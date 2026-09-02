@@ -1,0 +1,124 @@
+# DocuShift Product Taxonomy Configuration
+# Defines Business Unit hierarchies, Product Families, and Product mappings
+
+version: "1.0"
+
+business_units:
+  tibco:
+    name: "TIBCO"
+    default_engine: "flare"
+    families:
+      integration:
+        name: "Integration"
+        description: "Application integration, API management, and event-driven architecture"
+        products:
+          businessevents-enterprise:
+            name: "TIBCO BusinessEvents® Enterprise Edition"
+            engine: "flare"
+          bw:
+            name: "TIBCO ActiveMatrix BusinessWorks™"
+            engine: "flare"
+          bwce:
+            name: "TIBCO BusinessWorks™ Container Edition"
+            engine: "flare"
+          flogo:
+            name: "TIBCO Flogo® Enterprise"
+            engine: "flare"
+          api-exchange:
+            name: "TIBCO API Exchange Gateway"
+            engine: "flare"
+      messaging:
+        name: "Messaging"
+        description: "High-performance messaging, streaming, and pub-sub"
+        products:
+          ems:
+            name: "TIBCO Enterprise Message Service™"
+            engine: "flare"
+          ftl:
+            name: "TIBCO FTL®"
+            engine: "flare"
+          rendezvous:
+            name: "TIBCO Rendezvous®"
+            engine: "docbook"
+          activespaces:
+            name: "TIBCO ActiveSpaces®"
+            engine: "flare"
+      analytics:
+        name: "Analytics"
+        description: "Visual analytics, data science, and streaming analytics"
+        products:
+          spotfire:
+            name: "TIBCO Spotfire®"
+            engine: "flare"
+          streambase:
+            name: "TIBCO StreamBase®"
+            engine: "docbook"
+          statistica:
+            name: "TIBCO Statistica®"
+            engine: "flare"
+      data_management:
+        name: "Data Management"
+        description: "Master data management and data virtualization"
+        products:
+          ebx:
+            name: "TIBCO EBX®"
+            engine: "flare"
+          mdm:
+            name: "TIBCO MDM"
+            engine: "flare"
+          tdv:
+            name: "TIBCO Data Virtualization"
+            engine: "flare"
+      bpm:
+        name: "Business Process Management"
+        description: "Process automation, case management, and workflow"
+        products:
+          activematrix-bpm:
+            name: "TIBCO ActiveMatrix® BPM"
+            engine: "flare"
+          iprocess:
+            name: "TIBCO iProcess®"
+            engine: "docbook"
+          nimbus:
+            name: "TIBCO Nimbus®"
+            engine: "flare"
+
+  ibi:
+    name: "ibi"
+    default_engine: "flare"
+    families:
+      webfocus:
+        name: "WebFOCUS"
+        description: "Business intelligence and enterprise reporting"
+        products:
+          webfocus:
+            name: "ibi™ WebFOCUS®"
+            engine: "flare"
+          webfocus-app-studio:
+            name: "ibi™ WebFOCUS® App Studio"
+            engine: "flare"
+          webfocus-client:
+            name: "ibi™ WebFOCUS® Client"
+            engine: "flare"
+          webfocus-reporting-server:
+            name: "ibi™ WebFOCUS® Reporting Server"
+            engine: "flare"
+      data_management:
+        name: "Data Management & Quality"
+        description: "Omni-Gen and iWay data quality solutions"
+        products:
+          omni-gen:
+            name: "ibi™ Omni-Gen®"
+            engine: "flare"
+          omni-healthdata:
+            name: "ibi™ Omni-HealthData®"
+            engine: "flare"
+          iway-service-manager:
+            name: "ibi™ iWay® Service Manager"
+            engine: "flare"
+          iway-data-migrator:
+            name: "ibi™ iWay® DataMigrator"
+            engine: "flare"
+          dqm:
+            name: "ibi™ Data Quality Center"
+            engine: "flare"
