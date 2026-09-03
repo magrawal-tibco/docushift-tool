@@ -49,5 +49,6 @@ select = ["E", "F", "I", "UP", "B", "SIM"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-pythonpath = ["src"]
+# "." puts the repo root on sys.path so tests can share helpers via `tests.conftest`.
+pythonpath = ["src", "."]
 addopts = "-v --strict-markers"

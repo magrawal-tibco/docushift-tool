@@ -1,4 +1,4 @@
-"""Configuration and Taxonomy Manager for DocuShift."""
+"""Configuration and taxonomy manager for DocuShift."""
 
 import os
 from pathlib import Path
@@ -6,7 +6,7 @@ from typing import Any
 
 import yaml
 
-from docushift.models import SourceEngine
+from docushift.models import FamilySource
 
 
 class ConfigManager:
@@ -20,7 +20,8 @@ class ConfigManager:
         self.taxonomy_path = self.config_dir / "taxonomy.yaml"
         self.docsite_path = self.config_dir / "docsite.yaml"
         self.aem_templates_dir = self.config_dir / "aem_templates"
-        self.catalog_path = self.config_dir / "catalog.json"
+        self.products_path = self.config_dir / "products.csv"
+        self.versions_path = self.config_dir / "versions.csv"
         self.state_db_path = self.cache_dir / "state.db"
 
         # Ensure directories exist
@@ -38,11 +39,14 @@ class ConfigManager:
             return self._taxonomy_cache
 
         if not self.taxonomy_path.exists():
-            self._taxonomy_cache = {"business_units": {}}
+            self._taxonomy_cache = {"business_units": {}, "rules": []}
             return self._taxonomy_cache
 
         with open(self.taxonomy_path, encoding="utf-8") as f:
-            self._taxonomy_cache = yaml.safe_load(f) or {"business_units": {}}
+            loaded = yaml.safe_load(f) or {}
+        loaded.setdefault("business_units", {})
+        loaded.setdefault("rules", [])
+        self._taxonomy_cache = loaded
         return self._taxonomy_cache
 
     def load_docsite(self) -> dict[str, Any]:
@@ -58,46 +62,40 @@ class ConfigManager:
             self._docsite_cache = yaml.safe_load(f) or {}
         return self._docsite_cache
 
-    def resolve_product_info(self, product_code: str, product_name: str = "") -> dict[str, Any]:
-        """
-        Resolves BU, Product Family, and Engine based on taxonomy mappings
-        or intelligent heuristics.
-        """
-        taxonomy = self.load_taxonomy()
-        bus = taxonomy.get("business_units", {})
+    def families(self, bu: str) -> dict[str, Any]:
+        """The family definitions declared for one business unit."""
+        return self.load_taxonomy()["business_units"].get(bu, {}).get("families", {})
 
+    def is_known_family(self, bu: str, family: str) -> bool:
+        return family in self.families(bu)
+
+    def resolve_product_info(self, product_code: str, product_name: str = "") -> dict[str, Any]:
+        """Infers `bu` and `family` for a product from the taxonomy keyword rules.
+
+        Returns `family_source` alongside them so the caller can record provenance.
+        Anything matching no rule comes back `unclassified` for manual triage --
+        deliberately, since most products carry no docsite category and guessing a
+        family is worse than flagging one for review.
+
+        Never returns an engine: the source toolchain is a per-version property
+        detected from the package, not something a product-level rule can assert.
+        """
         code_lower = product_code.lower().strip()
         name_lower = product_name.lower().strip()
 
-        # 1. Exact match in taxonomy
-        for bu_key, bu_data in bus.items():
-            families = bu_data.get("families", {})
-            for fam_key, fam_data in families.items():
-                products = fam_data.get("products", {})
-                if code_lower in products:
-                    prod_info = products[code_lower]
-                    return {
-                        "bu": bu_key,
-                        "family": fam_key,
-                        "engine": SourceEngine(prod_info.get("engine", "flare")),
-                        "display_name": prod_info.get("name", product_name)
-                    }
+        for rule in self.load_taxonomy()["rules"]:
+            tokens = [str(t).lower().strip() for t in rule.get("match", [])]
+            if any(token == code_lower or (token and name_lower and token in name_lower) for token in tokens):
+                return {
+                    "bu": str(rule.get("bu", "tibco")).lower(),
+                    "family": str(rule.get("family", "general")).lower(),
+                    "family_source": FamilySource.TAXONOMY_RULE,
+                    "display_name": product_name or product_code,
+                }
 
-        # 2. Heuristic inference for IBI products
-        ibi_keywords = ("ibi", "webfocus", "omni", "iway")
-        if any(kw in name_lower for kw in ibi_keywords) or code_lower.startswith("ibi"):
-            fam = "webfocus" if "webfocus" in name_lower else "data_management"
-            return {
-                "bu": "ibi",
-                "family": fam,
-                "engine": SourceEngine.FLARE,
-                "display_name": product_name
-            }
-
-        # 3. Default fallback to TIBCO
         return {
             "bu": "tibco",
             "family": "general",
-            "engine": SourceEngine.FLARE,
-            "display_name": product_name
+            "family_source": FamilySource.UNCLASSIFIED,
+            "display_name": product_name or product_code,
         }

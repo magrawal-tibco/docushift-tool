@@ -1,8 +1,34 @@
-"""Unit tests for ConfigManager path resolution and YAML loading."""
+"""Unit tests for ConfigManager path resolution, YAML loading, and taxonomy rules.
+
+`resolve_product_info` is rule-driven rather than product-driven: per-product
+bu/family assignment lives in config/products.csv, so the taxonomy only declares
+which families exist and how to guess one. See docs/architecture.md §3.3.
+"""
 
 from pathlib import Path
 
 from docushift.config import ConfigManager
+from docushift.models import FamilySource
+
+RULES_YAML = (
+    "business_units:\n"
+    "  tibco:\n"
+    "    name: TIBCO\n"
+    "    families:\n"
+    "      messaging: {name: Messaging}\n"
+    "      general: {name: General}\n"
+    "  ibi:\n"
+    "    name: ibi\n"
+    "    families:\n"
+    "      webfocus: {name: WebFOCUS}\n"
+    "rules:\n"
+    '  - match: ["ems", "enterprise message service"]\n'
+    "    bu: tibco\n"
+    "    family: messaging\n"
+    '  - match: ["webfocus"]\n'
+    "    bu: ibi\n"
+    "    family: webfocus\n"
+)
 
 
 def test_creates_working_directories(project_root: Path) -> None:
@@ -20,8 +46,15 @@ def test_resolved_paths(config: ConfigManager, project_root: Path) -> None:
     assert config.state_db_path == project_root / "cache" / "state.db"
 
 
+def test_catalog_paths_are_the_csv_pair(config: ConfigManager, project_root: Path) -> None:
+    """The JSON catalog was retired in Phase 2 in favour of two CSVs."""
+    assert config.products_path == project_root / "config" / "products.csv"
+    assert config.versions_path == project_root / "config" / "versions.csv"
+    assert not hasattr(config, "catalog_path")
+
+
 def test_missing_taxonomy_yields_empty_structure(config: ConfigManager) -> None:
-    assert config.load_taxonomy() == {"business_units": {}}
+    assert config.load_taxonomy() == {"business_units": {}, "rules": []}
 
 
 def test_missing_docsite_yields_empty_dict(config: ConfigManager) -> None:
@@ -46,34 +79,69 @@ def test_docsite_loads_endpoints(config: ConfigManager) -> None:
     assert config.load_docsite()["endpoints"]["a_to_z"] == "/api/a_to_z"
 
 
-def test_resolve_product_info_matches_taxonomy(config: ConfigManager) -> None:
-    config.taxonomy_path.write_text(
-        "business_units:\n"
-        "  tibco:\n"
-        "    families:\n"
-        "      messaging:\n"
-        "        products:\n"
-        "          ems:\n"
-        '            name: "TIBCO Enterprise Message Service"\n',
-        encoding="utf-8",
-    )
+def test_families_are_listed_per_business_unit(config: ConfigManager) -> None:
+    config.taxonomy_path.write_text(RULES_YAML, encoding="utf-8")
 
-    info = config.resolve_product_info("ems", "EMS")
+    assert set(config.families("tibco")) == {"messaging", "general"}
+    assert set(config.families("ibi")) == {"webfocus"}
+    assert config.families("nonexistent") == {}
+
+
+def test_is_known_family_is_scoped_to_its_business_unit(config: ConfigManager) -> None:
+    """`webfocus` is a real family, but not under `tibco`."""
+    config.taxonomy_path.write_text(RULES_YAML, encoding="utf-8")
+
+    assert config.is_known_family("ibi", "webfocus") is True
+    assert config.is_known_family("tibco", "webfocus") is False
+
+
+def test_resolve_product_info_matches_a_rule_by_product_code(config: ConfigManager) -> None:
+    config.taxonomy_path.write_text(RULES_YAML, encoding="utf-8")
+
+    info = config.resolve_product_info("ems", "TIBCO Enterprise Message Service")
 
     assert info["bu"] == "tibco"
     assert info["family"] == "messaging"
+    assert info["family_source"] is FamilySource.TAXONOMY_RULE
     assert info["display_name"] == "TIBCO Enterprise Message Service"
 
 
-def test_resolve_product_info_infers_ibi(config: ConfigManager) -> None:
-    info = config.resolve_product_info("webfocus", "ibi WebFOCUS")
+def test_resolve_product_info_matches_a_rule_by_display_name_substring(config: ConfigManager) -> None:
+    config.taxonomy_path.write_text(RULES_YAML, encoding="utf-8")
 
-    assert info["bu"] == "ibi"
-    assert info["family"] == "webfocus"
+    info = config.resolve_product_info("wf-client", "ibi WebFOCUS Client")
+
+    assert (info["bu"], info["family"]) == ("ibi", "webfocus")
 
 
-def test_resolve_product_info_falls_back_to_tibco_general(config: ConfigManager) -> None:
+def test_resolve_product_info_is_case_insensitive(config: ConfigManager) -> None:
+    config.taxonomy_path.write_text(RULES_YAML, encoding="utf-8")
+
+    assert config.resolve_product_info("EMS", "EMS")["family"] == "messaging"
+
+
+def test_unmatched_products_are_unclassified_not_guessed(config: ConfigManager) -> None:
+    """Flagging a product for triage beats inventing a family for it."""
+    config.taxonomy_path.write_text(RULES_YAML, encoding="utf-8")
+
     info = config.resolve_product_info("unknown-thing", "Some Unlisted Product")
 
-    assert info["bu"] == "tibco"
-    assert info["family"] == "general"
+    assert (info["bu"], info["family"]) == ("tibco", "general")
+    assert info["family_source"] is FamilySource.UNCLASSIFIED
+
+
+def test_resolve_product_info_never_returns_an_engine(config: ConfigManager) -> None:
+    """Engine is a per-version property detected from the package, not a rule output."""
+    config.taxonomy_path.write_text(RULES_YAML, encoding="utf-8")
+
+    assert "engine" not in config.resolve_product_info("ems", "EMS")
+
+
+def test_shipped_taxonomy_rules_classify_known_products(repo_root: Path) -> None:
+    """A guard on the real config/taxonomy.yaml, not a synthetic one."""
+    cfg = ConfigManager(root_dir=repo_root)
+
+    assert cfg.resolve_product_info("ems", "TIBCO Enterprise Message Service")["family"] == "messaging"
+    assert cfg.resolve_product_info("spotfire", "TIBCO Spotfire")["family"] == "analytics"
+    assert cfg.resolve_product_info("webfocus", "ibi WebFOCUS")["bu"] == "ibi"
+    assert cfg.resolve_product_info("ebx", "TIBCO EBX")["family"] == "data_management"

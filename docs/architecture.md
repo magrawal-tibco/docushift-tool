@@ -151,7 +151,11 @@ Classification is a **majority-manual triage job**: most products carry no docsi
 
 This makes triage a spreadsheet filter, and makes progress reportable (`docushift catalog triage` → "187 of 250 unclassified").
 
-Consequently `config/taxonomy.yaml` holds **family definitions and keyword inference rules only** — it no longer carries per-product mappings, since maintaining 250 hand-classified products in four-level nested YAML recreates the exact pain CSV was chosen to avoid. The ibi/WebFOCUS/Omni/iWay heuristics currently hardcoded in `config.py:resolve_product_info()` become YAML rule data.
+Consequently `config/taxonomy.yaml` holds **family definitions and keyword inference rules only** — it no longer carries per-product mappings, since maintaining 250 hand-classified products in four-level nested YAML recreates the exact pain CSV was chosen to avoid. The ibi/WebFOCUS/Omni/iWay heuristics formerly hardcoded in `config.py:resolve_product_info()` are now YAML rule data.
+
+A rule lists `match` tokens plus the `bu` and `family` to assign. Each token is compared case-insensitively against the `product_code` as an exact match, and against the display name as a substring; the first rule to match wins, so specific rules are ordered above broad ones. A product matching nothing is written `unclassified` rather than guessed into a family.
+
+Because two automated sources can disagree, `family` is the one field the merge resolves by **provenance rank** rather than by snapshot comparison: a fetch may only raise a product's classification confidence, never lower it.
 
 ### 3.4 Engine Resolution (Per-Version, Detected)
 
@@ -191,6 +195,14 @@ Verified against the cached `dsp_gridserver` 7.1.1 sample: all six Flare marker 
 - **mine** — what the CSV currently says
 
 If `mine != base`, the field was edited by a human and is preserved. Otherwise `theirs` wins. No `custom_override` flag is required for this to work — expecting a user to remember to tick a protection column on each edited row of a 4,000-row sheet guarantees silent data loss. `custom_override` survives only as an explicit "pin this entire row" escape hatch.
+
+Three properties of the implementation matter:
+
+- **Resolution is per field, not per row.** Editing `display_name` must not also freeze the `slug` beside it.
+- **With no snapshot, `mine` wins** unless it is empty. A missing base means the row predates the state DB (or the DB was discarded); inventing one would silently overwrite edits. Only genuinely blank cells are filled from the fetch.
+- **The merge covers only what discovery owns**: `display_name`, `slug`, `is_archived`, `convert_eligible`, `release_date`, `zip_url`. `engine`/`engine_source` are excluded, and `version_snapshot` carries no engine columns at all — a fetch structurally cannot reset a detected engine (§3.4).
+
+Deletion detection is scoped to the products present in the current fetch, so `catalog fetch --product ems` cannot read every other product's absence as a removal.
 
 ### 3.6 CSV Round-Trip Hygiene
 

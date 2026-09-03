@@ -33,7 +33,7 @@ docushift doctor
 
 Prints the resolved project paths (`config/`, `cache/downloads/`, `cache/extracted/`, `output/`, `state.db`) and whether each exists, creating the working directories on first run.
 
-> **Implementation status.** The command tree below is the full intended surface and `--help` reflects it, but only `doctor` is implemented today. Every other command exits non-zero with the phase that will build it — see `docs/planning.md`. Commands are never silently no-op.
+> **Implementation status.** The command tree below is the full intended surface and `--help` reflects it. Implemented today: `doctor` and the whole `catalog` group **except `catalog fetch`**, which waits on the Phase 3 docsite crawler to supply its input — the merge engine behind it is already built and tested. Every unbuilt command exits non-zero naming the phase that will build it (see `docs/planning.md`); commands are never silently no-op.
 
 ---
 
@@ -89,6 +89,30 @@ The files are written UTF-8 with a BOM so Excel opens `®` and `™` correctly. 
 - **Do not delete rows** to exclude something; set `convert_eligible=false` instead. Deletions require `docushift catalog import --allow-deletes`.
 
 Columns starting with an underscore (`_bu`, `_family` in `versions.csv`) are generated for filtering convenience. Edits to them are ignored — change the value in `products.csv`.
+
+After a spreadsheet session, re-import to normalize the files and check them for damage:
+
+```bash
+# Re-read, validate, and rewrite both CSVs in canonical form
+docushift catalog import
+```
+
+It reports version keys that vanished (the `1.10` → `1.1` case), convert-eligible versions with no `zip_url`, and unknown families, and writes nothing if it finds any. Re-run with `--allow-deletes` once you have confirmed the removals are intended.
+
+### Editing from the command line
+
+`catalog set` is the scriptable equivalent of editing a cell, and it records provenance for you:
+
+```bash
+# Product row (products.csv)
+docushift catalog set --product ems --family messaging     # also sets family_source=manual
+docushift catalog set --product ems --bu tibco
+docushift catalog set --product ems --display-name "TIBCO Enterprise Message Service"
+
+# Version row (versions.csv) — --engine and --zip-url require --version
+docushift catalog set --product ems --version 8.6.0 --engine webworks
+docushift catalog set --product ems --version 8.6.0 --zip-url https://internal/mirror.zip
+```
 
 ### Triaging Unclassified Products
 

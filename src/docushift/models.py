@@ -1,7 +1,13 @@
-"""Data models for DocuShift."""
+"""Data models for DocuShift.
+
+These are the in-memory representation. The on-disk form is the CSV pair
+`config/products.csv` + `config/versions.csv` (docs/architecture.md §3); volatile
+machine state (etags, sizes, checksums, per-stage status, free-form metadata)
+deliberately lives in `state.db` instead, so the CSVs stay stable enough to leave
+open in a spreadsheet.
+"""
 
 from enum import StrEnum
-from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -17,7 +23,11 @@ class ConversionStatus(StrEnum):
 
 
 class SourceEngine(StrEnum):
-    """Source documentation generator engine."""
+    """Source documentation generator engine.
+
+    A property of a *version*, not a product -- see docs/architecture.md §3.4.
+    `AUTO` means "not yet determined"; it is never a guess.
+    """
     FLARE = "flare"
     DITA = "dita"
     WEBWORKS = "webworks"
@@ -25,39 +35,46 @@ class SourceEngine(StrEnum):
     AUTO = "auto"
 
 
+class EngineSource(StrEnum):
+    """How a version's engine was arrived at. Precedence: manual > detected > auto."""
+    MANUAL = "manual"
+    DETECTED = "detected"
+    AUTO = "auto"
+
+
+class FamilySource(StrEnum):
+    """How a product's family was arrived at. Precedence: first listed wins."""
+    MANUAL = "manual"
+    TAXONOMY_RULE = "taxonomy_rule"
+    DOCSITE_CATEGORY = "docsite_category"
+    UNCLASSIFIED = "unclassified"
+
+
 class ProductVersion(BaseModel):
-    """Represents a specific published version of a product."""
+    """One published version of a product -- one row of `versions.csv`."""
+    product_code: str
     version: str
-    title: str | None = None
-    slug: str | None = None
-    folder_path: str | None = None
-    zip_url: str | None = None
-    zip_size: int | None = None
-    zip_etag: str | None = None
-    release_date: str | None = None
     is_archived: bool = False
     convert_eligible: bool = True
-    source: str = "tool_fetch"  # "tool_fetch" or "manual"
+    release_date: str | None = None
+    engine: SourceEngine = SourceEngine.AUTO
+    engine_source: EngineSource = EngineSource.AUTO
+    zip_url: str | None = None
     custom_override: bool = False
-    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class Product(BaseModel):
-    """Represents a product entry in the catalog."""
+    """One product -- one row of `products.csv`, plus its versions."""
     product_code: str
     display_name: str
-    slug: str | None = None
-    bu: str = "tibco"  # "tibco" or "ibi"
+    bu: str = "tibco"
     family: str = "general"
-    engine: SourceEngine = SourceEngine.FLARE
-    docsite_id: int | None = None
+    family_source: FamilySource = FamilySource.UNCLASSIFIED
+    slug: str | None = None
     custom_override: bool = False
-    metadata: dict[str, Any] = Field(default_factory=dict)
     versions: dict[str, ProductVersion] = Field(default_factory=dict)
 
 
 class Catalog(BaseModel):
-    """Master Additive Product Catalog."""
-    version: str = "1.0"
-    last_updated: str | None = None
+    """The master additive product catalog."""
     products: dict[str, Product] = Field(default_factory=dict)

@@ -7,7 +7,8 @@ its own phase (see docs/planning.md). Unimplemented commands fail loudly -- a
 ``convert`` that exits 0 while converting nothing hides how far along the pipeline
 actually is.
 
-``doctor`` is the only fully functional command in Phase 1.
+Functional so far: ``doctor`` (Phase 1) and the ``catalog`` group apart from
+``fetch``, which waits on the Phase 3 crawler to supply its input.
 """
 
 from pathlib import Path
@@ -17,7 +18,9 @@ from rich.console import Console
 from rich.table import Table
 
 from docushift import __version__
+from docushift.catalog import CatalogError, CatalogManager
 from docushift.config import ConfigManager
+from docushift.state import StateStore
 
 console = Console()
 
@@ -72,37 +75,91 @@ def catalog() -> None:
     """Discover, inspect, and edit config/products.csv and config/versions.csv."""
 
 
+def _catalog_manager(ctx: click.Context) -> CatalogManager:
+    cfg: ConfigManager = ctx.obj["config"]
+    return CatalogManager(cfg.products_path, cfg.versions_path, StateStore(cfg.state_db_path))
+
+
 @catalog.command("fetch")
 @_scope_options
 @click.option("--include-archived/--no-include-archived", default=True, help="Also inventory archived versions.")
 @click.option("--dry-run", is_flag=True, help="Report the merge plan without writing the CSVs.")
 def catalog_fetch(**kwargs) -> None:
     """Fetch from docs.tibco.com and 3-way merge into the catalog CSVs."""
-    _pending("catalog fetch", "Phase 2 (merge) and Phase 3 (discovery)")
+    # The merge engine below is complete; only the crawler that supplies its input
+    # is outstanding, so this stays pending on Phase 3 alone.
+    _pending("catalog fetch", "Phase 3 (the docsite crawler; the merge engine is already built)")
 
 
 @catalog.command("list")
 @_scope_options
 @click.option("--eligible-only", is_flag=True, help="Only versions with convert_eligible=true.")
-def catalog_list(**kwargs) -> None:
+@click.pass_context
+def catalog_list(ctx: click.Context, bu, family, product_code, version, select_all, eligible_only) -> None:
     """List catalog products and versions."""
-    _pending("catalog list", "Phase 2")
+    pairs = _catalog_manager(ctx).iter_versions(
+        bu=bu, family=family, product_code=product_code, version=version, eligible_only=eligible_only
+    )
+    if not pairs:
+        console.print("[yellow]No matching catalog rows.[/yellow] Run `docushift catalog fetch` to populate.")
+        return
+
+    table = Table(title=f"Catalog ({len(pairs)} versions)")
+    for column in ("Product", "BU", "Family", "Version", "Archived", "Eligible", "Engine"):
+        table.add_column(column)
+    for product, ver in pairs:
+        table.add_row(
+            product.product_code,
+            product.bu,
+            product.family,
+            ver.version,
+            "yes" if ver.is_archived else "",
+            "[green]yes[/green]" if ver.convert_eligible else "[dim]no[/dim]",
+            f"{ver.engine} ({ver.engine_source})",
+        )
+    console.print(table)
 
 
 @catalog.command("show")
 @click.option("--product", "product_code", required=True, help="Product to describe.")
-def catalog_show(product_code: str) -> None:
+@click.pass_context
+def catalog_show(ctx: click.Context, product_code: str) -> None:
     """Show one product and its full version history."""
-    _pending("catalog show", "Phase 2")
+    manager = _catalog_manager(ctx)
+    product = manager.get_product(product_code)
+    if product is None:
+        raise click.ClickException(f"No product '{product_code}' in the catalog.")
+
+    console.print(
+        f"[bold]{product.display_name}[/bold] ({product.product_code})\n"
+        f"  bu={product.bu}  family={product.family} (source: {product.family_source})\n"
+        f"  slug={product.slug or '-'}  custom_override={product.custom_override}"
+    )
+    table = Table(title=f"{len(product.versions)} versions")
+    for column in ("Version", "Archived", "Eligible", "Released", "Engine", "ZIP"):
+        table.add_column(column)
+    for _, ver in manager.iter_versions(product_code=product_code):
+        table.add_row(
+            ver.version,
+            "yes" if ver.is_archived else "",
+            "yes" if ver.convert_eligible else "no",
+            ver.release_date or "-",
+            f"{ver.engine} ({ver.engine_source})",
+            ver.zip_url or "-",
+        )
+    console.print(table)
 
 
 @catalog.command("enable")
 @click.option("--product", "product_code", required=True, help="Product to modify.")
 @click.option("--version", required=True, help="Version to modify.")
 @click.option("--disable", is_flag=True, help="Set convert_eligible=false instead of true.")
-def catalog_enable(product_code: str, version: str, disable: bool) -> None:
+@click.pass_context
+def catalog_enable(ctx: click.Context, product_code: str, version: str, disable: bool) -> None:
     """Toggle convert_eligible for one product version."""
-    _pending("catalog enable", "Phase 2")
+    if not _catalog_manager(ctx).set_conversion_eligibility(product_code, version, not disable):
+        raise click.ClickException(f"No version '{version}' for product '{product_code}'.")
+    console.print(f"{product_code}@{version}: convert_eligible = {'false' if disable else 'true'}")
 
 
 @catalog.command("set")
@@ -110,6 +167,7 @@ def catalog_enable(product_code: str, version: str, disable: bool) -> None:
 @click.option("--version", default=None, help="Target a version row instead of the product row.")
 @click.option("--bu", default=None, help="Set the business unit (products.csv).")
 @click.option("--family", default=None, help="Set the family; also sets family_source=manual.")
+@click.option("--display-name", default=None, help="Set the product display name.")
 @click.option(
     "--engine",
     type=click.Choice(["flare", "dita", "webworks", "docbook", "auto"]),
@@ -117,22 +175,77 @@ def catalog_enable(product_code: str, version: str, disable: bool) -> None:
     help="Override the detected engine; also sets engine_source=manual (permanent).",
 )
 @click.option("--zip-url", default=None, help="Override the resolved download endpoint.")
-def catalog_set(**kwargs) -> None:
+@click.pass_context
+def catalog_set(ctx: click.Context, product_code, version, bu, family, display_name, engine, zip_url) -> None:
     """Set a catalog field, recording the change as a manual edit."""
-    _pending("catalog set", "Phase 2")
+    manager = _catalog_manager(ctx)
+    product_edits = {"bu": bu, "family": family, "display_name": display_name}
+    version_edits = {"engine": engine, "zip_url": zip_url}
+
+    if not any(v is not None for v in {**product_edits, **version_edits}.values()):
+        raise click.ClickException("Nothing to set. Pass at least one field option.")
+    if any(v is not None for v in version_edits.values()) and not version:
+        raise click.ClickException("--engine and --zip-url are version fields; pass --version too.")
+
+    try:
+        for name, value in product_edits.items():
+            if value is not None and not manager.set_product_field(product_code, name, value):
+                raise click.ClickException(f"No product '{product_code}' in the catalog.")
+        for name, value in version_edits.items():
+            if value is not None and not manager.set_version_field(product_code, version, name, value):
+                raise click.ClickException(f"No version '{version}' for product '{product_code}'.")
+    except CatalogError as exc:
+        raise click.ClickException(str(exc)) from exc
+
+    console.print(f"Updated {product_code}" + (f"@{version}" if version else ""))
 
 
 @catalog.command("import")
 @click.option("--allow-deletes", is_flag=True, help="Permit removal of rows that discovery no longer returns.")
-def catalog_import(allow_deletes: bool) -> None:
-    """Re-import the CSVs, validating version keys against the last known set."""
-    _pending("catalog import", "Phase 2")
+@click.pass_context
+def catalog_import(ctx: click.Context, allow_deletes: bool) -> None:
+    """Re-import and normalize the CSVs, checking for spreadsheet damage."""
+    manager = _catalog_manager(ctx)
+    try:
+        problems = manager.validate()
+    except CatalogError as exc:
+        raise click.ClickException(str(exc)) from exc
+
+    if problems and not allow_deletes:
+        for problem in problems:
+            console.print(f"[red]![/red] {problem}")
+        raise click.ClickException(
+            f"{len(problems)} problem(s) found; nothing written. "
+            f"Fix the CSVs, or re-run with --allow-deletes if the removals are intended."
+        )
+    for problem in problems:
+        console.print(f"[yellow]![/yellow] {problem} [dim](allowed)[/dim]")
+
+    manager.save()
+    console.print("Catalog re-imported and normalized.")
 
 
 @catalog.command("triage")
-def catalog_triage() -> None:
+@click.pass_context
+def catalog_triage(ctx: click.Context) -> None:
     """Report family classification progress and list unclassified products."""
-    _pending("catalog triage", "Phase 2")
+    summary = _catalog_manager(ctx).triage_summary()
+    total = summary["total"]
+    if not total:
+        console.print("[yellow]Catalog is empty.[/yellow] Run `docushift catalog fetch` to populate.")
+        return
+
+    table = Table(title=f"Family classification ({total} products)")
+    table.add_column("family_source")
+    table.add_column("Products", justify="right")
+    for source, count in summary["counts"].items():
+        table.add_row(source, str(count))
+    console.print(table)
+
+    unclassified = summary["unclassified"]
+    console.print(f"\n[bold]{len(unclassified)} of {total}[/bold] products still need triage.")
+    if unclassified:
+        console.print("  " + ", ".join(unclassified[:40]) + (" ..." if len(unclassified) > 40 else ""))
 
 
 # ---------------------------------------------------------------------------

@@ -1,7 +1,7 @@
 # Project Context & Living Ledger: DocuShift Tool
 
 > **Last Updated:** 2026-09-03  
-> **Status:** Phase 1 complete and verified (54 tests pass, lint clean); Phase 2 (CSV catalog + state engine) next  
+> **Status:** Phases 1-2 complete and verified (157 tests pass, lint clean); Phase 3 (docsite discovery crawler) next  
 > **Primary Runtime:** Python 3.11+ (Active: Python 3.13)  
 > **Business Scope:** TIBCO & IBI Documentation Migration (~250 Products) to AEM on GitHub
 
@@ -106,6 +106,10 @@ docushift-tool/
 | 2026-09-03 | CLI | Full command tree declared in `cli.py`, matching the surface already documented in `user-guide.md`. Stage commands are scaffolded but **fail loudly** — each raises a `ClickException` naming its implementing phase rather than being omitted or no-op'ing. New `docushift doctor` (paths + artifact presence) is the only functional command in Phase 1; `status` stays reserved for the Phase 7 delta dashboard the user guide describes. | `[project.scripts]` already promised `docushift.cli:main`, so the module had to exist. A `convert` that exits 0 while converting nothing is worse than one that doesn't exist: it makes the pipeline look further along than it is — the same failure mode the Phase 1 audit found in `pytest` exiting green on zero tests. |
 | 2026-09-03 | Dependencies | Added `jinja2` to `pyproject.toml` dependencies. | `config/aem_templates/` ships Jinja templates for the Stage 6 synthesizer; a template directory with no template engine behind it is incoherent. |
 | 2026-09-03 | Tooling | Added `[tool.ruff]` to `pyproject.toml` with an explicitly pinned rule set (`E,F,I,UP,B,SIM`, line length 120). Fixed the 47 findings this surfaced in the pre-existing `models.py` / `config.py` / `catalog.py`, including two unused imports, an unused variable, and `str, Enum` → `StrEnum`. | `ruff` was a declared dev dependency with no configuration, so its rule set was whatever the installed version defaulted to — the lint result would have silently changed on upgrade. All 47 findings were in code written before the environment existed; none were in the Phase 1 additions, which is what running the linter for the first time was meant to establish. |
+| 2026-09-03 | Merge Implementation | The 3-way decision reduces to one predicate: take the fetched value only if the CSV value still equals the recorded snapshot (`CatalogManager._take_theirs`). With **no** snapshot, the fallback is to keep the CSV value — except where it is empty. | Field-by-field, not row-by-row: an edited `display_name` must not freeze the `slug` next to it. The no-snapshot fallback is the conservative direction — inventing a base would silently overwrite edits made before the state DB existed. |
+| 2026-09-03 | Merge Scope | Discovery owns only `display_name`, `slug`, `is_archived`, `convert_eligible`, `release_date`, `zip_url`. `engine`/`engine_source` are excluded from the merge **and from `version_snapshot` entirely**; `family` is merged by provenance rank, not by snapshot comparison. | The engine columns are written by the detector after extraction, so a fetch has nothing true to say about them — omitting the columns from the snapshot table makes that structural rather than a rule someone can forget. Family needs ranking because two automated sources disagree with different confidence. |
+| 2026-09-03 | Merge Safety | Deletion detection is scoped to the products present in the current fetch. | Otherwise `catalog fetch --product ems` would read every other product's absence as a deletion and abort — or, with `--allow-deletes`, wipe the catalog. |
+| 2026-09-03 | Testing | `tests/` became a package (`__init__.py` at each level) and `pythonpath` gained `"."`, so suites can share `make_product` / `make_version` builders from `tests.conftest`. | Merge tests need to construct discovery-shaped products inline; fixtures cannot be called with arguments, and duplicating the builders across `test_catalog.py`, `test_state.py`, and `test_cli.py` would let them drift apart. |
 | 2026-09-03 | Taxonomy | Docsite category data (`/product/categories`, `/api/bu_category_products`) is **advisory only, never authoritative**. Added `family_source` provenance column (`manual` > `taxonomy_rule` > `docsite_category` > `unclassified`, first wins). | Confirmed by user: the majority of products carry no docsite category, so classification is a majority-manual triage job. Provenance distinguishes "triaged and genuinely general" from "never looked at" and makes triage progress a reportable metric. |
 
 ---
@@ -117,15 +121,13 @@ Audited against the filesystem, not against checkboxes:
 - [x] Verified `docs.tibco.com` API endpoints and active/archived version models
 - [x] `pyproject.toml`, `config/taxonomy.yaml` created
 - [x] **Phase 1 scaffolding closed**: all 9 subpackages created; `cli.py` command tree written (so `[project.scripts]` now resolves); `tests/` with `conftest.py`, unit and integration suites, and a documented `fixtures/` plan; `config/docsite.yaml` and `config/aem_templates/` (Jinja `toc.yml`/`nav.yml`/`meta.yml`/`index.md`) added; `.gitignore` extended to `output/`, `*.db`, `.venv/`, and build/test caches
-- [x] **Environment created and code executed for the first time** — `.venv` on Python 3.13.7, `pip install -e ".[dev]"`, **54/54 tests pass**, `ruff check src tests` clean, and the `docushift` console script runs. Setup from the repo root:
+- [x] **Environment created and code executed for the first time** — `.venv` on Python 3.13.7, `pip install -e ".[dev]"`, `ruff check src tests` clean, and the `docushift` console script runs. Setup from the repo root:
   ```
   python -m venv .venv && .venv/Scripts/python -m pip install -e ".[dev]" && .venv/Scripts/python -m pytest
   ```
-- [ ] `state.py` remains unwritten (Phase 2)
+- [x] **Phase 2 closed**: `models.py` reshaped (per-version engine, `family_source`, volatile fields evicted); `utils/csvio.py`, `state.py`, and a CSV-backed `catalog.py` with the snapshot 3-way merge written; `config.py` switched to `products_path`/`versions_path` and rule-driven classification; `taxonomy.yaml` reshaped to families + rules; `config/catalog.json` removed; the `catalog` CLI group wired up apart from `fetch`. **157/157 tests pass**, lint clean.
 
 ### Next steps
-- [ ] Migrate catalog to CSV: rewrite `catalog.py` load/save, split `config.py` paths, delete `config/catalog.json`, reshape `taxonomy.yaml`
-- [ ] Implement State Engine (`src/docushift/state.py`) incl. last-fetch snapshot table backing the 3-way merge
-- [ ] Implement Docsite Discovery Crawler (`src/docushift/discovery/crawler.py`) for active + archived versions
+- [ ] Implement Docsite Discovery Crawler (`src/docushift/discovery/crawler.py`) for active + archived versions, and wire `catalog fetch` to `CatalogManager.merge_fetch_results()` — the only piece missing from that command
 - [ ] Implement Resumable Downloader & Extractor (`src/docushift/downloader/`)
 - [ ] Implement MadCap Flare Engine + CSH Mapper with `pytest` unit test suite

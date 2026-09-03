@@ -1,124 +1,101 @@
 # DocuShift Product Taxonomy Configuration
-# Defines Business Unit hierarchies, Product Families, and Product mappings
+#
+# This file defines WHICH FAMILIES EXIST and THE KEYWORD RULES used to guess them.
+# It does NOT list individual products -- per-product bu/family assignment lives in
+# config/products.csv, where it can be bulk-edited in a spreadsheet.
+#
+# It also carries no engine information: the source toolchain differs between
+# versions of the same product, so it is detected per version from the extracted
+# package. See docs/architecture.md sections 3.3 and 3.4.
 
 version: "1.0"
 
 business_units:
   tibco:
     name: "TIBCO"
-    default_engine: "flare"
     families:
       integration:
         name: "Integration"
         description: "Application integration, API management, and event-driven architecture"
-        products:
-          businessevents-enterprise:
-            name: "TIBCO BusinessEvents® Enterprise Edition"
-            engine: "flare"
-          bw:
-            name: "TIBCO ActiveMatrix BusinessWorks™"
-            engine: "flare"
-          bwce:
-            name: "TIBCO BusinessWorks™ Container Edition"
-            engine: "flare"
-          flogo:
-            name: "TIBCO Flogo® Enterprise"
-            engine: "flare"
-          api-exchange:
-            name: "TIBCO API Exchange Gateway"
-            engine: "flare"
       messaging:
         name: "Messaging"
         description: "High-performance messaging, streaming, and pub-sub"
-        products:
-          ems:
-            name: "TIBCO Enterprise Message Service™"
-            engine: "flare"
-          ftl:
-            name: "TIBCO FTL®"
-            engine: "flare"
-          rendezvous:
-            name: "TIBCO Rendezvous®"
-            engine: "docbook"
-          activespaces:
-            name: "TIBCO ActiveSpaces®"
-            engine: "flare"
       analytics:
         name: "Analytics"
         description: "Visual analytics, data science, and streaming analytics"
-        products:
-          spotfire:
-            name: "TIBCO Spotfire®"
-            engine: "flare"
-          streambase:
-            name: "TIBCO StreamBase®"
-            engine: "docbook"
-          statistica:
-            name: "TIBCO Statistica®"
-            engine: "flare"
       data_management:
         name: "Data Management"
         description: "Master data management and data virtualization"
-        products:
-          ebx:
-            name: "TIBCO EBX®"
-            engine: "flare"
-          mdm:
-            name: "TIBCO MDM"
-            engine: "flare"
-          tdv:
-            name: "TIBCO Data Virtualization"
-            engine: "flare"
       bpm:
         name: "Business Process Management"
         description: "Process automation, case management, and workflow"
-        products:
-          activematrix-bpm:
-            name: "TIBCO ActiveMatrix® BPM"
-            engine: "flare"
-          iprocess:
-            name: "TIBCO iProcess®"
-            engine: "docbook"
-          nimbus:
-            name: "TIBCO Nimbus®"
-            engine: "flare"
+      general:
+        name: "General"
+        description: "Not yet triaged into a family"
 
   ibi:
     name: "ibi"
-    default_engine: "flare"
     families:
       webfocus:
         name: "WebFOCUS"
         description: "Business intelligence and enterprise reporting"
-        products:
-          webfocus:
-            name: "ibi™ WebFOCUS®"
-            engine: "flare"
-          webfocus-app-studio:
-            name: "ibi™ WebFOCUS® App Studio"
-            engine: "flare"
-          webfocus-client:
-            name: "ibi™ WebFOCUS® Client"
-            engine: "flare"
-          webfocus-reporting-server:
-            name: "ibi™ WebFOCUS® Reporting Server"
-            engine: "flare"
       data_management:
         name: "Data Management & Quality"
         description: "Omni-Gen and iWay data quality solutions"
-        products:
-          omni-gen:
-            name: "ibi™ Omni-Gen®"
-            engine: "flare"
-          omni-healthdata:
-            name: "ibi™ Omni-HealthData®"
-            engine: "flare"
-          iway-service-manager:
-            name: "ibi™ iWay® Service Manager"
-            engine: "flare"
-          iway-data-migrator:
-            name: "ibi™ iWay® DataMigrator"
-            engine: "flare"
-          dqm:
-            name: "ibi™ Data Quality Center"
-            engine: "flare"
+      general:
+        name: "General"
+        description: "Not yet triaged into a family"
+
+# Keyword inference. First match wins, so order matters -- put the specific rules
+# above the broad ones. Each `match` token is compared case-insensitively against:
+#   * the product_code, as an exact match; and
+#   * the display name, as a substring.
+# A product matching no rule is written as family_source=unclassified for manual
+# triage. Rules never assign `engine`.
+rules:
+  # -- ibi ----------------------------------------------------------------
+  - match: ["webfocus", "webfocus-app-studio", "webfocus-client", "webfocus-reporting-server"]
+    bu: ibi
+    family: webfocus
+  - match: ["omni-gen", "omni-healthdata", "omni gen", "omni-healthdata", "iway", "dqm", "data quality center"]
+    bu: ibi
+    family: data_management
+
+  # -- TIBCO messaging ----------------------------------------------------
+  - match: ["ems", "enterprise message service", "ftl", "rendezvous", "activespaces"]
+    bu: tibco
+    family: messaging
+
+  # -- TIBCO integration --------------------------------------------------
+  - match:
+      - "businessevents-enterprise"
+      - "businessevents"
+      - "bw"
+      - "bwce"
+      - "businessworks"
+      - "flogo"
+      - "api-exchange"
+      - "api exchange"
+    bu: tibco
+    family: integration
+
+  # -- TIBCO analytics ----------------------------------------------------
+  - match: ["spotfire", "streambase", "statistica"]
+    bu: tibco
+    family: analytics
+
+  # -- TIBCO data management ----------------------------------------------
+  - match: ["ebx", "mdm", "tdv", "data virtualization"]
+    bu: tibco
+    family: data_management
+
+  # -- TIBCO BPM ----------------------------------------------------------
+  - match: ["activematrix-bpm", "iprocess", "nimbus"]
+    bu: tibco
+    family: bpm
+
+  # -- ibi catch-all ------------------------------------------------------
+  # Deliberately last: broad enough to misfire against a more specific rule above.
+  - match: ["ibi"]
+    bu: ibi
+    family: general

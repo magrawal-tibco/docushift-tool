@@ -1,4 +1,4 @@
-"""Phase 1 guards: the package layout and shipped config files must actually exist.
+"""Layout guards: the package modules and shipped config files must actually exist.
 
 These exist because a missing subpackage or a broken console-script entrypoint is
 silent -- the previous state of the repo had `pytest` exit green on zero tests and
@@ -23,15 +23,24 @@ SUBPACKAGES = [
     "docushift.utils",
 ]
 
+CORE_MODULES = [
+    "docushift.models",
+    "docushift.config",
+    "docushift.catalog",
+    "docushift.state",
+    "docushift.cli",
+    "docushift.utils.csvio",
+]
+
 
 @pytest.mark.parametrize("module_name", SUBPACKAGES)
 def test_subpackage_imports(module_name: str) -> None:
     assert importlib.import_module(module_name) is not None
 
 
-def test_core_modules_import() -> None:
-    for module_name in ("docushift.models", "docushift.config", "docushift.catalog", "docushift.cli"):
-        assert importlib.import_module(module_name) is not None
+@pytest.mark.parametrize("module_name", CORE_MODULES)
+def test_core_modules_import(module_name: str) -> None:
+    assert importlib.import_module(module_name) is not None
 
 
 def test_console_script_entrypoint_resolves() -> None:
@@ -56,9 +65,28 @@ def test_docsite_config_declares_verified_endpoints(repo_root: Path) -> None:
     assert docsite["defaults"]["engine"] == "auto"
 
 
-def test_taxonomy_config_parses(repo_root: Path) -> None:
+def test_taxonomy_declares_families_and_rules_but_no_products(repo_root: Path) -> None:
+    """Per-product assignment moved to products.csv in Phase 2."""
     taxonomy = yaml.safe_load((repo_root / "config" / "taxonomy.yaml").read_text(encoding="utf-8"))
+
     assert set(taxonomy["business_units"]) == {"tibco", "ibi"}
+    for bu in taxonomy["business_units"].values():
+        assert bu["families"]
+        assert "products" not in bu
+        assert "default_engine" not in bu
+
+    assert taxonomy["rules"], "the taxonomy must ship keyword rules for family inference"
+
+
+def test_every_taxonomy_rule_targets_a_declared_family(repo_root: Path) -> None:
+    """A rule pointing at a family that does not exist would classify into nothing."""
+    taxonomy = yaml.safe_load((repo_root / "config" / "taxonomy.yaml").read_text(encoding="utf-8"))
+
+    for rule in taxonomy["rules"]:
+        assert rule["match"], f"rule {rule} has no match tokens"
+        assert "engine" not in rule
+        families = taxonomy["business_units"][rule["bu"]]["families"]
+        assert rule["family"] in families, f"{rule['bu']}/{rule['family']} is not a declared family"
 
 
 def test_aem_templates_present(repo_root: Path) -> None:
