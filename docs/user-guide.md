@@ -33,8 +33,8 @@ The catalog is **two CSV files**, designed to be edited directly in Excel:
 
 | File | Contents |
 | :--- | :--- |
-| `config/products.csv` | One row per product — `bu`, `family`, `engine`, display name |
-| `config/versions.csv` | One row per version — the `convert_eligible` toggle, `zip_url`, `is_archived` |
+| `config/products.csv` | One row per product — `bu`, `family`, display name |
+| `config/versions.csv` | One row per version — the `convert_eligible` toggle, `zip_url`, `is_archived`, and the detected `engine` |
 
 They join on `product_code`. It is additive, distinguishes Active vs Archived versions, and **preserves your edits automatically** — see "How your edits are protected" below.
 
@@ -176,8 +176,36 @@ rules:
   - match: ["omni-gen", "omni-healthdata", "iway"]
     bu: ibi
     family: data_management
-  - match: ["rendezvous", "streambase", "iprocess"]
-    engine: docbook
 ```
 
 Anything that matches no rule is written as `family_source=unclassified` for manual triage.
+
+> Rules assign `bu` and `family` only — never `engine`. The source toolchain
+> differs between versions of the same product, so it is detected per version
+> from the extracted package rather than declared here. See §5.
+
+---
+
+## 5. Source Engines (Per-Version)
+
+The tool that built a doc set — MadCap Flare, DITA, WebWorks, DocBook — **varies between versions of the same product**. TIBCO moved products onto Flare over time, so an older release may be WebWorks or DITA while the current one is Flare. `engine` is therefore a column in `versions.csv`, not `products.csv`.
+
+You do not assign it by hand. It is detected from the package contents during extraction:
+
+| `engine_source` | Meaning |
+| :--- | :--- |
+| `auto` | Not yet known — package not downloaded or extracted |
+| `detected` | Identified from the extracted files |
+| `manual` | You set it; detection will not overwrite it |
+
+```bash
+# What engines are in play, and what is still undetermined?
+docushift report --engines
+
+# Override a misdetection (sets engine_source=manual, permanent)
+docushift catalog set --product ems --version 8.6.0 --engine webworks
+```
+
+A version left at `engine=auto` is **skipped during conversion with a warning**, not guessed. Guessing wrong produces Markdown that looks plausible but is subtly wrong throughout, which is far more expensive to discover later than a skipped package.
+
+If `report --engines` shows a version stuck at `auto` after extraction, the detector found no recognised signature — inspect the extracted folder under `cache/extracted/` and set the engine manually.

@@ -33,10 +33,11 @@ flowchart TD
     subgraph Extract["Extraction & Asset Cataloging"]
         DW2 --> EX1["ZIP Extractor & Validator"]
         EX1 --> EX2["Asset & CSH Catalog\n(HTML, CSH Aliases, PDF, Word, XLS, Imgs)"]
+        EX2 --> EX3["Engine Detector\n(per version, writes back to versions.csv)"]
     end
 
     subgraph Convert["Multi-Engine Conversion & Transforms"]
-        EX2 --> C1["Profile Selector\n(Flare | DITA | WebWorks | DocBook)"]
+        EX3 --> C1["Profile Selector\n(Flare | DITA | WebWorks | DocBook)"]
         C1 --> C2["Core Transforms\n- Dropdowns & Callouts (> [!NOTE])\n- HTML Tables to GFM\n- Link & Anchor Resolution\n- CSH Mapping to MD Anchors\n- Asset Relinking"]
         C2 --> C3["Clean GFM Markdown Files"]
     end
@@ -98,16 +99,17 @@ The pydantic models in `models.py` remain the in-memory representation; CSV is p
 | `bu` | **user** | `tibco` or `ibi` |
 | `family` | **user** | Must exist in `taxonomy.yaml` for this BU |
 | `family_source` | tool | Provenance — see §3.3 |
-| `engine` | user | `flare` \| `dita` \| `webworks` \| `docbook` \| `auto` |
 | `slug` | tool | Docsite slug used for API calls |
 | `custom_override` | user | Explicit whole-row pin; ignore all upstream changes |
 
 ```csv
-product_code,display_name,bu,family,family_source,engine,slug,custom_override
-ems,TIBCO Enterprise Message Service™,tibco,messaging,manual,flare,tibco-ems,false
-ebx,TIBCO EBX®,tibco,data_management,taxonomy_rule,flare,tibco-ebx,false
-webfocus,ibi™ WebFOCUS®,ibi,webfocus,manual,flare,ibi-webfocus,true
+product_code,display_name,bu,family,family_source,slug,custom_override
+ems,TIBCO Enterprise Message Service™,tibco,messaging,manual,tibco-ems,false
+ebx,TIBCO EBX®,tibco,data_management,taxonomy_rule,tibco-ebx,false
+webfocus,ibi™ WebFOCUS®,ibi,webfocus,manual,ibi-webfocus,true
 ```
+
+> **`engine` is deliberately absent here.** The source toolchain varies *between versions* of the same product — TIBCO migrated products onto Flare over time, so an older version may be WebWorks or DITA while the current one is Flare. It is therefore a `versions.csv` column. See §3.4.
 
 ### 3.2 `config/versions.csv` — one row per version
 
@@ -118,16 +120,21 @@ webfocus,ibi™ WebFOCUS®,ibi,webfocus,manual,flare,ibi-webfocus,true
 | `is_archived` | tool | From the archive API |
 | `convert_eligible` | **user** | The primary toggle. Active defaults `true`, archived defaults `false` |
 | `release_date` | tool | ISO where parseable; free text otherwise (the archive API returns values like `June 2022`) |
+| `engine` | tool (detected), user-overridable | `flare` \| `dita` \| `webworks` \| `docbook` \| `auto`. **Per-version, not per-product** — see §3.4 |
+| `engine_source` | tool | `detected` \| `manual` \| `auto` (not yet determined) |
 | `zip_url` | tool, user-editable | Resolved download endpoint |
 | `custom_override` | user | Explicit row pin |
 | `_bu`, `_family` | **tool, read-only** | Denormalized from `products.csv` so you can filter by family without a VLOOKUP. Regenerated on every write; **edits here are ignored** — change them in `products.csv` |
 
 ```csv
-product_code,version,is_archived,convert_eligible,release_date,zip_url,custom_override,_bu,_family
-ems,10.4.0,false,true,2025-11-04,https://docs.tibco.com/pub/ems/10.4.0/doc/zip/tib_ems_10.4.0_doc.zip,false,tibco,messaging
-ems,10.2.1,true,false,2023-06-12,https://docs.tibco.com/pub/ems/tibco-ems-10-2-1_documentation.zip,false,tibco,messaging
-ebx,6.2.0,false,true,2025-09-30,https://docs.tibco.com/pub/ebx/6.2.0/doc/zip/tib_ebx_6.2.0_doc.zip,false,tibco,data_management
+product_code,version,is_archived,convert_eligible,release_date,engine,engine_source,zip_url,custom_override,_bu,_family
+ems,10.4.0,false,true,2025-11-04,flare,detected,https://docs.tibco.com/pub/ems/10.4.0/doc/zip/tib_ems_10.4.0_doc.zip,false,tibco,messaging
+ems,10.2.1,true,false,2023-06-12,auto,auto,https://docs.tibco.com/pub/ems/tibco-ems-10-2-1_documentation.zip,false,tibco,messaging
+ems,8.6.0,true,false,2020-04-30,webworks,detected,https://docs.tibco.com/pub/ems/tibco-ems-8-6-0_documentation.zip,false,tibco,messaging
+ebx,6.2.0,false,true,2025-09-30,flare,detected,https://docs.tibco.com/pub/ebx/6.2.0/doc/zip/tib_ebx_6.2.0_doc.zip,false,tibco,data_management
 ```
+
+Note the three `ems` rows: the current release is Flare, an older one is WebWorks, and the un-downloaded one is still `auto` because its engine cannot be known until the package is extracted.
 
 **Volatile machine state is deliberately excluded** from both files. `zip_etag`, `zip_size`, checksums, per-stage status, and free-form metadata live in `state.db`. This is what keeps the CSVs stable enough to leave open in a spreadsheet — a `catalog fetch` touches them only when discovery finds a genuinely new product or version.
 
@@ -146,7 +153,36 @@ This makes triage a spreadsheet filter, and makes progress reportable (`docushif
 
 Consequently `config/taxonomy.yaml` holds **family definitions and keyword inference rules only** — it no longer carries per-product mappings, since maintaining 250 hand-classified products in four-level nested YAML recreates the exact pain CSV was chosen to avoid. The ibi/WebFOCUS/Omni/iWay heuristics currently hardcoded in `config.py:resolve_product_info()` become YAML rule data.
 
-### 3.4 Snapshot-Based 3-Way Merge
+### 3.4 Engine Resolution (Per-Version, Detected)
+
+**The source toolchain is a property of a version, not of a product.** TIBCO migrated products onto MadCap Flare progressively, so a single product's history commonly spans generators — an 8.x doc set built with FrameMaker + WebWorks, a 9.x set from DITA, and a 10.x set from Flare. Modelling `engine` on the product would apply the wrong converter to every older version.
+
+It is also **detected, not declared**. Across 1,500-4,000 versions, hand-assignment is infeasible, and a wrong default is silently destructive: feeding a WebWorks set to the Flare engine produces plausible-looking but incorrect Markdown with no error. The default is therefore `auto`, never `flare`.
+
+**Resolution order** (first match wins):
+
+| `engine_source` | Meaning | Overwritable by detection? |
+| :--- | :--- | :--- |
+| `manual` | A human corrected it | **Never** |
+| `detected` | `engines/detector.py` identified it from extracted content | Yes, on re-extract |
+| `auto` | Not yet determined — package not downloaded/extracted | Yes |
+
+**Detection signals**, ordered by reliability (marker files first, they are cheapest and least ambiguous):
+
+| Engine | Marker files / directories | Content signature |
+| :--- | :--- | :--- |
+| Flare | `*.mcwebhelp`, `*.mclog`, `Skins/`, `Data/`, `MicroContent/`, `_globalpages/`, `csh.js` | `MadCap` namespace and `MadCap:*` attributes |
+| WebWorks | `wwhelp/`, `wwhdata/` | `WebWorks` generator meta tag |
+| DITA-OT | `*.dita` remnants, DITA metadata files | DITA-OT generator comment |
+| DocBook | — (flat HTML output) | `DocBook XSL Stylesheets` generator comment |
+
+Verified against the cached `dsp_gridserver` 7.1.1 sample: all six Flare marker paths present, and a `MadCap` reference in **197 of 197** `admin-guide` files. Marker-file detection alone is decisive there; the content signature serves as corroboration and as the fallback for DocBook, which has no distinctive file layout.
+
+**Pipeline consequence:** `engine` cannot be populated at Stage 1 (Discovery) because it requires the package contents. It is written back into `versions.csv` after Stage 4 (Extraction), making the catalog a mid-pipeline write target rather than a discovery-time artifact. Stage 5 then reads it to select the converter.
+
+**Granularity caveat:** one version's ZIP may bundle multiple guides. In the `dsp_gridserver` sample these are nine sibling folders (`admin-guide`, `dev-guide`, `install-guide`, `com-tutorial`, …) of a *single* Flare output, so per-version resolution is correct. Should a bundle ever mix generators across guides, the detector records the per-folder map in `state.db` and sets the dominant engine in the CSV; handling genuinely mixed bundles is deferred until one is observed.
+
+### 3.5 Snapshot-Based 3-Way Merge
 
 `state.db` retains the **last-fetched value of every field**. On `catalog fetch`, each field is resolved from three inputs:
 
@@ -156,7 +192,7 @@ Consequently `config/taxonomy.yaml` holds **family definitions and keyword infer
 
 If `mine != base`, the field was edited by a human and is preserved. Otherwise `theirs` wins. No `custom_override` flag is required for this to work — expecting a user to remember to tick a protection column on each edited row of a 4,000-row sheet guarantees silent data loss. `custom_override` survives only as an explicit "pin this entire row" escape hatch.
 
-### 3.5 CSV Round-Trip Hygiene
+### 3.6 CSV Round-Trip Hygiene
 
 Excel is the expected editor, which imposes hard requirements:
 
@@ -172,6 +208,8 @@ Excel is the expected editor, which imposes hard requirements:
 ---
 
 ## 4. Multi-Engine Conversion & Asset Handling
+
+The converter for a package is chosen from that **version's** `engine` value, resolved by `engines/detector.py` during extraction (§3.4) — not from any product-level setting. A version whose engine is still `auto` is skipped with a warning rather than guessed at, since a wrong guess yields silently malformed Markdown.
 
 ### 4.1 MadCap Flare Engine (`engines/flare.py`)
 - **Dropdown Extraction**: Unrolls `MCDropDown` structures into native Markdown headings or sections.

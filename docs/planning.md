@@ -27,6 +27,9 @@
   - Split into `config/products.csv` + `config/versions.csv`, normalized on `product_code`; retire `config/catalog.json`.
   - Reshape `taxonomy.yaml` to family definitions + keyword rules; move the hardcoded heuristics out of `config.py:resolve_product_info()` into YAML data.
   - Add `family_source` provenance (`manual` > `taxonomy_rule` > `docsite_category` > `unclassified`).
+  - **Move `engine` from product-level to version-level.** Concretely: delete `Product.engine` (`models.py:51`, currently defaulting to `SourceEngine.FLARE`) and add `engine` + `engine_source` to `ProductVersion`, which has no engine field today. Default becomes `AUTO`, not `FLARE`.
+  - Remove the now-dead product-level engine plumbing: `catalog.py:78` (`product.engine = existing.engine`) and the three return sites in `config.py:resolve_product_info()` (lines 64, 74, 82).
+  - Strip engine from `taxonomy.yaml`: the two BU-level `default_engine: "flare"` keys (lines 9, 88) and all 21 per-product `engine:` keys — including the three non-default `docbook` assertions for `rendezvous` (line 42), `streambase` (line 55), and `iprocess` (line 81), which are exactly the products most likely to have switched toolchains across versions.
   - CSV round-trip hygiene: `utf-8-sig`, permissive boolean/date parsing, ISO/lowercase normalized writes, fixed column order, natural-version stable sort.
 - [ ] Additive Catalog Engine (`src/docushift/catalog.py`):
   - Load/save the CSV pair.
@@ -56,6 +59,11 @@
 - [ ] Asset discovery (PDF, Word, Excel, TXT, images, ZIP).
 
 ### Phase 5: Multi-Engine HTML -> GFM Conversion & Transforms
+- [ ] **Engine Detector** (`engines/detector.py`) — resolve the generator per version from extracted content and write it back to `versions.csv`:
+  - Marker-file pass first (cheapest, least ambiguous): Flare `*.mcwebhelp`/`*.mclog`/`Skins/`/`Data/`/`MicroContent/`; WebWorks `wwhelp/`/`wwhdata/`; DITA `*.dita` remnants.
+  - Content-signature pass as corroboration and as the sole means of identifying DocBook (`DocBook XSL Stylesheets` generator comment), which has no distinctive layout.
+  - Never guess: leave `auto` and skip conversion with a warning if no signature matches.
+  - Record the per-guide-folder map in `state.db` to surface any genuinely mixed bundle.
 - [ ] MadCap Flare Engine (dropdown unrolling, proxy stripping, table text, breadcrumbs).
 - [ ] DITA, WebWorks, DocBook engine handlers.
 - [ ] Callouts to GFM alerts (`> [!NOTE]`, `> [!WARNING]`, etc.).
