@@ -10,78 +10,78 @@
 <Why this approach; decisions made and alternatives rejected; anything a
 reviewer would otherwise have to reverse-engineer from the diff.>
 
-# ==============================================================================
-# DocuShift commit template
-# Lines starting with '#' are stripped. Delete any section you do not need.
-# ==============================================================================
-#
-# SUBJECT
-#   <type>(<scope>): <subject>
-#
-#   type   feat     new capability
-#          fix      bug fix
-#          docs     documentation only (incl. CONTEXT.md ledger entries)
-#          refactor behaviour-preserving restructure
-#          test     adding or correcting tests
-#          build    pyproject, deps, packaging, .gitignore
-#          chore    tooling, config, housekeeping
-#          perf     performance work
-#          revert   reverts a previous commit
-#
-#   scope  Pipeline stage or module, matching the source tree:
-#          catalog | discovery | downloader | extractor | engines |
-#          transforms | aem | sync | cli | state | config | taxonomy |
-#          reporting | utils | docs
-#          Omit the scope if the change is genuinely cross-cutting.
-#
-#   Imperative mood ("add", not "added"/"adds"). No trailing period.
-#
-# ------------------------------------------------------------------------------
-# ## User Requests
-#   The prompt(s) that motivated this commit, so intent survives the diff.
-#   Quote the ask rather than restating the outcome — the outcome is in
-#   ## Changes. Include follow-up corrections; they are often the most
-#   informative part of the history. One bullet per distinct request.
-#
-#   Example:
-#     - "the list should be json or csv as i prefer to edit csv when the
-#        list is too large"
-#     - "keep in mind while we are planning and executing, keep updating
-#        the documentation and context as well"
-#
-# ------------------------------------------------------------------------------
-# ## Changes
-#   One bullet per file or coherent area. Say what changed, not how it
-#   works — mechanism belongs in ## Technical Details. Group related files
-#   under one bullet rather than mirroring the diff file-by-file.
-#
-#   Example:
-#     - `docs/architecture.md` — §3 rewritten from JSON schema to the CSV
-#       schema with column-ownership and provenance tables
-#     - `config/` — `catalog.json` retired; `products.csv` + `versions.csv`
-#       added
-#
-# ------------------------------------------------------------------------------
-# ## Technical Details
-#   The reviewer's shortcut. Cover whichever apply:
-#     - design decisions and the alternatives rejected, with the reason
-#     - trade-offs knowingly accepted
-#     - migration/compatibility impact on existing data or config
-#     - known gaps, follow-ups, or anything deliberately left undone
-#     - how it was verified (tests added, commands run, or "not yet run")
-#
-#   State plainly when something is unverified. Do not imply testing that
-#   did not happen.
-#
-# ------------------------------------------------------------------------------
-# BEFORE COMMITTING
-#   [ ] CONTEXT.md §3 ledger has a row for any decision made here
-#   [ ] CONTEXT.md §4 and docs/planning.md checkboxes match the filesystem
-#   [ ] docs/architecture.md reflects any schema or pipeline change
-#   [ ] docs/user-guide.md reflects any CLI or config-file change
-#
-# FOOTER
-#   Reference issues with "Refs: #123" / "Closes: #123".
-#   For AI-assisted commits, keep the trailer:
-#     Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
-# ==============================================================================
+; ==============================================================================
+; DocuShift commit template
+; Lines starting with ';' are stripped (core.commentChar=; is set locally). Delete any section you do not need.
+; ==============================================================================
+;
+; SUBJECT
+;   <type>(<scope>): <subject>
+;
+;   type   feat     new capability
+;          fix      bug fix
+;          docs     documentation only (incl. CONTEXT.md ledger entries)
+;          refactor behaviour-preserving restructure
+;          test     adding or correcting tests
+;          build    pyproject, deps, packaging, .gitignore
+;          chore    tooling, config, housekeeping
+;          perf     performance work
+;          revert   reverts a previous commit
+;
+;   scope  Pipeline stage or module, matching the source tree:
+;          catalog | discovery | downloader | extractor | engines |
+;          transforms | aem | sync | cli | state | config | taxonomy |
+;          reporting | utils | docs
+;          Omit the scope if the change is genuinely cross-cutting.
+;
+;   Imperative mood ("add", not "added"/"adds"). No trailing period.
+;
+; ------------------------------------------------------------------------------
+; ## User Requests
+;   The prompt(s) that motivated this commit, so intent survives the diff.
+;   Quote the ask rather than restating the outcome — the outcome is in
+;   ## Changes. Include follow-up corrections; they are often the most
+;   informative part of the history. One bullet per distinct request.
+;
+;   Example:
+;     - "the list should be json or csv as i prefer to edit csv when the
+;        list is too large"
+;     - "keep in mind while we are planning and executing, keep updating
+;        the documentation and context as well"
+;
+; ------------------------------------------------------------------------------
+; ## Changes
+;   One bullet per file or coherent area. Say what changed, not how it
+;   works — mechanism belongs in ## Technical Details. Group related files
+;   under one bullet rather than mirroring the diff file-by-file.
+;
+;   Example:
+;     - `docs/architecture.md` — §3 rewritten from JSON schema to the CSV
+;       schema with column-ownership and provenance tables
+;     - `config/` — `catalog.json` retired; `products.csv` + `versions.csv`
+;       added
+;
+; ------------------------------------------------------------------------------
+; ## Technical Details
+;   The reviewer's shortcut. Cover whichever apply:
+;     - design decisions and the alternatives rejected, with the reason
+;     - trade-offs knowingly accepted
+;     - migration/compatibility impact on existing data or config
+;     - known gaps, follow-ups, or anything deliberately left undone
+;     - how it was verified (tests added, commands run, or "not yet run")
+;
+;   State plainly when something is unverified. Do not imply testing that
+;   did not happen.
+;
+; ------------------------------------------------------------------------------
+; BEFORE COMMITTING
+;   [ ] CONTEXT.md §3 ledger has a row for any decision made here
+;   [ ] CONTEXT.md §4 and docs/planning.md checkboxes match the filesystem
+;   [ ] docs/architecture.md reflects any schema or pipeline change
+;   [ ] docs/user-guide.md reflects any CLI or config-file change
+;
+; FOOTER
+;   Reference issues with "Refs: #123" / "Closes: #123".
+;   For AI-assisted commits, keep the trailer:
+;     Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+; ==============================================================================

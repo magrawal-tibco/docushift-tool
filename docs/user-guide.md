@@ -15,7 +15,15 @@ cd docushift-tool
 
 # Install in development mode
 pip install -e ".[dev]"
+
+# Enable the commit message template (local git config, not inherited by clones)
+git config --local commit.template .gitmessage
+git config --local core.commentChar ';'
 ```
+
+> `core.commentChar` must be set to `;`. Git's default comment character is
+> `#`, which would strip the template's `## User Requests` / `## Changes` /
+> `## Technical Details` headers out of every commit message.
 
 ---
 
