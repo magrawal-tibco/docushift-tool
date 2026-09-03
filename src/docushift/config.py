@@ -2,20 +2,24 @@
 
 import os
 from pathlib import Path
-from typing import Dict, Any, Optional
+from typing import Any
+
 import yaml
+
 from docushift.models import SourceEngine
 
 
 class ConfigManager:
     """Manages project paths, taxonomy definitions, and configuration files."""
 
-    def __init__(self, root_dir: Optional[Path] = None):
+    def __init__(self, root_dir: Path | None = None):
         self.root_dir = root_dir or Path(os.getcwd())
         self.config_dir = self.root_dir / "config"
         self.cache_dir = self.root_dir / "cache"
         self.output_dir = self.root_dir / "output"
         self.taxonomy_path = self.config_dir / "taxonomy.yaml"
+        self.docsite_path = self.config_dir / "docsite.yaml"
+        self.aem_templates_dir = self.config_dir / "aem_templates"
         self.catalog_path = self.config_dir / "catalog.json"
         self.state_db_path = self.cache_dir / "state.db"
 
@@ -25,9 +29,10 @@ class ConfigManager:
         (self.cache_dir / "extracted").mkdir(parents=True, exist_ok=True)
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
-        self._taxonomy_cache: Optional[Dict[str, Any]] = None
+        self._taxonomy_cache: dict[str, Any] | None = None
+        self._docsite_cache: dict[str, Any] | None = None
 
-    def load_taxonomy(self) -> Dict[str, Any]:
+    def load_taxonomy(self) -> dict[str, Any]:
         """Loads and caches taxonomy rules from taxonomy.yaml."""
         if self._taxonomy_cache is not None:
             return self._taxonomy_cache
@@ -36,11 +41,24 @@ class ConfigManager:
             self._taxonomy_cache = {"business_units": {}}
             return self._taxonomy_cache
 
-        with open(self.taxonomy_path, "r", encoding="utf-8") as f:
+        with open(self.taxonomy_path, encoding="utf-8") as f:
             self._taxonomy_cache = yaml.safe_load(f) or {"business_units": {}}
         return self._taxonomy_cache
 
-    def resolve_product_info(self, product_code: str, product_name: str = "") -> Dict[str, Any]:
+    def load_docsite(self) -> dict[str, Any]:
+        """Loads and caches docsite discovery endpoints from docsite.yaml."""
+        if self._docsite_cache is not None:
+            return self._docsite_cache
+
+        if not self.docsite_path.exists():
+            self._docsite_cache = {}
+            return self._docsite_cache
+
+        with open(self.docsite_path, encoding="utf-8") as f:
+            self._docsite_cache = yaml.safe_load(f) or {}
+        return self._docsite_cache
+
+    def resolve_product_info(self, product_code: str, product_name: str = "") -> dict[str, Any]:
         """
         Resolves BU, Product Family, and Engine based on taxonomy mappings
         or intelligent heuristics.
@@ -66,7 +84,8 @@ class ConfigManager:
                     }
 
         # 2. Heuristic inference for IBI products
-        if "ibi" in name_lower or "webfocus" in name_lower or "omni" in name_lower or "iway" in name_lower or code_lower.startswith("ibi"):
+        ibi_keywords = ("ibi", "webfocus", "omni", "iway")
+        if any(kw in name_lower for kw in ibi_keywords) or code_lower.startswith("ibi"):
             fam = "webfocus" if "webfocus" in name_lower else "data_management"
             return {
                 "bu": "ibi",

@@ -1,11 +1,12 @@
 """Data models for DocuShift."""
 
-from enum import Enum
-from typing import Dict, Optional, List, Any
+from enum import StrEnum
+from typing import Any
+
 from pydantic import BaseModel, Field
 
 
-class ConversionStatus(str, Enum):
+class ConversionStatus(StrEnum):
     """Lifecycle status of a product version."""
     DISCOVERED = "DISCOVERED"
     DOWNLOADED = "DOWNLOADED"
@@ -15,7 +16,7 @@ class ConversionStatus(str, Enum):
     ERROR = "ERROR"
 
 
-class SourceEngine(str, Enum):
+class SourceEngine(StrEnum):
     """Source documentation generator engine."""
     FLARE = "flare"
     DITA = "dita"
@@ -27,36 +28,36 @@ class SourceEngine(str, Enum):
 class ProductVersion(BaseModel):
     """Represents a specific published version of a product."""
     version: str
-    title: Optional[str] = None
-    slug: Optional[str] = None
-    folder_path: Optional[str] = None
-    zip_url: Optional[str] = None
-    zip_size: Optional[int] = None
-    zip_etag: Optional[str] = None
-    release_date: Optional[str] = None
+    title: str | None = None
+    slug: str | None = None
+    folder_path: str | None = None
+    zip_url: str | None = None
+    zip_size: int | None = None
+    zip_etag: str | None = None
+    release_date: str | None = None
     is_archived: bool = False
     convert_eligible: bool = True
     source: str = "tool_fetch"  # "tool_fetch" or "manual"
     custom_override: bool = False
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class Product(BaseModel):
     """Represents a product entry in the catalog."""
     product_code: str
     display_name: str
-    slug: Optional[str] = None
+    slug: str | None = None
     bu: str = "tibco"  # "tibco" or "ibi"
     family: str = "general"
     engine: SourceEngine = SourceEngine.FLARE
-    docsite_id: Optional[int] = None
+    docsite_id: int | None = None
     custom_override: bool = False
-    metadata: Dict[str, Any] = Field(default_factory=dict)
-    versions: Dict[str, ProductVersion] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+    versions: dict[str, ProductVersion] = Field(default_factory=dict)
 
 
 class Catalog(BaseModel):
     """Master Additive Product Catalog."""
     version: str = "1.0"
-    last_updated: Optional[str] = None
-    products: Dict[str, Product] = Field(default_factory=dict)
+    last_updated: str | None = None
+    products: dict[str, Product] = Field(default_factory=dict)

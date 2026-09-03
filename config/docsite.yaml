@@ -1,0 +1,45 @@
+# DocuShift Docsite Discovery Configuration
+# Endpoints and crawling rules for docs.tibco.com.
+# Verified 2026-09-02 -- see docs/architecture.md section 2.
+
+version: "1.0"
+
+base_url: "https://docs.tibco.com"
+
+endpoints:
+  # All active public products: names, slugs, docsite ids.
+  a_to_z: "/api/a_to_z"
+  # Active versions for one product: version_no, folder_path, isArchiveExists, siblings.
+  product: "/api/products/{slug}"
+  # Archived "Other Versions": children with version_no, name, GA_date, zipPath.
+  product_archive: "/api/products/archive/{slug}"
+  # Suite groupings (WebFOCUS, ibi, Spotfire, EMS, BusinessWorks, EBX).
+  product_list_by_suites: "/api/product_list_by_suites"
+  # Category data. Advisory only -- most products carry no category, so this may
+  # only promote an `unclassified` family, never override a `manual` one.
+  bu_category_products: "/api/bu_category_products"
+
+zip_urls:
+  # Active versions: built from the version's folder_path.
+  # e.g. folder_path "ems/10.4.0" -> /pub/ems/10.4.0/doc/zip/tib_ems_10.4.0_doc.zip
+  active_template: "/pub/{folder_path}/doc/zip/tib_{folder_slug}_doc.zip"
+  # Archived versions: the archive API returns an explicit zipPath; use it verbatim.
+  archive_field: "zipPath"
+
+crawl:
+  user_agent: "Mozilla/5.0 (compatible; DocuShift/0.1; documentation migration)"
+  accept: "application/json"
+  timeout_seconds: 30
+  max_retries: 3
+  backoff_factor: 1.5
+  # Politeness: cap concurrent requests and pause between them.
+  rate_limit_per_second: 2
+  max_concurrent_requests: 4
+
+defaults:
+  # Conversion policy -- see docs/architecture.md section 2.3.
+  active_convert_eligible: true
+  archived_convert_eligible: false
+  # Engine is detected after extraction (Stage 4), never at discovery time.
+  engine: "auto"
+  engine_source: "auto"

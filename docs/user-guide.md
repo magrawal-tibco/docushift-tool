@@ -25,6 +25,16 @@ git config --local core.commentChar ';'
 > `#`, which would strip the template's `## User Requests` / `## Changes` /
 > `## Technical Details` headers out of every commit message.
 
+### Verify the installation
+
+```bash
+docushift doctor
+```
+
+Prints the resolved project paths (`config/`, `cache/downloads/`, `cache/extracted/`, `output/`, `state.db`) and whether each exists, creating the working directories on first run.
+
+> **Implementation status.** The command tree below is the full intended surface and `--help` reflects it, but only `doctor` is implemented today. Every other command exits non-zero with the phase that will build it — see `docs/planning.md`. Commands are never silently no-op.
+
 ---
 
 ## 2. Managing the Additive Product Catalog
@@ -119,6 +129,14 @@ docushift download --product businessevents-enterprise --version 6.4.0
 ```
 
 ### Extract & Convert to GFM
+Extraction is a separate step because it is where the engine is detected and written
+back into `versions.csv` (see §5):
+```bash
+# Unzip, catalog assets and CSH maps, detect engines
+docushift extract --all
+docushift extract --product businessevents-enterprise --version 6.4.0
+```
+
 ```bash
 # Convert all downloaded packages
 docushift convert --all

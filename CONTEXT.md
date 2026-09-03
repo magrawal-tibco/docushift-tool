@@ -1,7 +1,7 @@
 # Project Context & Living Ledger: DocuShift Tool
 
 > **Last Updated:** 2026-09-03  
-> **Status:** Architecture & Scaffolding Phase (Phase 1 ~70% complete)  
+> **Status:** Phase 1 complete and verified (54 tests pass, lint clean); Phase 2 (CSV catalog + state engine) next  
 > **Primary Runtime:** Python 3.11+ (Active: Python 3.13)  
 > **Business Scope:** TIBCO & IBI Documentation Migration (~250 Products) to AEM on GitHub
 
@@ -103,6 +103,9 @@ docushift-tool/
 | 2026-09-03 | Pipeline | Catalog becomes a **mid-pipeline write target**: `engine` cannot be known at Stage 1 (Discovery) and is written back after Stage 4 (Extraction). | Engine resolution requires the package contents, so discovery can only leave it `auto`. Stage 5 reads the value to select a converter. |
 | 2026-09-03 | Taxonomy | `taxonomy.yaml` keyword rules assign `bu`/`family` **only** — engine assertions removed. | Per-version engine variance makes any product-level engine rule wrong by construction. The existing `rendezvous`/`streambase`/`iprocess` → `docbook` mappings in `taxonomy.yaml` are product-level assertions that must be dropped. |
 | 2026-09-03 | Process | Standardised commit messages via `.gitmessage` (Conventional Commits subject + **User Requests** / **Changes** / **Technical Details** sections). Requires two local settings: `git config --local commit.template .gitmessage` and `git config --local core.commentChar ';'`. | The **User Requests** section preserves the intent behind each change — in AI-assisted work the originating ask, and especially the mid-course correction, is the context most easily lost. The pre-commit checklist enforces the living-docs discipline at the point where drift would otherwise be introduced. |
+| 2026-09-03 | CLI | Full command tree declared in `cli.py`, matching the surface already documented in `user-guide.md`. Stage commands are scaffolded but **fail loudly** — each raises a `ClickException` naming its implementing phase rather than being omitted or no-op'ing. New `docushift doctor` (paths + artifact presence) is the only functional command in Phase 1; `status` stays reserved for the Phase 7 delta dashboard the user guide describes. | `[project.scripts]` already promised `docushift.cli:main`, so the module had to exist. A `convert` that exits 0 while converting nothing is worse than one that doesn't exist: it makes the pipeline look further along than it is — the same failure mode the Phase 1 audit found in `pytest` exiting green on zero tests. |
+| 2026-09-03 | Dependencies | Added `jinja2` to `pyproject.toml` dependencies. | `config/aem_templates/` ships Jinja templates for the Stage 6 synthesizer; a template directory with no template engine behind it is incoherent. |
+| 2026-09-03 | Tooling | Added `[tool.ruff]` to `pyproject.toml` with an explicitly pinned rule set (`E,F,I,UP,B,SIM`, line length 120). Fixed the 47 findings this surfaced in the pre-existing `models.py` / `config.py` / `catalog.py`, including two unused imports, an unused variable, and `str, Enum` → `StrEnum`. | `ruff` was a declared dev dependency with no configuration, so its rule set was whatever the installed version defaulted to — the lint result would have silently changed on upgrade. All 47 findings were in code written before the environment existed; none were in the Phase 1 additions, which is what running the linter for the first time was meant to establish. |
 | 2026-09-03 | Taxonomy | Docsite category data (`/product/categories`, `/api/bu_category_products`) is **advisory only, never authoritative**. Added `family_source` provenance column (`manual` > `taxonomy_rule` > `docsite_category` > `unclassified`, first wins). | Confirmed by user: the majority of products carry no docsite category, so classification is a majority-manual triage job. Provenance distinguishes "triaged and genuinely general" from "never looked at" and makes triage progress a reportable metric. |
 
 ---
@@ -113,12 +116,14 @@ docushift-tool/
 Audited against the filesystem, not against checkboxes:
 - [x] Verified `docs.tibco.com` API endpoints and active/archived version models
 - [x] `pyproject.toml`, `config/taxonomy.yaml` created
-- [x] `models.py`, `config.py`, `catalog.py` written — **but never executed** (no venv, `pydantic` not installed, `import docushift` fails)
-- [ ] **Scaffolding gap**: no `tests/` directory (so `pytest` collects nothing and exits green); all 9 subpackages missing (`discovery/`, `downloader/`, `extractor/`, `engines/`, `transforms/`, `aem/`, `sync/`, `reporting/`, `utils/`); `cli.py` missing while `[project.scripts]` declares `docushift = "docushift.cli:main"`, so the console script installs broken; `state.py`, `config/docsite.yaml`, `config/aem_templates/` missing
-- [ ] **`.gitignore` gap**: contains only `cache/`, but `ConfigManager.__init__` unconditionally creates `output/`, and `state.db` needs ignoring
+- [x] **Phase 1 scaffolding closed**: all 9 subpackages created; `cli.py` command tree written (so `[project.scripts]` now resolves); `tests/` with `conftest.py`, unit and integration suites, and a documented `fixtures/` plan; `config/docsite.yaml` and `config/aem_templates/` (Jinja `toc.yml`/`nav.yml`/`meta.yml`/`index.md`) added; `.gitignore` extended to `output/`, `*.db`, `.venv/`, and build/test caches
+- [x] **Environment created and code executed for the first time** — `.venv` on Python 3.13.7, `pip install -e ".[dev]"`, **54/54 tests pass**, `ruff check src tests` clean, and the `docushift` console script runs. Setup from the repo root:
+  ```
+  python -m venv .venv && .venv/Scripts/python -m pip install -e ".[dev]" && .venv/Scripts/python -m pytest
+  ```
+- [ ] `state.py` remains unwritten (Phase 2)
 
 ### Next steps
-- [ ] Close Phase 1: venv + `pip install -e ".[dev]"`, subpackage stubs, `cli.py` command tree, `tests/` with real coverage of the merge logic, `.gitignore` fixes
 - [ ] Migrate catalog to CSV: rewrite `catalog.py` load/save, split `config.py` paths, delete `config/catalog.json`, reshape `taxonomy.yaml`
 - [ ] Implement State Engine (`src/docushift/state.py`) incl. last-fetch snapshot table backing the 3-way merge
 - [ ] Implement Docsite Discovery Crawler (`src/docushift/discovery/crawler.py`) for active + archived versions

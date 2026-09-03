@@ -1,10 +1,10 @@
 """Additive Catalog Manager for DocuShift."""
 
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Any
-from docushift.models import Catalog, Product, ProductVersion, SourceEngine
+
+from docushift.models import Catalog, Product, ProductVersion
 
 
 class CatalogManager:
@@ -16,7 +16,7 @@ class CatalogManager:
 
     def __init__(self, catalog_path: Path):
         self.catalog_path = catalog_path
-        self._catalog: Optional[Catalog] = None
+        self._catalog: Catalog | None = None
 
     def load(self) -> Catalog:
         """Loads catalog from disk or initializes a new one if not present."""
@@ -24,16 +24,16 @@ class CatalogManager:
             return self._catalog
 
         if not self.catalog_path.exists():
-            self._catalog = Catalog(last_updated=datetime.now(timezone.utc).isoformat())
+            self._catalog = Catalog(last_updated=datetime.now(UTC).isoformat())
             return self._catalog
 
         try:
-            with open(self.catalog_path, "r", encoding="utf-8") as f:
+            with open(self.catalog_path, encoding="utf-8") as f:
                 data = json.load(f)
             self._catalog = Catalog.model_validate(data)
-        except Exception as e:
+        except Exception:
             # Fallback to empty catalog on corruption or error
-            self._catalog = Catalog(last_updated=datetime.now(timezone.utc).isoformat())
+            self._catalog = Catalog(last_updated=datetime.now(UTC).isoformat())
         return self._catalog
 
     def save(self) -> None:
@@ -41,17 +41,17 @@ class CatalogManager:
         if self._catalog is None:
             return
 
-        self._catalog.last_updated = datetime.now(timezone.utc).isoformat()
+        self._catalog.last_updated = datetime.now(UTC).isoformat()
         self.catalog_path.parent.mkdir(parents=True, exist_ok=True)
         with open(self.catalog_path, "w", encoding="utf-8") as f:
             json.dump(self._catalog.model_dump(mode="json"), f, indent=2, ensure_ascii=False)
 
-    def get_product(self, product_code: str) -> Optional[Product]:
+    def get_product(self, product_code: str) -> Product | None:
         """Gets a product by its code."""
         catalog = self.load()
         return catalog.products.get(product_code)
 
-    def get_version(self, product_code: str, version: str) -> Optional[ProductVersion]:
+    def get_version(self, product_code: str, version: str) -> ProductVersion | None:
         """Gets a specific product version."""
         product = self.get_product(product_code)
         if product:
@@ -81,17 +81,16 @@ class CatalogManager:
         # Merge versions
         for ver_key, ver_data in product.versions.items():
             existing_ver = existing.versions.get(ver_key)
-            if existing_ver is not None:
-                if existing_ver.custom_override:
-                    # Preserve manual version overrides (e.g. custom zip url, convert_eligible toggle)
-                    ver_data.convert_eligible = existing_ver.convert_eligible
-                    ver_data.zip_url = existing_ver.zip_url or ver_data.zip_url
-                    ver_data.custom_override = True
+            if existing_ver is not None and existing_ver.custom_override:
+                # Preserve manual version overrides (e.g. custom zip url, convert_eligible toggle)
+                ver_data.convert_eligible = existing_ver.convert_eligible
+                ver_data.zip_url = existing_ver.zip_url or ver_data.zip_url
+                ver_data.custom_override = True
             existing.versions[ver_key] = ver_data
 
         return existing
 
-    def smart_merge_fetch_results(self, discovered_products: List[Product]) -> Dict[str, int]:
+    def smart_merge_fetch_results(self, discovered_products: list[Product]) -> dict[str, int]:
         """
         Merges a list of freshly discovered products from docsite discovery into catalog.
         Returns statistics: {'products_added': int, 'products_updated': int, 'versions_added': int}

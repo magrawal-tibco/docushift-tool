@@ -1,0 +1,14 @@
+---
+title: "{{ product.display_name }} {{ version.version }}"
+description: "Documentation for {{ product.display_name }} version {{ version.version }}."
+product: "{{ product.product_code }}"
+product_version: "{{ version.version }}"
+business_unit: "{{ product.bu }}"
+family: "{{ product.family }}"
+---
+
+# {{ product.display_name }} {{ version.version }}
+
+{% for guide in guides %}
+- [{{ guide.title }}]({{ guide.path }})
+{%- endfor %}
