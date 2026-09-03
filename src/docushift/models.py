@@ -51,11 +51,21 @@ class FamilySource(StrEnum):
 
 
 class ProductVersion(BaseModel):
-    """One published version of a product -- one row of `versions.csv`."""
+    """One published version of a product -- one row of `versions.csv`.
+
+    `convert_eligible` and `convert_batch` answer two different questions and are
+    deliberately separate columns -- see docs/architecture.md §3.7. Eligibility is
+    long-lived policy ("may this version ever be converted?"); the batch is
+    scheduling ("is it in *this* run?"). Collapsing them would mean a three-version
+    POC required flipping `convert_eligible` to false on every other row.
+    """
     product_code: str
     version: str
     is_archived: bool = False
     convert_eligible: bool = True
+    # Free-text run label, e.g. `poc-1` or `wave-2`. Empty means "not scheduled".
+    # Opt-in by design: tagging three rows is the whole cost of scoping a POC.
+    convert_batch: str = ""
     release_date: str | None = None
     engine: SourceEngine = SourceEngine.AUTO
     engine_source: EngineSource = EngineSource.AUTO

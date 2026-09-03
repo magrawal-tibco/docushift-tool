@@ -34,9 +34,38 @@ RULES_YAML = (
 def test_creates_working_directories(project_root: Path) -> None:
     ConfigManager(root_dir=project_root)
 
-    assert (project_root / "cache" / "downloads").is_dir()
-    assert (project_root / "cache" / "extracted").is_dir()
+    assert (project_root / "cache").is_dir()
+    assert (project_root / "families").is_dir()
     assert (project_root / "output").is_dir()
+
+
+def test_family_workspace_paths(config: ConfigManager, project_root: Path) -> None:
+    families = project_root / "families" / "en-us-tibco-data-management"
+
+    assert config.family_folder_name("tibco", "data_management") == "en-us-tibco-data-management"
+    assert config.family_dir("tibco", "data_management") == families
+    assert config.downloads_dir("tibco", "data_management") == families / "downloads"
+    assert config.extracted_dir("tibco", "data_management") == families / "extracted"
+    assert config.archive_dir("tibco", "data_management") == families / "archive"
+
+
+def test_download_and_extract_paths_are_keyed_by_the_catalog(config: ConfigManager) -> None:
+    """Both paths derive from `product_code` + `version`, so state.db can round-trip them."""
+    family = config.family_dir("tibco", "messaging")
+
+    assert config.download_path("tibco", "messaging", "ems", "10.4.0") == family / "downloads" / "ems-10.4.0.zip"
+    # Dots survive in the working tree; dots-to-dashes is a Stage 6 output concern.
+    assert config.extract_path("tibco", "messaging", "ems", "10.4.0") == family / "extracted" / "ems" / "10.4.0"
+
+
+def test_locale_prefix_is_configurable(project_root: Path) -> None:
+    cfg = ConfigManager(root_dir=project_root, locale="fr-fr")
+
+    assert cfg.family_folder_name("tibco", "messaging") == "fr-fr-tibco-messaging"
+
+
+def test_family_folders_are_not_precreated(config: ConfigManager, project_root: Path) -> None:
+    assert not config.family_dir("tibco", "messaging").exists()
 
 
 def test_resolved_paths(config: ConfigManager, project_root: Path) -> None:

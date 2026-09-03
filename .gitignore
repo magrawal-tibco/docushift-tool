@@ -1,5 +1,6 @@
 # Downloaded packages, extracted working sets, and the state DB
 cache/
+families/
 output/
 *.db
 *.db-journal

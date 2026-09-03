@@ -20,8 +20,10 @@ from tests.conftest import make_product, make_version
 PENDING_COMMANDS = [
     ["catalog", "fetch", "--all"],
     ["download", "--all"],
+    ["download", "--batch", "poc-1"],
     ["extract", "--all"],
     ["convert", "--product", "ems", "--version", "10.4.0"],
+    ["archive", "download", "--product", "ems", "--version", "8.6.0"],
     ["sync", "--target-dir", "workspace"],
     ["validate", "--target-dir", "workspace"],
     ["status", "--bu", "tibco"],
@@ -65,7 +67,18 @@ def test_help_lists_the_pipeline_commands(runner: CliRunner) -> None:
     result = runner.invoke(main, ["--help"])
 
     assert result.exit_code == 0
-    for command in ("catalog", "download", "extract", "convert", "sync", "validate", "status", "report", "doctor"):
+    for command in (
+        "catalog",
+        "archive",
+        "download",
+        "extract",
+        "convert",
+        "sync",
+        "validate",
+        "status",
+        "report",
+        "doctor",
+    ):
         assert command in result.output
 
 
@@ -73,8 +86,25 @@ def test_catalog_help_lists_subcommands(runner: CliRunner) -> None:
     result = runner.invoke(main, ["catalog", "--help"])
 
     assert result.exit_code == 0
-    for command in ("fetch", "list", "show", "enable", "set", "import", "triage"):
+    for command in ("fetch", "list", "show", "enable", "set", "import", "triage", "batches"):
         assert command in result.output
+
+
+def test_archive_help_lists_subcommands(runner: CliRunner) -> None:
+    result = runner.invoke(main, ["archive", "--help"])
+
+    assert result.exit_code == 0
+    for command in ("list", "download"):
+        assert command in result.output
+
+
+@pytest.mark.parametrize("command", ["download", "extract", "convert", "sync", "catalog list", "catalog fetch"])
+def test_batch_is_a_selector_on_every_stage(runner: CliRunner, command: str) -> None:
+    """A POC scope must be expressible on every command that walks the catalog."""
+    result = runner.invoke(main, [*command.split(), "--help"])
+
+    assert result.exit_code == 0
+    assert "--batch" in result.output
 
 
 @pytest.mark.parametrize("argv", PENDING_COMMANDS, ids=lambda a: " ".join(a[:2]))
@@ -225,5 +255,69 @@ def test_doctor_reports_project_artifacts(runner: CliRunner, tmp_path: Path) -> 
     result = _invoke(runner, tmp_path, "doctor")
 
     assert result.exit_code == 0
-    assert "downloads" in result.output
+    assert "families" in result.output
     assert "state.db" in result.output
+    assert "en-us" in result.output
+
+
+# -- batch scheduling --------------------------------------------------------
+
+
+def test_catalog_set_batch_tags_a_version(runner: CliRunner, populated_root: Path) -> None:
+    result = _invoke(
+        runner, populated_root, "catalog", "set", "--product", "ems", "--version", "10.4.0", "--batch", "poc-1"
+    )
+
+    assert result.exit_code == 0
+    listed = _invoke(runner, populated_root, "catalog", "list", "--batch", "poc-1")
+    assert "10.4.0" in listed.output
+    assert "8.6.0" not in listed.output
+
+
+def test_catalog_set_batch_requires_a_version(runner: CliRunner, populated_root: Path) -> None:
+    """`--batch` on a product row is ambiguous: it would schedule the whole history."""
+    result = _invoke(runner, populated_root, "catalog", "set", "--product", "ems", "--batch", "poc-1")
+
+    assert result.exit_code != 0
+    assert "--batch" in result.output
+
+
+def test_catalog_batches_lists_scheduled_work(runner: CliRunner, populated_root: Path) -> None:
+    _invoke(runner, populated_root, "catalog", "set", "--product", "ems", "--version", "10.4.0", "--batch", "poc-1")
+
+    result = _invoke(runner, populated_root, "catalog", "batches")
+
+    assert result.exit_code == 0
+    assert "poc-1" in result.output
+
+
+def test_catalog_batches_when_nothing_is_scheduled(runner: CliRunner, populated_root: Path) -> None:
+    result = _invoke(runner, populated_root, "catalog", "batches")
+
+    assert result.exit_code == 0
+    assert "No versions are tagged" in result.output
+
+
+def test_catalog_show_reports_the_family_workspace(runner: CliRunner, populated_root: Path) -> None:
+    result = _invoke(runner, populated_root, "catalog", "show", "--product", "ems")
+
+    assert result.exit_code == 0
+    assert "en-us-tibco-messaging" in result.output
+
+
+# -- archived versions -------------------------------------------------------
+
+
+def test_archive_list_shows_only_archived_versions(runner: CliRunner, populated_root: Path) -> None:
+    result = _invoke(runner, populated_root, "archive", "list")
+
+    assert result.exit_code == 0
+    assert "8.6.0" in result.output
+    assert "10.4.0" not in result.output
+
+
+def test_archive_list_when_nothing_is_archived(runner: CliRunner, populated_root: Path) -> None:
+    result = _invoke(runner, populated_root, "archive", "list", "--product", "nosuchproduct")
+
+    assert result.exit_code == 0
+    assert "No archived versions" in result.output

@@ -11,6 +11,7 @@ flag required, because expecting a user to tick one on each edited row of a
 
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from docushift.models import (
     Catalog,
@@ -30,6 +31,9 @@ from docushift.utils.csvio import (
     write_rows,
 )
 
+if TYPE_CHECKING:  # pragma: no cover - import kept lazy to avoid a config <-> catalog cycle
+    from docushift.config import ConfigManager
+
 PRODUCT_COLUMNS = (
     "product_code",
     "display_name",
@@ -48,6 +52,7 @@ VERSION_COLUMNS = (
     "version",
     "is_archived",
     "convert_eligible",
+    "convert_batch",
     "release_date",
     "engine",
     "engine_source",
@@ -61,6 +66,9 @@ VERSION_COLUMNS = (
 # because `family_source=manual` outranks any fetch.
 _MERGEABLE_PRODUCT_FIELDS = ("display_name", "slug")
 # Engine fields are absent by design: the detector writes them, not discovery.
+# `convert_batch` is absent for the same structural reason from the other side --
+# it is purely a human scheduling decision, so a fetch has nothing true to say
+# about it and it is excluded from `version_snapshot` entirely.
 _MERGEABLE_VERSION_FIELDS = ("is_archived", "convert_eligible", "release_date", "zip_url")
 
 
@@ -92,10 +100,19 @@ class MergeStats:
 class CatalogManager:
     """Loads, merges, and writes the catalog CSV pair."""
 
-    def __init__(self, products_path: Path, versions_path: Path, state: StateStore | None = None):
+    def __init__(
+        self,
+        products_path: Path,
+        versions_path: Path,
+        state: StateStore | None = None,
+        config: "ConfigManager | None" = None,
+    ):
         self.products_path = products_path
         self.versions_path = versions_path
         self.state = state
+        # Only needed to check family names against taxonomy.yaml. Optional, because
+        # an unknown family is a warning, not an error -- see `warnings()`.
+        self.config = config
         self._catalog: Catalog | None = None
 
     # -- load / save ---------------------------------------------------------
@@ -138,6 +155,7 @@ class CatalogManager:
                 version=version,
                 is_archived=is_archived,
                 convert_eligible=parse_bool(row.get("convert_eligible"), default=not is_archived),
+                convert_batch=row.get("convert_batch", "").strip().lower(),
                 release_date=normalize_date(row.get("release_date")) or None,
                 engine=_coerce_enum(SourceEngine, row.get("engine"), SourceEngine.AUTO),
                 engine_source=_coerce_enum(EngineSource, row.get("engine_source"), EngineSource.AUTO),
@@ -186,6 +204,7 @@ class CatalogManager:
                         "version": version.version,
                         "is_archived": format_bool(version.is_archived),
                         "convert_eligible": format_bool(version.convert_eligible),
+                        "convert_batch": version.convert_batch,
                         "release_date": normalize_date(version.release_date),
                         "engine": str(version.engine),
                         "engine_source": str(version.engine_source),
@@ -212,9 +231,17 @@ class CatalogManager:
         family: str | None = None,
         product_code: str | None = None,
         version: str | None = None,
+        batch: str | None = None,
         eligible_only: bool = False,
     ) -> list[tuple[Product, ProductVersion]]:
-        """Filtered `(product, version)` pairs, in catalog sort order."""
+        """Filtered `(product, version)` pairs, in catalog sort order.
+
+        `batch` and `eligible_only` compose rather than override: `batch="poc-1"`
+        with `eligible_only=True` yields the versions that are both scheduled and
+        permitted. That is the selection every pipeline stage runs on -- a row
+        tagged into a batch but left `convert_eligible=false` is still excluded,
+        because eligibility is the hard gate.
+        """
         catalog = self.load()
         results = []
         for product in sorted(catalog.products.values(), key=lambda p: (p.bu, p.family, p.product_code)):
@@ -227,10 +254,25 @@ class CatalogManager:
             for ver in sorted(product.versions.values(), key=lambda v: natural_version_key(v.version), reverse=True):
                 if version and ver.version != version:
                     continue
+                if batch and ver.convert_batch != batch.strip().lower():
+                    continue
                 if eligible_only and not ver.convert_eligible:
                     continue
                 results.append((product, ver))
         return results
+
+    def batches(self) -> dict[str, int]:
+        """Version counts per `convert_batch` label, so a run's scope is checkable.
+
+        Unscheduled rows are omitted rather than grouped under `""` -- "how many
+        versions are in wave-2" is the question this answers, and folding 3,900
+        untagged rows into the same table would bury it.
+        """
+        counts: dict[str, int] = {}
+        for _, ver in self.iter_versions():
+            if ver.convert_batch:
+                counts[ver.convert_batch] = counts.get(ver.convert_batch, 0) + 1
+        return dict(sorted(counts.items()))
 
     # -- merge ---------------------------------------------------------------
 
@@ -414,6 +456,9 @@ class CatalogManager:
             target.zip_url = value or None
         elif name == "convert_eligible":
             target.convert_eligible = parse_bool(value)
+        elif name == "convert_batch":
+            # Normalized on the way in so `POC-1`, `poc-1 ` and `poc-1` are one batch.
+            target.convert_batch = value.strip().lower()
         elif name == "custom_override":
             target.custom_override = parse_bool(value)
         else:
@@ -468,6 +513,42 @@ class CatalogManager:
                 if ver.convert_eligible and not ver.zip_url:
                     problems.append(f"{product.product_code}@{ver.version}: convert_eligible with no zip_url")
         return problems
+
+    def warnings(self) -> list[str]:
+        """Things worth saying out loud that must not block a write.
+
+        Kept separate from `validate()` because the two have opposite consequences:
+        a `validate()` problem aborts the import, whereas everything here is a
+        legitimate state the user may have chosen deliberately.
+        """
+        notes: list[str] = []
+        catalog = self.load()
+
+        for product in sorted(catalog.products.values(), key=lambda p: p.product_code):
+            # A family typed straight into products.csv is accepted and its folder
+            # auto-registered; the warning exists so a typo ('mesaging') is visible
+            # before it silently becomes a third family folder holding one product.
+            if self.config is not None and not self.config.is_known_family(product.bu, product.family):
+                try:
+                    folder = self.config.family_folder_name(product.bu, product.family)
+                except ValueError as exc:
+                    notes.append(f"{product.product_code}: {exc}")
+                    continue
+                notes.append(
+                    f"{product.product_code}: family '{product.family}' is not declared in taxonomy.yaml "
+                    f"for bu '{product.bu}'. Accepted; workspace folder -> families/{folder}. "
+                    f"Add it to taxonomy.yaml to silence this."
+                )
+            for ver in sorted(product.versions.values(), key=lambda v: natural_version_key(v.version), reverse=True):
+                # Scheduled but not permitted: the batch flag looks like it selected
+                # this row, and nothing downstream will ever pick it up.
+                if ver.convert_batch and not ver.convert_eligible:
+                    notes.append(
+                        f"{product.product_code}@{ver.version}: in batch '{ver.convert_batch}' but "
+                        f"convert_eligible=false, so it will be skipped. Run "
+                        f"`docushift catalog enable --product {product.product_code} --version {ver.version}`."
+                    )
+        return notes
 
 
 _FAMILY_PRECEDENCE = {

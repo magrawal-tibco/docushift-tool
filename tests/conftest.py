@@ -28,7 +28,37 @@ def project_root(tmp_path: Path) -> Path:
 
 @pytest.fixture
 def config(project_root: Path) -> ConfigManager:
-    """A ConfigManager rooted in a throwaway directory."""
+    """A ConfigManager rooted in a throwaway directory, with no taxonomy.yaml."""
+    return ConfigManager(root_dir=project_root)
+
+
+# Mirrors the families the shipped config/taxonomy.yaml declares, trimmed to the
+# ones the fixtures below actually use.
+TAXONOMY_YAML = """\
+business_units:
+  tibco:
+    name: TIBCO
+    families:
+      messaging: {name: Messaging}
+      data_management: {name: Data Management}
+      general: {name: General}
+  ibi:
+    name: ibi
+    families:
+      webfocus: {name: WebFOCUS}
+      general: {name: General}
+rules: []
+"""
+
+
+@pytest.fixture
+def taxonomy_config(project_root: Path) -> ConfigManager:
+    """A ConfigManager whose taxonomy.yaml declares the families the fixtures use.
+
+    Needed wherever a test asserts on family *validation*: the bare `config`
+    fixture has no taxonomy file, so every family reads as undeclared there.
+    """
+    (project_root / "config" / "taxonomy.yaml").write_text(TAXONOMY_YAML, encoding="utf-8")
     return ConfigManager(root_dir=project_root)
 
 

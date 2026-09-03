@@ -25,13 +25,14 @@ flowchart TD
         T1 --> T2["Categorized Products\n(BU: TIBCO / IBI -> Product Family)"]
     end
 
-    subgraph Download["Resumable Downloader"]
-        T2 --> DW1["Async / Resumable\nPackage Downloader\n(Filter: convert_eligible = true)"]
-        DW1 --> DW2["Local Cache Storage\n(cache/downloads/*.zip)"]
+    subgraph Download["Package Acquisition"]
+        T2 --> DW1["Async / Resumable\nPackage Downloader\n(Filter: convert_eligible AND convert_batch)"]
+        DW1 --> DW2["Family Workspace\n(families/{locale}-{bu}-{family}/downloads/*.zip)"]
+        MZ["Manually Supplied ZIP\n(--from-file; zip_source=manual)\nno usable zip_url"] --> DW2
     end
 
     subgraph Extract["Extraction & Asset Cataloging"]
-        DW2 --> EX1["ZIP Extractor & Validator"]
+        DW2 --> EX1["ZIP Extractor & Validator\n(same selection as download;\narchived versions never reach here)"]
         EX1 --> EX2["Asset & CSH Catalog\n(HTML, CSH Aliases, PDF, Word, XLS, Imgs)"]
         EX2 --> EX3["Engine Detector\n(per version, writes back to versions.csv)"]
     end
@@ -118,23 +119,27 @@ webfocus,ibi™ WebFOCUS®,ibi,webfocus,manual,ibi-webfocus,true
 | `product_code` | tool | FK to `products.csv` |
 | `version` | tool | e.g. `10.4.0`; with `product_code` forms the row key |
 | `is_archived` | tool | From the archive API |
-| `convert_eligible` | **user** | The primary toggle. Active defaults `true`, archived defaults `false` |
+| `convert_eligible` | **user** | Policy gate: *may* this version ever be converted? Active defaults `true`, archived defaults `false` |
+| `convert_batch` | **user** | Scheduling: which run this version belongs to, e.g. `poc-1`. Empty = not scheduled. Free text, lowercased on write — see §3.7 |
 | `release_date` | tool | ISO where parseable; free text otherwise (the archive API returns values like `June 2022`) |
 | `engine` | tool (detected), user-overridable | `flare` \| `dita` \| `webworks` \| `docbook` \| `auto`. **Per-version, not per-product** — see §3.4 |
 | `engine_source` | tool | `detected` \| `manual` \| `auto` (not yet determined) |
-| `zip_url` | tool, user-editable | Resolved download endpoint |
+| `zip_url` | tool, user-editable | Resolved download endpoint. May be empty when `zip_source=manual` |
+| `zip_source` | **user** | `auto` (fetch from `zip_url`) \| `manual` (package supplied by hand; never fetched) — see §3.8 |
 | `custom_override` | user | Explicit row pin |
 | `_bu`, `_family` | **tool, read-only** | Denormalized from `products.csv` so you can filter by family without a VLOOKUP. Regenerated on every write; **edits here are ignored** — change them in `products.csv` |
 
 ```csv
-product_code,version,is_archived,convert_eligible,release_date,engine,engine_source,zip_url,custom_override,_bu,_family
-ems,10.4.0,false,true,2025-11-04,flare,detected,https://docs.tibco.com/pub/ems/10.4.0/doc/zip/tib_ems_10.4.0_doc.zip,false,tibco,messaging
-ems,10.2.1,true,false,2023-06-12,auto,auto,https://docs.tibco.com/pub/ems/tibco-ems-10-2-1_documentation.zip,false,tibco,messaging
-ems,8.6.0,true,false,2020-04-30,webworks,detected,https://docs.tibco.com/pub/ems/tibco-ems-8-6-0_documentation.zip,false,tibco,messaging
-ebx,6.2.0,false,true,2025-09-30,flare,detected,https://docs.tibco.com/pub/ebx/6.2.0/doc/zip/tib_ebx_6.2.0_doc.zip,false,tibco,data_management
+product_code,version,is_archived,convert_eligible,convert_batch,release_date,engine,engine_source,zip_url,zip_source,custom_override,_bu,_family
+ems,10.4.0,false,true,poc-1,2025-11-04,flare,detected,https://docs.tibco.com/pub/ems/10.4.0/doc/zip/tib_ems_10.4.0_doc.zip,auto,false,tibco,messaging
+ems,10.2.1,true,false,,2023-06-12,auto,auto,https://docs.tibco.com/pub/ems/tibco-ems-10-2-1_documentation.zip,auto,false,tibco,messaging
+ems,8.6.0,true,false,,2020-04-30,webworks,detected,https://docs.tibco.com/pub/ems/tibco-ems-8-6-0_documentation.zip,auto,false,tibco,messaging
+ebx,6.2.0,false,true,poc-1,2025-09-30,flare,detected,,manual,false,tibco,data_management
 ```
 
-Note the three `ems` rows: the current release is Flare, an older one is WebWorks, and the un-downloaded one is still `auto` because its engine cannot be known until the package is extracted.
+Note the three `ems` rows: the current release is Flare, an older one is WebWorks, and the un-downloaded one is still `auto` because its engine cannot be known until the package is extracted. Two rows carry `convert_batch=poc-1`; `docushift download --batch poc-1` selects exactly those two and nothing else.
+
+The `ebx` row shows the other acquisition path: it is convert-eligible with **no** `zip_url`, because discovery never produced a working one and the ZIP was handed to the tool directly. `zip_source=manual` is what makes that a valid state rather than a validation failure — see §3.8.
 
 **Volatile machine state is deliberately excluded** from both files. `zip_etag`, `zip_size`, checksums, per-stage status, and free-form metadata live in `state.db`. This is what keeps the CSVs stable enough to leave open in a spreadsheet — a `catalog fetch` touches them only when discovery finds a genuinely new product or version.
 
@@ -200,7 +205,7 @@ Three properties of the implementation matter:
 
 - **Resolution is per field, not per row.** Editing `display_name` must not also freeze the `slug` beside it.
 - **With no snapshot, `mine` wins** unless it is empty. A missing base means the row predates the state DB (or the DB was discarded); inventing one would silently overwrite edits. Only genuinely blank cells are filled from the fetch.
-- **The merge covers only what discovery owns**: `display_name`, `slug`, `is_archived`, `convert_eligible`, `release_date`, `zip_url`. `engine`/`engine_source` are excluded, and `version_snapshot` carries no engine columns at all — a fetch structurally cannot reset a detected engine (§3.4).
+- **The merge covers only what discovery owns**: `display_name`, `slug`, `is_archived`, `convert_eligible`, `release_date`, `zip_url`. Four columns are excluded structurally rather than by rule, and `version_snapshot` carries none of them: `engine`/`engine_source`, because the detector writes them *after* discovery (§3.4); `convert_batch`, because no automated stage writes it at all (§3.7); and `zip_source`, because it records a human's supply decision that a fetch has no standing to revoke (§3.8). A fetch therefore cannot reset a detected engine, clear a batch tag, or silently re-point a hand-supplied package at a URL.
 
 Deletion detection is scoped to the products present in the current fetch, so `catalog fetch --product ems` cannot read every other product's absence as a removal.
 
@@ -217,24 +222,142 @@ Excel is the expected editor, which imposes hard requirements:
 | Row deleted to mean "skip this" | Deletion requires `--allow-deletes`; the supported way to exclude is `convert_eligible=false` |
 | Diff churn on every fetch | Fixed column order; stable sort — products by `(bu, family, product_code)`, versions by `(product_code, version desc)` using natural version sort so `10.4.0` sorts above `9.1.0` |
 
+### 3.7 Selecting Versions to Convert
+
+Two separate columns, because they answer two different questions:
+
+| Question | Column | Type | Default | Lifetime |
+| :--- | :--- | :--- | :--- | :--- |
+| *May this version ever be converted?* | `convert_eligible` | bool | `true` active, `false` archived | Long-lived policy |
+| *Is it in **this** run?* | `convert_batch` | free text | empty | Changes every wave |
+
+**Why not one column.** Only a minority of the ~1,500–4,000 catalogued versions are ever converted, and a POC typically wants three. With `convert_eligible` alone, scoping that POC means setting `false` on ~1,497 rows — the sheet fills with `false`, and "deliberately out of scope" becomes indistinguishable from "not in this wave." `convert_batch` inverts the direction: it is **opt-in**, so tagging three rows is the entire cost of scoping a run, and every other row stays exactly as the last fetch left it.
+
+**How they compose.** Eligibility is the hard gate; the batch is a filter applied within it.
+
+```
+selection = catalog.iter_versions(batch="poc-1", eligible_only=True)
+```
+
+A version tagged into a batch but left `convert_eligible=false` is **skipped**, not converted. That combination is almost always a mistake, so `catalog import` warns about it by name rather than failing.
+
+**Provenance.** `convert_batch` is excluded from `_MERGEABLE_VERSION_FIELDS` and from the `version_snapshot` table entirely — the same structural exclusion the engine columns get, for the mirror-image reason. The engine columns are written after discovery, by the detector; `convert_batch` is never written by any automated stage at all. A fetch therefore cannot clear a batch tag, and does not need a merge rule saying so.
+
+**Normalization.** Values are trimmed and lowercased on write, so `POC-1`, `poc-1 `, and `poc-1` are one batch rather than three. `docushift catalog batches` prints the labels in use with a version count each, so a run's scope is checkable before it starts.
+
+### 3.8 Manually Supplied Packages
+
+Discovery will not always produce a usable `zip_url`. Across ~250 products the docsite is not uniform: some products publish no "Download All Docs" bundle, some `folder_path` values do not compose into a valid ZIP endpoint, and archive `zipPath` entries go stale. The resulting row is convert-eligible with a URL that 404s or is simply blank — and the package itself is often obtainable another way (support, an internal mirror, a colleague's copy).
+
+**A hand-supplied ZIP is therefore a first-class package source, not a workaround.** It converts, and it archives, through exactly the same downstream path as a downloaded one.
+
+**Contract: the file goes where the pipeline already looks.** There is no new location and no path stored anywhere in the catalog:
+
+| Version | Canonical location |
+| :--- | :--- |
+| Active / eligible | `ConfigManager.download_path(bu, family, product_code, version)` → `families/<family>/downloads/<product_code>-<version>.zip` |
+| Archived | `ConfigManager.archive_path(bu, family, product_code, version)` → `families/<family>/archive/<product_code>-<version>.zip` |
+
+Because the path is fully derivable from `(bu, family, product_code, version)`, Stage 4 needs no special case: a manually placed ZIP and a downloaded one are indistinguishable on disk, which is the point. `archive_path()` is the one new method this requires, added for symmetry with `download_path()`.
+
+**Why a `zip_source` column and not just "is the file there?"** Two reasons, both concrete:
+
+- `catalog import` runs on a fresh checkout where `families/` does not exist — it is git-ignored. A validator that stats the filesystem would report every manually supplied version as broken on any machine that has not downloaded yet. The catalog has to be able to state the intent independently of the working tree.
+- `download` needs to know not to try. Without a pin, a version with no `zip_url` is an error and a version with a stale `zip_url` gets re-fetched over the good local copy.
+
+**Why not put the local path in `zip_url`.** An absolute path (`C:\Users\…\ems.zip`) or a `file://` URL in a CSV that is committed and shared is valid on exactly one machine. Recording *that* the package is local, and deriving *where* from the layout, keeps both CSVs machine-independent.
+
+**`zip_url` and `zip_source` stay independent.** `zip_url` remains fully merged — if a later fetch discovers a working endpoint, it is recorded even on a `manual` row. Only the supply decision is pinned. That combination (`zip_source=manual` with a non-empty `zip_url`) is exactly what makes "discovery has since found a real URL for this; you can drop the manual pin" a computable warning rather than something the user has to notice.
+
+**Consequences elsewhere:**
+
+| Component | Change |
+| :--- | :--- |
+| `validate()` | The `convert_eligible with no zip_url` problem is exempted when `zip_source=manual`. Without this, every hand-supplied version blocks the import. |
+| `warnings()` | Reports `zip_source=manual` rows that now carry a `zip_url`, and `manual` rows whose expected file is absent when the family workspace exists locally. |
+| Merge | `zip_source` excluded structurally (§3.5). |
+| Stage 4 extract | Unchanged — reads the canonical path. |
+| `state.db` | Records the computed sha256, size, `downloaded` status, and the originating path the file was copied from, for audit. There is no upstream checksum to compare against, so the computed one is authoritative for later "is this still the same file" checks. |
+
+**Ingestion is validated, not trusted.** `--from-file` rejects anything `zipfile.is_zipfile` does not accept before copying. The common real failure is not a corrupt archive but an HTML login redirect or error page saved under a `.zip` name; caught at ingest it is a one-line message, and caught at Stage 4 it is a confusing extraction failure days later. The file is **copied**, not moved — the user's own copy is not the tool's to consume.
+
+**Unknown versions.** `--from-file` requires the *product* to exist in the catalog: a typo'd product code is unrecoverable and would seed a junk row. If the product exists but the version does not, the version row is auto-added with a warning, matching the treatment of an undeclared family (§4.2) — the user has a real package in hand, which is stronger evidence the version exists than discovery's silence is that it does not.
+
 ---
 
-## 4. Multi-Engine Conversion & Asset Handling
+## 4. The Families Workspace
+
+Downloaded ZIPs and extracted trees are organized **by family**, not by product, in a top-level `families/` directory (git-ignored).
+
+### 4.1 Layout
+
+```
+families/
+└── en-us-tibco-messaging/          # {locale}-{bu}-{family}
+    ├── downloads/
+    │   ├── ems-10.4.0.zip          # {product_code}-{version}.zip
+    │   └── ems-10.3.0.zip
+    ├── extracted/
+    │   └── ems/
+    │       ├── 10.4.0/             # version keeps its dots
+    │       │   └── doc/html/…
+    │       └── 10.3.0/
+    └── archive/                    # only via `docushift archive download`
+```
+
+`ConfigManager` is the single owner of these paths (`family_dir`, `downloads_dir`, `extracted_dir`, `archive_dir`, `download_path`, `extract_path`). Stage 3, Stage 4, and Stage 5 each derive the location they need rather than passing paths between themselves; `state.db` records the resolved `download_path` / `extract_path` per version so a resumed run does not have to recompute the layout it ran under.
+
+Four naming decisions worth stating:
+
+- **`{locale}-{bu}-{family}`, flat and hyphenated.** Inherited from the predecessor `html-to-md` project, where the identical string names the *publishing repository* a family is destined for (`en-us-ibi-ibi`, `en-us-spot-data-science-statistica`). Keeping the working folder and the eventual repo identically named makes the Stage 7 hand-off a copy rather than a translation.
+- **The locale prefix is reserved, not yet variable.** `html-to-md` publishes `fr-fr` and `ja-jp` trees; nothing here is multi-locale, but `ConfigManager(locale=…)` means adding one is not a rename of every folder on disk.
+- **`family` is slugified, `taxonomy.yaml` keys are not.** The YAML key `data_management` is an identifier; the folder is `data-management`. `utils/slug.py:slugify` is the only place that conversion happens, so the two cannot drift.
+- **Versions keep their dots in the working tree.** `html-to-md` writes `6-2-3` in *published* paths, and Stage 6 will too. Here the segment must round-trip back to a `versions.csv` key, and `6-2-3` is ambiguous (`6.2.3`? `6-2.3`?) where `6.2.3` is not.
+
+`downloads/` and `extracted/` are split rather than co-located per version so that reclaiming disk after a successful extract is one `rmtree` of `downloads/`, not a glob across the tree.
+
+A hand-supplied ZIP (§3.8) lands in `downloads/` under the same `{product_code}-{version}.zip` name as a downloaded one and is deliberately indistinguishable from it — the provenance lives in `versions.csv` and `state.db`, not in the filename, so no downstream stage needs a second code path.
+
+### 4.2 Families Are User-Extensible
+
+A user may type a **new family name straight into `products.csv`** without declaring it in `taxonomy.yaml` first. The folder is auto-registered on first download and `catalog import` emits a warning naming the resulting path:
+
+```
+WARN newthing: family 'streaming_analytics' is not declared in taxonomy.yaml for bu 'tibco'.
+     Accepted; workspace folder -> families/en-us-tibco-streaming-analytics.
+     Add it to taxonomy.yaml to silence this.
+```
+
+Accepting-with-a-warning rather than rejecting is deliberate: requiring a YAML edit before a CSV edit takes effect is the two-step friction that pushed per-product classification out of `taxonomy.yaml` in the first place (§3.3). The warning is what keeps a typo (`mesaging`) from silently becoming a third family folder holding one product. Warnings never block a write — they are reported separately from `validate()` problems, which do.
+
+### 4.3 Archived Versions Are Never Downloaded
+
+Archived versions are inventoried for a complete product history but default to `convert_eligible=false`, and the pipeline honours that at **both** Stage 3 and Stage 4 — an archived ZIP is not downloaded, so there is nothing to extract. Across ~250 products with 5–15 versions each, downloading history nothing reads would dominate both bandwidth and disk.
+
+When an old release does come up, `docushift archive download --product ems --version 8.6.0` pulls that one ZIP into `families/<family>/archive/`. It lands outside `downloads/` on purpose: that directory is the pipeline's working set, and a reference ZIP sitting in it would look to `extract` like a package awaiting conversion. Genuinely converting an archived version remains a `convert_eligible=true` flip on its row, which routes it through the normal path.
+
+Archived `zipPath` values are the most likely to be stale, so the same command takes `--from-file` (§3.8) and files a hand-obtained ZIP at `archive_path()` instead of fetching it. Its `--extract` unpacks within `archive/`, never into the pipeline's `extracted/` tree — an archived package that was never selected for conversion must not appear alongside ones that were.
+
+---
+
+## 5. Multi-Engine Conversion & Asset Handling
 
 The converter for a package is chosen from that **version's** `engine` value, resolved by `engines/detector.py` during extraction (§3.4) — not from any product-level setting. A version whose engine is still `auto` is skipped with a warning rather than guessed at, since a wrong guess yields silently malformed Markdown.
 
-### 4.1 MadCap Flare Engine (`engines/flare.py`)
+### 5.1 MadCap Flare Engine (`engines/flare.py`)
 - **Dropdown Extraction**: Unrolls `MCDropDown` structures into native Markdown headings or sections.
 - **Proxy Stripping**: Removes `MadCap:topicToolbarProxy`, breadcrumb proxies, search bars, and skin templates.
 - **Callout Normalization**: Maps Flare `.note`, `.tip`, `.warning`, `.caution` classes to standard GFM alerts (`> [!NOTE]`, `> [!WARNING]`, etc.).
 - **Table Normalization**: Formats Flare table styles into clean GFM pipe tables.
 - **CSH Linkage**: Preserves Flare `Alias.xml` / `CSH.js` identifier-to-target anchor mapping.
 
-### 4.2 Universal Asset Preservation
+### 5.2 Universal Asset Preservation
 - Copies referenced assets (`PDF`, `DOC`, `DOCX`, `XLS`, `XLSX`, `TXT`, `PNG`, `SVG`, `ZIP`) and rewrites relative markdown paths.
 
 ---
 
-## 5. AEM Structure Synthesis & Git Sync
+## 6. AEM Structure Synthesis & Git Sync
 - Synthesizes `toc.yml`, `nav.yml`, `meta.yml`, `index.md`, and YAML frontmatter.
 - Distributes ready-to-push documentation sets into `{target_git}/{bu}/{family}/{product}/{version}/`.
+
+> **Open, deferred to Phase 6:** the family workspace name (`en-us-tibco-messaging`, §4.1) is the same string `html-to-md` uses as a *publishing repository* name, which suggests the sync target should be `{target_git}/{locale}-{bu}-{family}/{locale}/{product}/{doc-class}/{version-dashed}/` rather than the nested form above. `html-to-md` also splits assets into a sibling `-resources` repo and dashes the version (`6-2-3`). Deciding between the two shapes needs a real AEM target repo to check against, so the workspace layout is settled and the sync layout is not.

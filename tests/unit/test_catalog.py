@@ -448,3 +448,116 @@ def test_validate_flags_eligible_versions_with_no_zip(catalog: CatalogManager) -
 
 def test_catalog_json_is_retired(repo_root: Path) -> None:
     assert not (repo_root / "config" / "catalog.json").exists()
+
+
+# -- convert_batch: run scheduling, orthogonal to eligibility ----------------
+
+
+def test_convert_batch_round_trips_through_the_csv(catalog: CatalogManager, sample_product: Product) -> None:
+    _fetch(catalog, sample_product)
+
+    catalog.set_version_field("ems", "10.4.0", "convert_batch", "poc-1")
+
+    assert read_rows(catalog.versions_path)[0]["convert_batch"] == "poc-1"
+    assert _reload(catalog).get_version("ems", "10.4.0").convert_batch == "poc-1"
+
+
+def test_convert_batch_is_normalized_to_lowercase(catalog: CatalogManager, sample_product: Product) -> None:
+    """`POC-1` and `poc-1 ` must select the same rows as `poc-1`."""
+    _fetch(catalog, sample_product)
+
+    catalog.set_version_field("ems", "10.4.0", "convert_batch", "  POC-1 ")
+
+    assert catalog.get_version("ems", "10.4.0").convert_batch == "poc-1"
+    assert len(catalog.iter_versions(batch="POC-1")) == 1
+
+
+def test_a_batch_tag_survives_a_refetch(catalog: CatalogManager, sample_product: Product) -> None:
+    """Discovery has nothing to say about scheduling, so it must never clear the column."""
+    _fetch(catalog, sample_product)
+    catalog.set_version_field("ems", "10.4.0", "convert_batch", "wave-2")
+
+    _fetch(_reload(catalog), sample_product)
+
+    assert _reload(catalog).get_version("ems", "10.4.0").convert_batch == "wave-2"
+
+
+def test_batch_selection_is_opt_in(catalog: CatalogManager, sample_product: Product) -> None:
+    """The POC case: tagging one row must not require touching any other."""
+    ebx = make_product("ebx", family="data_management")
+    ebx.versions = {"6.2.0": make_version("ebx", "6.2.0"), "6.1.0": make_version("ebx", "6.1.0")}
+    _fetch(catalog, sample_product, ebx)
+    catalog.set_version_field("ebx", "6.2.0", "convert_batch", "poc-1")
+
+    assert len(catalog.iter_versions()) == 4
+    assert [v.version for _, v in catalog.iter_versions(batch="poc-1")] == ["6.2.0"]
+    # Every other row is untouched -- still eligible, just not scheduled.
+    assert len(catalog.iter_versions(eligible_only=True)) == 3
+
+
+def test_eligibility_is_the_hard_gate_over_the_batch(catalog: CatalogManager, sample_product: Product) -> None:
+    """An archived version tagged into a batch is still excluded from the run."""
+    _fetch(catalog, sample_product)
+    catalog.set_version_field("ems", "8.6.0", "convert_batch", "poc-1")
+
+    assert len(catalog.iter_versions(batch="poc-1")) == 1
+    assert catalog.iter_versions(batch="poc-1", eligible_only=True) == []
+
+
+def test_batches_counts_only_scheduled_versions(catalog: CatalogManager, sample_product: Product) -> None:
+    ebx = make_product("ebx", family="data_management")
+    ebx.versions = {"6.2.0": make_version("ebx", "6.2.0")}
+    _fetch(catalog, sample_product, ebx)
+    catalog.set_version_field("ems", "10.4.0", "convert_batch", "poc-1")
+    catalog.set_version_field("ebx", "6.2.0", "convert_batch", "poc-1")
+
+    assert catalog.batches() == {"poc-1": 2}
+
+
+def test_batches_is_empty_when_nothing_is_scheduled(catalog: CatalogManager, sample_product: Product) -> None:
+    _fetch(catalog, sample_product)
+
+    assert catalog.batches() == {}
+
+
+# -- warnings: accepted, but worth saying out loud ---------------------------
+
+
+def test_scheduled_but_ineligible_version_warns(catalog: CatalogManager, sample_product: Product) -> None:
+    _fetch(catalog, sample_product)
+    catalog.set_version_field("ems", "8.6.0", "convert_batch", "poc-1")
+
+    notes = catalog.warnings()
+
+    assert any("convert_eligible=false" in note and "8.6.0" in note for note in notes)
+
+
+def test_an_undeclared_family_warns_but_does_not_fail(taxonomy_config, catalog: CatalogManager) -> None:
+    """A family typed straight into products.csv is accepted; the folder is auto-registered."""
+    catalog.config = taxonomy_config
+    product = make_product("newthing", family="streaming_analytics")
+    product.versions = {"1.0.0": make_version("newthing", "1.0.0", zip_url="https://x/z.zip")}
+    _fetch(catalog, product)
+
+    assert catalog.validate() == []
+    notes = catalog.warnings()
+    assert any("streaming_analytics" in note for note in notes)
+    assert any("families/en-us-tibco-streaming-analytics" in note for note in notes)
+
+
+def test_a_declared_family_produces_no_warning(
+    taxonomy_config, catalog: CatalogManager, sample_product: Product
+) -> None:
+    catalog.config = taxonomy_config
+    _fetch(catalog, sample_product)
+
+    assert catalog.warnings() == []
+
+
+def test_warnings_are_inert_without_a_config(catalog: CatalogManager) -> None:
+    """Family checking is optional; nothing should blow up when taxonomy is unavailable."""
+    product = make_product("newthing", family="whatever")
+    product.versions = {"1.0.0": make_version("newthing", "1.0.0", zip_url="https://x/z.zip")}
+    _fetch(catalog, product)
+
+    assert catalog.warnings() == []

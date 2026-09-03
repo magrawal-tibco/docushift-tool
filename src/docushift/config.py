@@ -1,4 +1,12 @@
-"""Configuration and taxonomy manager for DocuShift."""
+"""Configuration and taxonomy manager for DocuShift.
+
+Also the single owner of the **families workspace** path contract
+(docs/architecture.md §4): every downloaded ZIP and extracted tree lives under
+`families/{locale}-{bu}-{family}/`. Deriving those paths in one place is what lets
+Stage 3, Stage 4, and Stage 5 agree on where a package is without passing paths
+between them -- `state.db` records the resolved path per version, but the layout
+itself is computed here.
+"""
 
 import os
 from pathlib import Path
@@ -7,15 +15,24 @@ from typing import Any
 import yaml
 
 from docushift.models import FamilySource
+from docushift.utils.slug import family_folder
+
+# Every folder name is locale-prefixed because the predecessor `html-to-md` project
+# publishes `fr-fr` and `ja-jp` trees alongside `en-us`. Nothing in the pipeline is
+# multi-locale yet; the prefix reserves the shape so adding one is not a rename of
+# every folder on disk.
+DEFAULT_LOCALE = "en-us"
 
 
 class ConfigManager:
     """Manages project paths, taxonomy definitions, and configuration files."""
 
-    def __init__(self, root_dir: Path | None = None):
+    def __init__(self, root_dir: Path | None = None, locale: str = DEFAULT_LOCALE):
         self.root_dir = root_dir or Path(os.getcwd())
+        self.locale = locale
         self.config_dir = self.root_dir / "config"
         self.cache_dir = self.root_dir / "cache"
+        self.families_dir = self.root_dir / "families"
         self.output_dir = self.root_dir / "output"
         self.taxonomy_path = self.config_dir / "taxonomy.yaml"
         self.docsite_path = self.config_dir / "docsite.yaml"
@@ -24,14 +41,62 @@ class ConfigManager:
         self.versions_path = self.config_dir / "versions.csv"
         self.state_db_path = self.cache_dir / "state.db"
 
-        # Ensure directories exist
+        # Ensure directories exist. Per-family subfolders are created on demand by
+        # the downloader, not up front -- pre-creating a folder for all ~12 declared
+        # families would make an empty workspace look like a started migration.
         self.cache_dir.mkdir(parents=True, exist_ok=True)
-        (self.cache_dir / "downloads").mkdir(parents=True, exist_ok=True)
-        (self.cache_dir / "extracted").mkdir(parents=True, exist_ok=True)
+        self.families_dir.mkdir(parents=True, exist_ok=True)
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
         self._taxonomy_cache: dict[str, Any] | None = None
         self._docsite_cache: dict[str, Any] | None = None
+
+    # -- families workspace layout -------------------------------------------
+
+    def family_folder_name(self, bu: str, family: str) -> str:
+        """The folder name for one family, e.g. `en-us-tibco-data-management`."""
+        return family_folder(self.locale, bu, family)
+
+    def family_dir(self, bu: str, family: str) -> Path:
+        """`families/en-us-<bu>-<family>/` -- the root of one family's working set."""
+        return self.families_dir / self.family_folder_name(bu, family)
+
+    def downloads_dir(self, bu: str, family: str) -> Path:
+        """Where a family's ZIPs land. Split from `extracted/` so that clearing
+        every ZIP after a successful extract is one `rmtree`, not a glob."""
+        return self.family_dir(bu, family) / "downloads"
+
+    def extracted_dir(self, bu: str, family: str) -> Path:
+        """Where a family's unpacked packages land."""
+        return self.family_dir(bu, family) / "extracted"
+
+    def archive_dir(self, bu: str, family: str) -> Path:
+        """Where `docushift archive download` puts on-demand archived-version ZIPs.
+
+        Deliberately outside `downloads/`, which the pipeline treats as its own
+        working set: an archived ZIP pulled for reference must not look to Stage 4
+        like a package awaiting extraction.
+        """
+        return self.family_dir(bu, family) / "archive"
+
+    def download_path(self, bu: str, family: str, product_code: str, version: str) -> Path:
+        """The ZIP path for one version: `.../downloads/<product_code>-<version>.zip`.
+
+        Named from the catalog key rather than from the remote filename, because the
+        docsite's own names collide across versions and are not derivable in reverse.
+        """
+        return self.downloads_dir(bu, family) / f"{product_code}-{version}.zip"
+
+    def extract_path(self, bu: str, family: str, product_code: str, version: str) -> Path:
+        """The extracted tree for one version: `.../extracted/<product_code>/<version>/`.
+
+        The version keeps its dots here. `html-to-md` writes `6-2-3` in *published*
+        paths, but this is a working directory keyed by the catalog, and a dotted
+        segment round-trips back to a `versions.csv` key unambiguously where a
+        dashed one does not (`6-2-3` could be `6.2.3` or `6-2.3`). The dots-to-dashes
+        conversion belongs at Stage 6, where the AEM output path is built.
+        """
+        return self.extracted_dir(bu, family) / product_code / version
 
     def load_taxonomy(self) -> dict[str, Any]:
         """Loads and caches taxonomy rules from taxonomy.yaml."""

@@ -47,17 +47,34 @@
 - [x] Unit tests for Catalog merger and State engine (`tests/unit/test_catalog.py`, `tests/unit/test_state.py`, `tests/unit/test_csvio.py`), including CSV round-trip fidelity and Excel-mangling regression cases (`TRUE`/`FALSE` booleans, `11/4/2025` dates, `1.10` → `1.1` version keys, BOM loss, stray columns).
 
 ### Phase 3: Docsite Discovery Engine (`docs.tibco.com` API Client)
-**Next up.** The merge target is already built and tested; this phase supplies its input and unblocks `catalog fetch`.
+**Next up — and next to be *implemented*.** Phase 4's design half ran ahead of this (see the note below); the code order returns here. The merge target is already built and tested; this phase supplies its input and unblocks `catalog fetch`.
 - [ ] API client for `docs.tibco.com` (`/api/a_to_z`, `/api/products/{slug}`, `/api/products/archive/{slug}`, `/api/product_list_by_suites`).
 - [ ] Automated ZIP URL generator (`/pub/{folder_path}/doc/zip/tib_{...}_doc.zip` and archive `zipPath`).
 - [ ] Category ingestion (`/api/bu_category_products`, `/product/categories`) as an **advisory** family hint only — most products are uncategorized, so it may only promote `unclassified` rows.
 - [ ] Additive merge into Catalog Manager and State DB.
+- [ ] **`zip_source` column** (`auto` | `manual`) in `versions.csv` — the catalog half of manually supplied packages (`architecture.md` §3.8). Belongs here rather than in Phase 4 because the merge rule has to exist *before* the first real fetch runs, or a fetch could overwrite a hand-supplied row:
+  - [ ] `ProductVersion.zip_source` + `VERSION_COLUMNS` + round-trip; `catalog set --zip-source`.
+  - [ ] Excluded from `_MERGEABLE_VERSION_FIELDS` and from `version_snapshot`, alongside the engine columns and `convert_batch`. `zip_url` itself stays merged.
+  - [ ] `validate()`: exempt `zip_source=manual` from the *convert-eligible with no `zip_url`* problem.
+  - [ ] `warnings()`: flag `manual` rows that discovery has since found a `zip_url` for.
 - [ ] Unit & mock tests in `tests/unit/test_discovery.py`.
 
 ### Phase 4: Package Downloader & Extractor
-- [ ] Resumable async/threaded downloader with checksum verification into `cache/downloads/`.
-- [ ] Filter by `convert_eligible: true`.
-- [ ] ZIP extraction and asset cataloger in `cache/extracted/`.
+The selection model and the on-disk layout this phase writes into are settled and tested (`architecture.md` §3.7 and §4); what remains is the I/O.
+
+> **Sequencing note (2026-09-03).** The two `[x]` items below landed ahead of Phase 3. They are design decisions — a CSV column and a path contract — with no network dependency, and they were settled while answering how partial conversions and the families folder should work. Implementation order returns to Phase 3 next; nothing further in this phase starts before the crawler exists.
+
+- [x] **Selection model**: `convert_eligible` (policy) + `convert_batch` (scheduling), composed by `CatalogManager.iter_versions(batch=…, eligible_only=True)`. `--batch` is a selector on every stage command.
+- [x] **Families workspace path contract** owned by `ConfigManager`: `family_dir`, `downloads_dir`, `extracted_dir`, `archive_dir`, `download_path`, `extract_path`, over `families/{locale}-{bu}-{family}/`.
+- [ ] Resumable async/threaded downloader with checksum verification into `families/<family>/downloads/`, driven by `iter_versions(eligible_only=True)`. Skips rows pinned `zip_source=manual`.
+- [ ] Record `download_path` / `extract_path` / `checksum` / status per version in `state.db` (columns already exist).
+- [ ] ZIP extraction and asset cataloger into `families/<family>/extracted/<product>/<version>/`, over the **same** selection as download — archived versions must never be unpacked.
+- [ ] `docushift archive download` — the on-demand escape hatch for a single archived ZIP, into `families/<family>/archive/`, outside the pipeline's working set.
+- [ ] **`--from-file` ingestion** for manually supplied packages (`architecture.md` §3.8) — the I/O half of the `zip_source` work started in Phase 3:
+  - [ ] `ConfigManager.archive_path()`, for symmetry with `download_path()`.
+  - [ ] `docushift download --product X --version Y --from-file <zip>` — requires both selectors; validates with `zipfile.is_zipfile` before copying; copies (never moves) to `download_path()`; sets `zip_source=manual`; records sha256, size, status and the origin path in `state.db`.
+  - [ ] `docushift archive download … --from-file <zip>` — same, to `archive_path()`; `--extract` unpacks within `archive/`, never into the pipeline's `extracted/`.
+  - [ ] Unknown *version* on a known product is auto-added with a warning; unknown *product* is an error.
 - [ ] CSH map file extractor (`Alias.xml`, `CSH.js`, WebWorks maps).
 - [ ] Asset discovery (PDF, Word, Excel, TXT, images, ZIP).
 
@@ -80,6 +97,7 @@
 - [ ] AEM navigation builder (`toc.yml`, `nav.yml`, `meta.yml`).
 - [ ] Frontmatter injector and landing page (`index.md`) generator.
 - [ ] Git workspace distributor (copies to `{target_git}/{bu}/{family}/{product}/{version}/`).
+- [ ] **Decide the sync path shape** against a real AEM target repo: the nested form above, or the `html-to-md` publishing form `{locale}-{bu}-{family}/{locale}/{product}/{doc-class}/{version-dashed}/` with a sibling `-resources` repo. The family workspace name (§4.1) is already the publishing repo name, which argues for the latter. Deferred deliberately — see the note at the end of `architecture.md` §6.
 
 ### Phase 7: CLI, Reporting & Verification Dashboard
 - [ ] Click CLI with full command tree (`catalog`, `status`, `download`, `convert`, `sync`, `report`).
@@ -93,5 +111,6 @@
 - **Catalog Merge Fidelity**: 100% preservation of manual edits and toggle states when fetching updates — *without* requiring the user to have flagged them.
 - **CSV Round-Trip Fidelity**: A load-then-save cycle with no changes produces a byte-identical file (stable sort, fixed columns, normalized booleans/dates). No diff churn on repeat fetches.
 - **Active vs Archive Segregation**: Archived versions are never auto-converted unless explicitly flagged.
+- **Package Source Transparency**: A manually supplied ZIP converts through exactly the same path as a downloaded one — no downstream stage branches on provenance, and no machine-local path appears in either CSV.
 - **Unit Test Coverage**: >90% coverage on core transforms, engines, catalog, and state management.
 - **Link & Asset Integrity**: Zero broken relative links or missing referenced assets in converted output.
