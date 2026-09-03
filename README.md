@@ -7,7 +7,7 @@
 
 ## Key Capabilities
 - **Multi-Engine Ingestion**: MadCap Flare (Primary), SDL DITA CMS, FrameMaker + WebWorks, and DocBook.
-- **Additive Product Catalog**: Smart 3-way merge preserving tool fetches and manual overrides.
+- **Spreadsheet-Editable Catalog**: `products.csv` + `versions.csv`, with a snapshot-based 3-way merge that preserves your edits automatically on re-fetch — no override flags to remember.
 - **Active & Archived Version Management**: Automatic download link resolution with selective conversion flags.
 - **Context-Sensitive Help (CSH)**: Maps Flare CSH identifiers to Markdown anchor targets.
 - **AEM Architecture Synthesis**: Generates `toc.yml`, `nav.yml`, `meta.yml`, landing pages, and frontmatter.
