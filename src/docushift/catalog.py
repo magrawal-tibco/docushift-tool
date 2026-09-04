@@ -20,6 +20,7 @@ from docushift.models import (
     Product,
     ProductVersion,
     SourceEngine,
+    ZipSource,
 )
 from docushift.state import StateStore
 from docushift.utils.csvio import (
@@ -57,6 +58,7 @@ VERSION_COLUMNS = (
     "engine",
     "engine_source",
     "zip_url",
+    "zip_source",
     "custom_override",
     "_bu",
     "_family",
@@ -68,7 +70,11 @@ _MERGEABLE_PRODUCT_FIELDS = ("display_name", "slug")
 # Engine fields are absent by design: the detector writes them, not discovery.
 # `convert_batch` is absent for the same structural reason from the other side --
 # it is purely a human scheduling decision, so a fetch has nothing true to say
-# about it and it is excluded from `version_snapshot` entirely.
+# about it and it is excluded from `version_snapshot` entirely. `zip_source` is
+# excluded on the same grounds: it records a human's decision to supply the
+# package by hand, which a fetch has no standing to revoke. Note `zip_url` *is*
+# merged even on a manual row -- recording the endpoint discovery has since found
+# is what makes "you can drop the pin now" a computable warning.
 _MERGEABLE_VERSION_FIELDS = ("is_archived", "convert_eligible", "release_date", "zip_url")
 
 
@@ -160,6 +166,7 @@ class CatalogManager:
                 engine=_coerce_enum(SourceEngine, row.get("engine"), SourceEngine.AUTO),
                 engine_source=_coerce_enum(EngineSource, row.get("engine_source"), EngineSource.AUTO),
                 zip_url=row.get("zip_url", "").strip() or None,
+                zip_source=_coerce_enum(ZipSource, row.get("zip_source"), ZipSource.AUTO),
                 custom_override=parse_bool(row.get("custom_override")),
             )
 
@@ -209,6 +216,7 @@ class CatalogManager:
                         "engine": str(version.engine),
                         "engine_source": str(version.engine_source),
                         "zip_url": version.zip_url or "",
+                        "zip_source": str(version.zip_source),
                         "custom_override": format_bool(version.custom_override),
                         "_bu": product.bu,
                         "_family": product.family,
@@ -454,6 +462,8 @@ class CatalogManager:
             target.engine_source = EngineSource.MANUAL
         elif name == "zip_url":
             target.zip_url = value or None
+        elif name == "zip_source":
+            target.zip_source = ZipSource(value.strip().lower())
         elif name == "convert_eligible":
             target.convert_eligible = parse_bool(value)
         elif name == "convert_batch":
@@ -510,7 +520,9 @@ class CatalogManager:
             for ver in product.versions.values():
                 if ver.engine is SourceEngine.AUTO and ver.engine_source is not EngineSource.AUTO:
                     problems.append(f"{product.product_code}@{ver.version}: engine 'auto' with a resolved source")
-                if ver.convert_eligible and not ver.zip_url:
+                # A `manual` row is exempt: its package is supplied by hand at the
+                # canonical path, so there is no URL to be missing (architecture §3.8).
+                if ver.convert_eligible and not ver.zip_url and ver.zip_source is not ZipSource.MANUAL:
                     problems.append(f"{product.product_code}@{ver.version}: convert_eligible with no zip_url")
         return problems
 
@@ -547,6 +559,15 @@ class CatalogManager:
                         f"{product.product_code}@{ver.version}: in batch '{ver.convert_batch}' but "
                         f"convert_eligible=false, so it will be skipped. Run "
                         f"`docushift catalog enable --product {product.product_code} --version {ver.version}`."
+                    )
+                # The pin still wins, but discovery has since produced an endpoint,
+                # so the hand-supplied package may no longer be necessary.
+                if ver.zip_source is ZipSource.MANUAL and ver.zip_url:
+                    notes.append(
+                        f"{product.product_code}@{ver.version}: zip_source=manual, but discovery now has a "
+                        f"zip_url for it. The manual package still wins. Run `docushift catalog set "
+                        f"--product {product.product_code} --version {ver.version} --zip-source auto` to "
+                        f"download it instead."
                     )
         return notes
 

@@ -10,7 +10,7 @@ from pathlib import Path
 import pytest
 
 from docushift.catalog import CatalogError, CatalogManager
-from docushift.models import EngineSource, FamilySource, Product, SourceEngine
+from docushift.models import EngineSource, FamilySource, Product, SourceEngine, ZipSource
 from docushift.utils.csvio import read_rows
 from tests.conftest import make_product, make_version
 
@@ -561,3 +561,71 @@ def test_warnings_are_inert_without_a_config(catalog: CatalogManager) -> None:
     _fetch(catalog, product)
 
     assert catalog.warnings() == []
+
+
+# -- zip_source: where the package came from ---------------------------------
+
+
+def test_zip_source_defaults_to_auto_and_round_trips(catalog: CatalogManager, sample_product: Product) -> None:
+    _fetch(catalog, sample_product)
+
+    assert read_rows(catalog.versions_path)[0]["zip_source"] == "auto"
+
+    catalog.set_version_field("ems", "10.4.0", "zip_source", "manual")
+
+    assert read_rows(catalog.versions_path)[0]["zip_source"] == "manual"
+    assert _reload(catalog).get_version("ems", "10.4.0").zip_source is ZipSource.MANUAL
+
+
+def test_a_manual_package_is_exempt_from_the_missing_zip_url_check(catalog: CatalogManager) -> None:
+    """The package is already at the canonical path, so there is no URL to be missing."""
+    product = make_product("ems")
+    product.versions = {"1.0.0": make_version("ems", "1.0.0", convert_eligible=True)}
+    _fetch(catalog, product)
+    catalog.set_version_field("ems", "1.0.0", "zip_source", "manual")
+
+    assert catalog.validate() == []
+
+
+def test_a_manual_package_with_a_discovered_url_warns_without_blocking(
+    catalog: CatalogManager, sample_product: Product
+) -> None:
+    """Discovery has since found an endpoint, so the hand-supplied ZIP may be redundant."""
+    _fetch(catalog, sample_product)
+    catalog.set_version_field("ems", "10.4.0", "zip_source", "manual")
+
+    assert catalog.validate() == []
+    assert any("--zip-source auto" in note for note in catalog.warnings())
+
+
+def test_a_refetch_never_clears_zip_source(catalog: CatalogManager, sample_product: Product) -> None:
+    """It records a human's supply decision; discovery has no opinion to contribute."""
+    _fetch(catalog, sample_product)
+    catalog.set_version_field("ems", "10.4.0", "zip_source", "manual")
+
+    _fetch(_reload(catalog), sample_product)
+
+    assert _reload(catalog).get_version("ems", "10.4.0").zip_source is ZipSource.MANUAL
+
+
+def test_a_refetch_still_updates_zip_url_on_a_manual_row(catalog: CatalogManager) -> None:
+    """zip_url stays merged so 'discovery now has a URL' remains a computable warning."""
+    product = make_product("ems")
+    product.versions = {"1.0.0": make_version("ems", "1.0.0")}
+    _fetch(catalog, product)
+    catalog.set_version_field("ems", "1.0.0", "zip_source", "manual")
+
+    found = make_product("ems")
+    found.versions = {"1.0.0": make_version("ems", "1.0.0", zip_url="https://docs.tibco.com/found.zip")}
+    _fetch(_reload(catalog), found)
+
+    updated = _reload(catalog).get_version("ems", "1.0.0")
+    assert updated.zip_url == "https://docs.tibco.com/found.zip"
+    assert updated.zip_source is ZipSource.MANUAL
+
+
+def test_an_unknown_zip_source_is_rejected(catalog: CatalogManager, sample_product: Product) -> None:
+    _fetch(catalog, sample_product)
+
+    with pytest.raises(ValueError):
+        catalog.set_version_field("ems", "10.4.0", "zip_source", "somewhere-else")

@@ -7,8 +7,8 @@ its own phase (see docs/planning.md). Unimplemented commands fail loudly -- a
 ``convert`` that exits 0 while converting nothing hides how far along the pipeline
 actually is.
 
-Functional so far: ``doctor`` (Phase 1) and the ``catalog`` group apart from
-``fetch``, which waits on the Phase 3 crawler to supply its input.
+Functional so far: ``doctor`` (Phase 1) and the whole ``catalog`` group including
+``fetch`` (Phase 3). The pipeline stages wait on Phases 4-7.
 """
 
 from pathlib import Path
@@ -20,6 +20,8 @@ from rich.table import Table
 from docushift import __version__
 from docushift.catalog import CatalogError, CatalogManager
 from docushift.config import ConfigManager
+from docushift.discovery import DocsiteClient, DocsiteCrawler
+from docushift.models import ZipSource
 from docushift.state import StateStore
 
 console = Console()
@@ -88,12 +90,128 @@ def _catalog_manager(ctx: click.Context) -> CatalogManager:
 @catalog.command("fetch")
 @_scope_options
 @click.option("--include-archived/--no-include-archived", default=True, help="Also inventory archived versions.")
+@click.option("--allow-deletes", is_flag=True, help="Permit removal of versions discovery no longer returns.")
 @click.option("--dry-run", is_flag=True, help="Report the merge plan without writing the CSVs.")
-def catalog_fetch(**kwargs) -> None:
+@click.pass_context
+def catalog_fetch(
+    ctx: click.Context,
+    bu,
+    family,
+    product_code,
+    version,
+    batch,
+    select_all,
+    include_archived,
+    allow_deletes,
+    dry_run,
+) -> None:
     """Fetch from docs.tibco.com and 3-way merge into the catalog CSVs."""
-    # The merge engine below is complete; only the crawler that supplies its input
-    # is outstanding, so this stays pending on Phase 3 alone.
-    _pending("catalog fetch", "Phase 3 (the docsite crawler; the merge engine is already built)")
+    if version:
+        # Discovery works a whole product at a time, and the merge reads "absent
+        # from this fetch" as deleted. Honouring --version would make every other
+        # version of the product look removed.
+        raise click.ClickException("`catalog fetch` works per product; drop --version (try --product instead).")
+    if not any([select_all, bu, family, product_code, batch]):
+        # A bare `catalog fetch` crawls the whole A-to-Z list (700+ entries). Make
+        # that an explicit choice rather than the default.
+        raise click.ClickException("Choose a scope: --all, or one of --bu / --family / --product / --batch.")
+
+    cfg: ConfigManager = ctx.obj["config"]
+    manager = _catalog_manager(ctx)
+
+    # --product and --batch are resolved to crawl selectors up front so the crawler
+    # can skip the per-product request entirely; --bu/--family cannot be, because
+    # a product's family is not known until it has been classified.
+    selectors: set[str] | None = None
+    if product_code:
+        selectors = _selectors(manager, [product_code])
+    if batch:
+        tagged = {p.product_code for p, _ in manager.iter_versions(batch=batch)}
+        if not tagged:
+            raise click.ClickException(f"No catalog versions are tagged with batch '{batch}'.")
+        batch_selectors = _selectors(manager, tagged)
+        selectors = batch_selectors if selectors is None else selectors & batch_selectors
+
+    crawler = DocsiteCrawler(DocsiteClient(cfg.load_docsite()), cfg, include_archived=include_archived)
+
+    with console.status("Fetching product list from docs.tibco.com...") as status:
+        def on_progress(index: int, total: int, slug: str) -> None:
+            status.update(f"[{index}/{total}] {slug}")
+
+        result = crawler.discover(bu=bu, family=family, selectors=selectors, on_progress=on_progress)
+
+    for error in result.errors:
+        console.print(f"[red]![/red] {error}")
+    if not result.products:
+        message = "Discovery returned no products; the catalog was left untouched."
+        if selectors and not result.errors:
+            # Almost always a code the A-to-Z list does not use as a slug, e.g.
+            # `ems` is published as `tibco-enterprise-message-service`.
+            message += (
+                f" Nothing matched {', '.join(sorted(selectors))} -- if the product is not in the catalog yet,"
+                f" pass its docs.tibco.com slug to --product."
+            )
+        raise click.ClickException(message)
+
+    try:
+        stats = manager.merge_fetch_results(result.products, allow_deletes=allow_deletes, dry_run=dry_run)
+    except CatalogError as exc:
+        raise click.ClickException(str(exc)) from exc
+
+    if not dry_run:
+        _record_discovery_metadata(manager, result)
+
+    table = Table(title="Merge" + (" (dry run -- nothing written)" if dry_run else ""))
+    table.add_column("Change")
+    table.add_column("Count", justify="right")
+    for label, count in stats.as_dict().items():
+        if label == "deletions_blocked":
+            continue
+        table.add_row(label.replace("_", " "), str(count))
+    console.print(table)
+
+    if result.unversioned or result.non_public:
+        console.print(
+            f"[dim]Skipped {result.unversioned} entries with no published versions "
+            f"and {result.non_public} that are not publicly visible.[/dim]"
+        )
+    for note in manager.warnings():
+        console.print(f"[yellow]WARN[/yellow] {note}")
+    if result.errors:
+        console.print(f"[yellow]{len(result.errors)} product(s) could not be reached and were left as-is.[/yellow]")
+
+
+def _selectors(manager: CatalogManager, codes) -> set[str]:
+    """Expands catalog product codes into the selectors the crawler can match.
+
+    A product's code is rarely its docsite slug (`ems` is published as
+    `tibco-enterprise-message-service`), so the slug already recorded in the
+    catalog is passed alongside the code. A code with no catalog row is passed
+    through on its own, which lets `--product <slug>` work before a first fetch.
+    """
+    out: set[str] = set()
+    for code in codes:
+        out.add(str(code).strip().lower())
+        product = manager.get_product(code)
+        if product and product.slug:
+            out.add(product.slug.strip().lower())
+    return out
+
+
+def _record_discovery_metadata(manager: CatalogManager, result) -> None:
+    """Parks docsite ids and folder paths in state.db rather than the CSVs.
+
+    They are machine detail the download stage needs and a human editing a
+    spreadsheet does not -- see docs/architecture.md §3.
+    """
+    if manager.state is None:
+        return
+    for code, fields in result.product_metadata.items():
+        for key, value in fields.items():
+            manager.state.set_product_metadata(code, key, value)
+    for (code, version), fields in result.version_metadata.items():
+        for key, value in fields.items():
+            manager.state.set_version_metadata(code, version, key, value)
 
 
 @catalog.command("list")
@@ -159,7 +277,9 @@ def catalog_show(ctx: click.Context, product_code: str) -> None:
             ver.convert_batch or "-",
             ver.release_date or "-",
             f"{ver.engine} ({ver.engine_source})",
-            ver.zip_url or "-",
+            # A manual row usually has no URL, so name the source rather than
+            # printing a bare "-" that reads as "nothing to download".
+            ver.zip_url or (f"[dim]{ver.zip_source}[/dim]" if ver.zip_source is not ZipSource.AUTO else "-"),
         )
     console.print(table)
 
@@ -190,6 +310,12 @@ def catalog_enable(ctx: click.Context, product_code: str, version: str, disable:
 )
 @click.option("--zip-url", default=None, help="Override the resolved download endpoint.")
 @click.option(
+    "--zip-source",
+    type=click.Choice(["auto", "manual"]),
+    default=None,
+    help="Mark the package as hand-supplied (manual) or fetchable (auto). See docs/user-guide.md.",
+)
+@click.option(
     "--batch",
     "convert_batch",
     default=None,
@@ -197,17 +323,24 @@ def catalog_enable(ctx: click.Context, product_code: str, version: str, disable:
 )
 @click.pass_context
 def catalog_set(
-    ctx: click.Context, product_code, version, bu, family, display_name, engine, zip_url, convert_batch
+    ctx: click.Context, product_code, version, bu, family, display_name, engine, zip_url, zip_source, convert_batch
 ) -> None:
     """Set a catalog field, recording the change as a manual edit."""
     manager = _catalog_manager(ctx)
     product_edits = {"bu": bu, "family": family, "display_name": display_name}
-    version_edits = {"engine": engine, "zip_url": zip_url, "convert_batch": convert_batch}
+    version_edits = {
+        "engine": engine,
+        "zip_url": zip_url,
+        "zip_source": zip_source,
+        "convert_batch": convert_batch,
+    }
 
     if not any(v is not None for v in {**product_edits, **version_edits}.values()):
         raise click.ClickException("Nothing to set. Pass at least one field option.")
     if any(v is not None for v in version_edits.values()) and not version:
-        raise click.ClickException("--engine, --zip-url and --batch are version fields; pass --version too.")
+        raise click.ClickException(
+            "--engine, --zip-url, --zip-source and --batch are version fields; pass --version too."
+        )
 
     try:
         for name, value in product_edits.items():

@@ -33,7 +33,7 @@ docushift doctor
 
 Prints the resolved project paths (`config/`, `cache/`, `families/`, `output/`, `state.db`), the active locale, and which family workspaces exist so far. The working directories are created on first run; per-family folders are not, so an untouched project reads `family workspaces: none yet`.
 
-> **Implementation status.** The command tree below is the full intended surface and `--help` reflects it. Implemented today: `doctor` and the whole `catalog` group **except `catalog fetch`**, which waits on the Phase 3 docsite crawler to supply its input — the merge engine behind it is already built and tested. Every unbuilt command exits non-zero naming the phase that will build it (see `docs/planning.md`); commands are never silently no-op.
+> **Implementation status.** The command tree below is the full intended surface and `--help` reflects it. Implemented today: `doctor` and the **whole `catalog` group, `fetch` included** — discovery talks to the live docsite. The acquisition stages (`download`, `extract`) and everything downstream are not built yet. Every unbuilt command exits non-zero naming the phase that will build it (see `docs/planning.md`); commands are never silently no-op.
 
 ---
 
@@ -51,17 +51,34 @@ They join on `product_code`. It is additive, distinguishes Active vs Archived ve
 ### On-Demand Fetching from Docsite
 Queries `docs.tibco.com/a_z_products` via its backend REST APIs to discover all products, active versions, and archived ("Other Versions") packages:
 ```bash
-# Fetch catalog for both TIBCO and IBI
-docushift catalog fetch --all
+# One product — the fastest way to try it, and one HTTP request
+docushift catalog fetch --product ems
 
-# Fetch catalog for a specific Business Unit
+# Everything already tagged into a run
+docushift catalog fetch --batch poc-1
+
+# A Business Unit, or the whole A-to-Z list (~670 products, several minutes)
 docushift catalog fetch --bu tibco
-docushift catalog fetch --bu ibi
+docushift catalog fetch --all
 
 # List catalog products and versions
 docushift catalog list
 docushift catalog show --product businessevents-enterprise
 ```
+
+**A scope is required.** A bare `catalog fetch` would crawl the entire A-to-Z list, so it asks for `--all` or one of `--bu` / `--family` / `--product` / `--batch` instead of assuming. `--version` is rejected: discovery works a product at a time, and fetching one version would make the others look deleted.
+
+`--product` accepts a **catalog product code or a docsite slug**. The two are usually different — `ems` is published as `tibco-enterprise-message-service` — so for a product already in `products.csv`, the code works and the recorded slug is used behind the scenes. For a product you have never fetched, pass the slug from its `docs.tibco.com` URL. If nothing matches, the error says so and suggests the slug.
+
+Useful flags:
+
+| Flag | Effect |
+| :--- | :--- |
+| `--dry-run` | Runs the whole crawl and merge, prints the counts, writes nothing. Worth doing first on `--all`. |
+| `--allow-deletes` | Permits removal of versions discovery no longer returns. Without it, a disappearing version **aborts** the merge — an upstream outage should not silently prune your catalog. |
+| `--no-include-archived` | Skips the archive index. Faster; leaves you without version history. |
+
+What it prints: a table of added / updated / unchanged / protected counts, a dim line counting entries skipped as unversioned or not publicly visible (roughly 70 of the 739 A-to-Z entries are employee-only), any catalog warnings, and — if some products could not be reached — how many. **A product that fails is left exactly as it was**, never emptied, so a partial crawl cannot look like a mass deletion.
 
 ### Choosing which versions get converted
 

@@ -37,7 +37,7 @@
   - [x] Active (`convert_eligible: true`) vs Archived (`convert_eligible: false`) version model.
   - [x] **Snapshot-based 3-way merge** (base = last fetch from `state.db`, theirs = new fetch, mine = current CSV), replacing flag-based protection. With no snapshot the merge falls back to the conservative reading: the CSV value is the user's.
   - [x] Deletion safety: disappearing version keys abort the merge unless `--allow-deletes`, and the check is scoped to the products actually fetched, so `--product ems` can never threaten another product's rows.
-  - [x] CLI operations: `catalog list`, `show`, `enable`, `set`, `import`, `triage` are wired up. `catalog fetch` remains pending on the Phase 3 crawler — only its input is missing.
+  - [x] CLI operations: `catalog list`, `show`, `enable`, `set`, `import`, `triage` are wired up; `catalog fetch` joined them in Phase 3.
 - [x] SQLite State Store (`src/docushift/state.py`):
   - [x] `product_snapshot` / `version_snapshot` tables backing the 3-way merge. Deliberately carry no engine columns: the detector owns those, not discovery, so a fetch cannot reset a detected engine.
   - [x] Volatile fields evicted from the catalog: `zip_etag`, `zip_size`, checksums, paths, per-stage status, free-form product/version metadata.
@@ -46,23 +46,27 @@
   - [x] Batch slice helper for phased runs across ~250 products.
 - [x] Unit tests for Catalog merger and State engine (`tests/unit/test_catalog.py`, `tests/unit/test_state.py`, `tests/unit/test_csvio.py`), including CSV round-trip fidelity and Excel-mangling regression cases (`TRUE`/`FALSE` booleans, `11/4/2025` dates, `1.10` → `1.1` version keys, BOM loss, stray columns).
 
-### Phase 3: Docsite Discovery Engine (`docs.tibco.com` API Client)
-**Next up — and next to be *implemented*.** Phase 4's design half ran ahead of this (see the note below); the code order returns here. The merge target is already built and tested; this phase supplies its input and unblocks `catalog fetch`.
-- [ ] API client for `docs.tibco.com` (`/api/a_to_z`, `/api/products/{slug}`, `/api/products/archive/{slug}`, `/api/product_list_by_suites`).
-- [ ] Automated ZIP URL generator (`/pub/{folder_path}/doc/zip/tib_{...}_doc.zip` and archive `zipPath`).
-- [ ] Category ingestion (`/api/bu_category_products`, `/product/categories`) as an **advisory** family hint only — most products are uncategorized, so it may only promote `unclassified` rows.
-- [ ] Additive merge into Catalog Manager and State DB.
-- [ ] **`zip_source` column** (`auto` | `manual`) in `versions.csv` — the catalog half of manually supplied packages (`architecture.md` §3.8). Belongs here rather than in Phase 4 because the merge rule has to exist *before* the first real fetch runs, or a fetch could overwrite a hand-supplied row:
-  - [ ] `ProductVersion.zip_source` + `VERSION_COLUMNS` + round-trip; `catalog set --zip-source`.
-  - [ ] Excluded from `_MERGEABLE_VERSION_FIELDS` and from `version_snapshot`, alongside the engine columns and `convert_batch`. `zip_url` itself stays merged.
-  - [ ] `validate()`: exempt `zip_source=manual` from the *convert-eligible with no `zip_url`* problem.
-  - [ ] `warnings()`: flag `manual` rows that discovery has since found a `zip_url` for.
-- [ ] Unit & mock tests in `tests/unit/test_discovery.py`.
+### Phase 3: Docsite Discovery Engine (`docs.tibco.com` API Client) — COMPLETE
+`catalog fetch` is wired end to end and verified against the live docsite (2026-09-03): a scoped fetch of `tibco-enterprise-message-service` returns 33 versions, and the generated ZIP URLs answer HTTP 200 for both active and archived releases.
+- [x] API client (`discovery/client.py`) for `/api/a_to_z`, `/api/products/{slug}`, `/api/products/archive/{slug}`, `/api/bu_category_products`, `/api/product_list_by_suites` — endpoints, templates and politeness read from `docsite.yaml`, urllib3 `Retry` on 429/5xx, and a hard minimum interval between requests rather than a token bucket.
+- [x] Automated ZIP URL generator: `/pub/{folder_path}/doc/zip/tib_{folder_slug}_doc.zip` for active versions, the archive index's `zipPath` verbatim for archived ones.
+- [x] Crawler (`discovery/crawler.py`) mapping payloads to `Product` records, **written against the API's verified real shape** (`architecture.md` §2.1): a `{"result": {"product": …}}` envelope, the detail object doubling as the current version with the rest under `siblings`, and `isArchive` splitting active from archived.
+- [x] Category ingestion as an **advisory** family hint only — it may only promote `unclassified` rows, and a failure to reach it degrades triage rather than the crawl.
+- [x] Partial-failure policy: an unreachable product is **excluded** from the result rather than returned empty, so a half-finished crawl can never trip deletion detection.
+- [x] Pre-request filtering of the 70 (of 739) A-to-Z entries the docsite marks not publicly visible, which otherwise answer with an SSO page as HTTP 200.
+- [x] `catalog fetch` wired to `CatalogManager.merge_fetch_results()` with `--allow-deletes`, `--dry-run`, a required scope, and `--product`/`--batch` resolved to crawl selectors so a three-product batch is three requests rather than 668.
+- [x] Docsite ids and folder paths recorded in `state.db`, not in the CSVs.
+- [x] **`zip_source` column** (`auto` | `manual`) in `versions.csv` — the catalog half of manually supplied packages (`architecture.md` §3.8). Landed here rather than in Phase 4 because the merge rule has to exist *before* the first real fetch runs, or a fetch could overwrite a hand-supplied row:
+  - [x] `ProductVersion.zip_source` + `VERSION_COLUMNS` + round-trip; `catalog set --zip-source`.
+  - [x] Excluded from `_MERGEABLE_VERSION_FIELDS` and from `version_snapshot`, alongside the engine columns and `convert_batch`. `zip_url` itself stays merged.
+  - [x] `validate()`: exempt `zip_source=manual` from the *convert-eligible with no `zip_url`* problem.
+  - [x] `warnings()`: flag `manual` rows that discovery has since found a `zip_url` for.
+- [x] Unit & mock tests in `tests/unit/test_discovery.py` (38), plus `catalog fetch` wiring tests in `test_cli.py`. No network: a fake session serves payloads shaped like the real responses.
 
 ### Phase 4: Package Downloader & Extractor
 The selection model and the on-disk layout this phase writes into are settled and tested (`architecture.md` §3.7 and §4); what remains is the I/O.
 
-> **Sequencing note (2026-09-03).** The two `[x]` items below landed ahead of Phase 3. They are design decisions — a CSV column and a path contract — with no network dependency, and they were settled while answering how partial conversions and the families folder should work. Implementation order returns to Phase 3 next; nothing further in this phase starts before the crawler exists.
+> **Sequencing note (2026-09-03).** The two `[x]` items below landed ahead of Phase 3. They are design decisions — a CSV column and a path contract — with no network dependency, and they were settled while answering how partial conversions and the families folder should work. Implementation order then returned to Phase 3, which is now complete; this phase is next.
 
 - [x] **Selection model**: `convert_eligible` (policy) + `convert_batch` (scheduling), composed by `CatalogManager.iter_versions(batch=…, eligible_only=True)`. `--batch` is a selector on every stage command.
 - [x] **Families workspace path contract** owned by `ConfigManager`: `family_dir`, `downloads_dir`, `extracted_dir`, `archive_dir`, `download_path`, `extract_path`, over `families/{locale}-{bu}-{family}/`.

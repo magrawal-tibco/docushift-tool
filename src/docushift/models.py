@@ -42,6 +42,19 @@ class EngineSource(StrEnum):
     AUTO = "auto"
 
 
+class ZipSource(StrEnum):
+    """Where a version's package comes from -- see docs/architecture.md §3.8.
+
+    `MANUAL` means the ZIP was supplied by hand and sits at the canonical path
+    already; the pipeline must never try to fetch it, and it is exempt from the
+    "convert-eligible with no zip_url" check. The path itself is deliberately not
+    stored: it is derivable from `(bu, family, product_code, version)`, whereas an
+    absolute path in a shared CSV is valid on exactly one machine.
+    """
+    AUTO = "auto"
+    MANUAL = "manual"
+
+
 class FamilySource(StrEnum):
     """How a product's family was arrived at. Precedence: first listed wins."""
     MANUAL = "manual"
@@ -70,6 +83,7 @@ class ProductVersion(BaseModel):
     engine: SourceEngine = SourceEngine.AUTO
     engine_source: EngineSource = EngineSource.AUTO
     zip_url: str | None = None
+    zip_source: ZipSource = ZipSource.AUTO
     custom_override: bool = False
 
 

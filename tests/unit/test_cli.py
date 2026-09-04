@@ -14,11 +14,11 @@ from click.testing import CliRunner
 from docushift import __version__
 from docushift.catalog import CatalogManager
 from docushift.cli import main
+from docushift.discovery import CrawlResult, DocsiteCrawler
 from docushift.state import StateStore
 from tests.conftest import make_product, make_version
 
 PENDING_COMMANDS = [
-    ["catalog", "fetch", "--all"],
     ["download", "--all"],
     ["download", "--batch", "poc-1"],
     ["extract", "--all"],
@@ -42,7 +42,11 @@ def populated_root(tmp_path: Path) -> Path:
     (tmp_path / "config").mkdir(exist_ok=True)
     state = StateStore(tmp_path / "cache" / "state.db")
     manager = CatalogManager(tmp_path / "config" / "products.csv", tmp_path / "config" / "versions.csv", state)
-    product = make_product("ems", display_name="TIBCO EMS", family="messaging")
+    # The slug is deliberately not the product code: that is the real docsite
+    # relationship, and several fetch tests turn on it.
+    product = make_product(
+        "ems", display_name="TIBCO EMS", family="messaging", slug="tibco-enterprise-message-service"
+    )
     product.versions = {
         "10.4.0": make_version("ems", "10.4.0", zip_url="https://docs.tibco.com/ems.zip"),
         "8.6.0": make_version("ems", "8.6.0", is_archived=True, convert_eligible=False),
@@ -115,11 +119,152 @@ def test_unimplemented_stages_exit_nonzero(runner: CliRunner, argv: list[str], t
     assert "not implemented yet" in result.output
 
 
-def test_catalog_fetch_names_the_phase_that_blocks_it(runner: CliRunner, tmp_path: Path) -> None:
-    """The merge engine landed in Phase 2; only the crawler is outstanding."""
-    result = _invoke(runner, tmp_path, "catalog", "fetch", "--all")
+# -- catalog fetch -------------------------------------------------------------
 
-    assert "Phase 3" in result.output
+
+@pytest.fixture
+def fake_crawl(monkeypatch: pytest.MonkeyPatch):
+    """Replaces the crawler's network walk with a canned result.
+
+    The crawl itself is covered in test_discovery.py; what these tests assert is
+    the wiring -- scope validation, the merge call, and what reaches the CSVs.
+    """
+    calls: list[dict] = []
+
+    def factory(products=None, errors=None):
+        result = CrawlResult(
+            products=products if products is not None else [_discovered_ems()],
+            errors=list(errors or []),
+            product_metadata={"ems": {"docsite_id": "1042"}},
+            version_metadata={("ems", "10.4.0"): {"folder_path": "ems/10.4.0"}},
+        )
+
+        def discover(self, bu=None, family=None, selectors=None, on_progress=None):
+            calls.append({"bu": bu, "family": family, "selectors": selectors})
+            return result
+
+        monkeypatch.setattr(DocsiteCrawler, "discover", discover)
+        return calls
+
+    return factory
+
+
+def _discovered_ems():
+    product = make_product("ems", display_name="TIBCO EMS", family="messaging")
+    product.versions = {
+        "10.4.0": make_version("ems", "10.4.0", zip_url="https://docs.tibco.com/ems.zip"),
+        "10.5.0": make_version("ems", "10.5.0", zip_url="https://docs.tibco.com/ems105.zip"),
+        "8.6.0": make_version("ems", "8.6.0", is_archived=True, convert_eligible=False),
+    }
+    return product
+
+
+def test_catalog_fetch_requires_a_scope(runner: CliRunner, tmp_path: Path) -> None:
+    """A bare fetch would crawl ~250 products; make that an explicit choice."""
+    result = _invoke(runner, tmp_path, "catalog", "fetch")
+
+    assert result.exit_code != 0
+    assert "Choose a scope" in result.output
+
+
+def test_catalog_fetch_rejects_a_version_filter(runner: CliRunner, tmp_path: Path) -> None:
+    """Fetching one version of a product would make its siblings look deleted."""
+    result = _invoke(runner, tmp_path, "catalog", "fetch", "--product", "ems", "--version", "10.4.0")
+
+    assert result.exit_code != 0
+    assert "per product" in result.output
+
+
+def test_catalog_fetch_merges_into_the_csvs(runner: CliRunner, populated_root: Path, fake_crawl) -> None:
+    fake_crawl()
+    result = _invoke(runner, populated_root, "catalog", "fetch", "--all")
+
+    assert result.exit_code == 0
+    assert "10.5.0" in (populated_root / "config" / "versions.csv").read_text(encoding="utf-8-sig")
+
+
+def test_catalog_fetch_dry_run_writes_nothing(runner: CliRunner, populated_root: Path, fake_crawl) -> None:
+    fake_crawl()
+    before = (populated_root / "config" / "versions.csv").read_text(encoding="utf-8-sig")
+    result = _invoke(runner, populated_root, "catalog", "fetch", "--all", "--dry-run")
+
+    assert result.exit_code == 0
+    assert "dry run" in result.output
+    assert (populated_root / "config" / "versions.csv").read_text(encoding="utf-8-sig") == before
+
+
+def test_catalog_fetch_resolves_a_batch_to_crawl_selectors(
+    runner: CliRunner, populated_root: Path, fake_crawl
+) -> None:
+    """--batch must narrow the crawl itself, not just the rows printed afterwards.
+
+    The docsite is addressed by slug, so the catalog's slug goes along with the code.
+    """
+    _invoke(runner, populated_root, "catalog", "set", "--product", "ems", "--version", "10.4.0", "--batch", "poc-1")
+    calls = fake_crawl()
+    result = _invoke(runner, populated_root, "catalog", "fetch", "--batch", "poc-1")
+
+    assert result.exit_code == 0
+    assert calls[0]["selectors"] == {"ems", "tibco-enterprise-message-service"}
+
+
+def test_catalog_fetch_with_an_unused_batch_fails(runner: CliRunner, populated_root: Path, fake_crawl) -> None:
+    fake_crawl()
+    result = _invoke(runner, populated_root, "catalog", "fetch", "--batch", "nope")
+
+    assert result.exit_code != 0
+    assert "nope" in result.output
+
+
+def test_catalog_fetch_reports_unreachable_products_without_failing(
+    runner: CliRunner, populated_root: Path, fake_crawl
+) -> None:
+    fake_crawl(errors=["tibco-ebx: GET ... returned HTTP 503"])
+    result = _invoke(runner, populated_root, "catalog", "fetch", "--all")
+
+    assert result.exit_code == 0
+    assert "503" in result.output
+    assert "left as-is" in result.output
+
+
+def test_catalog_fetch_leaves_the_catalog_alone_when_discovery_returns_nothing(
+    runner: CliRunner, populated_root: Path, fake_crawl
+) -> None:
+    """An empty crawl is a failed crawl, not a signal that every product vanished."""
+    fake_crawl(products=[], errors=["product list: GET ... failed"])
+    before = (populated_root / "config" / "products.csv").read_text(encoding="utf-8-sig")
+    result = _invoke(runner, populated_root, "catalog", "fetch", "--all")
+
+    assert result.exit_code != 0
+    assert (populated_root / "config" / "products.csv").read_text(encoding="utf-8-sig") == before
+
+
+def test_catalog_fetch_preserves_a_manual_edit(runner: CliRunner, populated_root: Path, fake_crawl) -> None:
+    """The whole point of the 3-way merge, asserted end-to-end from argv."""
+    _invoke(
+        runner, populated_root, "catalog", "set", "--product", "ems", "--version", "10.4.0",
+        "--zip-url", "https://internal.example/ems.zip",
+    )
+    fake_crawl()
+    result = _invoke(runner, populated_root, "catalog", "fetch", "--all")
+
+    assert result.exit_code == 0
+    assert "https://internal.example/ems.zip" in (
+        populated_root / "config" / "versions.csv"
+    ).read_text(encoding="utf-8-sig")
+
+
+def test_catalog_fetch_parks_folder_paths_in_the_state_db(
+    runner: CliRunner, populated_root: Path, fake_crawl
+) -> None:
+    """Machine detail belongs in state.db, not in a spreadsheet column."""
+    fake_crawl()
+    _invoke(runner, populated_root, "catalog", "fetch", "--all")
+
+    store = StateStore(populated_root / "cache" / "state.db")
+    assert store.get_version_metadata("ems", "10.4.0")["folder_path"] == "ems/10.4.0"
+    assert store.get_product_metadata("ems")["docsite_id"] == "1042"
+    store.close()
 
 
 # -- implemented catalog commands ---------------------------------------------
@@ -193,6 +338,16 @@ def test_catalog_set_family_pins_provenance(runner: CliRunner, populated_root: P
 
     assert result.exit_code == 0
     assert "integration,manual" in (populated_root / "config" / "products.csv").read_text(encoding="utf-8-sig")
+
+
+def test_catalog_set_zip_source_marks_a_hand_supplied_package(runner: CliRunner, populated_root: Path) -> None:
+    result = _invoke(
+        runner, populated_root, "catalog", "set", "--product", "ems", "--version", "8.6.0",
+        "--zip-source", "manual",
+    )
+
+    assert result.exit_code == 0
+    assert ",manual" in (populated_root / "config" / "versions.csv").read_text(encoding="utf-8-sig")
 
 
 def test_catalog_set_rejects_unknown_engine(runner: CliRunner, tmp_path: Path) -> None:

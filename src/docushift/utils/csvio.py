@@ -22,6 +22,8 @@ _FALSE_TOKENS = frozenset({"false", "0", "no", "n", "f", ""})
 # day > 12 falls through to the day-first attempt.
 _DATE_FORMATS = ("%Y-%m-%d", "%m/%d/%Y", "%d/%m/%Y", "%Y/%m/%d", "%d-%m-%Y")
 
+_ISO_TIMESTAMP = re.compile(r"^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}")
+
 _VERSION_PART = re.compile(r"(\d+)")
 
 
@@ -55,6 +57,10 @@ def normalize_date(value: object) -> str:
     text = str(value).strip()
     if not text:
         return ""
+    # The docsite reports release dates as ISO timestamps (`2025-02-06T09:21:53.000Z`).
+    # The catalog records the day; the time of day is noise in a spreadsheet column.
+    if _ISO_TIMESTAMP.match(text):
+        return text[:10]
     for fmt in _DATE_FORMATS:
         try:
             return datetime.strptime(text, fmt).date().isoformat()
