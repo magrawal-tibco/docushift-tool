@@ -364,6 +364,28 @@ docushift sync --target-dir ../tibco-docs-aem/
 docushift validate --target-dir ../tibco-docs-aem/
 ```
 
+**What sync writes.** Two repositories per family, both named after the family workspace (§3):
+
+```
+en-us-tibco-messaging/                  # the docs repo — what a reader reads
+└── en-us/ems/
+    ├── online-help/10-4-0/…            # converted Markdown, toc.yml, nav.yml, meta.yml, csh.yml
+    ├── user-guides/10-4-0/…            # user-guide PDFs
+    ├── release-information/10-4-0/…    # release notes + readme
+    └── reference-documents/10-4-0/…    # VPAT, licence, rest of doc/
+
+en-us-tibco-messaging-resources/        # the bulk repo
+└── en-us/ems/
+    ├── api-references/java/10-4-0/…    # Javadoc and the C / Go / tibdg trees
+    └── archives/                       # archived-version ZIPs
+```
+
+Three things to expect:
+
+- **Versions are dashed here** (`10.4.0` → `10-4-0`) and nowhere else. The catalog and the `families/` workspace keep the dots.
+- **API references are never converted.** Javadoc is copied through as HTML, and topic links into it are rewritten to absolute URLs on the AEM host. Set that host in `config/publishing.yaml` (`publish_base_url`) before your first sync — the path after it is derived, not configured.
+- **`validate` skips those absolute links by default.** They point at a different repository, so there is nothing on disk to check; pass `--check-external` to verify them over HTTP.
+
 ---
 
 ## 5. Product Taxonomy Configuration (`config/taxonomy.yaml`)

@@ -105,18 +105,27 @@ The selection model and the on-disk layout this phase writes into are settled an
   - [ ] Writer: one `csh.yml` per version at the Markdown output root; `topics` is the only index; no file at all when the version has no CSH.
   - [ ] Frontmatter injection: `csh: ["id-a", "id-b"]` on topics that own identifiers, written in the topic's first pass rather than as a read-modify-write second pass.
 - [ ] Asset copier and relative link re-pointer.
+- [ ] **Conversion skip-list for API-reference trees** (`api/`, `javadoc/`, `Java_API/`, `java/`, `c/`, `golang/`, `tibdg/`). These are copied verbatim by Stage 7 into the `api-references` doc-class (`architecture.md` §6.2), never fed to an engine — Javadoc is not generator output and converting it yields broken Markdown from working HTML. Links from converted topics into these paths are left intact here and re-pointed at sync time, when the target repository is known.
 - [ ] Exhaustive unit tests with fixtures in `tests/unit/`, including the CSH cases the corpus survey turned up: case-only identifier collision, a digit-only identifier that must survive a YAML round-trip as a string, fragment in `Link`, an alias file that resolves 0%, a version with three doc-sets whose identifiers overlap, and empty/zero-byte alias files.
 
 ### Phase 6: AEM Architecture Synthesis & Git Sync
 - [ ] AEM navigation builder (`toc.yml`, `nav.yml`, `meta.yml`).
 - [ ] Frontmatter injector and landing page (`index.md`) generator.
-- [ ] Git workspace distributor (copies to `{target_git}/{bu}/{family}/{product}/{version}/`).
-- [ ] **Decide the sync path shape** against a real AEM target repo: the nested form above, or the `html-to-md` publishing form `{locale}-{bu}-{family}/{locale}/{product}/{doc-class}/{version-dashed}/` with a sibling `-resources` repo. The family workspace name (§4.1) is already the publishing repo name, which argues for the latter. Deferred deliberately — see the note at the end of `architecture.md` §6.
+- [ ] Git workspace distributor — publishing form `{target_git}/{locale}-{bu}-{family}/{locale}/{product}/{doc-class}/{version-dashed}/`, layout fixed in `architecture.md` §6.1.
+  - [ ] Docs repo: `online-help/` (converted tree + navigation + `csh.yml`), `user-guides/` (PDFs), `release-information/` (relnotes + readme), `reference-documents/` (VPAT, licence, rest of `doc/`).
+  - [ ] `-resources` repo: `api-references/{c,java,golang,tibdg}/` and `archives/` (ZIPs, no version segment).
+  - [ ] **API-reference trees are excluded from Stage 5 conversion and copied verbatim** — Javadoc is not engine output, and converting it turns working HTML into broken Markdown. Needs a skip-path list in the converter as well as a copy step here.
+  - [ ] Cross-repo link rewriter: help-topic links into `api/{c,java,golang,tibdg}/…` are re-pointed at the `-resources` repo as **absolute URLs** (`architecture.md` §6.4). Runs after both trees are placed. Links that stay inside the docs repo remain relative.
+  - [ ] New **`config/publishing.yaml`** — `publish_base_url` plus the doc-class-to-repo map. The AEM host must not be compiled into the distributor; a staging target is a config edit. One path-template function serves both the file copy and the link rewrite, so the two cannot disagree.
+  - [ ] Dots-to-dashes version conversion at this boundary only (`10.4.0` → `10-4-0`); nothing upstream may see a dashed version.
+  - [ ] `-resources` is a **separate repository** per family, created and pushed alongside the docs repo — not a directory inside it (`architecture.md` §6.3).
+  - [ ] Only value still to supply: the `publish_base_url` string itself, once the AEM host is known. Deployment configuration, not design — nothing waits on it.
 
 ### Phase 7: CLI, Reporting & Verification Dashboard
 - [ ] Click CLI with full command tree (`catalog`, `status`, `download`, `convert`, `sync`, `report`).
 - [ ] Rich terminal dashboard and exportable Markdown/HTML migration reports.
 - [ ] Broken link and missing asset linter, including the CSH checks in `architecture.md` §5.3.6.
+  - [ ] **Classify before checking**: relative links resolve on the filesystem and a miss is an error; absolute URLs are external — which after Stage 7 means every API-reference link — and are skipped by default, HTTP-checked only under `validate --check-external`.
 - [ ] `docushift csh {list,report,validate}` — per-version identifier listing, coverage across a batch, and integrity checking.
 - [ ] **Cross-version CSH regression report** — identifiers present in the previously converted version and absent from this one. A dropped identifier is a Help button that breaks on upgrade, and it cannot be seen from inside a single version.
 - [ ] End-to-end integration test suite.

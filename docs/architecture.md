@@ -522,6 +522,69 @@ The identifiers are known before conversion writes the file (parsing a 24 KB `Al
 
 ## 6. AEM Structure Synthesis & Git Sync
 - Synthesizes `toc.yml`, `nav.yml`, `meta.yml`, `index.md`, and YAML frontmatter.
-- Distributes ready-to-push documentation sets into `{target_git}/{bu}/{family}/{product}/{version}/`.
+- Distributes ready-to-push documentation sets into the publishing layout below.
 
-> **Open, deferred to Phase 6:** the family workspace name (`en-us-tibco-messaging`, §4.1) is the same string `html-to-md` uses as a *publishing repository* name, which suggests the sync target should be `{target_git}/{locale}-{bu}-{family}/{locale}/{product}/{doc-class}/{version-dashed}/` rather than the nested form above. `html-to-md` also splits assets into a sibling `-resources` repo and dashes the version (`6-2-3`). Deciding between the two shapes needs a real AEM target repo to check against, so the workspace layout is settled and the sync layout is not.
+### 6.1 Publishing Layout
+
+The sync target is the **publishing form**, `{target_git}/{locale}-{bu}-{family}/{locale}/{product}/{doc-class}/{version-dashed}/`, not the nested `{bu}/{family}/{product}/{version}/` form. The repository name is the family workspace name (§4.1) unchanged, so the Stage 7 hand-off is a copy rather than a translation.
+
+```
+en-us-tibco-messaging/                  # docs repo — what a reader reads
+└── en-us/
+    └── ems/
+        ├── online-help/10-4-0/…        # converted Markdown + toc.yml, nav.yml, meta.yml, index.md, csh.yml
+        ├── user-guides/10-4-0/…        # user-guide PDFs
+        ├── release-information/10-4-0/ # release notes + readme
+        └── reference-documents/10-4-0/ # VPAT, licence, remaining doc/ files
+
+en-us-tibco-messaging-resources/        # bulk repo — generated trees and cold storage
+└── en-us/
+    └── ems/
+        ├── api-references/java/10-4-0/ # Javadoc; siblings c/, golang/, tibdg/
+        └── archives/                   # archived-version ZIPs, no version segment
+```
+
+### 6.2 Which Doc-Class Goes Where
+
+| Doc-class | Repo | Contents | Converted? |
+| :--- | :--- | :--- | :--- |
+| `online-help` | docs | The converted GFM tree, its navigation, and `csh.yml` | Yes — Stage 5 |
+| `user-guides` | docs | User-guide PDFs | No — copied |
+| `release-information` | docs | Release-notes PDF, readme TXT | No — copied |
+| `reference-documents` | docs | VPAT, licence, everything else under the package's `doc/` | No — copied |
+| `api-references` | `-resources` | **Javadoc and the C / Go / `tibdg` API trees**, under a per-language subdirectory | **Never** — copied verbatim |
+| `archives` | `-resources` | Archived-version ZIPs, via `docushift archive download` | No — never unpacked |
+
+**The split is by what the artefact *is*, not by whether it is Markdown.** The docs repo holds the per-version publication set — every deliverable a human wrote and a reader opens, whether that is converted help or a PDF that was never HTML to begin with. Splitting those off would mean a reviewer diffing one product version across two repositories to see one release's worth of documentation. The `-resources` repo holds the two classes that are neither authored nor read as prose: machine-generated API trees, which are large, regenerate wholesale, and produce diffs nobody reads; and archived ZIPs, which are opaque binaries kept for reference. Keeping those out is what stops a clone of the docs repo from being dominated by bytes that are not documentation.
+
+Four consequences worth stating:
+
+- **`api-references` is excluded from conversion, not merely routed differently.** Standard Javadoc is not Flare output and has its own navigation frames; running it through an engine would produce broken Markdown from working HTML. Stage 5 skips these paths and Stage 7 copies the source tree through untouched. The predecessor reached the same conclusion the hard way — `html-to-md` carries `/javadoc/`, `/Java_API/`, `/java/` in both a `skip_path_segments` and a `copy_path_segments` list.
+- **Cross-repo links must be rewritten at sync time.** Converted help routinely links into the API tree (`[…](api/java/index.html)`), and that target now lives in a separate repository (§6.3). Stage 7 owns the rewrite; it cannot be done during conversion, which does not know the publishing layout.
+- **`archives/` has no version segment.** The ZIP filename already carries the version, and unlike every other doc-class there is no per-version folder of contents to hold.
+- **Dots become dashes here and nowhere earlier** (`10.4.0` → `10-4-0`). See §4.1: the working tree's segment must round-trip to a `versions.csv` key, which a dashed version cannot.
+
+### 6.3 Why `-resources` Is a Separate Repository
+
+`-resources` is a **sibling repository**, not a directory inside the docs repo. Three reasons, in the order they bite:
+
+- **Size and clone cost.** A single Javadoc tree runs to thousands of generated files, and `archives/` accumulates every archived ZIP a product ever shipped. Both grow monotonically and neither compresses in git's favour — binaries do not delta. Carried inside the docs repo they would dominate its history permanently, and every author cloning to fix a typo would pay for them.
+- **Different lifecycle, different review.** API references regenerate wholesale on each release; archives are append-only cold storage. Neither is reviewed the way a documentation change is, so neither wants the docs repo's branch protection, PR workflow, or diff attention. A regenerated Javadoc tree landing as a 4,000-file diff in the repo where prose is reviewed makes the prose changes unfindable.
+- **The predecessor already publishes it this way** — `html-to-md`'s output carries `activespaces-resources`, `bwpluginawss3-resources` and siblings beside each docs repo. Matching it keeps DocuShift's Stage 7 a copy into an established target rather than a migration of one.
+
+### 6.4 Cross-Repo Links Are Absolute URLs
+
+A help-topic link into `api-references/` is rewritten to an **absolute URL** on the AEM host — not a relative sibling path. `html-to-md` builds a relative `../../…` prefix, which holds only because both its trees sit under one local `output/`; across two published repositories nothing guarantees a traversable path between them, and AEM serves the two at content paths it decides, not at a filesystem offset.
+
+```
+[Java API](api/java/index.html)
+  → [Java API]({publish_base_url}/en-us-tibco-messaging-resources/en-us/ems/api-references/java/10-4-0/index.html)
+```
+
+**The base URL is configuration, not a constant.** A new `config/publishing.yaml` holds `publish_base_url` alongside the doc-class-to-repo map, so the host is not compiled into the distributor and a staging target is a config edit rather than a code change. The path after the base is derived from the same `{locale}-{bu}-{family}-resources/{locale}/{product}/api-references/{subdir}/{version-dashed}/` template that placed the file, so the link and the copy cannot disagree — both read one function.
+
+Three consequences:
+
+- **The rewrite is unconditional and lossless in one direction only.** Once absolute, a link no longer survives relocating the resources repo; it survives re-running sync. That is the right trade, because conversion is reproducible and the alternative — a relative path — is broken on arrival rather than after a move.
+- **API-reference links become *external* to the link checker** (§8.4, Phase 7). A validator walking the docs repo cannot resolve them on the filesystem, so it must classify them as external and either skip them or check them over HTTP behind a flag. Treating them as internal would report every one as broken.
+- **Nothing else changes shape.** Links within `online-help/`, and links to the PDF doc-classes, stay relative — those targets are in the same repository, and keeping them relative is what lets the docs repo be reviewed and previewed before it is published.

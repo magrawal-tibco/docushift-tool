@@ -410,6 +410,8 @@ Count products by family provenance and list the unclassified ones. This turns "
 
 `docushift validate` treats CSH as link integrity, because that is what it is (§9.6).
 
+**Links are classified before they are checked.** A relative link resolves against the filesystem and a missing target is an error. An absolute URL is external — which, after Stage 7, includes every rewritten API-reference link (`architecture.md` §6.4) — and is skipped by default, checked over HTTP only behind an explicit flag. Checking the two the same way would report the entire API surface of every product as broken.
+
 ---
 
 ## 9. Context-Sensitive Help
@@ -490,7 +492,13 @@ Identifiers are known before conversion writes the file — parsing a 24 KB alia
 
 **Specified.** Navigation synthesis walks the converted tree to produce `toc.yml`, `nav.yml`, `meta.yml` and landing pages from the Jinja templates in `config/aem_templates/`, then the distributor copies each version's output into the target repository layout.
 
-**Open, deliberately:** the sync path shape. The nested `{bu}/{family}/{product}/{version}/` form and the predecessor's publishing form — `{locale}-{bu}-{family}/{locale}/{product}/{doc-class}/{version-dashed}/` with a sibling `-resources` repo — are both live candidates, and choosing between them needs a real AEM target repo to check against. The dots-to-dashes version conversion belongs here, at the publishing boundary, and nowhere earlier: the working tree's dotted version must round-trip to a `versions.csv` key, which `6-2-3` cannot (`6.2.3`? `6-2.3`?).
+**The sync path shape is settled** (`architecture.md` §6.1): the publishing form `{locale}-{bu}-{family}/{locale}/{product}/{doc-class}/{version-dashed}/`, with the docs repo taking `online-help`, `user-guides`, `release-information` and `reference-documents`, and a sibling `-resources` repo taking `api-references` and `archives`. The distributor therefore does four things per version, in order: copy the converted tree and its navigation into `online-help/`; copy the PDF and document assets into their three doc-classes; copy the API-reference trees, unconverted, into the sibling repo; then rewrite every link that crosses from one repo to the other. The rewrite is last because it needs both destinations to exist, and it belongs here rather than in Stage 5 because conversion does not know the publishing layout.
+
+The dots-to-dashes version conversion belongs here too, at the publishing boundary, and nowhere earlier: the working tree's dotted version must round-trip to a `versions.csv` key, which `6-2-3` cannot (`6.2.3`? `6-2.3`?).
+
+`-resources` is a **separate repository**, not a directory in the docs repo (`architecture.md` §6.3) — generated API trees and archived ZIPs grow monotonically, do not delta, and are not reviewed like prose.
+
+**Step 4, the link rewrite, in full.** Every link from a converted topic into an API-reference path (`api/`, `javadoc/`, `Java_API/`, `java/`, `c/`, `golang/`, `tibdg/`, however many `../` deep) is replaced with an **absolute URL**: `publish_base_url` from `config/publishing.yaml`, then the same `{locale}-{bu}-{family}-resources/{locale}/{product}/api-references/{subdir}/{version-dashed}/{rest}` template that placed the file. Link construction and file placement call one function, so a link cannot point somewhere the copy did not write. Links that stay inside the docs repo — within `online-help/`, or out to the PDF doc-classes — are left relative, which is what keeps the repo previewable before publication.
 
 ---
 
