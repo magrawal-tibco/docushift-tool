@@ -1,7 +1,7 @@
 # Project Context & Living Ledger: DocuShift Tool
 
-> **Last Updated:** 2026-09-03  
-> **Status:** Phases 1-3 complete and verified — `catalog fetch` runs against the live docsite (256 tests pass, lint clean); Phase 4's selection model and path contract also landed, so what remains there is the acquisition I/O  
+> **Last Updated:** 2026-09-07  
+> **Status:** Phases 1-3 complete and verified — `catalog fetch` runs against the live docsite (256 tests pass, lint clean); Phase 4's selection model and path contract also landed, so what remains there is the acquisition I/O. The Phase 5 **CSH design is settled** (`architecture.md` §5.3) and awaiting implementation  
 > **Primary Runtime:** Python 3.11+ (Active: Python 3.13)  
 > **Business Scope:** TIBCO & IBI Documentation Migration (~250 Products) to AEM on GitHub
 
@@ -19,7 +19,7 @@
 2. **Taxonomy & Family Mapping**: Categorize products into structured Product Families (e.g., Messaging, Integration, Analytics, WebFOCUS, Omni, Data Management). Per-product assignment lives in `config/products.csv` (bulk-editable); `config/taxonomy.yaml` holds family definitions and keyword inference rules only. Classification is majority-manual — the docsite's own category data covers only a minority of products.
 3. **Package Acquisition & Cache**: Resumable downloader with checksumming and rate-limiting, writing doc ZIPs into the per-family workspace `families/{locale}-{bu}-{family}/downloads/`. Selection is `convert_eligible` (policy) narrowed by `convert_batch` (which run), so a POC converts three versions without touching the other ~1,500 rows. Where discovery yields no usable `zip_url`, a hand-obtained ZIP is ingested with `--from-file` and pinned `zip_source=manual` — it lands at the same canonical path and converts through the same code path as a downloaded one.
 4. **Extraction & Asset Cataloger**: Unzip into `families/{...}/extracted/{product}/{version}/`, discover HTML docs, Context-Sensitive Help (CSH) maps, and binary/document assets (`PDF`, `DOC`, `XLS`, `TXT`, `PNG`, `SVG`, `ZIP`). Runs over the same selection as the downloader, so archived versions are neither fetched nor unpacked.
-5. **Multi-Engine Conversion to GFM**: Convert HTML (primarily MadCap Flare + DITA/WebWorks/DocBook) into clean GitHub-Flavored Markdown tailored for AEM. The engine is a **per-version** property detected from package contents — the same product commonly spans generators across its version history.
+5. **Multi-Engine Conversion to GFM**: Convert HTML (primarily MadCap Flare + DITA/WebWorks/DocBook) into clean GitHub-Flavored Markdown tailored for AEM. The engine is a **per-version** property detected from package contents — the same product commonly spans generators across its version history. Conversion also emits the version's **context-sensitive help map** (`csh.yml`) and stamps the matching identifiers into topic frontmatter, so a product's Help button still resolves after migration.
 6. **AEM Navigation & Architecture Synthesis**: Generate AEM-required navigation trees (`toc.yml`, `nav.yml`, `meta.yml`), landing pages, and frontmatter.
 7. **Git Sync & Distribution**: Organize converted output into target GitHub repository structures ready for branching, review, and pushing.
 
@@ -36,6 +36,7 @@ docushift-tool/
 ├── pyproject.toml          # Python package manifest, dependencies, test config
 ├── docs/                   # Living Project Documentation
 │   ├── architecture.md     # Full 7-stage pipeline architecture, additive catalog, data schemas
+│   ├── design.md           # Logic & algorithms in standard English, marked Built vs Specified
 │   ├── user-guide.md       # CLI reference, batch workflows, manual catalog editing
 │   └── planning.md         # Master roadmap, milestones, validation criteria
 ├── config/                 # Configurations, Taxonomies & Catalog
@@ -66,7 +67,7 @@ docushift-tool/
 │       │   ├── tables.py   # Table normalizer
 │       │   ├── code.py     # Code syntax highlighter
 │       │   ├── links.py    # Cross-document & anchor link resolver
-│       │   ├── csh.py      # Context-Sensitive Help mapper (alias to MD anchor)
+│       │   ├── csh.py      # CSH schema, resolver & csh.yml writer (engine-neutral; engines supply readers)
 │       │   └── assets.py   # Asset re-linker & copier
 │       ├── aem/            # Stage 6: AEM Navigation & Architecture generator (TOC/YAML)
 │       ├── sync/           # Stage 7: GitHub workspace folder sync & distributor
@@ -86,6 +87,10 @@ docushift-tool/
 │       ├── extracted/ems/10.4.0/   # version keeps its dots; dashes are a Stage 6 concern
 │       └── archive/                # only via `docushift archive download`
 └── output/                 # (Git-ignored) Final converted GFM output organized by BU/Family
+    └── …/<product>/<version>/
+        ├── csh.yml         # identifier -> topic map for this version (omitted when the package has none)
+        ├── toc.yml
+        └── <doc-set>/…     # converted topics, CSH identifiers stamped into frontmatter
 ```
 
 Per-family folders are created on demand by the downloader, not at startup: pre-creating one per declared family would make an empty workspace look like a started migration.
@@ -128,6 +133,17 @@ Per-family folders are created on demand by the downloader, not at startup: pre-
 | 2026-09-03 | Discovery | **70 of the 739 A-to-Z entries are `isPublicLevel: false` and are filtered out before the request**; a missing flag is treated as public. A sign-in page arriving as HTTP 200 also gets its own error message. | Those products answer with an SSO interstitial served as HTTP 200 — 3 of the first 13 sampled products, which read as crawler bugs. Filtering on the flag the docsite already publishes is cheaper and more honest than sniffing HTML; defaulting a *missing* flag to public means a schema change degrades to noise rather than silently emptying the crawl. Post-filter sample crawl: 0 errors. |
 | 2026-09-03 | Discovery | **A product whose fetch fails is excluded from `CrawlResult.products` entirely, never returned with an empty version list.** `catalog fetch` requires a scope, and `--product`/`--batch` resolve to selectors matching either the docsite slug or the catalog code. | An empty version list reads to the 3-way merge as "every version was deleted upstream" — a transient 503 would abort the fetch or, with `--allow-deletes`, wipe the product. On scoping: an unscoped crawl is 668 requests, and a product's code is rarely its slug (`ems` is published as `tibco-enterprise-message-service`), so the selector set carries both. |
 | 2026-09-03 | Taxonomy | A `family` value not declared in `taxonomy.yaml` is **auto-registered with a warning**, never rejected. `CatalogManager.warnings()` is separate from `validate()`: problems block the write, warnings do not. The warning names the folder that will be created. | User chose warn-once over rejection: families are user-extensible by design, and a hard failure would make `catalog import` unusable mid-triage. Naming the resulting `families/en-us-tibco-streaming-analytics` is what makes the warning also catch the other case — a typo (`mesaging`) about to become its own folder. |
+| 2026-09-04 | CSH | **Context-sensitive help becomes a first-class conversion output**: one `csh.yml` per product version at the Markdown output root (beside `toc.yml`), plus a `csh:` list in each mapped topic's frontmatter. Full design in `architecture.md` §5.3. Design only — no implementation. | Requested by user. A product's Help button passes an identifier, not a URL; if the identifier does not survive migration the button breaks in the shipping product and nothing in the Markdown looks wrong. Grounded in a survey of **272 real `Alias.xml` files / 7,220 `<Map>` entries** in the predecessor `html-to-md` cache rather than in the format's documentation. |
+| 2026-09-04 | CSH | **The map is keyed by `Name`, never by `ResolvedId`.** ~~`ids` survives only as a derived index, nested per doc-set, whose values are always lists.~~ *(the derived `ids` index was dropped entirely 2026-09-07 — see below; the name-as-key half stands)* | `ResolvedId` is non-unique **within a single alias file** in 29 of 196 files (15%), and the colliding ids address different topics — BW 6.12.0 `bwce-html` reuses 18. `Name` had 0 violations across the whole corpus. The predecessor's `csh_map.json` was keyed by id, so those entries silently overwrote each other. Nesting `ids` per doc-set matches the real scope of an integer id: it is per help target, not per version. |
+| 2026-09-04 | CSH | **Identifiers are compared and stored byte-exactly; nothing case-folds them.** Names are emitted double-quoted in YAML, ids as bare integers. | Confirmed by user and by the corpus: TIBCO BC 7.4/7.5 ship `GatewayInstances` → `Gateway_Instances.htm` and `gatewayInstances` → `Managing_Gateway_Instances.htm` as two live, different help targets. Quoting is not cosmetic — an unquoted name of `1000`, `Yes`, `On`, or `6.2` loads as an int/bool/float under a YAML 1.1 loader such as PyYAML, which is what the map is read with. |
+| 2026-09-04 | CSH | **Resolution is doc-set first, then version-wide**, merging identifiers across a version's several help outputs. Conflicts keep the largest doc-set as primary (ties alphabetical) and record the alternative under `also:`; nothing is dropped. | 15 of 254 versions ship more than one alias file, and Flare frequently copies one output's alias file wholesale into a sibling: **1,609 of 7,220 links (22%) dangle**, with 10 of the 11 affected files being `relnotes/Data/Alias.xml` at 0% resolution. Per-doc-set resolution would report 205 broken identifiers for BW relnotes; version-wide resolution resolves all 205 against the main output where the topics actually live. This is the strongest argument for the per-version file the user asked for. Ids collide across doc-sets (31 of 205 in BW 6.12.0) and names occasionally do (5 of 233), so the conflict case has to be representable rather than assumed away. |
+| 2026-09-04 | CSH | **Absent CSH is normal, not a failure.** Empty, zero-byte, and unparseable sources are counted and skipped; a version with no identifiers gets **no `csh.yml` at all**. Unresolvable identifiers are kept in an `unresolved:` list rather than dropped. | 65 empty `<CatapultAliasFile />` plus 11 zero-byte files — 28% of the corpus. Raising on those would make a routine condition look like a defect. Conversely an empty map file is indistinguishable from a failed run, so absence is the honest signal. Keeping unresolved entries is the mirror-image concern: a dropped identifier converts a broken Help button into a silent absence, which no downstream check can find. |
+| 2026-09-04 | CSH | **CSH is engine-neutral**: `transforms/csh.py` owns the schema, resolver and writer; each engine contributes only a reader. ~~DITA yields `id: null` as a real state.~~ *(moot from 2026-09-07 — there is no id field; DITA's name-only contract is simply the general case)* | Verified against the predecessor's three separate working implementations (Flare `Alias.xml`, WebWorks `ctx/` + `wwhdata/xml/files.xml`, DITA `head.js` `suitehelp.contexts`), which had diverged into three schemas and three frontmatter conventions for the same concept. |
+| 2026-09-04 | CSH | **No backward-compatible `csh_map.json` is emitted.** Confirmed by user: no AEM-side consumer is built yet, so `csh.yml` is free-standing and nothing constrains its filename or key. | Worth recording as a decision rather than an omission — the predecessor's id-keyed `csh_map.json` is the obvious thing to keep emitting "just in case," and doing so would carry its data loss forward into a consumer that does not exist yet. If a contract appears later it can be generated from `csh.yml`, which is lossless; the reverse is not true. |
+| 2026-09-04 | CSH | ~~Frontmatter uses a single `csh: [{name, id}]` list~~ *(superseded 2026-09-07: with no numeric key there is nothing to pair, so frontmatter is a flat `csh: ["id-a", "id-b"]`)*, **not** the predecessor's parallel `csh_ids` / `csh_names` arrays. Confirmed by user 2026-09-04. Identifiers are resolved before the topic is written, so frontmatter lands in the file's first and only write. | A page commonly owns several identifiers, and parallel arrays lose the pairing the moment the counts differ — which they always do for DITA, where there are names and no ids. Writing frontmatter in a second read-modify-write pass over every converted file (what the predecessor did) re-parses and rewrites the whole output tree to touch a small minority of it. |
+| 2026-09-07 | CSH | **Numeric identifiers are removed from the CSH schema entirely.** Flare's `ResolvedId` is read and discarded; `csh.yml` has one index (`topics`) keyed by a single string identifier, and frontmatter becomes a flat `csh: ["id-a", "id-b"]`. | Called by user: an identifier that is not unique is not an identifier, so carrying it as a second key means carrying a key that is wrong in 15% of alias files. The simplification is real — one index instead of two, no derived-index drift to reason about, no `{name, id}` pairing in frontmatter. Reversible if needed: `Alias.xml` stays in the extracted tree and `csh.yml` is a build artifact, so reintroducing a numeric index costs a re-run rather than a migration. |
+| 2026-09-07 | CSH | **The identifier is a string, not a name — and WebWorks is why.** Flare contributes its alias `Name`, DITA its context name, WebWorks the **ctx file stem** (`admin1234`). One namespace, one type. | Flagged during the above change: WebWorks help has no alias name at all. The application requests `ctx/admin1234.htm` directly, so the stem *is* the shipped key and the internal topic id from `files.xml` is invisible to the product. A literally name-only schema would have dropped WebWorks CSH in full. The consequence is that digit-only identifiers are routine, which promotes the YAML quoting rule from a nicety to a correctness requirement — unquoted, `1234` loads as an int and `6.2` as a float, in a map documented as string-keyed. Case-sensitivity likewise becomes load-bearing: with the integer gone, byte-exact comparison is the only thing separating `GatewayInstances` from `gatewayInstances`. |
+| 2026-09-07 | Docs | **New fourth living document: `docs/design.md`** — the tool's logic and algorithms in standard English, step by step, with every algorithm marked **Built** (implemented and tested) or **Specified** (designed, not yet written) and an index table mapping each to its module or its phase. `architecture.md` keeps the shapes and the rationale; `design.md` keeps the procedures. | Requested by user. The algorithms existed only as prose scattered through `architecture.md`, as module docstrings, and as the code itself — so the ordering rules that carry the actual data-safety guarantees (trademark strip before NFKD fold, deletion check before any write, resolve doc-set before version-wide) were discoverable only by reading three places at once. The Built/Specified split is what keeps the document honest as Phases 4-7 land: an unbuilt algorithm is stated as a binding contract on the implementation, not described as if it already runs. |
 
 ---
 
@@ -151,3 +167,21 @@ Audited against the filesystem, not against checkboxes:
 
 - [ ] **Phase 4 — acquisition I/O** against the settled contract: resumable downloader into `downloads_dir()`, ZIP extractor into `extract_path()`, `docushift archive download`, `--from-file` ingestion plus `ConfigManager.archive_path()`, and the per-version path/checksum/status writes into `state.db`
 - [ ] **Phase 5** — MadCap Flare Engine + CSH Mapper with `pytest` unit test suite
+
+> **Standing docs obligation.** Every algorithm in `docs/design.md` is marked **Built** or **Specified**. Landing one flips its mark and its row in the §12 index — in the same commit, not afterwards. A Specified algorithm that has quietly shipped is worse than an undocumented one: it reads as a plan while being the code.
+
+### Design landed ahead of implementation (2026-09-04, simplified 2026-09-07)
+- [x] **CSH system fully specified** — `architecture.md` §5.3, `user-guide.md` §7, planning tasks split across Phase 4 (source inventory) and Phase 5 (resolver, writer, frontmatter). Nothing implemented. **One string identifier, one index, no numeric key.** The spec is grounded in a survey of the predecessor `html-to-md` cache rather than in the Flare documentation:
+
+  | Measured | Value |
+  | :--- | :--- |
+  | `Alias.xml` files inspected | 272 (196 with content, 65 empty, 11 zero-byte) |
+  | `<Map>` entries | 7,220 across ~254 product versions |
+  | Files where a `ResolvedId` addresses >1 topic | 29 of 196 (15%) |
+  | Files where a `Name` addresses >1 topic | **0** |
+  | Links that dangle inside their own doc-set | 1,609 of 7,220 (22%), 10 of 11 files being `relnotes` at 0% |
+  | Versions shipping >1 alias file | 15 of 254 |
+  | Links carrying a fragment | 239 |
+  | Case-only name collisions with different targets | TIBCO BC 7.4 & 7.5 |
+
+  The reproduction scripts live in `C:\tmp\an_alias*.py`; they are throwaway analysis, not part of the package. Re-running them needs the `html-to-md` cache, which is not in this repo.

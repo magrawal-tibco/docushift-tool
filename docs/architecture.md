@@ -6,6 +6,8 @@
 > **Source:** `docs.tibco.com` (Active & Archived Versions)  
 > **Target:** AEM-Ready GitHub-Flavored Markdown Repositories
 
+> This document holds the **shapes and the reasoning** — what each part of the system is, and why it is that way. The **step-by-step procedures** live in [`design.md`](design.md): the ordered algorithms, their tie-breaks, and their behaviour on malformed input, each marked Built or Specified.
+
 ---
 
 ## 1. End-to-End System Architecture
@@ -40,7 +42,8 @@ flowchart TD
     subgraph Convert["Multi-Engine Conversion & Transforms"]
         EX3 --> C1["Profile Selector\n(Flare | DITA | WebWorks | DocBook)"]
         C1 --> C2["Core Transforms\n- Dropdowns & Callouts (> [!NOTE])\n- HTML Tables to GFM\n- Link & Anchor Resolution\n- CSH Mapping to MD Anchors\n- Asset Relinking"]
-        C2 --> C3["Clean GFM Markdown Files"]
+        C2 --> C3["Clean GFM Markdown Files\n(+ csh frontmatter)"]
+        C3 --> C4["csh.yml per version\n(identifier -> topic map)"]
     end
 
     subgraph AEM["AEM Architecture Synthesis"]
@@ -369,10 +372,151 @@ The converter for a package is chosen from that **version's** `engine` value, re
 - **Proxy Stripping**: Removes `MadCap:topicToolbarProxy`, breadcrumb proxies, search bars, and skin templates.
 - **Callout Normalization**: Maps Flare `.note`, `.tip`, `.warning`, `.caution` classes to standard GFM alerts (`> [!NOTE]`, `> [!WARNING]`, etc.).
 - **Table Normalization**: Formats Flare table styles into clean GFM pipe tables.
-- **CSH Linkage**: Preserves Flare `Alias.xml` / `CSH.js` identifier-to-target anchor mapping.
+- **CSH Linkage**: Supplies the Flare reader for the engine-neutral CSH mapper — `Data/Alias.xml`, one per help output. See §5.3.
 
 ### 5.2 Universal Asset Preservation
 - Copies referenced assets (`PDF`, `DOC`, `DOCX`, `XLS`, `XLSX`, `TXT`, `PNG`, `SVG`, `ZIP`) and rewrites relative markdown paths.
+
+### 5.3 Context-Sensitive Help (CSH)
+
+A shipping product calls its help by identifier, not by URL: a **Help** button passes a topic id and the help system resolves it to a page. If the identifier does not survive migration, the button breaks — silently, in the product, long after the docs were signed off. CSH is therefore a **first-class conversion output**, not a nicety.
+
+**The artifact.** Each converted product version gets one **`csh.yml`** at the root of its Markdown output, beside `toc.yml` / `nav.yml` / `meta.yml`. It maps every help identifier to the Markdown topic that identifier opens. The same identifiers are mirrored into the frontmatter of the topics themselves, so the mapping is discoverable from either end.
+
+**One identifier, and it is a string.** Every generator offers at most one key that is actually unique, and it is never the integer. Flare's `Name`, DITA's context name, and WebWorks' ctx stem all land in a single string namespace; Flare's `ResolvedId` is read and discarded (§5.3.1). A numeric-looking identifier such as WebWorks' `admin1234` is a *string* that happens to be digits, which is why the YAML quoting rule in §5.3.2 is load-bearing rather than cosmetic.
+
+#### 5.3.1 What the source actually looks like
+
+Verified 2026-09-04 against **272 `Alias.xml` files** in the predecessor `html-to-md` cache — 196 with content, **7,220 `<Map>` entries** across ~254 product versions. MadCap Flare writes one alias file per help output:
+
+```
+<doc-set-root>/Data/Alias.xml
+    <Map Name="TOPIC_ID" Link="relative/path/file.htm" ResolvedId="1000"/>
+```
+
+`Name` is the alphanumeric key, `ResolvedId` the integer key, `Link` the topic path relative to the folder containing `Data/`. Both keys address the same page. Only those three attributes were ever observed; `Map` is the only child element.
+
+Six properties of the real corpus drive every design decision below:
+
+| Observed | Count | Consequence |
+| :--- | :--- | :--- |
+| **`ResolvedId` is not unique**, even within a single alias file, and colliding ids point at *different* topics | 29 of 196 files (15%) — e.g. BW 6.12.0 `bwce-html` reuses 18 ids | **`ResolvedId` is discarded.** An identifier that cannot address one page is not an identifier. Carrying it as a second key would mean carrying a key that is wrong 15% of the time; `csh_map.json` in the predecessor was keyed by it, so those entries overwrote each other silently. |
+| **`Name` is unique within a file** — no file has one name resolving to two topics | 0 of 196 violations | `Name` is the only key, and the only one the schema has. |
+| **Names differ only by case, and mean different pages** | `GatewayInstances` → `Gateway_Instances.htm` vs `gatewayInstances` → `Managing_Gateway_Instances.htm` (TIBCO BC 7.4/7.5) | Case-folding anywhere — dict keys, filename normalization, YAML round-trip — merges two live help targets into one. Comparisons are byte-exact. With the integer gone this is the *only* thing keeping those two apart. |
+| **A version can ship several alias files**, one per help output | 15 of 254 versions — BW 6.12.0 has `bw-ent-html`, `bwce-html`, `relnotes` | Names collide *across* doc-sets in 5 of 233 cases, so version-wide name uniqueness cannot be assumed and the conflict case stays representable (`also:`). Ids collide far worse — 31 of 205 — which is the second reason they are dropped. |
+| **An alias file is often copied wholesale into a sibling output**, where none of its links exist | 1,609 of 7,220 links (22%) dangle; 10 of the 11 affected files are `relnotes/Data/Alias.xml` at **0% resolution** | A per-doc-set map would report 205 broken identifiers for BW relnotes. Resolving version-wide instead makes those same names resolve — against the main output, where the topics live. |
+| **Empty and zero-byte alias files are normal** | 65 `<CatapultAliasFile />` + 11 zero-byte, 28% of the corpus | Absent CSH is the common case, not a failure. It is counted and skipped, never raised. |
+| **239 links carry a fragment** (`config/Getting_Started.htm#adb.palette.gettingstartedurl`) | 3% | The anchor is part of the target and is carried through to the Markdown anchor. |
+
+No link used a backslash separator, `../`, or an absolute path; every link resolved to a `.htm` file relative to the doc-set root.
+
+#### 5.3.2 `csh.yml`
+
+One file per product version, at the version's Markdown output root. `topics` is the whole mapping — there is no second index, because there is no second key.
+
+```yaml
+schema: docushift.csh/1
+product: bw
+version: 6.12.0
+engine: flare
+generated: 2026-09-07
+
+sources:
+  - doc_set: bw-ent-html
+    file: bw-ent-html/Data/Alias.xml
+    entries: 207
+    resolved: 207
+  - doc_set: bwce-html
+    file: bwce-html/Data/Alias.xml
+    entries: 151
+    resolved: 151
+  - doc_set: relnotes
+    file: relnotes/Data/Alias.xml
+    entries: 203
+    resolved: 0
+    note: no link resolves in this doc-set; every name is already defined by bw-ent-html
+
+counts: { topics: 358, ambiguous: 5, unresolved: 0 }
+
+topics:
+  "bw_java_bw_java_xmltojava":
+    doc_set: bw-ent-html
+    file: bw-ent-html/binding-palette/xml-to-java.md
+  "bw_rest_binding":
+    doc_set: bw-ent-html
+    file: bw-ent-html/REST-reference/rest-reference.md
+    also:
+      - { doc_set: bwce-html, file: bwce-html/REST-reference/rest-reference-bindi.md }
+  "adb.palette.gettingstartedurl":
+    doc_set: html
+    file: config/Getting_Started.md
+    anchor: adb.palette.gettingstartedurl
+
+unresolved: []
+```
+
+Field rules, each answering a hazard from §5.3.1:
+
+- **`topics` is keyed by the identifier and there is no other index.** Names are unique within a source (0 violations in 196 files); integers are not (29 of 196). A schema with one key cannot develop a disagreement between two.
+- **Every identifier is emitted double-quoted.** An identifier of `1000`, `Yes`, `No`, `On`, `Off`, `null`, or `6.2` loads as an int/bool/float/None under a YAML 1.1 loader such as PyYAML. This matters more now than it did with a separate integer field: WebWorks identifiers are *routinely* all digits (`admin1234`, and bare numerics where the guide prefix is empty), so unquoted keys would silently become integers in a map whose keys are documented as strings.
+- **`file` is POSIX, relative to `csh.yml`**, so the whole output tree relocates without rewriting. `anchor` stays a separate field rather than being appended to `file`: the consumer decides how to fragment-encode it for AEM, and an anchor's existence is separately checkable.
+- **`also` is present only on a genuinely conflicting identifier.** Its absence means "this identifier is unambiguous in this version" — the common case (5 of 233 in the worst observed version).
+- **`unresolved` keeps entries whose link matched no produced topic anywhere in the version**, with the original `link`. Dropping them would turn a broken help button into a silent absence; keeping them makes it a countable, reportable defect.
+- **A version with no CSH source, or only empty ones, gets no `csh.yml` at all.** An empty map file is indistinguishable from a failed run; the absence plus a report line ("CSH source present but empty") is honest.
+
+> **`ResolvedId` is read and thrown away.** It is parsed only so that a malformed alias entry is still recognised as an entry, and it appears nowhere in the output. If a product is later found to call its help by number, the mapping is regenerable — `Alias.xml` stays in the extracted tree and `csh.yml` is a build artifact, so reintroducing a numeric index costs a re-run, not a migration.
+
+#### 5.3.3 Resolution
+
+Run per version, after that version's topics have been converted so resolution tests against files that were actually produced:
+
+1. **Collect** every CSH source under the version's extracted tree, grouped by doc-set (§5.3.4 lists the per-engine sources).
+2. **Parse** to `(identifier, link, anchor, doc_set)`. Empty, zero-byte, and unparseable files are counted and skipped.
+3. **Resolve within the doc-set first** — the alias link's `.htm` path against the Markdown the converter emitted for that HTML file.
+4. **Fall back version-wide.** If the link does not resolve in its own doc-set, try the identical relative path in every sibling. One hit wins. This is what rescues the 22% dangling population: the BW `relnotes` alias copy resolves entirely against `bw-ent-html`.
+5. **Merge by identifier.** Same target from several doc-sets collapses to one entry. Different targets produce a primary plus `also`. **The primary is the doc-set with the most resolved entries, ties broken alphabetically** — deterministic, and it picks the main help output over a release-notes or getting-started sidecar every time.
+6. **Emit** `csh.yml`, then the frontmatter (§5.3.5).
+
+Steps 3-4 need a source-HTML → output-Markdown mapping from the converter. That mapping is recorded per version in `state.db` during Stage 5 rather than recomputed here, so CSH resolution cannot disagree with what conversion actually did about renaming, deduplication, or dropped topics.
+
+#### 5.3.4 CSH is engine-neutral
+
+`transforms/csh.py` owns the schema, the resolver, and the writer. Each engine contributes only a reader that yields `(identifier, link, anchor)` — verified against the predecessor's three working implementations:
+
+| Engine | Source | Identifier | Discarded |
+| :--- | :--- | :--- | :--- |
+| Flare | `<doc-set>/Data/Alias.xml` | the `Map`'s `Name` | `ResolvedId` |
+| WebWorks | `<doc-set>/ctx/<guide><id>.htm`, a JS redirect carrying `context` + `topic`, resolved to a file through `<guide>/wwhdata/xml/files.xml` | the **ctx file stem** (`admin1234`) | the internal WebWorks topic id |
+| DITA (file & SDL) | `<doc-set>/static/head.js` → the `suitehelp.contexts` object; SDL additionally maps `GUID-*.html` through the GUID rename map | the context name | — |
+| DocBook | none observed | — | no `csh.yml` |
+
+**WebWorks is the reason the identifier is a string rather than a name.** It has no alias name: the application requests `ctx/admin1234.htm` directly, so the ctx file stem *is* the key the product ships with, and the internal topic id from `files.xml` is an implementation detail the product never sees. Taking the stem keeps one namespace across all three generators and keeps WebWorks CSH working — where a name-only schema would have dropped it entirely. It also means digit-only identifiers are normal, which is what the quoting rule in §5.3.2 protects.
+
+Flare's `csh.js` is a runtime shim for `Default.htm#cshid=`, not a data source; it stays a detector marker only (§3.4).
+
+#### 5.3.5 Frontmatter on the topics
+
+A topic that owns help identifiers carries them, so the mapping survives even if `csh.yml` is lost and so an author editing a page can see it is a help target:
+
+```yaml
+---
+title: REST reference
+csh: ["bw_rest_binding", "restBindingRef"]
+---
+```
+
+A flat list of quoted strings. With a single key there is nothing to pair, so the predecessor's parallel `csh_ids` / `csh_names` arrays — and the `{name, id}` mappings that replaced them — both collapse to this. A page commonly owns several identifiers, so the value is always a list even at length one; topics with no identifier get no `csh` key at all. The quoting is required for the same reason as in `csh.yml`: a WebWorks identifier is often all digits.
+
+The identifiers are known before conversion writes the file (parsing a 24 KB `Alias.xml` is cheap), so frontmatter is written in the topic's **first and only** write. `csh.yml` is written afterwards, once the produced set is known and resolution can be checked against it.
+
+#### 5.3.6 Verification
+
+`docushift validate` treats CSH as link integrity, because that is what it is:
+
+- Every `file` in `csh.yml` exists, and every `anchor` is present in that file.
+- Every identifier in a topic's frontmatter appears in `csh.yml`, and vice versa.
+- `unresolved` is empty, or every entry in it is accounted for in the report.
+- **Cross-version regression**: identifiers present in the previous converted version and absent from this one are reported. A dropped identifier is an upgrade that breaks the product's Help button, and it is invisible from within a single version.
 
 ---
 

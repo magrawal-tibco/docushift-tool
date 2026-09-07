@@ -10,7 +10,7 @@
 
 ### Phase 1: Architecture, Living Docs & Project Scaffolding
 **Status: COMPLETE.** Implemented and verified 2026-09-03 — 54 tests pass, `ruff check src tests` is clean.
-- [x] Living documentation system (`CONTEXT.md`, `architecture.md`, `user-guide.md`, `planning.md`).
+- [x] Living documentation system (`CONTEXT.md`, `architecture.md`, `user-guide.md`, `planning.md`; joined 2026-09-07 by `design.md`, the algorithm reference).
 - [x] Multi-engine 7-stage pipeline design with additive catalog and active/archived version handling.
 - [x] Verified `docs.tibco.com` API endpoints (`/api/a_to_z`, `/api/products/{slug}`, `/api/products/archive/{slug}`).
 - [x] Create initial `config/taxonomy.yaml`.
@@ -79,7 +79,10 @@ The selection model and the on-disk layout this phase writes into are settled an
   - [ ] `docushift download --product X --version Y --from-file <zip>` — requires both selectors; validates with `zipfile.is_zipfile` before copying; copies (never moves) to `download_path()`; sets `zip_source=manual`; records sha256, size, status and the origin path in `state.db`.
   - [ ] `docushift archive download … --from-file <zip>` — same, to `archive_path()`; `--extract` unpacks within `archive/`, never into the pipeline's `extracted/`.
   - [ ] Unknown *version* on a known product is auto-added with a warning; unknown *product* is an error.
-- [ ] CSH map file extractor (`Alias.xml`, `CSH.js`, WebWorks maps).
+- [ ] **CSH source inventory** — locate every CSH source in the extracted tree and record it per `(product, version, doc_set)` in `state.db`: path, format (`flare_alias` \| `webworks_ctx` \| `dita_head_js`), raw entry count, parse status. Design in `architecture.md` §5.3.
+  - [ ] Flare `<doc-set>/Data/Alias.xml`, WebWorks `<doc-set>/ctx/` + `wwhdata/xml/files.xml`, DITA `<doc-set>/static/head.js`.
+  - [ ] Empty (`<CatapultAliasFile />`), zero-byte, and unparseable files are **counted and skipped**, never raised — they are 28% of the observed corpus.
+  - [ ] `docushift extract` reports the tally ("CSH: 3 sources, 561 entries") so a version with no help map is visible before conversion, not after.
 - [ ] Asset discovery (PDF, Word, Excel, TXT, images, ZIP).
 
 ### Phase 5: Multi-Engine HTML -> GFM Conversion & Transforms
@@ -93,9 +96,16 @@ The selection model and the on-disk layout this phase writes into are settled an
 - [ ] Callouts to GFM alerts (`> [!NOTE]`, `> [!WARNING]`, etc.).
 - [ ] HTML Table to clean GFM Pipe Table normalizer.
 - [ ] Cross-document link and anchor re-writer (`.html` -> `.md`).
-- [ ] CSH alias to Markdown anchor mapper.
+- [ ] **Context-Sensitive Help mapper** (`transforms/csh.py`) — schema, resolver and writer shared by all engines; each engine supplies only a reader. Full design in `architecture.md` §5.3, grounded in a 272-file / 7,220-entry survey of the real corpus.
+  - [ ] Source-HTML → output-Markdown mapping recorded per version in `state.db` by the converter, so CSH resolution cannot disagree with what conversion actually did.
+  - [ ] **One string identifier per topic; no numeric key anywhere in the schema.** Readers: Flare → the `Map`'s `Name` (`ResolvedId` read and discarded); WebWorks → the **ctx file stem** (`admin1234`), which is what the application actually requests; DITA → the `suitehelp.contexts` context name. DocBook has none.
+  - [ ] Resolver: doc-set first, then version-wide fallback (this is what rescues the 22% of links that dangle inside their own doc-set); merge by identifier; primary doc-set = most resolved entries, ties alphabetical; conflicts recorded under `also`.
+  - [ ] **Byte-exact, case-sensitive handling of identifiers throughout.** `GatewayInstances` and `gatewayInstances` are different live help targets in TIBCO BC 7.4/7.5 — with the integer gone, case is the only thing telling them apart.
+  - [ ] **Identifiers are always emitted double-quoted**, in `csh.yml` keys and in frontmatter. WebWorks identifiers are routinely all digits, and a YAML 1.1 loader turns an unquoted `1234`, `Yes`, or `6.2` into a non-string.
+  - [ ] Writer: one `csh.yml` per version at the Markdown output root; `topics` is the only index; no file at all when the version has no CSH.
+  - [ ] Frontmatter injection: `csh: ["id-a", "id-b"]` on topics that own identifiers, written in the topic's first pass rather than as a read-modify-write second pass.
 - [ ] Asset copier and relative link re-pointer.
-- [ ] Exhaustive unit tests with fixtures in `tests/unit/`.
+- [ ] Exhaustive unit tests with fixtures in `tests/unit/`, including the CSH cases the corpus survey turned up: case-only identifier collision, a digit-only identifier that must survive a YAML round-trip as a string, fragment in `Link`, an alias file that resolves 0%, a version with three doc-sets whose identifiers overlap, and empty/zero-byte alias files.
 
 ### Phase 6: AEM Architecture Synthesis & Git Sync
 - [ ] AEM navigation builder (`toc.yml`, `nav.yml`, `meta.yml`).
@@ -106,7 +116,9 @@ The selection model and the on-disk layout this phase writes into are settled an
 ### Phase 7: CLI, Reporting & Verification Dashboard
 - [ ] Click CLI with full command tree (`catalog`, `status`, `download`, `convert`, `sync`, `report`).
 - [ ] Rich terminal dashboard and exportable Markdown/HTML migration reports.
-- [ ] Broken link and missing asset linter.
+- [ ] Broken link and missing asset linter, including the CSH checks in `architecture.md` §5.3.6.
+- [ ] `docushift csh {list,report,validate}` — per-version identifier listing, coverage across a batch, and integrity checking.
+- [ ] **Cross-version CSH regression report** — identifiers present in the previously converted version and absent from this one. A dropped identifier is a Help button that breaks on upgrade, and it cannot be seen from inside a single version.
 - [ ] End-to-end integration test suite.
 
 ---
@@ -118,3 +130,4 @@ The selection model and the on-disk layout this phase writes into are settled an
 - **Package Source Transparency**: A manually supplied ZIP converts through exactly the same path as a downloaded one — no downstream stage branches on provenance, and no machine-local path appears in either CSV.
 - **Unit Test Coverage**: >90% coverage on core transforms, engines, catalog, and state management.
 - **Link & Asset Integrity**: Zero broken relative links or missing referenced assets in converted output.
+- **CSH Fidelity**: Every identifier in the source help map is either resolved in `csh.yml` or listed under `unresolved` — none is silently dropped. Identifier text round-trips byte-exactly as a string, including case and digit-only values. The map has exactly one key, and it is one the corpus shows to be unique within a source.

@@ -4,6 +4,8 @@
 > **Last Updated:** 2026-09-03  
 > **Target Environment:** TIBCO & IBI Documentation Migration to AEM
 
+> Wondering *why* a command behaved the way it did — which value a re-fetch kept, which versions a batch selected, how a help identifier was resolved? Every decision rule is written out step by step in [`design.md`](design.md).
+
 ---
 
 ## 1. Quickstart & Installation
@@ -350,6 +352,9 @@ docushift convert \
   --output ./output/tibco/integration/businessevents-enterprise/6.4.0
 ```
 
+Conversion also writes the version's context-sensitive help map (`csh.yml`) and stamps the
+matching identifiers into topic frontmatter — see §7.
+
 ### AEM Synthesis & Git Sync
 ```bash
 # Sync converted AEM files to local GitHub repo folder
@@ -429,3 +434,72 @@ docushift catalog set --product ems --version 8.6.0 --engine webworks
 A version left at `engine=auto` is **skipped during conversion with a warning**, not guessed. Guessing wrong produces Markdown that looks plausible but is subtly wrong throughout, which is far more expensive to discover later than a skipped package.
 
 If `report --engines` shows a version stuck at `auto` after extraction, the detector found no recognised signature — inspect the extracted folder under `families/<locale>-<bu>-<family>/extracted/` and set the engine manually.
+
+---
+
+## 7. Context-Sensitive Help (CSH)
+
+A product's **Help** button passes an identifier, not a URL. If that identifier does not come through the migration, the button breaks in the shipping product — and nothing in the Markdown looks wrong. Conversion therefore carries the help map through as a first-class output.
+
+### What you get
+
+Each converted version gets a **`csh.yml`** at the root of its Markdown output, beside `toc.yml`:
+
+```
+output/.../businessworks/6.12.0/
+├── csh.yml            ← identifier → topic map for this version
+├── toc.yml
+├── bw-ent-html/
+├── bwce-html/
+└── relnotes/
+```
+
+```yaml
+schema: docushift.csh/1
+product: bw
+version: 6.12.0
+engine: flare
+counts: { topics: 358, ambiguous: 5, unresolved: 0 }
+
+topics:
+  "bw_java_bw_java_xmltojava":
+    doc_set: bw-ent-html
+    file: bw-ent-html/binding-palette/xml-to-java.md
+```
+
+and the topics themselves carry their identifiers in frontmatter:
+
+```yaml
+---
+title: REST reference
+csh: ["bw_rest_binding", "restBindingRef"]
+---
+```
+
+A version whose package contains no help map — around a quarter of them do not — gets **no `csh.yml`**. An empty map file would be indistinguishable from a failed run.
+
+### Inspecting and checking it
+
+```bash
+# What identifiers does this version publish?
+docushift csh list --product businessworks --version 6.12.0
+
+# Coverage across a run: sources found, identifiers resolved, anything unresolved
+docushift csh report --batch poc-1
+
+# Integrity: every mapped topic exists, frontmatter and csh.yml agree,
+# and nothing the previous version published has gone missing
+docushift csh validate --product businessworks --version 6.12.0
+```
+
+`docushift extract` already prints the tally (`CSH: 3 sources, 561 entries`), so a version with no help map is visible before you spend a conversion on it.
+
+### Three things worth knowing
+
+**There is one identifier, and it is a string.** Flare's numeric `ResolvedId` is deliberately not carried through: 15% of the alias files surveyed reuse an id for two different topics *within one file*, so it cannot address a page and is not an identifier. What you get is Flare's alias name, DITA's context name, or — for WebWorks, which has no name — the ctx stem the application actually requests (`admin1234`). Those are all strings, and always quoted, because a digit-only identifier must not load as a number.
+
+**Identifiers are case-sensitive, and the difference is load-bearing.** TIBCO BC 7.4 and 7.5 both ship `GatewayInstances` and `gatewayInstances` as *different* help targets pointing at different pages. Nothing in the pipeline case-folds an identifier, and neither should anything downstream — with the integer gone, case is the only thing keeping those two apart.
+
+**Identifiers are merged across the version's doc-sets.** A version can ship several help outputs (`bw-ent-html`, `bwce-html`, `relnotes`), and Flare frequently copies one output's alias file into a sibling where none of its topics exist. Resolving version-wide rather than per-output fixes those: in TIBCO BusinessWorks, the release-notes alias file resolves 0 of 203 links on its own and 203 of 203 against the main output. Where two outputs genuinely disagree about a name, the larger output wins and the alternative is recorded under `also:` — nothing is dropped.
+
+Full design and the corpus evidence behind it: `architecture.md` §5.3.
