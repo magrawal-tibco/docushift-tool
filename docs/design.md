@@ -455,12 +455,18 @@ Run per version, over the extracted tree, in three passes.
 
 | Engine | Markers | Versions |
 | --- | --- | --- |
-| Flare | `*.mcwebhelp`, `*.mclog`, `Skins/`, `Data/`, `MicroContent/`, `_globalpages/`, `csh.js` | 670 |
+| Flare | `*.mcwebhelp`, `*.mclog`, `MicroContent/`, `_globalpages/`, `csh.js` | 595 |
 | WebWorks | `wwhelp/`, `wwhdata/` | 176 |
 | DITA (SDL) | `GUID-*.html` filenames, or `static/head.js` + `static/body.js` | 371 |
 | R help | `snext.css` or `snextchm.css` | 11 |
 
 19 further versions match Flare *and* WebWorks markers — a Flare output with a WebWorks tree left beside it. Flare wins; the per-folder map (below) keeps the ambiguity visible.
+
+**`Skins/` and `Data/` were dropped from the Flare row on 2026-09-08** (`architecture.md` §5.1.2). Over all 1,822 cached versions the seven-marker list matched 689 against 595 that actually hold a `Data/HelpSystem.xml` runtime: `Skins/` is 91.4% precise and `Data/` 88.0%, because other publishers use directories by those names too. **All 94 false positives come from those two markers and no other** — 43 matched both, 38 `Data/` alone, 13 `Skins/` alone; 17 are WebWorks, 3 DITA, and 74 carry no engine marker at all (mostly 2010–2013 adapter packages). Removing them costs no recall: **`*.mcwebhelp` alone finds all 595 and `csh.js` alone finds all 595.** Worth a regression test with a WebWorks fixture that ships a `Skins/` directory: under the old list it detects as Flare.
+
+**And the casing matters, in the opposite direction to §7.2's DITA rule.** The figures above are case-insensitive matching. Matching exact casing gives 631 matches and 36 false positives and makes `Skins/` 100% precise — every non-Flare match was a lowercase `skins`. `Data/` misfires either way: 36 versions ship a correctly-cased `Data` with no Flare runtime. So case sensitivity is decided per signal here — mandatory-insensitive for `DC.*` (§7.2), and not worth specifying for a marker that is being dropped anyway.
+
+**Flare root detection is a separate step from engine detection.** The engine answers "which converter", per version; the converter then locates its units of work by walking for `Data/HelpSystem.xml`, since **51 of 595 versions ship more than one output root and 153 roots nest inside another** (`architecture.md` §5.1.1, §5.1.3). The walk descends into nested roots rather than stopping at the first match, and the innermost root owns a file.
 
 **Pass 2 — content signatures.** Corroboration for pass 1, and the *only* means of identifying DocBook, whose flat HTML output has no distinctive layout. Signatures: the `MadCap` namespace and `MadCap:*` attributes; the WebWorks generator meta tag; the DITA-OT generator comment; `DC.Type` / `DC.Identifier` / `DC.Title` meta tags (SDL DITA); `class="RdName"` / `class="RdTitle"` (R help); the `DocBook XSL Stylesheets` generator comment.
 
@@ -633,6 +639,11 @@ Identifiers are known before conversion writes the file — parsing a 24 KB alia
 ## 10. Stages 6 and 7: Synthesis and sync
 
 **Specified.** Navigation synthesis walks the converted tree to produce `toc.yml`, `nav.yml`, `meta.yml` and landing pages from the Jinja templates in `config/aem_templates/`, then the distributor copies each version's output into the target repository layout.
+
+**Navigation synthesis does not just serialize what the engine handed it.** Two nodes come from the synthesizer rather than from the source TOC, both settled by the 2026-09-09 Flare survey (`architecture.md` §5.1.5) and both engine-neutral:
+
+- **The landing page is the first node.** The engine reports which converted topic is the version's landing page — for Flare, `HelpSystem.xml`'s `DefaultUrl`, which resolves in 676 of 676 output roots but is absent from the TOC in 55 of 60 sampled ones. If that topic is already a TOC node it moves to first; otherwise it is inserted as first. It never falls through to "Unfiled".
+- **A node with children and no page gets a generated one.** AEM treats a childed navigation node with no page as a broken parent, and Flare's `'___'` sentinel produces 165 of them per 60 output roots — 151 at top level, holding 1,357 children between them. The synthesizer emits a page titled from the node's label whose body links its immediate children, stamped as generated in frontmatter so a re-run replaces it rather than treating it as authored. Childless headless nodes are dropped and counted.
 
 **The sync path shape is settled** (`architecture.md` §6.1): the publishing form `{locale}-{bu}-{family}/{locale}/{product}/{doc-class}/{version-dashed}/`, with the docs repo taking `online-help`, `user-guides`, `release-information` and `reference-documents`, and a sibling `-resources` repo taking `api-references` and `archives`. The distributor therefore does four things per version, in order: copy the converted tree and its navigation into `online-help/`; copy the PDF and document assets into their three doc-classes; copy the API-reference trees, unconverted, into the sibling repo; then rewrite every link that crosses from one repo to the other. The rewrite is last because it needs both destinations to exist, and it belongs here rather than in Stage 5 because conversion does not know the publishing layout.
 

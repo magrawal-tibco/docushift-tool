@@ -41,7 +41,7 @@ flowchart TD
 
     subgraph Convert["Multi-Engine Conversion & Transforms"]
         EX3 --> C1["Profile Selector\n(Flare | DITA | WebWorks | DocBook)"]
-        C1 --> C2["Core Transforms\n- Dropdowns & Callouts (> [!NOTE])\n- HTML Tables to GFM\n- Link & Anchor Resolution\n- CSH Mapping to MD Anchors\n- Asset Relinking"]
+        C1 --> C2["Core Transforms\n- Chrome Stripping & Callouts (> [!NOTE])\n- HTML Tables to GFM\n- Link & Anchor Resolution\n- CSH Mapping to MD Anchors\n- Asset Relinking"]
         C2 --> C3["Clean GFM Markdown Files\n(+ csh frontmatter)"]
         C3 --> C4["csh.yml per version\n(identifier -> topic map)"]
     end
@@ -210,13 +210,15 @@ It is also **detected, not declared**. Across 1,500-4,000 versions, hand-assignm
 
 | Engine | Marker files / directories | Content signature | Versions |
 | :--- | :--- | :--- | ---: |
-| Flare | `*.mcwebhelp`, `*.mclog`, `Skins/`, `Data/`, `MicroContent/`, `_globalpages/`, `csh.js` | `MadCap` namespace and `MadCap:*` attributes | 670 |
+| Flare | `*.mcwebhelp`, `*.mclog`, `MicroContent/`, `_globalpages/`, `csh.js` — **not** `Skins/` or `Data/`, see §5.1.2 | `MadCap` namespace and `MadCap:*` attributes | 595 |
 | DITA (SDL) | `GUID-*.html` filenames, `static/head.js` + `static/body.js` | `DC.Type` / `DC.Identifier` / `DC.Title` meta tags (**case-insensitively** — see §5.2.1) | 371 |
 | WebWorks | `wwhelp/`, `wwhdata/` | `WebWorks` generator meta tag | 176 |
 | R help | `snext.css`, `snextchm.css` | `class="RdName"`, `class="RdTitle"` | 11 |
 | DocBook | — (flat HTML output) | `DocBook XSL Stylesheets` generator comment | 10 |
 
 Verified against the cached `dsp_gridserver` 7.1.1 sample: all six Flare marker paths present, and a `MadCap` reference in **197 of 197** `admin-guide` files. Marker-file detection alone is decisive there; the content signature serves as corroboration and as the fallback for DocBook, which has no distinctive file layout.
+
+**The Flare row is the correction the 2026-09-08 Flare survey forced** (§5.1.2). The original seven-marker list matches **689 versions, of which only 595 hold a Flare runtime** — `Skins/` is 91.4% precise and `Data/` 88.0% under case-insensitive matching, because both are generic directory names other publishers also use. **All 94 false positives come from those two markers and no other**, and dropping them costs no recall whatever: `*.mcwebhelp` alone finds all 595, and `csh.js` alone finds all 595. The `Versions` count above is now the number holding a Flare runtime, which is the population the engine converts.
 
 **The DITA row is the correction the sweep forced.** The original signals looked for DITA the way DITA-OT leaves it — `.dita` remnants and the DITA-OT generator comment. TIBCO publishes DITA through SDL's publisher, which emits neither, so the second-largest engine in the corpus (371 versions, 61,712 HTML files — more than WebWorks) was detecting as `auto`. Adding the SDL signals plus R help takes coverage of HTML-bearing versions from **68% to 98%**; `design.md` §7.2 has the per-signal hit counts and the two rules that were considered and rejected.
 
@@ -408,11 +410,227 @@ Archived `zipPath` values are the most likely to be stale, so the same command t
 The converter for a package is chosen from that **version's** `engine` value, resolved by `engines/detector.py` during extraction (§3.4) — not from any product-level setting. A version whose engine is still `auto` is skipped with a warning rather than guessed at, since a wrong guess yields silently malformed Markdown.
 
 ### 5.1 MadCap Flare Engine (`engines/flare.py`)
-- **Dropdown Extraction**: Unrolls `MCDropDown` structures into native Markdown headings or sections.
-- **Proxy Stripping**: Removes `MadCap:topicToolbarProxy`, breadcrumb proxies, search bars, and skin templates.
-- **Callout Normalization**: Maps Flare `.note`, `.tip`, `.warning`, `.caution` classes to standard GFM alerts (`> [!NOTE]`, `> [!WARNING]`, etc.).
-- **Table Normalization**: Formats Flare table styles into clean GFM pipe tables.
-- **CSH Linkage**: Supplies the Flare reader for the engine-neutral CSH mapper — `Data/Alias.xml`, one per help output. See §5.3.
+
+Flare is the corpus's dominant engine by a wide margin — **422,267 content topics against DITA's 67,406** — and until 2026-09-08 it had the thinnest specification of the three. This section replaces that five-bullet sketch. Everything below was measured on 2026-09-08 against the predecessor `html-to-md` cache (`cache\pub`). Sample sizes are stated per claim; where a claim rests on a sample it is **60 whole output roots** (59 versions, 48 products, 43,753 files) chosen at random rather than scattered files, so that per-output-root properties — TOC coverage, link integrity, name collisions — are measurable at all.
+
+Four of the original five bullets survive the measurement — proxy stripping, callout normalization, table normalization (with a 57% caveat, §5.1.7) and CSH linkage. The fifth survives only in one place: **dropdown unrolling describes a construct no *content topic* uses (§5.1.7) — but it is exactly how the landing page is built, and the landing page is converted (§5.1.5).** And the sketch's framing was wrong in one further way — it treated chrome as something outside the content container, when **the chrome that matters is inside it, and one block of it accounts for half of every link in the corpus** (§5.1.6).
+
+#### 5.1.1 What the source actually looks like
+
+**Scale.** A full-cache scan finds **676 Flare output roots across 595 versions and 208 products**, holding **422,267 content HTML topics and 307,394 content images, 19.5 GB in all**. An output root is a directory holding `Data/HelpSystem.xml` — Flare's WebHelp2 runtime manifest — and it is located by that file, never by a configured path.
+
+| Observed | Count | Consequence |
+| :--- | :--- | :--- |
+| Output roots span four orders of magnitude | min 2, median 106, p90 1,223, max 8,485 topics; 26 roots under 10 topics, 106 over 1,000 | Conversion is per-output-root and streamed. An 8,485-topic root cannot hold its DOM, and a 2-topic root must not fail a "does this look like a real doc set" heuristic. |
+| **The source tree is shallow but not flat** | 360,326 topics (85.3%) sit one directory below the root; 1,122 at the root itself; 60,819 at depth ≥2 | Unlike DITA (§5.2.2) there *is* a source hierarchy, and §5.1.3 mirrors it rather than flattening. |
+| **A version can ship several output roots** | 51 of 595 | The output root, not the version, is the unit of conversion and of TOC. See §5.1.3 — this one is genuinely hard, because the roots overlap. |
+| **Output roots nest inside other output roots** | 153 nested roots holding 22,456 files, e.g. `tp/1.1.0/html/Subsystems/{platform-ct,flogo-capability,ems-capability,…}` | A recursive walk that stops at the first `Data/HelpSystem.xml` silently drops 22,456 topics; one that does not stop converts them twice. The walk descends, and the innermost root owns a file. |
+| **Partial outputs exist** — topics, no runtime | 5 trees | They carry MadCap topics but no `Data/HelpSystem.xml`, so they are invisible to root detection. Reported, not converted (§5.1.9). |
+
+**Output-root anatomy**, over all 676:
+
+| Path | What it is |
+| :--- | :--- |
+| `Data/HelpSystem.xml` | The runtime manifest. **Defines the root**; not content. |
+| `Data/Tocs/<Name>.js` + `<Name>_Chunk0.js` | The TOC, as JavaScript (§5.1.4). |
+| `Data/Alias.xml` | The CSH map (§5.3). |
+| `csh.js`, `Default.htm`, `Default_CSH.htm` | Runtime entry points and frameset stubs. 1,295 stub files corpus-wide, none of them topics. |
+| `Skins/`, `Resources/`, `_globalpages/`, `MicroContent/` | Generated skin, scripts, stylesheets and micro-content. **2,339 HTML files, none converted** (§5.1.9). |
+| `_templates/` | Landing and boilerplate pages — 2,803 files under 80 distinct names, `Home.htm` (644), `Legal-and-Third-Party-Notices.htm` (651), `Whats-New.htm` (518). **Partly converted**: the `DefaultUrl` landing page always, plus whatever the TOC references (§5.1.5). |
+| `*.mcwebhelp`, `*.mclog` | Build manifest and build log. Detection markers only (§5.1.2). |
+
+Encoding is not a hazard: **0 of 4,810 sampled topics fail a strict UTF-8 decode.** Probe output rendering a trademark symbol as a replacement character (`TIBCO GridServer?`) is a Windows console codepage artifact, not a property of the files, and must not be designed around.
+
+#### 5.1.2 Detection — two of §3.4's seven markers misfire
+
+§3.4 lists seven Flare markers. Measured over all 1,822 cached versions against the 595 that hold a `Data/HelpSystem.xml` runtime, five are perfectly precise and two are not:
+
+| Marker | Versions matching | Of those, hold a Flare runtime | Precision | Recall |
+| :--- | ---: | ---: | ---: | ---: |
+| `*.mcwebhelp` | 595 | 595 | **100%** | **100%** |
+| `csh.js` | 595 | 595 | **100%** | **100%** |
+| `_globalpages/` | 578 | 578 | **100%** | 97.1% |
+| `*.mclog` | 368 | 368 | **100%** | 61.8% |
+| `MicroContent/` | 257 | 257 | **100%** | 43.2% |
+| `Skins/` | 651 | 595 | 91.4% | **100%** |
+| `Data/` | 676 | 595 | 88.0% | **100%** |
+
+**689 versions match at least one marker; only 595 hold a Flare runtime**, and **all 94 false positives come from `Skins/` or `Data/`** — 43 matched both, 38 `Data/` alone, 13 `Skins/` alone, and not one matched any other marker. What they actually are: 74 carry no other engine's marker either (chiefly 2010–2013 adapter packages that ship an unrelated `data/` or `skins/` directory), 17 are WebWorks, 3 are DITA.
+
+Both are pure loss, because **neither adds any recall**: `*.mcwebhelp` alone finds all 595, and `csh.js` alone finds all 595. Dropping them removes 94 misdetections, each of which would route a non-Flare package to the Flare converter and emit plausible-looking wrong Markdown — precisely the failure §3.4 exists to prevent.
+
+> **Case-sensitivity changes the numbers and is the reason to state the rule explicitly.** The table above is case-insensitive matching, which is what a naive implementation on Windows does. Matching the exact casing instead gives 631 matches and 36 false positives, and makes `Skins/` **100% precise** — every non-Flare match was a lowercase `skins` (56 of them). But `Data/` misfires either way: **36 versions ship a correctly-cased `Data` directory with no Flare runtime**, so it is 94.3% precise at best. Dropping both markers is simpler than specifying a case rule for one of them, and costs nothing. Note the direction is the opposite of `design.md` §7.2's DITA rule, where case-*insensitive* matching is mandatory (`DC.Type` vs `DC.type`) — case sensitivity is a per-signal decision in this corpus, not a global one.
+
+> §3.4 and `design.md` §7.1 carry the corrected marker list and now read **595**, superseding the 670 the 2026-09-08 detection sweep published. The two differ because 670 counted versions matching the seven-marker list, including its loose-marker false positives; 595 is the number holding a `Data/HelpSystem.xml` runtime, which is the population this engine converts.
+
+#### 5.1.3 The unit of conversion is the output root, and a version can ship several
+
+51 of 595 versions have more than one output root, and those roots **share 30,736 relative paths** — the same `install/prerequisites.htm` exists in two places. Comparing every shared path pair:
+
+| Relationship | Share |
+| :--- | ---: |
+| Byte-identical | 40.3% |
+| Content text identical, markup or chrome differs | ~45% |
+| **Genuinely different content** | **~15%** |
+
+So the tempting rule — "same path means same topic, take either" — is wrong 15% of the time. The worst observed case is `mdm/9.3.2`, where `release-notes/new-features.htm` in the two roots has a **0.019 token overlap**: two different releases' notes at the same path. Merging them loses one entirely.
+
+**Therefore each output root converts independently into its own output subtree**, named from the root's path relative to the version (`bw-ent-html/`, `bwce-html/`, `relnotes/`), and no cross-root deduplication is attempted. The 40% that are byte-identical are duplicated in the output; that is the correct trade against silently discarding a release's notes. Nested roots (§5.1.1) are converted as their own subtrees too, and the innermost root owns a file, so nothing is converted twice.
+
+**Output path mirrors the source tree.** Filename stems collide at **6.0% within a single output root** and title-derived slugs at **2.6%**, so neither a flat layout nor a title slug is unique by construction. The source hierarchy is already meaningful (85% of topics sit one level down, in `install/`, `admin/`, `reference/`), it is stable across rebuilds, and it is what every `href` in the corpus already encodes — so mirroring it makes §5.1.8's link rewriting a suffix substitution rather than a lookup. This is the opposite of §5.2.2's decision for DITA, and deliberately: DITA's source is flat and its TOC is near-complete, Flare's source is structured and its TOC is not (§5.1.4).
+
+#### 5.1.4 The TOC is JavaScript, and it is 86% complete
+
+**The TOC is declared, not discovered.** `Data/HelpSystem.xml` names it outright — `Toc="Data/Tocs/_HTML_Docset.js"` — beside `Alias=`, `Index=`, `Glossary=`, `SearchDatabase=` and `DefaultUrl=`. That attribute is the entry point; globbing `Data/Tocs/*.js` is not.
+
+It is built from two kinds of file, both AMD modules (`define({…})`) rather than HTML or XML, and both parsed with a targeted expression rather than executed:
+
+- **The tree file** `Data/Tocs/<Name>.js` carries `numchunks`, `prefix`, `chunkstart[]` and `tree`. `tree` is the shape and nothing else: nested `{i:<int>, c:<int>, n:[children]}` nodes holding an integer id, a chunk number, and an ordered child array. **There are no titles and no hrefs in it.**
+- **The payload files** `<Name>_Chunk<N>.js` map **topic path → `{i:[ids], t:['Label'], b:['#anchor']}`**, the path relative to the output root with a leading `/`.
+
+So a titled tree takes two passes and an inversion: parse the chunks into `id → (path, label, anchor)`, then walk `tree` depth-first substituting each `i` for its record. Sibling order in `n` is the published navigation order. It resolves cleanly — across the 60-root sample, **39,488 tree nodes and 0 with no matching payload entry**.
+
+**`i`, `t` and `b` are parallel arrays, not a list and two singletons.** The `k`th id is labelled by the `k`th title and anchored by the `k`th bookmark. Reading `t[0]` for every id — the obvious mistake, and the one the first pass of this survey made — silently relabels nodes:
+
+```js
+'___':{i:[0,21,252], t:['Installation','User Guide','Server Configuration Guide'], b:['','','']}
+```
+
+The alignment holds everywhere: **0 ragged arrays in 37,598 sampled entries.** Three consequences:
+
+- **A page can sit at several TOC positions, under a different label at each.** 1,381 of 37,561 page entries (**3.7%**) occupy more than one position, 3,346 positions between them, and **60 carry a different label per position** — `dev-guide/Statements.htm` is "Statements" in one place and "Built-in Commands" in another. Each position is its own `toc.yml` node; the label comes from the position, not from the page.
+- **`b` is a bookmark.** **12.1% of entries** target an anchor inside the topic (`#install_802405880_1750080`), not its top. Discarding it collapses distinct TOC entries onto one page.
+- **The chunking never actually shards.** All **679 TOC files across the 676 roots are `numchunks:1`**. `chunkstart[]` exists so the runtime can binary-search for the chunk holding a path; a converter that reads everything ignores it. The multi-chunk path is implemented but untested by this corpus.
+
+**Not every key is a path.** 37 of the 37,598 sampled entries have a key that is not an HTML file: 36 are the literal `'___'`, Flare's sentinel for nodes that have a label but no page, and one is a stray `/../../../ipe.flprj` project file. Those 37 entries carry **172 node ids** between them. §5.1.5 is about what to do with them.
+
+**A root can ship more than one tree, and `Toc=` names only one.** 673 roots have exactly one tree; three have two:
+
+| Output root | Topics | Declared tree | Covers | Other tree | Covers | Union |
+|---|---|---|---|---|---|---|
+| `bc/7.4.0/doc/bcgs/html` | 604 | `_HTML_interior_server.js` | 473 | `_HTML_gateway_server.js` | 56 | 500 |
+| `bc/7.5.0/doc/html` | 564 | `_HTML_interior_server.js` | 476 | `_HTML_gateway_server.js` | 59 | 503 |
+| `bctcm/6.2.0/doc/webclient/html` | 106 | `_HTML_Server.js` | 53 | `_HTML_Client.js` | 50 | 103 |
+
+Alphabetical-first globbing picks the wrong file in all three. But reading `Toc=` alone is not sufficient either: in `bctcm/6.2.0` the declared tree covers half the root. **So the declared tree is the root of `toc.yml`, and any remaining trees are appended as sibling top-level nodes** named from their file stem, ahead of the Unfiled node.
+
+**Coverage of the output root's topics is 85.9% corpus-wide** (median 92%), once nested roots, API trees, generated directories and the `Default`/`Default_CSH` stubs are excluded from the denominator; the naive figure over every HTML file is 79%. **85 of 676 roots are complete. 59 are below 50%.** Topics in no TOC entry are **orphans** — they are appended to `toc.yml` under an explicit "Unfiled" node and counted in the report, exactly as in §5.2.3. A 14% orphan rate is normal for this corpus and is not a failure; silently dropping 59,000 topics would be.
+
+**`data-mc-toc-path` is not a substitute.** It looks like the answer — an attribute on the topic naming its own TOC position — but **64% of the values carry an unresolved `[%=System.LinkedHeader%]` template token** rather than a heading. It is a build-time placeholder Flare never expanded. It is not read.
+
+**Titles come from the topic's `h1`, TOC labels from the TOC.** These are two different strings and both are kept:
+
+- `<title>` disagrees with `h1` in about **10%** of topics, and in every inspected case `<title>` is the truncated one. It is not used.
+- The TOC label equals `h1` in **2,429 of 2,512** matched entries. The 83 that differ are mostly deliberate short nav labels ("Overview" for "Overview of the Administration Console").
+
+So `h1` is the page title written into frontmatter and the `#` heading, and the TOC label is the `toc.yml` entry text. Collapsing them to one string would either put a truncated title on the page or a 60-character label in the navigation.
+
+#### 5.1.5 Two nodes `toc.yml` needs that the source does not supply
+
+A `toc.yml` faithful to the Flare TOC is not yet a valid AEM navigation. Two nodes are missing, and both are the engine's to create.
+
+**The landing page is real content, and it is nowhere in the TOC.**
+
+`Data/HelpSystem.xml` declares it as `DefaultUrl` — usually `_templates/Home.htm`, and it resolves in **676 of 676 roots with zero misses**. 646 point inside `_templates/`; **30 point at an ordinary content topic instead** (`bwce-relnotes/new-features.htm`, `statistica-lts-release/overview.htm`). But in **55 of the 60 sampled roots the landing page is not a TOC entry at all** — in the other five it already is, and is already first. So for the overwhelming majority it is an orphan that would land under "Unfiled", at the bottom of the navigation, if it were converted at all. **It is converted and hoisted to the first node of `toc.yml`.** Where `DefaultUrl` already appears in the TOC, the existing node is moved to first rather than duplicated.
+
+It is worth converting, because it is not boilerplate. A scan for `lorem`, `[Enter …]`, `TBD`, `placeholder` and unexpanded `[%=…%]` tokens across all 676 landing pages returned **zero hits**. Measuring instead what survives once the generated hero furniture — `div.homepage-banner`, `div#release-info`, `div.download-button` — is removed:
+
+| Tier | Roots | What is there |
+| :--- | ---: | :--- |
+| **Rich** (≥400 chars beyond the hero) | 351 (51.9%) | Product description, "Key New Features", curated topic lists |
+| **Light** (100–399) | 270 (39.9%) | Product description plus one or two link sections |
+| **Hero-only** (<100) | 55 (8.1%) | Title and version, nothing else — mostly the `flogo-*` connectors and the Statistica sub-guides |
+
+Median post-hero text is 418 characters; the largest landing page is 42,388. So **91.9% of roots have something worth keeping** and the 8.1% get a generated stub instead. Four handling rules follow from the same scan:
+
+- **`#mc-main-content` is not guaranteed here.** 5 roots' landing pages lack it — all five are the same `statistica-lts-release/overview.htm` with 3,444 characters of real prose in a plain `<body>`. The landing-page extractor falls back to `<body>` where the invariant of §5.1.6 does not hold.
+- **24 landing pages have no `h1`** (all `bwplugin*`), and **only 2 of those have a usable `<title>`**. The title falls back to the `span.mc-variable.productvar.productName` in the banner, then to the catalog's product name.
+- **The landing page is mostly a link hub, and most of the links leave.** 9,061 links across the 676 pages: **5,911 point at non-HTML targets** (`.pdf`, `.zip`, `.txt` — often `../../../` outside the output root) and **3,698 are absolute `http(s)`**. Neither kind is rewritten to `.md`; external links pass through and out-of-root asset links are recorded as unresolved rather than silently broken.
+- **Dropdown unrolling comes back, scoped to this page.** §5.1.7 finds the construct absent from content topics — but the landing page is exactly where it lives, and the landing page is now converted. The `MCDropDown` sections carry stable, meaningful labels (`Release Documents` 454, `Related Product Documentation` 439, `Most Visited Topics` 408, `Downloadable PDF Guides` 388, `Key New Features` 325) and unroll into `##` headings over their link lists.
+
+**165 section nodes have children but no page of their own.**
+
+Walking the tree rather than the flat path map, the sample holds **7,388 container nodes** (nodes with children). **7,223 (97.8%) have a real page** — median 1,276 characters of text — and need nothing. The remaining **165 (2.2%) are headless**: the `'___'` sentinel, a label and children and no file anywhere on disk. They are not obscure — **151 of the 165 are top-level nodes**, the books a reader sees first ("Installation", "User Guide", "Server Configuration Guide"), and they hold **1,357 child topics** between them. In AEM a navigation node with children and no page is a broken parent, so:
+
+- **The engine generates a section page for each headless container**, titled from the TOC label, whose body is a linked list of its immediate children. This is generated content and is marked as such in frontmatter, so a later re-run replaces it rather than treating it as authored.
+- **7 headless nodes have no children either** — a label alone. They are dropped and counted.
+- **30 container nodes (0.4%) point at the same page as one of their own children.** The child node is dropped; the parent keeps the page, so the topic appears once.
+
+`_templates/` is therefore no longer wholly excluded: beyond the landing page, **162 TOC entries in 59 of the 60 sampled roots point into it** — `legal-and-third-party-notices.htm` (55), `tibco-documentation-and-support-services.htm` (40), `whats-new.htm` (34). A file under `_templates/` is converted when the TOC references it or when it is the `DefaultUrl`, and skipped otherwise. See §5.1.10 — the predecessor skips `Home.htm` unconditionally, and that is one of its rules to reject.
+
+#### 5.1.6 Content extraction: one invariant, and the chrome is inside it
+
+**`div[role='main']#mc-main-content` is present in 4,656 of 4,660 MadCap topics (99.9%).** The predecessor's four-selector fallback chain is not needed for Flare; a single selector is the rule.
+
+The apparent 3% miss is a measurement artifact worth recording, because it looks like a real gap: of 4,810 sampled HTML files, 154 lack the container — but **150 of them are not MadCap files at all** (Javadoc pages inside an embedded API tree, e.g. `as/4.10.0/doc/html/API-Reference/api/java/…`), 1 is a MadCap file that is not runtime-type `Topic`, and only **3 are genuine MadCap topics without the container**. The API trees are already excluded by the shared `is_api_reference()` predicate (§6.3), so against the population the engine actually converts, the selector is a 99.9% invariant.
+
+**Chrome lives inside the container, and one block dominates everything:**
+
+| Inside `#mc-main-content` | Share of sampled topics | Handling |
+| :--- | ---: | :--- |
+| `div#feedback-survey` | 95% | **Removed first.** See below. |
+| `div.topic-frame` | 88% | Unwrapped — a layout wrapper around the real content. |
+| `div.MCBreadcrumbsBox_0` | common | Removed; `toc.yml` carries the trail. |
+| `div.MCMiniTocBox_0` | common | Removed; generated in-page navigation. |
+| `MadCap:topicToolbarProxy`, `p.MCWebHelpFramesetLink` | common | Removed. |
+
+**`#feedback-survey` accounts for 47.7% of every raw `href` in the corpus** — they are `javascript:void(0)` buttons. Strip it before counting anything and the link profile is clean; strip it after and every link statistic is wrong by half. This is stated as an ordering rule, not a preference: chrome removal precedes link analysis.
+
+`div.topic-frame` is the omission in the predecessor's configuration (§5.1.10) — it is in 88% of topics and is in none of its chrome selectors.
+
+After chrome removal, a topic averages **1.1 links**. That is the real link density of this corpus.
+
+#### 5.1.7 The MadCap vocabulary
+
+Flare does not preserve a semantic class vocabulary the way DITA does (§5.2.5). Its semantics live in **`data-mc-autonum`** — an attribute carrying the label text, which the skin's CSS renders. Nothing renders it in Markdown, so the engine must read it and re-emit the label itself. This is the structural difference from DITA, where the label is already a `span` in the DOM and must be *deleted* (§5.2.5) rather than recovered.
+
+**Callouts** are `div.note`, `div.noteNote`, `div.warning`, `div.noteWarning`, `div.caution`, `div.noteCaution`, `div.tip`, `div.noteTip`, `div.important`, `div.noteImportant`. Observed distribution over the sample: **Note 1,574, Warning 30, Tip 28, Important 21**, the rest in single digits. They map to GFM alerts (`> [!NOTE]`, `> [!WARNING]`, `> [!TIP]`, `> [!IMPORTANT]`, `> [!CAUTION]`) with the label taken from `data-mc-autonum` where the class is ambiguous.
+
+**MadCap emits lists as tables.** `AutoNumber_p_*` single-column tables are the fake-list construct: **1,321 of them in 7% of sampled topics** — `Bullet` 753, `Step` 480, `ListDash` 82, `StepInd` 6 — against 1,809 real `<ul>` and 1,201 real `<ol>`. Converting them as tables produces a one-column pipe table where a list belongs. `data-mc-autonum` on the content cell is the ground truth for ordered-versus-bulleted; the class name alone is not (`Step` and `Bullet` both appear with and without numbering).
+
+**DITA-style task structure survives as autonum labels, not as classes**: `Procedure` 702, `Subtopics` 467, `Before you begin` 244, `What to do next` 137, `Result` 88. These become bold run-in labels or `###` headings depending on what follows; they are the only structure a Flare task topic has left.
+
+**Tables.** 98% of ordinary tables carry `TableStyle-Table`, which is styling and carries no semantics. **57% are GFM-safe** — every cell single-paragraph inline content, no `colspan` or `rowspan`. The rest are passed through as HTML verbatim, on §5.2.5's reasoning: silently flattening a `rowspan` changes what the table says. `colspan`-only tables are split where the split is unambiguous, following the predecessor's `split_colspan_tables` pass, which is one of the parts of it worth keeping (§5.1.10).
+
+**Code fences are bare.** 1,565 of roughly 1,600 `<pre>` blocks carry no language attribute. Guessing one would be a fabrication applied 1,565 times.
+
+**Dropdowns are not a thing in this corpus, and the original §5.1 said they were.** A sweep of the cache for `MCDropDown`, `MCExpanding`, `MCToggler` and `MCSnippet` in HTML found 459 matching files, of which **457 are the generated `_templates/Home.htm` landing page** and one more is the same page under a differently-named template directory. **Exactly one content topic in the corpus uses a dropdown** — `tp/1.1.0/html/UserGuide/previous-versions-release-notes.htm`, with 12 of them. The classes are all over every root's skin CSS and `MadCapAll.js`, which is why the construct looks ubiquitous until skin is separated from content, and is very likely how the original bullet came to be written. Sampling agrees: **0 occurrences in 4,810 content topics.** In a **content topic** a dropdown is therefore handled by the generic unwrap path — heading plus content, no special case. The construct is not dead, though: those 457 `Home.htm` files are the landing pages §5.1.5 converts, where the dropdowns carry the page's entire structure and are unrolled into `##` sections. So "dropdown unrolling" moves from a headline feature of the topic converter to a required step of the landing-page converter. *(Bound: the sweep was stopped before completing its walk of the full 2.2M-file cache; it had classified 459 matches with a stable 457:1 ratio. The sampled zero is the independent check.)*
+
+#### 5.1.8 Links, anchors, and images
+
+Two numbers, both measured **after** `#feedback-survey` removal (§5.1.6) over the 60-root sample, and both meaningless before it:
+
+- **78% of hrefs are relative `.htm`/`.html`** — the cross-references. They are rewritten to `.md` at the mirrored path (§5.1.3), which is a suffix substitution rather than a lookup precisely because the output tree mirrors the input tree.
+- **98.3% of them resolve to a file that exists on disk.** The 1.7% that dangle are source defects: the link is emitted as plain text and counted in the report.
+
+The remaining 22% are absolute URLs (left alone), fragment-only links (kept as in-page anchors), and links into an embedded API tree, which become absolute URLs into the `-resources` repo per §6.3/§6.4. Their exact split was not measured; the rewriting rule for each is determined by its form, not by its frequency.
+
+This is a different situation from the CSH numbers in §5.3.1, and the two must not be confused. **In-content links are 98.3% good; `Alias.xml` links are 22% dangling** — because alias files get copied wholesale into sibling outputs where their targets do not exist. The link rewriter and the CSH resolver therefore have different failure profiles and different fallbacks; §5.3.1's version-wide resolution exists for the alias case only.
+
+Images keep their source filename and their `alt` where one exists. `image_skip_prefixes` — `Skins/`, `Resources/Scripts/`, `Resources/Stylesheets/` — are skin assets and are never copied as content; 307,394 content images are.
+
+#### 5.1.9 What the engine does not convert
+
+- **Generated directories** — `Skins/`, `Resources/`, `_globalpages/`, `MicroContent/`. **2,339 HTML files**: 1,965 in `_globalpages/`, 295 in `MicroContent/`, 79 in `Resources/`. **`_templates/` is no longer among them** (§5.1.5): of its 2,803 files, the `DefaultUrl` landing page and the ~162-per-60-roots the TOC references are converted, and the remainder are skipped.
+- **Runtime stubs** — `Default.htm`, `Default_CSH.htm`, `csh.js`, `Default.js`. **1,295 files**, none of them topics.
+- **`Data/`** — the runtime manifest, TOC and alias files are *read* (§5.1.4, §5.3) and never emitted.
+- **API reference trees** — Javadoc shipped inside a Flare output: **595 directories holding 8,078 files, concentrated in just 56 versions** (one output root each). Identified by the shared `is_api_reference()` marker predicate (§6.3) and routed to `-resources` by §6.4, never by directory name. *(The 595 matching the 595-version total is coincidence; it was re-derived to confirm that.)*
+- **The `ja` localized subtree** — 8,004 files, and the only localized subtree in the corpus: no `zh`, `de`, `fr`, `es`, `ko`, `pt-br`, `it` or `ru` tree exists at the top level of any output root. Out of scope for the English migration; reported so its existence is visible rather than discovered later.
+- **Source-format assets shipped alongside the output** — 1,160 `.vsd`, 818 `.vsdx`, 149 `.zip`, 127 `.xlsx`, 80 `.drawio` across all 676 roots. These are authoring sources, not published documents; they go to asset preservation (§5.4), not to conversion or to the doc-class router.
+- **The 5 partial Flare outputs** (§5.1.1) — MadCap topics with no `Data/HelpSystem.xml`. No TOC, no CSH, no reliable root boundary. Reported for triage.
+
+#### 5.1.10 The predecessor's Flare pipeline is a reference, with measured gaps
+
+Unlike its DITA sketch (§5.2.8), the predecessor's Flare path is its *main* pipeline and has actually run at scale. `scripts/lib/preprocessor.py` (1,029 lines) documents 13 ordered passes, and the ordering is real knowledge worth inheriting: `strip_chrome` → `fake_list_tables` → `merge_list_continuations` → `callout_divs` → `icon_tables` → `text_popups` → `definition_lists` → `task_sections` → `inline_spans` → `code_urls_to_links` → `split_colspan_tables` → `extract_table_captions` → `classify_tables` → whitespace and code normalization. `fake_list_tables()` independently arrived at §5.1.7's finding that `data-mc-autonum` is the ground truth for ordered-versus-bulleted, and its `SPAN_TO_TAG` map (`uicontrol`/`wintitle`/`option` → bold, `filepath`/`codeph`/`userinput` → code, `varname`/`parmname`/`term` → italic) matches the vocabulary this survey observed.
+
+Four measured gaps, each of which would ship as a defect:
+
+1. **`div.topic-frame` is missing from `chrome_selectors`.** It wraps the content in **88% of topics** (§5.1.6). Its absence leaves a stray wrapper in the DOM for the great majority of the corpus.
+2. **The content-selector fallback chain is unnecessary and hides failures.** `content_selectors` lists four selectors; `div[role='main']#mc-main-content` matches 99.9% of MadCap topics on its own. The three fallbacks (`div#center article`, `article`, `div#ebx_main`) exist for other engines, and in a Flare run they convert a *non-Flare* file rather than reporting that the file is not a Flare topic — which is how a Javadoc page ends up in the Markdown output. One selector, and a report line when it misses.
+3. **`skip_path_segments` is a hand-maintained name list.** It carries `/javadoc/`, `/Java_API/`, `/golang/`, `/java/`, `/c/`, `/tibdg/` — product names and language names mixed together, accumulated by hand as each one caused a problem. §6.3's marker-based `is_api_reference()` replaces it: a generator marker decides, a directory name never does. The list is the exact failure mode that predicate was specified to end.
+4. **`skip_filenames` also skips `Home.htm`, and that one is wrong.** It discards the `DefaultUrl` landing page in 644 of 676 roots — the page §5.1.5 measures as having real content in 91.9% of them, and as belonging at the top of `toc.yml`. Skipping it by filename is the reason the predecessor's output has no landing page at all. Take the other three entries; drop this one.
+
+What is worth taking: the 13-pass ordering, `fake_list_tables()`, `split_colspan_tables()`, the `SPAN_TO_TAG` vocabulary, and most of the `skip_filenames` stub list — `Default.htm`, `Default_CSH.htm` and `index.htm` match what §5.1.9 arrived at independently.
 
 ### 5.2 SDL DITA Engine (`engines/dita.py`)
 
@@ -601,6 +819,8 @@ Verified 2026-09-04 against **272 `Alias.xml` files** in the predecessor `html-t
 `Name` is the alphanumeric key, `ResolvedId` the integer key, `Link` the topic path relative to the folder containing `Data/`. Both keys address the same page. Only those three attributes were ever observed; `Map` is the only child element.
 
 **Re-measured 2026-09-07 over the whole cache** (`cache\pub`, every `Alias.xml` at any depth rather than the 2026-09-04 subset): **863 files, 387 with content, 11,054 entries, 2,396 distinct names.** The larger sample confirms the shape of the original survey and sharpens two numbers — the empty-file share and the digit-only share, both flagged in place below.
+
+> **Not all 863 are Flare, and the Flare survey (§5.1) resolved the split.** By where the file actually sits: **674 in a detected Flare output root** (10,239 entries), **153 nested inside one** (772 entries — the nested outputs of §5.1.1), 5 in a partial Flare tree (43), **30 in a WebWorks tree** (0 entries; all 30 are zero-byte), and 1 elsewhere (0 bytes). The entry counts everything below is built on are unaffected — 10,239 + 772 + 43 = 11,054 — because every file with content is Flare. Only the attribution needed correcting. The corpus-wide zero-byte count is **31**, not the 11 the 2026-09-04 subset showed.
 
 Six properties of the real corpus drive every design decision below:
 
