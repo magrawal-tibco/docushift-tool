@@ -1,7 +1,7 @@
 # Project Context & Living Ledger: DocuShift Tool
 
 > **Last Updated:** 2026-09-07  
-> **Status:** Phases 1-3 complete and verified — `catalog fetch` runs against the live docsite (256 tests pass, lint clean); Phase 4's selection model and path contract also landed, so what remains there is the acquisition I/O. The Phase 5 **CSH design is settled** (`architecture.md` §5.3) and awaiting implementation  
+> **Status:** Phases 1-3 complete and verified — `catalog fetch` runs against the live docsite (256 tests pass, lint clean); Phase 4's selection model and path contract also landed, so what remains there is the acquisition I/O. The Phase 5 **CSH design is settled** (`architecture.md` §5.3) and the **SDL DITA converter engine is specified** (§5.2), both awaiting implementation; Phase 4's **extraction inventory columns are specified** (§3.9) and awaiting implementation  
 > **Primary Runtime:** Python 3.11+ (Active: Python 3.13)  
 > **Business Scope:** TIBCO & IBI Documentation Migration (~250 Products) to AEM on GitHub
 
@@ -138,7 +138,7 @@ Per-family folders are created on demand by the downloader, not at startup: pre-
 | 2026-09-04 | CSH | **The map is keyed by `Name`, never by `ResolvedId`.** ~~`ids` survives only as a derived index, nested per doc-set, whose values are always lists.~~ *(the derived `ids` index was dropped entirely 2026-09-07 — see below; the name-as-key half stands)* | `ResolvedId` is non-unique **within a single alias file** in 29 of 196 files (15%), and the colliding ids address different topics — BW 6.12.0 `bwce-html` reuses 18. `Name` had 0 violations across the whole corpus. The predecessor's `csh_map.json` was keyed by id, so those entries silently overwrote each other. Nesting `ids` per doc-set matches the real scope of an integer id: it is per help target, not per version. |
 | 2026-09-04 | CSH | **Identifiers are compared and stored byte-exactly; nothing case-folds them.** Names are emitted double-quoted in YAML, ids as bare integers. | Confirmed by user and by the corpus: TIBCO BC 7.4/7.5 ship `GatewayInstances` → `Gateway_Instances.htm` and `gatewayInstances` → `Managing_Gateway_Instances.htm` as two live, different help targets. Quoting is not cosmetic — an unquoted name of `1000`, `Yes`, `On`, or `6.2` loads as an int/bool/float under a YAML 1.1 loader such as PyYAML, which is what the map is read with. |
 | 2026-09-04 | CSH | **Resolution is doc-set first, then version-wide**, merging identifiers across a version's several help outputs. Conflicts keep the largest doc-set as primary (ties alphabetical) and record the alternative under `also:`; nothing is dropped. | 15 of 254 versions ship more than one alias file, and Flare frequently copies one output's alias file wholesale into a sibling: **1,609 of 7,220 links (22%) dangle**, with 10 of the 11 affected files being `relnotes/Data/Alias.xml` at 0% resolution. Per-doc-set resolution would report 205 broken identifiers for BW relnotes; version-wide resolution resolves all 205 against the main output where the topics actually live. This is the strongest argument for the per-version file the user asked for. Ids collide across doc-sets (31 of 205 in BW 6.12.0) and names occasionally do (5 of 233), so the conflict case has to be representable rather than assumed away. |
-| 2026-09-04 | CSH | **Absent CSH is normal, not a failure.** Empty, zero-byte, and unparseable sources are counted and skipped; a version with no identifiers gets **no `csh.yml` at all**. Unresolvable identifiers are kept in an `unresolved:` list rather than dropped. | 65 empty `<CatapultAliasFile />` plus 11 zero-byte files — 28% of the corpus. Raising on those would make a routine condition look like a defect. Conversely an empty map file is indistinguishable from a failed run, so absence is the honest signal. Keeping unresolved entries is the mirror-image concern: a dropped identifier converts a broken Help button into a silent absence, which no downstream check can find. |
+| 2026-09-04 | CSH | **Absent CSH is normal, not a failure.** Empty, zero-byte, and unparseable sources are counted and skipped; a version with no identifiers gets **no `csh.yml` at all**. Unresolvable identifiers are kept in an `unresolved:` list rather than dropped. | 445 empty `<CatapultAliasFile />` plus 31 zero-byte files — 55% of the corpus (re-measured 2026-09-07; the original subset read 28%). Raising on those would make a routine condition look like a defect. Conversely an empty map file is indistinguishable from a failed run, so absence is the honest signal. Keeping unresolved entries is the mirror-image concern: a dropped identifier converts a broken Help button into a silent absence, which no downstream check can find. |
 | 2026-09-04 | CSH | **CSH is engine-neutral**: `transforms/csh.py` owns the schema, resolver and writer; each engine contributes only a reader. ~~DITA yields `id: null` as a real state.~~ *(moot from 2026-09-07 — there is no id field; DITA's name-only contract is simply the general case)* | Verified against the predecessor's three separate working implementations (Flare `Alias.xml`, WebWorks `ctx/` + `wwhdata/xml/files.xml`, DITA `head.js` `suitehelp.contexts`), which had diverged into three schemas and three frontmatter conventions for the same concept. |
 | 2026-09-04 | CSH | **No backward-compatible `csh_map.json` is emitted.** Confirmed by user: no AEM-side consumer is built yet, so `csh.yml` is free-standing and nothing constrains its filename or key. | Worth recording as a decision rather than an omission — the predecessor's id-keyed `csh_map.json` is the obvious thing to keep emitting "just in case," and doing so would carry its data loss forward into a consumer that does not exist yet. If a contract appears later it can be generated from `csh.yml`, which is lossless; the reverse is not true. |
 | 2026-09-04 | CSH | ~~Frontmatter uses a single `csh: [{name, id}]` list~~ *(superseded 2026-09-07: with no numeric key there is nothing to pair, so frontmatter is a flat `csh: ["id-a", "id-b"]`)*, **not** the predecessor's parallel `csh_ids` / `csh_names` arrays. Confirmed by user 2026-09-04. Identifiers are resolved before the topic is written, so frontmatter lands in the file's first and only write. | A page commonly owns several identifiers, and parallel arrays lose the pairing the moment the counts differ — which they always do for DITA, where there are names and no ids. Writing frontmatter in a second read-modify-write pass over every converted file (what the predecessor did) re-parses and rewrites the whole output tree to touch a small minority of it. |
@@ -170,7 +170,8 @@ Audited against the filesystem, not against checkboxes:
 ### Next steps
 
 - [ ] **Phase 4 — acquisition I/O** against the settled contract: resumable downloader into `downloads_dir()`, ZIP extractor into `extract_path()`, `docushift archive download`, `--from-file` ingestion plus `ConfigManager.archive_path()`, and the per-version path/checksum/status writes into `state.db`
-- [ ] **Phase 5** — MadCap Flare Engine + CSH Mapper with `pytest` unit test suite
+- [ ] **Phase 4 — the inventory measurement**: the counting walk, the marker-based `is_api_reference()` predicate, and the unmarked-candidate triage line in the `extract` report. The catalog half already landed (ahead of the extractor, the way `zip_source` did in Phase 3), so this is purely the Stage 4 side
+- [ ] **Phase 5** — MadCap Flare Engine + **SDL DITA Engine** (specified 2026-09-08, `architecture.md` §5.2) + CSH Mapper (**all three readers: Flare, DITA, WebWorks** — settled 2026-09-08) with `pytest` unit test suite
 
 > **Standing docs obligation.** Every algorithm in `docs/design.md` is marked **Built** or **Specified**. Landing one flips its mark and its row in the §12 index — in the same commit, not afterwards. A Specified algorithm that has quietly shipped is worse than an undocumented one: it reads as a plan while being the code.
 
@@ -189,3 +190,142 @@ Audited against the filesystem, not against checkboxes:
   | Case-only name collisions with different targets | TIBCO BC 7.4 & 7.5 |
 
   The reproduction scripts live in `C:\tmp\an_alias*.py`; they are throwaway analysis, not part of the package. Re-running them needs the `html-to-md` cache, which is not in this repo.
+
+- [x] **Extraction inventory columns — catalog half built** (2026-09-07) — `architecture.md` §3.9, `design.md` §6.3, `user-guide.md` §2, Phase 4 checklist. Five tool-owned columns in `versions.csv`, written by `docushift extract`: `_has_csh`, `_csh_names`, `_has_api_ref`, `_api_files`, `_doc_files`. Landed: the model fields, `VERSION_COLUMNS`, the blank-preserving `csvio` round-trip, merge/snapshot exclusion, `record_extract_inventory()` / `clear_extract_inventory()`, and the desync warning. **279/279 tests pass** (23 new), lint clean. Pending with the extractor: the counting walk and the API-reference predicate.
+
+  The gap they close: every column the sheet carries today is discovery-time, so `convert_eligible` and `convert_batch` are set on packages nobody has opened. Four decisions worth keeping:
+
+  - **They live in the CSV, not `state.db`, and that is a stated exception to §3.2.** The test §3.2 actually cares about is *does a fetch churn the diff* — these change only on `extract`. They earn the seat because they are the inputs to the two decisions the sheet exists to record, and a number you must query is a number nobody consults before tagging 200 rows into `wave-2`.
+  - **Blank ≠ zero.** All five are optional in the model. Blank is "never extracted", `0` is "extracted, found none". Conflating them would make the archived half of the catalog indistinguishable from a corpus with no CSH in it. A failed extract writes nothing.
+  - **`_has_csh` is not `_csh_names > 0`.** It records that a source *file* was found; the count records what parsed out of it. `true` with `0` is the empty-alias-file case — 55% of the surveyed corpus. `_has_api_ref` genuinely is a convenience duplicate of `_api_files > 0`; both are written by one call so they cannot drift, and `warnings()` flags a hand-edit that desyncs them.
+  - **One shared `is_api_reference()` predicate.** Three stages need the same answer — Stage 4 counts, Stage 5 skips, Stage 7 routes — and three copies would let a file be counted as documentation and published as an API reference.
+
+- [x] **API-reference predicate settled: markers decide, names raise a flag** (2026-09-07). Surveyed against the `html-to-md` extracted cache — **2,201,528 files, 515 products** (`design.md` §6.3.1; scripts `C:\tmp\an_segments*.py`). The seven-name list inherited from the predecessor is wrong in both directions:
+
+  | Measured | Value |
+  | :--- | :--- |
+  | Files under the seven inherited segments | 283,267 |
+  | Real API trees the list misses | `apidocs/` 27,450 · `apischemas/` 16,464 · `components-api/` 15,563 · `api-docs/` 3,935 · `api-reference/` 3,257 · `console-api/`+`config-api/` 3,930 · `cpp-reference/`+`c-and-cobol-reference/` 3,200 · `api reference/` 1,141 (with a space) |
+  | Product names that a substring rule would destroy | `api-exchange-gateway/` 15,677 · `api-exchange-manager/` 1,015 |
+  | Files wrongly skipped by the predecessor's `/c` substring rule | **186,856 (8.5%)** — including `csh.js` and the WebWorks `ctx/` CSH source directory |
+  | Casings observed | `API`/`api`, `C`/`c`, `JavaDoc`/`javadoc`, `Java_API` |
+
+  **Resolution:** a directory is an API-reference root iff it holds a known generator marker (`allclasses-frame.html`, `annotated.html`, `jsdoc-default.css`, `godocs.js`, `fti/FTI_*.json`, …); everything beneath inherits; the outermost match wins. **A name classifies nothing.** Names are used only to flag unmarked API-ish directories in the `extract` report, so an unseen generator becomes a question at extract time rather than broken Markdown at conversion time — and so `api-exchange-gateway/` can never be swept up. This is the conclusion §3.4 already reached for engine detection, for the same reason: what a tree contains is knowable, what someone named it is not.
+
+  `javascript/` **is** an API tree (JSDoc, nested under `api-reference/`) — the earlier claim that it was documentation was wrong. `c-tutorial/` does not exist in the corpus.
+
+- [x] ~~**CSH scope narrowed to MadCap Flare only**~~ **superseded 2026-09-08 — DITA is back in** (2026-09-07, user decision) — `architecture.md` §5.3.4, `design.md` §6.2/§9.2, `user-guide.md` §7, Phase 4/5 checklists. WebWorks and DITA CSH readers are **not built**. Their sources are still *located* by the Stage 4 inventory and named in the extract report as triage lines, so "we do not handle this version's help" stays a visible number rather than an assumption; they contribute nothing to `_has_csh` / `_csh_names`, which describe what will become a `csh.yml`.
+
+  Two things this had to survive, since both were justified *by* WebWorks:
+
+  - **The identifier stays a string.** Re-measured over the whole cache: **834 of 11,054 Flare names (7.5%) are digit-only** (`12`, `1000`, `1122`). The YAML double-quoting rule keeps its evidence without WebWorks. Measured precisely, the hazard is numeric coercion only — 0 names are `Yes`/`No`/`null`-shaped, 0 sexagesimal, 0 leading-zero — but quoting stays unconditional, because a conditional quote is a branch that can be wrong.
+  - **Byte-exact comparison stays.** 8 case-only collisions in the full corpus, not just the one BC 7.4/7.5 anecdote.
+
+  **Why Flare and not the others:** the Flare contract is the only one measured. The WebWorks and DITA contracts were transcribed from the predecessor's source and never checked — and checking the WebWorks one now weakens it: 692 `wwhdata/` trees against **69 `ctx/` directories**, so the input its reader is specified against is absent from 90% of WebWorks output. A `csh.yml` built on that is confidently wrong an unknown fraction of the time, and a help map pointing at the wrong page is worse than no help map: the first is invisible, the second is reportable.
+
+- [x] **WebWorks CSH back in scope — all three HTML engines now read** (2026-09-08, user decision) — `architecture.md` §5.3/§5.3.3/§5.3.4, `design.md` §6.2/§9/§9.2/§9.3, `user-guide.md` §7, Phase 4/5 checklists. Scripts `C:	mpn_ww_csh.py`, `an_ww_csh2.py`. **This reverses the last remaining half of the 2026-09-07 narrowing, and it does so because the argument for it was wrong — not because the priority changed.**
+
+  **The measurement error.** The stated reason WebWorks stayed out was that its reader depends on `ctx/`, and the cache holds 692 `wwhdata/` trees against only 69 `ctx/` directories — "absent from 90% of WebWorks output". `wwhdata/` is **per book**; `ctx/` is **per doc-set**; WebWorks averages **3.5 books per doc-set**. At matching granularity: 186 doc-sets hold WebWorks books and **68 of them have a `ctx/` (37%)**. The general form of the error is the part worth keeping — *a ratio between two counts is only evidence if the counts are of the same kind of thing* — because it is what produced two descoping decisions in one day.
+
+  **And `ctx/` was never the source.** Those files are two-line redirect stubs (`document.location = "../index.htm?context=…&topic=…"`) generated *from* the map. The map is `<book>/wwhdata/common/topics.js`, a dispatch chain of `if(P=="<identifier>")C="<file>#<anchor>";`, present in **647 of 692 books (93%)**.
+
+  **The measured contract**, and it is the best of the three:
+
+  | | Flare | DITA (SDL) | WebWorks |
+  | :--- | ---: | ---: | ---: |
+  | Sources located | 863 | 418 | 647 |
+  | …with at least one entry | 387 (45%) | 380 (91%) | 155 (24%) |
+  | Entries | 11,054 | — | 3,439 |
+  | Distinct identifiers | 2,396 | — | 1,180 |
+  | Versions covered | ~254 | — | 101 |
+  | Links resolving in their own source | 78% | — | **100%** |
+  | Entries with a `#anchor` | 3% | ~0% | **43%** |
+
+  All 3,439 targets exist and all 1,492 anchors are present in the file they name. Zero digit-only identifiers, zero case-only collisions — they are dotted lowercase names.
+
+  Consequences beyond "build the reader":
+
+  - **`wwhdata/xml/files.xml` is a trap.** It holds the same map in proper XML — more parseable than a JS dispatch chain — and agrees in 153 of 155 books. But both disagreements are entries *missing from the XML*, and one book ships no `files.xml` at all. `topics.js` is the source of record; the tidier format is the lossy one.
+  - **The `anchor` field earns its keep here.** 43% of WebWorks entries carry one against Flare's 3%, so what looked like a Flare edge case is a WebWorks main path.
+  - **The version-wide resolution fallback is Flare-specific.** It exists for the 22% of Flare links that dangle in their own doc-set; WebWorks never reaches it. The `also:` merge still applies — 26 identifiers are claimed by two books with different targets.
+  - **The string/quoting rules lose one of their justifications and keep the other.** They are often attributed to WebWorks; WebWorks needs neither. Flare carries them alone (834 digit-only names, 8 case-only collisions). The rules stay unconditional anyway.
+
+- [x] ~~**DITA CSH reader back in scope; WebWorks stays out**~~ **superseded the same day — WebWorks is in too** (2026-09-08, user decision) — `architecture.md` §5.3/§5.3.4, `design.md` §6.2/§9/§9.2, `user-guide.md` §7, Phase 4/5 checklists. **Reverses one half of the 2026-09-07 narrowing**, and the reversal is the point: that decision descoped DITA and WebWorks together on the shared ground that both contracts were transcribed from the predecessor's source and never checked. Checking DITA's held.
+
+  **The measured DITA contract** (script `C:	mpn_headjs.py`, sample `activematrix-businessworks-plugin-for-marketo/7.1.0`): `static/head.js` assigns `suitehelp.contexts={"bwmarketo_palette":"GUID-3F0A….html", …}` — one flat JSON object, identifier → target HTML file, no nesting and no per-entry attributes. Present in **380 of 418 `head.js` files (91%)**; the other 38 assign an empty object, which is the DITA equivalent of Flare's empty `<CatapultAliasFile />` and is counted and skipped identically. It is a materially *simpler* read than `Alias.xml` — no `ResolvedId` to discard, no case-collision hazard from a second key.
+
+  Two things this changes and one it does not:
+
+  - **It matters at corpus scale.** DITA is 371 versions, the second-largest engine (above), so this is not a long-tail reader.
+  - **`_has_csh` now means Flare *or* DITA.** The column still answers "will this version get a `csh.yml`?", so WebWorks continues to leave it `false` and produce a triage line.
+  - **WebWorks is unaffected.** Its exclusion never rested on "unverified" — 692 `wwhdata/` trees against 69 `ctx/` directories is a measurement, and it says the input its reader needs is absent from 90% of WebWorks output.
+
+  The correction worth remembering is procedural: I recommended descoping DITA on an argument I had not tested, and the user acted on it. Measuring first would have avoided a decision and its reversal.
+
+- [x] **Engine detection extended to DITA and R help; unconvertible engines get real names** (2026-09-08, user decision) — `architecture.md` §3.4, `design.md` §7, Phase 5 checklist, `models.py`, `catalog.py`, `cli.py`. Scripts `C:	mpn_engine*.py`, `an_htmltype.py`, `an_rules.py`, `an_headjs.py`. The detection signals in `design.md` §7 had only ever been checked against one package (`dsp_gridserver` 7.1.1). Swept over all 1,822 cached versions:
+
+  | Outcome | Versions | Note |
+  | :--- | ---: | :--- |
+  | No HTML at all | 539 (29.6%) | PDF-only packages — correctly nothing to detect |
+  | Engine detected | 875 (48.0%) | flare 670, webworks 176, docbook 10, flare+webworks 19 |
+  | **HTML present, engine unknown** | **408 (22.4%)** | would be skipped silently |
+
+  So detection covers **68% of the versions that actually have something to convert**, not the ~100% the single-sample check implied. Fingerprinting all 408 identifies almost all of them:
+
+  | What it is | Versions | HTML files | Signal |
+  | :--- | ---: | ---: | :--- |
+  | **SDL DITA** | 371 (91%) | 61,712 | `GUID-*.html` filenames · `DC.Type`/`DC.Identifier`/`DC.Title` meta (**case-insensitive**) · `static/head.js`+`body.js` · `screen.css`+`print.css` |
+  | **R help** (Rd → HTML) | 11 (3%) | 14,514 | `snext.css`/`snextchm.css` · `class="RdName"`/`"RdTitle"` |
+  | RoboHelp 11 · FrontPage 6.0 · Help & Manual · MkDocs · Docusaurus · Maven Doxia | 19 | ~7,200 | `<meta name="generator">`, verbatim |
+  | Hand-authored (`openspirit-*`) | 6 | ~10 | an author's name in a comment |
+
+  Two rules — `GUID-*.html OR DC.* meta` and `snext.css OR Rd* class` — recover **382 of 408 (94%)**. Adding them plus the generator-meta pass would take coverage of HTML-bearing versions from 68% to **98%**.
+
+  - **DITA is not a fringe engine — it is the second-largest, ahead of WebWorks** (371 versions vs 176). It went undetected because §7 looked for DITA-OT markers (`.dita` remnants, the DITA-OT generator comment) and this output comes from **SDL's publisher**, which emits neither. *(2026-09-08, later the same day: the 371 resolves into 316 SDL SuiteHelp + ~55 file-named Spotfire versions — two publishers, one `engine` value. See the converter-engine entry below.)*
+  - **`<!-- NewPage -->` in `bex`/`spm` is Javadoc**, i.e. an API-reference tree rather than a missing engine. It belongs to the §6.3 predicate, not here.
+  - The CSS/JS pair is the *broadest* signal (382) but the worst rule — `screen.css` + `print.css` is a filename coincidence waiting to happen. The narrower `GUID-*.html OR DC.* meta` is specified instead, even though it matches 11 fewer.
+
+  **Decided:** both rules go into §7, plus a `<meta name="generator">` pass for the long tail. Coverage of HTML-bearing versions goes from 68% to **98%**.
+
+  **And detecting is not converting — so the two must not share a value.** `SourceEngine` now carries `r-help`, `robohelp`, `frontpage`, `help-and-manual`, `mkdocs`, `docusaurus`, `doxia` and `other` beside the four convertible engines, with a `CONVERTIBLE_ENGINES` frozenset that Stage 5 tests membership of instead of asking "is it `auto`". Collapsing an identified generator into `auto` would have destroyed the distinction the column exists for: `auto` is a *detector bug*, a named engine with no handler is a *scoping decision*. `warnings()` names any `convert_eligible` row whose engine has no handler — such a row otherwise reads as completely settled and silently produces nothing — and `catalog set --engine` offers the full list, generated from the enum so the CLI cannot drift from the model. 18 new tests; **297/297 pass**, lint clean.
+
+- [x] **SDL DITA converter engine specified** (2026-09-08) — `architecture.md` §5.2 (new; "Universal Asset Preservation" moved to §5.4 so §5.3's widely-cited CSH subsection numbers survive), Phase 5 checklist. Scripts `C:\tmp\an_dita*.py`, index at `C:\tmp\dita_docsets.json`. Nothing implemented. This closes the `planning.md` placeholder that said the DITA handler was "a placeholder line, not a design". Surveyed over **353 doc-sets / 319 versions / 136 products / 67,406 `GUID-*.html` topics**; where a claim is sampled, the sample is a whole doc-set, so per-doc-set properties are measurable at all.
+
+  What the survey settled, and the measurement behind each:
+
+  | Decision | Measurement |
+  | :--- | :--- |
+  | Content is `<article>`, then chrome is stripped from *inside* it | `<article>` in 3,742/3,742 topics (100%) — the only invariant across two coexisting skins (Bootstrap 89%, legacy `#leftbar` 11%). Inside it: `#copyright` 98%, `<noscript>` 89%, `#thumbnailDialog` 89%, `.familylinks` 85% |
+  | Titles from the topic, structure from `suitehelp_topic_list.html`, orphans to an "Unfiled" node | `h1` == `DC.Title` == `<title>` in 100%. `suitehelp_topic_list.html` covers median 98% but is complete in **2 of 314**; `toc_crawler.html` exists in only 54 of 353; their union is complete in **36 of 353**. They disagree on 86 of 2,409 shared titles (4%) and `toc_crawler.html` is the stale one in all five spot-checks |
+  | **`DC.Relation` rejected as a parent pointer** | 97% of topics carry one and every target exists — but **42% sit in a mutual `a↔b` pair and all 65 doc-sets tested contain a cycle**. It is DITA's related-links relation; no tree can be built from it |
+  | Flat output, deterministic slugs, `_unique_N` collapsed | 44% of doc-sets contain a title collision (106 of 3,675 topics). 2.7% of topics are the same topic republished at a second TOC position — identical but for `_unique_N` on every id and anchor (byte-diffed on `marketo/7.1.0`) |
+  | Callouts → GFM alerts with the label span removed; fences bare | 1,764 callouts, **each with a matching `span.*title`** (1,674 `span.notetitle` for 1,674 `note` divs). 864 `<pre>` blocks yield exactly one language attribute in the whole corpus |
+  | Rewrite links by GUID, not by suffix; drop redundant fragments | **17,043 of 17,046 GUID links resolve (0.02% broken)** and all 2,650 content images exist — link integrity is the *opposite* of Flare's. But 48% of hrefs are `GUID-….html`, 15 are extensionless, and **84% of fragments are redundant self-references**; 6.1% of the real ones dangle |
+  | Images keep their source filename | **1,656 of 1,819 `<img>` (91%) carry no `alt` at all**; only 4.6% have usable alt |
+  | `GUID-*-homepage.html` feeds `meta.yml`, never converted | Present in 314 of 353 doc-sets and **all 314 carry `publication-title`, `release-version`, `release-date`**; its `<article>` holds those three divs and no body |
+
+  - **The predecessor's DITA implementation is a sketch, not a reference**, and reading it rather than trusting it paid three times: its callout transform strips `span.note__title` (the *other* DITA flavour) and never `span.notetitle`, so every SuiteHelp callout would emit a duplicated label; **there is no `<a href>` rewriting anywhere** in its four-step pipeline, so 48% of links in its output would point at files that do not exist; and it has essentially never run — one rename map in the whole cache, and an output directory holding a `toc.yml` reading `docs: []` and zero `.md` files.
+  - **The 371 turned out to be two publishers, and chasing that down cost one wrong answer first.** §3.4's rule is `GUID-*.html` **or** `DC.*` meta; the GUID population is 316 (319 corpus-wide). The ~55 remainder is the predecessor's `file_dita` — file-named topics under `topics/`, **132 doc-sets / 66 versions / ~6,215 topics, entirely Spotfire** (`sf-pysrv` 27, `sf-rsrv` 21, `enterprise-runtime-for-R` 11, five more). Its transform half is the same DITA (`topictitle1` 100%, `shortdesc` 99%, `note` 58%; `DC.identifier` still a GUID in 98%; `DC.relation` *plural* in 86%, which strengthens the refutation above). Its **layout** is not: a nested tree with a `_shared/` directory, against SuiteHelp's flat doc-set. So §5.2 is scoped to SuiteHelp, `engines/dita.py` branches on whether a doc-set holds `GUID-*.html`, and the file-named flavour is skipped with a report line until it gets its own layout survey.
+  - **A case-sensitive regex produced a confident wrong correction, and it is recorded because it nearly landed.** Probing for `name="DC.Type"` returned 0 file-named versions, which looked like clean evidence that `file_dita` did not exist in this corpus — and, combined with a recount, like evidence that the published 371 was inflated to 316 by the rejected `screen.css`+`print.css` signal. Both conclusions were written into `architecture.md` §3.4 before the next probe showed the flavour writes **`DC.type`** in lowercase. **371 was correct all along** (316 + ~55), the coverage claim stays 68% → 98%, and `design.md` §7.2 now states the case-insensitivity as a rule with a test attached. The failure mode is the one this ledger keeps hitting: a null result from an unvalidated matcher reads exactly like a real absence.
+  - A first pass at the `DC.Relation` test assigned depth only after recursing, so cycles produced plausible-looking but wrong numbers. It is recorded because the *corrected* result is what rules the approach out — the same failure mode as the 2026-09-07 WebWorks descoping, where an unmeasured premise drove a decision that had to be reversed.
+
+- [x] **Doc-class routing settled: source folder first, then name** (2026-09-07, user decision) — `architecture.md` §6.2/§6.2.1, `design.md` §10.4, Phase 6 checklist. Surveyed against the extracted cache: **1,822 versions, 11,633 documents** in `pdf/` and `doc/` (scripts `C:	mpn_docclass*.py`).
+
+  The rule the user gave, and what the corpus says about it:
+
+  | Source | Rule | Doc-class | Measured |
+  | :--- | :--- | :--- | ---: |
+  | `pdf/` | release note | `release-information` | 1,829 |
+  | `pdf/` | VPAT, licence, reminder notice | `reference-documents` | 2,214 |
+  | `pdf/` | *default* | `user-guides` | 5,088 |
+  | `doc/` | readme | `release-information` | 1,159 |
+  | `doc/` | *default* | `reference-documents` | 1,343 |
+
+  - **The folder discriminates before the name, and before the extension.** `pdf/` is flat and holds the authored deliverables (6,795 PDFs, no subdirectories); `doc/` holds boilerplate (2,419 TXT — reminder notices, licence details, RTU statements). Extension-based routing would have to explain why licence PDF and licence TXT agree while user-guide PDF and readme TXT do not.
+  - **`doc/` needs exactly one name test.** Licence, reminder notice, RTU and the CSV/XLSX/HTML tail all share one destination, so the only question is *is this the readme*. The licence and VPAT patterns exist solely for `pdf/`, whose default is `user-guides`.
+  - **Both folders occur at two depths** — 1,123 versions at the package root, **373 nested as `doc/pdf/` and `doc/doc/`**. Handling only the root layout would publish nothing for a fifth of the corpus.
+  - **`user-guides` is the default, not a match**, so there is no unclassified bucket and an unfamiliar guide name is published rather than dropped. Residue after routing: **4 files**, all genuine guides containing the word "note" (`special-notes`, `liveviewweb_newnote`).
+
+  **The separator is where this breaks.** A first pass anchored on `` misrouted **1,753 `*_relnotes.pdf` into `user-guides`** — `_` is a word character, so `` never matches between `_` and `rel`. The corpus also spells these names with spaces (`mft platform server v7.1 for windows release notes.pdf`) and both ways round (`licencing` beside `licensing`). This is the predecessor's substring bug seen from the other side: there the boundary was too loose and swallowed 8.5% of the corpus, here too tight and dropped 1,753 files. Patterns are now written against observed spellings and tested as such.
+
+- [x] **Flare alias corpus re-measured over the full cache** (2026-09-07) — **863 `Alias.xml` files, 387 with content, 11,054 entries, 2,396 distinct names**, superseding the 2026-09-04 subset (272 / 196 / 7,220). Script: `C:	mpn_flare_csh.py`. One published number was materially wrong and is corrected everywhere it appeared (`architecture.md` §3.9/§5.3.1, `design.md` §6.2/§6.3, `planning.md`, `user-guide.md` §2, `catalog.py`, `models.py`): **empty and zero-byte alias files are 55% of the corpus (476 of 863), not 28%**. 445 are well-formed `<CatapultAliasFile />`, 31 are zero-byte. This strengthens rather than complicates the two-column design — `_has_csh=true` with `_csh_names=0` is the *majority* case, not an edge case, which is exactly why the boolean and the count are not collapsible into one column.

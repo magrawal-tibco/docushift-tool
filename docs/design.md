@@ -340,7 +340,7 @@ The archive variant is identical but targets the archive path, and its `--extrac
 
 ## 6. Stage 4: Extraction and inventory
 
-**Specified.**
+**Specified**, except the catalog half of §6.3 (the columns, the round-trip and the write-back), which is **Built**.
 
 ### 6.1 Extract
 
@@ -348,6 +348,7 @@ The archive variant is identical but targets the archive path, and its `--extrac
 2. Refuse any archive member whose resolved path escapes the target directory, and any absolute member path. A documentation ZIP has no legitimate reason to contain either.
 3. Unpack to the canonical extract path, then record the resolved path and status `EXTRACTED`.
 4. Inventory assets by extension — PDF, Word, Excel, text, images, nested ZIPs — into `state.db`, so Stage 5 can relink them and Stage 7 can account for them.
+5. Walk the extracted tree once more, partitioning every file into API-reference or not, and write the five inventory columns back to `versions.csv` (§6.3).
 
 ### 6.2 CSH source inventory
 
@@ -355,30 +356,143 @@ Locating help maps is separated from parsing them, because the *absence* of a he
 
 For each doc-set inside the extracted tree, look for:
 
-| Format token | Where |
+| Format token | Where | Parsed? |
+| :--- | :--- | :--- |
+| `flare_alias` | `<book>/Data/Alias.xml` | **Yes** |
+| `dita_head_js` | `<doc-set>/static/head.js`, the `suitehelp.contexts` object | **Yes** |
+| `webworks_topics` | `<book>/wwhdata/common/topics.js` | **Yes** |
+
+**All three are read** (§9.2). Two nearby files are deliberately *not* consulted: `<doc-set>/ctx/` holds redirect stubs generated from the WebWorks map rather than the map itself, and `<book>/wwhdata/xml/files.xml` is a lossy XML twin of `topics.js` — where the two disagree it is the XML that is missing entries, and one observed book ships no `files.xml` at all.
+
+A source that is located but fails to parse still sets `_has_csh` — a file *was* found — with the failure counted and named in the extract report. "This version has help we could not read" and "this version has no help" are different facts, and only one of them is acceptable to discover after publishing.
+
+Record path, format, raw entry count and parse status per `(product, version, doc_set)`. **Empty, zero-byte and unparseable sources are counted and skipped, never raised** — an empty map is the *normal* case in every format, and overwhelmingly so in two of them: 476 of 863 Flare alias files (55%), 492 of 647 WebWorks `topics.js` (76%), 38 of 418 DITA `head.js` (9%). Raising would make a routine condition look like a defect. `docushift extract` prints the tally (`CSH: 3 sources, 561 entries`) so that a version with no help map is a fact known at extraction time.
+
+### 6.3 Inventory write-back to `versions.csv`
+
+**Built** — the columns, the blank-preserving round-trip, `CatalogManager.record_extract_inventory` / `clear_extract_inventory`, the merge exclusion and the desync warning. **Specified** — the API-reference predicate below and its triage report, which belong to the Stage 4 extractor and land with it.
+
+(`architecture.md` §3.9.) The per-doc-set detail from §6.2 stays in `state.db`; what goes back into the sheet is the five numbers a human needs in order to set `convert_eligible` and `convert_batch` on a package they have not opened.
+
+**Is a path an API reference?** One predicate, three callers (Stage 4 here, Stage 5's skip-list, Stage 7's doc-class router). Its shape is set by the corpus survey of 2026-09-07 (§6.3.1): **a marker decides, a name never does.**
+
+1. **Find the API-reference roots.** Walk the extracted tree; a directory is a root if it holds one of the generator markers in §6.3.1 Finding 5. Record the roots, not the files.
+2. **Every file beneath a root is an API reference.** Roots do not nest meaningfully — a Javadoc tree inside a Doxygen tree is one artefact — so the outermost match wins and the walk does not descend past it.
+3. **Names classify nothing.** They are used for exactly one thing: raising a flag (below). This is what makes `api reference/` (with a space) and `hawk/6.2.2/console-api/` resolve correctly while `api-exchange-gateway/`, a product name, does not.
+4. Where a name *is* compared — the flag, and nothing else — compare **whole segments, case-insensitively**. The corpus carries `API`/`api`, `C`/`c`, `JavaDoc`/`javadoc` and `Java_API`; and the predecessor's substring test over-matched 186,856 files on the pattern `/c` alone, including `csh.js` and the WebWorks `ctx/` help-source directory.
+
+**The flag.** A marker list only knows the generators we have seen. So after the roots are found, any directory whose *name* looks like an API reference — a whole segment matching `api`, `apidocs`, `api-docs`, `api_reference`, `api-reference`, `api reference`, `javadoc`, `Java_API`, `java`, `c`, `cpp`, `golang`, `tibdg`, or ending `-api` / `_api` — but which sits under **no** marker root is reported by `docushift extract`:
+
+```
+API-reference triage: 2 unmarked candidates in ftl@6.10.0
+  html/api-docs/            412 files, no known generator marker
+  html/api-docs/dotnet/     311 files, no known generator marker
+```
+
+It is a report line, not a classification: the files stay in `_doc_files` until a human says otherwise. The flag exists so that a generator we have no marker for surfaces as a question at extract time rather than as broken Markdown at conversion time, and so the marker list grows from evidence. Products whose *name* contains `api` are the reason this cannot be silently auto-promoted.
+
+**The five values,** computed in a single walk so they always describe one moment:
+
+| Value | Rule |
 | :--- | :--- |
-| `flare_alias` | `<doc-set>/Data/Alias.xml` |
-| `webworks_ctx` | `<doc-set>/ctx/` plus `<guide>/wwhdata/xml/files.xml` |
-| `dita_head_js` | `<doc-set>/static/head.js` |
+| `_api_files` | Files whose path satisfies the predicate |
+| `_doc_files` | Every other file. Not a topic count — images, CSS and skin assets are included, which is what makes it a footprint figure rather than a workload one |
+| `_has_api_ref` | `_api_files > 0` |
+| `_csh_names` | Distinct identifiers across all of the version's CSH sources, counted **byte-exactly and case-sensitively** — `GatewayInstances` and `gatewayInstances` are two (§9.1) — and deduplicated version-wide, matching how the resolver merges them (§9.3) |
+| `_has_csh` | At least one **readable** CSH source file was located — Flare `Alias.xml` or DITA `head.js` — regardless of whether it parsed to anything. `true` with `_csh_names=0` is the empty-source case, 55% of the Flare corpus. A WebWorks source leaves this `false` and produces a triage line instead (§6.2) |
 
-Record path, format, raw entry count and parse status per `(product, version, doc_set)`. **Empty, zero-byte and unparseable sources are counted and skipped, never raised** — they are 28% of the observed corpus, so raising would make a routine condition look like a defect. `docushift extract` prints the tally (`CSH: 3 sources, 561 entries`) so that a version with no help map is a fact known at extraction time.
+Directories are not counted, only files. Symlinks are not followed — a documentation ZIP has no legitimate reason to contain one, and Stage 4 already refuses escaping members (§6.1).
 
----
+**Writing.** One call sets all five together, so the two booleans cannot disagree with the counts they summarize. It follows `record_detected_engine`: locate the row, set the fields, save. A version that extracted with errors is left blank rather than written zero — a failed run must not look like an empty package.
+
+### 6.3.1 What the corpus says about API-reference paths
+
+Measured 2026-09-07 against the predecessor `html-to-md` extracted cache: **2,201,528 files across 515 products**. The reproduction scripts are `C:\tmp\an_segments.py` and `an_segments2.py`; they need that cache, which is not in this repo.
+
+**Finding 1 — the inherited seven-name list under-covers.** All seven segments do occur (283,267 files), but the corpus's real generated-API trees are named far more variously, and none of these are on the list:
+
+| Segment | Files | What it is |
+| :--- | ---: | :--- |
+| `apidocs/` | 27,450 | Spotfire SFDS — Doxygen C++ and .NET |
+| `apischemas/` | 16,464 | AMX BPM |
+| `components-api/` | 15,563 | BPME |
+| `api-docs/` | 3,935 | FTL — C and .NET |
+| `api-reference/` | 3,257 | ActiveSpaces C/Go, eFTL JavaScript/Python |
+| `console-api/`, `config-api/` | 3,930 | Hawk — Javadoc (`allclasses-frame.html`, `COM/TIBCO/…/class-use/`) |
+| `cpp-reference/`, `c-and-cobol-reference/` | 3,200 | Rendezvous, EMS |
+| `api reference/` | 1,141 | Contains a space |
+| `api_reference/` | 1,084 | Loyalty |
+
+Observed spellings: `api`, `apidocs`, `api-docs`, `api_reference`, `api-reference`, `api reference`, `<product>_api_ref`, `<thing>-api`. Across 515 products written by different teams over fifteen years there is no naming convention to key off.
+
+**Finding 2 — widening to a substring test is worse, not better.** `api-exchange-gateway/` (15,677 files) and `api-exchange-manager/` (1,015) are *product names* — TIBCO API Exchange Gateway. A "contains api" rule discards an entire product's documentation. This is why the predecessor's approach fails: it tests `seg.rstrip("/") in path`, so its `/c/` entry becomes the substring `/c` and matches **186,856 files (8.5% of the corpus)** that are not API references at all — `csh.js`, `collapse.png`, `contents.htm`, `css/`, `common/`, and the WebWorks **`ctx/` directory, which is a CSH source**. A rule meant for the C API has been quietly skipping context-sensitive-help inputs.
+
+**Finding 3 — casing is not stable.** `API`/`api`, `C`/`c`, `JavaDoc`/`javadoc`, and `Java_API` all occur. Comparison must fold case. (This is the one place in the tool that does: CSH identifiers are byte-exact, §9.1. Paths are not identifiers.)
+
+**Finding 4 — `javascript/` is an API tree, not documentation.** Every occurrence is `eftl/*/html/api-reference/javascript/eFTL.html` beside `styles/jsdoc-default.css` — JSDoc output. It is already covered by its `api-reference/` parent. `c-tutorial/` does not exist in the corpus.
+
+**Finding 5 — the trees are identifiable by content even when the name is unguessable.** Each generator leaves an unmistakable marker at the tree root:
+
+| Generator | Marker |
+| :--- | :--- |
+| Javadoc | `allclasses-frame.html`, `package-frame.html`, `index-all.html`, `class-use/` |
+| Doxygen (C / C++) | `annotated.html`, `*_8h.html` |
+| JSDoc | `styles/jsdoc-default.css` |
+| godoc | `lib/godoc/godocs.js` |
+| Sandcastle (.NET) | `fti/FTI_*.json`, `Help/html/<guid>.htm` |
+
+This is the same conclusion §7 reaches for engine detection, for the same reason: **what a tree contains is knowable; what someone named it is not.**
 
 ## 7. Stage 5: Engine detection
 
-**Specified** (`architecture.md` §3.4).
+**Specified** (`architecture.md` §3.4). Rules measured against the whole `html-to-md` cache on 2026-09-08 — 1,822 versions, of which 539 (29.6%) carry no HTML at all and are not this algorithm's problem.
 
-Run per version, over the extracted tree, in two passes:
+### 7.1 The rules
 
-1. **Marker pass** — cheapest and least ambiguous. Flare: `*.mcwebhelp`, `*.mclog`, `Skins/`, `Data/`, `MicroContent/`, `_globalpages/`, `csh.js`. WebWorks: `wwhelp/`, `wwhdata/`. DITA: `.dita` remnants and DITA metadata files.
-2. **Content-signature pass** — corroboration for the above, and the *only* means of identifying DocBook, whose flat HTML output has no distinctive layout. Signatures: the `MadCap` namespace and `MadCap:*` attributes; the WebWorks generator meta tag; the DITA-OT generator comment; the `DocBook XSL Stylesheets` generator comment.
+Run per version, over the extracted tree, in three passes.
 
-Then:
+**Pass 1 — layout markers.** Cheapest and least ambiguous: a directory listing decides it.
 
-3. **Never guess.** A version matching no signature stays `auto` and is skipped at conversion with a warning. A wrong engine does not fail — it produces plausible-looking, silently wrong Markdown, which is the most expensive outcome available.
-4. **Never override a manual value.** Writing back is refused outright when `engine_source` is `manual`; otherwise the engine is written with `engine_source=detected`.
-5. **Record the per-guide-folder map** in `state.db` regardless. One version's ZIP commonly bundles nine sibling guide folders of a single Flare output; should a bundle ever genuinely mix generators, the map makes it visible rather than flattening it into one CSV cell.
+| Engine | Markers | Versions |
+| --- | --- | --- |
+| Flare | `*.mcwebhelp`, `*.mclog`, `Skins/`, `Data/`, `MicroContent/`, `_globalpages/`, `csh.js` | 670 |
+| WebWorks | `wwhelp/`, `wwhdata/` | 176 |
+| DITA (SDL) | `GUID-*.html` filenames, or `static/head.js` + `static/body.js` | 371 |
+| R help | `snext.css` or `snextchm.css` | 11 |
+
+19 further versions match Flare *and* WebWorks markers — a Flare output with a WebWorks tree left beside it. Flare wins; the per-folder map (below) keeps the ambiguity visible.
+
+**Pass 2 — content signatures.** Corroboration for pass 1, and the *only* means of identifying DocBook, whose flat HTML output has no distinctive layout. Signatures: the `MadCap` namespace and `MadCap:*` attributes; the WebWorks generator meta tag; the DITA-OT generator comment; `DC.Type` / `DC.Identifier` / `DC.Title` meta tags (SDL DITA); `class="RdName"` / `class="RdTitle"` (R help); the `DocBook XSL Stylesheets` generator comment.
+
+**Pass 3 — the generator meta tag.** A last look for `<meta name="generator">`, which names the remaining long tail outright: Adobe RoboHelp 11, Microsoft FrontPage 6.0, Help & Manual, MkDocs / mkdocs-material, Docusaurus, Apache Maven Doxia. 19 versions, ~7,200 files. None of these has a Stage 5 handler; they are recorded anyway (§7.3). A string we cannot map to a known name becomes `other`, with the raw value kept in `state.db`.
+
+### 7.2 Why DITA needed its own rule
+
+The original spec looked for DITA the way DITA-OT leaves it: `.dita` remnants and the DITA-OT generator comment. **The corpus has almost none of that.** TIBCO publishes DITA through SDL's publisher, which emits neither marker — so 371 versions and 61,712 HTML files, the second-largest engine in the corpus and larger than WebWorks, detected as `auto`.
+
+The signals SDL *does* leave, measured over the 408 HTML-bearing versions that the original rules missed:
+
+| Signal | Hits |
+| --- | --- |
+| `static/head.js` + `static/body.js` | 382 |
+| `screen.css` + `print.css` | 382 |
+| `DC.*` meta tags | 369 |
+| `GUID-*.html` filenames | 316 |
+
+`GUID-*.html OR DC.* meta` recovers 371; the R-help rule recovers 11 more. Together **382 of 408 (94%)**, taking coverage of HTML-bearing versions from **68% to 98%**. The residue is ~6 hand-authored `openspirit-*` versions and a handful of one-offs, which stay `auto` and should.
+
+**The two clauses of the DITA rule match two different publishers**, which the 2026-09-08 converter survey (`architecture.md` §5.2.1) separated: `GUID-*.html` matches 316 SDL SuiteHelp versions, and `DC.*` meta picks up ~55 more that SuiteHelp never touches — file-named topics under `topics/`, all in the Spotfire family. That is why the `DC.*` hit count (369) exceeds the GUID one (316) rather than merely corroborating it, and it is the reason both clauses stay: dropping `DC.*` as redundant would lose a sixth of the DITA corpus.
+
+**`DC.*` is matched case-insensitively.** SuiteHelp writes `DC.Type`, the file-named flavour writes `DC.type`. A case-sensitive match silently drops all 66 of the latter's versions — it did exactly that once during the survey, and produced a confident, wrong "correction" of 371 down to 316 before the casing was spotted.
+
+Two lessons are worth keeping. First, the CSS/JS pair is the *broadest* signal but the worst rule — `screen.css` + `print.css` is a filename coincidence waiting to happen, so the specific signals are preferred even though they match less. Second, `<!-- NewPage -->` in the `bex` and `spm` trees is **Javadoc**, not a missing engine: those are API-reference trees, and the §6.3 predicate — not this algorithm — is what should be claiming them.
+
+### 7.3 What detection does with the answer
+
+1. **Never guess.** A version matching no signature stays `auto` and is skipped at conversion with a warning. A wrong engine does not fail — it produces plausible-looking, silently wrong Markdown, which is the most expensive outcome available.
+2. **Name what cannot be converted.** `auto` and "R help" are both unconvertible, but they are not the same fact, so they do not share a value: `auto` means *undetected* and is a detector bug, while a named engine with no handler is a scoping decision for a human. `SourceEngine` therefore carries the pass-3 generators as real values, and Stage 5 tests membership of `CONVERTIBLE_ENGINES` rather than "is it `auto`". `warnings()` reports an identified-but-unconvertible engine on a `convert_eligible` row, because such a row *looks* settled in the sheet and silently produces nothing.
+3. **Never override a manual value.** Writing back is refused outright when `engine_source` is `manual`; otherwise the engine is written with `engine_source=detected`.
+4. **Record the per-guide-folder map** in `state.db` regardless. One version's ZIP commonly bundles nine sibling guide folders of a single Flare output; should a bundle ever genuinely mix generators, the map makes it visible rather than flattening it into one CSV cell.
 
 This is the step that makes the catalog a mid-pipeline write target: the engine cannot be known at discovery, so it is written back after extraction and read by conversion.
 
@@ -401,6 +515,7 @@ This is the step that makes the catalog a mid-pipeline write target: the engine 
 1. **A family not declared in `taxonomy.yaml`**, naming the workspace folder that will be created. Families are user-extensible by design (`architecture.md` §4.2); the warning is what stops a typo (`mesaging`) from silently becoming a third family folder holding one product. If the family name cannot even form a folder, that failure is reported in its place.
 2. **In a batch but not eligible** — nothing downstream will ever pick this row up. The message includes the exact `catalog enable` command that fixes it.
 3. **`zip_source=manual` but discovery now has a URL** — the pin still wins; the user may no longer need it.
+4. **An inventory boolean disagreeing with its count** — `_has_api_ref=false` beside a non-zero `_api_files`, or `_has_csh=false` beside a non-zero `_csh_names` (`architecture.md` §3.9). The tool writes both from one computation, so this shape only arises from a hand-edit. A warning rather than a problem: the values are advisory, the next `docushift extract` overwrites them, and blocking an import over a stale summary column would be out of proportion.
 
 ### 8.3 Triage progress — **Built**
 
@@ -416,31 +531,58 @@ Count products by family provenance and list the unclassified ones. This turns "
 
 ## 9. Context-Sensitive Help
 
-**Specified.** This is the most intricate algorithm in the tool, and the one grounded most directly in measurement: 272 real `Alias.xml` files, 7,220 entries, ~254 product versions. The full evidence table and the reasoning are in `architecture.md` §5.3; what follows is the procedure.
+**Specified.** This is the most intricate algorithm in the tool, and the one grounded most directly in measurement — now re-measured over the whole cache: **863 `Alias.xml` files, 387 with content, 11,054 entries, 2,396 distinct names**, superseding the 2026-09-04 subset of 272 files / 7,220 entries. **Scope: all three HTML engines — Flare, DITA and WebWorks** (§9.2). The full evidence table and the reasoning are in `architecture.md` §5.3; what follows is the procedure.
 
 ### 9.1 The single identifier rule
 
-Every generator offers at most one key that is genuinely unique, and it is never the integer. Flare's `Name`, DITA's context name, and WebWorks' ctx file stem all live in **one string namespace**. Flare's `ResolvedId` is parsed — so that a malformed entry is still recognised as an entry — and then discarded.
+Flare offers one key that is genuinely unique, and it is not the integer: the `Map`'s `Name`. `ResolvedId` is parsed — so that a malformed entry is still recognised as an entry — and then discarded. The identifier is typed as a **string**, not as an integer and not as a name-shaped token.
 
-Two consequences follow, and both are correctness requirements rather than style:
+Three consequences follow, and all are correctness requirements rather than style:
 
-- **Comparison is byte-exact.** `GatewayInstances` and `gatewayInstances` are two different live help targets in TIBCO BC 7.4/7.5. With no integer to disambiguate them, case is the only thing that does.
-- **Identifiers are always emitted double-quoted**, in map keys and in frontmatter alike. WebWorks identifiers are routinely all digits, and a YAML 1.1 loader turns an unquoted `1234` into an integer, `6.2` into a float, and `Yes`/`No`/`On`/`Off`/`null` into non-strings — in a map documented as string-keyed.
+- **Comparison is byte-exact.** `GatewayInstances` and `gatewayInstances` are two different live help targets in TIBCO BC 7.4/7.5. With no integer to disambiguate them, case is the only thing that does — and the full-cache re-measure finds **8 such case-only collisions**, so this is not a single anecdote.
+- **The string typing is carried by Flare alone.** It is often attributed to WebWorks, but WebWorks needs none of it: its identifiers are dotted lowercase names with **zero digit-only and zero case-only collisions** in the corpus. Flare supplies the whole justification on its own — **834 of 11,054 names (7.5%) are digit-only** (`12`, `1000`, `1122`), and the 8 case-only collisions above are all Flare's.
+- **Identifiers are always emitted double-quoted**, in map keys and in frontmatter alike. A YAML 1.1 loader turns an unquoted `1234` into an integer and `6.2` into a float, in a map documented as string-keyed. Measured over Flare the live hazard is *only* numeric coercion — zero names are `Yes`/`No`/`On`/`Off`/`null`-shaped, zero are sexagesimal, zero carry a leading zero — but the rule is applied to every identifier rather than narrowed to the digit ones, because a conditional quote is a branch that can be wrong and an unconditional one cannot.
 
-### 9.2 Readers, one per engine
+### 9.2 Three readers, one per HTML engine
 
-Each engine contributes only a reader yielding `(identifier, link, anchor)`. The schema, the resolver and the writer are shared and engine-neutral.
+The schema, the resolver and the writer are shared and engine-neutral; an engine contributes only a reader yielding `(identifier, link, anchor)`. **Every format the corpus ships is read.**
 
-| Engine | Read from | Identifier |
-| :--- | :--- | :--- |
-| Flare | `Data/Alias.xml`, one `Map` element per entry | the `Name` attribute |
-| WebWorks | `ctx/<guide><id>.htm`, a JS redirect, resolved to a file through `<guide>/wwhdata/xml/files.xml` | the **ctx file stem** (`admin1234`) |
-| DITA (file and SDL) | `static/head.js` → the `suitehelp.contexts` object; SDL additionally maps `GUID-*.html` through the GUID rename map | the context name |
-| DocBook | nothing observed | — |
+| Engine | Read from | Identifier | Status |
+| :--- | :--- | :--- | :--- |
+| Flare | `<book>/Data/Alias.xml`, one `Map` element per entry | the `Name` attribute | **Supported** |
+| DITA (SDL) | `<doc-set>/static/head.js` → `suitehelp.contexts` | the JSON object key | **Supported** |
+| WebWorks | `<book>/wwhdata/common/topics.js` | the `WWHBookData_MatchTopic` case label | **Supported** |
+| DocBook | nothing observed | — | No CSH exists |
 
-WebWorks is why the identifier is typed as a string rather than as a name: it has no alias name, and the application requests `ctx/admin1234.htm` directly, so the stem *is* the key the shipped product holds.
+**The DITA contract, measured.** `static/head.js` assigns a single flat JSON object:
 
-A link may carry a fragment (`config/Getting_Started.htm#adb.palette…`, 3% of the corpus). The reader splits it: the path is the link, the fragment is the anchor.
+```js
+suitehelp.contexts={"bwmarketo_palette":"GUID-3F0A….html","bwmarketo_conn":"GUID-9C21….html", …}
+```
+
+Identifier → target HTML file, one level deep, no nesting and no per-entry attributes — materially simpler to read than Flare's `Alias.xml`. It is present in **380 of 418 `static/head.js` files (91%)**; the remaining 38 assign an empty object, which is the DITA equivalent of Flare's empty `<CatapultAliasFile />` and is counted and skipped the same way. Because the values are plain file names, the fragment split below usually finds no fragment — the reader still applies it rather than special-casing, since the shape is the same.
+
+**The WebWorks contract, measured.** `wwhdata/common/topics.js` is a generated dispatch chain, one file per book:
+
+```js
+function  WWHBookData_MatchTopic(P)
+{
+var C=null;
+if(P=="as400.palette.gettingstartedurl")C="adas400_gettingstarted.6.1.htm#1674528";
+if(P=="as400.instance.helpurl")C="adas400_instance.7.1.htm#1851467";
+return C;
+}
+```
+
+The reader takes each `if(P=="<identifier>")C="<target>"` pair. Identifiers are dotted lowercase names; targets are a file plus, 43% of the time, a Frame-generated numeric anchor. Present in **647 of 692 `wwhdata/` trees (93%)**, of which 155 carry at least one case — the other 492 (76%) return `null` unconditionally and are the WebWorks equivalent of an empty `<CatapultAliasFile />`.
+
+It is the cleanest of the three sources. **All 3,439 targets exist and all 1,492 anchors are present in the file they name** — 100% internal integrity, against Flare's 78%.
+
+**Two nearby files are not the source, and picking either would be a mistake.** `wwhdata/xml/files.xml` holds the same map as `<... name="id" href="file#anchor" />` and agrees with `topics.js` in 153 of 155 books — but the two disagreements are entries *missing from the XML*, and one book ships no `files.xml` at all, so the XML is the lossy twin despite being the more parseable format. `ctx/<book><n>.htm` is not a map either: each file is a two-line redirect stub carrying `document.location = "../index.htm?context=…&topic=…"`, generated from the map rather than holding it.
+
+**How this section had WebWorks wrong.** Until 2026-09-08 WebWorks was out of scope, on the argument that its reader depended on `ctx/`, and that `ctx/` was missing from 90% of WebWorks output — 692 `wwhdata/` trees against 69 `ctx/` directories. Both halves were wrong. The ratio compared a **per-book** directory against a **per-doc-set** one, and WebWorks averages 3.5 books per doc-set; measured at matching granularity, 68 of the 186 doc-sets holding WebWorks books have a `ctx/`, which is 37%. And the reader never needed `ctx/` in the first place. The general form of the error is worth naming, because it produced two descoping decisions in one day: a ratio between two counts is only evidence if the counts are of the same kind of thing.
+
+A link may carry a fragment — `config/Getting_Started.htm#adb.palette…` in 3% of Flare entries, a numeric `#1674528` in 43% of WebWorks ones. The reader splits it: the path is the link, the fragment is the anchor. WebWorks is why that field is not optional decoration.
 
 ### 9.3 Resolution
 
@@ -449,7 +591,7 @@ Run **after** the version's topics have been converted, so resolution tests agai
 1. **Collect** every CSH source under the version's extracted tree, grouped by doc-set.
 2. **Parse** to `(identifier, link, anchor, doc_set)`. Empty, zero-byte and unparseable files are counted and skipped.
 3. **Resolve within the doc-set first**: map the link's `.htm` path to the Markdown file the converter emitted for that HTML file.
-4. **Fall back version-wide**: if the link does not resolve in its own doc-set, try the identical relative path in every sibling doc-set. One hit wins.
+4. **Fall back version-wide**: if the link does not resolve in its own doc-set, try the identical relative path in every sibling doc-set. One hit wins. This is a Flare remedy specifically — WebWorks links resolve inside their own book 100% of the time, so on a WebWorks version the step never fires.
 5. **Merge by identifier.** The same target reached from several doc-sets collapses to one entry. Different targets produce a primary plus alternatives under `also`. **The primary is the doc-set with the most resolved entries; ties break alphabetically** — deterministic, and it picks the main help output over a release-notes or getting-started sidecar every time.
 6. **Emit** `csh.yml`, then the frontmatter.
 
@@ -498,6 +640,36 @@ The dots-to-dashes version conversion belongs here too, at the publishing bounda
 
 `-resources` is a **separate repository**, not a directory in the docs repo (`architecture.md` §6.3) — generated API trees and archived ZIPs grow monotonically, do not delta, and are not reviewed like prose.
 
+### 10.4 Step 2, the document router — **Specified**
+
+Which doc-class a non-converted document lands in. Grounded in a 2026-09-07 survey of 1,822 versions and 11,633 documents (`architecture.md` §6.2.1).
+
+**Locate the two source folders.** For a version's extracted root `V`, the PDF folder is `V/pdf` or `V/doc/pdf`, and the document folder is `V/doc`. Both depths occur — 1,123 versions put `pdf/` and `doc/` at the root, 373 nest them under `doc/`. Check both; a version may have either, both, or neither. Only *files directly inside* these folders are routed here: subdirectories are the converter's and the API router's business, not this step's.
+
+**Four name patterns**, matched against the filename stem, case-insensitively, with `[\s_.-]?` standing for the optional separator:
+
+| Pattern | Matches |
+| :--- | :--- |
+| release-note | `relnotes` \| `(^\|[\s_.-])rel(ease)?[\s_.-]?notes?` \| `readme` |
+| vpat | `vpat` |
+| licence | `licen[cs](e\|ing)` |
+| reminder-notice | `remind(er)?[\s_.-]?notice` |
+
+**Route**, first match wins:
+
+1. A file in the **document folder** → `release-information` if it matches release-note, otherwise `reference-documents`. There is deliberately no second test: licence, reminder notice, RTU and the CSV/XLSX/HTML strays all share one destination, so asking anything beyond *is this the readme* would add branches that cannot change the answer.
+2. A file in the **PDF folder** → `reference-documents` if it matches vpat, licence or reminder-notice; else `release-information` if it matches release-note; else **`user-guides`**.
+
+`user-guides` is the **default, not a match**, which is why the router has no unclassified bucket and why a generator that ships an unfamiliar guide name is published rather than dropped.
+
+**Three rules about the patterns themselves**, each of which the corpus broke at least once:
+
+- **`\b` is not a usable boundary here.** `_` is a word character, so `\b` does not match between `_` and `rel`, and a first pass written with it misrouted **1,753 `*_relnotes.pdf` files into `user-guides`**. The alternation therefore lists `relnotes` bare and anchors the spelled-out form on `(^|[\s_.-])`.
+- **Spaces are a real separator.** `mft platform server v7.1 for windows release notes.pdf` and `tibco nimbus control 8.1.3 release notes.pdf` exist. A pattern accepting only `_` and `-` misses them.
+- **`licence` and `licencing` are spelled both ways** (`tib_nimbus_9.1.0_licencing_doc.pdf` beside `tib_control_9.0.1_licensing_doc.pdf`), hence `licen[cs](e|ing)` rather than a literal.
+
+Validated against the full corpus, the residue in `user-guides` after routing is **4 files** — `special-notes` ×2 and `liveviewweb_newnote` ×2 — all of which are genuine guides that merely contain the word "note". Nothing is misrouted and nothing is unrouted.
+
 **Step 4, the link rewrite, in full.** Every link from a converted topic into an API-reference path (`api/`, `javadoc/`, `Java_API/`, `java/`, `c/`, `golang/`, `tibdg/`, however many `../` deep) is replaced with an **absolute URL**: `publish_base_url` from `config/publishing.yaml`, then the same `{locale}-{bu}-{family}-resources/{locale}/{product}/api-references/{subdir}/{version-dashed}/{rest}` template that placed the file. Link construction and file placement call one function, so a link cannot point somewhere the copy did not write. Links that stay inside the docs repo — within `online-help/`, or out to the PDF doc-classes — are left relative, which is what keeps the repo previewable before publication.
 
 ---
@@ -515,6 +687,8 @@ Properties that hold across the whole tool. Each is a rule some algorithm above 
 7. **A hand-supplied package converts through exactly the same path as a downloaded one.** No downstream stage branches on provenance. (§5.2)
 8. **A help identifier is either resolved or listed as unresolved.** Nothing is silently dropped, and identifier text round-trips byte-exactly as a string. (§9)
 9. **Absence is reported, never faked.** No empty `csh.yml`, no empty version list from a failed crawl, no stage command that exits 0 having done nothing.
+10. **An unmeasured value is blank, never zero.** The inventory columns distinguish "never extracted" from "extracted, found none", and no stage writes them for a run that failed. (§6.3)
+11. **One path is classified as an API reference by exactly one predicate**, shared by the Stage 4 count, the Stage 5 skip and the Stage 7 route. (§6.3)
 
 ---
 
@@ -544,9 +718,13 @@ Properties that hold across the whole tool. Each is a rule some algorithm above 
 | 5.2 | Hand-supplied ingestion | Specified | Phase 4 |
 | 6.1 | Extraction | Specified | Phase 4 |
 | 6.2 | CSH source inventory | Specified | Phase 4 |
+| 6.3 | Inventory columns and write-back | Built | `catalog.py:record_extract_inventory`, `utils/csvio.py` |
+| 6.3 | API-reference predicate and triage | Specified | Phase 4 |
 | 7 | Engine detection | Specified | Phase 5 |
 | 8.1–8.3 | Catalog validation, warnings, triage | Built | `catalog.py` |
 | 9.3 | CSH resolution | Specified | Phase 5 |
 | 9.4–9.5 | `csh.yml` and frontmatter | Specified | Phase 5 |
 | 9.6 | CSH verification | Specified | Phase 7 |
+| 9.2 | CSH readers (**Flare, DITA, WebWorks**) | Specified | Phase 5 |
 | 10 | AEM synthesis and sync | Specified | Phases 6–7 |
+| 10.4 | Document router (`pdf/` and `doc/` → doc-class) | Specified | Phase 6 |
