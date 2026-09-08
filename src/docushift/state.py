@@ -176,7 +176,13 @@ class StateStore:
         return dict(row) if row else None
 
     def record_version_snapshot(self, version: ProductVersion) -> None:
-        """Records the discovery-owned version fields. Engine fields are excluded."""
+        """Records the discovery-owned version fields.
+
+        The engine columns, `convert_batch`, `zip_source` and the Stage 4 inventory
+        columns are all absent from `version_snapshot` structurally rather than by
+        rule -- discovery does not write them, so there is no base value a merge
+        could legitimately compare against (docs/architecture.md §3.5).
+        """
         with self._tx() as conn:
             conn.execute(
                 """

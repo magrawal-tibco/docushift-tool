@@ -10,9 +10,13 @@ import pytest
 
 from docushift.utils.csvio import (
     format_bool,
+    format_optional_bool,
+    format_optional_int,
     natural_version_key,
     normalize_date,
     parse_bool,
+    parse_optional_bool,
+    parse_optional_int,
     read_rows,
     write_rows,
 )
@@ -119,3 +123,31 @@ def test_rewrite_is_byte_identical(tmp_path: Path) -> None:
     write_rows(path, columns, read_rows(path))
 
     assert path.read_bytes() == first
+
+
+# -- nullable inventory columns (architecture.md §3.9) ------------------------
+
+
+@pytest.mark.parametrize(
+    ("raw", "expected"),
+    [("", None), ("   ", None), (None, None), ("true", True), ("FALSE", False), ("junk", None)],
+)
+def test_optional_bool_keeps_blank_distinct_from_false(raw, expected) -> None:
+    """A blank inventory cell means 'never extracted', which is not 'false'."""
+    assert parse_optional_bool(raw) is expected
+
+
+@pytest.mark.parametrize(
+    ("raw", "expected"),
+    [("", None), ("0", 0), ("4310", 4310), ("4,310", 4310), ("4310.0", 4310), ("-1", None), ("x", None)],
+)
+def test_optional_int_keeps_blank_distinct_from_zero(raw, expected) -> None:
+    """Excel renders a count as '4,310' or '4310.0' given the chance; both are real."""
+    assert parse_optional_int(raw) == expected
+
+
+def test_optional_formatters_preserve_the_empty_cell() -> None:
+    assert format_optional_bool(None) == ""
+    assert format_optional_int(None) == ""
+    assert format_optional_bool(False) == "false"
+    assert format_optional_int(0) == "0"

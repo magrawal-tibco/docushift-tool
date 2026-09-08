@@ -373,6 +373,33 @@ def test_engine_varies_across_one_products_versions(catalog: CatalogManager) -> 
     assert reloaded.get_version("ems", "10.2.1").engine == SourceEngine.AUTO
 
 
+def test_an_unconvertible_engine_survives_a_round_trip(catalog: CatalogManager, sample_product: Product) -> None:
+    """The point of naming R help in the enum: it has to reach the sheet to be reviewed.
+
+    Before the unconvertible engines existed, `load()` coerced anything it did not
+    recognise back to `auto` -- which is exactly the value that means "we have no
+    idea", so a correct detection became indistinguishable from a failed one.
+    """
+    _fetch(catalog, sample_product)
+
+    assert catalog.record_detected_engine("ems", "10.4.0", SourceEngine.R_HELP) is True
+
+    row = next(r for r in read_rows(catalog.versions_path) if r["version"] == "10.4.0")
+    assert row["engine"] == "r-help"
+    assert _reload(catalog).get_version("ems", "10.4.0").engine == SourceEngine.R_HELP
+
+
+@pytest.mark.parametrize("engine", sorted(e.value for e in SourceEngine))
+def test_every_engine_value_round_trips_through_the_csv(
+    catalog: CatalogManager, sample_product: Product, engine: str
+) -> None:
+    _fetch(catalog, sample_product)
+
+    catalog.set_version_field("ems", "10.4.0", "engine", engine)
+
+    assert _reload(catalog).get_version("ems", "10.4.0").engine == SourceEngine(engine)
+
+
 # -- edits, filtering, reporting ---------------------------------------------
 
 
@@ -532,6 +559,44 @@ def test_scheduled_but_ineligible_version_warns(catalog: CatalogManager, sample_
     assert any("convert_eligible=false" in note and "8.6.0" in note for note in notes)
 
 
+def test_an_identified_but_unconvertible_engine_warns(catalog: CatalogManager, sample_product: Product) -> None:
+    """A named engine makes the row *look* settled, so the missing handler has to be said."""
+    _fetch(catalog, sample_product)
+    catalog.record_detected_engine("ems", "10.4.0", SourceEngine.R_HELP)
+
+    notes = catalog.warnings()
+
+    assert any("r-help" in note and "no Stage 5 handler" in note for note in notes)
+
+
+def test_a_convertible_engine_produces_no_handler_warning(
+    catalog: CatalogManager, sample_product: Product
+) -> None:
+    _fetch(catalog, sample_product)
+    catalog.record_detected_engine("ems", "10.4.0", SourceEngine.FLARE)
+
+    assert not any("no Stage 5 handler" in note for note in catalog.warnings())
+
+
+def test_auto_is_not_reported_as_an_unconvertible_engine(
+    catalog: CatalogManager, sample_product: Product
+) -> None:
+    """`auto` is also unconvertible, but it means "undetected" -- a different report line."""
+    _fetch(catalog, sample_product)
+
+    assert not any("no Stage 5 handler" in note for note in catalog.warnings())
+
+
+def test_an_ineligible_unconvertible_engine_stays_quiet(
+    catalog: CatalogManager, sample_product: Product
+) -> None:
+    """Out of scope already: the warning would name nothing the user can act on."""
+    _fetch(catalog, sample_product)
+    catalog.record_detected_engine("ems", "8.6.0", SourceEngine.MKDOCS)
+
+    assert not any("no Stage 5 handler" in note for note in catalog.warnings())
+
+
 def test_an_undeclared_family_warns_but_does_not_fail(taxonomy_config, catalog: CatalogManager) -> None:
     """A family typed straight into products.csv is accepted; the folder is auto-registered."""
     catalog.config = taxonomy_config
@@ -629,3 +694,114 @@ def test_an_unknown_zip_source_is_rejected(catalog: CatalogManager, sample_produ
 
     with pytest.raises(ValueError):
         catalog.set_version_field("ems", "10.4.0", "zip_source", "somewhere-else")
+
+
+# -- Stage 4 extraction inventory (architecture.md §3.9) ---------------------
+
+
+def _extracted(catalog: CatalogManager) -> None:
+    """Puts one product in the catalog and records an inventory against it."""
+    _fetch(catalog, make_product("ems", versions={"10.4.0": make_version("ems", "10.4.0")}))
+    catalog.record_extract_inventory("ems", "10.4.0", csh_sources=2, csh_names=358, api_files=4310, doc_files=19776)
+
+
+def test_inventory_is_blank_until_the_version_is_extracted(catalog: CatalogManager) -> None:
+    """Blank and zero are different answers: nothing has opened this package yet."""
+    _fetch(catalog, make_product("ems", versions={"10.4.0": make_version("ems", "10.4.0")}))
+
+    version = _reload(catalog).get_version("ems", "10.4.0")
+
+    assert version.has_csh is None
+    assert version.csh_names is None
+    assert version.api_files is None
+    assert version.doc_files is None
+    row = read_rows(catalog.versions_path)[0]
+    assert row["_has_csh"] == ""
+    assert row["_doc_files"] == ""
+
+
+def test_recorded_inventory_round_trips(catalog: CatalogManager) -> None:
+    _extracted(catalog)
+
+    version = _reload(catalog).get_version("ems", "10.4.0")
+
+    assert version.has_csh is True
+    assert version.csh_names == 358
+    assert version.has_api_ref is True
+    assert version.api_files == 4310
+    assert version.doc_files == 19776
+
+
+def test_measured_zero_survives_as_zero_not_blank(catalog: CatalogManager) -> None:
+    """`0` means Stage 4 looked and found none -- it must not degrade to 'never ran'."""
+    _fetch(catalog, make_product("ebx", versions={"6.2.0": make_version("ebx", "6.2.0")}))
+    catalog.record_extract_inventory("ebx", "6.2.0", csh_sources=0, csh_names=0, api_files=0, doc_files=8104)
+
+    version = _reload(catalog).get_version("ebx", "6.2.0")
+
+    assert version.has_csh is False
+    assert version.csh_names == 0
+    assert version.has_api_ref is False
+    assert version.api_files == 0
+
+
+def test_a_csh_source_that_parses_to_nothing_is_a_distinct_state(catalog: CatalogManager) -> None:
+    """The empty `<CatapultAliasFile />` case -- 28% of the corpus (architecture.md §5.3.1)."""
+    _fetch(catalog, make_product("ebx", versions={"6.2.0": make_version("ebx", "6.2.0")}))
+    catalog.record_extract_inventory("ebx", "6.2.0", csh_sources=3, csh_names=0, api_files=0, doc_files=8104)
+
+    version = _reload(catalog).get_version("ebx", "6.2.0")
+
+    assert version.has_csh is True
+    assert version.csh_names == 0
+    # A source that yields nothing is a measurement, not an inconsistency.
+    assert catalog.warnings() == []
+
+
+def test_a_fetch_never_touches_the_inventory(catalog: CatalogManager) -> None:
+    """Discovery has never opened the package, so it has nothing true to say (§3.5)."""
+    _extracted(catalog)
+
+    _fetch(catalog, make_product("ems", versions={"10.4.0": make_version("ems", "10.4.0")}))
+
+    version = _reload(catalog).get_version("ems", "10.4.0")
+    assert version.csh_names == 358
+    assert version.api_files == 4310
+    assert version.doc_files == 19776
+
+
+def test_inventory_survives_a_spreadsheet_round_trip(catalog: CatalogManager) -> None:
+    _extracted(catalog)
+    before = catalog.versions_path.read_bytes()
+
+    _reload(catalog).save()
+
+    assert catalog.versions_path.read_bytes() == before
+
+
+def test_clearing_the_inventory_restores_never_extracted(catalog: CatalogManager) -> None:
+    _extracted(catalog)
+
+    assert catalog.clear_extract_inventory("ems", "10.4.0") is True
+
+    version = _reload(catalog).get_version("ems", "10.4.0")
+    assert version.has_csh is None
+    assert version.doc_files is None
+
+
+def test_recording_against_an_unknown_version_reports_failure(catalog: CatalogManager) -> None:
+    assert catalog.record_extract_inventory("nope", "1.0", 0, 0, 0, 0) is False
+
+
+def test_a_hand_edited_boolean_that_contradicts_its_count_warns(catalog: CatalogManager) -> None:
+    """The tool writes both from one measurement, so this shape is only ever a hand-edit."""
+    _extracted(catalog)
+    catalog.get_version("ems", "10.4.0").has_api_ref = False
+    catalog.save()
+
+    notes = _reload(catalog).warnings()
+
+    assert any("_has_api_ref=false but _api_files=4310" in note for note in notes)
+    # Advisory only -- the next extract overwrites both, so it must never become a
+    # blocking problem. (Other, unrelated problems may legitimately be present.)
+    assert not any("_has_api_ref" in problem for problem in _reload(catalog).validate())

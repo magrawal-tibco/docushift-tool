@@ -46,6 +46,61 @@ def format_bool(value: bool) -> str:
     return "true" if value else "false"
 
 
+def parse_optional_bool(value: object) -> bool | None:
+    """Reads a boolean that is allowed to be absent.
+
+    Distinct from `parse_bool` because for the Stage 4 inventory columns
+    (architecture.md §3.9) a blank cell means "never measured", which is not the
+    same answer as `false`. Anything unrecognized reads as `None` for the same
+    reason: inventing a `false` would claim a measurement nobody took.
+    """
+    if isinstance(value, bool):
+        return value
+    if value is None:
+        return None
+    token = str(value).strip().lower()
+    if not token:
+        return None
+    if token in _TRUE_TOKENS:
+        return True
+    if token in _FALSE_TOKENS - {""}:
+        return False
+    return None
+
+
+def format_optional_bool(value: bool | None) -> str:
+    """Writes a nullable boolean, preserving the empty cell."""
+    return "" if value is None else format_bool(value)
+
+
+def parse_optional_int(value: object) -> int | None:
+    """Reads a count that is allowed to be absent, tolerating spreadsheet damage.
+
+    Excel renders a count column as `4310.0` or `4,310` given the chance. Both are
+    accepted; a negative or unparseable value reads as `None` rather than `0`,
+    keeping "never measured" distinct from "measured zero" (§3.9).
+    """
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, int):
+        return value if value >= 0 else None
+    if value is None:
+        return None
+    token = str(value).strip().replace(",", "")
+    if not token:
+        return None
+    try:
+        number = int(float(token))
+    except ValueError:
+        return None
+    return number if number >= 0 else None
+
+
+def format_optional_int(value: int | None) -> str:
+    """Writes a nullable count, preserving the empty cell."""
+    return "" if value is None else str(value)
+
+
 def normalize_date(value: object) -> str:
     """Normalizes a date to ISO, passing unparseable values through verbatim.
 

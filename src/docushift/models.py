@@ -26,13 +26,48 @@ class SourceEngine(StrEnum):
     """Source documentation generator engine.
 
     A property of a *version*, not a product -- see docs/architecture.md §3.4.
-    `AUTO` means "not yet determined"; it is never a guess.
+
+    Three kinds of value live here, and the distinction is the point of the
+    column. `AUTO` means **not yet determined** -- never a guess. The four
+    engines above the divider are ones Stage 5 converts. The rest are generators
+    the detector can *name* but the pipeline cannot convert: recording them beats
+    collapsing them into `AUTO`, because "we know what this is and have no
+    handler" is a scoping decision for a human, while "we have no idea" is a
+    detector bug. Both skip conversion; only one is worth investigating.
+
+    The unconvertible set is what the 2026-09-08 corpus sweep actually found in
+    the 408 versions that carried HTML and detected as `AUTO` -- see
+    docs/design.md §7. `OTHER` is the honest slot for a `<meta name="generator">`
+    string we have no name for; the raw string goes to `state.db`.
     """
+    # Converted by a Stage 5 handler.
     FLARE = "flare"
     DITA = "dita"
     WEBWORKS = "webworks"
     DOCBOOK = "docbook"
+
+    # Identified, but no handler -- recorded so the sheet can be reviewed.
+    R_HELP = "r-help"
+    ROBOHELP = "robohelp"
+    FRONTPAGE = "frontpage"
+    HELP_AND_MANUAL = "help-and-manual"
+    MKDOCS = "mkdocs"
+    DOCUSAURUS = "docusaurus"
+    DOXIA = "doxia"
+    OTHER = "other"
+
     AUTO = "auto"
+
+
+CONVERTIBLE_ENGINES = frozenset(
+    {SourceEngine.FLARE, SourceEngine.DITA, SourceEngine.WEBWORKS, SourceEngine.DOCBOOK}
+)
+"""Engines a Stage 5 handler exists or is planned for.
+
+Membership -- not "is it `AUTO`" -- is what Stage 5 tests before converting.
+Anything outside this set is skipped with a message naming the engine, which is
+a different report line from the one `AUTO` produces.
+"""
 
 
 class EngineSource(StrEnum):
@@ -85,6 +120,24 @@ class ProductVersion(BaseModel):
     zip_url: str | None = None
     zip_source: ZipSource = ZipSource.AUTO
     custom_override: bool = False
+
+    # Stage 4 extraction inventory -- see docs/architecture.md §3.9. Every one is
+    # optional because blank and zero are different answers: blank means this
+    # version has never been extracted, `0` means it was and there was nothing
+    # there. Defaulting them to 0/False would make the archived half of the
+    # catalog indistinguishable from a corpus that genuinely ships no CSH.
+    #
+    # `has_csh` is not `csh_names > 0`: it records that a CSH *source file* was
+    # found, while the count records what parsed out of it. `true` with `0` is the
+    # empty-alias-file case, 55% of the observed corpus (§5.3.1). `has_api_ref`
+    # against `api_files` carries no such nuance and is a filtering convenience;
+    # `record_extract_inventory` writes each pair from one computation so they
+    # cannot drift.
+    has_csh: bool | None = None
+    csh_names: int | None = None
+    has_api_ref: bool | None = None
+    api_files: int | None = None
+    doc_files: int | None = None
 
 
 class Product(BaseModel):

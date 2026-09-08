@@ -21,7 +21,7 @@ from docushift import __version__
 from docushift.catalog import CatalogError, CatalogManager
 from docushift.config import ConfigManager
 from docushift.discovery import DocsiteClient, DocsiteCrawler
-from docushift.models import ZipSource
+from docushift.models import SourceEngine, ZipSource
 from docushift.state import StateStore
 
 console = Console()
@@ -304,7 +304,11 @@ def catalog_enable(ctx: click.Context, product_code: str, version: str, disable:
 @click.option("--display-name", default=None, help="Set the product display name.")
 @click.option(
     "--engine",
-    type=click.Choice(["flare", "dita", "webworks", "docbook", "auto"]),
+    # Taken from the enum rather than retyped, so adding a generator in one place
+    # is enough. The list includes the engines Stage 5 cannot convert: naming one
+    # by hand is a legitimate correction of a bad detection, and it is more useful
+    # in the sheet than `auto` even when nothing downstream acts on it.
+    type=click.Choice([e.value for e in SourceEngine]),
     default=None,
     help="Override the detected engine; also sets engine_source=manual (permanent).",
 )

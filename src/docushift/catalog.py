@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from docushift.models import (
+    CONVERTIBLE_ENGINES,
     Catalog,
     EngineSource,
     FamilySource,
@@ -25,9 +26,13 @@ from docushift.models import (
 from docushift.state import StateStore
 from docushift.utils.csvio import (
     format_bool,
+    format_optional_bool,
+    format_optional_int,
     natural_version_key,
     normalize_date,
     parse_bool,
+    parse_optional_bool,
+    parse_optional_int,
     read_rows,
     write_rows,
 )
@@ -62,6 +67,24 @@ VERSION_COLUMNS = (
     "custom_override",
     "_bu",
     "_family",
+    # Stage 4 inventory (architecture.md §3.9). Underscored like `_bu`/`_family`
+    # because they are tool-owned and edits are ignored, but unlike those two they
+    # are *not* regenerated on every write -- they persist between extract runs,
+    # the way `engine` does.
+    "_has_csh",
+    "_csh_names",
+    "_has_api_ref",
+    "_api_files",
+    "_doc_files",
+)
+
+# The `versions.csv` column each inventory field round-trips through.
+_INVENTORY_COLUMNS = (
+    ("has_csh", "_has_csh"),
+    ("csh_names", "_csh_names"),
+    ("has_api_ref", "_has_api_ref"),
+    ("api_files", "_api_files"),
+    ("doc_files", "_doc_files"),
 )
 
 # Fields discovery owns and may therefore update. `family` is handled separately
@@ -168,6 +191,13 @@ class CatalogManager:
                 zip_url=row.get("zip_url", "").strip() or None,
                 zip_source=_coerce_enum(ZipSource, row.get("zip_source"), ZipSource.AUTO),
                 custom_override=parse_bool(row.get("custom_override")),
+                # Nullable on purpose -- a blank cell means "never extracted" and
+                # must not read as `false`/`0` (architecture.md §3.9).
+                has_csh=parse_optional_bool(row.get("_has_csh")),
+                csh_names=parse_optional_int(row.get("_csh_names")),
+                has_api_ref=parse_optional_bool(row.get("_has_api_ref")),
+                api_files=parse_optional_int(row.get("_api_files")),
+                doc_files=parse_optional_int(row.get("_doc_files")),
             )
 
         self._catalog = catalog
@@ -220,6 +250,11 @@ class CatalogManager:
                         "custom_override": format_bool(version.custom_override),
                         "_bu": product.bu,
                         "_family": product.family,
+                        "_has_csh": format_optional_bool(version.has_csh),
+                        "_csh_names": format_optional_int(version.csh_names),
+                        "_has_api_ref": format_optional_bool(version.has_api_ref),
+                        "_api_files": format_optional_int(version.api_files),
+                        "_doc_files": format_optional_int(version.doc_files),
                     }
                 )
         write_rows(self.versions_path, VERSION_COLUMNS, version_rows)
@@ -486,6 +521,57 @@ class CatalogManager:
         self.save()
         return True
 
+    def record_extract_inventory(
+        self,
+        product_code: str,
+        version: str,
+        csh_sources: int,
+        csh_names: int,
+        api_files: int,
+        doc_files: int,
+    ) -> bool:
+        """Writes back the Stage 4 inventory for one version -- architecture.md §3.9.
+
+        All five columns are set in one call so the two booleans cannot disagree
+        with the counts they summarize: each is *derived here* from the measurement
+        rather than passed in, which is why the signature takes `csh_sources` (how
+        many CSH source files were located) and not `has_csh`.
+
+        `has_csh` is deliberately not `csh_names > 0`. An empty `<CatapultAliasFile />`
+        or zero-byte alias file is 55% of the observed corpus, so `has_csh=True` with
+        `csh_names=0` is a real and distinct state -- the version ships a help map
+        that yields nothing -- and it is worth seeing before conversion, not after.
+
+        Callers must not invoke this for a failed or partial extract. Leaving the
+        row blank is the honest answer there; writing zeros would make a failure
+        indistinguishable from an empty package.
+        """
+        target = self.get_version(product_code, version)
+        if target is None:
+            return False
+        target.has_csh = csh_sources > 0
+        target.csh_names = csh_names
+        target.has_api_ref = api_files > 0
+        target.api_files = api_files
+        target.doc_files = doc_files
+        self.save()
+        return True
+
+    def clear_extract_inventory(self, product_code: str, version: str) -> bool:
+        """Blanks the inventory columns, restoring "never extracted".
+
+        Needed when a version's extracted tree is discarded: stale counts describing
+        a directory that no longer exists are worse than no counts, because nothing
+        about the row says they are stale.
+        """
+        target = self.get_version(product_code, version)
+        if target is None:
+            return False
+        for field_name, _ in _INVENTORY_COLUMNS:
+            setattr(target, field_name, None)
+        self.save()
+        return True
+
     # -- reporting -----------------------------------------------------------
 
     def triage_summary(self) -> dict[str, object]:
@@ -569,6 +655,50 @@ class CatalogManager:
                         f"--product {product.product_code} --version {ver.version} --zip-source auto` to "
                         f"download it instead."
                     )
+                # Identified, eligible, and unconvertible. Worth saying out loud
+                # because the sheet looks ready: the row has a real engine name
+                # rather than `auto`, so nothing about it reads as unresolved --
+                # yet Stage 5 has no handler and will skip it. Scoped to eligible
+                # rows so this stays actionable; an ineligible row carrying
+                # `r-help` is inventory, and sorting the column shows it.
+                identified_no_handler = (
+                    ver.engine is not SourceEngine.AUTO and ver.engine not in CONVERTIBLE_ENGINES
+                )
+                if ver.convert_eligible and identified_no_handler:
+                    notes.append(
+                        f"{product.product_code}@{ver.version}: engine '{ver.engine}' is identified but has no "
+                        f"Stage 5 handler, so conversion will skip it. Set convert_eligible=false to take it out "
+                        f"of scope, or convert it by hand."
+                    )
+                notes.extend(self._inventory_notes(product.product_code, ver))
+        return notes
+
+    @staticmethod
+    def _inventory_notes(product_code: str, ver: ProductVersion) -> list[str]:
+        """Flags an inventory boolean that contradicts the count beside it (§3.9).
+
+        `record_extract_inventory` derives both from one measurement, so this shape
+        only arises from a hand-edit. It is a warning rather than a `validate()`
+        problem on purpose: the columns are advisory, the next `docushift extract`
+        overwrites them wholesale, and blocking an import over a stale summary cell
+        would be out of proportion to the harm.
+
+        `_has_csh=true` with `_csh_names=0` is **not** flagged -- that is the
+        empty-alias-file case and a legitimate measurement.
+        """
+        notes = []
+        if ver.has_api_ref is False and ver.api_files:
+            notes.append(
+                f"{product_code}@{ver.version}: _has_api_ref=false but _api_files={ver.api_files}. "
+                f"These are written together, so one has been hand-edited. The next "
+                f"`docushift extract` of this version will overwrite both."
+            )
+        if ver.has_csh is False and ver.csh_names:
+            notes.append(
+                f"{product_code}@{ver.version}: _has_csh=false but _csh_names={ver.csh_names}. "
+                f"These are written together, so one has been hand-edited. The next "
+                f"`docushift extract` of this version will overwrite both."
+            )
         return notes
 
 
