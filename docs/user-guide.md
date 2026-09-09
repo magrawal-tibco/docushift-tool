@@ -557,4 +557,4 @@ docushift csh validate --product businessworks --version 6.12.0
 
 **Identifiers are merged across the version's doc-sets.** A version can ship several help outputs (`bw-ent-html`, `bwce-html`, `relnotes`), and Flare frequently copies one output's alias file into a sibling where none of its topics exist. Resolving version-wide rather than per-output fixes those: in TIBCO BusinessWorks, the release-notes alias file resolves 0 of 203 links on its own and 203 of 203 against the main output. Where two outputs genuinely disagree about a name, the larger output wins and the alternative is recorded under `also:` — nothing is dropped. WebWorks does not have the copied-alias problem at all (its links resolve where they sit, every time), but it does ship several books per version, so the `also:` case still comes up.
 
-Full design and the corpus evidence behind it: `architecture.md` §5.3.
+Full design and the corpus evidence behind it: `architecture.md` §5.4.

@@ -330,7 +330,7 @@ Because the path is fully derivable from `(bu, family, product_code, version)`, 
 
 | Column | Type | Written by | Answers |
 | :--- | :--- | :--- | :--- |
-| `_has_csh` | bool | Stage 4 CSH inventory | Will this version get a `csh.yml`? (Flare, DITA and WebWorks sources — §5.3.4) |
+| `_has_csh` | bool | Stage 4 CSH inventory | Will this version get a `csh.yml`? (Flare, DITA and WebWorks sources — §5.4.4) |
 | `_csh_names` | int | Stage 4 CSH inventory | How many help identifiers have to resolve? |
 | `_has_api_ref` | bool | Stage 4 asset inventory | Does it carry a Javadoc / C / Go / `tibdg` tree that is **copied, never converted** (§6.2)? |
 | `_api_files` | int | Stage 4 asset inventory | How much of the package is that tree? |
@@ -338,7 +338,7 @@ Because the path is fully derivable from `(bu, family, product_code, version)`, 
 
 **Blank is not zero.** All five are empty until the version has actually been extracted; `0` means Stage 4 looked and found none. A blank `_csh_names` on an archived row says "never unpacked", and a `0` says "unpacked, no help map" — conflating them would make the archived half of the catalog indistinguishable from a corpus with no CSH in it. The model types are therefore `bool | None` and `int | None`, and the CSV round-trip preserves the empty cell rather than defaulting it.
 
-**`_has_csh` and `_csh_names` are not redundant.** `_has_csh` records that a source *file* was found; `_csh_names` records what parsed out of it. Empty `<CatapultAliasFile />` and zero-byte alias files are **55% of the observed corpus** (476 of 863 — §5.3.1), so `_has_csh=true, _csh_names=0` is a routine and distinct state: the product ships a help map that yields nothing, which is worth seeing before conversion rather than after. `_has_api_ref` against `_api_files` carries no such nuance and is a filtering convenience — the tool writes both from one computation in one call, so they cannot drift apart on their own.
+**`_has_csh` and `_csh_names` are not redundant.** `_has_csh` records that a source *file* was found; `_csh_names` records what parsed out of it. Empty `<CatapultAliasFile />` and zero-byte alias files are **55% of the observed corpus** (476 of 863 — §5.4.1), so `_has_csh=true, _csh_names=0` is a routine and distinct state: the product ships a help map that yields nothing, which is worth seeing before conversion rather than after. `_has_api_ref` against `_api_files` carries no such nuance and is a filtering convenience — the tool writes both from one computation in one call, so they cannot drift apart on their own.
 
 **What counts as an API reference is defined once** — one predicate read by all three stages that care: Stage 4 to split `_api_files` from `_doc_files`, Stage 5 to skip conversion, Stage 7 to route into the `api-references` doc-class. Three copies would let a file be counted as documentation, skipped by the converter, and published as an API reference.
 
@@ -433,7 +433,7 @@ Four of the original five bullets survive the measurement — proxy stripping, c
 | :--- | :--- |
 | `Data/HelpSystem.xml` | The runtime manifest. **Defines the root**; not content. |
 | `Data/Tocs/<Name>.js` + `<Name>_Chunk0.js` | The TOC, as JavaScript (§5.1.4). |
-| `Data/Alias.xml` | The CSH map (§5.3). |
+| `Data/Alias.xml` | The CSH map (§5.4). |
 | `csh.js`, `Default.htm`, `Default_CSH.htm` | Runtime entry points and frameset stubs. 1,295 stub files corpus-wide, none of them topics. |
 | `Skins/`, `Resources/`, `_globalpages/`, `MicroContent/` | Generated skin, scripts, stylesheets and micro-content. **2,339 HTML files, none converted** (§5.1.9). |
 | `_templates/` | Landing and boilerplate pages — 2,797 files under 82 distinct names (78 case-folded: one page ships as both `Legal-and-Third-Party-Notices.htm` and `Legal_and_Third-Party_Notices.htm`), `Home.htm` (644), `Legal-and-Third-Party-Notices.htm` (651), `Whats-New.htm` (518). **Partly converted**: the `DefaultUrl` landing page always, plus whatever the TOC references (§5.1.5). |
@@ -628,7 +628,7 @@ Two numbers, both measured **after** `#feedback-survey` removal (§5.1.6) over t
 
 The remaining 22% are absolute URLs (left alone), fragment-only links (kept as in-page anchors), and links into an embedded API tree, which become absolute URLs into the `-resources` repo per §6.3/§6.4. Their exact split was not measured; the rewriting rule for each is determined by its form, not by its frequency.
 
-This is a different situation from the CSH numbers in §5.3.1, and the two must not be confused. **In-content links are 98.3% good; `Alias.xml` links are 22% dangling** — because alias files get copied wholesale into sibling outputs where their targets do not exist. The link rewriter and the CSH resolver therefore have different failure profiles and different fallbacks; §5.3.1's version-wide resolution exists for the alias case only.
+This is a different situation from the CSH numbers in §5.4.1, and the two must not be confused. **In-content links are 98.3% good; `Alias.xml` links are 22% dangling** — because alias files get copied wholesale into sibling outputs where their targets do not exist. The link rewriter and the CSH resolver therefore have different failure profiles and different fallbacks; §5.4.1's version-wide resolution exists for the alias case only.
 
 Images keep their source filename and their `alt` where one exists. `image_skip_prefixes` — `Skins/`, `Resources/Scripts/`, `Resources/Stylesheets/` — are skin assets and are never copied as content; 307,394 content images are.
 
@@ -636,10 +636,10 @@ Images keep their source filename and their `alt` where one exists. `image_skip_
 
 - **Generated directories** — `Skins/`, `Resources/`, `_globalpages/`, `MicroContent/`. **2,339 HTML files**: 1,965 in `_globalpages/`, 295 in `MicroContent/`, 79 in `Resources/`. **`_templates/` is no longer among them** (§5.1.5): of its 2,797 files, the `DefaultUrl` landing page and the 1,737 paths the TOC references across 660 roots are converted, and the remainder are skipped.
 - **Runtime stubs** — `Default.htm`, `Default_CSH.htm`, `csh.js`, `Default.js`. **1,295 files**, none of them topics.
-- **`Data/`** — the runtime manifest, TOC and alias files are *read* (§5.1.4, §5.3) and never emitted.
+- **`Data/`** — the runtime manifest, TOC and alias files are *read* (§5.1.4, §5.4) and never emitted.
 - **API reference trees** — Javadoc shipped inside a Flare output: **595 directories holding 8,078 files, concentrated in just 56 versions** (one output root each). Identified by the shared `is_api_reference()` marker predicate (§6.3) and routed to `-resources` by §6.4, never by directory name. *(The 595 matching the 595-version total is coincidence; it was re-derived to confirm that.)*
 - **The `ja` localized subtree** — 8,004 files, and the only localized subtree in the corpus: no `zh`, `de`, `fr`, `es`, `ko`, `pt-br`, `it` or `ru` tree exists at the top level of any output root. Out of scope for the English migration; reported so its existence is visible rather than discovered later.
-- **Source-format assets shipped alongside the output** — 1,160 `.vsd`, 818 `.vsdx`, 149 `.zip`, 127 `.xlsx`, 80 `.drawio` across all 676 roots. These are authoring sources, not published documents; they go to asset preservation (§5.4), not to conversion or to the doc-class router.
+- **Source-format assets shipped alongside the output** — 1,160 `.vsd`, 818 `.vsdx`, 149 `.zip`, 127 `.xlsx`, 80 `.drawio` across all 676 roots. These are authoring sources, not published documents; they go to asset preservation (§5.5), not to conversion or to the doc-class router.
 - **The 5 partial Flare outputs** (§5.1.1) — MadCap topics with no `Data/HelpSystem.xml`. No TOC, no CSH, no reliable root boundary. Reported for triage.
 
 #### 5.1.10 The predecessor's Flare pipeline is a reference, with measured gaps
@@ -668,7 +668,7 @@ Everything in this section was measured on 2026-09-08 against the predecessor `h
 | Observed | Count | Consequence |
 | :--- | :--- | :--- |
 | Topics per doc-set spans three orders of magnitude | min 6, median 68, p90 523, max 6,152 | Conversion is per-doc-set and streamed; nothing loads a whole doc-set's DOM at once. |
-| **A version can ship several doc-sets** | 23 of 319 — `amx-bpm/4.3.0` has `bpmhelp`, `install`, `soahelp`, `tutorials`; `bwpluginas/7.1.1` has `doc/bw5` and `doc/bw6` | Doc-set is the unit of conversion and of TOC, exactly as for Flare (§5.3.3). Two doc-sets in one version share a GUID namespace only by accident and are never merged. |
+| **A version can ship several doc-sets** | 23 of 319 — `amx-bpm/4.3.0` has `bpmhelp`, `install`, `soahelp`, `tutorials`; `bwpluginas/7.1.1` has `doc/bw5` and `doc/bw6` | Doc-set is the unit of conversion and of TOC, exactly as for Flare (§5.4.3). Two doc-sets in one version share a GUID namespace only by accident and are never merged. |
 | The doc-set root is not at a fixed depth | `html` 201, `doc/html` 102, `html_v3` 16, `en-US` 10, everything else ≤3 | The doc-set is located by *content* — a directory containing `GUID-*.html` — never by a configured path. |
 | The doc-set is **flat** | 297 of 353 have exactly one subdirectory (`static/`); 54 have two | There is no source hierarchy to mirror. Structure exists only in the TOC files (§5.2.3), which is why §5.2.2 cannot derive an output path from the input path. |
 
@@ -676,7 +676,7 @@ Everything in this section was measured on 2026-09-08 against the predecessor `h
 
 | File | Present in | What it is |
 | :--- | ---: | :--- |
-| `static/` (`head.js`, `body.js`, `screen.css`, `print.css`) | 353 (100%) | Skin and scripts. `head.js` also carries the CSH map (§5.3.4). Never content. |
+| `static/` (`head.js`, `body.js`, `screen.css`, `print.css`) | 353 (100%) | Skin and scripts. `head.js` also carries the CSH map (§5.4.4). Never content. |
 | `index.html` | 352 | A redirect into the viewer. Not a topic. |
 | `search-index.sqlite` | 352 | Viewer search index. Discarded. |
 | `suitehelp_topic_list.html` | 314 (89%) | The primary TOC source (§5.2.3). |
@@ -711,7 +711,7 @@ So the layout half needs its own survey and the transform half does not. `engine
 
 **The topic file is authoritative for its own title.** Over 3,675 sampled topics, `h1` equals the `DC.Title` meta in **3,675 cases (100%)**, and `<title>` equals `h1` in 100%. `h1.topictitle1` carries it in 98%; the missing 2% are exactly the `-homepage.html` files, which are not topics. The title is therefore read from the topic, never from a TOC entry — which matters, because the TOCs disagree with the topics (§5.2.3).
 
-**Slugs collide, routinely.** 106 of 3,675 sampled topics (2.9%) share an `h1` with another topic in the same doc-set, and **62 of 140 doc-sets (44%) contain at least one collision.** A title-derived filename is therefore not unique by construction, and the tie-break has to be deterministic rather than dependent on directory iteration order: colliding slugs are ordered by GUID and suffixed `-2`, `-3`, … so that re-running the conversion, or converting on another machine, produces the same filenames. A `guid → output path` map is written to `state.db` for the version — the same map §5.3.3 resolves CSH against, so CSH and links cannot disagree with what conversion actually emitted.
+**Slugs collide, routinely.** 106 of 3,675 sampled topics (2.9%) share an `h1` with another topic in the same doc-set, and **62 of 140 doc-sets (44%) contain at least one collision.** A title-derived filename is therefore not unique by construction, and the tie-break has to be deterministic rather than dependent on directory iteration order: colliding slugs are ordered by GUID and suffixed `-2`, `-3`, … so that re-running the conversion, or converting on another machine, produces the same filenames. A `guid → output path` map is written to `state.db` for the version — the same map §5.4.3 resolves CSH against, so CSH and links cannot disagree with what conversion actually emitted.
 
 **`_unique_N` topics are republished duplicates, not new topics.** `DC.Identifier` equals the filename stem in 4,504 of 4,687 topics (96.1%) and is absent in 55 (1.2%, the homepages). The remaining **128 (2.7%) are the reuse case**: a file named `GUID-…ADE1E1.html` carrying identifier `GUID-…ADE1E_unique_1`. Byte-diffing that pair on `marketo/7.1.0` shows two files identical in content and title, differing only in that every `id` and `<a name>` has `_unique_1` appended — SDL republishing one topic at a second TOC position. Converting both yields near-duplicate Markdown and a spurious `-2` slug. The engine strips the `_unique_N` suffix from `DC.Identifier`, and when the result names another topic in the same doc-set, emits **one** Markdown file and points both TOC positions at it.
 
@@ -806,7 +806,7 @@ Href forms over 8,300 links:
 - **`GUID-*-homepage.html` → `meta.yml`, not a topic.** It is present in 314 of 353 doc-sets and **all 314 carry `publication-title`, `release-version` and `release-date`**; its entire `<article>` is `<div class="titles">` holding those three divs and no body content. It is the only in-package source for the published release date and title, so it feeds `meta.yml` (§6) and is then skipped. 5 doc-sets ship more than one (take the one whose GUID matches the TOC root); 39 ship none.
 - **`index.html`** — a redirect stub.
 - **`search-index.sqlite`** — regenerated by the target platform.
-- **`static/`, `fonts/`** — skin, scripts, and CSS. `static/head.js` is read for CSH (§5.3.4) and for nothing else.
+- **`static/`, `fonts/`** — skin, scripts, and CSS. `static/head.js` is read for CSH (§5.4.4) and for nothing else.
 - **`suitehelp_topic_list.html`, `toc_crawler.html`** — consumed as TOC input, not emitted.
 - **API reference trees** (`javadoc/`, `apidocs/`) — routed to the `-resources` repo by §6.3/§6.4, not converted.
 
@@ -820,17 +820,309 @@ Per the standing rule that the predecessor's config encodes its bugs as well as 
 
 What is worth taking from it: the doc-set skip lists (`index.html`, `suitehelp_topic_list.html`, `*-homepage.html`, `/static/`, `/pdf/`), which match what §5.2.7 arrived at independently, and the observation that two DITA flavours exist at all — which is what surfaced the unmeasured `file_dita` question in §5.2.1.
 
-### 5.3 Context-Sensitive Help (CSH)
+### 5.3 WebWorks Engine (`engines/webworks.py`)
+
+WebWorks Help 5.0 (later ePublisher) is what TIBCO published from FrameMaker before Flare. It is the corpus's third engine and its oldest — the dated packages run 2004 to roughly 2015 — and it is structurally unlike the other two. **Nothing in its output is semantic HTML.** Across 29,712 topics it emits 121 `<ul>`, 25 `<ol>`, 455 `<li>`, 60 `<pre>`, 107 `<th>` and 334 headings of any level; every list is a table, every heading is a `<div>` with a class, every code block is a run of sibling `<div>`s, and every paragraph is a `<div class="Body">`. Against that, the runtime metadata is the best of the three engines: the TOC, the file index, the book titles and the CSH map are all present, all consistent, and all machine-readable.
+
+Everything in this section was measured on 2026-09-09 against the predecessor `html-to-md` cache (`cache\pub`). Where a figure is over "the corpus" it is over all 691 books unless stated; the two probes that read every element of every DOM (§5.3.6–§5.3.8) skip the seven books over 400 topics, which are the embedded API-reference trees of §5.3.9, and so run over 29,712 topics rather than 38,818.
+
+#### 5.3.1 What the source actually looks like
+
+**Scale.** **691 books across 195 versions and 110 products, holding 38,818 HTML files, 32,690 images and 1.49 GB.** WebWorks is the third engine by volume — roughly a tenth of Flare's 422,267 topics and half of DITA's 67,406 — but it is the engine with the most books per version.
+
+| Observed | Count | Consequence |
+| :--- | :--- | :--- |
+| **A version ships several books, and that is the normal case** | mean 3.5, median 3, p90 6, max 30; only 25 of 195 versions ship one | The book, not the version, is the unit of conversion (§5.3.3). This is the reverse of Flare, where 544 of 595 versions ship a single output root. |
+| Topics per book are small | min 3, median 37, p90 112, max 1,165 | A whole book fits in memory; a whole *version* need not be held at once. |
+| The book root is not at a fixed depth below the version | 2 levels 525, 3 levels 91, 4 levels 73, 1 level 2 | The book is located by content — a directory containing `wwhdata/` — never by a configured path, exactly as for the other two engines. |
+| **Topics are flat inside the book** | 4,510 of 38,818 files (11.6%) sit in a subdirectory, and 4,508 of those are one embedded Javadoc tree under `api/` | There is no source hierarchy to mirror. Once §5.3.9's API trees are excluded the book is flat, which is why §5.3.3 emits flat output. |
+
+**Book anatomy**, over all 691:
+
+| File | Present in | What it is |
+| :--- | ---: | :--- |
+| `wwhdata/common/files.js` | 646 (93%) | The **file index** — the array `l=` addresses (§5.3.4). Also the authoritative topic titles. |
+| `wwhdata/js/toc.js` | 645 (93%) | The TOC (§5.3.4). |
+| `wwhdata/xml/toc.xml` | 641 | A faithful XML twin of `toc.js` — see §5.3.4. |
+| `wwhdata/common/title.js` | 646 (93%) | The book title, as a one-line `return "…"`. |
+| `wwhdata/common/topics.js` | 647 (93%) | The CSH map (§5.4.4). Not read by this engine. |
+| `wwhdata/files.htm` | 691 (100%) | A **lossy HTML twin** of `files.js` in a different order. A trap — see §5.3.4. |
+| `wwhelp/books.xml` | — | Present in every book, declaring `<Book directory="."/>`; only meaningful at the collection root (§5.3.3). |
+| `tpl/` | most | Skin images (`note.gif`, `ga.gif`). 14,467 `<img>` point into it; none is content. |
+| `index.htm`, `wwhsec.htm` | 1,211 files | Runtime frameset stubs. Absent from `files.js` and from the TOC. Not topics. |
+
+**45 books are stripped.** They ship `wwhdata/files.htm` and nothing else — no TOC, no `files.js`, no `title.js`, no CSH. They hold **1,395 convertible topics across 18 versions**, and `files.htm` indexes 98.9% of them, so the content is recoverable and the navigation is not. They are the reason `wwhdata/` beats `wwhelp/` as the detection marker (§5.3.2) and the reason `files.htm` is read at all (§5.3.4).
+
+**A second markup flavour exists, and it is small enough to name exhaustively.** 5 books — `businessconnect_remote/5.0.0_july_2006/html/{host,install,user}`, `businessworks_integrationmanager_plugin/1.0.0_october_2004/html/im_pal`, `hawkjmx/2.1.0/html/usr` — hold **118 topics** in a 2004–2006 output format that uses real `<h2 class="pNewHTMLPage">`, `<p class="pBody">` and `<pre class="pPreformattedRelative">`, puts `<a name="wp1670719">` *before* each block rather than around its text, links with ordinary relative hrefs, and has **no `<blockquote>` container at all**. That is 0.4% of topics, and it is the entire population of the `p*` class family in the vocabulary histogram (§5.3.7). The engine detects the flavour by the container test of §5.3.6 and converts these books through the generic HTML path; they are the one place in this engine where the HTML is already semantic.
+
+Encoding is a real hazard here, unlike DITA, and the fix is exact: of 37,658 files, **213 fail a strict UTF-8 decode and all 213 declare `charset=iso-8859-1`**. 36,215 declare `utf-8`, 320 declare `iso-8859-1`, 1,123 declare nothing. So decode by the declared charset and default to UTF-8; in this corpus that rule is never wrong.
+
+#### 5.3.2 Detection: one marker, and it is exact
+
+Measured over all 1,822 cached versions, against the ground truth "this version holds at least one directory containing `wwhdata/`" — **195 versions**:
+
+| Marker | Matched | Precision | Recall |
+| :--- | ---: | ---: | ---: |
+| **`wwhdata/`** | 195 | **100%** | **100%** |
+| `wwhelp/` | 178 | 100% | 91.3% |
+| `wwhelp/books.xml` | 178 | 100% | 91.3% |
+| `wwhelp/wwhimpl/` | 178 | 100% | 91.3% |
+| `wwhdata/common/files.js` | 178 | 100% | 91.3% |
+| `wwhdata/js/toc.js` | 178 | 100% | 91.3% |
+| `wwhelp/books.htm` | 141 | 100% | 72.3% |
+| `<meta name="generator">` naming WebWorks or ePublisher | 3 | 100% | **1.5%** |
+
+**`wwhdata/` alone is a perfect classifier on this corpus — zero false positives and zero false negatives.** No non-WebWorks package ships a directory by that name, which is the opposite of Flare's `Skins/` and `Data/` at 91.4% and 88.0% precision (§5.1.2). §3.4 lists `wwhelp/` and `wwhdata/` together; keep both, because the union is also 195/195 and the pair is cheap, but the recall belongs to `wwhdata/`. The 17 versions `wwhelp/` misses are the stripped books of §5.3.1.
+
+Two corrections to the existing spec follow from this table.
+
+1. **The generator meta tag is not a usable WebWorks signature.** `design.md` §7.1's pass 2 lists it beside the MadCap namespace and the DITA-OT comment; it hits **3 of 195 versions**. It costs nothing to keep as corroboration and must not be relied on for recall. A null result from it means nothing.
+2. **`wwhelp/books.htm` is the predecessor's detection marker and it misses 54 versions (27.7%).** See §5.3.10.
+
+**Casing is not a hazard for this marker.** Over all 1,822 versions the directory is spelled `wwhdata` and `wwhelp` in lower case every time — zero variants. Per `design.md` §7.1's per-signal rule, matching case-insensitively costs nothing and risks nothing here, and is what §3.4 already does.
+
+**The 195 reconciles with §3.4's 176.** The 2026-09-08 sweep recorded 176 `webworks` versions plus 19 that matched Flare *and* WebWorks markers and were resolved in Flare's favour. 176 + 19 = 195. Those 19 are genuinely mixed bundles: a Flare output with a WebWorks tree beside it. The per-doc-set engine map `design.md` §7.3 already writes to `state.db` is what keeps them visible, and on such a version **both** engines have work to do — this is the case the map exists for, and the first one in the corpus where it is not hypothetical.
+
+#### 5.3.3 The unit of conversion is the book; the collection is the doc-set
+
+**Every book ships a complete WebWorks runtime.** A book's own `wwhelp/books.xml` declares `<Book directory="."/>` with `showbooks="false"` — it is a self-contained help system for that one book. So "a directory containing `wwhelp/`" identifies neither a book nor a doc-set, and the discriminator is the *content* of `books.xml`:
+
+- a **book** is a directory holding `wwhdata/`;
+- a **collection** is a directory whose `wwhelp/books.xml` names at least one `<Book directory="X"/>` with X ≠ `.`.
+
+*(This is the same error, in the same shape, as the one CONTEXT.md records for the 2026-09-07 CSH descoping: `wwhdata/` is per **book**, `ctx/` is per **doc-set**. A first pass at this survey took the parent of any `wwhelp/` to be the doc-set and reported "643 doc-sets with exactly one book, 180 with none". Both numbers were artifacts of the wrong denominator.)*
+
+**157 collections declare 602 of the 691 books, and all 602 resolve.** The remaining 89 are undeclared — books with no collection above them. The collection root carries the doc-set's own metadata:
+
+| `books.xml` | Observed |
+| :--- | :--- |
+| Schema `version` | `5.0` in 154 collections, `3.0.0` in 3 |
+| Root `name` | Present in all 157 — the collection title (`TIBCO ActiveMatrix BusinessWorks`) |
+| `<BookGroup name="…">` | 1 group in 136 collections, 0 in 7, 2–4 in 14; 95 distinct names |
+| `<Book>` attributes | `directory` (602) and `encoding` (3) — **and nothing else** |
+
+Three rules come out of that table.
+
+- **`<Book directory="…">` is percent-encoded and must be decoded.** 22 books are declared as `directory="TIBCO%20Product%20Documentation%20and%20Support%20Services"` and resolve to nothing until unquoted. Uniformly percent-decoding lifts declared-book resolution from 580 to **602 of 602**. The same encoding appears in `files.js` (§5.3.4), so this is one rule applied in two places, not two rules.
+- **The declared order is authored order and must be preserved.** It is **not alphabetical in 112 of 157 collections (71%)** — `tib_bw_getting_started` is declared last, after `tib_bw_process_design`. Sorting the books would scramble the navigation of nearly three quarters of the corpus.
+- **`BookGroup` is a real but degenerate level.** 136 of 157 collections have exactly one group, usually named the same as the collection. The engine emits a `toc.yml` level for a `BookGroup` only when a collection declares more than one; with a single group the level is flattened, because a tree with one child at every level is not navigation.
+
+**Book titles come from `title.js`, not from `books.xml`.** `<Book>` carries no name attribute anywhere in the corpus, so the display name for a book is the `return "…"` in its own `wwhdata/common/title.js` — present in 646 of 691 books. The 45 without it are the stripped books, which fall back to the directory name.
+
+**Output is flat within the book, and the collection supplies one level of hierarchy.** The source is flat (§5.3.1), the TOC is at most four levels deep (§5.3.4), and §6 carries hierarchy in `toc.yml` rather than in the directory tree. Topics land at the book root under their source filename; the version's `toc.yml` is the collection's books in `books.xml` order, each holding its own TOC tree. This matches DITA's flat output (§5.2.2) and deliberately not Flare's mirrored tree (§5.1.3) — Flare's source has structure to mirror and WebWorks' does not.
+
+#### 5.3.4 The TOC is JavaScript indexed by position, and the index file matters
+
+`wwhdata/js/toc.js` is a chain of calls whose **receiver variable carries the nesting** — there is no bracket structure to parse:
+
+```js
+var A = P.fN("Preface", "1");
+var B = A.fN("Related Documentation", "2#18992");
+      P.fN("Chapter 1  Introduction", "5");
+```
+
+`X = Y.fN(title, l)` makes the new node a child of `Y`'s node; `P` is the root. Depth is recovered by tracking the receiver, and the file is parsed with a targeted expression, never executed — the same rule as Flare's `define({…})` chunks (§5.1.4).
+
+Over 645 books: **68,970 entries, 55 of them label-only.** Depth is 1 in 5,379, 2 in 28,362, 3 in 34,971 and 4 in 258 — **the tree is never deeper than four levels**, and 99.6% of it sits in the first three.
+
+**The `l` value is an integer index into the book's file list, optionally with a fragment** (`"7#31355"`). Which file list it indexes is the single most consequential fact in this section, because the book ships two, in different orders, and **the predecessor reads the wrong one.**
+
+| Index source | Anchored TOC entries that resolve to a file containing the named anchor |
+| :--- | ---: |
+| **`wwhdata/common/files.js`** — `P.fA("Title","href")` | **39,363 of 39,647 (99.28%)** |
+| `wwhdata/files.htm` — `<div><a href title>` | 35,234 (88.87%) |
+
+That is a ground-truth test, not a preference: it resolves each of the 39,647 anchored entries through both orderings and then checks that the anchor is actually present in the file it lands on. **86 books resolve strictly fewer anchors through `files.htm`**, several of them resolving 0 of 195. `files.js` is the index; `files.htm` is read only for the 45 stripped books that have nothing else.
+
+**`toc.xml` is a faithful twin, and `toc.js` is still the source of record.** Of the 641 books shipping both, **0 differ** in entry count, depth or `l` value. The JS wins on coverage alone — 645 books against 641. This is worth stating because it is the exact opposite of the CSH finding one directory away, where `wwhdata/xml/files.xml` is a *lossy* twin of `topics.js` (§5.4.4). Same package, same generator, two XML twins, one faithful and one not. Neither can be assumed from the other.
+
+**`files.js` hrefs are percent-encoded.** `fA("System Message Descriptions","error%20messages.4.001.htm")` — 152 of 163 entries in `ipe-oracle/11.8.1/html/tib_ipe_system_messages_guide`. Decoding lifts corpus TOC coverage from 85.7% to **87.1%** and cuts the books below 50% coverage from 19 to 12. Undecoded, that one book reads as 5.6% covered when it is complete.
+
+**Coverage, over the population the engine actually converts** — that is, excluding embedded API-reference trees (§5.3.9), the 1,211 runtime stubs, and 1,478 front/back-matter files (`title*.htm`, `copyrigh.htm`, `lof`, `lot`, `ix`):
+
+| Book class | Books | Convertible topics | In the TOC | In `files.js` |
+| :--- | ---: | ---: | ---: | ---: |
+| TOC + `files.js` | 645 | 33,427 | **87.1%** | 87.2% |
+| `files.htm` only (stripped) | 45 | 1,395 | — | 98.9% |
+| `files.js`, no TOC | 1 | 1 | — | 100% |
+
+Per-book TOC coverage is **median 100%**, and **below 50% in 12 of 642** — three of which are the Sandcastle .NET trees of §5.3.9 and not WebWorks content at all. The raw figure before this scoping is 74.8%, and the difference is entirely non-topics; quoting it would understate the TOC by twelve points. *(This is the same correction Flare needed: 79% naive against 85.9% over the real conversion population, §5.1.4.)*
+
+**The orphans are real but few.** 5,383 files are outside the TOC. 1,078 of them are indexed in `files.js` but unlisted — almost entirely `copyrigh.htm` and `title.1.1.htm`, the front matter. 4,305 are in neither, and **3,344 of those are one Sandcastle tree**. That leaves **961 genuine orphans, 3.2% of topics** — files with real titles (`SSOLite Stored Procedures`, `Installation Checklist`) that no navigation reaches. They are converted and appended to an explicit "Unfiled" node, as in Flare and DITA, and counted in the report. Conversion enumerates the disk, not the TOC; a TOC-driven walk would drop all 961 silently.
+
+**Titles: the file index and the topic agree, and the index is cleaner.** The `files.js` title equals the topic's `<title>` in **28,723 of 29,188 (98.4%)**, and every one of the 465 differences is `&nbsp;` padding (`Catch &nbsp;&nbsp;&nbsp;` against `Catch`). So the topic title comes from `files.js`; the TOC label names the nav entry, per the two-title rule of §5.1.4. There is no `h1` to fall back to — the topic's own heading is a `div.N1Heading` (§5.3.7).
+
+#### 5.3.5 Node rules
+
+The four node rules of §5.1.5 and §6.2 are engine-neutral, and three of the four apply here unchanged. What differs is what the source offers.
+
+**There is no landing page to hoist.** WebWorks has no `DefaultUrl`. The collection root ships `index.htm` (156 of 157) and `wwhelp/wwhimpl/js/html/wwhelp.htm` (157 of 157), and both are frameset stubs with no content — they are in the §5.3.9 skip list, not candidates. **The first node of a version's `toc.yml` is therefore a generated collection index**, titled from `books.xml`'s root `name` and listing the books in declared order. This is the one place where WebWorks needs synthesis that Flare does not: Flare has a real page in 676 of 676 roots and WebWorks has one in none.
+
+**The support and legal pages arrive by two routes, and both feed the same tail rule.** §6.2's rule — support second-last, legal last, promoted to top level, **moved rather than appended** — is unchanged. What is new is that in this corpus they can be *whole books*:
+
+- **As top-level TOC nodes inside a book**: `Legal and Third-Party Notices` appears in the last two top-level slots 67 times, `TIBCO Product Documentation and Support Services` 66 times.
+- **As standalone books**: 31 books are one of these two pages and nothing else, typically three files (`index.htm`, `wwhsec.htm`, one topic). Six of them have percent-encoded directory names (`adas400/{6.2.2,6.3.0,6.4.0}/html/TIBCO Product Documentation and Support Services`, `bwcp/{1.3.0,1.5.0}/doc/html/…`) and are exactly the 22 declarations of §5.3.3.
+
+A standalone support or legal book collapses to a single tail node rather than becoming a book-level branch of its own. The label comes from the book's `title.js`, which is brand-varied in the same way Flare's `h1` is (`TIBCO Documentation and Support Services`, `Documentation and support services`, `Legal and Third-Party Notices`) — so it is carried, never constanted.
+
+**Generated section pages: the rule fires here for a different reason.** WebWorks has no headless-container sentinel; 68,915 of 68,970 TOC entries carry an `l` value. But **the book TOC is a forest, not a tree** — 584 of 645 books have more than one top-level node and only 61 have a single root — so the book itself is a node with children and no page. §6.2's rule already covers it: a node with children and no page gets a generated page, marked `generated: true` in frontmatter. That applies to the book node, to the collection node, and to any `BookGroup` level that survives §5.3.3's flattening.
+
+**Front matter is dropped, not filed.** `lof.htm`, `lot.htm`, `ix.htm` and the `FigureTitleLOF` / `TableTitleLOT` pages are generated lists of figures, tables and index terms — 396 of the 1,478 front/back-matter files are TOC entries, and "Figures" or "Tables" is the *first* top-level node in 246 books. They are regenerable navigation over content the Markdown already carries, and they are dropped with a report line. `copyrigh.htm` — "Important Information" — is real content and converts.
+
+#### 5.3.6 Content extraction: one invariant, and the chrome is outside it
+
+**`body > blockquote` holds the content, in 29,594 of 29,712 topics (99.6%), and no topic anywhere in the corpus has more than one.** That is a stronger invariant than either of the other two engines'. There are zero topics where a `<blockquote>` exists but is not a direct child of `<body>`, so the selector needs no descendant search.
+
+The 118 misses are the 2004–2006 flavour of §5.3.1 and nothing else. Per book the rate is bimodal to the point of being binary: **634 books at 100%, 5 books at 0%**, nothing in between.
+
+*(A first pass measured 87.5% and it was a scoping error, not a finding: the denominator included the embedded API-reference trees, which are 4,552 of the 4,763 topics that lack the container. Excluding them by the §6.3 predicate — which the engine does anyway — moves the figure to 99.6%. Same shape as §5.1.6's apparent 3% miss.)*
+
+**All the chrome is outside the container**, which is why the invariant is worth so much. Counting direct children of `<body>` over 29,712 topics: `hr` 59,293, `br` 54,246, `table` 53,551, `div` 32,638, `script` 29,692, `blockquote` 29,594. Every topic is laid out the same way:
+
+| Outside the blockquote | Present in | What it is |
+| :--- | ---: | :--- |
+| `table[align=right]` with `td.WebWorks_Company_Logo_Top` | 28,850 files | Logo and copyright banner. |
+| `div.WebWorks_Breadcrumbs` | 32,928 files | The trail; `toc.yml` carries it. **It is also where nearly every plain relative link in the corpus lives** (§5.3.8). |
+| `<hr>`, `<br clear="all">` | ~2 each per topic | Rules around the banner and breadcrumbs. |
+| `scripts/expand.js`, `WWHUpdate()` / `WWHUnload()` handlers | 32,938 / 33,051 | Runtime. |
+| `WWHRelatedTopics*` | 33,036 | Generated see-also navigation. |
+
+Selecting `body > blockquote` discards all of it in one step. **This is the reverse of Flare, where the chrome is inside `#mc-main-content` and one block of it accounts for 47.7% of every href in the corpus** (§5.1.6). Here, chrome removal is the selector, and no ordering rule is needed — but the corollary matters for §5.3.8: any link statistic computed over the whole file rather than over the blockquote is dominated by breadcrumbs, by roughly 77 to 1.
+
+#### 5.3.7 The WebWorks vocabulary: nothing is semantic HTML
+
+The class vocabulary is FrameMaker paragraph and character tags carried through verbatim, so it is large, it is stable, and it is the only semantics available. Counts are of elements inside the blockquote, over 29,712 topics.
+
+**Headings.** `N1Heading` 19,738 → `#`, `N2Heading` 32,473 → `##`, `N3Heading` 16,437 → `###`, plus `MinorHead` 19,531, `Block-title` 12,788, `N3Syntax` 11,173 and `Chapter_inner` 5,780. `N1Heading` is the topic's own title and appears roughly once per topic; the numeral in the class *is* the level, which makes this the one place WebWorks is easier than Flare, where the level has to be inferred from `data-mc-autonum`.
+
+**Body text.** `div.Body` 229,690, `div.ListContinue` 27,791, `div.ListContinueIndent` 5,579, `div.TitleBody` 7,100. A `ListContinue` is a paragraph belonging to the preceding list item and must be indented into it, not emitted as a sibling.
+
+**Every list is a table, and the shape is exact.** The construct is `div.<Kind>_outer > table > tr > td[div.<Kind>_inner] × 2` — first cell the marker, second cell the content:
+
+| Kind | `_outer` | `_inner` | Ratio | Markdown |
+| :--- | ---: | ---: | ---: | :--- |
+| `Bullet` | 116,423 | 232,846 | 2.000 | `-` |
+| `Step` | 66,677 | 133,354 | 2.000 | `1.` |
+| `ListDash` | 18,781 | 37,562 | 2.000 | `-` |
+| `StepInd` | 7,677 | 15,354 | 2.000 | nested `1.` |
+
+**The 2:1 ratio is exact in all four families across the whole corpus** — every `_outer` holds precisely two `_inner` divs. That is a hard structural invariant, and it means the list transform is a shape match rather than a heuristic. The ordinal is in the first cell as literal text (`1.&#9;`); the marker glyph is a `<span>` holding `•`. The same shape carries the message-reference triple `Action` / `Explanation` / `Source` (≈6,300 `_outer` each) and `List_1_inner` 6,762, `Step_1_inner` 5,490, `Unorderedlist_inner` 4,554.
+
+**Code is a run of sibling divs, never `<pre>`.** `WCodeLine` 51,345, `CodeLine` 43,355, `CodeLineFirst` 10,196 — against **60 `<pre>` elements in the entire corpus**, all of them in the 2004–2006 flavour. Consecutive `*CodeLine` siblings coalesce into **one** fenced block; leading indentation arrives as `&nbsp;` runs and is converted to spaces; inline `span.Code*` formatting inside the fence is flattened to text, because a fence cannot carry emphasis. **Fences are bare** — there is no language attribute anywhere to read, and guessing one would be a fabrication applied 100,000 times.
+
+**Callouts are `table.IconTable`, and the body is in the *other* cell.** 12,866 of them. The kind is a `div.Icon<Kind>` in the first cell — `IconNote` 11,804 dominant, with `IconWarning`, `IconCaution` and `IconTip` in the tail — and that div holds only a `tpl/*.gif` and a `&nbsp;`. **The prose is in the second cell**, as an ordinary `div.Body` or `div.ListContinue`. They map to GFM alerts, taking the whole second cell as the alert body. Reading the kind from the icon div and then emitting *its* content is the predecessor's bug (§5.3.10) and produces an empty alert followed by an unquoted paragraph.
+
+**Inline spans.** `Code` 205,059 and `CodeItalic` 43,028 and `CodeBold` 18,318 → inline code; `Bold` 115,619 → `**`; `Italic` 30,527 and `Emphasis` 4,123 → `_`; `RunIn` 34,211 → a bold run-in label; `LiveLink` 85,719 → **a cross-reference, not text** (§5.3.8); `Command` 5,367, `URL` 3,092, `ErrorVariable` 600 → inline code; `uicontrol` 5,828, `wintitle` 358, `option` 416 → bold; `codeph` 330 → inline code. The last four are DITA class names leaking through a FrameMaker template and map exactly as they do in §5.2.5.
+
+**Three kinds of table, and the discriminator is not `role`.** 269,084 tables sit inside the blockquotes:
+
+| Kind | Test | Count |
+| :--- | :--- | ---: |
+| **Layout** | parent is a `div.*_outer`, or `role="presentation"` | ≈237,290 |
+| **Admonition** | `class="IconTable"` | 12,866 |
+| **Content** | cells hold `div.CellHeading` / `div.CellBody` | 18,928 |
+
+`role="presentation"` marks 149,326 of the layout tables and **86,702 identical ones carry no `role` at all** — older output predating the attribute. Testing `role` alone would push 87,964 list-item wrappers into the table converter and emit a one-column pipe table for each. The parent-class test is what makes the classification complete, and the 2:1 invariant above is what makes it safe.
+
+Content tables have **no `<th>`** — 45 in the whole corpus. The header row is ordinary `<td>`s holding `div.CellHeading`, and **16,161 of the 16,406 content tables with three or more rows (98.5%) have one**.
+
+**Half of the content tables do not fit a GFM pipe table**, which is the largest single fidelity decision in this engine. Of 20,746 content tables, **10,473 (50.5%) are GFM-safe** and 10,273 are not:
+
+| Why not | Count |
+| :--- | ---: |
+| A cell holds more than one block | 9,635 |
+| A nested table | 3,815 |
+| `rowspan` or `colspan` | 1,791 |
+
+*(The categories overlap.)* A pipe table cannot express any of the three. Unsafe tables are emitted as HTML passthrough, which AEM renders and which loses nothing; safe ones become pipe tables. Forcing all 20,746 into pipes would flatten multi-paragraph cells into run-on text in nearly half of them — and a 98.5% header-row rate makes the safe half genuinely safe.
+
+**Captions sit in two different places, and figures put theirs first.** `TableTitle` 7,732: **7,529 (97.4%) are the last thing in their `<caption>`**, so the table caption is a caption element and reads normally. `FigureTitle` 7,442: **7,316 (98.3%) are followed by a sibling holding the image** — 5,576 by a `div` with an `<img>`, 1,681 by a plain `div`, 59 by a `table` with an `<img>` — so a figure's title *precedes* its figure. Emitting it after the image, as prose order would suggest, would caption the wrong thing 7,316 times. Both carry the Frame-generated number (`Table 2   Effects of various configuration settings`).
+
+#### 5.3.8 Links, anchors, and images
+
+**Cross-references are JavaScript popups, and they are 99.7% of all in-content links.** Inside the blockquote, over 29,712 topics: `javascript:` 89,808, absolute URL 3,868, fragment-only 1,160, and **plain relative `.htm` — 314**. The form is always the same, and `WWHClickedPopup` is the only function name that appears:
+
+```html
+<span class="LiveLink"><a href="javascript:WWHClickedPopup('tib_bw_administration',
+     'admin.5.15.htm#1691748', '');" title="Creating an Archive for Deployment">…</a></span>
+```
+
+The first argument is the **target book**, the second the file and anchor. Both are recoverable, so this is a fully-specified link and not an opaque script. Measured over the 89,125 popups in indexed topics:
+
+| | Count | Resolves |
+| :--- | ---: | ---: |
+| Same book | 87,626 | **87,626 (100%)** |
+| Another book in the same collection | 1,499 | 788 (52.6%) |
+
+**Every single popup carries an anchor** — 89,125 of 89,125. And **the Flare version-wide fallback rescues exactly 0 of the 711 that dangle**: those name books the package does not ship (`tib_osb_installing_and_operating`, `User_s_Guide`, `Palette_Reference`). So §5.4.3's step 4 is a Flare remedy and stays one; here a cross-book miss is a source defect, emitted as plain text and counted.
+
+**The 314 plain relative links are not the whole story, and the difference is a measurement trap.** Counted over the whole file rather than the blockquote there are 24,429 of them, 99.3% resolving — because **the breadcrumb is a relative link and there is one per topic** (§5.3.6). Any link profile computed before selecting the container is 77× too large and describes navigation, not content. Flare has the same hazard in mirror image (§5.1.6); WebWorks' version is worse because the inflation is 77-fold rather than 2-fold.
+
+**Anchors are the reason this engine cannot use a naive text extractor.** There are **1,286,498 `<a name>` elements inside the blockquotes — 43 per topic — and 96.5% of the corpus's 1,372,544 anchor names are bare integers.** They are not empty markers: the generator wraps the *leading text* of each block in one.
+
+```html
+<div class="Body"><a name="1674478">To create an application in TIBCO Administrator, you
+must import an enterprise archive file created in TIBCO Designer. See </a>…</div>
+```
+
+An `<a>` with no `href` is therefore both an anchor and a text node, and the two have to be separated: the text belongs in the paragraph, the name belongs on the enclosing block. This is exactly what 57.5% of TOC entries (§5.3.4), 100% of popups (above) and 43% of CSH targets (§5.4.4) point at. Unwrapping the `<a>` and keeping only its text — which is what the predecessor does — is silently correct for the prose and destroys every anchor target in the corpus.
+
+**Almost none of them are referenced, and almost all of the referenced ones exist.** Resolving every TOC `l=` fragment, every `topics.js` CSH target and every popup href back to the file it names:
+
+| | Count |
+| :--- | ---: |
+| `<a name>` in the content | 1,319,510 |
+| …of which something actually points at it | **85,219 (6.46%)** |
+| References to an anchor | 85,377 |
+| …that name an anchor the file does not contain | **158 (0.19%)** |
+
+So the rule is DITA's (§5.2.6): **emit an explicit anchor only where a reference targets it**, which is one in fifteen, and drop the rest. Emitting all 1.32 million would add roughly 43 anchors per topic of pure noise; emitting none would break 85,219 links. And because references resolve at **99.81%**, a dangling anchor is a reportable defect rather than an expected condition — the opposite of the cross-book popup case above.
+
+Since the anchor sits on the first text of a block rather than on a heading, the emitted form attaches to the block the name was found on, not to the nearest heading above it.
+
+**Images.** 37,241 `<img>` inside the blockquotes:
+
+| `src` | Count | Handling |
+| :--- | ---: | :--- |
+| `images/…` | 22,126 | Content. Copied. |
+| `tpl/…` | 14,467 | Skin — callout icons, the logo. **Never copied.** |
+| flat, in the book root | 648 | Content. |
+
+**Alt text does not exist on content images and always exists on skin ones.** The 22,126 with no `alt` attribute are precisely the 22,126 under `images/`; every one of the 14,467 `tpl/` icons carries `alt="*"` or the copyright string. So `alt` is not a caption source and is not a filename source — it is a skin marker. The caption is the adjacent `div.FigureTitle`, and images keep their source filename. *(The predecessor names images from alt text with a fallback; measured here the fallback would fire on 100% of content images, which is the same finding as DITA's 95%, §5.2.6.)*
+
+#### 5.3.9 What the engine does not convert
+
+- **`wwhdata/` and `wwhelp/`** — the runtime. Read for the TOC, the file index, titles and CSH (§5.3.4, §5.4.4); never emitted. The walk prunes at both.
+- **Runtime stubs** — `index.htm` (639), `wwhsec.htm` (592). Framesets, absent from `files.js`, absent from the TOC.
+- **`tpl/`** — skin images, 14,467 references and no content.
+- **Generated lists** — `lof.htm`, `lot.htm`, `ix.htm`, and the `FigureTitleLOF` / `TableTitleLOT` pages (§5.3.5).
+- **API reference trees.** Two generators, both inside WebWorks books, both claimed by the shared `is_api_reference()` predicate (§6.3) and routed to `-resources` by §6.4: **Javadoc** under `api/javadoc/` and `api/java/SDK/` in 6 books (4,508 files), and **Sandcastle** under `api/dotnet/Help/` in the three `activespaces_remote` `.NET` reference books (3,344 files). The Sandcastle tree is the one that matters for the marker list — its books read as 0.1% TOC-covered and 0% blockquote until the predicate claims them, and its root markers are `Index.aspx` / `FillNode.aspx` carrying the string `Sandcastle Help File Builder`, not the `fti/FTI_*.json` currently listed in §6.3. **The marker list needs the `Index.aspx` form added**; `fti/` is present in this tree too, one level down, so the current list finds it but claims a narrower root.
+- **The 45 stripped books** convert their content and produce no navigation (§5.3.1). They are reported, not skipped: 1,395 topics is too many to drop and `files.htm` gives every one of them a title.
+
+#### 5.3.10 The predecessor's WebWorks pipeline is a reference, with measured gaps
+
+`html-to-md/scripts/webworks/` is a real implementation — `convert.py` (496 lines), `build_toc.py`, `utils.py` — and it gets the two hardest things right: **`soup.find("blockquote")` is the correct container** (99.6%, §5.3.6) and its div-class dispatch table is a genuine subset of the vocabulary this survey measured. Six gaps, each measured, and each of which ships as a defect:
+
+1. **It reads the wrong file index.** `utils.read_files_index()` parses `wwhdata/files.htm`; `build_toc._resolve_l()` resolves every `l=` against it. Ground truth says `files.js` resolves **99.28%** of anchored entries against `files.htm`'s **88.87%**, with 86 books strictly worse and several resolving nothing at all (§5.3.4). Every TOC entry in those books points at the wrong topic — not at a missing one, at a *plausible wrong* one, which is the failure mode that does not announce itself.
+2. **It discards every anchor.** `_inline()` returns only the inner text for an `<a>` with no `href`. That is 1,286,498 anchors, 43 per topic, and the targets of 57.5% of TOC entries, 100% of popups and 43% of CSH entries (§5.3.8). CSH cannot be resolved at all against its output.
+3. **It discards every cross-reference.** `_SPAN_MAP` maps `LiveLink` to plain text. There are **85,719 `span.LiveLink`** in the corpus and 89,125 `WWHClickedPopup` hrefs, and both arguments of the popup are readable (§5.3.8). This is not a link it fails to rewrite; it is a link it deletes.
+4. **Its callout handler reads the icon cell.** `_convert_blockquote()` dispatches on `div.IconNote` and emits `> **Note:**` with that div's content — which is a `.gif` and a `&nbsp;`. The prose is in the sibling `<td>` and is emitted afterwards, outside the quote (§5.3.7). All 12,866 admonitions come out as an empty alert followed by a loose paragraph.
+5. **It fences code line by line.** `CodeLine` maps to a fenced block per `div`, so a five-line command becomes five one-line fences. Consecutive `*CodeLine` siblings are one block (§5.3.7), and there are 104,896 of them.
+6. **It detects on `wwhelp/books.htm`**, which is present in 141 of the 195 WebWorks versions — **72.3% recall** (§5.3.2). `utils.is_version_level_books()` then infers collection-versus-book by counting `/` characters in that file's hrefs, where `books.xml`'s `<Book directory>` answers it exactly (§5.3.3).
+
+What is worth taking: the container selector, `_SKIP_FILENAMES` (`title.htm`, `lof.htm`, `lot.htm`, `glossary.htm` — which matches what §5.3.9 arrived at independently, though it misses `index.htm` and `wwhsec.htm`), the heading-level mapping from the `N?Heading` numeral, and the `_SPAN_MAP` entries other than `LiveLink`. What is worth discarding entirely: `build_csh_maps.py`, which reads `ctx/*.htm` and `wwhdata/xml/files.xml` — both superseded by `topics.js` on 2026-09-08 (§5.4.4).
+
+### 5.4 Context-Sensitive Help (CSH)
 
 A shipping product calls its help by identifier, not by URL: a **Help** button passes a topic id and the help system resolves it to a page. If the identifier does not survive migration, the button breaks — silently, in the product, long after the docs were signed off. CSH is therefore a **first-class conversion output**, not a nicety.
 
 **The artifact.** Each converted product version gets one **`csh.yml`** at the root of its Markdown output, beside `toc.yml` / `nav.yml` / `meta.yml`. It maps every help identifier to the Markdown topic that identifier opens. The same identifiers are mirrored into the frontmatter of the topics themselves, so the mapping is discoverable from either end.
 
-**All three HTML engines.** CSH is read from MadCap Flare alias files, from SDL DITA's `head.js` context map, and from WebWorks' `topics.js` (§5.3.4). Every format the corpus actually ships is read; DocBook is the only engine with no CSH, because it has none to read.
+**All three HTML engines.** CSH is read from MadCap Flare alias files, from SDL DITA's `head.js` context map, and from WebWorks' `topics.js` (§5.4.4). Every format the corpus actually ships is read; DocBook is the only engine with no CSH, because it has none to read.
 
-**One identifier, and it is a string.** Flare offers one key that is actually unique, and it is not the integer: the `Map`'s `Name`. `ResolvedId` is read and discarded (§5.3.1). The identifier is typed as a *string* rather than as an integer or a name-shaped token because **834 of 11,054 observed Flare names (7.5%) are digit-only** — `1000`, `1122`, `12`. Those are strings that happen to be digits, which is why the YAML quoting rule in §5.3.2 is load-bearing rather than cosmetic.
+**One identifier, and it is a string.** Flare offers one key that is actually unique, and it is not the integer: the `Map`'s `Name`. `ResolvedId` is read and discarded (§5.4.1). The identifier is typed as a *string* rather than as an integer or a name-shaped token because **834 of 11,054 observed Flare names (7.5%) are digit-only** — `1000`, `1122`, `12`. Those are strings that happen to be digits, which is why the YAML quoting rule in §5.4.2 is load-bearing rather than cosmetic.
 
-#### 5.3.1 What the source actually looks like
+#### 5.4.1 What the source actually looks like
 
 Verified 2026-09-04 against **272 `Alias.xml` files** in the predecessor `html-to-md` cache — 196 with content, **7,220 `<Map>` entries** across ~254 product versions. MadCap Flare writes one alias file per help output:
 
@@ -859,7 +1151,7 @@ Six properties of the real corpus drive every design decision below:
 
 No link used a backslash separator, `../`, or an absolute path; every link resolved to a `.htm` file relative to the doc-set root.
 
-#### 5.3.2 `csh.yml`
+#### 5.4.2 `csh.yml`
 
 One file per product version, at the version's Markdown output root. `topics` is the whole mapping — there is no second index, because there is no second key.
 
@@ -904,7 +1196,7 @@ topics:
 unresolved: []
 ```
 
-Field rules, each answering a hazard from §5.3.1:
+Field rules, each answering a hazard from §5.4.1:
 
 - **`topics` is keyed by the identifier and there is no other index.** Names are unique within a source (0 violations in 196 files); integers are not (29 of 196). A schema with one key cannot develop a disagreement between two.
 - **Every identifier is emitted double-quoted.** An identifier of `1000`, `Yes`, `No`, `On`, `Off`, `null`, or `6.2` loads as an int/bool/float/None under a YAML 1.1 loader such as PyYAML. Dropping WebWorks does not relax this: **834 of 11,054 Flare names (7.5%) are digit-only**, so unquoted keys would silently become integers in a map whose keys are documented as strings. The corpus shows the hazard is *specifically* numeric coercion — 0 Flare names are `Yes`/`No`/`null`-shaped, 0 are sexagesimal, and none carry a leading zero — but the rule is applied uniformly rather than narrowed to digits, because it costs nothing and the next corpus need not look like this one.
@@ -915,20 +1207,20 @@ Field rules, each answering a hazard from §5.3.1:
 
 > **`ResolvedId` is read and thrown away.** It is parsed only so that a malformed alias entry is still recognised as an entry, and it appears nowhere in the output. If a product is later found to call its help by number, the mapping is regenerable — `Alias.xml` stays in the extracted tree and `csh.yml` is a build artifact, so reintroducing a numeric index costs a re-run, not a migration.
 
-#### 5.3.3 Resolution
+#### 5.4.3 Resolution
 
 Run per version, after that version's topics have been converted so resolution tests against files that were actually produced:
 
-1. **Collect** every CSH source under the version's extracted tree, grouped by doc-set (§5.3.4 lists the per-engine sources).
+1. **Collect** every CSH source under the version's extracted tree, grouped by doc-set (§5.4.4 lists the per-engine sources).
 2. **Parse** to `(identifier, link, anchor, doc_set)`. Empty, zero-byte, and unparseable files are counted and skipped.
 3. **Resolve within the doc-set first** — the alias link's `.htm` path against the Markdown the converter emitted for that HTML file.
 4. **Fall back version-wide.** If the link does not resolve in its own doc-set, try the identical relative path in every sibling. One hit wins. This is what rescues the 22% dangling population: the BW `relnotes` alias copy resolves entirely against `bw-ent-html`. The fallback is a Flare remedy specifically — every WebWorks link resolves inside its own book, so on a WebWorks version this step simply never fires.
 5. **Merge by identifier.** Same target from several doc-sets collapses to one entry. Different targets produce a primary plus `also`. **The primary is the doc-set with the most resolved entries, ties broken alphabetically** — deterministic, and it picks the main help output over a release-notes or getting-started sidecar every time. WebWorks needs this too, if less: a version averages 3.5 books, and 26 identifiers across the corpus are claimed by two books with different targets.
-6. **Emit** `csh.yml`, then the frontmatter (§5.3.5).
+6. **Emit** `csh.yml`, then the frontmatter (§5.4.5).
 
 Steps 3-4 need a source-HTML → output-Markdown mapping from the converter. That mapping is recorded per version in `state.db` during Stage 5 rather than recomputed here, so CSH resolution cannot disagree with what conversion actually did about renaming, deduplication, or dropped topics.
 
-#### 5.3.4 Three readers, one per HTML engine
+#### 5.4.4 Three readers, one per HTML engine
 
 `transforms/csh.py` owns the schema, the resolver, and the writer; an engine contributes only a reader that yields `(identifier, link, anchor)`. **Every format the corpus ships is read:**
 
@@ -965,7 +1257,7 @@ The lesson is procedural, and it is the reason the schema, resolver, writer and 
 
 Flare's `csh.js` is a runtime shim for `Default.htm#cshid=`, not a data source; it stays a detector marker only (§3.4).
 
-#### 5.3.5 Frontmatter on the topics
+#### 5.4.5 Frontmatter on the topics
 
 A topic that owns help identifiers carries them, so the mapping survives even if `csh.yml` is lost and so an author editing a page can see it is a help target:
 
@@ -980,7 +1272,7 @@ A flat list of quoted strings. With a single key there is nothing to pair, so th
 
 The identifiers are known before conversion writes the file (parsing a 24 KB `Alias.xml` is cheap), so frontmatter is written in the topic's **first and only** write. `csh.yml` is written afterwards, once the produced set is known and resolution can be checked against it.
 
-#### 5.3.6 Verification
+#### 5.4.6 Verification
 
 `docushift validate` treats CSH as link integrity, because that is what it is:
 
@@ -989,7 +1281,7 @@ The identifiers are known before conversion writes the file (parsing a 24 KB `Al
 - `unresolved` is empty, or every entry in it is accounted for in the report.
 - **Cross-version regression**: identifiers present in the previous converted version and absent from this one are reported. A dropped identifier is an upgrade that breaks the product's Help button, and it is invisible from within a single version.
 
-### 5.4 Universal Asset Preservation
+### 5.5 Universal Asset Preservation
 - Copies referenced assets (`PDF`, `DOC`, `DOCX`, `XLS`, `XLSX`, `TXT`, `PNG`, `SVG`, `ZIP`) and rewrites relative markdown paths.
 
 ---

@@ -352,7 +352,7 @@ The archive variant is identical but targets the archive path, and its `--extrac
 
 ### 6.2 CSH source inventory
 
-Locating help maps is separated from parsing them, because the *absence* of a help map needs to be visible before conversion starts rather than discovered after (`architecture.md` §5.3, planning Phase 4).
+Locating help maps is separated from parsing them, because the *absence* of a help map needs to be visible before conversion starts rather than discovered after (`architecture.md` §5.4, planning Phase 4).
 
 For each doc-set inside the extracted tree, look for:
 
@@ -456,11 +456,13 @@ Run per version, over the extracted tree, in three passes.
 | Engine | Markers | Versions |
 | --- | --- | --- |
 | Flare | `*.mcwebhelp`, `*.mclog`, `MicroContent/`, `_globalpages/`, `csh.js` | 595 |
-| WebWorks | `wwhelp/`, `wwhdata/` | 176 |
+| WebWorks | `wwhelp/`, `wwhdata/` | 176 (195 with the 19 below) |
 | DITA (SDL) | `GUID-*.html` filenames, or `static/head.js` + `static/body.js` | 371 |
 | R help | `snext.css` or `snextchm.css` | 11 |
 
 19 further versions match Flare *and* WebWorks markers — a Flare output with a WebWorks tree left beside it. Flare wins; the per-folder map (below) keeps the ambiguity visible.
+
+**The WebWorks row is carried by `wwhdata/` alone, and that marker is exact** (`architecture.md` §5.3.2, 2026-09-09). Ground truth is "the version holds a directory containing `wwhdata/`" — **195 versions**, which is the 176 above plus all 19 of the mixed bundles. `wwhdata/` matches 195 with **zero false positives and zero false negatives**; `wwhelp/` matches 178 at 91.3% recall, missing the 17 versions whose books are stripped to `wwhdata/files.htm`. The union is also 195/195, so the pair stays as written — but the recall belongs to `wwhdata/`, and the marker is lowercase in all 1,822 versions with no variants. On the 19 mixed versions **both** converters have work to do; that is the case the per-folder map exists for, and the first one in the corpus where it is not hypothetical.
 
 **`Skins/` and `Data/` were dropped from the Flare row on 2026-09-08** (`architecture.md` §5.1.2). Over all 1,822 cached versions the seven-marker list matched 689 against 595 that actually hold a `Data/HelpSystem.xml` runtime: `Skins/` is 91.4% precise and `Data/` 88.0%, because other publishers use directories by those names too. **All 94 false positives come from those two markers and no other** — 43 matched both, 38 `Data/` alone, 13 `Skins/` alone; 17 are WebWorks, 3 DITA, and 74 carry no engine marker at all (mostly 2010–2013 adapter packages). Removing them costs no recall: **`*.mcwebhelp` alone finds all 595 and `csh.js` alone finds all 595.** Worth a regression test with a WebWorks fixture that ships a `Skins/` directory: under the old list it detects as Flare.
 
@@ -469,6 +471,8 @@ Run per version, over the extracted tree, in three passes.
 **Flare root detection is a separate step from engine detection.** The engine answers "which converter", per version; the converter then locates its units of work by walking for `Data/HelpSystem.xml`, since **51 of 595 versions ship more than one output root and 153 roots nest inside another** (`architecture.md` §5.1.1, §5.1.3). The walk descends into nested roots rather than stopping at the first match, and the innermost root owns a file.
 
 **Pass 2 — content signatures.** Corroboration for pass 1, and the *only* means of identifying DocBook, whose flat HTML output has no distinctive layout. Signatures: the `MadCap` namespace and `MadCap:*` attributes; the WebWorks generator meta tag; the DITA-OT generator comment; `DC.Type` / `DC.Identifier` / `DC.Title` meta tags (SDL DITA); `class="RdName"` / `class="RdTitle"` (R help); the `DocBook XSL Stylesheets` generator comment.
+
+**The WebWorks generator meta tag is corroboration only — it has 1.5% recall.** Measured 2026-09-09 it names WebWorks or ePublisher in **3 of the 195** WebWorks versions. It is precise, it costs nothing, and it must never be read as evidence of absence: a null result from it says nothing at all. Pass 1's `wwhdata/` is the WebWorks rule.
 
 **Pass 3 — the generator meta tag.** A last look for `<meta name="generator">`, which names the remaining long tail outright: Adobe RoboHelp 11, Microsoft FrontPage 6.0, Help & Manual, MkDocs / mkdocs-material, Docusaurus, Apache Maven Doxia. 19 versions, ~7,200 files. None of these has a Stage 5 handler; they are recorded anyway (§7.3). A string we cannot map to a known name becomes `other`, with the raw value kept in `state.db`.
 
@@ -537,7 +541,7 @@ Count products by family provenance and list the unclassified ones. This turns "
 
 ## 9. Context-Sensitive Help
 
-**Specified.** This is the most intricate algorithm in the tool, and the one grounded most directly in measurement — now re-measured over the whole cache: **863 `Alias.xml` files, 387 with content, 11,054 entries, 2,396 distinct names**, superseding the 2026-09-04 subset of 272 files / 7,220 entries. **Scope: all three HTML engines — Flare, DITA and WebWorks** (§9.2). The full evidence table and the reasoning are in `architecture.md` §5.3; what follows is the procedure.
+**Specified.** This is the most intricate algorithm in the tool, and the one grounded most directly in measurement — now re-measured over the whole cache: **863 `Alias.xml` files, 387 with content, 11,054 entries, 2,396 distinct names**, superseding the 2026-09-04 subset of 272 files / 7,220 entries. **Scope: all three HTML engines — Flare, DITA and WebWorks** (§9.2). The full evidence table and the reasoning are in `architecture.md` §5.4; what follows is the procedure.
 
 ### 9.1 The single identifier rule
 
@@ -770,6 +774,9 @@ Properties that hold across the whole tool. Each is a rule some algorithm above 
 | 6.3 | Inventory columns and write-back | Built | `catalog.py:record_extract_inventory`, `utils/csvio.py` |
 | 6.3 | API-reference predicate and triage | Specified | Phase 4 |
 | 7 | Engine detection | Specified | Phase 5 |
+| `architecture.md` §5.1 | Flare converter | Specified | Phase 5, `engines/flare.py` |
+| `architecture.md` §5.2 | SDL DITA converter | Specified | Phase 5, `engines/dita.py` |
+| `architecture.md` §5.3 | WebWorks converter | Specified | Phase 5, `engines/webworks.py` |
 | 8.1–8.3 | Catalog validation, warnings, triage | Built | `catalog.py` |
 | 9.3 | CSH resolution | Specified | Phase 5 |
 | 9.4–9.5 | `csh.yml` and frontmatter | Specified | Phase 5 |
