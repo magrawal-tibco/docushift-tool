@@ -991,8 +991,8 @@ en-us-tibco-messaging/                  # docs repo — what a reader reads
 en-us-tibco-messaging-resources/        # bulk repo — generated trees and cold storage
 └── en-us/
     └── ems/
-        ├── api-references/java/10-4-0/ # Javadoc; siblings c/, golang/, tibdg/
-        └── archives/                   # archived-version ZIPs, no version segment
+        ├── api-references/java/10-4-0/ # Javadoc; siblings c/, golang/, tibdg/ — no generated index
+        └── archives/                   # archived-version ZIPs + index.md, toc.yml; no version segment
 ```
 
 ### 6.2 Which Doc-Class Goes Where
@@ -1003,8 +1003,8 @@ en-us-tibco-messaging-resources/        # bulk repo — generated trees and cold
 | `user-guides` | docs | Everything in the package's `pdf/` that is not a release note, VPAT or licence | No — copied, plus a generated `index.md` + `toc.yml` (§6.2.2) |
 | `release-information` | docs | Release-notes PDF, readme TXT | No — copied, plus a generated `index.md` + `toc.yml` (§6.2.2) |
 | `reference-documents` | docs | Licence (TXT and PDF), reminder notice, VPAT, and everything else under the package's `doc/` | No — copied, plus a generated `index.md` + `toc.yml` (§6.2.2) |
-| `api-references` | `-resources` | **Javadoc and the C / Go / `tibdg` API trees**, under a per-language subdirectory | **Never** — copied verbatim |
-| `archives` | `-resources` | Archived-version ZIPs, via `docushift archive download` | No — never unpacked |
+| `api-references` | `-resources` | **Javadoc and the C / Go / `tibdg` API trees**, under a per-language subdirectory | **Never** — copied verbatim, and **no** generated index (§6.2.3) |
+| `archives` | `-resources` | Archived-version ZIPs, via `docushift archive download` | No — never unpacked, but indexed from the catalog (§6.2.3) |
 
 **The split is by what the artefact *is*, not by whether it is Markdown.** The docs repo holds the per-version publication set — every deliverable a human wrote and a reader opens, whether that is converted help or a PDF that was never HTML to begin with. Splitting those off would mean a reviewer diffing one product version across two repositories to see one release's worth of documentation. The `-resources` repo holds the two classes that are neither authored nor read as prose: machine-generated API trees, which are large, regenerate wholesale, and produce diffs nobody reads; and archived ZIPs, which are opaque binaries kept for reference. Keeping those out is what stops a clone of the docs repo from being dominated by bytes that are not documentation.
 
@@ -1064,6 +1064,26 @@ Measured 2026-09-08 over the same 1,822 versions (scripts `C:\tmp\dc1_index.py` 
 > **Dependency, unresolved.** The 78% figure was measured with **pymupdf**, which is AGPL and therefore a poor fit for a shipped tool. **pypdf** (BSD) reads the same Info dictionary and should give the same answer, but it is not installed here and this has **not** been verified. Confirm before writing the dependency into `pyproject.toml`.
 
 **Shape of the generated files.** `toc.yml` is flat — these doc-classes have no hierarchy — with one item per file carrying `title`, `path` (the filename, relative), `type` (the extension) and `bytes`. `index.md` carries the same frontmatter as the `online-help` index (product, version, BU, family) plus `doc_class`, and renders the items as a linked list. Ordering is by kind rank then title, so `release-information` always leads with the release notes and `reference-documents` with the VPAT, rather than with whatever the filesystem returned first. Both are generated from `config/aem_templates/`, as siblings of the existing `index.md.j2` and `toc.yml.j2` — the existing pair assumes Markdown targets and a nested `guides` tree, so the document doc-classes need their own templates rather than a reuse of those.
+
+#### 6.2.3 `archives/` is indexed from the catalog, not from the directory
+
+`archives/` also gets an `index.md` and a `toc.yml` — but unlike §6.2.2's three, **it cannot be built from the files on disk**. Archived ZIPs are downloaded only on demand (§4.3), so the directory typically holds two of a product's forty archived versions. A directory-driven index would list those two and imply the rest do not exist, which inverts the folder's entire purpose: `archives/` is the *complete product history*, and the ZIP is the optional part.
+
+**The index is therefore built from the catalog's archived rows**, and each entry carries either a repository-relative path, if the ZIP was pulled, or the docsite URL, if it was not. Both states are listed; only the link differs.
+
+Measured 2026-09-09 against the live archive API over a random sample of **60 of the 669 public products / 326 archived versions** (scripts `C:\tmp\ar1_archives.py` … `ar3_order.py`):
+
+- **17 of the 60 products (28%) have no archived versions at all** and get no `archives/` folder and no index — the same emptiness-by-absence rule as §6.2.2. Of the 43 that do: min 1 archived version, median 4, p90 20, max 40.
+- **The payload is complete.** `name`, `version_no`, `zipPath` and `GA_date` are present in **326 of 326** children. Nothing here needs a fallback chain of the §6.2.2 kind.
+- **The title is `version_no`, not `name`.** `name` ends with the version in **326 of 326** cases (`TIBCO Enterprise Message Service™ 10.2.1`), so rendering it per row repeats the product name forty times and the version twice. The product name belongs in the index heading, once.
+- **`GA_date` arrives in two formats** — 54.3% as `November 2022`, 45.7% as `2017-10-23T08:54:14.000Z`. Printed raw, one table shows both. Normalize to `YYYY-MM`: month is the precision the *majority* of the corpus actually has, and inventing a day for it would be fabrication. All 326 parse under those two patterns.
+- **Order by version descending, never by date.** In **9 of the 32 sampled products with two or more archived versions (28%)** the two orders disagree, because maintenance lines ship after their successors — EMS's 8.7.0 is dated July 2023 and its 10.2.1 November 2022. Date order interleaves the 5.x and 6.x lines of `loglogic-log-management-intelligence` into a sequence no reader is looking for.
+- **`zipPath` is not derivable and the filename is not a source of truth.** 81% match `/pub/{slug}-{version-dashed}_documentation.zip`, but 19% do not: the filename preserves a *former* product name (`…composite-information-server-3-1-0…` for the product now slugged `cisco-information-server`; `…apple-ipad…` for `apple-ios`) and the directory varies freely (`/pub/ftl/`, `/pub/sfire-sfds/`, `/pub/ai-suite/3.1.0/`). So the index cannot recover a version or a title from the ZIP it links to; `version_no` is carried from the catalog. This is §2.8's "use `zipPath` verbatim" rule seen from the indexing side. 12 of 12 sampled paths return HTTP 200, 0.1–72.5 MB.
+- **7.7% of archived versions are also live.** 25 of the 326 — always exactly one per affected product, its current version, which the archive list repeats rather than replaces (§2.8). Those entries link to the published `online-help/` in the docs repo as well as to the ZIP, so a reader does not download 70 MB to read what is online.
+
+`toc.yml` is flat, one item per archived version: `version`, `released` (`YYYY-MM`), `available` (is the ZIP in this repo), and then `path` + `bytes` or `url`. `index.md` renders them as a table under the product heading.
+
+**`api-references/` deliberately gets no generated index.** Of 499 Javadoc-shaped roots in the cache, **496 ship their own `index.html`** — the three that do not are package subdirectories named `api`, not roots. The generator already wrote the entry point, and a second one beside it competes with the frame set rather than completing it. This is the same reasoning that keeps those trees out of conversion (§6.2).
 
 ### 6.3 Why `-resources` Is a Separate Repository
 

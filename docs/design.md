@@ -645,7 +645,7 @@ Identifiers are known before conversion writes the file — parsing a 24 KB alia
 - **The landing page is the first node.** The engine reports which converted topic is the version's landing page — for Flare, `HelpSystem.xml`'s `DefaultUrl`, which resolves in 676 of 676 output roots but is absent from the TOC in 55 of 60 sampled ones. If that topic is already a TOC node it moves to first; otherwise it is inserted as first. It never falls through to "Unfiled".
 - **A node with children and no page gets a generated one.** AEM treats a childed navigation node with no page as a broken parent, and Flare's `'___'` sentinel produces 165 of them per 60 output roots — 151 at top level, holding 1,357 children between them. The synthesizer emits a page titled from the node's label whose body links its immediate children, stamped as generated in frontmatter so a re-run replaces it rather than treating it as authored. Childless headless nodes are dropped and counted.
 
-**The sync path shape is settled** (`architecture.md` §6.1): the publishing form `{locale}-{bu}-{family}/{locale}/{product}/{doc-class}/{version-dashed}/`, with the docs repo taking `online-help`, `user-guides`, `release-information` and `reference-documents`, and a sibling `-resources` repo taking `api-references` and `archives`. The distributor therefore does four things per version, in order: copy the converted tree and its navigation into `online-help/`; copy the PDF and document assets into their three doc-classes and generate an `index.md` and `toc.yml` for each (§10.5); copy the API-reference trees, unconverted, into the sibling repo; then rewrite every link that crosses from one repo to the other. The rewrite is last because it needs both destinations to exist, and it belongs here rather than in Stage 5 because conversion does not know the publishing layout.
+**The sync path shape is settled** (`architecture.md` §6.1): the publishing form `{locale}-{bu}-{family}/{locale}/{product}/{doc-class}/{version-dashed}/`, with the docs repo taking `online-help`, `user-guides`, `release-information` and `reference-documents`, and a sibling `-resources` repo taking `api-references` and `archives`. The distributor therefore does four things per version, in order: copy the converted tree and its navigation into `online-help/`; copy the PDF and document assets into their three doc-classes and generate an `index.md` and `toc.yml` for each (§10.5); copy the API-reference trees, unconverted, into the sibling repo and index `archives/` from the catalog (§10.6); then rewrite every link that crosses from one repo to the other. The rewrite is last because it needs both destinations to exist, and it belongs here rather than in Stage 5 because conversion does not know the publishing layout.
 
 The dots-to-dashes version conversion belongs here too, at the publishing boundary, and nowhere earlier: the working tree's dotted version must round-trip to a `versions.csv` key, which `6-2-3` cannot (`6.2.3`? `6-2.3`?).
 
@@ -698,6 +698,23 @@ Each of `user-guides`, `release-information` and `reference-documents` gets a fl
 **Order** is by kind rank then title, so `release-information` leads with Release Notes and `reference-documents` with the VPAT, rather than with whatever order the filesystem returned.
 
 **Output.** `toc.yml` is flat — these doc-classes have no hierarchy — one item per file with `title`, `path` (the bare filename), `type` (extension) and `bytes`. `index.md` carries the `online-help` index frontmatter plus `doc_class`, and renders the items as a linked list. Both come from new templates in `config/aem_templates/`; the existing `index.md.j2` and `toc.yml.j2` assume Markdown targets and a nested `guides` tree and are not reusable here.
+
+### 10.6 The `archives/` index — **Specified**
+
+`archives/` in the `-resources` repo gets an `index.md` and a `toc.yml` too, but **its input is the catalog, not the directory**. Archived ZIPs are downloaded on demand (`architecture.md` §4.3), so the folder typically holds two of a product's forty archived versions; indexing what is on disk would publish a history that is 95% missing and look complete while doing it. Grounded in a 2026-09-09 sample of 60 public products / 326 archived versions (`architecture.md` §6.2.3).
+
+**Input** is every `versions.csv` row for the product with `is_archived` set — present or not on disk. A product with no archived rows gets no folder and no index; 17 of the 60 sampled products (28%) are in that state.
+
+**One item per archived version:**
+
+- `version` — `version_no` from the catalog. **Not parsed out of the ZIP filename**, which in 19% of cases carries a former product name (`…composite-information-server-3-1-0…` under the slug `cisco-information-server`).
+- `released` — `GA_date` normalized to `YYYY-MM`. It arrives in two formats, `November 2022` (54.3%) and `2017-10-23T08:54:14.000Z` (45.7%); all 326 parse under those two patterns. Month is the precision the majority actually carries, so a day is never synthesized.
+- `available` — is the ZIP in this repository. If true, `path` (relative) and `bytes`; if false, `url` — `{base_url}{zipPath}` verbatim, never templated.
+- A cross-link to `online-help/` when the version is **also live**: 25 of 326 archived versions (7.7%) are, always the product's current one, which the archive list repeats rather than replaces (§2.8).
+
+**Order is version descending** (§1.3's natural ordering), never `released` descending. The two disagree for 9 of the 32 sampled products with two or more archived versions (28%), because maintenance lines ship after their successors — EMS 8.7.0 is dated July 2023, EMS 10.2.1 November 2022.
+
+**`api-references/` gets no index.** 496 of 499 Javadoc-shaped roots in the cache ship their own `index.html` (the 3 exceptions are package directories named `api`, not roots). Generating a second entry point beside the generator's own competes with it.
 
 **Step 4, the link rewrite, in full.** Every link from a converted topic into an API-reference path (`api/`, `javadoc/`, `Java_API/`, `java/`, `c/`, `golang/`, `tibdg/`, however many `../` deep) is replaced with an **absolute URL**: `publish_base_url` from `config/publishing.yaml`, then the same `{locale}-{bu}-{family}-resources/{locale}/{product}/api-references/{subdir}/{version-dashed}/{rest}` template that placed the file. Link construction and file placement call one function, so a link cannot point somewhere the copy did not write. Links that stay inside the docs repo — within `online-help/`, or out to the PDF doc-classes — are left relative, which is what keeps the repo previewable before publication.
 
@@ -758,3 +775,4 @@ Properties that hold across the whole tool. Each is a rule some algorithm above 
 | 10 | AEM synthesis and sync | Specified | Phases 6–7 |
 | 10.4 | Document router (`pdf/` and `doc/` → doc-class) | Specified | Phase 6 |
 | 10.5 | Document doc-class index (`index.md`, `toc.yml`, title chain) | Specified | Phase 6 |
+| 10.6 | `archives/` index, built from the catalog rather than the directory | Specified | Phase 6 |
