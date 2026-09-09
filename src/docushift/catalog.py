@@ -20,6 +20,7 @@ from docushift.models import (
     FamilySource,
     Product,
     ProductVersion,
+    ScopeSource,
     SourceEngine,
     ZipSource,
 )
@@ -47,6 +48,11 @@ PRODUCT_COLUMNS = (
     "family",
     "family_source",
     "slug",
+    # The outermost selection gate (architecture.md §3.10). Resolved from
+    # `config/scope.yaml` at merge time and carried here so the sheet shows the
+    # answer without anyone opening the YAML.
+    "in_scope",
+    "scope_source",
     "custom_override",
 )
 
@@ -88,7 +94,10 @@ _INVENTORY_COLUMNS = (
 )
 
 # Fields discovery owns and may therefore update. `family` is handled separately
-# because `family_source=manual` outranks any fetch.
+# because `family_source=manual` outranks any fetch. `in_scope`/`scope_source` are
+# absent structurally: they are a local policy call resolved from `scope.yaml`, and
+# the docsite has no value to three-way-merge against -- so `product_snapshot`
+# carries neither and there is no rule needed to stop a fetch overwriting them.
 _MERGEABLE_PRODUCT_FIELDS = ("display_name", "slug")
 # Engine fields are absent by design: the detector writes them, not discovery.
 # `convert_batch` is absent for the same structural reason from the other side --
@@ -113,7 +122,11 @@ class MergeStats:
     versions_added: int = 0
     versions_updated: int = 0
     fields_preserved: int = 0
+    products_out_of_scope: int = 0
     deletions_blocked: list[str] = field(default_factory=list)
+    # Slugs in `scope.yaml` that matched no product this fetch touched. Almost
+    # always an upstream rename, which is how an exclusion silently stops working.
+    scope_rules_unmatched: list[str] = field(default_factory=list)
 
     def as_dict(self) -> dict[str, object]:
         return {
@@ -122,7 +135,9 @@ class MergeStats:
             "versions_added": self.versions_added,
             "versions_updated": self.versions_updated,
             "fields_preserved": self.fields_preserved,
+            "products_out_of_scope": self.products_out_of_scope,
             "deletions_blocked": list(self.deletions_blocked),
+            "scope_rules_unmatched": list(self.scope_rules_unmatched),
         }
 
 
@@ -163,6 +178,13 @@ class CatalogManager:
                 family=row.get("family", "").strip().lower() or "general",
                 family_source=_coerce_enum(FamilySource, row.get("family_source"), FamilySource.UNCLASSIFIED),
                 slug=row.get("slug", "").strip() or None,
+                # Read through the *optional* parser, then defaulted to true: only
+                # an explicit `false` excludes. `parse_bool` cannot express this --
+                # it treats a blank cell as `false` outright, ignoring its own
+                # default -- and a blank cell in a hand-added row must never
+                # silently drop the product out of every stage of the pipeline.
+                in_scope=parse_optional_bool(row.get("in_scope")) is not False,
+                scope_source=_coerce_enum(ScopeSource, row.get("scope_source"), ScopeSource.DEFAULT),
                 custom_override=parse_bool(row.get("custom_override")),
             )
 
@@ -224,6 +246,8 @@ class CatalogManager:
                     "family": p.family,
                     "family_source": str(p.family_source),
                     "slug": p.slug or "",
+                    "in_scope": format_bool(p.in_scope),
+                    "scope_source": str(p.scope_source),
                     "custom_override": format_bool(p.custom_override),
                 }
                 for p in products
@@ -279,11 +303,16 @@ class CatalogManager:
     ) -> list[tuple[Product, ProductVersion]]:
         """Filtered `(product, version)` pairs, in catalog sort order.
 
-        `batch` and `eligible_only` compose rather than override: `batch="poc-1"`
-        with `eligible_only=True` yields the versions that are both scheduled and
-        permitted. That is the selection every pipeline stage runs on -- a row
-        tagged into a batch but left `convert_eligible=false` is still excluded,
-        because eligibility is the hard gate.
+        The three gates compose rather than override, outside in (§3.7): scope,
+        then eligibility, then the batch. `batch="poc-1"` with `eligible_only=True`
+        yields the versions that are both scheduled and permitted -- a row tagged
+        into a batch but left `convert_eligible=false` is still excluded -- and no
+        version of an out-of-scope product is yielded at all.
+
+        The scope gate is deliberately conditioned on `eligible_only` rather than
+        applied unconditionally, so that reporting and inventory callers (which
+        pass `eligible_only=False`) still see excluded products. An out-of-scope
+        product is absent from the *work*, never from the *books* (§3.10).
         """
         catalog = self.load()
         results = []
@@ -293,6 +322,8 @@ class CatalogManager:
             if family and product.family != family.lower():
                 continue
             if product_code and product.product_code != product_code:
+                continue
+            if eligible_only and not product.in_scope:
                 continue
             for ver in sorted(product.versions.values(), key=lambda v: natural_version_key(v.version), reverse=True):
                 if version and ver.version != version:
@@ -332,6 +363,7 @@ class CatalogManager:
         """
         catalog = self.load()
         stats = MergeStats()
+        scope_rules = self._scope_rules()
 
         for incoming in discovered:
             code = incoming.product_code
@@ -349,6 +381,14 @@ class CatalogManager:
                 stats.versions_updated += updated
                 stats.fields_preserved += preserved
 
+            # Applied to new and existing products alike, so a product first seen
+            # after the rule was written is excluded on arrival rather than
+            # converted once and excluded afterwards.
+            product = catalog.products[code]
+            _resolve_scope(product, scope_rules)
+            if not product.in_scope:
+                stats.products_out_of_scope += 1
+
             blocked = self._collect_deletions(catalog.products[code], incoming)
             if blocked:
                 if allow_deletes:
@@ -358,6 +398,10 @@ class CatalogManager:
                             self.state.forget_version(code, gone)
                 else:
                     stats.deletions_blocked.extend(f"{code}@{v}" for v in blocked)
+
+        # Computed against the whole catalog, not just the products this fetch
+        # touched: on a scoped fetch every other rule would look unmatched.
+        stats.scope_rules_unmatched = self.unmatched_scope_rules()
 
         if stats.deletions_blocked and not allow_deletes:
             raise CatalogError(
@@ -372,6 +416,24 @@ class CatalogManager:
             self.save()
 
         return stats
+
+    def _scope_rules(self) -> dict[str, str]:
+        """`{slug: reason}` from `config/scope.yaml`, or empty with no config."""
+        return self.config.load_scope() if self.config is not None else {}
+
+    def unmatched_scope_rules(self) -> list[str]:
+        """Scope rules whose slug matches no product in the catalog -- §3.10.
+
+        The day a rule stops matching is the day the exclusion stops working, and
+        the usual cause is an upstream rename. Reported rather than ignored,
+        because silence is indistinguishable from success here.
+
+        Note this is only conclusive over a fully fetched catalog: before the first
+        `catalog fetch --all`, a rule matches nothing simply because its product has
+        not been discovered yet. Callers say so when they present the list.
+        """
+        known = {p.slug for p in self.load().products.values() if p.slug}
+        return sorted(slug for slug in self._scope_rules() if slug not in known)
 
     def _merge_product(self, mine: Product, theirs: Product) -> int:
         """Merges discovery-owned product fields. Returns the count preserved."""
@@ -480,6 +542,12 @@ class CatalogManager:
             product.display_name = value
         elif name == "slug":
             product.slug = value or None
+        elif name == "in_scope":
+            # Pinned to manual either way. Putting a product back in scope has to
+            # outrank scope.yaml or the next fetch would undo it; taking one out by
+            # hand records the same provenance so the two are read the same way.
+            product.in_scope = parse_bool(value)
+            product.scope_source = ScopeSource.MANUAL
         elif name == "custom_override":
             product.custom_override = parse_bool(value)
         else:
@@ -578,15 +646,22 @@ class CatalogManager:
         """Family classification progress, so triage has a reportable metric."""
         catalog = self.load()
         counts = dict.fromkeys((str(s) for s in FamilySource), 0)
+        scope_counts = dict.fromkeys((str(s) for s in ScopeSource), 0)
         unclassified = []
+        out_of_scope = []
         for product in catalog.products.values():
             counts[str(product.family_source)] += 1
+            scope_counts[str(product.scope_source)] += 1
             if product.family_source is FamilySource.UNCLASSIFIED:
                 unclassified.append(product.product_code)
+            if not product.in_scope:
+                out_of_scope.append(product.product_code)
         return {
             "total": len(catalog.products),
             "counts": counts,
             "unclassified": sorted(unclassified),
+            "scope_counts": scope_counts,
+            "out_of_scope": sorted(out_of_scope),
         }
 
     def validate(self) -> list[str]:
@@ -622,6 +697,18 @@ class CatalogManager:
         notes: list[str] = []
         catalog = self.load()
 
+        # One aggregated line rather than one per rule: with 61 exclusions and a
+        # partially fetched catalog this is routinely dozens of entries, and sixty
+        # near-identical warnings would bury the ones that matter.
+        unmatched = self.unmatched_scope_rules()
+        if unmatched and catalog.products:
+            shown = ", ".join(unmatched[:8]) + (" ..." if len(unmatched) > 8 else "")
+            notes.append(
+                f"config/scope.yaml: {len(unmatched)} of {len(self._scope_rules())} out-of-scope rules match no "
+                f"product in the catalog ({shown}). Expected until `catalog fetch --all` has run; afterwards it "
+                f"means the product was renamed upstream and is no longer being excluded."
+            )
+
         for product in sorted(catalog.products.values(), key=lambda p: p.product_code):
             # A family typed straight into products.csv is accepted and its folder
             # auto-registered; the warning exists so a typo ('mesaging') is visible
@@ -638,6 +725,21 @@ class CatalogManager:
                     f"Add it to taxonomy.yaml to silence this."
                 )
             for ver in sorted(product.versions.values(), key=lambda v: natural_version_key(v.version), reverse=True):
+                # Scheduled, but the product it belongs to is excluded outright.
+                # The row reads as scheduled and will never run. Which of the two
+                # places the exclusion came from is named, because they are undone
+                # differently: one is a YAML edit, the other a CSV edit.
+                if ver.convert_batch and not product.in_scope:
+                    origin = (
+                        "config/scope.yaml"
+                        if product.scope_source is ScopeSource.SCOPE_RULE
+                        else f"a manual in_scope=false on {product.product_code}"
+                    )
+                    notes.append(
+                        f"{product.product_code}@{ver.version}: in batch '{ver.convert_batch}' but the product "
+                        f"is out of scope (via {origin}), so it will be skipped. Run "
+                        f"`docushift catalog set --product {product.product_code} --in-scope` to include it."
+                    )
                 # Scheduled but not permitted: the batch flag looks like it selected
                 # this row, and nothing downstream will ever pick it up.
                 if ver.convert_batch and not ver.convert_eligible:
@@ -712,6 +814,35 @@ _FAMILY_PRECEDENCE = {
 
 def _family_rank(source: FamilySource) -> int:
     return _FAMILY_PRECEDENCE[source]
+
+
+def _resolve_scope(product: Product, rules: dict[str, str]) -> None:
+    """Applies `scope.yaml` to one product -- docs/design.md §3.3.1.
+
+    Ranked `manual` > `scope_rule` > `default`, first match wins:
+
+    1. `scope_source=manual` is a human's decision and is preserved unconditionally.
+    2. A slug listed in the rules excludes the product.
+    3. Anything else is in scope -- and this step **actively resets** a previous
+       `scope_rule` exclusion, so deleting a slug from the YAML really does restore
+       the product. That is safe only because step 1 short-circuits ahead of it: a
+       reset can never undo a hand-set value.
+
+    The lookup is a dict hit on the exact slug, never a substring test. Which rules
+    are live is answered separately by `unmatched_scope_rules()`, over the whole
+    catalog rather than one fetch -- a scoped fetch would otherwise report every
+    rule it did not visit as dead.
+    """
+    if product.scope_source is ScopeSource.MANUAL:
+        return
+
+    if product.slug and product.slug in rules:
+        product.in_scope = False
+        product.scope_source = ScopeSource.SCOPE_RULE
+        return
+
+    product.in_scope = True
+    product.scope_source = ScopeSource.DEFAULT
 
 
 def _as_text(value: object) -> str:

@@ -1,7 +1,7 @@
 # DocuShift User Guide: Migration & Conversion CLI
 
 > **Document Status:** Living User Manual  
-> **Last Updated:** 2026-09-03  
+> **Last Updated:** 2026-09-09  
 > **Target Environment:** TIBCO & IBI Documentation Migration to AEM
 
 > Wondering *why* a command behaved the way it did — which value a re-fetch kept, which versions a batch selected, how a help identifier was resolved? Every decision rule is written out step by step in [`design.md`](design.md).
@@ -84,19 +84,20 @@ What it prints: a table of added / updated / unchanged / protected counts, a dim
 
 ### Choosing which versions get converted
 
-Two columns in `config/versions.csv`, answering two different questions:
+Three columns, answering three different questions:
 
-| Column | Question | Default |
-| :--- | :--- | :--- |
-| `convert_eligible` | *May this version ever be converted?* | `true` for active, `false` for archived |
-| `convert_batch` | *Is it in **this** run?* | empty (not scheduled) |
+| Column | File | Question | Default |
+| :--- | :--- | :--- | :--- |
+| `in_scope` | `products.csv` | *May **this product** ever be converted?* | `true` |
+| `convert_eligible` | `versions.csv` | *May this version ever be converted?* | `true` for active, `false` for archived |
+| `convert_batch` | `versions.csv` | *Is it in **this** run?* | empty (not scheduled) |
 
 Use `convert_eligible` for permanent policy — this version is out of scope, full stop. Use `convert_batch` to scope a run: tag the handful of rows you want with a label like `poc-1` or `wave-2` and pass `--batch poc-1` to the pipeline. Nothing else in the sheet has to move.
 
 ```bash
 # Scope a POC to two versions
 docushift catalog set --product ems --version 10.4.0 --batch poc-1
-docushift catalog set --product ebx --version 6.2.0 --batch poc-1
+docushift catalog set --product dsp_gridserver --version 7.1.1 --batch poc-1
 
 # Check the scope before running anything
 docushift catalog batches
@@ -110,7 +111,34 @@ docushift convert  --batch poc-1
 
 For anything larger than a handful, the spreadsheet is faster: filter `versions.csv` by `_family`, select the `convert_batch` column, and fill down `wave-2`. Values are lowercased on save, so `POC-1` and `poc-1` are the same batch. To unschedule a version, clear the cell (or pass `--batch ""`).
 
-**The two columns compose, and eligibility wins.** A version tagged `poc-1` but left `convert_eligible=false` is skipped, not converted — `catalog import` warns about that combination by name, since it is nearly always an oversight.
+**The columns compose, outside in.** A version tagged `poc-1` but left `convert_eligible=false` is skipped, not converted; a version of a product with `in_scope=false` is skipped whatever its own two columns say. `catalog import` warns about both combinations by name, since each is nearly always an oversight.
+
+#### Products that are never converted
+
+Some products are excluded permanently — as of 2026-09-09 that is 61 EBX and Spotfire products. The list lives in `config/scope.yaml`, keyed by the product's **docsite slug**:
+
+```yaml
+out_of_scope:
+  - slug: tibco-ebx
+    display_name: TIBCO EBX®
+    reason: EBX and Spotfire are out of scope for migration (2026-09-09)
+```
+
+Every `catalog fetch` re-applies the file, so a version of an excluded product discovered next quarter is excluded the moment it appears — which is the whole point of putting it here rather than clearing `convert_eligible` on the rows you can see today. The tool writes the result into `products.csv` as `in_scope=false, scope_source=scope_rule`.
+
+Excluded products are **still fully catalogued**: they appear in `products.csv`, all their versions appear in `versions.csv`, and they are counted in every inventory. They are simply never downloaded, extracted, converted or laid out. `docushift catalog list --out-of-scope` shows them.
+
+To readmit one product without editing the YAML:
+
+```bash
+docushift catalog set --product ebx --in-scope
+```
+
+That sets `scope_source=manual`, which outranks the rule file — no later fetch will undo it. To exclude a product not on the list, either add it to `scope.yaml` (durable, reviewable) or run `catalog set --product X --out-of-scope` for a one-off.
+
+Two things to know if you edit `products.csv` by hand. An **empty `in_scope` cell means in scope** — only the literal `false` excludes, so a row you type in yourself cannot vanish from the pipeline by omission. And **deleting a slug from `scope.yaml` really does restore the product**: the next fetch resets it to `in_scope=true, scope_source=default`. The one thing a fetch will not touch is a `manual` decision.
+
+> **Slugs are matched exactly.** `slug: ebx` matches nothing, and a substring rule would be worse than useless — `ebx` appears inside `tibco-businessconnect-ebxml-protocol`, which is an unrelated product that *is* in scope. If you add an entry, copy the slug from `products.csv`. Any rule that matches no product is reported after every fetch, which is how you find out a product was renamed upstream.
 
 ### What's actually in the package
 
@@ -237,12 +265,13 @@ It distinguishes two kinds of finding:
 docushift catalog set --product ems --family messaging     # also sets family_source=manual
 docushift catalog set --product ems --bu tibco
 docushift catalog set --product ems --display-name "TIBCO Enterprise Message Service"
+docushift catalog set --product ebx --in-scope                # also sets scope_source=manual
 
 # Version row (versions.csv) — --engine, --zip-url, --zip-source and --batch require --version
 docushift catalog set --product ems --version 8.6.0 --engine webworks
 docushift catalog set --product ems --version 8.6.0 --zip-url https://internal/mirror.zip
 docushift catalog set --product ems --version 10.4.0 --batch poc-1
-docushift catalog set --product ebx --version 6.2.0 --zip-source auto   # undo a manual pin
+docushift catalog set --product dsp_gridserver --version 7.1.1 --zip-source auto   # undo a manual pin
 ```
 
 ### Triaging Unclassified Products
@@ -329,7 +358,7 @@ docushift report --output ./reports/migration_summary.md
 | `--version 10.4.0` | One version (with `--product`) |
 | `--batch poc-1` | Every version tagged into that run |
 
-Versions with `convert_eligible=false` are excluded regardless of the selector.
+Versions with `convert_eligible=false` are excluded regardless of the selector, and so is every version of a product with `in_scope=false` — `--product ebx --all` selects nothing.
 
 ### Download Documentation ZIPs
 Downloads eligible versions into `families/<locale>-<bu>-<family>/downloads/`:
@@ -377,26 +406,28 @@ docushift convert \
 Conversion also writes the version's context-sensitive help map (`csh.yml`) and stamps the
 matching identifiers into topic frontmatter — see §7.
 
-### AEM Synthesis & Git Sync
+### AEM Synthesis & Publishing Layout
 ```bash
-# Sync converted AEM files to local GitHub repo folder
+# Organize converted AEM files into repo-shaped folders on disk
 docushift sync --target-dir ../tibco-docs-aem/
 
 # Run link and asset integrity validation
 docushift validate --target-dir ../tibco-docs-aem/
 ```
 
-**What sync writes.** Two repositories per family, both named after the family workspace (§3):
+> **`sync` writes folders, not commits.** DocuShift stops at the filesystem: it never runs a git command, creates no repository and pushes nothing. The two trees it writes per family are named exactly as the publishing repositories are, so taking them the rest of the way is a copy into a clone — done by you, by a CI job, or by whatever owns those repositories. That also means you can run `sync` and read the result without any GitHub credentials.
+
+**What sync writes.** Two trees per family, both named after the family workspace (§3) — which is also the name of the repository each becomes:
 
 ```
-en-us-tibco-messaging/                  # the docs repo — what a reader reads
+en-us-tibco-messaging/                  # the docs tree — what a reader reads
 └── en-us/ems/
     ├── online-help/10-4-0/…            # converted Markdown, toc.yml, nav.yml, meta.yml, csh.yml
     ├── user-guides/10-4-0/…            # user-guide PDFs + index.md, toc.yml
     ├── release-information/10-4-0/…    # release notes + readme + index.md, toc.yml
     └── reference-documents/10-4-0/…    # VPAT, licence, rest of doc/ + index.md, toc.yml
 
-en-us-tibco-messaging-resources/        # the bulk repo
+en-us-tibco-messaging-resources/        # the bulk tree
 └── en-us/ems/
     ├── api-references/java/10-4-0/…    # Javadoc and the C / Go / tibdg trees
     └── archives/…                      # archived-version ZIPs + index.md, toc.yml

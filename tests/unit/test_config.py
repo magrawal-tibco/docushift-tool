@@ -7,6 +7,8 @@ which families exist and how to guess one. See docs/architecture.md §3.3.
 
 from pathlib import Path
 
+import pytest
+
 from docushift.config import ConfigManager
 from docushift.models import FamilySource
 
@@ -164,6 +166,54 @@ def test_resolve_product_info_never_returns_an_engine(config: ConfigManager) -> 
     config.taxonomy_path.write_text(RULES_YAML, encoding="utf-8")
 
     assert "engine" not in config.resolve_product_info("ems", "EMS")
+
+
+# -- scope.yaml (architecture.md §3.10) --------------------------------------
+
+
+def test_missing_scope_yields_no_exclusions(config: ConfigManager) -> None:
+    """A fresh checkout with no scope.yaml excludes nothing, rather than erroring."""
+    assert config.load_scope() == {}
+
+
+def test_scope_loads_slug_to_reason(config: ConfigManager) -> None:
+    config.scope_path.write_text(
+        "out_of_scope:\n"
+        '  - slug: ebx\n    display_name: "TIBCO EBX"\n    reason: "EBX is out of scope"\n'
+        "  - slug: spotfire\n    reason: \"Spotfire is out of scope\"\n",
+        encoding="utf-8",
+    )
+
+    assert config.load_scope() == {"ebx": "EBX is out of scope", "spotfire": "Spotfire is out of scope"}
+
+
+def test_scope_accepts_a_bare_slug_with_no_reason(config: ConfigManager) -> None:
+    config.scope_path.write_text("out_of_scope:\n  - ebx\n  - Spotfire-Server\n", encoding="utf-8")
+
+    assert config.load_scope() == {"ebx": "", "spotfire-server": ""}
+
+
+def test_duplicate_scope_slug_is_an_error(config: ConfigManager) -> None:
+    """Two entries for one product means two reasons, one of them about to vanish."""
+    config.scope_path.write_text(
+        'out_of_scope:\n  - slug: ebx\n    reason: "first"\n  - slug: ebx\n    reason: "second"\n',
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="duplicate out_of_scope slug 'ebx'"):
+        config.load_scope()
+
+
+def test_shipped_scope_lists_the_ebx_and_spotfire_products(repo_root: Path) -> None:
+    """A guard on the real config/scope.yaml, verified against the A-to-Z index."""
+    rules = ConfigManager(root_dir=repo_root).load_scope()
+
+    assert len(rules) == 61
+    for slug in ("tibco-ebx", "spotfire", "spotfire-server", "spotfire-desktop", "tibco-spotfire-for-apple-ipad"):
+        assert slug in rules
+    # The look-alikes the exact-slug rule exists to protect -- see §3.10.
+    for slug in ("tibco-businessconnect-ebxml-protocol", "spotfire-data-streams", "spotfire-statistics-services"):
+        assert slug not in rules
 
 
 def test_shipped_taxonomy_rules_classify_known_products(repo_root: Path) -> None:

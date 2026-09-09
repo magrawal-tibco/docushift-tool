@@ -216,6 +216,37 @@ def test_catalog_fetch_with_an_unused_batch_fails(runner: CliRunner, populated_r
     assert "nope" in result.output
 
 
+def test_catalog_fetch_excludes_a_listed_product_on_arrival(
+    runner: CliRunner, populated_root: Path, fake_crawl
+) -> None:
+    """The rule is applied during the merge, so nothing is ever eligible even once."""
+    (populated_root / "config" / "scope.yaml").write_text(
+        'out_of_scope:\n  - slug: ems\n    reason: "test"\n', encoding="utf-8"
+    )
+    fake_crawl()
+
+    result = _invoke(runner, populated_root, "catalog", "fetch", "--all")
+
+    assert result.exit_code == 0
+    assert "products out of scope" in result.output
+    assert "false,scope_rule" in (populated_root / "config" / "products.csv").read_text(encoding="utf-8-sig")
+
+
+def test_catalog_fetch_reports_a_rule_that_matched_nothing(
+    runner: CliRunner, populated_root: Path, fake_crawl
+) -> None:
+    """Only on `--all`: on a scoped fetch every rule it did not visit would look dead."""
+    (populated_root / "config" / "scope.yaml").write_text(
+        'out_of_scope:\n  - slug: renamed-upstream\n    reason: "test"\n', encoding="utf-8"
+    )
+    fake_crawl()
+
+    result = _invoke(runner, populated_root, "catalog", "fetch", "--all")
+
+    assert result.exit_code == 0
+    assert "renamed-upstream" in result.output
+
+
 def test_catalog_fetch_reports_unreachable_products_without_failing(
     runner: CliRunner, populated_root: Path, fake_crawl
 ) -> None:
@@ -291,6 +322,82 @@ def test_catalog_list_eligible_only_filters(runner: CliRunner, populated_root: P
     assert result.exit_code == 0
     assert "10.4.0" in result.output
     assert "8.6.0" not in result.output
+
+
+# -- product scope (architecture.md §3.10) -----------------------------------
+
+
+def test_catalog_set_out_of_scope_pins_the_decision_as_manual(runner: CliRunner, populated_root: Path) -> None:
+    result = _invoke(runner, populated_root, "catalog", "set", "--product", "ems", "--out-of-scope")
+
+    assert result.exit_code == 0
+    row = (populated_root / "config" / "products.csv").read_text(encoding="utf-8-sig")
+    assert "false,manual" in row
+
+
+def test_catalog_set_in_scope_readmits_a_product(runner: CliRunner, populated_root: Path) -> None:
+    _invoke(runner, populated_root, "catalog", "set", "--product", "ems", "--out-of-scope")
+
+    result = _invoke(runner, populated_root, "catalog", "set", "--product", "ems", "--in-scope")
+
+    assert result.exit_code == 0
+    assert "true,manual" in (populated_root / "config" / "products.csv").read_text(encoding="utf-8-sig")
+
+
+def test_catalog_list_out_of_scope_shows_only_excluded_products(runner: CliRunner, populated_root: Path) -> None:
+    _invoke(runner, populated_root, "catalog", "set", "--product", "ems", "--out-of-scope")
+
+    result = _invoke(runner, populated_root, "catalog", "list", "--out-of-scope")
+
+    assert result.exit_code == 0
+    assert "10.4.0" in result.output
+    # The Scope column appears only when something is excluded; its cell text is
+    # width-truncated by Rich at 80 columns, so the header is what is asserted.
+    assert "Scope" in result.output
+
+
+def test_catalog_list_out_of_scope_when_nothing_is_excluded(runner: CliRunner, populated_root: Path) -> None:
+    result = _invoke(runner, populated_root, "catalog", "list", "--out-of-scope")
+
+    assert result.exit_code == 0
+    assert "No out-of-scope products" in result.output
+
+
+def test_catalog_list_rejects_the_two_disjoint_scope_flags(runner: CliRunner, populated_root: Path) -> None:
+    result = _invoke(runner, populated_root, "catalog", "list", "--out-of-scope", "--eligible-only")
+
+    assert result.exit_code != 0
+    assert "disjoint" in result.output
+
+
+def test_catalog_list_eligible_only_skips_an_out_of_scope_product(runner: CliRunner, populated_root: Path) -> None:
+    _invoke(runner, populated_root, "catalog", "set", "--product", "ems", "--out-of-scope")
+
+    result = _invoke(runner, populated_root, "catalog", "list", "--eligible-only")
+
+    assert result.exit_code == 0
+    assert "No matching catalog rows" in result.output
+
+
+def test_catalog_show_says_an_excluded_product_is_never_converted(runner: CliRunner, populated_root: Path) -> None:
+    """The version rows below still say Eligible, so the scope line has to overrule them."""
+    _invoke(runner, populated_root, "catalog", "set", "--product", "ems", "--out-of-scope")
+
+    result = _invoke(runner, populated_root, "catalog", "show", "--product", "ems")
+
+    assert result.exit_code == 0
+    assert "in_scope=false" in result.output
+    assert "10.4.0" in result.output
+
+
+def test_catalog_triage_counts_scope_alongside_family(runner: CliRunner, populated_root: Path) -> None:
+    _invoke(runner, populated_root, "catalog", "set", "--product", "ems", "--out-of-scope")
+
+    result = _invoke(runner, populated_root, "catalog", "triage")
+
+    assert result.exit_code == 0
+    assert "1 of 1" in result.output
+    assert "out of scope" in result.output
 
 
 def test_catalog_show_describes_one_product(runner: CliRunner, populated_root: Path) -> None:

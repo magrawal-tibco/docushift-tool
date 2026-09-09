@@ -98,6 +98,19 @@ class FamilySource(StrEnum):
     UNCLASSIFIED = "unclassified"
 
 
+class ScopeSource(StrEnum):
+    """How a product's `in_scope` value was arrived at -- docs/architecture.md §3.10.
+
+    Precedence: first listed wins, exactly as `FamilySource` does. `MANUAL` is a
+    human's edit and no fetch may touch it; `SCOPE_RULE` means the product's
+    docsite slug is listed in `config/scope.yaml`; `DEFAULT` means listed nowhere,
+    and is the value a merge resets to when a slug is removed from the rule file.
+    """
+    MANUAL = "manual"
+    SCOPE_RULE = "scope_rule"
+    DEFAULT = "default"
+
+
 class ProductVersion(BaseModel):
     """One published version of a product -- one row of `versions.csv`.
 
@@ -141,13 +154,22 @@ class ProductVersion(BaseModel):
 
 
 class Product(BaseModel):
-    """One product -- one row of `products.csv`, plus its versions."""
+    """One product -- one row of `products.csv`, plus its versions.
+
+    `in_scope` is the outermost of the three selection gates (§3.7): a product-level
+    standing decision that no version of this product is ever converted. It is
+    deliberately not expressible as `convert_eligible=false` on every version row,
+    because next quarter's release arrives from a fetch defaulting to eligible --
+    an exclusion written that way decays silently (§3.10).
+    """
     product_code: str
     display_name: str
     bu: str = "tibco"
     family: str = "general"
     family_source: FamilySource = FamilySource.UNCLASSIFIED
     slug: str | None = None
+    in_scope: bool = True
+    scope_source: ScopeSource = ScopeSource.DEFAULT
     custom_override: bool = False
     versions: dict[str, ProductVersion] = Field(default_factory=dict)
 

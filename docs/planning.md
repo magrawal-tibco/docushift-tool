@@ -1,7 +1,7 @@
 # DocuShift Master Planning & Roadmap
 
 > **Document Status:** Active Roadmap  
-> **Last Updated:** 2026-09-03  
+> **Last Updated:** 2026-09-09  
 > **Target:** Multi-Stage Documentation Migration Pipeline (TIBCO & IBI -> AEM)
 
 ---
@@ -62,6 +62,18 @@
   - [x] `validate()`: exempt `zip_source=manual` from the *convert-eligible with no `zip_url`* problem.
   - [x] `warnings()`: flag `manual` rows that discovery has since found a `zip_url` for.
 - [x] Unit & mock tests in `tests/unit/test_discovery.py` (38), plus `catalog fetch` wiring tests in `test_cli.py`. No network: a fake session serves payloads shaped like the real responses.
+
+### Phase 3.5: Product Scope Exclusions ✅
+**Complete (2026-09-09).** Catalog work, not a pipeline stage, and it had to land **before the first full `catalog fetch`** — the same reason `zip_source` landed early in Phase 3. Once a fetch has populated 250 products and ~1,800 versions, the 61 excluded products are already in the sheet with `convert_eligible=true`, and the exclusion becomes a bulk edit to undo rather than a rule that was there first. Design: `architecture.md` §3.10, `design.md` §3.3.1 and §4. 30 new tests; suite at 327.
+
+- [x] **`config/scope.yaml`** — `out_of_scope:` list of `{slug, display_name, reason}`, seeded with the 61 EBX/Spotfire slugs verified against the live A-to-Z index on 2026-09-09 (61/61 matched, 1:1, all public, 0 ambiguous). `ConfigManager.load_scope()` returns `{slug: reason}`; a duplicate slug is an error, not a silent overwrite.
+- [x] **`Product.in_scope: bool = True` + `scope_source`** in `products.csv`, after `slug` and before `custom_override`. Ranked `manual` > `scope_rule` > `default`, resolved exactly the way `family_source` is.
+- [x] **Excluded from `product_snapshot` and from the mergeable product fields.** Scope is a local policy call; the docsite has no value to three-way-merge, so there is nothing for a fetch to overwrite and no rule needed to say so.
+- [x] **Resolution runs on every product the merge touches, new ones included** (`design.md` §3.3.1) — a product first discovered after the rule is written is excluded on arrival. Step 3 actively resets `scope_rule` → `default`, so deleting a slug from the YAML really does restore the product; `manual` short-circuits ahead of it and is never reset.
+- [x] **`iter_versions(eligible_only=True)` skips out-of-scope products whole.** Gated on `eligible_only`, so reporting and inventory paths still see them: an excluded product is absent from the work, never from the books.
+- [x] **Reporting** — `catalog fetch` prints the excluded count; `catalog triage` counts scope alongside family provenance; `catalog list --out-of-scope` lists them; `catalog set --in-scope/--out-of-scope` sets `scope_source=manual` for the one-off override.
+- [x] **`warnings()`**: a batch tag on a version of an out-of-scope product, and a `scope.yaml` rule matching no product in the catalog. The second is the rename detector — the day a rule stops matching is the day the exclusion stops working, and silence would make that invisible.
+- [x] **Tests.** Matching is by exact slug, and the two failure modes are regression cases with names: `tibco-businessconnect-ebxml-protocol` and `tibco-businessconnect-container-edition-ebxml-protocol` must stay in scope (a substring `ebx` rule sweeps both), and the 16 public in-scope `spotfire`-slugged products must survive (a substring `spotfire` rule sweeps all of them), as must `tibco-product-and-service-catalog-powered-by-tibco-ebx`. Plus: `manual` surviving a fetch that would exclude, a slug removed from the YAML returning to scope, a rule matching nothing reported, an excluded product still fully catalogued with all its versions, and `iter_versions` returning it under `eligible_only=False` but not under `True`.
 
 ### Phase 4: Package Downloader & Extractor
 The selection model and the on-disk layout this phase writes into are settled and tested (`architecture.md` §3.7 and §4); what remains is the I/O.
@@ -180,17 +192,20 @@ The selection model and the on-disk layout this phase writes into are settled an
   - [ ] Writer: one `csh.yml` per version at the Markdown output root; `topics` is the only index; no file at all when the version has no CSH.
   - [ ] Frontmatter injection: `csh: ["id-a", "id-b"]` on topics that own identifiers, written in the topic's first pass rather than as a read-modify-write second pass.
 - [ ] Asset copier and relative link re-pointer.
-- [ ] **Conversion skip for API-reference trees** — the *same* `is_api_reference()` predicate Stage 4 counts with (`design.md` §6.3), not a second name list that can drift from it. Marker files decide; a name-only match is reported for triage and still converted. These trees are copied verbatim by Stage 7 into the `api-references` doc-class (`architecture.md` §6.2), never fed to an engine — Javadoc is not generator output and converting it yields broken Markdown from working HTML. Links from converted topics into these paths are left intact here and re-pointed at sync time, when the target repository is known.
+- [ ] **Conversion skip for API-reference trees** — the *same* `is_api_reference()` predicate Stage 4 counts with (`design.md` §6.3), not a second name list that can drift from it. Marker files decide; a name-only match is reported for triage and still converted. These trees are copied verbatim by Stage 7 into the `api-references` doc-class (`architecture.md` §6.2), never fed to an engine — Javadoc is not generator output and converting it yields broken Markdown from working HTML. Links from converted topics into these paths are left intact here and re-pointed at sync time, when the publishing layout and `publish_base_url` are known.
 - [ ] Exhaustive unit tests with fixtures in `tests/unit/`, including the CSH cases the corpus survey turned up: case-only identifier collision, a digit-only identifier that must survive a YAML round-trip as a string, fragment in `Link`, an alias file that resolves 0%, a version with three doc-sets whose identifiers overlap, empty/zero-byte alias files, a `head.js` whose `suitehelp.contexts` is an empty object, and — for the WebWorks reader — a `topics.js` that returns `null` unconditionally, one carrying a `#anchor` target, and a book where `files.xml` disagrees with `topics.js` (the XML is not consulted, and a test should pin that).
 
-### Phase 6: AEM Architecture Synthesis & Git Sync
+### Phase 6: AEM Architecture Synthesis & Publishing Layout
+
+> **Scope boundary (2026-09-09, user decision).** **Git operations are out of scope for this tool.** `docushift sync` organizes the output into repo-shaped directory trees under `--target-dir` and stops; `git init` / `commit` / `push` / repository creation and every branch, review and PR policy are picked up separately, by whoever owns the publishing repositories. Nothing about the *layout* changes — the two-tree split, the doc-class routing and the absolute cross-tree links are all properties of what gets written (`architecture.md` §6.0). No GitHub credentials, no `gitpython`/`gh` dependency, and no repository state for this tool to get wrong.
+
 - [ ] AEM navigation builder (`toc.yml`, `nav.yml`, `meta.yml`).
   - [ ] **First node is the version's landing page** (`design.md` §10, `architecture.md` §5.1.5). The engine reports it; if it is already a TOC node, move it to first, else insert it. It must never fall through to "Unfiled".
   - [ ] **Generate a page for any node with children and no page.** Title from the node label, body a link list of its immediate children, `generated: true` in frontmatter so a re-run replaces it. Drop and count childless label-only nodes. Engine-neutral, but Flare alone produces 165 per 60 output roots (151 of them top level, 1,357 children).
   - [ ] **Last two nodes are support then legal** (`design.md` §10, `architecture.md` §5.1.5) — `Documentation and Support Services` second-last, `Legal and Third-Party Notices` last, both hoisted to top level. **Move, never append**: they are already TOC entries in 657 and 649 of 676 Flare roots, so appending duplicates the topic; and 18 legal nodes sit one level down and must be promoted. **One legal node, not two** — no separate third-party-notices page exists in the corpus (0 of 676) and the combined page has one `h1` and zero `h2`. Absent pages leave a shorter tail, with no generated stand-in. Tests: a root that is already support-then-legal last (610 of 676 — must come out unchanged), one with the support node first (4 roots), one with a nested legal node, and one missing both.
 - [ ] Frontmatter injector and landing page (`index.md`) generator.
-- [ ] Git workspace distributor — publishing form `{target_git}/{locale}-{bu}-{family}/{locale}/{product}/{doc-class}/{version-dashed}/`, layout fixed in `architecture.md` §6.1.
-  - [ ] Docs repo: `online-help/` (converted tree + navigation + `csh.yml`), `user-guides/` (PDFs), `release-information/` (relnotes + readme), `reference-documents/` (VPAT, licence, reminder notice, rest of `doc/`).
+- [ ] Workspace distributor — publishing form `{target_dir}/{locale}-{bu}-{family}/{locale}/{product}/{doc-class}/{version-dashed}/`, layout fixed in `architecture.md` §6.1. **Filesystem only** — it writes the trees and reports what it wrote; it does not publish them.
+  - [ ] Docs tree: `online-help/` (converted tree + navigation + `csh.yml`), `user-guides/` (PDFs), `release-information/` (relnotes + readme), `reference-documents/` (VPAT, licence, reminder notice, rest of `doc/`).
   - [ ] **Document router** (`design.md` §10.4, settled 2026-09-07) — source folder first, then name. `pdf/` defaults to `user-guides`, with release-note / VPAT / licence pulled out; `doc/` defaults to `reference-documents`, with only the readme pulled out. Locate `pdf/` and `doc/` at **both** depths (`<version>/` and `<version>/doc/`) — 373 of 1,822 versions use the nested form.
     - [ ] Pattern tests written against the **observed** spellings, not the expected ones: `tib_ems_relnotes.pdf`, `mft platform server v7.1 for windows release notes.pdf` (spaces), `tib_nimbus_9.1.0_licencing_doc.pdf` (`licencing`), `tib_ebx-addon_remindernotice.txt`, and `special-notes.pdf` which must stay in `user-guides`.
     - [ ] Regression test for the `\b` trap: `_relnotes` must match. A word-boundary anchor misrouted 1,753 files in the survey because `_` is a word character.
@@ -215,7 +230,8 @@ The selection model and the on-disk layout this phase writes into are settled an
   - [ ] Cross-repo link rewriter: help-topic links into `api/{c,java,golang,tibdg}/…` are re-pointed at the `-resources` repo as **absolute URLs** (`architecture.md` §6.4). Runs after both trees are placed. Links that stay inside the docs repo remain relative.
   - [ ] New **`config/publishing.yaml`** — `publish_base_url` plus the doc-class-to-repo map. The AEM host must not be compiled into the distributor; a staging target is a config edit. One path-template function serves both the file copy and the link rewrite, so the two cannot disagree.
   - [ ] Dots-to-dashes version conversion at this boundary only (`10.4.0` → `10-4-0`); nothing upstream may see a dashed version.
-  - [ ] `-resources` is a **separate repository** per family, created and pushed alongside the docs repo — not a directory inside it (`architecture.md` §6.3).
+  - [ ] `-resources` is a **separate tree** per family, written as a sibling of the docs tree — not a directory inside it (`architecture.md` §6.3). Sync creates the two directories; it does not create or push the two repositories.
+  - [ ] **Re-run behaviour is the only idempotency question**, and it is a filesystem one: a second sync over the same `--target-dir` must produce the same tree, replacing a version's doc-class folder wholesale rather than merging into it, so a topic deleted upstream does not survive as a stale file. No git state is consulted.
   - [ ] Only value still to supply: the `publish_base_url` string itself, once the AEM host is known. Deployment configuration, not design — nothing waits on it.
 
 ### Phase 7: CLI, Reporting & Verification Dashboard
@@ -233,6 +249,7 @@ The selection model and the on-disk layout this phase writes into are settled an
 - **Catalog Merge Fidelity**: 100% preservation of manual edits and toggle states when fetching updates — *without* requiring the user to have flagged them.
 - **CSV Round-Trip Fidelity**: A load-then-save cycle with no changes produces a byte-identical file (stable sort, fixed columns, normalized booleans/dates). No diff churn on repeat fetches.
 - **Active vs Archive Segregation**: Archived versions are never auto-converted unless explicitly flagged.
+- **Scope Exclusion Durability**: No version of an out-of-scope product is ever downloaded, extracted, converted or laid out — including versions first discovered after the exclusion was written. Excluded products remain fully catalogued and counted, and no slug is matched by anything looser than string equality.
 - **Package Source Transparency**: A manually supplied ZIP converts through exactly the same path as a downloaded one — no downstream stage branches on provenance, and no machine-local path appears in either CSV.
 - **Unit Test Coverage**: >90% coverage on core transforms, engines, catalog, and state management.
 - **Link & Asset Integrity**: Zero broken relative links or missing referenced assets in converted output.

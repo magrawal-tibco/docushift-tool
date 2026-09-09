@@ -1,7 +1,7 @@
 # DocuShift Architecture Document: End-to-End Documentation Migration Engine
 
 > **Document Status:** Living Architecture Specification  
-> **Last Updated:** 2026-09-03  
+> **Last Updated:** 2026-09-09  
 > **Scope:** ~250 Products across TIBCO & IBI BUs  
 > **Source:** `docs.tibco.com` (Active & Archived Versions)  
 > **Target:** AEM-Ready GitHub-Flavored Markdown Repositories
@@ -51,9 +51,10 @@ flowchart TD
         AEM1 --> AEM2["toc.yml, nav.yml, meta.yml\nLanding Pages & Frontmatter"]
     end
 
-    subgraph Sync["Git Sync & Distribution"]
-        AEM2 --> G1["Git Workspace Organizer"]
-        G1 --> G2["Target GitHub Product Repositories\n(BU / Family / Product / Version)"]
+    subgraph Sync["Publishing Layout Assembly"]
+        AEM2 --> G1["Workspace Organizer"]
+        G1 --> G2["Staged repo-shaped trees on disk\n(family / locale / product / doc-class / version)"]
+        G2 -.->|"out of scope: git init, commit, push"| G3["Publishing (handled separately)"]
     end
 
     subgraph Central["Central State & Tracking Engine"]
@@ -124,14 +125,19 @@ The pydantic models in `models.py` remain the in-memory representation; CSV is p
 | `family` | **user** | Must exist in `taxonomy.yaml` for this BU |
 | `family_source` | tool | Provenance — see §3.3 |
 | `slug` | tool | Docsite slug used for API calls |
+| `in_scope` | **user** | Policy gate above `convert_eligible`: may **any** version of this product ever be converted? Defaults `true` — see §3.10 |
+| `scope_source` | tool | Provenance — `manual` \| `scope_rule` \| `default`, see §3.10 |
 | `custom_override` | user | Explicit whole-row pin; ignore all upstream changes |
 
 ```csv
-product_code,display_name,bu,family,family_source,slug,custom_override
-ems,TIBCO Enterprise Message Service™,tibco,messaging,manual,tibco-ems,false
-ebx,TIBCO EBX®,tibco,data_management,taxonomy_rule,tibco-ebx,false
-webfocus,ibi™ WebFOCUS®,ibi,webfocus,manual,ibi-webfocus,true
+product_code,display_name,bu,family,family_source,slug,in_scope,scope_source,custom_override
+ems,TIBCO Enterprise Message Service™,tibco,messaging,manual,tibco-ems,true,default,false
+dsp_gridserver,TIBCO DataSynapse GridServer®,tibco,integration,taxonomy_rule,tibco-datasynapse-gridserver,true,default,false
+ebx,TIBCO EBX®,tibco,data_management,taxonomy_rule,tibco-ebx,false,scope_rule,false
+webfocus,ibi™ WebFOCUS®,ibi,webfocus,manual,ibi-webfocus,true,default,true
 ```
+
+The `ebx` row is the shape of an excluded product: fully catalogued, every version still discovered and counted, and `in_scope=false` so no stage ever acts on it (§3.10).
 
 > **`engine` is deliberately absent here.** The source toolchain varies *between versions* of the same product — TIBCO migrated products onto Flare over time, so an older version may be WebWorks or DITA while the current one is Flare. It is therefore a `versions.csv` column. See §3.4.
 
@@ -162,12 +168,14 @@ product_code,version,is_archived,convert_eligible,convert_batch,release_date,eng
 ems,10.4.0,false,true,poc-1,2025-11-04,flare,detected,https://docs.tibco.com/pub/ems/10.4.0/doc/zip/tib_ems_10.4.0_doc.zip,auto,false,tibco,messaging,true,412,true,4310,19776
 ems,10.2.1,true,false,,2023-06-12,auto,auto,https://docs.tibco.com/pub/ems/tibco-ems-10-2-1_documentation.zip,auto,false,tibco,messaging,,,,,
 ems,8.6.0,true,false,,2020-04-30,webworks,detected,https://docs.tibco.com/pub/ems/tibco-ems-8-6-0_documentation.zip,auto,false,tibco,messaging,,,,,
-ebx,6.2.0,false,true,poc-1,2025-09-30,flare,detected,,manual,false,tibco,data_management,true,0,false,0,8104
+dsp_gridserver,7.1.1,false,true,poc-1,2025-09-30,flare,detected,,manual,false,tibco,integration,true,0,false,0,8104
 ```
 
 Note the three `ems` rows: the current release is Flare, an older one is WebWorks, and the un-downloaded one is still `auto` because its engine cannot be known until the package is extracted. Two rows carry `convert_batch=poc-1`; `docushift download --batch poc-1` selects exactly those two and nothing else. The two archived rows have **blank** inventory columns because nothing has ever unpacked them — blank and `0` are different answers (§3.9).
 
-The `ebx` row shows the other acquisition path: it is convert-eligible with **no** `zip_url`, because discovery never produced a working one and the ZIP was handed to the tool directly. `zip_source=manual` is what makes that a valid state rather than a validation failure — see §3.8. It also shows `_has_csh=true` with `_csh_names=0`: an alias file exists but yielded no identifiers.
+The `dsp_gridserver` row shows the other acquisition path: it is convert-eligible with **no** `zip_url`, because discovery never produced a working one and the ZIP was handed to the tool directly. `zip_source=manual` is what makes that a valid state rather than a validation failure — see §3.8. It also shows `_has_csh=true` with `_csh_names=0`: an alias file exists but yielded no identifiers.
+
+There are **no `ebx` rows in this example**, and that is not an omission: EBX is out of scope (§3.10), so its versions are catalogued but never selected. Scope is a product-level gate, so it does not appear in `versions.csv` at all.
 
 **Volatile machine state is deliberately excluded** from both files. `zip_etag`, `zip_size`, checksums, per-stage status, and free-form metadata live in `state.db`. This is what keeps the CSVs stable enough to leave open in a spreadsheet — a `catalog fetch` touches them only when discovery finds a genuinely new product or version.
 
@@ -246,7 +254,7 @@ Three properties of the implementation matter:
 
 - **Resolution is per field, not per row.** Editing `display_name` must not also freeze the `slug` beside it.
 - **With no snapshot, `mine` wins** unless it is empty. A missing base means the row predates the state DB (or the DB was discarded); inventing one would silently overwrite edits. Only genuinely blank cells are filled from the fetch.
-- **The merge covers only what discovery owns**: `display_name`, `slug`, `is_archived`, `convert_eligible`, `release_date`, `zip_url`. Four columns are excluded structurally rather than by rule, and `version_snapshot` carries none of them: `engine`/`engine_source`, because the detector writes them *after* discovery (§3.4); `convert_batch`, because no automated stage writes it at all (§3.7); and `zip_source`, because it records a human's supply decision that a fetch has no standing to revoke (§3.8). A fetch therefore cannot reset a detected engine, clear a batch tag, or silently re-point a hand-supplied package at a URL. The five inventory columns of §3.9 are excluded on the same grounds and for the same reason as the engine columns — Stage 4 writes them, and discovery has never opened the package.
+- **The merge covers only what discovery owns**: `display_name`, `slug`, `is_archived`, `convert_eligible`, `release_date`, `zip_url`. `in_scope`/`scope_source` are excluded from `product_snapshot` on the product side — they are a local policy call, resolved by provenance rank like `family` (§3.10), and the docsite has no opinion to merge. On the version side four columns are excluded structurally rather than by rule, and `version_snapshot` carries none of them: `engine`/`engine_source`, because the detector writes them *after* discovery (§3.4); `convert_batch`, because no automated stage writes it at all (§3.7); and `zip_source`, because it records a human's supply decision that a fetch has no standing to revoke (§3.8). A fetch therefore cannot reset a detected engine, clear a batch tag, or silently re-point a hand-supplied package at a URL. The five inventory columns of §3.9 are excluded on the same grounds and for the same reason as the engine columns — Stage 4 writes them, and discovery has never opened the package.
 
 Deletion detection is scoped to the products present in the current fetch, so `catalog fetch --product ems` cannot read every other product's absence as a removal.
 
@@ -265,22 +273,25 @@ Excel is the expected editor, which imposes hard requirements:
 
 ### 3.7 Selecting Versions to Convert
 
-Two separate columns, because they answer two different questions:
+Three separate columns, because they answer three different questions — at two different grains:
 
-| Question | Column | Type | Default | Lifetime |
-| :--- | :--- | :--- | :--- | :--- |
-| *May this version ever be converted?* | `convert_eligible` | bool | `true` active, `false` archived | Long-lived policy |
-| *Is it in **this** run?* | `convert_batch` | free text | empty | Changes every wave |
+| Question | Column | Grain | Type | Default | Lifetime |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| *May **this product** ever be converted?* | `in_scope` | product | bool | `true` | Permanent policy (§3.10) |
+| *May this version ever be converted?* | `convert_eligible` | version | bool | `true` active, `false` archived | Long-lived policy |
+| *Is it in **this** run?* | `convert_batch` | version | free text | empty | Changes every wave |
 
 **Why not one column.** Only a minority of the ~1,500–4,000 catalogued versions are ever converted, and a POC typically wants three. With `convert_eligible` alone, scoping that POC means setting `false` on ~1,497 rows — the sheet fills with `false`, and "deliberately out of scope" becomes indistinguishable from "not in this wave." `convert_batch` inverts the direction: it is **opt-in**, so tagging three rows is the entire cost of scoping a run, and every other row stays exactly as the last fetch left it.
 
-**How they compose.** Eligibility is the hard gate; the batch is a filter applied within it.
+**How they compose.** Scope is the outermost gate, eligibility the next, and the batch a filter applied within both.
 
 ```
 selection = catalog.iter_versions(batch="poc-1", eligible_only=True)
 ```
 
-A version tagged into a batch but left `convert_eligible=false` is **skipped**, not converted. That combination is almost always a mistake, so `catalog import` warns about it by name rather than failing.
+A version tagged into a batch but left `convert_eligible=false` is **skipped**, not converted, and a version of an out-of-scope product is skipped whatever its own two columns say. Both combinations are almost always a mistake, so `catalog import` warns about them by name rather than failing.
+
+**Why scope is not just `convert_eligible=false` on every row.** The two are different facts and collapsing them loses the distinction the sheet exists to preserve. `convert_eligible` is a per-version judgement a fetch legitimately sets (archived → `false`) and a human legitimately flips back; `in_scope` is a standing product-level exclusion that must survive every future fetch, including fetches that discover versions nobody has seen yet. Excluding a product by clearing 40 version rows leaves the 41st — published next quarter — defaulting straight back to `convert_eligible=true`.
 
 **Provenance.** `convert_batch` is excluded from `_MERGEABLE_VERSION_FIELDS` and from the `version_snapshot` table entirely — the same structural exclusion the engine columns get, for the mirror-image reason. The engine columns are written after discovery, by the detector; `convert_batch` is never written by any automated stage at all. A fetch therefore cannot clear a batch tag, and does not need a merge rule saying so.
 
@@ -347,6 +358,88 @@ Because the path is fully derivable from `(bu, family, product_code, version)`, 
 **`_doc_files` counts everything else in the extracted tree** — HTML topics, images, CSS, skins, PDFs, the lot. It is a package-footprint number, not a conversion-workload number; a Flare package's file count is dominated by skin assets. Read it as "how big is this thing", and read `_csh_names` as "how much of it is load-bearing".
 
 **Merge and edit behaviour** follows `_bu` / `_family`: tool-owned, edits ignored, no fetch may touch them (§3.5). Unlike `_bu` / `_family` they are *not* regenerated on every write — they persist in the CSV between extract runs, the way `engine` does. A hand-edit therefore survives until the next `docushift extract`, so `catalog import` warns when a boolean disagrees with the count beside it.
+
+### 3.10 Product Scope: Products Excluded From Conversion
+
+Some products are **never** to be converted, as a standing business decision rather than a per-run one. The EBX and Spotfire families are the first such set: **61 products**, each confirmed against the live A-to-Z index on 2026-09-09 (0 unmatched, 0 ambiguous, all public). The list is the 56 supplied from the docsite plus five the user added on review — `spotfire-desktop`, `spotfire-server`, `spotfire-enterprise-runtime-for-r-server-edition`, `tibco-spotfire-for-apple-ipad` and `tibco-silver-fabric-enabler-for-spotfire-web-player`, together **291 versions**, two of them (`spotfire-server` at 139 and `spotfire-enterprise-runtime-for-r-server-edition` at 80) among the largest version histories in the corpus.
+
+**Exclusion is a rule in config, not 61 edited rows.** Both catalogs are currently empty, so there are no rows to edit; and even once they are populated, hand-clearing `convert_eligible` cannot express the decision, for the reason §3.7 gives — the next release of an excluded product arrives from a fetch defaulting to `convert_eligible=true`. The decision has to live somewhere a fetch consults, so it lives in `config/scope.yaml`:
+
+```yaml
+# Products that are never converted. Matched by docsite slug, exactly.
+out_of_scope:
+  - slug: tibco-ebx
+    display_name: TIBCO EBX®          # for humans and for rename detection
+    reason: EBX and Spotfire are out of scope for migration (2026-09-09)
+```
+
+**Matching is by slug and exact — never by substring, and never by display name.** Two independent failure modes make this non-negotiable, and both are present in the live corpus:
+
+| Naive rule | What it wrongly sweeps in | Files at stake |
+| :--- | :--- | :--- |
+| slug contains `ebx` | `tibco-businessconnect-ebxml-protocol` and `tibco-businessconnect-container-edition-ebxml-protocol` (ebXML is an unrelated B2B standard), plus `tibco-product-and-service-catalog-powered-by-tibco-ebx`, which is built *on* EBX but is a distinct in-scope product | 3 in-scope products silently dropped |
+| slug contains `spotfire` | 16 public products that remain in scope, including the whole Data Science and Statistica lines | 16 in-scope products silently dropped |
+
+This is the same lesson §3.9.1 records for API-reference paths, where `api-exchange-gateway/` turned out to be a product name: **a substring of an identifier is not an identifier.** Display-name matching fails for a second reason — the names arrive mojibaked (`TIBCO EBXÂ®`) through copy-and-paste, and `slugify()` folds `™®©℠` away deliberately (`design.md` §1.4), so two distinct names can collide on one slug.
+
+**Provenance mirrors `family` exactly** (§3.3), ranked, first match wins:
+
+| `scope_source` | Meaning | Overwritable by fetch? |
+| :--- | :--- | :--- |
+| `manual` | A human set `in_scope` in the CSV | **Never** |
+| `scope_rule` | The product's slug is listed in `config/scope.yaml` | Yes |
+| `default` | Listed nowhere; in scope | Yes |
+
+So a human can put one excluded product back into scope by editing the CSV, without touching the YAML, and no later fetch will undo it. `in_scope` and `scope_source` are excluded from `product_snapshot` (§3.5): the docsite has no opinion about scope, so there is nothing to three-way-merge.
+
+**An out-of-scope product is still fully catalogued.** It is discovered, written to `products.csv`, given all its versions in `versions.csv`, and counted in every inventory. It is simply never downloaded, extracted, converted or laid out. This is the same choice §4.3 makes for archived versions, for the same reason: *deliberately excluded* and *never seen* must stay distinguishable, and a product missing from the catalog answers neither question.
+
+**A rule that matches nothing is reported, not ignored.** `catalog fetch` prints the count of products excluded by rule, and names the rules whose slug matched no product in the catalog — the signal that a product was renamed upstream and has silently drifted back into scope. Silence would let a rename quietly re-admit an excluded product, which is exactly the failure this section exists to prevent. Two qualifications, both about not crying wolf: the naming happens on `--all` fetches only, since a `--product` fetch has visited one product and can say nothing about the other sixty rules; and `catalog import` reports the same condition as **one aggregated line**, because on a partially fetched catalog it is routinely dozens of rules and sixty near-identical warnings would bury the ones that matter.
+
+**A blank `in_scope` cell reads as `true`.** It is the only boolean column in either CSV that does: §3.6's permissive read maps an empty cell to `false`, which is the harmless default everywhere else and the harmful one here — a row typed in by hand, with that column left empty, would disappear from every stage of the pipeline with no error. Only an explicit `false` excludes.
+
+<details>
+<summary>The 61 excluded slugs (verified against the docsite, 2026-09-09)</summary>
+
+```
+spotfire                                               tibco-spotfire-connector-for-ibm-netezza
+spotfire-desktop                                       tibco-spotfire-connector-for-oracle-essbase
+spotfire-enterprise-runtime-for-r                      tibco-spotfire-connector-for-oracle-mysql
+spotfire-enterprise-runtime-for-r-server-edition       tibco-spotfire-connector-for-pipeline-pilot
+spotfire-for-android                                   tibco-spotfire-connector-for-pivotal-greenplum
+spotfire-for-apple-ios                                 tibco-spotfire-connector-for-pivotal-hawq
+spotfire-on-kubernetes                                 tibco-spotfire-connector-for-postgresql
+spotfire-server                                        tibco-spotfire-connector-for-sap-bw
+spotfire-service-for-python                            tibco-spotfire-connector-for-sap-hana
+spotfire-service-for-r                                 tibco-spotfire-connector-for-teradata-aster
+spotfire-service-for-statistica                        tibco-spotfire-connectors
+tibco-activematrix-spotfire-enabler                    tibco-spotfire-consumer
+tibco-cloud-ebx                                        tibco-spotfire-data-source-for-activespaces
+tibco-cloud-spotfire-14-6-0                            tibco-spotfire-decisionsite
+tibco-cloud-spotfire-14-6-2                            tibco-spotfire-deployment-kit
+tibco-ebx                                              tibco-spotfire-deployment-kit-for-apple-ios
+tibco-ebx-add-ons                                      tibco-spotfire-developer
+tibco-ebx-cloud-enterprise                             tibco-spotfire-extension-for-openspirit
+tibco-silver-fabric-enabler-for-spotfire-web-player    tibco-spotfire-for-apple-ipad
+tibco-spotfire-analytics-server                        tibco-spotfire-general
+tibco-spotfire-automation-services                     tibco-spotfire-lead-discovery
+tibco-spotfire-business-author                         tibco-spotfire-metrics-modeler
+tibco-spotfire-capability-matrix                       tibco-spotfire-metrics-services
+tibco-spotfire-clinical                                tibco-spotfire-miner
+tibco-spotfire-clinical-graphics                       tibco-spotfire-network-analytics
+tibco-spotfire-connector-for-cisco-information-server  tibco-spotfire-operations-analytics
+tibco-spotfire-connector-for-cloudera-hive             tibco-spotfire-professional
+tibco-spotfire-connector-for-cloudera-impala           tibco-spotfire-qualification
+tibco-spotfire-connector-for-hortonworks               tibco-spotfire-s
+tibco-spotfire-connector-for-hp-vertica                tibco-spotfire-web-player
+tibco-spotfire-connector-for-ibm-db2
+```
+
+`tibco-spotfire-s` is *TIBCO Spotfire® S+* — the `+` does not survive slugification, which is one more reason the rule keys on the docsite's own slug rather than on a name.
+
+</details>
+
+**Products a reader may expect here and will not find.** Two Spotfire products need no rule at all — `spotfire-analytics` and `tibco-spotfire-advanced-data-services` are `isPublicLevel: false`, so discovery filters them before any request is made. Nineteen public products keep a matching-looking slug and **remain in scope deliberately**: the eight-product Data Science line, the four Statistica products, `spotfire-application`, `spotfire-data-streams`, `spotfire-liveview-web-enterprise-edition`, `spotfire-statistics-services`, the two BusinessConnect ebXML protocols, and `tibco-product-and-service-catalog-powered-by-tibco-ebx` — a product *built on* EBX rather than a part of it. They are recorded here so that their absence from the list reads as a decision rather than an oversight, and they are the exact population a substring rule would destroy.
 
 ---
 
@@ -1286,13 +1379,27 @@ The identifiers are known before conversion writes the file (parsing a 24 KB `Al
 
 ---
 
-## 6. AEM Structure Synthesis & Git Sync
+## 6. AEM Structure Synthesis & Publishing Layout
 - Synthesizes `toc.yml`, `nav.yml`, `meta.yml`, `index.md`, and YAML frontmatter.
-- Distributes ready-to-push documentation sets into the publishing layout below.
+- Assembles the documentation sets into the publishing layout below, on disk, ready for someone else to publish.
+
+### 6.0 Scope Boundary: DocuShift Organizes, It Does Not Publish
+
+**Git operations are out of scope for this tool** (decided 2026-09-09). `docushift sync` writes plain directory trees under `--target-dir` in the exact shape the publishing repositories take, and stops there. It never runs `git init`, `add`, `commit`, `push` or `gh repo create`, never authenticates against GitHub, and holds no branch, review or PR policy.
+
+Everything below about *layout* is unchanged and still binding — the two-tree split (§6.3), the doc-class routing (§6.2), and the absolute cross-tree links (§6.4) are all properties of what gets written, not of how it is published. "Repository" in the sections that follow names the **tree that is destined to become one**; the trees are named exactly as the repositories are, so whoever picks them up copies rather than translates.
+
+Three things this buys, and they are why the boundary sits here:
+
+- **The output stays inspectable without a remote.** A sync run is diffable against the previous one with ordinary file tools, and a reviewer needs no credentials to look at it.
+- **The tool has no state that git also has.** Re-running sync over a target directory is the only idempotency question there is; there is no second question about a dirty working tree, a diverged branch, or a force-push.
+- **Publishing policy belongs to whoever owns the repositories.** Branch naming, review gates, commit granularity and release cadence are organizational decisions with no correct default that this tool could pick.
+
+What Stage 7 still owes the person who publishes: a layout that is correct on arrival, and a report saying what was written. Nothing in the layout depends on a git operation having happened.
 
 ### 6.1 Publishing Layout
 
-The sync target is the **publishing form**, `{target_git}/{locale}-{bu}-{family}/{locale}/{product}/{doc-class}/{version-dashed}/`, not the nested `{bu}/{family}/{product}/{version}/` form. The repository name is the family workspace name (§4.1) unchanged, so the Stage 7 hand-off is a copy rather than a translation.
+The sync target is the **publishing form**, `{target_dir}/{locale}-{bu}-{family}/{locale}/{product}/{doc-class}/{version-dashed}/`, not the nested `{bu}/{family}/{product}/{version}/` form. The top-level directory name is the family workspace name (§4.1) unchanged — which is also the repository name — so the Stage 7 hand-off is a copy rather than a translation.
 
 ```
 en-us-tibco-messaging/                  # docs repo — what a reader reads
@@ -1402,9 +1509,9 @@ Measured 2026-09-09 against the live archive API over a random sample of **60 of
 
 **`api-references/` deliberately gets no generated index.** Of 499 Javadoc-shaped roots in the cache, **496 ship their own `index.html`** — the three that do not are package subdirectories named `api`, not roots. The generator already wrote the entry point, and a second one beside it competes with the frame set rather than completing it. This is the same reasoning that keeps those trees out of conversion (§6.2).
 
-### 6.3 Why `-resources` Is a Separate Repository
+### 6.3 Why `-resources` Is a Separate Tree
 
-`-resources` is a **sibling repository**, not a directory inside the docs repo. Three reasons, in the order they bite:
+`-resources` is a **sibling tree**, written beside the docs tree and destined to be a sibling repository — not a directory inside the docs tree. Publishing it is someone else's step (§6.0); keeping it separate is this tool's decision, because it determines what gets written where. Three reasons, in the order they bite:
 
 - **Size and clone cost.** A single Javadoc tree runs to thousands of generated files, and `archives/` accumulates every archived ZIP a product ever shipped. Both grow monotonically and neither compresses in git's favour — binaries do not delta. Carried inside the docs repo they would dominate its history permanently, and every author cloning to fix a typo would pay for them.
 - **Different lifecycle, different review.** API references regenerate wholesale on each release; archives are append-only cold storage. Neither is reviewed the way a documentation change is, so neither wants the docs repo's branch protection, PR workflow, or diff attention. A regenerated Javadoc tree landing as a 4,000-file diff in the repo where prose is reviewed makes the prose changes unfindable.

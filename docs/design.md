@@ -1,7 +1,7 @@
 # DocuShift Design Document: Logic & Algorithms
 
 > **Document Status:** Living Design Specification
-> **Last Updated:** 2026-09-07
+> **Last Updated:** 2026-09-09
 > **Companion to:** `architecture.md` (what the system is and *why*), `planning.md` (when each part gets built), `user-guide.md` (how to drive it)
 
 This document states, in plain English, **how each piece of DocuShift decides what it decides**. Where `architecture.md` records a shape and its justification, this records the procedure: the inputs, the ordered steps, the tie-breaks, and what happens when the input is malformed — which, across ~250 products of undocumented API and twenty years of accumulated help output, is routine rather than exceptional.
@@ -258,6 +258,23 @@ Discovery owns exactly six fields, and merges only those: `display_name`, `slug`
 
 A fetch may raise a product's classification confidence; it may never lower it.
 
+### 3.3.1 Scope, by rule then provenance — **Built**
+
+`config/scope.yaml` is loaded once per run into a `{slug: reason}` map (`architecture.md` §3.10). For each product the merge touches, resolve `in_scope` the way `family` resolves, ranked `manual` (0) > `scope_rule` (1) > `default` (2):
+
+1. If `scope_source` is already `manual`, preserve both fields — unconditionally.
+2. Otherwise, if the product's `slug` is a key in the map, write `in_scope=false, scope_source=scope_rule`.
+3. Otherwise write `in_scope=true, scope_source=default`.
+
+Four details carry the weight:
+
+- **The lookup is a dict hit on the exact slug.** Not `in`, not `startswith`, not a regex over the display name — `architecture.md` §3.10 tabulates what each of those wrongly excludes.
+- **Step 3 actively resets.** Removing a slug from the YAML must bring the product back into scope on the next fetch; leaving `in_scope=false` behind would make the rule file removable in name only. This is safe precisely because `manual` short-circuits at step 1, so it can only ever reset a value the rule file itself set.
+- **Rules that matched nothing are collected**, not discarded: every YAML slug absent from the catalog is reported with the merge statistics and by `warnings()`. The check runs over the **whole catalog**, not the products one fetch touched — a `--product ems` fetch would otherwise call all sixty other rules dead — and is only conclusive after `catalog fetch --all`, which is what both callers say when they print it. A rule silently matching nothing is how a renamed product drifts back into scope.
+- **`in_scope` is the one boolean column read with `parse_optional_bool`.** §1.2's permissive read maps a blank cell to `false`, which is the safe default for every other flag and the dangerous one here: a hand-added row with an empty cell would vanish from every stage of the pipeline. Only an explicit `false` excludes.
+
+New products take the same three steps, so a product first discovered *after* the rule is written is excluded on arrival rather than converted once and excluded later.
+
 ### 3.4 Deletion detection — **Built**
 
 For each product in the fetch, compute the version keys the catalog holds that the fetch of *that same product* did not return.
@@ -270,7 +287,7 @@ Two properties matter. The check is **scoped to the products actually fetched**,
 ### 3.5 Whole-merge sequence — **Built**
 
 1. Load the catalog.
-2. For each discovered product: add it wholesale if unknown; otherwise merge product fields (§3.2, §3.3) then versions — new versions added, existing ones merged field by field.
+2. For each discovered product: add it wholesale if unknown; otherwise merge product fields (§3.2, §3.3). Resolve scope for every product either way (§3.3.1), then merge versions — new versions added, existing ones merged field by field.
 3. Collect deletions per product (§3.4).
 4. If deletions were blocked, raise. Nothing has been written.
 5. If this is a dry run, return the statistics without writing.
@@ -293,15 +310,18 @@ The sort is what makes a no-op fetch produce a zero-line diff, and the zero-line
 
 ## 4. Selection: what a run acts on
 
-**Built.** Two independent questions, two columns, composed at every stage command (`architecture.md` §3.7):
+**Built.** Three independent questions at two grains, composed at every stage command (`architecture.md` §3.7):
 
 1. Walk products in catalog sort order, filtering by BU, family and product code where given.
-2. Within each, walk versions in natural descending order, filtering by version where given.
-3. If a batch label was given, keep only versions whose (trimmed, lowercased) batch matches.
-4. If eligibility was requested, keep only versions with `convert_eligible` true.
-5. Return the surviving `(product, version)` pairs.
+2. If eligibility was requested, **skip the whole product** when `in_scope` is false — no version of it is ever selected (§3.3.1).
+3. Within each surviving product, walk versions in natural descending order, filtering by version where given.
+4. If a batch label was given, keep only versions whose (trimmed, lowercased) batch matches.
+5. If eligibility was requested, keep only versions with `convert_eligible` true.
+6. Return the surviving `(product, version)` pairs.
 
-Steps 3 and 4 **compose rather than override**: a version tagged into a batch but left ineligible is skipped, because eligibility is the hard gate and the batch is a filter within it. That combination is almost always a mistake, so it is reported as a warning naming the exact command that fixes it (§8.2) rather than being silently honoured or fatally rejected.
+Steps 2, 4 and 5 **compose rather than override**: scope is the outermost gate, eligibility the hard gate within it, and the batch a filter within that. A version tagged into a batch but left ineligible is skipped; a version of an out-of-scope product is skipped even if it is both eligible and tagged. Both combinations are almost always a mistake, so each is reported as a warning naming the exact command that fixes it (§8.2) rather than being silently honoured or fatally rejected.
+
+Step 2 is gated on `eligible_only` rather than applied always, so that inventory and reporting paths — which pass `eligible_only=False` — still see excluded products. An out-of-scope product is absent from the *work*, never from the *books* (`architecture.md` §3.10).
 
 Batch labels are trimmed and lowercased on write, so `POC-1`, `poc-1 ` and `poc-1` are one batch and not three. The batch census counts versions per label and **omits unscheduled rows entirely** — folding 3,900 untagged rows into the same table would bury the answer to the question being asked.
 
@@ -525,7 +545,9 @@ This is the step that makes the catalog a mid-pipeline write target: the engine 
 1. **A family not declared in `taxonomy.yaml`**, naming the workspace folder that will be created. Families are user-extensible by design (`architecture.md` §4.2); the warning is what stops a typo (`mesaging`) from silently becoming a third family folder holding one product. If the family name cannot even form a folder, that failure is reported in its place.
 2. **In a batch but not eligible** — nothing downstream will ever pick this row up. The message includes the exact `catalog enable` command that fixes it.
 3. **`zip_source=manual` but discovery now has a URL** — the pin still wins; the user may no longer need it.
-4. **An inventory boolean disagreeing with its count** — `_has_api_ref=false` beside a non-zero `_api_files`, or `_has_csh=false` beside a non-zero `_csh_names` (`architecture.md` §3.9). The tool writes both from one computation, so this shape only arises from a hand-edit. A warning rather than a problem: the values are advisory, the next `docushift extract` overwrites them, and blocking an import over a stale summary column would be out of proportion.
+4. **A batch tag on a version of an out-of-scope product** — the row looks scheduled and will never run. The message names the product and whether the exclusion came from `config/scope.yaml` or from a hand-set `in_scope=false`, because the two are undone in different places.
+5. **A `config/scope.yaml` rule matching no product in the catalog** (§3.3.1) — usually an upstream rename, occasionally a typo. Reported after every fetch as well as by `catalog validate`, since the day it starts matching nothing is the day it stops working.
+6. **An inventory boolean disagreeing with its count** — `_has_api_ref=false` beside a non-zero `_api_files`, or `_has_csh=false` beside a non-zero `_csh_names` (`architecture.md` §3.9). The tool writes both from one computation, so this shape only arises from a hand-edit. A warning rather than a problem: the values are advisory, the next `docushift extract` overwrites them, and blocking an import over a stale summary column would be out of proportion.
 
 ### 8.3 Triage progress — **Built**
 
@@ -642,7 +664,9 @@ Identifiers are known before conversion writes the file — parsing a 24 KB alia
 
 ## 10. Stages 6 and 7: Synthesis and sync
 
-**Specified.** Navigation synthesis walks the converted tree to produce `toc.yml`, `nav.yml`, `meta.yml` and landing pages from the Jinja templates in `config/aem_templates/`, then the distributor copies each version's output into the target repository layout.
+**Specified.** Navigation synthesis walks the converted tree to produce `toc.yml`, `nav.yml`, `meta.yml` and landing pages from the Jinja templates in `config/aem_templates/`, then the distributor copies each version's output into the target publishing layout.
+
+**The stage ends at the filesystem** (`architecture.md` §6.0, decided 2026-09-09). `docushift sync` writes repo-shaped directory trees under `--target-dir`; it runs no git command, creates no repository and pushes nothing. Publishing is picked up separately. Every rule below describes what is written, so none of them changes.
 
 **Navigation synthesis does not just serialize what the engine handed it.** Three rules apply to the node list before it is written, all settled by the 2026-09-09 Flare survey (`architecture.md` §5.1.5) and all engine-neutral — two create nodes the source does not supply, one moves nodes the source misfiles:
 
@@ -650,11 +674,11 @@ Identifiers are known before conversion writes the file — parsing a 24 KB alia
 - **A node with children and no page gets a generated one.** AEM treats a childed navigation node with no page as a broken parent, and Flare's `'___'` sentinel produces 165 of them per 60 output roots — 151 at top level, holding 1,357 children between them. The synthesizer emits a page titled from the node's label whose body links its immediate children, stamped as generated in frontmatter so a re-run replaces it rather than treating it as authored. Childless headless nodes are dropped and counted.
 - **The support and legal pages are the last two nodes** — `Documentation and Support Services` second-last, `Legal and Third-Party Notices` last, both at top level. The engine reports which converted topic is which; the synthesizer **moves** those nodes to the tail rather than appending, because they are already TOC entries in 97% and 96% of Flare roots and appending would duplicate the topic. It is the landing-page rule inverted, and it mostly ratifies the source: 610 of 676 roots (90.2%) already end support-then-legal. Three constraints follow from the survey. The label is taken from the node, never hard-coded — the support page's heading is `TIBCO` in 565 roots, `ibi` in 49 and `Spotfire` in 45. There is **one legal node, not two** — no separate third-party-notices page exists in the corpus, and the combined page has a single `h1` and no `h2` sections. And a version that ships neither page simply has a shorter tail; unlike a headless container, a missing legal page breaks nothing, so nothing is generated to stand in for it.
 
-**The sync path shape is settled** (`architecture.md` §6.1): the publishing form `{locale}-{bu}-{family}/{locale}/{product}/{doc-class}/{version-dashed}/`, with the docs repo taking `online-help`, `user-guides`, `release-information` and `reference-documents`, and a sibling `-resources` repo taking `api-references` and `archives`. The distributor therefore does four things per version, in order: copy the converted tree and its navigation into `online-help/`; copy the PDF and document assets into their three doc-classes and generate an `index.md` and `toc.yml` for each (§10.5); copy the API-reference trees, unconverted, into the sibling repo and index `archives/` from the catalog (§10.6); then rewrite every link that crosses from one repo to the other. The rewrite is last because it needs both destinations to exist, and it belongs here rather than in Stage 5 because conversion does not know the publishing layout.
+**The sync path shape is settled** (`architecture.md` §6.1): the publishing form `{locale}-{bu}-{family}/{locale}/{product}/{doc-class}/{version-dashed}/`, with the docs repo taking `online-help`, `user-guides`, `release-information` and `reference-documents`, and a sibling `-resources` repo taking `api-references` and `archives`. The distributor therefore does four things per version, in order: copy the converted tree and its navigation into `online-help/`; copy the PDF and document assets into their three doc-classes and generate an `index.md` and `toc.yml` for each (§10.5); copy the API-reference trees, unconverted, into the sibling repo and index `archives/` from the catalog (§10.6); then rewrite every link that crosses from one tree to the other. The rewrite is last because it needs both destinations to exist, and it belongs here rather than in Stage 5 because conversion does not know the publishing layout. There is no fifth step: the trees are left on disk.
 
 The dots-to-dashes version conversion belongs here too, at the publishing boundary, and nowhere earlier: the working tree's dotted version must round-trip to a `versions.csv` key, which `6-2-3` cannot (`6.2.3`? `6-2.3`?).
 
-`-resources` is a **separate repository**, not a directory in the docs repo (`architecture.md` §6.3) — generated API trees and archived ZIPs grow monotonically, do not delta, and are not reviewed like prose.
+`-resources` is a **separate tree**, not a directory in the docs tree (`architecture.md` §6.3) — generated API trees and archived ZIPs grow monotonically, do not delta, and are not reviewed like prose. It is written as a sibling and left to be published as a sibling repository.
 
 ### 10.4 Step 2, the document router — **Specified**
 
@@ -764,6 +788,7 @@ Properties that hold across the whole tool. Each is a rule some algorithm above 
 | 3.1 | Catalog load and join | Built | `catalog.py:load` |
 | 3.2 | Three-way field decision | Built | `catalog.py:_take_theirs` |
 | 3.3 | Family by provenance | Built | `catalog.py:_merge_product` |
+| 3.3.1 | Scope by rule then provenance | Built | `catalog.py:_resolve_scope` |
 | 3.4 | Deletion detection | Built | `catalog.py:_collect_deletions` |
 | 3.6 | Canonical write | Built | `catalog.py:save` |
 | 4 | Selection | Built | `catalog.py:iter_versions` |

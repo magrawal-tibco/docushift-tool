@@ -1,0 +1,209 @@
+# Products that are never converted -- docs/architecture.md 3.10.
+#
+# Every entry is matched against a product's `slug` column in products.csv by
+# STRING EQUALITY. Never a substring: `ebx` also occurs in
+# `tibco-businessconnect-ebxml-protocol` (an unrelated B2B standard) and in
+# `tibco-product-and-service-catalog-powered-by-tibco-ebx`, and `spotfire` also
+# occurs in 16 public products that are in scope, among them the whole Data
+# Science and Statistica lines. Never a display name either: names arrive
+# mojibaked through copy-and-paste, and slugify() folds the trademark symbols
+# away, so two distinct names can collide on one slug.
+#
+# `display_name` is documentation, not a matching key. It is here so a reader can
+# tell what a slug is, and so a rule that stops matching (an upstream rename) can
+# be traced back to a product. Every fetch reports rules that matched nothing.
+#
+# A merge re-applies this file to every product it touches, new ones included, so
+# a version discovered after an entry was written is excluded on arrival. Removing
+# an entry restores the product to scope on the next fetch. To exempt a single
+# product without editing this file, run
+# `docushift catalog set --product <code> --in-scope`, which records
+# scope_source=manual and outranks everything here.
+#
+# 61 products, each verified against the live docs.tibco.com A-to-Z index on
+# 2026-09-09: 61/61 matched 1:1, all publicly visible, 0 ambiguous.
+
+out_of_scope:
+  - slug: spotfire
+    display_name: "Spotfire®"
+    reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"
+  - slug: spotfire-desktop
+    display_name: "Spotfire® Desktop"
+    reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"
+  - slug: spotfire-enterprise-runtime-for-r
+    display_name: "Spotfire® Enterprise Runtime for R"
+    reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"
+  - slug: spotfire-enterprise-runtime-for-r-server-edition
+    display_name: "Spotfire Enterprise Runtime for R - Server Edition"
+    reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"
+  - slug: spotfire-for-android
+    display_name: "Spotfire® for Android"
+    reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"
+  - slug: spotfire-for-apple-ios
+    display_name: "Spotfire® for Apple iOS"
+    reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"
+  - slug: spotfire-on-kubernetes
+    display_name: "Spotfire on Kubernetes"
+    reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"
+  - slug: spotfire-server
+    display_name: "Spotfire® Server"
+    reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"
+  - slug: spotfire-service-for-python
+    display_name: "Spotfire® Service for Python"
+    reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"
+  - slug: spotfire-service-for-r
+    display_name: "Spotfire® Service for R"
+    reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"
+  - slug: spotfire-service-for-statistica
+    display_name: "Spotfire® Service for Statistica®"
+    reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"
+  - slug: tibco-activematrix-spotfire-enabler
+    display_name: "TIBCO ActiveMatrix® Spotfire Enabler"
+    reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"
+  - slug: tibco-cloud-ebx
+    display_name: "TIBCO Cloud™ EBX®"
+    reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"
+  - slug: tibco-cloud-spotfire-14-6-0
+    display_name: "TIBCO Cloud™ Spotfire® 14.6.0"
+    reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"
+  - slug: tibco-cloud-spotfire-14-6-2
+    display_name: "TIBCO Cloud™ Spotfire® 14.6.2"
+    reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"
+  - slug: tibco-ebx
+    display_name: "TIBCO EBX™"
+    reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"
+  - slug: tibco-ebx-add-ons
+    display_name: "TIBCO EBX™ Add-ons"
+    reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"
+  - slug: tibco-ebx-cloud-enterprise
+    display_name: "TIBCO EBX® Cloud Enterprise"
+    reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"
+  - slug: tibco-silver-fabric-enabler-for-spotfire-web-player
+    display_name: "TIBCO Silver® Fabric Enabler for Spotfire® Web Player"
+    reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"
+  - slug: tibco-spotfire-analytics-server
+    display_name: "TIBCO Spotfire® Analytics Server"
+    reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"
+  - slug: tibco-spotfire-automation-services
+    display_name: "TIBCO Spotfire® Automation Services"
+    reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"
+  - slug: tibco-spotfire-business-author
+    display_name: "TIBCO Spotfire® Business Author"
+    reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"
+  - slug: tibco-spotfire-capability-matrix
+    display_name: "TIBCO Spotfire® Capability Matrix"
+    reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"
+  - slug: tibco-spotfire-clinical
+    display_name: "TIBCO Spotfire® Clinical"
+    reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"
+  - slug: tibco-spotfire-clinical-graphics
+    display_name: "TIBCO Spotfire® Clinical Graphics"
+    reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"
+  - slug: tibco-spotfire-connector-for-cisco-information-server
+    display_name: "TIBCO Spotfire® Connector for Cisco Information Server"
+    reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"
+  - slug: tibco-spotfire-connector-for-cloudera-hive
+    display_name: "TIBCO Spotfire® Connector for Cloudera Hive"
+    reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"
+  - slug: tibco-spotfire-connector-for-cloudera-impala
+    display_name: "TIBCO Spotfire® Connector for Cloudera Impala"
+    reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"
+  - slug: tibco-spotfire-connector-for-hortonworks
+    display_name: "TIBCO Spotfire® Connector for Hortonworks"
+    reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"
+  - slug: tibco-spotfire-connector-for-hp-vertica
+    display_name: "TIBCO Spotfire Connector for HP Vertica"
+    reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"
+  - slug: tibco-spotfire-connector-for-ibm-db2
+    display_name: "TIBCO Spotfire Connector for IBM DB2"
+    reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"
+  - slug: tibco-spotfire-connector-for-ibm-netezza
+    display_name: "TIBCO Spotfire® Connector for IBM Netezza"
+    reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"
+  - slug: tibco-spotfire-connector-for-oracle-essbase
+    display_name: "TIBCO Spotfire® Connector for Oracle Essbase"
+    reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"
+  - slug: tibco-spotfire-connector-for-oracle-mysql
+    display_name: "TIBCO Spotfire® Connector for Oracle MySQL"
+    reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"
+  - slug: tibco-spotfire-connector-for-pipeline-pilot
+    display_name: "TIBCO Spotfire® Connector for Pipeline Pilot"
+    reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"
+  - slug: tibco-spotfire-connector-for-pivotal-greenplum
+    display_name: "TIBCO Spotfire® Connector for Pivotal Greenplum"
+    reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"
+  - slug: tibco-spotfire-connector-for-pivotal-hawq
+    display_name: "TIBCO Spotfire Connector for Pivotal HAWQ"
+    reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"
+  - slug: tibco-spotfire-connector-for-postgresql
+    display_name: "TIBCO Spotfire® Connector for PostgreSQL"
+    reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"
+  - slug: tibco-spotfire-connector-for-sap-bw
+    display_name: "TIBCO Spotfire® Connector for SAP BW"
+    reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"
+  - slug: tibco-spotfire-connector-for-sap-hana
+    display_name: "TIBCO Spotfire® Connector for SAP HANA"
+    reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"
+  - slug: tibco-spotfire-connector-for-teradata-aster
+    display_name: "TIBCO Spotfire Connector for Teradata Aster"
+    reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"
+  - slug: tibco-spotfire-connectors
+    display_name: "TIBCO Spotfire® Connectors"
+    reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"
+  - slug: tibco-spotfire-consumer
+    display_name: "TIBCO Spotfire® Consumer"
+    reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"
+  - slug: tibco-spotfire-data-source-for-activespaces
+    display_name: "TIBCO Spotfire® Data Source for ActiveSpaces®"
+    reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"
+  - slug: tibco-spotfire-decisionsite
+    display_name: "TIBCO Spotfire DecisionSite®"
+    reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"
+  - slug: tibco-spotfire-deployment-kit
+    display_name: "TIBCO Spotfire® Deployment Kit"
+    reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"
+  - slug: tibco-spotfire-deployment-kit-for-apple-ios
+    display_name: "TIBCO Spotfire® Deployment Kit for Apple iOS"
+    reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"
+  - slug: tibco-spotfire-developer
+    display_name: "TIBCO Spotfire® Developer"
+    reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"
+  - slug: tibco-spotfire-extension-for-openspirit
+    display_name: "TIBCO Spotfire® Extension for OpenSpirit®"
+    reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"
+  - slug: tibco-spotfire-for-apple-ipad
+    display_name: "TIBCO Spotfire® for Apple iPad"
+    reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"
+  - slug: tibco-spotfire-general
+    display_name: "TIBCO Spotfire® General"
+    reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"
+  - slug: tibco-spotfire-lead-discovery
+    display_name: "TIBCO Spotfire® Lead Discovery"
+    reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"
+  - slug: tibco-spotfire-metrics-modeler
+    display_name: "TIBCO Spotfire® Metrics Modeler"
+    reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"
+  - slug: tibco-spotfire-metrics-services
+    display_name: "TIBCO Spotfire® Metrics Services"
+    reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"
+  - slug: tibco-spotfire-miner
+    display_name: "TIBCO Spotfire Miner™"
+    reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"
+  - slug: tibco-spotfire-network-analytics
+    display_name: "TIBCO Spotfire® Network Analytics"
+    reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"
+  - slug: tibco-spotfire-operations-analytics
+    display_name: "TIBCO Spotfire® Operations Analytics"
+    reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"
+  - slug: tibco-spotfire-professional
+    display_name: "TIBCO Spotfire® Professional"
+    reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"
+  - slug: tibco-spotfire-qualification
+    display_name: "TIBCO Spotfire® Qualification"
+    reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"
+  - slug: tibco-spotfire-s
+    display_name: "TIBCO Spotfire® S+"
+    reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"
+  - slug: tibco-spotfire-web-player
+    display_name: "TIBCO Spotfire® Web Player"
+    reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"

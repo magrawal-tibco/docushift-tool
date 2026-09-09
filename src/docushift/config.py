@@ -36,6 +36,7 @@ class ConfigManager:
         self.output_dir = self.root_dir / "output"
         self.taxonomy_path = self.config_dir / "taxonomy.yaml"
         self.docsite_path = self.config_dir / "docsite.yaml"
+        self.scope_path = self.config_dir / "scope.yaml"
         self.aem_templates_dir = self.config_dir / "aem_templates"
         self.products_path = self.config_dir / "products.csv"
         self.versions_path = self.config_dir / "versions.csv"
@@ -50,6 +51,7 @@ class ConfigManager:
 
         self._taxonomy_cache: dict[str, Any] | None = None
         self._docsite_cache: dict[str, Any] | None = None
+        self._scope_cache: dict[str, str] | None = None
 
     # -- families workspace layout -------------------------------------------
 
@@ -126,6 +128,48 @@ class ConfigManager:
         with open(self.docsite_path, encoding="utf-8") as f:
             self._docsite_cache = yaml.safe_load(f) or {}
         return self._docsite_cache
+
+    def load_scope(self) -> dict[str, str]:
+        """Loads `scope.yaml` as `{docsite_slug: reason}` -- docs/architecture.md §3.10.
+
+        The returned mapping is looked up by **exact slug** at merge time. It is a
+        dict rather than a list precisely so no caller can be tempted into a
+        substring test: `ebx` matches `tibco-businessconnect-ebxml-protocol`, and
+        `spotfire` matches sixteen products that are in scope.
+
+        A missing file yields an empty mapping -- no exclusions -- rather than an
+        error, so a fresh checkout works. A **duplicate slug raises**: two entries
+        for one product mean two different reasons were recorded and one is about
+        to be silently discarded, which is the sort of thing this file exists to
+        make visible.
+        """
+        if self._scope_cache is not None:
+            return self._scope_cache
+
+        rules: dict[str, str] = {}
+        if not self.scope_path.exists():
+            self._scope_cache = rules
+            return rules
+
+        with open(self.scope_path, encoding="utf-8") as f:
+            loaded = yaml.safe_load(f) or {}
+
+        for entry in loaded.get("out_of_scope") or []:
+            # A bare string is accepted as a slug with no reason: the list is
+            # hand-edited, and rejecting the terser form would be pedantry.
+            if isinstance(entry, str):
+                slug, reason = entry.strip().lower(), ""
+            else:
+                slug = str(entry.get("slug", "")).strip().lower()
+                reason = str(entry.get("reason", "")).strip()
+            if not slug:
+                continue
+            if slug in rules:
+                raise ValueError(f"{self.scope_path}: duplicate out_of_scope slug '{slug}'")
+            rules[slug] = reason
+
+        self._scope_cache = rules
+        return rules
 
     def families(self, bu: str) -> dict[str, Any]:
         """The family definitions declared for one business unit."""

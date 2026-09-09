@@ -10,7 +10,9 @@ from pathlib import Path
 import pytest
 
 from docushift.catalog import CatalogError, CatalogManager
-from docushift.models import EngineSource, FamilySource, Product, SourceEngine, ZipSource
+from docushift.config import ConfigManager
+from docushift.models import EngineSource, FamilySource, Product, ScopeSource, SourceEngine, ZipSource
+from docushift.state import StateStore
 from docushift.utils.csvio import read_rows
 from tests.conftest import make_product, make_version
 
@@ -475,6 +477,233 @@ def test_validate_flags_eligible_versions_with_no_zip(catalog: CatalogManager) -
 
 def test_catalog_json_is_retired(repo_root: Path) -> None:
     assert not (repo_root / "config" / "catalog.json").exists()
+
+
+# -- product scope: the outermost gate (architecture.md §3.10) ---------------
+
+# The 16 public products whose slug contains `spotfire` and which are **in scope**:
+# the eight-product Data Science line, the four Statistica products, and four
+# others. A substring rule would sweep every one of them, which is why matching is
+# an exact dict hit. Taken from the live A-to-Z index, 2026-09-09.
+IN_SCOPE_SPOTFIRE_SLUGS = (
+    "spotfire-application",
+    "spotfire-data-science-author",
+    "spotfire-data-science-for-life-science-author",
+    "spotfire-data-science-for-life-science-operations",
+    "spotfire-data-science-operations",
+    "spotfire-data-science-workbench",
+    "spotfire-data-streams",
+    "spotfire-liveview-web-enterprise-edition",
+    "spotfire-statistica",
+    "spotfire-statistica-all-servers",
+    "spotfire-statistica-estore-edition",
+    "spotfire-statistica-integration",
+    "spotfire-statistics-services",
+    "tibco-data-science-for-tibco-spotfire-analyst",
+    "tibco-data-science-service-for-tibco-spotfire",
+    "tibco-spotfire-data-science-package-for-notebooks",
+)
+
+# The three in-scope products a substring `ebx` rule would drop. ebXML is an
+# unrelated B2B standard; the catalog product is built *on* EBX but is its own.
+IN_SCOPE_EBX_SLUGS = (
+    "tibco-businessconnect-ebxml-protocol",
+    "tibco-businessconnect-container-edition-ebxml-protocol",
+    "tibco-product-and-service-catalog-powered-by-tibco-ebx",
+)
+
+
+def _scoped(project_root: Path, state: StateStore, *slugs: str) -> CatalogManager:
+    """A catalog manager whose `config/scope.yaml` excludes exactly `slugs`.
+
+    Built fresh each call rather than reused, because `ConfigManager` caches the
+    parsed YAML -- rewriting the file mid-test would otherwise change nothing.
+    """
+    body = "out_of_scope:\n" + "".join(f'  - slug: {slug}\n    reason: "test"\n' for slug in slugs)
+    (project_root / "config" / "scope.yaml").write_text(body, encoding="utf-8")
+    return CatalogManager(
+        project_root / "config" / "products.csv",
+        project_root / "config" / "versions.csv",
+        state,
+        ConfigManager(root_dir=project_root),
+    )
+
+
+def test_a_listed_slug_is_excluded_on_arrival(project_root: Path, state: StateStore) -> None:
+    """A product first discovered after the rule was written is never converted once."""
+    catalog = _scoped(project_root, state, "tibco-ebx")
+
+    stats = _fetch(catalog, make_product("ebx", slug="tibco-ebx"))
+
+    product = catalog.get_product("ebx")
+    assert (product.in_scope, product.scope_source) == (False, ScopeSource.SCOPE_RULE)
+    assert stats.products_out_of_scope == 1
+
+
+def test_scope_matches_the_exact_slug_never_a_substring(project_root: Path, state: StateStore) -> None:
+    """The regression this whole mechanism is shaped around -- §3.10's failure table."""
+    catalog = _scoped(project_root, state, "tibco-ebx", "spotfire")
+    look_alikes = IN_SCOPE_EBX_SLUGS + IN_SCOPE_SPOTFIRE_SLUGS
+
+    _fetch(
+        catalog,
+        make_product("ebx", slug="tibco-ebx"),
+        make_product("spotfire", slug="spotfire"),
+        *(make_product(f"p{i}", slug=slug) for i, slug in enumerate(look_alikes)),
+    )
+
+    excluded = {p.product_code for p in catalog.load().products.values() if not p.in_scope}
+    assert excluded == {"ebx", "spotfire"}
+    assert len(look_alikes) == 19
+
+
+def test_scope_round_trips_through_the_csv(project_root: Path, state: StateStore) -> None:
+    catalog = _scoped(project_root, state, "tibco-ebx")
+    _fetch(catalog, make_product("ebx", slug="tibco-ebx"))
+
+    reloaded = _reload(catalog).get_product("ebx")
+
+    assert (reloaded.in_scope, reloaded.scope_source) == (False, ScopeSource.SCOPE_RULE)
+
+
+def test_a_blank_in_scope_cell_reads_as_in_scope(catalog: CatalogManager, sample_product: Product) -> None:
+    """A hand-made row must never be excluded from every stage by an empty cell."""
+    _fetch(catalog, sample_product)
+    text = catalog.products_path.read_text(encoding="utf-8-sig").replace(",true,default,", ",,,")
+    catalog.products_path.write_text(text, encoding="utf-8-sig", newline="")
+
+    product = _reload(catalog).get_product("ems")
+
+    assert (product.in_scope, product.scope_source) == (True, ScopeSource.DEFAULT)
+
+
+def test_a_manual_scope_decision_survives_a_fetch_that_would_exclude(
+    project_root: Path, state: StateStore
+) -> None:
+    """`manual` short-circuits ahead of the rule file, or readmission would not stick."""
+    catalog = _scoped(project_root, state, "tibco-ebx")
+    _fetch(catalog, make_product("ebx", slug="tibco-ebx"))
+    catalog.set_product_field("ebx", "in_scope", "true")
+
+    _fetch(_scoped(project_root, state, "tibco-ebx"), make_product("ebx", slug="tibco-ebx"))
+
+    product = _scoped(project_root, state, "tibco-ebx").get_product("ebx")
+    assert (product.in_scope, product.scope_source) == (True, ScopeSource.MANUAL)
+
+
+def test_a_manual_exclusion_survives_a_fetch_with_no_matching_rule(
+    project_root: Path, state: StateStore
+) -> None:
+    catalog = _scoped(project_root, state)
+    _fetch(catalog, make_product("ems", slug="tibco-ems"))
+    catalog.set_product_field("ems", "in_scope", "false")
+
+    _fetch(_scoped(project_root, state), make_product("ems", slug="tibco-ems"))
+
+    product = _scoped(project_root, state).get_product("ems")
+    assert (product.in_scope, product.scope_source) == (False, ScopeSource.MANUAL)
+
+
+def test_removing_a_slug_from_the_yaml_restores_the_product(project_root: Path, state: StateStore) -> None:
+    """Step 3 actively resets, so the rule file is removable in fact and not just in name."""
+    _fetch(_scoped(project_root, state, "tibco-ebx"), make_product("ebx", slug="tibco-ebx"))
+
+    _fetch(_scoped(project_root, state), make_product("ebx", slug="tibco-ebx"))
+
+    product = _scoped(project_root, state).get_product("ebx")
+    assert (product.in_scope, product.scope_source) == (True, ScopeSource.DEFAULT)
+
+
+def test_a_rule_matching_no_product_is_reported(project_root: Path, state: StateStore) -> None:
+    """The rename detector: a rule that quietly matches nothing stops excluding anything."""
+    catalog = _scoped(project_root, state, "tibco-ebx", "spotfire-renamed-upstream")
+
+    stats = _fetch(catalog, make_product("ebx", slug="tibco-ebx"))
+
+    assert stats.scope_rules_unmatched == ["spotfire-renamed-upstream"]
+    assert any("spotfire-renamed-upstream" in note and "match no product" in note for note in catalog.warnings())
+
+
+def test_unmatched_rules_are_reported_as_one_aggregated_note(project_root: Path, state: StateStore) -> None:
+    """Sixty near-identical warnings would bury the ones that matter."""
+    catalog = _scoped(project_root, state, *(f"gone-{i}" for i in range(20)))
+    _fetch(catalog, make_product("ems", slug="tibco-ems"))
+
+    notes = [note for note in catalog.warnings() if "scope.yaml" in note]
+
+    assert len(notes) == 1
+    assert "20 of 20" in notes[0] and "..." in notes[0]
+
+
+def test_an_excluded_product_is_still_fully_catalogued(project_root: Path, state: StateStore) -> None:
+    """Excluded is not absent: it stays on the books, it is just never worked on."""
+    catalog = _scoped(project_root, state, "tibco-ebx")
+    ebx = make_product("ebx", slug="tibco-ebx")
+    ebx.versions = {v: make_version("ebx", v) for v in ("6.2.0", "6.1.0", "5.9.0")}
+
+    _fetch(catalog, ebx)
+
+    assert set(_reload(catalog).get_product("ebx").versions) == {"6.2.0", "6.1.0", "5.9.0"}
+    assert len(catalog.iter_versions(product_code="ebx")) == 3
+
+
+def test_eligible_only_skips_an_out_of_scope_product_whole(project_root: Path, state: StateStore) -> None:
+    catalog = _scoped(project_root, state, "tibco-ebx")
+    ebx = make_product("ebx", slug="tibco-ebx")
+    ebx.versions = {"6.2.0": make_version("ebx", "6.2.0", convert_eligible=True)}
+    ems = make_product("ems", slug="tibco-ems")
+    ems.versions = {"10.4.0": make_version("ems", "10.4.0", convert_eligible=True)}
+    _fetch(catalog, ebx, ems)
+
+    assert len(catalog.iter_versions()) == 2
+    assert [p.product_code for p, _ in catalog.iter_versions(eligible_only=True)] == ["ems"]
+
+
+def test_a_batch_tag_on_an_out_of_scope_product_warns(project_root: Path, state: StateStore) -> None:
+    """The row reads as scheduled and will never run, so the exclusion has to be named."""
+    catalog = _scoped(project_root, state, "tibco-ebx")
+    ebx = make_product("ebx", slug="tibco-ebx")
+    ebx.versions = {"6.2.0": make_version("ebx", "6.2.0")}
+    _fetch(catalog, ebx)
+    catalog.set_version_field("ebx", "6.2.0", "convert_batch", "poc-1")
+
+    notes = catalog.warnings()
+
+    assert any("poc-1" in note and "config/scope.yaml" in note for note in notes)
+
+
+def test_a_batch_tag_under_a_manual_exclusion_names_the_csv_not_the_yaml(
+    project_root: Path, state: StateStore
+) -> None:
+    catalog = _scoped(project_root, state)
+    ems = make_product("ems", slug="tibco-ems")
+    ems.versions = {"10.4.0": make_version("ems", "10.4.0")}
+    _fetch(catalog, ems)
+    catalog.set_product_field("ems", "in_scope", "false")
+    catalog.set_version_field("ems", "10.4.0", "convert_batch", "poc-1")
+
+    notes = catalog.warnings()
+
+    assert any("poc-1" in note and "manual in_scope=false" in note for note in notes)
+
+
+def test_triage_summary_counts_scope(project_root: Path, state: StateStore) -> None:
+    catalog = _scoped(project_root, state, "tibco-ebx")
+    _fetch(catalog, make_product("ebx", slug="tibco-ebx"), make_product("ems", slug="tibco-ems"))
+    catalog.set_product_field("ems", "in_scope", "false")
+
+    summary = catalog.triage_summary()
+
+    assert summary["out_of_scope"] == ["ebx", "ems"]
+    assert summary["scope_counts"] == {"manual": 1, "scope_rule": 1, "default": 0}
+
+
+def test_a_catalog_with_no_config_excludes_nothing(catalog: CatalogManager, sample_product: Product) -> None:
+    """The scope file is optional; a manager built without a ConfigManager has no rules."""
+    stats = _fetch(catalog, sample_product)
+
+    assert stats.products_out_of_scope == 0
+    assert catalog.get_product("ems").in_scope is True
 
 
 # -- convert_batch: run scheduling, orthogonal to eligibility ----------------

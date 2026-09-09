@@ -21,7 +21,7 @@ from docushift import __version__
 from docushift.catalog import CatalogError, CatalogManager
 from docushift.config import ConfigManager
 from docushift.discovery import DocsiteClient, DocsiteCrawler
-from docushift.models import SourceEngine, ZipSource
+from docushift.models import ScopeSource, SourceEngine, ZipSource
 from docushift.state import StateStore
 
 console = Console()
@@ -165,10 +165,20 @@ def catalog_fetch(
     table.add_column("Change")
     table.add_column("Count", justify="right")
     for label, count in stats.as_dict().items():
-        if label == "deletions_blocked":
+        if label in ("deletions_blocked", "scope_rules_unmatched"):
             continue
         table.add_row(label.replace("_", " "), str(count))
     console.print(table)
+
+    # Only conclusive over a fully fetched catalog: before that, a rule matches
+    # nothing simply because its product has not been discovered yet.
+    if select_all and stats.scope_rules_unmatched:
+        console.print(
+            f"[yellow]{len(stats.scope_rules_unmatched)} config/scope.yaml rule(s) matched no product:[/yellow] "
+            + ", ".join(stats.scope_rules_unmatched[:12])
+            + (" ..." if len(stats.scope_rules_unmatched) > 12 else "")
+            + "\n[dim]Usually an upstream rename -- those products are no longer being excluded.[/dim]"
+        )
 
     if result.unversioned or result.non_public:
         console.print(
@@ -217,9 +227,22 @@ def _record_discovery_metadata(manager: CatalogManager, result) -> None:
 @catalog.command("list")
 @_scope_options
 @click.option("--eligible-only", is_flag=True, help="Only versions with convert_eligible=true.")
+@click.option(
+    "--out-of-scope",
+    "out_of_scope",
+    is_flag=True,
+    help="Only products excluded from conversion (in_scope=false). See docs/architecture.md §3.10.",
+)
 @click.pass_context
-def catalog_list(ctx: click.Context, bu, family, product_code, version, batch, select_all, eligible_only) -> None:
+def catalog_list(
+    ctx: click.Context, bu, family, product_code, version, batch, select_all, eligible_only, out_of_scope
+) -> None:
     """List catalog products and versions."""
+    if out_of_scope and eligible_only:
+        # `--eligible-only` filters out-of-scope products out entirely, so the two
+        # flags together can only ever return nothing.
+        raise click.ClickException("--out-of-scope and --eligible-only select disjoint sets; pass one.")
+
     pairs = _catalog_manager(ctx).iter_versions(
         bu=bu,
         family=family,
@@ -228,15 +251,27 @@ def catalog_list(ctx: click.Context, bu, family, product_code, version, batch, s
         batch=batch,
         eligible_only=eligible_only,
     )
+    if out_of_scope:
+        pairs = [(p, v) for p, v in pairs if not p.in_scope]
     if not pairs:
+        if out_of_scope:
+            console.print("[green]No out-of-scope products in the catalog.[/green]")
+            return
         console.print("[yellow]No matching catalog rows.[/yellow] Run `docushift catalog fetch` to populate.")
         return
 
+    # The scope column earns its width only when something is actually excluded;
+    # on a catalog with no exclusions it would be 250 blank cells.
+    show_scope = any(not p.in_scope for p, _ in pairs)
+    columns = ["Product", "BU", "Family", "Version", "Archived", "Eligible", "Batch", "Engine"]
+    if show_scope:
+        columns.insert(3, "Scope")
+
     table = Table(title=f"Catalog ({len(pairs)} versions)")
-    for column in ("Product", "BU", "Family", "Version", "Archived", "Eligible", "Batch", "Engine"):
+    for column in columns:
         table.add_column(column)
     for product, ver in pairs:
-        table.add_row(
+        row = [
             product.product_code,
             product.bu,
             product.family,
@@ -245,7 +280,10 @@ def catalog_list(ctx: click.Context, bu, family, product_code, version, batch, s
             "[green]yes[/green]" if ver.convert_eligible else "[dim]no[/dim]",
             ver.convert_batch or "[dim]-[/dim]",
             f"{ver.engine} ({ver.engine_source})",
-        )
+        ]
+        if show_scope:
+            row.insert(3, "" if product.in_scope else f"[red]out[/red] ({product.scope_source})")
+        table.add_row(*row)
     console.print(table)
 
 
@@ -260,10 +298,19 @@ def catalog_show(ctx: click.Context, product_code: str) -> None:
     if product is None:
         raise click.ClickException(f"No product '{product_code}' in the catalog.")
 
+    # An excluded product still prints its whole version history -- excluded is
+    # not absent (§3.10) -- so the scope line has to say plainly that none of the
+    # rows below will ever be converted, whatever their Eligible column says.
+    scope = (
+        "in_scope=true"
+        if product.in_scope
+        else f"[red]in_scope=false[/red] -- no version is ever converted; source: {product.scope_source}"
+    )
     console.print(
         f"[bold]{product.display_name}[/bold] ({product.product_code})\n"
         f"  bu={product.bu}  family={product.family} (source: {product.family_source})\n"
         f"  slug={product.slug or '-'}  custom_override={product.custom_override}\n"
+        f"  {scope}\n"
         f"  workspace={cfg.family_dir(product.bu, product.family)}"
     )
     table = Table(title=f"{len(product.versions)} versions")
@@ -303,6 +350,13 @@ def catalog_enable(ctx: click.Context, product_code: str, version: str, disable:
 @click.option("--family", default=None, help="Set the family; also sets family_source=manual.")
 @click.option("--display-name", default=None, help="Set the product display name.")
 @click.option(
+    "--in-scope/--out-of-scope",
+    "in_scope",
+    default=None,
+    help="Include or exclude the whole product from conversion; also sets scope_source=manual, "
+    "which outranks config/scope.yaml permanently.",
+)
+@click.option(
     "--engine",
     # Taken from the enum rather than retyped, so adding a generator in one place
     # is enough. The list includes the engines Stage 5 cannot convert: naming one
@@ -327,11 +381,28 @@ def catalog_enable(ctx: click.Context, product_code: str, version: str, disable:
 )
 @click.pass_context
 def catalog_set(
-    ctx: click.Context, product_code, version, bu, family, display_name, engine, zip_url, zip_source, convert_batch
+    ctx: click.Context,
+    product_code,
+    version,
+    bu,
+    family,
+    display_name,
+    in_scope,
+    engine,
+    zip_url,
+    zip_source,
+    convert_batch,
 ) -> None:
     """Set a catalog field, recording the change as a manual edit."""
     manager = _catalog_manager(ctx)
-    product_edits = {"bu": bu, "family": family, "display_name": display_name}
+    product_edits = {
+        "bu": bu,
+        "family": family,
+        "display_name": display_name,
+        # `--in-scope/--out-of-scope` is a tri-state flag: None means untouched.
+        # Passed on as a string because every set_product_field value is one.
+        "in_scope": None if in_scope is None else str(in_scope).lower(),
+    }
     version_edits = {
         "engine": engine,
         "zip_url": zip_url,
@@ -431,6 +502,22 @@ def catalog_triage(ctx: click.Context) -> None:
     console.print(f"\n[bold]{len(unclassified)} of {total}[/bold] products still need triage.")
     if unclassified:
         console.print("  " + ", ".join(unclassified[:40]) + (" ..." if len(unclassified) > 40 else ""))
+
+    # Scope is reported next to triage because the two answer the same question
+    # for a reviewer -- how much of the catalog is actually work -- and because an
+    # out-of-scope product needs no family, so it should not read as a backlog.
+    out_of_scope = summary["out_of_scope"]
+    # `manual` is counted separately and not folded into the out-of-scope figure:
+    # the same provenance covers a product pinned *into* scope against the rule
+    # file, and reading those two as one number would misstate both.
+    manual = summary["scope_counts"][str(ScopeSource.MANUAL)]
+    console.print(
+        f"\n[bold]{len(out_of_scope)} of {total}[/bold] products are out of scope "
+        f"({summary['scope_counts'][str(ScopeSource.SCOPE_RULE)]} by config/scope.yaml); "
+        f"{manual} carry a manual scope decision."
+    )
+    if out_of_scope:
+        console.print("  " + ", ".join(out_of_scope[:40]) + (" ..." if len(out_of_scope) > 40 else ""))
 
 
 # ---------------------------------------------------------------------------
