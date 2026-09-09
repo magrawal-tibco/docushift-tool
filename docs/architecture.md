@@ -436,7 +436,7 @@ Four of the original five bullets survive the measurement — proxy stripping, c
 | `Data/Alias.xml` | The CSH map (§5.3). |
 | `csh.js`, `Default.htm`, `Default_CSH.htm` | Runtime entry points and frameset stubs. 1,295 stub files corpus-wide, none of them topics. |
 | `Skins/`, `Resources/`, `_globalpages/`, `MicroContent/` | Generated skin, scripts, stylesheets and micro-content. **2,339 HTML files, none converted** (§5.1.9). |
-| `_templates/` | Landing and boilerplate pages — 2,803 files under 80 distinct names, `Home.htm` (644), `Legal-and-Third-Party-Notices.htm` (651), `Whats-New.htm` (518). **Partly converted**: the `DefaultUrl` landing page always, plus whatever the TOC references (§5.1.5). |
+| `_templates/` | Landing and boilerplate pages — 2,797 files under 82 distinct names (78 case-folded: one page ships as both `Legal-and-Third-Party-Notices.htm` and `Legal_and_Third-Party_Notices.htm`), `Home.htm` (644), `Legal-and-Third-Party-Notices.htm` (651), `Whats-New.htm` (518). **Partly converted**: the `DefaultUrl` landing page always, plus whatever the TOC references (§5.1.5). |
 | `*.mcwebhelp`, `*.mclog` | Build manifest and build log. Detection markers only (§5.1.2). |
 
 Encoding is not a hazard: **0 of 4,810 sampled topics fail a strict UTF-8 decode.** Probe output rendering a trademark symbol as a replacement character (`TIBCO GridServer?`) is a Windows console codepage artifact, not a property of the files, and must not be designed around.
@@ -525,9 +525,9 @@ Alphabetical-first globbing picks the wrong file in all three. But reading `Toc=
 
 So `h1` is the page title written into frontmatter and the `#` heading, and the TOC label is the `toc.yml` entry text. Collapsing them to one string would either put a truncated title on the page or a 60-character label in the navigation.
 
-#### 5.1.5 Two nodes `toc.yml` needs that the source does not supply
+#### 5.1.5 The three node rules that make `toc.yml` more than a copy of the source TOC
 
-A `toc.yml` faithful to the Flare TOC is not yet a valid AEM navigation. Two nodes are missing, and both are the engine's to create.
+A `toc.yml` faithful to the Flare TOC is not yet a valid AEM navigation. Two nodes are missing and are the engine's to create; two more exist but are not reliably where they belong.
 
 **The landing page is real content, and it is nowhere in the TOC.**
 
@@ -556,7 +556,30 @@ Walking the tree rather than the flat path map, the sample holds **7,388 contain
 - **7 headless nodes have no children either** — a label alone. They are dropped and counted.
 - **30 container nodes (0.4%) point at the same page as one of their own children.** The child node is dropped; the parent keeps the page, so the topic appears once.
 
-`_templates/` is therefore no longer wholly excluded: beyond the landing page, **162 TOC entries in 59 of the 60 sampled roots point into it** — `legal-and-third-party-notices.htm` (55), `tibco-documentation-and-support-services.htm` (40), `whats-new.htm` (34). A file under `_templates/` is converted when the TOC references it or when it is the `DefaultUrl`, and skipped otherwise. See §5.1.10 — the predecessor skips `Home.htm` unconditionally, and that is one of its rules to reject.
+`_templates/` is therefore no longer wholly excluded. Measured over all 676 roots rather than the first 60, the TOC references **1,737 `_templates/` paths across 660 of them** — median 3 per root, maximum 4. This supersedes the earlier 162-entries-in-59-of-60 figure, which was right in shape and an order of magnitude short in scale:
+
+| What the entry is | Entries | Share |
+| :--- | ---: | ---: |
+| Legal and Third-Party Notices | 657 | 37.8% |
+| Documentation and Support Services | 649 | 37.4% |
+| What's New | 381 | 21.9% |
+| Home / Default | 32 | 1.8% |
+| Everything else | 18 | 1.0% |
+
+A file under `_templates/` is converted when the TOC references it or when it is the `DefaultUrl`, and skipped otherwise. See §5.1.10 — the predecessor skips `Home.htm` unconditionally, and that is one of its rules to reject.
+
+**The top two rows of that table belong at the end of the navigation, and mostly already are there.**
+
+Three quarters of every `_templates/` TOC entry is one of two pages, and a reader expects both at the bottom: **Documentation and Support Services second-last, Legal and Third-Party Notices last.** The corpus makes that rule cheap to state and cheap to justify.
+
+- **Two pages, not three.** The legal page carries 669 of 676 roots (99%) and the support page 668 (99%), with 666 holding both. **No separate third-party-notices page exists anywhere in the corpus** — 0 roots ship one. The legal page is a single page with one `h1` (`Legal and Third-Party Notices` in 668 of the 669; one root has the hyphenated filename leaked into the heading) and **zero `h2` elements in all 669**, 7,159–20,055 bytes, median 18,526. Legal and third-party notices are one node, and splitting them would mean inventing a page the source does not have.
+- **This is a move, not an append.** The legal page is *already* a TOC entry in 657 roots (97%) and the support page in 649 (96%). Appending a tail node without first removing the existing one duplicates the topic. It is the landing-page hoist above, inverted: the node is relocated, never re-created.
+- **The rule ratifies the source convention and normalizes the rest.** In document order the legal node is already last in 656 of 676 roots (97.0%) and the support node already in the final two in 612 (90.5%); **610 roots (90.2%) are already support-then-legal in the final two slots**. The rule earns its keep on the other ~10%: 20 roots bury the support node in the middle, 13 put it in the first tenth, and 4 put it first.
+- **Both are promoted to top level.** The legal node is top-level in 639 roots and nested one level deeper in 18; the support node is top-level in 649 and never nested. Those 18 come out of their parent and go to the tail with the rest.
+- **Where a root ships several candidate files, the TOC picks the one.** 49 roots hold two or more support pages and 5 hold two or more legal pages; in **all 54 the TOC references exactly one**. A name-priority heuristic would get this wrong — `fsp_transactioninsight/5.5.0` picks `Legal_and_Third-Party_Notices.htm` while `6.0.0` picks `Legal-and-Third-Party-Notices.htm`. Convert the TOC's choice and leave the siblings unconverted, exactly as with any other unreferenced `_templates/` file.
+- **The label comes from the TOC entry, not from a constant string.** The support page's `h1` is brand-varied and occasionally malformed: `TIBCO Documentation and Support Services` (565), `ibi Documentation and Support Services` (49), `Spotfire Documentation and Support Services` (45), bare `Documentation and Support Services` (4), `TIBCO-Documentation-and-Support-Services` (2), `SpotfireDocumentation and Support Services` (2, missing space), `TIBCO Product Documentation and Support Services` (1). The two-title rule of §5.1.4 applies unchanged — `h1` titles the page, the TOC label names the nav entry — so hard-coding either tail label would overwrite a correct brand with a wrong one in 96 roots.
+- **The pages are per-product content, not boilerplate, so each version converts its own.** 588 distinct legal bodies across the 669 roots and 595 distinct support bodies across the 668. There is no single shared page these could point at.
+- **A missing page is simply an absent node.** 7 roots ship no legal page (`bstudio-mdm/6.0.0/doc/html`, `bstudio-mdm/6.0.0/doc/relnotes`, `bwdcp/4.8.1/doc/html`, `bwplugingooglecs/6.0.0/doc/html`, `cim-gdsn/4.0.0/doc/html`, `rendezvous/8.7.0/html`, `trns/2.1.0/html`) and 8 no support page — the same list minus the two `bstudio-mdm` roots, plus `odh-mf-cnct/1.3.6/html` and both `odh-mf-cnct/1.3.7` roots. Nothing is synthesized to fill the gap; the tail is just shorter. This is the opposite of the headless-container rule above, and deliberately so: a headless container breaks its children, a missing legal page breaks nothing.
 
 #### 5.1.6 Content extraction: one invariant, and the chrome is inside it
 
@@ -611,7 +634,7 @@ Images keep their source filename and their `alt` where one exists. `image_skip_
 
 #### 5.1.9 What the engine does not convert
 
-- **Generated directories** — `Skins/`, `Resources/`, `_globalpages/`, `MicroContent/`. **2,339 HTML files**: 1,965 in `_globalpages/`, 295 in `MicroContent/`, 79 in `Resources/`. **`_templates/` is no longer among them** (§5.1.5): of its 2,803 files, the `DefaultUrl` landing page and the ~162-per-60-roots the TOC references are converted, and the remainder are skipped.
+- **Generated directories** — `Skins/`, `Resources/`, `_globalpages/`, `MicroContent/`. **2,339 HTML files**: 1,965 in `_globalpages/`, 295 in `MicroContent/`, 79 in `Resources/`. **`_templates/` is no longer among them** (§5.1.5): of its 2,797 files, the `DefaultUrl` landing page and the 1,737 paths the TOC references across 660 roots are converted, and the remainder are skipped.
 - **Runtime stubs** — `Default.htm`, `Default_CSH.htm`, `csh.js`, `Default.js`. **1,295 files**, none of them topics.
 - **`Data/`** — the runtime manifest, TOC and alias files are *read* (§5.1.4, §5.3) and never emitted.
 - **API reference trees** — Javadoc shipped inside a Flare output: **595 directories holding 8,078 files, concentrated in just 56 versions** (one output root each). Identified by the shared `is_api_reference()` marker predicate (§6.3) and routed to `-resources` by §6.4, never by directory name. *(The 595 matching the 595-version total is coincidence; it was re-derived to confirm that.)*
