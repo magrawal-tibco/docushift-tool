@@ -984,9 +984,9 @@ en-us-tibco-messaging/                  # docs repo — what a reader reads
 └── en-us/
     └── ems/
         ├── online-help/10-4-0/…        # converted Markdown + toc.yml, nav.yml, meta.yml, index.md, csh.yml
-        ├── user-guides/10-4-0/…        # user-guide PDFs
-        ├── release-information/10-4-0/ # release notes + readme
-        └── reference-documents/10-4-0/ # VPAT, licence, remaining doc/ files
+        ├── user-guides/10-4-0/         # user-guide PDFs + index.md, toc.yml
+        ├── release-information/10-4-0/ # release notes + readme + index.md, toc.yml
+        └── reference-documents/10-4-0/ # VPAT, licence, remaining doc/ files + index.md, toc.yml
 
 en-us-tibco-messaging-resources/        # bulk repo — generated trees and cold storage
 └── en-us/
@@ -1000,9 +1000,9 @@ en-us-tibco-messaging-resources/        # bulk repo — generated trees and cold
 | Doc-class | Repo | Contents | Converted? |
 | :--- | :--- | :--- | :--- |
 | `online-help` | docs | The converted GFM tree, its navigation, and `csh.yml` | Yes — Stage 5 |
-| `user-guides` | docs | Everything in the package's `pdf/` that is not a release note, VPAT or licence | No — copied |
-| `release-information` | docs | Release-notes PDF, readme TXT | No — copied |
-| `reference-documents` | docs | Licence (TXT and PDF), reminder notice, VPAT, and everything else under the package's `doc/` | No — copied |
+| `user-guides` | docs | Everything in the package's `pdf/` that is not a release note, VPAT or licence | No — copied, plus a generated `index.md` + `toc.yml` (§6.2.2) |
+| `release-information` | docs | Release-notes PDF, readme TXT | No — copied, plus a generated `index.md` + `toc.yml` (§6.2.2) |
+| `reference-documents` | docs | Licence (TXT and PDF), reminder notice, VPAT, and everything else under the package's `doc/` | No — copied, plus a generated `index.md` + `toc.yml` (§6.2.2) |
 | `api-references` | `-resources` | **Javadoc and the C / Go / `tibdg` API trees**, under a per-language subdirectory | **Never** — copied verbatim |
 | `archives` | `-resources` | Archived-version ZIPs, via `docushift archive download` | No — never unpacked |
 
@@ -1036,6 +1036,34 @@ The three document doc-classes are filled by **the folder a file came from, then
 Resulting split: **5,088 `user-guides` (55.7%), 2,214 `reference-documents`, 1,829 `release-information`** from `pdf/`; 1,343 / 1,159 from `doc/`. Every one of the 11,633 files routes — the classification has no "unknown" bucket, because `user-guides` is the default rather than a match.
 
 **Name matching is case-insensitive and separator-tolerant, and the separator is where this goes wrong.** The corpus spells these names with underscores, hyphens, dots *and spaces* (`tib_ems_relnotes.pdf`, `mft platform server v7.1 for windows release notes.pdf`, `tib_nimbus_9.1.0_licencing_doc.pdf` — note `licencing`). A first pass using `\b` as the boundary misrouted **1,753 release notes into `user-guides`**, because `_` is a word character and `\b` therefore does not match between `_` and `rel`. This is the same failure mode as the predecessor's substring skip-list (§3.9, `design.md` §6.3.1) seen from the other side: there the boundary was too loose, here too tight. The patterns are written out in `design.md` §10.4 and are tested against the observed spellings rather than the expected ones.
+
+#### 6.2.2 The document doc-classes need an `index.md` and a `toc.yml` too
+
+A copied PDF is not reachable. `online-help` gets navigation because Stage 6 synthesizes it from the source TOC; the three document doc-classes get nothing, so today a reader arriving at `user-guides/10-4-0/` sees a directory listing at best and a 404 at worst. **Every doc-class folder that receives at least one file also receives an `index.md` and a `toc.yml`**, built from the routed file list rather than from a source TOC — there is no source TOC to build from.
+
+Measured 2026-09-08 over the same 1,822 versions (scripts `C:\tmp\dc1_index.py` … `dc5_pdfmeta.py`):
+
+| Doc-class | Versions with ≥1 file | Files | Median / max per version | Extensions |
+| :--- | ---: | ---: | :--- | :--- |
+| `user-guides` | 1,228 (67.4%) | 5,088 | 2 / 90 | `.pdf` 100% |
+| `release-information` | 1,612 (88.5%) | 2,988 | 1 / 27 | `.pdf` 1,830, `.txt` 1,154, `.html` 4 |
+| `reference-documents` | 1,590 (87.3%) | 3,557 | 2 / 14 | `.pdf` 2,215, `.txt` 1,265, `.csv` 52, then a tail of `.html`, `.ipynb`, `.htm`, `.xlsx`, `.xls`, `.aspx`, `.js`, `.xml`, `.mcwebhelp`, `.mclog` |
+
+**No folder, no index.** Doc-classes present per version: 0 → 156 versions, 1 → 91, 2 → 386, 3 → 1,189. The 156 with none get no folders and no index files; an empty `user-guides/` holding only an `index.md` that links to nothing is worse than its absence, because it publishes a navigation entry that dead-ends. The generator is driven by the routed file list, so this falls out rather than needing a special case.
+
+**De-duplicate before indexing, not after copying.** 25 versions carry both `pdf/` and `doc/pdf/`; in 24 of them the two directories hold identical file sets, and across the 25 there are **178 duplicate filenames**. Left alone the distributor copies the same PDF twice and lists it twice. The rule is one entry per lower-cased filename per doc-class, root `pdf/` winning over nested `doc/pdf/` — which drops 81 of the 5,088 `user-guides` files to 5,007. (Distribution of the pair: only root `pdf/` 1,287 versions, only nested 348, both 25, neither 162.)
+
+**Titles come from a three-step chain, and the obvious first step is the wrong one.**
+
+1. **Canonical name for a router-recognized kind.** The patterns in `design.md` §10.4 already identify what a file *is*, and the name of the kind is a better title than anything derivable from the filename: Release Notes, Readme, License Agreement, Reminder Notice, VPAT (Accessibility Conformance Report). This covers **100% of `release-information`** and, with a fifth pattern for `rtu` → Right to Use Terms, **97.7% of `reference-documents`** (licence 1,851, reminder notice 829, VPAT 532, RTU 235 — leaving 83 files, 2.3%, for step 3). `user-guides` is the residue of those patterns, so step 1 never fires there by construction.
+2. **The PDF's Info-dictionary `/Title`**, for `user-guides`. Sampled 300 of the 5,007: **78% usable, 22% absent or blank, 0% junk**, and the usable values are genuine document titles — `'TIBCO® Data Virtualization SQL Server Adapter Guide'`, `'MFT Platform Server for Windows User Guide'`, `'ibi® MDM Custom Installation'`.
+3. **The filename stem with separators normalized to spaces** — and nothing else. Not the vendor prefix stripped, not the product tokens removed, not the version number excised. A first pass did all three and produced 3,352 distinct titles from 5,007 files, 82.9% of them appearing exactly once, including `'1 0 0 installation'`, `'adix 2'` and `'dqid 3'`. The cleverness is what generates the garbage; a stem like `tib_ems_users_guide` reads acceptably as-is.
+
+**Why not read `/Title` with a regex.** The first attempt scanned raw PDF bytes for the first `/Title (…)` and reported 57% usable — but a PDF's outline bookmarks are also `/Title` entries and they usually appear before the Info dictionary, so what came back was `'Prerequisites for Installation'`, `'Basic Tab'`, `'Table of contents'`: confidently wrong labels that no reviewer would flag as broken. Reading the Info dictionary through a real parser gave 78% / 0% junk on the same sample. This is the `DC.Type` failure again (§5.2.1) — an unvalidated matcher whose output is plausible enough to ship.
+
+> **Dependency, unresolved.** The 78% figure was measured with **pymupdf**, which is AGPL and therefore a poor fit for a shipped tool. **pypdf** (BSD) reads the same Info dictionary and should give the same answer, but it is not installed here and this has **not** been verified. Confirm before writing the dependency into `pyproject.toml`.
+
+**Shape of the generated files.** `toc.yml` is flat — these doc-classes have no hierarchy — with one item per file carrying `title`, `path` (the filename, relative), `type` (the extension) and `bytes`. `index.md` carries the same frontmatter as the `online-help` index (product, version, BU, family) plus `doc_class`, and renders the items as a linked list. Ordering is by kind rank then title, so `release-information` always leads with the release notes and `reference-documents` with the VPAT, rather than with whatever the filesystem returned first. Both are generated from `config/aem_templates/`, as siblings of the existing `index.md.j2` and `toc.yml.j2` — the existing pair assumes Markdown targets and a nested `guides` tree, so the document doc-classes need their own templates rather than a reuse of those.
 
 ### 6.3 Why `-resources` Is a Separate Repository
 

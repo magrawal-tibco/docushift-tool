@@ -645,7 +645,7 @@ Identifiers are known before conversion writes the file — parsing a 24 KB alia
 - **The landing page is the first node.** The engine reports which converted topic is the version's landing page — for Flare, `HelpSystem.xml`'s `DefaultUrl`, which resolves in 676 of 676 output roots but is absent from the TOC in 55 of 60 sampled ones. If that topic is already a TOC node it moves to first; otherwise it is inserted as first. It never falls through to "Unfiled".
 - **A node with children and no page gets a generated one.** AEM treats a childed navigation node with no page as a broken parent, and Flare's `'___'` sentinel produces 165 of them per 60 output roots — 151 at top level, holding 1,357 children between them. The synthesizer emits a page titled from the node's label whose body links its immediate children, stamped as generated in frontmatter so a re-run replaces it rather than treating it as authored. Childless headless nodes are dropped and counted.
 
-**The sync path shape is settled** (`architecture.md` §6.1): the publishing form `{locale}-{bu}-{family}/{locale}/{product}/{doc-class}/{version-dashed}/`, with the docs repo taking `online-help`, `user-guides`, `release-information` and `reference-documents`, and a sibling `-resources` repo taking `api-references` and `archives`. The distributor therefore does four things per version, in order: copy the converted tree and its navigation into `online-help/`; copy the PDF and document assets into their three doc-classes; copy the API-reference trees, unconverted, into the sibling repo; then rewrite every link that crosses from one repo to the other. The rewrite is last because it needs both destinations to exist, and it belongs here rather than in Stage 5 because conversion does not know the publishing layout.
+**The sync path shape is settled** (`architecture.md` §6.1): the publishing form `{locale}-{bu}-{family}/{locale}/{product}/{doc-class}/{version-dashed}/`, with the docs repo taking `online-help`, `user-guides`, `release-information` and `reference-documents`, and a sibling `-resources` repo taking `api-references` and `archives`. The distributor therefore does four things per version, in order: copy the converted tree and its navigation into `online-help/`; copy the PDF and document assets into their three doc-classes and generate an `index.md` and `toc.yml` for each (§10.5); copy the API-reference trees, unconverted, into the sibling repo; then rewrite every link that crosses from one repo to the other. The rewrite is last because it needs both destinations to exist, and it belongs here rather than in Stage 5 because conversion does not know the publishing layout.
 
 The dots-to-dashes version conversion belongs here too, at the publishing boundary, and nowhere earlier: the working tree's dotted version must round-trip to a `versions.csv` key, which `6-2-3` cannot (`6.2.3`? `6-2.3`?).
 
@@ -680,6 +680,24 @@ Which doc-class a non-converted document lands in. Grounded in a 2026-09-07 surv
 - **`licence` and `licencing` are spelled both ways** (`tib_nimbus_9.1.0_licencing_doc.pdf` beside `tib_control_9.0.1_licensing_doc.pdf`), hence `licen[cs](e|ing)` rather than a literal.
 
 Validated against the full corpus, the residue in `user-guides` after routing is **4 files** — `special-notes` ×2 and `liveviewweb_newnote` ×2 — all of which are genuine guides that merely contain the word "note". Nothing is misrouted and nothing is unrouted.
+
+### 10.5 Step 3, the document doc-class index — **Specified**
+
+Each of `user-guides`, `release-information` and `reference-documents` gets a flat `index.md` and `toc.yml` built from its routed file list, because a copied PDF with no index is unreachable. Grounded in a 2026-09-08 survey of the same 1,822 versions (`architecture.md` §6.2.2).
+
+**Input** is §10.4's routed list for one version, **de-duplicated by lower-cased filename within each doc-class**, root `V/pdf` winning over nested `V/doc/pdf`. 25 versions carry both folders and they share **178 filenames**; without this the same PDF is copied and listed twice.
+
+**A doc-class with no files produces no folder and no index.** 156 of the 1,822 versions route nothing at all; the rest split 91 / 386 / 1,189 across one, two and three doc-classes. An index that links to nothing is a published dead end, so emptiness is expressed by absence.
+
+**Title for one entry**, first hit wins:
+
+1. **The canonical name of the kind**, if the filename stem matches one of §10.4's patterns or the fifth pattern `(^|[\s_.-])rtu([\s_.-]|$)` — Release Notes, Readme, License Agreement, Reminder Notice, VPAT (Accessibility Conformance Report), Right to Use Terms. Covers 100% of `release-information` and 97.7% of `reference-documents`. The `rtu` pattern exists for titling only: `doc/` already routes everything non-readme to `reference-documents`, so it changes no destination.
+2. **The PDF's Info-dictionary `/Title`**, for `.pdf` files that reached step 2 — i.e. `user-guides`, which is by construction the residue of the step-1 patterns. Measured on 300 of the 5,007 de-duplicated user-guide PDFs: 78% usable, 22% blank, 0% junk. **Read it with a PDF parser, never with a byte-level `/Title` regex** — outline bookmarks are `/Title` entries too and usually precede the Info dictionary, so a regex returns `'Basic Tab'` and `'Table of contents'` while claiming 57% success. *(The measurement used pymupdf, which is AGPL; pypdf is the intended dependency and reads the same dictionary, but this is unverified — confirm before adding it.)*
+3. **The filename stem with `[_.-]+` collapsed to single spaces.** Nothing more: no vendor-prefix strip, no product-token removal, no version excision. Doing all three yielded 3,352 distinct titles for 5,007 files, 82.9% of them unique, including `'adix 2'` and `'1 0 0 installation'`. The cleverness is what produces the garbage.
+
+**Order** is by kind rank then title, so `release-information` leads with Release Notes and `reference-documents` with the VPAT, rather than with whatever order the filesystem returned.
+
+**Output.** `toc.yml` is flat — these doc-classes have no hierarchy — one item per file with `title`, `path` (the bare filename), `type` (extension) and `bytes`. `index.md` carries the `online-help` index frontmatter plus `doc_class`, and renders the items as a linked list. Both come from new templates in `config/aem_templates/`; the existing `index.md.j2` and `toc.yml.j2` assume Markdown targets and a nested `guides` tree and are not reusable here.
 
 **Step 4, the link rewrite, in full.** Every link from a converted topic into an API-reference path (`api/`, `javadoc/`, `Java_API/`, `java/`, `c/`, `golang/`, `tibdg/`, however many `../` deep) is replaced with an **absolute URL**: `publish_base_url` from `config/publishing.yaml`, then the same `{locale}-{bu}-{family}-resources/{locale}/{product}/api-references/{subdir}/{version-dashed}/{rest}` template that placed the file. Link construction and file placement call one function, so a link cannot point somewhere the copy did not write. Links that stay inside the docs repo — within `online-help/`, or out to the PDF doc-classes — are left relative, which is what keeps the repo previewable before publication.
 
@@ -739,3 +757,4 @@ Properties that hold across the whole tool. Each is a rule some algorithm above 
 | 9.2 | CSH readers (**Flare, DITA, WebWorks**) | Specified | Phase 5 |
 | 10 | AEM synthesis and sync | Specified | Phases 6–7 |
 | 10.4 | Document router (`pdf/` and `doc/` → doc-class) | Specified | Phase 6 |
+| 10.5 | Document doc-class index (`index.md`, `toc.yml`, title chain) | Specified | Phase 6 |

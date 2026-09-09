@@ -392,9 +392,9 @@ docushift validate --target-dir ../tibco-docs-aem/
 en-us-tibco-messaging/                  # the docs repo — what a reader reads
 └── en-us/ems/
     ├── online-help/10-4-0/…            # converted Markdown, toc.yml, nav.yml, meta.yml, csh.yml
-    ├── user-guides/10-4-0/…            # user-guide PDFs
-    ├── release-information/10-4-0/…    # release notes + readme
-    └── reference-documents/10-4-0/…    # VPAT, licence, rest of doc/
+    ├── user-guides/10-4-0/…            # user-guide PDFs + index.md, toc.yml
+    ├── release-information/10-4-0/…    # release notes + readme + index.md, toc.yml
+    └── reference-documents/10-4-0/…    # VPAT, licence, rest of doc/ + index.md, toc.yml
 
 en-us-tibco-messaging-resources/        # the bulk repo
 └── en-us/ems/
@@ -402,8 +402,9 @@ en-us-tibco-messaging-resources/        # the bulk repo
     └── archives/                       # archived-version ZIPs
 ```
 
-Three things to expect:
+Four things to expect:
 
+- **The PDF doc-classes get an index too.** `user-guides/`, `release-information/` and `reference-documents/` each receive a generated `index.md` and `toc.yml` listing their files, so a copied PDF is reachable. Titles come from the document kind where the name identifies one (Release Notes, VPAT, License Agreement), otherwise from the PDF's own metadata, otherwise from the filename. A doc-class with no files gets no folder at all rather than an empty index.
 - **Versions are dashed here** (`10.4.0` → `10-4-0`) and nowhere else. The catalog and the `families/` workspace keep the dots.
 - **API references are never converted.** Javadoc is copied through as HTML, and topic links into it are rewritten to absolute URLs on the AEM host. Set that host in `config/publishing.yaml` (`publish_base_url`) before your first sync — the path after it is derived, not configured.
 - **`validate` skips those absolute links by default.** They point at a different repository, so there is nothing on disk to check; pass `--check-external` to verify them over HTTP.
