@@ -511,9 +511,11 @@ The signals SDL *does* leave, measured over the 408 HTML-bearing versions that t
 
 `GUID-*.html OR DC.* meta` recovers 371; the R-help rule recovers 11 more. Together **382 of 408 (94%)**, taking coverage of HTML-bearing versions from **68% to 98%**. The residue is ~6 hand-authored `openspirit-*` versions and a handful of one-offs, which stay `auto` and should.
 
-**The two clauses of the DITA rule match two different publishers**, which the 2026-09-08 converter survey (`architecture.md` §5.2.1) separated: `GUID-*.html` matches 316 SDL SuiteHelp versions, and `DC.*` meta picks up ~55 more that SuiteHelp never touches — file-named topics under `topics/`, all in the Spotfire family. That is why the `DC.*` hit count (369) exceeds the GUID one (316) rather than merely corroborating it, and it is the reason both clauses stay: dropping `DC.*` as redundant would lose a sixth of the DITA corpus.
+**The two clauses of the DITA rule match two different publishers**, which the 2026-09-08 converter survey (`architecture.md` §5.2.1) separated: `GUID-*.html` matches 316 SDL SuiteHelp versions, and `DC.*` meta picks up ~55 more that SuiteHelp never touches — file-named topics under `topics/`, all in the Spotfire family bar one EBX add-on. That is why the `DC.*` hit count (369) exceeds the GUID one (316) rather than merely corroborating it, and it is the reason both clauses stay: dropping `DC.*` as redundant would lose a sixth of the DITA corpus.
 
 **`DC.*` is matched case-insensitively.** SuiteHelp writes `DC.Type`, the file-named flavour writes `DC.type`. A case-sensitive match silently drops all 66 of the latter's versions — it did exactly that once during the survey, and produced a confident, wrong "correction" of 371 down to 316 before the casing was spotted.
+
+**The file-named flavour went out of scope on 2026-09-09, and that changes what these two clauses are for.** All nine products that publish it — `sf-pysrv`, `sf-rsrv`, `enterprise-runtime-for-R`, `ebx-addon`, `sf_ipad`, `sf_ipad_deploykit`, `sfire-android`, `sfire-cloud`, `sfire_dev` — are on `config/scope.yaml`'s exclusion list (`architecture.md` §3.10, §5.2.1), and an out-of-scope product is never extracted, so this algorithm never runs on one. The `DC.*` clause's live yield is therefore the SuiteHelp corroboration only, and its lowercase half yields nothing at all today. **Both stay exactly as written.** Neither costs anything, and both are what make a readmitted product detect as `dita` rather than as `auto` — which is the difference between one engine dispatch and a silent hole in a report. A signal kept for a population that is currently empty is cheap; re-deriving it after a scope change, from a null result that looks like a clean absence, is what §7.2 exists to warn about.
 
 Two lessons are worth keeping. First, the CSS/JS pair is the *broadest* signal but the worst rule — `screen.css` + `print.css` is a filename coincidence waiting to happen, so the specific signals are preferred even though they match less. Second, `<!-- NewPage -->` in the `bex` and `spm` trees is **Javadoc**, not a missing engine: those are API-reference trees, and the §6.3 predicate — not this algorithm — is what should be claiming them.
 
@@ -558,6 +560,8 @@ Count products by family provenance and list the unclassified ones. This turns "
 `docushift validate` treats CSH as link integrity, because that is what it is (§9.6).
 
 **Links are classified before they are checked.** A relative link resolves against the filesystem and a missing target is an error. An absolute URL is external — which, after Stage 7, includes every rewritten API-reference link (`architecture.md` §6.4) — and is skipped by default, checked over HTTP only behind an explicit flag. Checking the two the same way would report the entire API surface of every product as broken.
+
+**`nav.yml` and `meta.yml` are checked for existence and YAML well-formedness only** (§10). Their shapes are placeholders pending an AEM spec, so there is no field list to validate against; asserting one would pin a guess in the test suite and make the eventual real template read as a regression. `toc.yml`, `index.md` and `csh.yml` are validated on their content as specified above and in §9.6.
 
 ---
 
@@ -666,6 +670,8 @@ Identifiers are known before conversion writes the file — parsing a 24 KB alia
 
 **Specified.** Navigation synthesis walks the converted tree to produce `toc.yml`, `nav.yml`, `meta.yml` and landing pages from the Jinja templates in `config/aem_templates/`, then the distributor copies each version's output into the target publishing layout.
 
+**Two of the four templates are placeholders, deliberately** (2026-09-09, user decision). `toc.yml` and `index.md` have specified shapes: the three node rules below fix the first, and §10.5 and the landing-page rule fix the second. **`nav.yml` and `meta.yml` have no authored spec** — the AEM side has not supplied one, and `config/aem_templates/nav.yml.j2` and `meta.yml.j2` are Phase-1 scaffolding guesses that were never measured against anything. They stay as they are, marked in the template files themselves as placeholders, until the details arrive; then the templates get written against those details rather than retro-fitted to a guess. Three consequences hold in the meantime: their rendered content is **not a contract**, so §8.4 asserts nothing beyond "the file exists and parses as YAML"; the one fact that *is* grounded — SuiteHelp's `GUID-*-homepage.html` supplying `publication-title`, `release-version` and `release-date` in all 314 doc-sets that ship one (`architecture.md` §5.2.7) — is an input the eventual `meta.yml` will want, and is collected regardless of what the template does with it; and no Stage 6 work is blocked by the gap, because the synthesizer's real work is the node list, which `toc.yml` consumes.
+
 **The stage ends at the filesystem** (`architecture.md` §6.0, decided 2026-09-09). `docushift sync` writes repo-shaped directory trees under `--target-dir`; it runs no git command, creates no repository and pushes nothing. Publishing is picked up separately. Every rule below describes what is written, so none of them changes.
 
 **Navigation synthesis does not just serialize what the engine handed it.** Three rules apply to the node list before it is written, all settled by the 2026-09-09 Flare survey (`architecture.md` §5.1.5) and all engine-neutral — two create nodes the source does not supply, one moves nodes the source misfiles:
@@ -771,6 +777,8 @@ Properties that hold across the whole tool. Each is a rule some algorithm above 
 
 ## 12. Algorithm index
 
+Most rows are **Built** or **Specified**. Two are neither, and are marked as such rather than left off the table: **Unsurveyed** means the scope is known and the design is not, and **Placeholder** means the artifact is written but its shape is a guess awaiting a spec. Both are gaps someone has to close; a row that omits them reads as a complete index.
+
 | § | Algorithm | Status | Implementation |
 | :--- | :--- | :--- | :--- |
 | 1.2 | Tolerant read / strict write | Built | `utils/csvio.py` |
@@ -802,12 +810,14 @@ Properties that hold across the whole tool. Each is a rule some algorithm above 
 | `architecture.md` §5.1 | Flare converter | Specified | Phase 5, `engines/flare.py` |
 | `architecture.md` §5.2 | SDL DITA converter | Specified | Phase 5, `engines/dita.py` |
 | `architecture.md` §5.3 | WebWorks converter | Specified | Phase 5, `engines/webworks.py` |
+| — (owed) | DocBook converter — `str` and `sfire-sfds`, 10 versions | **Unsurveyed** | Phase 5, `engines/docbook.py`; needs an `architecture.md` §5.x first |
 | 8.1–8.3 | Catalog validation, warnings, triage | Built | `catalog.py` |
 | 9.3 | CSH resolution | Specified | Phase 5 |
 | 9.4–9.5 | `csh.yml` and frontmatter | Specified | Phase 5 |
 | 9.6 | CSH verification | Specified | Phase 7 |
 | 9.2 | CSH readers (**Flare, DITA, WebWorks**) | Specified | Phase 5 |
 | 10 | AEM synthesis and sync | Specified | Phases 6–7 |
+| 10 (part) | `nav.yml` / `meta.yml` shapes | **Placeholder** | Pending an AEM spec; the two templates in `config/aem_templates/` say so |
 | 10.4 | Document router (`pdf/` and `doc/` → doc-class) | Specified | Phase 6 |
 | 10.5 | Document doc-class index (`index.md`, `toc.yml`, title chain) | Specified | Phase 6 |
 | 10.6 | `archives/` index, built from the catalog rather than the directory | Specified | Phase 6 |

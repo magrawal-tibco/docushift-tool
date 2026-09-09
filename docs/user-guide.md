@@ -433,8 +433,9 @@ en-us-tibco-messaging-resources/        # the bulk tree
     └── archives/…                      # archived-version ZIPs + index.md, toc.yml
 ```
 
-Five things to expect:
+Six things to expect:
 
+- **`nav.yml` and `meta.yml` are placeholders — do not build on their shape yet.** `toc.yml`, `index.md` and `csh.yml` are specified and stable; those two are not. The AEM side has not supplied a spec for either, so `config/aem_templates/nav.yml.j2` and `meta.yml.j2` still hold the scaffolding shapes the project started with, and both templates say so at the top. They will be rewritten against the real requirements when those arrive, which is likely to change their field names. `validate` therefore checks that the files exist and parse, and asserts nothing about their content.
 - **The PDF doc-classes get an index too.** `user-guides/`, `release-information/` and `reference-documents/` each receive a generated `index.md` and `toc.yml` listing their files, so a copied PDF is reachable. Titles come from the document kind where the name identifies one (Release Notes, VPAT, License Agreement), otherwise from the PDF's own metadata, otherwise from the filename. A doc-class with no files gets no folder at all rather than an empty index.
 - **`archives/` is indexed from the catalog, so it lists every archived version — including the ones you have not downloaded.** Entries whose ZIP is not in the repository link to the docsite instead, and the index says which is which. That is deliberate: `archives/` exists to be the complete product history, and `archive download` is what fills it in. `api-references/` gets no generated index — Javadoc ships its own.
 - **Versions are dashed here** (`10.4.0` → `10-4-0`) and nowhere else. The catalog and the `families/` workspace keep the dots.
