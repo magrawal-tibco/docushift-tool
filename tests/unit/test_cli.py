@@ -6,6 +6,7 @@ missing one. Stages that *are* built must be reachable end-to-end from argv. The
 surface asserted is the one documented in docs/user-guide.md.
 """
 
+import zipfile
 from pathlib import Path
 
 import pytest
@@ -18,12 +19,11 @@ from docushift.discovery import CrawlResult, DocsiteCrawler
 from docushift.state import StateStore
 from tests.conftest import make_product, make_version
 
+# `download` and `archive download` left this list in Phase 4a. `extract` stays:
+# it is Phase 4b.
 PENDING_COMMANDS = [
-    ["download", "--all"],
-    ["download", "--batch", "poc-1"],
     ["extract", "--all"],
     ["convert", "--product", "ems", "--version", "10.4.0"],
-    ["archive", "download", "--product", "ems", "--version", "8.6.0"],
     ["sync", "--target-dir", "workspace"],
     ["validate", "--target-dir", "workspace"],
     ["status", "--bu", "tibco"],
@@ -800,3 +800,176 @@ def test_archive_list_when_nothing_is_archived(runner: CliRunner, populated_root
 
     assert result.exit_code == 0
     assert "No archived versions" in result.output
+
+
+# -- download (design.md §5.1, §5.2) -----------------------------------------
+
+
+def _zip(path: Path, members: dict[str, str] | None = None) -> Path:
+    """A readable ZIP on disk, built in-process rather than committed."""
+    with zipfile.ZipFile(path, "w") as archive:
+        for name, text in (members or {"docs/index.html": "hi"}).items():
+            archive.writestr(name, text)
+    return path
+
+
+def test_download_without_a_scope_is_refused(runner: CliRunner, populated_root: Path) -> None:
+    """A bare `download` over 4,000 versions is never what anyone meant."""
+    result = _invoke(runner, populated_root, "download")
+
+    assert result.exit_code != 0
+    assert "Choose a scope" in result.output
+
+
+def test_download_dry_run_lists_targets_without_writing(runner: CliRunner, populated_root: Path) -> None:
+    result = _invoke(runner, populated_root, "download", "--all", "--dry-run")
+
+    assert result.exit_code == 0
+    assert "10.4.0" in result.output
+    # The archived version is not the pipeline's business -- `archive download` is.
+    assert "8.6.0" not in result.output
+    # `families/` itself is created by every invocation; the family workspace is not.
+    assert not (populated_root / "families" / "en-us-tibco-messaging").exists()
+
+
+def test_download_from_file_files_the_package_and_pins_the_row(
+    runner: CliRunner, populated_root: Path, tmp_path: Path
+) -> None:
+    source = _zip(tmp_path / "handed-over.zip")
+
+    result = _invoke(
+        runner, populated_root, "download",
+        "--product", "ems", "--version", "10.4.0", "--from-file", str(source),
+    )
+
+    assert result.exit_code == 0
+    assert "zip_source=manual" in result.output
+    landed = (
+        populated_root / "families" / "en-us-tibco-messaging" / "downloads"
+        / "tibco-enterprise-message-service-10.4.0.zip"
+    )
+    assert landed.exists()
+    assert source.exists()
+
+
+def test_download_from_file_needs_both_selectors(
+    runner: CliRunner, populated_root: Path, tmp_path: Path
+) -> None:
+    source = _zip(tmp_path / "handed-over.zip")
+
+    result = _invoke(runner, populated_root, "download", "--product", "ems", "--from-file", str(source))
+
+    assert result.exit_code != 0
+    assert "--product and --version" in result.output
+
+
+def test_download_from_file_adds_an_unknown_version_with_a_warning(
+    runner: CliRunner, populated_root: Path, tmp_path: Path
+) -> None:
+    source = _zip(tmp_path / "handed-over.zip")
+
+    result = _invoke(
+        runner, populated_root, "download",
+        "--product", "ems", "--version", "9.9.9", "--from-file", str(source),
+    )
+
+    assert result.exit_code == 0
+    assert "adding the row" in result.output
+    assert "9.9.9" in (populated_root / "config" / "versions.csv").read_text(encoding="utf-8-sig")
+
+
+def test_download_from_file_on_an_unknown_product_is_an_error(
+    runner: CliRunner, populated_root: Path, tmp_path: Path
+) -> None:
+    """A typo'd code would otherwise seed a junk product row from a single ZIP."""
+    source = _zip(tmp_path / "handed-over.zip")
+
+    result = _invoke(
+        runner, populated_root, "download",
+        "--product", "nope", "--version", "1.0", "--from-file", str(source),
+    )
+
+    assert result.exit_code != 0
+    assert "catalog fetch" in result.output
+
+
+def test_download_from_file_rejects_a_sign_in_page(
+    runner: CliRunner, populated_root: Path, tmp_path: Path
+) -> None:
+    source = tmp_path / "handed-over.zip"
+    source.write_text("<html>Please sign in</html>", encoding="utf-8")
+
+    result = _invoke(
+        runner, populated_root, "download",
+        "--product", "ems", "--version", "10.4.0", "--from-file", str(source),
+    )
+
+    assert result.exit_code != 0
+    assert "readable ZIP" in result.output
+
+
+# -- archive download --------------------------------------------------------
+
+
+def test_archive_download_from_file_lands_outside_the_working_set(
+    runner: CliRunner, populated_root: Path, tmp_path: Path
+) -> None:
+    """In `archive/`, because an archived ZIP in `downloads/` would look to `extract`
+    like a package awaiting conversion."""
+    source = _zip(tmp_path / "ems-8.6.0.zip")
+
+    result = _invoke(
+        runner, populated_root, "archive", "download",
+        "--product", "ems", "--version", "8.6.0", "--from-file", str(source),
+    )
+
+    assert result.exit_code == 0
+    family = populated_root / "families" / "en-us-tibco-messaging"
+    assert (family / "archive" / "tibco-enterprise-message-service-8.6.0.zip").exists()
+    assert not (family / "downloads").exists()
+    # The pipeline's package for 8.6.0 was never supplied, so the row must not be
+    # pinned manual -- that would make `download` skip it forever.
+    assert "manual" not in (populated_root / "config" / "versions.csv").read_text(encoding="utf-8-sig")
+
+
+def test_archive_download_extract_unpacks_within_archive(
+    runner: CliRunner, populated_root: Path, tmp_path: Path
+) -> None:
+    source = _zip(tmp_path / "ems-8.6.0.zip", {"docs/index.html": "hi", "docs/a.html": "a"})
+
+    result = _invoke(
+        runner, populated_root, "archive", "download",
+        "--product", "ems", "--version", "8.6.0", "--from-file", str(source), "--extract",
+    )
+
+    assert result.exit_code == 0
+    unpacked = (
+        populated_root / "families" / "en-us-tibco-messaging" / "archive"
+        / "tibco-enterprise-message-service-8.6.0" / "docs" / "index.html"
+    )
+    assert unpacked.read_text(encoding="utf-8") == "hi"
+    assert not (populated_root / "families" / "en-us-tibco-messaging" / "extracted").exists()
+
+
+def test_archive_download_refuses_an_archive_that_escapes_its_target(
+    runner: CliRunner, populated_root: Path, tmp_path: Path
+) -> None:
+    source = _zip(tmp_path / "ems-8.6.0.zip", {"docs/index.html": "hi", "../escape.txt": "owned"})
+
+    result = _invoke(
+        runner, populated_root, "archive", "download",
+        "--product", "ems", "--version", "8.6.0", "--from-file", str(source), "--extract",
+    )
+
+    assert result.exit_code != 0
+    assert not (tmp_path / "escape.txt").exists()
+
+
+def test_archive_download_without_a_url_points_at_from_file(
+    runner: CliRunner, populated_root: Path
+) -> None:
+    """Archived `zipPath` values are the ones most likely to be stale or absent."""
+    result = _invoke(runner, populated_root, "archive", "download", "--product", "ems", "--version", "8.6.0")
+
+    assert result.exit_code != 0
+    assert "--from-file" in result.output

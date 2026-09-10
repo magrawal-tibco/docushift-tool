@@ -353,7 +353,7 @@ Because the path is fully derivable from `(bu, family, slug, version)`, Stage 4 
 | `warnings()` | Reports `zip_source=manual` rows that now carry a `zip_url`, and `manual` rows whose expected file is absent when the family workspace exists locally. |
 | Merge | `zip_source` excluded structurally (§3.5). |
 | Stage 4 extract | Unchanged — reads the canonical path. |
-| `state.db` | Records the computed sha256, size, `downloaded` status, and the originating path the file was copied from, for audit. There is no upstream checksum to compare against, so the computed one is authoritative for later "is this still the same file" checks. |
+| `state.db` | `version_state` records the computed sha256, size, download path and `downloaded` status. The originating path the file was copied from goes to `version_metadata` under **`zip_origin_path`** — free-form, so an audit field only a handful of rows carry costs no `SCHEMA_VERSION` bump. There is no upstream checksum to compare against, so the computed one is authoritative for later "is this still the same file" checks. |
 
 **Ingestion is validated, not trusted.** `--from-file` rejects anything `zipfile.is_zipfile` does not accept before copying. The common real failure is not a corrupt archive but an HTML login redirect or error page saved under a `.zip` name; caught at ingest it is a one-line message, and caught at Stage 4 it is a confusing extraction failure days later. The file is **copied**, not moved — the user's own copy is not the tool's to consume.
 
@@ -591,6 +591,8 @@ Archived versions are inventoried for a complete product history but default to 
 When an old release does come up, `docushift archive download --product ems --version 8.6.0` pulls that one ZIP into `families/<family>/archive/`. It lands outside `downloads/` on purpose: that directory is the pipeline's working set, and a reference ZIP sitting in it would look to `extract` like a package awaiting conversion. Genuinely converting an archived version remains a `convert_eligible=true` flip on its row, which routes it through the normal path.
 
 Archived `zipPath` values are the most likely to be stale, so the same command takes `--from-file` (§3.8) and files a hand-obtained ZIP at `archive_path()` instead of fetching it. Its `--extract` unpacks within `archive/`, never into the pipeline's `extracted/` tree — an archived package that was never selected for conversion must not appear alongside ones that were.
+
+**The archive variant does not set `zip_source=manual`,** unlike `download --from-file`. `zip_source` states where the *pipeline's* package for a version comes from, and a reference ZIP pulled outside the working set is not that; pinning it would make a later `download` skip a version whose real package was never supplied.
 
 ---
 

@@ -35,7 +35,7 @@ docushift doctor
 
 Prints the resolved project paths (`config/`, `cache/`, `families/`, `output/`, `state.db`), the active locale, and which family workspaces exist so far. The working directories are created on first run; per-family folders are not, so an untouched project reads `family workspaces: none yet`.
 
-> **Implementation status.** The command tree below is the full intended surface and `--help` reflects it. Implemented today: `doctor` and the **whole `catalog` group, `fetch` included** — discovery talks to the live docsite. The acquisition stages (`download`, `extract`) and everything downstream are not built yet. Every unbuilt command exits non-zero naming the phase that will build it (see `docs/planning.md`); commands are never silently no-op.
+> **Implementation status.** The command tree below is the full intended surface and `--help` reflects it. Implemented today: `doctor`, the **whole `catalog` group, `fetch` included** — discovery talks to the live docsite — and **`download` and `archive download`**, including `--from-file`. `extract` and everything downstream are not built yet. Every unbuilt command exits non-zero naming the phase that will build it (see `docs/planning.md`); commands are never silently no-op.
 
 ---
 
@@ -242,11 +242,21 @@ sets `zip_source=manual` on the row, and records its checksum. From then on `ext
 `convert`, and `sync` treat it as an ordinary package — nothing downstream needs to know
 where it came from. Your original file is copied, not moved.
 
+If the version is not in `versions.csv` at all, the row is added for you with a warning —
+you are holding the package, which is better evidence that the version exists than
+discovery's silence is that it does not. An unknown **product**, though, is an error: run
+`docushift catalog fetch --product <code>` first, so a typo cannot seed a junk row.
+
 For an archived version, the same flag is on the archive utility:
 
 ```bash
 docushift archive download --product ems --version 8.6.0 --from-file "D:\downloads\ems-86.zip"
 ```
+
+That one does **not** set `zip_source=manual`, because `zip_source` says where the
+*pipeline's* package for a version comes from and a reference ZIP in `archive/` is not
+that — pinning it would make `download` skip a version whose real package you never
+supplied.
 
 Notes:
 
@@ -279,7 +289,9 @@ docushift archive download --product businessevents-enterprise --version 6.2.2 -
 docushift archive download --product ems --version 8.6.0 --from-file "D:\downloads\ems-86.zip"
 ```
 
-The ZIP lands in `archive/`, deliberately outside `downloads/` — `downloads/` is the pipeline's working set, and a reference ZIP sitting there would look to `extract` like a package awaiting conversion.
+The ZIP lands in `archive/`, deliberately outside `downloads/` — `downloads/` is the pipeline's working set, and a reference ZIP sitting there would look to `extract` like a package awaiting conversion. `--extract` unpacks into `archive/<slug>-<version>/` for the same reason. A ZIP already present is left alone unless you pass `--force`.
+
+Archived `zip_url` values are the ones most likely to be stale, so if the fetch has nothing to work from the command tells you to obtain the file and re-run with `--from-file` rather than failing obscurely.
 
 To genuinely **convert** an archived version, flip its eligibility so it routes through the normal path:
 
@@ -433,12 +445,34 @@ docushift download --bu tibco --family integration
 docushift download --product businessevents-enterprise --version 6.4.0
 docushift download --batch poc-1
 
+# See what would be fetched, and where, without writing anything
+docushift download --all --dry-run
+
 # Supply a ZIP by hand when discovery has no usable URL (single version only)
 docushift download --product ebx --version 6.2.0 --from-file "D:\downloads\ebx-docs.zip"
 ```
 
+| Flag | Effect |
+| :--- | :--- |
+| `--dry-run` | Prints the product, version, source and target path for every version the selector picks, and stops. |
+| `--force` | Re-fetches even when the local ZIP's checksum still matches. Does **not** override a `zip_source=manual` pin. |
+| `--workers N` | How many versions download at once. Defaults to `crawl.max_concurrent_requests` in `config/docsite.yaml` (4). |
+| `--from-file PATH` | Files a ZIP you already have instead of fetching. Needs both `--product` and `--version`. |
+
 Archived versions are never downloaded here — use `docushift archive download` for those.
 Versions pinned with `zip_source=manual` are skipped: their package is already in place.
+
+Every run ends with five counts — downloaded, already current, skipped (manual), no
+`zip_url`, failed — and the last two are listed by name, because those are the rows you
+have to do something about. **A failure never stops the run**: one unreachable product
+out of two hundred is a report line, not an aborted batch.
+
+Downloads resume. An interrupted transfer leaves a `.part` file next to the target and
+the next run continues from where it stopped, provided the server still reports the same
+file; if the file changed upstream, the partial is discarded and the download restarts
+rather than producing a plausible-looking corrupt archive. Nothing is ever written to the
+final path until the whole ZIP has arrived and been checked, so a killed run cannot leave
+a truncated package that a later run would trust.
 
 ### Extract & Convert to GFM
 Extraction is a separate step because it is where the engine is detected and written

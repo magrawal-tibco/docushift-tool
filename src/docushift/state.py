@@ -12,6 +12,7 @@ Two distinct responsibilities, deliberately in one store:
 """
 
 import sqlite3
+import threading
 from collections.abc import Iterator
 from contextlib import contextmanager
 from datetime import UTC, datetime
@@ -110,13 +111,28 @@ class StateStore:
         self._conn: sqlite3.Connection | None = None
         # >0 while inside `transaction()`. Counted, not a flag, so nesting is safe.
         self._batch_depth = 0
+        # Reentrant, because `transaction()` holds it across nested `_tx()` calls.
+        self._lock = threading.RLock()
 
     # -- connection ---------------------------------------------------------
 
     def connect(self) -> sqlite3.Connection:
+        # Double-checked: the fast path is one attribute read per query, and only
+        # the first caller pays for the lock.
+        if self._conn is not None:
+            return self._conn
+        with self._lock:
+            return self._connect_locked()
+
+    def _connect_locked(self) -> sqlite3.Connection:
         if self._conn is None:
             self.db_path.parent.mkdir(parents=True, exist_ok=True)
-            self._conn = sqlite3.connect(self.db_path)
+            # Stage 3 downloads run on a thread pool and each worker records its own
+            # version's state, so the connection has to outlive the thread that made
+            # it. `sqlite3` is built serialized (`threadsafety == 3`), which makes a
+            # shared connection safe at the C level; `_tx` adds the lock that keeps
+            # one thread's commit from landing inside another's write.
+            self._conn = sqlite3.connect(self.db_path, check_same_thread=False)
             self._conn.row_factory = sqlite3.Row
             self._conn.executescript(_SCHEMA)
             if self._conn.execute("SELECT COUNT(*) FROM schema_info").fetchone()[0] == 0:
@@ -149,18 +165,19 @@ class StateStore:
 
     @contextmanager
     def _tx(self) -> Iterator[sqlite3.Connection]:
-        conn = self.connect()
-        # Inside a `transaction()` the caller owns the commit, so the write joins the open
-        # transaction instead of forcing its own fsync.
-        if self._batch_depth:
-            yield conn
-            return
-        try:
-            yield conn
-            conn.commit()
-        except Exception:
-            conn.rollback()
-            raise
+        with self._lock:
+            conn = self.connect()
+            # Inside a `transaction()` the caller owns the commit, so the write joins the open
+            # transaction instead of forcing its own fsync.
+            if self._batch_depth:
+                yield conn
+                return
+            try:
+                yield conn
+                conn.commit()
+            except Exception:
+                conn.rollback()
+                raise
 
     @contextmanager
     def transaction(self) -> Iterator["StateStore"]:
@@ -173,20 +190,24 @@ class StateStore:
 
         Nesting is counted rather than rejected, so a caller can wrap a helper that
         already batches without having to know that it does.
+
+        The lock is held for the whole batch: a concurrent single-write `_tx` would
+        otherwise commit the half-finished batch along with its own row.
         """
-        conn = self.connect()
-        self._batch_depth += 1
-        try:
-            yield self
-        except Exception:
-            self._batch_depth -= 1
-            if not self._batch_depth:
-                conn.rollback()
-            raise
-        else:
-            self._batch_depth -= 1
-            if not self._batch_depth:
-                conn.commit()
+        with self._lock:
+            conn = self.connect()
+            self._batch_depth += 1
+            try:
+                yield self
+            except Exception:
+                self._batch_depth -= 1
+                if not self._batch_depth:
+                    conn.rollback()
+                raise
+            else:
+                self._batch_depth -= 1
+                if not self._batch_depth:
+                    conn.commit()
 
     def __enter__(self) -> "StateStore":
         self.connect()

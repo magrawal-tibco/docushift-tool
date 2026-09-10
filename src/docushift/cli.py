@@ -672,16 +672,157 @@ def catalog_triage(ctx: click.Context) -> None:
 # ---------------------------------------------------------------------------
 
 
+def _ingest_target(manager: CatalogManager, product, version):
+    """Resolves `--from-file`'s `(product, version)`, adding the version row if needed.
+
+    Both selectors are required: `--from-file` files one specific package, and a
+    scope-shaped selector would silently pick one of several matches. The
+    product/version asymmetry is `architecture.md` §3.8's -- an unknown product is
+    an error, an unknown version on a known product is added with a warning.
+    """
+    if not product or not version:
+        raise click.ClickException("--from-file needs both --product and --version.")
+    slug = _resolve(manager, product)
+    found = manager.get_product(slug)
+    if found is None:
+        raise click.ClickException(
+            f"No product '{product}' in the catalog. A hand-supplied package still needs a "
+            f"product row -- run `docushift catalog fetch --product {product}` first."
+        )
+    if version not in found.versions:
+        console.print(
+            f"[yellow]WARN[/yellow] {slug}: no version '{version}' in the catalog; adding the row. "
+            f"You are holding the package, which is better evidence than discovery's silence."
+        )
+        try:
+            manager.add_version(slug, version)
+        except CatalogError as exc:
+            raise click.ClickException(str(exc)) from exc
+        found = manager.get_product(slug)
+    return found, found.versions[version]
+
+
+def _download_selection(manager: CatalogManager, bu, family, product, version, batch, select_all):
+    """The versions a `download` invocation acts on, with the scope rules enforced."""
+    if not any([select_all, bu, family, product, batch]):
+        raise click.ClickException("Choose a scope: --all, or one of --bu / --family / --product / --batch.")
+    try:
+        return manager.iter_versions(
+            bu=bu,
+            family=family,
+            slug=_resolve(manager, product) if product else None,
+            version=version,
+            batch=batch,
+            eligible_only=True,
+        )
+    except CatalogError as exc:
+        raise click.ClickException(str(exc)) from exc
+
+
+def _report_download(stats) -> None:
+    """The five-outcome summary every download run ends with."""
+    from docushift.downloader import Outcome
+
+    table = Table(title="Download")
+    table.add_column("Outcome")
+    table.add_column("Versions", justify="right")
+    for outcome, label in (
+        (Outcome.DOWNLOADED, "Downloaded"),
+        (Outcome.CURRENT, "Already current"),
+        (Outcome.SKIPPED_MANUAL, "Skipped (manual)"),
+        (Outcome.NO_URL, "No zip_url"),
+        (Outcome.FAILED, "Failed"),
+    ):
+        table.add_row(label, str(stats.count(outcome)))
+    console.print(table)
+    if stats.bytes_written:
+        console.print(f"[dim]{stats.bytes_written / 1_048_576:.1f} MiB written.[/dim]")
+    # Named individually rather than counted: "3 failed" out of 200 is not
+    # actionable, and these are the rows a human has to do something about.
+    for result in stats.results:
+        if result.outcome is Outcome.NO_URL:
+            console.print(f"[yellow]![/yellow] {result.slug}@{result.version}: {result.message}")
+    for result in stats.failures:
+        console.print(f"[red]![/red] {result.slug}@{result.version}: {result.message}")
+
+
 @main.command()
 @_scope_options
 @click.option("--force", is_flag=True, help="Re-download even if the cached ZIP is current.")
-def download(**kwargs) -> None:
+@click.option(
+    "--workers",
+    type=int,
+    default=None,
+    help="Parallel downloads. Defaults to docsite.yaml's max_concurrent_requests.",
+)
+@click.option(
+    "--from-file",
+    "from_file",
+    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    default=None,
+    help="File a hand-obtained ZIP at the canonical path instead of fetching. Needs --product and --version.",
+)
+@click.option("--dry-run", is_flag=True, help="List what would be fetched without writing.")
+@click.pass_context
+def download(ctx, bu, family, product, version, batch, select_all, force, workers, from_file, dry_run) -> None:
     """Download convert_eligible packages into families/<locale>-<bu-slug>-<family-slug>/downloads/.
 
     Archived versions are never downloaded here -- pull one on demand with
     `docushift archive download` instead.
     """
-    _pending("download", "Phase 4")
+    from docushift.downloader import Outcome, PackageDownloader
+
+    cfg: ConfigManager = ctx.obj["config"]
+    manager = _catalog_manager(ctx)
+
+    if from_file:
+        found, ver = _ingest_target(manager, product, version)
+        downloader = PackageDownloader(cfg, manager)
+        target = cfg.download_path(found.bu, found.family, found.slug, ver.version)
+        try:
+            result = downloader.ingest_file(found, ver, from_file, target)
+        except (OSError, CatalogError) as exc:
+            raise click.ClickException(str(exc)) from exc
+        console.print(
+            f"Filed {from_file} -> {result.path}\n"
+            f"[dim]sha256 {result.checksum}  {result.size / 1_048_576:.1f} MiB  zip_source=manual[/dim]"
+        )
+        return
+
+    pairs = _download_selection(manager, bu, family, product, version, batch, select_all)
+    if not pairs:
+        console.print("[yellow]No convert-eligible versions match.[/yellow]")
+        return
+
+    if dry_run:
+        table = Table(title=f"Would download ({len(pairs)})")
+        for column in ("Product", "Version", "Source", "Target"):
+            table.add_column(column)
+        for found, ver in pairs:
+            source = str(ver.zip_source) if ver.zip_source is not ZipSource.AUTO else (ver.zip_url or "-")
+            table.add_row(
+                found.slug,
+                ver.version,
+                source,
+                str(cfg.download_path(found.bu, found.family, found.slug, ver.version)),
+            )
+        console.print(table)
+        return
+
+    downloader = PackageDownloader(cfg, manager, workers=workers)
+    console.print(f"Downloading {len(pairs)} version(s) with {downloader.workers} worker(s)...")
+
+    def on_result(result) -> None:
+        if result.outcome is Outcome.DOWNLOADED:
+            note = " (resumed)" if result.resumed else ""
+            console.print(
+                f"  [green]v[/green] {result.slug}@{result.version} "
+                f"{result.size / 1_048_576:.1f} MiB{note}"
+            )
+        elif result.outcome is Outcome.FAILED:
+            console.print(f"  [red]x[/red] {result.slug}@{result.version}")
+
+    _report_download(downloader.download_many(pairs, force=force, on_result=on_result))
 
 
 @main.command()
@@ -788,20 +929,85 @@ def archive_list(ctx: click.Context, bu, family, product) -> None:
 
 
 @archive.command("download")
-@click.option(
-    "--product", "product", required=True, help="Product whose archived version to pull (slug or product_code)."
-)
+@click.option("--product", "product", required=True, help="Product to pull (slug or product_code).")
 @click.option("--version", required=True, help="Archived version to pull.")
-@click.option("--extract", "do_extract", is_flag=True, help="Also unpack it, which the pipeline will not do.")
-@click.option("--dest", type=DIR_PATH, default=None, help="Override the destination directory.")
-def archive_download(**kwargs) -> None:
-    """Download one archived version's ZIP into families/<family>/archive/.
+@click.option(
+    "--from-file",
+    "from_file",
+    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    default=None,
+    help="File a hand-obtained ZIP at the archive path instead of fetching it.",
+)
+@click.option("--extract", "do_extract", is_flag=True, help="Also unpack it, within archive/.")
+@click.option("--force", is_flag=True, help="Re-download even if the archived ZIP is already present.")
+@click.pass_context
+def archive_download(ctx, product, version, from_file, do_extract, force) -> None:
+    """Pull one archived version's ZIP into families/<family>/archive/.
 
-    Kept out of `downloads/` on purpose: that directory is the pipeline's working
-    set, and a reference ZIP sitting in it would look to `extract` like a package
-    awaiting conversion.
+    Outside the pipeline's working set on purpose: an archived ZIP in `downloads/`
+    would look to `extract` like a package awaiting conversion. `--extract` unpacks
+    within `archive/` for the same reason, never into `extracted/`.
     """
-    _pending("archive download", "Phase 4")
+    from docushift.downloader import PackageDownloader
+    from docushift.extractor import UnsafeArchiveError, safe_extract
+
+    cfg: ConfigManager = ctx.obj["config"]
+    manager = _catalog_manager(ctx)
+
+    found, ver = _ingest_target(manager, product, version) if from_file else _archive_target(manager, product, version)
+    target = cfg.archive_path(found.bu, found.family, found.slug, ver.version)
+    downloader = PackageDownloader(cfg, manager)
+
+    if from_file:
+        try:
+            # `pin_manual=False`: `zip_source` states where the *pipeline's* package
+            # for a version comes from, and a reference ZIP pulled outside the
+            # working set is not that. Pinning here would make `download` skip a
+            # version whose real package was never supplied.
+            result = downloader.ingest_file(found, ver, from_file, target, pin_manual=False)
+        except OSError as exc:
+            raise click.ClickException(str(exc)) from exc
+        console.print(f"Filed {from_file} -> {result.path}")
+    elif target.exists() and not force:
+        console.print(f"[dim]Already present: {target}[/dim]")
+    else:
+        if not ver.zip_url:
+            # Archived `zipPath` values are the ones most likely to be missing or
+            # stale, which is exactly why the same command takes --from-file.
+            raise click.ClickException(
+                f"{found.slug}@{ver.version} has no zip_url. Archived endpoints go stale -- "
+                f"obtain the ZIP and re-run with --from-file <zip>."
+            )
+        target.parent.mkdir(parents=True, exist_ok=True)
+        console.print(f"Fetching {ver.zip_url}")
+        try:
+            result = downloader.fetch_to(ver.zip_url, target)
+        except OSError as exc:
+            raise click.ClickException(str(exc)) from exc
+        console.print(f"Wrote {target} [dim]({result.size / 1_048_576:.1f} MiB, sha256 {result.checksum})[/dim]")
+
+    if do_extract:
+        destination = target.parent / f"{found.slug}-{ver.version}"
+        try:
+            written = safe_extract(target, destination)
+        except (UnsafeArchiveError, OSError) as exc:
+            raise click.ClickException(str(exc)) from exc
+        console.print(f"Extracted {written} file(s) -> {destination}")
+
+
+def _archive_target(manager: CatalogManager, product: str, version: str):
+    """Resolves a `(product, version)` that must already be in the catalog."""
+    slug = _resolve(manager, product)
+    found = manager.get_product(slug)
+    if found is None:
+        raise click.ClickException(f"No product '{product}' in the catalog.")
+    ver = found.versions.get(version)
+    if ver is None:
+        raise click.ClickException(
+            f"No version '{version}' for product '{slug}'. Run `docushift catalog show "
+            f"--product {slug}` to see what is catalogued."
+        )
+    return found, ver
 
 
 @main.command()

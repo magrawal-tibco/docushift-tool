@@ -109,13 +109,15 @@ Every endpoint, URL template and politeness setting is read from `config/docsite
 
 One request proceeds as follows:
 
-1. **Throttle.** If a rate limit is configured, sleep until at least `1 / rate` seconds have passed since the previous request *returned*. This is a hard floor between requests, not a token bucket — a burst of 250 product lookups is precisely the traffic shape this crawler generates, and a bucket would pass the whole burst through untouched.
+1. **Throttle.** If a rate limit is configured, sleep until at least `1 / rate` seconds have passed since the previous request *started*. This is a hard floor between requests, not a token bucket — a burst of 250 product lookups is precisely the traffic shape this crawler generates, and a bucket would pass the whole burst through untouched.
 2. **GET** with the configured timeout. Transport-level failures raise a `DocsiteError` naming the URL.
 3. **Retry** is handled beneath this, by the HTTP adapter: up to *N* attempts with exponential backoff, but only on 429, 500, 502, 503 and 504, and only for GET. A 404 is **not** retried — an absent archive index is a normal answer for a product that has no history, not a transient fault.
 4. **Reject non-200** with the status code in the message.
 5. **Decode JSON.** If decoding fails, inspect the first 2 KB of the body: if it looks like HTML and contains a sign-in marker, report *"this product is not public"* rather than *"invalid JSON"*. The docsite serves its SSO interstitial with HTTP 200, and the distinction is the difference between a crawler bug and an access boundary.
 
-The timestamp in step 1 is updated in a `finally` block, so a failed request still counts against the rate limit. Otherwise a run of failures would spin at full speed against a site that is already struggling.
+**The floor is on request *starts*, and it is shared** (`utils/http.py:Throttle`, extracted from the crawler in Phase 4a so the crawler and the downloader cannot disagree about what politeness means). Two consequences. A failed request still counts against the limit, so a run of failures cannot spin at full speed against a site that is already struggling. And a long transfer does not extend the gap after it — which is what lets Stage 3's worker pool share one floor (§5.1) without the pool collapsing back into a single serialized stream, since a 900 MB download would otherwise hold the gate for its whole duration.
+
+The session itself — retry adapter, `User-Agent`, `Accept` — is built by `utils/http.py:build_session` for the same reason. Stage 3 passes a different `Accept` (a ZIP is not JSON) and nothing else differs.
 
 ### 2.2 Reading a payload that keeps changing shape — **Built**
 
@@ -367,7 +369,7 @@ Batch labels are trimmed and lowercased on write, so `POC-1`, `poc-1 ` and `poc-
 
 ## 5. Stage 3: Acquisition
 
-**Specified.** The selection model and path contract are Built (§1.5, §4); the I/O is not.
+**Built** (Phase 4a, 2026-09-10), for acquisition. §5.1 and §5.2 are implemented in `downloader/fetcher.py`; §6's extraction and inventory are Phase 4b and remain Specified.
 
 ### 5.1 Download one version
 
@@ -380,7 +382,9 @@ Batch labels are trimmed and lowercased on write, so `POC-1`, `poc-1 ` and `poc-
 7. Move into place atomically, and record path, size, etag, checksum and status `DOWNLOADED` in `state.db`.
 8. On failure, record status `ERROR` with the message and leave the partial file for the next resume.
 
-**Open:** concurrency model (thread pool over versions versus async) and its default width. Whatever it is, the rate-limit floor of §2.1 applies to docsite requests as a whole, not per worker.
+**Concurrency: a thread pool over versions, default width `docsite.yaml`'s `crawl.max_concurrent_requests` (4)** — resolved 2026-09-10 (user decision), previously open. Streaming a ZIP to disk is I/O-bound, so threads cost nothing here and the resume logic above stays ordinary synchronous code; async would have bought nothing and made steps 4–7 harder to read. The default is the value the config already carries, so politeness stays a config edit rather than a source change, and `--workers` overrides it for one run. The rate-limit floor of §2.1 is **shared across workers**, not applied per worker, and it paces request *starts* only — throttling transfers would serialize the pool back into one stream.
+
+Two consequences of the pool that are not obvious from the steps: `state.db`'s connection is shared across worker threads (`check_same_thread=False`, with a lock around the write path), and every failure in step 8 is a **returned outcome rather than a raised exception**, because one unreachable product must not stop a 200-version batch. A run reports five counts: downloaded, already-current, skipped-manual, no-`zip_url`, failed — with the last two named individually, since "3 failed" out of 200 is not actionable.
 
 ### 5.2 Ingesting a hand-supplied package
 
@@ -390,15 +394,17 @@ Batch labels are trimmed and lowercased on write, so `POC-1`, `poc-1 ` and `poc-
 2. If the product exists but the version does not, **add the version row with a warning**. The user has a real package in hand, which is stronger evidence the version exists than discovery's silence is that it does not.
 3. Reject anything that is not a readable ZIP, before copying. The common real failure is not a corrupt archive but an HTML login page saved under a `.zip` name; caught here it is one line, caught at extraction it is a baffling failure days later.
 4. **Copy — never move.** The user's own copy is not the tool's to consume.
-5. Set `zip_source=manual`, and record the computed sha256, the size, status `DOWNLOADED`, and the originating path for audit. There is no upstream checksum to compare against, so the computed one is authoritative for later "is this still the same file" checks.
+5. Set `zip_source=manual`, and record the computed sha256, the size, status `DOWNLOADED`, and the originating path for audit — in `state.db`'s `version_metadata` under `zip_origin_path`, which is free-form and so costs no `SCHEMA_VERSION` bump for a field only a few rows carry. There is no upstream checksum to compare against, so the computed one is authoritative for later "is this still the same file" checks.
 
-The archive variant is identical but targets the archive path, and its `--extract` unpacks within `archive/` — never into the pipeline's `extracted/` tree.
+The archive variant is identical but targets the archive path, and its `--extract` unpacks within `archive/` — never into the pipeline's `extracted/` tree. **It does not set `zip_source=manual`,** which is the one place the two diverge: `zip_source` states where the *pipeline's* package for a version comes from, and a reference ZIP pulled outside the working set is not that. Pinning it there would make `download` skip a version whose real package was never supplied.
+
+Extraction under `--extract` goes through the same path-traversal refusal as §6.1 step 2: every member is checked *before* any is written, so a malicious archive cannot leave half a tree on disk before being refused.
 
 ---
 
 ## 6. Stage 4: Extraction and inventory
 
-**Specified**, except the catalog half of §6.3 (the columns, the round-trip and the write-back), which is **Built**.
+**Specified** (Phase 4b), except two pieces that are **Built**: the catalog half of §6.3 (the columns, the round-trip and the write-back), and §6.1 step 2's path-traversal refusal — which landed early in Phase 4a because `archive download --extract` needs it and there must not be two answers to "is this member safe".
 
 ### 6.1 Extract
 
@@ -880,7 +886,7 @@ Most rows are **Built** or **Specified**. Two are neither, and are marked as suc
 | 1.3 | Natural version ordering | Built | `utils/csvio.py:natural_version_key` |
 | 1.4 | Slug and folder naming | Built | `utils/slug.py` |
 | 1.5 | Path derivation | Built | `config.py` |
-| 2.1 | Request policy and throttling | Built | `discovery/client.py` |
+| 2.1 | Request policy and throttling | Built | `utils/http.py:build_session`, `Throttle`; `discovery/client.py` |
 | 2.2 | Tolerant payload reading | Built | `discovery/crawler.py` |
 | 2.3 | The crawl | Built | `discovery/crawler.py:discover` |
 | 2.4 | Product-list normalization | Built | `discovery/crawler.py:_list_products` |
@@ -899,13 +905,14 @@ Most rows are **Built** or **Specified**. Two are neither, and are marked as suc
 | 3.6 | Canonical write | Built | `catalog.py:save` |
 | 3.5 | Snapshot recording, one transaction per fetch | Built | `state.py:transaction`, `catalog.py:_record_snapshots` |
 | 4 | Selection | Built | `catalog.py:iter_versions` |
-| 5.1 | Download one version | Specified | Phase 4 |
-| 5.2 | Hand-supplied ingestion | Specified | Phase 4 |
-| 6.1 | Extraction | Specified | Phase 4 |
-| 6.2 | CSH source inventory | Specified | Phase 4 |
+| 5.1 | Download one version | Built | `downloader/fetcher.py:download_one`, `fetch_to`, `download_many` |
+| 5.2 | Hand-supplied ingestion | Built | `downloader/fetcher.py:ingest_file`, `catalog.py:add_version` |
+| 6.1 | Extraction | Specified | Phase 4b |
+| 6.1 step 2 | Path-traversal refusal | Built | `extractor/safe_unzip.py:safe_extract` |
+| 6.2 | CSH source inventory | Specified | Phase 4b |
 | 6.3 | Inventory columns and write-back | Built | `catalog.py:record_extract_inventory`, `utils/csvio.py` |
-| 6.3 | API-reference predicate and triage | Specified | Phase 4 |
-| 6.4 | Asset inventory by category and destination | Specified | Phase 4 |
+| 6.3 | API-reference predicate and triage | Specified | Phase 4b |
+| 6.4 | Asset inventory by category and destination | Specified | Phase 4b |
 | 6.4 | Asset copy set — resolve once, copy and link together | Specified | Phase 5, `transforms/assets.py` |
 | 7 | Engine detection | Specified | Phase 5 |
 | `architecture.md` §5.1 | Flare converter | Specified | Phase 5, `engines/flare.py` |

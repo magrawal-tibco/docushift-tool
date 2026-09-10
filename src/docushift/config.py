@@ -257,6 +257,16 @@ class ConfigManager:
         """
         return self.downloads_dir(bu, family) / f"{slug}-{version}.zip"
 
+    def archive_path(self, bu: str, family: str, slug: str, version: str) -> Path:
+        """The ZIP path for one archived version: `.../archive/<slug>-<version>.zip`.
+
+        The same filename as `download_path` under a different parent, which is the
+        whole design: an archived package pulled for reference is named and found
+        exactly like a pipeline one, but sits outside the working set so `extract`
+        never mistakes it for a package awaiting conversion (§4.3).
+        """
+        return self.archive_dir(bu, family) / f"{slug}-{version}.zip"
+
     def extract_path(self, bu: str, family: str, slug: str, version: str) -> Path:
         """The extracted tree for one version: `.../extracted/<slug>/<version>/`.
 

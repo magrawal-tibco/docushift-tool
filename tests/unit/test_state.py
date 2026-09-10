@@ -6,6 +6,7 @@ checksums, lifecycle status). Keeping the second out of the CSVs is what stops
 `versions.csv` churning on every run. See docs/architecture.md §3.5.
 """
 
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import pytest
@@ -263,3 +264,18 @@ def test_transactions_nest_without_committing_early(project_root: Path) -> None:
 
     assert store.get_product_snapshot("tibco-ems") is None
     store.close()
+
+
+def test_state_survives_writes_from_a_thread_pool(state: StateStore) -> None:
+    """Stage 3 downloads on a pool and each worker records its own version.
+
+    A connection pinned to its creating thread raised `SQLite objects created in a
+    thread can only be used in that same thread` on the second version of every
+    parallel run, so this is the regression test for the shared connection.
+    """
+    versions = [f"1.{n}.0" for n in range(16)]
+
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        list(pool.map(lambda v: state.set_version_state("tibco-ems", v, checksum=v), versions))
+
+    assert [state.get_version_state("tibco-ems", v)["checksum"] for v in versions] == versions

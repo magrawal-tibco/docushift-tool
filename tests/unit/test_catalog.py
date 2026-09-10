@@ -1577,3 +1577,60 @@ def test_a_hand_edited_boolean_that_contradicts_its_count_warns(catalog: Catalog
     # Advisory only -- the next extract overwrites both, so it must never become a
     # blocking problem. (Other, unrelated problems may legitimately be present.)
     assert not any("_has_api_ref" in problem for problem in _reload(catalog).validate())
+
+
+# -- hand-supplied packages (architecture.md §3.8) ---------------------------
+
+
+def test_add_version_seeds_a_row_outside_a_merge(catalog: CatalogManager, sample_product: Product) -> None:
+    """`--from-file` on a version discovery never listed: the user is holding the ZIP,
+    which is stronger evidence the version exists than discovery's silence is that it
+    does not."""
+    _fetch(catalog, sample_product)
+
+    added = catalog.add_version("tibco-ems", "9.1.0", zip_source=ZipSource.MANUAL)
+
+    assert added.version == "9.1.0"
+    assert _reload(catalog).get_version("tibco-ems", "9.1.0").zip_source is ZipSource.MANUAL
+
+
+def test_add_version_is_idempotent(catalog: CatalogManager, sample_product: Product) -> None:
+    _fetch(catalog, sample_product)
+
+    assert catalog.add_version("tibco-ems", "10.4.0").zip_url == sample_product.versions["10.4.0"].zip_url
+
+
+def test_add_version_refuses_an_unknown_product(catalog: CatalogManager, sample_product: Product) -> None:
+    """A typo'd code would seed a junk row nothing downstream can tell from a real one."""
+    _fetch(catalog, sample_product)
+
+    with pytest.raises(CatalogError, match="No product"):
+        catalog.add_version("tibco-emss", "10.4.0")
+
+
+def test_a_manual_row_with_no_package_on_disk_warns(project_root: Path, state: StateStore) -> None:
+    """The pin means `download` will skip it forever, so a missing file is silent."""
+    catalog = _scoped(project_root, state)
+    ems = make_product("tibco-ems", product_code="ems", family="messaging")
+    ems.versions = {"10.4.0": make_version("tibco-ems", "10.4.0")}
+    _fetch(catalog, ems)
+    catalog.set_version_field("tibco-ems", "10.4.0", "zip_source", "manual")
+    # The check is guarded on the family workspace existing, so it has to.
+    catalog.config.downloads_dir("tibco", "messaging").mkdir(parents=True)
+
+    notes = catalog.warnings()
+
+    assert any("zip_source=manual" in note and "--from-file" in note for note in notes)
+
+
+def test_a_manual_row_is_not_called_broken_on_a_fresh_clone(project_root: Path, state: StateStore) -> None:
+    """`families/` is git-ignored, so an unguarded filesystem check would report every
+    manual row as missing on a checkout that has simply not downloaded anything yet --
+    the exact failure mode §3.8 rejected filesystem-based provenance to avoid."""
+    catalog = _scoped(project_root, state)
+    ems = make_product("tibco-ems", product_code="ems", family="messaging")
+    ems.versions = {"10.4.0": make_version("tibco-ems", "10.4.0")}
+    _fetch(catalog, ems)
+    catalog.set_version_field("tibco-ems", "10.4.0", "zip_source", "manual")
+
+    assert not any("--from-file" in note for note in catalog.warnings())

@@ -61,6 +61,17 @@ def test_download_and_extract_paths_are_keyed_by_the_catalog(config: ConfigManag
     assert config.extract_path("tibco", "messaging", slug, "10.4.0") == family / "extracted" / slug / "10.4.0"
 
 
+def test_an_archived_package_is_named_like_a_pipeline_one(config: ConfigManager) -> None:
+    """Same name, different directory: `archive/` keeps it out of `extract`'s way."""
+    family = config.family_dir("tibco", "messaging")
+    slug = "tibco-enterprise-message-service"
+
+    assert config.archive_path("tibco", "messaging", slug, "8.6.0") == family / "archive" / f"{slug}-8.6.0.zip"
+    assert config.archive_path("tibco", "messaging", slug, "8.6.0").name == (
+        config.download_path("tibco", "messaging", slug, "8.6.0").name
+    )
+
+
 def test_two_products_sharing_a_code_do_not_share_a_path(config: ConfigManager) -> None:
     """The reason the paths take the slug: `product_code` is not unique.
 

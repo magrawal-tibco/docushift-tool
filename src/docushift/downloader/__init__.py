@@ -1,4 +1,14 @@
 """Stage 3: Resumable package downloader & cache manager.
 
-Implemented in Phase 4. See docs/planning.md.
+Built in Phase 4a. See docs/design.md §5.
 """
+
+from docushift.downloader.fetcher import (
+    DownloadResult,
+    DownloadStats,
+    Outcome,
+    PackageDownloader,
+    sha256_of,
+)
+
+__all__ = ["DownloadResult", "DownloadStats", "Outcome", "PackageDownloader", "sha256_of"]

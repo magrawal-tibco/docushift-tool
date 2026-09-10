@@ -9,17 +9,11 @@ build a ZIP URL. Interpreting the payloads is `crawler.py`'s job, which is what
 lets the crawler be tested against canned records with no network at all.
 """
 
-import time
 from typing import Any
 
 import requests
-from requests.adapters import HTTPAdapter
-from urllib3.util.retry import Retry
 
-# Transient by nature: 429 is the docsite rate-limiting us, the 5xx family is it
-# failing. A 404 is not retried -- an absent archive index is a normal answer.
-_RETRY_STATUSES = (429, 500, 502, 503, 504)
-
+from docushift.utils.http import Throttle, build_session
 
 # Markers from the SSO interstitial docs.tibco.com serves (as HTTP 200) for
 # products that are not publicly visible.
@@ -39,8 +33,7 @@ class DocsiteClient:
     """Fetches JSON from the docsite, politely.
 
     Rate limiting is a hard floor on the interval between requests rather than a
-    token bucket: a burst of 250 product lookups is exactly the shape of traffic
-    this crawler generates, and a bucket would let the whole burst through.
+    token bucket -- see `utils.http.Throttle`, which the package downloader shares.
     """
 
     def __init__(self, docsite: dict[str, Any], session: requests.Session | None = None):
@@ -50,31 +43,8 @@ class DocsiteClient:
 
         crawl = dict(docsite.get("crawl") or {})
         self.timeout = float(crawl.get("timeout_seconds", 30))
-        rate = float(crawl.get("rate_limit_per_second", 0) or 0)
-        self._min_interval = 1.0 / rate if rate > 0 else 0.0
-        self._last_request_at = 0.0
-        self.session = session if session is not None else self._build_session(crawl)
-
-    @staticmethod
-    def _build_session(crawl: dict[str, Any]) -> requests.Session:
-        session = requests.Session()
-        retry = Retry(
-            total=int(crawl.get("max_retries", 3)),
-            backoff_factor=float(crawl.get("backoff_factor", 1.5)),
-            status_forcelist=_RETRY_STATUSES,
-            allowed_methods=frozenset({"GET"}),
-            raise_on_status=False,
-        )
-        adapter = HTTPAdapter(max_retries=retry)
-        session.mount("https://", adapter)
-        session.mount("http://", adapter)
-        session.headers.update(
-            {
-                "User-Agent": str(crawl.get("user_agent") or "DocuShift/0.1"),
-                "Accept": str(crawl.get("accept") or "application/json"),
-            }
-        )
-        return session
+        self._throttle_gate = Throttle.from_crawl(crawl)
+        self.session = session if session is not None else build_session(crawl)
 
     # -- urls ----------------------------------------------------------------
 
@@ -104,23 +74,14 @@ class DocsiteClient:
 
     # -- requests -------------------------------------------------------------
 
-    def _throttle(self) -> None:
-        if self._min_interval <= 0:
-            return
-        elapsed = time.monotonic() - self._last_request_at
-        if elapsed < self._min_interval:
-            time.sleep(self._min_interval - elapsed)
-
     def get_json(self, path: str) -> Any:
         """GETs a docsite path and decodes JSON, or raises `DocsiteError`."""
         url = self.url(path)
-        self._throttle()
+        self._throttle_gate.wait()
         try:
             response = self.session.get(url, timeout=self.timeout)
         except requests.RequestException as exc:
             raise DocsiteError(f"GET {url} failed: {exc}") from exc
-        finally:
-            self._last_request_at = time.monotonic()
 
         if response.status_code != 200:
             raise DocsiteError(f"GET {url} returned HTTP {response.status_code}")

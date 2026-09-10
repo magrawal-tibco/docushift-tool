@@ -12,7 +12,7 @@ flag required, because expecting a user to tick one on each edited row of a
 
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from docushift.models import (
     CONVERTIBLE_ENGINES,
@@ -760,6 +760,31 @@ class CatalogManager:
         self.save()
         return True
 
+    def add_version(self, slug: str, version: str, **fields: Any) -> ProductVersion:
+        """Creates a version row outside a merge. Raises for an unknown product.
+
+        The only caller is `download --from-file` (docs/architecture.md §3.8). The
+        asymmetry is deliberate and is the whole reason this is not a general
+        editing method: an unknown **product** is an error, because a typo'd code
+        would seed a junk row nothing downstream can distinguish from a real one,
+        while an unknown **version** on a known product is accepted -- the user is
+        holding the package, which is stronger evidence that the version exists
+        than discovery's silence is that it does not.
+
+        Returns the existing row unchanged if there already is one, so ingesting a
+        second time is not an error and cannot clear a hand-set field.
+        """
+        product = self.get_product(slug)
+        if product is None:
+            raise CatalogError(f"No product '{slug}' in the catalog.")
+        existing = product.versions.get(version)
+        if existing is not None:
+            return existing
+        row = ProductVersion(slug=slug, version=version, **fields)
+        product.versions[version] = row
+        self.save()
+        return row
+
     def record_detected_engine(self, slug: str, version: str, engine: SourceEngine) -> bool:
         """Writes back an engine resolved during extraction. Never overrides a manual value."""
         target = self.get_version(slug, version)
@@ -992,6 +1017,26 @@ class CatalogManager:
                         f"--product {product.slug} --version {ver.version} --zip-source auto` to "
                         f"download it instead."
                     )
+                # The other half of the manual pin: the row promises a package at a
+                # path the pipeline will read, and nothing has put one there.
+                #
+                # Guarded on the family directory existing, which is the point.
+                # `families/` is git-ignored, so an unconditional filesystem check
+                # would call every manual row broken on any machine that has not
+                # downloaded yet -- exactly the failure §3.8 rejected
+                # filesystem-based provenance to avoid. A family folder that exists
+                # means this machine has a workspace, so an absent file is news.
+                if ver.zip_source is ZipSource.MANUAL and self.config is not None:
+                    family_dir = self.config.family_dir(product.bu, product.family)
+                    expected = self.config.download_path(
+                        product.bu, product.family, product.slug, ver.version
+                    )
+                    if family_dir.is_dir() and not expected.exists():
+                        notes.append(
+                            f"{product.slug}@{ver.version}: zip_source=manual, but no package at "
+                            f"{expected}. Run `docushift download --product {product.slug} "
+                            f"--version {ver.version} --from-file <zip>` to file one."
+                        )
                 # Identified, eligible, and unconvertible. Worth saying out loud
                 # because the sheet looks ready: the row has a real engine name
                 # rather than `auto`, so nothing about it reads as unresolved --
