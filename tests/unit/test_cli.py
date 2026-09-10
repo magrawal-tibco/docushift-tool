@@ -775,10 +775,13 @@ def test_catalog_batches_when_nothing_is_scheduled(runner: CliRunner, populated_
 
 
 def test_catalog_show_reports_the_family_workspace(runner: CliRunner, populated_root: Path) -> None:
+    """No taxonomy.yaml here, so the BU token falls back to the slugified key."""
     result = _invoke(runner, populated_root, "catalog", "show", "--product", "ems")
 
     assert result.exit_code == 0
     assert "en-us-tibco-messaging" in result.output
+    # The workspace is not a repository name and carries no publishing suffix.
+    assert "userdocs" not in result.output
 
 
 # -- archived versions -------------------------------------------------------

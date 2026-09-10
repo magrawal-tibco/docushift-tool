@@ -859,6 +859,13 @@ class CatalogManager:
         problems: list[str] = []
         catalog = self.load()
 
+        # Not spreadsheet damage, but the same consequence and the same gate: a
+        # duplicate repo_slug or an unparseable suffix publishes two families into
+        # one repository, and the destination name is computed from config the
+        # moment Stage 4 writes its first workspace folder.
+        if self.config is not None:
+            problems.extend(self.config.publishing_problems())
+
         # The key. Two rows sharing a slug means one of them has already been lost
         # from the in-memory catalog, and letting a `save()` follow would write the
         # loss back to disk -- so this aborts the import while both rows still exist
@@ -927,7 +934,7 @@ class CatalogManager:
             # before it silently becomes a third family folder holding one product.
             if self.config is not None and not self.config.is_known_family(product.bu, product.family):
                 try:
-                    folder = self.config.family_folder_name(product.bu, product.family)
+                    folder = self.config.family_workspace_name(product.bu, product.family)
                 except ValueError as exc:
                     notes.append(f"{product.slug}: {exc}")
                     continue

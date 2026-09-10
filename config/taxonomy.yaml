@@ -7,12 +7,22 @@
 # It also carries no engine information: the source toolchain differs between
 # versions of the same product, so it is detected per version from the extracted
 # package. See docs/architecture.md sections 3.3 and 3.4.
+#
+# `repo_slug` is optional on a business unit and on a family: the short token that
+# names the workspace folder and the publishing repositories, defaulting to the
+# slugified key when absent. It is a *publishing* concern and deliberately does not
+# reshape the catalog -- family keys, products.csv and the keyword rules below are
+# unaffected by it. Two families in one BU may not share one, since they would then
+# publish into a single repository. See docs/planning.md Phase 3.8.
 
 version: "1.0"
 
 business_units:
   tibco:
     name: "TIBCO"
+    # `en-us-tib-messaging-userdocs`, not `en-us-tibco-...` -- the doc platform's
+    # naming, on names that already carry a median-39-character product slug.
+    repo_slug: "tib"
     families:
       integration:
         name: "Integration"

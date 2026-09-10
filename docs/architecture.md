@@ -29,7 +29,7 @@ flowchart TD
 
     subgraph Download["Package Acquisition"]
         T2 --> DW1["Async / Resumable\nPackage Downloader\n(Filter: convert_eligible AND convert_batch)"]
-        DW1 --> DW2["Family Workspace\n(families/{locale}-{bu}-{family}/downloads/*.zip)"]
+        DW1 --> DW2["Family Workspace\n(families/{locale}-{bu-slug}-{family-slug}/downloads/*.zip)"]
         MZ["Manually Supplied ZIP\n(--from-file; zip_source=manual)\nno usable zip_url"] --> DW2
     end
 
@@ -544,7 +544,7 @@ Downloaded ZIPs and extracted trees are organized **by family**, not by product,
 
 ```
 families/
-└── en-us-tibco-messaging/          # {locale}-{bu}-{family}
+└── en-us-tib-messaging/            # {locale}-{bu}-{family}, over repo_slug tokens
     ├── downloads/
     │   ├── tibco-ems-10.4.0.zip    # {slug}-{version}.zip
     │   └── tibco-ems-10.3.0.zip
@@ -558,12 +558,13 @@ families/
 
 `ConfigManager` is the single owner of these paths (`family_dir`, `downloads_dir`, `extracted_dir`, `archive_dir`, `download_path`, `extract_path`). Stage 3, Stage 4, and Stage 5 each derive the location they need rather than passing paths between themselves; `state.db` records the resolved `download_path` / `extract_path` per version so a resumed run does not have to recompute the layout it ran under.
 
-Five naming decisions worth stating:
+Six naming decisions worth stating:
 
 - **The product segment is the slug, not `product_code`.** The code is not unique (§3.1), and nine of its ten collisions are between products in the *same* family — so a code-named ZIP would drop two different products' packages at one path inside one `downloads/`, and a code-named extract directory would interleave two trees. The slug is unique by construction, which is the property a filesystem path needs.
 
-- **`{locale}-{bu}-{family}`, flat and hyphenated.** Inherited from the predecessor `html-to-md` project, where the identical string names the *publishing repository* a family is destined for (`en-us-ibi-ibi`, `en-us-spot-data-science-statistica`). Keeping the working folder and the eventual repo identically named makes the Stage 7 hand-off a copy rather than a translation.
-- **The locale prefix is reserved, not yet variable.** `html-to-md` publishes `fr-fr` and `ja-jp` trees; nothing here is multi-locale, but `ConfigManager(locale=…)` means adding one is not a rename of every folder on disk.
+- **`{locale}-{bu}-{family}`, flat and hyphenated — but no longer a repository name.** The predecessor `html-to-md` made the workspace folder and the publishing repo one string, so that the Stage 7 hand-off was a copy rather than a translation. That stopped being possible when the doc platform named the real destinations (§6.1): one family now maps to two or three trees — `en-us-tib-messaging-userdocs`, `loc-tib-messaging-userdocs`, `en-us-tib-messaging-userdocs-resources` — and there is no single repo name left for the workspace to mirror. The workspace keeps the shorter, suffix-free stem and `sync --target-dir` composes the destination name, which is a name it already had to compute.
+- **The tokens are `repo_slug`, not the taxonomy keys.** `taxonomy.yaml` carries an optional `repo_slug` on each business unit and family, defaulting to the slugified key; `tibco` is `tib`. It is a publishing concern and deliberately changes nothing about classification — family keys, `products.csv` and the keyword rules are untouched. Two families in one BU may not share a `repo_slug`, since they would publish into one repository; `catalog import` refuses it (§3.6's `product_code` collision, in a new place).
+- **The locale prefix is reserved, not yet variable.** `html-to-md` publishes `fr-fr` and `ja-jp` trees; nothing here is multi-locale, but `ConfigManager(locale=…)` means adding one is not a rename of every folder on disk. The workspace keeps the *real* locale even though every non-English one publishes into the single `loc-` tree: localized packages are different ZIPs and must not land on top of the English ones. There is **no locale mapping table** anywhere in the tool — the locale string is used verbatim, since a table's only content would be the value the caller already has.
 - **`family` is slugified, `taxonomy.yaml` keys are not.** The YAML key `data_management` is an identifier; the folder is `data-management`. `utils/slug.py:slugify` is the only place that conversion happens, so the two cannot drift.
 - **Versions keep their dots in the working tree.** `html-to-md` writes `6-2-3` in *published* paths, and Stage 6 will too. Here the segment must round-trip back to a `versions.csv` key, and `6-2-3` is ambiguous (`6.2.3`? `6-2.3`?) where `6.2.3` is not.
 
@@ -577,7 +578,7 @@ A user may type a **new family name straight into `products.csv`** without decla
 
 ```
 WARN newthing: family 'streaming_analytics' is not declared in taxonomy.yaml for bu 'tibco'.
-     Accepted; workspace folder -> families/en-us-tibco-streaming-analytics.
+     Accepted; workspace folder -> families/en-us-tib-streaming-analytics.
      Add it to taxonomy.yaml to silence this.
 ```
 
@@ -1687,10 +1688,20 @@ What Stage 7 still owes the person who publishes: a layout that is correct on ar
 
 ### 6.1 Publishing Layout
 
-The sync target is the **publishing form**, `{target_dir}/{locale}-{bu}-{family}/{locale}/{slug}/{doc-class}/{version-dashed}/`, not the nested `{bu}/{family}/{product}/{version}/` form. The top-level directory name is the family workspace name (§4.1) unchanged — which is also the repository name — so the Stage 7 hand-off is a copy rather than a translation.
+The sync target is the **publishing form**, `{target_dir}/{docs-tree}/{locale}/{slug}/{doc-class}/{version-dashed}/`, not the nested `{bu}/{family}/{product}/{version}/` form. The inner path is the family workspace's contents unchanged; only the top-level directory is renamed, from the workspace stem to the repository name.
+
+**The tree names** (supplied by the doc platform, 2026-09-10; tokens in `config/publishing.yaml`, shape in `utils/slug.py`):
+
+| Tree | Name | When |
+| :--- | :--- | :--- |
+| Docs | `{locale}-{bu}-{family}-{docs_suffix}` — `en-us-tib-messaging-userdocs` | `locale == primary_locale` |
+| Docs, localized | `{localized_prefix}-{bu}-{family}-{docs_suffix}` — `loc-tib-messaging-userdocs` | every other locale, **all sharing one tree** |
+| Resources | `{locale}-{bu}-{family}-{docs_suffix}-{resources_suffix}` — `en-us-tib-messaging-userdocs-resources` | primary locale **only** |
+
+Three things follow. **`userdocs` names the audience, not the format** — Javadoc and the C / Go / `tibdg` trees are documentation too, which is exactly why they route to `-resources`; a suffix meaning "documentation" could not separate them, so `*-userdocs` enumerates the published docs trees and nothing else. **It is a config token rather than a literal**, and the resources name is derived from it rather than written twice, so the two cannot drift; it must be a single lowercase word, since a hyphen would make the family/suffix boundary unparseable. **Localized content has no `-resources` sibling at all** — API references and archives are English-only — and asking for one raises rather than returning a repository name that will never exist.
 
 ```
-en-us-tibco-messaging/                  # docs repo — what a reader reads
+en-us-tib-messaging-userdocs/           # docs repo — what a reader reads
 └── en-us/
     └── tibco-ems/
         ├── online-help/10-4-0/…        # converted Markdown + toc.yml, nav.yml, meta.yml, index.md, csh.yml
@@ -1698,7 +1709,7 @@ en-us-tibco-messaging/                  # docs repo — what a reader reads
         ├── release-information/10-4-0/ # release notes + readme + index.md, toc.yml
         └── reference-documents/10-4-0/ # VPAT, licence, remaining doc/ files + index.md, toc.yml
 
-en-us-tibco-messaging-resources/        # bulk repo — generated trees and cold storage
+en-us-tib-messaging-userdocs-resources/ # bulk repo — generated trees and cold storage
 └── en-us/
     └── tibco-ems/
         ├── api-references/java/10-4-0/ # Javadoc; siblings c/, golang/, tibdg/ — no generated index
@@ -1813,10 +1824,10 @@ A help-topic link into `api-references/` is rewritten to an **absolute URL** on 
 
 ```
 [Java API](api/java/index.html)
-  → [Java API]({publish_base_url}/en-us-tibco-messaging-resources/en-us/ems/api-references/java/10-4-0/index.html)
+  → [Java API]({publish_base_url}/en-us-tib-messaging-userdocs-resources/en-us/ems/api-references/java/10-4-0/index.html)
 ```
 
-**The base URL is configuration, not a constant.** A new `config/publishing.yaml` holds `publish_base_url` alongside the doc-class-to-repo map, so the host is not compiled into the distributor and a staging target is a config edit rather than a code change. The path after the base is derived from the same `{locale}-{bu}-{family}-resources/{locale}/{product}/api-references/{subdir}/{version-dashed}/` template that placed the file, so the link and the copy cannot disagree — both read one function.
+**The base URL is configuration, not a constant.** `config/publishing.yaml` — which already exists, holding the naming tokens (§6.1) — gains `publish_base_url` and the doc-class-to-repo map, so the host is not compiled into the distributor and a staging target is a config edit rather than a code change. The path after the base is derived from the same `resources_tree_name(…)/{locale}/{product}/api-references/{subdir}/{version-dashed}/` template that placed the file, so the link and the copy cannot disagree — both read one function, and both compose the tree name from the same `docs_suffix`, so a link cannot name a repository that was never created.
 
 Three consequences:
 

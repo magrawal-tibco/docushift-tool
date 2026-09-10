@@ -1,0 +1,40 @@
+# DocuShift Publishing Configuration
+#
+# The naming tokens for the destination repositories, and nothing else. The
+# *shape* of a tree name lives in `src/docushift/utils/slug.py`; this file owns
+# only the words that go into it, so a rename is an edit here rather than a grep
+# across the codebase. Supplied by the doc-platform owners, 2026-09-10 --
+# see docs/planning.md Phase 3.8 and docs/architecture.md section 6.1.
+#
+#   families/en-us-tib-messaging/          <- local workspace (no suffix)
+#   en-us-tib-messaging-userdocs           <- docs tree, primary locale
+#   loc-tib-messaging-userdocs             <- docs tree, ALL other locales
+#   en-us-tib-messaging-userdocs-resources <- API references and archives
+#
+# A missing file is not an error: every key below is also the built-in default,
+# so a fresh checkout publishes to the documented names.
+
+version: "1.0"
+
+# `userdocs`, not `docs`: Javadoc and the C / Go / tibdg trees are documentation
+# too, which is exactly why they route to the -resources tree instead. A suffix
+# meaning "documentation" cannot separate them, so this one names the *audience*
+# and `*-userdocs` then enumerates the published docs trees and nothing else.
+#
+# Must be a single lowercase token -- every other segment is hyphen-separated, so
+# `user-docs` would make the family/suffix boundary unparseable. `catalog import`
+# refuses a suffix with a hyphen in it.
+docs_suffix: "userdocs"
+
+# Appended to the docs tree name, never composed independently, so the two names
+# cannot drift apart when `docs_suffix` changes.
+resources_suffix: "resources"
+
+# Replaces the locale segment for every non-primary locale: one tree carries all
+# localized content, rather than one tree per language.
+localized_prefix: "loc"
+
+# Language-region, matching the inner path segment. The only locale in scope.
+# A locale other than this one selects the `loc-` docs tree and gets no
+# `-resources` sibling at all.
+primary_locale: "en-us"

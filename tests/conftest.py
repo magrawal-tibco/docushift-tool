@@ -39,6 +39,7 @@ TAXONOMY_YAML = """\
 business_units:
   tibco:
     name: TIBCO
+    repo_slug: tib
     families:
       messaging: {name: Messaging}
       data_management: {name: Data Management}

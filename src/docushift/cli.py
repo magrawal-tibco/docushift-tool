@@ -676,7 +676,7 @@ def catalog_triage(ctx: click.Context) -> None:
 @_scope_options
 @click.option("--force", is_flag=True, help="Re-download even if the cached ZIP is current.")
 def download(**kwargs) -> None:
-    """Download convert_eligible packages into families/<locale>-<bu>-<family>/downloads/.
+    """Download convert_eligible packages into families/<locale>-<bu-slug>-<family-slug>/downloads/.
 
     Archived versions are never downloaded here -- pull one on demand with
     `docushift archive download` instead.
@@ -820,6 +820,7 @@ def doctor(ctx: click.Context) -> None:
         ("config", cfg.config_dir),
         ("taxonomy.yaml", cfg.taxonomy_path),
         ("docsite.yaml", cfg.docsite_path),
+        ("publishing.yaml", cfg.publishing_path),
         ("aem_templates", cfg.aem_templates_dir),
         ("cache", cfg.cache_dir),
         ("families", cfg.families_dir),
@@ -832,10 +833,17 @@ def doctor(ctx: click.Context) -> None:
     console.print(table)
 
     workspaces = sorted(p.name for p in cfg.families_dir.glob("*") if p.is_dir())
+    publishing = cfg.load_publishing()
+    # The suffix and the resources line are shown because they are what a workspace
+    # name no longer tells you: `families/en-us-tib-messaging/` is not the name of
+    # anything that gets published, and a locale change silently drops a whole tree.
+    primary = cfg.publishes_resources()
+    stem = f"{cfg.locale}-<bu>-<family>" if primary else f"{publishing['localized_prefix']}-<bu>-<family>"
     console.print(
-        f"\nlocale: [bold]{cfg.locale}[/bold]  |  family workspaces: "
-        + (", ".join(workspaces) if workspaces else "[dim]none yet[/dim]")
+        f"\nlocale: [bold]{cfg.locale}[/bold]  |  publishes to: [bold]{stem}-{publishing['docs_suffix']}[/bold]"
+        + ("" if primary else " [dim](localized -- no -resources tree)[/dim]")
     )
+    console.print("family workspaces: " + (", ".join(workspaces) if workspaces else "[dim]none yet[/dim]"))
 
 
 if __name__ == "__main__":

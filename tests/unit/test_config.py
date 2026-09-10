@@ -44,7 +44,7 @@ def test_creates_working_directories(project_root: Path) -> None:
 def test_family_workspace_paths(config: ConfigManager, project_root: Path) -> None:
     families = project_root / "families" / "en-us-tibco-data-management"
 
-    assert config.family_folder_name("tibco", "data_management") == "en-us-tibco-data-management"
+    assert config.family_workspace_name("tibco", "data_management") == "en-us-tibco-data-management"
     assert config.family_dir("tibco", "data_management") == families
     assert config.downloads_dir("tibco", "data_management") == families / "downloads"
     assert config.extracted_dir("tibco", "data_management") == families / "extracted"
@@ -82,7 +82,146 @@ def test_two_products_sharing_a_code_do_not_share_a_path(config: ConfigManager) 
 def test_locale_prefix_is_configurable(project_root: Path) -> None:
     cfg = ConfigManager(root_dir=project_root, locale="fr-fr")
 
-    assert cfg.family_folder_name("tibco", "messaging") == "fr-fr-tibco-messaging"
+    assert cfg.family_workspace_name("tibco", "messaging") == "fr-fr-tibco-messaging"
+
+
+def _write_publishing(project_root: Path, body: str) -> None:
+    (project_root / "config" / "publishing.yaml").write_text(body, encoding="utf-8")
+
+
+PUBLISHING_TAXONOMY = (
+    "business_units:\n"
+    "  tibco:\n"
+    "    name: TIBCO\n"
+    "    repo_slug: tib\n"
+    "    families:\n"
+    "      messaging: {name: Messaging}\n"
+    "      data_management: {name: Data Management, repo_slug: mdm}\n"
+    "  ibi:\n"
+    "    name: ibi\n"
+    "    families:\n"
+    "      webfocus: {name: WebFOCUS}\n"
+    "rules: []\n"
+)
+
+
+@pytest.fixture
+def publishing_config(project_root: Path) -> ConfigManager:
+    """A ConfigManager over a taxonomy that exercises `repo_slug` on both levels."""
+    (project_root / "config" / "taxonomy.yaml").write_text(PUBLISHING_TAXONOMY, encoding="utf-8")
+    return ConfigManager(root_dir=project_root)
+
+
+def test_repo_slug_overrides_the_key_and_otherwise_slugifies_it(publishing_config: ConfigManager) -> None:
+    assert publishing_config.repo_slug("tibco") == "tib"
+    assert publishing_config.repo_slug("ibi") == "ibi"
+    assert publishing_config.repo_slug("tibco", "data_management") == "mdm"
+    assert publishing_config.repo_slug("tibco", "messaging") == "messaging"
+
+
+def test_repo_slug_names_a_folder_for_an_undeclared_family(publishing_config: ConfigManager) -> None:
+    """An auto-registered family (§4.2) still has to name a workspace folder."""
+    assert publishing_config.family_workspace_name("tibco", "mesaging") == "en-us-tib-mesaging"
+
+
+def test_workspace_and_tree_names_use_the_repo_slug(publishing_config: ConfigManager) -> None:
+    assert publishing_config.family_workspace_name("tibco", "messaging") == "en-us-tib-messaging"
+    assert publishing_config.docs_tree_name("tibco", "messaging") == "en-us-tib-messaging-userdocs"
+    assert publishing_config.resources_tree_name("tibco", "messaging") == "en-us-tib-messaging-userdocs-resources"
+
+
+def test_a_localized_run_publishes_to_loc_and_has_no_resources_tree(project_root: Path) -> None:
+    (project_root / "config" / "taxonomy.yaml").write_text(PUBLISHING_TAXONOMY, encoding="utf-8")
+    cfg = ConfigManager(root_dir=project_root, locale="ja-jp")
+
+    assert cfg.family_workspace_name("tibco", "messaging") == "ja-jp-tib-messaging"
+    assert cfg.docs_tree_name("tibco", "messaging") == "loc-tib-messaging-userdocs"
+    assert not cfg.publishes_resources()
+    with pytest.raises(ValueError, match="ja-jp"):
+        cfg.resources_tree_name("tibco", "messaging")
+
+
+def test_publishing_defaults_apply_with_no_file(config: ConfigManager) -> None:
+    """Nothing publishes until Stage 7; a fresh checkout must still name a folder."""
+    assert config.load_publishing() == {
+        "docs_suffix": "userdocs",
+        "resources_suffix": "resources",
+        "localized_prefix": "loc",
+        "primary_locale": "en-us",
+    }
+
+
+def test_a_partial_publishing_file_falls_back_key_by_key(project_root: Path) -> None:
+    _write_publishing(project_root, "docs_suffix: docs\n")
+    cfg = ConfigManager(root_dir=project_root)
+
+    assert cfg.load_publishing()["docs_suffix"] == "docs"
+    assert cfg.load_publishing()["resources_suffix"] == "resources"
+
+
+def test_changing_the_suffix_moves_every_tree_name_together(project_root: Path) -> None:
+    """The point of holding the suffix in config rather than in a literal."""
+    (project_root / "config" / "taxonomy.yaml").write_text(PUBLISHING_TAXONOMY, encoding="utf-8")
+    _write_publishing(project_root, "docs_suffix: docs\n")
+
+    english = ConfigManager(root_dir=project_root)
+    localized = ConfigManager(root_dir=project_root, locale="ja-jp")
+
+    assert english.docs_tree_name("tibco", "messaging") == "en-us-tib-messaging-docs"
+    assert english.resources_tree_name("tibco", "messaging") == "en-us-tib-messaging-docs-resources"
+    assert localized.docs_tree_name("tibco", "messaging") == "loc-tib-messaging-docs"
+    # The workspace is not a repo name and must not follow the suffix.
+    assert english.family_workspace_name("tibco", "messaging") == "en-us-tib-messaging"
+
+
+def test_publishing_problems_flags_a_duplicate_repo_slug_within_a_bu(project_root: Path) -> None:
+    (project_root / "config" / "taxonomy.yaml").write_text(
+        "business_units:\n"
+        "  tibco:\n"
+        "    name: TIBCO\n"
+        "    families:\n"
+        "      messaging: {name: Messaging, repo_slug: msg}\n"
+        "      streaming: {name: Streaming, repo_slug: msg}\n"
+        "rules: []\n",
+        encoding="utf-8",
+    )
+    problems = ConfigManager(root_dir=project_root).publishing_problems()
+
+    assert len(problems) == 1
+    assert "'messaging' and 'streaming'" in problems[0]
+    assert "repo_slug 'msg'" in problems[0]
+
+
+def test_the_same_repo_slug_in_two_business_units_is_fine(project_root: Path) -> None:
+    """`general` exists under both BUs and the BU token keeps the trees apart."""
+    (project_root / "config" / "taxonomy.yaml").write_text(
+        "business_units:\n"
+        "  tibco: {name: TIBCO, families: {general: {name: General}}}\n"
+        "  ibi: {name: ibi, families: {general: {name: General}}}\n"
+        "rules: []\n",
+        encoding="utf-8",
+    )
+    assert ConfigManager(root_dir=project_root).publishing_problems() == []
+
+
+@pytest.mark.parametrize("suffix", ["user-docs", "UserDocs", "user docs"])
+def test_publishing_problems_flags_a_multi_token_suffix(project_root: Path, suffix: str) -> None:
+    """A hyphen makes the family/suffix boundary unparseable."""
+    _write_publishing(project_root, f"docs_suffix: '{suffix}'\n")
+    problems = ConfigManager(root_dir=project_root).publishing_problems()
+
+    assert len(problems) == 1
+    assert "docs_suffix" in problems[0]
+
+
+def test_the_shipped_publishing_config_is_valid(repo_root: Path) -> None:
+    """The one test that would catch a bad token being shipped rather than typed."""
+    cfg = ConfigManager(root_dir=repo_root)
+
+    assert cfg.publishing_problems() == []
+    assert cfg.load_publishing()["docs_suffix"] == "userdocs"
+    assert cfg.repo_slug("tibco") == "tib"
+    assert cfg.docs_tree_name("tibco", "messaging") == "en-us-tib-messaging-userdocs"
 
 
 def test_family_folders_are_not_precreated(config: ConfigManager, project_root: Path) -> None:

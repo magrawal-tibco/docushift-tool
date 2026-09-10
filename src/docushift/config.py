@@ -10,6 +10,7 @@ itself is computed here.
 
 import csv
 import os
+import re
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
@@ -18,13 +19,40 @@ from typing import Any
 import yaml
 
 from docushift.models import FamilySource, ReleaseStatus
-from docushift.utils.slug import family_folder, slugify
+from docushift.utils.slug import (
+    docs_tree_name,
+    family_workspace_folder,
+    is_primary_locale,
+    resources_tree_name,
+    slugify,
+)
 
 # Every folder name is locale-prefixed because the predecessor `html-to-md` project
 # publishes `fr-fr` and `ja-jp` trees alongside `en-us`. Nothing in the pipeline is
 # multi-locale yet; the prefix reserves the shape so adding one is not a rename of
 # every folder on disk.
+#
+# Language-region, and used verbatim: there is no locale mapping table anywhere in
+# the tool. Its only content would be the value the caller already has, and it
+# would have to be maintained for every locale the docsite might one day serve. If
+# the docsite's own codes turn out to differ from the publishing platform's, that
+# mapping belongs at the discovery boundary where the codes are read.
 DEFAULT_LOCALE = "en-us"
+
+# The publishing tokens, duplicated from `config/publishing.yaml` so a missing or
+# partial file falls back to the documented names rather than failing a run that
+# has not reached publishing yet. Same cache-and-default pattern as `load_docsite`.
+PUBLISHING_DEFAULTS: dict[str, str] = {
+    "docs_suffix": "userdocs",
+    "resources_suffix": "resources",
+    "localized_prefix": "loc",
+    "primary_locale": DEFAULT_LOCALE,
+}
+
+# A publishing suffix must be one lowercase token. A hyphen makes the family/suffix
+# boundary unparseable (`...-messaging-user-docs` -- where does the family end?) and
+# an empty value silently turns a tree name back into the bare workspace name.
+_SUFFIX_TOKEN = re.compile(r"^[a-z0-9]+$")
 
 # The end-of-support report writes `12-31-2025`, and it is unambiguously
 # month-first: field one never exceeds 12 across all 5,948 rows while field two
@@ -119,6 +147,7 @@ class ConfigManager:
         self.docsite_path = self.config_dir / "docsite.yaml"
         self.scope_path = self.config_dir / "scope.yaml"
         self.eos_path = self.config_dir / "eos.yaml"
+        self.publishing_path = self.config_dir / "publishing.yaml"
         self.aem_templates_dir = self.config_dir / "aem_templates"
         self.products_path = self.config_dir / "products.csv"
         self.versions_path = self.config_dir / "versions.csv"
@@ -135,16 +164,67 @@ class ConfigManager:
         self._docsite_cache: dict[str, Any] | None = None
         self._scope_cache: dict[str, str] | None = None
         self._eos_cache: EosReport | None = None
+        self._publishing_cache: dict[str, str] | None = None
+
+    # -- publishing tokens ----------------------------------------------------
+
+    def repo_slug(self, bu: str, family: str | None = None) -> str:
+        """The short publishing token for a business unit, or for one of its families.
+
+        Resolution goes through the taxonomy but never *requires* it: a family typed
+        straight into products.csv is auto-registered rather than rejected (§4.2), and
+        an auto-registered family still has to name a folder. Absent a `repo_slug` the
+        slugified key is the token, which is what every family currently uses.
+        """
+        units = self.load_taxonomy()["business_units"]
+        unit = units.get(bu) or {}
+        if family is None:
+            return str(unit.get("repo_slug") or "").strip().lower() or slugify(bu)
+        declared = self.families(bu).get(family) or {}
+        return str(declared.get("repo_slug") or "").strip().lower() or slugify(family)
 
     # -- families workspace layout -------------------------------------------
 
-    def family_folder_name(self, bu: str, family: str) -> str:
-        """The folder name for one family, e.g. `en-us-tibco-data-management`."""
-        return family_folder(self.locale, bu, family)
+    def family_workspace_name(self, bu: str, family: str) -> str:
+        """The local folder name for one family, e.g. `en-us-tib-data-management`.
+
+        Deliberately *not* a repository name any more. One family now publishes into
+        two or three trees, so there is no single repo name for the workspace to
+        mirror; `sync` composes the destination name from `docs_tree_name` instead.
+        """
+        return family_workspace_folder(self.locale, self.repo_slug(bu), self.repo_slug(bu, family))
+
+    def docs_tree_name(self, bu: str, family: str) -> str:
+        """The docs repository for one family, e.g. `en-us-tib-messaging-userdocs`."""
+        publishing = self.load_publishing()
+        return docs_tree_name(
+            self.locale,
+            self.repo_slug(bu),
+            self.repo_slug(bu, family),
+            suffix=publishing["docs_suffix"],
+            localized_prefix=publishing["localized_prefix"],
+            primary_locale=publishing["primary_locale"],
+        )
+
+    def resources_tree_name(self, bu: str, family: str) -> str:
+        """The resources sibling. Raises for a non-primary locale -- English only."""
+        publishing = self.load_publishing()
+        return resources_tree_name(
+            self.locale,
+            self.repo_slug(bu),
+            self.repo_slug(bu, family),
+            docs_suffix=publishing["docs_suffix"],
+            resources_suffix=publishing["resources_suffix"],
+            primary_locale=publishing["primary_locale"],
+        )
+
+    def publishes_resources(self) -> bool:
+        """Whether this run's locale gets a `-resources` tree at all."""
+        return is_primary_locale(self.locale, self.load_publishing()["primary_locale"])
 
     def family_dir(self, bu: str, family: str) -> Path:
         """`families/en-us-<bu>-<family>/` -- the root of one family's working set."""
-        return self.families_dir / self.family_folder_name(bu, family)
+        return self.families_dir / self.family_workspace_name(bu, family)
 
     def downloads_dir(self, bu: str, family: str) -> Path:
         """Where a family's ZIPs land. Split from `extracted/` so that clearing
@@ -216,6 +296,65 @@ class ConfigManager:
         with open(self.docsite_path, encoding="utf-8") as f:
             self._docsite_cache = yaml.safe_load(f) or {}
         return self._docsite_cache
+
+    def load_publishing(self) -> dict[str, str]:
+        """Loads and caches the publishing tokens from `publishing.yaml`.
+
+        A missing or partial file falls back to `PUBLISHING_DEFAULTS` key by key,
+        rather than erroring: nothing publishes until Stage 7, and a fresh checkout
+        must still be able to compute a workspace folder name. The values are not
+        validated here -- `catalog validate` reports a malformed suffix, so a bad
+        token surfaces once with an explanation instead of raising from whichever
+        accessor happened to touch it first.
+        """
+        if self._publishing_cache is not None:
+            return self._publishing_cache
+
+        loaded: dict[str, Any] = {}
+        if self.publishing_path.exists():
+            with open(self.publishing_path, encoding="utf-8") as f:
+                loaded = yaml.safe_load(f) or {}
+
+        resolved = dict(PUBLISHING_DEFAULTS)
+        for key in PUBLISHING_DEFAULTS:
+            value = str(loaded.get(key, "") or "").strip()
+            if value:
+                resolved[key] = value
+        self._publishing_cache = resolved
+        return resolved
+
+    def publishing_problems(self) -> list[str]:
+        """Naming problems that would publish two things into one repository.
+
+        Reported rather than raised, and reported alongside the catalog's own
+        problems, because they share a consequence: a run that continues past one of
+        these writes into a destination nobody meant, and does so silently.
+        """
+        problems: list[str] = []
+        publishing = self.load_publishing()
+
+        for key in ("docs_suffix", "resources_suffix"):
+            value = publishing[key]
+            if not _SUFFIX_TOKEN.match(value):
+                problems.append(
+                    f"config/publishing.yaml: {key} '{value}' is not a single lowercase token. "
+                    f"Every other segment of a tree name is hyphen-separated, so a hyphen here makes "
+                    f"the family/suffix boundary unparseable."
+                )
+
+        for bu in sorted(self.load_taxonomy()["business_units"]):
+            seen: dict[str, str] = {}
+            for family in sorted(self.families(bu)):
+                token = self.repo_slug(bu, family)
+                if token in seen:
+                    problems.append(
+                        f"config/taxonomy.yaml: families '{seen[token]}' and '{family}' in bu '{bu}' both "
+                        f"resolve to repo_slug '{token}', so both would publish into one repository. "
+                        f"Give one of them its own repo_slug."
+                    )
+                    continue
+                seen[token] = family
+        return problems
 
     def load_scope(self) -> dict[str, str]:
         """Loads `scope.yaml` as `{docsite_slug: reason}` -- docs/architecture.md §3.10.

@@ -237,7 +237,7 @@ converts exactly like a downloaded one:
 docushift download --product ebx --version 6.2.0 --from-file "D:\downloads\ebx-docs.zip"
 ```
 
-That copies your file into `families/en-us-tibco-data-management/downloads/ebx-6.2.0.zip`,
+That copies your file into `families/en-us-tib-data-management/downloads/ebx-6.2.0.zip`,
 sets `zip_source=manual` on the row, and records its checksum. From then on `extract`,
 `convert`, and `sync` treat it as an ordinary package — nothing downstream needs to know
 where it came from. Your original file is copied, not moved.
@@ -352,7 +352,7 @@ Type the family name straight into the `family` column of `products.csv` — it 
 
 ```
 WARN newthing: family 'streaming_analytics' is not declared in taxonomy.yaml for bu 'tibco'.
-     Accepted; workspace folder -> families/en-us-tibco-streaming-analytics.
+     Accepted; workspace folder -> families/en-us-tib-streaming-analytics.
      Add it to taxonomy.yaml to silence this.
 ```
 
@@ -362,11 +362,11 @@ This is a warning, not an error: the write goes through. Add the family under `b
 
 ## 3. The Families Workspace
 
-Downloaded ZIPs and extracted packages are organized by **family**, under a git-ignored `families/` directory. The folder name is `{locale}-{bu}-{family}`:
+Downloaded ZIPs and extracted packages are organized by **family**, under a git-ignored `families/` directory. The folder name is `{locale}-{bu}-{family}`, using the short `repo_slug` tokens from `taxonomy.yaml` (`tibco` → `tib`):
 
 ```
 families/
-└── en-us-tibco-messaging/
+└── en-us-tib-messaging/
     ├── downloads/
     │   ├── ems-10.4.0.zip
     │   └── ems-10.3.0.zip
@@ -379,10 +379,11 @@ families/
 
 Notes on the naming:
 
-- The family is **hyphenated** even though `taxonomy.yaml` keys are underscored: `data_management` → `en-us-tibco-data-management`.
+- The family is **hyphenated** even though `taxonomy.yaml` keys are underscored: `data_management` → `en-us-tib-data-management`.
 - Trademark symbols are stripped, so `TIBCO EBX®` slugs to `tibco-ebx`.
 - Versions keep their dots (`10.4.0`, not `10-4-0`) so the folder maps back to a `versions.csv` row unambiguously.
-- The `en-us` prefix is fixed today. It is there because the same string names the publishing repository each family is destined for, and because other locales exist upstream.
+- **This is not a repository name.** One family publishes into two or three trees (§8), so the workspace keeps the short, suffix-free stem and `sync` composes the destination name. `docushift doctor` prints which tree the current locale publishes to.
+- The `en-us` prefix is fixed today, and other locales exist upstream. A localized run keeps its own locale here — those are different ZIPs and must not overwrite the English ones — even though all of them publish into the single `loc-` tree.
 
 `docushift catalog show --product ems` prints the resolved workspace path for a product, and `docushift doctor` lists every workspace created so far.
 
@@ -467,7 +468,7 @@ docushift convert --batch poc-1
 
 # Convert a local standalone folder directly
 docushift convert \
-  --input ./families/en-us-tibco-integration/extracted/businessevents-enterprise/6.4.0 \
+  --input ./families/en-us-tib-integration/extracted/businessevents-enterprise/6.4.0 \
   --output ./output/tibco/integration/businessevents-enterprise/6.4.0
 ```
 
@@ -493,23 +494,25 @@ docushift validate --target-dir ../tibco-docs-aem/
 
 > **`sync` writes folders, not commits.** DocuShift stops at the filesystem: it never runs a git command, creates no repository and pushes nothing. The two trees it writes per family are named exactly as the publishing repositories are, so taking them the rest of the way is a copy into a clone — done by you, by a CI job, or by whatever owns those repositories. That also means you can run `sync` and read the result without any GitHub credentials.
 
-**What sync writes.** Two trees per family, both named after the family workspace (§3) — which is also the name of the repository each becomes:
+**What sync writes.** Two trees per family, named from the family workspace stem (§3) plus a publishing suffix — the workspace itself is not a repository name:
 
 ```
-en-us-tibco-messaging/                  # the docs tree — what a reader reads
+en-us-tib-messaging-userdocs/           # the docs tree — what a reader reads
 └── en-us/ems/
     ├── online-help/10-4-0/…            # converted Markdown, toc.yml, nav.yml, meta.yml, csh.yml
     ├── user-guides/10-4-0/…            # user-guide PDFs + index.md, toc.yml
     ├── release-information/10-4-0/…    # release notes + readme + index.md, toc.yml
     └── reference-documents/10-4-0/…    # VPAT, licence, rest of doc/ + index.md, toc.yml
 
-en-us-tibco-messaging-resources/        # the bulk tree
+en-us-tib-messaging-userdocs-resources/ # the bulk tree
 └── en-us/ems/
     ├── api-references/java/10-4-0/…    # Javadoc and the C / Go / tibdg trees
     └── archives/…                      # archived-version ZIPs + index.md, toc.yml
 ```
 
-Seven things to expect:
+Eight things to expect:
+
+- **A non-`en-us` run publishes into `loc-tib-messaging-userdocs` and gets no `-resources` tree.** All localized content shares one docs tree rather than getting one per language, and API references and archives are English-only. Asking for a localized resources tree is an error, not an empty directory.
 
 - **`nav.yml` and `meta.yml` are placeholders — do not build on their shape yet.** `toc.yml`, `index.md` and `csh.yml` are specified and stable; those two are not. The AEM side has not supplied a spec for either, so `config/aem_templates/nav.yml.j2` and `meta.yml.j2` still hold the scaffolding shapes the project started with, and both templates say so at the top. They will be rewritten against the real requirements when those arrive, which is likely to change their field names. `validate` therefore checks that the files exist and parse, and asserts nothing about their content.
 - **The PDF doc-classes get an index too.** `user-guides/`, `release-information/` and `reference-documents/` each receive a generated `index.md` and `toc.yml` listing their files, so a copied PDF is reachable. Titles come from the document kind where the name identifies one (Release Notes, VPAT, License Agreement), otherwise from the PDF's own metadata, otherwise from the filename. A doc-class with no files gets no folder at all rather than an empty index.

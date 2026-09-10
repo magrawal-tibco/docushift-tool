@@ -1378,7 +1378,8 @@ def test_an_undeclared_family_warns_but_does_not_fail(taxonomy_config, catalog: 
     assert catalog.validate() == []
     notes = catalog.warnings()
     assert any("streaming_analytics" in note for note in notes)
-    assert any("families/en-us-tibco-streaming-analytics" in note for note in notes)
+    # The BU's `repo_slug` applies even though the family has none of its own.
+    assert any("families/en-us-tib-streaming-analytics" in note for note in notes)
 
 
 def test_a_declared_family_produces_no_warning(
