@@ -16,7 +16,7 @@
 - [x] Create initial `config/taxonomy.yaml`.
 - [x] `pyproject.toml` authored; `jinja2` added as a dependency for the AEM templates; `[tool.ruff]` added with an explicitly pinned rule set (`E,F,I,UP,B,SIM`, line length 120) so linting does not drift with the ruff version.
 - [x] **Working environment** — `.venv` created, `pip install -e ".[dev]"` succeeded on Python 3.13.7. The console script `docushift` installs and runs.
-- [x] **Directory layout** — all 9 subpackages created (`discovery/`, `downloader/`, `extractor/`, `engines/`, `transforms/`, `aem/`, `sync/`, `reporting/`, `utils/`), each a real package with a docstring naming its stage and phase. `config/aem_templates/` populated with Jinja templates for `toc.yml`, `nav.yml`, `meta.yml`, and `index.md`.
+- [x] **Directory layout** — all 9 subpackages created (`discovery/`, `downloader/`, `extractor/`, `engines/`, `transforms/`, `aem/`, `sync/`, `reporting/`, `utils/`), each a real package with a docstring naming its stage and phase. `config/aem_templates/` populated with Jinja templates for `toc.yml`, `nav.yml`, `meta.yml`, and `index.md`. *(Superseded 2026-09-10: AEM supplied the real artifact list — `nav.yml.j2` is deleted, `meta.yml.j2` becomes `metadata.yml.j2`, and `version.yml.j2` is added. See Phase 6's artifact contract.)*
 - [x] **`cli.py`** — Click command tree matching the surface in `user-guide.md`: `catalog {fetch,list,show,enable,set,import,triage}`, `download`, `extract`, `convert`, `sync`, `validate`, `status`, `report`, `doctor`. `doctor` is functional; every stage command raises a `ClickException` naming its implementing phase, so an unbuilt stage exits non-zero instead of silently succeeding.
 - [x] **`pytest` framework** — `tests/{conftest.py,unit/,integration/,fixtures/}`, **54 passing tests**. Real coverage of `ConfigManager`, the additive catalog merge, the CLI surface, and Phase 1 layout guards (subpackage imports, console-script entrypoint, shipped config contents, `.gitignore`).
 - [x] **`.gitignore`** — now covers `output/`, `*.db`, `.venv/`, `__pycache__/`, build and test caches.
@@ -172,6 +172,53 @@ These are fully dead products and dropping them is correct, but a rule that remo
 
 **Not in this phase.** The 277 unmatched report names are left unmatched and unreported-on beyond a count — chasing them means deciding what `DataSynapse GridServer` maps to when the catalog splits it in two, which is product-knowledge work, not tool work. The report also carries `Last Updated On`, which nothing reads; it stays in the file and out of the model.
 
+### Phase 3.8: Publishing-Name Rework — `-userdocs` Repositories
+
+**Status: PLANNED (2026-09-10).** The destination naming was corrected by the doc-platform owners. Everything below is a rename of *names*, not of *shapes*: the inner path `{locale}/{product}/{doc-class}/{version-dashed}` is unchanged, doc-class routing is unchanged, and the two-tree split is unchanged. It lands before Phase 4 because `family_dir` is the path contract Phase 4's downloader writes into, and renaming it after packages are on disk means a migration rather than an edit.
+
+#### What changed
+
+| | Old | New |
+| :--- | :--- | :--- |
+| Docs tree (English) | `en-us-tibco-messaging` | `en-us-tib-messaging-userdocs` |
+| Docs tree (localized) | `ja-jp-tibco-messaging` | `loc-tib-messaging-userdocs` — **one tree for all non-English locales** |
+| Resources tree | `en-us-tibco-messaging-resources` | `en-us-tib-messaging-userdocs-resources` — **English only** |
+| Locale token | `en-us` (language-region) | **unchanged** — `en-us`, in the tree name *and* the inner segment |
+| BU / family token | taxonomy key verbatim (`tibco`) | new `repo_slug` from `taxonomy.yaml` (`tib`) |
+
+**The locale token flipped twice and landed where it started** (AEM, 2026-09-10). It was briefly specified as region-language (`us-en`) and is now confirmed as **language-region — `en-us` — in both the tree name and the inner segment**, which is what the codebase already does. `DEFAULT_LOCALE` therefore does not change, and the only surviving locale change in this rework is the `loc-` tree. Localized content gets **no** `-resources` sibling: API references and archives are English-only.
+
+> **One example in the AEM note contradicts its own rule and is unresolved.** The rule is language-region, but the localized folders are given as `/jp-ja` and `/fr-fr` — `jp-ja` is *region*-language; language-region for Japanese is `ja-jp`. `fr-fr` is identical either way, so Japanese is the only observed case that distinguishes them. **This blocks nothing**: no mapping table exists (see below), so a locale folder is literally the locale string a run is given, and the question is which string to pass when localized migration starts. It is recorded here rather than guessed at, and English — the only locale in scope — is unaffected.
+
+#### Decisions taken here
+
+- **`repo_slug`, not a rename of the taxonomy.** `taxonomy.yaml` gains an optional `repo_slug` on each business unit and each family; `tibco` gets `tib`, everything else defaults to `slugify(key)` when the field is absent. Family keys, `products.csv` classification and the keyword rules are untouched — the short token is a *publishing* concern and does not get to reshape the catalog. The example that prompted this (`en-us-tib-bwplugins-userdocs`) implies a `bwplugins` family that does not exist yet; adding it is ordinary taxonomy triage, not part of this rework.
+- **No locale mapping table; the locale string is used verbatim.** `DEFAULT_LOCALE` stays `en-us`. A table would have to be maintained for every locale the docsite might one day serve, and its only content is the value the caller already has. This is also what makes the `jp-ja` / `ja-jp` ambiguity above cheap: the folder name is the string that was passed in, so settling it later costs a config value, not a rename of a naming layer. If the docsite's own locale codes turn out to differ from AEM's, that mapping belongs at the discovery boundary where the codes are read.
+- **The workspace folder keeps its shape but loses the repo identity**: `families/en-us-tib-messaging/` — new tokens, no `-userdocs` suffix. The old rule "the workspace folder *is* the repo name, so hand-off is a copy" is dead on arrival now that one family maps to two or three trees; there is no single repo name left to match. Keeping the locale prefix is still right — localized packages are different ZIPs and must not land on top of English ones. The Stage 7 hand-off becomes a copy *plus a name*, which is what `sync --target-dir` already computes.
+- **`loc-` is derived, not configured.** A locale other than `en-us` selects the `loc-` docs tree and suppresses the resources tree. One predicate, in one place, so the two rules cannot disagree.
+- **The `userdocs` suffix is a config value, not a literal** (decided 2026-09-10). `-docs` was proposed as the alternative. `userdocs` is kept as the default because it names the *audience*, and that is the distinction this pipeline is built on: Javadoc and the C / Go / `tibdg` trees are documentation too, which is why they route to a separate tree — a suffix meaning "documentation" cannot separate them, and `<product>-docs` is also what an engineering team names a README site sitting in the same org. `*-userdocs` therefore enumerates exactly the published docs trees and nothing else. The known cost is four characters on every published URL, on names that already carry a median-39 / max-95 product slug (§Phase 3.6). Holding the value in config is what makes that cost reversible: until the first publish it is a one-line edit, and the `-resources` name derives from the same string rather than being a second literal that can drift out of step.
+  **Single token, not `-user-docs`.** Every other segment is hyphen-separated, so a two-word suffix makes the family/suffix boundary unparseable. Validation enforces it.
+
+#### Work items
+
+- [ ] **New `config/publishing.yaml`, born here rather than in Phase 6.** It holds the naming tokens only — `docs_suffix: userdocs`, `resources_suffix: resources`, `localized_prefix: loc`, `primary_locale: en-us`. Phase 6 later adds `publish_base_url` and the doc-class-to-repo map to the same file (see that phase's item, which no longer creates it). The file arrives now because the tree names are computed now; deferring it would mean shipping the literal this decision exists to avoid.
+- [ ] **`utils/slug.py`** — retire `family_folder(locale, bu, family)` and replace it with four functions over the `repo_slug` tokens: `family_workspace_folder(locale, bu, family)` → `en-us-tib-messaging`; `docs_tree_name(locale, bu, family, *, suffix, localized_prefix)` → `en-us-tib-messaging-userdocs` or `loc-tib-messaging-userdocs`; `resources_tree_name(...)` → the `-userdocs-resources` name, **raising** for a non-English locale rather than returning a name nobody will publish; and `is_primary_locale(locale, primary)`. The suffixes arrive as arguments, never read from disk here: `slug.py` stays the sole owner of the name's **shape** and `publishing.yaml` becomes the sole owner of its **tokens**, which is the same split that already keeps `taxonomy.yaml` and `slug.py` from drifting. The empty-component guard carries over unchanged — it is the reason `en-us-tibco-` never got created, and `en-us-tib--userdocs` is the same bug with a longer name.
+- [ ] **`config/taxonomy.yaml`** — `repo_slug: tib` on the `tibco` BU; `repo_slug` on each of the 9 declared families where it differs from the key. `ibi` keeps `ibi`.
+- [ ] **`ConfigManager`** — `DEFAULT_LOCALE` stays `en-us` (the region-language flip was reverted); `family_folder_name` renamed to `family_workspace_name` and re-pointed; new `docs_tree_name` / `resources_tree_name` accessors that resolve `repo_slug` from the taxonomy **and the suffixes from `publishing.yaml`** before delegating to `slug.py`. `load_publishing()` follows the established cache-and-default pattern of `load_docsite()`, so a missing or partial file falls back to the documented defaults rather than failing a run that has not reached publishing yet. `repo_slug` resolution goes through `families()` / the BU accessor so an auto-registered family still names a folder (§Phase 2's warn-don't-reject rule).
+- [ ] **`validate()`** — two new blocking errors, both for the same reason: they publish two things into one repository, silently.
+  - A duplicate `repo_slug` within a BU — exactly as the `product_code` collision would have (Phase 3.6). The one new failure mode the rework introduces.
+  - A `docs_suffix` or `resources_suffix` that is not a single lowercase token — a hyphen in the suffix makes the family/suffix boundary unparseable, and an empty one silently produces the bare workspace name as a tree name.
+- [ ] **`catalog.py:930`** — the auto-registration warning names the new workspace folder.
+- [ ] **`cli.py`** — the `download` docstring and the `status` locale line.
+- [ ] **Tests** — `test_slug.py` and `test_config.py` re-expressed against the new names; new cases for the `loc-` tree, for `resources_tree_name` refusing a non-`en-us` locale, and for the two new validation errors. **One test sets `docs_suffix: docs` and asserts the whole family of names moves together** — docs tree, `loc-` tree and resources tree — which is the only thing that actually proves the value is reversible rather than merely stored in a file. `test_catalog.py:1381` and `test_cli.py:781` carry hardcoded folder names and follow.
+- [ ] **Docs in the same commit** — `architecture.md` §4.1 (workspace name and its rationale, which is the paragraph that changes most), §6.1 (the layout block and the sync-target template), §6.3–6.4 (the `-resources` name and the absolute-URL template), and the Stage 1 diagram at line 32; `design.md` §82, §758, §831; `user-guide.md` §365–382, the §499 layout block, and `publishing.yaml` in the config reference; `CONTEXT.md` tree at line 91 and a new ledger row recording both the rename and the `-userdocs` / `-docs` choice. Every literal `en-us-tibco-…` in prose is an example that now misleads.
+
+#### Deliberately not in this rework
+
+- **No `bwplugins` family.** Adding it re-cuts `integration` and reclassifies `products.csv` rows — product-knowledge work with its own review.
+- **No locale mapping table**, per the decision above.
+- **No migration of existing `families/` folders.** Nothing is downloaded yet (Phase 4 is unbuilt), so there is nothing on disk to rename. If that stops being true before this lands, the rename is a `git mv`-equivalent one-liner, not a code path worth keeping.
+
 ### Phase 4: Package Downloader & Extractor
 The selection model and the on-disk layout this phase writes into are settled and tested (`architecture.md` §3.7 and §4); what remains is the I/O.
 
@@ -250,7 +297,7 @@ The selection model and the on-disk layout this phase writes into are settled an
   - [ ] Class-vocabulary mapping (`topictitle1`, `sectiontitle`, `shortdesc`, `codeblock`, `uicontrol`, `stepexpand`, `fignone`, …); **callouts to GFM alerts with the `span.*title` label span removed** — every one of the 1,764 observed callouts carries one, and leaving it duplicates the label; **code fences emitted bare** (the corpus has exactly one language attribute in 864 `<pre>` blocks).
   - [ ] GUID link rewriter — 48% of hrefs are `GUID-….html` and 0.1% are extensionless, so match on the GUID not the suffix; drop the 84% of fragments that are redundant self-references; report the 6.1% that dangle.
   - [ ] Content images keep their source filename — 91% of `<img>` carry no `alt` at all, so the predecessor's alt-text renaming strategy is abandoned; `static/` icons are never copied.
-  - [ ] `GUID-*-homepage.html` feeds `meta.yml` (`publication-title`, `release-version`, `release-date` — present in all 314 doc-sets that ship one) and is never converted as a topic. `index.html`, `search-index.sqlite`, `static/`, `fonts/` are skipped.
+  - [ ] `GUID-*-homepage.html` is parsed for `publication-title`, `release-version` and `release-date` (present in all 314 doc-sets that ship one) and is never converted as a topic. `index.html`, `search-index.sqlite`, `static/`, `fonts/` are skipped. *(Amended 2026-09-10: these three no longer feed `metadata.yml`, which AEM specified as `csg-*` keys only. They become a **cross-check** against the catalog's `display_name` and `release_date` — a mismatch is a report line, not a failure. Collection is unchanged; only the destination moved. See Phase 6's artifact contract.)*
   - [ ] **Flavour detection, kept as a guard now that the file-named flavour is out of scope.** The detector's 371 DITA versions are **316 SDL SuiteHelp** (`GUID-*.html`, flat) plus **~55 file-named** (`topics/…/administrator_roles.html`, nested, lowercase `DC.*` — 132 doc-sets, ~6,215 topics, and 9 products that are all excluded as of 2026-09-09). `engines/dita.py` still branches on whether the doc-set holds `GUID-*.html`, implements SuiteHelp, and reports the rest rather than converting them — the branch can now only fire if a product is readmitted to scope, and without it a bare-`article` doc-set would run the SuiteHelp path and produce plausible wrong output instead of a report line.
   - [ ] **`DC.*` detection must be case-insensitive** — SuiteHelp writes `DC.Type`, the file-named flavour `DC.type`. Worth a detector test with a lowercase fixture; a case-sensitive match drops 66 versions and looks like a clean result. Its live yield is zero today (all 66 belong to out-of-scope products, which are never extracted), and it stays regardless: one `re.I` is the difference between a readmitted product detecting as `dita` and it reading as `auto`.
 
@@ -293,8 +340,12 @@ The selection model and the on-disk layout this phase writes into are settled an
   - [ ] **One string identifier per topic; no numeric key anywhere in the schema.** The Flare reader takes the `Map`'s `Name`; `ResolvedId` is parsed so a malformed entry still counts as an entry, then discarded. The DITA reader takes the key of the flat `suitehelp.contexts` JSON object in `static/head.js` (380 of 418 files carry one). The WebWorks reader takes the case label from each `if(P=="<id>")C="<file>#<anchor>";` in `wwhdata/common/topics.js` (155 of 647 files carry cases).
   - [ ] Resolver: doc-set first, then version-wide fallback (this rescues the 22% of *Flare* links that dangle inside their own doc-set; WebWorks resolves at 100% and never reaches the fallback); merge by identifier; primary doc-set = most resolved entries, ties alphabetical; conflicts recorded under `also` (26 genuine cross-book conflicts in the WebWorks corpus).
   - [ ] **Byte-exact, case-sensitive handling of identifiers throughout.** `GatewayInstances` and `gatewayInstances` are different live help targets in TIBCO BC 7.4/7.5 — with the integer gone, case is the only thing telling them apart.
-  - [ ] **Identifiers are always emitted double-quoted**, in `csh.yml` keys and in frontmatter. 834 of 11,054 Flare names (7.5%) are digit-only, and a YAML 1.1 loader turns an unquoted `1234` into an int and `6.2` into a float. WebWorks and DITA identifiers need none of this — the rule stays unconditional anyway, because a conditional quote is a branch that can be wrong.
-  - [ ] Writer: one `csh.yml` per version at the Markdown output root; `topics` is the only index; no file at all when the version has no CSH.
+  - [ ] **Identifiers are always emitted double-quoted**, in `csh.yml` keys and in frontmatter. 834 of 11,054 Flare names (7.5%) are digit-only, and a YAML 1.1 loader turns an unquoted `1234` into an int and `6.2` into a float. WebWorks and DITA identifiers need none of this — the rule stays unconditional anyway, because a conditional quote is a branch that can be wrong. **Values are quoted too** under the flat schema below, since a path may carry a `#`.
+  - [ ] **`csh.yml` is a flat `"<identifier>": "<relative-path>"` map** (AEM contract, supplied 2026-09-10 — supersedes the `schema`/`sources`/`counts`/`topics`/`unresolved` document in `architecture.md` §5.4.2). One file per version at the Markdown output root; no file at all when the version has no CSH.
+    - [ ] **Anchors are appended to the path** (`config/start.md#adb-palette`) rather than carried as a sibling field. §5.4.2's argument for splitting them — the consumer chooses the fragment encoding — is void now that the consumer has specified a single string.
+    - [ ] **`doc_set` disappears without loss**: each output root is already the first segment of the relative path (`architecture.md` §1576), so the flat value carries it.
+    - [ ] **Ambiguity now needs a deterministic winner.** `also` has nowhere to go in a flat map, so an identifier claimed by two doc-sets resolves to the **first doc-set in the version's ordered doc-set list** — ordered, so a re-run picks the same one. 5 of 233 in the worst observed version.
+    - [ ] **`sources`, `counts`, ambiguity and `unresolved` move to the run report**, and none of them is dropped. This is what keeps `design.md` invariant 10 ("absence is reported, never faked") true: a Help identifier that resolves to nothing must stay countable somewhere, and after this change the report is the only somewhere left. **The report line is not optional polish — it is the entire remaining record.**
   - [ ] Frontmatter injection: `csh: ["id-a", "id-b"]` on topics that own identifiers, written in the topic's first pass rather than as a read-modify-write second pass.
 - [ ] **Asset copier and link writer — one resolution, two outputs** (`architecture.md` §5.5, `design.md` §6.4, invariant 13). The copy set is what the emitted Markdown references, computed in the pass that emits it. Never a second walk that re-derives a destination from a URL or a cache layout: that is precisely what breaks 7,231 of the predecessor's 23,172 image links, 7,223 of them in one product, silently (`architecture.md` §5.5.9).
   - [ ] Normalize before resolving — strip `#fragment`/`?query`, percent-**decode**, `\` → `/`. Skipping this reports 1,872 WebWorks references as missing that are not.
@@ -311,8 +362,51 @@ The selection model and the on-disk layout this phase writes into are settled an
 
 > **Scope boundary (2026-09-09, user decision).** **Git operations are out of scope for this tool.** `docushift sync` organizes the output into repo-shaped directory trees under `--target-dir` and stops; `git init` / `commit` / `push` / repository creation and every branch, review and PR policy are picked up separately, by whoever owns the publishing repositories. Nothing about the *layout* changes — the two-tree split, the doc-class routing and the absolute cross-tree links are all properties of what gets written (`architecture.md` §6.0). No GitHub credentials, no `gitpython`/`gh` dependency, and no repository state for this tool to get wrong.
 
-- [ ] AEM navigation builder (`toc.yml`, `nav.yml`, `meta.yml`).
-  - [ ] **`nav.yml` and `meta.yml` stay placeholders until AEM supplies the details** (2026-09-09, user decision — `design.md` §10). Neither has an authored template or spec; `config/aem_templates/nav.yml.j2` and `meta.yml.j2` are Phase-1 scaffolding guesses measured against nothing, and they are marked as placeholders in the template files themselves. The templates get written when the details arrive, against those details — not retro-fitted to a guess, and not verified beyond "exists and parses" by §8.4 in the meantime. `toc.yml` and `index.md` are unaffected: the three node rules below and §10.5 fix both of their shapes, and the node list is where the synthesizer's real work is.
+- [ ] AEM navigation builder (`toc.yml`, `metadata.yml`, `version.yml`).
+
+#### The AEM artifact contract — supplied 2026-09-10, supersedes the placeholders
+
+The 2026-09-09 placeholder decision is **closed**: AEM has named the artifacts. `nav.yml` is dropped outright, `meta.yml` becomes `metadata.yml` with a real two-key spec, and a new `version.yml` drives the version drop-down. `design.md` §10's "two of the four templates are placeholders" paragraph and its §12 index row go with it.
+
+```
+tibco-ems/                       <- product level
+├── metadata.yml                 csg-product: TIBCO EMS
+├── online-help/
+│   ├── version.yml              the version drop-down, one per doc-class
+│   └── 10-4-0/                  <- version level
+│       ├── metadata.yml         csg-version: 10.4.0
+│       ├── toc.yml
+│       └── csh.yml
+└── user-guides/
+    ├── version.yml              lists only the versions THIS doc-class has
+    └── 10-4-0/
+        ├── metadata.yml
+        └── toc.yml
+```
+
+- [ ] **`nav.yml` is deleted, not deferred.** Nothing consumes it, nothing implements it, and `toc.yml` was always the specified navigation artifact. Remove `config/aem_templates/nav.yml.j2`, its two references in the architecture diagrams (§lines 51, 1696), the §8.4 validation sentence that pairs it with `meta.yml`, and the `design.md` §12 index row. The Phase-1 scaffolding invented it; nothing since has needed it.
+- [ ] **`meta.yml` → `metadata.yml`, carrying only the `csg-*` keys.** `csg-product: <display name>` at product level, `csg-version: <catalog version>` at version level — **dotted, not dashed**: the folder carries the dashed form, and the metadata carries the version as the product names it. The ~11 invented fields in `meta.yml.j2` are **deleted rather than kept alongside** — they were marked in the file itself as measured against nothing, and shipping a guess beside a contract is what makes the guess look load-bearing. One level-parameterized `metadata.yml.j2` replaces the old template.
+  - [ ] Version-level `metadata.yml` goes in **every doc-class version folder that receives a file**, joining the existing `index.md` + `toc.yml` rule (`architecture.md` §6.2.2). A folder that gets no file gets nothing.
+  - [ ] Docs tree only. The `-resources` tree holds generated API trees and opaque ZIPs; neither is a product page and neither reads a `csg-product`.
+  - [ ] The grounded SuiteHelp input — `publication-title` / `release-version` / `release-date` from `GUID-*-homepage.html`, present in all 314 doc-sets that ship one — is **still collected but no longer emitted**. It becomes a cross-check against the catalog's `display_name` and `release_date` rather than a metadata source, since AEM named neither field. Phase 5's item is amended, not dropped.
+- [ ] **New `version.yml`, one per doc-class folder** (AEM, 2026-09-10 — it sits beside the version folders, not above the doc-classes). The version drop-down. Lists **active versions only** (archived ones live in the `-resources` archives tree), highest version first.
+  ```yaml
+  versions:
+  - title: 10.4.0 (Feb 2026)
+    path: /10-4-0
+  - title: 10.3.1 (Aug 2025)
+    path: /10-3-1
+  ```
+  - [ ] **`title` is the catalog version verbatim**, plus the release date in `(%b %Y)`. No trimming to a marketing two-part form: `10.4.0` and `10.4.1` are routinely both active, and both would render as `10.4`.
+  - [ ] **`path` is the bare dashed version**, exactly as AEM's example shows — the file now lives inside the doc-class, so the doc-class segment would be wrong rather than merely redundant.
+  - [ ] **Each doc-class lists only its own versions**, built from what sync actually wrote into that folder. *This deletes a rule rather than adding one:* the product-level placement needed a precedence chain (`online-help` → `user-guides` → …) to pick one doc-class per version, and a version with PDFs but no converted help was mis-filed by it. Per-doc-class files have no such choice to make, and a version missing from one doc-class is simply absent from that drop-down.
+  - [ ] **The schema permits a hand-written entry with an absolute URL** (`path: https://…`), per the supplied example. DocuShift generates only the catalog-derived rows; it must not delete or reorder a row it did not write, or the first re-sync silently drops whatever a human added.
+  - [ ] **`release_date` needs a third parser — epoch milliseconds.** Measured over the 1,762 active versions on 2026-09-10: **1,377 ISO dates, 372 epoch-millisecond strings, 13 empty**. The two formats currently documented (`architecture.md` §6.2.3: `November 2022` and ISO-datetime) were measured on *archived* `GA_date` and do not cover this column. 372 rows would render as garbage on a naive parse. **An undated version keeps its title without the bracket** — 6 of the 280 multi-version products have one.
+  - [ ] **Sorting is numeric-descending over the dotted components, not lexical.** `10.4.0` must outrank `9.3.0`, which string sort gets backwards, and the largest product carries **38 active versions**.
+  - [ ] **20 active rows carry a non-numeric version string** — `Server`, `Desktop`, `Edition`, `Services` and similar, on 4 multi-version products including `spotfire-server`. These are upstream parse artifacts, not versions. They **sort last and are named in the run report**; they are not silently dropped, because the folder they name does get published and a missing drop-down entry would be unreachable.
+  - [ ] 280 of 458 products with active versions have more than one; the other 178 have exactly one. A one-entry `version.yml` is still written — its absence and its presence must not mean different things to AEM. Per-doc-class placement multiplies the file count by the number of doc-classes a product fills (up to four), and **the drop-downs will legitimately disagree with each other** — `user-guides` carries versions that shipped no converted help. That is the point of the move, not a defect to reconcile.
+- [ ] **Validation gains real assertions.** `design.md` §8.4 currently checks `nav.yml` and `meta.yml` for existence and YAML well-formedness *only*, on the grounds that their shapes were guesses. Both grounds are gone: `metadata.yml` and `version.yml` have authored specs, so they get field-level checks — the required `csg-*` key present and non-empty, every `version.yml` path resolving to a directory sync wrote, ordering numeric-descending.
+- [ ] **Docs in the same commit** — `architecture.md` §5.4.2 rewritten to the flat `csh.yml` (its six field rules reduce to three; the anchor and `also` rules are replaced, not deleted, so the reasoning that produced them stays readable), §5.4.5–5.4.6 validation, the two Mermaid diagram nodes naming `nav.yml`/`meta.yml` (lines 51, 1696), and §6.1's layout block gaining the product level and the per-doc-class `version.yml`; `design.md` §8.4, §9.4, the §10 placeholder paragraph, and the §12 index rows for 9.4 and 10; `user-guide.md` line 474 and the §499 layout block; `CONTEXT.md` a ledger row. **The Phase-1 template inventory at line 19 is annotated rather than rewritten** — it records what was true when it was written.
   - [ ] **First node is the version's landing page** (`design.md` §10, `architecture.md` §5.1.5). The engine reports it; if it is already a TOC node, move it to first, else insert it. It must never fall through to "Unfiled".
   - [ ] **Generate a page for any node with children and no page.** Title from the node label, body a link list of its immediate children, `generated: true` in frontmatter so a re-run replaces it. Drop and count childless label-only nodes. Engine-neutral, but Flare alone produces 165 per 60 output roots (151 of them top level, 1,357 children).
   - [ ] **Last two nodes are support then legal** (`design.md` §10, `architecture.md` §5.1.5) — `Documentation and Support Services` second-last, `Legal and Third-Party Notices` last, both hoisted to top level. **Move, never append**: they are already TOC entries in 657 and 649 of 676 Flare roots, so appending duplicates the topic; and 18 legal nodes sit one level down and must be promoted. **One legal node, not two** — no separate third-party-notices page exists in the corpus (0 of 676) and the combined page has one `h1` and zero `h2`. Absent pages leave a shorter tail, with no generated stand-in. Tests: a root that is already support-then-legal last (610 of 676 — must come out unchanged), one with the support node first (4 roots), one with a nested legal node, and one missing both.
@@ -341,23 +435,102 @@ The selection model and the on-disk layout this phase writes into are settled an
     - [ ] **No index for `api-references/`** — 496 of 499 Javadoc roots ship their own `index.html`; a second entry point competes with it.
   - [ ] **API-reference trees are excluded from Stage 5 conversion and copied verbatim** — Javadoc is not engine output, and converting it turns working HTML into broken Markdown. Needs a skip-path list in the converter as well as a copy step here.
   - [ ] Cross-repo link rewriter: help-topic links into `api/{c,java,golang,tibdg}/…` are re-pointed at the `-resources` repo as **absolute URLs** (`architecture.md` §6.4). Runs after both trees are placed. Links that stay inside the docs repo remain relative.
-  - [ ] New **`config/publishing.yaml`** — `publish_base_url` plus the doc-class-to-repo map. The AEM host must not be compiled into the distributor; a staging target is a config edit. One path-template function serves both the file copy and the link rewrite, so the two cannot disagree.
+  - [ ] **Extend `config/publishing.yaml`** — created in Phase 3.8 with the naming tokens; this phase adds `publish_base_url` plus the doc-class-to-repo map. The AEM host must not be compiled into the distributor; a staging target is a config edit. One path-template function serves both the file copy and the link rewrite, so the two cannot disagree — and it composes the tree name from the same `docs_suffix` the trees were written with, so a link cannot point at a repo name that was never created.
   - [ ] Dots-to-dashes version conversion at this boundary only (`10.4.0` → `10-4-0`); nothing upstream may see a dashed version.
   - [ ] `-resources` is a **separate tree** per family, written as a sibling of the docs tree — not a directory inside it (`architecture.md` §6.3). Sync creates the two directories; it does not create or push the two repositories.
   - [ ] **Re-run behaviour is the only idempotency question**, and it is a filesystem one: a second sync over the same `--target-dir` must produce the same tree, replacing a version's doc-class folder wholesale rather than merging into it, so a topic deleted upstream does not survive as a stale file. No git state is consulted.
   - [ ] Only value still to supply: the `publish_base_url` string itself, once the AEM host is known. Deployment configuration, not design — nothing waits on it.
 
 ### Phase 7: CLI, Reporting & Verification Dashboard
-- [ ] Click CLI with full command tree (`catalog`, `status`, `download`, `convert`, `sync`, `report`).
-- [ ] Rich terminal dashboard and exportable Markdown/HTML migration reports.
+
+**Design settled 2026-09-10.** The reframe that drives everything below: **this phase is not a dashboard, it is where a dozen earlier decisions come due.** At least fifteen rules across Stages 1–6 end in "…is a report line", "counted and named", or "reported rather than dropped" — and since `csh.yml` lost its `unresolved` key (Phase 6 contract), the report is now the *only* surviving record that a Help identifier resolved to nothing. Built as a summary screen, every one of those obligations quietly becomes nothing, and `design.md` invariant 10 ("absence is reported, never faked") becomes untrue in a way no test would catch.
+
+#### 7.1 The findings table
+
+Findings persist in `state.db`, written by the stage that discovers them and queried by `report`. Not in-memory: a record that dies with the terminal buffer cannot be the only copy of a broken Help button.
+
+```sql
+runs(run_id, command, batch, started_at, finished_at, exit_code)
+findings(id, run_id, stage, severity, code, slug, version, path, message, count)
+```
+
+- [ ] **`code` is the contract; `message` is prose.** Tests assert on codes, so a message can be reworded without breaking anything, and an obligation that exists only as an English sentence becomes an enumerable thing. This is the single design decision that makes §7.5 auditable.
+- [ ] **Severity is a property of the code, fixed in one registry — never chosen at the call site.** Two call sites reporting the same condition at different severities makes the exit code a matter of which one fired.
+- [ ] **Errors and warnings get one row each; notes are aggregated into a single row with a `count`.** You act on an error individually and only need the magnitude of a note — and a per-file note would write hundreds of thousands of rows for the orphan-image case alone. The list behind a note is regenerable by re-running the stage.
+- [ ] **Findings are written inside the stage's existing transaction** (`state.py:transaction`, §3.5). A failed stage leaves none, which is what keeps invariant 11 true — a failed run must not write partial measurements.
+- [ ] Retained across runs, so §7.6 is a query rather than a re-parse. `report --prune --keep N` for the day that matters.
+
+#### 7.2 Severity, and what gates
+
+| Severity | Meaning | Exit effect |
+| :--- | :--- | :--- |
+| `error` | The output is wrong or unpublishable | `validate` exits **1** |
+| `warning` | The run succeeded; a human decision is pending | Printed and counted; exit 0 |
+| `note` | Normal for this corpus, recorded so a change in magnitude is visible | Counted only; exit 0 |
+
+- [ ] **Only `validate` gates.** A `convert` that finishes 99 of 100 versions and reports one error has done its job; failing it would make partial progress impossible and tempt everyone to pass a skip flag. **But invariant 10 still binds**: a stage command that did nothing at all exits non-zero, which is a different condition from having found problems.
+- [ ] **`note` exists so that `warning` stays worth reading.** 54.6% of Flare's images are orphans by the authoring tool's design; filed as warnings, they would bury the six that matter.
+
+#### 7.3 Command surface
+
+Three commands, split by the question each answers — the current `status`/`report` pair has no stated boundary and would otherwise converge.
+
+- [ ] **`docushift status` — *where is everything now?*** A standing snapshot over the catalog, needing no run: counts per stage (discovered → in scope → eligible → downloaded → extracted → converted → synced), family workspaces, locale, batch tags. Extends what `status` already prints.
+- [ ] **`docushift report` — *what happened?*** Findings from a run. `--run last|<id>`, `--stage`, `--severity`, `--code`, `--slug`, `--explain <CODE>`, `--export <file.md>`.
+- [ ] **`docushift validate` — *is the output correct?*** Runs §7.4 against `--target-dir`, writes findings, gates on errors.
+- [ ] `docushift csh {list,report,validate}` — per-version identifier listing, coverage across a batch, integrity checking. `csh report --since <version>` is §7.6.
+- [ ] **Markdown export only** (decided 2026-09-10 — no JSON, no HTML). One file: run header, then errors, warnings and notes grouped by stage then code. **Consequence: tests assert against the `findings` table, never by parsing the Markdown.** With no JSON there is no machine format to assert on, and a test that greps report prose pins the wording of every message in the tool.
+
+#### 7.4 Link, asset and AEM-artifact integrity
+
 - [ ] Broken link and missing asset linter, including the CSH checks in `architecture.md` §5.4.6.
   - [ ] **Classify before checking**: relative links resolve on the filesystem and a miss is an error; absolute URLs are external — which after Stage 7 means every API-reference link — and are skipped by default, HTTP-checked only under `validate --check-external`.
   - [ ] **Percent-decode before resolving**, so the linter compares what a renderer would.
   - [ ] **An unreferenced asset is not an error.** Orphans are a Phase 5 report line, not a lint failure — 54.6% of Flare's images are unreferenced by the authoring tool's design (`architecture.md` §5.5.7).
   - [ ] A broken asset link here is a **regression against `design.md` invariant 13**, not a discovery: Phase 5 resolves the copy and the link together, so the count should be zero and the test exists to prove it stays zero.
-- [ ] `docushift csh {list,report,validate}` — per-version identifier listing, coverage across a batch, and integrity checking.
-- [ ] **Cross-version CSH regression report** — identifiers present in the previously converted version and absent from this one. A dropped identifier is a Help button that breaks on upgrade, and it cannot be seen from inside a single version.
+- [ ] **The AEM artifacts get field-level checks**, replacing `design.md` §8.4's "existence and well-formedness only" rule, which was justified by their shapes being guesses (both grounds gone — Phase 6 contract): `metadata.yml` carries its required `csg-*` key, non-empty; every `version.yml` `path` resolves to a sibling directory and every version directory has exactly one entry, ordered numeric-descending; every `csh.yml` value's file part exists and its anchor is present in that file.
+
+#### 7.5 The obligation register
+
+The concrete deliverable of §7.1: every deferred "report line" in the three documents, given a code. **A test asserts that every code emitted is registered and every registered code is reachable** — which is how a promise made in prose three phases earlier stops being able to quietly evaporate.
+
+| Code | Sev | Stage | Obligation | Specified in |
+| :--- | :--- | :--- | :--- | :--- |
+| `SCOPE_RULE_UNMATCHED` | warn | catalog | A `scope.yaml` rule matching no product | `design.md` §8.2.5 |
+| `EOS_ALIAS_STALE` | warn | catalog | An alias naming a product the active report lacks | `design.md` §8.2 |
+| `EOS_PRODUCT_EMPTIED` | warn | catalog | Retirement left a product with nothing to convert (11 products) | Phase 3.7 |
+| `BATCH_NOT_ELIGIBLE` | warn | catalog | Tagged into a batch but not eligible | `design.md` §8.2.2 |
+| `CSH_SOURCE_EMPTY` | note | extract | CSH source present but empty — no `csh.yml` written | `architecture.md` §5.4.2 |
+| `CSH_SOURCE_UNPARSED` | warn | extract | Source located but failed to parse; `_has_csh` still set | `design.md` §6.2 |
+| `ENGINE_UNKNOWN` | warn | convert | `auto`, or a named engine with no handler — skipped, not guessed | invariant 7 |
+| `DOCSET_SKIPPED` | warn | convert | A file-named doc-set reaching the engine guard | `architecture.md` §5.2 |
+| `NAV_NODE_DROPPED` | note | convert | `lof`/`lot`/`ix` nodes dropped (first top-level node in 246 books) | Phase 5 |
+| `ASSET_ORPHANED` | note | convert | Unreferenced asset — 54.6% is normal for Flare | `architecture.md` §5.5.7 |
+| `REFERENCE_UNRESOLVED` | **error** | convert | A reference producing neither link nor copy | invariant 13 |
+| `CSH_UNRESOLVED` | warn | convert | Identifier matched no produced topic | Phase 6 contract |
+| `CSH_AMBIGUOUS` | note | convert | Identifier claimed by 2+ doc-sets; first ordered doc-set wins | Phase 6 contract |
+| `DOC_REFERENCE_MISSING` | warn | sync | Flare escape pointing at a document the ZIP never shipped (152) | `architecture.md` §5.5.8 |
+| `VERSION_NOT_NUMERIC` | warn | sync | Non-numeric version string sorted last in `version.yml` (20 rows) | Phase 6 contract |
+| `VERSION_UNDATED` | note | sync | Active version with no `release_date`; title loses its bracket (13) | Phase 6 contract |
+| `METADATA_MISMATCH` | warn | sync | SuiteHelp `publication-title` / `release-date` disagreeing with the catalog | Phase 6 contract |
+| `ARCHIVE_ALSO_LIVE` | note | sync | Archived version that is also live, cross-linked (25 of 326) | `architecture.md` §6.2.3 |
+| `LINK_BROKEN` | **error** | validate | Relative link resolving to nothing | `design.md` §8.4 |
+| `CSH_IDENTIFIER_DROPPED` | warn | validate | Present in the prior version, absent here (§7.6) | this phase |
+
+#### 7.6 Cross-version CSH regression
+
+A dropped identifier is a Help button that breaks on upgrade, and it is invisible from inside a single version.
+
+- [ ] **The comparison target is the next-lower *converted* version of the same product**, by `natural_version_key` (§1.3, already built) — not "the previous run", which is a scheduling accident and would compare 10.4.0 against whatever happened to be converted last Tuesday.
+- [ ] **Read the prior version's `csh.yml` from the output tree**, not the findings table. That file is what actually shipped; the database records what the tool meant to ship, and the difference between those two is exactly the class of defect this check exists to find.
+- [ ] A missing prior tree is a `note`, not a failure — the first conversion of a product has nothing to regress against.
+
+#### 7.7 Sequencing: the findings module cannot wait for Phase 7
+
+- [ ] **`reporting/findings.py` and the code registry land at the start of Phase 4**, even though every command that reads them lands here. Phase 4 is the first stage that produces findings, and Phases 4–6 each carry several rows of the §7.5 register. If the module arrives last, those five phases each invent their own logging and Phase 7 becomes a rewrite of working code rather than a read layer over it. The table, the registry and a `record()` call are perhaps 80 lines; the commands are the phase.
+
 - [ ] End-to-end integration test suite.
+- [ ] **Docs in the same commit** — `design.md` gains §8.5 (findings and severity), §8.6 (the obligation register), §8.7 (cross-version CSH), with §8.4 rewritten for the AEM artifacts and §12 index rows for each; `architecture.md` §7 for the command surface; `user-guide.md` the `report` / `validate` / `csh` surfaces and the severity table; `CONTEXT.md` a ledger row.
 
 ---
 
@@ -370,4 +543,7 @@ The selection model and the on-disk layout this phase writes into are settled an
 - **Package Source Transparency**: A manually supplied ZIP converts through exactly the same path as a downloaded one — no downstream stage branches on provenance, and no machine-local path appears in either CSV.
 - **Unit Test Coverage**: >90% coverage on core transforms, engines, catalog, and state management.
 - **Link & Asset Integrity**: Zero broken relative links or missing referenced assets in converted output. This is a structural guarantee, not a target: a relative asset link exists if and only if the asset was copied, because one resolution at emit time produces both (`design.md` invariant 13). Every reference that did not resolve is counted and named in the run report — the failure mode being designed out is the predecessor's, which loses 31.2% of its image links and logs nothing.
-- **CSH Fidelity**: Every identifier in the source help map is either resolved in `csh.yml` or listed under `unresolved` — none is silently dropped. Identifier text round-trips byte-exactly as a string, including case and digit-only values. The map has exactly one key, and it is one the corpus shows to be unique within a source.
+- **CSH Fidelity**: Every identifier in the source help map is either resolved in `csh.yml` or **named in the run report** — none is silently dropped. *(Reworded 2026-09-10: `csh.yml` is now a flat map with no `unresolved` key, so the report carries what the file no longer can. The guarantee is unchanged; only its location moved.)* Identifier text round-trips byte-exactly as a string, including case and digit-only values. The map is keyed on the identifier, the one key the corpus shows to be unique within a source.
+- **Reporting Completeness**: Every finding code emitted anywhere in the tool is present in the §7.5 registry, and every registered code is reachable from at least one code path. This is the test that keeps a promise made in prose three phases earlier from evaporating — the register is only worth having if it cannot silently fall out of step with the code.
+- **Exit-code Discipline**: `validate` exits non-zero if and only if the run recorded at least one `error`. A stage command exits non-zero when it did no work, and zero when it did its work and found problems — the two are different conditions and must not be conflated.
+- **Version Drop-down Integrity**: Every `path` in a `version.yml` resolves to a sibling directory that sync actually wrote, and every version folder in that doc-class has exactly one entry — the file and the folders beside it are two views of one list, so neither can carry what the other lacks. Ordering is numeric-descending, so `10.4.0` precedes `9.3.0`. A hand-added entry survives a re-sync.
