@@ -1,7 +1,7 @@
 # DocuShift User Guide: Migration & Conversion CLI
 
 > **Document Status:** Living User Manual  
-> **Last Updated:** 2026-09-09  
+> **Last Updated:** 2026-09-11  
 > **Target Environment:** TIBCO & IBI Documentation Migration to AEM
 
 > Wondering *why* a command behaved the way it did — which value a re-fetch kept, which versions a batch selected, how a help identifier was resolved? Every decision rule is written out step by step in [`design.md`](design.md).
@@ -35,7 +35,7 @@ docushift doctor
 
 Prints the resolved project paths (`config/`, `cache/`, `families/`, `output/`, `state.db`), the active locale, and which family workspaces exist so far. The working directories are created on first run; per-family folders are not, so an untouched project reads `family workspaces: none yet`.
 
-> **Implementation status.** The command tree below is the full intended surface and `--help` reflects it. Implemented today: `doctor`, the **whole `catalog` group, `fetch` included** — discovery talks to the live docsite — and **`download` and `archive download`**, including `--from-file`. `extract` and everything downstream are not built yet. Every unbuilt command exits non-zero naming the phase that will build it (see `docs/planning.md`); commands are never silently no-op.
+> **Implementation status.** The command tree below is the full intended surface and `--help` reflects it. Implemented today: `doctor`, the **whole `catalog` group, `fetch` included** — discovery talks to the live docsite — **`download` and `archive download`**, including `--from-file`, and **`extract`**, which unpacks a package and detects its engine. `extract` does not yet inventory assets or CSH, or write the five inventory columns — that is the next commit, and the asset and CSH output described below is not printed yet. `convert` and everything downstream are not built at all. Every unbuilt command exits non-zero naming the phase that will build it (see `docs/planning.md`); commands are never silently no-op.
 
 ---
 
@@ -484,6 +484,32 @@ docushift extract --all
 docushift extract --product businessevents-enterprise --version 6.4.0
 docushift extract --batch poc-1
 ```
+
+| Flag | Effect |
+| :--- | :--- |
+| `--dry-run` | List what would be unpacked, and whether each package is on disk, without writing. |
+| `--force` | Re-extract even when the package has not changed since last time. |
+
+Each run ends with five counts — extracted, already current, no package, refused, failed —
+an engine tally, and then **two named lists**: the versions left `auto`, and the versions
+whose engine was identified but has no converter. Those are different problems. `auto`
+means DocuShift could not tell what made the package and is worth reporting as a gap;
+a named engine with no converter is a scoping question for you, not a bug. A failure
+never stops the run.
+
+**Re-running is cheap and re-running is safe.** A package whose bytes have not changed
+since the last extract is skipped entirely, so `extract --all` over a settled batch does
+almost no work. When a package *has* changed, the new tree is built beside the old one and
+swapped in, so files the new package no longer ships are gone rather than lingering — a
+guide dropped upstream does not quietly survive and convert. If a run is killed mid-swap
+you may find a a `.part` directory left behind; the next run removes it before it starts.
+
+Extraction is deliberately serial. Downloads run in parallel because transfers overlap;
+two large unzips onto one disk only contend, so there is no `--workers` here.
+
+**A package that tries to write outside its own folder is refused, not repaired**, and
+nothing from it is left on disk. That is counted separately from a failure because a
+retry will not help — somebody needs to look at the ZIP.
 
 **Extract inventories assets by where they are going, not by extension.** It prints one line per destination — topic assets inside the engine's output root, PDFs and Word files the document router will publish (§4), API-reference trees copied whole, archives — and then the residue: files no destination claimed, grouped by their top folder. That last group is the one to read. A handful of stray files is normal; a few thousand under one folder name means a generated reference tree the tool has not learned to recognise, and it should be reported rather than converted:
 

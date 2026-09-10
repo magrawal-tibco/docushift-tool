@@ -19,10 +19,8 @@ from docushift.discovery import CrawlResult, DocsiteCrawler
 from docushift.state import StateStore
 from tests.conftest import make_product, make_version
 
-# `download` and `archive download` left this list in Phase 4a. `extract` stays:
-# it is Phase 4b.
+# `download` and `archive download` left this list in Phase 4a, `extract` in 4b-1.
 PENDING_COMMANDS = [
-    ["extract", "--all"],
     ["convert", "--product", "ems", "--version", "10.4.0"],
     ["sync", "--target-dir", "workspace"],
     ["validate", "--target-dir", "workspace"],
@@ -973,3 +971,86 @@ def test_archive_download_without_a_url_points_at_from_file(
 
     assert result.exit_code != 0
     assert "--from-file" in result.output
+
+
+# -- extract (design.md §6.1, §7) ----------------------------------------------
+
+
+def _place(root: Path, version: str, members: dict[str, str]) -> Path:
+    """Files a ZIP where `download` would have left it, for the populated_root product."""
+    downloads = root / "families" / "en-us-tibco-messaging" / "downloads"
+    downloads.mkdir(parents=True, exist_ok=True)
+    return _zip(downloads / f"tibco-enterprise-message-service-{version}.zip", members)
+
+
+def test_extract_requires_a_scope(runner: CliRunner, populated_root: Path) -> None:
+    result = _invoke(runner, populated_root, "extract")
+
+    assert result.exit_code != 0
+    assert "Choose a scope" in result.output
+
+
+def test_extract_unpacks_and_names_the_engine(runner: CliRunner, populated_root: Path) -> None:
+    _place(populated_root, "10.4.0", {"guide/Output.mcwebhelp": "", "guide/a.htm": "<html/>"})
+
+    result = _invoke(runner, populated_root, "extract", "--all")
+
+    assert result.exit_code == 0
+    unpacked = (
+        populated_root / "families" / "en-us-tibco-messaging" / "extracted"
+        / "tibco-enterprise-message-service" / "10.4.0" / "guide" / "a.htm"
+    )
+    assert unpacked.is_file()
+    assert "flare" in result.output
+    # The archived 8.6.0 row is not convert-eligible, so it is never unpacked.
+    assert not (unpacked.parents[2] / "8.6.0").exists()
+
+
+def test_extract_writes_the_engine_back_to_the_catalog(runner: CliRunner, populated_root: Path) -> None:
+    _place(populated_root, "10.4.0", {"topics/GUID-AAA.html": "<html/>"})
+
+    _invoke(runner, populated_root, "extract", "--all")
+
+    rows = (populated_root / "config" / "versions.csv").read_text(encoding="utf-8-sig")
+    assert "dita,detected" in rows
+
+
+def test_extract_dry_run_lists_targets_without_writing(runner: CliRunner, populated_root: Path) -> None:
+    _place(populated_root, "10.4.0", {"guide/a.htm": "<html/>"})
+
+    result = _invoke(runner, populated_root, "extract", "--all", "--dry-run")
+
+    assert result.exit_code == 0
+    assert "Would extract" in result.output
+    assert not (populated_root / "families" / "en-us-tibco-messaging" / "extracted").exists()
+
+
+def test_extract_names_an_undetected_version_rather_than_counting_it(
+    runner: CliRunner, populated_root: Path
+) -> None:
+    """`auto` is a detector bug and an unconvertible engine is a scoping call (§7.3 step 2)."""
+    _place(populated_root, "10.4.0", {"readme.html": "<html><body>x</body></html>"})
+
+    result = _invoke(runner, populated_root, "extract", "--all")
+
+    assert result.exit_code == 0
+    assert "engine undetected" in result.output
+
+
+def test_extract_names_an_identified_engine_that_has_no_converter(
+    runner: CliRunner, populated_root: Path
+) -> None:
+    _place(populated_root, "10.4.0", {"lib/snext.css": "", "fn.html": "<html/>"})
+
+    result = _invoke(runner, populated_root, "extract", "--all")
+
+    assert result.exit_code == 0
+    # Not the whole sentence: Rich wraps the line at the console width.
+    assert "r-help is identified but has no" in result.output
+
+
+def test_extract_reports_a_missing_package_without_failing(runner: CliRunner, populated_root: Path) -> None:
+    result = _invoke(runner, populated_root, "extract", "--all")
+
+    assert result.exit_code == 0
+    assert "docushift download" in result.output

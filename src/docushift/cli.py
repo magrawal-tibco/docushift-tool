@@ -7,8 +7,10 @@ its own phase (see docs/planning.md). Unimplemented commands fail loudly -- a
 ``convert`` that exits 0 while converting nothing hides how far along the pipeline
 actually is.
 
-Functional so far: ``doctor`` (Phase 1) and the whole ``catalog`` group including
-``fetch`` (Phase 3). The pipeline stages wait on Phases 4-7.
+Functional so far: ``doctor`` (Phase 1), the whole ``catalog`` group including
+``fetch`` (Phase 3), ``download`` and ``archive download`` (Phase 4a), and
+``extract`` (Phase 4b-1, unpack and engine detection -- the inventory walk it
+also owes is 4b-2). ``convert`` onward wait on Phases 5-7.
 """
 
 from pathlib import Path
@@ -825,15 +827,111 @@ def download(ctx, bu, family, product, version, batch, select_all, force, worker
     _report_download(downloader.download_many(pairs, force=force, on_result=on_result))
 
 
+def _report_extract(stats) -> None:
+    """The five-outcome summary, the engine tally, and the two lists a human acts on."""
+    from docushift.extractor import ExtractOutcome
+    from docushift.models import CONVERTIBLE_ENGINES, SourceEngine
+
+    table = Table(title="Extract")
+    table.add_column("Outcome")
+    table.add_column("Versions", justify="right")
+    for outcome, label in (
+        (ExtractOutcome.EXTRACTED, "Extracted"),
+        (ExtractOutcome.CURRENT, "Already current"),
+        (ExtractOutcome.NO_PACKAGE, "No package"),
+        (ExtractOutcome.REFUSED, "Refused (unsafe archive)"),
+        (ExtractOutcome.FAILED, "Failed"),
+    ):
+        table.add_row(label, str(stats.count(outcome)))
+    console.print(table)
+    if stats.files_written:
+        console.print(f"[dim]{stats.files_written} file(s) written.[/dim]")
+
+    tally = stats.engine_tally()
+    if tally:
+        engines = Table(title="Engines")
+        engines.add_column("Engine")
+        engines.add_column("Versions", justify="right")
+        for engine, count in tally.items():
+            engines.add_row(str(engine), str(count))
+        console.print(engines)
+
+    # Two lists, not one count, because they are two different facts (§7.3 step
+    # 2). `auto` means the detector failed and is a bug to investigate; a named
+    # engine with no handler is a scoping decision for a human. Collapsing them
+    # into "23 versions will not convert" makes neither actionable.
+    undetected = [r for r in stats.results if r.engine is SourceEngine.AUTO and r.path]
+    unconvertible = [
+        r for r in stats.results
+        if r.path and r.engine is not SourceEngine.AUTO and r.engine not in CONVERTIBLE_ENGINES
+    ]
+    for result in undetected:
+        console.print(
+            f"[yellow]?[/yellow] {result.slug}@{result.version}: engine undetected (`auto`)"
+        )
+    for result in unconvertible:
+        console.print(
+            f"[yellow]![/yellow] {result.slug}@{result.version}: "
+            f"{result.engine} is identified but has no converter"
+        )
+    for result in stats.results:
+        if result.outcome is ExtractOutcome.NO_PACKAGE:
+            console.print(f"[yellow]![/yellow] {result.slug}@{result.version}: {result.message}")
+    for result in stats.failures:
+        console.print(f"[red]x[/red] {result.slug}@{result.version}: {result.message}")
+
+
 @main.command()
 @_scope_options
-def extract(**kwargs) -> None:
-    """Extract packages into the family workspace, catalog assets and CSH maps, and detect engines.
+@click.option("--force", is_flag=True, help="Re-extract even if the package has not changed.")
+@click.option("--dry-run", is_flag=True, help="List what would be unpacked without writing.")
+@click.pass_context
+def extract(ctx, bu, family, product, version, batch, select_all, force, dry_run) -> None:
+    """Extract packages into the family workspace and detect their source engine.
 
     Extraction runs over the same selection as `download`, so an archived or
-    ineligible version is never unpacked.
+    ineligible version is never unpacked. Serial by design: two large unzips onto
+    one disk contend rather than overlap.
     """
-    _pending("extract", "Phase 4 (extraction) and Phase 5 (engine detection)")
+    from docushift.extractor import ExtractOutcome, PackageExtractor
+
+    cfg: ConfigManager = ctx.obj["config"]
+    manager = _catalog_manager(ctx)
+
+    pairs = _download_selection(manager, bu, family, product, version, batch, select_all)
+    if not pairs:
+        console.print("[yellow]No convert-eligible versions match.[/yellow]")
+        return
+
+    if dry_run:
+        table = Table(title=f"Would extract ({len(pairs)})")
+        for column in ("Product", "Version", "Package", "Target"):
+            table.add_column(column)
+        for found, ver in pairs:
+            source = cfg.download_path(found.bu, found.family, found.slug, ver.version)
+            table.add_row(
+                found.slug,
+                ver.version,
+                "present" if source.is_file() else "[yellow]missing[/yellow]",
+                str(cfg.extract_path(found.bu, found.family, found.slug, ver.version)),
+            )
+        console.print(table)
+        return
+
+    extractor = PackageExtractor(cfg, manager)
+    console.print(f"Extracting {len(pairs)} version(s)...")
+
+    def on_result(result) -> None:
+        if result.outcome is ExtractOutcome.EXTRACTED:
+            roots = f", {result.roots} root(s)" if result.roots else ""
+            console.print(
+                f"  [green]v[/green] {result.slug}@{result.version} "
+                f"{result.files} file(s), {result.engine}{roots}"
+            )
+        elif result.outcome in (ExtractOutcome.FAILED, ExtractOutcome.REFUSED):
+            console.print(f"  [red]x[/red] {result.slug}@{result.version}")
+
+    _report_extract(extractor.extract_many(pairs, force=force, on_result=on_result))
 
 
 @main.command()

@@ -1,7 +1,7 @@
 # DocuShift Design Document: Logic & Algorithms
 
 > **Document Status:** Living Design Specification
-> **Last Updated:** 2026-09-09
+> **Last Updated:** 2026-09-11
 > **Companion to:** `architecture.md` (what the system is and *why*), `planning.md` (when each part gets built), `user-guide.md` (how to drive it)
 
 This document states, in plain English, **how each piece of DocuShift decides what it decides**. Where `architecture.md` records a shape and its justification, this records the procedure: the inputs, the ordered steps, the tie-breaks, and what happens when the input is malformed — which, across ~250 products of undocumented API and twenty years of accumulated help output, is routine rather than exceptional.
@@ -369,7 +369,7 @@ Batch labels are trimmed and lowercased on write, so `POC-1`, `poc-1 ` and `poc-
 
 ## 5. Stage 3: Acquisition
 
-**Built** (Phase 4a, 2026-09-10), for acquisition. §5.1 and §5.2 are implemented in `downloader/fetcher.py`; §6's extraction and inventory are Phase 4b and remain Specified.
+**Built** (Phase 4a, 2026-09-10), for acquisition. §5.1 and §5.2 are implemented in `downloader/fetcher.py`; §6's extraction landed in Phase 4b-1 and its inventory walk is Phase 4b-2.
 
 ### 5.1 Download one version
 
@@ -404,15 +404,23 @@ Extraction under `--extract` goes through the same path-traversal refusal as §6
 
 ## 6. Stage 4: Extraction and inventory
 
-**Specified** (Phase 4b), except two pieces that are **Built**: the catalog half of §6.3 (the columns, the round-trip and the write-back), and §6.1 step 2's path-traversal refusal — which landed early in Phase 4a because `archive download --extract` needs it and there must not be two answers to "is this member safe".
+**Half Built.** §6.1 steps 1–3 landed in Phase 4b-1 (2026-09-11) in `extractor/unpacker.py`, along with the catalog half of §6.3 (the columns, the round-trip and the write-back) and §6.1 step 2's path-traversal refusal — which landed earlier still, in Phase 4a, because `archive download --extract` needs it and there must not be two answers to "is this member safe". **Steps 4 and 5 — the inventory walk, §6.2, §6.3's predicate and §6.4 — remain Specified**, for Phase 4b-2.
 
-### 6.1 Extract
+### 6.1 Extract — steps 1–3 **Built** (Phase 4b-1), steps 4–5 **Specified**
 
 1. Run over **the same selection as the download**, so an archived version is neither fetched nor unpacked.
 2. Refuse any archive member whose resolved path escapes the target directory, and any absolute member path. A documentation ZIP has no legitimate reason to contain either.
 3. Unpack to the canonical extract path, then record the resolved path and status `EXTRACTED`.
 4. Inventory assets **by category and by destination**, not by an extension allow-list, into `state.db` (§6.4).
 5. Walk the extracted tree once more, partitioning every file into API-reference or not, and write the five inventory columns back to `versions.csv` (§6.3).
+
+**Step 3 unpacks into `<extract_path>.part/` and swaps, never over a live directory.** Unpacking in place leaves the *previous* package's files behind, so a guide deleted upstream survives on disk forever — and converts, and nothing in the report says why. The swap is build, remove, rename, and **is not atomic on Windows**: an interrupted run can leave a `.part` directory, which the next run removes before it starts. That is the honest guarantee, and it is stated rather than implied.
+
+**An unchanged package is a no-op.** The ZIP's sha256 goes to `version_metadata` under `extract_zip_checksum`, and a matching one with a directory already in place skips the whole step; `--force` overrides. Keyed on the *package* rather than on the tree, because a tree is thousands of files and hashing it would cost more than re-extracting it. Same mechanism as §5.2's `zip_origin_path`, and for the same reason: detail for the rows that have it, not a field every version carries, so it costs no `SCHEMA_VERSION` bump.
+
+**Extraction is serial, and that is a decision rather than a default.** §5.1's pool exists because HTTP transfers overlap; two 900 MB unzips onto one disk contend rather than overlap, and the second finishes no sooner for having been started early. It also keeps `catalog.save()` — which §7's write-back calls per version — off a thread pool.
+
+**Five outcomes, and `refused` is not `failed`.** `extracted`, `current`, `no-package`, `refused`, `failed`. An archive that escapes its target directory is a statement about the package, not about this run: a retry will not fix it and somebody has to look at the ZIP, so it is counted apart from an I/O failure rather than summed into one number nobody can act on.
 
 ### 6.2 CSH source inventory
 
@@ -545,9 +553,13 @@ If it does not exist, emit **neither**: no link, no copy. The alt text or link l
 
 **Open:** whether a sharp version-over-version rise in the orphan count should warn rather than merely report. It is the signal that a guide silently failed to convert, but there is no baseline until Phase 5 has run twice.
 
-## 7. Stage 5: Engine detection
+## 7. Engine detection
 
-**Specified** (`architecture.md` §3.4). Rules measured against the whole `html-to-md` cache on 2026-09-08 — 1,822 versions, of which 539 (29.6%) carry no HTML at all and are not this algorithm's problem.
+**Built** (Phase 4b-1, 2026-09-11) in `engines/detector.py` and `engines/roots.py`, called by `extractor/unpacker.py` (`architecture.md` §3.4). Rules measured against the whole `html-to-md` cache on 2026-09-08 — 1,822 versions, of which 539 (29.6%) carry no HTML at all and are not this algorithm's problem.
+
+**This section was filed under Stage 5 until 2026-09-11, and the number stayed while the phase moved.** Detection runs at *extract* time, not at conversion time — §6.2's per-doc-set CSH inventory and §6.4's asset destinations are both engine-specific and both walk the tree the moment it is unpacked, so an engine that arrived at Stage 5 would arrive after its first two consumers. `user-guide.md` has described `extract` as the command that detects engines since Phase 1; this is the design catching up to it. Every measured figure below is unchanged.
+
+**Passes 2 and 3 read a bounded sample:** the first 8 KB of at most 200 HTML files per tree, breadth-first. `<head>`, the generator comment and the `MadCap:`/`DC.*` markers all live in the first few hundred bytes, and breadth-first reaches one file from each guide folder before it reaches the second file of any. The bound is recorded on the result, so "we looked at everything and found nothing" stays a different report line from "we stopped looking".
 
 ### 7.1 The rules
 
@@ -576,7 +588,7 @@ Run per version, over the extracted tree, in three passes.
 
 **The WebWorks generator meta tag is corroboration only — it has 1.5% recall.** Measured 2026-09-09 it names WebWorks or ePublisher in **3 of the 195** WebWorks versions. It is precise, it costs nothing, and it must never be read as evidence of absence: a null result from it says nothing at all. Pass 1's `wwhdata/` is the WebWorks rule.
 
-**Pass 3 — the generator meta tag.** A last look for `<meta name="generator">`, which names the remaining long tail outright: Adobe RoboHelp 11, Microsoft FrontPage 6.0, Help & Manual, MkDocs / mkdocs-material, Docusaurus, Apache Maven Doxia. 19 versions, ~7,200 files. None of these has a Stage 5 handler; they are recorded anyway (§7.3). A string we cannot map to a known name becomes `other`, with the raw value kept in `state.db`.
+**Pass 3 — the generator meta tag.** A last look for `<meta name="generator">`, which names the remaining long tail outright: Adobe RoboHelp 11, Microsoft FrontPage 6.0, Help & Manual, MkDocs / mkdocs-material, Docusaurus, Apache Maven Doxia. 19 versions, ~7,200 files. None of these has a Stage 5 converter; they are recorded anyway (§7.3). A string we cannot map to a known name becomes `other`, with the raw value kept in `state.db`.
 
 ### 7.2 Why DITA needed its own rule
 
@@ -907,14 +919,17 @@ Most rows are **Built** or **Specified**. Two are neither, and are marked as suc
 | 4 | Selection | Built | `catalog.py:iter_versions` |
 | 5.1 | Download one version | Built | `downloader/fetcher.py:download_one`, `fetch_to`, `download_many` |
 | 5.2 | Hand-supplied ingestion | Built | `downloader/fetcher.py:ingest_file`, `catalog.py:add_version` |
-| 6.1 | Extraction | Specified | Phase 4b |
+| 6.1 steps 1–3 | Extraction, `.part/` swap and the unchanged-package skip | Built | `extractor/unpacker.py:extract_one`, `extract_many` |
 | 6.1 step 2 | Path-traversal refusal | Built | `extractor/safe_unzip.py:safe_extract` |
-| 6.2 | CSH source inventory | Specified | Phase 4b |
+| 6.1 steps 4–5 | The inventory walk | Specified | Phase 4b-2 |
+| 6.2 | CSH source inventory | Specified | Phase 4b-2 |
 | 6.3 | Inventory columns and write-back | Built | `catalog.py:record_extract_inventory`, `utils/csvio.py` |
-| 6.3 | API-reference predicate and triage | Specified | Phase 4b |
-| 6.4 | Asset inventory by category and destination | Specified | Phase 4b |
+| 6.3 | API-reference predicate and triage | Specified | Phase 4b-2 |
+| 6.4 | Asset inventory by category and destination | Specified | Phase 4b-2 |
 | 6.4 | Asset copy set — resolve once, copy and link together | Specified | Phase 5, `transforms/assets.py` |
-| 7 | Engine detection | Specified | Phase 5 |
+| 7.1–7.3 | Engine detection, three passes | Built | `engines/detector.py:detect_version`, `detect_tree` |
+| 7.1 | Output-root location, by content | Built | `engines/roots.py:find_output_roots`, `owning_root` |
+| 7.3 | Write-back, folder map and the raw generator | Built | `extractor/unpacker.py:identify`, `catalog.py:record_detected_engine` |
 | `architecture.md` §5.1 | Flare converter | Specified | Phase 5, `engines/flare.py` |
 | `architecture.md` §5.2 | SDL DITA converter | Specified | Phase 5, `engines/dita.py` |
 | `architecture.md` §5.3 | WebWorks converter | Specified | Phase 5, `engines/webworks.py` |
