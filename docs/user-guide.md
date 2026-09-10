@@ -450,6 +450,13 @@ docushift extract --product businessevents-enterprise --version 6.4.0
 docushift extract --batch poc-1
 ```
 
+**Extract inventories assets by where they are going, not by extension.** It prints one line per destination — topic assets inside the engine's output root, PDFs and Word files the document router will publish (§4), API-reference trees copied whole, archives — and then the residue: files no destination claimed, grouped by their top folder. That last group is the one to read. A handful of stray files is normal; a few thousand under one folder name means a generated reference tree the tool has not learned to recognise, and it should be reported rather than converted:
+
+```
+assets   images 2,341   documents 12   api-reference 8,904   archives 0
+         unclaimed 512  →  components-api/ 498, css/ 14
+```
+
 ```bash
 # Convert all downloaded packages
 docushift convert --all
@@ -466,6 +473,14 @@ docushift convert \
 
 Conversion also writes the version's context-sensitive help map (`csh.yml`) and stamps the
 matching identifiers into topic frontmatter — see §7.
+
+**Conversion copies an asset because a topic referenced it, and it copies it at the moment it writes the link.** There is no extension allow-list and no separate copying pass: the two happen together, so a relative image link in the output always has a file at the other end. Each asset keeps the path it had relative to its topic, so nothing is renamed, flattened or de-duplicated. Three things get reported rather than copied:
+
+- **Skipped skin.** Most references in a help package point at the generator's own chrome — SDL's `static/`, WebWorks' `tpl/`, Flare's `Skins/`. Half to three-quarters of all references are these. They are counted and dropped.
+- **Unreferenced assets.** Images no topic points at are named in the report and left behind — over half of a typical Flare image library. That is normal; MadCap projects accumulate.
+- **References that resolve to nothing.** These are counted **grouped by folder**, because that is how they cluster: a broken reference usually means one generated tree whose source was already broken, not scattered per-file loss. A count spread thinly across many folders is a tool problem; a few thousand under one folder is the package.
+
+Case mismatches are reported and not fixed. If a topic says `Images/Logo.png` and the file is `images/logo.png`, conversion copies the file as it found it and tells you — the link works on Windows and breaks once published to a case-sensitive host, so it needs a source fix, not a silent rewrite.
 
 ### AEM Synthesis & Publishing Layout
 ```bash
@@ -494,7 +509,7 @@ en-us-tibco-messaging-resources/        # the bulk tree
     └── archives/…                      # archived-version ZIPs + index.md, toc.yml
 ```
 
-Six things to expect:
+Seven things to expect:
 
 - **`nav.yml` and `meta.yml` are placeholders — do not build on their shape yet.** `toc.yml`, `index.md` and `csh.yml` are specified and stable; those two are not. The AEM side has not supplied a spec for either, so `config/aem_templates/nav.yml.j2` and `meta.yml.j2` still hold the scaffolding shapes the project started with, and both templates say so at the top. They will be rewritten against the real requirements when those arrive, which is likely to change their field names. `validate` therefore checks that the files exist and parse, and asserts nothing about their content.
 - **The PDF doc-classes get an index too.** `user-guides/`, `release-information/` and `reference-documents/` each receive a generated `index.md` and `toc.yml` listing their files, so a copied PDF is reachable. Titles come from the document kind where the name identifies one (Release Notes, VPAT, License Agreement), otherwise from the PDF's own metadata, otherwise from the filename. A doc-class with no files gets no folder at all rather than an empty index.
@@ -502,6 +517,7 @@ Six things to expect:
 - **Versions are dashed here** (`10.4.0` → `10-4-0`) and nowhere else. The catalog and the `families/` workspace keep the dots.
 - **API references are never converted.** Javadoc is copied through as HTML, and topic links into it are rewritten to absolute URLs on the AEM host. Set that host in `config/publishing.yaml` (`publish_base_url`) before your first sync — the path after it is derived, not configured.
 - **`validate` skips those absolute links by default.** They point at a different repository, so there is nothing on disk to check; pass `--check-external` to verify them over HTTP.
+- **A broken relative asset link is a tool bug, not a content finding.** Conversion writes the link and copies the file in one step, so `validate` finding one means something downstream moved a file without moving its link — it is reported as a regression, with the stage that could have caused it. An asset that nothing links to is not an error and is not reported here; that count belongs to `convert`.
 
 ---
 

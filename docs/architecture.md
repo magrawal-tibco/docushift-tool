@@ -827,7 +827,7 @@ Images keep their source filename and their `alt` where one exists. `image_skip_
 - **`Data/`** — the runtime manifest, TOC and alias files are *read* (§5.1.4, §5.4) and never emitted.
 - **API reference trees** — Javadoc shipped inside a Flare output: **595 directories holding 8,078 files, concentrated in just 56 versions** (one output root each). Identified by the shared `is_api_reference()` marker predicate (§6.3) and routed to `-resources` by §6.4, never by directory name. *(The 595 matching the 595-version total is coincidence; it was re-derived to confirm that.)*
 - **The `ja` localized subtree** — 8,004 files, and the only localized subtree in the corpus: no `zh`, `de`, `fr`, `es`, `ko`, `pt-br`, `it` or `ru` tree exists at the top level of any output root. Out of scope for the English migration; reported so its existence is visible rather than discovered later.
-- **Source-format assets shipped alongside the output** — 1,160 `.vsd`, 818 `.vsdx`, 149 `.zip`, 127 `.xlsx`, 80 `.drawio` across all 676 roots. These are authoring sources, not published documents; they go to asset preservation (§5.5), not to conversion or to the doc-class router.
+- **Source-format assets shipped alongside the output** — 1,160 `.vsd`, 818 `.vsdx`, 149 `.zip`, 127 `.xlsx`, 80 `.drawio` across all 676 roots. These are authoring sources, not published documents: the Visio and draw.io originals sit beside the PNG that was exported from them. No topic references any of them, so §5.5.3's rule leaves them where they are — **inventoried and reported, not copied** — and they reach neither conversion nor the doc-class router.
 - **The 5 partial Flare outputs** (§5.1.1) — MadCap topics with no `Data/HelpSystem.xml`. No TOC, no CSH, no reliable root boundary. Reported for triage.
 
 #### 5.1.10 The predecessor's Flare pipeline is a reference, with measured gaps
@@ -1469,8 +1469,201 @@ The identifiers are known before conversion writes the file (parsing a 24 KB `Al
 - `unresolved` is empty, or every entry in it is accounted for in the report.
 - **Cross-version regression**: identifiers present in the previous converted version and absent from this one are reported. A dropped identifier is an upgrade that breaks the product's Help button, and it is invisible from within a single version.
 
-### 5.5 Universal Asset Preservation
-- Copies referenced assets (`PDF`, `DOC`, `DOCX`, `XLS`, `XLSX`, `TXT`, `PNG`, `SVG`, `ZIP`) and rewrites relative markdown paths.
+### 5.5 Asset Management
+
+Everything a topic points at that is not another topic. In this corpus that is overwhelmingly one thing — **images** — and the interesting part is not which formats to carry but *how the copy and the link are kept in agreement*, because that is the thing the predecessor gets wrong at scale (§5.5.9).
+
+**Scope.** This section owns assets that live **inside an engine output root** and are reached from a converted topic. It does not own the PDFs and readmes in the package's `pdf/` and `doc/` folders — those are whole deliverables, not assets, and §6.2.1's document router publishes them into their own doc-classes. The two meet in exactly one place, §5.5.8, where a Flare topic links out of its root at a routed document.
+
+Measured 2026-09-10 over the predecessor's extracted cache — **1,822 versions, 2,204,598 files, 100 extensions, 75.2 GB**. Scripts: `C:\tmp\as1_census.py` (extension census), `as4_refs.py` (per-engine references and on-disk assets), `as5_placement.py` (which pipeline destination claims each file), `as8_pred3.py` (the predecessor's own output), `as10_names.py` (filenames against Markdown URL syntax).
+
+#### 5.5.1 The extension list this section used to carry was wrong in both directions
+
+It named `PDF`, `DOC`, `DOCX`, `XLS`, `XLSX`, `TXT`, `PNG`, `SVG`, `ZIP`. Against the population:
+
+| Extension | Files | Bytes | |
+| :--- | ---: | ---: | :--- |
+| `.png` | 448,349 | 11.906 GB | |
+| `.gif` | **192,979** | 2.342 GB | **not on the list** |
+| `.jpg` | **86,031** | 3.024 GB | **not on the list** |
+| `.svg` | 42,090 | 0.245 GB | |
+| `.pdf` | 10,800 | **18.155 GB** | the largest byte class in the corpus; 84.6% of it is the document router's (§5.5.2) |
+| `.txt` | 4,784 | 0.069 GB | |
+| `.zip` | 433 | 0.069 GB | |
+| `.xlsx` | 138 | 0.002 GB | |
+| `.jpeg` | **940** | 0.299 GB | **not on the list** |
+| `.xls` | **3** | — | on the list |
+| `.docx` | **1** | — | on the list |
+| `.doc` | **0** | — | on the list |
+
+Three corrections:
+
+- **It omits 36.2% of the corpus's images.** Of 773,941 image files, PNG and SVG are 490,439 (63.4%); GIF, JPG and JPEG are 279,950 (36.2%). GIF is the *dominant* format in one whole engine — 83,839 of WebWorks' 96,559 image references (§5.5.4). An allow-list built from PNG and SVG loses more than a third of the pictures in the corpus, and loses them unevenly: it would take out most of WebWorks and almost none of DITA.
+- **Three of the nine extensions it names barely exist.** `.doc` occurs zero times, `.docx` once and `.xls` three times in 2.2 million files — and all four of those files sit in a package's `doc/` or `pdf/` folder, so they are the router's and never an asset a topic references. Word and Excel are on the list because they sound like documentation, not because anyone measured.
+- **PDF is on the list for the wrong reason.** 9,133 of the 10,800 PDFs (84.6%) are directly inside `pdf/` or `doc/` and belong to §6.2.1. Only **10** sit inside an engine output root. What §5.5 actually needs from PDF is the 241 *references* Flare topics make to one (§5.5.4) — a link problem, not a copy problem.
+
+The corpus also holds 100 extensions, of which the list names nine. Sizing an allow-list against a corpus this varied is the wrong shape of rule; §5.5.3 replaces it.
+
+#### 5.5.2 Where the bytes actually go, and what is left over
+
+Every file of every version, classified against the destination the pipeline has for it — an engine output root, the document router's folders, an API-reference tree (§6.3), or nothing:
+
+| Destination | Files | Bytes |
+| :--- | ---: | ---: |
+| Engine output root — HTML topics | 569,844 | 11.349 GB |
+| Engine output root — **images** | 588,946 | 13.946 GB |
+| Engine output root — CSS / JS / fonts | 381,947 | 17.683 GB |
+| Engine output root — **every other asset** | **2,703** | 0.318 GB |
+| Engine output root — XML, JSON, other | 3,085 | 0.125 GB |
+| API-reference trees (copied verbatim, §6.2) | 302,701 | 5.573 GB |
+| Document router, `pdf/` + `doc/` (§6.2.1) | 12,352 | 15.186 GB |
+| **Nothing claims it** | 343,020 | 11.034 GB |
+
+**Inside an output root, an asset is an image — 99.5% of the time.** Against 588,946 images, everything else totals 2,703 files: `.vsd` 1,160, `.txt` 559, `.vsdx` 545, `.xlsx` 127, `.swf` 106, `.mp4` 85, `.drawio` 80, `.zip` 30, `.pdf` 10, `.jar` 1. Two of those groups are not assets at all but *source formats* shipped beside their exported image (§5.1.9) — 1,785 files that no topic references. The genuine non-image asset class in this corpus is **30 ZIPs and 85 videos**.
+
+**The document router's folders hold what the old extension list was reaching for.** `.pdf` 9,133, `.txt` 3,126, `.csv` 60, `.xlsx` 11, `.html` 8, `.ipynb` 6, `.xls` 3, `.aspx` 2, `.xml`/`.htm`/`.docx` 1 each. This is where Word and Excel live — one file each — and they arrive there by folder, not by extension.
+
+**The 343,020 unclaimed files are two different problems and only one of them is this section's.** 280,495 of them (81.8%) are in **179 versions that have no surveyed output root at all** — DocBook, which is unspecified (§5.5 owes it nothing until §5.x exists), and engines the three inventories do not yet cover. That is a coverage gap tracked elsewhere. The remaining **62,525 files in 243 versions that *do* have a root** are the residue this section cares about, and it is dominated by generated reference trees the §6.3 marker list does not yet claim: `bpme/5.7.0`'s `components-api/` (already Finding 1 in `design.md` §6.3.1), `activespaces_remote/2.1.6`'s `tib_activespaces_java_api/` and `tib_activespaces_net_api/`, `sfire-dsc/6.5.0`'s `api/`. **The rule that follows is that Stage 4 must count and report unclaimed files rather than let the walk fall through them silently** — the report is how a missed generator surfaces, and §6.3's flag is the mechanism.
+
+#### 5.5.3 The copy set is what the emitted Markdown references, computed in the same pass that emits it
+
+Not an extension allow-list, and not a second walk that re-derives paths.
+
+1. The engine resolves a reference once, while converting the topic, against the source file's own directory.
+2. That single resolution produces **two** outputs: the path written into the Markdown, and an instruction to copy that source file to the corresponding place in the output tree.
+3. A reference that cannot be resolved produces **neither** — no link, no copy — and is counted and named in the report.
+
+The property this buys is worth stating as an invariant: **a relative asset link exists in the output if and only if the file it names was copied.** Broken relative asset links become structurally impossible rather than something a linter finds afterwards, and the extension question disappears — a `.wmf` referenced by a topic is copied because it was referenced, and a `.psd` sitting unreferenced in `Resources/Images/` is not, because it was not.
+
+Three things follow that are not obvious:
+
+- **Nothing is copied on the strength of its extension.** The 1,785 `.vsd`/`.vsdx`/`.drawio` source files are Visio and draw.io originals shipped beside their exported PNG; they are not referenced, so they are not copied, and §5.1.9 already says so.
+- **The parse that finds references must be the parse that emits.** If a reference form is invisible to the converter — a CSS `url()`, a `srcset`, an `<object data>` the extractor drops — then no Markdown link is emitted for it either, so no link breaks. Using a *different* pass to build the copy set is what re-introduces the failure, which is exactly the predecessor's defect (§5.5.9).
+- **This makes the orphan count a real number rather than a residue.** Everything on disk that the copy set does not contain is unreachable from the converted output, by construction, and §5.5.7 reports it.
+
+#### 5.5.4 Skin is most of the reference traffic, and the prefix test must be exact
+
+References out of a topic to something that is not HTML, per engine. *Counted over the whole topic file rather than inside the content container, so these are upper bounds; the content-scoped counts are §5.1.8, §5.2.6 and §5.3.8. Flare is a seeded random sample of **70 of 676 output roots, 36,462 of 422,267 topics (8.6%)** — a four-hour population walk buys precision the design does not need; DITA and WebWorks are complete.*
+
+| | Flare (8.6% sample) | SDL DITA | WebWorks |
+| :--- | ---: | ---: | ---: |
+| Non-HTML references | 24,966 | 150,237 | 96,560 |
+| …into the skin directory | 2,196 (**8.8%**) | 73,176 (**48.7%**) | 73,573 (**76.2%**) |
+| …content references | 22,491 | 77,061 | 22,986 |
+| The skin prefix | `Skins/` | `static/` | `tpl/` |
+| Content references that are images | 24,648 of 24,966 | 150,196 of 150,237 | 96,559 of 96,560 |
+| Non-image references | 313 `.pdf`/`.txt`, 2 `.zip`, 3 `.mp4` | 20 `.fm`, 19 `.zip`, 2 `.txt` | 1 `.pdf` |
+| Dominant format | `.gif` 11,071, `.png` 10,269, `.jpg` 3,207 | `.png` 130,688, `.gif` 11,784, `.jpg` 7,669 | `.gif` 83,839, `.jpg` 11,248, `.png` 1,449 |
+
+Three readings:
+
+- **In two of the three engines, most image references are chrome.** Skipping the skin is not an edge case to be tidied up later; it is the majority of the work in DITA and three-quarters of it in WebWorks. Getting it wrong in the copying direction imports 73,573 callout icons into the docs repo; getting it wrong in the *counting* direction reports them as missing assets, which is the bug this survey itself had before the `skin-target` bucket separated them.
+- **The prefix test is a whole-segment test on the resolved path, not a substring.** `design.md` §6.3.1 Finding 2 already condemns the substring form for API paths, and the predecessor applies exactly that form here too: `src.startswith(pfx) or f"/{pfx}" in src`. Every skin prefix in the table is a single top-level directory, so the resolved path either starts with it or does not.
+- **The engines' asset shapes are genuinely different and the design must not assume one.** DITA references reach two levels down into shared `wsdls/` (41,129) and `apischemas/` (11,002) trees, and 24,889 sit in the topic's own directory; WebWorks is essentially one shape, `images/x` (22,860 of 22,935); Flare is spread across every guide directory in the root and 5 levels deep in 3,443 cases. A rule that hard-codes "images live in `images/`" fits one engine of three.
+
+#### 5.5.5 Assets keep their source-relative path
+
+The alternative — flattening every asset into one `assets/` folder per output — collides, measurably:
+
+| | Flare (sample) | SDL DITA | WebWorks |
+| :--- | ---: | ---: | ---: |
+| Basename collisions if flattened **within one output root** | **5,328**, in 26 of 70 roots | 927, in 2 of 353 | 0 |
+| …**within one version** (roots merged) | 5,389 | 2,698 | 4,902 |
+| Same relative path in two roots of one version, **different bytes** | 7 | 2 | **112** |
+
+Flare flattens worst because a root routinely ships a translated tree beside the English one — `sfire-dsc/7.1.0` alone loses 1,490 files to collision, most of them `ja/` mirroring `en`. Mirroring the source path costs nothing: it makes the rewrite a no-op for the 24,889 DITA and 22,860 WebWorks references that are already same-directory or `images/x`, and it is the only arrangement in which the 112 WebWorks files that share a path across two books but differ in content both survive.
+
+Two consequences: **each output root gets its own subtree** in the version's `online-help/{version-dashed}/` folder, since roots are separate publications that may disagree at the same relative path; and **no de-duplication across roots**, which would need a content hash to be safe and would break 121 references to save a few megabytes.
+
+**Filenames are kept as they are** — no slugification. `alt` text is not a filename source in any engine (§5.1.8, §5.2.6, §5.3.8), the corpus contains **no non-ASCII asset filename** in 792,607 assets, and renaming would break the one property §5.5.3 exists to guarantee.
+
+#### 5.5.6 The five ways a reference goes wrong, all measured
+
+| | Flare (sample) | SDL DITA | WebWorks |
+| :--- | ---: | ---: | ---: |
+| Content references that resolve | 19,586 | 77,036 | 22,935 |
+| **Dangling** — no such file | 2,905 (12.9%) | **25 (0.032%)** | **51 (0.222%)** |
+| **Case mismatch** — resolves on Windows, 404s on a case-sensitive host | 13 | **0** | **1** |
+| Percent-encoded in the source | 0 | 0 | 1,224 |
+| Contains a literal space | 448 | 0 | 1,224 |
+| Backslash as separator | 0 | 20 | 648 |
+| Root-absolute (`/…`) | 0 | 0 | 1 |
+| Escapes the output root | **279** | **0** | **0** |
+
+- **Dangling references cluster in whole trees, not across topics.** Flare's 12.9% is one number hiding two facts: **2,706 of the 2,905** are a single generated function-reference tree in `businessevents-enterprise/6.2.2`, where every page under `functions/*/` carries `src="icon.gif"` and the file sits one level up at `functions/icon.gif` — broken in the source, in a browser, today. Another 126 are `amsg/3.4.4`, whose generator emitted `src="adding-a-service-or-.htm/service.png"`, using the topic's own filename as a directory. Excluding those two trees the rate is **73 of 19,785, 0.37%**, which is DITA's and WebWorks' order of magnitude. **The report must therefore be per-tree, not just a total**: a package that is 99% sound with one wholly broken subtree looks identical to a package with scattered rot if you only print a percentage.
+- **Case is a near-non-problem, and now it is known rather than assumed.** 14 mismatches in 119,557 resolving references. They are real (`ja/Resources/Images/DISTINCT (TDV) operator icon.png` referenced against `Distinct (TDV) operator icon.png` on disk) and they only surface after publishing to a case-sensitive host, so they are worth reporting — but the design does not need a case-folding resolution layer to survive this corpus.
+- **The malformed-separator cases are WebWorks' and they are fixable at parse time.** 1,224 percent-encoded references are exactly the 1,224 that contain a space; 648 use `\`. Decoding percent-escapes and normalizing separators before resolution is what turns these from misses into hits, and skipping it would report 1,872 false failures.
+
+**And a fifth failure that lives on the emit side, not the source side.** A bare Markdown URL cannot contain a space or a parenthesis. Of **792,607 asset files** in the corpus, **6,587 (0.83%)** sit at a path that breaks one — 3,858 by filename, 2,729 by a directory segment; 3,796 contain a space, 164 a parenthesis, 15 an `&`, 3 an apostrophe. **104 filenames already contain a literal `%`** (`7SelectFile%201.gif`), which is the case that punishes a naive encoder: `%` must become `%25` or the name round-trips into a different file. So every emitted asset URL is **percent-encoded**, including a pre-existing `%`. The predecessor does not, and ships 11 broken image links because of it (§5.5.9) — all in `ebx-addon`, all of the form `![…](./resources/pictures/Align_Data_MDM_Field_(PathName).png)`.
+
+#### 5.5.7 Orphans are counted and reported, never copied
+
+Assets on disk inside an output root that no topic references:
+
+| | Flare (sample) | SDL DITA | WebWorks |
+| :--- | ---: | ---: | ---: |
+| Content images on disk | 30,810 | 72,312 | 24,560 |
+| …unreferenced | **16,808 (54.6%)**, 673 MB | **402 (0.6%)**, 22 MB | **5,696 (23.2%)**, 12 MB |
+| Other unreferenced assets | 208 source-format, 6 media, 3 docs, 1 ZIP | 7 ZIPs, 4 docs | — |
+
+Flare's rate is the shape of the tool rather than a defect: a MadCap project's `Resources/Images/` is an author-managed library that accumulates, and the build ships all of it plus generated `*_thumb_0_0.png` variants. Copying orphans would add 673 MB of unreachable files to the docs repo per full run; dropping them silently would hide the case where a whole guide failed to convert and took its images out of the reference set with it. So the count is a report line per output root, and a sharp rise between two versions of the same product is the signal worth watching.
+
+*One caveat on this figure in both directions: references from pruned skin CSS and JS are not counted, so the orphan count is an upper bound; and the survey reads the whole topic file rather than the content container, so it is an upper bound on what is genuinely reachable too.*
+
+#### 5.5.8 References that leave the output root are Flare's, and they land in the document doc-classes
+
+`escapes-root` is **0** in DITA and **0** in WebWorks: no content reference in either engine ever leaves its own output root, so for those two the cross-doc-class asset problem does not exist. Flare has **279**, of which 127 point at a file that is present, and their destinations are exactly the document router's territory:
+
+| Destination | Count |
+| :--- | ---: |
+| `doc/` | 76 |
+| `pdf/` | 66 |
+| A file directly at the version root (`tib_bw_6.11.0_relnotes.pdf`, `tib_amsg_3.4.4_vpat.pdf`, `tib_bwplugintwitter_remindernotice.txt`, `…_readme.txt`) | 68 |
+| `license/` | 15 |
+
+These are Flare topics linking to the release notes, VPAT, licence and readme that §6.2.1 routes into `release-information/` and `reference-documents/`. After Stage 7 the target is a sibling doc-class in the same repository, so this is not the `-resources` case of §6.4 — it is a relative path across doc-classes, and Stage 7 owns it for the same reason (§10.7): conversion does not know the publishing layout. The 152 that point at nothing are references to documents the ZIP does not ship, and they are reported, not emitted.
+
+#### 5.5.9 The predecessor's asset step, measured on its own output
+
+`html-to-md/scripts/03_convert.py:copy_images()` is the naive design, and its output is on disk, so it can be scored rather than argued about. Fourteen published products, 34,695 Markdown files, every relative image reference resolved against the filesystem:
+
+| Product | md | Image refs | Broken | | Cause |
+| :--- | ---: | ---: | ---: | ---: | :--- |
+| `en-us-spot-data-science-statistica` | 13,726 | 9,381 | **7,223** | 77.0% | target absent |
+| `ebx` | 5,962 | 7,087 | 0 | 0.0% | |
+| `ebx-addon` | 2,625 | 5,410 | 4 | 0.1% | malformed URL |
+| `en-us-ibi-ibi` | 524 | 623 | 0 | 0.0% | |
+| `dsp_gridserver` | 1,925 | 127 | 4 | 3.1% | malformed URL |
+| the other 9 | 9,933 | 544 | 0 | 0.0% | |
+| **Total** | **34,695** | **23,172** | **7,231** | **31.2%** | 7,220 absent, 11 malformed |
+
+**The 31.2% is not a per-file loss rate; it is one product failing wholesale.** `ebx` gets 7,087 of 7,087 right. Statistica gets 2,158 of 9,381. That bimodality is the diagnosis: the images exist in the cache, and the output tree holds 1,949 PNGs against 7,220 dangling references — so this is a path-shape disagreement, not files that went missing one at a time.
+
+The mechanism is `copy_images()` deriving the destination from **the page URL** through `url_to_cache_path()`, while the Markdown keeps the source's own relative `src`. Two independent derivations of the same path, and where they disagree:
+
+```python
+cached = url_to_cache_path(abs_url, cache_dir)
+if not cached.exists(): continue          # no count, no log, no report
+```
+
+The reference is already written into the Markdown by then, so the failure produces a broken link and no record of itself. `scripts/fix_missing_images.py` exists precisely because of this, and it re-derives the cache path a *third* way — which is why it cannot repair Statistica, where the output version segment is `14-4-0` and the cache's is `14.1.0`, and where the source path shape is `doc/html/…` rather than the one it expects.
+
+Three rules for DocuShift come directly out of this, and all three are already in §5.5.3 and §5.5.6:
+
+1. **One resolution produces both the copy and the link.** Never re-derive a path a second time from a URL, a cache layout or a guessed version segment.
+2. **A reference that will not resolve is counted and named**, never `continue`d past. `design.md` §11.10 already requires this in general; this is the case that motivated it.
+3. **Encode the URL on emit.** The 11 malformed links are the whole of the non-Statistica failure and they are a one-line fix.
+
+*What is worth taking from `copy_images()`: the `data:` and `http` short-circuit, and the idea of a skip-prefix list. What is worth discarding: the substring form of that list (§5.5.4), the URL-derived destination, and the silent `continue`.*
+
+#### 5.5.10 What each stage does
+
+| Stage | Does |
+| :--- | :--- |
+| **4 — extract** | Walks the extracted tree once (the same walk as §6.3's API partition) and records, per output root: asset files by category and bytes, files no destination claims, and the counts the report prints. It resolves nothing — it has not parsed a topic yet. (`design.md` §6.4) |
+| **5 — convert** | Resolves each reference while emitting the topic, writes the percent-encoded relative link, copies the source file to the mirrored path under the root's output subtree, and counts every reference that did not resolve. Skin prefixes are never copied; orphans are never copied. (`design.md` §6.4) |
+| **7 — sync** | Moves the converted tree into the publishing layout; assets ride with it, so intra-root links do not change. Rewrites only the references that cross a boundary — Flare's 279 escapes into the document doc-classes (§5.5.8), and links into `-resources` (§6.4). (`design.md` §10.7) |
+| **7 — validate** | `docushift validate` re-resolves every relative link against the filesystem. Under §5.5.3 this should find nothing; a finding means the invariant broke. (`design.md` §8.4) |
 
 ---
 

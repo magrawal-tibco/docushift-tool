@@ -401,7 +401,7 @@ The archive variant is identical but targets the archive path, and its `--extrac
 1. Run over **the same selection as the download**, so an archived version is neither fetched nor unpacked.
 2. Refuse any archive member whose resolved path escapes the target directory, and any absolute member path. A documentation ZIP has no legitimate reason to contain either.
 3. Unpack to the canonical extract path, then record the resolved path and status `EXTRACTED`.
-4. Inventory assets by extension — PDF, Word, Excel, text, images, nested ZIPs — into `state.db`, so Stage 5 can relink them and Stage 7 can account for them.
+4. Inventory assets **by category and by destination**, not by an extension allow-list, into `state.db` (§6.4).
 5. Walk the extracted tree once more, partitioning every file into API-reference or not, and write the five inventory columns back to `versions.csv` (§6.3).
 
 ### 6.2 CSH source inventory
@@ -496,6 +496,44 @@ Observed spellings: `api`, `apidocs`, `api-docs`, `api_reference`, `api-referenc
 | Sandcastle (.NET) | `fti/FTI_*.json`, `Help/html/<guid>.htm` |
 
 This is the same conclusion §7 reaches for engine detection, for the same reason: **what a tree contains is knowable; what someone named it is not.**
+
+### 6.4 Assets: the inventory, and the copy set — **Specified**
+
+One algorithm that spans two stages, kept in one place because splitting it is what breaks it (`architecture.md` §5.5, §5.5.9). Stage 4 runs steps 1–2; the converter runs steps 3–7 per topic; Stage 7's part is §10.7.
+
+**Step 1 — inventory, in the §6.3 walk.** The same single walk that partitions API-reference files also classifies every non-HTML file by **category** (image, media, document, archive, source-format, skin, other — decided by extension) and by **destination** (inside an engine output root / directly inside `pdf/` or `doc/` / under an API-reference root / unclaimed). Record counts and bytes per `(version, output_root, category)` in `state.db`. Nothing is filtered by an extension allow-list: the corpus holds 100 extensions and the nine the old list named cover neither the images that matter nor the documents that do (`architecture.md` §5.5.1).
+
+**Step 2 — report the residue.** Files that no destination claims are counted and printed by `docushift extract`, grouped by their top path segment:
+
+```
+Assets: 30,810 images (1.25 GB), 208 source-format, 3 archives in 1 output root
+Unclaimed: 5,426 files in components-api/ — no destination, no API-reference marker
+```
+
+This is the same mechanism as §6.3's API-reference flag and it exists for the same reason: 62,525 files across 243 rooted versions currently fall through, almost all of them generated reference trees whose generator has no marker yet (`architecture.md` §5.5.2). Silence here is how a whole tree goes missing without anyone noticing.
+
+**Step 3 — resolve, while emitting.** For each non-HTML reference found by the engine's content extractor, in the same pass that writes the topic:
+
+1. **Classify the raw reference.** `data:` and any absolute URL (`http`, `https`, `ftp`, `mailto`) are emitted unchanged and never copied. A fragment-only reference is not an asset.
+2. **Normalize before resolving**, in this order: strip the `#fragment` and `?query`; percent-**decode**; replace `\` with `/`. Skipping this reports 1,872 WebWorks references as missing that are not (`architecture.md` §5.5.6) — 1,224 percent-encoded, 648 backslash-separated.
+3. **Resolve against the source topic's own directory**, then normalize `.` and `..`. The result is a path relative to the output root.
+4. **Skin check first.** If the resolved path starts with one of the engine's skin prefixes — Flare `Skins/`, `Resources/Scripts/`, `Resources/Stylesheets/`, `Resources/MasterPages/`, `Resources/TemplateExtensions/`, `Data/`; DITA `static/`, `fonts/`; WebWorks `wwhdata/`, `wwhelp/`, `tpl/` — the reference is chrome. Drop the element, do not copy, do not count as missing. **Compare whole segments, never as a substring** (§6.3.1 Finding 2 for the same rule on API paths; the predecessor makes the substring mistake here too). This branch takes 48.7% of DITA references and 76.2% of WebWorks ones.
+5. **Escape check.** A resolved path starting `..` leaves the output root. It is not copied and not emitted as a relative link; it is handed to Stage 7 with its resolved absolute source path, which routes it (§10.7). 279 in the Flare sample, 0 in DITA and WebWorks.
+
+**Step 4 — the two outputs, or neither.** If the resolved path names a file that exists:
+
+- Copy that file to **the same relative path** under the output root's subtree in the converted output. Never flatten: flattening collides 5,328 times inside a single Flare root (`architecture.md` §5.5.5). Never rename: the filename is kept byte-for-byte.
+- Emit the Markdown link as the path **from the emitted topic to the emitted asset**, percent-encoded — space → `%20`, `(` → `%28`, `)` → `%29`, and a pre-existing literal `%` → `%25` *first*. 104 filenames in the corpus contain a `%`, and encoding them in the wrong order produces a different filename.
+
+If it does not exist, emit **neither**: no link, no copy. The alt text or link label is emitted as plain text so the prose still reads, and the reference is counted.
+
+**Step 5 — count, per output root.** Resolved, skin, escaped, dangling, and — after the topic loop — orphan (on disk, not in the copy set). Dangling references are grouped by **top path segment** in the report, not only totalled. A total hides the corpus's actual failure shape: 2,706 of Flare's 2,905 dangling references are one generated tree that is broken in its own source, and the remaining rate is 0.37% (`architecture.md` §5.5.6).
+
+**Step 6 — case is checked, not corrected.** Where a reference resolves but its spelling differs from the file's, count it and name it. The extracted cache is on Windows, so these work locally and 404 after publishing. There are 14 in the whole corpus, so this is a report line and not a resolution strategy.
+
+**Step 7 — orphans are reported, never copied.** Count and size everything on disk inside the output root that the copy set does not contain. This is 54.6% of Flare's images by count and 673 MB by size, and copying it would put unreachable files in the docs repo (`architecture.md` §5.5.7).
+
+**Open:** whether a sharp version-over-version rise in the orphan count should warn rather than merely report. It is the signal that a guide silently failed to convert, but there is no baseline until Phase 5 has run twice.
 
 ## 7. Stage 5: Engine detection
 
@@ -595,6 +633,8 @@ Count products by family provenance and list the unclassified ones. This turns "
 `docushift validate` treats CSH as link integrity, because that is what it is (§9.6).
 
 **Links are classified before they are checked.** A relative link resolves against the filesystem and a missing target is an error. An absolute URL is external — which, after Stage 7, includes every rewritten API-reference link (`architecture.md` §6.4) — and is skipped by default, checked over HTTP only behind an explicit flag. Checking the two the same way would report the entire API surface of every product as broken.
+
+**Asset links are checked, and finding one is a regression rather than a discovery.** §6.4 resolves the copy and the link together, so under invariant 13 a broken relative asset link cannot be produced; `validate` re-resolves them anyway, because an invariant nobody tests is an assumption. The linter decodes percent-escapes before resolving, so its comparison matches what a renderer does. It does **not** report unreferenced assets as errors — orphans are a Stage 5 report line (§6.4 step 7), and 54.6% of Flare's images are orphans by design of the authoring tool, not by defect.
 
 **`nav.yml` and `meta.yml` are checked for existence and YAML well-formedness only** (§10). Their shapes are placeholders pending an AEM spec, so there is no field list to validate against; asserting one would pin a guess in the test suite and make the eventual real template read as a regression. `toc.yml`, `index.md` and `csh.yml` are validated on their content as specified above and in §9.6.
 
@@ -792,6 +832,20 @@ Each of `user-guides`, `release-information` and `reference-documents` gets a fl
 
 ---
 
+### 10.7 Step 4, the cross-boundary rewrite — **Specified**
+
+The distributor's last step (§10 above), and the only link work Stage 7 does. Everything else was settled at conversion time, which is the point: §6.4 guarantees that a *relative* asset link inside an output root already resolves, so the assets move with their tree and those links are untouched. Three reference classes are left, all of which needed a destination that did not exist until now.
+
+**1. Links into `-resources`.** Converted help links into an API-reference tree (`[…](api/java/index.html)`), which is now a sibling repository. Rewrite to an absolute URL from `publish_base_url` (`architecture.md` §6.4). §8.4 then classifies these as external and does not resolve them against the filesystem.
+
+**2. References that escaped the output root**, handed over by §6.4 step 3.5 with their resolved absolute source path. Route the target through §10.4's document router to find the doc-class it landed in, then emit a relative path across doc-classes — both are in the docs repo, so this stays a filesystem link and stays checkable. Measured: 279 in the Flare sample (76 into `doc/`, 66 into `pdf/`, 68 at the version root, 15 in `license/`), **0 in DITA and 0 in WebWorks** (`architecture.md` §5.5.8). Where the target resolves to no routed document — 152 of the 279, references to files the ZIP does not ship — emit the link text as plain text and count it.
+
+**3. The `archives/` and doc-class index links**, which §10.5 and §10.6 generate from lists rather than rewrite.
+
+**Nothing is re-resolved from a URL or a cache path.** Every rewrite here consumes a target that Stage 5 already resolved and recorded; Stage 7 changes the *form* of a reference, never its identity. This is the rule `architecture.md` §5.5.9 measures the cost of breaking — 7,231 broken image links in the predecessor's output, from a second derivation of a path that was already known.
+
+The rewrite is last because it needs both destinations on disk, and it is here rather than in Stage 5 because conversion does not know the publishing layout.
+
 ## 11. Invariants
 
 Properties that hold across the whole tool. Each is a rule some algorithm above exists to maintain, and each is worth testing directly.
@@ -808,6 +862,7 @@ Properties that hold across the whole tool. Each is a rule some algorithm above 
 10. **Absence is reported, never faked.** No empty `csh.yml`, no empty version list from a failed crawl, no stage command that exits 0 having done nothing.
 11. **An unmeasured value is blank, never zero.** The inventory columns distinguish "never extracted" from "extracted, found none", and no stage writes them for a run that failed. (§6.3)
 12. **One path is classified as an API reference by exactly one predicate**, shared by the Stage 4 count, the Stage 5 skip and the Stage 7 route. (§6.3)
+13. **A relative asset link exists in the output if and only if that asset was copied.** One resolution, at emit time, produces both — or neither, plus a counted failure. No later stage re-derives an asset path from a URL, a cache layout or a version segment. (§6.4, §10.7)
 
 ---
 
@@ -846,6 +901,8 @@ Most rows are **Built** or **Specified**. Two are neither, and are marked as suc
 | 6.2 | CSH source inventory | Specified | Phase 4 |
 | 6.3 | Inventory columns and write-back | Built | `catalog.py:record_extract_inventory`, `utils/csvio.py` |
 | 6.3 | API-reference predicate and triage | Specified | Phase 4 |
+| 6.4 | Asset inventory by category and destination | Specified | Phase 4 |
+| 6.4 | Asset copy set — resolve once, copy and link together | Specified | Phase 5, `transforms/assets.py` |
 | 7 | Engine detection | Specified | Phase 5 |
 | `architecture.md` §5.1 | Flare converter | Specified | Phase 5, `engines/flare.py` |
 | `architecture.md` §5.2 | SDL DITA converter | Specified | Phase 5, `engines/dita.py` |
@@ -861,3 +918,4 @@ Most rows are **Built** or **Specified**. Two are neither, and are marked as suc
 | 10.4 | Document router (`pdf/` and `doc/` → doc-class) | Specified | Phase 6 |
 | 10.5 | Document doc-class index (`index.md`, `toc.yml`, title chain) | Specified | Phase 6 |
 | 10.6 | `archives/` index, built from the catalog rather than the directory | Specified | Phase 6 |
+| 10.7 | Cross-boundary link rewrite (`-resources` URLs, escaped asset references) | Specified | Phase 6 |
