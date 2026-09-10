@@ -233,10 +233,12 @@ class StateStore:
     def record_version_snapshot(self, version: ProductVersion) -> None:
         """Records the discovery-owned version fields.
 
-        The engine columns, `convert_batch`, `zip_source` and the Stage 4 inventory
-        columns are all absent from `version_snapshot` structurally rather than by
-        rule -- discovery does not write them, so there is no base value a merge
-        could legitimately compare against (docs/architecture.md §3.5).
+        The engine columns, `convert_batch`, `zip_source`, the Stage 4 inventory
+        columns and the three release-status columns are all absent from
+        `version_snapshot` structurally rather than by rule -- discovery does not
+        write them, so there is no base value a merge could legitimately compare
+        against (docs/architecture.md §3.5, §3.11). The schema is therefore
+        unchanged by the end-of-support work: no migration, no version bump.
         """
         with self._tx() as conn:
             conn.execute(

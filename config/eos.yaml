@@ -1,0 +1,100 @@
+# End-of-support exclusions -- docs/architecture.md 3.11.
+#
+# Support publishes a retirement report; a version it marks `Retired` is never
+# converted. This file is the authored half: which report is active, and how its
+# product names map to catalog slugs where the name alone does not resolve.
+#
+# THE REPORT'S ONLY JOIN KEY IS THE DISPLAY NAME. It carries no slug and no
+# product_code. A name is matched by slugifying it and testing the result against
+# `products.csv` by STRING EQUALITY -- the same rule scope.yaml uses, for the same
+# reason. Anything that does not match exactly must be listed under `aliases:`
+# below, by hand, after review. There is deliberately no fuzzy fallback.
+#
+# ABSENCE NEVER RETIRES ANYTHING. 2,506 of the catalog's 4,462 versions have no
+# row in this report -- 2,004 of them because the product is absent from it
+# entirely, and most of the rest because the version is newer than anything the
+# report lists. Only an explicit `Retired` row excludes; `Retirement Announced`
+# and `GA` still convert.
+#
+# A NEW REPORT IS A NEW FILE, not an overwrite. Point `report:` at it and run
+# `docushift catalog eos`. The dated filename is what makes the change a
+# reviewable diff rather than a silent re-decision of a thousand rows.
+
+report: eos/EOS-Report-2026-09-10.csv
+
+# Report names that do not slugify to a catalog slug, reviewed one at a time.
+#
+# `shared` records how many of the report's versions for that name are also in the
+# catalog for that slug, measured on 2026-09-10. It is the evidence for the entry,
+# not something the tool reads -- but it is why each of these is here: a rename is
+# proved by the two sides describing the same releases.
+#
+# One-directional evidence, worth knowing before adding an entry. A shared version
+# proves an alias; zero shared versions does NOT disprove a match -- 13 of the 237
+# names that match a slug exactly also share no version, and every one of them is
+# plainly the right product whose report and docsite simply list different
+# releases. But since absence retires nothing, an alias with no shared version
+# changes no row today, which makes writing it speculation rather than caution.
+# Hence the rule this list was built on: only aliases with evidence.
+
+aliases:
+  - report_name: "TIBCO Data Streams"
+    slug: spotfire-data-streams
+    note: "Renamed to Spotfire Data Streams; shared 16/16"
+  - report_name: "Spotfire Data Science Team Studio"
+    slug: tibco-data-science-team-studio
+    note: "Vendor prefix flipped Spotfire <-> TIBCO; shared 5/5"
+  - report_name: "DataSynapse High-Performance Computing Cloud Adapter"
+    slug: tibco-datasynapse-high-performance-computing-cloud-adapter
+    note: "Report drops the TIBCO prefix; shared 5/5"
+  - report_name: "EBX"
+    slug: tibco-ebx
+    note: "Report drops the TIBCO prefix; shared 49/55"
+  - report_name: "Spotfire Analytics Server"
+    slug: tibco-spotfire-analytics-server
+    note: "Report drops the TIBCO prefix; shared 2/9"
+  - report_name: "Spotfire Business Author"
+    slug: tibco-spotfire-business-author
+    note: "Report drops the TIBCO prefix; shared 2/56"
+  - report_name: "Spotfire Clinical Graphics"
+    slug: tibco-spotfire-clinical-graphics
+    note: "Report drops the TIBCO prefix; shared 4/7"
+  - report_name: "Spotfire Connectors"
+    slug: tibco-spotfire-connectors
+    note: "Report drops the TIBCO prefix; shared 2/48"
+  - report_name: "Spotfire Consumer"
+    slug: tibco-spotfire-consumer
+    note: "Report drops the TIBCO prefix; shared 2/53"
+  - report_name: "Spotfire Metrics Modeler"
+    slug: tibco-spotfire-metrics-modeler
+    note: "Report drops the TIBCO prefix; shared 3/3"
+  - report_name: "Spotfire Metrics Services"
+    slug: tibco-spotfire-metrics-services
+    note: "Report drops the TIBCO prefix; shared 3/3"
+  - report_name: "Spotfire Qualification"
+    slug: tibco-spotfire-qualification
+    note: "Report drops the TIBCO prefix; shared 12/56"
+  - report_name: "Spotfire S+"
+    slug: tibco-spotfire-s
+    note: "The `+` slugifies away on both sides; shared 1/16"
+  - report_name: "Spotfire Web Player"
+    slug: tibco-spotfire-web-player
+    note: "Report drops the TIBCO prefix; shared 34/102"
+
+# Rejected candidates, kept so the next reviewer inherits the evidence rather than
+# re-deriving it. All six were proposed by a prefix-tolerant matcher and all six
+# share no version with the catalog product, so none of them would retire a row.
+#
+#   Spotfire Analytics           -> tibco-analytics    0/7   WRONG. The report lists
+#       14.0.7-14.8.0 and the catalog holds 7.x and 10.x. Produced by stripping
+#       `spotfire-` from one side and `tibco-` from the other, which is exactly the
+#       looseness scope.yaml already refuses. Do not add this one.
+#   Spotfire Automation Services -> tibco-spotfire-automation-services   0/37
+#   Spotfire DecisionSite        -> tibco-spotfire-decisionsite          0/9
+#   Spotfire Developer           -> tibco-spotfire-developer             0/70
+#   Spotfire Miner               -> tibco-spotfire-miner                 0/17
+#   Spotfire Operations Analytics-> tibco-spotfire-operations-analytics  0/3
+#
+# The last five are probably the right products; they are simply unprovable from
+# this report and would change nothing. Add one when a report arrives that shares
+# a version with the catalog.

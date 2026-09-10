@@ -21,6 +21,8 @@ from docushift.models import (
     FamilySource,
     Product,
     ProductVersion,
+    ReleaseStatus,
+    ReleaseStatusSource,
     ScopeSource,
     SourceEngine,
     ZipSource,
@@ -40,7 +42,7 @@ from docushift.utils.csvio import (
 )
 
 if TYPE_CHECKING:  # pragma: no cover - import kept lazy to avoid a config <-> catalog cycle
-    from docushift.config import ConfigManager
+    from docushift.config import ConfigManager, EosReport
 
 PRODUCT_COLUMNS = (
     # First because it is the key: the column `versions.csv` joins on and every
@@ -70,6 +72,13 @@ VERSION_COLUMNS = (
     "convert_eligible",
     "convert_batch",
     "release_date",
+    # Support's retirement verdict (architecture.md §3.11). Resolved from
+    # `config/eos.yaml` at merge time and carried here for the same reason
+    # `in_scope` is -- so the sheet shows the answer. Un-prefixed for the same
+    # reason too: unlike `_bu` or `_has_csh`, these are hand-overridable.
+    "release_status",
+    "retirement_date",
+    "release_status_source",
     "engine",
     "engine_source",
     "zip_url",
@@ -113,6 +122,12 @@ _MERGEABLE_PRODUCT_FIELDS = ("display_name", "product_code")
 # package by hand, which a fetch has no standing to revoke. Note `zip_url` *is*
 # merged even on a manual row -- recording the endpoint discovery has since found
 # is what makes "you can drop the pin now" a computable warning.
+#
+# The three release-status columns are absent structurally, exactly as
+# `in_scope`/`scope_source` are on the product side: they are resolved from
+# `config/eos.yaml` at merge time and the docsite has no lifecycle value to
+# three-way-merge against, so `version_snapshot` carries none of them and no rule
+# is needed to stop a fetch overwriting them (§3.11).
 _MERGEABLE_VERSION_FIELDS = ("is_archived", "convert_eligible", "release_date", "zip_url")
 
 
@@ -133,6 +148,14 @@ class MergeStats:
     # Slugs in `scope.yaml` that matched no product this fetch touched. Almost
     # always an upstream rename, which is how an exclusion silently stops working.
     scope_rules_unmatched: list[str] = field(default_factory=list)
+    # Versions the end-of-support report retires (§3.11), counted over what would
+    # otherwise be converted -- in scope and eligible. The raw retired count is
+    # four times larger and mostly restates the archive flag.
+    versions_retired: int = 0
+    # Products whose every remaining convertible version is retired. Reported by
+    # slug rather than as a count: this is the one outcome where the rule removes
+    # a product's whole documentation set, and it must not read as a number.
+    products_fully_retired: list[str] = field(default_factory=list)
 
     def as_dict(self) -> dict[str, object]:
         return {
@@ -144,6 +167,8 @@ class MergeStats:
             "products_out_of_scope": self.products_out_of_scope,
             "deletions_blocked": list(self.deletions_blocked),
             "scope_rules_unmatched": list(self.scope_rules_unmatched),
+            "versions_retired": self.versions_retired,
+            "products_fully_retired": list(self.products_fully_retired),
         }
 
 
@@ -224,6 +249,15 @@ class CatalogManager:
                 convert_eligible=parse_bool(row.get("convert_eligible"), default=not is_archived),
                 convert_batch=row.get("convert_batch", "").strip().lower(),
                 release_date=normalize_date(row.get("release_date")) or None,
+                release_status=_coerce_enum(ReleaseStatus, row.get("release_status"), ReleaseStatus.UNKNOWN),
+                # Left verbatim rather than run through `normalize_date`: the value
+                # is written ISO by `_parse_eos_date`, and re-parsing it here with
+                # the permissive format list is what would turn `2021-04-03` back
+                # into something else on a round trip.
+                retirement_date=(row.get("retirement_date") or "").strip() or None,
+                release_status_source=_coerce_enum(
+                    ReleaseStatusSource, row.get("release_status_source"), ReleaseStatusSource.UNKNOWN
+                ),
                 engine=_coerce_enum(SourceEngine, row.get("engine"), SourceEngine.AUTO),
                 engine_source=_coerce_enum(EngineSource, row.get("engine_source"), EngineSource.AUTO),
                 zip_url=row.get("zip_url", "").strip() or None,
@@ -283,6 +317,9 @@ class CatalogManager:
                         "convert_eligible": format_bool(version.convert_eligible),
                         "convert_batch": version.convert_batch,
                         "release_date": normalize_date(version.release_date),
+                        "release_status": str(version.release_status),
+                        "retirement_date": version.retirement_date or "",
+                        "release_status_source": str(version.release_status_source),
                         "engine": str(version.engine),
                         "engine_source": str(version.engine_source),
                         "zip_url": version.zip_url or "",
@@ -351,16 +388,23 @@ class CatalogManager:
     ) -> list[tuple[Product, ProductVersion]]:
         """Filtered `(product, version)` pairs, in catalog sort order.
 
-        The three gates compose rather than override, outside in (§3.7): scope,
-        then eligibility, then the batch. `batch="poc-1"` with `eligible_only=True`
-        yields the versions that are both scheduled and permitted -- a row tagged
-        into a batch but left `convert_eligible=false` is still excluded -- and no
-        version of an out-of-scope product is yielded at all.
+        The four gates compose rather than override, outside in (§3.7): scope,
+        then retirement, then eligibility, then the batch. `batch="poc-1"` with
+        `eligible_only=True` yields the versions that are scheduled, permitted and
+        still supported -- a row tagged into a batch but left
+        `convert_eligible=false` is still excluded -- and no version of an
+        out-of-scope product is yielded at all.
 
-        The scope gate is deliberately conditioned on `eligible_only` rather than
+        The order is meaningful: scope is a product-level decision taken locally,
+        retirement is a version-level fact reported upstream, and
+        `convert_eligible` is version-level local policy. Only `RETIRED` gates;
+        `RETIREMENT_ANNOUNCED` names a version that is still supported today
+        (§3.11), and `UNKNOWN` means the report is silent, which is not a verdict.
+
+        All of them are deliberately conditioned on `eligible_only` rather than
         applied unconditionally, so that reporting and inventory callers (which
-        pass `eligible_only=False`) still see excluded products. An out-of-scope
-        product is absent from the *work*, never from the *books* (§3.10).
+        pass `eligible_only=False`) still see excluded products. An out-of-scope or
+        retired version is absent from the *work*, never from the *books* (§3.10).
         """
         catalog = self.load()
         results = []
@@ -377,6 +421,8 @@ class CatalogManager:
                 if version and ver.version != version:
                     continue
                 if batch and ver.convert_batch != batch.strip().lower():
+                    continue
+                if eligible_only and ver.release_status is ReleaseStatus.RETIRED:
                     continue
                 if eligible_only and not ver.convert_eligible:
                     continue
@@ -412,6 +458,7 @@ class CatalogManager:
         catalog = self.load()
         stats = MergeStats()
         scope_rules = self._scope_rules()
+        eos = self._eos_report()
 
         for incoming in discovered:
             slug = incoming.slug
@@ -436,6 +483,11 @@ class CatalogManager:
             _resolve_scope(product, scope_rules)
             if not product.in_scope:
                 stats.products_out_of_scope += 1
+            # Re-applied on every fetch for the reason the rule exists: a fetch
+            # defaults a newly discovered version to `convert_eligible=true`, so a
+            # retirement recorded once and never re-checked would be undone by the
+            # next crawl (§3.10, §3.11).
+            _resolve_release_status(product, eos)
 
             blocked = self._collect_deletions(catalog.products[slug], incoming)
             if blocked:
@@ -450,6 +502,7 @@ class CatalogManager:
         # Computed against the whole catalog, not just the products this fetch
         # touched: on a scoped fetch every other rule would look unmatched.
         stats.scope_rules_unmatched = self.unmatched_scope_rules()
+        stats.versions_retired, stats.products_fully_retired = self._retirement_effect()
 
         if stats.deletions_blocked and not allow_deletes:
             raise CatalogError(
@@ -482,6 +535,72 @@ class CatalogManager:
         """
         known = set(self.load().products)
         return sorted(slug for slug in self._scope_rules() if slug not in known)
+
+    def _eos_report(self) -> "EosReport":
+        """The active end-of-support report, or an empty one with no config."""
+        if self.config is None:
+            from docushift.config import EosReport
+
+            return EosReport()
+        return self.config.load_eos()
+
+    def eos_coverage(self) -> tuple[int, int]:
+        """`(products with report data, products in the catalog)`.
+
+        The gap is not a defect to chase: the report names 528 products and 277 of
+        them have no docs.tibco.com presence at all, or are named at a granularity
+        the docsite splits in two. It is reported so that "no retirements found"
+        can be read correctly -- as coverage rather than as a clean bill.
+        """
+        report = self._eos_report()
+        products = self.load().products
+        return sum(1 for slug in products if slug in report.entries), len(products)
+
+    def unmatched_eos_aliases(self) -> list[str]:
+        """Aliases in `eos.yaml` naming a product the active report does not carry."""
+        return self._eos_report().unmatched_aliases
+
+    def _retirement_effect(self) -> tuple[int, list[str]]:
+        """What the retirement rule costs: retired versions, and products emptied.
+
+        Both are measured over the *convertible* population -- in scope and
+        `convert_eligible` -- rather than the whole catalog, because that is what
+        the rule actually changes. Counted over the whole catalog the retired
+        figure is four times larger and almost entirely restates the archive flag,
+        which is a number that sounds alarming and means nothing.
+        """
+        retired = 0
+        emptied = []
+        for product in self.load().products.values():
+            if not product.in_scope:
+                continue
+            convertible = [v for v in product.versions.values() if v.convert_eligible]
+            if not convertible:
+                continue
+            gone = [v for v in convertible if v.release_status is ReleaseStatus.RETIRED]
+            retired += len(gone)
+            if len(gone) == len(convertible):
+                emptied.append(product.slug)
+        return retired, sorted(emptied)
+
+    def apply_eos(self) -> MergeStats:
+        """Re-resolves the release-status columns from the active report.
+
+        Exists so a new report costs a CSV swap rather than an hour-long crawl:
+        `catalog fetch --all` re-applies the report too, but only as a side effect
+        of re-walking 634 products at two requests a second.
+
+        Touches nothing else. It is deliberately not folded into `catalog import`,
+        which validates and normalizes what is already in the sheet -- rewriting a
+        thousand rows from an external file is not what a reader expects that to do.
+        """
+        stats = MergeStats()
+        eos = self._eos_report()
+        for product in self.load().products.values():
+            _resolve_release_status(product, eos)
+        stats.versions_retired, stats.products_fully_retired = self._retirement_effect()
+        self.save()
+        return stats
 
     def _merge_product(self, mine: Product, theirs: Product) -> int:
         """Merges discovery-owned product fields. Returns the count preserved."""
@@ -622,6 +741,13 @@ class CatalogManager:
             target.zip_url = value or None
         elif name == "zip_source":
             target.zip_source = ZipSource(value.strip().lower())
+        elif name == "release_status":
+            # Pinned to manual either way, exactly as `in_scope` is. Overriding a
+            # retirement has to outrank the report or the next fetch would undo it;
+            # retiring a version by hand records the same provenance so the two
+            # read the same way and neither is mistaken for the report's verdict.
+            target.release_status = ReleaseStatus(value.strip().lower())
+            target.release_status_source = ReleaseStatusSource.MANUAL
         elif name == "convert_eligible":
             target.convert_eligible = parse_bool(value)
         elif name == "convert_batch":
@@ -702,6 +828,7 @@ class CatalogManager:
         catalog = self.load()
         counts = dict.fromkeys((str(s) for s in FamilySource), 0)
         scope_counts = dict.fromkeys((str(s) for s in ScopeSource), 0)
+        status_counts = dict.fromkeys((str(s) for s in ReleaseStatus), 0)
         unclassified = []
         out_of_scope = []
         for product in catalog.products.values():
@@ -711,12 +838,20 @@ class CatalogManager:
                 unclassified.append(product.slug)
             if not product.in_scope:
                 out_of_scope.append(product.slug)
+            for ver in product.versions.values():
+                status_counts[str(ver.release_status)] += 1
+        retired, fully_retired = self._retirement_effect()
         return {
             "total": len(catalog.products),
             "counts": counts,
             "unclassified": sorted(unclassified),
             "scope_counts": scope_counts,
             "out_of_scope": sorted(out_of_scope),
+            # Over every version in the books; `versions_retired` is the subset
+            # that would otherwise convert, which is the number that matters.
+            "release_status_counts": status_counts,
+            "versions_retired": retired,
+            "products_fully_retired": fully_retired,
         }
 
     def validate(self) -> list[str]:
@@ -774,6 +909,18 @@ class CatalogManager:
                 f"means the product was renamed upstream and is no longer being excluded."
             )
 
+        # The rename detector for the report, and the exact analogue of the scope
+        # warning above: an alias naming a product support has since renamed stops
+        # retiring anything, and nothing else would say so.
+        stale_aliases = self.unmatched_eos_aliases()
+        if stale_aliases:
+            notes.append(
+                f"config/eos.yaml: {len(stale_aliases)} alias(es) name a product the active end-of-support "
+                f"report does not mention ({', '.join(stale_aliases[:8])}"
+                f"{' ...' if len(stale_aliases) > 8 else ''}). Support has probably renamed it, which means "
+                f"those versions are no longer being retired."
+            )
+
         for product in sorted(catalog.products.values(), key=lambda p: p.slug):
             # A family typed straight into products.csv is accepted and its folder
             # auto-registered; the warning exists so a typo ('mesaging') is visible
@@ -804,6 +951,22 @@ class CatalogManager:
                         f"{product.slug}@{ver.version}: in batch '{ver.convert_batch}' but the product "
                         f"is out of scope (via {origin}), so it will be skipped. Run "
                         f"`docushift catalog set --product {product.slug} --in-scope` to include it."
+                    )
+                # Scheduled, but support has retired it. Same shape as the scope
+                # warning, and the origin is named for the same reason: a report
+                # verdict is undone by a `--release-status` override, a hand-set one
+                # by correcting the value that was set.
+                if ver.convert_batch and ver.release_status is ReleaseStatus.RETIRED:
+                    origin = (
+                        "the end-of-support report"
+                        if ver.release_status_source is ReleaseStatusSource.EOS_REPORT
+                        else "a manual release_status=retired"
+                    )
+                    notes.append(
+                        f"{product.slug}@{ver.version}: in batch '{ver.convert_batch}' but the version is "
+                        f"retired (via {origin}), so it will be skipped. Run `docushift catalog set "
+                        f"--product {product.slug} --version {ver.version} --release-status ga` to convert "
+                        f"it anyway."
                     )
                 # Scheduled but not permitted: the batch flag looks like it selected
                 # this row, and nothing downstream will ever pick it up.
@@ -908,6 +1071,40 @@ def _resolve_scope(product: Product, rules: dict[str, str]) -> None:
 
     product.in_scope = True
     product.scope_source = ScopeSource.DEFAULT
+
+
+def _resolve_release_status(product: Product, report: "EosReport") -> None:
+    """Applies the end-of-support report to one product's versions -- §3.11.
+
+    Ranked `manual` > `eos_report` > `unknown`, first match wins, exactly as
+    `_resolve_scope` is:
+
+    1. `release_status_source=manual` is a human's decision and is preserved
+       unconditionally -- the escape hatch for a version support has retired that
+       is being converted anyway, and for one it has not that is being skipped.
+    2. A row in the active report for this exact `(slug, version)` sets the
+       status and the retirement date.
+    3. Anything else is `unknown` -- and this step **actively resets** a previous
+       `eos_report` verdict, so a corrected report or a removed alias really does
+       restore the version. Safe only because step 1 short-circuits ahead of it.
+
+    Step 3 is also why absence can never accumulate into a retirement: `unknown`
+    is written, never `retired`, and 2,506 of the catalog's versions are in
+    exactly that state.
+    """
+    for version in product.versions.values():
+        if version.release_status_source is ReleaseStatusSource.MANUAL:
+            continue
+
+        found = report.status_for(product.slug, version.version)
+        if found is not None:
+            version.release_status, version.retirement_date = found[0], found[1] or None
+            version.release_status_source = ReleaseStatusSource.EOS_REPORT
+            continue
+
+        version.release_status = ReleaseStatus.UNKNOWN
+        version.retirement_date = None
+        version.release_status_source = ReleaseStatusSource.UNKNOWN
 
 
 def _as_text(value: object) -> str:

@@ -27,6 +27,7 @@ These are used by every stage. They are small, and they are where most of the co
 | Version | `(slug, version)` | `version` keeps its dots (`10.4.0`) everywhere except the published AEM path. |
 | Doc-set | `(slug, version, doc_set)` | One help output inside a package, e.g. `bw-ent-html`. |
 | Help identifier | the identifier string itself | Byte-exact, case-significant, always a string (§9). |
+| End-of-support row | `(resolved slug, version)` | The report carries a product *name*, resolved to a slug by `slugify` or a reviewed alias (§3.3.2). `version` is matched byte-exactly — never coerced. |
 
 Every key is compared byte-exactly after trimming surrounding whitespace. Nothing is case-folded except where a rule below says so explicitly, and the two places it happens (`bu`, `family`) are controlled vocabularies, not data.
 
@@ -285,6 +286,28 @@ Four details carry the weight:
 
 New products take the same three steps, so a product first discovered *after* the rule is written is excluded on arrival rather than converted once and excluded later.
 
+### 3.3.2 Release status, by report then provenance — **Built**
+
+`config/eos.yaml` and the CSV it names are loaded once per run (`architecture.md` §3.11). Resolution runs immediately after §3.3.1, on every product the merge touches, and mirrors it exactly — ranked `manual` (0) > `eos_report` (1) > `unknown` (2), per **version**:
+
+1. If `release_status_source` is already `manual`, preserve all three fields — unconditionally.
+2. Otherwise, if the report carries a row for this exact `(slug, version)`, write that status and its retirement date with `release_status_source=eos_report`.
+3. Otherwise write `release_status=unknown`, `retirement_date=None`, `release_status_source=unknown`.
+
+Loading the report is where the care goes:
+
+- **Read `utf-8-sig`.** The file ships a BOM, and its header ends in a trailing comma that `DictReader` renders as a `None` key. Both are support's format, not damage.
+- **Dates parse with one explicit `%m-%d-%Y`, not through `normalize_date`.** §1.2's permissive list tries `%d-%m-%Y` and would read `03-04-2021` as 3 April rather than 4 March. The report is unambiguously month-first: field one never exceeds 12 across 5,948 rows, field two reaches 31 in 5,134. A value that matches nothing is kept **verbatim** rather than blanked, so a format change from support is visible in the sheet.
+- **A name resolves through an alias first, then `slugify`.** The alias is what lets a reviewed decision correct a name that happens to slugify onto the wrong product.
+- **Two names resolving to one slug and disagreeing about a version raises.** Repeated rows do not — the report has 2 exact duplicates and **0 conflicting statuses** across 5,948 rows, so last-wins is safe within a name. Across names it is not: a conflict means an alias is wrong, and picking one silently is how that stays invisible.
+- **A status the enum has no value for is collected, not guessed at.** A new spelling from support must not read as "not retired" by default.
+
+Three details then carry the same weight they do for scope:
+
+- **Step 3 actively resets.** Dropping a row from the report, or removing a wrong alias, restores the version — safe only because `manual` short-circuits at step 1. Without it a retirement would be permanent even after being retracted.
+- **Aliases that the active report never mentions are collected**, exactly as unmatched scope rules are, and reported as one aggregated line. That is the rename detector: the day support renames a product, its alias silently stops retiring anything.
+- **Resolution is re-run on every fetch**, for new and existing versions alike, because a fetch defaults a newly discovered version to `convert_eligible=true`. `catalog eos` runs steps 1–3 over the whole catalog on their own, so a new report costs a CSV swap rather than a crawl.
+
 ### 3.4 Deletion detection — **Built**
 
 For each product in the fetch, compute the version keys the catalog holds that the fetch of *that same product* did not return.
@@ -297,7 +320,7 @@ Two properties matter. The check is **scoped to the products actually fetched**,
 ### 3.5 Whole-merge sequence — **Built**
 
 1. Load the catalog.
-2. For each discovered product: add it wholesale if unknown; otherwise merge product fields (§3.2, §3.3). Resolve scope for every product either way (§3.3.1), then merge versions — new versions added, existing ones merged field by field.
+2. For each discovered product: add it wholesale if unknown; otherwise merge product fields (§3.2, §3.3). Resolve scope for every product either way (§3.3.1), then merge versions — new versions added, existing ones merged field by field — then resolve release status over every version (§3.3.2).
 3. Collect deletions per product (§3.4).
 4. If deletions were blocked, raise. Nothing has been written.
 5. If this is a dry run, return the statistics without writing.
@@ -320,18 +343,19 @@ The sort is what makes a no-op fetch produce a zero-line diff, and the zero-line
 
 ## 4. Selection: what a run acts on
 
-**Built.** Three independent questions at two grains, composed at every stage command (`architecture.md` §3.7):
+**Built.** Four independent questions at two grains, composed at every stage command (`architecture.md` §3.7):
 
 1. Walk products in catalog sort order, filtering by BU, family and product code where given.
 2. If eligibility was requested, **skip the whole product** when `in_scope` is false — no version of it is ever selected (§3.3.1).
 3. Within each surviving product, walk versions in natural descending order, filtering by version where given.
 4. If a batch label was given, keep only versions whose (trimmed, lowercased) batch matches.
-5. If eligibility was requested, keep only versions with `convert_eligible` true.
-6. Return the surviving `(product, version)` pairs.
+5. If eligibility was requested, drop versions whose `release_status` is `retired` (§3.3.2). Only `retired` — `retirement-announced` names a version that is still supported today, and `unknown` means the report is silent, which is not a verdict.
+6. If eligibility was requested, keep only versions with `convert_eligible` true.
+7. Return the surviving `(product, version)` pairs.
 
-Steps 2, 4 and 5 **compose rather than override**: scope is the outermost gate, eligibility the hard gate within it, and the batch a filter within that. A version tagged into a batch but left ineligible is skipped; a version of an out-of-scope product is skipped even if it is both eligible and tagged. Both combinations are almost always a mistake, so each is reported as a warning naming the exact command that fixes it (§8.2) rather than being silently honoured or fatally rejected.
+Steps 2, 4, 5 and 6 **compose rather than override**, outside in: scope, then retirement, then eligibility, with the batch a filter within all three. A version tagged into a batch but left ineligible is skipped; so is a retired one; so is any version of an out-of-scope product, even if it is both eligible and tagged. All three combinations are almost always a mistake, so each is reported as a warning naming the exact command that fixes it (§8.2) rather than being silently honoured or fatally rejected. The warnings name *which* gate closed, because a rule-file exclusion, a report verdict and a hand-edit are undone three different ways.
 
-Step 2 is gated on `eligible_only` rather than applied always, so that inventory and reporting paths — which pass `eligible_only=False` — still see excluded products. An out-of-scope product is absent from the *work*, never from the *books* (`architecture.md` §3.10).
+Steps 2, 5 and 6 are gated on `eligible_only` rather than applied always, so that inventory and reporting paths — which pass `eligible_only=False` — still see excluded rows. An out-of-scope or retired version is absent from the *work*, never from the *books* (`architecture.md` §3.10, §3.11).
 
 Batch labels are trimmed and lowercased on write, so `POC-1`, `poc-1 ` and `poc-1` are one batch and not three. The batch census counts versions per label and **omits unscheduled rows entirely** — folding 3,900 untagged rows into the same table would bury the answer to the question being asked.
 
@@ -777,12 +801,13 @@ Properties that hold across the whole tool. Each is a rule some algorithm above 
 3. **A fetch is all-or-nothing.** A blocked deletion leaves both CSVs and the state DB untouched. (§3.4)
 4. **No machine-local path appears in either CSV.** Locations are derived; only intent is stored. (§1.5)
 5. **An archived version is never downloaded, extracted or converted** unless a human flips its eligibility. (§4)
-6. **An unknown engine is never guessed.** A version stays `auto` and is skipped loudly. (§7)
-7. **A hand-supplied package converts through exactly the same path as a downloaded one.** No downstream stage branches on provenance. (§5.2)
-8. **A help identifier is either resolved or listed as unresolved.** Nothing is silently dropped, and identifier text round-trips byte-exactly as a string. (§9)
-9. **Absence is reported, never faked.** No empty `csh.yml`, no empty version list from a failed crawl, no stage command that exits 0 having done nothing.
-10. **An unmeasured value is blank, never zero.** The inventory columns distinguish "never extracted" from "extracted, found none", and no stage writes them for a run that failed. (§6.3)
-11. **One path is classified as an API reference by exactly one predicate**, shared by the Stage 4 count, the Stage 5 skip and the Stage 7 route. (§6.3)
+6. **A version support has retired is never downloaded, extracted, converted or laid out** — including one first discovered after the report landed. Absence from the report never retires anything, and no product name is matched by anything looser than an exact slug or a reviewed alias. (§3.3.2)
+7. **An unknown engine is never guessed.** A version stays `auto` and is skipped loudly. (§7)
+8. **A hand-supplied package converts through exactly the same path as a downloaded one.** No downstream stage branches on provenance. (§5.2)
+9. **A help identifier is either resolved or listed as unresolved.** Nothing is silently dropped, and identifier text round-trips byte-exactly as a string. (§9)
+10. **Absence is reported, never faked.** No empty `csh.yml`, no empty version list from a failed crawl, no stage command that exits 0 having done nothing.
+11. **An unmeasured value is blank, never zero.** The inventory columns distinguish "never extracted" from "extracted, found none", and no stage writes them for a run that failed. (§6.3)
+12. **One path is classified as an API reference by exactly one predicate**, shared by the Stage 4 count, the Stage 5 skip and the Stage 7 route. (§6.3)
 
 ---
 
@@ -809,6 +834,8 @@ Most rows are **Built** or **Specified**. Two are neither, and are marked as suc
 | 3.2 | Three-way field decision | Built | `catalog.py:_take_theirs` |
 | 3.3 | Family by provenance | Built | `catalog.py:_merge_product` |
 | 3.3.1 | Scope by rule then provenance | Built | `catalog.py:_resolve_scope` |
+| 3.3.2 | End-of-support report loading | Built | `config.py:load_eos`, `_read_eos_report` |
+| 3.3.2 | Release status by report then provenance | Built | `catalog.py:_resolve_release_status`, `apply_eos` |
 | 3.4 | Deletion detection | Built | `catalog.py:_collect_deletions` |
 | 3.6 | Canonical write | Built | `catalog.py:save` |
 | 3.5 | Snapshot recording, one transaction per fetch | Built | `state.py:transaction`, `catalog.py:_record_snapshots` |

@@ -157,6 +157,9 @@ The code is kept as a column because it is what a human recognizes (`ems`, not `
 | `convert_eligible` | **user** | Policy gate: *may* this version ever be converted? Active defaults `true`, archived defaults `false` |
 | `convert_batch` | **user** | Scheduling: which run this version belongs to, e.g. `poc-1`. Empty = not scheduled. Free text, lowercased on write — see §3.7 |
 | `release_date` | tool | ISO where parseable; free text otherwise (the archive API returns values like `June 2022`) |
+| `release_status` | tool (from the report), user-overridable | `retired` \| `retirement-announced` \| `ga` \| `unknown`. Support's lifecycle verdict, re-resolved from `config/eos.yaml` on every fetch. **Only `retired` blocks conversion** — see §3.11 |
+| `retirement_date` | tool (from the report) | ISO. Populated for announced and GA rows too — the report dates every row it carries |
+| `release_status_source` | tool | `manual` \| `eos_report` \| `unknown` (no row in the active report) |
 | `engine` | tool (detected), user-overridable | `flare` \| `dita` \| `webworks` \| `docbook` (convertible), `r-help` \| `robohelp` \| `frontpage` \| `help-and-manual` \| `mkdocs` \| `docusaurus` \| `doxia` \| `other` (identified, no handler), or `auto` (undetected). **Per-version, not per-product** — see §3.4 |
 | `engine_source` | tool | `detected` \| `manual` \| `auto` (not yet determined) |
 | `zip_url` | tool, user-editable | Resolved download endpoint. May be empty when `zip_source=manual` |
@@ -170,16 +173,18 @@ The code is kept as a column because it is what a human recognizes (`ems`, not `
 | `_doc_files` | **tool, read-only** | Stage 4: every other file in the extracted tree |
 
 ```csv
-slug,version,is_archived,convert_eligible,convert_batch,release_date,engine,engine_source,zip_url,zip_source,custom_override,_bu,_family,_has_csh,_csh_names,_has_api_ref,_api_files,_doc_files
-tibco-ems,10.4.0,false,true,poc-1,2025-11-04,flare,detected,https://docs.tibco.com/pub/ems/10.4.0/doc/zip/tib_ems_10.4.0_doc.zip,auto,false,tibco,messaging,true,412,true,4310,19776
-tibco-ems,10.2.1,true,false,,2023-06-12,auto,auto,https://docs.tibco.com/pub/ems/tibco-ems-10-2-1_documentation.zip,auto,false,tibco,messaging,,,,,
-tibco-ems,8.6.0,true,false,,2020-04-30,webworks,detected,https://docs.tibco.com/pub/ems/tibco-ems-8-6-0_documentation.zip,auto,false,tibco,messaging,,,,,
-tibco-datasynapse-gridserver,7.1.1,false,true,poc-1,2025-09-30,flare,detected,,manual,false,tibco,integration,true,0,false,0,8104
+slug,version,is_archived,convert_eligible,convert_batch,release_date,release_status,retirement_date,release_status_source,engine,engine_source,zip_url,zip_source,custom_override,_bu,_family,_has_csh,_csh_names,_has_api_ref,_api_files,_doc_files
+tibco-ems,10.4.0,false,true,poc-1,2025-11-04,ga,2030-12-31,eos_report,flare,detected,https://docs.tibco.com/pub/ems/10.4.0/doc/zip/tib_ems_10.4.0_doc.zip,auto,false,tibco,messaging,true,412,true,4310,19776
+tibco-ems,10.2.1,true,false,,2023-06-12,retirement-announced,2027-12-31,eos_report,auto,auto,https://docs.tibco.com/pub/ems/tibco-ems-10-2-1_documentation.zip,auto,false,tibco,messaging,,,,,
+tibco-ems,8.6.0,true,false,,2020-04-30,retired,2024-12-31,eos_report,webworks,detected,https://docs.tibco.com/pub/ems/tibco-ems-8-6-0_documentation.zip,auto,false,tibco,messaging,,,,,
+tibco-datasynapse-gridserver,7.1.1,false,true,poc-1,2025-09-30,unknown,,unknown,flare,detected,,manual,false,tibco,integration,true,0,false,0,8104
 ```
 
 Note that the rows join on the slug while the `zip_url` paths still carry the code — `pub/ems/...` is the docsite's own folder, which is exactly what `product_code` records and exactly why it survives as a column.
 
 Note the three `tibco-ems` rows: the current release is Flare, an older one is WebWorks, and the un-downloaded one is still `auto` because its engine cannot be known until the package is extracted. Two rows carry `convert_batch=poc-1`; `docushift download --batch poc-1` selects exactly those two and nothing else. The two archived rows have **blank** inventory columns because nothing has ever unpacked them — blank and `0` are different answers (§3.9).
+
+The three lifecycle columns show all four states the report can leave a row in. `10.2.1` is `retirement-announced` with a date three years out — still supported, still convertible if anyone re-enabled it. `8.6.0` is `retired` and would be skipped even if `convert_eligible` were flipped back to `true`. And the `tibco-datasynapse-gridserver` row is `unknown` with no date, because the report carries no row for it — which is silence, not a verdict (§3.11).
 
 The `tibco-datasynapse-gridserver` row shows the other acquisition path: it is convert-eligible with **no** `zip_url`, because discovery never produced a working one and the ZIP was handed to the tool directly. `zip_source=manual` is what makes that a valid state rather than a validation failure — see §3.8. It also shows `_has_csh=true` with `_csh_names=0`: an alias file exists but yielded no identifiers.
 
@@ -287,23 +292,28 @@ Excel is the expected editor, which imposes hard requirements:
 
 ### 3.7 Selecting Versions to Convert
 
-Three separate columns, because they answer three different questions — at two different grains:
+Four separate columns, because they answer four different questions — at two different grains, and from two different authorities:
 
-| Question | Column | Grain | Type | Default | Lifetime |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| *May **this product** ever be converted?* | `in_scope` | product | bool | `true` | Permanent policy (§3.10) |
-| *May this version ever be converted?* | `convert_eligible` | version | bool | `true` active, `false` archived | Long-lived policy |
-| *Is it in **this** run?* | `convert_batch` | version | free text | empty | Changes every wave |
+| Question | Column | Grain | Decided by | Type | Default | Lifetime |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| *May **this product** ever be converted?* | `in_scope` | product | us | bool | `true` | Permanent policy (§3.10) |
+| *Is this version still supported?* | `release_status` | version | **support** | enum | `unknown` | Until the next report (§3.11) |
+| *May this version ever be converted?* | `convert_eligible` | version | us | bool | `true` active, `false` archived | Long-lived policy |
+| *Is it in **this** run?* | `convert_batch` | version | us | free text | empty | Changes every wave |
+
+`release_status` is the odd one out and the ordering above says why: it is the only gate whose value is a **fact reported from outside** rather than a decision taken here. It is placed second because it is narrower than scope and wider than eligibility — and because a version support has retired should not need a per-version local decision to be skipped.
 
 **Why not one column.** Only a minority of the ~1,500–4,000 catalogued versions are ever converted, and a POC typically wants three. With `convert_eligible` alone, scoping that POC means setting `false` on ~1,497 rows — the sheet fills with `false`, and "deliberately out of scope" becomes indistinguishable from "not in this wave." `convert_batch` inverts the direction: it is **opt-in**, so tagging three rows is the entire cost of scoping a run, and every other row stays exactly as the last fetch left it.
 
-**How they compose.** Scope is the outermost gate, eligibility the next, and the batch a filter applied within both.
+**How they compose.** Outside in: scope, then retirement, then eligibility, with the batch a filter applied within all three.
 
 ```
 selection = catalog.iter_versions(batch="poc-1", eligible_only=True)
 ```
 
-A version tagged into a batch but left `convert_eligible=false` is **skipped**, not converted, and a version of an out-of-scope product is skipped whatever its own two columns say. Both combinations are almost always a mistake, so `catalog import` warns about them by name rather than failing.
+A version tagged into a batch but left `convert_eligible=false` is **skipped**, not converted; so is one support has retired; and so is every version of an out-of-scope product, whatever its own three columns say. All three combinations are almost always a mistake, so `catalog import` warns about them by name — naming *which* gate closed, since each is undone differently — rather than failing.
+
+All three gates are conditioned on `eligible_only` rather than applied unconditionally, so a reporting or inventory caller still sees the excluded rows. An excluded version is absent from the **work**, never from the **books**.
 
 **Why scope is not just `convert_eligible=false` on every row.** The two are different facts and collapsing them loses the distinction the sheet exists to preserve. `convert_eligible` is a per-version judgement a fetch legitimately sets (archived → `false`) and a human legitimately flips back; `in_scope` is a standing product-level exclusion that must survive every future fetch, including fetches that discover versions nobody has seen yet. Excluding a product by clearing 40 version rows leaves the 41st — published next quarter — defaulting straight back to `convert_eligible=true`.
 
@@ -456,6 +466,73 @@ tibco-spotfire-connector-for-ibm-db2
 </details>
 
 **Products a reader may expect here and will not find.** Two Spotfire products need no rule at all — `spotfire-analytics` and `tibco-spotfire-advanced-data-services` are `isPublicLevel: false`, so discovery filters them before any request is made. Nineteen public products keep a matching-looking slug and **remain in scope deliberately**: the eight-product Data Science line, the four Statistica products, `spotfire-application`, `spotfire-data-streams`, `spotfire-liveview-web-enterprise-edition`, `spotfire-statistics-services`, the two BusinessConnect ebXML protocols, and `tibco-product-and-service-catalog-powered-by-tibco-ebx` — a product *built on* EBX rather than a part of it. They are recorded here so that their absence from the list reads as a decision rather than an oversight, and they are the exact population a substring rule would destroy.
+
+### 3.11 End-of-Support: Versions Support Has Retired
+
+Support publishes an end-of-support report naming, per product version, where it sits in the lifecycle. **A version marked `Retired` is not converted.** Nobody publishes fresh documentation for software that is no longer supported, and on the 2026-09-10 report that decision removes **128 versions** from the convertible population and empties **11 products** of convertible content entirely.
+
+This is the same shape of rule as §3.10 and deliberately so, with one decisive difference: **scope is our decision, retirement is upstream's fact.** That difference is what every choice below follows from.
+
+**The report is an input file, not a one-off import.** `config/eos/EOS-Report-2026-09-10.csv` is committed verbatim as support supplied it, and `config/eos.yaml` names the active one:
+
+```yaml
+report: eos/EOS-Report-2026-09-10.csv
+aliases:
+  - report_name: "TIBCO Data Streams"      # the report's spelling
+    slug: spotfire-data-streams            # the docsite's slug
+    note: "Renamed to Spotfire Data Streams; shared 16/16"
+```
+
+Two files because they have two authors. The CSV is support's, arrives periodically, and is never hand-edited. The YAML is ours, and carries the one thing the CSV cannot supply — how its product *names* map to catalog *slugs*.
+
+**Why it is re-applied on every fetch and not converted into cleared flags.** Exactly the §3.10 argument: a fetch defaults a newly discovered version to `convert_eligible=true`. A retirement applied once by clearing flags would be undone the next time the crawl found something. So the report is consulted at merge time, on every product, every fetch — and `docushift catalog eos` re-applies it on its own when a new report lands and nothing else has changed, which costs a CSV swap rather than an hour of crawling at two requests a second.
+
+**Only `Retired` gates.** The report's other two statuses are recorded and neither one blocks anything:
+
+| `release_status` | Meaning | Blocks conversion? |
+| :--- | :--- | :--- |
+| `retired` | Support has ended | **Yes** |
+| `retirement-announced` | A dated warning; still supported today | No — 94 eligible versions, most dated a year or more out |
+| `ga` | Generally available | No |
+| `unknown` | No row in the active report | No |
+
+Treating `retirement-announced` as retired would drop 94 versions the pipeline exists to convert, in order to pre-empt a date that has not arrived. The column records the warning so a reviewer can see it coming; it does not act on it.
+
+**Absence means unknown, never retired.** 2,506 of the catalog's 4,462 versions have no row in the report, and **2,050 of those are silent because their product is absent from the report entirely** — support tracks 528 product names, of which 277 name nothing on docs.tibco.com. A rule that read "not listed as supported" as "retired" would delete most of the corpus on the strength of a join that never matched. `unknown` is written, and `unknown` converts.
+
+**The join is by name, because the report carries no slug and no code.** Names that already slugify onto a catalog slug resolve to themselves; everything else resolves only through a reviewed alias in `eos.yaml`. Fourteen aliases are shipped, each one verified by **version-set overlap** — the report's versions for the name against the catalog's versions for the slug. That test is deliberately one-directional: overlap proves an alias, but *no overlap does not disprove one*, since 13 exact-slug matches also share zero versions and are plainly correct. So the six candidates with no overlap were rejected rather than resolved, and one of them is recorded in `eos.yaml` as actively wrong:
+
+> `Spotfire Analytics` → `tibco-analytics` shares **0 of 7** versions. Do not add this one.
+
+Unmatched report names are reported, never guessed at.
+
+**Version matching is exact string equality.** Of the 456 versions whose product the report covers but whose own number it does not carry, trailing-`.0` coercion would resolve exactly **one** — in exchange for reintroducing the `1.10` → `1.1` hazard §3.6 exists to prevent. Not a trade worth making.
+
+**Dates are read `MM-DD-YYYY`, with a dedicated parser.** The report writes `12-31-2025`, and the format is unambiguously month-first: across all 5,948 rows the first field never exceeds 12 while the second reaches 31 in 5,134 of them. It is deliberately *not* read through `csvio.normalize_date`, whose permissive list tries `%d-%m-%Y` first and would turn `03-04-2021` into 3 April instead of 4 March — silently, and only for the third of rows where both fields are 12 or under.
+
+**Provenance mirrors `scope_source` exactly** (§3.10), ranked, first match wins:
+
+| `release_status_source` | Meaning | Overwritable by the report? |
+| :--- | :--- | :--- |
+| `manual` | A human set `release_status` in the CSV | **Never** |
+| `eos_report` | The active report carried a row for this exact `(slug, version)` | Yes |
+| `unknown` | It did not | Yes |
+
+`manual` is the escape hatch in both directions: a retired version that is being converted anyway, and one support has not reached that is being skipped. `docushift catalog set --version X --release-status ga` sets it. The override leaves `retirement_date` standing — support really did retire the version on that day, and the override is the record of converting it anyway, not a denial of the fact.
+
+The `unknown` tier **actively resets**, which is what makes a correction land: drop a row from the report, or remove a wrong alias, and the version returns to `unknown` and converts again. That is only safe because `manual` short-circuits ahead of it.
+
+**The three columns are absent from `version_snapshot` structurally**, like `convert_batch` and the engine columns (§3.5, §3.7). Discovery does not write them, so there is no base value a 3-way merge could compare against. `state.db` is therefore unchanged by this rule — no migration, no schema version bump.
+
+**A retired version is still fully catalogued**, on the same reasoning §3.10 gives for out-of-scope products and §4.3 for archived ones: *retired* and *never seen* must stay distinguishable. It keeps its row, its date, and its place in every inventory; it is simply never downloaded, extracted, converted or laid out. `docushift catalog list --retired` shows exactly that population.
+
+**What is reported, and why none of it is a count.** Three things, because three different mistakes are possible:
+
+- **A stale alias.** An alias naming a product the active report no longer mentions has stopped retiring anything, and silence is indistinguishable from success. Same detector as §3.10's unmatched scope rules, aggregated onto one line for the same reason.
+- **Coverage.** `catalog eos` prints "the report carries rows for 251 of 634 catalogued products", next to the retirement result. "Nothing retired" over 251 covered products is a finding; over three, it is a join that is not working.
+- **Products left with nothing.** The 11 products whose every convertible version is retired are **named in full, never truncated to a count.** Everywhere else in the CLI a long list gets an ellipsis; here the list *is* the finding, because a product with no convertible version left publishes no documentation at all, and that is not something a reader should have to run a second command to discover.
+
+The retirement figures are measured over the **convertible** population — in scope and `convert_eligible` — not over the whole catalog. Counted over everything, 1,751 versions are retired, a number that is four times larger, almost entirely restates the archive flag, and means nothing. 128 is what the rule actually costs.
 
 ---
 

@@ -11,7 +11,16 @@ import pytest
 
 from docushift.catalog import CatalogError, CatalogManager
 from docushift.config import ConfigManager
-from docushift.models import EngineSource, FamilySource, Product, ScopeSource, SourceEngine, ZipSource
+from docushift.models import (
+    EngineSource,
+    FamilySource,
+    Product,
+    ReleaseStatus,
+    ReleaseStatusSource,
+    ScopeSource,
+    SourceEngine,
+    ZipSource,
+)
 from docushift.state import StateStore
 from docushift.utils.csvio import read_rows
 from tests.conftest import make_product, make_version
@@ -707,6 +716,375 @@ def test_a_catalog_with_no_config_excludes_nothing(catalog: CatalogManager, samp
 
     assert stats.products_out_of_scope == 0
     assert catalog.get_product("tibco-ems").in_scope is True
+
+
+# -- end-of-support retirement: the second gate (architecture.md §3.11) ------
+
+
+def _eos(
+    project_root: Path,
+    state: StateStore,
+    rows: tuple[tuple[str, str, str, str], ...] = (),
+    aliases: str = "",
+    out_of_scope: tuple[str, ...] = (),
+) -> CatalogManager:
+    """A catalog manager over an end-of-support report carrying exactly `rows`.
+
+    Each row is `(report name, version, status, retirement date)` in the report's
+    own `MM-DD-YYYY` spelling. Built fresh each call for the same reason `_scoped`
+    is: `ConfigManager` caches both files, so rewriting one mid-test would
+    otherwise change nothing -- which is exactly the shape of the re-apply tests
+    below.
+    """
+    report = project_root / "config" / "eos" / "report.csv"
+    report.parent.mkdir(parents=True, exist_ok=True)
+    report.write_text(
+        "Product Name,Version,Release Status,Retirement Date,Last Updated On,\n"
+        + "".join(f"{name},{version},{status},{date},01-05-2025,\n" for name, version, status, date in rows),
+        encoding="utf-8-sig",
+    )
+    (project_root / "config" / "eos.yaml").write_text(f"report: eos/report.csv\n{aliases}", encoding="utf-8")
+    body = "out_of_scope:\n" + "".join(f'  - slug: {slug}\n    reason: "test"\n' for slug in out_of_scope)
+    (project_root / "config" / "scope.yaml").write_text(body, encoding="utf-8")
+    return CatalogManager(
+        project_root / "config" / "products.csv",
+        project_root / "config" / "versions.csv",
+        state,
+        ConfigManager(root_dir=project_root),
+    )
+
+
+def _ems(*versions: str) -> Product:
+    """One product whose every version is active and convert-eligible."""
+    return make_product(
+        "tibco-ems",
+        product_code="ems",
+        versions={v: make_version("tibco-ems", v, zip_url=f"https://x/{v}.zip") for v in versions},
+    )
+
+
+RETIRED_8_6 = (("TIBCO EMS", "8.6.0", "Retired", "12-31-2024"),)
+
+
+def test_a_retired_version_is_excluded_from_the_work(project_root: Path, state: StateStore) -> None:
+    catalog = _eos(project_root, state, RETIRED_8_6)
+
+    _fetch(catalog, _ems("10.4.0", "8.6.0"))
+
+    assert [v.version for _, v in catalog.iter_versions(eligible_only=True)] == ["10.4.0"]
+
+
+def test_a_retired_version_is_never_absent_from_the_books(project_root: Path, state: StateStore) -> None:
+    """Reporting and inventory callers still see it -- §3.10's rule, applied to §3.11."""
+    catalog = _eos(project_root, state, RETIRED_8_6)
+
+    _fetch(catalog, _ems("10.4.0", "8.6.0"))
+
+    assert [v.version for _, v in catalog.iter_versions()] == ["10.4.0", "8.6.0"]
+
+
+def test_only_retired_gates_conversion(project_root: Path, state: StateStore) -> None:
+    """`Retirement Announced` names a version that is supported *today*.
+
+    Treating it as retired would drop 94 eligible versions whose retirement dates
+    are a year or more out -- versions the pipeline exists to convert.
+    """
+    catalog = _eos(
+        project_root,
+        state,
+        (
+            ("TIBCO EMS", "8.6.0", "Retired", "12-31-2024"),
+            ("TIBCO EMS", "9.1.0", "Retirement Announced", "12-31-2027"),
+            ("TIBCO EMS", "10.4.0", "GA", "12-31-2030"),
+        ),
+    )
+
+    _fetch(catalog, _ems("10.4.0", "9.1.0", "8.6.0", "11.0.0"))
+
+    # 11.0.0 has no row at all: absence is silence, not a verdict.
+    assert [v.version for _, v in catalog.iter_versions(eligible_only=True)] == ["11.0.0", "10.4.0", "9.1.0"]
+
+
+def test_a_version_missing_from_a_covered_product_stays_eligible(
+    project_root: Path, state: StateStore
+) -> None:
+    """The report covers `TIBCO EMS` but says nothing about 10.4.0. That is not a retirement."""
+    catalog = _eos(project_root, state, RETIRED_8_6)
+
+    _fetch(catalog, _ems("10.4.0", "8.6.0"))
+
+    version = catalog.get_version("tibco-ems", "10.4.0")
+    assert version.release_status is ReleaseStatus.UNKNOWN
+    assert version.release_status_source is ReleaseStatusSource.UNKNOWN
+    assert version.convert_eligible is True
+
+
+def test_a_product_absent_from_the_report_is_untouched(project_root: Path, state: StateStore) -> None:
+    """2,004 of the catalog's 2,506 unknown versions are unknown for exactly this reason."""
+    catalog = _eos(project_root, state, RETIRED_8_6)
+
+    _fetch(catalog, make_product("tibco-ebx", versions={"6.2.0": make_version("tibco-ebx", "6.2.0")}))
+
+    assert catalog.get_version("tibco-ebx", "6.2.0").release_status is ReleaseStatus.UNKNOWN
+    assert len(catalog.iter_versions(eligible_only=True)) == 1
+
+
+def test_the_verdict_and_its_date_round_trip_through_the_csv(project_root: Path, state: StateStore) -> None:
+    catalog = _eos(project_root, state, RETIRED_8_6)
+    _fetch(catalog, _ems("8.6.0"))
+
+    row = read_rows(catalog.versions_path)[0]
+    assert row["release_status"] == "retired"
+    assert row["retirement_date"] == "2024-12-31"
+    assert row["release_status_source"] == "eos_report"
+
+    reloaded = _reload(catalog).get_version("tibco-ems", "8.6.0")
+    assert reloaded.release_status is ReleaseStatus.RETIRED
+    # Re-read verbatim: running the ISO value back through the permissive date
+    # parser is what would turn it into something else on the second round trip.
+    assert reloaded.retirement_date == "2024-12-31"
+
+
+def test_a_version_discovered_after_the_report_landed_is_retired_on_arrival(
+    project_root: Path, state: StateStore
+) -> None:
+    """The §3.10 argument, restated for retirement: policy written as a cleared flag decays.
+
+    A fetch defaults a newly discovered version to `convert_eligible=true`, so a
+    retirement applied once and never re-checked would be undone by the next crawl.
+    """
+    catalog = _eos(project_root, state, RETIRED_8_6)
+    _fetch(catalog, _ems("10.4.0"))
+
+    _fetch(_eos(project_root, state, RETIRED_8_6), _ems("10.4.0", "8.6.0"))
+
+    assert _eos(project_root, state, RETIRED_8_6).get_version("tibco-ems", "8.6.0").release_status is (
+        ReleaseStatus.RETIRED
+    )
+
+
+def test_a_manual_verdict_survives_a_fetch(project_root: Path, state: StateStore) -> None:
+    """The escape hatch: a retired version being converted anyway must stay converted."""
+    catalog = _eos(project_root, state, RETIRED_8_6)
+    _fetch(catalog, _ems("8.6.0"))
+    catalog.set_version_field("tibco-ems", "8.6.0", "release_status", "ga")
+
+    _fetch(_eos(project_root, state, RETIRED_8_6), _ems("8.6.0"))
+
+    version = _eos(project_root, state, RETIRED_8_6).get_version("tibco-ems", "8.6.0")
+    assert (version.release_status, version.release_status_source) == (
+        ReleaseStatus.GA,
+        ReleaseStatusSource.MANUAL,
+    )
+
+
+def test_a_manual_retirement_also_pins_to_manual(project_root: Path, state: StateStore) -> None:
+    """The other direction: retiring by hand a version the report has not reached."""
+    catalog = _eos(project_root, state)
+    _fetch(catalog, _ems("8.6.0"))
+
+    catalog.set_version_field("tibco-ems", "8.6.0", "release_status", "retired")
+
+    version = _reload(catalog).get_version("tibco-ems", "8.6.0")
+    assert version.release_status_source is ReleaseStatusSource.MANUAL
+    assert catalog.iter_versions(eligible_only=True) == []
+
+
+def test_removing_an_alias_restores_the_version(project_root: Path, state: StateStore) -> None:
+    """Step 3 of the resolution actively resets, so a correction really does take effect."""
+    alias = 'aliases:\n  - report_name: "EMS Classic"\n    slug: tibco-ems\n'
+    rows = (("EMS Classic", "8.6.0", "Retired", "12-31-2024"),)
+    _fetch(_eos(project_root, state, rows, aliases=alias), _ems("8.6.0"))
+
+    _fetch(_eos(project_root, state, rows), _ems("8.6.0"))
+
+    version = _eos(project_root, state, rows).get_version("tibco-ems", "8.6.0")
+    assert version.release_status is ReleaseStatus.UNKNOWN
+    assert version.retirement_date is None
+    assert version.release_status_source is ReleaseStatusSource.UNKNOWN
+
+
+def test_a_dropped_report_row_restores_the_version(project_root: Path, state: StateStore) -> None:
+    """A corrected report is the common case; it must not need a hand-edit to land."""
+    _fetch(_eos(project_root, state, RETIRED_8_6), _ems("8.6.0"))
+
+    _fetch(_eos(project_root, state), _ems("8.6.0"))
+
+    assert _eos(project_root, state).get_version("tibco-ems", "8.6.0").release_status is ReleaseStatus.UNKNOWN
+
+
+def test_apply_eos_re_resolves_without_a_crawl(project_root: Path, state: StateStore) -> None:
+    """A new report should cost a CSV swap, not an hour of walking the docsite."""
+    _fetch(_eos(project_root, state), _ems("10.4.0", "8.6.0"))
+
+    stats = _eos(project_root, state, RETIRED_8_6).apply_eos()
+
+    assert stats.versions_retired == 1
+    assert _eos(project_root, state, RETIRED_8_6).get_version("tibco-ems", "8.6.0").release_status is (
+        ReleaseStatus.RETIRED
+    )
+
+
+def test_a_product_left_with_nothing_convertible_is_named(project_root: Path, state: StateStore) -> None:
+    """Never a count: a product with no convertible version publishes no docs at all."""
+    catalog = _eos(
+        project_root,
+        state,
+        (("TIBCO EMS", "10.4.0", "Retired", "12-31-2024"), ("TIBCO EMS", "8.6.0", "Retired", "12-31-2024")),
+    )
+
+    stats = _fetch(catalog, _ems("10.4.0", "8.6.0"))
+
+    assert stats.versions_retired == 2
+    assert stats.products_fully_retired == ["tibco-ems"]
+
+
+def test_a_partly_retired_product_is_not_reported_as_emptied(project_root: Path, state: StateStore) -> None:
+    catalog = _eos(project_root, state, RETIRED_8_6)
+
+    stats = _fetch(catalog, _ems("10.4.0", "8.6.0"))
+
+    assert (stats.versions_retired, stats.products_fully_retired) == (1, [])
+
+
+def test_retirement_is_measured_over_the_convertible_population(
+    project_root: Path, state: StateStore
+) -> None:
+    """An out-of-scope product's retirements cost the run nothing, so they are not counted.
+
+    Counted over the whole catalog the figure is four times larger and almost
+    entirely restates the archive flag -- alarming, and meaningless.
+    """
+    catalog = _eos(project_root, state, RETIRED_8_6, out_of_scope=("tibco-ems",))
+
+    stats = _fetch(catalog, _ems("10.4.0", "8.6.0"))
+
+    assert (stats.versions_retired, stats.products_fully_retired) == (0, [])
+
+
+def test_an_ineligible_retired_version_is_not_counted_twice(project_root: Path, state: StateStore) -> None:
+    """It was already excluded; retirement changes nothing about this row."""
+    catalog = _eos(project_root, state, RETIRED_8_6)
+    product = _ems("10.4.0")
+    product.versions["8.6.0"] = make_version("tibco-ems", "8.6.0", is_archived=True, convert_eligible=False)
+
+    stats = _fetch(catalog, product)
+
+    assert stats.versions_retired == 0
+
+
+def test_a_batch_tag_on_a_retired_version_warns(project_root: Path, state: StateStore) -> None:
+    """The row reads as scheduled and will never run, so the reason has to be named."""
+    catalog = _eos(project_root, state, RETIRED_8_6)
+    _fetch(catalog, _ems("8.6.0"))
+
+    catalog.set_version_field("tibco-ems", "8.6.0", "convert_batch", "poc-1")
+
+    notes = catalog.warnings()
+    assert any("poc-1" in note and "the end-of-support report" in note for note in notes)
+
+
+def test_a_manually_retired_version_in_a_batch_names_the_hand_edit(
+    project_root: Path, state: StateStore
+) -> None:
+    """The two are undone differently, so the warning must not conflate them."""
+    catalog = _eos(project_root, state)
+    _fetch(catalog, _ems("8.6.0"))
+    catalog.set_version_field("tibco-ems", "8.6.0", "release_status", "retired")
+
+    catalog.set_version_field("tibco-ems", "8.6.0", "convert_batch", "poc-1")
+
+    assert any("a manual release_status=retired" in note for note in catalog.warnings())
+
+
+def test_a_stale_alias_warns(project_root: Path, state: StateStore) -> None:
+    """Support renaming a product silently stops the alias retiring anything."""
+    catalog = _eos(
+        project_root,
+        state,
+        RETIRED_8_6,
+        aliases='aliases:\n  - report_name: "Renamed Upstream"\n    slug: tibco-ebx\n',
+    )
+    _fetch(catalog, _ems("8.6.0"))
+
+    notes = [note for note in catalog.warnings() if "eos.yaml" in note]
+    assert len(notes) == 1
+    assert "Renamed Upstream" in notes[0]
+
+
+def test_an_unknown_release_status_is_rejected(project_root: Path, state: StateStore) -> None:
+    catalog = _eos(project_root, state)
+    _fetch(catalog, _ems("8.6.0"))
+
+    with pytest.raises(ValueError):
+        catalog.set_version_field("tibco-ems", "8.6.0", "release_status", "end-of-life")
+
+
+def test_eos_coverage_counts_products_the_report_reaches(project_root: Path, state: StateStore) -> None:
+    """Reported so 'nothing retired' reads as coverage rather than as a clean bill."""
+    catalog = _eos(project_root, state, RETIRED_8_6)
+    _fetch(catalog, _ems("8.6.0"), make_product("tibco-ebx", versions={"6.2.0": make_version("tibco-ebx", "6.2.0")}))
+
+    assert catalog.eos_coverage() == (1, 2)
+
+
+def test_triage_summary_counts_release_status(project_root: Path, state: StateStore) -> None:
+    catalog = _eos(
+        project_root,
+        state,
+        (("TIBCO EMS", "8.6.0", "Retired", "12-31-2024"), ("TIBCO EMS", "9.1.0", "GA", "12-31-2030")),
+    )
+    _fetch(catalog, _ems("10.4.0", "9.1.0", "8.6.0"))
+
+    summary = catalog.triage_summary()
+
+    assert summary["release_status_counts"] == {
+        "retired": 1,
+        "retirement-announced": 0,
+        "ga": 1,
+        "unknown": 1,
+    }
+    assert summary["versions_retired"] == 1
+
+
+def test_a_catalog_with_no_config_retires_nothing(catalog: CatalogManager, sample_product: Product) -> None:
+    """The report is optional; a manager built without a ConfigManager has none."""
+    stats = _fetch(catalog, sample_product)
+
+    assert (stats.versions_retired, stats.products_fully_retired) == (0, [])
+    assert catalog.get_version("tibco-ems", "10.4.0").release_status is ReleaseStatus.UNKNOWN
+
+
+def test_the_shipped_report_retires_the_measured_set(repo_root: Path) -> None:
+    """A guard on the real three files: products.csv, versions.csv and eos.yaml.
+
+    The figures are what the 2026-09-10 report costs the *convertible* population,
+    and they are asserted exactly rather than as a floor: a report swap that moves
+    them is a decision to look at, not something to discover after a conversion run.
+    """
+    manager = CatalogManager(
+        repo_root / "config" / "products.csv",
+        repo_root / "config" / "versions.csv",
+        config=ConfigManager(root_dir=repo_root),
+    )
+
+    summary = manager.triage_summary()
+
+    assert summary["versions_retired"] == 128
+    assert len(summary["products_fully_retired"]) == 11
+    assert manager.eos_coverage() == (251, 634)
+
+
+def test_the_shipped_report_never_retires_a_look_alike(repo_root: Path) -> None:
+    """`Spotfire Analytics` shares 0 of 7 versions with `tibco-analytics` -- see eos.yaml.
+
+    The one rejected alias that would have been actively wrong. Asserted here as
+    well as in test_config, because the config test only proves the mapping is
+    absent while this proves no version of the product was retired by it.
+    """
+    report = ConfigManager(root_dir=repo_root).load_eos()
+
+    assert report.entries.get("tibco-analytics") is None
 
 
 # -- the catalog key: slug, not product_code (architecture.md §3.1) ----------

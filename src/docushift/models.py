@@ -111,6 +111,40 @@ class ScopeSource(StrEnum):
     DEFAULT = "default"
 
 
+class ReleaseStatus(StrEnum):
+    """Where a version sits in support's lifecycle -- docs/architecture.md §3.11.
+
+    Reported by support, not decided here: the values are the ones the
+    end-of-support report uses. **Only `RETIRED` gates conversion.**
+    `RETIREMENT_ANNOUNCED` is a dated warning about a version that is still
+    supported today, and treating it as retired would drop 94 eligible versions
+    whose retirement dates are a year or more out.
+
+    `UNKNOWN` is the default and means exactly that: no row in the active report.
+    It must never be read as retired. 2,506 of the catalog's 4,462 versions are
+    `UNKNOWN`, and 2,050 of those are so because their product is absent from the
+    report entirely -- absence is silence, not a verdict.
+    """
+    RETIRED = "retired"
+    RETIREMENT_ANNOUNCED = "retirement-announced"
+    GA = "ga"
+    UNKNOWN = "unknown"
+
+
+class ReleaseStatusSource(StrEnum):
+    """How a version's `release_status` was arrived at -- docs/architecture.md §3.11.
+
+    Precedence: first listed wins, exactly as `ScopeSource` does. `MANUAL` is a
+    human's override and no report may touch it; `EOS_REPORT` means the active
+    report carried a row for this exact `(product, version)`; `UNKNOWN` means it
+    did not, and is the value a re-apply resets to when a row or an alias goes
+    away.
+    """
+    MANUAL = "manual"
+    EOS_REPORT = "eos_report"
+    UNKNOWN = "unknown"
+
+
 class ProductVersion(BaseModel):
     """One published version of a product -- one row of `versions.csv`.
 
@@ -131,6 +165,14 @@ class ProductVersion(BaseModel):
     # Opt-in by design: tagging three rows is the whole cost of scoping a POC.
     convert_batch: str = ""
     release_date: str | None = None
+    # Support's retirement verdict, resolved from `config/eos.yaml` at merge time
+    # and carried here so the sheet shows the answer without anyone opening the
+    # report (§3.11). Grouped with `release_date` because GA date, retirement date
+    # and lifecycle status are one story. `retirement_date` is populated for
+    # announced and GA rows too -- the report dates every row it carries.
+    release_status: ReleaseStatus = ReleaseStatus.UNKNOWN
+    retirement_date: str | None = None
+    release_status_source: ReleaseStatusSource = ReleaseStatusSource.UNKNOWN
     engine: SourceEngine = SourceEngine.AUTO
     engine_source: EngineSource = EngineSource.AUTO
     zip_url: str | None = None
@@ -159,7 +201,7 @@ class ProductVersion(BaseModel):
 class Product(BaseModel):
     """One product -- one row of `products.csv`, plus its versions.
 
-    `in_scope` is the outermost of the three selection gates (§3.7): a product-level
+    `in_scope` is the outermost of the four selection gates (§3.7): a product-level
     standing decision that no version of this product is ever converted. It is
     deliberately not expressible as `convert_eligible=false` on every version row,
     because next quarter's release arrives from a fetch defaulting to eligible --

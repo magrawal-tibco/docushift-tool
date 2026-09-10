@@ -66,6 +66,9 @@ docushift catalog fetch --all
 # List catalog products and versions
 docushift catalog list
 docushift catalog show --product businessevents-enterprise
+
+# Re-apply support's end-of-support report without re-crawling
+docushift catalog eos
 ```
 
 **A scope is required.** A bare `catalog fetch` would crawl the entire A-to-Z list, so it asks for `--all` or one of `--bu` / `--family` / `--product` / `--batch` instead of assuming. `--version` is rejected: discovery works a product at a time, and fetching one version would make the others look deleted.
@@ -88,17 +91,20 @@ Useful flags:
 | `--allow-deletes` | Permits removal of versions discovery no longer returns. Without it, a disappearing version **aborts** the merge — an upstream outage should not silently prune your catalog. |
 | `--no-include-archived` | Skips the archive index. Faster; leaves you without version history. |
 
-What it prints: a table of added / updated / unchanged / protected counts, a dim line counting entries skipped as unversioned or not publicly visible (roughly 70 of the 739 A-to-Z entries are employee-only), any catalog warnings, and — if some products could not be reached — how many. **A product that fails is left exactly as it was**, never emptied, so a partial crawl cannot look like a mass deletion.
+What it prints: a table of added / updated / unchanged / protected counts, a dim line counting entries skipped as unversioned or not publicly visible (roughly 70 of the 739 A-to-Z entries are employee-only), what support's end-of-support report retires, any catalog warnings, and — if some products could not be reached — how many. **A product that fails is left exactly as it was**, never emptied, so a partial crawl cannot look like a mass deletion.
 
 ### Choosing which versions get converted
 
-Three columns, answering three different questions:
+Four columns, answering four different questions:
 
 | Column | File | Question | Default |
 | :--- | :--- | :--- | :--- |
 | `in_scope` | `products.csv` | *May **this product** ever be converted?* | `true` |
+| `release_status` | `versions.csv` | *Is this version still supported?* | `unknown` (from support's report) |
 | `convert_eligible` | `versions.csv` | *May this version ever be converted?* | `true` for active, `false` for archived |
 | `convert_batch` | `versions.csv` | *Is it in **this** run?* | empty (not scheduled) |
+
+Three of the four are yours. `release_status` is not — it comes from support's end-of-support report, and only the value `retired` blocks anything.
 
 Use `convert_eligible` for permanent policy — this version is out of scope, full stop. Use `convert_batch` to scope a run: tag the handful of rows you want with a label like `poc-1` or `wave-2` and pass `--batch poc-1` to the pipeline. Nothing else in the sheet has to move.
 
@@ -119,7 +125,7 @@ docushift convert  --batch poc-1
 
 For anything larger than a handful, the spreadsheet is faster: filter `versions.csv` by `_family`, select the `convert_batch` column, and fill down `wave-2`. Values are lowercased on save, so `POC-1` and `poc-1` are the same batch. To unschedule a version, clear the cell (or pass `--batch ""`).
 
-**The columns compose, outside in.** A version tagged `poc-1` but left `convert_eligible=false` is skipped, not converted; a version of a product with `in_scope=false` is skipped whatever its own two columns say. `catalog import` warns about both combinations by name, since each is nearly always an oversight.
+**The columns compose, outside in.** A version tagged `poc-1` but left `convert_eligible=false` is skipped, not converted; so is one support has retired; and so is any version of a product with `in_scope=false`, whatever its own three columns say. `catalog import` warns about all three combinations by name — and says which gate closed, since each is undone differently.
 
 #### Products that are never converted
 
@@ -147,6 +153,52 @@ That sets `scope_source=manual`, which outranks the rule file — no later fetch
 Two things to know if you edit `products.csv` by hand. An **empty `in_scope` cell means in scope** — only the literal `false` excludes, so a row you type in yourself cannot vanish from the pipeline by omission. And **deleting a slug from `scope.yaml` really does restore the product**: the next fetch resets it to `in_scope=true, scope_source=default`. The one thing a fetch will not touch is a `manual` decision.
 
 > **Slugs are matched exactly.** `slug: ebx` matches nothing, and a substring rule would be worse than useless — `ebx` appears inside `tibco-businessconnect-ebxml-protocol`, which is an unrelated product that *is* in scope. If you add an entry, copy the slug from `products.csv`. Any rule that matches no product is reported after every fetch, which is how you find out a product was renamed upstream.
+
+#### Versions support has retired
+
+Support publishes an end-of-support report, and **a version it marks `Retired` is not converted** — there is no point publishing fresh documentation for software nobody supports. On the 2026-09-10 report that removes 128 versions from the work and leaves 11 products with nothing convertible at all.
+
+The report is committed as-is under `config/eos/`, and `config/eos.yaml` names the active one:
+
+```yaml
+report: eos/EOS-Report-2026-09-10.csv
+aliases:
+  - report_name: "TIBCO Data Streams"   # what the report calls it
+    slug: spotfire-data-streams         # what the docsite calls it
+```
+
+The aliases exist because the report carries product **names** and the catalog is keyed on **slugs**. Most names slugify straight onto a product; fourteen do not, and each of those mappings was checked by hand against the two version lists before being added.
+
+Three columns in `versions.csv` record the result:
+
+| Column | Values |
+| :--- | :--- |
+| `release_status` | `retired` (blocks conversion) · `retirement-announced` (a dated warning; still supported, still converted) · `ga` · `unknown` |
+| `retirement_date` | ISO, from the report |
+| `release_status_source` | `eos_report` · `manual` · `unknown` |
+
+**`unknown` means the report said nothing, not that the version is retired.** Support tracks 528 product names, 251 of which match something in this catalog — so most of the catalog is `unknown`, and all of it converts normally.
+
+When a new report arrives, drop it in `config/eos/`, point `eos.yaml` at it, and run:
+
+```bash
+docushift catalog eos
+```
+
+That re-applies the report to every row and prints what changed, how many products the report actually covers, and — named in full, never as a count — every product it leaves with nothing to publish. `catalog fetch` does the same thing, but only as a side effect of re-crawling the whole docsite, which takes about an hour.
+
+To see what is being skipped, and to convert something anyway:
+
+```bash
+docushift catalog list --retired
+docushift catalog set --product ems --version 8.6.0 --release-status ga
+```
+
+The override sets `release_status_source=manual`, which outranks the report permanently — no fetch and no new report will undo it. The retirement date stays in the row, because support really did retire the version on that day; you have decided to convert it regardless. The same flag works the other way (`--release-status retired`) for a version you want skipped before the report catches up.
+
+Removing a row from the report, or removing a wrong alias, **restores the version** on the next `catalog eos` — the tool resets anything it set itself. And as with scope, retired versions stay fully catalogued: they keep their rows, their dates and their place in every inventory. They are just never downloaded, extracted, converted or laid out.
+
+> **An alias that stops matching is reported.** If support renames a product, its alias silently stops retiring anything — so `catalog eos` and `catalog import` both name any alias the active report no longer mentions. That warning is the only sign you would get.
 
 ### What's actually in the package
 
@@ -262,7 +314,7 @@ docushift catalog import
 It distinguishes two kinds of finding:
 
 - **Problems block the write.** Version keys that vanished (the `1.10` → `1.1` case) and convert-eligible versions with no `zip_url` — unless `zip_source=manual`, which says the package is supplied by hand and no URL is expected. Nothing is written until you fix them, or re-run with `--allow-deletes` once you have confirmed the removals are intended.
-- **Warnings do not.** A family not yet declared in `taxonomy.yaml`, a version tagged into a batch but left `convert_eligible=false`, or a `zip_source=manual` row that discovery has since found a real URL for. All are states you may have chosen deliberately, so they are reported and the write proceeds.
+- **Warnings do not.** A family not yet declared in `taxonomy.yaml`, a version tagged into a batch but left `convert_eligible=false` or retired by support, a `zip_source=manual` row that discovery has since found a real URL for, or an alias in `eos.yaml` the active report no longer mentions. All are states you may have chosen deliberately, so they are reported and the write proceeds.
 
 ### Editing from the command line
 
@@ -275,10 +327,11 @@ docushift catalog set --product ems --bu tibco
 docushift catalog set --product ems --display-name "TIBCO Enterprise Message Service"
 docushift catalog set --product ebx --in-scope                # also sets scope_source=manual
 
-# Version row (versions.csv) — --engine, --zip-url, --zip-source and --batch require --version
+# Version row (versions.csv) — every one of these requires --version
 docushift catalog set --product ems --version 8.6.0 --engine webworks
 docushift catalog set --product ems --version 8.6.0 --zip-url https://internal/mirror.zip
 docushift catalog set --product ems --version 10.4.0 --batch poc-1
+docushift catalog set --product ems --version 8.6.0 --release-status ga    # convert it despite the report
 docushift catalog set --product dsp_gridserver --version 7.1.1 --zip-source auto   # undo a manual pin
 ```
 
@@ -366,7 +419,7 @@ docushift report --output ./reports/migration_summary.md
 | `--version 10.4.0` | One version (with `--product`) |
 | `--batch poc-1` | Every version tagged into that run |
 
-Versions with `convert_eligible=false` are excluded regardless of the selector, and so is every version of a product with `in_scope=false` — `--product ebx --all` selects nothing.
+Versions with `convert_eligible=false` are excluded regardless of the selector, and so are versions support has retired (`release_status=retired`) and every version of a product with `in_scope=false` — `--product ebx --all` selects nothing.
 
 ### Download Documentation ZIPs
 Downloads eligible versions into `families/<locale>-<bu>-<family>/downloads/`:

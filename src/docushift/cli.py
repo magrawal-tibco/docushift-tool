@@ -21,7 +21,7 @@ from docushift import __version__
 from docushift.catalog import CatalogError, CatalogManager
 from docushift.config import ConfigManager
 from docushift.discovery import DocsiteClient, DocsiteCrawler
-from docushift.models import ScopeSource, SourceEngine, ZipSource
+from docushift.models import ReleaseStatus, ScopeSource, SourceEngine, ZipSource
 from docushift.state import StateStore
 
 console = Console()
@@ -80,6 +80,20 @@ def main(ctx: click.Context, root: Path | None) -> None:
 @main.group()
 def catalog() -> None:
     """Discover, inspect, and edit config/products.csv and config/versions.csv."""
+
+
+def _status_cell(ver) -> str:
+    """One version's lifecycle status, rendered for a table.
+
+    `unknown` prints blank rather than as a word: it is the majority state and it
+    means the report is silent, which is not a finding. Only `retired` is coloured,
+    because only `retired` stops the version converting.
+    """
+    if ver.release_status is ReleaseStatus.UNKNOWN:
+        return ""
+    if ver.release_status is ReleaseStatus.RETIRED:
+        return f"[red]retired[/red]{f' {ver.retirement_date}' if ver.retirement_date else ''}"
+    return f"[dim]{ver.release_status}[/dim]"
 
 
 def _catalog_manager(ctx: click.Context) -> CatalogManager:
@@ -168,10 +182,12 @@ def catalog_fetch(
     table.add_column("Change")
     table.add_column("Count", justify="right")
     for label, count in stats.as_dict().items():
-        if label in ("deletions_blocked", "scope_rules_unmatched"):
+        if label in ("deletions_blocked", "scope_rules_unmatched", "products_fully_retired"):
             continue
         table.add_row(label.replace("_", " "), str(count))
     console.print(table)
+
+    _report_retirements(stats)
 
     # Only conclusive over a fully fetched catalog: before that, a rule matches
     # nothing simply because its product has not been discovered yet.
@@ -245,15 +261,23 @@ def _record_discovery_metadata(manager: CatalogManager, result) -> None:
     is_flag=True,
     help="Only products excluded from conversion (in_scope=false). See docs/architecture.md §3.10.",
 )
+@click.option(
+    "--retired",
+    is_flag=True,
+    help="Only versions support has retired (release_status=retired). See docs/architecture.md §3.11.",
+)
 @click.pass_context
 def catalog_list(
-    ctx: click.Context, bu, family, product, version, batch, select_all, eligible_only, out_of_scope
+    ctx: click.Context, bu, family, product, version, batch, select_all, eligible_only, out_of_scope, retired
 ) -> None:
     """List catalog products and versions."""
     if out_of_scope and eligible_only:
         # `--eligible-only` filters out-of-scope products out entirely, so the two
         # flags together can only ever return nothing.
         raise click.ClickException("--out-of-scope and --eligible-only select disjoint sets; pass one.")
+    if retired and eligible_only:
+        # Same shape: the eligibility gate excludes retired versions outright.
+        raise click.ClickException("--retired and --eligible-only select disjoint sets; pass one.")
 
     manager = _catalog_manager(ctx)
     try:
@@ -269,9 +293,14 @@ def catalog_list(
         raise click.ClickException(str(exc)) from exc
     if out_of_scope:
         pairs = [(p, v) for p, v in pairs if not p.in_scope]
+    if retired:
+        pairs = [(p, v) for p, v in pairs if v.release_status is ReleaseStatus.RETIRED]
     if not pairs:
         if out_of_scope:
             console.print("[green]No out-of-scope products in the catalog.[/green]")
+            return
+        if retired:
+            console.print("[green]No retired versions in the catalog.[/green]")
             return
         console.print("[yellow]No matching catalog rows.[/yellow] Run `docushift catalog fetch` to populate.")
         return
@@ -279,9 +308,14 @@ def catalog_list(
     # The scope column earns its width only when something is actually excluded;
     # on a catalog with no exclusions it would be 250 blank cells.
     show_scope = any(not p.in_scope for p, _ in pairs)
+    # Same rule for the lifecycle column: silence from the report is the norm for
+    # 56% of versions, and a column of `unknown` would be noise.
+    show_status = any(v.release_status is not ReleaseStatus.UNKNOWN for _, v in pairs)
     columns = ["Product", "BU", "Family", "Version", "Archived", "Eligible", "Batch", "Engine"]
     if show_scope:
         columns.insert(3, "Scope")
+    if show_status:
+        columns.insert(4 if show_scope else 3, "Status")
 
     table = Table(title=f"Catalog ({len(pairs)} versions)")
     for column in columns:
@@ -301,8 +335,70 @@ def catalog_list(
         ]
         if show_scope:
             row.insert(3, "" if product.in_scope else f"[red]out[/red] ({product.scope_source})")
+        if show_status:
+            row.insert(4 if show_scope else 3, _status_cell(ver))
         table.add_row(*row)
     console.print(table)
+
+
+def _report_retirements(stats) -> None:
+    """Prints what the end-of-support rule cost this run -- docs/architecture.md §3.11.
+
+    The emptied-product list gets its own line, in red, and is never truncated to a
+    count. Everywhere else in this CLI a long list is trimmed with an ellipsis;
+    here the list *is* the finding, because a product with no convertible version
+    left publishes no documentation at all, and that is not something a reader
+    should have to run a second command to discover.
+    """
+    if not stats.versions_retired:
+        return
+    console.print(
+        f"[dim]{stats.versions_retired} in-scope eligible version(s) are retired and will be skipped "
+        f"(config/eos.yaml).[/dim]"
+    )
+    if stats.products_fully_retired:
+        console.print(
+            f"[red]{len(stats.products_fully_retired)} product(s) have no convertible version left -- "
+            f"every eligible version is retired:[/red]\n  "
+            + "\n  ".join(stats.products_fully_retired)
+        )
+
+
+@catalog.command("eos")
+@click.pass_context
+def catalog_eos(ctx: click.Context) -> None:
+    """Re-apply the end-of-support report to the catalog's release-status columns.
+
+    `catalog fetch` does this too, but only as a side effect of re-crawling the
+    docsite at two requests a second. When a new report lands and nothing else has
+    changed, this is the whole update.
+    """
+    manager = _catalog_manager(ctx)
+    try:
+        stats = manager.apply_eos()
+    except (CatalogError, ValueError) as exc:
+        raise click.ClickException(str(exc)) from exc
+
+    summary = manager.triage_summary()
+    counts = summary["release_status_counts"]
+    table = Table(title="Release status (all catalogued versions)")
+    table.add_column("release_status")
+    table.add_column("Versions", justify="right")
+    for status, count in counts.items():
+        table.add_row(status, str(count))
+    console.print(table)
+
+    covered, total = manager.eos_coverage()
+    console.print(f"[dim]The report carries rows for {covered} of {total} catalogued products.[/dim]")
+
+    _report_retirements(stats)
+    if not stats.versions_retired:
+        # Printed next to the coverage line on purpose: "nothing retired" over 251
+        # covered products is a result, over 3 it is a join that is not working.
+        console.print("[green]No in-scope eligible version is retired by the current report.[/green]")
+    for note in manager.warnings():
+        if "eos.yaml" in note:
+            console.print(f"[yellow]WARN[/yellow] {note}")
 
 
 @catalog.command("show")
@@ -334,13 +430,14 @@ def catalog_show(ctx: click.Context, product: str) -> None:
         f"  workspace={cfg.family_dir(product.bu, product.family)}"
     )
     table = Table(title=f"{len(product.versions)} versions")
-    for column in ("Version", "Archived", "Eligible", "Batch", "Released", "Engine", "ZIP"):
+    for column in ("Version", "Archived", "Eligible", "Status", "Batch", "Released", "Engine", "ZIP"):
         table.add_column(column)
     for _, ver in manager.iter_versions(slug=slug):
         table.add_row(
             ver.version,
             "yes" if ver.is_archived else "",
             "yes" if ver.convert_eligible else "no",
+            _status_cell(ver),
             ver.convert_batch or "-",
             ver.release_date or "-",
             f"{ver.engine} ({ver.engine_source})",
@@ -396,6 +493,17 @@ def catalog_enable(ctx: click.Context, product: str, version: str, disable: bool
     help="Mark the package as hand-supplied (manual) or fetchable (auto). See docs/user-guide.md.",
 )
 @click.option(
+    "--release-status",
+    "release_status",
+    # From the enum for the same reason `--engine` is. Includes `unknown`, which is
+    # the honest way to say "the report was wrong about this one" without asserting
+    # a lifecycle stage nobody has verified.
+    type=click.Choice([s.value for s in ReleaseStatus]),
+    default=None,
+    help="Override support's retirement verdict; also sets release_status_source=manual, "
+    "which outranks the end-of-support report permanently. Only 'retired' blocks conversion.",
+)
+@click.option(
     "--batch",
     "convert_batch",
     default=None,
@@ -413,6 +521,7 @@ def catalog_set(
     engine,
     zip_url,
     zip_source,
+    release_status,
     convert_batch,
 ) -> None:
     """Set a catalog field, recording the change as a manual edit."""
@@ -429,6 +538,7 @@ def catalog_set(
         "engine": engine,
         "zip_url": zip_url,
         "zip_source": zip_source,
+        "release_status": release_status,
         "convert_batch": convert_batch,
     }
 
@@ -436,7 +546,8 @@ def catalog_set(
         raise click.ClickException("Nothing to set. Pass at least one field option.")
     if any(v is not None for v in version_edits.values()) and not version:
         raise click.ClickException(
-            "--engine, --zip-url, --zip-source and --batch are version fields; pass --version too."
+            "--engine, --zip-url, --zip-source, --release-status and --batch are version fields; "
+            "pass --version too."
         )
 
     slug = _resolve(manager, product)
@@ -541,6 +652,19 @@ def catalog_triage(ctx: click.Context) -> None:
     )
     if out_of_scope:
         console.print("  " + ", ".join(out_of_scope[:40]) + (" ..." if len(out_of_scope) > 40 else ""))
+
+    # Reported here for the same reason scope is: it is the other permanent gate,
+    # and a reviewer asking "how much of this catalog is work" needs both numbers.
+    retired_total = summary["release_status_counts"][str(ReleaseStatus.RETIRED)]
+    console.print(
+        f"\n[bold]{retired_total}[/bold] version(s) are retired, of which "
+        f"[bold]{summary['versions_retired']}[/bold] would otherwise be converted."
+    )
+    if summary["products_fully_retired"]:
+        console.print(
+            f"[red]{len(summary['products_fully_retired'])} product(s) have no convertible version "
+            f"left:[/red]\n  " + "\n  ".join(summary["products_fully_retired"])
+        )
 
 
 # ---------------------------------------------------------------------------

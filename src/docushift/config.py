@@ -8,20 +8,101 @@ between them -- `state.db` records the resolved path per version, but the layout
 itself is computed here.
 """
 
+import csv
 import os
+from dataclasses import dataclass, field
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
 import yaml
 
-from docushift.models import FamilySource
-from docushift.utils.slug import family_folder
+from docushift.models import FamilySource, ReleaseStatus
+from docushift.utils.slug import family_folder, slugify
 
 # Every folder name is locale-prefixed because the predecessor `html-to-md` project
 # publishes `fr-fr` and `ja-jp` trees alongside `en-us`. Nothing in the pipeline is
 # multi-locale yet; the prefix reserves the shape so adding one is not a rename of
 # every folder on disk.
 DEFAULT_LOCALE = "en-us"
+
+# The end-of-support report writes `12-31-2025`, and it is unambiguously
+# month-first: field one never exceeds 12 across all 5,948 rows while field two
+# reaches 31 in 5,134 of them. Parsed with one explicit format rather than through
+# `csvio.normalize_date`, whose permissive list tries `%d-%m-%Y` and would read
+# `03-04-2021` as 3 April instead of 4 March -- silently, and only for the third of
+# rows where both fields are 12 or under.
+_EOS_DATE_FORMAT = "%m-%d-%Y"
+
+# The report's `Release Status` spellings, mapped to the enum. Anything else is a
+# new value from support and is reported rather than guessed at.
+_EOS_STATUS_TOKENS = {
+    "retired": ReleaseStatus.RETIRED,
+    "retirement announced": ReleaseStatus.RETIREMENT_ANNOUNCED,
+    "ga": ReleaseStatus.GA,
+}
+
+
+@dataclass
+class EosReport:
+    """The active end-of-support report, resolved against `config/eos.yaml`.
+
+    `entries` is keyed by the **slug the report name resolves to**, so a caller
+    joins it with a dict hit on `product.slug` and never runs a name match of its
+    own. Names that already slugify to a catalog slug resolve to themselves; the
+    rest resolve only through a reviewed alias.
+
+    Note the keys are *candidate* slugs: this class has no catalog to check them
+    against, and 277 of the report's 528 names name products the catalog does not
+    carry at all. An entry for an unknown slug is simply never looked up.
+    """
+    entries: dict[str, dict[str, tuple[ReleaseStatus, str]]] = field(default_factory=dict)
+    aliases: dict[str, str] = field(default_factory=dict)
+    # Every product name the report carries a usable row for. Deliberately not
+    # paired with a "resolved" set: slugifying a name always yields *something*, so
+    # a count computed here would read 528 of 528 whatever the catalog holds. How
+    # many of these name a real product is a question only the catalog can answer,
+    # and `CatalogManager.eos_coverage()` answers it.
+    report_names: set[str] = field(default_factory=set)
+    # Statuses the report used that this tool has no enum value for.
+    unknown_statuses: list[str] = field(default_factory=list)
+
+    @property
+    def unmatched_aliases(self) -> list[str]:
+        """Aliases naming a product the active report does not mention.
+
+        The rename detector, and the exact analogue of `unmatched_scope_rules()`:
+        the day support renames a product in the report is the day that alias
+        stops retiring anything, and silence is indistinguishable from success.
+        """
+        return sorted(name for name in self.aliases if name not in self.report_names)
+
+    def status_for(self, slug: str, version: str) -> tuple[ReleaseStatus, str] | None:
+        """The report's verdict on one version, or `None` if it carries no row.
+
+        Version matching is **exact string equality**, deliberately. Of the 456
+        versions whose product the report covers but whose own number it does not
+        carry, trailing-`.0` coercion would resolve exactly one -- in exchange for
+        reintroducing the `1.10` -> `1.1` hazard the CSV layer exists to prevent.
+        """
+        return self.entries.get(slug, {}).get(version)
+
+
+def _parse_eos_date(value: object) -> str:
+    """Reads the report's `MM-DD-YYYY` date as ISO, passing anything else through.
+
+    Deliberately not `csvio.normalize_date` -- see `_EOS_DATE_FORMAT`. A value that
+    does not match is returned verbatim rather than dropped: the date is
+    documentation on the row, and a format change from support should be visible
+    in the sheet, not silently blanked.
+    """
+    text = str(value or "").strip()
+    if not text:
+        return ""
+    try:
+        return datetime.strptime(text, _EOS_DATE_FORMAT).date().isoformat()
+    except ValueError:
+        return text
 
 
 class ConfigManager:
@@ -37,6 +118,7 @@ class ConfigManager:
         self.taxonomy_path = self.config_dir / "taxonomy.yaml"
         self.docsite_path = self.config_dir / "docsite.yaml"
         self.scope_path = self.config_dir / "scope.yaml"
+        self.eos_path = self.config_dir / "eos.yaml"
         self.aem_templates_dir = self.config_dir / "aem_templates"
         self.products_path = self.config_dir / "products.csv"
         self.versions_path = self.config_dir / "versions.csv"
@@ -52,6 +134,7 @@ class ConfigManager:
         self._taxonomy_cache: dict[str, Any] | None = None
         self._docsite_cache: dict[str, Any] | None = None
         self._scope_cache: dict[str, str] | None = None
+        self._eos_cache: EosReport | None = None
 
     # -- families workspace layout -------------------------------------------
 
@@ -175,6 +258,102 @@ class ConfigManager:
 
         self._scope_cache = rules
         return rules
+
+    def load_eos(self) -> EosReport:
+        """Loads `eos.yaml` and the report it names -- docs/architecture.md §3.11.
+
+        Two files, because they have two different authors. The CSV is support's,
+        arrives periodically and is never hand-edited; the YAML is ours, and holds
+        the one thing the CSV cannot supply -- how its product *names* map to
+        catalog *slugs*, given that it carries no slug and no code.
+
+        A missing `eos.yaml` yields an empty report -- no retirements -- rather
+        than an error, so a fresh checkout works. Everything else raises, on the
+        same reasoning `load_scope()` uses: a duplicate alias, an alias with no
+        slug, or a `report:` naming a file that is not there are all cases where
+        continuing would quietly retire the wrong set of rows.
+        """
+        if self._eos_cache is not None:
+            return self._eos_cache
+
+        report = EosReport()
+        if not self.eos_path.exists():
+            self._eos_cache = report
+            return report
+
+        with open(self.eos_path, encoding="utf-8") as f:
+            loaded = yaml.safe_load(f) or {}
+
+        for entry in loaded.get("aliases") or []:
+            name = str(entry.get("report_name", "")).strip()
+            slug = str(entry.get("slug", "")).strip().lower()
+            if not name:
+                continue
+            if not slug:
+                raise ValueError(f"{self.eos_path}: alias '{name}' has no slug")
+            if name in report.aliases:
+                raise ValueError(f"{self.eos_path}: duplicate alias report_name '{name}'")
+            report.aliases[name] = slug
+
+        report_ref = str(loaded.get("report", "")).strip()
+        if not report_ref:
+            self._eos_cache = report
+            return report
+
+        report_path = self.config_dir / report_ref
+        if not report_path.exists():
+            raise ValueError(f"{self.eos_path}: report '{report_ref}' not found at {report_path}")
+
+        self._read_eos_report(report_path, report)
+        self._eos_cache = report
+        return report
+
+    def _read_eos_report(self, path: Path, report: EosReport) -> None:
+        """Parses the support CSV into `report`, keyed by resolved slug.
+
+        Read with `utf-8-sig`: the report ships a BOM, and its header line ends in
+        a trailing comma, which `DictReader` renders as a `None` key. Both are
+        support's format rather than damage, so neither is worth complaining
+        about -- the named columns are read and the rest ignored.
+
+        The report is self-consistent (0 conflicting statuses over 5,948 rows), so
+        a repeated `(name, version)` is a harmless duplicate and last-wins is safe.
+        A *conflict* is not: two report names resolving to one slug and disagreeing
+        about a version means an alias is wrong, and picking one silently is how
+        that stays invisible.
+        """
+        seen_unknown: set[str] = set()
+        with open(path, encoding="utf-8-sig", newline="") as handle:
+            for row in csv.DictReader(handle):
+                name = (row.get("Product Name") or "").strip()
+                version = (row.get("Version") or "").strip()
+                if not name or not version:
+                    continue
+                report.report_names.add(name)
+
+                token = (row.get("Release Status") or "").strip().lower()
+                status = _EOS_STATUS_TOKENS.get(token)
+                if status is None:
+                    if token and token not in seen_unknown:
+                        seen_unknown.add(token)
+                        report.unknown_statuses.append(token)
+                    continue
+
+                # An alias wins over the slugified name, so a reviewed decision can
+                # correct a name that happens to slugify onto the wrong product.
+                slug = report.aliases.get(name) or slugify(name)
+                if not slug:
+                    continue
+
+                retired_on = _parse_eos_date(row.get("Retirement Date"))
+                existing = report.entries.setdefault(slug, {}).get(version)
+                if existing is not None and existing[0] is not status:
+                    raise ValueError(
+                        f"{path.name}: '{name}' and another report name both resolve to slug '{slug}' "
+                        f"and disagree about version {version} ({existing[0]} vs {status}). "
+                        f"Fix the alias in {self.eos_path.name}."
+                    )
+                report.entries[slug][version] = (status, retired_on)
 
     def families(self, bu: str) -> dict[str, Any]:
         """The family definitions declared for one business unit."""

@@ -10,7 +10,7 @@ from pathlib import Path
 import pytest
 
 from docushift.config import ConfigManager
-from docushift.models import FamilySource
+from docushift.models import FamilySource, ReleaseStatus
 
 RULES_YAML = (
     "business_units:\n"
@@ -233,6 +233,190 @@ def test_shipped_scope_lists_the_ebx_and_spotfire_products(repo_root: Path) -> N
     # The look-alikes the exact-slug rule exists to protect -- see §3.10.
     for slug in ("tibco-businessconnect-ebxml-protocol", "spotfire-data-streams", "spotfire-statistics-services"):
         assert slug not in rules
+
+
+# -- eos.yaml and the support report (architecture.md §3.11) -----------------
+
+
+def _write_eos(config: ConfigManager, rows: str, aliases: str = "") -> None:
+    """Writes a two-file end-of-support setup: the support CSV and our YAML.
+
+    `rows` is the body of the report, without its header. The BOM and the trailing
+    header comma are reproduced because the real report has both, and neither may
+    be something the loader has to be shielded from.
+    """
+    report = config.config_dir / "eos" / "report.csv"
+    report.parent.mkdir(parents=True, exist_ok=True)
+    header = "Product Name,Version,Release Status,Retirement Date,Last Updated On,\n"
+    report.write_text(header + rows, encoding="utf-8-sig")
+    config.eos_path.write_text(f"report: eos/report.csv\n{aliases}", encoding="utf-8")
+
+
+def test_missing_eos_yields_no_retirements(config: ConfigManager) -> None:
+    """A fresh checkout with no eos.yaml retires nothing, rather than erroring."""
+    report = config.load_eos()
+
+    assert report.entries == {}
+    assert report.status_for("tibco-ems", "8.6.0") is None
+
+
+def test_a_report_row_is_keyed_by_the_slugified_name(config: ConfigManager) -> None:
+    _write_eos(config, "TIBCO Enterprise Message Service,8.6.0,Retired,12-31-2024,01-05-2025,\n")
+
+    assert config.load_eos().status_for("tibco-enterprise-message-service", "8.6.0") == (
+        ReleaseStatus.RETIRED,
+        "2024-12-31",
+    )
+
+
+def test_the_report_date_is_read_month_first(config: ConfigManager) -> None:
+    """`03-04-2021` is 4 March. Read day-first it would silently become 3 April."""
+    _write_eos(config, "TIBCO EMS,1.0.0,Retired,03-04-2021,01-05-2025,\n")
+
+    assert config.load_eos().status_for("tibco-ems", "1.0.0") == (ReleaseStatus.RETIRED, "2021-03-04")
+
+
+def test_an_unparseable_date_survives_verbatim(config: ConfigManager) -> None:
+    """A format change from support must be visible in the sheet, not blanked."""
+    _write_eos(config, "TIBCO EMS,1.0.0,Retired,Q3 2026,01-05-2025,\n")
+
+    assert config.load_eos().status_for("tibco-ems", "1.0.0") == (ReleaseStatus.RETIRED, "Q3 2026")
+
+
+def test_the_three_report_statuses_all_parse(config: ConfigManager) -> None:
+    _write_eos(
+        config,
+        "TIBCO EMS,1.0.0,Retired,12-31-2024,01-05-2025,\n"
+        "TIBCO EMS,2.0.0,Retirement Announced,12-31-2027,01-05-2025,\n"
+        "TIBCO EMS,3.0.0,GA,12-31-2030,01-05-2025,\n",
+    )
+
+    report = config.load_eos()
+
+    assert report.status_for("tibco-ems", "1.0.0")[0] is ReleaseStatus.RETIRED
+    assert report.status_for("tibco-ems", "2.0.0")[0] is ReleaseStatus.RETIREMENT_ANNOUNCED
+    assert report.status_for("tibco-ems", "3.0.0")[0] is ReleaseStatus.GA
+    assert report.unknown_statuses == []
+
+
+def test_an_unrecognized_status_is_reported_not_guessed_at(config: ConfigManager) -> None:
+    """A new spelling from support must not silently read as "not retired"."""
+    _write_eos(config, "TIBCO EMS,1.0.0,End of Life,12-31-2024,01-05-2025,\n")
+
+    report = config.load_eos()
+
+    assert report.status_for("tibco-ems", "1.0.0") is None
+    assert report.unknown_statuses == ["end of life"]
+
+
+def test_version_matching_is_exact_string_equality(config: ConfigManager) -> None:
+    """`1.10` is not `1.1`, and `1.0` is not `1.0.0` -- the whole reason for the CSV layer."""
+    _write_eos(config, "TIBCO EMS,1.10,Retired,12-31-2024,01-05-2025,\n")
+
+    report = config.load_eos()
+
+    assert report.status_for("tibco-ems", "1.10")[0] is ReleaseStatus.RETIRED
+    assert report.status_for("tibco-ems", "1.1") is None
+
+
+def test_a_trailing_zero_is_not_coerced(config: ConfigManager) -> None:
+    _write_eos(config, "TIBCO EMS,10.4,Retired,12-31-2024,01-05-2025,\n")
+
+    assert config.load_eos().status_for("tibco-ems", "10.4.0") is None
+
+
+def test_an_alias_redirects_a_report_name_to_a_catalog_slug(config: ConfigManager) -> None:
+    """The report carries no slug and no code, so a rename is only bridgeable by hand."""
+    _write_eos(
+        config,
+        "TIBCO Data Streams,10.6.0,Retired,12-31-2024,01-05-2025,\n",
+        aliases='aliases:\n  - report_name: "TIBCO Data Streams"\n    slug: spotfire-data-streams\n',
+    )
+
+    report = config.load_eos()
+
+    assert report.status_for("spotfire-data-streams", "10.6.0")[0] is ReleaseStatus.RETIRED
+    # The slugified name is not *also* populated: one row, one product.
+    assert report.status_for("tibco-data-streams", "10.6.0") is None
+
+
+def test_a_duplicate_alias_is_an_error(config: ConfigManager) -> None:
+    """Two mappings for one report name means one of them is about to be discarded."""
+    _write_eos(
+        config,
+        "TIBCO EMS,1.0.0,Retired,12-31-2024,01-05-2025,\n",
+        aliases='aliases:\n  - report_name: "EBX"\n    slug: tibco-ebx\n'
+        '  - report_name: "EBX"\n    slug: spotfire\n',
+    )
+
+    with pytest.raises(ValueError, match="duplicate alias report_name 'EBX'"):
+        config.load_eos()
+
+
+def test_an_alias_with_no_slug_is_an_error(config: ConfigManager) -> None:
+    _write_eos(
+        config,
+        "TIBCO EMS,1.0.0,Retired,12-31-2024,01-05-2025,\n",
+        aliases='aliases:\n  - report_name: "EBX"\n    note: "meant to fill this in"\n',
+    )
+
+    with pytest.raises(ValueError, match="alias 'EBX' has no slug"):
+        config.load_eos()
+
+
+def test_a_report_that_is_not_there_is_an_error(config: ConfigManager) -> None:
+    """Silently retiring nothing is the one failure mode this file cannot afford."""
+    config.eos_path.write_text("report: eos/gone.csv\n", encoding="utf-8")
+
+    with pytest.raises(ValueError, match="not found"):
+        config.load_eos()
+
+
+def test_two_names_resolving_to_one_slug_and_disagreeing_is_an_error(config: ConfigManager) -> None:
+    """The alias-is-wrong detector: picking one verdict silently is how that stays hidden."""
+    _write_eos(
+        config,
+        "TIBCO EMS,1.0.0,Retired,12-31-2024,01-05-2025,\nEMS Classic,1.0.0,GA,12-31-2030,01-05-2025,\n",
+        aliases='aliases:\n  - report_name: "EMS Classic"\n    slug: tibco-ems\n',
+    )
+
+    with pytest.raises(ValueError, match="disagree about version 1.0.0"):
+        config.load_eos()
+
+
+def test_a_repeated_row_with_the_same_verdict_is_harmless(config: ConfigManager) -> None:
+    """The real report has two exact duplicates and zero conflicts over 5,948 rows."""
+    _write_eos(
+        config,
+        "TIBCO EMS,1.0.0,Retired,12-31-2024,01-05-2025,\nTIBCO EMS,1.0.0,Retired,12-31-2024,01-05-2025,\n",
+    )
+
+    assert config.load_eos().status_for("tibco-ems", "1.0.0")[0] is ReleaseStatus.RETIRED
+
+
+def test_an_alias_the_report_never_mentions_is_reported(config: ConfigManager) -> None:
+    """The rename detector: the day support renames a product, the alias stops working."""
+    _write_eos(
+        config,
+        "TIBCO EMS,1.0.0,Retired,12-31-2024,01-05-2025,\n",
+        aliases='aliases:\n  - report_name: "Renamed Upstream"\n    slug: tibco-ebx\n',
+    )
+
+    assert config.load_eos().unmatched_aliases == ["Renamed Upstream"]
+
+
+def test_the_shipped_eos_config_resolves_cleanly(repo_root: Path) -> None:
+    """A guard on the real config/eos.yaml and the report it names."""
+    report = ConfigManager(root_dir=repo_root).load_eos()
+
+    assert len(report.report_names) == 528
+    assert report.unmatched_aliases == []
+    assert report.unknown_statuses == []
+    # The reviewed rename, and the look-alike the review rejected: `Spotfire
+    # Analytics` shares 0 of 7 versions with `tibco-analytics`, so it is not an alias.
+    assert report.aliases["EBX"] == "tibco-ebx"
+    assert "Spotfire Analytics" not in report.aliases
+    assert report.status_for("tibco-ebx", "5.9.0") == (ReleaseStatus.RETIRED, "2024-06-30")
 
 
 def test_shipped_taxonomy_rules_classify_known_products(repo_root: Path) -> None:

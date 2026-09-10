@@ -559,6 +559,174 @@ def test_catalog_triage_on_an_empty_catalog(runner: CliRunner, tmp_path: Path) -
     assert "empty" in result.output
 
 
+# -- end-of-support retirement (architecture.md §3.11) -----------------------
+
+
+def _write_eos(root: Path, rows: str, aliases: str = "") -> None:
+    """Drops an end-of-support report and its alias file into a project root.
+
+    `rows` is the report body without its header. `TIBCO Enterprise Message
+    Service` is the name that slugifies onto `populated_root`'s only product.
+    """
+    report = root / "config" / "eos" / "report.csv"
+    report.parent.mkdir(parents=True, exist_ok=True)
+    report.write_text(
+        "Product Name,Version,Release Status,Retirement Date,Last Updated On,\n" + rows, encoding="utf-8-sig"
+    )
+    (root / "config" / "eos.yaml").write_text(f"report: eos/report.csv\n{aliases}", encoding="utf-8")
+
+
+RETIRED_ROW = "TIBCO Enterprise Message Service,10.4.0,Retired,12-31-2024,01-05-2025,\n"
+
+
+def test_catalog_eos_applies_the_report(runner: CliRunner, populated_root: Path) -> None:
+    _write_eos(populated_root, RETIRED_ROW)
+
+    result = _invoke(runner, populated_root, "catalog", "eos")
+
+    assert result.exit_code == 0
+    assert "1 in-scope eligible version(s) are retired" in result.output
+    assert "retired" in (populated_root / "config" / "versions.csv").read_text(encoding="utf-8-sig")
+
+
+def test_catalog_eos_names_every_emptied_product(runner: CliRunner, populated_root: Path) -> None:
+    """10.4.0 is the product's only eligible version, so retiring it publishes nothing."""
+    _write_eos(populated_root, RETIRED_ROW)
+
+    result = _invoke(runner, populated_root, "catalog", "eos")
+
+    assert "no convertible version left" in result.output
+    assert "tibco-enterprise-message-service" in result.output
+
+
+def test_catalog_eos_reports_coverage_alongside_a_clean_result(
+    runner: CliRunner, populated_root: Path
+) -> None:
+    """'Nothing retired' over one covered product and over zero are different findings."""
+    _write_eos(populated_root, "Some Other Product,1.0.0,Retired,12-31-2024,01-05-2025,\n")
+
+    result = _invoke(runner, populated_root, "catalog", "eos")
+
+    assert result.exit_code == 0
+    assert "rows for 0 of 1 catalogued products" in result.output
+    assert "No in-scope eligible version is retired" in result.output
+
+
+def test_catalog_eos_warns_about_a_stale_alias(runner: CliRunner, populated_root: Path) -> None:
+    _write_eos(
+        populated_root,
+        RETIRED_ROW,
+        aliases='aliases:\n  - report_name: "Renamed Upstream"\n    slug: tibco-ebx\n',
+    )
+
+    result = _invoke(runner, populated_root, "catalog", "eos")
+
+    assert result.exit_code == 0
+    assert "Renamed Upstream" in result.output
+
+
+def test_catalog_eos_on_a_project_with_no_report(runner: CliRunner, populated_root: Path) -> None:
+    """The file is optional; the command must still run and say nothing was retired."""
+    result = _invoke(runner, populated_root, "catalog", "eos")
+
+    assert result.exit_code == 0
+    assert "No in-scope eligible version is retired" in result.output
+
+
+def test_catalog_list_retired_shows_only_retired_versions(runner: CliRunner, populated_root: Path) -> None:
+    _write_eos(populated_root, RETIRED_ROW)
+    _invoke(runner, populated_root, "catalog", "eos")
+
+    result = _invoke(runner, populated_root, "catalog", "list", "--retired")
+
+    assert result.exit_code == 0
+    assert "10.4.0" in result.output
+    assert "8.6.0" not in result.output
+    assert "Status" in result.output
+
+
+def test_catalog_list_retired_when_nothing_is_retired(runner: CliRunner, populated_root: Path) -> None:
+    result = _invoke(runner, populated_root, "catalog", "list", "--retired")
+
+    assert result.exit_code == 0
+    assert "No retired versions" in result.output
+
+
+def test_catalog_list_rejects_the_two_disjoint_retirement_flags(
+    runner: CliRunner, populated_root: Path
+) -> None:
+    result = _invoke(runner, populated_root, "catalog", "list", "--retired", "--eligible-only")
+
+    assert result.exit_code != 0
+    assert "disjoint" in result.output
+
+
+def test_catalog_list_eligible_only_skips_a_retired_version(runner: CliRunner, populated_root: Path) -> None:
+    _write_eos(populated_root, RETIRED_ROW)
+    _invoke(runner, populated_root, "catalog", "eos")
+
+    result = _invoke(runner, populated_root, "catalog", "list", "--eligible-only")
+
+    assert result.exit_code == 0
+    assert "No matching catalog rows" in result.output
+
+
+def test_catalog_set_release_status_overrides_the_report(runner: CliRunner, populated_root: Path) -> None:
+    """The escape hatch, from argv: convert a version support has retired."""
+    _write_eos(populated_root, RETIRED_ROW)
+    _invoke(runner, populated_root, "catalog", "eos")
+
+    result = _invoke(
+        runner, populated_root, "catalog", "set", "--product", "ems", "--version", "10.4.0",
+        "--release-status", "ga",
+    )
+
+    assert result.exit_code == 0
+    # The retirement date is left standing: support really did retire this on that
+    # day, and the override is the record of converting it anyway, not a denial.
+    assert "ga,2024-12-31,manual" in (populated_root / "config" / "versions.csv").read_text(encoding="utf-8-sig")
+    listed = _invoke(runner, populated_root, "catalog", "list", "--eligible-only")
+    assert "10.4.0" in listed.output
+
+
+def test_catalog_set_release_status_requires_a_version(runner: CliRunner, populated_root: Path) -> None:
+    """Retirement is a per-version fact; applying one to a whole product is meaningless."""
+    result = _invoke(runner, populated_root, "catalog", "set", "--product", "ems", "--release-status", "retired")
+
+    assert result.exit_code != 0
+    assert "--release-status" in result.output
+
+
+def test_catalog_set_rejects_an_unknown_release_status(runner: CliRunner, populated_root: Path) -> None:
+    result = _invoke(
+        runner, populated_root, "catalog", "set", "--product", "ems", "--version", "10.4.0",
+        "--release-status", "end-of-life",
+    )
+
+    assert result.exit_code != 0
+
+
+def test_catalog_show_lists_the_lifecycle_status(runner: CliRunner, populated_root: Path) -> None:
+    _write_eos(populated_root, RETIRED_ROW)
+    _invoke(runner, populated_root, "catalog", "eos")
+
+    result = _invoke(runner, populated_root, "catalog", "show", "--product", "ems")
+
+    assert result.exit_code == 0
+    assert "Status" in result.output
+
+
+def test_catalog_triage_reports_retirement(runner: CliRunner, populated_root: Path) -> None:
+    _write_eos(populated_root, RETIRED_ROW)
+    _invoke(runner, populated_root, "catalog", "eos")
+
+    result = _invoke(runner, populated_root, "catalog", "triage")
+
+    assert result.exit_code == 0
+    assert "would otherwise be converted" in result.output
+    assert "no convertible version left" in result.output
+
+
 def test_doctor_reports_project_artifacts(runner: CliRunner, tmp_path: Path) -> None:
     result = _invoke(runner, tmp_path, "doctor")
 
