@@ -86,6 +86,8 @@ class CrawlResult:
     # Entries the docsite marks as not publicly visible. Skipped before the
     # request, because fetching one just yields an SSO page.
     non_public: int = 0
+    # Both keyed by docsite slug -- the catalog key -- so they land in `state.db`
+    # under the same identifier the CSV rows use.
     product_metadata: dict[str, dict[str, str]] = field(default_factory=dict)
     version_metadata: dict[tuple[str, str], dict[str, str]] = field(default_factory=dict)
 
@@ -236,17 +238,18 @@ class DocsiteCrawler:
         if not records:
             return None
 
-        code = self._derive_code(entry["slug"], detail, records)
+        slug = entry["slug"]
+        code = self._derive_code(slug, detail, records)
         product = self._product_shell(entry, detail, code, categories)
 
         for record in records:
-            version = self._version_from_record(code, record, result)
+            version = self._version_from_record(slug, code, record, result)
             product.versions.setdefault(version.version, version)
 
         if self.include_archived and self._archive_may_exist(detail):
-            self._apply_archive_index(product, entry["slug"], code, result)
+            self._apply_archive_index(product, slug, result)
 
-        meta = result.product_metadata.setdefault(code, {"docsite_slug": entry["slug"]})
+        meta = result.product_metadata.setdefault(slug, {"docsite_slug": slug})
         if entry["id"]:
             meta["docsite_id"] = entry["id"]
         return product
@@ -268,15 +271,23 @@ class DocsiteCrawler:
             family_source = FamilySource.DOCSITE_CATEGORY
 
         return Product(
+            slug=entry["slug"],
             product_code=code,
             display_name=display_name,
             bu=str(info["bu"]),
             family=family,
             family_source=family_source,
-            slug=entry["slug"],
         )
 
-    def _version_from_record(self, code: str, record: dict[str, Any], result: CrawlResult) -> ProductVersion:
+    def _version_from_record(
+        self, slug: str, code: str, record: dict[str, Any], result: CrawlResult
+    ) -> ProductVersion:
+        """Builds one version row. Keyed on `slug`, pathed from `code`.
+
+        Both identifiers are needed and they are not interchangeable: the catalog
+        row is keyed on the slug, while the docsite's ZIP folder is named from the
+        code, which is precisely what `_derive_code` was built to recover.
+        """
         number = _first(record, _VERSION_KEYS)
         archived = parse_bool(record.get(_present(record, _ARCHIVED_KEYS)))
         declared, folder = _version_folder(record, code, number)
@@ -284,10 +295,10 @@ class DocsiteCrawler:
         # reconstructed one below is good enough to build a URL from but not
         # something to hand the download stage as fact.
         if declared:
-            result.version_metadata.setdefault((code, number), {})["folder_path"] = declared
+            result.version_metadata.setdefault((slug, number), {})["folder_path"] = declared
 
         return ProductVersion(
-            product_code=code,
+            slug=slug,
             version=number,
             is_archived=archived,
             convert_eligible=self.archived_eligible if archived else self.active_eligible,
@@ -301,10 +312,16 @@ class DocsiteCrawler:
     def _derive_code(self, slug: str, detail: dict[str, Any], records: list[dict[str, Any]]) -> str:
         """The catalog's `product_code`, e.g. `ems` for `tibco-enterprise-message-service`.
 
-        Read from a `<code>/<version>` folder path -- what the catalog already uses
-        and what the ZIP URL is built from. The current version's own path is
-        preferred because archived siblings carry stale ones. Products with no
-        usable path at all fall back to the slug with its vendor prefix stripped.
+        Read from a `<code>/<version>` folder path, which is what the ZIP URL is
+        built from. The current version's own path is preferred because archived
+        siblings carry stale ones. Products with no usable path at all fall back to
+        the slug with its vendor prefix stripped.
+
+        Unchanged by the 2026-09-10 re-key, and deliberately so: this always
+        answered "what does the docsite call this product's folder?", which is a
+        real and correct question. What was wrong was treating the answer as a
+        unique key -- ten codes are shared by twenty-one products, and the fix was
+        to key on the slug rather than to make this derivation guess harder.
         """
         for record in (detail, *records):
             folder = _first(record, _FOLDER_KEYS)
@@ -332,7 +349,7 @@ class DocsiteCrawler:
         key = _present(detail, _ARCHIVE_EXISTS_KEYS)
         return True if key is None else bool(detail[key])
 
-    def _apply_archive_index(self, product: Product, slug: str, code: str, result: CrawlResult) -> None:
+    def _apply_archive_index(self, product: Product, slug: str, result: CrawlResult) -> None:
         """Fills in archived versions' real ZIP endpoints from the archive index.
 
         The index overlaps `siblings` rather than replacing it, so a version already
@@ -357,7 +374,7 @@ class DocsiteCrawler:
 
             if existing is None:
                 product.versions[number] = ProductVersion(
-                    product_code=code,
+                    slug=slug,
                     version=number,
                     is_archived=True,
                     convert_eligible=self.archived_eligible,

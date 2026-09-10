@@ -45,11 +45,15 @@ def populated_root(tmp_path: Path) -> Path:
     # The slug is deliberately not the product code: that is the real docsite
     # relationship, and several fetch tests turn on it.
     product = make_product(
-        "ems", display_name="TIBCO EMS", family="messaging", slug="tibco-enterprise-message-service"
+        "tibco-enterprise-message-service", product_code="ems", display_name="TIBCO EMS", family="messaging"
     )
     product.versions = {
-        "10.4.0": make_version("ems", "10.4.0", zip_url="https://docs.tibco.com/ems.zip"),
-        "8.6.0": make_version("ems", "8.6.0", is_archived=True, convert_eligible=False),
+        "10.4.0": make_version(
+            "tibco-enterprise-message-service", "10.4.0", zip_url="https://docs.tibco.com/ems.zip"
+        ),
+        "8.6.0": make_version(
+            "tibco-enterprise-message-service", "8.6.0", is_archived=True, convert_eligible=False
+        ),
     }
     manager.merge_fetch_results([product])
     state.close()
@@ -198,14 +202,16 @@ def test_catalog_fetch_resolves_a_batch_to_crawl_selectors(
 ) -> None:
     """--batch must narrow the crawl itself, not just the rows printed afterwards.
 
-    The docsite is addressed by slug, so the catalog's slug goes along with the code.
+    The catalog is keyed on the docsite slug, which is also how the crawler addresses
+    the A-to-Z list, so a batch resolves straight to the selector with nothing to
+    translate -- the `--product ems` path is the one that still has to resolve a code.
     """
     _invoke(runner, populated_root, "catalog", "set", "--product", "ems", "--version", "10.4.0", "--batch", "poc-1")
     calls = fake_crawl()
     result = _invoke(runner, populated_root, "catalog", "fetch", "--batch", "poc-1")
 
     assert result.exit_code == 0
-    assert calls[0]["selectors"] == {"ems", "tibco-enterprise-message-service"}
+    assert calls[0]["selectors"] == {"tibco-enterprise-message-service"}
 
 
 def test_catalog_fetch_with_an_unused_batch_fails(runner: CliRunner, populated_root: Path, fake_crawl) -> None:
@@ -412,6 +418,46 @@ def test_catalog_show_on_a_missing_product_fails(runner: CliRunner, populated_ro
 
     assert result.exit_code != 0
     assert "No product 'nope'" in result.output
+
+
+def test_catalog_show_accepts_either_spelling_of_the_product(runner: CliRunner, populated_root: Path) -> None:
+    """`--product` takes the slug or the code, and reports the slug either way.
+
+    The slug is the catalog key, so it is what the Product column prints and what a
+    user copies back onto the next command line; the code stays accepted because
+    typing `ems` is the whole reason it is still a column.
+    """
+    by_code = _invoke(runner, populated_root, "catalog", "show", "--product", "ems")
+    by_slug = _invoke(runner, populated_root, "catalog", "show", "--product", "tibco-enterprise-message-service")
+
+    assert by_code.exit_code == 0
+    assert by_slug.exit_code == 0
+    assert "tibco-enterprise-message-service" in by_code.output
+
+
+def test_an_ambiguous_product_code_is_refused_with_the_choices(runner: CliRunner, tmp_path: Path) -> None:
+    """Ten real codes name more than one product; the CLI must ask rather than pick one.
+
+    A `ClickException`, not a traceback: the user typed a reasonable thing and needs the
+    two slugs to choose between, which is information only the catalog has.
+    """
+    (tmp_path / "config").mkdir(exist_ok=True)
+    state = StateStore(tmp_path / "cache" / "state.db")
+    manager = CatalogManager(tmp_path / "config" / "products.csv", tmp_path / "config" / "versions.csv", state)
+    manager.merge_fetch_results(
+        [
+            make_product("spotfire-service-for-statistica", product_code="stat-sts"),
+            make_product("tibco-data-science-service-for-tibco-spotfire", product_code="stat-sts"),
+        ]
+    )
+    state.close()
+
+    result = _invoke(runner, tmp_path, "catalog", "show", "--product", "stat-sts")
+
+    assert result.exit_code != 0
+    assert "shared by 2 products" in result.output
+    assert "spotfire-service-for-statistica" in result.output
+    assert "tibco-data-science-service-for-tibco-spotfire" in result.output
 
 
 def test_catalog_enable_writes_through_to_the_csv(runner: CliRunner, populated_root: Path) -> None:

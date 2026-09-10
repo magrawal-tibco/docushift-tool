@@ -83,7 +83,7 @@ class ZipSource(StrEnum):
     `MANUAL` means the ZIP was supplied by hand and sits at the canonical path
     already; the pipeline must never try to fetch it, and it is exempt from the
     "convert-eligible with no zip_url" check. The path itself is deliberately not
-    stored: it is derivable from `(bu, family, product_code, version)`, whereas an
+    stored: it is derivable from `(bu, family, slug, version)`, whereas an
     absolute path in a shared CSV is valid on exactly one machine.
     """
     AUTO = "auto"
@@ -119,8 +119,11 @@ class ProductVersion(BaseModel):
     long-lived policy ("may this version ever be converted?"); the batch is
     scheduling ("is it in *this* run?"). Collapsing them would mean a three-version
     POC required flipping `convert_eligible` to false on every other row.
+
+    Joined to `products.csv` on `slug`, not on `product_code` -- the code is not
+    unique (see `Product.slug`).
     """
-    product_code: str
+    slug: str
     version: str
     is_archived: bool = False
     convert_eligible: bool = True
@@ -162,12 +165,22 @@ class Product(BaseModel):
     because next quarter's release arrives from a fetch defaulting to eligible --
     an exclusion written that way decays silently (§3.10).
     """
+    # The catalog key. The docsite slug is unique by construction upstream (634
+    # products, 0 duplicates, 0 nulls on the 2026-09-09 crawl), stable across
+    # rebrands, and already what `config/scope.yaml` matches on. `product_code` is
+    # **not** unique -- 10 codes are shared by 21 products, and one of those pairs
+    # (`stat-sts`) straddles the scope boundary, so keying on it would have let
+    # merge order decide whether four excluded versions got converted. Required,
+    # not optional: a product with no slug is a discovery error, not a row.
+    slug: str
+    # Short descriptive label, derived from the docsite's ZIP folder path. Kept
+    # because it is what a human recognizes (`ems`) and what taxonomy rules match,
+    # but it is a column, not a key, and duplicates are expected.
     product_code: str
     display_name: str
     bu: str = "tibco"
     family: str = "general"
     family_source: FamilySource = FamilySource.UNCLASSIFIED
-    slug: str | None = None
     in_scope: bool = True
     scope_source: ScopeSource = ScopeSource.DEFAULT
     custom_override: bool = False
@@ -175,5 +188,5 @@ class Product(BaseModel):
 
 
 class Catalog(BaseModel):
-    """The master additive product catalog."""
+    """The master additive product catalog, keyed by docsite slug."""
     products: dict[str, Product] = Field(default_factory=dict)

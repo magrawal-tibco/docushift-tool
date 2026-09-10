@@ -217,3 +217,49 @@ def test_batches_of_an_empty_list_is_empty() -> None:
 def test_batch_size_must_be_positive() -> None:
     with pytest.raises(ValueError, match="positive"):
         list(StateStore.batches([1, 2], 0))
+
+
+# -- transactions ----------------------------------------------------------------
+
+
+def test_a_transaction_commits_every_write_together(project_root: Path) -> None:
+    """One fetch is one commit. The point is ~5,100 fsyncs collapsing into one."""
+    path = project_root / "cache" / "state.db"
+    store = StateStore(path)
+
+    with store.transaction():
+        store.record_product_snapshot(make_product("tibco-ems"))
+        store.record_version_snapshot(make_version("tibco-ems", "10.4.0"))
+
+    reopened = StateStore(path)
+    assert reopened.get_product_snapshot("tibco-ems") is not None
+    assert reopened.get_version_snapshot("tibco-ems", "10.4.0") is not None
+    reopened.close()
+    store.close()
+
+
+def test_a_failed_transaction_leaves_no_half_written_base(project_root: Path) -> None:
+    """A partial merge base is worse than none: the missing rows read as manual edits."""
+    path = project_root / "cache" / "state.db"
+    store = StateStore(path)
+
+    with pytest.raises(RuntimeError), store.transaction():
+        store.record_product_snapshot(make_product("tibco-ems"))
+        raise RuntimeError("crawl died mid-merge")
+
+    assert store.get_product_snapshot("tibco-ems") is None
+    store.close()
+
+
+def test_transactions_nest_without_committing_early(project_root: Path) -> None:
+    """A caller may wrap a helper that already batches, without knowing that it does."""
+    store = StateStore(project_root / "cache" / "state.db")
+
+    with pytest.raises(RuntimeError), store.transaction():
+        with store.transaction():
+            store.record_product_snapshot(make_product("tibco-ems"))
+        # The inner block ended, but the outer one still owns the commit.
+        raise RuntimeError("failed after the inner batch closed")
+
+    assert store.get_product_snapshot("tibco-ems") is None
+    store.close()

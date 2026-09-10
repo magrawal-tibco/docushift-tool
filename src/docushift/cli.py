@@ -44,7 +44,7 @@ def _scope_options(func):
             click.option("--all", "select_all", is_flag=True, help="Apply to the whole catalog."),
             click.option("--bu", default=None, help="Restrict to a business unit (tibco | ibi)."),
             click.option("--family", default=None, help="Restrict to a product family."),
-            click.option("--product", "product_code", default=None, help="Restrict to a single product."),
+            click.option("--product", "product", default=None, help="Restrict to one product (slug or product_code)."),
             click.option("--version", default=None, help="Restrict to a single version."),
             click.option(
                 "--batch",
@@ -97,7 +97,7 @@ def catalog_fetch(
     ctx: click.Context,
     bu,
     family,
-    product_code,
+    product,
     version,
     batch,
     select_all,
@@ -111,7 +111,7 @@ def catalog_fetch(
         # from this fetch" as deleted. Honouring --version would make every other
         # version of the product look removed.
         raise click.ClickException("`catalog fetch` works per product; drop --version (try --product instead).")
-    if not any([select_all, bu, family, product_code, batch]):
+    if not any([select_all, bu, family, product, batch]):
         # A bare `catalog fetch` crawls the whole A-to-Z list (700+ entries). Make
         # that an explicit choice rather than the default.
         raise click.ClickException("Choose a scope: --all, or one of --bu / --family / --product / --batch.")
@@ -123,14 +123,17 @@ def catalog_fetch(
     # can skip the per-product request entirely; --bu/--family cannot be, because
     # a product's family is not known until it has been classified.
     selectors: set[str] | None = None
-    if product_code:
-        selectors = _selectors(manager, [product_code])
-    if batch:
-        tagged = {p.product_code for p, _ in manager.iter_versions(batch=batch)}
-        if not tagged:
-            raise click.ClickException(f"No catalog versions are tagged with batch '{batch}'.")
-        batch_selectors = _selectors(manager, tagged)
-        selectors = batch_selectors if selectors is None else selectors & batch_selectors
+    try:
+        if product:
+            selectors = _selectors(manager, [product])
+        if batch:
+            tagged = {p.slug for p, _ in manager.iter_versions(batch=batch)}
+            if not tagged:
+                raise click.ClickException(f"No catalog versions are tagged with batch '{batch}'.")
+            batch_selectors = _selectors(manager, tagged)
+            selectors = batch_selectors if selectors is None else selectors & batch_selectors
+    except CatalogError as exc:
+        raise click.ClickException(str(exc)) from exc
 
     crawler = DocsiteCrawler(DocsiteClient(cfg.load_docsite()), cfg, include_archived=include_archived)
 
@@ -191,20 +194,29 @@ def catalog_fetch(
         console.print(f"[yellow]{len(result.errors)} product(s) could not be reached and were left as-is.[/yellow]")
 
 
-def _selectors(manager: CatalogManager, codes) -> set[str]:
-    """Expands catalog product codes into the selectors the crawler can match.
+def _resolve(manager: CatalogManager, selector: str) -> str:
+    """`resolve_slug` with the ambiguity error surfaced as a CLI error, not a traceback."""
+    try:
+        return manager.resolve_slug(selector)
+    except CatalogError as exc:
+        raise click.ClickException(str(exc)) from exc
 
-    A product's code is rarely its docsite slug (`ems` is published as
-    `tibco-enterprise-message-service`), so the slug already recorded in the
-    catalog is passed alongside the code. A code with no catalog row is passed
-    through on its own, which lets `--product <slug>` work before a first fetch.
+
+def _selectors(manager: CatalogManager, wanted) -> set[str]:
+    """Expands what the user typed into the selectors the crawler can match.
+
+    The crawler filters the A-to-Z list on either spelling, so both are passed:
+    the resolved slug, and the raw token in case the catalog does not know it yet.
+    That last case is what lets `--product <slug>` work before a first fetch.
+
+    An ambiguous `product_code` raises out of `resolve_slug` rather than being
+    silently narrowed to one of the products sharing it.
     """
     out: set[str] = set()
-    for code in codes:
-        out.add(str(code).strip().lower())
-        product = manager.get_product(code)
-        if product and product.slug:
-            out.add(product.slug.strip().lower())
+    for token in wanted:
+        token = str(token).strip().lower()
+        out.add(token)
+        out.add(manager.resolve_slug(token))
     return out
 
 
@@ -216,12 +228,12 @@ def _record_discovery_metadata(manager: CatalogManager, result) -> None:
     """
     if manager.state is None:
         return
-    for code, fields in result.product_metadata.items():
+    for slug, fields in result.product_metadata.items():
         for key, value in fields.items():
-            manager.state.set_product_metadata(code, key, value)
-    for (code, version), fields in result.version_metadata.items():
+            manager.state.set_product_metadata(slug, key, value)
+    for (slug, version), fields in result.version_metadata.items():
         for key, value in fields.items():
-            manager.state.set_version_metadata(code, version, key, value)
+            manager.state.set_version_metadata(slug, version, key, value)
 
 
 @catalog.command("list")
@@ -235,7 +247,7 @@ def _record_discovery_metadata(manager: CatalogManager, result) -> None:
 )
 @click.pass_context
 def catalog_list(
-    ctx: click.Context, bu, family, product_code, version, batch, select_all, eligible_only, out_of_scope
+    ctx: click.Context, bu, family, product, version, batch, select_all, eligible_only, out_of_scope
 ) -> None:
     """List catalog products and versions."""
     if out_of_scope and eligible_only:
@@ -243,14 +255,18 @@ def catalog_list(
         # flags together can only ever return nothing.
         raise click.ClickException("--out-of-scope and --eligible-only select disjoint sets; pass one.")
 
-    pairs = _catalog_manager(ctx).iter_versions(
-        bu=bu,
-        family=family,
-        product_code=product_code,
-        version=version,
-        batch=batch,
-        eligible_only=eligible_only,
-    )
+    manager = _catalog_manager(ctx)
+    try:
+        pairs = manager.iter_versions(
+            bu=bu,
+            family=family,
+            slug=manager.resolve_slug(product) if product else None,
+            version=version,
+            batch=batch,
+            eligible_only=eligible_only,
+        )
+    except CatalogError as exc:
+        raise click.ClickException(str(exc)) from exc
     if out_of_scope:
         pairs = [(p, v) for p, v in pairs if not p.in_scope]
     if not pairs:
@@ -272,7 +288,9 @@ def catalog_list(
         table.add_column(column)
     for product, ver in pairs:
         row = [
-            product.product_code,
+            # The slug, not `product_code`: this column is what gets typed back at
+            # `--product`, and only one of the two is guaranteed to name one product.
+            product.slug,
             product.bu,
             product.family,
             ver.version,
@@ -288,15 +306,17 @@ def catalog_list(
 
 
 @catalog.command("show")
-@click.option("--product", "product_code", required=True, help="Product to describe.")
+@click.option("--product", "product", required=True, help="Product to describe (slug or product_code).")
 @click.pass_context
-def catalog_show(ctx: click.Context, product_code: str) -> None:
+def catalog_show(ctx: click.Context, product: str) -> None:
     """Show one product and its full version history."""
     cfg: ConfigManager = ctx.obj["config"]
     manager = _catalog_manager(ctx)
-    product = manager.get_product(product_code)
-    if product is None:
-        raise click.ClickException(f"No product '{product_code}' in the catalog.")
+    slug = _resolve(manager, product)
+    found = manager.get_product(slug)
+    if found is None:
+        raise click.ClickException(f"No product '{product}' in the catalog.")
+    product = found
 
     # An excluded product still prints its whole version history -- excluded is
     # not absent (§3.10) -- so the scope line has to say plainly that none of the
@@ -307,16 +327,16 @@ def catalog_show(ctx: click.Context, product_code: str) -> None:
         else f"[red]in_scope=false[/red] -- no version is ever converted; source: {product.scope_source}"
     )
     console.print(
-        f"[bold]{product.display_name}[/bold] ({product.product_code})\n"
+        f"[bold]{product.display_name}[/bold] ({product.slug})\n"
         f"  bu={product.bu}  family={product.family} (source: {product.family_source})\n"
-        f"  slug={product.slug or '-'}  custom_override={product.custom_override}\n"
+        f"  product_code={product.product_code}  custom_override={product.custom_override}\n"
         f"  {scope}\n"
         f"  workspace={cfg.family_dir(product.bu, product.family)}"
     )
     table = Table(title=f"{len(product.versions)} versions")
     for column in ("Version", "Archived", "Eligible", "Batch", "Released", "Engine", "ZIP"):
         table.add_column(column)
-    for _, ver in manager.iter_versions(product_code=product_code):
+    for _, ver in manager.iter_versions(slug=slug):
         table.add_row(
             ver.version,
             "yes" if ver.is_archived else "",
@@ -332,19 +352,21 @@ def catalog_show(ctx: click.Context, product_code: str) -> None:
 
 
 @catalog.command("enable")
-@click.option("--product", "product_code", required=True, help="Product to modify.")
+@click.option("--product", "product", required=True, help="Product to modify (slug or product_code).")
 @click.option("--version", required=True, help="Version to modify.")
 @click.option("--disable", is_flag=True, help="Set convert_eligible=false instead of true.")
 @click.pass_context
-def catalog_enable(ctx: click.Context, product_code: str, version: str, disable: bool) -> None:
+def catalog_enable(ctx: click.Context, product: str, version: str, disable: bool) -> None:
     """Toggle convert_eligible for one product version."""
-    if not _catalog_manager(ctx).set_conversion_eligibility(product_code, version, not disable):
-        raise click.ClickException(f"No version '{version}' for product '{product_code}'.")
-    console.print(f"{product_code}@{version}: convert_eligible = {'false' if disable else 'true'}")
+    manager = _catalog_manager(ctx)
+    slug = _resolve(manager, product)
+    if not manager.set_conversion_eligibility(slug, version, not disable):
+        raise click.ClickException(f"No version '{version}' for product '{slug}'.")
+    console.print(f"{slug}@{version}: convert_eligible = {'false' if disable else 'true'}")
 
 
 @catalog.command("set")
-@click.option("--product", "product_code", required=True, help="Product to modify.")
+@click.option("--product", "product", required=True, help="Product to modify (slug or product_code).")
 @click.option("--version", default=None, help="Target a version row instead of the product row.")
 @click.option("--bu", default=None, help="Set the business unit (products.csv).")
 @click.option("--family", default=None, help="Set the family; also sets family_source=manual.")
@@ -382,7 +404,7 @@ def catalog_enable(ctx: click.Context, product_code: str, version: str, disable:
 @click.pass_context
 def catalog_set(
     ctx: click.Context,
-    product_code,
+    product,
     version,
     bu,
     family,
@@ -417,17 +439,18 @@ def catalog_set(
             "--engine, --zip-url, --zip-source and --batch are version fields; pass --version too."
         )
 
+    slug = _resolve(manager, product)
     try:
         for name, value in product_edits.items():
-            if value is not None and not manager.set_product_field(product_code, name, value):
-                raise click.ClickException(f"No product '{product_code}' in the catalog.")
+            if value is not None and not manager.set_product_field(slug, name, value):
+                raise click.ClickException(f"No product '{product}' in the catalog.")
         for name, value in version_edits.items():
-            if value is not None and not manager.set_version_field(product_code, version, name, value):
-                raise click.ClickException(f"No version '{version}' for product '{product_code}'.")
+            if value is not None and not manager.set_version_field(slug, version, name, value):
+                raise click.ClickException(f"No version '{version}' for product '{slug}'.")
     except CatalogError as exc:
         raise click.ClickException(str(exc)) from exc
 
-    console.print(f"Updated {product_code}" + (f"@{version}" if version else ""))
+    console.print(f"Updated {slug}" + (f"@{version}" if version else ""))
 
 
 @catalog.command("import")
@@ -609,13 +632,16 @@ def archive() -> None:
 @archive.command("list")
 @click.option("--bu", default=None, help="Restrict to a business unit (tibco | ibi).")
 @click.option("--family", default=None, help="Restrict to a product family.")
-@click.option("--product", "product_code", default=None, help="Restrict to a single product.")
+@click.option("--product", "product", default=None, help="Restrict to one product (slug or product_code).")
 @click.pass_context
-def archive_list(ctx: click.Context, bu, family, product_code) -> None:
+def archive_list(ctx: click.Context, bu, family, product) -> None:
     """List archived versions and their ZIP endpoints."""
+    manager = _catalog_manager(ctx)
     pairs = [
-        (product, ver)
-        for product, ver in _catalog_manager(ctx).iter_versions(bu=bu, family=family, product_code=product_code)
+        (found, ver)
+        for found, ver in manager.iter_versions(
+            bu=bu, family=family, slug=_resolve(manager, product) if product else None
+        )
         if ver.is_archived
     ]
     if not pairs:
@@ -625,10 +651,10 @@ def archive_list(ctx: click.Context, bu, family, product_code) -> None:
     table = Table(title=f"Archived versions ({len(pairs)})")
     for column in ("Product", "Family", "Version", "Released", "Eligible", "ZIP"):
         table.add_column(column)
-    for product, ver in pairs:
+    for found, ver in pairs:
         table.add_row(
-            product.product_code,
-            product.family,
+            found.slug,
+            found.family,
             ver.version,
             ver.release_date or "-",
             "[green]yes[/green]" if ver.convert_eligible else "[dim]no[/dim]",
@@ -638,7 +664,9 @@ def archive_list(ctx: click.Context, bu, family, product_code) -> None:
 
 
 @archive.command("download")
-@click.option("--product", "product_code", required=True, help="Product whose archived version to pull.")
+@click.option(
+    "--product", "product", required=True, help="Product whose archived version to pull (slug or product_code)."
+)
 @click.option("--version", required=True, help="Archived version to pull.")
 @click.option("--extract", "do_extract", is_flag=True, help="Also unpack it, which the pipeline will not do.")
 @click.option("--dest", type=DIR_PATH, default=None, help="Override the destination directory.")

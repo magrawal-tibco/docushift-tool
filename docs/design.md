@@ -23,12 +23,14 @@ These are used by every stage. They are small, and they are where most of the co
 
 | Thing | Key | Notes |
 | :--- | :--- | :--- |
-| Product | `product_code` | Lowercase slug, e.g. `ems`. Rarely equal to the docsite slug. |
-| Version | `(product_code, version)` | `version` keeps its dots (`10.4.0`) everywhere except the published AEM path. |
-| Doc-set | `(product_code, version, doc_set)` | One help output inside a package, e.g. `bw-ent-html`. |
+| Product | `slug` | The docsite slug, e.g. `tibco-enterprise-message-service`. Required; a product without one is a discovery error. |
+| Version | `(slug, version)` | `version` keeps its dots (`10.4.0`) everywhere except the published AEM path. |
+| Doc-set | `(slug, version, doc_set)` | One help output inside a package, e.g. `bw-ent-html`. |
 | Help identifier | the identifier string itself | Byte-exact, case-significant, always a string (§9). |
 
 Every key is compared byte-exactly after trimming surrounding whitespace. Nothing is case-folded except where a rule below says so explicitly, and the two places it happens (`bu`, `family`) are controlled vocabularies, not data.
+
+**`product_code` is not a key** (`architecture.md` §3.1). It is a short label derived from the docsite's ZIP folder path — `ems`, `dsp_gridserver` — and 21 of the 634 products share one with a sibling. It is carried as a column because it is what a human types and what taxonomy rules match, and `--product` therefore accepts it; but resolution goes through the catalog, and a code naming more than one product is refused with the candidate slugs rather than resolved to one of them.
 
 ### 1.2 Tolerant read, strict write — **Built**
 
@@ -80,13 +82,15 @@ Step 1 must precede step 2. NFKD gives `™` a *compatibility* decomposition int
 
 ### 1.5 Path derivation — **Built**
 
-All working paths are computed from `(bu, family, product_code, version)` and are never passed between stages:
+All working paths are computed from `(bu, family, slug, version)` and are never passed between stages:
 
 ```
-families/<locale>-<bu>-<family>/downloads/<product_code>-<version>.zip
-families/<locale>-<bu>-<family>/extracted/<product_code>/<version>/
-families/<locale>-<bu>-<family>/archive/<product_code>-<version>.zip
+families/<locale>-<bu>-<family>/downloads/<slug>-<version>.zip
+families/<locale>-<bu>-<family>/extracted/<slug>/<version>/
+families/<locale>-<bu>-<family>/archive/<slug>-<version>.zip
 ```
+
+The product segment is the **slug** and not `product_code`, because a path has to be unique and the code is not: nine of its ten collisions are within one family, so two products would share a `downloads/` filename and an `extracted/` directory (§1.1).
 
 Derivation rather than passing is what lets a resumed run, a manually supplied ZIP, and a fresh download all land on the same location with no coordination (`architecture.md` §3.8, §4.1). The resolved path is *recorded* in `state.db` afterwards for audit and for resume, but it is never the authority — the layout function is.
 
@@ -157,13 +161,15 @@ For each record in the A-to-Z payload:
 
 ### 2.6 Deriving the product code and a version's folder — **Built**
 
-**Product code.** The catalog's key for `tibco-enterprise-message-service` is `ems`, which is not derivable from the slug. It is read from a folder path instead:
+**Product code.** The docsite calls `tibco-enterprise-message-service`'s ZIP folder `ems`, which is not derivable from the slug. It is read from a folder path instead:
 
 1. For the detail record first, then every other record in turn, read the folder path and split it on the first `/`.
 2. If **both** halves are non-empty — the path is version-shaped, `<code>/<version>` — slugify the first half and return it.
 3. If no record yields one, fall back to the slug with a known vendor prefix (`tibco-`, `ibi-`, `spotfire-`) stripped.
 
 The detail record is tried first because archived siblings carry stale paths (`enterprise_message_service`, `ems-zlinux`). The two-segment test is the whole guard: a one-segment path is exactly the stale form.
+
+This derivation was **unchanged** by the 2026-09-10 re-key onto the slug (§1.1), deliberately: it always answered *what does the docsite call this product's folder?*, which is a real question with a correct answer, and it is still the answer every ZIP URL is built from. What was wrong was treating that answer as a unique product key. Making the derivation guess harder would not have helped — `tibco-clarity` and `tibco-clarity-enterprise-edition` genuinely publish under one folder.
 
 **Version folder.** For each version record the same split is applied, returning a pair:
 
@@ -218,9 +224,11 @@ The archive index *overlaps* the sibling list rather than replacing it, which is
 
 ### 3.1 Loading and joining — **Built**
 
-1. Read `products.csv`. Skip rows with no product code. Coerce each enum column tolerantly — an unrecognized token falls back to that column's default rather than raising, since a spreadsheet will eventually contain one.
-2. Read `versions.csv`. Skip rows missing either the product code or the version.
-3. For each version row, look up its product. **A version whose product is absent raises** and names both keys. This is a broken join, not a product to invent: silently creating a shell product would make a mistyped code look like a successful import.
+1. Read `products.csv`. Skip rows with no slug. Coerce each enum column tolerantly — an unrecognized token falls back to that column's default rather than raising, since a spreadsheet will eventually contain one.
+2. Read `versions.csv`. Skip rows missing either the slug or the version.
+3. For each version row, look up its product by slug. **A version whose product is absent raises** and names both keys. This is a broken join, not a product to invent: silently creating a shell product would make a mistyped slug look like a successful import.
+
+A **repeated slug** does not raise: the later row wins in memory and the slug is recorded, so `validate()` can report it while the file on disk still holds both rows. Raising would leave the sheet unopenable by the tool that is supposed to explain what is wrong with it; saving without reporting would write the collapsed catalog back over the original. Only a hand-edit can produce one — discovery's keys are unique by construction.
 4. Default `convert_eligible` to *not archived* when the cell is blank (§1.2).
 5. Ignore the `_bu` and `_family` columns entirely on read. They are denormalized conveniences for spreadsheet filtering and are regenerated on every write.
 
@@ -232,9 +240,11 @@ The merge takes three inputs per field: **base** (what discovery wrote last time
 
 With **no snapshot** — the first fetch after the state DB was adopted, or after it was discarded — the fallback is to **keep the CSV value unless it is empty**. Inventing a base would silently overwrite edits made before the snapshot existed; filling genuinely blank cells is safe and useful.
 
-Comparison is textual on both sides: the snapshot stores everything as text, so `None` becomes empty string and booleans become `true`/`false` before comparing. The decision is **per field, never per row** — editing `display_name` must not also freeze the `slug` beside it.
+Comparison is textual on both sides: the snapshot stores everything as text, so `None` becomes empty string and booleans become `true`/`false` before comparing. The decision is **per field, never per row** — editing `display_name` must not also freeze the `product_code` beside it.
 
-Discovery owns exactly six fields, and merges only those: `display_name`, `slug`, `is_archived`, `convert_eligible`, `release_date`, `zip_url`.
+Discovery owns exactly six fields, and merges only those: `display_name`, `product_code`, `is_archived`, `convert_eligible`, `release_date`, `zip_url`.
+
+`slug` is **not** among them, and not for either of the reasons the table below gives: it is the key. A fetch returning a different slug is describing a different product, not proposing an edit to this one.
 
 **Four columns are excluded structurally**, meaning they are absent from the snapshot tables rather than skipped by a rule someone could later delete:
 
@@ -298,7 +308,7 @@ The reported statistics count products and versions added and updated, fields pr
 
 ### 3.6 Canonical write — **Built**
 
-1. Sort products by `(bu, family, product_code)`.
+1. Sort products by `(bu, family, slug)`.
 2. Sort each product's versions by natural version key (§1.3), **descending**, so the newest release is the first row under its product.
 3. Write the fixed column list in fixed order, regenerating `_bu` and `_family` from the product row.
 4. Normalize every value on the way out: booleans lowercased, dates to ISO, `None` to empty string.
@@ -333,7 +343,7 @@ Batch labels are trimmed and lowercased on write, so `POC-1`, `poc-1 ` and `poc-
 
 ### 5.1 Download one version
 
-1. Resolve the canonical download path from `(bu, family, product_code, version)`. Never accept a path from the caller.
+1. Resolve the canonical download path from `(bu, family, slug, version)`. Never accept a path from the caller.
 2. **Skip immediately if `zip_source` is `manual`.** The package is expected to be at that path already, placed by hand; fetching would overwrite it with whatever the stale URL now serves.
 3. If the file exists and `state.db` holds a checksum for it that still matches, mark it downloaded and return. This is what makes a re-run over a completed batch cheap.
 4. Otherwise fetch `zip_url` to a temporary file beside the target, resuming from the partial length if one is present and the server's validator (etag or last-modified) matches the recorded one. A changed validator discards the partial and restarts — resuming against a different file produces a corrupt archive that passes a length check.
@@ -536,9 +546,10 @@ This is the step that makes the catalog a mid-pipeline write target: the engine 
 
 `validate()` returns problems that **block** an import. Each is a shape that indicates data damage rather than a choice:
 
-1. **Versions known to discovery but absent from the CSV.** Compared against the snapshot table; this is the Excel `1.10` → `1.1` coercion, caught by name.
-2. **Engine `auto` with a resolved engine source** — an internally inconsistent row.
-3. **Convert-eligible with no `zip_url`** — *except* on a `zip_source=manual` row, whose package arrives by hand and legitimately has no URL.
+1. **A slug appearing on more than one `products.csv` row.** The slug is the key, so the load has already dropped one of them; blocking here is what stops a later `save()` from writing the collapsed catalog back over a file that still holds both rows (§3.1).
+2. **Versions known to discovery but absent from the CSV.** Compared against the snapshot table; this is the Excel `1.10` → `1.1` coercion, caught by name.
+3. **Engine `auto` with a resolved engine source** — an internally inconsistent row.
+4. **Convert-eligible with no `zip_url`** — *except* on a `zip_source=manual` row, whose package arrives by hand and legitimately has no URL.
 
 ### 8.2 Catalog warnings — **Built**
 
@@ -794,11 +805,13 @@ Most rows are **Built** or **Specified**. Two are neither, and are marked as suc
 | 2.7 | Family classification | Built | `config.py:resolve_product_info` |
 | 2.8 | Archive index overlay | Built | `discovery/crawler.py:_apply_archive_index` |
 | 3.1 | Catalog load and join | Built | `catalog.py:load` |
+| 3.1 | Selector resolution (slug or code) | Built | `catalog.py:resolve_slug` |
 | 3.2 | Three-way field decision | Built | `catalog.py:_take_theirs` |
 | 3.3 | Family by provenance | Built | `catalog.py:_merge_product` |
 | 3.3.1 | Scope by rule then provenance | Built | `catalog.py:_resolve_scope` |
 | 3.4 | Deletion detection | Built | `catalog.py:_collect_deletions` |
 | 3.6 | Canonical write | Built | `catalog.py:save` |
+| 3.5 | Snapshot recording, one transaction per fetch | Built | `state.py:transaction`, `catalog.py:_record_snapshots` |
 | 4 | Selection | Built | `catalog.py:iter_versions` |
 | 5.1 | Download one version | Specified | Phase 4 |
 | 5.2 | Hand-supplied ingestion | Specified | Phase 4 |

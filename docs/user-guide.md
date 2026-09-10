@@ -45,10 +45,10 @@ The catalog is **two CSV files**, designed to be edited directly in Excel:
 
 | File | Contents |
 | :--- | :--- |
-| `config/products.csv` | One row per product — `bu`, `family`, display name |
+| `config/products.csv` | One row per product — `slug`, `product_code`, `bu`, `family`, display name |
 | `config/versions.csv` | One row per version — the `convert_eligible` toggle, the `convert_batch` run label, `zip_url` / `zip_source`, `is_archived`, and the detected `engine` |
 
-They join on `product_code`. It is additive, distinguishes Active vs Archived versions, and **preserves your edits automatically** — see "How your edits are protected" below.
+They join on `slug`, the product's `docs.tibco.com` slug. It is additive, distinguishes Active vs Archived versions, and **preserves your edits automatically** — see "How your edits are protected" below.
 
 ### On-Demand Fetching from Docsite
 Queries `docs.tibco.com/a_z_products` via its backend REST APIs to discover all products, active versions, and archived ("Other Versions") packages:
@@ -70,7 +70,15 @@ docushift catalog show --product businessevents-enterprise
 
 **A scope is required.** A bare `catalog fetch` would crawl the entire A-to-Z list, so it asks for `--all` or one of `--bu` / `--family` / `--product` / `--batch` instead of assuming. `--version` is rejected: discovery works a product at a time, and fetching one version would make the others look deleted.
 
-`--product` accepts a **catalog product code or a docsite slug**. The two are usually different — `ems` is published as `tibco-enterprise-message-service` — so for a product already in `products.csv`, the code works and the recorded slug is used behind the scenes. For a product you have never fetched, pass the slug from its `docs.tibco.com` URL. If nothing matches, the error says so and suggests the slug.
+`--product` accepts a **docsite slug or a product code**. The two are usually different — `ems` is published as `tibco-enterprise-message-service` — and the slug is the catalog's key, so it is what `catalog list` and `catalog show` print back at you. The code still works for a product already in `products.csv`: it is looked up and the slug is used behind the scenes. For a product you have never fetched, pass the slug from its `docs.tibco.com` URL. If nothing matches, the error says so and suggests the slug.
+
+Ten product codes name **more than one product** (`spotfire`, `clarity-dt`, `stat-sts` and seven others), and one of those pairs is split across the scope boundary. Passing an ambiguous code is refused rather than resolved to whichever product sorted first:
+
+```
+Error: 'stat-sts' is a product_code shared by 2 products, and product_code is not unique.
+       Pass one of these slugs instead: spotfire-service-for-statistica,
+       tibco-data-science-service-for-tibco-spotfire
+```
 
 Useful flags:
 

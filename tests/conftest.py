@@ -1,5 +1,6 @@
 """Shared pytest fixtures for the DocuShift suite."""
 
+import json
 from pathlib import Path
 
 import pytest
@@ -93,7 +94,7 @@ def stateless_catalog(project_root: Path) -> CatalogManager:
 def sample_version() -> ProductVersion:
     """An active, convert-eligible version modelled on a real docsite record."""
     return ProductVersion(
-        product_code="ems",
+        slug="tibco-ems",
         version="10.4.0",
         is_archived=False,
         convert_eligible=True,
@@ -106,7 +107,7 @@ def sample_version() -> ProductVersion:
 def archived_version() -> ProductVersion:
     """An archived version: inventoried for completeness, but not convert-eligible."""
     return ProductVersion(
-        product_code="ems",
+        slug="tibco-ems",
         version="8.6.0",
         is_archived=True,
         convert_eligible=False,
@@ -119,12 +120,12 @@ def archived_version() -> ProductVersion:
 def sample_product(sample_version: ProductVersion, archived_version: ProductVersion) -> Product:
     """A product carrying one active and one archived version."""
     return Product(
+        slug="tibco-ems",
         product_code="ems",
         display_name="TIBCO Enterprise Message Service™",
         bu="tibco",
         family="messaging",
         family_source=FamilySource.TAXONOMY_RULE,
-        slug="tibco-ems",
         versions={
             sample_version.version: sample_version,
             archived_version.version: archived_version,
@@ -132,23 +133,51 @@ def sample_product(sample_version: ProductVersion, archived_version: ProductVers
     )
 
 
-def make_product(code: str, **overrides) -> Product:
-    """Builds a discovery-shaped product for merge tests."""
+@pytest.fixture
+def discovered_products() -> list[Product]:
+    """The whole 2026-09-09 crawl, replayed from disk as discovery would hand it over.
+
+    Committed as JSONL (one product per line) rather than as a JSON document, so the
+    next re-crawl shows up in a diff as the products that changed and not as one
+    159 KB line. Trimmed to the identity and version columns: engines, dates and
+    document listings are not what this fixture is for, which is scale and the ten
+    real `product_code` collisions hiding in it.
+    """
+    products = []
+    for line in (FIXTURES_DIR / "discovery" / "crawl_2026_09_09.jsonl").read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        record = json.loads(line)
+        versions = record.pop("versions")
+        product = Product(**record, family_source=FamilySource.TAXONOMY_RULE)
+        for number in versions:
+            product.versions[number] = ProductVersion(slug=product.slug, version=number)
+        products.append(product)
+    return products
+
+
+def make_product(slug: str, **overrides) -> Product:
+    """Builds a discovery-shaped product for merge tests.
+
+    Takes the *slug*, which is the catalog key. `product_code` defaults to the same
+    string so a test that does not care about the distinction reads as it always
+    did; the tests that do care pass `product_code=` explicitly.
+    """
     versions = overrides.pop("versions", {})
     defaults = {
-        "product_code": code,
-        "display_name": code.upper(),
+        "slug": slug,
+        "product_code": slug,
+        "display_name": slug.upper(),
         "bu": "tibco",
         "family": "general",
         "family_source": FamilySource.UNCLASSIFIED,
-        "slug": code,
     }
     defaults.update(overrides)
     return Product(**defaults, versions=versions)
 
 
-def make_version(code: str, version: str, **overrides) -> ProductVersion:
+def make_version(slug: str, version: str, **overrides) -> ProductVersion:
     """Builds a discovery-shaped version for merge tests."""
-    defaults = {"product_code": code, "version": version}
+    defaults = {"slug": slug, "version": version}
     defaults.update(overrides)
     return ProductVersion(**defaults)

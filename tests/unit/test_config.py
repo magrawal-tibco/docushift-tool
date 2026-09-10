@@ -52,12 +52,31 @@ def test_family_workspace_paths(config: ConfigManager, project_root: Path) -> No
 
 
 def test_download_and_extract_paths_are_keyed_by_the_catalog(config: ConfigManager) -> None:
-    """Both paths derive from `product_code` + `version`, so state.db can round-trip them."""
+    """Both paths derive from `slug` + `version`, so state.db can round-trip them."""
     family = config.family_dir("tibco", "messaging")
+    slug = "tibco-enterprise-message-service"
 
-    assert config.download_path("tibco", "messaging", "ems", "10.4.0") == family / "downloads" / "ems-10.4.0.zip"
+    assert config.download_path("tibco", "messaging", slug, "10.4.0") == family / "downloads" / f"{slug}-10.4.0.zip"
     # Dots survive in the working tree; dots-to-dashes is a Stage 6 output concern.
-    assert config.extract_path("tibco", "messaging", "ems", "10.4.0") == family / "extracted" / "ems" / "10.4.0"
+    assert config.extract_path("tibco", "messaging", slug, "10.4.0") == family / "extracted" / slug / "10.4.0"
+
+
+def test_two_products_sharing_a_code_do_not_share_a_path(config: ConfigManager) -> None:
+    """The reason the paths take the slug: `product_code` is not unique.
+
+    Both of these carry `product_code=clarity-dt` and both live in the same family,
+    so a code-named ZIP would put two different products' packages at one path and
+    a code-named extract directory would interleave two trees.
+    """
+    one = "tibco-clarity"
+    two = "tibco-clarity-enterprise-edition"
+
+    assert config.download_path("tibco", "data_management", one, "3.1.0") != config.download_path(
+        "tibco", "data_management", two, "3.1.0"
+    )
+    assert config.extract_path("tibco", "data_management", one, "3.1.0") != config.extract_path(
+        "tibco", "data_management", two, "3.1.0"
+    )
 
 
 def test_locale_prefix_is_configurable(project_root: Path) -> None:

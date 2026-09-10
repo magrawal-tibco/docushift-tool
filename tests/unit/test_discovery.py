@@ -399,9 +399,12 @@ def test_crawler_never_sets_engine_or_zip_source(crawler: DocsiteCrawler) -> Non
 def test_folder_paths_and_ids_are_reported_for_the_state_db(crawler: DocsiteCrawler) -> None:
     result = crawler.discover()
 
-    assert result.version_metadata[("ems", "10.4.0")]["folder_path"] == "ems/10.4.0"
-    assert result.product_metadata["ems"]["docsite_id"] == "644"
-    assert result.product_metadata["ems"]["docsite_slug"] == "tibco-enterprise-message-service"
+    # Keyed by slug, matching the catalog and every `state.db` table. The value is
+    # still the code-named folder -- that is what the ZIP URL is built from.
+    slug = "tibco-enterprise-message-service"
+    assert result.version_metadata[(slug, "10.4.0")]["folder_path"] == "ems/10.4.0"
+    assert result.product_metadata[slug]["docsite_id"] == "644"
+    assert result.product_metadata[slug]["docsite_slug"] == slug
 
 
 # -- crawler: scoping ---------------------------------------------------------

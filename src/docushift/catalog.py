@@ -1,7 +1,8 @@
 """Additive catalog manager backed by the CSV pair.
 
 Storage is `config/products.csv` + `config/versions.csv`, normalized on
-`product_code` (docs/architecture.md §3). Merging is a **snapshot-based 3-way
+the docsite `slug` (docs/architecture.md §3), which is the only product identifier
+the source system guarantees unique. Merging is a **snapshot-based 3-way
 merge**: `state.db` holds what discovery wrote last (*base*), the CSV holds what
 the user has since edited (*mine*), and a fetch supplies *theirs*. Any field where
 `mine != base` is inferred to be a human edit and is preserved -- no protection
@@ -42,12 +43,15 @@ if TYPE_CHECKING:  # pragma: no cover - import kept lazy to avoid a config <-> c
     from docushift.config import ConfigManager
 
 PRODUCT_COLUMNS = (
+    # First because it is the key: the column `versions.csv` joins on and every
+    # `state.db` table is keyed by. `product_code` follows it as a short label and
+    # is explicitly **not** unique -- see `Product.slug`.
+    "slug",
     "product_code",
     "display_name",
     "bu",
     "family",
     "family_source",
-    "slug",
     # The outermost selection gate (architecture.md §3.10). Resolved from
     # `config/scope.yaml` at merge time and carried here so the sheet shows the
     # answer without anyone opening the YAML.
@@ -60,7 +64,7 @@ PRODUCT_COLUMNS = (
 # by family without a VLOOKUP. They are regenerated on every write and edits to
 # them are ignored -- see docs/architecture.md §3.2.
 VERSION_COLUMNS = (
-    "product_code",
+    "slug",
     "version",
     "is_archived",
     "convert_eligible",
@@ -98,7 +102,9 @@ _INVENTORY_COLUMNS = (
 # absent structurally: they are a local policy call resolved from `scope.yaml`, and
 # the docsite has no value to three-way-merge against -- so `product_snapshot`
 # carries neither and there is no rule needed to stop a fetch overwriting them.
-_MERGEABLE_PRODUCT_FIELDS = ("display_name", "slug")
+# `slug` is absent for a third reason again: it is the key, so a fetch that changed
+# it would be describing a different product, not an edit to this one.
+_MERGEABLE_PRODUCT_FIELDS = ("display_name", "product_code")
 # Engine fields are absent by design: the detector writes them, not discovery.
 # `convert_batch` is absent for the same structural reason from the other side --
 # it is purely a human scheduling decision, so a fetch has nothing true to say
@@ -158,6 +164,10 @@ class CatalogManager:
         # an unknown family is a warning, not an error -- see `warnings()`.
         self.config = config
         self._catalog: Catalog | None = None
+        # Slugs seen more than once in products.csv on the last `load()`. Only a
+        # hand-edit can produce one -- discovery's keys are unique -- and it is
+        # reported by `validate()` rather than raised, so the sheet stays openable.
+        self._duplicate_slugs: list[str] = []
 
     # -- load / save ---------------------------------------------------------
 
@@ -167,17 +177,23 @@ class CatalogManager:
             return self._catalog
 
         catalog = Catalog()
+        self._duplicate_slugs = []
         for row in read_rows(self.products_path):
-            code = row.get("product_code", "").strip()
-            if not code:
+            slug = row.get("slug", "").strip().lower()
+            if not slug:
                 continue
-            catalog.products[code] = Product(
-                product_code=code,
-                display_name=row.get("display_name", "").strip() or code,
+            # Last row wins, and the loser is recorded rather than lost silently:
+            # `validate()` reports it, so `catalog import` refuses the sheet before
+            # a `save()` writes the collapsed version back over the original.
+            if slug in catalog.products:
+                self._duplicate_slugs.append(slug)
+            catalog.products[slug] = Product(
+                slug=slug,
+                product_code=row.get("product_code", "").strip() or slug,
+                display_name=row.get("display_name", "").strip() or slug,
                 bu=row.get("bu", "").strip().lower() or "tibco",
                 family=row.get("family", "").strip().lower() or "general",
                 family_source=_coerce_enum(FamilySource, row.get("family_source"), FamilySource.UNCLASSIFIED),
-                slug=row.get("slug", "").strip() or None,
                 # Read through the *optional* parser, then defaulted to true: only
                 # an explicit `false` excludes. `parse_bool` cannot express this --
                 # it treats a blank cell as `false` outright, ignoring its own
@@ -189,20 +205,20 @@ class CatalogManager:
             )
 
         for row in read_rows(self.versions_path):
-            code = row.get("product_code", "").strip()
+            slug = row.get("slug", "").strip().lower()
             version = row.get("version", "").strip()
-            if not code or not version:
+            if not slug or not version:
                 continue
-            product = catalog.products.get(code)
+            product = catalog.products.get(slug)
             if product is None:
                 # A version row with no product row is a broken join, not a product.
                 raise CatalogError(
-                    f"versions.csv references unknown product_code '{code}' (version '{version}'). "
+                    f"versions.csv references unknown slug '{slug}' (version '{version}'). "
                     f"Add the product to products.csv or remove the orphaned version row."
                 )
             is_archived = parse_bool(row.get("is_archived"))
             product.versions[version] = ProductVersion(
-                product_code=code,
+                slug=slug,
                 version=version,
                 is_archived=is_archived,
                 convert_eligible=parse_bool(row.get("convert_eligible"), default=not is_archived),
@@ -229,23 +245,23 @@ class CatalogManager:
         """Writes both CSVs with a fixed column order and a stable sort.
 
         The sort is what makes a no-op fetch produce a zero-line diff: products by
-        `(bu, family, product_code)`, versions by product then version descending
+        `(bu, family, slug)`, versions by product then version descending
         using a natural sort, so `10.4.0` sits above `9.1.0`.
         """
         catalog = self.load()
 
-        products = sorted(catalog.products.values(), key=lambda p: (p.bu, p.family, p.product_code))
+        products = sorted(catalog.products.values(), key=lambda p: (p.bu, p.family, p.slug))
         write_rows(
             self.products_path,
             PRODUCT_COLUMNS,
             [
                 {
+                    "slug": p.slug,
                     "product_code": p.product_code,
                     "display_name": p.display_name,
                     "bu": p.bu,
                     "family": p.family,
                     "family_source": str(p.family_source),
-                    "slug": p.slug or "",
                     "in_scope": format_bool(p.in_scope),
                     "scope_source": str(p.scope_source),
                     "custom_override": format_bool(p.custom_override),
@@ -261,7 +277,7 @@ class CatalogManager:
             ):
                 version_rows.append(
                     {
-                        "product_code": product.product_code,
+                        "slug": product.slug,
                         "version": version.version,
                         "is_archived": format_bool(version.is_archived),
                         "convert_eligible": format_bool(version.convert_eligible),
@@ -285,18 +301,50 @@ class CatalogManager:
 
     # -- accessors -----------------------------------------------------------
 
-    def get_product(self, product_code: str) -> Product | None:
-        return self.load().products.get(product_code)
+    def get_product(self, slug: str) -> Product | None:
+        return self.load().products.get(slug)
 
-    def get_version(self, product_code: str, version: str) -> ProductVersion | None:
-        product = self.get_product(product_code)
+    def resolve_slug(self, selector: str) -> str:
+        """Turns whatever a human typed at `--product` into a catalog key.
+
+        A slug is returned as-is. A `product_code` is resolved to the slug of the
+        product carrying it -- which is the whole reason this exists: `ems` is a
+        code, `tibco-enterprise-message-service` is the key, and demanding the
+        latter on the command line for the sake of an internal rename would be a
+        poor trade.
+
+        An **ambiguous** code raises rather than picking one. Ten codes are shared
+        by twenty-one products and one of those pairs straddles the scope boundary,
+        so silently resolving `stat-sts` to whichever product sorted first is
+        exactly the class of bug this re-key was done to remove.
+
+        An unknown selector is returned unchanged, so callers keep their own
+        "no such product" message -- and `--product <slug>` still works before the
+        first fetch, when the catalog is empty.
+        """
+        selector = selector.strip().lower()
+        catalog = self.load()
+        if selector in catalog.products:
+            return selector
+        matches = sorted(p.slug for p in catalog.products.values() if p.product_code == selector)
+        if len(matches) == 1:
+            return matches[0]
+        if len(matches) > 1:
+            raise CatalogError(
+                f"'{selector}' is a product_code shared by {len(matches)} products, and product_code is not "
+                f"unique. Pass one of these slugs instead: " + ", ".join(matches)
+            )
+        return selector
+
+    def get_version(self, slug: str, version: str) -> ProductVersion | None:
+        product = self.get_product(slug)
         return product.versions.get(version) if product else None
 
     def iter_versions(
         self,
         bu: str | None = None,
         family: str | None = None,
-        product_code: str | None = None,
+        slug: str | None = None,
         version: str | None = None,
         batch: str | None = None,
         eligible_only: bool = False,
@@ -316,12 +364,12 @@ class CatalogManager:
         """
         catalog = self.load()
         results = []
-        for product in sorted(catalog.products.values(), key=lambda p: (p.bu, p.family, p.product_code)):
+        for product in sorted(catalog.products.values(), key=lambda p: (p.bu, p.family, p.slug)):
             if bu and product.bu != bu.lower():
                 continue
             if family and product.family != family.lower():
                 continue
-            if product_code and product.product_code != product_code:
+            if slug and product.slug != slug:
                 continue
             if eligible_only and not product.in_scope:
                 continue
@@ -366,11 +414,11 @@ class CatalogManager:
         scope_rules = self._scope_rules()
 
         for incoming in discovered:
-            code = incoming.product_code
-            mine = catalog.products.get(code)
+            slug = incoming.slug
+            mine = catalog.products.get(slug)
 
             if mine is None:
-                catalog.products[code] = incoming
+                catalog.products[slug] = incoming
                 stats.products_added += 1
                 stats.versions_added += len(incoming.versions)
             else:
@@ -384,20 +432,20 @@ class CatalogManager:
             # Applied to new and existing products alike, so a product first seen
             # after the rule was written is excluded on arrival rather than
             # converted once and excluded afterwards.
-            product = catalog.products[code]
+            product = catalog.products[slug]
             _resolve_scope(product, scope_rules)
             if not product.in_scope:
                 stats.products_out_of_scope += 1
 
-            blocked = self._collect_deletions(catalog.products[code], incoming)
+            blocked = self._collect_deletions(catalog.products[slug], incoming)
             if blocked:
                 if allow_deletes:
                     for gone in blocked:
-                        del catalog.products[code].versions[gone]
+                        del catalog.products[slug].versions[gone]
                         if self.state:
-                            self.state.forget_version(code, gone)
+                            self.state.forget_version(slug, gone)
                 else:
-                    stats.deletions_blocked.extend(f"{code}@{v}" for v in blocked)
+                    stats.deletions_blocked.extend(f"{slug}@{v}" for v in blocked)
 
         # Computed against the whole catalog, not just the products this fetch
         # touched: on a scoped fetch every other rule would look unmatched.
@@ -432,7 +480,7 @@ class CatalogManager:
         `catalog fetch --all`, a rule matches nothing simply because its product has
         not been discovered yet. Callers say so when they present the list.
         """
-        known = {p.slug for p in self.load().products.values() if p.slug}
+        known = set(self.load().products)
         return sorted(slug for slug in self._scope_rules() if slug not in known)
 
     def _merge_product(self, mine: Product, theirs: Product) -> int:
@@ -441,7 +489,7 @@ class CatalogManager:
             # Explicit whole-row pin: ignore every upstream change.
             return len(_MERGEABLE_PRODUCT_FIELDS) + 1
 
-        base = self.state.get_product_snapshot(mine.product_code) if self.state else None
+        base = self.state.get_product_snapshot(mine.slug) if self.state else None
         preserved = 0
 
         for name in _MERGEABLE_PRODUCT_FIELDS:
@@ -482,7 +530,7 @@ class CatalogManager:
                 preserved += len(_MERGEABLE_VERSION_FIELDS)
                 continue
 
-            base = self.state.get_version_snapshot(mine.product_code, key) if self.state else None
+            base = self.state.get_version_snapshot(mine.slug, key) if self.state else None
             for name in _MERGEABLE_VERSION_FIELDS:
                 if self._take_theirs(existing, incoming, base, name):
                     setattr(existing, name, getattr(incoming, name))
@@ -510,27 +558,34 @@ class CatalogManager:
         return sorted(set(mine.versions) - set(theirs.versions))
 
     def _record_snapshots(self, discovered: list[Product]) -> None:
+        """Writes the new merge base: what discovery said, this fetch.
+
+        One transaction for the whole pass, which is both faster and more correct
+        than one per row -- a half-written base would read as a set of unflagged
+        manual edits on the next fetch.
+        """
         if self.state is None:
             return
-        for product in discovered:
-            self.state.record_product_snapshot(product)
-            for version in product.versions.values():
-                self.state.record_version_snapshot(version)
+        with self.state.transaction():
+            for product in discovered:
+                self.state.record_product_snapshot(product)
+                for version in product.versions.values():
+                    self.state.record_version_snapshot(version)
 
     # -- edits ---------------------------------------------------------------
 
-    def set_conversion_eligibility(self, product_code: str, version: str, eligible: bool) -> bool:
+    def set_conversion_eligibility(self, slug: str, version: str, eligible: bool) -> bool:
         """Toggles `convert_eligible`. The snapshot makes this survive the next fetch."""
-        target = self.get_version(product_code, version)
+        target = self.get_version(slug, version)
         if target is None:
             return False
         target.convert_eligible = eligible
         self.save()
         return True
 
-    def set_product_field(self, product_code: str, name: str, value: str) -> bool:
+    def set_product_field(self, slug: str, name: str, value: str) -> bool:
         """Sets a product field. Setting `family` also pins its provenance to manual."""
-        product = self.get_product(product_code)
+        product = self.get_product(slug)
         if product is None:
             return False
         if name == "family":
@@ -555,9 +610,9 @@ class CatalogManager:
         self.save()
         return True
 
-    def set_version_field(self, product_code: str, version: str, name: str, value: str) -> bool:
+    def set_version_field(self, slug: str, version: str, name: str, value: str) -> bool:
         """Sets a version field. Setting `engine` pins `engine_source` to manual."""
-        target = self.get_version(product_code, version)
+        target = self.get_version(slug, version)
         if target is None:
             return False
         if name == "engine":
@@ -579,9 +634,9 @@ class CatalogManager:
         self.save()
         return True
 
-    def record_detected_engine(self, product_code: str, version: str, engine: SourceEngine) -> bool:
+    def record_detected_engine(self, slug: str, version: str, engine: SourceEngine) -> bool:
         """Writes back an engine resolved during extraction. Never overrides a manual value."""
-        target = self.get_version(product_code, version)
+        target = self.get_version(slug, version)
         if target is None or target.engine_source is EngineSource.MANUAL:
             return False
         target.engine = engine
@@ -591,7 +646,7 @@ class CatalogManager:
 
     def record_extract_inventory(
         self,
-        product_code: str,
+        slug: str,
         version: str,
         csh_sources: int,
         csh_names: int,
@@ -614,7 +669,7 @@ class CatalogManager:
         row blank is the honest answer there; writing zeros would make a failure
         indistinguishable from an empty package.
         """
-        target = self.get_version(product_code, version)
+        target = self.get_version(slug, version)
         if target is None:
             return False
         target.has_csh = csh_sources > 0
@@ -625,14 +680,14 @@ class CatalogManager:
         self.save()
         return True
 
-    def clear_extract_inventory(self, product_code: str, version: str) -> bool:
+    def clear_extract_inventory(self, slug: str, version: str) -> bool:
         """Blanks the inventory columns, restoring "never extracted".
 
         Needed when a version's extracted tree is discarded: stale counts describing
         a directory that no longer exists are worse than no counts, because nothing
         about the row says they are stale.
         """
-        target = self.get_version(product_code, version)
+        target = self.get_version(slug, version)
         if target is None:
             return False
         for field_name, _ in _INVENTORY_COLUMNS:
@@ -653,9 +708,9 @@ class CatalogManager:
             counts[str(product.family_source)] += 1
             scope_counts[str(product.scope_source)] += 1
             if product.family_source is FamilySource.UNCLASSIFIED:
-                unclassified.append(product.product_code)
+                unclassified.append(product.slug)
             if not product.in_scope:
-                out_of_scope.append(product.product_code)
+                out_of_scope.append(product.slug)
         return {
             "total": len(catalog.products),
             "counts": counts,
@@ -669,22 +724,32 @@ class CatalogManager:
         problems: list[str] = []
         catalog = self.load()
 
+        # The key. Two rows sharing a slug means one of them has already been lost
+        # from the in-memory catalog, and letting a `save()` follow would write the
+        # loss back to disk -- so this aborts the import while both rows still exist
+        # in the file the user can fix.
+        for duplicate in sorted(set(self._duplicate_slugs)):
+            problems.append(
+                f"products.csv has more than one row with slug '{duplicate}'. The slug is the catalog key; "
+                f"give each product its own docs.tibco.com slug or delete the duplicate row."
+            )
+
         for product in catalog.products.values():
             if self.state:
-                known = self.state.known_versions(product.product_code)
+                known = self.state.known_versions(product.slug)
                 missing = known - set(product.versions)
                 if missing:
                     problems.append(
-                        f"{product.product_code}: version(s) {sorted(missing)} known to discovery are absent "
+                        f"{product.slug}: version(s) {sorted(missing)} known to discovery are absent "
                         f"from versions.csv (Excel may have coerced e.g. '1.10' to '1.1')"
                     )
             for ver in product.versions.values():
                 if ver.engine is SourceEngine.AUTO and ver.engine_source is not EngineSource.AUTO:
-                    problems.append(f"{product.product_code}@{ver.version}: engine 'auto' with a resolved source")
+                    problems.append(f"{product.slug}@{ver.version}: engine 'auto' with a resolved source")
                 # A `manual` row is exempt: its package is supplied by hand at the
                 # canonical path, so there is no URL to be missing (architecture §3.8).
                 if ver.convert_eligible and not ver.zip_url and ver.zip_source is not ZipSource.MANUAL:
-                    problems.append(f"{product.product_code}@{ver.version}: convert_eligible with no zip_url")
+                    problems.append(f"{product.slug}@{ver.version}: convert_eligible with no zip_url")
         return problems
 
     def warnings(self) -> list[str]:
@@ -709,7 +774,7 @@ class CatalogManager:
                 f"means the product was renamed upstream and is no longer being excluded."
             )
 
-        for product in sorted(catalog.products.values(), key=lambda p: p.product_code):
+        for product in sorted(catalog.products.values(), key=lambda p: p.slug):
             # A family typed straight into products.csv is accepted and its folder
             # auto-registered; the warning exists so a typo ('mesaging') is visible
             # before it silently becomes a third family folder holding one product.
@@ -717,10 +782,10 @@ class CatalogManager:
                 try:
                     folder = self.config.family_folder_name(product.bu, product.family)
                 except ValueError as exc:
-                    notes.append(f"{product.product_code}: {exc}")
+                    notes.append(f"{product.slug}: {exc}")
                     continue
                 notes.append(
-                    f"{product.product_code}: family '{product.family}' is not declared in taxonomy.yaml "
+                    f"{product.slug}: family '{product.family}' is not declared in taxonomy.yaml "
                     f"for bu '{product.bu}'. Accepted; workspace folder -> families/{folder}. "
                     f"Add it to taxonomy.yaml to silence this."
                 )
@@ -733,28 +798,28 @@ class CatalogManager:
                     origin = (
                         "config/scope.yaml"
                         if product.scope_source is ScopeSource.SCOPE_RULE
-                        else f"a manual in_scope=false on {product.product_code}"
+                        else f"a manual in_scope=false on {product.slug}"
                     )
                     notes.append(
-                        f"{product.product_code}@{ver.version}: in batch '{ver.convert_batch}' but the product "
+                        f"{product.slug}@{ver.version}: in batch '{ver.convert_batch}' but the product "
                         f"is out of scope (via {origin}), so it will be skipped. Run "
-                        f"`docushift catalog set --product {product.product_code} --in-scope` to include it."
+                        f"`docushift catalog set --product {product.slug} --in-scope` to include it."
                     )
                 # Scheduled but not permitted: the batch flag looks like it selected
                 # this row, and nothing downstream will ever pick it up.
                 if ver.convert_batch and not ver.convert_eligible:
                     notes.append(
-                        f"{product.product_code}@{ver.version}: in batch '{ver.convert_batch}' but "
+                        f"{product.slug}@{ver.version}: in batch '{ver.convert_batch}' but "
                         f"convert_eligible=false, so it will be skipped. Run "
-                        f"`docushift catalog enable --product {product.product_code} --version {ver.version}`."
+                        f"`docushift catalog enable --product {product.slug} --version {ver.version}`."
                     )
                 # The pin still wins, but discovery has since produced an endpoint,
                 # so the hand-supplied package may no longer be necessary.
                 if ver.zip_source is ZipSource.MANUAL and ver.zip_url:
                     notes.append(
-                        f"{product.product_code}@{ver.version}: zip_source=manual, but discovery now has a "
+                        f"{product.slug}@{ver.version}: zip_source=manual, but discovery now has a "
                         f"zip_url for it. The manual package still wins. Run `docushift catalog set "
-                        f"--product {product.product_code} --version {ver.version} --zip-source auto` to "
+                        f"--product {product.slug} --version {ver.version} --zip-source auto` to "
                         f"download it instead."
                     )
                 # Identified, eligible, and unconvertible. Worth saying out loud
@@ -768,15 +833,15 @@ class CatalogManager:
                 )
                 if ver.convert_eligible and identified_no_handler:
                     notes.append(
-                        f"{product.product_code}@{ver.version}: engine '{ver.engine}' is identified but has no "
+                        f"{product.slug}@{ver.version}: engine '{ver.engine}' is identified but has no "
                         f"Stage 5 handler, so conversion will skip it. Set convert_eligible=false to take it out "
                         f"of scope, or convert it by hand."
                     )
-                notes.extend(self._inventory_notes(product.product_code, ver))
+                notes.extend(self._inventory_notes(product.slug, ver))
         return notes
 
     @staticmethod
-    def _inventory_notes(product_code: str, ver: ProductVersion) -> list[str]:
+    def _inventory_notes(slug: str, ver: ProductVersion) -> list[str]:
         """Flags an inventory boolean that contradicts the count beside it (§3.9).
 
         `record_extract_inventory` derives both from one measurement, so this shape
@@ -791,13 +856,13 @@ class CatalogManager:
         notes = []
         if ver.has_api_ref is False and ver.api_files:
             notes.append(
-                f"{product_code}@{ver.version}: _has_api_ref=false but _api_files={ver.api_files}. "
+                f"{slug}@{ver.version}: _has_api_ref=false but _api_files={ver.api_files}. "
                 f"These are written together, so one has been hand-edited. The next "
                 f"`docushift extract` of this version will overwrite both."
             )
         if ver.has_csh is False and ver.csh_names:
             notes.append(
-                f"{product_code}@{ver.version}: _has_csh=false but _csh_names={ver.csh_names}. "
+                f"{slug}@{ver.version}: _has_csh=false but _csh_names={ver.csh_names}. "
                 f"These are written together, so one has been hand-edited. The next "
                 f"`docushift extract` of this version will overwrite both."
             )
@@ -836,7 +901,7 @@ def _resolve_scope(product: Product, rules: dict[str, str]) -> None:
     if product.scope_source is ScopeSource.MANUAL:
         return
 
-    if product.slug and product.slug in rules:
+    if product.slug in rules:
         product.in_scope = False
         product.scope_source = ScopeSource.SCOPE_RULE
         return

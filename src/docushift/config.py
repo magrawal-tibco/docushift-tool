@@ -81,16 +81,21 @@ class ConfigManager:
         """
         return self.family_dir(bu, family) / "archive"
 
-    def download_path(self, bu: str, family: str, product_code: str, version: str) -> Path:
-        """The ZIP path for one version: `.../downloads/<product_code>-<version>.zip`.
+    def download_path(self, bu: str, family: str, slug: str, version: str) -> Path:
+        """The ZIP path for one version: `.../downloads/<slug>-<version>.zip`.
 
         Named from the catalog key rather than from the remote filename, because the
         docsite's own names collide across versions and are not derivable in reverse.
-        """
-        return self.downloads_dir(bu, family) / f"{product_code}-{version}.zip"
 
-    def extract_path(self, bu: str, family: str, product_code: str, version: str) -> Path:
-        """The extracted tree for one version: `.../extracted/<product_code>/<version>/`.
+        The key is the slug, not `product_code`, because the code is not unique:
+        nine of the ten shared codes are shared by products in the *same* family, so
+        a code-named ZIP would land two different products' packages on top of each
+        other in one directory.
+        """
+        return self.downloads_dir(bu, family) / f"{slug}-{version}.zip"
+
+    def extract_path(self, bu: str, family: str, slug: str, version: str) -> Path:
+        """The extracted tree for one version: `.../extracted/<slug>/<version>/`.
 
         The version keeps its dots here. `html-to-md` writes `6-2-3` in *published*
         paths, but this is a working directory keyed by the catalog, and a dotted
@@ -98,7 +103,7 @@ class ConfigManager:
         dashed one does not (`6-2-3` could be `6.2.3` or `6-2.3`). The dots-to-dashes
         conversion belongs at Stage 6, where the AEM output path is built.
         """
-        return self.extracted_dir(bu, family) / product_code / version
+        return self.extracted_dir(bu, family) / slug / version
 
     def load_taxonomy(self) -> dict[str, Any]:
         """Loads and caches taxonomy rules from taxonomy.yaml."""

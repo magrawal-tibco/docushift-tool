@@ -38,7 +38,7 @@ def test_save_then_reload_round_trips(catalog: CatalogManager, sample_product: P
 
     reloaded = _reload(catalog).load()
 
-    product = reloaded.products["ems"]
+    product = reloaded.products["tibco-ems"]
     assert product.display_name == "TIBCO Enterprise Message Service™"
     assert product.family == "messaging"
     assert set(product.versions) == {"10.4.0", "8.6.0"}
@@ -102,25 +102,23 @@ def test_edits_to_denormalized_columns_are_ignored(catalog: CatalogManager) -> N
 
 
 def test_orphaned_version_row_is_an_error_not_a_silent_product(catalog: CatalogManager) -> None:
-    catalog.products_path.write_text("product_code,display_name\n", encoding="utf-8-sig", newline="")
-    catalog.versions_path.write_text(
-        "product_code,version\nghost,1.0.0\n", encoding="utf-8-sig", newline=""
-    )
+    catalog.products_path.write_text("slug,product_code,display_name\n", encoding="utf-8-sig", newline="")
+    catalog.versions_path.write_text("slug,version\nghost,1.0.0\n", encoding="utf-8-sig", newline="")
 
-    with pytest.raises(CatalogError, match="unknown product_code 'ghost'"):
+    with pytest.raises(CatalogError, match="unknown slug 'ghost'"):
         catalog.load()
 
 
 def test_booleans_are_read_permissively_and_written_lowercase(catalog: CatalogManager) -> None:
     """Excel writes TRUE/FALSE; the catalog always writes lowercase."""
     catalog.products_path.write_text(
-        "product_code,display_name,bu,family,family_source,slug,custom_override\n"
-        "ems,EMS,tibco,messaging,manual,tibco-ems,TRUE\n",
+        "slug,product_code,display_name,bu,family,family_source,custom_override\n"
+        "tibco-ems,ems,EMS,tibco,messaging,manual,TRUE\n",
         encoding="utf-8-sig",
         newline="",
     )
 
-    assert catalog.load().products["ems"].custom_override is True
+    assert catalog.load().products["tibco-ems"].custom_override is True
 
     catalog.save()
     assert read_rows(catalog.products_path)[0]["custom_override"] == "true"
@@ -138,22 +136,22 @@ def test_fetch_adds_new_products(catalog: CatalogManager, sample_product: Produc
 def test_fetch_is_additive_for_new_versions(catalog: CatalogManager, sample_product: Product) -> None:
     _fetch(catalog, sample_product)
 
-    incoming = make_product("ems", family="messaging")
+    incoming = make_product("tibco-ems", product_code="ems", family="messaging")
     incoming.versions = {
-        "10.5.0": make_version("ems", "10.5.0"),
-        "10.4.0": make_version("ems", "10.4.0"),
-        "8.6.0": make_version("ems", "8.6.0", is_archived=True, convert_eligible=False),
+        "10.5.0": make_version("tibco-ems", "10.5.0"),
+        "10.4.0": make_version("tibco-ems", "10.4.0"),
+        "8.6.0": make_version("tibco-ems", "8.6.0", is_archived=True, convert_eligible=False),
     }
     stats = catalog.merge_fetch_results([incoming])
 
     assert stats.versions_added == 1
-    assert set(catalog.get_product("ems").versions) == {"10.4.0", "8.6.0", "10.5.0"}
+    assert set(catalog.get_product("tibco-ems").versions) == {"10.4.0", "8.6.0", "10.5.0"}
 
 
 def test_archived_versions_default_to_ineligible(catalog: CatalogManager, sample_product: Product) -> None:
     _fetch(catalog, sample_product)
 
-    archived = _reload(catalog).get_version("ems", "8.6.0")
+    archived = _reload(catalog).get_version("tibco-ems", "8.6.0")
 
     assert (archived.is_archived, archived.convert_eligible) == (True, False)
 
@@ -165,8 +163,8 @@ def test_disappearing_version_aborts_the_fetch(catalog: CatalogManager, sample_p
     """Excel reading '1.10' as '1.1' must be reported, not silently applied."""
     _fetch(catalog, sample_product)
 
-    shrunk = make_product("ems", family="messaging")
-    shrunk.versions = {"10.4.0": make_version("ems", "10.4.0")}
+    shrunk = make_product("tibco-ems", product_code="ems", family="messaging")
+    shrunk.versions = {"10.4.0": make_version("tibco-ems", "10.4.0")}
 
     with pytest.raises(CatalogError, match="8.6.0"):
         catalog.merge_fetch_results([shrunk])
@@ -175,12 +173,12 @@ def test_disappearing_version_aborts_the_fetch(catalog: CatalogManager, sample_p
 def test_allow_deletes_permits_the_removal(catalog: CatalogManager, sample_product: Product) -> None:
     _fetch(catalog, sample_product)
 
-    shrunk = make_product("ems", family="messaging")
-    shrunk.versions = {"10.4.0": make_version("ems", "10.4.0")}
+    shrunk = make_product("tibco-ems", product_code="ems", family="messaging")
+    shrunk.versions = {"10.4.0": make_version("tibco-ems", "10.4.0")}
     catalog.merge_fetch_results([shrunk], allow_deletes=True)
 
-    assert set(catalog.get_product("ems").versions) == {"10.4.0"}
-    assert catalog.state.get_version_snapshot("ems", "8.6.0") is None
+    assert set(catalog.get_product("tibco-ems").versions) == {"10.4.0"}
+    assert catalog.state.get_version_snapshot("tibco-ems", "8.6.0") is None
 
 
 def test_deletion_check_is_scoped_to_fetched_products(catalog: CatalogManager) -> None:
@@ -202,49 +200,53 @@ def test_deletion_check_is_scoped_to_fetched_products(catalog: CatalogManager) -
 def test_manual_eligibility_toggle_survives_refetch(catalog: CatalogManager, sample_product: Product) -> None:
     """The headline guarantee -- no custom_override was set here."""
     _fetch(catalog, sample_product)
-    catalog.set_conversion_eligibility("ems", "8.6.0", True)
+    catalog.set_conversion_eligibility("tibco-ems", "8.6.0", True)
 
     catalog.merge_fetch_results([sample_product])
 
-    assert catalog.get_version("ems", "8.6.0").convert_eligible is True
+    assert catalog.get_version("tibco-ems", "8.6.0").convert_eligible is True
 
 
 def test_untouched_fields_still_take_upstream_changes(catalog: CatalogManager, sample_product: Product) -> None:
     """Preserving edits must not mean freezing everything else."""
     _fetch(catalog, sample_product)
 
-    renamed = make_product("ems", display_name="TIBCO EMS (renamed upstream)", family="messaging")
+    renamed = make_product(
+        "tibco-ems", product_code="ems", display_name="TIBCO EMS (renamed upstream)", family="messaging"
+    )
     renamed.versions = dict(sample_product.versions)
     catalog.merge_fetch_results([renamed])
 
-    assert catalog.get_product("ems").display_name == "TIBCO EMS (renamed upstream)"
+    assert catalog.get_product("tibco-ems").display_name == "TIBCO EMS (renamed upstream)"
 
 
 def test_edited_field_is_preserved_while_its_sibling_updates(
     catalog: CatalogManager, sample_product: Product
 ) -> None:
     _fetch(catalog, sample_product)
-    catalog.get_product("ems").display_name = "My Preferred Name"
+    catalog.get_product("tibco-ems").display_name = "My Preferred Name"
     catalog.save()
 
-    upstream = make_product("ems", display_name="Upstream Name", slug="tibco-ems-new", family="messaging")
+    upstream = make_product("tibco-ems", product_code="ems-new", display_name="Upstream Name", family="messaging")
     upstream.versions = dict(sample_product.versions)
     catalog.merge_fetch_results([upstream])
 
-    product = catalog.get_product("ems")
+    product = catalog.get_product("tibco-ems")
     assert product.display_name == "My Preferred Name"
-    assert product.slug == "tibco-ems-new"
+    assert product.product_code == "ems-new"
 
 
 def test_manual_family_is_never_overwritten(catalog: CatalogManager, sample_product: Product) -> None:
     _fetch(catalog, sample_product)
-    catalog.set_product_field("ems", "family", "integration")
+    catalog.set_product_field("tibco-ems", "family", "integration")
 
-    upstream = make_product("ems", family="analytics", family_source=FamilySource.DOCSITE_CATEGORY)
+    upstream = make_product(
+        "tibco-ems", product_code="ems", family="analytics", family_source=FamilySource.DOCSITE_CATEGORY
+    )
     upstream.versions = dict(sample_product.versions)
     catalog.merge_fetch_results([upstream])
 
-    product = catalog.get_product("ems")
+    product = catalog.get_product("tibco-ems")
     assert (product.family, product.family_source) == ("integration", FamilySource.MANUAL)
 
 
@@ -271,13 +273,13 @@ def test_docsite_category_can_promote_an_unclassified_product(catalog: CatalogMa
 
 def test_custom_override_pins_the_whole_product_row(catalog: CatalogManager, sample_product: Product) -> None:
     _fetch(catalog, sample_product)
-    catalog.set_product_field("ems", "custom_override", "true")
+    catalog.set_product_field("tibco-ems", "custom_override", "true")
 
-    upstream = make_product("ems", display_name="Upstream", slug="new-slug", bu="ibi", family="webfocus")
+    upstream = make_product("new-slug", product_code="ems", display_name="Upstream", bu="ibi", family="webfocus")
     upstream.versions = dict(sample_product.versions)
     catalog.merge_fetch_results([upstream])
 
-    product = catalog.get_product("ems")
+    product = catalog.get_product("tibco-ems")
     assert (product.display_name, product.slug, product.bu) == (
         "TIBCO Enterprise Message Service™",
         "tibco-ems",
@@ -287,17 +289,17 @@ def test_custom_override_pins_the_whole_product_row(catalog: CatalogManager, sam
 
 def test_custom_override_pins_a_version_row(catalog: CatalogManager, sample_product: Product) -> None:
     _fetch(catalog, sample_product)
-    catalog.set_version_field("ems", "10.4.0", "custom_override", "true")
-    catalog.set_version_field("ems", "10.4.0", "zip_url", "https://internal/mirror.zip")
+    catalog.set_version_field("tibco-ems", "10.4.0", "custom_override", "true")
+    catalog.set_version_field("tibco-ems", "10.4.0", "zip_url", "https://internal/mirror.zip")
 
-    upstream = make_product("ems", family="messaging")
+    upstream = make_product("tibco-ems", product_code="ems", family="messaging")
     upstream.versions = {
-        "10.4.0": make_version("ems", "10.4.0", zip_url="https://docs.tibco.com/upstream.zip"),
-        "8.6.0": make_version("ems", "8.6.0", is_archived=True, convert_eligible=False),
+        "10.4.0": make_version("tibco-ems", "10.4.0", zip_url="https://docs.tibco.com/upstream.zip"),
+        "8.6.0": make_version("tibco-ems", "8.6.0", is_archived=True, convert_eligible=False),
     }
     catalog.merge_fetch_results([upstream])
 
-    assert catalog.get_version("ems", "10.4.0").zip_url == "https://internal/mirror.zip"
+    assert catalog.get_version("tibco-ems", "10.4.0").zip_url == "https://internal/mirror.zip"
 
 
 def test_without_a_snapshot_existing_values_are_kept(
@@ -306,18 +308,18 @@ def test_without_a_snapshot_existing_values_are_kept(
     """With no merge base, the conservative reading is that the CSV value is the user's."""
     stateless_catalog.merge_fetch_results([sample_product])
 
-    renamed = make_product("ems", display_name="Upstream Rename", family="messaging")
+    renamed = make_product("tibco-ems", product_code="ems", display_name="Upstream Rename", family="messaging")
     renamed.versions = dict(sample_product.versions)
     stateless_catalog.merge_fetch_results([renamed])
 
-    assert stateless_catalog.get_product("ems").display_name == "TIBCO Enterprise Message Service™"
+    assert stateless_catalog.get_product("tibco-ems").display_name == "TIBCO Enterprise Message Service™"
 
 
 def test_dry_run_writes_nothing(catalog: CatalogManager, sample_product: Product) -> None:
     catalog.merge_fetch_results([sample_product], dry_run=True)
 
     assert not catalog.products_path.exists()
-    assert catalog.state.get_product_snapshot("ems") is None
+    assert catalog.state.get_product_snapshot("tibco-ems") is None
 
 
 # -- engine handling ---------------------------------------------------------
@@ -327,7 +329,7 @@ def test_new_versions_default_to_auto_never_flare(catalog: CatalogManager, sampl
     """A wrong engine default is silently destructive; `auto` is skipped instead."""
     _fetch(catalog, sample_product)
 
-    version = catalog.get_version("ems", "10.4.0")
+    version = catalog.get_version("tibco-ems", "10.4.0")
 
     assert (version.engine, version.engine_source) == (SourceEngine.AUTO, EngineSource.AUTO)
 
@@ -335,28 +337,28 @@ def test_new_versions_default_to_auto_never_flare(catalog: CatalogManager, sampl
 def test_detected_engine_is_written_back(catalog: CatalogManager, sample_product: Product) -> None:
     _fetch(catalog, sample_product)
 
-    assert catalog.record_detected_engine("ems", "10.4.0", SourceEngine.FLARE) is True
+    assert catalog.record_detected_engine("tibco-ems", "10.4.0", SourceEngine.FLARE) is True
 
-    version = _reload(catalog).get_version("ems", "10.4.0")
+    version = _reload(catalog).get_version("tibco-ems", "10.4.0")
     assert (version.engine, version.engine_source) == (SourceEngine.FLARE, EngineSource.DETECTED)
 
 
 def test_detection_never_overrides_a_manual_engine(catalog: CatalogManager, sample_product: Product) -> None:
     _fetch(catalog, sample_product)
-    catalog.set_version_field("ems", "8.6.0", "engine", "webworks")
+    catalog.set_version_field("tibco-ems", "8.6.0", "engine", "webworks")
 
-    assert catalog.record_detected_engine("ems", "8.6.0", SourceEngine.FLARE) is False
-    assert catalog.get_version("ems", "8.6.0").engine == SourceEngine.WEBWORKS
+    assert catalog.record_detected_engine("tibco-ems", "8.6.0", SourceEngine.FLARE) is False
+    assert catalog.get_version("tibco-ems", "8.6.0").engine == SourceEngine.WEBWORKS
 
 
 def test_a_fetch_does_not_reset_a_detected_engine(catalog: CatalogManager, sample_product: Product) -> None:
     """Discovery does not own the engine columns, so it must not touch them."""
     _fetch(catalog, sample_product)
-    catalog.record_detected_engine("ems", "10.4.0", SourceEngine.FLARE)
+    catalog.record_detected_engine("tibco-ems", "10.4.0", SourceEngine.FLARE)
 
     catalog.merge_fetch_results([sample_product])
 
-    assert catalog.get_version("ems", "10.4.0").engine == SourceEngine.FLARE
+    assert catalog.get_version("tibco-ems", "10.4.0").engine == SourceEngine.FLARE
 
 
 def test_engine_varies_across_one_products_versions(catalog: CatalogManager) -> None:
@@ -384,11 +386,11 @@ def test_an_unconvertible_engine_survives_a_round_trip(catalog: CatalogManager, 
     """
     _fetch(catalog, sample_product)
 
-    assert catalog.record_detected_engine("ems", "10.4.0", SourceEngine.R_HELP) is True
+    assert catalog.record_detected_engine("tibco-ems", "10.4.0", SourceEngine.R_HELP) is True
 
     row = next(r for r in read_rows(catalog.versions_path) if r["version"] == "10.4.0")
     assert row["engine"] == "r-help"
-    assert _reload(catalog).get_version("ems", "10.4.0").engine == SourceEngine.R_HELP
+    assert _reload(catalog).get_version("tibco-ems", "10.4.0").engine == SourceEngine.R_HELP
 
 
 @pytest.mark.parametrize("engine", sorted(e.value for e in SourceEngine))
@@ -397,9 +399,9 @@ def test_every_engine_value_round_trips_through_the_csv(
 ) -> None:
     _fetch(catalog, sample_product)
 
-    catalog.set_version_field("ems", "10.4.0", "engine", engine)
+    catalog.set_version_field("tibco-ems", "10.4.0", "engine", engine)
 
-    assert _reload(catalog).get_version("ems", "10.4.0").engine == SourceEngine(engine)
+    assert _reload(catalog).get_version("tibco-ems", "10.4.0").engine == SourceEngine(engine)
 
 
 # -- edits, filtering, reporting ---------------------------------------------
@@ -408,9 +410,9 @@ def test_every_engine_value_round_trips_through_the_csv(
 def test_setting_family_pins_provenance_to_manual(catalog: CatalogManager, sample_product: Product) -> None:
     _fetch(catalog, sample_product)
 
-    catalog.set_product_field("ems", "family", "Integration")
+    catalog.set_product_field("tibco-ems", "family", "Integration")
 
-    product = catalog.get_product("ems")
+    product = catalog.get_product("tibco-ems")
     assert (product.family, product.family_source) == ("integration", FamilySource.MANUAL)
 
 
@@ -418,7 +420,7 @@ def test_setting_an_unknown_field_is_rejected(catalog: CatalogManager, sample_pr
     _fetch(catalog, sample_product)
 
     with pytest.raises(CatalogError, match="not a settable"):
-        catalog.set_product_field("ems", "nonsense", "x")
+        catalog.set_product_field("tibco-ems", "nonsense", "x")
 
 
 def test_edits_to_absent_rows_report_failure(catalog: CatalogManager) -> None:
@@ -435,7 +437,7 @@ def test_iter_versions_filters(catalog: CatalogManager, sample_product: Product)
     assert len(catalog.iter_versions()) == 3
     assert len(catalog.iter_versions(family="messaging")) == 2
     assert len(catalog.iter_versions(eligible_only=True)) == 2
-    assert len(catalog.iter_versions(product_code="ems", version="10.4.0")) == 1
+    assert len(catalog.iter_versions(slug="tibco-ems", version="10.4.0")) == 1
 
 
 def test_triage_summary_counts_provenance(catalog: CatalogManager) -> None:
@@ -533,9 +535,9 @@ def test_a_listed_slug_is_excluded_on_arrival(project_root: Path, state: StateSt
     """A product first discovered after the rule was written is never converted once."""
     catalog = _scoped(project_root, state, "tibco-ebx")
 
-    stats = _fetch(catalog, make_product("ebx", slug="tibco-ebx"))
+    stats = _fetch(catalog, make_product("tibco-ebx", product_code="ebx"))
 
-    product = catalog.get_product("ebx")
+    product = catalog.get_product("tibco-ebx")
     assert (product.in_scope, product.scope_source) == (False, ScopeSource.SCOPE_RULE)
     assert stats.products_out_of_scope == 1
 
@@ -547,9 +549,9 @@ def test_scope_matches_the_exact_slug_never_a_substring(project_root: Path, stat
 
     _fetch(
         catalog,
-        make_product("ebx", slug="tibco-ebx"),
-        make_product("spotfire", slug="spotfire"),
-        *(make_product(f"p{i}", slug=slug) for i, slug in enumerate(look_alikes)),
+        make_product("tibco-ebx", product_code="ebx"),
+        make_product("spotfire"),
+        *(make_product(slug, product_code=f"p{i}") for i, slug in enumerate(look_alikes)),
     )
 
     excluded = {p.product_code for p in catalog.load().products.values() if not p.in_scope}
@@ -559,9 +561,9 @@ def test_scope_matches_the_exact_slug_never_a_substring(project_root: Path, stat
 
 def test_scope_round_trips_through_the_csv(project_root: Path, state: StateStore) -> None:
     catalog = _scoped(project_root, state, "tibco-ebx")
-    _fetch(catalog, make_product("ebx", slug="tibco-ebx"))
+    _fetch(catalog, make_product("tibco-ebx", product_code="ebx"))
 
-    reloaded = _reload(catalog).get_product("ebx")
+    reloaded = _reload(catalog).get_product("tibco-ebx")
 
     assert (reloaded.in_scope, reloaded.scope_source) == (False, ScopeSource.SCOPE_RULE)
 
@@ -572,7 +574,7 @@ def test_a_blank_in_scope_cell_reads_as_in_scope(catalog: CatalogManager, sample
     text = catalog.products_path.read_text(encoding="utf-8-sig").replace(",true,default,", ",,,")
     catalog.products_path.write_text(text, encoding="utf-8-sig", newline="")
 
-    product = _reload(catalog).get_product("ems")
+    product = _reload(catalog).get_product("tibco-ems")
 
     assert (product.in_scope, product.scope_source) == (True, ScopeSource.DEFAULT)
 
@@ -582,12 +584,12 @@ def test_a_manual_scope_decision_survives_a_fetch_that_would_exclude(
 ) -> None:
     """`manual` short-circuits ahead of the rule file, or readmission would not stick."""
     catalog = _scoped(project_root, state, "tibco-ebx")
-    _fetch(catalog, make_product("ebx", slug="tibco-ebx"))
-    catalog.set_product_field("ebx", "in_scope", "true")
+    _fetch(catalog, make_product("tibco-ebx", product_code="ebx"))
+    catalog.set_product_field("tibco-ebx", "in_scope", "true")
 
-    _fetch(_scoped(project_root, state, "tibco-ebx"), make_product("ebx", slug="tibco-ebx"))
+    _fetch(_scoped(project_root, state, "tibco-ebx"), make_product("tibco-ebx", product_code="ebx"))
 
-    product = _scoped(project_root, state, "tibco-ebx").get_product("ebx")
+    product = _scoped(project_root, state, "tibco-ebx").get_product("tibco-ebx")
     assert (product.in_scope, product.scope_source) == (True, ScopeSource.MANUAL)
 
 
@@ -595,22 +597,22 @@ def test_a_manual_exclusion_survives_a_fetch_with_no_matching_rule(
     project_root: Path, state: StateStore
 ) -> None:
     catalog = _scoped(project_root, state)
-    _fetch(catalog, make_product("ems", slug="tibco-ems"))
-    catalog.set_product_field("ems", "in_scope", "false")
+    _fetch(catalog, make_product("tibco-ems", product_code="ems"))
+    catalog.set_product_field("tibco-ems", "in_scope", "false")
 
-    _fetch(_scoped(project_root, state), make_product("ems", slug="tibco-ems"))
+    _fetch(_scoped(project_root, state), make_product("tibco-ems", product_code="ems"))
 
-    product = _scoped(project_root, state).get_product("ems")
+    product = _scoped(project_root, state).get_product("tibco-ems")
     assert (product.in_scope, product.scope_source) == (False, ScopeSource.MANUAL)
 
 
 def test_removing_a_slug_from_the_yaml_restores_the_product(project_root: Path, state: StateStore) -> None:
     """Step 3 actively resets, so the rule file is removable in fact and not just in name."""
-    _fetch(_scoped(project_root, state, "tibco-ebx"), make_product("ebx", slug="tibco-ebx"))
+    _fetch(_scoped(project_root, state, "tibco-ebx"), make_product("tibco-ebx", product_code="ebx"))
 
-    _fetch(_scoped(project_root, state), make_product("ebx", slug="tibco-ebx"))
+    _fetch(_scoped(project_root, state), make_product("tibco-ebx", product_code="ebx"))
 
-    product = _scoped(project_root, state).get_product("ebx")
+    product = _scoped(project_root, state).get_product("tibco-ebx")
     assert (product.in_scope, product.scope_source) == (True, ScopeSource.DEFAULT)
 
 
@@ -618,7 +620,7 @@ def test_a_rule_matching_no_product_is_reported(project_root: Path, state: State
     """The rename detector: a rule that quietly matches nothing stops excluding anything."""
     catalog = _scoped(project_root, state, "tibco-ebx", "spotfire-renamed-upstream")
 
-    stats = _fetch(catalog, make_product("ebx", slug="tibco-ebx"))
+    stats = _fetch(catalog, make_product("tibco-ebx", product_code="ebx"))
 
     assert stats.scope_rules_unmatched == ["spotfire-renamed-upstream"]
     assert any("spotfire-renamed-upstream" in note and "match no product" in note for note in catalog.warnings())
@@ -627,7 +629,7 @@ def test_a_rule_matching_no_product_is_reported(project_root: Path, state: State
 def test_unmatched_rules_are_reported_as_one_aggregated_note(project_root: Path, state: StateStore) -> None:
     """Sixty near-identical warnings would bury the ones that matter."""
     catalog = _scoped(project_root, state, *(f"gone-{i}" for i in range(20)))
-    _fetch(catalog, make_product("ems", slug="tibco-ems"))
+    _fetch(catalog, make_product("tibco-ems", product_code="ems"))
 
     notes = [note for note in catalog.warnings() if "scope.yaml" in note]
 
@@ -638,20 +640,20 @@ def test_unmatched_rules_are_reported_as_one_aggregated_note(project_root: Path,
 def test_an_excluded_product_is_still_fully_catalogued(project_root: Path, state: StateStore) -> None:
     """Excluded is not absent: it stays on the books, it is just never worked on."""
     catalog = _scoped(project_root, state, "tibco-ebx")
-    ebx = make_product("ebx", slug="tibco-ebx")
-    ebx.versions = {v: make_version("ebx", v) for v in ("6.2.0", "6.1.0", "5.9.0")}
+    ebx = make_product("tibco-ebx", product_code="ebx")
+    ebx.versions = {v: make_version("tibco-ebx", v) for v in ("6.2.0", "6.1.0", "5.9.0")}
 
     _fetch(catalog, ebx)
 
-    assert set(_reload(catalog).get_product("ebx").versions) == {"6.2.0", "6.1.0", "5.9.0"}
-    assert len(catalog.iter_versions(product_code="ebx")) == 3
+    assert set(_reload(catalog).get_product("tibco-ebx").versions) == {"6.2.0", "6.1.0", "5.9.0"}
+    assert len(catalog.iter_versions(slug="tibco-ebx")) == 3
 
 
 def test_eligible_only_skips_an_out_of_scope_product_whole(project_root: Path, state: StateStore) -> None:
     catalog = _scoped(project_root, state, "tibco-ebx")
-    ebx = make_product("ebx", slug="tibco-ebx")
+    ebx = make_product("tibco-ebx", product_code="ebx")
     ebx.versions = {"6.2.0": make_version("ebx", "6.2.0", convert_eligible=True)}
-    ems = make_product("ems", slug="tibco-ems")
+    ems = make_product("tibco-ems", product_code="ems")
     ems.versions = {"10.4.0": make_version("ems", "10.4.0", convert_eligible=True)}
     _fetch(catalog, ebx, ems)
 
@@ -662,10 +664,10 @@ def test_eligible_only_skips_an_out_of_scope_product_whole(project_root: Path, s
 def test_a_batch_tag_on_an_out_of_scope_product_warns(project_root: Path, state: StateStore) -> None:
     """The row reads as scheduled and will never run, so the exclusion has to be named."""
     catalog = _scoped(project_root, state, "tibco-ebx")
-    ebx = make_product("ebx", slug="tibco-ebx")
+    ebx = make_product("tibco-ebx", product_code="ebx")
     ebx.versions = {"6.2.0": make_version("ebx", "6.2.0")}
     _fetch(catalog, ebx)
-    catalog.set_version_field("ebx", "6.2.0", "convert_batch", "poc-1")
+    catalog.set_version_field("tibco-ebx", "6.2.0", "convert_batch", "poc-1")
 
     notes = catalog.warnings()
 
@@ -676,11 +678,11 @@ def test_a_batch_tag_under_a_manual_exclusion_names_the_csv_not_the_yaml(
     project_root: Path, state: StateStore
 ) -> None:
     catalog = _scoped(project_root, state)
-    ems = make_product("ems", slug="tibco-ems")
+    ems = make_product("tibco-ems", product_code="ems")
     ems.versions = {"10.4.0": make_version("ems", "10.4.0")}
     _fetch(catalog, ems)
-    catalog.set_product_field("ems", "in_scope", "false")
-    catalog.set_version_field("ems", "10.4.0", "convert_batch", "poc-1")
+    catalog.set_product_field("tibco-ems", "in_scope", "false")
+    catalog.set_version_field("tibco-ems", "10.4.0", "convert_batch", "poc-1")
 
     notes = catalog.warnings()
 
@@ -689,12 +691,13 @@ def test_a_batch_tag_under_a_manual_exclusion_names_the_csv_not_the_yaml(
 
 def test_triage_summary_counts_scope(project_root: Path, state: StateStore) -> None:
     catalog = _scoped(project_root, state, "tibco-ebx")
-    _fetch(catalog, make_product("ebx", slug="tibco-ebx"), make_product("ems", slug="tibco-ems"))
-    catalog.set_product_field("ems", "in_scope", "false")
+    _fetch(catalog, make_product("tibco-ebx", product_code="ebx"), make_product("tibco-ems", product_code="ems"))
+    catalog.set_product_field("tibco-ems", "in_scope", "false")
 
     summary = catalog.triage_summary()
 
-    assert summary["out_of_scope"] == ["ebx", "ems"]
+    # Reported as slugs, which is what identifies a product now that the code does not.
+    assert summary["out_of_scope"] == ["tibco-ebx", "tibco-ems"]
     assert summary["scope_counts"] == {"manual": 1, "scope_rule": 1, "default": 0}
 
 
@@ -703,7 +706,168 @@ def test_a_catalog_with_no_config_excludes_nothing(catalog: CatalogManager, samp
     stats = _fetch(catalog, sample_product)
 
     assert stats.products_out_of_scope == 0
-    assert catalog.get_product("ems").in_scope is True
+    assert catalog.get_product("tibco-ems").in_scope is True
+
+
+# -- the catalog key: slug, not product_code (architecture.md §3.1) ----------
+
+# Every `product_code` the 2026-09-09 crawl of all 634 products found on more than
+# one product, with the slugs carrying it. Enumerated rather than sampled because
+# each pair is a distinct way the old code-keyed catalog silently lost a product:
+# a rebrand that kept the old code (`tibco-clarity` / `-enterprise-edition`), an
+# edition split (`bwpluginedi-healthcare`), a renamed product whose code outlived
+# the name (`fsi`), and one -- `stat-sts` -- that straddles the scope boundary.
+SHARED_CODES = {
+    "business-studio-analyst-edition": (
+        "tibco-business-studio-analyst-edition",
+        "tibco-business-studio-for-analysts",
+    ),
+    "bwpluginedi-healthcare": (
+        "tibco-activematrix-businessworks-plug-in-for-edi",
+        "tibco-activematrix-businessworks-plug-in-for-edi-healthcare-edition",
+    ),
+    "clarity-dt": ("tibco-clarity", "tibco-clarity-enterprise-edition"),
+    "fsi": ("tibco-fulfillment-subscriber-inventory", "tibco-product-and-service-inventory-2-1-0"),
+    "loglmi": ("tibco-loglogic", "tibco-loglogic-log-management-intelligence"),
+    "sfire-cloud": ("tibco-cloud-spotfire-14-6-0", "tibco-cloud-spotfire-14-6-2"),
+    "sfire-dscpn": (
+        "tibco-data-science-package-for-notebooks",
+        "tibco-spotfire-data-science-package-for-notebooks",
+    ),
+    "spotfire": ("spotfire", "tibco-spotfire-general", "tibco-spotfire-professional"),
+    "stat-ext": ("spotfire-statistica-integration", "tibco-data-science-for-tibco-spotfire-analyst"),
+    "stat-sts": ("spotfire-service-for-statistica", "tibco-data-science-service-for-tibco-spotfire"),
+}
+
+
+@pytest.mark.parametrize(("code", "slugs"), sorted(SHARED_CODES.items()))
+def test_products_sharing_a_code_round_trip_as_separate_rows(
+    catalog: CatalogManager, code: str, slugs: tuple[str, ...]
+) -> None:
+    """Twenty-one real products share ten codes; none of them may collapse into one row.
+
+    Keyed on `product_code` this wrote `len(slugs)` rows and read back one, so the
+    losing products lost every column the user had edited and every version they had.
+    """
+    incoming = []
+    for index, slug in enumerate(slugs):
+        product = make_product(slug, product_code=code, display_name=slug.upper())
+        product.versions[f"{index + 1}.0.0"] = make_version(slug, f"{index + 1}.0.0")
+        incoming.append(product)
+
+    _fetch(catalog, *incoming)
+
+    reloaded = _reload(catalog).load()
+    assert sorted(s for s in reloaded.products if reloaded.products[s].product_code == code) == sorted(slugs)
+    # Each keeps its own versions rather than inheriting whichever row was written last.
+    for index, slug in enumerate(slugs):
+        assert set(reloaded.products[slug].versions) == {f"{index + 1}.0.0"}
+
+
+def test_the_one_scope_mixed_collision_is_decided_per_product_not_per_code(
+    project_root: Path, state: StateStore
+) -> None:
+    """`stat-sts` by name: the collision that made this re-key urgent rather than tidy.
+
+    Both products carry `product_code=stat-sts`, but only `spotfire-service-for-statistica`
+    is listed in `scope.yaml`. Keyed on the code, whichever of the two merged second
+    overwrote the other's `in_scope`, so *merge order* -- effectively the docsite's A-to-Z
+    ordering -- decided whether four excluded versions got converted.
+    """
+    excluded = "spotfire-service-for-statistica"
+    included = "tibco-data-science-service-for-tibco-spotfire"
+    manager = _scoped(project_root, state, excluded)
+
+    stats = _fetch(
+        manager,
+        make_product(included, product_code="stat-sts"),
+        make_product(excluded, product_code="stat-sts"),
+    )
+
+    assert stats.products_out_of_scope == 1
+    reloaded = _reload(manager)
+    assert reloaded.get_product(excluded).in_scope is False
+    assert reloaded.get_product(included).in_scope is True
+
+
+def test_the_scope_verdict_does_not_depend_on_merge_order(project_root: Path, state: StateStore) -> None:
+    """The same fetch with the two `stat-sts` products swapped must reach the same catalog."""
+    excluded = "spotfire-service-for-statistica"
+    included = "tibco-data-science-service-for-tibco-spotfire"
+    manager = _scoped(project_root, state, excluded)
+
+    _fetch(manager, make_product(excluded, product_code="stat-sts"), make_product(included, product_code="stat-sts"))
+
+    reloaded = _reload(manager)
+    assert reloaded.get_product(excluded).in_scope is False
+    assert reloaded.get_product(included).in_scope is True
+
+
+def test_a_duplicate_slug_is_a_validation_error(catalog: CatalogManager) -> None:
+    """Only a hand-edit can produce one, and `load()` has already dropped a row by then.
+
+    Reported rather than raised, so the sheet still opens -- but reported loudly, because
+    a `save()` on the collapsed catalog would write the loss back over the file.
+    """
+    catalog.products_path.write_text(
+        "slug,product_code,display_name\n"
+        "tibco-ems,ems,TIBCO EMS\n"
+        "tibco-ems,ems,TIBCO EMS (copy)\n",
+        encoding="utf-8",
+    )
+    catalog.versions_path.write_text("slug,version\n", encoding="utf-8")
+
+    problems = catalog.validate()
+
+    assert any("more than one row with slug 'tibco-ems'" in problem for problem in problems)
+
+
+def test_a_product_code_shared_by_two_products_is_not_silently_resolved(catalog: CatalogManager) -> None:
+    """`--product stat-sts` must ask rather than pick, and must say what to pick from."""
+    _fetch(
+        catalog,
+        make_product("spotfire-service-for-statistica", product_code="stat-sts"),
+        make_product("tibco-data-science-service-for-tibco-spotfire", product_code="stat-sts"),
+    )
+
+    with pytest.raises(CatalogError) as excinfo:
+        catalog.resolve_slug("stat-sts")
+
+    message = str(excinfo.value)
+    assert "spotfire-service-for-statistica" in message
+    assert "tibco-data-science-service-for-tibco-spotfire" in message
+
+
+def test_an_unambiguous_product_code_still_resolves(catalog: CatalogManager, sample_product: Product) -> None:
+    """The short code stays typeable: nobody should have to write out the slug for `ems`."""
+    _fetch(catalog, sample_product)
+
+    assert catalog.resolve_slug("ems") == "tibco-ems"
+    assert catalog.resolve_slug("tibco-ems") == "tibco-ems"
+    # Unknown selectors pass through, so `--product <slug>` works before the first fetch.
+    assert catalog.resolve_slug("never-heard-of-it") == "never-heard-of-it"
+
+
+def test_the_full_discovery_dump_merges_and_re_merges_cleanly(
+    catalog: CatalogManager, discovered_products: list[Product]
+) -> None:
+    """The regression this phase exists for, at full scale: 634 products, twice.
+
+    The bug surfaced as a second `catalog fetch --all` aborting with blocked deletions
+    against a catalog the *first* fetch had just written -- because the code-keyed rows
+    had collapsed, so the versions of every losing product were missing on re-read and
+    read as upstream removals. Re-merging the identical dump must be a no-op.
+    """
+    first = _fetch(catalog, *discovered_products)
+
+    assert first.products_added == 634
+    assert first.deletions_blocked == []
+
+    second = _reload(catalog).merge_fetch_results(discovered_products)
+
+    assert second.deletions_blocked == []
+    assert second.products_added == 0
+    assert second.versions_added == 0
 
 
 # -- convert_batch: run scheduling, orthogonal to eligibility ----------------
@@ -712,30 +876,30 @@ def test_a_catalog_with_no_config_excludes_nothing(catalog: CatalogManager, samp
 def test_convert_batch_round_trips_through_the_csv(catalog: CatalogManager, sample_product: Product) -> None:
     _fetch(catalog, sample_product)
 
-    catalog.set_version_field("ems", "10.4.0", "convert_batch", "poc-1")
+    catalog.set_version_field("tibco-ems", "10.4.0", "convert_batch", "poc-1")
 
     assert read_rows(catalog.versions_path)[0]["convert_batch"] == "poc-1"
-    assert _reload(catalog).get_version("ems", "10.4.0").convert_batch == "poc-1"
+    assert _reload(catalog).get_version("tibco-ems", "10.4.0").convert_batch == "poc-1"
 
 
 def test_convert_batch_is_normalized_to_lowercase(catalog: CatalogManager, sample_product: Product) -> None:
     """`POC-1` and `poc-1 ` must select the same rows as `poc-1`."""
     _fetch(catalog, sample_product)
 
-    catalog.set_version_field("ems", "10.4.0", "convert_batch", "  POC-1 ")
+    catalog.set_version_field("tibco-ems", "10.4.0", "convert_batch", "  POC-1 ")
 
-    assert catalog.get_version("ems", "10.4.0").convert_batch == "poc-1"
+    assert catalog.get_version("tibco-ems", "10.4.0").convert_batch == "poc-1"
     assert len(catalog.iter_versions(batch="POC-1")) == 1
 
 
 def test_a_batch_tag_survives_a_refetch(catalog: CatalogManager, sample_product: Product) -> None:
     """Discovery has nothing to say about scheduling, so it must never clear the column."""
     _fetch(catalog, sample_product)
-    catalog.set_version_field("ems", "10.4.0", "convert_batch", "wave-2")
+    catalog.set_version_field("tibco-ems", "10.4.0", "convert_batch", "wave-2")
 
     _fetch(_reload(catalog), sample_product)
 
-    assert _reload(catalog).get_version("ems", "10.4.0").convert_batch == "wave-2"
+    assert _reload(catalog).get_version("tibco-ems", "10.4.0").convert_batch == "wave-2"
 
 
 def test_batch_selection_is_opt_in(catalog: CatalogManager, sample_product: Product) -> None:
@@ -754,7 +918,7 @@ def test_batch_selection_is_opt_in(catalog: CatalogManager, sample_product: Prod
 def test_eligibility_is_the_hard_gate_over_the_batch(catalog: CatalogManager, sample_product: Product) -> None:
     """An archived version tagged into a batch is still excluded from the run."""
     _fetch(catalog, sample_product)
-    catalog.set_version_field("ems", "8.6.0", "convert_batch", "poc-1")
+    catalog.set_version_field("tibco-ems", "8.6.0", "convert_batch", "poc-1")
 
     assert len(catalog.iter_versions(batch="poc-1")) == 1
     assert catalog.iter_versions(batch="poc-1", eligible_only=True) == []
@@ -764,7 +928,7 @@ def test_batches_counts_only_scheduled_versions(catalog: CatalogManager, sample_
     ebx = make_product("ebx", family="data_management")
     ebx.versions = {"6.2.0": make_version("ebx", "6.2.0")}
     _fetch(catalog, sample_product, ebx)
-    catalog.set_version_field("ems", "10.4.0", "convert_batch", "poc-1")
+    catalog.set_version_field("tibco-ems", "10.4.0", "convert_batch", "poc-1")
     catalog.set_version_field("ebx", "6.2.0", "convert_batch", "poc-1")
 
     assert catalog.batches() == {"poc-1": 2}
@@ -781,7 +945,7 @@ def test_batches_is_empty_when_nothing_is_scheduled(catalog: CatalogManager, sam
 
 def test_scheduled_but_ineligible_version_warns(catalog: CatalogManager, sample_product: Product) -> None:
     _fetch(catalog, sample_product)
-    catalog.set_version_field("ems", "8.6.0", "convert_batch", "poc-1")
+    catalog.set_version_field("tibco-ems", "8.6.0", "convert_batch", "poc-1")
 
     notes = catalog.warnings()
 
@@ -791,7 +955,7 @@ def test_scheduled_but_ineligible_version_warns(catalog: CatalogManager, sample_
 def test_an_identified_but_unconvertible_engine_warns(catalog: CatalogManager, sample_product: Product) -> None:
     """A named engine makes the row *look* settled, so the missing handler has to be said."""
     _fetch(catalog, sample_product)
-    catalog.record_detected_engine("ems", "10.4.0", SourceEngine.R_HELP)
+    catalog.record_detected_engine("tibco-ems", "10.4.0", SourceEngine.R_HELP)
 
     notes = catalog.warnings()
 
@@ -802,7 +966,7 @@ def test_a_convertible_engine_produces_no_handler_warning(
     catalog: CatalogManager, sample_product: Product
 ) -> None:
     _fetch(catalog, sample_product)
-    catalog.record_detected_engine("ems", "10.4.0", SourceEngine.FLARE)
+    catalog.record_detected_engine("tibco-ems", "10.4.0", SourceEngine.FLARE)
 
     assert not any("no Stage 5 handler" in note for note in catalog.warnings())
 
@@ -821,7 +985,7 @@ def test_an_ineligible_unconvertible_engine_stays_quiet(
 ) -> None:
     """Out of scope already: the warning would name nothing the user can act on."""
     _fetch(catalog, sample_product)
-    catalog.record_detected_engine("ems", "8.6.0", SourceEngine.MKDOCS)
+    catalog.record_detected_engine("tibco-ems", "8.6.0", SourceEngine.MKDOCS)
 
     assert not any("no Stage 5 handler" in note for note in catalog.warnings())
 
@@ -865,10 +1029,10 @@ def test_zip_source_defaults_to_auto_and_round_trips(catalog: CatalogManager, sa
 
     assert read_rows(catalog.versions_path)[0]["zip_source"] == "auto"
 
-    catalog.set_version_field("ems", "10.4.0", "zip_source", "manual")
+    catalog.set_version_field("tibco-ems", "10.4.0", "zip_source", "manual")
 
     assert read_rows(catalog.versions_path)[0]["zip_source"] == "manual"
-    assert _reload(catalog).get_version("ems", "10.4.0").zip_source is ZipSource.MANUAL
+    assert _reload(catalog).get_version("tibco-ems", "10.4.0").zip_source is ZipSource.MANUAL
 
 
 def test_a_manual_package_is_exempt_from_the_missing_zip_url_check(catalog: CatalogManager) -> None:
@@ -886,7 +1050,7 @@ def test_a_manual_package_with_a_discovered_url_warns_without_blocking(
 ) -> None:
     """Discovery has since found an endpoint, so the hand-supplied ZIP may be redundant."""
     _fetch(catalog, sample_product)
-    catalog.set_version_field("ems", "10.4.0", "zip_source", "manual")
+    catalog.set_version_field("tibco-ems", "10.4.0", "zip_source", "manual")
 
     assert catalog.validate() == []
     assert any("--zip-source auto" in note for note in catalog.warnings())
@@ -895,11 +1059,11 @@ def test_a_manual_package_with_a_discovered_url_warns_without_blocking(
 def test_a_refetch_never_clears_zip_source(catalog: CatalogManager, sample_product: Product) -> None:
     """It records a human's supply decision; discovery has no opinion to contribute."""
     _fetch(catalog, sample_product)
-    catalog.set_version_field("ems", "10.4.0", "zip_source", "manual")
+    catalog.set_version_field("tibco-ems", "10.4.0", "zip_source", "manual")
 
     _fetch(_reload(catalog), sample_product)
 
-    assert _reload(catalog).get_version("ems", "10.4.0").zip_source is ZipSource.MANUAL
+    assert _reload(catalog).get_version("tibco-ems", "10.4.0").zip_source is ZipSource.MANUAL
 
 
 def test_a_refetch_still_updates_zip_url_on_a_manual_row(catalog: CatalogManager) -> None:
@@ -922,7 +1086,7 @@ def test_an_unknown_zip_source_is_rejected(catalog: CatalogManager, sample_produ
     _fetch(catalog, sample_product)
 
     with pytest.raises(ValueError):
-        catalog.set_version_field("ems", "10.4.0", "zip_source", "somewhere-else")
+        catalog.set_version_field("tibco-ems", "10.4.0", "zip_source", "somewhere-else")
 
 
 # -- Stage 4 extraction inventory (architecture.md §3.9) ---------------------

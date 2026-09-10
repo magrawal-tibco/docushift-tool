@@ -119,25 +119,31 @@ The pydantic models in `models.py` remain the in-memory representation; CSV is p
 
 | Column | Owner | Notes |
 | :--- | :--- | :--- |
-| `product_code` | tool | Primary key; join key for `versions.csv` |
+| `slug` | tool | **Primary key**; the docsite slug, join key for `versions.csv`, and what `scope.yaml` matches on |
+| `product_code` | tool | Short descriptive label, derived from the docsite's ZIP folder path. **Not unique** — see below |
 | `display_name` | tool, user-editable | e.g. `TIBCO Enterprise Message Service™` |
 | `bu` | **user** | `tibco` or `ibi` |
 | `family` | **user** | Must exist in `taxonomy.yaml` for this BU |
 | `family_source` | tool | Provenance — see §3.3 |
-| `slug` | tool | Docsite slug used for API calls |
 | `in_scope` | **user** | Policy gate above `convert_eligible`: may **any** version of this product ever be converted? Defaults `true` — see §3.10 |
 | `scope_source` | tool | Provenance — `manual` \| `scope_rule` \| `default`, see §3.10 |
 | `custom_override` | user | Explicit whole-row pin; ignore all upstream changes |
 
 ```csv
-product_code,display_name,bu,family,family_source,slug,in_scope,scope_source,custom_override
-ems,TIBCO Enterprise Message Service™,tibco,messaging,manual,tibco-ems,true,default,false
-dsp_gridserver,TIBCO DataSynapse GridServer®,tibco,integration,taxonomy_rule,tibco-datasynapse-gridserver,true,default,false
-ebx,TIBCO EBX®,tibco,data_management,taxonomy_rule,tibco-ebx,false,scope_rule,false
-webfocus,ibi™ WebFOCUS®,ibi,webfocus,manual,ibi-webfocus,true,default,true
+slug,product_code,display_name,bu,family,family_source,in_scope,scope_source,custom_override
+tibco-ems,ems,TIBCO Enterprise Message Service™,tibco,messaging,manual,true,default,false
+tibco-datasynapse-gridserver,dsp_gridserver,TIBCO DataSynapse GridServer®,tibco,integration,taxonomy_rule,true,default,false
+tibco-ebx,ebx,TIBCO EBX®,tibco,data_management,taxonomy_rule,false,scope_rule,false
+ibi-webfocus,webfocus,ibi™ WebFOCUS®,ibi,webfocus,manual,true,default,true
 ```
 
-The `ebx` row is the shape of an excluded product: fully catalogued, every version still discovered and counted, and `in_scope=false` so no stage ever acts on it (§3.10).
+The `tibco-ebx` row is the shape of an excluded product: fully catalogued, every version still discovered and counted, and `in_scope=false` so no stage ever acts on it (§3.10).
+
+**The key is the slug, and `product_code` is not unique.** A full crawl on 2026-09-09 returned 634 products with 634 distinct slugs and no nulls — the docsite mints one per product and never reuses it. `product_code`, which is derived from the ZIP folder path, is shared by **21 products across 10 codes**: rebrands that kept the old folder (`clarity-dt` → `tibco-clarity` and `tibco-clarity-enterprise-edition`), edition splits (`bwpluginedi-healthcare`), renames the folder outlived (`fsi`), and `spotfire`, which three products answer to.
+
+Keying the catalog on the code cost one row per collision — the loser's `family`, `in_scope` and every version it owned. One collision made that a correctness bug rather than a data-loss bug: `stat-sts` is carried by both `spotfire-service-for-statistica`, which is excluded, and `tibco-data-science-service-for-tibco-spotfire`, which is not. Whichever merged second set `in_scope` for both, so the docsite's A-to-Z ordering decided whether four excluded versions were converted.
+
+The code is kept as a column because it is what a human recognizes (`ems`, not `tibco-enterprise-message-service`), what `taxonomy.yaml` rules match on, and what the docsite names the ZIP folder. `--product` accepts either spelling; an ambiguous code is refused with the matching slugs listed rather than resolved to one of them.
 
 > **`engine` is deliberately absent here.** The source toolchain varies *between versions* of the same product — TIBCO migrated products onto Flare over time, so an older version may be WebWorks or DITA while the current one is Flare. It is therefore a `versions.csv` column. See §3.4.
 
@@ -145,8 +151,8 @@ The `ebx` row is the shape of an excluded product: fully catalogued, every versi
 
 | Column | Owner | Notes |
 | :--- | :--- | :--- |
-| `product_code` | tool | FK to `products.csv` |
-| `version` | tool | e.g. `10.4.0`; with `product_code` forms the row key |
+| `slug` | tool | FK to `products.csv` |
+| `version` | tool | e.g. `10.4.0`; with `slug` forms the row key |
 | `is_archived` | tool | From the archive API |
 | `convert_eligible` | **user** | Policy gate: *may* this version ever be converted? Active defaults `true`, archived defaults `false` |
 | `convert_batch` | **user** | Scheduling: which run this version belongs to, e.g. `poc-1`. Empty = not scheduled. Free text, lowercased on write — see §3.7 |
@@ -164,18 +170,20 @@ The `ebx` row is the shape of an excluded product: fully catalogued, every versi
 | `_doc_files` | **tool, read-only** | Stage 4: every other file in the extracted tree |
 
 ```csv
-product_code,version,is_archived,convert_eligible,convert_batch,release_date,engine,engine_source,zip_url,zip_source,custom_override,_bu,_family,_has_csh,_csh_names,_has_api_ref,_api_files,_doc_files
-ems,10.4.0,false,true,poc-1,2025-11-04,flare,detected,https://docs.tibco.com/pub/ems/10.4.0/doc/zip/tib_ems_10.4.0_doc.zip,auto,false,tibco,messaging,true,412,true,4310,19776
-ems,10.2.1,true,false,,2023-06-12,auto,auto,https://docs.tibco.com/pub/ems/tibco-ems-10-2-1_documentation.zip,auto,false,tibco,messaging,,,,,
-ems,8.6.0,true,false,,2020-04-30,webworks,detected,https://docs.tibco.com/pub/ems/tibco-ems-8-6-0_documentation.zip,auto,false,tibco,messaging,,,,,
-dsp_gridserver,7.1.1,false,true,poc-1,2025-09-30,flare,detected,,manual,false,tibco,integration,true,0,false,0,8104
+slug,version,is_archived,convert_eligible,convert_batch,release_date,engine,engine_source,zip_url,zip_source,custom_override,_bu,_family,_has_csh,_csh_names,_has_api_ref,_api_files,_doc_files
+tibco-ems,10.4.0,false,true,poc-1,2025-11-04,flare,detected,https://docs.tibco.com/pub/ems/10.4.0/doc/zip/tib_ems_10.4.0_doc.zip,auto,false,tibco,messaging,true,412,true,4310,19776
+tibco-ems,10.2.1,true,false,,2023-06-12,auto,auto,https://docs.tibco.com/pub/ems/tibco-ems-10-2-1_documentation.zip,auto,false,tibco,messaging,,,,,
+tibco-ems,8.6.0,true,false,,2020-04-30,webworks,detected,https://docs.tibco.com/pub/ems/tibco-ems-8-6-0_documentation.zip,auto,false,tibco,messaging,,,,,
+tibco-datasynapse-gridserver,7.1.1,false,true,poc-1,2025-09-30,flare,detected,,manual,false,tibco,integration,true,0,false,0,8104
 ```
 
-Note the three `ems` rows: the current release is Flare, an older one is WebWorks, and the un-downloaded one is still `auto` because its engine cannot be known until the package is extracted. Two rows carry `convert_batch=poc-1`; `docushift download --batch poc-1` selects exactly those two and nothing else. The two archived rows have **blank** inventory columns because nothing has ever unpacked them — blank and `0` are different answers (§3.9).
+Note that the rows join on the slug while the `zip_url` paths still carry the code — `pub/ems/...` is the docsite's own folder, which is exactly what `product_code` records and exactly why it survives as a column.
 
-The `dsp_gridserver` row shows the other acquisition path: it is convert-eligible with **no** `zip_url`, because discovery never produced a working one and the ZIP was handed to the tool directly. `zip_source=manual` is what makes that a valid state rather than a validation failure — see §3.8. It also shows `_has_csh=true` with `_csh_names=0`: an alias file exists but yielded no identifiers.
+Note the three `tibco-ems` rows: the current release is Flare, an older one is WebWorks, and the un-downloaded one is still `auto` because its engine cannot be known until the package is extracted. Two rows carry `convert_batch=poc-1`; `docushift download --batch poc-1` selects exactly those two and nothing else. The two archived rows have **blank** inventory columns because nothing has ever unpacked them — blank and `0` are different answers (§3.9).
 
-There are **no `ebx` rows in this example**, and that is not an omission: EBX is out of scope (§3.10), so its versions are catalogued but never selected. Scope is a product-level gate, so it does not appear in `versions.csv` at all.
+The `tibco-datasynapse-gridserver` row shows the other acquisition path: it is convert-eligible with **no** `zip_url`, because discovery never produced a working one and the ZIP was handed to the tool directly. `zip_source=manual` is what makes that a valid state rather than a validation failure — see §3.8. It also shows `_has_csh=true` with `_csh_names=0`: an alias file exists but yielded no identifiers.
+
+There are **no `tibco-ebx` rows in this example**, and that is not an omission: EBX is out of scope (§3.10), so its versions are catalogued but never selected. Scope is a product-level gate, so it does not appear in `versions.csv` at all.
 
 **Volatile machine state is deliberately excluded** from both files. `zip_etag`, `zip_size`, checksums, per-stage status, and free-form metadata live in `state.db`. This is what keeps the CSVs stable enough to leave open in a spreadsheet — a `catalog fetch` touches them only when discovery finds a genuinely new product or version.
 
@@ -275,7 +283,7 @@ Excel is the expected editor, which imposes hard requirements:
 | `2025-11-04` reformatted to `11/4/2025` by locale | Parse permissively, always write ISO; pass unparseable values through verbatim |
 | Excel writes `TRUE` / `FALSE` | Read case-insensitively (`true`/`1`/`yes`/`y`); always write lowercase `true`/`false` |
 | Row deleted to mean "skip this" | Deletion requires `--allow-deletes`; the supported way to exclude is `convert_eligible=false` |
-| Diff churn on every fetch | Fixed column order; stable sort — products by `(bu, family, product_code)`, versions by `(product_code, version desc)` using natural version sort so `10.4.0` sorts above `9.1.0` |
+| Diff churn on every fetch | Fixed column order; stable sort — products by `(bu, family, slug)`, versions by `(slug, version desc)` using natural version sort so `10.4.0` sorts above `9.1.0` |
 
 ### 3.7 Selecting Versions to Convert
 
@@ -313,10 +321,10 @@ Discovery will not always produce a usable `zip_url`. Across ~250 products the d
 
 | Version | Canonical location |
 | :--- | :--- |
-| Active / eligible | `ConfigManager.download_path(bu, family, product_code, version)` → `families/<family>/downloads/<product_code>-<version>.zip` |
-| Archived | `ConfigManager.archive_path(bu, family, product_code, version)` → `families/<family>/archive/<product_code>-<version>.zip` |
+| Active / eligible | `ConfigManager.download_path(bu, family, slug, version)` → `families/<family>/downloads/<slug>-<version>.zip` |
+| Archived | `ConfigManager.archive_path(bu, family, slug, version)` → `families/<family>/archive/<slug>-<version>.zip` |
 
-Because the path is fully derivable from `(bu, family, product_code, version)`, Stage 4 needs no special case: a manually placed ZIP and a downloaded one are indistinguishable on disk, which is the point. `archive_path()` is the one new method this requires, added for symmetry with `download_path()`.
+Because the path is fully derivable from `(bu, family, slug, version)`, Stage 4 needs no special case: a manually placed ZIP and a downloaded one are indistinguishable on disk, which is the point. `archive_path()` is the one new method this requires, added for symmetry with `download_path()`.
 
 **Why a `zip_source` column and not just "is the file there?"** Two reasons, both concrete:
 
@@ -387,6 +395,8 @@ out_of_scope:
 | slug contains `spotfire` | 16 public products that remain in scope, including the whole Data Science and Statistica lines | 16 in-scope products silently dropped |
 
 This is the same lesson §3.9.1 records for API-reference paths, where `api-exchange-gateway/` turned out to be a product name: **a substring of an identifier is not an identifier.** Display-name matching fails for a second reason — the names arrive mojibaked (`TIBCO EBXÂ®`) through copy-and-paste, and `slugify()` folds `™®©℠` away deliberately (`design.md` §1.4), so two distinct names can collide on one slug.
+
+Since 2026-09-10 the slug is also the catalog's primary key (§3.1), so a rule and a row now meet on the same string with nothing in between — no translation step, and no way for a rule to resolve to a *different* product than the one it names. That was not true when the catalog was keyed on `product_code`: `stat-sts` names two products, one excluded and one not, so the rule's verdict landed on whichever of them the merge wrote last.
 
 **Provenance mirrors `family` exactly** (§3.3), ranked, first match wins:
 
@@ -459,10 +469,10 @@ Downloaded ZIPs and extracted trees are organized **by family**, not by product,
 families/
 └── en-us-tibco-messaging/          # {locale}-{bu}-{family}
     ├── downloads/
-    │   ├── ems-10.4.0.zip          # {product_code}-{version}.zip
-    │   └── ems-10.3.0.zip
+    │   ├── tibco-ems-10.4.0.zip    # {slug}-{version}.zip
+    │   └── tibco-ems-10.3.0.zip
     ├── extracted/
-    │   └── ems/
+    │   └── tibco-ems/
     │       ├── 10.4.0/             # version keeps its dots
     │       │   └── doc/html/…
     │       └── 10.3.0/
@@ -471,7 +481,9 @@ families/
 
 `ConfigManager` is the single owner of these paths (`family_dir`, `downloads_dir`, `extracted_dir`, `archive_dir`, `download_path`, `extract_path`). Stage 3, Stage 4, and Stage 5 each derive the location they need rather than passing paths between themselves; `state.db` records the resolved `download_path` / `extract_path` per version so a resumed run does not have to recompute the layout it ran under.
 
-Four naming decisions worth stating:
+Five naming decisions worth stating:
+
+- **The product segment is the slug, not `product_code`.** The code is not unique (§3.1), and nine of its ten collisions are between products in the *same* family — so a code-named ZIP would drop two different products' packages at one path inside one `downloads/`, and a code-named extract directory would interleave two trees. The slug is unique by construction, which is the property a filesystem path needs.
 
 - **`{locale}-{bu}-{family}`, flat and hyphenated.** Inherited from the predecessor `html-to-md` project, where the identical string names the *publishing repository* a family is destined for (`en-us-ibi-ibi`, `en-us-spot-data-science-statistica`). Keeping the working folder and the eventual repo identically named makes the Stage 7 hand-off a copy rather than a translation.
 - **The locale prefix is reserved, not yet variable.** `html-to-md` publishes `fr-fr` and `ja-jp` trees; nothing here is multi-locale, but `ConfigManager(locale=…)` means adding one is not a rename of every folder on disk.
@@ -480,7 +492,7 @@ Four naming decisions worth stating:
 
 `downloads/` and `extracted/` are split rather than co-located per version so that reclaiming disk after a successful extract is one `rmtree` of `downloads/`, not a glob across the tree.
 
-A hand-supplied ZIP (§3.8) lands in `downloads/` under the same `{product_code}-{version}.zip` name as a downloaded one and is deliberately indistinguishable from it — the provenance lives in `versions.csv` and `state.db`, not in the filename, so no downstream stage needs a second code path.
+A hand-supplied ZIP (§3.8) lands in `downloads/` under the same `{slug}-{version}.zip` name as a downloaded one and is deliberately indistinguishable from it — the provenance lives in `versions.csv` and `state.db`, not in the filename, so no downstream stage needs a second code path.
 
 ### 4.2 Families Are User-Extensible
 
@@ -1405,12 +1417,12 @@ What Stage 7 still owes the person who publishes: a layout that is correct on ar
 
 ### 6.1 Publishing Layout
 
-The sync target is the **publishing form**, `{target_dir}/{locale}-{bu}-{family}/{locale}/{product}/{doc-class}/{version-dashed}/`, not the nested `{bu}/{family}/{product}/{version}/` form. The top-level directory name is the family workspace name (§4.1) unchanged — which is also the repository name — so the Stage 7 hand-off is a copy rather than a translation.
+The sync target is the **publishing form**, `{target_dir}/{locale}-{bu}-{family}/{locale}/{slug}/{doc-class}/{version-dashed}/`, not the nested `{bu}/{family}/{product}/{version}/` form. The top-level directory name is the family workspace name (§4.1) unchanged — which is also the repository name — so the Stage 7 hand-off is a copy rather than a translation.
 
 ```
 en-us-tibco-messaging/                  # docs repo — what a reader reads
 └── en-us/
-    └── ems/
+    └── tibco-ems/
         ├── online-help/10-4-0/…        # converted Markdown + toc.yml, nav.yml, meta.yml, index.md, csh.yml
         ├── user-guides/10-4-0/         # user-guide PDFs + index.md, toc.yml
         ├── release-information/10-4-0/ # release notes + readme + index.md, toc.yml
@@ -1418,10 +1430,12 @@ en-us-tibco-messaging/                  # docs repo — what a reader reads
 
 en-us-tibco-messaging-resources/        # bulk repo — generated trees and cold storage
 └── en-us/
-    └── ems/
+    └── tibco-ems/
         ├── api-references/java/10-4-0/ # Javadoc; siblings c/, golang/, tibdg/ — no generated index
         └── archives/                   # archived-version ZIPs + index.md, toc.yml; no version segment
 ```
+
+**The product segment is the slug**, for the §4.1 reason and one more that only applies here: this segment becomes a **public URL path**, and `product_code` collides. `tibco-clarity` and `tibco-clarity-enterprise-edition` are both `clarity-dt` and both in `data_management`, so a code-named segment would publish two products' documentation into one directory of one repository — silently, since the doc-class and version segments below it differ.
 
 ### 6.2 Which Doc-Class Goes Where
 

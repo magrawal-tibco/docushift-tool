@@ -9,6 +9,17 @@ Sample inputs for the unit and integration suites.
 | `csh/` — hand-written `Alias.xml` variants, one per hazard the corpus survey found | `transforms/csh.py` | Phase 5 |
 | `csv/` — Excel-mangled `products.csv` / `versions.csv` (BOM loss, `1.10` → `1.1`, `TRUE`/`FALSE`, locale dates) | CSV round-trip regression tests | Phase 2 |
 
+`discovery/crawl_2026_09_09.jsonl` is the one committed fixture that is *not* small: the whole
+2026-09-09 crawl, 634 products and 4,462 versions, trimmed to slug, code, name, `bu`, `family`
+and the version list. It exists because the Phase 3.6 bug — `product_code` shared by 21 products,
+one pair straddling the scope boundary (`architecture.md` §3.1) — is a property of the real
+population and does not reproduce at three hand-written products. Sampling it down would mean
+choosing which collisions to keep, which is choosing which regression to stop catching.
+
+JSONL rather than JSON so a re-crawl diffs as the products that changed, not as one 159 KB line.
+The merge it drives runs in under a second; the earlier per-row `state.db` commits that made it
+take two minutes are gone (`design.md` §12, `state.py:transaction`).
+
 The `csh/` fixtures are enumerated rather than sampled, because each one stands for a
 measured property of the real corpus (`docs/architecture.md` §5.3.1): two identifiers
 differing only in case, an identifier YAML would coerce to a non-string (`1000`, `Yes`,
