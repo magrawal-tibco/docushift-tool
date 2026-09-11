@@ -26,10 +26,11 @@ from docushift.models import ConversionStatus, Product, ProductVersion
 # holds only snapshots and volatile machine state, all of it rebuildable by one
 # `catalog fetch`, so deleting it costs a crawl rather than any user data.
 #
-# Phase 4b-2's `csh_source` and `asset_inventory` did *not* bump this. The v2 bump
-# was forced by a column *rename*, which `CREATE TABLE IF NOT EXISTS` cannot
-# repair on a file that already exists; two new tables are additive and an
-# existing v2 database grows them on open.
+# Phase 4b-2's `csh_source` and `asset_inventory` did *not* bump this, and neither
+# do Phase 5a's `runs`, `findings` and `output_map`. The v2 bump was forced by a
+# column *rename*, which `CREATE TABLE IF NOT EXISTS` cannot repair on a file that
+# already exists; a new table is additive and an existing v2 database grows it on
+# open.
 SCHEMA_VERSION = 2
 
 _SCHEMA = """
@@ -128,6 +129,47 @@ CREATE TABLE IF NOT EXISTS asset_inventory (
     bytes       INTEGER NOT NULL,
     PRIMARY KEY (slug, version, output_root, category, destination)
 );
+
+-- Stage 5's source-HTML -> output-Markdown map (design.md §9.3). Recorded by the
+-- converter and read by CSH resolution, so the two cannot disagree about renaming,
+-- deduplication or a dropped topic. Keyed on the *source* path, which is unique
+-- within a version by construction; two sources may legitimately produce one
+-- output only where an engine collapses republished topics (DITA `_unique_N`).
+CREATE TABLE IF NOT EXISTS output_map (
+    slug     TEXT NOT NULL,
+    version  TEXT NOT NULL,
+    source   TEXT NOT NULL,   -- relative to the extracted tree, POSIX
+    output   TEXT NOT NULL,   -- relative to the version's output root, POSIX
+    unit     TEXT NOT NULL,   -- the doc-set / output root / book that produced it
+    PRIMARY KEY (slug, version, source)
+);
+
+-- Stage-agnostic findings (planning.md §7.1). One row per run, and one per
+-- error/warning; notes arrive pre-aggregated with a count. `run_id` is an
+-- explicit column rather than a rowid alias so a run survives a `findings` purge.
+CREATE TABLE IF NOT EXISTS runs (
+    run_id      INTEGER PRIMARY KEY AUTOINCREMENT,
+    command     TEXT NOT NULL,
+    batch       TEXT NOT NULL DEFAULT '',
+    started_at  TEXT NOT NULL,
+    finished_at TEXT,
+    exit_code   INTEGER
+);
+
+CREATE TABLE IF NOT EXISTS findings (
+    id       INTEGER PRIMARY KEY AUTOINCREMENT,
+    run_id   INTEGER NOT NULL,
+    stage    TEXT NOT NULL,
+    severity TEXT NOT NULL,   -- error | warning | note
+    code     TEXT NOT NULL,
+    slug     TEXT NOT NULL DEFAULT '',
+    version  TEXT NOT NULL DEFAULT '',
+    path     TEXT NOT NULL DEFAULT '',
+    message  TEXT NOT NULL DEFAULT '',
+    count    INTEGER NOT NULL DEFAULT 1
+);
+
+CREATE INDEX IF NOT EXISTS findings_by_run ON findings (run_id);
 """
 
 
@@ -488,6 +530,81 @@ class StateStore:
             (slug, version),
         ).fetchall()
         return [dict(row) for row in rows]
+
+    # -- stage 5 output map ----------------------------------------------------
+
+    def record_output_map(self, slug: str, version: str, rows: Iterable[tuple]) -> None:
+        """Replaces this version's source -> output map wholesale.
+
+        Same rule as the two Stage 4 inventories: a re-convert of a package that
+        dropped a guide must not leave the old topic's mapping behind, or §9.3
+        would resolve a Help identifier onto a Markdown file nothing wrote.
+        """
+        with self._tx() as conn:
+            conn.execute("DELETE FROM output_map WHERE slug = ? AND version = ?", (slug, version))
+            conn.executemany(
+                "INSERT INTO output_map (slug, version, source, output, unit) VALUES (?, ?, ?, ?, ?)",
+                [(slug, version, *row) for row in rows],
+            )
+
+    def get_output_map(self, slug: str, version: str) -> dict[str, str]:
+        """Source path -> output path, for §9.3's resolver."""
+        rows = self.connect().execute(
+            "SELECT source, output FROM output_map WHERE slug = ? AND version = ? ORDER BY source",
+            (slug, version),
+        ).fetchall()
+        return {row["source"]: row["output"] for row in rows}
+
+    # -- findings (planning.md §7.1) -------------------------------------------
+
+    def start_run(self, command: str, batch: str = "") -> int:
+        """Opens a run row and returns its id. Never fails a stage: an unopened
+        run would silently discard every finding the stage is about to make."""
+        with self._tx() as conn:
+            cursor = conn.execute(
+                "INSERT INTO runs (command, batch, started_at) VALUES (?, ?, ?)",
+                (command, batch, _now()),
+            )
+            return int(cursor.lastrowid or 0)
+
+    def finish_run(self, run_id: int, exit_code: int) -> None:
+        with self._tx() as conn:
+            conn.execute(
+                "UPDATE runs SET finished_at = ?, exit_code = ? WHERE run_id = ?",
+                (_now(), exit_code, run_id),
+            )
+
+    def record_findings(self, run_id: int, rows: Iterable[tuple]) -> None:
+        """Appends findings to a run. Rows are `(stage, severity, code, slug,
+        version, path, message, count)`.
+
+        Appends rather than replaces, because a stage flushes per version: the
+        rows for version 200 must not delete the rows for version 1.
+        """
+        with self._tx() as conn:
+            conn.executemany(
+                "INSERT INTO findings "
+                "(run_id, stage, severity, code, slug, version, path, message, count) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                [(run_id, *row) for row in rows],
+            )
+
+    def get_findings(self, run_id: int) -> list[dict[str, Any]]:
+        rows = self.connect().execute(
+            "SELECT stage, severity, code, slug, version, path, message, count "
+            "FROM findings WHERE run_id = ? ORDER BY id",
+            (run_id,),
+        ).fetchall()
+        return [dict(row) for row in rows]
+
+    def last_run(self, command: str | None = None) -> dict[str, Any] | None:
+        sql = "SELECT * FROM runs"
+        params: tuple[Any, ...] = ()
+        if command is not None:
+            sql += " WHERE command = ?"
+            params = (command,)
+        row = self.connect().execute(sql + " ORDER BY run_id DESC LIMIT 1", params).fetchone()
+        return dict(row) if row is not None else None
 
     # -- batching ------------------------------------------------------------
 

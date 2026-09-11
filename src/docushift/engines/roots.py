@@ -15,12 +15,42 @@ Roots are found **by content, never by a configured path**. Measured against the
   stopping at the first match.
 - DITA (SDL): a directory holding a `GUID-*.html`, at no fixed depth.
 - WebWorks: the parent of a `wwhdata/` directory -- 195 of 195, zero either way.
+
+`SKIN_PREFIXES` lives here for the same reason the roots do: it is per-engine
+layout knowledge with two stage-level callers. Stage 4 categorises a file as
+`skin`, Stage 5 drops a reference to one -- and those have to be the same answer,
+or a file is chrome in the inventory and an asset in the copy set.
 """
 
 from pathlib import Path
 
 from docushift.engines.detector import GUID_HTML_NAME
 from docushift.models import SourceEngine
+
+# Skin is a *location*, not an extension: a `.gif` in `Skins/` is chrome. This
+# branch takes 48.7% of DITA and 76.2% of WebWorks reference traffic
+# (`architecture.md` §5.5.4), so it is the main path rather than an edge case.
+# Prefixes are relative to the output root and are matched as **whole segments,
+# never as substrings** -- the same rule §6.3.1 Finding 2 imposes on API paths,
+# and the predecessor breaks it in both places.
+SKIN_PREFIXES: dict[SourceEngine, tuple[tuple[str, ...], ...]] = {
+    SourceEngine.FLARE: (
+        ("skins",),
+        ("resources", "scripts"),
+        ("resources", "stylesheets"),
+        ("resources", "masterpages"),
+        ("resources", "templateextensions"),
+        ("data",),
+    ),
+    SourceEngine.DITA: (("static",), ("fonts",)),
+    SourceEngine.WEBWORKS: (("wwhdata",), ("wwhelp",), ("tpl",)),
+}
+
+
+def is_skin_path(relative: tuple[str, ...], engine: SourceEngine) -> bool:
+    """Is this path, relative to its output root, inside the engine's chrome?"""
+    folded = tuple(part.lower() for part in relative)
+    return any(folded[: len(prefix)] == prefix for prefix in SKIN_PREFIXES.get(engine, ()))
 
 
 def _walk_dirs(tree: Path):

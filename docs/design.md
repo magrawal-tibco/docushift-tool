@@ -404,7 +404,7 @@ Extraction under `--extract` goes through the same path-traversal refusal as §6
 
 ## 6. Stage 4: Extraction and inventory
 
-**Built**, except §6.4 steps 3–7. §6.1 steps 1–3 landed in Phase 4b-1 (2026-09-11) in `extractor/unpacker.py`, along with the catalog half of §6.3 (the columns, the round-trip and the write-back) and §6.1 step 2's path-traversal refusal — which landed earlier still, in Phase 4a, because `archive download --extract` needs it and there must not be two answers to "is this member safe". **Steps 4 and 5 — the one walk, §6.2, §6.3's predicate and §6.4 steps 1–2 — landed in Phase 4b-2 (2026-09-11)** in `apiref.py`, `engines/csh.py` and `extractor/inventory.py`. §6.4's steps 3–7 are the converter's half and remain Specified for Phase 5.
+**Built.** §6.1 steps 1–3 landed in Phase 4b-1 (2026-09-11) in `extractor/unpacker.py`, along with the catalog half of §6.3 (the columns, the round-trip and the write-back) and §6.1 step 2's path-traversal refusal — which landed earlier still, in Phase 4a, because `archive download --extract` needs it and there must not be two answers to "is this member safe". **Steps 4 and 5 — the one walk, §6.2, §6.3's predicate and §6.4 steps 1–2 — landed in Phase 4b-2 (2026-09-11)** in `apiref.py`, `engines/csh.py` and `extractor/inventory.py`. **§6.4's steps 3–7 — the converter's half — landed in Phase 5a (2026-09-11)** in `transforms/assets.py`, driven by `converter/driver.py`.
 
 ### 6.1 Extract — **Built** (steps 1–3 Phase 4b-1, steps 4–5 Phase 4b-2)
 
@@ -415,6 +415,8 @@ Extraction under `--extract` goes through the same path-traversal refusal as §6
 5. Write the five inventory columns back to `versions.csv` (§6.3) — but only from a walk that finished. A directory the walk could not read leaves the columns blank, on the same rule as a failed extract.
 
 **Step 3 unpacks into `<extract_path>.part/` and swaps, never over a live directory.** Unpacking in place leaves the *previous* package's files behind, so a guide deleted upstream survives on disk forever — and converts, and nothing in the report says why. The swap is build, remove, rename, and **is not atomic on Windows**: an interrupted run can leave a `.part` directory, which the next run removes before it starts. That is the honest guarantee, and it is stated rather than implied.
+
+**The rename retries before it fails** (`utils/swap.py`, Phase 5a). On Windows it raises `PermissionError: [WinError 5]` whenever any handle to the tree is still open, and an unrequested handle is the normal case there — the search indexer and the on-access scanner open files moments after they are written. Measured while building Stage 5: roughly **one run in seven** of a 21-test suite failed at this call on a tree of *nine* files. Five attempts, 0.1 s apart and growing, is a second of patience; a real permission failure is still reported, and the retry is shared with §6.4's converter swap because it is the same syscall losing the same race.
 
 **An unchanged package is a no-op.** The ZIP's sha256 goes to `version_metadata` under `extract_zip_checksum`, and a matching one with a directory already in place skips the whole step; `--force` overrides. Keyed on the *package* rather than on the tree, because a tree is thousands of files and hashing it would cost more than re-extracting it. Same mechanism as §5.2's `zip_origin_path`, and for the same reason: detail for the rows that have it, not a field every version carries, so it costs no `SCHEMA_VERSION` bump.
 
@@ -521,9 +523,11 @@ Observed spellings: `api`, `apidocs`, `api-docs`, `api_reference`, `api-referenc
 
 This is the same conclusion §7 reaches for engine detection, for the same reason: **what a tree contains is knowable; what someone named it is not.**
 
-### 6.4 Assets: the inventory, and the copy set — steps 1–2 **Built** (Phase 4b-2), steps 3–7 **Specified**
+### 6.4 Assets: the inventory, and the copy set — **Built** (steps 1–2 Phase 4b-2, steps 3–7 Phase 5a)
 
 One algorithm that spans two stages, kept in one place because splitting it is what breaks it (`architecture.md` §5.5, §5.5.9). Stage 4 runs steps 1–2 (`extractor/inventory.py`); the converter runs steps 3–7 per topic; Stage 7's part is §10.7.
+
+**Steps 3–7 are `transforms/assets.py:AssetCopier`, one per unit, and the driver owns it.** `converter/driver.py` constructs it, hands it to the engine on `ConversionContext.assets`, and calls `copy()` after the unit's topics are written. The engine therefore resolves *while* it emits — which is invariant 13 — without deciding where anything lands, which would put the destination rule in four engines instead of one.
 
 **Step 1 — inventory, in the §6.1 walk.** The same single walk that partitions API-reference files also classifies **every** file — topics included, so the rows sum to the file count and the total is checkable — by **category** and by **destination**. Record counts and bytes per `(version, output_root, category, destination)` in `state.db`. Nothing is filtered by an extension allow-list: the corpus holds 100 extensions and the nine the old list named cover neither the images that matter nor the documents that do (`architecture.md` §5.5.1).
 
@@ -540,7 +544,7 @@ Unclaimed: 5,426 files in components-api/ — no destination, no API-reference m
 
 This is the same mechanism as §6.3's API-reference flag and it exists for the same reason: 62,525 files across 243 rooted versions currently fall through, almost all of them generated reference trees whose generator has no marker yet (`architecture.md` §5.5.2). Silence here is how a whole tree goes missing without anyone noticing.
 
-**Step 3 — resolve, while emitting** (Phase 5, `transforms/assets.py`)**.** For each non-HTML reference found by the engine's content extractor, in the same pass that writes the topic:
+**Step 3 — resolve, while emitting** (`transforms/assets.py:AssetCopier.resolve`)**.** For each non-HTML reference found by the engine's content extractor, in the same pass that writes the topic:
 
 1. **Classify the raw reference.** `data:` and any absolute URL (`http`, `https`, `ftp`, `mailto`) are emitted unchanged and never copied. A fragment-only reference is not an asset.
 2. **Normalize before resolving**, in this order: strip the `#fragment` and `?query`; percent-**decode**; replace `\` with `/`. Skipping this reports 1,872 WebWorks references as missing that are not (`architecture.md` §5.5.6) — 1,224 percent-encoded, 648 backslash-separated.
@@ -670,11 +674,25 @@ Count products by family provenance and list the unclassified ones. This turns "
 
 **`nav.yml` and `meta.yml` are checked for existence and YAML well-formedness only** (§10). Their shapes are placeholders pending an AEM spec, so there is no field list to validate against; asserting one would pin a guess in the test suite and make the eventual real template read as a regression. `toc.yml`, `index.md` and `csh.yml` are validated on their content as specified above and in §9.6.
 
+### 8.5 The findings register — **Built** (Phase 5a)
+
+`reporting/findings.py`. Every deferred "report line" in this document has a **code**, and the twenty of them are one table (`planning.md` §7.5). The module landed with Stage 5 rather than with `validate`, because the first stage that produces findings in bulk is conversion and a register invented alongside its second caller is a register shaped by its first.
+
+Three rules, each of them a rule about where a decision is *not* made:
+
+- **`code` is the contract; `message` is prose.** Tests assert on codes. An obligation that existed only as an English sentence in a design document becomes an enumerable thing that a run can be checked against.
+- **Severity belongs to the code, not to the call site.** It is fixed once in `REGISTRY`. Two call sites reporting one condition at two severities would make the exit code depend on which of them fired. Recording an unregistered code raises — at the call site, which is the only place that can fix it.
+- **Errors and warnings get a row each; notes are aggregated by `(code, slug, version)` with a count.** You act on an error individually and only need the magnitude of a note. A per-file note would write hundreds of thousands of rows for `ASSET_ORPHANED` alone, which is 54.6% of Flare's images *by design of the authoring tool*.
+
+**Findings flush per version**, so a crash on version 200 of a batch does not discard the first 199, and the run row carries the batch tag and the exit code. Only `validate` gates, and only on `ERROR` (§8.4).
+
+**All twenty rows are registered although Phase 5a can reach six.** A half-populated register cannot be audited. The reachability test names the unreached codes rather than failing, so the debt is a visible list that shrinks as Stages 6 and 7 land instead of a silence.
+
 ---
 
 ## 9. Context-Sensitive Help
 
-**Specified.** This is the most intricate algorithm in the tool, and the one grounded most directly in measurement — now re-measured over the whole cache: **863 `Alias.xml` files, 387 with content, 11,054 entries, 2,396 distinct names**, superseding the 2026-09-04 subset of 272 files / 7,220 entries. **Scope: all three HTML engines — Flare, DITA and WebWorks** (§9.2). The full evidence table and the reasoning are in `architecture.md` §5.4; what follows is the procedure.
+**Built**, except §9.6's verification. The readers landed with Stage 4 (§9.2, Phase 4b-2); the schema, the resolver, the writer and the frontmatter landed in Phase 5a as `transforms/csh.py`. This is the most intricate algorithm in the tool, and the one grounded most directly in measurement — now re-measured over the whole cache: **863 `Alias.xml` files, 387 with content, 11,054 entries, 2,396 distinct names**, superseding the 2026-09-04 subset of 272 files / 7,220 entries. **Scope: all three HTML engines — Flare, DITA and WebWorks** (§9.2). The full evidence table and the reasoning are in `architecture.md` §5.4; what follows is the procedure.
 
 ### 9.1 The single identifier rule
 
@@ -727,32 +745,44 @@ It is the cleanest of the three sources. **All 3,439 targets exist and all 1,492
 
 A link may carry a fragment — `config/Getting_Started.htm#adb.palette…` in 3% of Flare entries, a numeric `#1674528` in 43% of WebWorks ones. The reader splits it: the path is the link, the fragment is the anchor. WebWorks is why that field is not optional decoration.
 
-### 9.3 Resolution
+### 9.3 Resolution — **Built** (Phase 5a)
 
-Run **after** the version's topics have been converted, so resolution tests against files that were actually produced.
+`transforms/csh.py:resolve`. Run **after** the version's topics have been converted, so resolution tests against files that were actually produced.
 
 1. **Collect** every CSH source under the version's extracted tree, grouped by doc-set.
 2. **Parse** to `(identifier, link, anchor, doc_set)`. Empty, zero-byte and unparseable files are counted and skipped.
 3. **Resolve within the doc-set first**: map the link's `.htm` path to the Markdown file the converter emitted for that HTML file.
 4. **Fall back version-wide**: if the link does not resolve in its own doc-set, try the identical relative path in every sibling doc-set. One hit wins. This is a Flare remedy specifically — WebWorks links resolve inside their own book 100% of the time, so on a WebWorks version the step never fires.
-5. **Merge by identifier.** The same target reached from several doc-sets collapses to one entry. Different targets produce a primary plus alternatives under `also`. **The primary is the doc-set with the most resolved entries; ties break alphabetically** — deterministic, and it picks the main help output over a release-notes or getting-started sidecar every time.
+5. **Merge by identifier.** The same target reached from several doc-sets collapses to one entry and is not a conflict. Different targets keep one: **the doc-set with the most resolved entries, ties breaking alphabetically** — deterministic, and it picks the main help output over a release-notes or getting-started sidecar every time. The flat schema (§9.4) has nowhere to put the losers, so they go to the findings as `CSH_AMBIGUOUS`, naming both the winner and what was dropped.
 6. **Emit** `csh.yml`, then the frontmatter.
+
+**One ordering rule, not two.** Step 4's fallback scan and step 5's winner are the same `order_doc_sets` — most resolved entries first, then name. They were written from two specifications that said it two different ways (§9.3 step 5 and the Phase 6 contract's "first ordered doc-set"), and a second implementation of an ordering is a second answer waiting to disagree.
+
+**Resolution runs against the rows this run just produced**, passed in from the converter rather than read back out of `state.db`. The table is written after the swap, so a read-back would resolve a re-convert against the *previous* run's output map.
 
 **Step 4 is the one that earns the per-version file.** Flare frequently copies one output's alias file wholesale into a sibling where none of its links exist: 1,609 of 7,220 links (22%) dangle inside their own doc-set, and 10 of the 11 affected files are a `relnotes` alias resolving at 0%. Per-doc-set resolution would report 205 broken identifiers for BW release notes; version-wide resolution resolves all 205 against the main output, where the topics actually live.
 
 **Steps 3 and 4 depend on a source-HTML → output-Markdown mapping** recorded per version in `state.db` by the converter, rather than recomputed here. Recomputing it would let CSH resolution disagree with what conversion actually did about renaming, deduplication, or dropped topics — and disagree silently.
 
-### 9.4 Writing `csh.yml`
+### 9.4 Writing `csh.yml` — **Built** (Phase 5a)
 
-One file per version at the Markdown output root, beside `toc.yml`. It carries the schema tag, the product/version/engine, the per-source tally (entries and resolved counts per doc-set), the counts, the `topics` map, and the `unresolved` list.
+`transforms/csh.py:render`, `write`. One file per version at the Markdown output root, beside `toc.yml`, and **it is a flat map and nothing else**:
 
-- **`topics` is the only index**, keyed by the identifier. A schema with one key cannot develop a disagreement between two.
-- **`file` is POSIX and relative to `csh.yml`**, so the whole output tree relocates without a rewrite. `anchor` stays a separate field rather than being appended, because the consumer decides how to fragment-encode it and because an anchor's existence is separately checkable.
-- **`also` appears only on a genuinely conflicting identifier**; its absence means "unambiguous in this version", which is the common case.
-- **`unresolved` keeps every entry whose link matched no produced topic anywhere in the version**, with the original link. Dropping them would convert a broken Help button into a silent absence that no later check can find.
-- **A version with no CSH source, or only empty ones, gets no file at all.** An empty map is indistinguishable from a failed run; absence plus a report line is the honest signal.
+```yaml
+"bw_rest_binding": "topics/rest_binding.md#adb.palette"
+"1234": "topics/install.md"
+```
 
-### 9.5 Frontmatter
+**The shape is AEM's contract, fixed on 2026-09-10** (`architecture.md` §5.4.2), and it replaced a nested schema this section carried until then — schema tag, product/version/engine header, per-doc-set tallies, a `topics` map of `{file, anchor, also}` objects and an `unresolved` list. What the consumer reads is `identifier → path`; everything else was the tool describing its own work inside a file somebody else parses.
+
+- **Both sides are double-quoted, unconditionally** (§9.1). Keys because 834 of 11,054 Flare names are digit-only and YAML 1.1 turns `1234` into an integer and `6.2` into a float; values for symmetry, since a conditional quote is a branch that can be wrong.
+- **Keys are sorted byte-exactly**, so a re-convert of an unchanged version produces an identical file and a diff means something changed.
+- **The anchor is appended to the path**, `file.md#anchor`, rather than kept as its own field. There is no field to keep it in, and 43% of WebWorks entries carry one.
+- **The path is POSIX and relative to `csh.yml`**, so the whole output tree relocates without a rewrite.
+- **Everything the nested schema carried and this one cannot goes to the findings register** (§8.5), not to a sidecar file: `unresolved` becomes `CSH_UNRESOLVED` with the original link, `also` becomes `CSH_AMBIGUOUS` naming the winner and the dropped targets, and the per-doc-set tallies stay on the run's result for the report. Invariant 9 is the reason they go somewhere rather than nowhere — an identifier is resolved *or* listed, never quietly dropped.
+- **A version with no CSH source, or only empty ones, gets no file at all**, and a stale one from a previous run is removed. An empty map is indistinguishable from a failed run; absence plus a report line is the honest signal.
+
+### 9.5 Frontmatter — **Built** (Phase 5a)
 
 A topic that owns identifiers carries them as a flat list of quoted strings:
 
@@ -766,7 +796,7 @@ Identifiers are known before conversion writes the file — parsing a 24 KB alia
 
 ### 9.6 CSH verification
 
-- Every `file` in `csh.yml` exists, and every `anchor` is present in that file.
+- Every value in `csh.yml` names a file that exists, and where it carries a `#anchor`, that anchor is present in the file.
 - Every identifier in a topic's frontmatter appears in `csh.yml`, and every identifier in `csh.yml` appears in its topic's frontmatter.
 - `unresolved` is empty, or each entry in it is accounted for in the report.
 - **Cross-version regression:** identifiers present in the previously converted version and absent from this one are reported. A dropped identifier is an upgrade that breaks the product's Help button, and it cannot be seen from inside a single version.
@@ -936,17 +966,23 @@ Most rows are **Built** or **Specified**. Two are neither, and are marked as suc
 | 6.3 | Inventory columns and write-back | Built | `catalog.py:record_extract_inventory`, `utils/csvio.py` |
 | 6.3 | API-reference predicate and triage | Built | `apiref.py:find_api_roots`, `is_api_reference`, `looks_like_api_name` |
 | 6.4 steps 1–2 | Asset inventory by category and destination | Built | `extractor/inventory.py`; `state.py:record_asset_inventory` |
-| 6.4 | Asset copy set — resolve once, copy and link together | Specified | Phase 5, `transforms/assets.py` |
+| 6.4 steps 3–7 | Asset copy set — resolve once, copy and link together | Built | `transforms/assets.py:AssetCopier` |
+| 6.1, 6.4 | Build-and-swap, with the Windows scanner retry | Built | `utils/swap.py:swap`, `remove` |
 | 7.1–7.3 | Engine detection, three passes | Built | `engines/detector.py:detect_version`, `detect_tree` |
 | 7.1 | Output-root location, by content | Built | `engines/roots.py:find_output_roots`, `owning_root` |
 | 7.3 | Write-back, folder map and the raw generator | Built | `extractor/unpacker.py:identify`, `catalog.py:record_detected_engine` |
-| `architecture.md` §5.1 | Flare converter | Specified | Phase 5, `engines/flare.py` |
-| `architecture.md` §5.2 | SDL DITA converter | Specified | Phase 5, `engines/dita.py` |
-| `architecture.md` §5.3 | WebWorks converter | Specified | Phase 5, `engines/webworks.py` |
-| — (owed) | DocBook converter — `str` and `sfire-sfds`, 10 versions | **Unsurveyed** | Phase 5, `engines/docbook.py`; needs an `architecture.md` §5.x first |
+| `architecture.md` §5 | Stage 5 driver — selection, dispatch, the write, the swap | Built | `converter/driver.py:DocumentConverter` |
+| `architecture.md` §5 | The engine contract and the document model | Built | `engines/base.py:BaseEngine`, `ConversionContext`, `Unit`, `Document` |
+| `architecture.md` §5.1.8, §5.2.6, §5.3.8 | Reference classification, normalization and emit | Built | `transforms/links.py` |
+| `architecture.md` §5.1.7, §5.2.5, §5.3.7 | Callouts, code fences, GFM-safe tables | Built | `transforms/{callouts,code,tables}.py` |
+| `architecture.md` §5.1 | Flare converter | Specified | Phase 5b, `engines/flare.py` |
+| `architecture.md` §5.2 | SDL DITA converter | Specified | Phase 5c, `engines/dita.py` |
+| `architecture.md` §5.3 | WebWorks converter | Specified | Phase 5d, `engines/webworks.py` |
+| — (owed) | DocBook converter — `str` and `sfire-sfds`, 10 versions | **Unsurveyed** | Phase 5e, `engines/docbook.py`; needs an `architecture.md` §5.x first |
 | 8.1–8.3 | Catalog validation, warnings, triage | Built | `catalog.py` |
-| 9.3 | CSH resolution | Specified | Phase 5 |
-| 9.4–9.5 | `csh.yml` and frontmatter | Specified | Phase 5 |
+| 8.5 | Findings register — codes, severity, per-version flush | Built | `reporting/findings.py`; `state.py:record_findings` |
+| 9.3 | CSH resolution | Built | `transforms/csh.py:resolve`, `order_doc_sets` |
+| 9.4–9.5 | `csh.yml` and frontmatter | Built | `transforms/csh.py:render`, `write`, `frontmatter_value` |
 | 9.6 | CSH verification | Specified | Phase 7 |
 | 9.2 | CSH readers (**Flare, DITA, WebWorks**) | Built | `engines/csh.py`; the schema, resolver and writer stay Phase 5 |
 | 10 | AEM synthesis and sync | Specified | Phases 6–7 |

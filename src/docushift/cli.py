@@ -1006,13 +1006,130 @@ def extract(ctx, bu, family, product, version, batch, select_all, force, dry_run
     _report_extract(extractor.extract_many(pairs, force=force, on_result=on_result))
 
 
+def _report_convert(stats, findings) -> None:
+    """The five-outcome summary, the two asset blocks, and the findings tally."""
+    from docushift.converter import ConvertOutcome
+
+    table = Table(title="Convert")
+    table.add_column("Outcome")
+    table.add_column("Versions", justify="right")
+    for outcome, label in (
+        (ConvertOutcome.CONVERTED, "Converted"),
+        (ConvertOutcome.CURRENT, "Already current"),
+        (ConvertOutcome.NO_TREE, "No extracted tree"),
+        (ConvertOutcome.ENGINE_UNKNOWN, "Engine unknown"),
+        (ConvertOutcome.FAILED, "Failed"),
+    ):
+        table.add_row(label, str(stats.count(outcome)))
+    console.print(table)
+    if stats.documents:
+        console.print(f"[dim]{stats.documents} topic(s), {stats.assets} asset(s) written.[/dim]")
+
+    for result in stats.converted:
+        counts = result.counts
+        console.print(
+            f"[dim]{result.slug}@{result.version}: {counts.resolved} resolved, "
+            f"{counts.skin} skin, {counts.escaped} escaped, {counts.dangling} dangling, "
+            f"{counts.case_mismatch} case-mismatch, {counts.orphan_files} orphan "
+            f"({_gb(counts.orphan_bytes)})[/dim]"
+        )
+        if result.csh is not None and (result.csh.entries or result.csh.unresolved):
+            rescued = f", {result.csh.rescued} rescued version-wide" if result.csh.rescued else ""
+            console.print(
+                f"[dim]{result.slug}@{result.version}: CSH {len(result.csh.entries)} resolved, "
+                f"{len(result.csh.unresolved)} unresolved, "
+                f"{len(result.csh.ambiguous)} ambiguous{rescued}[/dim]"
+            )
+
+    # Named individually rather than counted, the same rule `download` and
+    # `extract` follow: "23 versions will not convert" is not something a human
+    # can act on, and these are exactly the rows somebody has to look at.
+    for result in stats.results:
+        if result.outcome in (ConvertOutcome.ENGINE_UNKNOWN, ConvertOutcome.NO_TREE):
+            console.print(f"[yellow]![/yellow] {result.slug}@{result.version}: {result.message}")
+    for result in stats.failures:
+        console.print(f"[red]x[/red] {result.slug}@{result.version}: {result.message}")
+
+    summary = findings.summary()
+    if summary:
+        console.print(f"[dim]Findings: {summary}.[/dim]")
+
+
 @main.command()
 @_scope_options
+@click.option("--force", is_flag=True, help="Re-convert even if the extracted tree has not changed.")
+@click.option("--dry-run", is_flag=True, help="List what would be converted without writing.")
 @click.option("--input", "input_dir", type=DIR_PATH, default=None, help="Convert a standalone extracted folder.")
 @click.option("--output", "output_dir", type=DIR_PATH, default=None, help="Destination for the converted GFM.")
-def convert(**kwargs) -> None:
-    """Convert extracted HTML to AEM-ready GFM in output/."""
-    _pending("convert", "Phase 5")
+@click.pass_context
+def convert(ctx, bu, family, product, version, batch, select_all, force, dry_run, input_dir, output_dir) -> None:
+    """Convert extracted HTML to AEM-ready GFM in output/.
+
+    Runs over the same selection as `download` and `extract`, narrowed to what has
+    actually been extracted: a version with no tree is a report line, not an abort.
+    A version whose engine has no registered converter is skipped and named --
+    never guessed at.
+    """
+    from docushift.converter import ConvertOutcome, DocumentConverter
+    from docushift.reporting.findings import FindingsRun
+
+    cfg: ConfigManager = ctx.obj["config"]
+    manager = _catalog_manager(ctx)
+
+    if (input_dir is None) != (output_dir is None):
+        raise click.ClickException("--input and --output are used together, or not at all.")
+    if input_dir is not None and not (product and version):
+        raise click.ClickException("--input needs --product and --version to name the catalog row.")
+
+    pairs = _download_selection(manager, bu, family, product, version, batch, select_all)
+    if not pairs:
+        console.print("[yellow]No convert-eligible versions match.[/yellow]")
+        return
+
+    if dry_run:
+        table = Table(title=f"Would convert ({len(pairs)})")
+        for column in ("Product", "Version", "Engine", "Tree", "Target"):
+            table.add_column(column)
+        for found, ver in pairs:
+            tree = input_dir or cfg.extract_path(found.bu, found.family, found.slug, ver.version)
+            target = output_dir or cfg.output_path(found.bu, found.family, found.slug, ver.version)
+            table.add_row(
+                found.slug,
+                ver.version,
+                str(ver.engine),
+                "present" if tree.is_dir() else "[yellow]missing[/yellow]",
+                str(target),
+            )
+        console.print(table)
+        return
+
+    findings = FindingsRun("convert", batch=batch or "", store=manager.state).start()
+    converter = DocumentConverter(cfg, manager, findings=findings)
+    console.print(f"Converting {len(pairs)} version(s)...")
+
+    def on_result(result) -> None:
+        if result.outcome is ConvertOutcome.CONVERTED:
+            console.print(
+                f"  [green]v[/green] {result.slug}@{result.version} "
+                f"{result.documents} topic(s), {result.assets} asset(s), {result.units} unit(s)"
+            )
+        elif result.outcome is ConvertOutcome.FAILED:
+            console.print(f"  [red]x[/red] {result.slug}@{result.version}")
+
+    if input_dir is not None:
+        found, ver = pairs[0]
+        stats_results = [
+            converter.convert_one(found, ver, force=force, tree=input_dir, output=output_dir)
+        ]
+        from docushift.converter import ConvertStats
+
+        stats = ConvertStats(results=stats_results)
+        on_result(stats_results[0])
+    else:
+        stats = converter.convert_many(pairs, force=force, on_result=on_result)
+
+    findings.finish()
+    _report_convert(stats, findings)
 
 
 @main.command()

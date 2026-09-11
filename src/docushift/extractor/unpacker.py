@@ -31,6 +31,7 @@ from docushift.engines.roots import find_output_roots
 from docushift.extractor.inventory import Inventory, inventory_tree
 from docushift.extractor.safe_unzip import UnsafeArchiveError, safe_extract
 from docushift.models import ConversionStatus, EngineSource, Product, ProductVersion, SourceEngine
+from docushift.utils.swap import remove, swap
 
 
 class ExtractOutcome(StrEnum):
@@ -189,8 +190,7 @@ class PackageExtractor:
         # leave a `.part` directory; the next run removes it before it starts.
         staging = target.with_name(target.name + ".part")
         try:
-            if staging.exists():
-                shutil.rmtree(staging)
+            remove(staging)
             files = safe_extract(source, staging)
         except UnsafeArchiveError as exc:
             shutil.rmtree(staging, ignore_errors=True)
@@ -203,10 +203,7 @@ class PackageExtractor:
             return ExtractResult(slug, number, ExtractOutcome.FAILED, message=message)
 
         try:
-            if target.exists():
-                shutil.rmtree(target)
-            target.parent.mkdir(parents=True, exist_ok=True)
-            staging.replace(target)
+            swap(staging, target)
         except OSError as exc:
             message = f"{type(exc).__name__}: {exc}"
             self._record(slug, number, status=ConversionStatus.ERROR, error=message)

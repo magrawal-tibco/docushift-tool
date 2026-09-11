@@ -1344,57 +1344,35 @@ No link used a backslash separator, `../`, or an absolute path; every link resol
 
 #### 5.4.2 `csh.yml`
 
-One file per product version, at the version's Markdown output root. `topics` is the whole mapping — there is no second index, because there is no second key.
+One file per product version, at the version's Markdown output root. It is **a flat map of identifier to path, and nothing else** — the shape AEM asked for on 2026-09-10, and the schema this section carried until then is recorded below it because the difference is instructive.
 
 ```yaml
-schema: docushift.csh/1
-product: bw
-version: 6.12.0
-engine: flare
-generated: 2026-09-07
-
-sources:
-  - doc_set: bw-ent-html
-    file: bw-ent-html/Data/Alias.xml
-    entries: 207
-    resolved: 207
-  - doc_set: bwce-html
-    file: bwce-html/Data/Alias.xml
-    entries: 151
-    resolved: 151
-  - doc_set: relnotes
-    file: relnotes/Data/Alias.xml
-    entries: 203
-    resolved: 0
-    note: no link resolves in this doc-set; every name is already defined by bw-ent-html
-
-counts: { topics: 358, ambiguous: 5, unresolved: 0 }
-
-topics:
-  "bw_java_bw_java_xmltojava":
-    doc_set: bw-ent-html
-    file: bw-ent-html/binding-palette/xml-to-java.md
-  "bw_rest_binding":
-    doc_set: bw-ent-html
-    file: bw-ent-html/REST-reference/rest-reference.md
-    also:
-      - { doc_set: bwce-html, file: bwce-html/REST-reference/rest-reference-bindi.md }
-  "adb.palette.gettingstartedurl":
-    doc_set: html
-    file: config/Getting_Started.md
-    anchor: adb.palette.gettingstartedurl
-
-unresolved: []
+"adb.palette.gettingstartedurl": "config/Getting_Started.md#adb.palette.gettingstartedurl"
+"bw_java_bw_java_xmltojava": "bw-ent-html/binding-palette/xml-to-java.md"
+"bw_rest_binding": "bw-ent-html/REST-reference/rest-reference.md"
+"1234": "bw-ent-html/install/install.md"
 ```
 
 Field rules, each answering a hazard from §5.4.1:
 
-- **`topics` is keyed by the identifier and there is no other index.** Names are unique within a source (0 violations in 196 files); integers are not (29 of 196). A schema with one key cannot develop a disagreement between two.
-- **Every identifier is emitted double-quoted.** An identifier of `1000`, `Yes`, `No`, `On`, `Off`, `null`, or `6.2` loads as an int/bool/float/None under a YAML 1.1 loader such as PyYAML. Dropping WebWorks does not relax this: **834 of 11,054 Flare names (7.5%) are digit-only**, so unquoted keys would silently become integers in a map whose keys are documented as strings. The corpus shows the hazard is *specifically* numeric coercion — 0 Flare names are `Yes`/`No`/`null`-shaped, 0 are sexagesimal, and none carry a leading zero — but the rule is applied uniformly rather than narrowed to digits, because it costs nothing and the next corpus need not look like this one.
-- **`file` is POSIX, relative to `csh.yml`**, so the whole output tree relocates without rewriting. `anchor` stays a separate field rather than being appended to `file`: the consumer decides how to fragment-encode it for AEM, and an anchor's existence is separately checkable.
-- **`also` is present only on a genuinely conflicting identifier.** Its absence means "this identifier is unambiguous in this version" — the common case (5 of 233 in the worst observed version).
-- **`unresolved` keeps entries whose link matched no produced topic anywhere in the version**, with the original `link`. Dropping them would turn a broken help button into a silent absence; keeping them makes it a countable, reportable defect.
-- **A version with no CSH source, or only empty ones, gets no `csh.yml` at all.** An empty map file is indistinguishable from a failed run; the absence plus a report line ("CSH source present but empty") is honest.
+- **Keyed by the identifier, and there is no other index.** Names are unique within a source (0 violations in 196 files); integers are not (29 of 196). A schema with one key cannot develop a disagreement between two.
+- **Every identifier is emitted double-quoted, and so is every path.** An identifier of `1000`, `Yes`, `No`, `On`, `Off`, `null`, or `6.2` loads as an int/bool/float/None under a YAML 1.1 loader such as PyYAML. Dropping WebWorks does not relax this: **834 of 11,054 Flare names (7.5%) are digit-only**, so unquoted keys would silently become integers in a map whose keys are documented as strings. The corpus shows the hazard is *specifically* numeric coercion — 0 Flare names are `Yes`/`No`/`null`-shaped, 0 are sexagesimal, and none carry a leading zero — but the rule is applied uniformly rather than narrowed to digits, because it costs nothing and the next corpus need not look like this one.
+- **Keys are sorted byte-exactly**, so re-converting an unchanged version rewrites an identical file and any diff is a real change.
+- **The path is POSIX and relative to `csh.yml`**, so the whole output tree relocates without rewriting, and **the anchor is appended to it** as `file.md#anchor`. There is no separate field to hold it in; 3% of Flare links and 43% of WebWorks ones carry one.
+- **The doc-set is the path's first segment.** It was a field; it is now derivable, which is what makes dropping the field lossless.
+- **A version with no CSH source, or only empty ones, gets no `csh.yml` at all**, and a stale file from an earlier run is removed rather than left. An empty map file is indistinguishable from a failed run; the absence plus a report line ("CSH source present but empty") is honest.
+
+**What the flat schema cannot carry goes to the findings register, not to a sidecar** (`design.md` §8.5). The previous version of this section specified a `schema` tag, a product/version/engine header, a `sources` list of per-doc-set tallies, a `counts` line, a `topics` map of `{doc_set, file, anchor, also}` objects, and an `unresolved` list. Of that:
+
+| Was | Now |
+| :--- | :--- |
+| `sources` tallies, `counts` | The run's report line and `state.db`; nothing a consumer parses |
+| `also` (the losing doc-sets of a conflict) | `CSH_AMBIGUOUS`, naming the winner and each dropped target |
+| `unresolved` | `CSH_UNRESOLVED`, one per identifier, with the original link |
+| `doc_set`, `anchor` | The path's first segment, and its `#fragment` |
+| `schema`, `product`, `version`, `engine`, `generated` | The tree already says all five by where the file sits |
+
+The lesson worth keeping is that most of the removed schema was **the tool describing its own work inside a file somebody else parses**. Every one of those facts still exists and is still reported; none of them belonged in the artifact. What survived the cut is exactly the question the consumer asks — *which page does this identifier open?* — and invariant 9 is what forced the rest to land somewhere rather than nowhere.
 
 > **`ResolvedId` is read and thrown away.** It is parsed only so that a malformed alias entry is still recognised as an entry, and it appears nowhere in the output. If a product is later found to call its help by number, the mapping is regenerable — `Alias.xml` stays in the extracted tree and `csh.yml` is a build artifact, so reintroducing a numeric index costs a re-run, not a migration.
 
@@ -1406,7 +1384,7 @@ Run per version, after that version's topics have been converted so resolution t
 2. **Parse** to `(identifier, link, anchor, doc_set)`. Empty, zero-byte, and unparseable files are counted and skipped.
 3. **Resolve within the doc-set first** — the alias link's `.htm` path against the Markdown the converter emitted for that HTML file.
 4. **Fall back version-wide.** If the link does not resolve in its own doc-set, try the identical relative path in every sibling. One hit wins. This is what rescues the 22% dangling population: the BW `relnotes` alias copy resolves entirely against `bw-ent-html`. The fallback is a Flare remedy specifically — every WebWorks link resolves inside its own book, so on a WebWorks version this step simply never fires.
-5. **Merge by identifier.** Same target from several doc-sets collapses to one entry. Different targets produce a primary plus `also`. **The primary is the doc-set with the most resolved entries, ties broken alphabetically** — deterministic, and it picks the main help output over a release-notes or getting-started sidecar every time. WebWorks needs this too, if less: a version averages 3.5 books, and 26 identifiers across the corpus are claimed by two books with different targets.
+5. **Merge by identifier.** Same target from several doc-sets collapses to one entry and is not a conflict. Different targets keep one — **the doc-set with the most resolved entries, ties broken alphabetically** — deterministic, and it picks the main help output over a release-notes or getting-started sidecar every time. The losers go to `CSH_AMBIGUOUS`, since the flat map has nowhere to put them (§5.4.2). WebWorks needs this too, if less: a version averages 3.5 books, and 26 identifiers across the corpus are claimed by two books with different targets.
 6. **Emit** `csh.yml`, then the frontmatter (§5.4.5).
 
 Steps 3-4 need a source-HTML → output-Markdown mapping from the converter. That mapping is recorded per version in `state.db` during Stage 5 rather than recomputed here, so CSH resolution cannot disagree with what conversion actually did about renaming, deduplication, or dropped topics.
@@ -1467,9 +1445,9 @@ The identifiers are known before conversion writes the file (parsing a 24 KB `Al
 
 `docushift validate` treats CSH as link integrity, because that is what it is:
 
-- Every `file` in `csh.yml` exists, and every `anchor` is present in that file.
+- Every value in `csh.yml` names a file that exists, and where it carries a `#anchor`, that anchor is present in the file.
 - Every identifier in a topic's frontmatter appears in `csh.yml`, and vice versa.
-- `unresolved` is empty, or every entry in it is accounted for in the report.
+- No `CSH_UNRESOLVED` finding for the version, or every one of them is accounted for in the report.
 - **Cross-version regression**: identifiers present in the previous converted version and absent from this one are reported. A dropped identifier is an upgrade that breaks the product's Help button, and it is invisible from within a single version.
 
 ### 5.5 Asset Management

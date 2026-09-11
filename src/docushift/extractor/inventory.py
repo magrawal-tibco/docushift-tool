@@ -29,7 +29,7 @@ from pathlib import Path
 
 from docushift.apiref import has_api_marker, looks_like_api_name
 from docushift.engines.csh import CshFormat, CshSource, csh_format_of, read_csh_source
-from docushift.engines.roots import owning_root
+from docushift.engines.roots import is_skin_path, owning_root
 from docushift.models import SourceEngine
 
 
@@ -82,23 +82,10 @@ _ARCHIVE = frozenset({".zip", ".jar", ".tar", ".gz", ".tgz", ".bz2", ".7z", ".ra
 # they are visible without ever being mistaken for something to copy.
 _SOURCE_FORMAT = frozenset({".vsd", ".vsdx", ".drawio", ".psd", ".ai", ".fm", ".indd", ".eps"})
 
-# Skin is a *location*, not an extension: a `.gif` in `Skins/` is chrome, and
-# that branch takes 48.7% of DITA and 76.2% of WebWorks reference traffic
-# (`architecture.md` §5.5.4). Prefixes are relative to the output root and are
-# matched as **whole segments, never as substrings** -- the same rule §6.3.1
-# Finding 2 imposes on API paths, and the predecessor breaks in both places.
-_SKIN_PREFIXES: dict[SourceEngine, tuple[tuple[str, ...], ...]] = {
-    SourceEngine.FLARE: (
-        ("skins",),
-        ("resources", "scripts"),
-        ("resources", "stylesheets"),
-        ("resources", "masterpages"),
-        ("resources", "templateextensions"),
-        ("data",),
-    ),
-    SourceEngine.DITA: (("static",), ("fonts",)),
-    SourceEngine.WEBWORKS: (("wwhdata",), ("wwhelp",), ("tpl",)),
-}
+# The skin prefix table moved to `engines/roots.py` in Phase 5a, beside the other
+# per-engine layout knowledge: Stage 5's asset copier drops references to chrome
+# and has to reach the same answer this walk does, and two copies of the table
+# would let a file be `skin` in the inventory and an asset in the copy set.
 
 # §10.4's document router owns whole deliverables rather than assets: the PDFs
 # and readmes a package ships beside its help output. 9,133 of the corpus's
@@ -189,12 +176,6 @@ def _category(name: str) -> AssetCategory:
     return AssetCategory.OTHER
 
 
-def _is_skin(relative: tuple[str, ...], engine: SourceEngine) -> bool:
-    """Is this path, relative to its output root, inside the engine's chrome?"""
-    folded = tuple(part.lower() for part in relative)
-    return any(folded[: len(prefix)] == prefix for prefix in _SKIN_PREFIXES.get(engine, ()))
-
-
 def inventory_tree(
     tree: Path, engine: SourceEngine, output_roots: list[Path]
 ) -> Inventory:
@@ -274,7 +255,7 @@ def _count_file(
     root = owning_root(path, output_roots)
     if root is not None:
         inside = path.relative_to(root).parts
-        category = AssetCategory.SKIN if _is_skin(inside, engine) else _category(path.name)
+        category = AssetCategory.SKIN if is_skin_path(inside, engine) else _category(path.name)
         _bucket(result, _rel(tree, root), category, Destination.OUTPUT_ROOT, size)
         return
 

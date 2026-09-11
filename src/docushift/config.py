@@ -278,6 +278,21 @@ class ConfigManager:
         """
         return self.extracted_dir(bu, family) / slug / version
 
+    def output_path(self, bu: str, family: str, slug: str, version: str) -> Path:
+        """The converted Markdown for one version: `output/<family>/<slug>/<version>/`.
+
+        Under `output/` rather than beside `extracted/` because these two trees have
+        different lifetimes: the extracted tree is disposable working state, and the
+        Markdown is what Stage 6 shapes and Stage 7 lays out. `--clean` reaching one
+        must not reach the other.
+
+        The version keeps its dots, for the reason `extract_path` gives: this is a
+        working path keyed by the catalog, and the dots-to-dashes conversion belongs
+        at Stage 6 where the AEM path is built. A method rather than a join at the
+        call site, because Stages 5, 6 and 7 all need the same answer.
+        """
+        return self.output_dir / self.family_workspace_name(bu, family) / slug / version
+
     def load_taxonomy(self) -> dict[str, Any]:
         """Loads and caches taxonomy rules from taxonomy.yaml."""
         if self._taxonomy_cache is not None:

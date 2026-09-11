@@ -19,9 +19,9 @@ from docushift.discovery import CrawlResult, DocsiteCrawler
 from docushift.state import StateStore
 from tests.conftest import make_product, make_version
 
-# `download` and `archive download` left this list in Phase 4a, `extract` in 4b-1.
+# `download` and `archive download` left this list in Phase 4a, `extract` in 4b-1,
+# `convert` in 5a.
 PENDING_COMMANDS = [
-    ["convert", "--product", "ems", "--version", "10.4.0"],
     ["sync", "--target-dir", "workspace"],
     ["validate", "--target-dir", "workspace"],
     ["status", "--bu", "tibco"],

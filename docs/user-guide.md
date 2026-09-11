@@ -35,7 +35,7 @@ docushift doctor
 
 Prints the resolved project paths (`config/`, `cache/`, `families/`, `output/`, `state.db`), the active locale, and which family workspaces exist so far. The working directories are created on first run; per-family folders are not, so an untouched project reads `family workspaces: none yet`.
 
-> **Implementation status.** The command tree below is the full intended surface and `--help` reflects it. Implemented today: `doctor`, the **whole `catalog` group, `fetch` included** — discovery talks to the live docsite — **`download` and `archive download`**, including `--from-file`, and **`extract`** in full — it unpacks a package, detects its engine, inventories its assets and CSH sources, and writes the five inventory columns back to `versions.csv`. `convert` and everything downstream are not built at all. Every unbuilt command exits non-zero naming the phase that will build it (see `docs/planning.md`); commands are never silently no-op.
+> **Implementation status.** The command tree below is the full intended surface and `--help` reflects it. Implemented today: `doctor`, the **whole `catalog` group, `fetch` included** — discovery talks to the live docsite — **`download` and `archive download`**, including `--from-file`, and **`extract`** in full — it unpacks a package, detects its engine, inventories its assets and CSH sources, and writes the five inventory columns back to `versions.csv`. **`convert` runs, but converts nothing yet**: the whole engine-neutral spine is built — asset resolution, CSH, frontmatter, the build-and-swap, the report and the findings register — and no engine converter is written, so every version reports `Engine unknown` (see §4). Everything downstream of `convert` is not built at all. Every unbuilt command exits non-zero naming the phase that will build it (see `docs/planning.md`); commands are never silently no-op.
 
 ---
 
@@ -567,6 +567,25 @@ docushift convert \
   --output ./output/tibco/integration/businessevents-enterprise/6.4.0
 ```
 
+| Flag | Effect |
+| :--- | :--- |
+| `--dry-run` | List what would be converted, and where, without writing. |
+| `--force` | Re-convert even when the extracted tree has not changed since last time. |
+| `--input` / `--output` | Convert one folder that never went through `extract`. Both are required together, with `--product` and `--version`. |
+
+> **Today every version reports `Engine unknown`, and that is the honest answer.** The
+> conversion spine is built — selection, the asset copy set, CSH resolution, the
+> frontmatter, the build-and-swap, the report and the findings — but **no engine
+> converter is written yet**. The Flare, DITA, WebWorks and DocBook readers arrive one
+> sub-phase each (`docs/planning.md` Phase 5b–5e), and until the one a version needs is
+> registered, that version is skipped and named rather than guessed at. The command
+> exits 0: one unconvertible version must not stop a 200-version run.
+
+Each run ends with five counts — converted, already current, no extracted tree, engine
+unknown, failed — plus the documents and assets written, the asset resolution line, and
+the findings summary. Re-running is cheap on the same terms as `extract`: a version whose
+extracted tree has not changed since it was converted is skipped, and `--force` overrides.
+
 Conversion also writes the version's context-sensitive help map (`csh.yml`) and stamps the
 matching identifiers into topic frontmatter — see §7.
 
@@ -714,20 +733,24 @@ output/.../businessworks/6.12.0/
 └── relnotes/
 ```
 
-```yaml
-schema: docushift.csh/1
-product: bw
-version: 6.12.0
-engine: flare
-counts: { topics: 358, ambiguous: 5, unresolved: 0 }
+It is a flat map, identifier to path, and nothing else — the shape AEM asked for:
 
-topics:
-  "bw_java_bw_java_xmltojava":
-    doc_set: bw-ent-html
-    file: bw-ent-html/binding-palette/xml-to-java.md
+```yaml
+"adb.palette.gettingstartedurl": "config/Getting_Started.md#adb.palette.gettingstartedurl"
+"bw_java_bw_java_xmltojava": "bw-ent-html/binding-palette/xml-to-java.md"
+"1234": "bw-ent-html/install/install.md"
 ```
 
-and the topics themselves carry their identifiers in frontmatter:
+Three things to know about reading it. The path is relative to `csh.yml` and carries the
+anchor after a `#` where the source had one. The doc-set is the path's first segment.
+And **both sides are always quoted**, because 7.5% of Flare identifiers are all digits and
+an unquoted `1234` loads as an integer out of a map whose keys are strings.
+
+What the file does *not* carry — identifiers that matched no produced topic, and
+identifiers two doc-sets claim for different pages — is not lost: both are reported by the
+run, as `CSH_UNRESOLVED` and `CSH_AMBIGUOUS`. A broken Help button is always countable.
+
+The topics themselves carry their identifiers in frontmatter:
 
 ```yaml
 ---
