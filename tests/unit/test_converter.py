@@ -146,14 +146,16 @@ def convert(config, catalog, product, version, **kwargs):
 
 def test_importing_the_package_registers_every_written_engine() -> None:
     """A handler that is written but not imported is a handler that does not exist."""
-    assert registered_engines() == [SourceEngine.DITA, SourceEngine.FLARE]
-    assert engine_for(SourceEngine.WEBWORKS) is None
+    assert registered_engines() == [
+        SourceEngine.DITA, SourceEngine.FLARE, SourceEngine.WEBWORKS,
+    ]
+    assert engine_for(SourceEngine.DOCBOOK) is None
 
 
 def test_a_version_reports_engine_unknown_when_nothing_is_registered(
     config, catalog, product, version, extracted
 ) -> None:
-    version.engine = SourceEngine.WEBWORKS
+    version.engine = SourceEngine.DOCBOOK
     result, findings = convert(config, catalog, product, version)
 
     assert result.outcome is ConvertOutcome.ENGINE_UNKNOWN

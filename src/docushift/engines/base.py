@@ -137,9 +137,16 @@ def is_legal_label(label: str, path: str = "") -> bool:
     question. The `path` half is optional for the same reason DITA needs it to be:
     a Flare page is `legal_notices.htm` and a DITA topic is a GUID, so there the
     label is the only evidence.
+
+    `copyrigh` earns its place from WebWorks, where the page is `copyrigh.htm` --
+    truncated, so `copyright` would not match it -- and titled `Important
+    Information` in 99 of 101 books. The title is the same boilerplate Flare files
+    under `legal_notices.htm`: the licence, the trademarks and the third-party
+    notices. Matching the title instead would take every topic a writer called
+    `Important Information` with it, so the filename is the evidence used.
     """
     text = f"{label} {PurePosixPath(path).stem}".lower().replace("-", " ").replace("_", " ")
-    return "legal" in text or "third party" in text
+    return "legal" in text or "third party" in text or "copyrigh" in text
 
 
 def is_support_label(label: str, path: str = "") -> bool:

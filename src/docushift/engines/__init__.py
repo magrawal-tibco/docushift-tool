@@ -31,6 +31,7 @@ from docushift.engines.detector import Detection, detect_tree, detect_version
 from docushift.engines.dita import DitaEngine
 from docushift.engines.flare import FlareEngine
 from docushift.engines.roots import find_output_roots, owning_root
+from docushift.engines.webworks import WebWorksEngine
 
 __all__ = [
     "BaseEngine",
@@ -45,6 +46,7 @@ __all__ = [
     "FlareEngine",
     "NavNode",
     "Unit",
+    "WebWorksEngine",
     "csh_format_of",
     "detect_tree",
     "detect_version",
