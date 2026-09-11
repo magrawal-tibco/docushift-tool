@@ -874,11 +874,83 @@ def _report_extract(stats) -> None:
             f"[yellow]![/yellow] {result.slug}@{result.version}: "
             f"{result.engine} is identified but has no converter"
         )
+    _report_inventory(stats)
+
     for result in stats.results:
         if result.outcome is ExtractOutcome.NO_PACKAGE:
             console.print(f"[yellow]![/yellow] {result.slug}@{result.version}: {result.message}")
     for result in stats.failures:
         console.print(f"[red]x[/red] {result.slug}@{result.version}: {result.message}")
+
+
+def _gb(size: int) -> str:
+    return f"{size / 1_000_000_000:.3f} GB" if size >= 1_000_000_000 else f"{size / 1_000_000:.1f} MB"
+
+
+def _report_inventory(stats) -> None:
+    """The four §6.2/§6.3/§6.4 report blocks, in order.
+
+    Every one of them names its version rather than only totalling, for the
+    reason §7.3 gave for the two engine lists: a number nobody can trace back to
+    a package is not something anybody can act on.
+    """
+    from docushift.engines.csh import CshStatus
+    from docushift.extractor import AssetCategory, Destination
+
+    measured = stats.measured
+    if not measured:
+        return
+
+    sources, names = stats.csh_totals()
+    console.print(f"[dim]CSH: {sources} source(s), {names} identifier(s).[/dim]")
+    for result in measured:
+        for source in result.inventory.csh_sources:
+            if source.status in (CshStatus.UNPARSEABLE, CshStatus.UNREADABLE):
+                # A located source that will not read is not the same fact as no
+                # source at all, and only one of them is acceptable to find out
+                # about after publishing (architecture.md §5.4.4).
+                console.print(
+                    f"[yellow]![/yellow] {result.slug}@{result.version}: "
+                    f"{source.path.as_posix()} is {source.status}"
+                )
+
+    totals: dict[tuple[str, str], list[int]] = {}
+    for result in measured:
+        for _root, category, destination, files, size in result.inventory.rows():
+            bucket = totals.setdefault((category, destination), [0, 0])
+            bucket[0] += files
+            bucket[1] += size
+    if totals:
+        table = Table(title="Assets")
+        table.add_column("Category")
+        table.add_column("Destination")
+        table.add_column("Files", justify="right")
+        table.add_column("Size", justify="right")
+        order = {str(value): index for index, value in enumerate(AssetCategory)}
+        place = {str(value): index for index, value in enumerate(Destination)}
+        for (category, destination), (files, size) in sorted(
+            totals.items(), key=lambda item: (place[item[0][1]], order[item[0][0]])
+        ):
+            table.add_row(category, destination, str(files), _gb(size))
+        console.print(table)
+
+    for result in measured:
+        for segment, bucket in sorted(
+            result.inventory.unclaimed.items(), key=lambda item: -item[1].files
+        ):
+            console.print(
+                f"[yellow]?[/yellow] {result.slug}@{result.version}: {bucket.files} unclaimed "
+                f"file(s) in {segment}/ ({_gb(bucket.bytes)}) -- no destination"
+            )
+
+    for result in measured:
+        for directory, files in result.inventory.triage:
+            # Reported, never classified: the files stay in `_doc_files` until a
+            # human adds a marker. `api-exchange-gateway/` is why.
+            console.print(
+                f"[yellow]?[/yellow] {result.slug}@{result.version}: {directory}/ "
+                f"{files} file(s), no known generator marker"
+            )
 
 
 @main.command()

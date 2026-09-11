@@ -1054,3 +1054,56 @@ def test_extract_reports_a_missing_package_without_failing(runner: CliRunner, po
 
     assert result.exit_code == 0
     assert "docushift download" in result.output
+
+
+def test_extract_reports_the_csh_tally_and_the_asset_table(
+    runner: CliRunner, populated_root: Path
+) -> None:
+    """The four §6.2/§6.4 report blocks. A version with no help map is visible now."""
+    _place(populated_root, "10.4.0", {
+        "guide/Output.mcwebhelp": "",
+        "guide/Data/HelpSystem.xml": "<x/>",
+        "guide/Data/Alias.xml": '<CatapultAliasFile><Map Name="X" Link="a.htm"/></CatapultAliasFile>',
+        "guide/images/d.gif": "x",
+    })
+
+    result = _invoke(runner, populated_root, "extract", "--all")
+
+    assert result.exit_code == 0
+    assert "CSH: 1 source(s), 1 identifier(s)." in result.output
+    assert "Assets" in result.output
+    assert "image" in result.output
+
+
+def test_extract_names_an_unmarked_api_candidate_and_the_unclaimed_residue(
+    runner: CliRunner, populated_root: Path
+) -> None:
+    """Two report lines, never a classification -- the files stay documentation."""
+    _place(populated_root, "10.4.0", {
+        "guide/Output.mcwebhelp": "",
+        "guide/Data/HelpSystem.xml": "<x/>",
+        "components-api/a.html": "<html/>",
+    })
+
+    result = _invoke(runner, populated_root, "extract", "--all")
+
+    assert result.exit_code == 0
+    # Not the whole sentence: Rich wraps the line at the console width.
+    assert "components-api/ 1 file(s), no known" in result.output
+    assert "unclaimed" in result.output
+    rows = (populated_root / "config" / "versions.csv").read_text(encoding="utf-8-sig")
+    # `_has_api_ref` stays false: a name has classified nothing.
+    assert ",false,0," in rows
+
+
+def test_extract_writes_the_five_inventory_columns_back(
+    runner: CliRunner, populated_root: Path
+) -> None:
+    _place(populated_root, "10.4.0", {"guide/Output.mcwebhelp": "", "guide/a.htm": "<html/>"})
+
+    _invoke(runner, populated_root, "extract", "--all")
+
+    rows = (populated_root / "config" / "versions.csv").read_text(encoding="utf-8-sig")
+    line = next(row for row in rows.splitlines() if "10.4.0" in row)
+    # false,0,false,0,2 -- measured zeroes, not the blanks of a row nobody opened.
+    assert "false,0,false,0,2" in line

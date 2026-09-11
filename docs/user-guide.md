@@ -35,7 +35,7 @@ docushift doctor
 
 Prints the resolved project paths (`config/`, `cache/`, `families/`, `output/`, `state.db`), the active locale, and which family workspaces exist so far. The working directories are created on first run; per-family folders are not, so an untouched project reads `family workspaces: none yet`.
 
-> **Implementation status.** The command tree below is the full intended surface and `--help` reflects it. Implemented today: `doctor`, the **whole `catalog` group, `fetch` included** — discovery talks to the live docsite — **`download` and `archive download`**, including `--from-file`, and **`extract`**, which unpacks a package and detects its engine. `extract` does not yet inventory assets or CSH, or write the five inventory columns — that is the next commit, and the asset and CSH output described below is not printed yet. `convert` and everything downstream are not built at all. Every unbuilt command exits non-zero naming the phase that will build it (see `docs/planning.md`); commands are never silently no-op.
+> **Implementation status.** The command tree below is the full intended surface and `--help` reflects it. Implemented today: `doctor`, the **whole `catalog` group, `fetch` included** — discovery talks to the live docsite — **`download` and `archive download`**, including `--from-file`, and **`extract`** in full — it unpacks a package, detects its engine, inventories its assets and CSH sources, and writes the five inventory columns back to `versions.csv`. `convert` and everything downstream are not built at all. Every unbuilt command exits non-zero naming the phase that will build it (see `docs/planning.md`); commands are never silently no-op.
 
 ---
 
@@ -511,12 +511,47 @@ two large unzips onto one disk only contend, so there is no `--workers` here.
 nothing from it is left on disk. That is counted separately from a failure because a
 retry will not help — somebody needs to look at the ZIP.
 
-**Extract inventories assets by where they are going, not by extension.** It prints one line per destination — topic assets inside the engine's output root, PDFs and Word files the document router will publish (§4), API-reference trees copied whole, archives — and then the residue: files no destination claimed, grouped by their top folder. That last group is the one to read. A handful of stray files is normal; a few thousand under one folder name means a generated reference tree the tool has not learned to recognise, and it should be reported rather than converted:
+**Extract measures the packages it unpacked, in one walk, and prints four things.** All four name the version they came from, because a total nobody can trace back to a package is not something anybody can act on.
+
+First, the help maps:
 
 ```
-assets   images 2,341   documents 12   api-reference 8,904   archives 0
-         unclaimed 512  →  components-api/ 498, css/ 14
+CSH: 3 source(s), 561 identifier(s).
+! businessworks@6.8.0: guide/Data/Alias.xml is unparseable
 ```
+
+A `!` line is a help map that was found and would not read. That is a different fact from a version with no help map at all, and only one of the two is acceptable to discover after publishing.
+
+Then the asset table, **by category and by destination** rather than by extension. Every file is in it, topics included, so the `Files` column sums to what was unpacked:
+
+```
+              Assets
+Category   Destination     Files      Size
+topic      api-reference   8,904   412.3 MB
+topic      output-root     4,110   180.6 MB
+image      output-root     2,341     1.2 GB
+skin       output-root       880    12.4 MB
+document   document-router    12    46.8 MB
+other      unclaimed         512     3.1 MB
+```
+
+`skin` is decided by *where* a file is, not by its extension — a `.gif` in `Skins/` is chrome and a `.gif` beside a topic is an image. Roughly half of a DITA package's references and three-quarters of a WebWorks one's are chrome, so this is not a rounding error.
+
+Then the residue — files no destination claimed, grouped by their top folder:
+
+```
+? bpme@5.6.0: 498 unclaimed file(s) in components-api/ (14.2 MB) -- no destination
+```
+
+This is the group to read. A handful of stray files is normal; a few thousand under one folder name means a generated reference tree the tool has not learned to recognise, and it should be reported rather than converted.
+
+And last, the API-reference triage:
+
+```
+? ftl@6.10.0: html/api-docs/ 412 file(s), no known generator marker
+```
+
+A directory whose *name* looks like an API reference but which carries no generator marker. **It is a question, not a classification** — the files stay in `_doc_files`, and the count stays out of `_api_files`, until somebody looks and a marker is added. A directory is only ever classified by what it contains: `api-exchange-gateway/` is a product name with 15,677 files of ordinary documentation, and any rule that reads names would throw the lot away.
 
 ```bash
 # Convert all downloaded packages
@@ -717,7 +752,7 @@ docushift csh report --batch poc-1
 docushift csh validate --product businessworks --version 6.12.0
 ```
 
-`docushift extract` already prints the tally (`CSH: 3 sources, 561 entries`), so a version with no help map is visible before you spend a conversion on it.
+`docushift extract` already prints the tally (`CSH: 3 source(s), 561 identifier(s).`), so a version with no help map is visible before you spend a conversion on it.
 
 ### Four things worth knowing
 

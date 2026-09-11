@@ -83,6 +83,25 @@ def catalog(project_root: Path, state: StateStore) -> CatalogManager:
 
 
 @pytest.fixture
+def product(catalog: CatalogManager) -> Product:
+    """One catalogued product with one eligible version, for the Stage 4 tests.
+
+    Here rather than in `test_extractor.py` because both halves of Stage 4 --
+    unpack and measure -- assert against the same catalog row, and a fixture
+    imported across test modules trips `F811` on every use.
+    """
+    built = make_product("tibco-ems", product_code="ems", family="messaging")
+    built.versions = {"10.4.0": make_version("tibco-ems", "10.4.0", zip_url="https://docs.example/ems.zip")}
+    catalog.merge_fetch_results([built])
+    return catalog.get_product("tibco-ems")
+
+
+@pytest.fixture
+def version(product: Product) -> ProductVersion:
+    return product.versions["10.4.0"]
+
+
+@pytest.fixture
 def stateless_catalog(project_root: Path) -> CatalogManager:
     """A CatalogManager with no state store, to exercise the no-snapshot path."""
     return CatalogManager(

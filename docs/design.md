@@ -369,7 +369,7 @@ Batch labels are trimmed and lowercased on write, so `POC-1`, `poc-1 ` and `poc-
 
 ## 5. Stage 3: Acquisition
 
-**Built** (Phase 4a, 2026-09-10), for acquisition. §5.1 and §5.2 are implemented in `downloader/fetcher.py`; §6's extraction landed in Phase 4b-1 and its inventory walk is Phase 4b-2.
+**Built** (Phase 4a, 2026-09-10), for acquisition. §5.1 and §5.2 are implemented in `downloader/fetcher.py`; §6's extraction landed in Phase 4b-1 and its inventory walk in Phase 4b-2.
 
 ### 5.1 Download one version
 
@@ -404,15 +404,15 @@ Extraction under `--extract` goes through the same path-traversal refusal as §6
 
 ## 6. Stage 4: Extraction and inventory
 
-**Half Built.** §6.1 steps 1–3 landed in Phase 4b-1 (2026-09-11) in `extractor/unpacker.py`, along with the catalog half of §6.3 (the columns, the round-trip and the write-back) and §6.1 step 2's path-traversal refusal — which landed earlier still, in Phase 4a, because `archive download --extract` needs it and there must not be two answers to "is this member safe". **Steps 4 and 5 — the inventory walk, §6.2, §6.3's predicate and §6.4 — remain Specified**, for Phase 4b-2.
+**Built**, except §6.4 steps 3–7. §6.1 steps 1–3 landed in Phase 4b-1 (2026-09-11) in `extractor/unpacker.py`, along with the catalog half of §6.3 (the columns, the round-trip and the write-back) and §6.1 step 2's path-traversal refusal — which landed earlier still, in Phase 4a, because `archive download --extract` needs it and there must not be two answers to "is this member safe". **Steps 4 and 5 — the one walk, §6.2, §6.3's predicate and §6.4 steps 1–2 — landed in Phase 4b-2 (2026-09-11)** in `apiref.py`, `engines/csh.py` and `extractor/inventory.py`. §6.4's steps 3–7 are the converter's half and remain Specified for Phase 5.
 
-### 6.1 Extract — steps 1–3 **Built** (Phase 4b-1), steps 4–5 **Specified**
+### 6.1 Extract — **Built** (steps 1–3 Phase 4b-1, steps 4–5 Phase 4b-2)
 
 1. Run over **the same selection as the download**, so an archived version is neither fetched nor unpacked.
 2. Refuse any archive member whose resolved path escapes the target directory, and any absolute member path. A documentation ZIP has no legitimate reason to contain either.
 3. Unpack to the canonical extract path, then record the resolved path and status `EXTRACTED`.
-4. Inventory assets **by category and by destination**, not by an extension allow-list, into `state.db` (§6.4).
-5. Walk the extracted tree once more, partitioning every file into API-reference or not, and write the five inventory columns back to `versions.csv` (§6.3).
+4. Walk the extracted tree **once**, partitioning every file into API-reference or not, inventorying assets **by category and by destination** rather than by an extension allow-list, and locating the CSH sources (§6.2, §6.3, §6.4). One walk, so all three describe one moment; the per-file detail goes to `state.db`.
+5. Write the five inventory columns back to `versions.csv` (§6.3) — but only from a walk that finished. A directory the walk could not read leaves the columns blank, on the same rule as a failed extract.
 
 **Step 3 unpacks into `<extract_path>.part/` and swaps, never over a live directory.** Unpacking in place leaves the *previous* package's files behind, so a guide deleted upstream survives on disk forever — and converts, and nothing in the report says why. The swap is build, remove, rename, and **is not atomic on Windows**: an interrupted run can leave a `.part` directory, which the next run removes before it starts. That is the honest guarantee, and it is stated rather than implied.
 
@@ -422,7 +422,9 @@ Extraction under `--extract` goes through the same path-traversal refusal as §6
 
 **Five outcomes, and `refused` is not `failed`.** `extracted`, `current`, `no-package`, `refused`, `failed`. An archive that escapes its target directory is a statement about the package, not about this run: a retry will not fix it and somebody has to look at the ZIP, so it is counted apart from an I/O failure rather than summed into one number nobody can act on.
 
-### 6.2 CSH source inventory
+### 6.2 CSH source inventory — **Built** (Phase 4b-2)
+
+`engines/csh.py:csh_format_of` locates, `read_csh_source` parses; `extractor/inventory.py` runs both inside the §6.1 walk.
 
 Locating help maps is separated from parsing them, because the *absence* of a help map needs to be visible before conversion starts rather than discovered after (`architecture.md` §5.4, planning Phase 4).
 
@@ -434,15 +436,17 @@ For each doc-set inside the extracted tree, look for:
 | `dita_head_js` | `<doc-set>/static/head.js`, the `suitehelp.contexts` object | **Yes** |
 | `webworks_topics` | `<book>/wwhdata/common/topics.js` | **Yes** |
 
+**A source is located by shape — the file name *and* its parent directory — not by sitting under an output root.** 153 Flare alias files in the corpus sit in roots nested below another root, so keying off the root list would lose them; the parent test is what keeps a stray `head.js` in some product's script folder from being read as a context map.
+
 **All three are read** (§9.2). Two nearby files are deliberately *not* consulted: `<doc-set>/ctx/` holds redirect stubs generated from the WebWorks map rather than the map itself, and `<book>/wwhdata/xml/files.xml` is a lossy XML twin of `topics.js` — where the two disagree it is the XML that is missing entries, and one observed book ships no `files.xml` at all.
 
 A source that is located but fails to parse still sets `_has_csh` — a file *was* found — with the failure counted and named in the extract report. "This version has help we could not read" and "this version has no help" are different facts, and only one of them is acceptable to discover after publishing.
 
-Record path, format, raw entry count and parse status per `(product, version, doc_set)`. **Empty, zero-byte and unparseable sources are counted and skipped, never raised** — an empty map is the *normal* case in every format, and overwhelmingly so in two of them: 476 of 863 Flare alias files (55%), 492 of 647 WebWorks `topics.js` (76%), 38 of 418 DITA `head.js` (9%). Raising would make a routine condition look like a defect. `docushift extract` prints the tally (`CSH: 3 sources, 561 entries`) so that a version with no help map is a fact known at extraction time.
+Record path, format, raw entry count and parse status per `(product, version, doc_set)`. **Empty, zero-byte and unparseable sources are counted and skipped, never raised** — an empty map is the *normal* case in every format, and overwhelmingly so in two of them: 476 of 863 Flare alias files (55%), 492 of 647 WebWorks `topics.js` (76%), 38 of 418 DITA `head.js` (9%). Raising would make a routine condition look like a defect. `docushift extract` prints the tally (`CSH: 3 source(s), 561 identifier(s).`) so that a version with no help map is a fact known at extraction time.
 
 ### 6.3 Inventory write-back to `versions.csv`
 
-**Built** — the columns, the blank-preserving round-trip, `CatalogManager.record_extract_inventory` / `clear_extract_inventory`, the merge exclusion and the desync warning. **Specified** — the API-reference predicate below and its triage report, which belong to the Stage 4 extractor and land with it.
+**Built.** The columns, the blank-preserving round-trip, `CatalogManager.record_extract_inventory` / `clear_extract_inventory`, the merge exclusion and the desync warning landed in Phase 4b-1. The API-reference predicate below and its triage report landed in Phase 4b-2 as `apiref.py` — a top-level module rather than one under `extractor/`, because Stage 5's skip-list and Stage 7's doc-class router are its other two callers and neither should import from the extractor to get it.
 
 (`architecture.md` §3.9.) The per-doc-set detail from §6.2 stays in `state.db`; what goes back into the sheet is the five numbers a human needs in order to set `convert_eligible` and `convert_batch` on a package they have not opened.
 
@@ -458,8 +462,10 @@ Record path, format, raw entry count and parse status per `(product, version, do
 ```
 API-reference triage: 2 unmarked candidates in ftl@6.10.0
   html/api-docs/            412 files, no known generator marker
-  html/api-docs/dotnet/     311 files, no known generator marker
+  html/api-docs/c/          101 files, no known generator marker
 ```
+
+Nested candidates are separate lines, because `api-docs/` and the `c/` inside it are two questions a human may answer differently. A sibling `dotnet/` would produce **no** line: the name test is a fixed vocabulary, not a guess at what an API directory might be called, and a name that is not in it is not a candidate.
 
 It is a report line, not a classification: the files stay in `_doc_files` until a human says otherwise. The flag exists so that a generator we have no marker for surfaces as a question at extract time rather than as broken Markdown at conversion time, and so the marker list grows from evidence. Products whose *name* contains `api` are the reason this cannot be silently auto-promoted.
 
@@ -471,7 +477,7 @@ It is a report line, not a classification: the files stay in `_doc_files` until 
 | `_doc_files` | Every other file. Not a topic count — images, CSS and skin assets are included, which is what makes it a footprint figure rather than a workload one |
 | `_has_api_ref` | `_api_files > 0` |
 | `_csh_names` | Distinct identifiers across all of the version's CSH sources, counted **byte-exactly and case-sensitively** — `GatewayInstances` and `gatewayInstances` are two (§9.1) — and deduplicated version-wide, matching how the resolver merges them (§9.3) |
-| `_has_csh` | At least one **readable** CSH source file was located — Flare `Alias.xml` or DITA `head.js` — regardless of whether it parsed to anything. `true` with `_csh_names=0` is the empty-source case, 55% of the Flare corpus. A WebWorks source leaves this `false` and produces a triage line instead (§6.2) |
+| `_has_csh` | At least one CSH source file was located — Flare `Alias.xml`, DITA `head.js` or WebWorks `topics.js`, all three the same — regardless of whether it parsed to anything. It records that a file was *found*, so `true` with `_csh_names=0` is a routine state, not a contradiction: 55% of the Flare corpus and 76% of the WebWorks corpus. An unreadable source sets it too, and is named in the report (§6.2) |
 
 Directories are not counted, only files. Symlinks are not followed — a documentation ZIP has no legitimate reason to contain one, and Stage 4 already refuses escaping members (§6.1).
 
@@ -515,11 +521,15 @@ Observed spellings: `api`, `apidocs`, `api-docs`, `api_reference`, `api-referenc
 
 This is the same conclusion §7 reaches for engine detection, for the same reason: **what a tree contains is knowable; what someone named it is not.**
 
-### 6.4 Assets: the inventory, and the copy set — **Specified**
+### 6.4 Assets: the inventory, and the copy set — steps 1–2 **Built** (Phase 4b-2), steps 3–7 **Specified**
 
-One algorithm that spans two stages, kept in one place because splitting it is what breaks it (`architecture.md` §5.5, §5.5.9). Stage 4 runs steps 1–2; the converter runs steps 3–7 per topic; Stage 7's part is §10.7.
+One algorithm that spans two stages, kept in one place because splitting it is what breaks it (`architecture.md` §5.5, §5.5.9). Stage 4 runs steps 1–2 (`extractor/inventory.py`); the converter runs steps 3–7 per topic; Stage 7's part is §10.7.
 
-**Step 1 — inventory, in the §6.3 walk.** The same single walk that partitions API-reference files also classifies every non-HTML file by **category** (image, media, document, archive, source-format, skin, other — decided by extension) and by **destination** (inside an engine output root / directly inside `pdf/` or `doc/` / under an API-reference root / unclaimed). Record counts and bytes per `(version, output_root, category)` in `state.db`. Nothing is filtered by an extension allow-list: the corpus holds 100 extensions and the nine the old list named cover neither the images that matter nor the documents that do (`architecture.md` §5.5.1).
+**Step 1 — inventory, in the §6.1 walk.** The same single walk that partitions API-reference files also classifies **every** file — topics included, so the rows sum to the file count and the total is checkable — by **category** and by **destination**. Record counts and bytes per `(version, output_root, category, destination)` in `state.db`. Nothing is filtered by an extension allow-list: the corpus holds 100 extensions and the nine the old list named cover neither the images that matter nor the documents that do (`architecture.md` §5.5.1).
+
+**Category is decided by extension, except `skin`, which is decided by location.** A `.gif` in `Skins/Default/` is chrome and a `.gif` beside a topic is an image, and no extension can tell them apart — so the skin test runs *first*, against the file's path relative to its output root, using step 4's per-engine prefix list and step 4's whole-segment rule. Everything else falls to extension: `topic`, `image`, `media`, `document`, `archive`, `source-format`, `other`.
+
+**Destination is a precedence, not a set.** API-reference root, then engine output root, then a top-level `pdf/` or `doc/` (§10.4's document router), then unclaimed. It has to be ordered because an API tree commonly sits *inside* an output root, and a file counted under both would be counted twice.
 
 **Step 2 — report the residue.** Files that no destination claims are counted and printed by `docushift extract`, grouped by their top path segment:
 
@@ -530,7 +540,7 @@ Unclaimed: 5,426 files in components-api/ — no destination, no API-reference m
 
 This is the same mechanism as §6.3's API-reference flag and it exists for the same reason: 62,525 files across 243 rooted versions currently fall through, almost all of them generated reference trees whose generator has no marker yet (`architecture.md` §5.5.2). Silence here is how a whole tree goes missing without anyone noticing.
 
-**Step 3 — resolve, while emitting.** For each non-HTML reference found by the engine's content extractor, in the same pass that writes the topic:
+**Step 3 — resolve, while emitting** (Phase 5, `transforms/assets.py`)**.** For each non-HTML reference found by the engine's content extractor, in the same pass that writes the topic:
 
 1. **Classify the raw reference.** `data:` and any absolute URL (`http`, `https`, `ftp`, `mailto`) are emitted unchanged and never copied. A fragment-only reference is not an asset.
 2. **Normalize before resolving**, in this order: strip the `#fragment` and `?query`; percent-**decode**; replace `\` with `/`. Skipping this reports 1,872 WebWorks references as missing that are not (`architecture.md` §5.5.6) — 1,224 percent-encoded, 648 backslash-separated.
@@ -676,9 +686,9 @@ Three consequences follow, and all are correctness requirements rather than styl
 - **The string typing is carried by Flare alone.** It is often attributed to WebWorks, but WebWorks needs none of it: its identifiers are dotted lowercase names with **zero digit-only and zero case-only collisions** in the corpus. Flare supplies the whole justification on its own — **834 of 11,054 names (7.5%) are digit-only** (`12`, `1000`, `1122`), and the 8 case-only collisions above are all Flare's.
 - **Identifiers are always emitted double-quoted**, in map keys and in frontmatter alike. A YAML 1.1 loader turns an unquoted `1234` into an integer and `6.2` into a float, in a map documented as string-keyed. Measured over Flare the live hazard is *only* numeric coercion — zero names are `Yes`/`No`/`On`/`Off`/`null`-shaped, zero are sexagesimal, zero carry a leading zero — but the rule is applied to every identifier rather than narrowed to the digit ones, because a conditional quote is a branch that can be wrong and an unconditional one cannot.
 
-### 9.2 Three readers, one per HTML engine
+### 9.2 Three readers, one per HTML engine — **Built** (Phase 4b-2)
 
-The schema, the resolver and the writer are shared and engine-neutral; an engine contributes only a reader yielding `(identifier, link, anchor)`. **Every format the corpus ships is read.**
+The schema, the resolver and the writer are shared and engine-neutral; an engine contributes only a reader yielding `(identifier, link, anchor)`. **Every format the corpus ships is read.** The readers landed early, with Stage 4, because §6.2's inventory cannot report "help we could not read" without them; the schema, resolver and writer stay in Phase 5's `transforms/csh.py`.
 
 | Engine | Read from | Identifier | Status |
 | :--- | :--- | :--- | :--- |
@@ -921,11 +931,11 @@ Most rows are **Built** or **Specified**. Two are neither, and are marked as suc
 | 5.2 | Hand-supplied ingestion | Built | `downloader/fetcher.py:ingest_file`, `catalog.py:add_version` |
 | 6.1 steps 1–3 | Extraction, `.part/` swap and the unchanged-package skip | Built | `extractor/unpacker.py:extract_one`, `extract_many` |
 | 6.1 step 2 | Path-traversal refusal | Built | `extractor/safe_unzip.py:safe_extract` |
-| 6.1 steps 4–5 | The inventory walk | Specified | Phase 4b-2 |
-| 6.2 | CSH source inventory | Specified | Phase 4b-2 |
+| 6.1 steps 4–5 | The one walk | Built | `extractor/inventory.py:inventory_tree`; `unpacker.py:measure` |
+| 6.2 | CSH source location and the three readers | Built | `engines/csh.py:csh_format_of`, `read_csh_source` |
 | 6.3 | Inventory columns and write-back | Built | `catalog.py:record_extract_inventory`, `utils/csvio.py` |
-| 6.3 | API-reference predicate and triage | Specified | Phase 4b-2 |
-| 6.4 | Asset inventory by category and destination | Specified | Phase 4b-2 |
+| 6.3 | API-reference predicate and triage | Built | `apiref.py:find_api_roots`, `is_api_reference`, `looks_like_api_name` |
+| 6.4 steps 1–2 | Asset inventory by category and destination | Built | `extractor/inventory.py`; `state.py:record_asset_inventory` |
 | 6.4 | Asset copy set — resolve once, copy and link together | Specified | Phase 5, `transforms/assets.py` |
 | 7.1–7.3 | Engine detection, three passes | Built | `engines/detector.py:detect_version`, `detect_tree` |
 | 7.1 | Output-root location, by content | Built | `engines/roots.py:find_output_roots`, `owning_root` |
@@ -938,7 +948,7 @@ Most rows are **Built** or **Specified**. Two are neither, and are marked as suc
 | 9.3 | CSH resolution | Specified | Phase 5 |
 | 9.4–9.5 | `csh.yml` and frontmatter | Specified | Phase 5 |
 | 9.6 | CSH verification | Specified | Phase 7 |
-| 9.2 | CSH readers (**Flare, DITA, WebWorks**) | Specified | Phase 5 |
+| 9.2 | CSH readers (**Flare, DITA, WebWorks**) | Built | `engines/csh.py`; the schema, resolver and writer stay Phase 5 |
 | 10 | AEM synthesis and sync | Specified | Phases 6–7 |
 | 10 (part) | `nav.yml` / `meta.yml` shapes | **Placeholder** | Pending an AEM spec; the two templates in `config/aem_templates/` say so |
 | 10.4 | Document router (`pdf/` and `doc/` → doc-class) | Specified | Phase 6 |

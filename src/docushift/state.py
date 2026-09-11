@@ -13,7 +13,7 @@ Two distinct responsibilities, deliberately in one store:
 
 import sqlite3
 import threading
-from collections.abc import Iterator
+from collections.abc import Iterable, Iterator
 from contextlib import contextmanager
 from datetime import UTC, datetime
 from pathlib import Path
@@ -25,6 +25,11 @@ from docushift.models import ConversionStatus, Product, ProductVersion
 # code is not unique -- docs/planning.md Phase 3.6. There is no migration: the DB
 # holds only snapshots and volatile machine state, all of it rebuildable by one
 # `catalog fetch`, so deleting it costs a crawl rather than any user data.
+#
+# Phase 4b-2's `csh_source` and `asset_inventory` did *not* bump this. The v2 bump
+# was forced by a column *rename*, which `CREATE TABLE IF NOT EXISTS` cannot
+# repair on a file that already exists; two new tables are additive and an
+# existing v2 database grows them on open.
 SCHEMA_VERSION = 2
 
 _SCHEMA = """
@@ -95,6 +100,33 @@ CREATE TABLE IF NOT EXISTS engine_folder_map (
     folder       TEXT NOT NULL,
     engine       TEXT NOT NULL,
     PRIMARY KEY (slug, version, folder)
+);
+
+-- Stage 4's CSH inventory: one row per located help map (design.md §6.2). The
+-- per-doc-set detail stays here; only the two summary columns reach versions.csv.
+CREATE TABLE IF NOT EXISTS csh_source (
+    slug    TEXT NOT NULL,
+    version TEXT NOT NULL,
+    path    TEXT NOT NULL,   -- relative to the extracted tree
+    doc_set TEXT NOT NULL,
+    format  TEXT NOT NULL,   -- flare_alias | dita_head_js | webworks_topics
+    entries INTEGER NOT NULL,
+    status  TEXT NOT NULL,   -- ok | empty | unparseable | unreadable
+    PRIMARY KEY (slug, version, path)
+);
+
+-- Stage 4's asset inventory: files and bytes per output root, category and
+-- destination (design.md §6.4 step 1). Not an extension allow-list -- the corpus
+-- holds 100 extensions and every one of them is counted somewhere.
+CREATE TABLE IF NOT EXISTS asset_inventory (
+    slug        TEXT NOT NULL,
+    version     TEXT NOT NULL,
+    output_root TEXT NOT NULL,   -- relative to the tree; '' when none claims it
+    category    TEXT NOT NULL,
+    destination TEXT NOT NULL,
+    files       INTEGER NOT NULL,
+    bytes       INTEGER NOT NULL,
+    PRIMARY KEY (slug, version, output_root, category, destination)
 );
 """
 
@@ -410,6 +442,52 @@ class StateStore:
             (slug, version),
         ).fetchall()
         return {row["folder"]: row["engine"] for row in rows}
+
+    # -- stage 4 inventory ----------------------------------------------------
+
+    def record_csh_sources(self, slug: str, version: str, rows: Iterable[tuple]) -> None:
+        """Replaces this version's CSH inventory wholesale.
+
+        Replaced rather than merged, in one transaction with the delete: a
+        re-extract of a package that dropped a help output must not leave the old
+        source behind, and a half-replaced inventory is worse than either.
+        """
+        with self._tx() as conn:
+            conn.execute("DELETE FROM csh_source WHERE slug = ? AND version = ?", (slug, version))
+            conn.executemany(
+                "INSERT INTO csh_source (slug, version, path, doc_set, format, entries, status) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?)",
+                [(slug, version, *row) for row in rows],
+            )
+
+    def get_csh_sources(self, slug: str, version: str) -> list[dict[str, Any]]:
+        rows = self.connect().execute(
+            "SELECT path, doc_set, format, entries, status FROM csh_source "
+            "WHERE slug = ? AND version = ? ORDER BY path",
+            (slug, version),
+        ).fetchall()
+        return [dict(row) for row in rows]
+
+    def record_asset_inventory(self, slug: str, version: str, rows: Iterable[tuple]) -> None:
+        """Replaces this version's asset inventory wholesale, for the same reason."""
+        with self._tx() as conn:
+            conn.execute(
+                "DELETE FROM asset_inventory WHERE slug = ? AND version = ?", (slug, version)
+            )
+            conn.executemany(
+                "INSERT INTO asset_inventory "
+                "(slug, version, output_root, category, destination, files, bytes) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?)",
+                [(slug, version, *row) for row in rows],
+            )
+
+    def get_asset_inventory(self, slug: str, version: str) -> list[dict[str, Any]]:
+        rows = self.connect().execute(
+            "SELECT output_root, category, destination, files, bytes FROM asset_inventory "
+            "WHERE slug = ? AND version = ? ORDER BY output_root, category, destination",
+            (slug, version),
+        ).fetchall()
+        return [dict(row) for row in rows]
 
     # -- batching ------------------------------------------------------------
 

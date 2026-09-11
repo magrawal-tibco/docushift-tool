@@ -1,6 +1,7 @@
-"""Stage 4, first half: unpacking a package and identifying what is in it.
+"""Stage 4: unpacking a package, identifying it, and measuring what is in it.
 
-Implements `docs/design.md` §6.1 steps 1-3 and §7. The selection is the
+Implements `docs/design.md` §6.1 and §7, and drives §6.2 / §6.3 / §6.4 through
+`inventory.py` -- unpack, identify, then **one walk** that measures. The selection is the
 download's, so an archived or ineligible version is never unpacked; the path is
 never accepted from a caller but derived by `ConfigManager`, the same invariant
 that lets Stage 5 find a tree without being told where it is.
@@ -27,6 +28,7 @@ from docushift.config import ConfigManager
 from docushift.downloader import sha256_of
 from docushift.engines.detector import Detection, detect_version
 from docushift.engines.roots import find_output_roots
+from docushift.extractor.inventory import Inventory, inventory_tree
 from docushift.extractor.safe_unzip import UnsafeArchiveError, safe_extract
 from docushift.models import ConversionStatus, EngineSource, Product, ProductVersion, SourceEngine
 
@@ -60,6 +62,8 @@ class ExtractResult:
     engine_written: bool = False
     roots: int = 0
     message: str = ""
+    # What the §6.3 walk measured, or None when there was no tree to walk.
+    inventory: Inventory | None = None
 
 
 @dataclass
@@ -93,6 +97,22 @@ class ExtractStats:
             r for r in self.results
             if r.outcome in (ExtractOutcome.FAILED, ExtractOutcome.REFUSED)
         ]
+
+    @property
+    def measured(self) -> list[ExtractResult]:
+        """The versions this run actually walked, in run order."""
+        return [r for r in self.results if r.inventory is not None]
+
+    def csh_totals(self) -> tuple[int, int]:
+        """Sources located and distinct identifiers, summed over the run.
+
+        Identifiers are deduplicated *within* a version and added *across* them:
+        two products may legitimately both ship a `1000`, and §9.3 merges only
+        version-wide.
+        """
+        sources = sum(r.inventory.readable_csh_sources for r in self.measured)
+        names = sum(len(r.inventory.csh_names) for r in self.measured)
+        return sources, names
 
     def engine_tally(self) -> dict[SourceEngine, int]:
         """Engine histogram over the versions this run actually looked at."""
@@ -146,10 +166,21 @@ class PackageExtractor:
         # *package's* checksum rather than the tree's: the tree is thousands of
         # files and hashing it would cost more than re-extracting.
         if not force and target.is_dir() and recorded.get("extract_zip_checksum") == checksum:
-            return ExtractResult(
+            current = ExtractResult(
                 slug, number, ExtractOutcome.CURRENT, path=target,
                 engine=version.engine, engine_written=version.engine_source is not EngineSource.AUTO,
             )
+            # An unchanged package is a no-op *unless* nobody has measured it.
+            # A tree extracted before the inventory walk existed has blank
+            # columns, and reporting `current` over a blank row would leave it
+            # blank for good.
+            if version.api_files is not None and version.doc_files is not None:
+                return current
+            identified = self.identify(product, version, target)
+            current.engine = identified.engine
+            current.roots = len(identified.roots)
+            current.inventory = self.measure(product, version, target, identified)
+            return current
 
         # Unpack beside the destination and swap, never over it. A re-extract onto
         # a live directory leaves the *previous* package's files in place, so a
@@ -195,6 +226,7 @@ class PackageExtractor:
             engine=identified.engine,
             engine_written=identified.written,
             roots=len(identified.roots),
+            inventory=self.measure(product, version, target, identified),
         )
 
     # -- identification (design.md §7) -----------------------------------------
@@ -240,6 +272,42 @@ class PackageExtractor:
         if not manual and detection.engine is not SourceEngine.AUTO:
             written = self.catalog.record_detected_engine(slug, number, detection.engine)
         return Identified(detection=detection, engine=engine, roots=roots, written=written)
+
+    # -- measurement (design.md §6.2, §6.3, §6.4) -------------------------------
+
+    def measure(
+        self, product: Product, version: ProductVersion, tree: Path, identified: "Identified"
+    ) -> Inventory:
+        """The one walk, its two `state.db` tables, and the five columns.
+
+        The output roots come from `identify` rather than being re-derived, so the
+        inventory and the extract report cannot end up describing two different
+        sets of roots.
+        """
+        slug, number = product.slug, version.version
+        inventory = inventory_tree(tree, identified.engine, identified.roots)
+
+        if self.catalog.state is not None:
+            self.catalog.state.record_csh_sources(slug, number, inventory.csh_rows())
+            self.catalog.state.record_asset_inventory(slug, number, inventory.rows())
+        if inventory.api_roots:
+            self._set_metadata(
+                slug, number, "api_roots",
+                "\n".join(str(root.relative_to(tree)) for root in inventory.api_roots),
+            )
+
+        # A footprint measured over part of a tree is a wrong number rather than a
+        # small one, so a partial walk writes no columns at all -- the same rule
+        # that leaves a failed extract blank rather than zero.
+        if not inventory.partial:
+            self.catalog.record_extract_inventory(
+                slug, number,
+                csh_sources=inventory.readable_csh_sources,
+                csh_names=len(inventory.csh_names),
+                api_files=inventory.api_files,
+                doc_files=inventory.doc_files,
+            )
+        return inventory
 
     # -- a run ----------------------------------------------------------------
 

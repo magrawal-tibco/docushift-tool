@@ -29,7 +29,6 @@ from docushift.models import (
     ProductVersion,
     SourceEngine,
 )
-from tests.conftest import make_product, make_version
 
 # -- helpers -----------------------------------------------------------------
 
@@ -286,19 +285,6 @@ def test_an_engine_with_no_root_rule_reports_none(tmp_path: Path) -> None:
 
 
 # -- extraction (design.md §6.1) ---------------------------------------------
-
-
-@pytest.fixture
-def product(catalog: CatalogManager) -> Product:
-    built = make_product("tibco-ems", product_code="ems", family="messaging")
-    built.versions = {"10.4.0": make_version("tibco-ems", "10.4.0", zip_url="https://docs.example/ems.zip")}
-    catalog.merge_fetch_results([built])
-    return catalog.get_product("tibco-ems")
-
-
-@pytest.fixture
-def version(product: Product) -> ProductVersion:
-    return product.versions["10.4.0"]
 
 
 def place_package(config: ConfigManager, product: Product, version: ProductVersion, members: dict) -> Path:
