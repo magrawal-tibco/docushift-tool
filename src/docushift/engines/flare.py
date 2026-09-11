@@ -53,6 +53,8 @@ from docushift.engines.base import (
     Document,
     NavNode,
     Unit,
+    is_legal_label,
+    is_support_label,
     register,
 )
 from docushift.engines.flare_toc import Manifest, Toc, TocNode, read_manifest, read_toc, tree_files
@@ -652,8 +654,8 @@ class FlareEngine(BaseEngine):
         container, a missing legal page breaks nothing.
         """
         for attribute, matches, label in (
-            ("support", _is_support, "support"),
-            ("legal", _is_legal, "legal"),
+            ("support", is_support_label, "support"),
+            ("legal", is_legal_label, "legal"),
         ):
             found = None
             for toc in plan.tocs:
@@ -939,16 +941,6 @@ def _stem_label(stem: str) -> str:
     if name.lower().startswith("html_"):
         name = name[5:]
     return " ".join(name.replace("_", " ").replace("-", " ").split()) or stem
-
-
-def _is_legal(label: str, path: str) -> bool:
-    text = f"{label} {PurePosixPath(path).stem}".lower().replace("-", " ").replace("_", " ")
-    return "legal" in text or "third party" in text
-
-
-def _is_support(label: str, path: str) -> bool:
-    text = f"{label} {PurePosixPath(path).stem}".lower().replace("-", " ").replace("_", " ")
-    return "support services" in text or "documentation and support" in text
 
 
 def _relative(tree: Path, path: Path) -> str:

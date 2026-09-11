@@ -28,6 +28,7 @@ from docushift.engines.csh import (
     read_csh_source,
 )
 from docushift.engines.detector import Detection, detect_tree, detect_version
+from docushift.engines.dita import DitaEngine
 from docushift.engines.flare import FlareEngine
 from docushift.engines.roots import find_output_roots, owning_root
 
@@ -39,6 +40,7 @@ __all__ = [
     "CshSource",
     "CshStatus",
     "Detection",
+    "DitaEngine",
     "Document",
     "FlareEngine",
     "NavNode",

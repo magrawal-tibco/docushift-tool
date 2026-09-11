@@ -116,9 +116,40 @@ class Unit:
     # HTML the engine looked at and did not convert, with why. A count, not a
     # silence: `_globalpages/`, `Default.htm` stubs, framesets, generated indexes.
     skipped: dict[str, int] = field(default_factory=dict)
+    # What the source says about itself, where it says anything: DITA's
+    # `-homepage.html` carries `publication-title`, `release-version` and
+    # `release-date` (§5.2.7). It does *not* become `metadata.yml`, whose keys AEM
+    # fixed as `csg-*`; Phase 6 reads it as a cross-check against the catalog and
+    # a disagreement is a `METADATA_MISMATCH` line. Empty where the engine has no
+    # such file, which invariant 11 makes a blank rather than a zero.
+    metadata: dict[str, str] = field(default_factory=dict)
 
     def skip(self, reason: str, count: int = 1) -> None:
         self.skipped[reason] = self.skipped.get(reason, 0) + count
+
+
+def is_legal_label(label: str, path: str = "") -> bool:
+    """Whether a nav node is the legal notice. Matched, never constanted.
+
+    Lives here rather than in an engine because `Unit` has the slot and more than
+    one engine has to fill it -- Phase 5c moved it out of `flare.py` the moment
+    the second caller appeared, rather than growing a second spelling of one
+    question. The `path` half is optional for the same reason DITA needs it to be:
+    a Flare page is `legal_notices.htm` and a DITA topic is a GUID, so there the
+    label is the only evidence.
+    """
+    text = f"{label} {PurePosixPath(path).stem}".lower().replace("-", " ").replace("_", " ")
+    return "legal" in text or "third party" in text
+
+
+def is_support_label(label: str, path: str = "") -> bool:
+    """Whether a nav node is the support page. See `is_legal_label`.
+
+    The heading is `TIBCO Documentation and Support Services` in 565 Flare roots,
+    `ibi` in 49 and `Spotfire` in 45, which is why the brand is not in the test.
+    """
+    text = f"{label} {PurePosixPath(path).stem}".lower().replace("-", " ").replace("_", " ")
+    return "support services" in text or "documentation and support" in text
 
 
 @dataclass

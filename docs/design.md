@@ -979,7 +979,7 @@ Most rows are **Built** or **Specified**. Two are neither, and are marked as suc
 | `architecture.md` §5.1.7, §5.2.5, §5.3.7 | Callouts, code fences, GFM-safe tables | Built | `transforms/{callouts,code,tables}.py` |
 | `architecture.md` §5.1 | Flare converter | Built | `engines/flare.py:FlareEngine`; its TOC reader in `engines/flare_toc.py` |
 | `architecture.md` §5.1–§5.3 | The HTML→GFM walk the engines share | Built | `transforms/markdown.py:Renderer`, `parse` |
-| `architecture.md` §5.2 | SDL DITA converter | Specified | Phase 5c, `engines/dita.py` |
+| `architecture.md` §5.2 | SDL DITA converter | Built | `engines/dita.py:DitaEngine`; its TOC reader is `read_toc` in the same module |
 | `architecture.md` §5.3 | WebWorks converter | Specified | Phase 5d, `engines/webworks.py` |
 | — (owed) | DocBook converter — `str` and `sfire-sfds`, 10 versions | **Unsurveyed** | Phase 5e, `engines/docbook.py`; needs an `architecture.md` §5.x first |
 | 8.1–8.3 | Catalog validation, warnings, triage | Built | `catalog.py` |
