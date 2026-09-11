@@ -9,6 +9,7 @@ import pytest
 
 from docushift.reporting.findings import (
     REACHABLE_IN_PHASE_5A,
+    REACHABLE_IN_PHASE_5B,
     REGISTRY,
     FindingsRun,
     Severity,
@@ -28,9 +29,14 @@ def test_every_registered_code_names_a_real_severity_and_stage() -> None:
         assert row.obligation and row.specified_in
 
 
-def test_the_register_carries_all_twenty_rows_of_7_5() -> None:
-    """A half-populated register cannot be audited, so all 20 land in 5a."""
-    assert len(REGISTRY) == 20
+def test_the_register_carries_every_row_of_7_5() -> None:
+    """A half-populated register cannot be audited, so all 20 landed in 5a.
+
+    5b adds 8 more, which were *not* in §7.5: they are the Flare engine's own
+    obligations, and the register grows with the code paths that can raise them
+    rather than being frozen at the number the plan first guessed.
+    """
+    assert len(REGISTRY) == 28
 
 
 def test_severity_comes_from_the_registry_and_not_from_the_call_site() -> None:
@@ -124,12 +130,13 @@ def test_summary_counts_note_rows_not_note_occurrences() -> None:
     assert run.summary() == "1 warning, 1 note"
 
 
-def test_the_5a_reachability_debt_is_named_rather_than_asserted_away() -> None:
+def test_the_reachability_debt_is_named_rather_than_asserted_away() -> None:
     """§7.5's guarantee, allowed to pass with a *named* list of unreached codes."""
-    outstanding = unreachable_codes(REACHABLE_IN_PHASE_5A)
+    outstanding = unreachable_codes(REACHABLE_IN_PHASE_5B)
 
-    assert set(REACHABLE_IN_PHASE_5A) <= set(REGISTRY)
-    # Every remaining debt belongs to a stage 5a does not build. If a code for
-    # `convert` shows up here, the spine emitted one fewer finding than it owes.
+    assert set(REACHABLE_IN_PHASE_5A) <= set(REACHABLE_IN_PHASE_5B) <= set(REGISTRY)
+    # With the first engine built, `convert` owes nothing: every remaining debt
+    # belongs to `sync` or `validate`. The 5a exemption for `NAV_NODE_DROPPED` is
+    # gone, which is the point of the sub-phase.
     for code in outstanding:
-        assert REGISTRY[code].stage is not Stage.CONVERT or code == "NAV_NODE_DROPPED"
+        assert REGISTRY[code].stage is not Stage.CONVERT, code

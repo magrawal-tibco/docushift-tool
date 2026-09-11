@@ -94,7 +94,33 @@ REGISTRY: dict[str, Code] = _codes(
     Code("DOCSET_SKIPPED", Severity.WARNING, Stage.CONVERT,
          "A file-named doc-set reaching the engine guard", "architecture.md §5.2"),
     Code("NAV_NODE_DROPPED", Severity.NOTE, Stage.CONVERT,
-         "lof/lot/ix nodes dropped", "planning.md Phase 5"),
+         "A navigation node with no page and no children -- DITA's lof/lot/ix, "
+         "Flare's childless headless node and its same-page child",
+         "planning.md Phase 5"),
+    Code("OUTPUT_ROOT_MISSING", Severity.WARNING, Stage.CONVERT,
+         "Engine detected and no unit of work found -- a partial output",
+         "architecture.md §5.1.1"),
+    Code("CONTENT_MISSING", Severity.WARNING, Stage.CONVERT,
+         "A topic with no content container -- not converted, never guessed at",
+         "architecture.md §5.1.6"),
+    Code("TOC_ORPHAN", Severity.NOTE, Stage.CONVERT,
+         "Converted topics in no TOC entry, filed under Unfiled -- 14.1% for Flare",
+         "architecture.md §5.1.4"),
+    Code("TOPIC_LINK_DANGLING", Severity.NOTE, Stage.CONVERT,
+         "A cross-reference to a topic this run did not produce; text kept, link dropped",
+         "architecture.md §5.1.3"),
+    Code("ALERT_LABEL_UNMAPPED", Severity.WARNING, Stage.CONVERT,
+         "An admonition label outside the five GitHub renders; rendered as NOTE",
+         "transforms/callouts.py"),
+    Code("LANDING_PAGE_EMPTY", Severity.NOTE, Stage.CONVERT,
+         "A landing page with nothing past its hero -- a stub was generated",
+         "architecture.md §5.1.5"),
+    Code("TAIL_PAGE_MISSING", Severity.WARNING, Stage.CONVERT,
+         "No support or no legal page in the TOC -- nothing is synthesized",
+         "architecture.md §5.1.5"),
+    Code("LOCALIZED_TREE_SKIPPED", Severity.NOTE, Stage.CONVERT,
+         "A localized subtree inside an English unit, not converted",
+         "architecture.md §5.1.9"),
     Code("ASSET_ORPHANED", Severity.NOTE, Stage.CONVERT,
          "Unreferenced asset -- 54.6% is normal for Flare", "architecture.md §5.5.7"),
     Code("REFERENCE_UNRESOLVED", Severity.ERROR, Stage.CONVERT,
@@ -123,12 +149,20 @@ REGISTRY: dict[str, Code] = _codes(
          "Present in the prior version, absent here", "planning.md §7.6"),
 )
 
-# Codes 5a can actually emit. Named rather than inferred, so the reachability test
-# reports a shrinking list of debts instead of asserting something already true.
+# Codes the built code paths can actually emit. Named rather than inferred, so the
+# reachability test reports a shrinking list of debts instead of asserting
+# something already true. 5b adds the nine the Flare engine raises, which is what
+# closes Stage 5's side of the register: every remaining unreachable code belongs
+# to `sync` or `validate`, neither of which is written.
 REACHABLE_IN_PHASE_5A = frozenset(
     {"ENGINE_UNKNOWN", "REFERENCE_UNRESOLVED", "ASSET_ORPHANED", "CSH_UNRESOLVED",
      "CSH_AMBIGUOUS", "DOCSET_SKIPPED"}
 )
+REACHABLE_IN_PHASE_5B = REACHABLE_IN_PHASE_5A | {
+    "NAV_NODE_DROPPED", "OUTPUT_ROOT_MISSING", "CONTENT_MISSING", "TOC_ORPHAN",
+    "TOPIC_LINK_DANGLING", "ALERT_LABEL_UNMAPPED", "LANDING_PAGE_EMPTY",
+    "TAIL_PAGE_MISSING", "LOCALIZED_TREE_SKIPPED",
+}
 
 
 class UnregisteredCode(KeyError):

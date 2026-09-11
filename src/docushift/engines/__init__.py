@@ -11,8 +11,14 @@ consume them are Phase 5.
 the three help-map readers, one per HTML engine. It is here rather than in
 ``transforms/`` because docs/design.md §9.2 puts the *readers* with the engines
 and the schema, resolver and writer with the transform.
+
+Importing this package **registers every converter engine**. `base.py`'s registry
+is what Stage 5 dispatches on, and a handler that is written but not imported is
+a handler that does not exist -- the version reports `ENGINE_UNKNOWN` and nothing
+is written, which is exactly what an unwritten handler looks like.
 """
 
+from docushift.engines.base import BaseEngine, ConversionContext, Document, NavNode, Unit
 from docushift.engines.csh import (
     CshEntry,
     CshFormat,
@@ -22,14 +28,21 @@ from docushift.engines.csh import (
     read_csh_source,
 )
 from docushift.engines.detector import Detection, detect_tree, detect_version
+from docushift.engines.flare import FlareEngine
 from docushift.engines.roots import find_output_roots, owning_root
 
 __all__ = [
+    "BaseEngine",
+    "ConversionContext",
     "CshEntry",
     "CshFormat",
     "CshSource",
     "CshStatus",
     "Detection",
+    "Document",
+    "FlareEngine",
+    "NavNode",
+    "Unit",
     "csh_format_of",
     "detect_tree",
     "detect_version",

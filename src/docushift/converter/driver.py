@@ -214,6 +214,7 @@ class DocumentConverter:
             engine=version.engine,
             slug=slug,
             version=number,
+            product_name=product.display_name,
             api_roots=self._recorded_paths(slug, number, "api_roots", tree),
             output_roots=self._recorded_paths(slug, number, "output_roots", tree),
             findings=self.findings,

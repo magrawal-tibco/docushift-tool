@@ -80,6 +80,10 @@ class NavNode:
     # roots. Phase 6 generates a page for the 158 that have children and drops the
     # 7 that do not; the engine reports the fact rather than deciding.
     document: PurePosixPath | None = None
+    # The bookmark within `document`, without its `#`. 12.1% of Flare's TOC entries
+    # carry one and several entries routinely share a page; discarding it collapses
+    # them onto one navigation target and loses the distinction the author drew.
+    anchor: str = ""
     children: list["NavNode"] = field(default_factory=list)
 
     def walk(self) -> Iterator["NavNode"]:
@@ -132,6 +136,10 @@ class ConversionContext:
     engine: SourceEngine
     slug: str = ""
     version: str = ""
+    # The catalog's display name. The last fallback for a page title, used where a
+    # landing page has neither an `h1` nor a product variable -- which is 22 of the
+    # corpus's 676 Flare roots, and inventing a title there would be worse.
+    product_name: str = ""
     api_roots: list[Path] = field(default_factory=list)
     output_roots: list[Path] = field(default_factory=list)
     findings: FindingsRun | None = None

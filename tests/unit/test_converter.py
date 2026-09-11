@@ -1,15 +1,16 @@
 """Unit tests for Stage 5's spine (planning.md Phase 5a).
 
-**No real engine exists yet**, which is the sub-phase's whole point, so the spine
-is proven two ways. Without a registered handler every version reports
-`ENGINE_UNKNOWN` -- the honest state, and the one §7.5 already has a code for.
-With an in-process fake engine registered by the test and never shipped, the
-driver runs end to end: five reference branches, a build-and-swap, an output map,
-a flat `csh.yml`, frontmatter in the topic's first write, and the findings.
+The spine is proven two ways, and both survive 5b's real engine. With no handler
+registered for the version's generator, the version reports `ENGINE_UNKNOWN` --
+the honest state, and the one §7.5 already has a code for. With an in-process
+fake engine registered by the test and never shipped, the driver runs end to end:
+five reference branches, a build-and-swap, an output map, a flat `csh.yml`,
+frontmatter in the topic's first write, and the findings.
 
-The fake engine is deliberately the smallest thing that satisfies the contract.
-Anything it knows about MadCap would make this a Flare test written three
-sub-phases early.
+The fake engine is still the smallest thing that satisfies the contract, and it
+stays that way now that `FlareEngine` exists: these tests are about the *driver*,
+and asserting on MadCap output here would make a driver failure look like an
+engine failure. `test_flare.py` is where the engine is tested.
 """
 
 import re
@@ -99,10 +100,18 @@ class FakeEngine(BaseEngine):
 
 @pytest.fixture
 def fake_engine():
-    """Registers the fake handler for the duration of one test, then removes it."""
+    """Swaps in the fake handler for one test, then puts the real one back.
+
+    Save-and-restore rather than register-and-unregister: since 5b there *is* a
+    registered Flare engine, and unregistering it would leave every later test in
+    the session dispatching to nothing -- silently, as `ENGINE_UNKNOWN`.
+    """
+    previous = engine_for(SourceEngine.FLARE)
     register(FakeEngine)
     yield FakeEngine
     unregister(SourceEngine.FLARE)
+    if previous is not None:
+        register(previous)
 
 
 @pytest.fixture
@@ -132,17 +141,19 @@ def convert(config, catalog, product, version, **kwargs):
     return result, findings
 
 
-# -- with no engine registered (Phase 5a's actual behaviour) -------------------
+# -- with no engine registered for the version's generator ---------------------
 
 
-def test_the_registry_is_empty_until_an_engine_is_written() -> None:
-    assert registered_engines() == []
-    assert engine_for(SourceEngine.FLARE) is None
+def test_importing_the_package_registers_every_written_engine() -> None:
+    """A handler that is written but not imported is a handler that does not exist."""
+    assert registered_engines() == [SourceEngine.FLARE]
+    assert engine_for(SourceEngine.WEBWORKS) is None
 
 
-def test_every_version_reports_engine_unknown_when_nothing_is_registered(
+def test_a_version_reports_engine_unknown_when_nothing_is_registered(
     config, catalog, product, version, extracted
 ) -> None:
+    version.engine = SourceEngine.WEBWORKS
     result, findings = convert(config, catalog, product, version)
 
     assert result.outcome is ConvertOutcome.ENGINE_UNKNOWN

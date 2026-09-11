@@ -1040,6 +1040,15 @@ def _report_convert(stats, findings) -> None:
                 f"{len(result.csh.unresolved)} unresolved, "
                 f"{len(result.csh.ambiguous)} ambiguous{rescued}[/dim]"
             )
+        # Invariant 10: HTML the engine looked at and did not convert is a count
+        # with a reason, never a silence. Flare's largest reasons are whole
+        # directories -- 8,078 API files, an 8,004-file `ja` tree -- and a run that
+        # writes 400 topics out of 9,000 files needs to say where the rest went.
+        if result.skipped:
+            reasons = ", ".join(
+                f"{count} {reason}" for reason, count in sorted(result.skipped.items())
+            )
+            console.print(f"[dim]{result.slug}@{result.version}: skipped {reasons}[/dim]")
 
     # Named individually rather than counted, the same rule `download` and
     # `extract` follow: "23 versions will not convert" is not something a human

@@ -13,7 +13,7 @@ from bs4 import BeautifulSoup
 
 from docushift.engines.csh import CshEntry, CshFormat, CshSource, CshStatus
 from docushift.models import SourceEngine
-from docushift.transforms import callouts, code, csh, links, tables
+from docushift.transforms import callouts, code, csh, links, markdown, tables
 from docushift.transforms.assets import AssetCopier, AssetOutcome
 from tests.unit.test_extractor import build_tree, page
 
@@ -174,6 +174,72 @@ def test_a_headerless_table_gets_an_empty_header_not_a_promoted_row() -> None:
 
 def test_a_pipe_and_a_newline_survive_a_cell() -> None:
     assert tables.escape("a | b\nc") == r"a \| b c"
+
+
+# -- the markdown walk (§5.1, invariant 13) -----------------------------------
+
+
+def render(html: str, renderer: markdown.Renderer | None = None) -> str:
+    return (renderer or markdown.Renderer()).render(markdown.parse(html).body)
+
+
+def test_a_cdata_section_survives_the_parser_as_its_own_text() -> None:
+    """`lxml` deletes `<![CDATA[...]]>` outright -- CDATA is not a thing in HTML.
+
+    130 files of a 3,411-file sample carry 300 sections and 170 of them hold only
+    the space between a word and the `<span>` after it, so the parser's answer is
+    "ensure that thelibjvm library".
+    """
+    assert render("<p>ensure that the<![CDATA[ ]]><span>libjvm</span> library</p>") == (
+        "ensure that the libjvm library"
+    )
+
+
+def test_markup_inside_a_cdata_section_stays_text() -> None:
+    """None of the 300 sampled sections hold markup, and an unsampled one is text.
+
+    Only the `<` is escaped: a bare `>` mid-line starts nothing, and one that leads
+    a line is `escape_leading`'s to catch.
+    """
+    assert render("<p><![CDATA[<b>literal</b>]]></p>") == r"\<b>literal\</b>"
+
+
+def test_a_comment_is_not_prose() -> None:
+    """`Comment` is a `NavigableString` subclass, so the obvious isinstance is true.
+
+    Corpus topics carry commented-out markup beside their content; emitting it is
+    the difference between a paragraph and a paragraph followed by a stylesheet.
+    """
+    assert markdown.is_text(BeautifulSoup("<p>x</p>", "html.parser").p.string)
+    assert render("<p>kept<!-- .style { color: red } --></p>") == "kept"
+
+
+def test_a_passthrough_table_gets_its_references_resolved() -> None:
+    """Invariant 13 does not stop at the edge of a pipe table.
+
+    43% of Flare's tables cannot be a GFM one, and their HTML would otherwise ship
+    `src="images/x.png"` -- a path in the *source* layout -- in the one branch
+    where no hook was consulted.
+    """
+
+    class Resolving(markdown.Renderer):
+        def image(self, tag):
+            return "/assets/x.png"
+
+        def link(self, tag):
+            return None if tag.get("href") == "gone.htm" else "/docs/there.md"
+
+    rendered = render(
+        "<table><tr><td colspan='2'><img src='images/x.png'/>"
+        "<a href='there.htm'>here</a><a href='gone.htm'>orphan</a></td></tr></table>",
+        Resolving(),
+    )
+
+    assert 'src="/assets/x.png"' in rendered
+    assert 'href="/docs/there.md"' in rendered
+    # The text was authored and stays; only the claim that it leads somewhere goes.
+    assert "gone.htm" not in rendered
+    assert ">orphan<" in rendered
 
 
 # -- assets (§6.4 steps 3-7, invariant 13) ------------------------------------

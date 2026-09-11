@@ -35,7 +35,7 @@ docushift doctor
 
 Prints the resolved project paths (`config/`, `cache/`, `families/`, `output/`, `state.db`), the active locale, and which family workspaces exist so far. The working directories are created on first run; per-family folders are not, so an untouched project reads `family workspaces: none yet`.
 
-> **Implementation status.** The command tree below is the full intended surface and `--help` reflects it. Implemented today: `doctor`, the **whole `catalog` group, `fetch` included** — discovery talks to the live docsite — **`download` and `archive download`**, including `--from-file`, and **`extract`** in full — it unpacks a package, detects its engine, inventories its assets and CSH sources, and writes the five inventory columns back to `versions.csv`. **`convert` runs, but converts nothing yet**: the whole engine-neutral spine is built — asset resolution, CSH, frontmatter, the build-and-swap, the report and the findings register — and no engine converter is written, so every version reports `Engine unknown` (see §4). Everything downstream of `convert` is not built at all. Every unbuilt command exits non-zero naming the phase that will build it (see `docs/planning.md`); commands are never silently no-op.
+> **Implementation status.** The command tree below is the full intended surface and `--help` reflects it. Implemented today: `doctor`, the **whole `catalog` group, `fetch` included** — discovery talks to the live docsite — **`download` and `archive download`**, including `--from-file`, and **`extract`** in full — it unpacks a package, detects its engine, inventories its assets and CSH sources, and writes the five inventory columns back to `versions.csv`. **`convert` converts MadCap Flare** — the engine-neutral spine (asset resolution, CSH, frontmatter, the build-and-swap, the report and the findings register) plus the Flare reader, which is the corpus's dominant engine by six times. A version on any other engine reports `Engine unknown` and is skipped by name (see §4); DITA, WebWorks and DocBook arrive one sub-phase each. Everything downstream of `convert` is not built at all. Every unbuilt command exits non-zero naming the phase that will build it (see `docs/planning.md`); commands are never silently no-op.
 
 ---
 
@@ -573,13 +573,32 @@ docushift convert \
 | `--force` | Re-convert even when the extracted tree has not changed since last time. |
 | `--input` / `--output` | Convert one folder that never went through `extract`. Both are required together, with `--product` and `--version`. |
 
-> **Today every version reports `Engine unknown`, and that is the honest answer.** The
-> conversion spine is built — selection, the asset copy set, CSH resolution, the
-> frontmatter, the build-and-swap, the report and the findings — but **no engine
-> converter is written yet**. The Flare, DITA, WebWorks and DocBook readers arrive one
-> sub-phase each (`docs/planning.md` Phase 5b–5e), and until the one a version needs is
-> registered, that version is skipped and named rather than guessed at. The command
-> exits 0: one unconvertible version must not stop a 200-version run.
+> **MadCap Flare converts today; the other three engines do not yet.** Flare is the
+> corpus's dominant engine — 422,267 topics against DITA's 67,406 — so most eligible
+> versions now produce Markdown. The DITA, WebWorks and DocBook readers arrive one
+> sub-phase each (`docs/planning.md` Phase 5c–5e), and until the one a version needs is
+> registered that version reports **`Engine unknown`**, is skipped and named rather than
+> guessed at. The command exits 0: one unconvertible version must not stop a 200-version
+> run.
+
+**What a Flare version produces.** One output subtree per *output root* — the directory
+holding `Data/HelpSystem.xml` — mirroring the source layout, because filename stems collide
+6% of the time inside a single root and a flat output would lose topics to each other. A
+version shipping several roots (51 of 595) gets several subtrees, deliberately including
+the paths they share: 30,736 of those overlap and about 15% differ in content, so
+de-duplicating them would drop one release's notes on top of another's. Alongside the
+topics: the landing page as the first navigation node, a generated section page for each
+navigation node that has children and no page of its own, and the support and legal pages
+identified as the last two. Topics in no TOC entry are filed under **Unfiled** and counted
+rather than dropped — Flare's TOC covers 86% of its own topics, so this is the normal case
+and not an error.
+
+**What it skips, and says it skipped.** Generated directories (`_globalpages/`,
+`MicroContent/`, `Resources/`), the `Default.htm` runtime stubs, any localized subtree, and
+API-reference trees — the last identified by a generator marker inside the directory, never
+by its name, because `api-exchange-gateway/` is a product with 15,677 files of ordinary
+documentation. A topic with no `#mc-main-content` container is reported, never guessed at,
+which is what keeps a Javadoc page out of the Markdown output.
 
 Each run ends with five counts — converted, already current, no extracted tree, engine
 unknown, failed — plus the documents and assets written, the asset resolution line, and

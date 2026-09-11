@@ -676,7 +676,7 @@ Count products by family provenance and list the unclassified ones. This turns "
 
 ### 8.5 The findings register — **Built** (Phase 5a)
 
-`reporting/findings.py`. Every deferred "report line" in this document has a **code**, and the twenty of them are one table (`planning.md` §7.5). The module landed with Stage 5 rather than with `validate`, because the first stage that produces findings in bulk is conversion and a register invented alongside its second caller is a register shaped by its first.
+`reporting/findings.py`. Every deferred "report line" in this document has a **code**, and they are one table (`planning.md` §7.5) — twenty at 5a, **twenty-eight after Phase 5b added the eight `architecture.md` §5.1 had asked for in prose**. The module landed with Stage 5 rather than with `validate`, because the first stage that produces findings in bulk is conversion and a register invented alongside its second caller is a register shaped by its first.
 
 Three rules, each of them a rule about where a decision is *not* made:
 
@@ -687,6 +687,8 @@ Three rules, each of them a rule about where a decision is *not* made:
 **Findings flush per version**, so a crash on version 200 of a batch does not discard the first 199, and the run row carries the batch tag and the exit code. Only `validate` gates, and only on `ERROR` (§8.4).
 
 **All twenty rows are registered although Phase 5a can reach six.** A half-populated register cannot be audited. The reachability test names the unreached codes rather than failing, so the debt is a visible list that shrinks as Stages 6 and 7 land instead of a silence.
+
+**And the reachability half earns its keep.** Phase 5b registered `ALERT_LABEL_UNMAPPED` and then could not reach it: every callout class the engine matched was one the vocabulary mapped. The two ways out were deleting the code and widening the detection, and the second is right — Flare's convention is `div.note<Kind>` for whatever kind the project stylesheet defines, so an unsampled `noteBestPractice` was going to arrive as unmarked prose with nothing said. An unreachable code is usually a rule that is narrower than the thing it was written about.
 
 ---
 
@@ -975,7 +977,8 @@ Most rows are **Built** or **Specified**. Two are neither, and are marked as suc
 | `architecture.md` §5 | The engine contract and the document model | Built | `engines/base.py:BaseEngine`, `ConversionContext`, `Unit`, `Document` |
 | `architecture.md` §5.1.8, §5.2.6, §5.3.8 | Reference classification, normalization and emit | Built | `transforms/links.py` |
 | `architecture.md` §5.1.7, §5.2.5, §5.3.7 | Callouts, code fences, GFM-safe tables | Built | `transforms/{callouts,code,tables}.py` |
-| `architecture.md` §5.1 | Flare converter | Specified | Phase 5b, `engines/flare.py` |
+| `architecture.md` §5.1 | Flare converter | Built | `engines/flare.py:FlareEngine`; its TOC reader in `engines/flare_toc.py` |
+| `architecture.md` §5.1–§5.3 | The HTML→GFM walk the engines share | Built | `transforms/markdown.py:Renderer`, `parse` |
 | `architecture.md` §5.2 | SDL DITA converter | Specified | Phase 5c, `engines/dita.py` |
 | `architecture.md` §5.3 | WebWorks converter | Specified | Phase 5d, `engines/webworks.py` |
 | — (owed) | DocBook converter — `str` and `sfire-sfds`, 10 versions | **Unsurveyed** | Phase 5e, `engines/docbook.py`; needs an `architecture.md` §5.x first |
