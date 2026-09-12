@@ -1671,6 +1671,211 @@ Three rules for DocuShift come directly out of this, and all three are already i
 
 ---
 
+### 5.6 DocBook Engine (`engines/docbook.py`)
+
+**Why this is §5.6 and not §5.4.** The engines were written in the order 5.1 Flare, 5.2 DITA, 5.3 WebWorks, and the next two numbers were taken by the cross-engine components — §5.4 CSH and §5.5 Asset Management — before the fourth engine was surveyed. Renumbering to keep the engines contiguous would invalidate several dozen inbound references to "§5.4" and "§5.5" in this file, `design.md` and `planning.md`. The engine sections are therefore §5.1, §5.2, §5.3 and §5.6.
+
+DocBook is the corpus's fourth and last convertible engine, and its smallest by version count: **10 versions in 2 products.** It is also the only one where every version is a near-copy of every other, so a rule measured on one version is a rule measured on all ten — and the only one whose generator writes a single flat, self-describing page shape with no runtime metadata files at all. There is no TOC file, no file index, no CSH map: everything the engine needs is in the HTML.
+
+Everything in this section was measured on 2026-09-11 against the predecessor `html-to-md` cache (`cache\pub`). Figures given per version are `str/11.2.1` unless stated; figures given "across the ten" were run over all of them.
+
+**As built** (Phase 5e, 2026-09-12): `engines/docbook.py`, over the same `transforms/markdown.py` walk the other three use, and **one module** — the TOC, the menu and the link graph are all read out of the pages themselves, so there is no runtime format to split off the way `flare_toc.py` and `webworks_toc.py` were. Three things below changed between the design and the code.
+
+- **§5.6.6's rule was rewritten before it was implemented.** It was drafted as DITA's prepend rule and the refentry measurement retired it; the section above is the corrected version, and the promotion rule is what shipped.
+- **§5.6.10's "skipped by generator marker as well as by Stage 4's recorded API roots" needed a change outside the engine.** `ConversionContext.api_roots` was populated from Stage 4's record alone, so on the `--input` path — no catalog, no extract — it was always empty and `html/apidocs/dotnet`'s 1,466 Sandcastle pages fell into the generic `not-docbook` bucket instead of being named as API reference. `converter/driver.py` now returns the recorded roots **or** `apiref.find_api_roots(tree)`, mirroring the CSH-source fallback beside it; §6.3's rule that the record wins is unchanged, because the fallback runs only when there is no record.
+- **`TOC_ORPHAN` reports both kinds of orphan**, not just the second. §5.6.5's link graph files a page it reached under that page's guide, which is the right output and made those pages invisible to a count that only looked at pages reaching no guide at all. Both populations feed one record, which is why the batch figure (286 of 11,689, 2.4%) is larger than the survey's per-version reading and still small.
+
+Run over all ten versions on 2026-09-12: **11,689 documents, 0 exceptions**, 11,679 of them in a nav tree and the other 10 the hoisted landing pages; `landing` real in 10 of 10; legal and support resolved in 10 of 10 with **0 `TAIL_PAGE_MISSING`**; findings `TOC_ORPHAN` 286, `TOPIC_LINK_DANGLING` 780, `DOCSET_SKIPPED` 51.
+
+#### 5.6.1 What the source actually looks like
+
+**Population.** Exactly 10 versions in 2 products:
+
+| Product | Versions | HTML files per version | Bytes per version |
+| :--- | :--- | ---: | ---: |
+| `str` | 11.1.0, 11.1.1, 11.1.2, 11.1.3, 11.2.0, 11.2.1 | 3,562 – 4,007 | 159 – 203 MB |
+| `sfire-sfds` | 10.6.5, 10.6.6, 11.1.0, 11.1.1 | 3,562 – 3,970 | 160 – 199 MB |
+
+These are the two StreamBase-derived products, and the second is a repackaging of the first: the guide directories, the navigation menu and the page shape are the same in both.
+
+**Four generators ship in one package, and only one of them is DocBook.** Every page declares its generator in a comment or a meta tag in the first 6 KB, so the partition is exact:
+
+| Generator | Files (`str/11.2.1`) | Where | Converted |
+| :--- | ---: | :--- | :--- |
+| `DocBook XSL Stylesheets V1.76.1` | **1,178** | `html/<guide>/` | **Yes** — this engine |
+| javadoc | ~2,300 | `html/apidocs/` | No — API reference (§6.3) |
+| Doxygen | ~150 | `html/apidocs/…` | No — API reference |
+| `Apache Maven Doxia Site Renderer 2.0.0` | 46 | `html/mms/` (`str` 11.2.0 and 11.2.1 only) | No — foreign generator |
+
+`html/apidocs` alone is 2,265–2,481 files. **The prose is a quarter of the file count and a small fraction of the bytes**; the rest is the API tree the pipeline deliberately does not convert. This is the largest api-to-prose ratio of any engine in the corpus, and it is why the skip accounting in §5.6.10 is a first-class part of this engine rather than an afterthought.
+
+**Encoding is not a hazard.** 1,178 of 1,178 pages declare `charset=utf-8`. There is no `iso-8859-1` tail as in WebWorks (§5.3.1).
+
+#### 5.6.2 Detection: already correct, and confirmed
+
+`detect_tree` returns `SourceEngine.DOCBOOK` with `decided_by=2` — the content signature, not a path marker — for all ten versions, and `DOCBOOK` is already in `CONVERTIBLE_ENGINES`. No detection change is needed for this phase. The signature is the `DocBook XSL Stylesheets` string the stylesheet writes into every page's head; the same string is what §5.6.3 and §5.6.10 use to classify individual files, so detection and conversion agree by construction.
+
+#### 5.6.3 The unit of conversion is the version, rooted at `html/`
+
+**The version tree is `html/` plus zero to eight duplicates of directories that already live under it.** Measured across all ten versions, the outermost directories holding a DocBook-marked page are:
+
+| Version | Outermost DocBook directories |
+| :--- | :--- |
+| `str` × 6 | `html`, plus `adaptersguide`, `architect`, `dochome`, `install`, `lv-admin`, `lv-devel`, `rtadmin`, `welcome` |
+| `sfire-sfds/10.6.5`, `10.6.6`, `11.1.1` | `html`, plus `dochome` |
+| `sfire-sfds/11.1.0` | `html` only |
+
+**Every top-level duplicate is byte-identical to its twin under `html/`.** Over all 42 duplicate directories in the ten versions: identical *N*, differ **0**, only-here **0**, only-under-`html` **0**. They are a publishing artefact, not a second doc set.
+
+The root rule therefore cannot be "a directory holding DocBook pages" — that selects nine roots on a `str` version and converts the same guide twice. The rule that works is **a directory holding a DocBook-marked page whose stylesheet link resolves to a file inside that directory**:
+
+- `html/index.html` links `css/sbhelp.css`, which exists under `html/` → `html` is a root.
+- `adaptersguide/index.html` links `../css/sbhelp.css`, which resolves *outside* `adaptersguide` and does not exist there → not a root.
+
+On this corpus that rule selects **exactly `html` in 10 of 10 versions, with zero false positives**, and rejects all 42 duplicates. So DocBook is a **one-unit-per-version** engine — the simplest shape of the four, and the opposite of WebWorks, where the version holds a mean of 3.5 units (§5.3.3). `find_output_roots` gains `_is_docbook_root` and `roots.py`'s module docstring loses its claim that DocBook has nothing to anchor on; that claim was written before this survey and is false.
+
+The rejected duplicates are not silently dropped. Each one is reported once as `DOCSET_SKIPPED` with the reason `duplicate-of-html`, so the report says out loud that eight directories of real HTML were seen and deliberately not converted (invariant 10).
+
+`SKIN_PREFIXES[DOCBOOK]` is `(("css",),)`. There is one skin directory and it holds only stylesheets.
+
+#### 5.6.4 The content container is also the chrome removal
+
+`div#mainContent` is present on **1,178 of 1,178** pages, and **all chrome is outside it**:
+
+| Chrome element | Pages | Position |
+| :--- | ---: | :--- |
+| `div#header`, `div#banner`, `ul#topNavigation`, `div#breadcrumbs`, `div.navheader` | 1,178 | Before the container |
+| `p#mainhelp-navmenu` | 1,178 | Before the container (read for navigation, §5.6.5) |
+| `div#footer`, `div.navfooter` | 1,178 | After the container |
+
+Selecting `div#mainContent` therefore *is* the chrome removal. This is the WebWorks pattern (§5.3.6), not the DITA one — DITA needs an explicit `_strip_chrome` pass because its chrome is interleaved with content. There is no fallback container: a page without `div#mainContent` does not exist in this corpus, and if one appears it is reported `CONTENT_MISSING` rather than converted from `<body>`, because converting from `<body>` would emit the header and breadcrumbs into every page.
+
+The container's single top-level child names the DocBook element that produced the page:
+
+| Top-level child | Pages | What it is |
+| :--- | ---: | :--- |
+| `div.article` | 1,000 | An ordinary topic |
+| `div.refentry` | 81 | A reference page (`refsynopsisdiv`, `refsect1`) |
+| `div.part` | 65 | A part divider |
+| `div.book` | 24 | A guide's `index.html` |
+| `div.index` | 6 | A generated index |
+| `div.glossary` | 2 | A glossary |
+
+All six render through the same generic walk. The distinction matters only for titles (§5.6.6) and navigation (§5.6.5), where `div.book` marks a guide root.
+
+#### 5.6.5 Navigation: guide-local TOCs, a menu for order, a link-graph fallback
+
+There is no TOC file. Navigation is reconstructed from three sources, in order.
+
+**1. `div.toc` in each guide's `index.html`, walked recursively.** DocBook XSL writes a nested `div.toc` into the book page listing that book's chapters and sections. It is strictly guide-local: across the corpus its links are **5,527 same-directory, 16 self, 0 cross-directory**. A recursive walk from a guide's `index.html` — following each entry, and each entry's own `div.toc` — covers **100% of that guide's pages in 21 of the 24 guides**, on every version measured.
+
+**2. Three guides have no `div.toc` at all.** `adaptersguide` (199 pages), `samplesinfo` (202) and `lv-reference` (34) are generated lists whose book page links to their members directly without a TOC wrapper. For these, the fallback is a **link graph**: the book page's in-guide links, plus one hop through those pages' in-guide links. That brings the total unfiled from ~430 to **42 of 1,178 pages (3.6%)** — comparable to DITA's 2–3% orphan rate (§5.2.5). The remaining 42 are reported `TOC_ORPHAN` and appended to their guide's node in source order, so they are navigable rather than lost.
+
+**3. `p#mainhelp-navmenu` supplies order and short labels for the top level.** Both `html/index.html` and `html/lvindex.html` carry the same 14-entry menu — Home, Welcome, Rel Notes, Install, SB Start, Concepts, Authoring, Test/Debug, Configuration, SB Admin, Adapters, Samples, API Guide, Studio Reference. It names 13 of the 24 guide directories (Home is the landing page itself). So the menu fixes the order and the label of those 13, and the remaining 11 guides follow in alphabetical order under their own `<title>`. The menu's labels wrap across lines in some versions (`SB\n  Start`) and must be whitespace-collapsed before use.
+
+**`html/index.html` is a real landing page.** It is a `div.book` with prose and a `div.toc`, not a frameset stub. So `unit.landing` is a real converted document here — unlike DITA and WebWorks, where the landing page is synthesized because none exists. This is the only engine of the four that does not synthesize one.
+
+The `Samples` and `API Guide` menu entries point at `samplesinfo/samplecontents.html` and `apiguide/apiguide-contents.html` rather than an `index.html`; the guide root is whatever the menu names, falling back to `index.html` when the menu does not name the guide.
+
+#### 5.6.6 Titles: `<title>`, promoted rather than prepended
+
+`<title>` equals the titlepage heading on **1,094 of 1,178** pages. Of the 84 that differ, **81 are the `div.refentry` pages**, whose visible title lives in `span.refentrytitle` rather than in a heading, and **3 genuinely differ**. So `<title>` is the title source for every page.
+
+DITA's rule (§5.2.6) — prepend `# {title}` when the body does not already start with a `#` — is **not** the right rule here, and the refentry pages are why. A refentry page's first heading is an `h2` holding the `span.refentrytitle`, so the body *does* start with a `#`, the prepend never fires, and the page is emitted with no level-1 heading at all. Prepending unconditionally is no better: it gives the page a `# sbd` above a `## sbd`.
+
+The measurement settles it. Across all 10 versions, **10,768 of 11,689 pages open at `h1` and 921 open at `h2`** — every `div.refentry` and every generated index — and in **921 of 921 the first heading's text is exactly `<title>`**. That heading *is* the page title, rendered one level down. So:
+
+- **first heading is `h1`** → nothing to do, and the sections below it keep their levels;
+- **first heading is not `h1`** → promote that one heading to `h1`, and leave every later heading where it is, so `## SYNOPSIS` stays under the name it documents;
+- **no heading at all** → prepend `# {title}`. Unreachable in this corpus, where all 11,689 pages carry at least one heading, but a page with prose and no `#` is worse than one titled from `<title>`.
+
+Titles carry no site suffix to strip — DocBook XSL writes the bare element title.
+
+#### 5.6.7 The class vocabulary
+
+The generator is one stylesheet at one version (`V1.76.1`), so the vocabulary is closed and small. Everything not named below renders through the generic walk in `transforms/markdown.py`, which is correct for it.
+
+**Admonitions.** Uniformly `div.{kind} > h3.title + body`, where the class *is* the kind:
+
+| Class | Occurrences | Maps to |
+| :--- | ---: | :--- |
+| `div.note` | 535 | `> [!NOTE]` |
+| `div.caution` | 239 | `> [!CAUTION]` |
+| `div.important` | 211 | `> [!IMPORTANT]` |
+| `div.tip` | 52 | `> [!TIP]` |
+| `div.warning` | 33 | `> [!WARNING]` |
+
+The `h3.title` holds the printed label ("Note", "Caution") and must be **deleted**, not rendered — GFM's alert syntax supplies the label. DocBook's admonition vocabulary is closed at these five and all five map, so **`ALERT_LABEL_UNMAPPED` is not reachable from this engine**; that is a property of the source, not an omission.
+
+**Code.** `pre.programlisting` (2,721), `pre.screen` (177), `pre.synopsis` (61) → a generic fence with no language. Nothing in the markup carries a language hint, so none is guessed (invariant 11).
+
+**Inline spans, and the double-wrap trap.** `span.bold`, `span.command` and `span.keycap` would naturally map to `**` and code. They cannot be mapped naively: **3,145 `span.bold` contain a `strong`, 2,088 `span.command` contain a `strong`, 1,235 `span.keycap` contain a `strong`, and 661 `span.emphasis` contain an `em`.** Wrapping an already-wrapped run yields `****text****`. Two rules follow:
+
+1. A normalize pass **unwraps a redundant sole `strong`/`b`/`em`/`i` child** of a mapped span before the walk sees it.
+2. **`span.emphasis` is never mapped** — its inner `em` already carries the emphasis, and mapping it adds nothing.
+
+**Layout tables that are not tables.** `div.mediaobject > table > tr > td > img` occurs **1,126 times**: a single-cell table wrapped around one image, purely for centring. It is unwrapped to the image. `table.simplelist` (192) is rows of one or two cells holding links or code — a two-column list, not tabular data — and becomes a bullet list.
+
+**Titled blocks.** `div.figure` is `a + p.title + div.figure-contents`, and `div.example` is `a + p.title[b] + div.example-contents[pre]`. In both the caption precedes the content in source order; it is emitted as an italic line before the content. `div.abstract`'s `p.title` is **empty** on every occurrence and is dropped.
+
+**Definition lists.** `div.variablelist > dl > dt/dd` — the generic `dl` handling is correct and needs no override.
+
+**Unclassed headings** are the `refsynopsisdiv` and `refsect1` headings of the refentry pages (SYNOPSIS, DESCRIPTION, OPTIONS, SEE ALSO) and the letter headings of `indexdiv`. Generic handling is correct for both.
+
+#### 5.6.8 Links, anchors and images
+
+**Every intra-tree reference is file-relative.** There are no rooted intra-tree paths and no query-string addressing. Resolution over the corpus:
+
+| Reference kind | Resolves | Notes |
+| :--- | ---: | :--- |
+| `a.olink` | 7,113 ok, 16 exist-but-not-DocBook, 3 missing | Cross-book DocBook links |
+| classless `a[href]` | 5,527 ok | The `div.toc` links |
+| `a.link` | 2,709 ok | |
+| `a.indexterm` | 1,912 ok | |
+| `a.xref` | 729 ok | |
+| `a.ulink` | 453 absolute, 41 missing, 32 exist | External links; the absolute ones pass through |
+
+`/cgi-bin/olink?sysid=…` appears as a `ROOTED` reference and is a **broken cross-book olink baked in at build time** — there is no CGI in a static tree. It is dropped to its text and reported `TOPIC_LINK_DANGLING`. Links into `../apidocs/…` point at the deliberately unconverted API tree and are reported dangling for the same reason DITA's are (§5.2.8): the target exists on disk but has no converted counterpart, and inventing one would be a guess.
+
+**Anchors.** The corpus defines **10,753 plain `a[name]` and 3,347 `a.ix`**, and references **5,548 fragments**. Of those, **5,539 hit a plain `a[name]`, 0 hit an `a.ix`, and 9 hit nothing.** Two consequences:
+
+- **`a.ix` is dropped entirely.** It is the DocBook index marker; its `name` is human-readable prose with spaces, it is never a link target, and emitting it would produce 3,347 malformed anchors.
+- **No fragment in the corpus resolves to an element `id`** — every hit is an `a[name]`. DITA's id-pairing pass (§5.2.8) is therefore not needed here, and the anchor set is pruned to exactly the 5,539 referenced names.
+
+**Images.** 2,003 references to `../images/…` and 116 to a subdirectory, all resolving inside `html/`. The `AssetCopier` rooted at `html/` resolves every one; there are no escapes out of the unit, so nothing here needs §5.5.8's rewriting.
+
+#### 5.6.9 Tail pages come from the footer, not from the title
+
+`div#footer` declares the tail pages by `li` id on **100% of sampled pages**:
+
+| Version | Footer ids |
+| :--- | :--- |
+| `str/11.2.1`, `str/11.1.0`, `sfire-sfds/11.1.0` | `li#legal-and-third-party-notices` → `welcome/legal-and-third-party-notices.html`, `li#contact` → `welcome/contact.html` |
+| `sfire-sfds/10.6.5` | `li#copyright` → `welcome/copyright.html`, `li#contact` → `welcome/contact.html` |
+
+**Reading the footer is not a convenience; it is the only correct source.** Matching by title or path the way the other engines do picks the wrong page: `is_legal_label` matches the substring "third party", so `apiguide/thirdpartylibs.html` — "Using Third-Party JARs and Native Libraries", a genuine technical topic — sorts before `welcome/legal-and-third-party-notices.html` and wins. The footer names the real pages explicitly and there is no ambiguity in it.
+
+`is_legal_label` in `engines/base.py` already matches both `legal-and-third-party-notices` and `copyright`, so the legal page needs no new stem. Support does: `is_support_label` matches "support services" and "documentation and support" and correctly does not match "contact", so this engine carries a local `FOOTER_SUPPORT_IDS = frozenset({"contact"})` rather than widening the shared predicate — "contact" as a general support stem would over-match in the other three engines.
+
+Both pages are real converted documents; `TAIL_PAGE_MISSING` is recorded when the footer declares one and the file is absent.
+
+#### 5.6.10 What is skipped, and why each skip is named
+
+Only DocBook-marked pages convert. Everything else under `html/` is skipped with a stated reason, so the report distinguishes "not converted because it is an API tree" from "not converted because we did not understand it":
+
+| Reason | What it covers | Scale (`str/11.2.1`) |
+| :--- | :--- | ---: |
+| `api-reference` | Anything inside a recorded API root (§6.3) | ~2,400 files |
+| `foreign-generator` | javadoc, Doxygen and Doxia pages outside a recorded API root — `html/mms/` above all | 46+ |
+| `not-docbook` | `README.html`, and HTML that carries no generator signature | small |
+| `duplicate-of-html` | The top-level duplicate directories of §5.6.3, reported once each | 0–8 directories |
+
+`skips_api_references` stays `True`: the API partition is decided once, by `apiref.py`, and this engine consumes that decision rather than re-deciding it (invariant 12).
+
+**There is no CSH in either product.** Neither `str` nor `sfire-sfds` ships a context-sensitive-help map in any of the ten versions, so the CSH mapper (§5.4) stays a three-reader component and DocBook documents carry no `csh` value. That is an absence reported, not an absence assumed (invariant 10).
+
+---
+
 ## 6. AEM Structure Synthesis & Publishing Layout
 - Synthesizes `toc.yml`, `nav.yml`, `meta.yml`, `index.md`, and YAML frontmatter.
 - Assembles the documentation sets into the publishing layout below, on disk, ready for someone else to publish.

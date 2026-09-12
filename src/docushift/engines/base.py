@@ -228,11 +228,13 @@ class BaseEngine(ABC):
 
 # -- the registry -------------------------------------------------------------
 #
-# An empty registry is a valid state, and in Phase 5a it is the *only* state. That
+# An empty registry is a valid state, and in Phase 5a it was the *only* state. That
 # is why dispatch tests "is a handler registered" rather than "is the engine in
-# `CONVERTIBLE_ENGINES`": `docbook`, which is convertible-by-policy and unwritten,
-# and any engine at all in 5a take the same path and produce the same
-# `ENGINE_UNKNOWN` finding, instead of two ways of saying "nothing happened".
+# `CONVERTIBLE_ENGINES`": an engine that is convertible-by-policy and unwritten, and
+# any engine at all in 5a, take the same path and produce the same `ENGINE_UNKNOWN`
+# finding, instead of two ways of saying "nothing happened". All four convertible
+# engines are written as of Phase 5e, so the registry is now full -- and the test
+# still has to pass with it empty, because that is what a fifth one starts as.
 
 _REGISTRY: dict[SourceEngine, type[BaseEngine]] = {}
 

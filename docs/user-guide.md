@@ -35,7 +35,7 @@ docushift doctor
 
 Prints the resolved project paths (`config/`, `cache/`, `families/`, `output/`, `state.db`), the active locale, and which family workspaces exist so far. The working directories are created on first run; per-family folders are not, so an untouched project reads `family workspaces: none yet`.
 
-> **Implementation status.** The command tree below is the full intended surface and `--help` reflects it. Implemented today: `doctor`, the **whole `catalog` group, `fetch` included** — discovery talks to the live docsite — **`download` and `archive download`**, including `--from-file`, and **`extract`** in full — it unpacks a package, detects its engine, inventories its assets and CSH sources, and writes the five inventory columns back to `versions.csv`. **`convert` converts MadCap Flare, SDL DITA and WebWorks** — the engine-neutral spine (asset resolution, CSH, frontmatter, the build-and-swap, the report and the findings register) plus three engines' readers, which between them are 528,491 of the corpus's topics. A version on any other engine reports `Engine unknown` and is skipped by name (see §4); DocBook arrives in the next sub-phase. Everything downstream of `convert` is not built at all. Every unbuilt command exits non-zero naming the phase that will build it (see `docs/planning.md`); commands are never silently no-op.
+> **Implementation status.** The command tree below is the full intended surface and `--help` reflects it. Implemented today: `doctor`, the **whole `catalog` group, `fetch` included** — discovery talks to the live docsite — **`download` and `archive download`**, including `--from-file`, and **`extract`** in full — it unpacks a package, detects its engine, inventories its assets and CSH sources, and writes the five inventory columns back to `versions.csv`. **`convert` converts all four engines — MadCap Flare, SDL DITA, WebWorks and DocBook** — the engine-neutral spine (asset resolution, CSH, frontmatter, the build-and-swap, the report and the findings register) plus four engines' readers, which between them are every eligible version in the corpus. A version on a recognised but unconvertible engine reports `Engine unknown` and is skipped by name (see §4). Everything downstream of `convert` is not built at all. Every unbuilt command exits non-zero naming the phase that will build it (see `docs/planning.md`); commands are never silently no-op.
 
 ---
 
@@ -573,12 +573,12 @@ docushift convert \
 | `--force` | Re-convert even when the extracted tree has not changed since last time. |
 | `--input` / `--output` | Convert one folder that never went through `extract`. Both are required together, with `--product` and `--version`. |
 
-> **MadCap Flare, SDL DITA and WebWorks convert today; DocBook does not yet.** Between them
-> the three are 528,491 of the corpus's topics, so all but a handful of eligible versions
-> now produce Markdown. The DocBook reader arrives in `docs/planning.md` Phase 5e, and until
-> the engine a version needs is registered that version reports **`Engine unknown`**, is
-> skipped and named rather than guessed at. The command exits 0: one unconvertible version
-> must not stop a 200-version run.
+> **All four engines convert: MadCap Flare, SDL DITA, WebWorks and DocBook.** Between them
+> they are every eligible version in the corpus. A version whose generator DocuShift
+> recognises but has no converter for — RoboHelp, R help, MkDocs and the rest of the list in
+> §8 — reports **`Engine unknown`**, and is skipped and named rather than guessed at. So does
+> a version whose engine was never determined. The command exits 0 either way: one
+> unconvertible version must not stop a 200-version run.
 
 **What a Flare version produces.** One output subtree per *output root* — the directory
 holding `Data/HelpSystem.xml` — mirroring the source layout, because filename stems collide
@@ -635,6 +635,29 @@ are all recovered from the help runtime the generator shipped beside the pages, 
 between books in the same package resolve; a link naming a book the package does not ship is
 emitted as plain text and counted.
 
+**What a DocBook version produces.** One output subtree, `html/` — the whole version is one
+unit, because that is how DocBook publishes: one stylesheet, one tab strip and 24 guides
+under one directory. The guide directories are mirrored, since `index.html` alone is 24
+pages per version. A `str` package also ships up to eight **byte-identical copies** of a
+guide at the version root, and the copy is told from the original by where its stylesheet
+link lands; the copies are reported and converted once, not eight times. Unlike DITA and
+WebWorks the landing page is **real** — `html/index.html` is a written page, not a frameset
+stub — so it is converted and used as it stands. Navigation comes from three places at once:
+the tab strip across the top fixes the order of the guides it names, each guide's own
+contents page nests its pages, and the three guides that ship no contents page at all are
+filed by following their links two hops from the guide's front page. About 3.6% of pages are
+reached by none of the three; they are appended to their guide and counted, never dropped.
+The legal and support pages are read from the footer's own markup, because searching by
+title picks up a topic called "Using Third-Party JARs and Native Libraries" first.
+
+DocBook is the most uniform output of the four — one generator across ten years — so the
+conversion is mostly vocabulary: `div.note`/`tip`/`important`/`warning`/`caution` become GFM
+alerts, `pre.programlisting` becomes a bare fence (nothing in the source names a language),
+the single-cell tables drawn around 1,126 images are unwrapped back to images, and index
+anchors are dropped because nothing in the corpus references one. It is also the only engine
+with **no context-sensitive help** to emit: neither product ships a help map, so these
+versions produce no `csh.yml` — which is an absence in the source, not a gap in the reader.
+
 **What it skips, and says it skipped.** In Flare: generated directories (`_globalpages/`,
 `MicroContent/`, `Resources/`), the `Default.htm` runtime stubs, any localized subtree, and
 API-reference trees — the last identified by a generator marker inside the directory, never
@@ -644,7 +667,10 @@ and the generator's `static/` and `fonts/` chrome. In WebWorks: the `wwhdata/`, 
 and `tpl/` runtime directories (read for their metadata, never emitted), the frameset stubs,
 and the generated list-of-figures, list-of-tables and index pages — a book's *first*
 navigation entry is "Figures" or "Tables" often enough that dropping them silently would be
-a visible change. Across all three, a topic with no content container is reported, never
+a visible change. In DocBook: the stylesheet directory, and **the three other generators
+that ship inside the same package** — a TIBCO Streaming package holds Javadoc, Doxygen and a
+Maven site beside the prose, and the Javadoc tree alone is about 2,400 files, more than
+twice the prose. Across all four, a topic with no content container is reported, never
 guessed at, which is what keeps a Javadoc page out of the Markdown output.
 
 Each run ends with five counts — converted, already current, no extracted tree, engine

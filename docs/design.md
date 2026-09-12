@@ -932,7 +932,7 @@ Properties that hold across the whole tool. Each is a rule some algorithm above 
 
 ## 12. Algorithm index
 
-Most rows are **Built** or **Specified**. Two are neither, and are marked as such rather than left off the table: **Unsurveyed** means the scope is known and the design is not, and **Placeholder** means the artifact is written but its shape is a guess awaiting a spec. Both are gaps someone has to close; a row that omits them reads as a complete index.
+Most rows are **Built** or **Specified**. One is neither, and is marked as such rather than left off the table: **Placeholder** means the artifact is written but its shape is a guess awaiting a spec. A fourth mark, **Unsurveyed** — scope known, design not — was carried by the DocBook row from 2026-09-09 until it landed on 2026-09-12, and returns if another engine is ever scoped ahead of its design. Both are gaps someone has to close; a row that omits them reads as a complete index.
 
 | § | Algorithm | Status | Implementation |
 | :--- | :--- | :--- | :--- |
@@ -975,13 +975,13 @@ Most rows are **Built** or **Specified**. Two are neither, and are marked as suc
 | 7.3 | Write-back, folder map and the raw generator | Built | `extractor/unpacker.py:identify`, `catalog.py:record_detected_engine` |
 | `architecture.md` §5 | Stage 5 driver — selection, dispatch, the write, the swap | Built | `converter/driver.py:DocumentConverter` |
 | `architecture.md` §5 | The engine contract and the document model | Built | `engines/base.py:BaseEngine`, `ConversionContext`, `Unit`, `Document` |
-| `architecture.md` §5.1.8, §5.2.6, §5.3.8 | Reference classification, normalization and emit | Built | `transforms/links.py` |
-| `architecture.md` §5.1.7, §5.2.5, §5.3.7 | Callouts, code fences, GFM-safe tables | Built | `transforms/{callouts,code,tables}.py` |
+| `architecture.md` §5.1.8, §5.2.6, §5.3.8, §5.6.8 | Reference classification, normalization and emit | Built | `transforms/links.py` |
+| `architecture.md` §5.1.7, §5.2.5, §5.3.7, §5.6.7 | Callouts, code fences, GFM-safe tables | Built | `transforms/{callouts,code,tables}.py` |
 | `architecture.md` §5.1 | Flare converter | Built | `engines/flare.py:FlareEngine`; its TOC reader in `engines/flare_toc.py` |
-| `architecture.md` §5.1–§5.3 | The HTML→GFM walk the engines share | Built | `transforms/markdown.py:Renderer`, `parse` |
+| `architecture.md` §5.1–§5.6 | The HTML→GFM walk the engines share | Built | `transforms/markdown.py:Renderer`, `parse` |
 | `architecture.md` §5.2 | SDL DITA converter | Built | `engines/dita.py:DitaEngine`; its TOC reader is `read_toc` in the same module |
 | `architecture.md` §5.3 | WebWorks converter | Built | `engines/webworks.py:WebWorksEngine`; its four runtime readers in `engines/webworks_toc.py` |
-| — (owed) | DocBook converter — `str` and `sfire-sfds`, 10 versions | **Unsurveyed** | Phase 5e, `engines/docbook.py`; needs an `architecture.md` §5.x first |
+| `architecture.md` §5.6 | DocBook converter | Built | `engines/docbook.py:DocBookEngine`; its root rule is `is_docbook_page` in `engines/roots.py` |
 | 8.1–8.3 | Catalog validation, warnings, triage | Built | `catalog.py` |
 | 8.5 | Findings register — codes, severity, per-version flush | Built | `reporting/findings.py`; `state.py:record_findings` |
 | 9.3 | CSH resolution | Built | `transforms/csh.py:resolve`, `order_doc_sets` |

@@ -34,6 +34,7 @@ from enum import StrEnum
 from pathlib import Path, PurePosixPath
 from typing import Any
 
+from docushift.apiref import find_api_roots
 from docushift.catalog import CatalogManager
 from docushift.config import ConfigManager
 from docushift.engines.base import ConversionContext, Document, Unit, engine_for
@@ -215,7 +216,7 @@ class DocumentConverter:
             slug=slug,
             version=number,
             product_name=product.display_name,
-            api_roots=self._recorded_paths(slug, number, "api_roots", tree),
+            api_roots=self._api_roots(slug, number, tree),
             output_roots=self._recorded_paths(slug, number, "output_roots", tree),
             findings=self.findings,
         )
@@ -338,6 +339,25 @@ class DocumentConverter:
         """
         raw = self._metadata(slug, version).get(key, "")
         return [tree / line for line in raw.splitlines() if line.strip()]
+
+    def _api_roots(self, slug: str, version: str, tree: Path) -> list[Path]:
+        """Stage 4's recorded API roots, located here only when there is no record.
+
+        §6.3's rule -- Stages 4, 5 and 7 share one recorded answer -- is intact,
+        because this never *re*-walks a tree that has an answer: a recorded empty
+        list and a located empty list come from the same predicate and cannot
+        disagree. The fallback is for `--input`, a standalone folder that never
+        went through `extract`, and it is the same fallback `_csh_sources` makes
+        one line below for the same reason.
+
+        It is not cosmetic. A DocBook package's `apidocs/dotnet` tree is 1,466
+        pages whose generator is in no marker list, so without the fallback they
+        are skipped as merely "not DocBook" instead of named as the API reference
+        they are -- the difference between a report line that explains 1,466 files
+        and one that shrugs at them.
+        """
+        recorded = self._recorded_paths(slug, version, "api_roots", tree)
+        return recorded or find_api_roots(tree)
 
     def _csh_sources(self, slug: str, version: str, tree: Path) -> list[CshSource]:
         """The version's help maps, re-read from disk at the paths Stage 4 recorded.
