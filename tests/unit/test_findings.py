@@ -10,6 +10,7 @@ import pytest
 from docushift.reporting.findings import (
     REACHABLE_IN_PHASE_5A,
     REACHABLE_IN_PHASE_5B,
+    REACHABLE_IN_PHASE_6A,
     REGISTRY,
     FindingsRun,
     Severity,
@@ -132,9 +133,14 @@ def test_summary_counts_note_rows_not_note_occurrences() -> None:
 
 def test_the_reachability_debt_is_named_rather_than_asserted_away() -> None:
     """§7.5's guarantee, allowed to pass with a *named* list of unreached codes."""
-    outstanding = unreachable_codes(REACHABLE_IN_PHASE_5B)
+    outstanding = unreachable_codes(REACHABLE_IN_PHASE_6A)
 
-    assert set(REACHABLE_IN_PHASE_5A) <= set(REACHABLE_IN_PHASE_5B) <= set(REGISTRY)
+    assert (
+        set(REACHABLE_IN_PHASE_5A)
+        <= set(REACHABLE_IN_PHASE_5B)
+        <= set(REACHABLE_IN_PHASE_6A)
+        <= set(REGISTRY)
+    )
     # With the first engine built, `convert` owes nothing: every remaining debt
     # belongs to `sync` or `validate`. The 5a exemption for `NAV_NODE_DROPPED` is
     # gone, which is the point of the sub-phase.

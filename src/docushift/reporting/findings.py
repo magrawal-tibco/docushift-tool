@@ -138,8 +138,12 @@ REGISTRY: dict[str, Code] = _codes(
     Code("VERSION_UNDATED", Severity.NOTE, Stage.SYNC,
          "Active version with no release_date; title loses its bracket",
          "planning.md Phase 6 contract"),
-    Code("METADATA_MISMATCH", Severity.WARNING, Stage.SYNC,
-         "SuiteHelp publication-title / release-date disagreeing with the catalog",
+    # CONVERT rather than SYNC, corrected in 6a: the homepage figures live in
+    # `Unit.metadata`, which exists only while the engine's unit is in hand, so
+    # conversion is the stage that *discovers* the disagreement even though the
+    # keys it used to feed belong to sync's `metadata.yml`.
+    Code("METADATA_MISMATCH", Severity.WARNING, Stage.CONVERT,
+         "SuiteHelp release-version / release-date disagreeing with the catalog",
          "planning.md Phase 6 contract"),
     Code("ARCHIVE_ALSO_LIVE", Severity.NOTE, Stage.SYNC,
          "Archived version that is also live, cross-linked", "architecture.md §6.2.3"),
@@ -163,6 +167,10 @@ REACHABLE_IN_PHASE_5B = REACHABLE_IN_PHASE_5A | {
     "TOPIC_LINK_DANGLING", "ALERT_LABEL_UNMAPPED", "LANDING_PAGE_EMPTY",
     "TAIL_PAGE_MISSING", "LOCALIZED_TREE_SKIPPED",
 }
+# Stage 6a raises no new code -- the four the synthesizer needs were registered in
+# 5b and 5a. It gains one only because `METADATA_MISMATCH` moved from `sync` to
+# `convert`, which is where the figures it compares actually exist.
+REACHABLE_IN_PHASE_6A = REACHABLE_IN_PHASE_5B | {"METADATA_MISMATCH"}
 
 
 class UnregisteredCode(KeyError):

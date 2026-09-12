@@ -90,9 +90,17 @@ def test_every_taxonomy_rule_targets_a_declared_family(repo_root: Path) -> None:
 
 
 def test_aem_templates_present(repo_root: Path) -> None:
+    """Three, not the Phase-1 four: `nav.yml.j2` is deleted and `meta.yml` renamed.
+
+    The AEM contract of 2026-09-10 names `metadata.yml` and `version.yml` and has
+    no `nav.yml` at all -- nothing consumed it, nothing implemented it, and
+    `toc.yml` was always the specified navigation artifact.
+    """
     templates_dir = repo_root / "config" / "aem_templates"
-    for name in ("toc.yml.j2", "nav.yml.j2", "meta.yml.j2", "index.md.j2"):
+    for name in ("toc.yml.j2", "metadata.yml.j2", "index.md.j2"):
         assert (templates_dir / name).is_file()
+    for gone in ("nav.yml.j2", "meta.yml.j2"):
+        assert not (templates_dir / gone).exists()
 
 
 def test_gitignore_covers_generated_artifacts(repo_root: Path) -> None:

@@ -10,7 +10,7 @@
 - **Spreadsheet-Editable Catalog**: `products.csv` + `versions.csv`, with a snapshot-based 3-way merge that preserves your edits automatically on re-fetch — no override flags to remember.
 - **Active & Archived Version Management**: Automatic download link resolution with selective conversion flags.
 - **Context-Sensitive Help (CSH)**: Carries every help identifier through the migration — a `csh.yml` map per product version plus identifiers in topic frontmatter, so a product's Help button still resolves. Engine-neutral across Flare, WebWorks, and DITA.
-- **AEM Architecture Synthesis**: Generates `toc.yml`, `nav.yml`, `meta.yml`, landing pages, and frontmatter.
+- **AEM Architecture Synthesis**: Generates `toc.yml`, `metadata.yml`, `version.yml`, landing pages, and frontmatter.
 - **Enterprise Tracking & Delta Engine**: SQLite ledger for phased batch runs and delta updates.
 
 ---

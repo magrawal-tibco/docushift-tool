@@ -1,6 +1,7 @@
 """Shared pytest fixtures for the DocuShift suite."""
 
 import json
+import shutil
 from pathlib import Path
 
 import pytest
@@ -22,8 +23,15 @@ def repo_root() -> Path:
 
 @pytest.fixture
 def project_root(tmp_path: Path) -> Path:
-    """An isolated project root with a config/ directory, safe to write to."""
+    """An isolated project root with a config/ directory, safe to write to.
+
+    The shipped AEM templates are copied in rather than stubbed: a real working
+    root has them, and from Phase 6a a version that cannot find `toc.yml.j2`
+    fails to convert. A fixture root that lacks them would test a condition no
+    installation is in.
+    """
     (tmp_path / "config").mkdir()
+    shutil.copytree(REPO_ROOT / "config" / "aem_templates", tmp_path / "config" / "aem_templates")
     return tmp_path
 
 

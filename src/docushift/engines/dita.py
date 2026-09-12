@@ -545,6 +545,10 @@ class DitaEngine(BaseEngine):
         unit = Unit(root=root, name=_relative(context.tree, root))
         plan = self._plan(context, unit, root)
         unit.metadata = plan.metadata
+        # The homepage names the publication, and a version ships up to 11 doc-sets
+        # (§5.2.1) -- so this is the doc-set's label in a multi-unit `toc.yml`, and
+        # deliberately not a claim about the product, which the catalog names.
+        unit.title = plan.metadata.get("publication-title", "")
 
         documents: dict[str, Document] = {}
         for topic in plan.topics:
@@ -946,9 +950,11 @@ def _read_metadata(text: str, into: dict[str, str]) -> None:
 
     All three are present in 314 of 314 doc-sets that ship one, and in 20 of 20
     re-sampled. They no longer feed `metadata.yml` -- AEM specified that file as
-    `csg-*` keys only -- so they become a **cross-check** against the catalog's
-    `display_name` and `release_date` in Phase 6, where a disagreement is a
-    `METADATA_MISMATCH` report line rather than a failure. 5 doc-sets ship more
+    `csg-*` keys only -- so they are a **cross-check** against the catalog, run by
+    `converter/driver._report_metadata` as of Phase 6a, where a disagreement is a
+    `METADATA_MISMATCH` report line rather than a failure. Only the version and
+    the release *year* are compared: a version ships up to 11 publications, so
+    testing `publication-title` against one display name would fire on nearly all. 5 doc-sets ship more
     than one homepage and 39 ship none; the first read wins and an absent one
     leaves the dict empty, which invariant 11 makes a blank rather than a zero.
     """

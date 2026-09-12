@@ -681,6 +681,17 @@ extracted tree has not changed since it was converted is skipped, and `--force` 
 Conversion also writes the version's context-sensitive help map (`csh.yml`) and stamps the
 matching identifiers into topic frontmatter — see §7.
 
+**Conversion also builds the version's navigation.** `toc.yml` and `metadata.yml` are
+written by `convert`, not by `sync`, because the navigation tree exists only while the
+source is in hand. Where a version ships several books or doc-sets — 90% of WebWorks
+versions do — each becomes one top-level entry, in the order the source declares them
+rather than alphabetically. A navigation node that has children but no page of its own
+gets a page generated for it, marked `generated: true` so a re-run replaces it; a node
+with neither is dropped and counted. Support and legal notices are moved to the end of
+the version once, even when six books each ship a copy of the same notice — the extra
+copies leave the navigation and stay on disk, since a help identifier may still open one.
+The run's per-version line reports the node count and how many pages were generated.
+
 **Conversion copies an asset because a topic referenced it, and it copies it at the moment it writes the link.** There is no extension allow-list and no separate copying pass: the two happen together, so a relative image link in the output always has a file at the other end. Each asset keeps the path it had relative to its topic, so nothing is renamed, flattened or de-duplicated. Three things get reported rather than copied:
 
 - **Skipped skin.** Most references in a help package point at the generator's own chrome — SDL's `static/`, WebWorks' `tpl/`, Flare's `Skins/`. Half to three-quarters of all references are these. They are counted and dropped.
@@ -705,7 +716,8 @@ docushift validate --target-dir ../tibco-docs-aem/
 ```
 en-us-tib-messaging-userdocs/           # the docs tree — what a reader reads
 └── en-us/ems/
-    ├── online-help/10-4-0/…            # converted Markdown, toc.yml, nav.yml, meta.yml, csh.yml
+    ├── metadata.yml                    # csg-product
+    ├── online-help/10-4-0/…            # converted Markdown, toc.yml, metadata.yml, index.md, csh.yml
     ├── user-guides/10-4-0/…            # user-guide PDFs + index.md, toc.yml
     ├── release-information/10-4-0/…    # release notes + readme + index.md, toc.yml
     └── reference-documents/10-4-0/…    # VPAT, licence, rest of doc/ + index.md, toc.yml
@@ -720,7 +732,7 @@ Eight things to expect:
 
 - **A non-`en-us` run publishes into `loc-tib-messaging-userdocs` and gets no `-resources` tree.** All localized content shares one docs tree rather than getting one per language, and API references and archives are English-only. Asking for a localized resources tree is an error, not an empty directory.
 
-- **`nav.yml` and `meta.yml` are placeholders — do not build on their shape yet.** `toc.yml`, `index.md` and `csh.yml` are specified and stable; those two are not. The AEM side has not supplied a spec for either, so `config/aem_templates/nav.yml.j2` and `meta.yml.j2` still hold the scaffolding shapes the project started with, and both templates say so at the top. They will be rewritten against the real requirements when those arrive, which is likely to change their field names. `validate` therefore checks that the files exist and parse, and asserts nothing about their content.
+- **`nav.yml` is gone and `meta.yml` is now `metadata.yml`.** The AEM spec arrived on 2026-09-10 and named neither of the two placeholder templates the project started with. Nothing consumed `nav.yml`, so it was deleted rather than kept; `metadata.yml` replaces `meta.yml` and carries exactly two keys — `csg-product` beside the product's doc-classes, and `csg-version` in each version folder, dotted (`10.4.0`) even though the folder around it is dashed. The eleven fields the old placeholder invented are not there and are not coming back. If you built anything against `meta.yml`, it needs rewriting.
 - **The PDF doc-classes get an index too.** `user-guides/`, `release-information/` and `reference-documents/` each receive a generated `index.md` and `toc.yml` listing their files, so a copied PDF is reachable. Titles come from the document kind where the name identifies one (Release Notes, VPAT, License Agreement), otherwise from the PDF's own metadata, otherwise from the filename. A doc-class with no files gets no folder at all rather than an empty index.
 - **`archives/` is indexed from the catalog, so it lists every archived version — including the ones you have not downloaded.** Entries whose ZIP is not in the repository link to the docsite instead, and the index says which is which. That is deliberate: `archives/` exists to be the complete product history, and `archive download` is what fills it in. `api-references/` gets no generated index — Javadoc ships its own.
 - **Versions are dashed here** (`10.4.0` → `10-4-0`) and nowhere else. The catalog and the `families/` workspace keep the dots.
@@ -819,7 +831,8 @@ Each converted version gets a **`csh.yml`** at the root of its Markdown output, 
 ```
 output/.../businessworks/6.12.0/
 ├── csh.yml            ← identifier → topic map for this version
-├── toc.yml
+├── toc.yml            ← the version's navigation
+├── metadata.yml       ← csg-version: "6.12.0"
 ├── bw-ent-html/
 ├── bwce-html/
 └── relnotes/

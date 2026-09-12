@@ -17,6 +17,7 @@ import re
 from pathlib import Path, PurePosixPath
 
 import pytest
+import yaml
 from click.testing import CliRunner
 
 from docushift.catalog import CatalogManager
@@ -27,6 +28,7 @@ from docushift.engines.base import (
     BaseEngine,
     ConversionContext,
     Document,
+    NavNode,
     Unit,
     engine_for,
     register,
@@ -98,6 +100,14 @@ class FakeEngine(BaseEngine):
             unit.documents.append(
                 Document(source=html, relative=relative, title=html.stem, body="\n".join(lines))
             )
+        # A flat node list and a landing page: the least an engine can report and
+        # still have Stage 6a something to synthesize. Reporting nothing at all
+        # would let the driver write an empty `toc.yml` and look correct.
+        unit.nav = [
+            NavNode(label=document.title, document=document.relative)
+            for document in unit.documents
+        ]
+        unit.landing = unit.documents[0].relative if unit.documents else None
         unit.skip("frameset", 1)
         return unit
 
@@ -208,6 +218,32 @@ def test_the_spine_converts_a_unit_end_to_end(
     output = config.output_path(product.bu, product.family, product.slug, version.version)
     assert (output / "guide" / "Content" / "topic.md").is_file()
     assert result.skipped == {"frameset": 1}
+
+
+def test_the_version_gets_its_toc_and_metadata_inside_the_build(
+    config, catalog, product, version, extracted, fake_engine
+) -> None:
+    """Stage 6a runs before the swap, so the artifacts arrive with the topics.
+
+    Asserted here and not only in `test_navigation.py` because the seam is the
+    point: the node list exists only while the units are in hand, and a
+    synthesizer that ran after `swap()` would write into a directory that no
+    longer exists.
+    """
+    result, _ = convert(config, catalog, product, version)
+
+    output = config.output_path(product.bu, product.family, product.slug, version.version)
+    toc = yaml.safe_load((output / "toc.yml").read_text(encoding="utf-8"))
+    # The landing page first, and every path relative to the version root rather
+    # than to the unit the engine reported it from.
+    assert [item["path"] for item in toc["items"]] == [
+        "guide/Content/second.md", "guide/Content/topic.md",
+    ]
+    assert result.nav_nodes == 2
+    assert result.generated == 0
+    assert yaml.safe_load((output / "metadata.yml").read_text(encoding="utf-8")) == {
+        "csg-version": "10.4.0"
+    }
 
 
 def test_a_relative_link_exists_exactly_when_the_asset_was_copied(

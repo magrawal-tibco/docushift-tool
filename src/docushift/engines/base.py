@@ -18,7 +18,8 @@ So the contract fixes only what all of them share:
   engines have two and in all three they differ.
 - **Navigation is a node list, not rendered YAML.** The engine reports the tree,
   the landing page and the support/legal tail; §10's three node rules are
-  engine-neutral and are applied once, by the synthesizer, in Phase 6.
+  engine-neutral and are applied once, by `converter/navigation.py` (Phase 6a),
+  which also decides how several units become one version's `toc.yml`.
 - **A failure is a returned outcome, never an exception** -- the rule
   `PackageDownloader` and `PackageExtractor` already state, so all three stage
   drivers read alike.
@@ -77,8 +78,8 @@ class NavNode:
 
     label: str
     # None for a headless container -- Flare's `'___'` sentinel, 165 per 60 output
-    # roots. Phase 6 generates a page for the 158 that have children and drops the
-    # 7 that do not; the engine reports the fact rather than deciding.
+    # roots. `converter/navigation.py` generates a page for the 158 that have
+    # children and drops the 7 that do not; the engine reports the fact.
     document: PurePosixPath | None = None
     # The bookmark within `document`, without its `#`. 12.1% of Flare's TOC entries
     # carry one and several entries routinely share a page; discarding it collapses
@@ -104,10 +105,18 @@ class Unit:
 
     root: Path
     name: str
+    # What to call this unit where a version ships more than one -- 90.1% of
+    # WebWorks versions, against 9.6% of Flare's. Filled by the engine and not
+    # inferred by the synthesizer, because the engine is where the answer already
+    # is: WebWorks has `books.xml`'s book title, DITA has the homepage's
+    # `publication-title`, and a second guesser would drift from the first. Blank
+    # where the engine has no name for it, which `converter/navigation.py` falls
+    # back from rather than papers over -- the raw stem reads `tib_adas400_concepts`.
+    title: str = ""
     documents: list[Document] = field(default_factory=list)
     nav: list[NavNode] = field(default_factory=list)
-    # The version's landing page, which Phase 6 moves to first. Flare resolves one
-    # in 676 of 676 roots and it is *absent* from the TOC in 55 of 60 sampled.
+    # The version's landing page, which the synthesizer moves to first. Flare
+    # resolves one in 676 of 676 roots; it is *absent* from the TOC in 55 of 60.
     landing: PurePosixPath | None = None
     # Support and legal, in that order, reported by name and never constanted --
     # the support heading is `TIBCO` in 565 roots, `ibi` in 49, `Spotfire` in 45.
@@ -119,7 +128,7 @@ class Unit:
     # What the source says about itself, where it says anything: DITA's
     # `-homepage.html` carries `publication-title`, `release-version` and
     # `release-date` (§5.2.7). It does *not* become `metadata.yml`, whose keys AEM
-    # fixed as `csg-*`; Phase 6 reads it as a cross-check against the catalog and
+    # fixed as `csg-*`; the driver reads it as a cross-check against the catalog and
     # a disagreement is a `METADATA_MISMATCH` line. Empty where the engine has no
     # such file, which invariant 11 makes a blank rather than a zero.
     metadata: dict[str, str] = field(default_factory=dict)

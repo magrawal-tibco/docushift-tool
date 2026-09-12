@@ -1120,7 +1120,9 @@ def convert(ctx, bu, family, product, version, batch, select_all, force, dry_run
         if result.outcome is ConvertOutcome.CONVERTED:
             console.print(
                 f"  [green]v[/green] {result.slug}@{result.version} "
-                f"{result.documents} topic(s), {result.assets} asset(s), {result.units} unit(s)"
+                f"{result.documents} topic(s), {result.assets} asset(s), {result.units} unit(s), "
+                f"{result.nav_nodes} nav node(s)"
+                + (f", {result.generated} generated" if result.generated else "")
             )
         elif result.outcome is ConvertOutcome.FAILED:
             console.print(f"  [red]x[/red] {result.slug}@{result.version}")

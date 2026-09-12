@@ -37,12 +37,14 @@ from typing import Any
 from docushift.apiref import find_api_roots
 from docushift.catalog import CatalogManager
 from docushift.config import ConfigManager
+from docushift.converter import navigation
 from docushift.engines.base import ConversionContext, Document, Unit, engine_for
 from docushift.engines.csh import CshFormat, CshSource, csh_format_of, read_csh_source
 from docushift.models import ConversionStatus, Product, ProductVersion, SourceEngine
 from docushift.reporting.findings import FindingsRun
 from docushift.transforms import csh as csh_transform
 from docushift.transforms.assets import AssetCopier, Counts
+from docushift.utils.csvio import normalize_date
 from docushift.utils.swap import remove, swap
 
 
@@ -70,6 +72,12 @@ class ConvertResult:
     engine: SourceEngine = SourceEngine.AUTO
     units: int = 0
     documents: int = 0
+    # Pages Stage 6a wrote that no source file produced: the container pages and,
+    # where no unit reports a landing page, the version index. Counted apart from
+    # `documents`, which is what the engines converted -- a run that reports 3,625
+    # documents converted 3,625 topics.
+    generated: int = 0
+    nav_nodes: int = 0
     assets: int = 0
     message: str = ""
     # Asset counts summed over the version's units. Per-root detail stays in the
@@ -225,6 +233,7 @@ class DocumentConverter:
             slug, number, ConvertOutcome.CONVERTED, path=target, engine=version.engine
         )
         output_rows: list[tuple[str, str, str]] = []
+        units: list[Unit] = []
 
         for root in handler.units(context):
             unit_name = _relative(tree, root)
@@ -239,7 +248,13 @@ class DocumentConverter:
                 result.skipped[reason] = result.skipped.get(reason, 0) + count
             result.units += 1
             result.documents += len(unit.documents)
+            units.append(unit)
         context.assets = None
+
+        # Stage 6a, and it runs here rather than in a later command because the
+        # node list exists only while the units are in hand and the pages it
+        # generates have to reach the staging tree before the swap.
+        self._synthesize(context, units, staging, product, version, result)
 
         # Resolution runs against what this run *just produced*, from the rows in
         # hand rather than from the table -- the table is written below, and a
@@ -285,6 +300,45 @@ class DocumentConverter:
             path.write_text(_render(document), encoding="utf-8")
             output_rows.append((source, str(relative), unit.name))
 
+    def _synthesize(
+        self,
+        context: ConversionContext,
+        units: list[Unit],
+        staging: Path,
+        product: Product,
+        version: ProductVersion,
+        result: ConvertResult,
+    ) -> None:
+        """Stage 6a: the version's `toc.yml`, its generated pages and `metadata.yml`.
+
+        Inside the build and before the swap. The generated pages are written the
+        same way a converted topic is -- `_render` gives them the same frontmatter
+        rules -- and they are deliberately absent from `output_rows`: the §9.3 map
+        is keyed on the source file, and these have none.
+        """
+        templates = self.config.aem_templates_dir
+        synthesis = navigation.synthesize(context, units, templates)
+        for document in synthesis.documents:
+            path = staging / Path(*document.relative.parts)
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(_render(document), encoding="utf-8")
+
+        title = f"{product.display_name} {version.version}".strip()
+        (staging / "toc.yml").write_text(
+            navigation.render_toc(synthesis.nodes, templates, title), encoding="utf-8"
+        )
+        # Version level, so `csg-version` and nothing else -- `csg-product` belongs
+        # to the product folder, which only the distributor (6b) creates. Dotted,
+        # as the product names it; the dashed form is the publishing boundary's.
+        (staging / "metadata.yml").write_text(
+            navigation.render_metadata([("csg-version", version.version)], templates, "version"),
+            encoding="utf-8",
+        )
+
+        result.generated = synthesis.generated
+        result.nav_nodes = sum(1 for node in synthesis.nodes for _ in node.walk())
+        self._report_metadata(context, units, version)
+
     # -- reporting -------------------------------------------------------------
 
     def _report_assets(self, context: ConversionContext, unit: str, copier: AssetCopier) -> None:
@@ -307,6 +361,40 @@ class DocumentConverter:
                 message=f"{len(orphans)} unreferenced file(s), {copier.counts.orphan_bytes} bytes",
                 count=len(orphans),
             )
+
+    def _report_metadata(
+        self, context: ConversionContext, units: list[Unit], version: ProductVersion
+    ) -> None:
+        """What the source says about itself, against what the catalog says (§5.2.7).
+
+        SuiteHelp's `GUID-*-homepage.html` is the only source that states its own
+        version and date, in all 314 doc-sets that ship one. Since AEM fixed
+        `metadata.yml` at the `csg-*` keys, those three fields stopped being a
+        metadata source and became this check -- and it has to happen here, during
+        conversion, because `Unit.metadata` dies with the run.
+
+        **`publication-title` is not compared**, deliberately. It names the
+        *publication*, and a version ships up to 11 of them; equality with the
+        catalog's one product display name would be false for almost every
+        doc-set, and a warning that fires on almost everything is read as noise.
+        The date is compared by year, because the homepage writes `March 2021`
+        where the catalog writes a day, and normalizing further would be inventing
+        precision neither side has.
+        """
+        for unit in units:
+            declared = unit.metadata.get("release-version", "").strip()
+            if declared and declared != version.version.strip():
+                context.record(
+                    "METADATA_MISMATCH", path=unit.name,
+                    message=f"homepage release-version {declared!r} != catalog {version.version!r}",
+                )
+            date = normalize_date(unit.metadata.get("release-date", ""))[:4]
+            catalog_date = normalize_date(version.release_date or "")[:4]
+            if date and catalog_date and date != catalog_date:
+                context.record(
+                    "METADATA_MISMATCH", path=unit.name,
+                    message=f"homepage release-date {date} != catalog {catalog_date}",
+                )
 
     def _report_csh(self, context: ConversionContext, resolved: csh_transform.CshMap) -> None:
         """§9.4's `unresolved` and the ambiguity list, relocated to the register.

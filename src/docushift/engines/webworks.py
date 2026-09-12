@@ -1135,7 +1135,7 @@ class WebWorksEngine(BaseEngine):
     def convert_unit(self, context: ConversionContext, root: Path) -> Unit:
         name = _relative(context.tree, root)
         book = self._index.books.get(name) or _Book(root=root, name=name)
-        unit = Unit(root=root, name=name)
+        unit = Unit(root=root, name=name, title=book.title)
         for reason, count in book.skipped.items():
             unit.skip(reason, count)
         unit.metadata = _metadata(book)
