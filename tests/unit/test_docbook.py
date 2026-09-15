@@ -250,7 +250,16 @@ def test_the_landing_page_is_real_and_is_not_synthesized(tmp_path: Path) -> None
 
 
 def test_every_other_generator_in_the_package_is_skipped_by_name(tmp_path: Path) -> None:
-    """Four generators ship in one package and the prose is a quarter of the files."""
+    """Four generators ship in one package and the prose is a quarter of the files.
+
+    **The recorded API root buys nothing here, which is why 6d stopped consulting
+    it.** `skips_api_references` was inherited from the base class; DocBook selects
+    by a *positive* test (`is_docbook_page`), so the two Javadoc pages are rejected
+    as `foreign-generator` whether or not `html/apidocs` was recorded. What the
+    skip did do was subtract: in `bex` 1.3.5 and 1.3.6 the api marker lands on
+    `doc/html`, the DocBook root itself, and 335 real pages per version -- of 803
+    HTML files, the other 468 being the Javadoc -- were never converted.
+    """
     result = run(tmp_path, {
         "html/css/sbhelp.css": "body{}",
         "html/index.html": page("index.html", "Home", titlepage("Home")),
@@ -262,9 +271,7 @@ def test_every_other_generator_in_the_package_is_skipped_by_name(tmp_path: Path)
     }, api_roots=["html/apidocs"])
 
     assert result.names() == ["index.md"]
-    assert result.unit.skipped == {
-        "api-reference": 2, "foreign-generator": 1, "not-docbook": 1,
-    }
+    assert result.unit.skipped == {"foreign-generator": 3, "not-docbook": 1}
 
 
 def test_an_api_tree_with_no_recorded_root_is_still_not_converted(tmp_path: Path) -> None:

@@ -508,3 +508,260 @@ def test_sync_writes_nothing_back_into_output(config, distributor, product, targ
     distributor.sync_many([(product, product.versions["10.4.0"])], target)
 
     assert sorted(path.name for path in source.rglob("*")) == before
+
+
+# -- the -resources tree (6d) --------------------------------------------------------
+
+
+RESOURCES = "en-us-tibco-messaging-userdocs-resources"
+
+
+def javadoc_tree(config: ConfigManager, product: Product, number: str, *relatives: str) -> Path:
+    """An extracted tree carrying one or more API trees `apiref` recognises."""
+    root = config.extract_path(product.bu, product.family, product.slug, number)
+    for n, relative in enumerate(relatives):
+        folder = root.joinpath(*relative.split("/"))
+        folder.mkdir(parents=True, exist_ok=True)
+        (folder / "index-all.html").write_text("<html></html>", encoding="utf-8")
+        (folder / "index.html").write_text(f"<html>{relative}</html>", encoding="utf-8")
+        (folder / "Class.html").write_text("c" * (10 + n), encoding="utf-8")
+    root.mkdir(parents=True, exist_ok=True)
+    return root
+
+
+def resources(target: Path, *parts: str) -> Path:
+    return target.joinpath(RESOURCES, "en-us", "tibco-ems", *parts)
+
+
+def test_the_api_trees_go_to_the_sibling_tree_not_to_a_fifth_doc_class(
+    config, distributor, product, target
+) -> None:
+    """`{resources-tree}/{locale}/{slug}/api-references/{version}/{name}/` (§6.3)."""
+    javadoc_tree(config, product, "10.4.0", "html/api-docs/java", "html/api-docs/c")
+
+    (result,) = distributor.sync_api_references(product, product.versions["10.4.0"], target)
+
+    assert result.outcome is SyncOutcome.SYNCED
+    assert result.doc_class == "api-references"
+    folder = resources(target, "api-references", "10-4-0")
+    assert result.path == folder
+    assert sorted(child.name for child in folder.iterdir() if child.is_dir()) == ["c", "java"]
+    assert (folder / "java" / "index.html").read_text(
+        encoding="utf-8"
+    ) == "<html>html/api-docs/java</html>"
+    # The docs tree is untouched: this is a repository boundary, not a folder.
+    assert not (target / TREE / "en-us" / "tibco-ems" / "api-references").exists()
+
+
+def test_the_api_reference_copy_is_verbatim_with_no_index_of_its_own(
+    config, distributor, product, target
+) -> None:
+    """All 165 in-scope roots ship their own `index.html`; a second entry competes."""
+    javadoc_tree(config, product, "10.4.0", "html/api-docs/java")
+
+    distributor.sync_api_references(product, product.versions["10.4.0"], target)
+
+    tree = resources(target, "api-references", "10-4-0", "java")
+    assert sorted(child.name for child in tree.iterdir()) == [
+        "Class.html", "index-all.html", "index.html",
+    ]
+    assert not (tree / "index.md").exists()
+    assert not (tree / "metadata.yml").exists()
+
+
+def test_the_version_folder_carries_the_version_even_though_the_roots_do_not(
+    config, distributor, product, target
+) -> None:
+    """`metadata.yml` describes the folder, not the content -- 6c's rule, one tree over."""
+    javadoc_tree(config, product, "10.4.0", "html/api-docs/java")
+
+    distributor.sync_api_references(product, product.versions["10.4.0"], target)
+
+    loaded = yaml.safe_load(
+        resources(target, "api-references", "10-4-0", "metadata.yml").read_text(encoding="utf-8")
+    )
+    assert loaded == {"csg-version": "10.4.0"}
+
+
+def test_a_version_with_no_api_tree_reports_no_row_at_all(
+    config, distributor, product, target
+) -> None:
+    """409 of the 422 products a full sync selects. A row each would bury the 13."""
+    extract_tree(config, product, "10.4.0", **{"pdf/guide.pdf": "x"})
+
+    assert distributor.sync_api_references(product, product.versions["10.4.0"], target) == []
+    assert not (target / RESOURCES).exists()
+
+
+def test_a_placed_api_tree_reports_current_on_the_second_run(
+    config, distributor, product, target
+) -> None:
+    """Compared before staging: 1.39 GiB corpus-wide, and `copy2` already answered."""
+    javadoc_tree(config, product, "10.4.0", "html/api-docs/java")
+    version = product.versions["10.4.0"]
+    distributor.sync_api_references(product, version, target)
+
+    (again,) = distributor.sync_api_references(product, version, target)
+
+    assert again.outcome is SyncOutcome.CURRENT
+    (forced,) = distributor.sync_api_references(product, version, target, force=True)
+    assert forced.outcome is SyncOutcome.SYNCED
+
+
+def test_a_recorded_root_is_read_back_rather_than_re_walked(
+    config, catalog, product, target
+) -> None:
+    """§6.3: Stages 4, 5 and 7 share one answer. The record narrows what 7 publishes.
+
+    The tree holds two API trees and Stage 4 recorded one; publishing both would
+    mean Stage 7 disagreeing with the file counts already in `versions.csv`.
+    """
+    javadoc_tree(config, product, "10.4.0", "html/api-docs/java", "html/api-docs/c")
+    catalog.state.set_version_metadata("tibco-ems", "10.4.0", "api_roots", "html/api-docs/java\n")
+
+    (result,) = WorkspaceDistributor(config, catalog).sync_api_references(
+        product, product.versions["10.4.0"], target
+    )
+
+    folder = resources(target, "api-references", "10-4-0")
+    assert [child.name for child in folder.iterdir() if child.is_dir()] == ["java"]
+    assert result.files == 3
+
+
+def test_publishing_an_api_tree_with_no_host_configured_is_reported_not_failed(
+    config, catalog, product, target
+) -> None:
+    """Empty is the shipped state; failing would make `sync --all` unrunnable for the
+    sake of 13 products. The links stay relative and somebody is told so."""
+    javadoc_tree(config, product, "10.4.0", "html/api-docs/java")
+    findings = FindingsRun("sync")
+
+    (result,) = WorkspaceDistributor(config, catalog, findings=findings).sync_api_references(
+        product, product.versions["10.4.0"], target
+    )
+
+    assert result.outcome is SyncOutcome.SYNCED
+    assert [f.code for f in findings.all] == ["PUBLISH_BASE_URL_UNSET"]
+
+
+def test_a_localized_run_gets_no_resources_tree_at_all(
+    project_root: Path, catalog, product, target
+) -> None:
+    """The `loc-` tree carries every language; an API reference has none (§6.3)."""
+    cfg = ConfigManager(root_dir=project_root, locale="ja-jp")
+    javadoc_tree(cfg, product, "10.4.0", "html/api-docs/java")
+
+    distributor = WorkspaceDistributor(cfg, catalog)
+
+    assert distributor.sync_api_references(product, product.versions["10.4.0"], target) == []
+    assert distributor.sync_archives(product, target) is None
+
+
+# -- the archived history (6d) ---------------------------------------------------------
+
+
+def test_the_archive_index_is_built_from_the_catalog_not_from_the_disk(
+    distributor, product, target
+) -> None:
+    """0 archived ZIPs are on disk against 1,270 reachable rows; indexing the disk
+    would publish an empty history that reads as a complete one."""
+    product.versions["9.1.0"] = ProductVersion(
+        slug="tibco-ems", version="9.1.0", is_archived=True, release_date="2021-05-04",
+        zip_url="https://docs.example/ems-9.1.0.zip",
+    )
+
+    result = distributor.sync_archives(product, target)
+
+    assert result.outcome is SyncOutcome.SYNCED
+    assert result.doc_class == "archives"
+    # No version segment: the folder is the history, not a version of it.
+    folder = resources(target, "archives")
+    assert result.path == folder
+    assert sorted(child.name for child in folder.iterdir()) == [
+        "index.md", "metadata.yml", "toc.yml",
+    ]
+    assert "- [9.1.0](https://docs.example/ems-9.1.0.zip) -- May 2021" in (
+        folder / "index.md"
+    ).read_text(encoding="utf-8")
+
+
+def test_the_archive_row_carries_no_version_because_the_folder_spans_all_of_them(
+    distributor, product, target
+) -> None:
+    product.versions["9.1.0"] = ProductVersion(slug="tibco-ems", version="9.1.0", is_archived=True)
+
+    result = distributor.sync_archives(product, target)
+
+    assert result.version == ""
+    assert result.segment == ""
+    loaded = yaml.safe_load(
+        resources(target, "archives", "metadata.yml").read_text(encoding="utf-8")
+    )
+    assert loaded == {"csg-product": "TIBCO Enterprise Message Service™"}
+
+
+def test_a_product_with_no_archived_rows_gets_no_archives_folder(
+    distributor, product, target
+) -> None:
+    """43% of in-scope products, and an empty index is a claim about the product."""
+    assert distributor.sync_archives(product, target) is None
+    assert not resources(target, "archives").exists()
+
+
+def test_a_retired_version_appearing_since_the_last_sync_is_not_reported_current(
+    distributor, product, target
+) -> None:
+    """The file set never changes while nothing is downloaded, so the index is compared."""
+    product.versions["9.1.0"] = ProductVersion(slug="tibco-ems", version="9.1.0", is_archived=True)
+    distributor.sync_archives(product, target)
+
+    assert distributor.sync_archives(product, target).outcome is SyncOutcome.CURRENT
+
+    product.versions["9.2.0"] = ProductVersion(slug="tibco-ems", version="9.2.0", is_archived=True)
+    result = distributor.sync_archives(product, target)
+
+    assert result.outcome is SyncOutcome.SYNCED
+    assert "9.2.0" in resources(target, "archives", "index.md").read_text(encoding="utf-8")
+
+
+def test_a_downloaded_zip_is_copied_in_beside_the_index(
+    config, distributor, product, target
+) -> None:
+    product.versions["9.1.0"] = ProductVersion(
+        slug="tibco-ems", version="9.1.0", is_archived=True,
+        zip_url="https://docs.example/ems-9.1.0.zip",
+    )
+    archive = config.archive_path("tibco", "messaging", "tibco-ems", "9.1.0")
+    archive.parent.mkdir(parents=True, exist_ok=True)
+    archive.write_bytes(b"PK" * 32)
+
+    result = distributor.sync_archives(product, target)
+
+    folder = resources(target, "archives")
+    assert (folder / "tibco-ems-9.1.0.zip").read_bytes() == b"PK" * 32
+    assert result.bytes == 64
+    assert "- [9.1.0](tibco-ems-9.1.0.zip)" in (folder / "index.md").read_text(encoding="utf-8")
+
+
+# -- both trees in one run ---------------------------------------------------------------
+
+
+def test_one_run_writes_both_trees_and_places_the_api_refs_first(
+    config, distributor, product, target
+) -> None:
+    """The rewrite needs `-resources` on disk before the docs tree is staged (§6.4)."""
+    convert_output(config, product, "10.4.0")
+    javadoc_tree(config, product, "10.4.0", "html/api-docs/java")
+    product.versions["9.1.0"] = ProductVersion(slug="tibco-ems", version="9.1.0", is_archived=True)
+
+    stats = distributor.sync_many([(product, product.versions["10.4.0"])], target)
+
+    classes = [r.doc_class for r in stats.results]
+    assert classes.index("api-references") < classes.index(ONLINE_HELP)
+    assert "archives" in classes
+    assert published(target).is_dir()
+    assert resources(target, "api-references", "10-4-0", "java").is_dir()
+    assert resources(target, "archives", "index.md").is_file()
+    # No `version.yml` beside `api-references`: the drop-down is an AEM page
+    # control, and these folders are copied Javadoc rather than AEM pages.
+    assert not resources(target, "api-references", "version.yml").exists()

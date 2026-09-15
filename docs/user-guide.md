@@ -726,11 +726,12 @@ corpus that is the normal state. "Already current" is decided by comparing the t
 trees, not by a recorded hash, so a version somebody edited in the target is
 re-copied rather than skipped.
 
-> **Today `sync` places all four docs-tree doc-classes.** `online-help` from the
+> **`sync` now places both trees.** In the docs tree: `online-help` from the
 > converted tree, and `user-guides`, `release-information` and `reference-documents`
 > from the *extracted* one — so a version you have not converted still publishes its
-> PDFs and its readme. The whole `-resources` tree is the next sub-phase and is
-> described below as the layout it will complete.
+> PDFs and its readme. In the `-resources` sibling: `api-references/` copied verbatim
+> out of the extracted tree, and `archives/` indexed from the catalog. The one piece
+> still outstanding is the **cross-tree link rewrite** — see the last two bullets below.
 
 Because the documents come from the extracted package rather than the converted
 output, one version can report `no converted tree` for `online-help` and `synced`
@@ -758,11 +759,15 @@ en-us-tib-messaging-userdocs/           # the docs tree — what a reader reads
 
 en-us-tib-messaging-userdocs-resources/ # the bulk tree
 └── en-us/ems/
-    ├── api-references/java/10-4-0/…    # Javadoc and the C / Go / tibdg trees
-    └── archives/…                      # archived-version ZIPs + index.md, toc.yml
+    ├── api-references/10-4-0/          # version first, then one folder per API
+    │   ├── metadata.yml                #   csg-version — the only file added
+    │   ├── java/…                      #   Javadoc, copied byte for byte
+    │   └── c/…                         #   the C / Go / tibdg trees likewise
+    └── archives/…                      # archived-version ZIPs + index.md, toc.yml, metadata.yml
+                                        # no version segment: the folder is the whole history
 ```
 
-Twelve things to expect:
+Thirteen things to expect:
 
 - **`version.yml` is the drop-down, and a scoped sync does not shrink it.** Each doc-class gets its own, listing only the versions that doc-class actually holds — so `user-guides` and `online-help` will legitimately disagree. It is rebuilt by reading the folder on disk and matching it against the catalog's active versions, *not* from what the run just wrote, so `sync --product tibco-ems --version 10.4.0` updates one entry and leaves the other thirty-seven alone. Titles carry the release date (`10.4.0 (Feb 2026)`); an undated version keeps the version and drops the bracket.
 
@@ -778,8 +783,9 @@ Twelve things to expect:
 - **Versions are dashed here** (`10.4.0` → `10-4-0`) and nowhere else. The catalog and the `families/` workspace keep the dots. Two versions in the catalog are not version numbers at all — `Cloud™` and `(iPaaS)`, upstream parse artifacts — and those are reduced further to `cloud` and `ipaas`, because a trademark glyph and a bracket pair cannot be a URL path. Any version that is not `N.N.N` is named in the run report, whether it was reshaped or just sorted to the bottom of the drop-down.
 
 - **Re-running sync replaces a version's folder wholesale**, so a topic deleted upstream does not survive as a stale file. It replaces exactly that folder: `version.yml`, the product's `metadata.yml`, and every other version are untouched.
-- **API references are never converted.** Javadoc is copied through as HTML, and topic links into it are rewritten to absolute URLs on the AEM host. Set that host in `config/publishing.yaml` (`publish_base_url`) before your first sync — the path after it is derived, not configured.
-- **`validate` skips those absolute links by default.** They point at a different repository, so there is nothing on disk to check; pass `--check-external` to verify them over HTTP.
+- **API references are never converted, and the folder names come from the package.** Javadoc and the C / Go / `tibdg` trees are copied through as HTML, byte for byte, with only a `metadata.yml` added beside them. Each gets a folder named from its path inside the package with the uninformative segments removed — `html/api-reference/java` becomes `java`, `api/java/lib` becomes `java-lib` — and if two of a version's trees would end up with the same name, *all* of that version's folders fall back to their full path so the set stays readable as one scheme.
+- **Cross-tree links are still relative, and DocuShift tells you so.** The plan is for a topic link into `api-references/` to become an absolute URL on the AEM host, set in `config/publishing.yaml` (`publish_base_url`). That rewrite is not built yet — the links are dropped during conversion, before there is anything to rewrite — so for now a run that places an API tree with no host configured reports `PUBLISH_BASE_URL_UNSET` as a warning and publishes anyway. Setting the host is worth doing; it does not yet change any link.
+- **`validate` will skip those absolute links by default** once they exist. They point at a different repository, so there is nothing on disk to check; pass `--check-external` to verify them over HTTP.
 - **A broken relative asset link is a tool bug, not a content finding.** Conversion writes the link and copies the file in one step, so `validate` finding one means something downstream moved a file without moving its link — it is reported as a regression, with the stage that could have caused it. An asset that nothing links to is not an error and is not reported here; that count belongs to `convert`.
 
 ---

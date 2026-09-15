@@ -1144,6 +1144,15 @@ def convert(ctx, bu, family, product, version, batch, select_all, force, dry_run
     _report_convert(stats, findings)
 
 
+def _who(result) -> str:
+    """`ems@8.6.0`, or plain `ems` for a row about the product rather than a version.
+
+    6d's `archives` folder spans every version a product ever had, so it carries no
+    version string -- and `ems@` reads as a version this tool failed to name.
+    """
+    return f"{result.slug}@{result.version}" if result.version else result.slug
+
+
 def _report_sync(stats, findings) -> None:
     """The five-outcome summary, what was written above the versions, and findings.
 
@@ -1151,10 +1160,16 @@ def _report_sync(stats, findings) -> None:
     (version, doc-class) that had something to say, so a version with converted
     help and two folders of PDFs contributes three. The per-doc-class column is
     what makes that readable rather than merely inflated.
-    """
-    from docushift.sync import DOC_CLASSES, SyncOutcome
 
-    seen = [name for name in DOC_CLASSES if any(r.doc_class == name for r in stats.results)]
+    6d's two columns come last and are not `DOC_CLASSES`: they are the other tree,
+    and `archives` is not even per-version. They appear only for the products that
+    have them -- 13 of 422 for `api-references` -- so the common run's table is the
+    same width it was.
+    """
+    from docushift.sync import API_REFERENCES, ARCHIVES, DOC_CLASSES, SyncOutcome
+
+    columns = (*DOC_CLASSES, API_REFERENCES, ARCHIVES)
+    seen = [name for name in columns if any(r.doc_class == name for r in stats.results)]
     table = Table(title="Sync")
     table.add_column("Outcome")
     table.add_column("Rows", justify="right")
@@ -1186,9 +1201,9 @@ def _report_sync(stats, findings) -> None:
         console.print(f"[yellow]![/yellow] {path}: could not be parsed, left unchanged")
     for result in stats.results:
         if result.outcome in (SyncOutcome.NO_OUTPUT, SyncOutcome.SKIPPED):
-            console.print(f"[yellow]![/yellow] {result.slug}@{result.version}: {result.message}")
+            console.print(f"[yellow]![/yellow] {_who(result)}: {result.message}")
     for result in stats.failures:
-        console.print(f"[red]x[/red] {result.slug}@{result.version}: {result.message}")
+        console.print(f"[red]x[/red] {_who(result)}: {result.message}")
 
     summary = findings.summary()
     if summary:
@@ -1210,6 +1225,11 @@ def sync(ctx, bu, family, product, version, batch, select_all, target_dir, force
     `reference-documents` from the *extracted* one, so a version that never
     converted still publishes the PDFs it shipped.
 
+    Writes a second tree where the family has one: `api-references/` (copied
+    verbatim from the extracted package) and `archives/` (built from the catalog's
+    archived rows) go to the `-resources` sibling. English only -- the localized
+    tree carries every language and an API reference has none.
+
     Filesystem only. This writes the trees and reports what it wrote; it creates no
     repository and runs no git command (`architecture.md` §6.0).
     """
@@ -1227,11 +1247,13 @@ def sync(ctx, bu, family, product, version, batch, select_all, target_dir, force
     distributor = WorkspaceDistributor(cfg, manager)
 
     if dry_run:
+        from docushift.sync import apirefs, router
+        from docushift.sync import archives as archive_index
         from docushift.sync import documents as document_index
-        from docushift.sync import router
 
+        resources = cfg.publishes_resources()
         table = Table(title=f"Would sync ({len(pairs)})")
-        for column in ("Product", "Version", "Converted", "Documents", "Destination"):
+        for column in ("Product", "Version", "Converted", "Documents", "API refs", "Destination"):
             table.add_column(column)
         for found, ver in pairs:
             source = cfg.output_path(found.bu, found.family, found.slug, ver.version)
@@ -1242,14 +1264,33 @@ def sync(ctx, bu, family, product, version, batch, select_all, target_dir, force
                 document_index.group(router.route_version(tree, ver.engine))
                 if tree.is_dir() else {}
             )
+            roots = (
+                apirefs.select(tree, distributor.api_roots(found.slug, ver.version, tree))
+                if resources and tree.is_dir() else []
+            )
             table.add_row(
                 found.slug,
                 ver.version,
                 "present" if source.is_dir() else "[yellow]missing[/yellow]",
                 ", ".join(f"{name} {len(files)}" for name, files in grouped.items()) or "[dim]-[/dim]",
+                ", ".join(root.name for root in roots) or "[dim]-[/dim]",
                 str(destination),
             )
         console.print(table)
+
+        # Per product, not per version: the folder has no version segment, and one
+        # line per selected version would repeat one product's history N times.
+        if resources:
+            for found in {p.slug: p for p, _ in pairs}.values():
+                entries = archive_index.entries_for(
+                    found, cfg.archive_dir(found.bu, found.family)
+                )
+                if entries:
+                    console.print(
+                        f"[dim]{found.slug}: {len(entries)} archived version(s) -> "
+                        f"{distributor.resources_dir(found, target_dir) / archive_index.ARCHIVES}"
+                        f"[/dim]"
+                    )
         return
 
     findings = FindingsRun("sync", batch=batch or "", store=manager.state).start()
@@ -1260,13 +1301,13 @@ def sync(ctx, bu, family, product, version, batch, select_all, target_dir, force
 
     def on_result(result) -> None:
         if result.outcome is SyncOutcome.SYNCED:
+            where = f"{result.doc_class}/{result.segment}" if result.segment else result.doc_class
             console.print(
-                f"  [green]v[/green] {result.slug}@{result.version} -> "
-                f"{result.doc_class}/{result.segment} "
+                f"  [green]v[/green] {_who(result)} -> {where} "
                 f"{result.files} file(s), {_gb(result.bytes)}"
             )
         elif result.outcome is SyncOutcome.FAILED:
-            console.print(f"  [red]x[/red] {result.slug}@{result.version} ({result.doc_class})")
+            console.print(f"  [red]x[/red] {_who(result)} ({result.doc_class})")
 
     stats = distributor.sync_many(pairs, target_dir, force=force, on_result=on_result)
     findings.finish()

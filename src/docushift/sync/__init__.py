@@ -10,6 +10,8 @@ routed out of the *extracted* tree rather than the converted one. 6d adds the
 `-resources` sibling. See docs/planning.md.
 """
 
+from docushift.sync.apirefs import API_REFERENCES
+from docushift.sync.archives import ARCHIVES
 from docushift.sync.distributor import (
     DOC_CLASSES,
     ONLINE_HELP,
@@ -26,6 +28,8 @@ from docushift.sync.router import (
 )
 
 __all__ = [
+    "API_REFERENCES",
+    "ARCHIVES",
     "DOCUMENT_DOC_CLASSES",
     "DOC_CLASSES",
     "ONLINE_HELP",

@@ -22,6 +22,7 @@ conclusion `engines/detector.py` reaches, for the same reason.
 """
 
 import re
+from collections.abc import Mapping, Sequence
 from pathlib import Path
 
 # Finding 5: each generator leaves an unmistakable marker at its tree root.
@@ -86,7 +87,39 @@ def has_api_marker(directory: Path) -> bool:
         return False
 
 
-def find_api_roots(tree: Path) -> list[Path]:
+def recorded_roots(metadata: Mapping[str, str], key: str, tree: Path) -> list[Path]:
+    """Reads back a newline-joined path list Stage 4 wrote. Never re-walks.
+
+    §6.3 is explicit that Stages 4, 5 and 7 read **one** recorded answer, so the
+    reading of it is one function rather than one per stage: a second walk could
+    disagree with the counts already in `versions.csv`, and it would disagree
+    silently. Stage 5 reaches this through `converter/driver.py:_recorded_paths`
+    and Stage 7 through `sync/distributor.py:_recorded_paths`.
+    """
+    return [tree / line for line in metadata.get(key, "").splitlines() if line.strip()]
+
+
+def swallows_output_root(directory: Path, output_roots: Sequence[Path]) -> bool:
+    """Is `directory` an engine output root, or does it contain one?
+
+    The tie-break between the two things that can claim a directory (§6.3, 6d). A
+    generator that writes its pages into the *same* folder as the help output makes
+    the api marker fire on the help root, and since every file below an api root is
+    skipped, the help disappears. Measured on the in-scope corpus: `ftl` 7.0.0,
+    7.0.1 and 7.1.1 put Doxygen's `annotated.html` straight into `html/`, which is
+    the Flare output root -- **2,319 `.htm` topics never converted**. The sibling
+    versions that keep Doxygen in `html/api-docs/` convert correctly, which is what
+    says this is a collision and not a shape.
+
+    The output root wins and the marker is re-tested below it, so `ftl`'s real
+    Doxygen trees are still found where its working versions already have them.
+    Only a root at or *below* `directory` counts: 133 of the corpus's 165 in-scope
+    api roots sit inside an output root, and that is the normal case, not a clash.
+    """
+    return any(root == directory or directory in root.parents for root in output_roots)
+
+
+def find_api_roots(tree: Path, output_roots: Sequence[Path] = ()) -> list[Path]:
     """The outermost API-reference roots in `tree`, shallowest first.
 
     **The descent stops at a match.** A Javadoc tree inside a Doxygen tree is one
@@ -94,12 +127,16 @@ def find_api_roots(tree: Path) -> list[Path]:
     must be counted once through its parent rather than twice (§6.3.1 Finding 4).
     That is the whole difference between this and `engines.roots.find_output_roots`,
     where nesting is real and the innermost root owns a file.
+
+    `output_roots` is the one thing that can overrule a marker -- see
+    `swallows_output_root`. It defaults to empty so that a caller with no engine in
+    hand gets the original rule; every caller that *has* the roots passes them.
     """
     roots: list[Path] = []
     stack = [tree]
     while stack:
         current = stack.pop()
-        if has_api_marker(current):
+        if has_api_marker(current) and not swallows_output_root(current, output_roots):
             roots.append(current)
             continue
         try:

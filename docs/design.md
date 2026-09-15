@@ -904,7 +904,7 @@ Each of `user-guides`, `release-information` and `reference-documents` gets a fl
 
 **Reporting is per doc-class, and the two absences are different.** A run reports one row per (version, doc-class) that had something to say, so a version appears up to four times in the outcome table. An extracted tree that is *gone* is one `NO_OUTPUT` row against the version rather than a doc-class, naming `docushift extract`, because it is recoverable. A tree that is present and routes nothing gets **no row at all**: 156 of 1,822 versions are in that state, and reporting them would put 156 recoverable-looking failures in every full run. The version string is likewise named once, by §10.3, and not again per doc-class.
 
-### 10.6 The `archives/` index — **Specified**
+### 10.6 The `archives/` index — **Built (Phase 6d)**
 
 `archives/` in the `-resources` repo gets an `index.md` and a `toc.yml` too, but **its input is the catalog, not the directory**. Archived ZIPs are downloaded on demand (`architecture.md` §4.3), so the folder typically holds two of a product's forty archived versions; indexing what is on disk would publish a history that is 95% missing and look complete while doing it. Grounded in a 2026-09-09 sample of 60 public products / 326 archived versions (`architecture.md` §6.2.3).
 
@@ -921,11 +921,15 @@ Each of `user-guides`, `release-information` and `reference-documents` gets a fl
 
 **`api-references/` gets no index.** 496 of 499 Javadoc-shaped roots in the cache ship their own `index.html` (the 3 exceptions are package directories named `api`, not roots). Generating a second entry point beside the generator's own competes with it.
 
+**As built**, in `sync/archives.py` and `sync/distributor.py:sync_archives`, with four differences from the specification above — all of them corrections the committed catalog forced and all recorded in `architecture.md` §6.2.3. `released` renders `Feb 2026` through `release_month()`, the same function the drop-down uses, rather than `2024-02`. A row with no `zip_url` (14 of 2,100) is listed as `- 7.0.1 (not available)` with no `path` key rather than omitted. The "also live" cross-link is **not** emitted: `Product.versions` is keyed by version string, so one version being both archived and live is unrepresentable in the catalog this tool reads, and the 25-of-326 figure is an artifact of the archive API returning the two as separate children. And currency compares the **rendered `index.md` as text**, because the folder's three filenames never change while nothing is downloaded, so a file-set check would report it current forever. The folder has **no version segment** — it is the history, not a version of it — so the run reports one row per product with `version == ""`.
+
 **Step 4, the link rewrite, in full.** Every link from a converted topic into an API-reference path (`api/`, `javadoc/`, `Java_API/`, `java/`, `c/`, `golang/`, `tibdg/`, however many `../` deep) is replaced with an **absolute URL**: `publish_base_url` from `config/publishing.yaml`, then the same `resources_tree_name(…)/{locale}/{product}/api-references/{subdir}/{version-dashed}/{rest}` template that placed the file — `en-us-tib-messaging-userdocs-resources/…`, composed from the same `docs_suffix` the tree was written with, so a link cannot name a repository that was never created. Link construction and file placement call one function, so a link cannot point somewhere the copy did not write. Links that stay inside the docs repo — within `online-help/`, or out to the PDF doc-classes — are left relative, which is what keeps the repo previewable before publication.
 
 ---
 
-### 10.7 Step 4, the cross-boundary rewrite — **Specified**
+### 10.7 Step 4, the cross-boundary rewrite — **Specified, and reassigned to Phase 7 (2026-09-15)**
+
+> **This section cannot be built where it is written, and 6d is where that became measurable.** The targets exist — 3,183 source links resolve into an API root, in 38 of 49 sampled versions — but **none of them reach Markdown**: `engines/flare.py:link()` drops a topic-looking href outside `self.topics` via `dangling_link`, and `transforms/assets.py` returns an `ESCAPED` resolution with no `url` for everything else, so `_asset` yields `None`. A Stage 7 pass over the placed tree would find nothing and report success. Classes 1 and 2 below therefore need a **converter-side** change first — emit a rewritable reference instead of dropping one, in all four engines — which is Phase 7's. Class 3 shipped in 6d: §10.5's and §10.6's indexes generate their links from lists and never rewrite anything. Full trace and counts in `architecture.md` §6.4.2.
 
 The distributor's last step (§10 above), and the only link work Stage 7 does. Everything else was settled at conversion time, which is the point: §6.4 guarantees that a *relative* asset link inside an output root already resolves, so the assets move with their tree and those links are untouched. Three reference classes are left, all of which needed a destination that did not exist until now.
 
@@ -1023,5 +1027,7 @@ Most rows are **Built** or **Specified**. One is neither, and is marked as such 
 | 10 (part) | `metadata.yml` — `csg-product` / `csg-version` | Built | `converter/navigation.py:render_metadata`; `nav.yml` deleted, `meta.yml` renamed |
 | 10.4 | Document router (`pdf/` and `doc/` → doc-class) | Built | `sync/router.py:route_version`, `doc_class_for`, `kind_of` |
 | 10.5 | Document doc-class index (`index.md`, `toc.yml`, title chain) | Built | `sync/documents.py`; placed by `sync/distributor.py:sync_documents` |
-| 10.6 | `archives/` index, built from the catalog rather than the directory | Specified | Phase 6 |
-| 10.7 | Cross-boundary link rewrite (`-resources` URLs, escaped asset references) | Specified | Phase 6 |
+| 10.6 | `archives/` index, built from the catalog rather than the directory | Built | `sync/archives.py`; placed by `sync/distributor.py:sync_archives` |
+| `architecture.md` §6.3.2 | `api-references/` placement and per-language naming | Built | `sync/apirefs.py`; placed by `sync/distributor.py:sync_api_references` |
+| `architecture.md` §6.3.3 | An output root beats an API marker; one recorded answer for Stages 4, 5 and 7 | Built | `apiref.py:swallows_output_root`, `find_api_roots`, `recorded_roots` |
+| 10.7 | Cross-boundary link rewrite (`-resources` URLs, escaped asset references) | Specified | **Phase 7** — needs a converter-side change first (`architecture.md` §6.4.2) |

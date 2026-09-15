@@ -356,6 +356,18 @@ class DocBookEngine(BaseEngine):
 
     engine = SourceEngine.DOCBOOK
 
+    # The one engine that does not skip by api root, and the one that does not need
+    # to. `is_docbook_page` is a positive test -- the DocBook XSL stylesheet's own
+    # markup -- so a Javadoc page is rejected as foreign two lines below whether or
+    # not it sits under a marker. The skip only ever *subtracted*: `bex` 1.3.5 and
+    # 1.3.6 publish their Javadoc into `doc/html`, the same directory as the guides,
+    # so the marker fired on the root and all **335 DocBook pages per version** --
+    # seven guides -- were skipped as API reference. Measured over the same 803
+    # files, `is_docbook_page` accepts exactly those 335 and rejects the other 468.
+    # This is the case the `skips_api_references` class attribute was put in
+    # `base.py` for: which trees is `is_api_reference`'s to decide, whether is this.
+    skips_api_references = False
+
     def __init__(self) -> None:
         self._dropped = 0
         self._unfiled = 0

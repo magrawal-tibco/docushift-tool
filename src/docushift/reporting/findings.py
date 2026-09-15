@@ -154,8 +154,16 @@ REGISTRY: dict[str, Code] = _codes(
     Code("DOCUMENT_UNREADABLE", Severity.NOTE, Stage.SYNC,
          "PDF whose Info dictionary would not parse; titled from its filename",
          "design.md §10.5"),
-    Code("ARCHIVE_ALSO_LIVE", Severity.NOTE, Stage.SYNC,
-         "Archived version that is also live, cross-linked", "architecture.md §6.2.3"),
+    # 6d's one new code, and the first one whose condition is a *configuration*
+    # rather than a document. Raised once per product that places an api-reference
+    # tree while `publish_base_url` is empty: the copy is published, but the help
+    # topics that point into it keep relative links that cannot span two
+    # repositories. A warning rather than an error because empty is the shipped,
+    # supported state -- the AEM host is not known yet -- and rather than a note
+    # because it is a human decision pending, not a property of the corpus.
+    Code("PUBLISH_BASE_URL_UNSET", Severity.WARNING, Stage.SYNC,
+         "api-references placed with no publish_base_url; cross-tree links left relative",
+         "architecture.md §6.4"),
     Code("LINK_BROKEN", Severity.ERROR, Stage.VALIDATE,
          "Relative link resolving to nothing", "design.md §8.4"),
     Code("CSH_IDENTIFIER_DROPPED", Severity.WARNING, Stage.VALIDATE,
@@ -190,6 +198,14 @@ REACHABLE_IN_PHASE_6B = REACHABLE_IN_PHASE_6A | {"VERSION_NOT_NUMERIC", "VERSION
 # a code that is not in the table means the rule is new, not the table short -- and
 # "a shipped PDF is damaged" is a genuinely new thing for this tool to know.
 REACHABLE_IN_PHASE_6C = REACHABLE_IN_PHASE_6B | {"DOCUMENT_UNREADABLE"}
+# 6d adds one and *removes* one, which no earlier phase has done. `ARCHIVE_ALSO_LIVE`
+# was registered for a cross-link between an archived version and a live one; the
+# 2026-09-15 re-measure found 0 of 2,100 archived rows can be either -- the catalog
+# keys `Product.versions` by version string, so one version being both is
+# unrepresentable, and 0 archived rows are `convert_eligible`. A code no code path
+# can reach is an obligation the register claims and no test can check, so it is
+# gone rather than carried as a permanent debt. Register: 29 -> 28.
+REACHABLE_IN_PHASE_6D = REACHABLE_IN_PHASE_6C | {"PUBLISH_BASE_URL_UNSET"}
 
 
 class UnregisteredCode(KeyError):

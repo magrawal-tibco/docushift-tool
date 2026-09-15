@@ -1,0 +1,30 @@
+{#-
+  The archived-versions landing page (Stage 6d, design.md section 10.6).
+
+  Frontmatter included, for `documents_index.md.j2`'s reason: nothing converts
+  this folder, so this template is the only place it can come from.
+
+  **A row with no URL is still a row.** 14 of the corpus's 2,100 archived versions
+  carry no `zip_url` and none of them has a ZIP on disk; listing them as plain
+  text says "this version existed and we cannot hand it to you", while dropping
+  them would publish a history with silent gaps. That is design.md invariant 10 --
+  an absence is reported, never faked -- applied to a whole version.
+
+  `entry.link` is the remote URL untouched, or the quoted filename when the ZIP
+  was copied in beside this page.
+-#}
+---
+title: {{ title | yaml }}
+doc_class: archives
+generated: true
+---
+
+# {{ title }}
+
+{% for entry in entries -%}
+{% if entry.url -%}
+- [{{ entry.version }}]({{ entry.link }}){% if entry.released %} -- {{ entry.released }}{% endif %}
+{% else -%}
+- {{ entry.version }}{% if entry.released %} -- {{ entry.released }}{% endif %} (not available)
+{% endif -%}
+{% endfor -%}

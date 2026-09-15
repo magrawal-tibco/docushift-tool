@@ -153,13 +153,20 @@ def test_a_localized_run_publishes_to_loc_and_has_no_resources_tree(project_root
 
 
 def test_publishing_defaults_apply_with_no_file(config: ConfigManager) -> None:
-    """Nothing publishes until Stage 7; a fresh checkout must still name a folder."""
+    """Nothing publishes until Stage 7; a fresh checkout must still name a folder.
+
+    `publish_base_url` defaults to empty and that is the shipped value, not a
+    placeholder: the AEM host is not known yet, and 6d treats an unset one as a
+    reported condition rather than a failure.
+    """
     assert config.load_publishing() == {
         "docs_suffix": "userdocs",
         "resources_suffix": "resources",
         "localized_prefix": "loc",
         "primary_locale": "en-us",
+        "publish_base_url": "",
     }
+    assert config.publish_base_url() == ""
 
 
 def test_a_partial_publishing_file_falls_back_key_by_key(project_root: Path) -> None:

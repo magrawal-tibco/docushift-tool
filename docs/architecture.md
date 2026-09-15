@@ -2021,6 +2021,14 @@ Measured 2026-09-09 against the live archive API over a random sample of **60 of
 
 `toc.yml` is flat, one item per archived version: `version`, `released` (`YYYY-MM`), `available` (is the ZIP in this repo), and then `path` + `bytes` or `url`. `index.md` renders them as a table under the product heading.
 
+**As built (Phase 6d), three corrections to the survey above.** `sync/archives.py`.
+
+- **`released` renders `Feb 2026`, not `2024-02`.** The sample normalized to `YYYY-MM` because month is the precision the *majority* of the corpus carries. That is still true, but the corpus the tool actually reads is `versions.csv`, not the archive API: **1,785 of 2,100 archived rows are `YYYY-MM-DD` and 309 are epoch milliseconds, 6 empty** — day precision on 85% of them. The renderer calls `release_month()`, the same function `version.yml`'s drop-down calls, so the two places a date reaches published output agree by construction rather than by review. **The day is available and deliberately not published**: it is recorded here so a later decision to show it is a decision and not a discovery.
+- **A row with no `zip_url` is still a row.** 14 of the 2,100 have none. The survey found `zipPath` present in 326 of 326 and concluded no fallback chain was needed; the committed catalog disagrees, so the entry renders as `- 7.0.1 (not available)` with no `path` key in `toc.yml` at all — Invariant 10 applied to a whole version.
+- **Currency compares the rendered `index.md`, not the file set.** The folder holds the same three filenames for every state of a history nobody has downloaded, so a file-set check would report it current forever and a version retired since the last sync would never appear. The index is a few hundred bytes; it is re-rendered and compared as text.
+
+**`api-references/` was measured again at placement and the no-index rule held.** Of the **165 in-scope roots** Stage 4 records across the cache, every one ships its own `index.html`. The copy is verbatim: the only file Stage 6d adds to a version folder is `metadata.yml` carrying `csg-version`, and it sits *beside* the per-name subdirectories rather than inside any of them. There is no `version.yml` — the drop-down is an AEM page control and these are copied Javadoc, not AEM pages — and `archives/` has no version segment at all.
+
 **`api-references/` deliberately gets no generated index.** Of 499 Javadoc-shaped roots in the cache, **496 ship their own `index.html`** — the three that do not are package subdirectories named `api`, not roots. The generator already wrote the entry point, and a second one beside it competes with the frame set rather than completing it. This is the same reasoning that keeps those trees out of conversion (§6.2).
 
 ### 6.3 Why `-resources` Is a Separate Tree
@@ -2030,6 +2038,24 @@ Measured 2026-09-09 against the live archive API over a random sample of **60 of
 - **Size and clone cost.** A single Javadoc tree runs to thousands of generated files, and `archives/` accumulates every archived ZIP a product ever shipped. Both grow monotonically and neither compresses in git's favour — binaries do not delta. Carried inside the docs repo they would dominate its history permanently, and every author cloning to fix a typo would pay for them.
 - **Different lifecycle, different review.** API references regenerate wholesale on each release; archives are append-only cold storage. Neither is reviewed the way a documentation change is, so neither wants the docs repo's branch protection, PR workflow, or diff attention. A regenerated Javadoc tree landing as a 4,000-file diff in the repo where prose is reviewed makes the prose changes unfindable.
 - **The predecessor already publishes it this way** — `html-to-md`'s output carries `activespaces-resources`, `bwpluginawss3-resources` and siblings beside each docs repo. Matching it keeps DocuShift's Stage 7 a copy into an established target rather than a migration of one.
+
+#### 6.3.2 Naming the per-language subdirectory (as built, Phase 6d)
+
+The publishing form is `{resources-tree}/{locale}/{slug}/api-references/{version-dashed}/{name}/`, and `{name}` has to come from the root's path inside the extracted tree, because the roots themselves are unnamed — a Javadoc tree knows it is Javadoc and not that it is *the Java API for EMS 10.4.0*.
+
+**Container segments are dropped wherever they sit, not only at the front.** `html`, `api`, `apidocs`, `api-docs`, `api-reference`, `doc`, `docs` and their kin carry no information a reader wants in a URL, so `html/api-reference/java` names itself `java` and `api/java/lib` names itself `java-lib`. Dropping them only at the front would be wrong for a real case: `ems` ships its .NET tree at `html/api/dotnetdoc/html`, whose only informative segment is in the middle. Where *every* segment is a container — `html/apidocs` — the leaf is kept, because `apidocs` at least says what the packager thought it was and a nameless folder is not a folder.
+
+**A collision demotes the whole version, not the colliding pair.** Two roots in one version can reduce to the same name (`tps/6.0.0`). The fallback is the full dashed relative path for **every** root in that version, not just the two that clashed — a version whose folders are half short names and half long paths reads as a packaging accident, and a reader comparing two links cannot tell which rule produced which. One version, one naming rule.
+
+#### 6.3.3 A directory cannot be both an output root and an API tree
+
+Invariant 12 says one predicate classifies a path, shared by the Stage 4 count, the Stage 5 skip and the Stage 7 route. It does not say what happens when that predicate fires on a directory an engine has already claimed — and until 6d the API marker won silently, so the help vanished.
+
+**The rule: when an api root is, or contains, an engine output root, the output root wins**, and the marker is re-tested below it. `apiref.swallows_output_root()` is the test and `find_api_roots(tree, output_roots=…)` applies it; Stages 4, 5 and 7 all read the one recorded answer through `apiref.recorded_roots()` rather than re-walking, because a second walk could disagree with the file counts already in `versions.csv` and would do it silently.
+
+**Measured on `ftl/7.1.1`, the worst case.** Doxygen dumps `annotated.html` straight into `html/`, which *is* the Flare output root, so `html` matched the marker and everything beneath it was skipped. `api_roots` before: `["c", "html", "java"]`. After: `["c", "java", "html/api-docs/c", "html/api-docs/java", "html/api-docs/dotnet/html"]` — the real Doxygen trees, which is where the sibling versions that always worked have them. Converted pages **1 → 813**, all `.htm`, **0** `class_`-prefixed and **0** `annotated.html`. The help came back and no reference page came with it.
+
+**`bex/1.3.5` does not improve, and the reason is not this rule.** The plan expected 335 DocBook pages back from the same fix. `bex` has **no output roots at all** — `find_output_roots` returns `[]` — so the guard has nothing to protect and `api_roots` is `["doc/html"]` before and after. The cause is one level earlier: `_is_docbook_root` requires `is_docbook_page(page) **and** _links_stylesheet_within(page, directory)`, and **no `bex` guide page links a stylesheet at all** — 248 pages across `adminguide`, `architectsguide`, `developersguide` and `sizingguide`, zero `<link rel="stylesheet">`; the package's only `.css` is Javadoc's `doc/html/stylesheet.css`. So no root is located, `units()` records `DOCSET_SKIPPED`, and 0 pages convert. **That is a Stage 5 root-probe defect shared by every DocBook version, not an api-reference one** (§5.6.3 adopted the stylesheet test to reject the byte-identical duplicate guides), so it is named here and carried forward rather than fixed inside 6d: relaxing the conjunct changes what `find_output_roots` returns corpus-wide and wants its own measurement.
 
 ### 6.4 Cross-Repo Links Are Absolute URLs
 
@@ -2047,6 +2073,18 @@ Three consequences:
 - **The rewrite is unconditional and lossless in one direction only.** Once absolute, a link no longer survives relocating the resources repo; it survives re-running sync. That is the right trade, because conversion is reproducible and the alternative — a relative path — is broken on arrival rather than after a move.
 - **API-reference links become *external* to the link checker** (§8.4, Phase 7). A validator walking the docs repo cannot resolve them on the filesystem, so it must classify them as external and either skip them or check them over HTTP behind a flag. Treating them as internal would report every one as broken.
 - **Nothing else changes shape.** Links within `online-help/`, and links to the PDF doc-classes, stay relative — those targets are in the same repository, and keeping them relative is what lets the docs repo be reviewed and previewed before it is published.
+
+#### 6.4.1 An unset `publish_base_url` is reported, never fatal (as built, Phase 6d)
+
+`publish_base_url` ships empty: the AEM host is not known yet, and 6b writes no file that reads it. A run that places an api-reference tree with the key still empty raises **`PUBLISH_BASE_URL_UNSET`** — one warning per product, not per link — and places the copy anyway. A warning rather than an error because empty is the shipped, supported state and failing here would make `sync --all` unrunnable for the sake of 13 products; a warning rather than a note because it is a human decision pending, not a property of the corpus.
+
+#### 6.4.2 The rewrite cannot run over the published Markdown, and why that was not visible until now
+
+**The links are real.** Counted over the cache on 2026-09-15: **1,528,192 relative `href`/`src` attributes in non-API pages, of which 3,183 resolve into an API root, in 38 of 49 sampled versions** — `amx-bpm` 4.2.0 and 4.3.0 at 1,289 each, `ems` at 89 per version across four versions, `sfire-sfds` 35–36, `rtview/5.9.1-august-2011` 10, `tps` 8. This is not a rounding error and §10.7 is the right thing to want.
+
+**They do not survive conversion.** Traced through the shipped code: a link into an API root is a topic-looking `.html` that is not in `self.topics`, so `engines/flare.py:link()` fires `dangling_link` and returns `None` — the text is kept and the link is gone. A non-topic reference that escapes the output root gets `Resolution(AssetOutcome.ESCAPED)` from `transforms/assets.py:AssetCopier.resolve()` with no `url`, and `_asset` returns `copier.resolve(…).url or None`. **Both cross-boundary families — into the api roots, and §5.5.8's 279 Flare escapes into the document doc-classes — are destroyed before Markdown is written.** `AssetCopier.escaped` records them in memory with the comment "Stage 7 routes these (§10.7)", but nothing persists them and the anchor position in the Markdown is gone, so re-insertion from the record is not possible either.
+
+**So §10.7 is not a Stage 7 pass.** A rewriter walking the placed docs tree would find nothing to rewrite, and would report success doing it — the §5.5.9 failure mode (a second derivation of a path that was already known) with the sign flipped. Making the rewrite possible is a **converter-side** change: each engine must emit a rewritable reference where it currently drops one, which reopens the link path in all four engines and every link test they have. That is Phase 7 work, decided 2026-09-15; 6d places both trees and leaves the links relative, which is what `PUBLISH_BASE_URL_UNSET` says out loud. `DOC_REFERENCE_MISSING` stays the one registered `Stage.SYNC` code no shipped path raises, and it is the marker for this.
 
 ### 6.5 Navigation Synthesis (as built, Phase 6a)
 

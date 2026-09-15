@@ -34,7 +34,7 @@ from enum import StrEnum
 from pathlib import Path, PurePosixPath
 from typing import Any
 
-from docushift.apiref import find_api_roots
+from docushift.apiref import find_api_roots, recorded_roots
 from docushift.catalog import CatalogManager
 from docushift.config import ConfigManager
 from docushift.converter import navigation
@@ -217,6 +217,9 @@ class DocumentConverter:
         sources = self._csh_sources(slug, number, tree)
         owned = csh_transform.identifiers_by_source(sources)
 
+        # Read before the context is built, because `_api_roots` needs them: an api
+        # root that is also an output root is the output root's (6d).
+        output_roots = self._recorded_paths(slug, number, "output_roots", tree)
         context = ConversionContext(
             tree=tree,
             output=staging,
@@ -224,8 +227,8 @@ class DocumentConverter:
             slug=slug,
             version=number,
             product_name=product.display_name,
-            api_roots=self._api_roots(slug, number, tree),
-            output_roots=self._recorded_paths(slug, number, "output_roots", tree),
+            api_roots=self._api_roots(slug, number, tree, output_roots),
+            output_roots=output_roots,
             findings=self.findings,
         )
 
@@ -421,14 +424,15 @@ class DocumentConverter:
     def _recorded_paths(self, slug: str, version: str, key: str, tree: Path) -> list[Path]:
         """Reads back a newline-joined path list Stage 4 wrote. Never re-walks.
 
-        §6.3 is explicit that Stages 4, 5 and 7 read one recorded answer. A second
-        walk here could disagree with the counts already in `versions.csv`, and it
-        would disagree silently.
+        The reading itself moved to `apiref.recorded_roots` in 6d, when Stage 7
+        needed the same answer: §6.3 says the three stages share one record, and
+        two functions parsing it is the first step towards two records.
         """
-        raw = self._metadata(slug, version).get(key, "")
-        return [tree / line for line in raw.splitlines() if line.strip()]
+        return recorded_roots(self._metadata(slug, version), key, tree)
 
-    def _api_roots(self, slug: str, version: str, tree: Path) -> list[Path]:
+    def _api_roots(
+        self, slug: str, version: str, tree: Path, output_roots: list[Path]
+    ) -> list[Path]:
         """Stage 4's recorded API roots, located here only when there is no record.
 
         §6.3's rule -- Stages 4, 5 and 7 share one recorded answer -- is intact,
@@ -445,7 +449,7 @@ class DocumentConverter:
         and one that shrugs at them.
         """
         recorded = self._recorded_paths(slug, version, "api_roots", tree)
-        return recorded or find_api_roots(tree)
+        return recorded or find_api_roots(tree, output_roots)
 
     def _csh_sources(self, slug: str, version: str, tree: Path) -> list[CshSource]:
         """The version's help maps, re-read from disk at the paths Stage 4 recorded.

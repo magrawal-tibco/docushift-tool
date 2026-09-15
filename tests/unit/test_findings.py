@@ -13,6 +13,7 @@ from docushift.reporting.findings import (
     REACHABLE_IN_PHASE_6A,
     REACHABLE_IN_PHASE_6B,
     REACHABLE_IN_PHASE_6C,
+    REACHABLE_IN_PHASE_6D,
     REGISTRY,
     FindingsRun,
     Severity,
@@ -137,7 +138,7 @@ def test_summary_counts_note_rows_not_note_occurrences() -> None:
 
 def test_the_reachability_debt_is_named_rather_than_asserted_away() -> None:
     """§7.5's guarantee, allowed to pass with a *named* list of unreached codes."""
-    outstanding = unreachable_codes(REACHABLE_IN_PHASE_6C)
+    outstanding = unreachable_codes(REACHABLE_IN_PHASE_6D)
 
     assert (
         set(REACHABLE_IN_PHASE_5A)
@@ -145,6 +146,7 @@ def test_the_reachability_debt_is_named_rather_than_asserted_away() -> None:
         <= set(REACHABLE_IN_PHASE_6A)
         <= set(REACHABLE_IN_PHASE_6B)
         <= set(REACHABLE_IN_PHASE_6C)
+        <= set(REACHABLE_IN_PHASE_6D)
         <= set(REGISTRY)
     )
     # With the first engine built, `convert` owes nothing: every remaining debt
@@ -152,10 +154,12 @@ def test_the_reachability_debt_is_named_rather_than_asserted_away() -> None:
     # gone, which is the point of the sub-phase.
     for code in outstanding:
         assert REGISTRY[code].stage is not Stage.CONVERT, code
-    # 6c closes `DOCUMENT_UNREADABLE` the phase that added it. The two left are
-    # 6d's -- the cross-boundary rewrite and the archives tree -- named here rather
-    # than left to be inferred from a shrinking set.
+    # 6d closes `PUBLISH_BASE_URL_UNSET` the phase that added it and *removes*
+    # `ARCHIVE_ALSO_LIVE`, which no code path could reach. The one left is the
+    # cross-boundary link rewrite, which 6d deferred: the converter drops a
+    # reference that leaves its output root, so there is no link in the published
+    # Markdown for `sync` to re-point or to report as missing.
     assert {code for code in outstanding if REGISTRY[code].stage is Stage.SYNC} == {
         "DOC_REFERENCE_MISSING",
-        "ARCHIVE_ALSO_LIVE",
     }
+    assert "ARCHIVE_ALSO_LIVE" not in REGISTRY

@@ -27,7 +27,7 @@ from dataclasses import dataclass, field
 from enum import StrEnum
 from pathlib import Path
 
-from docushift.apiref import has_api_marker, looks_like_api_name
+from docushift.apiref import has_api_marker, looks_like_api_name, swallows_output_root
 from docushift.engines.csh import CshFormat, CshSource, csh_format_of, read_csh_source
 from docushift.engines.roots import is_skin_path, owning_root
 from docushift.models import SourceEngine
@@ -196,9 +196,15 @@ def inventory_tree(
     stack: list[tuple[Path, Path | None]] = [(tree, None)]
     while stack:
         current, api_root = stack.pop()
-        if api_root is None and has_api_marker(current):
+        if (
+            api_root is None
+            and has_api_marker(current)
+            and not swallows_output_root(current, output_roots)
+        ):
             # Outermost match wins and the descent stops testing: a Javadoc tree
-            # inside a Doxygen tree is one artefact (§6.3.1 Finding 4).
+            # inside a Doxygen tree is one artefact (§6.3.1 Finding 4) -- unless the
+            # directory is also an engine output root, in which case the engine wins
+            # and the marker is re-tested below it (6d; `apiref.swallows_output_root`).
             api_root = current
             result.api_roots.append(current)
         try:

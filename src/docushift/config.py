@@ -47,6 +47,13 @@ PUBLISHING_DEFAULTS: dict[str, str] = {
     "resources_suffix": "resources",
     "localized_prefix": "loc",
     "primary_locale": DEFAULT_LOCALE,
+    # The AEM host, for the one link that cannot be relative: a help topic pointing
+    # into the `-resources` tree crosses a repository boundary. **Empty is the
+    # shipped value and a supported state** -- the host is not known yet, and 409 of
+    # the 422 products a full sync selects have no api-reference tree to link into.
+    # `sync` leaves those links relative and reports it once per product; it does
+    # not fail, and it does not invent a URL. Deployment configuration, not design.
+    "publish_base_url": "",
 }
 
 # A publishing suffix must be one lowercase token. A hyphen makes the family/suffix
@@ -222,6 +229,16 @@ class ConfigManager:
         """Whether this run's locale gets a `-resources` tree at all."""
         return is_primary_locale(self.locale, self.load_publishing()["primary_locale"])
 
+    def publish_base_url(self) -> str:
+        """The AEM host, without a trailing slash. Empty means "not configured yet".
+
+        Empty is a supported state, not an error: `sync` leaves the cross-tree links
+        relative and reports it, because the alternative -- failing the run -- would
+        make `sync --all` unrunnable over 422 products for a value that changes the
+        output of 13.
+        """
+        return self.load_publishing()["publish_base_url"].rstrip("/")
+
     def family_dir(self, bu: str, family: str) -> Path:
         """`families/en-us-<bu>-<family>/` -- the root of one family's working set."""
         return self.families_dir / self.family_workspace_name(bu, family)
@@ -366,6 +383,16 @@ class ConfigManager:
                     f"Every other segment of a tree name is hyphen-separated, so a hyphen here makes "
                     f"the family/suffix boundary unparseable."
                 )
+
+        # Empty is fine and is the shipped value; a *set* value that is not a URL is
+        # not, because it is silently concatenated into every cross-tree link.
+        base = publishing["publish_base_url"]
+        if base and not base.lower().startswith(("http://", "https://")):
+            problems.append(
+                f"config/publishing.yaml: publish_base_url '{base}' is not an absolute URL. "
+                f"It is prefixed to every link that crosses from the docs tree into "
+                f"-resources, so a relative value publishes links that resolve nowhere."
+            )
 
         for bu in sorted(self.load_taxonomy()["business_units"]):
             seen: dict[str, str] = {}

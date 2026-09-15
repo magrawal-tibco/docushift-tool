@@ -38,3 +38,17 @@ localized_prefix: "loc"
 # A locale other than this one selects the `loc-` docs tree and gets no
 # `-resources` sibling at all.
 primary_locale: "en-us"
+
+# The published host, for the one link that cannot be relative: a help topic
+# pointing into an api-reference tree crosses from the docs repository into the
+# -resources one, and a relative path cannot span two repositories.
+#
+# **Empty is a supported state and is the shipped value.** The AEM host is not
+# known yet. Until it is, `sync` leaves those links exactly as the converter
+# emitted them and reports one line per affected product -- it does not fail the
+# run and it does not guess a host. Only 13 of the 422 products a full sync
+# selects have an api-reference tree at all.
+#
+# Must be absolute (`https://...`) when set; `catalog validate` says so, because
+# this value is concatenated into every cross-tree link without further checking.
+publish_base_url: ""
