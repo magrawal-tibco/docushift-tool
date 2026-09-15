@@ -28,6 +28,8 @@ from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 
+from docushift.transforms import links
+
 # Path segments that say where a generator's output was filed, not what it is.
 # Dropping them turns `html/api-reference/java` into `java` and
 # `doc/html/api/java/lib` into `java-lib`. Every one of these is a container the
@@ -92,19 +94,21 @@ def full_name(relative: PurePosixPath) -> str:
     return "-".join(part.lower() for part in relative.parts)
 
 
-def select(tree: Path, roots: Iterable[Path]) -> list[ApiRoot]:
-    """The publishable API trees for one version, de-duplicated and named.
+_Entry = tuple[PurePosixPath, Path, int, int]
 
-    `roots` is Stage 4's recorded answer, passed in rather than located -- §6.3's
-    rule that Stages 4, 5 and 7 read one answer. Roots outside `tree`, and roots
-    that no longer exist, are dropped silently: the record can outlive the extract,
-    and a recorded path is not a promise about the disk.
+
+def _measured(tree: Path, roots: Iterable[Path]) -> list[_Entry]:
+    """Every recorded root that is still on disk, measured, shallowest first.
+
+    Roots outside `tree`, and roots that no longer exist, are dropped silently: the
+    record can outlive the extract, and a recorded path is not a promise about the
+    disk.
 
     Shallowest first, so the copy a duplicate is dropped in favour of is the one
     nearest the version root -- `html/javadocs` rather than the same tree four
     directories down inside `rtview`'s self-nested extract.
     """
-    entries: list[tuple[PurePosixPath, Path, int, int]] = []
+    entries: list[_Entry] = []
     for root in roots:
         if not root.is_dir():
             continue
@@ -120,19 +124,35 @@ def select(tree: Path, roots: Iterable[Path]) -> list[ApiRoot]:
         entries.append((relative, root, files, size))
 
     entries.sort(key=lambda item: (len(item[0].parts), str(item[0])))
+    return entries
 
-    kept: list[tuple[PurePosixPath, Path, int, int]] = []
-    seen: set[tuple[int, int, str]] = set()
+
+def _deduplicate(entries: Sequence[_Entry]) -> tuple[list[_Entry], dict[Path, Path]]:
+    """The distinct trees, and the dropped copies mapped to the one that survived.
+
+    The second half is what `url_map` needs and `select` throws away: a help topic
+    that links into a duplicate has to be sent to the folder that was published,
+    not to the folder that was not.
+    """
+    kept: list[_Entry] = []
+    survivor: dict[tuple[int, int, str], Path] = {}
+    aliases: dict[Path, Path] = {}
     for relative, root, files, size in entries:
         # Size, count and leaf name together. Not content: `rtview`'s duplicate is
         # 8,000 files four levels down, and reading it to prove what its size
         # already says would cost more than publishing it.
         signature = (files, size, relative.name.lower())
-        if signature in seen:
+        first = survivor.get(signature)
+        if first is not None:
+            aliases[root] = first
             continue
-        seen.add(signature)
+        survivor[signature] = root
         kept.append((relative, root, files, size))
+    return kept, aliases
 
+
+def _named(kept: Sequence[_Entry]) -> list[ApiRoot]:
+    """The surviving trees, each with the folder name it gets."""
     names = [display_name(relative) for relative, *_ in kept]
     if len(set(names)) != len(names):
         # Uniform within the version, not per-root: mixing the two rules would name
@@ -146,6 +166,16 @@ def select(tree: Path, roots: Iterable[Path]) -> list[ApiRoot]:
     ]
 
 
+def select(tree: Path, roots: Iterable[Path]) -> list[ApiRoot]:
+    """The publishable API trees for one version, de-duplicated and named.
+
+    `roots` is Stage 4's recorded answer, passed in rather than located -- §6.3's
+    rule that Stages 4, 5 and 7 read one answer.
+    """
+    kept, _ = _deduplicate(_measured(tree, roots))
+    return _named(kept)
+
+
 def published_url(base: str, tree_name: str, locale: str, slug: str,
                   segment: str, name: str) -> str:
     """Where a placed API tree lives once it is published.
@@ -154,9 +184,45 @@ def published_url(base: str, tree_name: str, locale: str, slug: str,
     cannot disagree -- and it composes the tree name from the caller's
     `resources_tree_name()`, so a link cannot point at a repository that was never
     created.
+
+    An empty `base` yields the tree-rooted path with no scheme and no host. That is
+    the shipped state and a deliberate choice (6e): the path is the part this tool
+    can derive, a link missing only its prefix is fixable by search-and-replace when
+    the AEM host is known, and a link that was never emitted is not recoverable at
+    all. The path is percent-encoded here and the base is not -- the base is a URL
+    the config validated, and the path is folder names this tool invented.
     """
     path = f"{tree_name}/{locale}/{slug}/{API_REFERENCES}/{segment}/{name}"
-    return f"{base.rstrip('/')}/{path}" if base else path
+    encoded = links.encode(path)
+    return f"{base.rstrip('/')}/{encoded}" if base else encoded
+
+
+def url_map(tree: Path, roots: Iterable[Path], base: str, tree_name: str,
+            locale: str, slug: str, segment: str) -> dict[Path, str]:
+    """Every recorded API root paired with the URL its content is published at.
+
+    What Stage 5 is handed so that conversion can rewrite a cross-boundary link
+    without knowing the publishing layout (§10.7). Built through the same
+    `_measured`/`_deduplicate`/`_named` path Stage 7's `select` uses, so the folder
+    that gets written and the URL that gets emitted come from one de-duplication,
+    one naming rule and one collision fallback -- anything less and `tps/6.0.0`,
+    whose whole version demotes to dashed names, gets links to folders that were
+    never created.
+
+    **The 19 duplicates are keys too**, each mapping to its survivor's URL. A topic
+    inside `rtview`'s self-nested extract links to the copy beside it, and that copy
+    is exactly the one `select` drops; dropping the link with it would punish the
+    topic for the packager's mistake.
+    """
+    entries = _measured(tree, roots)
+    kept, aliases = _deduplicate(entries)
+    urls = {
+        root.source: published_url(base, tree_name, locale, slug, segment, root.name)
+        for root in _named(kept)
+    }
+    for duplicate, survivor in aliases.items():
+        urls[duplicate] = urls[survivor]
+    return urls
 
 
 def current(roots: Sequence[ApiRoot], destination: Path) -> bool:

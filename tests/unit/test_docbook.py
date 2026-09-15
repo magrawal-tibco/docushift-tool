@@ -29,6 +29,7 @@ from docushift.engines.docbook import CONTENT_ID, DocBookEngine
 from docushift.engines.roots import find_output_roots
 from docushift.models import SourceEngine
 from docushift.reporting.findings import FindingsRun
+from docushift.sync import apirefs
 from docushift.transforms.assets import AssetCopier
 
 # -- fixtures in the small ------------------------------------------------------
@@ -155,11 +156,21 @@ class Run:
         raise AssertionError(f"{label} not among {self.labels()}")
 
 
-def run(tmp_path: Path, files: Mapping[str, str], api_roots: list[str] | None = None) -> Run:
+def published(tree: Path, roots: list[Path]) -> dict[Path, str]:
+    """The URL map the driver builds and hands to the context (6e)."""
+    return apirefs.url_map(
+        tree, roots, "https://docs.example.com",
+        "en-us-tib-x-userdocs-resources", "en-us", "str", "11-2-1",
+    )
+
+
+def run(tmp_path: Path, files: Mapping[str, str], api_roots: list[str] | None = None,
+        *, publish: bool = False) -> Run:
     """Converts every unit in a tree, the way the driver does."""
     tree = build(tmp_path / "tree", files)
     output = tmp_path / "out"
     findings = FindingsRun("convert")
+    roots = [tree / name for name in (api_roots or [])]
     context = ConversionContext(
         tree=tree,
         output=output,
@@ -167,7 +178,8 @@ def run(tmp_path: Path, files: Mapping[str, str], api_roots: list[str] | None = 
         slug="str",
         version="11.2.1",
         product_name="TIBCO Streaming",
-        api_roots=[tree / name for name in (api_roots or [])],
+        api_roots=roots,
+        api_urls=published(tree, roots) if publish else {},
         output_roots=find_output_roots(tree, SourceEngine.DOCBOOK),
         findings=findings,
     )
@@ -657,3 +669,30 @@ def test_an_absent_tail_page_is_reported_rather_than_invented(tmp_path: Path) ->
 
     assert result.unit.legal is None and result.unit.support is None
     assert result.codes()["TAIL_PAGE_MISSING"] == 2
+
+
+# -- the cross-boundary rewrite (§10.7, 6e) -------------------------------------
+
+
+def test_a_link_into_an_api_tree_becomes_its_published_url(tmp_path: Path) -> None:
+    """142 references in 4 versions; `sfire-sfds` carries 36 of them twice over.
+
+    The engine already knew these were `../apidocs/...` and already said so in a
+    comment -- "the API tree exists on disk and has no converted counterpart".
+    It has a published one now.
+    """
+    result = run(tmp_path, {
+        "html/css/sbhelp.css": "body{}",
+        "html/index.html": page("index.html", "Home", (
+            titlepage("Home")
+            + '<p>See <a href="apidocs/index.html">the API</a>.</p>'
+        )),
+        "html/apidocs/index.html": javadoc("All Classes"),
+        "html/apidocs/index-all.html": javadoc("Index"),
+    }, api_roots=["html/apidocs"], publish=True)
+
+    assert (
+        "[the API](https://docs.example.com/en-us-tib-x-userdocs-resources"
+        "/en-us/str/api-references/11-2-1/apidocs/index.html)"
+    ) in result.body("index.md")
+    assert "TOPIC_LINK_DANGLING" not in result.codes()

@@ -14,6 +14,7 @@ from docushift.reporting.findings import (
     REACHABLE_IN_PHASE_6B,
     REACHABLE_IN_PHASE_6C,
     REACHABLE_IN_PHASE_6D,
+    REACHABLE_IN_PHASE_6E,
     REGISTRY,
     FindingsRun,
     Severity,
@@ -40,9 +41,10 @@ def test_the_register_carries_every_row_of_7_5() -> None:
     obligations, and the register grows with the code paths that can raise them
     rather than being frozen at the number the plan first guessed. 6c adds the
     29th, `DOCUMENT_UNREADABLE`, for the same reason and as the first code added
-    by the phase that raises it.
+    by the phase that raises it. 6d nets zero -- one added, `ARCHIVE_ALSO_LIVE`
+    removed as unreachable -- and 6e adds the 30th, `API_LINK_REWRITTEN`.
     """
-    assert len(REGISTRY) == 29
+    assert len(REGISTRY) == 30
 
 
 def test_severity_comes_from_the_registry_and_not_from_the_call_site() -> None:
@@ -138,7 +140,7 @@ def test_summary_counts_note_rows_not_note_occurrences() -> None:
 
 def test_the_reachability_debt_is_named_rather_than_asserted_away() -> None:
     """§7.5's guarantee, allowed to pass with a *named* list of unreached codes."""
-    outstanding = unreachable_codes(REACHABLE_IN_PHASE_6D)
+    outstanding = unreachable_codes(REACHABLE_IN_PHASE_6E)
 
     assert (
         set(REACHABLE_IN_PHASE_5A)
@@ -147,6 +149,7 @@ def test_the_reachability_debt_is_named_rather_than_asserted_away() -> None:
         <= set(REACHABLE_IN_PHASE_6B)
         <= set(REACHABLE_IN_PHASE_6C)
         <= set(REACHABLE_IN_PHASE_6D)
+        <= set(REACHABLE_IN_PHASE_6E)
         <= set(REGISTRY)
     )
     # With the first engine built, `convert` owes nothing: every remaining debt
@@ -154,11 +157,14 @@ def test_the_reachability_debt_is_named_rather_than_asserted_away() -> None:
     # gone, which is the point of the sub-phase.
     for code in outstanding:
         assert REGISTRY[code].stage is not Stage.CONVERT, code
-    # 6d closes `PUBLISH_BASE_URL_UNSET` the phase that added it and *removes*
-    # `ARCHIVE_ALSO_LIVE`, which no code path could reach. The one left is the
-    # cross-boundary link rewrite, which 6d deferred: the converter drops a
-    # reference that leaves its output root, so there is no link in the published
-    # Markdown for `sync` to re-point or to report as missing.
+    # 6d closed `PUBLISH_BASE_URL_UNSET` the phase that added it and *removed*
+    # `ARCHIVE_ALSO_LIVE`, which no code path could reach. 6e closes its own
+    # `API_LINK_REWRITTEN` likewise. The one left is `DOC_REFERENCE_MISSING`, and
+    # what remains behind it is §10.7's class 2 only: the 279 Flare references that
+    # escape into `doc/` and `pdf/` bound for the *document* doc-classes, whose
+    # destination needs §10.4's router and so is genuinely sync's to answer. The
+    # api-reference half, which 6d deferred for the same reason, turned out not to
+    # be sync's at all and shipped in 6e.
     assert {code for code in outstanding if REGISTRY[code].stage is Stage.SYNC} == {
         "DOC_REFERENCE_MISSING",
     }

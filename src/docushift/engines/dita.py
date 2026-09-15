@@ -255,6 +255,18 @@ class DitaRenderer(markdown.Renderer):
             return raw.strip()
         if not reference.resolvable:
             return None
+        # Into a published API tree: the one link kind whose target is a real
+        # file that this run deliberately does not convert (§10.7). The URL comes
+        # from `ConversionContext.api_url`, which the driver resolved -- the engine
+        # is told the publishing layout, never asked to work it out.
+        #
+        # Checked before the topic/asset split rather than inside one arm of it.
+        # Every one of the 3,194 measured references is a topic-suffixed page, but
+        # a repackaging that ships a PDF inside a Javadoc tree must not quietly
+        # start dropping links again.
+        api = self.context.api_url(self.source, reference.path, reference.fragment)
+        if api is not None:
+            return api
 
         guid = _guid_of(reference.path)
         if guid is None:

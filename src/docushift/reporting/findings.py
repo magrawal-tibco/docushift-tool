@@ -162,8 +162,18 @@ REGISTRY: dict[str, Code] = _codes(
     # supported state -- the AEM host is not known yet -- and rather than a note
     # because it is a human decision pending, not a property of the corpus.
     Code("PUBLISH_BASE_URL_UNSET", Severity.WARNING, Stage.SYNC,
-         "api-references placed with no publish_base_url; cross-tree links left relative",
+         "api-references placed with no publish_base_url; cross-tree links have no host",
          "architecture.md §6.4"),
+    # 6e's one new code, and a note for the reason 6c's is: nobody acts on one
+    # rewritten link and everybody wants the magnitude. Notes aggregate into a
+    # single row with a count (§7.1), which is the shape this needs -- because the
+    # failure it guards against is silent. A version with an API tree and **zero**
+    # rewritten links is either a product whose help genuinely never references its
+    # API (8 of the 49 in-scope versions) or a predicate that stopped matching, and
+    # a count of 0 is the only thing that tells those apart.
+    Code("API_LINK_REWRITTEN", Severity.NOTE, Stage.CONVERT,
+         "Link into an api-reference tree pointed at its published -resources URL",
+         "design.md §10.7"),
     Code("LINK_BROKEN", Severity.ERROR, Stage.VALIDATE,
          "Relative link resolving to nothing", "design.md §8.4"),
     Code("CSH_IDENTIFIER_DROPPED", Severity.WARNING, Stage.VALIDATE,
@@ -206,6 +216,11 @@ REACHABLE_IN_PHASE_6C = REACHABLE_IN_PHASE_6B | {"DOCUMENT_UNREADABLE"}
 # can reach is an obligation the register claims and no test can check, so it is
 # gone rather than carried as a permanent debt. Register: 29 -> 28.
 REACHABLE_IN_PHASE_6D = REACHABLE_IN_PHASE_6C | {"PUBLISH_BASE_URL_UNSET"}
+# 6e adds one, and it is the first `Stage.CONVERT` code added since 5b -- because
+# the phase is a Stage 5 change wearing a Stage 6 phase's clothes: the rewrite that
+# §10.7 assigned to sync turned out to have to happen while the engine is emitting.
+# Register: 29 -> 30.
+REACHABLE_IN_PHASE_6E = REACHABLE_IN_PHASE_6D | {"API_LINK_REWRITTEN"}
 
 
 class UnregisteredCode(KeyError):

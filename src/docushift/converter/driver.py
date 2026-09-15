@@ -42,9 +42,15 @@ from docushift.engines.base import ConversionContext, Document, Unit, engine_for
 from docushift.engines.csh import CshFormat, CshSource, csh_format_of, read_csh_source
 from docushift.models import ConversionStatus, Product, ProductVersion, SourceEngine
 from docushift.reporting.findings import FindingsRun
+
+# Stage 5 importing Stage 7's module is the point, not a layering slip: §6.4
+# guarantees the folder sync writes and the URL conversion emits come out of one
+# function, and two copies of the naming rule is exactly the failure it forbids.
+from docushift.sync import apirefs
 from docushift.transforms import csh as csh_transform
 from docushift.transforms.assets import AssetCopier, Counts
 from docushift.utils.csvio import normalize_date
+from docushift.utils.slug import slugify, version_segment
 from docushift.utils.swap import remove, swap
 
 
@@ -179,12 +185,23 @@ class DocumentConverter:
                 slug, number, ConvertOutcome.ENGINE_UNKNOWN, engine=version.engine, message=reason
             )
 
-        checksum = self._metadata(slug, number).get("extract_zip_checksum", "")
-        converted_from = self._metadata(slug, number).get("convert_source_checksum", "")
+        metadata = self._metadata(slug, number)
+        checksum = metadata.get("extract_zip_checksum", "")
+        converted_from = metadata.get("convert_source_checksum", "")
         # Keyed on the *package's* checksum, the value 4b-1 already records, rather
         # than on a hash of thousands of Markdown files: the input is one file and
         # the output is the thing whose freshness is in question.
-        if not force and checksum and checksum == converted_from and target.is_dir():
+        #
+        # 6e adds a second key, and only for the versions that have one. The package
+        # does not change when `publishing.yaml` does, so filling in
+        # `publish_base_url` would otherwise leave every converted tree reporting
+        # CURRENT with host-less API links baked in -- a silent partial success, the
+        # shape §7.5 exists to catch. Versions with no API tree record an empty
+        # prefix and are never invalidated by it, which keeps a host being set from
+        # reconverting 1,822 versions to change the output of 41.
+        recorded_prefix = metadata.get("convert_api_prefix", "")
+        prefix_current = not recorded_prefix or recorded_prefix == self._api_prefix(product, number)
+        if not force and checksum and checksum == converted_from and prefix_current and target.is_dir():
             return ConvertResult(
                 slug, number, ConvertOutcome.CURRENT, path=target, engine=version.engine
             )
@@ -220,6 +237,7 @@ class DocumentConverter:
         # Read before the context is built, because `_api_roots` needs them: an api
         # root that is also an output root is the output root's (6d).
         output_roots = self._recorded_paths(slug, number, "output_roots", tree)
+        api_roots = self._api_roots(slug, number, tree, output_roots)
         context = ConversionContext(
             tree=tree,
             output=staging,
@@ -227,7 +245,8 @@ class DocumentConverter:
             slug=slug,
             version=number,
             product_name=product.display_name,
-            api_roots=self._api_roots(slug, number, tree, output_roots),
+            api_roots=api_roots,
+            api_urls=self._api_urls(product, number, tree, api_roots),
             output_roots=output_roots,
             findings=self.findings,
         )
@@ -253,6 +272,7 @@ class DocumentConverter:
             result.documents += len(unit.documents)
             units.append(unit)
         context.assets = None
+        self._report_api_links(context)
 
         # Stage 6a, and it runs here rather than in a later command because the
         # node list exists only while the units are in hand and the pages it
@@ -278,6 +298,10 @@ class DocumentConverter:
             # checksum claiming an output tree that was never completed.
             if checksum:
                 self.state.set_version_metadata(slug, number, "convert_source_checksum", checksum)
+            self.state.set_version_metadata(
+                slug, number, "convert_api_prefix",
+                self._api_prefix(product, number) if context.api_urls else "",
+            )
         if self.findings is not None:
             self.findings.flush()
         return result
@@ -399,6 +423,25 @@ class DocumentConverter:
                     message=f"homepage release-date {date} != catalog {catalog_date}",
                 )
 
+    def _report_api_links(self, context: ConversionContext) -> None:
+        """One note per version for the whole cross-boundary rewrite (6e).
+
+        Once, with a count, rather than once per link: nobody acts on a single
+        rewritten link and everybody wants the magnitude. It matters because the
+        failure here is silent -- a version with an API tree and **zero** rewritten
+        links is either a product whose help genuinely never references its API (8
+        of the 49 in-scope versions) or a predicate that stopped matching, and
+        without the count those two are indistinguishable.
+        """
+        if not context.api_urls:
+            return
+        context.record(
+            "API_LINK_REWRITTEN",
+            message=f"{context.api_links} link(s) rewritten to the -resources tree "
+                    f"across {len(context.api_urls)} API tree(s)",
+            count=context.api_links,
+        )
+
     def _report_csh(self, context: ConversionContext, resolved: csh_transform.CshMap) -> None:
         """§9.4's `unresolved` and the ambiguity list, relocated to the register.
 
@@ -450,6 +493,42 @@ class DocumentConverter:
         """
         recorded = self._recorded_paths(slug, version, "api_roots", tree)
         return recorded or find_api_roots(tree, output_roots)
+
+    def _api_prefix(self, product: Product, version: str) -> str:
+        """The publishing coordinates every one of this version's API URLs shares.
+
+        The currency key, and nothing else reads it -- the URLs themselves are
+        composed per root by `apirefs.url_map`. Empty whenever no URL could be
+        emitted at all, so that "no API tree" and "no `-resources` tree for this
+        locale" record the same absence as a version that simply has none.
+        """
+        segment = version_segment(version)
+        if not segment or not self.config.publishes_resources():
+            return ""
+        tree_name = self.config.resources_tree_name(product.bu, product.family)
+        return apirefs.published_url(
+            self.config.publish_base_url(), tree_name,
+            slugify(self.config.locale), product.slug, segment, "",
+        )
+
+    def _api_urls(
+        self, product: Product, version: str, tree: Path, api_roots: list[Path]
+    ) -> dict[Path, str]:
+        """Where each of this version's API trees will be published (6e).
+
+        Conversion is *told* this rather than deriving it, which is what keeps
+        §10.7's rationale true: the engines still do not know the publishing layout.
+        Skipped entirely when there are no API roots, because `url_map` measures the
+        trees it is given and there is nothing to measure.
+        """
+        if not api_roots or not self._api_prefix(product, version):
+            return {}
+        return apirefs.url_map(
+            tree, api_roots,
+            self.config.publish_base_url(),
+            self.config.resources_tree_name(product.bu, product.family),
+            slugify(self.config.locale), product.slug, version_segment(version),
+        )
 
     def _csh_sources(self, slug: str, version: str, tree: Path) -> list[CshSource]:
         """The version's help maps, re-read from disk at the paths Stage 4 recorded.

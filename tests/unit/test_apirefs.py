@@ -188,3 +188,71 @@ def test_an_unset_host_leaves_the_path_alone_rather_than_inventing_one() -> None
     assert apirefs.published_url(
         "", "en-us-tib-messaging-userdocs-resources", "en-us", "tibco-ems", "10-4-0", "java",
     ) == "en-us-tib-messaging-userdocs-resources/en-us/tibco-ems/api-references/10-4-0/java"
+
+
+
+# -- the map Stage 5 converts against (6e) --------------------------------------
+
+PUBLISH = ("https://docs.example.com", "en-us-tib-messaging-userdocs-resources",
+           "en-us", "tibco-ems", "10-4-0")
+
+
+def test_every_root_is_a_key_and_a_dropped_copy_follows_its_survivor(tmp_path: Path) -> None:
+    """The 19 duplicates `select` drops are keys too, pointing at what was published.
+
+    A topic inside `rtview`'s self-nested extract links to the copy beside it, and
+    that copy is exactly the one de-duplication removes. Dropping the link with it
+    would punish the topic for the packager's mistake.
+    """
+    tree = tmp_path / "5.9.1"
+    outer = javadoc(tree / "html" / "javadocs")
+    inner = javadoc(tree / "rtview-5-9-1" / "html" / "javadocs")
+
+    urls = apirefs.url_map(tree, [inner, outer], *PUBLISH)
+
+    assert set(urls) == {outer, inner}
+    assert urls[inner] == urls[outer]
+    assert urls[outer].endswith("/api-references/10-4-0/javadocs")
+
+
+def test_the_url_uses_the_name_the_whole_version_fell_back_to(tmp_path: Path) -> None:
+    """`tps/6.0.0` demotes to dashed paths, and the link has to follow the folder.
+
+    The map goes through the same de-duplication and the same collision fallback as
+    `select`, which is the point of building it here rather than in the converter:
+    two copies of the naming rule is two chances to link to a folder nobody made.
+    """
+    tree = tmp_path / "6.0.0"
+    shallow = javadoc(tree / "api" / "java" / "lib", pages=2)
+    nested = javadoc(tree / "api" / "api" / "java" / "lib", pages=3)
+
+    urls = apirefs.url_map(tree, [nested, shallow], *PUBLISH)
+
+    assert [urls[root].rsplit("/", 1)[-1] for root in (shallow, nested)] == [
+        "api-java-lib", "api-api-java-lib",
+    ]
+    assert [root.name for root in apirefs.select(tree, [nested, shallow])] == [
+        "api-java-lib", "api-api-java-lib",
+    ]
+
+
+def test_an_unset_host_maps_to_a_tree_rooted_path(tmp_path: Path) -> None:
+    """The shipped state: the path is derivable and a missing prefix is fixable."""
+    tree = tmp_path / "10.4.0"
+    root = javadoc(tree / "html" / "api-docs" / "java")
+
+    urls = apirefs.url_map(tree, [root], "", *PUBLISH[1:])
+
+    assert urls[root] == (
+        "en-us-tib-messaging-userdocs-resources/en-us/tibco-ems/api-references/10-4-0/java"
+    )
+
+
+def test_a_recorded_root_that_is_gone_is_not_a_key(tmp_path: Path) -> None:
+    """Same silence as `select`: a recorded path is not a promise about the disk."""
+    tree = tmp_path / "1.0.0"
+    real = javadoc(tree / "html" / "javadoc")
+
+    urls = apirefs.url_map(tree, [real, tree / "html" / "gone"], *PUBLISH)
+
+    assert list(urls) == [real]

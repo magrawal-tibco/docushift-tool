@@ -25,15 +25,18 @@ So the contract fixes only what all of them share:
   drivers read alike.
 """
 
+import os
 from abc import ABC, abstractmethod
 from collections.abc import Iterator
 from dataclasses import dataclass, field
 from pathlib import Path, PurePosixPath
 from typing import Any, ClassVar
+from urllib.parse import quote
 
 from docushift.engines.roots import find_output_roots
 from docushift.models import SourceEngine
 from docushift.reporting.findings import FindingsRun
+from docushift.transforms import links
 from docushift.transforms.assets import AssetCopier
 
 
@@ -188,6 +191,11 @@ class ConversionContext:
     # corpus's 676 Flare roots, and inventing a title there would be worse.
     product_name: str = ""
     api_roots: list[Path] = field(default_factory=list)
+    # Each of those roots paired with the URL its content is published at, from
+    # `sync/apirefs.url_map` (6e). Empty for a version with no API tree, for a
+    # non-primary locale, and in any test that does not pass one -- and empty means
+    # the rewrite does not fire, not that it fires with a broken address.
+    api_urls: dict[Path, str] = field(default_factory=dict)
     output_roots: list[Path] = field(default_factory=list)
     findings: FindingsRun | None = None
     # The copier for the unit currently being converted, set by the driver before
@@ -197,6 +205,42 @@ class ConversionContext:
     # own copier it would also be deriving the destination, which is the driver's
     # answer and must not exist twice.
     assets: AssetCopier | None = None
+    # How many links this version's conversion sent into the `-resources` tree.
+    # Counted rather than recorded one by one: nobody acts on a single rewritten
+    # link and everybody wants the magnitude, so the driver reports one note per
+    # version at the end (§7.1).
+    api_links: int = 0
+
+    def api_url(self, source: Path, path: str, fragment: str = "") -> str | None:
+        """The published URL for a reference into an API tree, or `None`.
+
+        The one thing conversion is *told* about the publishing layout rather than
+        deriving. §10.7 assigned this rewrite to Stage 7 because "conversion does
+        not know where things get published", which remains true: the driver hands
+        over a resolved map, exactly as it already hands over `api_roots` rather
+        than letting an engine walk for them.
+
+        `None` for anything that is not a file inside a published API tree --
+        including a path that *looks* like one but is not on disk. That is
+        `apiref.py`'s rule applied to the link side: a marker decides and a name
+        never does. Emitting a URL for a page the copy will not contain would trade
+        a reported dangling link for a silent 404.
+        """
+        if not self.api_urls:
+            return None
+        absolute = Path(os.path.normpath(source.parent / path))
+        # Deepest first: nothing in the corpus nests one API root inside another,
+        # but the shallower root would win the containment test if one ever did.
+        for root, url in sorted(self.api_urls.items(), key=lambda item: -len(item[0].parts)):
+            if absolute != root and not absolute.is_relative_to(root):
+                continue
+            if not absolute.exists():
+                return None
+            tail = absolute.relative_to(root).as_posix()
+            target = f"{url}/{links.encode(tail)}" if tail != "." else url
+            self.api_links += 1
+            return f"{target}#{quote(fragment, safe='')}" if fragment else target
+        return None
 
     def record(self, code: str, path: str = "", message: str = "", count: int = 1) -> None:
         """Records a finding against this version, or does nothing without a run."""
