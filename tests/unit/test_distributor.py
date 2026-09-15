@@ -13,7 +13,14 @@ import yaml
 from docushift.config import ConfigManager
 from docushift.models import Product, ProductVersion
 from docushift.reporting.findings import FindingsRun
-from docushift.sync import ONLINE_HELP, SyncOutcome, WorkspaceDistributor
+from docushift.sync import (
+    ONLINE_HELP,
+    REFERENCE_DOCUMENTS,
+    RELEASE_INFORMATION,
+    USER_GUIDES,
+    SyncOutcome,
+    WorkspaceDistributor,
+)
 
 TREE = "en-us-tibco-messaging-userdocs"
 
@@ -56,8 +63,23 @@ def convert_output(config: ConfigManager, product: Product, number: str, **files
     return root
 
 
-def published(target: Path, number: str = "10-4-0") -> Path:
-    return target / TREE / "en-us" / "tibco-ems" / ONLINE_HELP / number
+def extract_tree(config: ConfigManager, product: Product, number: str, **files: str) -> Path:
+    """Writes an extracted tree where 6c's router expects to find one.
+
+    Keys are slash-separated relative paths, because where a file sits is half of
+    what §10.4 routes on -- `pdf/x.pdf` and `doc/pdf/x.pdf` are different facts.
+    """
+    root = config.extract_path(product.bu, product.family, product.slug, number)
+    for name, body in files.items():
+        path = root.joinpath(*name.split("/"))
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(body, encoding="utf-8")
+    root.mkdir(parents=True, exist_ok=True)
+    return root
+
+
+def published(target: Path, number: str = "10-4-0", doc_class: str = ONLINE_HELP) -> Path:
+    return target / TREE / "en-us" / "tibco-ems" / doc_class / number
 
 
 # -- one version -----------------------------------------------------------------
@@ -252,6 +274,176 @@ def test_an_unparseable_drop_down_is_left_alone_and_named(config, distributor, p
     assert stats.dropdowns == 0
 
 
+# -- the document doc-classes (6c) --------------------------------------------------
+
+# One package's non-converted shipment, in the shape 1,123 of 1,822 versions use.
+SHIPMENT = {
+    "pdf/tib_ems_users_guide.pdf": "a user guide\n",
+    "pdf/tib_ems_relnotes.pdf": "release notes\n",
+    "doc/readme.txt": "a readme\n",
+    "doc/tib_ems_licenses.txt": "a licence\n",
+}
+
+
+def test_the_documents_land_beside_the_help_in_their_own_doc_classes(
+    config, distributor, product, target
+) -> None:
+    """Four doc-classes from one version, and the folder decides three of them."""
+    convert_output(config, product, "10.4.0")
+    extract_tree(config, product, "10.4.0", **SHIPMENT)
+
+    distributor.sync_many([(product, product.versions["10.4.0"])], target)
+
+    def names(doc_class: str) -> set[str]:
+        return {child.name for child in published(target, doc_class=doc_class).iterdir()}
+
+    assert (published(target) / "index.md").is_file()
+    assert names(USER_GUIDES) == {"tib_ems_users_guide.pdf", "index.md", "toc.yml", "metadata.yml"}
+    assert names(RELEASE_INFORMATION) >= {"tib_ems_relnotes.pdf", "readme.txt"}
+    assert names(REFERENCE_DOCUMENTS) >= {"tib_ems_licenses.txt"}
+
+
+def test_a_doc_class_folder_is_indexed_because_nothing_synthesizes_its_navigation(
+    config, distributor, product, target
+) -> None:
+    """`online-help` gets a TOC from its source TOC; a folder of PDFs has none."""
+    extract_tree(config, product, "10.4.0", **SHIPMENT)
+
+    distributor.sync_many([(product, product.versions["10.4.0"])], target)
+
+    folder = published(target, doc_class=RELEASE_INFORMATION)
+    index = folder.joinpath("index.md").read_text(encoding="utf-8")
+    assert yaml.safe_load(index.split("---\n")[1]) == {
+        "title": "TIBCO Enterprise Message Service™ 10.4.0 Release Information",
+        "doc_class": "release-information",
+        "generated": True,
+    }
+    assert "- [Release Notes](tib_ems_relnotes.pdf)" in index
+    toc = yaml.safe_load(folder.joinpath("toc.yml").read_text(encoding="utf-8"))
+    assert [row["path"] for row in toc["items"]] == ["tib_ems_relnotes.pdf", "readme.txt"]
+    metadata = yaml.safe_load(folder.joinpath("metadata.yml").read_text(encoding="utf-8"))
+    assert metadata == {"csg-version": "10.4.0"}
+
+
+def test_a_version_that_never_converted_still_publishes_its_pdfs(
+    config, distributor, product, target
+) -> None:
+    """The reason the documents read `extract_path` and not `output_path`: one
+    version can be `NO_OUTPUT` for `online-help` and `SYNCED` for `user-guides`."""
+    extract_tree(config, product, "10.4.0", **SHIPMENT)
+
+    stats = distributor.sync_many([(product, product.versions["10.4.0"])], target)
+
+    outcomes = {r.doc_class: r.outcome for r in stats.results}
+    assert outcomes[ONLINE_HELP] is SyncOutcome.NO_OUTPUT
+    assert outcomes[USER_GUIDES] is SyncOutcome.SYNCED
+    assert not published(target).exists()
+    assert (published(target, doc_class=USER_GUIDES) / "tib_ems_users_guide.pdf").is_file()
+
+
+def test_an_extracted_tree_that_routes_nothing_gets_no_row_at_all(
+    config, distributor, product, target
+) -> None:
+    """156 of 1,822 versions. Reporting them would put 156 recoverable-looking
+    failures in every full run, and none of them is recoverable or a failure."""
+    convert_output(config, product, "10.4.0")
+    extract_tree(config, product, "10.4.0", **{"html/index.html": "<html></html>"})
+
+    stats = distributor.sync_many([(product, product.versions["10.4.0"])], target)
+
+    assert [r.doc_class for r in stats.results] == [ONLINE_HELP]
+
+
+def test_a_second_run_reports_current_for_every_doc_class(config, distributor, product, target) -> None:
+    """Compared before anything is staged -- `online-help`'s copy-then-compare shape
+    would re-copy the PDFs and re-read every one of them to answer this."""
+    extract_tree(config, product, "10.4.0", **SHIPMENT)
+    distributor.sync_many([(product, product.versions["10.4.0"])], target)
+
+    stats = distributor.sync_many([(product, product.versions["10.4.0"])], target)
+
+    documents = [r for r in stats.results if r.doc_class in (USER_GUIDES, RELEASE_INFORMATION, REFERENCE_DOCUMENTS)]
+    assert [r.outcome for r in documents] == [SyncOutcome.CURRENT] * 3
+    assert all(r.path is not None for r in documents)
+
+
+def test_force_rebuilds_a_doc_class_that_already_matches(config, distributor, product, target) -> None:
+    """The one thing the cheap currency check cannot see is a template change."""
+    extract_tree(config, product, "10.4.0", **SHIPMENT)
+    distributor.sync_many([(product, product.versions["10.4.0"])], target)
+
+    stats = distributor.sync_many([(product, product.versions["10.4.0"])], target, force=True)
+
+    assert {r.outcome for r in stats.results if r.doc_class == USER_GUIDES} == {SyncOutcome.SYNCED}
+
+
+def test_a_document_dropped_upstream_leaves_the_folder_and_the_index(
+    config, distributor, product, target
+) -> None:
+    source = extract_tree(config, product, "10.4.0", **SHIPMENT)
+    distributor.sync_many([(product, product.versions["10.4.0"])], target)
+    (source / "doc" / "readme.txt").unlink()
+
+    distributor.sync_many([(product, product.versions["10.4.0"])], target)
+
+    folder = published(target, doc_class=RELEASE_INFORMATION)
+    assert not (folder / "readme.txt").exists()
+    assert "readme" not in folder.joinpath("index.md").read_text(encoding="utf-8")
+
+
+def test_each_doc_class_carries_its_own_drop_down(config, distributor, product, target) -> None:
+    """They will legitimately disagree: `user-guides` holds versions that shipped no
+    converted help. That is the shape of the corpus, not a pair to reconcile."""
+    convert_output(config, product, "10.4.0")
+    convert_output(config, product, "10.3.1")
+    extract_tree(config, product, "10.4.0", **SHIPMENT)
+
+    distributor.sync_many([(product, product.versions[n]) for n in ("10.4.0", "10.3.1")], target)
+
+    def rows(doc_class: str) -> list[str]:
+        path = published(target, doc_class=doc_class).parent / "version.yml"
+        return [row["path"] for row in yaml.safe_load(path.read_text(encoding="utf-8"))["versions"]]
+
+    assert rows(ONLINE_HELP) == ["/10-4-0", "/10-3-1"]
+    assert rows(USER_GUIDES) == ["/10-4-0"]
+
+
+def test_a_scoped_document_run_does_not_unlink_its_sibling_version(
+    config, distributor, product, target
+) -> None:
+    """The 6b rule, and 6c rides on it unchanged: the swap is one directory deep."""
+    extract_tree(config, product, "10.4.0", **SHIPMENT)
+    extract_tree(config, product, "10.3.1", **SHIPMENT)
+    distributor.sync_many([(product, product.versions[n]) for n in ("10.4.0", "10.3.1")], target)
+
+    distributor.sync_many([(product, product.versions["10.4.0"])], target, force=True)
+
+    assert published(target, "10-3-1", USER_GUIDES).is_dir()
+    assert (published(target, doc_class=USER_GUIDES).parent / "version.yml").is_file()
+    assert [child.name for child in published(target, doc_class=USER_GUIDES).parent.iterdir()] == [
+        "10-3-1", "10-4-0", "version.yml",
+    ]
+
+
+def test_a_pdf_that_will_not_read_is_published_and_noted(config, catalog, product, target) -> None:
+    """A note, not a warning: the file ships and is titled from its filename. It
+    earns a code by being rare -- 7 of the corpus's 5,007 PDFs, in 4 filenames."""
+    extract_tree(config, product, "10.4.0", **{"pdf/tib_ems_users_guide.pdf": "not a PDF\n"})
+    findings = FindingsRun("sync")
+
+    WorkspaceDistributor(config, catalog, findings=findings).sync_many(
+        [(product, product.versions["10.4.0"])], target
+    )
+
+    assert [f.code for f in findings.all] == ["DOCUMENT_UNREADABLE"]
+    assert "tib_ems_users_guide.pdf" in findings.all[0].message
+    folder = published(target, doc_class=USER_GUIDES)
+    assert (folder / "tib_ems_users_guide.pdf").is_file()
+    assert "- [tib ems users guide](tib_ems_users_guide.pdf)" in folder.joinpath("index.md").read_text(
+        encoding="utf-8"
+    )
+
+
 # -- the register ------------------------------------------------------------------
 
 
@@ -287,12 +479,23 @@ def test_an_undated_version_is_noted(config, catalog, product, target) -> None:
 
 
 def test_the_run_reports_five_outcomes_over_a_partial_corpus(config, distributor, product, target) -> None:
+    """One converted version, one not, and neither of them ever extracted.
+
+    Counted per doc-class since 6c: the `online-help` rows are the 6b contract and
+    are unchanged, and each version contributes one more `NO_OUTPUT` for its
+    documents because its *extracted* tree is a separate absence from its converted
+    one. Both are recoverable and both name the command that recovers them.
+    """
     convert_output(config, product, "10.4.0")
 
     stats = distributor.sync_many([(product, product.versions[n]) for n in ("10.4.0", "10.3.1")], target)
 
-    assert stats.count(SyncOutcome.SYNCED) == 1
-    assert stats.count(SyncOutcome.NO_OUTPUT) == 1
+    help_rows = [r for r in stats.results if r.doc_class == ONLINE_HELP]
+    assert sum(1 for r in help_rows if r.outcome is SyncOutcome.SYNCED) == 1
+    assert sum(1 for r in help_rows if r.outcome is SyncOutcome.NO_OUTPUT) == 1
+    document_rows = [r for r in stats.results if r.doc_class == ""]
+    assert [r.outcome for r in document_rows] == [SyncOutcome.NO_OUTPUT] * 2
+    assert all("docushift extract" in r.message for r in document_rows)
     assert stats.products == 1
     assert stats.dropdowns == 1
 

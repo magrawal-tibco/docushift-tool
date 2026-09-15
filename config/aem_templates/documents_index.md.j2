@@ -1,0 +1,23 @@
+{#-
+  The landing page of a document doc-class (Stage 6c, design.md section 10.5).
+
+  **Frontmatter included**, unlike `index.md.j2`. That one is body-only because
+  the converter's `_render` heads every page it writes; nothing converts a folder
+  of PDFs, so this template is the only place the frontmatter can come from. The
+  keys are the `online-help` index's plus `doc_class`.
+
+  `entry.link` is the percent-encoded filename, not `entry.name`: the corpus ships
+  `mft platform server v7.1 for windows release notes.pdf`, and a Markdown link
+  target stops at the first space in every renderer.
+-#}
+---
+title: {{ title | yaml }}
+doc_class: {{ doc_class | yaml }}
+generated: true
+---
+
+# {{ title }}
+
+{% for entry in entries -%}
+- [{{ entry.title }}]({{ entry.link }})
+{% endfor -%}

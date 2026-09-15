@@ -1145,20 +1145,34 @@ def convert(ctx, bu, family, product, version, batch, select_all, force, dry_run
 
 
 def _report_sync(stats, findings) -> None:
-    """The five-outcome summary, what was written above the versions, and findings."""
-    from docushift.sync import SyncOutcome
+    """The five-outcome summary, what was written above the versions, and findings.
 
+    Counted in **rows, not versions**, since 6c: a run reports one row per
+    (version, doc-class) that had something to say, so a version with converted
+    help and two folders of PDFs contributes three. The per-doc-class column is
+    what makes that readable rather than merely inflated.
+    """
+    from docushift.sync import DOC_CLASSES, SyncOutcome
+
+    seen = [name for name in DOC_CLASSES if any(r.doc_class == name for r in stats.results)]
     table = Table(title="Sync")
     table.add_column("Outcome")
-    table.add_column("Versions", justify="right")
+    table.add_column("Rows", justify="right")
+    for name in seen:
+        table.add_column(name, justify="right")
     for outcome, label in (
         (SyncOutcome.SYNCED, "Synced"),
         (SyncOutcome.CURRENT, "Already current"),
-        (SyncOutcome.NO_OUTPUT, "No converted tree"),
+        (SyncOutcome.NO_OUTPUT, "No source tree"),
         (SyncOutcome.SKIPPED, "Skipped"),
         (SyncOutcome.FAILED, "Failed"),
     ):
-        table.add_row(label, str(stats.count(outcome)))
+        rows = [r for r in stats.results if r.outcome is outcome]
+        table.add_row(
+            label,
+            str(len(rows)),
+            *[str(sum(1 for r in rows if r.doc_class == name)) for name in seen],
+        )
     console.print(table)
     if stats.files:
         console.print(f"[dim]{stats.files} file(s), {_gb(stats.bytes)} copied.[/dim]")
@@ -1188,11 +1202,13 @@ def _report_sync(stats, findings) -> None:
 @click.option("--dry-run", is_flag=True, help="Show what would be copied without writing.")
 @click.pass_context
 def sync(ctx, bu, family, product, version, batch, select_all, target_dir, force, dry_run) -> None:
-    """Distribute converted output into a target GitHub workspace.
+    """Distribute converted output and shipped documents into a target workspace.
 
-    Runs over the same selection as `convert`, narrowed to what has actually been
-    converted: a version with no output tree is a report line, not an abort. Phase
-    6b places the `online-help` doc-class; the other three arrive with 6c.
+    Runs over the same selection as `convert`: a version with no output tree is a
+    report line, not an abort. Places all four doc-classes -- `online-help` from
+    the converted tree, and `user-guides`, `release-information` and
+    `reference-documents` from the *extracted* one, so a version that never
+    converted still publishes the PDFs it shipped.
 
     Filesystem only. This writes the trees and reports what it wrote; it creates no
     repository and runs no git command (`architecture.md` §6.0).
@@ -1211,17 +1227,26 @@ def sync(ctx, bu, family, product, version, batch, select_all, target_dir, force
     distributor = WorkspaceDistributor(cfg, manager)
 
     if dry_run:
+        from docushift.sync import documents as document_index
+        from docushift.sync import router
+
         table = Table(title=f"Would sync ({len(pairs)})")
-        for column in ("Product", "Version", "Output", "Destination"):
+        for column in ("Product", "Version", "Converted", "Documents", "Destination"):
             table.add_column(column)
         for found, ver in pairs:
             source = cfg.output_path(found.bu, found.family, found.slug, ver.version)
+            tree = cfg.extract_path(found.bu, found.family, found.slug, ver.version)
             segment = version_segment(ver.version)
             destination = distributor.doc_class_dir(found, target_dir, ONLINE_HELP) / segment
+            grouped = (
+                document_index.group(router.route_version(tree, ver.engine))
+                if tree.is_dir() else {}
+            )
             table.add_row(
                 found.slug,
                 ver.version,
                 "present" if source.is_dir() else "[yellow]missing[/yellow]",
+                ", ".join(f"{name} {len(files)}" for name, files in grouped.items()) or "[dim]-[/dim]",
                 str(destination),
             )
         console.print(table)
@@ -1236,11 +1261,12 @@ def sync(ctx, bu, family, product, version, batch, select_all, target_dir, force
     def on_result(result) -> None:
         if result.outcome is SyncOutcome.SYNCED:
             console.print(
-                f"  [green]v[/green] {result.slug}@{result.version} -> {result.segment} "
+                f"  [green]v[/green] {result.slug}@{result.version} -> "
+                f"{result.doc_class}/{result.segment} "
                 f"{result.files} file(s), {_gb(result.bytes)}"
             )
         elif result.outcome is SyncOutcome.FAILED:
-            console.print(f"  [red]x[/red] {result.slug}@{result.version}")
+            console.print(f"  [red]x[/red] {result.slug}@{result.version} ({result.doc_class})")
 
     stats = distributor.sync_many(pairs, target_dir, force=force, on_result=on_result)
     findings.finish()

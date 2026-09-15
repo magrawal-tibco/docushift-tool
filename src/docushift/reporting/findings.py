@@ -145,6 +145,15 @@ REGISTRY: dict[str, Code] = _codes(
     Code("METADATA_MISMATCH", Severity.WARNING, Stage.CONVERT,
          "SuiteHelp release-version / release-date disagreeing with the catalog",
          "planning.md Phase 6 contract"),
+    # 6c's one new code, and the only one this phase needed. A note rather than a
+    # warning: the file is published and titled from its filename, so nothing is
+    # lost -- but a damaged deliverable that nobody names is shipped silently. It
+    # earns a code by being rare: 7 of the corpus's 5,007 PDFs, in 4 filenames. A
+    # *blank* `/Title` is deliberately not reported at all; 27.9% of the corpus is
+    # blank, and a note firing 1,396 times describes the corpus, not a defect.
+    Code("DOCUMENT_UNREADABLE", Severity.NOTE, Stage.SYNC,
+         "PDF whose Info dictionary would not parse; titled from its filename",
+         "design.md §10.5"),
     Code("ARCHIVE_ALSO_LIVE", Severity.NOTE, Stage.SYNC,
          "Archived version that is also live, cross-linked", "architecture.md §6.2.3"),
     Code("LINK_BROKEN", Severity.ERROR, Stage.VALIDATE,
@@ -176,6 +185,11 @@ REACHABLE_IN_PHASE_6A = REACHABLE_IN_PHASE_5B | {"METADATA_MISMATCH"}
 # can reach them -- which is the test the sub-phase was held to: needing a code
 # that is not in the table would have meant the rule was new, not the table short.
 REACHABLE_IN_PHASE_6B = REACHABLE_IN_PHASE_6A | {"VERSION_NOT_NUMERIC", "VERSION_UNDATED"}
+# 6c adds exactly one, and it is the first code in the register that was *not*
+# there before the phase that raises it. That is the test the rule states: needing
+# a code that is not in the table means the rule is new, not the table short -- and
+# "a shipped PDF is damaged" is a genuinely new thing for this tool to know.
+REACHABLE_IN_PHASE_6C = REACHABLE_IN_PHASE_6B | {"DOCUMENT_UNREADABLE"}
 
 
 class UnregisteredCode(KeyError):

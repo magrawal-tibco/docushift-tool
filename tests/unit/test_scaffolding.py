@@ -17,7 +17,12 @@ SUBPACKAGES = [
     "docushift.extractor",
     "docushift.engines",
     "docushift.transforms",
-    "docushift.aem",
+    # `docushift.aem` was here until 6c and is deliberately gone: both halves
+    # of Stage 6 landed elsewhere -- navigation in `converter/`, because the
+    # node list exists only while the engines' units are in hand, and the
+    # distributor, the router and the document index in `sync/`, because
+    # everything above a version folder needs a `--target-dir`. An empty
+    # package asserted to import is a guard over a plan nobody followed.
     "docushift.sync",
     "docushift.reporting",
     "docushift.utils",

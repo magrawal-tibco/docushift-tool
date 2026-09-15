@@ -709,7 +709,7 @@ docushift sync --all --target-dir ../tibco-docs-aem/
 docushift sync --product tibco-ems --target-dir ../tibco-docs-aem/
 docushift sync --product tibco-ems --version 10.4.0 --target-dir ../tibco-docs-aem/
 
-# See where each version would land, without writing
+# See where each version would land, and how many documents it would place
 docushift sync --all --target-dir ../tibco-docs-aem/ --dry-run
 
 # Re-copy even where the published tree already matches
@@ -726,10 +726,19 @@ corpus that is the normal state. "Already current" is decided by comparing the t
 trees, not by a recorded hash, so a version somebody edited in the target is
 re-copied rather than skipped.
 
-> **Today `sync` places `online-help`.** The spine, the product `metadata.yml` and
-> the per-doc-class `version.yml` are built; `user-guides`, `release-information`,
-> `reference-documents` and the whole `-resources` tree are the next two sub-phases
-> and are described below as the layout they will complete.
+> **Today `sync` places all four docs-tree doc-classes.** `online-help` from the
+> converted tree, and `user-guides`, `release-information` and `reference-documents`
+> from the *extracted* one — so a version you have not converted still publishes its
+> PDFs and its readme. The whole `-resources` tree is the next sub-phase and is
+> described below as the layout it will complete.
+
+Because the documents come from the extracted package rather than the converted
+output, one version can report `no converted tree` for `online-help` and `synced`
+for `user-guides` in the same run. The table counts **rows, not versions**: a
+version shows up once per doc-class it had something to say about, up to four
+times. A version whose extracted package holds no documents at all is not a row —
+that is the normal state for roughly one version in twelve, and it is not something
+you can act on.
 
 > **`sync` writes folders, not commits.** DocuShift stops at the filesystem: it never runs a git command, creates no repository and pushes nothing. The two trees it writes per family are named exactly as the publishing repositories are, so taking them the rest of the way is a copy into a clone — done by you, by a CI job, or by whatever owns those repositories. That also means you can run `sync` and read the result without any GitHub credentials.
 
@@ -742,9 +751,10 @@ en-us-tib-messaging-userdocs/           # the docs tree — what a reader reads
     ├── online-help/
     │   ├── version.yml                 # the drop-down, listing only this doc-class's versions
     │   └── 10-4-0/…                    # converted Markdown, toc.yml, metadata.yml, index.md, csh.yml
-    ├── user-guides/10-4-0/…            # user-guide PDFs + version.yml, index.md, toc.yml
-    ├── release-information/10-4-0/…    # release notes + readme + version.yml, index.md, toc.yml
-    └── reference-documents/10-4-0/…    # VPAT, licence, rest of doc/ + version.yml, index.md, toc.yml
+    ├── user-guides/10-4-0/…            # user-guide PDFs + index.md, toc.yml, metadata.yml
+    ├── release-information/10-4-0/…    # release notes + readme + index.md, toc.yml, metadata.yml
+    └── reference-documents/10-4-0/…    # VPAT, licence, rest of doc/ + index.md, toc.yml, metadata.yml
+                                        # each doc-class also carries its own version.yml
 
 en-us-tib-messaging-userdocs-resources/ # the bulk tree
 └── en-us/ems/
@@ -752,7 +762,7 @@ en-us-tib-messaging-userdocs-resources/ # the bulk tree
     └── archives/…                      # archived-version ZIPs + index.md, toc.yml
 ```
 
-Eleven things to expect:
+Twelve things to expect:
 
 - **`version.yml` is the drop-down, and a scoped sync does not shrink it.** Each doc-class gets its own, listing only the versions that doc-class actually holds — so `user-guides` and `online-help` will legitimately disagree. It is rebuilt by reading the folder on disk and matching it against the catalog's active versions, *not* from what the run just wrote, so `sync --product tibco-ems --version 10.4.0` updates one entry and leaves the other thirty-seven alone. Titles carry the release date (`10.4.0 (Feb 2026)`); an undated version keeps the version and drops the bracket.
 
@@ -761,7 +771,9 @@ Eleven things to expect:
 - **A non-`en-us` run publishes into `loc-tib-messaging-userdocs` and gets no `-resources` tree.** All localized content shares one docs tree rather than getting one per language, and API references and archives are English-only. Asking for a localized resources tree is an error, not an empty directory.
 
 - **`nav.yml` is gone and `meta.yml` is now `metadata.yml`.** The AEM spec arrived on 2026-09-10 and named neither of the two placeholder templates the project started with. Nothing consumed `nav.yml`, so it was deleted rather than kept; `metadata.yml` replaces `meta.yml` and carries exactly two keys — `csg-product` beside the product's doc-classes, and `csg-version` in each version folder, dotted (`10.4.0`) even though the folder around it is dashed. The eleven fields the old placeholder invented are not there and are not coming back. If you built anything against `meta.yml`, it needs rewriting.
-- **The PDF doc-classes get an index too.** `user-guides/`, `release-information/` and `reference-documents/` each receive a generated `index.md` and `toc.yml` listing their files, so a copied PDF is reachable. Titles come from the document kind where the name identifies one (Release Notes, VPAT, License Agreement), otherwise from the PDF's own metadata, otherwise from the filename. A doc-class with no files gets no folder at all rather than an empty index.
+- **The PDF doc-classes get an index too.** `user-guides/`, `release-information/` and `reference-documents/` each receive a generated `index.md`, `toc.yml` and `metadata.yml` beside their files, so a copied PDF is reachable. Titles come from the document kind where the name identifies one (Release Notes, VPAT, License Agreement), otherwise from the PDF's own metadata, otherwise from the filename with its separators opened out. A doc-class with no files gets no folder at all rather than an empty index. A PDF that will not open is still copied and still listed, titled from its filename and named in the report as a note — it means the shipped file is damaged, which is worth knowing and is not worth failing a run over.
+
+- **What goes where is decided by the folder it shipped in, not by the extension.** Everything directly inside the package's `pdf/` is a user guide unless its name says VPAT, licence, reminder notice or release note; everything directly inside `doc/` is a reference document unless it is a readme or a release note. So a licence PDF and a licence `.txt` land together, and a user-guide PDF and a readme do not. Files in subdirectories are left to the converter.
 - **`archives/` is indexed from the catalog, so it lists every archived version — including the ones you have not downloaded.** Entries whose ZIP is not in the repository link to the docsite instead, and the index says which is which. That is deliberate: `archives/` exists to be the complete product history, and `archive download` is what fills it in. `api-references/` gets no generated index — Javadoc ships its own.
 - **Versions are dashed here** (`10.4.0` → `10-4-0`) and nowhere else. The catalog and the `families/` workspace keep the dots. Two versions in the catalog are not version numbers at all — `Cloud™` and `(iPaaS)`, upstream parse artifacts — and those are reduced further to `cloud` and `ipaas`, because a trademark glyph and a bracket pair cannot be a URL path. Any version that is not `N.N.N` is named in the run report, whether it was reshaped or just sorted to the bottom of the drop-down.
 

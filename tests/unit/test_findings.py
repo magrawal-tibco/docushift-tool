@@ -12,6 +12,7 @@ from docushift.reporting.findings import (
     REACHABLE_IN_PHASE_5B,
     REACHABLE_IN_PHASE_6A,
     REACHABLE_IN_PHASE_6B,
+    REACHABLE_IN_PHASE_6C,
     REGISTRY,
     FindingsRun,
     Severity,
@@ -36,9 +37,11 @@ def test_the_register_carries_every_row_of_7_5() -> None:
 
     5b adds 8 more, which were *not* in §7.5: they are the Flare engine's own
     obligations, and the register grows with the code paths that can raise them
-    rather than being frozen at the number the plan first guessed.
+    rather than being frozen at the number the plan first guessed. 6c adds the
+    29th, `DOCUMENT_UNREADABLE`, for the same reason and as the first code added
+    by the phase that raises it.
     """
-    assert len(REGISTRY) == 28
+    assert len(REGISTRY) == 29
 
 
 def test_severity_comes_from_the_registry_and_not_from_the_call_site() -> None:
@@ -134,13 +137,14 @@ def test_summary_counts_note_rows_not_note_occurrences() -> None:
 
 def test_the_reachability_debt_is_named_rather_than_asserted_away() -> None:
     """§7.5's guarantee, allowed to pass with a *named* list of unreached codes."""
-    outstanding = unreachable_codes(REACHABLE_IN_PHASE_6B)
+    outstanding = unreachable_codes(REACHABLE_IN_PHASE_6C)
 
     assert (
         set(REACHABLE_IN_PHASE_5A)
         <= set(REACHABLE_IN_PHASE_5B)
         <= set(REACHABLE_IN_PHASE_6A)
         <= set(REACHABLE_IN_PHASE_6B)
+        <= set(REACHABLE_IN_PHASE_6C)
         <= set(REGISTRY)
     )
     # With the first engine built, `convert` owes nothing: every remaining debt
@@ -148,9 +152,9 @@ def test_the_reachability_debt_is_named_rather_than_asserted_away() -> None:
     # gone, which is the point of the sub-phase.
     for code in outstanding:
         assert REGISTRY[code].stage is not Stage.CONVERT, code
-    # 6b closes two of `sync`'s three. `DOC_REFERENCE_MISSING` and
-    # `ARCHIVE_ALSO_LIVE` belong to the doc-classes 6c and 6d place, not to the
-    # spine -- named here rather than left to be inferred from a shrinking set.
+    # 6c closes `DOCUMENT_UNREADABLE` the phase that added it. The two left are
+    # 6d's -- the cross-boundary rewrite and the archives tree -- named here rather
+    # than left to be inferred from a shrinking set.
     assert {code for code in outstanding if REGISTRY[code].stage is Stage.SYNC} == {
         "DOC_REFERENCE_MISSING",
         "ARCHIVE_ALSO_LIVE",

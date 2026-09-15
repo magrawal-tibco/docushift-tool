@@ -6,9 +6,14 @@ the doc-class's `version.yml`. Shaped like `DocumentConverter` on purpose: the
 same selection, the same "a failure is a returned outcome, never an exception",
 the same five-outcome summary, because the four commands are read side by side.
 
-Phase 6b places **`online-help` only**. The other three doc-classes need 6c's
-document router, and the spine has to be provable before four doc-classes ride
-on it.
+Phase 6b built the spine and placed `online-help`; **6c adds the three document
+doc-classes**, which ride on it unchanged -- same staging sibling, same swap, same
+five outcomes, same one-directory-deep boundary. The one thing they do not share
+is their source: `online-help` comes from `output_path()` and the documents come
+from `extract_path()`, because a version that never converted can still ship eight
+PDFs. So one version can be `NO_OUTPUT` for `online-help` and `SYNCED` for
+`user-guides` in the same run, and that is a fact about the package rather than a
+disagreement to reconcile.
 
 Four rules the driver owns:
 
@@ -44,14 +49,25 @@ from docushift.config import ConfigManager
 from docushift.converter import navigation
 from docushift.models import Product, ProductVersion
 from docushift.reporting.findings import FindingsRun
+from docushift.sync import documents as document_index
+from docushift.sync import router
 from docushift.sync import versions as version_file
 from docushift.utils.slug import is_numeric_version, slugify, version_segment
 from docushift.utils.swap import remove, swap
 
-# The one doc-class 6b places. Named here rather than inlined at four call sites,
-# because 6c adds three more and the difference between "the doc-class we place"
-# and "the doc-class this file is for" is about to start mattering.
+# The converted doc-class. Named here rather than inlined at four call sites,
+# because 6c added three more and the difference between "the doc-class we place"
+# and "the doc-class this file is for" started mattering.
 ONLINE_HELP = "online-help"
+
+# Every doc-class in the docs tree, in the order a reader meets them. A fixed
+# tuple rather than "whatever directories are there": a stray folder somebody
+# dropped beside `online-help` must not acquire a `version.yml` and become a
+# drop-down. 6d's `-resources` tree is a sibling of this one, not a member.
+DOC_CLASSES = (ONLINE_HELP, *router.DOCUMENT_DOC_CLASSES)
+
+# The three files a document doc-class folder gets beside its copied files.
+_RENDERED = ("index.md", "toc.yml", "metadata.yml")
 
 
 class SyncOutcome(StrEnum):
@@ -84,6 +100,11 @@ class SyncResult:
     files: int = 0
     bytes: int = 0
     message: str = ""
+    # Which doc-class this row is about. A run reports one row per (version,
+    # doc-class) that had something to say, so a version appears up to four times.
+    # Empty means the row is about the version rather than one of its doc-classes
+    # -- the extracted tree being gone is not a fact about `user-guides`.
+    doc_class: str = ONLINE_HELP
 
 
 @dataclass
@@ -200,32 +221,165 @@ class WorkspaceDistributor:
         swap(staging, destination)
         return len(files), size
 
+    # -- one version's documents (6c) ------------------------------------------
+
+    def sync_documents(
+        self,
+        product: Product,
+        version: ProductVersion,
+        target: Path,
+        force: bool = False,
+    ) -> list[SyncResult]:
+        """Places the three document doc-classes for one version. Never raises.
+
+        One row per doc-class that had something to say, so a version with PDFs and
+        a readme reports two and a version with neither reports none. **The two
+        absences are different and are reported differently**: an extracted tree
+        that is gone is one `NO_OUTPUT` row naming `docushift extract`, because it
+        is recoverable; a tree that is present and routes nothing gets no row,
+        because 156 of 1,822 versions are in that state and reporting them would
+        put 156 recoverable-looking failures in every full run.
+        """
+        slug, number = product.slug, version.version
+        segment = version_segment(number)
+        if not segment:
+            # Silent here on purpose. The version string is a property of the
+            # version, not of a doc-class, and `sync_one` already names it --
+            # reporting it again per doc-class would quadruple one warning.
+            return []
+
+        tree = self.config.extract_path(product.bu, product.family, slug, number)
+        if not tree.is_dir():
+            message = f"no extracted tree at {tree}; run `docushift extract` first"
+            return [SyncResult(slug, number, SyncOutcome.NO_OUTPUT, segment=segment,
+                               message=message, doc_class="")]
+
+        grouped = document_index.group(router.route_version(tree, version.engine))
+        results = []
+        for doc_class, files in grouped.items():
+            results.append(self._sync_doc_class(product, version, target, doc_class, files, force))
+        return results
+
+    def _sync_doc_class(
+        self,
+        product: Product,
+        version: ProductVersion,
+        target: Path,
+        doc_class: str,
+        files: list[router.RoutedFile],
+        force: bool,
+    ) -> SyncResult:
+        slug, number = product.slug, version.version
+        segment = version_segment(number)
+        destination = self.doc_class_dir(product, target, doc_class) / segment
+
+        if not force and _documents_current(files, destination):
+            return SyncResult(slug, number, SyncOutcome.CURRENT, path=destination,
+                              segment=segment, doc_class=doc_class)
+
+        entries, unreadable = document_index.entries_for(files)
+        for path, error in unreadable:
+            self._record(
+                "DOCUMENT_UNREADABLE", slug, number,
+                message=f"{path.name}: {error}; titled from its filename",
+            )
+        try:
+            count, size = self._place_documents(entries, destination, product, version, doc_class)
+        except OSError as exc:  # pragma: no cover - filesystem failure, not logic
+            return SyncResult(slug, number, SyncOutcome.FAILED, segment=segment,
+                              message=f"{type(exc).__name__}: {exc}", doc_class=doc_class)
+
+        return SyncResult(slug, number, SyncOutcome.SYNCED, path=destination, segment=segment,
+                          files=count, bytes=size, doc_class=doc_class)
+
+    def _place_documents(
+        self,
+        entries: list[document_index.DocumentEntry],
+        destination: Path,
+        product: Product,
+        version: ProductVersion,
+        doc_class: str,
+    ) -> tuple[int, int]:
+        """The copied files and the three rendered ones, staged and swapped.
+
+        The same build-and-swap `_place` uses, and `copy2` for the same reason:
+        `_documents_current` compares mtime, and only a copy that preserves it can
+        tell a re-sync from a human's edit.
+        """
+        staging = destination.with_name(destination.name + ".part")
+        remove(staging)
+        staging.mkdir(parents=True, exist_ok=True)
+        size = 0
+        for entry in entries:
+            shutil.copy2(entry.source, staging / entry.name)
+            size += entry.bytes
+
+        templates = self.config.aem_templates_dir
+        title = document_index.index_title(product.display_name, version.version, doc_class)
+        (staging / "index.md").write_text(
+            document_index.render_index(entries, title, doc_class, templates), encoding="utf-8"
+        )
+        (staging / "toc.yml").write_text(
+            document_index.render_toc(entries, title, templates), encoding="utf-8"
+        )
+        (staging / "metadata.yml").write_text(
+            navigation.render_metadata([("csg-version", version.version)], templates, "version"),
+            encoding="utf-8",
+        )
+        swap(staging, destination)
+        return len(entries), size
+
     # -- one product -----------------------------------------------------------
 
     def finish_product(self, product: Product, target: Path, stats: SyncStats) -> None:
-        """The two artifacts above a version folder, written once the copies are done.
+        """The artifacts above a version folder, written once the copies are done.
 
-        Skipped entirely when the doc-class folder does not exist: a product whose
-        every version reported `NO_OUTPUT` has published nothing, and a product
-        folder holding a `metadata.yml` and no content is a dead entry in AEM.
+        One `metadata.yml` per product and **one `version.yml` per doc-class the
+        product actually has** -- the drop-downs will legitimately disagree, since
+        `user-guides` carries versions that shipped no converted help. That is the
+        point of the per-doc-class placement rather than a defect to reconcile, and
+        6b's assembly rule needs no change to produce it: it already takes
+        `present` from the directory listing.
+
+        Skipped entirely when the product has no doc-class folder at all: a product
+        whose every version reported `NO_OUTPUT` has published nothing, and a
+        product folder holding a `metadata.yml` and no content is a dead entry.
         """
-        doc_class = self.doc_class_dir(product, target)
-        if not doc_class.is_dir():
+        root = self.product_dir(product, target)
+        folders = [(name, root / name) for name in DOC_CLASSES if (root / name).is_dir()]
+        if not folders:
             return
 
         templates = self.config.aem_templates_dir
-        (doc_class.parent / "metadata.yml").write_text(
+        (root / "metadata.yml").write_text(
             navigation.render_metadata([("csg-product", product.display_name)], templates, "product"),
             encoding="utf-8",
         )
         stats.products += 1
 
-        present = {child.name for child in doc_class.iterdir() if child.is_dir()}
         catalog_versions = list(product.versions.values())
-        rows = version_file.generated_rows(catalog_versions, present)
-        self._report_rows(product, present)
+        everywhere: set[str] = set()
+        for _name, folder in folders:
+            present = {child.name for child in folder.iterdir() if child.is_dir()}
+            everywhere |= present
+            self._write_dropdown(folder, present, catalog_versions, templates, stats)
 
-        path = doc_class / "version.yml"
+        # Once per product over the union, not once per doc-class. A version in
+        # three doc-classes is one non-numeric version string, and naming it three
+        # times would make the report's warning count a function of how many PDFs
+        # the package happened to ship.
+        self._report_rows(product, everywhere)
+
+    def _write_dropdown(
+        self,
+        folder: Path,
+        present: set[str],
+        catalog_versions: list[ProductVersion],
+        templates: Path,
+        stats: SyncStats,
+    ) -> None:
+        rows = version_file.generated_rows(catalog_versions, present)
+        path = folder / "version.yml"
         existing: list[version_file.VersionRow] | None = []
         if path.is_file():
             existing = version_file.parse(path.read_text(encoding="utf-8"))
@@ -275,11 +429,15 @@ class WorkspaceDistributor:
         stats = SyncStats()
         touched: dict[str, Product] = {}
         for product, version in pairs:
-            result = self.sync_one(product, version, target, force=force)
-            stats.results.append(result)
+            results = [
+                self.sync_one(product, version, target, force=force),
+                *self.sync_documents(product, version, target, force=force),
+            ]
+            stats.results.extend(results)
             touched[product.slug] = product
             if on_result is not None:
-                on_result(result)
+                for result in results:
+                    on_result(result)
 
         for product in touched.values():
             self.finish_product(product, target, stats)
@@ -304,3 +462,32 @@ def _identical(source: Path, target: Path) -> bool:
     if left != right:
         return False
     return all(filecmp.cmp(source / name, target / name, shallow=True) for name in left)
+
+
+def _documents_current(files: list[router.RoutedFile], destination: Path) -> bool:
+    """Whether a document doc-class folder still matches what routing found.
+
+    **Compared before anything is built**, which is the whole reason this is not
+    `_identical`. Titling a `user-guides` folder means opening every PDF in it, and
+    reading all 5,007 in the corpus takes thirteen minutes; staging first and
+    comparing after -- `online-help`'s shape -- would pay that on every run to
+    answer a question the file metadata already answers.
+
+    The inference the cheap check rests on: the three rendered files are a pure
+    function of the routed filenames and the PDFs' contents, so if every copied
+    file is byte-for-byte current by size and mtime and the three exist, they are
+    current too. A *template* change is the one thing that escapes it, and
+    `--force` is the answer to that, as it is to a changed engine.
+    """
+    if not destination.is_dir():
+        return False
+    expected = {entry.path.name for entry in files}
+    try:
+        published = {child.name for child in destination.iterdir() if child.is_file()}
+    except OSError:  # pragma: no cover - unreadable target, treated as not current
+        return False
+    if published != expected | set(_RENDERED):
+        return False
+    return all(
+        filecmp.cmp(entry.path, destination / entry.path.name, shallow=True) for entry in files
+    )
