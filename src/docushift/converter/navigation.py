@@ -40,13 +40,10 @@ on 2026-09-12 and settled here:
 import posixpath
 import re
 from dataclasses import dataclass, field
-from functools import lru_cache
 from pathlib import Path, PurePosixPath
 
-from jinja2 import Environment, FileSystemLoader, StrictUndefined
-
 from docushift.engines.base import ConversionContext, Document, NavNode, Unit
-from docushift.transforms.csh import quote
+from docushift.utils.templating import template as _template
 
 # Where a generated container page goes when its children share no directory, and
 # what the version index is called. Both are Markdown documents like any other.
@@ -377,23 +374,6 @@ def render_metadata(values: list[tuple[str, str]], templates: Path, level: str =
     contract is what makes the guess look load-bearing.
     """
     return _template(templates, "metadata.yml.j2").render(level=level, values=values)
-
-
-@lru_cache(maxsize=8)
-def _environment(templates: Path) -> Environment:
-    """One environment per template directory. Cached: a batch is 1,800 versions."""
-    environment = Environment(
-        loader=FileSystemLoader(str(templates)),
-        undefined=StrictUndefined,
-        keep_trailing_newline=True,
-        autoescape=False,
-    )
-    environment.filters["yaml"] = quote
-    return environment
-
-
-def _template(templates: Path, name: str):
-    return _environment(templates).get_template(name)
 
 
 # -- paths and labels -----------------------------------------------------------

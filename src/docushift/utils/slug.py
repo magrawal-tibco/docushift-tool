@@ -31,6 +31,10 @@ import unicodedata
 
 _NON_ALNUM = re.compile(r"[^a-z0-9]+")
 
+# What a version string looks like when it is actually a version: `10.4.0`, `7`,
+# `11.1.1`. Anchored, because `10.x` must not pass on the strength of its prefix.
+_NUMERIC_VERSION = re.compile(r"^\d+(\.\d+)*$")
+
 # Deleted before the NFKD fold below, not after. NFKD gives these a *compatibility*
 # decomposition -- U+2122 becomes the letters "TM" -- so folding first would turn
 # `TIBCO EMS™` into `tibco-emstm`. Nearly every product name in the catalog carries
@@ -48,6 +52,37 @@ def slugify(value: str) -> str:
     stripped = str(value).translate(_SYMBOLS_TO_DROP)
     folded = unicodedata.normalize("NFKD", stripped).encode("ascii", "ignore").decode("ascii")
     return _NON_ALNUM.sub("-", folded.lower()).strip("-")
+
+
+def is_numeric_version(version: str) -> bool:
+    """Whether a catalog version string is a version at all, i.e. `N(.N)*`.
+
+    Twenty active rows are not -- `Server`, `Desktop`, `10.x`, `Cloud™`, `(iPaaS)`
+    and similar -- and they are upstream parse artifacts rather than releases. One
+    predicate answers two questions at Stage 6b, deliberately: which rows sort last
+    in `version.yml`, and which rows `VERSION_NOT_NUMERIC` names in the run report.
+    A second definition of "looks like a version" is how the two would drift apart.
+    """
+    return bool(_NUMERIC_VERSION.match(str(version).strip()))
+
+
+def version_segment(version: str) -> str:
+    """The published folder name for one version: `10.4.0` -> `10-4-0`.
+
+    The dots-to-dashes conversion, and **the only place it happens** -- upstream a
+    version segment must round-trip back to a `versions.csv` key, which `6-2-3`
+    does not (`6.2.3` or `6-2.3`?). Measured 2026-09-15 over the 1,762 active rows:
+    a plain dash swap for 1,760 of them, and injective -- no product has two active
+    versions that collapse to one segment.
+
+    The slugify is for the other two. `Cloud™` and `(iPaaS)` are both convert-
+    eligible, both in scope, and both their product's only active version, so
+    neither can be routed around; they become `cloud` and `ipaas`. Passing them
+    through raw would put a trademark glyph in a public URL path, and refusing to
+    publish them would drop two products on the strength of a parse artifact.
+    `is_numeric_version` is what names them in the report either way.
+    """
+    return slugify(str(version).replace(".", "-"))
 
 
 def _joined(what: str, **components: str) -> str:

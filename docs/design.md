@@ -825,6 +825,23 @@ The dots-to-dashes version conversion belongs here too, at the publishing bounda
 
 `-resources` is a **separate tree**, not a directory in the docs tree (`architecture.md` §6.3) — generated API trees and archived ZIPs grow monotonically, do not delta, and are not reviewed like prose. It is written as a sibling and left to be published as a sibling repository.
 
+### 10.3 Step 1, the distributor spine and `version.yml` — **Built (Phase 6b)**
+
+What `docushift sync --target-dir` does for `online-help`, before any of the other doc-classes exist. Grounded in a 2026-09-15 re-measure of the catalog and verified against it end to end (`architecture.md` §6.6). Built as `sync/distributor.py` and `sync/versions.py`.
+
+**Per version.** Read `ConfigManager.output_path(bu, family, slug, version)`; if it does not exist the version is a `NO_OUTPUT` row in the outcome table, not a failure. Otherwise build `{target}/{docs_tree_name(bu, family)}/{locale}/{slug}/online-help/{segment}/` in a staging sibling, copy the converted tree into it whole — Markdown, assets, `toc.yml`, `metadata.yml`, `csh.yml` — and `utils.swap.swap()` it over the target.
+
+**The segment.** `slugify(version.replace('.', '-'))`. A no-op for 1,760 of 1,762 active rows; `Cloud™` → `cloud` and `(iPaaS)` → `ipaas` for the two that carry a glyph or a bracket into what becomes a public URL path. Computed here and nowhere earlier, for the same reason the dashes are: upstream, a version segment must round-trip to a `versions.csv` key.
+
+**Per product, once.** `{slug}/metadata.yml` with `csg-product: <display_name>`, from the same level-parameterized template 6a uses. All 458 products with an active version have one.
+
+**Per doc-class, after the copies.** `version.yml`, assembled by listing the doc-class directory and intersecting it with the catalog's active rows for that product — never from the run's own write list, which a `--version` run would truncate to one entry (`architecture.md` §6.6). Each row is `title: <catalog version> (<%b %Y>)` and `path: /<segment>`, ordered numeric-descending over the dotted components with non-numeric strings last.
+
+- **Three date formats, not two.** 1,377 ISO, 372 epoch-millisecond, 13 empty. The two formats §6.2.3 documents were measured on archived `GA_date` and do not cover this column; 372 rows render as garbage without the third parser. An undated version keeps its title without the bracket and records `VERSION_UNDATED`.
+- **Rows DocuShift did not write are preserved.** The file is parsed first; any row whose `path` does not resolve to a directory in this doc-class is kept verbatim in place. An unparseable file is left untouched and reported.
+- **A one-entry file is still written.** 178 of 458 products have exactly one active version, and absence must not mean something different to AEM than presence.
+- **The drop-downs may legitimately disagree** once 6c lands: `user-guides` will carry versions that shipped no converted help. That is the point of the per-doc-class placement, not a defect to reconcile.
+
 ### 10.4 Step 2, the document router — **Specified**
 
 Which doc-class a non-converted document lands in. Grounded in a 2026-09-07 survey of 1,822 versions and 11,633 documents (`architecture.md` §6.2.1).
@@ -989,6 +1006,7 @@ Most rows are **Built** or **Specified**. One is neither, and is marked as such 
 | 9.6 | CSH verification | Specified | Phase 7 |
 | 9.2 | CSH readers (**Flare, DITA, WebWorks**) | Built | `engines/csh.py`; the schema, resolver and writer stay Phase 5 |
 | 10 | AEM synthesis and sync | Specified | Phases 6b–7 |
+| 10.3 | Distributor spine, the publishing segment and `version.yml` | Built | Phase 6b; `architecture.md` §6.6 |
 | 10 (part) | Navigation synthesis — the three node rules, cross-unit assembly, `toc.yml` | Built | `converter/navigation.py:synthesize`, `render_toc`; runs inside `convert` |
 | 10 (part) | `metadata.yml` — `csg-product` / `csg-version` | Built | `converter/navigation.py:render_metadata`; `nav.yml` deleted, `meta.yml` renamed |
 | 10.4 | Document router (`pdf/` and `doc/` → doc-class) | Specified | Phase 6 |

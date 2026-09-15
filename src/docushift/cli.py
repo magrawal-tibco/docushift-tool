@@ -25,6 +25,7 @@ from docushift.config import ConfigManager
 from docushift.discovery import DocsiteClient, DocsiteCrawler
 from docushift.models import ReleaseStatus, ScopeSource, SourceEngine, ZipSource
 from docushift.state import StateStore
+from docushift.utils.slug import version_segment
 
 console = Console()
 
@@ -1143,13 +1144,107 @@ def convert(ctx, bu, family, product, version, batch, select_all, force, dry_run
     _report_convert(stats, findings)
 
 
+def _report_sync(stats, findings) -> None:
+    """The five-outcome summary, what was written above the versions, and findings."""
+    from docushift.sync import SyncOutcome
+
+    table = Table(title="Sync")
+    table.add_column("Outcome")
+    table.add_column("Versions", justify="right")
+    for outcome, label in (
+        (SyncOutcome.SYNCED, "Synced"),
+        (SyncOutcome.CURRENT, "Already current"),
+        (SyncOutcome.NO_OUTPUT, "No converted tree"),
+        (SyncOutcome.SKIPPED, "Skipped"),
+        (SyncOutcome.FAILED, "Failed"),
+    ):
+        table.add_row(label, str(stats.count(outcome)))
+    console.print(table)
+    if stats.files:
+        console.print(f"[dim]{stats.files} file(s), {_gb(stats.bytes)} copied.[/dim]")
+    console.print(
+        f"[dim]{stats.products} product metadata.yml, {stats.dropdowns} version.yml written.[/dim]"
+    )
+
+    # Named individually rather than counted, the rule `convert` follows: these are
+    # exactly the rows somebody has to look at.
+    for path in stats.unparsed:
+        console.print(f"[yellow]![/yellow] {path}: could not be parsed, left unchanged")
+    for result in stats.results:
+        if result.outcome in (SyncOutcome.NO_OUTPUT, SyncOutcome.SKIPPED):
+            console.print(f"[yellow]![/yellow] {result.slug}@{result.version}: {result.message}")
+    for result in stats.failures:
+        console.print(f"[red]x[/red] {result.slug}@{result.version}: {result.message}")
+
+    summary = findings.summary()
+    if summary:
+        console.print(f"[dim]Findings: {summary}.[/dim]")
+
+
 @main.command()
 @_scope_options
 @click.option("--target-dir", type=DIR_PATH, required=True, help="Target GitHub workspace directory.")
+@click.option("--force", is_flag=True, help="Re-copy even where the published tree already matches.")
 @click.option("--dry-run", is_flag=True, help="Show what would be copied without writing.")
-def sync(**kwargs) -> None:
-    """Distribute converted output into a target GitHub workspace."""
-    _pending("sync", "Phase 6")
+@click.pass_context
+def sync(ctx, bu, family, product, version, batch, select_all, target_dir, force, dry_run) -> None:
+    """Distribute converted output into a target GitHub workspace.
+
+    Runs over the same selection as `convert`, narrowed to what has actually been
+    converted: a version with no output tree is a report line, not an abort. Phase
+    6b places the `online-help` doc-class; the other three arrive with 6c.
+
+    Filesystem only. This writes the trees and reports what it wrote; it creates no
+    repository and runs no git command (`architecture.md` §6.0).
+    """
+    from docushift.reporting.findings import FindingsRun
+    from docushift.sync import ONLINE_HELP, WorkspaceDistributor
+
+    cfg: ConfigManager = ctx.obj["config"]
+    manager = _catalog_manager(ctx)
+
+    pairs = _download_selection(manager, bu, family, product, version, batch, select_all)
+    if not pairs:
+        console.print("[yellow]No convert-eligible versions match.[/yellow]")
+        return
+
+    distributor = WorkspaceDistributor(cfg, manager)
+
+    if dry_run:
+        table = Table(title=f"Would sync ({len(pairs)})")
+        for column in ("Product", "Version", "Output", "Destination"):
+            table.add_column(column)
+        for found, ver in pairs:
+            source = cfg.output_path(found.bu, found.family, found.slug, ver.version)
+            segment = version_segment(ver.version)
+            destination = distributor.doc_class_dir(found, target_dir, ONLINE_HELP) / segment
+            table.add_row(
+                found.slug,
+                ver.version,
+                "present" if source.is_dir() else "[yellow]missing[/yellow]",
+                str(destination),
+            )
+        console.print(table)
+        return
+
+    findings = FindingsRun("sync", batch=batch or "", store=manager.state).start()
+    distributor.findings = findings
+    console.print(f"Syncing {len(pairs)} version(s) into {target_dir}...")
+
+    from docushift.sync import SyncOutcome
+
+    def on_result(result) -> None:
+        if result.outcome is SyncOutcome.SYNCED:
+            console.print(
+                f"  [green]v[/green] {result.slug}@{result.version} -> {result.segment} "
+                f"{result.files} file(s), {_gb(result.bytes)}"
+            )
+        elif result.outcome is SyncOutcome.FAILED:
+            console.print(f"  [red]x[/red] {result.slug}@{result.version}")
+
+    stats = distributor.sync_many(pairs, target_dir, force=force, on_result=on_result)
+    findings.finish()
+    _report_sync(stats, findings)
 
 
 @main.command()

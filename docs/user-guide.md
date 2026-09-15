@@ -703,11 +703,33 @@ Case mismatches are reported and not fixed. If a topic says `Images/Logo.png` an
 ### AEM Synthesis & Publishing Layout
 ```bash
 # Organize converted AEM files into repo-shaped folders on disk
-docushift sync --target-dir ../tibco-docs-aem/
+docushift sync --all --target-dir ../tibco-docs-aem/
+
+# One product, or one version of it -- the same selectors every stage takes
+docushift sync --product tibco-ems --target-dir ../tibco-docs-aem/
+docushift sync --product tibco-ems --version 10.4.0 --target-dir ../tibco-docs-aem/
+
+# See where each version would land, without writing
+docushift sync --all --target-dir ../tibco-docs-aem/ --dry-run
+
+# Re-copy even where the published tree already matches
+docushift sync --all --target-dir ../tibco-docs-aem/ --force
 
 # Run link and asset integrity validation
 docushift validate --target-dir ../tibco-docs-aem/
 ```
+
+`sync` ends with the same five-outcome table `download`, `extract` and `convert` do
+— synced / already current / no converted tree / skipped / failed. A version you
+have not converted yet is a report line, not an abort: over a partially converted
+corpus that is the normal state. "Already current" is decided by comparing the two
+trees, not by a recorded hash, so a version somebody edited in the target is
+re-copied rather than skipped.
+
+> **Today `sync` places `online-help`.** The spine, the product `metadata.yml` and
+> the per-doc-class `version.yml` are built; `user-guides`, `release-information`,
+> `reference-documents` and the whole `-resources` tree are the next two sub-phases
+> and are described below as the layout they will complete.
 
 > **`sync` writes folders, not commits.** DocuShift stops at the filesystem: it never runs a git command, creates no repository and pushes nothing. The two trees it writes per family are named exactly as the publishing repositories are, so taking them the rest of the way is a copy into a clone — done by you, by a CI job, or by whatever owns those repositories. That also means you can run `sync` and read the result without any GitHub credentials.
 
@@ -717,10 +739,12 @@ docushift validate --target-dir ../tibco-docs-aem/
 en-us-tib-messaging-userdocs/           # the docs tree — what a reader reads
 └── en-us/ems/
     ├── metadata.yml                    # csg-product
-    ├── online-help/10-4-0/…            # converted Markdown, toc.yml, metadata.yml, index.md, csh.yml
-    ├── user-guides/10-4-0/…            # user-guide PDFs + index.md, toc.yml
-    ├── release-information/10-4-0/…    # release notes + readme + index.md, toc.yml
-    └── reference-documents/10-4-0/…    # VPAT, licence, rest of doc/ + index.md, toc.yml
+    ├── online-help/
+    │   ├── version.yml                 # the drop-down, listing only this doc-class's versions
+    │   └── 10-4-0/…                    # converted Markdown, toc.yml, metadata.yml, index.md, csh.yml
+    ├── user-guides/10-4-0/…            # user-guide PDFs + version.yml, index.md, toc.yml
+    ├── release-information/10-4-0/…    # release notes + readme + version.yml, index.md, toc.yml
+    └── reference-documents/10-4-0/…    # VPAT, licence, rest of doc/ + version.yml, index.md, toc.yml
 
 en-us-tib-messaging-userdocs-resources/ # the bulk tree
 └── en-us/ems/
@@ -728,14 +752,20 @@ en-us-tib-messaging-userdocs-resources/ # the bulk tree
     └── archives/…                      # archived-version ZIPs + index.md, toc.yml
 ```
 
-Eight things to expect:
+Eleven things to expect:
+
+- **`version.yml` is the drop-down, and a scoped sync does not shrink it.** Each doc-class gets its own, listing only the versions that doc-class actually holds — so `user-guides` and `online-help` will legitimately disagree. It is rebuilt by reading the folder on disk and matching it against the catalog's active versions, *not* from what the run just wrote, so `sync --product tibco-ems --version 10.4.0` updates one entry and leaves the other thirty-seven alone. Titles carry the release date (`10.4.0 (Feb 2026)`); an undated version keeps the version and drops the bracket.
+
+- **You can hand-edit `version.yml` and DocuShift will not undo it.** The AEM schema allows a row pointing at an absolute URL, so any row whose `path` is not a folder in that doc-class is preserved exactly where you put it. If the file will not parse, sync leaves it completely alone and says so in the report rather than replacing it.
 
 - **A non-`en-us` run publishes into `loc-tib-messaging-userdocs` and gets no `-resources` tree.** All localized content shares one docs tree rather than getting one per language, and API references and archives are English-only. Asking for a localized resources tree is an error, not an empty directory.
 
 - **`nav.yml` is gone and `meta.yml` is now `metadata.yml`.** The AEM spec arrived on 2026-09-10 and named neither of the two placeholder templates the project started with. Nothing consumed `nav.yml`, so it was deleted rather than kept; `metadata.yml` replaces `meta.yml` and carries exactly two keys — `csg-product` beside the product's doc-classes, and `csg-version` in each version folder, dotted (`10.4.0`) even though the folder around it is dashed. The eleven fields the old placeholder invented are not there and are not coming back. If you built anything against `meta.yml`, it needs rewriting.
 - **The PDF doc-classes get an index too.** `user-guides/`, `release-information/` and `reference-documents/` each receive a generated `index.md` and `toc.yml` listing their files, so a copied PDF is reachable. Titles come from the document kind where the name identifies one (Release Notes, VPAT, License Agreement), otherwise from the PDF's own metadata, otherwise from the filename. A doc-class with no files gets no folder at all rather than an empty index.
 - **`archives/` is indexed from the catalog, so it lists every archived version — including the ones you have not downloaded.** Entries whose ZIP is not in the repository link to the docsite instead, and the index says which is which. That is deliberate: `archives/` exists to be the complete product history, and `archive download` is what fills it in. `api-references/` gets no generated index — Javadoc ships its own.
-- **Versions are dashed here** (`10.4.0` → `10-4-0`) and nowhere else. The catalog and the `families/` workspace keep the dots.
+- **Versions are dashed here** (`10.4.0` → `10-4-0`) and nowhere else. The catalog and the `families/` workspace keep the dots. Two versions in the catalog are not version numbers at all — `Cloud™` and `(iPaaS)`, upstream parse artifacts — and those are reduced further to `cloud` and `ipaas`, because a trademark glyph and a bracket pair cannot be a URL path. Any version that is not `N.N.N` is named in the run report, whether it was reshaped or just sorted to the bottom of the drop-down.
+
+- **Re-running sync replaces a version's folder wholesale**, so a topic deleted upstream does not survive as a stale file. It replaces exactly that folder: `version.yml`, the product's `metadata.yml`, and every other version are untouched.
 - **API references are never converted.** Javadoc is copied through as HTML, and topic links into it are rewritten to absolute URLs on the AEM host. Set that host in `config/publishing.yaml` (`publish_base_url`) before your first sync — the path after it is derived, not configured.
 - **`validate` skips those absolute links by default.** They point at a different repository, so there is nothing on disk to check; pass `--check-external` to verify them over HTTP.
 - **A broken relative asset link is a tool bug, not a content finding.** Conversion writes the link and copies the file in one step, so `validate` finding one means something downstream moved a file without moving its link — it is reported as a regression, with the stage that could have caused it. An asset that nothing links to is not an error and is not reported here; that count belongs to `convert`.

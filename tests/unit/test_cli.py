@@ -6,6 +6,7 @@ missing one. Stages that *are* built must be reachable end-to-end from argv. The
 surface asserted is the one documented in docs/user-guide.md.
 """
 
+import shutil
 import zipfile
 from pathlib import Path
 
@@ -17,12 +18,11 @@ from docushift.catalog import CatalogManager
 from docushift.cli import main
 from docushift.discovery import CrawlResult, DocsiteCrawler
 from docushift.state import StateStore
-from tests.conftest import make_product, make_version
+from tests.conftest import REPO_ROOT, make_product, make_version
 
 # `download` and `archive download` left this list in Phase 4a, `extract` in 4b-1,
-# `convert` in 5a.
+# `convert` in 5a, `sync` in 6b.
 PENDING_COMMANDS = [
-    ["sync", "--target-dir", "workspace"],
     ["validate", "--target-dir", "workspace"],
     ["status", "--bu", "tibco"],
     ["report", "--engines"],
@@ -36,8 +36,15 @@ def runner() -> CliRunner:
 
 @pytest.fixture
 def populated_root(tmp_path: Path) -> Path:
-    """A project root whose catalog CSVs already hold one product with two versions."""
+    """A project root whose catalog CSVs already hold one product with two versions.
+
+    The shipped AEM templates are copied in for the reason `conftest.project_root`
+    copies them: from Phase 6a a version that cannot find `toc.yml.j2` fails to
+    convert, and from 6b a product that cannot find `metadata.yml.j2` fails to
+    sync. A root without them is a condition no installation is in.
+    """
     (tmp_path / "config").mkdir(exist_ok=True)
+    shutil.copytree(REPO_ROOT / "config" / "aem_templates", tmp_path / "config" / "aem_templates")
     state = StateStore(tmp_path / "cache" / "state.db")
     manager = CatalogManager(tmp_path / "config" / "products.csv", tmp_path / "config" / "versions.csv", state)
     # The slug is deliberately not the product code: that is the real docsite
@@ -1107,3 +1114,79 @@ def test_extract_writes_the_five_inventory_columns_back(
     line = next(row for row in rows.splitlines() if "10.4.0" in row)
     # false,0,false,0,2 -- measured zeroes, not the blanks of a row nobody opened.
     assert "false,0,false,0,2" in line
+
+
+# -- sync ------------------------------------------------------------------------
+
+
+def _convert_output(root: Path, version: str, files: dict[str, str]) -> Path:
+    """Writes a converted tree where `sync` expects one, bypassing Stage 5."""
+    target = (
+        root / "output" / "en-us-tibco-messaging"
+        / "tibco-enterprise-message-service" / version
+    )
+    for name, body in files.items():
+        path = target / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(body, encoding="utf-8")
+    return target
+
+
+def test_sync_places_a_converted_version_in_the_publishing_form(
+    runner: CliRunner, populated_root: Path, tmp_path: Path
+) -> None:
+    _convert_output(populated_root, "10.4.0", {"index.md": "# x\n", "toc.yml": "nodes: []\n"})
+    workspace = tmp_path / "workspace"
+    workspace.mkdir()
+
+    result = _invoke(runner, populated_root, "sync", "--all", "--target-dir", str(workspace))
+
+    assert result.exit_code == 0
+    published = (
+        workspace / "en-us-tibco-messaging-userdocs" / "en-us"
+        / "tibco-enterprise-message-service" / "online-help" / "10-4-0"
+    )
+    assert (published / "index.md").is_file()
+    assert (published.parent / "version.yml").is_file()
+    assert (published.parent.parent / "metadata.yml").is_file()
+    assert "Synced" in result.output
+
+
+def test_sync_reports_a_version_with_no_converted_tree_without_failing(
+    runner: CliRunner, populated_root: Path, tmp_path: Path
+) -> None:
+    workspace = tmp_path / "workspace"
+    workspace.mkdir()
+
+    result = _invoke(runner, populated_root, "sync", "--all", "--target-dir", str(workspace))
+
+    assert result.exit_code == 0
+    assert "docushift convert" in result.output
+
+
+def test_sync_dry_run_names_the_destination_without_writing(
+    runner: CliRunner, populated_root: Path, tmp_path: Path
+) -> None:
+    _convert_output(populated_root, "10.4.0", {"index.md": "# x\n"})
+    workspace = tmp_path / "workspace"
+    workspace.mkdir()
+
+    result = _invoke(
+        runner, populated_root, "sync", "--all", "--target-dir", str(workspace), "--dry-run"
+    )
+
+    assert result.exit_code == 0
+    assert "Would sync" in result.output
+    assert not (workspace / "en-us-tibco-messaging-userdocs").exists()
+
+
+def test_sync_needs_a_scope_like_every_other_stage(
+    runner: CliRunner, populated_root: Path, tmp_path: Path
+) -> None:
+    workspace = tmp_path / "workspace"
+    workspace.mkdir()
+
+    result = _invoke(runner, populated_root, "sync", "--target-dir", str(workspace))
+
+    assert result.exit_code != 0
+    assert "Choose a scope" in result.output

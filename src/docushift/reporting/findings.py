@@ -171,6 +171,11 @@ REACHABLE_IN_PHASE_5B = REACHABLE_IN_PHASE_5A | {
 # 5b and 5a. It gains one only because `METADATA_MISMATCH` moved from `sync` to
 # `convert`, which is where the figures it compares actually exist.
 REACHABLE_IN_PHASE_6A = REACHABLE_IN_PHASE_5B | {"METADATA_MISMATCH"}
+# Stage 6b raises no new code either. Both of these were registered against
+# `Stage.SYNC` when the register was written and 6b is simply the first path that
+# can reach them -- which is the test the sub-phase was held to: needing a code
+# that is not in the table would have meant the rule was new, not the table short.
+REACHABLE_IN_PHASE_6B = REACHABLE_IN_PHASE_6A | {"VERSION_NOT_NUMERIC", "VERSION_UNDATED"}
 
 
 class UnregisteredCode(KeyError):
