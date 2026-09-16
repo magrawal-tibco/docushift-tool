@@ -853,24 +853,26 @@ Three commands, split by the question each answers — the current `status`/`rep
 
 - [ ] **`docushift status` — *where is everything now?*** A standing snapshot over the catalog, needing no run: counts per stage (discovered → in scope → eligible → downloaded → extracted → converted → synced), family workspaces, locale, batch tags. Extends what `status` already prints.
 - [ ] **`docushift report` — *what happened?*** Findings from a run. `--run last|<id>`, `--stage`, `--severity`, `--code`, `--slug`, `--explain <CODE>`, `--export <file.md>`.
-- [ ] **`docushift validate` — *is the output correct?*** Runs §7.4 against `--target-dir`, writes findings, gates on errors.
+- [x] **`docushift validate` — *is the output correct?*** Runs §7.4 against `--target-dir`, writes findings, gates on errors. **Built, Phase 7b.**
 - [ ] `docushift csh {list,report,validate}` — per-version identifier listing, coverage across a batch, integrity checking. `csh report --since <version>` is §7.6.
 - [ ] **Markdown export only** (decided 2026-09-10 — no JSON, no HTML). One file: run header, then errors, warnings and notes grouped by stage then code. **Consequence: tests assert against the `findings` table, never by parsing the Markdown.** With no JSON there is no machine format to assert on, and a test that greps report prose pins the wording of every message in the tool.
 
 #### 7.4 Link, asset and AEM-artifact integrity
 
-- [ ] Broken link and missing asset linter, including the CSH checks in `architecture.md` §5.4.6.
-  - [ ] **Classify before checking**: relative links resolve on the filesystem and a miss is an error; absolute URLs are external — which after Stage 7 means every API-reference link — and are skipped by default, HTTP-checked only under `validate --check-external`.
-  - [ ] **Percent-decode before resolving**, so the linter compares what a renderer would.
-  - [ ] **An unreferenced asset is not an error.** Orphans are a Phase 5 report line, not a lint failure — 54.6% of Flare's images are unreferenced by the authoring tool's design (`architecture.md` §5.5.7).
-  - [ ] A broken asset link here is a **regression against `design.md` invariant 13**, not a discovery: Phase 5 resolves the copy and the link together, so the count should be zero and the test exists to prove it stays zero.
-- [ ] **The AEM artifacts get field-level checks**, replacing `design.md` §8.4's "existence and well-formedness only" rule, which was justified by their shapes being guesses (both grounds gone — Phase 6 contract): `metadata.yml` carries its required `csg-*` key, non-empty; every `version.yml` `path` resolves to a sibling directory and every version directory has exactly one entry, ordered numeric-descending; every `csh.yml` value's file part exists and its anchor is present in that file.
+- [x] Broken link and missing asset linter, including the CSH checks in `architecture.md` §5.4.6.
+  - [x] **Classify before checking**: relative links resolve on the filesystem and a miss is an error; absolute URLs are external — which after Stage 7 means every API-reference link — and are skipped by default, HTTP-checked only under `validate --check-external`.
+  - [x] **Percent-decode before resolving**, so the linter compares what a renderer would.
+  - [x] **An unreferenced asset is not an error.** Orphans are a Phase 5 report line, not a lint failure — 54.6% of Flare's images are unreferenced by the authoring tool's design (`architecture.md` §5.5.7).
+  - [x] A broken asset link here is a **regression against `design.md` invariant 13**, not a discovery: Phase 5 resolves the copy and the link together, so the count should be zero and the test exists to prove it stays zero.
+- [x] **The AEM artifacts get field-level checks**, replacing `design.md` §8.4's "existence and well-formedness only" rule, which was justified by their shapes being guesses (both grounds gone — Phase 6 contract): `metadata.yml` carries its required `csg-*` key, non-empty; every `version.yml` `path` resolves to a sibling directory and every version directory has exactly one entry, ordered numeric-descending; every `csh.yml` value's file part exists and its anchor is present in that file.
 
 #### 7.5 The obligation register
 
 The concrete deliverable of §7.1: every deferred "report line" in the three documents, given a code. **A test asserts that every code emitted is registered and every registered code is reachable** — which is how a promise made in prose three phases earlier stops being able to quietly evaporate.
 
 **Eight rows were added by Phase 5b** (marked ⁵ᵇ). They are the report lines `architecture.md` §5.1 asked for in prose and this table had not yet given a code; the reachability half of that test is what forced the last of them — `ALERT_LABEL_UNMAPPED` was unreachable against a closed callout vocabulary, and rather than delete the code the detection was widened to the open `div.note<Kind>` convention it was written for.
+
+**Stage 6 netted two** (⁶ᶜ, ⁶ᵈ, ⁶ᵉ) — three added and `ARCHIVE_ALSO_LIVE` removed as unreachable once `sync/archives.py` was built and the condition turned out not to arise. **Phase 7b added seven** (⁷ᵇ), which is the largest single jump and not the register growing loosely: `validate` is the first command whose entire job is to raise findings, so its §7.4 and `design.md` §9.6 obligations had no codes for the plain reason that nothing had ever been written to emit them. The table is now 37 rows, and `NOT_YET_EMITTED` is down to two — `CSH_IDENTIFIER_DROPPED` for 7c and `DOC_REFERENCE_MISSING` for §10.7's class 2.
 
 | Code | Sev | Stage | Obligation | Specified in |
 | :--- | :--- | :--- | :--- | :--- |
@@ -898,9 +900,18 @@ The concrete deliverable of §7.1: every deferred "report line" in the three doc
 | `DOC_REFERENCE_MISSING` | warn | sync | Flare escape pointing at a document the ZIP never shipped (152) | `architecture.md` §5.5.8 |
 | `VERSION_NOT_NUMERIC` | warn | sync | Non-numeric version string sorted last in `version.yml` (20 rows) | Phase 6 contract |
 | `VERSION_UNDATED` | note | sync | Active version with no `release_date`; title loses its bracket (13) | Phase 6 contract |
-| `METADATA_MISMATCH` | warn | sync | SuiteHelp `publication-title` / `release-date` disagreeing with the catalog | Phase 6 contract |
-| `ARCHIVE_ALSO_LIVE` | note | sync | Archived version that is also live, cross-linked (25 of 326) | `architecture.md` §6.2.3 |
+| `METADATA_MISMATCH` | warn | convert | SuiteHelp `release-version` / `release-date` disagreeing with the catalog | Phase 6 contract |
+| `DOCUMENT_UNREADABLE`⁶ᶜ | note | sync | PDF whose Info dictionary would not parse; titled from its filename | `design.md` §10.5 |
+| `PUBLISH_BASE_URL_UNSET`⁶ᵈ | warn | sync | `api-references` placed with no `publish_base_url`; cross-tree links have no host | `architecture.md` §6.4 |
+| `API_LINK_REWRITTEN`⁶ᵉ | note | convert | Link into an api-reference tree pointed at its published `-resources` URL | `design.md` §10.7 |
 | `LINK_BROKEN` | **error** | validate | Relative link resolving to nothing | `design.md` §8.4 |
+| `ANCHOR_MISSING`⁷ᵇ | warn | validate | A `#fragment` naming no heading and no `id=` in the file it resolves to | §7.4 |
+| `LINK_EXTERNAL_DEAD`⁷ᵇ | warn | validate | An absolute URL that did not respond, under `--check-external` | §7.4 |
+| `CSH_FRONTMATTER_MISMATCH`⁷ᵇ | warn | validate | `csh.yml` and a topic's frontmatter disagree about an identifier | `design.md` §9.6 |
+| `METADATA_INVALID`⁷ᵇ | **error** | validate | `metadata.yml` missing, unshaped, or with an empty `csg-product`/`csg-version` | `architecture.md` §6.2 |
+| `DROPDOWN_INCONSISTENT`⁷ᵇ | warn | validate | `version.yml` disagrees with the version folders beside it | `architecture.md` §6.6 |
+| `ARTIFACT_UNPARSED`⁷ᵇ | **error** | validate | An AEM YAML artifact that would not parse; its field checks were skipped | §7.4 |
+| `SYNC_RESIDUE`⁷ᵇ | note | validate | A `.part` staging folder left by a sync that did not finish | §7.4 |
 | `CSH_IDENTIFIER_DROPPED` | warn | validate | Present in the prior version, absent here (§7.6) | this phase |
 
 #### 7.6 Cross-version CSH regression
@@ -978,9 +989,102 @@ A dropped identifier is a Help button that breaks on upgrade, and it is invisibl
 - **`status` over the whole catalog**: 4,462 catalogued → 3,617 in scope → 2,294 not retired → 1,389 convert-eligible, with 1,291 versions still `auto`.
 - **1,125 tests pass** (+64), lint clean.
 
-#### Phase 7b — `validate`
+#### Phase 7b — `validate` — **Complete (2026-09-16)**
 
 §7.4 in full: the link, asset and AEM-artifact linter over `--target-dir`, `LINK_BROKEN`, and the one command in the tool that gates on what it finds. It is second because it is the first command that reads the *published* tree rather than the database, and because 7a's `report` is how its findings become legible. `design.md` §8.4 is rewritten with it.
+
+**The reframe: almost everything `validate` looks for should not be there.** Stage 5 resolves the copy and the link in one pass (`design.md` invariant 13), so a broken relative asset link is not a discovery about the corpus — it is a regression in this tool. A linter written to *find* problems would be tuned for recall and would ship with a noisy baseline; this one is written to **stay** near zero, which means every gating check has to be one whose clean answer is knowable in advance. Where a check cannot make that claim — an anchor that depends on an emission convention no engine guarantees, an external URL that depends on the network — it is a warning and it does not gate. The measurement below is what turned that from a slogan into a specification: it found **two** broken links in 37,800, and it found them only after three classification rules were fixed that would otherwise have reported 121 correct links as broken and 1,626 warnings as errors.
+
+##### Measured 2026-09-16, against a real published tree
+
+Nothing in the checkout had ever been published, so one was built: 21 cached versions across all four engines (flare 15, docbook 4, webworks 1, dita 1) staged into a throwaway root, `convert --all` over the 19 the catalog accepted, `sync --all` into a throwaway target. That target is **6 trees, 91 published version folders, 10,190 Markdown files, 25,068 files and 728 MB**, and a prototype of the walk below was run over it.
+
+- **40,054 references, of which 2,520 (6.3%) are raw HTML inside the Markdown** — `<a href>` and `<img src>` in the passthrough the engines emit for tables GFM cannot express — concentrated in 366 files. A linter reading only `[](…)` and `![](…)` would call the tree clean while those images 404. Separately, **11,887 `<a id=|name=>` anchor targets in 2,036 files**: the HTML is load-bearing in both directions.
+- **121 of the 123 broken links were the linter's own bug, not the tree's.** With `publish_base_url` empty — the shipped state — a rewritten API-reference link is a tree-rooted path with no host (`architecture.md` §6.4.2), which `links.classify()` correctly calls RELATIVE. Resolve it against the citing page's directory and you get `html/apiguide/en-us-tib-analytics-userdocs-resources/…`, which exists nowhere. Detect it on the **raw** path instead and resolve it against `--target-dir`, and **121 of 121 resolve** — proving the link *and* that the API tree it names was actually synced.
+- **That leaves 2 genuinely broken links**, the same reference in the same file in two versions of `tibco-eftl-enterprise-edition`: `api-reference/python/connection.md`, which the source package does not ship. Upstream authoring, not this tool — and still an error, because a 404 is a 404. The headline is therefore **not** zero: it is *zero from us, two from the publisher*, which is the number the acceptance criteria are written against.
+- **Zero references live inside code.** Across 79,497 fenced lines and 928,552 characters of inline code span, the extractor dropped **0** links — the false-positive baseline that justified fence-stripping does not exist. The real trap is the opposite one: **787 HTML and 166 Markdown references sit on lines indented four spaces**, which is list continuation in converted help, not a code block. A CommonMark-correct extractor that honours indented code blocks would silently stop checking 953 references.
+- **Anchors cannot gate.** 14,055 references carry a fragment onto a file that resolves; **12,429 match and 1,626 (11.6%) do not** — and spot-checking says these are real. `hocon-sb-JMSAdapter.md#mapsUsageNote` is cited six times in the file that should define it and the anchor is not there; `docker-create.md#docker-create_dockernotes` does not occur in `docker-create.md` at all. So the finding is worth raising — it is an unmeasured Stage 5/6 defect in its own right — and 1,626 of them cannot be allowed to fail a run.
+- **`csh.yml`: 4 files, 215 entries, 0 missing file parts, and 33 of the 47 anchors missing.** The same split, from the other direction: the half `transforms/csh.py` controls is perfect, the half that depends on anchor emission is not.
+- **Required artifacts are per doc-class, not global.** `online-help` has 19 `toc.yml` but only **2** `index.md` and **4** `csh.yml`; `api-references` has `metadata.yml` and nothing else (§6.2.1); the three document doc-classes have all three of `metadata.yml`, `toc.yml`, `index.md`. A single required-set would report 60 findings against correct output.
+- **All 10 `-resources` product directories have no product `metadata.yml`**, because `sync` writes one per product in the docs tree only. That is as-built and undocumented either way, so it is *not* checked — see the open question below.
+- **`sync` leaves `.part` directories behind when it fails.** Two online-help folders failed the copy (a Windows `MAX_PATH` overrun under `C:\tmp`, an artefact of the throwaway location) and left `1-5-0.part` and `1-6-0.part` on the shelf. The atomic swap did its job — no half-published folder — but a walk that enumerates directories counted them as two extra versions and found two extra broken links in them.
+- **Cost: 93 folders and 10,190 files in 84 seconds.** Roughly a second per 120 files, single-threaded, with anchors cached per file. Extrapolated to 1,389 convert-eligible versions that is a run measured in hours, which is why the selectors are not a convenience.
+
+##### The design
+
+- [x] **`docushift validate` — is the output correct?** `--target-dir` (required), `--product` / `--version` / `--doc-class` to narrow, `--check-external` to verify absolute URLs over HTTP, `--dry-run` to list what would be walked. Writes findings, prints them grouped the way `report` does, and **exits 1 if and only if it recorded at least one `error`** (§7.2). The one gating command in the tool.
+
+- [x] **It reads the disk, and the catalog is not its source of truth.** §7.1's table already says so; the consequence worth writing down is that the selectors filter *directory names*, not catalog rows. A published tree outlives the row that produced it — a product retired last week still has help on the shelf, and that is exactly when somebody wants to know whether it is intact. `validate` therefore works against a target another machine synced, with no `versions.csv` agreement required. It opens `state.db` to write its run, which is the 7a instrument being used rather than a second source of truth.
+
+- [x] **One walk, three checkers, each a pure function over one version folder.** `validation/tree.py` enumerates `(tree, locale, slug, doc-class, segment)` from the disk; `validation/links.py`, `validation/artifacts.py` and `validation/csh.py` take a folder and return findings. None of them takes a `CatalogManager`, a `StateStore` or a `FindingsRun` — the driver records what they return. That is what makes each one testable against a fixture directory in three lines, and it is the same separation `sync/` already has between `router.py` and `distributor.py`.
+
+- [x] **The walk skips `.part`.** A failed sync leaves its staging sibling on the shelf, and the measurement walked straight into two of them. Reporting findings about a folder the swap deliberately refused to publish is reporting on a file nobody can reach; worse, it makes a failed `sync` produce `validate` errors that a successful re-run silently cures, which trains people to ignore the gate. The presence of a `.part` is itself worth one note per folder, because it is litter from a failure that may have gone unnoticed. **New code: `SYNC_RESIDUE` (note).**
+
+- [x] **Reference extraction reads Markdown *and* the HTML inside it.** Inline links, images, reference definitions and autolinks, plus `<a href>`, `<img src>`, `<source>` and `<iframe>` in the passthrough HTML — 2,520 of 40,054 references measured, 6.3%, in 366 files. An `<img>` in one of those is a link a renderer follows.
+  - [x] **Fenced blocks and inline code spans are excluded, and indented lines are not.** The measurement found 0 references inside 79,497 fenced lines, so the exclusion buys nothing today and is kept only because a future engine emitting sample HTML inside a fence would otherwise break the gate. Treating four-space indentation as a code block, on the other hand, would stop checking **953 real references** sitting in nested list items — so the extractor is deliberately *not* CommonMark-correct here, and the reason is written into the code.
+  - [x] **The extractor is multiline-aware.** `<img>` attributes in converted help span newlines; a line-oriented regex undercounts. Cheap to get right once, invisible when wrong.
+
+- [x] **Classification and decoding reuse `transforms/links.py`.** `classify()` already strips the fragment and the query, percent-decodes and fixes backslashes, in that order — and §5.5.6 measured what skipping it costs: **1,872 WebWorks references reported missing that are not**, 1,224 percent-encoded and 648 backslash-separated. The linter has to decode exactly the way the emitter encoded or it reports the emitter's own correct output as broken. One resolution, two callers.
+
+- [x] **A reference whose raw first segment names a tree in `--target-dir` is a host-less published URL, and it resolves against the target root.** This is the single highest-value rule in the phase: **121 of the sample's 123 broken links are what happens without it**, and `design.md` §9.6 already promised the behaviour ("§8.4 classifies these as external and does not resolve them against the filesystem") without saying where the classification happens. It happens on the *raw* path, before `resolve()` — after resolution the tree name is buried behind the citing page's own directory and the rule cannot fire. Resolving rather than merely skipping is the bonus: it catches help that links into an API tree nobody synced, which nothing else in the tool would notice. A dangling one is a `LINK_BROKEN`.
+
+- [x] **Resolution is case-sensitive, on every platform.** The target is published to Linux. A link that differs from its file only in case resolves on the developer's Windows machine and 404s in production, which is precisely the defect class a linter is for. Where a case-insensitive match exists the message names the file that is actually there, so the fix is one rename rather than a search. It is a `LINK_BROKEN` like any other, because on the platform that matters it *is* broken. **This rule caught a data-loss bug on its first run** — see below; it is the reason the rule is in the phase rather than in a backlog.
+
+- [x] **A missing file is an error; a missing anchor is a warning.** 1,626 unmatched fragments against 12,429 matched settles it arithmetically: an 11.6% rate cannot gate. It is still worth raising — the spot-checks say these are anchors the conversion genuinely dropped, not slug-algorithm disagreement, which makes this the first measurement of a Stage 5/6 defect nobody had counted. Explicit `id=` and `name=` attributes in passthrough HTML count as anchors alongside computed heading slugs, since the engines emit 11,887 of them. **New code: `ANCHOR_MISSING` (warning).**
+
+- [x] **Absolute URLs are skipped by default and counted; `--check-external` checks them over HTTP.** 1,676 in the sample, and after §10.7 every link into an API reference on a configured host is one of these, so checking by default would put the API surface of every product on the wire on every run. Under the flag: deduplicated per URL across the whole run, `HEAD` with a `GET` fallback, the `discovery/client.py` request policy for rate and retry. **New code: `LINK_EXTERNAL_DEAD` (warning)** — a proxy, an outage or a host that dislikes `HEAD` is not a defect in the output, and an exit code that depends on the network is an exit code nobody trusts.
+
+- [x] **CSH is checked as link integrity, because that is what it is** (§5.4.6, §9.6). A `csh.yml` value whose file part is absent is a `LINK_BROKEN` (0 in the sample); its anchor half is an `ANCHOR_MISSING` (33 of 47); an identifier in a topic's frontmatter that is not in `csh.yml`, or the reverse, is **new code `CSH_FRONTMATTER_MISMATCH` (warning)** — the two are written in one pass by `transforms/csh.py`, so a disagreement is a regression, but it breaks one Help button rather than the page, and §7.6's harder question is 7c's.
+
+- [x] **The AEM artifacts get field-level checks**, replacing `design.md` §8.4's "existence and well-formedness only" rule — both of whose grounds are gone, since the shapes stopped being guesses when the AEM contract landed (2026-09-10).
+  - [x] **Which artifacts are required is a per-doc-class table, not a global set.** Measured: `online-help` reliably has `toc.yml` and `metadata.yml` but `index.md` in 2 of 19 and `csh.yml` in 4 of 19; the three document doc-classes have all three (§6.2.2); `api-references` has `metadata.yml` alone (§6.2.1); `archives` has `index.md` and `toc.yml` and no version segment. One global set would raise ~60 findings against correct output. The table lives beside the doc-class constants it keys on, so adding a doc-class cannot forget it.
+  - [x] **`metadata.yml`**: `csg-product` at product level and `csg-version` at version level, present and non-empty, and no version folder without one. **New code: `METADATA_INVALID` (error).**
+  - [x] **`version.yml`**: every row DocuShift is entitled to own resolves to a sibling directory, every version directory has exactly one row, and the rows are in numeric-descending order. **New code: `DROPDOWN_INCONSISTENT` (warning)** — a warning, not an error, because `sync` deliberately preserves rows it does not own (`sync/versions.py`) and failing a run over somebody's intentional hand-edit is how a tool teaches people to stop running it.
+  - [x] **`toc.yml`**: every `path` resolves to a file in the version folder. That is a link, so it is a `LINK_BROKEN`, and its `#anchor` half an `ANCHOR_MISSING`; giving the TOC its own code would mean two codes for one condition and a `report --code LINK_BROKEN` that misses half the broken links.
+  - [x] **Any of the four YAML artifacts failing to parse is separate from any of them being wrong.** **New code: `ARTIFACT_UNPARSED` (error)** — the action is different (the file is unreadable, so no field check ran at all) and, more to the point, an unparseable file makes every other finding about that folder unsound. Reported once and the folder's remaining artifact checks are skipped.
+
+- [x] **The `-resources` tree is walked, and `api-references/` is not link-checked.** `archives/`'s generated `index.md` and `toc.yml` are DocuShift's output and are checked like any other. The API trees are copied Javadoc — not this tool's output, not fixable from here, and 496 of 499 ship their own frame set. Walking them would dominate the run's wall-clock to report defects in somebody else's generator. Their `metadata.yml` is still checked, because that file *is* ours.
+
+- [x] **`validate` writes nothing into the target.** The one command that reads the published tree is the one command with no business changing it; there is no `--fix`. Stated because a linter that can rewrite is the obvious next request and the answer wants to be on the record: the published tree is regenerated by `sync`, and a repair applied here would be silently reverted by the next run.
+
+- [x] **The selectors are load-bearing, and the walk is measured.** 84 seconds for 91 folders extrapolates to hours over 1,389, so `--product` / `--version` / `--doc-class` are how the command is actually used and `--dry-run` says what a selection covers before it costs anything. Anchors are computed once per file and cached for the run; no file is read twice.
+
+- [x] **Exit codes, all three rules in one command** (§7.4). Errors → 1. A selection that matched no version folder → 1, the same rule the four stage commands took in 7a. Anything else → 0, warnings and notes included.
+
+- [x] **The register goes 30 → 37 and `NOT_YET_EMITTED` goes 3 → 2.** `LINK_BROKEN` starts firing and leaves the set by hand, as 7a's equality assertion requires. The six new codes are the §7.4 and §9.6 obligations that had no code because nothing had ever been written to raise them; `CSH_IDENTIFIER_DROPPED` stays outstanding for 7c and `DOC_REFERENCE_MISSING` for §10.7's class 2.
+
+**One open question, carried rather than guessed.** No `-resources` product directory has a product `metadata.yml`, in all 10 cases, because `sync` writes that file in the docs tree only. Nothing in `architecture.md` §6.2 says whether AEM wants one there. `validate` therefore does not check it, and the phase records the gap instead of inventing a rule — a gating command that enforces a guess about someone else's contract is worse than one that stays quiet.
+
+##### What the first run found — a Stage 6 defect, and it was losing text
+
+The prototype read page links. The finished checker also reads `toc.yml`, and on its first run over the same tree it returned **five** errors rather than the two that were measured. The three extra were case-only: `toc.yml` said `html/install/installation.md` where the folder held `Installation.md`, in `tibco-patterns` 6.1.2 and 6.2.0 and `tibco-businessconnect-edi-protocol-powered-by-instream` 6.11.0.
+
+The 404 was the symptom. `_slug` lower-cases a TOC container's label, and `navigation._free` tested the resulting path against the taken set **case-sensitively** — so with a converted `install/Installation.md` already on disk, `install/installation.md` looked free. On Windows it is not a second file: the generated container page was written straight into the converted topic, and `Installation.htm`'s text left the corpus without a single finding anywhere in the run. Three topics, silently, across three versions.
+
+`_free` now folds case, the three container pages land on `installation-2.md`, and the three topics come back — the sample's file count goes 9,460 → 9,463. The measured baseline is unchanged at two errors, which is why the acceptance criterion below still reads two: the fix is what puts it back there. The general lesson is the one the reframe already claimed and this makes concrete — a check whose clean answer is knowable in advance is worth having precisely because the first thing it reports is real.
+
+##### Acceptance
+
+- [x] **The sample tree validates to exactly two errors, both named** — the `tibco-eftl-enterprise-edition` `python/connection.md` references in 7.1.2 and 7.2.0, exit 1. Not "clean": the measured truth, asserted as the number, so that a regression that adds a third is visible and a fix upstream that removes both is too. It reached two by way of five: see above.
+- [x] **A TOC container whose slug collides with an existing topic in another case gets its own page** — `navigation._free` folds case, with a test that would have caught the three topics this lost.
+- [x] **The 121 host-less API links produce no findings**, and moving the `api-references` folder aside turns all 121 into `LINK_BROKEN` — the rule tested in both directions, because a skip and a resolve are indistinguishable when everything is present.
+- [x] **Deleting one asset from a published version turns exit 0 into exit 1**, with exactly one `LINK_BROKEN` row naming the file and the topic that points at it.
+- [x] **Renaming a published asset to differ only in case is also a `LINK_BROKEN`**, on Windows, with the actual filename in the message.
+- [x] **A `.part` folder yields one `SYNC_RESIDUE` note and no other findings**, however broken its contents.
+- [x] **A reference on a four-space-indented line is checked; one inside a fence is not** — the two halves of the extractor's deliberate non-conformance, each with a fixture.
+- [x] **Corrupting each of the four YAML artifacts in turn yields `ARTIFACT_UNPARSED` and no field-level findings for that folder** — the skip is asserted, not assumed.
+- [x] **A `csh.yml` value pointing at a deleted topic is a `LINK_BROKEN`; a frontmatter identifier missing from `csh.yml` is a `CSH_FRONTMATTER_MISMATCH`** — the two halves of §9.6, distinguishable by code.
+- [x] **`--check-external` makes no network call without the flag**, asserted by a test whose fake fetcher raises if called.
+- [x] **`report --run last` reads back what `validate` just wrote**, which is the same cross-check 7a closed on and the reason 7b comes after it.
+- [x] **Docs in the same commit** — `design.md` §8.4 rewritten and flipped to **Built** with its §12 row; `architecture.md` §7 gains **§7.5, what `validate` walks and what it refuses to do**, and its header stops calling `validate` unbuilt; `user-guide.md`'s `validate` block loses "not yet built" and gains the severity/exit-code paragraph and `--check-external`; `planning.md` §7.4's checkboxes and the §7.5 register's seven new rows; `CONTEXT.md` a ledger row and the register count 30 → 37.
+
+##### Verified against the real published tree, 2026-09-16
+
+- **The sample tree validates to exactly two errors, and they are the two that were predicted** — `tibco-eftl-enterprise-edition` 7.1.2 and 7.2.0, both citing `html/api-reference/python/connection.md`, which the source package does not ship. It reached two by way of five: the three case-only `toc.yml` rows the checker found on its first run were a real Stage 6 defect, fixed in `navigation._free`.
+- **121 tree-rooted references, zero findings.** The highest-value rule, confirmed in the direction that matters: every host-less API link in the tree resolves against `--target-dir`, which also proves the `-resources` trees they name were synced.
+- **9,463 files, 39,328 references, 2,418 of them HTML, 1,777 absolute, 12,440 of 14,3xx fragments matched.** The three recovered topics are the file count's move from 9,460.
+- **3,006 `ANCHOR_MISSING` warnings and 1 `SYNC_RESIDUE` note over 2 `.part` folders** — exit 0 would have been wrong and exit 1 on either of them would have been worse. The gate fires on the two errors and on nothing else.
+- **1,184 tests pass** (+59), lint clean.
 
 #### Phase 7c — `csh {list,report,validate}` and the cross-version regression
 

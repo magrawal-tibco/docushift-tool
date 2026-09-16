@@ -81,6 +81,13 @@ DOC_CLASSES = (ONLINE_HELP, *router.DOCUMENT_DOC_CLASSES)
 # The three files a document doc-class folder gets beside its copied files.
 _RENDERED = ("index.md", "toc.yml", "metadata.yml")
 
+# The staging sibling a version folder is built in before the swap. A constant
+# rather than four literals because Phase 7b's `validate` has to recognize one: a
+# failed run leaves `10-4-0.part` on the shelf, and a linter that mistook it for a
+# published version would report findings about a folder the swap deliberately
+# refused to publish.
+STAGING_SUFFIX = ".part"
+
 
 class SyncOutcome(StrEnum):
     """What happened to one version. Every run reports these five counts."""
@@ -234,7 +241,7 @@ class WorkspaceDistributor:
         must not survive in the published tree, and `version.yml` one level up must
         not be reached by the replacement that removes it.
         """
-        staging = destination.with_name(destination.name + ".part")
+        staging = destination.with_name(destination.name + STAGING_SUFFIX)
         remove(staging)
         staging.parent.mkdir(parents=True, exist_ok=True)
         # `copy2` rather than `copy`, so mtime survives the copy -- which is what
@@ -330,7 +337,7 @@ class WorkspaceDistributor:
         `_documents_current` compares mtime, and only a copy that preserves it can
         tell a re-sync from a human's edit.
         """
-        staging = destination.with_name(destination.name + ".part")
+        staging = destination.with_name(destination.name + STAGING_SUFFIX)
         remove(staging)
         staging.mkdir(parents=True, exist_ok=True)
         size = 0
@@ -427,7 +434,7 @@ class WorkspaceDistributor:
         folder* rather than the content, and leaving it out would make this the one
         version folder in the layout that carries no version.
         """
-        staging = destination.with_name(destination.name + ".part")
+        staging = destination.with_name(destination.name + STAGING_SUFFIX)
         remove(staging)
         staging.mkdir(parents=True, exist_ok=True)
         for root in roots:
@@ -510,7 +517,7 @@ class WorkspaceDistributor:
         `csg-product` at product level, not `csg-version`: this folder spans every
         version the product ever had, so there is no version for it to carry.
         """
-        staging = destination.with_name(destination.name + ".part")
+        staging = destination.with_name(destination.name + STAGING_SUFFIX)
         remove(staging)
         staging.mkdir(parents=True, exist_ok=True)
         size = 0

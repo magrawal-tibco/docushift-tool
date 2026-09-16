@@ -331,6 +331,32 @@ def test_a_generated_page_never_lands_on_top_of_a_converted_one(context, templat
     assert str(result.documents[0].relative) == "guide/ch/chapter-one-2.md"
 
 
+def test_a_generated_page_never_lands_on_a_converted_one_in_another_case(
+    context, templates
+) -> None:
+    """The collision test folds case, because the shelf does not.
+
+    `_slug` lower-cases a container's label, so a "Installation" node beside a
+    converted `install/Installation.md` produced `install/installation.md` -- a
+    different path to Python and the *same file* to Windows, which wrote the
+    generated page straight into the topic. Three versions shipped that way and
+    lost their text, and nothing in the run reported it; Stage 8's case-sensitive
+    resolution found all three as `toc.yml` `LINK_BROKEN` rows on its first run.
+    """
+    unit = book(
+        "guide",
+        pages=("install/Installation.md", "install/Installation_Modes.md"),
+        nav=[
+            node("Installation", None, node("Modes", "install/Installation_Modes.md")),
+            node("Installation Modes", "install/Installation.md"),
+        ],
+    )
+
+    result = synthesize(context, [unit], templates)
+
+    assert str(result.documents[0].relative) == "guide/install/installation-2.md"
+
+
 def test_a_version_with_no_landing_page_gets_a_generated_index(context, templates) -> None:
     """WebWorks has none by design; DITA's TOC is a forest in 23 of 23 doc-sets."""
     units = [

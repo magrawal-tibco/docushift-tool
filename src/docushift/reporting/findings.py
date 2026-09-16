@@ -178,6 +178,56 @@ REGISTRY: dict[str, Code] = _codes(
          "Relative link resolving to nothing", "design.md §8.4"),
     Code("CSH_IDENTIFIER_DROPPED", Severity.WARNING, Stage.VALIDATE,
          "Present in the prior version, absent here", "planning.md §7.6"),
+    # 7b's six. Every one of them was an obligation `planning.md` §7.4 or
+    # `design.md` §9.6 already carried in English; none had a code, because until
+    # `validate` existed nothing could raise one. Their severities are the phase's
+    # central decision and each was measured before it was chosen (Phase 7b's
+    # "Measured 2026-09-16" table), on the principle that a gating command may only
+    # gate on checks whose clean answer is knowable in advance.
+    #
+    # A warning, not an error, and the arithmetic is why: 1,626 of the sample's
+    # 14,055 resolving fragments -- 11.6% -- name an anchor that is not there.
+    # They are real (spot-checked: the anchors were dropped in conversion, this is
+    # not a slug-algorithm disagreement), which is what earns the code; the rate is
+    # what forbids the gate.
+    Code("ANCHOR_MISSING", Severity.WARNING, Stage.VALIDATE,
+         "A #fragment naming no heading and no id= in the file it resolves to",
+         "planning.md §7.4"),
+    # The network is not the output. A proxy, an outage or a host that dislikes
+    # HEAD would otherwise decide an exit code, and an exit code that depends on
+    # the network is one nobody trusts. Only reachable under `--check-external`.
+    Code("LINK_EXTERNAL_DEAD", Severity.WARNING, Stage.VALIDATE,
+         "An absolute URL that did not respond, under --check-external",
+         "planning.md §7.4"),
+    # `transforms/csh.py` writes the map and the frontmatter in one pass, so a
+    # disagreement is a regression -- but it breaks one Help button rather than the
+    # page, and the page is what an error should be about.
+    Code("CSH_FRONTMATTER_MISMATCH", Severity.WARNING, Stage.VALIDATE,
+         "csh.yml and a topic's frontmatter disagree about an identifier",
+         "design.md §9.6"),
+    # An error, because `metadata.yml` is the AEM contract's one required file and
+    # a version folder without a usable `csg-version` does not publish.
+    Code("METADATA_INVALID", Severity.ERROR, Stage.VALIDATE,
+         "metadata.yml missing, unshaped, or with an empty csg-product/csg-version",
+         "architecture.md §6.2"),
+    # A warning, because `sync` deliberately preserves drop-down rows it does not
+    # own (`sync/versions.py`) and failing a run over somebody's intentional
+    # hand-edit is how a tool teaches people to stop running it.
+    Code("DROPDOWN_INCONSISTENT", Severity.WARNING, Stage.VALIDATE,
+         "version.yml disagrees with the version folders beside it",
+         "architecture.md §6.6"),
+    # Separate from any artifact being *wrong*: the file is unreadable, so no field
+    # check ran at all, and every other finding about that folder would be unsound.
+    Code("ARTIFACT_UNPARSED", Severity.ERROR, Stage.VALIDATE,
+         "An AEM YAML artifact that would not parse; its field checks were skipped",
+         "planning.md §7.4"),
+    # A note, and the only 7b code that is not about correctness. A failed `sync`
+    # leaves its staging sibling on the shelf -- two in the sample. The swap did its
+    # job, so nothing half-published exists; what is left is litter from a failure
+    # that may have gone unnoticed, and the folder itself is skipped.
+    Code("SYNC_RESIDUE", Severity.NOTE, Stage.VALIDATE,
+         "A .part staging folder left by a sync that did not finish",
+         "planning.md §7.4"),
 )
 
 # The register's remaining debt, stated as the *complement* of what is written.
@@ -191,11 +241,13 @@ REGISTRY: dict[str, Code] = _codes(
 # code that starts firing fails the test until it is removed from here, and a code
 # that stops firing fails it until it is added back.
 #
-# Three left, and all three belong to commands that are not written: `LINK_BROKEN`
-# and `CSH_IDENTIFIER_DROPPED` to `validate` (Phase 7b), `DOC_REFERENCE_MISSING`
-# to the document router's escape check (Phase 7c). Before 7a there were nine,
-# four of them in stages -- `catalog fetch`, `catalog eos`, `extract` -- that
-# computed their findings, printed them, and opened no run to record them in.
+# Two left. `CSH_IDENTIFIER_DROPPED` needs two converted versions of one product
+# on disk and belongs to Phase 7c's cross-version comparison (§7.6);
+# `DOC_REFERENCE_MISSING` belongs to the document router's escape check. Before 7a
+# there were nine, four of them in stages -- `catalog fetch`, `catalog eos`,
+# `extract` -- that computed their findings, printed them, and opened no run to
+# record them in. `LINK_BROKEN` left the set in 7b, by hand, which is the whole
+# point of asserting this equal rather than as a subset.
 #
 # The count was briefly believed to be twenty, and how that happened is the reason
 # the companion test scans for a quoted literal rather than for a call: the earlier
@@ -203,9 +255,7 @@ REGISTRY: dict[str, Code] = _codes(
 # and every variable call site. The scan that replaces it proves a code is
 # *written*, not that it fires -- which is a real limit, and why this set is
 # curated by hand rather than derived.
-NOT_YET_EMITTED = frozenset(
-    {"LINK_BROKEN", "CSH_IDENTIFIER_DROPPED", "DOC_REFERENCE_MISSING"}
-)
+NOT_YET_EMITTED = frozenset({"CSH_IDENTIFIER_DROPPED", "DOC_REFERENCE_MISSING"})
 
 
 class UnregisteredCode(KeyError):

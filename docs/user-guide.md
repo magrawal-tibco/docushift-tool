@@ -703,7 +703,7 @@ docushift sync --all --target-dir ../tibco-docs-aem/ --dry-run
 # Re-copy even where the published tree already matches
 docushift sync --all --target-dir ../tibco-docs-aem/ --force
 
-# Run link and asset integrity validation (Phase 7b -- not yet built)
+# Check what you just published -- see "Is the output correct?" below
 docushift validate --target-dir ../tibco-docs-aem/
 ```
 
@@ -774,15 +774,16 @@ Thirteen things to expect:
 - **API references are never converted, and the folder names come from the package.** Javadoc and the C / Go / `tibdg` trees are copied through as HTML, byte for byte, with only a `metadata.yml` added beside them. Each gets a folder named from its path inside the package with the uninformative segments removed — `html/api-reference/java` becomes `java`, `api/java/lib` becomes `java-lib` — and if two of a version's trees would end up with the same name, *all* of that version's folders fall back to their full path so the set stays readable as one scheme.
 - **A topic link into `api-references/` becomes the published URL of the resources tree**, written during `convert` rather than during `sync` — by the time the tree is placed the reference is gone, so the rewrite has to happen while the page is being converted. The host comes from `publish_base_url` in `config/publishing.yaml`. **With no host set the link is still written**, as the path without a scheme or host (`en-us-tib-messaging-userdocs-resources/en-us/ems/api-references/10-4-0/java/index.html`), and the run reports `PUBLISH_BASE_URL_UNSET` once per product so you know what is missing — a prefix you can add later, rather than a link you cannot get back. Anchors are kept, and a link to a page that is not actually in the tree is left unlinked and reported rather than pointed at a 404. **One known gap**: where the source wrote the reference inside a code span — `<code><a href="…">MessageListener</a></code>`, which is how the EMS developer guide writes all of its — the conversion flattens it to plain code and the link is not recovered. That is roughly a tenth of these references corpus-wide and all of them are in one product; it is recorded as its own fix.
 - **Setting `publish_base_url` reconverts the versions it affects, and only those.** The host is part of what a converted tree contains, so `convert` treats a changed host the way it treats a changed package. Versions with no API tree are untouched, so setting one value does not reconvert the corpus. Each version that does rewrite reports `API_LINK_REWRITTEN` with the count — worth a glance, because a version with an API tree and a count of zero is either a product whose help never mentions its API or a sign something stopped matching.
-- **`validate` will skip those absolute links by default** once they exist. They point at a different repository, so there is nothing on disk to check; pass `--check-external` to verify them over HTTP.
+- **`validate` skips those absolute links by default**, and pass `--check-external` to request them over HTTP. With no `publish_base_url` set the rewritten link has no host, and `validate` resolves it against `--target-dir` instead — so it also tells you whether the API tree it names was actually synced.
 - **A broken relative asset link is a tool bug, not a content finding.** Conversion writes the link and copies the file in one step, so `validate` finding one means something downstream moved a file without moving its link — it is reported as a regression, with the stage that could have caused it. An asset that nothing links to is not an error and is not reported here; that count belongs to `convert`.
 
 ### Where things stand, and what happened
 
-Two commands, two questions, and the split is deliberate: `status` answers *where
-is everything now* from the catalog, `report` answers *what happened* from the
-findings a run recorded. Neither reads the other's source, so they cannot drift
-into two different answers to the same question.
+Three commands, three questions, and the split is deliberate: `status` answers
+*where is everything now* from the catalog, `report` answers *what happened* from
+the findings a run recorded, and `validate` (below) answers *is the output correct*
+from the published tree on disk. No two of them read the same source, so they
+cannot drift into different answers to the same question.
 
 ```bash
 # Where is everything now? The funnel, per stage, over the whole catalog
@@ -845,8 +846,67 @@ the errors are in the report, and that is what `report` is for. A selection that
 matched nothing exits **1** — before Phase 7a a typo in `--product` was
 indistinguishable from a clean run — and `--dry-run` is not exempt, because it is
 the same mistake discovered one command earlier. `report` itself exits 1 only for
-a run that is not there or an export it could not write. Only `validate` (Phase
-7b) will gate on what it found.
+a run that is not there or an export it could not write. Only `validate` gates on
+what it found.
+
+### Is the output correct?
+
+`validate` reads the **published tree** and nothing else — not the catalog. A tree
+another machine synced validates the same way, and a product you retired last week
+still has help on the shelf that can be checked.
+
+```bash
+# The whole target: links, anchors, AEM artifacts, CSH
+docushift validate --target-dir ../tibco-docs-aem/
+
+# Narrow it -- the walk costs about a second per 120 files, so this matters
+docushift validate --target-dir ../tibco-docs-aem/ --product tibco-ems
+docushift validate --target-dir ../tibco-docs-aem/ --product tibco-ems --version 10.4.0
+docushift validate --target-dir ../tibco-docs-aem/ --doc-class online-help
+
+# What would it walk? Reads no file
+docushift validate --target-dir ../tibco-docs-aem/ --dry-run
+
+# Also request every absolute URL once. Off by default; no network without it
+docushift validate --target-dir ../tibco-docs-aem/ --check-external
+```
+
+`--version` takes `10.4.0` or `10-4-0`: the dashed form is what is on disk and the
+dotted form is what you have in hand.
+
+**It exits 1 if and only if it recorded an error** — the only command in the tool
+that gates. Warnings and notes are printed and counted and change nothing, and a
+selection that matched no published folder exits 1 like every other stage.
+
+Six things to expect:
+
+- **A missing file is an error; a missing anchor is a warning.** Across a real
+  published tree of 91 versions, 11.6% of links carrying a `#fragment` point at an
+  anchor that is not there — anchors the conversion dropped, worth knowing about
+  and far too common to fail a run over. A file that is not there is a 404 and
+  gates.
+- **Case matters, even on Windows.** The tree is published to Linux, so a link that
+  differs from its file only in case resolves on your machine and 404s in
+  production. The message names the file that is actually there, so the fix is one
+  rename. This is not theoretical: the check's first run found three TOC entries
+  like that, and the cause turned out to be a converter bug that had been writing a
+  generated page over a real topic.
+- **`.part` folders are skipped and counted, not checked.** A sync that failed
+  leaves its staging folder behind; the swap refused to publish it, so validating it
+  would report problems a re-run cures. You get one note per folder saying it is
+  there.
+- **`api-references/` is not link-checked.** It is copied Javadoc — not this tool's
+  output and not fixable from here. Its `metadata.yml` is checked, because that file
+  is ours.
+- **Only `metadata.yml` is required.** `toc.yml`, `index.md`, `csh.yml` and
+  `version.yml` are checked when they are there and never demanded, because which of
+  them a doc-class carries legitimately varies. A YAML file that will not parse is
+  reported once, and the rest of that file's checks are skipped.
+- **It writes nothing, and there is no `--fix`.** The published tree is regenerated
+  by `sync`, so a repair applied here would be reverted by the next run.
+
+Everything it records goes into the findings register like any other run, so
+`docushift report --run last` reads it back and `--export` writes it out.
 
 
 ---

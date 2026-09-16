@@ -292,12 +292,23 @@ def _page(
 
 
 def _free(home: str, stem: str, taken: set[PurePosixPath]) -> PurePosixPath:
-    """A page path beside the children it indexes, never over one of them."""
+    """A page path beside the children it indexes, never over one of them.
+
+    The test folds case, because the shelf does not. `_slug` lower-cases, and
+    three versions ship a TOC container whose label slugs onto a topic that is
+    already there in another case -- `tibco-patterns` 6.2.0 has a container
+    "Installation" beside the converted `install/Installation.htm`. A
+    case-sensitive test called `install/installation.md` free, and on Windows the
+    generated page was then written *into* the converted topic, which is how the
+    topic's text left the corpus. `validate` found all three, as case-only
+    `LINK_BROKEN` rows in `toc.yml`.
+    """
     stem = stem or INDEX_NAME
+    folded = {str(path).lower() for path in taken}
     for attempt in range(1, 100):
         name = f"{stem}.md" if attempt == 1 else f"{stem}-{attempt}.md"
         relative = PurePosixPath(home) / name if home else PurePosixPath(name)
-        if relative not in taken:
+        if str(relative).lower() not in folded:
             return relative
     raise ValueError(f"no free path for {stem!r} under {home!r}")  # pragma: no cover
 

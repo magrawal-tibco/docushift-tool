@@ -21,11 +21,13 @@ from docushift.state import StateStore
 from tests.conftest import REPO_ROOT, make_product, make_version
 
 # `download` and `archive download` left this list in Phase 4a, `extract` in 4b-1,
-# `convert` in 5a, `sync` in 6b, and `status`/`report` in 7a. `validate` is the
-# last one, and 7b takes it.
-PENDING_COMMANDS = [
-    ["validate", "--target-dir", "workspace"],
-]
+# `convert` in 5a, `sync` in 6b, `status`/`report` in 7a, and `validate` in 7b.
+#
+# **The list is empty and the test over it still runs.** Kept rather than deleted
+# because `_pending` is still in `cli.py` and Phase 7c's `csh` group will use it:
+# an empty parametrization is the honest record that every declared command is now
+# built, and the harness is here for the next one that is not.
+PENDING_COMMANDS: list[list[str]] = []
 
 
 @pytest.fixture

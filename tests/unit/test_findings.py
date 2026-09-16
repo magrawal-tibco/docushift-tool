@@ -39,8 +39,12 @@ def test_the_register_carries_every_row_of_7_5() -> None:
     29th, `DOCUMENT_UNREADABLE`, for the same reason and as the first code added
     by the phase that raises it. 6d nets zero -- one added, `ARCHIVE_ALSO_LIVE`
     removed as unreachable -- and 6e adds the 30th, `API_LINK_REWRITTEN`.
+
+    7b adds seven at once and that is not the register growing loosely: `validate`
+    is the first command whose whole job is to raise findings, so its §7.4 and §9.6
+    obligations had no codes because nothing had ever been written to emit them.
     """
-    assert len(REGISTRY) == 30
+    assert len(REGISTRY) == 37
 
 
 def test_severity_comes_from_the_registry_and_not_from_the_call_site() -> None:
