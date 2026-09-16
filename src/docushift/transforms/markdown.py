@@ -129,6 +129,14 @@ def text_of(node: Tag) -> str:
 class Renderer:
     """Walks a parsed subtree and emits GFM blocks. Subclassed per engine."""
 
+    # How many links this walk flattened into a fence. A GFM fence cannot hold a
+    # link at all, so a `<pre>` that contains one loses it -- 4,964 of the 13,126
+    # swallowed references measured for Phase 8, nearly all of them the return
+    # type in a C signature. Counted rather than recorded one by one, and read by
+    # the engine after the walk: the residue of a fix has to be a number in the
+    # run report rather than a paragraph in a design document.
+    flattened_links = 0
+
     # -- hooks -----------------------------------------------------------------
 
     def block_override(self, tag: Tag) -> str | None:
@@ -208,6 +216,13 @@ class Renderer:
         if name == "dl":
             return self.blocks(tag)
         if name == "pre":
+            # The fence keeps its links' *words* and loses the links. Emitting the
+            # block as passthrough HTML instead -- one call, exactly what `table`
+            # below does -- would recover them at the cost of turning every such
+            # block into an HTML blob, and in this corpus the link is a decorative
+            # type cross-reference inside a function signature. The trade is
+            # recorded rather than hidden: see `flattened_links`.
+            self.flattened_links += len(tag.find_all("a", href=True))
             return [code_transform.fence(text_of(tag))]
         if name == "blockquote":
             inner = self.blocks(tag)
@@ -300,11 +315,73 @@ class Renderer:
         if name in ("del", "s", "strike"):
             return wrap(self.inline_children(node), "~~")
         if name in ("code", "tt", "kbd", "samp"):
-            return code_transform.inline(text_of(node))
+            return self.code_span(node)
         if name in _KEEP_AS_HTML:
             inner = self.inline_children(node).strip()
             return f"<{name}>{inner}</{name}>" if inner else ""
         return self.inline_children(node)
+
+    def code_span(self, tag: Tag) -> str:
+        """Inline code, with the links inside it kept rather than flattened.
+
+        Rendering a code span from its *text* -- which is what every one of the
+        five inline sites used to do, one in here and one in each engine -- means
+        an `<a>` inside one never reaches `link()`, so the reference is neither
+        resolved nor reported. It is not dropped, it is never classified, which is
+        why nothing in the register ever mentioned it. Measured over all 13
+        in-scope products, 88,691 files: **13,126** swallowed references, and this
+        is the path that recovers the 8,162 of them that are not inside a `<pre>`.
+
+        Two shapes, because GFM only has syntax for one of them:
+
+        - **The anchor is the span's whole content** -- 7,863 of the 8,162. The
+          nesting inverts to ``[`text`](url)``. The test is on the span's *text*,
+          not on its child list, because 218 of those -- all DocBook -- wrap the
+          anchor in another element, and a direct-childness check would skip every
+          one of them. CommonMark binds a code span tighter than a link, so a `]`
+          in the code does not close the link text.
+        - **The anchor shares the span** with prose, a second anchor, or a
+          trailing identifier fragment -- 299, of which 68 hold more than one
+          anchor. GFM cannot put a link inside a code span, so the span is emitted
+          as HTML, which is `_KEEP_AS_HTML`'s reason and `tables.passthrough`'s.
+          Rebuilt from the subtree rather than dumped from the source, so the
+          authoring tool's classes do not reach the output.
+
+        A `link()` of `None` -- a `javascript:` skin button, an unresolvable
+        target -- renders exactly what it rendered before. This adds links; it
+        never removes a code span.
+        """
+        anchors = tag.find_all("a", href=True)
+        if not anchors:
+            return code_transform.inline(text_of(tag))
+
+        body = code_transform.inline(text_of(tag))
+        if len(anchors) == 1:
+            anchor = anchors[0]
+            if _collapse(text_of(tag)).strip() == _collapse(text_of(anchor)).strip():
+                url = self.link(anchor)
+                return f"[{body}]({url})" if url and body else body
+
+        inner = "".join(self._code_fragment(child) for child in tag.children)
+        stripped = inner.strip()
+        return f"<code>{stripped}</code>" if stripped else ""
+
+    def _code_fragment(self, node: object) -> str:
+        """One child of a code span that is being emitted as HTML.
+
+        Text is HTML-escaped rather than Markdown-escaped -- inside a `<code>` the
+        backslashes would be literal -- and an anchor keeps its words whether or
+        not the hook gives it a URL.
+        """
+        if is_text(node):
+            return _html_escape(_collapse(str(node)))
+        if not isinstance(node, Tag):
+            return ""
+        if node.name == "a" and node.get("href"):
+            text = "".join(self._code_fragment(child) for child in node.children)
+            url = self.link(node)
+            return f'<a href="{_html_escape(url)}">{text}</a>' if url else text
+        return "".join(self._code_fragment(child) for child in node.children)
 
     def _anchor(self, tag: Tag) -> str:
         text = self.inline_children(tag).strip()
@@ -323,6 +400,11 @@ class Renderer:
             return ""
         alt = _collapse(str(tag.get("alt", ""))).strip()
         return f"![{escape(alt)}]({url})"
+
+
+def _html_escape(text: str) -> str:
+    """The three characters that would end a tag or an attribute early."""
+    return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;")
 
 
 def _collapse(text: str) -> str:

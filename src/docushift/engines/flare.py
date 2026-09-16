@@ -61,7 +61,6 @@ from docushift.engines.flare_toc import Manifest, Toc, TocNode, read_manifest, r
 from docushift.engines.roots import find_output_roots
 from docushift.models import SourceEngine
 from docushift.transforms import callouts, links, markdown
-from docushift.transforms import code as code_transform
 
 # The one selector (§5.1.6). Not a list, and deliberately.
 CONTENT_SELECTOR = "div[role='main']#mc-main-content"
@@ -273,7 +272,7 @@ class FlareRenderer(markdown.Renderer):
             if mapped == "em":
                 return markdown.wrap(self.inline_children(tag), "*")
             if mapped == "code":
-                return code_transform.inline(markdown.text_of(tag))
+                return self.code_span(tag)
         return None
 
     # -- references (invariant 13) --------------------------------------------
@@ -548,6 +547,7 @@ class FlareEngine(BaseEngine):
 
         renderer = FlareRenderer(self, context, unit, source, output, planned, landing=landing)
         body = renderer.render(container)
+        context.flattened_links += renderer.flattened_links
 
         if landing:
             return self._landing_document(context, unit, soup, source, output, title, body, anchors)

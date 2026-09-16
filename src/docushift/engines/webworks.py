@@ -90,7 +90,6 @@ from docushift.engines.webworks_toc import (
 )
 from docushift.models import SourceEngine
 from docushift.transforms import callouts, links, markdown
-from docushift.transforms import code as code_transform
 from docushift.transforms import tables as tables_transform
 
 # The runtime, read for metadata and never emitted (§5.3.9). `tpl/` is skin
@@ -314,7 +313,7 @@ class WebWorksRenderer(markdown.Renderer):
             if mapped == "em":
                 return markdown.wrap(self.inline_children(tag), "*")
             if mapped == "code":
-                return code_transform.inline(markdown.text_of(tag))
+                return self.code_span(tag)
         return None
 
     def _named_anchor(self, tag: Tag) -> str:
@@ -1203,6 +1202,7 @@ class WebWorksEngine(BaseEngine):
             key=str(output).lower(),
         )
         rendered = renderer.render(container)
+        context.flattened_links += renderer.flattened_links
         if not rendered.strip():
             unit.skip("empty")
             context.record("CONTENT_MISSING", path=reported, message="converted to nothing")

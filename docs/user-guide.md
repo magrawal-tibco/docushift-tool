@@ -688,6 +688,23 @@ The run's per-version line reports the node count and how many pages were genera
 
 Case mismatches are reported and not fixed. If a topic says `Images/Logo.png` and the file is `images/logo.png`, conversion copies the file as it found it and tells you — the link works on Windows and breaks once published to a case-sensitive host, so it needs a source fix, not a silent rewrite.
 
+**A link inside a code span survives, and two of them look unusual in the Markdown.** Help
+authors routinely make a code token the link — `<code><a href="tibems-status.htm">tibems_status</a></code>`
+— and there are **13,126** of these in the corpus. Where the link is the whole token it is
+written the only way GFM allows, with the code inside the link: ``[`tibems_status`](tibems-status.md)``.
+Where the token is only *part* code and part link — `mode=sync`, with `sync` linked — GFM has
+no syntax for it at all, so that span is written as a small piece of raw
+`<code>…<a href="…">…</a></code>` HTML, which renders correctly and which `validate` checks
+like any other link. There are about 299 of those.
+
+**A link inside a code *block* keeps its words and loses its target**, and the run report
+says how many. A fenced code block cannot contain a link in GFM, and the alternative —
+emitting the whole block as HTML — would cost every code block in the tree its
+copy-pasteability to preserve what is almost always a decorative type cross-reference in a
+C function signature. So the fence is kept and each version reports a
+`Link inside a code block…` note carrying the count, rather than losing them quietly:
+about 4,964 corpus-wide, 1,179 of them in `tibco-ems` 10.4.0 alone.
+
 ### AEM Synthesis & Publishing Layout
 ```bash
 # Organize converted AEM files into repo-shaped folders on disk

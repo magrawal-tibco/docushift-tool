@@ -242,6 +242,119 @@ def test_a_passthrough_table_gets_its_references_resolved() -> None:
     assert ">orphan<" in rendered
 
 
+# -- the code-span link swallow (Phase 8) -------------------------------------
+
+
+class Linking(markdown.Renderer):
+    """A hook that resolves everything except `gone.htm`, which it refuses."""
+
+    def link(self, tag):
+        href = str(tag.get("href") or "")
+        return None if href == "gone.htm" else f"/docs/{href}"
+
+
+def test_a_link_alone_in_a_code_span_inverts_the_nesting() -> None:
+    """The 7,470 of 7,654 that GFM can express, and it expresses them by swapping.
+
+    Rendering a code span from its text meant the `<a>` never reached `link()`, so
+    the reference was neither resolved nor reported as dangling -- never dropped,
+    never classified. Every one of the 7,470 is the span's direct child.
+    """
+    assert render("<p><code><a href='t.htm'>tibems_status</a></code></p>", Linking()) == (
+        "[`tibems_status`](/docs/t.htm)"
+    )
+
+
+def test_the_url_comes_from_the_hook_and_never_from_the_href() -> None:
+    """Invariant 13 does not stop at a code span, any more than at a pipe table."""
+    assert render("<p><code><a href='t.htm'>x</a></code></p>", Linking()) == (
+        "[`x`](/docs/t.htm)"
+    )
+    assert render("<p><code><a href='t.htm'>x</a></code></p>") == "[`x`](t.htm)"
+
+
+def test_a_refused_link_in_a_code_span_renders_exactly_what_it_used_to() -> None:
+    """A `javascript:` skin button or an unresolvable target. This adds links only."""
+    plain = render("<p><code>drop</code></p>")
+    assert render("<p><code><a href='gone.htm'>drop</a></code></p>", Linking()) == plain
+
+
+def test_a_bracket_inside_the_code_does_not_close_the_link_text() -> None:
+    """CommonMark binds a code span tighter than a link, so `]` is safe unescaped.
+
+    Asserted rather than assumed: if it were not true the emitted link text would
+    end at the bracket and the remainder would render as prose.
+    """
+    assert render("<p><code><a href='t.htm'>a]b</a></code></p>", Linking()) == (
+        "[`a]b`](/docs/t.htm)"
+    )
+
+
+def test_a_span_shared_between_code_and_a_link_is_emitted_as_html() -> None:
+    """184 of the 7,654. GFM cannot put a link inside a code span; HTML can.
+
+    `<code>mode=<a>sync</a></code>` is one code token, part of which is a link.
+    Splitting it into two adjacent spans would invent typography the author did
+    not write, so this takes `_KEEP_AS_HTML`'s branch for `_KEEP_AS_HTML`'s reason.
+    """
+    assert render("<p><code>mode=<a href='s.htm'>sync</a></code></p>", Linking()) == (
+        '<code>mode=<a href="/docs/s.htm">sync</a></code>'
+    )
+
+
+def test_a_shared_span_is_rebuilt_rather_than_dumped() -> None:
+    """The authoring tool's classes and wrappers do not reach the output."""
+    rendered = render(
+        "<p><code><span class='memberNameLink'><a href='s.htm'>go</a></span>()</code></p>",
+        Linking(),
+    )
+    assert rendered == '<code><a href="/docs/s.htm">go</a>()</code>'
+
+
+def test_a_shared_span_keeps_the_words_of_a_link_the_hook_refused() -> None:
+    assert render("<p><code>see <a href='gone.htm'>it</a></code></p>", Linking()) == (
+        "<code>see it</code>"
+    )
+
+
+def test_two_links_in_one_code_span_both_survive() -> None:
+    """Eight spans in the measured corpus, and the branch that would have lost them."""
+    rendered = render(
+        "<p><code><a href='c.htm'>commit</a> and <a href='a.htm'>autocommit</a></code></p>",
+        Linking(),
+    )
+    assert rendered == (
+        '<code><a href="/docs/c.htm">commit</a> and <a href="/docs/a.htm">autocommit</a></code>'
+    )
+
+
+def test_a_code_span_with_no_link_is_untouched() -> None:
+    assert render("<p><code>plain</code></p>", Linking()) == "`plain`"
+
+
+def test_a_link_inside_a_fence_keeps_its_words_and_is_counted() -> None:
+    """The decision, pinned rather than the accident.
+
+    4,860 of the 12,514 swallowed references are inside a `<pre>`, and GFM has no
+    syntax that puts a link inside a fence. Emitting the block as passthrough HTML
+    -- one call, exactly what `table` does -- would recover them and cost every
+    reader a copy-pasteable code block. The residue is counted instead, and the
+    driver reports it as `CODE_LINK_FLATTENED`.
+    """
+    renderer = Linking()
+    rendered = render(
+        "<pre><a href='t.htm'>tibems_status</a> tibems_GetAllowClose(void);</pre>", renderer
+    )
+    assert rendered == "```\ntibems_status tibems_GetAllowClose(void);\n```"
+    assert renderer.flattened_links == 1
+
+
+def test_a_fence_with_no_link_counts_nothing() -> None:
+    renderer = Linking()
+    render("<pre>plain</pre>", renderer)
+    assert renderer.flattened_links == 0
+
+
 # -- assets (§6.4 steps 3-7, invariant 13) ------------------------------------
 
 

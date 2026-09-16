@@ -73,7 +73,6 @@ from docushift.engines.base import (
 from docushift.engines.detector import GUID_HTML_NAME
 from docushift.models import SourceEngine
 from docushift.transforms import callouts, links, markdown
-from docushift.transforms import code as code_transform
 from docushift.utils.slug import slugify
 
 # The one selector (§5.2.4). Both skins wrap their content in it -- the Bootstrap
@@ -235,7 +234,7 @@ class DitaRenderer(markdown.Renderer):
         for name in _raw_classes(tag):
             style = CLASS_TO_STYLE.get(name)
             if style == "code":
-                return code_transform.inline(markdown.text_of(tag))
+                return self.code_span(tag)
             if style == "strong":
                 return markdown.wrap(self.inline_children(tag), "**")
             if style == "em":  # pragma: no cover - no class maps here today
@@ -681,7 +680,9 @@ class DitaEngine(BaseEngine):
         emitted = _prune_anchors(container, plan.referenced)
         title = _title(container) or topic.title
 
-        body = DitaRenderer(self, context, unit, plan, topic).render(container)
+        renderer = DitaRenderer(self, context, unit, plan, topic)
+        body = renderer.render(container)
+        context.flattened_links += renderer.flattened_links
         if title and not body.lstrip().startswith("#"):
             # The `h1` is inside `<article>` in 853 of 853 sampled topics, so this
             # fires on none of them. It stands for the unsampled remainder: a page

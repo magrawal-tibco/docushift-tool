@@ -210,6 +210,12 @@ class ConversionContext:
     # link and everybody wants the magnitude, so the driver reports one note per
     # version at the end (§7.1).
     api_links: int = 0
+    # How many links this version's conversion flattened into a code fence, which
+    # GFM will not let hold a link (Phase 8). Accumulated from each renderer after
+    # its walk and reported as one note per version, for `api_links`' reason and
+    # one more: it is the residue the code-span fix deliberately does not take, and
+    # a residue nobody counts is the silence the fix exists to end.
+    flattened_links: int = 0
 
     def api_url(self, source: Path, path: str, fragment: str = "") -> str | None:
         """The published URL for a reference into an API tree, or `None`.

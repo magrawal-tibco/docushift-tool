@@ -43,8 +43,13 @@ def test_the_register_carries_every_row_of_7_5() -> None:
     7b adds seven at once and that is not the register growing loosely: `validate`
     is the first command whose whole job is to raise findings, so its §7.4 and §9.6
     obligations had no codes because nothing had ever been written to emit them.
+
+    Phase 8 adds the 38th, `CODE_LINK_FLATTENED`, and it is the first code added to
+    name what a phase deliberately did *not* fix: the links a GFM fence cannot
+    hold. The defect it closes was invisible for six phases precisely because
+    nothing counted it.
     """
-    assert len(REGISTRY) == 37
+    assert len(REGISTRY) == 38
 
 
 def test_severity_comes_from_the_registry_and_not_from_the_call_site() -> None:

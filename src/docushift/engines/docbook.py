@@ -72,7 +72,6 @@ from docushift.engines.base import (
 from docushift.engines.roots import is_docbook_page, is_skin_path
 from docushift.models import SourceEngine
 from docushift.transforms import callouts, links, markdown
-from docushift.transforms import code as code_transform
 
 # The one container (§5.6.4). Present on 1,178 of 1,178 pages, with every piece of
 # chrome outside it, so selecting it *is* the chrome removal. There is deliberately
@@ -235,7 +234,7 @@ class DocBookRenderer(markdown.Renderer):
         for name in _raw_classes(tag):
             style = SPAN_TO_STYLE.get(name.lower())
             if style == "code":
-                return code_transform.inline(markdown.text_of(tag))
+                return self.code_span(tag)
             if style == "strong":
                 return markdown.wrap(self.inline_children(tag), "**")
         return None
@@ -533,7 +532,9 @@ class DocBookEngine(BaseEngine):
             # has two titles.
             heading.name = "h1"
 
-        body = DocBookRenderer(self, context, unit, plan, page).render(container)
+        renderer = DocBookRenderer(self, context, unit, plan, page)
+        body = renderer.render(container)
+        context.flattened_links += renderer.flattened_links
         if page.title and heading is None:
             # No heading anywhere in the container -- unmeasured in this corpus,
             # where all 11,689 pages carry at least one, but a page with prose and

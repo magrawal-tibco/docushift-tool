@@ -688,7 +688,7 @@ Count products by family provenance and list the unclassified ones. This turns "
 
 ### 8.5 The findings register — **Built** (Phase 5a)
 
-`reporting/findings.py`. Every deferred "report line" in this document has a **code**, and they are one table (`planning.md` §7.5) — twenty at 5a, twenty-eight after Phase 5b added the eight `architecture.md` §5.1 had asked for in prose, thirty after Stage 6 (`DOCUMENT_UNREADABLE` at 6c, `PUBLISH_BASE_URL_UNSET` at 6d replacing the removed `ARCHIVE_ALSO_LIVE`, `API_LINK_REWRITTEN` at 6e), and **thirty-seven after Phase 7b**, which adds seven at once because `validate` is the first command whose whole job is to raise findings and its §8.4 and §9.6 obligations had no codes until something could emit them. The module landed with Stage 5 rather than with `validate`, because the first stage that produces findings in bulk is conversion and a register invented alongside its second caller is a register shaped by its first.
+`reporting/findings.py`. Every deferred "report line" in this document has a **code**, and they are one table (`planning.md` §7.5) — twenty at 5a, twenty-eight after Phase 5b added the eight `architecture.md` §5.1 had asked for in prose, thirty after Stage 6 (`DOCUMENT_UNREADABLE` at 6c, `PUBLISH_BASE_URL_UNSET` at 6d replacing the removed `ARCHIVE_ALSO_LIVE`, `API_LINK_REWRITTEN` at 6e), **thirty-seven after Phase 7b**, which adds seven at once because `validate` is the first command whose whole job is to raise findings and its §8.4 and §9.6 obligations had no codes until something could emit them, and **thirty-eight after Phase 8**, whose `CODE_LINK_FLATTENED` is the first code added to name what a phase deliberately did *not* fix. The module landed with Stage 5 rather than with `validate`, because the first stage that produces findings in bulk is conversion and a register invented alongside its second caller is a register shaped by its first.
 
 Three rules, each of them a rule about where a decision is *not* made:
 
@@ -1054,6 +1054,7 @@ Most rows are **Built** or **Specified**. One is neither, and is marked as such 
 | `architecture.md` §5.1.7, §5.2.5, §5.3.7, §5.6.7 | Callouts, code fences, GFM-safe tables | Built | `transforms/{callouts,code,tables}.py` |
 | `architecture.md` §5.1 | Flare converter | Built | `engines/flare.py:FlareEngine`; its TOC reader in `engines/flare_toc.py` |
 | `architecture.md` §5.1–§5.6 | The HTML→GFM walk the engines share | Built | `transforms/markdown.py:Renderer`, `parse` |
+| `planning.md` Phase 8 | Links inside a code span, and the fence residue | Built | `transforms/markdown.py:Renderer.code_span`; `CODE_LINK_FLATTENED` in `converter/driver.py` |
 | `architecture.md` §5.2 | SDL DITA converter | Built | `engines/dita.py:DitaEngine`; its TOC reader is `read_toc` in the same module |
 | `architecture.md` §5.3 | WebWorks converter | Built | `engines/webworks.py:WebWorksEngine`; its four runtime readers in `engines/webworks_toc.py` |
 | `architecture.md` §5.6 | DocBook converter | Built | `engines/docbook.py:DocBookEngine`; its root rule is `is_docbook_page` in `engines/roots.py` |

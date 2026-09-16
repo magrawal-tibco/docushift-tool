@@ -174,6 +174,22 @@ REGISTRY: dict[str, Code] = _codes(
     Code("API_LINK_REWRITTEN", Severity.NOTE, Stage.CONVERT,
          "Link into an api-reference tree pointed at its published -resources URL",
          "design.md §10.7"),
+    # Phase 8's one new code. The phase taught the walk to keep the links inside a
+    # code *span*; a code *fence* is a different matter, because GFM gives it no
+    # way to hold a link at all -- the only alternative is emitting the whole block
+    # as HTML, which trades a copy-pasteable code block for a decorative type
+    # cross-reference in a C signature. Measured over all 13 in-scope products:
+    # 4,964 of 13,126 swallowed references are inside a `<pre>`.
+    #
+    # A note, because nobody acts on one of them and the residue is a magnitude.
+    # It exists at all because the defect this phase fixed was invisible for six
+    # phases -- the reference was never classified, so no dangling link was raised
+    # either -- and leaving a remainder behind with the same silence would repeat
+    # exactly the mistake the phase was called to correct.
+    Code("CODE_LINK_FLATTENED", Severity.NOTE, Stage.CONVERT,
+         "Link inside a code block kept its words and lost its target; a GFM fence "
+         "cannot hold a link",
+         "planning.md Phase 8"),
     Code("LINK_BROKEN", Severity.ERROR, Stage.VALIDATE,
          "Relative link resolving to nothing", "design.md §8.4"),
     # Emitted from Phase 7c, and a warning on arithmetic rather than on taste, the

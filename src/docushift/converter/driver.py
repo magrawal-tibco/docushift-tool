@@ -273,6 +273,7 @@ class DocumentConverter:
             units.append(unit)
         context.assets = None
         self._report_api_links(context)
+        self._report_flattened_links(context)
 
         # Stage 6a, and it runs here rather than in a later command because the
         # node list exists only while the units are in hand and the pages it
@@ -440,6 +441,25 @@ class DocumentConverter:
             message=f"{context.api_links} link(s) rewritten to the -resources tree "
                     f"across {len(context.api_urls)} API tree(s)",
             count=context.api_links,
+        )
+
+    def _report_flattened_links(self, context: ConversionContext) -> None:
+        """One note per version for the links a code fence could not hold (Phase 8).
+
+        The inline half of the code-span swallow is fixed -- a link inside
+        `<code>` now reaches `link()` and is emitted. A `<pre>` is not, because GFM
+        has no syntax that puts a link inside a fence, and emitting the block as
+        HTML instead would cost every reader a copy-pasteable code block to recover
+        a type cross-reference. That is a decision rather than an oversight, and
+        this is what makes it a number somebody can argue with.
+        """
+        if not context.flattened_links:
+            return
+        context.record(
+            "CODE_LINK_FLATTENED",
+            message=f"{context.flattened_links} link(s) inside a code block kept "
+                    f"their words and lost their target",
+            count=context.flattened_links,
         )
 
     def _report_csh(self, context: ConversionContext, resolved: csh_transform.CshMap) -> None:
