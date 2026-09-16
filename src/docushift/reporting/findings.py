@@ -176,6 +176,19 @@ REGISTRY: dict[str, Code] = _codes(
          "design.md §10.7"),
     Code("LINK_BROKEN", Severity.ERROR, Stage.VALIDATE,
          "Relative link resolving to nothing", "design.md §8.4"),
+    # Emitted from Phase 7c, and a warning on arithmetic rather than on taste, the
+    # same way 7b's six were. Measured over the whole cache: 51 of 317 adjacent
+    # version pairs (16.1%) drop at least one identifier -- 11.9% even when the
+    # comparison is restricted to same-major upgrades, and 69.6% across a major
+    # bump, where a product re-keys its help wholesale. A gate at that rate is a
+    # gate nobody leaves switched on.
+    #
+    # **One row per version, with the magnitude in `count`.** §7.1's "errors and
+    # warnings get a row each" is intact, because the condition is *this version
+    # dropped identifiers against its predecessor* and that is one condition per
+    # version. Per-identifier rows would be 784 over the cache, of which 376 come
+    # from two pairs -- burying the 30 pairs that dropped between one and five,
+    # which are the ones that are a regression rather than a redesign.
     Code("CSH_IDENTIFIER_DROPPED", Severity.WARNING, Stage.VALIDATE,
          "Present in the prior version, absent here", "planning.md §7.6"),
     # 7b's six. Every one of them was an obligation `planning.md` §7.4 or
@@ -241,13 +254,13 @@ REGISTRY: dict[str, Code] = _codes(
 # code that starts firing fails the test until it is removed from here, and a code
 # that stops firing fails it until it is added back.
 #
-# Two left. `CSH_IDENTIFIER_DROPPED` needs two converted versions of one product
-# on disk and belongs to Phase 7c's cross-version comparison (§7.6);
-# `DOC_REFERENCE_MISSING` belongs to the document router's escape check. Before 7a
-# there were nine, four of them in stages -- `catalog fetch`, `catalog eos`,
-# `extract` -- that computed their findings, printed them, and opened no run to
-# record them in. `LINK_BROKEN` left the set in 7b, by hand, which is the whole
-# point of asserting this equal rather than as a subset.
+# One left. `DOC_REFERENCE_MISSING` belongs to the document router's escape check
+# (§10.7's class 2), which is the one remaining debt that belongs to no sub-phase
+# yet. Before 7a there were nine, four of them in stages -- `catalog fetch`,
+# `catalog eos`, `extract` -- that computed their findings, printed them, and
+# opened no run to record them in. `LINK_BROKEN` left the set in 7b and
+# `CSH_IDENTIFIER_DROPPED` in 7c, both by hand, which is the whole point of
+# asserting this equal rather than as a subset.
 #
 # The count was briefly believed to be twenty, and how that happened is the reason
 # the companion test scans for a quoted literal rather than for a call: the earlier
@@ -255,7 +268,7 @@ REGISTRY: dict[str, Code] = _codes(
 # and every variable call site. The scan that replaces it proves a code is
 # *written*, not that it fires -- which is a real limit, and why this set is
 # curated by hand rather than derived.
-NOT_YET_EMITTED = frozenset({"CSH_IDENTIFIER_DROPPED", "DOC_REFERENCE_MISSING"})
+NOT_YET_EMITTED = frozenset({"DOC_REFERENCE_MISSING"})
 
 
 class UnregisteredCode(KeyError):

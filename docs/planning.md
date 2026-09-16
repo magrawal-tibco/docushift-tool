@@ -854,7 +854,7 @@ Three commands, split by the question each answers — the current `status`/`rep
 - [ ] **`docushift status` — *where is everything now?*** A standing snapshot over the catalog, needing no run: counts per stage (discovered → in scope → eligible → downloaded → extracted → converted → synced), family workspaces, locale, batch tags. Extends what `status` already prints.
 - [ ] **`docushift report` — *what happened?*** Findings from a run. `--run last|<id>`, `--stage`, `--severity`, `--code`, `--slug`, `--explain <CODE>`, `--export <file.md>`.
 - [x] **`docushift validate` — *is the output correct?*** Runs §7.4 against `--target-dir`, writes findings, gates on errors. **Built, Phase 7b.**
-- [ ] `docushift csh {list,report,validate}` — per-version identifier listing, coverage across a batch, integrity checking. `csh report --since <version>` is §7.6.
+- [x] `docushift csh {list,report,validate}` — per-version identifier listing, coverage, integrity checking. `csh report --since <version>` is §7.6. **Built, Phase 7c**, with one deliberate override: **coverage is across the published tree, not across a batch.** A batch is a `versions.csv` column, and `docushift report --run last --code CSH_UNRESOLVED` already answers the batch question from the run's own findings; the shelf had no reader at all. So the group takes `--target-dir` like `validate` and opens the catalog nowhere (`architecture.md` §7.6).
 - [ ] **Markdown export only** (decided 2026-09-10 — no JSON, no HTML). One file: run header, then errors, warnings and notes grouped by stage then code. **Consequence: tests assert against the `findings` table, never by parsing the Markdown.** With no JSON there is no machine format to assert on, and a test that greps report prose pins the wording of every message in the tool.
 
 #### 7.4 Link, asset and AEM-artifact integrity
@@ -872,7 +872,7 @@ The concrete deliverable of §7.1: every deferred "report line" in the three doc
 
 **Eight rows were added by Phase 5b** (marked ⁵ᵇ). They are the report lines `architecture.md` §5.1 asked for in prose and this table had not yet given a code; the reachability half of that test is what forced the last of them — `ALERT_LABEL_UNMAPPED` was unreachable against a closed callout vocabulary, and rather than delete the code the detection was widened to the open `div.note<Kind>` convention it was written for.
 
-**Stage 6 netted two** (⁶ᶜ, ⁶ᵈ, ⁶ᵉ) — three added and `ARCHIVE_ALSO_LIVE` removed as unreachable once `sync/archives.py` was built and the condition turned out not to arise. **Phase 7b added seven** (⁷ᵇ), which is the largest single jump and not the register growing loosely: `validate` is the first command whose entire job is to raise findings, so its §7.4 and `design.md` §9.6 obligations had no codes for the plain reason that nothing had ever been written to emit them. The table is now 37 rows, and `NOT_YET_EMITTED` is down to two — `CSH_IDENTIFIER_DROPPED` for 7c and `DOC_REFERENCE_MISSING` for §10.7's class 2.
+**Stage 6 netted two** (⁶ᶜ, ⁶ᵈ, ⁶ᵉ) — three added and `ARCHIVE_ALSO_LIVE` removed as unreachable once `sync/archives.py` was built and the condition turned out not to arise. **Phase 7b added seven** (⁷ᵇ), which is the largest single jump and not the register growing loosely: `validate` is the first command whose entire job is to raise findings, so its §7.4 and `design.md` §9.6 obligations had no codes for the plain reason that nothing had ever been written to emit them. The table is now 37 rows. **Phase 7c added none** (⁷ᶜ marks the row it *reached*, not a row it created) and took `NOT_YET_EMITTED` from two to **one**: `CSH_IDENTIFIER_DROPPED` fires, and only `DOC_REFERENCE_MISSING` is left, waiting on §10.7's class 2. A phase that closes a debt without opening one is the register working the way it was meant to.
 
 | Code | Sev | Stage | Obligation | Specified in |
 | :--- | :--- | :--- | :--- | :--- |
@@ -912,15 +912,15 @@ The concrete deliverable of §7.1: every deferred "report line" in the three doc
 | `DROPDOWN_INCONSISTENT`⁷ᵇ | warn | validate | `version.yml` disagrees with the version folders beside it | `architecture.md` §6.6 |
 | `ARTIFACT_UNPARSED`⁷ᵇ | **error** | validate | An AEM YAML artifact that would not parse; its field checks were skipped | §7.4 |
 | `SYNC_RESIDUE`⁷ᵇ | note | validate | A `.part` staging folder left by a sync that did not finish | §7.4 |
-| `CSH_IDENTIFIER_DROPPED` | warn | validate | Present in the prior version, absent here (§7.6) | this phase |
+| `CSH_IDENTIFIER_DROPPED`⁷ᶜ | warn | validate | Present in the prior version, absent here (§7.6). One row per version; `count` is how many | this phase |
 
 #### 7.6 Cross-version CSH regression
 
 A dropped identifier is a Help button that breaks on upgrade, and it is invisible from inside a single version.
 
-- [ ] **The comparison target is the next-lower *converted* version of the same product**, by `natural_version_key` (§1.3, already built) — not "the previous run", which is a scheduling accident and would compare 10.4.0 against whatever happened to be converted last Tuesday.
-- [ ] **Read the prior version's `csh.yml` from the output tree**, not the findings table. That file is what actually shipped; the database records what the tool meant to ship, and the difference between those two is exactly the class of defect this check exists to find.
-- [ ] A missing prior tree is a `note`, not a failure — the first conversion of a product has nothing to regress against.
+- [x] **The comparison target is the next-lower *converted* version of the same product**, by `natural_version_key` (§1.3, already built) — not "the previous run", which is a scheduling accident and would compare 10.4.0 against whatever happened to be converted last Tuesday. **Built, Phase 7c**, with the rule tightened by measurement: the predecessor is the immediate next-lower folder *in the same doc-class*, and if that folder has no map there is no finding. Skipping back to the last version that had one turns a vanished map into a row in every version after it.
+- [x] **Read the prior version's `csh.yml` from the output tree**, not the findings table. That file is what actually shipped; the database records what the tool meant to ship, and the difference between those two is exactly the class of defect this check exists to find. **Built** — and the tree is the *published* one rather than the converter's output, for §7.3's reason above.
+- [x] ~~A missing prior tree is a `note`, not a failure~~ **— refused on a number, Phase 7c.** The intent was *do not fail on a first conversion*, which writing no row honours. Writing one would add **150 rows** over the cache to a check that produces 51 real ones. The absence is a property of every product's oldest version, and it shows in `csh report`'s coverage table, which is a column rather than a finding.
 
 #### 7.7 Sequencing: the findings module cannot wait for Phase 7
 
@@ -1088,7 +1088,81 @@ The 404 was the symptom. `_slug` lower-cases a TOC container's label, and `navig
 
 #### Phase 7c — `csh {list,report,validate}` and the cross-version regression
 
-The per-version identifier listing, coverage across a batch, and §7.6's comparison against the next-lower converted version, which is what `CSH_IDENTIFIER_DROPPED` is for. Last because it is the only part that needs two converted versions of one product on disk, and because a dropped identifier is a regression — something you check once the thing it regresses against is being produced routinely. `design.md` gains §8.7.
+The per-version identifier listing, coverage across the shelf, and §7.6's comparison against the next-lower published version, which is what `CSH_IDENTIFIER_DROPPED` is for. Last because it is the only part that needs two converted versions of one product on disk, and because a dropped identifier is a regression — something you check once the thing it regresses against is being produced routinely. `design.md` gains §8.7.
+
+**The reframe: a dropped Help identifier is the one defect in this tool that cannot be seen from inside a version.** Every other check the tool runs is a statement about one artifact — this link resolves, this anchor is there, this `metadata.yml` has its key. §7.6's question is about two, and neither of them is wrong on its own: 6.10.0's map is correct and 6.11.0's map is correct, and the product's **Help** button still breaks on upgrade. That is why the comparison earns a command rather than a flag, and it is also why it cannot gate — the corpus says a map changes between releases far too often for "changed" to mean "broken".
+
+##### Measured 2026-09-16, against the whole `html-to-md` cache
+
+Every `Alias.xml`, `static/head.js` and `wwhdata/common/topics.js` under `cache/pub`, identifiers unioned per `(product, version)`, then each version compared with its next-lower one by `natural_version_key`. Script: `C:\tmp\csh_7c.py`.
+
+| Measured | Number | What it decides |
+| :--- | ---: | :--- |
+| Products carrying CSH / versions carrying CSH | **153 / 470** | §7.6 is not a curiosity. A third of the catalogued products have a help map. |
+| Products with ≥ 2 CSH-bearing versions | **104** | The comparison has something to compare on two thirds of them. |
+| **Comparable adjacent pairs** | **317** | The population every rate below is over. |
+| Pairs dropping ≥ 1 identifier | **51 (16.1%)** | `CSH_IDENTIFIER_DROPPED` fires on a sixth of upgrades. **It cannot gate.** |
+| …of those, same-major upgrades | **35 of 294 (11.9%)** | Even restricted to the case that is unambiguously an upgrade, one in eight. |
+| …of those, cross-major upgrades | **16 of 23 (69.6%)** | A major bump re-keys the map. That is a redesign, not a regression, and the finding says which kind it was by naming both versions. |
+| Identifiers dropped in total | **784** (492 same-major) | The row count a per-identifier finding would write. |
+| Median drop per affected pair | **4** (same-major: 2) | The interesting case is small. |
+| Pairs losing > 90% of the prior map | **15 of 51** (same-major: 5) | Two pairs lose 188 of 188. **A per-identifier row buries the median case under the wholesale one** — 784 rows, of which 376 are two pairs. |
+| Surviving identifiers that changed target | **1,084 of 8,425 (12.9%)**, in 81 of 317 pairs | **Retargeting is not a finding.** Pages get renamed between releases; the Help button still works. It is shown by `csh report --since` and never recorded. |
+| Products whose oldest version has no predecessor | **150** | §7.6's "a missing prior tree is a note" would write 150 rows to say nothing happened — 32% of everything the check produces. Not written; see the refusals. |
+
+**And the sample tree already contains one.** `tibco-businessconnect-edi-protocol-powered-by-instream` publishes 6-10-0 and 6-11-0 side by side in `C:/tmp/7b_target`, and **6.11.0's map has 28 identifiers where 6.10.0's had 123 — 95 dropped, 0 added**. The same 95 show in the cache's source alias files, so this is upstream authoring rather than a conversion defect, and it is the second time in two sub-phases that the first real run has found a genuine break in the published corpus. It means acceptance has a live finding to assert on rather than a fixture.
+
+##### The design
+
+**The `csh` group reads the published tree, and it takes `--target-dir` exactly as `validate` does.** This is the phase's load-bearing decision and it overrides §7.3's "coverage across a batch". A batch is a `versions.csv` column, so a batch-scoped `csh report` would have to read the catalog — and `docushift report --run last --code CSH_UNRESOLVED` already answers "did CSH come through for the batch I just converted", from the run's own findings. Building a second answer to that question is exactly the convergence §7.1's boundary exists to prevent. What has *no* reader is the shelf: which identifiers are published, where they point, and what changed since the version before. Three further consequences make it the right tree rather than merely the consistent one — the published tree is cumulative, so the predecessor is always there even when it was converted months and several runs ago; it is the upgrade path a customer actually travels; and it needs no `versions.csv` agreement, so a shelf another machine synced can be asked the question.
+
+**One checker, three surfaces.** `validation/csh.py` gains `diff(prior, current)` and `check_regression(...)`, and nothing else computes a CSH difference. `validate` calls it in the product-folder pass it already runs `_dropdowns` in; `csh validate` calls the same functions scoped to CSH; `csh report --since` calls the same `diff` and **prints** instead of recording. The 7b ledger row is the reason the rule is written down rather than assumed: two implementations of one decoding rule is how a linter reports the emitter's own correct output as broken.
+
+- [x] **`docushift csh list --target-dir T`** — every identifier in the selection, with its target and whether that target is on disk. Scoped by `--product` / `--version` / `--doc-class`, the same three selectors `validate` takes. **`--identifier <name>` is the query worth building the command for**: it looks one identifier up across *every* published version and prints the versions that have it and where each points, which is the question a support engineer arrives with — *the Help button for `Gateway.BusinessAgreements` is broken in 6.11.0, where did it go?* Without it the command is `cat csh.yml` with extra steps.
+- [x] **`docushift csh report --target-dir T`** — coverage across the shelf: one row per product, with versions published, versions carrying a map, identifiers, distinct target pages, and identifiers dropped against the prior version. `--since <version>` narrows to one product and prints the §7.6 diff **in full** — dropped, added and retargeted, with every identifier named — which is where the 95 that the finding can only count are actually listed.
+- [x] **`docushift csh validate --target-dir T`** — the §9.6 rules and the §7.6 regression, findings recorded, gating on `error` by §7.4's one rule. It is **not** `validate --product X`: it skips the link, anchor, asset and artifact passes, so it reads 4 `csh.yml` files and the pages they name instead of 9,463 files. That is the whole of its independent value and the phase does not claim more for it.
+- [x] **`validate` gains §7.6** in the same commit. The gate's report has to be complete, and a warning it cannot fail on still belongs in it.
+
+**The comparison target is the immediate next-lower version folder in the same doc-class, and nothing cleverer.** Sorted by `natural_version_key` over the **dashed published segment**, which orders correctly among segments because the key splits on digit runs and compares them numerically — `10-4-0` above `9-3-0`, measured, and the dashed form's failure to round-trip back to a dotted version (§4.1) does not touch ordering. **If the predecessor has no `csh.yml` there is nothing to compare and no finding is written.** The alternative — skip back to the last version that *had* a map — sounds more thorough and is worse: a product whose map vanishes in 6.11.0 would then report the same 123 identifiers again in 6.12.0, 6.13.0 and every version after, so one defect becomes an unbounded row count and the version that actually lost the map stops being identifiable. Under the rule as written, a vanished map fires exactly once, on the version that vanished it, with `count` equal to the predecessor's whole total.
+
+**One warning row per version, with the magnitude in `count` and a sample in the message.** §7.1 says errors and warnings get a row each and only notes fold — and that rule is intact here, because the condition being reported is *this version dropped identifiers relative to its predecessor*, which is one condition per version and not one per identifier. The measurement is what forbids the other reading: 784 per-identifier rows, of which 376 come from two pairs, would bury the 30 pairs that dropped between one and five — and those are the ones that are actually a regression rather than a re-key. The message names the predecessor and the first few identifiers and says how many more there are; `csh report --since` is where the full list lives. The split is deliberate and it is the same one 7a made for notes: **the finding carries the magnitude, the command carries the detail.**
+
+**No new codes, and that is worth stating after a phase that added seven.** `CSH_IDENTIFIER_DROPPED` has been registered and unemitted since 5a and this is the phase that reaches it. The register stays at **37** and `NOT_YET_EMITTED` goes **2 → 1**, leaving only `DOC_REFERENCE_MISSING`, which belongs to §10.7's class 2 and to no sub-phase yet.
+
+##### What is deliberately not built, each with its number
+
+- [x] **No note for "no prior version".** §7.6's third bullet asks for one; its intent was *do not fail on a first conversion*, and not writing a row honours that. Writing one would add **150 rows** to a check that produces 51 real ones — the absence is a property of every product's oldest version, and `csh report`'s coverage table shows it in the column where it belongs.
+- [x] **Retargeting is not reported.** **1,084 of 8,425 surviving identifiers (12.9%) change target** between adjacent versions. That is authoring, not breakage: the identifier still opens a page. `csh report --since` prints it.
+- [x] **No comparison against the *source* alias files.** The check is between two published maps. Comparing a published map against the ZIP it came from would be a second derivation of resolution, and §9.3 already rejected that for the same reason.
+- [x] **No `--fix`, no rewriting of `csh.yml`**, for 7b's reason: a linter that edits the thing it is measuring cannot be trusted about either.
+- [x] **`csh` does not read the catalog**, so it cannot say whether a version *should* have had a map. `status` and `report` own that question.
+
+##### Acceptance
+
+- [x] `docushift csh list`, `csh report` and `csh validate` run against `C:/tmp/7b_target`, and `csh list --identifier Gateway.BusinessAgreements` prints 6-10-0 with its target and nothing for 6-11-0.
+- [x] **`csh validate` finds exactly one `CSH_IDENTIFIER_DROPPED`** on the sample tree — `tibco-businessconnect-edi-protocol-powered-by-instream`, 6-11-0, `count` 95, the message naming 6-10-0 — and **exits 0**, because it is a warning and the tree has no CSH error.
+- [x] **A zero-drop control**, built — and the attempt to build it where the box said found a platform defect instead. Re-syncing `tibco-businessconnect-container-edition-edi-protocol-powered-by-instream` into `C:/tmp/7b_target` fails with `[WinError 3]`: the destination path is **268 characters**, past Windows' 260-character `MAX_PATH`, which is also why 7b left two `.part` folders there. Synced instead to the short root `C:/t7c` (1,005 files, 56.1 MB), where the product publishes 8 folders, 2 of them mapped, carrying the same 32 identifiers across 1 comparable pair: **0 dropped, `csh validate` reports "Findings: none" and exits 0.** A check that only ever fires has not been shown to be selective. The `MAX_PATH` failure is recorded as an Open below rather than fixed here.
+- [x] `validate` over the whole tree still reports **two errors and no more**, now with the one new warning beside its 3,006 `ANCHOR_MISSING`.
+- [x] `report --run last --code CSH_IDENTIFIER_DROPPED --export` reads the row back with its count.
+- [x] **`NOT_YET_EMITTED` is `frozenset({"DOC_REFERENCE_MISSING"})`**, asserted equal, and the register is still 37.
+- [x] Tests for the diff itself are fixture directories, as 7b's are, and none of them constructs a `CatalogManager`.
+- [x] **Docs in the same commit** — `design.md` gains **§8.7 (cross-version CSH)** with its §12 index row and §9.6's fourth bullet flips from owed to built; `architecture.md` §5.4.6's last bullet and a **§7.6** for what the `csh` group reads; `user-guide.md` a CSH section; `planning.md` §7.3's three boxes and §7.6's; `CONTEXT.md` a ledger row and the status line.
+
+##### What the acceptance run actually said
+
+Against `C:/tmp/7b_target` — 101 version folders, 9,463 files, 39,328 references:
+
+| | |
+| :--- | :--- |
+| `CSH_IDENTIFIER_DROPPED` rows | **1** — `tibco-businessconnect-edi-protocol-powered-by-instream` 6-11-0, `count` 95, message `95 of 6-10-0's 123: Gateway.BusinessAgreements, … and 90 more` |
+| `csh validate` exit code | **0** — 34 warnings, no error |
+| `validate` exit code and errors | unchanged: 2 errors, 3,007 warnings, 1 note |
+| Zero-drop control (`C:/t7c`) | 8 published, 2 mapped, 32 identifiers, 24 pages, 1 compared, **0 dropped**; "Findings: none" |
+| Register | 37 codes, `NOT_YET_EMITTED == {"DOC_REFERENCE_MISSING"}` |
+
+`csh report --since 6.10.0` showed the shape of the failure the finding can only count: of the 123 identifiers 6.10.0 published, 95 are gone and the surviving 28 **all retargeted**, from `html/TIB_bcedi_edifact/edft.5.*.md` to `doc/html/edifact-config/*.md`. The product reorganised its help output between releases and took most of its identifiers with it — which is exactly the case the `wholesale` sentence exists to let a reader recognise without opening either file.
+
+**Open, found here and not fixed: a `sync` destination path over 260 characters fails with `[WinError 3]` and leaves a `.part` folder behind.** Windows `MAX_PATH`. It is not a 7c defect — `sync` is Stage 7 and the two residue folders in `7b_target` predate this phase — but it is the first time the cause was identified rather than observed, and it will recur for any product whose slug, doc-class and version segment are long enough. The fixes are a shorter target root (what this phase did), the `\\?\` extended-length prefix on the destination, or enabling long paths in the registry; choosing between them is Stage 7's call, not this one's.
 
 ---
 

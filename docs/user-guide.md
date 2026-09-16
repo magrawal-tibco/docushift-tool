@@ -904,6 +904,11 @@ Six things to expect:
   reported once, and the rest of that file's checks are skipped.
 - **It writes nothing, and there is no `--fix`.** The published tree is regenerated
   by `sync`, so a repair applied here would be reverted by the next run.
+- **It compares each version's help map against the version below it.** An
+  identifier that was published in 6.10.0 and is gone in 6.11.0 is a Help button
+  that breaks on upgrade, and it is the one defect here that cannot be seen by
+  looking at either version alone. One warning per version; `docushift csh report
+  --since` lists the identifiers. §7 has the detail.
 
 Everything it records goes into the findings register like any other run, so
 `docushift report --run last` reads it back and `--export` writes it out.
@@ -1037,19 +1042,51 @@ A version whose package contains no help map — around a quarter of them do not
 
 ### Inspecting and checking it
 
-```bash
-# What identifiers does this version publish?
-docushift csh list --product businessworks --version 6.12.0
+**`docushift csh` reads a published tree, so every subcommand takes `--target-dir`** — the same directory `sync` wrote and `validate` checks. It never opens the catalog, which means you can point it at a tree another machine synced. The three selectors are `validate`'s: `--product`, `--version` (dotted or dashed) and `--doc-class`.
 
-# Coverage across a run: sources found, identifiers resolved, anything unresolved
-docushift csh report --batch poc-1
+```bash
+# What identifiers does this version publish, and are their targets on disk?
+docushift csh list --target-dir /publish --product businessworks --version 6.12.0
+
+# Coverage across the shelf: versions published, versions mapped, identifiers,
+# target pages, comparable version pairs, and identifiers dropped
+docushift csh report --target-dir /publish
 
 # Integrity: every mapped topic exists, frontmatter and csh.yml agree,
-# and nothing the previous version published has gone missing
-docushift csh validate --product businessworks --version 6.12.0
+# and nothing the version below published has gone missing
+docushift csh validate --target-dir /publish --product businessworks
 ```
 
+**The query worth remembering is `--identifier`.** A ticket says the Help button for `Gateway.BusinessAgreements` broke in 6.11.0; this says where it went, across every published version at once:
+
+```bash
+docushift csh list --target-dir /publish --identifier Gateway.BusinessAgreements
+```
+
+It prints the versions that carry it with its target and whether that file is there, then names every version that *has* a help map and does not carry it — which is the answer to "when did we lose it". The match is exact: an identifier differing only in case is reported as a near-miss rather than treated as a hit, because `GatewayInstances` and `gatewayInstances` are two different live help targets in this corpus.
+
+**`docushift validate` already includes all of this**, so `csh validate` is for when you want the help checks without the 84-second link walk. Both run the same code and cannot disagree.
+
+**To see what changed between two versions, name the older one:**
+
+```bash
+docushift csh report --target-dir /publish --product businessworks --since 6.11.0
+```
+
+That prints the diff identifier by identifier — dropped, added, and **retargeted**, meaning the identifier survived but now opens a different page. Retargeting is normal (it is pages being renamed between releases, 12.9% of surviving identifiers) and is never reported as a problem; it is shown here because when a Help button opens the wrong topic, this is where you see it.
+
 `docushift extract` already prints the tally (`CSH: 3 source(s), 561 identifier(s).`), so a version with no help map is visible before you spend a conversion on it.
+
+### A dropped identifier is a warning, and why
+
+`validate` and `csh validate` both raise **`CSH_IDENTIFIER_DROPPED`** when a version's help map is missing an identifier the version below it published. It is one warning per version, carrying the number dropped and naming the first five; `csh report --since` lists the rest.
+
+It is a warning rather than an error because **16% of upgrades do it** — 51 of 317 comparable version pairs across the whole corpus, and 70% of cross-major upgrades. A gate that fails on one upgrade in six is a gate people learn to skip. Two things follow that are worth knowing before you read the output:
+
+- **A version's predecessor is the next-lower version folder of the same doc-class, and only that one.** If that folder has no help map, nothing is compared — so a product that loses its map entirely reports once, in the version that lost it, rather than in every version after it.
+- **When more than 90% of the map is gone, the message says the map was re-keyed.** That is usually a product redesigning its help across a major version rather than a conversion losing it. Same warning, same severity — you still want to look, but you are looking at something different.
+
+A product's oldest published version is never compared against anything, and that is not a gap being reported: it has no predecessor on the shelf.
 
 ### Four things worth knowing
 

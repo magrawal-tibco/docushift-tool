@@ -714,13 +714,29 @@ The scan is the weaker of the two and is kept honest about it: **it proves a cod
 
 **The read layer is `reporting/report.py` and `reporting/status.py`**, and the boundary between them is enforced rather than trusted: a test reads both module bodies and asserts that `status.py` never names `findings` and `report.py` never names `catalog`. It is a crude test and it is the only kind available for a rule about what a module is allowed to know. The five queries `report` needs (`get_run`, `recent_runs`, `query_findings`, `findings_tally`, `prune_findings`) live in `state.py` with every other query, because `state.db`'s schema has one owner and a second module writing SQL against `findings` is how a column rename becomes a silent empty table.
 
-**What is outstanding is a number, not a paragraph.** After Phase 7a three codes remain unemitted — `LINK_BROKEN` and `CSH_IDENTIFIER_DROPPED`, which belong to `validate` (7b and 7c), and `DOC_REFERENCE_MISSING`, which waits on §10.7's class 2. Before it, nine were, four of them in a stage that opened no run at all.
+**What is outstanding is a number, not a paragraph.** After Phase 7c **one** code remains unemitted — `DOC_REFERENCE_MISSING`, which waits on §10.7's class 2. It was three after 7a and nine before that, four of them in a stage that opened no run at all; 7b closed `LINK_BROKEN` and 7c closed `CSH_IDENTIFIER_DROPPED`.
+
+### 8.7 Cross-version CSH — **Built** (Phase 7c)
+
+§9.6's fourth rule, and the one check in this tool that **cannot be made from inside a version**. 6.10.0's help map is correct and 6.11.0's help map is correct, and the product's Help button still breaks on upgrade, because the identifier the application passes no longer exists. Nothing the single-version checks in §8.4 look at can see it.
+
+**It reads the published tree, not a batch.** The original plan said "coverage across a batch"; a batch is a `versions.csv` column, and `docushift report --run last --code CSH_UNRESOLVED` already answers "did CSH come through for what I just converted" out of the run's own findings. Building a second answer to that is exactly the convergence `architecture.md` §7.1 exists to prevent. What had no reader was the shelf — and the shelf is the right place for this question for three reasons: it is cumulative where a batch is a moment, it is the upgrade path a customer actually travels, and it needs no `versions.csv` agreement, so a tree another machine synced can be checked.
+
+**How big the problem is, measured over the whole cache** (`Alias.xml`, SuiteHelp `head.js` and WebWorks `topics.js`, 2026-09-16): 153 products and 470 versions carry CSH, 104 products have at least two, giving **317 comparable version pairs. 51 of them — 16.1% — drop at least one identifier**, 784 identifiers in total. Same-major upgrades drop in 35 of 294 (11.9%); cross-major in 16 of 23 (69.6%). The median dropping pair loses 4 identifiers, 2 for same-major.
+
+**The predecessor is the immediate next-lower folder in the same doc-class, and nothing cleverer.** Ordering is `natural_version_key` over the dashed published segment, which sorts correctly among segments because the key splits on digit runs and compares them numerically. If that folder has no map, there is no finding. Skipping back to the last version that *had* one sounds more thorough and is worse: a product whose map vanishes in 6.11.0 would report the same 123 identifiers again in every version after it, so one defect becomes an unbounded row count and the version that lost the map stops being identifiable.
+
+**One warning per version, with the magnitude in `count` and five identifiers named in the message.** §8.5's rule that errors and warnings get a row each is intact — the condition is *this version dropped identifiers relative to its predecessor*, which is one condition per version. The measurement forbids the other reading: 784 per-identifier rows, of which 376 come from two pairs, would bury the 30 pairs that dropped between one and five, and those are the regressions rather than the re-keys. Where more than 90% of the map went — 15 of the 51, two of them losing 188 of 188 — the message says the map was re-keyed. That is a sentence, not a second code, because the defect is the same defect.
+
+**Three things are deliberately not reported, each refused on a number.** A version with no predecessor gets nothing: §9.6 asked for a note there and its intent was *do not fail a first conversion*, which writing no row honours, while writing one would add 150 rows to a check that produces 51. **Retargeting is not a finding**: 1,084 of 8,425 surviving identifiers (12.9%) open a different page than they did in the version below, across 81 of the 317 pairs — that is pages being renamed between releases, and the Help button still works. And there is no `--fix`, for §8.4's reason: `sync` regenerates the tree.
+
+**The reader is `docushift csh {list,report,validate}`** (`architecture.md` §7.6), which takes `--target-dir` and reads the catalog nowhere. `list --identifier` is the query the group exists for — a support engineer arrives with "the Help button for `Gateway.BusinessAgreements` is broken in 6.11.0" and this answers where it went across the whole shelf in one call, byte-exact, naming a case-only near-miss rather than matching it (§9.1). `report --since` prints the full diff — dropped, added and retargeted, every identifier named — which is the half the finding cannot carry. `csh validate` gates by §8.4's one rule and runs exactly the functions `validate` runs, because `validation/csh.py` holds the only implementation of the comparison in the tool; two implementations would be two answers to "did this Help button survive".
 
 ---
 
 ## 9. Context-Sensitive Help
 
-**Built**, except §9.6's verification. The readers landed with Stage 4 (§9.2, Phase 4b-2); the schema, the resolver, the writer and the frontmatter landed in Phase 5a as `transforms/csh.py`. This is the most intricate algorithm in the tool, and the one grounded most directly in measurement — now re-measured over the whole cache: **863 `Alias.xml` files, 387 with content, 11,054 entries, 2,396 distinct names**, superseding the 2026-09-04 subset of 272 files / 7,220 entries. **Scope: all three HTML engines — Flare, DITA and WebWorks** (§9.2). The full evidence table and the reasoning are in `architecture.md` §5.4; what follows is the procedure.
+**Built, §9.6 included** — its first three rules in Phase 7b and its fourth in 7c (§8.7). The readers landed with Stage 4 (§9.2, Phase 4b-2); the schema, the resolver, the writer and the frontmatter landed in Phase 5a as `transforms/csh.py`. This is the most intricate algorithm in the tool, and the one grounded most directly in measurement — now re-measured over the whole cache: **863 `Alias.xml` files, 387 with content, 11,054 entries, 2,396 distinct names**, superseding the 2026-09-04 subset of 272 files / 7,220 entries. **Scope: all three HTML engines — Flare, DITA and WebWorks** (§9.2). The full evidence table and the reasoning are in `architecture.md` §5.4; what follows is the procedure.
 
 ### 9.1 The single identifier rule
 
@@ -827,7 +843,7 @@ Identifiers are known before conversion writes the file — parsing a 24 KB alia
 - Every value in `csh.yml` names a file that exists, and where it carries a `#anchor`, that anchor is present in the file.
 - Every identifier in a topic's frontmatter appears in `csh.yml`, and every identifier in `csh.yml` appears in its topic's frontmatter.
 - `unresolved` is empty, or each entry in it is accounted for in the report.
-- **Cross-version regression:** identifiers present in the previously converted version and absent from this one are reported. A dropped identifier is an upgrade that breaks the product's Help button, and it cannot be seen from inside a single version.
+- **Cross-version regression — built in Phase 7c (§8.7).** Identifiers present in the previously converted version and absent from this one are reported, one warning per version with the magnitude in its count. A dropped identifier is an upgrade that breaks the product's Help button, and it cannot be seen from inside a single version. **16.1% of the corpus's 317 comparable version pairs drop at least one.**
 
 ---
 
@@ -1047,7 +1063,8 @@ Most rows are **Built** or **Specified**. One is neither, and is marked as such 
 | 8.6 | Reading the register back — `report`, `--explain`, the two reachability tests | Built | `reporting/report.py`, `reporting/status.py`; `architecture.md` §7 |
 | 9.3 | CSH resolution | Built | `transforms/csh.py:resolve`, `order_doc_sets` |
 | 9.4–9.5 | `csh.yml` and frontmatter | Built | `transforms/csh.py:render`, `write`, `frontmatter_value` |
-| 9.6 | CSH verification | Specified | Phase 7 |
+| 9.6 | CSH verification, single-version (three rules) | Built | `validation/csh.py:check`, `check_map` |
+| 8.7, 9.6 | CSH verification, cross-version — the diff, the predecessor rule, coverage | Built | `validation/csh.py:diff`, `pairs`, `check_regression`, `coverage`; `docushift csh` in `cli.py`; `architecture.md` §7.6 |
 | 9.2 | CSH readers (**Flare, DITA, WebWorks**) | Built | `engines/csh.py`; the schema, resolver and writer stay Phase 5 |
 | 10 | AEM synthesis and sync | Specified | Phases 6b–7 |
 | 10.3 | Distributor spine, the publishing segment and `version.yml` | Built | Phase 6b; `architecture.md` §6.6 |

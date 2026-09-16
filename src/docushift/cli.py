@@ -1551,6 +1551,11 @@ def _report_validate(stats, findings: FindingsRun, checked_external: bool) -> No
     console.print(table)
     if stats.residue:
         console.print(f"[dim]{stats.residue} .part folder(s) skipped as sync residue.[/dim]")
+    if stats.dropped:
+        console.print(
+            f"[dim]{stats.dropped} help identifier(s) dropped against a prior version; "
+            f"`docushift csh report --since` lists them.[/dim]"
+        )
     if checked_external:
         console.print(f"[dim]{stats.external_checked} distinct external URL(s) requested.[/dim]")
 
@@ -1579,6 +1584,337 @@ def _report_validate(stats, findings: FindingsRun, checked_external: bool) -> No
 
     summary = findings.summary()
     console.print(f"[dim]Findings: {summary or 'none'}.[/dim]")
+
+
+# ---------------------------------------------------------------------------
+# Context-sensitive help, as the shelf has it (Phase 7c)
+# ---------------------------------------------------------------------------
+
+
+@main.group("csh")
+def csh_group() -> None:
+    """Context-sensitive help on a published tree: what is mapped, and what moved.
+
+    Takes `--target-dir` like `validate`, and reads the catalog nowhere. That is a
+    deliberate override of the original plan's "coverage across a batch": a batch
+    is a `versions.csv` column, and `docushift report --run last --code
+    CSH_UNRESOLVED` already answers "did CSH come through for the batch I just
+    converted" from the run's own findings. What had no reader is the shelf --
+    which identifiers are published, where they point, and what changed since the
+    version before.
+    """
+
+
+def _published(target_dir: Path, product, version, doc_class, command: str):
+    """The walk every `csh` subcommand starts with. Exits 1 on an empty selection.
+
+    **The `-resources` sibling is skipped.** `transforms/csh.py` writes `csh.yml`
+    into the version's Markdown output root, which `sync` places in the docs tree
+    and nowhere else; the resources tree holds copied API-reference trees and the
+    archive index, neither of which has a help map or ever will. Walking it would
+    double the row count of `csh report` to print zeroes, and would build a
+    `FolderIndex` over a Javadoc frame set to look for frontmatter that is not
+    there.
+    """
+    from docushift.validation.tree import walk
+
+    selection = [
+        entry for entry in walk(target_dir, product, version, doc_class)
+        if not entry.is_resources
+    ]
+    if not any(entry.versions for entry in selection):
+        console.print(
+            f"[yellow]No published version folders match this selection in "
+            f"{target_dir}'s docs tree(s).[/yellow] `{command}` reads the docs tree "
+            f"only -- a help map is never published into `-resources`. "
+            f"`docushift status --target-dir {target_dir}` shows what is on the shelf."
+        )
+        raise click.exceptions.Exit(1)
+    return selection
+
+
+def _target_options(func):
+    """The three selectors `validate` takes, shared by all three subcommands."""
+    func = click.option("--doc-class", "doc_class", default=None,
+                        help="Restrict to one doc-class folder.")(func)
+    func = click.option("--version", default=None,
+                        help="Restrict to one version (10.4.0 or 10-4-0).")(func)
+    func = click.option("--product", "product", default=None,
+                        help="Restrict to one published product slug.")(func)
+    func = click.option("--target-dir", type=DIR_PATH, required=True,
+                        help="Synced workspace to read.")(func)
+    return func
+
+
+@csh_group.command("list")
+@_target_options
+@click.option(
+    "--identifier",
+    default=None,
+    help="Look one identifier up across every published version in the selection.",
+)
+def csh_list(target_dir: Path, product, version, doc_class, identifier) -> None:
+    """Every help identifier in the selection, with its target and whether it is there.
+
+    `--identifier` is the query worth building the command for. A support engineer
+    arrives with "the Help button for `Gateway.BusinessAgreements` is broken in
+    6.11.0" and wants to know where it went; this answers that across the whole
+    shelf in one call. Without it the command is `cat csh.yml` with extra steps.
+
+    The lookup is byte-exact, because `GatewayInstances` and `gatewayInstances` are
+    two different live help targets in the corpus (`design.md` §9.1). A case-only
+    near-miss is reported as such rather than matched.
+    """
+    from docushift.validation import csh as check
+
+    selection = _published(target_dir, product, version, doc_class, "csh list")
+    maps = [
+        check.load(folder)
+        for entry in selection for folder in entry.versions if folder.segment
+    ]
+    if identifier is not None:
+        _csh_lookup(maps, identifier)
+        return
+
+    total = sum(len(found.entries) for found in maps)
+    carrying = [found for found in maps if found.entries]
+    if total > _CSH_LIST_LIMIT:
+        console.print(
+            f"[yellow]{total} identifiers across {len(carrying)} version folder(s) "
+            f"-- too many to read.[/yellow] Narrow with --product/--version, or use "
+            f"--identifier to look one up."
+        )
+        for found in carrying:
+            console.print(
+                f"  {found.folder.relative.as_posix()}  "
+                f"[bold]{len(found.entries)}[/bold] identifier(s)"
+            )
+        return
+
+    if not carrying:
+        console.print(
+            f"[dim]No `csh.yml` in {len(maps)} version folder(s). "
+            f"A version whose package shipped no help map gets no file (§9.4).[/dim]"
+        )
+        return
+    for found in carrying:
+        table = Table(title=found.folder.relative.as_posix())
+        table.add_column("Identifier")
+        table.add_column("Target")
+        table.add_column("On disk", justify="center")
+        for key in sorted(found.entries):
+            target = found.entries[key]
+            there = (found.folder.path / target.partition("#")[0]).is_file()
+            table.add_row(key, target, "[green]yes[/green]" if there else "[red]no[/red]")
+        console.print(table)
+
+
+# Above this, a listing stops being something a person reads and the command says
+# so instead of filling the scrollback. The corpus's largest single map is 223
+# identifiers, so a whole product's versions fit and a whole tree does not.
+_CSH_LIST_LIMIT = 400
+
+
+def _csh_lookup(maps, identifier: str) -> None:
+    """`--identifier`: every version that carries it, and every one that nearly does."""
+    hits = [(found, found.entries[identifier]) for found in maps if identifier in found.entries]
+    folded = identifier.lower()
+    near = [
+        (found, key) for found in maps for key in found.entries
+        if key != identifier and key.lower() == folded
+    ]
+    if not hits and not near:
+        console.print(
+            f"[yellow]{identifier} is in no published `csh.yml` in this selection.[/yellow]"
+        )
+        return
+    if hits:
+        table = Table(title=identifier)
+        table.add_column("Product")
+        table.add_column("Version")
+        table.add_column("Target")
+        table.add_column("On disk", justify="center")
+        for found, target in hits:
+            there = (found.folder.path / target.partition("#")[0]).is_file()
+            table.add_row(
+                found.folder.slug, found.folder.segment or "-", target,
+                "[green]yes[/green]" if there else "[red]no[/red]",
+            )
+        console.print(table)
+    # Named rather than matched: two identifiers differing only in case are two
+    # help targets, and silently folding them is how one Help button answers for
+    # the other.
+    for found, key in near:
+        console.print(
+            f"[dim]{found.folder.slug}@{found.folder.segment or '-'} carries "
+            f"[bold]{key}[/bold], which differs only in case.[/dim]"
+        )
+    versions = {found.folder.segment for found, _ in hits}
+    missing = [
+        found.folder for found in maps
+        if found.entries and found.folder.segment not in versions
+    ]
+    for folder in missing:
+        console.print(
+            f"[yellow]![/yellow] {folder.slug}@{folder.segment} has a help map "
+            f"and does not carry {identifier}."
+        )
+
+
+@csh_group.command("report")
+@_target_options
+@click.option(
+    "--since",
+    default=None,
+    help="Print the full diff of one product's map against this version, identifier by identifier.",
+)
+def csh_report(target_dir: Path, product, version, doc_class, since) -> None:
+    """Coverage across the shelf, and what changed between versions.
+
+    One row per product: how many versions are published, how many carry a map,
+    how many distinct identifiers and target pages there are, and how many
+    identifiers were lost against the version below.
+
+    `--since` prints the §7.6 comparison **in full** -- dropped, added and
+    retargeted, every identifier named. That is the half the finding cannot carry:
+    `CSH_IDENTIFIER_DROPPED` is one row per version with the magnitude in its
+    count, because 784 per-identifier rows over the corpus would be 376 from two
+    products re-keying their help. The register carries the magnitude; this
+    carries the detail.
+    """
+    from docushift.validation import csh as check
+
+    selection = _published(target_dir, product, version, doc_class, "csh report")
+    coverages = [check.coverage(entry) for entry in selection if entry.versions]
+
+    if since is not None:
+        _csh_since(coverages, since)
+        return
+
+    table = Table(title=f"CSH coverage in {target_dir}")
+    for column, justify in (
+        ("Product", "left"), ("Published", "right"), ("Mapped", "right"),
+        ("Identifiers", "right"), ("Pages", "right"), ("Compared", "right"),
+        ("Dropped", "right"),
+    ):
+        table.add_column(column, justify=justify)
+    for entry in coverages:
+        dropped = f"[yellow]{entry.dropped}[/yellow]" if entry.dropped else "0"
+        table.add_row(
+            entry.slug, str(entry.published), str(entry.mapped), str(entry.identifiers),
+            str(entry.pages), str(entry.comparable), dropped,
+        )
+    console.print(table)
+    mapped = sum(entry.mapped for entry in coverages)
+    published = sum(entry.published for entry in coverages)
+    console.print(
+        f"[dim]{mapped} of {published} published version folder(s) carry a help map; "
+        f"{sum(e.comparable for e in coverages)} comparable pair(s), "
+        f"{sum(e.dropped for e in coverages)} identifier(s) dropped.[/dim]"
+    )
+
+
+def _csh_since(coverages, since: str) -> None:
+    """The full diff against one named version. Narrow on purpose."""
+    from docushift.utils.slug import version_segment
+
+    wanted = version_segment(since) or since
+    shown = 0
+    for entry in coverages:
+        for change in entry.diffs:
+            if change.prior.folder.segment != wanted:
+                continue
+            shown += 1
+            before, after = change.prior.folder, change.current.folder
+            console.print(
+                f"[bold]{entry.slug}[/bold] {before.segment} -> {after.segment}"
+                f"  [dim]({len(change.prior.entries)} -> {len(change.current.entries)} "
+                f"identifiers)[/dim]"
+            )
+            for label, colour, keys in (
+                ("dropped", "red", change.dropped),
+                ("added", "green", change.added),
+                ("retargeted", "yellow", change.retargeted),
+            ):
+                if not keys:
+                    continue
+                console.print(f"  [{colour}]{len(keys)} {label}[/{colour}]")
+                for key in keys:
+                    if label == "retargeted":
+                        console.print(
+                            f"    {key}: {change.prior.entries[key]} -> "
+                            f"{change.current.entries[key]}"
+                        )
+                    elif label == "dropped":
+                        console.print(f"    {key} [dim](was {change.prior.entries[key]})[/dim]")
+                    else:
+                        console.print(f"    {key} -> {change.current.entries[key]}")
+            if change.wholesale:
+                console.print(
+                    "  [dim]More than 90% of the map went. That is usually a product "
+                    "re-keying its help rather than losing it -- 15 of the corpus's 51 "
+                    "dropping pairs look like this.[/dim]"
+                )
+    if not shown:
+        console.print(
+            f"[yellow]No published version in this selection has {wanted} directly "
+            f"below it with a help map.[/yellow] `docushift csh report --target-dir …` "
+            f"shows which products have a comparable pair."
+        )
+
+
+@csh_group.command("validate")
+@_target_options
+@click.pass_context
+def csh_validate(ctx: click.Context, target_dir: Path, product, version, doc_class) -> None:
+    """The CSH checks alone: `csh.yml`, the frontmatter mirror, and §7.6's regression.
+
+    Runs exactly the functions `docushift validate` runs -- `validation/csh.py` is
+    the only thing in the tool that reads a help map or compares two -- so the two
+    commands cannot give different answers. What it does differently is skip the
+    link, anchor, asset and artifact passes, which is its whole independent value
+    and the phase claims no more for it.
+
+    Gates by §7.4's one rule: exit 1 if and only if it recorded an error. On CSH
+    that means a `csh.yml` value naming a file that is not there, or a map that
+    would not parse. A dropped identifier is a warning and never fails a run --
+    16% of the corpus's version upgrades drop at least one.
+    """
+    from docushift.validation import csh as check
+    from docushift.validation.links import FolderIndex
+
+    cfg: ConfigManager = ctx.obj["config"]
+    selection = _published(target_dir, product, version, doc_class, "csh validate")
+    findings = FindingsRun("csh validate", store=StateStore(cfg.state_db_path)).start()
+
+    folders = 0
+    mapped = 0
+    for entry in selection:
+        rows = list(check.check_regression(entry))
+        for folder in entry.versions:
+            folders += 1
+            found = check.load(folder)
+            mapped += int(bool(found.entries))
+            rows.extend(check.check_map(found, FolderIndex(folder.path)))
+        for finding in rows:
+            findings.record(
+                finding.code, finding.slug, finding.version, finding.path,
+                finding.message, finding.count,
+            )
+        findings.flush()
+
+    errors = findings.counts()[Severity.ERROR]
+    findings.finish(exit_code=1 if errors else 0)
+    console.print(
+        f"Read {mapped} help map(s) in {folders} published folder(s) in {target_dir}."
+    )
+    for finding in findings.all:
+        colour = {Severity.ERROR: "red", Severity.WARNING: "yellow"}.get(finding.severity, "dim")
+        count = f" [dim]x{finding.count}[/dim]" if finding.count > 1 else ""
+        console.print(f"[{colour}]{finding.code}[/{colour}] {finding.path}: {finding.message}{count}")
+    console.print(f"[dim]Findings: {findings.summary() or 'none'}.[/dim]")
+    if errors:
+        raise click.exceptions.Exit(1)
 
 
 @main.command()

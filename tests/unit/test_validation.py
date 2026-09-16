@@ -23,6 +23,7 @@ from click.testing import CliRunner
 from docushift.cli import main
 from docushift.reporting.findings import REGISTRY, Severity
 from docushift.validation import Validator, walk
+from docushift.validation import csh as csh_mod
 from docushift.validation import references as refs
 from docushift.validation.links import FolderIndex, LinkContext, check, check_external
 from docushift.validation.tree import VersionFolder
@@ -548,10 +549,8 @@ def test_a_hand_written_row_pointing_outside_the_doc_class_is_not_ours(tmp_path:
 
 
 def csh_of(target: Path):
-    from docushift.validation import csh
-
     folder = only(target)
-    return csh.check(folder, FolderIndex(folder.path))
+    return csh_mod.check(folder, FolderIndex(folder.path))
 
 
 def test_a_csh_value_pointing_at_a_deleted_topic_is_a_link_broken(tmp_path: Path) -> None:
@@ -632,6 +631,203 @@ def test_an_unparseable_csh_yml_is_reported_as_an_unparsed_artifact(tmp_path: Pa
     publish(target, {"csh.yml": "help_1: [unclosed\n"})
 
     assert codes(csh_of(target)) == ["ARTIFACT_UNPARSED"]
+
+
+# -- csh.py, §7.6: the cross-version regression ----------------------------------
+
+
+def product_of(target: Path):
+    """The one product folder in a multi-version fixture tree."""
+    found = walk(target)
+    assert len(found) == 1, found
+    return found[0]
+
+
+def shelf(target: Path, maps: dict[str, str | None], *, doc_class: str = "online-help") -> Path:
+    """Several published versions of one product, `{segment -> csh.yml body}`.
+
+    `None` publishes the folder with no map at all, which is the common case:
+    13 of the sample's 17 `online-help` folders have none.
+    """
+    for segment, body in maps.items():
+        files = {} if body is None else {"csh.yml": body}
+        publish(target, files, doc_class=doc_class, segment=segment)
+    return target
+
+
+def test_an_identifier_the_version_below_had_and_this_one_does_not_is_a_drop(
+    tmp_path: Path,
+) -> None:
+    """The one defect that cannot be seen from inside a version.
+
+    1-0-0's map is correct and 2-0-0's map is correct, and the Help button for
+    `help_2` still breaks on upgrade. 51 of the corpus's 317 comparable pairs
+    (16.1%) look like this.
+    """
+    target = tmp_path / "target"
+    shelf(target, {
+        "1-0-0": 'help_1: "html/a.md"\nhelp_2: "html/b.md"\n',
+        "2-0-0": 'help_1: "html/a.md"\n',
+    })
+
+    findings = csh_mod.check_regression(product_of(target))
+
+    assert codes(findings) == ["CSH_IDENTIFIER_DROPPED"]
+    assert REGISTRY["CSH_IDENTIFIER_DROPPED"].severity is Severity.WARNING
+    assert findings[0].version == "2-0-0"
+    assert findings[0].count == 1
+    assert findings[0].message == "1 of 1-0-0's 2: help_2"
+    assert findings[0].path.endswith("2-0-0/csh.yml")
+
+
+def test_a_map_that_did_not_lose_anything_reports_nothing(tmp_path: Path) -> None:
+    """The control. A check that fires on every pair is not a check."""
+    target = tmp_path / "target"
+    shelf(target, {
+        "1-0-0": 'help_1: "html/a.md"\n',
+        "2-0-0": 'help_1: "html/a.md"\nhelp_2: "html/b.md"\n',
+    })
+
+    assert csh_mod.check_regression(product_of(target)) == []
+
+
+def test_a_single_version_product_is_not_compared_against_anything(tmp_path: Path) -> None:
+    """§7.6 asked for a note on "no prior version"; its intent was *do not fail a
+    first conversion*, and 150 of the corpus's products would have earned one
+    against 51 real findings."""
+    target = tmp_path / "target"
+    shelf(target, {"1-0-0": 'help_1: "html/a.md"\n'})
+
+    assert csh_mod.check_regression(product_of(target)) == []
+
+
+def test_a_predecessor_with_no_map_gives_nothing_to_regress_against(tmp_path: Path) -> None:
+    target = tmp_path / "target"
+    shelf(target, {"1-0-0": None, "2-0-0": 'help_1: "html/a.md"\n'})
+
+    assert csh_mod.check_regression(product_of(target)) == []
+
+
+def test_a_vanished_map_fires_once_and_not_in_every_version_after_it(tmp_path: Path) -> None:
+    """The predecessor is the immediate next-lower folder and nothing cleverer.
+
+    Skipping back to the last version that *had* a map sounds more thorough and
+    turns one defect into an unbounded row count: 3-0-0 and 4-0-0 would each
+    report 1-0-0's identifiers again, and the version that actually lost them
+    would stop being identifiable.
+    """
+    target = tmp_path / "target"
+    shelf(target, {
+        "1-0-0": 'help_1: "html/a.md"\nhelp_2: "html/b.md"\n',
+        "2-0-0": None,
+        "3-0-0": None,
+        "4-0-0": None,
+    })
+
+    findings = csh_mod.check_regression(product_of(target))
+
+    assert [(f.version, f.count) for f in findings] == [("2-0-0", 2)]
+
+
+def test_losing_more_than_ninety_percent_is_named_a_re_key_in_the_message(
+    tmp_path: Path,
+) -> None:
+    """15 of the corpus's 51 dropping pairs did, two of them losing 188 of 188.
+
+    It changes nothing about the finding -- same code, same severity -- which is
+    why it is a sentence in the message rather than a second code.
+    """
+    target = tmp_path / "target"
+    before = "".join(f'help_{n}: "html/a.md"\n' for n in range(11))
+    target = shelf(target, {"1-0-0": before, "2-0-0": 'help_0: "html/a.md"\n'})
+
+    findings = csh_mod.check_regression(product_of(target))
+
+    assert findings[0].count == 10
+    assert findings[0].message.startswith("10 of 1-0-0's 11 -- the map was re-keyed: ")
+
+
+def test_the_message_names_five_and_counts_the_rest(tmp_path: Path) -> None:
+    """The register carries the magnitude in `count`; `csh report --since` carries
+    the detail. The message is the bridge and it is bounded."""
+    target = tmp_path / "target"
+    before = "".join(f'help_{n}: "html/a.md"\n' for n in range(8))
+    shelf(target, {"1-0-0": before, "2-0-0": 'help_0: "html/a.md"\n'})
+
+    findings = csh_mod.check_regression(product_of(target))
+
+    assert findings[0].count == 7
+    assert findings[0].message.endswith(
+        "help_1, help_2, help_3, help_4, help_5 and 2 more"
+    )
+
+
+def test_an_identifier_that_moved_to_another_page_is_carried_and_never_reported(
+    tmp_path: Path,
+) -> None:
+    """1,084 of 8,425 survivors (12.9%) retarget between adjacent versions, in 81
+    of 317 pairs. That is pages being renamed, and the Help button still works."""
+    target = tmp_path / "target"
+    shelf(target, {
+        "1-0-0": 'help_1: "html/old.md"\n',
+        "2-0-0": 'help_1: "doc/new.md"\n',
+    })
+    entry = product_of(target)
+
+    assert csh_mod.check_regression(entry) == []
+    assert csh_mod.coverage(entry).diffs[0].retargeted == ("help_1",)
+
+
+def test_versions_are_ordered_numerically_so_ten_comes_after_nine(tmp_path: Path) -> None:
+    """`natural_version_key` over the dashed published segment: it splits on digit
+    runs and compares them numerically, so `10-4-0` sorts above `9-3-0`. Sorted as
+    strings the pair would invert and the drop would be blamed on the older
+    folder."""
+    target = tmp_path / "target"
+    shelf(target, {
+        "9-3-0": 'help_1: "html/a.md"\nhelp_2: "html/b.md"\n',
+        "10-4-0": 'help_1: "html/a.md"\n',
+    })
+
+    findings = csh_mod.check_regression(product_of(target))
+
+    assert [f.version for f in findings] == ["10-4-0"]
+
+
+def test_two_doc_classes_are_two_sequences_and_never_compared_across(
+    tmp_path: Path,
+) -> None:
+    """A product's `user-guides` 2-0-0 is not the successor of its `online-help`
+    1-0-0. They are different documents that happen to share a slug."""
+    target = tmp_path / "target"
+    publish(target, {"csh.yml": 'help_1: "html/a.md"\n'}, doc_class="online-help",
+            segment="1-0-0")
+    publish(target, {"csh.yml": 'help_2: "html/b.md"\n'}, doc_class="user-guides",
+            segment="2-0-0")
+
+    entry = product_of(target)
+
+    assert csh_mod.pairs(entry) == []
+    assert csh_mod.check_regression(entry) == []
+
+
+def test_coverage_counts_the_shelf_without_a_terminal(tmp_path: Path) -> None:
+    """What `csh report` prints, computed where it can be tested."""
+    target = tmp_path / "target"
+    shelf(target, {
+        "1-0-0": 'help_1: "html/a.md#top"\nhelp_2: "html/b.md"\n',
+        "2-0-0": 'help_1: "html/a.md"\n',
+        "3-0-0": None,
+    })
+
+    found = csh_mod.coverage(product_of(target))
+
+    assert (found.published, found.mapped) == (3, 2)
+    # The union across versions, and the distinct pages they open, anchors off.
+    assert (found.identifiers, found.pages) == (2, 2)
+    # Both pairs are comparable -- 2-0-0 carries a map, so 3-0-0 losing it counts
+    # -- and between them they lose help_2 and then help_1.
+    assert (found.comparable, found.dropped) == (2, 2)
 
 
 # -- driver.py -------------------------------------------------------------------
@@ -729,6 +925,28 @@ def test_a_clean_published_folder_produces_nothing(tmp_path: Path) -> None:
     assert result.findings == []
 
 
+def test_the_run_carries_the_drop_as_a_count_not_a_row_per_identifier(
+    tmp_path: Path,
+) -> None:
+    """§7.6 is a product-level question -- it needs two version folders -- so the
+    driver asks it beside the drop-down check rather than inside the per-folder
+    pass, and sums the magnitude off the finding's `count`."""
+    target = tmp_path / "target"
+    shelf(target, {
+        "1-0-0": 'help_1: "html/a.md"\nhelp_2: "html/b.md"\nhelp_3: "html/c.md"\n',
+        "2-0-0": 'help_1: "html/a.md"\n',
+    })
+
+    collected: list = []
+    validator = Validator(target)
+    validator._record = collected.extend  # type: ignore[method-assign]
+    stats = validator.run()
+
+    assert "CSH_IDENTIFIER_DROPPED" in codes(collected)
+    assert sum(1 for c in codes(collected) if c == "CSH_IDENTIFIER_DROPPED") == 1
+    assert stats.dropped == 2
+
+
 # -- the command -----------------------------------------------------------------
 
 
@@ -824,3 +1042,182 @@ def test_report_run_last_reads_back_what_validate_wrote(
     assert "LINK_BROKEN" in written
     assert "media/missing.png is not in this version folder" in written
     assert f"{TREE}/en-us/{SLUG}/online-help/1-0-0/html/a.md:1" in written
+
+
+# -- the csh command group -------------------------------------------------------
+
+
+def csh_cli(runner: CliRunner, root: Path, target: Path, *argv: str):
+    return runner.invoke(
+        main, ["--root", str(root), "csh", *argv, "--target-dir", str(target)], color=False
+    )
+
+
+def test_csh_list_prints_each_identifier_with_whether_its_target_is_there(
+    runner: CliRunner, tmp_path: Path
+) -> None:
+    target = tmp_path / "target"
+    publish(target, {"csh.yml": 'help_1: "a.md"\nhelp_2: "gone.md"\n', "a.md": "# A\n"})
+
+    result = csh_cli(runner, tmp_path, target, "list")
+
+    assert result.exit_code == 0
+    assert "help_1" in result.output and "help_2" in result.output
+    assert "yes" in result.output and "no" in result.output
+
+
+def test_csh_list_by_identifier_names_the_versions_that_do_not_carry_it(
+    runner: CliRunner, tmp_path: Path
+) -> None:
+    """The query the command exists for: "the Help button for X is broken in the
+    new version" -- where did it go, across the whole shelf, in one call."""
+    target = tmp_path / "target"
+    shelf(target, {"1-0-0": 'help_1: "a.md"\n', "2-0-0": 'help_9: "a.md"\n'})
+
+    result = csh_cli(runner, tmp_path, target, "list", "--identifier", "help_1")
+
+    assert result.exit_code == 0
+    assert "1-0-0" in result.output
+    assert "does not carry help_1" in result.output
+
+
+def test_csh_list_reports_a_case_only_near_miss_rather_than_matching_it(
+    runner: CliRunner, tmp_path: Path
+) -> None:
+    """`GatewayInstances` and `gatewayInstances` are two live help targets in the
+    corpus (§9.1). Folding them here is how one Help button answers for the other."""
+    target = tmp_path / "target"
+    publish(target, {"csh.yml": 'GatewayInstances: "a.md"\n', "a.md": "# A\n"})
+
+    result = csh_cli(runner, tmp_path, target, "list", "--identifier", "gatewayinstances")
+
+    assert result.exit_code == 0
+    assert "differs only in case" in result.output
+
+
+def test_csh_report_counts_coverage_and_the_drop(runner: CliRunner, tmp_path: Path) -> None:
+    target = tmp_path / "target"
+    shelf(target, {
+        "1-0-0": 'help_1: "a.md"\nhelp_2: "b.md"\n',
+        "2-0-0": 'help_1: "a.md"\n',
+    })
+
+    result = csh_cli(runner, tmp_path, target, "report")
+
+    assert result.exit_code == 0
+    assert "2 of 2 published version folder(s) carry a help map" in result.output
+    # The summary line wraps at the console width, so the claim is made on the
+    # halves rather than on a sentence that may have a newline through it.
+    assert "1 comparable pair(s)" in result.output
+    assert "identifier(s) dropped" in result.output
+
+
+def test_csh_report_since_names_every_identifier_the_finding_only_counts(
+    runner: CliRunner, tmp_path: Path
+) -> None:
+    """The register carries the magnitude, the command carries the detail --
+    including the retargeting that is deliberately not a finding."""
+    target = tmp_path / "target"
+    shelf(target, {
+        "1-0-0": 'help_1: "old.md"\nhelp_2: "b.md"\n',
+        "2-0-0": 'help_1: "new.md"\nhelp_3: "c.md"\n',
+    })
+
+    result = csh_cli(runner, tmp_path, target, "report", "--since", "1.0.0")
+
+    assert result.exit_code == 0
+    assert "1 dropped" in result.output and "help_2" in result.output
+    assert "1 added" in result.output and "help_3" in result.output
+    assert "1 retargeted" in result.output
+
+
+def test_csh_report_since_a_version_with_nothing_below_it_says_so(
+    runner: CliRunner, tmp_path: Path
+) -> None:
+    target = tmp_path / "target"
+    publish(target, {"csh.yml": 'help_1: "a.md"\n', "a.md": "# A\n"})
+
+    result = csh_cli(runner, tmp_path, target, "report", "--since", "1.0.0")
+
+    assert result.exit_code == 0
+    assert "No published version in this selection has 1-0-0 directly below it" in result.output
+
+
+def test_csh_validate_warns_on_a_drop_and_still_exits_zero(
+    runner: CliRunner, tmp_path: Path
+) -> None:
+    """16% of the corpus's version upgrades drop at least one identifier. A gate
+    that fails on that is a gate nobody runs."""
+    target = tmp_path / "target"
+    shelf(target, {
+        "1-0-0": 'help_1: "a.md"\nhelp_2: "a.md"\n',
+        "2-0-0": 'help_1: "a.md"\n',
+    })
+    for segment in ("1-0-0", "2-0-0"):
+        publish(target, {"a.md": "---\ncsh:\n  - help_1\n  - help_2\n---\n\n# A\n"},
+                segment=segment)
+
+    result = csh_cli(runner, tmp_path, target, "validate")
+
+    assert result.exit_code == 0
+    assert "CSH_IDENTIFIER_DROPPED" in result.output
+
+
+def test_csh_validate_gates_on_a_map_pointing_at_a_file_that_is_not_there(
+    runner: CliRunner, tmp_path: Path
+) -> None:
+    """§7.4's one rule, unchanged: exit 1 if and only if an error was recorded."""
+    target = tmp_path / "target"
+    publish(target, {"csh.yml": 'help_1: "gone.md"\n'})
+
+    result = csh_cli(runner, tmp_path, target, "validate")
+
+    assert result.exit_code == 1
+    assert "LINK_BROKEN" in result.output
+
+
+def test_csh_validate_and_validate_cannot_disagree(runner: CliRunner, tmp_path: Path) -> None:
+    """Both call `validation/csh.py`, which is the only thing in the tool that reads
+    a help map or compares two. Asserted rather than commented."""
+    target = tmp_path / "target"
+    shelf(target, {
+        "1-0-0": 'help_1: "a.md"\nhelp_2: "a.md"\n',
+        "2-0-0": 'help_1: "a.md"\n',
+    })
+    for segment in ("1-0-0", "2-0-0"):
+        publish(target, {"a.md": "---\ncsh:\n  - help_1\n  - help_2\n---\n\n# A\n"},
+                segment=segment)
+
+    both = csh_cli(runner, tmp_path, target, "validate")
+    full = invoke(runner, tmp_path, target)
+
+    assert both.exit_code == 0 and full.exit_code == 0
+    assert "CSH_IDENTIFIER_DROPPED" in both.output
+    assert "CSH_IDENTIFIER_DROPPED" in full.output
+
+
+def test_a_csh_selection_that_matches_nothing_exits_one(
+    runner: CliRunner, tmp_path: Path
+) -> None:
+    """The same rule the four stage commands took in 7a, and `validate` in 7b."""
+    target = tmp_path / "target"
+    publish(target)
+
+    result = csh_cli(runner, tmp_path, target, "report", "--product", "not-a-product")
+
+    assert result.exit_code == 1
+
+
+def test_the_resources_tree_is_not_walked_for_a_help_map(
+    runner: CliRunner, tmp_path: Path
+) -> None:
+    """`transforms/csh.py` writes `csh.yml` into the Markdown output root, which
+    `sync` places in the docs tree and nowhere else. Walking the sibling would
+    double `csh report`'s rows to print zeroes."""
+    target = tmp_path / "target"
+    publish(target, tree=RESOURCES, doc_class="api-references")
+
+    result = csh_cli(runner, tmp_path, target, "report")
+
+    assert result.exit_code == 1
+    assert "docs tree" in result.output

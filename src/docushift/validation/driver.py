@@ -61,6 +61,10 @@ class ValidationStats:
     anchors_matched: int = 0
     residue: int = 0
     external_checked: int = 0
+    # Help identifiers a version lost against its predecessor (§7.6). Summed from
+    # the findings' `count`, because the finding is one row per version and the
+    # magnitude lives in the column.
+    dropped: int = 0
     results: list[FolderResult] = field(default_factory=list)
 
     @property
@@ -123,6 +127,14 @@ class Validator:
             stats.products += 1
             self._record(artifacts.check_product(entry))
             self._record(self._dropdowns(entry))
+            # §7.6 is a product-level question -- it needs two version folders --
+            # so it sits beside the drop-down check rather than inside the
+            # per-folder pass. `validate` runs it although it can never fail on
+            # it: the gate's report has to be complete, and a warning it cannot
+            # gate on still belongs in it.
+            regressions = csh.check_regression(entry)
+            stats.dropped += sum(finding.count for finding in regressions)
+            self._record(regressions)
             self._record(self._residue(entry))
             stats.residue += len(entry.residue)
             for folder in entry.versions:

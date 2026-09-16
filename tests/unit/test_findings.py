@@ -138,25 +138,26 @@ def test_summary_counts_note_rows_not_note_occurrences() -> None:
     assert run.summary() == "1 warning, 1 note"
 
 
-def test_the_outstanding_debt_is_three_codes_and_all_three_are_unbuilt_commands() -> None:
+def test_the_outstanding_debt_is_one_code_and_it_belongs_to_an_unbuilt_check() -> None:
     """§7.5's guarantee, asserted **equal** rather than as a subset (Phase 7a).
 
     Equality is what makes the test fail in both directions. The eight-deep
     `REACHABLE_IN_PHASE_*` chain it replaces was asserted as a subset, so a code
     that quietly started firing never surfaced and the named debt could only ever
     be an overstatement.
+
+    Nine before 7a, three after it, one after 7c: 7b closed `LINK_BROKEN` and 7c
+    closed `CSH_IDENTIFIER_DROPPED`. What is left belongs to §10.7's class 2, the
+    document router's escape check -- a check that does not exist yet, which is
+    the only honest kind of debt here. Before 7a four of the nine belonged to
+    `catalog` and `extract`, which computed their findings and opened no run to
+    put them in.
     """
     assert set(REGISTRY) >= NOT_YET_EMITTED
     assert set(unreachable_codes(set(REGISTRY) - NOT_YET_EMITTED)) == set(NOT_YET_EMITTED)
 
-    # Two belong to `validate` (7b) and one to the document router's escape check
-    # (7c). Nothing outstanding belongs to a command that exists: before 7a, four
-    # of the nine belonged to `catalog` and `extract`, which computed their
-    # findings and opened no run to put them in.
-    assert {REGISTRY[code].stage for code in NOT_YET_EMITTED} == {Stage.VALIDATE, Stage.SYNC}
-    assert {c for c in NOT_YET_EMITTED if REGISTRY[c].stage is Stage.SYNC} == {
-        "DOC_REFERENCE_MISSING",
-    }
+    assert set(NOT_YET_EMITTED) == {"DOC_REFERENCE_MISSING"}
+    assert {REGISTRY[code].stage for code in NOT_YET_EMITTED} == {Stage.SYNC}
     assert "ARCHIVE_ALSO_LIVE" not in REGISTRY
 
 

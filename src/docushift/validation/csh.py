@@ -21,20 +21,35 @@ The third rule is the round trip. `transforms/csh.py` writes the map and the
 frontmatter in one pass, so a disagreement between them is a regression -- but it
 breaks one Help button rather than the page, which is why
 `CSH_FRONTMATTER_MISMATCH` is a warning.
+
+**The fourth rule is §7.6's, and it arrived in Phase 7c.** A dropped identifier is
+the one defect in this tool that cannot be seen from inside a version: 6.10.0's map
+is correct and 6.11.0's map is correct, and the product's Help button still breaks
+on upgrade. `diff` is the only thing in the tool that computes a CSH difference --
+`validate`, `csh validate` and `csh report --since` all call it -- because two
+implementations of one comparison is two answers to "did this Help button survive".
 """
 
+from dataclasses import dataclass, field
 from pathlib import Path, PurePosixPath
 
 import yaml
 
 from docushift.reporting.findings import Finding
+from docushift.utils.csvio import natural_version_key
 from docushift.validation import references
 from docushift.validation.links import FolderIndex
-from docushift.validation.tree import VersionFolder
+from docushift.validation.tree import ProductFolder, VersionFolder
 
 CSH_FILE = "csh.yml"
 # The frontmatter key `transforms/csh.py::frontmatter_value` writes (§9.5).
 FRONTMATTER_KEY = "csh"
+
+# How many dropped identifiers the finding's message names before it counts the
+# rest. The full list is `csh report --since`'s job: the register carries the
+# magnitude and the command carries the detail, which is the same split §7.1 makes
+# for a note's `count`.
+NAMED_IN_MESSAGE = 5
 
 
 def _identifiers(text: str) -> list[str]:
@@ -59,6 +74,55 @@ def _identifiers(text: str) -> list[str]:
     return []
 
 
+@dataclass(frozen=True)
+class MapFile:
+    """One version folder's `csh.yml`, read once and shared by every surface.
+
+    `absent` and `unparsed` are different facts and the tool has always treated
+    them so: a version with no help source gets no file at all (§9.4), which is
+    the common case, while a file that will not load is an `ARTIFACT_UNPARSED`
+    error. Both come back with an empty `entries`, so a caller that only wants
+    the identifiers needs no branch.
+    """
+
+    folder: VersionFolder
+    entries: dict[str, str] = field(default_factory=dict)
+    present: bool = False
+    # Why it would not load. Empty when it loaded, or when there is no file.
+    unparsed: str = ""
+
+    @property
+    def where(self) -> str:
+        return (self.folder.relative / CSH_FILE).as_posix()
+
+    @property
+    def targets(self) -> set[str]:
+        """The distinct pages the map opens, anchors stripped."""
+        return {value.partition("#")[0] for value in self.entries.values()}
+
+
+def load(folder: VersionFolder) -> MapFile:
+    """Reads one folder's `csh.yml`. Never raises, and never reports."""
+    path = folder.path / CSH_FILE
+    if not path.is_file():
+        return MapFile(folder)
+    try:
+        document = yaml.safe_load(path.read_text(encoding="utf-8"))
+    except (OSError, yaml.YAMLError) as error:
+        detail = str(error).splitlines()[0] if str(error) else "invalid YAML"
+        return MapFile(folder, present=True, unparsed=detail)
+    if document is None:
+        document = {}
+    if not isinstance(document, dict):
+        return MapFile(folder, present=True,
+                       unparsed="is not the flat identifier map §9.4 specifies")
+    return MapFile(
+        folder,
+        entries={str(key): str(value) for key, value in document.items()},
+        present=True,
+    )
+
+
 def check(folder: VersionFolder, index: FolderIndex) -> list[Finding]:
     """One version folder's CSH, or nothing at all if it has none.
 
@@ -67,25 +131,22 @@ def check(folder: VersionFolder, index: FolderIndex) -> list[Finding]:
     mapping, and §9.4 is explicit that an empty map gets no file rather than an
     empty one.
     """
-    path = folder.path / CSH_FILE
+    return check_map(load(folder), index)
+
+
+def check_map(found: MapFile, index: FolderIndex) -> list[Finding]:
+    """The three single-version rules, over a map somebody has already read."""
+    folder = found.folder
     pages = _frontmatter_index(folder, index)
-    if not path.is_file():
+    if not found.present:
         return _orphan_frontmatter(folder, pages, mapping={})
 
-    where = (folder.relative / CSH_FILE).as_posix()
-    try:
-        document = yaml.safe_load(path.read_text(encoding="utf-8"))
-    except (OSError, yaml.YAMLError) as error:
-        detail = str(error).splitlines()[0] if str(error) else "invalid YAML"
+    where = found.where
+    if found.unparsed:
         return [Finding("ARTIFACT_UNPARSED", slug=folder.slug, version=folder.segment,
-                        path=where, message=detail)]
-    if document is None:
-        document = {}
-    if not isinstance(document, dict):
-        return [Finding("ARTIFACT_UNPARSED", slug=folder.slug, version=folder.segment,
-                        path=where, message="is not the flat identifier map §9.4 specifies")]
+                        path=where, message=found.unparsed)]
 
-    mapping = {str(key): str(value) for key, value in document.items()}
+    mapping = found.entries
     findings: list[Finding] = []
     for identifier, value in sorted(mapping.items()):
         target, _, anchor = value.partition("#")
@@ -159,3 +220,193 @@ def _orphan_frontmatter(
             message=f"frontmatter claims {', '.join(missing)}, absent from {CSH_FILE}",
         ))
     return findings
+
+
+# -- §7.6, the cross-version regression ---------------------------------------
+
+
+@dataclass(frozen=True)
+class Diff:
+    """What changed between one version's help map and its predecessor's."""
+
+    prior: MapFile
+    current: MapFile
+    dropped: tuple[str, ...] = ()
+    added: tuple[str, ...] = ()
+    # Identifiers in both, opening a different page. **Not a finding.** Measured
+    # over the cache, 1,084 of 8,425 survivors (12.9%) retarget between adjacent
+    # versions, in 81 of 317 pairs -- that is pages being renamed between
+    # releases, and the Help button still works. Carried so `csh report --since`
+    # can show it, and read by nothing that records.
+    retargeted: tuple[str, ...] = ()
+
+    @property
+    def wholesale(self) -> bool:
+        """Did more than 90% of the predecessor's map go?
+
+        15 of the cache's 51 dropping pairs did, two of them losing 188 of 188.
+        That is a product re-keying its help, usually across a major version --
+        a redesign rather than a regression. It changes nothing about the
+        finding; it is why the message names both versions, so a reader can tell
+        the two apart without opening either file.
+        """
+        return bool(self.prior.entries) and (
+            len(self.dropped) / len(self.prior.entries) > 0.9
+        )
+
+
+def diff(prior: MapFile, current: MapFile) -> Diff:
+    """The comparison, and **the only place in the tool that computes one.**
+
+    `validate` records from it, `csh validate` records from it and
+    `csh report --since` prints from it. Byte-exact on the identifier, never
+    case-folded: `GatewayInstances` and `gatewayInstances` are two live help
+    targets in TIBCO BC 7.4/7.5 (§9.1), and folding them here would hide a drop
+    behind a survivor.
+    """
+    before, after = prior.entries, current.entries
+    return Diff(
+        prior=prior,
+        current=current,
+        dropped=tuple(sorted(set(before) - set(after))),
+        added=tuple(sorted(set(after) - set(before))),
+        retargeted=tuple(sorted(
+            identifier for identifier in set(before) & set(after)
+            if before[identifier] != after[identifier]
+        )),
+    )
+
+
+def pairs(entry: ProductFolder) -> list[tuple[VersionFolder, VersionFolder]]:
+    """`(predecessor, version)` for each version folder that has one.
+
+    **The predecessor is the immediate next-lower folder in the same doc-class,
+    and nothing cleverer.** Ordered by `natural_version_key` over the dashed
+    published segment, which sorts correctly among segments because the key
+    splits on digit runs and compares them numerically -- `10-4-0` above `9-3-0`.
+    §4.1's point that the dashed form does not round-trip back to a dotted
+    version is about parsing, and this is ordering.
+
+    Skipping back to the last version that *had* a map sounds more thorough and
+    is worse: a product whose map vanishes in 6.11.0 would report the same 123
+    identifiers again in 6.12.0 and every version after it, so one defect becomes
+    an unbounded row count and the version that actually lost the map stops being
+    identifiable. Under the rule as written a vanished map fires exactly once.
+    """
+    by_class: dict[str, list[VersionFolder]] = {}
+    for folder in entry.versions:
+        if folder.segment:
+            by_class.setdefault(folder.doc_class, []).append(folder)
+    found: list[tuple[VersionFolder, VersionFolder]] = []
+    for folders in by_class.values():
+        ordered = sorted(folders, key=lambda f: natural_version_key(f.segment))
+        found.extend(zip(ordered, ordered[1:], strict=False))
+    return found
+
+
+def check_regression(entry: ProductFolder) -> list[Finding]:
+    """§7.6 over one product folder. One warning per version, never per identifier.
+
+    **The magnitude is in `count` and a sample is in the message.** §7.1 says
+    errors and warnings get a row each and only notes fold, and that rule is
+    intact: the condition is *this version dropped identifiers relative to its
+    predecessor*, which is one condition per version. The measurement is what
+    forbids the other reading -- 784 per-identifier rows over the cache, of which
+    376 come from two pairs, would bury the 30 pairs that dropped between one and
+    five, and those are the ones that are a regression rather than a re-key.
+
+    A product's oldest version gets nothing. §7.6 asked for a note there; its
+    intent was *do not fail on a first conversion*, and writing no row honours it
+    while writing one would add 150 rows over the cache to a check that produces
+    51 real ones. The absence shows in `csh report`'s coverage table, where it is
+    a column rather than a finding.
+    """
+    findings: list[Finding] = []
+    for before, after in pairs(entry):
+        prior = load(before)
+        if not prior.entries:
+            # Nothing to regress against. An unparseable predecessor is already
+            # an `ARTIFACT_UNPARSED` error against its own folder; claiming a
+            # drop from a file nobody could read would be a guess.
+            continue
+        change = diff(prior, load(after))
+        if not change.dropped:
+            continue
+        findings.append(Finding(
+            "CSH_IDENTIFIER_DROPPED",
+            slug=after.slug,
+            version=after.segment,
+            path=(after.relative / CSH_FILE).as_posix(),
+            message=_dropped_message(before.segment, change),
+            count=len(change.dropped),
+        ))
+    return findings
+
+
+def _dropped_message(prior_segment: str, change: Diff) -> str:
+    named = ", ".join(change.dropped[:NAMED_IN_MESSAGE])
+    rest = len(change.dropped) - NAMED_IN_MESSAGE
+    if rest > 0:
+        named = f"{named} and {rest} more"
+    total = len(change.prior.entries)
+    scale = (
+        f"{len(change.dropped)} of {prior_segment}'s {total}"
+        if not change.wholesale
+        else f"{len(change.dropped)} of {prior_segment}'s {total} -- the map was re-keyed"
+    )
+    return f"{scale}: {named}"
+
+
+# -- what `csh report` counts --------------------------------------------------
+
+
+@dataclass(frozen=True)
+class Coverage:
+    """One product's CSH, as the shelf has it.
+
+    Computed here rather than in the command so it can be tested without a
+    terminal, and so `csh report` and any later reader cannot disagree about what
+    "covered" means.
+    """
+
+    slug: str
+    tree: str
+    published: int = 0
+    mapped: int = 0
+    identifiers: int = 0
+    pages: int = 0
+    dropped: int = 0
+    maps: tuple[MapFile, ...] = ()
+    diffs: tuple[Diff, ...] = ()
+
+    @property
+    def comparable(self) -> int:
+        """Version pairs where the predecessor had a map to compare against."""
+        return len(self.diffs)
+
+
+def coverage(entry: ProductFolder) -> Coverage:
+    """Reads every `csh.yml` under one product and tallies it."""
+    maps = [load(folder) for folder in entry.versions if folder.segment]
+    loaded = {found.folder.path: found for found in maps}
+    diffs = []
+    for before, after in pairs(entry):
+        prior = loaded[before.path]
+        if prior.entries:
+            diffs.append(diff(prior, loaded[after.path]))
+    identifiers: set[str] = set()
+    pages: set[str] = set()
+    for found in maps:
+        identifiers |= set(found.entries)
+        pages |= found.targets
+    return Coverage(
+        slug=entry.slug,
+        tree=entry.tree,
+        published=len(maps),
+        mapped=sum(1 for found in maps if found.entries),
+        identifiers=len(identifiers),
+        pages=len(pages),
+        dropped=sum(len(change.dropped) for change in diffs),
+        maps=tuple(maps),
+        diffs=tuple(diffs),
+    )
