@@ -29,6 +29,7 @@ from docushift.models import (
     ProductVersion,
     SourceEngine,
 )
+from docushift.reporting.findings import FindingsRun, Severity
 
 # -- helpers -----------------------------------------------------------------
 
@@ -559,3 +560,68 @@ def test_an_empty_selection_is_not_an_error(config: ConfigManager, catalog: Cata
 
     assert stats.results == []
     assert stats.files_written == 0
+
+
+# -- findings (Phase 7a) -------------------------------------------------------
+
+
+def test_extract_records_one_csh_finding_per_version_not_per_source(
+    config: ConfigManager, catalog: CatalogManager, product: Product, version: ProductVersion
+) -> None:
+    """Three help maps, one row. The reader's question is about the version.
+
+    Per-source rows would put a version with forty doc-sets forty times into a
+    report, and the per-source detail is already in `csh_sources` -- which this
+    does not duplicate. The magnitude lives in the note's `count`, the way every
+    other note in the register carries it.
+    """
+    place_package(config, product, version, {
+        **FLARE_PACKAGE,
+        "guide/Data/alias.xml": "",
+        "other/Output.mcwebhelp": "",
+        "other/Data/alias.xml": "",
+        "third/Output.mcwebhelp": "",
+        "third/Data/alias.xml": "<CatapultAliasFile></CatapultAliasFile>",
+    })
+    findings = FindingsRun("extract")
+
+    PackageExtractor(config, catalog, findings=findings).extract_one(product, version)
+
+    empty = [f for f in findings.all if f.code == "CSH_SOURCE_EMPTY"]
+    assert len(empty) == 1
+    assert empty[0].count == 3
+    assert (empty[0].slug, empty[0].version) == (product.slug, version.version)
+
+
+def test_a_help_map_that_cannot_be_parsed_is_a_warning_and_not_a_note(
+    config: ConfigManager, catalog: CatalogManager, product: Product, version: ProductVersion
+) -> None:
+    """"Help we could not read" and "no help" are different facts (architecture.md §5.4.4).
+
+    An empty map is the majority of the corpus and a measurement; a located map
+    that yielded nothing is a defect, and `_has_csh` is set on the strength of
+    having found the file.
+    """
+    place_package(config, product, version, {
+        **FLARE_PACKAGE,
+        "guide/Data/alias.xml": "<CatapultAliasFile><unclosed>",
+    })
+    findings = FindingsRun("extract")
+
+    PackageExtractor(config, catalog, findings=findings).extract_one(product, version)
+
+    codes = {f.code: f for f in findings.all}
+    assert "CSH_SOURCE_UNPARSED" in codes
+    assert codes["CSH_SOURCE_UNPARSED"].severity is Severity.WARNING
+    assert codes["CSH_SOURCE_UNPARSED"].path == "guide/Data/alias.xml"
+
+
+def test_an_extractor_with_no_findings_run_behaves_exactly_as_before(
+    config: ConfigManager, catalog: CatalogManager, product: Product, version: ProductVersion
+) -> None:
+    """The run is optional so a unit test and a --dry-run build one the same way."""
+    place_package(config, product, version, {**FLARE_PACKAGE, "guide/Data/alias.xml": ""})
+
+    result = PackageExtractor(config, catalog).extract_one(product, version)
+
+    assert result.outcome is ExtractOutcome.EXTRACTED

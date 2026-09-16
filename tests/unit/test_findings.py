@@ -5,16 +5,12 @@ The register's whole value is that it is enumerable, so these tests assert on
 is prose and may be reworded freely.
 """
 
+from pathlib import Path
+
 import pytest
 
 from docushift.reporting.findings import (
-    REACHABLE_IN_PHASE_5A,
-    REACHABLE_IN_PHASE_5B,
-    REACHABLE_IN_PHASE_6A,
-    REACHABLE_IN_PHASE_6B,
-    REACHABLE_IN_PHASE_6C,
-    REACHABLE_IN_PHASE_6D,
-    REACHABLE_IN_PHASE_6E,
+    NOT_YET_EMITTED,
     REGISTRY,
     FindingsRun,
     Severity,
@@ -138,34 +134,44 @@ def test_summary_counts_note_rows_not_note_occurrences() -> None:
     assert run.summary() == "1 warning, 1 note"
 
 
-def test_the_reachability_debt_is_named_rather_than_asserted_away() -> None:
-    """§7.5's guarantee, allowed to pass with a *named* list of unreached codes."""
-    outstanding = unreachable_codes(REACHABLE_IN_PHASE_6E)
+def test_the_outstanding_debt_is_three_codes_and_all_three_are_unbuilt_commands() -> None:
+    """§7.5's guarantee, asserted **equal** rather than as a subset (Phase 7a).
 
-    assert (
-        set(REACHABLE_IN_PHASE_5A)
-        <= set(REACHABLE_IN_PHASE_5B)
-        <= set(REACHABLE_IN_PHASE_6A)
-        <= set(REACHABLE_IN_PHASE_6B)
-        <= set(REACHABLE_IN_PHASE_6C)
-        <= set(REACHABLE_IN_PHASE_6D)
-        <= set(REACHABLE_IN_PHASE_6E)
-        <= set(REGISTRY)
-    )
-    # With the first engine built, `convert` owes nothing: every remaining debt
-    # belongs to `sync` or `validate`. The 5a exemption for `NAV_NODE_DROPPED` is
-    # gone, which is the point of the sub-phase.
-    for code in outstanding:
-        assert REGISTRY[code].stage is not Stage.CONVERT, code
-    # 6d closed `PUBLISH_BASE_URL_UNSET` the phase that added it and *removed*
-    # `ARCHIVE_ALSO_LIVE`, which no code path could reach. 6e closes its own
-    # `API_LINK_REWRITTEN` likewise. The one left is `DOC_REFERENCE_MISSING`, and
-    # what remains behind it is §10.7's class 2 only: the 279 Flare references that
-    # escape into `doc/` and `pdf/` bound for the *document* doc-classes, whose
-    # destination needs §10.4's router and so is genuinely sync's to answer. The
-    # api-reference half, which 6d deferred for the same reason, turned out not to
-    # be sync's at all and shipped in 6e.
-    assert {code for code in outstanding if REGISTRY[code].stage is Stage.SYNC} == {
+    Equality is what makes the test fail in both directions. The eight-deep
+    `REACHABLE_IN_PHASE_*` chain it replaces was asserted as a subset, so a code
+    that quietly started firing never surfaced and the named debt could only ever
+    be an overstatement.
+    """
+    assert set(REGISTRY) >= NOT_YET_EMITTED
+    assert set(unreachable_codes(set(REGISTRY) - NOT_YET_EMITTED)) == set(NOT_YET_EMITTED)
+
+    # Two belong to `validate` (7b) and one to the document router's escape check
+    # (7c). Nothing outstanding belongs to a command that exists: before 7a, four
+    # of the nine belonged to `catalog` and `extract`, which computed their
+    # findings and opened no run to put them in.
+    assert {REGISTRY[code].stage for code in NOT_YET_EMITTED} == {Stage.VALIDATE, Stage.SYNC}
+    assert {c for c in NOT_YET_EMITTED if REGISTRY[c].stage is Stage.SYNC} == {
         "DOC_REFERENCE_MISSING",
     }
     assert "ARCHIVE_ALSO_LIVE" not in REGISTRY
+
+
+def test_every_registered_code_is_written_down_somewhere_in_src() -> None:
+    """The static half of §7.5's reachability test, and its limit.
+
+    A literal scan, because the obvious version of this -- grepping for
+    `record("CODE"` -- is what produced a wrong count of twenty unemitted codes:
+    it misses every continuation-line and every variable call site. This proves a
+    code is **written**, not that it fires, which is why `NOT_YET_EMITTED` above
+    is curated by hand rather than derived from this.
+    """
+    src = Path(__file__).resolve().parents[2] / "src" / "docushift"
+    register = src / "reporting" / "findings.py"
+    text = "\n".join(
+        path.read_text(encoding="utf-8")
+        for path in sorted(src.rglob("*.py"))
+        if path != register
+    )
+
+    written = {code for code in REGISTRY if f'"{code}"' in text or f"'{code}'" in text}
+    assert set(REGISTRY) - written == set(NOT_YET_EMITTED)

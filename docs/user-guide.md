@@ -407,18 +407,6 @@ A ZIP you supplied with `--from-file` sits in `downloads/` under the same name a
 
 ## 4. End-to-End Migration Commands
 
-### View Status & Delta Dashboard
-```bash
-# Print overall status summary in terminal
-docushift status
-
-# Filter by BU or Family
-docushift status --bu tibco --family integration
-
-# Generate an exportable Markdown/HTML migration report
-docushift report --output ./reports/migration_summary.md
-```
-
 ### Selecting what a command acts on
 
 `download`, `extract`, `convert`, and `sync` all take the same selectors, which combine:
@@ -715,7 +703,7 @@ docushift sync --all --target-dir ../tibco-docs-aem/ --dry-run
 # Re-copy even where the published tree already matches
 docushift sync --all --target-dir ../tibco-docs-aem/ --force
 
-# Run link and asset integrity validation
+# Run link and asset integrity validation (Phase 7b -- not yet built)
 docushift validate --target-dir ../tibco-docs-aem/
 ```
 
@@ -789,6 +777,78 @@ Thirteen things to expect:
 - **`validate` will skip those absolute links by default** once they exist. They point at a different repository, so there is nothing on disk to check; pass `--check-external` to verify them over HTTP.
 - **A broken relative asset link is a tool bug, not a content finding.** Conversion writes the link and copies the file in one step, so `validate` finding one means something downstream moved a file without moving its link — it is reported as a regression, with the stage that could have caused it. An asset that nothing links to is not an error and is not reported here; that count belongs to `convert`.
 
+### Where things stand, and what happened
+
+Two commands, two questions, and the split is deliberate: `status` answers *where
+is everything now* from the catalog, `report` answers *what happened* from the
+findings a run recorded. Neither reads the other's source, so they cannot drift
+into two different answers to the same question.
+
+```bash
+# Where is everything now? The funnel, per stage, over the whole catalog
+docushift status
+
+# Filter by BU or Family; add the target to learn what is actually published
+docushift status --bu tibco --family integration
+docushift status --target-dir ../tibco-docs-aem/
+
+# What engines are in play, and what is still undetermined?
+docushift status --engines
+
+# What happened in the last run?
+docushift report --run last
+
+# Narrow it: one stage, one severity, one code, one product
+docushift report --stage convert --severity error
+docushift report --code TOPIC_LINK_DANGLING --slug ems
+
+# What is this code, and who promised it?
+docushift report --explain CSH_UNRESOLVED
+
+# Write it out for somebody who was not at the terminal
+docushift report --run last --export ./reports/convert-2026-09-16.md
+```
+
+Findings are grouped by stage, then by code, errors first. Each one carries a
+severity that belongs to the **code**, never to the place that raised it:
+
+| Severity | Meaning | Effect on the exit code |
+| :--- | :--- | :--- |
+| `error` | The output is wrong or unpublishable | `validate` exits 1; nothing else gates |
+| `warning` | The run succeeded and a human decision is pending | Printed and counted |
+| `note` | Normal for this corpus, recorded so a change in magnitude shows | Counted only |
+
+Notes are aggregated — one row per code per version, carrying a count — because
+the useful thing about 1,308 orphaned images is the number, not 1,308 rows. Errors
+and warnings get a row each, because you act on those individually.
+
+`status` reports a **Published** row **only** when you give it `--target-dir`, and
+it counts the version folders on disk. Sync currency is compared against the
+published tree and never recorded, so the database genuinely does not know what is
+published — and a column that guessed would be wrong for exactly the versions
+somebody had edited by hand.
+
+The funnel's other rows nest, because each is read from what a stage recorded
+rather than from a single status column: a version that downloaded and extracted
+and then failed still counts as downloaded and extracted, because it was. The one
+case where a later step can exceed an earlier one is `convert --input`, which runs
+a tree this workspace never downloaded; `status` says so in a footnote rather than
+leaving you to wonder.
+
+Findings are kept across runs, so old ones stay queryable by run id.
+`docushift report --runs` lists the recent ones with their counts, and
+`docushift report --prune --keep 10` drops the findings of everything older — the
+run rows survive, so a pruned run is still a dated record that something ran.
+
+**Exit codes.** A stage that did its work exits 0 even when it recorded errors:
+the errors are in the report, and that is what `report` is for. A selection that
+matched nothing exits **1** — before Phase 7a a typo in `--product` was
+indistinguishable from a clean run — and `--dry-run` is not exempt, because it is
+the same mistake discovered one command earlier. `report` itself exits 1 only for
+a run that is not there or an export it could not write. Only `validate` (Phase
+7b) will gate on what it found.
+
+
 ---
 
 ## 5. Product Taxonomy Configuration (`config/taxonomy.yaml`)
@@ -850,7 +910,7 @@ You do not assign it by hand. It is detected from the package contents during ex
 
 ```bash
 # What engines are in play, and what is still undetermined?
-docushift report --engines
+docushift status --engines
 
 # Override a misdetection (sets engine_source=manual, permanent)
 docushift catalog set --product ems --version 8.6.0 --engine webworks

@@ -2183,3 +2183,44 @@ Three things §10 did not say, measured over the predecessor's cache on 2026-09-
 **Titles come from the filename's kind before the PDF.** The kind's canonical name covers 100% of `release-information` and 97.7% of `reference-documents` and is the better title in both, so the PDF read is confined to `user-guides` — the residue of the router's patterns by construction. The three rejected alternatives are recorded in `design.md` §10.5 with what each cost when it was measured: a byte-level `/Title` regex returns outline bookmarks while claiming 57% success, a cleaned-up filename produces `'adix 2'`, and pymupdf is AGPL for a gain of one usable title in 5,007.
 
 **Verified over the whole corpus, then placed end to end.** The shipped router and index were run over all 1,822 extracted versions: **12,352 files routed, 228 duplicates dropped** root-folder-wins, **12,124 published** — 5,007 `user-guides`, 3,824 `reference-documents`, 3,293 `release-information`, 13.7 GiB — with **156 versions routing nothing**, titles **7,016** from the kind name, **3,516** from a PDF `/Title` and **1,592** from the filename (1,491 of those because the `/Title` was blank or junk), and **7 unreadable PDFs in 4 filenames**. The plan predicted 12,130; the six-file difference is `flogo-oracledb/1.2.1`, where the owning-root guard hands `Default.htm`, `Default.js`, `Default.mcwebhelp`, `Default_CSH.htm`, `csh.js` and `tp-html.mclog` back to the converter — the only one of the four corrections that changes a count rather than confirming one. The distributor was then run for real against 120 of those packages junctioned into `extract_path()`: **752 MB in 19.8 s** and a single note on the first run, the second **all-current at 310 rows** (85 `user-guides`, 119 `release-information`, 106 `reference-documents`) with nothing re-copied — the pre-staging currency check doing exactly what it is for. The same table shows the two absences side by side: 1,389 `online-help` `NO_OUTPUT` rows for versions with no converted tree, and 1,269 version-level ones for versions with no extracted tree.
+
+---
+
+## 7. The Command Surface
+
+**Specified 2026-09-16. `report` and `status` are Built (Phase 7a, same day); `validate` is 7b and `csh` is 7c.** This section exists because the tool's read commands were declared in Phase 1 (`cli.py`'s command tree, `user-guide.md` §4) and have been raising `ClickException` ever since, so the only written account of what they do is a user guide describing a dashboard nobody has designed. What follows is the boundary between them, which is the part that has to be settled before any of the three is written.
+
+### 7.1 Three commands, three questions
+
+| Command | Question | Source of truth | Gates |
+| :--- | :--- | :--- | :--- |
+| `docushift status` | Where is everything now? | The catalog and `version_state` | No |
+| `docushift report` | What happened in a run? | The `runs` and `findings` tables | No |
+| `docushift validate` | Is the output correct? | The published tree on disk | **Yes**, on `error` |
+
+The boundary is load-bearing rather than tidy. `status` and `report` were both declared in Phase 1 with overlapping help text, and left that way they converge: a status screen grows a "problems" section, a report grows a progress table, and the tool ends with two commands that answer each other's question differently on the same day. So **`status` never reads the `findings` table and `report` never reads the catalog.** A `report` that needed the catalog to explain a slug would be reporting on a run in terms of state that has changed since the run — the exact confusion the run table was introduced to avoid.
+
+`validate` is the only one that gates, and that is `planning.md` §7.2's rule, not a property of how serious its findings are. A `convert` that finishes 99 of 100 versions and reports one error has done its job; failing it would make partial progress impossible and would put a skip flag in everybody's script within a week.
+
+### 7.2 What `status` can and cannot know
+
+The funnel — catalogued → in scope → not retired → eligible → downloaded → extracted → converted — is read from the catalog and from `version_state.status`, both of which the pipeline writes as it goes.
+
+**There is no `synced` column, unless the caller supplies `--target-dir`.** Phase 6b decided that sync currency is *compared against the target and never recorded*, because a fingerprint in `state.db` would report a version as current after somebody edited the published tree — and the published tree is the one artifact in this pipeline that DocuShift does not own. That decision has a consequence here that is worth stating rather than discovering: the database cannot answer "is this version published", so `status` does not pretend it can. Given a target directory it counts version folders on the disk, which is the same direction 6b's drop-down assembly takes (§6.6) — about the target, the disk is the evidence and the database is a memory.
+
+### 7.3 What `report` reads, and why the code is the contract
+
+One run is a row in `runs` and its findings are rows in `findings`, written by the stage that discovered them inside that stage's own transaction (`planning.md` §7.1, `design.md` §8.5). `report` is a read layer over those two tables and adds no analysis of its own: everything it prints was decided by a stage, at the moment the stage could still see what it was talking about.
+
+- **Findings are grouped by stage, then by code**, errors before warnings before notes, with a note's `count` beside it. That is the register's own shape (§7.5), so a reader who has seen the register can find a row without learning a second layout.
+- **`--explain <CODE>` prints the register entry** — severity, stage, obligation and the document section that promised it. Every `Code` has carried `specified_in` since Phase 5a with nothing reading it; this is what it was recorded for, and it is what lets a finding be traced back to the sentence that owes it.
+- **The export is Markdown and there is no JSON** (decided 2026-09-10). The consequence is stated as a rule rather than left implicit: tests assert against the `findings` table, never by parsing the report. A test that greps report prose pins the wording of every message in the tool. Asserting that a **code** appears in an export is allowed, because the code is the contract and the message is not.
+- **Retention is explicit.** `--prune --keep N` drops the findings of older runs and keeps their `runs` rows, which is why `run_id` is a real column and not a rowid alias.
+
+### 7.4 Exit codes
+
+Three rules, and they are three different conditions that a single "did it work" flag would collapse:
+
+1. **A stage command that did its work exits 0, even having reported errors.** Reporting is the work.
+2. **A stage command whose selection matched nothing exits 1.** `--batch poc-1` against a batch nobody tagged is not a successful run of zero versions, and in a script it is indistinguishable from one unless the exit code says so. `--dry-run` is unaffected: listing what would happen *is* the work.
+3. **`validate` exits 1 if and only if it recorded at least one `error`.** The only command in the tool whose exit code is a function of what it found.

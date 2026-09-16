@@ -180,47 +180,32 @@ REGISTRY: dict[str, Code] = _codes(
          "Present in the prior version, absent here", "planning.md §7.6"),
 )
 
-# Codes the built code paths can actually emit. Named rather than inferred, so the
-# reachability test reports a shrinking list of debts instead of asserting
-# something already true. 5b adds the nine the Flare engine raises, which is what
-# closes Stage 5's side of the register: every remaining unreachable code belongs
-# to `sync` or `validate`, neither of which is written.
-REACHABLE_IN_PHASE_5A = frozenset(
-    {"ENGINE_UNKNOWN", "REFERENCE_UNRESOLVED", "ASSET_ORPHANED", "CSH_UNRESOLVED",
-     "CSH_AMBIGUOUS", "DOCSET_SKIPPED"}
+# The register's remaining debt, stated as the *complement* of what is written.
+#
+# Through Phase 6e this was an eight-deep chain of `REACHABLE_IN_PHASE_*` unions,
+# one per sub-phase, each naming what its predecessor could reach plus what it
+# added. That shape had two faults. It grew a constant per phase while answering
+# one question, and it was asserted as a **subset** -- so a code that quietly
+# started being emitted never showed up, and the list could only ever overstate
+# the debt. Phase 7a replaces the chain with one frozenset asserted **equal**: a
+# code that starts firing fails the test until it is removed from here, and a code
+# that stops firing fails it until it is added back.
+#
+# Three left, and all three belong to commands that are not written: `LINK_BROKEN`
+# and `CSH_IDENTIFIER_DROPPED` to `validate` (Phase 7b), `DOC_REFERENCE_MISSING`
+# to the document router's escape check (Phase 7c). Before 7a there were nine,
+# four of them in stages -- `catalog fetch`, `catalog eos`, `extract` -- that
+# computed their findings, printed them, and opened no run to record them in.
+#
+# The count was briefly believed to be twenty, and how that happened is the reason
+# the companion test scans for a quoted literal rather than for a call: the earlier
+# count came from grepping `record("CODE"`, which misses every continuation-line
+# and every variable call site. The scan that replaces it proves a code is
+# *written*, not that it fires -- which is a real limit, and why this set is
+# curated by hand rather than derived.
+NOT_YET_EMITTED = frozenset(
+    {"LINK_BROKEN", "CSH_IDENTIFIER_DROPPED", "DOC_REFERENCE_MISSING"}
 )
-REACHABLE_IN_PHASE_5B = REACHABLE_IN_PHASE_5A | {
-    "NAV_NODE_DROPPED", "OUTPUT_ROOT_MISSING", "CONTENT_MISSING", "TOC_ORPHAN",
-    "TOPIC_LINK_DANGLING", "ALERT_LABEL_UNMAPPED", "LANDING_PAGE_EMPTY",
-    "TAIL_PAGE_MISSING", "LOCALIZED_TREE_SKIPPED",
-}
-# Stage 6a raises no new code -- the four the synthesizer needs were registered in
-# 5b and 5a. It gains one only because `METADATA_MISMATCH` moved from `sync` to
-# `convert`, which is where the figures it compares actually exist.
-REACHABLE_IN_PHASE_6A = REACHABLE_IN_PHASE_5B | {"METADATA_MISMATCH"}
-# Stage 6b raises no new code either. Both of these were registered against
-# `Stage.SYNC` when the register was written and 6b is simply the first path that
-# can reach them -- which is the test the sub-phase was held to: needing a code
-# that is not in the table would have meant the rule was new, not the table short.
-REACHABLE_IN_PHASE_6B = REACHABLE_IN_PHASE_6A | {"VERSION_NOT_NUMERIC", "VERSION_UNDATED"}
-# 6c adds exactly one, and it is the first code in the register that was *not*
-# there before the phase that raises it. That is the test the rule states: needing
-# a code that is not in the table means the rule is new, not the table short -- and
-# "a shipped PDF is damaged" is a genuinely new thing for this tool to know.
-REACHABLE_IN_PHASE_6C = REACHABLE_IN_PHASE_6B | {"DOCUMENT_UNREADABLE"}
-# 6d adds one and *removes* one, which no earlier phase has done. `ARCHIVE_ALSO_LIVE`
-# was registered for a cross-link between an archived version and a live one; the
-# 2026-09-15 re-measure found 0 of 2,100 archived rows can be either -- the catalog
-# keys `Product.versions` by version string, so one version being both is
-# unrepresentable, and 0 archived rows are `convert_eligible`. A code no code path
-# can reach is an obligation the register claims and no test can check, so it is
-# gone rather than carried as a permanent debt. Register: 29 -> 28.
-REACHABLE_IN_PHASE_6D = REACHABLE_IN_PHASE_6C | {"PUBLISH_BASE_URL_UNSET"}
-# 6e adds one, and it is the first `Stage.CONVERT` code added since 5b -- because
-# the phase is a Stage 5 change wearing a Stage 6 phase's clothes: the rewrite that
-# §10.7 assigned to sync turned out to have to happen while the engine is emitting.
-# Register: 29 -> 30.
-REACHABLE_IN_PHASE_6E = REACHABLE_IN_PHASE_6D | {"API_LINK_REWRITTEN"}
 
 
 class UnregisteredCode(KeyError):

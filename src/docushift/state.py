@@ -429,6 +429,39 @@ class StateStore:
         ).fetchall()
         return [(row["slug"], row["version"]) for row in rows]
 
+    def progress(self) -> dict[tuple[str, str], dict[str, Any]]:
+        """Per-version pipeline evidence, keyed `(slug, version)` -- `status`'s funnel.
+
+        Read from what each stage *recorded* rather than from `status` alone,
+        because `status` is one column holding the furthest point reached and
+        `ERROR` overwrites it: a version that downloaded, extracted and then failed
+        to convert would otherwise vanish from the downloaded count as well, and a
+        funnel whose steps do not nest is worse than no funnel. `converted` is the
+        presence of an `output_map`, which is written after the tree swap -- so an
+        interrupted conversion is not counted as one.
+        """
+        rows: dict[tuple[str, str], dict[str, Any]] = {}
+        for row in self.connect().execute(
+            "SELECT slug, version, status, download_path, extract_path, error FROM version_state"
+        ).fetchall():
+            rows[(row["slug"], row["version"])] = {
+                "status": row["status"],
+                "downloaded": bool(row["download_path"]),
+                "extracted": bool(row["extract_path"]),
+                "converted": False,
+                "error": row["error"],
+            }
+        for row in self.connect().execute(
+            "SELECT DISTINCT slug, version FROM output_map"
+        ).fetchall():
+            entry = rows.setdefault(
+                (row["slug"], row["version"]),
+                {"status": None, "downloaded": False, "extracted": False,
+                 "converted": False, "error": None},
+            )
+            entry["converted"] = True
+        return rows
+
     def status_counts(self) -> dict[str, int]:
         """Lifecycle histogram, for the migration dashboard."""
         rows = self.connect().execute(
@@ -605,6 +638,96 @@ class StateStore:
             params = (command,)
         row = self.connect().execute(sql + " ORDER BY run_id DESC LIMIT 1", params).fetchone()
         return dict(row) if row is not None else None
+
+    # -- the read side (Phase 7a, architecture.md §7.3) -------------------------
+    #
+    # Five methods, all of them `report`'s. They are here rather than in
+    # `reporting/` for the reason every other query is: `state.db`'s schema has one
+    # owner, and a second module writing SQL against `findings` is how a column
+    # rename becomes a silent empty table.
+
+    def get_run(self, run_id: int) -> dict[str, Any] | None:
+        row = self.connect().execute(
+            "SELECT * FROM runs WHERE run_id = ?", (run_id,)
+        ).fetchone()
+        return dict(row) if row is not None else None
+
+    def recent_runs(self, limit: int = 20, command: str | None = None) -> list[dict[str, Any]]:
+        """Newest first, with each run's finding count -- the `--run` picker's list."""
+        sql = (
+            "SELECT r.*, (SELECT COUNT(*) FROM findings f WHERE f.run_id = r.run_id) AS findings "
+            "FROM runs r"
+        )
+        params: tuple[Any, ...] = ()
+        if command is not None:
+            sql += " WHERE r.command = ?"
+            params = (command,)
+        rows = self.connect().execute(
+            sql + " ORDER BY r.run_id DESC LIMIT ?", (*params, limit)
+        ).fetchall()
+        return [dict(row) for row in rows]
+
+    def query_findings(
+        self,
+        run_id: int,
+        stage: str | None = None,
+        severity: str | None = None,
+        code: str | None = None,
+        slug: str | None = None,
+    ) -> list[dict[str, Any]]:
+        """`get_findings` with `report`'s four filters, applied in SQL.
+
+        Filtered here rather than in the caller because a convert run over the
+        whole catalog writes tens of thousands of rows and `--code X` is how you
+        look at one of them.
+        """
+        sql = (
+            "SELECT id, stage, severity, code, slug, version, path, message, count "
+            "FROM findings WHERE run_id = ?"
+        )
+        params: list[Any] = [run_id]
+        for column, value in (
+            ("stage", stage), ("severity", severity), ("code", code), ("slug", slug)
+        ):
+            if value:
+                sql += f" AND {column} = ?"
+                params.append(value)
+        rows = self.connect().execute(sql + " ORDER BY id", params).fetchall()
+        return [dict(row) for row in rows]
+
+    def findings_tally(self, run_id: int) -> dict[str, int]:
+        """`{severity: rows}` for one run, without loading the rows."""
+        rows = self.connect().execute(
+            "SELECT severity, COUNT(*) AS rows FROM findings WHERE run_id = ? GROUP BY severity",
+            (run_id,),
+        ).fetchall()
+        return {row["severity"]: row["rows"] for row in rows}
+
+    def prune_findings(self, keep: int) -> tuple[int, int]:
+        """Drops the findings of all but the newest `keep` runs. Returns `(runs, rows)`.
+
+        The `runs` rows survive, which is what `run_id` being an explicit column
+        rather than a rowid alias is for: a pruned run is still a dated record that
+        something ran, and a report can still say its findings are gone rather than
+        that the run never happened.
+        """
+        if keep < 0:
+            raise ValueError("--keep cannot be negative")
+        stale = [
+            int(row["run_id"])
+            for row in self.connect().execute(
+                "SELECT run_id FROM runs WHERE run_id IN "
+                "(SELECT DISTINCT run_id FROM findings) ORDER BY run_id DESC"
+            ).fetchall()
+        ][keep:]
+        if not stale:
+            return 0, 0
+        placeholders = ",".join("?" * len(stale))
+        with self._tx() as conn:
+            cursor = conn.execute(
+                f"DELETE FROM findings WHERE run_id IN ({placeholders})", stale
+            )
+            return len(stale), int(cursor.rowcount or 0)
 
     # -- batching ------------------------------------------------------------
 

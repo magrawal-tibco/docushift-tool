@@ -26,11 +26,13 @@ from typing import Any
 from docushift.catalog import CatalogManager
 from docushift.config import ConfigManager
 from docushift.downloader import sha256_of
+from docushift.engines.csh import CshStatus
 from docushift.engines.detector import Detection, detect_version
 from docushift.engines.roots import find_output_roots
 from docushift.extractor.inventory import Inventory, inventory_tree
 from docushift.extractor.safe_unzip import UnsafeArchiveError, safe_extract
 from docushift.models import ConversionStatus, EngineSource, Product, ProductVersion, SourceEngine
+from docushift.reporting.findings import FindingsRun
 from docushift.utils.swap import remove, swap
 
 
@@ -127,9 +129,16 @@ class ExtractStats:
 class PackageExtractor:
     """Unpacks packages into `families/<family>/extracted/<slug>/<version>/`."""
 
-    def __init__(self, config: ConfigManager, catalog: CatalogManager):
+    def __init__(
+        self, config: ConfigManager, catalog: CatalogManager, findings: FindingsRun | None = None
+    ):
         self.config = config
         self.catalog = catalog
+        # Optional, so a unit test and a `--dry-run` construct an extractor the
+        # same way a run does. `measure` records into it and the CLI flushes per
+        # version, which is the §7.1 rule: findings land inside the stage's own
+        # transaction, not in one big write at the end.
+        self.findings = findings
 
     # -- state ---------------------------------------------------------------
 
@@ -304,7 +313,45 @@ class PackageExtractor:
                 api_files=inventory.api_files,
                 doc_files=inventory.doc_files,
             )
+        self._record_csh_findings(slug, number, inventory)
         return inventory
+
+    def _record_csh_findings(self, slug: str, number: str, inventory: Inventory) -> None:
+        """The two Stage.EXTRACT codes -- one row per version, never one per source.
+
+        A version can carry dozens of help maps and the reader's question is about
+        the version: does this product ship help we could not read? The per-source
+        detail is already in `csh_sources`, which this does not duplicate; the
+        finding carries the count and a few paths so the row is actionable without
+        a second query.
+
+        `CSH_SOURCE_EMPTY` is a note because an empty map is the majority of the
+        corpus and a measurement rather than a defect (`csh.py`). Unparsed is a
+        warning: the file was located, `_has_csh` is set on the strength of that,
+        and nothing came out of it.
+        """
+        if self.findings is None:
+            return
+        empty = [s for s in inventory.csh_sources if s.status is CshStatus.EMPTY]
+        unparsed = [
+            s for s in inventory.csh_sources
+            if s.status in (CshStatus.UNPARSEABLE, CshStatus.UNREADABLE)
+        ]
+        if empty:
+            self.findings.record(
+                "CSH_SOURCE_EMPTY", slug=slug, version=number, count=len(empty),
+                message=f"{len(empty)} help map(s) located and empty -- no csh.yml entry from them",
+            )
+        if unparsed:
+            self.findings.record(
+                "CSH_SOURCE_UNPARSED", slug=slug, version=number, count=len(unparsed),
+                path=unparsed[0].path.as_posix(),
+                message=(
+                    f"{len(unparsed)} help map(s) located but not parsed; _has_csh is still set: "
+                    + ", ".join(s.path.as_posix() for s in unparsed[:5])
+                    + (" ..." if len(unparsed) > 5 else "")
+                ),
+            )
 
     # -- a run ----------------------------------------------------------------
 

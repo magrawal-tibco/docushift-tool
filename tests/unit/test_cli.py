@@ -21,11 +21,10 @@ from docushift.state import StateStore
 from tests.conftest import REPO_ROOT, make_product, make_version
 
 # `download` and `archive download` left this list in Phase 4a, `extract` in 4b-1,
-# `convert` in 5a, `sync` in 6b.
+# `convert` in 5a, `sync` in 6b, and `status`/`report` in 7a. `validate` is the
+# last one, and 7b takes it.
 PENDING_COMMANDS = [
     ["validate", "--target-dir", "workspace"],
-    ["status", "--bu", "tibco"],
-    ["report", "--engines"],
 ]
 
 
@@ -1190,3 +1189,183 @@ def test_sync_needs_a_scope_like_every_other_stage(
 
     assert result.exit_code != 0
     assert "Choose a scope" in result.output
+
+
+# -- status and report (Phase 7a) ----------------------------------------------
+
+
+def test_status_prints_the_funnel_and_names_no_findings(
+    runner: CliRunner, populated_root: Path
+) -> None:
+    """The §7.1 boundary at the command level: `status` is about progress only."""
+    result = _invoke(runner, populated_root, "status")
+
+    assert result.exit_code == 0
+    for step in ("Catalogued", "In scope", "Convert eligible", "Downloaded", "Converted"):
+        assert step in result.output
+    # No Published row without --target-dir: sync currency is compared, never
+    # recorded, so the database cannot answer it (§7.2).
+    assert "Published" not in result.output
+
+
+def test_status_counts_published_versions_from_the_target_tree(
+    runner: CliRunner, populated_root: Path, tmp_path: Path
+) -> None:
+    _convert_output(populated_root, "10.4.0", {"index.md": "# x\n", "toc.yml": "nodes: []\n"})
+    workspace = tmp_path / "workspace"
+    workspace.mkdir()
+    _invoke(runner, populated_root, "sync", "--all", "--target-dir", str(workspace))
+
+    result = _invoke(runner, populated_root, "status", "--target-dir", str(workspace))
+
+    assert result.exit_code == 0
+    assert "Published" in result.output
+
+
+def test_status_engines_separates_undetermined_from_unconvertible(
+    runner: CliRunner, populated_root: Path
+) -> None:
+    result = _invoke(runner, populated_root, "status", "--engines")
+
+    assert result.exit_code == 0
+    assert "Engines" in result.output
+    assert "still `auto`" in result.output
+
+
+def test_report_explains_a_code_without_a_run_or_a_database(
+    runner: CliRunner, populated_root: Path
+) -> None:
+    """`--explain` is answered from the register, so it works on a fresh checkout."""
+    result = _invoke(runner, populated_root, "report", "--explain", "csh_unresolved")
+
+    assert result.exit_code == 0
+    assert "CSH_UNRESOLVED" in result.output
+    assert "specified in" in result.output
+
+
+def test_report_rejects_a_code_that_is_not_in_the_register(
+    runner: CliRunner, populated_root: Path
+) -> None:
+    result = _invoke(runner, populated_root, "report", "--explain", "ASSET_WOBBLY")
+
+    assert result.exit_code != 0
+    assert "not a registered finding code" in result.output
+
+
+def test_report_on_an_empty_database_says_so_rather_than_printing_nothing(
+    runner: CliRunner, populated_root: Path
+) -> None:
+    result = _invoke(runner, populated_root, "report")
+
+    assert result.exit_code != 0
+    assert "No run has been recorded" in result.output
+
+
+def test_catalog_eos_records_what_it_prints(runner: CliRunner, populated_root: Path) -> None:
+    """The gap 7a closes: these numbers were already computed and already printed.
+
+    Before this phase `catalog eos` was one of four stage commands that opened no
+    run, so everything it found lived only in the terminal scrollback.
+    """
+    (populated_root / "config" / "scope.yaml").write_text(
+        'out_of_scope:\n  - slug: gone-upstream\n    reason: "renamed"\n', encoding="utf-8"
+    )
+
+    result = _invoke(runner, populated_root, "catalog", "eos")
+
+    assert result.exit_code == 0
+    store = StateStore(populated_root / "cache" / "state.db")
+    run = store.last_run("catalog")
+    codes = [row["code"] for row in store.get_findings(run["run_id"])]
+    assert "SCOPE_RULE_UNMATCHED" in codes
+    store.close()
+
+
+def test_report_reads_back_the_run_a_stage_just_wrote(
+    runner: CliRunner, populated_root: Path
+) -> None:
+    (populated_root / "config" / "scope.yaml").write_text(
+        'out_of_scope:\n  - slug: gone-upstream\n    reason: "renamed"\n', encoding="utf-8"
+    )
+    _invoke(runner, populated_root, "catalog", "eos")
+
+    result = _invoke(runner, populated_root, "report", "--run", "last")
+
+    assert result.exit_code == 0
+    assert "catalog" in result.output
+    assert "SCOPE_RULE_UNMATCHED" in result.output
+
+
+def test_report_filters_on_a_code_and_exports_markdown(
+    runner: CliRunner, populated_root: Path, tmp_path: Path
+) -> None:
+    (populated_root / "config" / "scope.yaml").write_text(
+        'out_of_scope:\n  - slug: gone-upstream\n    reason: "renamed"\n', encoding="utf-8"
+    )
+    _invoke(runner, populated_root, "catalog", "eos")
+    export = tmp_path / "reports" / "eos.md"
+
+    result = _invoke(
+        runner, populated_root, "report", "--code", "SCOPE_RULE_UNMATCHED", "--export", str(export)
+    )
+
+    assert result.exit_code == 0
+    assert export.is_file()
+    text = export.read_text(encoding="utf-8")
+    assert "SCOPE_RULE_UNMATCHED" in text
+    assert "code=SCOPE_RULE_UNMATCHED" in text
+
+
+def test_report_prune_drops_old_findings_and_keeps_the_run_rows(
+    runner: CliRunner, populated_root: Path
+) -> None:
+    (populated_root / "config" / "scope.yaml").write_text(
+        'out_of_scope:\n  - slug: gone-upstream\n    reason: "renamed"\n', encoding="utf-8"
+    )
+    _invoke(runner, populated_root, "catalog", "eos")
+    _invoke(runner, populated_root, "catalog", "eos")
+
+    result = _invoke(runner, populated_root, "report", "--prune", "--keep", "1")
+
+    assert result.exit_code == 0
+    store = StateStore(populated_root / "cache" / "state.db")
+    assert len(store.recent_runs()) == 2
+    assert store.recent_runs()[1]["findings"] == 0
+    store.close()
+
+
+@pytest.mark.parametrize("command", ["download", "extract", "convert", "sync"])
+def test_a_selection_that_matches_nothing_exits_one(
+    runner: CliRunner, populated_root: Path, tmp_path: Path, command: str
+) -> None:
+    """§7.4. Until 7a a typo in --product was indistinguishable from a clean run."""
+    workspace = tmp_path / "workspace"
+    workspace.mkdir()
+    extra = ["--target-dir", str(workspace)] if command == "sync" else []
+
+    result = _invoke(runner, populated_root, command, "--family", "nothing-like-this", *extra)
+
+    assert result.exit_code == 1
+    assert "No convert-eligible versions match" in result.output
+
+
+def test_a_dry_run_over_an_empty_selection_exits_one_too(
+    runner: CliRunner, populated_root: Path
+) -> None:
+    """Not exempt: it is the same mistake, discovered one command earlier."""
+    result = _invoke(runner, populated_root, "extract", "--family", "nope", "--dry-run")
+
+    assert result.exit_code == 1
+
+
+def test_a_run_that_found_errors_still_exits_zero(
+    runner: CliRunner, populated_root: Path, tmp_path: Path
+) -> None:
+    """A stage that did its work exits 0. Only `validate` gates on severity."""
+    workspace = tmp_path / "workspace"
+    workspace.mkdir()
+    _convert_output(populated_root, "10.4.0", {"index.md": "# x\n", "toc.yml": "nodes: []\n"})
+
+    result = _invoke(runner, populated_root, "sync", "--all", "--target-dir", str(workspace))
+
+    assert result.exit_code == 0

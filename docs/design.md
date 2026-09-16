@@ -676,7 +676,7 @@ Count products by family provenance and list the unclassified ones. This turns "
 
 ### 8.5 The findings register — **Built** (Phase 5a)
 
-`reporting/findings.py`. Every deferred "report line" in this document has a **code**, and they are one table (`planning.md` §7.5) — twenty at 5a, **twenty-eight after Phase 5b added the eight `architecture.md` §5.1 had asked for in prose**. The module landed with Stage 5 rather than with `validate`, because the first stage that produces findings in bulk is conversion and a register invented alongside its second caller is a register shaped by its first.
+`reporting/findings.py`. Every deferred "report line" in this document has a **code**, and they are one table (`planning.md` §7.5) — twenty at 5a, twenty-eight after Phase 5b added the eight `architecture.md` §5.1 had asked for in prose, and **thirty after Stage 6**: `DOCUMENT_UNREADABLE` (6c), `PUBLISH_BASE_URL_UNSET` (6d, replacing the removed `ARCHIVE_ALSO_LIVE`) and `API_LINK_REWRITTEN` (6e). The module landed with Stage 5 rather than with `validate`, because the first stage that produces findings in bulk is conversion and a register invented alongside its second caller is a register shaped by its first.
 
 Three rules, each of them a rule about where a decision is *not* made:
 
@@ -689,6 +689,20 @@ Three rules, each of them a rule about where a decision is *not* made:
 **All twenty rows are registered although Phase 5a can reach six.** A half-populated register cannot be audited. The reachability test names the unreached codes rather than failing, so the debt is a visible list that shrinks as Stages 6 and 7 land instead of a silence.
 
 **And the reachability half earns its keep.** Phase 5b registered `ALERT_LABEL_UNMAPPED` and then could not reach it: every callout class the engine matched was one the vocabulary mapped. The two ways out were deleting the code and widening the detection, and the second is right — Flare's convention is `div.note<Kind>` for whatever kind the project stylesheet defines, so an unsampled `noteBestPractice` was going to arrive as unmarked prose with nothing said. An unreachable code is usually a rule that is narrower than the thing it was written about.
+
+### 8.6 Reading the register back — **Built** (Phase 7a)
+
+The register is only worth having if it cannot fall out of step with the code, and if somebody can read it. Those are two mechanisms, not one.
+
+**Reading it back is `docushift report`** (`architecture.md` §7.3): a read layer over `runs` and `findings` that groups by stage then by code, prints a note's count beside it, and resolves `--explain <CODE>` out of `REGISTRY` — severity, stage, obligation, and the document section that promised it. Nothing in `report` derives a finding; everything it shows was decided by a stage at the moment that stage could still see what it was describing.
+
+**Keeping it in step is two tests, deliberately different in kind.** The first asserts that the set of registered-but-unemitted codes is *exactly* a named frozenset, so closing a code without updating the list fails, and so does registering one and walking away. The second is a literal scan of `src/` for each code, which catches the cheap failure — registered and never written down anywhere.
+
+The scan is the weaker of the two and is kept honest about it: **it proves a code is written, not that it fires.** A code sitting in an unreachable branch passes the scan and fails the curated set, which is why the set is not replaced by the scan. The inverse mistake is on record: a first attempt to derive the list by grepping for `record("CODE"` missed every call whose code arrives on a continuation line or through a variable, and reported nine reachable codes as dead.
+
+**The read layer is `reporting/report.py` and `reporting/status.py`**, and the boundary between them is enforced rather than trusted: a test reads both module bodies and asserts that `status.py` never names `findings` and `report.py` never names `catalog`. It is a crude test and it is the only kind available for a rule about what a module is allowed to know. The five queries `report` needs (`get_run`, `recent_runs`, `query_findings`, `findings_tally`, `prune_findings`) live in `state.py` with every other query, because `state.db`'s schema has one owner and a second module writing SQL against `findings` is how a column rename becomes a silent empty table.
+
+**What is outstanding is a number, not a paragraph.** After Phase 7a three codes remain unemitted — `LINK_BROKEN` and `CSH_IDENTIFIER_DROPPED`, which belong to `validate` (7b and 7c), and `DOC_REFERENCE_MISSING`, which waits on §10.7's class 2. Before it, nine were, four of them in a stage that opened no run at all.
 
 ---
 
@@ -1017,6 +1031,7 @@ Most rows are **Built** or **Specified**. One is neither, and is marked as such 
 | `architecture.md` §5.6 | DocBook converter | Built | `engines/docbook.py:DocBookEngine`; its root rule is `is_docbook_page` in `engines/roots.py` |
 | 8.1–8.3 | Catalog validation, warnings, triage | Built | `catalog.py` |
 | 8.5 | Findings register — codes, severity, per-version flush | Built | `reporting/findings.py`; `state.py:record_findings` |
+| 8.6 | Reading the register back — `report`, `--explain`, the two reachability tests | Built | `reporting/report.py`, `reporting/status.py`; `architecture.md` §7 |
 | 9.3 | CSH resolution | Built | `transforms/csh.py:resolve`, `order_doc_sets` |
 | 9.4–9.5 | `csh.yml` and frontmatter | Built | `transforms/csh.py:render`, `write`, `frontmatter_value` |
 | 9.6 | CSH verification | Specified | Phase 7 |

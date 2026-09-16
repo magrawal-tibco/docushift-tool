@@ -24,6 +24,7 @@ from docushift.catalog import CatalogError, CatalogManager
 from docushift.config import ConfigManager
 from docushift.discovery import DocsiteClient, DocsiteCrawler
 from docushift.models import ReleaseStatus, ScopeSource, SourceEngine, ZipSource
+from docushift.reporting.findings import REGISTRY, FindingsRun, Severity
 from docushift.state import StateStore
 from docushift.utils.slug import version_segment
 
@@ -38,6 +39,25 @@ def _pending(command: str, phase: str) -> None:
         f"`docushift {command}` is not implemented yet (scheduled for {phase}). "
         f"See docs/planning.md for the roadmap."
     )
+
+
+def _no_selection(command: str) -> None:
+    """Exits 1 for a selection that matched nothing -- `architecture.md` §7.4.
+
+    Until Phase 7a every stage printed this and exited 0, which meant a typo in
+    `--product` was indistinguishable from a clean run in any script that checked
+    the status. Exit 1 is "you asked for nothing", not "something went wrong": a
+    stage that ran and found errors still exits 0, because it did its work and the
+    errors are in the report.
+
+    `--dry-run` is deliberately not exempt. A dry run over an empty selection is
+    the same mistake, discovered one command earlier.
+    """
+    console.print(
+        f"[yellow]No convert-eligible versions match this selection.[/yellow] "
+        f"`docushift catalog list --eligible-only` shows what `{command}` can work on."
+    )
+    raise click.exceptions.Exit(1)
 
 
 def _scope_options(func):
@@ -178,8 +198,13 @@ def catalog_fetch(
     except CatalogError as exc:
         raise click.ClickException(str(exc)) from exc
 
+    findings = FindingsRun("catalog", batch=batch or "", store=None if dry_run else manager.state).start()
     if not dry_run:
         _record_discovery_metadata(manager, result)
+    _record_catalog_findings(
+        manager, findings, stats.products_fully_retired, scope_rules_conclusive=bool(select_all)
+    )
+    findings.finish()
 
     table = Table(title="Merge" + (" (dry run -- nothing written)" if dry_run else ""))
     table.add_column("Change")
@@ -211,6 +236,7 @@ def catalog_fetch(
         console.print(f"[yellow]WARN[/yellow] {note}")
     if result.errors:
         console.print(f"[yellow]{len(result.errors)} product(s) could not be reached and were left as-is.[/yellow]")
+    _report_findings(findings)
 
 
 def _resolve(manager: CatalogManager, selector: str) -> str:
@@ -367,6 +393,55 @@ def _report_retirements(stats) -> None:
         )
 
 
+def _record_catalog_findings(
+    manager: CatalogManager,
+    findings: FindingsRun,
+    emptied: list[str],
+    *,
+    scope_rules_conclusive: bool,
+) -> None:
+    """The four Stage.CATALOG codes, written to the run the caller opened.
+
+    Every one of these was already computed and printed before Phase 7a -- the
+    unmatched scope rules, the stale aliases, the emptied products -- and none of
+    them survived the terminal scrollback. That is the whole gap 7a closes here:
+    the numbers do not change, they just become rows somebody can query a week
+    later.
+
+    `scope_rules_conclusive` is the one judgement call. A rule matching nothing is
+    only a finding over a fully fetched catalog; on a `--product ems` fetch it
+    means the other 633 products were not looked at. `catalog eos` reads the
+    catalog on disk and so is always conclusive.
+    """
+    if scope_rules_conclusive:
+        for rule in manager.unmatched_scope_rules():
+            findings.record(
+                "SCOPE_RULE_UNMATCHED",
+                slug=rule,
+                message=f"config/scope.yaml excludes '{rule}', which matches no catalogued product",
+            )
+    for alias in manager.unmatched_eos_aliases():
+        findings.record(
+            "EOS_ALIAS_STALE",
+            slug=alias,
+            message=f"config/eos.yaml aliases '{alias}', which the active report does not mention",
+        )
+    for slug in emptied:
+        findings.record(
+            "EOS_PRODUCT_EMPTIED",
+            slug=slug,
+            message="every convert-eligible version is retired -- this product publishes nothing",
+        )
+    for product, version in manager.iter_versions():
+        if version.convert_batch and not version.convert_eligible:
+            findings.record(
+                "BATCH_NOT_ELIGIBLE",
+                slug=product.slug,
+                version=version.version,
+                message=f"tagged into batch '{version.convert_batch}' but convert_eligible is false",
+            )
+
+
 @catalog.command("eos")
 @click.pass_context
 def catalog_eos(ctx: click.Context) -> None:
@@ -377,10 +452,18 @@ def catalog_eos(ctx: click.Context) -> None:
     changed, this is the whole update.
     """
     manager = _catalog_manager(ctx)
+    findings = FindingsRun("catalog", store=manager.state).start()
     try:
         stats = manager.apply_eos()
     except (CatalogError, ValueError) as exc:
         raise click.ClickException(str(exc)) from exc
+
+    # Conclusive here in a way it is not during a scoped fetch: this command reads
+    # the catalog on disk, so a rule that matches nothing really matches nothing.
+    _record_catalog_findings(
+        manager, findings, stats.products_fully_retired, scope_rules_conclusive=True
+    )
+    findings.finish()
 
     summary = manager.triage_summary()
     counts = summary["release_status_counts"]
@@ -402,6 +485,15 @@ def catalog_eos(ctx: click.Context) -> None:
     for note in manager.warnings():
         if "eos.yaml" in note:
             console.print(f"[yellow]WARN[/yellow] {note}")
+    _report_findings(findings)
+
+
+def _report_findings(findings: FindingsRun) -> None:
+    """The one line that makes a run's findings findable again."""
+    summary = findings.summary()
+    if not summary:
+        return
+    console.print(f"[dim]Recorded {summary} -- `docushift report --run {findings.run_id}`.[/dim]")
 
 
 @catalog.command("show")
@@ -794,8 +886,7 @@ def download(ctx, bu, family, product, version, batch, select_all, force, worker
 
     pairs = _download_selection(manager, bu, family, product, version, batch, select_all)
     if not pairs:
-        console.print("[yellow]No convert-eligible versions match.[/yellow]")
-        return
+        _no_selection("download")
 
     if dry_run:
         table = Table(title=f"Would download ({len(pairs)})")
@@ -973,8 +1064,7 @@ def extract(ctx, bu, family, product, version, batch, select_all, force, dry_run
 
     pairs = _download_selection(manager, bu, family, product, version, batch, select_all)
     if not pairs:
-        console.print("[yellow]No convert-eligible versions match.[/yellow]")
-        return
+        _no_selection("extract")
 
     if dry_run:
         table = Table(title=f"Would extract ({len(pairs)})")
@@ -991,10 +1081,14 @@ def extract(ctx, bu, family, product, version, batch, select_all, force, dry_run
         console.print(table)
         return
 
-    extractor = PackageExtractor(cfg, manager)
+    findings = FindingsRun("extract", batch=batch or "", store=manager.state).start()
+    extractor = PackageExtractor(cfg, manager, findings=findings)
     console.print(f"Extracting {len(pairs)} version(s)...")
 
     def on_result(result) -> None:
+        # Flushed per version, so an unzip that dies on version 200 keeps the
+        # findings of the first 199 (§7.1).
+        findings.flush()
         if result.outcome is ExtractOutcome.EXTRACTED:
             roots = f", {result.roots} root(s)" if result.roots else ""
             console.print(
@@ -1004,7 +1098,11 @@ def extract(ctx, bu, family, product, version, batch, select_all, force, dry_run
         elif result.outcome in (ExtractOutcome.FAILED, ExtractOutcome.REFUSED):
             console.print(f"  [red]x[/red] {result.slug}@{result.version}")
 
-    _report_extract(extractor.extract_many(pairs, force=force, on_result=on_result))
+    try:
+        _report_extract(extractor.extract_many(pairs, force=force, on_result=on_result))
+    finally:
+        findings.finish()
+    _report_findings(findings)
 
 
 def _report_convert(stats, findings) -> None:
@@ -1081,7 +1179,6 @@ def convert(ctx, bu, family, product, version, batch, select_all, force, dry_run
     never guessed at.
     """
     from docushift.converter import ConvertOutcome, DocumentConverter
-    from docushift.reporting.findings import FindingsRun
 
     cfg: ConfigManager = ctx.obj["config"]
     manager = _catalog_manager(ctx)
@@ -1093,8 +1190,7 @@ def convert(ctx, bu, family, product, version, batch, select_all, force, dry_run
 
     pairs = _download_selection(manager, bu, family, product, version, batch, select_all)
     if not pairs:
-        console.print("[yellow]No convert-eligible versions match.[/yellow]")
-        return
+        _no_selection("convert")
 
     if dry_run:
         table = Table(title=f"Would convert ({len(pairs)})")
@@ -1233,7 +1329,6 @@ def sync(ctx, bu, family, product, version, batch, select_all, target_dir, force
     Filesystem only. This writes the trees and reports what it wrote; it creates no
     repository and runs no git command (`architecture.md` §6.0).
     """
-    from docushift.reporting.findings import FindingsRun
     from docushift.sync import ONLINE_HELP, WorkspaceDistributor
 
     cfg: ConfigManager = ctx.obj["config"]
@@ -1241,8 +1336,7 @@ def sync(ctx, bu, family, product, version, batch, select_all, target_dir, force
 
     pairs = _download_selection(manager, bu, family, product, version, batch, select_all)
     if not pairs:
-        console.print("[yellow]No convert-eligible versions match.[/yellow]")
-        return
+        _no_selection("sync")
 
     distributor = WorkspaceDistributor(cfg, manager)
 
@@ -1324,18 +1418,279 @@ def validate(target_dir: Path) -> None:
 @main.command()
 @click.option("--bu", default=None, help="Restrict to a business unit (tibco | ibi).")
 @click.option("--family", default=None, help="Restrict to a product family.")
-def status(bu: str | None, family: str | None) -> None:
-    """Print the per-product migration status and delta dashboard."""
-    _pending("status", "Phase 7 (needs the Phase 2 state engine)")
+@click.option(
+    "--target-dir",
+    type=DIR_PATH,
+    default=None,
+    help="Published workspace to count against. Without it there is no published row.",
+)
+@click.option("--engines", "by_engine", is_flag=True, help="Report engine resolution and what is still `auto`.")
+@click.pass_context
+def status(
+    ctx: click.Context, bu: str | None, family: str | None, target_dir: Path | None, by_engine: bool
+) -> None:
+    """Where every version is in the pipeline, read from the catalog and state.db.
+
+    Reports a `Published` row only with `--target-dir`, and counts it from the
+    disk. Sync currency is compared against the target and never recorded
+    (`architecture.md` §7.2), so the database cannot answer that question and this
+    command does not pretend it can.
+
+    Says nothing about findings -- that is `docushift report`. The two commands
+    read different sources on purpose, so they cannot give two answers to one
+    question.
+    """
+    from docushift.reporting import status as status_report
+
+    cfg: ConfigManager = ctx.obj["config"]
+    manager = _catalog_manager(ctx)
+
+    published = None
+    if target_dir is not None:
+        published = status_report.published_counts(cfg, manager, target_dir, bu=bu, family=family)
+
+    funnel = status_report.funnel(manager, bu=bu, family=family, published=published)
+    if not funnel.catalogued:
+        console.print("[yellow]No catalogued versions match. Run `docushift catalog fetch`.[/yellow]")
+        return
+
+    scope = ", ".join(filter(None, [f"bu={bu}" if bu else "", f"family={family}" if family else ""]))
+    table = Table(title="Status" + (f" ({scope})" if scope else ""))
+    table.add_column("Step")
+    table.add_column("Versions", justify="right")
+    table.add_column("of eligible", justify="right")
+    table.add_column("Source", style="dim")
+    # The share is measured against the eligible population, so the four gate rows
+    # above it have no share to show -- they are what produce the denominator.
+    gates = ("Catalogued", "In scope", "Not retired", "Convert eligible")
+    for label, count, source in funnel.rows():
+        share = f"{count / funnel.eligible:.0%}" if funnel.eligible and label not in gates else ""
+        table.add_row(label, str(count), share, source)
+    console.print(table)
+
+    if funnel.converted > funnel.extracted:
+        # Not a broken funnel: `convert --input` runs a tree this tool never
+        # downloaded, so the output rows are real and the two steps above them are
+        # genuinely empty. Said plainly, because a step that exceeds the one before
+        # it reads as a bug.
+        console.print(
+            f"[dim]{funnel.converted - funnel.extracted} version(s) were converted from a tree this "
+            f"workspace did not extract -- `convert --input`.[/dim]"
+        )
+    if funnel.errors:
+        console.print(
+            f"[yellow]{funnel.errors} version(s) carry a recorded error -- "
+            f"`docushift report --run last` for what it was.[/yellow]"
+        )
+    if published is not None and not published:
+        console.print(f"[dim]Nothing published under {target_dir} yet.[/dim]")
+
+    if by_engine:
+        engines = status_report.engines(manager, bu=bu, family=family)
+        engine_table = Table(title="Engines (convert-eligible versions)")
+        engine_table.add_column("Engine")
+        engine_table.add_column("Versions", justify="right")
+        for name, count in engines.rows():
+            engine_table.add_row(name, str(count))
+        console.print(engine_table)
+        # Two lists, not one: `auto` is a detector that has not run, and a named
+        # engine with no handler is a scoping call. See design.md invariant 7.
+        if engines.undetermined:
+            console.print(
+                f"[yellow]{len(engines.undetermined)} version(s) still `auto` -- "
+                f"run `docushift extract` to detect:[/yellow] "
+                + _first(engines.undetermined)
+            )
+        if engines.unconvertible:
+            console.print(
+                f"[yellow]{len(engines.unconvertible)} version(s) name an engine with no "
+                f"converter:[/yellow] " + _first(engines.unconvertible)
+            )
+
+
+def _first(items: list[str], limit: int = 12) -> str:
+    """A long list, trimmed. The emptied-product list in §3.11 is the exception."""
+    return ", ".join(items[:limit]) + (f" ... (+{len(items) - limit})" if len(items) > limit else "")
+
+
+def _minute(stamp: str | None) -> str:
+    """`2026-09-15T11:04:09+00:00` -> `2026-09-15 11:04`, so seven columns fit.
+
+    The full stamp stays in the table and in the Markdown export; a run list is
+    scanned, and a truncated ISO string with an ellipsis through it is worse than
+    no seconds at all.
+    """
+    if not stamp:
+        return ""
+    return stamp.replace("T", " ")[:16]
+
+
+def _resolve_run(store: StateStore, which: str) -> dict:
+    """`last`, or a run id. A run that is not there is an error, never an empty report."""
+    if which == "last":
+        run = store.last_run()
+        if run is None:
+            raise click.ClickException(
+                "No run has been recorded yet. Run a stage command -- `docushift convert`, "
+                "`docushift extract` -- and its findings will be here."
+            )
+        return run
+    try:
+        run_id = int(which)
+    except ValueError:
+        raise click.ClickException(f"--run takes `last` or a run id, not '{which}'.") from None
+    run = store.get_run(run_id)
+    if run is None:
+        raise click.ClickException(f"No run {run_id} in state.db. `docushift report --runs` lists them.")
+    return run
 
 
 @main.command()
-@click.option("--output", "output_path", type=click.Path(dir_okay=False, path_type=Path), default=None)
-@click.option("--engines", "by_engine", is_flag=True, help="Report engine resolution and what is still `auto`.")
-@click.option("--format", "fmt", type=click.Choice(["terminal", "markdown", "html"]), default="terminal")
-def report(**kwargs) -> None:
-    """Render the migration dashboard and exportable audit report."""
-    _pending("report", "Phase 7")
+@click.option("--run", "which_run", default="last", help="Which run to report on: `last` or a run id.")
+@click.option("--runs", "list_runs", is_flag=True, help="List recent runs and their finding counts.")
+@click.option("--stage", default=None, help="Only findings discovered by this stage.")
+@click.option(
+    "--severity",
+    type=click.Choice([str(s) for s in Severity]),
+    default=None,
+    help="Only findings at this severity.",
+)
+@click.option("--code", default=None, help="Only this finding code, e.g. TOPIC_LINK_DANGLING.")
+@click.option("--slug", default=None, help="Only findings about this product slug.")
+@click.option("--explain", "explain_code", default=None, help="Describe one code and stop.")
+@click.option(
+    "--export",
+    "export_path",
+    type=click.Path(dir_okay=False, path_type=Path),
+    default=None,
+    help="Write the report as Markdown to this file.",
+)
+@click.option("--prune", is_flag=True, help="Drop the findings of older runs. Use with --keep.")
+@click.option("--keep", type=int, default=10, show_default=True, help="Runs to keep findings for.")
+@click.pass_context
+def report(
+    ctx: click.Context,
+    which_run: str,
+    list_runs: bool,
+    stage: str | None,
+    severity: str | None,
+    code: str | None,
+    slug: str | None,
+    explain_code: str | None,
+    export_path: Path | None,
+    prune: bool,
+    keep: int,
+) -> None:
+    """What a run found: the findings register, read back.
+
+    Reads `runs` and `findings` and nothing else -- not the catalog. A report
+    resolving a slug against `products.csv` would describe a run in terms of state
+    that has changed since the run, which is what the run table exists to prevent
+    (`architecture.md` §7.3).
+
+    Never gates. A run that reported errors did its work; exit 1 here means the run
+    or the export path was the problem, not what was found.
+    """
+    from docushift.reporting import report as report_view
+
+    cfg: ConfigManager = ctx.obj["config"]
+    store = StateStore(cfg.state_db_path)
+
+    if explain_code is not None:
+        # Answered from the register, so it needs no run and no database -- which
+        # is what makes `--explain` usable on a machine that has run nothing.
+        try:
+            for line in report_view.explain(explain_code.strip().upper()):
+                console.print(line)
+        except KeyError:
+            raise click.ClickException(
+                f"{explain_code} is not a registered finding code. "
+                f"`docushift report --explain` takes one of {len(REGISTRY)} codes; "
+                f"see docs/planning.md §7.5."
+            ) from None
+        return
+
+    if prune:
+        runs, rows = store.prune_findings(keep)
+        console.print(
+            f"Pruned {rows} finding(s) from {runs} run(s); "
+            f"the newest {keep} keep theirs and every `runs` row is intact."
+        )
+        return
+
+    if list_runs:
+        recent = store.recent_runs()
+        if not recent:
+            console.print("[yellow]No runs recorded yet.[/yellow]")
+            return
+        table = Table(title="Recent runs")
+        for column in ("Run", "Command", "Batch", "Started", "Finished", "Exit", "Findings"):
+            table.add_column(column, justify="right" if column in ("Run", "Exit", "Findings") else "left")
+        for row in recent:
+            table.add_row(
+                str(row["run_id"]),
+                row["command"],
+                row["batch"] or "",
+                _minute(row["started_at"]),
+                _minute(row["finished_at"]) or "[yellow]-[/yellow]",
+                "" if row["exit_code"] is None else str(row["exit_code"]),
+                str(row["findings"]),
+            )
+        console.print(table)
+        return
+
+    run = _resolve_run(store, which_run)
+    rows = store.query_findings(
+        run["run_id"], stage=stage, severity=severity, code=code, slug=slug
+    )
+    filters = ", ".join(
+        f"{name}={value}"
+        for name, value in (("stage", stage), ("severity", severity), ("code", code), ("slug", slug))
+        if value
+    )
+
+    console.print(f"[bold]{report_view.describe_run(run)}[/bold]")
+    if filters:
+        console.print(f"[dim]Filtered by {filters}.[/dim]")
+    console.print(f"[dim]{report_view.summarize(rows)}.[/dim]")
+
+    if not rows:
+        console.print("[green]Nothing to report for this selection.[/green]")
+    for stage_group in report_view.group(rows):
+        table = Table(title=stage_group.stage)
+        table.add_column("Code")
+        table.add_column("Severity")
+        table.add_column("Rows", justify="right")
+        table.add_column("Occurrences", justify="right")
+        table.add_column("Obligation", style="dim")
+        for group in stage_group.codes:
+            registered = group.registered
+            table.add_row(
+                group.code,
+                group.severity,
+                str(len(group.rows)),
+                str(group.occurrences),
+                registered.obligation if registered is not None else "[yellow]retired code[/yellow]",
+            )
+        console.print(table)
+
+    # Named individually only when the selection is narrow enough to be read. A
+    # convert run over the whole catalog writes tens of thousands of rows, and
+    # printing them is how a report stops being read at all.
+    if (code or slug) and len(rows) <= 200:
+        for row in rows:
+            where = f"{row['slug']}@{row['version']}" if row["version"] else row["slug"]
+            count = f" x{row['count']}" if (row["count"] or 1) > 1 else ""
+            console.print(f"  [dim]{where}[/dim] {row['message']}{count}")
+
+    if export_path is not None:
+        text = report_view.render_markdown(run, rows, filters=filters)
+        try:
+            export_path.parent.mkdir(parents=True, exist_ok=True)
+            export_path.write_text(text, encoding="utf-8")
+        except OSError as exc:
+            raise click.ClickException(f"Could not write {export_path}: {exc}") from exc
+        console.print(f"Wrote {export_path}")
 
 
 # ---------------------------------------------------------------------------
