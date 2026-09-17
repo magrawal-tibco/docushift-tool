@@ -1341,7 +1341,7 @@ Everything downstream is derived from `unit.name` and follows without edit: the 
 
 - **Nested-root versions** — 32 Flare version trees, plus the 1 name clash, keep today's full relative names.
 - **`online-help`'s missing `index.md` in the general case.** Collapsing hands 38 versions a real one and puts `datasynapse`'s landing page (`_templates/Home.md`) at the version root, but it does not *synthesize* an index where the source has none. Still open, still separate.
-- **The `_templates/` directory** leaking into published output, which is a Flare chrome question for `engines/roots.py` and is noted here only so it is not mistaken for a regression of this change.
+- **The `_templates/` directory** appearing in published output. Noted here as an open chrome question; **closed 2026-09-17 as correct behaviour, not a leak** — see Phase 11's note below.
 
 #### 10b. `validate` already follows `index.md`'s links — the recorded gap is wrong
 
@@ -1413,6 +1413,17 @@ Keep the overview and Key New Features; cut from the first portal block onward. 
 Run over all 778 Home files: **688 trimmed, 90 untouched** (no portal block present), and **0 in which a Key New Features section would be cut**. The headings kept before the cut are 2 for 446 files, 1 for 193, 3 for 31.
 
 The h1/h2 lens is not enough on its own — `datasynapse`'s Home has exactly one `h1` and no `h2`, yet converts to a page with `## Key New Features`, because Flare styles these labels with classes rather than heading tags. The detector therefore reads the *converted Markdown* headings, which is the form the rule is actually stated about.
+
+#### 11c. `_templates/` in the published tree is content, and stays
+
+Phase 10 left open whether the `_templates/` segment surviving into `online-help/<version>/` was chrome leaking out of the Flare build. **It is not.** The directory is where a Flare project keeps the pages that are common to the whole product rather than to one guide, and the corpus's own TOCs treat them as topics: **1,737 `_templates/` paths are TOC entries across 660 of 676 roots** — legal 657, support 649, what's new 381, home 32, other 18. A rule that stripped the directory would be stripping a reader's landing page, legal notice and support page.
+
+So the exclusions stand exactly as already defined, and no new one is added:
+
+- a `_templates/` file no TOC entry reaches and that is not the `DefaultUrl` is not converted (`unreferenced-template`, §5.1.5);
+- a What's New page still holding the authoring template is not converted even where a TOC entry *does* reach it (`placeholder-template`, 11a above).
+
+Everything else under `_templates/` publishes where the source put it. The directory name is a Flare convention showing through into the output tree, and that is the same trade every other source directory name gets: the path is the source's, the content is the product's.
 
 ##### Acceptance
 
