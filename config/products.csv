@@ -88,6 +88,10 @@ tibco-streambase-add-in-for-microsoft-excel,sb-addin-exc,TIBCO StreamBase® Add-
 tibco-streambase-cep-connectivity-package,sb-cep-conn,TIBCO StreamBase® CEP Connectivity Package,tibco,analytics,taxonomy_rule,true,default,false
 tibco-streambase-high-performance-fix-engine,sb-hp-fix,TIBCO StreamBase® High-Performance FIX Engine,tibco,analytics,taxonomy_rule,true,default,false
 tibco-streambase-standard-edition,sb-cep-std,TIBCO StreamBase® Standard Edition,tibco,analytics,taxonomy_rule,true,default,false
+tibco-activematrix-bpm,amx-bpm,TIBCO ActiveMatrix® BPM,tibco,bpm,manual,true,default,false
+tibco-activematrix-bpm-mobilespace-for-ios-1-0-0,bpm-ios,TIBCO ActiveMatrix® BPM - Mobilespace for iOS 1.0.0,tibco,bpm,manual,true,default,false
+tibco-auditsafe,auditsafe,TIBCO® AuditSafe,tibco,bpm,manual,true,default,false
+tibco-bpm-suite,bpm-suite,TIBCO® BPM Suite,tibco,bpm,manual,true,default,false
 tibco-business-studio-iprocess-add-in,business-studio-iprocess-add-in,TIBCO Business Studio™ iProcess® Add-in,tibco,bpm,taxonomy_rule,true,default,false
 tibco-cloud-nimbus-essentials,cloud-nimbus-essentials,TIBCO Cloud™ Nimbus® Essentials,tibco,bpm,taxonomy_rule,true,default,false
 tibco-cloud-nimbus-professional,cloud-nimbus-professional,TIBCO Cloud™ Nimbus® Professional,tibco,bpm,taxonomy_rule,true,default,false
@@ -126,6 +130,9 @@ tibco-mdm-administration-agent,mdm-administration-agent,TIBCO® MDM Administrati
 tibco-mdm-for-retail,mdm-retail-suite,TIBCO® MDM for Retail,tibco,data_management,taxonomy_rule,true,default,false
 tibco-mdm-studio,bstudio-mdm,TIBCO® MDM Studio,tibco,data_management,taxonomy_rule,true,default,false
 tibco-product-and-service-catalog-powered-by-tibco-ebx,psc-ebx,TIBCO® Product and Service Catalog powered by TIBCO EBX®,tibco,data_management,taxonomy_rule,true,default,false
+tibco-datasynapse-gridserver-logviewer,dsp-logv,TIBCO DataSynapse GridServer® LogViewer,tibco,datasynapse,manual,true,default,false
+tibco-datasynapse-gridserver-manager,dsp-gridserver,TIBCO DataSynapse GridServer® Manager,tibco,datasynapse,manual,true,default,false
+tibco-datasynapse-high-performance-computing-cloud-adapter,ds-highperf-comp-cloud,TIBCO DataSynapse™ High-Performance Computing Cloud Adapter,tibco,datasynapse,manual,true,default,false
 "tibbr,-tibbr-service,-tibbr-community,-and-tibbrcommunity-service",tibbr,"tibbr®, tibbr® Service, tibbr® Community, and tibbr®Community Service",tibco,general,unclassified,true,default,false
 tibbr-for-ios,tibbr-for-ios,tibbr® for iOS,tibco,general,unclassified,true,default,false
 tibbr-for-microsoft-outlook,tibbr-for-microsoft-outlook,tibbr® for Microsoft Outlook,tibco,general,unclassified,true,default,false
@@ -156,8 +163,6 @@ tibco-activematrix-binding-type-for-adapters,activematrix-binding-type-for-adapt
 tibco-activematrix-binding-type-for-ejb,activematrix-binding-type-for-ejb,TIBCO ActiveMatrix® Binding Type for EJB,tibco,general,unclassified,true,default,false
 tibco-activematrix-binding-type-for-ldap,activematrix-binding-type-for-ldap,TIBCO ActiveMatrix® Binding Type for LDAP,tibco,general,unclassified,true,default,false
 tibco-activematrix-binding-type-for-rest,activematrix-binding-type-for-rest,TIBCO ActiveMatrix® Binding Type for REST,tibco,general,unclassified,true,default,false
-tibco-activematrix-bpm,amx-bpm,TIBCO ActiveMatrix® BPM,tibco,general,unclassified,true,default,false
-tibco-activematrix-bpm-mobilespace-for-ios-1-0-0,bpm-ios,TIBCO ActiveMatrix® BPM - Mobilespace for iOS 1.0.0,tibco,general,unclassified,true,default,false
 tibco-activematrix-decisions,amx-dec,TIBCO ActiveMatrix® Decisions,tibco,general,unclassified,true,default,false
 tibco-activematrix-implementation-type-for-c++,activematrix-implementation-type-for-cpp,TIBCO ActiveMatrix® Implementation Type for C++,tibco,general,unclassified,true,default,false
 tibco-activematrix-implementation-type-for-microsoft-clr,activematrix-implementation-type-for-microsoft-clr,TIBCO ActiveMatrix® Implementation Type for Microsoft CLR,tibco,general,unclassified,true,default,false
@@ -184,8 +189,6 @@ tibco-analytics,sfire-analyst-suite,TIBCO® Analytics,tibco,general,unclassified
 tibco-analytics-business-author-add-on,sfire-bauthor-suite,TIBCO® Analytics - Business Author Add-on,tibco,general,unclassified,true,default,false
 tibco-analytics-consumer-add-on,sfire-consumer-suite,TIBCO® Analytics - Consumer Add-on,tibco,general,unclassified,true,default,false
 tibco-application-integration-b2b,b2b-addon-itg-suite,TIBCO® Application Integration B2B,tibco,general,unclassified,true,default,false
-tibco-auditsafe,auditsafe,TIBCO® AuditSafe,tibco,general,unclassified,true,default,false
-tibco-bpm-suite,bpm-suite,TIBCO® BPM Suite,tibco,general,unclassified,true,default,false
 tibco-business-studio-activematrix-decisions-add-in,bstudio-decisions-addin,TIBCO Business Studio™ ActiveMatrix® Decisions Add-in,tibco,general,unclassified,true,default,false
 tibco-business-studio-analyst-edition,business-studio-analyst-edition,TIBCO Business Studio™ - Analyst Edition,tibco,general,unclassified,true,default,false
 tibco-business-studio-bpm-edition,business-studio-bpm-edition,TIBCO Business Studio™ - BPM Edition,tibco,general,unclassified,true,default,false
@@ -238,9 +241,6 @@ tibco-control-plane,platform-cp,TIBCO® Control Plane,tibco,general,unclassified
 tibco-data-science-package-for-notebooks,sfire-dscpn,TIBCO® Data Science - Package for Notebooks,tibco,general,unclassified,true,default,false
 tibco-data-science-team-studio,sfire-dsc,TIBCO® Data Science - Team Studio,tibco,general,unclassified,true,default,false
 tibco-datasynapse-federator,dsfed,TIBCO DataSynapse Federator™,tibco,general,unclassified,true,default,false
-tibco-datasynapse-gridserver-logviewer,dsp-logv,TIBCO DataSynapse GridServer® LogViewer,tibco,general,unclassified,true,default,false
-tibco-datasynapse-gridserver-manager,dsp-gridserver,TIBCO DataSynapse GridServer® Manager,tibco,general,unclassified,true,default,false
-tibco-datasynapse-high-performance-computing-cloud-adapter,ds-highperf-comp-cloud,TIBCO DataSynapse™ High-Performance Computing Cloud Adapter,tibco,general,unclassified,true,default,false
 tibco-designer,designer,TIBCO Designer™,tibco,general,unclassified,true,default,false
 tibco-designer-add-in-for-tibco-business-studio,designer-addin-for-business-studio,TIBCO Designer™ Add-in for TIBCO Business Studio™,tibco,general,unclassified,true,default,false
 tibco-dq-service-provider-dqs-add-on,tdqsp,TIBCO® DQ Service Provider - DQS Add-on,tibco,general,unclassified,true,default,false
@@ -392,6 +392,7 @@ tibco-platform,tp,TIBCO® Platform,tibco,general,unclassified,true,default,false
 tibco-platform-add-on-for-business-process-management,tp-bpm,TIBCO® Platform Add-on for Business Process Management,tibco,general,unclassified,true,default,false
 tibco-platform-add-on-for-event-processing,tp-ep,TIBCO® Platform Add-on for Event Processing,tibco,general,unclassified,true,default,false
 tibco-platform-command-line-interface,tibco-platform-cli,TIBCO® Platform Command Line Interface,tibco,general,unclassified,true,default,false
+tibco-product-and-service-inventory,fsi,TIBCO® Product and Service Inventory,tibco,general,unclassified,true,default,false
 tibco-product-and-service-inventory-2-1-0,fsi,TIBCO® Product and Service Inventory 2.1.0,tibco,general,unclassified,true,default,false
 tibco-red-enabled-for-ziip,mfred-ziip,TIBCO® RED Enabled for zIIP,tibco,general,unclassified,true,default,false
 tibco-reward,loyalty,TIBCO® Reward,tibco,general,unclassified,true,default,false
@@ -531,6 +532,7 @@ tibco-businessworks-enterprise,bwent,TIBCO BusinessWorks™ Enterprise,tibco,int
 tibco-businessworks-formbuilder,formbuilder,TIBCO BusinessWorks™ FormBuilder,tibco,integration,taxonomy_rule,true,default,false
 tibco-businessworks-integrationmanager-plug-in,businessworks-integrationmanager-plugin,TIBCO BusinessWorks™ IntegrationManager Plug-in,tibco,integration,taxonomy_rule,true,default,false
 tibco-businessworks-plug-in-for-ai,bwpluginai,TIBCO BusinessWorks™ Plug-in for AI,tibco,integration,taxonomy_rule,true,default,false
+tibco-businessworks-plug-in-for-tibco-auditsafe-for-tibco-platform,bwpluginauditsafeplatform,TIBCO BusinessWorks™ Plug-in for TIBCO® AuditSafe for TIBCO® Platform,tibco,integration,taxonomy_rule,true,default,false
 tibco-businessworks-processmonitor,bwpm,TIBCO BusinessWorks™ ProcessMonitor,tibco,integration,taxonomy_rule,true,default,false
 tibco-businessworks-xa-transaction-manager,businessworks-xa-transaction-manager,TIBCO BusinessWorks™ XA Transaction Manager,tibco,integration,taxonomy_rule,true,default,false
 tibco-cloud-integration-businessworks-payg,bwce-aws,TIBCO Cloud™ Integration - BusinessWorks™ (PAYG),tibco,integration,taxonomy_rule,true,default,false

@@ -39,6 +39,9 @@ business_units:
       bpm:
         name: "Business Process Management"
         description: "Process automation, case management, and workflow"
+      datasynapse:
+        name: "DataSynapse"
+        description: "GridServer grid computing and HPC workload management"
       general:
         name: "General"
         description: "Not yet triaged into a family"
