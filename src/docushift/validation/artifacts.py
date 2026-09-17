@@ -36,12 +36,13 @@ from pathlib import Path, PurePosixPath
 import yaml
 
 from docushift.reporting.findings import Finding
-from docushift.sync import API_REFERENCES, ARCHIVES
+from docushift.sync import API_REFERENCES, ARCHIVES, DOCUMENT_DOC_CLASSES
 from docushift.sync import versions as version_file
 from docushift.sync.distributor import STAGING_SUFFIX
 from docushift.transforms import links as refs
 from docushift.utils.csvio import natural_version_key
 from docushift.utils.slug import is_numeric_version
+from docushift.validation import references as md
 from docushift.validation.links import FolderIndex
 from docushift.validation.tree import ProductFolder, VersionFolder
 
@@ -180,6 +181,65 @@ def _check_toc(folder: VersionFolder, index: FolderIndex) -> list[Finding]:
     return findings
 
 
+# -- index.md, in the folders DocuShift writes one for -----------------------------
+
+INDEX = "index.md"
+
+# The files Stage 6 generates into a doc-class folder. They are the page and its
+# furniture, not artifacts the index is supposed to link, so they are never
+# unlinked. `version.yml` sits a level up but is listed for the same reason.
+_GENERATED = frozenset({INDEX, TOC, METADATA, VERSION_FILE, "csh.yml"})
+
+# Where an `index.md` is a *complete* list of the folder's files. `online-help` is
+# excluded and must stay excluded: its pages are a converted tree whose navigation
+# is `toc.yml`, and its index -- where there is one -- is a landing page rather
+# than a manifest, so every topic and every image in it would be reported here.
+_INDEXED_DOC_CLASSES = frozenset(DOCUMENT_DOC_CLASSES) | {ARCHIVES}
+
+
+def _check_index(folder: VersionFolder) -> list[Finding]:
+    """Files in a generated doc-class folder that `index.md` links to nowhere.
+
+    The reverse of `LINK_BROKEN`, and the direction nothing checked: a link with no
+    file is an error, a file with no link is this. Phase 9 moved the artifact list
+    out of `toc.yml` and into `index.md`, and `validate` already follows it --
+    renaming a published PDF raises `LINK_BROKEN` from the page checker, tested
+    rather than assumed. What that leaves is a file the index simply never named,
+    which is unreachable and reported by nobody.
+
+    Expected to find nothing. `render_index` is handed the same routed list that
+    decides what gets copied, so the invariant holds by construction; the value is
+    that it would stop holding silently otherwise.
+    """
+    if folder.doc_class not in _INDEXED_DOC_CLASSES:
+        return []
+    index = folder.path / INDEX
+    if not index.is_file():
+        return []
+    try:
+        text = index.read_text(encoding="utf-8")
+    except OSError:  # pragma: no cover - the file was just listed
+        return []
+
+    linked: set[str] = set()
+    for raw in md.references(text):
+        reference = refs.classify(raw.raw)
+        if reference.kind is refs.ReferenceKind.RELATIVE:
+            linked.add(str(refs.resolve(PurePosixPath("."), reference.path)).lower())
+
+    findings: list[Finding] = []
+    for child in sorted(folder.path.iterdir()):
+        if not child.is_file() or child.name in _GENERATED:
+            continue
+        if child.name.lower() not in linked:
+            findings.append(Finding(
+                "INDEX_UNLINKED", slug=folder.slug, version=folder.segment,
+                path=(folder.relative / child.name).as_posix(),
+                message=f"{child.name} is published here but {INDEX} links to it nowhere",
+            ))
+    return findings
+
+
 # -- version.yml ----------------------------------------------------------------
 
 
@@ -273,4 +333,4 @@ def check(folder: VersionFolder, index: FolderIndex) -> list[Finding]:
         # Copied Javadoc. `metadata.yml` is ours and is checked above; everything
         # else in there belongs to somebody else's generator (§6.2.1).
         return findings
-    return findings + _check_toc(folder, index)
+    return findings + _check_toc(folder, index) + _check_index(folder)

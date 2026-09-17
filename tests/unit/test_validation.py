@@ -472,6 +472,101 @@ def artifacts_of(target: Path):
     return artifacts.check(folder, FolderIndex(folder.path))
 
 
+# -- index.md, the reverse direction (Phase 10b) ----------------------------------
+
+
+def test_a_published_file_the_index_never_names_is_a_note(tmp_path: Path) -> None:
+    """The direction nothing checked. A link with no file is `LINK_BROKEN`; a file
+    with no link is unreachable and, until now, reported by nobody."""
+    target = tmp_path / "target"
+    publish(
+        target,
+        {
+            "index.md": "# Release Information\n\n- [Release Notes](relnotes.pdf)\n",
+            "relnotes.pdf": "pdf",
+            "readme.txt": "txt",
+        },
+        doc_class="release-information",
+    )
+
+    findings = artifacts_of(target)
+
+    assert codes(findings) == ["INDEX_UNLINKED"]
+    assert findings[0].severity is Severity.NOTE
+    assert "readme.txt" in findings[0].message
+
+
+def test_an_index_naming_every_file_is_silent(tmp_path: Path) -> None:
+    """The expected state, and the one `render_index` produces by construction --
+    it is handed the same routed list that decides what gets copied."""
+    target = tmp_path / "target"
+    publish(
+        target,
+        {
+            "index.md": "# Release Information\n\n- [Notes](relnotes.pdf)\n- [Readme](readme.txt)\n",
+            "relnotes.pdf": "pdf",
+            "readme.txt": "txt",
+        },
+        doc_class="release-information",
+    )
+
+    assert artifacts_of(target) == []
+
+
+def test_a_percent_encoded_link_names_the_file_it_encodes(tmp_path: Path) -> None:
+    """`mft platform server v7.1 ... .pdf` is a real filename, and the index has to
+    encode the spaces to link it at all. Comparing the raw target would report
+    every such file as unlinked -- so this resolves through the same
+    `transforms/links.py` the rest of the checker uses."""
+    target = tmp_path / "target"
+    publish(
+        target,
+        {
+            "index.md": "# Guides\n\n- [Users Guide](mft%20server%20v7.1%20guide.pdf)\n",
+            "mft server v7.1 guide.pdf": "pdf",
+        },
+        doc_class="user-guides",
+    )
+
+    assert artifacts_of(target) == []
+
+
+def test_online_help_is_not_checked_because_its_index_is_not_a_manifest(
+    tmp_path: Path,
+) -> None:
+    """Its navigation is `toc.yml` and its `index.md` -- in 2 of the sample's 17
+    folders -- is a landing page. Checking it here would report every topic and
+    every image in a converted tree as unlinked."""
+    target = tmp_path / "target"
+    publish(
+        target,
+        {
+            "index.md": "# Help\n\n- [Install](install.md)\n",
+            "install.md": "# Install\n",
+            "orphan.md": "# Nobody links me\n",
+        },
+    )
+
+    assert artifacts_of(target) == []
+
+
+def test_the_generated_furniture_is_never_reported_as_unlinked(tmp_path: Path) -> None:
+    """`toc.yml`, `metadata.yml` and `csh.yml` are the page's furniture, not
+    artifacts the index is supposed to link."""
+    target = tmp_path / "target"
+    publish(
+        target,
+        {
+            "index.md": "# Release Information\n\n- [Notes](relnotes.pdf)\n",
+            "relnotes.pdf": "pdf",
+            "csh.yml": '"install": "relnotes.pdf"\n',
+        },
+        doc_class="release-information",
+    )
+
+    assert artifacts_of(target) == []
+
+
 # -- version.yml -----------------------------------------------------------------
 
 

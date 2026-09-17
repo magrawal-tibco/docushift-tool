@@ -408,7 +408,7 @@ class DocBookEngine(BaseEngine):
     # -- one unit --------------------------------------------------------------
 
     def convert_unit(self, context: ConversionContext, root: Path) -> Unit:
-        unit = Unit(root=root, name=_relative(context.tree, root))
+        unit = Unit(root=root, name=context.subtree_name(root))
         plan = self._plan(context, unit, root)
 
         documents: dict[str, Document] = {}

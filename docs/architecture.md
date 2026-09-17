@@ -668,7 +668,19 @@ Both are pure loss, because **neither adds any recall**: `*.mcwebhelp` alone fin
 
 So the tempting rule — "same path means same topic, take either" — is wrong 15% of the time. The worst observed case is `mdm/9.3.2`, where `release-notes/new-features.htm` in the two roots has a **0.019 token overlap**: two different releases' notes at the same path. Merging them loses one entirely.
 
-**Therefore each output root converts independently into its own output subtree**, named from the root's path relative to the version (`bw-ent-html/`, `bwce-html/`, `relnotes/`), and no cross-root deduplication is attempted. The 40% that are byte-identical are duplicated in the output; that is the correct trade against silently discarding a release's notes. Nested roots (§5.1.1) are converted as their own subtrees too, and the innermost root owns a file, so nothing is converted twice.
+**Therefore each output root converts independently into its own output subtree**, and no cross-root deduplication is attempted. The 40% that are byte-identical are duplicated in the output; that is the correct trade against silently discarding a release's notes. Nested roots (§5.1.1) are converted as their own subtrees too, and the innermost root owns a file, so nothing is converted twice.
+
+**What the subtree is called is a property of the set of roots, not of one root** (`engines/roots.subtree_names`, Phase 10). The original rule — the root's path relative to the version — was measured on 2026-09-17 and found to misplace most of the corpus: of **611 Flare version trees, 491 ship a single output root and 0 of those have it at the version root**. 257 sit at `html/` and 203 at `doc/html/`, so 80.4% of Flare versions published one or two directories below where §6.2 says their content lives. The prefix was never a property of a particular bundle; it is what a Flare build looks like.
+
+| Case | Rule | Versions |
+|---|---|---|
+| One root | Publishes at the version root; the subtree name is empty | 491 |
+| Several, none nested | The shallowest takes the version root (ties broken case-insensitively, so capitalization cannot decide); every other root is named by its **last segment only**, so `doc/html` + `doc/relnotes` becomes the root plus `relnotes/` | 93 |
+| A nested pair, or two secondaries sharing a last segment | Every root keeps its full relative path, as before | 32 + 1 |
+
+The third row is measured, not defensive. Flattening *every* root onto the version root — the naive reading — collides in **125 of 125 multi-root versions, 155,647 paths**, because separate Flare builds reuse the same `_templates/` chrome and overlapping topic filenames (BusinessWorks 6.10.0 alone: 7,101). Naming each non-primary root avoids that entirely; what is left is the folder name clashing with one of the primary's own top-level entries, which across the 93 eligible versions happens once. Nested roots cannot use the rule at all — the inner root's files are already inside the outer one, so naming the inner root as a sibling does not separate them, it renames the collision.
+
+Two consequences worth stating. **38 of the single-root versions ship an `index.htm` at their root**, which converts to an `index.md` landing the version root has otherwise never had; `converter/navigation._free` already folds case when it names a synthesized page, so nothing is written over it. And the name is read through **one** accessor, `ConversionContext.subtree_name`, by all four engines *and* by the driver's asset copier — two derivations would put a page and its images in different subtrees, where each half is internally consistent and every image 404s.
 
 **Output path mirrors the source tree.** Filename stems collide at **6.0% within a single output root** and title-derived slugs at **2.6%**, so neither a flat layout nor a title slug is unique by construction. The source hierarchy is already meaningful (85% of topics sit one level down, in `install/`, `admin/`, `reference/`), it is stable across rebuilds, and it is what every `href` in the corpus already encodes — so mirroring it makes §5.1.8's link rewriting a suffix substitution rather than a lookup. This is the opposite of §5.2.2's decision for DITA, and deliberately: DITA's source is flat and its TOC is near-complete, Flare's source is structured and its TOC is not (§5.1.4).
 
@@ -2007,7 +2019,7 @@ Measured 2026-09-08 over the same 1,822 versions (scripts `C:\tmp\dc1_index.py` 
 
 **The list moved; it did not go.** This is the half worth testing explicitly, because losing it fails silently — the folder would still publish its PDFs and simply stop linking to some of them. The check that `index.md` names every routed file is a separate test from the check that `toc.yml` names only itself.
 
-One consequence is a **weakening of `validate`**, recorded rather than fixed here: §9 walks every `path` in a `toc.yml` and raises `LINK_BROKEN`, so it used to verify each artifact's filename resolved. Now it verifies one sibling that always resolves. Whether `validate` should follow `index.md`'s links instead is open.
+This was first recorded as a **weakening of `validate`**, on the reasoning that §9 walks every `path` in a `toc.yml` and now finds only one sibling that always resolves. **That was wrong, and testing it is what showed so** (Phase 10b): renaming a published PDF on a scratch shelf still produced `LINK_BROKEN`, because `index.md` is a Markdown page and the reference checker walks every Markdown page. The artifact list is checked wherever the artifact list lives. What was genuinely unchecked is the other direction — a file in the folder that `index.md` names nowhere — which no check had ever covered; that is `INDEX_UNLINKED`, a note.
 
 #### 6.2.3 `archives/` is indexed from the catalog, not from the directory
 

@@ -553,7 +553,7 @@ class DitaEngine(BaseEngine):
     # -- one doc-set -----------------------------------------------------------
 
     def convert_unit(self, context: ConversionContext, root: Path) -> Unit:
-        unit = Unit(root=root, name=_relative(context.tree, root))
+        unit = Unit(root=root, name=context.subtree_name(root))
         plan = self._plan(context, unit, root)
         unit.metadata = plan.metadata
         # The homepage names the publication, and a version ships up to 11 doc-sets

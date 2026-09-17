@@ -48,8 +48,14 @@ def test_the_register_carries_every_row_of_7_5() -> None:
     name what a phase deliberately did *not* fix: the links a GFM fence cannot
     hold. The defect it closes was invisible for six phases precisely because
     nothing counted it.
+
+    Phase 10b adds the 39th, `INDEX_UNLINKED`, which is the reverse of
+    `LINK_BROKEN` -- a file with no link rather than a link with no file. It is
+    expected to raise nothing, because `render_index` is handed the same routed
+    list that decides what gets copied; it exists so that would stop being true
+    loudly rather than silently.
     """
-    assert len(REGISTRY) == 38
+    assert len(REGISTRY) == 39
 
 
 def test_severity_comes_from_the_registry_and_not_from_the_call_site() -> None:

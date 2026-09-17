@@ -554,7 +554,7 @@ This is the same mechanism as §6.3's API-reference flag and it exists for the s
 
 **Step 4 — the two outputs, or neither.** If the resolved path names a file that exists:
 
-- Copy that file to **the same relative path** under the output root's subtree in the converted output. Never flatten: flattening collides 5,328 times inside a single Flare root (`architecture.md` §5.5.5). Never rename: the filename is kept byte-for-byte.
+- Copy that file to **the same relative path** under the output root's subtree in the converted output. Never flatten: flattening collides 5,328 times inside a single Flare root (`architecture.md` §5.5.5). Never rename: the filename is kept byte-for-byte. **The subtree is empty for a version with a single output root** (`architecture.md` §5.1.3), which is 491 of 611 Flare versions, and both this copy and the engine's page paths read it from `ConversionContext.subtree_name` — deriving it twice would put a page and its images in different subtrees and 404 every image while each half looked correct.
 - Emit the Markdown link as the path **from the emitted topic to the emitted asset**, percent-encoded — space → `%20`, `(` → `%28`, `)` → `%29`, and a pre-existing literal `%` → `%25` *first*. 104 filenames in the corpus contain a `%`, and encoding them in the wrong order produces a different filename.
 
 If it does not exist, emit **neither**: no link, no copy. The alt text or link label is emitted as plain text so the prose still reads, and the reference is counted.

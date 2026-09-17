@@ -93,7 +93,11 @@ class FakeEngine(BaseEngine):
     def convert_unit(self, context: ConversionContext, root: Path) -> Unit:
         FakeEngine.seen_api_roots = list(context.api_roots)
         FakeEngine.seen_api_urls = dict(context.api_urls)
-        unit = Unit(root=root, name=root.relative_to(context.tree).as_posix())
+        # Through the context, exactly as the four real engines do. Deriving the
+        # name here instead is what a stub can get wrong without anybody noticing:
+        # the driver names the asset destination from the same call, and two
+        # derivations put a page and its images in different subtrees.
+        unit = Unit(root=root, name=context.subtree_name(root))
         for html in sorted(root.rglob("*.htm")):
             relative = PurePosixPath(html.relative_to(root).as_posix()).with_suffix(".md")
             lines = []
@@ -220,7 +224,7 @@ def test_the_spine_converts_a_unit_end_to_end(
     assert result.units == 1
     assert result.documents == 2
     output = config.output_path(product.bu, product.family, product.slug, version.version)
-    assert (output / "guide" / "Content" / "topic.md").is_file()
+    assert (output / "Content" / "topic.md").is_file()
     assert result.skipped == {"frameset": 1}
 
 
@@ -241,7 +245,7 @@ def test_the_version_gets_its_toc_and_metadata_inside_the_build(
     # The landing page first, and every path relative to the version root rather
     # than to the unit the engine reported it from.
     assert [item["path"] for item in toc["items"]] == [
-        "guide/Content/second.md", "guide/Content/topic.md",
+        "Content/second.md", "Content/topic.md",
     ]
     assert result.nav_nodes == 2
     assert result.generated == 0
@@ -257,9 +261,9 @@ def test_a_relative_link_exists_exactly_when_the_asset_was_copied(
     result, _ = convert(config, catalog, product, version)
 
     output = config.output_path(product.bu, product.family, product.slug, version.version)
-    body = (output / "guide" / "Content" / "topic.md").read_text(encoding="utf-8")
+    body = (output / "Content" / "topic.md").read_text(encoding="utf-8")
     assert "![](images/shot.png)" in body
-    assert (output / "guide" / "Content" / "images" / "shot.png").is_file()
+    assert (output / "Content" / "images" / "shot.png").is_file()
     # The dangling, skin and escaping references emit nothing at all...
     assert "missing.png" not in body
     assert "logo.gif" not in body
@@ -279,7 +283,7 @@ def test_an_orphan_is_reported_and_never_copied(
     result, findings = convert(config, catalog, product, version)
 
     output = config.output_path(product.bu, product.family, product.slug, version.version)
-    assert not (output / "guide" / "Content" / "images" / "orphan.png").exists()
+    assert not (output / "Content" / "images" / "orphan.png").exists()
     # Two: the unreferenced image, and `Output.mcwebhelp`. The build marker is not
     # in the skin table -- which lists directory prefixes -- and it is genuinely an
     # unreferenced file inside the root, so counting it is the honest answer.
@@ -294,7 +298,7 @@ def test_dangling_references_are_grouped_by_top_segment_in_the_register(
     _, findings = convert(config, catalog, product, version)
 
     unresolved = [f for f in findings.all if f.code == "REFERENCE_UNRESOLVED"]
-    assert [f.path for f in unresolved] == ["guide/Content"]
+    assert [f.path for f in unresolved] == ["Content"]
     assert unresolved[0].severity is Severity.ERROR
 
 
@@ -304,7 +308,7 @@ def test_the_output_map_is_recorded_for_the_csh_resolver(
     convert(config, catalog, product, version)
 
     mapping = catalog.state.get_output_map("tibco-ems", "10.4.0")
-    assert mapping["guide/Content/topic.htm"] == "guide/Content/topic.md"
+    assert mapping["guide/Content/topic.htm"] == "Content/topic.md"
 
 
 def test_csh_yml_is_flat_quoted_and_omits_what_did_not_resolve(
@@ -313,7 +317,7 @@ def test_csh_yml_is_flat_quoted_and_omits_what_did_not_resolve(
     result, findings = convert(config, catalog, product, version)
 
     output = config.output_path(product.bu, product.family, product.slug, version.version)
-    assert (output / "csh.yml").read_text(encoding="utf-8") == '"install": "guide/Content/topic.md"\n'
+    assert (output / "csh.yml").read_text(encoding="utf-8") == '"install": "Content/topic.md"\n'
     # The unresolved digit-only identifier is not in the file and is not lost.
     assert [entry.identifier for entry in result.csh.unresolved] == ["1234"]
     assert [f.code for f in findings.all if f.code == "CSH_UNRESOLVED"] == ["CSH_UNRESOLVED"]
@@ -326,8 +330,8 @@ def test_identifiers_reach_the_topics_first_and_only_write(
     convert(config, catalog, product, version)
 
     output = config.output_path(product.bu, product.family, product.slug, version.version)
-    owner = (output / "guide" / "Content" / "topic.md").read_text(encoding="utf-8")
-    other = (output / "guide" / "Content" / "second.md").read_text(encoding="utf-8")
+    owner = (output / "Content" / "topic.md").read_text(encoding="utf-8")
+    other = (output / "Content" / "second.md").read_text(encoding="utf-8")
     assert 'csh: ["install"]' in owner
     assert "csh:" not in other
 

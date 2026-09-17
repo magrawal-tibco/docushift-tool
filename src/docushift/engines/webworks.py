@@ -1144,9 +1144,11 @@ class WebWorksEngine(BaseEngine):
     # -- one book --------------------------------------------------------------
 
     def convert_unit(self, context: ConversionContext, root: Path) -> Unit:
-        name = _relative(context.tree, root)
-        book = self._index.books.get(name) or _Book(root=root, name=name)
-        unit = Unit(root=root, name=name, title=book.title)
+        # The index is keyed by the tree-relative path, which is what `_books`
+        # wrote and is independent of where the output goes.
+        key = _relative(context.tree, root)
+        book = self._index.books.get(key) or _Book(root=root, name=key)
+        unit = Unit(root=root, name=context.subtree_name(root), title=book.title)
         for reason, count in book.skipped.items():
             unit.skip(reason, count)
         unit.metadata = _metadata(book)

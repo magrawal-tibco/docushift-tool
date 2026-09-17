@@ -40,6 +40,7 @@ from docushift.config import ConfigManager
 from docushift.converter import navigation
 from docushift.engines.base import ConversionContext, Document, Unit, engine_for
 from docushift.engines.csh import CshFormat, CshSource, csh_format_of, read_csh_source
+from docushift.engines.roots import subtree_names
 from docushift.models import ConversionStatus, Product, ProductVersion, SourceEngine
 from docushift.reporting.findings import FindingsRun
 
@@ -257,8 +258,15 @@ class DocumentConverter:
         output_rows: list[tuple[str, str, str]] = []
         units: list[Unit] = []
 
-        for root in handler.units(context):
-            unit_name = _relative(tree, root)
+        # Materialized before the first unit converts, because a unit's subtree
+        # name is a property of how many units the version has (§5.1.3): a lone
+        # output root publishes at the version root, and that cannot be known
+        # while the list is still a generator.
+        work = list(handler.units(context))
+        context.subtrees = subtree_names(tree, work)
+
+        for root in work:
+            unit_name = context.subtree_name(root)
             copier = AssetCopier(root, version.engine, staging / unit_name if unit_name else staging)
             context.assets = copier
             unit = handler.convert_unit(context, root)

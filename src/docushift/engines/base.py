@@ -197,6 +197,13 @@ class ConversionContext:
     # the rewrite does not fire, not that it fires with a broken address.
     api_urls: dict[Path, str] = field(default_factory=dict)
     output_roots: list[Path] = field(default_factory=list)
+    # Each unit's output subtree name, from `roots.subtree_names`. Set by the
+    # driver once the unit list is in hand, because a unit's name depends on how
+    # many units the version has -- a lone root publishes at the version root.
+    # Empty until then, and `subtree_name` falls back to the tree-relative path,
+    # which is both the old behaviour and the right answer for a single unit whose
+    # root *is* the tree.
+    subtrees: dict[Path, str] = field(default_factory=dict)
     findings: FindingsRun | None = None
     # The copier for the unit currently being converted, set by the driver before
     # each `convert_unit`. Per-unit state on a per-version object, and deliberately:
@@ -216,6 +223,22 @@ class ConversionContext:
     # one more: it is the residue the code-span fix deliberately does not take, and
     # a residue nobody counts is the silence the fix exists to end.
     flattened_links: int = 0
+
+    def subtree_name(self, root: Path) -> str:
+        """Where this unit's output goes, relative to the version folder.
+
+        The one definition, read by all four engines *and* by the driver's asset
+        copier. Two of them would be two answers, and two answers here put a
+        topic's pages and that topic's images in different subtrees -- every image
+        on the version 404s and nothing reports it, because each half is
+        internally consistent.
+        """
+        if self.subtrees:
+            return self.subtrees.get(root, "")
+        try:
+            return root.relative_to(self.tree).as_posix() if root != self.tree else ""
+        except ValueError:  # pragma: no cover - a root outside its own tree
+            return root.name
 
     def api_url(self, source: Path, path: str, fragment: str = "") -> str | None:
         """The published URL for a reference into an API tree, or `None`.

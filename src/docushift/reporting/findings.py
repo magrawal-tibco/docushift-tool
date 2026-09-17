@@ -257,6 +257,16 @@ REGISTRY: dict[str, Code] = _codes(
     Code("SYNC_RESIDUE", Severity.NOTE, Stage.VALIDATE,
          "A .part staging folder left by a sync that did not finish",
          "planning.md §7.4"),
+    # Phase 10b, and the reverse of `LINK_BROKEN`: not a link with no file, but a
+    # file with no link. A note, and expected to find nothing -- `render_index` is
+    # handed the same routed list that decides what gets copied, so every published
+    # artifact is linked by construction. That is exactly why the check is worth
+    # having and why it must not gate: it guards an invariant that holds today and
+    # is one refactor away from being silently false, and a gate that fires on
+    # correct output is a gate people switch off.
+    Code("INDEX_UNLINKED", Severity.NOTE, Stage.VALIDATE,
+         "A published file in a generated doc-class folder that index.md links to nowhere",
+         "planning.md Phase 10b"),
 )
 
 # The register's remaining debt, stated as the *complement* of what is written.

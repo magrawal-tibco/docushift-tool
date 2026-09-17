@@ -204,3 +204,68 @@ def owning_root(path: Path, roots: list[Path]) -> Path | None:
         if contains and (best is None or len(root.parts) > len(best.parts)):
             best = root
     return best
+
+
+def subtree_names(tree: Path, roots: list[Path]) -> dict[Path, str]:
+    """What each unit's output subtree is called. `""` means the version root.
+
+    `architecture.md` §5.1.3 used to answer this with one line -- the root's path
+    relative to the version -- and that line put **80.4% of Flare versions one or
+    two directories below where the published contract says their content lives**.
+    Measured over the cache on 2026-09-17: of 611 Flare version trees, 491 ship a
+    single output root, and **0 of those 491 have it at the version root**. 257 sit
+    at `html/`, 203 at `doc/html/`. The prefix was never a property of a
+    particular bundle; it is what a Flare build looks like.
+
+    So the name is a property of the *set* of roots, not of one root, which is why
+    this returns a lookup rather than taking a path:
+
+    - **One root** -> `""`. Nothing can collide with it, because there is nothing
+      else in the tree.
+    - **Several, none nested** -> the shallowest takes the version root and each
+      other root is named by its **last segment only**, so `doc/html` +
+      `doc/relnotes` publishes as the root plus `relnotes/`.
+    - **A nested pair, or a name clash in the case above** -> every root keeps its
+      full relative path, exactly as before.
+
+    The last case is measured, not defensive. Flattening every root onto the
+    version root collides in **125 of 125 multi-root versions, 155,647 paths** --
+    BusinessWorks 6.10.0 alone collides 7,101, because separate Flare builds reuse
+    the same `_templates/` chrome and overlapping topic filenames. Naming each
+    non-primary root instead avoids all of that; the only thing left that can
+    collide is the folder name against the primary's own top-level entries, which
+    across all 93 eligible versions happens **once** (`stat` 14.4.0, two roots with
+    the same last segment). Nested roots cannot use the rule at all -- the inner
+    root's files are already inside the outer one, so naming the inner root as a
+    sibling folder does not separate them, it just renames the collision.
+    """
+    if not roots:
+        return {}
+    # Case-folded before the tie-break, so which root becomes the primary does not
+    # turn on capitalization: `doc/RelNotes` sorts before `doc/html` in ASCII and
+    # would otherwise take the version root away from the main guide.
+    ordered = sorted(roots, key=lambda path: (len(path.parts), str(path).lower(), str(path)))
+    full = {root: _relative(tree, root) for root in ordered}
+    if len(ordered) == 1:
+        return {ordered[0]: ""}
+    if any(other != root and root in other.parents for root in ordered for other in ordered):
+        return full
+
+    primary, others = ordered[0], ordered[1:]
+    names = [root.name for root in others]
+    try:
+        taken = {entry.name.lower() for entry in primary.iterdir()}
+    except OSError:  # pragma: no cover - the root was just walked to get here
+        return full
+    if len(set(name.lower() for name in names)) != len(names):
+        return full
+    if any(name.lower() in taken for name in names):
+        return full
+    return {primary: "", **{root: root.name for root in others}}
+
+
+def _relative(tree: Path, path: Path) -> str:
+    try:
+        return path.relative_to(tree).as_posix()
+    except ValueError:  # pragma: no cover - a root outside the tree it was found in
+        return path.name
