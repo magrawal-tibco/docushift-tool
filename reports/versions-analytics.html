@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>DocuShift catalog &mdash; versions.csv analytics</title>
+<title>DocuShift catalog analytics</title>
 <style>
 /* ---------------------------------------------------------------------------
    Roles, not raw hex. Light values here; dark declared twice below so the OS
@@ -27,181 +27,149 @@
   --ord-2:          #2a78d6;  /* blue 450 */
   --ord-3:          #104281;  /* blue 650 */
   --meter-track:    #e1e0d9;
-  --label-on-fill:  #ffffff;
 }
 @media (prefers-color-scheme: dark) {
-  :root:where(:not([data-theme="light"])) .viz-root {
-    color-scheme: dark;
-    --surface-1:      #1a1a19;
-    --plane:          #0d0d0d;
-    --text-primary:   #ffffff;
-    --text-secondary: #c3c2b7;
-    --text-muted:     #898781;
-    --grid:           #2c2c2a;
-    --axis:           #383835;
-    --border:         rgba(255,255,255,0.10);
-    --series-1:       #3987e5;
-    --series-2:       #d95926;
-    --ord-1:          #cde2fb;
-    --ord-2:          #6da7ec;
-    --ord-3:          #256abf;
-    --meter-track:    #2c2c2a;
-    --label-on-fill:  #0b0b0b;
-  }
+  :root:where(:not([data-theme="light"])) .viz-root { color-scheme: dark;
+    --surface-1:#1a1a19; --plane:#0d0d0d; --text-primary:#ffffff;
+    --text-secondary:#c3c2b7; --text-muted:#898781; --grid:#2c2c2a; --axis:#383835;
+    --border:rgba(255,255,255,0.10); --series-1:#3987e5; --series-2:#d95926;
+    --ord-1:#cde2fb; --ord-2:#6da7ec; --ord-3:#256abf; --meter-track:#2c2c2a; }
 }
-:root[data-theme="dark"] .viz-root {
-  color-scheme: dark;
-  --surface-1:      #1a1a19;
-  --plane:          #0d0d0d;
-  --text-primary:   #ffffff;
-  --text-secondary: #c3c2b7;
-  --text-muted:     #898781;
-  --grid:           #2c2c2a;
-  --axis:           #383835;
-  --border:         rgba(255,255,255,0.10);
-  --series-1:       #3987e5;
-  --series-2:       #d95926;
-  --ord-1:          #cde2fb;
-  --ord-2:          #6da7ec;
-  --ord-3:          #256abf;
-  --meter-track:    #2c2c2a;
-  --label-on-fill:  #0b0b0b;
-}
+:root[data-theme="dark"] .viz-root { color-scheme: dark;
+  --surface-1:#1a1a19; --plane:#0d0d0d; --text-primary:#ffffff;
+  --text-secondary:#c3c2b7; --text-muted:#898781; --grid:#2c2c2a; --axis:#383835;
+  --border:rgba(255,255,255,0.10); --series-1:#3987e5; --series-2:#d95926;
+  --ord-1:#cde2fb; --ord-2:#6da7ec; --ord-3:#256abf; --meter-track:#2c2c2a; }
 
 * { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; }
-body {
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-  -webkit-font-smoothing: antialiased;
-}
+body { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; -webkit-font-smoothing: antialiased; }
 /* The role tokens are declared on .viz-root, so they must be *consumed* at or
    below it -- setting colour on <body> reads an undefined variable and leaves
    headings inheriting black onto the dark surface. */
-.viz-root {
-  background: var(--plane);
-  color: var(--text-primary);
-  min-height: 100vh;
-  padding: 28px 24px 56px;
-}
+.viz-root { background: var(--plane); color: var(--text-primary); min-height: 100vh; padding: 28px 24px 56px; }
 .wrap { max-width: 1180px; margin: 0 auto; }
 
-/* -- header ---------------------------------------------------------------- */
-.head { display: flex; align-items: flex-start; gap: 24px; flex-wrap: wrap; margin-bottom: 20px; }
+.head { display: flex; align-items: flex-start; gap: 24px; flex-wrap: wrap; margin-bottom: 18px; }
 .head h1 { font-size: 21px; font-weight: 650; margin: 0 0 4px; letter-spacing: -0.01em; }
-.head p { margin: 0; font-size: 13px; color: var(--text-secondary); max-width: 66ch; line-height: 1.5; }
+.head p { margin: 0; font-size: 13px; color: var(--text-secondary); max-width: 74ch; line-height: 1.5; }
 .head .spacer { flex: 1 1 auto; }
 .switches { display: flex; gap: 8px; }
 
-/* -- controls -------------------------------------------------------------- */
-.filters {
-  display: flex; align-items: flex-end; gap: 14px; flex-wrap: wrap;
-  padding: 12px 14px; margin-bottom: 18px;
+/* -- the data-source strip ------------------------------------------------- */
+.source {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  padding: 10px 14px; margin-bottom: 14px; font-size: 12.5px;
   background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px;
+  color: var(--text-secondary);
 }
+.source.warn { border-color: var(--series-2); }
+.source .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--series-1); flex: none; }
+.source.warn .dot { background: var(--series-2); }
+.source .spacer { flex: 1 1 auto; }
+.source b { color: var(--text-primary); font-weight: 600; }
+.source code { font-size: 11.5px; background: var(--plane); border: 1px solid var(--border);
+               border-radius: 4px; padding: 1px 5px; }
+
+.filters { display: flex; align-items: flex-end; gap: 14px; flex-wrap: wrap;
+  padding: 12px 14px; margin-bottom: 18px;
+  background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; }
 .field { display: flex; flex-direction: column; gap: 5px; }
 .field label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
-select, .btn {
-  font: inherit; font-size: 13px; color: var(--text-primary);
+select, .btn { font: inherit; font-size: 13px; color: var(--text-primary);
   background: var(--surface-1); border: 1px solid var(--axis);
-  border-radius: 7px; padding: 6px 10px; min-height: 32px; cursor: pointer;
-}
-select { min-width: 190px; }
+  border-radius: 7px; padding: 6px 10px; min-height: 32px; cursor: pointer; }
+select { min-width: 180px; }
 .btn[aria-pressed="true"] { background: var(--series-1); border-color: var(--series-1); color: #fff; }
-:root[data-theme="dark"] .btn[aria-pressed="true"],
-.viz-root .btn[aria-pressed="true"] { color: #fff; }
 .btn:focus-visible, select:focus-visible { outline: 2px solid var(--series-1); outline-offset: 2px; }
 .filters .spacer { flex: 1 1 auto; }
 .reset { color: var(--text-secondary); }
 
-/* -- KPI row --------------------------------------------------------------- */
-.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(178px, 1fr)); gap: 12px; margin-bottom: 18px; }
-.tile {
-  background: var(--surface-1); border: 1px solid var(--border);
-  border-radius: 10px; padding: 14px 16px 15px;
-}
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(172px, 1fr)); gap: 12px; margin-bottom: 18px; }
+.tile { background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px 15px; }
 .tile .k { font-size: 12px; color: var(--text-secondary); margin-bottom: 7px; line-height: 1.3; }
-.tile .v { font-size: 30px; font-weight: 640; letter-spacing: -0.02em; line-height: 1; }
+.tile .v { font-size: 29px; font-weight: 640; letter-spacing: -0.02em; line-height: 1; }
 .tile .s { font-size: 12px; color: var(--text-muted); margin-top: 7px; line-height: 1.35; }
 .tile.flag { border-color: var(--series-2); }
 .tile.flag .s { color: var(--text-secondary); }
-.tile .swatch { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 6px; vertical-align: baseline; }
+.tile .swatch { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 6px; }
 
-/* -- cards ----------------------------------------------------------------- */
 .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-.card {
-  background: var(--surface-1); border: 1px solid var(--border);
-  border-radius: 10px; padding: 16px 18px 14px; min-width: 0;
-}
+.card { background: var(--surface-1); border: 1px solid var(--border);
+        border-radius: 10px; padding: 16px 18px 14px; min-width: 0; }
 .card.wide { grid-column: 1 / -1; }
 .card h2 { font-size: 14px; font-weight: 620; margin: 0 0 3px; }
 .card .sub { font-size: 12px; color: var(--text-secondary); margin: 0 0 14px; line-height: 1.45; }
 .cardhead { display: flex; align-items: flex-start; gap: 12px; }
 .cardhead .spacer { flex: 1 1 auto; }
-.tbtn {
-  font: inherit; font-size: 11px; color: var(--text-secondary); background: none;
-  border: 1px solid var(--border); border-radius: 6px; padding: 3px 8px; cursor: pointer; white-space: nowrap;
-}
+.tbtn { font: inherit; font-size: 11px; color: var(--text-secondary); background: none;
+        border: 1px solid var(--border); border-radius: 6px; padding: 3px 8px; cursor: pointer; white-space: nowrap; }
 .tbtn:hover { color: var(--text-primary); }
 
-/* -- legend ---------------------------------------------------------------- */
 .legend { display: flex; gap: 16px; flex-wrap: wrap; margin: 0 0 10px; padding: 0; list-style: none; }
 .legend li { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--text-secondary); }
 .legend .key { width: 11px; height: 11px; border-radius: 2px; flex: none; }
 
-/* -- svg chrome ------------------------------------------------------------ */
 svg { display: block; width: 100%; height: auto; overflow: visible; }
 .grid-line { stroke: var(--grid); stroke-width: 1; shape-rendering: crispEdges; }
 .axis-line { stroke: var(--axis); stroke-width: 1; shape-rendering: crispEdges; }
 .tick { font-size: 11px; fill: var(--text-muted); }
 .cat  { font-size: 12px; fill: var(--text-secondary); }
 .val  { font-size: 12px; fill: var(--text-primary); font-weight: 560; }
-.val-in { font-size: 11px; font-weight: 600; fill: var(--label-on-fill); }
-.note { font-size: 11px; fill: var(--text-muted); }
 .hit  { fill: transparent; cursor: default; }
 .mark { transition: opacity .09s ease; }
-.dim  { opacity: .38; }
 
-/* -- tooltip --------------------------------------------------------------- */
-.tip {
-  position: fixed; z-index: 40; pointer-events: none; opacity: 0;
-  transition: opacity .08s ease; min-width: 148px; max-width: 280px;
-  background: var(--surface-1); color: var(--text-primary);
-  border: 1px solid var(--border); border-radius: 8px;
-  box-shadow: 0 6px 20px rgba(0,0,0,.16); padding: 9px 11px;
-}
+.tip { position: fixed; z-index: 40; pointer-events: none; opacity: 0; transition: opacity .08s ease;
+  min-width: 150px; max-width: 300px; background: var(--surface-1); color: var(--text-primary);
+  border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 6px 20px rgba(0,0,0,.16); padding: 9px 11px; }
 .tip .t { font-size: 12px; font-weight: 620; margin-bottom: 7px; }
 .tip .r { display: flex; align-items: center; gap: 8px; font-size: 12px; margin-top: 4px; }
 .tip .r .ln { width: 12px; height: 2px; border-radius: 1px; flex: none; }
 .tip .r .nm { color: var(--text-secondary); flex: 1 1 auto; white-space: nowrap; }
-.tip .r .nu { font-weight: 640; font-variant-numeric: tabular-nums; }
+.tip .r .nu, .tip .tot .nu { font-weight: 640; font-variant-numeric: tabular-nums; }
 .tip .tot { margin-top: 7px; padding-top: 6px; border-top: 1px solid var(--border);
             display: flex; justify-content: space-between; font-size: 12px; }
 .tip .tot .nm { color: var(--text-secondary); }
-.tip .tot .nu { font-weight: 640; font-variant-numeric: tabular-nums; }
 
-/* -- meter ----------------------------------------------------------------- */
-.meter { margin-top: 4px; }
-.meter .track { height: 14px; border-radius: 7px; background: var(--meter-track); overflow: hidden; display: flex; }
+.meter { margin-bottom: 18px; }
+.meter:last-child { margin-bottom: 0; }
+.meter .lbl { font-size: 12px; color: var(--text-secondary); margin-bottom: 7px; }
+.meter .track { height: 14px; border-radius: 7px; background: var(--meter-track); overflow: hidden; }
 .meter .fill { height: 100%; background: var(--ord-2); border-radius: 7px 0 0 7px; }
-.meter .cap { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-secondary); margin-top: 8px; }
+.meter .cap { display: flex; justify-content: space-between; gap: 12px; font-size: 12px;
+              color: var(--text-secondary); margin-top: 8px; }
 .meter .cap b { color: var(--text-primary); font-weight: 620; }
 
-/* -- table view ------------------------------------------------------------ */
-.tbl { display: none; margin-top: 10px; max-height: 320px; overflow: auto; }
+.callout { margin-top: 18px; padding: 11px 13px; border-radius: 8px;
+           border: 1px solid var(--series-2); font-size: 12.5px; line-height: 1.5; color: var(--text-secondary); }
+.callout b { color: var(--text-primary); font-weight: 620; }
+
+.tbl { display: none; margin-top: 10px; max-height: 330px; overflow: auto; }
 .tbl.on { display: block; }
 table { border-collapse: collapse; width: 100%; font-size: 12px; }
 th, td { text-align: right; padding: 5px 9px; border-bottom: 1px solid var(--grid); font-variant-numeric: tabular-nums; }
 th:first-child, td:first-child { text-align: left; font-variant-numeric: normal; }
 thead th { position: sticky; top: 0; background: var(--surface-1); color: var(--text-secondary); font-weight: 600; }
 
-/* -- footer ---------------------------------------------------------------- */
 .foot { margin-top: 20px; font-size: 12px; color: var(--text-muted); line-height: 1.6; }
 .foot code { font-size: 11.5px; background: var(--surface-1); border: 1px solid var(--border);
              border-radius: 4px; padding: 1px 5px; }
 .foot b { color: var(--text-secondary); font-weight: 600; }
 .empty { font-size: 13px; color: var(--text-muted); padding: 28px 0; text-align: center; }
 
-@media (max-width: 860px) { .grid { grid-template-columns: 1fr; } }
+/* -- the file-drop fallback, shown only when fetch cannot reach the CSVs ---- */
+#loader { display: none; }
+#loader.on { display: block; }
+.drop { border: 2px dashed var(--axis); border-radius: 12px; padding: 34px 24px; text-align: center;
+        background: var(--surface-1); }
+.drop.over { border-color: var(--series-1); }
+.drop h2 { font-size: 15px; margin: 0 0 8px; }
+.drop p { font-size: 13px; color: var(--text-secondary); margin: 0 auto 16px; max-width: 62ch; line-height: 1.55; }
+.drop code { font-size: 12px; background: var(--plane); border: 1px solid var(--border);
+             border-radius: 4px; padding: 2px 6px; }
+#dash.hidden { display: none; }
+
+@media (max-width: 880px) { .grid { grid-template-columns: 1fr; } }
 @media (forced-colors: active) { .mark { forced-color-adjust: none; } }
 </style>
 </head>
@@ -212,10 +180,10 @@ thead th { position: sticky; top: 0; background: var(--surface-1); color: var(--
   <div class="head">
     <div>
       <h1>DocuShift catalog &mdash; what is in scope, and when it shipped</h1>
-      <p>Every product version DocuShift knows about, from <code>config/versions.csv</code>.
-         A version is <b>convert-eligible</b> when the pipeline will process it, and
-         <b>archived</b> when it is kept for the record only &mdash; the two are exclusive
-         and together they are the whole catalog.</p>
+      <p>Read live from <code>config/products.csv</code> and <code>config/versions.csv</code>.
+         A version is <b>convert-eligible</b> when the pipeline will process it and
+         <b>archived</b> when it is kept for the record only; a <b>product</b> is in
+         scope when the catalog intends to publish it at all.</p>
     </div>
     <div class="spacer"></div>
     <div class="switches">
@@ -224,74 +192,113 @@ thead th { position: sticky; top: 0; background: var(--surface-1); color: var(--
     </div>
   </div>
 
-  <div class="filters">
-    <div class="field">
-      <label for="f-bu">Business unit</label>
-      <select id="f-bu"><option value="">All</option></select>
+  <!-- Shown when the page cannot fetch the CSVs itself (opened as a file:// URL,
+       where the browser blocks cross-origin reads of local files). -->
+  <div id="loader">
+    <div class="drop" id="drop">
+      <h2>Point the page at the two CSVs</h2>
+      <p>This page holds no copy of the data &mdash; it reads the files, so the charts
+         always match whatever is on disk. A browser will not let a <code>file://</code>
+         page read its neighbours, so either serve the repo
+         (<code>python -m http.server</code> from the repo root, then open
+         <code>/reports/versions-analytics.html</code>) or drop
+         <code>products.csv</code> and <code>versions.csv</code> here.</p>
+      <p><input type="file" id="picker" accept=".csv" multiple></p>
+      <p id="loadmsg" style="color:var(--text-muted)"></p>
     </div>
-    <div class="field">
-      <label for="f-family">Family</label>
-      <select id="f-family"><option value="">All</option></select>
-    </div>
-    <div class="field">
-      <label for="f-from">Released from</label>
-      <select id="f-from"></select>
-    </div>
-    <div class="spacer"></div>
-    <button class="btn reset" id="reset">Reset</button>
   </div>
 
-  <div class="kpis" id="kpis"></div>
+  <div id="dash" class="hidden">
 
-  <div class="grid">
+    <div class="source" id="src"></div>
 
-    <div class="card wide">
-      <div class="cardhead">
-        <div>
-          <h2>Releases per year</h2>
-          <p class="sub">When the catalog's versions shipped, split by whether DocuShift will
-             convert them. <span id="ytd-note"></span></p>
-        </div>
-        <div class="spacer"></div>
-        <button class="tbtn" data-table="t-year" aria-expanded="false">Table</button>
-      </div>
-      <ul class="legend" id="lg-year"></ul>
-      <div id="c-year"></div>
-      <div class="tbl" id="t-year"></div>
+    <div class="filters">
+      <div class="field"><label for="f-bu">Business unit</label>
+        <select id="f-bu"><option value="">All</option></select></div>
+      <div class="field"><label for="f-family">Family</label>
+        <select id="f-family"><option value="">All</option></select></div>
+      <div class="field"><label for="f-scope">Product scope</label>
+        <select id="f-scope">
+          <option value="">All products</option>
+          <option value="in">In scope only</option>
+          <option value="out">Out of scope only</option>
+        </select></div>
+      <div class="field"><label for="f-from">Released from</label>
+        <select id="f-from"></select></div>
+      <div class="spacer"></div>
+      <button class="btn reset" id="reset">Reset</button>
     </div>
 
-    <div class="card">
-      <div class="cardhead">
-        <div>
-          <h2>Versions by family</h2>
-          <p class="sub">Where the conversion work actually sits.</p>
+    <div class="kpis" id="kpis"></div>
+
+    <div class="grid">
+
+      <div class="card wide">
+        <div class="cardhead">
+          <div><h2>Releases per year</h2>
+            <p class="sub">When the catalog's versions shipped, split by whether DocuShift
+               will convert them. <span id="ytd-note"></span></p></div>
+          <div class="spacer"></div>
+          <button class="tbtn" data-table="t-year" aria-expanded="false">Table</button>
         </div>
-        <div class="spacer"></div>
-        <button class="tbtn" data-table="t-fam" aria-expanded="false">Table</button>
+        <ul class="legend" id="lg-year"></ul>
+        <div id="c-year"></div>
+        <div class="tbl" id="t-year"></div>
       </div>
-      <ul class="legend" id="lg-fam"></ul>
-      <div id="c-fam"></div>
-      <div class="tbl" id="t-fam"></div>
+
+      <div class="card">
+        <div class="cardhead">
+          <div><h2>Heaviest products</h2>
+            <p class="sub" id="prod-sub">&nbsp;</p></div>
+          <div class="spacer"></div>
+          <button class="tbtn" data-table="t-prod" aria-expanded="false">Table</button>
+        </div>
+        <ul class="legend" id="lg-prod"></ul>
+        <div id="c-prod"></div>
+        <div class="tbl" id="t-prod"></div>
+      </div>
+
+      <div class="card">
+        <div class="cardhead">
+          <div><h2>Versions by family</h2>
+            <p class="sub" id="fam-sub">&nbsp;</p></div>
+          <div class="spacer"></div>
+          <button class="tbtn" data-table="t-fam" aria-expanded="false">Table</button>
+        </div>
+        <ul class="legend" id="lg-fam"></ul>
+        <div id="c-fam"></div>
+        <div class="tbl" id="t-fam"></div>
+      </div>
+
+      <div class="card">
+        <div class="cardhead">
+          <div><h2>Catalog hygiene</h2>
+            <p class="sub">Three coverage questions the catalog answers about itself.
+               Each is one ratio against its whole, so each is a meter rather than a chart.</p></div>
+          <div class="spacer"></div>
+          <button class="tbtn" data-table="t-hyg" aria-expanded="false">Table</button>
+        </div>
+        <div id="c-hyg"></div>
+        <div class="tbl" id="t-hyg"></div>
+      </div>
+
+      <div class="card">
+        <div class="cardhead">
+          <div><h2>Release-status coverage</h2>
+            <p class="sub">The lifecycle field is ordered, so it takes one hue getting
+               darker &mdash; not four identities.</p></div>
+          <div class="spacer"></div>
+          <button class="tbtn" data-table="t-st" aria-expanded="false">Table</button>
+        </div>
+        <div class="meter" id="m-st"></div>
+        <div id="c-st" style="margin-top:16px"></div>
+        <div class="tbl" id="t-st"></div>
+      </div>
+
     </div>
 
-    <div class="card">
-      <div class="cardhead">
-        <div>
-          <h2>Release-status coverage</h2>
-          <p class="sub">The lifecycle field is ordered, so it takes one hue getting darker
-             &mdash; not four identities. Most rows have no status at all.</p>
-        </div>
-        <div class="spacer"></div>
-        <button class="tbtn" data-table="t-st" aria-expanded="false">Table</button>
-      </div>
-      <div class="meter" id="m-st"></div>
-      <div id="c-st" style="margin-top:16px"></div>
-      <div class="tbl" id="t-st"></div>
-    </div>
-
+    <p class="foot" id="foot"></p>
   </div>
-
-  <p class="foot" id="foot"></p>
 </div>
 </div>
 
@@ -299,50 +306,169 @@ thead th { position: sticky; top: 0; background: var(--surface-1); color: var(--
 
 <script>
 "use strict";
+
 /* ===========================================================================
-   Data. Rows are packed as [buIdx, famIdx, eligible, year, statusIdx] where
-   year is -1 for a row with no release date. Generated from config/versions.csv.
+   1. Loading. The page keeps no embedded copy of the data -- a snapshot would
+   go stale the moment either CSV is edited, which is exactly what it must not
+   do. Over HTTP it fetches; on file:// the browser refuses, so it asks.
    =========================================================================== */
-const DATA = {"bus":["tibco","ibi"],"families":["analytics","bpm","data management","datasynapse","general","integration","messaging","webfocus"],"statuses":["ga","retirement-announced","retired","unknown"],"statusLabels":["Generally available","Retirement announced","Retired","No status recorded"],"rows":[[1,2,1,2026,3],[1,2,1,2023,3],[1,2,1,2023,3],[1,2,1,2023,3],[1,2,1,2023,3],[1,2,0,2022,3],[1,2,0,2022,3],[1,2,0,2022,3],[1,2,0,2022,3],[1,2,0,2021,3],[1,2,0,2021,3],[1,2,0,2021,3],[1,2,1,2021,3],[1,2,1,2021,3],[1,2,0,2021,3],[1,4,1,2026,3],[1,4,1,2026,3],[1,4,1,2025,3],[1,4,1,2024,3],[1,4,1,2024,3],[1,4,1,2023,3],[1,4,1,2023,3],[1,4,1,2023,3],[1,4,1,2023,3],[1,4,1,2022,3],[1,4,1,2022,3],[1,4,1,2022,3],[1,4,1,2020,3],[1,4,1,2018,3],[1,4,1,2023,3],[1,4,0,2021,3],[1,4,0,2022,3],[1,4,0,2021,3],[1,4,1,2026,3],[1,4,1,2025,3],[1,4,1,2025,3],[1,4,1,2025,3],[1,4,1,2025,3],[1,4,1,2025,3],[1,4,1,2025,3],[1,4,1,2024,3],[1,4,1,2024,3],[1,4,1,2024,3],[1,4,1,2024,3],[1,4,1,2024,3],[1,4,1,2024,3],[1,4,1,2023,3],[1,4,1,2023,3],[1,4,1,2023,3],[1,4,1,2022,3],[1,4,1,2022,3],[1,4,1,2022,3],[1,4,1,2022,3],[1,4,1,2023,3],[1,4,1,2023,3],[1,4,1,2023,3],[1,4,1,2023,3],[1,4,1,2022,3],[1,4,1,2022,3],[1,4,1,2022,3],[1,4,1,2022,3],[1,4,1,2022,3],[1,7,1,2026,3],[1,7,1,2025,3],[1,7,1,2025,3],[1,7,1,2025,3],[1,7,1,2025,3],[1,7,1,2025,3],[1,7,1,2024,3],[1,7,1,2024,3],[1,7,1,2024,3],[1,7,1,2024,3],[1,7,1,2024,3],[1,7,1,2023,3],[1,7,1,2023,3],[1,7,1,2023,3],[1,7,1,2023,3],[1,7,1,2023,3],[1,7,1,2023,3],[1,7,1,2022,3],[1,7,1,2023,3],[1,7,1,2022,3],[1,7,1,2022,3],[1,7,1,2022,3],[1,7,1,2022,3],[1,7,1,2021,3],[1,7,1,2026,3],[1,7,1,2025,3],[1,7,1,2025,3],[1,7,1,2025,3],[1,7,1,2025,3],[1,7,1,2025,3],[1,7,1,2024,3],[1,7,1,2024,3],[1,7,1,2023,3],[1,7,1,2022,3],[1,7,1,2022,3],[1,7,1,2022,3],[1,7,1,2022,3],[1,7,1,2022,3],[1,7,1,2026,3],[1,7,1,2025,3],[1,7,1,2025,3],[1,7,1,2025,3],[1,7,1,2025,3],[1,7,1,2025,3],[1,7,1,2024,3],[1,7,1,2024,3],[1,7,1,2023,3],[1,7,0,2022,3],[1,7,0,2022,3],[1,7,0,2022,3],[0,0,0,2023,3],[0,0,1,2026,3],[0,0,1,2025,3],[0,0,1,2024,3],[0,0,1,2023,3],[0,0,1,2023,3],[0,0,0,2020,3],[0,0,0,2019,3],[0,0,0,2019,3],[0,0,0,2018,3],[0,0,1,2026,3],[0,0,1,2025,3],[0,0,1,2024,3],[0,0,1,2023,3],[0,0,1,2023,3],[0,0,0,2020,3],[0,0,1,2026,3],[0,0,1,2025,3],[0,0,1,2024,3],[0,0,1,2023,3],[0,0,1,2023,3],[0,0,0,2020,3],[0,0,1,2026,3],[0,0,1,2025,3],[0,0,1,2024,3],[0,0,1,2023,3],[0,0,1,2023,3],[0,0,0,2020,3],[0,0,0,2019,3],[0,0,0,2019,3],[0,0,0,2018,3],[0,0,1,2026,3],[0,0,1,2025,3],[0,0,0,2024,2],[0,0,1,2023,3],[0,0,0,2022,2],[0,0,0,2020,2],[0,0,0,2019,3],[0,0,0,2018,3],[0,0,1,2024,3],[0,0,1,2023,3],[0,0,0,2023,2],[0,0,0,2022,2],[0,0,1,2024,2],[0,0,1,2024,2],[0,0,0,2023,2],[0,0,0,2022,2],[0,0,0,2021,2],[0,0,0,2020,2],[0,0,0,2020,2],[0,0,0,2019,2],[0,0,0,2020,2],[0,0,0,2019,2],[0,0,0,2019,2],[0,0,0,2019,2],[0,0,0,2019,2],[0,0,0,2018,2],[0,0,1,2023,3],[0,0,1,2023,2],[0,0,0,2023,2],[0,0,0,2023,2],[0,0,0,2022,2],[0,0,0,2022,2],[0,0,0,2022,2],[0,0,1,2023,3],[0,0,1,2023,3],[0,0,1,2022,3],[0,0,1,2022,3],[0,0,1,2022,3],[0,0,0,2022,2],[0,0,0,2022,2],[0,0,0,2021,2],[0,0,0,2021,2],[0,0,1,2023,2],[0,0,1,2023,2],[0,0,1,2022,2],[0,0,1,2022,2],[0,0,1,2022,2],[0,0,1,2022,2],[0,0,1,2021,2],[0,0,1,2021,2],[0,0,0,2021,2],[0,0,0,2021,2],[0,0,0,2021,2],[0,0,0,2020,2],[0,0,1,2022,2],[0,0,0,2022,2],[0,0,0,2021,2],[0,0,0,2021,2],[0,0,0,2020,2],[0,0,0,2020,2],[0,0,0,2020,2],[0,0,0,2020,2],[0,0,0,2020,2],[0,0,0,2020,2],[0,0,0,2019,2],[0,0,0,2019,2],[0,0,0,2019,2],[0,0,0,2019,2],[0,0,0,2021,2],[0,0,0,2019,2],[0,0,0,2019,2],[0,0,0,2019,2],[0,0,0,2019,2],[0,0,0,2019,2],[0,0,0,2019,2],[0,0,0,2018,2],[0,0,0,2018,2],[0,0,0,2018,2],[0,0,0,2018,2],[0,0,0,2019,2],[0,0,0,2018,2],[0,0,0,2017,2],[0,0,0,2018,2],[0,0,0,2017,2],[0,0,0,2020,2],[0,0,0,2020,2],[0,0,0,2020,2],[0,0,0,2020,2],[0,0,0,2020,2],[0,0,0,2020,2],[0,0,1,2026,3],[0,0,1,2026,3],[0,0,1,2025,3],[0,0,1,2025,3],[0,0,1,2025,3],[0,0,1,2024,3],[0,0,1,2024,3],[0,0,1,2024,3],[0,0,1,2023,3],[0,0,1,2023,3],[0,0,1,2023,2],[0,0,1,2023,2],[0,0,0,2022,2],[0,0,0,2020,2],[0,0,0,2020,2],[0,0,0,2019,2],[0,0,0,2018,2],[0,0,0,2018,2],[0,0,0,2017,2],[0,0,0,2017,2],[0,0,0,2017,2],[0,0,0,2017,2],[0,0,0,2016,2],[0,0,0,2017,2],[0,0,0,2015,2],[0,0,0,2015,2],[0,0,0,2015,2],[0,0,0,2017,2],[0,0,0,2015,2],[0,0,0,2017,2],[0,0,1,2023,3],[0,0,1,2026,3],[0,0,1,2026,3],[0,0,1,2026,1],[0,0,1,2025,1],[0,0,1,2026,3],[0,0,1,2025,3],[0,0,1,2025,3],[0,0,1,2025,2],[0,0,1,2025,2],[0,0,1,2024,2],[0,0,1,2024,2],[0,0,0,2024,2],[0,0,0,2024,2],[0,0,0,2023,2],[0,0,1,2026,3],[0,0,1,2026,3],[0,0,1,2025,3],[0,0,1,2025,1],[0,0,1,2025,1],[0,0,1,2025,1],[0,0,1,2024,1],[0,0,1,2024,1],[0,0,1,2024,1],[0,0,1,2024,1],[0,0,1,2024,1],[0,0,1,2023,1],[0,0,1,2023,1],[0,0,1,2023,2],[0,0,1,2023,2],[0,0,0,2023,2],[0,0,0,2023,2],[0,0,1,2024,2],[0,0,1,2024,2],[0,0,1,2024,2],[0,0,1,2023,2],[0,0,1,2023,2],[0,0,1,2023,2],[0,0,1,2023,2],[0,0,0,2023,2],[0,0,0,2023,2],[0,0,0,2023,2],[0,0,0,2023,2],[0,0,0,2023,2],[0,0,0,2022,2],[0,0,0,2021,2],[0,0,0,2021,2],[0,0,0,2021,2],[0,0,0,-1,2],[0,0,0,2023,2],[0,0,1,2023,2],[0,0,1,2023,2],[0,0,0,2022,2],[0,0,0,2023,2],[0,0,0,2023,2],[0,0,0,2023,2],[0,0,0,2023,2],[0,0,0,2023,2],[0,0,0,2023,2],[0,0,0,2023,2],[0,0,0,2023,2],[0,0,0,-1,2],[0,0,0,-1,2],[0,0,0,-1,2],[0,0,0,2023,2],[0,0,0,2023,2],[0,0,0,2023,2],[0,0,0,2023,2],[0,0,0,2023,2],[0,0,0,2023,2],[0,0,0,2023,2],[0,0,0,2023,2],[0,0,0,2023,2],[0,0,0,2021,2],[0,0,0,2020,2],[0,0,0,2020,2],[0,0,0,-1,2],[0,0,0,-1,2],[0,0,0,-1,2],[0,0,0,-1,2],[0,0,1,2024,3],[0,0,1,2023,3],[0,0,0,2021,3],[0,0,0,2021,3],[0,0,0,2020,3],[0,0,0,2020,3],[0,0,0,2019,3],[0,0,0,2019,3],[0,0,0,2019,3],[0,0,0,2018,3],[0,0,0,2018,3],[0,0,0,2018,3],[0,0,0,2018,3],[0,0,0,2018,3],[0,0,0,2018,3],[0,0,1,2023,3],[0,0,1,2022,3],[0,0,1,2020,3],[0,0,1,2019,3],[0,0,1,2019,3],[0,0,1,2019,3],[0,0,1,2018,3],[0,0,1,2018,3],[0,0,1,2018,3],[0,0,1,2017,3],[0,0,1,2017,3],[0,0,1,2017,3],[0,0,1,2016,3],[0,0,1,2024,3],[0,0,1,2024,3],[0,0,0,2021,3],[0,0,0,2020,3],[0,0,0,2020,3],[0,0,0,2018,3],[0,0,0,2018,3],[0,0,0,2017,3],[0,0,0,2017,3],[0,0,0,2017,3],[0,0,0,2017,3],[0,0,0,2017,3],[0,0,0,2017,3],[0,0,0,2016,3],[0,0,0,2016,3],[0,0,0,2016,3],[0,0,0,2018,3],[0,0,0,2016,3],[0,0,1,2026,3],[0,0,1,2026,3],[0,0,1,2026,3],[0,0,1,2026,3],[0,0,1,2025,3],[0,0,1,2025,3],[0,0,1,2025,3],[0,0,1,2023,3],[0,0,1,2026,3],[0,0,1,2026,1],[0,0,1,2025,1],[0,0,1,2026,3],[0,0,1,2026,3],[0,0,1,2025,3],[0,0,1,2025,3],[0,0,1,2025,2],[0,0,1,2025,2],[0,0,1,2024,2],[0,0,1,2024,2],[0,0,0,2024,2],[0,0,0,2024,2],[0,0,0,2023,2],[0,0,1,2026,3],[0,0,1,2026,1],[0,0,1,2026,1],[0,0,1,2025,1],[0,0,1,2025,1],[0,0,1,2025,1],[0,0,1,2025,1],[0,0,1,2024,1],[0,0,1,2024,1],[0,0,1,2024,1],[0,0,1,2024,1],[0,0,1,2024,1],[0,0,1,2023,1],[0,0,1,2023,1],[0,0,1,2023,2],[0,0,0,2023,2],[0,0,0,2023,2],[0,0,0,2022,2],[0,0,0,2022,2],[0,0,0,2022,2],[0,0,1,2024,2],[0,0,1,2024,2],[0,0,1,2024,2],[0,0,1,2023,2],[0,0,1,2023,2],[0,0,1,2023,2],[0,0,1,2023,2],[0,0,1,2023,2],[0,0,1,2023,2],[0,0,0,2022,2],[0,0,0,2022,2],[0,0,0,2022,2],[0,0,0,2022,2],[0,0,0,2022,2],[0,0,0,2022,2],[0,0,0,2022,2],[0,0,0,2021,2],[0,0,0,2021,2],[0,0,0,2021,2],[0,0,0,2021,2],[0,0,0,2021,2],[0,0,0,2023,2],[0,0,0,2023,2],[0,0,0,2023,2],[0,0,1,2023,2],[0,0,1,2023,2],[0,0,0,2022,2],[0,0,0,2022,2],[0,0,0,2022,2],[0,0,0,2022,2],[0,0,0,2022,2],[0,0,0,2021,2],[0,0,0,2021,2],[0,0,0,2021,2],[0,0,0,2021,2],[0,0,0,2021,2],[0,0,0,2021,2],[0,0,0,2021,2],[0,0,0,2021,2],[0,0,0,2020,2],[0,0,0,2022,2],[0,0,0,2022,2],[0,0,0,2022,2],[0,0,0,2022,2],[0,0,0,2021,2],[0,0,0,2021,2],[0,0,0,2021,2],[0,0,0,2021,2],[0,0,0,2021,2],[0,0,0,2021,2],[0,0,0,2020,2],[0,0,0,2020,2],[0,0,0,2020,2],[0,0,0,2020,2],[0,0,0,2020,2],[0,0,0,2020,2],[0,0,0,2020,2],[0,0,0,2020,2],[0,0,0,2019,2],[0,0,0,2019,2],[0,0,0,2019,2],[0,0,0,2019,2],[0,0,0,2021,2],[0,0,0,2021,2],[0,0,0,2020,2],[0,0,0,2020,2],[0,0,0,2020,2],[0,0,0,2020,2],[0,0,0,2020,2],[0,0,0,2020,2],[0,0,0,2019,2],[0,0,0,2019,2],[0,0,0,2019,2],[0,0,0,2019,2],[0,0,0,2019,2],[0,0,0,2019,2],[0,0,0,2019,2],[0,0,0,2019,2],[0,0,0,2019,2],[0,0,0,2019,2],[0,0,0,2018,2],[0,0,0,2018,2],[0,0,0,2018,2],[0,0,0,2018,2],[0,0,0,2020,2],[0,0,0,2020,2],[0,0,0,2020,2],[0,0,0,2019,2],[0,0,0,2019,2],[0,0,0,2019,2],[0,0,0,2019,2],[0,0,0,2019,2],[0,0,0,2019,2],[0,0,0,2019,2],[0,0,0,2018,2],[0,0,0,2018,2],[0,0,0,2019,2],[0,0,0,2018,2],[0,0,0,2020,2],[0,0,0,2020,2],[0,0,0,2020,2],[0,0,0,2020,2],[0,0,0,2018,2],[0,0,0,2020,2],[0,0,1,2026,3],[0,0,1,2026,3],[0,0,1,2026,1],[0,0,1,2025,1],[0,0,1,2026,3],[0,0,1,2025,3],[0,0,1,2025,3],[0,0,1,2025,2],[0,0,1,2025,2],[0,0,1,2024,2],[0,0,1,2024,2],[0,0,0,2024,2],[0,0,0,2024,2],[0,0,0,2023,2],[0,0,1,2026,3],[0,0,1,2026,1],[0,0,1,2025,1],[0,0,1,2025,1],[0,0,1,2025,1],[0,0,1,2025,1],[0,0,1,2024,1],[0,0,1,2024,1],[0,0,1,2024,1],[0,0,1,2024,1],[0,0,1,2024,1],[0,0,1,2023,1],[0,0,1,2023,1],[0,0,1,2023,2],[0,0,1,2023,2],[0,0,0,2022,2],[0,0,0,2022,2],[0,0,1,2024,2],[0,0,1,2024,2],[0,0,1,2024,2],[0,0,1,2023,2],[0,0,1,2023,2],[0,0,1,2023,2],[0,0,1,2023,2],[0,0,0,2022,2],[0,0,0,2022,2],[0,0,0,2022,2],[0,0,0,2022,2],[0,0,0,2022,2],[0,0,0,2022,2],[0,0,0,2021,2],[0,0,0,2021,2],[0,0,0,2021,2],[0,0,0,2021,2],[0,0,0,2023,2],[0,0,1,2023,2],[0,0,1,2023,2],[0,0,0,2022,2],[0,0,0,2022,2],[0,0,0,2022,2],[0,0,0,2022,2],[0,0,0,2022,2],[0,0,0,2021,2],[0,0,0,2021,2],[0,0,0,2021,2],[0,0,0,2021,2],[0,0,0,2022,2],[0,0,0,-1,2],[0,0,0,2022,2],[0,0,0,2022,2],[0,0,0,2022,2],[0,0,0,2021,2],[0,0,0,2021,2],[0,0,0,2021,2],[0,0,0,2021,2],[0,0,0,2020,2],[0,0,0,2019,2],[0,0,1,2026,3],[0,0,1,2026,3],[0,0,1,2026,1],[0,0,1,2025,1],[0,0,1,2026,3],[0,0,1,2025,3],[0,0,1,2025,3],[0,0,1,2025,2],[0,0,1,2025,2],[0,0,1,2024,2],[0,0,1,2024,2],[0,0,0,2024,2],[0,0,0,2024,2],[0,0,0,2023,2],[0,0,1,2026,3],[0,0,1,2026,1],[0,0,1,2025,1],[0,0,1,2025,1],[0,0,1,2025,1],[0,0,1,2025,1],[0,0,1,2024,1],[0,0,1,2024,1],[0,0,1,2024,1],[0,0,1,2024,1],[0,0,1,2024,1],[0,0,1,2023,1],[0,0,1,2023,1],[0,0,1,2023,2],[0,0,1,2026,3],[0,0,1,2026,3],[0,0,1,2025,3],[0,0,1,2024,3],[0,0,1,2026,3],[0,0,1,2025,3],[0,0,1,2024,3],[0,0,1,2023,3],[0,0,0,2022,3],[0,0,0,2020,3],[0,0,1,2024,3],[0,0,0,2022,3],[0,0,0,2020,3],[0,0,1,2026,3],[0,0,1,2026,3],[0,0,1,2025,3],[0,0,1,2024,3],[0,0,1,2023,3],[0,0,1,2023,3],[0,0,1,2023,2],[0,0,1,2023,2],[0,0,0,2022,2],[0,0,0,2022,2],[0,0,1,2024,3],[0,0,0,2024,2],[0,0,0,2024,2],[0,0,1,2023,2],[0,0,1,2023,2],[0,0,1,2023,2],[0,0,1,2023,2],[0,0,0,2022,2],[0,0,0,2022,2],[0,0,0,2022,2],[0,0,0,2022,2],[0,0,0,2022,2],[0,0,0,2022,2],[0,0,0,2021,2],[0,0,0,2021,2],[0,0,0,2021,2],[0,0,0,2021,2],[0,0,1,2023,2],[0,0,1,2023,2],[0,0,1,2023,2],[0,0,0,2022,2],[0,0,0,2022,2],[0,0,0,2022,2],[0,0,0,2022,2],[0,0,0,2022,2],[0,0,0,2022,2],[0,0,0,2021,2],[0,0,0,2021,2],[0,0,0,2021,2],[0,0,0,2021,2],[0,0,0,2021,2],[0,0,0,2021,2],[0,0,0,2021,2],[0,0,0,2021,2],[0,0,0,2022,2],[0,0,0,2022,2],[0,0,0,2022,2],[0,0,0,2021,2],[0,0,0,2021,2],[0,0,0,2021,2],[0,0,0,2021,2],[0,0,0,2021,2],[0,0,0,2021,2],[0,0,0,2020,2],[0,0,0,2020,2],[0,0,0,2021,2],[0,0,0,2019,2],[0,0,0,2019,2],[0,0,0,2018,2],[0,0,0,2019,2],[0,0,0,2018,2],[0,0,0,2017,2],[0,0,0,2020,2],[0,0,0,2020,2],[0,0,1,2012,3],[0,0,1,2025,3],[0,0,1,2026,3],[0,0,1,2023,3],[0,0,0,2022,3],[0,0,0,2020,3],[0,0,0,2019,3],[0,0,0,2018,3],[0,0,0,2018,3],[0,0,1,2023,3],[0,0,0,2022,3],[0,0,0,2022,3],[0,0,0,2020,3],[0,0,0,2019,3],[0,0,0,2017,2],[0,0,0,2016,2],[0,0,0,2015,2],[0,0,0,2015,2],[0,0,0,2014,2],[0,0,0,2018,2],[0,0,0,2012,2],[0,0,0,2013,2],[0,0,0,2011,3],[0,0,0,2019,3],[0,0,0,2019,3],[0,0,0,2018,3],[0,0,0,2018,3],[0,0,0,2018,3],[0,0,0,2018,3],[0,0,0,2017,3],[0,0,0,2017,3],[0,0,0,2017,3],[0,0,0,2017,3],[0,0,0,2017,3],[0,0,0,2017,3],[0,0,0,2020,2],[0,0,0,2020,2],[0,0,1,2026,3],[0,0,1,2026,3],[0,0,1,2025,3],[0,0,1,2025,3],[0,0,1,2025,3],[0,0,1,2024,3],[0,0,1,2024,3],[0,0,1,2024,3],[0,0,1,2024,3],[0,0,1,2023,3],[0,0,1,2023,3],[0,0,0,2023,3],[0,0,0,2022,3],[0,0,0,2022,3],[0,0,0,2022,3],[0,0,0,2021,3],[0,0,0,2021,3],[0,0,0,2021,3],[0,0,0,2013,3],[0,0,0,2013,3],[0,0,0,2012,3],[0,0,0,2012,2],[0,0,0,2011,2],[0,0,0,2012,2],[0,0,0,2012,2],[0,0,0,2014,3],[0,0,0,2014,3],[0,0,0,2014,3],[0,0,0,2013,3],[0,0,0,2014,3],[0,0,0,2014,3],[0,0,0,2014,3],[0,0,0,2014,3],[0,0,0,2014,3],[0,0,0,2014,3],[0,0,0,2014,3],[0,0,0,2014,3],[0,0,0,2014,3],[0,0,0,2014,3],[0,0,0,2014,3],[0,0,0,2014,3],[0,0,0,2014,3],[0,0,0,2014,3],[0,0,0,2014,3],[0,0,0,2014,3],[0,0,0,2014,3],[0,0,0,2014,3],[0,0,0,2014,3],[0,0,0,2013,3],[0,0,0,2014,3],[0,0,0,2014,3],[0,0,0,2014,3],[0,0,0,2014,3],[0,0,0,2014,3],[0,0,0,2014,3],[0,0,0,2013,3],[0,0,1,2011,3],[0,0,0,2014,3],[0,0,0,2014,3],[0,0,1,2014,3],[0,0,0,2014,3],[0,0,0,2014,3],[0,0,0,2014,3],[0,0,0,2014,3],[0,0,0,2013,3],[0,0,0,2014,3],[0,0,0,2014,3],[0,0,0,2014,3],[0,0,0,2014,3],[0,0,0,2014,3],[0,0,0,2017,2],[0,0,0,2016,2],[0,0,0,2016,3],[0,0,0,2015,3],[0,0,0,2020,2],[0,0,0,2020,2],[0,0,0,2019,3],[0,0,0,2018,3],[0,0,0,2011,3],[0,0,0,2019,3],[0,0,0,2019,3],[0,0,0,2018,3],[0,0,0,2018,3],[0,0,0,2018,3],[0,0,0,2018,3],[0,0,0,2018,3],[0,0,0,2017,3],[0,0,0,2018,3],[0,0,0,2017,3],[0,0,0,2017,3],[0,0,0,2018,3],[0,0,0,2017,3],[0,0,0,2017,3],[0,0,0,2018,3],[0,0,0,2017,3],[0,0,0,2017,3],[0,0,0,2016,3],[0,0,0,2017,3],[0,0,0,2018,3],[0,0,0,2017,3],[0,0,0,2017,3],[0,0,0,2017,3],[0,0,0,2014,3],[0,0,0,2014,3],[0,0,0,2014,3],[0,0,0,2014,3],[0,0,0,2013,3],[0,0,0,2014,3],[0,0,0,2012,3],[0,0,0,2014,3],[0,0,0,2012,3],[0,0,0,2012,3],[0,0,0,2011,3],[0,0,0,2012,3],[0,0,0,2012,3],[0,0,0,2012,3],[0,0,0,2012,3],[0,0,0,2012,3],[0,0,0,2012,3],[0,0,0,2012,3],[0,0,0,2012,3],[0,0,0,2012,3],[0,0,0,2012,3],[0,0,1,2023,3],[0,0,0,2022,3],[0,0,0,2020,3],[0,0,0,2020,3],[0,0,0,2019,3],[0,0,0,2018,3],[0,0,0,2018,3],[0,0,0,2018,3],[0,0,0,2017,3],[0,0,0,2017,3],[0,0,0,2017,3],[0,0,0,2016,3],[0,0,0,2016,3],[0,0,0,2016,3],[0,0,0,2016,3],[0,0,0,2016,3],[0,0,0,2016,3],[0,0,0,2016,3],[0,0,0,2015,3],[0,0,0,2014,3],[0,0,0,2014,3],[0,0,0,2014,3],[0,0,0,2014,3],[0,0,0,2013,3],[0,0,0,2013,3],[0,0,0,2013,3],[0,0,0,2013,3],[0,0,0,2013,3],[0,0,0,2013,3],[0,0,1,2021,3],[0,0,0,2016,2],[0,0,0,2015,2],[0,0,0,2012,2],[0,0,1,2023,3],[0,0,0,2012,3],[0,0,0,2012,3],[0,0,1,2011,3],[0,0,0,2011,3],[0,0,0,2014,2],[0,0,0,2014,2],[0,0,0,2013,2],[0,0,0,2014,2],[0,0,0,2014,2],[0,0,0,2013,2],[0,0,0,2011,3],[0,0,0,2017,3],[0,0,0,2013,3],[0,0,0,2011,3],[0,0,0,2011,3],[0,0,0,2017,3],[0,0,0,2015,3],[0,0,0,2015,3],[0,0,0,2017,3],[0,0,0,2015,3],[0,0,0,2014,3],[0,0,0,2015,3],[0,0,0,2014,3],[0,0,0,2015,3],[0,0,0,2014,3],[0,0,0,2013,3],[0,0,0,2013,3],[0,0,0,2013,3],[0,0,0,2012,3],[0,0,0,2013,3],[0,0,0,2013,3],[0,0,0,2012,3],[0,0,0,2012,3],[0,0,0,2013,3],[0,0,0,2019,2],[0,0,0,2019,2],[0,0,0,2018,2],[0,0,0,2018,2],[0,0,0,2018,2],[0,0,0,2018,2],[0,0,0,2017,2],[0,0,0,2017,2],[0,0,0,2020,2],[0,0,0,2020,2],[0,0,0,2020,2],[0,0,0,2020,2],[0,0,0,2011,2],[0,0,0,2019,2],[0,0,0,2019,2],[0,0,0,2019,2],[0,0,0,2019,2],[0,0,0,2019,2],[0,0,0,2019,2],[0,0,0,2019,2],[0,0,0,2019,2],[0,0,0,2019,2],[0,0,0,2019,2],[0,0,0,2019,2],[0,0,0,2019,2],[0,0,0,2019,2],[0,0,0,2019,2],[0,0,0,2013,2],[0,0,0,2019,2],[0,0,0,2019,2],[0,0,0,2019,2],[0,0,0,2019,2],[0,0,0,2019,2],[0,0,0,2019,2],[0,0,0,2012,2],[0,0,0,2019,2],[0,0,0,2019,2],[0,0,0,2013,2],[0,0,0,2019,2],[0,0,0,2011,2],[0,0,0,2019,2],[0,0,0,2019,2],[0,0,0,2019,2],[0,0,0,2019,2],[0,0,0,2019,2],[0,0,0,2019,2],[0,0,0,2019,2],[0,0,0,2019,3],[0,0,0,2018,3],[0,0,0,2018,3],[0,0,0,2018,3],[0,0,0,2017,3],[0,0,1,2023,3],[0,0,1,2021,3],[0,0,1,2019,3],[0,0,0,2018,3],[0,0,0,2018,3],[0,0,0,2017,3],[0,0,0,2019,3],[0,0,0,2019,3],[0,0,0,2019,3],[0,0,0,2018,3],[0,0,0,2018,3],[0,0,0,2018,3],[0,0,0,2017,3],[0,0,0,2017,3],[0,0,0,2017,3],[0,0,0,2017,3],[0,0,0,2017,3],[0,0,0,2016,3],[0,0,0,2016,3],[0,0,0,2016,3],[0,0,0,2016,3],[0,0,0,2016,3],[0,0,0,2016,3],[0,0,0,2015,3],[0,0,0,2017,3],[0,0,0,2016,2],[0,0,0,2018,2],[0,0,0,2015,2],[0,0,0,2014,2],[0,0,0,2018,3],[0,0,0,2018,3],[0,0,0,2018,3],[0,0,0,2017,3],[0,0,0,2017,3],[0,0,0,2017,3],[0,0,0,2017,3],[0,0,0,2017,3],[0,0,1,2025,3],[0,0,1,2025,3],[0,0,1,2026,3],[0,0,1,2025,3],[0,0,1,2024,3],[0,0,1,2023,3],[0,0,1,2023,3],[0,0,0,2022,3],[0,0,1,2024,3],[0,0,1,2024,3],[0,0,1,2023,3],[0,0,0,2022,3],[0,0,0,2021,3],[0,0,0,2020,3],[0,0,0,2020,3],[0,0,0,2019,3],[0,0,0,2020,3],[0,0,0,2019,3],[0,0,0,2019,3],[0,0,0,2019,3],[0,0,0,2019,3],[0,0,0,2018,3],[0,0,0,2018,3],[0,0,0,2018,3],[0,0,0,2017,3],[0,0,0,2019,3],[0,0,0,2019,3],[0,0,0,2019,3],[0,0,0,2018,3],[0,0,0,2018,3],[0,0,0,2018,3],[0,0,0,2017,3],[0,0,0,2017,3],[0,0,0,2017,3],[0,0,0,2017,3],[0,0,0,2017,3],[0,0,0,2018,3],[0,1,1,2018,3],[0,1,1,2017,3],[0,1,0,2022,3],[0,1,0,2022,3],[0,1,0,2022,3],[0,1,0,2022,3],[0,1,0,2022,3],[0,1,1,2017,3],[0,1,1,2024,2],[0,1,1,2023,2],[0,1,1,2022,2],[0,1,0,2022,2],[0,1,0,2021,2],[0,1,0,2020,2],[0,1,1,2022,3],[0,1,1,2021,3],[0,1,1,2019,3],[0,1,1,2017,3],[0,1,0,2022,3],[0,1,0,2022,3],[0,1,1,2012,3],[0,1,1,2018,3],[0,1,1,2019,3],[0,1,1,2011,3],[0,1,1,2011,3],[0,1,1,2012,3],[0,1,1,2015,3],[0,1,1,2013,3],[0,1,1,2025,3],[0,1,1,2025,3],[0,1,1,2024,3],[0,1,1,2022,3],[0,1,1,2022,3],[0,1,0,2020,3],[0,1,0,2019,3],[0,1,0,2017,3],[0,1,0,2016,3],[0,1,0,2015,3],[0,1,0,2014,3],[0,1,0,2013,3],[0,1,0,2012,3],[0,1,0,2011,3],[0,1,0,2011,3],[0,1,1,2013,3],[0,1,1,2012,3],[0,1,1,2011,3],[0,1,1,2011,3],[0,1,1,2011,3],[0,1,1,2025,3],[0,1,1,2022,3],[0,1,1,2014,1],[0,1,1,2012,1],[0,1,0,2011,2],[0,1,1,2025,3],[0,1,1,2022,3],[0,1,1,2014,1],[0,1,1,2012,1],[0,1,0,2011,2],[0,1,1,2024,3],[0,1,1,2025,3],[0,1,1,2025,3],[0,1,1,2022,1],[0,1,1,2022,1],[0,1,1,2020,1],[0,1,0,2019,2],[0,1,0,2018,2],[0,1,0,2017,2],[0,1,0,2016,2],[0,1,0,2015,2],[0,1,0,2014,2],[0,1,0,2013,2],[0,1,0,2012,2],[0,1,0,2012,2],[0,1,1,2022,3],[0,1,1,2022,1],[0,1,1,2021,1],[0,1,0,2011,2],[0,1,1,2022,3],[0,1,1,2022,1],[0,1,1,2021,1],[0,1,1,2011,3],[0,1,0,2011,2],[0,1,1,2025,3],[0,1,0,2022,3],[0,1,0,2022,1],[0,1,0,2020,1],[0,1,0,2018,2],[0,1,0,2014,2],[0,1,0,2012,2],[0,1,0,2011,2],[0,1,1,2011,3],[0,1,1,2025,3],[0,1,1,2022,3],[0,1,1,2022,1],[0,1,1,2020,1],[0,1,0,2019,2],[0,1,0,2018,2],[0,1,0,2017,2],[0,1,0,2016,2],[0,1,0,2015,2],[0,1,0,2014,2],[0,1,0,2013,2],[0,1,0,2012,2],[0,1,0,2012,2],[0,1,0,2011,2],[0,1,1,2025,3],[0,1,1,2025,3],[0,1,0,2022,1],[0,1,0,2020,1],[0,1,0,2019,2],[0,1,0,2017,2],[0,1,0,2016,2],[0,1,0,2015,2],[0,1,0,2014,2],[0,1,0,2013,2],[0,1,0,2013,2],[0,1,0,2012,2],[0,1,0,2011,2],[0,1,0,2011,2],[0,1,1,2023,3],[0,1,1,2022,3],[0,1,1,2022,3],[0,1,1,2021,3],[0,1,0,2021,2],[0,1,0,2020,2],[0,1,0,2019,2],[0,1,0,2019,2],[0,1,0,2017,2],[0,1,0,2017,2],[0,1,1,2016,3],[0,1,0,2017,2],[0,1,0,2014,2],[0,1,0,2014,2],[0,1,0,2014,2],[0,1,0,2014,2],[0,1,0,2014,2],[0,1,0,2014,2],[0,1,0,2014,2],[0,1,1,2013,2],[0,1,1,2013,2],[0,1,1,2013,2],[0,1,1,2013,2],[0,1,1,2013,2],[0,1,1,2012,2],[0,1,1,2012,2],[0,1,1,2011,2],[0,1,1,2012,2],[0,1,1,2014,3],[0,1,1,2012,3],[0,1,1,2011,3],[0,1,1,2017,3],[0,1,1,2017,3],[0,1,0,2012,3],[0,1,0,2011,3],[0,1,1,2017,3],[0,2,1,2023,3],[0,2,0,2020,3],[0,2,0,2018,3],[0,2,0,2016,3],[0,2,0,2016,3],[0,2,0,2021,3],[0,2,0,2011,3],[0,2,1,2011,3],[0,2,1,2026,3],[0,2,1,2025,3],[0,2,1,2025,1],[0,2,1,2024,1],[0,2,1,2023,1],[0,2,1,2025,3],[0,2,0,2019,0],[0,2,0,2019,2],[0,2,0,2015,2],[0,2,0,2013,2],[0,2,0,2013,2],[0,2,1,2022,3],[0,2,0,2017,3],[0,2,0,2021,2],[0,2,0,2021,3],[0,2,0,2021,2],[0,2,1,2026,3],[0,2,1,2025,3],[0,2,1,2025,3],[0,2,1,2024,1],[0,2,1,2025,1],[0,2,1,2024,1],[0,2,1,2023,1],[0,2,1,2023,1],[0,2,1,2023,1],[0,2,1,2022,1],[0,2,0,2023,2],[0,2,0,2023,2],[0,2,0,2023,2],[0,2,0,2023,2],[0,2,0,2023,2],[0,2,0,2023,2],[0,2,0,2022,2],[0,2,0,2022,2],[0,2,0,2022,2],[0,2,0,2022,2],[0,2,0,2022,2],[0,2,0,2022,2],[0,2,0,2022,2],[0,2,0,2021,2],[0,2,0,2021,2],[0,2,0,2021,2],[0,2,0,2022,2],[0,2,0,2022,2],[0,2,1,2026,3],[0,2,1,2025,3],[0,2,1,2024,1],[0,2,0,2023,2],[0,2,0,2023,2],[0,2,0,2023,2],[0,2,0,2023,2],[0,2,0,2022,2],[0,2,0,2022,2],[0,2,0,2022,2],[0,2,0,2022,2],[0,2,0,2022,2],[0,2,0,2021,2],[0,2,0,2021,2],[0,2,0,2022,2],[0,2,0,2022,2],[0,2,0,2022,2],[0,2,0,2022,2],[0,2,0,2022,2],[0,2,0,2022,2],[0,2,0,2022,2],[0,2,0,2022,2],[0,2,0,2022,2],[0,2,0,2022,2],[0,2,0,2022,2],[0,2,0,2022,2],[0,2,1,2026,3],[0,2,1,2025,3],[0,2,1,2025,3],[0,2,1,2024,3],[0,2,1,2025,3],[0,2,1,2024,3],[0,2,1,2023,3],[0,2,1,2023,3],[0,2,1,2023,3],[0,2,1,2022,3],[0,2,1,2023,3],[0,2,1,2023,3],[0,2,1,2023,3],[0,2,1,2023,3],[0,2,0,2022,3],[0,2,0,2022,3],[0,2,0,2022,3],[0,2,0,2022,3],[0,2,0,2022,3],[0,2,0,2022,3],[0,2,0,2022,3],[0,2,0,2022,3],[0,2,0,2022,3],[0,2,0,2022,3],[0,2,0,2022,3],[0,2,0,2022,3],[0,2,0,2022,3],[0,2,0,2022,3],[0,2,0,2022,3],[0,2,0,2022,3],[0,2,0,2022,3],[0,2,0,2022,3],[0,2,1,2026,3],[0,2,1,2025,3],[0,2,1,2024,3],[0,2,1,2023,3],[0,2,1,2023,3],[0,2,1,2023,3],[0,2,1,2023,3],[0,2,0,2023,3],[0,2,0,2022,3],[0,2,0,2022,3],[0,2,0,2022,3],[0,2,0,2022,3],[0,2,0,2022,3],[0,2,0,2022,3],[0,2,0,2022,3],[0,2,0,2022,3],[0,2,0,2021,3],[0,2,0,2022,3],[0,2,0,2022,3],[0,2,0,2022,3],[0,2,0,2022,3],[0,2,0,2022,3],[0,2,0,2022,3],[0,2,0,2022,3],[0,2,0,2022,3],[0,2,0,2022,3],[0,2,0,2022,3],[0,2,0,2022,3],[0,2,0,2022,3],[0,2,0,2022,3],[0,2,0,2022,3],[0,2,0,2022,3],[0,2,0,2022,3],[0,2,0,2022,3],[0,2,0,2022,3],[0,2,0,2022,3],[0,2,0,2022,3],[0,2,1,2022,3],[0,2,1,2024,3],[0,2,0,2021,3],[0,2,0,2020,3],[0,2,0,2019,3],[0,2,0,2021,3],[0,2,1,2024,3],[0,2,1,2023,3],[0,2,1,2022,3],[0,2,0,2020,3],[0,2,0,2019,3],[0,2,0,2017,2],[0,2,0,2015,2],[0,2,0,2015,3],[0,2,0,2021,3],[0,2,0,2021,3],[0,2,0,2021,3],[0,2,0,2021,3],[0,2,0,2021,3],[0,2,0,2021,3],[0,2,1,2023,1],[0,2,0,2023,2],[0,2,0,2022,2],[0,2,1,2021,3],[0,2,1,2021,3],[0,3,1,2023,3],[0,3,1,2026,3],[0,3,1,2026,3],[0,3,0,2022,3],[0,3,0,2018,3],[0,3,0,2018,3],[0,3,0,2018,3],[0,3,0,2014,3],[0,3,0,2017,3],[0,3,0,2013,3],[0,3,0,2018,3],[0,3,0,2018,3],[0,3,0,2016,3],[0,3,1,2026,3],[0,3,1,2024,3],[0,3,1,2023,3],[0,3,0,2021,3],[0,3,0,2020,1],[0,3,0,2020,1],[0,3,0,2019,1],[0,3,0,2017,1],[0,3,0,2016,1],[0,4,1,2020,3],[0,4,0,2021,3],[0,4,0,2021,3],[0,4,0,2021,3],[0,4,0,2021,3],[0,4,0,2021,3],[0,4,0,2021,3],[0,4,0,2021,3],[0,4,0,2021,3],[0,4,0,2021,3],[0,4,0,2021,3],[0,4,0,2021,3],[0,4,0,2021,3],[0,4,0,2021,3],[0,4,0,2021,3],[0,4,0,2021,3],[0,4,0,2021,3],[0,4,0,2021,3],[0,4,0,2021,3],[0,4,0,2021,3],[0,4,0,2021,3],[0,4,0,2021,3],[0,4,0,2021,3],[0,4,0,2021,3],[0,4,0,2021,3],[0,4,0,2021,3],[0,4,0,2021,3],[0,4,0,2021,3],[0,4,1,2025,3],[0,4,1,2025,3],[0,4,0,2012,2],[0,4,1,2011,2],[0,4,1,2016,3],[0,4,1,2015,3],[0,4,1,2016,3],[0,4,1,2015,3],[0,4,1,2024,3],[0,4,1,2022,3],[0,4,1,2021,3],[0,4,1,2020,3],[0,4,1,2016,3],[0,4,1,2012,3],[0,4,1,2010,3],[0,4,1,2022,3],[0,4,1,2013,3],[0,4,1,2011,3],[0,4,1,2011,3],[0,4,1,2016,3],[0,4,1,2015,3],[0,4,0,2016,2],[0,4,0,2012,2],[0,4,0,2011,2],[0,4,0,2009,2],[0,4,0,2009,2],[0,4,1,2023,3],[0,4,1,2020,3],[0,4,1,2019,3],[0,4,1,2018,3],[0,4,1,2018,3],[0,4,1,2017,3],[0,4,1,2017,3],[0,4,1,2016,3],[0,4,1,2015,3],[0,4,1,2014,3],[0,4,1,2014,3],[0,4,1,2014,3],[0,4,1,2011,3],[0,4,1,2011,3],[0,4,1,2011,3],[0,4,1,2011,3],[0,4,1,2011,3],[0,4,1,2011,3],[0,4,1,2011,3],[0,4,1,2011,3],[0,4,0,2012,2],[0,4,0,2011,2],[0,4,0,2013,2],[0,4,1,2012,3],[0,4,1,2011,3],[0,4,0,2013,2],[0,4,1,2011,3],[0,4,0,2011,2],[0,4,1,2015,3],[0,4,1,2012,3],[0,4,0,2015,2],[0,4,0,2014,2],[0,4,0,2014,2],[0,4,0,2013,2],[0,4,0,2012,2],[0,4,0,2011,2],[0,4,1,2012,3],[0,4,1,2011,3],[0,4,1,2010,3],[0,4,1,2010,3],[0,4,1,2011,3],[0,4,1,2013,3],[0,4,1,2012,3],[0,4,1,2011,3],[0,4,1,2011,3],[0,4,0,2012,2],[0,4,1,2011,3],[0,4,1,2015,3],[0,4,1,2011,3],[0,4,1,2009,3],[0,4,1,2015,3],[0,4,1,2011,3],[0,4,1,2009,3],[0,4,0,2017,2],[0,4,0,2014,2],[0,4,0,2017,2],[0,4,0,2012,2],[0,4,1,2011,3],[0,4,1,2009,3],[0,4,0,2019,2],[0,4,0,2018,2],[0,4,0,2012,2],[0,4,0,2012,2],[0,4,0,2012,2],[0,4,0,2011,2],[0,4,0,2010,2],[0,4,0,2009,2],[0,4,1,2012,3],[0,4,1,2015,3],[0,4,1,2013,3],[0,4,0,2011,2],[0,4,0,2018,3],[0,4,0,2016,3],[0,4,0,2011,3],[0,4,1,2011,3],[0,4,1,2011,3],[0,4,1,2011,3],[0,4,1,2022,3],[0,4,1,2022,3],[0,4,1,2020,3],[0,4,1,2018,3],[0,4,0,2026,2],[0,4,1,2024,3],[0,4,1,2023,3],[0,4,1,2023,3],[0,4,0,2021,3],[0,4,0,2022,3],[0,4,0,2020,3],[0,4,0,2019,3],[0,4,0,2018,3],[0,4,0,2020,3],[0,4,0,2019,3],[0,4,0,2018,3],[0,4,0,2015,3],[0,4,0,2015,3],[0,4,0,2014,3],[0,4,0,2012,3],[0,4,0,2012,3],[0,4,0,2010,3],[0,4,0,2018,2],[0,4,0,2019,3],[0,4,0,2019,3],[0,4,0,2019,3],[0,4,0,2019,3],[0,4,0,2019,3],[0,4,0,2019,3],[0,4,0,2019,3],[0,4,0,2019,3],[0,4,0,2019,3],[0,4,0,2019,3],[0,4,0,2019,3],[0,4,0,2019,3],[0,4,0,2018,3],[0,4,0,2018,3],[0,4,0,2018,3],[0,4,0,2018,3],[0,4,0,2018,3],[0,4,0,2018,3],[0,4,0,2019,3],[0,4,0,2019,3],[0,4,0,2019,3],[0,4,0,2019,3],[0,4,0,2019,3],[0,4,0,2018,3],[0,4,0,2018,3],[0,4,0,2017,3],[0,4,0,2017,3],[0,4,0,2017,3],[0,4,0,2017,3],[0,4,0,2017,3],[0,4,0,2019,3],[0,4,0,2019,3],[0,4,0,2019,3],[0,4,0,2019,3],[0,4,0,2019,3],[0,4,0,2019,3],[0,4,0,2019,3],[0,4,0,2019,3],[0,4,0,2019,3],[0,4,0,2019,3],[0,4,0,2019,3],[0,4,0,2019,3],[0,4,0,2018,3],[0,4,0,2018,3],[0,4,0,2018,3],[0,4,0,2018,3],[0,4,0,2018,3],[0,4,0,2018,3],[0,4,0,2019,3],[0,4,0,2019,3],[0,4,0,2019,3],[0,4,0,2019,3],[0,4,0,2019,3],[0,4,0,2018,3],[0,4,0,2018,3],[0,4,0,2017,3],[0,4,0,2017,3],[0,4,0,2017,3],[0,4,0,2017,3],[0,4,0,2019,3],[0,4,0,2019,3],[0,4,0,2019,3],[0,4,0,2019,3],[0,4,0,2019,3],[0,4,0,2019,3],[0,4,0,2019,3],[0,4,0,2019,3],[0,4,0,2019,3],[0,4,0,2019,3],[0,4,0,2019,3],[0,4,0,2019,3],[0,4,0,2018,3],[0,4,0,2018,3],[0,4,0,2018,3],[0,4,0,2018,3],[0,4,0,2018,3],[0,4,0,2018,3],[0,4,0,2019,3],[0,4,0,2019,3],[0,4,0,2019,3],[0,4,0,2019,3],[0,4,0,2019,3],[0,4,0,2018,3],[0,4,0,2018,3],[0,4,0,2017,3],[0,4,0,2017,3],[0,4,0,2017,3],[0,4,0,2017,3],[0,4,1,2019,3],[0,4,1,2018,3],[0,4,1,2017,3],[0,4,1,2016,3],[0,4,1,2019,3],[0,4,1,2015,3],[0,4,0,2014,2],[0,4,0,2014,2],[0,4,0,2013,2],[0,4,0,2012,2],[0,4,0,2011,2],[0,4,1,2018,3],[0,4,1,2017,3],[0,4,0,2022,3],[0,4,0,2022,3],[0,4,1,2026,3],[0,4,1,2025,3],[0,4,1,2024,3],[0,4,1,2024,2],[0,4,1,2023,2],[0,4,1,2022,2],[0,4,0,2022,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2020,2],[0,4,1,2025,3],[0,4,1,2025,2],[0,4,1,2024,2],[0,4,0,2022,2],[0,4,0,2020,2],[0,4,0,2018,2],[0,4,0,2018,2],[0,4,0,2018,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,3],[0,4,1,2018,3],[0,4,1,2014,3],[0,4,1,2013,3],[0,4,1,2012,3],[0,4,1,2013,3],[0,4,1,2019,3],[0,4,0,2012,2],[0,4,1,2011,3],[0,4,1,2026,3],[0,4,1,2025,0],[0,4,1,2024,1],[0,4,1,2026,3],[0,4,1,2025,0],[0,4,1,2024,1],[0,4,1,2023,1],[0,4,1,2026,3],[0,4,1,2025,0],[0,4,1,2024,1],[0,4,1,2024,1],[0,4,1,2023,1],[0,4,1,2022,1],[0,4,0,2021,2],[0,4,1,2026,3],[0,4,1,2025,0],[0,4,1,2024,1],[0,4,1,2024,1],[0,4,1,2023,1],[0,4,0,2022,2],[0,4,0,2021,2],[0,4,0,2020,2],[0,4,1,2026,3],[0,4,1,2025,0],[0,4,1,2024,1],[0,4,1,2024,1],[0,4,1,2023,1],[0,4,1,2022,2],[0,4,0,2021,2],[0,4,0,2020,2],[0,4,1,2026,3],[0,4,1,2025,3],[0,4,1,2025,1],[0,4,1,2024,1],[0,4,1,2023,1],[0,4,0,2019,3],[0,4,0,2016,2],[0,4,0,2013,2],[0,4,0,2015,2],[0,4,1,2017,3],[0,4,0,2014,2],[0,4,0,2013,2],[0,4,0,2013,2],[0,4,0,2011,2],[0,4,0,2013,2],[0,4,0,2013,2],[0,4,1,2025,3],[0,4,1,2019,0],[0,4,0,2018,2],[0,4,0,2017,2],[0,4,0,2015,2],[0,4,0,2014,2],[0,4,0,2014,2],[0,4,0,2013,2],[0,4,0,2013,2],[0,4,0,2011,2],[0,4,0,2013,2],[0,4,0,2013,2],[0,4,0,2013,2],[0,4,0,2013,2],[0,4,1,2026,3],[0,4,1,2024,0],[0,4,1,2022,2],[0,4,0,2019,2],[0,4,0,2017,2],[0,4,0,2015,2],[0,4,1,2026,3],[0,4,1,2025,3],[0,4,1,2016,3],[0,4,1,2020,3],[0,4,0,2016,2],[0,4,0,2020,2],[0,4,1,2011,3],[0,4,0,2019,3],[0,4,0,2020,2],[0,4,1,2025,3],[0,4,1,2019,0],[0,4,0,2014,2],[0,4,0,2013,2],[0,4,1,2025,3],[0,4,1,2019,0],[0,4,0,2018,2],[0,4,0,2017,2],[0,4,0,2015,2],[0,4,0,2014,2],[0,4,1,2025,3],[0,4,0,2022,3],[0,4,0,2020,0],[0,4,0,2012,2],[0,4,0,2016,3],[0,4,0,2016,3],[0,4,1,2015,3],[0,4,0,2015,3],[0,4,0,2015,3],[0,4,0,2014,3],[0,4,0,2014,3],[0,4,0,2014,3],[0,4,0,2014,3],[0,4,0,2014,3],[0,4,0,2014,3],[0,4,0,2014,3],[0,4,0,2014,3],[0,4,0,2013,3],[0,4,0,2019,3],[0,4,0,2018,3],[0,4,0,2022,2],[0,4,0,2019,2],[0,4,0,2018,2],[0,4,0,2018,2],[0,4,1,2020,3],[0,4,1,2018,3],[0,4,1,2023,3],[0,4,1,2023,3],[0,4,1,2022,3],[0,4,1,2022,3],[0,4,1,2022,3],[0,4,1,2021,3],[0,4,1,2023,3],[0,4,1,2022,3],[0,4,1,2019,3],[0,4,1,2014,3],[0,4,0,2022,3],[0,4,1,2018,3],[0,4,1,2018,3],[0,4,1,2018,3],[0,4,1,2025,3],[0,4,1,2025,3],[0,4,1,2024,3],[0,4,1,2024,3],[0,4,1,2024,3],[0,4,1,2023,3],[0,4,1,2023,3],[0,4,1,2023,3],[0,4,1,2023,3],[0,4,1,2022,3],[0,4,1,2022,3],[0,4,1,2022,3],[0,4,1,2022,3],[0,4,1,2021,3],[0,4,1,2021,3],[0,4,1,2021,3],[0,4,1,2021,3],[0,4,1,2021,3],[0,4,1,2021,3],[0,4,1,2020,3],[0,4,1,2020,3],[0,4,1,2020,3],[0,4,1,2020,3],[0,4,1,2019,3],[0,4,1,2019,3],[0,4,1,2019,3],[0,4,1,2019,3],[0,4,1,2018,3],[0,4,1,2018,3],[0,4,1,2018,3],[0,4,1,2018,3],[0,4,1,2018,3],[0,4,1,2018,3],[0,4,1,2024,3],[0,4,1,2024,3],[0,4,1,2024,3],[0,4,1,2023,3],[0,4,1,2023,3],[0,4,1,2023,3],[0,4,1,2023,3],[0,4,1,2023,3],[0,4,1,2022,3],[0,4,1,2022,3],[0,4,1,2022,3],[0,4,1,2022,3],[0,4,1,2021,3],[0,4,1,2021,3],[0,4,1,2021,3],[0,4,1,2021,3],[0,4,1,2021,3],[0,4,1,2021,3],[0,4,1,2021,3],[0,4,1,2021,3],[0,4,1,2021,3],[0,4,1,2020,3],[0,4,1,2020,3],[0,4,1,2020,3],[0,4,1,2020,3],[0,4,1,2020,3],[0,4,1,2019,3],[0,4,1,2019,3],[0,4,1,2019,3],[0,4,1,2019,3],[0,4,1,2018,3],[0,4,1,2018,3],[0,4,1,2018,3],[0,4,1,2025,3],[0,4,1,2025,3],[0,4,1,2024,3],[0,4,1,2024,3],[0,4,1,2024,3],[0,4,1,2023,3],[0,4,1,2023,3],[0,4,1,2023,3],[0,4,1,2023,3],[0,4,0,2022,3],[0,4,0,2022,3],[0,4,0,2022,3],[0,4,0,2022,3],[0,4,0,2021,3],[0,4,0,2021,3],[0,4,0,2021,3],[0,4,0,2021,3],[0,4,0,2021,3],[0,4,0,2021,3],[0,4,0,2021,3],[0,4,0,2020,3],[0,4,0,2020,3],[0,4,0,2020,3],[0,4,0,2020,3],[0,4,0,2019,3],[0,4,0,2019,3],[0,4,0,2019,3],[0,4,1,2017,3],[0,4,1,2018,3],[0,4,1,2020,3],[0,4,1,2020,3],[0,4,1,-1,3],[0,4,0,2020,3],[0,4,0,2019,3],[0,4,0,2019,3],[0,4,1,2012,3],[0,4,1,2026,3],[0,4,1,2026,3],[0,4,1,2026,3],[0,4,1,2026,3],[0,4,1,2026,3],[0,4,1,2026,3],[0,4,1,2025,3],[0,4,1,2025,3],[0,4,1,2025,3],[0,4,1,2025,3],[0,4,1,2025,3],[0,4,1,2025,3],[0,4,1,2025,3],[0,4,1,2025,3],[0,4,1,2025,3],[0,4,1,2025,3],[0,4,1,2025,3],[0,4,1,2025,3],[0,4,1,2024,3],[0,4,0,2022,3],[0,4,0,2021,3],[0,4,1,2023,2],[0,4,1,2023,2],[0,4,1,2021,2],[0,4,0,2022,2],[0,4,1,2022,2],[0,4,0,2019,3],[0,4,0,-1,3],[0,4,0,-1,3],[0,4,0,2015,3],[0,4,0,2012,3],[0,4,0,2013,3],[0,4,0,2013,3],[0,4,0,2013,3],[0,4,0,2013,3],[0,4,0,2015,3],[0,4,0,2014,3],[0,4,0,2012,3],[0,4,0,2012,3],[0,4,0,2011,3],[0,4,0,2011,3],[0,4,0,2014,3],[0,4,1,2013,3],[0,4,1,2012,3],[0,4,1,2012,3],[0,4,1,2011,3],[0,4,1,2012,3],[0,4,1,2012,3],[0,4,1,2012,3],[0,4,1,2013,3],[0,4,0,2022,3],[0,4,1,2025,3],[0,4,1,2024,3],[0,4,0,2022,3],[0,4,0,2020,3],[0,4,0,2017,3],[0,4,0,2015,3],[0,4,0,2014,3],[0,4,0,2014,3],[0,4,0,2014,3],[0,4,0,2014,3],[0,4,0,2013,3],[0,4,0,2015,3],[0,4,0,2014,3],[0,4,0,2014,3],[0,4,0,2014,3],[0,4,0,2014,3],[0,4,0,2014,3],[0,4,0,2013,3],[0,4,1,2025,3],[0,4,1,2025,3],[0,4,1,2025,3],[0,4,1,2025,3],[0,4,1,2025,3],[0,4,1,2025,3],[0,4,1,2025,3],[0,4,1,2026,3],[0,4,1,2025,3],[0,4,1,2025,3],[0,4,1,2025,3],[0,4,1,2026,3],[0,4,1,2025,3],[0,4,0,2017,3],[0,4,0,2016,3],[0,4,1,2025,3],[0,4,1,2023,3],[0,4,1,2023,3],[0,4,0,2020,3],[0,4,0,2020,3],[0,4,0,2017,3],[0,4,0,2020,3],[0,4,0,2016,3],[0,4,1,2011,3],[0,4,0,2022,3],[0,4,0,2021,3],[0,4,1,2024,3],[0,4,0,2021,3],[0,4,0,2019,3],[0,4,0,2018,2],[0,4,0,2017,2],[0,4,0,2016,2],[0,4,0,2015,3],[0,4,0,2014,3],[0,4,1,2014,3],[0,4,1,2014,3],[0,4,0,2021,3],[0,4,0,2019,3],[0,4,1,2025,3],[0,4,1,2023,3],[0,4,1,2023,3],[0,4,0,2020,3],[0,4,0,2020,3],[0,4,0,2017,3],[0,4,0,2020,3],[0,4,0,2016,3],[0,4,1,2024,3],[0,4,1,2023,3],[0,4,1,2023,3],[0,4,0,2022,3],[0,4,0,2021,3],[0,4,0,2021,3],[0,4,1,2025,3],[0,4,1,2023,3],[0,4,1,2023,3],[0,4,0,2020,3],[0,4,0,2020,3],[0,4,0,2017,3],[0,4,0,2020,2],[0,4,0,2016,3],[0,4,0,2018,3],[0,4,1,2025,3],[0,4,0,2020,3],[0,4,0,2019,3],[0,4,0,2018,2],[0,4,0,2018,2],[0,4,0,2016,3],[0,4,0,2015,3],[0,4,0,2014,3],[0,4,0,2013,3],[0,4,0,2013,3],[0,4,0,2013,3],[0,4,0,2013,3],[0,4,0,2012,3],[0,4,1,2023,3],[0,4,1,2021,3],[0,4,1,2015,3],[0,4,1,2015,3],[0,4,0,2017,2],[0,4,0,2013,2],[0,4,0,2013,2],[0,4,0,2013,2],[0,4,0,2012,2],[0,4,0,2013,2],[0,4,0,2013,2],[0,4,0,2013,2],[0,4,0,2013,2],[0,4,1,-1,3],[0,4,1,2025,3],[0,4,0,2017,3],[0,4,0,2015,1],[0,4,0,2013,3],[0,4,0,2012,3],[0,4,0,2011,3],[0,4,1,2017,3],[0,4,1,2015,3],[0,4,1,2017,3],[0,4,1,2015,3],[0,4,1,2017,3],[0,4,1,2015,3],[0,4,1,2017,3],[0,4,1,2015,3],[0,4,1,2013,3],[0,4,1,2011,3],[0,4,1,2017,3],[0,4,1,2015,3],[0,4,1,2017,3],[0,4,1,2015,3],[0,4,1,2017,3],[0,4,1,2015,3],[0,4,1,2017,3],[0,4,1,2015,3],[0,4,1,2017,3],[0,4,1,2015,3],[0,4,1,2017,3],[0,4,1,2015,3],[0,4,1,2017,3],[0,4,1,2015,3],[0,4,1,2017,3],[0,4,1,2015,3],[0,4,1,2017,3],[0,4,1,2015,3],[0,4,1,2017,3],[0,4,1,2015,3],[0,4,1,2017,3],[0,4,1,2015,3],[0,4,1,2017,3],[0,4,1,2015,3],[0,4,1,2013,3],[0,4,0,2019,3],[0,4,0,2018,3],[0,4,0,2016,3],[0,4,1,2024,3],[0,4,1,2024,3],[0,4,1,2024,3],[0,4,1,2024,3],[0,4,1,2024,3],[0,4,1,2015,3],[0,4,1,2012,3],[0,4,1,2011,3],[0,4,0,2019,3],[0,4,0,2017,3],[0,4,0,2020,3],[0,4,0,2021,3],[0,4,0,2017,3],[0,4,0,2021,2],[0,4,0,2020,2],[0,4,0,2020,2],[0,4,0,2019,2],[0,4,0,2018,2],[0,4,0,2018,2],[0,4,0,2017,2],[0,4,0,2016,2],[0,4,1,2012,3],[0,4,1,2011,3],[0,4,0,2019,2],[0,4,0,2018,2],[0,4,1,2022,3],[0,4,1,2019,3],[0,4,0,2017,2],[0,4,0,2017,2],[0,4,1,2014,3],[0,4,0,2017,2],[0,4,1,2017,3],[0,4,0,2016,2],[0,4,1,2016,3],[0,4,0,2018,3],[0,4,0,2017,2],[0,4,0,2014,2],[0,4,0,2012,2],[0,4,1,2022,3],[0,4,1,2025,3],[0,4,1,2025,3],[0,4,1,2024,3],[0,4,1,2024,3],[0,4,1,2024,3],[0,4,1,2023,3],[0,4,1,2023,3],[0,4,1,2023,3],[0,4,1,2023,3],[0,4,1,2023,3],[0,4,1,2023,3],[0,4,0,2022,3],[0,4,0,2022,3],[0,4,0,2022,3],[0,4,0,2022,3],[0,4,0,2021,3],[0,4,0,2021,3],[0,4,0,2021,3],[0,4,0,2021,3],[0,4,0,2021,3],[0,4,0,2021,3],[0,4,0,2021,3],[0,4,0,2020,3],[0,4,0,2020,3],[0,4,0,2020,3],[0,4,0,2020,3],[0,4,0,2019,3],[0,4,0,2019,3],[0,4,0,2019,3],[0,4,0,2019,3],[0,4,0,2018,3],[0,4,0,2018,3],[0,4,0,2017,3],[0,4,0,2017,3],[0,4,0,2016,3],[0,4,0,2016,3],[0,4,1,2024,3],[0,4,1,2024,3],[0,4,1,2023,3],[0,4,1,2023,3],[0,4,1,2023,3],[0,4,1,2023,3],[0,4,1,2023,3],[0,4,1,2022,3],[0,4,1,2022,3],[0,4,1,2022,3],[0,4,1,2022,3],[0,4,1,2021,3],[0,4,1,2021,3],[0,4,1,2021,3],[0,4,1,2021,3],[0,4,1,2021,3],[0,4,1,2021,3],[0,4,1,2021,3],[0,4,1,2020,3],[0,4,1,2020,3],[0,4,1,2020,3],[0,4,1,2020,3],[0,4,1,2019,3],[0,4,1,2019,3],[0,4,1,2019,3],[0,4,1,2019,3],[0,4,1,2018,3],[0,4,1,2017,3],[0,4,1,2017,3],[0,4,1,2016,3],[0,4,1,2016,3],[0,4,1,2026,3],[0,4,1,2025,3],[0,4,1,2025,3],[0,4,1,2025,3],[0,4,1,2025,3],[0,4,1,2024,3],[0,4,1,2024,3],[0,4,1,2024,3],[0,4,1,2024,3],[0,4,1,2024,3],[0,4,1,2023,3],[0,4,1,2023,3],[0,4,1,2023,3],[0,4,1,2023,3],[0,4,0,2022,3],[0,4,0,2022,3],[0,4,0,2022,3],[0,4,0,2022,3],[0,4,0,2021,3],[0,4,0,2021,3],[0,4,0,2021,3],[0,4,0,2021,3],[0,4,0,2021,3],[0,4,0,2021,3],[0,4,0,2021,3],[0,4,0,2020,3],[0,4,0,2020,3],[0,4,0,2020,3],[0,4,0,2020,3],[0,4,0,2020,3],[0,4,0,2019,3],[0,4,0,2019,3],[0,4,0,2019,3],[0,4,0,2019,3],[0,4,0,2018,3],[0,4,0,2018,3],[0,4,0,2018,3],[0,4,0,2018,3],[0,4,1,2024,3],[0,4,1,2024,3],[0,4,1,2024,3],[0,4,1,2024,3],[0,4,1,2023,3],[0,4,1,2023,3],[0,4,1,2023,3],[0,4,1,2023,3],[0,4,1,2023,3],[0,4,1,2022,3],[0,4,1,2022,3],[0,4,1,2022,3],[0,4,1,2022,3],[0,4,1,2021,3],[0,4,1,2021,3],[0,4,1,2021,3],[0,4,1,2021,3],[0,4,1,2021,3],[0,4,1,2021,3],[0,4,1,2021,3],[0,4,1,2021,3],[0,4,1,2020,3],[0,4,1,2020,3],[0,4,1,2020,3],[0,4,1,2020,3],[0,4,1,2020,3],[0,4,1,2019,3],[0,4,1,2019,3],[0,4,1,2019,3],[0,4,1,2019,3],[0,4,1,2018,3],[0,4,1,2018,3],[0,4,1,2025,3],[0,4,1,2025,3],[0,4,1,2024,3],[0,4,1,2024,3],[0,4,1,2025,3],[0,4,1,2025,3],[0,4,1,2025,3],[0,4,1,2025,3],[0,4,1,2024,3],[0,4,1,2024,3],[0,4,1,2024,3],[0,4,0,2019,3],[0,4,0,2017,3],[0,4,0,2016,3],[0,4,1,2018,3],[0,4,1,2017,3],[0,4,1,2017,3],[0,4,1,2018,3],[0,4,0,2018,2],[0,4,0,2018,2],[0,4,0,2017,2],[0,4,0,2019,2],[0,4,0,2019,2],[0,4,0,2019,2],[0,4,0,2018,2],[0,4,0,2018,2],[0,4,0,2018,2],[0,4,0,2018,2],[0,4,0,2018,2],[0,4,0,2018,2],[0,4,0,2018,2],[0,4,0,2018,2],[0,4,0,2018,2],[0,4,0,2018,2],[0,4,0,2018,2],[0,4,0,2018,2],[0,4,0,2018,2],[0,4,0,2018,2],[0,4,0,2018,2],[0,4,0,2019,3],[0,4,0,2019,3],[0,4,0,2019,3],[0,4,0,2019,2],[0,4,0,2020,2],[0,4,0,2019,2],[0,4,0,2019,2],[0,4,0,2019,2],[0,4,0,2018,2],[0,4,0,2018,2],[0,4,0,2018,2],[0,4,0,2017,2],[0,4,0,2017,2],[0,4,0,2017,2],[0,4,0,2017,2],[0,4,0,2016,2],[0,4,0,2016,2],[0,4,0,2016,2],[0,4,0,2016,2],[0,4,0,2016,2],[0,4,0,2016,2],[0,4,0,2015,2],[0,4,0,2016,3],[0,4,0,2015,2],[0,4,0,2015,3],[0,4,0,2015,3],[0,4,0,2015,3],[0,4,0,2015,3],[0,4,0,2015,3],[0,4,0,2015,3],[0,4,0,2014,3],[0,4,0,2014,3],[0,4,0,2017,3],[0,4,0,2017,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2017,2],[0,4,0,2016,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,1,2021,3],[0,4,1,2018,3],[0,4,1,2021,3],[0,4,0,2017,3],[0,4,0,2021,2],[0,4,0,2017,2],[0,4,0,2016,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2017,2],[0,4,0,2016,2],[0,4,0,2014,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2017,2],[0,4,0,2016,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2017,2],[0,4,0,2016,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2017,2],[0,4,0,2016,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2017,2],[0,4,0,2016,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,3],[0,4,0,2021,3],[0,4,0,2021,2],[0,4,0,2019,2],[0,4,0,2018,2],[0,4,0,2018,2],[0,4,0,2018,2],[0,4,0,2018,2],[0,4,0,2017,3],[0,4,0,2017,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,1,2021,3],[0,4,1,2020,3],[0,4,0,2021,2],[0,4,0,2020,2],[0,4,0,2018,2],[0,4,0,2018,2],[0,4,0,2018,2],[0,4,0,2018,2],[0,4,0,2017,2],[0,4,0,2017,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2022,3],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2017,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2018,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,1,2026,3],[0,4,0,2020,3],[0,4,0,2019,3],[0,4,0,2018,2],[0,4,0,2018,2],[0,4,0,2016,2],[0,4,0,2017,2],[0,4,0,2015,2],[0,4,0,2014,2],[0,4,0,2013,2],[0,4,0,2012,2],[0,4,1,2011,3],[0,4,1,2020,3],[0,4,1,2019,3],[0,4,1,2018,3],[0,4,1,2020,3],[0,4,1,2019,3],[0,4,1,2018,3],[0,4,1,2017,3],[0,4,1,2016,3],[0,4,1,2014,3],[0,4,1,2011,3],[0,4,1,2011,3],[0,4,1,2026,3],[0,4,1,2025,3],[0,4,1,2025,3],[0,4,1,2024,1],[0,4,1,2023,1],[0,4,1,2023,1],[0,4,1,2024,1],[0,4,1,2023,1],[0,4,0,2022,1],[0,4,0,2022,1],[0,4,0,2021,1],[0,4,0,2022,2],[0,4,0,2022,2],[0,4,0,2020,2],[0,4,0,2022,2],[0,4,0,2019,2],[0,4,0,2019,2],[0,4,0,2018,2],[0,4,0,2018,2],[0,4,0,2018,2],[0,4,0,2017,2],[0,4,0,2016,2],[0,4,0,2016,2],[0,4,0,2018,2],[0,4,0,2017,2],[0,4,0,2016,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,1,2026,3],[0,4,1,2025,3],[0,4,1,2025,3],[0,4,1,2024,1],[0,4,1,2023,1],[0,4,1,2023,1],[0,4,1,2024,1],[0,4,1,2023,1],[0,4,0,2022,1],[0,4,0,2022,1],[0,4,0,2021,1],[0,4,0,2022,2],[0,4,0,2022,2],[0,4,0,2020,2],[0,4,0,2022,2],[0,4,0,2019,2],[0,4,0,2019,2],[0,4,0,2018,2],[0,4,0,2018,2],[0,4,0,2018,2],[0,4,0,2017,2],[0,4,0,2016,2],[0,4,0,2016,2],[0,4,0,2018,2],[0,4,0,2017,2],[0,4,0,2016,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,1,2016,3],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,1,2013,2],[0,4,1,2011,3],[0,4,0,2019,2],[0,4,0,2021,3],[0,4,1,2026,3],[0,4,1,2024,3],[0,4,1,2022,3],[0,4,0,2021,3],[0,4,1,2024,1],[0,4,0,2022,1],[0,4,0,2019,1],[0,4,0,2021,2],[0,4,0,2021,3],[0,4,1,2025,3],[0,4,1,2024,3],[0,4,0,2022,1],[0,4,0,2018,1],[0,4,0,2016,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,1,2014,3],[0,4,1,2014,3],[0,4,1,2025,3],[0,4,1,2022,3],[0,4,1,2021,3],[0,4,1,2022,3],[0,4,1,2019,3],[0,4,1,-1,3],[0,4,1,-1,3],[0,4,0,2021,3],[0,4,0,2018,3],[0,4,0,2021,3],[0,4,0,2021,3],[0,4,1,2025,3],[0,4,1,2025,3],[0,4,1,2025,3],[0,4,1,2024,3],[0,4,1,2024,3],[0,4,1,2023,3],[0,4,1,2023,3],[0,4,0,2022,3],[0,4,0,2022,3],[0,4,0,2022,3],[0,4,0,2021,3],[0,4,0,2021,3],[0,4,0,2021,3],[0,4,0,2021,3],[0,4,0,2021,3],[0,4,0,2020,3],[0,4,0,2020,3],[0,4,0,2020,3],[0,4,0,2020,3],[0,4,0,2019,3],[0,4,0,2019,3],[0,4,0,2019,3],[0,4,0,2019,3],[0,4,0,2018,3],[0,4,0,2018,3],[0,4,0,2018,3],[0,4,0,2016,3],[0,4,0,2016,3],[0,4,1,2023,3],[0,4,1,2022,3],[0,4,1,2020,3],[0,4,1,2020,3],[0,4,1,2019,3],[0,4,1,2018,3],[0,4,1,2023,3],[0,4,1,2022,3],[0,4,1,2020,3],[0,4,0,2020,2],[0,4,1,2019,2],[0,4,1,2018,2],[0,4,1,2018,2],[0,4,1,2020,3],[0,4,1,2020,3],[0,4,0,2021,3],[0,4,0,2019,2],[0,4,0,2019,3],[0,4,0,2018,3],[0,4,0,2018,3],[0,4,0,2021,3],[0,4,0,2019,2],[0,4,0,2019,3],[0,4,0,2018,3],[0,4,0,2018,3],[0,4,1,2025,3],[0,4,1,2023,3],[0,4,0,2023,2],[0,4,0,2022,2],[0,4,0,2020,2],[0,4,1,2020,3],[0,4,1,2019,3],[0,4,1,2023,3],[0,4,1,2022,3],[0,4,1,2021,3],[0,4,1,2021,3],[0,4,1,2021,3],[0,4,1,2023,3],[0,4,1,2021,3],[0,4,1,2023,3],[0,4,1,2023,3],[0,4,1,2021,3],[0,4,1,2021,3],[0,4,1,2020,3],[0,4,1,2020,3],[0,4,1,2018,3],[0,4,1,2018,3],[0,4,1,2026,3],[0,4,1,2025,1],[0,4,1,2023,2],[0,4,1,2023,2],[0,4,0,2021,2],[0,4,0,2021,2],[0,4,0,2020,2],[0,4,0,2020,2],[0,4,0,2018,3],[0,4,0,2018,3],[0,4,0,2016,2],[0,4,0,2016,2],[0,4,0,2017,2],[0,4,1,2023,3],[0,4,0,2022,2],[0,4,0,2021,3],[0,4,0,2021,2],[0,4,1,2016,3],[0,4,1,2012,3],[0,4,1,2011,3],[0,4,0,2021,3],[0,4,0,2024,2],[0,4,0,2023,2],[0,4,0,2022,2],[0,4,0,2020,2],[0,4,0,2019,2],[0,4,0,2018,2],[0,4,0,2017,2],[0,4,0,2016,2],[0,4,0,2015,2],[0,4,0,2014,2],[0,4,0,2013,2],[0,4,0,2013,2],[0,4,0,2012,2],[0,4,1,2011,3],[0,4,1,2013,3],[0,4,0,2012,2],[0,4,0,2012,2],[0,4,0,2013,2],[0,4,1,2013,3],[0,4,1,2012,3],[0,4,1,2012,3],[0,4,1,2012,3],[0,4,1,2011,3],[0,4,0,2016,2],[0,4,0,2014,2],[0,4,0,2018,2],[0,4,0,2017,2],[0,4,0,2015,2],[0,4,0,2015,2],[0,4,0,2013,2],[0,4,0,2013,2],[0,4,0,2012,2],[0,4,1,2011,3],[0,4,1,2018,3],[0,4,1,2017,3],[0,4,1,2015,3],[0,4,1,2015,3],[0,4,1,2013,3],[0,4,1,2013,3],[0,4,1,2012,3],[0,4,0,2023,2],[0,4,0,2023,2],[0,4,0,2019,2],[0,4,0,2018,2],[0,4,0,2017,2],[0,4,0,2016,2],[0,4,0,2015,2],[0,4,0,2015,2],[0,4,0,2014,2],[0,4,0,2012,2],[0,4,0,2019,2],[0,4,0,2018,2],[0,4,0,2015,2],[0,4,0,2024,2],[0,4,0,2023,2],[0,4,0,2020,2],[0,4,0,2020,2],[0,4,0,2019,2],[0,4,0,2018,2],[0,4,0,2017,2],[0,4,0,2016,2],[0,4,0,2015,2],[0,4,0,2014,2],[0,4,0,2014,2],[0,4,0,2024,2],[0,4,0,2023,2],[0,4,0,2020,2],[0,4,0,2018,2],[0,4,0,2018,2],[0,4,0,2017,2],[0,4,0,2017,2],[0,4,0,2015,2],[0,4,0,2015,2],[0,4,0,2020,2],[0,4,0,2018,2],[0,4,0,2017,2],[0,4,0,2015,2],[0,4,0,2024,2],[0,4,0,2018,2],[0,4,0,2016,2],[0,4,0,2015,2],[0,4,0,2019,2],[0,4,0,2018,2],[0,4,0,2015,2],[0,4,0,2018,2],[0,4,0,2017,2],[0,4,0,2015,2],[0,4,0,2024,2],[0,4,0,2023,2],[0,4,0,2023,2],[0,4,0,2020,2],[0,4,0,2019,2],[0,4,0,2018,2],[0,4,0,2018,2],[0,4,0,2017,2],[0,4,0,2017,2],[0,4,0,2017,2],[0,4,0,2016,2],[0,4,0,2015,2],[0,4,0,2015,2],[0,4,0,2014,2],[0,4,0,2013,2],[0,4,0,2013,2],[0,4,1,2013,3],[0,4,1,2012,3],[0,4,0,2018,2],[0,4,0,2015,2],[0,4,0,2014,2],[0,4,0,2019,2],[0,4,0,2018,2],[0,4,0,2018,2],[0,4,0,2015,2],[0,4,0,2024,2],[0,4,0,2018,2],[0,4,0,2015,2],[0,4,0,2014,2],[0,4,0,2013,2],[0,4,0,2013,2],[0,4,0,2012,2],[0,4,0,2012,2],[0,4,0,2011,2],[0,4,0,2013,2],[0,4,0,2013,2],[0,4,0,2020,2],[0,4,0,2019,2],[0,4,0,2018,2],[0,4,1,2017,2],[0,4,1,2016,3],[0,4,0,2015,2],[0,4,0,2014,2],[0,4,0,2013,2],[0,4,0,2012,2],[0,4,0,2024,2],[0,4,0,2019,2],[0,4,0,2018,2],[0,4,0,2016,2],[0,4,0,2014,2],[0,4,0,2012,2],[0,4,0,2012,2],[0,4,1,2011,3],[0,4,1,2016,3],[0,4,1,2019,3],[0,4,0,2021,3],[0,4,0,2020,3],[0,4,0,2020,3],[0,4,0,2015,2],[0,4,1,2011,2],[0,4,1,2026,3],[0,4,1,2024,3],[0,4,1,2023,3],[0,4,1,2023,3],[0,4,1,2022,3],[0,4,0,2022,1],[0,4,0,2021,1],[0,4,0,2020,2],[0,4,0,2018,2],[0,4,0,2017,2],[0,4,0,2016,2],[0,4,0,2015,2],[0,4,0,2014,2],[0,4,0,2013,2],[0,4,0,2011,2],[0,4,1,2024,3],[0,4,1,2024,3],[0,4,1,2024,3],[0,4,1,2025,3],[0,4,1,2025,3],[0,4,1,2025,3],[0,4,1,2025,3],[0,4,1,2024,3],[0,4,1,2024,3],[0,4,1,2025,3],[0,4,1,2025,3],[0,4,1,2022,3],[0,4,0,2019,2],[0,4,0,2018,2],[0,4,0,2016,2],[0,4,1,2022,3],[0,4,1,2026,3],[0,4,0,2019,3],[0,4,0,2018,3],[0,4,0,2016,3],[0,4,0,2015,3],[0,4,0,2015,3],[0,4,0,2014,3],[0,4,1,2022,3],[0,4,1,2022,3],[0,4,1,2021,3],[0,4,1,2021,3],[0,4,1,2021,3],[0,4,1,2021,3],[0,4,1,2020,3],[0,4,1,2020,3],[0,4,1,2021,3],[0,4,1,2019,3],[0,4,1,2019,3],[0,4,1,2019,3],[0,4,1,2019,3],[0,4,1,2019,3],[0,4,1,2019,3],[0,4,1,2018,3],[0,4,1,2018,3],[0,4,1,2018,3],[0,4,1,2018,3],[0,4,1,2018,3],[0,4,1,2017,3],[0,4,1,2022,3],[0,4,1,2017,3],[0,4,1,2017,3],[0,4,0,2021,3],[0,4,1,2017,3],[0,4,1,2017,3],[0,4,1,2016,3],[0,4,1,2022,3],[0,4,1,2016,3],[0,4,1,2016,3],[0,4,0,2021,3],[0,4,0,2021,3],[0,4,0,2021,3],[0,4,0,2021,3],[0,4,0,2021,3],[0,4,0,2021,3],[0,4,0,2021,3],[0,4,0,2021,3],[0,4,0,2021,3],[0,4,0,2021,3],[0,4,0,2021,3],[0,4,1,2024,3],[0,4,1,2024,3],[0,4,1,2018,3],[0,4,1,2018,3],[0,4,1,2017,3],[0,4,1,2016,3],[0,4,1,2015,3],[0,4,1,2014,3],[0,4,1,2013,3],[0,4,1,2012,3],[0,4,1,2011,3],[0,4,1,2024,3],[0,4,1,2023,3],[0,4,1,2023,3],[0,4,1,2023,3],[0,4,0,2021,3],[0,4,0,2021,3],[0,4,0,2022,3],[0,4,0,2020,3],[0,4,0,2019,3],[0,4,0,2018,3],[0,4,0,2020,3],[0,4,0,2019,3],[0,4,0,2018,3],[0,4,0,2015,3],[0,4,0,2015,3],[0,4,0,2014,3],[0,4,0,2012,3],[0,4,0,2012,3],[0,4,0,2012,3],[0,4,0,2011,3],[0,4,0,2011,3],[0,4,0,2014,3],[0,4,1,2018,3],[0,4,1,2013,3],[0,4,1,2011,3],[0,4,1,2013,3],[0,4,1,2013,3],[0,4,0,2017,2],[0,4,1,2014,3],[0,4,0,2014,2],[0,4,1,2013,2],[0,4,1,2011,3],[0,4,1,2013,3],[0,4,1,2013,3],[0,4,1,2013,3],[0,4,1,2013,3],[0,4,1,2013,3],[0,4,0,2024,2],[0,4,0,2023,2],[0,4,1,2021,3],[0,4,1,2020,3],[0,4,1,2018,3],[0,4,1,2017,3],[0,4,0,2016,2],[0,4,0,2015,2],[0,4,0,2014,2],[0,4,0,2014,2],[0,4,0,2013,2],[0,4,0,2013,2],[0,4,1,2017,3],[0,4,1,2014,3],[0,4,0,2019,2],[0,4,0,2017,2],[0,4,0,2016,2],[0,4,0,2015,2],[0,4,0,2014,2],[0,4,0,2014,2],[0,4,0,2013,2],[0,4,0,2019,2],[0,4,0,2017,2],[0,4,0,2014,2],[0,4,0,2013,2],[0,4,0,2015,2],[0,4,0,2013,2],[0,4,0,2013,2],[0,4,0,2016,2],[0,4,0,2014,2],[0,4,0,2013,2],[0,4,0,2016,2],[0,4,0,2014,2],[0,4,0,2016,2],[0,4,0,2014,2],[0,4,0,2017,2],[0,4,0,2014,2],[0,4,0,2017,2],[0,4,1,2013,2],[0,4,0,2014,2],[0,4,0,2018,2],[0,4,0,2016,2],[0,4,0,2015,2],[0,4,0,2018,2],[0,4,0,2014,2],[0,4,0,2013,2],[0,4,1,2018,3],[0,4,0,2014,2],[0,4,0,2013,2],[0,4,1,2015,2],[0,4,1,2014,2],[0,4,0,2014,2],[0,4,0,2023,2],[0,4,0,2021,2],[0,4,0,2015,2],[0,4,0,2014,2],[0,4,1,2014,3],[0,4,1,2013,3],[0,4,1,2014,3],[0,4,1,2013,3],[0,4,1,2014,3],[0,4,1,2013,3],[0,4,1,2013,3],[0,4,1,2012,3],[0,4,0,2015,2],[0,4,0,2014,2],[0,4,0,2014,2],[0,4,0,2014,2],[0,4,0,2013,2],[0,4,0,2011,2],[0,4,0,2011,3],[0,4,0,2013,2],[0,4,1,2025,3],[0,4,0,2019,3],[0,4,0,2020,3],[0,4,0,2019,2],[0,4,0,2018,2],[0,4,0,2018,2],[0,4,0,2018,2],[0,4,0,2018,2],[0,4,0,2016,2],[0,4,0,2017,2],[0,4,0,2014,2],[0,4,0,2013,2],[0,4,0,2011,2],[0,4,0,2011,3],[0,4,1,2019,3],[0,4,0,2017,2],[0,4,0,2014,2],[0,4,0,2020,3],[0,4,0,2019,3],[0,4,0,2018,3],[0,4,0,2018,3],[0,4,0,2018,3],[0,4,0,2018,3],[0,4,0,2016,3],[0,4,0,2015,3],[0,4,1,2020,3],[0,4,1,2019,3],[0,4,1,2018,3],[0,4,1,2018,3],[0,4,1,2016,3],[0,4,1,2015,3],[0,4,0,2015,2],[0,4,0,2014,2],[0,4,0,2014,2],[0,4,0,2014,2],[0,4,0,2014,2],[0,4,0,2013,2],[0,5,1,2021,3],[0,5,1,2020,3],[0,5,1,2017,3],[0,5,1,2011,3],[0,5,1,2011,3],[0,5,1,2010,3],[0,5,1,2011,3],[0,5,1,2010,3],[0,5,1,2009,3],[0,5,1,2008,3],[0,5,1,2022,3],[0,5,1,2021,3],[0,5,1,2019,3],[0,5,1,2019,3],[0,5,1,2019,3],[0,5,1,2022,3],[0,5,1,2022,3],[0,5,1,2019,3],[0,5,0,2017,2],[0,5,0,2016,2],[0,5,0,2016,2],[0,5,0,2015,2],[0,5,0,2014,2],[0,5,1,2023,3],[0,5,0,2022,3],[0,5,1,2024,3],[0,5,1,2023,1],[0,5,1,2021,1],[0,5,0,2021,2],[0,5,0,2019,2],[0,5,0,2019,2],[0,5,0,2019,2],[0,5,0,2018,2],[0,5,0,2017,2],[0,5,0,2017,2],[0,5,1,2026,3],[0,5,1,2023,3],[0,5,1,2022,1],[0,5,1,2021,2],[0,5,1,2021,2],[0,5,0,2020,3],[0,5,0,2019,3],[0,5,0,2019,3],[0,5,0,2018,3],[0,5,0,2018,2],[0,5,0,2017,3],[0,5,1,2026,3],[0,5,1,2025,3],[0,5,1,2025,3],[0,5,1,2023,1],[0,5,1,2023,1],[0,5,1,2022,3],[0,5,1,2022,1],[0,5,0,2021,2],[0,5,0,2020,2],[0,5,0,2019,2],[0,5,0,2019,2],[0,5,0,2016,2],[0,5,0,2016,2],[0,5,1,2025,3],[0,5,1,2022,3],[0,5,0,2020,2],[0,5,0,2017,2],[0,5,1,2025,3],[0,5,1,2024,3],[0,5,1,2023,3],[0,5,1,2023,1],[0,5,0,2022,1],[0,5,0,2022,1],[0,5,0,2021,2],[0,5,0,2021,2],[0,5,0,2020,2],[0,5,0,2020,2],[0,5,0,2020,2],[0,5,0,2020,2],[0,5,0,2019,2],[0,5,0,2018,2],[0,5,0,2018,2],[0,5,0,2017,2],[0,5,1,2025,3],[0,5,1,2024,3],[0,5,1,2025,3],[0,5,1,2024,3],[0,5,1,2024,1],[0,5,1,2023,1],[0,5,1,2024,3],[0,5,1,2026,3],[0,5,1,2023,3],[0,5,1,2019,3],[0,5,1,2021,3],[0,5,1,2019,2],[0,5,1,2018,2],[0,5,0,2018,2],[0,5,0,2018,2],[0,5,0,2016,2],[0,5,0,2016,2],[0,5,0,2015,2],[0,5,0,2014,2],[0,5,0,2013,3],[0,5,1,2026,3],[0,5,1,2025,3],[0,5,1,2024,3],[0,5,1,2022,3],[0,5,1,2022,3],[0,5,0,2019,2],[0,5,0,2018,2],[0,5,0,2016,2],[0,5,0,2017,2],[0,5,0,2014,2],[0,5,1,2014,2],[0,5,1,2025,3],[0,5,1,2023,3],[0,5,1,2023,2],[0,5,1,2023,3],[0,5,1,2020,2],[0,5,0,2018,2],[0,5,0,2018,2],[0,5,0,2017,2],[0,5,1,2023,3],[0,5,1,2022,2],[0,5,1,2025,3],[0,5,1,2020,2],[0,5,0,2018,2],[0,5,1,2021,3],[0,5,1,2021,2],[0,5,1,2019,2],[0,5,1,2026,3],[0,5,1,2025,3],[0,5,1,2025,3],[0,5,1,2021,3],[0,5,1,2019,3],[0,5,0,2018,2],[0,5,0,2018,2],[0,5,0,2017,2],[0,5,0,2017,2],[0,5,0,2014,2],[0,5,0,2014,2],[0,5,1,2021,3],[0,5,1,2021,2],[0,5,0,2018,2],[0,5,0,2018,2],[0,5,0,2013,2],[0,5,0,2011,2],[0,5,0,2011,2],[0,5,0,2013,2],[0,5,1,2023,3],[0,5,1,2022,1],[0,5,1,2020,2],[0,5,0,2020,2],[0,5,0,2019,2],[0,5,0,2019,2],[0,5,0,2018,2],[0,5,0,2018,2],[0,5,0,2018,2],[0,5,0,2017,2],[0,5,1,2023,3],[0,5,1,2022,3],[0,5,0,2021,2],[0,5,1,2023,3],[0,5,1,2021,2],[0,5,0,2014,2],[0,5,0,2013,2],[0,5,0,2012,2],[0,5,0,2012,2],[0,5,0,2011,2],[0,5,0,2009,2],[0,5,0,2011,2],[0,5,1,2016,3],[0,5,0,2015,3],[0,5,1,2019,3],[0,5,1,2019,3],[0,5,1,2020,3],[0,5,1,2016,2],[0,5,0,2014,2],[0,5,1,2024,3],[0,5,0,2011,2],[0,5,1,2022,1],[0,5,1,2021,2],[0,5,0,2019,2],[0,5,0,2018,2],[0,5,0,2017,2],[0,5,0,2017,2],[0,5,0,2014,2],[0,5,0,2014,2],[0,5,1,2022,1],[0,5,1,2021,2],[0,5,1,2019,2],[0,5,0,2018,2],[0,5,0,2015,2],[0,5,0,2012,2],[0,5,1,2022,3],[0,5,1,2021,2],[0,5,1,-1,2],[0,5,0,2017,2],[0,5,0,2022,3],[0,5,0,2021,1],[0,5,0,2023,3],[0,5,0,2021,2],[0,5,0,2021,2],[0,5,0,2021,2],[0,5,0,2021,2],[0,5,0,2012,2],[0,5,1,2023,3],[0,5,0,2020,2],[0,5,1,2023,3],[0,5,0,2020,1],[0,5,0,2020,2],[0,5,1,2021,3],[0,5,1,2023,3],[0,5,1,2022,3],[0,5,1,2021,3],[0,5,1,2020,3],[0,5,1,2020,3],[0,5,1,2020,3],[0,5,0,2019,3],[0,5,0,2018,3],[0,5,0,2018,3],[0,5,1,2016,3],[0,5,1,2015,3],[0,5,1,2012,3],[0,5,1,2022,3],[0,5,0,2020,2],[0,5,0,2019,2],[0,5,0,2019,2],[0,5,0,2020,2],[0,5,0,2016,2],[0,5,0,2016,2],[0,5,0,2017,2],[0,5,0,2017,2],[0,5,1,2022,3],[0,5,1,2022,3],[0,5,1,2022,3],[0,5,1,2020,3],[0,5,0,2018,2],[0,5,0,2017,2],[0,5,0,2016,2],[0,5,0,2016,2],[0,5,0,2015,2],[0,5,0,2015,2],[0,5,0,2014,2],[0,5,0,2014,2],[0,5,1,2021,3],[0,5,1,2021,3],[0,5,0,2020,2],[0,5,0,2020,2],[0,5,0,2018,2],[0,5,0,2015,2],[0,5,0,2015,2],[0,5,0,2014,2],[0,5,0,2014,2],[0,5,0,2013,2],[0,5,1,2022,3],[0,5,1,2018,2],[0,5,0,2016,2],[0,5,1,2021,3],[0,5,1,2019,2],[0,5,1,2018,2],[0,5,0,2019,2],[0,5,0,2016,2],[0,5,0,2014,2],[0,5,1,2014,3],[0,5,0,2013,2],[0,5,1,2022,3],[0,5,1,2018,2],[0,5,0,2020,2],[0,5,0,2017,2],[0,5,0,2017,2],[0,5,1,2021,3],[0,5,0,2021,2],[0,5,0,2021,2],[0,5,0,2021,3],[0,5,1,2021,1],[0,5,1,2017,2],[0,5,1,2016,2],[0,5,1,2016,2],[0,5,0,2015,2],[0,5,0,2014,2],[0,5,0,2014,2],[0,5,1,2026,3],[0,5,1,2024,3],[0,5,1,2022,3],[0,5,0,2020,3],[0,5,0,2017,3],[0,5,1,2017,3],[0,5,0,2021,3],[0,5,0,2021,3],[0,5,0,2021,3],[0,5,0,2016,3],[0,5,0,2021,3],[0,5,0,2021,3],[0,5,1,2025,3],[0,5,1,2023,1],[0,5,1,2022,1],[0,5,1,2022,1],[0,5,0,2021,2],[0,5,0,2020,2],[0,5,0,2020,2],[0,5,0,2019,2],[0,5,0,2019,2],[0,5,1,2019,2],[0,5,0,2018,2],[0,5,0,2018,2],[0,5,0,2017,2],[0,5,0,2017,2],[0,5,0,2017,2],[0,5,0,2017,2],[0,5,0,2017,2],[0,5,0,2014,2],[0,5,0,2014,2],[0,5,1,2019,3],[0,5,1,-1,2],[0,5,0,2017,2],[0,5,1,2023,3],[0,5,1,2022,1],[0,5,1,2022,1],[0,5,0,2021,2],[0,5,0,2018,2],[0,5,0,2017,2],[0,5,0,2017,2],[0,5,0,2017,2],[0,5,0,2014,2],[0,5,0,2014,2],[0,5,0,2013,3],[0,5,0,2013,2],[0,5,1,2024,3],[0,5,1,2020,1],[0,5,1,2016,2],[0,5,0,2014,2],[0,5,1,2013,2],[0,5,1,2024,3],[0,5,1,2023,1],[0,5,0,2022,1],[0,5,0,2020,2],[0,5,1,2018,2],[0,5,0,2017,2],[0,5,0,2013,2],[0,5,1,2013,2],[0,5,1,2026,3],[0,5,1,2021,3],[0,5,1,2020,2],[0,5,0,2020,2],[0,5,0,2019,2],[0,5,0,2018,2],[0,5,0,2018,2],[0,5,0,2017,2],[0,5,0,2016,2],[0,5,0,2016,1],[0,5,0,2015,2],[0,5,1,2025,3],[0,5,0,2020,3],[0,5,0,2017,2],[0,5,0,2014,2],[0,5,1,2025,3],[0,5,1,2023,3],[0,5,1,2022,1],[0,5,1,2022,2],[0,5,0,2021,2],[0,5,0,2019,2],[0,5,0,2018,2],[0,5,0,2018,2],[0,5,0,2017,2],[0,5,0,2017,2],[0,5,0,2017,2],[0,5,0,2014,2],[0,5,0,2014,2],[0,5,1,2023,3],[0,5,1,2021,1],[0,5,0,2018,1],[0,5,0,2013,1],[0,5,1,2024,3],[0,5,1,2023,3],[0,5,1,2023,3],[0,5,1,2023,1],[0,5,1,2022,2],[0,5,0,2021,2],[0,5,0,2020,1],[0,5,0,2020,2],[0,5,0,2019,2],[0,5,0,2018,2],[0,5,0,2018,2],[0,5,0,2016,2],[0,5,0,2016,2],[0,5,1,2023,3],[0,5,1,2022,1],[0,5,1,2020,2],[0,5,0,2026,2],[0,5,0,2019,2],[0,5,0,2018,2],[0,5,0,2017,2],[0,5,0,2016,2],[0,5,0,2014,2],[0,5,0,2014,2],[0,5,0,2013,2],[0,5,0,2012,2],[0,5,0,2012,2],[0,5,1,2018,3],[0,5,1,-1,2],[0,5,1,-1,2],[0,5,1,-1,2],[0,5,1,2015,3],[0,5,0,2013,2],[0,5,0,2011,2],[0,5,0,2012,2],[0,5,1,2023,3],[0,5,1,2023,3],[0,5,1,2021,1],[0,5,1,2021,2],[0,5,0,2019,2],[0,5,0,2018,2],[0,5,0,2017,2],[0,5,0,2017,2],[0,5,0,2017,2],[0,5,1,2026,3],[0,5,1,2023,3],[0,5,1,2019,2],[0,5,1,2011,2],[0,5,1,2012,3],[0,5,1,2011,3],[0,5,1,2022,3],[0,5,1,2021,2],[0,5,0,2020,2],[0,5,0,2018,2],[0,5,0,2016,2],[0,5,0,2015,2],[0,5,1,2013,3],[0,5,1,2012,2],[0,5,1,2025,3],[0,5,1,2019,3],[0,5,0,-1,2],[0,5,0,-1,2],[0,5,0,-1,2],[0,5,0,-1,2],[0,5,0,2014,3],[0,5,1,2024,3],[0,5,1,2023,1],[0,5,1,2022,1],[0,5,0,2021,2],[0,5,0,2019,2],[0,5,0,2018,2],[0,5,1,2012,3],[0,5,0,2011,2],[0,5,1,2024,3],[0,5,1,2023,1],[0,5,1,2017,3],[0,5,1,2017,2],[0,5,1,-1,2],[0,5,1,-1,2],[0,5,1,-1,2],[0,5,0,2012,2],[0,5,1,2024,3],[0,5,1,2022,3],[0,5,1,2022,1],[0,5,1,2021,2],[0,5,1,2021,2],[0,5,1,2020,2],[0,5,0,2020,2],[0,5,0,2019,2],[0,5,0,2019,2],[0,5,0,2019,2],[0,5,0,2018,2],[0,5,0,2018,2],[0,5,0,2018,2],[0,5,0,2018,2],[0,5,0,2017,2],[0,5,0,2017,2],[0,5,0,2016,2],[0,5,0,2016,2],[0,5,0,2014,2],[0,5,0,2014,2],[0,5,0,2022,3],[0,5,0,2016,3],[0,5,0,2014,2],[0,5,0,2013,2],[0,5,0,2011,2],[0,5,1,2021,3],[0,5,1,2023,3],[0,5,1,2024,3],[0,5,0,2020,1],[0,5,1,2024,3],[0,5,1,2023,3],[0,5,1,2022,3],[0,5,0,2021,2],[0,5,0,2020,2],[0,5,0,2020,2],[0,5,0,2018,2],[0,5,0,2018,2],[0,5,0,2018,2],[0,5,0,2017,2],[0,5,0,2016,2],[0,5,0,2015,2],[0,5,1,2024,3],[0,5,1,2022,3],[0,5,1,2021,2],[0,5,1,2021,2],[0,5,1,2016,2],[0,5,0,2021,2],[0,5,0,2021,2],[0,5,0,2021,2],[0,5,0,2021,2],[0,5,0,2021,2],[0,5,0,2021,2],[0,5,1,2022,3],[0,5,1,2019,2],[0,5,1,2019,3],[0,5,1,-1,2],[0,5,1,2024,3],[0,5,1,2022,1],[0,5,0,2019,2],[0,5,0,2018,2],[0,5,0,2016,2],[0,5,0,2016,2],[0,5,0,2014,2],[0,5,1,2024,3],[0,5,1,2015,1],[0,5,0,2013,2],[0,5,1,2022,3],[0,5,1,2021,2],[0,5,0,2020,2],[0,5,0,2018,2],[0,5,1,2020,3],[0,5,1,2011,2],[0,5,1,2010,2],[0,5,1,2011,2],[0,5,1,2023,3],[0,5,1,2020,1],[0,5,0,2017,2],[0,5,0,2016,2],[0,5,0,2014,3],[0,5,0,2014,3],[0,5,1,2018,3],[0,5,0,2023,3],[0,5,0,2020,2],[0,5,0,2019,2],[0,5,0,2019,2],[0,5,1,2025,3],[0,5,1,2024,3],[0,5,0,2022,1],[0,5,0,2021,2],[0,5,0,2021,2],[0,5,0,2020,2],[0,5,1,2025,3],[0,5,1,2024,1],[0,5,1,2023,1],[0,5,1,2022,1],[0,5,0,2021,2],[0,5,0,2020,2],[0,5,0,2019,2],[0,5,0,2018,2],[0,5,0,2018,2],[0,5,0,2017,2],[0,5,0,2017,2],[0,5,0,2017,2],[0,5,1,2026,3],[0,5,1,2025,3],[0,5,1,2024,1],[0,5,1,2023,1],[0,5,0,2022,2],[0,5,0,2021,2],[0,5,0,2020,2],[0,5,0,2019,2],[0,5,0,2018,2],[0,5,0,2017,2],[0,5,0,2016,2],[0,5,0,2015,2],[0,5,0,2014,2],[0,5,0,2014,2],[0,5,1,2013,3],[0,5,1,2012,2],[0,5,1,2025,3],[0,5,1,2024,3],[0,5,1,2023,3],[0,5,1,2023,3],[0,5,1,2021,0],[0,5,1,2021,0],[0,5,1,2020,3],[0,5,1,2019,3],[0,5,0,2018,3],[0,5,0,2022,3],[0,5,0,2018,2],[0,5,0,2018,2],[0,5,1,2022,3],[0,5,1,2016,3],[0,5,1,2015,3],[0,5,1,2014,3],[0,5,1,2012,3],[0,5,1,2026,3],[0,5,1,2024,3],[0,5,1,2023,3],[0,5,1,2022,3],[0,5,1,2021,3],[0,5,1,2021,3],[0,5,0,2020,2],[0,5,0,2018,2],[0,5,1,2017,3],[0,5,1,2024,3],[0,5,1,2023,3],[0,5,1,2022,3],[0,5,1,2021,3],[0,5,0,2020,2],[0,5,0,2020,2],[0,5,1,2016,3],[0,5,1,2014,3],[0,5,1,2013,3],[0,5,1,2022,3],[0,5,1,2020,3],[0,5,1,2015,3],[0,5,0,2022,1],[0,5,0,2019,2],[0,5,1,2016,2],[0,5,0,2014,2],[0,5,0,2014,2],[0,5,0,2013,1],[0,5,1,2016,3],[0,5,1,2016,2],[0,5,1,2014,3],[0,5,0,2011,3],[0,5,0,2011,3],[0,5,0,2021,3],[0,5,1,2013,3],[0,5,0,2011,3],[0,5,1,2024,3],[0,5,1,2022,3],[0,5,1,2021,3],[0,5,1,2021,3],[0,5,1,2020,3],[0,5,1,2019,3],[0,5,1,2018,3],[0,5,1,2016,3],[0,5,1,2015,3],[0,5,1,2015,3],[0,5,1,2014,3],[0,5,1,2014,3],[0,5,1,2013,3],[0,5,1,2020,3],[0,5,1,2019,3],[0,5,1,2018,3],[0,5,1,2016,3],[0,5,0,2015,3],[0,5,0,2015,3],[0,5,0,2017,3],[0,5,0,2017,3],[0,5,0,2017,3],[0,5,0,2017,3],[0,5,0,2016,3],[0,5,0,2015,3],[0,5,0,2015,3],[0,5,0,2015,3],[0,5,0,2014,3],[0,5,0,2014,3],[0,5,0,2014,3],[0,5,0,2012,3],[0,5,0,2012,3],[0,5,0,2012,3],[0,5,1,2011,3],[0,5,0,2012,3],[0,5,0,2011,3],[0,5,0,2013,3],[0,5,0,2017,3],[0,5,0,2017,3],[0,5,0,2016,3],[0,5,0,2015,3],[0,5,0,2015,3],[0,5,0,2015,3],[0,5,0,2014,3],[0,5,0,2014,3],[0,5,0,2014,3],[0,5,0,2012,3],[0,5,0,2012,3],[0,5,0,2012,3],[0,5,0,2011,3],[0,5,0,2012,3],[0,5,0,2011,3],[0,5,0,2013,3],[0,5,0,2017,3],[0,5,0,2017,3],[0,5,0,2016,3],[0,5,0,2015,3],[0,5,0,2015,3],[0,5,0,2015,3],[0,5,0,2014,3],[0,5,0,2014,3],[0,5,0,2014,3],[0,5,0,2012,3],[0,5,0,2012,3],[0,5,0,2012,3],[0,5,1,2011,3],[0,5,0,2012,3],[0,5,0,2011,3],[0,5,0,2013,3],[0,5,0,2019,2],[0,5,0,2018,2],[0,5,0,2017,2],[0,5,0,2017,2],[0,5,0,2015,2],[0,5,0,2015,2],[0,5,0,2015,2],[0,5,0,2015,2],[0,5,0,2014,2],[0,5,0,2014,2],[0,5,0,2014,2],[0,5,0,2014,2],[0,5,0,2014,2],[0,5,0,2013,2],[0,5,0,2013,2],[0,5,0,2013,2],[0,5,0,2013,2],[0,5,0,2013,2],[0,5,0,2012,2],[0,5,0,2012,2],[0,5,0,2012,3],[0,5,0,2012,3],[0,5,0,2022,3],[0,5,0,2021,3],[0,5,0,2021,3],[0,5,0,2021,3],[0,5,0,2021,3],[0,5,0,2020,3],[0,5,0,2020,3],[0,5,0,2019,3],[0,5,0,2019,3],[0,5,0,2018,3],[0,5,0,2017,3],[0,5,0,2017,3],[0,5,0,2016,3],[0,5,0,2015,3],[0,5,0,2015,3],[0,5,0,2015,3],[0,5,0,2014,3],[0,5,0,2014,3],[0,5,0,2012,3],[0,5,0,2012,3],[0,5,0,2019,3],[0,5,0,2019,3],[0,5,0,2018,3],[0,5,0,2017,3],[0,5,0,2017,3],[0,5,0,2016,3],[0,5,0,2015,3],[0,5,0,2015,3],[0,5,0,2015,3],[0,5,0,2014,3],[0,5,0,2014,3],[0,5,0,2014,3],[0,5,0,2012,3],[0,5,0,2012,3],[0,5,0,2012,3],[0,5,0,2011,3],[0,5,0,2012,3],[0,5,0,2011,3],[0,5,0,2013,3],[0,5,1,2011,2],[0,5,0,2017,2],[0,5,0,2015,2],[0,5,0,2013,2],[0,5,1,2012,3],[0,5,0,2011,2],[0,5,1,2024,1],[0,5,1,2024,1],[0,5,1,2024,1],[0,5,1,2023,1],[0,5,1,2023,2],[0,5,1,2023,2],[0,5,1,2023,2],[0,5,0,2022,2],[0,5,0,2022,2],[0,5,0,2022,2],[0,5,0,2022,2],[0,5,0,2021,2],[0,5,0,2021,2],[0,5,0,2021,2],[0,5,0,2021,2],[0,5,0,2020,2],[0,5,0,2020,2],[0,5,0,2020,2],[0,5,0,2020,2],[0,5,0,2020,2],[0,5,0,2019,2],[0,5,0,2019,2],[0,5,0,2019,2],[0,5,0,2019,2],[0,5,0,2018,2],[0,5,0,2018,2],[0,5,0,2018,2],[0,5,0,2022,2],[0,5,0,2022,2],[0,5,0,2022,2],[0,5,0,2022,2],[0,5,0,2022,2],[0,5,0,2022,2],[0,5,0,2022,2],[0,5,0,2022,2],[0,5,0,2022,2],[0,5,0,2022,2],[0,5,0,2022,3],[0,5,0,2022,3],[0,5,1,2017,3],[0,5,1,2025,3],[0,5,1,2025,3],[0,5,1,2025,3],[0,5,1,2024,3],[0,5,1,2024,3],[0,5,1,2024,3],[0,5,1,2023,3],[0,5,1,2023,3],[0,5,1,2023,3],[0,5,1,2022,3],[0,5,1,2022,3],[0,5,1,2022,3],[0,5,1,2022,3],[0,5,1,2021,3],[0,5,1,2021,3],[0,5,1,2021,3],[0,5,1,2021,3],[0,5,1,2021,3],[0,5,1,2020,3],[0,5,1,2020,3],[0,5,1,2020,3],[0,5,1,2020,3],[0,5,1,2019,3],[0,5,1,2019,3],[0,5,1,2019,3],[0,5,1,2018,3],[0,5,1,2018,3],[0,5,0,2022,3],[0,5,0,2022,3],[0,5,0,2022,3],[0,5,1,2017,3],[0,5,1,2015,3],[0,5,1,2011,3],[0,5,1,2011,3],[0,5,1,2026,3],[0,5,1,2026,3],[0,5,1,2026,3],[0,5,0,2016,2],[0,5,1,2015,2],[0,5,1,2015,2],[0,5,1,2015,2],[0,5,1,2014,2],[0,5,1,2014,2],[0,5,1,2013,2],[0,5,1,2013,2],[0,5,1,2013,2],[0,5,1,2012,2],[0,5,0,2015,2],[0,5,1,2013,2],[0,5,1,2023,3],[0,5,1,2021,3],[0,5,1,2021,3],[0,5,1,2020,3],[0,5,1,2020,3],[0,5,1,2020,3],[0,5,1,2019,3],[0,5,1,2019,3],[0,5,1,2019,3],[0,5,1,2018,3],[0,5,1,2018,3],[0,5,1,2018,3],[0,5,1,2017,3],[0,5,1,2021,3],[0,5,1,2020,3],[0,5,1,2020,3],[0,5,1,2019,3],[0,5,1,2019,3],[0,5,1,2019,3],[0,5,0,2018,3],[0,5,1,2018,3],[0,5,1,2019,3],[0,5,1,2019,3],[0,5,1,2019,3],[0,5,1,2019,3],[0,5,1,2018,3],[0,5,1,2020,3],[0,5,1,2019,3],[0,5,1,2018,3],[0,5,1,2018,3],[0,5,1,2018,3],[0,5,1,2024,3],[0,5,0,2020,3],[0,5,1,2022,3],[0,5,0,2019,2],[0,5,0,2018,2],[0,5,1,2023,3],[0,5,0,2020,3],[0,5,0,2019,3],[0,5,0,2019,3],[0,5,1,2023,3],[0,5,0,2020,3],[0,5,1,2023,3],[0,5,0,2020,3],[0,5,1,2019,3],[0,5,1,2018,3],[0,5,1,2018,3],[0,5,1,2018,3],[0,5,1,2025,3],[0,5,1,2024,3],[0,5,1,2023,3],[0,5,0,2019,3],[0,5,0,2018,3],[0,5,0,2018,3],[0,5,1,2025,3],[0,5,1,2024,3],[0,5,1,2023,3],[0,5,1,2023,3],[0,5,1,2018,3],[0,5,1,2018,3],[0,5,1,2020,3],[0,5,1,2024,3],[0,5,1,2018,3],[0,5,1,2024,3],[0,5,0,2021,3],[0,5,1,2019,3],[0,5,1,2018,3],[0,5,1,2022,3],[0,5,1,2018,3],[0,5,1,2018,3],[0,5,1,2022,3],[0,5,0,2019,2],[0,5,1,2023,3],[0,5,1,2020,3],[0,5,1,2025,3],[0,5,1,2019,3],[0,5,1,2019,3],[0,5,1,2018,3],[0,5,1,2019,3],[0,5,1,2025,3],[0,5,1,2018,3],[0,5,1,2021,3],[0,5,1,2021,3],[0,5,1,2019,3],[0,5,1,2018,3],[0,5,1,2018,3],[0,5,1,2024,3],[0,5,0,2019,3],[0,5,0,2018,3],[0,5,1,2025,3],[0,5,1,2023,3],[0,5,0,2022,3],[0,5,0,2021,3],[0,5,0,2019,3],[0,5,0,2018,3],[0,5,1,2025,3],[0,5,1,2024,3],[0,5,0,2020,3],[0,5,0,2019,3],[0,5,0,2018,3],[0,5,1,2024,3],[0,5,0,2019,3],[0,5,0,2019,3],[0,5,1,2024,3],[0,5,0,2019,3],[0,5,1,2023,3],[0,5,0,2019,3],[0,5,0,2018,3],[0,5,1,2024,3],[0,5,1,2025,3],[0,5,1,2024,3],[0,5,0,2020,3],[0,5,0,2020,3],[0,5,1,2024,3],[0,5,0,2019,3],[0,5,0,2019,3],[0,5,0,2019,3],[0,5,1,2024,3],[0,5,0,2019,3],[0,5,0,2019,3],[0,5,0,2018,3],[0,5,1,2024,3],[0,5,0,2021,3],[0,5,0,2018,3],[0,5,1,2018,3],[0,5,1,2024,3],[0,5,1,2023,3],[0,5,1,2022,3],[0,5,1,2021,3],[0,5,1,2021,3],[0,5,1,2020,3],[0,5,1,2020,3],[0,5,1,2019,3],[0,5,1,2018,3],[0,5,1,2018,3],[0,5,1,2020,3],[0,5,1,2018,3],[0,5,1,2021,3],[0,5,1,2019,3],[0,5,1,2018,3],[0,5,1,2018,3],[0,5,1,2018,3],[0,5,1,2019,3],[0,5,1,2021,3],[0,5,1,2018,3],[0,5,1,2018,3],[0,5,1,2024,3],[0,5,1,2021,3],[0,5,1,2019,3],[0,5,1,2018,3],[0,5,1,2024,3],[0,5,0,2019,3],[0,5,1,2021,3],[0,5,1,2020,3],[0,5,1,2020,3],[0,5,1,2019,3],[0,5,1,2018,3],[0,5,1,2018,3],[0,5,1,2021,3],[0,5,1,2024,3],[0,5,1,2023,3],[0,5,1,2018,3],[0,5,1,2018,3],[0,5,1,2024,3],[0,5,1,2021,3],[0,5,1,2024,3],[0,5,1,2019,3],[0,5,1,2019,3],[0,5,1,2018,3],[0,5,1,2019,3],[0,5,1,2025,3],[0,5,1,2025,3],[0,5,1,2025,3],[0,5,1,2025,3],[0,5,1,2025,3],[0,5,1,2025,3],[0,5,1,2025,3],[0,5,1,2025,3],[0,5,1,2025,3],[0,5,1,2024,3],[0,5,1,2024,3],[0,5,1,2026,3],[0,5,1,2022,3],[0,5,1,2021,3],[0,5,1,2020,3],[0,5,1,2022,3],[0,5,1,2020,3],[0,5,0,2019,3],[0,5,0,2018,3],[0,5,1,2025,3],[0,5,1,2023,1],[0,5,1,2023,1],[0,5,1,2019,1],[0,5,0,2018,2],[0,5,0,2021,3],[0,5,0,2023,2],[0,5,0,2019,2],[0,5,0,2017,2],[0,5,0,2015,2],[0,5,0,2019,2],[0,5,0,2017,2],[0,5,0,2017,2],[0,5,0,2016,2],[0,5,0,2016,2],[0,5,0,2015,2],[0,5,0,2014,2],[0,5,0,2014,2],[0,5,1,2013,2],[0,5,0,2013,2],[0,5,0,2014,2],[0,5,0,2014,2],[0,5,0,2018,2],[0,5,0,2017,2],[0,5,0,2016,2],[0,5,0,2016,2],[0,5,0,2015,2],[0,5,0,2014,2],[0,5,0,2013,2],[0,5,0,2014,3],[0,5,0,2014,3],[0,5,0,2014,3],[0,5,0,2013,3],[0,6,1,2025,3],[0,6,1,2023,3],[0,6,1,2022,3],[0,6,1,2021,1],[0,6,0,2020,2],[0,6,0,2019,2],[0,6,1,2025,3],[0,6,1,2024,3],[0,6,1,2023,3],[0,6,1,2021,1],[0,6,1,2020,1],[0,6,1,2019,1],[0,6,1,2017,1],[0,6,0,2017,2],[0,6,0,2017,2],[0,6,0,2022,2],[0,6,0,2017,2],[0,6,0,2016,2],[0,6,0,2021,2],[0,6,0,2021,2],[0,6,0,2021,2],[0,6,0,2021,3],[0,6,0,2021,3],[0,6,0,2021,2],[0,6,0,2021,2],[0,6,0,2021,2],[0,6,0,2021,2],[0,6,1,2020,3],[0,6,1,2025,3],[0,6,1,2025,3],[0,6,1,2024,3],[0,6,1,2024,3],[0,6,1,2022,3],[0,6,1,2021,3],[0,6,1,2020,3],[0,6,1,2019,3],[0,6,0,2019,2],[0,6,0,2018,2],[0,6,0,2018,2],[0,6,0,2017,2],[0,6,1,2026,3],[0,6,0,2020,2],[0,6,0,2020,3],[0,6,0,2014,3],[0,6,0,2017,3],[0,6,0,2016,3],[0,6,0,2016,3],[0,6,0,2015,3],[0,6,0,2014,3],[0,6,0,2014,3],[0,6,0,2014,3],[0,6,0,2019,2],[0,6,0,2019,2],[0,6,0,2018,2],[0,6,0,2017,2],[0,6,0,2017,2],[0,6,0,2017,2],[0,6,0,2016,2],[0,6,0,2016,2],[0,6,0,2017,2],[0,6,0,2015,2],[0,6,0,2015,2],[0,6,0,2015,2],[0,6,0,2014,2],[0,6,0,2015,2],[0,6,0,2014,2],[0,6,0,2014,2],[0,6,0,2014,2],[0,6,0,2014,2],[0,6,0,2014,2],[0,6,0,2013,2],[0,6,0,2013,2],[0,6,0,2013,2],[0,6,0,2013,2],[0,6,0,2012,2],[0,6,0,2012,2],[0,6,0,2012,2],[0,6,1,2026,3],[0,6,1,2025,3],[0,6,1,2026,3],[0,6,1,2025,3],[0,6,1,2025,3],[0,6,1,2024,3],[0,6,1,2024,3],[0,6,1,2024,3],[0,6,1,2023,3],[0,6,1,2023,3],[0,6,0,2022,3],[0,6,0,2022,3],[0,6,0,2022,3],[0,6,0,2022,3],[0,6,0,2022,3],[0,6,0,2021,3],[0,6,0,2021,3],[0,6,0,2021,3],[0,6,0,2021,3],[0,6,0,2021,3],[0,6,0,2020,3],[0,6,0,2020,3],[0,6,0,2020,3],[0,6,0,2020,3],[0,6,0,2019,3],[0,6,0,2019,3],[0,6,0,2019,3],[0,6,0,2019,3],[0,6,0,2018,3],[0,6,0,2019,3],[0,6,0,2018,3],[0,6,0,2018,3],[0,6,0,2017,3],[0,6,0,2017,3],[0,6,0,2017,3],[0,6,0,2016,3],[0,6,0,2017,3],[0,6,0,2015,3],[0,6,0,2015,3],[0,6,0,2014,3],[0,6,0,2013,3],[0,6,0,2022,3],[0,6,0,2019,3],[0,6,0,2019,3],[0,6,0,2017,3],[0,6,0,2016,3],[0,6,0,2014,3],[0,6,0,2014,3],[0,6,0,2012,3],[0,6,0,2011,3],[0,6,0,2011,3],[0,6,0,2013,3],[0,6,0,2013,3],[0,6,0,2019,2],[0,6,0,2019,2],[0,6,0,2017,2],[0,6,0,2014,3],[0,6,0,2014,2],[0,6,0,2011,2],[0,6,0,2011,3],[0,6,0,2013,2],[0,6,0,2013,2],[0,6,0,2022,3],[0,6,0,2019,2],[0,6,0,2017,2],[0,6,0,2016,2],[0,6,0,2017,2],[0,6,0,2014,2],[0,6,0,2012,2],[0,6,0,2011,2],[0,6,0,2011,3],[0,6,0,2013,2],[0,6,0,2012,3],[0,6,0,2012,3],[0,6,0,2012,3],[0,6,1,2026,3],[0,6,1,2026,3],[0,6,1,2026,3],[0,6,1,2026,3],[0,6,1,2025,3],[0,6,1,2025,3],[0,6,1,2024,2],[0,6,0,2022,2],[0,6,0,2022,2],[0,6,0,2021,2],[0,6,0,2023,2],[0,6,0,2021,2],[0,6,0,2019,2],[0,6,0,2019,2],[0,6,0,2018,2],[0,6,0,2022,2],[0,6,0,2022,2],[0,6,0,2022,2],[0,6,0,2022,2],[0,6,0,2022,2],[0,6,0,2022,2],[0,6,0,2022,2],[0,6,0,2022,2],[0,6,0,2022,2],[0,6,0,2022,2],[0,6,0,2022,3],[0,6,0,2022,2],[0,6,0,2022,2],[0,6,0,2022,2],[0,6,0,2022,2],[0,6,0,2022,2],[0,6,0,2022,2],[0,6,0,2022,2],[0,6,0,2022,2],[0,6,0,2022,2],[0,6,1,2025,3],[0,6,1,2023,3],[0,6,1,2026,3],[0,6,1,2025,3],[0,6,1,2026,3],[0,6,1,2025,3],[0,6,1,2025,3],[0,6,1,2024,3],[0,6,1,2024,3],[0,6,1,2024,3],[0,6,1,2023,3],[0,6,1,2023,3],[0,6,0,2022,3],[0,6,0,2022,3],[0,6,0,2022,3],[0,6,0,2022,3],[0,6,0,2022,3],[0,6,0,2021,3],[0,6,0,2021,3],[0,6,0,2021,3],[0,6,0,2021,3],[0,6,0,2021,3],[0,6,0,2020,3],[0,6,0,2020,3],[0,6,0,2020,3],[0,6,0,2020,3],[0,6,0,2019,3],[0,6,0,2019,3],[0,6,0,2019,3],[0,6,0,2019,3],[0,6,0,2018,3],[0,6,0,2019,3],[0,6,0,2018,3],[0,6,0,2018,3],[0,6,0,2018,3],[0,6,0,2022,3],[0,6,0,2017,3],[0,6,0,2017,3],[0,6,0,2017,3],[0,6,0,2016,3],[0,6,0,2017,3],[0,6,0,2015,3],[0,6,0,2015,3],[0,6,0,2014,3],[0,6,0,2013,3],[0,6,0,2013,3],[0,6,0,2012,3],[0,6,0,2012,3],[0,6,0,2012,3],[0,6,0,2011,3],[0,6,0,2011,3],[0,6,0,2012,3],[0,6,1,2026,3],[0,6,1,2026,3],[0,6,1,2022,3],[0,6,0,2020,2],[0,6,1,2023,3],[0,6,1,2022,3],[0,6,1,2022,3],[0,6,1,2025,3],[0,6,1,2025,3],[0,6,1,2024,3],[0,6,1,2023,2],[0,6,0,2022,2],[0,6,0,2022,2],[0,6,0,2020,2],[0,6,0,2020,2],[0,6,0,2019,2],[0,6,0,2018,2],[0,6,0,2018,2],[0,6,0,2015,2],[0,6,0,2015,2],[0,6,0,2017,2],[0,6,0,2013,2],[0,6,0,2012,2],[0,6,0,2011,2],[0,6,0,2011,2],[0,6,0,2012,2],[0,6,0,2013,2],[0,6,0,2013,2],[0,6,1,2025,3],[0,6,1,2023,3],[0,6,0,2023,2],[0,6,1,2016,3],[0,6,0,2016,2],[0,6,0,2015,2],[0,6,0,2014,2],[0,6,0,2017,2],[0,6,0,2016,2],[0,6,0,2015,2],[0,6,0,2014,2],[0,6,0,2015,3],[0,6,1,2014,3]],"productCount":636,"epochCount":751,"missingCount":28,"yearMin":2008,"yearMax":2026,"yearNow":2026,"generated":"2026-09-17"};
+const SOURCES = { products: "../config/products.csv", versions: "../config/versions.csv" };
 
-const BUS      = DATA.bus;
-const FAMILIES = DATA.families;
-const STATUSES = DATA.statuses;          // ordered: ga -> announced -> retired -> unknown
-const ROWS     = DATA.rows;
-const YEAR_NOW = DATA.yearNow;
+/* RFC-4180 enough for this data: quoted fields, doubled quotes, CRLF. */
+function parseCSV(text) {
+  const rows = []; let row = [], field = "", quoted = false;
+  if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (quoted) {
+      if (c === '"') { if (text[i + 1] === '"') { field += '"'; i++; } else quoted = false; }
+      else field += c;
+    } else if (c === '"') quoted = true;
+    else if (c === ",") { row.push(field); field = ""; }
+    else if (c === "\n" || c === "\r") {
+      if (c === "\r" && text[i + 1] === "\n") i++;
+      row.push(field); field = "";
+      if (row.length > 1 || row[0] !== "") rows.push(row);
+      row = [];
+    } else field += c;
+  }
+  if (field !== "" || row.length) { row.push(field); rows.push(row); }
+  const head = rows.shift().map(h => h.trim());
+  return rows.map(r => Object.fromEntries(head.map((h, i) => [h, (r[i] ?? "").trim()])));
+}
 
-const F_BU = 0, F_FAM = 1, F_ELIG = 2, F_YEAR = 3, F_ST = 4;
+async function fetchCSVs() {
+  const stamp = Date.now();     // defeat the disk cache, or "reload" would lie
+  const out = {};
+  for (const [key, url] of Object.entries(SOURCES)) {
+    const res = await fetch(`${url}?t=${stamp}`);
+    if (!res.ok) throw new Error(`${url} -> HTTP ${res.status}`);
+    out[key] = parseCSV(await res.text());
+  }
+  return out;
+}
 
-const SERIES = [
-  { key: "elig", name: "Convert-eligible", css: "--series-1" },
-  { key: "arch", name: "Archived",         css: "--series-2" },
-];
+/* ===========================================================================
+   2. Shaping. products.csv is the dimension table, versions.csv the facts;
+   the join is on `slug` and is total in both directions (636 / 636).
+   =========================================================================== */
+const STATUSES = ["ga", "retirement-announced", "retired", "unknown"];
+const STATUS_LABELS = ["Generally available", "Retirement announced", "Retired", "No status recorded"];
 
-const fmt  = n => n.toLocaleString("en-US");
-const cssv = n => getComputedStyle(document.querySelector(".viz-root")).getPropertyValue(n).trim();
+let MODEL = null;
+
+/* `release_date` does not hold one format. It holds whatever last wrote the
+   file, so the reader names each form rather than assuming one and silently
+   dropping the rest -- and the page reports the tally, because which forms are
+   present is itself the interesting fact about the catalog. */
+const DATE_FORMS = {
+  iso:          { label: "ISO (2023-12-26)", ok: true },
+  us:           { label: "US m/d/yyyy", ok: false },
+  epoch:        { label: "epoch milliseconds", ok: false },
+  scientific:   { label: "scientific notation", ok: false, lossy: true },
+  unrecognised: { label: "unrecognised", ok: false },
+  missing:      { label: "empty", ok: false },
+};
+
+function parseDate(raw) {
+  raw = (raw || "").trim();
+  if (!raw) return { year: -1, form: "missing" };
+  let m;
+  if ((m = /^(\d{4})-(\d{2})-(\d{2})/.exec(raw))) return { year: +m[1], form: "iso" };
+  if ((m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(raw))) return { year: +m[3], form: "us" };
+  if (/^\d{12,}$/.test(raw)) return { year: new Date(+raw).getUTCFullYear(), form: "epoch" };
+  // 1.39942E+12 -- an epoch value Excel rounded to six significant figures. The
+  // instant is gone for good; the year survives, so the timeline is still true
+  // at the only granularity it draws.
+  if (/^\d(?:\.\d+)?[eE][+-]?\d+$/.test(raw)) {
+    const n = Number(raw);
+    return { year: Number.isFinite(n) ? new Date(n).getUTCFullYear() : -1, form: "scientific" };
+  }
+  const d = new Date(raw);
+  return isNaN(+d) ? { year: -1, form: "unrecognised" }
+                   : { year: d.getFullYear(), form: "unrecognised" };
+}
+
+function build(products, versions) {
+  const bySlug = new Map(products.map(p => [p.slug, p]));
+  // versions.csv carries its own `_bu`/`_family` beside products.csv's `bu`/
+  // `family`. They are meant to agree and do not always: the row-level copy is
+  // the one that gets re-assigned first, so it wins here and the disagreement
+  // is counted rather than hidden.
+  const buOf  = (v, p) => (v._bu     || "").trim() || (p && p.bu     || "").trim() || "unknown";
+  const famOf = (v, p) => (v._family || "").trim() || (p && p.family || "").trim() || "unknown";
+
+  const families = [...new Set(versions.map(v => famOf(v, bySlug.get(v.slug))))].sort();
+  const bus = [...new Set(versions.map(v => buOf(v, bySlug.get(v.slug))))].sort();
+  let buDisagree = 0, famDisagree = 0;
+
+  const forms = {}; let orphans = 0;
+  const rows = versions.map(v => {
+    const p = bySlug.get(v.slug);
+    if (!p) orphans++;
+    const { year, form } = parseDate(v.release_date);
+    forms[form] = (forms[form] || 0) + 1;
+    const si = STATUSES.indexOf((v.release_status || "").trim());
+    const bu = buOf(v, p), fam = famOf(v, p);
+    if (p && (p.bu || "").trim() && p.bu.trim() !== bu) buDisagree++;
+    if (p && (p.family || "").trim() && p.family.trim() !== fam) famDisagree++;
+    return {
+      slug: v.slug,
+      bu: bus.indexOf(bu),
+      fam: families.indexOf(fam),
+      elig: /^true$/i.test(v.convert_eligible) ? 1 : 0,
+      year,
+      st: si < 0 ? STATUSES.indexOf("unknown") : si,   // blank or unrecognised -> unknown
+      inScope: p ? /^true$/i.test(p.in_scope) : true,
+    };
+  });
+
+  const years = rows.map(r => r.year).filter(y => y > 0);
+  const malformed = Object.entries(forms)
+    .filter(([f]) => f !== "iso" && f !== "missing")
+    .sort((a, b) => b[1] - a[1]);
+  return {
+    products, bySlug, families, bus, rows, forms, malformed,
+    familyLabels: families.map(f => f.replace(/_/g, " ")),
+    orphans, buDisagree, famDisagree,
+    malformedCount: malformed.reduce((a, [, n]) => a + n, 0),
+    missingCount: forms.missing || 0,
+    lossyCount: Object.entries(forms)
+      .filter(([f]) => DATE_FORMS[f] && DATE_FORMS[f].lossy)
+      .reduce((a, [, n]) => a + n, 0),
+    yearMin: years.length ? Math.min(...years) : 0,
+    yearMax: years.length ? Math.max(...years) : 0,
+    yearNow: new Date().getFullYear(),
+  };
+}
+
+/* ===========================================================================
+   3. Drawing primitives
+   =========================================================================== */
 const SVGNS = "http://www.w3.org/2000/svg";
+const fmt = n => n.toLocaleString("en-US");
+const cssv = n => getComputedStyle(document.querySelector(".viz-root")).getPropertyValue(n).trim();
 
 function el(tag, attrs, parent) {
   const node = document.createElementNS(SVGNS, tag);
-  for (const k in attrs) if (attrs[k] !== null && attrs[k] !== undefined) node.setAttribute(k, attrs[k]);
+  for (const k in attrs) if (attrs[k] != null) node.setAttribute(k, attrs[k]);
   if (parent) parent.appendChild(node);
   return node;
 }
-function text(node, s) { node.textContent = s; return node; }
+const text = (node, s) => (node.textContent = s, node);
 
-/* A bar with a 4px rounded data-end and a square baseline end. Drawn as a path
-   so only the far corners round -- a uniform rx would round the baseline too. */
+/* A bar with a 4px rounded data-end and a square baseline end -- a uniform rx
+   would round the baseline too, detaching the bar from its axis. */
 function barPath(x, y, w, h, r, dir) {
   r = Math.max(0, Math.min(r, dir === "up" ? w / 2 : h / 2, dir === "up" ? h : w));
-  if (dir === "up") {   // column growing up from y+h
-    return `M${x},${y + h} L${x},${y + r} Q${x},${y} ${x + r},${y}
-            L${x + w - r},${y} Q${x + w},${y} ${x + w},${y + r} L${x + w},${y + h} Z`;
-  }                      // bar growing right from x
+  if (dir === "up")
+    return `M${x},${y + h} L${x},${y + r} Q${x},${y} ${x + r},${y} L${x + w - r},${y}
+            Q${x + w},${y} ${x + w},${y + r} L${x + w},${y + h} Z`;
   return `M${x},${y} L${x + w - r},${y} Q${x + w},${y} ${x + w},${y + r}
           L${x + w},${y + h - r} Q${x + w},${y + h} ${x + w - r},${y + h} L${x},${y + h} Z`;
 }
 
-/* -- texture: one hand-drawn "Lines" fill at 45 deg and its 135 deg mirror ---- */
+let TEXTURE = false;
 function ensureDefs(svg) {
   const defs = el("defs", {}, svg);
   [["tx-1", 45, "--series-1"], ["tx-2", 135, "--series-2"],
@@ -353,12 +479,9 @@ function ensureDefs(svg) {
     el("rect", { width: 7, height: 7, fill: cssv(v) }, p);
     el("path", { d: "M0,0 V7", stroke: cssv("--surface-1"), "stroke-width": 2.4, opacity: .85 }, p);
   });
-  return defs;
 }
-let TEXTURE = false;
-const paint = (cssVar, txId) => TEXTURE ? `url(#${txId})` : cssv(cssVar);
+const paint = (v, tx) => TEXTURE ? `url(#${tx})` : cssv(v);
 
-/* -- tooltip ---------------------------------------------------------------- */
 const tip = document.getElementById("tip");
 function showTip(evt, title, rows, total) {
   tip.replaceChildren();
@@ -376,42 +499,33 @@ function showTip(evt, title, rows, total) {
     const b = document.createElement("span"); b.className = "nu"; b.textContent = fmt(total);
     t.append(a, b); tip.appendChild(t);
   }
-  tip.style.opacity = "1";
-  moveTip(evt);
+  tip.style.opacity = "1"; moveTip(evt);
 }
 function moveTip(evt) {
   const pad = 14, r = tip.getBoundingClientRect();
   let x = (evt.clientX ?? 0) + pad, y = (evt.clientY ?? 0) + pad;
   if (x + r.width  > innerWidth  - 8) x = (evt.clientX ?? 0) - r.width  - pad;
   if (y + r.height > innerHeight - 8) y = (evt.clientY ?? 0) - r.height - pad;
-  tip.style.left = Math.max(8, x) + "px";
-  tip.style.top  = Math.max(8, y) + "px";
+  tip.style.left = Math.max(8, x) + "px"; tip.style.top = Math.max(8, y) + "px";
 }
-function hideTip() { tip.style.opacity = "0"; }
+const hideTip = () => { tip.style.opacity = "0"; };
 
-/* The hit target is the mark plus its gap and then some, never the painted
-   pixels alone; focus gets the same readout as hover. */
-function bindMark(hit, marks, title, rows, total) {
-  const on  = e => { marks.forEach(m => m.style.opacity = "1");
-                     showTip(e.type === "focus" ? focusPoint(hit) : e, title, rows, total); };
-  const off = () => { hideTip(); };
-  hit.addEventListener("pointerenter", on);
-  hit.addEventListener("pointermove", e => moveTip(e));
-  hit.addEventListener("pointerleave", off);
-  hit.addEventListener("focus", on);
-  hit.addEventListener("blur", off);
+/* Hit target is the mark plus its gap, never the painted pixels alone; focus
+   gets the same readout as hover. */
+function bindMark(hit, title, rows, total) {
+  const at = () => { const b = hit.getBoundingClientRect();
+                     return { clientX: b.left + b.width / 2, clientY: b.top + b.height / 2 }; };
+  hit.addEventListener("pointerenter", e => showTip(e, title, rows, total));
+  hit.addEventListener("pointermove", moveTip);
+  hit.addEventListener("pointerleave", hideTip);
+  hit.addEventListener("focus", () => showTip(at(), title, rows, total));
+  hit.addEventListener("blur", hideTip);
   hit.setAttribute("tabindex", "0");
   hit.setAttribute("role", "img");
-  hit.setAttribute("aria-label",
-    `${title}: ` + rows.map(r => `${r.name} ${fmt(r.value)}`).join(", ") +
-    (total !== undefined ? `, total ${fmt(total)}` : ""));
-}
-function focusPoint(node) {
-  const b = node.getBoundingClientRect();
-  return { clientX: b.left + b.width / 2, clientY: b.top + b.height / 2 };
+  hit.setAttribute("aria-label", `${title}: ` + rows.map(r => `${r.name} ${fmt(r.value)}`).join(", ") +
+                                 (total !== undefined ? `, total ${fmt(total)}` : ""));
 }
 
-/* -- table view -------------------------------------------------------------- */
 function renderTable(host, head, rows) {
   const t = document.createElement("table");
   const th = document.createElement("thead"), tr = document.createElement("tr");
@@ -420,378 +534,524 @@ function renderTable(host, head, rows) {
   const tb = document.createElement("tbody");
   rows.forEach(r => {
     const row = document.createElement("tr");
-    r.forEach((v, i) => { const c = document.createElement("td");
-                          c.textContent = typeof v === "number" ? fmt(v) : v; row.appendChild(c); });
+    r.forEach(v => { const c = document.createElement("td");
+                     c.textContent = typeof v === "number" ? fmt(v) : v; row.appendChild(c); });
     tb.appendChild(row);
   });
-  t.appendChild(tb);
-  host.replaceChildren(t);
-}
-
-/* ===========================================================================
-   Filtering -- one state object; everything below re-renders from it, so the
-   numbers in the tiles, the charts and the tables can never disagree.
-   =========================================================================== */
-const state = { bu: "", family: "", from: 0 };
-
-function selected() {
-  return ROWS.filter(r =>
-    (state.bu === "" || r[F_BU] === +state.bu) &&
-    (state.family === "" || r[F_FAM] === +state.family) &&
-    (state.from === 0 || (r[F_YEAR] >= state.from)));
-}
-
-/* ===========================================================================
-   KPI row
-   =========================================================================== */
-function renderKpis(rows) {
-  const host = document.getElementById("kpis");
-  const total = rows.length;
-  const elig  = rows.filter(r => r[F_ELIG] === 1).length;
-  const arch  = total - elig;
-  const pct   = total ? Math.round(elig / total * 1000) / 10 : 0;
-  const undated = rows.filter(r => r[F_YEAR] < 0).length;
-
-  const tiles = [
-    { k: "Versions in scope", v: total, s: `across ${fmt(DATA.productCount)} products in the catalog` },
-    { k: "Convert-eligible",  v: elig,  s: `${pct}% of the selection`, sw: "--series-1" },
-    { k: "Archived",          v: arch,  s: `${total ? (100 - pct).toFixed(1) : 0}% of the selection`, sw: "--series-2" },
-    { k: "Release date missing", v: undated, s: "no date at all; excluded from the year chart" },
-  ];
-  host.replaceChildren();
-  tiles.forEach(t => {
-    const d = document.createElement("div"); d.className = "tile";
-    const k = document.createElement("div"); k.className = "k";
-    if (t.sw) { const s = document.createElement("span"); s.className = "swatch";
-                s.style.background = cssv(t.sw); k.appendChild(s); }
-    k.appendChild(document.createTextNode(t.k));
-    const v = document.createElement("div"); v.className = "v"; v.textContent = fmt(t.v);
-    const s = document.createElement("div"); s.className = "s"; s.textContent = t.s;
-    d.append(k, v, s); host.appendChild(d);
-  });
-
-  // The data-quality flag is a property of the file, not of the current slice,
-  // so it is stated once and never re-scoped by the filters.
-  const f = document.createElement("div"); f.className = "tile flag";
-  const k = document.createElement("div"); k.className = "k"; k.textContent = "Malformed release dates";
-  const v = document.createElement("div"); v.className = "v"; v.textContent = fmt(DATA.epochCount);
-  const s = document.createElement("div"); s.className = "s";
-  s.textContent = "rows store epoch-milliseconds, not an ISO date. Normalised for this page; the file still holds them.";
-  f.append(k, v, s); host.appendChild(f);
-}
-
-/* ===========================================================================
-   Chart 1 -- releases per year. Stacked columns: change over time, two
-   identities. One y-axis; a second scale would invent a correlation.
-   =========================================================================== */
-function renderYear(rows) {
-  const host = document.getElementById("c-year");
-  const years = [];
-  for (let y = DATA.yearMin; y <= DATA.yearMax; y++) if (state.from === 0 || y >= state.from) years.push(y);
-  const by = new Map(years.map(y => [y, [0, 0]]));
-  rows.forEach(r => { const b = by.get(r[F_YEAR]); if (b) b[r[F_ELIG] === 1 ? 0 : 1]++; });
-
-  const data = years.map(y => ({ year: y, elig: by.get(y)[0], arch: by.get(y)[1],
-                                 total: by.get(y)[0] + by.get(y)[1] }));
-  if (!data.length || !data.some(d => d.total)) { host.replaceChildren(emptyNote()); return; }
-
-  const W = 1100, H = 300, M = { t: 18, r: 14, b: 34, l: 46 };
-  const iw = W - M.l - M.r, ih = H - M.t - M.b;
-  const max = Math.max(...data.map(d => d.total));
-  const step = niceStep(max), top = Math.ceil(max / step) * step;
-  const band = iw / data.length;
-  const bw = Math.min(24, band - 8);
-  const GAP = 2;                                   // the surface gap, one width everywhere
-
-  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img",
-                          "aria-label": "Releases per year, split by convert-eligible and archived" });
-  ensureDefs(svg);
-  const y = v => M.t + ih - (v / top) * ih;
-
-  for (let g = 0; g <= top; g += step) {
-    el("line", { class: g === 0 ? "axis-line" : "grid-line",
-                 x1: M.l, x2: M.l + iw, y1: y(g), y2: y(g) }, svg);
-    text(el("text", { class: "tick", x: M.l - 9, y: y(g) + 4, "text-anchor": "end" }, svg), fmt(g));
-  }
-
-  const peak = data.reduce((a, b) => b.total > a.total ? b : a, data[0]);
-  const last = data[data.length - 1];
-
-  data.forEach((d, i) => {
-    const x = M.l + i * band + (band - bw) / 2;
-    const marks = [];
-    let cursor = y(0);
-    // archived sits at the baseline, eligible on top -- the series on top is the
-    // one the reader is tracking, and it keeps a flat shared floor to compare against.
-    [["arch", "--series-2", "tx-2"], ["elig", "--series-1", "tx-1"]].forEach(([k, v, tx], si) => {
-      const val = d[k]; if (!val) return;
-      const h = (val / top) * ih;
-      const isTop = k === "elig" || d.elig === 0;
-      const h2 = Math.max(1, h - (si === 0 ? 0 : GAP));
-      const ytop = cursor - h;
-      const p = el("path", { class: "mark", d: barPath(x, ytop, bw, h2, isTop ? 4 : 0, "up"),
-                             fill: paint(v, tx) }, svg);
-      marks.push(p);
-      cursor = ytop;
-    });
-
-    const tipRows = [
-      { name: "Convert-eligible", value: d.elig, color: cssv("--series-1") },
-      { name: "Archived",         value: d.arch, color: cssv("--series-2") },
-    ];
-    const hit = el("rect", { class: "hit", x: M.l + i * band, y: M.t, width: band, height: ih }, svg);
-    bindMark(hit, marks, String(d.year) + (d.year === YEAR_NOW ? " (year to date)" : ""), tipRows, d.total);
-
-    // Ticks every other year at this density, plus the first and last, so the
-    // axis never collides with itself.
-    if (i % 2 === 0 || i === data.length - 1) {
-      text(el("text", { class: "tick", x: x + bw / 2, y: H - 12, "text-anchor": "middle" }, svg),
-           String(d.year).slice(2).padStart(2, "0") === "08" ? String(d.year) : "'" + String(d.year).slice(2));
-    }
-    // Label selectively: the peak and the most recent year, not every column.
-    if (d === peak || d === last) {
-      text(el("text", { class: "val", x: x + bw / 2, y: y(d.total) - 8, "text-anchor": "middle" }, svg),
-           fmt(d.total));
-    }
-  });
-
-  host.replaceChildren(svg);
-  renderTable(document.getElementById("t-year"),
-              ["Year", "Convert-eligible", "Archived", "Total"],
-              data.map(d => [String(d.year) + (d.year === YEAR_NOW ? " (YTD)" : ""), d.elig, d.arch, d.total]));
-
-  document.getElementById("ytd-note").textContent =
-    `${YEAR_NOW} is a partial year — it is labelled year-to-date rather than left to read as a collapse.`;
+  t.appendChild(tb); host.replaceChildren(t);
 }
 
 function emptyNote() {
   const d = document.createElement("div"); d.className = "empty";
-  d.textContent = "No versions match this selection.";
-  return d;
+  d.textContent = "No versions match this selection."; return d;
 }
 function niceStep(max) {
   const raw = max / 5, mag = Math.pow(10, Math.floor(Math.log10(raw || 1)));
   return [1, 2, 2.5, 5, 10].map(m => m * mag).find(s => s >= raw) || mag * 10;
 }
-
-/* ===========================================================================
-   Chart 2 -- versions by family. Horizontal stacked bar: part-to-whole with
-   long category names, ranked.
-   =========================================================================== */
-function renderFamily(rows) {
-  const host = document.getElementById("c-fam");
-  const by = new Map(FAMILIES.map((f, i) => [i, [0, 0]]));
-  rows.forEach(r => by.get(r[F_FAM])[r[F_ELIG] === 1 ? 0 : 1]++);
-  const data = [...by.entries()]
-    .map(([i, v]) => ({ name: FAMILIES[i], elig: v[0], arch: v[1], total: v[0] + v[1] }))
-    .filter(d => d.total > 0)
-    .sort((a, b) => b.total - a.total);
-  if (!data.length) { host.replaceChildren(emptyNote()); return; }
-
-  const LBL = 116, VAL = 52, GAP = 2;
-  const W = 520, rowH = 30, H = data.length * rowH + 24;
-  const iw = W - LBL - VAL;
-  const max = Math.max(...data.map(d => d.total));
-  const bh = Math.min(24, rowH - 10);
-
-  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img",
-                          "aria-label": "Versions by product family, split by convert-eligible and archived" });
-  ensureDefs(svg);
-
-  data.forEach((d, i) => {
-    const yTop = i * rowH + 6, sc = iw / max;
-    text(el("text", { class: "cat", x: LBL - 10, y: yTop + bh / 2 + 4, "text-anchor": "end" }, svg), d.name);
-
-    const marks = []; let x = LBL;
-    [["elig", "--series-1", "tx-1"], ["arch", "--series-2", "tx-2"]].forEach(([k, v, tx], si) => {
-      const val = d[k]; if (!val) return;
-      const w = val * sc;
-      const isLast = (k === "arch") || d.arch === 0;
-      const w2 = Math.max(1, w - (isLast ? 0 : GAP));
-      marks.push(el("path", { class: "mark", d: barPath(x, yTop, w2, bh, isLast ? 4 : 0, "right"),
-                              fill: paint(v, tx) }, svg));
-      x += w;
-    });
-
-    // Value at the tip -- the bar's own total. Segment values stay in the
-    // tooltip and the table; an interior segment has no free end to label.
-    text(el("text", { class: "val", x: LBL + d.total * sc + 8, y: yTop + bh / 2 + 4 }, svg), fmt(d.total));
-
-    const hit = el("rect", { class: "hit", x: LBL, y: i * rowH, width: iw + VAL, height: rowH }, svg);
-    bindMark(hit, marks, d.name, [
-      { name: "Convert-eligible", value: d.elig, color: cssv("--series-1") },
-      { name: "Archived",         value: d.arch, color: cssv("--series-2") },
-    ], d.total);
-  });
-
-  host.replaceChildren(svg);
-  renderTable(document.getElementById("t-fam"),
-              ["Family", "Convert-eligible", "Archived", "Total"],
-              data.map(d => [d.name, d.elig, d.arch, d.total]));
-}
-
-/* ===========================================================================
-   Chart 3 -- release-status coverage. The field is an ordered lifecycle, so
-   it takes the ordinal blue ramp, not four categorical identities and NOT the
-   status palette (those four hues fail every all-pairs gate, and these are
-   catalog states rather than health states).
-   =========================================================================== */
-const ORD = ["--ord-1", "--ord-2", "--ord-3"];
-const ORD_TX = ["tx-o1", "tx-o2", "tx-o3"];
-
-function renderStatus(rows) {
-  const counts = STATUSES.map((_, i) => rows.filter(r => r[F_ST] === i).length);
-  const unknownIdx = STATUSES.indexOf("unknown");
-  const known = counts.reduce((a, c, i) => i === unknownIdx ? a : a + c, 0);
-  const total = rows.length;
-
-  // The coverage question is one ratio against a limit -> a meter, not a pie.
-  const m = document.getElementById("m-st");
-  const pct = total ? (known / total * 100) : 0;
-  m.replaceChildren();
+function meter(host, label, value, whole, capLeft, capRight) {
+  const m = document.createElement("div"); m.className = "meter";
+  const l = document.createElement("div"); l.className = "lbl"; l.textContent = label;
   const track = document.createElement("div"); track.className = "track";
   const fill = document.createElement("div"); fill.className = "fill";
+  const pct = whole ? value / whole * 100 : 0;
   fill.style.width = pct.toFixed(1) + "%";
   track.appendChild(fill);
   const cap = document.createElement("div"); cap.className = "cap";
   const a = document.createElement("span");
-  a.append(Object.assign(document.createElement("b"), { textContent: fmt(known) }),
-           document.createTextNode(` of ${fmt(total)} versions carry a release status`));
+  a.append(Object.assign(document.createElement("b"), { textContent: capLeft }));
   const b = document.createElement("span");
   b.append(Object.assign(document.createElement("b"), { textContent: pct.toFixed(1) + "%" }),
-           document.createTextNode(" coverage"));
+           document.createTextNode(" " + capRight));
   cap.append(a, b);
-  m.append(track, cap);
+  m.append(l, track, cap); host.appendChild(m);
+  return pct;
+}
 
-  // The three known states, ordered ga -> retirement-announced -> retired.
+/* ===========================================================================
+   4. Filter state -- one object; every tile, chart and table recomputes from
+   it, so they cannot disagree.
+   =========================================================================== */
+const state = { bu: "", family: "", scope: "", from: 0 };
+const selected = () => MODEL.rows.filter(r =>
+  (state.bu === "" || r.bu === +state.bu) &&
+  (state.family === "" || r.fam === +state.family) &&
+  (state.scope === "" || (state.scope === "in") === r.inScope) &&
+  (state.from === 0 || r.year >= state.from));
+
+/* Derived from the selected *versions* rather than filtered independently: BU
+   and family are read off the version row, so a product is in the selection
+   exactly when one of its versions is. Filtering the two lists separately is
+   how a dashboard ends up reporting 0 products against 849 versions. */
+function selectedProducts(rows) {
+  const slugs = new Set(rows.map(r => r.slug));
+  return MODEL.products.filter(p => slugs.has(p.slug));
+}
+
+/* ===========================================================================
+   5. KPI row
+   =========================================================================== */
+function renderKpis(rows, prods) {
+  const host = document.getElementById("kpis");
+  const total = rows.length;
+  const elig = rows.filter(r => r.elig).length;
+  const pct = total ? (elig / total * 100) : 0;
+  const oosEligible = rows.filter(r => !r.inScope && r.elig).length;
+
+  host.replaceChildren();
+  const add = (k, v, s, cls, sw) => {
+    const d = document.createElement("div"); d.className = "tile" + (cls ? " " + cls : "");
+    const kk = document.createElement("div"); kk.className = "k";
+    if (sw) { const c = document.createElement("span"); c.className = "swatch";
+              c.style.background = cssv(sw); kk.appendChild(c); }
+    kk.appendChild(document.createTextNode(k));
+    const vv = document.createElement("div"); vv.className = "v"; vv.textContent = fmt(v);
+    const ss = document.createElement("div"); ss.className = "s"; ss.textContent = s;
+    d.append(kk, vv, ss); host.appendChild(d);
+  };
+
+  add("Versions in scope", total, `across ${fmt(prods.length)} products`);
+  add("Convert-eligible", elig, `${pct.toFixed(1)}% of the selection`, "", "--series-1");
+  add("Archived", total - elig, `${(100 - pct).toFixed(1)}% of the selection`, "", "--series-2");
+  add("Products out of scope", prods.filter(p => !/^true$/i.test(p.in_scope)).length,
+      "the catalog does not intend to publish these");
+  if (oosEligible)
+    add("Eligible under an out-of-scope product", oosEligible,
+        "marked convert_eligible while their product is not in scope — one of the two fields is wrong", "flag");
+  if (MODEL.malformedCount)
+    add("Release dates not in ISO form", MODEL.malformedCount,
+        MODEL.malformed.map(([f, n]) => `${fmt(n)} ${DATE_FORMS[f].label}`).join(", ") +
+        ". Read anyway; the files are never written to.", "flag");
+}
+
+/* ===========================================================================
+   6. Releases per year -- stacked columns. One y-axis; a second scale would
+   invent a correlation.
+   =========================================================================== */
+function renderYear(rows) {
+  const host = document.getElementById("c-year");
+  const years = [];
+  for (let y = MODEL.yearMin; y <= MODEL.yearMax; y++) if (state.from === 0 || y >= state.from) years.push(y);
+  const by = new Map(years.map(y => [y, [0, 0]]));
+  rows.forEach(r => { const b = by.get(r.year); if (b) b[r.elig ? 0 : 1]++; });
+  const data = years.map(y => ({ year: y, elig: by.get(y)[0], arch: by.get(y)[1],
+                                 total: by.get(y)[0] + by.get(y)[1] }));
+  if (!data.some(d => d.total)) { host.replaceChildren(emptyNote()); return; }
+
+  const W = 1100, H = 300, M = { t: 18, r: 14, b: 34, l: 46 };
+  const iw = W - M.l - M.r, ih = H - M.t - M.b;
+  const max = Math.max(...data.map(d => d.total));
+  const step = niceStep(max), top = Math.ceil(max / step) * step;
+  const band = iw / data.length, bw = Math.min(24, band - 8), GAP = 2;
+
+  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img",
+    "aria-label": "Releases per year, split by convert-eligible and archived" });
+  ensureDefs(svg);
+  const y = v => M.t + ih - (v / top) * ih;
+
+  for (let g = 0; g <= top; g += step) {
+    el("line", { class: g === 0 ? "axis-line" : "grid-line", x1: M.l, x2: M.l + iw, y1: y(g), y2: y(g) }, svg);
+    text(el("text", { class: "tick", x: M.l - 9, y: y(g) + 4, "text-anchor": "end" }, svg), fmt(g));
+  }
+
+  const peak = data.reduce((a, b) => b.total > a.total ? b : a, data[0]);
+  const last = data[data.length - 1];
+  const everyOther = data.length > 12;
+
+  data.forEach((d, i) => {
+    const x = M.l + i * band + (band - bw) / 2;
+    let cursor = y(0);
+    // Archived sits on the baseline, eligible on top: the reader is tracking
+    // eligible growth, and archived keeps the flat floor to compare against.
+    [["arch", "--series-2", "tx-2"], ["elig", "--series-1", "tx-1"]].forEach(([k, v, tx], si) => {
+      const val = d[k]; if (!val) return;
+      const h = (val / top) * ih, isTop = k === "elig" || d.elig === 0;
+      el("path", { class: "mark", d: barPath(x, cursor - h, bw, Math.max(1, h - (si ? GAP : 0)),
+                   isTop ? 4 : 0, "up"), fill: paint(v, tx) }, svg);
+      cursor -= h;
+    });
+
+    const hit = el("rect", { class: "hit", x: M.l + i * band, y: M.t, width: band, height: ih }, svg);
+    bindMark(hit, d.year + (d.year === MODEL.yearNow ? " (year to date)" : ""), [
+      { name: "Convert-eligible", value: d.elig, color: cssv("--series-1") },
+      { name: "Archived", value: d.arch, color: cssv("--series-2") }], d.total);
+
+    if (!everyOther || i % 2 === 0 || i === data.length - 1)
+      text(el("text", { class: "tick", x: x + bw / 2, y: H - 12, "text-anchor": "middle" }, svg),
+           i === 0 ? String(d.year) : "'" + String(d.year).slice(2));
+    // Label selectively: the peak and the latest, never every column.
+    if (d === peak || d === last)
+      text(el("text", { class: "val", x: x + bw / 2, y: y(d.total) - 8, "text-anchor": "middle" }, svg),
+           fmt(d.total));
+  });
+
+  host.replaceChildren(svg);
+  renderTable(document.getElementById("t-year"), ["Year", "Convert-eligible", "Archived", "Total"],
+    data.map(d => [d.year + (d.year === MODEL.yearNow ? " (YTD)" : ""), d.elig, d.arch, d.total]));
+  document.getElementById("ytd-note").textContent =
+    `${MODEL.yearNow} is a partial year — labelled year-to-date rather than left to read as a collapse.`;
+}
+
+/* ===========================================================================
+   7. A ranked horizontal stacked bar, shared by "heaviest products" and
+   "versions by family": same question (part-to-whole, long names, ranked).
+   =========================================================================== */
+function rankedBars(host, tableHost, data, tableHead, opts) {
+  if (!data.length) { host.replaceChildren(emptyNote()); tableHost.replaceChildren(); return; }
+  const LBL = opts.labelWidth, VAL = 54, GAP = 2, W = 560, rowH = 27;
+  const H = data.length * rowH + 16, iw = W - LBL - VAL;
+  const max = Math.max(...data.map(d => d.total));
+  const bh = Math.min(22, rowH - 8);
+
+  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": opts.aria });
+  ensureDefs(svg);
+
+  data.forEach((d, i) => {
+    const yTop = i * rowH + 5, sc = iw / max;
+    const label = el("text", { class: "cat", x: LBL - 10, y: yTop + bh / 2 + 4, "text-anchor": "end" }, svg);
+    text(label, d.short);
+    if (d.short !== d.name) text(el("title", {}, label), d.name);
+
+    let x = LBL;
+    [["elig", "--series-1", "tx-1"], ["arch", "--series-2", "tx-2"]].forEach(([k, v, tx]) => {
+      const val = d[k]; if (!val) return;
+      const w = val * sc, isLast = k === "arch" || d.arch === 0;
+      el("path", { class: "mark", d: barPath(x, yTop, Math.max(1, w - (isLast ? 0 : GAP)), bh,
+                   isLast ? 4 : 0, "right"), fill: paint(v, tx) }, svg);
+      x += w;
+    });
+    // The value at the tip is the bar's own total; a segment buried mid-bar has
+    // no free end to label, so its number lives in the tooltip and the table.
+    text(el("text", { class: "val", x: LBL + d.total * sc + 8, y: yTop + bh / 2 + 4 }, svg), fmt(d.total));
+
+    const hit = el("rect", { class: "hit", x: 0, y: i * rowH, width: W, height: rowH }, svg);
+    bindMark(hit, d.name, [
+      { name: "Convert-eligible", value: d.elig, color: cssv("--series-1") },
+      { name: "Archived", value: d.arch, color: cssv("--series-2") }], d.total);
+  });
+
+  host.replaceChildren(svg);
+  renderTable(tableHost, tableHead, data.map(d => [d.name, d.elig, d.arch, d.total]));
+}
+
+function renderProducts(rows) {
+  const by = new Map();
+  rows.forEach(r => {
+    let e = by.get(r.slug);
+    if (!e) by.set(r.slug, e = { elig: 0, arch: 0 });
+    e[r.elig ? "elig" : "arch"]++;
+  });
+  const clean = s => s.replace(/[®™]/g, "");     // (R)/(TM) are noise in an axis label
+  const all = [...by.entries()].map(([slug, v]) => {
+    const p = MODEL.bySlug.get(slug);
+    const name = clean(p ? p.display_name : slug);
+    return { name, short: name.length > 30 ? name.slice(0, 29) + "…" : name,
+             elig: v.elig, arch: v.arch, total: v.elig + v.arch };
+  }).sort((a, b) => b.total - a.total);
+
+  const TOP = 12;
+  rankedBars(document.getElementById("c-prod"), document.getElementById("t-prod"),
+    all.slice(0, TOP), ["Product", "Convert-eligible", "Archived", "Total"],
+    { labelWidth: 196, aria: `Top ${TOP} products by version count` });
+  document.getElementById("prod-sub").textContent = all.length > TOP
+    ? `The ${TOP} heaviest of ${fmt(all.length)} products, by version count — the table below lists them all.`
+    : "Version count per product.";
+
+  // The table must not be a truncated view of a chart that says "top 12".
+  renderTable(document.getElementById("t-prod"), ["Product", "Convert-eligible", "Archived", "Total"],
+              all.map(d => [d.name, d.elig, d.arch, d.total]));
+}
+
+function renderFamily(rows, prods) {
+  const by = new Map(MODEL.families.map((_, i) => [i, [0, 0]]));
+  rows.forEach(r => by.get(r.fam)[r.elig ? 0 : 1]++);
+  const data = [...by.entries()].map(([i, v]) => ({
+      name: MODEL.familyLabels[i], short: MODEL.familyLabels[i],
+      elig: v[0], arch: v[1], total: v[0] + v[1] }))
+    .filter(d => d.total).sort((a, b) => b.total - a.total);
+
+  rankedBars(document.getElementById("c-fam"), document.getElementById("t-fam"), data,
+    ["Family", "Convert-eligible", "Archived", "Total"],
+    { labelWidth: 150, aria: "Versions by product family" });
+
+  // "general" is not a family -- it is the bucket a product lands in when no
+  // taxonomy rule matched. Say so, or the biggest bar reads as a real segment.
+  const unclassified = prods.filter(p => p.family_source === "unclassified").length;
+  document.getElementById("fam-sub").textContent = unclassified
+    ? `“general” is the unmatched bucket, not a real segment — ${fmt(unclassified)} of ` +
+      `${fmt(prods.length)} products reached it because no taxonomy rule fired.`
+    : "Where the conversion work sits.";
+}
+
+/* ===========================================================================
+   8. Catalog hygiene -- three ratios, three meters.
+   =========================================================================== */
+function renderHygiene(rows, prods) {
+  const host = document.getElementById("c-hyg");
+  host.replaceChildren();
+  const classified = prods.filter(p => p.family_source && p.family_source !== "unclassified").length;
+  const inScope = prods.filter(p => /^true$/i.test(p.in_scope)).length;
+  const dated = rows.filter(r => r.year > 0).length;
+
+  meter(host, "Products with a taxonomy classification", classified, prods.length,
+        `${fmt(classified)} of ${fmt(prods.length)} products matched a rule`, "classified");
+  meter(host, "Products the catalog intends to publish", inScope, prods.length,
+        `${fmt(inScope)} of ${fmt(prods.length)} products in scope`, "in scope");
+  meter(host, "Versions with a usable release date", dated, rows.length,
+        `${fmt(dated)} of ${fmt(rows.length)} versions can be placed on the timeline`, "dated");
+
+  const callout = (lead, rest) => {
+    const c = document.createElement("div"); c.className = "callout";
+    c.append(Object.assign(document.createElement("b"), { textContent: lead }),
+             document.createTextNode(" " + rest));
+    host.appendChild(c);
+  };
+
+  const oosEligible = rows.filter(r => !r.inScope && r.elig).length;
+  if (oosEligible)
+    callout(fmt(oosEligible) + " versions contradict their product's scope.",
+      "They are marked convert_eligible in versions.csv while products.csv puts their product out of " +
+      "scope. The pipeline will act on one of these and ignore the other, so the pair needs reconciling.");
+
+  // Unfiltered on purpose: this is a property of the two files, not of a slice.
+  if (MODEL.buDisagree)
+    callout(fmt(MODEL.buDisagree) + " versions carry a business unit their product does not.",
+      "versions.csv `_bu` has been re-assigned where products.csv `bu` has not, so the two files now " +
+      "disagree. This page reads the version's own value — the charts follow the newer edit — but " +
+      "products.csv is the one the pipeline's taxonomy reads, so the split needs closing there too.");
+
+  renderTable(document.getElementById("t-hyg"), ["Measure", "Count", "Whole", "Share"], [
+    ["Products classified by a taxonomy rule", classified, prods.length,
+      prods.length ? (classified / prods.length * 100).toFixed(1) + "%" : "0%"],
+    ["Products in scope", inScope, prods.length,
+      prods.length ? (inScope / prods.length * 100).toFixed(1) + "%" : "0%"],
+    ["Versions with a usable release date", dated, rows.length,
+      rows.length ? (dated / rows.length * 100).toFixed(1) + "%" : "0%"],
+    ["Versions eligible under an out-of-scope product", oosEligible, rows.length,
+      rows.length ? (oosEligible / rows.length * 100).toFixed(1) + "%" : "0%"],
+  ]);
+}
+
+/* ===========================================================================
+   9. Release status -- an ordered lifecycle, so one hue getting darker. NOT
+   the status palette: those four hues fail every all-pairs gate, and these are
+   catalog states rather than health states.
+   =========================================================================== */
+const ORD = ["--ord-1", "--ord-2", "--ord-3"], ORD_TX = ["tx-o1", "tx-o2", "tx-o3"];
+
+function renderStatus(rows) {
+  const counts = STATUSES.map((_, i) => rows.filter(r => r.st === i).length);
+  const unknown = STATUSES.indexOf("unknown");
+  const known = counts.reduce((a, c, i) => i === unknown ? a : a + c, 0);
+  const total = rows.length;
+
+  const m = document.getElementById("m-st"); m.replaceChildren();
+  meter(m, "", known, total, `${fmt(known)} of ${fmt(total)} versions carry a release status`, "coverage");
+
   const host = document.getElementById("c-st");
-  const data = STATUSES.map((s, i) => ({ name: DATA.statusLabels[i], value: counts[i], i }))
-                       .filter(d => d.i !== unknownIdx);
-  const max = Math.max(1, ...data.map(d => d.value));
-  if (!known) { host.replaceChildren(emptyNote()); }
+  const data = STATUSES.map((s, i) => ({ name: STATUS_LABELS[i], value: counts[i], i }))
+                       .filter(d => d.i !== unknown);
+  if (!known) host.replaceChildren(emptyNote());
   else {
-    const LBL = 150, VAL = 56, W = 520, rowH = 30, H = data.length * rowH + 22;
-    const iw = W - LBL - VAL;
-    const bh = Math.min(24, rowH - 10);
+    const LBL = 150, VAL = 56, W = 560, rowH = 30, H = data.length * rowH + 22;
+    const iw = W - LBL - VAL, bh = 22, max = Math.max(1, ...data.map(d => d.value));
     const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img",
-                            "aria-label": "Versions by release status, known statuses only" });
+      "aria-label": "Versions by release status, known statuses only" });
     ensureDefs(svg);
     data.forEach((d, i) => {
       const yTop = i * rowH + 5;
       text(el("text", { class: "cat", x: LBL - 10, y: yTop + bh / 2 + 4, "text-anchor": "end" }, svg), d.name);
-      const w = Math.max(d.value ? 2 : 0, (d.value / max) * iw);
-      const marks = [];
-      if (w) marks.push(el("path", { class: "mark", d: barPath(LBL, yTop, w, bh, 4, "right"),
-                                     fill: paint(ORD[i], ORD_TX[i]) }, svg));
+      const w = d.value ? Math.max(2, d.value / max * iw) : 0;
+      if (w) el("path", { class: "mark", d: barPath(LBL, yTop, w, bh, 4, "right"),
+                          fill: paint(ORD[i], ORD_TX[i]) }, svg);
       text(el("text", { class: "val", x: LBL + w + 8, y: yTop + bh / 2 + 4 }, svg), fmt(d.value));
-      const hit = el("rect", { class: "hit", x: LBL, y: i * rowH, width: iw + VAL, height: rowH }, svg);
-      bindMark(hit, marks, d.name,
-               [{ name: "Versions", value: d.value, color: cssv(ORD[i]) }]);
+      const hit = el("rect", { class: "hit", x: 0, y: i * rowH, width: W, height: rowH }, svg);
+      bindMark(hit, d.name, [{ name: "Versions", value: d.value, color: cssv(ORD[i]) }]);
     });
     host.replaceChildren(svg);
   }
 
-  renderTable(document.getElementById("t-st"),
-              ["Release status", "Versions", "Share of selection"],
-              STATUSES.map((s, i) => [DATA.statusLabels[i], counts[i],
-                                      total ? (counts[i] / total * 100).toFixed(1) + "%" : "0%"]));
+  renderTable(document.getElementById("t-st"), ["Release status", "Versions", "Share of selection"],
+    STATUSES.map((s, i) => [STATUS_LABELS[i], counts[i],
+      total ? (counts[i] / total * 100).toFixed(1) + "%" : "0%"]));
 }
 
 /* ===========================================================================
-   Legends -- always present for two or more series.
+   10. Legends -- always present for two or more series; a single-series chart
+   is named by its title instead.
    =========================================================================== */
 function renderLegends() {
-  ["lg-year", "lg-fam"].forEach(id => {
-    const ul = document.getElementById(id);
-    ul.replaceChildren();
-    SERIES.forEach((s, i) => {
+  const keys = [["Convert-eligible", "--series-1", 45], ["Archived", "--series-2", 135]];
+  ["lg-year", "lg-fam", "lg-prod"].forEach(id => {
+    const ul = document.getElementById(id); ul.replaceChildren();
+    keys.forEach(([name, v, deg]) => {
       const li = document.createElement("li");
       const k = document.createElement("span"); k.className = "key";
-      k.style.background = TEXTURE ? `repeating-linear-gradient(${i ? 135 : 45}deg, ${cssv(s.css)} 0 3px, ${cssv("--surface-1")} 3px 5px)`
-                                   : cssv(s.css);
-      li.append(k, document.createTextNode(s.name));
-      ul.appendChild(li);
+      k.style.background = TEXTURE
+        ? `repeating-linear-gradient(${deg}deg, ${cssv(v)} 0 3px, ${cssv("--surface-1")} 3px 5px)`
+        : cssv(v);
+      li.append(k, document.createTextNode(name)); ul.appendChild(li);
     });
   });
 }
 
 /* ===========================================================================
-   Wiring
+   11. Wiring
    =========================================================================== */
 function renderAll() {
-  const rows = selected();
+  const rows = selected(), prods = selectedProducts(rows);
   renderLegends();
-  renderKpis(rows);
+  renderKpis(rows, prods);
   renderYear(rows);
-  renderFamily(rows);
+  renderProducts(rows);
+  renderFamily(rows, prods);
+  renderHygiene(rows, prods);
   renderStatus(rows);
   renderFoot();
 }
 
 function renderFoot() {
-  const f = document.getElementById("foot");
-  f.replaceChildren();
-  const bits = [
-    ["Source. ", `config/versions.csv — ${fmt(ROWS.length)} rows, ${fmt(DATA.productCount)} products, generated ${DATA.generated}.`],
-    ["Dates. ", `${fmt(DATA.epochCount)} rows store release_date as epoch-milliseconds instead of an ISO date; they are normalised here so the year chart is honest, and ${fmt(DATA.missingCount)} rows have no date at all and sit outside it. The file itself is unchanged — this is a catalog defect to fix at the source, not a rendering choice.`],
-    ["Palette. ", "Two categorical slots for the eligible/archived identity (blue · orange) and a three-step ordinal blue for the ordered lifecycle. Both ran through the skill's validator and pass every gate in both modes — worst adjacent CVD ΔE 24.7 light / 26.8 dark against a target of 8. The four status hues were tried and rejected: as a four-way set they fail the lightness band, CVD separation and the normal-vision floor, and these are catalog states rather than health states."],
-    ["Reading it. ", "One y-axis per chart, never two. Colour follows the entity, so filtering never repaints a survivor. Every value on screen is also in the table view and the tooltip, and the Texture switch adds a directional hatch for colour-blind, greyscale-print and forced-colors reading."],
-  ];
-  bits.forEach(([b, t], i) => {
+  const f = document.getElementById("foot"); f.replaceChildren();
+  [["Source. ", `config/products.csv (${fmt(MODEL.products.length)} products) joined to ` +
+      `config/versions.csv (${fmt(MODEL.rows.length)} versions) on slug — the join is total in both ` +
+      `directions. Read from disk at page load, so editing either file and reloading updates every number here.`],
+   ["Dates. ", `release_date is not written in one format: ` +
+      Object.entries(MODEL.forms).sort((a, b) => b[1] - a[1])
+        .map(([f, n]) => `${fmt(n)} ${DATE_FORMS[f] ? DATE_FORMS[f].label : f}`).join(", ") +
+      `. All of them are read, so the timeline covers the whole catalog` +
+      (MODEL.lossyCount ? `, but ${fmt(MODEL.lossyCount)} of them are rounded to six significant figures — ` +
+        `the year survives and the exact instant does not, which is a spreadsheet round-trip, not a source value` : "") +
+      `. The files are never written to: these are catalog defects to fix at the source, not rendering choices.`],
+   ["Palette. ", "Two categorical slots for the eligible/archived identity (blue · orange) and a three-step " +
+      "ordinal blue for the ordered lifecycle. Both ran through the dataviz validator and pass every gate in " +
+      "both modes — worst adjacent CVD ΔE 24.7 light / 26.8 dark against a target of 8. The four status hues " +
+      "were tried and rejected: as a four-way set they fail the lightness band, CVD separation and the " +
+      "normal-vision floor, and these are catalog states rather than health states."],
+   ["Reading it. ", "One y-axis per chart, never two. Colour follows the entity, so filtering never repaints " +
+      "a survivor. Every value on screen is also in the table view and the tooltip, and the Texture switch " +
+      "adds a directional hatch for colour-blind, greyscale-print and forced-colors reading."],
+  ].forEach(([b, t], i) => {
     if (i) f.appendChild(document.createElement("br"));
-    const strong = document.createElement("b"); strong.textContent = b;
-    f.append(strong, document.createTextNode(t));
+    const s = document.createElement("b"); s.textContent = b;
+    f.append(s, document.createTextNode(t));
   });
+}
+
+function renderSource(how) {
+  const s = document.getElementById("src"); s.replaceChildren();
+  s.className = "source" + (how === "files" ? " warn" : "");
+  const dot = document.createElement("span"); dot.className = "dot";
+  const msg = document.createElement("span");
+  if (how === "fetch") {
+    msg.append(document.createTextNode("Live from "),
+               Object.assign(document.createElement("code"), { textContent: "config/*.csv" }),
+               document.createTextNode(` — read ${new Date().toLocaleTimeString()}. Edit either file and reload.`));
+  } else {
+    msg.append(document.createTextNode("Loaded from the files you picked. "),
+               Object.assign(document.createElement("b"), { textContent: "Re-pick them after editing" }),
+               document.createTextNode(" — a file:// page cannot re-read the disk on its own."));
+  }
+  const spacer = document.createElement("span"); spacer.className = "spacer";
+  const btn = document.createElement("button"); btn.className = "tbtn";
+  btn.textContent = how === "fetch" ? "Reload data" : "Pick files again";
+  btn.addEventListener("click", () => how === "fetch" ? boot(true) : showLoader(""));
+  s.append(dot, msg, spacer, btn);
 }
 
 function initControls() {
-  const bu = document.getElementById("f-bu");
-  BUS.forEach((b, i) => bu.appendChild(new Option(b.toUpperCase(), String(i))));
-  const fam = document.getElementById("f-family");
-  FAMILIES.map((f, i) => [f, i]).sort((a, b) => a[0].localeCompare(b[0]))
-          .forEach(([f, i]) => fam.appendChild(new Option(f, String(i))));
-  const from = document.getElementById("f-from");
+  const bu = document.getElementById("f-bu"), fam = document.getElementById("f-family"),
+        from = document.getElementById("f-from"), scope = document.getElementById("f-scope");
+  bu.length = 1; fam.length = 1; from.length = 0;
+  MODEL.bus.forEach((b, i) => bu.appendChild(new Option(b.toUpperCase(), String(i))));
+  MODEL.familyLabels.map((f, i) => [f, i]).sort((a, b) => a[0].localeCompare(b[0]))
+       .forEach(([f, i]) => fam.appendChild(new Option(f, String(i))));
   from.appendChild(new Option("All years", "0"));
-  [YEAR_NOW - 1, YEAR_NOW - 2, YEAR_NOW - 4, YEAR_NOW - 9].forEach(y =>
-    from.appendChild(new Option(`${y} onwards`, String(y))));
+  [1, 2, 4, 9].forEach(n => { const y = MODEL.yearNow - n;
+    if (y >= MODEL.yearMin) from.appendChild(new Option(`${y} onwards`, String(y))); });
 
-  bu.addEventListener("change",  e => { state.bu = e.target.value; renderAll(); });
-  fam.addEventListener("change", e => { state.family = e.target.value; renderAll(); });
-  from.addEventListener("change", e => { state.from = +e.target.value; renderAll(); });
-  document.getElementById("reset").addEventListener("click", () => {
-    state.bu = ""; state.family = ""; state.from = 0;
-    bu.value = ""; fam.value = ""; from.value = "0"; renderAll();
-  });
-
-  document.querySelectorAll("[data-table]").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const t = document.getElementById(btn.dataset.table);
-      const on = t.classList.toggle("on");
-      btn.setAttribute("aria-expanded", String(on));
-      btn.textContent = on ? "Hide table" : "Table";
-    });
-  });
-
-  const theme = document.getElementById("theme");
-  theme.addEventListener("click", () => {
-    const dark = document.documentElement.getAttribute("data-theme") === "dark";
-    document.documentElement.setAttribute("data-theme", dark ? "light" : "dark");
-    theme.setAttribute("aria-pressed", String(!dark));
-    theme.textContent = dark ? "Dark" : "Light";
-    renderAll();                       // dark steps are selected, not flipped
-  });
-
-  const tx = document.getElementById("texture");
-  tx.addEventListener("click", () => {
-    TEXTURE = !TEXTURE;
-    tx.setAttribute("aria-pressed", String(TEXTURE));
-    renderAll();
-  });
+  bu.onchange    = e => { state.bu = e.target.value; renderAll(); };
+  fam.onchange   = e => { state.family = e.target.value; renderAll(); };
+  scope.onchange = e => { state.scope = e.target.value; renderAll(); };
+  from.onchange  = e => { state.from = +e.target.value; renderAll(); };
+  document.getElementById("reset").onclick = () => {
+    Object.assign(state, { bu: "", family: "", scope: "", from: 0 });
+    bu.value = ""; fam.value = ""; scope.value = ""; from.value = "0"; renderAll();
+  };
 }
 
-initControls();
-renderAll();
-addEventListener("resize", () => hideTip());
+document.querySelectorAll("[data-table]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const t = document.getElementById(btn.dataset.table);
+    const on = t.classList.toggle("on");
+    btn.setAttribute("aria-expanded", String(on));
+    btn.textContent = on ? "Hide table" : "Table";
+  });
+});
+document.getElementById("theme").addEventListener("click", e => {
+  const dark = document.documentElement.getAttribute("data-theme") === "dark";
+  document.documentElement.setAttribute("data-theme", dark ? "light" : "dark");
+  e.target.setAttribute("aria-pressed", String(!dark));
+  e.target.textContent = dark ? "Dark" : "Light";
+  if (MODEL) renderAll();          // dark steps are selected, not flipped
+});
+document.getElementById("texture").addEventListener("click", e => {
+  TEXTURE = !TEXTURE;
+  e.target.setAttribute("aria-pressed", String(TEXTURE));
+  if (MODEL) renderAll();
+});
+addEventListener("resize", hideTip);
+
+/* -- the file:// fallback ---------------------------------------------------- */
+function showLoader(msg) {
+  document.getElementById("loader").classList.add("on");
+  document.getElementById("dash").classList.add("hidden");
+  document.getElementById("loadmsg").textContent = msg;
+}
+function start(products, versions, how) {
+  MODEL = build(products, versions);
+  document.getElementById("loader").classList.remove("on");
+  document.getElementById("dash").classList.remove("hidden");
+  initControls();
+  renderSource(how);
+  renderAll();
+}
+
+const picked = {};
+function takeFiles(files) {
+  const msg = document.getElementById("loadmsg");
+  [...files].forEach(file => {
+    const name = file.name.toLowerCase();
+    const key = name.includes("product") ? "products" : name.includes("version") ? "versions" : null;
+    if (!key) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      picked[key] = parseCSV(reader.result);
+      if (picked.products && picked.versions) start(picked.products, picked.versions, "files");
+      else msg.textContent = `Got ${key}.csv — still waiting for ` +
+                             `${picked.products ? "versions" : "products"}.csv.`;
+    };
+    reader.readAsText(file);
+  });
+}
+document.getElementById("picker").addEventListener("change", e => takeFiles(e.target.files));
+const drop = document.getElementById("drop");
+["dragenter", "dragover"].forEach(t => drop.addEventListener(t, e => {
+  e.preventDefault(); drop.classList.add("over"); }));
+["dragleave", "drop"].forEach(t => drop.addEventListener(t, e => {
+  e.preventDefault(); drop.classList.remove("over"); }));
+drop.addEventListener("drop", e => takeFiles(e.dataTransfer.files));
+
+async function boot(again) {
+  try {
+    const { products, versions } = await fetchCSVs();
+    start(products, versions, "fetch");
+  } catch (err) {
+    if (again) { alert("Could not re-read the CSVs: " + err.message); return; }
+    showLoader("");
+    console.info("Falling back to the file picker:", err.message);
+  }
+}
+boot(false);
 </script>
 </body>
 </html>

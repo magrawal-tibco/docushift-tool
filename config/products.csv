@@ -1,4 +1,4 @@
-﻿slug,product_code,display_name,bu,family,family_source,in_scope,scope_source,custom_override
+slug,product_code,display_name,bu,family,family_source,in_scope,scope_source,custom_override
 ibi-iway-service-manager-edi-add-on,sm-edi,ibi™ iWay® Service Manager EDI Add-on,ibi,data_management,taxonomy_rule,true,default,false
 ibi-omni-healthdata-business-release,ohd-br,ibi™ Omni-HealthData® Business Release,ibi,data_management,taxonomy_rule,true,default,false
 tibco-iway-business-activity-monitor,sm-bam,TIBCO iWay® Business Activity Monitor,ibi,data_management,taxonomy_rule,true,default,false
@@ -13,76 +13,76 @@ ibi-web-query-for-ibm-i,wq,ibi™ Web Query for IBM i,ibi,general,taxonomy_rule,
 ibi-webfocus-container-edition,wfce,ibi™ WebFOCUS® - Container Edition,ibi,webfocus,taxonomy_rule,true,default,false
 ibi-webfocus-dsml-services,dsml,ibi™ WebFOCUS® DSML Services,ibi,webfocus,taxonomy_rule,true,default,false
 ibi-webfocus-dsml-services-container-edition,dsmlce,ibi™ WebFOCUS® DSML Services - Container Edition,ibi,webfocus,taxonomy_rule,true,default,false
-spotfire,spotfire,Spotfire®,tibco,analytics,taxonomy_rule,false,scope_rule,false
-spotfire-data-science-author,dsc-author,Spotfire® Data Science - Author,tibco,analytics,taxonomy_rule,true,default,false
-spotfire-data-science-for-life-science-author,dscls-author,Spotfire® Data Science for Life Science - Author,tibco,analytics,taxonomy_rule,true,default,false
-spotfire-data-science-for-life-science-operations,dscls-operations,Spotfire® Data Science for Life Science - Operations,tibco,analytics,taxonomy_rule,true,default,false
-spotfire-data-science-operations,dsc-operations,Spotfire® Data Science - Operations,tibco,analytics,taxonomy_rule,true,default,false
-spotfire-data-science-workbench,dsc-stat,Spotfire® Data Science - Workbench,tibco,analytics,taxonomy_rule,true,default,false
+spotfire,spotfire,Spotfire®,spotfire,analytics,taxonomy_rule,false,scope_rule,false
+spotfire-data-science-author,dsc-author,Spotfire® Data Science - Author,spotfire,analytics,taxonomy_rule,true,default,false
+spotfire-data-science-for-life-science-author,dscls-author,Spotfire® Data Science for Life Science - Author,spotfire,analytics,taxonomy_rule,true,default,false
+spotfire-data-science-for-life-science-operations,dscls-operations,Spotfire® Data Science for Life Science - Operations,spotfire,analytics,taxonomy_rule,true,default,false
+spotfire-data-science-operations,dsc-operations,Spotfire® Data Science - Operations,spotfire,analytics,taxonomy_rule,true,default,false
+spotfire-data-science-workbench,dsc-stat,Spotfire® Data Science - Workbench,spotfire,analytics,taxonomy_rule,true,default,false
 spotfire-data-streams,sfire-sfds,Spotfire® Data Streams,tibco,analytics,taxonomy_rule,true,default,false
-spotfire-desktop,spd,Spotfire® Desktop,tibco,analytics,taxonomy_rule,false,scope_rule,false
-spotfire-enterprise-runtime-for-r,enterprise-runtime-for-r,Spotfire® Enterprise Runtime for R,tibco,analytics,taxonomy_rule,false,scope_rule,false
-spotfire-enterprise-runtime-for-r-server-edition,terrsrv,Spotfire Enterprise Runtime for R - Server Edition,tibco,analytics,taxonomy_rule,false,scope_rule,false
-spotfire-for-android,sfire-android,Spotfire® for Android,tibco,analytics,taxonomy_rule,false,scope_rule,false
-spotfire-for-apple-ios,sf-ipad,Spotfire® for Apple iOS,tibco,analytics,taxonomy_rule,false,scope_rule,false
+spotfire-desktop,spd,Spotfire® Desktop,spotfire,analytics,taxonomy_rule,false,scope_rule,false
+spotfire-enterprise-runtime-for-r,enterprise-runtime-for-r,Spotfire® Enterprise Runtime for R,spotfire,analytics,taxonomy_rule,false,scope_rule,false
+spotfire-enterprise-runtime-for-r-server-edition,terrsrv,Spotfire Enterprise Runtime for R - Server Edition,spotfire,analytics,taxonomy_rule,false,scope_rule,false
+spotfire-for-android,sfire-android,Spotfire® for Android,spotfire,analytics,taxonomy_rule,false,scope_rule,false
+spotfire-for-apple-ios,sf-ipad,Spotfire® for Apple iOS,spotfire,analytics,taxonomy_rule,false,scope_rule,false
 spotfire-liveview-web-enterprise-edition,ldm-web,Spotfire LiveView™ Web Enterprise Edition,tibco,analytics,taxonomy_rule,true,default,false
-spotfire-on-kubernetes,sf-kbn,Spotfire on Kubernetes,tibco,analytics,taxonomy_rule,false,scope_rule,false
-spotfire-server,spotfire-server,Spotfire® Server,tibco,analytics,taxonomy_rule,false,scope_rule,false
-spotfire-service-for-python,sf-pysrv,Spotfire® Service for Python,tibco,analytics,taxonomy_rule,false,scope_rule,false
-spotfire-service-for-r,sf-rsrv,Spotfire® Service for R,tibco,analytics,taxonomy_rule,false,scope_rule,false
-spotfire-service-for-statistica,stat-sts,Spotfire® Service for Statistica®,tibco,analytics,taxonomy_rule,false,scope_rule,false
-spotfire-statistica-all-servers,stat-all-servers,Spotfire Statistica® - All Servers,tibco,analytics,taxonomy_rule,true,default,false
-spotfire-statistica-estore-edition,stat-estore,Spotfire Statistica® - Estore Edition,tibco,analytics,taxonomy_rule,true,default,false
-spotfire-statistica-integration,stat-ext,Spotfire Statistica® Integration,tibco,analytics,taxonomy_rule,true,default,false
-spotfire-statistics-services,sf-statsvcs,Spotfire® Statistics Services,tibco,analytics,taxonomy_rule,true,default,false
+spotfire-on-kubernetes,sf-kbn,Spotfire on Kubernetes,spotfire,analytics,taxonomy_rule,false,scope_rule,false
+spotfire-server,spotfire-server,Spotfire® Server,spotfire,analytics,taxonomy_rule,false,scope_rule,false
+spotfire-service-for-python,sf-pysrv,Spotfire® Service for Python,spotfire,analytics,taxonomy_rule,false,scope_rule,false
+spotfire-service-for-r,sf-rsrv,Spotfire® Service for R,spotfire,analytics,taxonomy_rule,false,scope_rule,false
+spotfire-service-for-statistica,stat-sts,Spotfire® Service for Statistica®,spotfire,analytics,taxonomy_rule,false,scope_rule,false
+spotfire-statistica-all-servers,stat-all-servers,Spotfire Statistica® - All Servers,spotfire,analytics,taxonomy_rule,true,default,false
+spotfire-statistica-estore-edition,stat-estore,Spotfire Statistica® - Estore Edition,spotfire,analytics,taxonomy_rule,true,default,false
+spotfire-statistica-integration,stat-ext,Spotfire Statistica® Integration,spotfire,analytics,taxonomy_rule,true,default,false
+spotfire-statistics-services,sf-statsvcs,Spotfire® Statistics Services,spotfire,analytics,taxonomy_rule,true,default,false
 tibco-activematrix-spotfire-enabler,activematrix-spotfire-enabler,TIBCO ActiveMatrix® Spotfire Enabler,tibco,analytics,taxonomy_rule,false,scope_rule,false
-tibco-cloud-spotfire-14-6-0,sfire-cloud,TIBCO Cloud™ Spotfire® 14.6.0,tibco,analytics,taxonomy_rule,false,scope_rule,false
-tibco-cloud-spotfire-14-6-2,sfire-cloud,TIBCO Cloud™ Spotfire® 14.6.2,tibco,analytics,taxonomy_rule,false,scope_rule,false
-tibco-data-science-for-tibco-spotfire-analyst,stat-ext,TIBCO® Data Science for TIBCO Spotfire® Analyst,tibco,analytics,taxonomy_rule,true,default,false
-tibco-data-science-service-for-tibco-spotfire,stat-sts,TIBCO® Data Science Service for TIBCO Spotfire®,tibco,analytics,taxonomy_rule,true,default,false
+tibco-cloud-spotfire-14-6-0,sfire-cloud,TIBCO Cloud™ Spotfire® 14.6.0,spotfire,analytics,taxonomy_rule,false,scope_rule,false
+tibco-cloud-spotfire-14-6-2,sfire-cloud,TIBCO Cloud™ Spotfire® 14.6.2,spotfire,analytics,taxonomy_rule,false,scope_rule,false
+tibco-data-science-for-tibco-spotfire-analyst,stat-ext,TIBCO® Data Science for TIBCO Spotfire® Analyst,spotfire,analytics,taxonomy_rule,true,default,false
+tibco-data-science-service-for-tibco-spotfire,stat-sts,TIBCO® Data Science Service for TIBCO Spotfire®,spotfire,analytics,taxonomy_rule,true,default,false
 tibco-silver-fabric-enabler-for-spotfire-web-player,silver-fabric-spotfire,TIBCO Silver® Fabric Enabler for Spotfire® Web Player,tibco,analytics,taxonomy_rule,false,scope_rule,false
-tibco-spotfire-analytics-server,spotfire-analytics-server,TIBCO Spotfire® Analytics Server,tibco,analytics,taxonomy_rule,false,scope_rule,false
-tibco-spotfire-automation-services,sfire-autsvcs,TIBCO Spotfire® Automation Services,tibco,analytics,taxonomy_rule,false,scope_rule,false
-tibco-spotfire-business-author,spotfire-business-author,TIBCO Spotfire® Business Author,tibco,analytics,taxonomy_rule,false,scope_rule,false
-tibco-spotfire-capability-matrix,sf-cap-mtx,TIBCO Spotfire® Capability Matrix,tibco,analytics,taxonomy_rule,false,scope_rule,false
-tibco-spotfire-clinical,spotfire-clinical,TIBCO Spotfire® Clinical,tibco,analytics,taxonomy_rule,false,scope_rule,false
-tibco-spotfire-clinical-graphics,spotfire-clinical-graphics,TIBCO Spotfire® Clinical Graphics,tibco,analytics,taxonomy_rule,false,scope_rule,false
-tibco-spotfire-connector-for-cisco-information-server,spotfire-connector-for-composite-information-services,TIBCO Spotfire® Connector for Cisco Information Server,tibco,analytics,taxonomy_rule,false,scope_rule,false
-tibco-spotfire-connector-for-cloudera-hive,spotfire-connector-for-cloudera-hive,TIBCO Spotfire® Connector for Cloudera Hive,tibco,analytics,taxonomy_rule,false,scope_rule,false
-tibco-spotfire-connector-for-cloudera-impala,spotfire-connector-for-cloudera-impala,TIBCO Spotfire® Connector for Cloudera Impala,tibco,analytics,taxonomy_rule,false,scope_rule,false
-tibco-spotfire-connector-for-hortonworks,spotfire-connector-for-hortonworks,TIBCO Spotfire® Connector for Hortonworks,tibco,analytics,taxonomy_rule,false,scope_rule,false
-tibco-spotfire-connector-for-hp-vertica,spotfire-connector-for-hp-vertica,TIBCO Spotfire Connector for HP Vertica,tibco,analytics,taxonomy_rule,false,scope_rule,false
-tibco-spotfire-connector-for-ibm-db2,spotfre-connector-for-ibm-db2,TIBCO Spotfire Connector for IBM DB2,tibco,analytics,taxonomy_rule,false,scope_rule,false
-tibco-spotfire-connector-for-ibm-netezza,spotfire-connector-for-ibm-netezza,TIBCO Spotfire® Connector for IBM Netezza,tibco,analytics,taxonomy_rule,false,scope_rule,false
-tibco-spotfire-connector-for-oracle-essbase,spc-oracleess,TIBCO Spotfire® Connector for Oracle Essbase,tibco,analytics,taxonomy_rule,false,scope_rule,false
-tibco-spotfire-connector-for-oracle-mysql,spotfire-connector-for-oracle-mysql,TIBCO Spotfire® Connector for Oracle MySQL,tibco,analytics,taxonomy_rule,false,scope_rule,false
-tibco-spotfire-connector-for-pipeline-pilot,spotfire-connector-for-pipeline-pilot,TIBCO Spotfire® Connector for Pipeline Pilot,tibco,analytics,taxonomy_rule,false,scope_rule,false
-tibco-spotfire-connector-for-pivotal-greenplum,spotfire-connector-for-pivotal-greenplum,TIBCO Spotfire® Connector for Pivotal Greenplum,tibco,analytics,taxonomy_rule,false,scope_rule,false
-tibco-spotfire-connector-for-pivotal-hawq,spc-pivotal-hawq,TIBCO Spotfire Connector for Pivotal HAWQ,tibco,analytics,taxonomy_rule,false,scope_rule,false
-tibco-spotfire-connector-for-postgresql,spotfire-connector-for-postgresql,TIBCO Spotfire® Connector for PostgreSQL,tibco,analytics,taxonomy_rule,false,scope_rule,false
-tibco-spotfire-connector-for-sap-hana,spotfire-connector-for-sap-hana,TIBCO Spotfire® Connector for SAP HANA,tibco,analytics,taxonomy_rule,false,scope_rule,false
-tibco-spotfire-connector-for-teradata-aster,spotfire-connector-for-teradata-aster,TIBCO Spotfire Connector for Teradata Aster,tibco,analytics,taxonomy_rule,false,scope_rule,false
-tibco-spotfire-connectors,spc,TIBCO Spotfire® Connectors,tibco,analytics,taxonomy_rule,false,scope_rule,false
-tibco-spotfire-consumer,spotfire-consumer,TIBCO Spotfire® Consumer,tibco,analytics,taxonomy_rule,false,scope_rule,false
-tibco-spotfire-data-science-package-for-notebooks,sfire-dscpn,TIBCO Spotfire® Data Science Package for Notebooks,tibco,analytics,taxonomy_rule,true,default,false
-tibco-spotfire-decisionsite,spotfire-decisionsite,TIBCO Spotfire DecisionSite®,tibco,analytics,taxonomy_rule,false,scope_rule,false
-tibco-spotfire-deployment-kit,sfire-deploy,TIBCO Spotfire® Deployment Kit,tibco,analytics,taxonomy_rule,false,scope_rule,false
-tibco-spotfire-deployment-kit-for-apple-ios,sf-ipad-deploykit,TIBCO Spotfire® Deployment Kit for Apple iOS,tibco,analytics,taxonomy_rule,false,scope_rule,false
-tibco-spotfire-developer,sfire-dev,TIBCO Spotfire® Developer,tibco,analytics,taxonomy_rule,false,scope_rule,false
-tibco-spotfire-extension-for-openspirit,os-sfext,TIBCO Spotfire® Extension for OpenSpirit®,tibco,analytics,taxonomy_rule,false,scope_rule,false
-tibco-spotfire-general,spotfire,TIBCO Spotfire® General,tibco,analytics,taxonomy_rule,false,scope_rule,false
-tibco-spotfire-lead-discovery,spotfire-lead-discovery,TIBCO Spotfire® Lead Discovery,tibco,analytics,taxonomy_rule,false,scope_rule,false
-tibco-spotfire-metrics-modeler,spotfire-metrics-modeler,TIBCO Spotfire® Metrics Modeler,tibco,analytics,taxonomy_rule,false,scope_rule,false
-tibco-spotfire-metrics-services,spotfire-metrics-services,TIBCO Spotfire® Metrics Services,tibco,analytics,taxonomy_rule,false,scope_rule,false
-tibco-spotfire-miner,spotfire-miner,TIBCO Spotfire Miner™,tibco,analytics,taxonomy_rule,false,scope_rule,false
-tibco-spotfire-network-analytics,spotfire-network-analytics,TIBCO Spotfire® Network Analytics,tibco,analytics,taxonomy_rule,false,scope_rule,false
-tibco-spotfire-operations-analytics,spotfire-operations-analytics,TIBCO Spotfire® Operations Analytics,tibco,analytics,taxonomy_rule,false,scope_rule,false
-tibco-spotfire-professional,spotfire,TIBCO Spotfire® Professional,tibco,analytics,taxonomy_rule,false,scope_rule,false
-tibco-spotfire-qualification,spotfire-qualification,TIBCO Spotfire® Qualification,tibco,analytics,taxonomy_rule,false,scope_rule,false
-tibco-spotfire-s,spotfire-s-plus,TIBCO Spotfire® S+,tibco,analytics,taxonomy_rule,false,scope_rule,false
-tibco-spotfire-web-player,spotfire-web-player,TIBCO Spotfire® Web Player,tibco,analytics,taxonomy_rule,false,scope_rule,false
-tibco-statistica-document-management-system,stat-dms,TIBCO Statistica® Document Management System,tibco,analytics,taxonomy_rule,true,default,false
-tibco-statistica-language-packs,stat-lp,TIBCO Statistica® Language Packs,tibco,analytics,taxonomy_rule,true,default,false
+tibco-spotfire-analytics-server,spotfire-analytics-server,TIBCO Spotfire® Analytics Server,spotfire,analytics,taxonomy_rule,false,scope_rule,false
+tibco-spotfire-automation-services,sfire-autsvcs,TIBCO Spotfire® Automation Services,spotfire,analytics,taxonomy_rule,false,scope_rule,false
+tibco-spotfire-business-author,spotfire-business-author,TIBCO Spotfire® Business Author,spotfire,analytics,taxonomy_rule,false,scope_rule,false
+tibco-spotfire-capability-matrix,sf-cap-mtx,TIBCO Spotfire® Capability Matrix,spotfire,analytics,taxonomy_rule,false,scope_rule,false
+tibco-spotfire-clinical,spotfire-clinical,TIBCO Spotfire® Clinical,spotfire,analytics,taxonomy_rule,false,scope_rule,false
+tibco-spotfire-clinical-graphics,spotfire-clinical-graphics,TIBCO Spotfire® Clinical Graphics,spotfire,analytics,taxonomy_rule,false,scope_rule,false
+tibco-spotfire-connector-for-cisco-information-server,spotfire-connector-for-composite-information-services,TIBCO Spotfire® Connector for Cisco Information Server,spotfire,analytics,taxonomy_rule,false,scope_rule,false
+tibco-spotfire-connector-for-cloudera-hive,spotfire-connector-for-cloudera-hive,TIBCO Spotfire® Connector for Cloudera Hive,spotfire,analytics,taxonomy_rule,false,scope_rule,false
+tibco-spotfire-connector-for-cloudera-impala,spotfire-connector-for-cloudera-impala,TIBCO Spotfire® Connector for Cloudera Impala,spotfire,analytics,taxonomy_rule,false,scope_rule,false
+tibco-spotfire-connector-for-hortonworks,spotfire-connector-for-hortonworks,TIBCO Spotfire® Connector for Hortonworks,spotfire,analytics,taxonomy_rule,false,scope_rule,false
+tibco-spotfire-connector-for-hp-vertica,spotfire-connector-for-hp-vertica,TIBCO Spotfire Connector for HP Vertica,spotfire,analytics,taxonomy_rule,false,scope_rule,false
+tibco-spotfire-connector-for-ibm-db2,spotfre-connector-for-ibm-db2,TIBCO Spotfire Connector for IBM DB2,spotfire,analytics,taxonomy_rule,false,scope_rule,false
+tibco-spotfire-connector-for-ibm-netezza,spotfire-connector-for-ibm-netezza,TIBCO Spotfire® Connector for IBM Netezza,spotfire,analytics,taxonomy_rule,false,scope_rule,false
+tibco-spotfire-connector-for-oracle-essbase,spc-oracleess,TIBCO Spotfire® Connector for Oracle Essbase,spotfire,analytics,taxonomy_rule,false,scope_rule,false
+tibco-spotfire-connector-for-oracle-mysql,spotfire-connector-for-oracle-mysql,TIBCO Spotfire® Connector for Oracle MySQL,spotfire,analytics,taxonomy_rule,false,scope_rule,false
+tibco-spotfire-connector-for-pipeline-pilot,spotfire-connector-for-pipeline-pilot,TIBCO Spotfire® Connector for Pipeline Pilot,spotfire,analytics,taxonomy_rule,false,scope_rule,false
+tibco-spotfire-connector-for-pivotal-greenplum,spotfire-connector-for-pivotal-greenplum,TIBCO Spotfire® Connector for Pivotal Greenplum,spotfire,analytics,taxonomy_rule,false,scope_rule,false
+tibco-spotfire-connector-for-pivotal-hawq,spc-pivotal-hawq,TIBCO Spotfire Connector for Pivotal HAWQ,spotfire,analytics,taxonomy_rule,false,scope_rule,false
+tibco-spotfire-connector-for-postgresql,spotfire-connector-for-postgresql,TIBCO Spotfire® Connector for PostgreSQL,spotfire,analytics,taxonomy_rule,false,scope_rule,false
+tibco-spotfire-connector-for-sap-hana,spotfire-connector-for-sap-hana,TIBCO Spotfire® Connector for SAP HANA,spotfire,analytics,taxonomy_rule,false,scope_rule,false
+tibco-spotfire-connector-for-teradata-aster,spotfire-connector-for-teradata-aster,TIBCO Spotfire Connector for Teradata Aster,spotfire,analytics,taxonomy_rule,false,scope_rule,false
+tibco-spotfire-connectors,spc,TIBCO Spotfire® Connectors,spotfire,analytics,taxonomy_rule,false,scope_rule,false
+tibco-spotfire-consumer,spotfire-consumer,TIBCO Spotfire® Consumer,spotfire,analytics,taxonomy_rule,false,scope_rule,false
+tibco-spotfire-data-science-package-for-notebooks,sfire-dscpn,TIBCO Spotfire® Data Science Package for Notebooks,spotfire,analytics,taxonomy_rule,true,default,false
+tibco-spotfire-decisionsite,spotfire-decisionsite,TIBCO Spotfire DecisionSite®,spotfire,analytics,taxonomy_rule,false,scope_rule,false
+tibco-spotfire-deployment-kit,sfire-deploy,TIBCO Spotfire® Deployment Kit,spotfire,analytics,taxonomy_rule,false,scope_rule,false
+tibco-spotfire-deployment-kit-for-apple-ios,sf-ipad-deploykit,TIBCO Spotfire® Deployment Kit for Apple iOS,spotfire,analytics,taxonomy_rule,false,scope_rule,false
+tibco-spotfire-developer,sfire-dev,TIBCO Spotfire® Developer,spotfire,analytics,taxonomy_rule,false,scope_rule,false
+tibco-spotfire-extension-for-openspirit,os-sfext,TIBCO Spotfire® Extension for OpenSpirit®,spotfire,analytics,taxonomy_rule,false,scope_rule,false
+tibco-spotfire-general,spotfire,TIBCO Spotfire® General,spotfire,analytics,taxonomy_rule,false,scope_rule,false
+tibco-spotfire-lead-discovery,spotfire-lead-discovery,TIBCO Spotfire® Lead Discovery,spotfire,analytics,taxonomy_rule,false,scope_rule,false
+tibco-spotfire-metrics-modeler,spotfire-metrics-modeler,TIBCO Spotfire® Metrics Modeler,spotfire,analytics,taxonomy_rule,false,scope_rule,false
+tibco-spotfire-metrics-services,spotfire-metrics-services,TIBCO Spotfire® Metrics Services,spotfire,analytics,taxonomy_rule,false,scope_rule,false
+tibco-spotfire-miner,spotfire-miner,TIBCO Spotfire Miner™,spotfire,analytics,taxonomy_rule,false,scope_rule,false
+tibco-spotfire-network-analytics,spotfire-network-analytics,TIBCO Spotfire® Network Analytics,spotfire,analytics,taxonomy_rule,false,scope_rule,false
+tibco-spotfire-operations-analytics,spotfire-operations-analytics,TIBCO Spotfire® Operations Analytics,spotfire,analytics,taxonomy_rule,false,scope_rule,false
+tibco-spotfire-professional,spotfire,TIBCO Spotfire® Professional,spotfire,analytics,taxonomy_rule,false,scope_rule,false
+tibco-spotfire-qualification,spotfire-qualification,TIBCO Spotfire® Qualification,spotfire,analytics,taxonomy_rule,false,scope_rule,false
+tibco-spotfire-s,spotfire-s-plus,TIBCO Spotfire® S+,spotfire,analytics,taxonomy_rule,false,scope_rule,false
+tibco-spotfire-web-player,spotfire-web-player,TIBCO Spotfire® Web Player,spotfire,analytics,taxonomy_rule,false,scope_rule,false
+tibco-statistica-document-management-system,stat-dms,TIBCO Statistica® Document Management System,spotfire,analytics,taxonomy_rule,true,default,false
+tibco-statistica-language-packs,stat-lp,TIBCO Statistica® Language Packs,spotfire,analytics,taxonomy_rule,true,default,false
 tibco-streambase,sb-cep,TIBCO StreamBase®,tibco,analytics,taxonomy_rule,true,default,false
 tibco-streambase-add-in-for-microsoft-excel,sb-addin-exc,TIBCO StreamBase® Add-in for Microsoft Excel,tibco,analytics,taxonomy_rule,true,default,false
 tibco-streambase-cep-connectivity-package,sb-cep-conn,TIBCO StreamBase® CEP Connectivity Package,tibco,analytics,taxonomy_rule,true,default,false
@@ -120,19 +120,19 @@ tibco-nimbus-storyboard-player,nimbus-iphone,TIBCO Nimbus™ Storyboard Player,t
 ibi-mdm-add-on-for-global-data-synchronization,cim-gdsn,ibi™ MDM Add-on for Global Data Synchronization,tibco,data_management,taxonomy_rule,true,default,false
 tibco-businessconnect-container-edition-ebxml-protocol,bcce-ebxml,TIBCO BusinessConnect™ Container Edition - ebXML Protocol,tibco,data_management,taxonomy_rule,true,default,false
 tibco-businessconnect-ebxml-protocol,bcebxml,TIBCO BusinessConnect™ ebXML Protocol,tibco,data_management,taxonomy_rule,true,default,false
-tibco-cloud-ebx,cloudebx,TIBCO Cloud™ EBX®,tibco,data_management,taxonomy_rule,false,scope_rule,false
+tibco-cloud-ebx,cloudebx,TIBCO Cloud™ EBX®,onebx,data_management,taxonomy_rule,false,scope_rule,false
 tibco-cloud-mdm,mdm-cloud,TIBCO® Cloud MDM,tibco,data_management,taxonomy_rule,true,default,false
-tibco-ebx,ebx,TIBCO EBX™,tibco,data_management,taxonomy_rule,false,scope_rule,false
-tibco-ebx-add-ons,ebx-addon,TIBCO EBX™ Add-ons,tibco,data_management,taxonomy_rule,false,scope_rule,false
-tibco-ebx-cloud-enterprise,ebx-cloud-enterprise,TIBCO EBX® Cloud Enterprise,tibco,data_management,taxonomy_rule,false,scope_rule,false
+tibco-ebx,ebx,TIBCO EBX™,onebx,data_management,taxonomy_rule,false,scope_rule,false
+tibco-ebx-add-ons,ebx-addon,TIBCO EBX™ Add-ons,onebx,data_management,taxonomy_rule,false,scope_rule,false
+tibco-ebx-cloud-enterprise,ebx-cloud-enterprise,TIBCO EBX® Cloud Enterprise,onebx,data_management,taxonomy_rule,false,scope_rule,false
 tibco-enterprise-mdm,tp-mdm,TIBCO® Enterprise MDM,tibco,data_management,taxonomy_rule,true,default,false
 tibco-mdm-administration-agent,mdm-administration-agent,TIBCO® MDM Administration Agent,tibco,data_management,taxonomy_rule,true,default,false
 tibco-mdm-for-retail,mdm-retail-suite,TIBCO® MDM for Retail,tibco,data_management,taxonomy_rule,true,default,false
 tibco-mdm-studio,bstudio-mdm,TIBCO® MDM Studio,tibco,data_management,taxonomy_rule,true,default,false
 tibco-product-and-service-catalog-powered-by-tibco-ebx,psc-ebx,TIBCO® Product and Service Catalog powered by TIBCO EBX®,tibco,data_management,taxonomy_rule,true,default,false
-tibco-datasynapse-gridserver-logviewer,dsp-logv,TIBCO DataSynapse GridServer® LogViewer,tibco,datasynapse,manual,true,default,false
-tibco-datasynapse-gridserver-manager,dsp-gridserver,TIBCO DataSynapse GridServer® Manager,tibco,datasynapse,manual,true,default,false
-tibco-datasynapse-high-performance-computing-cloud-adapter,ds-highperf-comp-cloud,TIBCO DataSynapse™ High-Performance Computing Cloud Adapter,tibco,datasynapse,manual,true,default,false
+tibco-datasynapse-gridserver-logviewer,dsp-logv,TIBCO DataSynapse GridServer® LogViewer,datasynapse,datasynapse,manual,true,default,false
+tibco-datasynapse-gridserver-manager,dsp-gridserver,TIBCO DataSynapse GridServer® Manager,datasynapse,datasynapse,manual,true,default,false
+tibco-datasynapse-high-performance-computing-cloud-adapter,ds-highperf-comp-cloud,TIBCO DataSynapse™ High-Performance Computing Cloud Adapter,datasynapse,datasynapse,manual,true,default,false
 "tibbr,-tibbr-service,-tibbr-community,-and-tibbrcommunity-service",tibbr,"tibbr®, tibbr® Service, tibbr® Community, and tibbr®Community Service",tibco,general,unclassified,true,default,false
 tibbr-for-ios,tibbr-for-ios,tibbr® for iOS,tibco,general,unclassified,true,default,false
 tibbr-for-microsoft-outlook,tibbr-for-microsoft-outlook,tibbr® for Microsoft Outlook,tibco,general,unclassified,true,default,false
@@ -238,8 +238,8 @@ tibco-cloud-passport,cloud-passport,TIBCO Cloud™ Passport,tibco,general,unclas
 tibco-computedb-enterprise-edition,compute,TIBCO ComputeDB™ - Enterprise Edition,tibco,general,unclassified,true,default,false
 tibco-configuration-tool,cofiguration-tool,TIBCO Configuration Tool,tibco,general,unclassified,true,default,false
 tibco-control-plane,platform-cp,TIBCO® Control Plane,tibco,general,unclassified,true,default,false
-tibco-data-science-package-for-notebooks,sfire-dscpn,TIBCO® Data Science - Package for Notebooks,tibco,general,unclassified,true,default,false
-tibco-data-science-team-studio,sfire-dsc,TIBCO® Data Science - Team Studio,tibco,general,unclassified,true,default,false
+tibco-data-science-package-for-notebooks,sfire-dscpn,TIBCO® Data Science - Package for Notebooks,spotfire,general,unclassified,true,default,false
+tibco-data-science-team-studio,sfire-dsc,TIBCO® Data Science - Team Studio,spotfire,general,unclassified,true,default,false
 tibco-datasynapse-federator,dsfed,TIBCO DataSynapse Federator™,tibco,general,unclassified,true,default,false
 tibco-designer,designer,TIBCO Designer™,tibco,general,unclassified,true,default,false
 tibco-designer-add-in-for-tibco-business-studio,designer-addin-for-business-studio,TIBCO Designer™ Add-in for TIBCO Business Studio™,tibco,general,unclassified,true,default,false
