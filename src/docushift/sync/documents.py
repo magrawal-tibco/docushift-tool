@@ -218,6 +218,13 @@ def render_index(entries: list[DocumentEntry], title: str, doc_class: str, templ
     )
 
 
-def render_toc(entries: list[DocumentEntry], title: str, templates: Path) -> str:
-    """`toc.yml`, flat -- these doc-classes have no hierarchy to indent."""
-    return template(templates, "documents_toc.yml.j2").render(title=title, entries=entries)
+def render_toc(title: str, templates: Path) -> str:
+    """`toc.yml`: one item, pointing at the `index.md` beside it.
+
+    It takes no entries, which is the change Phase 9 made visible. A `toc.yml` is
+    AEM's navigation and every item in it promises the reader a page; a folder of
+    PDFs has exactly one, and `index.md` already lists the downloads. So this file
+    is a function of the folder's title and nothing else -- passing it the entries
+    would imply it could still choose to list them.
+    """
+    return template(templates, "documents_toc.yml.j2").render(title=title)

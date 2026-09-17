@@ -140,17 +140,25 @@ def test_the_index_writes_its_own_frontmatter_because_nothing_converts_this_fold
     assert "- [10.1.0](https://docs.example/ems-10.1.0.zip) -- Feb 2024" in rendered
 
 
-def test_the_toc_is_flat_and_says_what_can_actually_be_fetched(product: Product) -> None:
-    parsed = yaml.safe_load(
-        archives.render_toc(archives.entries_for(product), "T", _templates())
+def test_the_toc_is_one_item_pointing_at_the_index(product: Product) -> None:
+    """Phase 9: the same rule as the document doc-classes, applied here even though
+    these entries are catalog rows rather than files."""
+    parsed = yaml.safe_load(archives.render_toc("T", _templates()))
+
+    assert parsed["items"] == [{"title": "T", "path": "index.md"}]
+
+
+def test_the_version_history_the_toc_stopped_listing_is_all_in_the_index(
+    product: Product,
+) -> None:
+    """The history moved into `index.md`, it did not go -- including the rows with
+    no fetchable ZIP, which are most of them and the whole point of the folder."""
+    rendered = archives.render_index(
+        archives.entries_for(product), "EMS Archived Versions", _templates()
     )
 
-    assert [item["version"] for item in parsed["items"]] == [
-        "10.1.0", "8.10.0", "8.5.0", "7.0.1", "ga",
-    ]
-    assert all(item["available"] is False for item in parsed["items"])
-    # No `path` key at all for the row with no URL, rather than an empty one.
-    assert "path" not in parsed["items"][3]
+    for version in ("10.1.0", "8.10.0", "8.5.0", "7.0.1", "ga"):
+        assert version in rendered
 
 
 def test_the_title_carries_no_version_because_the_folder_is_all_of_them() -> None:

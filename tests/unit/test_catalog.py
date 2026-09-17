@@ -1061,6 +1061,12 @@ def test_the_shipped_report_retires_the_measured_set(repo_root: Path) -> None:
     The figures are what the 2026-09-10 report costs the *convertible* population,
     and they are asserted exactly rather than as a floor: a report swap that moves
     them is a decision to look at, not something to discover after a conversion run.
+
+    *Re-baselined 2026-09-17, and the decision was looked at.* The catalog gained
+    two discovered products (634 -> 636), one of which the report covers (251 ->
+    252). The two retirement figures did not move at all, which is the check that
+    matters: nothing became retired or un-retired, so the delta is population, not
+    verdict.
     """
     manager = CatalogManager(
         repo_root / "config" / "products.csv",
@@ -1072,7 +1078,7 @@ def test_the_shipped_report_retires_the_measured_set(repo_root: Path) -> None:
 
     assert summary["versions_retired"] == 128
     assert len(summary["products_fully_retired"]) == 11
-    assert manager.eos_coverage() == (251, 634)
+    assert manager.eos_coverage() == (252, 636)
 
 
 def test_the_shipped_report_never_retires_a_look_alike(repo_root: Path) -> None:

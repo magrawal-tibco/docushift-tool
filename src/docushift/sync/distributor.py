@@ -351,7 +351,7 @@ class WorkspaceDistributor:
             document_index.render_index(entries, title, doc_class, templates), encoding="utf-8"
         )
         (staging / "toc.yml").write_text(
-            document_index.render_toc(entries, title, templates), encoding="utf-8"
+            document_index.render_toc(title, templates), encoding="utf-8"
         )
         (staging / "metadata.yml").write_text(
             navigation.render_metadata([("csg-version", version.version)], templates, "version"),
@@ -529,7 +529,7 @@ class WorkspaceDistributor:
         templates = self.config.aem_templates_dir
         (staging / "index.md").write_text(index, encoding="utf-8")
         (staging / "toc.yml").write_text(
-            archive_index.render_toc(entries, title, templates), encoding="utf-8"
+            archive_index.render_toc(title, templates), encoding="utf-8"
         )
         (staging / "metadata.yml").write_text(
             navigation.render_metadata([("csg-product", product.display_name)],

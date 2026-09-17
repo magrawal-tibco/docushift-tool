@@ -263,9 +263,25 @@ def test_the_index_writes_its_own_frontmatter(config: ConfigManager, tmp_path: P
     assert "- [Release Notes](mft%20server%20v7.1%20release%20notes.pdf)" in body
 
 
-def test_the_toc_is_flat_and_keeps_bytes_an_integer(config: ConfigManager, tmp_path: Path) -> None:
-    """A folder of PDFs is a list; `toc.yml.j2`'s tree would render a one-level one
-    to say so. And a quoted `bytes` would publish `"10"`, which AEM cannot add up.
+def test_the_toc_is_one_item_pointing_at_the_index(config: ConfigManager) -> None:
+    """A `toc.yml` item promises the reader a page. A PDF is a download, and these
+    folders have exactly one page -- so the nav has exactly one entry (Phase 9).
+    """
+    loaded = yaml.safe_load(
+        render_toc("TIBCO EMS 10.4.0 Reference Documents", config.aem_templates_dir)
+    )
+
+    assert loaded["items"] == [
+        {"title": "TIBCO EMS 10.4.0 Reference Documents", "path": "index.md"},
+    ]
+
+
+def test_the_artifacts_the_toc_stopped_listing_are_all_in_the_index(
+    config: ConfigManager, tmp_path: Path
+) -> None:
+    """The half of Phase 9 that is easy to break silently: the file list moved out
+    of `toc.yml`, it did not go. If this passes while the test above fails open,
+    the folder still publishes every download -- if it fails, one is unreachable.
     """
     entries, _ = entries_for(
         [
@@ -274,18 +290,19 @@ def test_the_toc_is_flat_and_keeps_bytes_an_integer(config: ConfigManager, tmp_p
         ]
     )
 
-    loaded = yaml.safe_load(render_toc(entries, "TIBCO EMS 10.4.0 Reference Documents",
-                                       config.aem_templates_dir))
+    rendered = render_index(
+        entries, "TIBCO EMS 10.4.0 Reference Documents", REFERENCE_DOCUMENTS,
+        config.aem_templates_dir,
+    )
 
-    assert loaded["items"] == [
-        {"title": "VPAT (Accessibility Conformance Report)", "path": "TIB_ems_VPAT.pdf",
-         "type": "pdf", "bytes": 10},
-        {"title": "License Agreement", "path": "tib_ems_licenses.pdf", "type": "pdf", "bytes": 1},
-    ]
+    assert "[VPAT (Accessibility Conformance Report)](TIB_ems_VPAT.pdf)" in rendered
+    assert "[License Agreement](tib_ems_licenses.pdf)" in rendered
 
 
 def test_an_empty_index_renders_rather_than_raising(config: ConfigManager) -> None:
     """It is never written -- an empty doc-class is absent -- but a template that
     only works on a non-empty list is a trap for whatever calls it next."""
     assert "# Nothing" in render_index([], "Nothing", USER_GUIDES, config.aem_templates_dir)
-    assert yaml.safe_load(render_toc([], "Nothing", config.aem_templates_dir))["items"] is None
+    assert yaml.safe_load(render_toc("Nothing", config.aem_templates_dir))["items"] == [
+        {"title": "Nothing", "path": "index.md"},
+    ]

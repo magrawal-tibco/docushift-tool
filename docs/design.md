@@ -938,7 +938,7 @@ Each of `user-guides`, `release-information` and `reference-documents` gets a fl
 
 **Order** is by kind rank then title, from **one rank table shared by all three doc-classes** — VPAT, License Agreement, Reminder Notice, Right to Use Terms, Release Notes, Readme, then the unranked. Each doc-class holds a subset of the kinds, so the single list gives `release-information` its release notes first and `reference-documents` its VPAT first with no per-doc-class branch, rather than whatever order the filesystem returned.
 
-**Output.** `toc.yml` is flat — these doc-classes have no hierarchy — one item per file with `title`, `path` (the bare filename), `type` (extension) and `bytes`. `index.md` carries the `online-help` index frontmatter plus `doc_class`, and renders the items as a linked list. Both come from new templates in `config/aem_templates/` (`documents_index.md.j2`, `documents_toc.yml.j2`): `toc.yml.j2` carries `children` and a precomputed indent for a nested tree, and `index.md.j2` is body-only because the converter's `_render` writes its frontmatter — neither fits a flat list that no converter runs over.
+**Output.** `toc.yml` is **one item — `title` and `path: "index.md"`** *(corrected 2026-09-17, Phase 9; it was one item per file with `type` and `bytes`)*: the nav promises pages, the folder has one, and the artifacts are `index.md`'s list. It therefore takes no entries at all — `render_toc(title, templates)` — because a signature that still accepted them would imply it could choose to list them. `index.md` carries the `online-help` index frontmatter plus `doc_class`, and renders the routed files as a linked list. Both come from new templates in `config/aem_templates/` (`documents_index.md.j2`, `documents_toc.yml.j2`): `toc.yml.j2` carries `children` and a precomputed indent for a nested tree, and `index.md.j2` is body-only because the converter's `_render` writes its frontmatter — neither fits a folder that no converter runs over. See `architecture.md` §6.2.2.
 
 **The version folder also gets a `metadata.yml`**, `csg-version: <dotted version>`, from the same level-parameterized `metadata.yml.j2` that writes `online-help`'s. Without it, three of a product's four doc-classes would ship version folders with no version metadata, and the asymmetry would record which stage wrote the folder rather than anything about the product.
 
@@ -951,6 +951,8 @@ Each of `user-guides`, `release-information` and `reference-documents` gets a fl
 `archives/` in the `-resources` repo gets an `index.md` and a `toc.yml` too, but **its input is the catalog, not the directory**. Archived ZIPs are downloaded on demand (`architecture.md` §4.3), so the folder typically holds two of a product's forty archived versions; indexing what is on disk would publish a history that is 95% missing and look complete while doing it. Grounded in a 2026-09-09 sample of 60 public products / 326 archived versions (`architecture.md` §6.2.3).
 
 **Input** is every `versions.csv` row for the product with `is_archived` set — present or not on disk. A product with no archived rows gets no folder and no index; 17 of the 60 sampled products (28%) are in that state.
+
+**`toc.yml` is the single-entry form** (Phase 9; `architecture.md` §6.2.3): one item at `index.md`, and `render_toc` takes no entries. Everything below describes **`index.md`'s** list, which is unchanged.
 
 **One item per archived version:**
 

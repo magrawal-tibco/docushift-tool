@@ -318,9 +318,14 @@ def test_a_doc_class_folder_is_indexed_because_nothing_synthesizes_its_navigatio
         "doc_class": "release-information",
         "generated": True,
     }
+    # The artifacts are the index's list (Phase 9), and both are still named here.
     assert "- [Release Notes](tib_ems_relnotes.pdf)" in index
+    assert "(readme.txt)" in index
     toc = yaml.safe_load(folder.joinpath("toc.yml").read_text(encoding="utf-8"))
-    assert [row["path"] for row in toc["items"]] == ["tib_ems_relnotes.pdf", "readme.txt"]
+    assert toc["items"] == [
+        {"title": "TIBCO Enterprise Message Service™ 10.4.0 Release Information",
+         "path": "index.md"},
+    ]
     metadata = yaml.safe_load(folder.joinpath("metadata.yml").read_text(encoding="utf-8"))
     assert metadata == {"csg-version": "10.4.0"}
 
