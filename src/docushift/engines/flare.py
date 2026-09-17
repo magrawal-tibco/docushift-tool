@@ -54,7 +54,9 @@ from docushift.engines.base import (
     NavNode,
     Unit,
     is_legal_label,
+    is_placeholder_whats_new,
     is_support_label,
+    is_whats_new,
     register,
 )
 from docushift.engines.flare_toc import Manifest, Toc, TocNode, read_manifest, read_toc, tree_files
@@ -354,6 +356,14 @@ class _Plan:
     # Root-relative source paths, sorted. The landing page is not among them.
     topics: list[str] = field(default_factory=list)
     landing: str = ""
+    # The What's New topic under `_templates/`, root-relative, where the root has
+    # one *and it says something*. Blank otherwise -- including where the page is
+    # there but unfilled, which is the case `placeholder` records.
+    whats_new: str = ""
+    # A What's New page that is still the authoring template, case-folded. Held
+    # separately because it has to be rejected even when the source TOC references
+    # it, which is true of 4 versions.
+    placeholder: str = ""
     # `topics` plus `landing`, case-folded: what a cross-reference may point at.
     planned: set[str] = field(default_factory=set)
 
@@ -400,6 +410,11 @@ class FlareEngine(BaseEngine):
                 documents[plan.landing.lower()] = landing
                 unit.landing = landing.relative
 
+        if plan.whats_new:
+            found = documents.get(plan.whats_new.lower())
+            if found is not None:
+                unit.whats_new = found.relative
+
         unit.documents = list(documents.values())
         unit.nav = self._navigation(context, unit, plan, documents)
         self._tail(context, unit, plan, documents)
@@ -425,11 +440,49 @@ class FlareEngine(BaseEngine):
         if landing and not (root / Path(*PurePosixPath(landing).parts)).is_file():
             landing = ""
 
-        topics = self._topics(context, unit, root, referenced, landing)
+        whats_new, placeholder = self._whats_new(context, unit, root, landing)
+        if whats_new:
+            # 74 roots have a real What's New that no TOC entry reaches, and
+            # `_rejection` would discard it as `unreferenced-template`. Declaring it
+            # referenced here -- rather than special-casing the rejection -- keeps
+            # one answer to "what does this root convert".
+            referenced.add(whats_new.lower())
+
+        topics = self._topics(context, unit, root, referenced, landing, placeholder)
         planned = {name.lower() for name in topics}
         if landing:
             planned.add(landing.lower())
-        return _Plan(manifest=manifest, tocs=tocs, landing=landing, topics=topics, planned=planned)
+        return _Plan(manifest=manifest, tocs=tocs, landing=landing, topics=topics,
+                     whats_new=whats_new, placeholder=placeholder, planned=planned)
+
+    def _whats_new(self, context: ConversionContext, unit: Unit, root: Path,
+                   landing: str) -> tuple[str, str]:
+        """The root's What's New topic, and whether it is still the blank template.
+
+        Returns `(real, placeholder)` -- at most one of them is set. Measured over
+        903 Flare roots: 648 carry the file, 481 of those say something and 167 do
+        not. The landing page is excluded from the search because a root whose
+        `DefaultUrl` *is* the What's New page already has it first.
+        """
+        directory = root / TEMPLATES_DIRECTORY
+        if not directory.is_dir():
+            return "", ""
+        for path in sorted(directory.iterdir()):
+            if path.suffix.lower() not in _HTML_SUFFIXES or not is_whats_new(path.name):
+                continue
+            relative = f"{TEMPLATES_DIRECTORY}/{path.name}"
+            if relative.lower() == landing.lower():
+                return "", ""
+            text = _read(path)
+            if text is None:  # pragma: no cover - reported by `_convert` if reached
+                return "", ""
+            container = markdown.parse(text).select_one(CONTENT_SELECTOR)
+            if container is not None and not is_placeholder_whats_new(_text(container)):
+                return relative, ""
+            context.record("WHATS_NEW_PLACEHOLDER", path=unit.name,
+                           message=f"{path.name} is the unfilled template; left out of the TOC")
+            return "", relative.lower()
+        return "", ""
 
     def _tocs(self, context: ConversionContext, unit: Unit, root: Path,
               manifest: Manifest) -> list[Toc]:
@@ -460,7 +513,7 @@ class FlareEngine(BaseEngine):
         return tocs
 
     def _topics(self, context: ConversionContext, unit: Unit, root: Path,
-                referenced: set[str], landing: str) -> list[str]:
+                referenced: set[str], landing: str, placeholder: str = "") -> list[str]:
         """Every HTML file under `root` that is a topic, root-relative and sorted.
 
         Everything rejected is counted rather than passed over in silence -- the
@@ -482,7 +535,8 @@ class FlareEngine(BaseEngine):
                 # skip, and counting it as one would put a converted page in the
                 # column that says nothing was written.
                 continue
-            reason = self._rejection(path, relative, nested, context.api_roots, referenced)
+            reason = self._rejection(path, relative, nested, context.api_roots,
+                                     referenced, placeholder)
             if reason:
                 unit.skip(reason)
                 continue
@@ -494,7 +548,7 @@ class FlareEngine(BaseEngine):
         return sorted(found)
 
     def _rejection(self, path: Path, relative: PurePosixPath, nested: list[Path],
-                   api_roots: list[Path], referenced: set[str]) -> str:
+                   api_roots: list[Path], referenced: set[str], placeholder: str = "") -> str:
         """Why this HTML file is not a topic, or `""` if it is one."""
         first = relative.parts[0].lower() if len(relative.parts) > 1 else ""
         if first in LOCALIZED_DIRECTORIES:
@@ -508,6 +562,11 @@ class FlareEngine(BaseEngine):
         if self.skips_api_references and is_api_reference(path, api_roots):
             return "api-reference"
         key = str(relative).lower()
+        if placeholder and key == placeholder:
+            # Rejected whether or not a TOC entry reaches it, which is the one
+            # place this overrules the source. 4 versions file the unfilled
+            # template in their navigation; the rest never referenced it anyway.
+            return "placeholder-template"
         if first == TEMPLATES_DIRECTORY and key not in referenced:
             return "unreferenced-template"
         return ""
@@ -566,6 +625,8 @@ class FlareEngine(BaseEngine):
         if not title:
             variable = soup.select_one("span.productvar.productName, span.mc-variable.productName")
             title = _text(variable) if variable is not None else context.product_name
+
+        body = _trim_portal(body)
 
         frontmatter: dict[str, object] = {}
         if len(_visible(body)) < _LANDING_MINIMUM:
@@ -940,6 +1001,55 @@ def _anchors(container: Tag) -> set[str]:
 
 def _text(node: Tag | None) -> str:
     return " ".join(node.get_text(" ").split()) if node is not None else ""
+
+
+# The doc-portal blocks a Flare landing page ends with. They are `docs.tibco.com`
+# furniture -- a PDF shelf, a site-wide "most visited" list, links to sibling
+# products -- and in a published version folder their targets are external or gone,
+# so they render as bare text lists. Counts over 778 landing pages.
+PORTAL_BLOCKS = frozenset({
+    "release documents",              # 545
+    "related product documentation",  # 537
+    "related products documentation",  # 50, the same block spelled with the plural
+    "most visited topics",            # 482
+    "downloadable pdf guides",        # 457
+    "downloadable pdf guide",         # 2
+    "videos",                         # 49
+    "key guides",                     # 27
+    "recommended topics",             # 18
+})
+
+_HEADING_LINE = re.compile(r"^#{1,6}\s+(.*?)\s*#*\s*$")
+
+
+def _trim_portal(body: str) -> str:
+    """The landing page, cut at its first doc-portal block.
+
+    Keeps the product overview and its Key New Features; drops the website
+    furniture below. Over 778 landing pages this trims 688 and leaves 90 alone.
+
+    **Cut at the block labels, not at "the section after Key New Features".** The
+    obvious rule fails twice: 351 of the 778 have no Key New Features section at
+    all and would go untrimmed, and 10 carry *genuine* feature subsections below it
+    -- `Server Improvements`, `Governance & Security`, `Platform Support` -- which
+    anchoring would delete. Cutting at a closed set of known labels keeps those,
+    and over all 778 pages there is **no** page whose Key New Features section it
+    removes.
+
+    Read off the converted Markdown rather than the HTML, because in the HTML these
+    labels are frequently not headings at all: `datasynapse`'s landing page has one
+    `h1` and no `h2`, and Flare styles the block titles with classes. The Markdown
+    is the form the rule is actually about.
+    """
+    lines = body.splitlines()
+    for index, line in enumerate(lines):
+        match = _HEADING_LINE.match(line)
+        if match is None:
+            continue
+        label = re.sub(r"[^a-z0-9 ]+", "", match.group(1).lower()).strip()
+        if label in PORTAL_BLOCKS:
+            return "\n".join(lines[:index]).rstrip()
+    return body
 
 
 def _visible(body: str) -> str:

@@ -837,10 +837,15 @@ def test_a_hero_only_landing_page_becomes_a_generated_stub(tmp_path: Path) -> No
 
 
 def test_dropdowns_unroll_on_the_landing_page_and_nowhere_else(tmp_path: Path) -> None:
-    """457 of the 459 files using the construct are this page; 1 content topic is."""
+    """457 of the 459 files using the construct are this page; 1 content topic is.
+
+    The label is `Getting Started` rather than the corpus's own `Release Documents`
+    because the latter is a portal block and `_trim_portal` now cuts the page there
+    -- which is a different rule, tested on its own below.
+    """
     dropdown = (
         "<div class='MCDropDown'>"
-        "<div class='MCDropDownHead'><a href='javascript:void(0);'>Release Documents</a></div>"
+        "<div class='MCDropDownHead'><a href='javascript:void(0);'>Getting Started</a></div>"
         f"<div class='MCDropDownBody'>{LANDING_PROSE}</div>"
         "</div>"
     )
@@ -850,9 +855,116 @@ def test_dropdowns_unroll_on_the_landing_page_and_nowhere_else(tmp_path: Path) -
 
     result = run(tmp_path, files)
 
-    assert "## Release Documents" in result.body("_templates/Home.md")
-    assert "## Release Documents" not in result.body("Content/intro.md")
+    assert "## Getting Started" in result.body("_templates/Home.md")
+    assert "## Getting Started" not in result.body("Content/intro.md")
     assert "Everything you need to install" in result.body("Content/intro.md")
+
+
+# -- What's New and the portal blocks (Phase 11) --------------------------------
+
+PLACEHOLDER = (
+    "<h1>What's New</h1>"
+    "<p>[Provide list of update made to the product documentation. You can either "
+    "provide list or categorize in sections of different features and components.]</p>"
+    "<h2>[Feature Name]</h2>"
+    "<p>[Use sections with h2 styles to further categorize new features.]</p>"
+)
+REAL_WHATS_NEW = "<h1>What's New</h1><p>No new features have been added in this release.</p>"
+
+
+def test_a_real_whats_new_is_converted_even_though_no_toc_entry_reaches_it(tmp_path) -> None:
+    """74 roots: today `_rejection` discards it as an unreferenced template."""
+    files = basic()
+    files["html/_templates/Whats-New.htm"] = page(REAL_WHATS_NEW)
+
+    result = run(tmp_path, files)
+
+    assert str(result.unit.whats_new) == "_templates/Whats-New.md"
+    assert "No new features" in result.body("_templates/Whats-New.md")
+
+
+@pytest.mark.parametrize("name", ["Whats-New.html", "What_s-New.htm", "Whats_New.htm"])
+def test_the_spellings_of_the_filename_all_match(tmp_path, name: str) -> None:
+    """`Whats-New.html` 12, `What_s-New.htm` 9, `Whats_New.htm` 6, `What's-New.htm` 5."""
+    files = basic()
+    files[f"html/_templates/{name}"] = page(REAL_WHATS_NEW)
+
+    assert run(tmp_path, files).unit.whats_new is not None
+
+
+def test_a_per_component_variant_is_not_promoted(tmp_path) -> None:
+    """`Whats-New-old.htm`, `-client`, `-server`: the filename does not say which."""
+    files = basic()
+    files["html/_templates/Whats-New-old.htm"] = page(REAL_WHATS_NEW)
+
+    assert run(tmp_path, files).unit.whats_new is None
+
+
+def test_an_unfilled_whats_new_is_neither_converted_nor_reported_as_a_topic(tmp_path) -> None:
+    """167 of 648 are the authoring template; publishing it is worse than nothing."""
+    files = basic()
+    files["html/_templates/Whats-New.htm"] = page(PLACEHOLDER)
+
+    result = run(tmp_path, files)
+
+    assert result.unit.whats_new is None
+    assert "_templates/Whats-New.md" not in [str(d.relative) for d in result.unit.documents]
+    assert result.codes()["WHATS_NEW_PLACEHOLDER"] == 1
+
+
+def test_an_unfilled_whats_new_is_dropped_even_when_the_toc_files_it(tmp_path) -> None:
+    """The 4 versions where this overrules the source TOC."""
+    files = basic()
+    files["html/_templates/Whats-New.htm"] = page(PLACEHOLDER)
+    files.update({f"html/{name}": text for name, text in toc_files(
+        [{"i": 1}],
+        {"_templates/Whats-New.htm": {"i": [1], "t": ["What's New"], "b": [""]}},
+    ).items()})
+
+    result = run(tmp_path, files)
+
+    assert result.unit.skipped["placeholder-template"] == 1
+    assert "What's New" not in [node.label for node in result.unit.nav]
+
+
+def test_the_landing_page_is_cut_at_its_first_portal_block(tmp_path) -> None:
+    """688 of 778 landing pages. The blocks' targets are external or gone."""
+    files = basic()
+    files["html/_templates/Home.htm"] = page(
+        f"<h1>Acme Server</h1>{LANDING_PROSE}"
+        "<h2>Key New Features</h2><ul><li>Faster startup</li></ul>"
+        "<h2>Release Documents</h2><ul><li>Readme</li></ul>"
+        "<h2>Downloadable PDF Guides</h2><ul><li>Installation Guide</li></ul>"
+    )
+
+    body = run(tmp_path, files).body("_templates/Home.md")
+
+    assert "Key New Features" in body and "Faster startup" in body
+    assert "Release Documents" not in body
+    assert "Downloadable PDF Guides" not in body
+
+
+def test_genuine_sections_below_key_new_features_survive(tmp_path) -> None:
+    """10 landing pages categorize their features; anchoring on the heading loses them."""
+    files = basic()
+    files["html/_templates/Home.htm"] = page(
+        f"<h1>Acme Server</h1>{LANDING_PROSE}"
+        "<h2>Key New Features</h2><p>Plenty.</p>"
+        "<h2>Governance &amp; Security</h2><p>Tightened.</p>"
+        "<h2>Most Visited Topics</h2><ul><li>Install</li></ul>"
+    )
+
+    body = run(tmp_path, files).body("_templates/Home.md")
+
+    assert "Governance" in body and "Tightened" in body
+    assert "Most Visited Topics" not in body
+
+
+def test_a_landing_page_with_no_portal_block_is_left_alone(tmp_path) -> None:
+    """90 of 778. The rule subtracts or does nothing; it never rewrites."""
+    result = run(tmp_path, basic())
+
+    assert "Everything you need to install" in result.body("_templates/Home.md")
 
 
 # -- navigation (§5.1.4, §5.1.5) ------------------------------------------------

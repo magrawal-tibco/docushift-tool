@@ -54,8 +54,14 @@ def test_the_register_carries_every_row_of_7_5() -> None:
     expected to raise nothing, because `render_index` is handed the same routed
     list that decides what gets copied; it exists so that would stop being true
     loudly rather than silently.
+
+    Phase 11a adds the 40th, `WHATS_NEW_PLACEHOLDER`. 167 of 648 Flare roots ship
+    the What's New page as MadCap wrote it, its whole body bracketed instructions
+    to the author. Those are not published, and the note is what says so -- the
+    page exists in the source, so its absence downstream would otherwise look like
+    a conversion failure.
     """
-    assert len(REGISTRY) == 39
+    assert len(REGISTRY) == 40
 
 
 def test_severity_comes_from_the_registry_and_not_from_the_call_site() -> None:

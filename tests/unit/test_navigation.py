@@ -63,7 +63,7 @@ def node(label: str, relative: str | None = None, *children: NavNode) -> NavNode
 
 def book(name: str, *, title: str = "", pages: tuple[str, ...] = (), **rest) -> Unit:
     """One unit of work. `pages` names the documents; everything else is passed on."""
-    for key in ("landing", "support", "legal"):
+    for key in ("landing", "whats_new", "support", "legal"):
         if key in rest:
             rest[key] = PurePosixPath(rest[key])
     return Unit(
@@ -156,6 +156,61 @@ def test_a_unit_wrapper_takes_the_units_landing_page_as_its_own(context, templat
     # And the wrapper that had no landing to take is the only one that needed a
     # page generated -- under its own subtree, not at the version root.
     assert [str(document.relative) for document in result.documents] == ["two/two.md"]
+
+
+# -- What's New, second (Phase 11a) ---------------------------------------------
+
+
+def test_whats_new_is_moved_to_second_from_wherever_the_source_filed_it(context, templates) -> None:
+    """407 of 481 real ones are buried inside a guide. All of them end up here."""
+    unit = book(
+        "guide",
+        pages=("home.md", "install.md", "_templates/Whats-New.md"),
+        nav=[
+            node("Home", "home.md"),
+            node("Installation", "install.md", node("What's New", "_templates/Whats-New.md")),
+        ],
+        landing="home.md",
+        whats_new="_templates/Whats-New.md",
+    )
+
+    result = synthesize(context, [unit], templates)
+
+    assert paths(result.nodes) == [
+        "guide/home.md", "guide/_templates/Whats-New.md", "guide/install.md",
+    ]
+    # Moved rather than copied: the node is gone from under Installation.
+    assert result.nodes[2].children == []
+
+
+def test_whats_new_in_no_toc_entry_is_inserted_rather_than_lost(context, templates) -> None:
+    """74 roots have a real What's New that no TOC entry reaches."""
+    unit = book(
+        "guide",
+        pages=("home.md", "install.md", ("_templates/Whats-New.md", "What's New")),
+        nav=[node("Home", "home.md"), node("Installation", "install.md")],
+        landing="home.md",
+        whats_new="_templates/Whats-New.md",
+    )
+
+    result = synthesize(context, [unit], templates)
+
+    assert labels(result.nodes) == ["Home", "What's New", "Installation"]
+
+
+def test_whats_new_is_still_second_where_the_version_index_is_generated(context, templates) -> None:
+    """No landing page: the node goes first and the generated index lands above it."""
+    unit = book(
+        "guide",
+        pages=("a.md", ("_templates/Whats-New.md", "What's New")),
+        nav=[node("A", "a.md")],
+        whats_new="_templates/Whats-New.md",
+    )
+
+    result = synthesize(context, [unit], templates)
+
+    assert labels(result.nodes)[1] == "What's New"
+    assert result.landing == result.nodes[0].document
 
 
 # -- the support / legal tail ---------------------------------------------------

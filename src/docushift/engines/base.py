@@ -26,6 +26,7 @@ So the contract fixes only what all of them share:
 """
 
 import os
+import re
 from abc import ABC, abstractmethod
 from collections.abc import Iterator
 from dataclasses import dataclass, field
@@ -125,6 +126,11 @@ class Unit:
     # the support heading is `TIBCO` in 565 roots, `ibi` in 49, `Spotfire` in 45.
     support: PurePosixPath | None = None
     legal: PurePosixPath | None = None
+    # The What's New topic, which the synthesizer moves to *second* -- after the
+    # landing page, which stays the entry point. Set only where the page says
+    # something: 167 of 648 Flare roots ship the authoring template unfilled, and
+    # those are not converted at all (`is_placeholder_whats_new`).
+    whats_new: PurePosixPath | None = None
     # HTML the engine looked at and did not convert, with why. A count, not a
     # silence: `_globalpages/`, `Default.htm` stubs, framesets, generated indexes.
     skipped: dict[str, int] = field(default_factory=dict)
@@ -169,6 +175,55 @@ def is_support_label(label: str, path: str = "") -> bool:
     """
     text = f"{label} {PurePosixPath(path).stem}".lower().replace("-", " ").replace("_", " ")
     return "support services" in text or "documentation and support" in text
+
+
+def is_whats_new(path: str) -> bool:
+    """Whether this file is the What's New topic. Matched on the stem, folded.
+
+    The filename is not stable across the corpus -- `Whats-New.htm` dominates, with
+    `Whats-New.html` (12), `What_s-New.htm` (9), `Whats_New.htm` (6) and
+    `What's-New.htm` (5) behind it -- so every separator and apostrophe is removed
+    before the comparison and the four spellings become one.
+
+    The per-component variants are deliberately **not** matched: `Whats-New-old.htm`
+    (5), `-client` (4) and `-server` (4) fold to `whatsnewold` and friends. Which of
+    a pair is the version's What's New is a judgement the filename does not settle,
+    and promoting the wrong one to second in the navigation is worse than leaving
+    both where the source TOC put them.
+    """
+    return re.sub(r"[^a-z0-9]+", "", PurePosixPath(path).stem.lower()) == "whatsnew"
+
+
+_BRACKETED = re.compile(r"\[[^\]]*\]")
+_NAVIGATION_CHROME = re.compile(r"open topic with navigation", re.I)
+_WHATS_NEW_HEADING = re.compile(r"^\s*what\W*s\s+new\b", re.I)
+
+
+def is_placeholder_whats_new(text: str) -> bool:
+    """Whether a What's New page is still the unfilled authoring template.
+
+    167 of 648 Flare roots ship it as written by MadCap, its whole body a set of
+    bracketed instructions to the author: *"[Provide list of update made to the
+    product documentation...] [Feature Name] [Use sections with h2 styles...]"*.
+    Publishing that as the first topic a reader meets is worse than publishing no
+    What's New at all.
+
+    `text` is the main content. Drop every `[...]` span, the navigation chrome, and
+    the leading heading; strip all non-alphanumerics; a page with nothing left said
+    nothing.
+
+    **There is no threshold here, and that is the point.** Across 654 files the
+    residue is 0 for 167 and 60+ for 467, with twenty between 20 and 59 and
+    **nothing at all between 1 and 19**. The twenty in the middle are genuine short
+    releases -- "No new features have been added in this release." -- and a cutoff
+    picked anywhere in that gap behaves identically, which is what makes `== 0`
+    trustworthy rather than tuned. Of the 167, five have empty main content and 162
+    are the stub.
+    """
+    residue = _BRACKETED.sub(" ", text)
+    residue = _NAVIGATION_CHROME.sub(" ", residue)
+    residue = _WHATS_NEW_HEADING.sub("", residue.strip())
+    return not re.sub(r"[^a-z0-9]+", "", residue.lower())
 
 
 @dataclass

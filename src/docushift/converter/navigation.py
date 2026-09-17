@@ -80,6 +80,7 @@ class _View:
     unit: Unit
     nodes: list[NavNode]
     landing: PurePosixPath | None = None
+    whats_new: PurePosixPath | None = None
     support: PurePosixPath | None = None
     legal: PurePosixPath | None = None
 
@@ -100,6 +101,7 @@ def synthesize(context: ConversionContext, units: list[Unit], templates: Path) -
     nodes = _assemble(views, documents)
     result.dropped += _tail(views, nodes)
     result.landing, wants_index = _landing(views, nodes, documents)
+    _whats_new(views, nodes, documents, after_landing=result.landing is not None)
 
     taken = set(documents)
     nodes, dropped = _generate(nodes, taken, documents, result.documents, templates)
@@ -129,6 +131,7 @@ def _view(unit: Unit) -> _View:
         unit=unit,
         nodes=[_rebase(node, name) for node in unit.nav],
         landing=_under(name, unit.landing),
+        whats_new=_under(name, unit.whats_new),
         support=_under(name, unit.support),
         legal=_under(name, unit.legal),
     )
@@ -219,6 +222,33 @@ def _landing(
         node = NavNode(label=_label_of(landing, documents), document=landing)
     nodes.insert(0, node)
     return landing, False
+
+
+def _whats_new(
+    views: list[_View],
+    nodes: list[NavNode],
+    documents: dict[PurePosixPath, Document],
+    after_landing: bool,
+) -> None:
+    """What's New goes second: after the landing page, before the first guide.
+
+    The same move `_landing` makes, one position later and for the opposite reason.
+    Home is where a reader arrives, so it keeps first place; What's New is what a
+    reader on an upgrade came for, and in the source TOC it is usually buried --
+    407 of the 481 real ones are filed somewhere inside a guide, and 74 are in no
+    TOC entry at all. Both cases end in the same place, which is the point: the
+    position stops depending on what each writer happened to do.
+
+    Where no unit reported a landing page the node goes first, and the generated
+    version index is inserted above it moments later -- so it is second either way.
+    """
+    path = next((view.whats_new for view in views if view.whats_new is not None), None)
+    if path is None:
+        return
+    node = _extract(nodes, path)
+    if node is None:
+        node = NavNode(label=_label_of(path, documents), document=path)
+    nodes.insert(1 if after_landing else 0, node)
 
 
 def _generate(
