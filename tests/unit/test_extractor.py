@@ -380,6 +380,91 @@ def test_force_re_extracts_an_unchanged_package(
     assert not (extract_dir(config, product, version) / "sentinel.txt").exists()
 
 
+# -- measuring a tree whose package is gone (planning.md Phase 12) -------------
+
+
+def test_a_cached_tree_is_measured_with_no_package_in_hand(
+    config: ConfigManager, catalog: CatalogManager, product: Product, version: ProductVersion
+) -> None:
+    """The state six converted DataSynapse versions were found in: tree, no ZIP.
+
+    They were unpacked months before `record_extract_inventory` existed, and their
+    packages have since been cleaned away -- so `extract_one` returns `NO_PACKAGE`
+    before it can reach the walk, and the five columns stay blank for good.
+    """
+    build_tree(extract_dir(config, product, version), FLARE_PACKAGE)
+    assert not config.download_path(
+        product.bu, product.family, product.slug, version.version
+    ).exists()
+
+    result = PackageExtractor(config, catalog).measure_cached(product, version)
+
+    assert result.outcome is ExtractOutcome.MEASURED
+    assert result.engine is SourceEngine.FLARE
+    measured = catalog.get_version("tibco-ems", "10.4.0")
+    assert measured.doc_files is not None and measured.api_files is not None
+
+
+def test_measuring_from_cache_writes_no_checksum_and_no_state(
+    config: ConfigManager, catalog: CatalogManager, product: Product, version: ProductVersion
+) -> None:
+    """Two lies it must not tell: that the tree is current, and that this run built it.
+
+    A fabricated `extract_zip_checksum` would make the next real `extract` skip a
+    tree it has never verified, and recording `EXTRACTED` over a version that has
+    already converted would walk it backwards through its own pipeline.
+    """
+    build_tree(extract_dir(config, product, version), FLARE_PACKAGE)
+    catalog.state.set_version_state("tibco-ems", "10.4.0", status=ConversionStatus.CONVERTED)
+
+    PackageExtractor(config, catalog).measure_cached(product, version)
+
+    metadata = catalog.state.get_version_metadata("tibco-ems", "10.4.0") or {}
+    assert "extract_zip_checksum" not in metadata
+    assert catalog.state.get_version_state("tibco-ems", "10.4.0")["status"] == str(
+        ConversionStatus.CONVERTED
+    )
+
+
+def test_a_tree_already_measured_is_not_walked_again(
+    config: ConfigManager, catalog: CatalogManager, product: Product, version: ProductVersion
+) -> None:
+    """The columns are the only record of the walk, so they are what gates it."""
+    build_tree(extract_dir(config, product, version), FLARE_PACKAGE)
+    extractor = PackageExtractor(config, catalog)
+    extractor.measure_cached(product, version)
+
+    result = extractor.measure_cached(product, catalog.get_version("tibco-ems", "10.4.0"))
+
+    assert result.outcome is ExtractOutcome.CURRENT
+    assert result.inventory is None
+
+
+def test_measuring_a_tree_that_is_not_there_reports_it_rather_than_zeroes(
+    config: ConfigManager, catalog: CatalogManager, product: Product, version: ProductVersion
+) -> None:
+    """Zeroes would make "never extracted" indistinguishable from "extracted, empty"."""
+    result = PackageExtractor(config, catalog).measure_cached(product, version)
+
+    assert result.outcome is ExtractOutcome.NO_PACKAGE
+    assert catalog.get_version("tibco-ems", "10.4.0").doc_files is None
+
+
+def test_measuring_from_cache_leaves_the_tree_exactly_as_it_found_it(
+    config: ConfigManager, catalog: CatalogManager, product: Product, version: ProductVersion
+) -> None:
+    """A measurement that edits its subject is not a measurement."""
+    tree = build_tree(extract_dir(config, product, version), FLARE_PACKAGE)
+    (tree / "sentinel.txt").write_text("kept", encoding="utf-8")
+    before = sorted((p.relative_to(tree).as_posix(), p.read_bytes()) for p in tree.rglob("*") if p.is_file())
+
+    PackageExtractor(config, catalog).measure_cached(product, version)
+
+    after = sorted((p.relative_to(tree).as_posix(), p.read_bytes()) for p in tree.rglob("*") if p.is_file())
+    assert after == before
+    assert not list(tree.parent.glob("*.part"))
+
+
 def test_a_re_extract_does_not_leave_the_previous_packages_files_behind(
     config: ConfigManager, catalog: CatalogManager, product: Product, version: ProductVersion
 ) -> None:

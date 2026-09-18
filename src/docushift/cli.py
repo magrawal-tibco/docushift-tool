@@ -931,6 +931,7 @@ def _report_extract(stats) -> None:
     for outcome, label in (
         (ExtractOutcome.EXTRACTED, "Extracted"),
         (ExtractOutcome.CURRENT, "Already current"),
+        (ExtractOutcome.MEASURED, "Measured from cache"),
         (ExtractOutcome.NO_PACKAGE, "No package"),
         (ExtractOutcome.REFUSED, "Refused (unsafe archive)"),
         (ExtractOutcome.FAILED, "Failed"),
@@ -1049,42 +1050,65 @@ def _report_inventory(stats) -> None:
 @main.command()
 @_scope_options
 @click.option("--force", is_flag=True, help="Re-extract even if the package has not changed.")
+@click.option(
+    "--measure-only",
+    is_flag=True,
+    help="Walk trees already extracted and fill their inventory columns. No package needed.",
+)
 @click.option("--dry-run", is_flag=True, help="List what would be unpacked without writing.")
 @click.pass_context
-def extract(ctx, bu, family, product, version, batch, select_all, force, dry_run) -> None:
+def extract(ctx, bu, family, product, version, batch, select_all, force, measure_only, dry_run) -> None:
     """Extract packages into the family workspace and detect their source engine.
 
     Extraction runs over the same selection as `download`, so an archived or
     ineligible version is never unpacked. Serial by design: two large unzips onto
     one disk contend rather than overlap.
+
+    `--measure-only` is for a workspace whose trees outlived their packages: it
+    fills `_has_csh`/`_api_files`/`_doc_files` from the tree on disk and unpacks
+    nothing. The columns then describe what is there, not what is upstream.
     """
     from docushift.extractor import ExtractOutcome, PackageExtractor
 
     cfg: ConfigManager = ctx.obj["config"]
     manager = _catalog_manager(ctx)
 
+    # Opposites, not variants: one insists on re-reading the package, the other
+    # never opens it. Silently letting one win would make the run a guess.
+    if measure_only and force:
+        raise click.UsageError("--measure-only and --force are opposites; pass one.")
+
     pairs = _download_selection(manager, bu, family, product, version, batch, select_all)
     if not pairs:
         _no_selection("extract")
 
     if dry_run:
-        table = Table(title=f"Would extract ({len(pairs)})")
-        for column in ("Product", "Version", "Package", "Target"):
+        verb = "measure" if measure_only else "extract"
+        table = Table(title=f"Would {verb} ({len(pairs)})")
+        for column in ("Product", "Version", "Package" if not measure_only else "Tree", "Target"):
             table.add_column(column)
         for found, ver in pairs:
-            source = cfg.download_path(found.bu, found.family, found.slug, ver.version)
-            table.add_row(
-                found.slug,
-                ver.version,
-                "present" if source.is_file() else "[yellow]missing[/yellow]",
-                str(cfg.extract_path(found.bu, found.family, found.slug, ver.version)),
-            )
+            target = cfg.extract_path(found.bu, found.family, found.slug, ver.version)
+            if measure_only:
+                # The tree is the input here, so its absence -- not the ZIP's -- is
+                # what the reader needs to see before committing to the run.
+                present = target.is_dir()
+                if present and ver.api_files is not None and ver.doc_files is not None:
+                    state = "[dim]already measured[/dim]"
+                else:
+                    state = "present" if present else "[yellow]missing[/yellow]"
+            else:
+                source = cfg.download_path(found.bu, found.family, found.slug, ver.version)
+                state = "present" if source.is_file() else "[yellow]missing[/yellow]"
+            table.add_row(found.slug, ver.version, state, str(target))
         console.print(table)
         return
 
     findings = FindingsRun("extract", batch=batch or "", store=manager.state).start()
     extractor = PackageExtractor(cfg, manager, findings=findings)
-    console.print(f"Extracting {len(pairs)} version(s)...")
+    console.print(
+        f"{'Measuring' if measure_only else 'Extracting'} {len(pairs)} version(s)..."
+    )
 
     def on_result(result) -> None:
         # Flushed per version, so an unzip that dies on version 200 keeps the
@@ -1096,11 +1120,19 @@ def extract(ctx, bu, family, product, version, batch, select_all, force, dry_run
                 f"  [green]v[/green] {result.slug}@{result.version} "
                 f"{result.files} file(s), {result.engine}{roots}"
             )
+        elif result.outcome is ExtractOutcome.MEASURED:
+            inventory = result.inventory
+            counted = f"{inventory.doc_files} doc file(s)" if inventory else "measured"
+            console.print(
+                f"  [green]v[/green] {result.slug}@{result.version} {counted}, {result.engine}"
+            )
         elif result.outcome in (ExtractOutcome.FAILED, ExtractOutcome.REFUSED):
             console.print(f"  [red]x[/red] {result.slug}@{result.version}")
 
     try:
-        _report_extract(extractor.extract_many(pairs, force=force, on_result=on_result))
+        _report_extract(extractor.extract_many(
+            pairs, force=force, on_result=on_result, measure_only=measure_only,
+        ))
     finally:
         findings.finish()
     _report_findings(findings)

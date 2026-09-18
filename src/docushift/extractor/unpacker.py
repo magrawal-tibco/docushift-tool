@@ -42,6 +42,10 @@ class ExtractOutcome(StrEnum):
     EXTRACTED = "extracted"
     # The ZIP's checksum matches the one the current tree was built from.
     CURRENT = "current"
+    # Walked a tree that was already on disk, with no package in hand. Counted
+    # apart from `extracted` because nothing was unpacked and the tree's currency
+    # against upstream was never tested -- see `measure_cached`.
+    MEASURED = "measured"
     # Eligible, but there is no package at the canonical path yet.
     NO_PACKAGE = "no-package"
     # The archive tried to write outside its target directory. Counted apart from
@@ -121,7 +125,9 @@ class ExtractStats:
         """Engine histogram over the versions this run actually looked at."""
         tally: dict[SourceEngine, int] = {}
         for result in self.results:
-            if result.outcome in (ExtractOutcome.EXTRACTED, ExtractOutcome.CURRENT):
+            if result.outcome in (
+                ExtractOutcome.EXTRACTED, ExtractOutcome.CURRENT, ExtractOutcome.MEASURED,
+            ):
                 tally[result.engine] = tally.get(result.engine, 0) + 1
         return dict(sorted(tally.items(), key=lambda item: (-item[1], str(item[0]))))
 
@@ -229,6 +235,54 @@ class PackageExtractor:
         identified = self.identify(product, version, target)
         return ExtractResult(
             slug, number, ExtractOutcome.EXTRACTED, path=target, files=files,
+            engine=identified.engine,
+            engine_written=identified.written,
+            roots=len(identified.roots),
+            inventory=self.measure(product, version, target, identified),
+        )
+
+    def measure_cached(self, product: Product, version: ProductVersion) -> ExtractResult:
+        """§6.2-§6.4 over a tree already on disk, with no package in hand.
+
+        `extract_one` measures an unmeasured tree too, but only after its checksum
+        test, and that test needs the ZIP -- so a workspace whose packages have been
+        cleaned away cannot reach it, and the five columns stay blank for good. Six
+        versions were in exactly that state when this was written: extracted before
+        `record_extract_inventory` existed, converted since, packages long gone.
+
+        What it deliberately does **not** do:
+
+        * **write `extract_zip_checksum`.** There is no package to hash, and a
+          fabricated key would tell the next real `extract` that the tree is current.
+          The row stays measured-but-not-checksummed, which is the truth.
+        * **touch `version_state`.** The tree was not built by this run and may
+          already be converted; recording `EXTRACTED` over that would walk a version
+          backwards through its own pipeline.
+        * **claim the tree matches upstream.** The columns describe what is on disk.
+          That satisfies the rule the stage is built on -- never write a number you
+          did not just measure -- but currency is a separate question this cannot
+          answer, which is why the caller has to ask for it by name.
+        """
+        slug, number = product.slug, version.version
+        target = self.config.extract_path(product.bu, product.family, slug, number)
+
+        if not target.is_dir():
+            message = f"no extracted tree at {target}; run `docushift extract` first"
+            return ExtractResult(slug, number, ExtractOutcome.NO_PACKAGE, message=message)
+
+        # The same test `extract_one` uses to decide a no-op has gone unmeasured.
+        # Re-walking a measured tree would cost the walk to write what is there.
+        if version.api_files is not None and version.doc_files is not None:
+            return ExtractResult(
+                slug, number, ExtractOutcome.CURRENT, path=target,
+                engine=version.engine,
+                engine_written=version.engine_source is not EngineSource.AUTO,
+                message="already measured",
+            )
+
+        identified = self.identify(product, version, target)
+        return ExtractResult(
+            slug, number, ExtractOutcome.MEASURED, path=target,
             engine=identified.engine,
             engine_written=identified.written,
             roots=len(identified.roots),
@@ -360,11 +414,20 @@ class PackageExtractor:
         pairs: Iterable[tuple[Product, ProductVersion]],
         force: bool = False,
         on_result: Callable[[ExtractResult], None] | None = None,
+        measure_only: bool = False,
     ) -> ExtractStats:
-        """Runs the selection in `iter_versions` order, serially (see the module docstring)."""
+        """Runs the selection in `iter_versions` order, serially (see the module docstring).
+
+        `measure_only` swaps the whole per-version route for `measure_cached`: no
+        package is read and no tree is written. It is not a variant of `force` but
+        its opposite, and the CLI refuses the two together.
+        """
         stats = ExtractStats()
         for product, version in pairs:
-            result = self.extract_one(product, version, force=force)
+            result = (
+                self.measure_cached(product, version) if measure_only
+                else self.extract_one(product, version, force=force)
+            )
             stats.results.append(result)
             if on_result is not None:
                 on_result(result)
