@@ -74,7 +74,12 @@ def test_taxonomy_declares_families_and_rules_but_no_products(repo_root: Path) -
     """Per-product assignment moved to products.csv in Phase 2."""
     taxonomy = yaml.safe_load((repo_root / "config" / "taxonomy.yaml").read_text(encoding="utf-8"))
 
-    assert set(taxonomy["business_units"]) == {"tibco", "ibi"}
+    # Spotfire, OneBX and DataSynapse were split out of `tibco` once the catalog
+    # carried a real `bu` per product; the roster is asserted so a BU cannot appear
+    # by accident, not because two is the right number.
+    assert set(taxonomy["business_units"]) == {
+        "tibco", "ibi", "spotfire", "onebx", "datasynapse",
+    }
     for bu in taxonomy["business_units"].values():
         assert bu["families"]
         assert "products" not in bu

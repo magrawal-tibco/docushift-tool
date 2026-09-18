@@ -42,6 +42,95 @@ business_units:
       datasynapse:
         name: "DataSynapse"
         description: "GridServer grid computing and HPC workload management"
+      # Declared from the keys products.csv already carries, heaviest first. These
+      # were being auto-registered one warning at a time across 305 products; the
+      # names are a transcription of what is in the catalog, not a re-grouping --
+      # no product moved and no workspace path changed.
+      bw-plugin:
+        name: "BusinessWorks Plug-ins"
+        description: "ActiveMatrix BusinessWorks plug-ins, connectors, and extensions"
+      flogo-connectors:
+        name: "Flogo Connectors"
+        description: "Flogo connections and connectors to external services"
+      businessconnect:
+        name: "BusinessConnect"
+        description: "B2B gateway, protocols, and trading-partner management"
+      fulfillment:
+        name: "Fulfillment"
+        description: "Order management, fulfillment orchestration, and provisioning"
+      loglogic:
+        name: "LogLogic"
+        description: "Log management, compliance suites, and security analytics"
+      iprocess:
+        name: "iProcess"
+        description: "iProcess workflow engine, clients, and conductor"
+      foresight:
+        name: "Foresight"
+        description: "Healthcare EDI validation, translation, and archiving"
+      streaming:
+        name: "Streaming"
+        description: "StreamBase, LiveView, and enterprise streaming analytics"
+      businessevents:
+        name: "BusinessEvents"
+        description: "Complex event processing, decision management, and data modeling"
+      businessworks:
+        name: "BusinessWorks"
+        description: "The BusinessWorks integration engine and its editions"
+      hawk:
+        name: "Hawk"
+        description: "Infrastructure monitoring agents, adapters, and plug-ins"
+      activespaces:
+        name: "ActiveSpaces"
+        description: "In-memory data grid, its editions, and its connectors"
+      ems:
+        name: "EMS"
+        description: "Enterprise Message Service clients for non-native platforms"
+      platform:
+        name: "Platform"
+        description: "TIBCO Platform, Control Plane, and their add-ons"
+      tra:
+        name: "Runtime Agent"
+        description: "Administrator, Designer, and the shared runtime agent"
+      ftl:
+        name: "FTL"
+        description: "FTL and eFTL low-latency messaging"
+      scribe:
+        name: "Scribe"
+        description: "Scribe cloud data integration"
+      general:
+        name: "General"
+        description: "Not yet triaged into a family"
+
+  # Split out of `tibco` when the catalog was re-surveyed: the Spotfire products
+  # answer to their own BU, so they publish to `en-us-spotfire-...` rather than
+  # sitting under `tib`. `messaging` holds exactly one product (the ActiveSpaces
+  # data source) and is declared so it is not an auto-registered ghost.
+  spotfire:
+    name: "Spotfire"
+    families:
+      analytics:
+        name: "Analytics"
+        description: "Visual analytics, data science, and streaming analytics"
+      statistica:
+        name: "Statistica"
+        description: "Statistica advanced analytics and data science workbench"
+      messaging:
+        name: "Messaging"
+        description: "Data sources bridging Spotfire onto the messaging products"
+
+  onebx:
+    name: "OneBX"
+    families:
+      data_management:
+        name: "Data Management"
+        description: "EBX master data management, on-premises and cloud"
+
+  datasynapse:
+    name: "DataSynapse"
+    families:
+      datasynapse:
+        name: "DataSynapse"
+        description: "GridServer grid computing and HPC workload management"
       general:
         name: "General"
         description: "Not yet triaged into a family"
@@ -92,13 +181,30 @@ rules:
     bu: tibco
     family: integration
 
+  # -- Spotfire -----------------------------------------------------------
+  # Above the TIBCO rules and split off them: these tokens used to resolve to
+  # `bu: tibco`, which is now contradicted by the BU the products actually carry.
+  # `streambase` stays with TIBCO -- its products sit in `tibco`/`streaming`.
+  - match: ["statistica"]
+    bu: spotfire
+    family: statistica
+  - match: ["spotfire"]
+    bu: spotfire
+    family: analytics
+
   # -- TIBCO analytics ----------------------------------------------------
-  - match: ["spotfire", "streambase", "statistica"]
+  - match: ["streambase"]
     bu: tibco
     family: analytics
 
+  # -- OneBX --------------------------------------------------------------
+  # All four EBX products moved out of `tibco`/`data_management` with the BU.
+  - match: ["ebx", "cloudebx", "ebx-addon", "ebx-cloud-enterprise"]
+    bu: onebx
+    family: data_management
+
   # -- TIBCO data management ----------------------------------------------
-  - match: ["ebx", "mdm", "tdv", "data virtualization"]
+  - match: ["mdm", "tdv", "data virtualization"]
     bu: tibco
     family: data_management
 
