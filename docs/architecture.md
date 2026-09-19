@@ -1987,6 +1987,54 @@ Only DocBook-marked pages convert. Everything else under `html/` is skipped with
 
 ---
 
+### 5.7 An Anchor Target Is Not a Link (Phase 16)
+
+**Why this is §5.7 and not part of §5.1.** It is a rule of the shared walk in `transforms/markdown.py`, so it holds for all four engines; §5.6's note on append-only numbering applies.
+
+An `<a>` with an `href` is a link. An `<a>` **without** one is a destination — the place other pages point at — and Flare writes every legacy cross-reference target that way:
+
+```html
+<a name="ID-2FC4B4A1"></a>
+```
+
+Until Phase 16 the walk treated the absence of an `href` as the absence of meaning. `rewrite()` unwrapped the tag out of passthrough tables; `_anchor()` returned `""` for an empty one. The words survived and the destination did not, while every `href="#ID-2FC4B4A1"` elsewhere in the corpus converted cleanly and then resolved to nothing.
+
+**Measured on the published `ems` tree**, resolving each of `validate`'s 1,763 `ANCHOR_MISSING` findings back through `output_map` to the HTML it came from:
+
+| | |
+|---|---|
+| target present in the source as `<a name=>` | **1,679** (95.2%) |
+| target present as `id=` only | 0 |
+| target genuinely absent upstream | 84 |
+
+and by position in the source DOM — which is the same question as *which branch of the walk dropped it*: **1,092 inside a `<table>`, 424 inside a heading, 163 in ordinary prose.**
+
+Not an `ems` quirk. A 1,500-file sample per tree finds 209 such targets in `ems`, **2,437** in `datasynapse` and **2,564** in the predecessor's `cache/pub`. The pattern is denser everywhere else; every product converted before this phase lost them.
+
+Four rules now:
+
+- **The target is emitted, as `id=`.** HTML5 dropped `name` on `<a>`, so no renderer AEM will run resolves it. `validation/references.py` accepts both spellings, which means `name=` would have satisfied the check — a fix aimed at the test rather than at the reader.
+- **The marker leads.** `<a id="X"></a>` is emitted immediately before whatever the tag would otherwise have produced, so it sits with the text it labels. An `<a>` carrying *both* a target and an `href` keeps both; zero of the corpus's 49,587 links do, and the branch exists for correctness rather than for coverage.
+- **A heading hoists it out.** 424 targets sit inside an `<h1>`–`<h6>`, and `validation/references.py` computes heading slugs from the raw title. Left in the line, `## <a id="X"></a>Configuring Users` would stop resolving `#configuring-users` — breaking fragments that work today in the act of fixing ones that do not. The markers become their own block above the heading; both anchors then resolve and the slug is the string it always was.
+- **So does every other construct that cannot contain one.** A code span, a pipe table, a split table's label, a table rewritten into a list. Each of these rebuilds its output from something narrower than the subtree — the span's text, the table's *cells*, the label cell's text, the rows — and each therefore discarded the target independently. **This is the general rule, and the reason there are five sites and not two**: a rewrite that carries the text across has to be told that a destination is not text.
+
+The five sites, in the order the measurement found them — each number is what fixing that site alone recovered:
+
+| site | what it rebuilt from | recovered |
+|---|---|---|
+| `markdown.rewrite` and `markdown._anchor` | the first two: an unwrap, and an empty string | 1,579 |
+| `markdown.code_span`, `flare._heading_paragraph` | the span's text; the label cell's text | 34 |
+| `markdown.table` (pipe branch) | `tables.read`'s rows and cells — Flare's table-level target sits between `<col>` and `<thead>`, in neither | 42 |
+| `flare._split_colspan_tables`, `_fake_list_tables` | the rows, moved into a new element while the old table was decomposed | 18 |
+
+Output growth is bounded and small: over the 8,613 HTML files Stage 5 converts, **1,218 targets in 350 files** — none in the other 8,263. The published tree's resolving fragments went from **1,603 to 1,703 of 1,787**, and the 84 that remain are absent from the source, re-checked one by one.
+
+An `<a>` with neither an `href` nor a target is still unwrapped, and `_code_fragment` is unchanged: inside a `<code>` that is *emitted as HTML* the target has already been hoisted out in front of the span.
+
+**One of the 84 was not the converter's at all.** `transforms/links.classify` percent-decodes the fragment on the `RELATIVE` path and, until Phase 16, left it raw on the `FRAGMENT` path — so a same-page `#Event_Reason…%0A%20%20%20…` was compared against an anchor holding a literal newline and three spaces, and `links.emit` re-encoded the raw form on the way out, double-encoding it. One corpus anchor has an entire pasted table in its `name`, which is the only reason anything in 17,213 references reached the asymmetry.
+
+---
+
 ## 6. AEM Structure Synthesis & Publishing Layout
 - Synthesizes `toc.yml`, `metadata.yml`, `version.yml`, `index.md`, and YAML frontmatter.
 - Assembles the documentation sets into the publishing layout below, on disk, ready for someone else to publish.
@@ -2357,11 +2405,12 @@ Three rules, and they are three different conditions that a single "did it work"
 
 **The catalog is not consulted, and that is §7.1's boundary rather than an optimization.** A published tree outlives the row that produced it — a product retired last week still has help on the shelf, and that is exactly when somebody wants to know whether it is intact. `validate` therefore works against a target another machine synced, with no `versions.csv` agreement required. It opens `state.db` only to write its run, which is 7a's instrument being used rather than a second source of truth.
 
-Four refusals, each of them measured rather than assumed (`design.md` §8.4, `planning.md` Phase 7b):
+Five refusals, each of them measured rather than assumed (`design.md` §8.4, `planning.md` Phase 7b and Phase 16):
 
 - **It does not walk `.part`.** A failed sync leaves its staging sibling on the shelf — two in the sample tree. Reporting findings about a folder the swap deliberately refused to publish makes a failed `sync` produce `validate` errors that a successful re-run silently cures, which trains people to ignore the gate. The residue is one `SYNC_RESIDUE` note per folder and nothing else.
 - **It does not link-check `api-references/`.** Copied Javadoc, 496 of 499 roots shipping their own frame set; walking them would dominate the run to report defects in somebody else's generator. Their `metadata.yml` is checked, because that file is ours (§6.2.1).
 - **It does not demand artifacts it did not measure.** Only `metadata.yml` is required; `toc.yml`, `index.md`, `csh.yml` and `version.yml` are checked if present. A global required-set would raise around sixty findings against correct output.
+- **It does not read Markdown where CommonMark does not.** A block-level HTML region — a table too irregular for GFM, passed through as source — is emitted verbatim by every renderer, so `[%s](%s:%d)` inside one is punctuation. Reading it as a link produced the single `LINK_BROKEN` on the `ems` tree, against a printf format string present character for character in the source HTML. `mask_html_blocks` blanks those regions for the three Markdown patterns and **not** for `<a href>` or `id=`/`name=`, which is where most of the tree's real references live. Measured over 8,657 published files: of 15,112 Markdown-syntax references, exactly **one** is removed. The block rule is CommonMark's — the type-6 tag list, which excludes `a`, `b` and `span` so an inline tag opening a line suspends nothing, plus type 7, a complete tag alone on its line.
 - **It does not write.** There is no `--fix`. The published tree is regenerated by `sync`, so a repair applied here would be reverted by the next run — and the one command that reads the published tree is the one command with no business changing it.
 
 **Cost is why the selectors are load-bearing**: 91 folders and 10,190 files in 84 seconds, single-threaded, anchors cached per file. Extrapolated to 1,389 convert-eligible versions that is a run measured in hours, so `--dry-run` says what a selection covers before it costs anything.

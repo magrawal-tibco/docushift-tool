@@ -15,6 +15,7 @@ from docushift.engines.csh import CshEntry, CshFormat, CshSource, CshStatus
 from docushift.models import SourceEngine
 from docushift.transforms import callouts, code, csh, links, markdown, tables
 from docushift.transforms.assets import AssetCopier, AssetOutcome
+from docushift.validation import references
 from tests.unit.test_extractor import build_tree, page
 
 # -- links (§6.4 step 3, points 1-3) ------------------------------------------
@@ -44,6 +45,16 @@ def test_normalization_strips_the_fragment_decodes_and_fixes_slashes() -> None:
     assert reference.path == "../Images/My Image.png"
     assert reference.fragment == "top"
     assert reference.query == "v=2"
+
+
+def test_a_same_page_fragment_is_decoded_like_every_other_one() -> None:
+    """The one branch that left it raw compared `%0A` against a real newline.
+
+    A Flare anchor name can contain whitespace -- the corpus has one holding a
+    pasted table -- and the link to it is written encoded, so the two sides never
+    met. 6 of the `ems` tree's missing anchors were that, all of them present.
+    """
+    assert links.classify("#Event_Reason%0A%20Values").fragment == "Event_Reason\n Values"
 
 
 def test_a_percent_encoded_hash_in_a_filename_is_not_the_fragment_separator() -> None:
@@ -240,6 +251,85 @@ def test_a_passthrough_table_gets_its_references_resolved() -> None:
     # The text was authored and stays; only the claim that it leads somewhere goes.
     assert "gone.htm" not in rendered
     assert ">orphan<" in rendered
+
+
+# -- anchor targets (Phase 16) ------------------------------------------------
+
+
+def test_a_named_anchor_in_a_passthrough_table_survives_as_an_id() -> None:
+    """1,092 of the `ems` tree's 1,763 missing anchors were targets in a table.
+
+    `rewrite` unwrapped every href-less `<a>` as a link that leads nowhere. Most
+    of them were not links at all -- they were the destinations the surviving
+    `href="#ID-2FC4B4A1"` elsewhere in the corpus point at.
+    """
+    rendered = render(
+        "<table><tr><td colspan='2'><a name='ID-2FC4B4A1'></a>Error 42</td></tr></table>"
+    )
+
+    assert '<a id="ID-2FC4B4A1"></a>' in rendered
+    # `name=` is what HTML5 dropped, and what an AEM renderer will not resolve.
+    assert "name=" not in rendered
+    assert "Error 42" in rendered
+
+
+def test_an_anchor_with_neither_href_nor_target_is_still_unwrapped() -> None:
+    """The old behaviour, kept: an `<a>` that is neither a link nor a place."""
+    rendered = render("<table><tr><td colspan='2'><a class='x'>words</a></td></tr></table>")
+
+    assert "words" in rendered
+    assert "<a" not in rendered
+
+
+def test_a_named_anchor_in_prose_emits_its_target() -> None:
+    """`_anchor` returned `""` for an empty one, deleting the destination."""
+    assert render("<p><a name='ID-7B'></a>See below.</p>") == '<a id="ID-7B"></a>See below.'
+
+
+def test_a_named_anchor_in_a_heading_is_hoisted_above_it() -> None:
+    """Left in the line it would change the slug it was meant to sit beside.
+
+    `slugify_heading` reads the raw title, so `## <a id="X"></a>Configuring Users`
+    stops resolving `#configuring-users` -- breaking fragments that work today in
+    the act of fixing 424 that do not.
+    """
+    rendered = render("<h2><a name='ID-2F'></a>Configuring Users</h2>")
+
+    assert rendered == '<a id="ID-2F"></a>\n\n## Configuring Users'
+    assert references.anchors(rendered) == {"id-2f", "configuring-users"}
+
+
+def test_a_tables_own_target_is_hoisted_in_front_of_the_pipe_table() -> None:
+    """Flare writes it between `<col>` and `<thead>`, which is in no cell.
+
+    `tables.read` sees rows and cells, so a pipe table drops it -- while the
+    passthrough branch, which walks the whole subtree, always kept it.
+    """
+    rendered = render(
+        "<table><col/><a name='ID-00002B38'></a>"
+        "<thead><tr><th>Name</th></tr></thead>"
+        "<tbody><tr><td>host</td></tr></tbody></table>"
+    )
+
+    assert rendered.startswith('<a id="ID-00002B38"></a>\n\n| Name |')
+
+
+def test_a_named_anchor_inside_a_code_span_is_hoisted_out_of_it() -> None:
+    """100 of the `ems` tree's missing anchors were a target inside `<code>`.
+
+    Backticks are not a place, so the marker leads the span the way it leads a
+    heading -- and the span renders exactly as it did before.
+    """
+    rendered = render("<p><code><a name='tibemsd_P'></a>tibemsd </code> is the daemon.</p>")
+
+    assert rendered == '<a id="tibemsd_P"></a>`tibemsd` is the daemon.'
+
+
+def test_an_anchor_carrying_both_a_target_and_a_link_keeps_both() -> None:
+    """Zero of the `ems` corpus's 49,587 links do this. Correctness, not coverage."""
+    rendered = render("<p><a name='ID-9C' href='there.htm'>here</a></p>", Linking())
+
+    assert rendered == '<a id="ID-9C"></a>[here](/docs/there.htm)'
 
 
 # -- the code-span link swallow (Phase 8) -------------------------------------

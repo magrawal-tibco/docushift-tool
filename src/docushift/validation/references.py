@@ -20,6 +20,12 @@ sample published tree of 2026-09-16 (`planning.md` Phase 7b):
   silently stop checking **953 real references** -- four-space indentation in
   converted help is list continuation, not code. So this reader is deliberately
   not CommonMark-correct, in one direction, on purpose.
+- **HTML blocks are masked for the Markdown patterns only.** CommonMark does not
+  parse inline Markdown inside a block-level HTML block, so `[%s](%s:%d)` in a
+  passthrough table row is text. Reading it as a link produced the one
+  `LINK_BROKEN` on the `ems` tree, against a printf format string present
+  verbatim in the source HTML. The `<a href>` and `id=`/`name=` patterns still
+  run over those regions -- that is where most of them live.
 - **Masking preserves offsets.** Code regions are overwritten with spaces rather
   than deleted, so every match's line number is the line number in the file the
   reader will open. A finding that names the wrong line is a finding somebody
@@ -57,6 +63,20 @@ _MD_INLINE = re.compile(
 _MD_REFDEF = re.compile(r"^[ \t]{0,3}\[[^\]\n]+\]:[ \t]*(?:<([^>\n]*)>|(\S+))", re.MULTILINE)
 # `<https://example.com>`. Always absolute by definition, counted for completeness.
 _AUTOLINK = re.compile(r"<([a-zA-Z][a-zA-Z0-9+.\-]*:[^<>\s]*)>")
+
+# CommonMark's HTML-block type 6 tag list, verbatim. `a`, `b`, `span`, `code`,
+# `img` are deliberately *not* in it: an inline tag opening a line suspends
+# nothing, so a Markdown link beside one is still a link.
+_BLOCK_TAGS = (
+    "address|article|aside|base|basefont|blockquote|body|caption|center|col|colgroup|"
+    "dd|details|dialog|dir|div|dl|dt|fieldset|figcaption|figure|footer|form|frame|"
+    "frameset|h1|h2|h3|h4|h5|h6|head|header|hr|html|iframe|legend|li|link|main|menu|"
+    "menuitem|nav|noframes|ol|optgroup|option|p|param|search|section|summary|table|"
+    "tbody|td|tfoot|th|thead|title|tr|track|ul"
+)
+_HTML_BLOCK_6 = re.compile(rf"^[ \t]{{0,3}}</?(?:{_BLOCK_TAGS})(?:[ \t>]|/>|$)", re.IGNORECASE)
+# Type 7: one complete tag, alone on its line.
+_HTML_BLOCK_7 = re.compile(r"^[ \t]{0,3}(?:<[a-zA-Z][^>]*>|</[a-zA-Z][a-zA-Z0-9-]*[ \t]*>)[ \t]*$")
 
 _FENCE = re.compile(r"^[ \t]{0,3}(`{3,}|~{3,})")
 _CODE_SPAN = re.compile(r"(`+)(?!`)(?:[^`\n]|(?!\1)`)+\1")
@@ -114,6 +134,31 @@ def mask_code(text: str) -> str:
     return _CODE_SPAN.sub(lambda m: _blank(m.group(0)), "".join(out))
 
 
+def mask_html_blocks(text: str) -> str:
+    """Overwrites block-level HTML regions with spaces, offsets preserved.
+
+    For the Markdown patterns only. Inside an HTML block CommonMark emits the
+    source through untouched, so brackets and parentheses there are punctuation.
+    Measured over the published `ems` tree: of 15,112 Markdown-syntax references
+    in 8,657 files this removes **one**, and that one is a `%s:%d` in an error
+    table. A block runs from its opening line to the next blank line.
+    """
+    out: list[str] = []
+    inside = False
+    for line in text.splitlines(keepends=True):
+        if inside:
+            out.append(_blank(line))
+            if not line.strip():
+                inside = False
+            continue
+        if _HTML_BLOCK_6.match(line) or _HTML_BLOCK_7.match(line):
+            inside = True
+            out.append(_blank(line))
+            continue
+        out.append(line)
+    return "".join(out)
+
+
 def frontmatter(text: str) -> str:
     """The YAML frontmatter block's body, or `""`. Not parsed here."""
     matter = _FRONTMATTER.match(text)
@@ -152,12 +197,17 @@ def references(text: str) -> list[RawReference]:
                 high = mid
         return low + 1
 
+    # The Markdown patterns read the text with HTML blocks blanked out as well;
+    # the HTML pattern below reads it with only code masked, because a real
+    # `<a href>` inside a passthrough table is the majority of them.
+    prose = mask_html_blocks(masked)
+
     found: list[RawReference] = []
-    for match in _MD_INLINE.finditer(masked):
+    for match in _MD_INLINE.finditer(prose):
         found.append(RawReference(_value(match, 1, 2), line_of(match.start()), "markdown"))
-    for match in _MD_REFDEF.finditer(masked):
+    for match in _MD_REFDEF.finditer(prose):
         found.append(RawReference(_value(match, 1, 2), line_of(match.start()), "markdown"))
-    for match in _AUTOLINK.finditer(masked):
+    for match in _AUTOLINK.finditer(prose):
         found.append(RawReference(match.group(1), line_of(match.start()), "markdown"))
     for match in _HTML_REF.finditer(masked):
         found.append(RawReference(_value(match, 1, 2, 3), line_of(match.start()), "html"))

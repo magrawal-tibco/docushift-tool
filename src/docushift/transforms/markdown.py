@@ -77,6 +77,12 @@ _ESCAPES = re.compile(r"([\\`*\[\]<])")
 # is a fact rather than a guess.
 _LEADING = re.compile(r"^(\s*)([#>+=|-]|\d+[.)])(\s|$)")
 
+# An anchor *target* this module emitted, recognisable so a heading can hoist it
+# back out. Written with `id=` rather than Flare's `name=`: HTML5 dropped `name`
+# on `<a>`, so no modern renderer resolves it, and the findings register defines
+# `ANCHOR_MISSING` as a fragment naming no heading and no `id=`.
+_MARKER = re.compile(r'<a id="[^"]*"></a>')
+
 
 def parse(text: str) -> BeautifulSoup:
     """Parses one source topic. The engines' single entry point to bs4."""
@@ -109,6 +115,26 @@ def escape(text: str) -> str:
 def escape_leading(text: str) -> str:
     """Escapes a block-starting character that ended up at the start of a line."""
     return "\n".join(_LEADING.sub(r"\1\\\2\3", line) for line in text.split("\n"))
+
+
+def anchor_target(tag: Tag) -> str:
+    """The fragment `tag` is a destination for, or `""` if it is not one.
+
+    An `<a>` with no `href` is not a broken link, it is a place other pages point
+    at, and Flare writes every one of its cross-references that way:
+    `<a name="ID-2FC4B4A1"></a>`. Both spellings are read because the corpus
+    mixes them and because an engine may have modernised its own output.
+    """
+    for attribute in ("name", "id"):
+        value = tag.get(attribute)
+        if isinstance(value, str) and value.strip():
+            return value.strip()
+    return ""
+
+
+def anchor_marker(target: str) -> str:
+    """`target` as the inline HTML that makes `#target` resolve in the output."""
+    return f'<a id="{_html_escape(target)}"></a>' if target else ""
 
 
 def text_of(node: Tag) -> str:
@@ -204,8 +230,19 @@ class Renderer:
         if name in _TRANSPARENT:
             return self.blocks(tag)
         if name in _HEADINGS:
-            text = self.inline_children(tag).strip()
-            return [f"{'#' * _HEADINGS[name]} {text}"] if text else []
+            # A target inside a heading is hoisted above it rather than left in
+            # the line. `slugify_heading` reads the raw title, so `## <a
+            # id="X"></a>Configuring Users` would change `#configuring-users` --
+            # breaking every fragment that resolves today in the act of fixing
+            # 424 that do not. Out here both anchors work and the slug is the
+            # same string it was.
+            inline = self.inline_children(tag).strip()
+            markers = "".join(_MARKER.findall(inline))
+            text = _MARKER.sub("", inline).strip()
+            out = [markers] if markers else []
+            if text:
+                out.append(f"{'#' * _HEADINGS[name]} {text}")
+            return out
         if name == "p" or name == "dd" or name == "li":
             return self.blocks(tag)
         if name == "dt":
@@ -254,7 +291,18 @@ class Renderer:
         """A pipe table where GFM can carry it, the original HTML where it cannot."""
         model = tables_transform.read(tag)
         if tables_transform.is_gfm_safe(model):
-            return tables_transform.to_pipe(model, self.inline_children)
+            # A target in no cell -- Flare puts the table's own between `<col>`
+            # and `<thead>` -- is invisible to `read`, so a pipe table would drop
+            # it. Hoisted out in front, where the rows cannot swallow it. The
+            # passthrough branch below needs none of this: `rewrite` walks the
+            # whole subtree.
+            markers = "".join(
+                anchor_marker(anchor_target(found))
+                for found in tag.find_all("a")
+                if found.find_parent(["td", "th"]) is None
+            )
+            pipe = tables_transform.to_pipe(model, self.inline_children)
+            return f"{markers}\n\n{pipe}" if markers else pipe
         return tables_transform.passthrough(self.rewrite(tag))
 
     def rewrite(self, tag: Tag) -> Tag:
@@ -275,9 +323,15 @@ class Renderer:
                 image.decompose()
         for anchor in tag.find_all("a"):
             url = self.link(anchor)
+            target = anchor_target(anchor)
+            if target:
+                # `name=` in, `id=` out. 1,092 of the tree's missing anchors were
+                # targets inside a table, unwrapped away by the branch below.
+                del anchor["name"]
+                anchor["id"] = target
             if url:
                 anchor["href"] = url
-            else:
+            elif not target:
                 # The text was authored and stays; only the claim that it leads
                 # somewhere is dropped.
                 anchor.unwrap()
@@ -350,7 +404,17 @@ class Renderer:
         A `link()` of `None` -- a `javascript:` skin button, an unresolvable
         target -- renders exactly what it rendered before. This adds links; it
         never removes a code span.
+
+        An anchor *target* inside the span is hoisted out in front of it, for the
+        same reason a heading hoists one above itself (§5.7): it cannot be a
+        destination inside backticks, and Flare puts one there often enough that
+        100 of the `ems` tree's missing anchors were a `<a name=>` inside a
+        `<code>` in a table cell.
         """
+        markers = "".join(anchor_marker(anchor_target(found)) for found in tag.find_all("a"))
+        return markers + self._code_span_body(tag)
+
+    def _code_span_body(self, tag: Tag) -> str:
         anchors = tag.find_all("a", href=True)
         if not anchors:
             return code_transform.inline(text_of(tag))
@@ -384,15 +448,23 @@ class Renderer:
         return "".join(self._code_fragment(child) for child in node.children)
 
     def _anchor(self, tag: Tag) -> str:
+        """One `<a>`: its destination, its link, or both.
+
+        The two are independent, and treating the absence of an `href` as "not a
+        link, therefore nothing" deleted 1,679 of the `ems` tree's cross-reference
+        targets while every `href="#..."` pointing at them survived (Phase 16).
+        The marker leads, so it sits *before* the text it labels.
+        """
         text = self.inline_children(tag).strip()
         url = self.link(tag)
+        marker = anchor_marker(anchor_target(tag))
         if not url:
-            return text
+            return marker + text
         if not text:
             # A link with no text is either an anchor target or a broken one;
             # emitting `[](url)` renders as nothing and hides both.
-            return ""
-        return f"[{text}]({url})"
+            return marker
+        return f"{marker}[{text}]({url})"
 
     def _image(self, tag: Tag) -> str:
         url = self.image(tag)

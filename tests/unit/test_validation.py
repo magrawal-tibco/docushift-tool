@@ -140,6 +140,40 @@ def test_anchors_come_from_headings_and_from_explicit_html_attributes() -> None:
     assert refs.anchors(text) == {"my-heading", "my-heading-1", "legacytarget"}
 
 
+def test_bracket_text_inside_an_html_block_is_not_a_link() -> None:
+    """The one `LINK_BROKEN` on the `ems` tree was a printf format string.
+
+    `<p>Pulsar: [%s](%s:%d): %s</p>` is in the source HTML character for
+    character, inside a table too irregular for GFM. CommonMark does not parse
+    inline Markdown inside an HTML block, so nothing there points anywhere --
+    and the `<a href>` beside it still does.
+    """
+    text = (
+        "[real](real.md)\n\n"
+        "<table><tr><td>\n"
+        "<p>Pulsar: [%s](%s:%d): %s</p>\n"
+        '<a href="kept.md">kept</a>\n'
+        "</td></tr></table>\n"
+    )
+
+    found = refs.references(text)
+
+    assert [(r.raw, r.syntax) for r in found] == [("real.md", "markdown"), ("kept.md", "html")]
+
+
+def test_an_inline_tag_opening_a_line_starts_no_html_block() -> None:
+    """`a`, `b`, `span` are not in CommonMark's type-6 list, and that is the point.
+
+    Masking on any tag would stop checking the links in every paragraph that
+    happens to begin with emphasis -- and every anchor target Stage 5 now emits
+    ahead of the prose it labels.
+    """
+    text = '<a id="ID-7B"></a>See [the guide](guide.md).\n'
+
+    assert [r.raw for r in refs.references(text)] == ["guide.md"]
+    assert refs.anchors(text) == {"id-7b"}
+
+
 # -- the walk: tree.py -----------------------------------------------------------
 
 

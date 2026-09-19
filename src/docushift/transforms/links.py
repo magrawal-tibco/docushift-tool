@@ -80,7 +80,11 @@ def classify(raw: str) -> Reference:
     body, fragment = _split(text, "#")
     body, query = _split(body, "?")
     if not body:
-        return Reference(raw, ReferenceKind.FRAGMENT, fragment=fragment, query=query)
+        # Decoded, like the `RELATIVE` branch below: a same-page `#foo` is the
+        # same fragment whether or not it arrived encoded, and the one branch
+        # that left it raw compared `%0A%20%20%20` against a literal newline --
+        # 6 of the `ems` tree's missing anchors, all of them present.
+        return Reference(raw, ReferenceKind.FRAGMENT, fragment=unquote(fragment), query=query)
 
     # Decode *after* the split, so a `%23` inside a filename is not mistaken for
     # the fragment separator, and before the slash fix, so `%5C` becomes a `/`.

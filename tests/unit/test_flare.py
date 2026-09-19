@@ -662,6 +662,55 @@ def test_a_full_width_colspan_row_becomes_a_label_and_the_table_splits(
     assert "colspan" not in body
 
 
+def test_a_tables_own_target_survives_being_split_or_listed(tmp_path: Path) -> None:
+    """Flare puts it between `<col>` and `<thead>`, where no row carries it away.
+
+    Both rewrites move rows into a new element and discard the old table, so a
+    target in no cell went with it -- 24 of the `ems` tree's missing anchors.
+    """
+    files = basic()
+    files["html/Content/intro.htm"] = topic(
+        "Introduction",
+        "<table><col/><a name='ID-00002B38'></a>"
+        "<tr><td colspan='2'>Connection settings</td></tr>"
+        "<tr><td>host</td><td>The server name</td></tr>"
+        "</table>"
+        "<table class='TableStyle-AutoNumber_p_Bullet'>"
+        "<col/><a name='ID-00002D5C'></a>"
+        "<tr><td>First step.</td></tr>"
+        "</table>",
+    )
+
+    body = run(tmp_path, files).body("Content/intro.md")
+
+    assert '<a id="ID-00002B38"></a>' in body
+    assert '<a id="ID-00002D5C"></a>' in body
+    assert "**Connection settings**" in body
+    assert "- First step." in body
+
+
+def test_a_split_labels_anchor_target_survives_the_rebuild(tmp_path: Path) -> None:
+    """The label is rebuilt from the cell's text, and the text has no children.
+
+    100 of the `ems` tree's missing anchors were an `<a name=>` inside one of
+    these full-width rows -- a destination discarded while every link to it
+    converted cleanly (§5.7).
+    """
+    files = basic()
+    files["html/Content/intro.htm"] = topic(
+        "Introduction",
+        "<table>"
+        "<tr><td colspan='2'><code><a name='tibemsd_P'></a>tibemsd </code>settings</td></tr>"
+        "<tr><td>host</td><td>The server name</td></tr>"
+        "</table>",
+    )
+
+    body = run(tmp_path, files).body("Content/intro.md")
+
+    assert '<a id="tibemsd_P"></a>' in body
+    assert "**tibemsd settings**" in body
+
+
 def test_a_table_that_gfm_cannot_carry_passes_through_with_its_links_resolved(
     tmp_path: Path,
 ) -> None:

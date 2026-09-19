@@ -798,6 +798,23 @@ def _is_toolbar_proxy(tag: Tag) -> bool:
     return bool(tag.name) and tag.name.lower().endswith("topictoolbarproxy")
 
 
+def _orphan_targets(table: Tag) -> list[Tag]:
+    """The table's *own* anchor targets, extracted, in document order.
+
+    Flare writes one between `<col>` and `<thead>` -- in no cell, so a rewrite
+    that carries the rows across leaves it on the element it is about to
+    discard. 24 of the `ems` tree's missing anchors were exactly that (§5.7).
+    A target inside a cell rides with its row and is deliberately not taken.
+    """
+    return [
+        anchor.extract()
+        for anchor in list(table.find_all("a"))
+        if not anchor.get("href")
+        and markdown.anchor_target(anchor)
+        and anchor.find_parent(["td", "th"]) is None
+    ]
+
+
 def _fake_list_tables(container: Tag) -> None:
     """`AutoNumber_p_*` single-column tables are lists (§5.1.7).
 
@@ -825,6 +842,8 @@ def _fake_list_tables(container: Tag) -> None:
             # or number in the first one.
             item.extend(list(cells[-1].children))
             replacement.append(item)
+        for anchor in reversed(_orphan_targets(table)):
+            table.insert_before(anchor)
         table.replace_with(replacement)
 
 
@@ -919,7 +938,7 @@ def _split_colspan_tables(container: Tag) -> None:
         if groups and groups[0][0] is None and not groups[0][1]:
             groups = groups[1:]
 
-        replacements: list[Tag] = []
+        replacements: list[Tag] = list(_orphan_targets(table))
         for label, body in groups:
             if label is not None:
                 replacements.append(_heading_paragraph(label))
@@ -937,6 +956,14 @@ def _heading_paragraph(cell: Tag) -> Tag:
     paragraph = _SOUP.new_tag("p")
     text = _text(cell)
     if len(text) <= _SHORT_HEADING:
+        # A short label is rebuilt from the cell's *text*, which drops every child
+        # element -- including the anchor targets Flare writes into these rows.
+        # 100 of the `ems` tree's missing anchors were one of these (§5.7), so the
+        # targets are carried over ahead of the label they name. `_text` above is
+        # unaffected: an empty `<a>` contributes no text to it.
+        for anchor in list(cell.find_all("a")):
+            if not anchor.get("href") and markdown.anchor_target(anchor):
+                paragraph.append(anchor.extract())
         strong = _SOUP.new_tag("strong")
         strong.string = text
         paragraph.append(strong)
