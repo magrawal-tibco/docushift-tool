@@ -41,6 +41,7 @@ from docushift.converter import navigation
 from docushift.engines.base import ConversionContext, Document, Unit, engine_for
 from docushift.engines.csh import CshFormat, CshSource, csh_format_of, read_csh_source
 from docushift.engines.roots import subtree_names
+from docushift.extractor import content_root
 from docushift.models import ConversionStatus, Product, ProductVersion, SourceEngine
 from docushift.reporting.findings import FindingsRun
 
@@ -623,6 +624,19 @@ class DocumentConverter:
             slugify(self.config.locale), product.slug, segment, "",
         )
 
+    def _content_tree(self, product: Product, version: str, tree: Path) -> Path:
+        """Where content starts inside the extracted tree (Phase 15b).
+
+        Used for one thing only -- the base API-reference folders are named from.
+        The engines locate content by scanning rather than by path, so a wrapper
+        directory has never troubled them, and moving their root on no evidence
+        would be a change to four converters to fix a defect in neither.
+        """
+        metadata = self.catalog.state.get_version_metadata(
+            product.slug, version
+        ) if self.catalog.state else {}
+        return content_root.of(tree, metadata.get(content_root.METADATA_KEY))
+
     def _api_urls(
         self, product: Product, version: str, tree: Path, api_roots: list[Path]
     ) -> dict[Path, str]:
@@ -635,8 +649,12 @@ class DocumentConverter:
         """
         if not api_roots or not self._api_prefix(product, version):
             return {}
+        # The *naming* base, not the tree: `url_map` and Stage 7's `select` run
+        # through one `_measured`, so the URL emitted here and the folder written
+        # there must be derived from the same root or they disagree by a wrapper
+        # directory's name (Phase 15b).
         return apirefs.url_map(
-            tree, api_roots,
+            self._content_tree(product, version, tree), api_roots,
             self.config.publish_base_url(),
             self.config.resources_tree_name(product.bu, product.family),
             slugify(self.config.locale), product.slug, version_segment(version),

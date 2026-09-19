@@ -20,7 +20,7 @@ import pytest
 
 from docushift.extractor import safe_extract
 from docushift.extractor.safe_unzip import UnsafeArchiveError
-from docushift.utils.longpath import long_path
+from docushift.utils.longpath import long_path, over_limit, walk_files
 from docushift.utils.swap import swap
 
 WINDOWS = os.name == "nt"
@@ -120,3 +120,109 @@ def test_a_staging_tree_past_max_path_can_still_be_swapped(tmp_path: Path) -> No
 
     assert long_path(target / DEEP / "topic.md").read_text(encoding="utf-8") == "deep"
     assert not long_path(staging).exists()
+
+
+# -- the published ceiling (Phase 15d) ----------------------------------------------------
+
+
+def test_a_tree_that_fits_reports_no_offender(tmp_path: Path) -> None:
+    source = tmp_path / "javadoc"
+    (source / "html").mkdir(parents=True)
+    (source / "html" / "index.html").write_text("x", encoding="utf-8")
+
+    assert over_limit(tmp_path / "published", source, limit=200) is None
+
+
+def test_the_first_file_over_the_ceiling_is_named_with_its_length(tmp_path: Path) -> None:
+    """The offender and the number, because "too long" without either is a finding
+    nobody can act on."""
+    source = tmp_path / "javadoc"
+    source.mkdir()
+    (source / ("class_" + "a" * 80 + ".html")).write_text("x", encoding="utf-8")
+
+    found = over_limit(Path("C:/published/api-references/10-4-0/dotnetdoc"), source, limit=60)
+
+    assert found is not None
+    path, length = found
+    assert path.name.startswith("class_")
+    assert length > 60
+
+
+def test_the_measurement_is_of_the_destination_and_not_of_the_source(tmp_path: Path) -> None:
+    """The extracted tree sits under a short workspace path and the published one
+    under whatever root the user picked, so the source's own length says nothing."""
+    source = tmp_path / "j"
+    source.mkdir()
+    (source / "a.html").write_text("x", encoding="utf-8")
+
+    assert over_limit(tmp_path / "short", source, limit=400) is None
+    assert over_limit(Path("C:/" + "d" * 300), source, limit=260) is not None
+
+
+def test_a_source_that_is_not_there_is_not_an_overflow(tmp_path: Path) -> None:
+    """`select` drops roots that no longer exist; this must not raise on one."""
+    assert over_limit(tmp_path / "published", tmp_path / "gone") is None
+
+
+# -- seeing the files that are over it (Phase 15e) -----------------------------
+
+
+def test_the_walk_finds_a_file_that_rglob_silently_drops(tmp_path: Path) -> None:
+    """The defect 15e closes, and the reason it went a whole phase unnoticed.
+
+    `rglob` does not raise on a path over the ceiling -- it returns a shorter
+    list. Measured on one published EMS API tree: 798 entries plain, 801 through
+    the prefix, and those 3 are exactly the files `copytree` then failed on. A
+    check that cannot see the longest files in the tree it is checking passes.
+    """
+    deep = long_path(tmp_path / DEEP)
+    deep.mkdir(parents=True)
+    (deep / "over-the-ceiling.html").write_text("x", encoding="utf-8")
+
+    walked = {relative.name for relative, _ in walk_files(tmp_path)}
+    plain = {path.name for path in tmp_path.rglob("*") if path.is_file()}
+
+    assert "over-the-ceiling.html" in walked
+    if WINDOWS:
+        assert "over-the-ceiling.html" not in plain, "the unprefixed walk should miss it"
+
+
+def test_the_walk_returns_a_relative_name_and_an_openable_absolute(tmp_path: Path) -> None:
+    r"""Two spellings because they have two jobs: the absolute one is the only way
+    to open the file, and the relative one is what belongs in a message -- `\\?\`
+    in a report is this tool's plumbing, not the reader's path."""
+    deep = long_path(tmp_path / DEEP)
+    deep.mkdir(parents=True)
+    (deep / "topic.html").write_text("body", encoding="utf-8")
+
+    relative, absolute = next(iter(walk_files(tmp_path)))
+
+    assert relative == Path(DEEP.replace("/", os.sep)) / "topic.html"
+    assert not str(relative).startswith("\\?\\")
+    assert absolute.read_text(encoding="utf-8") == "body"
+
+
+def test_the_walk_yields_files_and_not_the_directories_over_them(tmp_path: Path) -> None:
+    (tmp_path / "html").mkdir()
+    (tmp_path / "html" / "a.html").write_text("x", encoding="utf-8")
+    (tmp_path / "empty").mkdir()
+
+    assert [relative.as_posix() for relative, _ in walk_files(tmp_path)] == ["html/a.html"]
+
+
+def test_the_ceiling_check_now_sees_the_long_file_and_names_it_unprefixed(tmp_path: Path) -> None:
+    """The two halves of 15e meeting: the prefix is how the source is *read*, the
+    limit is what the destination is *held to*. Before this the check walked
+    unprefixed and so was blind to the one file that mattered."""
+    source = tmp_path / "dotnetdoc"
+    deep = long_path(source / DEEP)
+    deep.mkdir(parents=True)
+    (deep / "over.html").write_text("x", encoding="utf-8")
+
+    found = over_limit(Path("C:/published/api-references/10-4-0/dotnetdoc"), source, limit=260)
+
+    assert found is not None
+    path, length = found
+    assert path.name == "over.html"
+    assert not str(path).startswith("\\?\\")
+    assert length > 260

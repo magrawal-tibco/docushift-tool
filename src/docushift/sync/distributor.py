@@ -58,12 +58,14 @@ from docushift.apiref import find_api_roots, recorded_roots
 from docushift.catalog import CatalogManager
 from docushift.config import ConfigManager
 from docushift.converter import navigation
+from docushift.extractor import content_root
 from docushift.models import Product, ProductVersion
 from docushift.reporting.findings import FindingsRun
 from docushift.sync import apirefs, router
 from docushift.sync import archives as archive_index
 from docushift.sync import documents as document_index
 from docushift.sync import versions as version_file
+from docushift.utils.longpath import PUBLISHED_PATH_LIMIT, long_path, over_limit
 from docushift.utils.slug import is_numeric_version, slugify, version_segment
 from docushift.utils.swap import remove, swap
 
@@ -197,6 +199,21 @@ class WorkspaceDistributor:
         tree = self.config.resources_tree_name(product.bu, product.family)
         return target / tree / slugify(self.config.locale) / product.slug
 
+    def content_tree(self, product: Product, version: ProductVersion, tree: Path) -> Path:
+        """The directory inside the extracted tree where content actually starts.
+
+        Phase 15b. A downloaded package usually unpacks to a wrapper directory, and
+        both of this class's readers of the *extracted* tree address content by
+        name -- `router.source_folders` looks for `pdf/` and `doc/`, and
+        `apirefs._measured` names a published folder from the path relative to the
+        base it is given. Handed the version directory, the first finds nothing and
+        the second publishes `tibco-enterprise-message-service-10-4-0-dotnetdoc`.
+        """
+        metadata = self.catalog.state.get_version_metadata(
+            product.slug, version.version
+        ) if self.catalog.state else {}
+        return content_root.of(tree, metadata.get(content_root.METADATA_KEY))
+
     # -- one version -----------------------------------------------------------
 
     def sync_one(
@@ -243,13 +260,17 @@ class WorkspaceDistributor:
         """
         staging = destination.with_name(destination.name + STAGING_SUFFIX)
         remove(staging)
-        staging.parent.mkdir(parents=True, exist_ok=True)
-        # `copy2` rather than `copy`, so mtime survives the copy -- which is what
-        # makes `_identical` able to tell a re-sync from a human's edit.
-        shutil.copytree(source, staging, copy_function=shutil.copy2)
-        files = [path for path in staging.rglob("*") if path.is_file()]
-        size = sum(path.stat().st_size for path in files)
-        swap(staging, destination)
+        try:
+            staging.parent.mkdir(parents=True, exist_ok=True)
+            # `copy2` rather than `copy`, so mtime survives the copy -- which is
+            # what makes `_identical` able to tell a re-sync from a human's edit.
+            shutil.copytree(source, staging, copy_function=shutil.copy2)
+            files = [path for path in staging.rglob("*") if path.is_file()]
+            size = sum(path.stat().st_size for path in files)
+            swap(staging, destination)
+        except BaseException:
+            remove(staging)  # Phase 15c: never leave `.part` in a published tree.
+            raise
         return len(files), size
 
     # -- one version's documents (6c) ------------------------------------------
@@ -285,7 +306,9 @@ class WorkspaceDistributor:
             return [SyncResult(slug, number, SyncOutcome.NO_OUTPUT, segment=segment,
                                message=message, doc_class="")]
 
-        grouped = document_index.group(router.route_version(tree, version.engine))
+        grouped = document_index.group(
+            router.route_version(self.content_tree(product, version, tree), version.engine)
+        )
         results = []
         for doc_class, files in grouped.items():
             results.append(self._sync_doc_class(product, version, target, doc_class, files, force))
@@ -339,25 +362,30 @@ class WorkspaceDistributor:
         """
         staging = destination.with_name(destination.name + STAGING_SUFFIX)
         remove(staging)
-        staging.mkdir(parents=True, exist_ok=True)
-        size = 0
-        for entry in entries:
-            shutil.copy2(entry.source, staging / entry.name)
-            size += entry.bytes
+        try:
+            staging.mkdir(parents=True, exist_ok=True)
+            size = 0
+            for entry in entries:
+                shutil.copy2(entry.source, staging / entry.name)
+                size += entry.bytes
 
-        templates = self.config.aem_templates_dir
-        title = document_index.index_title(product.display_name, version.version, doc_class)
-        (staging / "index.md").write_text(
-            document_index.render_index(entries, title, doc_class, templates), encoding="utf-8"
-        )
-        (staging / "toc.yml").write_text(
-            document_index.render_toc(title, templates), encoding="utf-8"
-        )
-        (staging / "metadata.yml").write_text(
-            navigation.render_metadata([("csg-version", version.version)], templates, "version"),
-            encoding="utf-8",
-        )
-        swap(staging, destination)
+            templates = self.config.aem_templates_dir
+            title = document_index.index_title(product.display_name, version.version, doc_class)
+            (staging / "index.md").write_text(
+                document_index.render_index(entries, title, doc_class, templates),
+                encoding="utf-8",
+            )
+            (staging / "toc.yml").write_text(
+                document_index.render_toc(title, templates), encoding="utf-8"
+            )
+            (staging / "metadata.yml").write_text(
+                navigation.render_metadata([("csg-version", version.version)], templates, "version"),
+                encoding="utf-8",
+            )
+            swap(staging, destination)
+        except BaseException:
+            remove(staging)  # Phase 15c: never leave `.part` in a published tree.
+            raise
         return len(entries), size
 
     # -- one version's API references (6d) -------------------------------------
@@ -396,7 +424,11 @@ class WorkspaceDistributor:
             # missing extracted tree, and that absence is a fact about the version.
             return []
 
-        roots = apirefs.select(tree, self.api_roots(slug, number, tree))
+        # The recorded roots are resolved against the version directory, which is
+        # what Stage 4 recorded them relative to; only the *naming* base moves.
+        roots = apirefs.select(
+            self.content_tree(product, version, tree), self.api_roots(slug, number, tree)
+        )
         if not roots:
             return []
 
@@ -405,12 +437,23 @@ class WorkspaceDistributor:
             return [SyncResult(slug, number, SyncOutcome.CURRENT, path=destination,
                                segment=segment, doc_class=apirefs.API_REFERENCES)]
 
+        # Measured before anything is copied, because the failure it prevents is
+        # a partial tree: `copytree` writes what fits and raises at the end
+        # (Phase 15d).
+        overflow = self._overflowing(roots, destination)
+        if overflow is not None:
+            root, path, length = overflow
+            message = (f"{root.name}: publishing {path.name} would need {length} characters, "
+                       f"over the {PUBLISHED_PATH_LIMIT} the published tree allows")
+            self._record("PUBLISHED_PATH_TOO_LONG", slug, number, message=message, path=str(path))
+            return [SyncResult(slug, number, SyncOutcome.FAILED, segment=segment,
+                               message=message, doc_class=apirefs.API_REFERENCES)]
+
         try:
             files, size = self._place_api_references(roots, destination, version)
         except OSError as exc:  # pragma: no cover - filesystem failure, not logic
             return [SyncResult(slug, number, SyncOutcome.FAILED, segment=segment,
-                               message=f"{type(exc).__name__}: {exc}",
-                               doc_class=apirefs.API_REFERENCES)]
+                               message=_readable(exc), doc_class=apirefs.API_REFERENCES)]
 
         if not self.config.publish_base_url():
             self._record(
@@ -436,17 +479,51 @@ class WorkspaceDistributor:
         """
         staging = destination.with_name(destination.name + STAGING_SUFFIX)
         remove(staging)
-        staging.mkdir(parents=True, exist_ok=True)
-        for root in roots:
-            shutil.copytree(root.source, staging / root.name, copy_function=shutil.copy2)
-        (staging / "metadata.yml").write_text(
-            navigation.render_metadata(
-                [("csg-version", version.version)], self.config.aem_templates_dir, "version"
-            ),
-            encoding="utf-8",
-        )
-        swap(staging, destination)
+        try:
+            staging.mkdir(parents=True, exist_ok=True)
+            for root in roots:
+                # Both ends prefixed, for two different reasons (Phase 15e). The
+                # source holds files at 265 characters, written there by
+                # `safe_extract` through the same prefix and openable by nothing
+                # else. The destination is short by construction -- `_overflowing`
+                # ran first -- but staging adds `.part` to it, which is 14b's
+                # transient overflow exactly, in a second writer of a staged tree.
+                shutil.copytree(
+                    long_path(root.source),
+                    long_path(staging / root.name),
+                    copy_function=shutil.copy2,
+                )
+            (staging / "metadata.yml").write_text(
+                navigation.render_metadata(
+                    [("csg-version", version.version)], self.config.aem_templates_dir, "version"
+                ),
+                encoding="utf-8",
+            )
+            swap(staging, destination)
+        except BaseException:
+            # The staging tree is this tool's private vocabulary, and `destination`
+            # is a directory it does not own. A half-copied `.part` left in a
+            # published workspace is unreadable litter to whoever looks next, and
+            # `remove` on the way *in* only cleans it up if there is a next run
+            # (Phase 15c).
+            remove(staging)
+            raise
         return sum(root.files for root in roots), sum(root.bytes for root in roots)
+
+    def _overflowing(
+        self, roots: list[apirefs.ApiRoot], destination: Path
+    ) -> tuple[apirefs.ApiRoot, Path, int] | None:
+        """The first API tree that would publish a path over the ceiling, if any.
+
+        One root is enough to stop the version: the folders are staged and swapped
+        together, so publishing the ones that fit would leave the version's
+        `api-references` claiming to hold trees it does not.
+        """
+        for root in roots:
+            found = over_limit(destination / root.name, root.source, PUBLISHED_PATH_LIMIT)
+            if found is not None:
+                return root, found[0], found[1]
+        return None
 
     def api_roots(self, slug: str, version: str, tree: Path) -> list[Path]:
         """Stage 4's recorded API roots, located here only when there is no record.
@@ -670,6 +747,24 @@ class WorkspaceDistributor:
         if self.findings is not None:
             self.findings.flush()
         return stats
+
+
+def _readable(exc: BaseException) -> str:
+    """One line for a failed copy, however many files failed inside it.
+
+    `shutil.copytree` collects every `(source, destination, reason)` it could not
+    copy and raises them as one `shutil.Error` whose `str` is the whole list --
+    several kilobytes for an API tree, printed into a table cell, with the reason
+    repeated once per file. The count and the first offender say the same thing in
+    a line a reader can act on (Phase 15c).
+    """
+    if isinstance(exc, shutil.Error) and exc.args and isinstance(exc.args[0], list):
+        failures = exc.args[0]
+        first = failures[0]
+        source, reason = (first[0], first[-1]) if isinstance(first, tuple) else (first, "")
+        return (f"{len(failures)} file(s) could not be copied, the first "
+                f"{Path(str(source)).name}: {reason}")
+    return f"{type(exc).__name__}: {exc}"
 
 
 def _identical(source: Path, target: Path) -> bool:

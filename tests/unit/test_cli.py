@@ -1181,6 +1181,28 @@ def test_sync_dry_run_names_the_destination_without_writing(
     assert not (workspace / "en-us-tibco-messaging-userdocs").exists()
 
 
+def test_sync_exits_non_zero_when_a_version_fails(
+    runner: CliRunner, populated_root: Path, tmp_path: Path, monkeypatch
+) -> None:
+    """Phase 15e. The first `sync --family ems` run printed six red `x` rows and
+    exited **0**, because the exit rule read findings and a failed copy is a row.
+    A batch driver reading that status is told six failures were a success.
+    """
+    _convert_output(populated_root, "10.4.0", {"index.md": "# x\n"})
+    workspace = tmp_path / "workspace"
+    workspace.mkdir()
+
+    def refuse(*args, **kwargs):
+        raise OSError("the disk said no")
+
+    monkeypatch.setattr("docushift.sync.distributor.shutil.copytree", refuse)
+
+    result = _invoke(runner, populated_root, "sync", "--all", "--target-dir", str(workspace))
+
+    assert result.exit_code == 1
+    assert "Failed" in result.output
+
+
 def test_sync_needs_a_scope_like_every_other_stage(
     runner: CliRunner, populated_root: Path, tmp_path: Path
 ) -> None:
@@ -1363,7 +1385,12 @@ def test_a_dry_run_over_an_empty_selection_exits_one_too(
 def test_a_run_that_found_errors_still_exits_zero(
     runner: CliRunner, populated_root: Path, tmp_path: Path
 ) -> None:
-    """A stage that did its work exits 0. Only `validate` gates on severity."""
+    """A stage that did its work exits 0 -- notes and warnings are not failures.
+
+    `validate` and, since Phase 15e, `sync` gate on *errors* and on failed rows;
+    neither is present here, so the rule this pins is the other half: a clean run
+    with findings in it is still a clean run.
+    """
     workspace = tmp_path / "workspace"
     workspace.mkdir()
     _convert_output(populated_root, "10.4.0", {"index.md": "# x\n", "toc.yml": "nodes: []\n"})

@@ -770,3 +770,112 @@ def test_one_run_writes_both_trees_and_places_the_api_refs_first(
     # No `version.yml` beside `api-references`: the drop-down is an AEM page
     # control, and these folders are copied Javadoc rather than AEM pages.
     assert not resources(target, "api-references", "version.yml").exists()
+
+
+# -- the package wrapper, and the ceiling (Phase 15) --------------------------------------
+
+
+def wrapped(config: ConfigManager, product: Product, number: str, wrapper: str,
+            **files: str) -> Path:
+    """An extracted tree in the shape 46 of 50 sampled packages actually have."""
+    root = config.extract_path(product.bu, product.family, product.slug, number)
+    for name, body in files.items():
+        path = root.joinpath(wrapper, *name.split("/"))
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(body, encoding="utf-8")
+    return root
+
+
+def test_documents_inside_a_package_wrapper_are_found(config, distributor, product, target) -> None:
+    """Stage 7's first run against a downloaded package published no documents at
+    all: `router.source_folders` reads `pdf/` from the version root, and a real
+    package keeps it one level down (Phase 15a)."""
+    wrapped(config, product, "10.4.0", "tibco-ems-10-4-0", **{
+        "pdf/TIB_ems_10.4.0_user_guide.pdf": "%PDF-1.4",
+        "pdf/TIB_ems_10.4.0_relnotes.pdf": "%PDF-1.4",
+    })
+
+    results = distributor.sync_documents(product, product.versions["10.4.0"], target)
+
+    classes = {result.doc_class: result for result in results}
+    assert classes[USER_GUIDES].outcome is SyncOutcome.SYNCED
+    assert (published(target, doc_class=USER_GUIDES) / "TIB_ems_10.4.0_user_guide.pdf").is_file()
+    assert (published(target, doc_class=RELEASE_INFORMATION)
+            / "TIB_ems_10.4.0_relnotes.pdf").is_file()
+
+
+def test_an_api_tree_is_not_named_after_the_wrapper_it_shipped_in(
+    config, distributor, product, target
+) -> None:
+    """`tibco-ems-10-4-0-dotnetdoc` repeats the slug and version already two
+    segments up the published path, and those characters are what put the longest
+    file over the ceiling (Phase 15a)."""
+    root = config.extract_path(product.bu, product.family, product.slug, "10.4.0")
+    folder = root / "tibco-ems-10-4-0" / "html" / "api" / "dotnetdoc" / "html"
+    folder.mkdir(parents=True)
+    (folder / "index-all.html").write_text("<html></html>", encoding="utf-8")
+    (folder / "index.html").write_text("<html>dotnet</html>", encoding="utf-8")
+
+    (result,) = distributor.sync_api_references(product, product.versions["10.4.0"], target)
+
+    assert result.outcome is SyncOutcome.SYNCED
+    assert resources(target, "api-references", "10-4-0", "dotnetdoc").is_dir()
+
+
+def test_a_published_path_over_the_ceiling_is_refused_and_named(
+    config, distributor, product, target, monkeypatch
+) -> None:
+    """The error the wrapper fix removes the only known occurrence of. Refused
+    *before* the copy, because `copytree` writes what fits and raises at the end,
+    which publishes a partial API tree as though it were whole (Phase 15d)."""
+    findings = FindingsRun("sync", store=None).start()
+    distributor.findings = findings
+    javadoc_tree(config, product, "10.4.0", "html/api-docs/java")
+    monkeypatch.setattr("docushift.sync.distributor.PUBLISHED_PATH_LIMIT", 40)
+
+    (result,) = distributor.sync_api_references(product, product.versions["10.4.0"], target)
+
+    assert result.outcome is SyncOutcome.FAILED
+    assert "over the 40" in result.message
+    assert [f.code for f in findings.all] == ["PUBLISHED_PATH_TOO_LONG"]
+    # Nothing half-written, and no staging tree left in a workspace we do not own.
+    assert not resources(target, "api-references", "10-4-0").exists()
+    assert not resources(target, "api-references", "10-4-0.part").exists()
+
+
+def test_a_failed_placement_leaves_no_part_directory_behind(
+    config, distributor, product, target, monkeypatch
+) -> None:
+    """`remove(staging)` runs on the way *in*, so before Phase 15c a failure left
+    its half-copied tree in the published workspace until some later run."""
+    javadoc_tree(config, product, "10.4.0", "html/api-docs/java")
+
+    def explode(*args, **kwargs):
+        raise OSError("disk full")
+
+    monkeypatch.setattr("docushift.sync.distributor.shutil.copytree", explode)
+
+    (result,) = distributor.sync_api_references(product, product.versions["10.4.0"], target)
+
+    assert result.outcome is SyncOutcome.FAILED
+    assert not resources(target, "api-references", "10-4-0.part").exists()
+
+
+def test_a_copy_failure_reports_one_line_and_not_the_whole_triple_list(
+    config, distributor, product, target, monkeypatch
+) -> None:
+    """`shutil.Error` carries every failed `(src, dst, why)`; printing it raw put
+    several kilobytes into one table cell (Phase 15c)."""
+    import shutil as shutil_module
+
+    javadoc_tree(config, product, "10.4.0", "html/api-docs/java")
+    failures = [(f"src/{n}.html", f"dst/{n}.html", "[WinError 3]") for n in range(200)]
+
+    def explode(*args, **kwargs):
+        raise shutil_module.Error(failures)
+
+    monkeypatch.setattr("docushift.sync.distributor.shutil.copytree", explode)
+
+    (result,) = distributor.sync_api_references(product, product.versions["10.4.0"], target)
+
+    assert result.message == "200 file(s) could not be copied, the first 0.html: [WinError 3]"

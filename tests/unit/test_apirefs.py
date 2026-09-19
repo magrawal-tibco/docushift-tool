@@ -12,6 +12,7 @@ from pathlib import Path, PurePosixPath
 import pytest
 
 from docushift.sync import apirefs
+from docushift.utils.longpath import long_path, walk_files
 
 
 def javadoc(root: Path, pages: int = 2, filler: str = "x") -> Path:
@@ -128,6 +129,27 @@ def test_the_measurement_is_the_files_and_the_bytes(tmp_path: Path) -> None:
     (selected,) = apirefs.select(tree, [root])
 
     assert (selected.files, selected.bytes) == (4, expected)
+
+
+def test_a_page_past_the_ceiling_is_counted_rather_than_skipped(tmp_path: Path) -> None:
+    """Phase 15e. `measure` walked with `rglob`, which on Windows drops a file
+    over 260 characters without raising, so every EMS API tree measured 3 files
+    light. The count is compared against the *published* copy, which sits under a
+    short path and so counts in full -- an undercount here would therefore not
+    just be wrong, it would make a perfectly published tree look stale and be
+    re-copied on every run.
+    """
+    root = javadoc(tmp_path / "api" / "java", pages=1)
+    deep = long_path(root / "/".join(["segment_of_some_length"] * 12))
+    deep.mkdir(parents=True)
+    (deep / "DeepClass.html").write_text("body", encoding="utf-8")
+
+    files, size = apirefs.measure(root)
+
+    assert files == 4
+    assert size == sum(
+        path.stat().st_size for _, path in walk_files(root)
+    )
 
 
 # -- currency, compared before staging (§10.7) ----------------------------------

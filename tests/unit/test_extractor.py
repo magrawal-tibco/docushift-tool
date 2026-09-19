@@ -710,3 +710,73 @@ def test_an_extractor_with_no_findings_run_behaves_exactly_as_before(
     result = PackageExtractor(config, catalog).extract_one(product, version)
 
     assert result.outcome is ExtractOutcome.EXTRACTED
+
+
+# -- where the content starts (Phase 15b) -------------------------------------------------
+
+
+WRAPPED_PACKAGE = {
+    "tibco-ems-10-4-0/guide/Output.mcwebhelp": "",
+    "tibco-ems-10-4-0/guide/Data/HelpSystem.xml": "<x/>",
+    "tibco-ems-10-4-0/guide/a.htm": "<html/>",
+    "tibco-ems-10-4-0/pdf/guide.pdf": "%PDF-1.4",
+}
+
+
+def test_extract_records_the_wrapper_directory_it_unpacked_into(
+    config: ConfigManager, catalog: CatalogManager, product: Product, version: ProductVersion
+) -> None:
+    """46 of 50 sampled packages unpack to one directory named after themselves.
+    Stage 7 addresses content by name, so where it starts has to be recorded rather
+    than rediscovered per reader."""
+    place_package(config, product, version, WRAPPED_PACKAGE)
+
+    PackageExtractor(config, catalog).extract_one(product, version)
+
+    metadata = catalog.state.get_version_metadata("tibco-ems", "10.4.0") or {}
+    assert metadata["content_root"] == "tibco-ems-10-4-0"
+
+
+def test_a_flat_package_records_an_empty_content_root_rather_than_nothing(
+    config: ConfigManager, catalog: CatalogManager, product: Product, version: ProductVersion
+) -> None:
+    """`""` says "flat, measured"; a missing key says "never measured", and a
+    reader deciding whether to walk the disk needs to tell them apart."""
+    place_package(config, product, version, {"html/a.htm": "<html/>", "pdf/g.pdf": "%PDF-1.4"})
+
+    PackageExtractor(config, catalog).extract_one(product, version)
+
+    metadata = catalog.state.get_version_metadata("tibco-ems", "10.4.0") or {}
+    assert metadata["content_root"] == ""
+
+
+def test_measuring_a_cached_tree_records_the_content_root_too(
+    config: ConfigManager, catalog: CatalogManager, product: Product, version: ProductVersion
+) -> None:
+    """Unlike the checksum, the shape of a tree is readable with no package in
+    hand — so the one path that exists for packageless trees must not skip it."""
+    build_tree(extract_dir(config, product, version), WRAPPED_PACKAGE)
+
+    PackageExtractor(config, catalog).measure_cached(product, version)
+
+    metadata = catalog.state.get_version_metadata("tibco-ems", "10.4.0") or {}
+    assert metadata["content_root"] == "tibco-ems-10-4-0"
+    assert "extract_zip_checksum" not in metadata
+
+
+def test_a_tree_extracted_before_the_rule_existed_is_recorded_on_the_next_run(
+    config: ConfigManager, catalog: CatalogManager, product: Product, version: ProductVersion
+) -> None:
+    """Otherwise the disk-reading fallback becomes the permanent answer for the
+    whole corpus rather than the exception it is meant to be."""
+    source = place_package(config, product, version, WRAPPED_PACKAGE)
+    extractor = PackageExtractor(config, catalog)
+    extractor.extract_one(product, version)
+    catalog.state.set_version_metadata("tibco-ems", "10.4.0", "content_root", None)
+    assert source.is_file()
+
+    result = extractor.extract_one(product, version)
+
+    assert result.outcome is ExtractOutcome.CURRENT
+    metadata = catalog.state.get_version_metadata("tibco-ems", "10.4.0") or {}
+    assert metadata["content_root"] == "tibco-ems-10-4-0"

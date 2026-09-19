@@ -177,6 +177,19 @@ REGISTRY: dict[str, Code] = _codes(
     Code("PUBLISH_BASE_URL_UNSET", Severity.WARNING, Stage.SYNC,
          "api-references placed with no publish_base_url; cross-tree links have no host",
          "architecture.md §6.4"),
+    # Phase 15d, and `sync`'s first `error`. An **error** rather than a warning,
+    # against the precedent `ZIP_URL_UNRESOLVED` set three phases of a day
+    # earlier: that one has a remedy a user can apply at run time
+    # (`download --from-file`) and this one has none, nothing downstream can read
+    # what would have been written, and a partially copied API tree published as
+    # though it were whole is the failure this register exists to make loud.
+    # It outlives the wrapper-directory fix that removes its only known
+    # occurrence: the ceiling is a property of the target filesystem and of the
+    # publishing root the user picks, and a deeper root puts other products over
+    # the line with no wrapper involved.
+    Code("PUBLISHED_PATH_TOO_LONG", Severity.ERROR, Stage.SYNC,
+         "a file's published path exceeds 260 characters; the tree was not copied",
+         "planning.md Phase 15d"),
     # 6e's one new code, and a note for the reason 6c's is: nobody acts on one
     # rewritten link and everybody wants the magnitude. Notes aggregate into a
     # single row with a count (§7.1), which is the shape this needs -- because the

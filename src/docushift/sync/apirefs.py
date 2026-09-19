@@ -29,6 +29,7 @@ from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 
 from docushift.transforms import links
+from docushift.utils.longpath import walk_files
 
 # Path segments that say where a generator's output was filed, not what it is.
 # Dropping them turns `html/api-reference/java` into `java` and
@@ -61,12 +62,18 @@ class ApiRoot:
 
 
 def measure(root: Path) -> tuple[int, int]:
-    """File count and byte total for one tree. `(0, 0)` for an unreadable one."""
+    """File count and byte total for one tree. `(0, 0)` for an unreadable one.
+
+    Walked through `long_path` (Phase 15e). The number this returns is compared
+    against the same measurement of the *published* copy by `current()`, and the
+    published copy sits under a short path where a plain `rglob` sees everything.
+    Counting the source with `rglob` therefore did not merely undercount -- it
+    made the two sides incomparable, so a tree that published perfectly would
+    have been re-copied on every run.
+    """
     files = size = 0
-    for path in root.rglob("*"):
+    for _, path in walk_files(root):
         try:
-            if not path.is_file():
-                continue
             size += path.stat().st_size
         except OSError:  # pragma: no cover - a file that vanished mid-walk
             continue

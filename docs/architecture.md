@@ -658,6 +658,31 @@ Two deliberate limits on its reach:
 
 `safe_extract` also no longer calls `ZipFile.extract`, which builds its own target path from the unprefixed directory and so reinstates the limit. It opens each member and `shutil.copyfileobj`s it into a destination derived from the prefixed root.
 
+#### 4.4.1 Both sides of the line, met in one run (Phase 15)
+
+Publishing `ems` hit the ceiling twice in the same command, on opposite sides of the rule above, and separating them is what the rule is for.
+
+| | length | what it was | what it got |
+|---|---|---|---|
+| a published API path, named after the package wrapper | **267** | the far side: a final path no reader outside this tool could open | the **name** fixed (§4.5), not the ceiling lifted — and `PUBLISHED_PATH_TOO_LONG` added so the next one is reported |
+| an extracted source file, `…detailed_transaction_info_1_1_consumer_message-members.html` | **265** | this side: a path inside our own workspace, written there by `safe_extract` through the prefix | read back through the prefix, and it publishes to **190** |
+
+So the line is not "260 is always a defect". It is **published paths are held to the ceiling; paths this tool owns are read through the prefix that wrote them.** The second case had gone unnoticed because nothing on the *read* side lifted a prefix the *write* side had needed.
+
+**And `Path.rglob` does not report what it cannot reach.** It resolves each directory through the unprefixed spelling, so on Windows it omits an over-limit file with no exception and no warning — one EMS API tree walks 798 entries plain and **801** prefixed. Any measurement of a tree this tool extracted therefore goes through `utils/longpath.py:walk_files`, which yields `(relative, prefixed_absolute)`: the absolute half is the only spelling that opens the file, and the relative half is what belongs in a report. A silently short list is worse than a raised error, and it defeated `sync`'s own ceiling check for a phase — the check could not see the three files that then broke the copy.
+
+### 4.5 The Content Root Is Not the Version Directory
+
+§4.1's sketch shows `10.4.0/doc/html/…`, and for the five trees hand-copied from the predecessor's `html-to-md` cache that is what is on disk. **A downloaded package is one level deeper.** Unpacking `tibco-enterprise-message-service-10.4.0.zip` into `10.4.0/` produces a single child, `tibco-enterprise-message-service-10-4-0/`, with `doc/ html/ javadoc/ pdf/` inside *it* — the ZIP carries its own stem as a directory.
+
+Measured 2026-09-19 over 60 eligible versions in 24 families, read as central directories over HTTP Range rather than downloaded: of the **50** endpoints that returned a ZIP, **46 carry exactly one wrapper directory** named `{slug}-{version_dashed}`, 4 are flat, and **0** unpack to a single child that is itself content. The wrapper is the corpus's dominant shape; the flat one is what every step in this tool was originally written against, because the cache has no wrapper level.
+
+So `extract` resolves a **content root** per version and records it in `state.db` (`extractor/content_root.py`, metadata key `content_root`, stored as a bare name so a moved workspace does not carry a dead absolute). The rule: **descend through a single child directory only when that child is not itself a known content segment.** The exclusion is not theoretical — the five DataSynapse cache trees hold a lone `doc/`, and `sync/router.py:source_folders` asks for `doc/pdf` and `doc/doc` by name, so descending there would move the root past the directory the next reader wants. A recorded root that no longer exists is ignored rather than trusted, and the descent stops after one level; no sampled package nests two.
+
+**Only the readers that address content *by name* use it** — `router.source_folders`, and `apirefs`' naming base in both `select` and `url_map`. The four conversion engines locate content by scanning for their own markers (`Data/HelpSystem.xml`, and so on) and are deliberately untouched: they found the content through the wrapper already, and Stage 5's counts are unchanged across the change (8,613 topics in 8,847 files, before and after). What the wrapper broke was naming and lookup, not discovery.
+
+The unstripped alternative was considered and rejected: hoisting the child's contents into the version directory would make the tree match what every step assumed, with no consumer changes — but then the extracted tree no longer matches the package it came from, and the next structural defect of this kind becomes unfalsifiable.
+
 ---
 
 ## 5. Multi-Engine Conversion & Asset Handling

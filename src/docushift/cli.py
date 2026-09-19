@@ -1410,12 +1410,15 @@ def sync(ctx, bu, family, product, version, batch, select_all, target_dir, force
             tree = cfg.extract_path(found.bu, found.family, found.slug, ver.version)
             segment = version_segment(ver.version)
             destination = distributor.doc_class_dir(found, target_dir, ONLINE_HELP) / segment
+            # The same base the real run uses, or the dry run would predict
+            # folder names the run will not write (Phase 15b).
+            content = distributor.content_tree(found, ver, tree) if tree.is_dir() else tree
             grouped = (
-                document_index.group(router.route_version(tree, ver.engine))
+                document_index.group(router.route_version(content, ver.engine))
                 if tree.is_dir() else {}
             )
             roots = (
-                apirefs.select(tree, distributor.api_roots(found.slug, ver.version, tree))
+                apirefs.select(content, distributor.api_roots(found.slug, ver.version, tree))
                 if resources and tree.is_dir() else []
             )
             table.add_row(
@@ -1460,8 +1463,16 @@ def sync(ctx, bu, family, product, version, batch, select_all, target_dir, force
             console.print(f"  [red]x[/red] {_who(result)} ({result.doc_class})")
 
     stats = distributor.sync_many(pairs, target_dir, force=force, on_result=on_result)
-    findings.finish()
+    # Phase 15e. `validate` has always exited 1 on an error; `sync` reported six
+    # failed versions on screen and exited 0, which tells a batch driver reading
+    # the status that six failures were a success. Rows *and* findings: a version
+    # can fail on an `OSError` that no register code claims, and that row is still
+    # a tree the target directory does not have.
+    failed = len(stats.failures) or findings.counts()[Severity.ERROR]
+    findings.finish(exit_code=1 if failed else 0)
     _report_sync(stats, findings)
+    if failed:
+        raise click.exceptions.Exit(1)
 
 
 @main.command()

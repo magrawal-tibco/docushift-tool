@@ -29,6 +29,7 @@ from docushift.downloader import sha256_of
 from docushift.engines.csh import CshStatus
 from docushift.engines.detector import Detection, detect_version
 from docushift.engines.roots import find_output_roots
+from docushift.extractor import content_root
 from docushift.extractor.inventory import Inventory, inventory_tree
 from docushift.extractor.safe_unzip import UnsafeArchiveError, safe_extract
 from docushift.models import ConversionStatus, EngineSource, Product, ProductVersion, SourceEngine
@@ -161,6 +162,20 @@ class PackageExtractor:
         if self.catalog.state is not None:
             self.catalog.state.set_version_metadata(slug, version, key, value)
 
+    def _record_content_root(self, slug: str, version: str, tree: Path) -> None:
+        """Where this package's content starts, resolved once (Phase 15b).
+
+        Written on every path that leaves a tree on disk, `current` included: a
+        version extracted before this rule existed has no record, and leaving it
+        that way would make the fallback in `content_root.of` the permanent answer
+        for the corpus rather than the exception it is meant to be.
+
+        The value is recorded even when it is empty. `""` says "flat package,
+        measured"; a missing key says "never measured", and the two are different
+        things to a reader deciding whether to walk the disk.
+        """
+        self._set_metadata(slug, version, content_root.METADATA_KEY, content_root.relative(tree))
+
     # -- one version ----------------------------------------------------------
 
     def extract_one(
@@ -182,6 +197,8 @@ class PackageExtractor:
         # *package's* checksum rather than the tree's: the tree is thousands of
         # files and hashing it would cost more than re-extracting.
         if not force and target.is_dir() and recorded.get("extract_zip_checksum") == checksum:
+            if recorded.get(content_root.METADATA_KEY) is None:
+                self._record_content_root(slug, number, target)
             current = ExtractResult(
                 slug, number, ExtractOutcome.CURRENT, path=target,
                 engine=version.engine, engine_written=version.engine_source is not EngineSource.AUTO,
@@ -231,6 +248,7 @@ class PackageExtractor:
         # Written only after the tree is in place, so an interrupted extract
         # cannot leave a checksum claiming a directory that was never built.
         self._set_metadata(slug, number, "extract_zip_checksum", checksum)
+        self._record_content_root(slug, number, target)
 
         identified = self.identify(product, version, target)
         return ExtractResult(
@@ -269,6 +287,11 @@ class PackageExtractor:
         if not target.is_dir():
             message = f"no extracted tree at {target}; run `docushift extract` first"
             return ExtractResult(slug, number, ExtractOutcome.NO_PACKAGE, message=message)
+
+        # The shape of the tree is readable without the package -- unlike the
+        # checksum, which is why this is not in the list of things the method
+        # refuses to write above.
+        self._record_content_root(slug, number, target)
 
         # The same test `extract_one` uses to decide a no-op has gone unmeasured.
         # Re-walking a measured tree would cost the walk to write what is there.
