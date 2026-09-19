@@ -183,7 +183,9 @@ thead th { position: sticky; top: 0; background: var(--surface-1); color: var(--
       <p>Read live from <code>config/products.csv</code> and <code>config/versions.csv</code>.
          A version is <b>convert-eligible</b> when the pipeline will process it and
          <b>archived</b> when it is kept for the record only; a <b>product</b> is in
-         scope when the catalog intends to publish it at all.</p>
+         scope when the catalog intends to publish it at all. Where a version has been
+         extracted and converted, the catalog also records <b>how many files went in
+         and how many came out</b>.</p>
     </div>
     <div class="spacer"></div>
     <div class="switches">
@@ -268,6 +270,18 @@ thead th { position: sticky; top: 0; background: var(--surface-1); color: var(--
         <ul class="legend" id="lg-fam"></ul>
         <div id="c-fam"></div>
         <div class="tbl" id="t-fam"></div>
+      </div>
+
+      <div class="card wide">
+        <div class="cardhead">
+          <div><h2>What conversion produced</h2>
+            <p class="sub" id="files-sub">&nbsp;</p></div>
+          <div class="spacer"></div>
+          <button class="tbtn" data-table="t-files" aria-expanded="false">Table</button>
+        </div>
+        <ul class="legend" id="lg-files"></ul>
+        <div id="c-files"></div>
+        <div class="tbl" id="t-files"></div>
       </div>
 
       <div class="card">
@@ -389,6 +403,17 @@ function parseDate(raw) {
                    : { year: d.getFullYear(), form: "unrecognised" };
 }
 
+/* The `_`-prefixed inventory columns are tool-owned and **nullable on purpose**:
+   blank means "never measured", `0` would mean "measured, found none". The two
+   must not collapse into each other here, or an unmeasured version would be
+   drawn as a version that converted to nothing. */
+function num(raw) {
+  raw = (raw || "").trim();
+  if (!raw) return null;
+  const n = Number(raw.replace(/,/g, ""));
+  return Number.isFinite(n) ? n : null;
+}
+
 function build(products, versions) {
   const bySlug = new Map(products.map(p => [p.slug, p]));
   // versions.csv carries its own `_bu`/`_family` beside products.csv's `bu`/
@@ -414,12 +439,19 @@ function build(products, versions) {
     if (p && (p.family || "").trim() && p.family.trim() !== fam) famDisagree++;
     return {
       slug: v.slug,
+      version: (v.version || "").trim(),
       bu: bus.indexOf(bu),
       fam: families.indexOf(fam),
       elig: /^true$/i.test(v.convert_eligible) ? 1 : 0,
       year,
       st: si < 0 ? STATUSES.indexOf("unknown") : si,   // blank or unrecognised -> unknown
       inScope: p ? /^true$/i.test(p.in_scope) : true,
+      // What went in (written by `extract`) and what came out (written by
+      // `convert`). Two stages write these, so a version can carry one half.
+      docFiles: num(v._doc_files),
+      apiFiles: num(v._api_files),
+      mdFiles:  num(v._md_files),
+      outFiles: num(v._out_files),
     };
   });
 
@@ -439,6 +471,11 @@ function build(products, versions) {
     yearMin: years.length ? Math.min(...years) : 0,
     yearMax: years.length ? Math.max(...years) : 0,
     yearNow: new Date().getFullYear(),
+    // Unfiltered, because measurement coverage is a property of the catalog
+    // rather than of a slice -- the new card says so against this, not against
+    // whatever the filters happen to leave standing.
+    measuredIn:  rows.filter(r => r.docFiles != null).length,
+    measuredOut: rows.filter(r => r.outFiles != null && r.mdFiles != null).length,
   };
 }
 
@@ -541,10 +578,16 @@ function renderTable(host, head, rows) {
   t.appendChild(tb); host.replaceChildren(t);
 }
 
-function emptyNote() {
+function emptyNote(msg) {
   const d = document.createElement("div"); d.className = "empty";
-  d.textContent = "No versions match this selection."; return d;
+  d.textContent = msg || "No versions match this selection."; return d;
 }
+const clean = s => s.replace(/[®™]/g, "");   // (R)/(TM) are noise in an axis label
+const label = (slug, version) => {
+  const p = MODEL.bySlug.get(slug);
+  return clean(p ? p.display_name : slug) + (version ? " " + version : "");
+};
+const short = (s, n) => s.length > n ? s.slice(0, n - 1) + "…" : s;
 function niceStep(max) {
   const raw = max / 5, mag = Math.pow(10, Math.floor(Math.log10(raw || 1)));
   return [1, 2, 2.5, 5, 10].map(m => m * mag).find(s => s >= raw) || mag * 10;
@@ -615,6 +658,21 @@ function renderKpis(rows, prods) {
   add("Archived", total - elig, `${(100 - pct).toFixed(1)}% of the selection`, "", "--series-2");
   add("Products out of scope", prods.filter(p => !/^true$/i.test(p.in_scope)).length,
       "the catalog does not intend to publish these");
+
+  // The output side. Shown only where it has been measured -- a zero here would
+  // read as "converted to nothing" when it means "nobody has looked yet".
+  const m = rows.filter(r => r.outFiles != null && r.mdFiles != null);
+  if (m.length) {
+    const sum = k => m.reduce((a, r) => a + (r[k] || 0), 0);
+    const outF = sum("outFiles"), mdF = sum("mdFiles");
+    const inF = m.filter(r => r.docFiles != null).reduce((a, r) => a + r.docFiles, 0);
+    add("Files after conversion", outF,
+        inF ? `from ${fmt(inF)} source doc files — ${(outF / inF * 100).toFixed(0)}% carried through`
+            : `across ${fmt(m.length)} measured version(s)`, "", "--ord-3");
+    add("Markdown produced", mdF,
+        outF ? `${(mdF / outF * 100).toFixed(0)}% of the output; the rest is assets and artifacts` : "",
+        "", "--ord-2");
+  }
   if (oosEligible)
     add("Eligible under an out-of-scope product", oosEligible,
         "marked convert_eligible while their product is not in scope — one of the two fields is wrong", "flag");
@@ -741,11 +799,9 @@ function renderProducts(rows) {
     if (!e) by.set(r.slug, e = { elig: 0, arch: 0 });
     e[r.elig ? "elig" : "arch"]++;
   });
-  const clean = s => s.replace(/[®™]/g, "");     // (R)/(TM) are noise in an axis label
   const all = [...by.entries()].map(([slug, v]) => {
-    const p = MODEL.bySlug.get(slug);
-    const name = clean(p ? p.display_name : slug);
-    return { name, short: name.length > 30 ? name.slice(0, 29) + "…" : name,
+    const name = label(slug, "");
+    return { name, short: short(name, 30),
              elig: v.elig, arch: v.arch, total: v.elig + v.arch };
   }).sort((a, b) => b.total - a.total);
 
@@ -784,7 +840,126 @@ function renderFamily(rows, prods) {
 }
 
 /* ===========================================================================
-   8. Catalog hygiene -- three ratios, three meters.
+   7b. What conversion produced. One row per measured version, and **each row is
+   scaled to its own package** rather than to a shared axis: the question here is
+   what share of a package survives conversion, and that share runs from 9% to
+   67% across products of the same generator -- a spread a shared axis would
+   flatten into "one big product and five small ones". Absolute counts are on the
+   row, in the tooltip and in the table, so nothing is lost to the normalisation.
+
+   Three ordered parts of one whole, so one hue getting darker, not three
+   identities: Markdown is the payload, the other output files support it, and
+   the remainder never left the package. The eligible/archived pair is not reused
+   here -- it means something else on every other card.
+
+   There is no output-side API count and there should not be: the converter skips
+   API-reference trees and Stage 7 copies them verbatim, so `_api_files` is the
+   same number at both ends. It rides in the tooltip and the table as a
+   pass-through, never as a segment.
+   =========================================================================== */
+function renderFiles(rows) {
+  const host = document.getElementById("c-files");
+  const tableHost = document.getElementById("t-files");
+  const sub = document.getElementById("files-sub");
+
+  const data = rows
+    .filter(r => r.outFiles != null && r.mdFiles != null)
+    .map(r => {
+      const name = label(r.slug, r.version);
+      // Truncate the *product*, never the version: three of these six products
+      // share a 40-character prefix, so cutting the tail made three rows read as
+      // one and the version is the only thing telling them apart.
+      const shortName = short(label(r.slug, ""), 31) + " " + r.version;
+      const md = r.mdFiles, out = r.outFiles;
+      const other = Math.max(0, out - md);
+      // `_doc_files` comes from a different stage, so it can be absent while the
+      // output is present. Without it there is no "whole" to take a share of;
+      // the row falls back to its own output and reports no ratio.
+      const src = r.docFiles;
+      const whole = Math.max(src != null ? src : 0, out) || 1;
+      return { name, short: shortName, api: r.apiFiles,
+               md, other, out, src, whole,
+               kept: src ? out / src : null };
+    })
+    .sort((a, b) => (b.kept ?? -1) - (a.kept ?? -1));
+
+  const cov = `${fmt(MODEL.measuredOut)} of ${fmt(MODEL.rows.length)} versions in the catalog ` +
+              `carry file counts — they are written when a version is extracted and converted, ` +
+              `and blank means never measured rather than zero.`;
+
+  if (!data.length) {
+    host.replaceChildren(emptyNote(
+      MODEL.measuredOut
+        ? "No version in this selection has been converted with file counts recorded."
+        : "No version in the catalog has been converted with file counts recorded yet."));
+    tableHost.replaceChildren();
+    sub.textContent = cov;
+    return;
+  }
+
+  sub.textContent = `Each bar is one version's source package, split by what reached the ` +
+                    `output tree. ${cov}`;
+
+  const LBL = 264, PAD = 150, W = 1100, rowH = 32, GAP = 2;
+  const H = data.length * rowH + 14, iw = W - LBL - PAD, bh = 20;
+
+  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img",
+    "aria-label": "Source files per version, split into Markdown, other output files, " +
+                  "and files not carried into the output" });
+  ensureDefs(svg);
+
+  data.forEach((d, i) => {
+    const yTop = i * rowH + 5, sc = iw / d.whole;
+    const lbl = el("text", { class: "cat", x: LBL - 10, y: yTop + bh / 2 + 4, "text-anchor": "end" }, svg);
+    text(lbl, d.short);
+    if (d.short !== d.name) text(el("title", {}, lbl), d.name);
+
+    const notCarried = Math.max(0, d.whole - d.out);
+    const segs = [["md", "--ord-3", "tx-o3"], ["other", "--ord-2", "tx-o2"],
+                  ["rest", "--meter-track", null]];
+    const value = { md: d.md, other: d.other, rest: notCarried };
+    const lastKey = segs.map(s => s[0]).filter(k => value[k] > 0).pop();
+
+    let x = LBL;
+    segs.forEach(([k, v, tx]) => {
+      const val = value[k]; if (!val) return;
+      const w = val * sc, isLast = k === lastKey;
+      el("path", { class: "mark", d: barPath(x, yTop, Math.max(1, w - (isLast ? 0 : GAP)), bh,
+                   isLast ? 4 : 0, "right"), fill: tx ? paint(v, tx) : cssv(v) }, svg);
+      x += w;
+    });
+
+    // The data end of the *output*, which is what the row is about -- the label
+    // sits after it when there is room and falls back to the right margin when
+    // the output fills the bar, so it can never be clipped by its own mark.
+    const outEnd = LBL + d.out * sc;
+    const caption = d.kept === null
+      ? `${fmt(d.out)} files out`
+      : `${fmt(d.out)} of ${fmt(d.src)} · ${(d.kept * 100).toFixed(0)}%`;
+    const roomy = outEnd + 8 + PAD * 0.72 < W;
+    text(el("text", { class: "val", x: roomy ? outEnd + 8 : W, y: yTop + bh / 2 + 4,
+                      "text-anchor": roomy ? "start" : "end" }, svg), caption);
+
+    const tipRows = [
+      { name: "Markdown", value: d.md, color: cssv("--ord-3") },
+      { name: "Other output files", value: d.other, color: cssv("--ord-2") },
+      { name: "Not carried into output", value: notCarried, color: cssv("--meter-track") },
+    ];
+    if (d.api) tipRows.push({ name: "API files (copied unchanged)", value: d.api,
+                              color: cssv("--axis") });
+    const hit = el("rect", { class: "hit", x: 0, y: i * rowH, width: W, height: rowH }, svg);
+    bindMark(hit, d.name, tipRows, d.src ?? d.out);
+  });
+
+  host.replaceChildren(svg);
+  renderTable(tableHost,
+    ["Version", "Source doc files", "Files out", "Markdown", "Other output", "API files", "Carried"],
+    data.map(d => [d.name, d.src ?? "—", d.out, d.md, d.other,
+                   d.api ?? "—", d.kept === null ? "—" : (d.kept * 100).toFixed(1) + "%"]));
+}
+
+/* ===========================================================================
+   8. Catalog hygiene -- four ratios, four meters.
    =========================================================================== */
 function renderHygiene(rows, prods) {
   const host = document.getElementById("c-hyg");
@@ -799,6 +974,9 @@ function renderHygiene(rows, prods) {
         `${fmt(inScope)} of ${fmt(prods.length)} products in scope`, "in scope");
   meter(host, "Versions with a usable release date", dated, rows.length,
         `${fmt(dated)} of ${fmt(rows.length)} versions can be placed on the timeline`, "dated");
+  const counted = rows.filter(r => r.outFiles != null).length;
+  meter(host, "Versions with their output files counted", counted, rows.length,
+        `${fmt(counted)} of ${fmt(rows.length)} versions have been converted and measured`, "counted");
 
   const callout = (lead, rest) => {
     const c = document.createElement("div"); c.className = "callout";
@@ -829,6 +1007,8 @@ function renderHygiene(rows, prods) {
       rows.length ? (dated / rows.length * 100).toFixed(1) + "%" : "0%"],
     ["Versions eligible under an out-of-scope product", oosEligible, rows.length,
       rows.length ? (oosEligible / rows.length * 100).toFixed(1) + "%" : "0%"],
+    ["Versions with their output files counted", counted, rows.length,
+      rows.length ? (counted / rows.length * 100).toFixed(1) + "%" : "0%"],
   ]);
 }
 
@@ -880,19 +1060,28 @@ function renderStatus(rows) {
    10. Legends -- always present for two or more series; a single-series chart
    is named by its title instead.
    =========================================================================== */
+function legendInto(id, keys) {
+  const ul = document.getElementById(id); ul.replaceChildren();
+  keys.forEach(([name, v, deg]) => {
+    const li = document.createElement("li");
+    const k = document.createElement("span"); k.className = "key";
+    // The neutral remainder carries no texture: it is the absence of a mark, and
+    // hatching it would give "nothing happened here" an identity of its own.
+    k.style.background = TEXTURE && deg
+      ? `repeating-linear-gradient(${deg}deg, ${cssv(v)} 0 3px, ${cssv("--surface-1")} 3px 5px)`
+      : cssv(v);
+    li.append(k, document.createTextNode(name)); ul.appendChild(li);
+  });
+}
+
 function renderLegends() {
   const keys = [["Convert-eligible", "--series-1", 45], ["Archived", "--series-2", 135]];
-  ["lg-year", "lg-fam", "lg-prod"].forEach(id => {
-    const ul = document.getElementById(id); ul.replaceChildren();
-    keys.forEach(([name, v, deg]) => {
-      const li = document.createElement("li");
-      const k = document.createElement("span"); k.className = "key";
-      k.style.background = TEXTURE
-        ? `repeating-linear-gradient(${deg}deg, ${cssv(v)} 0 3px, ${cssv("--surface-1")} 3px 5px)`
-        : cssv(v);
-      li.append(k, document.createTextNode(name)); ul.appendChild(li);
-    });
-  });
+  ["lg-year", "lg-fam", "lg-prod"].forEach(id => legendInto(id, keys));
+  legendInto("lg-files", [
+    ["Markdown", "--ord-3", 45],
+    ["Other output files (assets, toc.yml, metadata.yml)", "--ord-2", 135],
+    ["Not carried into the output", "--meter-track", 0],
+  ]);
 }
 
 /* ===========================================================================
@@ -905,6 +1094,7 @@ function renderAll() {
   renderYear(rows);
   renderProducts(rows);
   renderFamily(rows, prods);
+  renderFiles(rows);
   renderHygiene(rows, prods);
   renderStatus(rows);
   renderFoot();
@@ -922,12 +1112,25 @@ function renderFoot() {
       (MODEL.lossyCount ? `, but ${fmt(MODEL.lossyCount)} of them are rounded to six significant figures — ` +
         `the year survives and the exact instant does not, which is a spreadsheet round-trip, not a source value` : "") +
       `. The files are never written to: these are catalog defects to fix at the source, not rendering choices.`],
+   ["File counts. ", `_doc_files is written when a version is extracted and _md_files / _out_files when it ` +
+      `is converted, so a version can carry one half and not the other. ` +
+      `${fmt(MODEL.measuredIn)} of ${fmt(MODEL.rows.length)} versions have an input count and ` +
+      `${fmt(MODEL.measuredOut)} an output count — a blank is “never measured”, never zero, and nothing ` +
+      `here fills one in by inference. There is deliberately no output-side API count: the converter skips ` +
+      `API-reference trees and publishing copies them verbatim, so _api_files is the same number at both ` +
+      `ends and appears once, as a pass-through.`],
    ["Palette. ", "Two categorical slots for the eligible/archived identity (blue · orange) and a three-step " +
-      "ordinal blue for the ordered lifecycle. Both ran through the dataviz validator and pass every gate in " +
-      "both modes — worst adjacent CVD ΔE 24.7 light / 26.8 dark against a target of 8. The four status hues " +
-      "were tried and rejected: as a four-way set they fail the lightness band, CVD separation and the " +
-      "normal-vision floor, and these are catalog states rather than health states."],
-   ["Reading it. ", "One y-axis per chart, never two. Colour follows the entity, so filtering never repaints " +
+      "ordinal blue used twice — for the ordered lifecycle, and for the ordered parts of a converted package " +
+      "(Markdown, other output, not carried). Both ran through the dataviz validator and pass every gate in " +
+      "both modes — worst adjacent CVD ΔE 24.7 light / 26.8 dark for the categorical pair, 19.0 / 19.1 for " +
+      "the two output fills, against a target of 8; the ramp passes the ordinal checks outright. The " +
+      "eligible/archived pair is not reused for the file counts, because colour follows the entity and those " +
+      "two hues already mean something else on every other card. The four status hues were tried and " +
+      "rejected: as a four-way set they fail the lightness band, CVD separation and the normal-vision floor, " +
+      "and these are catalog states rather than health states."],
+   ["Reading it. ", "One y-axis per chart, never two — and in “What conversion produced” each bar is scaled " +
+      "to its own package, so the bars compare the share carried through rather than the size of the " +
+      "package; the absolute counts are on the row and in the table. Colour follows the entity, so filtering never repaints " +
       "a survivor. Every value on screen is also in the table view and the tooltip, and the Texture switch " +
       "adds a directional hatch for colour-blind, greyscale-print and forced-colors reading."],
   ].forEach(([b, t], i) => {
