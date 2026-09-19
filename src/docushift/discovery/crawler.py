@@ -306,7 +306,7 @@ class DocsiteCrawler:
             # Archived versions are not published under the active layout; their
             # real endpoint comes from the archive index below, and a templated
             # guess here would be a broken URL recorded as fact.
-            zip_url=None if archived else self.client.active_zip_url(folder),
+            zip_url=None if archived else self.client.active_zip_url(folder, slug, number),
         )
 
     def _derive_code(self, slug: str, detail: dict[str, Any], records: list[dict[str, Any]]) -> str:

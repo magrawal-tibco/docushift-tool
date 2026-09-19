@@ -59,18 +59,45 @@ class DocsiteClient:
             return text
         return f"{self.base_url}/{text.lstrip('/')}"
 
-    def active_zip_url(self, folder_path: str) -> str | None:
-        """Builds an active version's "Download All Docs" URL from its `folder_path`.
+    def active_zip_url(self, folder_path: str, slug: str = "", version: str = "") -> str | None:
+        """Builds an active version's "Download All Docs" URL.
 
-        `ems/10.4.0` -> `/pub/ems/10.4.0/doc/zip/tib_ems_10.4.0_doc.zip`. Returns
-        `None` rather than a malformed URL when the product publishes no folder
-        path -- a wrong URL would be recorded in the catalog and fail much later.
+        `ems/10.4.0` + `tibco-enterprise-message-service` ->
+        `/pub/ems/10.4.0/tibco-enterprise-message-service-10-4-0_documentation.zip`.
+
+        Returns `None` rather than a malformed URL when any token the configured
+        template needs is missing -- a wrong URL would be recorded in the catalog
+        and fail much later. That contract is why the tokens are checked against
+        the template rather than unconditionally: a deployment that pins the old
+        `folder_path`-only form keeps working without a slug.
+
+        The filename's `{slug}-{version_dashed}` is the `finalSlug` that the
+        package's own `landing-page.js` computes by slugifying the display name.
+        It is taken from the catalog rather than re-derived: the docsite API
+        publishes the same string as each version's `slug`, and a second
+        slugifier would be one more thing to keep in step with `utils.slug`.
+        See architecture.md §2.2.
         """
         template = self.zip_urls.get("active_template")
         folder = str(folder_path or "").strip().strip("/")
         if not template or not folder:
             return None
-        return self.url(template.format(folder_path=folder, folder_slug=folder.replace("/", "_")))
+
+        tokens = {
+            "folder_path": folder,
+            "folder_slug": folder.replace("/", "_"),
+            "slug": str(slug or "").strip(),
+            "version_dashed": str(version or "").strip().replace(".", "-"),
+        }
+        needed = [name for name in ("slug", "version_dashed") if "{" + name + "}" in template]
+        if any(not tokens[name] for name in needed):
+            return None
+        try:
+            return self.url(template.format(**tokens))
+        except KeyError:
+            # An unknown token in a hand-edited template. Better no URL than a
+            # crash mid-crawl, and better than a URL with a literal brace in it.
+            return None
 
     # -- requests -------------------------------------------------------------
 

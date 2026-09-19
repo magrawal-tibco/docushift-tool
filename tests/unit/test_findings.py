@@ -66,8 +66,14 @@ def test_the_register_carries_every_row_of_7_5() -> None:
     a converted topic on a case-insensitive filesystem, in three published
     versions, with every individual write succeeding. Counting the output tree is
     what turns a second write landing on a first into arithmetic.
+
+    Phase 14a adds the 42nd, `ZIP_URL_UNRESOLVED`, and it is the register's first
+    `download` row -- a stage that had carried no code for eight phases because it
+    had never successfully run. 7 of 35 sampled products publish under a directory
+    segment no pattern predicts, so the code names them and `--from-file` answers
+    them; a gate there would stop a batch over a bounded, known residue.
     """
-    assert len(REGISTRY) == 41
+    assert len(REGISTRY) == 42
 
 
 def test_severity_comes_from_the_registry_and_not_from_the_call_site() -> None:

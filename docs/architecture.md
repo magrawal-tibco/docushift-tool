@@ -79,7 +79,8 @@ DocuShift integrates directly with the `docs.tibco.com` REST APIs:
 2. **Active Product Versions (`/api/products/{slug}`)**:
    - Returns the **current version as the product object itself** — `version_no`, `folder_path`, `isArchiveExists`, document listings — with every other release under `siblings`. See §2.1.
    - **Download All Docs ZIP Endpoint**: Built from `folder_path`, but only for active versions and only when the path is version-shaped:
-     `https://docs.tibco.com/pub/{folder_path}/doc/zip/tib_{folder_path.replace('/', '_')}_doc.zip`
+     `https://docs.tibco.com/pub/{folder_path}/{slug}-{version_dashed}_documentation.zip`
+     ~~`…/doc/zip/tib_{folder_path.replace('/', '_')}_doc.zip`~~ — **superseded 2026-09-19**, see §2.2. The old template resolves for **0 of 35** sampled products; the current one for 28.
 3. **Archived / "Other Versions" (`/api/products/archive/{parent_slug}`)**:
    - Returns `result.product.children`: archived records with `version_no`, `name`, `GA_date`, and a direct `zipPath` — the only trustworthy source of an archived version's URL.
    - **Conversion Policy**: By default, archived versions are inventoried with `is_archived: true` and `convert_eligible: false`. Users can flip `convert_eligible: true` on specific archived versions when needed.
@@ -106,6 +107,26 @@ Two policies fall out of this and are worth stating separately, because they are
 
 - **A product that cannot be reached is excluded from the result, not returned empty.** An empty version list would read to the merge as "every version was deleted upstream" and abort the whole fetch (§3.5).
 - **`catalog fetch` requires a scope.** `--product` and `--batch` are resolved to crawl selectors *before* the per-product request, so a three-product batch costs three requests rather than 668. Because a product's code is rarely its slug (`ems` is published as `tibco-enterprise-message-service`), the selector set carries both the code and the slug already recorded in the catalog.
+
+### 2.2 The ZIP endpoint, and why HTTP 200 is not the signal
+
+**A missing path under `/pub/` is served as HTTP 200 with an empty body.** Not a 404, not a redirect, not a sign-in page — a success status over zero bytes. Any check that reads the status code will pass on a URL that does not exist, which is how the template above went a full phase without resolving anything. Measured 2026-09-19: **0 of 35** sampled products' stored `zip_url` return a ZIP, and 0 of 7 for `ems`.
+
+The correct form was read out of `html/Resources/Scripts/landing-page.js` — a MadCap Flare file **shipped inside the documentation package**, which reproduces the product's docsite landing page and constructs its own Download Help link:
+
+```js
+finalSlug = slugify(productName) + "-" + version.split(".").join("-")
+baseUrl   = location.href.split("doc/html")[0]      // -> /pub/{code}/{version}/
+download  = baseUrl + finalSlug + "_documentation.zip"
+```
+
+The ZIP therefore sits at the **version root**, not under `doc/zip/`, and its filename repeats the version in dashed form. `finalSlug` is not re-derived by this tool: the docsite API already publishes it as the per-version `slug` (`tibco-ebx-add-ons-6-2-3`), and in every case measured it equals the catalog's `slug` plus the dashed version — so a second slugifier, kept in agreement with `utils/slug.py`, buys nothing.
+
+Three consequences:
+
+- **Verification of a URL means reading the first four bytes**, not the status code. A ZIP starts `PK\x03\x04`; `downloader/fetcher.py` already enforces this with `is_zipfile` before it moves anything into place, which is why the defect surfaced at download time rather than living on in the catalog undetected.
+- **The stored column is not the authority for an active version.** `zip_url` is honoured when `zip_source=manual` (a human pinned it, §3.8) or when the row is archived (the value is the archive index's `zipPath`, given verbatim by upstream). Otherwise the downloader derives, because discovery's stored value is known wrong catalog-wide. See `planning.md` Phase 14a.
+- **Not every product resolves.** 7 of 35 resolve under neither template, and the shape of the failure is the *directory* segment rather than the filename: `businessworks_integrationmanager_plugin` publishes under `1.0.0_october_2004` while its catalog version reads `1.0`. These are reported as `ZIP_URL_UNRESOLVED` and acquired with `--from-file` (§3.8) rather than pattern-matched further.
 
 ---
 
@@ -623,6 +644,19 @@ When an old release does come up, `docushift archive download --product ems --ve
 Archived `zipPath` values are the most likely to be stale, so the same command takes `--from-file` (§3.8) and files a hand-obtained ZIP at `archive_path()` instead of fetching it. Its `--extract` unpacks within `archive/`, never into the pipeline's `extracted/` tree — an archived package that was never selected for conversion must not appear alongside ones that were.
 
 **The archive variant does not set `zip_source=manual`,** unlike `download --from-file`. `zip_source` states where the *pipeline's* package for a version comes from, and a reference ZIP pulled outside the working set is not that; pinning it would make a later `download` skip a version whose real package was never supplied.
+
+### 4.4 The Windows 260-Character Ceiling, and Where It Is Lifted
+
+This machine has `HKLM\SYSTEM\CurrentControlSet\Control\FileSystem\LongPathsEnabled = 0x0`, so the Win32 MAX_PATH limit of 260 characters is live. Extracting EMS 10.5.1 hit it: a member 257 characters below the extract root produced a 262-character absolute path and `[WinError 206] The filename or extension is too long` — and it did so *transiently*, because the build-and-swap staging directory (§4.1's `extracted/` is written as a sibling `.part/` tree first) adds five characters that the final path does not have. A tree that would sit comfortably under the limit once swapped into place can fail while it is being built.
+
+The lift is `utils/longpath.py:long_path`, which prefixes an absolute path with `\\?\` (or `\\?\UNC\` for a UNC path) and is a no-op off Windows. The prefix **disables the OS's own path normalization**, so it can only be applied to an already-absolute, already-normalized string — `os.path.abspath` first, prefix second. That ordering is the reason it lives in one helper rather than being spelled at each call site.
+
+Two deliberate limits on its reach:
+
+- **Only the two writers of a staged tree call it** — `extractor/safe_unzip.py:safe_extract` and `utils/swap.py`'s `remove`/`swap`. A *final* path over 260 characters is a real defect that would break every reader downstream, including the ones outside this tool; papering over it everywhere would hide it. The transient `.part` overflow is the one case where the limit is an artifact of our own staging, and that is the case the prefix is for.
+- **The traversal refusal still runs first.** `safe_extract` validates every member name against the extract root before it writes anything, and `long_path` is applied to the root, not used to construct a member path that skipped that check. The prefix removes a length ceiling; it must not become a way around the containment rule.
+
+`safe_extract` also no longer calls `ZipFile.extract`, which builds its own target path from the unprefixed directory and so reinstates the limit. It opens each member and `shutil.copyfileobj`s it into a destination derived from the prefixed root.
 
 ---
 

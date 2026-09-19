@@ -29,9 +29,16 @@ def project_root(tmp_path: Path) -> Path:
     root has them, and from Phase 6a a version that cannot find `toc.yml.j2`
     fails to convert. A fixture root that lacks them would test a condition no
     installation is in.
+
+    `docsite.yaml` is copied for the same reason, from Phase 14a: the download
+    stage no longer reads the catalog's `zip_url` column but derives the endpoint
+    from that file's template, so a root without it downloads nothing at all.
+    Copying the shipped file rather than a stub is deliberate -- it is the
+    template the corpus was measured against, and a stub would let it rot.
     """
     (tmp_path / "config").mkdir()
     shutil.copytree(REPO_ROOT / "config" / "aem_templates", tmp_path / "config" / "aem_templates")
+    shutil.copyfile(REPO_ROOT / "config" / "docsite.yaml", tmp_path / "config" / "docsite.yaml")
     return tmp_path
 
 

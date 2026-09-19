@@ -237,6 +237,35 @@ class StateStore:
             self._conn.close()
             self._conn = None
 
+    # -- reads ----------------------------------------------------------------
+    #
+    # Reads take the same lock the writes do (Phase 14c). They did not, and the
+    # gap was not theoretical: `download --family ems` failed with
+    # `sqlite3.InterfaceError: bad parameter or other API misuse`, intermittently,
+    # under four workers and never when a version was fetched alone. Every write
+    # went through `_tx` and every read went straight to `connect().execute(...)`,
+    # so one worker's `commit()` could land while another was stepping a
+    # statement on the same shared connection. `check_same_thread=False` makes
+    # that legal, not safe.
+    #
+    # Reproduced deliberately before it was fixed -- 8 threads interleaving a
+    # read, a write and a read raised 2-3 times per 3,200 rounds, and **one of
+    # those was an `IndexError` rather than an `InterfaceError`**: a row coming
+    # back malformed instead of an exception, which is the worse half of the same
+    # race and the reason this is a lock rather than a retry.
+    #
+    # Both helpers materialize inside the lock. Returning a live cursor would
+    # hand the caller a statement to step after the lock was dropped, which is
+    # the bug with an extra step in it.
+
+    def _one(self, sql: str, params: "tuple[Any, ...]" = ()) -> sqlite3.Row | None:
+        with self._lock:
+            return self.connect().execute(sql, params).fetchone()
+
+    def _all(self, sql: str, params: "tuple[Any, ...]" = ()) -> list[sqlite3.Row]:
+        with self._lock:
+            return self.connect().execute(sql, params).fetchall()
+
     @contextmanager
     def _tx(self) -> Iterator[sqlite3.Connection]:
         with self._lock:
@@ -320,9 +349,9 @@ class StateStore:
             )
 
     def get_product_snapshot(self, slug: str) -> dict[str, Any] | None:
-        row = self.connect().execute(
+        row = self._one(
             "SELECT * FROM product_snapshot WHERE slug = ?", (slug,)
-        ).fetchone()
+        )
         return dict(row) if row else None
 
     def record_version_snapshot(self, version: ProductVersion) -> None:
@@ -360,10 +389,10 @@ class StateStore:
             )
 
     def get_version_snapshot(self, slug: str, version: str) -> dict[str, Any] | None:
-        row = self.connect().execute(
+        row = self._one(
             "SELECT * FROM version_snapshot WHERE slug = ? AND version = ?",
             (slug, version),
-        ).fetchone()
+        )
         return dict(row) if row else None
 
     def known_versions(self, slug: str) -> set[str]:
@@ -372,9 +401,9 @@ class StateStore:
         Used by the importer to detect keys that vanished from the CSV -- typically
         Excel coercing `1.10` to `1.1` -- and abort rather than delete silently.
         """
-        rows = self.connect().execute(
+        rows = self._all(
             "SELECT version FROM version_snapshot WHERE slug = ?", (slug,)
-        ).fetchall()
+        )
         return {row["version"] for row in rows}
 
     def forget_version(self, slug: str, version: str) -> None:
@@ -415,18 +444,18 @@ class StateStore:
                 )
 
     def get_version_state(self, slug: str, version: str) -> dict[str, Any] | None:
-        row = self.connect().execute(
+        row = self._one(
             "SELECT * FROM version_state WHERE slug = ? AND version = ?",
             (slug, version),
-        ).fetchone()
+        )
         return dict(row) if row else None
 
     def versions_with_status(self, status: ConversionStatus | str) -> list[tuple[str, str]]:
         """All `(slug, version)` pairs currently at a given lifecycle stage."""
-        rows = self.connect().execute(
+        rows = self._all(
             "SELECT slug, version FROM version_state WHERE status = ? ORDER BY slug, version",
             (str(status),),
-        ).fetchall()
+        )
         return [(row["slug"], row["version"]) for row in rows]
 
     def progress(self) -> dict[tuple[str, str], dict[str, Any]]:
@@ -441,9 +470,9 @@ class StateStore:
         interrupted conversion is not counted as one.
         """
         rows: dict[tuple[str, str], dict[str, Any]] = {}
-        for row in self.connect().execute(
+        for row in self._all(
             "SELECT slug, version, status, download_path, extract_path, error FROM version_state"
-        ).fetchall():
+        ):
             rows[(row["slug"], row["version"])] = {
                 "status": row["status"],
                 "downloaded": bool(row["download_path"]),
@@ -451,9 +480,9 @@ class StateStore:
                 "converted": False,
                 "error": row["error"],
             }
-        for row in self.connect().execute(
+        for row in self._all(
             "SELECT DISTINCT slug, version FROM output_map"
-        ).fetchall():
+        ):
             entry = rows.setdefault(
                 (row["slug"], row["version"]),
                 {"status": None, "downloaded": False, "extracted": False,
@@ -464,9 +493,9 @@ class StateStore:
 
     def status_counts(self) -> dict[str, int]:
         """Lifecycle histogram, for the migration dashboard."""
-        rows = self.connect().execute(
+        rows = self._all(
             "SELECT status, COUNT(*) AS n FROM version_state WHERE status IS NOT NULL GROUP BY status"
-        ).fetchall()
+        )
         return {row["status"]: row["n"] for row in rows}
 
     # -- metadata ------------------------------------------------------------
@@ -480,9 +509,9 @@ class StateStore:
             )
 
     def get_product_metadata(self, slug: str) -> dict[str, str]:
-        rows = self.connect().execute(
+        rows = self._all(
             "SELECT key, value FROM product_metadata WHERE slug = ?", (slug,)
-        ).fetchall()
+        )
         return {row["key"]: row["value"] for row in rows}
 
     def set_version_metadata(self, slug: str, version: str, key: str, value: Any) -> None:
@@ -494,10 +523,10 @@ class StateStore:
             )
 
     def get_version_metadata(self, slug: str, version: str) -> dict[str, str]:
-        rows = self.connect().execute(
+        rows = self._all(
             "SELECT key, value FROM version_metadata WHERE slug = ? AND version = ?",
             (slug, version),
-        ).fetchall()
+        )
         return {row["key"]: row["value"] for row in rows}
 
     # -- engine detection ----------------------------------------------------
@@ -512,10 +541,10 @@ class StateStore:
             )
 
     def get_engine_folder_map(self, slug: str, version: str) -> dict[str, str]:
-        rows = self.connect().execute(
+        rows = self._all(
             "SELECT folder, engine FROM engine_folder_map WHERE slug = ? AND version = ? ORDER BY folder",
             (slug, version),
-        ).fetchall()
+        )
         return {row["folder"]: row["engine"] for row in rows}
 
     # -- stage 4 inventory ----------------------------------------------------
@@ -536,11 +565,11 @@ class StateStore:
             )
 
     def get_csh_sources(self, slug: str, version: str) -> list[dict[str, Any]]:
-        rows = self.connect().execute(
+        rows = self._all(
             "SELECT path, doc_set, format, entries, status FROM csh_source "
             "WHERE slug = ? AND version = ? ORDER BY path",
             (slug, version),
-        ).fetchall()
+        )
         return [dict(row) for row in rows]
 
     def record_asset_inventory(self, slug: str, version: str, rows: Iterable[tuple]) -> None:
@@ -557,11 +586,11 @@ class StateStore:
             )
 
     def get_asset_inventory(self, slug: str, version: str) -> list[dict[str, Any]]:
-        rows = self.connect().execute(
+        rows = self._all(
             "SELECT output_root, category, destination, files, bytes FROM asset_inventory "
             "WHERE slug = ? AND version = ? ORDER BY output_root, category, destination",
             (slug, version),
-        ).fetchall()
+        )
         return [dict(row) for row in rows]
 
     # -- stage 5 output map ----------------------------------------------------
@@ -582,10 +611,10 @@ class StateStore:
 
     def get_output_map(self, slug: str, version: str) -> dict[str, str]:
         """Source path -> output path, for §9.3's resolver."""
-        rows = self.connect().execute(
+        rows = self._all(
             "SELECT source, output FROM output_map WHERE slug = ? AND version = ? ORDER BY source",
             (slug, version),
-        ).fetchall()
+        )
         return {row["source"]: row["output"] for row in rows}
 
     # -- findings (planning.md §7.1) -------------------------------------------
@@ -623,11 +652,11 @@ class StateStore:
             )
 
     def get_findings(self, run_id: int) -> list[dict[str, Any]]:
-        rows = self.connect().execute(
+        rows = self._all(
             "SELECT stage, severity, code, slug, version, path, message, count "
             "FROM findings WHERE run_id = ? ORDER BY id",
             (run_id,),
-        ).fetchall()
+        )
         return [dict(row) for row in rows]
 
     def last_run(self, command: str | None = None) -> dict[str, Any] | None:
@@ -636,7 +665,7 @@ class StateStore:
         if command is not None:
             sql += " WHERE command = ?"
             params = (command,)
-        row = self.connect().execute(sql + " ORDER BY run_id DESC LIMIT 1", params).fetchone()
+        row = self._one(sql + " ORDER BY run_id DESC LIMIT 1", params)
         return dict(row) if row is not None else None
 
     # -- the read side (Phase 7a, architecture.md §7.3) -------------------------
@@ -647,9 +676,9 @@ class StateStore:
     # rename becomes a silent empty table.
 
     def get_run(self, run_id: int) -> dict[str, Any] | None:
-        row = self.connect().execute(
+        row = self._one(
             "SELECT * FROM runs WHERE run_id = ?", (run_id,)
-        ).fetchone()
+        )
         return dict(row) if row is not None else None
 
     def recent_runs(self, limit: int = 20, command: str | None = None) -> list[dict[str, Any]]:
@@ -662,9 +691,9 @@ class StateStore:
         if command is not None:
             sql += " WHERE r.command = ?"
             params = (command,)
-        rows = self.connect().execute(
+        rows = self._all(
             sql + " ORDER BY r.run_id DESC LIMIT ?", (*params, limit)
-        ).fetchall()
+        )
         return [dict(row) for row in rows]
 
     def query_findings(
@@ -692,15 +721,15 @@ class StateStore:
             if value:
                 sql += f" AND {column} = ?"
                 params.append(value)
-        rows = self.connect().execute(sql + " ORDER BY id", params).fetchall()
+        rows = self._all(sql + " ORDER BY id", params)
         return [dict(row) for row in rows]
 
     def findings_tally(self, run_id: int) -> dict[str, int]:
         """`{severity: rows}` for one run, without loading the rows."""
-        rows = self.connect().execute(
+        rows = self._all(
             "SELECT severity, COUNT(*) AS rows FROM findings WHERE run_id = ? GROUP BY severity",
             (run_id,),
-        ).fetchall()
+        )
         return {row["severity"]: row["rows"] for row in rows}
 
     def prune_findings(self, keep: int) -> tuple[int, int]:
@@ -715,10 +744,10 @@ class StateStore:
             raise ValueError("--keep cannot be negative")
         stale = [
             int(row["run_id"])
-            for row in self.connect().execute(
+            for row in self._all(
                 "SELECT run_id FROM runs WHERE run_id IN "
                 "(SELECT DISTINCT run_id FROM findings) ORDER BY run_id DESC"
-            ).fetchall()
+            )
         ][keep:]
         if not stale:
             return 0, 0

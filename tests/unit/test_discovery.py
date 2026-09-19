@@ -30,7 +30,13 @@ DOCSITE = {
         "product_archive": "/api/products/archive/{slug}",
         "bu_category_products": "/api/bu_category_products",
     },
-    "zip_urls": {"active_template": "/pub/{folder_path}/doc/zip/tib_{folder_slug}_doc.zip"},
+    # The shipped template, corrected in Phase 14a. The `{folder_slug}` form it
+    # replaced is kept as a second entry, because the client's contract is that a
+    # deployment pinning the older, slug-free shape keeps working.
+    "zip_urls": {
+        "active_template": "/pub/{folder_path}/{slug}-{version_dashed}_documentation.zip",
+        "legacy_template": "/pub/{folder_path}/doc/zip/tib_{folder_slug}_doc.zip",
+    },
     # No rate limit: a throttled suite is a slow one, and the throttle is exercised
     # directly in test_client_throttles_between_requests.
     "crawl": {"timeout_seconds": 5, "rate_limit_per_second": 0},
@@ -197,15 +203,42 @@ def test_client_passes_an_absolute_url_through(client: DocsiteClient) -> None:
     assert client.url("https://elsewhere.example/ems.zip") == "https://elsewhere.example/ems.zip"
 
 
-def test_active_zip_url_fills_both_template_slots(client: DocsiteClient) -> None:
-    assert client.active_zip_url("ems/10.4.0") == (
-        "https://docs.tibco.com/pub/ems/10.4.0/doc/zip/tib_ems_10.4.0_doc.zip"
+def test_active_zip_url_fills_every_template_slot(client: DocsiteClient) -> None:
+    """The Phase 14a shape, read out of the package's own `landing-page.js`.
+
+    The filename is the version's `finalSlug` and the version with its dots turned
+    to dashes -- not the folder slug, which is what the template said until the
+    whole corpus was measured against it and resolved 0 of 35.
+    """
+    assert client.active_zip_url("ems/10.4.0", "tibco-enterprise-message-service", "10.4.0") == (
+        "https://docs.tibco.com/pub/ems/10.4.0/"
+        "tibco-enterprise-message-service-10-4-0_documentation.zip"
     )
 
 
 def test_active_zip_url_without_a_folder_path_is_none(client: DocsiteClient) -> None:
     """A guessed URL would be recorded in the catalog and only fail at download time."""
-    assert client.active_zip_url("") is None
+    assert client.active_zip_url("", "tibco-enterprise-message-service", "10.4.0") is None
+
+
+def test_active_zip_url_is_none_when_the_template_wants_a_token_it_was_not_given(
+    client: DocsiteClient,
+) -> None:
+    """Better no URL than a malformed one -- the same contract, extended to the new slots."""
+    assert client.active_zip_url("ems/10.4.0", "", "10.4.0") is None
+    assert client.active_zip_url("ems/10.4.0", "tibco-enterprise-message-service", "") is None
+
+
+def test_a_template_that_wants_no_slug_still_builds_without_one(session) -> None:
+    """The tokens are checked against the template, not unconditionally.
+
+    A deployment pinning the pre-14a `{folder_slug}` form has no slug to give and
+    must keep working, which is why the check is "what does this template need".
+    """
+    pinned = {**DOCSITE, "zip_urls": {"active_template": DOCSITE["zip_urls"]["legacy_template"]}}
+    assert DocsiteClient(pinned, session=session).active_zip_url("ems/10.4.0") == (
+        "https://docs.tibco.com/pub/ems/10.4.0/doc/zip/tib_ems_10.4.0_doc.zip"
+    )
 
 
 def test_get_json_raises_on_a_non_200(client: DocsiteClient) -> None:
@@ -276,9 +309,12 @@ def test_siblings_are_split_by_their_archive_flag(crawler: DocsiteCrawler) -> No
 
 
 def test_active_versions_get_a_generated_zip_url(crawler: DocsiteCrawler) -> None:
+    """The crawler hands the template a slug and a version, not just a folder (Phase 14a)."""
     ems = _by_code(crawler.discover(), "ems")
 
-    assert ems.versions["10.4.0"].zip_url.endswith("/pub/ems/10.4.0/doc/zip/tib_ems_10.4.0_doc.zip")
+    assert ems.versions["10.4.0"].zip_url.endswith(
+        "/pub/ems/10.4.0/tibco-enterprise-message-service-10-4-0_documentation.zip"
+    )
 
 
 def test_iso_release_timestamps_are_trimmed_to_the_day(crawler: DocsiteCrawler) -> None:
@@ -318,7 +354,7 @@ def test_camelcase_and_alternate_list_keys_parse_the_same(crawler: DocsiteCrawle
 
     assert "6.2.0" in ebx.versions
     assert ebx.versions["6.2.0"].release_date == "2025-02-01"
-    assert ebx.versions["6.2.0"].zip_url.endswith("/pub/ebx/6.2.0/doc/zip/tib_ebx_6.2.0_doc.zip")
+    assert ebx.versions["6.2.0"].zip_url.endswith("/pub/ebx/6.2.0/tibco-ebx-6-2-0_documentation.zip")
 
 
 def test_unversioned_docsite_entries_are_skipped_and_counted(crawler: DocsiteCrawler) -> None:

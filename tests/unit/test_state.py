@@ -279,3 +279,40 @@ def test_state_survives_writes_from_a_thread_pool(state: StateStore) -> None:
         list(pool.map(lambda v: state.set_version_state("tibco-ems", v, checksum=v), versions))
 
     assert [state.get_version_state("tibco-ems", v)["checksum"] for v in versions] == versions
+
+
+def test_reads_interleaved_with_writes_do_not_corrupt_the_shared_connection(
+    state: StateStore,
+) -> None:
+    """Phase 14c. The test above fixed *writes* from a pool and left reads unlocked.
+
+    `download --family ems` then failed intermittently with
+    `sqlite3.InterfaceError: bad parameter or other API misuse` -- four workers,
+    never reproducible on a single version. Every write took `_tx`'s lock and
+    every read went straight to the connection, so a `commit()` could land while
+    another thread was stepping a statement.
+
+    Sized from the measurement rather than guessed: eight threads doing
+    read-write-read 400 times raised on 2 or 3 of every 3,200 rounds before the
+    fix, on every one of three runs, and one of those was an `IndexError` from a
+    malformed row rather than an exception from sqlite -- silent bad data, which
+    is why this is worth a two-second test.
+    """
+    rounds = 400
+
+    def hammer(worker: int) -> None:
+        slug = f"product-{worker}"
+        for i in range(rounds):
+            state.get_version_state(slug, "1.0")
+            state.set_version_state(slug, "1.0", checksum=f"{worker}-{i}", zip_size=i)
+            state.get_version_metadata(slug, "1.0")
+
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        # `list()` is load-bearing: `map` swallows a worker's exception until the
+        # result is pulled, and an unread future is a green test over a raising one.
+        list(pool.map(hammer, range(8)))
+
+    for worker in range(8):
+        assert state.get_version_state(f"product-{worker}", "1.0")["checksum"] == (
+            f"{worker}-{rounds - 1}"
+        )

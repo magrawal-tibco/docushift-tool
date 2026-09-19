@@ -20,9 +20,20 @@ endpoints:
   bu_category_products: "/api/bu_category_products"
 
 zip_urls:
-  # Active versions: built from the version's folder_path.
-  # e.g. folder_path "ems/10.4.0" -> /pub/ems/10.4.0/doc/zip/tib_ems_10.4.0_doc.zip
-  active_template: "/pub/{folder_path}/doc/zip/tib_{folder_slug}_doc.zip"
+  # Active versions: built from the version's folder_path, the catalog slug, and the
+  # version with its dots turned to dashes.
+  # e.g. folder_path "ems/10.4.0" + slug "tibco-enterprise-message-service"
+  #   -> /pub/ems/10.4.0/tibco-enterprise-message-service-10-4-0_documentation.zip
+  #
+  # Read out of `html/Resources/Scripts/landing-page.js`, a MadCap Flare file shipped
+  # inside the package that builds the docsite landing page's own Download Help link.
+  # See architecture.md §2.2.
+  active_template: "/pub/{folder_path}/{slug}-{version_dashed}_documentation.zip"
+  # Superseded 2026-09-19. Kept for the record, and read by nothing: measured against
+  # the live docsite it resolves for 0 of 35 sampled products, and 0 of 7 EMS versions.
+  # It looked correct for a phase because a missing /pub/ path is served as HTTP 200
+  # with an empty body, so a status-code check passes on a URL that does not exist.
+  legacy_template: "/pub/{folder_path}/doc/zip/tib_{folder_slug}_doc.zip"
   # Archived versions: the archive API returns an explicit zipPath; use it verbatim.
   archive_field: "zipPath"
 

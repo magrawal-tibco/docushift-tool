@@ -265,6 +265,14 @@ def test_missing_taxonomy_yields_empty_structure(config: ConfigManager) -> None:
 
 
 def test_missing_docsite_yields_empty_dict(config: ConfigManager) -> None:
+    """The file is unlinked first: from Phase 14a the fixture root ships a real one.
+
+    Copying the shipped `docsite.yaml` into every fixture root is what lets the
+    download tests exercise the real template, so the one test that is *about* its
+    absence has to create that absence deliberately.
+    """
+    config.docsite_path.unlink()
+
     assert config.load_docsite() == {}
 
 

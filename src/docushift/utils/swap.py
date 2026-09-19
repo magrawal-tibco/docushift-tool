@@ -28,6 +28,8 @@ import shutil
 import time
 from pathlib import Path
 
+from docushift.utils.longpath import long_path
+
 # Five attempts, 0.1s apart and growing: 1.0s of patience in total. Long enough
 # for a scanner to let go of a freshly written tree, short enough that a real
 # permission problem is still reported inside one heartbeat of the run.
@@ -36,7 +38,13 @@ DELAY = 0.1
 
 
 def remove(path: Path, attempts: int = ATTEMPTS, delay: float = DELAY) -> None:
-    """Removes a file or a whole tree, retrying the scanner race. Raises on the last try."""
+    """Removes a file or a whole tree, retrying the scanner race. Raises on the last try.
+
+    Long-path spelled (Phase 14b): a `.part` tree that Windows refused to *create*
+    at full length is equally one it will refuse to walk, so a failed extract
+    would otherwise leave litter that nothing could clean up.
+    """
+    path = long_path(path)
     for attempt in range(attempts):
         try:
             if path.is_dir():
@@ -57,7 +65,12 @@ def swap(staging: Path, target: Path, attempts: int = ATTEMPTS, delay: float = D
     leave the target missing and the staging directory present. That is the
     same window the callers already documented; the retry narrows it rather
     than closing it.
+
+    Both ends are long-path spelled (Phase 14b). The staging tree is the longer
+    of the two by the width of `.part`, which is the whole reason the limit is
+    reachable here at all.
     """
+    staging, target = long_path(staging), long_path(target)
     for attempt in range(attempts):
         try:
             remove(target, attempts=1)

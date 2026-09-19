@@ -150,17 +150,94 @@ def test_force_refetches_a_current_package(
     assert target.read_bytes() == body
 
 
-def test_a_version_with_no_url_is_a_report_line(
+def test_a_version_whose_endpoint_cannot_be_derived_is_a_report_line(
     config: ConfigManager, catalog: CatalogManager, product: Product, version: ProductVersion
 ) -> None:
-    """Not an abort: discovery genuinely misses some endpoints, and --from-file answers."""
-    version.zip_url = ""
+    """Not an abort: 7 of 35 sampled products resolve under no pattern, and --from-file answers.
+
+    Phase 14a moved the condition. It used to be "the `zip_url` column is empty",
+    which since the template was corrected means nothing -- the column is stale on
+    every active row and the endpoint is derived. What is left is the real
+    residue: a version the docsite publishes under a folder no template predicts,
+    modelled here by a product with no code to build one from.
+    """
+    product.product_code = ""
     session = FakeSession()
 
     result = downloader(config, catalog, session).download_one(product, version)
 
     assert result.outcome is Outcome.NO_URL
     assert "--from-file" in result.message
+    assert session.calls == []
+
+
+def test_a_blank_zip_url_column_no_longer_stops_a_download(
+    config: ConfigManager, catalog: CatalogManager, product: Product, version: ProductVersion
+) -> None:
+    """The inversion of Phase 14a, stated as a test: the column is not the endpoint.
+
+    Every active row in the real catalog carries a *wrong* URL rather than a blank
+    one, so `column or derive()` would never have derived anything. Derivation is
+    unconditional for an active `auto` row, which is what held the fix to zero
+    catalog rows changed.
+    """
+    body = zip_bytes()
+    version.zip_url = ""
+    session = FakeSession(FakeResponse(body))
+
+    result = downloader(config, catalog, session).download_one(product, version)
+
+    assert result.outcome is Outcome.DOWNLOADED
+    assert session.calls[0]["url"] == (
+        "https://docs.tibco.com/pub/ems/10.4.0/tibco-ems-10-4-0_documentation.zip"
+    )
+
+
+def test_a_stale_zip_url_column_is_ignored_in_favour_of_the_derived_endpoint(
+    config: ConfigManager, catalog: CatalogManager, product: Product, version: ProductVersion
+) -> None:
+    """The defect Phase 14a fixed, pinned so it cannot come back.
+
+    The fixture's column says `https://docs.example/ems.zip`; the download must go
+    to the templated endpoint instead. Trusting the column is exactly what made
+    the stage fail for eight phases while reporting HTTP 200.
+    """
+    session = FakeSession(FakeResponse(zip_bytes()))
+
+    downloader(config, catalog, session).download_one(product, version)
+
+    assert session.calls[0]["url"] == (
+        "https://docs.tibco.com/pub/ems/10.4.0/tibco-ems-10-4-0_documentation.zip"
+    )
+
+
+def test_an_archived_version_keeps_the_zipPath_upstream_gave_it(
+    config: ConfigManager, catalog: CatalogManager, product: Product, version: ProductVersion
+) -> None:
+    """Derivation is for active rows only. `zipPath` is published, not templated."""
+    version.is_archived = True
+    version.zip_url = "https://docs.example/archive/ems-7.0.zip"
+    session = FakeSession(FakeResponse(zip_bytes()))
+
+    downloader(config, catalog, session).download_one(product, version)
+
+    assert session.calls[0]["url"] == "https://docs.example/archive/ems-7.0.zip"
+
+
+def test_an_unresolved_endpoint_records_the_register_code(
+    config: ConfigManager, catalog: CatalogManager, product: Product, version: ProductVersion
+) -> None:
+    """§7.5's first `download` row, and the reason the residue is reported not chased."""
+    from docushift.reporting.findings import FindingsRun
+
+    product.product_code = ""
+    findings = FindingsRun("download")
+    PackageDownloader(config, catalog, session=FakeSession(), findings=findings).download_one(
+        product, version
+    )
+
+    assert [f.code for f in findings.all] == ["ZIP_URL_UNRESOLVED"]
+    assert findings.all[0].version == "10.4.0"
 
 
 # -- the transfer ------------------------------------------------------------

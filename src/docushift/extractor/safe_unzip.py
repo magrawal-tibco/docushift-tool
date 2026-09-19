@@ -13,8 +13,11 @@ a package that carries one is not a package we understand, and unpacking the
 other 4,000 members of it would leave a tree nobody can reason about.
 """
 
+import shutil
 import zipfile
 from pathlib import Path, PurePosixPath
+
+from docushift.utils.longpath import long_path
 
 
 class UnsafeArchiveError(Exception):
@@ -51,12 +54,16 @@ def safe_extract(zip_path: Path, target_dir: Path) -> int:
     for an archive that is not readable. Neither is caught here: the caller decides
     whether one bad package fails a run or becomes a report line.
     """
-    target_dir.mkdir(parents=True, exist_ok=True)
+    root = long_path(target_dir)
+    root.mkdir(parents=True, exist_ok=True)
     written = 0
     with zipfile.ZipFile(zip_path) as archive:
         members = archive.namelist()
         # Every member is checked *before* any is written, so a malicious archive
-        # cannot leave half a tree on disk before being refused.
+        # cannot leave half a tree on disk before being refused. This runs on the
+        # raw names and stays ahead of `long_path` on purpose: `\\?\` suppresses
+        # the OS's own path normalization, so a `..` that got past here would no
+        # longer be collapsed by anything (see `utils/longpath.py`).
         for member in members:
             if _is_unsafe(member):
                 raise UnsafeArchiveError(
@@ -65,6 +72,13 @@ def safe_extract(zip_path: Path, target_dir: Path) -> int:
         for member in members:
             if member.endswith("/"):
                 continue
-            archive.extract(member, target_dir)
+            # Written here rather than by `ZipFile.extract`, which joins the
+            # member onto an unprefixed target of its own making and so puts the
+            # 260-character limit back. The member is already proven safe, and
+            # `extract`'s sanitizer is the only thing being given up.
+            destination = root.joinpath(*PurePosixPath(member.replace("\\", "/")).parts)
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            with archive.open(member) as source, destination.open("wb") as sink:
+                shutil.copyfileobj(source, sink)
             written += 1
     return written

@@ -84,6 +84,16 @@ REGISTRY: dict[str, Code] = _codes(
          "Retirement left a product with nothing to convert", "planning.md Phase 3.7"),
     Code("BATCH_NOT_ELIGIBLE", Severity.WARNING, Stage.CATALOG,
          "Tagged into a batch but not eligible", "design.md §8.2.2"),
+    # Phase 14a, and the register's first `download` row -- the stage had never
+    # had one, because until the template was corrected the stage had never run.
+    # A warning rather than an error: 7 of 35 sampled products publish their
+    # package under a directory segment no pattern predicts (`1.0.0_october_2004`
+    # for version `1.0`), and `download --from-file` exists for exactly that.
+    # Gating on a condition whose remedy is a hand-supplied file would stop a
+    # 200-version batch over a known, bounded residue.
+    Code("ZIP_URL_UNRESOLVED", Severity.WARNING, Stage.DOWNLOAD,
+         "No ZIP endpoint could be derived for an active version; supply it with "
+         "download --from-file", "planning.md Phase 14a"),
     Code("CSH_SOURCE_EMPTY", Severity.NOTE, Stage.EXTRACT,
          "CSH source present but empty -- no csh.yml written", "architecture.md §5.4.2"),
     Code("CSH_SOURCE_UNPARSED", Severity.WARNING, Stage.EXTRACT,

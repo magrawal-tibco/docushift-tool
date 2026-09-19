@@ -526,7 +526,7 @@ def catalog_show(ctx: click.Context, product: str) -> None:
         f"  workspace={cfg.family_dir(product.bu, product.family)}"
     )
     table = Table(title=f"{len(product.versions)} versions")
-    for column in ("Version", "Archived", "Eligible", "Status", "Batch", "Released", "Engine", "ZIP"):
+    for column in ("Version", "Archived", "Eligible", "Status", "Batch", "Released", "Engine", "ZIP (stored)"):
         table.add_column(column)
     for _, ver in manager.iter_versions(slug=slug):
         table.add_row(
@@ -539,6 +539,11 @@ def catalog_show(ctx: click.Context, product: str) -> None:
             f"{ver.engine} ({ver.engine_source})",
             # A manual row usually has no URL, so name the source rather than
             # printing a bare "-" that reads as "nothing to download".
+            #
+            # "stored", not "the endpoint": on an active `auto` row this is what
+            # the last `catalog fetch` templated, and `download` derives its own
+            # (`PackageDownloader.resolve_url`). `download --dry-run` is the
+            # column to read for what would actually be fetched.
             ver.zip_url or (f"[dim]{ver.zip_source}[/dim]" if ver.zip_source is not ZipSource.AUTO else "-"),
         )
     console.print(table)
@@ -826,7 +831,7 @@ def _report_download(stats) -> None:
         (Outcome.DOWNLOADED, "Downloaded"),
         (Outcome.CURRENT, "Already current"),
         (Outcome.SKIPPED_MANUAL, "Skipped (manual)"),
-        (Outcome.NO_URL, "No zip_url"),
+        (Outcome.NO_URL, "No ZIP endpoint"),
         (Outcome.FAILED, "Failed"),
     ):
         table.add_row(label, str(stats.count(outcome)))
@@ -890,11 +895,18 @@ def download(ctx, bu, family, product, version, batch, select_all, force, worker
         _no_selection("download")
 
     if dry_run:
+        # The Source column asks the downloader rather than reading `zip_url`, so a
+        # dry run shows the endpoint the real run would fetch. Reading the column
+        # is how the wrong template survived a phase of spot-checks (§2.2).
+        resolver = PackageDownloader(cfg, manager)
         table = Table(title=f"Would download ({len(pairs)})")
         for column in ("Product", "Version", "Source", "Target"):
             table.add_column(column)
         for found, ver in pairs:
-            source = str(ver.zip_source) if ver.zip_source is not ZipSource.AUTO else (ver.zip_url or "-")
+            if ver.zip_source is not ZipSource.AUTO:
+                source = str(ver.zip_source)
+            else:
+                source = resolver.resolve_url(found, ver) or "[yellow]unresolved[/yellow]"
             table.add_row(
                 found.slug,
                 ver.version,
@@ -904,10 +916,14 @@ def download(ctx, bu, family, product, version, batch, select_all, force, worker
         console.print(table)
         return
 
-    downloader = PackageDownloader(cfg, manager, workers=workers)
+    findings = FindingsRun("download", batch=batch or "", store=manager.state).start()
+    downloader = PackageDownloader(cfg, manager, workers=workers, findings=findings)
     console.print(f"Downloading {len(pairs)} version(s) with {downloader.workers} worker(s)...")
 
     def on_result(result) -> None:
+        # Flushed per version, for §7.1's reason: a batch that dies on version 200
+        # keeps the findings of the first 199.
+        findings.flush()
         if result.outcome is Outcome.DOWNLOADED:
             note = " (resumed)" if result.resumed else ""
             console.print(
@@ -918,6 +934,8 @@ def download(ctx, bu, family, product, version, batch, select_all, force, worker
             console.print(f"  [red]x[/red] {result.slug}@{result.version}")
 
     _report_download(downloader.download_many(pairs, force=force, on_result=on_result))
+    findings.flush()
+    _report_findings(findings)
 
 
 def _report_extract(stats) -> None:

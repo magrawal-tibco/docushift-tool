@@ -239,6 +239,27 @@ docushift extract --batch poc-1
 
 ### When the ZIP URL is missing or wrong
 
+> **Changed in Phase 14 (2026-09-19).** For an active version, `download` does not read
+> the `zip_url` column at all — it **derives** the endpoint from the template in
+> `config/docsite.yaml`, because every templated value that was in the catalog was
+> wrong (0 of 35 sampled products resolved). Your `zip_url` still wins where you pinned
+> the row with `zip_source=manual`, and an archived row still uses the archive index's
+> link verbatim. A version that resolves under no known pattern is reported as
+> `ZIP_URL_UNRESOLVED` and is a `--from-file` job, exactly as below.
+>
+> Two practical consequences. **`catalog show` labels its column `ZIP (stored)`** — on
+> an active row that is what the last `catalog fetch` templated, not what `download`
+> will use; run **`download --dry-run`** to see the endpoint that would actually be
+> fetched. And the stale strings in `versions.csv` are left where they are: the next
+> `catalog fetch` rewrites them through the corrected template, and a blanked cell
+> could not be told apart from "discovery found nothing". See `planning.md` Phase 14a.
+>
+> The trap worth knowing either way: **docs.tibco.com answers a missing `/pub/` path
+> with HTTP 200 and an empty body.** A URL that "returns 200" in a browser or with
+> `curl -I` may still be nothing at all — which is why `download` checks that the bytes
+> begin `PK\x03\x04` and reports *"did not return a readable ZIP"* rather than writing
+> an empty file and calling it a success.
+
 Discovery does not always find a working download link — some products publish no
 "Download All Docs" bundle, and archived links go stale. If you have the ZIP by other
 means (support, an internal mirror, a colleague), hand it to DocuShift directly and it

@@ -26,7 +26,9 @@ import requests
 
 from docushift.catalog import CatalogManager
 from docushift.config import ConfigManager
+from docushift.discovery.client import DocsiteClient
 from docushift.models import ConversionStatus, Product, ProductVersion, ZipSource
+from docushift.reporting.findings import FindingsRun
 from docushift.utils.http import Throttle, build_session
 
 # Read in 1 MiB blocks. The corpus's packages run to 900 MB, so the hash is
@@ -127,14 +129,62 @@ class PackageDownloader:
         catalog: CatalogManager,
         session: requests.Session | None = None,
         workers: int | None = None,
+        findings: FindingsRun | None = None,
     ):
         self.config = config
         self.catalog = catalog
+        self.findings = findings
         crawl = dict(config.load_docsite().get("crawl") or {})
         self.timeout = float(crawl.get("timeout_seconds", 30))
         self.session = session if session is not None else build_session(crawl, accept=_ZIP_ACCEPT)
         self.throttle = Throttle.from_crawl(crawl)
         self.workers = int(workers or crawl.get("max_concurrent_requests", 4) or 4)
+        # The same builder discovery templates with, so the endpoint the downloader
+        # derives and the one a fetch would record cannot drift apart.
+        self._urls = DocsiteClient(config.load_docsite(), session=self.session)
+
+    # -- the endpoint ---------------------------------------------------------
+
+    def resolve_url(self, product: Product, version: ProductVersion) -> str | None:
+        """Which URL to fetch this version from, and where that answer comes from.
+
+        The stored `zip_url` is *not* the default. Every active row in the catalog
+        was templated by discovery, and until 2026-09-19 discovery's template was
+        wrong for the entire corpus -- 0 of 35 sampled products resolved. So the
+        column is trusted only where it carries something discovery did not invent:
+
+        1. `zip_source=manual` -- a human pinned this row (architecture.md §3.8).
+           Handled before this point; `download_one` skips such rows outright.
+        2. archived -- the value is the archive index's `zipPath`, given verbatim
+           by upstream and never templated (`crawler._version_from_record`).
+        3. otherwise -- derive. See architecture.md §2.2.
+
+        Deriving rather than reading is what keeps the fix to zero catalog rows.
+        The stale column is left where it is: the next `catalog fetch` rewrites it
+        through the corrected template, and a blanked cell would be
+        indistinguishable from "discovery found nothing".
+        """
+        if version.is_archived:
+            return version.zip_url or None
+
+        folder = self._folder_path(product, version)
+        derived = self._urls.active_zip_url(folder, product.slug, version.version)
+        return derived or None
+
+    def _folder_path(self, product: Product, version: ProductVersion) -> str:
+        """The docsite's `<code>/<version>` folder for this version.
+
+        Prefers the path discovery actually observed and recorded; falls back to
+        the canonical reconstruction, which is what the crawler itself builds a
+        URL from when a record declares no usable path.
+        """
+        if self.catalog.state is not None:
+            declared = self.catalog.state.get_version_metadata(product.slug, version.version)
+            observed = str(declared.get("folder_path") or "").strip().strip("/")
+            if observed.count("/") == 1:
+                return observed
+        code = str(product.product_code or "").strip().strip("/")
+        return f"{code}/{version.version}" if code and version.version else ""
 
     # -- state ---------------------------------------------------------------
 
@@ -178,15 +228,21 @@ class PackageDownloader:
                 size=target.stat().st_size, checksum=recorded["checksum"],
             )
 
-        if not version.zip_url:
-            # A report line, not an abort: discovery genuinely fails to produce a
-            # usable endpoint for some products, and `--from-file` is the answer.
-            message = "no zip_url; supply the package with `download --from-file`"
+        url = self.resolve_url(product, version)
+        if not url:
+            # A report line, not an abort: some products resolve under no known
+            # pattern -- 7 of 35 sampled -- and `--from-file` is the answer. The
+            # shape is a directory-segment problem rather than a filename one,
+            # e.g. a package published under `1.0.0_october_2004` for version
+            # `1.0`. See architecture.md §2.2.
+            message = "no ZIP endpoint resolved; supply the package with `download --from-file`"
             self._record(slug, number, status=ConversionStatus.ERROR, error=message)
+            if self.findings is not None:
+                self.findings.record("ZIP_URL_UNRESOLVED", slug=slug, version=number, message=message)
             return DownloadResult(slug, number, Outcome.NO_URL, message=message)
 
         try:
-            return self._fetch(product, version, target, force=force)
+            return self._fetch(product, version, target, url, force=force)
         except Exception as exc:  # noqa: BLE001 - every failure is a report line
             message = f"{type(exc).__name__}: {exc}"
             self._record(slug, number, status=ConversionStatus.ERROR, error=message)
@@ -271,12 +327,12 @@ class PackageDownloader:
         )
 
     def _fetch(
-        self, product: Product, version: ProductVersion, target: Path, force: bool
+        self, product: Product, version: ProductVersion, target: Path, url: str, force: bool
     ) -> DownloadResult:
         slug, number = product.slug, version.version
         recorded = self._recorded_state(slug, number)
         transfer = self.fetch_to(
-            version.zip_url, target, known_etag=recorded.get("zip_etag"), force=force
+            url, target, known_etag=recorded.get("zip_etag"), force=force
         )
         self._record(
             slug,
