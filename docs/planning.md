@@ -1678,7 +1678,86 @@ The six `zip_url` values were reverted to the wrong template before the run, so 
 
 **14d is answered by arithmetic, not by inspection.** The three versions converted earlier in the session from the predecessor's wrapper-free cache trees produced 4,326 topics in 4,445 files. Re-converted from the real ZIP, with its `tibco-enterprise-message-service-10-5-1/` wrapper directory in the way, 10.5.0 + 10.4.1 + 10.4.0 produce 1,437 + 1,437 + 1,452 = **4,326 topics** in 1,476 + 1,475 + 1,494 = **4,445 files**. `roots.py` and `apiref.py` absorb the extra level exactly as claimed, and the claim is now a number rather than a reading.
 
+**14d's scope, corrected 2026-09-19.** The arithmetic above is about *counts*, and it holds. It is not a statement that the wrapper is harmless: it was measured over Stage 5, which is the only stage that had run. Stage 7 had not, and the wrapper breaks two of its steps outright — see Phase 15.
+
 The suite went 1,270 → **1,285** (+15, 2 skipped: the `\\?\` assertions are Windows-only and skip elsewhere), `ruff` clean. One test changed premise rather than being added: `test_a_version_with_no_url_is_a_report_line` asserted that blanking `zip_url` stops a download, which after the inversion means nothing — it is now two tests, one that a blank column no longer stops anything and one for the condition that genuinely remains, a version with no folder to build a path from. `tests/conftest.py`'s `project_root` copies the shipped `docsite.yaml` in for the same reason it already copied the AEM templates: a root without it now downloads nothing, which is a condition no installation is in.
+
+---
+
+### Phase 15: The Package Wrapper Is Not the Version Root — **Planned, 2026-09-19**
+
+Phase 14 got the `ems` family through download, extract and convert. `sync --family ems --target-dir C:\github\tibco-docs-aem` is the first Stage 7 run against a package this tool actually fetched, and it publishes **one doc-class of four**:
+
+| doc-class | result |
+|---|---|
+| `online-help` | **6 of 6**, 8,849 files |
+| `archives` | index written, 28 archived versions |
+| `api-references` | **0 of 6**, every version failed |
+| `user-guides`, `release-information`, `reference-documents` | **0 files**, over 30 shipped PDFs |
+
+One cause under all three failures. A downloaded EMS package unpacks to a **single child directory** — `tibco-enterprise-message-service-10-4-0/`, the name the ZIP carries — with `doc/ html/ javadoc/ pdf/` inside *it*. Every hand-copied tree in this repo came from the predecessor's cache, which has no such level, so every step written against those trees assumes content sits at the version root.
+
+#### 15a. Two Stage 7 steps read the version root directly
+
+`sync/router.py:source_folders` returns `tree/pdf`, `tree/doc/pdf`, `tree/doc` and `tree/doc/doc`. Against a wrapped tree all four are absent, `route()` returns nothing, and the three document doc-classes publish an empty set without reporting anything — the run says `-` in the Documents column, which reads as "this version ships no PDFs" rather than "this version's PDFs were not found". 10.4.0 ships five.
+
+`sync/apirefs.py:display_name` names a published API folder from the tree's path relative to the version root, dropping known container segments (`doc`, `html`, `api`, …). The wrapper is not a container, so it survives into the name:
+
+```
+tibco-enterprise-message-service-10-4-0/html/api/dotnetdoc/html
+  -> tibco-enterprise-message-service-10-4-0-dotnetdoc      (48 chars)
+  -> dotnetdoc, once the wrapper is the root                 (9 chars)
+```
+
+Those 39 characters are pure repetition — the slug and the version are already two segments up the published path. They are also what pushes the longest published file past the ceiling:
+
+| | |
+|---|---|
+| longest published path, as named today | **267** |
+| the same path while staged as `10-4-0.part` | **272** |
+| Windows ceiling, `LongPathsEnabled = 0x0` | 260 |
+| the same path with the wrapper as root | **228** |
+
+**This is not §4.4's transient overflow, and must not be fixed with `\\?\`.** 267 is the *final* path — a published tree no reader outside this tool could open. Architecture §4.4 draws that line deliberately, and this is the first case to land on the far side of it. The fix is the name, which is wrong on its own terms; the length is the symptom that made it visible.
+
+#### 15b. A content root, resolved once at extract time
+
+**Not a strip during extraction.** Unpacking the child's contents into the version directory would make the tree match what every step assumes, with no consumer changes — but it rewrites the layout on disk, invalidates every recorded `extract_path`, and means the extracted tree no longer matches the package it came from. When an upstream ZIP and our copy of it disagree about structure, the next defect of this kind is unfalsifiable.
+
+**Not a patch to the two callers**, either. The assumption is "content is at the version root", and it is written in more than two places; fixing the two that failed leaves the rest waiting for a package that reaches them.
+
+So: `extract` resolves a **content root** per version and records it in `state.db`, and Stage 5/6/7 derive from it instead of from the version directory. The rule has to survive the corpus, and the corpus already contains the counter-example:
+
+| shape | versions on disk | single child | the child |
+|---|---|---|---|
+| `ems` packages | 6 | yes | `tibco-enterprise-message-service-10-4-0` |
+| `datasynapse` packages | 5 | yes | `doc` |
+| `gridserver-manager/7.1.1` | 1 | no (5 children) | — |
+
+**"One child" is therefore not the rule.** `doc/` is a single child too, and it is *content* — `source_folders` looks for `doc/pdf` and `doc/doc` by name. A rule that descended into it would break the five versions that work today. The rule is: descend through a single child **only when that child is not itself a known content segment**. Both halves need measuring before the code is written — a sample of packages from other families, read from the ZIP's central directory rather than by extracting them.
+
+#### 15c. A failed publish leaves its staging tree behind, and says so illegibly
+
+`_place` and `_place_api_references` call `remove(staging)` on the way *in*, not on the way out, so six `10-4-x.part/` trees with 6,146 files in them were left sitting in the published workspace. A `.part` directory is this tool's private vocabulary; in a target directory it does not own, it is litter that the next reader has no way to interpret.
+
+The failure also arrives as `shutil.Error`'s full list — every failed `(src, dst, why)` triple, several kilobytes of it, printed raw — and the run **exits 0**, because the per-version catch turns it into a `FAILED` row and `sync`'s exit rule is about findings, not rows.
+
+Three changes: stage cleanup in a `finally`, a one-line message with the count and the first offender, and a new register code.
+
+#### 15d. `PUBLISHED_PATH_TOO_LONG`
+
+The register's 43rd row, and `sync`'s first `error`. `sync` measures the destination path before it copies, skips the root that would overflow, and names it with the length and the path. A published path over the ceiling is not a warning: unlike `ZIP_URL_UNRESOLVED`, whose remedy is a hand-supplied file, there is nothing a user can do at run time and nothing downstream can read what was written.
+
+The code stays after 15b removes its only known occurrence. The ceiling is a property of the target filesystem and the publishing root the user chooses — `C:\github\tibco-docs-aem` is 24 characters, and a deeper one puts other products over the line with no wrapper involved.
+
+##### Acceptance
+
+- `sync --family ems` publishes all four doc-classes: 6 of 6 `api-references`, and the 30 shipped PDFs routed into their three doc-classes with an index apiece.
+- No `.part` directory survives any run, successful or failed.
+- `validate --target-dir` reads the published tree clean.
+- The API folders are named `dotnetdoc`, `javadoc` — not slug-and-version-prefixed.
+- A forced over-limit destination produces one `PUBLISHED_PATH_TOO_LONG` line, a skipped root, a non-zero exit, and no residue.
+- Stage 5's counts are unchanged: 8,613 topics in 8,847 files, which is the check that the content root resolved to the same tree the converter was already finding.
 
 ---
 
