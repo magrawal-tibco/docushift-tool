@@ -60,8 +60,14 @@ def test_the_register_carries_every_row_of_7_5() -> None:
     to the author. Those are not published, and the note is what says so -- the
     page exists in the source, so its absence downstream would otherwise look like
     a conversion failure.
+
+    Phase 13 adds the 41st, `OUTPUT_COUNT_MISMATCH`, and it is the first code added
+    for a defect that has already shipped: 7b found a generated page written *over*
+    a converted topic on a case-insensitive filesystem, in three published
+    versions, with every individual write succeeding. Counting the output tree is
+    what turns a second write landing on a first into arithmetic.
     """
-    assert len(REGISTRY) == 40
+    assert len(REGISTRY) == 41
 
 
 def test_severity_comes_from_the_registry_and_not_from_the_call_site() -> None:
@@ -197,3 +203,19 @@ def test_every_registered_code_is_written_down_somewhere_in_src() -> None:
 
     written = {code for code in REGISTRY if f'"{code}"' in text or f"'{code}'" in text}
     assert set(REGISTRY) - written == set(NOT_YET_EMITTED)
+
+
+def test_the_published_table_carries_every_registered_code() -> None:
+    """§7.5 is a *published* table, and a register only two people can enumerate is not one.
+
+    The count above pins the register against itself; this pins it against the
+    document that readers actually consult. It was written because the two had
+    already drifted: `CODE_LINK_FLATTENED`, `INDEX_UNLINKED` and
+    `WHATS_NEW_PLACEHOLDER` were in the code and absent from the table, each one
+    added by a phase whose own notes said the register had grown.
+    """
+    table = (Path(__file__).resolve().parents[2] / "docs" / "planning.md").read_text(
+        encoding="utf-8"
+    )
+
+    assert {code for code in REGISTRY if f"| `{code}`" not in table} == set()

@@ -485,6 +485,15 @@ Directories are not counted, only files. Symlinks are not followed — a documen
 
 **Writing.** One call sets all five together, so the two booleans cannot disagree with the counts they summarize. It follows `record_detected_engine`: locate the row, set the fields, save. A version that extracted with errors is left blank rather than written zero — a failed run must not look like an empty package.
 
+**The output side — `_md_files` and `_out_files` — Built (Phase 13).** Two more columns, written by Stage 5 rather than Stage 4, closing the other end of the same question. `_md_files` counts Markdown files in the version's output tree (converted topics plus Stage 6a's generated pages); `_out_files` counts every file in it, including the copied assets and the `toc.yml` / `metadata.yml` / `csh.yml` artifacts. Four rules, and they are the same four:
+
+1. **One walk, after the swap.** Not derived from the run's counters. `documents + generated + assets + 3` is wrong at the last term whenever `csh.yml` was not written, which §9.4 makes the majority case rather than an edge one; and walking the target rather than the staging directory means the numbers describe the tree that will be published.
+2. **No `_out_api_files`.** Conversion skips API trees and Stage 7 copies them verbatim (§10.6), so `_api_files` is the count at both ends. The pair to read across a row is `_doc_files` → `_out_files`.
+3. **Blank rather than zero on a failure.** `no-tree`, `engine-unknown` and `failed` leave both columns as they were. A `current` version whose columns are blank is walked anyway — §6.1's rule for an unmeasured tree, for the reason Phase 12 had to exist.
+4. **A shortfall against `documents + generated` is a finding.** Each document is one write to a path an engine chose, so fewer files than documents means two writes resolved to one path and the second replaced the first — `OUTPUT_COUNT_MISMATCH` (§7.5).
+
+`clear_convert_inventory` blanks these two and nothing else: the extracted tree is still on disk and still measured.
+
 ### 6.3.1 What the corpus says about API-reference paths
 
 Measured 2026-09-07 against the predecessor `html-to-md` extracted cache: **2,201,528 files across 515 products**. The reproduction scripts are `C:\tmp\an_segments.py` and `an_segments2.py`; they need that cache, which is not in this repo.
@@ -1044,6 +1053,7 @@ Most rows are **Built** or **Specified**. One is neither, and is marked as such 
 | 6.1 steps 4–5 | The one walk | Built | `extractor/inventory.py:inventory_tree`; `unpacker.py:measure` |
 | 6.2 | CSH source location and the three readers | Built | `engines/csh.py:csh_format_of`, `read_csh_source` |
 | 6.3 | Inventory columns and write-back | Built | `catalog.py:record_extract_inventory`, `utils/csvio.py` |
+| 6.3 | Output inventory columns, from one walk after the swap | Built | `converter/driver.py:_measure_output`; `catalog.py:record_convert_inventory` |
 | 6.3 | API-reference predicate and triage | Built | `apiref.py:find_api_roots`, `is_api_reference`, `looks_like_api_name` |
 | 6.4 steps 1–2 | Asset inventory by category and destination | Built | `extractor/inventory.py`; `state.py:record_asset_inventory` |
 | 6.4 steps 3–7 | Asset copy set — resolve once, copy and link together | Built | `transforms/assets.py:AssetCopier` |

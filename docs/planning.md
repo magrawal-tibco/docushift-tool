@@ -872,7 +872,7 @@ The concrete deliverable of §7.1: every deferred "report line" in the three doc
 
 **Eight rows were added by Phase 5b** (marked ⁵ᵇ). They are the report lines `architecture.md` §5.1 asked for in prose and this table had not yet given a code; the reachability half of that test is what forced the last of them — `ALERT_LABEL_UNMAPPED` was unreachable against a closed callout vocabulary, and rather than delete the code the detection was widened to the open `div.note<Kind>` convention it was written for.
 
-**Stage 6 netted two** (⁶ᶜ, ⁶ᵈ, ⁶ᵉ) — three added and `ARCHIVE_ALSO_LIVE` removed as unreachable once `sync/archives.py` was built and the condition turned out not to arise. **Phase 7b added seven** (⁷ᵇ), which is the largest single jump and not the register growing loosely: `validate` is the first command whose entire job is to raise findings, so its §7.4 and `design.md` §9.6 obligations had no codes for the plain reason that nothing had ever been written to emit them. The table is now 37 rows. **Phase 7c added none** (⁷ᶜ marks the row it *reached*, not a row it created) and took `NOT_YET_EMITTED` from two to **one**: `CSH_IDENTIFIER_DROPPED` fires, and only `DOC_REFERENCE_MISSING` is left, waiting on §10.7's class 2. A phase that closes a debt without opening one is the register working the way it was meant to.
+**Stage 6 netted two** (⁶ᶜ, ⁶ᵈ, ⁶ᵉ) — three added and `ARCHIVE_ALSO_LIVE` removed as unreachable once `sync/archives.py` was built and the condition turned out not to arise. **Phase 7b added seven** (⁷ᵇ), which is the largest single jump and not the register growing loosely: `validate` is the first command whose entire job is to raise findings, so its §7.4 and `design.md` §9.6 obligations had no codes for the plain reason that nothing had ever been written to emit them. **Phase 7c added none** (⁷ᶜ marks the row it *reached*, not a row it created) and took `NOT_YET_EMITTED` from two to **one**: `CSH_IDENTIFIER_DROPPED` fires, and only `DOC_REFERENCE_MISSING` is left, waiting on §10.7's class 2. A phase that closes a debt without opening one is the register working the way it was meant to. Four more followed one at a time — `CODE_LINK_FLATTENED` (⁸), `INDEX_UNLINKED` (¹⁰ᵇ), `WHATS_NEW_PLACEHOLDER` (¹¹ᵃ) and `OUTPUT_COUNT_MISMATCH` (¹³) — and **the table is now 41 rows**. Three of those four were added to the code and not to this table, and the drift stood until Phase 13 came looking: `test_the_register_carries_every_row_of_7_5` pins the register's size against itself, which cannot see a missing row here. `test_the_published_table_carries_every_registered_code` now reads this file and asserts every registered code appears in it, so the next omission fails a test rather than waiting to be noticed.
 
 | Code | Sev | Stage | Obligation | Specified in |
 | :--- | :--- | :--- | :--- | :--- |
@@ -913,6 +913,10 @@ The concrete deliverable of §7.1: every deferred "report line" in the three doc
 | `ARTIFACT_UNPARSED`⁷ᵇ | **error** | validate | An AEM YAML artifact that would not parse; its field checks were skipped | §7.4 |
 | `SYNC_RESIDUE`⁷ᵇ | note | validate | A `.part` staging folder left by a sync that did not finish | §7.4 |
 | `CSH_IDENTIFIER_DROPPED`⁷ᶜ | warn | validate | Present in the prior version, absent here (§7.6). One row per version; `count` is how many | this phase |
+| `CODE_LINK_FLATTENED`⁸ | note | convert | Link inside a code block kept its words and lost its target; a GFM fence cannot hold one | Phase 8 |
+| `INDEX_UNLINKED`¹⁰ᵇ | note | sync | A published document no `index.md` links to — the reverse of `LINK_BROKEN` | Phase 10b |
+| `WHATS_NEW_PLACEHOLDER`¹¹ᵃ | note | convert | What's New shipped as the unfilled MadCap template (167 of 648 roots); not published | Phase 11a |
+| `OUTPUT_COUNT_MISMATCH`¹³ | warn | convert | Fewer Markdown files on disk than documents converted; two writes landed on one path | Phase 13 |
 
 #### 7.6 Cross-version CSH regression
 
@@ -1480,6 +1484,90 @@ The package is wanted for one thing — a checksum, for the *currency* test. `me
 ##### Acceptance
 
 `extract --product tibco-datasynapse-gridserver-manager --measure-only` with `downloads/` still empty: outcome `MEASURED`, no network, no `.part` directory created, and `_has_csh`, `_csh_names`, `_has_api_ref`, `_api_files`, `_doc_files` filled on `7.1.1` and `7.2.0`. Byte-compare the extracted tree before and after — a measurement must not touch it. Re-run the same command: the rows are no longer blank, so it reports nothing to do. Then `--measure-only` over all six, and check the two booleans against their counts — `_has_csh=true` with `_csh_names=0` is legal and expected (55% of the corpus ships an empty help map), `_has_csh=false` with `_csh_names>0` is the contradiction `catalog import` already gates on (`catalog.py:1078`). Finally `extract --product … --measure-only --force` is refused with a message rather than doing something surprising, and the full suite.
+
+---
+
+### Phase 13: The Output Tree Is Counted Too
+
+Five columns describe the package going **in** — `_has_csh`, `_csh_names`, `_has_api_ref`, `_api_files`, `_doc_files`, all written by Stage 4's one walk. Nothing describes what came **out**. `convert` counts topics, generated pages and assets while it runs and prints them (`cli.py:1253`), and those numbers die with the process: `report` reads findings, `status` reads `version_state`, and neither can answer "how big is the Markdown for this version" for a run that finished last week. The catalog is where a per-version number lives, and on the output side it holds none.
+
+#### Why the API count is not repeated
+
+Because it is the same number at both ends, and storing it twice would be storing it twice. The converter **skips** API-reference trees (`flare.py:562`, on `apiref.is_api_reference`), so no API file is ever written into `output/`; Stage 7 copies those trees **verbatim** out of the *extracted* tree into `{resources-tree}/…/api-references/…` (§10.6). A Javadoc tree that arrives as 1,466 files is published as 1,466 files, and `_api_files` already says so.
+
+So the before/after pair to read across a row is **`_doc_files` → `_out_files`**, and `_api_files` sits outside both ends of it, unchanged by construction.
+
+#### Two columns, measured rather than derived
+
+| Column | Meaning |
+|---|---|
+| `_md_files` | Markdown files in the version's output tree — converted topics **and** the pages Stage 6a generated |
+| `_out_files` | **Every** file in that tree: the Markdown, the assets that were copied, and the `toc.yml` / `metadata.yml` / `csh.yml` artifacts |
+
+Assets get no column of their own: they are `_out_files - _md_files` minus the artifacts, and the subtraction carries no nuance the way `_has_csh` against `_csh_names` does.
+
+**Both come from one walk of the output tree, not from the run's counters** — and that is not ceremony. The obvious derivation, `documents + generated + assets + 3`, is already wrong by one on **every** version on disk today: `csh.yml` is written only when the map is non-empty (`transforms/csh.py:275`), and all six converted versions have `_csh_names=0`, so all six have **two** root artifacts, not three. A constant that is already false on 6 of 6 is not a constant.
+
+#### What the corpus says, walked by hand on 2026-09-19
+
+| version | `_doc_files` (in) | `_out_files` | `_md_files` | assets | out/in |
+|---|---|---|---|---|---|
+| `gridserver-logviewer` 1.0.0 | 345 | 46 | 27 | 17 | 13% |
+| `gridserver-manager` 7.1.1 | 1,458 | 981 | 930 | 49 | 67% |
+| `gridserver-manager` 7.2.0 | 1,552 | 1,050 | 1,000 | 48 | 68% |
+| `hpc-cloud-adapter` 2.0.0 | 290 | 25 | 20 | 3 | 9% |
+| `hpc-cloud-adapter` 2.1.0 | 313 | 29 | 24 | 3 | 9% |
+| `hpc-cloud-adapter` 2.2.0 | 314 | 31 | 25 | 4 | 10% |
+| **total** | **4,272** | **2,162** | **2,026** | **124** | **51%** |
+
+Two things fall out that no existing column can show. **The output is 94% Markdown** — 124 asset files out of 2,162 — because a Flare package's file count is dominated by skin chrome and orphan images, neither of which is copied (§6.4 step 7: 54.6% of Flare's images are orphans). And **the ratio is not stable**: two products of the same generator land at 67% and 9%. A 9% survival rate is either correct or a conversion that quietly lost a guide, and today nothing in the catalog lets anyone ask which.
+
+All six carry `_api_files=0`, so the "API files are unchanged" claim above is not demonstrated by this slice — it rests on the converter's skip and Stage 7's verbatim copy, which is where it should rest.
+
+#### The invariant it buys
+
+`_md_files` must equal `documents + generated`. When it does not, two writes landed on one path — which is not hypothetical: Phase 7b found `navigation._free` comparing a generated container page's path case-sensitively, so on Windows the page was written **over** a converted topic and three versions shipped with content silently replaced. That defect is arithmetic once the tree is counted. A new `warn` code, `OUTPUT_COUNT_MISMATCH`, carries the difference (register **40 → 41**); it is separable if the register is to stay put, but the check is the cheapest part of the phase and it catches the one failure mode that has already shipped once.
+
+#### What changes
+
+| File | Change |
+|---|---|
+| `models.py` | `ProductVersion.md_files`, `.out_files`, both `int \| None` — blank and `0` are different answers, as on the extract side |
+| `catalog.py` | `VERSION_COLUMNS` gains `_md_files`, `_out_files` after `_doc_files`; `_INVENTORY_COLUMNS` splits into an extract tuple and a convert tuple; `parse_optional_int` / `format_optional_int` round-trips; `record_convert_inventory(slug, version, md_files, out_files)` and `clear_convert_inventory` |
+| `converter/driver.py` | `_measure_output(path)` — one walk, two counts — called **after the swap** in `_build`, and on the `CURRENT` fast path when the columns are blank; `ConvertResult.md_files` / `.out_files` |
+| `cli.py` (`convert`) | the per-version line and the run summary report files on disk beside topics and assets |
+| `reporting/findings.py` | `OUTPUT_COUNT_MISMATCH`, warn, Stage.CONVERT |
+| `architecture.md` §3.9, `design.md` §6.4, `user-guide.md` §2 | the two columns, who writes them, and the `_doc_files` → `_out_files` reading |
+
+Nothing is needed in `version_snapshot`: discovery has no value for these, and the snapshot carries only fields discovery owns, so the merge exclusion is structural rather than a rule (`catalog.py:129`).
+
+#### The `CURRENT` fast path is not optional here
+
+Phase 12 exists because a column shipped that a no-op left blank forever. `convert_one`'s unchanged-input fast path (`driver.py:205`) returns `CURRENT` without building anything, and a version converted before this phase would report `CURRENT` on every future run and never be counted. So the same rule 4b-1 wrote into `extract_one` applies: **`CURRENT` with blank output columns walks the target tree anyway.** It is a directory walk against a conversion, which is free.
+
+This is also why `convert` gets no `--measure-only` twin. `extract` needed one because its fast path was gated behind a ZIP that no longer exists; `convert`'s is gated on a checksum and the output tree itself, both of which are on disk.
+
+#### What it deliberately does not do
+
+- **It does not count the published tree.** `_out_files` describes `output/<family>/<slug>/<version>/`, which is Stage 5's. What Stage 7 placed into a target workspace is `validate`'s question, answered against the target with no `versions.csv` agreement required (§7b), and a catalog column claiming to know it would be claiming to know another machine's disk.
+- **It does not count what was skipped.** Topics dropped as `runtime-stub` or `empty`, orphan assets, dangling references — all already findings with codes, and folding them into a footprint column would make a healthy version and a broken one read the same.
+- **It does not write on a failure.** `NO_TREE`, `ENGINE_UNKNOWN` and `FAILED` leave both columns exactly as they were, on §6.3's blank-not-zero rule: a version that did not convert is not a version that converted to nothing.
+- **It does not add a boolean.** `_has_api_ref` is the one derivable column in the set and it is justified as a filtering convenience; `_out_files > 0` needs no second spelling.
+- **It does not special-case `--input`/`--output`.** A conversion through overridden paths already writes `output_map` and `version_state` unconditionally (`driver.py:301`), and branching the catalog write on provenance would make the columns mean two things.
+
+#### Tests
+
+Round-trip: blank survives as blank in both directions, a measured `0` survives as `0`, an Excel `1,050` parses. A `FAILED` convert leaves both blank; a clean one with no assets writes `_md_files == _out_files - 2`. A version whose `csh.yml` **is** written lands on `- 3`, pinning the artifact count as measured rather than assumed. `CURRENT` over a blank row walks and fills; `CURRENT` over a filled row does not walk. `_md_files != documents + generated` emits `OUTPUT_COUNT_MISMATCH`, and the collision that produces it — two documents resolving to one path — is constructed rather than mocked. `clear_convert_inventory` blanks both and leaves the five extract columns alone.
+
+One test here is not about output files at all. Registering the 41st code turned up three earlier ones — `CODE_LINK_FLATTENED`, `INDEX_UNLINKED`, `WHATS_NEW_PLACEHOLDER` — that were in `findings.py` and missing from §7.5, because the only test guarding that table compared the register's size to a literal and could not see the document. `test_the_published_table_carries_every_registered_code` reads this file and asserts every registered code appears as a row in it.
+
+##### Acceptance
+
+`convert --product tibco-datasynapse-gridserver-manager --force` and read the row back: `_md_files=930` and `_out_files=981` on `7.1.1`, `1000` / `1050` on `7.2.0`, matching the hand walk above. Re-run without `--force`: no re-conversion, no change to the columns. Then blank the two columns on one row by hand and re-run — the `CURRENT` path fills them without rewriting the tree, and the output tree is byte-identical before and after. Convert all six and check the totals against the table: **2,026 Markdown files, 2,162 files**, and `OUTPUT_COUNT_MISMATCH` emitted **0** times. Finally the full suite and `ruff`.
+
+**Verified, 2026-09-19.** All six converted and every row read back matches the hand walk to the file: 930/981 and 1000/1050 on the two `manager` versions, 27/46 on `logviewer`, 20/25, 24/29 and 25/31 on the three `hpc` versions — **4,272 in, 2,162 out, 2,026 Markdown, 124 assets**. `findings` holds **0** `OUTPUT_COUNT_MISMATCH` rows, ever. **1,270 tests pass**, `ruff` clean.
+
+One clause of the acceptance could not be run, for the reason Phase 12 found: none of these six carries an `extract_zip_checksum`, so `convert_one`'s `checksum` is empty and the `CURRENT` branch is unreachable for them — a second run reconverts rather than reporting `Already current`. The backfill on that branch is covered by two unit tests instead (walks a blank row and fills it, leaving the tree byte-identical; does not walk a filled one), and it will be exercised on the corpus the first time a version is converted from a package that is actually on disk.
 
 ---
 

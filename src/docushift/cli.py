@@ -1156,6 +1156,10 @@ def _report_convert(stats, findings) -> None:
     console.print(table)
     if stats.documents:
         console.print(f"[dim]{stats.documents} topic(s), {stats.assets} asset(s) written.[/dim]")
+    if stats.out_files:
+        # What the trees hold, not what this run wrote: the two differ on a
+        # `current` version that was walked to fill blank columns.
+        console.print(f"[dim]{stats.out_files} file(s) standing in the measured output tree(s).[/dim]")
 
     for result in stats.converted:
         counts = result.counts
@@ -1253,6 +1257,7 @@ def convert(ctx, bu, family, product, version, batch, select_all, force, dry_run
                 f"{result.documents} topic(s), {result.assets} asset(s), {result.units} unit(s), "
                 f"{result.nav_nodes} nav node(s)"
                 + (f", {result.generated} generated" if result.generated else "")
+                + f" -> {result.out_files} file(s)"
             )
         elif result.outcome is ConvertOutcome.FAILED:
             console.print(f"  [red]x[/red] {result.slug}@{result.version}")

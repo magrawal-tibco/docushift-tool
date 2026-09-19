@@ -197,6 +197,18 @@ class ProductVersion(BaseModel):
     api_files: int | None = None
     doc_files: int | None = None
 
+    # Stage 5 output inventory -- see docs/architecture.md §3.9. Optional for the
+    # same reason the five above are: blank means this version has never been
+    # converted, `0` would mean it converted to nothing.
+    #
+    # There is deliberately no `_out_api_files` beside them. The converter skips
+    # API-reference trees and Stage 7 copies them verbatim (§10.6), so an API
+    # tree's file count is `api_files` at both ends of the pipeline and a second
+    # column would store the same number twice. The before/after pair to read
+    # across a row is `doc_files` -> `out_files`.
+    md_files: int | None = None
+    out_files: int | None = None
+
 
 class Product(BaseModel):
     """One product -- one row of `products.csv`, plus its versions.

@@ -193,6 +193,17 @@ REGISTRY: dict[str, Code] = _codes(
          "Link inside a code block kept its words and lost its target; a GFM fence "
          "cannot hold a link",
          "planning.md Phase 8"),
+    # Phase 13's one new code, and it exists because the failure has already
+    # shipped once: 7b found `navigation._free` comparing a generated container
+    # page's path case-sensitively, so on Windows the page was written *over* a
+    # converted topic and three versions published with content silently replaced.
+    # Counting the output tree turns that class of defect into arithmetic -- the
+    # engines reported N documents, the disk holds fewer -- which is the only
+    # way a write landing on another write is visible from outside the run.
+    Code("OUTPUT_COUNT_MISMATCH", Severity.WARNING, Stage.CONVERT,
+         "Fewer Markdown files on disk than documents converted; two writes "
+         "resolved to one path",
+         "planning.md Phase 13"),
     Code("LINK_BROKEN", Severity.ERROR, Stage.VALIDATE,
          "Relative link resolving to nothing", "design.md §8.4"),
     # Emitted from Phase 7c, and a warning on arithmetic rather than on taste, the

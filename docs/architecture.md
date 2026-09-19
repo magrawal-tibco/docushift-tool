@@ -171,13 +171,15 @@ The code is kept as a column because it is what a human recognizes (`ems`, not `
 | `_has_api_ref` | **tool, read-only** | Stage 4: the package carries an API-reference tree (Javadoc, C / Go / `tibdg`) — never converted, routed to the `api-references` doc-class (§6.2) |
 | `_api_files` | **tool, read-only** | Stage 4: files under those API-reference paths |
 | `_doc_files` | **tool, read-only** | Stage 4: every other file in the extracted tree |
+| `_md_files` | **tool, read-only** | Stage 5: Markdown files in the converted output tree — topics plus the pages Stage 6a generated. Blank until converted — see §3.9 |
+| `_out_files` | **tool, read-only** | Stage 5: **every** file in that tree — the Markdown, the assets that were copied, and `toc.yml` / `metadata.yml` / `csh.yml` |
 
 ```csv
-slug,version,is_archived,convert_eligible,convert_batch,release_date,release_status,retirement_date,release_status_source,engine,engine_source,zip_url,zip_source,custom_override,_bu,_family,_has_csh,_csh_names,_has_api_ref,_api_files,_doc_files
-tibco-ems,10.4.0,false,true,poc-1,2025-11-04,ga,2030-12-31,eos_report,flare,detected,https://docs.tibco.com/pub/ems/10.4.0/doc/zip/tib_ems_10.4.0_doc.zip,auto,false,tibco,messaging,true,412,true,4310,19776
-tibco-ems,10.2.1,true,false,,2023-06-12,retirement-announced,2027-12-31,eos_report,auto,auto,https://docs.tibco.com/pub/ems/tibco-ems-10-2-1_documentation.zip,auto,false,tibco,messaging,,,,,
-tibco-ems,8.6.0,true,false,,2020-04-30,retired,2024-12-31,eos_report,webworks,detected,https://docs.tibco.com/pub/ems/tibco-ems-8-6-0_documentation.zip,auto,false,tibco,messaging,,,,,
-tibco-datasynapse-gridserver,7.1.1,false,true,poc-1,2025-09-30,unknown,,unknown,flare,detected,,manual,false,tibco,integration,true,0,false,0,8104
+slug,version,is_archived,convert_eligible,convert_batch,release_date,release_status,retirement_date,release_status_source,engine,engine_source,zip_url,zip_source,custom_override,_bu,_family,_has_csh,_csh_names,_has_api_ref,_api_files,_doc_files,_md_files,_out_files
+tibco-ems,10.4.0,false,true,poc-1,2025-11-04,ga,2030-12-31,eos_report,flare,detected,https://docs.tibco.com/pub/ems/10.4.0/doc/zip/tib_ems_10.4.0_doc.zip,auto,false,tibco,messaging,true,412,true,4310,19776,2841,3196
+tibco-ems,10.2.1,true,false,,2023-06-12,retirement-announced,2027-12-31,eos_report,auto,auto,https://docs.tibco.com/pub/ems/tibco-ems-10-2-1_documentation.zip,auto,false,tibco,messaging,,,,,,,
+tibco-ems,8.6.0,true,false,,2020-04-30,retired,2024-12-31,eos_report,webworks,detected,https://docs.tibco.com/pub/ems/tibco-ems-8-6-0_documentation.zip,auto,false,tibco,messaging,,,,,,,
+tibco-datasynapse-gridserver,7.1.1,false,true,poc-1,2025-09-30,unknown,,unknown,flare,detected,,manual,false,tibco,integration,true,0,false,0,1458,930,981
 ```
 
 Note that the rows join on the slug while the `zip_url` paths still carry the code — `pub/ems/...` is the docsite's own folder, which is exactly what `product_code` records and exactly why it survives as a column.
@@ -192,7 +194,7 @@ There are **no `tibco-ebx` rows in this example**, and that is not an omission: 
 
 **Volatile machine state is deliberately excluded** from both files. `zip_etag`, `zip_size`, checksums, per-stage status, and free-form metadata live in `state.db`. This is what keeps the CSVs stable enough to leave open in a spreadsheet — a `catalog fetch` touches them only when discovery finds a genuinely new product or version.
 
-The five `_`-prefixed inventory columns are the deliberate exception, and the test they pass is the same one: **a fetch never touches them.** They change only when `docushift extract` runs, which is a real state change worth a diff. They earn a place in the sheet rather than in `state.db` because they are not machine bookkeeping — they are the inputs to the two decisions the sheet exists to record, `convert_eligible` and `convert_batch`. A number you must run a query to see is a number nobody consults before tagging 200 rows into `wave-2`.
+The seven `_`-prefixed inventory columns are the deliberate exception, and the test they pass is the same one: **a fetch never touches them.** They change only when `docushift extract` or `docushift convert` runs, which is a real state change worth a diff. They earn a place in the sheet rather than in `state.db` because they are not machine bookkeeping — they are the inputs to the two decisions the sheet exists to record, `convert_eligible` and `convert_batch`. A number you must run a query to see is a number nobody consults before tagging 200 rows into `wave-2`.
 
 ### 3.3 Family Classification & Provenance
 
@@ -359,9 +361,9 @@ Because the path is fully derivable from `(bu, family, slug, version)`, Stage 4 
 
 **Unknown versions.** `--from-file` requires the *product* to exist in the catalog: a typo'd product code is unrecoverable and would seed a junk row. If the product exists but the version does not, the version row is auto-added with a warning, matching the treatment of an undeclared family (§4.2) — the user has a real package in hand, which is stronger evidence the version exists than discovery's silence is that it does not.
 
-### 3.9 Extraction Inventory Columns
+### 3.9 Inventory Columns: What Went In, and What Came Out
 
-`convert_eligible` and `convert_batch` are decisions a human makes about a package they have not opened. Until Stage 4 runs, every version row looks identical in the only respect that matters to that decision — how much work it is and what is in it. Five columns, written back by `docushift extract`, close that gap.
+`convert_eligible` and `convert_batch` are decisions a human makes about a package they have not opened. Until Stage 4 runs, every version row looks identical in the only respect that matters to that decision — how much work it is and what is in it. Five columns, written back by `docushift extract`, close that gap. Two more, written back by `docushift convert`, close the other end of it.
 
 | Column | Type | Written by | Answers |
 | :--- | :--- | :--- | :--- |
@@ -370,8 +372,10 @@ Because the path is fully derivable from `(bu, family, slug, version)`, Stage 4 
 | `_has_api_ref` | bool | Stage 4 asset inventory | Does it carry a Javadoc / C / Go / `tibdg` tree that is **copied, never converted** (§6.2)? |
 | `_api_files` | int | Stage 4 asset inventory | How much of the package is that tree? |
 | `_doc_files` | int | Stage 4 asset inventory | How much of the package is everything else? |
+| `_md_files` | int | Stage 5 output walk | How many Markdown pages came out — converted topics plus Stage 6a's generated pages? |
+| `_out_files` | int | Stage 5 output walk | How big is the converted tree in total — Markdown, copied assets and the root artifacts? |
 
-**Blank is not zero.** All five are empty until the version has actually been extracted; `0` means Stage 4 looked and found none. A blank `_csh_names` on an archived row says "never unpacked", and a `0` says "unpacked, no help map" — conflating them would make the archived half of the catalog indistinguishable from a corpus with no CSH in it. The model types are therefore `bool | None` and `int | None`, and the CSV round-trip preserves the empty cell rather than defaulting it.
+**Blank is not zero.** All seven are empty until the version has actually been through the stage that writes them; `0` means the tool looked and found none. A blank `_csh_names` on an archived row says "never unpacked", and a `0` says "unpacked, no help map" — conflating them would make the archived half of the catalog indistinguishable from a corpus with no CSH in it. The model types are therefore `bool | None` and `int | None`, and the CSV round-trip preserves the empty cell rather than defaulting it.
 
 **`_has_csh` and `_csh_names` are not redundant.** `_has_csh` records that a source *file* was found; `_csh_names` records what parsed out of it. Empty `<CatapultAliasFile />` and zero-byte alias files are **55% of the observed corpus** (476 of 863 — §5.4.1), so `_has_csh=true, _csh_names=0` is a routine and distinct state: the product ships a help map that yields nothing, which is worth seeing before conversion rather than after. `_has_api_ref` against `_api_files` carries no such nuance and is a filtering convenience — the tool writes both from one computation in one call, so they cannot drift apart on their own.
 
@@ -383,7 +387,31 @@ Because the path is fully derivable from `(bu, family, slug, version)`, Stage 4 
 
 **`_doc_files` counts everything else in the extracted tree** — HTML topics, images, CSS, skins, PDFs, the lot. It is a package-footprint number, not a conversion-workload number; a Flare package's file count is dominated by skin assets. Read it as "how big is this thing", and read `_csh_names` as "how much of it is load-bearing".
 
-**Merge and edit behaviour** follows `_bu` / `_family`: tool-owned, edits ignored, no fetch may touch them (§3.5). Unlike `_bu` / `_family` they are *not* regenerated on every write — they persist in the CSV between extract runs, the way `engine` does. A hand-edit therefore survives until the next `docushift extract`, so `catalog import` warns when a boolean disagrees with the count beside it.
+#### 3.9.2 The output side: `_md_files` and `_out_files`
+
+`_doc_files` → `_out_files` is the before/after pair, and **`_api_files` is deliberately not counted twice.** The converter skips API-reference trees and Stage 7 copies them verbatim into the `-resources` tree (§10.6), so a Javadoc tree that arrives as 1,466 files is published as 1,466 files; a second column would store a number the row already carries. The Markdown half is the half that changes shape, and it is the only half these two describe.
+
+**Both come from one walk of the output tree, after the swap** — never from the run's own counters. The derivation that looks equivalent, `documents + generated + assets + 3`, is wrong at the last term on every version measured so far: `csh.yml` is written only for a non-empty map (§9.4), so a version whose help map yields no identifiers has **two** root artifacts and not three, and that is the majority case rather than an edge of it. The walk also runs against the tree that will actually be published rather than against the staging directory, so a swap that half-succeeded cannot leave a count describing a tree nobody has.
+
+The first six versions measured (2026-09-19, all DataSynapse, all Flare):
+
+| version | `_doc_files` | `_out_files` | `_md_files` | out/in |
+| :--- | ---: | ---: | ---: | ---: |
+| `gridserver-logviewer` 1.0.0 | 345 | 46 | 27 | 13% |
+| `gridserver-manager` 7.1.1 | 1,458 | 981 | 930 | 67% |
+| `gridserver-manager` 7.2.0 | 1,552 | 1,050 | 1,000 | 68% |
+| `hpc-cloud-adapter` 2.0.0 / 2.1.0 / 2.2.0 | 290 / 313 / 314 | 25 / 29 / 31 | 20 / 24 / 25 | ~9% |
+| **total** | **4,272** | **2,162** | **2,026** | **51%** |
+
+Two things fall out that no other column shows. **The output is 94% Markdown** — 124 asset files out of 2,162 — because a Flare package's file count is dominated by skin chrome and orphan images, and neither is copied (§6.4 step 7). And **the ratio is not stable across products of the same generator**: 67% against 9%. A 9% survival rate is either correct or a conversion that quietly lost a guide, and before these columns nothing in the catalog let anyone ask which.
+
+**A `current` version with blank output columns is walked anyway.** This is the rule 4b-1 wrote into `extract_one`, applied here for the reason Phase 12 exists: `convert`'s unchanged-input fast path returns without building anything, so a version converted before these columns existed would report `current` on every future run and stay blank permanently. A directory walk against a conversion is free. It is also why `convert` needs no `--measure-only` twin — `extract` needed one only because its fast path was gated behind a ZIP that no longer exists.
+
+**Fewer Markdown files than documents converted is a finding, not a rounding.** Every document and every generated page is one write to a path an engine chose, so `_md_files` equals `documents + generated` unless two writes resolved to one path — in which case the second silently replaced the first. That is not hypothetical: §7b found `navigation._free` comparing a generated container page's path case-sensitively, so on Windows the page was written *over* a converted topic and three versions published with the topic gone, every individual write having succeeded. `OUTPUT_COUNT_MISMATCH` carries the shortfall.
+
+**Merge and edit behaviour** follows `_bu` / `_family`: tool-owned, edits ignored, no fetch may touch them (§3.5). Unlike `_bu` / `_family` they are *not* regenerated on every write — they persist in the CSV between runs, the way `engine` does. A hand-edit therefore survives until the next `docushift extract` or `docushift convert`, so `catalog import` warns when a boolean disagrees with the count beside it, or when `_md_files` exceeds `_out_files` — the Markdown is counted out of the same walk as the total, so it cannot come out larger.
+
+**The two halves clear separately.** `clear_extract_inventory` blanks the five, `clear_convert_inventory` blanks the two, and neither reaches the other: discarding an extracted tree does not unmake the Markdown already produced from it, and discarding the Markdown does not unmeasure a package still on disk. §4.1's `--clean` reaching one tree and not the other is the same rule one level down.
 
 ### 3.10 Product Scope: Products Excluded From Conversion
 

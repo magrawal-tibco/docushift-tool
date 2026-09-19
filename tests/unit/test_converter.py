@@ -431,6 +431,138 @@ def test_api_roots_are_located_when_no_extract_recorded_them(
     ]
 
 
+# -- the output tree is counted (planning.md Phase 13) -------------------------
+
+
+def _walk(tree: Path) -> tuple[int, int]:
+    """What the columns should say, counted independently of the code under test."""
+    files = [path for path in tree.rglob("*") if path.is_file()]
+    return sum(1 for path in files if path.suffix == ".md"), len(files)
+
+
+def test_the_output_tree_is_counted_after_the_swap(
+    config, catalog, product, version, extracted, fake_engine
+) -> None:
+    """Two columns, from one walk of the tree that will actually be published."""
+    result, _ = convert(config, catalog, product, version)
+
+    md_files, out_files = _walk(result.path)
+    assert (result.md_files, result.out_files) == (md_files, out_files)
+    row = catalog.get_version("tibco-ems", "10.4.0")
+    assert (row.md_files, row.out_files) == (md_files, out_files)
+
+
+def test_the_artifact_count_is_measured_and_never_assumed(
+    config, catalog, product, version, extracted, fake_engine
+) -> None:
+    """`csh.yml` exists only for a non-empty map, so the root artifacts are 3 or 2.
+
+    This is the whole reason the columns come out of a walk rather than out of
+    `documents + generated + assets + 3`: the derivation is wrong by one on every
+    version whose help map yields no identifiers, which is the majority of the
+    corpus rather than an edge of it.
+    """
+    with_csh, _ = convert(config, catalog, product, version)
+    assert (with_csh.path / "csh.yml").is_file()
+    artifacts = with_csh.out_files - with_csh.md_files - with_csh.assets
+    assert artifacts == 3
+
+    # The same package with its alias file emptied -- `_csh_names=0`, which 55% of
+    # the Flare corpus ships.
+    (extracted / "guide" / "Data" / "Alias.xml").write_text(
+        "<CatapultAliasFile />", encoding="utf-8"
+    )
+    without_csh, _ = convert(config, catalog, product, version, force=True)
+
+    assert not (without_csh.path / "csh.yml").exists()
+    assert without_csh.out_files - without_csh.md_files - without_csh.assets == 2
+
+
+def test_a_version_that_did_not_convert_leaves_the_columns_blank(
+    config, catalog, product, version, fake_engine
+) -> None:
+    """Blank-not-zero: a version that did not convert is not one that converted to nothing."""
+    result, _ = convert(config, catalog, product, version)
+
+    assert result.outcome is ConvertOutcome.NO_TREE
+    row = catalog.get_version("tibco-ems", "10.4.0")
+    assert row.md_files is None
+    assert row.out_files is None
+
+
+def test_a_current_version_with_blank_columns_is_walked_and_filled(
+    config, catalog, product, version, extracted, fake_engine
+) -> None:
+    """Phase 12's lesson, applied before it can bite: a no-op must still count.
+
+    Without this the six versions converted before the columns existed would
+    report `current` on every future run and stay blank permanently -- exactly the
+    state `extract --measure-only` had to be written to get out of.
+    """
+    first, _ = convert(config, catalog, product, version)
+    before = {
+        path.relative_to(first.path): path.read_bytes()
+        for path in first.path.rglob("*") if path.is_file()
+    }
+    catalog.clear_convert_inventory("tibco-ems", "10.4.0")
+
+    again, _ = convert(config, catalog, product, version)
+
+    assert again.outcome is ConvertOutcome.CURRENT
+    assert (again.md_files, again.out_files) == (first.md_files, first.out_files)
+    row = catalog.get_version("tibco-ems", "10.4.0")
+    assert (row.md_files, row.out_files) == (first.md_files, first.out_files)
+    # A measurement must not touch what it measures.
+    assert {
+        path.relative_to(again.path): path.read_bytes()
+        for path in again.path.rglob("*") if path.is_file()
+    } == before
+
+
+def test_a_current_version_that_is_already_counted_is_not_walked_again(
+    config, catalog, product, version, extracted, fake_engine
+) -> None:
+    """The backfill is for blank rows only; re-walking a counted tree buys nothing."""
+    convert(config, catalog, product, version)
+
+    again, _ = convert(config, catalog, product, version)
+
+    assert again.outcome is ConvertOutcome.CURRENT
+    assert (again.md_files, again.out_files) == (0, 0)
+
+
+def test_two_documents_on_one_path_are_reported_rather_than_silently_lost(
+    config, catalog, product, version, extracted, fake_engine
+) -> None:
+    """The 7b defect, turned into arithmetic.
+
+    `navigation._free` compared a generated page's path case-sensitively, so on
+    Windows the page was written *over* a converted topic and three versions
+    shipped with the topic gone. Nothing in the run said so, because each write
+    succeeded. Counting the tree is what makes the second write visible.
+    """
+    class CollidingEngine(FakeEngine):
+        def convert_unit(self, context, root):
+            unit = super().convert_unit(context, root)
+            # Two distinct sources resolving to one output path, which is what a
+            # case-insensitive filesystem did to `navigation._free`. The map keeps
+            # both rows; the disk keeps one file.
+            unit.documents[1].relative = unit.documents[0].relative
+            return unit
+
+    register(CollidingEngine)
+    try:
+        result, findings = convert(config, catalog, product, version)
+    finally:
+        unregister(SourceEngine.FLARE)
+        register(FakeEngine)
+
+    assert result.md_files == result.documents + result.generated - 1
+    mismatch = [f for f in findings.all if f.code == "OUTPUT_COUNT_MISMATCH"]
+    assert len(mismatch) == 1
+    assert mismatch[0].count == 1
+
+
 def test_findings_are_flushed_per_version(
     config, catalog, product, version, extracted, fake_engine
 ) -> None:

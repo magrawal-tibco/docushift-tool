@@ -1585,6 +1585,105 @@ def test_a_hand_edited_boolean_that_contradicts_its_count_warns(catalog: Catalog
     assert not any("_has_api_ref" in problem for problem in _reload(catalog).validate())
 
 
+# -- Stage 5 output inventory (architecture.md §3.9, planning.md Phase 13) ----
+
+
+def _converted(catalog: CatalogManager) -> None:
+    """The same product, now with an output tree measured against it."""
+    _extracted(catalog)
+    catalog.record_convert_inventory("ems", "10.4.0", md_files=930, out_files=981)
+
+
+def test_the_output_columns_are_blank_until_the_version_is_converted(
+    catalog: CatalogManager,
+) -> None:
+    """Extracted is not converted: measuring the package says nothing about the Markdown."""
+    _extracted(catalog)
+
+    version = _reload(catalog).get_version("ems", "10.4.0")
+
+    assert version.doc_files == 19776
+    assert version.md_files is None
+    assert version.out_files is None
+    row = read_rows(catalog.versions_path)[0]
+    assert row["_md_files"] == ""
+    assert row["_out_files"] == ""
+
+
+def test_recorded_output_inventory_round_trips(catalog: CatalogManager) -> None:
+    _converted(catalog)
+
+    version = _reload(catalog).get_version("ems", "10.4.0")
+
+    assert version.md_files == 930
+    assert version.out_files == 981
+
+
+def test_a_conversion_that_produced_nothing_survives_as_zero(catalog: CatalogManager) -> None:
+    """`0` means the walk ran and the tree was empty -- not that it never ran."""
+    _extracted(catalog)
+    catalog.record_convert_inventory("ems", "10.4.0", md_files=0, out_files=0)
+
+    version = _reload(catalog).get_version("ems", "10.4.0")
+
+    assert version.md_files == 0
+    assert version.out_files == 0
+
+
+def test_a_fetch_never_touches_the_output_columns(catalog: CatalogManager) -> None:
+    """Discovery has not read the Markdown either (§3.5)."""
+    _converted(catalog)
+
+    _fetch(catalog, make_product("ems", versions={"10.4.0": make_version("ems", "10.4.0")}))
+
+    version = _reload(catalog).get_version("ems", "10.4.0")
+    assert version.md_files == 930
+    assert version.out_files == 981
+
+
+def test_the_output_inventory_survives_a_spreadsheet_round_trip(catalog: CatalogManager) -> None:
+    _converted(catalog)
+    before = catalog.versions_path.read_bytes()
+
+    _reload(catalog).save()
+
+    assert catalog.versions_path.read_bytes() == before
+
+
+def test_clearing_the_output_inventory_leaves_the_extract_columns_alone(
+    catalog: CatalogManager,
+) -> None:
+    """Two trees, two lifetimes: discarding the Markdown does not unmeasure the package."""
+    _converted(catalog)
+
+    assert catalog.clear_convert_inventory("ems", "10.4.0") is True
+
+    version = _reload(catalog).get_version("ems", "10.4.0")
+    assert version.md_files is None
+    assert version.out_files is None
+    assert version.doc_files == 19776
+    assert version.has_csh is True
+
+
+def test_recording_output_against_an_unknown_version_reports_failure(
+    catalog: CatalogManager,
+) -> None:
+    assert catalog.record_convert_inventory("nope", "1.0", 0, 0) is False
+
+
+def test_more_markdown_than_files_is_a_hand_edit_and_warns(catalog: CatalogManager) -> None:
+    """The Markdown is counted out of the same walk as the total, so it cannot exceed it."""
+    _converted(catalog)
+    catalog.get_version("ems", "10.4.0").out_files = 12
+    catalog.save()
+
+    notes = _reload(catalog).warnings()
+
+    assert any("_md_files=930 exceeds _out_files=12" in note for note in notes)
+    # Advisory, like every other inventory note: the next convert overwrites both.
+    assert not any("_md_files" in problem for problem in _reload(catalog).validate())
+
+
 # -- hand-supplied packages (architecture.md §3.8) ---------------------------
 
 

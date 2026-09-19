@@ -86,6 +86,11 @@ class ConvertResult:
     generated: int = 0
     nav_nodes: int = 0
     assets: int = 0
+    # What the output tree holds once it is built -- one walk, after the swap.
+    # Not `documents + generated` and not `assets + 3`: both derivations are
+    # wrong in ways the walk is not (see `_measure_output`).
+    md_files: int = 0
+    out_files: int = 0
     message: str = ""
     # Asset counts summed over the version's units. Per-root detail stays in the
     # findings, which name the root.
@@ -109,6 +114,16 @@ class ConvertStats:
     @property
     def assets(self) -> int:
         return sum(r.assets for r in self.results)
+
+    @property
+    def out_files(self) -> int:
+        """Files standing in the output trees this run measured.
+
+        Summed over every result that carries a measurement, not only over
+        `converted`: a `current` version whose columns were blank is walked and
+        filled, and its tree is as real as one this run built.
+        """
+        return sum(r.out_files for r in self.results)
 
     @property
     def failures(self) -> list[ConvertResult]:
@@ -203,9 +218,17 @@ class DocumentConverter:
         recorded_prefix = metadata.get("convert_api_prefix", "")
         prefix_current = not recorded_prefix or recorded_prefix == self._api_prefix(product, number)
         if not force and checksum and checksum == converted_from and prefix_current and target.is_dir():
-            return ConvertResult(
+            current = ConvertResult(
                 slug, number, ConvertOutcome.CURRENT, path=target, engine=version.engine
             )
+            # An unchanged conversion is a no-op *unless* nobody has counted it.
+            # This is 4b-1's rule for `extract`, and Phase 12 is what happens
+            # without it: a version converted before the output columns existed
+            # would report `current` on every future run and stay blank for good.
+            # A directory walk against a conversion is free.
+            if version.md_files is None or version.out_files is None:
+                current.md_files, current.out_files = self._measure_output(slug, number, target)
+            return current
 
         try:
             return self._build(product, version, handler_cls(), source, target, checksum)
@@ -298,6 +321,12 @@ class DocumentConverter:
 
         swap(staging, target)
 
+        # After the swap rather than over the staging directory, so the columns
+        # describe the tree that is actually published from. A swap that failed
+        # raised above and wrote nothing, which is the blank-not-zero rule.
+        result.md_files, result.out_files = self._measure_output(slug, number, target)
+        self._report_output_count(context, result)
+
         if self.state is not None:
             self.state.record_output_map(slug, number, output_rows)
             self.state.set_version_state(
@@ -314,6 +343,36 @@ class DocumentConverter:
         if self.findings is not None:
             self.findings.flush()
         return result
+
+    # -- measurement -------------------------------------------------------------
+
+    def _measure_output(self, slug: str, version: str, target: Path) -> tuple[int, int]:
+        """One walk of the output tree, and the two columns it writes (§3.9).
+
+        **Walked, not derived.** The arithmetic that looks equivalent --
+        `documents + generated` for the Markdown, plus `assets`, plus the root
+        artifacts -- is wrong at the last term on every version measured so far:
+        `csh.yml` is written only for a non-empty map (`transforms/csh.write`), so
+        a version whose help map yields no identifiers has **two** root artifacts
+        and not three, and that is the majority case rather than the edge one. A
+        constant that is already false is not a constant, and the walk costs a
+        directory traversal against a conversion.
+
+        `_api_files` has no counterpart here because it needs none: the converter
+        skips API-reference trees and Stage 7 copies them verbatim into
+        `-resources` (§10.6), so the same count stands at both ends of the
+        pipeline. What this measures is the Markdown half -- the thing that
+        actually changed shape.
+        """
+        md_files = out_files = 0
+        for path in target.rglob("*"):
+            if not path.is_file():
+                continue
+            out_files += 1
+            if path.suffix.lower() == ".md":
+                md_files += 1
+        self.catalog.record_convert_inventory(slug, version, md_files, out_files)
+        return md_files, out_files
 
     # -- writing ---------------------------------------------------------------
 
@@ -468,6 +527,31 @@ class DocumentConverter:
             message=f"{context.flattened_links} link(s) inside a code block kept "
                     f"their words and lost their target",
             count=context.flattened_links,
+        )
+
+    def _report_output_count(self, context: ConversionContext, result: ConvertResult) -> None:
+        """The engines' document count against the files on disk (Phase 13).
+
+        Every document and every generated page is one `write_text` to a path the
+        engine chose, so the two numbers agree unless **two writes resolved to one
+        path** -- in which case the second silently replaced the first and the
+        version publishes with a topic missing. That is not hypothetical: 7b found
+        `navigation._free` comparing a generated container page's path
+        case-sensitively, and three versions had already shipped that way.
+
+        Only a shortfall is reported. A surplus means a file in the tree that no
+        document produced, which is what `csh.yml`, `toc.yml` and `metadata.yml`
+        are -- they are `.yml`, so they cannot reach this count at all, and any
+        other surplus is a stray the orphan sweep is the right reader for.
+        """
+        expected = result.documents + result.generated
+        if result.md_files >= expected:
+            return
+        context.record(
+            "OUTPUT_COUNT_MISMATCH",
+            message=f"{expected} document(s) converted but {result.md_files} Markdown file(s) "
+                    f"on disk; {expected - result.md_files} write(s) landed on another",
+            count=expected - result.md_files,
         )
 
     def _report_csh(self, context: ConversionContext, resolved: csh_transform.CshMap) -> None:

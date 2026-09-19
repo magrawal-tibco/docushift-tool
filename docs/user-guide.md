@@ -212,9 +212,20 @@ Choosing a batch means judging packages you have not opened. `docushift extract`
 | `_api_files` | How much of the package that tree is. |
 | `_doc_files` | Everything else — HTML, images, CSS, PDFs. A size figure, not a topic count. |
 
-Two readings worth knowing:
+And `docushift convert` writes two more, so the sheet carries both ends of the pipeline:
 
-- **An empty cell is not a zero.** Blank means the version has never been extracted. `0` means it was, and there was nothing there.
+| Column | Reads as |
+| :--- | :--- |
+| `_md_files` | Markdown pages produced — converted topics plus the landing and container pages the tool generated. |
+| `_out_files` | Everything in the converted tree: the Markdown, the images and CSS that were actually referenced and copied, and the `toc.yml` / `metadata.yml` / `csh.yml` beside them. |
+
+**Read `_doc_files` → `_out_files` as the before and after.** `_api_files` has no counterpart on purpose: an API-reference tree is copied verbatim rather than converted, so its file count is the same at both ends and the column already on the row is the answer.
+
+Expect the output to be much smaller than the input, and expect the ratio to move. On the first six versions measured, 4,272 source files became 2,162 — but that is 67% for one product and 9% for another, because a Flare package's file count is mostly skin chrome and unreferenced images, and none of that is copied. A number far below its neighbours is worth one look before you tag the batch: it is usually correct, and occasionally a guide that did not convert.
+
+Three readings worth knowing:
+
+- **An empty cell is not a zero.** Blank means the version has never been extracted (or, for the last two, never converted). `0` means it was, and there was nothing there.
 - **`_has_csh=true` with `_csh_names=0`** means the product ships a help map that yields no identifiers — a normal state, and in fact the *majority* of what we have surveyed: 476 of 863 Flare alias files (55%), 492 of 647 WebWorks `topics.js` (76%), 38 of 418 DITA `head.js` (9%). Worth seeing before conversion rather than after.
 
 ```bash

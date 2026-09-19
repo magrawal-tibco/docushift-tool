@@ -95,6 +95,12 @@ VERSION_COLUMNS = (
     "_has_api_ref",
     "_api_files",
     "_doc_files",
+    # Stage 5 output inventory (architecture.md §3.9), written by `convert` from
+    # one walk of the output tree. Placed immediately after the Stage 4 columns
+    # because `_doc_files` -> `_out_files` is the before/after pair and reading it
+    # should not require scrolling.
+    "_md_files",
+    "_out_files",
 )
 
 # The `versions.csv` column each inventory field round-trips through.
@@ -104,6 +110,15 @@ _INVENTORY_COLUMNS = (
     ("has_api_ref", "_has_api_ref"),
     ("api_files", "_api_files"),
     ("doc_files", "_doc_files"),
+)
+
+# The Stage 5 half, kept apart from the Stage 4 half because the two describe
+# different trees with different lifetimes: discarding an extracted tree does not
+# invalidate the Markdown that was already produced from it, so `clear_*` on one
+# must not reach the other.
+_OUTPUT_COLUMNS = (
+    ("md_files", "_md_files"),
+    ("out_files", "_out_files"),
 )
 
 # Fields discovery owns and may therefore update. `family` is handled separately
@@ -270,6 +285,11 @@ class CatalogManager:
                 has_api_ref=parse_optional_bool(row.get("_has_api_ref")),
                 api_files=parse_optional_int(row.get("_api_files")),
                 doc_files=parse_optional_int(row.get("_doc_files")),
+                # Blank here means "never converted", and for the same reason:
+                # a version that failed to convert must not read as one that
+                # converted to nothing.
+                md_files=parse_optional_int(row.get("_md_files")),
+                out_files=parse_optional_int(row.get("_out_files")),
             )
 
         self._catalog = catalog
@@ -332,6 +352,8 @@ class CatalogManager:
                         "_has_api_ref": format_optional_bool(version.has_api_ref),
                         "_api_files": format_optional_int(version.api_files),
                         "_doc_files": format_optional_int(version.doc_files),
+                        "_md_files": format_optional_int(version.md_files),
+                        "_out_files": format_optional_int(version.out_files),
                     }
                 )
         write_rows(self.versions_path, VERSION_COLUMNS, version_rows)
@@ -846,6 +868,46 @@ class CatalogManager:
         self.save()
         return True
 
+    def record_convert_inventory(
+        self, slug: str, version: str, md_files: int, out_files: int
+    ) -> bool:
+        """Writes back the Stage 5 output inventory for one version -- §3.9.
+
+        Both numbers come from **one walk of the output tree**, never from the
+        run's own counters. The tempting derivation -- topics plus generated pages
+        plus assets plus three artifacts -- is wrong on every version measured so
+        far: `csh.yml` is written only for a non-empty map (`transforms/csh.py`),
+        so a version with no help identifiers has two root artifacts and not three.
+
+        No `out_api_files` beside them, deliberately: conversion skips API trees
+        and Stage 7 copies them verbatim, so `api_files` is the count at both ends.
+
+        Callers must not invoke this for a version that did not convert. Leaving
+        the row blank is the honest answer there -- the same rule
+        `record_extract_inventory` carries.
+        """
+        target = self.get_version(slug, version)
+        if target is None:
+            return False
+        target.md_files = md_files
+        target.out_files = out_files
+        self.save()
+        return True
+
+    def clear_convert_inventory(self, slug: str, version: str) -> bool:
+        """Blanks the output columns, restoring "never converted".
+
+        The Stage 4 columns are untouched: the extracted tree is still on disk and
+        still measured, and blanking a measurement nobody discarded would lose it.
+        """
+        target = self.get_version(slug, version)
+        if target is None:
+            return False
+        for field_name, _ in _OUTPUT_COLUMNS:
+            setattr(target, field_name, None)
+        self.save()
+        return True
+
     # -- reporting -----------------------------------------------------------
 
     def triage_summary(self) -> dict[str, object]:
@@ -1080,6 +1142,15 @@ class CatalogManager:
                 f"{slug}@{ver.version}: _has_csh=false but _csh_names={ver.csh_names}. "
                 f"These are written together, so one has been hand-edited. The next "
                 f"`docushift extract` of this version will overwrite both."
+            )
+        # The Markdown is a subset of the output tree by construction -- the walk
+        # counts the `.md` files and then everything -- so this ordering cannot
+        # come out of a run, only out of a hand-edit.
+        if ver.md_files is not None and ver.out_files is not None and ver.md_files > ver.out_files:
+            notes.append(
+                f"{slug}@{ver.version}: _md_files={ver.md_files} exceeds _out_files={ver.out_files}. "
+                f"These are written together from one walk, so one has been hand-edited. The next "
+                f"`docushift convert` of this version will overwrite both."
             )
         return notes
 
