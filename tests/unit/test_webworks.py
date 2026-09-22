@@ -26,7 +26,7 @@ from collections.abc import Mapping
 from pathlib import Path
 
 from docushift.engines.base import ConversionContext, Unit
-from docushift.engines.roots import find_output_roots
+from docushift.engines.roots import find_output_roots, subtree_names
 from docushift.engines.webworks import (
     SPAN_TO_TAG,
     WebWorksEngine,
@@ -188,6 +188,16 @@ class Run:
     def names(self, unit: Unit | None = None) -> list[str]:
         return sorted(str(d.relative) for d in (unit or self.unit).documents)
 
+    def roots(self) -> list[str]:
+        """Which books were converted, in order, named on the *tree* side.
+
+        `unit.name` is the output subtree and answers a different question -- it
+        is `""` for whichever book takes the version root -- so a test about book
+        identity or book order asks here and a test about publishing layout asks
+        `unit.name`.
+        """
+        return [unit.root.relative_to(self.tree).as_posix() for unit in self.units]
+
     def codes(self) -> dict[str, int]:
         tally: dict[str, int] = {}
         for finding in self.findings.all:
@@ -227,8 +237,15 @@ def run(tmp_path: Path, files: Mapping[str, str | bytes], *, api_roots: tuple[st
     )
     engine = WebWorksEngine()
     units = []
-    for root in engine.units(context):
-        name = root.relative_to(tree).as_posix()
+    # Named through `subtree_names` exactly as `driver.py` does, and materialized
+    # before the first unit converts for the same reason (§5.1.3). This harness
+    # used to name a unit by its full path relative to the tree, which made
+    # `unit.name` and `book.name` the same string in every test -- and Phase 17a's
+    # link rebase is invisible unless the two differ.
+    work = list(engine.units(context))
+    context.subtrees = subtree_names(tree, work)
+    for root in work:
+        name = context.subtree_name(root)
         context.assets = AssetCopier(root, SourceEngine.WEBWORKS, output / name if name else output)
         units.append(engine.convert_unit(context, root))
     return Run(units, findings, tree)
@@ -368,7 +385,7 @@ def test_percent_encoded_hrefs_and_directories_are_decoded(tmp_path: Path) -> No
             toc=toc_js(node("", "P", "Messages", "0")),
         ),
     })
-    assert [unit.name for unit in result.units] == ["My Guide"]
+    assert result.roots() == ["My Guide"]
     assert [(n.label, str(n.document)) for n in result.unit.nav] == [("Messages", "error messages.md")]
 
 
@@ -383,7 +400,7 @@ def test_declared_book_order_is_authored_order(tmp_path: Path) -> None:
             toc=toc_js(node("", "P", name, "0")),
         ))
     result = run(tmp_path, files)
-    assert [unit.name for unit in result.units] == ["zebra", "alpha"]
+    assert result.roots() == ["zebra", "alpha"]
     assert [unit.metadata["book_order"] for unit in result.units] == ["0", "1"]
 
 
@@ -398,7 +415,7 @@ def test_a_book_no_manifest_declares_is_converted_last(tmp_path: Path) -> None:
             toc=toc_js(node("", "P", name, "0")),
         ))
     result = run(tmp_path, files)
-    assert [unit.name for unit in result.units] == ["declared", "orphan"]
+    assert result.roots() == ["declared", "orphan"]
 
 
 def test_a_single_book_group_is_not_emitted_as_a_level(tmp_path: Path) -> None:
@@ -858,7 +875,121 @@ def test_a_popup_is_a_cross_book_reference_and_not_a_dead_javascript_href(tmp_pa
         context="refbook",
     ))
     result = run(tmp_path, files)
-    assert "[the reference](../reference/ref.md#p9)" in result.body("a.md", result.named("guide"))
+    # `guide` is the shallowest of two roots, so it publishes at the version root
+    # and `reference` beside it -- the link crosses books without climbing out of
+    # one. It read `../reference/ref.md#p9` until Phase 17b, which was this test
+    # asserting the source tree's shape rather than the published tree's.
+    assert "[the reference](reference/ref.md#p9)" in result.body("a.md", result.named(""))
+
+
+# -- links are emitted in the published tree's coordinates (Phase 17a) ----------
+#
+# `book.name` is the book root relative to the extracted tree; `unit.name` is
+# `subtree_name(root)`, which gives the version root to the shallowest book and
+# the last segment to the rest (§5.1.3). The two differ for every WebWorks book
+# that is not its version's only output root, and every assertion below is on the
+# second -- a link is read by whatever renders the file that was published, not
+# by the tree it was converted from.
+
+
+def two_books(**topics: Mapping[str, str]) -> dict[str, str | bytes]:
+    """`designerhelp/palettes` at the version root and `trahelp/upgrade` beside it.
+
+    The `tra` family's real shape in miniature, and the smallest fixture in which
+    `book.name` and `unit.name` disagree: `trahelp/upgrade` publishes as `upgrade`.
+    """
+    files: dict[str, str | bytes] = {}
+    for name, pages in (("designerhelp/palettes", topics["primary"]),
+                        ("trahelp/upgrade", topics["secondary"])):
+        files.update(book(
+            name,
+            topics={k: topic(k, v) for k, v in pages.items()},
+            files=tuple((k, k) for k in pages),
+            toc=toc_js(*[node("", "P", k, str(i)) for i, k in enumerate(pages)]),
+        ))
+    return files
+
+
+def test_a_link_inside_the_book_that_took_the_version_root_is_a_bare_sibling(
+        tmp_path: Path) -> None:
+    """The flat case, and the one that broke loudest: 795 links in one version.
+
+    `designerhelp/palettes` publishes at the version root, so its two topics are
+    siblings there. Resolving the target in source coordinates emitted the whole
+    of `designerhelp/palettes/b.htm` as the URL, from a file sitting next to it.
+    """
+    result = run(tmp_path, two_books(
+        primary={"a.htm": '<div class="Body">See <a href="b.htm">B</a>.</div>',
+                 "b.htm": heading("B")},
+        secondary={"t.htm": heading("T")},
+    ))
+    assert "[B](b.md)" in result.body("a.md", result.named(""))
+
+
+def test_a_link_inside_a_named_unit_is_a_bare_sibling_too(tmp_path: Path) -> None:
+    """`trahelp/upgrade` publishes as `upgrade`, so its topics are siblings there.
+
+    This is the case that emitted a leading `../`: `relpath` climbed out of the
+    one-segment output directory before descending the two-segment source path.
+    """
+    result = run(tmp_path, two_books(
+        primary={"a.htm": heading("A")},
+        secondary={"t.htm": '<div class="Body">See <a href="u.htm">U</a>.</div>',
+                   "u.htm": heading("U")},
+    ))
+    assert "[U](u.md)" in result.body("t.md", result.named("upgrade"))
+
+
+def test_a_link_from_the_version_root_into_a_named_unit_descends_once(
+        tmp_path: Path) -> None:
+    result = run(tmp_path, two_books(
+        primary={"a.htm": '<div class="Body">See '
+                          '<a href="../../trahelp/upgrade/t.htm">T</a>.</div>'},
+        secondary={"t.htm": heading("T")},
+    ))
+    assert "[T](upgrade/t.md)" in result.body("a.md", result.named(""))
+
+
+def test_a_link_from_a_named_unit_back_to_the_version_root_climbs_once(
+        tmp_path: Path) -> None:
+    """One `../` and not three -- the source path is two segments deep, the
+    published one is one."""
+    result = run(tmp_path, two_books(
+        primary={"a.htm": heading("A")},
+        secondary={"t.htm": '<div class="Body">See '
+                            '<a href="../../designerhelp/palettes/a.htm">A</a>.</div>'},
+    ))
+    assert "[A](../a.md)" in result.body("t.md", result.named("upgrade"))
+
+
+def test_a_popup_and_a_relative_href_resolve_to_the_same_entry(tmp_path: Path) -> None:
+    """The index key stays *tree*-relative so both arrive at one table entry, and
+    only the value it returns is in output coordinates."""
+    result = run(tmp_path, two_books(
+        primary={"a.htm": '<div class="Body">'
+                          '<a href="../../trahelp/upgrade/t.htm">rel</a> and '
+                          '<a href="javascript:WWHClickedPopup(\'upgrade\', '
+                          '\'t.htm\', \'\');">pop</a>.</div>'},
+        secondary={"t.htm": heading("T")},
+    ))
+    body = result.body("a.md", result.named(""))
+    assert "[rel](upgrade/t.md)" in body
+    assert "[pop](upgrade/t.md)" in body
+
+
+def test_an_anchor_in_a_named_unit_is_still_emitted(tmp_path: Path) -> None:
+    """`referenced` and `anchors` are keyed on the *source* path, and the renderer
+    was looking them up with the *output* one -- so `wanted` came back empty for
+    every book outside the version root and the target was silently never written.
+    That is the other half of Phase 17a, and it is why the link above resolves to
+    a page and the fragment on it did not."""
+    result = run(tmp_path, two_books(
+        primary={"a.htm": '<div class="Body">See '
+                          '<a href="../../trahelp/upgrade/t.htm#s1">T</a>.</div>'},
+        secondary={"t.htm": '<div class="N1Heading"><a name="s1">Section</a></div>'},
+    ))
+    assert "[T](upgrade/t.md#s1)" in result.body("a.md", result.named(""))
+    assert '<a id="s1"></a>' in result.body("t.md", result.named("upgrade"))
 
 
 def test_a_popup_naming_a_book_the_package_never_shipped_is_reported(tmp_path: Path) -> None:

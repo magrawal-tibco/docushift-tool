@@ -101,10 +101,14 @@ class NavNode:
 class Unit:
     """One unit of work, converted: a Flare output root, a DITA doc-set, a WebWorks book.
 
-    `name` is the unit's path relative to the extracted tree, and it becomes the
-    unit's subtree in the output -- which is why the flat `csh.yml` can drop
-    `doc_set` without loss (`architecture.md` §1576): the doc-set is already the
-    first segment of every value.
+    `name` is the unit's subtree in the *output* -- `subtree_name(root)`, which is
+    `""` for a lone output root and drops the source prefix for the rest (§5.1.3).
+    It is **not** the unit's path relative to the extracted tree, and the two
+    differ for most WebWorks versions; reading it as the latter is what put
+    3,862 links in the wrong space (`planning.md` Phase 17a). `root` is the
+    tree-side answer. That `name` is the output subtree is why the flat `csh.yml`
+    can drop `doc_set` without loss (`architecture.md` §1576): the doc-set is
+    already the first segment of every value.
     """
 
     root: Path

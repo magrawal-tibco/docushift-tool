@@ -1108,6 +1108,29 @@ def test_validate_exits_zero_on_a_clean_tree_and_one_on_a_broken_one(
     assert "LINK_BROKEN" in result.output
 
 
+def test_a_finding_reaches_the_terminal_as_itself(runner: CliRunner, tmp_path: Path) -> None:
+    """A finding is machine output and must survive printing byte for byte.
+
+    Rich substitutes `:shortcode:` by default, and `:100:` is 💯 -- so a finding on
+    line 100 printed `a.md💯` with the line number gone. Silently on a UTF-8
+    terminal; on the cp1252 console a piped Windows run gets, it took the whole
+    command down with a `UnicodeEncodeError` *after* the validation had finished
+    (`planning.md` Phase 17c). Square brackets in a path went the same way, eaten
+    as rich markup.
+
+    The link is on line 100 on purpose. Both halves are asserted at once because
+    they are one bug -- untrusted text interpolated into a markup string.
+    """
+    target = tmp_path / "target"
+    publish(target, {"html/a[1].md": "# A\n" + "\n" * 98 + "![shot](media/missing.png)\n"})
+
+    result = invoke(runner, tmp_path, target)
+
+    assert result.exit_code == 1
+    assert "a[1].md:100" in result.output
+    assert "\U0001f4af" not in result.output
+
+
 def test_warnings_alone_do_not_change_the_exit_code(runner: CliRunner, tmp_path: Path) -> None:
     """1,626 unmatched anchors in the sample. An 11.6% rate cannot gate."""
     target = tmp_path / "target"

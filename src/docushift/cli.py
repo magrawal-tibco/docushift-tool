@@ -18,6 +18,7 @@ from pathlib import Path
 import click
 import requests
 from rich.console import Console
+from rich.markup import escape
 from rich.table import Table
 
 from docushift import __version__
@@ -29,7 +30,13 @@ from docushift.reporting.findings import REGISTRY, FindingsRun, Severity
 from docushift.state import StateStore
 from docushift.utils.slug import version_segment
 
-console = Console()
+# `emoji=False` tool-wide, because a finding is machine output and must survive
+# the terminal byte for byte. Rich substitutes `:shortcode:` by default, so
+# `palette.4.24.md:100:` printed as `palette.4.24.md💯` -- the line number gone,
+# silently on a UTF-8 terminal and as a `UnicodeEncodeError` on a cp1252 one
+# (`planning.md` Phase 17c). No call site in this tool writes a shortcode on
+# purpose; paths and messages that happen to contain one are the only source.
+console = Console(emoji=False)
 
 DIR_PATH = click.Path(file_okay=False, path_type=Path)
 
@@ -1646,7 +1653,9 @@ def _report_validate(stats, findings: FindingsRun, checked_external: bool) -> No
             if code_group.severity != str(Severity.ERROR):
                 continue
             for row in code_group.rows:
-                console.print(f"  [red]x[/red] {row['path']}: {row['message']}")
+                console.print(
+                    f"  [red]x[/red] {escape(str(row['path']))}: {escape(str(row['message']))}"
+                )
 
     summary = findings.summary()
     console.print(f"[dim]Findings: {summary or 'none'}.[/dim]")
@@ -1977,7 +1986,10 @@ def csh_validate(ctx: click.Context, target_dir: Path, product, version, doc_cla
     for finding in findings.all:
         colour = {Severity.ERROR: "red", Severity.WARNING: "yellow"}.get(finding.severity, "dim")
         count = f" [dim]x{finding.count}[/dim]" if finding.count > 1 else ""
-        console.print(f"[{colour}]{finding.code}[/{colour}] {finding.path}: {finding.message}{count}")
+        console.print(
+            f"[{colour}]{finding.code}[/{colour}] "
+            f"{escape(str(finding.path))}: {escape(str(finding.message))}{count}"
+        )
     console.print(f"[dim]Findings: {findings.summary() or 'none'}.[/dim]")
     if errors:
         raise click.exceptions.Exit(1)
@@ -2249,7 +2261,7 @@ def report(
         for row in rows:
             where = f"{row['slug']}@{row['version']}" if row["version"] else row["slug"]
             count = f" x{row['count']}" if (row["count"] or 1) > 1 else ""
-            console.print(f"  [dim]{where}[/dim] {row['message']}{count}")
+            console.print(f"  [dim]{escape(where)}[/dim] {escape(str(row['message']))}{count}")
 
     if export_path is not None:
         text = report_view.render_markdown(run, rows, filters=filters)

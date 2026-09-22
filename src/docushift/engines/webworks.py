@@ -189,15 +189,20 @@ class WebWorksRenderer(markdown.Renderer):
         self.unit = unit
         self.index = index
         self.source = source
-        # Tree-relative, because a cross-book link is resolved against the version
-        # and not against this book.
+        # Where this page is *published*, relative to the version folder. The one
+        # field in output coordinates, and the only one `links.relative_to` may be
+        # handed -- a link is read by the renderer against the emitted file.
         self.output = output
         # Unit-relative -- what the driver writes and what the asset copier, whose
         # destination is already this unit's folder, resolves against.
         self.relative = relative
-        # This topic's directory, tree-relative: the base every relative href
-        # resolves against, which makes `../otherbook/x.htm` fall out for free.
+        # This topic's directory *in the extracted tree*: the base every relative
+        # href resolves against, which makes `../otherbook/x.htm` fall out for
+        # free, and which lands in the space `_scan` keys its indexes on.
         self.base = base
+        # The same space as `base`: `referenced` and `anchors` are built in `_scan`
+        # from `_join(book.name, relative)`, so a key in output coordinates misses
+        # every lookup -- silently, as an empty `wanted` and an absent anchor.
         self.key = key
         self.wanted = index.referenced.get(key, frozenset())
         # Filled as anchors are emitted, and handed to `Document.anchors`.
@@ -396,10 +401,18 @@ class WebWorksRenderer(markdown.Renderer):
 
         Tree-relative and not book-relative, so a cross-book popup and a
         `../other_book/x.htm` take the same path through the same table.
+
+        The index answers in *source* coordinates, and `relative_to` may only be
+        handed *output* ones -- `self.output` has had the book root replaced by
+        `subtree_name`, so a link built against the raw source path climbs out of
+        the published directory and back down a tree that is not there. The two
+        spaces coincide under Flare (§5.1.2) and diverge for every WebWorks book
+        that is not its version's only output root, which is what put 3,862 links
+        in the wrong place across 13 versions (`planning.md` Phase 17a).
         """
         key = str(resolved).lower()
-        target = self.index.topics.get(key)
-        if target is None:
+        entry = self.index.topics.get(key)
+        if entry is None:
             self.engine.dangling_link(self.context, self.unit, self.source, raw)
             return None
         if fragment and fragment not in self.index.anchors.get(key, frozenset()):
@@ -408,6 +421,10 @@ class WebWorksRenderer(markdown.Renderer):
             # not, and the link is emitted without its bookmark.
             self.engine.dangling_link(self.context, self.unit, self.source, raw)
             fragment = ""
+        root, relative = entry
+        target = links.to_markdown(
+            PurePosixPath(_join(self.context.subtree_name(root), relative))
+        )
         return links.emit(links.relative_to(self.output, target), fragment)
 
     def image(self, tag: Tag) -> str | None:
@@ -918,8 +935,13 @@ class _Index:
     # Normalized `context.js` value and directory name -> unit name. Both, because
     # the two disagree for 34 of 646 books and a popup names one of them.
     by_key: dict[str, str] = field(default_factory=dict)
-    # Tree-relative source path (lowercased) -> tree-relative Markdown output.
-    topics: dict[str, PurePosixPath] = field(default_factory=dict)
+    # Tree-relative source path (lowercased) -> the book it lives in and its
+    # path inside that book. Deliberately *not* a finished output path: `_scan`
+    # runs inside `units()`, before the driver has called `subtree_names`, so the
+    # output coordinate is not knowable yet (§5.1.3). `_topic` completes it once
+    # `context.subtrees` is populated. Storing a tree-relative path here instead
+    # and handing it straight to `relative_to` is Phase 17a's defect.
+    topics: dict[str, tuple[Path, str]] = field(default_factory=dict)
     # The same key -> the anchor names that file contains, and the ones pointed at.
     anchors: dict[str, set[str]] = field(default_factory=dict)
     referenced: dict[str, set[str]] = field(default_factory=dict)
@@ -1022,7 +1044,7 @@ class WebWorksEngine(BaseEngine):
                 index.by_key.setdefault(alias, book.name)
             for relative in book.topics:
                 source = _join(book.name, relative)
-                index.topics[source.lower()] = links.to_markdown(PurePosixPath(source))
+                index.topics[source.lower()] = (book.root, relative)
             for entry in book.toc:
                 for node in entry.walk():
                     if node.anchor and node.index is not None and 0 <= node.index < len(book.files):
@@ -1191,7 +1213,15 @@ class WebWorksEngine(BaseEngine):
         _strip_chrome(container, whole_body=whole_body)
         normalize(container)
 
+        # Two spaces, and the renderer needs both. `output` is where this page is
+        # published -- relative to the version folder, with the book root dropped
+        # by `subtree_name` -- and is the only thing `relative_to` may be handed.
+        # `within` is where the page sits in the extracted tree, and is the key
+        # every index in `_scan` is built on. They coincide under Flare and differ
+        # under WebWorks whenever a book is not the version's only output root
+        # (`planning.md` Phase 17a).
         output = PurePosixPath(_join(unit.name, relative))
+        within = _join(book.name, relative)
         renderer = WebWorksRenderer(
             engine=self,
             context=context,
@@ -1200,8 +1230,8 @@ class WebWorksEngine(BaseEngine):
             source=source,
             output=links.to_markdown(output),
             relative=links.to_markdown(PurePosixPath(relative)),
-            base=PurePosixPath(posixpath.dirname(str(output))),
-            key=str(output).lower(),
+            base=PurePosixPath(posixpath.dirname(within)),
+            key=within.lower(),
         )
         rendered = renderer.render(container)
         context.flattened_links += renderer.flattened_links
