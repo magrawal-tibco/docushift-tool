@@ -61,7 +61,26 @@ column names a human:
 | `in_scope` | `scope_source=manual` | outranks `config/scope.yaml` |
 | `engine` (versions.csv) | `engine_source=manual` | permanent |
 | `release_status` | `release_status_source=manual` | outranks the EOS report |
-| `zip_url` | `zip_source=manual` | |
+| `zip_url` | **nothing — see below** | |
+
+**`zip_source` is the exception to this table, and setting it by reflex breaks the
+row.** It does not record who wrote `zip_url`; it records *how the package
+arrives*. `manual` means **"a human places the ZIP on disk; never fetch this"** —
+`download_one` returns `SKIPPED_MANUAL` before resolving anything
+(`fetcher.py:214`), ahead of `--force`. Set it only when you have actually filed a
+package with `download --from-file`, which sets it for you.
+
+Editing `zip_url` alone needs no provenance pin at all, because **the column is not
+read for an active row**: `_resolve_url` derives the endpoint from the product code
+and version and trusts the stored value only when the row is archived or manually
+pinned (`fetcher.py:150-171`). If the derived URL is wrong, the fix is
+`product_code`, or a hand-filed package — not the `zip_url` cell.
+
+To pin a row against a fetch, use **`custom_override=true`**. On a product it
+returns from `_merge_product` before reading a single upstream field
+(`catalog.py:629`); on a version it skips every mergeable field
+(`catalog.py:670`). That is the only whole-row pin, and it is what a hand-added
+product that discovery cannot see requires.
 
 **`family` is the dangerous one.** It is resolved by *provenance rank*, not by the
 snapshot diff every other field uses. If the user left `family_source` at

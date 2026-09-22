@@ -1067,6 +1067,13 @@ def test_the_shipped_report_retires_the_measured_set(repo_root: Path) -> None:
     252). The two retirement figures did not move at all, which is the check that
     matters: nothing became retired or un-retired, so the delta is population, not
     verdict.
+
+    *Re-baselined again 2026-09-22, same reading.* `tibco-streaming` was added by
+    hand (636 -> 637, planning.md Phase 18c) because discovery cannot see a parent
+    product. Both retirement figures are again unmoved. Coverage rose with the
+    population, 252 -> 253, and that is worth one line: **support's report already
+    carried `tibco-streaming`.** The product was never in doubt anywhere except the
+    catalog, which is the whole of Phase 18.
     """
     manager = CatalogManager(
         repo_root / "config" / "products.csv",
@@ -1078,7 +1085,7 @@ def test_the_shipped_report_retires_the_measured_set(repo_root: Path) -> None:
 
     assert summary["versions_retired"] == 128
     assert len(summary["products_fully_retired"]) == 11
-    assert manager.eos_coverage() == (252, 636)
+    assert manager.eos_coverage() == (253, 637)
 
 
 def test_the_shipped_report_never_retires_a_look_alike(repo_root: Path) -> None:

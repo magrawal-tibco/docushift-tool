@@ -629,6 +629,7 @@ tibco-streambase-add-in-for-microsoft-excel,sb-addin-exc,TIBCO StreamBase® Add-
 tibco-streambase-cep-connectivity-package,sb-cep-conn,TIBCO StreamBase® CEP Connectivity Package,tibco,streaming,taxonomy_rule,true,default,false
 tibco-streambase-high-performance-fix-engine,sb-hp-fix,TIBCO StreamBase® High-Performance FIX Engine,tibco,streaming,taxonomy_rule,true,default,false
 tibco-streambase-standard-edition,sb-cep-std,TIBCO StreamBase® Standard Edition,tibco,streaming,taxonomy_rule,true,default,false
+tibco-streaming,str,TIBCO® Streaming,tibco,streaming,manual,true,default,true
 tibco-streaming-for-3gpp,str-gpp,TIBCO® Streaming for 3GPP™,tibco,streaming,unclassified,true,default,false
 tibco-administrator-enterprise-edition,administrator,TIBCO Administrator™ - Enterprise Edition,tibco,tra,unclassified,true,default,false
 tibco-administrator-enterprise-edition-distribution-for-tibco-silver-fabric,tasf,TIBCO Administrator™ - Enterprise Edition Distribution for TIBCO Silver® Fabric,tibco,tra,unclassified,true,default,false

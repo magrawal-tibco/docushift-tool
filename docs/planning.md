@@ -2083,6 +2083,154 @@ Unit tests: a WebWorks link between two topics in the same flattened book emits 
 
 ---
 
+### Phase 18: A Parent Product Publishes No Versions of Its Own — **Planned, 2026-09-22**
+
+The `streaming` family ran `download` 20/24, `extract` 20/20, and then `convert` **converted 2 of 24**: 4 `NO_TREE`, 18 `ENGINE_UNKNOWN`, 0 failed. Seventeen of the eighteen are the correct outcome and not a defect — those trees hold no HTML at all. `tibco-enterprise-streaming@11.2.1` is four files: a readme, a ReminderNotice, an RTU, and a licence PDF.
+
+That is not a broken package. It is the wrong product.
+
+| | `tibco-enterprise-streaming` | `tibco-streaming` |
+|---|---|---|
+| docsite id | 9042 | 4943 |
+| `product_code` | `platform-tp-stream` | `str` |
+| API shape | `isChildProduct: true` | `isParentProduct: true` |
+| versions | 4 | **22** |
+| package | readme + licence, 0.2 MB | the help |
+| in `config/products.csv` | yes | **no** |
+
+`tibco-enterprise-streaming` is a **licence bundle**. Its own API `description` says so: *"Click on the links below to access Documentation for the included Suite Components."* The catalog has the bundle and has never had the product.
+
+#### 18a. The crawler drops every parent product, silently
+
+`/api/products/{slug}` returns two shapes, and `discovery/crawler.py` handles one. The module docstring (`crawler.py:14-17`) describes the child shape correctly — the detail object *is* the current version, carrying `version_no` and `folder_path`, with the rest in `siblings`. A **parent** returns neither:
+
+```
+spotfire-application               parent=False child=True  ver='15.0.0'  folder='sfire-analyst/15.0.0'  siblings=True
+tibco-streaming                    parent=True  child=None  ver=None      folder=''                      siblings=absent
+tibco-flogo                        parent=True  child=None  ver=None      folder=''                      siblings=absent
+tibco-activematrix-businessworks   parent=True  child=None  ver=None      folder=''                      siblings=absent
+ibi-webfocus-client                parent=True  child=None  ver=None      folder=''                      siblings=absent
+```
+
+So at `crawler.py:236-239` the `_first(r, _VERSION_KEYS)` filter empties `records`, `_build_product` returns `None`, and the product is gone. No error, no count, no line in the report — `a_to_z` advertises `versionCount: 22` for `tibco-streaming` and the catalog ends up with nothing.
+
+The versions are one slug away. `/api/products/tibco-streaming-11-2-1` returns `version_no: '11.2.1'`, `folder_path: 'str/11.2.1'`, and **21 siblings** — 22 total, matching `versionCount` exactly. Fed to the existing `active_template` that yields:
+
+```
+/pub/{folder_path}/{slug}-{version_dashed}_documentation.zip
+  -> https://docs.tibco.com/pub/str/11.2.1/tibco-streaming-11-2-1_documentation.zip
+```
+
+**The template is not wrong and `docsite.yaml` does not change.** Discovery never got far enough to use it.
+
+#### 18b. Blast radius: 35 products, 707 versions
+
+Live `a_to_z` against `config/products.csv`: 738 entries, 636 catalog rows. 69 of the missing carry `isPublicLevel: false` and are dropped on purpose (`crawler.py:170-172`). That leaves **35 public, versioned products absent from the catalog, carrying 707 versions**:
+
+| versions | slug | | versions | slug |
+|---:|---|---|---:|---|
+| 99 | `spotfire-application` | | 16 | `tibco-bpm-enterprise` |
+| 49 | `tibco-flogo` | | 14 | `tibco-product-and-service-catalog` |
+| 47 | `tibco-activespaces-enterprise-edition` | | 14 | `tibco-mdm` |
+| 45 | `tibco-activematrix-businessworks` | | 14 | `tibco-foresight-studio` |
+| 39 | `ibi-webfocus-reporting-server` | | 11 | `spotfire-statistica` |
+| 39 | `ibi-webfocus-client` | | 10 | `tibco-businessconnect-container-edition` |
+| 38 | `ibi-webfocus-app-studio` | | 9 | `tibco-activematrix-service-grid` |
+| 36 | `ibi-webfocus-installer` | | 8 | `tibco-foresight-hipaa-validator-desktop` |
+| 32 | `tibco-businessevents-enterprise-edition` | | 8 | `ibi-iway-service-manager` |
+| 26 | `tibco-data-virtualization` | | 7 | `tibco-messaging-enterprise-edition` |
+| 26 | `ibi-focus` | | 5 | `ibi-omni-gen-mdm` |
+| 25 | `tibco-operational-intelligence-hawk-redtail` | | 5 | `ibi-omni-gen` |
+| 22 | `tibco-streaming` | | 4 | `ibi-omni-healthdata` |
+| 18 | `tibco-businessconnect` | | 3 | `tibco-offer-and-price-engine` |
+| 16 | `tibco-order-management` | | 2 | `tibco-activematrix-service-grid-container-edition` |
+| 16 | `tibco-foresight-instream` | | 1 | 4 more |
+
+**The parent-product mechanism is verified on 4 of the 35, not on all of them.** `spotfire-application` is a *child* with a version and siblings, is not in `config/scope.yaml`, and is missing anyway — a second cause, unidentified. The other 30 are unexamined. 707 is therefore the size of the gap, not a promise of what one fix recovers.
+
+#### 18c. Interim: pin `tibco-streaming` by hand — **Built, 2026-09-22**
+
+The catalog is CSV so that this is possible (`architecture.md` §3.1). Adding the product does not wait on 18d.
+
+One row in `config/products.csv`:
+
+```
+tibco-streaming,str,TIBCO® Streaming,tibco,streaming,manual,true,default,true
+```
+
+Six rows in `config/versions.csv` — every **active** version, each with the `active_template` URL written out. *(Planned as `zip_source=manual`; shipped as `auto` — see the correction below.)*
+
+| version | `folder_path` | release |
+|---|---|---|
+| 11.2.1 | `str/11.2.1` | 2025-10-23 |
+| 11.2.0 | `str/11.2.0` | 2025-06-13 |
+| 11.1.3 | `str/11.1.3` | 2026-03-25 |
+| 11.1.2 | `str/11.1.2` | 2025-11-20 |
+| 11.1.1 | `str/11.1.1` | 2024-10-04 |
+| 11.1.0 | `str/11.1.0` | 2023-11-16 |
+
+The other 16 (11.0.1 down to 10.4.0) are archived, so `convert_eligible=false` by the 2026-09-02 archive policy, and their real `zipPath` comes from `/api/products/archive/tibco-streaming` rather than from a template — the last seven carry the stale `folder_path: 'str'` the crawler docstring warns about. **They are deferred to 18d**, where the archive index is read the way it is read for every other product.
+
+Durability is the point of the exercise, and two mechanisms carry it:
+
+* `custom_override=true` on the product row is a **whole-row pin** — `_merge_product` returns before reading a single upstream field (`catalog.py:629-631`). A `catalog fetch` that still cannot see this product cannot damage it.
+* `family_source=manual` pins the family, per the provenance table in the `propagate-catalog-edit` skill. `family` needs it most: it resolves by provenance **rank**, not by snapshot diff, so a `taxonomy_rule` value would survive only as long as `state.db` holds a snapshot. ~~`zip_source=manual`~~ — wrong, and corrected below.
+
+`catalog fetch` does not delete versions discovery stops returning unless `--allow-deletes` is passed, so the rows are safe from an ordinary fetch even before the pin.
+
+Then `download` → `extract` → `convert` over `--product tibco-streaming`. The engine is whatever the detector says; `tibco-streaming` is the StreamBase documentation set and no prediction is recorded here.
+
+##### 18c shipped with two corrections to the plan above, both about `zip_source`
+
+**`zip_source=manual` does not mean "a human set the URL". It means "a human places the package; never fetch this row."** `download_one` returns `SKIPPED_MANUAL` before it resolves anything (`fetcher.py:214-215`), ahead of `--force`. Writing the six rows as `manual` — which the plan did, following the provenance table in the `propagate-catalog-edit` skill — would have made all six undownloadable. `catalog import` said so immediately, twice per row. The rows were corrected to `zip_source=auto` via `catalog set`.
+
+**And the `zip_url` column is not read for an active row at all.** `_resolve_url` derives the endpoint from `_folder_path` + `active_zip_url` and trusts the stored column only when the row is archived or manually pinned (`fetcher.py:150-171`) — a deliberate choice from 2026-09-19, when discovery's template was wrong for the whole corpus. So the six URLs written into the CSV are documentation, not mechanism. What actually makes the download work is `product_code=str`: `_folder_path` falls back to `f"{code}/{version}"` → `str/11.2.1`, which is the correct folder, so the derivation lands on the right URL with no `state.db` metadata to seed it.
+
+The durable pin is therefore `custom_override=true` alone, on the product row and on all six version rows. That is the mechanism the skill's table does not cover, and it is the one that matters here.
+
+##### The `spotfire-` era is real, and it explains the four `sb-hp-fix` failures too
+
+`download` fetched 4 of 6 — 11.2.1, 11.2.0, 11.1.3, 11.1.2, 400.6 MiB. **11.1.1 and 11.1.0 failed** with the same empty-200 as the `sb-hp-fix` rows. The predecessor's manifest records their doc URLs as `docs.tibco.com/products/spotfire-streaming-11-1-1` — a rebrand window — and a ranged probe settles it:
+
+| URL | status | first 4 bytes |
+|---|---|---|
+| `/pub/str/11.1.1/tibco-streaming-11-1-1_documentation.zip` | 200 | *empty body* |
+| `/pub/str/11.1.1/spotfire-streaming-11-1-1_documentation.zip` | **206** | **`PK\x03\x04`** |
+
+Same for 11.1.0. The `finalSlug` in the filename is the display name **as it was at that release**, not as it is now — so `active_template` is correct in form and wrong in input for every product that was rebranded mid-life. Both packages were fetched by hand and filed with `download --from-file`, which pins `zip_source=manual` for exactly the reason that flag exists. Their extracted wrappers are named `spotfire-streaming-11-1-1/`, which is the rebrand visible on disk.
+
+This is the cause of 18d's item 4 as well, now confirmed rather than suspected: the four `tibco-streambase-high-performance-fix-engine` failures are the same window and will need the same stem.
+
+##### Acceptance
+
+`download` 4/6 fetched + 2 filed by hand, `extract` **6/6, all six detected `docbook`**, `convert` **6/6 with 0 failed, 0 `ENGINE_UNKNOWN`, 0 `NO_TREE`** — 7,071 topics, 8,178 assets, 15,261 output files.
+
+| version | topics | nav nodes | out files | resolved | dangling | orphan |
+|---|---:|---:|---:|---:|---:|---:|
+| 11.2.1 | 1,196 | 3,384 | 2,566 | 2,118 | 0 | 1,272 (40.3 MB) |
+| 11.2.0 | 1,191 | 3,362 | 2,534 | 2,118 | 0 | 1,272 (40.3 MB) |
+| 11.1.3 | 1,187 | 3,341 | 2,555 | 2,127 | 1 | 1,155 (33.4 MB) |
+| 11.1.2 | 1,182 | 3,319 | 2,550 | 2,127 | 1 | 1,155 (33.4 MB) |
+| 11.1.1 | 1,179 | 3,301 | 2,547 | 2,125 | 1 | 1,155 (33.5 MB) |
+| 11.1.0 | 1,171 | 3,268 | 2,537 | 2,119 | 0 | 1,153 (33.5 MB) |
+
+0 skin, 0 escaped, 0 case-mismatch throughout. Findings: **3 errors, 30 notes** — the three errors are one `REFERENCE_UNRESOLVED` apiece in 11.1.3, 11.1.2 and 11.1.1, the same single dangling reference `spotfire-data-streams@11.1.1` carries. Each version skips ~850–1,010 `foreign-generator` and ~1,477 `not-docbook` files, and the orphan block is the `html/apidocs/` Javadoc tree the extractor flags as having no known generator marker (2,530–2,829 files per version).
+
+**`validate` has not been run against this family** — `sync` has not been run either, so there is no published tree to walk. The conversion is measured; the publication is not.
+
+**What 18c does not do.** It does not touch the bundle rows. `tibco-enterprise-streaming` and `tibco-enterprise-streaming-high-performance-fix-engine` stay `convert_eligible=true` and will keep reporting `ENGINE_UNKNOWN` on every run, because turning them off is a policy question about how the catalog should represent a licence bundle that publishes a licence — and answering it for two rows in the `streaming` family, when 18b says there are more bundles behind the other 34 products, would be setting precedent from the smallest possible sample.
+
+#### 18d. The crawler fix — **deferred**
+
+When a product detail carries no version, fall back to the versioned child slug rather than returning `None`, and recover the version set from its `siblings`. Open questions this phase has not answered, and must before it is built:
+
+1. **How is the child slug obtained?** `a_to_z` gives `versionCount` but no version list, and `/api/products/tibco-streaming` gives no children. Constructing `{slug}-{version_dashed}` needs a version nobody has yet. There may be an endpoint that lists a parent's children; if there is not, the fallback needs a different key.
+2. **`spotfire-application`** — a child shape, in `a_to_z`, not excluded by scope, and still missing. Until this is explained, the fix cannot claim to close the gap.
+3. **A silent `None` is the deeper defect.** `_build_product` returning `None` for a product `a_to_z` says has 22 versions should be a counted, named line in the crawl report, the way `non_public` already is. A count would have surfaced this on the first fetch in 2026-09-10 rather than on a convert run twelve days later.
+4. **Not in this phase, and no longer a hypothesis:** `tibco-streambase-high-performance-fix-engine` 11.1.1, 11.1.0, 10.6.6 and 10.6.5 are active with correct `sb-hp-fix/<version>` folder paths whose templated URLs return an empty body under HTTP 200 — the four `NO_TREE` rows in the streaming run. 18c **proved the mechanism** on `tibco-streaming` 11.1.1 and 11.1.0: the `finalSlug` in the filename is the product's display name *at that release*, and both resolve under a `spotfire-` stem. `active_template` needs a per-version stem, not the catalog's current slug. A filename-derivation defect, independent of the parent-product shape, and it gets its own phase rather than being absorbed into this one.
+
+---
+
 ## 2. Validation & Testing Criteria
 - **Catalog Merge Fidelity**: 100% preservation of manual edits and toggle states when fetching updates — *without* requiring the user to have flagged them.
 - **CSV Round-Trip Fidelity**: A load-then-save cycle with no changes produces a byte-identical file (stable sort, fixed columns, normalized booleans/dates). No diff churn on repeat fetches.
