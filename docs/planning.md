@@ -2112,7 +2112,9 @@ tibco-activematrix-businessworks   parent=True  child=None  ver=None      folder
 ibi-webfocus-client                parent=True  child=None  ver=None      folder=''                      siblings=absent
 ```
 
-So at `crawler.py:236-239` the `_first(r, _VERSION_KEYS)` filter empties `records`, `_build_product` returns `None`, and the product is gone. No error, no count, no line in the report — `a_to_z` advertises `versionCount: 22` for `tibco-streaming` and the catalog ends up with nothing.
+So at `crawler.py:236-239` the `_first(r, _VERSION_KEYS)` filter empties `records`, `_build_product` returns `None`, and the product is gone. `a_to_z` advertises `versionCount: 22` for `tibco-streaming` and the catalog ends up with nothing.
+
+*(Corrected 2026-09-22: an earlier draft of this paragraph said "no error, no count, no line in the report". The count exists — `discover()` does `result.unversioned += 1` at `crawler.py:152`, and `cli.py:238-241` prints "Skipped N entries with no published versions and M that are not publicly visible." The defect is not silence, it is **misattribution**. `unversioned` is documented as the licence-page and connector-stub bucket, so a product with 22 published versions lands in a tally whose name says it has none, next to entries for which that is true. Nothing cross-checks the bucket against the `versionCount` `a_to_z` already returned for every slug in it, which is why a 22-version product could sit in a printed number for twelve days without anyone reading it as a fault. Item 3 of 18d is unchanged by this correction — it is about naming and cross-checking the drop, not about creating a counter that already exists.)*
 
 The versions are one slug away. `/api/products/tibco-streaming-11-2-1` returns `version_no: '11.2.1'`, `folder_path: 'str/11.2.1'`, and **21 siblings** — 22 total, matching `versionCount` exactly. Fed to the existing `active_template` that yields:
 
@@ -2146,7 +2148,7 @@ Live `a_to_z` against `config/products.csv`: 738 entries, 636 catalog rows. 69 o
 | 16 | `tibco-order-management` | | 2 | `tibco-activematrix-service-grid-container-edition` |
 | 16 | `tibco-foresight-instream` | | 1 | 4 more |
 
-**The parent-product mechanism is verified on 4 of the 35, not on all of them.** `spotfire-application` is a *child* with a version and siblings, is not in `config/scope.yaml`, and is missing anyway — a second cause, unidentified. The other 30 are unexamined. 707 is therefore the size of the gap, not a promise of what one fix recovers.
+*(Written when the parent-product mechanism was verified on 4 of the 35 and `spotfire-application` was an unexplained second cause. Both are resolved in 18d below: 34 of the 35 are parent products and the 35th is a distinct dedup defect. The table stands as the measured gap.)*
 
 #### 18c. Interim: pin `tibco-streaming` by hand — **Built, 2026-09-22**
 
@@ -2220,14 +2222,128 @@ This is the cause of 18d's item 4 as well, now confirmed rather than suspected: 
 
 **What 18c does not do.** It does not touch the bundle rows. `tibco-enterprise-streaming` and `tibco-enterprise-streaming-high-performance-fix-engine` stay `convert_eligible=true` and will keep reporting `ENGINE_UNKNOWN` on every run, because turning them off is a policy question about how the catalog should represent a licence bundle that publishes a licence — and answering it for two rows in the `streaming` family, when 18b says there are more bundles behind the other 34 products, would be setting precedent from the smallest possible sample.
 
-#### 18d. The crawler fix — **deferred**
+#### 18d. The crawler fix — **Built, 2026-09-23**
 
-When a product detail carries no version, fall back to the versioned child slug rather than returning `None`, and recover the version set from its `siblings`. Open questions this phase has not answered, and must before it is built:
+18d's blocking question was *"how is the child slug obtained?"* — `a_to_z` gives a `versionCount` but no version list, and a parent detail gives no children, so `{slug}-{version_dashed}` needed a version nobody had. **Mayur supplied the answer: append `-latest`.** `/api/products/{slug}-latest` returns the ordinary child shape, and its `siblings` array is the version drop-down.
 
-1. **How is the child slug obtained?** `a_to_z` gives `versionCount` but no version list, and `/api/products/tibco-streaming` gives no children. Constructing `{slug}-{version_dashed}` needs a version nobody has yet. There may be an endpoint that lists a parent's children; if there is not, the fallback needs a different key.
-2. **`spotfire-application`** — a child shape, in `a_to_z`, not excluded by scope, and still missing. Until this is explained, the fix cannot claim to close the gap.
-3. **A silent `None` is the deeper defect.** `_build_product` returning `None` for a product `a_to_z` says has 22 versions should be a counted, named line in the crawl report, the way `non_public` already is. A count would have surfaced this on the first fetch in 2026-09-10 rather than on a convert run twelve days later.
-4. **Not in this phase, and no longer a hypothesis:** `tibco-streambase-high-performance-fix-engine` 11.1.1, 11.1.0, 10.6.6 and 10.6.5 are active with correct `sb-hp-fix/<version>` folder paths whose templated URLs return an empty body under HTTP 200 — the four `NO_TREE` rows in the streaming run. 18c **proved the mechanism** on `tibco-streaming` 11.1.1 and 11.1.0: the `finalSlug` in the filename is the product's display name *at that release*, and both resolve under a `spotfire-` stem. `active_template` needs a per-version stem, not the catalog's current slug. A filename-derivation defect, independent of the parent-product shape, and it gets its own phase rather than being absorbed into this one.
+##### The `-latest` fallback resolves the whole parent-product class
+
+Probed against every one of the 35 missing products:
+
+| | |
+|---|---|
+| `-latest` returns a child shape | **34 of 34 parent products** |
+| sibling count matches `a_to_z` `versionCount` | **34 of 34, exactly** |
+| versions recovered | **685** |
+
+```
+tibco-streaming-latest                   11.2.1   str/11.2.1                      21 siblings  (22 = versionCount)
+tibco-flogo-latest                        3.0.0   flogo/3.0.0                     48 siblings  (49)
+tibco-activematrix-businessworks-latest   6.13.0  activematrix_businessworks/6.13.0  44 siblings  (45)
+ibi-webfocus-client-latest                9.3.8   wf-wf/9.3.8                     38 siblings  (39)
+```
+
+The exact match on all 34 is the load-bearing result: it says `-latest`'s siblings are the *complete* version set, not a recent window, so the fallback needs no pagination and no second call.
+
+Two cautions the probe turned up. **`-latest` is a slug suffix, not a URL suffix** — the user's list is of `/products/...` page paths, and `/products/tibco-webfocus-client` is a page whose API slug is `ibi-webfocus-client`; `tibco-webfocus-client-latest` errors. The fallback must be driven by the slug `a_to_z` returns, never by a hand-kept list. And the user counted ~20 custom pages; `a_to_z` says **34**. The list is a sample, so the fallback is applied to every parent, not to an allow-list.
+
+##### `spotfire-application` is a different defect: first-wins dedup lets a non-public twin shadow a public product
+
+The 35th product is not a parent — `/api/products/spotfire-application` returns a perfectly good child shape with 98 siblings. It never gets requested. `a_to_z` returns **two records under that one slug**:
+
+| id | `isPublicLevel` | `isOnlyForAdmin` | `versionCount` |
+|---|---|---|---:|
+| 8862 | `False` | `True` | 1 |
+| 2452 | `True` | `False` | **99** |
+
+and `_list_products` (`crawler.py:178-186`) dedups **first-wins**, adding the slug to `seen` *before* it applies the visibility filter:
+
+```python
+if not slug or slug in seen:
+    continue
+seen.add(slug)                      # the admin stub claims the slug here
+public = _present(record, _PUBLIC_KEYS)
+if public is not None and not record[public]:
+    result.non_public += 1          # ...and is then dropped as non-public
+    continue
+```
+
+The admin-only stub arrives first, consumes the slug, and is discarded. The real 99-version product is then skipped as a duplicate. `discover(selectors=['spotfire-application'])` returns `products: 0, unversioned: 0, non_public: 70` — it never reaches `_build_product` at all, which is why 18b could not explain it as a parent.
+
+This is **the only duplicated slug in `a_to_z`** (739 records, 738 distinct slugs), so the fix reaches exactly one product.
+
+##### …and those 99 versions are out of scope, which is the actual finding
+
+`spotfire-application` is `folder_path: 'sfire-analyst/15.0.0'` — **Spotfire Analyst itself**, the core client, beside `spotfire`, `spotfire-desktop` and `spotfire-server`, all three of which `config/scope.yaml` already excludes. Not one of its 99 versions would ever be converted. *(An earlier draft of this phase counted them as recovered yield. They are not yield.)*
+
+The defect is therefore not the missing versions. It is that **`config/scope.yaml` does not exclude it.** The file excludes 61 products and deliberately leaves 16 public `spotfire*` slugs in scope — its header names the Data Science and Statistica lines, and Mayur's custom-page list includes `spotfire-statistica`, so that policy is intact. But `spotfire-application` is in that in-scope 16 **only because the dedup bug hid it when the list was compiled on 2026-09-09.** It was never a candidate for exclusion because nobody could see it.
+
+So the standing state is: *99 versions of Spotfire Analyst are out of scope by intent, in scope by configuration, and protected from download by nothing but a bug.* The record ordering that hides it belongs to the API, not to us.
+
+The two changes have to ship together. `scope.yaml` reports rules that match no product (`catalog.py:547`, `997-998`), so adding the entry while the product stays undiscoverable leaves a rule that warns on every fetch — and that warning exists to flag an upstream rename, so one that never clears is worse than no warning. Fixing the dedup makes the product discoverable, the rule match, and the exclusion behave exactly like the other 61: **catalogued, counted, never converted.** The dedup is also worth correcting as a rule rather than as a special case, because a visibility filter that runs *after* the dedup it depends on will reproduce this the next time the API duplicates a slug.
+
+##### What gets built
+
+1. **Parent fallback.** When `_build_product` finds no versioned record, re-request `{slug}-latest` before returning `None`, and build from that detail plus its siblings. One extra call per parent, ~34 per full crawl.
+2. **Dedup after visibility, and prefer the public record.** Group `a_to_z` by slug, drop non-public records first, and only then dedup — so `non_public` counts a slug only when *every* record for it is non-public.
+3. **Exclude `spotfire-application` in `config/scope.yaml`**, in the same change as 2 and for the reason above. Reason string matching the existing Spotfire entries; `display_name: "Spotfire® Application"` as documentation, since the file matches on `slug` by string equality only.
+4. **Name the drop and cross-check it.** Keep `unversioned` but split out the products `a_to_z` claims have versions: a product with `versionCount > 0` that yields none is a defect, not a licence page, and belongs on its own report line with its slugs named. This is the guard that would have caught 18a on 2026-09-10; per the correction in 18a the counter already exists, so this is a naming and cross-check change, not a new tally.
+
+##### Acceptance
+
+A full `catalog fetch` adds **34 products / 685 versions** by the parent fallback, and the new defect line reads zero afterwards. `tibco-streaming` arrives from discovery with all 22 versions — matching the six rows 18c pinned by hand, which is the check that the fallback and the hand-pin agree. The 18c rows keep `custom_override=true` and must survive the fetch unchanged.
+
+`spotfire-application` arrives as the 35th product with 99 versions and is **immediately out of scope**: `in_scope=false`, `scope_source=scope_rule`, zero versions download-eligible, and `scope_rules_unmatched` does **not** name it — the rule matching is the proof the dedup fix worked. Its 99 rows are inventory, not yield; the 62 `scope.yaml` rules must still match 62 products with none unmatched.
+
+##### Shipped 2026-09-23 — and the gap closed exactly
+
+`catalog fetch --all --include-archived` against the live docsite:
+
+| | before | after |
+|---|---:|---:|
+| products in `config/products.csv` | 637 | **669** |
+| versions in `config/versions.csv` | 4,480 | **5,181** |
+| public A-to-Z slugs **not** in the catalog | 33 | **2** |
+| products `in_scope=false` | 60 | **61** |
+
+**669 public A-to-Z slugs, 669 catalog products.** 32 products added (0 removed), carrying 683 versions; the other 18 of the +701 are archived versions topped up onto products already present, `tibco-streaming`'s 16 among them. The largest arrivals are `spotfire-application` 99, `tibco-flogo` 49, `tibco-activespaces-enterprise-edition` 47, `tibco-activematrix-businessworks` 45 and the four `ibi-webfocus-*` at 152 between them.
+
+**`tibco-streaming` now arrives from discovery with all 22 versions, and 18c's hand-pinned rows survived intact** — `custom_override=true` on the product row and on all six, `family_source=manual` held, `zip_source` untouched (`manual` on the two hand-filed 11.1.x packages, `auto` on the other four), and the 16 archived versions arrived `is_archived=true, convert_eligible=false`. That is the check the phase was built around: the fallback and the hand-pin independently produce the same 22 versions, and the merge protected the hand-pin rather than overwriting it.
+
+**`spotfire-application` landed exactly as intended:** `in_scope=false`, `scope_source=scope_rule`, `product_code=sfire-analyst`, 99 versions catalogued and none of them ever selectable.
+
+##### Two corrections to the acceptance criteria above
+
+**"34 products / 685 versions" was wrong, in a way worth recording.** The real figure is 32 new products and 683 versions from them. Two of the 34 parents were never going to become new products: `tibco-streaming` was already in the catalog from 18c, so recovering it adds versions rather than a product — and the 685 count was taken by summing `-latest` sibling lists without checking that each sibling carries a usable version number. It counted records, and two of them are blank.
+
+**"the new defect line reads zero" was also wrong, and the line is right.** It names **two** products, and both are real:
+
+| slug | `versionCount` | what `-latest` actually returns |
+|---|---:|---|
+| `ibi` | 1 | `version_no: ''`, `folder_path: 'ibi'`, 0 siblings, **67 Documents** |
+| `tibco-spotfire-for-apple-ipad` | 1 | `version_no: null`, `folder_path: null`, 0 siblings, 0 documents |
+
+Neither is a crawler defect. Both are landing pages the docsite counts as having one version while publishing no version number for it — `ibi` is a documents hub, and the iPad product is already excluded by `scope.yaml` (and is the one rule that was *already* unmatched before this phase, now explained). The line is doing precisely the job 18a's correction defined for it: surfacing a disagreement between what the index claims and what discovery can read, by name, for a human to judge. Reporting two products a reader can resolve in one look is the intended output, not a failure of the fix.
+
+`scope_rules_unmatched` therefore still names `tibco-spotfire-for-apple-ipad` — 62 rules, 61 matched. Unchanged by this phase and not caused by it.
+
+##### Acceptance, measured
+
+The catalog growth moved the end-of-support guard for the first time — `versions_retired` 128 → **139**, `eos_coverage` (253, 637) → **(270, 669)** — and the reading is still *population, not verdict*, on better evidence than the count:
+
+* **Not one of the 4,480 pre-existing version rows changed `release_status` or `convert_eligible`.** The merge was purely additive.
+* All 173 newly retired rows sit on products this fetch added, led by `tibco-activematrix-businessworks` (38) and `tibco-businessevents-enterprise-edition` (26).
+* `products_fully_retired` is **unmoved at 11**, and it is the same 11 — nothing newly discovered is retired in its entirety.
+
+Support's report is judging products it previously could not see; its verdict on everything it had already judged is untouched. Re-baselined with that written into the test.
+
+**1,341 tests pass (+7), 2 skipped, lint clean.** The seven new tests cover the fallback path, its cost (a product with a child shape never asks for `-latest`), version keying onto the parent slug, the archived-sibling URL rule surviving the fallback, a parent whose `-latest` does not resolve being named rather than swallowed, a genuinely unversioned entry staying out of the defect bucket, and both duplicate-slug directions. `test_shipped_scope_lists_the_ebx_and_spotfire_products` was re-baselined 61 → 62 with the reason written into the test.
+
+##### Still deferred
+
+1. The **16 archived `tibco-streaming` versions**, which need `/api/products/archive/{slug}` rather than a template.
+2. The two `streaming` bundle rows left `convert_eligible=true` (see "What 18c does not do").
+3. **Not in this phase, and no longer a hypothesis:** `tibco-streambase-high-performance-fix-engine` 11.1.1, 11.1.0, 10.6.6 and 10.6.5 are active with correct `sb-hp-fix/<version>` folder paths whose templated URLs return an empty body under HTTP 200 — the four `NO_TREE` rows in the streaming run. 18c **proved the mechanism** on `tibco-streaming` 11.1.1 and 11.1.0: the `finalSlug` in the filename is the product's display name *at that release*, and both resolve under a `spotfire-` stem. `active_template` needs a per-version stem, not the catalog's current slug. A filename-derivation defect, independent of the parent-product shape, and it gets its own phase rather than being absorbed into this one.
 
 ---
 

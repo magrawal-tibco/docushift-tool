@@ -1074,6 +1074,24 @@ def test_the_shipped_report_retires_the_measured_set(repo_root: Path) -> None:
     population, 252 -> 253, and that is worth one line: **support's report already
     carried `tibco-streaming`.** The product was never in doubt anywhere except the
     catalog, which is the whole of Phase 18.
+
+    *Re-baselined 2026-09-23, and this time `versions_retired` moved: 128 -> 139.*
+    Phase 18d fixed discovery, so the catalog gained 32 products and 701 versions
+    in one fetch (637 -> 669, planning.md Phase 18d) -- the largest population
+    change this guard has seen. The delta is still population rather than verdict,
+    and the evidence is stronger than the count:
+
+    * **Not one of the 4,480 pre-existing version rows changed `release_status` or
+      `convert_eligible`.** The merge was purely additive.
+    * All 173 newly retired rows sit on products added by the same fetch, led by
+      `tibco-activematrix-businessworks` (38) and
+      `tibco-businessevents-enterprise-edition` (26).
+    * `products_fully_retired` is **unmoved at 11**, and it is the same 11: nothing
+      newly discovered turned out to be retired in its entirety.
+
+    So the report's verdict on everything it had already judged is untouched; it is
+    now judging products it could not previously see. That is the outcome 18d was
+    built for, and the number moving is what it looks like.
     """
     manager = CatalogManager(
         repo_root / "config" / "products.csv",
@@ -1083,9 +1101,9 @@ def test_the_shipped_report_retires_the_measured_set(repo_root: Path) -> None:
 
     summary = manager.triage_summary()
 
-    assert summary["versions_retired"] == 128
+    assert summary["versions_retired"] == 139
     assert len(summary["products_fully_retired"]) == 11
-    assert manager.eos_coverage() == (253, 637)
+    assert manager.eos_coverage() == (270, 669)
 
 
 def test_the_shipped_report_never_retires_a_look_alike(repo_root: Path) -> None:

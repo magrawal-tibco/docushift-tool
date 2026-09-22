@@ -3,25 +3,37 @@ tibco-datasynapse-federator,dsfed,TIBCO DataSynapse Federator™,datasynapse,dat
 tibco-datasynapse-gridserver-logviewer,dsp-logv,TIBCO DataSynapse GridServer® LogViewer,datasynapse,datasynapse,manual,true,manual,false
 tibco-datasynapse-gridserver-manager,dsp-gridserver,TIBCO DataSynapse GridServer® Manager,datasynapse,datasynapse,manual,true,manual,false
 tibco-datasynapse-high-performance-computing-cloud-adapter,ds-highperf-comp-cloud,TIBCO DataSynapse™ High-Performance Computing Cloud Adapter,datasynapse,datasynapse,manual,true,manual,false
+ibi-iway-service-manager,sm,ibi™ iWay® Service Manager,ibi,data_management,taxonomy_rule,true,default,false
 ibi-iway-service-manager-edi-add-on,sm-edi,ibi™ iWay® Service Manager EDI Add-on,ibi,data_management,taxonomy_rule,true,default,false
+ibi-omni-gen,og,ibi™ Omni-Gen®,ibi,data_management,taxonomy_rule,true,default,false
+ibi-omni-gen-mdm,og-mdm,ibi™ Omni-Gen® MDM,ibi,data_management,taxonomy_rule,true,default,false
+ibi-omni-healthdata,ohd,ibi™ Omni-HealthData®,ibi,data_management,taxonomy_rule,true,default,false
 ibi-omni-healthdata-business-release,ohd-br,ibi™ Omni-HealthData® Business Release,ibi,data_management,taxonomy_rule,true,default,false
 tibco-iway-business-activity-monitor,sm-bam,TIBCO iWay® Business Activity Monitor,ibi,data_management,taxonomy_rule,true,default,false
 tibco-iway-trading-partner-manager,sm-tpm,TIBCO iWay® Trading Partner Manager,ibi,data_management,taxonomy_rule,true,default,false
+tibco-omni-healthdata-cohort-builder,ohcb,TIBCO Omni-HealthData® Cohort Builder,ibi,data_management,taxonomy_rule,true,default,false
+tibco-omni-healthdata-healthviews,ohhv,TIBCO Omni-HealthData® Healthviews,ibi,data_management,taxonomy_rule,true,default,false
 tibco-omni-healthdata-reference-data,ohrd,TIBCO Omni-HealthData® Reference Data,ibi,data_management,taxonomy_rule,true,default,false
 ibi-ai-assistant,ibiai,ibi™ AI Assistant,ibi,general,taxonomy_rule,true,default,false
 ibi-data-intelligence,ibi-di,ibi™ Data Intelligence,ibi,general,taxonomy_rule,true,default,false
 ibi-data-quality,tdq,ibi™ Data Quality,ibi,general,taxonomy_rule,true,default,false
+ibi-focus,focus,ibi™ FOCUS®,ibi,general,taxonomy_rule,true,default,false
 ibi-omni-insurance,oin,ibi Omni-Insurance™,ibi,general,taxonomy_rule,true,default,false
 ibi-open-data-hub-for-mainframe-connectors,odh-mf-cnct,ibi™ Open Data Hub for Mainframe Connectors,ibi,general,taxonomy_rule,true,default,false
 ibi-web-query-for-ibm-i,wq,ibi™ Web Query for IBM i,ibi,general,taxonomy_rule,true,default,false
+ibi-webfocus-app-studio,wf-as,ibi™ WebFOCUS® App Studio,ibi,webfocus,taxonomy_rule,true,default,false
+ibi-webfocus-client,wf-wf,ibi™ WebFOCUS® Client,ibi,webfocus,taxonomy_rule,true,default,false
 ibi-webfocus-container-edition,wfce,ibi™ WebFOCUS® - Container Edition,ibi,webfocus,taxonomy_rule,true,default,false
 ibi-webfocus-dsml-services,dsml,ibi™ WebFOCUS® DSML Services,ibi,webfocus,taxonomy_rule,true,default,false
 ibi-webfocus-dsml-services-container-edition,dsmlce,ibi™ WebFOCUS® DSML Services - Container Edition,ibi,webfocus,taxonomy_rule,true,default,false
+ibi-webfocus-installer,wf-wi,ibi™ WebFOCUS® Installer,ibi,webfocus,taxonomy_rule,true,default,false
+ibi-webfocus-reporting-server,wf-rs,ibi™ WebFOCUS® Reporting Server,ibi,webfocus,taxonomy_rule,true,default,false
 tibco-cloud-ebx,cloudebx,TIBCO Cloud™ EBX®,onebx,data_management,manual,false,scope_rule,false
 tibco-ebx,ebx,TIBCO EBX™,onebx,data_management,manual,false,scope_rule,false
 tibco-ebx-add-ons,ebx-addon,TIBCO EBX™ Add-ons,onebx,data_management,manual,false,scope_rule,false
 tibco-ebx-cloud-enterprise,ebx-cloud-enterprise,TIBCO EBX® Cloud Enterprise,onebx,data_management,manual,false,scope_rule,false
 spotfire,spotfire,Spotfire®,spotfire,analytics,manual,false,scope_rule,false
+spotfire-application,sfire-analyst,Spotfire® Application,spotfire,analytics,taxonomy_rule,false,scope_rule,false
 spotfire-desktop,spd,Spotfire® Desktop,spotfire,analytics,manual,false,scope_rule,false
 spotfire-enterprise-runtime-for-r,enterprise-runtime-for-r,Spotfire® Enterprise Runtime for R,spotfire,analytics,manual,false,scope_rule,false
 spotfire-enterprise-runtime-for-r-server-edition,terrsrv,Spotfire Enterprise Runtime for R - Server Edition,spotfire,analytics,manual,false,scope_rule,false
@@ -79,6 +91,7 @@ spotfire-data-science-for-life-science-author,dscls-author,Spotfire® Data Scien
 spotfire-data-science-for-life-science-operations,dscls-operations,Spotfire® Data Science for Life Science - Operations,spotfire,statistica,manual,true,default,false
 spotfire-data-science-operations,dsc-operations,Spotfire® Data Science - Operations,spotfire,statistica,manual,true,default,false
 spotfire-data-science-workbench,dsc-stat,Spotfire® Data Science - Workbench,spotfire,statistica,manual,true,default,false
+spotfire-statistica,stat,Spotfire Statistica®,spotfire,statistica,taxonomy_rule,true,default,false
 spotfire-statistica-all-servers,stat-all-servers,Spotfire Statistica® - All Servers,spotfire,statistica,manual,true,default,false
 spotfire-statistica-estore-edition,stat-estore,Spotfire Statistica® - Estore Edition,spotfire,statistica,manual,true,default,false
 spotfire-statistica-integration,stat-ext,Spotfire Statistica® Integration,spotfire,statistica,manual,true,default,false
@@ -242,7 +255,9 @@ tibco-businessworks-plug-in-for-ai,bwpluginai,TIBCO BusinessWorks™ Plug-in for
 tibco-businessworks-plug-in-for-tibco-auditsafe-for-tibco-platform,bwpluginauditsafeplatform,TIBCO BusinessWorks™ Plug-in for TIBCO® AuditSafe for TIBCO® Platform,tibco,bw-plugin,taxonomy_rule,true,default,false
 ibi-mdm-add-on-for-global-data-synchronization,cim-gdsn,ibi™ MDM Add-on for Global Data Synchronization,tibco,data_management,taxonomy_rule,true,default,false
 tibco-cloud-mdm,mdm-cloud,TIBCO® Cloud MDM,tibco,data_management,taxonomy_rule,true,default,false
+tibco-data-virtualization,sdv,TIBCO® Data Virtualization,tibco,data_management,taxonomy_rule,true,default,false
 tibco-enterprise-mdm,tp-mdm,TIBCO® Enterprise MDM,tibco,data_management,taxonomy_rule,true,default,false
+tibco-mdm,mdm,TIBCO MDM,tibco,data_management,taxonomy_rule,true,default,false
 tibco-mdm-administration-agent,mdm-administration-agent,TIBCO® MDM Administration Agent,tibco,data_management,taxonomy_rule,true,default,false
 tibco-mdm-for-retail,mdm-retail-suite,TIBCO® MDM for Retail,tibco,data_management,taxonomy_rule,true,default,false
 tibco-mdm-studio,bstudio-mdm,TIBCO® MDM Studio,tibco,data_management,taxonomy_rule,true,default,false
@@ -391,6 +406,8 @@ tibco-activematrix-management-agent-for-wcf,activematrix-management-agent-for-wc
 tibco-activematrix-management-agent-for-websphere,activematrix-management-agent-for-websphere,TIBCO ActiveMatrix® Management Agent for WebSphere,tibco,general,unclassified,true,default,false
 tibco-activematrix-policy-director,activematrix-policy-director,TIBCO ActiveMatrix® Policy Director,tibco,general,unclassified,true,default,false
 tibco-activematrix-runtime-uddi-server,activematrix-runtime-uddi-server,TIBCO ActiveMatrix® Runtime UDDI Server,tibco,general,unclassified,true,default,false
+tibco-activematrix-service-grid,amsg,TIBCO ActiveMatrix® Service Grid,tibco,general,unclassified,true,default,false
+tibco-activematrix-service-grid-container-edition,amsgce,TIBCO ActiveMatrix® Service Grid - Container Edition,tibco,general,unclassified,true,default,false
 tibco-activematrix-updater-tool-for-java-runtime-environment-jre,amx-jre-updater,TIBCO ActiveMatrix® Updater Tool for Java Runtime Environment (JRE),tibco,general,unclassified,true,default,false
 tibco-adapter-for-com,adapter-for-com,TIBCO Adapter™ for COM,tibco,general,unclassified,true,default,false
 tibco-adapter-for-files-ibm-i,fa,TIBCO® Adapter for Files (IBM i),tibco,general,unclassified,true,default,false
@@ -403,11 +420,14 @@ tibco-analytics,sfire-analyst-suite,TIBCO® Analytics,tibco,general,unclassified
 tibco-analytics-business-author-add-on,sfire-bauthor-suite,TIBCO® Analytics - Business Author Add-on,tibco,general,unclassified,true,default,false
 tibco-analytics-consumer-add-on,sfire-consumer-suite,TIBCO® Analytics - Consumer Add-on,tibco,general,unclassified,true,default,false
 tibco-application-integration-b2b,b2b-addon-itg-suite,TIBCO® Application Integration B2B,tibco,general,unclassified,true,default,false
+tibco-bpm-enterprise,bpme,TIBCO® BPM Enterprise,tibco,general,unclassified,true,default,false
 tibco-business-studio-activematrix-decisions-add-in,bstudio-decisions-addin,TIBCO Business Studio™ ActiveMatrix® Decisions Add-in,tibco,general,unclassified,true,default,false
 tibco-business-studio-analyst-edition,business-studio-analyst-edition,TIBCO Business Studio™ - Analyst Edition,tibco,general,unclassified,true,default,false
 tibco-business-studio-community-edition,business-studio-community-edition,TIBCO Business Studio™ - Community Edition,tibco,general,unclassified,true,default,false
 tibco-business-studio-for-analysts,business-studio-analyst-edition,TIBCO Business Studio™ for Analysts,tibco,general,unclassified,true,default,false
 tibco-business-studio-iprocess-add-in,business-studio-iprocess-add-in,TIBCO Business Studio™ iProcess® Add-in,tibco,general,taxonomy_rule,true,default,false
+tibco-businessconnect,bc,TIBCO BusinessConnect™,tibco,general,unclassified,true,default,false
+tibco-businessconnect-container-edition,bcce,TIBCO BusinessConnect™ Container Edition,tibco,general,unclassified,true,default,false
 tibco-clarity,clarity-dt,TIBCO® Clarity,tibco,general,unclassified,true,default,false
 tibco-clarity-cloud-edition,clarity,TIBCO® Clarity - Cloud Edition,tibco,general,unclassified,true,default,false
 tibco-clarity-enterprise-edition,clarity-dt,TIBCO® Clarity - Enterprise Edition,tibco,general,unclassified,true,default,false
@@ -433,6 +453,9 @@ tibco-enterprise-administrator-sdk,tea-sdk,TIBCO® Enterprise Administrator SDK,
 tibco-enterprise-foresight,fs-ent,TIBCO® Enterprise Foresight®,tibco,general,unclassified,true,default,false
 tibco-enterprise-foresight-healthcare-add-on,fs-hc-addon,TIBCO® Enterprise Foresight® Healthcare Add-on,tibco,general,unclassified,true,default,false
 tibco-event-processing,ep-suite,TIBCO® Event Processing,tibco,general,unclassified,true,default,false
+tibco-foresight-hipaa-validator-desktop,fsp-desktop,TIBCO Foresight® HIPAA Validator® Desktop,tibco,general,unclassified,true,default,false
+tibco-foresight-instream,fsp-instream,TIBCO Foresight™ Instream®,tibco,general,unclassified,true,default,false
+tibco-foresight-studio,fsp-studio,TIBCO Foresight™ Studio,tibco,general,unclassified,true,default,false
 tibco-formvine,formvine,TIBCO Formvine®,tibco,general,unclassified,true,default,false
 tibco-general-interface-enterprise-edition,general-interface-enterprise-edition,TIBCO® General Interface - Enterprise Edition,tibco,general,unclassified,true,default,false
 tibco-geoanalytics,geo,TIBCO GeoAnalytics,tibco,general,unclassified,true,default,false
@@ -470,9 +493,11 @@ tibco-managed-file-transfer-platform-server-for-windows,mftps-win,TIBCO® Manage
 tibco-managed-file-transfer-platform-server-for-windows-with-rocketstream-accelerator,managed-file-transfer-platform-server-for-windows-with-rocketstream-accelerator,TIBCO® Managed File Transfer Platform Server for Windows with RocketStream Accelerator,tibco,general,unclassified,true,default,false
 tibco-managed-file-transfer-platform-server-for-z-linux,mftps-zlinux,TIBCO® Managed File Transfer Platform Server for z/Linux,tibco,general,unclassified,true,default,false
 tibco-managed-file-transfer-platform-server-for-z-os,mftps-zos,TIBCO® Managed File Transfer Platform Server for z/OS,tibco,general,unclassified,true,default,false
+tibco-messaging-enterprise-edition,messaging,TIBCO® Messaging - Enterprise Edition,tibco,general,unclassified,true,default,false
 tibco-microflow-container-edition,microflow-container-edition,TIBCO Microflow™ Container Edition,tibco,general,unclassified,true,default,false
 tibco-monitoring-1-0-0,mon-suite,TIBCO® Monitoring 1.0.0,tibco,general,unclassified,true,default,false
 tibco-object-service-broker,object-service-broker,TIBCO® Object Service Broker,tibco,general,unclassified,true,default,false
+tibco-offer-and-price-engine,ope,TIBCO® Offer and Price Engine,tibco,general,unclassified,true,default,false
 tibco-omni-insurance-business-release,oin-br,TIBCO Omni-Insurance™ Business Release,tibco,general,unclassified,true,default,false
 tibco-openspirit-adapter-for-petrel,os-toap,TIBCO OpenSpirit® Adapter for Petrel,tibco,general,unclassified,true,default,false
 tibco-openspirit-arcgis-extension,openspirit-arcgis-extension,TIBCO OpenSpirit® ArcGIS Extension,tibco,general,unclassified,true,default,false
@@ -495,9 +520,12 @@ tibco-openspirit-scan-for-studio,os-scan-studio,TIBCO OpenSpirit® Scan for Stud
 tibco-openspirit-scan-utility,os-scan,TIBCO OpenSpirit® Scan Utility,tibco,general,unclassified,true,default,false
 tibco-openspirit-web-server-2008,openspirit-web-server,TIBCO OpenSpirit® Web Server 2008,tibco,general,unclassified,true,default,false
 tibco-openspirit-web-services,ospws,TIBCO OpenSpirit® Web Services,tibco,general,unclassified,true,default,false
+tibco-operational-intelligence-hawk-redtail,oihr,TIBCO® Operational Intelligence Hawk® RedTail,tibco,general,unclassified,true,default,false
 tibco-orchestra-networks,orchestra-networks,TIBCO® Orchestra Networks,tibco,general,unclassified,true,default,false
+tibco-order-management,om,TIBCO® Order Management,tibco,general,unclassified,true,default,false
 tibco-partnerexpress,bcpx,TIBCO PartnerExpress™,tibco,general,unclassified,true,default,false
 tibco-patterns,tps,TIBCO® Patterns,tibco,general,unclassified,true,default,false
+tibco-product-and-service-catalog,cim-ac,TIBCO® Product and Service Catalog,tibco,general,unclassified,true,default,false
 tibco-product-and-service-catalog-powered-by-tibco-ebx,psc-ebx,TIBCO® Product and Service Catalog powered by TIBCO EBX®,tibco,general,taxonomy_rule,true,default,false
 tibco-product-and-service-inventory,fsi,TIBCO® Product and Service Inventory,tibco,general,unclassified,true,default,false
 tibco-product-and-service-inventory-2-1-0,fsi,TIBCO® Product and Service Inventory 2.1.0,tibco,general,unclassified,true,default,false
@@ -544,10 +572,13 @@ tibco-hawk-microagent-for-tibco-ftl-tibco-eftl,hawkftl,TIBCO Hawk® Microagent f
 tibco-hawk-snmp-adapter,hawksnmp,TIBCO Hawk® SNMP Adapter,tibco,hawk,unclassified,true,default,false
 adapter-code-for-tibco-api-exchange-and-joomla,api-exchange-joomla-adapter,Adapter Code for TIBCO® API Exchange and Joomla!,tibco,integration,taxonomy_rule,true,default,false
 premium-subscription-for-tibco-businessworks-container-edition-and-plug-ins-for-aws-marketplace,bwce-aws-premsub,Premium Subscription for TIBCO BusinessWorks™ Container Edition and Plug-ins for AWS Marketplace,tibco,integration,taxonomy_rule,true,default,false
+tibco-activematrix-businessworks,activematrix-businessworks,TIBCO ActiveMatrix BusinessWorks™,tibco,integration,taxonomy_rule,true,default,false
 tibco-api-exchange-gateway,api-exchange-gateway,TIBCO® API Exchange Gateway,tibco,integration,taxonomy_rule,true,default,false
 tibco-api-exchange-manager,api-exchange-manager,TIBCO® API Exchange Manager,tibco,integration,taxonomy_rule,true,default,false
+tibco-businessevents-enterprise-edition,businessevents-enterprise,TIBCO BusinessEvents® Enterprise Edition,tibco,integration,taxonomy_rule,true,default,false
 tibco-cloud-integration-businessworks-payg,bwce-aws,TIBCO Cloud™ Integration - BusinessWorks™ (PAYG),tibco,integration,taxonomy_rule,true,default,false
 tibco-cloud-integration-flogo-payg,tci-flogo-payg,TIBCO Cloud™ Integration - Flogo® (PAYG),tibco,integration,taxonomy_rule,true,default,false
+tibco-flogo,flogo,TIBCO Flogo®,tibco,integration,taxonomy_rule,true,default,false
 tibco-rtview-for-tibco-businessevents,rtview-be,TIBCO® RTView® for TIBCO BusinessEvents®,tibco,integration,taxonomy_rule,true,default,false
 tibco-silver-fabric-enabler-for-activematrix-businessworks,sfbw,TIBCO Silver® Fabric Enabler for ActiveMatrix BusinessWorks™,tibco,integration,taxonomy_rule,true,default,false
 tibco-silver-fabric-enabler-for-tibco-api-exchange-gateway,sfax,TIBCO Silver® Fabric Enabler for TIBCO® API Exchange Gateway,tibco,integration,taxonomy_rule,true,default,false
@@ -590,6 +621,7 @@ tibco-loglogic-unity,loglogic-unity,TIBCO LogLogic® Unity,tibco,loglogic,unclas
 tibco-loglogic-unity-plug-in-for-activematrix-businessworks,loglogic-unity-plug-in-for-activematrix-businessworks,TIBCO LogLogic® Unity Plug-in for ActiveMatrix BusinessWorks™,tibco,loglogic,taxonomy_rule,true,default,false
 tibco-loglogic-universal-collector,loguc,TIBCO LogLogic® Universal Collector,tibco,loglogic,unclassified,true,default,false
 tibco-loglogic-visual-analytics,loglogic-visual-analytics,TIBCO LogLogic® Visual Analytics,tibco,loglogic,unclassified,true,default,false
+tibco-activespaces-enterprise-edition,as,TIBCO ActiveSpaces® - Enterprise Edition,tibco,messaging,taxonomy_rule,true,default,false
 tibco-gemini-powered-by-apache-cassandra,acd,TIBCO® Gemini - Powered by Apache Cassandra®,tibco,messaging,unclassified,true,default,false
 tibco-gems,msg-gems,TIBCO GEMS™,tibco,messaging,taxonomy_rule,true,default,false
 tibco-graphical-rendezvous,grv,TIBCO® Graphical Rendezvous®,tibco,messaging,taxonomy_rule,true,default,false

@@ -93,6 +93,17 @@ Useful flags:
 
 What it prints: a table of added / updated / unchanged / protected counts, a dim line counting entries skipped as unversioned or not publicly visible (roughly 70 of the 739 A-to-Z entries are employee-only), what support's end-of-support report retires, any catalog warnings, and — if some products could not be reached — how many. **A product that fails is left exactly as it was**, never emptied, so a partial crawl cannot look like a mass deletion.
 
+One line is worth reading closely when it appears:
+
+```
+2 product(s) are listed with versions but yielded none: ibi, tibco-spotfire-for-apple-ipad
+Discovery could not read their versions -- missing from the catalog, not empty upstream.
+```
+
+This is **not** the dim skipped-entries line above it, and the two are deliberately separate. A skipped entry is a licence page with nothing to convert — the docsite working as intended. A product on *this* line is one the A-to-Z index says has versions, which means the tool could not read what the docsite published, and the product is absent from your catalog as a result. It is named rather than counted because the first question is always *which product*. Two currently appear and both are genuine: `ibi` is a documents hub and `tibco-spotfire-for-apple-ipad` is retired, and neither publishes a version number the index nonetheless counts. If a product you expect to convert shows up here, that is a bug to report, not a setting to change.
+
+*(Until 2026-09-23 these were folded into the skipped-entries count, which is how 34 products and ~683 versions — `tibco-streaming` and `tibco-flogo` among them — stayed out of the catalog while a number that said "nothing to convert here" was printed on every fetch.)*
+
 ### Choosing which versions get converted
 
 Four columns, answering four different questions:

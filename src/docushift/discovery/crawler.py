@@ -14,6 +14,14 @@ Verified against the live API on 2026-09-03:
 * `/api/products/{slug}` returns **the current version as the product object** --
   it carries `version_no` and `folder_path` itself -- with every *other* version
   in a `siblings` list. So the record set is `[product] + siblings`.
+* ...but only for a slug the API flags `isChildProduct`. A slug flagged
+  `isParentProduct` returns `version_no: null`, `folder_path: ""` and no
+  `siblings` at all -- 34 products, 685 versions, and until 2026-09-23 every one
+  of them was dropped. **`/api/products/{slug}-latest` turns any parent into a
+  child**: it returns the ordinary child shape, and its `siblings` list is the
+  version drop-down. Measured 2026-09-22 across all 34: it resolves for every
+  one, with sibling counts matching A-to-Z's `versionCount` exactly, which is why
+  one extra request per parent is the whole fix and no pagination is needed.
 * A sibling's `isArchive` flag is what separates active from archived. Archived
   siblings often carry a stale `folder_path` (`enterprise_message_service` rather
   than `ems/8.2.1`), which is why an active ZIP URL is only ever built from a
@@ -59,6 +67,17 @@ _ARCHIVE_CHILD_KEYS = ("children", "archives", "archive_versions", "versions")
 _CATEGORY_KEYS = ("category", "category_name", "categoryName", "suite", "suite_name")
 _PUBLIC_KEYS = ("isPublicLevel", "is_public_level", "isPublic")
 _PRODUCT_LIST_KEYS = ("products", "results", "items", "data")
+# How many versions A-to-Z claims a product has. Not used to build anything --
+# it is the independent number the crawl's own output is checked against, which
+# is what turns a parent product's silent drop into a reported defect.
+_VERSION_COUNT_KEYS = ("versionCount", "version_count", "versionsCount", "versions_count")
+
+# Appended to a slug to turn a parent product into a child one. See the module
+# docstring. A slug suffix, never a URL suffix: the docsite page
+# `/products/tibco-webfocus-client` is served by the slug `ibi-webfocus-client`,
+# and `tibco-webfocus-client-latest` is not a thing. Always built from the slug
+# A-to-Z returned.
+_LATEST_SUFFIX = "-latest"
 
 # Envelopes the docsite wraps responses in, peeled before anything is read.
 _ENVELOPE_KEYS = ("result", "data", "response", "payload", "product")
@@ -83,6 +102,14 @@ class CrawlResult:
     # stubs). Counted rather than listed: none of them have anything to convert.
     # Skipped for the same reason errored products are.
     unversioned: int = 0
+    # Entries A-to-Z advertises a `versionCount` for that still yielded nothing.
+    # Split out of `unversioned` on 2026-09-23 and **named, not counted**, because
+    # the two are not the same event: a licence page with no versions is the
+    # docsite working as intended, while a product the index says has 22 is a
+    # defect in this module. Both landed in one tally until `tibco-streaming`
+    # surfaced twelve days later in a convert run -- the number was printed the
+    # whole time, under a label that said the drop was expected.
+    advertised_but_empty: list[str] = field(default_factory=list)
     # Entries the docsite marks as not publicly visible. Skipped before the
     # request, because fetching one just yields an SSO page.
     non_public: int = 0
@@ -149,7 +176,10 @@ class DocsiteCrawler:
                 result.errors.append(f"{entry['slug']}: {exc}")
                 continue
             if product is None:
-                result.unversioned += 1
+                if _as_count(entry["version_count"]) > 0:
+                    result.advertised_but_empty.append(entry["slug"])
+                else:
+                    result.unversioned += 1
                 continue
             if bu and product.bu != bu.strip().lower():
                 continue
@@ -172,23 +202,40 @@ class DocsiteCrawler:
         entries, which would otherwise be 70 wasted requests and 70 errors in the
         report. A *missing* flag is treated as public, so a schema change cannot
         silently empty the crawl.
+
+        **The visibility filter runs before the de-duplication, not after.** One
+        slug can arrive twice with different visibility: `spotfire-application` is
+        both id 8862 (`isPublicLevel: false`, `isOnlyForAdmin: true`, 1 version)
+        and id 2452 (public, 99 versions). De-duplicating first meant the
+        admin-only record claimed the slug and was then discarded as non-public,
+        so the real product was never requested and was counted under
+        `non_public` -- one duplicated slug in 739 records, and the reason a
+        99-version product was invisible to the catalog until 2026-09-22.
+        A slug therefore counts as non-public only when **every** record for it
+        is. Among several visible records the first still wins: nothing in the
+        payload ranks them, and inventing an order would be a guess.
         """
-        entries = []
-        seen = set()
+        grouped: dict[str, list[dict[str, Any]]] = {}
         for record in _as_records(self.client.a_to_z(), _PRODUCT_LIST_KEYS):
             slug = _first(record, _SLUG_KEYS)
-            if not slug or slug in seen:
-                continue
-            seen.add(slug)
-            public = _present(record, _PUBLIC_KEYS)
-            if public is not None and not record[public]:
+            if slug:
+                grouped.setdefault(slug, []).append(record)
+
+        entries = []
+        for slug, records in grouped.items():
+            visible = [r for r in records if _is_public(r)]
+            if not visible:
                 result.non_public += 1
                 continue
+            record = visible[0]
             entries.append(
                 {
                     "slug": slug,
                     "name": _first(record, _NAME_KEYS) or slug,
                     "id": _first(record, _ID_KEYS) or "",
+                    # The most versions any visible record claims. Read from the
+                    # whole group so a stub cannot understate a real product.
+                    "version_count": str(max(_as_count(_first(r, _VERSION_COUNT_KEYS)) for r in visible)),
                 }
             )
         return entries
@@ -225,20 +272,21 @@ class DocsiteCrawler:
         self, entry: dict[str, str], categories: dict[str, str], result: CrawlResult
     ) -> Product | None:
         """Builds one product, or `None` if the docsite publishes no versions for it."""
-        detail = _unwrap(self.client.product(entry["slug"]))
+        slug = entry["slug"]
+        detail = _unwrap(self.client.product(slug))
         if not isinstance(detail, dict):
             raise DocsiteError("product detail was not an object")
 
-        # The detail object *is* the current version; `siblings` holds the rest.
-        # Looked up by name only -- the generic list search would happily return
-        # the product's `Documents` array instead.
-        siblings = detail.get(_present(detail, _SIBLING_KEYS) or "") or []
-        records = [detail, *(s for s in siblings if isinstance(s, dict))]
-        records = [r for r in records if _first(r, _VERSION_KEYS)]
+        records = _versioned_records(detail)
+        if not records:
+            # A parent product: no version, no folder path, no siblings. Its
+            # releases are one slug away -- see the module docstring.
+            latest = self._latest_detail(slug, result)
+            if latest is not None:
+                detail, records = latest, _versioned_records(latest)
         if not records:
             return None
 
-        slug = entry["slug"]
         code = self._derive_code(slug, detail, records)
         product = self._product_shell(entry, detail, code, categories)
 
@@ -253,6 +301,25 @@ class DocsiteCrawler:
         if entry["id"]:
             meta["docsite_id"] = entry["id"]
         return product
+
+    def _latest_detail(self, slug: str, result: CrawlResult) -> dict[str, Any] | None:
+        """`/api/products/{slug}-latest`, or `None` if it does not resolve.
+
+        Only reached by a product whose own detail carried no version, so the
+        cost is one request per parent -- 34 on a full crawl -- and none at all
+        for the ~600 products that already work.
+
+        A failure here is **not** recorded as an error. The caller returns `None`
+        and the product lands in `advertised_but_empty` or `unversioned`, which
+        says the same thing in the place a reader is already looking; adding an
+        error line as well would report one genuinely version-less licence page
+        twice.
+        """
+        try:
+            detail = _unwrap(self.client.product(f"{slug}{_LATEST_SUFFIX}"))
+        except DocsiteError:
+            return None
+        return detail if isinstance(detail, dict) else None
 
     def _product_shell(
         self, entry: dict[str, str], detail: dict[str, Any], code: str, categories: dict[str, str]
@@ -404,6 +471,39 @@ def _first(record: Any, keys: tuple[str, ...]) -> str:
         if value not in (None, "", [], {}):
             return str(value).strip()
     return ""
+
+
+def _is_public(record: dict[str, Any]) -> bool:
+    """Whether A-to-Z says this record is publicly visible.
+
+    A *missing* flag is public, for the reason `_list_products` gives: a schema
+    change must not be able to empty the crawl.
+    """
+    key = _present(record, _PUBLIC_KEYS)
+    return True if key is None else bool(record[key])
+
+
+def _as_count(value: Any) -> int:
+    """A count from a payload field that may be absent, blank, or a string.
+
+    Anything unreadable is 0, which means "A-to-Z made no claim" -- so a product
+    is only ever reported as a defect on a number the docsite actually published.
+    """
+    try:
+        return int(str(value).strip() or 0)
+    except ValueError:
+        return 0
+
+
+def _versioned_records(detail: dict[str, Any]) -> list[dict[str, Any]]:
+    """The detail object and its siblings, keeping only those carrying a version.
+
+    `siblings` is looked up by name only -- the generic list search would happily
+    return the product's `Documents` array instead.
+    """
+    siblings = detail.get(_present(detail, _SIBLING_KEYS) or "") or []
+    records = [detail, *(s for s in siblings if isinstance(s, dict))]
+    return [r for r in records if _first(r, _VERSION_KEYS)]
 
 
 def _present(record: Any, keys: tuple[str, ...]) -> str | None:

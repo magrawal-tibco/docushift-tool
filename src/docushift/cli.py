@@ -192,7 +192,15 @@ def catalog_fetch(
         console.print(f"[red]![/red] {error}")
     if not result.products:
         message = "Discovery returned no products; the catalog was left untouched."
-        if selectors and not result.errors:
+        if result.advertised_but_empty:
+            # The one case where the generic advice below is wrong: the slug was
+            # right and the docsite lists versions for it, so telling the user to
+            # check the slug would send them after the wrong thing.
+            message += (
+                f" The A-to-Z index lists versions for {', '.join(result.advertised_but_empty)},"
+                f" but discovery could not read any -- that is a defect here, not a bad selector."
+            )
+        elif selectors and not result.errors:
             # Almost always a code the A-to-Z list does not use as a slug, e.g.
             # `ems` is published as `tibco-enterprise-message-service`.
             message += (
@@ -239,6 +247,18 @@ def catalog_fetch(
         console.print(
             f"[dim]Skipped {result.unversioned} entries with no published versions "
             f"and {result.non_public} that are not publicly visible.[/dim]"
+        )
+    # Deliberately not folded into the line above. These are products the A-to-Z
+    # index says have versions, so a drop is this tool's defect rather than the
+    # docsite's shape -- and they are named, because the fix always starts with
+    # which product.
+    if result.advertised_but_empty:
+        named = result.advertised_but_empty
+        console.print(
+            f"[yellow]{len(named)} product(s) are listed with versions but yielded none:[/yellow] "
+            + ", ".join(named[:12])
+            + (" ..." if len(named) > 12 else "")
+            + "\n[dim]Discovery could not read their versions -- missing from the catalog, not empty upstream.[/dim]"
         )
     for note in manager.warnings():
         console.print(f"[yellow]WARN[/yellow] {note}")

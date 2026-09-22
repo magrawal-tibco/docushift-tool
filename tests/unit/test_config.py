@@ -392,9 +392,15 @@ def test_shipped_scope_lists_the_ebx_and_spotfire_products(repo_root: Path) -> N
     """A guard on the real config/scope.yaml, verified against the A-to-Z index."""
     rules = ConfigManager(root_dir=repo_root).load_scope()
 
-    assert len(rules) == 61
+    # 61 compiled on 2026-09-09, plus `spotfire-application` on 2026-09-23. That
+    # one was missing because the duplicate-slug defect in `_list_products` kept
+    # Spotfire Analyst out of every catalog the list could be compiled from --
+    # exactness stops a rule matching the wrong product, and says nothing about a
+    # product missing from the list. See architecture.md §3.10.
+    assert len(rules) == 62
     for slug in ("tibco-ebx", "spotfire", "spotfire-server", "spotfire-desktop", "tibco-spotfire-for-apple-ipad"):
         assert slug in rules
+    assert "spotfire-application" in rules
     # The look-alikes the exact-slug rule exists to protect -- see §3.10.
     for slug in ("tibco-businessconnect-ebxml-protocol", "spotfire-data-streams", "spotfire-statistics-services"):
         assert slug not in rules

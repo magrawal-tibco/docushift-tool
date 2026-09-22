@@ -403,6 +403,163 @@ def _html_for(session: FakeSession, path: str, body: str):
     return get
 
 
+# -- crawler: parent products and duplicated slugs ------------------------------
+#
+# Both defects were found on 2026-09-22 and cost the catalog 35 products between
+# them. They present identically -- a product the A-to-Z index lists is absent
+# from the catalog -- and have nothing else in common, which is why the fixtures
+# below keep them apart.
+
+
+def _parent_payloads(a_to_z_extra: list[dict], **detail: object) -> dict:
+    """PAYLOADS plus one parent product: version-less detail, versions under `-latest`."""
+    payloads = dict(PAYLOADS)
+    listing = json.loads(json.dumps(PAYLOADS["/api/a_to_z"]))
+    listing["result"]["products"].extend(a_to_z_extra)
+    payloads["/api/a_to_z"] = listing
+    # What the live API returns for a parent: no version, no folder, no siblings.
+    payloads["/api/products/tibco-streaming"] = _envelope(
+        "product",
+        {"id": 4943, "name": "TIBCO® Streaming", "isParentProduct": True, "version_no": None, "folder_path": ""},
+    )
+    payloads.update(detail)
+    return payloads
+
+
+_STREAMING_LATEST = _envelope(
+    "product",
+    {
+        "id": 9200,
+        "name": "TIBCO® Streaming 11.2.1",
+        "slug": "tibco-streaming-11-2-1",
+        "isChildProduct": True,
+        "version_no": "11.2.1",
+        "folder_path": "str/11.2.1",
+        "releaseDate": "2025-10-23T00:00:00.000Z",
+        "isArchive": False,
+        "isArchiveExists": False,
+        "siblings": [
+            {"version_no": "11.2.0", "folder_path": "str/11.2.0", "isArchive": False},
+            {"version_no": "11.1.0", "folder_path": "str/11.1.0", "isArchive": True},
+        ],
+    },
+)
+
+_STREAMING_ENTRY = {
+    "name": "TIBCO® Streaming",
+    "slug": "tibco-streaming",
+    "id": 4943,
+    "isPublicLevel": True,
+    "versionCount": 3,
+}
+
+
+def test_a_parent_product_is_recovered_through_its_latest_slug(crawl_config: ConfigManager) -> None:
+    """A parent publishes no versions of its own; `{slug}-latest` is the child that does."""
+    session = FakeSession(
+        _parent_payloads([_STREAMING_ENTRY], **{"/api/products/tibco-streaming-latest": _STREAMING_LATEST})
+    )
+    result = _crawl(session, crawl_config)
+
+    streaming = next(p for p in result.products if p.slug == "tibco-streaming")
+    assert sorted(streaming.versions) == ["11.1.0", "11.2.0", "11.2.1"]
+    assert not result.advertised_but_empty
+    # The row is keyed on the parent slug, not on the `-latest` one that answered.
+    assert all(v.slug == "tibco-streaming" for v in streaming.versions.values())
+
+
+def test_the_recovered_versions_get_the_code_and_urls_the_parent_never_supplied(
+    crawl_config: ConfigManager,
+) -> None:
+    """The folder path arrives with the fallback, so the existing ZIP template just works."""
+    session = FakeSession(
+        _parent_payloads([_STREAMING_ENTRY], **{"/api/products/tibco-streaming-latest": _STREAMING_LATEST})
+    )
+    streaming = _by_code(_crawl(session, crawl_config), "str")
+
+    assert streaming.versions["11.2.1"].zip_url.endswith(
+        "/pub/str/11.2.1/tibco-streaming-11-2-1_documentation.zip"
+    )
+    # Archived siblings are still not templated -- the fallback changes where the
+    # records come from, not which of them may have a URL guessed for them.
+    assert streaming.versions["11.1.0"].zip_url is None
+
+
+def test_a_product_that_already_works_never_asks_for_latest(crawler: DocsiteCrawler, session: FakeSession) -> None:
+    """The fallback is reached only by a product that yielded nothing.
+
+    So the ~635 products with a child shape cost nothing, and the retry is spent
+    on the 34 parents plus whatever genuinely publishes no versions. It is
+    deliberately *not* gated on A-to-Z's `versionCount`: every public record in
+    the live index claims a non-zero count, licence pages included, so the gate
+    would buy no request back while quietly disabling the fallback the day the
+    docsite stops sending the field.
+    """
+    crawler.discover()
+
+    assert "/api/products/tibco-enterprise-message-service-latest" not in session.calls
+    assert "/api/products/tibco-ebx-latest" not in session.calls
+
+
+def test_a_parent_whose_latest_does_not_resolve_is_named_not_swallowed(crawl_config: ConfigManager) -> None:
+    """The index says it has versions and discovery produced none: that is this tool's defect."""
+    session = FakeSession(_parent_payloads([_STREAMING_ENTRY]))  # no `-latest` payload
+    result = _crawl(session, crawl_config)
+
+    assert result.advertised_but_empty == ["tibco-streaming"]
+    # Not double-reported: `advertised_but_empty` already names it, and a licence
+    # page that genuinely has no `-latest` must not raise an error line as well.
+    assert not result.errors
+
+
+def test_a_genuinely_unversioned_entry_is_not_reported_as_a_defect(crawl_config: ConfigManager) -> None:
+    """A licence page with no `versionCount` is the docsite working as intended."""
+    session = FakeSession(_parent_payloads([]))
+    result = _crawl(session, crawl_config)
+
+    assert result.unversioned == 1  # adapter-code-for-joomla
+    assert result.advertised_but_empty == []
+
+
+def test_a_public_product_is_not_shadowed_by_a_non_public_twin(crawl_config: ConfigManager) -> None:
+    """`spotfire-application`: one slug, two A-to-Z records, and only one of them real."""
+    twins = [
+        # The admin-only stub arrives first, exactly as the live index returns it.
+        {"name": "Spotfire Application", "slug": "spotfire-application", "id": 8862, "isPublicLevel": False},
+        {
+            "name": "Spotfire® Application",
+            "slug": "spotfire-application",
+            "id": 2452,
+            "isPublicLevel": True,
+            "versionCount": 1,
+        },
+    ]
+    detail = _envelope(
+        "product",
+        {"name": "Spotfire® Application 15.0.0", "version_no": "15.0.0", "folder_path": "sfire-analyst/15.0.0"},
+    )
+    session = FakeSession(_parent_payloads(twins, **{"/api/products/spotfire-application": detail}))
+    result = _crawl(session, crawl_config)
+
+    assert "spotfire-application" in [p.slug for p in result.products]
+    # One record being invisible does not make the slug invisible.
+    assert result.non_public == 1  # tibco-policy-manager only
+    assert "/api/products/spotfire-application" in session.calls
+
+
+def test_a_slug_is_non_public_only_when_every_record_for_it_is(crawl_config: ConfigManager) -> None:
+    """The saving the visibility filter exists for still has to hold for duplicates."""
+    twins = [
+        {"name": "Hidden", "slug": "hidden-product", "id": 1, "isPublicLevel": False},
+        {"name": "Hidden", "slug": "hidden-product", "id": 2, "isPublicLevel": False},
+    ]
+    session = FakeSession(_parent_payloads(twins))
+    result = _crawl(session, crawl_config)
+
+    assert result.non_public == 2  # the duplicated pair counts once, plus policy-manager
+    assert "/api/products/hidden-product" not in session.calls
+
+
 # -- crawler: classification --------------------------------------------------
 
 

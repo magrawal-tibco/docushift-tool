@@ -20,7 +20,7 @@
 # `docushift catalog set --product <code> --in-scope`, which records
 # scope_source=manual and outranks everything here.
 #
-# 61 products, each verified against the live docs.tibco.com A-to-Z index on
+# 62 products. 61 were verified against the live docs.tibco.com A-to-Z index on
 # 2026-09-09: 61/61 matched 1:1, all publicly visible, 0 ambiguous.
 
 out_of_scope:
@@ -44,6 +44,16 @@ out_of_scope:
     reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"
   - slug: spotfire-on-kubernetes
     display_name: "Spotfire on Kubernetes"
+    reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"
+  # Spotfire Analyst itself (folder `sfire-analyst`, 99 versions). Added
+  # 2026-09-23, and absent from the 2026-09-09 list for a reason worth keeping:
+  # a crawler defect returned two A-to-Z records for this slug and kept the
+  # admin-only one, so the product was in no catalog anyone could compile the
+  # list from. Exact-slug matching stops a rule hitting the wrong product; it
+  # cannot tell you a product is missing from the list. See architecture.md
+  # §3.10 and planning.md 18d.
+  - slug: spotfire-application
+    display_name: "Spotfire® Application"
     reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"
   - slug: spotfire-server
     display_name: "Spotfire® Server"
