@@ -934,6 +934,19 @@ docushift validate --target-dir ../tibco-docs-aem/ --check-external
 `--version` takes `10.4.0` or `10-4-0`: the dashed form is what is on disk and the
 dotted form is what you have in hand.
 
+**There is no `--family` here, and that is not an oversight** — `validate` never
+opens the catalog, and `family` is a catalog column. To check one family, loop over
+the product folders in its tree:
+
+```bash
+for p in ../tibco-docs-aem/en-us-tib-streaming-userdocs/en-us/*/; do
+  docushift validate --target-dir ../tibco-docs-aem/ --product "$(basename "$p")"
+done
+```
+
+Each run gates on its own exit code, so a loop tells you *which* product failed
+rather than only that something did.
+
 **It exits 1 if and only if it recorded an error** — the only command in the tool
 that gates. Warnings and notes are printed and counted and change nothing, and a
 selection that matched no published folder exits 1 like every other stage.
