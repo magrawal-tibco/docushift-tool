@@ -19,9 +19,11 @@ Four rules the driver holds so the packer never has to:
 - **An unrecognised TOC is a failure, not a skip.** A half-parsed tree merges into
   a plausible-looking page count with a branch silently missing.
 
-In Phase 20a no packer is registered, so a Flare version is read, checked and
-passed through byte-identical. That is the sub-phase's whole visible behaviour and
-it is honest: the spine runs end to end, the gate holds, and nothing is merged yet.
+A fifth rule arrives with the packer in 20b: **the acceptance checks run before the
+swap, not after it.** Requirements §6 asks the stage to self-validate and fail, and
+§1 explains why it has to be here rather than in a test -- the merge is a one-way
+door, so the run that built a tree is the last cheap moment to reject it. A failing
+audit removes the staging tree and leaves the previous merge, if any, untouched.
 """
 
 from __future__ import annotations
@@ -30,15 +32,19 @@ import shutil
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass, field
 from enum import StrEnum
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 import yaml
 
 from docushift.catalog import CatalogManager
 from docushift.config import ConfigManager
 from docushift.models import Product, ProductVersion, SourceEngine
+from docushift.reframe import manifest
+from docushift.reframe.audit import audit
+from docushift.reframe.packer import Page, assign, carry, pack
+from docushift.reframe.pages import LinkCounts, render, split_frontmatter, title_of, word_count
 from docushift.reframe.policy import ReframePolicy, policy_for
-from docushift.reframe.toc import TocEntry, schema_for
+from docushift.reframe.toc import TocEntry, retarget, schema_for
 from docushift.reporting.findings import FindingsRun
 from docushift.utils.swap import remove, swap
 
@@ -46,6 +52,66 @@ from docushift.utils.swap import remove, swap
 #: because the question "which engines produce topics small enough to need this?"
 #: is an empirical one, and WebWorks is the plausible second answer.
 REFRAMABLE_ENGINES: tuple[SourceEngine, ...] = (SourceEngine.FLARE,)
+
+
+#: Written fresh by this stage, so a copy of the source's version would be stale.
+_REGENERATED = frozenset({"toc.yml", "reframe.yml", "redirects.yml"})
+
+
+@dataclass(frozen=True)
+class _Written:
+    """What `_write` actually put on disk, for §6's word-conservation equality."""
+
+    #: Body tokens across every merged page, frontmatter excluded.
+    words: int
+    #: Tokens the anchors and heading shifts declared they added (`pages.render`).
+    scaffolding: int
+
+
+class _Source:
+    """A read-only view of the converted tree, with one word count per topic.
+
+    A class rather than a pair of closures because the word count is asked for
+    twice -- once to choose boundaries and once to check conservation -- and the
+    two must be the same number by construction rather than by two call sites
+    agreeing. It also holds the file inventory that separates R4's *unresolvable*
+    target from a genuinely orphaned one.
+
+    Nothing here writes, which is C4 held at the level of the type.
+    """
+
+    def __init__(self, root: Path) -> None:
+        self.root = root
+        paths = sorted(p.relative_to(root).as_posix() for p in root.rglob("*") if p.is_file())
+        self.files = frozenset(PurePosixPath(p) for p in paths)
+        #: Everything copied through untouched: not a topic, and not the navigation
+        #: or sidecars this stage regenerates from scratch.
+        self.assets = tuple(
+            PurePosixPath(p)
+            for p in paths
+            if not p.lower().endswith(".md") and p not in _REGENERATED
+        )
+        #: Every Markdown topic on disk, whether or not the TOC knows about it.
+        self.topics = tuple(PurePosixPath(p) for p in paths if p.lower().endswith(".md"))
+        self._words: dict[PurePosixPath, int] = {}
+
+    def exists(self, relative: PurePosixPath) -> bool:
+        return relative in self.files
+
+    def read(self, relative: PurePosixPath) -> str:
+        return (self.root / relative).read_text(encoding="utf-8")
+
+    def words(self, relative: PurePosixPath) -> int:
+        """Body tokens, frontmatter excluded. Memoized; never swallows a read error.
+
+        The POC returned 0 on `OSError` here and then opened the same path
+        unguarded in its write pass (requirements §10). The driver checks every TOC
+        path exists before calling this, so a failure now is a real filesystem
+        fault and belongs in the stage's `except OSError`, not in a zero.
+        """
+        if relative not in self._words:
+            self._words[relative] = word_count(split_frontmatter(self.read(relative))[1])
+        return self._words[relative]
 
 
 class ReframeOutcome(StrEnum):
@@ -74,7 +140,7 @@ class ReframeResult:
     #: Topics read out of the source `toc.yml`. The denominator every acceptance
     #: check in requirements §6 is measured against.
     topics: int = 0
-    #: Pages written. Equal to `topics` until the packer lands in 20b.
+    #: Merged pages written. The ratio against `topics` is the stage's whole point.
     pages: int = 0
     #: Which TOC dialect the adapter seam matched, for the report.
     toc_schema: str = ""
@@ -183,29 +249,97 @@ class Reframer:
         target: Path,
         checksum: str,
     ) -> ReframeResult:
-        """Reads the navigation, checks the pins, writes the tree, swaps it in."""
+        """Reads the navigation, packs, writes the tree, audits it, swaps it in."""
         slug, number = product.slug, version.version
 
-        entries, schema_name = self._navigation(converted, policy, slug, number)
-        if entries is None:
+        roots, schema_name = self._navigation(converted, policy, slug, number)
+        if roots is None:
             return ReframeResult(
                 slug, number, ReframeOutcome.FAILED, engine=version.engine,
                 message=f"no TOC adapter matches {converted / 'toc.yml'}",
             )
 
         self._check_pin(product, policy)
-        topics = sum(1 for entry in entries if entry.path is not None)
+        source = _Source(converted)
+        nodes = [entry for root in roots for entry in root.walk() if entry.path is not None]
+        topics = len(nodes)
+
+        # Requirements §10's third POC defect, refused at the only point it can be:
+        # there, a TOC entry naming a missing file sized as zero words, packed
+        # silently, and then crashed the write pass -- after the previous output had
+        # already been deleted. Here it is a named failure before anything is built.
+        missing = [str(entry.path) for entry in nodes if not source.exists(entry.path)]
+        if missing:
+            shown = ", ".join(missing[:5]) + (", ..." if len(missing) > 5 else "")
+            self._record("REFRAME_SELF_CHECK_FAILED", slug, number, path="toc.yml",
+                         message=f"{len(missing)} TOC path(s) name no file: {shown}")
+            return ReframeResult(
+                slug, number, ReframeOutcome.FAILED, engine=version.engine, topics=topics,
+                toc_schema=schema_name, message=f"{len(missing)} TOC path(s) name no file",
+            )
+
+        packed = pack(roots, source.words, policy.max_words)
+        # Topics the navigation never listed. Stage 7 publishes them today, so
+        # dropping them would delete live content; `packer.carry` explains the call.
+        stranded = [
+            path for path in source.topics if path not in {entry.path for entry in nodes}
+        ]
+        if stranded:
+            shown = ", ".join(str(path) for path in stranded[:5])
+            self._record(
+                "REFRAME_TOPIC_UNTOCKED", slug, number,
+                message=(
+                    f"{len(stranded)} topic(s) absent from toc.yml, carried through as "
+                    f"single-topic pages: {shown}{', ...' if len(stranded) > 5 else ''}"
+                ),
+            )
+        carried = carry(
+            stranded,
+            lambda path: title_of(source.read(path), path.stem),
+            source.words,
+        )
+        built = packed + carried
+        located = assign(built)
+        unnavigated = frozenset(page.path for page in carried)
 
         staging = target.with_name(target.name + ".part")
         remove(staging)
         staging.parent.mkdir(parents=True, exist_ok=True)
 
-        # 20a's passthrough. The packer replaces this call in 20b; what it must not
-        # replace is the shape around it -- build into `.part`, swap, then record.
-        # `copytree` rather than a rename of the input, because C4 is the rule the
-        # rest of this stage's reversibility rests on.
-        shutil.copytree(converted, staging)
-        pages = sum(1 for _ in staging.rglob("*.md"))
+        counts = LinkCounts()
+        added = self._write(staging, source, built, located, counts)
+        self._write_navigation(staging, source, roots, built, located, policy, counts, schema_name)
+
+        failures = audit(
+            built, located, roots,
+            words_in=sum(topic.words for page in built for topic in page.topics),
+            words_out=added.words, added=added.scaffolding, counts=counts,
+            unnavigated=unnavigated,
+        )
+        if failures:
+            # Nothing is swapped. Requirements §6: "fail the stage if any check
+            # fails" -- and the staging tree is removed rather than left for
+            # inspection, because a half-trusted merged tree beside a good one is
+            # exactly the thing a later run would pick up by mistake.
+            for failure in failures:
+                self._record("REFRAME_SELF_CHECK_FAILED", slug, number, message=failure)
+            remove(staging)
+            return ReframeResult(
+                slug, number, ReframeOutcome.FAILED, engine=version.engine, topics=topics,
+                pages=len(built), toc_schema=schema_name,
+                message=f"{len(failures)} acceptance check(s) failed: {failures[0]}",
+            )
+
+        if counts.unresolved:
+            self._record(
+                "REFRAME_LINK_UNRESOLVED", slug, number,
+                message=(
+                    f"{counts.unresolved} relative reference(s) point outside the converted "
+                    f"tree; present before the merge and left exactly as written"
+                ),
+            )
+
+        pages = len(built)
 
         # Eight attempts over ~9s rather than `swap`'s default five over ~1s. The
         # default is calibrated against `convert`, which writes its files one at a
@@ -226,12 +360,68 @@ class Reframer:
             topics=topics, pages=pages, toc_schema=schema_name,
         )
 
+    # -- writing --------------------------------------------------------------
+
+    def _write(
+        self,
+        staging: Path,
+        source: _Source,
+        built: list[Page],
+        located: dict[PurePosixPath, tuple[Page, str]],
+        counts: LinkCounts,
+    ) -> _Written:
+        """Renders every page into the staging tree. Returns the word accounting."""
+        existing = source.files
+        words = 0
+        scaffolding = 0
+        for page in built:
+            text, added = render(page, source.read, located, existing, counts)
+            destination = staging / page.path
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            # `newline=""` so the bytes are the same on every platform, which is
+            # half of C5; the other half is that everything feeding this is sorted.
+            destination.write_text(text, encoding="utf-8", newline="")
+            scaffolding += added
+            words += word_count(split_frontmatter(text)[1])
+        return _Written(words, scaffolding)
+
+    def _write_navigation(
+        self,
+        staging: Path,
+        source: _Source,
+        roots: list[TocEntry],
+        built: list[Page],
+        located: dict[PurePosixPath, tuple[Page, str]],
+        policy: ReframePolicy,
+        counts: LinkCounts,
+        schema: str,
+    ) -> None:
+        """Copies the assets through, then writes `toc.yml` and the two sidecars.
+
+        Assets are **everything that is not a topic** rather than an allowlist of
+        directory names. The POC hardcoded two (`Resources`, `users-guide/images`)
+        and silently repathed every reference to anything else into a link with no
+        file behind it -- counted as a success, because the asset branch never
+        checked. This corpus has three asset directories under two conventions and
+        another set will have others, so the rule has to be structural.
+        """
+        for relative in source.assets:
+            destination = staging / relative
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(source.root / relative, destination)
+
+        manifest.write(staging / "toc.yml", manifest.TOC_HEADER, retarget(roots, located))
+        manifest.write(
+            staging / "reframe.yml", manifest.PAGES_HEADER, manifest.summary(built, policy, counts, schema)
+        )
+        manifest.write(staging / "redirects.yml", manifest.REDIRECTS_HEADER, manifest.redirects(located))
+
     # -- the pieces -----------------------------------------------------------
 
     def _navigation(
         self, converted: Path, policy: ReframePolicy, slug: str, number: str
     ) -> tuple[list[TocEntry] | None, str]:
-        """Every TOC row of one version, flattened, through the adapter seam.
+        """The top-level TOC rows of one version, as a tree, through the adapter seam.
 
         Returns `(None, "")` after recording the finding, rather than raising, so a
         doc set with an unreadable TOC is one named row in the report and the rest
@@ -255,8 +445,9 @@ class Reframer:
             self._record("REFRAME_TOC_SCHEMA_UNKNOWN", slug, number, path="toc.yml", message=reason)
             return None, ""
 
-        entries = [row for top in schema.parse(document) for row in top.walk()]
-        return entries, schema.name
+        # The tree, not a flattened list: R1's packing is defined on subtrees, and
+        # flattening here would have thrown away the only thing it needs.
+        return schema.parse(document), schema.name
 
     def _check_pin(self, product: Product, policy: ReframePolicy) -> None:
         """R1.4. A doc set with two eligible versions and no pin drifts, permanently.

@@ -922,6 +922,9 @@ The concrete deliverable of §7.1: every deferred "report line" in the three doc
 | `OUTPUT_COUNT_MISMATCH`¹³ | warn | convert | Fewer Markdown files on disk than documents converted; two writes landed on one path | Phase 13 |
 | `REFRAME_TOC_SCHEMA_UNKNOWN`²⁰ᵃ | error | reframe | No TOC adapter matches this version's `toc.yml`; refusing to merge a partly-understood tree | `REFRAME-INTEGRATION-PLAN.md` §4 Phase 0 |
 | `REFRAME_LAYOUT_UNPINNED`²⁰ᵃ | warn | reframe | More than one eligible version of this doc set and no pinned layout; versions may not correspond | `REFRAME-REQUIREMENTS.md` R1.4 |
+| `REFRAME_SELF_CHECK_FAILED`²⁰ᵇ | error | reframe | A §6 acceptance check failed; the merged tree was discarded rather than swapped in | `REFRAME-REQUIREMENTS.md` §6 |
+| `REFRAME_LINK_UNRESOLVED`²⁰ᵇ | warn | reframe | Relative references pointing outside the converted tree, left as written; present before the merge | `REFRAME-REQUIREMENTS.md` R4, §8 |
+| `REFRAME_TOPIC_UNTOCKED`²⁰ᵇ | warn | reframe | Topics absent from `toc.yml`, carried through unmerged and unreachable from navigation | `REFRAME-REQUIREMENTS.md` R3 |
 
 #### 7.6 Cross-version CSH regression
 
@@ -2504,7 +2507,7 @@ One function in one engine (`_admonition`), one line in `inline_override`, one c
 
 ---
 
-### Phase 20: Reframe — A Flare Topic Is Too Small To Maintain — **20a built, 20b–20e planned, 2026-09-23**
+### Phase 20: Reframe — A Flare Topic Is Too Small To Maintain — **20a–20b built, 20c–20e planned, 2026-09-23**
 
 Every phase so far has converted a source tree faithfully. Reframe is the first that deliberately *changes the shape* of what the source said: it merges MadCap Flare's very small topics into fewer, larger pages, turning each former topic into an anchored `##` section, and it does so once, permanently, because Markdown becomes the authoring source the moment the migration lands.
 
@@ -2564,8 +2567,8 @@ This is a change to R6's neighbours, not to R6. The review queue — which the i
 
 Renumbered onto this repository's scheme; the integration plan's Phase 0–4 map onto 20a–20e.
 
-- **20a — Contracts and the gate.** `reframe/` package, `docushift reframe` command with the standard `_scope_options`, engine assertion inside the stage (C2), no-op passthrough for non-Flare, the `reframe.yaml` config shape with `MAX_WORDS` and the TOC-schema adapter seam. *Exit: the command runs over the whole catalog, touches nothing that is not Flare, and passes a Flare set through byte-identical.*
-- **20b — Packing.** R1–R5, fence-aware parsing, the three POC defects from requirements §10 left unported, **R1.4 layout pinning pinned to the newest eligible version** (required by Q2), determinism check. Anchors emitted per 20.3(1). *Exit: reproduces §6's baseline on EMS 10.5.1, page count allowed to rise from dropping `MIN_WORDS`.*
+- **20a — Contracts and the gate.** *(built)* `reframe/` package, `docushift reframe` command with the standard `_scope_options`, engine assertion inside the stage (C2), no-op passthrough for non-Flare, the `reframe.yaml` config shape with `MAX_WORDS` and the TOC-schema adapter seam. *Exit: the command runs over the whole catalog, touches nothing that is not Flare, and passes a Flare set through byte-identical.*
+- **20b — Packing.** *(built)* R1–R5, fence-aware parsing, the three POC defects from requirements §10 left unported, **R1.4 layout pinning pinned to the newest eligible version** (required by Q2), determinism check. Anchors emitted per 20.3(1). *Exit: reproduces §6's baseline on EMS 10.5.1, page count allowed to rise from dropping `MIN_WORDS`.*
 - **20c — Review queue.** R6 and R7.1. On the critical path, not polish: the ~25–30 flagged pages are the only ones a human ever sees, and Phase 20b ships deliberately incomplete without this.
 - **20d — Stage 7 integration.** Teach `validation/` about the redirect map and the merged TOC, so R5 and R6's acceptance checks are enforced by the existing checker rather than by a second one inside Reframe. Wire the exit-code idiom from Q4.
 - **20e — Pilot.** One doc set, queue worked, **explicit writer sign-off before redirects are published.**
@@ -2574,7 +2577,7 @@ Renumbered onto this repository's scheme; the integration plan's Phase 0–4 map
 
 - **That Reframe should run on all six EMS versions.** Q2 establishes that it *can* be asked to, which is what makes R1.4 mandatory. Whether the older five are worth merging is a scope decision for 20e, not a mechanical one.
 - **That the 14 `engine=flare` rows are the Flare population.** 1,647 of the 1,683 convert-eligible version rows are `engine=auto` and detect their engine at extract time (`engines/detector.py`). Reframe's real reach is unknown until those run, and sizing it is not a blocker for 20a.
-- **That §8's pre-existing defects have been confirmed here.** The requirements list 31 dangling in-page anchors and title mojibake in the reference corpus. Neither has been measured against the current tree, and Phase 19 changed how at least one engine emits anchors. They are baselined in 20b, before merging, exactly as the risk table says.
+- **That §8's pre-existing defects have been confirmed here.** The requirements list 31 dangling in-page anchors and title mojibake in the reference corpus. Neither has been measured against the current tree, and Phase 19 changed how at least one engine emits anchors. They are baselined in 20b, before merging, exactly as the risk table says. *(20b: the link half is measured — 92 unresolvable relative references, all `.html`/`.htm` into a sibling `…-resources` tree that Stage 6 does not produce. They are counted as `unresolved`, left exactly as written, and reported as `REFRAME_LINK_UNRESOLVED` rather than failing the stage. The in-page anchor count and the title mojibake are still unmeasured and belong to 20c, which is the phase that looks at page titles.)*
 
 #### 20a Contracts and the gate — **Built & verified, 2026-09-23**
 
@@ -2602,6 +2605,47 @@ The six DataSynapse Flare versions have **no `convert_source_checksum` recorded 
 **Verification.** `reframe --all` over the full catalog: **6 reframed, 8 already current, 1,669 not Flare, 0 no-output, 0 failed, 0 findings.** EMS 10.5.1 passes through **byte-identical — all 1,476 files, SHA-256 per file, zero differences** — and reads **1,441 topics** out of `toc.yml`, matching the corpus measurement in 20.2 exactly. The input tree is unmodified on bytes and mtimes. A second run with no `--force` reports `current`; a `max_words` edit invalidates it. **1,373 tests pass** (25 new in `tests/unit/test_reframe.py`), `ruff` clean.
 
 **What 20a does not do.** It merges nothing. `pages` equals the `.md` files copied, which is why the report reads `1441 topic(s) -> 1441 page(s)`; the number only becomes meaningful when 20b writes merged pages. No anchors are emitted, no TOC is regenerated, no redirects are written, and `review-queue.csv` does not exist yet. The `reframed/` tree is currently a copy, and that is the baseline 20b diffs against.
+
+#### 20b Packing — **Built & verified, 2026-09-23**
+
+Four new modules and one rewired driver. `packer.py` decides layout (R1, R2, R4.1, R4.2) and never opens a topic body — word counts arrive through a callable, so the whole of R1 is testable against a dict of sizes. `pages.py` turns a page's topics into bytes (R2.1, R4, R7). `audit.py` is §6's acceptance suite, run **before** the swap. `manifest.py` writes the two sidecars. `toc.retarget` regenerates the navigation (R3).
+
+**The register gains three codes, 46 → 49.** `REFRAME_SELF_CHECK_FAILED` (error), `REFRAME_LINK_UNRESOLVED` (warning), `REFRAME_TOPIC_UNTOCKED` (warning). Each is registered alongside the check that emits it, not ahead of it.
+
+| decision | what was built | why not the obvious alternative |
+|---|---|---|
+| **Anchor syntax** | `markdown.anchor_marker` as its own block above the heading | 20.3(1). GFM has no attribute syntax, so the POC's `## Title {#a}` renders the braces as literal text and the anchor does not exist. |
+| **Reading order** | `_subtree` returns one ordered run of closed `Page`s and open `_Unit`s; the packer splices *around* the pages | The POC appended to a shared list as the recursion unwound, so an overflowing child subtree's pages landed before the page holding their own parent's topic — which reads earlier. Order becomes an invariant of the return type rather than something to check. |
+| **R4.2** | Enforced at the join, not checked afterwards | "No page spans two source directories" then holds by construction. Every top-level subtree on the reference corpus is single-directory, so this changes nothing here; it is the sets not laid out that way that would otherwise get a page whose relative asset paths are correct for half its content. |
+| **Fence-awareness** | Every scan matches against `references.mask_code` / `mask_html_blocks` and edits the original by offset | Requirements §7's latent corruption. A `# comment` preceding a topic's real H1 becomes the *anchored* heading, and the topic's identity becomes a line of shell. The corpus has zero of these, which is why the POC never showed it. |
+| **Self-validation** | In the stage, before the swap; a failure removes the staging tree | §6 asks for it and §1 says why: the merge is a one-way door, so the run that built a tree is the last cheap moment to reject it. A check that lives only in the test suite protects the reference corpus and nothing else. |
+| **Broken links** | Split into `unresolved` (absent from disk — tolerated, §8) and `orphaned` (present but unclaimed — fatal) | R4's discriminator is *unresolvable*, which is an existence question, not a suffix question. A first cut keyed on `.html` would have passed a genuinely orphaned `.md` and failed on Stage 6's pre-existing defects. |
+| **Sidecars** | `reframe.yml` and `redirects.yml` at the version root, YAML | The POC wrote three CSVs into a `manifest/` directory beside the script, shared across every version it ever ran on, so the second run overwrote the first. These are the only place that survives the `.part` swap and the only place Stage 7 can find without being told. |
+
+**Three things the corpus found that the reference set does not exhibit.**
+
+*Word conservation failed by exactly one token per topic.* `<a id="x"></a>` is **two** whitespace-delimited tokens, not the one requirements §6's "+1 per topic" assumes. `shift_headings` now *measures* what it added and returns it; a hand-written constant only ever encodes whichever anchor syntax was in mind when it was written.
+
+*A topic listed under two guides.* GridServer 7.2.0's `toc.yml` has 1,014 nodes over 1,000 distinct paths — `Typographical_Conventions.md` appears three times — and packing it three times copies its body onto three pages. A `claimed` set threads through the walk: the first node to reach a path owns the content, the rest become rows pointing at the same `page.md#anchor`, which `retarget` handles for free.
+
+*A topic on disk the TOC never lists.* Runtime Agent 5.13.0 has 651 `.md` files and 649 nodes, and one of the two strays is the target of a live link. Stage 7 publishes the whole `output/` tree, so these are **already published**; dropping them would make Reframe delete live content as a side effect of a navigation gap. `packer.carry` turns each into a single-topic page rendered through the same pass — so its own links are rewritten — exempt from reachability only, and named by `REFRAME_TOPIC_UNTOCKED`.
+
+**Verification against §6's reference baseline** (EMS 10.5.1, `max_words: 3000`):
+
+| metric | POC baseline | built |
+|---|---|---|
+| topics → pages | 1,441 → 106 | 1,441 → **124** |
+| words per page | median 2,354 · min 20 · max 3,533 | median 2,082 · min 7 · **max 3,533** |
+| topics per page | median 12 · min 1 · max 60 | median 10 · min 1 · **max 60** |
+| guides | 9 | **9** |
+| words in → out | 226,517 → 227,958 | 226,871 → 229,753 |
+| links | 2,345 checked, 2,314 rewritten, 0 newly broken | 2,784 checked, 2,695 rewritten, **0 newly broken** |
+
+The page-count gap is accounted for twice over and the exit condition allows it. The POC ran against a *different* conversion of the same doc set (226,517 words against DocuShift's 226,871), and the reading-order fix refuses to merge units across an already-closed page — worth about eleven pages, and it buys pages whose sections are contiguous in the guide.
+
+**Verification, the rest.** `reframe --all --force` over the catalog: **14 reframed, 1,669 not Flare, 0 failed, 0 errors, 7 warnings**; 11,776 topics → 1,131 pages. C5 checked by copying the tree aside and re-running with `--force` — `diff -r` byte-identical. C4 checked with `git status --porcelain output/` — clean. R2's looping dedup fires on exactly §7's case (`tibemslookupcontext-.md` → `-2`, then `tibemslookupcontext-2.md` → `-2-2`); 16 slugs collide corpus-wide and only two dedups fire, because R2's uniqueness scope is per page. The output tree is 124 pages + 33 images + `metadata.yml` + the three regenerated YAML files, and carries 1,441 redirects with unique `from` values. **1,417 tests pass** (66 in `tests/unit/test_reframe.py`, up from 25), `ruff` clean.
+
+**What 20b does not do.** No review queue and no `review-queue.csv` — R6 and R7.1 are 20c, and a merged page still inherits its first topic's title with nothing flagging it. Stage 7 does not yet read `redirects.yml` or merge the TOC (20d). `MIN_WORDS` is deliberately not reimplemented (R1.2), and the POC's unused basename-keyed `dest` map is not ported.
 
 ---
 

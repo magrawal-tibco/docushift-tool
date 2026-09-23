@@ -1,12 +1,20 @@
-"""Stage 6b: the engine gate, the TOC adapter seam, the policy, and the swap.
+"""Stage 6b: the gate, the TOC adapter seam, the policy, the packer and the swap.
 
-Phase 20a builds no packer, so these tests are about the two things that have to be
-right before one can be written: that the stage refuses to touch what is not Flare,
-and that it refuses to guess at a navigation it does not recognise. The merge's own
-acceptance checks (requirements §6) arrive with the merge.
+Three layers, tested at three grains. The gate and the swap are about what the
+stage refuses to do -- touch a non-Flare set, guess at a navigation it does not
+recognise, write to its input. The packer is pure: it decides layout from a dict of
+word counts and never opens a file, so R1's boundary rules are asserted against
+hand-built TOC trees rather than against a corpus. The renderer and the audit sit
+between them, and every one of requirements §6's acceptance checks is pinned here
+by making it fail.
+
+Where a test exists because a real doc set broke, the doc set is named. Those are
+the cases nobody would have invented: a topic listed under two guides, a topic on
+disk that the TOC never mentions, a filename whose natural slug already ends in
+`-2`.
 """
 
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 import pytest
 import yaml
@@ -14,8 +22,24 @@ import yaml
 from docushift.config import ConfigManager
 from docushift.models import SourceEngine
 from docushift.reframe import ReframeOutcome, Reframer, policy_for
+from docushift.reframe.audit import audit
+from docushift.reframe.packer import UNNAVIGATED, Page, Topic, assign, carry, pack
+from docushift.reframe.pages import (
+    LinkCounts,
+    render,
+    rewrite_links,
+    shift_headings,
+    split_frontmatter,
+    title_of,
+)
 from docushift.reframe.policy import ReframePolicy
-from docushift.reframe.toc import ItemsPathChildren, TocEntry, registered_schemas, schema_for
+from docushift.reframe.toc import (
+    ItemsPathChildren,
+    TocEntry,
+    registered_schemas,
+    retarget,
+    schema_for,
+)
 from docushift.reporting.findings import FindingsRun, Severity
 from tests.conftest import make_product, make_version
 
@@ -108,21 +132,188 @@ def test_a_flare_version_with_no_conversion_is_named_not_failed(config, catalog,
     assert "docushift convert" in result.message
 
 
-# -- the passthrough and the swap (C4) ----------------------------------------
+# -- the merge, end to end -----------------------------------------------------
 
 
-def test_a_flare_set_passes_through_byte_identical(config, catalog, flare):
-    """Phase 20a's whole visible behaviour, and the baseline 20b diffs against."""
-    source = converted_tree(config, flare, "10.5.1")
-    before = {p.relative_to(source).as_posix(): p.read_bytes() for p in source.rglob("*") if p.is_file()}
+def test_a_flare_set_merges_into_fewer_pages_and_says_so(config, catalog, flare):
+    """The stage's whole visible behaviour, asserted at the grain the report uses.
+
+    Two top-level rows are two hard boundaries (R1.1), so three topics under a cap
+    nothing comes near become exactly two pages -- not one, however much room is
+    left. That is R1.2 stated as an outcome rather than as a rule.
+    """
+    converted_tree(config, flare, "10.5.1")
 
     result = Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"])
 
     assert result.outcome is ReframeOutcome.REFRAMED
     assert result.toc_schema == "items-path-children"
-    assert result.topics == 3
-    after = {p.relative_to(result.path).as_posix(): p.read_bytes() for p in result.path.rglob("*") if p.is_file()}
-    assert after == before
+    assert (result.topics, result.pages) == (3, 2)
+    written = sorted(p.relative_to(result.path).as_posix() for p in result.path.rglob("*") if p.is_file())
+    assert written == [
+        "installation/installation-2.md",
+        "redirects.yml",
+        "reframe.yml",
+        "toc.yml",
+        "users-guide/user-guide.md",
+    ]
+
+
+def test_an_absorbed_topic_becomes_an_anchored_section_of_its_parent(config, catalog, flare):
+    """R2, R2.1 and R7 on one page: frontmatter, then two anchored `##` sections."""
+    converted_tree(config, flare, "10.5.1")
+
+    result = Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"])
+    text = (result.path / "installation/installation-2.md").read_text(encoding="utf-8")
+    matter, body = split_frontmatter(text)
+
+    assert yaml.safe_load(matter.strip("-\r\n")) == {
+        "title": "Installation", "guide": "Installation", "merged_from": 2,
+    }
+    assert '<a id="installation-2"></a>' in body
+    assert '<a id="installation-overvie"></a>' in body
+    assert body.count("\n## ") == 2
+    assert "\n# " not in body
+
+
+def test_the_toc_points_absorbed_topics_at_a_fragment_and_leaders_at_a_page(
+    config, catalog, flare
+):
+    """R3. The merge has to be invisible to a reader following the navigation."""
+    converted_tree(config, flare, "10.5.1")
+
+    result = Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"])
+    document = yaml.safe_load((result.path / "toc.yml").read_text(encoding="utf-8"))
+
+    assert document == {
+        "items": [
+            {
+                "title": "Installation",
+                "path": "installation/installation-2.md",
+                "children": [
+                    {
+                        "title": "Installation Overview",
+                        "path": "installation/installation-2.md#installation-overvie",
+                    }
+                ],
+            },
+            {"title": "User Guide", "path": "users-guide/user-guide.md"},
+        ]
+    }
+
+
+def test_every_source_topic_gets_a_redirect_with_its_anchor(config, catalog, flare):
+    """R5. One 301 per topic, anchored even for the topic that leads its page.
+
+    A reader arriving from an old URL named a topic, not a page, and dropping them
+    at the top of a merged page is a worse answer than one redundant fragment.
+    """
+    converted_tree(config, flare, "10.5.1")
+
+    result = Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"])
+    document = yaml.safe_load((result.path / "redirects.yml").read_text(encoding="utf-8"))
+
+    assert document["redirects"] == [
+        {"from": "installation/installation-2.md",
+         "to": "installation/installation-2.md#installation-2", "status": 301},
+        {"from": "installation/installation-overvie.md",
+         "to": "installation/installation-2.md#installation-overvie", "status": 301},
+        {"from": "users-guide/user-guide.md",
+         "to": "users-guide/user-guide.md#user-guide", "status": 301},
+    ]
+
+
+def test_two_runs_over_one_input_produce_identical_bytes(config, catalog, flare):
+    """C5, and §6's last row. Determinism is what makes the merge reviewable at all.
+
+    A `--force` re-run rather than a second `reframe_one`, because currency would
+    otherwise short-circuit the thing under test.
+    """
+    converted_tree(config, flare, "10.5.1")
+    reframer = Reframer(config, catalog)
+
+    first = reframer.reframe_one(flare, flare.versions["10.5.1"])
+    once = {p.relative_to(first.path).as_posix(): p.read_bytes() for p in first.path.rglob("*") if p.is_file()}
+    second = reframer.reframe_one(flare, flare.versions["10.5.1"], force=True)
+
+    assert {
+        p.relative_to(second.path).as_posix(): p.read_bytes()
+        for p in second.path.rglob("*") if p.is_file()
+    } == once
+
+
+def test_a_toc_path_naming_no_file_fails_before_anything_is_written(config, catalog, flare):
+    """Requirements §10's third POC defect, at the only point it can be refused.
+
+    There, the missing entry sized as zero words, packed silently, and crashed the
+    write pass -- *after* the previous output had already been deleted.
+    """
+    tree = converted_tree(config, flare, "10.5.1")
+    (tree / "installation/installation-overvie.md").unlink()
+    findings = FindingsRun("reframe")
+
+    result = Reframer(config, catalog, findings=findings).reframe_one(
+        flare, flare.versions["10.5.1"]
+    )
+
+    assert result.outcome is ReframeOutcome.FAILED
+    assert codes(findings.all) == ["REFRAME_SELF_CHECK_FAILED"]
+    assert "installation/installation-overvie.md" in findings.all[0].message
+    target = config.reframed_path(flare.bu, flare.family, flare.slug, "10.5.1")
+    assert not target.exists()
+    assert not target.with_name(target.name + ".part").exists()
+
+
+def test_a_topic_the_toc_never_lists_is_carried_through_and_named(config, catalog, flare):
+    """Runtime Agent 5.13.0 has two, and one of them is the target of a live link.
+
+    Stage 7 publishes the whole tree, so an untocked topic is *already* published.
+    Dropping it would make Reframe delete live content as a side effect of a
+    navigation gap -- so it is carried through as its own page, and warned about.
+    """
+    tree = converted_tree(config, flare, "10.5.1")
+    (tree / "users-guide/stray.md").write_text(
+        "---\ntitle: A Stray Topic\n---\n\n# A Stray Topic\n", encoding="utf-8"
+    )
+    findings = FindingsRun("reframe")
+
+    result = Reframer(config, catalog, findings=findings).reframe_one(
+        flare, flare.versions["10.5.1"]
+    )
+
+    assert result.outcome is ReframeOutcome.REFRAMED
+    assert codes(findings.all) == ["REFRAME_TOPIC_UNTOCKED"]
+    assert findings.all[0].severity is Severity.WARNING
+    carried = result.path / "users-guide/stray.md"
+    assert carried.is_file()
+    assert yaml.safe_load(split_frontmatter(carried.read_text(encoding="utf-8"))[0].strip("-\r\n")) == {
+        "title": "A Stray Topic", "guide": UNNAVIGATED, "merged_from": 1,
+    }
+    # ...and it stays out of the navigation, because R3 only promises to preserve
+    # what was in it. Carrying it through is not the same as inventing a TOC row.
+    document = yaml.safe_load((result.path / "toc.yml").read_text(encoding="utf-8"))
+    assert "stray" not in yaml.safe_dump(document)
+
+
+def test_an_asset_of_any_shape_is_copied_through(config, catalog, flare):
+    """The POC allowlisted two directory names and silently dropped the rest.
+
+    Every reference into anything else was repathed onto a file that was not there,
+    and counted as a rewritten link. The rule has to be structural: not a topic,
+    not a regenerated sidecar, therefore an asset.
+    """
+    tree = converted_tree(config, flare, "10.5.1")
+    (tree / "odd-place").mkdir()
+    (tree / "odd-place/diagram.svg").write_bytes(b"<svg/>")
+    (tree / "metadata.yml").write_text("version: 10.5.1\n", encoding="utf-8")
+
+    result = Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"])
+
+    assert (result.path / "odd-place/diagram.svg").read_bytes() == b"<svg/>"
+    assert (result.path / "metadata.yml").read_text(encoding="utf-8") == "version: 10.5.1\n"
+
+
+# -- the input and the swap (C4) ----------------------------------------------
 
 
 def test_the_input_tree_is_never_written_to(config, catalog, flare):
@@ -380,3 +571,431 @@ def test_toc_entry_walk_is_depth_first_in_document_order():
     tree = TocEntry("a", children=[TocEntry("b", children=[TocEntry("c")]), TocEntry("d")])
 
     assert [entry.title for entry in tree.walk()] == ["a", "b", "c", "d"]
+
+
+# -- R1: the packer ------------------------------------------------------------
+#
+# The packer never opens a file, so every rule below is asserted against a TOC tree
+# and a dict of word counts. That separation is the point: a boundary that moved
+# because a renderer changed would be a bug nobody could locate.
+
+
+def node(title: str, path: str | None = None, *children: TocEntry) -> TocEntry:
+    return TocEntry(title, PurePosixPath(path) if path else None, children=list(children))
+
+
+def sized(**words: int):
+    """`words_of` over a `{a__b: count}` mapping -- `__` is `/`, `_` is `-`."""
+    by_path = {name.replace("__", "/").replace("_", "-") + ".md": count for name, count in words.items()}
+    return lambda path: by_path[str(path)]
+
+
+def layout(pages) -> list[list[str]]:
+    return [[str(topic.source) for topic in page.topics] for page in pages]
+
+
+def test_a_subtree_that_fits_under_the_cap_becomes_one_page():
+    roots = [node("Guide", "g/a.md", node("Child", "g/b.md"), node("Other", "g/c.md"))]
+
+    pages = pack(roots, sized(g__a=10, g__b=10, g__c=10), 3000)
+
+    assert layout(pages) == [["g/a.md", "g/b.md", "g/c.md"]]
+    assert pages[0].guide == "Guide"
+
+
+def test_top_level_items_are_hard_boundaries_however_much_room_is_left():
+    """R1.1. Two guides under a 3000-word cap holding 20 words between them.
+
+    The cap is a cap and never a target (R1.2), so there is no pressure anywhere in
+    the packer to fill a page -- which is what keeps a merged page comprehensible
+    rather than merely large.
+    """
+    roots = [node("First", "g/a.md"), node("Second", "g/b.md")]
+
+    pages = pack(roots, sized(g__a=10, g__b=10), 3000)
+
+    assert layout(pages) == [["g/a.md"], ["g/b.md"]]
+    assert [page.guide for page in pages] == ["First", "Second"]
+
+
+def test_the_cap_refuses_a_join_and_the_run_carries_on_after_it():
+    roots = [node("Guide", "g/a.md", node("B", "g/b.md"), node("C", "g/c.md"))]
+
+    pages = pack(roots, sized(g__a=60, g__b=60, g__c=10), 100)
+
+    assert layout(pages) == [["g/a.md"], ["g/b.md", "g/c.md"]]
+
+
+def test_a_topic_bigger_than_the_cap_becomes_an_oversized_page_of_its_own():
+    """R1.3 forbids splitting a topic body, so the cap has to yield here.
+
+    Requirements §6's reference baseline records a 3,533-word page under a 3,000
+    cap for exactly this reason; a packer that "fixed" it would be splitting prose
+    at a word offset.
+    """
+    roots = [node("Guide", "g/a.md", node("B", "g/big.md"), node("C", "g/c.md"))]
+
+    pages = pack(roots, sized(g__a=10, g__big=5000, g__c=10), 100)
+
+    assert layout(pages) == [["g/a.md"], ["g/big.md"], ["g/c.md"]]
+    assert pages[1].words == 5000
+
+
+def test_a_page_never_spans_two_source_directories():
+    """R4.2, enforced at the join rather than checked afterwards.
+
+    Both topics fit the cap with room to spare, so only the directory rule can be
+    what separates them. It matters because R4.1 puts the page in its first topic's
+    directory, and every relative asset path on it resolves from there.
+    """
+    roots = [node("Guide", "g/a.md", node("B", "h/b.md"))]
+
+    pages = pack(roots, sized(g__a=10, h__b=10), 3000)
+
+    assert layout(pages) == [["g/a.md"], ["h/b.md"]]
+
+
+def test_a_page_closed_inside_a_subtree_keeps_its_place_in_reading_order():
+    """The proof-of-concept's ordering defect, pinned.
+
+    It appended to one shared list as the recursion unwound, so an overflowing
+    child subtree's pages landed *before* the page holding their own parent's
+    topic -- which reads earlier. The sections of a guide then jumped around it,
+    which is precisely the thing a reader notices.
+    """
+    roots = [node("Guide", "g/a.md", node("B", "g/b.md", node("C", "g/c.md")), node("D", "g/d.md"))]
+
+    pages = pack(roots, sized(g__a=10, g__b=90, g__c=90, g__d=10), 100)
+
+    assert layout(pages) == [["g/a.md"], ["g/b.md"], ["g/c.md"], ["g/d.md"]]
+
+
+def test_a_topic_listed_under_two_guides_is_packed_once_and_shared():
+    """GridServer 7.2.0 lists `Typographical_Conventions.md` three times.
+
+    Packing it once per listing copies its body onto three pages, which breaks word
+    conservation and gives a reader three URLs for one topic. The first node to
+    reach it owns the content; the rest become navigation rows pointing at it.
+    """
+    roots = [
+        node("First", "g/a.md", node("Shared", "g/s.md")),
+        node("Second", "g/b.md", node("Shared", "g/s.md")),
+    ]
+
+    pages = pack(roots, sized(g__a=10, g__b=10, g__s=10), 3000)
+    located = assign(pages)
+
+    assert layout(pages) == [["g/a.md", "g/s.md"], ["g/b.md"]]
+    assert retarget(roots, located)["items"][1]["children"] == [
+        {"title": "Shared", "path": "g/a.md#s"}
+    ]
+
+
+def test_carry_makes_one_single_topic_page_per_untocked_file():
+    pages = carry([PurePosixPath("g/x.md")], lambda p: "Stray", lambda p: 7)
+
+    assert layout(pages) == [["g/x.md"]]
+    assert (pages[0].guide, pages[0].words) == (UNNAVIGATED, 7)
+
+
+# -- R2: names and anchors -----------------------------------------------------
+
+
+def test_a_page_is_named_after_its_first_topic_and_placed_beside_it():
+    pages = pack([node("Guide", "g/deep/Getting Started.md")], lambda p: 10, 3000)
+
+    assign(pages)
+
+    assert str(pages[0].path) == "g/deep/getting-started.md"
+
+
+def test_anchors_dedup_by_looping_because_one_pass_is_not_enough():
+    """Requirements §7's hard-won case, and the reason `-2` is tried repeatedly.
+
+    `tibemslookupcontext-.md` slugs to `tibemslookupcontext`, which the first topic
+    already took, so it becomes `tibemslookupcontext-2` -- which is the *natural*
+    slug of the third topic. A single suffixing pass hands two topics one anchor.
+    """
+    sources = ["g/tibemslookupcontext.md", "g/tibemslookupcontext-.md", "g/tibemslookupcontext-2.md"]
+    pages = [Page("Guide", [Topic(s, PurePosixPath(s), 10) for s in sources])]
+
+    assign(pages)
+
+    assert list(pages[0].anchors.values()) == [
+        "tibemslookupcontext", "tibemslookupcontext-2", "tibemslookupcontext-2-2",
+    ]
+
+
+def test_two_pages_in_one_directory_never_collide_on_a_filename():
+    """Anchors dedup per page -- the scope a fragment resolves in -- but filenames
+    dedup against the whole output tree, so this pair needs the wider scope."""
+    roots = [node("First", "g/Over View.md"), node("Second", "g/over-view.md")]
+
+    pages = pack(roots, lambda p: 10, 3000)
+    assign(pages)
+
+    assert [str(page.path) for page in pages] == ["g/over-view.md", "g/over-view-2.md"]
+
+
+# -- R2.1: the heading shift ---------------------------------------------------
+
+
+def test_the_first_h1_becomes_the_anchored_h2_and_everything_else_drops_a_level():
+    body = "# Top\n\nprose\n\n## Sub\n\n### Deeper\n"
+
+    shifted, added = shift_headings(body, "Ignored", "anc")
+
+    assert shifted == '<a id="anc"></a>\n\n## Top\n\nprose\n\n### Sub\n\n#### Deeper\n'
+    # Two tokens, not one: `<a id="anc"></a>` splits on whitespace. §6's word
+    # conservation is an equality, so this is measured rather than assumed.
+    assert added == 2
+
+
+def test_a_heading_shift_stops_at_h6_rather_than_emitting_seven_hashes():
+    """Not exercised by the reference corpus, which is H1-H4. A set that is deeper
+    would otherwise emit `#######`, which GFM renders as literal hashes."""
+    shifted, _ = shift_headings("# Top\n\n###### Deep\n", "Ignored", "anc")
+
+    assert "\n###### Deep\n" in shifted
+    assert "#######" not in shifted
+
+
+def test_a_topic_with_no_h1_gets_one_synthesized_from_its_toc_title():
+    shifted, added = shift_headings("just prose\n", "Release Notes", "anc")
+
+    assert shifted == '<a id="anc"></a>\n\n## Release Notes\n\njust prose\n'
+    assert added == 2 + 1 + 2  # the marker, the `##`, and the two-word title
+
+
+def test_a_hash_comment_inside_a_fence_is_not_a_heading():
+    """Requirements §7's latent corruption in the POC, which scanned the raw body.
+
+    The `# Install the broker` line precedes the real H1, so the POC would have
+    anchored *it* -- the topic's identity would have become a line of shell. The
+    reference corpus has zero of these, which is why the POC never showed it.
+    """
+    body = "```bash\n# Install the broker\nmake install\n```\n\n# Installation\n"
+
+    shifted, _ = shift_headings(body, "Ignored", "anc")
+
+    assert "```bash\n# Install the broker\n" in shifted
+    assert '<a id="anc"></a>\n\n## Installation' in shifted
+
+
+# -- R4: links and assets ------------------------------------------------------
+
+
+@pytest.fixture
+def linked():
+    """Two pages over three topics, plus an asset and an unclaimed topic on disk."""
+    here = Page("G", [Topic("A", PurePosixPath("g/a.md"), 10), Topic("B", PurePosixPath("g/b.md"), 10)])
+    # `h/c.md` is deliberately the *second* topic of its page, so a rewritten
+    # cross-page link is visibly not the path that was already there.
+    there = Page("H", [Topic("O", PurePosixPath("h/other.md"), 10), Topic("C", PurePosixPath("h/c.md"), 10)])
+    located = assign([here, there])
+    existing = frozenset(
+        PurePosixPath(p)
+        for p in ("g/a.md", "g/b.md", "h/other.md", "h/c.md", "g/img.png", "g/ghost.md")
+    )
+    return here, located, existing
+
+
+def rewrite(body: str, linked, counts: LinkCounts) -> str:
+    here, located, existing = linked
+    return rewrite_links(body, PurePosixPath("g/a.md"), here.path, located, existing, counts)
+
+
+def test_a_link_onto_the_same_merged_page_becomes_a_bare_fragment(linked):
+    counts = LinkCounts()
+
+    assert rewrite("see [B](b.md).", linked, counts) == "see [B](#b)."
+    assert (counts.checked, counts.intra) == (1, 1)
+
+
+def test_a_link_onto_another_page_is_repathed_and_keeps_an_anchor(linked):
+    counts = LinkCounts()
+
+    assert rewrite("see [C](../h/c.md).", linked, counts) == "see [C](../h/other.md#c)."
+    assert counts.inter == 1
+
+
+def test_an_asset_reference_is_recomputed_from_the_new_page(linked):
+    counts = LinkCounts()
+
+    assert rewrite('<img src="img.png">', linked, counts) == '<img src="img.png">'
+    assert counts.asset == 1
+
+
+def test_a_target_that_was_already_missing_is_left_alone_and_tolerated(linked):
+    """Requirements §8: the 92 `.html` references into a sibling resources tree.
+
+    It pointed at nothing before the merge and points at the same nothing after, so
+    repathing it would only move a broken link somewhere less obvious -- and failing
+    on it would make Reframe fail on a defect Stage 6 introduced.
+    """
+    counts = LinkCounts()
+
+    assert rewrite("see [X](../elsewhere/x.html).", linked, counts) == "see [X](../elsewhere/x.html)."
+    assert (counts.unresolved, counts.orphaned) == (1, 0)
+
+
+def test_a_topic_that_exists_but_belongs_to_no_page_is_newly_broken(linked):
+    """The only breakage the merge itself can create, and what §6 is measured on."""
+    counts = LinkCounts()
+
+    rewrite("see [G](ghost.md).", linked, counts)
+
+    assert (counts.orphaned, counts.unresolved) == (1, 0)
+
+
+def test_external_rooted_and_fragment_references_are_never_touched(linked):
+    counts = LinkCounts()
+    body = "[a](https://example.com/x.md) [b](/rooted/x.md) [c](#section) [d](mailto:x@y.z)"
+
+    assert rewrite(body, linked, counts) == body
+    assert counts.checked == 0
+
+
+def test_a_link_inside_a_fence_or_a_code_span_is_not_rewritten(linked):
+    """The mask preserves offsets, so a match in the mask is a span in the original.
+
+    A sample showing `[B](b.md)` is documentation *about* a link, and rewriting it
+    to `#b` would make the sample wrong for every reader who copied it.
+    """
+    counts = LinkCounts()
+    body = "literal `[B](b.md)` and\n\n```\n[B](b.md)\n```\n"
+
+    assert rewrite(body, linked, counts) == body
+    assert counts.checked == 0
+
+
+def test_a_reference_definition_is_rewritten_like_an_inline_link(linked):
+    counts = LinkCounts()
+
+    assert rewrite("[ref]: b.md\n", linked, counts) == "[ref]: #b\n"
+
+
+# -- R7: frontmatter, and C5 at the grain it is decided at ----------------------
+
+
+def test_a_title_containing_a_quote_produces_valid_frontmatter():
+    """The POC interpolated the title into `"..."` and produced an unparseable file."""
+    page = Page("G", [Topic('The "Big" One', PurePosixPath("g/a.md"), 2)])
+    located = assign([page])
+
+    text, _ = render(
+        page, lambda p: "# Heading\n", located, frozenset({PurePosixPath("g/a.md")}), LinkCounts()
+    )
+
+    assert yaml.safe_load(split_frontmatter(text)[0].strip("-\r\n")) == {
+        "title": 'The "Big" One', "guide": "G", "merged_from": 1,
+    }
+
+
+def test_rendering_the_same_page_twice_produces_the_same_bytes():
+    """C5. The stage-level statement of the same rule is the `--force` re-run."""
+    page = Page("G", [Topic("A", PurePosixPath("g/a.md"), 2), Topic("B", PurePosixPath("g/b.md"), 2)])
+    located = assign([page])
+    existing = frozenset({PurePosixPath("g/a.md"), PurePosixPath("g/b.md")})
+    read = {"g/a.md": "# A\n\n[B](b.md)\n", "g/b.md": "# B\n"}
+
+    once = render(page, lambda p: read[str(p)], located, existing, LinkCounts())
+    twice = render(page, lambda p: read[str(p)], located, existing, LinkCounts())
+
+    assert once == twice
+
+
+def test_a_carried_topic_takes_its_title_from_its_own_frontmatter():
+    """The only place the body's metadata wins: there is no TOC row to ask."""
+    assert title_of("---\ntitle: Stray\n---\n\nbody\n", "fallback") == "Stray"
+    assert title_of("no frontmatter\n", "fallback") == "fallback"
+    assert title_of("---\ntitle: [unclosed\n---\n", "fallback") == "fallback"
+
+
+# -- §6: the acceptance checks -------------------------------------------------
+#
+# Every check is asserted by making it fail. A self-validation that has only ever
+# been seen passing is a self-validation nobody has tested.
+
+
+@pytest.fixture
+def merged():
+    """A clean two-topic merge: the pages, their `located` map, and the TOC."""
+    pages = [
+        Page("Guide", [Topic("A", PurePosixPath("g/a.md"), 10), Topic("B", PurePosixPath("g/b.md"), 10)])
+    ]
+    located = assign(pages)
+    roots = [node("Guide", "g/a.md", node("B", "g/b.md"))]
+    return pages, located, roots
+
+
+def check(merged, **overrides) -> list[str]:
+    pages, located, roots = merged
+    kwargs = {"words_in": 20, "words_out": 24, "added": 4, "counts": LinkCounts()}
+    kwargs.update(overrides)
+    return audit(pages, located, roots, **kwargs)
+
+
+def test_a_clean_merge_reports_nothing(merged):
+    assert check(merged) == []
+
+
+def test_word_conservation_is_an_equality_and_not_a_tolerance(merged):
+    """One token adrift is content that moved or vanished. A tolerance hides that."""
+    failures = check(merged, words_out=25)
+
+    assert len(failures) == 1
+    assert failures[0].startswith("word conservation:")
+    assert "difference 1" in failures[0]
+
+
+def test_a_repeated_anchor_on_one_page_is_caught(merged):
+    pages, _, _ = merged
+    pages[0].anchors[PurePosixPath("g/b.md")] = "a"
+
+    assert any(f.startswith("anchors:") and "repeats a" in f for f in check(merged))
+
+
+def test_a_page_spanning_two_source_directories_is_caught(merged):
+    """The packer makes this unreachable, which is why the audit still asks."""
+    pages, _, _ = merged
+    pages[0].topics[1] = Topic("B", PurePosixPath("h/b.md"), 10)
+
+    assert any(f.startswith("directory integrity:") for f in check(merged))
+
+
+def test_a_toc_node_pointing_at_no_page_is_caught(merged):
+    _, _, roots = merged
+    roots.append(node("Lost", "g/lost.md"))
+
+    assert any(f.startswith("TOC completeness:") for f in check(merged))
+
+
+def test_a_page_nothing_navigates_to_is_caught_unless_it_was_never_navigated(merged):
+    """Both directions, because either one alone passes a real failure.
+
+    Completeness alone would accept a tree that also emitted pages nothing links
+    to; reachability alone would accept a TOC that quietly lost a branch.
+    """
+    pages, located, _ = merged
+    stray = Page(UNNAVIGATED, [Topic("X", PurePosixPath("g/x.md"), 0)])
+    pages.append(stray)
+    located.update(assign(pages))
+
+    assert any(f.startswith("reachability:") for f in check(merged))
+    assert check(merged, unnavigated=frozenset({stray.path})) == []
+
+
+def test_only_a_newly_broken_link_fails_the_stage(merged):
+    assert check(merged, counts=LinkCounts(unresolved=92)) == []
+    assert [f[:6] for f in check(merged, counts=LinkCounts(orphaned=1))] == ["links:"]
+
+
+def test_a_redirect_into_a_page_that_was_never_written_is_caught(merged):
+    """Checked against the pages actually built, so a page lost between packing and
+    writing surfaces here rather than as a reader following a 301 into a 404."""
+    _, located, _ = merged
+    ghost = Page("Guide", [Topic("C", PurePosixPath("g/c.md"), 0)], PurePosixPath("g/c.md"))
+    located[PurePosixPath("g/c.md")] = (ghost, "c")
+
+    assert any(f.startswith("redirects:") for f in check(merged))

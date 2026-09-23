@@ -790,12 +790,37 @@ to be tuned repeatedly. Two keys:
 
 - **`max_words`** is a **cap, not a target**. Subtree cohesion chooses the boundary; the cap
   only refuses a join that would cross it, and a source topic larger than the cap is never
-  split. Measured over EMS 10.5.1: `2000` gives 171 pages, `3000` gives 113, `6000` gives 60.
+  split. Measured over EMS 10.5.1: `2000` gives 183 pages, `3000` gives 124, `6000` gives 64.
+  A 3,533-word page survives every one of those caps, because it is a single topic.
 - **`pin_layout_to`** names the version whose page layout every other version of that doc set
   reuses. EMS has six eligible Flare versions; without a pin each would be laid out by its own
   subtree sizes, the versions would stop being diffable, and porting a fix would stop being a
   clean diff — permanently. `reframe` warns when a doc set has two eligible versions and no
   pin.
+
+**What a merged tree contains.** The pages, every asset copied through untouched, and three
+regenerated files at the version root:
+
+| File | What it is for |
+|---|---|
+| `toc.yml` | The same navigation, retargeted. A topic that led its page gets `page.md`; a topic absorbed into one gets `page.md#anchor`. A reader following the TOC cannot tell the merge happened. |
+| `redirects.yml` | One 301 per source topic, anchored — so a published URL from before the merge lands on the section that replaced it, not at the top of a twelve-section page. |
+| `reframe.yml` | Which source topic became which section of which page, plus the policy that shaped it and the link counts. This is the record to read when a boundary looks wrong. |
+
+**It checks its own output before it swaps it in.** Words are conserved exactly, every topic
+is anchored once, no page spans two source directories, the TOC round-trips in both
+directions, every redirect resolves, and no link that worked before the merge is broken by
+it. A failure names every check that failed, deletes the staging tree, and leaves the
+previous merge — if there is one — exactly where it was. The merge is a one-way door once
+pages have been hand-edited, so the run that built a tree is the last cheap moment to reject
+it.
+
+Two things it reports rather than fixes. A relative link that pointed at nothing *before* the
+merge still points at nothing after, and is counted and named rather than repathed — on EMS
+10.5.1 that is 92 `.html` references into a resources tree Stage 6 does not produce. And a
+topic on disk that `toc.yml` never lists is carried through as its own page and warned about:
+`sync` publishes the whole tree, so those topics are already live, and dropping them would
+delete published content as a side effect of a navigation gap.
 
 A version whose conversion has no recorded source checksum — a set converted through
 `--input`, for instance — is re-merged on every run rather than reported as current. That is

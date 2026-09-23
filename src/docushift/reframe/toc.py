@@ -110,6 +110,38 @@ class ItemsPathChildren(TocSchema):
         return out
 
 
+def retarget(roots: list[TocEntry], located: dict[Any, tuple[Any, str]]) -> dict[str, Any]:
+    """R3. The merged `toc.yml`: every node kept, every path pointed at its page.
+
+    A node whose topic leads its page gets the bare `page.md`; an absorbed topic
+    gets `page.md#anchor`, which is the signal to the site generator that the node
+    is a section and must not become an HTML page of its own. Nothing is dropped --
+    navigation is identical, only the number of generated pages falls.
+
+    Reading goes through the adapter seam because the input dialect varies; writing
+    does not, because the output is DocuShift's own tree and Stage 7 reads exactly
+    one shape. A second *output* dialect would be a second publishing target, not a
+    second source engine.
+
+    A TOC path with no page is left without a `path` rather than raising -- the POC
+    subscripted `anchor_of` here and died on a TOC entry it had never packed. The
+    audit reports the same condition as a named check failure, before the swap.
+    """
+    return {"items": [_node(root, located) for root in roots]}
+
+
+def _node(entry: TocEntry, located: dict[Any, tuple[Any, str]]) -> dict[str, Any]:
+    row: dict[str, Any] = {"title": entry.title}
+    found = located.get(entry.path) if entry.path is not None else None
+    if found is not None:
+        page, anchor = found
+        leads = bool(page.topics) and page.topics[0].source == entry.path
+        row["path"] = str(page.path) if leads else f"{page.path}#{anchor}"
+    if entry.children:
+        row["children"] = [_node(child, located) for child in entry.children]
+    return row
+
+
 _REGISTRY: dict[str, TocSchema] = {}
 
 

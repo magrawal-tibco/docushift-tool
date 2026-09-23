@@ -254,6 +254,36 @@ REGISTRY: dict[str, Code] = _codes(
          "More than one eligible version of this doc set and no pinned layout; "
          "versions may be merged into non-corresponding pages",
          "REFRAME-REQUIREMENTS.md R1.4"),
+    # Requirements §6: "Reframe must self-validate and fail the stage if any check
+    # fails." One row per failed check, because the eight checks fail for eight
+    # unrelated reasons and a single "the audit failed" row would send a reader
+    # back to the code to find out which. The stage refuses the swap when this is
+    # emitted -- §1's "Reframe cannot be re-run to fix a bad boundary" is what makes
+    # a merged tree that only mostly passed worse than no merged tree at all.
+    Code("REFRAME_SELF_CHECK_FAILED", Severity.ERROR, Stage.REFRAME,
+         "A requirements §6 acceptance check failed; the merged tree was discarded "
+         "rather than swapped in",
+         "REFRAME-REQUIREMENTS.md §6"),
+    # R4's "leave unchanged and count them", kept distinct from the error above
+    # because §8 says so: a relative target that pointed at nothing *before* the
+    # merge is Stage 6a's defect, and failing Reframe on it would block a doc set on
+    # a fault this stage can neither cause nor repair. Measured on EMS 10.5.1: 92,
+    # all of them `.html` links into a sibling resources tree that is published
+    # separately and is genuinely not there at merge time.
+    Code("REFRAME_LINK_UNRESOLVED", Severity.WARNING, Stage.REFRAME,
+         "Relative references pointing outside the converted tree, left exactly as "
+         "written; present before the merge",
+         "REFRAME-REQUIREMENTS.md R4, §8"),
+    # A `.md` file Stage 6a wrote and `toc.yml` never listed. Reframe carries it
+    # through as a single-topic page rather than dropping it, because Stage 7
+    # publishes the whole tree and a navigation gap is not a licence to delete
+    # content -- but it is a gap, and the writer is the only one who can say whether
+    # the topic wants a TOC node or wants deleting. Two on the corpus, both in
+    # `tibco-runtime-agent@5.13.0`, one of them the target of a live link.
+    Code("REFRAME_TOPIC_UNTOCKED", Severity.WARNING, Stage.REFRAME,
+         "Topics absent from toc.yml, carried through unmerged and unreachable from "
+         "navigation",
+         "REFRAME-REQUIREMENTS.md R3"),
     Code("LINK_BROKEN", Severity.ERROR, Stage.VALIDATE,
          "Relative link resolving to nothing", "design.md §8.4"),
     # Emitted from Phase 7c, and a warning on arithmetic rather than on taste, the
