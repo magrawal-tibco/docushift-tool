@@ -1512,6 +1512,12 @@ def _report_sync(stats, findings) -> None:
     console.print(
         f"[dim]{stats.products} product metadata.yml, {stats.dropdowns} version.yml written.[/dim]"
     )
+    # 20d. Which tree a version published from is not recoverable from the target --
+    # a merged tree and a converted one are both just Markdown once copied -- and it
+    # is the one fact somebody reading this report after a pilot needs.
+    merged = sorted({r.slug for r in stats.results if r.merged and r.outcome is SyncOutcome.SYNCED})
+    if merged:
+        console.print(f"[dim]Published merged (Stage 6b): {', '.join(merged)}.[/dim]")
 
     # Named individually rather than counted, the rule `convert` follows: these are
     # exactly the rows somebody has to look at.

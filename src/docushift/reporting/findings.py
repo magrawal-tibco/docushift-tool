@@ -360,6 +360,25 @@ REGISTRY: dict[str, Code] = _codes(
     Code("SYNC_RESIDUE", Severity.NOTE, Stage.VALIDATE,
          "A .part staging folder left by a sync that did not finish",
          "planning.md §7.4"),
+    # Phase 20d. A doc set with `publish: true` in `reframe.yaml` and no usable
+    # merged tree -- either none built, or one older than the conversion under it.
+    # A warning and not an error, because the doc set is mid-flight rather than
+    # broken: the sign-off landed and the merge has not been re-run. What it must
+    # not do is fall back to `output/`, which would republish 1,441 unmerged topics
+    # over URLs a merge already took, so the version publishes nothing and says so.
+    Code("SYNC_MERGE_UNAVAILABLE", Severity.WARNING, Stage.SYNC,
+         "A product set to publish merged has no current reframed tree",
+         "planning.md §20d"),
+    # Phase 20d, and found by measuring EMS rather than by reading R5: a redirect
+    # whose `from` still resolves to a published file can never fire. All five on
+    # the reference corpus differ from their target only in case
+    # (`_templates/Home.md` -> `_templates/home.md#home`), which is a necessary
+    # redirect on a case-sensitive host and a 301 loop on a case-insensitive one.
+    # The tool does not know which host it publishes to, so it names them and a
+    # human decides once per platform.
+    Code("REDIRECT_SHADOWED", Severity.WARNING, Stage.VALIDATE,
+         "A redirect whose source path still exists in the published tree",
+         "REFRAME-REQUIREMENTS.md R5"),
     # Phase 10b, and the reverse of `LINK_BROKEN`: not a link with no file, but a
     # file with no link. A note, and expected to find nothing -- `render_index` is
     # handed the same routed list that decides what gets copied, so every published

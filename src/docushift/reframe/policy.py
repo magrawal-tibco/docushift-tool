@@ -18,6 +18,13 @@ from typing import Any
 # change the output must not be forgotten -- so this is the dataclass's own fields,
 # derived, rather than a second list to keep in step.
 
+#: The exception to that, and it has to argue for itself. `publish` decides whether
+#: Stage 7 picks the merged tree up; it does not change a byte of it. In the digest
+#: it would re-merge a whole doc set on a sign-off commit -- and invalidate every
+#: tree already built, because the field's arrival changes the digest of every
+#: policy that does not name it. The default stays "every field counts".
+_NOT_OUTPUT = frozenset({"publish"})
+
 
 @dataclass(frozen=True)
 class ReframePolicy:
@@ -31,6 +38,11 @@ class ReframePolicy:
     #: each version is laid out on its own, which is only safe for a single-version
     #: doc set and raises `REFRAME_LAYOUT_UNPINNED` otherwise.
     pin_layout_to: str = ""
+    #: Whether Stage 7 publishes this product's *merged* tree instead of its Stage 6
+    #: one. Off by default and left off for every product: opting in is the writer
+    #: sign-off the integration plan calls the point of the whole thing (§4 Phase 4),
+    #: and a commit to this file is the only form of it the tool can enforce.
+    publish: bool = False
 
     @property
     def key(self) -> str:
@@ -43,7 +55,8 @@ class ReframePolicy:
         tuned repeatedly, so that failure would be the common case rather than a
         corner of it.
         """
-        payload = json.dumps(asdict(self), sort_keys=True, separators=(",", ":"))
+        shaping = {k: v for k, v in asdict(self).items() if k not in _NOT_OUTPUT}
+        payload = json.dumps(shaping, sort_keys=True, separators=(",", ":"))
         return hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16]
 
 
@@ -62,4 +75,5 @@ def policy_for(reframe: dict[str, Any], slug: str) -> ReframePolicy:
         max_words=int(values.get("max_words") or ReframePolicy.max_words),
         toc_schema=str(values.get("toc_schema") or "").strip(),
         pin_layout_to=str(values.get("pin_layout_to") or "").strip(),
+        publish=bool(values.get("publish") or False),
     )

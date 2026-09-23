@@ -49,6 +49,8 @@ from docushift.validation.tree import ProductFolder, VersionFolder
 METADATA = "metadata.yml"
 TOC = "toc.yml"
 VERSION_FILE = "version.yml"
+#: Reframe's 301 map, present only in a merged tree (20d).
+REDIRECTS = "redirects.yml"
 
 PRODUCT_KEY = "csg-product"
 VERSION_KEY = "csg-version"
@@ -179,6 +181,96 @@ def _check_toc(folder: VersionFolder, index: FolderIndex) -> list[Finding]:
                     message=f"#{reference.fragment} is not an anchor in {target}",
                 ))
     return findings
+
+
+# -- redirects.yml, where Reframe published one ------------------------------------
+
+
+def _check_redirects(folder: VersionFolder, index: FolderIndex) -> list[Finding]:
+    """R5 at the gate: one 301 per source topic, zero dangling, none unreachable.
+
+    Phase 20d. Reframe audits its own redirect map before it swaps a tree in, and
+    that is the right place for it -- but the map it audits is the one it believes
+    it wrote, against a set it built in memory. This checks the file that actually
+    shipped against the folder that actually shipped, which is the only version of
+    the question a published URL cares about. Checked *if present*, like every
+    other artifact here: only a merged tree has one.
+
+    Same codes as `_check_toc`, for the reason its docstring gives -- a dangling
+    redirect is a broken link that happens to live in a different file, and two
+    codes for one condition would make `report --code LINK_BROKEN` miss half of
+    them. `REDIRECT_SHADOWED` is the one genuinely new condition; see below.
+    """
+    path = folder.path / REDIRECTS
+    if not path.is_file():
+        return []
+    where = (folder.relative / REDIRECTS).as_posix()
+    loaded = _load(path, folder.slug, folder.segment, where)
+    if loaded.failure is not None:
+        return [loaded.failure]
+
+    document = loaded.document
+    entries = document.get("redirects") if isinstance(document, dict) else None
+    findings: list[Finding] = []
+    for entry in entries or []:
+        if not isinstance(entry, dict):
+            continue
+        source = str(entry.get("from") or "").strip()
+        raw = str(entry.get("to") or "").strip()
+        if not raw:
+            continue
+        reference = refs.classify(raw)
+        if reference.kind is not refs.ReferenceKind.RELATIVE:
+            continue
+        target = str(refs.resolve(PurePosixPath("."), reference.path))
+        if target not in index.present:
+            findings.append(Finding(
+                "LINK_BROKEN", slug=folder.slug, version=folder.segment, path=where,
+                message=f"{raw} is not in this version folder",
+            ))
+            continue
+        if (
+            reference.fragment
+            and PurePosixPath(target).suffix.lower() == ".md"
+            and reference.fragment.lower() not in index.anchors(target)
+        ):
+            findings.append(Finding(
+                "ANCHOR_MISSING", slug=folder.slug, version=folder.segment, path=where,
+                message=f"#{reference.fragment} is not an anchor in {target}",
+            ))
+        findings.extend(_shadowed(folder, index, where, source, target))
+    return findings
+
+
+def _shadowed(
+    folder: VersionFolder, index: FolderIndex, where: str, source: str, target: str
+) -> list[Finding]:
+    """A redirect whose `from` still resolves to a published file.
+
+    It can never fire, and the interesting half is *why*. A page's own leader
+    redirects to itself -- `a.md -> a.md#a`, 108 of EMS 10.5.1's 1,441 -- which is
+    expected and excluded. What is left is a source path that differs from its
+    target only in case: five on that corpus, `_templates/Home.md` pointing at
+    `_templates/home.md#home` among them, because the packer lowercases page
+    filenames and the source topic was capitalised.
+
+    Those five are a **necessary** redirect on a case-sensitive host and a **301
+    loop** on a case-insensitive one. Nothing in this tool knows which host it
+    publishes to, so the check names them with the distinction in the message and
+    a human decides once per platform rather than once per redirect.
+    """
+    if not source or source == target:
+        return []
+    actual = source if source in index.present else index.actual_case(source)
+    if actual is None:
+        return []
+    reason = (
+        "differs from its target only in case, so it is a 301 loop on a "
+        "case-insensitive host" if source.lower() == target.lower()
+        else "still exists, so the redirect can never fire"
+    )
+    return [Finding("REDIRECT_SHADOWED", slug=folder.slug, version=folder.segment, path=where,
+                    message=f"{source} -> {target}: the source {reason}")]
 
 
 # -- index.md, in the folders DocuShift writes one for -----------------------------
@@ -333,4 +425,4 @@ def check(folder: VersionFolder, index: FolderIndex) -> list[Finding]:
         # Copied Javadoc. `metadata.yml` is ours and is checked above; everything
         # else in there belongs to somebody else's generator (§6.2.1).
         return findings
-    return findings + _check_toc(folder, index) + _check_index(folder)
+    return findings + _check_toc(folder, index) + _check_redirects(folder, index) + _check_index(folder)

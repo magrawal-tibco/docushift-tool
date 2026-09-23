@@ -926,6 +926,8 @@ The concrete deliverable of §7.1: every deferred "report line" in the three doc
 | `REFRAME_LINK_UNRESOLVED`²⁰ᵇ | warn | reframe | Relative references pointing outside the converted tree, left as written; present before the merge | `REFRAME-REQUIREMENTS.md` R4, §8 |
 | `REFRAME_TOPIC_UNTOCKED`²⁰ᵇ | warn | reframe | Topics absent from `toc.yml`, carried through unmerged and unreachable from navigation | `REFRAME-REQUIREMENTS.md` R3 |
 | `REFRAME_REVIEW_QUEUED`²⁰ᶜ | note | reframe | Merged pages needing an editorial decision, listed in `review-queue.csv` | `REFRAME-REQUIREMENTS.md` R6 |
+| `SYNC_MERGE_UNAVAILABLE`²⁰ᵈ | warn | sync | A product set to publish merged has no current reframed tree; it publishes nothing rather than falling back | §20d |
+| `REDIRECT_SHADOWED`²⁰ᵈ | warn | validate | A redirect whose source path still exists in the published tree; a 301 loop where the two differ only in case | `REFRAME-REQUIREMENTS.md` R5 |
 
 #### 7.6 Cross-version CSH regression
 
@@ -2508,7 +2510,7 @@ One function in one engine (`_admonition`), one line in `inline_override`, one c
 
 ---
 
-### Phase 20: Reframe — A Flare Topic Is Too Small To Maintain — **20a–20c built, 20d–20e planned, 2026-09-24**
+### Phase 20: Reframe — A Flare Topic Is Too Small To Maintain — **20a–20d built, 20e planned, 2026-09-24**
 
 Every phase so far has converted a source tree faithfully. Reframe is the first that deliberately *changes the shape* of what the source said: it merges MadCap Flare's very small topics into fewer, larger pages, turning each former topic into an anchored `##` section, and it does so once, permanently, because Markdown becomes the authoring source the moment the migration lands.
 
@@ -2571,7 +2573,7 @@ Renumbered onto this repository's scheme; the integration plan's Phase 0–4 map
 - **20a — Contracts and the gate.** *(built)* `reframe/` package, `docushift reframe` command with the standard `_scope_options`, engine assertion inside the stage (C2), no-op passthrough for non-Flare, the `reframe.yaml` config shape with `MAX_WORDS` and the TOC-schema adapter seam. *Exit: the command runs over the whole catalog, touches nothing that is not Flare, and passes a Flare set through byte-identical.*
 - **20b — Packing.** *(built)* R1–R5, fence-aware parsing, the three POC defects from requirements §10 left unported, **R1.4 layout pinning pinned to the newest eligible version** (required by Q2), determinism check. Anchors emitted per 20.3(1). *Exit: reproduces §6's baseline on EMS 10.5.1, page count allowed to rise from dropping `MIN_WORDS`.*
 - **20c — Review queue.** *(built)* R6 and R7.1. On the critical path, not polish: the ~25–30 flagged pages are the only ones a human ever sees, and Phase 20b ships deliberately incomplete without this.
-- **20d — Stage 7 integration.** Teach `validation/` about the redirect map and the merged TOC, so R5 and R6's acceptance checks are enforced by the existing checker rather than by a second one inside Reframe. Wire the exit-code idiom from Q4.
+- **20d — Stage 7 integration.** *(built)* Teach `validation/` about the redirect map and the merged TOC, so R5 and R6's acceptance checks are enforced by the existing checker rather than by a second one inside Reframe. Wire the exit-code idiom from Q4.
 - **20e — Pilot.** One doc set, queue worked, **explicit writer sign-off before redirects are published.**
 
 #### 20.5 What this phase does not claim
@@ -2698,6 +2700,92 @@ Between them they cover every page — 107 + 17 = 124 — so the other three fla
 **`heterogeneous` counts *depth-2* ancestors only, and a guide's landing topic has none.** The first implementation bucketed a top-level row's own topic under its own title, which makes a page holding a parent topic plus its single child branch read as spanning two branches — the one shape that obviously is not heterogeneous. R6 says "depth-2 ancestor", and a guide landing topic does not have one. Measured on EMS 10.5.1: **5 pages either way against 7**, and the two dropped are exactly that false positive. A page merging a landing topic with *several* branches still flags, on the branches. Queue: **18 of 124**, not 20.
 
 **Verified.** EMS 10.5.1, `--force`: 1,441 topics → 124 pages, **18 queued (14%)**, flag totals across all 124 pages `reference-list` 13, `oversized` 1, `title-inherited` 107, `heterogeneous` 5, `single-topic` 17. The one `oversized` row is `users-guide/tibemsd-conf.md`, a single 3,533-word topic — R1.3 forbids splitting a body, so the cap yields and the row says why. The queue reads as a worklist: eleven parameter tables, five multi-branch pages, one outsized topic. Two `--force` runs are byte-identical under `diff -r` (C5) and `output/` is untouched (C4). Suite `1,431 passed, 2 skipped`; `ruff` clean on `src`/`tests`; registry 50.
+
+#### 20d Stage 7 integration — **Planned, 2026-09-24**
+
+The merged tree currently goes nowhere. `sync` reads `config.output_path(...)` at `distributor.py:234` and has never heard of `reframed/`, so every version of every doc set publishes its unmerged Stage 6 pages and the four sidecars Reframe writes are, today, files on a developer's disk. 20d is the phase that makes the component load-bearing — and the phase where a mistake becomes a published URL.
+
+**Two of the integration plan's four Phase 3 bullets are already done, and saying so is part of the phase.** Eligibility-driven version scoping shipped in 20a (C3, `_scope_options`, `eligible_only=True`). The Q4 exit-code idiom shipped in 20b: `cli.py:1451-1462` already fails the command on `len(stats.failures) or findings.counts()[Severity.ERROR]`, with the comment explaining why Reframe gates and `convert` does not. Neither is rebuilt. The **second TOC schema adapter** is measured and **not in scope**: all 14 merged doc sets parse as `items-path-children` and no run has ever raised `REFRAME_TOC_SCHEMA_UNKNOWN`. The seam stays; a second adapter arrives with the set that needs it.
+
+What is left is the bullet this repository's own §20.4 wrote: teach Stage 7 and Stage 8 about the merged tree, so R5 and §6's TOC check are enforced by the existing checker against **what actually shipped**, rather than only by Reframe against what it believed it wrote.
+
+**Half of that already works, and it was checked rather than assumed.** `artifacts._check_toc` resolves every `toc.yml` path against the published folder and — when the target is `.md` and the reference carries a fragment — looks the fragment up in `index.anchors(target)`. That is §6's "every referenced page exists; every referenced anchor exists" applied to a merged TOC, written three phases before there was a merged TOC to apply it to. Nothing needs adding for R3. `redirects.yml` is the one nobody reads.
+
+##### The decision 20d turns on: publishing is opt-in, per doc set
+
+| option | why not |
+|---|---|
+| Publish `reframed/` whenever it exists | 14 merged trees are already on disk from 20b/20c tuning runs. This option publishes all of them on the next `sync --all`, which is the irreversible step the whole plan exists to gate. |
+| A `sync --reframed` flag | Not durable and not reviewable. The decision "this doc set is merged now" is a property of the doc set, not of one invocation, and it needs to survive the next person's `sync --all`. |
+| **Opt-in per product in `config/reframe.yaml`** ← proposed | Same file, same shape and same reasoning as `pin_layout_to`. A writer's sign-off becomes **a commit** — reviewable, attributable, revertable — which is exactly what 20e asks for and the only form of sign-off this tool can actually enforce. Default `false`; **no product opts in during 20d.** |
+
+So 20d ships the mechanism with nobody using it. That is deliberate: the pilot doc set is 20e's choice and a writer's, not this phase's.
+
+**`publish: true` with no usable merged tree does not fall back.** A silent fallback to `output/` is the worst failure available here — it republishes 1,441 unmerged topics over a merged tree whose URLs are already live, un-merging published pages as a side effect of a merge that failed. Three cases, all reported, none published:
+
+| state | what sync does |
+|---|---|
+| no `reframed/` tree | `SyncOutcome.NO_OUTPUT`-shaped row naming `docushift reframe`, same as a missing conversion |
+| `reframe_source_checksum` ≠ the version's current `convert_source_checksum` | refuse and name it: the merge predates the conversion beneath it |
+| tree present and current | publish it instead of `output/` |
+
+The staleness test is the comparison Reframe already makes for its own currency (`driver.py:237-238`), read from the same state metadata. It belongs in `sync` and not in `validate`, because `validate` deliberately takes no catalog — §7.1, "the target is the evidence" — and a checker that needed the state DB could not check the one tree somebody most wants checked.
+
+##### What validation learns
+
+`redirects.yml`, checked the way `toc.yml` is checked, in `artifacts.py` beside it and reusing its codes:
+
+| check | code | why |
+|---|---|---|
+| every `to` resolves to a file in the folder | `LINK_BROKEN` (**error**) | R5's "zero dangling", enforced at the gate. Same code `toc.yml` paths already use — a dangling redirect is a broken link that happens to live in a different file. |
+| every `to` fragment is a real anchor on that page | `ANCHOR_MISSING` (warning) | A redirect landing at the top of a twelve-section page is the exact failure R5's anchors exist to prevent. Warning, matching `toc.yml`. |
+| a `from` that still resolves to a published file | **`REDIRECT_SHADOWED`** (warning, register **50 → 51**) | New, and found by measuring rather than by reading the spec. |
+
+**`REDIRECT_SHADOWED` exists because EMS has five of them.** 1,441 redirects: 108 where `from` is the page's own path (the leader of each page — harmless and expected, and excluded), 1,333 where the source topic is genuinely gone. Of those 1,333, **five have a `from` that still resolves on disk**, and all five differ from their target **only in case**:
+
+```
+_templates/Home.md                    -> _templates/home.md#home
+_templates/Legal-and-Third-Party-Notices.md -> _templates/legal-and-third-party-notices.md#...
+_templates/TIBCO-Documentation-and-Support-Services.md -> ...
+c-and-cobol-reference/tibemsOAuth2Params-and-Environment-Variables.md -> ...
+users-guide/DisasterRecovery.md       -> users-guide/disasterrecovery.md#disasterrecovery
+```
+
+On a case-sensitive host these are correct and necessary. On a case-insensitive one they are **301 loops**. The tool does not know which host it is publishing to, so it cannot call this an error — it names it, with the case-only ones distinguished in the message, and a human decides once per platform. Reframe cannot catch it either: its own audit resolves paths through `PurePosixPath` against a set it built, where the two names are distinct.
+
+**Nothing else needs adding.** The sidecars land in `online-help/<segment>/`, which is not in `_INDEXED_DOC_CLASSES`, so `_check_index` never reports them as unlinked — checked, not assumed, and no `_GENERATED` change is needed.
+
+##### What 20d will not do
+
+**It will not rewrite redirect paths into published URLs.** `redirects.yml` ships as written, relative to the version root. The mapping from `online-help/<segment>/page.md` to a URL belongs to the publishing platform, and this tool has never been told it — baking a guess into a 301 map is a guess that becomes permanent the moment it is served. Naming the transform is 20e's conversation with whoever runs the platform, and it needs an answer before any redirect is published, not before this phase is built.
+
+*Exit: `sync` publishes the merged tree for a doc set that opts in and refuses, loudly, for one that opts in without a current merge; a dangling redirect fails `validate`; EMS 10.5.1 publishes to a scratch target and validates with the five case-only redirects named and nothing else new; no product opts in on `master`.*
+
+#### 20d Stage 7 integration — **Built & verified, 2026-09-24**
+
+Every row of the plan above was built as written. Three files carry it: `reframe/policy.py` gains `publish`, `sync/distributor.py` gains `_source` and `_stale`, `validation/artifacts.py` gains `_check_redirects`. **Register 50 → 52**: `SYNC_MERGE_UNAVAILABLE` (warning, sync) and `REDIRECT_SHADOWED` (warning, validate).
+
+**`publish` is the one policy field kept out of the currency digest**, and that is a deliberate exception to `policy.key`'s rule that the digest is the dataclass's own fields. In the digest, a sign-off commit re-merges the whole doc set for no change in output — and worse, the field's mere arrival changes the digest of *every* policy that does not name it, invalidating all 14 merged trees on this branch. The rule stays "every field counts"; `_NOT_OUTPUT` is the named exemption and it has to argue for itself.
+
+**The import is lazy, and it has to be.** `reframe` reads `validation.references` for its fence-aware masking and `validation.artifacts` reads `sync.distributor` for `STAGING_SUFFIX`, so a module-level `from docushift.reframe import policy_for` in the distributor closes the loop and nothing in `docushift.validation` will load at all. Found by the suite, one import after writing it.
+
+**Verified on the corpus, end to end.** EMS 10.5.1 opted in, synced to a scratch target, and validated:
+
+| | |
+|---|---|
+| `sync` | 6 rows synced, 1,241 files, 39.4 MB, `Published merged (Stage 6b): tibco-enterprise-message-service.` The merged tree is what landed in `online-help/10-5-1/`, sidecars and all. |
+| `validate` | 128 files, 2,919 references, **2,732 of 2,733 anchors matched**, **0 errors** |
+| R5 at the gate | **zero `LINK_BROKEN` from `redirects.yml`** — all 1,441 redirect targets resolve to a published page *and* a published anchor |
+| new | **5 `REDIRECT_SHADOWED`**, exactly the five predicted, each naming the 301-loop-on-a-case-insensitive-host condition |
+| pre-existing | 1 `ANCHOR_MISSING`, `#Using`, an in-page link inside a page — §8's dangling-anchor baseline, not a redirect and not new |
+
+**The refusal was verified on real data too**, and not only in tests. `tibco-datasynapse-gridserver-manager` 7.2.0 opted in: `online-help` published **nothing** and said why — *"publishes merged and the merge or the conversion recorded no source checksum, so neither can be vouched for"* — while its PDFs shipped normally, because documents come from the extracted tree and a merge has nothing to say about them. That doc set is one of the six DataSynapse versions with no `convert_source_checksum` at all, which is the inherited gap 20a pinned a test around; the safe direction turns out to be the one that matters here.
+
+**`config/reframe.yaml` ships with `publish: false` and no product opting in**, which was the second thing decided. Both opt-ins above were temporary and are reverted.
+
+Suite `1,449 passed, 2 skipped` (+18); `ruff` clean on `src`/`tests`.
+
+**What 20d does not do.** No redirect path is rewritten into a published URL — see above, that belongs to the platform and needs an answer before 20e publishes anything. `sync` still has exactly one thing to say about Reframe, `_source`; nothing downstream branches on which tree it was handed. And no writer has signed anything off, which is 20e.
 
 ---
 

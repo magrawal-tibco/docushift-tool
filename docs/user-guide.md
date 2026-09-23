@@ -842,6 +842,35 @@ A version whose conversion has no recorded source checksum — a set converted t
 `--input`, for instance — is re-merged on every run rather than reported as current. That is
 `convert`'s rule too: no recorded provenance, no currency claim.
 
+**Merging changes nothing about what gets published until you say so.** `sync` reads the
+Stage 6 tree for every product, and goes on doing that however many merged trees are sitting
+in `reframed/`. A product publishes its merged pages only when `config/reframe.yaml` says so:
+
+```yaml
+products:
+  tibco-enterprise-message-service:
+    pin_layout_to: "10.5.1"
+    publish: true            # after a writer has worked review-queue.csv
+```
+
+Turning it on is a commit, which is the point: merging is reversible right up until a merged
+page is served under an old topic's URL, and after that it is not. No product ships with it
+on.
+
+Once a product has opted in, `sync` will not fall back. If the merged tree is missing, or is
+older than the conversion beneath it, that version's `online-help` publishes **nothing** and
+the run says why — its PDFs and other documents still ship, because those come from the
+extracted package and a merge has nothing to say about them. The alternative, quietly
+publishing the unmerged topics instead, would un-merge URLs that are already live.
+
+`validate` then checks `redirects.yml` against the tree that actually shipped: a redirect
+pointing at a page or a section that is not there is a `LINK_BROKEN` error and fails the gate,
+and a redirect whose *source* path is still published is a `REDIRECT_SHADOWED` warning,
+because it can never fire. Five of EMS 10.5.1's 1,441 are the latter — they differ from their
+target only in case, which is a necessary redirect on a case-sensitive host and a 301 loop on
+a case-insensitive one. Which of those you have is a question about your host, so the tool
+names them and leaves the call to you.
+
 ### AEM Synthesis & Publishing Layout
 ```bash
 # Organize converted AEM files into repo-shaped folders on disk

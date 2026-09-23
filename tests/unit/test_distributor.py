@@ -879,3 +879,155 @@ def test_a_copy_failure_reports_one_line_and_not_the_whole_triple_list(
     (result,) = distributor.sync_api_references(product, product.versions["10.4.0"], target)
 
     assert result.message == "200 file(s) could not be copied, the first 0.html: [WinError 3]"
+
+
+# -- which tree gets published (Phase 20d) ----------------------------------------
+#
+# The one seam Reframe needed. Everything downstream of `_source` is a directory
+# copy that does not care which tree it was handed, so these are the only tests in
+# Stage 7 that have heard of Stage 6b.
+
+
+def reframe_output(config: ConfigManager, product: Product, number: str, **files: str) -> Path:
+    """A merged tree where `sync` looks for one when a product has opted in."""
+    root = config.reframed_path(product.bu, product.family, product.slug, number)
+    root.mkdir(parents=True, exist_ok=True)
+    for name, body in ({"index.md": f"# merged {number}\n", "redirects.yml": "redirects: []\n"} | files).items():
+        path = root / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(body, encoding="utf-8")
+    return root
+
+
+def opt_in(config: ConfigManager, slug: str) -> None:
+    config.reframe_path.write_text(
+        f"defaults:\n  max_words: 3000\nproducts:\n  {slug}:\n    publish: true\n",
+        encoding="utf-8",
+    )
+
+
+def current(catalog, slug: str, number: str, checksum: str = "abc123") -> None:
+    """Both stages' recorded source checksums agreeing -- what `_stale` reads."""
+    catalog.state.set_version_metadata(slug, number, "convert_source_checksum", checksum)
+    catalog.state.set_version_metadata(slug, number, "reframe_source_checksum", checksum)
+
+
+def test_a_product_that_has_not_opted_in_publishes_the_converted_tree(
+    config, distributor, product, target
+) -> None:
+    """The default, and the state every product is in. A merged tree standing on
+    disk from a tuning run must not reach the target on somebody's `sync --all`."""
+    convert_output(config, product, "10.4.0")
+    reframe_output(config, product, "10.4.0")
+
+    result = distributor.sync_one(product, product.versions["10.4.0"], target)
+
+    assert result.outcome is SyncOutcome.SYNCED
+    assert not result.merged
+    assert (result.path / "index.md").read_text(encoding="utf-8") == "# 10.4.0\n"
+
+
+def test_an_opted_in_product_publishes_the_merged_tree_instead(
+    config, catalog, distributor, product, target
+) -> None:
+    convert_output(config, product, "10.4.0")
+    reframe_output(config, product, "10.4.0")
+    opt_in(config, product.slug)
+    current(catalog, product.slug, "10.4.0")
+
+    result = distributor.sync_one(product, product.versions["10.4.0"], target)
+
+    assert result.outcome is SyncOutcome.SYNCED
+    assert result.merged
+    assert (result.path / "index.md").read_text(encoding="utf-8") == "# merged 10.4.0\n"
+    assert (result.path / "redirects.yml").is_file()
+
+
+def test_an_opted_in_product_with_no_merged_tree_publishes_nothing_at_all(
+    config, catalog, target, product
+) -> None:
+    """The refusal this phase exists for. Falling back to `output/` would republish
+    the unmerged topics over URLs the merge already took -- un-merging live pages as
+    a side effect of a merge that had simply not been re-run. Publishing nothing is
+    recoverable; that is not.
+    """
+    convert_output(config, product, "10.4.0")
+    opt_in(config, product.slug)
+    findings = FindingsRun("sync")
+    distributor = WorkspaceDistributor(config, catalog, findings=findings)
+
+    result = distributor.sync_one(product, product.versions["10.4.0"], target)
+
+    assert result.outcome is SyncOutcome.NO_OUTPUT
+    assert "docushift reframe" in result.message
+    assert [f.code for f in findings.all] == ["SYNC_MERGE_UNAVAILABLE"]
+    assert not (target / TREE).exists()
+
+
+def test_a_merged_tree_older_than_the_conversion_beneath_it_is_refused(
+    config, catalog, target, product
+) -> None:
+    """The comparison `reframe` already makes for its own currency, read from the
+    same version metadata -- so a merge `docushift reframe` would rebuild is one
+    `sync` declines to publish, and the two stages cannot disagree about "current".
+    """
+    convert_output(config, product, "10.4.0")
+    reframe_output(config, product, "10.4.0")
+    opt_in(config, product.slug)
+    catalog.state.set_version_metadata(product.slug, "10.4.0", "convert_source_checksum", "new")
+    catalog.state.set_version_metadata(product.slug, "10.4.0", "reframe_source_checksum", "old")
+    findings = FindingsRun("sync")
+    distributor = WorkspaceDistributor(config, catalog, findings=findings)
+
+    result = distributor.sync_one(product, product.versions["10.4.0"], target)
+
+    assert result.outcome is SyncOutcome.NO_OUTPUT
+    assert "older than the conversion" in result.message
+    assert [f.code for f in findings.all] == ["SYNC_MERGE_UNAVAILABLE"]
+
+
+def test_a_merge_with_no_recorded_checksum_cannot_claim_currency(
+    config, catalog, target, product
+) -> None:
+    """No recorded provenance, no currency claim -- the rule `reframe` inherited
+    from `convert`, and the safe direction. The six DataSynapse Flare versions have
+    no `convert_source_checksum` at all and land here."""
+    convert_output(config, product, "10.4.0")
+    reframe_output(config, product, "10.4.0")
+    opt_in(config, product.slug)
+    findings = FindingsRun("sync")
+    distributor = WorkspaceDistributor(config, catalog, findings=findings)
+
+    result = distributor.sync_one(product, product.versions["10.4.0"], target)
+
+    assert result.outcome is SyncOutcome.NO_OUTPUT
+    assert "no source checksum" in result.message
+
+
+def test_opting_in_does_not_re_merge_anything(config) -> None:
+    """`publish` is the one policy field kept out of the currency digest. In it, a
+    sign-off commit would re-merge the whole doc set -- and invalidate every tree
+    already built, because a new field changes the digest of every policy."""
+    from docushift.reframe import policy_for
+
+    before = policy_for({"defaults": {"max_words": 3000}}, "tibco-ems")
+    after = policy_for({"defaults": {"max_words": 3000, "publish": True}}, "tibco-ems")
+
+    assert not before.publish
+    assert after.publish
+    assert before.key == after.key
+    assert policy_for({"defaults": {"max_words": 2000}}, "tibco-ems").key != before.key
+
+
+def test_the_documents_doc_classes_are_untouched_by_the_choice(
+    config, catalog, distributor, product, target
+) -> None:
+    """`online-help` is the only doc-class Reframe produces. The PDFs come from the
+    extracted tree and a merge has nothing to say about them."""
+    extract_tree(config, product, "10.4.0", **{"doc/guide.pdf": "%PDF-1.4\n"})
+    opt_in(config, product.slug)
+
+    results = distributor.sync_documents(product, product.versions["10.4.0"], target)
+
+    assert [r.outcome for r in results] == [SyncOutcome.SYNCED]
+    assert not any(r.merged for r in results)

@@ -506,6 +506,158 @@ def artifacts_of(target: Path):
     return artifacts.check(folder, FolderIndex(folder.path))
 
 
+# -- redirects.yml, R5 at the gate (Phase 20d) ------------------------------------
+#
+# Reframe audits its own redirect map before it swaps a tree in, against a set it
+# built in memory. These check the file that shipped against the folder that
+# shipped, which is the only version of the question a published URL cares about.
+
+
+def redirects(*entries: str) -> str:
+    return "redirects:\n" + "".join(entries)
+
+
+def entry(source: str, to: str) -> str:
+    return f"- from: {source}\n  to: {to}\n  status: 301\n"
+
+
+def test_a_folder_with_no_redirect_map_is_not_a_folder_with_a_bad_one(tmp_path: Path) -> None:
+    """Only a merged tree has one, and every artifact here is checked if present."""
+    target = tmp_path / "target"
+    publish(target, {"html/a.md": "# A\n"})
+
+    assert artifacts_of(target) == []
+
+
+def test_a_redirect_to_a_page_that_was_not_published_is_a_link_broken(tmp_path: Path) -> None:
+    """R5's "zero dangling", enforced by the gate rather than only by the merge.
+
+    `LINK_BROKEN` and not a code of its own, for the reason `toc.yml` gives: a
+    dangling redirect is a broken link that happens to live in a different file.
+    """
+    target = tmp_path / "target"
+    publish(target, {"redirects.yml": redirects(entry("html/old.md", "html/gone.md#old"))})
+
+    findings = artifacts_of(target)
+
+    assert codes(findings) == ["LINK_BROKEN"]
+    assert "html/gone.md#old is not in this version folder" in findings[0].message
+
+
+def test_a_redirect_landing_on_a_page_but_not_on_a_section_is_an_anchor_missing(
+    tmp_path: Path,
+) -> None:
+    """The exact failure R5's anchors exist to prevent -- a reader following a
+    pre-merge URL onto the top of a twelve-section page."""
+    target = tmp_path / "target"
+    publish(
+        target,
+        {
+            "redirects.yml": redirects(entry("html/old.md", "html/page.md#old")),
+            "html/page.md": "# Page\n",
+        },
+    )
+
+    findings = artifacts_of(target)
+
+    assert codes(findings) == ["ANCHOR_MISSING"]
+    assert "#old is not an anchor in html/page.md" in findings[0].message
+
+
+def test_a_redirect_that_resolves_to_a_real_section_is_silent(tmp_path: Path) -> None:
+    target = tmp_path / "target"
+    publish(
+        target,
+        {
+            "redirects.yml": redirects(entry("html/old.md", "html/page.md#old")),
+            "html/page.md": '# Page\n\n<a id="old"></a>\n\n## Old\n',
+        },
+    )
+
+    assert artifacts_of(target) == []
+
+
+def test_a_page_leaders_redirect_to_its_own_anchor_is_expected_and_not_reported(
+    tmp_path: Path,
+) -> None:
+    """108 of EMS 10.5.1's 1,441. Every page's first topic keeps its path, so its
+    `from` is its `to` -- reporting those would bury the five that matter."""
+    target = tmp_path / "target"
+    publish(
+        target,
+        {
+            "redirects.yml": redirects(entry("html/page.md", "html/page.md#page")),
+            "html/page.md": '# Page\n\n<a id="page"></a>\n\n## Page\n',
+        },
+    )
+
+    assert artifacts_of(target) == []
+
+
+def test_a_redirect_differing_from_its_target_only_in_case_is_a_301_loop(
+    tmp_path: Path,
+) -> None:
+    """Five of EMS 10.5.1's, `_templates/Home.md -> _templates/home.md#home` among
+    them: the packer lowercases page filenames and the source topic was capitalised.
+
+    Necessary on a case-sensitive host, a redirect loop on a case-insensitive one.
+    Nothing here knows which host it publishes to, so it is a warning that names
+    the distinction rather than an error either way.
+    """
+    target = tmp_path / "target"
+    publish(
+        target,
+        {
+            "redirects.yml": redirects(entry("html/Home.md", "html/home.md#home")),
+            "html/home.md": '# Home\n\n<a id="home"></a>\n\n## Home\n',
+        },
+    )
+
+    findings = artifacts_of(target)
+
+    assert codes(findings) == ["REDIRECT_SHADOWED"]
+    assert "only in case" in findings[0].message
+    assert "301 loop" in findings[0].message
+
+
+def test_a_redirect_from_a_page_that_is_still_published_can_never_fire(
+    tmp_path: Path,
+) -> None:
+    """The general case behind the case-only one, and the one Reframe cannot catch:
+    its audit resolves both names against a set it built, where they are distinct."""
+    target = tmp_path / "target"
+    publish(
+        target,
+        {
+            "redirects.yml": redirects(entry("html/kept.md", "html/page.md#kept")),
+            "html/kept.md": "# Kept\n",
+            "html/page.md": '# Page\n\n<a id="kept"></a>\n\n## Kept\n',
+        },
+    )
+
+    findings = artifacts_of(target)
+
+    assert codes(findings) == ["REDIRECT_SHADOWED"]
+    assert "can never fire" in findings[0].message
+
+
+def test_an_unparseable_redirect_map_is_reported_once_and_read_no_further(
+    tmp_path: Path,
+) -> None:
+    target = tmp_path / "target"
+    publish(target, {"redirects.yml": "redirects:\n  - from: [unclosed\n"})
+
+    assert codes(artifacts_of(target)) == ["ARTIFACT_UNPARSED"]
+
+
+def test_the_two_redirect_codes_are_registered_at_the_severities_they_gate_on() -> None:
+    """`validate` gates on errors only, so which of the three a redirect defect gets
+    is the difference between blocking a publish and annotating one."""
+    assert REGISTRY["LINK_BROKEN"].severity is Severity.ERROR
+    assert REGISTRY["ANCHOR_MISSING"].severity is Severity.WARNING
+    assert REGISTRY["REDIRECT_SHADOWED"].severity is Severity.WARNING
+
+
 # -- index.md, the reverse direction (Phase 10b) ----------------------------------
 
 

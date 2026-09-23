@@ -44,6 +44,12 @@ Four rules the driver owns:
   the catalog and writes only under `--target-dir`. A version with no converted
   tree is one of the five outcomes, not an abort: over a partially converted
   corpus, that is the normal state.
+
+**20d adds a choice of source tree, and nothing else.** A product with
+`publish: true` in `reframe.yaml` has its `online-help` read from `reframed/`
+instead of `output/` -- see `_source`. Everything downstream of that line is a
+directory copy that does not care which tree it was handed, which is why this is
+the only place in Stage 7 that has heard of Reframe.
 """
 
 import filecmp
@@ -121,6 +127,9 @@ class SyncResult:
     files: int = 0
     bytes: int = 0
     message: str = ""
+    # Whether the tree published was Reframe's rather than Stage 6's (20d). Only
+    # ever true for `online-help`, and only for a product that opted in.
+    merged: bool = False
     # Which doc-class this row is about. A run reports one row per (version,
     # doc-class) that had something to say, so a version appears up to four times.
     # Empty means the row is about the version rather than one of its doc-classes
@@ -231,14 +240,15 @@ class WorkspaceDistributor:
             self._record("VERSION_NOT_NUMERIC", slug, number, message=message)
             return SyncResult(slug, number, SyncOutcome.SKIPPED, message=message)
 
-        source = self.config.output_path(product.bu, product.family, slug, number)
-        if not source.is_dir():
-            message = f"no converted tree at {source}; run `docushift convert` first"
-            return SyncResult(slug, number, SyncOutcome.NO_OUTPUT, segment=segment, message=message)
+        source, merged, refusal = self._source(product, version)
+        if refusal is not None:
+            return SyncResult(slug, number, SyncOutcome.NO_OUTPUT, segment=segment, message=refusal)
 
         destination = self.doc_class_dir(product, target) / segment
         if not force and destination.is_dir() and _identical(source, destination):
-            return SyncResult(slug, number, SyncOutcome.CURRENT, path=destination, segment=segment)
+            return SyncResult(
+                slug, number, SyncOutcome.CURRENT, path=destination, segment=segment, merged=merged
+            )
 
         try:
             files, size = self._place(source, destination)
@@ -248,8 +258,76 @@ class WorkspaceDistributor:
 
         return SyncResult(
             slug, number, SyncOutcome.SYNCED, path=destination, segment=segment,
-            files=files, bytes=size,
+            files=files, bytes=size, merged=merged,
         )
+
+    def _source(self, product: Product, version: ProductVersion) -> tuple[Path, bool, str | None]:
+        """Which tree `online-help` publishes from, and why it might publish none.
+
+        Phase 20d, and the one seam Reframe needed: everything downstream of here is
+        a directory copy that does not care which tree it was handed. A product opts
+        in through `publish: true` in `reframe.yaml` -- see that file for why the
+        switch lives there and not on the command line -- and until it does, this
+        returns exactly what it has always returned.
+
+        **An opted-in product never falls back to `output/`.** That is the whole
+        reason this returns a refusal instead of a second path. Falling back
+        republishes the unmerged topics over URLs the merge already took, un-merging
+        live pages as a side effect of a merge that simply had not been re-run; the
+        version publishing nothing is recoverable and that is not.
+        """
+        # Imported here and not at module scope: `reframe` reads
+        # `validation.references` for its fence-aware masking, and `validation`
+        # reads this module for `STAGING_SUFFIX`. A top-level import closes that
+        # loop and nothing in `docushift.validation` will load.
+        from docushift.reframe import policy_for
+
+        slug, number = product.slug, version.version
+        converted = self.config.output_path(product.bu, product.family, slug, number)
+        policy = policy_for(self.config.load_reframe(), slug)
+
+        if not policy.publish:
+            if not converted.is_dir():
+                return converted, False, f"no converted tree at {converted}; run `docushift convert` first"
+            return converted, False, None
+
+        merged = self.config.reframed_path(product.bu, product.family, slug, number)
+        # Both branches are the same finding: the tree this product publishes from is
+        # not one Stage 7 can vouch for. The message carries which.
+        if not merged.is_dir():
+            detail = f"no merged tree at {merged}; run `docushift reframe` first"
+        elif (stale := self._stale(slug, number)) is not None:
+            detail = stale
+        else:
+            return merged, True, None
+
+        message = f"{slug} publishes merged and {detail}"
+        self._record("SYNC_MERGE_UNAVAILABLE", slug, number, message=message)
+        return merged, True, message
+
+    def _stale(self, slug: str, number: str) -> str | None:
+        """Whether the merged tree predates the conversion beneath it.
+
+        The same two values Reframe compares for its own currency
+        (`reframe/driver.py`), read from the same version metadata -- so a merge that
+        `docushift reframe` would rebuild is one `sync` declines to publish, and the
+        two stages cannot disagree about what "current" means.
+
+        This lives in `sync` rather than in `validate` because `validate` takes no
+        catalog on purpose (§7.1, "the target is the evidence"). A checker that
+        needed the state DB could not check the one tree somebody most wants checked.
+        """
+        metadata = self.catalog.state.get_version_metadata(slug, number) if self.catalog.state else {}
+        converted_from = metadata.get("convert_source_checksum", "")
+        merged_from = metadata.get("reframe_source_checksum", "")
+        if merged_from and converted_from and merged_from == converted_from:
+            return None
+        # No recorded provenance, no currency claim -- the rule `reframe` inherited
+        # from `convert` and the safe direction. The six DataSynapse Flare versions
+        # have no `convert_source_checksum` at all and land here.
+        if not merged_from or not converted_from:
+            return "the merge or the conversion recorded no source checksum, so neither can be vouched for"
+        return "the merged tree is older than the conversion beneath it; re-run `docushift reframe`"
 
     def _place(self, source: Path, destination: Path) -> tuple[int, int]:
         """Copies the tree into a staging sibling and swaps it over the target.

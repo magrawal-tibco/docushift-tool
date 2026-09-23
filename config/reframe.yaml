@@ -24,6 +24,22 @@ defaults:
   # REFRAME_TOC_SCHEMA_UNKNOWN error, never a silent partial parse.
   toc_schema: ""
 
+  # Whether `docushift sync` publishes the *merged* tree for this product instead of
+  # Stage 6's. Off, and deliberately off for every product below.
+  #
+  # This is the writer sign-off gate. Merging is reversible right up until the moment
+  # a merged page is served under an old topic's URL, and after that it is not: the
+  # redirects are live and the pages have been hand-edited. So publishing is not a
+  # property of an invocation -- a `--reframed` flag would be re-decided by whoever
+  # next runs `sync --all` -- it is a property of the doc set, recorded here, where
+  # turning it on is a reviewable and revertable commit.
+  #
+  # Turn it on for a product only after a writer has worked its `review-queue.csv`.
+  # `sync` then refuses to publish that product at all if the merged tree is missing
+  # or older than the conversion beneath it, rather than quietly falling back to the
+  # unmerged pages -- which would un-merge URLs that are already live.
+  publish: false
+
 products:
   # R1.4 -- layout pinning. This product has six convert-eligible Flare versions
   # (10.4.0, 10.4.1, 10.4.3, 10.4.4, 10.5.0, 10.5.1), so an unpinned merge would lay
