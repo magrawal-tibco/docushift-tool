@@ -1,0 +1,65 @@
+"""The effective Reframe policy for one product, and the key that invalidates it.
+
+Separated from `ConfigManager` on the same line `load_scope` draws: the manager
+reads and shapes files, and the per-row resolution lives with the stage that has
+the row in hand. It also keeps the currency key next to the values it is a digest
+of, which is the pairing that goes wrong when they drift apart.
+"""
+
+from __future__ import annotations
+
+import hashlib
+import json
+from dataclasses import asdict, dataclass
+from typing import Any
+
+# Only the keys that change the output belong in the digest. A comment edit or a
+# reordered mapping must not re-merge 113 pages, and an added field that does
+# change the output must not be forgotten -- so this is the dataclass's own fields,
+# derived, rather than a second list to keep in step.
+
+
+@dataclass(frozen=True)
+class ReframePolicy:
+    """What Stage 6b will do to one product, after defaults and overrides."""
+
+    #: The cap a join may not cross (R1.2). Never splits a topic to respect it.
+    max_words: int = 3000
+    #: Forced TOC dialect, or empty for detection.
+    toc_schema: str = ""
+    #: R1.4 -- the version whose page layout every other version reuses. Empty means
+    #: each version is laid out on its own, which is only safe for a single-version
+    #: doc set and raises `REFRAME_LAYOUT_UNPINNED` otherwise.
+    pin_layout_to: str = ""
+
+    @property
+    def key(self) -> str:
+        """A short digest of the policy, for currency.
+
+        Stage 6b is current when its input tree is unchanged **and** the policy that
+        shaped the output is unchanged. Convert learned the same lesson at
+        `convert_api_prefix`: keying on the source alone means a config edit leaves a
+        stale tree looking up to date, and the boundary rules here are expected to be
+        tuned repeatedly, so that failure would be the common case rather than a
+        corner of it.
+        """
+        payload = json.dumps(asdict(self), sort_keys=True, separators=(",", ":"))
+        return hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16]
+
+
+def policy_for(reframe: dict[str, Any], slug: str) -> ReframePolicy:
+    """Resolves `ConfigManager.load_reframe()` down to one product's policy.
+
+    Default-then-override, key by key, so a product block naming only
+    `pin_layout_to` keeps the shipped `max_words` rather than falling back to the
+    dataclass's -- the two agree today and a silent divergence when they stop
+    agreeing is the kind of thing that is only noticed as a page-count change.
+    """
+    values: dict[str, Any] = dict(reframe.get("defaults") or {})
+    values.update((reframe.get("products") or {}).get(slug) or {})
+
+    return ReframePolicy(
+        max_words=int(values.get("max_words") or ReframePolicy.max_words),
+        toc_schema=str(values.get("toc_schema") or "").strip(),
+        pin_layout_to=str(values.get("pin_layout_to") or "").strip(),
+    )

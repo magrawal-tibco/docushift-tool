@@ -1,0 +1,45 @@
+# Reframe -- Stage 6b editorial policy (docs/REFRAME-REQUIREMENTS.md, planning.md Phase 20).
+#
+# Reframe merges granular MadCap Flare topics into fewer, larger pages, each former
+# topic becoming an anchored `##` section. It runs only for the Flare engine, reads
+# Stage 6's `output/` tree, and writes a sibling `reframed/` tree -- never its input.
+#
+# This file carries the editorial judgement. It is expected to be tuned repeatedly,
+# which is exactly why it is a file and not a constant in the packer: a boundary pass
+# should not be a code change.
+
+defaults:
+  # A cap, not a target (R1.2). Subtree cohesion chooses the boundary; this only
+  # refuses a join that would cross it. A single source topic larger than the cap is
+  # never split -- it becomes an oversized page and is flagged for a writer.
+  #
+  # Measured over the reference corpus (EMS 10.5.1, 1,441 topics, 226,871 words):
+  #   2000 -> 171 pages, median 1,459 words    4000 ->  92 pages, median 3,030 words
+  #   3000 -> 113 pages, median 2,226 words    6000 ->  60 pages, median 4,312 words
+  max_words: 3000
+
+  # Which `toc.yml` dialect to parse with. Empty means "ask the registered adapters
+  # which one matches", which is right for every set measured so far. Name a schema
+  # only to override a detection that guessed wrong -- an unrecognised shape is a
+  # REFRAME_TOC_SCHEMA_UNKNOWN error, never a silent partial parse.
+  toc_schema: ""
+
+products:
+  # R1.4 -- layout pinning. This product has six convert-eligible Flare versions
+  # (10.4.0, 10.4.1, 10.4.3, 10.4.4, 10.5.0, 10.5.1), so an unpinned merge would lay
+  # each one out by its own subtree sizes and the versions would stop being diffable.
+  # Pinned to the newest, which is the version the requirements' baseline was
+  # measured against and the one `iter_versions` yields first.
+  tibco-enterprise-message-service:
+    pin_layout_to: "10.5.1"
+
+  # The other two multi-version Flare sets, pinned on the same rule -- the newest
+  # eligible version, which is the one `iter_versions` yields first and the one a
+  # fix gets written against. The remaining three Flare products have a single
+  # eligible version each and are left unpinned rather than pinned to themselves;
+  # `REFRAME_LAYOUT_UNPINNED` will name them if a second version ever arrives.
+  tibco-datasynapse-gridserver-manager:
+    pin_layout_to: "7.2.0"
+
+  tibco-datasynapse-high-performance-computing-cloud-adapter:
+    pin_layout_to: "2.2.0"

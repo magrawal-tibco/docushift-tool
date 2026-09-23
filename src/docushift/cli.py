@@ -1323,6 +1323,134 @@ def convert(ctx, bu, family, product, version, batch, select_all, force, dry_run
     _report_convert(stats, findings)
 
 
+# --- Reframe (Phase 20) ------------------------------------------------------
+
+
+def _report_reframe(stats, findings) -> None:
+    """The five-outcome summary, the merge ratio, and the findings tally."""
+    from docushift.reframe import ReframeOutcome
+
+    table = Table(title="Reframe")
+    table.add_column("Outcome")
+    table.add_column("Versions", justify="right")
+    for outcome, label in (
+        (ReframeOutcome.REFRAMED, "Reframed"),
+        (ReframeOutcome.CURRENT, "Already current"),
+        (ReframeOutcome.NOT_FLARE, "Not Flare (skipped)"),
+        (ReframeOutcome.NO_OUTPUT, "No converted tree"),
+        (ReframeOutcome.FAILED, "Failed"),
+    ):
+        table.add_row(label, str(stats.count(outcome)))
+    console.print(table)
+    if stats.topics:
+        console.print(f"[dim]{stats.topics} topic(s) read into {stats.pages} page(s).[/dim]")
+
+    # `NOT_FLARE` is counted and never named. It is the overwhelming majority of any
+    # full-catalog selection and naming it would bury the rows that need reading --
+    # the opposite call to `ENGINE_UNKNOWN` in `convert`, which is rare and is a
+    # to-do. `NO_OUTPUT` is named: it means somebody expected a merge and the
+    # conversion has not run.
+    for result in stats.results:
+        if result.outcome is ReframeOutcome.NO_OUTPUT:
+            console.print(f"[yellow]![/yellow] {result.slug}@{result.version}: {result.message}")
+    for result in stats.failures:
+        console.print(f"[red]x[/red] {result.slug}@{result.version}: {result.message}")
+
+    summary = findings.summary()
+    if summary:
+        console.print(f"[dim]Findings: {summary}.[/dim]")
+
+
+@main.command()
+@_scope_options
+@click.option("--force", is_flag=True, help="Re-merge even if the converted tree and policy are unchanged.")
+@click.option("--dry-run", is_flag=True, help="List what would be reframed without writing.")
+@click.option("--input", "input_dir", type=DIR_PATH, default=None, help="Reframe a standalone converted folder.")
+@click.option("--output", "output_dir", type=DIR_PATH, default=None, help="Destination for the merged GFM.")
+@click.pass_context
+def reframe(ctx, bu, family, product, version, batch, select_all, force, dry_run, input_dir, output_dir) -> None:
+    """Merge granular Flare topics into fewer, larger pages in reframed/.
+
+    Runs over the same selection as `convert`, and skips every version whose engine
+    is not Flare -- a doc set whose topics are already page-sized is counted, not
+    warned about. The converted tree is read and never written to, so a boundary
+    rule can be tuned and the merge re-run without re-converting anything.
+    """
+    from docushift.reframe import ReframeOutcome, Reframer, policy_for
+
+    cfg: ConfigManager = ctx.obj["config"]
+    manager = _catalog_manager(ctx)
+
+    if (input_dir is None) != (output_dir is None):
+        raise click.ClickException("--input and --output are used together, or not at all.")
+    if input_dir is not None and not (product and version):
+        raise click.ClickException("--input needs --product and --version to name the catalog row.")
+
+    pairs = _download_selection(manager, bu, family, product, version, batch, select_all)
+    if not pairs:
+        _no_selection("reframe")
+
+    if dry_run:
+        reframe_config = cfg.load_reframe()
+        table = Table(title=f"Would reframe ({len(pairs)})")
+        for column in ("Product", "Version", "Engine", "Converted", "Cap", "Pinned", "Target"):
+            table.add_column(column)
+        for found, ver in pairs:
+            policy = policy_for(reframe_config, found.slug)
+            source = input_dir or cfg.output_path(found.bu, found.family, found.slug, ver.version)
+            target = output_dir or cfg.reframed_path(found.bu, found.family, found.slug, ver.version)
+            flare = ver.engine is SourceEngine.FLARE
+            table.add_row(
+                found.slug,
+                ver.version,
+                str(ver.engine) if flare else f"[dim]{ver.engine}[/dim]",
+                "present" if source.is_dir() else "[yellow]missing[/yellow]",
+                str(policy.max_words) if flare else "[dim]-[/dim]",
+                policy.pin_layout_to or "[dim]-[/dim]",
+                str(target) if flare else "[dim]skipped[/dim]",
+            )
+        console.print(table)
+        return
+
+    findings = FindingsRun("reframe", batch=batch or "", store=manager.state).start()
+    reframer = Reframer(cfg, manager, findings=findings)
+    console.print(f"Reframing {len(pairs)} version(s)...")
+
+    def on_result(result) -> None:
+        if result.outcome is ReframeOutcome.REFRAMED:
+            console.print(
+                f"  [green]v[/green] {result.slug}@{result.version} "
+                f"{result.topics} topic(s) -> {result.pages} page(s)"
+            )
+        elif result.outcome is ReframeOutcome.FAILED:
+            console.print(f"  [red]x[/red] {result.slug}@{result.version}")
+
+    if input_dir is not None:
+        found, ver = pairs[0]
+        stats_results = [
+            reframer.reframe_one(found, ver, force=force, source=input_dir, output=output_dir)
+        ]
+        from docushift.reframe import ReframeStats
+
+        stats = ReframeStats(results=stats_results)
+        on_result(stats_results[0])
+    else:
+        stats = reframer.reframe_many(pairs, force=force, on_result=on_result)
+
+    # The exit gate `sync` and `validate` use, and `convert` deliberately does not.
+    # The difference is what an error means: a converter error is one topic in a
+    # tree somebody will read a report about, and a Reframe error is a merge that
+    # produced pages nobody should publish. Integration plan §7 Q4.
+    # Rows *and* findings, the shape `sync` settled on: a version can fail on an
+    # `OSError` that no register code claims, and that row is still a doc set with
+    # no merged tree.
+    failed = len(stats.failures) or findings.counts()[Severity.ERROR]
+    findings.finish(exit_code=1 if failed else 0)
+    _report_reframe(stats, findings)
+    if failed:
+        raise click.exceptions.Exit(1)
+
+
 def _who(result) -> str:
     """`ems@8.6.0`, or plain `ems` for a row about the product rather than a version.
 

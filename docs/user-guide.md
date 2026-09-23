@@ -748,6 +748,59 @@ C function signature. So the fence is kept and each version reports a
 `Link inside a code block…` note carrying the count, rather than losing them quietly:
 about 4,964 corpus-wide, 1,179 of them in `tibco-ems` 10.4.0 alone.
 
+### Reframe: merging Flare topics into maintainable pages
+
+```bash
+# Merge every eligible Flare version; everything else is counted and skipped
+docushift reframe --all
+
+# One product, or one version of it -- the same selectors every stage takes
+docushift reframe --product tibco-enterprise-message-service
+docushift reframe --product tibco-enterprise-message-service --version 10.5.1
+
+# See what would be merged, at what cap, against which pinned layout
+docushift reframe --all --dry-run
+
+# A frozen converted folder, with no catalog paths involved
+docushift reframe --product tibco-ems --version 10.5.1 --input ./converted --output ./merged
+```
+
+| Flag | What it does |
+|---|---|
+| `--force` | Re-merge even when the converted tree and the policy are both unchanged |
+| `--dry-run` | List the selection, the cap and the pin; write nothing |
+| `--input` / `--output` | Work on a standalone folder. Used together, and both need `--product` and `--version` |
+
+A MadCap Flare topic is an authoring unit, not a reading unit. TIBCO Enterprise Message
+Service 10.5.1 is **1,441 topics with a median of 107 words** — and once the Markdown becomes
+the source that writers maintain, that is 1,441 files somebody has to keep in step. `reframe`
+merges them by navigation subtree, so each former topic becomes an anchored `##` section of a
+larger page, and hands the pages it could not confidently decide about to a human.
+
+**It only runs for Flare.** Every other engine is counted as skipped, not warned about: on a
+full catalog selection that is 1,669 of 1,683 eligible versions, and naming them would bury
+the rows worth reading.
+
+**It never writes to its input.** Stage 6's `output/` tree is read and a sibling `reframed/`
+tree is built. Tuning a boundary rule is a re-run, not a restore — which matters because the
+merge is irreversible once the pages have been hand-edited and the URLs published.
+
+The editorial policy lives in `config/reframe.yaml`, not in the code, because it is expected
+to be tuned repeatedly. Two keys:
+
+- **`max_words`** is a **cap, not a target**. Subtree cohesion chooses the boundary; the cap
+  only refuses a join that would cross it, and a source topic larger than the cap is never
+  split. Measured over EMS 10.5.1: `2000` gives 171 pages, `3000` gives 113, `6000` gives 60.
+- **`pin_layout_to`** names the version whose page layout every other version of that doc set
+  reuses. EMS has six eligible Flare versions; without a pin each would be laid out by its own
+  subtree sizes, the versions would stop being diffable, and porting a fix would stop being a
+  clean diff — permanently. `reframe` warns when a doc set has two eligible versions and no
+  pin.
+
+A version whose conversion has no recorded source checksum — a set converted through
+`--input`, for instance — is re-merged on every run rather than reported as current. That is
+`convert`'s rule too: no recorded provenance, no currency claim.
+
 ### AEM Synthesis & Publishing Layout
 ```bash
 # Organize converted AEM files into repo-shaped folders on disk

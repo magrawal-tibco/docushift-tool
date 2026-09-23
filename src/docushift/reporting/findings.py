@@ -43,6 +43,7 @@ class Stage(StrEnum):
     DOWNLOAD = "download"
     EXTRACT = "extract"
     CONVERT = "convert"
+    REFRAME = "reframe"
     SYNC = "sync"
     VALIDATE = "validate"
 
@@ -230,6 +231,29 @@ REGISTRY: dict[str, Code] = _codes(
          "Fewer Markdown files on disk than documents converted; two writes "
          "resolved to one path",
          "planning.md Phase 13"),
+    # Phase 20a's two codes, both about the stage refusing to guess.
+    #
+    # A TOC whose shape has no adapter is an **error** rather than a skip. Reframe
+    # rebuilds `toc.yml` from the tree it parsed, so a shape it half-understands
+    # does not produce a worse merge -- it produces a merge that silently loses
+    # whichever branch the parser did not recognise, and the page count looks
+    # plausible either way. The one doc set measured (EMS 10.5.1, 1,441 paths) is
+    # `items`/`title`/`path`/`children`; the second set is the risk, and this is
+    # the code that makes it arrive as a failure instead of a quiet shortfall.
+    Code("REFRAME_TOC_SCHEMA_UNKNOWN", Severity.ERROR, Stage.REFRAME,
+         "No TOC adapter matches this version's toc.yml; refusing to merge a tree "
+         "that was only partly understood",
+         "REFRAME-INTEGRATION-PLAN.md §4 Phase 0"),
+    # R1.4, and a warning rather than an error because the first run of a doc set
+    # legitimately has nothing to pin to. It matters because the reference product
+    # is the case: `tibco-enterprise-message-service` has six convert-eligible
+    # Flare versions, so an unpinned merge lays 10.4.0 out by its own subtree sizes
+    # and 10.5.1 by its own, and the two stop being diffable -- permanently, since
+    # the Markdown is hand-edited from here. Cheap now, impossible later.
+    Code("REFRAME_LAYOUT_UNPINNED", Severity.WARNING, Stage.REFRAME,
+         "More than one eligible version of this doc set and no pinned layout; "
+         "versions may be merged into non-corresponding pages",
+         "REFRAME-REQUIREMENTS.md R1.4"),
     Code("LINK_BROKEN", Severity.ERROR, Stage.VALIDATE,
          "Relative link resolving to nothing", "design.md §8.4"),
     # Emitted from Phase 7c, and a warning on arithmetic rather than on taste, the

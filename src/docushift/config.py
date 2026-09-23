@@ -56,6 +56,25 @@ PUBLISHING_DEFAULTS: dict[str, str] = {
     "publish_base_url": "",
 }
 
+# Stage 6b's editorial policy, duplicated from `config/reframe.yaml` for the reason
+# above and one more: these are the values the reference baseline was measured at.
+#
+# `max_words` is a **cap, not a target** (requirements R1.2). Subtree cohesion picks
+# the boundary; the cap only refuses a join that would cross it, and never splits a
+# source topic to respect it. Measured over EMS 10.5.1's 1,441 topics: 2000 gives 171
+# pages, 3000 gives 113, 4000 gives 92, 6000 gives 60. 3000 is shipped because it is
+# the value the proof-of-concept's published baseline was taken at, so a regression
+# in the packer shows up as a page-count diff against a number somebody has read.
+#
+# `min_words` is deliberately absent. The POC declared it and never used it, and the
+# maintenance retarget drops it rather than wiring it up: a short page whose subtree
+# is genuinely short is the correct answer, not a defect to pack away. Removing it is
+# what moves the count from the POC's 106 to 113.
+REFRAME_DEFAULTS: dict[str, Any] = {
+    "max_words": 3000,
+    "toc_schema": "",
+}
+
 # A publishing suffix must be one lowercase token. A hyphen makes the family/suffix
 # boundary unparseable (`...-messaging-user-docs` -- where does the family end?) and
 # an empty value silently turns a tree name back into the bare workspace name.
@@ -150,11 +169,13 @@ class ConfigManager:
         self.cache_dir = self.root_dir / "cache"
         self.families_dir = self.root_dir / "families"
         self.output_dir = self.root_dir / "output"
+        self.reframed_dir = self.root_dir / "reframed"
         self.taxonomy_path = self.config_dir / "taxonomy.yaml"
         self.docsite_path = self.config_dir / "docsite.yaml"
         self.scope_path = self.config_dir / "scope.yaml"
         self.eos_path = self.config_dir / "eos.yaml"
         self.publishing_path = self.config_dir / "publishing.yaml"
+        self.reframe_path = self.config_dir / "reframe.yaml"
         self.aem_templates_dir = self.config_dir / "aem_templates"
         self.products_path = self.config_dir / "products.csv"
         self.versions_path = self.config_dir / "versions.csv"
@@ -172,6 +193,7 @@ class ConfigManager:
         self._scope_cache: dict[str, str] | None = None
         self._eos_cache: EosReport | None = None
         self._publishing_cache: dict[str, str] | None = None
+        self._reframe_cache: dict[str, Any] | None = None
 
     # -- publishing tokens ----------------------------------------------------
 
@@ -310,6 +332,24 @@ class ConfigManager:
         """
         return self.output_dir / self.family_workspace_name(bu, family) / slug / version
 
+    def reframed_path(self, bu: str, family: str, slug: str, version: str) -> Path:
+        """The merged Markdown for one version: `reframed/<family>/<slug>/<version>/`.
+
+        A sibling tree rather than a rewrite of `output/`, because Reframe must never
+        write to its input (requirements C4). Two things follow from that. The merge
+        stays re-runnable -- boundary rules get tuned repeatedly and each pass needs a
+        clean `output/` to start from, which is the whole iterate-and-eyeball loop the
+        integration plan §3 is protecting. And the irreversibility the plan calls its
+        first risk becomes reversible right up until publication: a bad boundary is
+        one `reframe --force` away from gone, where an in-place merge would have taken
+        the converted topics with it.
+
+        `reframed/` is created on demand, not in `__init__`, for the reason the family
+        folders are: an empty directory in a workspace with no Flare set in scope reads
+        as a started migration.
+        """
+        return self.reframed_dir / self.family_workspace_name(bu, family) / slug / version
+
     def load_taxonomy(self) -> dict[str, Any]:
         """Loads and caches taxonomy rules from taxonomy.yaml."""
         if self._taxonomy_cache is not None:
@@ -364,6 +404,34 @@ class ConfigManager:
                 resolved[key] = value
         self._publishing_cache = resolved
         return resolved
+
+    def load_reframe(self) -> dict[str, Any]:
+        """Loads `reframe.yaml` -- the editorial policy Stage 6b merges topics by.
+
+        Two blocks: `defaults`, and `products` keyed by slug. Resolution is
+        default-then-override per key, which `reframe.policy_for` does; this method
+        only reads and shapes, so a caller that wants to print the file gets the file.
+
+        A missing file yields the built-in defaults rather than an error. That is the
+        deliberate choice `load_scope` makes and `load_publishing` makes, and it is
+        load-bearing here for a different reason: the defaults are what the reference
+        corpus was measured at, so a fresh checkout reproduces the baseline in
+        requirements §6 without first being configured into it.
+        """
+        if self._reframe_cache is not None:
+            return self._reframe_cache
+
+        loaded: dict[str, Any] = {}
+        if self.reframe_path.exists():
+            with open(self.reframe_path, encoding="utf-8") as f:
+                loaded = yaml.safe_load(f) or {}
+
+        defaults = dict(REFRAME_DEFAULTS)
+        defaults.update(
+            {k: v for k, v in (loaded.get("defaults") or {}).items() if k in REFRAME_DEFAULTS}
+        )
+        self._reframe_cache = {"defaults": defaults, "products": loaded.get("products") or {}}
+        return self._reframe_cache
 
     def publishing_problems(self) -> list[str]:
         """Naming problems that would publish two things into one repository.

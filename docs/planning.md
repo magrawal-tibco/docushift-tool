@@ -920,6 +920,8 @@ The concrete deliverable of §7.1: every deferred "report line" in the three doc
 | `INDEX_UNLINKED`¹⁰ᵇ | note | sync | A published document no `index.md` links to — the reverse of `LINK_BROKEN` | Phase 10b |
 | `WHATS_NEW_PLACEHOLDER`¹¹ᵃ | note | convert | What's New shipped as the unfilled MadCap template (167 of 648 roots); not published | Phase 11a |
 | `OUTPUT_COUNT_MISMATCH`¹³ | warn | convert | Fewer Markdown files on disk than documents converted; two writes landed on one path | Phase 13 |
+| `REFRAME_TOC_SCHEMA_UNKNOWN`²⁰ᵃ | error | reframe | No TOC adapter matches this version's `toc.yml`; refusing to merge a partly-understood tree | `REFRAME-INTEGRATION-PLAN.md` §4 Phase 0 |
+| `REFRAME_LAYOUT_UNPINNED`²⁰ᵃ | warn | reframe | More than one eligible version of this doc set and no pinned layout; versions may not correspond | `REFRAME-REQUIREMENTS.md` R1.4 |
 
 #### 7.6 Cross-version CSH regression
 
@@ -2502,7 +2504,7 @@ One function in one engine (`_admonition`), one line in `inline_override`, one c
 
 ---
 
-### Phase 20: Reframe — A Flare Topic Is Too Small To Maintain — **Planned, 2026-09-23**
+### Phase 20: Reframe — A Flare Topic Is Too Small To Maintain — **20a built, 20b–20e planned, 2026-09-23**
 
 Every phase so far has converted a source tree faithfully. Reframe is the first that deliberately *changes the shape* of what the source said: it merges MadCap Flare's very small topics into fewer, larger pages, turning each former topic into an anchored `##` section, and it does so once, permanently, because Markdown becomes the authoring source the moment the migration lands.
 
@@ -2571,8 +2573,35 @@ Renumbered onto this repository's scheme; the integration plan's Phase 0–4 map
 #### 20.5 What this phase does not claim
 
 - **That Reframe should run on all six EMS versions.** Q2 establishes that it *can* be asked to, which is what makes R1.4 mandatory. Whether the older five are worth merging is a scope decision for 20e, not a mechanical one.
-- **That the 14 `engine=flare` rows are the Flare population.** 2,067 of the 2,103 eligible version rows are `engine=auto` and detect their engine at extract time (`engines/detector.py`). Reframe's real reach is unknown until those run, and sizing it is not a blocker for 20a.
+- **That the 14 `engine=flare` rows are the Flare population.** 1,647 of the 1,683 convert-eligible version rows are `engine=auto` and detect their engine at extract time (`engines/detector.py`). Reframe's real reach is unknown until those run, and sizing it is not a blocker for 20a.
 - **That §8's pre-existing defects have been confirmed here.** The requirements list 31 dangling in-page anchors and title mojibake in the reference corpus. Neither has been measured against the current tree, and Phase 19 changed how at least one engine emits anchors. They are baselined in 20b, before merging, exactly as the risk table says.
+
+#### 20a Contracts and the gate — **Built & verified, 2026-09-23**
+
+`src/docushift/reframe/` — `driver.py` (the gate, currency, build-and-swap), `toc.py` (the adapter seam), `policy.py` (per-product resolution and the currency digest) — plus `config/reframe.yaml`, `ConfigManager.reframed_path` / `load_reframe`, and a `reframe` command sitting between `convert` and `sync`.
+
+**The register gains a sixth stage.** `Stage.REFRAME` is declared between `CONVERT` and `SYNC`, which is what puts the section in pipeline order in `report` (`_STAGE_RANK` reads declaration order). Two codes, taking the register **44 → 46**, and deliberately only two: 20a merges nothing, so the only things it can report are the two ways it refuses to guess. The codes the merge itself owes — an oversized page, a collided anchor, a queued review — are not registered ahead of the checks that emit them, which is what `test_every_registered_code_is_written_down_somewhere_in_src` exists to prevent.
+
+| decision | what was built | why not the obvious alternative |
+|---|---|---|
+| **Output location** | A sibling `reframed/` tree, never a rewrite of `output/` | C4. Boundary rules get tuned repeatedly and each pass needs a clean input; an in-place merge makes every tuning pass a restore from git, and makes the irreversibility the plan calls its first risk start one phase earlier than it has to. |
+| **Engine gate** | First statement in `reframe_one`, before any path is computed | C2. `--input` is the invocation the selection cannot filter, and it is exactly where a wrong-doc-set run happens. |
+| **Unrecognised `toc.yml`** | `REFRAME_TOC_SCHEMA_UNKNOWN`, **error**, version fails, nothing swapped | A half-parsed tree does not merge badly — it merges into a plausible page count with one branch silently missing. A configured schema that is not registered also fails rather than falling back to detection, for the same reason. |
+| **Currency key** | `reframe_source_checksum` (the upstream `convert_source_checksum`) **and** `reframe_policy_key` (a digest of the resolved policy) | Keying on the input alone is convert's `convert_api_prefix` lesson. Here it would be the common case, not a corner: a tuned `reframe.yaml` would leave every tree reporting `current` and the tuning loop would silently be a no-op. |
+| **Swap budget** | 8 attempts over ~9s, not `swap`'s default 5 over ~1s | Measured, not guessed — see below. |
+| **Non-Flare rows** | Counted, never named | 1,669 of 1,683. The opposite call to `convert`'s `ENGINE_UNKNOWN`, which is rare and is a to-do. `NO_OUTPUT` is still named: it means somebody expected a merge. |
+
+**Two things the first real run found.**
+
+The swap failed on EMS 10.5.1 with `PermissionError: [WinError 5]` and left the `.part` tree standing — then succeeded on a manual retry seconds later. `swap`'s 1-second budget is calibrated against `convert`, which writes its files one at a time over minutes; this stage hands the scanner 1,441 files in a burst and immediately asks to rename the directory out from under it. Widened at the call site rather than in `utils/swap.py`, so the other callers' genuine failures stay fast. Three consecutive `--force` runs then passed.
+
+The six DataSynapse Flare versions have **no `convert_source_checksum` recorded at all**, so they can never report `current` and are re-copied on every run. This is inherited behaviour, not a defect introduced here — `convert` applies the same rule — and the rule is the safe direction: no recorded provenance, no currency claim. Pinned by `test_a_version_with_no_recorded_conversion_is_never_current` so it is specified rather than accidental.
+
+**R1.4 decided, not deferred.** The first full run raised `REFRAME_LAYOUT_UNPINNED` five times across two products. All three multi-version Flare sets are now pinned to their newest eligible version in `config/reframe.yaml` — EMS `10.5.1`, gridserver-manager `7.2.0`, hpc-cloud-adapter `2.2.0` — which is the version `iter_versions` yields first and the one a fix gets written against. The other three Flare products have one eligible version each and are left unpinned; the code will name them if a second arrives. The risk table calls this "cheap now and impossible later", and it cost one config block.
+
+**Verification.** `reframe --all` over the full catalog: **6 reframed, 8 already current, 1,669 not Flare, 0 no-output, 0 failed, 0 findings.** EMS 10.5.1 passes through **byte-identical — all 1,476 files, SHA-256 per file, zero differences** — and reads **1,441 topics** out of `toc.yml`, matching the corpus measurement in 20.2 exactly. The input tree is unmodified on bytes and mtimes. A second run with no `--force` reports `current`; a `max_words` edit invalidates it. **1,373 tests pass** (25 new in `tests/unit/test_reframe.py`), `ruff` clean.
+
+**What 20a does not do.** It merges nothing. `pages` equals the `.md` files copied, which is why the report reads `1441 topic(s) -> 1441 page(s)`; the number only becomes meaningful when 20b writes merged pages. No anchors are emitted, no TOC is regenerated, no redirects are written, and `review-queue.csv` does not exist yet. The `reframed/` tree is currently a copy, and that is the baseline 20b diffs against.
 
 ---
 

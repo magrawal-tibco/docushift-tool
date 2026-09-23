@@ -85,8 +85,18 @@ def test_the_register_carries_every_row_of_7_5() -> None:
     emitted live links into it on that basis, and then did not write it. It exists
     because the absence of such a row is what let 152 `ANCHOR_MISSING` reach a
     published tree -- the promise and the output had no place to be compared.
+
+    Phase 20a adds the 45th and 46th and opens the register's **sixth stage**,
+    `reframe`. Two codes for a whole new stage is the point: the sub-phase builds
+    the gate and the seams and merges nothing, so the only things it can report are
+    the two ways it refuses to guess -- a `toc.yml` shape no adapter claims, and a
+    doc set with six eligible versions and no layout pinned. The codes the merge
+    itself owes (an oversized page, a collided anchor, a queued review) are not
+    registered here, because a code registered before the check that emits it is
+    exactly what `test_every_registered_code_is_written_down_somewhere_in_src`
+    exists to refuse.
     """
-    assert len(REGISTRY) == 44
+    assert len(REGISTRY) == 46
 
 
 def test_severity_comes_from_the_registry_and_not_from_the_call_site() -> None:

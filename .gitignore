@@ -2,6 +2,7 @@
 cache/
 families/
 output/
+reframed/
 *.db
 *.db-journal
 

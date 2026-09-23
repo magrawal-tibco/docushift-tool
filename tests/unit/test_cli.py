@@ -87,6 +87,7 @@ def test_help_lists_the_pipeline_commands(runner: CliRunner) -> None:
         "download",
         "extract",
         "convert",
+        "reframe",
         "sync",
         "validate",
         "status",
@@ -112,7 +113,10 @@ def test_archive_help_lists_subcommands(runner: CliRunner) -> None:
         assert command in result.output
 
 
-@pytest.mark.parametrize("command", ["download", "extract", "convert", "sync", "catalog list", "catalog fetch"])
+@pytest.mark.parametrize(
+    "command",
+    ["download", "extract", "convert", "reframe", "sync", "catalog list", "catalog fetch"],
+)
 def test_batch_is_a_selector_on_every_stage(runner: CliRunner, command: str) -> None:
     """A POC scope must be expressible on every command that walks the catalog."""
     result = runner.invoke(main, [*command.split(), "--help"])
