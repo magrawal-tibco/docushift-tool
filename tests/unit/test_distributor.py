@@ -1031,3 +1031,176 @@ def test_the_documents_doc_classes_are_untouched_by_the_choice(
 
     assert [r.outcome for r in results] == [SyncOutcome.SYNCED]
     assert not any(r.merged for r in results)
+
+
+# -- the published redirect map (Phase 20d.1) -------------------------------------
+#
+# The transform is one line; the tests are about the assembly, because that is
+# where the drop-down's bug lives and a 301 map has the same one. A scoped run
+# that publishes a map for the version it touched and drops the other five is the
+# failure mode, and it reports success.
+
+REDIRECT_MAP = "redirects.yml"
+MERGED = "redirects:\n- from: users-guide/old.md\n  to: users-guide/new.md#old\n  status: 301\n"
+
+
+def published_map(target: Path, product: Product) -> dict:
+    path = target / TREE / "en-us" / product.slug / ONLINE_HELP / REDIRECT_MAP
+    return yaml.safe_load(path.read_text(encoding="utf-8"))
+
+
+def merged_version(config: ConfigManager, catalog, product: Product, number: str,
+                   body: str = MERGED) -> None:
+    """A version set up to publish merged, with a redirect map of its own."""
+    convert_output(config, product, number)
+    reframe_output(config, product, number, **{REDIRECT_MAP: body, "users-guide/new.md": "# new\n"})
+    current(catalog, product.slug, number)
+
+
+def test_the_published_map_carries_tree_rooted_urls_for_every_merged_version(
+    config, catalog, distributor, product, target
+) -> None:
+    """Both sides transform, and both take the same prefix -- `from` is the
+    pre-merge published path of a topic that lived in the same version folder."""
+    opt_in(config, product.slug)
+    for number in ("10.4.0", "10.3.1"):
+        merged_version(config, catalog, product, number)
+
+    distributor.sync_many([(product, v) for v in product.versions.values()], target)
+
+    rows = published_map(target, product)["redirects"]
+    assert [row["from"] for row in rows] == [
+        f"{TREE}/en-us/tibco-ems/online-help/10-3-1/users-guide/old.md",
+        f"{TREE}/en-us/tibco-ems/online-help/10-4-0/users-guide/old.md",
+    ]
+    assert rows[0]["to"] == f"{TREE}/en-us/tibco-ems/online-help/10-3-1/users-guide/new.md#old"
+    assert all(row["status"] == 301 for row in rows)
+
+
+def test_no_row_carries_a_host_while_publish_base_url_is_empty(
+    config, catalog, distributor, product, target
+) -> None:
+    """The shipped state and a deliberate one (6e): the path is the part this tool
+    can derive, and a map missing only its prefix is a search-and-replace away."""
+    opt_in(config, product.slug)
+    merged_version(config, catalog, product, "10.4.0")
+
+    distributor.sync_many([(product, product.versions["10.4.0"])], target)
+
+    rows = published_map(target, product)["redirects"]
+    assert rows and not any("://" in row["to"] for row in rows)
+    assert all(row["to"].startswith(TREE) for row in rows)
+
+
+def test_a_configured_base_prefixes_every_row(
+    config, catalog, distributor, product, target
+) -> None:
+    (config.config_dir / "publishing.yaml").write_text(
+        'publish_base_url: "https://docs.example.com/"\n', encoding="utf-8"
+    )
+    opt_in(config, product.slug)
+    merged_version(config, catalog, product, "10.4.0")
+
+    distributor.sync_many([(product, product.versions["10.4.0"])], target)
+
+    rows = published_map(target, product)["redirects"]
+    assert rows[0]["from"] == (
+        f"https://docs.example.com/{TREE}/en-us/tibco-ems/online-help/10-4-0/users-guide/old.md"
+    )
+
+
+def test_a_scoped_run_leaves_the_other_versions_redirects_in_place(
+    config, catalog, distributor, product, target
+) -> None:
+    """The bug this file exists for, in its 301 form. `sync --version 10.4.0`
+    touches one folder out of six; a map assembled from the run's write list would
+    publish redirects for that one and 404 the rest -- and report success."""
+    opt_in(config, product.slug)
+    for number in ("10.4.0", "10.3.1"):
+        merged_version(config, catalog, product, number)
+    distributor.sync_many([(product, v) for v in product.versions.values()], target)
+
+    distributor.sync_many([(product, product.versions["10.4.0"])], target)
+
+    segments = {row["from"].split("/")[4] for row in published_map(target, product)["redirects"]}
+    assert segments == {"10-4-0", "10-3-1"}
+
+
+def test_a_hand_added_redirect_survives_a_resync(
+    config, catalog, distributor, product, target
+) -> None:
+    """`version.yml`'s rule, for its reason. A stale row is a wart `validate` can
+    name; a deleted one is a URL that 404s with no record that it ever worked."""
+    opt_in(config, product.slug)
+    merged_version(config, catalog, product, "10.4.0")
+    distributor.sync_many([(product, product.versions["10.4.0"])], target)
+    path = target / TREE / "en-us" / product.slug / ONLINE_HELP / REDIRECT_MAP
+    document = yaml.safe_load(path.read_text(encoding="utf-8"))
+    document["redirects"].append({"from": "legacy/ems.html", "to": "https://elsewhere/", "status": 302})
+    path.write_text(yaml.safe_dump(document, sort_keys=False), encoding="utf-8")
+
+    distributor.sync_many([(product, product.versions["10.4.0"])], target)
+
+    rows = published_map(target, product)["redirects"]
+    assert {"from": "legacy/ems.html", "to": "https://elsewhere/", "status": 302} in rows
+    assert len(rows) == 2
+
+
+def test_a_product_that_publishes_nothing_merged_gets_no_map_at_all(
+    config, distributor, product, target
+) -> None:
+    """Writing every product an empty map would put a 301 file into seventeen
+    trees with no redirects to serve. Absence is the honest answer."""
+    convert_output(config, product, "10.4.0")
+
+    distributor.sync_many([(product, product.versions["10.4.0"])], target)
+
+    assert (target / TREE / "en-us" / product.slug / ONLINE_HELP / "version.yml").is_file()
+    assert not (target / TREE / "en-us" / product.slug / ONLINE_HELP / REDIRECT_MAP).exists()
+
+
+def test_an_unparseable_published_map_is_left_alone_and_named(
+    config, catalog, distributor, product, target
+) -> None:
+    opt_in(config, product.slug)
+    merged_version(config, catalog, product, "10.4.0")
+    folder = target / TREE / "en-us" / product.slug / ONLINE_HELP
+    folder.mkdir(parents=True, exist_ok=True)
+    (folder / REDIRECT_MAP).write_text("redirects: not-a-list\n", encoding="utf-8")
+
+    stats = distributor.sync_many([(product, product.versions["10.4.0"])], target)
+
+    assert (folder / REDIRECT_MAP).read_text(encoding="utf-8") == "redirects: not-a-list\n"
+    assert any(REDIRECT_MAP in entry for entry in stats.unparsed)
+    assert stats.redirect_maps == 0
+
+
+def test_the_pdf_doc_classes_get_no_redirect_map(
+    config, catalog, distributor, product, target
+) -> None:
+    """`online-help` is the only doc-class Reframe produces, and a PDF has no topic
+    that moved."""
+    opt_in(config, product.slug)
+    merged_version(config, catalog, product, "10.4.0")
+    extract_tree(config, product, "10.4.0", **{"doc/guide.pdf": "%PDF-1.4\n"})
+
+    distributor.sync_many([(product, product.versions["10.4.0"])], target)
+
+    root = target / TREE / "en-us" / product.slug
+    written = sorted(p.parent.name for p in root.rglob(REDIRECT_MAP))
+    assert written == ["10-4-0", ONLINE_HELP]
+
+
+def test_the_per_version_map_is_published_unchanged_beside_it(
+    config, catalog, distributor, product, target
+) -> None:
+    """Two files, two jobs. The version-root map stays relative -- it is Reframe's
+    record, it is what `validate` resolves against the folder it sits in, and
+    rewriting it in place would break the copy's own currency check."""
+    opt_in(config, product.slug)
+    merged_version(config, catalog, product, "10.4.0")
+
+    distributor.sync_many([(product, product.versions["10.4.0"])], target)
+
+    inner = target / TREE / "en-us" / product.slug / ONLINE_HELP / "10-4-0" / REDIRECT_MAP
+    assert inner.read_text(encoding="utf-8") == MERGED

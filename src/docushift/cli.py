@@ -1518,6 +1518,16 @@ def _report_sync(stats, findings) -> None:
     merged = sorted({r.slug for r in stats.results if r.merged and r.outcome is SyncOutcome.SYNCED})
     if merged:
         console.print(f"[dim]Published merged (Stage 6b): {', '.join(merged)}.[/dim]")
+    # 20d.1. Said here rather than raised as a finding: an empty `publish_base_url`
+    # is the expected shipped state, so a warning on every correct run would train
+    # people to skip it. The count is what makes the search-and-replace tractable.
+    if stats.redirect_maps:
+        where = f"under {stats.redirect_base}" if stats.redirect_base \
+            else "tree-rooted (no publish_base_url set)"
+        console.print(
+            f"[dim]{stats.redirect_rows} redirect(s) in {stats.redirect_maps} "
+            f"redirects.yml, {where}.[/dim]"
+        )
 
     # Named individually rather than counted, the rule `convert` follows: these are
     # exactly the rows somebody has to look at.

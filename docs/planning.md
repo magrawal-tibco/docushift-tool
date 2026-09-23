@@ -2510,7 +2510,7 @@ One function in one engine (`_admonition`), one line in `inline_override`, one c
 
 ---
 
-### Phase 20: Reframe — A Flare Topic Is Too Small To Maintain — **20a–20d built, 20e planned, 2026-09-24**
+### Phase 20: Reframe — A Flare Topic Is Too Small To Maintain — **20a–20d.1 built, 20e planned, 2026-09-24**
 
 Every phase so far has converted a source tree faithfully. Reframe is the first that deliberately *changes the shape* of what the source said: it merges MadCap Flare's very small topics into fewer, larger pages, turning each former topic into an anchored `##` section, and it does so once, permanently, because Markdown becomes the authoring source the moment the migration lands.
 
@@ -2785,7 +2785,75 @@ Every row of the plan above was built as written. Three files carry it: `reframe
 
 Suite `1,449 passed, 2 skipped` (+18); `ruff` clean on `src`/`tests`.
 
-**What 20d does not do.** No redirect path is rewritten into a published URL — see above, that belongs to the platform and needs an answer before 20e publishes anything. `sync` still has exactly one thing to say about Reframe, `_source`; nothing downstream branches on which tree it was handed. And no writer has signed anything off, which is 20e.
+**What 20d does not do.** No redirect path is rewritten into a published URL — see above, that belongs to the platform and needs an answer before 20e publishes anything. *(That premise was wrong and 20d.1 below corrects it: only the host belongs to the platform, and `published_url` settled what to do about a missing host in 6e.)* `sync` still has exactly one thing to say about Reframe, `_source`; nothing downstream branches on which tree it was handed. And no writer has signed anything off, which is 20e.
+
+#### 20d.1 The published redirect map — **Planned, 2026-09-24**
+
+20d shipped `redirects.yml` as written: `users-guide/foo.md → users-guide/bar.md#foo`, relative to the version root. I recorded that turning those into served URLs was blocked on the publishing platform. **That was wrong, and the codebase already says so.** `apirefs.published_url` solved this exact problem in 6e and wrote the answer into its docstring:
+
+> An empty `base` yields the tree-rooted path with no scheme and no host. That is the shipped state and a deliberate choice: the path is the part this tool can derive, a link missing only its prefix is fixable by search-and-replace when the AEM host is known, and a link that was never emitted is not recoverable at all.
+
+The host is unknown; **the path is not**, and the path is the part with the information in it. `publish_base_url` has been empty and supported since Phase 3.8, `sync` already composes cross-tree API links this way, and `catalog validate` already refuses a non-absolute base. So the transform is the one `published_url` performs, against `online-help` instead of `api-references`:
+
+```
+users-guide/bar.md#foo
+  -> {base}/{tree}/{locale}/{slug}/online-help/{segment}/users-guide/bar.md#foo
+  -> en-us-tib-ems-userdocs/en-us/tibco-enterprise-message-service/online-help/10-5-1/users-guide/bar.md#foo
+     (the shipped state, base empty)
+```
+
+Both sides transform identically: `from` is the *pre-merge* published path of a topic that was in the same version folder, so it takes the same prefix.
+
+##### Where it goes, and why not in the version folder
+
+**A 301 map is consumed per site, not per version folder.** Rewriting the copied `redirects.yml` in place fails on its own terms and on a mechanical one:
+
+- The mechanical one: `_identical` compares the published folder against its source file by file (`filecmp.cmp`, shallow). A file rewritten after the copy never matches its source, so **every version would re-copy on every run** and `CURRENT` would stop existing for merged products.
+- The one that matters: a redirect map scoped to one version folder is not something a platform can serve. It needs every version's entries in one place, and it needs them to survive `sync --version 10.5.1`, which touches one folder out of six.
+
+So it is written where `version.yml` is written and assembled the way `version.yml` is assembled — `{target}/{tree}/{locale}/{slug}/online-help/redirects.yml`, built by `finish_product` **from the doc-class directory after the copy**, not from the run's write list. That rule exists because a scoped run would otherwise rewrite a 38-entry drop-down down to one and report success; a redirect map has exactly the same hazard and exactly the same fix.
+
+The per-version `redirects.yml` stays where it is. The two files have different jobs and the split is the same one `version.yml` makes against the version folders beside it: the version-root file is Reframe's **record** — relative, auditable, byte-identical across runs, and what `validate._check_redirects` resolves against the folder it sits in — and the doc-class file is the **published map**, which is cross-version and not resolvable that way.
+
+##### Decisions
+
+| decision | what gets built | why not the obvious alternative |
+|---|---|---|
+| **The transform** | One function in a new `sync/redirects.py`, mirroring `apirefs.published_url`: prefix, percent-encode the path, leave the fragment alone. Empty base yields the tree-rooted path. | Not a second composition of the same five segments. If the folder `sync` writes and the URL it emits are derived separately they disagree by a dashed segment, which is the bug `url_map`'s docstring records from `tps/6.0.0`. |
+| **`.md` is kept** | The published path keeps the extension the published file has | The tool does not know whether AEM serves `page.md` or `page`. Every relative link inside every published page, and every `toc.yml` path, already carries `.md` — a redirect map that guessed differently would be the only artifact in the tree that disagreed with the others, and would be wrong in a way search-and-replace could not distinguish from correct. |
+| **Assembly from the directory** | Every version folder under the doc-class that carries a `redirects.yml` contributes; versions this run did not touch keep their entries | `version.yml`'s first rule, for its reason. A scoped re-sync that silently dropped five versions' redirects would report success. |
+| **Hand-added rows are carried through** | DocuShift owns an entry whose `from` sits under a version segment present on disk; anything else is copied verbatim in its original position. A file that will not parse is left alone and named. | `version.yml`'s second rule, and the same asymmetry: a stale row is a visible wart `validate` can name, and a deleted row is somebody's only copy. |
+| **No new finding code for the empty base** | The run report names it once, beside the existing `Published merged (Stage 6b):` line | `PUBLISH_BASE_URL_UNSET` is registered against a different artifact and widening a registered code's meaning is worse than not having one. This is a property of the whole run, not of a product, and the shipped state is *expected* — a warning that fires on every run of a correctly configured tool stops being read, which is the argument 20a and 20c both made. |
+| **`validate` checks it** | New doc-class-level check beside `check_dropdown`: every `to` resolves to a file under the target. `LINK_BROKEN`, the code `toc.yml` and the per-version map already use. | These are the entries actually served. The per-version check resolves relative paths against one folder; this one resolves tree-rooted paths against the target root, the resolution `links.py` already performs for every tree-rooted reference it counts (`links.py:194-203`). |
+| **Register unchanged at 52** | No new codes | Every condition here is one of the three that already exist. |
+
+*Exit: EMS 10.5.1 publishes and its doc-class `redirects.yml` carries 1,441 tree-rooted entries; a scoped re-sync of one version leaves the others' entries intact; a hand-added row survives; `validate` resolves every entry and reports nothing new; the per-version maps and the merged trees are byte-identical to 20d's.*
+
+#### 20d.1 The published redirect map — **Built & verified, 2026-09-24**
+
+Built as planned. One new module, `sync/redirects.py`, three call sites: `finish_product` writes the map, `cli._report_sync` names the base it was rendered against, `validation.artifacts.check_redirect_map` resolves it. **Register unchanged at 52** — every condition here is `LINK_BROKEN` or `ARTIFACT_UNPARSED`, both already registered against the same conditions in the same words.
+
+**Verified on the corpus.** EMS opted in and synced to a scratch target, all six merged versions:
+
+| | |
+|---|---|
+| the map | **8,639 rows** — 10-4-0: 1,457, 10-4-1: 1,442, 10-4-3: 1,429, 10-4-4: 1,429, 10-5-0: 1,441, 10-5-1: 1,441 |
+| shape | every row tree-rooted (**0 carry a host**), every `to` ends `.md`, every `to` carries a fragment, sorted by `from`, `status: 301` throughout |
+| `validate` | 768 files, 17,213 references, **0 errors** — all 8,639 published redirects resolve to a file the target holds |
+| the check has teeth | one dangling row injected by hand → **1 error**, named with its `from`, its `to` and the folder |
+| the scoped run | `sync --version 10.5.1` re-ran against the six-version map and produced a **byte-identical file**, all six segments intact. This is the bug the assembly rule exists for and it is the only one worth measuring here. |
+| the hand-added row | a `legacy/ems-help.html → https://docs.example.com/ems` row added by hand survived a full re-sync in its own position; 8,640 rows out, 8,639 regenerated |
+| currency | the re-sync after all of it reported **31 of 31 rows `Already current`** |
+
+That last row is the one the placement decision turns on. Rewriting `redirects.yml` inside the copied version folder would have left it differing from its source, `_identical`'s shallow `filecmp` would have reported it stale, and **every merged version would have re-copied on every run** with `CURRENT` no longer reachable. The doc-class file is written beside `version.yml`, after the copies, and never touches a byte the copy placed: `reframed/…/10.5.1/redirects.yml` and the published `online-help/10-5-1/redirects.yml` are byte-identical.
+
+**Two files, and the duplication is the point.** The version-root map is Reframe's record — relative, resolved by `_check_redirects` against the folder it sits in, byte-identical across runs. The doc-class map is the served 301 map — cross-version, prefixed, and not resolvable relative to anything. `validate` checks both and they do not overlap: the published map checks that every `to` names a file the target holds, and anchors are left to the per-version check, which has the folder index to check them against. Two checkers reporting one dangling anchor twice would make `report --code ANCHOR_MISSING` a count of how many views of the map exist.
+
+**`relative_path` resolves a row whether or not it carries a host**, which is what let the validator stay ignorant of the config. `validate` takes no `ConfigManager` (§7.1) and so cannot know what `publish_base_url` was when the map was rendered — but it does not need to, because the tree name is the first path segment either way. A row that does not start at a published tree is somebody else's and is not resolved, the rule the page checker already applies to an absolute link.
+
+The empty-base note goes in the run report (`8639 redirect(s) in 1 redirects.yml, tree-rooted (no publish_base_url set)`) and not into the register, because an empty base is the expected shipped state and a warning that fires on every correct run stops being read.
+
+Suite `1,465 passed, 2 skipped` (+16); `ruff` clean on `src`/`tests`. `config/reframe.yaml` still opts nobody in.
 
 ---
 
@@ -2802,3 +2870,4 @@ Suite `1,449 passed, 2 skipped` (+18); `ruff` clean on `src`/`tests`.
 - **Reporting Completeness**: Every finding code emitted anywhere in the tool is present in the §7.5 registry, and every registered code is reachable from at least one code path. This is the test that keeps a promise made in prose three phases earlier from evaporating — the register is only worth having if it cannot silently fall out of step with the code.
 - **Exit-code Discipline**: `validate` exits non-zero if and only if the run recorded at least one `error`. A stage command exits non-zero when it did no work, and zero when it did its work and found problems — the two are different conditions and must not be conflated.
 - **Version Drop-down Integrity**: Every `path` in a `version.yml` resolves to a sibling directory that sync actually wrote, and every version folder in that doc-class has exactly one entry — the file and the folders beside it are two views of one list, so neither can carry what the other lacks. Ordering is numeric-descending, so `10.4.0` precedes `9.3.0`. A hand-added entry survives a re-sync.
+- **Redirect Map Integrity**: Every `to` in a published `redirects.yml` resolves to a file the target actually holds — these are the entries a reader is 301'd through, so a dangling one is an error. The map carries every merged version under its doc-class, not only the ones the run touched: a scoped `--version` re-sync leaves the other versions' redirects byte-identical. A hand-added redirect survives a re-sync. Paths are the served ones; an empty `publish_base_url` makes them tree-rooted rather than absent, because a map missing only its prefix is recoverable and a map never emitted is not.

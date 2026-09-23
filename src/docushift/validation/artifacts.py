@@ -37,6 +37,7 @@ import yaml
 
 from docushift.reporting.findings import Finding
 from docushift.sync import API_REFERENCES, ARCHIVES, DOCUMENT_DOC_CLASSES
+from docushift.sync import redirects as redirect_map
 from docushift.sync import versions as version_file
 from docushift.sync.distributor import STAGING_SUFFIX
 from docushift.transforms import links as refs
@@ -395,6 +396,49 @@ def check_dropdown(product: ProductFolder, doc_class: Path) -> list[Finding]:
             "DROPDOWN_INCONSISTENT", slug=product.slug, path=where,
             message=f"rows are not newest-first: {', '.join(numeric)}",
         ))
+    return findings
+
+
+def check_redirect_map(product: ProductFolder, doc_class: Path, target: Path,
+                       trees: set[str]) -> list[Finding]:
+    """`{slug}/{doc-class}/redirects.yml` -- the published 301 map (20d.1).
+
+    One question, and it is the only one this file can be asked here: does every
+    `to` name a file the target actually holds. These are the entries a reader is
+    301'd through, so a dangling one is `LINK_BROKEN` and an error, the same code
+    and the same severity the per-version map and `toc.yml` already use.
+
+    Anchors are not checked here and are checked by the per-version map, which has
+    the folder index to check them against. Two checkers reporting one dangling
+    anchor twice would make `report --code ANCHOR_MISSING` a count of how many
+    views of the map exist rather than of how many anchors are missing.
+
+    A row whose `to` does not start at a published tree is not resolved: it is a
+    hand-added redirect out of this target, which `sync` carries through verbatim
+    precisely so that nothing here has to adjudicate it.
+    """
+    path = doc_class / redirect_map.REDIRECTS
+    if not path.is_file():
+        return []
+    where = (product.relative / doc_class.name / redirect_map.REDIRECTS).as_posix()
+    try:
+        text = path.read_text(encoding="utf-8")
+    except OSError:  # pragma: no cover
+        return []
+    rows = redirect_map.parse(text)
+    if rows is None:
+        return [Finding("ARTIFACT_UNPARSED", slug=product.slug, path=where,
+                        message="is not the redirects.yml contract; sync leaves it alone")]
+
+    findings: list[Finding] = []
+    for row in rows:
+        to = str(row.get("to", ""))
+        resolved = redirect_map.relative_path(to, trees)
+        if resolved is not None and not (target / resolved).exists():
+            findings.append(Finding(
+                "LINK_BROKEN", slug=product.slug, path=where,
+                message=f"{row.get('from', '')} redirects to {to}, which this target does not hold",
+            ))
     return findings
 
 

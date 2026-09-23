@@ -871,6 +871,47 @@ target only in case, which is a necessary redirect on a case-sensitive host and 
 a case-insensitive one. Which of those you have is a question about your host, so the tool
 names them and leaves the call to you.
 
+#### The published redirect map
+
+The `redirects.yml` inside a version folder uses paths relative to that folder — it is the
+record of what moved where, and it is what the check above resolves. What a web server needs
+is a different file, and `sync` writes it one level up, beside `version.yml`:
+
+```
+en-us-tib-ems-userdocs/en-us/tibco-enterprise-message-service/online-help/
+├── redirects.yml          ← every merged version's redirects, as served URLs
+├── version.yml
+├── 10-5-1/
+│   └── redirects.yml      ← this version's, relative to this folder
+└── 10-5-0/…
+```
+
+It carries **every** merged version under that doc-class, rebuilt from the folders on disk
+rather than from what the run happened to touch — so `sync --version 10.5.1` leaves the other
+five versions' redirects exactly as they were. Rows you add by hand are kept where you put
+them; `sync` only rewrites rows whose source sits under a version folder it published.
+
+The paths are the URLs the pages are served at, minus the host:
+
+```yaml
+- from: en-us-tib-ems-userdocs/en-us/tibco-enterprise-message-service/online-help/10-5-1/users-guide/old.md
+  to: en-us-tib-ems-userdocs/en-us/tibco-enterprise-message-service/online-help/10-5-1/users-guide/new.md#old
+  status: 301
+```
+
+Set `publish_base_url` in `config/publishing.yaml` and every row is prefixed with it. Leave it
+empty — the shipped state, because the AEM host is not known yet — and the rows come out
+tree-rooted, as above. That is deliberate: a map missing only its prefix is one
+search-and-replace away from correct, and a map that was never written is not recoverable at
+all. The run report tells you which you got:
+
+```
+8639 redirect(s) in 1 redirects.yml, tree-rooted (no publish_base_url set).
+```
+
+`validate` resolves every `to` in it against the published tree, host or no host, and a row
+naming a file that is not there is a `LINK_BROKEN` error.
+
 ### AEM Synthesis & Publishing Layout
 ```bash
 # Organize converted AEM files into repo-shaped folders on disk

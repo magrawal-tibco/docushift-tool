@@ -70,6 +70,7 @@ from docushift.reporting.findings import FindingsRun
 from docushift.sync import apirefs, router
 from docushift.sync import archives as archive_index
 from docushift.sync import documents as document_index
+from docushift.sync import redirects as redirect_map
 from docushift.sync import versions as version_file
 from docushift.utils.longpath import PUBLISHED_PATH_LIMIT, long_path, over_limit
 from docushift.utils.slug import is_numeric_version, slugify, version_segment
@@ -145,6 +146,14 @@ class SyncStats:
     # touches one version and still rewrites the whole drop-down.
     products: int = 0
     dropdowns: int = 0
+    # Doc-class `redirects.yml` maps written, and the rows they carry. Zero on a
+    # run where no product publishes merged, which is every run until a writer
+    # signs one off (20d.1).
+    redirect_maps: int = 0
+    redirect_rows: int = 0
+    # The `publish_base_url` those rows were rendered against, so the report can
+    # say whether they carry a host without re-reading the config.
+    redirect_base: str = ""
     # `version.yml` files left alone because they would not parse. Named in the
     # report; the file is not touched.
     unparsed: list[str] = field(default_factory=list)
@@ -728,6 +737,8 @@ class WorkspaceDistributor:
             present = {child.name for child in folder.iterdir() if child.is_dir()}
             everywhere |= present
             self._write_dropdown(folder, present, catalog_versions, templates, stats)
+            if folder.name == ONLINE_HELP:
+                self._write_redirect_map(product, folder, present, stats)
 
         # Once per product over the union, not once per doc-class. A version in
         # three doc-classes is one non-numeric version string, and naming it three
@@ -758,6 +769,44 @@ class WorkspaceDistributor:
         )
         path.write_text(version_file.render(merged, templates), encoding="utf-8")
         stats.dropdowns += 1
+
+    def _write_redirect_map(
+        self, product: Product, folder: Path, present: set[str], stats: SyncStats
+    ) -> None:
+        """The doc-class 301 map, assembled from the merged trees beneath it (20d.1).
+
+        `online-help` only: it is the one doc-class Reframe produces, and a PDF has
+        no topic that moved. Skipped silently when nothing under the folder carries
+        a map and no map is already there -- which is every product that has not
+        opted in to publishing merged, and writing them all an empty file would put
+        a 301 map into 17 trees that have no redirects to serve.
+        """
+        base = self.config.publish_base_url()
+        tree = self.config.docs_tree_name(product.bu, product.family)
+        locale = slugify(self.config.locale)
+        rows, unparsed = redirect_map.generated_rows(
+            folder, present, base, tree, locale, product.slug
+        )
+        stats.unparsed.extend(unparsed)
+
+        path = folder / redirect_map.REDIRECTS
+        if not path.is_file():
+            if not rows:
+                return
+            existing: list[dict[str, Any]] | None = []
+        else:
+            existing = redirect_map.parse(path.read_text(encoding="utf-8"))
+        if existing is None:
+            # Left alone, deliberately. Whatever is in there is the only copy.
+            stats.unparsed.append(str(path))
+            return
+
+        merged = redirect_map.merge(existing, rows, redirect_map.owned_prefixes(
+            present, base, tree, locale, product.slug, folder.name))
+        path.write_text(redirect_map.render(merged), encoding="utf-8")
+        stats.redirect_maps += 1
+        stats.redirect_rows += len(merged)
+        stats.redirect_base = base
 
     def _report_rows(self, product: Product, present: set[str]) -> None:
         """The two registered `sync` findings, raised for the first time here.

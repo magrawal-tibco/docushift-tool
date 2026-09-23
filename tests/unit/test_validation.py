@@ -1525,3 +1525,131 @@ def test_the_resources_tree_is_not_walked_for_a_help_map(
 
     assert result.exit_code == 1
     assert "docs tree" in result.output
+
+
+# -- the published redirect map, one level up (Phase 20d.1) -----------------------
+#
+# The per-version map above is Reframe's record, resolved relative to the folder
+# it sits in. This is the map a reader is actually 301'd through, so it is checked
+# against the whole target -- and it is the file whose `to` can name a version
+# folder other than its own.
+
+
+def map_of(target: Path, doc_class: str = "online-help"):
+    from docushift.validation import artifacts
+    from docushift.validation.tree import tree_names, walk
+
+    entry = walk(target)[0]
+    return artifacts.check_redirect_map(
+        entry, entry.path / doc_class, target, tree_names(target)
+    )
+
+
+def published_map(target: Path, *entries: str, doc_class: str = "online-help") -> None:
+    (target / TREE / "en-us" / SLUG / doc_class / "redirects.yml").write_text(
+        redirects(*entries), encoding="utf-8"
+    )
+
+
+def test_a_published_redirect_resolving_to_a_file_in_the_target_is_clean(
+    tmp_path: Path,
+) -> None:
+    target = tmp_path / "target"
+    publish(target, {"html/new.md": "# New\n"})
+    published_map(
+        target,
+        entry(f"{TREE}/en-us/{SLUG}/online-help/1-0-0/html/old.md",
+              f"{TREE}/en-us/{SLUG}/online-help/1-0-0/html/new.md#old"),
+    )
+
+    assert map_of(target) == []
+
+
+def test_a_published_redirect_to_a_page_the_target_does_not_hold_is_an_error(
+    tmp_path: Path,
+) -> None:
+    """The entry a reader is actually served. `LINK_BROKEN`, the code `toc.yml` and
+    the per-version map already use -- two codes for one condition would make
+    `report --code LINK_BROKEN` miss half the broken links."""
+    target = tmp_path / "target"
+    publish(target, {"html/new.md": "# New\n"})
+    published_map(
+        target,
+        entry(f"{TREE}/en-us/{SLUG}/online-help/1-0-0/html/old.md",
+              f"{TREE}/en-us/{SLUG}/online-help/1-0-0/html/gone.md#old"),
+    )
+
+    findings = map_of(target)
+
+    assert codes(findings) == ["LINK_BROKEN"]
+    assert "which this target does not hold" in findings[0].message
+    assert REGISTRY["LINK_BROKEN"].severity is Severity.ERROR
+
+
+def test_a_redirect_out_of_this_target_is_not_resolved(tmp_path: Path) -> None:
+    """A hand-added row `sync` carried through verbatim precisely so that nothing
+    here has to adjudicate it. Same rule the page checker applies to an absolute
+    link, reached the same way."""
+    target = tmp_path / "target"
+    publish(target, {"html/new.md": "# New\n"})
+    published_map(
+        target,
+        entry("legacy/widget.html", "https://elsewhere.example.com/widget"),
+        entry(f"{TREE}/en-us/{SLUG}/online-help/1-0-0/html/old.md",
+              "en-us-some-other-tree/en-us/other/online-help/1-0-0/a.md"),
+    )
+
+    assert map_of(target) == []
+
+
+def test_a_host_on_the_row_does_not_stop_it_being_resolved(tmp_path: Path) -> None:
+    """`validate` has the target and not the config, so it cannot know what
+    `publish_base_url` was when the map was rendered. It does not need to: the tree
+    name is the first path segment either way."""
+    target = tmp_path / "target"
+    publish(target, {"html/new.md": "# New\n"})
+    published_map(
+        target,
+        entry(f"https://docs.example.com/{TREE}/en-us/{SLUG}/online-help/1-0-0/html/old.md",
+              f"https://docs.example.com/{TREE}/en-us/{SLUG}/online-help/1-0-0/html/gone.md"),
+    )
+
+    assert codes(map_of(target)) == ["LINK_BROKEN"]
+
+
+def test_a_percent_encoded_published_redirect_resolves_to_its_decoded_file(
+    tmp_path: Path,
+) -> None:
+    target = tmp_path / "target"
+    publish(target, {"html/release notes.md": "# Notes\n"})
+    published_map(
+        target,
+        entry(f"{TREE}/en-us/{SLUG}/online-help/1-0-0/html/old.md",
+              f"{TREE}/en-us/{SLUG}/online-help/1-0-0/html/release%20notes.md"),
+    )
+
+    assert map_of(target) == []
+
+
+def test_a_published_map_that_will_not_parse_is_named_and_not_read_further(
+    tmp_path: Path,
+) -> None:
+    target = tmp_path / "target"
+    publish(target, {"html/new.md": "# New\n"})
+    (target / TREE / "en-us" / SLUG / "online-help" / "redirects.yml").write_text(
+        "redirects:\n- to: only-one-key.md\n", encoding="utf-8"
+    )
+
+    findings = map_of(target)
+
+    assert codes(findings) == ["ARTIFACT_UNPARSED"]
+    assert "sync leaves it alone" in findings[0].message
+
+
+def test_a_doc_class_with_no_published_map_reports_nothing(tmp_path: Path) -> None:
+    """Every product that has not opted in to publishing merged, which is all of
+    them. Absence is not a finding."""
+    target = tmp_path / "target"
+    publish(target, {"html/new.md": "# New\n"})
+
+    assert map_of(target) == []
