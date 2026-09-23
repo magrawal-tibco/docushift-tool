@@ -78,8 +78,15 @@ def test_the_register_carries_every_row_of_7_5() -> None:
     for the stated reason: that one has a remedy a user can apply at run time and
     this one has none. A published path over 260 characters cannot be opened by
     anything downstream, including readers outside this tool.
+
+    Phase 19 adds the 44th, `ANCHOR_DROPPED`, and it is the register's first code
+    about the converter disagreeing with *itself*. Every other convert row reports
+    something the source did; this one reports that the engine kept an anchor,
+    emitted live links into it on that basis, and then did not write it. It exists
+    because the absence of such a row is what let 152 `ANCHOR_MISSING` reach a
+    published tree -- the promise and the output had no place to be compared.
     """
-    assert len(REGISTRY) == 43
+    assert len(REGISTRY) == 44
 
 
 def test_severity_comes_from_the_registry_and_not_from_the_call_site() -> None:

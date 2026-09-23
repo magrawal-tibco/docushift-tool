@@ -399,6 +399,32 @@ def test_every_admonition_class_maps_and_the_printed_label_is_deleted(tmp_path: 
     assert "ALERT_LABEL_UNMAPPED" not in body
 
 
+def test_a_title_that_is_not_the_kind_label_is_kept_and_one_that_is_is_not(
+    tmp_path: Path,
+) -> None:
+    """396 of 10,757 titles say something the kind does not (Phase 19).
+
+    `Disclaimer` 120, `Notes` 96, `Third-Party Software` 42, `Caution 1..3` 24.
+    Deleting those loses the only word that said what the box was, and leaves
+    three indistinguishable cautions on a page a cross-reference calls "Caution
+    2". The gate is `callouts.alert_for`, which already folds case and
+    punctuation -- so `Note`, `NOTE` and `Note:` are all the plain label and all
+    still go, and the 10,361 ordinary ones are unchanged.
+    """
+    body = one_page(tmp_path, (
+        '<div class="important"><h3 class="title">Disclaimer</h3><p>As is.</p></div>'
+        '<div class="caution"><h3 class="title">Caution 2</h3><p>Second.</p></div>'
+        '<div class="note"><h3 class="title">Note:</h3><p>Plain.</p></div>'
+        '<div class="warning"><h3 class="title">WARNING</h3><p>Shouty.</p></div>'
+    )).body("authoring/topic.md")
+
+    assert "> [!IMPORTANT]\n> **Disclaimer**\n>\n> As is." in body
+    assert "> [!CAUTION]\n> **Caution 2**\n>\n> Second." in body
+    assert "> [!NOTE]\n> Plain." in body
+    assert "> [!WARNING]\n> Shouty." in body
+    assert "**Note" not in body and "**WARNING**" not in body
+
+
 def test_a_mapped_span_is_unwrapped_before_it_is_wrapped(tmp_path: Path) -> None:
     """3,145 `span.bold` contain a `strong`; `**` around `**` renders `****`."""
     body = one_page(tmp_path, (
@@ -488,6 +514,54 @@ def test_a_bookmark_naming_no_anchor_loses_the_bookmark_and_keeps_the_link(
 
     assert "[it](other.md)" in result.body("authoring/topic.md")
     assert any("anchor absent" in m for m in result.messages("TOPIC_LINK_DANGLING"))
+
+
+def test_an_admonition_keeps_the_anchor_its_title_carried(tmp_path: Path) -> None:
+    """The Phase 19 defect, in the shape the corpus has it in.
+
+    40 of the 8 DocBook trees' 10,757 titled admonitions put the box's only anchor
+    on the `h3.title` -- and §5.6.7 deletes that `h3`, because GFM draws the label
+    itself. The anchor went with it while the page went on advertising it, so the
+    six inbound links per version stayed live and pointed at nothing.
+    """
+    result = one_page(tmp_path, '<p>See <a class="link" href="other.html#mapsUsageNote">it</a>.</p>', {
+        "html/authoring/other.html": page("authoring/other.html", "Other", (
+            titlepage("Other")
+            + '<div class="note"><h3 class="title"><a name="mapsUsageNote"></a>Usage Note</h3>'
+            + "<p>The editor does not support field maps.</p></div>"
+        )),
+    })
+    body = result.body("authoring/other.md")
+
+    # Above the box: block-level HTML, and it cannot perturb the alert's parsing.
+    assert '<a id="mapsUsageNote"></a>\n\n> [!NOTE]' in body
+    assert result.document("authoring/other.md").anchors == {"mapsUsageNote"}
+    assert "[it](other.md#mapsUsageNote)" in result.body("authoring/topic.md")
+    assert "ANCHOR_DROPPED" not in result.codes()
+
+
+def test_a_kept_anchor_the_render_never_wrote_is_reported_and_unadvertised(
+    tmp_path: Path,
+) -> None:
+    """The guard, not the fix -- and the reason the fix was needed two months late.
+
+    `div.toc` is deleted whole (`NAVIGATION_CLASSES`), so an anchor inside one is
+    kept by `_prune_anchors` and then never written. Before Phase 19 the page
+    still claimed it. Now the claim is withdrawn and the disagreement is a
+    finding, so the next handler that deletes a subtree says so at Stage 5 rather
+    than at Stage 7, two commands later.
+    """
+    result = one_page(tmp_path, '<p>See <a class="link" href="other.html#buried">it</a>.</p>', {
+        "html/authoring/other.html": page("authoring/other.html", "Other", (
+            titlepage("Other")
+            + '<div class="toc"><p><a name="buried"></a>Contents</p></div>'
+            + "<p>Prose.</p>"
+        )),
+    })
+
+    assert result.codes()["ANCHOR_DROPPED"] == 1
+    assert any("buried" in m for m in result.messages("ANCHOR_DROPPED"))
+    assert result.document("authoring/other.md").anchors == set()
 
 
 # -- links (§5.6.8) -------------------------------------------------------------

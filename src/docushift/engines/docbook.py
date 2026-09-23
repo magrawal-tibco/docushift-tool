@@ -163,6 +163,11 @@ class DocBookRenderer(markdown.Renderer):
         self.page = page
         self.source = page.source
         self.output = page.output
+        # Every anchor this renderer actually wrote into the body. `_prune_anchors`
+        # decided which ones to keep and the page advertises that set, but keeping
+        # an element is not emitting it -- a handler that deletes its subtree takes
+        # the anchor with it. `_convert` compares the two (§5.6.7).
+        self.emitted_anchors: set[str] = set()
 
     # -- blocks ---------------------------------------------------------------
 
@@ -190,11 +195,44 @@ class DocBookRenderer(markdown.Renderer):
         draws that label itself -- leaving it emits `> [!NOTE]` followed by
         `### Note`. All five kinds map, so `alert_for` never returns None here and
         there is no unmapped-label branch to report from.
+
+        **But the title is not only a label, in 436 of the corpus's 10,757.** It
+        carries the box's anchor (40) and a name that is not the kind (396), and
+        `decompose()` took both. Measured over the 8 DocBook trees: `Disclaimer`
+        120, `Notes` 96, `Third-Party Software` 42, `Caution 1..3` 24. Both are
+        read off the `h3` before it goes.
         """
+        markers: list[str] = []
+        caption = ""
         for title in tag.find_all("h3", class_="title", recursive=False):
+            for anchor in title.find_all("a"):
+                if anchor.get("href"):
+                    continue
+                target = markdown.anchor_target(anchor)
+                if target and target not in self.emitted_anchors:
+                    self.emitted_anchors.add(target)
+                    markers.append(markdown.anchor_marker(target))
+            # Compared against this box's own kind, not through `alert_for`:
+            # that folds *every* non-letter away (`callouts.py:60`), so it reads
+            # `Caution 2` as `caution` and the 24 numbered cautions would be
+            # deleted as plain labels -- on a page that then has three
+            # indistinguishable boxes and a cross-reference naming the second.
+            # Case and a trailing colon are the only variation the corpus has.
+            text = " ".join(markdown.text_of(title).split())
+            if text.rstrip(":.").strip().lower() != name:
+                caption = text
             title.decompose()
+
         kind = callouts.alert_for(name) or callouts.Alert.NOTE
-        return callouts.render(kind, "\n\n".join(self.blocks(tag)))
+        blocks = self.blocks(tag)
+        if caption:
+            blocks.insert(0, markdown.wrap(markdown.escape(caption), "**"))
+        alert = callouts.render(kind, "\n\n".join(blocks))
+        # Above the box, not inside it: an `<a id>` on its own line is block-level
+        # HTML every renderer resolves, and it cannot perturb GFM's alert parsing,
+        # which is sensitive to what follows `> [!NOTE]`. Landing the reader at the
+        # top of the box is also what the DocBook anchor meant.
+        return "\n\n".join([*markers, alert])
 
     def _captioned(self, tag: Tag) -> str:
         """A figure or an example: the caption first, italic, then the content."""
@@ -228,6 +266,7 @@ class DocBookRenderer(markdown.Renderer):
             # A referenced anchor that `_prune_anchors` kept. Emitted as HTML
             # because GFM has no anchor syntax, and as an `id` because that is
             # what a modern renderer resolves a fragment against.
+            self.emitted_anchors.add(str(tag["name"]))
             return f'<a id="{tag["name"]}"></a>'
         if tag.name != "span":
             return None
@@ -540,6 +579,21 @@ class DocBookEngine(BaseEngine):
             # where all 11,689 pages carry at least one, but a page with prose and
             # no `#` is worse than one titled from `<title>` (§5.6.6).
             body = f"# {markdown.escape(page.title)}\n\n{body}".rstrip("\n")
+
+        # `_prune_anchors` kept exactly the anchors something references, and
+        # `_fragment` emits a live bookmark for every one of them -- off
+        # `_Page.anchors`, read from the source in the plan pass, which cannot know
+        # what the render did. So a handler that deletes its subtree takes a kept
+        # anchor with it and the links into it stay, pointing at nothing, silently.
+        # That is how 152 `ANCHOR_MISSING` reached Stage 7 (Phase 19). The kept set
+        # and the written set are compared here, and the `Document` stops
+        # advertising what the body does not contain.
+        lost = emitted - renderer.emitted_anchors
+        if lost:
+            context.record("ANCHOR_DROPPED", path=str(page.output),
+                           message=f"kept but not emitted: {', '.join(sorted(lost))}",
+                           count=len(lost))
+            emitted = emitted - lost
 
         return Document(source=page.source, relative=page.output, title=page.title,
                         body=body, anchors=emitted)
