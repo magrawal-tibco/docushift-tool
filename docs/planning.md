@@ -2502,6 +2502,80 @@ One function in one engine (`_admonition`), one line in `inline_override`, one c
 
 ---
 
+### Phase 20: Reframe — A Flare Topic Is Too Small To Maintain — **Planned, 2026-09-23**
+
+Every phase so far has converted a source tree faithfully. Reframe is the first that deliberately *changes the shape* of what the source said: it merges MadCap Flare's very small topics into fewer, larger pages, turning each former topic into an anchored `##` section, and it does so once, permanently, because Markdown becomes the authoring source the moment the migration lands.
+
+The component arrived specified. `docs/REFRAME-REQUIREMENTS.md` defines R1–R7, five hard constraints and eight acceptance checks; `docs/REFRAME-INTEGRATION-PLAN.md` proposes the phasing. Both are committed verbatim and **neither was written against this codebase** — the plan says so itself (§2) and ends with seven questions for the DocuShift side. This section answers those seven against the code, and records the two places where the specification and this repository disagree.
+
+#### 20.1 The seven questions, answered against the code
+
+| # | Question | Answer |
+|---|---|---|
+| Q1 | How does a stage read the **conversion engine**? | `VersionRow.engine`, a `SourceEngine` enum (`models.py`) carried in the `engine` column of `config/versions.csv` and threaded to converters as `ConversionContext.engine` (`engines/base.py:236`). A stage reads it off the catalog row; nothing needs threading. |
+| Q2 | Can eligibility return **more than one version of the same doc set**? | **Yes, and for the reference product itself.** `tibco-enterprise-message-service` has **6 eligible Flare versions** — 10.4.0, 10.4.1, 10.4.3, 10.4.4, 10.5.0, 10.5.1 — all converted and standing in `output/en-us-tib-ems/`. `_download_selection` (`cli.py:833`) passes `eligible_only=True` and returns every one of them. **R1.4 layout pinning is mandatory, not conditional.** |
+| Q3 | Is there a **manifest/report convention** the four CSVs should match? | Partly, and it cuts both ways — see 20.3. |
+| Q4 | Can a stage **fail the pipeline** on its own validation? | Yes, and there is a two-command idiom: `errors = findings.counts()[Severity.ERROR]`, `findings.finish(exit_code=1 if errors else 0)`, `raise click.exceptions.Exit(1)` (`cli.py:1498` for sync, `cli.py:1581` for validate). Note `convert` deliberately does **not** do this. Reframe follows sync and validate. |
+| Q5 | Where do **per-doc-set configs** live, and is there precedent for editorial policy? | `config/*.yaml`, loaded through `ConfigManager` (`config.py:143`). The precedent is `scope.yaml`: a YAML rule file stating policy, overridable per row by a CSV column, with a `*_source` provenance column deciding who wins. `MAX_WORDS` belongs in exactly that shape. |
+| Q6 | Can a stage **run standalone** against frozen upstream output? | Yes. `convert --input/--output` (`cli.py:1252`) already converts a standalone extracted folder, and `validate --target-dir` walks any synced tree. The plan's assumption holds and the fast iterate loop is available. |
+| Q7 | Which stage owns `toc.yml`/`metadata.yml`, and does anything downstream consume them? | Stage 6a writes both, per version, at `converter/driver.py:423,429`, rendered by `converter/navigation.py` from `NavNode` trees. Downstream, `sync/distributor.py` writes *container-level* files of the same names and never rewrites a version's; `validation/artifacts.py:150` reads the version's `toc.yml` and checks every `path` in it. So Reframe has one producer to coordinate with and one checker that will grade its work. |
+
+There is **no stage-registration abstraction** to hook into. A stage in this tool is a package under `src/docushift/` plus a `@main.command()` in `cli.py` — `downloader/`, `extractor/`, `converter/`, `sync/`, `validation/`. Adding Reframe means adding `reframe/` and a command, not registering with an orchestrator. The integration plan's "recommended integration shape" (§3) therefore lands as written, and the engine gate it asks for in two places (C1/C2) has only one place to live, which makes C2 the operative rule rather than a belt-and-braces one.
+
+#### 20.2 The corpus checks out, and that is not a given
+
+The requirements quote a POC baseline for EMS 10.5.1. Measured against this repository's own Stage 6 output at `output/en-us-tib-ems/tibco-enterprise-message-service/10.5.1`:
+
+| | requirements §6 | measured here |
+|---|---:|---:|
+| topics | 1,441 | **1,441** |
+| median words/topic | ~107 | **107** |
+| total words | 226,517 | **226,871** |
+| guides (top-level TOC items) | 9 | **9** |
+| largest single topic | — | **3,533** |
+
+The POC was run against DocuShift's output, not against some other conversion, so §6's numbers are a genuine regression baseline rather than a figure from a neighbouring tool. The 354-word gap is frontmatter handling and nothing to chase. The largest *topic* is 3,533 words and §6's largest *page* is also 3,533 — the POC's biggest output page was one oversized topic on its own, which is R1.3 already firing once on the reference corpus.
+
+Two further facts the requirements do not mention, both from the measured tree:
+
+- **`toc.yml` carries 1,441 paths and zero fragments today.** Every node points at a whole file. R3 turns most of them into `page.md#anchor`, which is a shape this tool already emits elsewhere — `NavNode.anchor` exists and 12.1% of Flare's *source* TOC entries carry one (`engines/base.py:91`).
+- **Output filename stems are truncated to 20 characters** (`installation-overvie.md`, `integrating-with-thi.md`). R2 slugs anchors from the source filename, so it slugs from these truncated stems. That materially raises the collision rate the "dedup must loop" edge case (§7) was written about, and it is why that rule is not optional here.
+
+#### 20.3 Where the specification and this repository disagree
+
+Two conflicts. Both are cheap now and expensive after Phase 20b.
+
+**1. `## Heading {#anchor}` is not a shape this tool can emit or check.** R2 specifies the Pandoc/kramdown heading-attribute syntax. GFM has no such syntax — the braces render as literal text — and this repository has already answered the question in the opposite direction: `engines/docbook.py:inline_override` emits `<a id="…"></a>` as passthrough HTML with the comment *"GFM has no anchor syntax"*, and Phase 19 extended exactly that mechanism. Worse, Stage 7 would not merely fail to see the anchor, it would see the **wrong** one: `validation/references.anchors()` collects computed heading slugs and `id=`/`name=` attributes only, and `slugify_heading` strips `{`, `#` and `}` as punctuation, so `## Overview {#tibemsd-conf}` registers the anchor `overview-tibemsd-conf` and every R4 link written to `#tibemsd-conf` becomes an `ANCHOR_MISSING`. **R2 is implemented as `markdown.anchor_marker()` above the heading**, which is the house idiom, is already validated, and is what Phase 19 shipped 40 of.
+
+**2. Three of the four CSVs are derived data, and this tool does not publish derived data as CSV.** CSV here means one thing: the human-editable catalog surface, `config/products.csv` and `config/versions.csv`, written through `utils/csvio.py` and governed by `*_source` provenance columns. Derived per-version facts are YAML sidecars in the output tree (`toc.yml`, `metadata.yml`, `csh.yml`); derived *findings* go to the register and `state.db` and are rendered by `reporting/report.py`. So:
+
+| spec artifact | proposed home | why |
+|---|---|---|
+| `manifest/pages.csv` | `reframe.yml` sidecar in the version's output tree | derived, per version, alongside `toc.yml` — the same shape and the same lifecycle |
+| `manifest/topic-mapping.csv` | the same `reframe.yml` | it is the inverse index of the same fact; two files would be two truths |
+| `manifest/redirects.csv` | `redirects.yml` sidecar, and a Stage 7 check | a redirect map is a publishing artifact, and R5's "zero dangling" is a validation question |
+| **`manifest/review-queue.csv`** | **stays CSV, as specified** | it is the one human-editable artifact of the four, and that is precisely what CSV is for in this repository |
+
+This is a change to R6's neighbours, not to R6. The review queue — which the integration plan (§5) correctly identifies as the contract to fix first — keeps its columns and its format.
+
+#### 20.4 Phasing
+
+Renumbered onto this repository's scheme; the integration plan's Phase 0–4 map onto 20a–20e.
+
+- **20a — Contracts and the gate.** `reframe/` package, `docushift reframe` command with the standard `_scope_options`, engine assertion inside the stage (C2), no-op passthrough for non-Flare, the `reframe.yaml` config shape with `MAX_WORDS` and the TOC-schema adapter seam. *Exit: the command runs over the whole catalog, touches nothing that is not Flare, and passes a Flare set through byte-identical.*
+- **20b — Packing.** R1–R5, fence-aware parsing, the three POC defects from requirements §10 left unported, **R1.4 layout pinning pinned to the newest eligible version** (required by Q2), determinism check. Anchors emitted per 20.3(1). *Exit: reproduces §6's baseline on EMS 10.5.1, page count allowed to rise from dropping `MIN_WORDS`.*
+- **20c — Review queue.** R6 and R7.1. On the critical path, not polish: the ~25–30 flagged pages are the only ones a human ever sees, and Phase 20b ships deliberately incomplete without this.
+- **20d — Stage 7 integration.** Teach `validation/` about the redirect map and the merged TOC, so R5 and R6's acceptance checks are enforced by the existing checker rather than by a second one inside Reframe. Wire the exit-code idiom from Q4.
+- **20e — Pilot.** One doc set, queue worked, **explicit writer sign-off before redirects are published.**
+
+#### 20.5 What this phase does not claim
+
+- **That Reframe should run on all six EMS versions.** Q2 establishes that it *can* be asked to, which is what makes R1.4 mandatory. Whether the older five are worth merging is a scope decision for 20e, not a mechanical one.
+- **That the 14 `engine=flare` rows are the Flare population.** 2,067 of the 2,103 eligible version rows are `engine=auto` and detect their engine at extract time (`engines/detector.py`). Reframe's real reach is unknown until those run, and sizing it is not a blocker for 20a.
+- **That §8's pre-existing defects have been confirmed here.** The requirements list 31 dangling in-page anchors and title mojibake in the reference corpus. Neither has been measured against the current tree, and Phase 19 changed how at least one engine emits anchors. They are baselined in 20b, before merging, exactly as the risk table says.
+
+---
+
 ## 2. Validation & Testing Criteria
 - **Catalog Merge Fidelity**: 100% preservation of manual edits and toggle states when fetching updates — *without* requiring the user to have flagged them.
 - **CSV Round-Trip Fidelity**: A load-then-save cycle with no changes produces a byte-identical file (stable sort, fixed columns, normalized booleans/dates). No diff churn on repeat fetches.
