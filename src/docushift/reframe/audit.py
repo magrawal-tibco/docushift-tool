@@ -42,6 +42,7 @@ def audit(
     added: int,
     counts: LinkCounts,
     unnavigated: frozenset[PurePosixPath] = frozenset(),
+    queue: Sequence[dict[str, str]] = (),
 ) -> list[str]:
     """Every §6 check that failed, named. An empty list is a passing merge.
 
@@ -56,6 +57,7 @@ def audit(
     failures.extend(_navigation(pages, located, roots, unnavigated))
     failures.extend(_links(counts))
     failures.extend(_redirects(pages, located))
+    failures.extend(_queue(pages, queue))
     return failures
 
 
@@ -146,6 +148,24 @@ def _links(counts: LinkCounts) -> list[str]:
             f"belong to no page -- the merge broke them"
         ]
     return []
+
+
+def _queue(pages: Sequence[Page], queue: Sequence[dict[str, str]]) -> list[str]:
+    """R6: every queued row names a page that was actually written.
+
+    The same class of bug `_redirects` catches, at the same cost. A writer opening
+    the queue and finding a path that is not there loses the one thing the queue is
+    for -- and would reasonably conclude the whole file is stale.
+    """
+    written = {str(page.path) for page in pages}
+    missing = sorted(row["page_path"] for row in queue if row["page_path"] not in written)
+    if not missing:
+        return []
+    shown = ", ".join(missing[:5])
+    return [
+        f"review queue: {len(missing)} row(s) name a page that was not written "
+        f"({shown}{', ...' if len(missing) > 5 else ''})"
+    ]
 
 
 def _redirects(pages: Sequence[Page], located: dict[PurePosixPath, tuple[Page, str]]) -> list[str]:

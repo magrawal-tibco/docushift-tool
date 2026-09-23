@@ -925,6 +925,7 @@ The concrete deliverable of §7.1: every deferred "report line" in the three doc
 | `REFRAME_SELF_CHECK_FAILED`²⁰ᵇ | error | reframe | A §6 acceptance check failed; the merged tree was discarded rather than swapped in | `REFRAME-REQUIREMENTS.md` §6 |
 | `REFRAME_LINK_UNRESOLVED`²⁰ᵇ | warn | reframe | Relative references pointing outside the converted tree, left as written; present before the merge | `REFRAME-REQUIREMENTS.md` R4, §8 |
 | `REFRAME_TOPIC_UNTOCKED`²⁰ᵇ | warn | reframe | Topics absent from `toc.yml`, carried through unmerged and unreachable from navigation | `REFRAME-REQUIREMENTS.md` R3 |
+| `REFRAME_REVIEW_QUEUED`²⁰ᶜ | note | reframe | Merged pages needing an editorial decision, listed in `review-queue.csv` | `REFRAME-REQUIREMENTS.md` R6 |
 
 #### 7.6 Cross-version CSH regression
 
@@ -2507,7 +2508,7 @@ One function in one engine (`_admonition`), one line in `inline_override`, one c
 
 ---
 
-### Phase 20: Reframe — A Flare Topic Is Too Small To Maintain — **20a–20b built, 20c–20e planned, 2026-09-23**
+### Phase 20: Reframe — A Flare Topic Is Too Small To Maintain — **20a–20c built, 20d–20e planned, 2026-09-24**
 
 Every phase so far has converted a source tree faithfully. Reframe is the first that deliberately *changes the shape* of what the source said: it merges MadCap Flare's very small topics into fewer, larger pages, turning each former topic into an anchored `##` section, and it does so once, permanently, because Markdown becomes the authoring source the moment the migration lands.
 
@@ -2569,7 +2570,7 @@ Renumbered onto this repository's scheme; the integration plan's Phase 0–4 map
 
 - **20a — Contracts and the gate.** *(built)* `reframe/` package, `docushift reframe` command with the standard `_scope_options`, engine assertion inside the stage (C2), no-op passthrough for non-Flare, the `reframe.yaml` config shape with `MAX_WORDS` and the TOC-schema adapter seam. *Exit: the command runs over the whole catalog, touches nothing that is not Flare, and passes a Flare set through byte-identical.*
 - **20b — Packing.** *(built)* R1–R5, fence-aware parsing, the three POC defects from requirements §10 left unported, **R1.4 layout pinning pinned to the newest eligible version** (required by Q2), determinism check. Anchors emitted per 20.3(1). *Exit: reproduces §6's baseline on EMS 10.5.1, page count allowed to rise from dropping `MIN_WORDS`.*
-- **20c — Review queue.** R6 and R7.1. On the critical path, not polish: the ~25–30 flagged pages are the only ones a human ever sees, and Phase 20b ships deliberately incomplete without this.
+- **20c — Review queue.** *(built)* R6 and R7.1. On the critical path, not polish: the ~25–30 flagged pages are the only ones a human ever sees, and Phase 20b ships deliberately incomplete without this.
 - **20d — Stage 7 integration.** Teach `validation/` about the redirect map and the merged TOC, so R5 and R6's acceptance checks are enforced by the existing checker rather than by a second one inside Reframe. Wire the exit-code idiom from Q4.
 - **20e — Pilot.** One doc set, queue worked, **explicit writer sign-off before redirects are published.**
 
@@ -2646,6 +2647,57 @@ The page-count gap is accounted for twice over and the exit condition allows it.
 **Verification, the rest.** `reframe --all --force` over the catalog: **14 reframed, 1,669 not Flare, 0 failed, 0 errors, 7 warnings**; 11,776 topics → 1,131 pages. C5 checked by copying the tree aside and re-running with `--force` — `diff -r` byte-identical. C4 checked with `git status --porcelain output/` — clean. R2's looping dedup fires on exactly §7's case (`tibemslookupcontext-.md` → `-2`, then `tibemslookupcontext-2.md` → `-2-2`); 16 slugs collide corpus-wide and only two dedups fire, because R2's uniqueness scope is per page. The output tree is 124 pages + 33 images + `metadata.yml` + the three regenerated YAML files, and carries 1,441 redirects with unique `from` values. **1,417 tests pass** (66 in `tests/unit/test_reframe.py`, up from 25), `ruff` clean.
 
 **What 20b does not do.** No review queue and no `review-queue.csv` — R6 and R7.1 are 20c, and a merged page still inherits its first topic's title with nothing flagging it. Stage 7 does not yet read `redirects.yml` or merge the TOC (20d). `MIN_WORDS` is deliberately not reimplemented (R1.2), and the POC's unused basename-keyed `dest` map is not ported.
+
+#### 20c Review queue — **Planned, 2026-09-24**
+
+R6 and R7.1. This is the interface between the mechanical stage and the writer, and the requirements put it on the critical path: "Reframe deliberately does not resolve these cases itself."
+
+**The specified flag set does not discriminate in this implementation, and that had to be measured before anything was built.** Applying R6's five conditions literally to EMS 10.5.1 at `max_words: 3000` queues **124 pages out of 124** — which R6's own sentence forbids in the line above the table: *"a queue containing every page is not a queue."* Two flags are responsible:
+
+| flag | fires on | why |
+|---|---|---|
+| `title-inherited` | **107 of 124** | The condition is "`n_topics > 1` and the page title equals its first topic's title". R7 *defines* the page title as the first topic's, so the second clause is true by construction and the flag reduces to `n_topics > 1`. |
+| `single-topic` | **17 of 124** | R6's own column says "usually fine; flags structural outliers". A condition that is usually fine is not a reason to put a page in front of a human. |
+
+Between them they cover every page — 107 + 17 = 124 — so the other three flags never get to mean anything. Those three, on their own, flag **20 pages**: `reference-list` 13, `heterogeneous` 7, `oversized` 1. *(18 as built — see the `heterogeneous` scope decision below.)* That is very close to R6's own predicted load of "roughly 25–30 rows out of 106 pages", which suggests the estimate was made against a queue the two structural flags did not dominate.
+
+**A better page title cannot be derived from the TOC, and that is worth recording rather than re-litigating.** The obvious answer to R7.1 — "emit the best title it can" — is to title a page after the TOC node whose subtree it covers, rather than after its first topic. Measured: **30 of 124 pages are exactly one TOC subtree (20 of the 107 multi-topic pages), and in every one of those cases the subtree node's title is the identical string to the first topic's title.** It has to be: the packer walks bottom-up in reading order, so a subtree's own node contributes the first topic on the page it collapses into. There is no better title available from structure. R7.1's "best it can" is already what R7 emits, and the improvement is a human one — which is the whole reason the flag exists.
+
+**Decided — `title-inherited` and `single-topic` annotate, they do not queue.** Measured on EMS 10.5.1, with `reference-list`, `oversized` and `heterogeneous` queueing as specified in every row; the first row is the one taken:
+
+| rule for `title-inherited` | queue | share of 124 pages |
+|---|---|---|
+| **Annotation only — never queues a page by itself** ← chosen | **20** (18 as built) | **16%** |
+| `n_topics >= 12` and the page is not exactly one TOC subtree | 56 | 45% |
+| `n_topics >= 12` | 61 | 49% |
+| `n_topics > 1` and not exactly one TOC subtree | 91 | 73% |
+| `n_topics > 1` — the literal specification | 108 | 87% |
+
+`single-topic` is annotation-only under every row; nothing in R6 argues for queueing a condition it calls "usually fine". Both remain visible in the queued rows' `flags` column and in `reframe.yml` for every page, so widening the queue later is a filter change rather than a re-measurement — which is why this is a safe row to take first.
+
+**Everything below is settled regardless of which row is chosen.**
+
+| decision | what gets built | why not the obvious alternative |
+|---|---|---|
+| **Location** | `<out>/review-queue.csv`, at the version root beside `toc.yml`, `reframe.yml` and `redirects.yml`; added to `_REGENERATED` | Same reasoning 20b applied to the sidecars. The POC's `manifest/` directory sat beside the script and was shared across every version it ever ran on, so the second run overwrote the first. The version root is the only place that survives the `.part` swap and the only place Stage 7 can find without being told. |
+| **CSV, not YAML** | The one artifact of the four a human edits | Decided in 20.3 and unchanged. Derived per-version facts are YAML here; a flat worklist a writer opens in a spreadsheet is what CSV is for. Written `utf-8-sig` like the catalog CSVs, because titles carry `®`/`™` and Excel needs the BOM to read them. |
+| **Columns** | `page_path, guide, n_topics, words, flags, detail` — R6's, unchanged | It is a published contract with an editorial skill that does not exist yet. Adding a column is cheap later; renaming one is not. |
+| **Row order** | Reading order, matching `reframe.yml` | Not sorted by `page_path`. A writer works a guide at a time, and reading order is already deterministic, so sorting buys nothing and costs the ordering that makes the file navigable. |
+| **Every flag recorded, queued or not** | The full flag set for every page goes into `reframe.yml`'s per-page block; the CSV carries only queued pages | Nothing is lost by narrowing the queue — a later decision to widen it is a filter change, not a re-measurement. This is also what makes the `title-inherited` row above reversible. |
+| **`detail`** | One clause per flag, in the flags' declared order, joined by `; ` — e.g. `23 topics, median 61 words each`, `3,533 words over a 3,000 cap` | The flag says which judgment is being asked for; the detail has to carry the numbers that judgment turns on, or the writer opens the page to find them. |
+| **Finding** | `REFRAME_REVIEW_QUEUED`, **note**, one per version, carrying the count and the flag breakdown. Register **49 → 50** | Not a warning. The queue is expected output of a successful merge on every run, and a warning that always fires stops being read — the same argument 20a made for counting non-Flare rows instead of naming them. |
+| **Audit** | One new check: every queued `page_path` is a page that was actually written | The same class of bug `_redirects` already catches, and the same cost. A queue naming a page that is not there is a writer's dead end. |
+| **Report** | `ReframeResult.queued`, surfaced in the per-version line and the run summary | The count is the thing a human acts on. It should not require opening a file to discover. |
+
+*Exit: `review-queue.csv` at every merged version root; the queue is a strict subset of the pages and its size is defensible against R6's "not every page"; every flag is reproducible from `reframe.yml`; determinism unchanged.*
+
+#### 20c Review queue — **Built & verified, 2026-09-24**
+
+`src/docushift/reframe/review.py`, wired into `driver.py` between the pack and the write. Every row of the decision table above was built as written. One thing the corpus changed:
+
+**`heterogeneous` counts *depth-2* ancestors only, and a guide's landing topic has none.** The first implementation bucketed a top-level row's own topic under its own title, which makes a page holding a parent topic plus its single child branch read as spanning two branches — the one shape that obviously is not heterogeneous. R6 says "depth-2 ancestor", and a guide landing topic does not have one. Measured on EMS 10.5.1: **5 pages either way against 7**, and the two dropped are exactly that false positive. A page merging a landing topic with *several* branches still flags, on the branches. Queue: **18 of 124**, not 20.
+
+**Verified.** EMS 10.5.1, `--force`: 1,441 topics → 124 pages, **18 queued (14%)**, flag totals across all 124 pages `reference-list` 13, `oversized` 1, `title-inherited` 107, `heterogeneous` 5, `single-topic` 17. The one `oversized` row is `users-guide/tibemsd-conf.md`, a single 3,533-word topic — R1.3 forbids splitting a body, so the cap yields and the row says why. The queue reads as a worklist: eleven parameter tables, five multi-branch pages, one outsized topic. Two `--force` runs are byte-identical under `diff -r` (C5) and `output/` is untouched (C4). Suite `1,431 passed, 2 skipped`; `ruff` clean on `src`/`tests`; registry 50.
 
 ---
 

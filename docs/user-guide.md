@@ -798,7 +798,7 @@ to be tuned repeatedly. Two keys:
   clean diff — permanently. `reframe` warns when a doc set has two eligible versions and no
   pin.
 
-**What a merged tree contains.** The pages, every asset copied through untouched, and three
+**What a merged tree contains.** The pages, every asset copied through untouched, and four
 regenerated files at the version root:
 
 | File | What it is for |
@@ -806,6 +806,22 @@ regenerated files at the version root:
 | `toc.yml` | The same navigation, retargeted. A topic that led its page gets `page.md`; a topic absorbed into one gets `page.md#anchor`. A reader following the TOC cannot tell the merge happened. |
 | `redirects.yml` | One 301 per source topic, anchored — so a published URL from before the merge lands on the section that replaced it, not at the top of a twelve-section page. |
 | `reframe.yml` | Which source topic became which section of which page, plus the policy that shaped it and the link counts. This is the record to read when a boundary looks wrong. |
+| `review-queue.csv` | The pages a writer has to make a decision about, and why. Open it in a spreadsheet; it is the only one of the four meant to be edited. |
+
+**The review queue is where a human comes in.** Merging is mechanical, but a few pages come
+out of it needing an editorial call, and `reframe` lists those rather than guessing:
+
+| Flag | What it means |
+|---|---|
+| `reference-list` | Twenty or more topics with a median under 100 words — usually a parameter table that would read better as an actual table, or as a page left granular. |
+| `oversized` | Over the word cap, because a single source topic is already over it. Splitting a topic body is not something the merge will do. |
+| `heterogeneous` | The page spans more than one branch of the navigation, so its sections may not belong together. |
+
+Two more flags, `title-inherited` and `single-topic`, are recorded against every page in
+`reframe.yml` but never put a page in the queue on their own: a merged page is *always*
+titled after its first topic, and a page that merged nothing is usually fine, so queueing on
+either would queue everything. On EMS 10.5.1 the queue is 18 pages out of 124. The run
+reports the count; nothing about the queue fails the stage.
 
 **It checks its own output before it swaps it in.** Words are conserved exactly, every topic
 is anchored once, no page spans two source directories, the TOC round-trips in both

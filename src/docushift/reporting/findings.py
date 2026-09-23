@@ -284,6 +284,15 @@ REGISTRY: dict[str, Code] = _codes(
          "Topics absent from toc.yml, carried through unmerged and unreachable from "
          "navigation",
          "REFRAME-REQUIREMENTS.md R3"),
+    # A **note**, not a warning, and one row per version rather than per page.
+    # R6's queue is the expected output of a *successful* merge -- Reframe declines
+    # these judgments on purpose -- so a warning would fire on every version of
+    # every run and stop being read, which is the argument 20a made for counting
+    # non-Flare rows instead of naming them. The count and the flag breakdown go in
+    # the message, because the number is the thing a human acts on.
+    Code("REFRAME_REVIEW_QUEUED", Severity.NOTE, Stage.REFRAME,
+         "Merged pages needing an editorial decision, listed in review-queue.csv",
+         "REFRAME-REQUIREMENTS.md R6"),
     Code("LINK_BROKEN", Severity.ERROR, Stage.VALIDATE,
          "Relative link resolving to nothing", "design.md §8.4"),
     # Emitted from Phase 7c, and a warning on arithmetic rather than on taste, the

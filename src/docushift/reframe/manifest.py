@@ -35,6 +35,7 @@ import yaml
 from docushift.reframe.packer import Page
 from docushift.reframe.pages import LinkCounts
 from docushift.reframe.policy import ReframePolicy
+from docushift.reframe.review import Flag
 
 PAGES_HEADER = (
     "# Written by `docushift reframe` (Stage 6b). Do not hand-edit: this file is\n"
@@ -54,9 +55,14 @@ TOC_HEADER = (
 
 
 def summary(
-    pages: Sequence[Page], policy: ReframePolicy, counts: LinkCounts, schema: str
+    pages: Sequence[Page],
+    policy: ReframePolicy,
+    counts: LinkCounts,
+    schema: str,
+    flagged: dict[PurePosixPath, list[Flag]] | None = None,
 ) -> dict[str, Any]:
     """`reframe.yml`'s document: the policy that shaped the tree, then every page."""
+    flagged = flagged or {}
     return {
         "generated_by": "docushift reframe",
         "toc_schema": schema,
@@ -74,17 +80,21 @@ def summary(
             "unresolved": counts.unresolved,
             "orphaned": counts.orphaned,
         },
-        "merged": [_page(page) for page in pages],
+        "merged": [_page(page, flagged.get(page.path, [])) for page in pages],
     }
 
 
-def _page(page: Page) -> dict[str, Any]:
+def _page(page: Page, flags: list[Flag]) -> dict[str, Any]:
     return {
         "path": str(page.path),
         "title": page.topics[0].title,
         "guide": page.guide,
         "topics": len(page.topics),
         "words": page.words,
+        # Every R6 flag, not just the queueing ones. `review-queue.csv` is a view
+        # over this, so narrowing the queue never loses a measurement -- widening
+        # it later is a filter change rather than a re-run (planning §20c).
+        "flags": [flag.name for flag in flags],
         "sections": [
             {
                 "anchor": page.anchors[topic.source],

@@ -1344,6 +1344,17 @@ def _report_reframe(stats, findings) -> None:
     console.print(table)
     if stats.topics:
         console.print(f"[dim]{stats.topics} topic(s) read into {stats.pages} page(s).[/dim]")
+    # R6's queue is the stage's one hand-off to a human, so the count goes in the
+    # summary rather than only in the note. Named per version, because a writer
+    # works one doc set at a time.
+    if stats.queued:
+        console.print(f"[dim]{stats.queued} page(s) queued for editorial review:[/dim]")
+        for result in stats.reframed:
+            if result.queued:
+                console.print(
+                    f"[dim]  {result.slug}@{result.version}: {result.queued} of "
+                    f"{result.pages} -- see review-queue.csv[/dim]"
+                )
 
     # `NOT_FLARE` is counted and never named. It is the overwhelming majority of any
     # full-catalog selection and naming it would bury the rows that need reading --

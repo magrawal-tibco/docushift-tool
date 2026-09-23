@@ -39,11 +39,12 @@ import yaml
 from docushift.catalog import CatalogManager
 from docushift.config import ConfigManager
 from docushift.models import Product, ProductVersion, SourceEngine
-from docushift.reframe import manifest
+from docushift.reframe import manifest, review
 from docushift.reframe.audit import audit
 from docushift.reframe.packer import Page, assign, carry, pack
 from docushift.reframe.pages import LinkCounts, render, split_frontmatter, title_of, word_count
 from docushift.reframe.policy import ReframePolicy, policy_for
+from docushift.reframe.review import Flag, branches, inspect
 from docushift.reframe.toc import TocEntry, retarget, schema_for
 from docushift.reporting.findings import FindingsRun
 from docushift.utils.swap import remove, swap
@@ -55,7 +56,7 @@ REFRAMABLE_ENGINES: tuple[SourceEngine, ...] = (SourceEngine.FLARE,)
 
 
 #: Written fresh by this stage, so a copy of the source's version would be stale.
-_REGENERATED = frozenset({"toc.yml", "reframe.yml", "redirects.yml"})
+_REGENERATED = frozenset({"toc.yml", "reframe.yml", "redirects.yml", "review-queue.csv"})
 
 
 @dataclass(frozen=True)
@@ -144,6 +145,9 @@ class ReframeResult:
     pages: int = 0
     #: Which TOC dialect the adapter seam matched, for the report.
     toc_schema: str = ""
+    #: Pages R6 put in front of a writer. Surfaced because the count is the thing
+    #: a human acts on, and it should not need a file opened to be discovered.
+    queued: int = 0
     message: str = ""
 
 
@@ -161,6 +165,10 @@ class ReframeStats:
     @property
     def pages(self) -> int:
         return sum(r.pages for r in self.results)
+
+    @property
+    def queued(self) -> int:
+        return sum(r.queued for r in self.results)
 
     @property
     def failures(self) -> list[ReframeResult]:
@@ -306,15 +314,25 @@ class Reframer:
         remove(staging)
         staging.parent.mkdir(parents=True, exist_ok=True)
 
+        # R6, computed before anything is written so the queue and `reframe.yml`
+        # are two views of one measurement rather than two passes that could drift.
+        ancestors = branches(roots)
+        flagged: dict[PurePosixPath, list[Flag]] = {
+            page.path: inspect(page, policy.max_words, ancestors) for page in built
+        }
+        queue = review.rows(built, flagged)
+
         counts = LinkCounts()
         added = self._write(staging, source, built, located, counts)
-        self._write_navigation(staging, source, roots, built, located, policy, counts, schema_name)
+        self._write_navigation(
+            staging, source, roots, built, located, policy, counts, schema_name, flagged, queue
+        )
 
         failures = audit(
             built, located, roots,
             words_in=sum(topic.words for page in built for topic in page.topics),
             words_out=added.words, added=added.scaffolding, counts=counts,
-            unnavigated=unnavigated,
+            unnavigated=unnavigated, queue=queue,
         )
         if failures:
             # Nothing is swapped. Requirements §6: "fail the stage if any check
@@ -328,6 +346,16 @@ class Reframer:
                 slug, number, ReframeOutcome.FAILED, engine=version.engine, topics=topics,
                 pages=len(built), toc_schema=schema_name,
                 message=f"{len(failures)} acceptance check(s) failed: {failures[0]}",
+            )
+
+        if queue:
+            breakdown = ", ".join(f"{name} {count}" for name, count in review.tally(flagged).items())
+            self._record(
+                "REFRAME_REVIEW_QUEUED", slug, number, path="review-queue.csv",
+                message=(
+                    f"{len(queue)} of {len(built)} page(s) need an editorial decision "
+                    f"(flags across all pages: {breakdown})"
+                ),
             )
 
         if counts.unresolved:
@@ -357,7 +385,7 @@ class Reframer:
 
         return ReframeResult(
             slug, number, ReframeOutcome.REFRAMED, path=target, engine=version.engine,
-            topics=topics, pages=pages, toc_schema=schema_name,
+            topics=topics, pages=pages, toc_schema=schema_name, queued=len(queue),
         )
 
     # -- writing --------------------------------------------------------------
@@ -395,8 +423,10 @@ class Reframer:
         policy: ReframePolicy,
         counts: LinkCounts,
         schema: str,
+        flagged: dict[PurePosixPath, list[Flag]],
+        queue: list[dict[str, str]],
     ) -> None:
-        """Copies the assets through, then writes `toc.yml` and the two sidecars.
+        """Copies the assets through, then writes `toc.yml` and the three sidecars.
 
         Assets are **everything that is not a topic** rather than an allowlist of
         directory names. The POC hardcoded two (`Resources`, `users-guide/images`)
@@ -412,9 +442,15 @@ class Reframer:
 
         manifest.write(staging / "toc.yml", manifest.TOC_HEADER, retarget(roots, located))
         manifest.write(
-            staging / "reframe.yml", manifest.PAGES_HEADER, manifest.summary(built, policy, counts, schema)
+            staging / "reframe.yml",
+            manifest.PAGES_HEADER,
+            manifest.summary(built, policy, counts, schema, flagged),
         )
         manifest.write(staging / "redirects.yml", manifest.REDIRECTS_HEADER, manifest.redirects(located))
+        # Always written, even empty: an absent file is indistinguishable from a
+        # merge that predates the queue, and a writer checking for pending work
+        # should see a header and no rows rather than have to ask why.
+        review.write(staging / "review-queue.csv", queue)
 
     # -- the pieces -----------------------------------------------------------
 

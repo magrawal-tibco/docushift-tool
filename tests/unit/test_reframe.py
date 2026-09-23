@@ -33,6 +33,7 @@ from docushift.reframe.pages import (
     title_of,
 )
 from docushift.reframe.policy import ReframePolicy
+from docushift.reframe.review import QUEUEING, branches, inspect, rows
 from docushift.reframe.toc import (
     ItemsPathChildren,
     TocEntry,
@@ -154,6 +155,7 @@ def test_a_flare_set_merges_into_fewer_pages_and_says_so(config, catalog, flare)
         "installation/installation-2.md",
         "redirects.yml",
         "reframe.yml",
+        "review-queue.csv",
         "toc.yml",
         "users-guide/user-guide.md",
     ]
@@ -999,3 +1001,185 @@ def test_a_redirect_into_a_page_that_was_never_written_is_caught(merged):
     located[PurePosixPath("g/c.md")] = (ghost, "c")
 
     assert any(f.startswith("redirects:") for f in check(merged))
+
+
+# -- R6: the review queue ------------------------------------------------------
+#
+# The queue is the stage's one hand-off to a human, so the thing under test is not
+# "does a flag compute" but "is the result something a writer can work". Two of
+# R6's five conditions hold for every page in this implementation, and the tests
+# that matter are the ones pinning that they annotate rather than queue.
+
+
+def flagged(page, max_words=3000, ancestors=None):
+    return [f.name for f in inspect(page, max_words, ancestors or {})]
+
+
+def paged(*words: int, guide: str = "Guide", directory: str = "g") -> Page:
+    page = Page(guide, [Topic(f"T{i}", PurePosixPath(f"{directory}/t{i}.md"), w) for i, w in enumerate(words)])
+    assign([page])
+    return page
+
+
+def test_a_long_page_of_tiny_topics_is_a_reference_list():
+    """R6's sharpest flag: 20+ topics averaging under 100 words is a table."""
+    assert "reference-list" in flagged(paged(*[60] * 20))
+    assert "reference-list" not in flagged(paged(*[60] * 19))
+    assert "reference-list" not in flagged(paged(*[400] * 20))
+
+
+def test_a_page_over_the_cap_is_flagged_rather_than_split():
+    """R1.3 forbids splitting a topic body, so the cap yields and a human decides."""
+    assert "oversized" in flagged(paged(5000))
+    assert "oversized" not in flagged(paged(2999))
+
+
+def test_a_page_spanning_two_toc_branches_is_heterogeneous():
+    page = paged(10, 10)
+    ancestors = {
+        PurePosixPath("g/t0.md"): "Configuring",
+        PurePosixPath("g/t1.md"): "Troubleshooting",
+    }
+
+    assert "heterogeneous" in flagged(page, ancestors=ancestors)
+    assert "heterogeneous" not in flagged(page, ancestors=dict.fromkeys(ancestors, "Configuring"))
+
+
+def test_a_guide_landing_topic_beside_its_own_branch_is_not_heterogeneous():
+    """R6 says *depth-2* ancestor, and a top-level row's own topic has no such thing.
+
+    Bucketing it under its own title instead makes a parent plus its single child
+    branch read as spanning two branches, which is the one shape that obviously is
+    not heterogeneous. Measured on EMS 10.5.1: 5 pages flag either way against 7,
+    and the two dropped are exactly this false positive.
+    """
+    roots = [node("Installation", "g/a.md", node("Overview", "g/b.md", node("Deeper", "g/c.md")))]
+
+    found = branches(roots)
+
+    assert PurePosixPath("g/a.md") not in found
+    assert found[PurePosixPath("g/b.md")] == "Overview"
+    assert found[PurePosixPath("g/c.md")] == "Overview"
+    assert "heterogeneous" not in flagged(paged(10, 10, 10), ancestors=found)
+
+
+def test_the_two_universal_flags_annotate_and_never_queue_on_their_own():
+    """Planning §20c, and R6's own sentence: "a queue containing every page is not
+    a queue."
+
+    `title-inherited` is "`n_topics > 1` and the page title equals its first
+    topic's" -- but R7 *defines* the title as the first topic's, so the second
+    clause is true by construction and it fires on 107 of EMS 10.5.1's 124 pages.
+    `single-topic` fires on the other 17, and R6 itself calls it "usually fine".
+    Applied literally the pair queues every page and the other three flags stop
+    meaning anything.
+    """
+    assert flagged(paged(10, 10)) == ["title-inherited"]
+    assert flagged(paged(10)) == ["single-topic"]
+    assert not rows([paged(10, 10), paged(10)], {})
+    assert set(QUEUEING) == {"reference-list", "oversized", "heterogeneous"}
+
+
+def test_an_annotation_still_rides_along_on_a_page_queued_for_another_reason():
+    """Which is what makes narrowing the queue lossless rather than a measurement
+    thrown away -- widening it later is a change to `QUEUEING` and nothing else."""
+    page = paged(*[60] * 20)
+    flags = inspect(page, 3000, {})
+    queue = rows([page], {page.path: flags})
+
+    assert queue[0]["flags"] == "reference-list;title-inherited"
+    assert "20 topics" in queue[0]["detail"]
+
+
+def test_a_queue_row_carries_the_numbers_the_decision_turns_on():
+    page = paged(5000, guide="Reference")
+    queue = rows([page], {page.path: inspect(page, 3000, {})})
+
+    assert queue[0]["page_path"] == "g/t0.md"
+    assert queue[0]["guide"] == "Reference"
+    assert (queue[0]["n_topics"], queue[0]["words"]) == ("1", "5000")
+    assert queue[0]["flags"] == "oversized;single-topic"
+    assert "5,000 words over a 3,000 cap" in queue[0]["detail"]
+
+
+def test_a_carried_topic_has_no_toc_branch_and_is_not_heterogeneous():
+    """Its topics are absent from the ancestor map entirely, so the spread is empty."""
+    page = Page(UNNAVIGATED, [Topic("X", PurePosixPath("g/x.md"), 10)])
+    assign([page])
+
+    assert flagged(page) == ["single-topic"]
+
+
+def test_the_queue_is_written_in_reading_order_not_sorted_by_path():
+    """A writer works a guide at a time, and reading order is already deterministic."""
+    late = paged(5000, directory="z")
+    early = paged(5000, directory="a")
+    queue = rows([late, early], {p.path: inspect(p, 3000, {}) for p in (late, early)})
+
+    assert [row["page_path"] for row in queue] == ["z/t0.md", "a/t0.md"]
+
+
+def test_every_flag_is_recorded_for_every_page_even_when_nothing_is_queued(
+    config, catalog, flare
+):
+    """`review-queue.csv` is a view over `reframe.yml`, not a separate measurement."""
+    converted_tree(config, flare, "10.5.1")
+
+    result = Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"])
+    document = yaml.safe_load((result.path / "reframe.yml").read_text(encoding="utf-8"))
+
+    assert [page["flags"] for page in document["merged"]] == [["title-inherited"], ["single-topic"]]
+
+
+def test_an_empty_queue_is_still_written_with_its_header(config, catalog, flare):
+    """An absent file is indistinguishable from a merge that predates the queue."""
+    converted_tree(config, flare, "10.5.1")
+    findings = FindingsRun("reframe")
+
+    result = Reframer(config, catalog, findings=findings).reframe_one(
+        flare, flare.versions["10.5.1"]
+    )
+    written = (result.path / "review-queue.csv").read_text(encoding="utf-8-sig")
+
+    assert result.queued == 0
+    assert written.splitlines() == ["page_path,guide,n_topics,words,flags,detail"]
+    assert "REFRAME_REVIEW_QUEUED" not in codes(findings.all)
+
+
+def test_a_queued_page_is_reported_as_a_note_and_counted_on_the_result(
+    config, catalog, flare
+):
+    """A note, not a warning. The queue is expected output of a *successful* merge,
+    and a warning that fires on every version of every run stops being read."""
+    toc = yaml.safe_load(TOC)
+    toc["items"][1]["children"] = [
+        {"title": f"Row {i}", "path": f"users-guide/row-{i}.md"} for i in range(20)
+    ]
+    converted_tree(config, flare, "10.5.1", yaml.safe_dump(toc))
+    findings = FindingsRun("reframe")
+
+    result = Reframer(config, catalog, findings=findings).reframe_one(
+        flare, flare.versions["10.5.1"]
+    )
+
+    assert result.queued == 1
+    assert "REFRAME_REVIEW_QUEUED" in codes(findings.all)
+    note = next(f for f in findings.all if f.code == "REFRAME_REVIEW_QUEUED")
+    assert note.severity is Severity.NOTE
+    assert "1 of 2 page(s)" in note.message
+    rows_written = (result.path / "review-queue.csv").read_text(encoding="utf-8-sig").splitlines()
+    assert len(rows_written) == 2
+    assert rows_written[1].startswith("users-guide/user-guide.md,User Guide,21,")
+
+
+def test_a_queue_naming_a_page_that_was_not_written_fails_the_stage(merged):
+    """R6's own audit check, and the same class of bug `_redirects` catches.
+
+    A writer opening the queue and finding a path that is not there loses the one
+    thing the queue is for, and would reasonably conclude the file is stale.
+    """
+    ghost = [{"page_path": "g/nowhere.md", "guide": "Guide", "n_topics": "1",
+              "words": "1", "flags": "oversized", "detail": ""}]
+
+    assert any(f.startswith("review queue:") for f in check(merged, queue=ghost))
+    assert check(merged, queue=[]) == []
