@@ -43,6 +43,12 @@ class ReframePolicy:
     #: sign-off the integration plan calls the point of the whole thing (§4 Phase 4),
     #: and a commit to this file is the only form of it the tool can enforce.
     publish: bool = False
+    #: 20e. Source paths a writer has taken back out of the merge: a topic at or
+    #: under one of these is never joined to anything, so that subtree keeps the
+    #: layout Stage 6 gave it. Prefixes, matched on path parts. Held sorted, so
+    #: reordering the list in the file is not a re-merge -- the currency key reads
+    #: this field, unlike `publish`, because it changes every byte downstream.
+    keep_separate: tuple[str, ...] = ()
 
     @property
     def key(self) -> str:
@@ -76,4 +82,36 @@ def policy_for(reframe: dict[str, Any], slug: str) -> ReframePolicy:
         toc_schema=str(values.get("toc_schema") or "").strip(),
         pin_layout_to=str(values.get("pin_layout_to") or "").strip(),
         publish=bool(values.get("publish") or False),
+        keep_separate=_paths(values.get("keep_separate")),
     )
+
+
+def _paths(value: Any) -> tuple[str, ...]:
+    """The `keep_separate` list, normalized: POSIX, no slashes at either end, sorted.
+
+    De-duplicated and sorted because the digest reads it, and a writer moving a
+    line to group it with its neighbours is not a layout change. A single string
+    is accepted as a one-entry list -- YAML makes that mistake easy and the intent
+    is never ambiguous.
+    """
+    if isinstance(value, str):
+        value = [value]
+    if not isinstance(value, list):
+        return ()
+    cleaned = {_one(entry) for entry in value}
+    return tuple(sorted(path for path in cleaned if path))
+
+
+def _one(entry: Any) -> str:
+    """One path, spelled the way `sections[].source` spells it.
+
+    Windows separators, surrounding whitespace, a leading `/` and a copied-in
+    `./` are all the same path written differently, so they are normalized away
+    rather than warned about. A bare stem is not: `users-guide/monitor` names a
+    directory and never `monitor.md`, because guessing there would mean the same
+    line taking out different topics depending on what is on disk.
+    """
+    path = str(entry).strip().replace("\\", "/")
+    while path.startswith("./"):
+        path = path[2:]
+    return path.strip("/")

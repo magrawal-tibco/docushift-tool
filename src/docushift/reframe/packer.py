@@ -85,6 +85,9 @@ class _Unit:
     """A run of topics a parent may still absorb whole. Never crosses a directory."""
 
     topics: tuple[Topic, ...]
+    #: 20e. A unit a writer has taken out of the merge: it is still a unit, so it
+    #: keeps its place in reading order, but no join may reach it from either side.
+    separate: bool = False
 
     @property
     def words(self) -> int:
@@ -99,11 +102,18 @@ class _Unit:
 _Item = Page | _Unit
 
 
-def pack(roots: Sequence[TocEntry], words_of: Callable[[PurePosixPath], int], max_words: int) -> list[Page]:
+def pack(roots: Sequence[TocEntry], words_of: Callable[[PurePosixPath], int], max_words: int,
+         keep_separate: Sequence[str] = ()) -> list[Page]:
     """Every page one version becomes, in reading order.
 
     `roots` are the top-level TOC rows; each is packed independently, which is
     R1.1. `words_of` is asked for exactly one count per topic.
+
+    `keep_separate` is 20e's writer override: source-path prefixes whose topics
+    are not merged with anything, so that subtree keeps Stage 6's one-page-per
+    topic layout. It only ever *refuses* a join, like the cap -- there is no
+    entry that can make a page bigger, which is what keeps a hand-edited config
+    from being able to invent a layout the packer would not otherwise produce.
     """
     pages: list[Page] = []
     # A topic listed under two guides is shared, not duplicated: the first node to
@@ -113,12 +123,28 @@ def pack(roots: Sequence[TocEntry], words_of: Callable[[PurePosixPath], int], ma
     # exercises this, but GridServer 7.2.0 lists `Typographical_Conventions.md`
     # three times, and packing it three times copies its body onto three pages.
     claimed: set[PurePosixPath] = set()
+    prefixes = tuple(keep_separate)
     for root in roots:
         # `_close_run` is what turns the last open units into pages, so a guide
         # that fits entirely under the cap becomes exactly one page here.
-        items = _subtree(root, root.title, words_of, max_words, claimed)
+        items = _subtree(root, root.title, words_of, max_words, claimed, prefixes)
         pages.extend(_close_run(items, root.title, max_words))
     return pages
+
+
+def separated(source: PurePosixPath, prefixes: Sequence[str]) -> bool:
+    """Whether one source path is at or under a `keep_separate` entry (20e).
+
+    Compared on path *parts* rather than as a string prefix, so `users-guide/mon`
+    does not match `users-guide/monitoring.md`. An entry naming a file matches
+    that file; an entry naming a directory matches everything beneath it.
+    """
+    parts = source.parts
+    for prefix in prefixes:
+        head = PurePosixPath(prefix).parts
+        if head and parts[:len(head)] == head:
+            return True
+    return False
 
 
 #: The `guide` stamped on a topic the navigation never listed. Visible in the
@@ -155,19 +181,23 @@ def _subtree(
     words_of: Callable[[PurePosixPath], int],
     max_words: int,
     claimed: set[PurePosixPath],
+    prefixes: Sequence[str] = (),
 ) -> list[_Item]:
     """This node and its descendants, as an ordered run of pages and units."""
     items: list[_Item] = []
     if node.path is not None and node.path not in claimed:
         claimed.add(node.path)
-        items.append(_Unit((Topic(node.title, node.path, words_of(node.path)),)))
+        items.append(_Unit((Topic(node.title, node.path, words_of(node.path)),),
+                           separate=separated(node.path, prefixes)))
     for child in node.children:
-        items.extend(_subtree(child, guide, words_of, max_words, claimed))
+        items.extend(_subtree(child, guide, words_of, max_words, claimed, prefixes))
 
     units = [item for item in items if isinstance(item, _Unit)]
     # Collapsible only if nothing below has already been closed into a page: once
     # a boundary exists inside this subtree, the subtree is not one unit any more.
-    if len(units) == len(items) and units:
+    # A separated unit is the same kind of boundary, arrived at by a writer's
+    # decision instead of by the cap.
+    if len(units) == len(items) and units and not any(unit.separate for unit in units):
         topics = tuple(topic for unit in units for topic in unit.topics)
         if sum(unit.words for unit in units) <= max_words and _one_directory(topics):
             return [_Unit(topics)]
@@ -199,11 +229,17 @@ def _close_run(items: Iterable[_Item], guide: str, max_words: int) -> list[Page]
             pages.append(item)
             continue
         if current and (
-            sum(topic.words for topic in current) + item.words > max_words
+            item.separate
+            or sum(topic.words for topic in current) + item.words > max_words
             or current[0].directory != item.directory
         ):
             close()
         current.extend(item.topics)
+        # Closed after it as well, which is what makes the verb "granular" rather
+        # than "split here": the next unit starts a page instead of joining this
+        # one from behind.
+        if item.separate:
+            close()
     close()
     return pages
 

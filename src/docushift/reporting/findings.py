@@ -254,6 +254,14 @@ REGISTRY: dict[str, Code] = _codes(
          "More than one eligible version of this doc set and no pinned layout; "
          "versions may be merged into non-corresponding pages",
          "REFRAME-REQUIREMENTS.md R1.4"),
+    # 20e. A writer's decision that silently did nothing looks exactly like a
+    # writer's decision that was applied, which is the one way this file can be
+    # wrong without anybody finding out. A warning and not an error: a path stops
+    # matching legitimately when a version drops the topic, and failing there would
+    # let one version's deletion break every other version's merge.
+    Code("REFRAME_KEEP_SEPARATE_UNMATCHED", Severity.WARNING, Stage.REFRAME,
+         "A keep_separate path in reframe.yaml matches no topic in this version",
+         "planning.md §20e"),
     # Requirements §6: "Reframe must self-validate and fail the stage if any check
     # fails." One row per failed check, because the eight checks fail for eight
     # unrelated reasons and a single "the audit failed" row would send a reader

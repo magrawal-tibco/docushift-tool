@@ -823,6 +823,49 @@ titled after its first topic, and a page that merged nothing is usually fine, so
 either would queue everything. On EMS 10.5.1 the queue is 18 pages out of 124. The run
 reports the count; nothing about the queue fails the stage.
 
+**Working the queue.** A row is a question with two answers: accept the page, or take its
+topics back out of the merge. Nothing records an acceptance — an unlisted page is a merged
+page, and the queue is short enough to re-read. Taking one out is `keep_separate`:
+
+```bash
+.venv/Scripts/python.exe -m docushift.cli reframe --product tibco-enterprise-message-service
+```
+
+Open `review-queue.csv`, and for each row open the page it names under `reframed/`. If the
+merge reads badly, find that page in `reframe.yml` and copy the `source` of every section you
+want back to its own page into the product's `keep_separate` list:
+
+```yaml
+products:
+  tibco-enterprise-message-service:
+    pin_layout_to: "10.5.1"
+    keep_separate:
+      - users-guide/connect.md        # one topic, one page
+      - c-and-cobol-reference/types   # a whole directory, left granular
+```
+
+Then re-run `reframe`. A topic at or under a listed path is never joined to anything, and
+nothing is ever joined to it from behind, so the subtree keeps the layout Stage 6 gave it.
+Everything around it merges as before — taking one page out does not re-granularize the guide
+it sits in. This is the setting that answers a `reference-list` row without moving `max_words`
+and re-laying out all 124 pages.
+
+Write the path exactly as `reframe.yml` spells it: a file with its `.md`, a directory without
+one. Matching is on whole path segments, so `users-guide/monitor` takes the directory
+`users-guide/monitor/` and never `monitor.md` or `monitoring.md`; a leading `./`, a trailing
+slash and Windows separators are all normalized away, but a bare stem is not guessed at. A
+path matching no topic in a version is a `REFRAME_KEEP_SEPARATE_UNMATCHED` warning naming it —
+which is what makes the strictness safe, and which also catches the real case behind it: a
+path right for 10.5.1 and absent from 10.4.0.
+
+Editing the list re-merges the doc set, deliberately — it is part of the currency key, unlike
+`publish`, because it changes every page boundary downstream. Reordering the list does not:
+it is sorted and de-duplicated before it is digested, so grouping lines by guide is free.
+
+`oversized` is the one flag `keep_separate` cannot answer. That page is a single source topic
+larger than the cap, and the merge does not split topic bodies; the decision there is a
+writing one.
+
 **It checks its own output before it swaps it in.** Words are conserved exactly, every topic
 is anchored once, no page spans two source directories, the TOC round-trips in both
 directions, every redirect resolves, and no link that worked before the merge is broken by

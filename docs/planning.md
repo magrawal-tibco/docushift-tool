@@ -928,6 +928,7 @@ The concrete deliverable of §7.1: every deferred "report line" in the three doc
 | `REFRAME_REVIEW_QUEUED`²⁰ᶜ | note | reframe | Merged pages needing an editorial decision, listed in `review-queue.csv` | `REFRAME-REQUIREMENTS.md` R6 |
 | `SYNC_MERGE_UNAVAILABLE`²⁰ᵈ | warn | sync | A product set to publish merged has no current reframed tree; it publishes nothing rather than falling back | §20d |
 | `REDIRECT_SHADOWED`²⁰ᵈ | warn | validate | A redirect whose source path still exists in the published tree; a 301 loop where the two differ only in case | `REFRAME-REQUIREMENTS.md` R5 |
+| `REFRAME_KEEP_SEPARATE_UNMATCHED`²⁰ᵉ | warn | reframe | A `keep_separate` path matches no topic in this version; the merge a writer meant to undo still happened | §20e |
 
 #### 7.6 Cross-version CSH regression
 
@@ -2855,6 +2856,71 @@ The empty-base note goes in the run report (`8639 redirect(s) in 1 redirects.yml
 
 Suite `1,465 passed, 2 skipped` (+16); `ruff` clean on `src`/`tests`. `config/reframe.yaml` still opts nobody in.
 
+
+#### 20e Pilot — **Planned, 2026-09-24**
+
+The roadmap bullet is one line: *"One doc set, queue worked, explicit writer sign-off before redirects are published."* Preparing it found the gap 20d.1's closing note said was not there. `ReframePolicy` has four fields — `max_words`, `toc_schema`, `pin_layout_to`, `publish` — and **none of them is per-page**. A writer who reads the 18 rows and concludes "this page should have stayed granular" has exactly two places to put that: accept everything, or move the global cap and re-lay out all 124 pages to fix one. So 20e is not only a process phase; the queue is a question the config cannot currently answer.
+
+##### What the 18 rows actually ask for
+
+Measured, not assumed — this is the whole population a writer sees on the pilot doc set:
+
+| flag | rows | the decision it puts to a writer | verb |
+|---|---|---|---|
+| `reference-list` | **13** | 20–60 topics of 60–90 words each, merged into one page. Right for a parameter reference; wrong if the topics are conceptually separate. | *stay granular* |
+| `heterogeneous` | **5** | The page spans 2–4 TOC branches. | *split per branch* |
+| `oversized` | **1** | `tibemsd-conf.md`, a single 3,533-word topic. R1.3 forbids splitting a topic body. | *none — nothing a writer can do* |
+| `title-inherited`, `single-topic` | 17, 1 | Annotations. 20c measured that they hold for every page here and made them never queue alone. | *none* |
+
+**Correcting the question I asked**: I proposed one `keep_separate` list described as covering both verbs, and the packer says it does not. The two are opposite operations on the same node. *Stay granular* means a subtree's topics never merge **with each other**; *split per branch* means a subtree is packed **as one unit** and never merges with its siblings — which is R1.1's existing top-level rule applied deeper. A single list cannot mean both, and guessing per entry from whether the path is a leaf or a directory would make the file's meaning depend on the shape of the tree it names.
+
+So 20e builds **one** field, for the verb 13 of the 18 rows need, and records the other.
+
+##### Decisions
+
+| decision | what gets built | why not the obvious alternative |
+|---|---|---|
+| **`keep_separate` on `ReframePolicy`** ← approved | A per-product list of paths. A topic whose source path is, or sits under, a listed path **is never merged with anything**: it closes the page before it, and nothing joins onto it. One page per topic, which is Stage 6's own layout for exactly that subtree. | The name is the user's and it reads right. The semantics are the *granular* verb, because that is the 13-row case and because it is the conservative direction: un-merging is what a writer asks for when the merge was wrong, and the answer is always available — those pages already exist in `output/`. |
+| **Paths are prefixes, matched against the source topic path** | `users-guide/monitor` matches `users-guide/monitor-messages.md` and everything under `users-guide/monitor/`. Compared as POSIX path parts, not string prefixes, so `users-guide/mon` does not match `users-guide/monitoring.md`. | The writer's evidence is `reframe.yml`'s `sections[].source` and the redirect map's `from`, both of which are source topic paths. Making the file name *output* pages instead would be a config keyed on the thing the config changes. |
+| **`split_at` is not built** | Recorded here as the deferred second verb, with its measurement: **5 of 18 rows**, all `heterogeneous`. | No writer has asked for it, and the phase that finds out is this one. Building both now doubles the config surface on a guess; the 5 rows are still *reportable* today and a writer can name them in the sign-off commit. Naming a heterogeneous page's branches in `keep_separate` is a coarser answer than splitting it but never a wrong one — it returns those topics to what Stage 6 already publishes. |
+| **It counts in the currency digest** | `keep_separate` is **not** added to `_NOT_OUTPUT`, and is normalized to a sorted tuple in `policy_for` | The opposite call to `publish`, and for the opposite reason: this field changes every byte downstream of it, so a tuned list that left trees reporting `current` is exactly the silent no-op `reframe_policy_key` exists to prevent. Sorted so that reordering the list is not a re-merge. |
+| **An entry matching nothing is a warning** | `REFRAME_KEEP_SEPARATE_UNMATCHED`, warning, reframe. **Register 52 → 53.** | A typo in this file fails silently and looks exactly like "the writer's decision was applied." `scope.yaml` already warns for a rule matching no product, for the same reason. A warning and not an error: a path can legitimately stop matching when a version drops a topic, and failing the run would make a version's disappearance break the *other* versions' merge. |
+| **The pilot is all six EMS versions** | No scope narrowing | §20.5 left this open. Layout is pinned to 10.5.1, so the six are diffable by construction and a decision taken on 10.5.1's queue is the decision that shaped all six. Publishing only the newest would leave five active versions serving unmerged topics under URLs the merge has already claimed in the 8,639-row map. |
+| **Sign-off stays a human's commit** ← approved | `publish: false` unchanged; the runbook says what to read and what to write | The gate is the point of the phase. Nothing on this branch asserts a writer has read the pages, because nobody has. |
+
+##### The runbook, and what 20e delivers without a writer
+
+`docs/user-guide.md` gains the procedure: run `reframe`, open `review-queue.csv`, for each row open the page it names, and either accept it, or add its topics' source paths to `keep_separate` and re-run. Then one commit sets `publish: true` and says who signed off on what. Rolling back is the inverse commit plus a `sync`, and it is only cheap until the redirects are live — which is the sentence the whole gate exists for.
+
+*Exit: `keep_separate` changes the layout of exactly the subtrees it names and nothing else; a listed path that matches no topic is named in the run report; two runs with the same list are byte-identical and a reordered list does not re-merge; EMS's 18-row queue is unchanged, because nobody has worked it yet; no product opts in.*
+
+#### 20e Pilot — **Built, 2026-09-24**
+
+`keep_separate` on `ReframePolicy`, a per-product list of source paths whose topics are never merged with anything. Built as planned, with one thing learned from the packer and one from the corpus.
+
+**From the packer: the override has to close the run on both sides.** `_close_run` greedily extends a page until the cap or a directory change closes it, so marking a unit "separate" and closing *before* it is only half the rule — the last topic of a named subtree would then absorb whatever came next, which is the opposite of what a writer asking for granularity means. `_Unit` carries `separate`, and `_close_run` closes before *and* after it. The bottom-up collapse in `_subtree` gains the matching guard: a subtree containing a separated unit no longer collapses into one unit, which is what keeps `keep_separate` from being silently undone one level up.
+
+**From the corpus: the file's matching rule had to get stricter than the config comment first claimed.** The draft comment promised `users-guide/monitor` would match `monitor.md`; segment matching does not do that, and the test said so. The rule shipped is the strict one — path as written, a file with its `.md`, a directory without one, nothing guessed from a bare stem — because a bare stem would name two different things depending on what happened to be on disk. Spellings of the *same* path are still normalized: Windows separators, surrounding whitespace, a leading `/`, a trailing `/`, and a leading `./`. That last one is the one a writer actually produces, by copying a path out of a file explorer, and left unnormalized it matches nothing and the merge it was meant to undo happens anyway.
+
+**Verified against EMS.** `users-guide/command-listing.md` is the worst row in the queue — 60 topics, 2,978 words, the page a writer is most likely to reject. Listing its 60 sources:
+
+| | baseline | with the override |
+|---|---|---|
+| 10.5.1 pages | 124 | **183** (+59: one page became sixty) |
+| 10.5.1 queue | 18 | **17** (the row it answered is gone) |
+| `redirects.yml` rows | 1,441 | **1,441** — `users-guide/create-route.md` now 301s to `create-route.md#create-route` instead of `command-listing.md#create-route` |
+| files differing from baseline | — | 59 new pages, `command-listing.md` itself, the four regenerated root files, and **14 other pages — link retargeting only**, e.g. ``[`connect`](command-listing.md#connect)`` → ``[`connect`](connect.md#connect)`` |
+
+Nothing else moved: the override re-laid out exactly the subtree it named. Reverting `config/reframe.yaml` and re-running returned the tree **byte-identical** to the baseline snapshot, and the queue to 109 rows across the six versions.
+
+The digest behaved as the decision intended and as it costs: the field's mere arrival re-merged all six versions once (`Already current 0`), producing the same 124 pages and 18 queue rows as 20c's record — the layout did not change, only the key did. A second run reported `Already current 6`, and a run with the 60 paths shuffled and trailing whitespace added reported `Already current 6` as well, so reordering the list is free.
+
+`REFRAME_KEEP_SEPARATE_UNMATCHED` fires on real data: two bad paths (`users-guide/no-such-topic.md`, and `users-guide/command-listing` without its `.md` — the exact strictness trap) produced one extra warning naming both, aggregated per version rather than one finding per path.
+
+`split_at` remains unbuilt and measured at 5 of 18 rows. No product opts in: `config/reframe.yaml` ships `keep_separate: []` in `defaults` and `publish: false`, and the sign-off commit is a writer's.
+
+Register 52 → 53. Suite `1,480 passed, 2 skipped` (+15); `ruff` clean on `src`/`tests`.
+
 ---
 
 ## 2. Validation & Testing Criteria
@@ -2870,4 +2936,5 @@ Suite `1,465 passed, 2 skipped` (+16); `ruff` clean on `src`/`tests`. `config/re
 - **Reporting Completeness**: Every finding code emitted anywhere in the tool is present in the §7.5 registry, and every registered code is reachable from at least one code path. This is the test that keeps a promise made in prose three phases earlier from evaporating — the register is only worth having if it cannot silently fall out of step with the code.
 - **Exit-code Discipline**: `validate` exits non-zero if and only if the run recorded at least one `error`. A stage command exits non-zero when it did no work, and zero when it did its work and found problems — the two are different conditions and must not be conflated.
 - **Version Drop-down Integrity**: Every `path` in a `version.yml` resolves to a sibling directory that sync actually wrote, and every version folder in that doc-class has exactly one entry — the file and the folders beside it are two views of one list, so neither can carry what the other lacks. Ordering is numeric-descending, so `10.4.0` precedes `9.3.0`. A hand-added entry survives a re-sync.
+- **Editorial Override Fidelity**: A path in `keep_separate` returns exactly the subtree it names to Stage 6's layout — every topic at or under it becomes its own page, nothing merges onto it from either side, and no page outside it changes except for links that now point at a topic's own page. Removing the path returns the merged tree byte-identically to what it was before. A path matching no topic is named in the run report rather than applied silently, and reordering the list is not a re-merge.
 - **Redirect Map Integrity**: Every `to` in a published `redirects.yml` resolves to a file the target actually holds — these are the entries a reader is 301'd through, so a dangling one is an error. The map carries every merged version under its doc-class, not only the ones the run touched: a scoped `--version` re-sync leaves the other versions' redirects byte-identical. A hand-added redirect survives a re-sync. Paths are the served ones; an empty `publish_base_url` makes them tree-rooted rather than absent, because a map missing only its prefix is recoverable and a map never emitted is not.

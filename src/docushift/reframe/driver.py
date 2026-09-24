@@ -41,7 +41,7 @@ from docushift.config import ConfigManager
 from docushift.models import Product, ProductVersion, SourceEngine
 from docushift.reframe import manifest, review
 from docushift.reframe.audit import audit
-from docushift.reframe.packer import Page, assign, carry, pack
+from docushift.reframe.packer import Page, assign, carry, pack, separated
 from docushift.reframe.pages import LinkCounts, render, split_frontmatter, title_of, word_count
 from docushift.reframe.policy import ReframePolicy, policy_for
 from docushift.reframe.review import Flag, branches, inspect
@@ -286,7 +286,24 @@ class Reframer:
                 toc_schema=schema_name, message=f"{len(missing)} TOC path(s) name no file",
             )
 
-        packed = pack(roots, source.words, policy.max_words)
+        # 20e. Reported per version, not per product: `keep_separate` is written
+        # once against the pinned layout, and a path that is right for 10.5.1 and
+        # absent from 10.4.0 is exactly the drift worth naming.
+        unmatched = [
+            path for path in policy.keep_separate
+            if not any(separated(topic, [path]) for topic in source.topics)
+        ]
+        if unmatched:
+            self._record(
+                "REFRAME_KEEP_SEPARATE_UNMATCHED", slug, number, path="reframe.yaml",
+                message=(
+                    f"{len(unmatched)} keep_separate path(s) match no topic here, so the "
+                    f"merge they were meant to undo still happened: {', '.join(unmatched[:5])}"
+                    f"{', ...' if len(unmatched) > 5 else ''}"
+                ),
+            )
+
+        packed = pack(roots, source.words, policy.max_words, policy.keep_separate)
         # Topics the navigation never listed. Stage 7 publishes them today, so
         # dropping them would delete live content; `packer.carry` explains the call.
         stranded = [

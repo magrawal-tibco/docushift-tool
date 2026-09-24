@@ -1183,3 +1183,168 @@ def test_a_queue_naming_a_page_that_was_not_written_fails_the_stage(merged):
 
     assert any(f.startswith("review queue:") for f in check(merged, queue=ghost))
     assert check(merged, queue=[]) == []
+
+
+# -- 20e: keep_separate, the writer's answer to the queue --------------------------
+#
+# The one setting that undoes a merge for part of a doc set. It only ever refuses a
+# join -- there is no entry that makes a page bigger -- so the worst a wrong line in
+# the config can do is return a subtree to the layout Stage 6 already publishes.
+
+
+def test_a_named_topic_is_not_merged_with_anything():
+    roots = [node("Guide", "g/a.md", node("B", "g/b.md"), node("C", "g/c.md"))]
+
+    pages = pack(roots, sized(g__a=10, g__b=10, g__c=10), 3000, ["g/b.md"])
+
+    assert layout(pages) == [["g/a.md"], ["g/b.md"], ["g/c.md"]]
+
+
+def test_a_named_directory_keeps_its_whole_subtree_granular():
+    """The 13-row case. A writer reading `21 topics averaging 61 words` names the
+    directory rather than twenty-one paths."""
+    roots = [node("Guide", "g/a.md", node("R1", "g/ref/one.md"), node("R2", "g/ref/two.md"))]
+
+    pages = pack(roots, sized(g__a=10, g__ref__one=10, g__ref__two=10), 3000, ["g/ref"])
+
+    assert layout(pages) == [["g/a.md"], ["g/ref/one.md"], ["g/ref/two.md"]]
+
+
+def test_nothing_joins_a_separated_page_from_behind():
+    """What makes the verb "granular" and not "split here". Closing only *before* a
+    named topic would leave the last one of a named subtree absorbing whatever came
+    next, which is the opposite of what the writer asked for."""
+    roots = [node("Guide", "g/a.md", node("B", "g/b.md"), node("C", "g/c.md"))]
+
+    pages = pack(roots, sized(g__a=10, g__b=10, g__c=10), 3000, ["g/b.md"])
+
+    assert ["g/b.md", "g/c.md"] not in layout(pages)
+
+
+def test_an_unlisted_subtree_still_collapses_around_a_listed_one():
+    """Scoped to what it names. A writer taking one page out of the merge must not
+    re-granularize the guide it sits in."""
+    roots = [node("Guide", "g/a.md",
+                  node("Keep", "g/keep/x.md", node("Y", "g/keep/y.md")),
+                  node("Merged", "g/m/one.md", node("Two", "g/m/two.md")))]
+
+    pages = pack(roots, sized(g__a=10, g__keep__x=10, g__keep__y=10, g__m__one=10, g__m__two=10),
+                 3000, ["g/keep"])
+
+    assert layout(pages) == [["g/a.md"], ["g/keep/x.md"], ["g/keep/y.md"],
+                             ["g/m/one.md", "g/m/two.md"]]
+
+
+def test_a_prefix_matches_on_path_segments_and_not_on_characters():
+    """`g/mon` must not take `g/monitoring.md` out of the merge. Both shapes are in
+    the corpus and a character-prefix rule would fail silently on them."""
+    roots = [node("Guide", "g/mon.md", node("M", "g/monitoring.md"))]
+    counts = sized(g__mon=10, g__monitoring=10)
+
+    assert layout(pack(roots, counts, 3000, ["g/monitor"])) == [["g/mon.md", "g/monitoring.md"]]
+
+
+def test_a_file_must_be_named_with_its_extension():
+    """Nothing is guessed from a bare stem: `g/mon` would otherwise mean the file or
+    the directory depending on what happened to be on disk. Getting it wrong is the
+    case `REFRAME_KEEP_SEPARATE_UNMATCHED` exists to make loud."""
+    roots = [node("Guide", "g/mon.md", node("M", "g/other.md"))]
+    counts = sized(g__mon=10, g__other=10)
+
+    assert layout(pack(roots, counts, 3000, ["g/mon"])) == [["g/mon.md", "g/other.md"]]
+    assert layout(pack(roots, counts, 3000, ["g/mon.md"])) == [["g/mon.md"], ["g/other.md"]]
+
+
+def test_an_empty_list_changes_no_boundary():
+    roots = [node("Guide", "g/a.md", node("B", "g/b.md"))]
+    counts = sized(g__a=10, g__b=10)
+
+    assert layout(pack(roots, counts, 3000, [])) == layout(pack(roots, counts, 3000))
+
+
+def test_keep_separate_is_normalized_and_sorted_before_it_is_digested():
+    """Reordering the list, or writing a trailing slash, is not a layout change --
+    and the currency key is what would otherwise re-merge the doc set to prove it."""
+    one = policy_for({"products": {"x": {"keep_separate": ["b/c", "a/"]}}}, "x")
+    two = policy_for({"products": {"x": {"keep_separate": ["/a", "b/c", "a"]}}}, "x")
+
+    assert one.keep_separate == ("a", "b/c") == two.keep_separate
+    assert one.key == two.key
+
+
+def test_a_path_copied_in_with_a_leading_dot_slash_still_matches():
+    """`./users-guide/x.md` is how a path arrives from a file explorer or a shell
+    completion. Unnormalized it matches nothing, and the merge the writer meant to
+    undo happens anyway -- the warning would say so, but only after the fact."""
+    policy = policy_for({"products": {"x": {"keep_separate": ["./g/a.md", ".\\g\\b.md"]}}}, "x")
+
+    assert policy.keep_separate == ("g/a.md", "g/b.md")
+
+
+def test_a_string_is_taken_as_a_one_entry_list():
+    """YAML makes `keep_separate: users-guide/x.md` easy to write and the intent is
+    never ambiguous. Silently ignoring it would be the config lying."""
+    assert policy_for({"products": {"x": {"keep_separate": "g/a.md"}}}, "x").keep_separate == ("g/a.md",)
+
+
+def test_keep_separate_counts_in_the_currency_digest():
+    """The opposite call to `publish`, for the opposite reason: this field changes
+    every byte downstream, so a tuned list leaving trees `current` is exactly the
+    silent no-op `reframe_policy_key` exists to prevent."""
+    base = policy_for({"defaults": {"max_words": 3000}}, "x")
+    tuned = policy_for({"defaults": {"max_words": 3000}, "products": {"x": {"keep_separate": ["g"]}}}, "x")
+
+    assert base.key != tuned.key
+
+
+
+def keep(config, slug: str, *paths: str) -> None:
+    (config.config_dir / "reframe.yaml").write_text(
+        "defaults:\n  max_words: 3000\nproducts:\n  " + slug + ":\n    keep_separate:\n"
+        + "".join(f"      - {path}\n" for path in paths),
+        encoding="utf-8",
+    )
+
+
+def test_a_writers_decision_reaches_the_tree_that_is_written(config, catalog, flare):
+    """End to end, because every hop between `reframe.yaml` and a page boundary is
+    somewhere the decision could be dropped silently."""
+    converted_tree(config, flare, "10.5.1")
+    keep(config, flare.slug, "installation")
+
+    result = Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"])
+
+    assert result.outcome is ReframeOutcome.REFRAMED
+    written = sorted(p.relative_to(result.path).as_posix() for p in result.path.rglob("*.md"))
+    assert written == ["installation/installation-2.md",
+                       "installation/installation-overvie.md",
+                       "users-guide/user-guide.md"]
+
+
+def test_the_same_doc_set_merges_those_two_topics_without_the_override(config, catalog, flare):
+    """The control. Without it, `installation/` is one page of two topics."""
+    converted_tree(config, flare, "10.5.1")
+
+    result = Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"])
+
+    written = sorted(p.relative_to(result.path).as_posix() for p in result.path.rglob("*.md"))
+    assert written == ["installation/installation-2.md", "users-guide/user-guide.md"]
+
+
+def test_a_keep_separate_path_matching_no_topic_is_named(config, catalog, flare):
+    """A typo does nothing and looks exactly like a decision that was applied. Per
+    version, because a path right for 10.5.1 and absent from 10.4.0 is the drift
+    worth naming."""
+    converted_tree(config, flare, "10.5.1")
+    keep(config, flare.slug, "installation", "users-guide/typo.md")
+    findings = FindingsRun("reframe")
+
+    result = Reframer(config, catalog, findings=findings).reframe_one(
+        flare, flare.versions["10.5.1"]
+    )
+
+    assert result.outcome is ReframeOutcome.REFRAMED
+    assert codes(findings.all) == ["REFRAME_KEEP_SEPARATE_UNMATCHED"]
+    assert findings.all[0].severity is Severity.WARNING
+    assert "users-guide/typo.md" in findings.all[0].message
+    assert "installation" not in findings.all[0].message

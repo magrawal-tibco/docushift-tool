@@ -40,6 +40,26 @@ defaults:
   # unmerged pages -- which would un-merge URLs that are already live.
   publish: false
 
+  # A writer's answer to `review-queue.csv` (20e). Source paths -- topics, or
+  # directories of them -- whose content must *not* be merged: each one stays the
+  # single page Stage 6 made it. This is the one setting that undoes a merge for
+  # part of a doc set without moving `max_words` and re-laying out every page.
+  #
+  # Write the path as it appears in `reframe.yml`'s `sections[].source` -- a file
+  # with its `.md`, a directory without one. Matching is on whole path segments,
+  # so `users-guide/monitor` takes the *directory* `users-guide/monitor/` and
+  # never `users-guide/monitor.md` or `users-guide/monitoring.md`. Nothing is
+  # guessed from a bare stem, because `users-guide/monitor` would then name two
+  # different things depending on what happened to be on disk.
+  #
+  # A path that matches nothing is `REFRAME_KEEP_SEPARATE_UNMATCHED`, which is
+  # what makes the strictness safe: forget the `.md` and the run tells you, where
+  # a looser rule would quietly take out a directory you did not mean.
+  #
+  # Empty everywhere: nobody has worked a queue yet. Set it per product below,
+  # not here -- the topics are one doc set's.
+  keep_separate: []
+
 products:
   # R1.4 -- layout pinning. This product has six convert-eligible Flare versions
   # (10.4.0, 10.4.1, 10.4.3, 10.4.4, 10.5.0, 10.5.1), so an unpinned merge would lay
