@@ -22,6 +22,7 @@ import yaml
 from docushift.config import ConfigManager
 from docushift.models import SourceEngine
 from docushift.reframe import ReframeOutcome, Reframer, policy_for
+from docushift.reframe import csh as csh_map
 from docushift.reframe.audit import audit
 from docushift.reframe.packer import UNNAVIGATED, Page, Topic, assign, carry, pack
 from docushift.reframe.pages import (
@@ -1348,3 +1349,190 @@ def test_a_keep_separate_path_matching_no_topic_is_named(config, catalog, flare)
     assert findings.all[0].severity is Severity.WARNING
     assert "users-guide/typo.md" in findings.all[0].message
     assert "installation" not in findings.all[0].message
+
+# -- 20f: CSH survives the merge ---------------------------------------------------
+#
+# A Help button is the one link in the tree whose other end is compiled into a
+# shipped application. It cannot be fixed by re-running anything here, which is why
+# the audit refuses the merge rather than letting `validate` find it three stages on.
+
+
+def placed(page_path: str, *topics: tuple[str, str]):
+    """`located`, built by hand: `(source, anchor)` pairs on one page."""
+    built = Page(
+        "Guide",
+        [Topic(source, PurePosixPath(source), 10) for source, _ in topics],
+        path=PurePosixPath(page_path),
+        anchors={PurePosixPath(source): anchor for source, anchor in topics},
+    )
+    return {PurePosixPath(source): (built, anchor) for source, anchor in topics}
+
+
+def test_a_csh_value_keeps_its_own_anchor_and_changes_only_its_page():
+    """The whole reason this is not `toc.retarget`. The identifier's `<a id>` marker
+    travelled into the merged page with its topic body and is a more precise landing
+    point than the section heading."""
+    located = placed("g/merged.md", ("g/a.md", "a-section"), ("g/b.md", "b-section"))
+
+    out = csh_map.retarget({"help.a": "g/a.md#help.a", "help.b": "g/b.md#help.b"}, located)
+
+    assert out == {"help.a": "g/merged.md#help.a", "help.b": "g/merged.md#help.b"}
+
+
+def test_a_value_with_no_fragment_lands_on_the_section_and_not_the_page_top():
+    """18 of 108 in `tibco-runtime-agent@5.12.2`. Left bare, a Help button opens a
+    twelve-section page at the top, which is the defect R5 exists to prevent."""
+    located = placed("g/merged.md", ("g/a.md", "a-section"), ("g/b.md", "b-section"))
+
+    assert csh_map.retarget({"help.b": "g/b.md"}, located) == {"help.b": "g/merged.md#b-section"}
+
+
+def test_an_identifier_whose_topic_was_never_placed_is_left_exactly_as_it_was():
+    """`toc.retarget`'s rule for the same condition. This module declines to invent a
+    destination; the audit is what refuses the merge."""
+    located = placed("g/merged.md", ("g/a.md", "a-section"))
+
+    assert csh_map.retarget({"gone": "g/nowhere.md#gone"}, located) == {"gone": "g/nowhere.md#gone"}
+
+
+def test_the_identifier_set_is_never_changed_by_a_retarget():
+    """Design.md 9.6: a Help button may move and may never disappear. Asserted on the
+    set rather than on values, because that is the invariant."""
+    located = placed("g/merged.md", ("g/a.md", "a"), ("g/b.md", "b"))
+    mapping = {"one": "g/a.md#one", "two": "g/b.md#two", "three": "g/gone.md#three"}
+
+    assert set(csh_map.retarget(mapping, located)) == set(mapping)
+
+
+def test_identifiers_are_grouped_under_their_topic_and_sorted():
+    """Sorted because a merged page unions several topics' lists and C5 is byte
+    determinism -- map order would make the frontmatter depend on how the converter
+    happened to walk the source."""
+    grouped = csh_map.by_topic({"z": "g/a.md#z", "a": "g/a.md#a", "m": "g/b.md#m"})
+
+    assert grouped == {PurePosixPath("g/a.md"): ["a", "z"], PurePosixPath("g/b.md"): ["m"]}
+
+
+def test_a_merged_page_mirrors_every_identifier_it_absorbed(tmp_path):
+    """Design.md 9.5's mirror. Built from the `Page` alone it dropped all 154 in the
+    corpus, which is a CSH_FRONTMATTER_MISMATCH per Help button once the paths are
+    fixed -- and the path fix is what stops `validate` short-circuiting before it."""
+    page = Page(
+        "Guide",
+        [Topic("A", PurePosixPath("g/a.md"), 2), Topic("B", PurePosixPath("g/b.md"), 2)],
+        path=PurePosixPath("g/merged.md"),
+        anchors={PurePosixPath("g/a.md"): "a", PurePosixPath("g/b.md"): "b"},
+    )
+    bodies = {"g/a.md": "# A\n\nword word\n", "g/b.md": "# B\n\nword word\n"}
+    mirror = {PurePosixPath("g/a.md"): ["help.b", "help.a"], PurePosixPath("g/b.md"): ["help.c"]}
+
+    text, _ = render(page, lambda p: bodies[str(p)], {}, frozenset(), LinkCounts(), mirror)
+
+    assert yaml.safe_load(split_frontmatter(text)[0].strip("-\n"))["csh"] == [
+        "help.a", "help.b", "help.c"
+    ]
+
+
+def test_a_page_with_no_identifiers_gets_no_csh_key():
+    """An empty list in the frontmatter is a claim about context-sensitive help that
+    the conversion never made."""
+    page = Page("Guide", [Topic("A", PurePosixPath("g/a.md"), 2)],
+                path=PurePosixPath("g/m.md"), anchors={PurePosixPath("g/a.md"): "a"})
+
+    text, _ = render(page, lambda p: "# A\n\nword word\n", {}, frozenset(), LinkCounts(), {})
+
+    assert "csh" not in yaml.safe_load(split_frontmatter(text)[0].strip("-\n"))
+
+
+def test_the_audit_refuses_a_map_pointing_at_a_page_that_was_not_written():
+    failures = audit(
+        [], {}, [], words_in=0, words_out=0, added=0, counts=LinkCounts(),
+        csh={"help.a": "g/gone.md#help.a"}, anchors={}, mirrored={},
+    )
+
+    assert any("not a merged page" in failure for failure in failures)
+
+
+def test_the_audit_refuses_a_map_whose_anchor_did_not_survive_the_body_copy():
+    page = PurePosixPath("g/merged.md")
+    failures = audit(
+        [], {}, [], words_in=0, words_out=0, added=0, counts=LinkCounts(),
+        csh={"help.a": "g/merged.md#help.a"},
+        anchors={page: frozenset({"something-else"})}, mirrored={page: frozenset({"help.a"})},
+    )
+
+    assert any("is not an anchor in" in failure for failure in failures)
+
+
+def test_the_audit_refuses_a_map_the_frontmatter_does_not_mirror():
+    page = PurePosixPath("g/merged.md")
+    failures = audit(
+        [], {}, [], words_in=0, words_out=0, added=0, counts=LinkCounts(),
+        csh={"help.a": "g/merged.md#help.a"},
+        anchors={page: frozenset({"help.a"})}, mirrored={page: frozenset()},
+    )
+
+    assert any("frontmatter" in failure for failure in failures)
+
+
+def test_a_merge_with_no_csh_map_is_audited_as_before():
+    assert audit([], {}, [], words_in=0, words_out=0, added=0, counts=LinkCounts()) == []
+
+
+def test_a_csh_map_that_does_not_parse_fails_the_version_and_swaps_nothing(
+    config, catalog, flare
+):
+    """Not a skip, for the reason an unrecognised `toc.yml` is not a skip. Writing
+    nothing would delete every Help button from the merged tree with no record, and
+    copying the file through would republish the pre-merge paths."""
+    tree = converted_tree(config, flare, "10.5.1")
+    (tree / "csh.yml").write_text("a: [unclosed\n", encoding="utf-8")
+    findings = FindingsRun("reframe")
+
+    result = Reframer(config, catalog, findings=findings).reframe_one(
+        flare, flare.versions["10.5.1"]
+    )
+
+    assert result.outcome is ReframeOutcome.FAILED
+    assert codes(findings.all) == ["REFRAME_SELF_CHECK_FAILED"]
+    assert not config.reframed_path(
+        flare.bu, flare.family, flare.slug, "10.5.1"
+    ).exists()
+
+
+def test_a_version_with_no_csh_map_gets_no_csh_file(config, catalog, flare):
+    """A file the conversion never produced is a promise nobody made."""
+    converted_tree(config, flare, "10.5.1")
+
+    result = Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"])
+
+    assert result.outcome is ReframeOutcome.REFRAMED
+    assert not (result.path / "csh.yml").is_file()
+
+
+def test_the_written_map_and_the_written_frontmatter_agree_end_to_end(config, catalog, flare):
+    """Every hop between the converted map and the merged tree, because the two halves
+    are written by different modules and only agreeing matters."""
+    tree = converted_tree(config, flare, "10.5.1")
+    (tree / "csh.yml").write_text(
+        "install.overview.helpurl: installation/installation-overvie.md#install.overview.helpurl\n",
+        encoding="utf-8",
+    )
+    body = tree / "installation" / "installation-overvie.md"
+    body.write_text(
+        '# Installation Overview\n\n<a id="install.overview.helpurl"></a>\n\nWords here.\n',
+        encoding="utf-8",
+    )
+
+    result = Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"])
+
+    assert result.outcome is ReframeOutcome.REFRAMED
+    written = yaml.safe_load((result.path / "csh.yml").read_text(encoding="utf-8"))
+    assert written == {
+        "install.overview.helpurl":
+            "installation/installation-2.md#install.overview.helpurl"
+    }
+    page = (result.path / "installation/installation-2.md").read_text(encoding="utf-8")
+    assert yaml.safe_load(split_frontmatter(page)[0].strip("-\n"))["csh"] == [
+        "install.overview.helpurl"
+    ]

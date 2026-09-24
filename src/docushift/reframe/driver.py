@@ -39,6 +39,7 @@ import yaml
 from docushift.catalog import CatalogManager
 from docushift.config import ConfigManager
 from docushift.models import Product, ProductVersion, SourceEngine
+from docushift.reframe import csh as csh_map
 from docushift.reframe import manifest, review
 from docushift.reframe.audit import audit
 from docushift.reframe.packer import Page, assign, carry, pack, separated
@@ -49,6 +50,10 @@ from docushift.reframe.toc import TocEntry, retarget, schema_for
 from docushift.reporting.findings import FindingsRun
 from docushift.utils.swap import remove, swap
 
+# The same function `validate` resolves CSH fragments with, so the audit and the
+# gate three stages later cannot disagree about what an anchor is.
+from docushift.validation.references import anchors as anchors_in
+
 #: The one engine Reframe runs for (C1). A tuple rather than a bare constant
 #: because the question "which engines produce topics small enough to need this?"
 #: is an empirical one, and WebWorks is the plausible second answer.
@@ -56,7 +61,9 @@ REFRAMABLE_ENGINES: tuple[SourceEngine, ...] = (SourceEngine.FLARE,)
 
 
 #: Written fresh by this stage, so a copy of the source's version would be stale.
-_REGENERATED = frozenset({"toc.yml", "reframe.yml", "redirects.yml", "review-queue.csv"})
+_REGENERATED = frozenset(
+    {"toc.yml", "reframe.yml", "redirects.yml", "review-queue.csv", csh_map.CSH_FILE}
+)
 
 
 @dataclass(frozen=True)
@@ -67,6 +74,11 @@ class _Written:
     words: int
     #: Tokens the anchors and heading shifts declared they added (`pages.render`).
     scaffolding: int
+    #: Per page, the `<a id>` markers actually rendered into it -- section anchors
+    #: and the CSH markers that travelled in with the topic bodies alike (20f).
+    anchors: dict[PurePosixPath, frozenset[str]] = field(default_factory=dict)
+    #: Per page, the identifiers its frontmatter `csh:` key actually lists.
+    mirrored: dict[PurePosixPath, frozenset[str]] = field(default_factory=dict)
 
 
 class _Source:
@@ -94,6 +106,10 @@ class _Source:
         )
         #: Every Markdown topic on disk, whether or not the TOC knows about it.
         self.topics = tuple(PurePosixPath(p) for p in paths if p.lower().endswith(".md"))
+        #: The converted tree's CSH map, or `None` when it has none (20f). Read
+        #: here rather than at the write site because the frontmatter mirror and
+        #: the retargeted file are two views of it and must not read it twice.
+        self.csh = csh_map.load(root)
         self._words: dict[PurePosixPath, int] = {}
 
     def exists(self, relative: PurePosixPath) -> bool:
@@ -268,7 +284,18 @@ class Reframer:
             )
 
         self._check_pin(product, policy)
-        source = _Source(converted)
+        try:
+            source = _Source(converted)
+        except csh_map.Unreadable as error:
+            # Before anything is written, for the reason the TOC check above is:
+            # the cheap moment to refuse a merge is the one where there is nothing
+            # to roll back.
+            self._record("REFRAME_SELF_CHECK_FAILED", slug, number, path=csh_map.CSH_FILE,
+                         message=str(error))
+            return ReframeResult(
+                slug, number, ReframeOutcome.FAILED, engine=version.engine,
+                toc_schema=schema_name, message=f"{csh_map.CSH_FILE} does not parse",
+            )
         nodes = [entry for root in roots for entry in root.walk() if entry.path is not None]
         topics = len(nodes)
 
@@ -350,6 +377,8 @@ class Reframer:
             words_in=sum(topic.words for page in built for topic in page.topics),
             words_out=added.words, added=added.scaffolding, counts=counts,
             unnavigated=unnavigated, queue=queue,
+            csh=csh_map.retarget(source.csh, located) if source.csh else None,
+            anchors=added.anchors, mirrored=added.mirrored,
         )
         if failures:
             # Nothing is swapped. Requirements §6: "fail the stage if any check
@@ -417,10 +446,13 @@ class Reframer:
     ) -> _Written:
         """Renders every page into the staging tree. Returns the word accounting."""
         existing = source.files
+        mirror = csh_map.by_topic(source.csh) if source.csh else {}
         words = 0
         scaffolding = 0
+        anchors: dict[PurePosixPath, frozenset[str]] = {}
+        mirrored: dict[PurePosixPath, frozenset[str]] = {}
         for page in built:
-            text, added = render(page, source.read, located, existing, counts)
+            text, added = render(page, source.read, located, existing, counts, mirror)
             destination = staging / page.path
             destination.parent.mkdir(parents=True, exist_ok=True)
             # `newline=""` so the bytes are the same on every platform, which is
@@ -428,7 +460,12 @@ class Reframer:
             destination.write_text(text, encoding="utf-8", newline="")
             scaffolding += added
             words += word_count(split_frontmatter(text)[1])
-        return _Written(words, scaffolding)
+            if mirror:
+                anchors[page.path] = frozenset(anchors_in(text))
+                mirrored[page.path] = frozenset(
+                    name for topic in page.topics for name in mirror.get(topic.source, ())
+                )
+        return _Written(words, scaffolding, anchors, mirrored)
 
     def _write_navigation(
         self,
@@ -464,6 +501,15 @@ class Reframer:
             manifest.summary(built, policy, counts, schema, flagged),
         )
         manifest.write(staging / "redirects.yml", manifest.REDIRECTS_HEADER, manifest.redirects(located))
+        # Only when the converted tree has one: an empty map in the merged tree
+        # would be a file the conversion never produced, which `validate` reads as
+        # a promise of context-sensitive help nobody made.
+        if source.csh:
+            manifest.write(
+                staging / csh_map.CSH_FILE,
+                csh_map.CSH_HEADER,
+                csh_map.retarget(source.csh, located),
+            )
         # Always written, even empty: an absent file is indistinguishable from a
         # merge that predates the queue, and a writer checking for pending work
         # should see a header and no rows rather than have to ask why.

@@ -2921,6 +2921,67 @@ The digest behaved as the decision intended and as it costs: the field's mere ar
 
 Register 52 → 53. Suite `1,480 passed, 2 skipped` (+15); `ruff` clean on `src`/`tests`.
 
+#### 20f CSH survives the merge — **Planned, 2026-09-24**
+
+Reframe retargets `toc.yml` (R3) and emits `redirects.yml` (R5), and does neither for `csh.yml`. The file is not in `_REGENERATED`, so it falls through to `source.assets` — *everything that is not a topic* — and is `shutil.copy2`'d into the merged tree still naming the pre-merge topic paths. The requirements never mention CSH, and the reference corpus cannot show the gap: **EMS has no `csh.yml`**, which is why five phases of measuring against it found nothing.
+
+##### What is actually broken, measured
+
+Seven `csh.yml` exist under `output/`; two are in reframed Flare sets:
+
+| set | identifiers | paths dead in the merged tree | frontmatter `csh:` ids surviving the merge |
+|---|---|---|---|
+| `tibco-runtime-agent@5.13.0` | 108 | 105 | **0 of 108**, on 0 of 71 pages |
+| `tibco-administrator-enterprise-edition@5.13.0` | 46 | 46 | **0 of 46** |
+
+Opting runtime-agent in and syncing to a scratch target: **`LINK_BROKEN` 108 rows, 108 errors.** So the gate does hold — neither product can publish merged today — but it holds three stages too late. Reframe's audit runs before the swap precisely so a merge this broken is never built, and this one is built, swapped, synced, and only then refused.
+
+**The second half is worse than the first and is hidden behind it.** `validation/csh.py:159` emits `LINK_BROKEN` and `continue`s, so a dead path short-circuits the anchor and mirror checks. Fixing only the paths would surface 108 fresh `CSH_FRONTMATTER_MISMATCH` warnings, because `pages._frontmatter` builds each merged page's frontmatter from the `Page` and discards every absorbed topic's — including §9.5's `csh:` mirror. Both halves have to move together or the second is discovered by the next person to run `validate`.
+
+**The content itself is intact, which is what makes this small.** Both facts measured on the merged trees: **108 of 108** CSH anchors are present in the merged pages (the `<a id="…">` markers travelled with the topic bodies), and **0 of 154** CSH targets are topics the packer failed to place. Nothing has to be recovered; the map has to be pointed at where its content went.
+
+##### Decisions
+
+| decision | what gets built | why not the obvious alternative |
+|---|---|---|
+| **`csh.yml` joins `_REGENERATED`** | A `reframe/csh.py` retarget pass, called beside `retarget(roots, located)` in `_write_navigation`, writing the map from `located` | Leaving it an asset is the bug. The seam already exists and names its own reason — *"written fresh by this stage, so a copy of the source's version would be stale"* — and `csh.yml` has been exactly that since 20b. |
+| **The path half is replaced and the fragment half is kept** | `topic.md#ident` → `page.md#ident`, the identifier's own anchor unchanged | This is where CSH and `toc.yml` differ and the difference matters. `toc.yml` gets the *section* anchor because a TOC node **is** the section. A CSH identifier points at its own `<a id>` marker, which survived the merge and is the more precise landing point; overwriting it with the section anchor would move every Help button to the top of its section for no gain. `redirects.yml` carries the section anchor, so the redirect map is **not** the right source for this rewrite even though it is the obvious one. |
+| **A fragment-less entry gets the section anchor** | Fall back to `located`'s anchor when the value has no `#` | Measured: 0 of 154 in the two Flare sets, but **18 of 108** in `tibco-runtime-agent@5.12.2`, so the shape is real in this corpus and merely not Flare's. A fragment-less value landing on a merged page with no anchor is a Help button that opens a twelve-section page at the top — the exact defect R5 exists to prevent. |
+| **The merged page carries the union of its topics' `csh:` frontmatter** | `pages._frontmatter` gains the identifiers of every absorbed topic, sorted | §9.6's third rule is a round trip, and dropping the mirror breaks it for all 154. Sorted rather than in section order because the digest and C5 both read this file, and because `transforms/csh.py` is the other writer of this key and a stable order is what makes the two comparable. |
+| **The audit gains one check, and no register code** | Every `csh.yml` value resolves to a page that was written and an anchor that exists in it; every identifier is on its page's frontmatter | Same shape as the existing `_navigation` check, run before the swap. No new code: `validation/csh.py` already argues in its own docstring that a CSH target is link integrity and that inventing `CSH_TARGET_MISSING` would mean two codes for one condition. A failure here is `REFRAME_SELF_CHECK_FAILED`, which is what every other audit failure is. **Register stays at 53.** |
+| **A version with no `csh.yml` is untouched** | No file written | Five of the seven `csh.yml` are not Flare and will never reach this code, and EMS has none. Writing an empty map would put a file in the merged tree that is not in the converted one, which `validate` reads as a promise nobody made. |
+
+##### What this does not do
+
+It does not reconcile CSH across versions — §7.6's fourth rule, a dropped identifier visible only by comparing two versions, stays `diff`'s job and is unaffected: the merge changes where an identifier points, never whether it exists. And it does not touch the five non-Flare maps.
+
+*Exit: `csh.yml` in a merged tree resolves entirely against that tree — every path a page that exists, every fragment an anchor in it, every identifier mirrored in its page's frontmatter; runtime-agent 5.13.0 and administrator 5.13.0 sync and validate with **0 errors** where they produce 108 and 46 today; the identifier set is unchanged in both, because retargeting may move a Help button and must never drop one; two runs byte-identical; EMS, which has no `csh.yml`, is byte-identical to its current merged tree.*
+
+#### 20f CSH survives the merge — **Built, 2026-09-24**
+
+`reframe/csh.py` plus a frontmatter mirror in `pages._frontmatter` and one audit check. `csh.yml` joins `_REGENERATED`, so it is no longer copied through as an asset. Register unchanged at **53**, as planned.
+
+**One decision changed under implementation, and it was the plan's own wording that was wrong.** The plan said `load` should return `None` both for "no map" and for "a map that will not parse", *"because the two call for the same thing: copy nothing and write nothing."* They do not. With `csh.yml` in `_REGENERATED` it is no longer copied, so writing nothing **deletes every Help button from the merged tree with no record anywhere** — the exact class of silent-deletion failure `packer.carry` exists to prevent for untocked topics. The three available answers are all bad: writing nothing deletes, copying through republishes the stale paths this phase exists to fix, and a partial parse loses whichever identifiers were past the error. So an unreadable map now raises `csh.Unreadable` and **fails the version before anything is written**, which is the rule the driver's own docstring already states for `toc.yml`: *"an unrecognised TOC is a failure, not a skip."* Same file class, same argument. Verified: a truncated `csh.yml` gives `x tibco-runtime-agent@5.13.0: csh.yml does not parse`, one `REFRAME_SELF_CHECK_FAILED`, and no staging tree left behind.
+
+**The fragment rule held as measured.** Only the path half is rewritten; the identifier keeps its own `<a id>` marker, which is a more precise landing point than the section heading and which survived the merge in all 154 cases. A fragment-less value falls back to the section anchor. The audit resolves anchors through `validation.references.anchors` — the same function `validate` uses three stages later, so the two cannot disagree about what an anchor is.
+
+**Results, on the two Flare sets that have a map:**
+
+| | before | after |
+|---|---|---|
+| runtime-agent 5.13.0, dead paths | 105 of 108 | **0** |
+| administrator 5.13.0, dead paths | 46 of 46 | **0** |
+| frontmatter `csh:` ids surviving | 0 of 154 | **154 of 154** |
+| `sync` + `validate` on both | **154 errors** | **0 errors** |
+
+The remaining findings on that target are 16 `REDIRECT_SHADOWED` and the one pre-existing `#Using` `ANCHOR_MISSING` from 20d — no `CSH_FRONTMATTER_MISMATCH`, which is the check that would have fired had only the paths been fixed. The identifier **set** is byte-for-byte the source map's in both products: §9.6's rule is that a Help button may move and may never disappear, and that is asserted on the set rather than on the values.
+
+Determinism and blast radius both confirmed: two forced runs of runtime-agent are byte-identical, and EMS 10.5.1 — which has no `csh.yml` — is byte-identical to its 20e baseline, so a version without context-sensitive help gets no new file and no changed byte.
+
+The audit check emits no new code. A failure is `REFRAME_SELF_CHECK_FAILED`, and the three conditions are reported separately because they fail for different reasons: a missing page means the retarget did not fire, a missing anchor means the marker did not survive the body copy, and a missing mirror entry means `_frontmatter` dropped it.
+
+Suite `1,494 passed, 2 skipped` (+14); `ruff` clean on `src`/`tests`. No product opts in.
+
 ---
 
 ## 2. Validation & Testing Criteria
@@ -2936,5 +2997,6 @@ Register 52 → 53. Suite `1,480 passed, 2 skipped` (+15); `ruff` clean on `src`
 - **Reporting Completeness**: Every finding code emitted anywhere in the tool is present in the §7.5 registry, and every registered code is reachable from at least one code path. This is the test that keeps a promise made in prose three phases earlier from evaporating — the register is only worth having if it cannot silently fall out of step with the code.
 - **Exit-code Discipline**: `validate` exits non-zero if and only if the run recorded at least one `error`. A stage command exits non-zero when it did no work, and zero when it did its work and found problems — the two are different conditions and must not be conflated.
 - **Version Drop-down Integrity**: Every `path` in a `version.yml` resolves to a sibling directory that sync actually wrote, and every version folder in that doc-class has exactly one entry — the file and the folders beside it are two views of one list, so neither can carry what the other lacks. Ordering is numeric-descending, so `10.4.0` precedes `9.3.0`. A hand-added entry survives a re-sync.
+- **CSH Survives a Merge**: A merged tree's `csh.yml` resolves entirely against that tree — every path a page that exists, every fragment an anchor in it, every identifier listed in its page's frontmatter. The identifier **set** is exactly the converted map's: merging moves a Help button and never drops one, and a map the stage cannot parse fails the version rather than being written empty or copied stale. A version with no `csh.yml` gains no file.
 - **Editorial Override Fidelity**: A path in `keep_separate` returns exactly the subtree it names to Stage 6's layout — every topic at or under it becomes its own page, nothing merges onto it from either side, and no page outside it changes except for links that now point at a topic's own page. Removing the path returns the merged tree byte-identically to what it was before. A path matching no topic is named in the run report rather than applied silently, and reordering the list is not a re-merge.
 - **Redirect Map Integrity**: Every `to` in a published `redirects.yml` resolves to a file the target actually holds — these are the entries a reader is 301'd through, so a dangling one is an error. The map carries every merged version under its doc-class, not only the ones the run touched: a scoped `--version` re-sync leaves the other versions' redirects byte-identical. A hand-added redirect survives a re-sync. Paths are the served ones; an empty `publish_base_url` makes them tree-rooted rather than absent, because a map missing only its prefix is recoverable and a map never emitted is not.

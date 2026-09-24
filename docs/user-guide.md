@@ -808,6 +808,17 @@ regenerated files at the version root:
 | `reframe.yml` | Which source topic became which section of which page, plus the policy that shaped it and the link counts. This is the record to read when a boundary looks wrong. |
 | `review-queue.csv` | The pages a writer has to make a decision about, and why. Open it in a spreadsheet; it is the only one of the four meant to be edited. |
 
+A fifth file appears when the conversion produced one: **`csh.yml`, retargeted**. A
+context-sensitive help map is what an F1 keypress in the product resolves against, so it has to
+move with the topics. Each identifier keeps its **own** anchor and only the page it sits on
+changes — unlike `toc.yml` and `redirects.yml`, which both get the *section* anchor, because a
+TOC node is the section while a CSH identifier points at its own marker inside the body. The
+merged page also lists every identifier it absorbed in its frontmatter `csh:` key, which is the
+mirror `validate` checks the map against. A version whose conversion has no `csh.yml` gets none,
+and a map this stage cannot parse fails that version rather than being written empty — the same
+rule an unreadable `toc.yml` gets, because a merged tree that quietly lost its Help buttons looks
+exactly like one that never had any.
+
 **The review queue is where a human comes in.** Merging is mechanical, but a few pages come
 out of it needing an editorial call, and `reframe` lists those rather than guessing:
 

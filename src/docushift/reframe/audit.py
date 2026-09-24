@@ -43,6 +43,9 @@ def audit(
     counts: LinkCounts,
     unnavigated: frozenset[PurePosixPath] = frozenset(),
     queue: Sequence[dict[str, str]] = (),
+    csh: dict[str, str] | None = None,
+    anchors: dict[PurePosixPath, frozenset[str]] | None = None,
+    mirrored: dict[PurePosixPath, frozenset[str]] | None = None,
 ) -> list[str]:
     """Every §6 check that failed, named. An empty list is a passing merge.
 
@@ -58,6 +61,7 @@ def audit(
     failures.extend(_links(counts))
     failures.extend(_redirects(pages, located))
     failures.extend(_queue(pages, queue))
+    failures.extend(_csh(csh or {}, anchors or {}, mirrored or {}))
     return failures
 
 
@@ -183,4 +187,37 @@ def _redirects(pages: Sequence[Page], located: dict[PurePosixPath, tuple[Page, s
             failures.append(f"redirects: {source} points at {page.path}, which was not written")
         elif anchor not in built.anchors.values():
             failures.append(f"redirects: {source} points at {page.path}#{anchor}, which has no such anchor")
+    return failures
+
+
+def _csh(
+    csh: dict[str, str],
+    anchors: dict[PurePosixPath, frozenset[str]],
+    mirrored: dict[PurePosixPath, frozenset[str]],
+) -> list[str]:
+    """20f. Every Help button resolves against the tree that is about to be swapped.
+
+    Checked against what `_write` actually rendered rather than against `located`,
+    because the two halves this can get wrong are both in the bytes: the anchor a
+    CSH value points at is an `<a id>` marker inside a topic body, and the mirror
+    is a frontmatter key. Re-deriving either from the page model would be the audit
+    checking its own arithmetic.
+
+    Three findings and not one, because they fail for different reasons -- a
+    missing page means the retarget did not fire, a missing anchor means the
+    marker did not survive the body copy, and a missing mirror entry means
+    `_frontmatter` dropped it. `validate` would report all three later; §6's whole
+    point is that it should never get the chance.
+    """
+    failures: list[str] = []
+    for identifier, value in sorted(csh.items()):
+        target, _, fragment = value.partition("#")
+        page = PurePosixPath(target)
+        if page not in anchors:
+            failures.append(f"csh: {identifier} -> {value}, which is not a merged page")
+            continue
+        if fragment and fragment.lower() not in anchors[page]:
+            failures.append(f"csh: {identifier} -> #{fragment} is not an anchor in {target}")
+        if identifier not in mirrored.get(page, frozenset()):
+            failures.append(f"csh: {identifier} is not in {target}'s frontmatter (design.md 9.5)")
     return failures

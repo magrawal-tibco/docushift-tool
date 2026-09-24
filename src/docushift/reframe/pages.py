@@ -29,6 +29,7 @@ from collections import Counter
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import PurePosixPath
+from typing import Any
 
 import yaml
 
@@ -276,6 +277,7 @@ def render(
     located: dict[PurePosixPath, tuple[Page, str]],
     existing: frozenset[PurePosixPath],
     counts: LinkCounts,
+    csh: dict[PurePosixPath, list[str]] | None = None,
 ) -> tuple[str, int]:
     """One merged page's full text, and the tokens its scaffolding added.
 
@@ -284,7 +286,7 @@ def render(
     through `yaml.safe_dump` rather than interpolated into `"..."`: the POC did the
     latter and a title containing a quote produced a page with invalid frontmatter.
     """
-    parts = [_frontmatter(page)]
+    parts = [_frontmatter(page, csh or {})]
     added = 0
     for topic in page.topics:
         _, body = split_frontmatter(read(topic.source))
@@ -295,14 +297,25 @@ def render(
     return "\n\n".join(parts) + "\n", added
 
 
-def _frontmatter(page: Page) -> str:
+def _frontmatter(page: Page, csh: dict[PurePosixPath, list[str]]) -> str:
     """R7. `title` is the first topic's, which R7.1 calls a known weakness -- 20c's
-    review queue flags it as `title-inherited` rather than this stage guessing."""
-    data = {
+    review queue flags it as `title-inherited` rather than this stage guessing.
+
+    A merged page also inherits the `csh:` key of every topic it absorbed (20f).
+    That key is §9.5's mirror of `csh.yml`, and `validation/csh.py` checks the two
+    against each other; building this block from the `Page` alone dropped all 154
+    identifiers in the corpus, which is a `CSH_FRONTMATTER_MISMATCH` per Help
+    button. Unioned and re-sorted rather than concatenated per topic, because the
+    page is now one page and the mirror describes the page.
+    """
+    data: dict[str, Any] = {
         "title": page.topics[0].title,
         "guide": page.guide,
         "merged_from": len(page.topics),
     }
+    identifiers = sorted({name for topic in page.topics for name in csh.get(topic.source, ())})
+    if identifiers:
+        data["csh"] = identifiers
     dumped = yaml.safe_dump(data, sort_keys=False, allow_unicode=True, width=10**6)
     return f"---\n{dumped}---"
 
