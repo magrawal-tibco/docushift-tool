@@ -908,8 +908,10 @@ products:
 ```
 
 Turning it on is a commit, which is the point: merging is reversible right up until a merged
-page is served under an old topic's URL, and after that it is not. No product ships with it
-on.
+page is served under an old topic's URL, and after that it is not. **One product has it on** —
+`tibco-enterprise-message-service`, signed off on 2026-09-25 after its 18-row queue was read
+and every page accepted as merged. Every other Flare set is still `false`, and the commit that
+changes that should say who read which queue.
 
 Once a product has opted in, `sync` will not fall back. If the merged tree is missing, or is
 older than the conversion beneath it, that version's `online-help` publishes **nothing** and

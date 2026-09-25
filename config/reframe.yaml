@@ -25,7 +25,8 @@ defaults:
   toc_schema: ""
 
   # Whether `docushift sync` publishes the *merged* tree for this product instead of
-  # Stage 6's. Off, and deliberately off for every product below.
+  # Stage 6's. Off as the default, and overridden for exactly one product below:
+  # `tibco-enterprise-message-service`, the pilot doc set, signed off 2026-09-25.
   #
   # This is the writer sign-off gate. Merging is reversible right up until the moment
   # a merged page is served under an old topic's URL, and after that it is not: the
@@ -66,8 +67,14 @@ products:
   # each one out by its own subtree sizes and the versions would stop being diffable.
   # Pinned to the newest, which is the version the requirements' baseline was
   # measured against and the one `iter_versions` yields first.
+  # Signed off 2026-09-25: the 18-row review queue was read and every page was
+  # accepted as merged, so no `keep_separate` entries. The merged pages are now
+  # what `sync` publishes for this product, under the 8,639-row redirect map.
+  # Reverting is the inverse commit plus a `sync` -- cheap until the redirects are
+  # served, and not cheap afterwards.
   tibco-enterprise-message-service:
     pin_layout_to: "10.5.1"
+    publish: true
 
   # The other two multi-version Flare sets, pinned on the same rule -- the newest
   # eligible version, which is the one `iter_versions` yields first and the one a

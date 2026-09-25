@@ -2984,6 +2984,18 @@ Suite `1,494 passed, 2 skipped` (+14); `ruff` clean on `src`/`tests`. No product
 
 ---
 
+#### 20e Pilot sign-off — **Signed off, 2026-09-25**
+
+The human half of 20e, which no amount of code could supply. EMS's 18-row review queue was read and **every page accepted as merged** — so `keep_separate` stays empty for this product, and the queue's answer turned out to be the one the tooling could not have assumed. `publish: true` is now set for `tibco-enterprise-message-service`, with the reasoning in the config file beside it rather than only in this record, because the config is what the next person reads.
+
+Re-verified immediately before the commit, against the current code rather than 20d.1's run: `reframe` reports **Already current 6**, and a sync of all six merged versions to a scratch target validates at **768 files, 17,213 references, 0 errors, exit 0**, with 8,639 redirects in one doc-class map. The 37 warnings are 7 pre-existing `ANCHOR_MISSING` — the DocBook `a.indexterm` anchors carried since 20b, unrelated to the merge — and 30 `REDIRECT_SHADOWED`, 5 per version.
+
+**Those 30 are the one thing the sign-off does not settle, and deliberately so.** They are the case-only rows 20d measured: a `from` differing from its `to` in letter case alone, which is a necessary redirect on a case-sensitive host and a 301 loop on a case-insensitive one. Which of those the AEM host is, is not a fact about the documentation, so the tool names them and the answer has to arrive from the platform. They are warnings and do not gate.
+
+What this changes operationally: `sync` now reads `reframed/` for EMS, so the next run against a real target replaces 1,441 published topic URLs per version with 124 merged pages plus the 301 map that points the old URLs at the sections that replaced them. The rollback is the inverse commit plus a `sync`, and it is cheap only until those redirects are being served.
+
+---
+
 ## 2. Validation & Testing Criteria
 - **Catalog Merge Fidelity**: 100% preservation of manual edits and toggle states when fetching updates — *without* requiring the user to have flagged them.
 - **CSV Round-Trip Fidelity**: A load-then-save cycle with no changes produces a byte-identical file (stable sort, fixed columns, normalized booleans/dates). No diff churn on repeat fetches.
