@@ -167,6 +167,155 @@ def test_a_cell_wrapped_in_one_paragraph_is_safe_and_two_are_not() -> None:
     assert tables.unsafe_reason(double) is tables.Unsafe.MULTI_BLOCK
 
 
+def test_a_passthrough_table_loses_the_generated_style_classes() -> None:
+    """96.3% of the classes in the published EMS tree are this vocabulary."""
+    rendered = tables.passthrough(soup(
+        '<table class="TableStyle-Table">'
+        '<tr><td class="TableStyle-Table-BodyE-Column1-Body1">a</td></tr></table>'
+    ))
+
+    assert "TableStyle" not in rendered
+    assert "class=" not in rendered
+    assert ">a<" in rendered
+
+
+def test_a_passthrough_table_scrubs_its_root_and_not_only_its_descendants() -> None:
+    """`find_all(True)` returns descendants only.
+
+    The predecessor scrubs exactly that way, and every one of the 530
+    `ebx_definitionList` classes in its output sits on a `<table>` element that
+    its own cleaner walked straight past. This is that off-by-one, pinned.
+    """
+    rendered = tables.passthrough(soup('<table class="TableStyle-Table"><tr><td>a</td></tr></table>'))
+
+    assert "TableStyle-Table" not in rendered
+
+
+def test_a_passthrough_table_keeps_the_classes_that_carry_meaning() -> None:
+    """`varname` and `MCXref xref` are what a later phase reads; the band is not."""
+    rendered = tables.passthrough(soup(
+        '<table class="TableStyle-Table"><tr>'
+        '<td class="TableStyle-Table-Body-Body1"><span class="varname">EMSHOME</span></td>'
+        '<td><a class="MCXref xref" href="x.htm">see</a></td>'
+        "</tr></table>"
+    ))
+
+    assert 'class="varname"' in rendered
+    assert 'class="MCXref xref"' in rendered
+    assert "TableStyle" not in rendered
+
+
+def test_a_passthrough_table_keeps_an_engines_own_vocabulary_when_it_passes_one() -> None:
+    """In WebWorks the class name *is* the markup -- see `webworks.KEEP_CLASSES`."""
+    html = '<table><tr><td><span class="Code">tibemsd</span></td></tr></table>'
+
+    shared = tables.passthrough(soup(html))
+    engine = tables.passthrough(soup(html), tables.SEMANTIC_CLASSES | frozenset({"Code"}))
+
+    assert 'class="Code"' not in shared
+    assert 'class="Code"' in engine
+
+
+def test_a_scrubbed_class_is_removed_rather_than_emptied() -> None:
+    """`class=""` is neither the old shape nor the clean one."""
+    rendered = tables.passthrough(soup('<table><tr><td class="TableStyle-x">a</td></tr></table>'))
+
+    assert 'class=""' not in rendered
+
+
+def test_a_passthrough_table_drops_its_layout_attributes() -> None:
+    """Phase 23 reversed Phase 21's deferral. Phase 21's argument was about
+    sequencing -- verify the classes alone, so a regression cannot be ambiguous
+    about which change caused it -- and the sequence has happened."""
+    rendered = tables.passthrough(soup(
+        '<table border="0" cellpadding="5" width="100%" class="TableStyle-Table">'
+        '<tr><td valign="top">a</td></tr></table>'
+    ))
+
+    assert rendered == "<table><tr><td>a</td></tr></table>"
+
+
+def test_a_passthrough_table_drops_the_stylesheet_nothing_published() -> None:
+    """812 of these in the EMS tree, every one pointing at a `TableStyles` folder
+    that exists nowhere under `output/`. The link checker reads `href` and `src`,
+    so a dead reference inside a `style` attribute is invisible to it."""
+    rendered = tables.passthrough(soup(
+        '<table style="mc-table-style: '
+        "url('../Resources/TableStyles/Table.css');\"><tr><td>a</td></tr></table>"
+    ))
+
+    assert "mc-table-style" not in rendered
+    assert "style=" not in rendered
+
+
+def test_a_generated_column_tooltip_goes_and_an_authored_one_stays() -> None:
+    """`title` renders. 1,696 `<col title="C1">` means a reader hovering a column
+    border is shown "C1" -- so it is dropped where the authoring tool generates it
+    and kept where a human wrote it, which is not a distinction a single rule can
+    make about the attribute alone."""
+    rendered = tables.passthrough(soup(
+        '<table><col title="C1"/><tr><td>'
+        '<a href="x.htm" title="Read this first">go</a></td></tr></table>'
+    ))
+
+    assert 'title="C1"' not in rendered
+    assert 'title="Read this first"' in rendered
+
+
+def test_a_column_left_holding_nothing_is_removed_with_its_group() -> None:
+    """Once the widths are gone a `<col/>` carries no information, and keeping
+    1,696 empty ones would be keeping the skeleton of the decision."""
+    rendered = tables.passthrough(soup(
+        '<table><colgroup><col style="width: 169px;" title="C1"/></colgroup>'
+        "<tr><td>a</td></tr></table>"
+    ))
+
+    assert "<col" not in rendered
+    assert "<colgroup" not in rendered
+
+
+def test_a_column_that_still_says_what_it_covers_survives() -> None:
+    """`span` is structure, not styling -- it says how many columns the rule
+    applies to, which is the same category as `colspan`."""
+    rendered = tables.passthrough(soup(
+        '<table><colgroup><col span="2" style="width: 40px;"/></colgroup>'
+        "<tr><td>a</td></tr></table>"
+    ))
+
+    assert '<col span="2"/>' in rendered
+    assert "width" not in rendered
+
+
+def test_a_passthrough_table_keeps_what_the_cell_covers_and_where_it_points() -> None:
+    """The keep-list is structure and content. A dropped `rowspan` would silently
+    change the shape of the table, which is the failure `passthrough` exists to
+    avoid in the first place."""
+    rendered = tables.passthrough(soup(
+        '<table><tr><th scope="col" id="h1" abbr="Nm">N</th></tr>'
+        '<tr><td rowspan="2" colspan="3" headers="h1" bgcolor="#eee">'
+        '<a href="p.md#x">p</a></td></tr></table>'
+    ))
+
+    for kept in ('scope="col"', 'id="h1"', 'rowspan="2"', 'colspan="3"',
+                 'headers="h1"', 'href="p.md#x"'):
+        assert kept in rendered
+    assert "bgcolor" not in rendered
+    assert "abbr=" not in rendered
+
+
+def test_the_authoring_tools_own_plumbing_goes_whatever_it_is_called() -> None:
+    """A keep-list, so `data-mc-*` and a stray `xmlns` need no naming -- which is
+    the point, because the next engine's plumbing has a different name."""
+    rendered = tables.passthrough(soup(
+        '<table xmlns="http://www.w3.org/1999/xhtml">'
+        '<tr><td data-mc-conditions="Default.Print" data-mc-autonum="Table 1">'
+        "a</td></tr></table>"
+    ))
+
+    assert "data-mc" not in rendered
+    assert "xmlns" not in rendered
+
+
 def test_a_th_first_row_is_the_header_without_being_told() -> None:
     model = tables.read(soup("<table><tr><th>a</th><th>b</th></tr><tr><td>1</td><td>2</td></tr></table>"))
 

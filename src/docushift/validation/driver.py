@@ -26,6 +26,7 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from docushift import origins
 from docushift.reporting.findings import Finding, FindingsRun, Severity
 from docushift.sync import API_REFERENCES
 from docushift.validation import artifacts, csh, links
@@ -178,6 +179,9 @@ class Validator:
             found.extend(artifacts.check_dropdown(entry, entry.path / name))
             found.extend(artifacts.check_redirect_map(
                 entry, entry.path / name, self.target, self.context.trees))
+            found.extend(artifacts.check_redirect_map(
+                entry, entry.path / name, self.target, self.context.trees,
+                origins.ORIGINS))
         return found
 
     def _residue(self, entry: ProductFolder) -> list[Finding]:

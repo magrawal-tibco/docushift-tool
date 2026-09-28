@@ -301,6 +301,21 @@ REGISTRY: dict[str, Code] = _codes(
     Code("REFRAME_REVIEW_QUEUED", Severity.NOTE, Stage.REFRAME,
          "Merged pages needing an editorial decision, listed in review-queue.csv",
          "REFRAME-REQUIREMENTS.md R6"),
+    # Phase 22. A genuinely new condition rather than a broadened old one: this is
+    # neither a broken link nor an unparsed artifact, it is *the tool declining to
+    # guess a URL*. A warning and not an error, because an undeclared product is
+    # the expected state for every product but the pilot, and the run that names
+    # it has done nothing wrong.
+    #
+    # The severity is the argument in reverse from 20d.1's "no new code for the
+    # empty base". An empty `publish_base_url` is a property of the whole run and
+    # the shipped state, so a warning would fire on every correct run; this is a
+    # property of one version, is actionable by one line in `origin-urls.yaml`,
+    # and goes away for good once answered.
+    Code("ORIGIN_TEMPLATE_UNDECLARED", Severity.WARNING, Stage.REFRAME,
+         "No verified docsite URL template for this product, so no 301.yml was "
+         "written; a guessed origin URL is a redirect to a page that never existed",
+         "planning.md Phase 22"),
     Code("LINK_BROKEN", Severity.ERROR, Stage.VALIDATE,
          "Relative link resolving to nothing", "design.md §8.4"),
     # Emitted from Phase 7c, and a warning on arithmetic rather than on taste, the

@@ -400,7 +400,8 @@ def check_dropdown(product: ProductFolder, doc_class: Path) -> list[Finding]:
 
 
 def check_redirect_map(product: ProductFolder, doc_class: Path, target: Path,
-                       trees: set[str]) -> list[Finding]:
+                       trees: set[str],
+                       file_name: str = redirect_map.REDIRECTS) -> list[Finding]:
     """`{slug}/{doc-class}/redirects.yml` -- the published 301 map (20d.1).
 
     One question, and it is the only one this file can be asked here: does every
@@ -416,11 +417,16 @@ def check_redirect_map(product: ProductFolder, doc_class: Path, target: Path,
     A row whose `to` does not start at a published tree is not resolved: it is a
     hand-added redirect out of this target, which `sync` carries through verbatim
     precisely so that nothing here has to adjudicate it.
+
+    `file_name` is `301.yml` for Phase 22's origin map, which has the same `to`
+    side and the same contract. Its `from` side is checked by nothing, here or
+    anywhere: it is a live `docs.tibco.com` URL, and the only honest test of it is
+    a network fetch, which `validate` does not do.
     """
-    path = doc_class / redirect_map.REDIRECTS
+    path = doc_class / file_name
     if not path.is_file():
         return []
-    where = (product.relative / doc_class.name / redirect_map.REDIRECTS).as_posix()
+    where = (product.relative / doc_class.name / file_name).as_posix()
     try:
         text = path.read_text(encoding="utf-8")
     except OSError:  # pragma: no cover
@@ -428,7 +434,7 @@ def check_redirect_map(product: ProductFolder, doc_class: Path, target: Path,
     rows = redirect_map.parse(text)
     if rows is None:
         return [Finding("ARTIFACT_UNPARSED", slug=product.slug, path=where,
-                        message="is not the redirects.yml contract; sync leaves it alone")]
+                        message=f"is not the {file_name} contract; sync leaves it alone")]
 
     findings: list[Finding] = []
     for row in rows:

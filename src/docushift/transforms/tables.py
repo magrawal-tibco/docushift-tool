@@ -172,10 +172,131 @@ def _line(values: list[str], width: int | None = None) -> str:
     return "| " + " | ".join(cells) + " |"
 
 
-def passthrough(table: Tag) -> str:
-    """The table's own HTML, unchanged, as a block.
+#: Classes that survive a passthrough. Everything else goes. Measured on the
+#: published EMS tree: 26,829 `class` attributes across 899 of 8,639 files, of
+#: which **25,849 (96.3%) are Flare's generated `TableStyle-*` naming** -- a row
+#: band and a column position in a stylesheet that does not travel with the
+#: content, and therefore says nothing about what the table means.
+#:
+#: The ones below are the other 980. Each names something the plain text has
+#: already lost -- `varname` (617), `MCXref xref` (184), `filepath`, the `note*`
+#: family -- and a later phase turns them into real Markdown constructs rather
+#: than discarding them, so dropping them here would be destroying the input to
+#: that work.
+#:
+#: **A keep-list rather than a `TableStyle-*` strip-list.** A strip-list knows
+#: one generator's vocabulary; DITA, DocBook and WebWorks each bring their own,
+#: and anything unforeseen would pass through untouched. This fails closed, and
+#: an engine with a vocabulary of its own passes it as `keep` -- which is what
+#: WebWorks does with `SPAN_TO_TAG`, whose class names are the only record that
+#: a span was code or emphasis.
+SEMANTIC_CLASSES = frozenset({
+    "note", "noteTip", "noteWarning", "noteHeadInTable",
+    "varname", "filepath", "option", "cite",
+    "MCXref", "xref", "tabletitle", "autonumber", "groupOfURLs",
+})
+
+
+#: Attributes that survive a passthrough. Everything else is presentation or
+#: authoring-tool plumbing and goes with it.
+#:
+#: **Phase 23 widened Phase 21's scrub from `class` to every attribute**, and the
+#: corpus is the argument. Measured on the published EMS tree, 887 files with a
+#: table: **812 `style="mc-table-style: url('../Resources/TableStyles/Table.css')"`
+#: pointing at a folder that does not exist anywhere under `output/`** -- a
+#: dangling reference the link checker cannot see, because it reads `href` and
+#: `src` and this is inside a `style`. **1,696 `<col title="C1">`**, which is not
+#: a label but a *tooltip*: a reader hovering a column border sees "C1". And 201
+#: assorted `data-mc-conditions`, `data-mc-autonum` and stray `xmlns`.
+#:
+#: The 1,386 genuine layout attributes -- `cellspacing`, `col style="width:
+#: 169px"`, `td style="padding"` -- go too, which is the part Phase 21 declined
+#: to do and a writer decided. **That is a rendering change and is not claimed to
+#: be anything else**: the published stylesheet sizes these tables now, which is
+#: better on a narrow screen and occasionally worse where a pixel width was
+#: holding a command name on one line. It cannot be verified by showing that
+#: nothing changed, and it is not.
+#:
+#: A keep-list again, for `SEMANTIC_CLASSES`' reason: a strip-list knows one
+#: generator's vocabulary and lets the next one through untouched. What is kept
+#: is structure and content -- what a cell spans, where a link goes, what an
+#: anchor is called -- never how any of it looks.
+STRUCTURAL_ATTRS = frozenset({
+    "class",                                        # governed by `keep`, above
+    "href", "src", "alt", "srcset", "usemap",       # where it points
+    "id", "name", "headers", "scope",               # what it is called
+    "colspan", "rowspan", "span",                   # what it covers
+    "start", "value", "reversed", "type",           # list numbering, which is content
+    "lang", "dir", "datetime",                      # language and time
+})
+
+#: Elements whose `title` a human wrote. Everywhere else it is generated -- the
+#: 1,696 `<col title="C1">` above -- and a generated tooltip is worse than a
+#: silent one, because it renders.
+TITLE_BEARERS = frozenset({"a", "abbr", "area", "img", "iframe"})
+
+
+def scrub(table: Tag, keep: frozenset[str] = SEMANTIC_CLASSES,
+          attrs: frozenset[str] = STRUCTURAL_ATTRS) -> None:
+    """Drops presentation from a subtree about to be emitted as HTML.
+
+    **The root as well as its descendants.** `find_all(True)` returns descendants
+    only, and a scrub written without the root in front of it is the
+    predecessor's bug rather than a hypothetical one: `html-to-md`'s
+    `_clean_table_html` iterates exactly that way, and its output carries 530
+    `ebx_definitionList` classes of which every single one is on a `<table>` and
+    not one is on a descendant.
+
+    Mutates in place, which is safe for the same reason `markdown.rewrite`'s
+    mutation is: the subtree is discarded as soon as the topic is rendered.
+
+    An emptied `class` is deleted rather than left as `class=""` -- that shape is
+    neither the old output nor the clean one, and would defeat a check written
+    against either.
+
+    A `<col>` left holding nothing is removed, and a `<colgroup>` emptied by that
+    goes after it. Once the widths are gone a `<col/>` carries no information at
+    all, and leaving 1,696 of them in the output would be keeping the skeleton of
+    the decision rather than the decision.
+    """
+    for element in [table, *table.find_all(True)]:
+        names = element.get("class")
+        if names:
+            kept = [name for name in names if name in keep]
+            if kept:
+                element["class"] = kept
+            else:
+                del element["class"]
+
+        for name in [a for a in element.attrs if a not in attrs]:
+            if name == "title" and element.name in TITLE_BEARERS:
+                continue
+            del element[name]
+
+    # Two passes and in this order: a `<colgroup>` is only empty once its `<col>`
+    # children have gone, and `find_all` hands back the parent first.
+    for spec in table.find_all("col"):
+        if not spec.attrs:
+            spec.decompose()
+    for group in table.find_all("colgroup"):
+        if not group.attrs and not group.find(True):
+            group.decompose()
+
+
+def passthrough(table: Tag, keep: frozenset[str] = SEMANTIC_CLASSES,
+                attrs: frozenset[str] = STRUCTURAL_ATTRS) -> str:
+    """The table's own HTML, minus the authoring tool's styling, as a block.
 
     Blank-line padded so that Markdown treats it as an HTML block rather than
     trying to parse the first line as a paragraph.
+
+    **Layout goes too, as of Phase 23.** Phase 21 kept `border`, `cellpadding`,
+    `cellspacing`, `width` and `valign` on the argument that removing them is a
+    rendering change rather than a cleanup, and bundling the two would leave any
+    regression ambiguous about which caused it. That argument was about
+    *sequencing*, and the sequence has now happened: the classes went first and
+    were verified byte-for-byte, so this change stands on its own and the
+    published stylesheet sizes the tables.
     """
+    scrub(table, keep, attrs)
     return str(table)

@@ -95,8 +95,12 @@ def test_the_register_carries_every_row_of_7_5() -> None:
     registered here, because a code registered before the check that emits it is
     exactly what `test_every_registered_code_is_written_down_somewhere_in_src`
     exists to refuse.
+
+    Phase 22 adds the 54th, `ORIGIN_TEMPLATE_UNDECLARED`, on the same rule: it is
+    registered in the commit that emits it, and it emits for sixteen of seventeen
+    products because declining to guess a live URL is the whole design.
     """
-    assert len(REGISTRY) == 53
+    assert len(REGISTRY) == 54
 
 
 def test_severity_comes_from_the_registry_and_not_from_the_call_site() -> None:

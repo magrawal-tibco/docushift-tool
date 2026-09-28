@@ -1204,3 +1204,137 @@ def test_the_per_version_map_is_published_unchanged_beside_it(
 
     inner = target / TREE / "en-us" / product.slug / ONLINE_HELP / "10-4-0" / REDIRECT_MAP
     assert inner.read_text(encoding="utf-8") == MERGED
+
+
+# -- the published origin map (Phase 22) ------------------------------------------
+#
+# Same assembly, same four rules, one asymmetry: `from` is an address on
+# docs.tibco.com that this tool has never written, so it is not prefixed and
+# entitlement is read off `to`. Both halves of that are load-bearing, and getting
+# either wrong is silent -- a map that looks right and 301s nowhere.
+
+ORIGIN_MAP = "301.yml"
+ORIGINS = (
+    "redirects:\n"
+    "- from: https://docs.tibco.com/pub/ems/10.4.0/doc/html/users-guide/old.htm\n"
+    "  to: users-guide/new.md#old\n"
+    "  status: 301\n"
+)
+
+
+def published_origins(target: Path, product: Product) -> dict:
+    path = target / TREE / "en-us" / product.slug / ONLINE_HELP / ORIGIN_MAP
+    return yaml.safe_load(path.read_text(encoding="utf-8"))
+
+
+def origin_version(config: ConfigManager, catalog, product: Product, number: str) -> None:
+    """A merged version carrying both maps, which is what Reframe now writes."""
+    convert_output(config, product, number)
+    reframe_output(config, product, number, **{
+        REDIRECT_MAP: MERGED,
+        ORIGIN_MAP: ORIGINS.replace("10.4.0", number),
+        "users-guide/new.md": "# new\n",
+    })
+    current(catalog, product.slug, number)
+
+
+def test_the_origin_map_prefixes_the_destination_and_leaves_the_live_url_alone(
+    config, catalog, distributor, product, target
+) -> None:
+    """The one place this map differs from its sibling. `from` is already an
+    absolute docsite URL; prefixing it would bury a live host in the middle of a
+    published path, which is neither valid nor obviously wrong at a glance."""
+    opt_in(config, product.slug)
+    origin_version(config, catalog, product, "10.4.0")
+
+    distributor.sync_many([(product, product.versions["10.4.0"])], target)
+
+    rows = published_origins(target, product)["redirects"]
+    assert [row["from"] for row in rows] == [
+        "https://docs.tibco.com/pub/ems/10.4.0/doc/html/users-guide/old.htm"
+    ]
+    assert rows[0]["to"] == f"{TREE}/en-us/tibco-ems/online-help/10-4-0/users-guide/new.md#old"
+    assert rows[0]["status"] == 301
+
+
+def test_a_scoped_run_leaves_the_other_versions_origin_rows_in_place(
+    config, catalog, distributor, product, target
+) -> None:
+    opt_in(config, product.slug)
+    for number in ("10.4.0", "10.3.1"):
+        origin_version(config, catalog, product, number)
+    distributor.sync_many([(product, v) for v in product.versions.values()], target)
+
+    distributor.sync_many([(product, product.versions["10.4.0"])], target)
+
+    rows = published_origins(target, product)["redirects"]
+    assert {row["to"].split("/")[4] for row in rows} == {"10-4-0", "10-3-1"}
+
+
+def test_the_origin_map_regenerates_its_own_rows_rather_than_duplicating_them(
+    config, catalog, distributor, product, target
+) -> None:
+    """Entitlement on `to`, not `from`. Reading it off `from` would match no
+    prefix this tool owns, so every run would append a second copy of every row
+    and the map would grow without bound while every assertion above still held."""
+    opt_in(config, product.slug)
+    origin_version(config, catalog, product, "10.4.0")
+
+    distributor.sync_many([(product, product.versions["10.4.0"])], target)
+    distributor.sync_many([(product, product.versions["10.4.0"])], target)
+
+    assert len(published_origins(target, product)["redirects"]) == 1
+
+
+def test_a_hand_added_origin_row_survives_a_resync(
+    config, catalog, distributor, product, target
+) -> None:
+    """A legacy URL a human mapped by hand points outside every version segment
+    this tool publishes, so it is outside the entitled set and is carried
+    through verbatim -- the drop-down's rule, in the file it matters most."""
+    opt_in(config, product.slug)
+    origin_version(config, catalog, product, "10.4.0")
+    distributor.sync_many([(product, product.versions["10.4.0"])], target)
+    path = target / TREE / "en-us" / product.slug / ONLINE_HELP / ORIGIN_MAP
+    document = yaml.safe_load(path.read_text(encoding="utf-8"))
+    hand = {"from": "https://docs.tibco.com/ems.html", "to": "https://elsewhere/", "status": 302}
+    document["redirects"].append(hand)
+    path.write_text(yaml.safe_dump(document, sort_keys=False), encoding="utf-8")
+
+    distributor.sync_many([(product, product.versions["10.4.0"])], target)
+
+    rows = published_origins(target, product)["redirects"]
+    assert hand in rows
+    assert len(rows) == 2
+
+
+def test_a_product_with_no_declared_origin_template_gets_no_origin_map(
+    config, catalog, distributor, product, target
+) -> None:
+    """Reframe writes no per-version `301.yml` for an undeclared product, so there
+    is nothing to assemble. The alternative -- an empty file in seventeen trees --
+    reads as "this product has no redirects" rather than "nobody said where it
+    lives today", and only one of those is true."""
+    opt_in(config, product.slug)
+    merged_version(config, catalog, product, "10.4.0")
+
+    distributor.sync_many([(product, product.versions["10.4.0"])], target)
+
+    folder = target / TREE / "en-us" / product.slug / ONLINE_HELP
+    assert (folder / REDIRECT_MAP).is_file()
+    assert not (folder / ORIGIN_MAP).exists()
+
+
+def test_an_unparseable_published_origin_map_is_left_alone_and_named(
+    config, catalog, distributor, product, target
+) -> None:
+    opt_in(config, product.slug)
+    origin_version(config, catalog, product, "10.4.0")
+    folder = target / TREE / "en-us" / product.slug / ONLINE_HELP
+    folder.mkdir(parents=True, exist_ok=True)
+    (folder / ORIGIN_MAP).write_text("redirects: not-a-list\n", encoding="utf-8")
+
+    stats = distributor.sync_many([(product, product.versions["10.4.0"])], target)
+
+    assert (folder / ORIGIN_MAP).read_text(encoding="utf-8") == "redirects: not-a-list\n"
+    assert any(ORIGIN_MAP in entry for entry in stats.unparsed)

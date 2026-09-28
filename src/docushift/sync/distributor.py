@@ -60,6 +60,7 @@ from enum import StrEnum
 from pathlib import Path
 from typing import Any
 
+from docushift import origins
 from docushift.apiref import find_api_roots, recorded_roots
 from docushift.catalog import CatalogManager
 from docushift.config import ConfigManager
@@ -146,9 +147,10 @@ class SyncStats:
     # touches one version and still rewrites the whole drop-down.
     products: int = 0
     dropdowns: int = 0
-    # Doc-class `redirects.yml` maps written, and the rows they carry. Zero on a
-    # run where no product publishes merged, which is every run until a writer
-    # signs one off (20d.1).
+    # Doc-class published maps written -- `redirects.yml` and Phase 22's
+    # `301.yml`, counted together because the report's point is how many rows a
+    # search-and-replace has to cover -- and the rows they carry. Zero on a run
+    # where no product publishes merged (20d.1).
     redirect_maps: int = 0
     redirect_rows: int = 0
     # The `publish_base_url` those rows were rendered against, so the report can
@@ -739,6 +741,7 @@ class WorkspaceDistributor:
             self._write_dropdown(folder, present, catalog_versions, templates, stats)
             if folder.name == ONLINE_HELP:
                 self._write_redirect_map(product, folder, present, stats)
+                self._write_origin_map(product, folder, present, stats)
 
         # Once per product over the union, not once per doc-class. A version in
         # three doc-classes is one non-numeric version string, and naming it three
@@ -781,15 +784,51 @@ class WorkspaceDistributor:
         opted in to publishing merged, and writing them all an empty file would put
         a 301 map into 17 trees that have no redirects to serve.
         """
+        self._assemble_map(
+            product, folder, present, stats,
+            file_name=redirect_map.REDIRECTS,
+            header=redirect_map.HEADER,
+            prefix_keys=("from", "to"),
+            owned_key="from",
+        )
+
+    def _write_origin_map(
+        self, product: Product, folder: Path, present: set[str], stats: SyncStats
+    ) -> None:
+        """The doc-class origin 301 map -- live docsite URL -> published page (Phase 22).
+
+        The same assembly as `redirects.yml` and the same four rules, over the file
+        Reframe writes beside it. It differs in exactly two places, both because the
+        `from` side is somebody else's address rather than one of ours: only `to` is
+        prefixed into a published URL, and entitlement is read off `to`.
+        """
+        self._assemble_map(
+            product, folder, present, stats,
+            file_name=origins.ORIGINS,
+            header=origins.PUBLISHED_HEADER,
+            prefix_keys=("to",),
+            owned_key="to",
+        )
+
+    def _assemble_map(
+        self, product: Product, folder: Path, present: set[str], stats: SyncStats,
+        *, file_name: str, header: str, prefix_keys: tuple[str, ...], owned_key: str,
+    ) -> None:
+        """Both doc-class 301 maps: read the version folders, merge, write.
+
+        Shared because the four rules in `sync/redirects`'s module docstring are the
+        maps' whole contract, and two copies of them would drift on the next change
+        to any one of them -- which is the failure the rules exist to prevent.
+        """
         base = self.config.publish_base_url()
         tree = self.config.docs_tree_name(product.bu, product.family)
         locale = slugify(self.config.locale)
         rows, unparsed = redirect_map.generated_rows(
-            folder, present, base, tree, locale, product.slug
+            folder, present, base, tree, locale, product.slug, file_name, prefix_keys
         )
         stats.unparsed.extend(unparsed)
 
-        path = folder / redirect_map.REDIRECTS
+        path = folder / file_name
         if not path.is_file():
             if not rows:
                 return
@@ -801,9 +840,13 @@ class WorkspaceDistributor:
             stats.unparsed.append(str(path))
             return
 
-        merged = redirect_map.merge(existing, rows, redirect_map.owned_prefixes(
-            present, base, tree, locale, product.slug, folder.name))
-        path.write_text(redirect_map.render(merged), encoding="utf-8")
+        merged = redirect_map.merge(
+            existing, rows,
+            redirect_map.owned_prefixes(present, base, tree, locale, product.slug,
+                                        folder.name),
+            owned_key,
+        )
+        path.write_text(redirect_map.render(merged, header), encoding="utf-8")
         stats.redirect_maps += 1
         stats.redirect_rows += len(merged)
         stats.redirect_base = base

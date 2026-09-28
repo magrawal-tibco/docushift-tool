@@ -929,6 +929,7 @@ The concrete deliverable of §7.1: every deferred "report line" in the three doc
 | `SYNC_MERGE_UNAVAILABLE`²⁰ᵈ | warn | sync | A product set to publish merged has no current reframed tree; it publishes nothing rather than falling back | §20d |
 | `REDIRECT_SHADOWED`²⁰ᵈ | warn | validate | A redirect whose source path still exists in the published tree; a 301 loop where the two differ only in case | `REFRAME-REQUIREMENTS.md` R5 |
 | `REFRAME_KEEP_SEPARATE_UNMATCHED`²⁰ᵉ | warn | reframe | A `keep_separate` path matches no topic in this version; the merge a writer meant to undo still happened | §20e |
+| `ORIGIN_TEMPLATE_UNDECLARED`²² | warn | reframe | No verified docsite URL template for this product, so no `301.yml` was written; a guessed origin URL redirects to a page that never existed | Phase 22 |
 
 #### 7.6 Cross-version CSH regression
 
@@ -2994,6 +2995,212 @@ Re-verified immediately before the commit, against the current code rather than 
 
 What this changes operationally: `sync` now reads `reframed/` for EMS, so the next run against a real target replaces 1,441 published topic URLs per version with 124 merged pages plus the 301 map that points the old URLs at the sections that replaced them. The rollback is the inverse commit plus a `sync`, and it is cheap only until those redirects are being served.
 
+### Phase 21: A Passthrough Table Carries the Authoring Tool's Styling Into the Output — **Planned, 2026-09-28**
+
+`tables.passthrough` is one line — `return str(table)` — and that line is the whole of the problem. Half the corpus's tables take the passthrough branch for a good reason (§5.5: GFM has no `rowspan`, no multi-block cell, and flattening one produces a plausible table that is wrong), but `markdown.rewrite` resolves only `img src` and `a href`/`id` before the subtree is dumped. Everything else Flare stamped on the markup ships verbatim.
+
+**Measured on the published EMS tree** (`output/en-us-tib-ems`, 8,639 `.md` files):
+
+| | |
+|---|---:|
+| files carrying a `class=` | **899** (10.4%) |
+| `class` attributes total | **26,829** |
+| `TableStyle-*` | **25,849** (96.3%) |
+| everything else | **980** |
+
+The `TableStyle-*` vocabulary is Flare's generated table-style naming — `TableStyle-Table-BodyE-Column1-Body1` and 30-odd siblings — and it is presentational by construction: it names a row band and a column position in a stylesheet that does not travel with the content. The remaining 980 are not that. `varname` (617), `MCXref xref` (184), `filepath`, `option`, `cite`, and the four `note*` variants carry semantics the plain text has already lost, and some of them are the raw material for a later phase that turns them into real Markdown constructs. **They are kept.**
+
+Note what this is *not*. The `<table>` element also carries `border`, `cellpadding`, `cellspacing`, `width` and per-cell `valign`. Those are out of scope: unlike a class naming an absent stylesheet, they affect how a browser lays the table out today, and removing them is a rendering change rather than a cleanup. The predecessor stripped them; that is a separate decision and not this one.
+
+There is a second-order finding worth recording because it explains the predecessor's output and will otherwise be rediscovered. `html-to-md`'s `_clean_table_html` iterates `table.find_all(True)`, which in BeautifulSoup returns **descendants only, never the element itself**. Its passthrough tables therefore have clean cells and a fully-attributed `<table>` tag — 530 `ebx_definitionList` classes survive on EMS's neighbour tree, all 530 on the `<table>`, none on any descendant. DocuShift's bug is the wider one (it scrubs nothing), but the shape of the predecessor's is the reason to write the fix as a whole-subtree walk that includes the root, and to have a test that would fail on the off-by-one.
+
+#### Decisions
+
+| decision | what gets built | why not the obvious alternative |
+|---|---|---|
+| **Scrubbed in `tables.passthrough`, not in `markdown.rewrite`** | `passthrough` walks `[table, *table.find_all(True)]` and drops non-semantic classes before rendering | `rewrite` is `markdown.py`'s and WebWorks calls it separately (`webworks.py:304`); putting the scrub in the shared choke point means every engine that passes a table through gets it, including the next one. Mutation in place is already sanctioned here — the subtree is discarded as soon as the topic renders (`rewrite`'s docstring). |
+| **A keep-list, not a strip-list** | Classes are removed unless listed; the list is the semantic vocabulary above | A `TableStyle-*` prefix rule is a rule about *one* generator's naming. DITA, DocBook and WebWorks each have their own noise, and a strip-list would need extending per engine while silently passing anything unforeseen. A keep-list fails closed and is auditable in one place. |
+| **The keep-list is a module constant, not config** | `tables.SEMANTIC_CLASSES` | `reframe.yaml` is editorial policy a writer tunes. This is a fact about the source vocabulary, changes only when an engine is added, and belongs beside the code that reads it — the same argument `SPAN_TO_TAG` already makes in `webworks.py`. |
+| **An emptied `class` is removed, not left empty** | `class=""` never appears in the output | An empty attribute is the one shape that is neither the old output nor the clean one, and it would defeat a grep written against either. |
+| **Layout attributes untouched** | `border`, `cellpadding`, `cellspacing`, `width`, `valign` all survive | They change rendering. This phase is a cleanup with no visible effect; bundling a rendering change into it would make any regression ambiguous. |
+| **No new finding code** | Nothing is reported | Nothing here can fail or be ambiguous. A counter on a cleanup that always succeeds is a line nobody reads. |
+
+#### What this costs downstream
+
+The output of `convert` changes for every version with a passthrough table, so EMS must be re-converted, re-reframed and re-synced. **No path and no anchor changes**, so `toc.yml`, `csh.yml`, `redirects.yml` and the 8,639-row published map are all byte-identical across the change — which is the assertion worth making explicitly, because it is what makes this safe to run against a signed-off pilot. The merged pages themselves change in exactly one respect and `reframe` will report all six versions stale, which is correct and expected.
+
+*Exit: EMS re-converts with **0** `TableStyle-*` classes and **980** semantic classes surviving in the same 899 files; `toc.yml`, `csh.yml` and `redirects.yml` byte-identical before and after; `validate` reports no new findings; a unit test pins the root-element case that the predecessor's off-by-one would fail.*
+
+#### Phase 21 — **Built & verified, 2026-09-28**
+
+Built as planned, in two files. `tables.scrub` walks `[table, *table.find_all(True)]` and `tables.passthrough` calls it; `webworks.KEEP_CLASSES` widens the keep-list with `SPAN_TO_TAG`'s keys, which the plan did not anticipate and which matters: in that engine the class name *is* the markup — a span is code by virtue of being `class="Code"` — and the passthrough branch is the one place that never got rewritten into `<code>`. Dropping them would have made it the only part of the corpus where that distinction was gone for good.
+
+**Verified by re-converting EMS 10.5.1 to a scratch tree and diffing against the published one:**
+
+| | before | after |
+|---|---:|---:|
+| `TableStyle-*` classes | **4,272** | **0** |
+| semantic classes | 168 | **168** |
+| `toc.yml` | — | byte-identical |
+| `metadata.yml` | — | byte-identical |
+| `.md` files differing | — | 149 |
+| **files differing by anything other than a `class` attribute** | — | **0 of 1,441** |
+
+That last row is the one that matters: strip `class="…"` from both trees and all 1,441 pages compare equal. No path moved and no anchor changed, so nothing the *converter* produces is affected beyond the classes.
+
+**But "the merge layout is unaffected" — claimed here when this note was first written — is false, and the corpus rebuild showed it.** The packer sizes pages by word count, and a scrubbed `class="TableStyle-…"` is words. Re-converting all six EMS versions and re-merging moved two of them: **749 → 747 pages** (10.4.1 126 → 125, 10.4.0 129 → 128, the other four unchanged) and the review queue **109 → 115 rows**. Redirect coverage is unchanged at **8,613 rows**, so no topic gained or lost a redirect; only two page boundaries moved, and `REDIRECT_SHADOWED` went 30 → 32 as two more leaders became case-only self-redirects. `validate` is **0 errors** either way. The claim was wrong because it reasoned about the converter's output in isolation and the packer reads that output; the corrected statement is that the *content* is unaffected and the *layout* shifts by two pages.
+
+**Open, found here and not fixed: a converter change does not invalidate a merged tree.** `reframe`'s currency check keys on `convert_source_checksum` — the *extracted* package — plus the policy key, so after re-converting with the scrub in place all six versions reported `Already current` while holding pre-scrub HTML. `--force` is the workaround and it is not discoverable. The fix is to key on something the converter's own output moves; it is not in this phase because it changes when every product re-merges, not just EMS.
+
+The surviving 168 are exactly the declared vocabulary — `varname` 103, `MCXref xref` 35, `tabletitle` 10, `filepath` 7, and single figures of `option`, `noteHeadInTable`, `autonumber`, `note`, `noteTip`, `noteWarning`, `groupOfURLs`.
+
+This version has no `csh.yml` to compare — EMS is the empty-alias-file case (`has_csh: true`, `csh_names: 0`, §5.3.1), so the byte-identity claim for the help map is carried by the other five versions at the corpus rebuild rather than by this one.
+
+Six new tests, one per decision, including the root-element case the predecessor's off-by-one would fail. Suite **1,500 passed, 2 skipped**.
+
+---
+
+### Phase 22: The Redirect Map Does Not Start Where the Reader Does — **Planned, 2026-09-28**
+
+20d.1 shipped a served 301 map and it is correct about everything except its starting point. Its `from` is the **pre-merge published path in the new tree** — `…/online-help/10-5-1/users-guide/foo.md`. That URL has never been served. It is the address the topic *would* have had in the new structure had it not been merged, which makes the map a faithful record of what Reframe did and useless for the migration cutover, because the URLs that are about to stop working are on `docs.tibco.com` and are not in the file.
+
+What is missing is one join, and the pieces are all on disk:
+
+- **`state.db`'s `output_map`** — `source → output` per version, written by `converter/driver.py:332`. For EMS 10.5.1: 1,441 rows, `tibco-enterprise-message-service-10-5-1/html/_shared/about-this-product.htm → _shared/about-this-product.md`.
+- **Reframe's per-version `redirects.yml`** — `output → page.md#anchor`, 1,441 rows for the same version. The two counts agreeing is not a coincidence and is worth asserting: every converted topic has exactly one home after the merge.
+- **`sync/redirects.published()`** — the version-root-relative path to the served URL, already written and already used.
+
+**The origin URL, verified rather than assumed.** The live shape is `https://docs.tibco.com/pub/{folder_path}/doc/{source path, package-root segment removed}`, where `folder_path` is the directory part of `zip_url` under `/pub/` (`ems/10.5.1` for EMS 10.5.1). Checked against the live site on 2026-09-28: `https://docs.tibco.com/pub/ems/10.5.1/doc/html/_shared/about-this-product.htm` serves *About this Product* for EMS 10.5.1, which is the topic that row names.
+
+**And it does not generalise, which is the whole design constraint.** Grouping `output_map` by the first two segments of its source paths across the converted catalog returns four distinct layouts:
+
+| shape | example product |
+|---|---|
+| `<package-root>/html/…` | `tibco-enterprise-message-service`, `tibco-streaming`, `tibco-administrator-enterprise-edition` |
+| `html/…` (no package root) | `spotfire-data-science-author`, `tibco-designer-add-in-for-tibco-business-studio` |
+| `doc/html/…` | `tibco-datasynapse-gridserver-logviewer` |
+| `<package-root>/designerhelp/…` | `tibco-runtime-agent` |
+
+One rule applied to all four emits confident, wrong URLs for three of them. A wrong 301 is strictly worse than a missing one: the reader lands on a dead page and the map records success. So the origin template is **declared and verified per product, never inferred**.
+
+#### Where the two files go
+
+Per version, plus an assembled one per product — the same split `redirects.yml` already makes, for the same reasons, and with the same hazard to avoid.
+
+- **Per version: `301.yml` at the version root of the *source* tree** (`reframed/…/10.5.1/` for a product that publishes merged, `output/…` otherwise), written by Reframe beside the `redirects.yml` it already writes at `driver.py:503`. It is then copied into the published tree like any other file. **It must not be written into the published folder after the copy** — that is 20d.1's measured trap: `_identical`'s shallow `filecmp` would see the version folder differ from its source and every merged version would re-copy on every run, with `CURRENT` no longer reachable.
+- **Per product: `301.yml` at doc-class level**, beside `version.yml` and `redirects.yml`, assembled by `finish_product` **from the doc-class directory after the copy** — not from the run's write list, so `sync --version 10.5.1` cannot quietly publish a map that redirects one version out of six and reports success.
+
+The coordinate systems mirror `redirects.yml` exactly: the version-root file's `to` is version-root-relative and auditable against the folder it sits in; the doc-class file's `to` is the served URL, tree-rooted when `publish_base_url` is empty. The `from` is an absolute `docs.tibco.com` URL in **both**, because unlike the `to` side it is not a path this tool invented — it is a live address, and truncating it to a path would lose the one thing that makes the row a cutover instruction.
+
+#### Decisions
+
+| decision | what gets built | why not the obvious alternative |
+|---|---|---|
+| **Origin templates are declared, not inferred** | New `config/origin-urls.yaml`: per product, the verified live URL template and the number of leading source segments to drop. EMS filled in and verified; everything else absent. | The four-layout measurement above. Inference would be right for EMS and silently wrong for Runtime Agent, and the failure is invisible until a reader hits it. This is `scope.yaml`'s shape — a YAML rule file naming products explicitly — for `scope.yaml`'s reason. |
+| **A version with no declared template is skipped and named** | No `301.yml` is written; the run report names the version | The user's call, and the right one. A missing redirect is a gap someone can see and fill; a guessed one is a 404 with a success line beside it. |
+| **New code `ORIGIN_TEMPLATE_UNDECLARED`, warning** | Register **52 → 53** | This is a genuinely new condition — not a broken link, not an unparsed artifact — and 20d.1's argument against widening a registered code's meaning applies in reverse here. A warning, not an error: an undeclared product is the expected state for all but one product today. |
+| **Every converted topic gets a row, not only merged ones** | 1,441 rows per EMS version | The whole folder structure changed, so every live URL is about to break, merged or not. A map covering only merge-induced moves would leave the majority of the 404s unredirected — and that is the map that already exists. |
+| **The row count is asserted against `output_map`** | A version whose `301.yml` row count differs from its `output_map` count fails the version | The join has three inputs and a silent drop in any of them produces a short map that looks fine. This is the one invariant that catches it, and it is free. |
+| **`.md` is kept on the `to` side** | As 20d.1 | Unchanged argument: every relative link and every `toc.yml` path already carries it, and a map that guessed otherwise would be the only artifact in the tree that disagreed. |
+| **`status: 301` throughout** | As Reframe's map | The file is named for it. A 302 is a different decision and nobody has asked for one. |
+| **Hand-added rows survive; an unparsable file is left alone and named** | `version.yml`'s rules, via the existing `redirects.parse`/`merge` | Third time these rules apply to an assembled map. Reusing them rather than restating them is what keeps the three files behaving the same way under a scoped run. |
+| **`validate` checks the `to` side only** | Every `to` in a doc-class `301.yml` resolves to a file under the target — `LINK_BROKEN`, via the existing `relative_path` | The `from` side is a URL on a site this tool does not own and cannot resolve offline. Checking it would mean a network call inside `validate`, which takes no config and makes none. |
+
+#### Scope of this phase
+
+EMS only — six versions, ~8,639 rows. It is the pilot, it is the one product whose origin URLs are verified against the live site, and it is the product whose merge has already been signed off, which makes it the one where the cutover is real. The other products gain nothing until someone confirms their URL shape, and `ORIGIN_TEMPLATE_UNDECLARED` is how they ask.
+
+*Exit: each of EMS's six merged versions carries a `301.yml` whose row count equals its `output_map` count; the doc-class `301.yml` carries all six versions' rows, sorted, every `from` an absolute `docs.tibco.com` URL and every `to` tree-rooted; a scoped `sync --version 10.5.1` leaves the other five versions' rows byte-identical; a hand-added row survives; `validate` resolves every `to` with no new findings; a sample of origin URLs is confirmed live by hand before the map is called done; every other converted product reports `ORIGIN_TEMPLATE_UNDECLARED` and writes no file.*
+
+### Phase 22 — **Built & verified, 2026-09-28**
+
+`config/origin-urls.yaml` declares one product. `origins.py` turns a declaration plus a version's `zip_url` plus `state.db`'s `output_map` into rows; `reframe/driver._write_origins` writes `301.yml` into the **staging** tree so the copy's shallow `filecmp` check stays true; `sync/distributor._assemble_map` publishes the doc-class view after the copy. `sync/redirects` grew three parameters — `file_name`, `prefix_keys`, `merge(key=)` — rather than a second copy of the four rules.
+
+**The asymmetry that is the whole phase.** `redirects.yml` prefixes both sides and reads entitlement off `from`, because both sides are ours. `301.yml` prefixes **only `to`** and reads entitlement off **`to`**, because `from` is an address on `docs.tibco.com`. Getting either wrong is silent: prefixing `from` buries a live host mid-path, and owning on `from` matches no prefix, regenerates nothing, and appends a second copy of every row on every run while every other assertion still passes. Both are pinned by a test.
+
+| Exit criterion | Measured |
+|---|---|
+| Row count equals `output_map` per version | 1452 / 1437 / 1425 / 1425 / 1437 / 1437 — equal in all six, no dropped paths reported |
+| Doc-class map carries all six versions | 8,613 rows; `{10-4-0: 1452, 10-4-1: 1437, 10-4-3: 1425, 10-4-4: 1425, 10-5-0: 1437, 10-5-1: 1437}`; every `from` an absolute `docs.tibco.com` URL |
+| Every `to` resolves | 0 missing, checked in the reframed tree and again in the synced target |
+| Scoped run leaves the rest alone | `sync --version 10.5.1` → doc-class `301.yml` **byte-identical** |
+| Hand-added row survives | 8,613 → 8,614, the 302 carried through verbatim |
+| `validate` | 0 errors; 7 `ANCHOR_MISSING` + 32 `REDIRECT_SHADOWED`, all pre-existing per-version findings, none from `301.yml` (30 before Phase 21's rebuild moved two page boundaries) |
+| Origin URLs are live | `users-guide/connection-and-memor.htm` → "Connection and Memory Parameters"; `c-and-cobol-reference/tibemsmsgproducer-se.htm` → "tibemsMsgProducer_SetDeliveryMode"; `10.4.0/users-guide/export6.htm` → "Export" |
+| Undeclared products | `tibco-runtime-agent@5.13.0` reframed, reported `ORIGIN_TEMPLATE_UNDECLARED`, wrote no `301.yml` |
+
+**Deviations from the plan.** Two, both small. The `validate` check is `check_redirect_map` with a `file_name` argument rather than a new function — one checker, one message, and the `301.yml` name substituted into it, because the question and the code are identical. And the sync report line now says "N published map(s)" instead of "N redirects.yml": the counter always covered both files, and naming one of them was the kind of wrong that reads as right.
+
+One observation worth recording: a **leader** topic gets `page.md#its-own-anchor`, not a bare `page.md`. That is `redirects.yml`'s existing shape and its reason — the reader arrives at the section rather than the top of a merged page — and it is why `REDIRECT_SHADOWED` fires at all.
+
+---
+
+### Phase 23: The Classes Went and Everything Else Stayed — **Planned, 2026-09-28**
+
+Phase 21 scrubbed `class` and said so explicitly: layout attributes "change rendering", bundling the two would make any regression ambiguous about which caused it, and so `border`, `cellpadding`, `cellspacing`, `width` and `valign` were left alone. That was the right call for Phase 21 and it was an argument about **sequencing**, not a permanent boundary. A writer reading the output found the rest still there — *"I can still see cellspacing, style, and title attribute"* — and the measurement behind that observation turns out to be worse than "some layout survived".
+
+**Measured on the published EMS tree, 887 files carrying a table:**
+
+| what survives a Phase 21 passthrough | count | what it is |
+|---|---:|---|
+| `style="mc-table-style: url('../Resources/TableStyles/*.css')"` | **812** | a reference to a folder that **does not exist anywhere under `output/`** |
+| `<col title="C1">` | **1,696** (806 files) | not a label, a **tooltip**: hover a column border and the reader is shown "C1" |
+| `data-mc-conditions`, `data-mc-autonum`, stray `xmlns`, `madcap:` href | **201** | authoring-tool plumbing with no meaning outside Flare |
+| `cellspacing`, `col style="width: 169px"`, `td style="padding"`, `valign`, `align` | **1,386** | genuine layout |
+
+The first three rows are not a rendering decision at all — they are the same category as `TableStyle-*`, and Phase 21 simply did not look past `class`. The `mc-table-style` URL is the sharpest case: it is a dead link that **the link checker cannot see**, because the checker reads `href` and `src` and this is inside a `style`. 812 dangling references passing validation.
+
+The fourth row is a real rendering decision, and the writer made it: **the layout goes too**, and the site's own stylesheet sizes these tables. That is better on a narrow screen — a `width="100%"` table with pixel columns does not reflow — and occasionally worse where a pixel width was holding a command name on one line. It is a visible change and is not claimed to be anything else.
+
+#### Decisions
+
+| decision | what gets built | why not the obvious alternative |
+|---|---|---|
+| **A keep-list of attributes, mirroring the class keep-list** | `tables.STRUCTURAL_ATTRS`; `scrub` gains an `attrs` parameter beside `keep` | Same argument as `SEMANTIC_CLASSES` and it has already been proved by this phase: a strip-list written against Flare's vocabulary is exactly what let `data-mc-*` and `mc-table-style` through. What is kept is structure and content — what a cell spans, where a link points, what an anchor is called — never how any of it looks. |
+| **`title` is kept on `a`, `abbr`, `area`, `img`, `iframe` and dropped everywhere else** | `tables.TITLE_BEARERS` | A single rule about the attribute cannot work: on an `<a>` a human wrote it and it is content; on a `<col>` the generator wrote it and it renders as "C1" under the reader's cursor. 1,696 of the latter against a handful of the former. |
+| **An emptied `<col>` is removed, and a `<colgroup>` emptied by that goes with it** | two ordered passes at the end of `scrub` | Once the widths are gone a `<col/>` carries nothing. Keeping 1,696 empty ones is keeping the skeleton of the decision rather than the decision. `span` still counts as content, so `<col span="2">` survives. |
+| **No new finding code** | nothing is reported | Same as Phase 21: nothing here can fail. The 812 dead stylesheet URLs are *removed*, not reported — reporting a reference that nothing should have emitted is a queue nobody can action. |
+| **`webworks.py` is not touched** | it passes `keep` positionally and picks up the default `attrs` | Its override is about class vocabulary (`SPAN_TO_TAG`), which is orthogonal. An engine that needs a different attribute set can pass one. |
+
+#### What this costs downstream
+
+`convert` output changes for every version with a passthrough table, so EMS re-converts, re-reframes and re-syncs — and `reframe` must be `--force`d, for the reason recorded as an Open under Phase 21. **Expect the page count and review queue to move again**: removing attribute text changes the packer's word counts exactly as Phase 21's class removal did.
+
+*Exit: `mc-table-style`, `<col title>`, `cellspacing`, `data-mc-*` and `xmlns` all at **0** in the published tree; semantic classes and every structural attribute (`rowspan`, `colspan`, `scope`, `href`, `id`, `span`) unchanged in count; `validate` reports no new findings; tests pin the generated-vs-authored `title` split and the emptied-`<col>` removal.*
+
+#### Phase 23 — **Built & verified, 2026-09-28**
+
+One file. `tables.STRUCTURAL_ATTRS` and `tables.TITLE_BEARERS` are new; `scrub` gained an `attrs` parameter and two ordered passes at the end (a `<colgroup>` is only empty once its `<col>` children have gone, and `find_all` hands back the parent first); `passthrough` passes it through. `webworks.py` was not touched — it passes `keep` positionally and picks up the default.
+
+**Measured on the rebuilt EMS tree, 8,639 published files:**
+
+| | before | after |
+|---|---:|---:|
+| `mc-table-style` | 812 files | **0** |
+| `<col …title=…>` | 1,696 in 806 files | **0** |
+| `cellspacing` | 830 files | **0** |
+| `data-mc-*` | 77 | **0** |
+| `xmlns` | 120 | **0** |
+| `valign`, `cellpadding`, `bgcolor` | present | **0** |
+| `class="varname"` | 617 | **617** |
+| `class="MCXref xref"` | 184 | **184** |
+| `rowspan` / `scope` | 18 / 24 | **18 / 24** |
+| `<table>` elements | 1,050 | **1,050** |
+
+The two semantic counts are the Phase 21 baseline unchanged, which is the row that says this removed presentation and nothing else. No table was lost.
+
+**Pipeline, all six versions re-converted (`--force`), re-merged (`--force`, per Phase 21's Open), re-synced and validated:**
+
+| | |
+|---|---|
+| Pages | **747**, the same total as after Phase 21, redistributed: 10.5.1 and 10.5.0 125 → **124**, 10.4.4 and 10.4.3 → **123**, 10.4.1 **125**, 10.4.0 **128**. The packer sizes by word count and attribute text is words, exactly as Phase 21 found. |
+| Review queue | **115**, unchanged in total |
+| Redirects | **17,252 in 2 published maps** — 8,639 + 8,613, unchanged, so no topic gained or lost a redirect |
+| `validate` | **0 errors**; 7 `ANCHOR_MISSING` + 32 `REDIRECT_SHADOWED`, identical to the Phase 22 baseline |
+| Suite | **1,544 passed, 2 skipped**, `ruff` clean |
+
+**One thing the measurement turned up that is not this phase's doing.** `colspan` is **0** in the output while the 10.5.1 source carries 56 genuine `colspan="2"`/`"3"`. It is in the keep-list and a test pins it; the reason it never arrives is upstream — a full-width row like `<td colspan="2"><b>Headings specific to file-based stores</b></td>` is lifted out as a bold paragraph and the table split in two, which is the right rendering and predates Phase 21. Recorded because "0 colspan in the output" reads like a bug in this change and is not one.
+
 ---
 
 ## 2. Validation & Testing Criteria
@@ -3012,3 +3219,5 @@ What this changes operationally: `sync` now reads `reframed/` for EMS, so the ne
 - **CSH Survives a Merge**: A merged tree's `csh.yml` resolves entirely against that tree — every path a page that exists, every fragment an anchor in it, every identifier listed in its page's frontmatter. The identifier **set** is exactly the converted map's: merging moves a Help button and never drops one, and a map the stage cannot parse fails the version rather than being written empty or copied stale. A version with no `csh.yml` gains no file.
 - **Editorial Override Fidelity**: A path in `keep_separate` returns exactly the subtree it names to Stage 6's layout — every topic at or under it becomes its own page, nothing merges onto it from either side, and no page outside it changes except for links that now point at a topic's own page. Removing the path returns the merged tree byte-identically to what it was before. A path matching no topic is named in the run report rather than applied silently, and reordering the list is not a re-merge.
 - **Redirect Map Integrity**: Every `to` in a published `redirects.yml` resolves to a file the target actually holds — these are the entries a reader is 301'd through, so a dangling one is an error. The map carries every merged version under its doc-class, not only the ones the run touched: a scoped `--version` re-sync leaves the other versions' redirects byte-identical. A hand-added redirect survives a re-sync. Paths are the served ones; an empty `publish_base_url` makes them tree-rooted rather than absent, because a map missing only its prefix is recoverable and a map never emitted is not.
+- **Passthrough Carries Content, Not Presentation**: A table emitted as raw HTML carries no generated stylesheet class — on the `<table>` element itself as well as on every descendant, the case a scrub written as a descendant walk silently misses. Classes naming semantics the plain text has lost (`varname`, `MCXref xref`, the `note*` family) survive, because a later phase turns them into Markdown rather than discarding them. Layout attributes are not touched: they change rendering, and a cleanup that changes rendering cannot be verified by showing that nothing changed. A conversion run before and after the scrub produces byte-identical `toc.yml`, `csh.yml` and `redirects.yml`.
+- **Origin Redirect Coverage**: Every converted topic of a product with a declared origin template has exactly one row in its version's `301.yml` — the row count equals the version's `output_map` count, so a drop anywhere in the three-way join fails the version rather than shipping a short map. The `from` is the live docsite URL the reader has today, verified against the real site before the product is declared, never inferred from another product's layout; a product with no declared template writes no file and is named in the run report. The doc-class map carries every version under it, not only the ones the run touched, and a hand-added row survives a re-sync.

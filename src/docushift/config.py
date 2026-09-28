@@ -176,6 +176,7 @@ class ConfigManager:
         self.eos_path = self.config_dir / "eos.yaml"
         self.publishing_path = self.config_dir / "publishing.yaml"
         self.reframe_path = self.config_dir / "reframe.yaml"
+        self.origin_urls_path = self.config_dir / "origin-urls.yaml"
         self.aem_templates_dir = self.config_dir / "aem_templates"
         self.products_path = self.config_dir / "products.csv"
         self.versions_path = self.config_dir / "versions.csv"
@@ -194,6 +195,7 @@ class ConfigManager:
         self._eos_cache: EosReport | None = None
         self._publishing_cache: dict[str, str] | None = None
         self._reframe_cache: dict[str, Any] | None = None
+        self._origin_urls_cache: dict[str, dict[str, Any]] | None = None
 
     # -- publishing tokens ----------------------------------------------------
 
@@ -432,6 +434,36 @@ class ConfigManager:
         )
         self._reframe_cache = {"defaults": defaults, "products": loaded.get("products") or {}}
         return self._reframe_cache
+
+    def load_origin_urls(self) -> dict[str, dict[str, Any]]:
+        """Loads `origin-urls.yaml` as `{slug: {template, drop_segments}}`.
+
+        **A missing file yields `{}`, and an absent product is not an error** --
+        the opposite default from `load_reframe`, and deliberately so. Reframe's
+        defaults are a measured baseline that a fresh checkout should reproduce;
+        there is no such thing as a default origin URL, because the answer is a
+        fact about how one product's package happens to be laid out on the
+        docsite. The four layouts in the file's own header are the evidence. A
+        guess here is a 301 to a page that never existed, so the only safe
+        default is to decline.
+
+        Rows are shaped but not validated against the catalog: this method reads
+        files, and whether a slug names a real product is `origins.template_for`'s
+        question, asked where the row is in hand.
+        """
+        if self._origin_urls_cache is not None:
+            return self._origin_urls_cache
+
+        loaded: dict[str, Any] = {}
+        if self.origin_urls_path.exists():
+            with open(self.origin_urls_path, encoding="utf-8") as f:
+                loaded = yaml.safe_load(f) or {}
+
+        products = loaded.get("products") or {}
+        self._origin_urls_cache = {
+            slug: dict(entry) for slug, entry in products.items() if isinstance(entry, dict)
+        }
+        return self._origin_urls_cache
 
     def publishing_problems(self) -> list[str]:
         """Naming problems that would publish two things into one repository.

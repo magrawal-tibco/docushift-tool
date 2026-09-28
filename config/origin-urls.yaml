@@ -1,0 +1,46 @@
+# Origin URLs -- where a converted topic is served on docs.tibco.com **today**
+# (docs/planning.md Phase 22).
+#
+# This file exists so the 301 map can start where the reader does. Every other
+# redirect artifact in the tree is expressed in coordinates this tool invented;
+# these are the live addresses that stop working at cutover, and they are the
+# only half of a redirect row that cannot be derived from the output.
+#
+# **Declared per product, never inferred, and that is the whole point.** Grouping
+# `output_map` by the first two segments of its source paths across the converted
+# catalog returns four different layouts:
+#
+#   <package-root>/html/...       tibco-enterprise-message-service, tibco-streaming
+#   html/...                      spotfire-data-science-author
+#   doc/html/...                  tibco-datasynapse-gridserver-logviewer
+#   <package-root>/designerhelp/  tibco-runtime-agent
+#
+# One rule applied to all four emits confident, wrong URLs for three of them, and a
+# wrong 301 is strictly worse than a missing one: the reader lands on a dead page
+# and the run reports success. So a product absent from this file gets no `301.yml`
+# and is named in the run report as ORIGIN_TEMPLATE_UNDECLARED. Adding a product
+# means checking one of its URLs against the live site and writing the answer here.
+#
+# Per product:
+#   template       The served URL, with `{folder_path}` (the directory part of the
+#                  version's `zip_url` under `/pub/`, e.g. `ems/10.5.1`) and
+#                  `{path}` (the source path, after `drop_segments` are removed).
+#   drop_segments  Leading segments of the recorded source path to discard before
+#                  substituting `{path}`. The package wrapper directory is one;
+#                  a tree whose paths already start at the served root is zero.
+#   verified       The exact URL that was fetched to confirm the template, and when.
+#                  Not read by the code. It is here because the next person to add a
+#                  product needs to know that "verified" meant a live request and not
+#                  a pattern that looked right.
+
+version: "1.0"
+
+products:
+  # The pilot doc set. Source paths are recorded as
+  #   tibco-enterprise-message-service-10-5-1/html/_shared/about-this-product.htm
+  # and the package wrapper is the one segment to drop, leaving `html/...` under
+  # `/pub/ems/10.5.1/doc/`.
+  tibco-enterprise-message-service:
+    template: "https://docs.tibco.com/pub/{folder_path}/doc/{path}"
+    drop_segments: 1
+    verified: "https://docs.tibco.com/pub/ems/10.5.1/doc/html/_shared/about-this-product.htm (2026-09-28, serves 'About this Product')"

@@ -598,3 +598,44 @@ def test_shipped_taxonomy_rules_classify_known_products(repo_root: Path) -> None
     assert cfg.resolve_product_info("spotfire", "TIBCO Spotfire")["family"] == "analytics"
     assert cfg.resolve_product_info("webfocus", "ibi WebFOCUS")["bu"] == "ibi"
     assert cfg.resolve_product_info("ebx", "TIBCO EBX")["family"] == "data_management"
+
+
+# -- origin-urls.yaml (Phase 22) --------------------------------------------------
+
+
+def test_origin_urls_default_to_nothing_rather_than_to_a_guess(config: ConfigManager) -> None:
+    """The opposite default from `load_reframe`, and deliberately. Reframe's
+    defaults are a measured baseline a fresh checkout should reproduce; there is
+    no such thing as a default origin URL, because the answer is a fact about how
+    one product's package happens to be laid out on the docsite."""
+    assert config.load_origin_urls() == {}
+
+
+def test_a_declared_product_is_read_and_an_undeclared_one_is_simply_absent(
+    config: ConfigManager,
+) -> None:
+    (config.config_dir / "origin-urls.yaml").write_text(
+        'version: "1.0"\n'
+        "products:\n"
+        "  tibco-ems:\n"
+        '    template: "https://docs.tibco.com/pub/{folder_path}/doc/{path}"\n'
+        "    drop_segments: 1\n",
+        encoding="utf-8",
+    )
+
+    declared = config.load_origin_urls()
+
+    assert declared["tibco-ems"]["drop_segments"] == 1
+    assert "tibco-runtime-agent" not in declared
+
+
+def test_a_row_that_is_not_a_mapping_is_dropped_rather_than_carried(
+    config: ConfigManager,
+) -> None:
+    """`origins.template_for` would decline it anyway; dropping it here keeps the
+    shape the rest of the code is allowed to assume."""
+    (config.config_dir / "origin-urls.yaml").write_text(
+        "products:\n  tibco-ems: https://docs.tibco.com/\n", encoding="utf-8"
+    )
+
+    assert config.load_origin_urls() == {}

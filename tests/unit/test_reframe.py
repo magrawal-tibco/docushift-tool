@@ -57,8 +57,20 @@ items:
 """
 
 
-def codes(findings) -> list[str]:
+def all_codes(findings) -> list[str]:
     return [finding.code for finding in findings]
+
+
+def codes(findings) -> list[str]:
+    """Every code except Phase 22's, which fires on almost every run by design.
+
+    An undeclared origin template is the expected state for sixteen of seventeen
+    products, so the warning rides along with every merge in this file and says
+    nothing about the condition under test. Filtering it here rather than in each
+    assertion keeps the rest of the file about what it was about; the tests that
+    are about the origin map use `all_codes`.
+    """
+    return [code for code in all_codes(findings) if code != "ORIGIN_TEMPLATE_UNDECLARED"]
 
 
 @pytest.fixture
@@ -1536,3 +1548,151 @@ def test_the_written_map_and_the_written_frontmatter_agree_end_to_end(config, ca
     assert yaml.safe_load(split_frontmatter(page)[0].strip("-\n"))["csh"] == [
         "install.overview.helpurl"
     ]
+
+
+# -- the origin map (Phase 22) -------------------------------------------------
+#
+# The `301.yml` beside `redirects.yml`. Its whole reason to exist is that every
+# other redirect artifact is expressed in coordinates this tool invented, and the
+# `from` side of a cutover is an address on docs.tibco.com that it never wrote.
+# It is written here rather than in `sync` because of 20d.1's `filecmp` trap: a
+# per-version file written into the *published* folder after the copy makes every
+# merged version re-copy on every run and takes `CURRENT` with it.
+
+ORIGINS_CONFIG = """\
+version: "1.0"
+products:
+  tibco-flare-docs:
+    template: "https://docs.tibco.com/pub/{folder_path}/doc/{path}"
+    drop_segments: 1
+"""
+
+ZIP_URL = "https://docs.tibco.com/pub/flaredocs/10.5.1/TIB_flaredocs_10.5.1_docs.zip"
+
+SOURCES = [
+    ("TIB_flaredocs_10.5.1/html/installation-2.htm", "installation/installation-2.md", "topic"),
+    ("TIB_flaredocs_10.5.1/html/installation-overvie.htm",
+     "installation/installation-overvie.md", "topic"),
+    ("TIB_flaredocs_10.5.1/html/user-guide.htm", "users-guide/user-guide.md", "topic"),
+]
+
+
+@pytest.fixture
+def declared(config, catalog):
+    """A Flare product whose live URL shape somebody has actually checked."""
+    (config.config_dir / "origin-urls.yaml").write_text(ORIGINS_CONFIG, encoding="utf-8")
+    built = make_product("tibco-flare-docs", product_code="flaredocs", family="messaging")
+    built.versions = {"10.5.1": make_version(
+        "tibco-flare-docs", "10.5.1", engine=SourceEngine.FLARE, zip_url=ZIP_URL)}
+    catalog.merge_fetch_results([built])
+    product = catalog.get_product("tibco-flare-docs")
+    product.versions["10.5.1"].zip_url = ZIP_URL
+    catalog.state.record_output_map("tibco-flare-docs", "10.5.1", SOURCES)
+    return product
+
+
+def origin_rows(path: Path) -> list[dict]:
+    return yaml.safe_load((path / "301.yml").read_text(encoding="utf-8"))["redirects"]
+
+
+def test_every_converted_topic_gets_a_row_from_its_live_url(config, catalog, declared):
+    """One row per `output_map` entry, not one per merged page. The reader who
+    bookmarked an absorbed topic is the whole audience for this file."""
+    converted_tree(config, declared, "10.5.1")
+
+    result = Reframer(config, catalog).reframe_one(declared, declared.versions["10.5.1"])
+
+    rows = origin_rows(result.path)
+    assert [row["from"] for row in rows] == [
+        "https://docs.tibco.com/pub/flaredocs/10.5.1/doc/html/installation-2.htm",
+        "https://docs.tibco.com/pub/flaredocs/10.5.1/doc/html/installation-overvie.htm",
+        "https://docs.tibco.com/pub/flaredocs/10.5.1/doc/html/user-guide.htm",
+    ]
+    assert all(row["status"] == 301 for row in rows)
+
+
+def test_an_absorbed_topic_redirects_to_the_anchor_it_became(config, catalog, declared):
+    """A leader keeps its own page and still gains an anchor, so it lands at
+    `page.md#its-own-id` -- `redirects.yml`'s shape, for `redirects.yml`'s reason:
+    the reader arrives at the section rather than at the top of a merged page."""
+    converted_tree(config, declared, "10.5.1")
+
+    result = Reframer(config, catalog).reframe_one(declared, declared.versions["10.5.1"])
+
+    destinations = {row["from"].rsplit("/", 1)[1]: row["to"] for row in origin_rows(result.path)}
+    assert destinations["installation-overvie.htm"] == (
+        "installation/installation-2.md#installation-overvie")
+    assert destinations["user-guide.htm"] == "users-guide/user-guide.md#user-guide"
+
+
+def test_the_origin_map_is_relative_to_its_own_folder_like_its_sibling(
+    config, catalog, declared
+):
+    """The record, not the served form. `sync` prefixes the `to` side after the
+    copy; prefixing it here would put a published URL inside the version folder
+    and leave `validate` resolving it against the wrong root."""
+    converted_tree(config, declared, "10.5.1")
+
+    result = Reframer(config, catalog).reframe_one(declared, declared.versions["10.5.1"])
+
+    assert not any("://" in row["to"] for row in origin_rows(result.path))
+
+
+def test_the_origin_map_travels_with_the_merged_tree_rather_than_the_published_one(
+    config, catalog, declared
+):
+    """20d.1's `filecmp` trap, asserted as a location. Written into staging it is
+    copied like any other file and the shallow currency check stays true."""
+    converted_tree(config, declared, "10.5.1")
+
+    result = Reframer(config, catalog).reframe_one(declared, declared.versions["10.5.1"])
+
+    written = sorted(p.name for p in result.path.iterdir() if p.is_file())
+    assert written == ["301.yml", "redirects.yml", "reframe.yml", "review-queue.csv", "toc.yml"]
+
+
+def test_an_undeclared_product_gets_a_warning_and_no_file(config, catalog, flare):
+    """Sixteen of seventeen products, today. A guessed origin URL is a redirect
+    to a page that never existed, and nothing downstream could tell."""
+    converted_tree(config, flare, "10.5.1")
+    findings = FindingsRun("reframe")
+
+    result = Reframer(config, catalog, findings=findings).reframe_one(
+        flare, flare.versions["10.5.1"])
+
+    assert not (result.path / "301.yml").exists()
+    named = [f for f in findings.all if f.code == "ORIGIN_TEMPLATE_UNDECLARED"]
+    assert len(named) == 1 and "origin-urls.yaml" in named[0].message
+    assert named[0].severity is Severity.WARNING
+
+
+def test_a_zip_url_that_is_not_a_docsite_package_is_reported_rather_than_guessed(
+    config, catalog, declared
+):
+    """An archived version's `zipPath` comes back from the API verbatim. Building
+    a folder out of it would emit eight thousand rows pointing into a tree the
+    docsite does not serve -- all of them plausible, none of them live."""
+    declared.versions["10.5.1"].zip_url = "/archive/flaredocs/TIB_flaredocs_10.5.1_docs.zip"
+    converted_tree(config, declared, "10.5.1")
+    findings = FindingsRun("reframe")
+
+    result = Reframer(config, catalog, findings=findings).reframe_one(
+        declared, declared.versions["10.5.1"])
+
+    assert not (result.path / "301.yml").exists()
+    assert "not a /pub/ docsite package path" in [
+        f.message for f in findings.all if f.code == "ORIGIN_TEMPLATE_UNDECLARED"][0]
+
+
+def test_a_topic_the_merge_never_saw_still_gets_a_row(config, catalog, declared):
+    """`output_map` is the authority, not the TOC. A topic converted and left
+    unmerged still has a live URL that stops working at cutover, and it points at
+    its own carried-through page."""
+    catalog.state.record_output_map("tibco-flare-docs", "10.5.1", [
+        *SOURCES, ("TIB_flaredocs_10.5.1/html/orphan.htm", "orphan.md", "topic")])
+    converted_tree(config, declared, "10.5.1")
+
+    result = Reframer(config, catalog).reframe_one(declared, declared.versions["10.5.1"])
+
+    rows = {row["from"].rsplit("/", 1)[1]: row["to"] for row in origin_rows(result.path)}
+    assert rows["orphan.htm"] == "orphan.md"

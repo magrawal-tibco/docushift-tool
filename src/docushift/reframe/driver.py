@@ -36,6 +36,7 @@ from pathlib import Path, PurePosixPath
 
 import yaml
 
+from docushift import origins
 from docushift.catalog import CatalogManager
 from docushift.config import ConfigManager
 from docushift.models import Product, ProductVersion, SourceEngine
@@ -62,7 +63,8 @@ REFRAMABLE_ENGINES: tuple[SourceEngine, ...] = (SourceEngine.FLARE,)
 
 #: Written fresh by this stage, so a copy of the source's version would be stale.
 _REGENERATED = frozenset(
-    {"toc.yml", "reframe.yml", "redirects.yml", "review-queue.csv", csh_map.CSH_FILE}
+    {"toc.yml", "reframe.yml", "redirects.yml", "review-queue.csv", csh_map.CSH_FILE,
+     origins.ORIGINS}
 )
 
 
@@ -371,6 +373,7 @@ class Reframer:
         self._write_navigation(
             staging, source, roots, built, located, policy, counts, schema_name, flagged, queue
         )
+        self._write_origins(staging, product, version, located)
 
         failures = audit(
             built, located, roots,
@@ -514,6 +517,74 @@ class Reframer:
         # merge that predates the queue, and a writer checking for pending work
         # should see a header and no rows rather than have to ask why.
         review.write(staging / "review-queue.csv", queue)
+
+    def _write_origins(
+        self,
+        staging: Path,
+        product: Product,
+        version: ProductVersion,
+        located: dict[PurePosixPath, tuple[Page, str]],
+    ) -> None:
+        """Phase 22's `301.yml`: the live docsite URL of every converted topic.
+
+        Written here rather than in `sync` because of a trap 20d.1 measured. The
+        served map has to be assembled after the copy, but a *per-version* file
+        written into the published folder after the copy leaves it differing from
+        its source, `_identical`'s shallow `filecmp` reports it stale, and **every
+        merged version re-copies on every run** with `CURRENT` no longer
+        reachable. Written into the staging tree it is copied like any other file
+        and the comparison stays true.
+
+        Three reasons to write nothing, and all three are silence rather than
+        failure: no `state.db` to read the source map from (the standalone
+        `--input` path), no declared template, or a `zip_url` that is not a
+        docsite package URL. Only the second is worth a finding -- it is the one a
+        human can answer, and the answer is a line in `origin-urls.yaml`.
+        """
+        slug, number = product.slug, version.version
+        if self.state is None:
+            return
+
+        template = origins.template_for(self.config.load_origin_urls(), slug)
+        if template is None:
+            self._record(
+                "ORIGIN_TEMPLATE_UNDECLARED", slug, number,
+                message=(
+                    f"no origin URL template for '{slug}' in config/origin-urls.yaml, so no "
+                    f"{origins.ORIGINS} was written; declare one after checking a live URL"
+                ),
+            )
+            return
+
+        folder = origins.folder_path(version.zip_url)
+        if folder is None:
+            self._record(
+                "ORIGIN_TEMPLATE_UNDECLARED", slug, number,
+                message=(
+                    f"zip_url '{version.zip_url}' is not a /pub/ docsite package path, so the "
+                    f"origin folder cannot be read off it and no {origins.ORIGINS} was written"
+                ),
+            )
+            return
+
+        output_map = self.state.get_output_map(slug, number)
+        moved = {
+            str(path): f"{page.path}#{anchor}" for path, (page, anchor) in located.items()
+        }
+        built, dropped = origins.rows(output_map, moved, template, folder)
+
+        # The join has three inputs and a silent drop in any of them produces a
+        # short map that looks entirely plausible. Asserting the count against the
+        # map it was built from is the one check that catches it, and it is free.
+        if dropped:
+            self._record(
+                "ORIGIN_TEMPLATE_UNDECLARED", slug, number,
+                message=(
+                    f"{len(dropped)} source path(s) are shorter than the template's "
+                    f"drop_segments and produced no URL, e.g. '{dropped[0]}'"
+                ),
+            )
+        manifest.write(staging / origins.ORIGINS, origins.VERSION_HEADER, origins.document(built))
 
     # -- the pieces -----------------------------------------------------------
 

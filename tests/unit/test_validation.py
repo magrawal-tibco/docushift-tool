@@ -1653,3 +1653,98 @@ def test_a_doc_class_with_no_published_map_reports_nothing(tmp_path: Path) -> No
     publish(target, {"html/new.md": "# New\n"})
 
     assert map_of(target) == []
+
+
+# -- the published origin map (Phase 22) ------------------------------------------
+#
+# Same `to` side, same contract, same code. The `from` side is checked by nothing
+# here or anywhere: it is a live docs.tibco.com URL, and the only honest test of
+# one is a network fetch, which `validate` does not make.
+
+
+def origin_map_of(target: Path, doc_class: str = "online-help"):
+    from docushift.validation import artifacts
+    from docushift.validation.tree import tree_names, walk
+
+    entry = walk(target)[0]
+    return artifacts.check_redirect_map(
+        entry, entry.path / doc_class, target, tree_names(target), "301.yml"
+    )
+
+
+def published_origins(target: Path, *entries: str, doc_class: str = "online-help") -> None:
+    (target / TREE / "en-us" / SLUG / doc_class / "301.yml").write_text(
+        redirects(*entries), encoding="utf-8"
+    )
+
+
+def test_an_origin_redirect_landing_on_a_published_page_is_clean(tmp_path: Path) -> None:
+    target = tmp_path / "target"
+    publish(target, {"html/new.md": "# New\n"})
+    published_origins(
+        target,
+        entry("https://docs.tibco.com/pub/ems/1.0.0/doc/html/old.htm",
+              f"{TREE}/en-us/{SLUG}/online-help/1-0-0/html/new.md#old"),
+    )
+
+    assert origin_map_of(target) == []
+
+
+def test_an_origin_redirect_to_a_page_the_target_does_not_hold_is_an_error(
+    tmp_path: Path,
+) -> None:
+    """The cutover's own failure mode: the old URL stops working on schedule and
+    the new one was never published, so the reader gets a 301 into a 404."""
+    target = tmp_path / "target"
+    publish(target, {"html/new.md": "# New\n"})
+    published_origins(
+        target,
+        entry("https://docs.tibco.com/pub/ems/1.0.0/doc/html/old.htm",
+              f"{TREE}/en-us/{SLUG}/online-help/1-0-0/html/gone.md#old"),
+    )
+
+    findings = origin_map_of(target)
+
+    assert codes(findings) == ["LINK_BROKEN"]
+    assert "docs.tibco.com" in findings[0].message
+
+
+def test_the_live_url_on_the_left_is_never_resolved_against_the_target(
+    tmp_path: Path,
+) -> None:
+    """Every row's `from` is an absolute URL on somebody else's host, so a checker
+    that resolved it would report `LINK_BROKEN` on every row of a correct map."""
+    target = tmp_path / "target"
+    publish(target, {"html/new.md": "# New\n"})
+    published_origins(
+        target,
+        entry("https://docs.tibco.com/pub/ems/1.0.0/doc/html/nowhere.htm",
+              f"{TREE}/en-us/{SLUG}/online-help/1-0-0/html/new.md"),
+    )
+
+    assert origin_map_of(target) == []
+
+
+def test_an_unparseable_origin_map_names_the_file_it_is_actually_about(
+    tmp_path: Path,
+) -> None:
+    """`301.yml`, not `redirects.yml`. A message naming the sibling would send a
+    writer to a file that is fine."""
+    target = tmp_path / "target"
+    publish(target, {"html/new.md": "# New\n"})
+    (target / TREE / "en-us" / SLUG / "online-help" / "301.yml").write_text(
+        "redirects:\n- to: only-one-key.md\n", encoding="utf-8"
+    )
+
+    findings = origin_map_of(target)
+
+    assert codes(findings) == ["ARTIFACT_UNPARSED"]
+    assert "301.yml" in findings[0].message
+
+
+def test_a_doc_class_with_no_origin_map_reports_nothing(tmp_path: Path) -> None:
+    """Sixteen of seventeen products, until someone declares their URL shape."""
+    target = tmp_path / "target"
+    publish(target, {"html/new.md": "# New\n"})
+
+    assert origin_map_of(target) == []

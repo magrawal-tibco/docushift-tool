@@ -748,6 +748,24 @@ C function signature. So the fence is kept and each version reports a
 `Link inside a code block…` note carrying the count, rather than losing them quietly:
 about 4,964 corpus-wide, 1,179 of them in `tibco-ems` 10.4.0 alone.
 
+**About half the tables stay as HTML, and they carry structure only.** GFM's pipe table has
+no merged cells, no table inside a cell and no cell holding more than one paragraph, so a
+table that uses any of those is written as HTML rather than flattened into a pipe table that
+would read plausibly and be wrong. What passes through is **what the table means, never how
+the authoring tool drew it**: merged-cell spans, header scopes, links, anchors and the
+handful of class names that carry meaning the plain text has lost (`varname`, a
+cross-reference, the note styles) are kept. Everything else goes — the generated
+`TableStyle-…` class names, pixel column widths, `cellspacing` and cell padding, the
+`data-mc-…` attributes, and Flare's reference to a table stylesheet that is not part of the
+export and so was pointing at nothing.
+
+Two of those are worth knowing about because you will see the difference. **Table widths now
+come from your site's stylesheet**, not from pixel values baked into each page — tables
+reflow on a narrow screen, and very occasionally a column that a fixed width was holding on
+one line will wrap. And the **phantom "C1" tooltip is gone**: Flare labelled every column
+`C1`, `C2` and so on, and that label showed to the reader on hover. A tooltip an author
+actually wrote, on a link or an image, is kept.
+
 ### Reframe: merging Flare topics into maintainable pages
 
 ```bash
@@ -808,7 +826,32 @@ regenerated files at the version root:
 | `reframe.yml` | Which source topic became which section of which page, plus the policy that shaped it and the link counts. This is the record to read when a boundary looks wrong. |
 | `review-queue.csv` | The pages a writer has to make a decision about, and why. Open it in a spreadsheet; it is the only one of the four meant to be edited. |
 
-A fifth file appears when the conversion produced one: **`csh.yml`, retargeted**. A
+**`301.yml`, the cutover map, appears alongside them for a product whose live URL shape has
+been declared.** `redirects.yml` answers "where did this page go inside the new tree"; `301.yml`
+answers the question the migration actually asks — *the reader has a bookmark to
+`docs.tibco.com`, and on cutover day it stops working.* Its left-hand side is that live address
+and nothing else, so it is the one file here that cannot be derived from the tree.
+
+It exists only where somebody has written the product's URL shape into
+`config/origin-urls.yaml` after checking a real page. Nothing is guessed: the converted catalog
+contains four different source layouts, and a rule that generalised one product's would produce
+a redirect to a page that never existed — which nothing downstream could detect. A product with
+no declaration writes no file and is named in the run report as
+`ORIGIN_TEMPLATE_UNDECLARED`.
+
+```yaml
+# config/origin-urls.yaml
+products:
+  tibco-enterprise-message-service:
+    template: "https://docs.tibco.com/pub/{folder_path}/doc/{path}"
+    drop_segments: 1          # the package wrapper folder, which the docsite does not serve
+```
+
+`{folder_path}` comes from the version's own download URL rather than being rebuilt from the
+slug and the version number — the URL the downloader actually fetched is the one the docsite
+serves from, and composing it a second time is how the two come to disagree.
+
+A sixth file appears when the conversion produced one: **`csh.yml`, retargeted**. A
 context-sensitive help map is what an F1 keypress in the product resolves against, so it has to
 move with the topics. Each identifier keeps its **own** anchor and only the page it sits on
 changes — unlike `toc.yml` and `redirects.yml`, which both get the *section* anchor, because a
@@ -936,9 +979,11 @@ is a different file, and `sync` writes it one level up, beside `version.yml`:
 ```
 en-us-tib-ems-userdocs/en-us/tibco-enterprise-message-service/online-help/
 ├── redirects.yml          ← every merged version's redirects, as served URLs
+├── 301.yml                ← every merged version's live docsite URLs, same shape
 ├── version.yml
 ├── 10-5-1/
-│   └── redirects.yml      ← this version's, relative to this folder
+│   ├── redirects.yml      ← this version's, relative to this folder
+│   └── 301.yml            ← this version's cutover map, `to` relative to this folder
 └── 10-5-0/…
 ```
 
@@ -962,8 +1007,25 @@ search-and-replace away from correct, and a map that was never written is not re
 all. The run report tells you which you got:
 
 ```
-8639 redirect(s) in 1 redirects.yml, tree-rooted (no publish_base_url set).
+17252 redirect(s) in 2 published map(s), tree-rooted (no publish_base_url set).
 ```
+
+`301.yml` is assembled by the same code under the same rules, with one difference that follows
+from what it holds: only the **`to`** side is rewritten into a published URL, because the
+`from` side is already an absolute address on `docs.tibco.com`. That also decides which rows
+`sync` may rewrite — a row it owns is one whose *destination* sits under a version folder it
+published, so a legacy URL you mapped by hand is left exactly where you put it.
+
+```yaml
+- from: https://docs.tibco.com/pub/ems/10.5.1/doc/html/users-guide/old.htm
+  to: en-us-tib-ems-userdocs/en-us/tibco-enterprise-message-service/online-help/10-5-1/users-guide/new.md#old
+  status: 301
+```
+
+`validate` resolves every `to` against the published tree and reports a dangling one as
+`LINK_BROKEN`, the same as for `redirects.yml`. It never checks the `from` side: that is a page
+on a site this tool does not own, and the only honest test of it is a network request, which
+`validate` does not make. Sample a handful by hand before you hand the map over.
 
 `validate` resolves every `to` in it against the published tree, host or no host, and a row
 naming a file that is not there is a `LINK_BROKEN` error.

@@ -169,6 +169,14 @@ SPAN_TO_TAG = {
 
 _SOUP = BeautifulSoup("", "html.parser")
 
+# What survives a passthrough table here. `SPAN_TO_TAG`'s keys are added to the
+# shared list because in this engine the class name *is* the markup: a span is
+# code or emphasis by virtue of being `class="Code"`, and a table that passes
+# through as HTML is the one place that never got rewritten into `<code>`. Drop
+# them and the passthrough branch is the only part of the corpus where that
+# distinction is gone for good.
+KEEP_CLASSES = tables_transform.SEMANTIC_CLASSES | frozenset(SPAN_TO_TAG)
+
 
 # -- the renderer --------------------------------------------------------------
 
@@ -301,7 +309,7 @@ class WebWorksRenderer(markdown.Renderer):
         if tables_transform.is_gfm_safe(model):
             body = tables_transform.to_pipe(model, self.inline_children)
         else:
-            body = tables_transform.passthrough(self.rewrite(tag))
+            body = tables_transform.passthrough(self.rewrite(tag), KEEP_CLASSES)
         return "\n\n".join([*prefix, body] if body.strip() else prefix)
 
     # -- inline ---------------------------------------------------------------

@@ -1526,7 +1526,7 @@ def _report_sync(stats, findings) -> None:
             else "tree-rooted (no publish_base_url set)"
         console.print(
             f"[dim]{stats.redirect_rows} redirect(s) in {stats.redirect_maps} "
-            f"redirects.yml, {where}.[/dim]"
+            f"published map(s), {where}.[/dim]"
         )
 
     # Named individually rather than counted, the rule `convert` follows: these are
