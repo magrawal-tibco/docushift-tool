@@ -22,10 +22,10 @@ from rich.markup import escape
 from rich.table import Table
 
 from docushift import __version__
-from docushift.catalog import CatalogError, CatalogManager
+from docushift.catalog import CatalogError, CatalogManager, MigrateStats
 from docushift.config import ConfigManager
 from docushift.discovery import DocsiteClient, DocsiteCrawler
-from docushift.models import ReleaseStatus, ScopeSource, SourceEngine, ZipSource
+from docushift.models import MigrateDecision, ReleaseStatus, ScopeSource, SourceEngine, ZipSource
 from docushift.reporting.findings import REGISTRY, FindingsRun, Severity
 from docushift.state import StateStore
 from docushift.utils.slug import version_segment
@@ -125,6 +125,28 @@ def _status_cell(ver) -> str:
     if ver.release_status is ReleaseStatus.RETIRED:
         return f"[red]retired[/red]{f' {ver.retirement_date}' if ver.retirement_date else ''}"
     return f"[dim]{ver.release_status}[/dim]"
+
+
+def _eligible_cell(ver) -> str:
+    """`convert_eligible`, annotated where the migration verdict disagrees with it.
+
+    Folded into the eligibility cell rather than given a column of its own: at nine
+    columns this table stops fitting an 80-column terminal and starts eliding its
+    own headers, and the verdict is only ever read *against* eligibility anyway.
+
+    A silent export prints nothing extra -- `unknown` is 36% of the catalog and
+    means nobody has decided, which is not news. A verdict agreeing with the flag
+    prints nothing either, for the same reason. Only the 458-row disagreement earns
+    ink, because it is the one state in this column that asks the reader to act.
+    """
+    label = "yes" if ver.convert_eligible else "no"
+    decision = ver.migrate_decision
+    if decision is MigrateDecision.UNKNOWN:
+        return label
+    wants = decision is MigrateDecision.MIGRATE
+    if wants == ver.convert_eligible:
+        return label
+    return f"{label} [yellow]({decision})[/yellow]"
 
 
 def _catalog_manager(ctx: click.Context) -> CatalogManager:
@@ -428,7 +450,7 @@ def _record_catalog_findings(
     *,
     scope_rules_conclusive: bool,
 ) -> None:
-    """The four Stage.CATALOG codes, written to the run the caller opened.
+    """The Stage.CATALOG codes, written to the run the caller opened.
 
     Every one of these was already computed and printed before Phase 7a -- the
     unmatched scope rules, the stale aliases, the emptied products -- and none of
@@ -468,6 +490,7 @@ def _record_catalog_findings(
                 version=version.version,
                 message=f"tagged into batch '{version.convert_batch}' but convert_eligible is false",
             )
+    _record_migrate_conflicts(manager, findings)
 
 
 @catalog.command("eos")
@@ -516,6 +539,117 @@ def catalog_eos(ctx: click.Context) -> None:
     _report_findings(findings)
 
 
+def _record_migrate_conflicts(manager: CatalogManager, findings: FindingsRun) -> None:
+    """Every version whose imported verdict disagrees with `convert_eligible`.
+
+    Split out of `_record_migration_findings` because it needs no export to run --
+    it reads two columns already in the sheet. That is what lets `catalog fetch`
+    and `catalog eos` surface the conflict too: a fetch that flips
+    `convert_eligible` on an archived row has just created or cleared one, and
+    finding that out only when somebody next runs `catalog migrate` would make the
+    conflict count a stale number rather than a standing one.
+    """
+    for product, version in manager.iter_versions():
+        decision = version.migrate_decision
+        if decision is MigrateDecision.UNKNOWN:
+            continue
+        wants = decision is MigrateDecision.MIGRATE
+        if wants == version.convert_eligible:
+            continue
+        findings.record(
+            "MIGRATE_DECISION_CONFLICT",
+            slug=product.slug,
+            version=version.version,
+            message=(
+                f"migrate_decision is '{decision}' but convert_eligible is "
+                f"{str(version.convert_eligible).lower()}"
+            ),
+        )
+
+
+def _record_migration_findings(manager: CatalogManager, findings: FindingsRun, stats: MigrateStats) -> None:
+    """The Stage.CATALOG codes Phase 25 adds, written to the caller's run.
+
+    The conflict rows are recorded per version rather than as one summary finding.
+    458 of them is a working list somebody filters `report` by, and a single row
+    reading "458 conflicts" is a number, not a list.
+    """
+    for alias in manager.unmatched_migration_aliases():
+        findings.record(
+            "MIGRATE_ALIAS_STALE",
+            slug=alias,
+            message=f"config/docsite-migration.yaml aliases '{alias}', which the active export does not carry",
+        )
+    for raw, (rows, migrating) in sorted(stats.unmatched.items(), key=lambda kv: (-kv[1][0], kv[0])):
+        findings.record(
+            "MIGRATE_SHEET_SLUG_UNMATCHED",
+            slug=raw,
+            message=(
+                f"the export decides {rows} version(s) of '{raw}' ({migrating} to migrate), "
+                f"which matches no catalogued product -- add an alias to docsite-migration.yaml"
+            ),
+        )
+    _record_migrate_conflicts(manager, findings)
+
+
+@catalog.command("migrate")
+@click.pass_context
+def catalog_migrate(ctx: click.Context) -> None:
+    """Re-apply the docsite migration export to the catalog's decision columns.
+
+    Records the verdict; changes no version's eligibility. Where the two disagree
+    the conflict is counted here and recorded as a finding -- resolving one is
+    `catalog set --migrate-decision` or `catalog enable/--disable`, row by row.
+    """
+    manager = _catalog_manager(ctx)
+    findings = FindingsRun("catalog", store=manager.state).start()
+    try:
+        stats = manager.apply_migrate_decisions()
+    except (CatalogError, ValueError) as exc:
+        raise click.ClickException(str(exc)) from exc
+
+    _record_migration_findings(manager, findings, stats)
+    findings.finish()
+
+    table = Table(title="Migration verdict against convert_eligible")
+    table.add_column("migrate_decision")
+    table.add_column("eligible", justify="right")
+    table.add_column("not eligible", justify="right")
+    table.add_row("migrate", str(stats.migrate_eligible), f"[yellow]{stats.migrate_not_eligible}[/yellow]")
+    table.add_row("do_not_migrate", f"[yellow]{stats.declined_eligible}[/yellow]", str(stats.declined_not_eligible))
+    table.add_row("unknown", "", "")
+    console.print(table)
+
+    console.print(
+        f"[dim]The export decides {stats.decided} of {stats.decided + stats.undecided} "
+        f"catalogued versions; {stats.undecided} have no row in it and read 'unknown'.[/dim]"
+    )
+    if stats.manual:
+        console.print(f"[dim]{stats.manual} row(s) carry a manual decision and were not re-read from the export.[/dim]")
+
+    if stats.conflicts:
+        # Highlighted rather than buried: this is the number the command exists to
+        # produce, and it is the one thing in the output nobody should scroll past.
+        console.print(
+            f"[yellow]WARN[/yellow] {stats.conflicts} version(s) disagree with convert_eligible "
+            f"({stats.migrate_not_eligible} wanted but ineligible, "
+            f"{stats.declined_eligible} eligible but declined). Nothing was changed for them."
+        )
+    else:
+        console.print("[green]Every decided version agrees with convert_eligible.[/green]")
+
+    if stats.unmatched:
+        rows = sum(count for count, _ in stats.unmatched.values())
+        migrating = sum(m for _, m in stats.unmatched.values())
+        console.print(
+            f"[yellow]WARN[/yellow] {len(stats.unmatched)} export slug(s) match no catalogued product "
+            f"-- {rows} row(s), {migrating} of them marked migrate. Add aliases to docsite-migration.yaml."
+        )
+    for token in stats.unknown_decisions:
+        console.print(f"[yellow]WARN[/yellow] export used an unrecognized decision '{token}', ignored")
+    _report_findings(findings)
+
+
 def _report_findings(findings: FindingsRun) -> None:
     """The one line that makes a run's findings findable again."""
     summary = findings.summary()
@@ -559,7 +693,7 @@ def catalog_show(ctx: click.Context, product: str) -> None:
         table.add_row(
             ver.version,
             "yes" if ver.is_archived else "",
-            "yes" if ver.convert_eligible else "no",
+            _eligible_cell(ver),
             _status_cell(ver),
             ver.convert_batch or "-",
             ver.release_date or "-",
@@ -632,6 +766,17 @@ def catalog_enable(ctx: click.Context, product: str, version: str, disable: bool
     "which outranks the end-of-support report permanently. Only 'retired' blocks conversion.",
 )
 @click.option(
+    "--migrate-decision",
+    "migrate_decision",
+    # From the enum for the reason `--release-status` is, and `unknown` matters
+    # here for a second one: it is how somebody retracts a verdict the export
+    # asserted without asserting the opposite.
+    type=click.Choice([d.value for d in MigrateDecision]),
+    default=None,
+    help="Record the final call on whether this version moves to the new docsite; also sets "
+    "migrate_decision_source=manual, which outranks the export permanently. Gates nothing.",
+)
+@click.option(
     "--batch",
     "convert_batch",
     default=None,
@@ -650,6 +795,7 @@ def catalog_set(
     zip_url,
     zip_source,
     release_status,
+    migrate_decision,
     convert_batch,
 ) -> None:
     """Set a catalog field, recording the change as a manual edit."""
@@ -667,6 +813,7 @@ def catalog_set(
         "zip_url": zip_url,
         "zip_source": zip_source,
         "release_status": release_status,
+        "migrate_decision": migrate_decision,
         "convert_batch": convert_batch,
     }
 
@@ -674,8 +821,8 @@ def catalog_set(
         raise click.ClickException("Nothing to set. Pass at least one field option.")
     if any(v is not None for v in version_edits.values()) and not version:
         raise click.ClickException(
-            "--engine, --zip-url, --zip-source, --release-status and --batch are version fields; "
-            "pass --version too."
+            "--engine, --zip-url, --zip-source, --release-status, --migrate-decision and --batch "
+            "are version fields; pass --version too."
         )
 
     slug = _resolve(manager, product)

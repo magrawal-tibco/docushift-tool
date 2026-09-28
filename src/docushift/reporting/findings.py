@@ -85,6 +85,21 @@ REGISTRY: dict[str, Code] = _codes(
          "Retirement left a product with nothing to convert", "planning.md Phase 3.7"),
     Code("BATCH_NOT_ELIGIBLE", Severity.WARNING, Stage.CATALOG,
          "Tagged into a batch but not eligible", "design.md §8.2.2"),
+    # Phase 25. A warning, not an error: 104 sheet slugs match nothing today and
+    # the tool works perfectly well without them -- those rows simply carry no
+    # verdict. But 91 of their rows say `Migrate`, so silence here would be a
+    # request nobody ever sees. Cleared one alias at a time in
+    # `docsite-migration.yaml`, exactly as the eos aliases were.
+    Code("MIGRATE_SHEET_SLUG_UNMATCHED", Severity.WARNING, Stage.CATALOG,
+         "A migration-sheet slug matching no catalogued product", "planning.md Phase 25"),
+    Code("MIGRATE_ALIAS_STALE", Severity.WARNING, Stage.CATALOG,
+         "An alias naming a slug the active export lacks", "planning.md Phase 25"),
+    # The conflict the phase exists to surface: a verdict and an eligibility flag
+    # that disagree. Deliberately a warning on the *version* rather than anything
+    # blocking -- resolving it is a human's call, and 376 rows carry it today
+    # (458 on the first apply; 94 were hand-resolved the same day).
+    Code("MIGRATE_DECISION_CONFLICT", Severity.WARNING, Stage.CATALOG,
+         "migrate_decision disagrees with convert_eligible", "planning.md Phase 25"),
     # Phase 14a, and the register's first `download` row -- the stage had never
     # had one, because until the template was corrected the stage had never run.
     # A warning rather than an error: 7 of 35 sampled products publish their

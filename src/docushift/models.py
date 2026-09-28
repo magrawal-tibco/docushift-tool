@@ -145,6 +145,33 @@ class ReleaseStatusSource(StrEnum):
     UNKNOWN = "unknown"
 
 
+class MigrateDecision(StrEnum):
+    """Whether this version moves to the new docsite -- docs/architecture.md §3.12.
+
+    An editorial verdict taken outside this tool and imported, not something the
+    pipeline computes. `UNKNOWN` is the honest default and by far the largest
+    bucket: the sheet covers 3,312 of 5,181 catalogued versions, and the other
+    1,869 have had no decision taken about them at all. Absence is not a `NO`.
+    """
+    MIGRATE = "migrate"
+    DO_NOT_MIGRATE = "do_not_migrate"
+    UNKNOWN = "unknown"
+
+
+class MigrateDecisionSource(StrEnum):
+    """How a version's `migrate_decision` was arrived at -- §3.12.
+
+    Precedence: first listed wins, exactly as `ReleaseStatusSource` does.
+    `MANUAL` is a human's call and no import may touch it; `DOCSITE_SHEET` means
+    the active export carried a row for this exact `(slug, version)`; `UNKNOWN`
+    means it did not, and is the value a re-apply resets to when a row or an alias
+    goes away.
+    """
+    MANUAL = "manual"
+    DOCSITE_SHEET = "docsite_sheet"
+    UNKNOWN = "unknown"
+
+
 class ProductVersion(BaseModel):
     """One published version of a product -- one row of `versions.csv`.
 
@@ -164,6 +191,19 @@ class ProductVersion(BaseModel):
     # Free-text run label, e.g. `poc-1` or `wave-2`. Empty means "not scheduled".
     # Opt-in by design: tagging three rows is the whole cost of scoping a POC.
     convert_batch: str = ""
+    # The imported editorial verdict (§3.12), sitting beside the two columns it
+    # comments on rather than with the lifecycle block, because eligibility,
+    # scheduling and the verdict are one story read left to right.
+    #
+    # Deliberately **not** a third selection gate. Nothing downstream reads it:
+    # `convertible_versions` does not consult it, no stage branches on it, and
+    # `apply_migrate_decisions` never writes `convert_eligible`. It exists so the
+    # catalog can hold the verdict and the gate at once and show them disagreeing
+    # -- 458 rows do -- which is the artifact a human needs in order to take the
+    # final call. Wiring it into the pipeline would destroy that evidence in the
+    # act of using it.
+    migrate_decision: MigrateDecision = MigrateDecision.UNKNOWN
+    migrate_decision_source: MigrateDecisionSource = MigrateDecisionSource.UNKNOWN
     release_date: str | None = None
     # Support's retirement verdict, resolved from `config/eos.yaml` at merge time
     # and carried here so the sheet shows the answer without anyone opening the

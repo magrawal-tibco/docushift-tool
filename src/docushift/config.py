@@ -18,7 +18,7 @@ from typing import Any
 
 import yaml
 
-from docushift.models import FamilySource, ReleaseStatus
+from docushift.models import FamilySource, MigrateDecision, ReleaseStatus
 from docushift.utils.slug import (
     docs_tree_name,
     family_workspace_folder,
@@ -142,6 +142,75 @@ class EosReport:
         return self.entries.get(slug, {}).get(version)
 
 
+_MIGRATE_DECISION_TOKENS = {
+    "migrate": MigrateDecision.MIGRATE,
+    "do not migrate": MigrateDecision.DO_NOT_MIGRATE,
+    "do_not_migrate": MigrateDecision.DO_NOT_MIGRATE,
+}
+
+
+@dataclass
+class MigrationSheet:
+    """The active docsite-migration export, resolved against `docsite-migration.yaml`.
+
+    `entries` is keyed by the **slug recovered from the row's `doc_url`**, so a
+    caller joins it with a dict hit on `product.slug` and never runs a match of its
+    own. This is a stronger join than `EosReport`'s: that class has only a display
+    name to slugify, while this sheet ships the canonical docsite URL, so the key
+    is read off the row rather than reconstructed from prose.
+
+    The keys are still *candidate* slugs -- this class has no catalog to check them
+    against, and 104 of them name products the catalog does not carry. `unmatched`
+    is what makes that visible: `CatalogManager.apply_migrate_decisions` reports
+    every one of them rather than letting 410 rows evaporate.
+    """
+    entries: dict[str, dict[str, MigrateDecision]] = field(default_factory=dict)
+    aliases: dict[str, str] = field(default_factory=dict)
+    # Every sheet slug carrying at least one usable row, with its row count and how
+    # many of those rows say `migrate`. Kept for all slugs, not just unmatched ones:
+    # which of them name a real product is a question only the catalog can answer,
+    # and `apply_migrate_decisions` answers it.
+    slug_rows: dict[str, tuple[int, int]] = field(default_factory=dict)
+    # Decision tokens the sheet used that this tool has no enum value for.
+    unknown_decisions: list[str] = field(default_factory=list)
+
+    @property
+    def unmatched_aliases(self) -> list[str]:
+        """Aliases naming a sheet slug the active export does not carry.
+
+        The rename detector, and the exact analogue of `EosReport.unmatched_aliases`:
+        the day the export starts spelling a product the catalog's way is the day
+        that alias stops moving anything, and silence is indistinguishable from
+        success.
+        """
+        return sorted(name for name in self.aliases if name not in self.slug_rows)
+
+    def decision_for(self, slug: str, version: str) -> MigrateDecision | None:
+        """The sheet's verdict on one version, or `None` if it carries no row.
+
+        Version matching is **exact string equality**, for the reason
+        `EosReport.status_for` gives: the versions come from the same docsite the
+        catalog was crawled from, so a coercion could only ever paper over a real
+        mismatch while reintroducing the `1.10` -> `1.1` hazard.
+        """
+        return self.entries.get(slug, {}).get(version)
+
+
+def _sheet_slug(doc_url: str, version: str) -> str:
+    """The catalog slug a sheet row names, read off its `doc_url`.
+
+    Every row's URL is `https://docs.tibco.com/products/{slug}-{dashed version}`,
+    so the slug is the path after `/products/` with that suffix removed. The suffix
+    is required to match before it is stripped -- a URL shaped differently is
+    returned whole and will simply fail the equality test against `products.csv`,
+    which is the correct outcome for a row nobody has reviewed. Guessing at a
+    partial strip is how a verdict lands on the wrong product.
+    """
+    path = doc_url.strip().rstrip("/").rsplit("/products/", 1)[-1]
+    suffix = "-" + version.replace(".", "-")
+    return path[: -len(suffix)] if suffix != "-" and path.endswith(suffix) else path
+
+
 def _parse_eos_date(value: object) -> str:
     """Reads the report's `MM-DD-YYYY` date as ISO, passing anything else through.
 
@@ -174,6 +243,7 @@ class ConfigManager:
         self.docsite_path = self.config_dir / "docsite.yaml"
         self.scope_path = self.config_dir / "scope.yaml"
         self.eos_path = self.config_dir / "eos.yaml"
+        self.docsite_migration_path = self.config_dir / "docsite-migration.yaml"
         self.publishing_path = self.config_dir / "publishing.yaml"
         self.reframe_path = self.config_dir / "reframe.yaml"
         self.origin_urls_path = self.config_dir / "origin-urls.yaml"
@@ -193,6 +263,7 @@ class ConfigManager:
         self._docsite_cache: dict[str, Any] | None = None
         self._scope_cache: dict[str, str] | None = None
         self._eos_cache: EosReport | None = None
+        self._migration_cache: MigrationSheet | None = None
         self._publishing_cache: dict[str, str] | None = None
         self._reframe_cache: dict[str, Any] | None = None
         self._origin_urls_cache: dict[str, dict[str, Any]] | None = None
@@ -645,6 +716,111 @@ class ConfigManager:
                         f"Fix the alias in {self.eos_path.name}."
                     )
                 report.entries[slug][version] = (status, retired_on)
+
+    def load_docsite_migration(self) -> MigrationSheet:
+        """Loads `docsite-migration.yaml` and the export it names -- §3.12.
+
+        Two files with two authors, exactly as `load_eos()` has: the CSV is the
+        docsite inventory's, arrives periodically and is never hand-edited; the
+        YAML is ours, and holds the one thing the CSV cannot supply -- how its
+        slugs map to catalog slugs where somebody has since renamed a product.
+
+        A missing YAML yields an empty sheet -- every version `unknown` -- rather
+        than an error, so a fresh checkout works. Everything else raises, for
+        `load_scope()`'s reason: a duplicate alias, an alias with no slug, a
+        `sheet:` naming a file that is not there, or a `decision_column` the export
+        does not carry are all cases where continuing would quietly write the wrong
+        verdict onto a few thousand rows.
+        """
+        if self._migration_cache is not None:
+            return self._migration_cache
+
+        sheet = MigrationSheet()
+        if not self.docsite_migration_path.exists():
+            self._migration_cache = sheet
+            return sheet
+
+        with open(self.docsite_migration_path, encoding="utf-8") as f:
+            loaded = yaml.safe_load(f) or {}
+
+        for entry in loaded.get("aliases") or []:
+            name = str(entry.get("sheet_slug", "")).strip().lower()
+            slug = str(entry.get("slug", "")).strip().lower()
+            if not name:
+                continue
+            if not slug:
+                raise ValueError(f"{self.docsite_migration_path}: alias '{name}' has no slug")
+            if name in sheet.aliases:
+                raise ValueError(f"{self.docsite_migration_path}: duplicate alias sheet_slug '{name}'")
+            sheet.aliases[name] = slug
+
+        sheet_ref = str(loaded.get("sheet", "")).strip()
+        if not sheet_ref:
+            self._migration_cache = sheet
+            return sheet
+
+        sheet_path = self.config_dir / sheet_ref
+        if not sheet_path.exists():
+            raise ValueError(f"{self.docsite_migration_path}: sheet '{sheet_ref}' not found at {sheet_path}")
+
+        column = str(loaded.get("decision_column", "")).strip()
+        if not column:
+            raise ValueError(f"{self.docsite_migration_path}: no decision_column named")
+
+        self._read_migration_sheet(sheet_path, column, sheet)
+        self._migration_cache = sheet
+        return sheet
+
+    def _read_migration_sheet(self, path: Path, column: str, sheet: MigrationSheet) -> None:
+        """Parses the docsite export into `sheet`, keyed by resolved slug.
+
+        Read with `utf-8-sig`: the export ships a BOM, as the eos report does.
+
+        A repeated `(slug, version)` agreeing with itself is a harmless duplicate
+        and last-wins is safe. A *conflict* is not: two sheet slugs resolving to one
+        catalog slug and disagreeing about a version means an alias is wrong, and
+        picking one silently is how that stays invisible -- the same rule
+        `_read_eos_report` enforces, for the same reason.
+        """
+        seen_unknown: set[str] = set()
+        with open(path, encoding="utf-8-sig", newline="") as handle:
+            reader = csv.DictReader(handle)
+            if reader.fieldnames is None or column not in reader.fieldnames:
+                raise ValueError(
+                    f"{path.name}: no '{column}' column. "
+                    f"Fix decision_column in {self.docsite_migration_path.name}."
+                )
+            for row in reader:
+                version = (row.get("version") or "").strip()
+                doc_url = (row.get("doc_url") or "").strip()
+                if not version or not doc_url:
+                    continue
+
+                token = (row.get(column) or "").strip().lower()
+                decision = _MIGRATE_DECISION_TOKENS.get(token)
+                if decision is None:
+                    if token and token not in seen_unknown:
+                        seen_unknown.add(token)
+                        sheet.unknown_decisions.append(token)
+                    continue
+
+                raw = _sheet_slug(doc_url, version)
+                if not raw:
+                    continue
+                count, migrating = sheet.slug_rows.get(raw, (0, 0))
+                sheet.slug_rows[raw] = (count + 1, migrating + (decision is MigrateDecision.MIGRATE))
+
+                # An alias wins over the URL's own slug, so a reviewed decision can
+                # correct a product the docsite has since renamed.
+                slug = sheet.aliases.get(raw, raw)
+                existing = sheet.entries.setdefault(slug, {}).get(version)
+                if existing is not None and existing is not decision:
+                    raise ValueError(
+                        f"{path.name}: '{raw}' and another sheet slug both resolve to slug '{slug}' "
+                        f"and disagree about version {version} ({existing} vs {decision}). "
+                        f"Fix the alias in {self.docsite_migration_path.name}."
+                    )
+                sheet.entries[slug][version] = decision
 
     def families(self, bu: str) -> dict[str, Any]:
         """The family definitions declared for one business unit."""

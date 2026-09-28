@@ -180,6 +180,8 @@ The code is kept as a column because it is what a human recognizes (`ems`, not `
 | `is_archived` | tool | From the archive API |
 | `convert_eligible` | **user** | Policy gate: *may* this version ever be converted? Active defaults `true`, archived defaults `false` |
 | `convert_batch` | **user** | Scheduling: which run this version belongs to, e.g. `poc-1`. Empty = not scheduled. Free text, lowercased on write — see §3.7 |
+| `migrate_decision` | tool (from the export), user-overridable | `migrate` \| `do_not_migrate` \| `unknown`. Somebody's editorial verdict on whether this version moves to the new docsite, re-resolved from `config/docsite-migration.yaml` on every fetch. **Gates nothing** — it is recorded so it can be read against `convert_eligible`, which it contradicts on 376 rows. See §3.12 |
+| `migrate_decision_source` | tool | `manual` \| `docsite_sheet` \| `unknown` (no row in the active export) |
 | `release_date` | tool | ISO where parseable; free text otherwise (the archive API returns values like `June 2022`) |
 | `release_status` | tool (from the report), user-overridable | `retired` \| `retirement-announced` \| `ga` \| `unknown`. Support's lifecycle verdict, re-resolved from `config/eos.yaml` on every fetch. **Only `retired` blocks conversion** — see §3.11 |
 | `retirement_date` | tool (from the report) | ISO. Populated for announced and GA rows too — the report dates every row it carries |
@@ -199,16 +201,18 @@ The code is kept as a column because it is what a human recognizes (`ems`, not `
 | `_out_files` | **tool, read-only** | Stage 5: **every** file in that tree — the Markdown, the assets that were copied, and `toc.yml` / `metadata.yml` / `csh.yml` |
 
 ```csv
-slug,version,is_archived,convert_eligible,convert_batch,release_date,release_status,retirement_date,release_status_source,engine,engine_source,zip_url,zip_source,custom_override,_bu,_family,_has_csh,_csh_names,_has_api_ref,_api_files,_doc_files,_md_files,_out_files,_reframed_md_files,_reframed_files
-tibco-ems,10.4.0,false,true,poc-1,2025-11-04,ga,2030-12-31,eos_report,flare,detected,https://docs.tibco.com/pub/ems/10.4.0/doc/zip/tib_ems_10.4.0_doc.zip,auto,false,tibco,messaging,true,412,true,4310,19776,2841,3196,,
-tibco-ems,10.2.1,true,false,,2023-06-12,retirement-announced,2027-12-31,eos_report,auto,auto,https://docs.tibco.com/pub/ems/tibco-ems-10-2-1_documentation.zip,auto,false,tibco,messaging,,,,,,,,,
-tibco-ems,8.6.0,true,false,,2020-04-30,retired,2024-12-31,eos_report,webworks,detected,https://docs.tibco.com/pub/ems/tibco-ems-8-6-0_documentation.zip,auto,false,tibco,messaging,,,,,,,,,
-tibco-datasynapse-gridserver,7.1.1,false,true,poc-1,2025-09-30,unknown,,unknown,flare,detected,,manual,false,tibco,integration,true,0,false,0,1458,930,981,,
+slug,version,is_archived,convert_eligible,convert_batch,migrate_decision,migrate_decision_source,release_date,release_status,retirement_date,release_status_source,engine,engine_source,zip_url,zip_source,custom_override,_bu,_family,_has_csh,_csh_names,_has_api_ref,_api_files,_doc_files,_md_files,_out_files,_reframed_md_files,_reframed_files
+tibco-ems,10.4.0,false,true,poc-1,migrate,docsite_sheet,2025-11-04,ga,2030-12-31,eos_report,flare,detected,https://docs.tibco.com/pub/ems/10.4.0/doc/zip/tib_ems_10.4.0_doc.zip,auto,false,tibco,messaging,true,412,true,4310,19776,2841,3196,,
+tibco-ems,10.2.1,true,false,,migrate,docsite_sheet,2023-06-12,retirement-announced,2027-12-31,eos_report,auto,auto,https://docs.tibco.com/pub/ems/tibco-ems-10-2-1_documentation.zip,auto,false,tibco,messaging,,,,,,,,,
+tibco-ems,8.6.0,true,false,,do_not_migrate,docsite_sheet,2020-04-30,retired,2024-12-31,eos_report,webworks,detected,https://docs.tibco.com/pub/ems/tibco-ems-8-6-0_documentation.zip,auto,false,tibco,messaging,,,,,,,,,
+tibco-datasynapse-gridserver,7.1.1,false,true,poc-1,unknown,unknown,2025-09-30,unknown,,unknown,flare,detected,,manual,false,tibco,integration,true,0,false,0,1458,930,981,,
 ```
 
 Note that the rows join on the slug while the `zip_url` paths still carry the code — `pub/ems/...` is the docsite's own folder, which is exactly what `product_code` records and exactly why it survives as a column.
 
 Note the three `tibco-ems` rows: the current release is Flare, an older one is WebWorks, and the un-downloaded one is still `auto` because its engine cannot be known until the package is extracted. Two rows carry `convert_batch=poc-1`; `docushift download --batch poc-1` selects exactly those two and nothing else. The two archived rows have **blank** inventory columns because nothing has ever unpacked them — blank and `0` are different answers (§3.9). The merged pair is blank on all four: none has been through Stage 6, and the merge is Flare-only, so most of the catalog never fills it.
+
+The two decision columns show the conflict §3.12 exists to surface. `10.2.1` is marked `migrate` and is `convert_eligible=false` — one of the 88 versions somebody asked for that no stage would convert. The `tibco-datasynapse-gridserver` row is `unknown` on both, because the export carries no row for it: a coverage gap, not a decision. Nothing in the pipeline reads either column.
 
 The three lifecycle columns show all four states the report can leave a row in. `10.2.1` is `retirement-announced` with a date three years out — still supported, still convertible if anyone re-enabled it. `8.6.0` is `retired` and would be skipped even if `convert_eligible` were flipped back to `true`. And the `tibco-datasynapse-gridserver` row is `unknown` with no date, because the report carries no row for it — which is silence, not a verdict (§3.11).
 
@@ -236,6 +240,8 @@ This makes triage a spreadsheet filter, and makes progress reportable (`docushif
 Consequently `config/taxonomy.yaml` holds **family definitions and keyword inference rules only** — it no longer carries per-product mappings, since maintaining 250 hand-classified products in four-level nested YAML recreates the exact pain CSV was chosen to avoid. The ibi/WebFOCUS/Omni/iWay heuristics formerly hardcoded in `config.py:resolve_product_info()` are now YAML rule data.
 
 A rule lists `match` tokens plus the `bu` and `family` to assign. Each token is compared case-insensitively against the `product_code` as an exact match, and against the display name as a substring; the first rule to match wins, so specific rules are ordered above broad ones. A product matching nothing is written `unclassified` rather than guessed into a family.
+
+Two properties of that comparison are not visible in the rule syntax and both shaped the 2026-09-28 rule set. The name half is a **raw substring** of a name that carries a `®` or `™` *inside* it — the product is `TIBCO Silver® Fabric`, so `silver fabric` matches nothing and the working token is `fabric`, and conversely a token as short as `cloud` claims every Cloud Edition in the catalog. And ordering carries an editorial decision, not just a specificity gradient: a product named after two families (`BusinessWorks Plug-in for Managed File Transfer`, `Silver Fabric Enabler for EMS`, `Spotfire Extension for OpenSpirit`) is filed with the product it **extends**, so the rules for the extended families sit above the rules for the named ones. The rule set is measured rather than reasoned about — on the 2026-09-28 catalog it moves 188 verdicts and 186 land on the family a human curated; the two that do not are mirror-image cross-named products that no ordering resolves, and both are pinned `manual`.
 
 Because two automated sources can disagree, `family` is the one field the merge resolves by **provenance rank** rather than by snapshot comparison: a fetch may only raise a product's classification confidence, never lower it.
 
@@ -615,6 +621,53 @@ The `unknown` tier **actively resets**, which is what makes a correction land: d
 - **Products left with nothing.** The 11 products whose every convertible version is retired are **named in full, never truncated to a count.** Everywhere else in the CLI a long list gets an ellipsis; here the list *is* the finding, because a product with no convertible version left publishes no documentation at all, and that is not something a reader should have to run a second command to discover.
 
 The retirement figures are measured over the **convertible** population — in scope and `convert_eligible` — not over the whole catalog. Counted over everything, 1,751 versions are retired, a number that is four times larger, almost entirely restates the archive flag, and means nothing. 128 is what the rule actually costs.
+
+---
+
+### 3.12 The Migration Verdict: What Somebody Already Decided
+
+Before this tool existed, somebody went through the docsite inventory version by version and decided what moves to the new TIBCO docsite. That decision is exported as a spreadsheet with a `Migrate to New TIBCO Docsite` column reading `Migrate` (1,134 rows) or `Do Not Migrate` (2,588). **The catalog records it and acts on none of it.**
+
+That is the whole of the rule, and it is the opposite of §3.10 and §3.11. Scope is our decision and retirement is upstream's fact; both gate. This is an *editorial opinion* held outside the tool, and it gates nothing — no stage reads `migrate_decision`, `convertible_versions` does not consult it, and no code path writes `convert_eligible` from it.
+
+**Why it is stored at all, given that nothing reads it.** Because it disagrees with the catalog, and the disagreement is the point:
+
+| | `convert_eligible=true` | `convert_eligible=false` |
+| :--- | ---: | ---: |
+| `migrate` | 955 | **88** |
+| `do_not_migrate` | **370** | 1,899 |
+
+458 of 3,312 joined versions conflict — 13.8%. The cause is structural: `convert_eligible` is today a **perfect mirror of `is_archived`**, 3,078 archived rows false and 2,103 live rows true, zero exceptions across all 5,181. It carries no editorial signal; it restates the column two cells to its left. The export's verdict is a real decision that departs from archive status in 520 rows, and every conflict is exactly that departure — all 88 are archived, all 370 are live.
+
+So the 88 are versions somebody asked for that the pipeline would silently skip, and the 370 are versions somebody declined that it would convert. **Writing the verdict into `convert_eligible` would destroy that evidence in the act of using it.** Two columns holding two different facts, visibly disagreeing, is what lets the final call be taken row by row on the merits. `MIGRATE_DECISION_CONFLICT` names every one of the 458 so the list can be filtered out of `report` rather than re-derived by hand.
+
+**The export is an input file, not a one-off import** — §3.11's shape exactly. `config/migration/tibco-docsite-2026-09-03.csv` is committed verbatim, `config/docsite-migration.yaml` names the active one and the column to read, and a new export is a new file so the change is a reviewable diff. `docushift catalog migrate` re-applies it; `catalog fetch` does too, because a newly discovered version must pick up a verdict already in the export on arrival.
+
+**The join key is the slug in `doc_url`, and this is a stronger join than §3.11's.** The eos report has only a display name to slugify; this export ships the canonical docsite URL, so the key is *read off the row* — the path after `/products/`, minus the trailing `-{version with dots as dashes}`. That recovered a slug on 3,722 of 3,722 rows. It is then tested against `products.csv` by string equality, with no fuzzy fallback, and anything else needs a reviewed alias:
+
+```yaml
+sheet: migration/tibco-docsite-2026-09-03.csv
+decision_column: Migrate to New TIBCO Docsite
+aliases:
+  - sheet_slug: tibco-data-streams        # the export's spelling
+    slug: spotfire-data-streams           # the docsite's slug
+```
+
+**104 export slugs match nothing**, covering 410 rows of which 91 say `Migrate`. None has an alias yet; every one is reported as `MIGRATE_SHEET_SLUG_UNMATCHED` on each apply, with its row count and how many want to migrate, so the backlog stays visible instead of decaying into background noise. The largest is `tibco-flogo-enterprise` at 38 rows. Several look like Spotfire renames the catalog has absorbed under a different slug — `tibco-liveview-web-enterprise-edition`, `tibco-data-streams`, `tibco-nimbus-control` — and "looks like" is not the standard, so they are comments in the YAML until somebody confirms the versions line up.
+
+**Absence is a coverage gap, never a verdict.** 1,869 catalogued versions — 36% of the catalog, 778 of them currently eligible — have no row in the export at all. They read `unknown`. Defaulting them to `do_not_migrate` would convert silence into a decision about a third of the corpus, which is §3.11's "absence never retires anything" argument applied one file over.
+
+**Provenance mirrors `release_status_source` exactly**, ranked, first match wins:
+
+| `migrate_decision_source` | Meaning | Overwritable by the export? |
+| :--- | :--- | :--- |
+| `manual` | A human set `migrate_decision` in the CSV | **Never** |
+| `docsite_sheet` | The active export carried a row for this exact `(slug, version)` | Yes |
+| `unknown` | It did not | Yes |
+
+`manual` is what makes the final call durable: `docushift catalog set --version X --migrate-decision migrate` pins it, and no later import moves it. The `unknown` tier actively resets, so a corrected export or a removed alias really does restore the version — safe only because `manual` short-circuits ahead of it. Both columns are absent from `version_snapshot` structurally, for §3.11's reason: a crawl of the docsite has nothing to say about a verdict a human recorded in a spreadsheet.
+
+**Two columns the export carries and this rule ignores.** `is_archived in docsite` is already in the catalog and agrees on 3,304 of 3,312 joined rows — the eight exceptions are `tibco-control-plane` 1.3.0–1.9.0, where the export says archived and the catalog says live. `Marked Retired on support site` is §3.11's job, resolved from a report the tool already reads. Importing either would give one fact two owners.
 
 ---
 

@@ -1,0 +1,62 @@
+# The migration verdict -- docs/architecture.md 3.12.
+#
+# Somebody has already decided, version by version, what moves to the new TIBCO
+# docsite. That decision lives in a spreadsheet exported from the docsite
+# inventory; this file is the authored half, naming which export is active and how
+# its slugs map to catalog slugs where they differ.
+#
+# THIS FILE DECIDES NOTHING ABOUT CONVERSION. The verdict lands in
+# `versions.csv.migrate_decision` and is read by humans. No stage gates on it and
+# `convert_eligible` is never written from it -- the two columns disagreeing is the
+# review artifact, and resolving a disagreement is a hand edit per row.
+#
+# THE JOIN KEY IS THE SLUG IN `doc_url`. Unlike the end-of-support report, this
+# sheet carries the canonical docsite URL, so the key is recovered rather than
+# guessed: take the path after `/products/` and strip the trailing
+# `-{version with dots as dashes}`. The result is tested against `products.csv` by
+# STRING EQUALITY -- the same rule `scope.yaml` and `eos.yaml` use, for the same
+# reason. Anything that does not match must be listed under `aliases:` by hand,
+# after review. There is deliberately no fuzzy fallback.
+#
+# ABSENCE IS NOT A DECISION. 1,869 catalogued versions have no row in this sheet.
+# They read `unknown`, never `do_not_migrate` -- a coverage gap and a verdict are
+# different facts and the column must not conflate them.
+#
+# A NEW EXPORT IS A NEW FILE, not an overwrite. Point `sheet:` at it and run
+# `docushift catalog migrate`. The dated filename is what makes the change a
+# reviewable diff rather than a silent re-decision of three thousand rows.
+
+sheet: migration/tibco-docsite-2026-09-03.csv
+
+# The column carrying the verdict. Named here rather than hardcoded because it is
+# a spreadsheet header a human typed, and the next export may well capitalize it
+# differently -- a missing column raises rather than silently deciding nothing.
+decision_column: Migrate to New TIBCO Docsite
+
+# Sheet slugs that do not match a catalog slug, reviewed one at a time.
+#
+# `rows` records how many of the sheet's rows carry that slug and how many of them
+# say `Migrate`, measured on 2026-09-28. It is the evidence for the entry, not
+# something the tool reads -- a rename is worth writing down when the sheet and the
+# catalog plainly describe the same product under two names.
+#
+# 104 sheet slugs match nothing today, covering 410 rows of which 91 say `Migrate`.
+# None is written here yet: every one needs the same look the eos aliases got, and
+# an unreviewed guess here silently moves a verdict onto the wrong product. The
+# unmatched set is reported as `MIGRATE_SHEET_SLUG_UNMATCHED` on every apply, so it
+# stays visible until it is worked through rather than decaying into background
+# noise. The larger candidates, for whoever picks this up:
+#
+#   tibco-flogo-enterprise                  38 rows, 15 Migrate
+#   tibco-businessevents                    19 rows,  0 Migrate
+#   tibco-hawk                              16 rows,  2 Migrate
+#   tibco-ftl                               15 rows,  0 Migrate
+#   tibco-liveview-web-enterprise-edition    9 rows,  0 Migrate  -> spotfire-liveview-web-enterprise-edition?
+#   tibco-data-streams                       4 rows,  0 Migrate  -> spotfire-data-streams?
+#   tibco-nimbus-control                     8 rows,  0 Migrate  -> tibco-nimbus?
+#
+# The three with an arrow look like Spotfire/rebrand renames and are the obvious
+# first three to confirm -- but "looks like" is not the standard this list is held
+# to, so they are comments until somebody has checked the versions line up.
+
+aliases: []

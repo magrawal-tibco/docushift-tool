@@ -97,6 +97,44 @@ business_units:
       scribe:
         name: "Scribe"
         description: "Scribe cloud data integration"
+      # Declared 2026-09-28 out of the 196-product `general` pile, which was the
+      # largest bucket in the catalog and the one thing that could not become a
+      # repository. Every member carries `family_source=manual`: these are hand
+      # triage decisions, not rule output, and the rules below exist only so a
+      # product discovered next quarter lands beside its siblings.
+      adapters:
+        name: "Adapters"
+        description: "TIBCO and ActiveMatrix adapters, adapter service engines, and the adapter SDK"
+      activematrix:
+        name: "ActiveMatrix"
+        description: "Service Grid, binding and implementation types, management agents, and Policy Director"
+      int-platform:
+        name: "Integration Platform"
+        description: "TIBCO Integration, Hybrid Integration, and the connectivity add-ons"
+      cloud:
+        name: "TIBCO Cloud"
+        description: "TIBCO Cloud services: API Modeler, Bus, Events, Messaging, Metadata, Passport"
+      mft:
+        name: "Managed File Transfer"
+        description: "Command Center, Internet Server, and the platform servers"
+      monitoring:
+        name: "Monitoring"
+        description: "RTView, Service Performance Manager, and IT operations analytics"
+      mainframe:
+        name: "Mainframe"
+        description: "Mainframe WebUI, RED, TCP Library, Substation ES, and the z/OS transaction interfaces"
+      openspirit:
+        name: "OpenSpirit"
+        description: "Geoscience data connectors, adapters, and the OpenSpirit runtime"
+      silver-fabric:
+        name: "Silver Fabric"
+        description: "The Silver Fabric grid runtime and its enablers"
+      silver-mobile:
+        name: "Silver Mobile"
+        description: "Silver Mobile server and the Android and iOS device cores"
+      reward:
+        name: "Reward"
+        description: "Loyalty and customer reward marketing"
       general:
         name: "General"
         description: "Not yet triaged into a family"
@@ -159,6 +197,11 @@ rules:
   - match: ["webfocus", "webfocus-app-studio", "webfocus-client", "webfocus-reporting-server"]
     bu: ibi
     family: webfocus
+  # Above the mainframe rule below, which would otherwise claim it on `Mainframe
+  # Connectors`; ibi owns the product regardless of what it connects to.
+  - match: ["open data hub"]
+    bu: ibi
+    family: general
   - match: ["omni-gen", "omni-healthdata", "omni gen", "omni-healthdata", "iway", "dqm", "data quality center"]
     bu: ibi
     family: data_management
@@ -196,6 +239,103 @@ rules:
   - match: ["streambase"]
     bu: tibco
     family: analytics
+
+  # -- the 2026-09-28 families --------------------------------------------
+  # Placed *below* the messaging / integration / Spotfire rules on purpose. Several
+  # of these products are a plug-in or an enabler named after two families at once
+  # -- `BusinessWorks Plug-in for Managed File Transfer`, `Silver Fabric Enabler for
+  # EMS`, `Spotfire Extension for OpenSpirit` -- and the catalog puts every one of
+  # them with the product it extends, not with the product it names. Reading the
+  # rules top-down gives exactly that, where reading them bottom-up does not.
+  #
+  # Measured against all 669 catalogued products on 2026-09-28: these rules move
+  # 188 verdicts and 186 of them land on the family a human curated. The two that
+  # do not are both cross-named and both pinned `manual` in products.csv --
+  # `Silver Fabric Enabler for BusinessConnect` (curated silver-fabric) and
+  # `Administrator - Enterprise Edition Distribution for Silver Fabric` (curated
+  # tra). No token ordering fixes one without breaking its mirror image.
+  #
+  # A note on the tokens, because it is not guessable from the rule syntax: the
+  # name half of a match is a **raw lowercase substring** of `display_name`, and
+  # nearly every product name carries a `®` or `™` *inside* it. So `silver fabric`
+  # matches nothing -- the real name is `TIBCO Silver® Fabric` -- and `activematrix
+  # adapter` matches nothing either. Tokens here never span the symbol position,
+  # which is why several are a single word or an exact `product_code`.
+  # Ahead of `businessconnect`: `Foresight BusinessConnect Insight` is a Foresight
+  # product that names the gateway it reads from.
+  - match: ["foresight"]
+    bu: tibco
+    family: foresight
+  # Ahead of `fabric` and of OneBX's `ebx`: a BusinessConnect protocol or a
+  # BusinessConnect distribution is a BusinessConnect product either way.
+  - match: ["businessconnect", "partnerexpress"]
+    bu: tibco
+    family: businessconnect
+  # Ahead of `adapters`: the Fulfillment provisioning clients are named
+  # `... Client Adapter for BSCS`, and they are fulfillment components.
+  - match: ["fulfillment"]
+    bu: tibco
+    family: fulfillment
+  # `fabric`, not `silver fabric` -- see the symbol note above.
+  - match: ["fabric"]
+    bu: tibco
+    family: silver-fabric
+  - match: ["silver mobile", "silver-mobile-server", "silver-mobile-core-for-android", "silver-mobile-core-for-ios"]
+    bu: tibco
+    family: silver-mobile
+  - match: ["openspirit"]
+    bu: tibco
+    family: openspirit
+  - match: ["mainframe", "substation", "transaction interface", "object service broker", "ziip"]
+    bu: tibco
+    family: mainframe
+  - match: ["managed file transfer"]
+    bu: tibco
+    family: mft
+  - match: ["rtview", "service performance manager", "it-oa-suite", "mon-suite"]
+    bu: tibco
+    family: monitoring
+  # Above `adapters`: `Binding Type for Adapters` and `Implementation Type for
+  # TIBCO Adapters` are ActiveMatrix runtime pieces, not adapters.
+  - match: ["service grid", "binding type", "implementation type", "management agent", "policy director", "uddi"]
+    bu: tibco
+    family: activematrix
+  - match: ["adapter for", "adapter service engine", "adapter framework", "adapter sdk", "adapter migration"]
+    bu: tibco
+    family: adapters
+  - match: ["reward"]
+    bu: tibco
+    family: reward
+  - match:
+      - "hybrid integration"
+      - "tibco-int"
+      - "ai-suite"
+      - "int-cn-addon-suite"
+      - "cn-addon-itg-suite"
+      - "b2b-addon-itg-suite"
+      - "tp-integration"
+      - "tp-integration-conn"
+      - "tci-hybrid"
+      - "cloud-integration-sku"
+      - "cloud-int-connectivity"
+    bu: tibco
+    family: int-platform
+  # Exact codes only. The `®` sits between `Cloud` and the service name, so there
+  # is no usable name substring, and a bare `cloud` would swallow every product
+  # with a Cloud Edition.
+  - match:
+      - "cloud-administration"
+      - "tcam"
+      - "cloud-bus"
+      - "cloud-data-streams"
+      - "cloud-events"
+      - "tcisf"
+      - "cloud-integration-ipaas"
+      - "cloud-messaging"
+      - "cloud-metadata"
+      - "cloud-passport"
+    bu: tibco
+    family: cloud
 
   # -- OneBX --------------------------------------------------------------
   # All four EBX products moved out of `tibco`/`data_management` with the BU.

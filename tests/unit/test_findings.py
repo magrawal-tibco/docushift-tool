@@ -99,8 +99,16 @@ def test_the_register_carries_every_row_of_7_5() -> None:
     Phase 22 adds the 54th, `ORIGIN_TEMPLATE_UNDECLARED`, on the same rule: it is
     registered in the commit that emits it, and it emits for sixteen of seventeen
     products because declining to guess a live URL is the whole design.
+
+    Phase 25 adds the 55th through 57th, and they are the first codes the register
+    carries for a column that gates nothing. `MIGRATE_DECISION_CONFLICT` is the
+    unusual one: it fires 458 times on the current catalog and is *expected* to,
+    because the phase deliberately records the migration verdict without acting on
+    it. A finding that is loud by design needs a registry row more than a quiet one
+    does -- it is the only thing standing between 458 real disagreements and a
+    number nobody can enumerate.
     """
-    assert len(REGISTRY) == 54
+    assert len(REGISTRY) == 57
 
 
 def test_severity_comes_from_the_registry_and_not_from_the_call_site() -> None:

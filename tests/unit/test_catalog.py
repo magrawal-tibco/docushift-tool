@@ -14,6 +14,8 @@ from docushift.config import ConfigManager
 from docushift.models import (
     EngineSource,
     FamilySource,
+    MigrateDecision,
+    MigrateDecisionSource,
     Product,
     ReleaseStatus,
     ReleaseStatusSource,
@@ -1092,6 +1094,25 @@ def test_the_shipped_report_retires_the_measured_set(repo_root: Path) -> None:
     So the report's verdict on everything it had already judged is untouched; it is
     now judging products it could not previously see. That is the outcome 18d was
     built for, and the number moving is what it looks like.
+
+    *Re-baselined 2026-09-28, and both figures moved down: `versions_retired`
+    139 -> 133 and `products_fully_retired` 11 -> 10.* This one is not population
+    and it is not the report either -- **not one of the 5,181 version rows changed
+    `release_status`**, and coverage is unmoved at 270/669. What moved is
+    `convert_eligible`, hand-resolved against the docsite team's verdict (Phase 25):
+
+    * **6 rows went eligible -> ineligible, and all 6 are retired.** That is the
+      whole of the -6: three versions of `tibco-data-science-team-studio`, two of
+      `spotfire-data-streams`, and `tibco-silver-fabric-enabler-for-tibco-
+      administrator-enterprise-edition@2.9.0`.
+    * **88 rows went ineligible -> eligible, and none of them is retired** (61
+      unknown, 25 retirement-announced, 2 GA), so they add nothing to the count.
+      One of them is what empties the emptied list: `tibco-activematrix-
+      businessworks-plug-in-for-twitter@6.1.2` is retirement-announced rather than
+      retired, so the product is no longer convertible-and-wholly-retired.
+
+    The rule's verdict is therefore untouched in both directions; the convertible
+    population it is measured over is what a human changed.
     """
     manager = CatalogManager(
         repo_root / "config" / "products.csv",
@@ -1101,8 +1122,8 @@ def test_the_shipped_report_retires_the_measured_set(repo_root: Path) -> None:
 
     summary = manager.triage_summary()
 
-    assert summary["versions_retired"] == 139
-    assert len(summary["products_fully_retired"]) == 11
+    assert summary["versions_retired"] == 133
+    assert len(summary["products_fully_retired"]) == 10
     assert manager.eos_coverage() == (270, 669)
 
 
@@ -1887,3 +1908,244 @@ def test_a_manual_row_is_not_called_broken_on_a_fresh_clone(project_root: Path, 
     catalog.set_version_field("tibco-ems", "10.4.0", "zip_source", "manual")
 
     assert not any("--from-file" in note for note in catalog.warnings())
+
+
+# -- the migration verdict: recorded, never enforced (architecture.md §3.12) ---
+
+
+def _migration(
+    project_root: Path,
+    state: StateStore,
+    rows: tuple[tuple[str, str, str], ...] = (),
+    aliases: str = "aliases: []\n",
+    column: str = "Migrate to New TIBCO Docsite",
+) -> CatalogManager:
+    """A catalog manager over a docsite export carrying exactly `rows`.
+
+    Each row is `(sheet slug, version, decision)`; the `doc_url` is assembled the
+    way the real export spells it, so the tests exercise the slug recovery rather
+    than bypassing it. Built fresh each call for `_eos`'s reason: `ConfigManager`
+    caches the sheet, and the re-apply tests below turn on rewriting it.
+    """
+    sheet = project_root / "config" / "migration" / "export.csv"
+    sheet.parent.mkdir(parents=True, exist_ok=True)
+    sheet.write_text(
+        f"product_name,version,doc_url,{column}\n"
+        + "".join(
+            f"{slug},{version},"
+            f"https://docs.tibco.com/products/{slug}-{version.replace('.', '-')},{decision}\n"
+            for slug, version, decision in rows
+        ),
+        encoding="utf-8-sig",
+    )
+    (project_root / "config" / "docsite-migration.yaml").write_text(
+        f"sheet: migration/export.csv\ndecision_column: {column}\n{aliases}", encoding="utf-8"
+    )
+    return CatalogManager(
+        project_root / "config" / "products.csv",
+        project_root / "config" / "versions.csv",
+        state,
+        ConfigManager(root_dir=project_root),
+    )
+
+
+MIGRATE_10_4 = (("tibco-ems", "10.4.0", "Migrate"), ("tibco-ems", "8.6.0", "Do Not Migrate"))
+
+
+def test_the_export_lands_on_the_matching_versions(project_root: Path, state: StateStore) -> None:
+    catalog = _migration(project_root, state, MIGRATE_10_4)
+
+    _fetch(catalog, _ems("10.4.0", "8.6.0"))
+
+    assert catalog.get_version("tibco-ems", "10.4.0").migrate_decision is MigrateDecision.MIGRATE
+    assert catalog.get_version("tibco-ems", "8.6.0").migrate_decision is MigrateDecision.DO_NOT_MIGRATE
+    assert catalog.get_version("tibco-ems", "10.4.0").migrate_decision_source is (
+        MigrateDecisionSource.DOCSITE_SHEET
+    )
+
+
+def test_a_version_the_export_omits_reads_unknown(project_root: Path, state: StateStore) -> None:
+    """Absence is a coverage gap, never a `do_not_migrate` -- 1,869 rows depend on this."""
+    catalog = _migration(project_root, state, MIGRATE_10_4)
+
+    _fetch(catalog, _ems("10.4.0", "8.6.0", "9.1.0"))
+
+    version = catalog.get_version("tibco-ems", "9.1.0")
+    assert version.migrate_decision is MigrateDecision.UNKNOWN
+    assert version.migrate_decision_source is MigrateDecisionSource.UNKNOWN
+
+
+def test_the_verdict_never_touches_eligibility(project_root: Path, state: StateStore) -> None:
+    """The whole point of §3.12: the column records a decision and gates nothing.
+
+    `8.6.0` is declined by the export and eligible in the catalog -- exactly the
+    370-row conflict. It must still be convertible afterwards, because resolving
+    the conflict is a human's call and not this code's.
+    """
+    catalog = _migration(project_root, state, MIGRATE_10_4)
+
+    _fetch(catalog, _ems("10.4.0", "8.6.0"))
+
+    assert catalog.get_version("tibco-ems", "8.6.0").convert_eligible is True
+    assert [v.version for _, v in catalog.iter_versions(eligible_only=True)] == ["10.4.0", "8.6.0"]
+
+
+def test_apply_counts_the_conflicts_without_resolving_them(project_root: Path, state: StateStore) -> None:
+    _fetch(_migration(project_root, state), _ems("10.4.0", "8.6.0"))
+    catalog = _migration(project_root, state, MIGRATE_10_4)
+    catalog.set_conversion_eligibility("tibco-ems", "10.4.0", False)
+
+    stats = _migration(project_root, state, MIGRATE_10_4).apply_migrate_decisions()
+
+    # 10.4.0: wanted but ineligible. 8.6.0: eligible but declined. One of each.
+    assert (stats.migrate_not_eligible, stats.declined_eligible) == (1, 1)
+    assert (stats.migrate_eligible, stats.declined_not_eligible) == (0, 0)
+    assert stats.conflicts == 2
+    after = _migration(project_root, state, MIGRATE_10_4).get_version("tibco-ems", "10.4.0")
+    assert after.convert_eligible is False
+
+
+def test_apply_counts_the_versions_the_export_is_silent_about(
+    project_root: Path, state: StateStore
+) -> None:
+    _fetch(_migration(project_root, state), _ems("10.4.0", "8.6.0", "9.1.0"))
+
+    stats = _migration(project_root, state, MIGRATE_10_4).apply_migrate_decisions()
+
+    assert (stats.decided, stats.undecided) == (2, 1)
+
+
+def test_a_manual_decision_outranks_the_export(project_root: Path, state: StateStore) -> None:
+    """The final call has to survive the next import or the column is worthless."""
+    catalog = _migration(project_root, state, MIGRATE_10_4)
+    _fetch(catalog, _ems("10.4.0", "8.6.0"))
+
+    catalog.set_version_field("tibco-ems", "10.4.0", "migrate_decision", "do_not_migrate")
+    stats = _migration(project_root, state, MIGRATE_10_4).apply_migrate_decisions()
+
+    version = _migration(project_root, state, MIGRATE_10_4).get_version("tibco-ems", "10.4.0")
+    assert version.migrate_decision is MigrateDecision.DO_NOT_MIGRATE
+    assert version.migrate_decision_source is MigrateDecisionSource.MANUAL
+    assert stats.manual == 1
+
+
+def test_a_manual_decision_survives_a_fetch(project_root: Path, state: StateStore) -> None:
+    catalog = _migration(project_root, state, MIGRATE_10_4)
+    _fetch(catalog, _ems("10.4.0"))
+    catalog.set_version_field("tibco-ems", "10.4.0", "migrate_decision", "unknown")
+
+    _fetch(_migration(project_root, state, MIGRATE_10_4), _ems("10.4.0"))
+
+    version = _migration(project_root, state, MIGRATE_10_4).get_version("tibco-ems", "10.4.0")
+    assert version.migrate_decision is MigrateDecision.UNKNOWN
+    assert version.migrate_decision_source is MigrateDecisionSource.MANUAL
+
+
+def test_a_dropped_export_row_restores_the_version(project_root: Path, state: StateStore) -> None:
+    """Step 3 actively resets, so a corrected export needs no hand-edit to land."""
+    _fetch(_migration(project_root, state, MIGRATE_10_4), _ems("10.4.0"))
+
+    _migration(project_root, state).apply_migrate_decisions()
+
+    version = _migration(project_root, state).get_version("tibco-ems", "10.4.0")
+    assert version.migrate_decision is MigrateDecision.UNKNOWN
+    assert version.migrate_decision_source is MigrateDecisionSource.UNKNOWN
+
+
+def test_a_sheet_slug_matching_no_product_is_reported(project_root: Path, state: StateStore) -> None:
+    """410 rows across 104 slugs are in exactly this state, and 91 of them say migrate."""
+    rows = (("tibco-liveview-web", "1.2.0", "Migrate"), ("tibco-liveview-web", "1.1.0", "Do Not Migrate"))
+    _fetch(_migration(project_root, state, rows), _ems("10.4.0"))
+
+    stats = _migration(project_root, state, rows).apply_migrate_decisions()
+
+    assert stats.unmatched == {"tibco-liveview-web": (2, 1)}
+
+
+def test_an_alias_moves_the_verdict_onto_the_renamed_product(
+    project_root: Path, state: StateStore
+) -> None:
+    rows = (("tibco-ems-classic", "10.4.0", "Migrate"),)
+    aliases = "aliases:\n  - sheet_slug: tibco-ems-classic\n    slug: tibco-ems\n"
+    catalog = _migration(project_root, state, rows, aliases=aliases)
+
+    _fetch(catalog, _ems("10.4.0"))
+
+    assert catalog.get_version("tibco-ems", "10.4.0").migrate_decision is MigrateDecision.MIGRATE
+    reapplied = _migration(project_root, state, rows, aliases=aliases).apply_migrate_decisions()
+    assert reapplied.unmatched == {}
+
+
+def test_an_alias_naming_nothing_in_the_export_is_reported(
+    project_root: Path, state: StateStore
+) -> None:
+    aliases = "aliases:\n  - sheet_slug: tibco-gone\n    slug: tibco-ems\n"
+
+    catalog = _migration(project_root, state, MIGRATE_10_4, aliases=aliases)
+
+    assert catalog.unmatched_migration_aliases() == ["tibco-gone"]
+
+
+def test_two_sheet_slugs_disagreeing_about_a_version_raise(
+    project_root: Path, state: StateStore
+) -> None:
+    """Picking one silently is how a wrong alias stays invisible."""
+    rows = (("tibco-ems-classic", "10.4.0", "Migrate"), ("tibco-ems", "10.4.0", "Do Not Migrate"))
+    aliases = "aliases:\n  - sheet_slug: tibco-ems-classic\n    slug: tibco-ems\n"
+
+    with pytest.raises(ValueError, match="disagree about version 10.4.0"):
+        _migration(project_root, state, rows, aliases=aliases).apply_migrate_decisions()
+
+
+def test_a_missing_decision_column_raises(project_root: Path, state: StateStore) -> None:
+    """A silently-empty import would write `unknown` over three thousand verdicts."""
+    sheet = project_root / "config" / "migration" / "export.csv"
+    sheet.parent.mkdir(parents=True, exist_ok=True)
+    sheet.write_text("product_name,version,doc_url\n", encoding="utf-8-sig")
+    (project_root / "config" / "docsite-migration.yaml").write_text(
+        "sheet: migration/export.csv\ndecision_column: Migrate\naliases: []\n", encoding="utf-8"
+    )
+    catalog = CatalogManager(
+        project_root / "config" / "products.csv",
+        project_root / "config" / "versions.csv",
+        state,
+        ConfigManager(root_dir=project_root),
+    )
+
+    with pytest.raises(ValueError, match="no 'Migrate' column"):
+        catalog.apply_migrate_decisions()
+
+
+def test_an_unreadable_decision_token_is_reported_not_guessed(
+    project_root: Path, state: StateStore
+) -> None:
+    rows = (("tibco-ems", "10.4.0", "Maybe"),)
+    _fetch(_migration(project_root, state, rows), _ems("10.4.0"))
+
+    stats = _migration(project_root, state, rows).apply_migrate_decisions()
+
+    assert stats.unknown_decisions == ["maybe"]
+    version = _migration(project_root, state, rows).get_version("tibco-ems", "10.4.0")
+    assert version.migrate_decision is MigrateDecision.UNKNOWN
+
+
+def test_the_two_columns_round_trip(project_root: Path, state: StateStore) -> None:
+    catalog = _migration(project_root, state, MIGRATE_10_4)
+    _fetch(catalog, _ems("10.4.0"))
+
+    row = next(r for r in read_rows(catalog.versions_path) if r["version"] == "10.4.0")
+
+    assert row["migrate_decision"] == "migrate"
+    assert row["migrate_decision_source"] == "docsite_sheet"
+
+
+def test_a_catalog_with_no_migration_config_decides_nothing(
+    catalog: CatalogManager, sample_product: Product
+) -> None:
+    """The file is optional; a fresh checkout must import cleanly and assert nothing."""
+    _fetch(catalog, sample_product)
+
+    stats = catalog.apply_migrate_decisions()
+
+    assert stats.decided == 0
+    assert stats.undecided == len(sample_product.versions)

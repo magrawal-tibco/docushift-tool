@@ -69,6 +69,9 @@ docushift catalog show --product businessevents-enterprise
 
 # Re-apply support's end-of-support report without re-crawling
 docushift catalog eos
+
+# Re-apply the docsite team's migration export (records a verdict; gates nothing)
+docushift catalog migrate
 ```
 
 **A scope is required.** A bare `catalog fetch` would crawl the entire A-to-Z list, so it asks for `--all` or one of `--bu` / `--family` / `--product` / `--batch` instead of assuming. `--version` is rejected: discovery works a product at a time, and fetching one version would make the others look deleted.
@@ -116,6 +119,8 @@ Four columns, answering four different questions:
 | `convert_batch` | `versions.csv` | *Is it in **this** run?* | empty (not scheduled) |
 
 Three of the four are yours. `release_status` is not — it comes from support's end-of-support report, and only the value `retired` blocks anything.
+
+There is a fifth column, `migrate_decision`, and it is **not** on this list on purpose: it records what the docsite team decided, and gates nothing at all. See [The docsite team's verdict](#the-docsite-teams-verdict) below.
 
 Use `convert_eligible` for permanent policy — this version is out of scope, full stop. Use `convert_batch` to scope a run: tag the handful of rows you want with a label like `poc-1` or `wave-2` and pass `--batch poc-1` to the pipeline. Nothing else in the sheet has to move.
 
@@ -210,6 +215,56 @@ The override sets `release_status_source=manual`, which outranks the report perm
 Removing a row from the report, or removing a wrong alias, **restores the version** on the next `catalog eos` — the tool resets anything it set itself. And as with scope, retired versions stay fully catalogued: they keep their rows, their dates and their place in every inventory. They are just never downloaded, extracted, converted or laid out.
 
 > **An alias that stops matching is reported.** If support renames a product, its alias silently stops retiring anything — so `catalog eos` and `catalog import` both name any alias the active report no longer mentions. That warning is the only sign you would get.
+
+#### The docsite team's verdict
+
+The docsite team keeps its own list of what moves to the new TIBCO docsite. That list is an editorial judgement made by people, and it is **not** the same question as `convert_eligible` — which, in the catalog as it stands, is a mirror of `is_archived` and nothing more. So the verdict is imported into its own column and **changes nothing**:
+
+| Column | Values |
+| :--- | :--- |
+| `migrate_decision` | `migrate` · `do_not_migrate` · `unknown` |
+| `migrate_decision_source` | `docsite_sheet` · `manual` · `unknown` |
+
+Nothing downstream reads either one. No version is downloaded, skipped, converted or excluded because of them. The column exists so that the disagreement between the two lists is *visible* and can be settled row by row, by a human, rather than resolved silently by whichever list was imported last.
+
+The export is committed under `config/migration/` and `config/docsite-migration.yaml` names the active one, the same shape as `eos.yaml`:
+
+```yaml
+sheet: migration/tibco-docsite-2026-09-03.csv
+decision_column: Migrate to New TIBCO Docsite
+aliases: []
+```
+
+The join key is the **slug**, recovered from the export's `doc_url` (the trailing `-10-4-0` version suffix is stripped). Where the export's slug is not the catalog's, add an alias exactly as you would for the EOS report. To re-apply an export:
+
+```bash
+docushift catalog migrate
+```
+
+That prints the verdict crossed against eligibility, and this is the whole point of the command:
+
+```
+| migrate_decision | eligible | not eligible |
+| migrate          |      955 |           88 |
+| do_not_migrate   |      370 |         1899 |
+The export decides 3312 of 5181 catalogued versions; 1869 have no row in it and read 'unknown'.
+WARN 458 version(s) disagree with convert_eligible (88 wanted but ineligible, 370 eligible but
+     declined). Nothing was changed for them.
+WARN 104 export slug(s) match no catalogued product -- 410 row(s), 91 of them marked migrate.
+```
+
+The two yellow cells are the work: 88 versions the docsite team wants that the catalog will not convert, and 370 the catalog will convert that the docsite team declined. Every one is also recorded as a `MIGRATE_DECISION_CONFLICT` finding, so `docushift report` lists them individually. `catalog show` marks them too — a disagreeing row reads `no (migrate)` in its Eligible cell instead of a bare `no`.
+
+Settle one either way, and the decision sticks:
+
+```bash
+docushift catalog set --product ems --version 8.6.0 --migrate-decision migrate  # the verdict was wrong
+docushift catalog enable --product ems --version 8.6.0                          # the catalog was wrong
+```
+
+`--migrate-decision` sets `migrate_decision_source=manual`, which outranks the export permanently — no fetch and no later export will undo it.
+
+As with the EOS report, **absence is not a decision**: 1,869 versions have no row in the export and read `unknown`, which means nobody has looked, not that they were declined. Dropping a row from a new export resets that version back to `unknown` on the next `catalog migrate`, an alias that matches nothing in the export is reported, and a decision token the tool cannot read is reported rather than guessed at.
 
 ### What's actually in the package
 
@@ -1309,6 +1364,23 @@ rules:
 ```
 
 Anything that matches no rule is written as `family_source=unclassified` for manual triage.
+
+**Two things about `match` that the syntax does not show.** Each token is tested twice: as an **exact** `product_code`, and as a **raw lowercase substring** of `display_name`. Substring, not word — so a token as short as `cloud` claims every Cloud Edition in the catalog, and the tokens that work are either an exact code or a distinctive phrase. And the names carry a `®` or `™` **inside** them: the product is `TIBCO Silver® Fabric`, so `silver fabric` matches nothing and `fabric` matches everything you wanted. Nothing strips those symbols before the comparison. When you add a rule, check it against the catalog rather than reading it:
+
+```bash
+docushift catalog triage            # what is still unclassified
+docushift catalog list --family mft # what a rule actually claimed
+```
+
+**Order is load-bearing, and not only "specific before broad".** Many products are named after two families at once — `BusinessWorks Plug-in for Managed File Transfer`, `Silver Fabric Enabler for EMS`, `Spotfire Extension for OpenSpirit`. The catalog files each of these with the product it *extends*, not the product it names, so the `bw`/`messaging`/`spotfire` rules sit **above** the `mft`/`silver-fabric`/`openspirit` rules. Reading the list top-down is the only way to predict where a product lands.
+
+**A rule never overrides a human.** `family_source` ranks `manual > taxonomy_rule > docsite_category > unclassified`, and a fetch may only replace an assignment of equal or lower confidence. So a hand assignment left at `unclassified` *can* be re-guessed by a rule; pin it instead:
+
+```bash
+docushift catalog set --product tibco-rtview --family monitoring   # sets family_source=manual
+```
+
+Editing the `family` column in the spreadsheet does **not** pin it — set `family_source` to `manual` in the same row, or the next `catalog fetch` may move the product back.
 
 > Rules assign `bu` and `family` only — never `engine`. The source toolchain
 > differs between versions of the same product, so it is detected per version

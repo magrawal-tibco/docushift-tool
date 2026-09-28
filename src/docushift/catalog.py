@@ -19,6 +19,8 @@ from docushift.models import (
     Catalog,
     EngineSource,
     FamilySource,
+    MigrateDecision,
+    MigrateDecisionSource,
     Product,
     ProductVersion,
     ReleaseStatus,
@@ -42,7 +44,7 @@ from docushift.utils.csvio import (
 )
 
 if TYPE_CHECKING:  # pragma: no cover - import kept lazy to avoid a config <-> catalog cycle
-    from docushift.config import ConfigManager, EosReport
+    from docushift.config import ConfigManager, EosReport, MigrationSheet
 
 PRODUCT_COLUMNS = (
     # First because it is the key: the column `versions.csv` joins on and every
@@ -71,6 +73,13 @@ VERSION_COLUMNS = (
     "is_archived",
     "convert_eligible",
     "convert_batch",
+    # The imported migration verdict (architecture.md §3.12). Placed here, beside
+    # the two columns it comments on, because a reader taking the final call needs
+    # `convert_eligible` and the verdict in the same glance. Un-prefixed for the
+    # reason the release-status trio is: hand-overridable, with a source column
+    # recording who last spoke.
+    "migrate_decision",
+    "migrate_decision_source",
     "release_date",
     # Support's retirement verdict (architecture.md §3.11). Resolved from
     # `config/eos.yaml` at merge time and carried here for the same reason
@@ -156,8 +165,44 @@ _MERGEABLE_PRODUCT_FIELDS = ("display_name", "product_code")
 # `in_scope`/`scope_source` are on the product side: they are resolved from
 # `config/eos.yaml` at merge time and the docsite has no lifecycle value to
 # three-way-merge against, so `version_snapshot` carries none of them and no rule
-# is needed to stop a fetch overwriting them (§3.11).
+# is needed to stop a fetch overwriting them (§3.11). `migrate_decision` and its
+# source are absent for that same reason one file over: they are resolved from
+# `config/docsite-migration.yaml`, and a crawl of the docsite has nothing to say
+# about a verdict a human recorded in a spreadsheet (§3.12).
 _MERGEABLE_VERSION_FIELDS = ("is_archived", "convert_eligible", "release_date", "zip_url")
+
+
+@dataclass
+class MigrateStats:
+    """What the migration export says, and where it disagrees with the catalog.
+
+    The four `*_eligible` counters are the 2x2 that is the whole point of §3.12:
+    the verdict on one axis, `convert_eligible` on the other. `migrate_not_eligible`
+    and `declined_eligible` are the conflicts -- versions a human asked for that no
+    stage would convert, and versions a human declined that every stage would.
+    """
+    migrate_eligible: int = 0
+    migrate_not_eligible: int = 0
+    declined_eligible: int = 0
+    declined_not_eligible: int = 0
+    undecided: int = 0
+    manual: int = 0
+    # Sheet slug -> (rows, of which `migrate`) for every slug matching no product.
+    unmatched: dict[str, tuple[int, int]] = field(default_factory=dict)
+    unknown_decisions: list[str] = field(default_factory=list)
+
+    @property
+    def conflicts(self) -> int:
+        return self.migrate_not_eligible + self.declined_eligible
+
+    @property
+    def decided(self) -> int:
+        return (
+            self.migrate_eligible
+            + self.migrate_not_eligible
+            + self.declined_eligible
+            + self.declined_not_eligible
+        )
 
 
 class CatalogError(Exception):
@@ -277,6 +322,12 @@ class CatalogManager:
                 is_archived=is_archived,
                 convert_eligible=parse_bool(row.get("convert_eligible"), default=not is_archived),
                 convert_batch=row.get("convert_batch", "").strip().lower(),
+                migrate_decision=_coerce_enum(
+                    MigrateDecision, row.get("migrate_decision"), MigrateDecision.UNKNOWN
+                ),
+                migrate_decision_source=_coerce_enum(
+                    MigrateDecisionSource, row.get("migrate_decision_source"), MigrateDecisionSource.UNKNOWN
+                ),
                 release_date=normalize_date(row.get("release_date")) or None,
                 release_status=_coerce_enum(ReleaseStatus, row.get("release_status"), ReleaseStatus.UNKNOWN),
                 # Left verbatim rather than run through `normalize_date`: the value
@@ -355,6 +406,8 @@ class CatalogManager:
                         "is_archived": format_bool(version.is_archived),
                         "convert_eligible": format_bool(version.convert_eligible),
                         "convert_batch": version.convert_batch,
+                        "migrate_decision": str(version.migrate_decision),
+                        "migrate_decision_source": str(version.migrate_decision_source),
                         "release_date": normalize_date(version.release_date),
                         "release_status": str(version.release_status),
                         "retirement_date": version.retirement_date or "",
@@ -502,6 +555,7 @@ class CatalogManager:
         stats = MergeStats()
         scope_rules = self._scope_rules()
         eos = self._eos_report()
+        migration = self._migration_sheet()
 
         for incoming in discovered:
             slug = incoming.slug
@@ -531,6 +585,10 @@ class CatalogManager:
             # retirement recorded once and never re-checked would be undone by the
             # next crawl (§3.10, §3.11).
             _resolve_release_status(product, eos)
+            # Re-applied for the reason directly above, one file over: a newly
+            # discovered version arrives with no verdict, and one already in the
+            # sheet must pick its verdict up on arrival rather than a command later.
+            _resolve_migrate_decision(product, migration)
 
             blocked = self._collect_deletions(catalog.products[slug], incoming)
             if blocked:
@@ -644,6 +702,59 @@ class CatalogManager:
         stats.versions_retired, stats.products_fully_retired = self._retirement_effect()
         self.save()
         return stats
+
+    def _migration_sheet(self) -> "MigrationSheet":
+        if self.config is None:
+            from docushift.config import MigrationSheet
+
+            return MigrationSheet()
+        return self.config.load_docsite_migration()
+
+    def apply_migrate_decisions(self) -> "MigrateStats":
+        """Re-resolves the two migration columns from the active export -- §3.12.
+
+        The analogue of `apply_eos`, and deliberately as narrow: it writes
+        `migrate_decision` and `migrate_decision_source` and nothing else. In
+        particular it does not write `convert_eligible`, does not schedule
+        anything, and does not resolve a conflict between the two -- it *counts*
+        the conflicts and hands them back, because 458 rows is not a number to
+        flip from a join, and the disagreement is the artifact somebody needs in
+        order to decide.
+        """
+        sheet = self._migration_sheet()
+        stats = MigrateStats()
+        for product in self.load().products.values():
+            _resolve_migrate_decision(product, sheet)
+
+        for _product, version in self.iter_versions():
+            decision = version.migrate_decision
+            if decision is MigrateDecision.UNKNOWN:
+                stats.undecided += 1
+            elif decision is MigrateDecision.MIGRATE:
+                if version.convert_eligible:
+                    stats.migrate_eligible += 1
+                else:
+                    stats.migrate_not_eligible += 1
+            else:
+                if version.convert_eligible:
+                    stats.declined_eligible += 1
+                else:
+                    stats.declined_not_eligible += 1
+            if version.migrate_decision_source is MigrateDecisionSource.MANUAL:
+                stats.manual += 1
+
+        catalogued = set(self.load().products)
+        stats.unmatched = {
+            raw: counts for raw, counts in sheet.slug_rows.items()
+            if sheet.aliases.get(raw, raw) not in catalogued
+        }
+        stats.unknown_decisions = list(sheet.unknown_decisions)
+        self.save()
+        return stats
+
+    def unmatched_migration_aliases(self) -> list[str]:
+        """Aliases in `docsite-migration.yaml` naming a slug the active export lacks."""
+        return self._migration_sheet().unmatched_aliases
 
     def _merge_product(self, mine: Product, theirs: Product) -> int:
         """Merges discovery-owned product fields. Returns the count preserved."""
@@ -791,6 +902,13 @@ class CatalogManager:
             # read the same way and neither is mistaken for the report's verdict.
             target.release_status = ReleaseStatus(value.strip().lower())
             target.release_status_source = ReleaseStatusSource.MANUAL
+        elif name == "migrate_decision":
+            # Pinned to manual either way, exactly as `release_status` is. This is
+            # the column the final call gets written into, one row at a time, and
+            # a call the next `catalog migrate` silently reverted would be worse
+            # than no column at all.
+            target.migrate_decision = MigrateDecision(value.strip().lower())
+            target.migrate_decision_source = MigrateDecisionSource.MANUAL
         elif name == "convert_eligible":
             target.convert_eligible = parse_bool(value)
         elif name == "convert_batch":
@@ -1305,6 +1423,41 @@ def _resolve_release_status(product: Product, report: "EosReport") -> None:
         version.release_status = ReleaseStatus.UNKNOWN
         version.retirement_date = None
         version.release_status_source = ReleaseStatusSource.UNKNOWN
+
+
+def _resolve_migrate_decision(product: Product, sheet: "MigrationSheet") -> None:
+    """Applies the docsite migration export to one product's versions -- §3.12.
+
+    Ranked `manual` > `docsite_sheet` > `unknown`, first match wins, exactly as
+    `_resolve_release_status` is:
+
+    1. `migrate_decision_source=manual` is a human's call and is preserved
+       unconditionally -- the escape hatch for the row somebody has since looked
+       at properly, and the thing that makes taking the final call durable.
+    2. A row in the active sheet for this exact `(slug, version)` sets the verdict.
+    3. Anything else is `unknown` -- and this step **actively resets** a previous
+       `docsite_sheet` verdict, so a corrected export or a removed alias really
+       does restore the version. Safe only because step 1 short-circuits ahead.
+
+    Step 3 is also why absence can never accumulate into a `do_not_migrate`:
+    `unknown` is written, never a verdict, and 1,869 of the catalog's versions are
+    in exactly that state.
+
+    Writes nothing but the two columns. `convert_eligible` is not touched here and
+    is not touched anywhere else this feature reaches -- see `ProductVersion`.
+    """
+    for version in product.versions.values():
+        if version.migrate_decision_source is MigrateDecisionSource.MANUAL:
+            continue
+
+        found = sheet.decision_for(product.slug, version.version)
+        if found is not None:
+            version.migrate_decision = found
+            version.migrate_decision_source = MigrateDecisionSource.DOCSITE_SHEET
+            continue
+
+        version.migrate_decision = MigrateDecision.UNKNOWN
+        version.migrate_decision_source = MigrateDecisionSource.UNKNOWN
 
 
 def _as_text(value: object) -> str:
