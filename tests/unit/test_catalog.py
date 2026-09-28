@@ -1709,6 +1709,129 @@ def test_more_markdown_than_files_is_a_hand_edit_and_warns(catalog: CatalogManag
     assert not any("_md_files" in problem for problem in _reload(catalog).validate())
 
 
+# -- Stage 6 merged inventory (architecture.md §3.9.3, planning.md Phase 24) --
+
+
+def _reframed(catalog: CatalogManager) -> None:
+    """The same product again, now with a merged tree measured against it."""
+    _converted(catalog)
+    catalog.record_reframe_inventory("ems", "10.4.0", reframed_md_files=124, reframed_files=163)
+
+
+def test_the_merged_columns_are_blank_until_the_version_is_reframed(
+    catalog: CatalogManager,
+) -> None:
+    """Converted is not merged -- and for most of the catalog it never will be."""
+    _converted(catalog)
+
+    version = _reload(catalog).get_version("ems", "10.4.0")
+
+    assert version.md_files == 930
+    assert version.reframed_md_files is None
+    assert version.reframed_files is None
+    row = read_rows(catalog.versions_path)[0]
+    assert row["_reframed_md_files"] == ""
+    assert row["_reframed_files"] == ""
+
+
+def test_recorded_merged_inventory_round_trips(catalog: CatalogManager) -> None:
+    _reframed(catalog)
+
+    version = _reload(catalog).get_version("ems", "10.4.0")
+
+    assert version.reframed_md_files == 124
+    assert version.reframed_files == 163
+
+
+def test_the_three_inventory_blocks_read_as_one_sequence(catalog: CatalogManager) -> None:
+    """The point of the column: the whole pipeline's effect on file count, in one row."""
+    _reframed(catalog)
+
+    version = _reload(catalog).get_version("ems", "10.4.0")
+
+    assert (version.doc_files, version.md_files, version.reframed_md_files) == (19776, 930, 124)
+
+
+def test_a_merge_that_produced_nothing_survives_as_zero(catalog: CatalogManager) -> None:
+    """`0` means the walk ran and found no pages -- not that the merge never ran."""
+    _converted(catalog)
+    catalog.record_reframe_inventory("ems", "10.4.0", reframed_md_files=0, reframed_files=0)
+
+    version = _reload(catalog).get_version("ems", "10.4.0")
+
+    assert version.reframed_md_files == 0
+    assert version.reframed_files == 0
+
+
+def test_a_fetch_never_touches_the_merged_columns(catalog: CatalogManager) -> None:
+    """Discovery has not opened the package, let alone merged it (§3.5)."""
+    _reframed(catalog)
+
+    _fetch(catalog, make_product("ems", versions={"10.4.0": make_version("ems", "10.4.0")}))
+
+    version = _reload(catalog).get_version("ems", "10.4.0")
+    assert version.reframed_md_files == 124
+    assert version.reframed_files == 163
+
+
+def test_the_merged_inventory_survives_a_spreadsheet_round_trip(catalog: CatalogManager) -> None:
+    _reframed(catalog)
+    before = catalog.versions_path.read_bytes()
+
+    _reload(catalog).save()
+
+    assert catalog.versions_path.read_bytes() == before
+
+
+def test_clearing_the_merged_inventory_leaves_the_earlier_columns_alone(
+    catalog: CatalogManager,
+) -> None:
+    """Three trees, three lifetimes: discarding a merge unmakes neither of the others."""
+    _reframed(catalog)
+
+    assert catalog.clear_reframe_inventory("ems", "10.4.0") is True
+
+    version = _reload(catalog).get_version("ems", "10.4.0")
+    assert version.reframed_md_files is None
+    assert version.reframed_files is None
+    assert version.md_files == 930
+    assert version.out_files == 981
+    assert version.doc_files == 19776
+
+
+def test_clearing_the_output_inventory_leaves_the_merged_columns_alone(
+    catalog: CatalogManager,
+) -> None:
+    """The other direction of the same rule -- neither block reaches the other."""
+    _reframed(catalog)
+
+    assert catalog.clear_convert_inventory("ems", "10.4.0") is True
+
+    version = _reload(catalog).get_version("ems", "10.4.0")
+    assert version.md_files is None
+    assert version.reframed_md_files == 124
+
+
+def test_recording_a_merge_against_an_unknown_version_reports_failure(
+    catalog: CatalogManager,
+) -> None:
+    assert catalog.record_reframe_inventory("nope", "1.0", 0, 0) is False
+
+
+def test_more_merged_markdown_than_merged_files_is_a_hand_edit_and_warns(
+    catalog: CatalogManager,
+) -> None:
+    """Same subset relation as §3.9.2's, one stage later and from its own walk."""
+    _reframed(catalog)
+    catalog.get_version("ems", "10.4.0").reframed_files = 12
+    catalog.save()
+
+    notes = _reload(catalog).warnings()
+
+    assert any("_reframed_md_files=124 exceeds _reframed_files=12" in note for note in notes)
+    assert not any("_reframed_md_files" in problem for problem in _reload(catalog).validate())
+
+
 # -- hand-supplied packages (architecture.md §3.8) ---------------------------
 
 

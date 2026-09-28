@@ -15,7 +15,7 @@ from click.testing import CliRunner
 
 from docushift import __version__
 from docushift.catalog import CatalogManager
-from docushift.cli import main
+from docushift.cli import console, main
 from docushift.discovery import CrawlResult, DocsiteCrawler
 from docushift.state import StateStore
 from tests.conftest import REPO_ROOT, make_product, make_version
@@ -1402,3 +1402,102 @@ def test_a_run_that_found_errors_still_exits_zero(
     result = _invoke(runner, populated_root, "sync", "--all", "--target-dir", str(workspace))
 
     assert result.exit_code == 0
+
+
+# -- the reframe funnel (planning.md Phase 24) --------------------------------
+
+
+def _funnel_line(stats, manager) -> str:
+    """The rendered line, unwrapped. Rich hard-wraps at the console width."""
+    from docushift.cli import _report_reframe_funnel
+
+    with console.capture() as captured:
+        _report_reframe_funnel(stats, manager)
+    return " ".join(captured.get().split())
+
+
+def _merged(slug: str, version: str, md: int, files: int):
+    from docushift.reframe import ReframeOutcome, ReframeResult
+
+    return ReframeResult(
+        slug, version, ReframeOutcome.REFRAMED, reframed_md_files=md, reframed_files=files
+    )
+
+
+class _Rows:
+    """The two "before" counts, keyed as `CatalogManager.get_version` returns them."""
+
+    def __init__(self, rows: dict[tuple[str, str], tuple[int, int]]) -> None:
+        self._rows = rows
+
+    def get_version(self, slug: str, version: str):
+        found = self._rows.get((slug, version))
+        return make_version(slug, version, doc_files=found[0], md_files=found[1]) if found else None
+
+
+def test_the_funnel_reports_both_percentages() -> None:
+    """One figure alone is a lie by omission in whichever direction it is read.
+
+    The pilot's real numbers: the merge turned 1,441 converted files into 124, and
+    the gap between that and the source count is mostly `convert` declining to
+    emit a file at all rather than anything being compressed.
+    """
+    from docushift.reframe import ReframeStats
+
+    stats = ReframeStats(results=[_merged("ems", "10.5.1", 124, 163)])
+    rows = _Rows({("ems", "10.5.1"): (2268, 1441)})
+
+    line = _funnel_line(stats, rows)
+
+    assert "2268 source doc -> 1441 converted -> 124 merged" in line
+    assert "91.4% fewer at the merge" in line
+    assert "94.5% end to end" in line
+    assert "163 file(s)" in line
+
+
+def test_the_funnel_sums_only_the_versions_it_measured() -> None:
+    """A version this run did not reach must not deflate the ratio for the ones it did."""
+    from docushift.reframe import ReframeOutcome, ReframeResult, ReframeStats
+
+    stats = ReframeStats(results=[
+        _merged("ems", "10.5.1", 124, 163),
+        _merged("ems", "10.4.0", 128, 169),
+        ReframeResult("ems", "10.3.0", ReframeOutcome.NOT_FLARE),
+    ])
+    rows = _Rows({
+        ("ems", "10.5.1"): (2268, 1441),
+        ("ems", "10.4.0"): (2276, 1457),
+        ("ems", "10.3.0"): (9999, 9999),
+    })
+
+    line = _funnel_line(stats, rows)
+
+    assert "4544 source doc -> 2898 converted -> 252 merged" in line
+
+
+def test_the_funnel_is_silent_for_a_standalone_run() -> None:
+    """`--input` names a catalog row to key metadata, not to measure against, and a
+    funnel with one of its three columns missing is not a funnel."""
+    from docushift.reframe import ReframeStats
+
+    stats = ReframeStats(results=[_merged("ems", "10.5.1", 124, 163)])
+
+    assert _funnel_line(stats, None) == ""
+
+
+def test_the_funnel_is_silent_when_nothing_was_merged() -> None:
+    """A selection that was entirely not-Flare has no ratio to report."""
+    from docushift.reframe import ReframeOutcome, ReframeResult, ReframeStats
+
+    stats = ReframeStats(results=[ReframeResult("ems", "10.3.0", ReframeOutcome.NOT_FLARE)])
+
+    assert _funnel_line(stats, _Rows({})) == ""
+
+
+def test_a_version_whose_conversion_was_never_measured_contributes_nothing() -> None:
+    """Blank is not zero: a row with no `_md_files` cannot be an end of a ratio."""
+    from docushift.reframe import ReframeStats
+
+    stats = ReframeStats(results=[_merged("ems", "10.5.1", 124, 163)])
+
+    assert _funnel_line(stats, _Rows({("ems", "10.5.1"): (0, 0)})) == ""

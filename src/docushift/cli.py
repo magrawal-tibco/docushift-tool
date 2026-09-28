@@ -1326,8 +1326,53 @@ def convert(ctx, bu, family, product, version, batch, select_all, force, dry_run
 # --- Reframe (Phase 20) ------------------------------------------------------
 
 
-def _report_reframe(stats, findings) -> None:
-    """The five-outcome summary, the merge ratio, and the findings tally."""
+def _report_reframe_funnel(stats, manager) -> None:
+    """The three file counts across the pipeline, and the two ratios (Phase 24).
+
+    **Two percentages, never one.** The merge's own work is `_md_files` ->
+    `_reframed_md_files` -- 8,639 Markdown files into 747 pages across the pilot,
+    91.4%. End-to-end from the source tree is 13,564 -> 747, 94.5%, and most of
+    the difference between the two figures is `convert` declining to emit a file
+    at all rather than anything being compressed. Printing only the second would
+    credit the merge with the converter's skips; printing only the first would
+    withhold the number that was actually asked for.
+
+    Summed over every result carrying a measurement, so a `--force`-less re-run
+    over unchanged trees prints the same funnel as the run that built them. Rows
+    whose catalog columns are blank contribute nothing to either end: a version
+    this run did not reach must not deflate the ratio for the ones it did.
+    """
+    if manager is None:
+        # `--input` against a standalone folder. There is no catalog row to read
+        # the two "before" counts off, and a funnel with one of three columns is
+        # not a funnel.
+        return
+    doc_files = md_files = 0
+    for result in stats.results:
+        if not result.reframed_md_files:
+            continue
+        version = manager.get_version(result.slug, result.version)
+        if version is None:
+            continue
+        doc_files += version.doc_files or 0
+        md_files += version.md_files or 0
+    merged = stats.reframed_md_files
+    if not merged or not md_files:
+        return
+    console.print(
+        f"[dim]Files: {doc_files} source doc -> {md_files} converted -> {merged} merged "
+        f"({_pct(md_files, merged)} fewer at the merge, {_pct(doc_files, merged)} end to end); "
+        f"{stats.reframed_files} file(s) standing in the measured merged tree(s).[/dim]"
+    )
+
+
+def _pct(before: int, after: int) -> str:
+    """`before -> after` as a reduction. Blank when there is no denominator."""
+    return f"{(1 - after / before) * 100:.1f}%" if before else "-"
+
+
+def _report_reframe(stats, findings, manager=None) -> None:
+    """The five-outcome summary, the merge ratio, the funnel, and the findings tally."""
     from docushift.reframe import ReframeOutcome
 
     table = Table(title="Reframe")
@@ -1344,6 +1389,7 @@ def _report_reframe(stats, findings) -> None:
     console.print(table)
     if stats.topics:
         console.print(f"[dim]{stats.topics} topic(s) read into {stats.pages} page(s).[/dim]")
+    _report_reframe_funnel(stats, manager)
     # R6's queue is the stage's one hand-off to a human, so the count goes in the
     # summary rather than only in the note. Named per version, because a writer
     # works one doc set at a time.
@@ -1457,7 +1503,9 @@ def reframe(ctx, bu, family, product, version, batch, select_all, force, dry_run
     # no merged tree.
     failed = len(stats.failures) or findings.counts()[Severity.ERROR]
     findings.finish(exit_code=1 if failed else 0)
-    _report_reframe(stats, findings)
+    # No manager for `--input`: that path names a catalog row only to key the
+    # metadata, and the folder it merged is not the one the row was measured from.
+    _report_reframe(stats, findings, manager if input_dir is None else None)
     if failed:
         raise click.exceptions.Exit(1)
 

@@ -204,10 +204,23 @@ class ProductVersion(BaseModel):
     # There is deliberately no `_out_api_files` beside them. The converter skips
     # API-reference trees and Stage 7 copies them verbatim (§10.6), so an API
     # tree's file count is `api_files` at both ends of the pipeline and a second
-    # column would store the same number twice. The before/after pair to read
-    # across a row is `doc_files` -> `out_files`.
+    # column would store the same number twice. The same holds one stage later:
+    # the merge does not read API trees either.
     md_files: int | None = None
     out_files: int | None = None
+
+    # Stage 6 merged inventory -- see docs/architecture.md §3.9. Optional for the
+    # same reason again, and here the blank is the common case rather than the
+    # edge one: the merge is Flare-only, so most of the catalog never reaches it
+    # and `0` would claim it merged to nothing.
+    #
+    # This is the column the before/after pair was missing. `doc_files` ->
+    # `out_files` was the pipeline's whole effect on file count only while
+    # `convert` was the last stage to change the tree's shape; since Stage 6 that
+    # is the merge, and the sequence to read across a row is
+    # `doc_files` -> `md_files` -> `reframed_md_files`.
+    reframed_md_files: int | None = None
+    reframed_files: int | None = None
 
 
 class Product(BaseModel):

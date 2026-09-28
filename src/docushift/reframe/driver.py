@@ -166,6 +166,13 @@ class ReframeResult:
     #: Pages R6 put in front of a writer. Surfaced because the count is the thing
     #: a human acts on, and it should not need a file opened to be discovered.
     queued: int = 0
+    #: What the merged tree holds once it is built -- one walk, after the swap,
+    #: and the two columns Phase 24 records. Not `pages` and not `pages + 5`:
+    #: both derivations are wrong for the reason `_measure_merged` gives.
+    #: Carried on a `CURRENT` result too, where they are read back from the
+    #: catalog rather than measured, so a re-run reports the same funnel.
+    reframed_md_files: int = 0
+    reframed_files: int = 0
     message: str = ""
 
 
@@ -187,6 +194,21 @@ class ReframeStats:
     @property
     def queued(self) -> int:
         return sum(r.queued for r in self.results)
+
+    @property
+    def reframed_md_files(self) -> int:
+        """Markdown standing in the merged trees this run measured.
+
+        Summed over every result that carries a measurement, not only over
+        `reframed` -- a `current` version is read back from its columns, and its
+        tree is as real as one this run built. The same rule
+        `ConvertStats.out_files` follows, for the same reason.
+        """
+        return sum(r.reframed_md_files for r in self.results)
+
+    @property
+    def reframed_files(self) -> int:
+        return sum(r.reframed_files for r in self.results)
 
     @property
     def failures(self) -> list[ReframeResult]:
@@ -256,9 +278,23 @@ class Reframer:
         merged_from = metadata.get("reframe_source_checksum", "")
         policy_current = metadata.get("reframe_policy_key", "") == policy.key
         if not force and converted_from and converted_from == merged_from and policy_current and target.is_dir():
-            return ReframeResult(
+            current = ReframeResult(
                 slug, number, ReframeOutcome.CURRENT, path=target, engine=version.engine
             )
+            # Phase 24. Without this the second `reframe` over an unchanged tree
+            # reports nothing where the first reported 747 pages, which reads as
+            # "the merge produced nothing" rather than "the merge already ran".
+            # Measured only when a column is blank -- a version merged before
+            # these columns existed, or one whose row was cleared -- so the
+            # common case stays a metadata read and not a tree walk.
+            if version.reframed_md_files is None or version.reframed_files is None:
+                current.reframed_md_files, current.reframed_files = self._measure_merged(
+                    slug, number, target
+                )
+            else:
+                current.reframed_md_files = version.reframed_md_files
+                current.reframed_files = version.reframed_files
+            return current
 
         try:
             return self._build(product, version, policy, converted, target, converted_from)
@@ -426,6 +462,20 @@ class Reframer:
         # real run and succeeded on a manual retry a moment later. Widening the
         # budget here rather than in `swap` keeps the other callers' failures fast.
         swap(staging, target, attempts=8, delay=0.25)
+        merged_md, merged_files = self._measure_merged(slug, number, target)
+        # Every merged page is one `.md` and nothing else in the tree writes one,
+        # so the walk and the counter agree exactly on every version measured
+        # (124/124, 128/128). A disagreement therefore means a page write landed
+        # somewhere the layout did not intend -- the failure Stage 5's equivalent
+        # check exists to catch, here for free because the walk already happened.
+        if merged_md != pages:
+            self._record(
+                "REFRAME_SELF_CHECK_FAILED", slug, number,
+                message=(
+                    f"{pages} page(s) merged but {merged_md} Markdown file(s) in the merged "
+                    f"tree; a page write landed outside the layout"
+                ),
+            )
         if self.state is not None:
             self.state.set_version_metadata(slug, number, "reframe_source_checksum", checksum)
             self.state.set_version_metadata(slug, number, "reframe_policy_key", policy.key)
@@ -435,7 +485,36 @@ class Reframer:
         return ReframeResult(
             slug, number, ReframeOutcome.REFRAMED, path=target, engine=version.engine,
             topics=topics, pages=pages, toc_schema=schema_name, queued=len(queue),
+            reframed_md_files=merged_md, reframed_files=merged_files,
         )
+
+    # -- measurement -----------------------------------------------------------
+
+    def _measure_merged(self, slug: str, version: str, target: Path) -> tuple[int, int]:
+        """One walk of the merged tree, and the two columns it writes (§3.9).
+
+        **Walked, not derived**, and the arithmetic here is wronger than the one
+        `converter._measure_output` refuses. `len(built)` is 124 where the tree
+        holds 163 files, and the difference is not a constant: `toc.yml`,
+        `reframe.yml` and `redirects.yml` are always written, `csh.yml` only for a
+        version with a help map, `301.yml` only for a product with a declared
+        origin template, `review-queue.csv` always but empty, and the copied
+        assets are whatever the pages referenced. Two of those five artifacts are
+        conditional on things this stage does not decide.
+
+        Recorded even when the count is unremarkable, because the number that
+        matters is not this one -- it is the ratio against `_md_files`, and a
+        ratio needs both ends persisted to survive the run that measured it.
+        """
+        reframed_md = reframed_files = 0
+        for path in target.rglob("*"):
+            if not path.is_file():
+                continue
+            reframed_files += 1
+            if path.suffix.lower() == ".md":
+                reframed_md += 1
+        self.catalog.record_reframe_inventory(slug, version, reframed_md, reframed_files)
+        return reframed_md, reframed_files
 
     # -- writing --------------------------------------------------------------
 

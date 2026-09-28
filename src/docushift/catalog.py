@@ -101,6 +101,11 @@ VERSION_COLUMNS = (
     # should not require scrolling.
     "_md_files",
     "_out_files",
+    # Stage 6 merged inventory (architecture.md §3.9), written by `reframe` from
+    # one walk of the merged tree. Last in the row because the row reads left to
+    # right as the pipeline runs: source doc files, then converted, then merged.
+    "_reframed_md_files",
+    "_reframed_files",
 )
 
 # The `versions.csv` column each inventory field round-trips through.
@@ -119,6 +124,15 @@ _INVENTORY_COLUMNS = (
 _OUTPUT_COLUMNS = (
     ("md_files", "_md_files"),
     ("out_files", "_out_files"),
+)
+
+# The Stage 6 half, kept apart from the Stage 5 half for the reason that half is
+# kept apart from Stage 4's: discarding a merged tree does not invalidate the
+# conversion it was built from, so `clear_convert_inventory` and
+# `clear_reframe_inventory` must not reach each other's columns.
+_REFRAME_COLUMNS = (
+    ("reframed_md_files", "_reframed_md_files"),
+    ("reframed_files", "_reframed_files"),
 )
 
 # Fields discovery owns and may therefore update. `family` is handled separately
@@ -290,6 +304,11 @@ class CatalogManager:
                 # converted to nothing.
                 md_files=parse_optional_int(row.get("_md_files")),
                 out_files=parse_optional_int(row.get("_out_files")),
+                # Blank means "never reframed" -- which is most of the catalog,
+                # the merge being Flare-only, and is a different answer from a
+                # merge that produced no pages.
+                reframed_md_files=parse_optional_int(row.get("_reframed_md_files")),
+                reframed_files=parse_optional_int(row.get("_reframed_files")),
             )
 
         self._catalog = catalog
@@ -354,6 +373,8 @@ class CatalogManager:
                         "_doc_files": format_optional_int(version.doc_files),
                         "_md_files": format_optional_int(version.md_files),
                         "_out_files": format_optional_int(version.out_files),
+                        "_reframed_md_files": format_optional_int(version.reframed_md_files),
+                        "_reframed_files": format_optional_int(version.reframed_files),
                     }
                 )
         write_rows(self.versions_path, VERSION_COLUMNS, version_rows)
@@ -908,6 +929,50 @@ class CatalogManager:
         self.save()
         return True
 
+    def record_reframe_inventory(
+        self, slug: str, version: str, reframed_md_files: int, reframed_files: int
+    ) -> bool:
+        """Writes back the Stage 6 merged inventory for one version -- §3.9.
+
+        The third and last measurement across a row, and the one the merge exists
+        to move: `_doc_files` -> `_md_files` -> `_reframed_md_files` is the whole
+        pipeline's effect on file count, and before this column the last step of it
+        lived only in the run's own stdout.
+
+        Both numbers come from **one walk of the merged tree**, never from
+        `len(built)`. The derivation is wrong for the reason
+        `record_convert_inventory` gives about its own: the artifacts beside the
+        pages are conditional -- `csh.yml` only for a version with a help map,
+        `301.yml` only for a product with a declared origin template -- so any
+        constant added to the page count is already false for some version.
+
+        Callers must not invoke this for a version that did not merge. Leaving the
+        row blank is the honest answer, and it is the answer for the overwhelming
+        majority of the catalog, which is not Flare and never reaches this stage.
+        """
+        target = self.get_version(slug, version)
+        if target is None:
+            return False
+        target.reframed_md_files = reframed_md_files
+        target.reframed_files = reframed_files
+        self.save()
+        return True
+
+    def clear_reframe_inventory(self, slug: str, version: str) -> bool:
+        """Blanks the merged columns, restoring "never reframed".
+
+        The Stage 4 and Stage 5 columns are untouched: the extracted and converted
+        trees are both still on disk and still measured, and the merge is the only
+        thing being discarded.
+        """
+        target = self.get_version(slug, version)
+        if target is None:
+            return False
+        for field_name, _ in _REFRAME_COLUMNS:
+            setattr(target, field_name, None)
+        self.save()
+        return True
+
     # -- reporting -----------------------------------------------------------
 
     def triage_summary(self) -> dict[str, object]:
@@ -1151,6 +1216,18 @@ class CatalogManager:
                 f"{slug}@{ver.version}: _md_files={ver.md_files} exceeds _out_files={ver.out_files}. "
                 f"These are written together from one walk, so one has been hand-edited. The next "
                 f"`docushift convert` of this version will overwrite both."
+            )
+        # The same subset relation, one stage later and from its own walk.
+        if (
+            ver.reframed_md_files is not None
+            and ver.reframed_files is not None
+            and ver.reframed_md_files > ver.reframed_files
+        ):
+            notes.append(
+                f"{slug}@{ver.version}: _reframed_md_files={ver.reframed_md_files} exceeds "
+                f"_reframed_files={ver.reframed_files}. These are written together from one walk, "
+                f"so one has been hand-edited. The next `docushift reframe` of this version will "
+                f"overwrite both."
             )
         return notes
 

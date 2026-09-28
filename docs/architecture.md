@@ -199,16 +199,16 @@ The code is kept as a column because it is what a human recognizes (`ems`, not `
 | `_out_files` | **tool, read-only** | Stage 5: **every** file in that tree — the Markdown, the assets that were copied, and `toc.yml` / `metadata.yml` / `csh.yml` |
 
 ```csv
-slug,version,is_archived,convert_eligible,convert_batch,release_date,release_status,retirement_date,release_status_source,engine,engine_source,zip_url,zip_source,custom_override,_bu,_family,_has_csh,_csh_names,_has_api_ref,_api_files,_doc_files,_md_files,_out_files
-tibco-ems,10.4.0,false,true,poc-1,2025-11-04,ga,2030-12-31,eos_report,flare,detected,https://docs.tibco.com/pub/ems/10.4.0/doc/zip/tib_ems_10.4.0_doc.zip,auto,false,tibco,messaging,true,412,true,4310,19776,2841,3196
-tibco-ems,10.2.1,true,false,,2023-06-12,retirement-announced,2027-12-31,eos_report,auto,auto,https://docs.tibco.com/pub/ems/tibco-ems-10-2-1_documentation.zip,auto,false,tibco,messaging,,,,,,,
-tibco-ems,8.6.0,true,false,,2020-04-30,retired,2024-12-31,eos_report,webworks,detected,https://docs.tibco.com/pub/ems/tibco-ems-8-6-0_documentation.zip,auto,false,tibco,messaging,,,,,,,
-tibco-datasynapse-gridserver,7.1.1,false,true,poc-1,2025-09-30,unknown,,unknown,flare,detected,,manual,false,tibco,integration,true,0,false,0,1458,930,981
+slug,version,is_archived,convert_eligible,convert_batch,release_date,release_status,retirement_date,release_status_source,engine,engine_source,zip_url,zip_source,custom_override,_bu,_family,_has_csh,_csh_names,_has_api_ref,_api_files,_doc_files,_md_files,_out_files,_reframed_md_files,_reframed_files
+tibco-ems,10.4.0,false,true,poc-1,2025-11-04,ga,2030-12-31,eos_report,flare,detected,https://docs.tibco.com/pub/ems/10.4.0/doc/zip/tib_ems_10.4.0_doc.zip,auto,false,tibco,messaging,true,412,true,4310,19776,2841,3196,,
+tibco-ems,10.2.1,true,false,,2023-06-12,retirement-announced,2027-12-31,eos_report,auto,auto,https://docs.tibco.com/pub/ems/tibco-ems-10-2-1_documentation.zip,auto,false,tibco,messaging,,,,,,,,,
+tibco-ems,8.6.0,true,false,,2020-04-30,retired,2024-12-31,eos_report,webworks,detected,https://docs.tibco.com/pub/ems/tibco-ems-8-6-0_documentation.zip,auto,false,tibco,messaging,,,,,,,,,
+tibco-datasynapse-gridserver,7.1.1,false,true,poc-1,2025-09-30,unknown,,unknown,flare,detected,,manual,false,tibco,integration,true,0,false,0,1458,930,981,,
 ```
 
 Note that the rows join on the slug while the `zip_url` paths still carry the code — `pub/ems/...` is the docsite's own folder, which is exactly what `product_code` records and exactly why it survives as a column.
 
-Note the three `tibco-ems` rows: the current release is Flare, an older one is WebWorks, and the un-downloaded one is still `auto` because its engine cannot be known until the package is extracted. Two rows carry `convert_batch=poc-1`; `docushift download --batch poc-1` selects exactly those two and nothing else. The two archived rows have **blank** inventory columns because nothing has ever unpacked them — blank and `0` are different answers (§3.9).
+Note the three `tibco-ems` rows: the current release is Flare, an older one is WebWorks, and the un-downloaded one is still `auto` because its engine cannot be known until the package is extracted. Two rows carry `convert_batch=poc-1`; `docushift download --batch poc-1` selects exactly those two and nothing else. The two archived rows have **blank** inventory columns because nothing has ever unpacked them — blank and `0` are different answers (§3.9). The merged pair is blank on all four: none has been through Stage 6, and the merge is Flare-only, so most of the catalog never fills it.
 
 The three lifecycle columns show all four states the report can leave a row in. `10.2.1` is `retirement-announced` with a date three years out — still supported, still convertible if anyone re-enabled it. `8.6.0` is `retired` and would be skipped even if `convert_eligible` were flipped back to `true`. And the `tibco-datasynapse-gridserver` row is `unknown` with no date, because the report carries no row for it — which is silence, not a verdict (§3.11).
 
@@ -299,7 +299,7 @@ Three properties of the implementation matter:
 
 - **Resolution is per field, not per row.** Editing `display_name` must not also freeze the `slug` beside it.
 - **With no snapshot, `mine` wins** unless it is empty. A missing base means the row predates the state DB (or the DB was discarded); inventing one would silently overwrite edits. Only genuinely blank cells are filled from the fetch.
-- **The merge covers only what discovery owns**: `display_name`, `slug`, `is_archived`, `convert_eligible`, `release_date`, `zip_url`. `in_scope`/`scope_source` are excluded from `product_snapshot` on the product side — they are a local policy call, resolved by provenance rank like `family` (§3.10), and the docsite has no opinion to merge. On the version side four columns are excluded structurally rather than by rule, and `version_snapshot` carries none of them: `engine`/`engine_source`, because the detector writes them *after* discovery (§3.4); `convert_batch`, because no automated stage writes it at all (§3.7); and `zip_source`, because it records a human's supply decision that a fetch has no standing to revoke (§3.8). A fetch therefore cannot reset a detected engine, clear a batch tag, or silently re-point a hand-supplied package at a URL. The five inventory columns of §3.9 are excluded on the same grounds and for the same reason as the engine columns — Stage 4 writes them, and discovery has never opened the package.
+- **The merge covers only what discovery owns**: `display_name`, `slug`, `is_archived`, `convert_eligible`, `release_date`, `zip_url`. `in_scope`/`scope_source` are excluded from `product_snapshot` on the product side — they are a local policy call, resolved by provenance rank like `family` (§3.10), and the docsite has no opinion to merge. On the version side four columns are excluded structurally rather than by rule, and `version_snapshot` carries none of them: `engine`/`engine_source`, because the detector writes them *after* discovery (§3.4); `convert_batch`, because no automated stage writes it at all (§3.7); and `zip_source`, because it records a human's supply decision that a fetch has no standing to revoke (§3.8). A fetch therefore cannot reset a detected engine, clear a batch tag, or silently re-point a hand-supplied package at a URL. The nine inventory columns of §3.9 are excluded on the same grounds and for the same reason as the engine columns — Stage 4 writes them, and discovery has never opened the package.
 
 Deletion detection is scoped to the products present in the current fetch, so `catalog fetch --product ems` cannot read every other product's absence as a removal.
 
@@ -387,7 +387,7 @@ Because the path is fully derivable from `(bu, family, slug, version)`, Stage 4 
 
 ### 3.9 Inventory Columns: What Went In, and What Came Out
 
-`convert_eligible` and `convert_batch` are decisions a human makes about a package they have not opened. Until Stage 4 runs, every version row looks identical in the only respect that matters to that decision — how much work it is and what is in it. Five columns, written back by `docushift extract`, close that gap. Two more, written back by `docushift convert`, close the other end of it.
+`convert_eligible` and `convert_batch` are decisions a human makes about a package they have not opened. Until Stage 4 runs, every version row looks identical in the only respect that matters to that decision — how much work it is and what is in it. Five columns, written back by `docushift extract`, close that gap. Two more, written back by `docushift convert`, close the other end of it — and since Stage 6 the other end has moved, so two more again, written back by `docushift reframe`, follow it there.
 
 | Column | Type | Written by | Answers |
 | :--- | :--- | :--- | :--- |
@@ -398,8 +398,10 @@ Because the path is fully derivable from `(bu, family, slug, version)`, Stage 4 
 | `_doc_files` | int | Stage 4 asset inventory | How much of the package is everything else? |
 | `_md_files` | int | Stage 5 output walk | How many Markdown pages came out — converted topics plus Stage 6a's generated pages? |
 | `_out_files` | int | Stage 5 output walk | How big is the converted tree in total — Markdown, copied assets and the root artifacts? |
+| `_reframed_md_files` | int | Stage 6 merged walk | How many pages did the merge leave — the number the whole stage exists to move? |
+| `_reframed_files` | int | Stage 6 merged walk | How big is the merged tree in total — pages, copied assets, `toc.yml` / `csh.yml` / `redirects.yml` / `301.yml` / `review-queue.csv`? |
 
-**Blank is not zero.** All seven are empty until the version has actually been through the stage that writes them; `0` means the tool looked and found none. A blank `_csh_names` on an archived row says "never unpacked", and a `0` says "unpacked, no help map" — conflating them would make the archived half of the catalog indistinguishable from a corpus with no CSH in it. The model types are therefore `bool | None` and `int | None`, and the CSV round-trip preserves the empty cell rather than defaulting it.
+**Blank is not zero.** All nine are empty until the version has actually been through the stage that writes them; `0` means the tool looked and found none. A blank `_csh_names` on an archived row says "never unpacked", and a `0` says "unpacked, no help map" — conflating them would make the archived half of the catalog indistinguishable from a corpus with no CSH in it. The model types are therefore `bool | None` and `int | None`, and the CSV round-trip preserves the empty cell rather than defaulting it.
 
 **`_has_csh` and `_csh_names` are not redundant.** `_has_csh` records that a source *file* was found; `_csh_names` records what parsed out of it. Empty `<CatapultAliasFile />` and zero-byte alias files are **55% of the observed corpus** (476 of 863 — §5.4.1), so `_has_csh=true, _csh_names=0` is a routine and distinct state: the product ships a help map that yields nothing, which is worth seeing before conversion rather than after. `_has_api_ref` against `_api_files` carries no such nuance and is a filtering convenience — the tool writes both from one computation in one call, so they cannot drift apart on their own.
 
@@ -413,7 +415,7 @@ Because the path is fully derivable from `(bu, family, slug, version)`, Stage 4 
 
 #### 3.9.2 The output side: `_md_files` and `_out_files`
 
-`_doc_files` → `_out_files` is the before/after pair, and **`_api_files` is deliberately not counted twice.** The converter skips API-reference trees and Stage 7 copies them verbatim into the `-resources` tree (§10.6), so a Javadoc tree that arrives as 1,466 files is published as 1,466 files; a second column would store a number the row already carries. The Markdown half is the half that changes shape, and it is the only half these two describe.
+These two describe the converted tree; §3.9.3 carries the pair that describes the merged one. **`_api_files` is deliberately not counted twice.** The converter skips API-reference trees and Stage 7 copies them verbatim into the `-resources` tree (§10.6), so a Javadoc tree that arrives as 1,466 files is published as 1,466 files; a second column would store a number the row already carries. The Markdown half is the half that changes shape, and it is the only half these two describe.
 
 **Both come from one walk of the output tree, after the swap** — never from the run's own counters. The derivation that looks equivalent, `documents + generated + assets + 3`, is wrong at the last term on every version measured so far: `csh.yml` is written only for a non-empty map (§9.4), so a version whose help map yields no identifiers has **two** root artifacts and not three, and that is the majority case rather than an edge of it. The walk also runs against the tree that will actually be published rather than against the staging directory, so a swap that half-succeeded cannot leave a count describing a tree nobody has.
 
@@ -435,7 +437,31 @@ Two things fall out that no other column shows. **The output is 94% Markdown** �
 
 **Merge and edit behaviour** follows `_bu` / `_family`: tool-owned, edits ignored, no fetch may touch them (§3.5). Unlike `_bu` / `_family` they are *not* regenerated on every write — they persist in the CSV between runs, the way `engine` does. A hand-edit therefore survives until the next `docushift extract` or `docushift convert`, so `catalog import` warns when a boolean disagrees with the count beside it, or when `_md_files` exceeds `_out_files` — the Markdown is counted out of the same walk as the total, so it cannot come out larger.
 
-**The two halves clear separately.** `clear_extract_inventory` blanks the five, `clear_convert_inventory` blanks the two, and neither reaches the other: discarding an extracted tree does not unmake the Markdown already produced from it, and discarding the Markdown does not unmeasure a package still on disk. §4.1's `--clean` reaching one tree and not the other is the same rule one level down.
+**The three blocks clear separately.** `clear_extract_inventory` blanks the five, `clear_convert_inventory` the next two, `clear_reframe_inventory` the last two, and none reaches another: discarding an extracted tree does not unmake the Markdown already produced from it, discarding the Markdown does not unmeasure a package still on disk, and discarding a merge unmakes neither. §4.1's `--clean` reaching one tree and not the other is the same rule one level down.
+
+#### 3.9.3 The merged side: `_reframed_md_files` and `_reframed_files`
+
+**`_doc_files` → `_md_files` → `_reframed_md_files` is the before/after sequence**, and until Phase 24 it stopped one stage short. The sentence this section used to carry — that the pair to read across a row is `_doc_files` → `_out_files` — was true while `convert` was the last stage that changed the tree's shape. Since Stage 6 that is the merge, and the merge is the stage whose *entire purpose* is the ratio: `ReframeStats` held it for the length of one process, `_report_reframe` printed it once, and nothing kept it. Worse, it was kept selectively — the `CURRENT` fast path returns without reading anything, so the second `reframe` over an unchanged tree printed nothing where the first printed 747 pages, which reads as "the merge produced no pages" rather than "the merge already ran."
+
+The pilot, all six EMS versions (2026-09-28):
+
+| version | `_doc_files` | `_md_files` | `_reframed_md_files` | `_reframed_files` | merge | end to end |
+| :--- | ---: | ---: | ---: | ---: | ---: | ---: |
+| 10.5.1 | 2,268 | 1,441 | 124 | 163 | −91.4% | −94.5% |
+| 10.5.0 | 2,268 | 1,441 | 124 | 163 | −91.4% | −94.5% |
+| 10.4.4 | 2,247 | 1,429 | 123 | 161 | −91.4% | −94.5% |
+| 10.4.3 | 2,247 | 1,429 | 123 | 161 | −91.4% | −94.5% |
+| 10.4.1 | 2,258 | 1,442 | 125 | 162 | −91.3% | −94.5% |
+| 10.4.0 | 2,276 | 1,457 | 128 | 169 | −91.2% | −94.4% |
+| **total** | **13,564** | **8,639** | **747** | **979** | **−91.4%** | **−94.5%** |
+
+**Two percentages, and reporting one of them alone would be a lie by omission.** The merge's own work is `_md_files` → `_reframed_md_files`. The end-to-end figure against `_doc_files` is larger, and most of the difference is `convert` declining to emit a file at all — skin chrome, orphan images, API trees — rather than anything being compressed. Publishing only the second credits the merge with the converter's skips; publishing only the first withholds the number that gets asked for. The run summary prints both on one line.
+
+**Walked, not derived**, for the reason §3.9.2 gives and more sharply. `len(built)` is 124 where the tree holds 163, and the difference is not a constant: `toc.yml`, `reframe.yml` and `redirects.yml` are always written, `review-queue.csv` always but often empty, `csh.yml` only for a version with a help map (§9.4), `301.yml` only for a product with a declared origin template (Phase 22), and the copied assets are whatever the pages referenced. Two of those are conditional on things Stage 6 does not decide.
+
+**The walk cross-checks the counter.** Every merged page is one `.md` and nothing else in the tree writes one, so the walked count equals `len(built)` exactly — 124/124, 128/128 on every version measured. A disagreement means a page write landed outside the layout, which is §3.9.2's `OUTPUT_COUNT_MISMATCH` failure one stage later; it is recorded as `REFRAME_SELF_CHECK_FAILED` and costs nothing, the walk having already happened.
+
+**A `current` version with blank merged columns is walked anyway** — 3.9.2's rule, third time. One with columns already filled is read back from them rather than re-walked, so the common case of a re-run is a metadata read.
 
 ### 3.10 Product Scope: Products Excluded From Conversion
 

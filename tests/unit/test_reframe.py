@@ -406,6 +406,76 @@ def test_a_version_with_no_recorded_conversion_is_never_current(config, catalog,
     assert reframer.reframe_one(flare, flare.versions["10.5.1"]).outcome is ReframeOutcome.REFRAMED
 
 
+# -- the merged inventory (architecture.md §3.9.3, planning.md Phase 24) ------
+
+
+def test_a_merge_records_what_the_merged_tree_holds(config, catalog, flare):
+    """The third measurement across the row, and the one the stage exists to move."""
+    converted_tree(config, flare, "10.5.1")
+    target = config.reframed_path(flare.bu, flare.family, flare.slug, "10.5.1")
+
+    result = Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"])
+
+    on_disk = [p for p in target.rglob("*") if p.is_file()]
+    assert result.reframed_files == len(on_disk)
+    assert result.reframed_md_files == len([p for p in on_disk if p.suffix == ".md"])
+    version = catalog.get_version("tibco-flare-docs", "10.5.1")
+    assert version.reframed_md_files == result.reframed_md_files
+    assert version.reframed_files == result.reframed_files
+
+
+def test_the_merged_markdown_count_is_the_page_count(config, catalog, flare):
+    """Every merged page is one `.md` and nothing else in the tree writes one."""
+    converted_tree(config, flare, "10.5.1")
+
+    result = Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"])
+
+    assert result.reframed_md_files == result.pages
+
+
+def test_the_total_exceeds_the_pages_by_the_artifacts_beside_them(config, catalog, flare):
+    """Why the count is walked and not `len(built)` plus a constant."""
+    converted_tree(config, flare, "10.5.1")
+
+    result = Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"])
+
+    assert result.reframed_files > result.pages
+
+
+def test_a_current_version_still_reports_its_merged_counts(config, catalog, flare):
+    """Phase 24's whole complaint: the second run reported nothing where the first
+    reported every page, which reads as "the merge produced nothing"."""
+    converted_tree(config, flare, "10.5.1")
+    catalog.state.set_version_metadata("tibco-flare-docs", "10.5.1", "convert_source_checksum", "abc123")
+    reframer = Reframer(config, catalog)
+    built = reframer.reframe_one(flare, flare.versions["10.5.1"])
+
+    again = reframer.reframe_one(flare, flare.versions["10.5.1"])
+
+    assert again.outcome is ReframeOutcome.CURRENT
+    assert again.reframed_md_files == built.reframed_md_files
+    assert again.reframed_files == built.reframed_files
+
+
+def test_a_current_version_with_blank_columns_is_walked_anyway(config, catalog, flare):
+    """A version merged before these columns existed reports `current` forever, so
+    without the backfill it would stay blank for good -- §3.9.2's rule, third time.
+    """
+    converted_tree(config, flare, "10.5.1")
+    catalog.state.set_version_metadata("tibco-flare-docs", "10.5.1", "convert_source_checksum", "abc123")
+    reframer = Reframer(config, catalog)
+    built = reframer.reframe_one(flare, flare.versions["10.5.1"])
+    catalog.clear_reframe_inventory("tibco-flare-docs", "10.5.1")
+
+    again = reframer.reframe_one(flare, flare.versions["10.5.1"])
+
+    assert again.outcome is ReframeOutcome.CURRENT
+    assert again.reframed_md_files == built.reframed_md_files
+    version = catalog.get_version("tibco-flare-docs", "10.5.1")
+    assert version.reframed_md_files == built.reframed_md_files
+    assert version.reframed_files == built.reframed_files
+
+
 # -- the TOC adapter seam -----------------------------------------------------
 
 
