@@ -207,6 +207,28 @@ rules:
     family: data_management
 
   # -- TIBCO messaging ----------------------------------------------------
+  # Above the broad `activespaces` token in the messaging rule below, which was
+  # claiming the whole ActiveSpaces line for `messaging`. The `activespaces`
+  # family was declared but no rule reached it, so the five products sitting in
+  # it were hand edits a fetch would have silently reverted.
+  #
+  # Deliberately *not* the bare substring "activespaces": it also matches
+  # `spds-as` (Spotfire's data source, pinned to its own BU) and `bwpluginas`
+  # (the BusinessWorks plug-in, which belongs to `bw-plugin`). The product codes
+  # `as` and `ast` are just as unusable -- both are substrings of dozens of
+  # unrelated display names -- so those two products match on a display-name
+  # phrase that is unique to each.
+  - match:
+      - "activespaces® - enterprise edition"
+      - "activespaces® transactions"
+      - "sfas"
+      - "activespaces-remote"
+      - "activespaces-addon"
+      - "msg-ap2as"
+      - "activespaces-connector-for-apache-kafka-enterprise-edition"
+    bu: tibco
+    family: activespaces
+
   - match: ["ems", "enterprise message service", "ftl", "rendezvous", "activespaces"]
     bu: tibco
     family: messaging

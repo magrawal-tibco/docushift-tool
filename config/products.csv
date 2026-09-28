@@ -122,9 +122,11 @@ tibco-activematrix-service-grid-container-edition,amsgce,TIBCO ActiveMatrix® Se
 tibco-activematrix-updater-tool-for-java-runtime-environment-jre,amx-jre-updater,TIBCO ActiveMatrix® Updater Tool for Java Runtime Environment (JRE),tibco,activematrix,manual,true,default,false
 tibco-activespaces-connector-for-apache-kafka-enterprise-edition,activespaces-connector-for-apache-kafka-enterprise-edition,TIBCO ActiveSpaces® Connector for Apache Kafka - Enterprise Edition,tibco,activespaces,taxonomy_rule,true,default,false
 tibco-activespaces-connector-for-apache-pulsar-enterprise-edition,msg-ap2as,TIBCO ActiveSpaces® Connector for Apache Pulsar - Enterprise Edition,tibco,activespaces,taxonomy_rule,true,default,false
+tibco-activespaces-enterprise-edition,as,TIBCO ActiveSpaces® - Enterprise Edition,tibco,activespaces,manual,true,default,false
 tibco-activespaces-enterprise-edition-add-on,activespaces-addon,TIBCO ActiveSpaces® Enterprise Edition Add-on,tibco,activespaces,taxonomy_rule,true,default,false
 tibco-activespaces-remote-client,activespaces-remote,TIBCO ActiveSpaces® Remote Client,tibco,activespaces,taxonomy_rule,true,default,false
 tibco-activespaces-transactions,ast,TIBCO ActiveSpaces® Transactions,tibco,activespaces,taxonomy_rule,true,default,false
+tibco-silver-fabric-enabler-for-activespaces-enterprise-edition,sfas,TIBCO Silver® Fabric Enabler for ActiveSpaces® Enterprise Edition,tibco,activespaces,manual,true,default,false
 tibco-activematrix-adapter-for-amdocs-crm,adapter-for-clarifycrm,TIBCO ActiveMatrix® Adapter for Amdocs CRM,tibco,adapters,manual,true,default,false
 tibco-activematrix-adapter-for-database-tibco-business-studio,adadbbs,TIBCO ActiveMatrix® Adapter for Database (TIBCO Business Studio™),tibco,adapters,manual,true,default,false
 tibco-activematrix-adapter-for-files-for-unix-win-tibco-business-studio,adfilesbs,TIBCO ActiveMatrix® Adapter for Files for Unix/Win (TIBCO Business Studio™),tibco,adapters,manual,true,default,false
@@ -562,7 +564,6 @@ tibco-red-enabled-for-ziip,mfred-ziip,TIBCO® RED Enabled for zIIP,tibco,mainfra
 tibco-substation-es,substation,TIBCO Substation ES™,tibco,mainframe,manual,true,default,false
 tibco-transaction-interface-for-cics,substation-cics,TIBCO Transaction Interface™ for CICS,tibco,mainframe,manual,true,default,false
 tibco-transaction-interface-for-ims,substation-ims,TIBCO Transaction Interface™ for IMS,tibco,mainframe,manual,true,default,false
-tibco-activespaces-enterprise-edition,as,TIBCO ActiveSpaces® - Enterprise Edition,tibco,messaging,taxonomy_rule,true,default,false
 tibco-gemini-powered-by-apache-cassandra,acd,TIBCO® Gemini - Powered by Apache Cassandra®,tibco,messaging,unclassified,true,default,false
 tibco-gems,msg-gems,TIBCO GEMS™,tibco,messaging,taxonomy_rule,true,default,false
 tibco-graphical-rendezvous,grv,TIBCO® Graphical Rendezvous®,tibco,messaging,taxonomy_rule,true,default,false
@@ -584,7 +585,6 @@ tibco-messaging-schema-repository-for-apache-kafka-community-edition,msg-akd-rep
 tibco-messaging-schema-repository-for-apache-kafka-enterprise-edition,msg-akd-repo,TIBCO® Messaging - Schema Repository for Apache Kafka - Enterprise Edition,tibco,messaging,unclassified,true,default,false
 tibco-rendezvous,rendezvous,TIBCO Rendezvous®,tibco,messaging,taxonomy_rule,true,default,false
 tibco-rendezvous-network-service,trns,TIBCO Rendezvous® Network Service,tibco,messaging,taxonomy_rule,true,default,false
-tibco-silver-fabric-enabler-for-activespaces-enterprise-edition,sfas,TIBCO Silver® Fabric Enabler for ActiveSpaces® Enterprise Edition,tibco,messaging,taxonomy_rule,true,default,false
 tibco-silver-fabric-enabler-for-tibco-enterprise-message-service,silver-fabric-enabler-for-tibco-enterprise-message-service,TIBCO Silver® Fabric Enabler for TIBCO Enterprise Message Service™,tibco,messaging,taxonomy_rule,true,default,false
 tibco-managed-file-transfer-command-center,mftcc,TIBCO® Managed File Transfer Command Center,tibco,mft,manual,true,default,false
 tibco-managed-file-transfer-internet-server,mftis,TIBCO® Managed File Transfer Internet Server,tibco,mft,manual,true,default,false
