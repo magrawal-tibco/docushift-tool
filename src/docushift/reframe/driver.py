@@ -43,7 +43,7 @@ from docushift.models import Product, ProductVersion, SourceEngine
 from docushift.reframe import csh as csh_map
 from docushift.reframe import manifest, review
 from docushift.reframe.audit import audit
-from docushift.reframe.packer import Page, assign, carry, pack, separated
+from docushift.reframe.packer import Page, assign, carry, layout_of, pack, project, separated
 from docushift.reframe.pages import LinkCounts, render, split_frontmatter, title_of, word_count
 from docushift.reframe.policy import ReframePolicy, policy_for
 from docushift.reframe.review import Flag, branches, inspect
@@ -233,6 +233,11 @@ class Reframer:
         self.findings = findings
         self.state = catalog.state
         self.reframe_config = config.load_reframe()
+        # R1.4. Packing the reference version is the same cost as merging it, and a
+        # pinned set asks for it once per sibling -- six times over for EMS. Keyed on
+        # (slug, reference version) and holding `None` for a reference that could not
+        # be read, so the failure is reported once per product rather than per version.
+        self._layouts: dict[tuple[str, str], list[tuple[PurePosixPath, tuple[PurePosixPath, ...]]] | None] = {}
 
     # -- one version ----------------------------------------------------------
 
@@ -368,7 +373,13 @@ class Reframer:
                 ),
             )
 
-        packed = pack(roots, source.words, policy.max_words, policy.keep_separate)
+        packed = self._lay_out(product, version, policy, roots, source)
+        if packed is None:
+            return ReframeResult(
+                slug, number, ReframeOutcome.FAILED, engine=version.engine, topics=topics,
+                toc_schema=schema_name,
+                message=f"layout pinned to {policy.pin_layout_to}, which cannot be laid out",
+            )
         # Topics the navigation never listed. Stage 7 publishes them today, so
         # dropping them would delete live content; `packer.carry` explains the call.
         stranded = [
@@ -697,6 +708,96 @@ class Reframer:
         # The tree, not a flattened list: R1's packing is defined on subtrees, and
         # flattening here would have thrown away the only thing it needs.
         return schema.parse(document), schema.name
+
+    def _lay_out(
+        self,
+        product: Product,
+        version: ProductVersion,
+        policy: ReframePolicy,
+        roots: list[TocEntry],
+        source: _Source,
+    ) -> list[Page] | None:
+        """R1.4: the pages of this version, packed on its own or projected onto the pin.
+
+        `None` is the refusal: the pin names a version whose layout cannot be
+        computed. Falling back to an unpinned pack would be the worse outcome by
+        some distance -- it produces a plausible tree with silently different
+        boundaries, and a boundary is the one decision this stage cannot take back.
+        """
+        if not policy.pin_layout_to or policy.pin_layout_to == version.version:
+            return pack(roots, source.words, policy.max_words, policy.keep_separate)
+        reference = self._reference_layout(product, policy)
+        if reference is None:
+            return None
+        return project(reference, roots, source.words, policy.max_words, policy.keep_separate)
+
+    def _reference_layout(
+        self, product: Product, policy: ReframePolicy
+    ) -> list[tuple[PurePosixPath, tuple[PurePosixPath, ...]]] | None:
+        """The pinned version's topic->page mapping, packed once and cached.
+
+        Read from the catalog's converted tree even when the caller overrode
+        `--input`: the reference is a property of the doc set, not of whichever
+        folder this invocation happens to be pointed at.
+        """
+        number = policy.pin_layout_to
+        key = (product.slug, number)
+        if key in self._layouts:
+            return self._layouts[key]
+
+        layout: list[tuple[PurePosixPath, tuple[PurePosixPath, ...]]] | None = None
+        converted = self.config.output_path(product.bu, product.family, product.slug, number)
+        if not converted.is_dir():
+            reason = f"no converted tree at {converted}; convert {number} first"
+        else:
+            roots, _ = self._navigation(converted, policy, product.slug, number)
+            if roots is None:
+                reason = f"no TOC adapter matches {converted / 'toc.yml'}"
+            else:
+                try:
+                    reference = _Source(converted)
+                except csh_map.Unreadable as error:
+                    reason = str(error)
+                else:
+                    nodes = {
+                        entry.path for root in roots for entry in root.walk()
+                        if entry.path is not None
+                    }
+                    missing = [path for path in nodes if not reference.exists(path)]
+                    if missing:
+                        reason = f"{len(missing)} TOC path(s) name no file in {number}"
+                    else:
+                        reason = ""
+                        layout = self._reference_pages(roots, reference, policy, nodes)
+        if layout is None:
+            self._record(
+                "REFRAME_PIN_UNAVAILABLE", product.slug, "", path="reframe.yaml",
+                message=(
+                    f"`pin_layout_to: {number}` names a version whose layout cannot be "
+                    f"computed, so no other version can be merged: {reason}"
+                ),
+            )
+        self._layouts[key] = layout
+        return layout
+
+    @staticmethod
+    def _reference_pages(
+        roots: list[TocEntry],
+        source: _Source,
+        policy: ReframePolicy,
+        nodes: set[PurePosixPath],
+    ) -> list[tuple[PurePosixPath, tuple[PurePosixPath, ...]]]:
+        """The reference version's packed pages, named exactly as its own merge names them.
+
+        `carry` and `assign` are run even though only the packed pages are pinned,
+        because the carried pages compete for filenames: leaving them out would let
+        the reference report a name its own merge never used.
+        """
+        packed = pack(roots, source.words, policy.max_words, policy.keep_separate)
+        stranded = [path for path in source.topics if path not in nodes]
+        carried = carry(stranded, lambda path: title_of(source.read(path), path.stem), source.words)
+        assign(packed + carried)
+        return layout_of(packed)
 
     def _check_pin(self, product: Product, policy: ReframePolicy) -> None:
         """R1.4. A doc set with two eligible versions and no pin drifts, permanently.

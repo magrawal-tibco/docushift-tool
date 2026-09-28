@@ -269,6 +269,16 @@ REGISTRY: dict[str, Code] = _codes(
          "More than one eligible version of this doc set and no pinned layout; "
          "versions may be merged into non-corresponding pages",
          "REFRAME-REQUIREMENTS.md R1.4"),
+    # The other half of R1.4, and an error where the one above is a warning. There
+    # the pin is missing and the stage has no instruction; here it has one and
+    # cannot carry it out, so the only alternatives are to refuse or to pack the
+    # version unpinned. Refusing, because an unpinned fallback writes a tree that
+    # looks merged, passes the audit, and has boundaries nothing else in the set
+    # shares -- the exact drift the pin exists to prevent, arrived at silently.
+    Code("REFRAME_PIN_UNAVAILABLE", Severity.ERROR, Stage.REFRAME,
+         "The version named by pin_layout_to cannot be laid out, so the versions "
+         "pinned to it are refused rather than merged on their own boundaries",
+         "REFRAME-REQUIREMENTS.md R1.4"),
     # 20e. A writer's decision that silently did nothing looks exactly like a
     # writer's decision that was applied, which is the one way this file can be
     # wrong without anybody finding out. A warning and not an error: a path stops

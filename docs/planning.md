@@ -925,6 +925,7 @@ The concrete deliverable of §7.1: every deferred "report line" in the three doc
 | `OUTPUT_COUNT_MISMATCH`¹³ | warn | convert | Fewer Markdown files on disk than documents converted; two writes landed on one path | Phase 13 |
 | `REFRAME_TOC_SCHEMA_UNKNOWN`²⁰ᵃ | error | reframe | No TOC adapter matches this version's `toc.yml`; refusing to merge a partly-understood tree | `REFRAME-INTEGRATION-PLAN.md` §4 Phase 0 |
 | `REFRAME_LAYOUT_UNPINNED`²⁰ᵃ | warn | reframe | More than one eligible version of this doc set and no pinned layout; versions may not correspond | `REFRAME-REQUIREMENTS.md` R1.4 |
+| `REFRAME_PIN_UNAVAILABLE`²⁶ | error | reframe | `pin_layout_to` names a version whose layout cannot be computed; the versions pinned to it are refused rather than merged on their own boundaries | `REFRAME-REQUIREMENTS.md` R1.4 |
 | `REFRAME_SELF_CHECK_FAILED`²⁰ᵇ | error | reframe | A §6 acceptance check failed; the merged tree was discarded rather than swapped in | `REFRAME-REQUIREMENTS.md` §6 |
 | `REFRAME_LINK_UNRESOLVED`²⁰ᵇ | warn | reframe | Relative references pointing outside the converted tree, left as written; present before the merge | `REFRAME-REQUIREMENTS.md` R4, §8 |
 | `REFRAME_TOPIC_UNTOCKED`²⁰ᵇ | warn | reframe | Topics absent from `toc.yml`, carried through unmerged and unreachable from navigation | `REFRAME-REQUIREMENTS.md` R3 |
@@ -2576,7 +2577,7 @@ This is a change to R6's neighbours, not to R6. The review queue — which the i
 Renumbered onto this repository's scheme; the integration plan's Phase 0–4 map onto 20a–20e.
 
 - **20a — Contracts and the gate.** *(built)* `reframe/` package, `docushift reframe` command with the standard `_scope_options`, engine assertion inside the stage (C2), no-op passthrough for non-Flare, the `reframe.yaml` config shape with `MAX_WORDS` and the TOC-schema adapter seam. *Exit: the command runs over the whole catalog, touches nothing that is not Flare, and passes a Flare set through byte-identical.*
-- **20b — Packing.** *(built)* R1–R5, fence-aware parsing, the three POC defects from requirements §10 left unported, **R1.4 layout pinning pinned to the newest eligible version** (required by Q2), determinism check. Anchors emitted per 20.3(1). *Exit: reproduces §6's baseline on EMS 10.5.1, page count allowed to rise from dropping `MIN_WORDS`.*
+- **20b — Packing.** *(built)* R1–R5, fence-aware parsing, the three POC defects from requirements §10 left unported, **R1.4 layout pinning pinned to the newest eligible version** (required by Q2) — *the config key only here; the packer did not apply it until Phase 26* — determinism check. Anchors emitted per 20.3(1). *Exit: reproduces §6's baseline on EMS 10.5.1, page count allowed to rise from dropping `MIN_WORDS`.*
 - **20c — Review queue.** *(built)* R6 and R7.1. On the critical path, not polish: the ~25–30 flagged pages are the only ones a human ever sees, and Phase 20b ships deliberately incomplete without this.
 - **20d — Stage 7 integration.** *(built)* Teach `validation/` about the redirect map and the merged TOC, so R5 and R6's acceptance checks are enforced by the existing checker rather than by a second one inside Reframe. Wire the exit-code idiom from Q4.
 - **20e — Pilot.** One doc set, queue worked, **explicit writer sign-off before redirects are published.**
@@ -2608,7 +2609,7 @@ The swap failed on EMS 10.5.1 with `PermissionError: [WinError 5]` and left the 
 
 The six DataSynapse Flare versions have **no `convert_source_checksum` recorded at all**, so they can never report `current` and are re-copied on every run. This is inherited behaviour, not a defect introduced here — `convert` applies the same rule — and the rule is the safe direction: no recorded provenance, no currency claim. Pinned by `test_a_version_with_no_recorded_conversion_is_never_current` so it is specified rather than accidental.
 
-**R1.4 decided, not deferred.** The first full run raised `REFRAME_LAYOUT_UNPINNED` five times across two products. All three multi-version Flare sets are now pinned to their newest eligible version in `config/reframe.yaml` — EMS `10.5.1`, gridserver-manager `7.2.0`, hpc-cloud-adapter `2.2.0` — which is the version `iter_versions` yields first and the one a fix gets written against. The other three Flare products have one eligible version each and are left unpinned; the code will name them if a second arrives. The risk table calls this "cheap now and impossible later", and it cost one config block.
+**R1.4 decided, not deferred.** The first full run raised `REFRAME_LAYOUT_UNPINNED` five times across two products. All three multi-version Flare sets are now pinned to their newest eligible version in `config/reframe.yaml` — EMS `10.5.1`, gridserver-manager `7.2.0`, hpc-cloud-adapter `2.2.0` — which is the version `iter_versions` yields first and the one a fix gets written against. The other three Flare products have one eligible version each and are left unpinned; the code will name them if a second arrives. The risk table calls this "cheap now and impossible later", and it cost one config block. **And a config block was all it was** — measured 2026-09-29, the pin changed no layout, because nothing read it but the check that warns when it is absent. Phase 26 built the projection that makes it mean something, and re-cut all four sets against it.
 
 **Verification.** `reframe --all` over the full catalog: **6 reframed, 8 already current, 1,669 not Flare, 0 no-output, 0 failed, 0 findings.** EMS 10.5.1 passes through **byte-identical — all 1,476 files, SHA-256 per file, zero differences** — and reads **1,441 topics** out of `toc.yml`, matching the corpus measurement in 20.2 exactly. The input tree is unmodified on bytes and mtimes. A second run with no `--force` reports `current`; a `max_words` edit invalidates it. **1,373 tests pass** (25 new in `tests/unit/test_reframe.py`), `ruff` clean.
 
@@ -3327,6 +3328,72 @@ Every number in the plan reproduced exactly, from the shipped code rather than t
 **Follow-through, same day: 94 of the 458 conflicts were resolved by hand in `versions.csv`, leaving 376.** 88 archived-but-wanted rows were made eligible and 6 retired-but-declined rows were made ineligible, so the split is now 6 migrate-but-ineligible and 370 eligible-but-declined. Two consequences worth naming. First, `convert_eligible` is **no longer a mirror of `is_archived`** — 94 rows now depart from it, which is the first editorial signal that column has ever carried and the outcome the phase was built to enable. Second, the retirement guard on the real three files moved: **`versions_retired` 139 → 133** (the 6 newly-ineligible rows are all retired) and **`products_fully_retired` 11 → 10** (`tibco-activematrix-businessworks-plug-in-for-twitter@6.1.2` became eligible and is retirement-announced, not retired, so the product is no longer wholly retired over its convertible set). **Not one of the 5,181 rows changed `release_status`** and `eos_coverage` is unmoved at 270/669, so the report's verdict is untouched in both directions — only the population it is measured over moved. `test_the_shipped_report_retires_the_measured_set` was re-baselined with that reading recorded in its docstring, as the three re-baselines before it were.
 
 **Two things worth recording.** The first is that `catalog show` could not take a ninth column: adding a "Migrate?" column pushed the table past 80 columns and Rich elided the *Status* header, which a test caught. The verdict now lives inside the existing Eligible cell and only adds ink when it disagrees (`no (migrate)`) — which is better than the column would have been, because the cell that carries the conflict is the cell the conflict is about. The second is that the conflict finding is emitted from `_record_catalog_findings` as well as from `catalog migrate`, so a `fetch` or an `eos` surfaces the 458 too; a warning that only appears when you run the command that produces it is a warning nobody sees.
+
+---
+
+### Phase 26: The Layout Pin That Pins Nothing — **Complete, 2026-09-29**
+
+`config/reframe.yaml` has carried `pin_layout_to` since 20b. It is parsed into `ReframePolicy`, printed by `reframe --list`, contributes to the policy cache key — and **is read by exactly one caller**: `driver.py:710` `_check_pin`, which returns early when it is set and otherwise emits `REFRAME_LAYOUT_UNPINNED`. No code applies a reference version's topic→page mapping to any other version. **The only thing the pin does is silence the warning that says it is missing.**
+
+§20b's bullet records "R1.4 layout pinning pinned to the newest eligible version (required by Q2)" as built, and 20b's closing note says "R1.4 decided, not deferred". Both describe the *config block*. The packer never learned about it. `tests/unit/test_reframe.py` asserts that the key parses, that it changes `policy.key`, and that the shipped file carries `10.5.1` for EMS — nothing asserts a layout.
+
+**Measured, 2026-09-29.** Merging ActiveSpaces with the pin absent and again with `pin_layout_to: "5.2.0"` and `--force` produced **identical page counts both times**: 47, 47, 51, 56, 56, 46 over 322–330 topics per version. Page-name correspondence between two adjacent versions, 5.1.1 (56 pages) and the pin reference 5.2.0 (46):
+
+| | pages | corresponding | orphaned |
+|---|---:|---:|---:|
+| 5.1.1 → 5.2.0 | 56 / 46 | **41** | 15 in 5.1.1, 5 in 5.2.0 |
+
+**27% of the older version's pages have no counterpart in the version they are pinned to.** All four multi-version Flare sets drift: EMS 128/125/123/123/124/124, ActiveSpaces 47/47/51/56/56/46, gridserver-manager 95/104, hpc-cloud-adapter 10/9/10.
+
+**The EMS pilot was published under this.** `tibco-enterprise-message-service` is pinned to `10.5.1`, signed off 2026-09-25 and `publish: true`. Its 10.5.0↔10.5.1 correspondence is **123 of 124 pages with one boundary differing** — mild, and mild for the wrong reason: the versions happen to have near-identical content, not because anything pinned them. 10.4.0 against 10.5.1 is the honest measure and it is five pages apart.
+
+#### Decisions
+
+| decision | what gets built | why not the obvious alternative |
+|---|---|---|
+| **The reference layout is projected, not recomputed** | Pack the reference version's TOC once; for every other version, assign each topic to the page its own source path holds in the reference layout | Re-packing each version with the same cap is what happens today and is exactly the chaos R1.4 names: one topic growing 50 words cascades every subsequent boundary. The mapping is the artifact, not the parameters that produced it. |
+| **A topic absent from the reference gets its own page** | Topics the reference layout does not mention are packed by the normal bottom-up rule into pages of their own, never joined onto a projected page | R1.4 says only "topics absent from a given version simply omitted" and is silent on the reverse. Joining a new topic onto a projected page would move that page's boundary and un-pin it for one version — the precise failure being fixed. A separate page is the only option that leaves the projection intact, and it cannot drop published content (`carry`'s argument). |
+| **Reading order comes from the version being merged** | The projection decides *which page*, the version's own `toc.yml` decides order and navigation | Taking order from the reference would reorder a version whose TOC genuinely changed, which is a content decision the pin was never meant to make. |
+| **A missing reference tree is a refusal, not a fallback** | New `REFRAME_PIN_UNAVAILABLE` (error): the pinned version has no converted tree, so the run refuses that product rather than packing it unpinned | Silently falling back re-lays out every version the moment someone runs `reframe --version 4.10.0` in isolation, and reports success. This is `sync`'s rule for a missing merged tree, for the same reason. |
+
+**Consequence to accept up front: EMS's published merged pages will move.** It is pinned and published, so implementing the pin re-lays out its five non-reference versions — pages appear, disappear and change boundary. The redirects are regenerated by the same run and `sync` merges rather than replaces the served map, so no old URL loses its 301; but pages already hand-edited after sign-off would be re-cut. **Nothing has been hand-edited yet**, which is what makes this cheap today and not next month.
+
+#### Scope
+
+- `reframe/packer.py` — a `project(reference, roots, words_of, …)` beside `pack`, returning `list[Page]` so everything downstream is unchanged.
+- `reframe/driver.py` — resolve the reference version, build its layout once per product, pass it to the packer; `_check_pin` keeps its warning for the unpinned case.
+- `reframe/policy.py` — unchanged; the field already exists.
+- Findings register — one new code, `REFRAME_PIN_UNAVAILABLE`. Register 57 → 58.
+- Re-merge all four multi-version sets and record the correspondence table above, measured rather than asserted.
+
+#### Exit
+
+Page-name correspondence between every version of a pinned set and its reference is **100% of the reference's pages, minus only those whose topics the version does not contain** — and the orphan count in the other direction is zero except for topics genuinely new to that version. Re-running with no config change is byte-identical. `REFRAME_LAYOUT_UNPINNED` still fires for an unpinned multi-version set.
+
+#### Built, and what it measured
+
+Three functions: `packer.layout_of` takes a named layout off the reference's packed pages, `packer.project` lays a sibling out against it, and `driver._reference_layout` resolves and caches the reference once per product. `assign` gained one rule — a page `project` has already named keeps that name, and the pinned names are reserved before any unpinned page is named.
+
+**A fifth decision the plan did not anticipate: the page *name* is pinned too, not only the grouping.** With grouping alone, every version came out with zero regrouped pages and still 1–2 renamed ones: R4.1 names a page after its first topic, so a reference page whose first topic a version happens not to have was renamed after its second. Same topics, same page, different URL. `layout_of` therefore carries the path, which is why it must be taken *after* `assign` and not straight off `pack`.
+
+Measured after the change, `--force` over every converted version (reference row first):
+
+| set | pages | reference pages present | absent, and empty in this version | pages for topics new to this version | **regrouped** |
+|---|---:|---:|---:|---:|---:|
+| EMS 10.5.1 *(ref)* | 124 | — | — | — | — |
+| EMS 10.5.0 | 124 | 124 / 124 | 0 | 0 | **0** |
+| EMS 10.4.4 | 123 | 123 / 124 | 1 | 0 | **0** |
+| EMS 10.4.3 | 123 | 123 / 124 | 1 | 0 | **0** |
+| EMS 10.4.1 | 124 | 123 / 124 | 1 | 1 | **0** |
+| EMS 10.4.0 | 130 | 123 / 124 | 1 | 7 | **0** |
+| ActiveSpaces 5.2.0 *(ref)* | 46 | — | — | — | — |
+| ActiveSpaces 5.1.1 | 53 | 45 / 46 | 1 | 8 | **0** |
+| ActiveSpaces 5.1.0 | 53 | 45 / 46 | 1 | 8 | **0** |
+| ActiveSpaces 5.0.0 | 52 | 45 / 46 | 1 | 7 | **0** |
+| ActiveSpaces 4.10.1 | 50 | 44 / 46 | 2 | 6 | **0** |
+| ActiveSpaces 4.10.0 | 50 | 44 / 46 | 2 | 6 | **0** |
+
+Every absent reference page is absent because the version contains none of its topics, and every extra page holds only topics the reference does not have — both verified per page rather than by count. ActiveSpaces was 46/56/56/51/47/47 sharing 41 names at its worst before; EMS 10.4.0 was five pages and several boundaries away from its own pin. Re-running both products with no config change is byte-identical across all 1,536 files. `gridserver-manager` and `hpc-cloud-adapter` carry pins but have no convert-eligible version on disk yet, so their pins take effect the first time they are converted — nothing to re-merge and nothing measured.
 
 ---
 

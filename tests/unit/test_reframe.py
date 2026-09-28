@@ -24,7 +24,16 @@ from docushift.models import SourceEngine
 from docushift.reframe import ReframeOutcome, Reframer, policy_for
 from docushift.reframe import csh as csh_map
 from docushift.reframe.audit import audit
-from docushift.reframe.packer import UNNAVIGATED, Page, Topic, assign, carry, pack
+from docushift.reframe.packer import (
+    UNNAVIGATED,
+    Page,
+    Topic,
+    assign,
+    carry,
+    layout_of,
+    pack,
+    project,
+)
 from docushift.reframe.pages import (
     LinkCounts,
     render,
@@ -781,6 +790,121 @@ def test_carry_makes_one_single_topic_page_per_untocked_file():
 
     assert layout(pages) == [["g/x.md"]]
     assert (pages[0].guide, pages[0].words) == (UNNAVIGATED, 7)
+
+
+# -- R1.4: the pinned layout ---------------------------------------------------
+#
+# Phase 26. Every test here is the same shape: pack a reference, then project a
+# version that differs from it, and assert the difference did not move a boundary.
+
+
+def pinned(roots, words_of, max_words=3000, keep_separate=()):
+    """The reference half of a pin: pack, name, and take the layout as `project` wants it."""
+    pages = pack(roots, words_of, max_words, keep_separate)
+    assign(pages)
+    return layout_of(pages)
+
+
+def test_a_projected_version_reuses_the_reference_grouping_and_not_its_own_sizes():
+    """The defect Phase 26 exists for, at the smallest size that shows it.
+
+    `g/b` grows past the cap between the two versions. Packed on its own the
+    version would close a page early and every boundary after it would shift;
+    projected, the grouping is the reference's and the page is simply oversized,
+    which is the same thing R1.3 already does to a single large topic.
+    """
+    roots = [node("Guide", "g/a.md", node("B", "g/b.md"), node("C", "g/c.md"))]
+    reference = pinned(roots, sized(g__a=10, g__b=10, g__c=10))
+
+    pages = project(reference, roots, sized(g__a=10, g__b=9000, g__c=10), 3000)
+
+    assert layout(pages) == [["g/a.md", "g/b.md", "g/c.md"]]
+    assert pack(roots, sized(g__a=10, g__b=9000, g__c=10), 3000) != pages
+
+
+def test_a_topic_the_reference_does_not_have_gets_its_own_page():
+    """R1.4 covers topics missing *from* a version, and says nothing about new ones.
+
+    Joining one onto a projected page would move that page's boundary and un-pin
+    the version, so a new topic is packed by the normal rule and never reaches in.
+    """
+    reference = pinned([node("Guide", "g/a.md", node("C", "g/c.md"))], sized(g__a=10, g__c=10))
+    roots = [node("Guide", "g/a.md", node("B", "g/b.md"), node("C", "g/c.md"))]
+
+    pages = project(reference, roots, sized(g__a=10, g__b=10, g__c=10), 3000)
+
+    assert layout(pages) == [["g/a.md", "g/c.md"], ["g/b.md"]]
+
+
+def test_a_reference_page_whose_topics_are_all_absent_is_simply_omitted():
+    reference = pinned(
+        [node("First", "g/a.md"), node("Second", "g/b.md")], sized(g__a=10, g__b=10)
+    )
+
+    pages = project(reference, [node("First", "g/a.md")], sized(g__a=10), 3000)
+
+    assert layout(pages) == [["g/a.md"]]
+
+
+def test_a_projected_page_keeps_the_reference_name_when_its_first_topic_is_gone():
+    """Otherwise R4.1 renames the page after the surviving second topic.
+
+    Same topics, same grouping, different URL -- measured on ActiveSpaces as two
+    pages per version, which is two broken cross-version links for no editorial
+    reason. `assign` leaves a page `project` has already named.
+    """
+    roots = [node("Guide", "g/a.md", node("B", "g/b.md"))]
+    reference = pinned(roots, sized(g__a=10, g__b=10))
+
+    pages = project(reference, [node("Guide", "g/b.md")], sized(g__b=10), 3000)
+    assign(pages)
+
+    assert [str(page.path) for page in pages] == ["g/a.md"]
+
+
+def test_a_new_topic_cannot_take_a_name_a_projected_page_wants():
+    """The pinned names are reserved before any of them is reached, not as they are.
+
+    Without the pre-pass the new `g/a.md` page -- which sorts first in this
+    version's reading order -- would claim `g/a.md` and push the projected page
+    that owns that URL onto `g/a-2.md`.
+    """
+    reference = pinned([node("Guide", "g/a.md")], sized(g__a=10))
+    # Two different sources whose stems both slug to `a`, one of them the pin's.
+    roots = [node("New", "g/A.md"), node("Guide", "g/a.md")]
+
+    pages = project(reference, roots, lambda path: 10, 3000)
+    assign(pages)
+
+    assert [str(page.path) for page in pages] == ["g/a-2.md", "g/a.md"]
+
+
+def test_projection_reads_in_this_versions_order_but_sections_in_the_references():
+    """Two decisions at once, because they pull in opposite directions.
+
+    A version that genuinely reordered its TOC should read in its own order, so the
+    *pages* follow this version. Within a page the reference's order is kept, so two
+    versions of one page correspond section by section rather than merely as a set.
+    """
+    reference = pinned(
+        [node("First", "g/a.md", node("B", "g/b.md")), node("Second", "g/c.md")],
+        sized(g__a=10, g__b=10, g__c=10),
+    )
+    roots = [node("Second", "g/c.md"), node("First", "g/b.md", node("A", "g/a.md"))]
+
+    pages = project(reference, roots, sized(g__a=10, g__b=10, g__c=10), 3000)
+
+    assert layout(pages) == [["g/c.md"], ["g/a.md", "g/b.md"]]
+
+
+def test_keep_separate_still_takes_a_topic_out_of_a_projected_page():
+    """20e is a writer's decision and outranks the pin, which is a diffability one."""
+    roots = [node("Guide", "g/a.md", node("B", "g/b.md"))]
+    reference = pinned(roots, sized(g__a=10, g__b=10))
+
+    pages = project(reference, roots, sized(g__a=10, g__b=10), 3000, keep_separate=["g/b.md"])
+
+    assert layout(pages) == [["g/a.md"], ["g/b.md"]]
 
 
 # -- R2: names and anchors -----------------------------------------------------

@@ -108,7 +108,7 @@ def test_the_register_carries_every_row_of_7_5() -> None:
     does -- it is the only thing standing between 458 real disagreements and a
     number nobody can enumerate.
     """
-    assert len(REGISTRY) == 57
+    assert len(REGISTRY) == 58
 
 
 def test_severity_comes_from_the_registry_and_not_from_the_call_site() -> None:

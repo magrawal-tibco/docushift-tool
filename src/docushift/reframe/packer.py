@@ -132,6 +132,124 @@ def pack(roots: Sequence[TocEntry], words_of: Callable[[PurePosixPath], int], ma
     return pages
 
 
+#: One reference page as the pin carries it: where it was written, and which source
+#: topics shared it. Must be taken *after* `assign`, since the name is what `assign`
+#: decided and half the point of pinning is that the name does not move either.
+_Reference = tuple[PurePosixPath, tuple[PurePosixPath, ...]]
+
+
+def layout_of(pages: Sequence[Page]) -> list[_Reference]:
+    """One version's topic->page mapping, in the form the pin carries to its siblings.
+
+    Paths and source paths, and nothing else: titles and word counts are recomputed
+    from the version being merged, because they are its own. The page *name* is not,
+    and that is a deliberate addition to what R1.4 asks for. R4.1 names a page after
+    its first topic, so a reference page whose first topic a version happens not to
+    have would be renamed after the second one -- same topics, same grouping, and a
+    different URL. Measured on ActiveSpaces: two pages per version, which is two
+    broken cross-version links per version for no editorial reason at all.
+    """
+    return [(page.path, tuple(topic.source for topic in page.topics)) for page in pages]
+
+
+def project(
+    reference: Sequence[_Reference],
+    roots: Sequence[TocEntry],
+    words_of: Callable[[PurePosixPath], int],
+    max_words: int,
+    keep_separate: Sequence[str] = (),
+) -> list[Page]:
+    """R1.4: lay this version out against a reference version's mapping, not its own.
+
+    `pack` is greedy and therefore chaotic across versions -- one topic gaining 50
+    words pushes it past the cap, bumps it to the next page and cascades every
+    boundary after it. Measured on ActiveSpaces, two adjacent versions of the same
+    322-330 topics packed into 56 and 46 pages sharing only 41. So a doc set with
+    more than one eligible version pins one of them and the rest are *projected*:
+    a topic joins the page its own source path holds in the reference.
+
+    Three rules, each the one the requirement leaves implicit:
+
+    - **A topic the reference does not have gets its own page**, packed by the
+      normal rule with its neighbours but never joined onto a projected page. R1.4
+      covers only topics missing *from* a version; joining a new one would move a
+      projected boundary and un-pin that version, which is the whole failure.
+    - **Pages appear in this version's reading order**, first-surviving-topic first,
+      because a version whose TOC genuinely changed should read in its own order.
+    - **Sections within a page keep the reference's order**, so two versions of one
+      page correspond section by section and not merely as a set.
+
+    A projected page also keeps the reference's *name*, which `assign` then leaves
+    alone -- see `layout_of` for why recomputing it would move URLs.
+
+    `keep_separate` still wins: a topic a writer took out of the merge is its own
+    page here too, exactly as in `pack`.
+    """
+    prefixes = tuple(keep_separate)
+    group_of: dict[PurePosixPath, int] = {}
+    rank_of: dict[PurePosixPath, int] = {}
+    for index, (_, group) in enumerate(reference):
+        for rank, source in enumerate(group):
+            if source not in group_of:
+                group_of[source] = index
+                rank_of[source] = rank
+
+    # This version's reading order, deduped the way `pack` dedupes: the first node
+    # to reach a path owns it and later nodes become TOC rows pointing at it.
+    claimed: set[PurePosixPath] = set()
+    order: list[tuple[PurePosixPath, str, str]] = []
+    for root in roots:
+        for entry in root.walk():
+            if entry.path is None or entry.path in claimed:
+                continue
+            claimed.add(entry.path)
+            order.append((entry.path, entry.title, root.title))
+
+    def projected(path: PurePosixPath) -> int | None:
+        index = group_of.get(path)
+        return None if index is None or separated(path, prefixes) else index
+
+    members: dict[int, list[Topic]] = {}
+    guide_of: dict[int, str] = {}
+    for path, title, guide in order:
+        index = projected(path)
+        if index is None:
+            continue
+        members.setdefault(index, []).append(Topic(title, path, words_of(path)))
+        guide_of.setdefault(index, guide)
+
+    pages: list[Page] = []
+    emitted: set[int] = set()
+    pending: list[_Item] = []
+    pending_guide = ""
+
+    def flush() -> None:
+        nonlocal pending, pending_guide
+        if pending:
+            pages.extend(_close_run(pending, pending_guide, max_words))
+            pending = []
+            pending_guide = ""
+
+    for path, title, guide in order:
+        index = projected(path)
+        if index is None:
+            if not pending:
+                pending_guide = guide
+            pending.append(_Unit((Topic(title, path, words_of(path)),),
+                                 separate=separated(path, prefixes)))
+            continue
+        if index in emitted:
+            continue
+        emitted.add(index)
+        # A run of new topics never spans a projected boundary, which is what keeps
+        # the projection intact rather than merely mostly intact.
+        flush()
+        topics = sorted(members[index], key=lambda topic: rank_of[topic.source])
+        pages.append(Page(guide_of[index], topics, path=reference[index][0]))
+    flush()
+    return pages
+
+
 def separated(source: PurePosixPath, prefixes: Sequence[str]) -> bool:
     """Whether one source path is at or under a `keep_separate` entry (20e).
 
@@ -261,15 +379,23 @@ def assign(pages: Sequence[Page]) -> dict[PurePosixPath, tuple[Page, str]]:
     Filenames dedup against the full output path -- two directories may each hold
     an `overview.md` -- while anchors dedup per page, which is the scope R2 asks
     for and the scope a fragment is resolved in.
+
+    A page that already carries a path was named by `project` off the pinned
+    reference and is left exactly as it is (R1.4). Those names are reserved up
+    front rather than as they are reached, so a topic new to this version cannot
+    take a name a projected page further down the tree is going to want.
     """
     located: dict[PurePosixPath, tuple[Page, str]] = {}
-    taken_files: set[PurePosixPath] = set()
+    taken_files: set[PurePosixPath] = {
+        page.path for page in pages if page.path != PurePosixPath(".")
+    }
     for page in pages:
         first = page.topics[0]
-        stem = slugify(first.source.stem)
-        directory = first.source.parent
-        page.path = _unique(directory, stem, ".md", taken_files)
-        taken_files.add(page.path)
+        if page.path == PurePosixPath("."):
+            stem = slugify(first.source.stem)
+            directory = first.source.parent
+            page.path = _unique(directory, stem, ".md", taken_files)
+            taken_files.add(page.path)
 
         taken_anchors: set[str] = set()
         for topic in page.topics:
