@@ -21,3 +21,4 @@
 - [Design: Logic & Algorithms](docs/design.md)
 - [User Guide & CLI Reference](docs/user-guide.md)
 - [Project Roadmap & Milestones](docs/planning.md)
+- [Open Issues by Product](docs/open-issues.md) — what is outstanding per product, and who owns it
