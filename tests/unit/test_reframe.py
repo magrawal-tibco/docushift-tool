@@ -182,7 +182,7 @@ def test_a_flare_set_merges_into_fewer_pages_and_says_so(config, catalog, flare)
     assert (result.topics, result.pages) == (3, 2)
     written = sorted(p.relative_to(result.path).as_posix() for p in result.path.rglob("*") if p.is_file())
     assert written == [
-        "installation/installation-2.md",
+        "installation/installation.md",
         "redirects.yml",
         "reframe.yml",
         "review-queue.csv",
@@ -205,7 +205,7 @@ def test_an_absorbed_topic_becomes_an_anchored_section_under_its_parents_h1(
     converted_tree(config, flare, "10.5.1")
 
     result = Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"])
-    text = (result.path / "installation/installation-2.md").read_text(encoding="utf-8")
+    text = (result.path / "installation/installation.md").read_text(encoding="utf-8")
     matter, body = split_frontmatter(text)
 
     assert yaml.safe_load(matter.strip("-\r\n")) == {
@@ -233,11 +233,11 @@ def test_the_toc_points_absorbed_topics_at_a_fragment_and_leaders_at_a_page(
         "items": [
             {
                 "title": "Installation",
-                "path": "installation/installation-2.md",
+                "path": "installation/installation.md",
                 "children": [
                     {
                         "title": "Installation Overview",
-                        "path": "installation/installation-2.md#installation-overview",
+                        "path": "installation/installation.md#installation-overview",
                     }
                 ],
             },
@@ -262,9 +262,9 @@ def test_every_source_topic_gets_a_redirect_with_its_anchor(config, catalog, fla
          # `#installation`, not `#installation-2`: the anchor is the platform's
          # slug of the heading, so the file's `-2` disambiguator does not leak
          # into a reader's address bar (Phase 29).
-         "to": "installation/installation-2.md#installation", "status": 301},
+         "to": "installation/installation.md#installation", "status": 301},
         {"from": "installation/installation-overvie.md",
-         "to": "installation/installation-2.md#installation-overview", "status": 301},
+         "to": "installation/installation.md#installation-overview", "status": 301},
         {"from": "users-guide/user-guide.md",
          "to": "users-guide/user-guide.md#user-guide", "status": 301},
     ]
@@ -331,7 +331,8 @@ def test_a_topic_the_toc_never_lists_is_carried_through_and_named(config, catalo
     assert result.outcome is ReframeOutcome.REFRAMED
     assert codes(findings.all) == ["REFRAME_TOPIC_UNTOCKED"]
     assert findings.all[0].severity is Severity.WARNING
-    carried = result.path / "users-guide/stray.md"
+    # Named from its own frontmatter title, like every other page (Phase 29).
+    carried = result.path / "users-guide/a-stray-topic.md"
     assert carried.is_file()
     assert yaml.safe_load(split_frontmatter(carried.read_text(encoding="utf-8"))[0].strip("-\r\n")) == {
         "title": "A Stray Topic", "guide": UNNAVIGATED, "merged_from": 1,
@@ -822,7 +823,7 @@ def test_a_topic_listed_under_two_guides_is_packed_once_and_shared():
     assert layout(pages) == [["g/a.md", "g/s.md"], ["g/b.md"]]
     assert retarget(roots, located)["items"][1]["children"] == [
         # `#shared`, from the heading, not `#s` from the filename stem.
-        {"title": "Shared", "path": "g/a.md#shared"}
+        {"title": "Shared", "path": "g/first.md#shared"}
     ]
 
 
@@ -1017,7 +1018,10 @@ def test_a_projected_page_keeps_the_reference_name_when_its_first_topic_is_gone(
     pages = project(reference, [node("Guide", "g/b.md")], sized(g__b=10), 3000)
     assign(pages)
 
-    assert [str(page.path) for page in pages] == ["g/a.md"]
+    # The reference named this `g/guide.md` after its first topic's title; the
+    # version that lost that topic keeps the name rather than being renamed
+    # after "B".
+    assert [str(page.path) for page in pages] == ["g/guide.md"]
 
 
 def test_a_new_topic_cannot_take_a_name_a_projected_page_wants():
@@ -1028,13 +1032,13 @@ def test_a_new_topic_cannot_take_a_name_a_projected_page_wants():
     that owns that URL onto `g/a-2.md`.
     """
     reference = pinned([node("Guide", "g/a.md")], sized(g__a=10))
-    # Two different sources whose stems both slug to `a`, one of them the pin's.
-    roots = [node("New", "g/A.md"), node("Guide", "g/a.md")]
+    # A topic new to this version, sorting first in its reading order.
+    roots = [node("New", "g/new-topic.md"), node("Guide", "g/a.md")]
 
     pages = project(reference, roots, lambda path: 10, 3000)
     assign(pages)
 
-    assert [str(page.path) for page in pages] == ["g/a-2.md", "g/a.md"]
+    assert [str(page.path) for page in pages] == ["g/new.md", "g/guide.md"]
 
 
 def test_projection_reads_in_this_versions_order_but_sections_in_the_references():
@@ -1068,12 +1072,25 @@ def test_keep_separate_still_takes_a_topic_out_of_a_projected_page():
 # -- R2: names and anchors -----------------------------------------------------
 
 
-def test_a_page_is_named_after_its_first_topic_and_placed_beside_it():
-    pages = pack([node("Guide", "g/deep/Getting Started.md")], lambda p: 10, 3000)
+def test_a_page_is_named_after_its_first_topics_title_and_placed_beside_it():
+    """Phase 29: from the **title**, not the source stem, because the filename is
+    the URL. MadCap truncates its own filenames at 20 characters, and 428 of
+    1,700 merged pages published a name that disagreed with their own title."""
+    pages = pack([node("Getting Started", "g/deep/gettin-started-2.md")], lambda p: 10, 3000)
 
     assign(pages)
 
     assert str(pages[0].path) == "g/deep/getting-started.md"
+
+
+def test_a_page_falls_back_to_its_stem_when_the_title_is_really_a_filename():
+    """`Know_the_Basics` as a TOC "title" is a stem somebody forgot to write out,
+    and the stem is then the honest source -- with its edit history stripped."""
+    pages = pack([node("Know_the_Basics", "g/1__Know_the_Basics_updated.md")], lambda p: 10, 3000)
+
+    assign(pages)
+
+    assert str(pages[0].path) == "g/know-the-basics.md"
 
 
 def test_an_anchor_is_the_platforms_slug_of_the_heading_not_of_the_filename():
@@ -1125,15 +1142,39 @@ def test_a_sub_heading_competes_for_the_same_anchor_as_a_topic_heading():
     assert list(pages[0].anchors.values()) == ["install", "location-1"]
 
 
-def test_two_pages_in_one_directory_never_collide_on_a_filename():
-    """Anchors dedup per page -- the scope a fragment resolves in -- but filenames
-    dedup against the whole output tree, so this pair needs the wider scope."""
-    roots = [node("First", "g/Over View.md"), node("Second", "g/over-view.md")]
+def test_two_pages_with_one_title_are_told_apart_by_their_section():
+    """The earlier page in TOC order keeps the plain name; the later one is
+    qualified with the section it belongs to. `-2` is the last resort, not the
+    first, because `installing-overview` is both unique *and* better prose."""
+    roots = [
+        node("Installing", "g/a.md", node("Overview", "g/b.md")),
+        node("Upgrading", "g/c.md", node("Overview", "g/d.md")),
+    ]
 
-    pages = pack(roots, lambda p: 10, 3000)
+    # A cap the parent-plus-child subtree exceeds, so each section splits into
+    # its own page and its child's -- which is what puts two "Overview" pages in
+    # one doc set.
+    pages = pack(roots, lambda p: 10, 15)
     assign(pages)
 
-    assert [str(page.path) for page in pages] == ["g/over-view.md", "g/over-view-2.md"]
+    # Both "Overview" pages are generic, so both take their parent's prefix --
+    # neither publishes a bare `/overview`, which names nothing.
+    assert [str(page.path) for page in pages] == [
+        "g/installing.md", "g/installing-overview.md",
+        "g/upgrading.md", "g/upgrading-overview.md",
+    ]
+
+
+def test_a_collision_the_parent_cannot_break_falls_back_to_a_number():
+    """Same title, same parent: there is no prose left to tell them apart."""
+    roots = [node("Section", "g/s.md", node("Detail", "g/a.md"), node("Detail", "g/b.md"))]
+
+    pages = pack(roots, lambda p: 10, 15)
+    assign(pages)
+
+    assert [str(page.path) for page in pages] == [
+        "g/section.md", "g/detail.md", "g/section-detail.md",
+    ]
 
 
 # -- R2.1: the heading shift ---------------------------------------------------
@@ -1221,7 +1262,8 @@ def linked():
     here = Page("G", [Topic("A", PurePosixPath("g/a.md"), 10), Topic("B", PurePosixPath("g/b.md"), 10)])
     # `h/c.md` is deliberately the *second* topic of its page, so a rewritten
     # cross-page link is visibly not the path that was already there.
-    there = Page("H", [Topic("O", PurePosixPath("h/other.md"), 10), Topic("C", PurePosixPath("h/c.md"), 10)])
+    there = Page("H", [Topic("Other Topics", PurePosixPath("h/other.md"), 10),
+                       Topic("C", PurePosixPath("h/c.md"), 10)])
     located = assign([here, there])
     existing = frozenset(
         PurePosixPath(p)
@@ -1245,7 +1287,7 @@ def test_a_link_onto_the_same_merged_page_becomes_a_bare_fragment(linked):
 def test_a_link_onto_another_page_is_repathed_and_keeps_an_anchor(linked):
     counts = LinkCounts()
 
-    assert rewrite("see [C](../h/c.md).", linked, counts) == "see [C](../h/other.md#c)."
+    assert rewrite("see [C](../h/c.md).", linked, counts) == "see [C](../h/other-topics.md#c)."
     assert counts.inter == 1
 
 
@@ -1744,9 +1786,9 @@ def test_a_writers_decision_reaches_the_tree_that_is_written(config, catalog, fl
 
     assert result.outcome is ReframeOutcome.REFRAMED
     written = sorted(p.relative_to(result.path).as_posix() for p in result.path.rglob("*.md"))
-    assert written == ["installation/installation-2.md",
-                       "installation/installation-overvie.md",
-                       "users-guide/user-guide.md"]
+    assert sorted(written) == ["installation/installation-overview.md",
+                               "installation/installation.md",
+                               "users-guide/user-guide.md"]
 
 
 def test_the_same_doc_set_merges_those_two_topics_without_the_override(config, catalog, flare):
@@ -1756,7 +1798,7 @@ def test_the_same_doc_set_merges_those_two_topics_without_the_override(config, c
     result = Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"])
 
     written = sorted(p.relative_to(result.path).as_posix() for p in result.path.rglob("*.md"))
-    assert written == ["installation/installation-2.md", "users-guide/user-guide.md"]
+    assert written == ["installation/installation.md", "users-guide/user-guide.md"]
 
 
 def test_a_keep_separate_path_matching_no_topic_is_named(config, catalog, flare):
@@ -1966,9 +2008,9 @@ def test_the_written_map_and_the_written_frontmatter_agree_end_to_end(config, ca
     # is in the body and the platform does not honour it (Phase 29).
     assert written == {
         "install.overview.helpurl":
-            "installation/installation-2.md#installation-overview"
+            "installation/installation.md#installation-overview"
     }
-    page = (result.path / "installation/installation-2.md").read_text(encoding="utf-8")
+    page = (result.path / "installation/installation.md").read_text(encoding="utf-8")
     assert yaml.safe_load(split_frontmatter(page)[0].strip("-\n"))["csh"] == [
         "install.overview.helpurl"
     ]
@@ -2045,7 +2087,7 @@ def test_an_absorbed_topic_redirects_to_the_anchor_it_became(config, catalog, de
 
     destinations = {row["from"].rsplit("/", 1)[1]: row["to"] for row in origin_rows(result.path)}
     assert destinations["installation-overvie.htm"] == (
-        "installation/installation-2.md#installation-overview")
+        "installation/installation.md#installation-overview")
     assert destinations["user-guide.htm"] == "users-guide/user-guide.md#user-guide"
 
 

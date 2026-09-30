@@ -31,17 +31,30 @@ _TAG = re.compile(r"<[^>]*>")
 # Inline Markdown that renders to nothing in a heading: `**bold**`, `` `code` ``,
 # a link's brackets. Removed rather than replaced, so `**Bold** Term` gives
 # `bold-term` and not `-bold--term`.
-_INLINE_MARKUP = re.compile(r"[!\[\]()`*_~]")
+#
+# **`_` is deliberately not in this set**, though it is an emphasis marker and
+# was in it until Phase 29. It is also a word character to GitHub's rule, which
+# keeps it: `TIBCO_HOME` anchors at `tibco_home`, not `tibcohome`. Measured over
+# the merged corpus: **3,625 of 32,706 headings contain an underscore and none
+# of them uses underscore-emphasis** -- they are environment variables and error
+# codes. Stripping it was wrong for 11% of headings and right for none.
+_INLINE_MARKUP = re.compile(r"[!\[\]()`*~]")
 _DROP = re.compile(r"[^\w\- ]+", re.UNICODE)
 
 
 def slugify_heading(title: str) -> str:
     """One heading's anchor, before any disambiguation.
 
-    Deliberately *not* `utils/slug.py:slugify`, which answers a different
-    question: it names directories, where `10.4.0` has to become `10-4-0`. An
-    anchor keeps its dots, because the platform keeps them. Two callers, two
-    rules, and conflating them would silently break whichever one lost.
+    Deliberately *not* `utils/slug.py:slugify`, and the difference is sharper
+    than "both lowercase and hyphenate". Punctuation here is **deleted**, not
+    replaced by a separator, and `_` survives as a word character -- so
+    `Release 10.4.0` anchors at `release-1040` where a directory name would be
+    `release-10-4-0`, and `Know_the_Basics` keeps its underscores. Two callers,
+    two rules, and conflating them would silently break whichever one lost.
+
+    (An earlier version of this docstring claimed an anchor keeps its dots. It
+    does not, and never did; the code below has always dropped them. Corrected
+    when a test written against the sentence failed against the function.)
     """
     text = _TAG.sub("", title)
     text = _INLINE_MARKUP.sub("", text)

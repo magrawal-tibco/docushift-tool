@@ -3744,8 +3744,40 @@ The ~370 fragments that still miss are *source* anchors — `#ID-000071DF`,
 them. Nothing in the content can make those work; `validate` now reports them
 honestly instead of passing them against the markers it used to emit itself.
 
-Still to build: names from titles, folders mirroring the TOC, a copy per guide,
-the served-URL correction and its prefix migration, and `rename-map.csv`.
+#### Built so far — the filenames, 2026-09-30
+
+`utils/naming.py` (`slugify`, `shorten`, `qualify`, `GENERIC`, `MAX_SEGMENT`),
+`Topic.parent` threaded through the packer, and `_name_for` in `assign`.
+**1,651 tests pass**, lint clean.
+
+| | before | after |
+|---|---:|---:|
+| merged pages whose filename is unrelated to their title | **428 / 1,700** | **1 / 1,505** |
+| filenames longer than 50 characters | **33** | **0** |
+
+Measured over the three re-merged families (ActiveSpaces 359 pages, EMS 964,
+TRA 182). DataSynapse's 235 pages still carry the old names and account for the
+remaining over-length ones; it is out of scope and was not re-merged.
+
+**The one remaining mismatch is the pin working, not a fault.** EMS 10.5.1 titles
+a topic "Activation" and 10.4.0 titles the same topic "Product Activation"; the
+projected version keeps the reference's `activation.md` so the URL does not move
+between versions, which is what R1.4 exists for.
+
+Both of the spec's golden long names now come in under the cut —
+`configuring-ssl-existing-non-ssl-gridserver` at 43 and
+`configuring-permissions-processor-utilization` at 45 — so the platform truncates
+nothing and the filename *is* the URL leaf.
+
+**One rule changed on measurement rather than on reading.** The anchor slug
+stripped `_` as Markdown emphasis. Over the merged corpus **3,625 of 32,706
+headings contain an underscore and none of them uses underscore-emphasis** --
+they are environment variables (`TIBCO_HOME`) and error codes. Stripping it was
+wrong for 11% of headings and right for none, so `_` now survives, as it does
+under the platform's own rule.
+
+Still to build: folders mirroring the TOC, a copy per guide, the served-URL
+correction and its prefix migration, and `rename-map.csv`.
 
 #### Nothing is carried unverified
 

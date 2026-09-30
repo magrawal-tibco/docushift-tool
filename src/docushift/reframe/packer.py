@@ -53,8 +53,8 @@ from pathlib import PurePosixPath
 
 from docushift.reframe.toc import TocEntry
 from docushift.transforms.headings import compact
+from docushift.utils import naming
 from docushift.utils.anchors import anchor_run
-from docushift.utils.slug import slugify
 
 
 @dataclass(frozen=True)
@@ -67,6 +67,11 @@ class Topic:
     #: Relative to the converted tree's root, exactly as `toc.yml` wrote it.
     source: PurePosixPath
     words: int
+    #: The title of this topic's TOC parent, or "" at the top level. Carried so
+    #: that a page needing disambiguation can be qualified with the section it
+    #: belongs to -- `installation-overview` rather than a bare `overview`, which
+    #: names nothing and which twenty pages in one doc set are called (Phase 29).
+    parent: str = ""
     #: The heading level this topic's own H1 takes on its merged page (R2.1).
     #: An absolute level rather than a depth, because `pages.render` wants the
     #: answer and not the arithmetic -- and because `carry` and `project`'s
@@ -378,6 +383,7 @@ def _subtree(
     max_words: int,
     claimed: set[PurePosixPath],
     prefixes: Sequence[str] = (),
+    parent: str = "",
 ) -> list[Page]:
     """Every page this node's subtree becomes, in reading order.
 
@@ -387,7 +393,7 @@ def _subtree(
     exists for: a page's topics always share one TOC parent, so the page's first
     topic is the thing the page is about.
     """
-    whole = _collect(node, words_of, max_words, claimed, prefixes)
+    whole = _collect(node, words_of, max_words, claimed, prefixes, parent)
     if whole is not None:
         _commit(whole, claimed)
         return [Page(guide, list(whole))] if whole else []
@@ -399,7 +405,8 @@ def _subtree(
         # words this way -- and that is the honest shape: the TOC has a node here,
         # so the merged tree needs a page here for it to point at.
         claimed.add(node.path)
-        pages.append(Page(guide, [Topic(node.title, node.path, words_of(node.path), level=1)]))
+        pages.append(Page(guide, [Topic(node.title, node.path, words_of(node.path),
+                                        parent=parent, level=1)]))
 
     run: list[_Unit] = []
 
@@ -408,12 +415,13 @@ def _subtree(
         run.clear()
 
     for child in node.children:
-        unit = _collect(child, words_of, max_words, claimed, prefixes)
+        unit = _collect(child, words_of, max_words, claimed, prefixes, node.title)
         if unit is None:
             # This child overflows and will emit its own pages. Flush first, or
             # a later sibling that still fits would jump in front of them.
             flush()
-            pages.extend(_subtree(child, guide, words_of, max_words, claimed, prefixes))
+            pages.extend(_subtree(child, guide, words_of, max_words, claimed, prefixes,
+                                  node.title))
             continue
         if not unit:
             continue
@@ -429,6 +437,7 @@ def _collect(
     max_words: int,
     claimed: set[PurePosixPath],
     prefixes: Sequence[str],
+    parent: str = "",
 ) -> tuple[Topic, ...] | None:
     """This subtree as one page's worth of topics, or None if it may not be one.
 
@@ -456,7 +465,7 @@ def _collect(
     seen: set[PurePosixPath] = set()
     total = 0
 
-    def walk(entry: TocEntry, level: int) -> bool:
+    def walk(entry: TocEntry, level: int, parent: str) -> bool:
         nonlocal total
         emitted = False
         if entry.path is not None and entry.path not in claimed and entry.path not in seen:
@@ -467,12 +476,16 @@ def _collect(
             total += words
             if total > max_words:
                 return False
-            topics.append(Topic(entry.title, entry.path, words, level=min(level, _DEEPEST)))
+            topics.append(Topic(entry.title, entry.path, words, parent=parent,
+                                level=min(level, _DEEPEST)))
             emitted = True
         below = level + 1 if emitted else level
-        return all(walk(child, below) for child in entry.children)
+        # A row that contributed no topic is not a parent anybody can be named
+        # after, so its own children inherit the parent it had.
+        under = entry.title if emitted else parent
+        return all(walk(child, below, under) for child in entry.children)
 
-    if not walk(node, 1):
+    if not walk(node, 1, parent):
         return None
     # R4.2 is enforced here rather than checked afterwards. A subtree that fits by
     # words but straddles two source directories must still fall to the second
@@ -574,10 +587,14 @@ def assign(
     taken_files: set[PurePosixPath] = {
         page.path for page in pages if page.path != PurePosixPath(".")
     }
+    taken_stems: set[str] = {
+        page.path.stem.lower() for page in pages if page.path != PurePosixPath(".")
+    }
     for page in pages:
         first = page.topics[0]
         if page.path == PurePosixPath("."):
-            stem = slugify(first.source.stem)
+            stem = _name_for(first, taken_stems)
+            taken_stems.add(stem.lower())
             directory = first.source.parent
             page.path = _unique(directory, stem, ".md", taken_files)
             taken_files.add(page.path)
@@ -598,6 +615,39 @@ def assign(
             page.anchors[topic.source] = anchor
             located[topic.source] = (page, anchor)
     return located
+
+
+def _name_for(first: Topic, taken: set[str]) -> str:
+    """The filename stem for a page led by `first`. Phase 29's rule.
+
+    **From the title, because the filename is the URL.** AEM builds an address
+    from the TOC chain of filenames, so a page named after its *source* stem
+    publishes MadCap's 20-character truncation to readers: 428 of 1,700 merged
+    pages disagreed with their own title, one of them publishing a page titled
+    "Upgrading to Release 5.13.0" as `upgrading-to-release-5-12-4`.
+
+    Two reasons to qualify with the parent section, and they are the same reason
+    twice. A **generic** slug -- `overview`, `requirements` -- names nothing on
+    its own and dozens of pages in one doc set share it. A **collision** is that
+    having already happened. Either way `installation-overview` is both unique
+    and better prose than `overview-2`, which is why the numeric suffix is the
+    last resort rather than the first.
+
+    Uniqueness is doc-set-wide and case-insensitive. Folders mirror the TOC, so
+    two same-named pages in different sections could not collide on disk -- but
+    they would be two addresses a reader cannot tell apart from the last segment
+    alone, which is the thing a URL is for.
+    """
+    stem = naming.slugify(first.title, first.source.stem)
+    if not stem:
+        stem = naming.slugify("", first.source.stem) or "page"
+    if stem in naming.GENERIC or stem.lower() in taken:
+        stem = naming.qualify(stem, naming.slugify(first.parent)) or stem
+    if stem.lower() in taken:
+        # Room for the suffix first, or `-2` would push the name past the cut and
+        # the platform would truncate it back onto the name it collided with.
+        stem = _suffixed(naming.shorten(stem, naming.MAX_SEGMENT - 2), taken)
+    return stem
 
 
 def _unique(directory: PurePosixPath, stem: str, suffix: str, taken: set[PurePosixPath]) -> PurePosixPath:
