@@ -31,8 +31,10 @@ from docushift.utils.naming import MAX_SEGMENT, qualify, shorten, slugify
         ("", "1__Copy_Files_Before_Installation", "copy-files-before-installation"),
         ("", "Prior_to_Upgrade_", "prior-to-upgrade"),
         ("", "Configuring_HTTPS_updated", "configuring-https"),
-        # Trademark glyphs go before the fold, or `™` decomposes to the letters TM.
+        # Trademark glyphs go before the *normalize*, or NFKC decomposes `™` to
+        # the letters TM and a real folder reads `tibco-runtime-agenttm`.
         ("TIBCO ActiveSpaces® Enterprise Edition", "", "tibco-activespaces-enterprise-edition"),
+        ("TIBCO Runtime Agent™", "", "tibco-runtime-agent"),
         ("Messaging & Events", "", "messaging-and-events"),
         ("Overview of the Grid", "", "overview-of-the-grid"),
         # The name that made the case for this phase: published as

@@ -52,6 +52,7 @@ from docushift.reframe.packer import (
     layout_of,
     pack,
     project,
+    relocate,
     separated,
 )
 from docushift.reframe.pages import LinkCounts, render, split_frontmatter, title_of, word_count
@@ -59,6 +60,7 @@ from docushift.reframe.policy import ReframePolicy, policy_for
 from docushift.reframe.review import Flag, branches, inspect
 from docushift.reframe.toc import TocEntry, retarget, schema_for
 from docushift.reporting.findings import FindingsRun
+from docushift.utils.longpath import long_path, walk_files
 from docushift.utils.swap import remove, swap
 
 # The same function `validate` resolves CSH fragments with, so the audit and the
@@ -448,6 +450,10 @@ class Reframer:
         )
         built = packed + carried
         located = assign(built, source.headings)
+        # Folders mirror the TOC (Phase 29), so the repo path and the published
+        # URL are the same chain. Before `render`, which resolves every relative
+        # link and asset against `page.path`.
+        relocate(built, roots)
         unnavigated = frozenset(page.path for page in carried)
 
         staging = target.with_name(target.name + ".part")
@@ -565,9 +571,13 @@ class Reframer:
         ratio needs both ends persisted to survive the run that measured it.
         """
         reframed_md = reframed_files = 0
-        for path in target.rglob("*"):
-            if not path.is_file():
-                continue
+        # `walk_files`, not `rglob`. Since Phase 29 the folders mirror the TOC, so
+        # a page seven levels down a Runtime Agent guide is past Windows' 260
+        # characters -- and `rglob` reaches each directory through the unprefixed
+        # spelling and therefore **omits such a file silently**. It cost an hour
+        # here: 118 pages written, 116 counted, and an acceptance check correctly
+        # refusing a tree that was in fact complete.
+        for _relative, path in walk_files(target):
             reframed_files += 1
             if path.suffix.lower() == ".md":
                 reframed_md += 1
@@ -593,7 +603,11 @@ class Reframer:
         mirrored: dict[PurePosixPath, frozenset[str]] = {}
         for page in built:
             text, added = render(page, source.read, located, existing, counts, mirror)
-            destination = staging / page.path
+            # `long_path` since Phase 29: folders mirror the TOC, so a page seven
+            # levels down a Runtime Agent guide lands past Windows' 260-character
+            # limit and both the `mkdir` and the write fail with a bare
+            # FileNotFoundError that names the path and not the reason.
+            destination = long_path(staging / page.path)
             destination.parent.mkdir(parents=True, exist_ok=True)
             # `newline=""` so the bytes are the same on every platform, which is
             # half of C5; the other half is that everything feeding this is sorted.
@@ -630,9 +644,9 @@ class Reframer:
         another set will have others, so the rule has to be structural.
         """
         for relative in source.assets:
-            destination = staging / relative
+            destination = long_path(staging / relative)
             destination.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(source.root / relative, destination)
+            shutil.copy2(long_path(source.root / relative), destination)
 
         manifest.write(staging / "toc.yml", manifest.TOC_HEADER, retarget(roots, located))
         manifest.write(

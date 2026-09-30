@@ -587,16 +587,29 @@ def assign(
     taken_files: set[PurePosixPath] = {
         page.path for page in pages if page.path != PurePosixPath(".")
     }
-    taken_stems: set[str] = {
-        page.path.stem.lower() for page in pages if page.path != PurePosixPath(".")
-    }
+    # Keyed by the TOC parent, because that is the folder `relocate` will put the
+    # page in and therefore the only scope a name can actually clash in.
+    taken_stems: dict[str, set[str]] = {}
+    for page in pages:
+        if page.path != PurePosixPath("."):
+            taken_stems.setdefault("", set()).add(page.path.stem.lower())
     for page in pages:
         first = page.topics[0]
         if page.path == PurePosixPath("."):
-            stem = _name_for(first, taken_stems)
-            taken_stems.add(stem.lower())
-            directory = first.source.parent
-            page.path = _unique(directory, stem, ".md", taken_files)
+            siblings = taken_stems.setdefault(naming.slugify(first.parent), set())
+            stem = _name_for(first, siblings)
+            siblings.add(stem.lower())
+            if page.guide == UNNAVIGATED:
+                # No TOC row, so `relocate` will not move it and this path is
+                # final. It is also the only case that needs a tree-wide check.
+                page.path = _unique(first.source.parent, stem, ".md", taken_files)
+            else:
+                # Provisional, beside the source. `relocate` moves it into the
+                # TOC's folder chain straight after this. Deliberately *not*
+                # deduped here: two pages under different parents may collide
+                # transiently, and suffixing now would carry a `-2` the final
+                # folders make unnecessary into the published URL.
+                page.path = first.source.parent / f"{stem}.md"
             taken_files.add(page.path)
 
         titles: list[str] = []
@@ -617,6 +630,70 @@ def assign(
     return located
 
 
+def relocate(pages: Sequence[Page], roots: Sequence[TocEntry]) -> int:
+    """Moves every navigated page into a folder chain mirroring the TOC.
+
+    **Because the folder chain is the URL.** AEM builds an address from the TOC
+    chain of node filenames, so laying the directories out the same way makes the
+    repo path and the published address the same string -- and the path-based URL
+    the rest of the tool already computes becomes right by construction rather
+    than by a second, parallel calculation that can drift from it.
+
+    A page that has child pages becomes a folder named after its own file, with
+    those children inside it; its own page sits beside the folder. So the
+    Installation section is `installation.md` next to `installation/`, and its
+    children are `installation/requirements.md` -- `/installation` and
+    `/installation/requirements` respectively, which is what a reader sees.
+
+    Pages `carry` produced are left where they are: the TOC never mentioned them,
+    so there is no chain to put them in, and inventing one would give an
+    unnavigated topic a more confident address than a navigated one.
+
+    Returns how many pages moved. Must run **before** `pages.render`, because the
+    renderer resolves every relative link and asset path against `page.path`.
+    """
+    owner: dict[PurePosixPath, Page] = {}
+    for page in pages:
+        for topic in page.topics:
+            owner[topic.source] = page
+
+    placed: dict[int, PurePosixPath] = {}
+
+    def walk(entry: TocEntry, folder: PurePosixPath) -> None:
+        page = owner.get(entry.path) if entry.path is not None else None
+        # Only the page's *leading* topic puts it in the tree: an absorbed topic
+        # is a section, and its TOC row must not move the page it was merged into.
+        below = folder
+        if page is not None and page.topics[0].source == entry.path:
+            if id(page) not in placed:
+                placed[id(page)] = folder / page.path.name
+            below = folder / page.path.stem
+        for child in entry.children:
+            walk(child, below)
+
+    for root in roots:
+        walk(root, PurePosixPath())
+
+    # Final uniqueness is settled here, not in `assign`, because here is where a
+    # page's folder is actually known -- and it covers **every** page, not only
+    # the ones this function moves. `assign` deliberately leaves a navigated
+    # page's provisional path undeduped, so a page the walk above does not reach
+    # keeps a name that may already be taken. Runtime Agent 5.13.0 found this the
+    # only way it can be found: 118 pages merged, 116 files on disk, two writes
+    # landing on one path and the audit catching the arithmetic.
+    taken: set[PurePosixPath] = set()
+    moved = 0
+    for page in pages:
+        target = placed.get(id(page), page.path)
+        if target in taken:
+            target = _unique(target.parent, target.stem, ".md", taken)
+        taken.add(target)
+        if target != page.path:
+            page.path = target
+            moved += 1
+    return moved
+
+
 def _name_for(first: Topic, taken: set[str]) -> str:
     """The filename stem for a page led by `first`. Phase 29's rule.
 
@@ -626,23 +703,22 @@ def _name_for(first: Topic, taken: set[str]) -> str:
     pages disagreed with their own title, one of them publishing a page titled
     "Upgrading to Release 5.13.0" as `upgrading-to-release-5-12-4`.
 
-    Two reasons to qualify with the parent section, and they are the same reason
-    twice. A **generic** slug -- `overview`, `requirements` -- names nothing on
-    its own and dozens of pages in one doc set share it. A **collision** is that
-    having already happened. Either way `installation-overview` is both unique
-    and better prose than `overview-2`, which is why the numeric suffix is the
-    last resort rather than the first.
+    **Uniqueness is scoped to the TOC parent, not to the doc set.** `relocate`
+    puts a page in a folder named after its parent, so two pages in different
+    sections cannot collide on disk *or* in a URL -- `/installation/requirements`
+    and `/upgrading/requirements` are already distinct addresses that read
+    correctly. The spec asked for doc-set-wide uniqueness and a parent prefix on
+    every generic name, which was the right rule when folders were flat; with the
+    chain restored it buys nothing and costs `/installation/installation-
+    requirements`. Same scope as the folder, which is the scope a clash can
+    actually happen in.
 
-    Uniqueness is doc-set-wide and case-insensitive. Folders mirror the TOC, so
-    two same-named pages in different sections could not collide on disk -- but
-    they would be two addresses a reader cannot tell apart from the last segment
-    alone, which is the thing a URL is for.
+    Where two pages under *one* parent do share a title there is no prose left to
+    tell them apart, so the numeric suffix is what remains.
     """
     stem = naming.slugify(first.title, first.source.stem)
     if not stem:
         stem = naming.slugify("", first.source.stem) or "page"
-    if stem in naming.GENERIC or stem.lower() in taken:
-        stem = naming.qualify(stem, naming.slugify(first.parent)) or stem
     if stem.lower() in taken:
         # Room for the suffix first, or `-2` would push the name past the cut and
         # the platform would truncate it back onto the name it collided with.

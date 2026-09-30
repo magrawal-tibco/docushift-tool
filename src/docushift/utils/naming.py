@@ -81,12 +81,18 @@ def looks_like_a_filename(title: str) -> bool:
 def normalize(value: str) -> str:
     """A title reduced to the characters a slug may contain, before any cutting."""
     text = _ESCAPE.sub(lambda m: chr(int(m.group(1) or m.group(2), 16)), str(value))
+    # Trademark glyphs go **before** the normalize, not after. NFKC gives them a
+    # compatibility decomposition -- `™` becomes the letters "TM" -- so dropping
+    # them afterwards is dropping nothing, and "TIBCO Runtime Agent™" published
+    # as `tibco-runtime-agenttm`. `utils/slug.py` has had this ordering since it
+    # was written; this module lost it and got it back off a real folder name.
+    text = text.translate(_SYMBOLS)
     text = unicodedata.normalize("NFKC", text)
     # NBSP and the narrow/figure spaces authoring tools emit. NFKC folds most
     # of them; this covers the ones it leaves, written as escapes so the rule
     # survives a copy-paste of this file into an editor that eats them.
     text = re.sub("[    ]", " ", text)
-    text = text.translate(_SYMBOLS).translate(_STRIPPED)
+    text = text.translate(_STRIPPED)
     text = text.replace("&", " and ")
     folded = unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode("ascii")
     return _NON_ALNUM.sub("-", folded.lower()).strip("-")

@@ -33,6 +33,7 @@ from docushift.reframe.packer import (
     layout_of,
     pack,
     project,
+    relocate,
 )
 from docushift.reframe.pages import (
     LinkCounts,
@@ -182,12 +183,12 @@ def test_a_flare_set_merges_into_fewer_pages_and_says_so(config, catalog, flare)
     assert (result.topics, result.pages) == (3, 2)
     written = sorted(p.relative_to(result.path).as_posix() for p in result.path.rglob("*") if p.is_file())
     assert written == [
-        "installation/installation.md",
+        "installation.md",
         "redirects.yml",
         "reframe.yml",
         "review-queue.csv",
         "toc.yml",
-        "users-guide/user-guide.md",
+        "user-guide.md",
     ]
 
 
@@ -205,7 +206,7 @@ def test_an_absorbed_topic_becomes_an_anchored_section_under_its_parents_h1(
     converted_tree(config, flare, "10.5.1")
 
     result = Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"])
-    text = (result.path / "installation/installation.md").read_text(encoding="utf-8")
+    text = (result.path / "installation.md").read_text(encoding="utf-8")
     matter, body = split_frontmatter(text)
 
     assert yaml.safe_load(matter.strip("-\r\n")) == {
@@ -233,15 +234,15 @@ def test_the_toc_points_absorbed_topics_at_a_fragment_and_leaders_at_a_page(
         "items": [
             {
                 "title": "Installation",
-                "path": "installation/installation.md",
+                "path": "installation.md",
                 "children": [
                     {
                         "title": "Installation Overview",
-                        "path": "installation/installation.md#installation-overview",
+                        "path": "installation.md#installation-overview",
                     }
                 ],
             },
-            {"title": "User Guide", "path": "users-guide/user-guide.md"},
+            {"title": "User Guide", "path": "user-guide.md"},
         ]
     }
 
@@ -262,11 +263,11 @@ def test_every_source_topic_gets_a_redirect_with_its_anchor(config, catalog, fla
          # `#installation`, not `#installation-2`: the anchor is the platform's
          # slug of the heading, so the file's `-2` disambiguator does not leak
          # into a reader's address bar (Phase 29).
-         "to": "installation/installation.md#installation", "status": 301},
+         "to": "installation.md#installation", "status": 301},
         {"from": "installation/installation-overvie.md",
-         "to": "installation/installation.md#installation-overview", "status": 301},
+         "to": "installation.md#installation-overview", "status": 301},
         {"from": "users-guide/user-guide.md",
-         "to": "users-guide/user-guide.md#user-guide", "status": 301},
+         "to": "user-guide.md#user-guide", "status": 301},
     ]
 
 
@@ -1142,10 +1143,13 @@ def test_a_sub_heading_competes_for_the_same_anchor_as_a_topic_heading():
     assert list(pages[0].anchors.values()) == ["install", "location-1"]
 
 
-def test_two_pages_with_one_title_are_told_apart_by_their_section():
-    """The earlier page in TOC order keeps the plain name; the later one is
-    qualified with the section it belongs to. `-2` is the last resort, not the
-    first, because `installing-overview` is both unique *and* better prose."""
+def test_two_pages_with_one_title_are_told_apart_by_their_folder():
+    """The spec asked for a doc-set-wide name and a parent prefix on every
+    generic one, which was right when folders were flat. With the TOC chain
+    restored as directories, `/installing/overview` and `/upgrading/overview`
+    are already distinct addresses that read correctly -- and prefixing would
+    publish `/installing/installing-overview`.
+    """
     roots = [
         node("Installing", "g/a.md", node("Overview", "g/b.md")),
         node("Upgrading", "g/c.md", node("Overview", "g/d.md")),
@@ -1156,24 +1160,25 @@ def test_two_pages_with_one_title_are_told_apart_by_their_section():
     # one doc set.
     pages = pack(roots, lambda p: 10, 15)
     assign(pages)
+    relocate(pages, roots)
 
-    # Both "Overview" pages are generic, so both take their parent's prefix --
-    # neither publishes a bare `/overview`, which names nothing.
     assert [str(page.path) for page in pages] == [
-        "g/installing.md", "g/installing-overview.md",
-        "g/upgrading.md", "g/upgrading-overview.md",
+        "installing.md", "installing/overview.md",
+        "upgrading.md", "upgrading/overview.md",
     ]
 
 
-def test_a_collision_the_parent_cannot_break_falls_back_to_a_number():
-    """Same title, same parent: there is no prose left to tell them apart."""
+def test_a_collision_inside_one_folder_falls_back_to_a_number():
+    """Same title, same parent, so the same folder: there is no prose left to
+    tell them apart and nothing the chain can do about it."""
     roots = [node("Section", "g/s.md", node("Detail", "g/a.md"), node("Detail", "g/b.md"))]
 
     pages = pack(roots, lambda p: 10, 15)
     assign(pages)
+    relocate(pages, roots)
 
     assert [str(page.path) for page in pages] == [
-        "g/section.md", "g/detail.md", "g/section-detail.md",
+        "section.md", "section/detail.md", "section/detail-2.md",
     ]
 
 
@@ -1639,7 +1644,7 @@ def test_a_queued_page_is_reported_as_a_note_and_counted_on_the_result(
     assert "1 of 2 page(s)" in note.message
     rows_written = (result.path / "review-queue.csv").read_text(encoding="utf-8-sig").splitlines()
     assert len(rows_written) == 2
-    assert rows_written[1].startswith("users-guide/user-guide.md,User Guide,21,")
+    assert rows_written[1].startswith("user-guide.md,User Guide,21,")
 
 
 def test_a_queue_naming_a_page_that_was_not_written_fails_the_stage(merged):
@@ -1786,9 +1791,9 @@ def test_a_writers_decision_reaches_the_tree_that_is_written(config, catalog, fl
 
     assert result.outcome is ReframeOutcome.REFRAMED
     written = sorted(p.relative_to(result.path).as_posix() for p in result.path.rglob("*.md"))
-    assert sorted(written) == ["installation/installation-overview.md",
-                               "installation/installation.md",
-                               "users-guide/user-guide.md"]
+    assert sorted(written) == ["installation.md",
+                               "installation/installation-overview.md",
+                               "user-guide.md"]
 
 
 def test_the_same_doc_set_merges_those_two_topics_without_the_override(config, catalog, flare):
@@ -1798,7 +1803,7 @@ def test_the_same_doc_set_merges_those_two_topics_without_the_override(config, c
     result = Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"])
 
     written = sorted(p.relative_to(result.path).as_posix() for p in result.path.rglob("*.md"))
-    assert written == ["installation/installation.md", "users-guide/user-guide.md"]
+    assert written == ["installation.md", "user-guide.md"]
 
 
 def test_a_keep_separate_path_matching_no_topic_is_named(config, catalog, flare):
@@ -2008,9 +2013,9 @@ def test_the_written_map_and_the_written_frontmatter_agree_end_to_end(config, ca
     # is in the body and the platform does not honour it (Phase 29).
     assert written == {
         "install.overview.helpurl":
-            "installation/installation.md#installation-overview"
+            "installation.md#installation-overview"
     }
-    page = (result.path / "installation/installation.md").read_text(encoding="utf-8")
+    page = (result.path / "installation.md").read_text(encoding="utf-8")
     assert yaml.safe_load(split_frontmatter(page)[0].strip("-\n"))["csh"] == [
         "install.overview.helpurl"
     ]
@@ -2087,8 +2092,8 @@ def test_an_absorbed_topic_redirects_to_the_anchor_it_became(config, catalog, de
 
     destinations = {row["from"].rsplit("/", 1)[1]: row["to"] for row in origin_rows(result.path)}
     assert destinations["installation-overvie.htm"] == (
-        "installation/installation.md#installation-overview")
-    assert destinations["user-guide.htm"] == "users-guide/user-guide.md#user-guide"
+        "installation.md#installation-overview")
+    assert destinations["user-guide.htm"] == "user-guide.md#user-guide"
 
 
 def test_the_origin_map_is_relative_to_its_own_folder_like_its_sibling(
@@ -2114,7 +2119,8 @@ def test_the_origin_map_travels_with_the_merged_tree_rather_than_the_published_o
     result = Reframer(config, catalog).reframe_one(declared, declared.versions["10.5.1"])
 
     written = sorted(p.name for p in result.path.iterdir() if p.is_file())
-    assert written == ["301.yml", "redirects.yml", "reframe.yml", "review-queue.csv", "toc.yml"]
+    assert written == ["301.yml", "installation.md", "redirects.yml", "reframe.yml",
+                       "review-queue.csv", "toc.yml", "user-guide.md"]
 
 
 def test_an_undeclared_product_gets_a_warning_and_no_file(config, catalog, flare):
@@ -2162,3 +2168,56 @@ def test_a_topic_the_merge_never_saw_still_gets_a_row(config, catalog, declared)
 
     rows = {row["from"].rsplit("/", 1)[1]: row["to"] for row in origin_rows(result.path)}
     assert rows["orphan.htm"] == "orphan.md"
+
+
+def test_folders_mirror_the_toc_so_the_path_is_the_published_url():
+    """Phase 29. AEM builds an address from the TOC chain of filenames, so laying
+    the directories out the same way makes the repo path and the URL one string.
+
+    A page with child pages becomes a folder named after its own file, with the
+    children inside it and its own page beside the folder.
+    """
+    roots = [node(
+        "Installation", "src/a.md",
+        node("Requirements", "src/b.md"),
+        node("Installing", "src/c.md", node("On Windows", "src/d.md")),
+    )]
+
+    pages = pack(roots, lambda p: 10, 15)
+    assign(pages)
+    moved = relocate(pages, roots)
+
+    assert [str(page.path) for page in pages] == [
+        "installation.md",
+        "installation/requirements.md",
+        "installation/installing.md",
+        "installation/installing/on-windows.md",
+    ]
+    assert moved == 4
+
+
+def test_an_absorbed_topics_row_does_not_move_the_page_it_merged_into():
+    """Only a page's *leading* topic places it. An absorbed topic is a section,
+    and treating its TOC row as a location would push the whole page a level
+    deeper than the node a reader navigated from."""
+    roots = [node("Guide", "src/a.md", node("Absorbed", "src/b.md"))]
+
+    pages = pack(roots, lambda p: 10, 3000)
+    assign(pages)
+    relocate(pages, roots)
+
+    assert [str(page.path) for page in pages] == ["guide.md"]
+
+
+def test_a_carried_page_is_left_where_it_was_because_no_toc_names_it():
+    """`carry`'s pages were never in the navigation, so there is no chain to put
+    them in -- and inventing one would give an unnavigated topic a more confident
+    address than a navigated one."""
+    roots = [node("Guide", "src/a.md")]
+    pages = pack(roots, lambda p: 10, 3000) + carry(
+        [PurePosixPath("odd/stray.md")], lambda p: "A Stray", lambda p: 10
+    )
+    assign(pages)
+    relocate(pages, roots)
+
+    assert [str(page.path) for page in pages] == ["guide.md", "odd/a-stray.md"]

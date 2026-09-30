@@ -3776,8 +3776,48 @@ they are environment variables (`TIBCO_HOME`) and error codes. Stripping it was
 wrong for 11% of headings and right for none, so `_` now survives, as it does
 under the platform's own rule.
 
-Still to build: folders mirroring the TOC, a copy per guide, the served-URL
-correction and its prefix migration, and `rename-map.csv`.
+#### Built so far — the folders, 2026-09-30
+
+`packer.relocate` puts every navigated page in a folder chain mirroring the TOC:
+a page with child pages becomes a folder named after its own file, its children
+inside it, its own page beside the folder. So `installation.md` sits next to
+`installation/`, and `/installation/requirements` is both the repo path and the
+address. **1,655 tests pass**, lint clean.
+
+Folder depth over the 1,505 re-merged pages: 2 levels 131, 3 levels 424, 4
+levels 585, 5 levels 306, 6 levels 53, 7 levels 6.
+
+**The folder decision retired a rule the spec asked for, and that is a
+correction rather than a shortcut.** §3.6–3.7 wanted doc-set-wide unique names
+and a parent prefix on every generic one, which was right when folders were
+flat. With the chain restored, `/installing/overview` and `/upgrading/overview`
+are already distinct and read correctly, and prefixing would publish
+`/installing/installing-overview`. Uniqueness is now scoped to the TOC parent --
+the same scope as the folder, and the only scope a clash can happen in.
+
+**Three faults, each found by running it rather than by reading it.**
+
+1. **Windows stopped at 260 characters.** Deep chains put a Runtime Agent page
+   past the limit, and both the `mkdir` and the write failed with a bare
+   `FileNotFoundError`. `long_path` on the page write and the asset copy.
+2. **Then the *count* was wrong, not the write.** 118 pages written, 116
+   counted, and the acceptance check correctly refusing a complete tree:
+   `Path.rglob` reaches each directory through the unprefixed spelling and
+   **omits an over-limit file silently**. `utils/longpath.walk_files` exists for
+   exactly this and says so in its own docstring; `_measure_merged` was not
+   using it.
+3. **`tibco-runtime-agenttm`.** NFKC gives `™` a compatibility decomposition to
+   the letters "TM", so dropping trademark glyphs *after* normalizing drops
+   nothing. `utils/slug.py` has had the right order since it was written; this
+   module lost it and got it back off a real folder name.
+
+**One consequence to accept: 3 of 1,505 published paths exceed 260 characters**,
+all Runtime Agent, the longest 280. `sync` already refuses those with
+`PUBLISHED_PATH_TOO_LONG`, so they are named rather than silently truncated --
+the fix is a shorter title, which is a writer's call.
+
+Still to build: a copy per guide, the served-URL correction and its prefix
+migration, and `rename-map.csv`.
 
 #### Nothing is carried unverified
 
