@@ -70,13 +70,23 @@ Two consequences that drive every requirement below:
 
 ### R1 — Packing
 
-Walk the source `toc.yml` depth-first in TOC order. Each node contributes a *unit*: its own
-topic (if it has a `path`) followed by its descendants' units, in reading order.
+Walk the source `toc.yml` in TOC order. **A page is a subtree, never a cut through the middle
+of a sibling list.**
 
-Bottom-up rule:
-- If a subtree's total word count is **≤ MAX_WORDS**, return the whole subtree to its parent as
-  a single mergeable unit.
-- If it exceeds MAX_WORDS, pack its child units greedily **in TOC order** into pages and emit them.
+Parent-leads rule, applied top-down to each node:
+- If the node's whole subtree is **≤ MAX_WORDS** *and* sits in one source directory (R4.2), it
+  becomes one page.
+- Otherwise the node becomes a page of its own body, and its children are grouped **in TOC
+  order** into pages holding one or more *whole consecutive* child-subtrees of that one parent.
+  A child whose own subtree still does not fit recurses by the same rule.
+
+> **Amended 30 Sep 2026 (planning.md Phase 28).** The rule was bottom-up and, on overflow,
+> packed a subtree's contents greedily without regard to whose children they were. Measured on
+> the source TOCs, that put topics from more than one parent on **27 of ActiveSpaces' 46 pages
+> and 67 of EMS' 124** — a majority of merged pages were arbitrary sibling runs with no single
+> topic they were about, which is why no page could carry a meaningful H1. The cost of the new
+> rule is about a fifth more pages (46 → 56, 124 → 160). Refusing to group siblings *at all*
+> was measured too and is far worse: 119 and 628 pages, median page 416 and 159 words.
 
 **R1.1 — Top-level TOC items are hard boundaries.** A guide must never merge into a sibling
 guide. This is non-negotiable; see §7 for what happens without it.
@@ -104,7 +114,13 @@ topic→page mapping, with topics absent from a given version simply omitted.
 
 ### R2 — Anchors
 
-Every former topic becomes `## {Heading} {#anchor}` on its merged page.
+Every former topic becomes an anchored heading on its merged page, at the level its place
+in the tree gives it (R2.1).
+
+> **Amended 30 Sep 2026 (planning.md Phase 28).** This read "every former topic becomes
+> `## {Heading}`" — a flat list of siblings, whatever the TOC had nested. That was written
+> when a page was a *run* of topics; now a page is a *subtree*, so the levels carry the
+> nesting and the page's root topic supplies its one H1.
 
 - **Slug rule:** take the source filename without extension, lowercase it, replace each run of
   `[^a-z0-9]+` with `-`, strip leading/trailing `-`.
@@ -113,9 +129,23 @@ Every former topic becomes `## {Heading} {#anchor}` on its merged page.
 - **Uniqueness scope:** must be unique within a page. (Global uniqueness is not required,
   though the reference corpus happens to achieve it.)
 
-**R2.1 — Heading shift.** In each topic body, the first `#` H1 becomes the anchored `##`. Every
-other heading shifts down one level, capped at H6. If a topic has no H1, prepend
-`## {TOC title} {#anchor}` to its body.
+**R2.1 — Heading shift.** Each topic is given a **level**: the page's root topic takes 1, and
+every other topic one below its nearest ancestor *that is also on the page*. A page holding
+more than one whole sibling subtree drops every subtree after the first by one further level,
+so the second never collides with the first's H1.
+
+In each topic body the first `#` H1 becomes the anchored heading at that level; every other
+heading moves by the same offset; everything caps at H6. If a topic has no H1, prepend
+`{level hashes} {TOC title}` with its anchor above it.
+
+- Depth is counted in **what is emitted**, not in what the TOC holds: a bare container row, or
+  a row whose topic an earlier guide already claimed, contributes no level. Counting those
+  leaves a gap — EMS' *Appendix B* page came out `#` then `####` — which is the same defect
+  `design.md` §14 removed from the converter one stage earlier.
+- Capping at H6 makes two depths render the same. That is a flattening and never a *skipped*
+  level, so `design.md` invariant 14 continues to hold.
+- Measured need: 10 of ActiveSpaces' 324 topics and 4 of EMS' 1,441 can reach the cap, and
+  only on a page spanning the full tree depth.
 
 ### R3 — TOC regeneration
 

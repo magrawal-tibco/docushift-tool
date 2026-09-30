@@ -579,6 +579,33 @@ def test_a_flat_sub_heading_lands_below_the_deepest_numbered_one(tmp_path: Path)
     assert "#### Procedure" in rendered
 
 
+def test_a_flat_sub_heading_under_a_chapter_title_closes_the_gap(tmp_path: Path) -> None:
+    """Phase 27, and the commonest of the 612 skipping pages in `output/`.
+
+    `MinorHead` is fixed at 4, so a topic that runs `N1Heading` straight into one
+    emitted `#` then `####`. WebWorks has no `<hN>` for `transforms/headings.py`
+    to renumber, so the engine applies the same `compact` rule over the levels its
+    class names carry.
+    """
+    rendered = one(tmp_path, heading("Getting Started", 1)
+                   + '<div class="MinorHead">To Create a Session</div>')
+
+    assert "# Getting Started" in rendered
+    assert "## To Create a Session" in rendered
+    assert "#### To Create a Session" not in rendered
+
+
+def test_a_correctly_nested_webworks_topic_is_renumbered_to_itself(tmp_path: Path) -> None:
+    """The identity on correct input, which is what makes the re-conversion diffable."""
+    body = heading("Top", 1) + heading("Middle", 2) + heading("Deep", 3)
+
+    rendered = one(tmp_path, body)
+
+    assert "# Top" in rendered
+    assert "## Middle" in rendered
+    assert "### Deep" in rendered
+
+
 def test_a_chapter_outer_is_the_title_and_not_a_list_item(tmp_path: Path) -> None:
     """It wears the list shape and is the `h1`: `N1Heading` is absent from all 185.
 
@@ -1317,3 +1344,21 @@ def test_a_link_into_an_api_tree_becomes_its_published_url(tmp_path: Path) -> No
         "/en-us/prod/api-references/1-0-0/javadoc/index.html)"
     ) in result.body("a.md")
     assert "TOPIC_LINK_DANGLING" not in result.codes()
+
+
+def test_both_heading_vocabularies_share_one_stack(tmp_path: Path) -> None:
+    """A topic that spells its headings both ways is still one hierarchy (Phase 27).
+
+    Renumbering the two kinds separately left four pages still skipping on the
+    real corpus -- `tibco-administrator-enterprise-edition`'s `<h1>` into a real
+    `<h3>`, and `gridserver-manager`'s `<h2>` into `<h4>`. Depth belongs to the
+    page, not to the tag flavour.
+    """
+    body = heading("AppStatusCheck", 1) + "<h3>Purpose</h3><h3>Log File</h3>"
+
+    rendered = one(tmp_path, body)
+
+    assert "# AppStatusCheck" in rendered
+    assert "## Purpose" in rendered
+    assert "## Log File" in rendered
+    assert "### Purpose" not in rendered

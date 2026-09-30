@@ -183,8 +183,17 @@ def test_a_flare_set_merges_into_fewer_pages_and_says_so(config, catalog, flare)
     ]
 
 
-def test_an_absorbed_topic_becomes_an_anchored_section_of_its_parent(config, catalog, flare):
-    """R2, R2.1 and R7 on one page: frontmatter, then two anchored `##` sections."""
+def test_an_absorbed_topic_becomes_an_anchored_section_under_its_parents_h1(
+    config, catalog, flare
+):
+    """R2, R2.1 and R7 on one page: frontmatter, an H1, then the child at H2.
+
+    This is the test the Phase 28 repack was aimed at. It used to assert
+    `body.count("\\n## ") == 2` and `"\\n# " not in body` -- two topics side by side
+    as sibling `##` sections and no H1 anywhere, because a page was a run of
+    topics rather than a subtree. Now the page *is* the Installation subtree, so
+    Installation supplies the page's one H1 and its child nests beneath it.
+    """
     converted_tree(config, flare, "10.5.1")
 
     result = Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"])
@@ -196,8 +205,10 @@ def test_an_absorbed_topic_becomes_an_anchored_section_of_its_parent(config, cat
     }
     assert '<a id="installation-2"></a>' in body
     assert '<a id="installation-overvie"></a>' in body
-    assert body.count("\n## ") == 2
-    assert "\n# " not in body
+    assert body.count("\n# ") == 1
+    assert body.count("\n## ") == 1
+    # The H1 is the parent's, not the absorbed child's.
+    assert "\n# installation/installation-2.md" in body
 
 
 def test_the_toc_points_absorbed_topics_at_a_fragment_and_leaders_at_a_page(
@@ -584,6 +595,23 @@ def test_the_policy_key_tracks_every_field_that_changes_the_output():
     assert base.key != ReframePolicy(toc_schema="items-path-children").key
 
 
+def test_the_policy_key_tracks_the_packer_algorithm_and_not_only_the_config():
+    """Phase 28. The digest is built from config fields, and a code change that
+    moves every page boundary touches none of them -- so without the algorithm
+    constant every merged tree on disk reports CURRENT and keeps its old layout
+    for good, re-cut only by a `--force` somebody happens to remember."""
+    from docushift.reframe import policy as policy_module
+
+    base = ReframePolicy().key
+    original = policy_module._ALGORITHM
+    try:
+        policy_module._ALGORITHM = original + 1
+        assert ReframePolicy().key != base
+    finally:
+        policy_module._ALGORITHM = original
+    assert ReframePolicy().key == base
+
+
 def test_a_shipped_config_reproduces_the_measured_baseline(repo_root):
     """`config/reframe.yaml` is documentation as much as configuration.
 
@@ -785,6 +813,123 @@ def test_a_topic_listed_under_two_guides_is_packed_once_and_shared():
     ]
 
 
+def levels(pages) -> list[list[int]]:
+    return [[topic.level for topic in page.topics] for page in pages]
+
+
+def test_an_overflowing_parent_stands_alone_rather_than_taking_some_children():
+    """Phase 28's discriminator, and the whole reason for the repack.
+
+    Under the greedy rule this was `[a, b] | [c]` -- a page holding a parent and
+    one of its two children, with the other child stranded on a page of its own.
+    Nothing about that page could be given an H1, because no topic on it was the
+    thing the page was about. Now the parent stands alone and the children, which
+    are siblings of each other, share a page.
+    """
+    roots = [node("Guide", "g/a.md", node("B", "g/b.md"), node("C", "g/c.md"))]
+
+    pages = pack(roots, sized(g__a=10, g__b=10, g__c=10), 25)
+
+    assert layout(pages) == [["g/a.md"], ["g/b.md", "g/c.md"]]
+
+
+def test_a_page_is_whole_subtrees_of_one_parent_and_never_a_cut_across_siblings():
+    """The invariant the repack exists to establish, stated directly.
+
+    Measured before it: 27 of ActiveSpaces' 46 merged pages and 67 of EMS' 124
+    held topics from more than one parent. The check is on the page's *roots* --
+    its topics at the shallowest level -- because a page that is one whole subtree
+    legitimately holds a node and its own children, which is the point.
+    """
+    roots = [node(
+        "Guide", "g/root.md",
+        node("Left", "g/left.md", node("L1", "g/l1.md"), node("L2", "g/l2.md")),
+        node("Right", "g/right.md", node("R1", "g/r1.md")),
+    )]
+    parent = {"g/l1.md": "g/left.md", "g/l2.md": "g/left.md", "g/r1.md": "g/right.md",
+              "g/left.md": "g/root.md", "g/right.md": "g/root.md", "g/root.md": None}
+
+    pages = pack(roots, sized(g__root=10, g__left=40, g__l1=40, g__l2=40,
+                              g__right=40, g__r1=40), 100)
+
+    assert layout(pages) == [
+        ["g/root.md"], ["g/left.md"], ["g/l1.md", "g/l2.md"], ["g/right.md", "g/r1.md"],
+    ]
+    for page in pages:
+        top = min(topic.level for topic in page.topics)
+        rooted = [topic for topic in page.topics if topic.level == top]
+        assert len({parent[str(topic.source)] for topic in rooted}) == 1
+
+
+def test_a_subtree_that_fits_but_spans_two_directories_falls_to_the_second_rule():
+    """R4.2 has to be part of "may this be one page", not a check afterwards.
+
+    Words alone would collapse this whole subtree into one page, and
+    `audit._directories` would then discard the entire merged tree.
+    """
+    roots = [node("Guide", "g/a.md", node("B", "h/b.md"), node("C", "h/c.md"))]
+
+    pages = pack(roots, sized(g__a=10, h__b=10, h__c=10), 3000)
+
+    assert layout(pages) == [["g/a.md"], ["h/b.md", "h/c.md"]]
+
+
+def test_heading_level_follows_toc_depth_within_a_page():
+    roots = [node("Guide", "g/a.md",
+                  node("B", "g/b.md", node("C", "g/c.md", node("D", "g/d.md"))))]
+
+    pages = pack(roots, sized(g__a=10, g__b=10, g__c=10, g__d=10), 3000)
+
+    assert layout(pages) == [["g/a.md", "g/b.md", "g/c.md", "g/d.md"]]
+    assert levels(pages) == [[1, 2, 3, 4]]
+
+
+def test_a_toc_row_that_contributes_no_topic_leaves_no_hole_in_the_levels():
+    """Depth is counted in what is emitted, not in what the TOC happens to hold.
+
+    A bare container row carries no topic of its own, and counting it anyway put
+    EMS' `Appendix B` page at `#` followed by `####`. That is Phase 27's defect
+    reintroduced one stage later, so it gets Phase 27's rule.
+    """
+    inner = node("Leaf", "g/leaf.md")
+    container = TocEntry(title="Container", path=None, children=[inner])
+    roots = [node("Guide", "g/a.md", container)]
+
+    pages = pack(roots, sized(g__a=10, g__leaf=10), 3000)
+
+    assert layout(pages) == [["g/a.md", "g/leaf.md"]]
+    assert levels(pages) == [[1, 2]]
+
+
+def test_a_chain_deeper_than_six_flattens_onto_h6_rather_than_overflowing():
+    """GFM has no `h7`. Flattening repeats a level; it never *skips* one, so
+    `design.md` invariant 14 survives. Measured need: 10 of ActiveSpaces' 324
+    topics and 4 of EMS' 1,441."""
+    deep = node("G", "g/1.md", node("2", "g/2.md", node("3", "g/3.md", node(
+        "4", "g/4.md", node("5", "g/5.md", node("6", "g/6.md", node("7", "g/7.md")))))))
+
+    pages = pack([deep], sized(**{f"g__{n}": 1 for n in range(1, 8)}), 3000)
+
+    assert levels(pages) == [[1, 2, 3, 4, 5, 6, 6]]
+
+
+def test_a_later_sibling_subtree_sits_one_level_below_the_first():
+    """Two whole subtrees on one page cannot both be H1.
+
+    The second drops a level, and its own children drop with it -- which is what
+    stops a parent and its child arriving at the same level.
+    """
+    roots = [node("Guide", "g/root.md",
+                  node("B", "g/b.md", node("B1", "g/b1.md")),
+                  node("C", "g/c.md", node("C1", "g/c1.md")))]
+
+    pages = pack(roots, sized(g__root=90, g__b=10, g__b1=10, g__c=10, g__c1=10), 100)
+
+    assert layout(pages) == [["g/root.md"], ["g/b.md", "g/b1.md", "g/c.md", "g/c1.md"]]
+    #        b=H1  b1=H2      c=H2  c1=H3
+    assert levels(pages) == [[1], [1, 2, 2, 3]]
+
+
 def test_carry_makes_one_single_topic_page_per_untocked_file():
     pages = carry([PurePosixPath("g/x.md")], lambda p: "Stray", lambda p: 7)
 
@@ -949,7 +1094,9 @@ def test_two_pages_in_one_directory_never_collide_on_a_filename():
 # -- R2.1: the heading shift ---------------------------------------------------
 
 
-def test_the_first_h1_becomes_the_anchored_h2_and_everything_else_drops_a_level():
+def test_at_the_default_level_the_first_h1_becomes_the_anchored_h2():
+    """The `level=2` default: what every caller with no tree to consult still
+    gets -- `carry`'s untocked pages and `project`'s new topics."""
     body = "# Top\n\nprose\n\n## Sub\n\n### Deeper\n"
 
     shifted, added = shift_headings(body, "Ignored", "anc")
@@ -958,6 +1105,35 @@ def test_the_first_h1_becomes_the_anchored_h2_and_everything_else_drops_a_level(
     # Two tokens, not one: `<a id="anc"></a>` splits on whitespace. §6's word
     # conservation is an equality, so this is measured rather than assumed.
     assert added == 2
+
+
+def test_a_topic_takes_the_level_its_page_gives_it_and_its_own_headings_follow():
+    """Phase 28. A topic three deep in its page carries its own headings down
+    with it, so the page reads as one document rather than as a flat list."""
+    body = "# Top\n\nprose\n\n## Sub\n"
+
+    shifted, added = shift_headings(body, "Ignored", "anc", 3)
+
+    assert shifted == '<a id="anc"></a>\n\n### Top\n\nprose\n\n#### Sub\n'
+    # Unchanged by the offset: `#` and `######` are one token either way, which is
+    # what keeps `audit._words`' strict equality true at every level.
+    assert added == 2
+
+
+def test_a_topic_at_the_deepest_level_flattens_rather_than_overflowing():
+    shifted, added = shift_headings("# Top\n\n## Sub\n", "Ignored", "anc", 6)
+
+    assert shifted == '<a id="anc"></a>\n\n###### Top\n\n###### Sub\n'
+    assert added == 2
+
+
+def test_a_synthesized_heading_is_written_at_the_topics_own_level():
+    shifted, added = shift_headings("prose\n", "Two Words", "anc", 4)
+
+    assert shifted == '<a id="anc"></a>\n\n#### Two Words\n\nprose\n'
+    # Marker (2) + the hashes (1) + the title's own tokens (2). The hashes are one
+    # token at every level, so this figure does not move with the offset either.
+    assert added == 2 + 1 + 2
 
 
 def test_a_heading_shift_stops_at_h6_rather_than_emitting_seven_hashes():

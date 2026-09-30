@@ -282,6 +282,13 @@ class ConversionContext:
     # one more: it is the residue the code-span fix deliberately does not take, and
     # a residue nobody counts is the silence the fix exists to end.
     flattened_links: int = 0
+    # Phase 27, and counted for `flattened_links`' reason: both are structural
+    # repairs to what the author wrote, nobody acts on a single one of them, and a
+    # rewrite with no magnitude attached is unfalsifiable on the next corpus.
+    # How many headings this version's pages had renumbered to close a skipped
+    # level, and how many definition terms were recovered from `class="dt"`.
+    renumbered_headings: int = 0
+    recovered_terms: int = 0
 
     def subtree_name(self, root: Path) -> str:
         """Where this unit's output goes, relative to the version folder.

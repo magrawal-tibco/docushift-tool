@@ -920,6 +920,8 @@ The concrete deliverable of §7.1: every deferred "report line" in the three doc
 | `SYNC_RESIDUE`⁷ᵇ | note | validate | A `.part` staging folder left by a sync that did not finish | §7.4 |
 | `CSH_IDENTIFIER_DROPPED`⁷ᶜ | warn | validate | Present in the prior version, absent here (§7.6). One row per version; `count` is how many | this phase |
 | `CODE_LINK_FLATTENED`⁸ | note | convert | Link inside a code block kept its words and lost its target; a GFM fence cannot hold one | Phase 8 |
+| `HEADING_LEVEL_NORMALIZED`²⁷ | note | convert | Headings renumbered to close a level the source skipped; depth and order unchanged. One row per version; `count` is how many | Phase 27 |
+| `DEFINITION_TERM_RECOVERED`²⁷ | note | convert | Terms marked up as `class="dt"` rather than `<dt>`, retagged so they publish as terms instead of as prose | Phase 27 |
 | `INDEX_UNLINKED`¹⁰ᵇ | note | sync | A published document no `index.md` links to — the reverse of `LINK_BROKEN` | Phase 10b |
 | `WHATS_NEW_PLACEHOLDER`¹¹ᵃ | note | convert | What's New shipped as the unfilled MadCap template (167 of 648 roots); not published | Phase 11a |
 | `OUTPUT_COUNT_MISMATCH`¹³ | warn | convert | Fewer Markdown files on disk than documents converted; two writes landed on one path | Phase 13 |
@@ -3394,6 +3396,201 @@ Measured after the change, `--force` over every converted version (reference row
 | ActiveSpaces 4.10.0 | 50 | 44 / 46 | 2 | 6 | **0** |
 
 Every absent reference page is absent because the version contains none of its topics, and every extra page holds only topics the reference does not have — both verified per page rather than by count. ActiveSpaces was 46/56/56/51/47/47 sharing 41 names at its worst before; EMS 10.4.0 was five pages and several boundaries away from its own pin. Re-running both products with no config change is byte-identical across all 1,536 files. `gridserver-manager` and `hpc-cloud-adapter` carry pins but have no convert-eligible version on disk yet, so their pins take effect the first time they are converted — nothing to re-merge and nothing measured.
+
+---
+
+### Phase 27: Two Things the Source Says That the Markdown Does Not — **Planned, 2026-09-29**
+
+Two defects reported against the merged ActiveSpaces output, both traced past reframe into the conversion walk. They are unrelated in mechanism and are planned together because they share one call site and one re-run.
+
+#### 27a. A heading level the author skipped stays skipped
+
+`reframed/en-us-tib-activespaces/tibco-activespaces-enterprise-edition/5.2.0/Concepts/vectors-in-tibco-activespaces.md` runs `## → ### → ###### → ###`. The source, `Concepts/Sample-Programs.htm`, is `h1, h2, h2, h6, h6, h2, h6, h6` — the author reached for `h6` because of how it was styled, not because the section is five levels deep. Reframe's `shift_headings` adds one level to everything and clamps at six, so it neither caused this nor can fix it; the walk in `transforms/markdown.py` maps `h1…h6` straight through.
+
+**Measured over the emitted Markdown, 2026-09-29** (`scratch/scan_md_headings.py` — the `.md`, not the HTML, because a raw-HTML census counts things the engines never emit as headings):
+
+| tree | files skipping a level | of | jumps seen |
+|---|---:|---:|---|
+| `output/` | **612** | 24,781 | h1→h4 308, h2→h4 238, h1→h3 160, h2→h6 2 |
+| `reframed/` | **19** | 1,434 | h2→h5 6, h2→h4 6, h3→h5 6, h3→h6 2 |
+
+**The HTML census said 5,022 files and was wrong.** Scanning `families/` for raw `<hN>` charged 4,990 of Streaming's 31,192 files with an `h1→h3`/`h1→h4` skip. Nearly all of them are DocBook admonition titles — `<h3>Note</h3>`, `<h3>Caution</h3>`, `<h3>Disclaimer</h3>` — which Phase 19 already turns into a callout, so they never reach the Markdown as headings. This is the whole reason the exit criterion below is stated against `output/` and not against the source.
+
+Per family, over the emitted Markdown:
+
+| family | files skipping | of | engine |
+|---|---:|---:|---|
+| Runtime Agent / Administrator / Designer add-in | **477** | 2,641 | WebWorks |
+| TIBCO Streaming / Spotfire Data Streams | **112** | 9,421 | DocBook |
+| Enterprise Message Service | **12** | 8,639 | Flare |
+| ActiveSpaces | **9** | 2,054 | Flare |
+| GridServer Manager | **2** | 2,026 | Flare |
+
+**Correction, recorded rather than quietly fixed.** An earlier draft of this section read "Streaming contributes zero offenders", which was taken off the scan's printed sample of fifteen rather than off a per-family count. Streaming contributes 112 — the largest group after WebWorks. It cannot serve as the untouched control the exit criterion first named, and the exit criterion below is rewritten accordingly.
+
+#### 27b. A definition term that is not a `<dt>`
+
+`reframed/…/Concepts/concepts.md` renders *Scalability*, *System of Record*, *Tables*, *Rows*, *Columns*, *Nodes*, *Copysets* as bare paragraphs sitting above their definitions. The walk handles `<dt>` correctly and has since 5b — it emits `**term**`. The corpus's Flare-from-DITA output does not use the tag:
+
+```html
+<div class="dl">
+  <div class="dlentry"><span class="dt">Scalability</span>
+    <div class="dd">The biggest advantage of using ActiveSpaces is scalability. …</div>
+  </div>
+</div>
+```
+
+`div` is in `_TRANSPARENT`, `span` is not a block, so the term falls into the loose-inline run and comes out as prose. **Measured, same scan:**
+
+| flavour | files | families |
+|---|---:|---|
+| `<span class="dt">` | 146 | ActiveSpaces 119, EMS 24, DataSynapse 3 |
+| `<div class="dt">` | 11 | ActiveSpaces 6, EMS 3, DataSynapse 2 |
+| real `<dt>` | 18,848 | Streaming 15,741, EMS 2,171, ActiveSpaces 936 |
+
+`div.dd` outnumbers the terms (97 to 84 in ActiveSpaces 5.2.0 alone): a `dlentry` may carry several definitions for one term, and one of them may open with an authored `<b>` of its own. That is content, not a term, and must be left alone.
+
+**Two near-misses that are already correct and must stay untouched.** Streaming's 2,892 `<span class="term">` files are DocBook's `<dt><span class="term">…</span></dt>` — the tag is real and the term is already bold. And 1,536 EMS files carry `<span class="varname">`, which is an inline code-ish role inside running prose, not a definition term. Neither is in scope.
+
+#### Decisions
+
+| decision | what gets built | why not the obvious alternative |
+|---|---|---|
+| **Heading levels are compacted by nesting depth, not by closing each gap** | Walk the page's headings in order against a stack of source levels; emit the stack's depth. `h1,h2,h2,h6,h6,h2,h6,h6` → `h1,h2,h2,h3,h3,h2,h3,h3` | "Subtract the gap from everything after it" needs a running offset that a later shallower heading invalidates, and can push a heading below `h1`. The stack has no offset to get wrong and cannot invert two headings' relative depth. |
+| **Only depth is normalized; order, text, ids and slugs are untouched** | The retag happens on the DOM before the walk, so `anchor_target`, `_anchors` and `slugify_heading` see the same strings they see today | Rewriting the emitted Markdown with a regex is what Phase 20's proof-of-concept did to its cost (`reframe/pages.py` §1): a `# comment` in a shell fence is a heading to a regex. |
+| **A class-named term is retagged, never re-styled** | `span.dt`/`div.dt` → `<dt>`, `div.dd` → `<dd>`, `div.dlentry` unwrapped, `div.dl` → `<dl>`; the existing `_block` branches then do the work | Emitting `**term**` directly from the normalizer would give the corpus two definition-list renderers that drift apart — the exact failure `transforms/markdown.py`'s docstring was written to prevent. |
+| **Both run in the shared transform layer, called by all four engines** | `transforms/headings.py` and `transforms/deflists.py`, invoked immediately before `renderer.render(container)` in `flare.py`, `dita.py`, `docbook.py`, `webworks.py` | Putting either in `flare.py` leaves TRA's 400-odd WebWorks offenders unfixed and invites a second copy later. DocBook already promotes a leading `h2` to `h1` at that call site (`docbook.py:564`) — this is where page-level DOM repair lives. |
+| **Counted, not narrated** | Each normalizer returns how many elements it retagged; the engines add it to the run report beside `flattened_links` | A structural rewrite with no number attached is unfalsifiable on the next corpus. |
+
+**Known limit, accepted.** Where a page goes deep *before* it goes shallow across a gap — `h1, h4, h2` — the stack gives both `h4` and `h2` depth 2 and the two source levels merge. The source is genuinely ambiguous there and no rule recovers the author's intent; the alternative rules all produce something worse. It is recorded here rather than discovered later.
+
+#### Scope
+
+- `src/docushift/transforms/headings.py` — new; `normalize(container) -> int`.
+- `src/docushift/transforms/deflists.py` — new; `normalize(container) -> int`.
+- `src/docushift/engines/{flare,dita,docbook,webworks}.py` — one call each, before `render`.
+- `src/docushift/reporting/` — two counters in the run report.
+- `tests/unit/` — the four measured heading shapes above, the `dlentry` with two `dd`s and an authored `<b>`, DocBook's `<dt><span class="term">` unchanged, `span.varname` unchanged.
+- Re-convert and re-merge ActiveSpaces, EMS, TRA and DataSynapse; Streaming re-converted as the untouched control.
+- `docs/design.md` — the two rules; `docs/open-issues.md` — the ActiveSpaces entry closes when the re-merge lands.
+
+#### Exit
+
+`scratch/scan_md_headings.py` over `output/` reports **0 of 24,781** files skipping a level, and over `reframed/` **0 of 1,434**.
+
+**The control is not "one family is byte-identical" but "only the faulty pages moved".** Streaming turned out to hold 112 of the offenders, so no family is untouched; the stronger statement is that the set of pages whose *heading lines* changed equals the set that was skipping, per family, exactly. The seven ActiveSpaces terms named in 27b are `**bold**`, the `<b>Persistence on Nodes</b>` beside them is unchanged, and the 18,848 real-`<dt>` files show no diff attributable to the deflist normalizer.
+
+#### Built, and what it measured — **2026-09-29**
+
+`transforms/headings.py` (`compact`, `normalize`, `is_empty`), `transforms/deflists.py` (`normalize`), one call apiece in all four engines, two counters on `ConversionContext`, and `driver._report_repairs`. Register **58 → 60**. **1,612 tests pass** (+21), lint clean.
+
+Re-converted every convert-eligible version with `--force`, then re-merged every reframe set:
+
+| tree | skipping before | after |
+|---|---:|---:|
+| `output/` | 612 of 24,781 | **2 of 24,781** |
+| `reframed/` | 19 of 1,434 | **2 of 1,429** |
+
+**Both survivors are the same two GridServer Manager pages, and neither can be repaired here.** `tibco-datasynapse-gridserver-manager` carries `in_scope: false` in `products.csv` with `scope_source: manual`, so `convert` selects none of its versions and the pages under `output/` are left over from 19 Sep 2026. Lifting the scope mark is a catalog decision, not a converter one; it is `docs/open-issues.md`'s to carry, and it is filed there.
+
+**The heading rule moved exactly the pages that were broken, and no others.** Diffing every `.md` against a pre-change snapshot and classifying each changed line:
+
+| family | files whose heading lines changed | files that were skipping |
+|---|---:|---:|
+| Runtime Agent / Administrator / Designer add-in | 477 | 477 |
+| TIBCO Streaming / Spotfire Data Streams | 112 | 112 |
+| Enterprise Message Service | 12 | 12 |
+| ActiveSpaces | 9 | 9 |
+
+The two sets are equal in all four, which is the property worth having and a stronger one than the byte-identical control the plan first asked for. (The snapshot also carries a larger, unrelated diff — 1,606 Streaming files and 224 TRA ones whose *table* markup changed. That is Phases 21 and 23 landing in a tree that had never been re-converted since, not this phase; none of those files has a changed heading line.)
+
+**Definition terms, read back off the run report:** ActiveSpaces 84 / 86 / 86 / 85 / 82 / 82 across its six versions, EMS 11 in each of six. The reported page now opens `**Scalability**`, `**System of Record**`, `**Faster Access to Data**`; `**Persistence on Nodes**` — the authored `<b>` inside a second `dd` — is still exactly where it was.
+
+**Three things the plan did not anticipate, each found by measuring rather than by reading.**
+
+1. **WebWorks has no `<hN>`.** Its hierarchy is `div.N1Heading` / `div.MinorHead`, read out of the class name in `block_override`, so the shared normalizer found nothing to do on the largest offender group in the corpus. The rule is therefore exported as `compact` and the engine applies it to the levels its classes carry, writing the answer to an attribute — the class is also what identifies the div as a heading at all. Retagging those divs into real headings would have routed them through the generic branch, which hoists an `<a id>` out of the heading line and would have moved slugs that resolve today.
+2. **A page can spell its headings both ways at once**, which the first cut got wrong by renumbering the two vocabularies separately — four pages still skipped. Depth is a property of the page, so both kinds are now collected in one document-ordered pass and share one stack.
+3. **An empty heading emits nothing but was still taking a rung.** `admin_server.4.063` carries an empty `N3Syntax` between its title and its first section; with that rung spent, the page read `#` then `###` and no rule that only looks at levels could see why. `is_empty` excludes it — and counts a heading holding only an `<img>` as content, because GFM renders that.
+
+And one the plan did anticipate but under-weighted: **the DocBook admonition predicate is load-bearing.** Without `_consumed_heading`, every `<h3>Note</h3>` in Streaming's 31,192 files would have taken a level and pushed the real sections around it — which is the raw-HTML census's 4,990 false positives, converted from a measurement error into an output defect.
+
+---
+
+### Phase 28: A Merged Page Was a Run of Siblings, Not a Subtree — **Complete, 2026-09-30**
+
+Reported as "the reframed topics start at `h2` instead of `h1`". That part is not a
+regression — R2 has always said "every former topic becomes `## {Heading}`" — but it is the
+visible end of something real. `packer._close_run` filled a page by walking topics in reading
+order and joining until the cap, a directory change or a `keep_separate` unit stopped it. It
+never asked whose children they were.
+
+**Measured against the source TOCs before any change:**
+
+| | pages | pages holding topics from more than one TOC parent |
+|---|---:|---:|
+| ActiveSpaces 5.2.0 | 46 | **27** |
+| EMS 10.5.1 | 124 | **67** |
+
+A majority of merged pages were arbitrary sibling runs. That is *why* no page could carry a
+meaningful H1: there was no single topic the page was about. The heading level was a symptom;
+the boundary rule was the defect.
+
+#### Decisions
+
+| decision | what got built | why not the obvious alternative |
+|---|---|---|
+| **A page is a subtree** | A node's whole subtree becomes one page when it fits and shares one source directory; otherwise the node stands alone and its children group into pages of whole *consecutive sibling subtrees* of that one parent | Refusing to group siblings at all — the first shape considered — was measured: **119 and 628 pages**, medians 416 and 159 words, 363 EMS pages under 200. The grouping is what keeps the page count sane, and grouping *whole subtrees under one parent* keeps the H1 guarantee the strict rule was wanted for. |
+| **The H1 is always a real topic's** | The page's first topic supplies it, which is already the topic R4.1 names the page after. A subtree alone on a page keeps its own heading and title | Synthesising an H1 from the shared parent's title was the other candidate and would have titled ~half of all pages with a repeated parent name — four pages reading "Installation" in one section. It also needed new word-conservation accounting for a heading no topic owns. |
+| **Depth is counted in what is emitted** | A bare container row, or a row an earlier guide already claimed, contributes no level | Counting raw TOC depth leaves a hole. It did: EMS' *Appendix B* page came out `#` then `####`, which is Phase 27's defect reintroduced one stage later. `_relevel` reuses Phase 27's own `compact` rather than growing a second copy of the rule. |
+| **The packer's algorithm is in the currency digest** | A module constant `_ALGORITHM`, folded into `ReframePolicy.key` | The digest is built from config fields, and this change touches none of them — every merged tree on disk would have reported CURRENT and kept its old layout for good, re-cut only by a `--force` somebody happened to remember. Not a `reframe.yaml` field: a config that could select an algorithm would be two packers to keep alive. |
+
+#### Built, and what it measured
+
+`Topic.level`, `shift_headings(..., level=2)`, a top-down `_subtree` with a `_collect`/`_commit`
+probe pair, `_close_run` narrowed to whole sibling subtrees, `_relevel` for the projected path,
+and `_ALGORITHM`. **1,623 tests pass** (+11), lint clean.
+
+| | pages before | after | median words | pages holding two parents |
+|---|---:|---:|---:|---:|
+| ActiveSpaces 5.2.0 | 46 | **56** | 1,772 → 1,120 | 27 → **0** |
+| EMS 10.5.1 | 124 | **160** | 1,989 → 1,364 | 67 → **0** |
+
+Both page counts landed exactly on the simulation that justified the plan. Across all twelve
+re-merged versions, **1,323 of 1,323 merged pages now open at H1** and **none skips a heading
+level**. The review queue is unchanged — 87 and 118 — so the `heterogeneous` flag did not fire
+on the new sibling-group pages and the gate the plan held in reserve was not needed.
+
+**Three faults the plan did not predict, each found by measuring the real output rather than
+by reading the diff.** All three were the same mistake in different places: a level assigned
+from something other than the page's own emitted tree.
+
+1. **Carried pages** kept the `Topic` default and published 35 ActiveSpaces and 8 EMS pages
+   opening at `##` with nothing above them. A carried page is one topic alone, so that topic
+   *is* the page.
+2. **`project`'s new-topic path** did the same for every topic a pinned version has and its
+   reference does not — which is why the first re-cut looked clean on 5.2.0 and 10.5.1 and
+   wrong on all ten projected versions.
+3. **`_collect` counted skipped rows.** The hole this left is the `#` → `####` above.
+
+**Not a regression, and checked rather than assumed:** the largest merged page is EMS 10.4.0's
+`error-and-status-mes.md` at 13,985 words. It is a *single source topic*; R1.3 forbids
+splitting a topic body, so an oversized topic is an oversized page. Its 10.5.1 equivalent is
+3,395 words and also one topic.
+
+**Published, and validated.** Both families re-synced; `validate` over the whole target reports
+**0 errors** across 207 folders, 13,633 files and 148,464 references. `REDIRECT_SHADOWED` rose
+31 → 340, and all 340 were checked individually: **every one differs from its target only in
+capital letters**, none is a redirect onto a genuinely different live page. That is the class
+already accepted in `open-issues.md`, grown because more topics now become a page named after
+themselves — the lower-casing is what makes the pair. `sync` hit intermittent Windows file
+locks in the API-reference copy on several passes and needed re-running; unrelated to this
+work, but worth knowing it recurs.
+
+**Still open: the cap.** The "Installation" subtree the request used as its example is 3,188
+words against a 3,000 cap, so it comes out as a parent page plus two grouped child pages
+rather than the single page described. At 4,000 it is one page. Left at 3,000 deliberately —
+the decision was to look at a real re-cut first, and it is a config field, so changing it
+costs a re-merge and no code.
 
 ---
 

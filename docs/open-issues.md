@@ -41,21 +41,6 @@ tracker, and the way it loses trust is by filling up.
 
 ## ActiveSpaces
 
-### Merged pages not yet reviewed
-
-- **Status:** Open
-- **Owner:** unassigned
-- **Raised:** 29 Sep 2026
-- **Blocks publishing:** yes
-
-The six versions have been merged into larger pages and the result has not been
-read by a writer. Eighty-seven pages across the six versions are flagged for
-review. Until somebody signs them off, the product is set to publish the older
-un-merged pages, so nothing incorrect can reach readers — but the work of
-merging is not yet delivering anything either.
-
-The user began this review on 29 Sep 2026.
-
 ### Never published to the real destination
 
 - **Status:** Open
@@ -63,10 +48,17 @@ The user began this review on 29 Sep 2026.
 - **Raised:** 29 Sep 2026
 - **Blocks publishing:** n/a — this *is* the publishing step
 
-The destination folder for ActiveSpaces exists but is empty. The product has only
-ever been published to a temporary location used for checking. Publishing it for
-real is a deliberate decision that has not been taken, and it is tied to the
-review above: publishing today would put out the un-merged pages.
+The product has only ever been published to a temporary location used for
+checking. Publishing it for real is a deliberate decision that has not been
+taken.
+
+**What changed on 29 Sep 2026:** this used to be blocked on the page review as
+well. It no longer is. The merged pages were accepted that day, so whenever
+somebody does decide to publish for real, what goes out is the merged set — 46
+pages for the newest version in place of 334 separate topics — together with
+1,957 forwarding addresses per version that send every old topic link to its new
+home. That is now a decision about timing and about who owns the destination,
+and nothing else is holding it up.
 
 ### Web address template not recorded
 
@@ -85,22 +77,30 @@ address format, and record it. Sixteen other products are in the same position.
 
 ---
 
-## Enterprise Message Service
+## Enterprise Message Service, ActiveSpaces
 
-### Thirty-one redirects differ only in capital letters
+### 340 redirects differ only in capital letters
 
 - **Status:** Accepted
 - **Owner:** unassigned
-- **Raised:** 29 Sep 2026
+- **Raised:** 29 Sep 2026 (count revised 30 Sep 2026)
 - **Blocks publishing:** no
 
-For thirty-one pages, the old address and the new address are the same except for
+For 340 pages, the old address and the new address are the same except for
 capital letters. On a web server that treats capitals and lower case as the same
 thing, such a redirect can point at itself and loop.
 
-Harmless as things stand, and it pre-dates the recent merge work — it comes from
-the way pages are named, not from anything we changed. Worth a tidy-up pass at
-some point; not worth holding anything up for.
+**This was thirty-one, and it is now 340.** Two reasons, both expected: ActiveSpaces
+joined the set of products publishing merged pages on 29 Sep, and the 30 Sep
+change to how pages are grouped means many more topics now become a page named
+after themselves — and it is that renaming, lower-casing the file name, that
+creates the pair. Checked on 30 Sep: **all 340 are the capital-letters case and
+none is a redirect pointing at a genuinely different live page.**
+
+Still harmless as things stand, and still a property of how pages are named
+rather than a fault in any one of them. The decision it needs is a single one
+about the destination web server — does it treat capitals as significant? — and
+then a tidy-up pass. Not worth holding anything up for.
 
 ---
 
@@ -123,6 +123,29 @@ Nobody has raised these with the authoring team yet.
 ---
 
 ## GridServer Manager, HPC Cloud Adapter
+
+### Out of scope, and old working copies are still on disk
+
+- **Status:** Accepted
+- **Owner:** unassigned
+- **Raised:** 29 Sep 2026
+- **Blocks publishing:** no
+
+**DataSynapse is not being migrated.** Confirmed 29 Sep 2026. The whole product
+line is marked out of scope, so it is not rebuilt when everything else is, and it
+is never published.
+
+One consequence to be aware of. The heading-numbering fault repaired across the
+rest of the documentation on 29 Sep 2026 also affects two GridServer Manager
+security pages, in versions 7.2.0 and 7.1.1, and those two were not repaired —
+there is nothing to repair them into. More generally, the converted working
+copies for DataSynapse still sitting in the tool's working area date from
+19 Sep 2026 and no longer match anything current.
+
+They are harmless where they are: nothing reads them and nothing publishes them.
+They are recorded here only so that nobody who stumbles across them later mistakes
+them for current work. **Deleting them is safe and has not been done**, because
+removing files is not something to do on an assumption.
 
 ### Configured but not yet processed
 

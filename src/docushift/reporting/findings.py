@@ -235,6 +235,24 @@ REGISTRY: dict[str, Code] = _codes(
          "Link inside a code block kept its words and lost its target; a GFM fence "
          "cannot hold a link",
          "planning.md Phase 8"),
+    # Phase 27's two, both notes and both for `CODE_LINK_FLATTENED`'s reason: they
+    # are magnitudes, not incidents. Nobody opens a ticket about one renumbered
+    # heading -- but a structural rewrite of somebody else's document with no
+    # number attached cannot be checked against the next corpus, and both of these
+    # were invisible until a reader found them in published output.
+    #
+    # A note and *not* a warning, deliberately, even though each one means the
+    # source was malformed. 612 of 24,781 pages skip a heading level; a warning
+    # would fire on 2.5% of every convert run forever, on a fault the authoring
+    # team has no plan to fix and the tool has just finished repairing.
+    Code("HEADING_LEVEL_NORMALIZED", Severity.NOTE, Stage.CONVERT,
+         "Headings renumbered to close a level the source skipped; depth and order "
+         "are unchanged",
+         "planning.md Phase 27"),
+    Code("DEFINITION_TERM_RECOVERED", Severity.NOTE, Stage.CONVERT,
+         "Definition terms marked up as class=\"dt\" rather than <dt>, retagged so "
+         "they publish as terms instead of as prose",
+         "planning.md Phase 27"),
     # Phase 13's one new code, and it exists because the failure has already
     # shipped once: 7b found `navigation._free` comparing a generated container
     # page's path case-sensitively, so on Windows the page was written *over* a

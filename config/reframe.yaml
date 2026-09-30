@@ -86,10 +86,20 @@ products:
   # 322-330 topics came out as 46, 56, 56, 51, 47 and 47 pages sharing 41 names at
   # worst; projected onto 5.2.0 they are 46, 53, 53, 52, 50 and 50, and no page is
   # grouped differently from the reference (Phase 26).
-  # Not signed off -- the 87-page review queue has not been read, so `publish`
-  # stays false and `sync` keeps serving the unmerged pages.
+  # Signed off 2026-09-29: the 87-row review queue across the six versions was
+  # accepted as merged, so no `keep_separate` entries. The merged pages are now
+  # what `sync` publishes for this product. The sign-off was given after the
+  # 29 Sep conversion fixes (Phase 27 -- skipped heading levels and class-named
+  # definition terms), and re-merging with those in place moved no page boundary.
+  #
+  # Re-cut again 2026-09-30 by Phase 28's parent-leads packer, which *did* move
+  # every boundary: 56/61/61/61/60/60 against the 46/53/53/52/50/50 above. The
+  # queue came back at the same 87 rows and the sign-off was not re-taken, which
+  # is worth knowing if a page reads oddly -- what was accepted was the merge, not
+  # these particular boundaries.
   tibco-activespaces-enterprise-edition:
     pin_layout_to: "5.2.0"
+    publish: true
 
   # Pinned, but neither has a convert-eligible version on disk yet, so the pin first
   # takes effect the run after they are converted.

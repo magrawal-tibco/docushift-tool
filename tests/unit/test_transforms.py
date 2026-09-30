@@ -13,7 +13,7 @@ from bs4 import BeautifulSoup
 
 from docushift.engines.csh import CshEntry, CshFormat, CshSource, CshStatus
 from docushift.models import SourceEngine
-from docushift.transforms import callouts, code, csh, links, markdown, tables
+from docushift.transforms import callouts, code, csh, deflists, headings, links, markdown, tables
 from docushift.transforms.assets import AssetCopier, AssetOutcome
 from docushift.validation import references
 from tests.unit.test_extractor import build_tree, page
@@ -869,3 +869,175 @@ def test_identifiers_are_owned_by_source_path_before_conversion_runs() -> None:
     owned = csh.identifiers_by_source(sources)
 
     assert owned == {"main/topics/T.htm": ["a", "b"]}
+
+
+# -- headings and definition lists (Phase 27) ---------------------------------
+
+
+def _levels(html: str) -> list[str]:
+    soup = markdown.parse(html)
+    body = soup.body or soup
+    headings.normalize(body)
+    return [tag.name for tag in body.find_all(["h1", "h2", "h3", "h4", "h5", "h6"])]
+
+
+@pytest.mark.parametrize(
+    ("levels", "expected"),
+    [
+        # The reported page: `Concepts/Sample-Programs.htm`. The `h6` sections are
+        # second-level sections whose author picked the tag that looked right.
+        ([1, 2, 2, 6, 6, 2, 6, 6], [1, 2, 2, 3, 3, 2, 3, 3]),
+        # EMS `users-guide/DisasterRecovery.htm`, the whole page.
+        ([1, 4, 4, 4], [1, 2, 2, 2]),
+        # EMS `api/javadoc/javax/jms/package-summary.html`: a real two-deep tree
+        # under a jump, which has to keep both of its levels.
+        ([1, 3, 3, 4, 4, 3], [1, 2, 2, 3, 3, 2]),
+        # ActiveSpaces `Administration/Using-User-Defined-TIBCO-FTL-Certificates.htm`.
+        ([1, 2, 2, 4, 4, 4], [1, 2, 2, 3, 3, 3]),
+        # Already sequential: the rule must be the identity on correct input, which
+        # is what makes the 24,781-file re-conversion diffable.
+        ([1, 2, 3, 2, 3, 4], [1, 2, 3, 2, 3, 4]),
+        # A page whose shallowest heading is `h2` keeps it. Promoting to `h1` would
+        # hand 921 DocBook pages a title level they never had.
+        ([2, 4, 4, 3], [2, 3, 3, 3]),
+        # The accepted limit: deep before shallow across a gap merges two levels.
+        ([1, 4, 2], [1, 2, 2]),
+    ],
+)
+def test_heading_levels_are_compacted_to_the_depth_the_page_nests_to(
+    levels: list[int], expected: list[int]
+) -> None:
+    assert headings.compact(levels) == expected
+
+
+def test_renumbering_moves_the_tag_and_nothing_else() -> None:
+    """Text, order and `id` survive, because every slug and fragment depends on them."""
+    html = '<body><h1 id="top">Sample Programs</h1><h6 id="java">Java Vector Store</h6></body>'
+    soup = markdown.parse(html)
+    body = soup.body
+
+    assert headings.normalize(body) == 1
+    assert [(t.name, t.get("id"), t.get_text()) for t in body.find_all(["h1", "h2"])] == [
+        ("h1", "top", "Sample Programs"),
+        ("h2", "java", "Java Vector Store"),
+    ]
+
+
+def test_a_heading_the_engine_will_consume_takes_no_rung() -> None:
+    """DocBook's `<h3>Note</h3>` is an alert label, not a section (§5.6.7).
+
+    Without the predicate it takes depth 2 and the real `h2` below it is pinned
+    there too -- which is how the raw-HTML census charged Streaming with 4,990
+    skipped levels it does not have.
+    """
+    html = ('<body><h1>Adapter</h1><div class="note"><h3>Note</h3><p>x</p></div>'
+            '<h2>Introduction</h2><h4>Detail</h4></body>')
+    soup = markdown.parse(html)
+    body = soup.body
+
+    def skip(tag):
+        return any(p.name == "div" and "note" in (p.get("class") or []) for p in tag.parents)
+
+    headings.normalize(body, skip=skip)
+
+    assert [t.name for t in body.find_all(["h1", "h2", "h3", "h4"])] == ["h1", "h3", "h2", "h3"]
+
+
+def test_an_empty_heading_takes_no_rung() -> None:
+    """It emits nothing, so letting it hold a level is a gap with no heading in it.
+
+    `tibco-administrator-enterprise-edition`'s `admin_server.4.063` carries an
+    empty level-3 heading between its title and its first section, and it is why
+    that page still read `#` then `###` after the first cut of Phase 27.
+    """
+    html = '<body><h1>AppStatusCheck</h1><h3></h3><h4>Purpose</h4></body>'
+    soup = markdown.parse(html)
+    body = soup.body
+
+    headings.normalize(body)
+
+    assert [t.name for t in body.find_all(["h1", "h2", "h3", "h4"])] == ["h1", "h3", "h2"]
+
+
+def test_a_heading_holding_only_an_image_is_not_empty() -> None:
+    """GFM renders `# ![Logo](a.png)`, so the rung is doing work."""
+    html = '<body><h1>Top</h1><h4><img src="a.png" alt="Logo"></h4></body>'
+    soup = markdown.parse(html)
+    body = soup.body
+
+    assert headings.normalize(body) == 1
+    assert [t.name for t in body.find_all(["h1", "h2", "h3", "h4"])] == ["h1", "h2"]
+
+
+def test_a_class_named_term_becomes_a_real_term() -> None:
+    """The Flare-from-DITA shape, straight from `Concepts/Attributes-of-ActiveSpaces.htm`."""
+    html = ('<body><div class="dl">'
+            '<div class="dlentry"><span class="dt">Scalability</span>'
+            '<div class="dd">You can scale up the system horizontally.</div></div>'
+            '<div class="dlentry"><span class="dt">System of Record</span>'
+            '<div class="dd">It spans across nodes in an enterprise.</div></div>'
+            '</div></body>')
+    soup = markdown.parse(html)
+    body = soup.body
+
+    assert deflists.normalize(body) == 2
+
+    rendered = markdown.Renderer().render(body)
+    assert "**Scalability**" in rendered
+    assert "**System of Record**" in rendered
+    assert "You can scale up the system horizontally." in rendered
+
+
+def test_a_second_definition_is_not_a_second_term() -> None:
+    """`Concepts/How-Is-the-Data-Stored-in-a-Data-Grid.htm`: one term, two `dd`s.
+
+    The second opens `<b>Persistence on Nodes</b>`, which is a writer's emphasis
+    inside a definition and must survive as one rather than being read as a term.
+    """
+    html = ('<body><div class="dl"><div class="dlentry"><span class="dt">Nodes</span>'
+            '<div class="dd">A node is a process running within a computer.</div>'
+            '<div class="dd"><b>Persistence on Nodes</b> Shared Nothing mode.</div>'
+            '</div></div></body>')
+    soup = markdown.parse(html)
+    body = soup.body
+
+    assert deflists.normalize(body) == 1
+    assert [t.name for t in body.find_all(["dt", "dd"])] == ["dt", "dd", "dd"]
+
+    rendered = markdown.Renderer().render(body)
+    assert "**Nodes**" in rendered
+    assert "**Persistence on Nodes** Shared Nothing mode." in rendered
+
+
+def test_a_div_flavoured_term_is_retagged_too() -> None:
+    """11 files write the term as a `div` rather than a `span`."""
+    html = ('<body><div class="dl"><div class="dlentry"><div class="dt">Copysets</div>'
+            '<div class="dd">A logical grouping of nodes.</div></div></div></body>')
+    soup = markdown.parse(html)
+    body = soup.body
+
+    assert deflists.normalize(body) == 1
+    assert "**Copysets**" in markdown.Renderer().render(body)
+
+
+def test_a_real_definition_list_is_left_exactly_alone() -> None:
+    """DocBook's `<dt><span class="term">` already renders correctly: 18,848 files."""
+    html = ('<body><div class="variablelist"><dl>'
+            '<dt><span class="term">CME_iLink Configuration</span></dt>'
+            '<dd><p>The Edit button is a shortcut.</p></dd></dl></div></body>')
+    soup = markdown.parse(html)
+    body = soup.body
+    before = str(body)
+
+    assert deflists.normalize(body) == 0
+    assert str(body) == before
+
+
+def test_an_inline_role_that_is_not_a_term_is_not_a_term() -> None:
+    """`span.varname` appears in 1,536 EMS files and is prose, not a definition."""
+    html = '<body><p>Set <span class="varname">EMS_HOME</span> before starting.</p></body>'
+    soup = markdown.parse(html)
+    body = soup.body
+
+    assert deflists.normalize(body) == 0
+    assert markdown.Renderer().render(body) == "Set EMS_HOME before starting."

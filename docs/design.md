@@ -1016,6 +1016,23 @@ Properties that hold across the whole tool. Each is a rule some algorithm above 
 11. **An unmeasured value is blank, never zero.** The inventory columns distinguish "never extracted" from "extracted, found none", and no stage writes them for a run that failed. (§6.3)
 12. **One path is classified as an API reference by exactly one predicate**, shared by the Stage 4 count, the Stage 5 skip and the Stage 7 route. (§6.3)
 13. **A relative asset link exists in the output if and only if that asset was copied.** One resolution, at emit time, produces both — or neither, plus a counted failure. No later stage re-derives an asset path from a URL, a cache layout or a version segment. (§6.4, §10.7)
+14. **A converted page never skips a heading level**, whatever its source did. Depth is renumbered from the page's own shallowest heading, using one stack shared by every heading on the page — including a WebWorks topic that spells its headings two ways at once. Order, text and `id` are untouched, so no slug and no resolving `#fragment` moves. A heading the engine consumes (a DocBook admonition label) or emits nothing for (an empty one) takes no rung. (§14, Phase 27)
+15. **A definition term publishes as a term.** `<dt>` and the corpus's class-named equivalents converge on one renderer; a term is retagged, never separately styled. (§14, Phase 27)
+16. **A merged page is a subtree, and has exactly one H1.** Reframe groups whole sibling subtrees under one shared parent and never cuts through the middle of a sibling list, so a page's first topic is the thing the page is about and supplies its H1. Heading depth inside the page is counted in topics actually emitted — a container row or an already-claimed row contributes no level — which is invariant 14's rule applied one stage later. (`REFRAME-REQUIREMENTS.md` R1, R2.1, Phase 28)
+
+---
+
+## 14. Repairing the source — **Built (Phase 27)**
+
+Two rules that rewrite what the author wrote, applied to every page by all four engines immediately before the walk, in `transforms/headings.py` and `transforms/deflists.py`. They are set apart from the rest of this document because they are the only place the tool *corrects* its input rather than translating it, and that licence needs a boundary.
+
+**The boundary is: structure only, and counted.** Neither rule may change text, order or any `id`. Each returns how many elements it touched, and the driver records one note per version (`HEADING_LEVEL_NORMALIZED`, `DEFINITION_TERM_RECOVERED`) — a silent rewrite of somebody else's document cannot be audited a year later.
+
+**Heading depth (invariant 14).** Each heading pops every level at or below its own and pushes itself; the stack's depth, offset from the page's shallowest heading, is the level it emits. `h1,h2,h2,h6,h6,h2,h6,h6` → `h1,h2,h2,h3,h3,h2,h3,h3`. Where a page goes deep before it goes shallow across a gap — `h1,h4,h2` — two source levels merge; the source is ambiguous there and every alternative tested was worse.
+
+**Measure this on the emitted Markdown, never on the source HTML.** A raw-HTML census charged Streaming with 4,990 skipped levels; all 4,990 are DocBook admonition titles that §5.6.7 turns into callouts and never emits as headings. The honest figure was **612 of 24,781 pages**, and the families were Runtime Agent, EMS and ActiveSpaces.
+
+**Class-named definition lists (invariant 15).** Flare-from-DITA writes `div.dl > div.dlentry > span.dt + div.dd`; `span` is not a block, so 157 files published their terms as bare prose above their own definitions. The wrapper is the entry point and everything else is reached by descending, which is what keeps `span.term` (already inside a real `<dt>`) and `span.varname` (inline prose) out of it.
 
 ---
 

@@ -62,7 +62,7 @@ from docushift.engines.base import (
 from docushift.engines.flare_toc import Manifest, Toc, TocNode, read_manifest, read_toc, tree_files
 from docushift.engines.roots import find_output_roots
 from docushift.models import SourceEngine
-from docushift.transforms import callouts, links, markdown
+from docushift.transforms import callouts, deflists, headings, links, markdown
 
 # The one selector (§5.1.6). Not a list, and deliberately.
 CONTENT_SELECTOR = "div[role='main']#mc-main-content"
@@ -603,6 +603,9 @@ class FlareEngine(BaseEngine):
         _fake_list_tables(container)
         _merge_list_continuations(container)
         _split_colspan_tables(container)
+
+        context.recovered_terms += deflists.normalize(container)
+        context.renumbered_headings += headings.normalize(container)
 
         renderer = FlareRenderer(self, context, unit, source, output, planned, landing=landing)
         body = renderer.render(container)

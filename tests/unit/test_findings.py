@@ -107,8 +107,16 @@ def test_the_register_carries_every_row_of_7_5() -> None:
     it. A finding that is loud by design needs a registry row more than a quiet one
     does -- it is the only thing standing between 458 real disagreements and a
     number nobody can enumerate.
+
+    Phase 27 adds the 59th and 60th, `HEADING_LEVEL_NORMALIZED` and
+    `DEFINITION_TERM_RECOVERED`, and they are the register's first two codes for a
+    *repair* rather than a defect. Both fire on correct output, because both count
+    what the converter silently rewrote in somebody else's document -- which is
+    the one class of change that cannot be audited later unless it was counted at
+    the time. Notes and not warnings on arithmetic: 612 of 24,781 pages skip a
+    heading level, and a warning at 2.5% of every run is a warning nobody reads.
     """
-    assert len(REGISTRY) == 58
+    assert len(REGISTRY) == 60
 
 
 def test_severity_comes_from_the_registry_and_not_from_the_call_site() -> None:

@@ -306,6 +306,7 @@ class DocumentConverter:
         context.assets = None
         self._report_api_links(context)
         self._report_flattened_links(context)
+        self._report_repairs(context)
 
         # Stage 6a, and it runs here rather than in a later command because the
         # node list exists only while the units are in hand and the pages it
@@ -529,6 +530,28 @@ class DocumentConverter:
                     f"their words and lost their target",
             count=context.flattened_links,
         )
+
+    def _report_repairs(self, context: ConversionContext) -> None:
+        """One note each for Phase 27's two structural repairs to the source.
+
+        Both are rewrites of what the author wrote, applied to every page silently
+        and correctly, which is exactly the shape of change that is impossible to
+        audit a year later unless somebody counted it at the time.
+        """
+        if context.renumbered_headings:
+            context.record(
+                "HEADING_LEVEL_NORMALIZED",
+                message=f"{context.renumbered_headings} heading(s) renumbered to close "
+                        f"a level the source skipped",
+                count=context.renumbered_headings,
+            )
+        if context.recovered_terms:
+            context.record(
+                "DEFINITION_TERM_RECOVERED",
+                message=f"{context.recovered_terms} definition term(s) recovered from "
+                        f"class-named markup and published as terms",
+                count=context.recovered_terms,
+            )
 
     def _report_output_count(self, context: ConversionContext, result: ConvertResult) -> None:
         """The engines' document count against the files on disk (Phase 13).

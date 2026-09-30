@@ -25,6 +25,19 @@ from typing import Any
 #: policy that does not name it. The default stays "every field counts".
 _NOT_OUTPUT = frozenset({"publish"})
 
+#: The packer's boundary rule, versioned. Bumped whenever a *code* change moves a
+#: page boundary or a heading level.
+#:
+#: The digest below is built from config fields, and that is a hole the config
+#: cannot see: change the algorithm without touching `reframe.yaml` and every
+#: merged tree on disk still reports CURRENT, keeps its old layout for good, and
+#: only a `--force` anybody happens to remember will re-cut it. A constant here
+#: closes it. Not a `reframe.yaml` field -- a config that could select an
+#: algorithm would be two packers to keep alive.
+#:
+#: 1 = greedy sibling runs (Phase 20). 2 = parent-leads subtrees (Phase 28).
+_ALGORITHM = 2
+
 
 @dataclass(frozen=True)
 class ReframePolicy:
@@ -61,7 +74,8 @@ class ReframePolicy:
         tuned repeatedly, so that failure would be the common case rather than a
         corner of it.
         """
-        shaping = {k: v for k, v in asdict(self).items() if k not in _NOT_OUTPUT}
+        shaping: dict[str, Any] = {"algorithm": _ALGORITHM}
+        shaping.update({k: v for k, v in asdict(self).items() if k not in _NOT_OUTPUT})
         payload = json.dumps(shaping, sort_keys=True, separators=(",", ":"))
         return hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16]
 

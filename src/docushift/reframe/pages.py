@@ -120,12 +120,20 @@ def word_count(body: str) -> int:
     return len(body.split())
 
 
-def shift_headings(body: str, title: str, anchor: str) -> tuple[str, int]:
+def shift_headings(body: str, title: str, anchor: str, level: int = 2) -> tuple[str, int]:
     """R2.1. Returns the shifted body and how many tokens the shift added.
 
-    The first H1 becomes the anchored `##`; every other heading drops one level,
-    capped at H6 (requirements §7 -- this corpus is H1-H4 and never overflows, but
-    other sets will). A topic with no H1 gets a synthesized one from its TOC title.
+    The topic's first H1 becomes the anchored heading at `level`; every other
+    heading moves by the same offset, capped at H6 (requirements §7). A topic with
+    no H1 gets a synthesized one from its TOC title.
+
+    **`level` is the topic's place in its page, not a constant.** It was a constant
+    `2` until parent-leads packing (`planning.md` Phase 28): every topic became a
+    sibling `##` however deeply the TOC had nested it, because a page was a run of
+    topics rather than a subtree. Now a page *is* a subtree, so its root takes `1`
+    and a topic `d` levels below it takes `1 + d`. The default keeps every caller
+    that has no tree to consult -- `carry`'s untocked pages, `project`'s new
+    topics -- emitting exactly what they emitted before.
 
     The token delta is returned rather than recomputed because §6's word
     conservation is an *equality*, and the only honest way to check an equality is
@@ -133,26 +141,32 @@ def shift_headings(body: str, title: str, anchor: str) -> tuple[str, int]:
     for the reason the first corpus run found: `<a id="x"></a>` is two
     whitespace-delimited tokens, not the one that requirements §6's "+1 per topic"
     assumes, and a hand-written constant simply encodes whichever anchor syntax was
-    in mind when it was written. Shifting an existing heading is free -- `#` and
-    `##` are one token either way -- so the cost is the marker, plus a synthesized
-    `##` and its title where a topic had no H1 to anchor.
+    in mind when it was written.
+
+    **The delta does not depend on `level`, and that is worth stating rather than
+    noticing.** `#` through `######` are each one whitespace-delimited token, so
+    moving a heading is free at *any* offset, and so is the H6 cap collapsing two
+    depths onto one. The cost is the marker, plus a synthesized heading and its
+    title where a topic had no H1 to anchor -- exactly as before.
     """
     marker = anchor_marker(anchor)
+    hashes = "#" * level
     edits: list[tuple[int, int, str]] = []
     found = False
     for match in _HEADING.finditer(mask_code(body)):
-        level = len(match.group("hashes"))
+        depth = len(match.group("hashes"))
         text = body[match.start("text"):match.end("text")]
-        if level == 1 and not found:
+        if depth == 1 and not found:
             found = True
-            edits.append((match.start(), match.end(), f"{marker}\n\n## {text}"))
+            edits.append((match.start(), match.end(), f"{marker}\n\n{hashes} {text}"))
         else:
-            edits.append((match.start(), match.start("hashes") + level, "#" * min(level + 1, 6)))
+            edits.append((match.start(), match.start("hashes") + depth,
+                          "#" * min(depth + level - 1, 6)))
 
     shifted = _apply(body, edits)
     if found:
         return shifted, word_count(marker)
-    heading = f"{marker}\n\n## {title}"
+    heading = f"{marker}\n\n{hashes} {title}"
     added = word_count(marker) + 1 + word_count(title)
     return (f"{heading}\n\n{shifted}" if shifted else heading), added
 
@@ -291,7 +305,7 @@ def render(
     for topic in page.topics:
         _, body = split_frontmatter(read(topic.source))
         body = rewrite_links(body.strip(), topic.source, page.path, located, existing, counts)
-        body, extra = shift_headings(body, topic.title, page.anchors[topic.source])
+        body, extra = shift_headings(body, topic.title, page.anchors[topic.source], topic.level)
         parts.append(body)
         added += extra
     return "\n\n".join(parts) + "\n", added

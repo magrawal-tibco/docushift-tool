@@ -89,7 +89,7 @@ from docushift.engines.webworks_toc import (
     read_toc,
 )
 from docushift.models import SourceEngine
-from docushift.transforms import callouts, links, markdown
+from docushift.transforms import callouts, deflists, headings, links, markdown
 from docushift.transforms import tables as tables_transform
 
 # The runtime, read for metadata and never emitted (§5.3.9). `tpl/` is skin
@@ -110,6 +110,13 @@ _HEADING_CLASS = re.compile(r"^N(\d)(?:Heading|Syntax)$")
 # Sub-headings with no numeral: `MinorHead` 19,531 and `Block-title` 12,788, which
 # titles an error code. Both sit below `N3Heading` in every sample, so both are h4.
 _FLAT_HEADINGS = {"minorhead": 4, "block-title": 4}
+# Where `_renumber_headings` leaves its answer for `block_override` to read. An
+# attribute and not a rewritten class: the class is the only thing that identifies
+# the div as a heading in the first place.
+_LEVEL_ATTR = "data-docushift-level"
+# The other half of the vocabulary. Rare in this corpus but not absent, and where
+# it appears it is interleaved with the class-named kind on the same page.
+_REAL_HEADINGS = {"h1": 1, "h2": 2, "h3": 3, "h4": 4, "h5": 5, "h6": 6}
 
 # `div.<Kind>_outer`, the list shape, and `div.<Kind>_inner`, its two cells.
 _OUTER = re.compile(r"^(?P<kind>.+)_outer$")
@@ -229,6 +236,9 @@ class WebWorksRenderer(markdown.Renderer):
         primary = _primary_class(tag)
         level = _heading_level(primary)
         if level:
+            # `_renumber_headings` may have closed a skipped level on this page
+            # (Phase 27); absent that, the class name is still the level.
+            level = int(tag.get(_LEVEL_ATTR) or level)
             text = self.inline_children(tag).strip()
             return f"{'#' * level} {text}" if text else ""
         if primary.lower() == "figuretitle":
@@ -1241,6 +1251,9 @@ class WebWorksEngine(BaseEngine):
             base=PurePosixPath(posixpath.dirname(within)),
             key=within.lower(),
         )
+        context.recovered_terms += deflists.normalize(container)
+        context.renumbered_headings += _renumber_headings(container)
+
         rendered = renderer.render(container)
         context.flattened_links += renderer.flattened_links
         if not rendered.strip():
@@ -1438,6 +1451,48 @@ def _raw_classes(tag: Tag) -> list[str]:
 def _primary_class(tag: Tag) -> str:
     classes = _raw_classes(tag)
     return classes[0] if classes else ""
+
+
+def _renumber_headings(container: Tag) -> int:
+    """Phase 27 for a corpus that spells its headings two ways at once.
+
+    `transforms/headings.py` renumbers real heading tags. WebWorks mostly has
+    none -- `div.N1Heading` and `div.MinorHead` are the hierarchy, and `MinorHead`
+    is fixed at 4, so a topic running `N1Heading` straight into one emitted `#`
+    then `####`. That shape was most of the 612 skipping files in `output/`.
+
+    **But some topics use both**, which is what the first cut of this got wrong:
+    renumbering the two vocabularies separately left four pages still skipping --
+    `tibco-administrator-enterprise-edition`'s `<h1>` followed by a real `<h3>`,
+    and `gridserver-manager`'s `<h2>` followed by `<h4>`. Depth is a property of
+    the page, so both kinds are collected in one document-ordered pass and share
+    one stack.
+
+    A class-named heading's new level is written to an attribute rather than into
+    its class, because the class is also how `_scan` and `_heading_level`
+    recognise the div as a heading at all.
+    """
+    tags: list[Tag] = []
+    levels: list[int] = []
+    for tag in container.find_all(["div", *_REAL_HEADINGS]):
+        if not isinstance(tag, Tag):
+            continue
+        level = (_REAL_HEADINGS.get(tag.name) or 0) if tag.name != "div" \
+            else _heading_level(_primary_class(tag))
+        if level and not headings.is_empty(tag):
+            tags.append(tag)
+            levels.append(level)
+
+    moved = 0
+    for tag, level, target in zip(tags, levels, headings.compact(levels), strict=True):
+        if target == level:
+            continue
+        if tag.name == "div":
+            tag[_LEVEL_ATTR] = str(target)
+        else:
+            tag.name = f"h{target}"
+        moved += 1
+    return moved
 
 
 def _heading_level(name: str) -> int:

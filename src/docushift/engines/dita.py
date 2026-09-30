@@ -72,7 +72,7 @@ from docushift.engines.base import (
 )
 from docushift.engines.detector import GUID_HTML_NAME
 from docushift.models import SourceEngine
-from docushift.transforms import callouts, links, markdown
+from docushift.transforms import callouts, deflists, headings, links, markdown
 from docushift.utils.slug import slugify
 
 # The one selector (§5.2.4). Both skins wrap their content in it -- the Bootstrap
@@ -679,6 +679,9 @@ class DitaEngine(BaseEngine):
         _strip_chrome(container)
         emitted = _prune_anchors(container, plan.referenced)
         title = _title(container) or topic.title
+
+        context.recovered_terms += deflists.normalize(container)
+        context.renumbered_headings += headings.normalize(container)
 
         renderer = DitaRenderer(self, context, unit, plan, topic)
         body = renderer.render(container)

@@ -6,20 +6,34 @@ of sizes, and the body rewriting in `pages.py` cannot accidentally influence a
 boundary. Layout is the one decision Reframe cannot take back (requirements §1:
 "every layout decision is permanent"), so it is worth isolating.
 
-**The bottom-up rule** (R1): walk the TOC depth-first in reading order; a subtree
-whose words fit under the cap comes back to its parent as one absorbable unit, and
-a subtree that does not is packed greedily into pages on the spot. The cap is a
-cap and never a target (R1.2) -- there is no minimum size and nothing is ever
-joined to reach one. Top-level items are hard boundaries (R1.1).
+**The parent-leads rule** (R1, rewritten in `planning.md` Phase 28): a page is a
+*subtree*, never a cut through the middle of a sibling list. Walk the TOC from the
+top; a node whose whole subtree fits under the cap and sits in one source
+directory becomes one page. A node whose subtree does not becomes a page of its
+own body, and its children are then grouped into pages holding one or more *whole
+consecutive* child-subtrees of that same parent. A child that still does not fit
+recurses by the same rule. The cap is a cap and never a target (R1.2) -- there is
+no minimum size and nothing is ever joined to reach one. Top-level items are hard
+boundaries (R1.1), now structurally: each root's recursion emits its own pages.
+
+**Why it was changed.** The predecessor walked bottom-up and, when a subtree
+overflowed, packed its contents greedily in reading order without regard to whose
+children they were. Measured on the source TOCs, that made **27 of ActiveSpaces'
+46 pages and 67 of EMS' 124** span more than one TOC parent -- so a majority of
+merged pages were arbitrary sibling runs with no single topic they were *about*,
+and no page could carry a meaningful H1. Grouping only whole sibling subtrees
+fixes that at a cost of roughly a fifth more pages (46 -> ~56, 124 -> ~160).
+Refusing to group siblings *at all* was measured too and is far worse: 119 and
+628 pages, median page 416 and 159 words.
 
 Two places this deliberately departs from the proof-of-concept:
 
 - **Emitted pages keep their place in reading order.** The POC appended pages to
   one shared list as the recursion unwound, so an overflowing child subtree's
   pages landed *before* the page holding its own parent's topic -- which reads
-  earlier. Here `_subtree` returns a single ordered run of already-closed `Page`s
-  and still-absorbable `_Unit`s, and the packer splices around the pages rather
-  than past them. Reading order is then an invariant of the return type.
+  earlier. Here `_subtree` returns pages already in reading order: the parent's
+  own page first, then each child's, and an open run is flushed before a child
+  recurses so nothing jumps in front of it.
 - **R4.2 is enforced here, not checked afterwards.** A join is refused when the
   two sides come from different source directories, so "no page spans two source
   directories" holds by construction. On the reference corpus every top-level
@@ -33,11 +47,12 @@ The POC's `MIN_WORDS` is not reimplemented (R1.2), and its unused basename-keyed
 
 from __future__ import annotations
 
-from collections.abc import Callable, Iterable, Sequence
-from dataclasses import dataclass, field
+from collections.abc import Callable, Sequence
+from dataclasses import dataclass, field, replace
 from pathlib import PurePosixPath
 
 from docushift.reframe.toc import TocEntry
+from docushift.transforms.headings import compact
 from docushift.utils.slug import slugify
 
 
@@ -51,6 +66,13 @@ class Topic:
     #: Relative to the converted tree's root, exactly as `toc.yml` wrote it.
     source: PurePosixPath
     words: int
+    #: The heading level this topic's own H1 takes on its merged page (R2.1).
+    #: An absolute level rather than a depth, because `pages.render` wants the
+    #: answer and not the arithmetic -- and because `carry` and `project`'s
+    #: new-topic path can keep the default without knowing any tree at all.
+    #: Defaulted so every construction site that predates parent-leads packing
+    #: keeps emitting exactly what it emitted before.
+    level: int = 2
 
     @property
     def directory(self) -> str:
@@ -98,8 +120,11 @@ class _Unit:
         return self.topics[0].directory
 
 
-#: What `_subtree` returns: closed pages and open units, interleaved in reading order.
-_Item = Page | _Unit
+#: GFM's deepest heading. A page rooted high in a deep tree runs out of levels --
+#: measured, 10 of ActiveSpaces' 324 topics and 4 of EMS' 1,441, and only when a
+#: page spans the whole tree depth. Capping flattens two depths onto H6; it never
+#: *skips* a level, so `design.md` invariant 14 still holds.
+_DEEPEST = 6
 
 
 def pack(roots: Sequence[TocEntry], words_of: Callable[[PurePosixPath], int], max_words: int,
@@ -125,10 +150,9 @@ def pack(roots: Sequence[TocEntry], words_of: Callable[[PurePosixPath], int], ma
     claimed: set[PurePosixPath] = set()
     prefixes = tuple(keep_separate)
     for root in roots:
-        # `_close_run` is what turns the last open units into pages, so a guide
-        # that fits entirely under the cap becomes exactly one page here.
-        items = _subtree(root, root.title, words_of, max_words, claimed, prefixes)
-        pages.extend(_close_run(items, root.title, max_words))
+        # R1.1 is structural now: a root's recursion emits that root's pages and
+        # returns, so nothing can span two roots however much room is left.
+        pages.extend(_subtree(root, root.title, words_of, max_words, claimed, prefixes))
     return pages
 
 
@@ -198,11 +222,13 @@ def project(
     # to reach a path owns it and later nodes become TOC rows pointing at it.
     claimed: set[PurePosixPath] = set()
     order: list[tuple[PurePosixPath, str, str]] = []
+    depth_of: dict[PurePosixPath, int] = {}
     for root in roots:
-        for entry in root.walk():
+        for depth, entry in _walk_depth(root):
             if entry.path is None or entry.path in claimed:
                 continue
             claimed.add(entry.path)
+            depth_of[entry.path] = depth
             order.append((entry.path, entry.title, root.title))
 
     def projected(path: PurePosixPath) -> int | None:
@@ -220,7 +246,7 @@ def project(
 
     pages: list[Page] = []
     emitted: set[int] = set()
-    pending: list[_Item] = []
+    pending: list[_Unit] = []
     pending_guide = ""
 
     def flush() -> None:
@@ -235,7 +261,11 @@ def project(
         if index is None:
             if not pending:
                 pending_guide = guide
-            pending.append(_Unit((Topic(title, path, words_of(path)),),
+            # `level=1`: a topic the reference does not have is packed on its own
+            # merits, so the first on its page supplies that page's H1 and
+            # `_close_run` drops the rest below it. Left at the `Topic` default
+            # these published 43 pages opening at `##` with nothing above them.
+            pending.append(_Unit((Topic(title, path, words_of(path), level=1),),
                                  separate=separated(path, prefixes)))
             continue
         if index in emitted:
@@ -245,9 +275,51 @@ def project(
         # the projection intact rather than merely mostly intact.
         flush()
         topics = sorted(members[index], key=lambda topic: rank_of[topic.source])
-        pages.append(Page(guide_of[index], topics, path=reference[index][0]))
+        pages.append(Page(guide_of[index], _relevel(topics, depth_of), path=reference[index][0]))
     flush()
     return pages
+
+
+def _relevel(topics: Sequence[Topic], depth_of: dict[PurePosixPath, int]) -> list[Topic]:
+    """Heading levels for a projected page, read off *this* version's own TOC.
+
+    The pin carries which topics share a page and what that page is called; it
+    does not carry their depths, and it must not -- a version whose tree is a
+    level shallower here should read as one. So levels are recomputed from the
+    depths in hand, relative to the shallowest topic on the page, and everything
+    from the second topic at that shallowest depth onward drops one, which is the
+    rule `_close_run` applies when it groups sibling subtrees.
+
+    One consequence to accept: a page whose leading topic this version does not
+    have re-roots on the next one, so its internal levels shift. The page *name*
+    does not move, which is what R1.4 protects.
+    """
+    if not topics:
+        return []
+    depths = [depth_of.get(topic.source, 1) for topic in topics]
+    base = min(depths)
+    # `compact` is Phase 27's rule, reused rather than re-derived: the page holds
+    # only the topics this version has, so the TOC rows between two of them may
+    # be absent and their raw depths gap. Compacting by nesting depth closes that
+    # the same way it closes an authored `h3 -> h6`.
+    levels = [level - base + 1 for level in compact(depths)]
+    seen_root = False
+    demote = False
+    out: list[Topic] = []
+    for topic, depth, level in zip(topics, depths, levels, strict=True):
+        if depth == base:
+            demote = seen_root
+            seen_root = True
+        out.append(replace(topic, level=min(level + (1 if demote else 0), _DEEPEST)))
+    return out
+
+
+def _walk_depth(entry: TocEntry, depth: int = 1):
+    """`TocEntry.walk`, but saying how deep each node is. Depth is a property of
+    the traversal rather than of the node, so it is not a field on `TocEntry`."""
+    yield depth, entry
+    for child in entry.children:
+        yield from _walk_depth(child, depth + 1)
 
 
 def separated(source: PurePosixPath, prefixes: Sequence[str]) -> bool:
@@ -290,7 +362,12 @@ def carry(
     they were never in the navigation and R3 only promises to preserve what was.
     `audit` is told to exempt them from the reachability check for that reason.
     """
-    return [Page(UNNAVIGATED, [Topic(title_of(source), source, words_of(source))]) for source in sources]
+    # `level=1`: a carried page is one topic alone, so that topic *is* the page and
+    # takes its H1, exactly as a one-subtree page does. Leaving it at the `Topic`
+    # default published 35 ActiveSpaces pages and 8 EMS ones opening at `##` with
+    # no heading above them, which is the defect Phase 28 set out to remove.
+    return [Page(UNNAVIGATED, [Topic(title_of(source), source, words_of(source), level=1)])
+            for source in sources]
 
 
 def _subtree(
@@ -300,66 +377,157 @@ def _subtree(
     max_words: int,
     claimed: set[PurePosixPath],
     prefixes: Sequence[str] = (),
-) -> list[_Item]:
-    """This node and its descendants, as an ordered run of pages and units."""
-    items: list[_Item] = []
+) -> list[Page]:
+    """Every page this node's subtree becomes, in reading order.
+
+    Two rules, in order. **The whole subtree is one page** when it is allowed to
+    be. Otherwise **the node stands alone** and its children are grouped into
+    pages of whole sibling subtrees -- which is the guarantee the whole rewrite
+    exists for: a page's topics always share one TOC parent, so the page's first
+    topic is the thing the page is about.
+    """
+    whole = _collect(node, words_of, max_words, claimed, prefixes)
+    if whole is not None:
+        _commit(whole, claimed)
+        return [Page(guide, list(whole))] if whole else []
+
+    pages: list[Page] = []
     if node.path is not None and node.path not in claimed:
+        # The node's own body, alone. It is often a short landing paragraph above
+        # a list of children -- 10 of ActiveSpaces' ~56 pages come out under 200
+        # words this way -- and that is the honest shape: the TOC has a node here,
+        # so the merged tree needs a page here for it to point at.
         claimed.add(node.path)
-        items.append(_Unit((Topic(node.title, node.path, words_of(node.path)),),
-                           separate=separated(node.path, prefixes)))
+        pages.append(Page(guide, [Topic(node.title, node.path, words_of(node.path), level=1)]))
+
+    run: list[_Unit] = []
+
+    def flush() -> None:
+        pages.extend(_close_run(run, guide, max_words))
+        run.clear()
+
     for child in node.children:
-        items.extend(_subtree(child, guide, words_of, max_words, claimed, prefixes))
+        unit = _collect(child, words_of, max_words, claimed, prefixes)
+        if unit is None:
+            # This child overflows and will emit its own pages. Flush first, or
+            # a later sibling that still fits would jump in front of them.
+            flush()
+            pages.extend(_subtree(child, guide, words_of, max_words, claimed, prefixes))
+            continue
+        if not unit:
+            continue
+        _commit(unit, claimed)
+        run.append(_Unit(unit, separate=any(separated(t.source, prefixes) for t in unit)))
+    flush()
+    return pages
 
-    units = [item for item in items if isinstance(item, _Unit)]
-    # Collapsible only if nothing below has already been closed into a page: once
-    # a boundary exists inside this subtree, the subtree is not one unit any more.
-    # A separated unit is the same kind of boundary, arrived at by a writer's
-    # decision instead of by the cap.
-    if len(units) == len(items) and units and not any(unit.separate for unit in units):
-        topics = tuple(topic for unit in units for topic in unit.topics)
-        if sum(unit.words for unit in units) <= max_words and _one_directory(topics):
-            return [_Unit(topics)]
-    return list(_close_run(items, guide, max_words))
+
+def _collect(
+    node: TocEntry,
+    words_of: Callable[[PurePosixPath], int],
+    max_words: int,
+    claimed: set[PurePosixPath],
+    prefixes: Sequence[str],
+) -> tuple[Topic, ...] | None:
+    """This subtree as one page's worth of topics, or None if it may not be one.
+
+    Levels are assigned as though the subtree were alone on a page: its root at
+    H1 and each topic one below its nearest *emitted* ancestor, capped at H6
+    (requirements §7). When the caller puts two sibling subtrees on one page it
+    bumps the later ones by one, so the second never collides with the first's H1.
+
+    **The nearest emitted ancestor, not the raw TOC depth.** A node contributes no
+    topic when it is a bare container row or when an earlier guide already claimed
+    its path, and counting those nodes anyway leaves a hole: EMS' `Appendix B`
+    page came out `#` then `####` because the two rows between them were claimed
+    elsewhere. That is the same defect Phase 27 spent itself removing from the
+    converter, reintroduced one stage later, so the rule here is the same one --
+    depth is measured in what is actually emitted.
+
+    **Nothing is claimed here.** The walk reads `claimed` to skip topics an
+    earlier TOC node already owns, and accumulates its own `seen` set for a path
+    a subtree lists twice; the caller `_commit`s only once it has accepted the
+    result. A rejected probe that had mutated `claimed` would silently drop every
+    topic it touched -- the one way this recursion can lose content, and the
+    reason the probe and the commit are two functions rather than one walk.
+    """
+    topics: list[Topic] = []
+    seen: set[PurePosixPath] = set()
+    total = 0
+
+    def walk(entry: TocEntry, level: int) -> bool:
+        nonlocal total
+        emitted = False
+        if entry.path is not None and entry.path not in claimed and entry.path not in seen:
+            if separated(entry.path, prefixes):
+                return False  # 20e: a writer took this out of the merge.
+            seen.add(entry.path)
+            words = words_of(entry.path)
+            total += words
+            if total > max_words:
+                return False
+            topics.append(Topic(entry.title, entry.path, words, level=min(level, _DEEPEST)))
+            emitted = True
+        below = level + 1 if emitted else level
+        return all(walk(child, below) for child in entry.children)
+
+    if not walk(node, 1):
+        return None
+    # R4.2 is enforced here rather than checked afterwards. A subtree that fits by
+    # words but straddles two source directories must still fall to the second
+    # rule, or `audit._directories` discards the whole tree.
+    if not _one_directory(topics):
+        return None
+    return tuple(topics)
 
 
-def _close_run(items: Iterable[_Item], guide: str, max_words: int) -> list[Page]:
-    """Greedily packs the units of one run, in TOC order, around its closed pages.
+def _commit(topics: Sequence[Topic], claimed: set[PurePosixPath]) -> None:
+    """Takes ownership of an accepted `_collect` result."""
+    claimed.update(topic.source for topic in topics)
 
-    A page is closed when the next unit would take it over the cap (R1.2 -- the cap
-    only ever refuses a join) or would bring in a second source directory (R4.2).
-    A unit that is over the cap on its own is still placed whole: R1.3 forbids
-    splitting a topic body, so an oversized topic becomes an oversized page.
+
+def _close_run(units: Sequence[_Unit], guide: str, max_words: int) -> list[Page]:
+    """Groups whole sibling subtrees, in TOC order, into pages.
+
+    Every unit here is one child's entire subtree and they all share one parent,
+    so a page this closes can only ever hold whole siblings. A page is closed when
+    the next subtree would take it over the cap (R1.2 -- the cap only ever refuses
+    a join) or would bring in a second source directory (R4.2). A subtree over the
+    cap on its own never reaches here; R1.3 forbids splitting a topic body, so an
+    oversized *topic* still becomes an oversized page through the first rule.
     """
     pages: list[Page] = []
     current: list[Topic] = []
+    roots = 0
 
     def close() -> None:
-        nonlocal current
+        nonlocal current, roots
         if current:
             pages.append(Page(guide, current))
             current = []
+            roots = 0
 
-    for item in items:
-        if isinstance(item, Page):
-            # Already closed further down the tree. Keep it where reading order
-            # put it rather than letting later units jump in front of it.
-            close()
-            pages.append(item)
-            continue
+    for unit in units:
         if current and (
-            item.separate
-            or sum(topic.words for topic in current) + item.words > max_words
-            or current[0].directory != item.directory
+            unit.separate
+            or sum(topic.words for topic in current) + unit.words > max_words
+            or current[0].directory != unit.directory
         ):
             close()
-        current.extend(item.topics)
-        # Closed after it as well, which is what makes the verb "granular" rather
-        # than "split here": the next unit starts a page instead of joining this
-        # one from behind.
-        if item.separate:
+        # The first subtree on a page keeps its own levels and supplies the page's
+        # H1. Every later sibling drops one, so it reads as a section *after* the
+        # first rather than as a second H1 -- and its own children drop with it,
+        # which is what stops a parent and its child landing on the same level.
+        roots += 1
+        current.extend(unit.topics if roots == 1 else _demote(unit.topics))
+        if unit.separate:
             close()
     close()
     return pages
+
+
+def _demote(topics: Sequence[Topic]) -> list[Topic]:
+    return [replace(topic, level=min(topic.level + 1, _DEEPEST)) for topic in topics]
 
 
 def _one_directory(topics: Sequence[Topic]) -> bool:

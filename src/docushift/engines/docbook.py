@@ -71,7 +71,7 @@ from docushift.engines.base import (
 )
 from docushift.engines.roots import is_docbook_page, is_skin_path
 from docushift.models import SourceEngine
-from docushift.transforms import callouts, links, markdown
+from docushift.transforms import callouts, deflists, headings, links, markdown
 
 # The one container (§5.6.4). Present on 1,178 of 1,178 pages, with every piece of
 # chrome outside it, so selecting it *is* the chrome removal. There is deliberately
@@ -571,6 +571,11 @@ class DocBookEngine(BaseEngine):
             # has two titles.
             heading.name = "h1"
 
+        # After the `h2` promotion above, so the page's own title is already at the
+        # level the renumbering measures depth from.
+        context.recovered_terms += deflists.normalize(container)
+        context.renumbered_headings += headings.normalize(container, skip=_consumed_heading)
+
         renderer = DocBookRenderer(self, context, unit, plan, page)
         body = renderer.render(container)
         context.flattened_links += renderer.flattened_links
@@ -1032,6 +1037,24 @@ def _raw_classes(tag: Tag) -> list[str]:
 
 def _classes(tag: Tag) -> set[str]:
     return {name.lower() for name in _raw_classes(tag)}
+
+
+# The three wrappers whose contents `block_override` claims before the generic walk
+# ever sees them. An `h3.title` inside one is a label the renderer deletes or a nav
+# heading it returns `""` for, never a section, so `transforms/headings.py` must not
+# let it take a rung. This is what the raw-HTML census of Phase 27 got wrong:
+# Streaming's 4,990 "skipped levels" are all `<h3>Note</h3>` and friends.
+_CONSUMED_CLASSES = ADMONITION_CLASSES | NAVIGATION_CLASSES | CAPTIONED_CLASSES
+
+
+def _consumed_heading(tag: Tag) -> bool:
+    """Is this heading inside a box whose rendering replaces it?"""
+    for parent in tag.parents:
+        if not isinstance(parent, Tag):
+            continue
+        if parent.name == "div" and _classes(parent) & _CONSUMED_CLASSES:
+            return True
+    return False
 
 
 def _read(path: Path) -> str | None:
