@@ -98,11 +98,19 @@ def converted_tree(config: ConfigManager, product, number: str, toc: str = TOC) 
     tree = config.output_path(product.bu, product.family, product.slug, number)
     tree.mkdir(parents=True, exist_ok=True)
     (tree / "toc.yml").write_text(toc, encoding="utf-8")
+    def write(node: dict) -> None:
+        page = tree / node["path"]
+        page.parent.mkdir(parents=True, exist_ok=True)
+        # The body's H1 is the node's **title**, not its path. Since Phase 29 the
+        # anchor a topic gets is the platform's slug of its rendered heading, so a
+        # fixture whose H1 was a file path would assert against
+        # `installationinstallation-2md` and teach nothing about the real rule.
+        page.write_text(f"# {node['title']}\n", encoding="utf-8")
+        for child in node.get("children") or []:
+            write(child)
+
     for row in yaml.safe_load(toc).get("items") or []:
-        for path in [row["path"], *[c["path"] for c in row.get("children") or []]]:
-            page = tree / path
-            page.parent.mkdir(parents=True, exist_ok=True)
-            page.write_text(f"# {path}\n", encoding="utf-8")
+        write(row)
     return tree
 
 
@@ -203,12 +211,13 @@ def test_an_absorbed_topic_becomes_an_anchored_section_under_its_parents_h1(
     assert yaml.safe_load(matter.strip("-\r\n")) == {
         "title": "Installation", "guide": "Installation", "merged_from": 2,
     }
-    assert '<a id="installation-2"></a>' in body
-    assert '<a id="installation-overvie"></a>' in body
+    # No `<a id>` anywhere since Phase 29: the platform slugs the heading itself.
+    assert "<a id=" not in body
     assert body.count("\n# ") == 1
     assert body.count("\n## ") == 1
     # The H1 is the parent's, not the absorbed child's.
-    assert "\n# installation/installation-2.md" in body
+    assert "\n# Installation\n" in body
+    assert "\n## Installation Overview\n" in body
 
 
 def test_the_toc_points_absorbed_topics_at_a_fragment_and_leaders_at_a_page(
@@ -228,7 +237,7 @@ def test_the_toc_points_absorbed_topics_at_a_fragment_and_leaders_at_a_page(
                 "children": [
                     {
                         "title": "Installation Overview",
-                        "path": "installation/installation-2.md#installation-overvie",
+                        "path": "installation/installation-2.md#installation-overview",
                     }
                 ],
             },
@@ -250,9 +259,12 @@ def test_every_source_topic_gets_a_redirect_with_its_anchor(config, catalog, fla
 
     assert document["redirects"] == [
         {"from": "installation/installation-2.md",
-         "to": "installation/installation-2.md#installation-2", "status": 301},
+         # `#installation`, not `#installation-2`: the anchor is the platform's
+         # slug of the heading, so the file's `-2` disambiguator does not leak
+         # into a reader's address bar (Phase 29).
+         "to": "installation/installation-2.md#installation", "status": 301},
         {"from": "installation/installation-overvie.md",
-         "to": "installation/installation-2.md#installation-overvie", "status": 301},
+         "to": "installation/installation-2.md#installation-overview", "status": 301},
         {"from": "users-guide/user-guide.md",
          "to": "users-guide/user-guide.md#user-guide", "status": 301},
     ]
@@ -809,7 +821,8 @@ def test_a_topic_listed_under_two_guides_is_packed_once_and_shared():
 
     assert layout(pages) == [["g/a.md", "g/s.md"], ["g/b.md"]]
     assert retarget(roots, located)["items"][1]["children"] == [
-        {"title": "Shared", "path": "g/a.md#s"}
+        # `#shared`, from the heading, not `#s` from the filename stem.
+        {"title": "Shared", "path": "g/a.md#shared"}
     ]
 
 
@@ -1063,21 +1076,53 @@ def test_a_page_is_named_after_its_first_topic_and_placed_beside_it():
     assert str(pages[0].path) == "g/deep/getting-started.md"
 
 
-def test_anchors_dedup_by_looping_because_one_pass_is_not_enough():
-    """Requirements §7's hard-won case, and the reason `-2` is tried repeatedly.
+def test_an_anchor_is_the_platforms_slug_of_the_heading_not_of_the_filename():
+    """Phase 29. AEM ignores what we write and slugs the heading text itself.
 
-    `tibemslookupcontext-.md` slugs to `tibemslookupcontext`, which the first topic
-    already took, so it becomes `tibemslookupcontext-2` -- which is the *natural*
-    slug of the third topic. A single suffixing pass hands two topics one anchor.
+    The old rule slugged `topic.source.stem`. Measured across the merged corpus,
+    the two answers agreed for 7,153 of 18,657 anchors -- so ~11,500 fragments,
+    out of the 94% of internal links that carry one, named something the platform
+    was never going to create.
     """
-    sources = ["g/tibemslookupcontext.md", "g/tibemslookupcontext-.md", "g/tibemslookupcontext-2.md"]
-    pages = [Page("Guide", [Topic(s, PurePosixPath(s), 10) for s in sources])]
+    topics = [Topic("Configuring SSL", PurePosixPath("g/cfg_ssl_updated.md"), 10)]
+    pages = [Page("Guide", topics)]
 
-    assign(pages)
+    assign(pages, lambda topic: ["Configuring SSL"])
 
-    assert list(pages[0].anchors.values()) == [
-        "tibemslookupcontext", "tibemslookupcontext-2", "tibemslookupcontext-2-2",
+    assert list(pages[0].anchors.values()) == ["configuring-ssl"]
+
+
+def test_a_repeated_heading_is_numbered_the_way_the_platform_numbers_it():
+    """First occurrence bare, later ones `-1`, `-2`, in document order.
+
+    400 of 1,700 merged pages repeat a heading -- one has three "Location", three
+    "Syntax" and three "Examples".
+    """
+    topics = [Topic(f"t{n}", PurePosixPath(f"g/t{n}.md"), 10) for n in range(3)]
+    pages = [Page("Guide", topics)]
+
+    assign(pages, lambda topic: ["Location"])
+
+    assert list(pages[0].anchors.values()) == ["location", "location-1", "location-2"]
+
+
+def test_a_sub_heading_competes_for_the_same_anchor_as_a_topic_heading():
+    """Why `headings_of` returns every heading and not just the topic's own.
+
+    The first topic's `## Location` takes `#location`, so the second topic's own
+    `# Location` is the platform's *second* one and becomes `location-1`. Numbering
+    only the topic headings would have predicted `location` and been wrong.
+    """
+    topics = [
+        Topic("Install", PurePosixPath("g/install.md"), 10),
+        Topic("Location", PurePosixPath("g/location.md"), 10),
     ]
+    pages = [Page("Guide", topics)]
+    rendered = {"g/install.md": ["Install", "Location"], "g/location.md": ["Location"]}
+
+    assign(pages, lambda topic: rendered[str(topic.source)])
+
+    assert list(pages[0].anchors.values()) == ["install", "location-1"]
 
 
 def test_two_pages_in_one_directory_never_collide_on_a_filename():
@@ -1099,12 +1144,12 @@ def test_at_the_default_level_the_first_h1_becomes_the_anchored_h2():
     gets -- `carry`'s untocked pages and `project`'s new topics."""
     body = "# Top\n\nprose\n\n## Sub\n\n### Deeper\n"
 
-    shifted, added = shift_headings(body, "Ignored", "anc")
+    shifted, added = shift_headings(body, "Ignored")
 
-    assert shifted == '<a id="anc"></a>\n\n## Top\n\nprose\n\n### Sub\n\n#### Deeper\n'
-    # Two tokens, not one: `<a id="anc"></a>` splits on whitespace. §6's word
-    # conservation is an equality, so this is measured rather than assumed.
-    assert added == 2
+    assert shifted == "## Top\n\nprose\n\n### Sub\n\n#### Deeper\n"
+    # Zero since Phase 29. The `<a id>` marker used to cost two tokens; moving a
+    # heading costs none, because `#` and `######` are one token either way.
+    assert added == 0
 
 
 def test_a_topic_takes_the_level_its_page_gives_it_and_its_own_headings_follow():
@@ -1112,44 +1157,44 @@ def test_a_topic_takes_the_level_its_page_gives_it_and_its_own_headings_follow()
     with it, so the page reads as one document rather than as a flat list."""
     body = "# Top\n\nprose\n\n## Sub\n"
 
-    shifted, added = shift_headings(body, "Ignored", "anc", 3)
+    shifted, added = shift_headings(body, "Ignored", 3)
 
-    assert shifted == '<a id="anc"></a>\n\n### Top\n\nprose\n\n#### Sub\n'
+    assert shifted == "### Top\n\nprose\n\n#### Sub\n"
     # Unchanged by the offset: `#` and `######` are one token either way, which is
     # what keeps `audit._words`' strict equality true at every level.
-    assert added == 2
+    assert added == 0
 
 
 def test_a_topic_at_the_deepest_level_flattens_rather_than_overflowing():
-    shifted, added = shift_headings("# Top\n\n## Sub\n", "Ignored", "anc", 6)
+    shifted, added = shift_headings("# Top\n\n## Sub\n", "Ignored", 6)
 
-    assert shifted == '<a id="anc"></a>\n\n###### Top\n\n###### Sub\n'
-    assert added == 2
+    assert shifted == "###### Top\n\n###### Sub\n"
+    assert added == 0
 
 
 def test_a_synthesized_heading_is_written_at_the_topics_own_level():
-    shifted, added = shift_headings("prose\n", "Two Words", "anc", 4)
+    shifted, added = shift_headings("prose\n", "Two Words", 4)
 
-    assert shifted == '<a id="anc"></a>\n\n#### Two Words\n\nprose\n'
-    # Marker (2) + the hashes (1) + the title's own tokens (2). The hashes are one
-    # token at every level, so this figure does not move with the offset either.
-    assert added == 2 + 1 + 2
+    assert shifted == "#### Two Words\n\nprose\n"
+    # The hashes (1) plus the title's own two tokens. One token at every level, so
+    # this figure does not move with the offset either.
+    assert added == 1 + 2
 
 
 def test_a_heading_shift_stops_at_h6_rather_than_emitting_seven_hashes():
     """Not exercised by the reference corpus, which is H1-H4. A set that is deeper
     would otherwise emit `#######`, which GFM renders as literal hashes."""
-    shifted, _ = shift_headings("# Top\n\n###### Deep\n", "Ignored", "anc")
+    shifted, _ = shift_headings("# Top\n\n###### Deep\n", "Ignored")
 
     assert "\n###### Deep\n" in shifted
     assert "#######" not in shifted
 
 
 def test_a_topic_with_no_h1_gets_one_synthesized_from_its_toc_title():
-    shifted, added = shift_headings("just prose\n", "Release Notes", "anc")
+    shifted, added = shift_headings("just prose\n", "Release Notes")
 
-    assert shifted == '<a id="anc"></a>\n\n## Release Notes\n\njust prose\n'
-    assert added == 2 + 1 + 2  # the marker, the `##`, and the two-word title
+    assert shifted == "## Release Notes\n\njust prose\n"
+    assert added == 1 + 2  # the `##` and the two-word title
 
 
 def test_a_hash_comment_inside_a_fence_is_not_a_heading():
@@ -1161,10 +1206,10 @@ def test_a_hash_comment_inside_a_fence_is_not_a_heading():
     """
     body = "```bash\n# Install the broker\nmake install\n```\n\n# Installation\n"
 
-    shifted, _ = shift_headings(body, "Ignored", "anc")
+    shifted, _ = shift_headings(body, "Ignored")
 
     assert "```bash\n# Install the broker\n" in shifted
-    assert '<a id="anc"></a>\n\n## Installation' in shifted
+    assert "\n\n## Installation" in shifted
 
 
 # -- R4: links and assets ------------------------------------------------------
@@ -1750,15 +1795,22 @@ def placed(page_path: str, *topics: tuple[str, str]):
     return {PurePosixPath(source): (built, anchor) for source, anchor in topics}
 
 
-def test_a_csh_value_keeps_its_own_anchor_and_changes_only_its_page():
-    """The whole reason this is not `toc.retarget`. The identifier's `<a id>` marker
-    travelled into the merged page with its topic body and is a more precise landing
-    point than the section heading."""
+def test_a_csh_value_lands_on_the_section_because_its_own_anchor_is_unreachable():
+    """It used to keep the identifier's own fragment, on the reasoning that an
+    `<a id="help.a">` marker travelling in with the topic body was a more precise
+    landing point than the section heading.
+
+    Phase 29 measured that: the platform generates anchors from heading text and
+    ignores markers, so **0 of 154 identifiers across the merged corpus
+    resolved** -- every Help button landed nowhere. The section anchor is less
+    precise than the help author asked for and is the whole of what the platform
+    can express.
+    """
     located = placed("g/merged.md", ("g/a.md", "a-section"), ("g/b.md", "b-section"))
 
     out = csh_map.retarget({"help.a": "g/a.md#help.a", "help.b": "g/b.md#help.b"}, located)
 
-    assert out == {"help.a": "g/merged.md#help.a", "help.b": "g/merged.md#help.b"}
+    assert out == {"help.a": "g/merged.md#a-section", "help.b": "g/merged.md#b-section"}
 
 
 def test_a_value_with_no_fragment_lands_on_the_section_and_not_the_page_top():
@@ -1910,9 +1962,11 @@ def test_the_written_map_and_the_written_frontmatter_agree_end_to_end(config, ca
 
     assert result.outcome is ReframeOutcome.REFRAMED
     written = yaml.safe_load((result.path / "csh.yml").read_text(encoding="utf-8"))
+    # The section's heading anchor, not the identifier's own `<a id>`: the marker
+    # is in the body and the platform does not honour it (Phase 29).
     assert written == {
         "install.overview.helpurl":
-            "installation/installation-2.md#install.overview.helpurl"
+            "installation/installation-2.md#installation-overview"
     }
     page = (result.path / "installation/installation-2.md").read_text(encoding="utf-8")
     assert yaml.safe_load(split_frontmatter(page)[0].strip("-\n"))["csh"] == [
@@ -1991,7 +2045,7 @@ def test_an_absorbed_topic_redirects_to_the_anchor_it_became(config, catalog, de
 
     destinations = {row["from"].rsplit("/", 1)[1]: row["to"] for row in origin_rows(result.path)}
     assert destinations["installation-overvie.htm"] == (
-        "installation/installation-2.md#installation-overvie")
+        "installation/installation-2.md#installation-overview")
     assert destinations["user-guide.htm"] == "users-guide/user-guide.md#user-guide"
 
 

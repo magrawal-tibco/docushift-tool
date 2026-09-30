@@ -445,7 +445,11 @@ def test_a_named_anchor_in_a_heading_is_hoisted_above_it() -> None:
     rendered = render("<h2><a name='ID-2F'></a>Configuring Users</h2>")
 
     assert rendered == '<a id="ID-2F"></a>\n\n## Configuring Users'
-    assert references.anchors(rendered) == {"id-2f", "configuring-users"}
+    # Hoisting still matters, and for exactly the reason in the docstring: left in
+    # the line, the marker's text would be folded into the heading's own slug.
+    # The marker is no longer itself an anchor, though -- the platform ignores it
+    # (Phase 29) -- so `#id-2f` is a fragment nothing can resolve.
+    assert references.anchors(rendered) == {"configuring-users"}
 
 
 def test_a_tables_own_target_is_hoisted_in_front_of_the_pipe_table() -> None:

@@ -90,12 +90,28 @@ def retarget(mapping: dict[str, str], located: dict[PurePosixPath, tuple[Any, st
 
 
 def _value(value: str, located: dict[PurePosixPath, tuple[Any, str]]) -> str:
-    target, separator, fragment = value.partition("#")
+    """One identifier's new target: the merged page, and the section it became.
+
+    **The identifier's own fragment is dropped (Phase 29).** It used to be kept
+    where the source map had one, on the reasoning that a help author who named a
+    precise spot meant it. The spot was a Flare alias -- `aa.advisory.helpurl` --
+    backed by an `<a id>` marker, and the platform generates anchors from heading
+    text and ignores markers entirely. Measured on the merged corpus the moment
+    that was confirmed: **0 of 154 identifiers resolved.** Every Help button in
+    every published set landed nowhere.
+
+    So the fragment becomes the section anchor unconditionally. A reader arrives
+    at the topic's own heading instead of at a spot part-way down it, which is
+    less precise than the author asked for and is the whole of what the platform
+    can express. §9.6's rule is that a Help button may move and may never
+    disappear; keeping an unreachable fragment was the disappearing case.
+    """
+    target, _separator, _fragment = value.partition("#")
     found = located.get(PurePosixPath(target))
     if found is None:
         return value
     page, anchor = found
-    return f"{page.path}#{fragment if separator else anchor}"
+    return f"{page.path}#{anchor}"
 
 
 def by_topic(mapping: dict[str, str]) -> dict[PurePosixPath, list[str]]:

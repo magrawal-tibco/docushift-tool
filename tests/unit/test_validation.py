@@ -133,11 +133,21 @@ def test_line_numbers_survive_masking() -> None:
     assert [r.line for r in refs.references(text)] == [5]
 
 
-def test_anchors_come_from_headings_and_from_explicit_html_attributes() -> None:
-    """11,887 `id=`/`name=` attributes in the sample: the HTML is load-bearing."""
+def test_anchors_come_from_headings_and_an_html_attribute_is_not_one() -> None:
+    """Phase 29. The platform slugs heading text and ignores `id=`/`name=`.
+
+    This used to add the 11,887 `id=`/`name=` attributes in the sample as
+    resolvable anchors, which made the linter agree with the *emitter* rather
+    than with the renderer -- and is exactly how anchors slugged from source
+    filenames passed a check for six phases while 62% of them named something
+    that was never going to exist.
+
+    Dropping them means `#legacytarget` is now correctly reported as missing.
+    It genuinely does not resolve, and no content change can make it.
+    """
     text = '# My Heading\n\n<a name="legacyTarget"></a>\n\n## My Heading\n'
 
-    assert refs.anchors(text) == {"my-heading", "my-heading-1", "legacytarget"}
+    assert refs.anchors(text) == {"my-heading", "my-heading-1"}
 
 
 def test_bracket_text_inside_an_html_block_is_not_a_link() -> None:
@@ -171,7 +181,9 @@ def test_an_inline_tag_opening_a_line_starts_no_html_block() -> None:
     text = '<a id="ID-7B"></a>See [the guide](guide.md).\n'
 
     assert [r.raw for r in refs.references(text)] == ["guide.md"]
-    assert refs.anchors(text) == {"id-7b"}
+    # The marker itself is no longer an anchor (Phase 29); what this test is about
+    # is that the line it opens was still read for links.
+    assert refs.anchors(text) == set()
 
 
 # -- the walk: tree.py -----------------------------------------------------------

@@ -53,6 +53,7 @@ from pathlib import PurePosixPath
 
 from docushift.reframe.toc import TocEntry
 from docushift.transforms.headings import compact
+from docushift.utils.anchors import anchor_run
 from docushift.utils.slug import slugify
 
 
@@ -534,19 +535,35 @@ def _one_directory(topics: Sequence[Topic]) -> bool:
     return len({topic.directory for topic in topics}) <= 1
 
 
-def assign(pages: Sequence[Page]) -> dict[PurePosixPath, tuple[Page, str]]:
+def assign(
+    pages: Sequence[Page],
+    headings_of: Callable[[Topic], list[str]] | None = None,
+) -> dict[PurePosixPath, tuple[Page, str]]:
     """Names every page and anchors every topic. Returns source -> (page, anchor).
 
     R4.1 places a page beside its first topic and names it after that topic's
-    file; R2 slugs an anchor from each topic's own filename. Both dedup with the
-    **looping** `-2`, `-3`, ... suffix R2 insists on: `tibemslookupcontext2.md`
-    slugs to `tibemslookupcontext-2` all by itself, so a single attempt hands two
-    different topics the same anchor (requirements §7). Measured over the whole
-    corpus: 16 slugs collide, and 11 stems already end in `-N`.
+    file. Filenames dedup against the full output path -- two directories may each
+    hold an `overview.md` -- with the **looping** `-2`, `-3`, ... suffix R2 insists
+    on: `tibemslookupcontext2.md` slugs to `tibemslookupcontext-2` by itself, so a
+    single attempt hands two different names the same slug (requirements §7).
 
-    Filenames dedup against the full output path -- two directories may each hold
-    an `overview.md` -- while anchors dedup per page, which is the scope R2 asks
-    for and the scope a fragment is resolved in.
+    **Anchors are predicted, not chosen (Phase 29).** The platform generates them
+    from heading text and ignores anything this tool writes, so `headings_of`
+    supplies every heading a topic will render, in document order, and
+    `utils/anchors.anchor_run` numbers the page's whole run the way the platform
+    numbers it. A topic's own anchor is the one its *first H1* gets -- or, where
+    the body has no H1 and `pages.shift_headings` synthesizes one from the TOC
+    title, the anchor that synthesized heading gets.
+
+    **The run has to cover sub-headings too**, which is why the callable returns a
+    list rather than one string. A topic's `## Location` competes for `#location`
+    with another topic's `# Location` on the same page, and numbering only the
+    topic headings would predict `location` where the platform produces
+    `location-1`. 400 of 1,700 merged pages repeat a heading.
+
+    `headings_of` is optional so the packer stays testable against a dict of
+    sizes, as `words_of` already keeps it: with no reader, a topic is assumed to
+    render one heading, its title.
 
     A page that already carries a path was named by `project` off the pinned
     reference and is left exactly as it is (R1.4). Those names are reserved up
@@ -565,10 +582,19 @@ def assign(pages: Sequence[Page]) -> dict[PurePosixPath, tuple[Page, str]]:
             page.path = _unique(directory, stem, ".md", taken_files)
             taken_files.add(page.path)
 
-        taken_anchors: set[str] = set()
+        titles: list[str] = []
+        owned: list[int] = []
         for topic in page.topics:
-            anchor = _suffixed(slugify(topic.source.stem), taken_anchors)
-            taken_anchors.add(anchor)
+            found = list(headings_of(topic)) if headings_of else []
+            if not found:
+                # No H1 in the body: `shift_headings` prepends the TOC title.
+                found = [topic.title]
+            owned.append(len(titles))
+            titles.extend(found)
+
+        run = anchor_run(titles)
+        for topic, index in zip(page.topics, owned, strict=True):
+            anchor = run[index]
             page.anchors[topic.source] = anchor
             located[topic.source] = (page, anchor)
     return located

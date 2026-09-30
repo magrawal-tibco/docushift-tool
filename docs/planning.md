@@ -3594,6 +3594,174 @@ costs a re-merge and no code.
 
 ---
 
+### Phase 29: The Filename Is the URL — **Planned, 2026-09-30**
+
+From `docs/claude-code-naming-spec.md`. AEM generates the published URL itself, one
+segment per node in the TOC chain, each segment the lowercased filename cut at 50
+characters. **So a page's filename is not an implementation detail; it is the address a
+reader sees and a colleague pastes.** Today's names are inherited from MadCap, which
+truncates its own filenames at 20 characters, and Reframe names a merged page after its
+first topic's *source stem* rather than its title.
+
+**Measured, 2026-09-30.** Of 1,700 merged pages, **428 have a filename that disagrees with
+their own title** — `schema` for "Schema Resource", `installation-2` for "Installation",
+`attributes-panel-1` for "Attributes Panel". One is actively wrong: a page titled
+*Upgrading to Release 5.13.0* publishes as `upgrading-to-release-5-12-4.md`. Separately,
+**33 of 1,700 exceed the 50-character limit**, the longest at 74.
+
+#### Answers taken, 2026-09-30 — these were open questions in the spec and are not assumptions
+
+| question | answer | consequence |
+|---|---|---|
+| How does AEM build a URL? | **The TOC chain of filenames**, not the repo path | `architecture.md` §6.1 and `sync/redirects.published()` describe the wrong model and must be corrected |
+| Where does the work live? | **Inside Reframe**, replacing `packer.assign`'s naming rule | No new stage. Reframe already renames, rewrites every link, retargets `csh.yml` and regenerates redirects in one pass |
+| Separator | **`-`**, as a config key with that default | The spec's own example showed `_`; confirmed illustrative |
+| Section stub | **No `_section_*.md`** — that was the old tool. Where a parent node has no page of its own, the stub takes the folder name | |
+| Internal link form | **Relative `.md` paths**, unchanged — AEM resolves them to the generated URL | Confirmed, so the rewriter and `validate`'s on-disk resolution both stand |
+| Served URL shape | **`{region}/{lang}/{product}/{doc-class}/{version}/{toc chain}.html`** — no tree segment, `en-us` split **region-first** to `us/en` | `sync/redirects.published()` is wrong in three ways at once, below |
+| Heading anchors | **AEM ignores `<a id>` and generates its own** from heading text, lowercased and hyphenated, deduped GitHub-style (`location`, `location-1`, `location-2`) | The largest single piece of this phase — see below |
+| Duplicate placements | **A copy per guide**, reported with topic name and usage | |
+| Folder layout | **Mirror the merged TOC.** Every page-leading node with page-leading children becomes a folder named after its own file | Overrides the spec's "flat inside each section" |
+
+**The folder answer makes the URL correction much smaller than it looked.** If folders mirror
+the TOC, the repo path *becomes* the TOC chain, so the path half of the URL is right by
+construction rather than by a new computation.
+
+**The prefix half is wrong in three ways at once**, and `sync/redirects.published()`
+(`redirects.py:73`) is the single place all three live:
+
+```
+today   {tree}/{locale}/{product}/{doc-class}/{version}/installation/requirements.md
+served  {region}/{lang}/{product}/{doc-class}/{version}/installation/requirements.html
+```
+
+The tree segment does not appear in a URL; `en-us` splits **region-first** into `us/en`, not
+language-first; and the suffix is `.html`. One function, one fix — but see the migration note
+below, because that function is also what decides which rows in a published map the tool owns.
+
+#### The anchors are the bigger half of this phase, not the filenames
+
+**Measured, 2026-09-30.** Of 19,083 internal links in the merged tree, **17,937 (94%) carry a
+`#fragment`** — 5,475 of them same-page. All 154 `csh.yml` entries carry one. Every published
+redirect targets one.
+
+Anchors today are `slugify(topic.source.stem)`, deduped per page. AEM computes them from the
+**heading text**. The two agree for **7,153 of 18,657 markers (38%)** — so roughly 11,500
+anchors currently name something AEM will never create, and every link and help ID pointing
+at one lands at the top of the page instead of at the section.
+
+**And the new rule collides where the old one could not.** 400 of 1,700 pages repeat a
+heading: `installed-components.md` has three "Location", three "Syntax", three "Examples";
+`view-menu.md` repeats "Add Resource". GitHub-style numbering resolves them and is
+replicable exactly, at a cost worth naming — **the suffix is positional**, so inserting a
+section above a repeated heading renumbers every later one and moves a published anchor.
+No content change prevents that; it is a property of the rule AEM uses.
+
+#### Decisions
+
+| decision | what gets built | why not the obvious alternative |
+|---|---|---|
+| **A page is named from its title, not its source stem** | `utils/naming.py`: NFKC, decode `u0027`-style escapes, strip apostrophes without a separator, `&`→`and`, drop `®™©`, lowercase, one separator, 50 chars by dropping stopwords then cutting at a separator boundary | `utils/slug.py` stays as it is. It names *repositories and folders* from catalog values, where 50 characters and stopword-dropping would be wrong; two callers with different rules in one function is how both get broken. |
+| **Uniqueness is global and case-insensitive, and the earlier page wins** | On collision the later page becomes `<parent-slug><sep><slug>`, re-cut to 50 by shortening the parent part first; `-2` only as a last resort. Every disambiguation reported | `packer.assign`'s current `-2/-3` loop is per-directory and silent. Under the new URL model two pages in different folders can still collide on a segment, so the scope has to widen to the doc set. |
+| **A generic title takes its parent's prefix** | `overview`, `introduction`, `summary`, `services`, `requirements`, `before-you-begin` become `installation-overview` | These are the titles most likely to repeat, and a URL ending `/overview` tells a reader nothing. |
+| **Folders mirror the merged TOC** | A node that leads a page *and* has children that lead pages becomes a folder named after its own file stem, with its page beside it | The spec asked for one flat folder per section. Nesting is what makes the repo path equal the URL, which is worth more than flatness. |
+| **A topic in two guides becomes two pages** | `packer`'s first-occurrence `claimed` dedupe is replaced by per-placement packing; each copy is reported with its topic name and both usages | Sharing one page gives a topic two TOC parents and therefore two URLs for one file, which the new URL model cannot express. **Measured: 36 extra copies corpus-wide, 32 of them DataSynapse (out of scope) — so 4 pages in scope, all EMS 10.4.0/10.4.1.** |
+| **Names are persisted and reused** | `rename-map.csv` beside `reframe.yml`: `old_path,new_path,title,toc_breadcrumb,expected_aem_url`. A mapped file is not renamed because its title changed unless `--renormalize` | A published URL that moves because somebody fixed a typo in a title is the failure this phase is meant to prevent, not cause. |
+| **An anchor is the slug of the heading AEM will render** | `assign` takes a `heading_of(source)` callable beside `words_of`, slugs it the way AEM does, and dedupes per page with `-1`, `-2` | Computing it from the source filename is what put 62% of them wrong. The callable keeps the packer's rule that it never opens a topic body — the same seam `words_of` already uses, so layout stays testable against a dict. |
+| **The `<a id>` markers stop being emitted** | `anchor_marker` and its insertion in `shift_headings` go; `added` drops to 0 for a topic with an H1 | An anchor that looks real and is inert is worse than none — it is precisely what let 11,500 fragments drift wrong without a single check firing. The heading text becomes the one source of truth, and `validate` resolves fragments against it. |
+
+#### Scope
+
+- `src/docushift/utils/naming.py` — new; the slug algorithm and the 50-char rule. Pure, unit-tested.
+- `src/docushift/reframe/packer.py` — `assign` names from `Topic.title`; doc-set-wide uniqueness; parent-prefix disambiguation; per-placement packing for duplicates.
+- `src/docushift/reframe/pages.py` — `shift_headings` stops emitting the marker; `added` becomes 0 with an H1 and `1 + word_count(title)` without. `rewrite_links` is otherwise unchanged, which is the payoff of relative `.md` links being confirmed.
+- `src/docushift/validation/references.py` + `links.py` — a `#fragment` resolves against heading-derived anchors rather than `<a id>`/`name` attributes.
+- `src/docushift/reframe/manifest.py` — `rename-map.csv`.
+- `src/docushift/reframe/audit.py` — word conservation becomes a per-*placement* equality, not per-topic, or the 4 duplicated pages fail the stage; and its anchor check reads headings.
+- `src/docushift/sync/redirects.py` + `docs/architecture.md` §6.1 — the corrected URL model (no tree segment, `us/en`, `.html`), the 50-char per-segment cut, and the old-prefix migration.
+- `src/docushift/validation/artifacts.py` — `_check_redirects` resolves against the computed URL table, not the filesystem.
+- `config/reframe.yaml` — `naming.separator`, `naming.max_segment`, `naming.generic_slugs`, `duplicates`.
+- `policy.py` — the new keys join the currency digest; `_ALGORITHM` → 3.
+
+#### Exit
+
+Every merged page's filename equals `naming.slugify(its TOC title)`, is at most 50
+characters, matches `^[a-z0-9]+(-[a-z0-9]+)*\.md$`, and is unique across the doc set
+case-insensitively. **The 428 disagreements go to 0 and the 33 over-length names go to 0.**
+No two TOC nodes compute the same AEM URL.
+
+**And the anchor half, which is the one that can fail silently:** every `#fragment` in all
+17,937 fragment-bearing links, and all 154 `csh.yml` values, resolves to a heading that
+exists on the target page under AEM's own rule — measured by recomputing anchors from
+heading text and matching, not by trusting the emitter. Today that figure is 38%. No `<a id>`
+marker remains in the output. `audit` clean, `validate` 0 errors, and `reframe` run twice is
+byte-identical.
+
+#### The migration the URL fix drags with it
+
+`redirects.prefix()` is `published()` with an empty path, and `owned_prefixes` uses it to
+decide which rows in a doc-class map this tool is entitled to replace (`redirects.py:150-188`;
+everything else is carried through verbatim, which is what protects a hand-added row).
+**Change the prefix and the 17,252 rows already published stop being recognised as ours** —
+they would be left in place as foreign rows while a full set of new ones is inserted beside
+them, doubling every map and leaving the stale half pointing at URLs that never existed.
+
+So the fix needs a one-time migration in the same change: recognise the *old* prefix shape as
+also-owned for the purpose of deletion, emit only the new one. Written down here because it
+is invisible until it has already happened, and because the map is the one artifact `sync`
+merges rather than replaces.
+
+`validation/artifacts.py:_check_redirects` resolves a row's `to` against files on disk. A
+`.html` URL will not resolve that way, so the per-version check has to compare against the
+computed URL table instead — or it reports `LINK_BROKEN` on every correct row.
+
+#### Built so far — the anchors, 2026-09-30
+
+`utils/anchors.py` (`slugify_heading`, `anchor_run`), `assign` taking a
+`headings_of` callable, `shift_headings` losing its `anchor` parameter and the
+markers with it, `references.anchors()` reading headings only, and
+`csh._value` dropping the identifier's own fragment. `_ALGORITHM` → 3.
+**1,625 tests pass**, lint clean.
+
+| | before | after |
+|---|---:|---:|
+| ActiveSpaces fragments resolving under the platform's rule | — | **1,614 / 1,628 (99%)** |
+| EMS fragments resolving | — | **13,821 / 14,178 (97%)** |
+| Anchors agreeing with the platform, corpus-wide | 7,153 / 18,657 (38%) | — |
+| `csh.yml` entries resolving | **0 / 154** | **154 / 154** |
+
+**The `csh.yml` figure is the one that was not in the plan.** Checking it the
+moment `references.anchors()` stopped counting `<a id>` showed **every Help
+button in every published set landing nowhere** — each identifier kept its own
+Flare alias fragment (`aa.advisory.helpurl`), backed by a marker the platform
+ignores. `csh._value` now drops that fragment for the section anchor: less
+precise than the help author asked for, and the whole of what the platform can
+express. §9.6's rule is that a Help button may move and may never disappear, and
+keeping an unreachable fragment was the disappearing case.
+
+The ~370 fragments that still miss are *source* anchors — `#ID-000071DF`,
+`#top`, `#Starting` — pointing into the middle of a topic with no heading behind
+them. Nothing in the content can make those work; `validate` now reports them
+honestly instead of passing them against the markers it used to emit itself.
+
+Still to build: names from titles, folders mirroring the TOC, a copy per guide,
+the served-URL correction and its prefix migration, and `rename-map.csv`.
+
+#### Nothing is carried unverified
+
+Every question the spec raised has been answered against a real AEM instance rather than
+assumed, including the two that turned out to matter most — the URL is the TOC chain, and
+anchors come from heading text. That is the difference between this phase and a rewrite that
+would have shipped 11,500 broken fragments and looked clean doing it.
+
+**One accepted fragility, recorded rather than discovered later.** GitHub-style anchor
+numbering is positional: on the 400 pages with a repeated heading, inserting a section above
+one of them renumbers every later duplicate and moves a published anchor. No content change
+prevents it. The mitigation, if it ever bites, is editorial — make the repeated headings
+distinct — which is a writer's call and belongs in the review queue, not in the packer.
+
+---
+
 ## 2. Validation & Testing Criteria
 - **Catalog Merge Fidelity**: 100% preservation of manual edits and toggle states when fetching updates — *without* requiring the user to have flagged them.
 - **CSV Round-Trip Fidelity**: A load-then-save cycle with no changes produces a byte-identical file (stable sort, fixed columns, normalized booleans/dates). No diff churn on repeat fetches.

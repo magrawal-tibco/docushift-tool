@@ -28,6 +28,7 @@ audit removes the staging tree and leaves the previous merge, if any, untouched.
 
 from __future__ import annotations
 
+import re
 import shutil
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass, field
@@ -43,7 +44,16 @@ from docushift.models import Product, ProductVersion, SourceEngine
 from docushift.reframe import csh as csh_map
 from docushift.reframe import manifest, review
 from docushift.reframe.audit import audit
-from docushift.reframe.packer import Page, assign, carry, layout_of, pack, project, separated
+from docushift.reframe.packer import (
+    Page,
+    Topic,
+    assign,
+    carry,
+    layout_of,
+    pack,
+    project,
+    separated,
+)
 from docushift.reframe.pages import LinkCounts, render, split_frontmatter, title_of, word_count
 from docushift.reframe.policy import ReframePolicy, policy_for
 from docushift.reframe.review import Flag, branches, inspect
@@ -54,12 +64,18 @@ from docushift.utils.swap import remove, swap
 # The same function `validate` resolves CSH fragments with, so the audit and the
 # gate three stages later cannot disagree about what an anchor is.
 from docushift.validation.references import anchors as anchors_in
+from docushift.validation.references import mask_code
 
 #: The one engine Reframe runs for (C1). A tuple rather than a bare constant
 #: because the question "which engines produce topics small enough to need this?"
 #: is an empirical one, and WebWorks is the plausible second answer.
 REFRAMABLE_ENGINES: tuple[SourceEngine, ...] = (SourceEngine.FLARE,)
 
+
+#: A Markdown ATX heading. Declared here rather than imported from `pages.py`
+#: because this reads the *source* body to predict anchors, while that one edits
+#: the rendered body by offset; the shapes coincide today and are free to diverge.
+_HEADINGS = re.compile(r"^[ \t]{0,3}(#{1,6})[ \t]+(.*?)[ \t]*#*[ \t]*$", re.MULTILINE)
 
 #: Written fresh by this stage, so a copy of the source's version would be stale.
 _REGENERATED = frozenset(
@@ -113,6 +129,7 @@ class _Source:
         #: the retargeted file are two views of it and must not read it twice.
         self.csh = csh_map.load(root)
         self._words: dict[PurePosixPath, int] = {}
+        self._headings: dict[PurePosixPath, list[str]] = {}
 
     def exists(self, relative: PurePosixPath) -> bool:
         return relative in self.files
@@ -131,6 +148,36 @@ class _Source:
         if relative not in self._words:
             self._words[relative] = word_count(split_frontmatter(self.read(relative))[1])
         return self._words[relative]
+
+    def headings(self, topic: Topic) -> list[str]:
+        """Every heading this topic will render, in order. Memoized like `words`.
+
+        What `assign` needs to predict the platform's anchors (Phase 29). The
+        *text* is what matters and `shift_headings` never changes it -- only the
+        level -- so reading the source body gives the rendered run exactly.
+
+        Fence-masked, for the reason the module docstring gives: a `# comment` in
+        a shell sample is not a heading, and treating one as the topic's own H1 is
+        the proof-of-concept corruption requirements §7 singles out.
+
+        A body with no H1 gets its TOC title first, because that is precisely what
+        `shift_headings` prepends -- the two have to agree or the anchor names a
+        heading that is not there.
+
+        `assign` takes index 0 as the topic's own heading. Measured over EMS
+        10.5.1: 1,441 of 1,441 topics have an H1 and it is the first heading in
+        every one, so the two readings coincide on the whole corpus in hand. A
+        body that opened on an `h2` above its `h1` would anchor the topic at that
+        `h2` -- wrong, but wrong about a shape no measured topic has.
+        """
+        if topic.source not in self._headings:
+            body = split_frontmatter(self.read(topic.source))[1]
+            found = _HEADINGS.findall(mask_code(body))
+            texts = [text for _hashes, text in found]
+            if not any(len(hashes) == 1 for hashes, _text in found):
+                texts.insert(0, topic.title)
+            self._headings[topic.source] = texts
+        return self._headings[topic.source]
 
 
 class ReframeOutcome(StrEnum):
@@ -400,7 +447,7 @@ class Reframer:
             source.words,
         )
         built = packed + carried
-        located = assign(built)
+        located = assign(built, source.headings)
         unnavigated = frozenset(page.path for page in carried)
 
         staging = target.with_name(target.name + ".part")
@@ -796,7 +843,7 @@ class Reframer:
         packed = pack(roots, source.words, policy.max_words, policy.keep_separate)
         stranded = [path for path in source.topics if path not in nodes]
         carried = carry(stranded, lambda path: title_of(source.read(path), path.stem), source.words)
-        assign(packed + carried)
+        assign(packed + carried, source.headings)
         return layout_of(packed)
 
     def _check_pin(self, product: Product, policy: ReframePolicy) -> None:

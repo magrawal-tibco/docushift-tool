@@ -15,11 +15,19 @@ a mask and edits the original by offset. That is also why the patterns below are
 declared here rather than imported: the sibling module's are tuned for *counting*
 references and expose no destination span to rewrite.
 
-Anchors are emitted as `markdown.anchor_marker` on its own block above the heading
-(planning §20.3), not as the POC's `{#anchor}`. GFM has no attribute syntax, so
-`## Title {#a}` renders the braces as literal text and the anchor does not exist;
-the passthrough `<a id="..."></a>` is the house idiom and is what `slugify_heading`
-and `references.anchors()` already agree on.
+**A section's anchor is not emitted at all any more (Phase 29).** It used to be an
+`<a id="..."></a>` block above the heading, slugged from the source filename. AEM
+ignores those and generates its own anchor from the heading text, so the markers
+were inert and -- worse -- wrong: they agreed with the platform's answer for 7,153
+of 18,657, and 94% of internal links carry a fragment. An anchor that looks real
+and is inert is the reason 11,500 of them drifted with nothing reporting it. The
+heading text is now the single source of truth, predicted by `utils/anchors.py`
+and checked by `references.anchors()` through the same function.
+
+Stage 6a's markers stay, and the distinction matters: those preserve a *source*
+anchor (`<a name="ID-2FC4B4A1">`) that points into the middle of a topic and has
+no heading to be derived from. Nothing here can replace one, so nothing here
+removes one.
 """
 
 from __future__ import annotations
@@ -35,7 +43,6 @@ import yaml
 
 from docushift.reframe.packer import Page
 from docushift.transforms import links
-from docushift.transforms.markdown import anchor_marker
 from docushift.validation.references import mask_code, mask_html_blocks
 
 # Same shape as `validation/references.py`'s, with the destination named so it can
@@ -120,12 +127,18 @@ def word_count(body: str) -> int:
     return len(body.split())
 
 
-def shift_headings(body: str, title: str, anchor: str, level: int = 2) -> tuple[str, int]:
+def shift_headings(body: str, title: str, level: int = 2) -> tuple[str, int]:
     """R2.1. Returns the shifted body and how many tokens the shift added.
 
-    The topic's first H1 becomes the anchored heading at `level`; every other
-    heading moves by the same offset, capped at H6 (requirements §7). A topic with
-    no H1 gets a synthesized one from its TOC title.
+    The topic's first H1 moves to `level`; every other heading moves by the same
+    offset, capped at H6 (requirements §7). A topic with no H1 gets a synthesized
+    one from its TOC title.
+
+    **No anchor is written.** It used to take an `anchor` argument and emit an
+    `<a id>` above the heading; Phase 29 established that the platform ignores
+    those and derives the anchor from the heading text instead, so the parameter
+    went with the markup. The anchor a caller needs is `utils/anchors.anchor_run`
+    over this page's headings.
 
     **`level` is the topic's place in its page, not a constant.** It was a constant
     `2` until parent-leads packing (`planning.md` Phase 28): every topic became a
@@ -137,37 +150,32 @@ def shift_headings(body: str, title: str, anchor: str, level: int = 2) -> tuple[
 
     The token delta is returned rather than recomputed because §6's word
     conservation is an *equality*, and the only honest way to check an equality is
-    to have each step declare what it added. It is *measured* rather than asserted
-    for the reason the first corpus run found: `<a id="x"></a>` is two
-    whitespace-delimited tokens, not the one that requirements §6's "+1 per topic"
-    assumes, and a hand-written constant simply encodes whichever anchor syntax was
-    in mind when it was written.
+    to have each step declare what it added.
 
-    **The delta does not depend on `level`, and that is worth stating rather than
-    noticing.** `#` through `######` are each one whitespace-delimited token, so
-    moving a heading is free at *any* offset, and so is the H6 cap collapsing two
-    depths onto one. The cost is the marker, plus a synthesized heading and its
-    title where a topic had no H1 to anchor -- exactly as before.
+    **It is now zero whenever the topic has an H1**, and that is the phase's own
+    arithmetic rather than a simplification: moving a heading is free -- `#`
+    through `######` are each one whitespace-delimited token, at any offset, and
+    the H6 cap collapsing two depths onto one is free for the same reason. The
+    marker used to cost 2. All that remains is the synthesized heading and its
+    title, for a topic that had no H1 of its own.
     """
-    marker = anchor_marker(anchor)
     hashes = "#" * level
     edits: list[tuple[int, int, str]] = []
     found = False
     for match in _HEADING.finditer(mask_code(body)):
         depth = len(match.group("hashes"))
-        text = body[match.start("text"):match.end("text")]
         if depth == 1 and not found:
             found = True
-            edits.append((match.start(), match.end(), f"{marker}\n\n{hashes} {text}"))
+            edits.append((match.start("hashes"), match.start("hashes") + depth, hashes))
         else:
-            edits.append((match.start(), match.start("hashes") + depth,
+            edits.append((match.start("hashes"), match.start("hashes") + depth,
                           "#" * min(depth + level - 1, 6)))
 
     shifted = _apply(body, edits)
     if found:
-        return shifted, word_count(marker)
-    heading = f"{marker}\n\n{hashes} {title}"
-    added = word_count(marker) + 1 + word_count(title)
+        return shifted, 0
+    heading = f"{hashes} {title}"
+    added = 1 + word_count(title)
     return (f"{heading}\n\n{shifted}" if shifted else heading), added
 
 
@@ -305,7 +313,7 @@ def render(
     for topic in page.topics:
         _, body = split_frontmatter(read(topic.source))
         body = rewrite_links(body.strip(), topic.source, page.path, located, existing, counts)
-        body, extra = shift_headings(body, topic.title, page.anchors[topic.source], topic.level)
+        body, extra = shift_headings(body, topic.title, topic.level)
         parts.append(body)
         added += extra
     return "\n\n".join(parts) + "\n", added

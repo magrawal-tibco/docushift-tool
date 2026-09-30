@@ -36,7 +36,8 @@ _NOT_OUTPUT = frozenset({"publish"})
 #: algorithm would be two packers to keep alive.
 #:
 #: 1 = greedy sibling runs (Phase 20). 2 = parent-leads subtrees (Phase 28).
-_ALGORITHM = 2
+#: 3 = anchors predicted from heading text, no `<a id>` markers (Phase 29).
+_ALGORITHM = 3
 
 
 @dataclass(frozen=True)

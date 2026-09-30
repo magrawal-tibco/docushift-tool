@@ -36,8 +36,9 @@ Anchors are computed here too, from the same text, because the question "does
 """
 
 import re
-import unicodedata
 from dataclasses import dataclass
+
+from docushift.utils import anchors as anchors_util
 
 # A quoted or bare HTML attribute value. Three groups, one per quoting style; the
 # bare form exists because hand-written passthrough HTML in the corpus uses it.
@@ -82,8 +83,6 @@ _FENCE = re.compile(r"^[ \t]{0,3}(`{3,}|~{3,})")
 _CODE_SPAN = re.compile(r"(`+)(?!`)(?:[^`\n]|(?!\1)`)+\1")
 _FRONTMATTER = re.compile(r"\A---[ \t]*\r?\n.*?^---[ \t]*\r?$", re.DOTALL | re.MULTILINE)
 _HEADING = re.compile(r"^[ \t]{0,3}(#{1,6})[ \t]+(.*?)[ \t]*#*[ \t]*$", re.MULTILINE)
-_INLINE_MARKUP = re.compile(r"[!\[\]()`*_~]")
-_TAG = re.compile(r"<[^>]*>")
 
 
 @dataclass(frozen=True)
@@ -217,39 +216,39 @@ def references(text: str) -> list[RawReference]:
 def slugify_heading(title: str) -> str:
     """A heading's anchor, GitHub's way: tags out, punctuation out, spaces to dashes.
 
-    Reimplemented rather than imported because `utils/slug.py` answers a different
-    question -- it names *directories*, where `10.4.0` must become `10-4-0`. An
-    anchor keeps its dots. Two callers, two rules, and conflating them would break
-    whichever one lost.
+    Re-exported from `utils/anchors.py` rather than defined here. It used to live
+    in this module, which was right while the checker was its only caller; once
+    Reframe had to *emit* the same anchor (Phase 29) a second copy would have let
+    the writer and the checker agree with each other and both be wrong about what
+    the platform does.
     """
-    text = _TAG.sub("", title)
-    text = _INLINE_MARKUP.sub("", text)
-    text = unicodedata.normalize("NFKD", text).strip().lower()
-    text = re.sub(r"[^\w\- ]+", "", text, flags=re.UNICODE)
-    return text.replace(" ", "-")
+    return anchors_util.slugify_heading(title)
 
 
 def anchors(text: str) -> set[str]:
     """Every fragment `#foo` that resolves inside this file, lower-cased.
 
-    Two sources, both required: computed heading slugs, and the explicit `id=` /
-    `name=` attributes the engines emit into passthrough HTML. Lower-cased on both
-    sides of the comparison because renderers fold anchor case and a linter that
-    did not would report a difference nobody can see.
+    **Computed heading slugs, and nothing else (Phase 29).** This used to add the
+    explicit `id=` / `name=` attributes the engines pass through, on the reasonable
+    assumption that an `<a id>` in the output is an anchor in the output. It is
+    not: the platform generates anchors from heading text and ignores the
+    attributes entirely, confirmed 2026-09-30.
+
+    Counting them made this function agree with the emitter instead of with the
+    renderer, which is the failure mode a linter exists to catch rather than to
+    have. It is also *why* the old anchors went wrong unnoticed -- they were
+    slugged from source filenames, checked against themselves, and passed.
+
+    Dropping them raises `ANCHOR_MISSING` on every mid-topic Flare anchor
+    (`#ID-000071DF`, `#top`) that no heading backs. Those links genuinely do not
+    work, there is nothing in the content that can make them work, and a warning
+    naming them is the only honest output. Lower-cased on both sides because
+    renderers fold anchor case.
     """
-    found: set[str] = set()
-    seen: dict[str, int] = {}
-    masked = mask_code(text)
-    for _level, title in _HEADING.findall(masked):
-        base = slugify_heading(title)
-        if not base:
-            continue
-        # GitHub disambiguates repeats with `-1`, `-2`, in document order.
-        index = seen.get(base, 0)
-        found.add(base if not index else f"{base}-{index}")
-        seen[base] = index + 1
-    for match in _HTML_ANCHOR.finditer(masked):
-        value = _value(match, 1, 2, 3).strip()
-        if value:
-            found.add(value.lower())
-    return found
+    return {
+        anchor
+        for anchor in anchors_util.anchor_run(
+            [title for _level, title in _HEADING.findall(mask_code(text))]
+        )
+        if anchor
+    }
