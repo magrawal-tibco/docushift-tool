@@ -694,6 +694,59 @@ def relocate(pages: Sequence[Page], roots: Sequence[TocEntry]) -> int:
     return moved
 
 
+def override(pages: Sequence[Page], approved: dict[PurePosixPath, PurePosixPath]) -> int:
+    """Puts back the names a previous run recorded and a human kept.
+
+    Runs after `relocate`, so an approved path wins over both the computed name
+    and the computed folder: a writer who moved a page in `rename-map.csv` moved
+    it on purpose. Returns how many were pinned.
+
+    Keyed on the leading topic's *source*, which is the one identity that
+    survives a rename -- keying on the old path would stop matching the moment
+    the override took effect, which is the first run.
+
+    An approved path that another page has already taken is refused rather than
+    applied: two pages at one path is a page silently lost, and the record is
+    not worth that. The run reports it and keeps the computed name.
+    """
+    if not approved:
+        return 0
+    taken = {page.path for page in pages}
+    pinned = 0
+    for page in pages:
+        if not page.topics:  # pragma: no cover - a page always leads with a topic
+            continue
+        wanted = approved.get(page.topics[0].source)
+        if wanted is None or wanted == page.path or wanted in taken:
+            continue
+        taken.discard(page.path)
+        taken.add(wanted)
+        page.path = wanted
+        pinned += 1
+    return pinned
+
+
+def shortened(pages: Sequence[Page]) -> set[PurePosixPath]:
+    """The pages whose name lost words to the 50-character cut.
+
+    Flagged for review rather than quietly accepted: the cut takes the *tail* of
+    a title, which is where the distinguishing words usually are. Measured over
+    1,505 merged pages, 90 of them -- `deployment-scenario-running-activespaces`
+    from "Deployment Scenario for Running ActiveSpaces Processes as Windows
+    Services". Nothing here tries to do better; it says which ones a human or a
+    model should look at (`reframe/renames.py`).
+    """
+    marked: set[PurePosixPath] = set()
+    for page in pages:
+        if not page.topics:  # pragma: no cover
+            continue
+        first = page.topics[0]
+        full = naming.normalize(first.title)
+        if full and not page.path.stem.startswith(full) and not page.path.stem.endswith(full):
+            marked.add(first.source)
+    return marked
+
+
 def _name_for(first: Topic, taken: set[str]) -> str:
     """The filename stem for a page led by `first`. Phase 29's rule.
 

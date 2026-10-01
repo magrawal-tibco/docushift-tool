@@ -115,8 +115,13 @@ def test_the_register_carries_every_row_of_7_5() -> None:
     the one class of change that cannot be audited later unless it was counted at
     the time. Notes and not warnings on arithmetic: 612 of 24,781 pages skip a
     heading level, and a warning at 2.5% of every run is a warning nobody reads.
+
+    Phase 29 adds the 61st, `RENAME_MAP_APPLIED`, and it is the register's first
+    row for the tool *declining* to decide: a page name that came from a human
+    rather than from the slug algorithm. The count is what lets a reviewer tell a
+    tree that is stable from one that happened to recompute the same answer.
     """
-    assert len(REGISTRY) == 60
+    assert len(REGISTRY) == 61
 
 
 def test_severity_comes_from_the_registry_and_not_from_the_call_site() -> None:

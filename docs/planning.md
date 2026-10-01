@@ -920,6 +920,7 @@ The concrete deliverable of §7.1: every deferred "report line" in the three doc
 | `SYNC_RESIDUE`⁷ᵇ | note | validate | A `.part` staging folder left by a sync that did not finish | §7.4 |
 | `CSH_IDENTIFIER_DROPPED`⁷ᶜ | warn | validate | Present in the prior version, absent here (§7.6). One row per version; `count` is how many | this phase |
 | `CODE_LINK_FLATTENED`⁸ | note | convert | Link inside a code block kept its words and lost its target; a GFM fence cannot hold one | Phase 8 |
+| `RENAME_MAP_APPLIED`²⁹ | note | reframe | Page names taken from `rename-map.csv` rather than recomputed, so a published URL does not move when a title is edited | Phase 29 |
 | `HEADING_LEVEL_NORMALIZED`²⁷ | note | convert | Headings renumbered to close a level the source skipped; depth and order unchanged. One row per version; `count` is how many | Phase 27 |
 | `DEFINITION_TERM_RECOVERED`²⁷ | note | convert | Terms marked up as `class="dt"` rather than `<dt>`, retagged so they publish as terms instead of as prose | Phase 27 |
 | `INDEX_UNLINKED`¹⁰ᵇ | note | sync | A published document no `index.md` links to — the reverse of `LINK_BROKEN` | Phase 10b |
@@ -3861,8 +3862,35 @@ Stage 6a to retarget a fragment onto the nearest heading's anchor, exactly as
 `csh._value` now does, and it touches every unmerged product. **Raised as its
 own phase rather than absorbed into this one.**
 
-Still to build in 29: a copy per guide, and `rename-map.csv` with the hook for
-model-suggested names.
+#### Built so far — `rename-map.csv`, 2026-09-30
+
+`reframe/renames.py` and `packer.override`. One row per merged page, keyed on
+the source topic that leads it: `old_path, new_path, title, toc_breadcrumb,
+expected_aem_url, shortened`. **1,662 tests pass**, lint clean.
+
+It is a record *and* an override. A `new_path` a human keeps is read back on the
+next run and pins the page, so a published URL does not move because somebody
+fixed a typo in a title -- the failure requirements §1 calls permanent and that
+no amount of care at the naming end can prevent. `reframe --renormalize`
+recomputes anyway, so the pinning is a decision rather than a trap. Register
+**60 → 61** (`RENAME_MAP_APPLIED`, a note) so a reviewer can tell a tree that is
+stable from one that happened to recompute the same answer.
+
+`expected_aem_url` comes from `sync.redirects.published`, not a second formula
+beside it: the point of printing the address is that a reviewer can compare it
+against what the site serves, and two derivations would make that comparison
+meaningless exactly when it mattered.
+
+**The `shortened` column is the hook for model-assisted naming**, and it is why
+the build stays free of a model. Written over the real corpus: **1,505 rows, 90
+flagged** -- `creating-domain-that-integrates-ldap-directory` for "Creating a
+Domain that Integrates with an LDAP Directory Server", where the cut took
+"Server". A suggestion pass fills in `new_path`, a human approves, and the
+deterministic build reads the approved map as fixed input. The tool asserts
+byte-identical re-runs; a name that varied between runs would be a published
+address that moved on its own.
+
+Still to build in 29: a copy per guide.
 
 #### Nothing is carried unverified
 

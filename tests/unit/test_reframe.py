@@ -53,6 +53,7 @@ from docushift.reframe.toc import (
     schema_for,
 )
 from docushift.reporting.findings import FindingsRun, Severity
+from docushift.utils import csvio
 from tests.conftest import make_product, make_version
 
 TOC = """\
@@ -186,6 +187,7 @@ def test_a_flare_set_merges_into_fewer_pages_and_says_so(config, catalog, flare)
         "installation.md",
         "redirects.yml",
         "reframe.yml",
+        "rename-map.csv",
         "review-queue.csv",
         "toc.yml",
         "user-guide.md",
@@ -2120,7 +2122,7 @@ def test_the_origin_map_travels_with_the_merged_tree_rather_than_the_published_o
 
     written = sorted(p.name for p in result.path.iterdir() if p.is_file())
     assert written == ["301.yml", "installation.md", "redirects.yml", "reframe.yml",
-                       "review-queue.csv", "toc.yml", "user-guide.md"]
+                       "rename-map.csv", "review-queue.csv", "toc.yml", "user-guide.md"]
 
 
 def test_an_undeclared_product_gets_a_warning_and_no_file(config, catalog, flare):
@@ -2221,3 +2223,93 @@ def test_a_carried_page_is_left_where_it_was_because_no_toc_names_it():
     relocate(pages, roots)
 
     assert [str(page.path) for page in pages] == ["guide.md", "odd/a-stray.md"]
+
+
+# -- rename-map.csv (Phase 29) --------------------------------------------------
+
+
+def test_a_name_a_human_kept_survives_a_title_change(config, catalog, flare):
+    """The whole point of the map. A published URL must not move because somebody
+    fixed a typo in a title -- requirements §1's "every layout decision is
+    permanent", which no amount of care at the naming end can deliver on its own.
+    """
+    from docushift.reframe import renames
+
+    converted_tree(config, flare, "10.5.1")
+    result = Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"])
+    mapped = renames.load(result.path)
+    assert mapped[PurePosixPath("users-guide/user-guide.md")] == PurePosixPath("user-guide.md")
+
+    # A writer renames the page in the map, then somebody retitles the topic.
+    rows_now = list(csvio.read_rows(result.path / renames.RENAME_MAP))
+    for row in rows_now:
+        if row["old_path"] == "users-guide/user-guide.md":
+            row["new_path"] = "using-the-product.md"
+    renames.write(result.path / renames.RENAME_MAP, rows_now)
+    retitled = TOC.replace('title: "User Guide"', 'title: "User Guide (Revised)"')
+    converted_tree(config, flare, "10.5.1", toc=retitled)
+
+    again = Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"], force=True)
+
+    written = sorted(p.name for p in again.path.rglob("*.md"))
+    assert "using-the-product.md" in written
+    assert "user-guide-revised.md" not in written
+
+
+def test_renormalize_is_how_a_writer_asks_for_the_names_back(config, catalog, flare):
+    """Pinning has to be a decision rather than a trap."""
+    from docushift.reframe import renames
+
+    converted_tree(config, flare, "10.5.1")
+    result = Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"])
+    rows_now = list(csvio.read_rows(result.path / renames.RENAME_MAP))
+    for row in rows_now:
+        if row["old_path"] == "users-guide/user-guide.md":
+            row["new_path"] = "using-the-product.md"
+    renames.write(result.path / renames.RENAME_MAP, rows_now)
+
+    again = Reframer(config, catalog, renormalize=True).reframe_one(
+        flare, flare.versions["10.5.1"], force=True
+    )
+
+    written = sorted(p.name for p in again.path.rglob("*.md"))
+    assert "user-guide.md" in written
+    assert "using-the-product.md" not in written
+
+
+def test_the_map_records_the_address_a_reader_will_type(config, catalog, flare):
+    """The one column `reframe.yml` cannot supply, and the one somebody checks
+    when a link goes wrong. Through `sync.redirects.published`, not a second
+    formula beside it."""
+    from docushift.reframe import renames
+
+    converted_tree(config, flare, "10.5.1")
+
+    result = Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"])
+
+    rows_now = {r["old_path"]: r for r in csvio.read_rows(result.path / renames.RENAME_MAP)}
+
+    # One row per *page*, keyed on the topic that leads it -- an absorbed topic
+    # is a section, and `redirects.yml` is where it is accounted for.
+    assert set(rows_now) == {"installation/installation-2.md", "users-guide/user-guide.md"}
+    row = rows_now["installation/installation-2.md"]
+    assert row["title"] == "Installation"
+    assert row["toc_breadcrumb"] == "Installation"
+    assert row["expected_aem_url"] == (
+        "us/en/tibco-flare-docs/online-help/10-5-1/installation.html"
+    )
+
+
+def test_an_approved_name_another_page_already_holds_is_refused():
+    """Two pages at one path is a page silently lost, and no record is worth that."""
+    from docushift.reframe.packer import override
+
+    roots = [node("First", "g/a.md"), node("Second", "g/b.md")]
+    pages = pack(roots, lambda p: 10, 3000)
+    assign(pages)
+    relocate(pages, roots)
+
+    pinned = override(pages, {PurePosixPath("g/b.md"): PurePosixPath("first.md")})
+
+    assert pinned == 0
+    assert [str(page.path) for page in pages] == ["first.md", "second.md"]

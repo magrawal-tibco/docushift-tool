@@ -42,7 +42,7 @@ from docushift.catalog import CatalogManager
 from docushift.config import ConfigManager
 from docushift.models import Product, ProductVersion, SourceEngine
 from docushift.reframe import csh as csh_map
-from docushift.reframe import manifest, review
+from docushift.reframe import manifest, renames, review
 from docushift.reframe.audit import audit
 from docushift.reframe.packer import (
     Page,
@@ -50,17 +50,21 @@ from docushift.reframe.packer import (
     assign,
     carry,
     layout_of,
+    override,
     pack,
     project,
     relocate,
     separated,
+    shortened,
 )
 from docushift.reframe.pages import LinkCounts, render, split_frontmatter, title_of, word_count
 from docushift.reframe.policy import ReframePolicy, policy_for
 from docushift.reframe.review import Flag, branches, inspect
 from docushift.reframe.toc import TocEntry, retarget, schema_for
 from docushift.reporting.findings import FindingsRun
+from docushift.sync import redirects as redirect_urls
 from docushift.utils.longpath import long_path, walk_files
+from docushift.utils.slug import version_segment
 from docushift.utils.swap import remove, swap
 
 # The same function `validate` resolves CSH fragments with, so the audit and the
@@ -82,7 +86,7 @@ _HEADINGS = re.compile(r"^[ \t]{0,3}(#{1,6})[ \t]+(.*?)[ \t]*#*[ \t]*$", re.MULT
 #: Written fresh by this stage, so a copy of the source's version would be stale.
 _REGENERATED = frozenset(
     {"toc.yml", "reframe.yml", "redirects.yml", "review-queue.csv", csh_map.CSH_FILE,
-     origins.ORIGINS}
+     origins.ORIGINS, renames.RENAME_MAP}
 )
 
 
@@ -276,10 +280,15 @@ class Reframer:
         config: ConfigManager,
         catalog: CatalogManager,
         findings: FindingsRun | None = None,
+        renormalize: bool = False,
     ) -> None:
         self.config = config
         self.catalog = catalog
         self.findings = findings
+        #: Ignore `rename-map.csv` and recompute every name. A property of the
+        #: invocation rather than of a version, so it rides on the Reframer
+        #: rather than being threaded through five signatures that do not care.
+        self.renormalize = renormalize
         self.state = catalog.state
         self.reframe_config = config.load_reframe()
         # R1.4. Packing the reference version is the same cost as merging it, and a
@@ -454,6 +463,18 @@ class Reframer:
         # URL are the same chain. Before `render`, which resolves every relative
         # link and asset against `page.path`.
         relocate(built, roots)
+        # A name a human kept in `rename-map.csv` wins over both the computed
+        # name and the computed folder: a published URL must not move because
+        # somebody fixed a typo in a title. `--renormalize` is how a writer asks
+        # for the names to be recomputed anyway.
+        approved = {} if self.renormalize else renames.load(target)
+        pinned = override(built, approved)
+        if pinned:
+            self._record(
+                "RENAME_MAP_APPLIED", slug, number, count=pinned,
+                message=(f"{pinned} page name(s) taken from {renames.RENAME_MAP} "
+                         f"rather than recomputed"),
+            )
         unnavigated = frozenset(page.path for page in carried)
 
         staging = target.with_name(target.name + ".part")
@@ -471,7 +492,8 @@ class Reframer:
         counts = LinkCounts()
         added = self._write(staging, source, built, located, counts)
         self._write_navigation(
-            staging, source, roots, built, located, policy, counts, schema_name, flagged, queue
+            staging, source, roots, built, located, policy, counts, schema_name, flagged,
+            queue, self._url_for(product, version),
         )
         self._write_origins(staging, product, version, located)
 
@@ -621,6 +643,29 @@ class Reframer:
                 )
         return _Written(words, scaffolding, anchors, mirrored)
 
+    def _url_for(
+        self, product: Product, version: ProductVersion
+    ) -> Callable[[PurePosixPath], str]:
+        """A page path as the address a reader will type, for `rename-map.csv`.
+
+        Through `sync.redirects.published`, not a second formula beside it. The
+        served shape -- no repository segment, region-first locale, `.html` --
+        is one rule, and the whole point of printing the URL in the rename map
+        is that a reviewer can compare it against what the site actually serves.
+        Two derivations would make that comparison meaningless exactly when it
+        mattered.
+        """
+        base = str(self.config.load_publishing().get("publish_base_url") or "")
+        locale = str(self.config.load_publishing().get("primary_locale") or "en-us")
+        segment = version_segment(version.version)
+
+        def url_of(path: PurePosixPath) -> str:
+            return redirect_urls.published(
+                base, "", locale, product.slug, "online-help", segment, str(path)
+            )
+
+        return url_of
+
     def _write_navigation(
         self,
         staging: Path,
@@ -633,6 +678,7 @@ class Reframer:
         schema: str,
         flagged: dict[PurePosixPath, list[Flag]],
         queue: list[dict[str, str]],
+        url_of: Callable[[PurePosixPath], str],
     ) -> None:
         """Copies the assets through, then writes `toc.yml` and the three sidecars.
 
@@ -668,6 +714,10 @@ class Reframer:
         # merge that predates the queue, and a writer checking for pending work
         # should see a header and no rows rather than have to ask why.
         review.write(staging / "review-queue.csv", queue)
+        renames.write(
+            staging / renames.RENAME_MAP,
+            renames.rows(built, renames.breadcrumbs(roots), url_of, shortened(built)),
+        )
 
     def _write_origins(
         self,
@@ -891,9 +941,11 @@ class Reframer:
             return {}
         return self.state.get_version_metadata(slug, number)
 
-    def _record(self, code: str, slug: str, number: str, path: str = "", message: str = "") -> None:
+    def _record(self, code: str, slug: str, number: str, path: str = "", message: str = "",
+                count: int = 1) -> None:
         if self.findings is not None:
-            self.findings.record(code, slug=slug, version=number, path=path, message=message)
+            self.findings.record(code, slug=slug, version=number, path=path, message=message,
+                                 count=count)
 
     # -- the selection --------------------------------------------------------
 

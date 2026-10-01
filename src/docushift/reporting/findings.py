@@ -341,6 +341,14 @@ REGISTRY: dict[str, Code] = _codes(
     # every run and stop being read, which is the argument 20a made for counting
     # non-Flare rows instead of naming them. The count and the flag breakdown go in
     # the message, because the number is the thing a human acts on.
+    # Phase 29. A note, and the one row in the register that reports the tool
+    # *not* deciding something: a name here came from a human, and the run says
+    # how many so that a reviewer can tell a stable tree from one that happened
+    # to recompute the same answer.
+    Code("RENAME_MAP_APPLIED", Severity.NOTE, Stage.REFRAME,
+         "Page names taken from rename-map.csv rather than recomputed, so a "
+         "published URL does not move when a title is edited",
+         "planning.md Phase 29"),
     Code("REFRAME_REVIEW_QUEUED", Severity.NOTE, Stage.REFRAME,
          "Merged pages needing an editorial decision, listed in review-queue.csv",
          "REFRAME-REQUIREMENTS.md R6"),

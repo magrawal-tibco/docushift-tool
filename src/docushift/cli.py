@@ -1569,10 +1569,13 @@ def _report_reframe(stats, findings, manager=None) -> None:
 @_scope_options
 @click.option("--force", is_flag=True, help="Re-merge even if the converted tree and policy are unchanged.")
 @click.option("--dry-run", is_flag=True, help="List what would be reframed without writing.")
+@click.option("--renormalize", is_flag=True,
+              help="Recompute every page name, ignoring rename-map.csv. Published URLs will move.")
 @click.option("--input", "input_dir", type=DIR_PATH, default=None, help="Reframe a standalone converted folder.")
 @click.option("--output", "output_dir", type=DIR_PATH, default=None, help="Destination for the merged GFM.")
 @click.pass_context
-def reframe(ctx, bu, family, product, version, batch, select_all, force, dry_run, input_dir, output_dir) -> None:
+def reframe(ctx, bu, family, product, version, batch, select_all, force, dry_run, renormalize,
+            input_dir, output_dir) -> None:
     """Merge granular Flare topics into fewer, larger pages in reframed/.
 
     Runs over the same selection as `convert`, and skips every version whose engine
@@ -1617,7 +1620,7 @@ def reframe(ctx, bu, family, product, version, batch, select_all, force, dry_run
         return
 
     findings = FindingsRun("reframe", batch=batch or "", store=manager.state).start()
-    reframer = Reframer(cfg, manager, findings=findings)
+    reframer = Reframer(cfg, manager, findings=findings, renormalize=renormalize)
     console.print(f"Reframing {len(pairs)} version(s)...")
 
     def on_result(result) -> None:
