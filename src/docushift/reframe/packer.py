@@ -746,6 +746,27 @@ def override(pages: Sequence[Page], approved: dict[PurePosixPath, PurePosixPath]
     return pinned
 
 
+def asset_destination(source: PurePosixPath) -> PurePosixPath:
+    """Where an asset lands in the merged tree: lower-cased directories, same file.
+
+    **A folder, not a file, is renamed here**, and only in case. §6.4's rule that
+    an asset keeps its name byte-for-byte is intact -- `AS_Workflow_V-two.png`
+    stays exactly that -- because the thing that moves is the directory above it.
+
+    It has to move because `relocate` puts pages in lower-cased slug folders
+    while assets kept their source casing, and the two then collide. ActiveSpaces
+    has a source directory `Concepts/` and a page folder `concepts/`: on Windows
+    the copy silently lands in the folder that already exists, so the tree looks
+    right and every image link in it reads `../Concepts/…` against a directory
+    spelled `concepts`. On Linux those are two directories and the image 404s --
+    a defect that could not be seen on the machine that produced it.
+
+    One function, called by the copier and by `pages.rewrite_links`, because the
+    whole failure was the two disagreeing.
+    """
+    return PurePosixPath(*(part.lower() for part in source.parent.parts), source.name)
+
+
 def shortened(pages: Sequence[Page]) -> set[PurePosixPath]:
     """The pages whose name lost words to the 50-character cut.
 

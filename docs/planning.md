@@ -3983,6 +3983,46 @@ anchor the source never emitted, which is the `ANCHOR_MISSING` class Phase 7b
 measured at 11.6% and which no retargeting can reach. The other 625 are
 DataSynapse, out of scope and not re-converted.
 
+**Most of them were in the navigation, not in the prose.** The first run of
+this pass fixed the page bodies and `validate` still reported 18,112 missing
+anchors -- **18,047 of them from `toc.yml` and 65 from `.md` files**. A TOC node
+for a same-page section carries `path: "foo.md#anchor"`, and that anchor is a
+marker like any other. The pass now rewrites the value in place rather than
+re-emitting the YAML, so every other byte of the file is unchanged and a
+re-convert stays diffable. Retargeted went 52,930 → **71,006**.
+
+**Three more long-path traps, all the same shape.** `FolderIndex` and the
+per-folder walk in `validation/links.py` used `rglob`, so the index did not hold
+pages that are really there and every reference to one was reported broken --
+263 `LINK_BROKEN`. `artifacts._check_redirects` tested `exists()` unprefixed --
+60 more. Each one is `rglob` omitting an over-limit file *silently*, which
+`utils/longpath.walk_files` exists to prevent and says so in its own docstring.
+Phase 28 hit it once and Phase 29 twice; the deeper folders make it the default
+failure of any new walk.
+
+**And one defect this phase's own folders created.** `relocate` puts pages in
+lower-cased slug folders while assets kept their source casing. ActiveSpaces has
+a source directory `Concepts/` and a page folder `concepts/`: on Windows the
+copy lands in whichever exists, so the tree looks right and every image link in
+it reads `../Concepts/…` against a directory spelled `concepts`. On Linux those
+are two directories and the image 404s -- **a defect that could not be seen on
+the machine that produced it.** `packer.asset_destination` lower-cases the
+directory (never the filename, §6.4's rule) and the copier and the link rewriter
+both go through it, because the whole failure was the two disagreeing.
+
+#### The published target, end to end
+
+| | before Phase 29 | now |
+|---|---:|---:|
+| `validate` errors | 352 | **0** |
+| `ANCHOR_MISSING` | 70,273 | **537** |
+| `REDIRECT_SHADOWED` | 340 | 124 |
+
+Fragments resolving in the published trees: Streaming **45,248 / 45,248**,
+Runtime Agent 4,498 / 4,531, ActiveSpaces 1,730 / 1,736, EMS 14,171 / 14,178 --
+**65,647 of 65,693 (99.9%)**. The 537 that remain name an anchor the source
+never emitted at all, which no retargeting can reach.
+
 **One import had to be inverted.** `transforms/fragments.py` needs
 `validation.references.mask_code` -- the masker that stops a `# comment` in a
 shell sample being read as a heading -- and `transforms` sits *below*

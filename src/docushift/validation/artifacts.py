@@ -42,6 +42,7 @@ from docushift.sync import versions as version_file
 from docushift.sync.distributor import STAGING_SUFFIX
 from docushift.transforms import links as refs
 from docushift.utils.csvio import natural_version_key
+from docushift.utils.longpath import long_path
 from docushift.utils.slug import is_numeric_version
 from docushift.validation import references as md
 from docushift.validation.links import FolderIndex
@@ -447,11 +448,17 @@ def check_redirect_map(product: ProductFolder, doc_class: Path, target: Path,
         # product this target does not publish is somebody else's, carried
         # through verbatim, and resolving it would report every cross-repository
         # redirect as broken.
+        # `long_path` on both tests: since Phase 29 the merged folders mirror the
+        # TOC, so a deep page's path is past Windows' 260 characters and an
+        # unprefixed `exists()` answers False for a file that is really there --
+        # 60 `LINK_BROKEN` against redirects that resolve perfectly well.
         candidates = [
             candidate for candidate in redirect_map.disk_candidates(to, trees)
-            if (target / candidate.parts[0] / candidate.parts[1] / candidate.parts[2]).is_dir()
+            if long_path(
+                target / candidate.parts[0] / candidate.parts[1] / candidate.parts[2]
+            ).is_dir()
         ]
-        if candidates and not any((target / candidate).exists() for candidate in candidates):
+        if candidates and not any(long_path(target / c).exists() for c in candidates):
             findings.append(Finding(
                 "LINK_BROKEN", slug=product.slug, path=where,
                 message=f"{row.get('from', '')} redirects to {to}, which this target does not hold",

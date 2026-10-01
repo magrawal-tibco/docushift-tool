@@ -2338,3 +2338,37 @@ def test_an_approved_name_another_page_already_holds_is_refused():
 
     assert pinned == 0
     assert [str(page.path) for page in pages] == ["first.md", "second.md"]
+
+
+def test_an_asset_lands_in_a_lower_cased_folder_so_it_matches_the_page_tree():
+    """ActiveSpaces has a source directory `Concepts/` and, since `relocate`, a
+    page folder `concepts/`. On Windows the copy lands silently in whichever
+    exists and every link in it reads `../Concepts/` against a directory spelled
+    `concepts`; on Linux those are two directories and the image 404s.
+
+    The file keeps its name byte-for-byte -- §6.4's rule. Only the folder moves,
+    and only in case.
+    """
+    from docushift.reframe.packer import asset_destination
+
+    assert str(asset_destination(PurePosixPath("Concepts/AS_Workflow_V-two.png"))) == (
+        "concepts/AS_Workflow_V-two.png"
+    )
+    assert str(asset_destination(PurePosixPath("img/a.png"))) == "img/a.png"
+
+
+def test_an_asset_link_is_written_against_where_the_asset_lands():
+    """The copier and the rewriter through one function, because the whole
+    failure was the two disagreeing."""
+    here = Page("G", [Topic("A", PurePosixPath("Concepts/a.md"), 10)])
+    here.path = PurePosixPath("concepts/a.md")
+    located = {PurePosixPath("Concepts/a.md"): (here, "a")}
+    existing = frozenset({PurePosixPath("Concepts/a.md"), PurePosixPath("Concepts/shot.png")})
+    counts = LinkCounts()
+
+    out = rewrite_links(
+        "![s](shot.png)", PurePosixPath("Concepts/a.md"), here.path, located, existing, counts
+    )
+
+    assert out == "![s](shot.png)"
+    assert counts.asset == 1

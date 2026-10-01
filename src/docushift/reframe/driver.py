@@ -47,6 +47,7 @@ from docushift.reframe.audit import audit
 from docushift.reframe.packer import (
     Page,
     Topic,
+    asset_destination,
     assign,
     carry,
     layout_of,
@@ -697,7 +698,7 @@ class Reframer:
         another set will have others, so the rule has to be structural.
         """
         for relative in source.assets:
-            destination = long_path(staging / relative)
+            destination = long_path(staging / asset_destination(relative))
             destination.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(long_path(source.root / relative), destination)
 

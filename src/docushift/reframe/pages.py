@@ -41,7 +41,7 @@ from typing import Any
 
 import yaml
 
-from docushift.reframe.packer import Page
+from docushift.reframe.packer import Page, asset_destination
 from docushift.transforms import links
 from docushift.validation.references import mask_code, mask_html_blocks
 
@@ -268,7 +268,11 @@ def _retarget(
         return None
 
     counts.asset += 1
-    moved = links.relative_to(page, target)
+    # Against where the asset *lands*, not where it came from: `relocate` puts
+    # pages in lower-cased slug folders and the copier lower-cases the asset's
+    # directory to match. Computing this from the source path is how a link came
+    # to read `../Concepts/x.png` for a file written to `concepts/x.png`.
+    moved = links.relative_to(page, asset_destination(target))
     emitted = links.emit(moved, reference.fragment)
     return f"{emitted}?{reference.query}" if reference.query else emitted
 

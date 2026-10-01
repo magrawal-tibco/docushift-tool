@@ -28,6 +28,7 @@ In Phase 5a no engine is registered, so every selected version reports
 behaviour and it is honest: the spine runs end to end and the register says so.
 """
 
+import re
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass, field
 from enum import StrEnum
@@ -55,6 +56,12 @@ from docushift.transforms.assets import AssetCopier, Counts
 from docushift.utils.csvio import normalize_date
 from docushift.utils.slug import slugify, version_segment
 from docushift.utils.swap import remove, swap
+
+#: A `toc.yml` row's destination. The file is generated from one Jinja template
+#: with a stable shape, so a value-level rewrite is safe and -- unlike re-emitting
+#: the YAML -- leaves every other byte alone, which is what keeps a re-convert
+#: diffable.
+_TOC_PATH = re.compile(r'path:[ \t]*"([^"\n]*)"')
 
 
 class ConvertOutcome(StrEnum):
@@ -581,6 +588,36 @@ class DocumentConverter:
                 (staging / Path(*relative.parts)).write_text(
                     updated, encoding="utf-8", newline=""
                 )
+
+        # **And the navigation, which is where most of them are.** Measured on
+        # the first run of this pass: 18,047 of 18,112 surviving broken
+        # fragments came from `toc.yml` and only 65 from page bodies. A TOC node
+        # for a same-page section carries `path: "foo.md#anchor"`, and that
+        # anchor is a marker like any other. Rewriting the value in place rather
+        # than re-emitting the YAML keeps the file byte-stable everywhere else,
+        # which is what makes a re-convert diffable.
+        toc = staging / "toc.yml"
+        if toc.is_file():
+            text = toc.read_text(encoding="utf-8")
+            moved = 0
+
+            def replace(match: re.Match[str]) -> str:
+                nonlocal moved, unplaced
+                path, separator, fragment = match.group(1).partition("#")
+                if not separator or not fragment:
+                    return match.group(0)
+                found = targets.get(PurePosixPath(path))
+                placed = found.get(fragment.lower()) if found is not None else None
+                if placed is None:
+                    unplaced += 1
+                    return match.group(0)
+                moved += 1
+                return f'path: "{path}#{placed}"'
+
+            updated = _TOC_PATH.sub(replace, text)
+            if moved:
+                rewritten += moved
+                toc.write_text(updated, encoding="utf-8", newline="")
 
         if rewritten:
             context.record(

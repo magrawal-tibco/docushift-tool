@@ -46,6 +46,7 @@ from pathlib import Path, PurePosixPath
 
 from docushift.reporting.findings import Finding
 from docushift.transforms import links as refs
+from docushift.utils.longpath import long_path, walk_files
 from docushift.validation import references
 from docushift.validation.tree import VersionFolder
 
@@ -91,10 +92,16 @@ class LinkReport:
 class FolderIndex:
     """One version folder's files, read once.
 
-    Three indexes over one `rglob`, because the checker asks three questions of
+    Three indexes over one walk, because the checker asks three questions of
     every reference and re-walking for each would turn an 84-second run into a
     three-hour one. The anchor cache is the same bargain one level down: a page
     cited by two hundred siblings is parsed once.
+
+    `walk_files`, not `rglob`: since Phase 29 the merged folders mirror the TOC,
+    and `rglob` reaches each directory through the unprefixed spelling, so on
+    Windows it **omits an over-limit file silently**. The index then does not
+    hold a page that is really there and every reference to it is reported
+    broken -- 263 `LINK_BROKEN` on the first run after the folders deepened.
     """
 
     def __init__(self, folder: Path) -> None:
@@ -102,14 +109,13 @@ class FolderIndex:
         self.present: set[str] = set()
         self._folded: dict[str, str] = {}
         self._anchors: dict[str, set[str]] = {}
-        for path in folder.rglob("*"):
-            if path.is_file():
-                relative = path.relative_to(folder).as_posix()
-                self.present.add(relative)
-                # First writer wins. Two files differing only in case cannot both
-                # exist on Windows, and on Linux either one proves the reference
-                # is resolvable in *some* casing, which is all this index claims.
-                self._folded.setdefault(relative.lower(), relative)
+        for relative_path, _path in walk_files(folder):
+            relative = relative_path.as_posix()
+            self.present.add(relative)
+            # First writer wins. Two files differing only in case cannot both
+            # exist on Windows, and on Linux either one proves the reference
+            # is resolvable in *some* casing, which is all this index claims.
+            self._folded.setdefault(relative.lower(), relative)
 
     def actual_case(self, relative: str) -> str | None:
         """The file that is there, when only its casing differs. `None` otherwise."""
@@ -119,7 +125,8 @@ class FolderIndex:
         cached = self._anchors.get(relative)
         if cached is None:
             try:
-                text = (self.folder / relative).read_text(encoding="utf-8", errors="replace")
+                text = long_path(self.folder / relative).read_text(
+                    encoding="utf-8", errors="replace")
             except OSError:  # pragma: no cover - the file was just listed
                 text = ""
             cached = references.anchors(text)
@@ -135,16 +142,23 @@ def check(
     """Every Markdown file in one version folder, checked against what is there."""
     index = index if index is not None else FolderIndex(folder.path)
     report = LinkReport()
-    for path in sorted(folder.path.rglob("*.md")):
-        report.extend(_check_file(folder, context, index, path))
+    for relative, path in sorted(walk_files(folder.path)):
+        if path.suffix.lower() != ".md":
+            continue
+        # The relative half comes from the walk rather than from
+        # `path.relative_to(folder.path)`: `walk_files` returns the absolute
+        # path *prefixed*, which is the only spelling an over-limit file can be
+        # opened by, and which `relative_to` an unprefixed root cannot subtract.
+        report.extend(_check_file(folder, context, index, relative, path))
     return report
 
 
 def _check_file(
-    folder: VersionFolder, context: LinkContext, index: FolderIndex, path: Path
+    folder: VersionFolder, context: LinkContext, index: FolderIndex,
+    relative_path: PurePosixPath, path: Path,
 ) -> LinkReport:
     report = LinkReport(files=1)
-    relative = path.relative_to(folder.path).as_posix()
+    relative = relative_path.as_posix()
     base = PurePosixPath(relative).parent
     try:
         text = path.read_text(encoding="utf-8", errors="replace")
@@ -157,7 +171,10 @@ def _check_file(
                 code,
                 slug=folder.slug,
                 version=folder.segment,
-                path=f"{folder.rel(path)}:{line}",
+                # From the walk's relative half, not from the prefixed absolute
+                # path: the long-path prefix in a report is this tool's plumbing
+                # rather than the reader's path.
+                path=f"{(folder.relative / relative_path).as_posix()}:{line}",
                 message=message,
             )
         )
