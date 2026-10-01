@@ -73,7 +73,12 @@ from docushift.sync import archives as archive_index
 from docushift.sync import documents as document_index
 from docushift.sync import redirects as redirect_map
 from docushift.sync import versions as version_file
-from docushift.utils.longpath import PUBLISHED_PATH_LIMIT, long_path, over_limit
+from docushift.utils.longpath import (
+    PUBLISHED_PATH_LIMIT,
+    long_path,
+    over_limit,
+    walk_files,
+)
 from docushift.utils.slug import is_numeric_version, slugify, version_segment
 from docushift.utils.swap import remove, swap
 
@@ -353,8 +358,15 @@ class WorkspaceDistributor:
             staging.parent.mkdir(parents=True, exist_ok=True)
             # `copy2` rather than `copy`, so mtime survives the copy -- which is
             # what makes `_identical` able to tell a re-sync from a human's edit.
-            shutil.copytree(source, staging, copy_function=shutil.copy2)
-            files = [path for path in staging.rglob("*") if path.is_file()]
+            #
+            # `long_path` on both ends since Phase 29: the merged folders mirror
+            # the TOC, so a deep page plus the `.part` staging suffix crosses
+            # Windows' 260 characters while the *published* path is comfortably
+            # under it. Without the prefix the copy fails outright and takes
+            # seven ActiveSpaces versions with it -- for five characters that do
+            # not exist in the tree anybody reads.
+            shutil.copytree(long_path(source), long_path(staging), copy_function=shutil.copy2)
+            files = [path for _relative, path in walk_files(staging)]
             size = sum(path.stat().st_size for path in files)
             swap(staging, destination)
         except BaseException:

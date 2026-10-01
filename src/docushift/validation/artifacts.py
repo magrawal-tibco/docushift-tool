@@ -439,8 +439,19 @@ def check_redirect_map(product: ProductFolder, doc_class: Path, target: Path,
     findings: list[Finding] = []
     for row in rows:
         to = str(row.get("to", ""))
-        resolved = redirect_map.relative_path(to, trees)
-        if resolved is not None and not (target / resolved).exists():
+        # Plural since Phase 29: a served URL carries no repository segment, so
+        # the tree it lives in has to be tried rather than read off the row.
+        #
+        # "Not ours" used to be "the first segment is not a published tree". With
+        # that segment gone the equivalent test is the product: a row naming a
+        # product this target does not publish is somebody else's, carried
+        # through verbatim, and resolving it would report every cross-repository
+        # redirect as broken.
+        candidates = [
+            candidate for candidate in redirect_map.disk_candidates(to, trees)
+            if (target / candidate.parts[0] / candidate.parts[1] / candidate.parts[2]).is_dir()
+        ]
+        if candidates and not any((target / candidate).exists() for candidate in candidates):
             findings.append(Finding(
                 "LINK_BROKEN", slug=product.slug, path=where,
                 message=f"{row.get('from', '')} redirects to {to}, which this target does not hold",

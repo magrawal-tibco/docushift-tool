@@ -23,6 +23,9 @@ from docushift.sync import (
 )
 
 TREE = "en-us-tibco-messaging-userdocs"
+#: The served prefix: no repository segment, and `en-us` region-first as the
+#: platform serves it. Phase 29 -- see `sync/redirects.py`.
+SERVED = "us/en"
 
 
 @pytest.fixture
@@ -1070,10 +1073,10 @@ def test_the_published_map_carries_tree_rooted_urls_for_every_merged_version(
 
     rows = published_map(target, product)["redirects"]
     assert [row["from"] for row in rows] == [
-        f"{TREE}/en-us/tibco-ems/online-help/10-3-1/users-guide/old.md",
-        f"{TREE}/en-us/tibco-ems/online-help/10-4-0/users-guide/old.md",
+        f"{SERVED}/tibco-ems/online-help/10-3-1/users-guide/old.html",
+        f"{SERVED}/tibco-ems/online-help/10-4-0/users-guide/old.html",
     ]
-    assert rows[0]["to"] == f"{TREE}/en-us/tibco-ems/online-help/10-3-1/users-guide/new.md#old"
+    assert rows[0]["to"] == f"{SERVED}/tibco-ems/online-help/10-3-1/users-guide/new.html#old"
     assert all(row["status"] == 301 for row in rows)
 
 
@@ -1089,7 +1092,7 @@ def test_no_row_carries_a_host_while_publish_base_url_is_empty(
 
     rows = published_map(target, product)["redirects"]
     assert rows and not any("://" in row["to"] for row in rows)
-    assert all(row["to"].startswith(TREE) for row in rows)
+    assert all(row["to"].startswith(SERVED) for row in rows)
 
 
 def test_a_configured_base_prefixes_every_row(
@@ -1105,7 +1108,7 @@ def test_a_configured_base_prefixes_every_row(
 
     rows = published_map(target, product)["redirects"]
     assert rows[0]["from"] == (
-        f"https://docs.example.com/{TREE}/en-us/tibco-ems/online-help/10-4-0/users-guide/old.md"
+        f"https://docs.example.com/{SERVED}/tibco-ems/online-help/10-4-0/users-guide/old.html"
     )
 
 
@@ -1124,6 +1127,52 @@ def test_a_scoped_run_leaves_the_other_versions_redirects_in_place(
 
     segments = {row["from"].split("/")[4] for row in published_map(target, product)["redirects"]}
     assert segments == {"10-4-0", "10-3-1"}
+
+
+def test_a_row_written_under_the_old_url_shape_is_replaced_not_duplicated(
+    config, catalog, distributor, product, target
+) -> None:
+    """Phase 29's migration, and the reason it needs a test of its own.
+
+    `prefix` is both what this tool writes *and* how `owned_prefixes` decides
+    which rows it may replace. Correcting the served shape -- dropping the
+    repository segment, `en-us` -> `us/en`, `.md` -> `.html` -- therefore
+    orphaned the 17,252 rows already published: unrecognised, they would survive
+    verbatim beside a full set of replacements and double every map, half of it
+    pointing at URLs that never existed.
+
+    Invisible until it has already happened, which is why it is pinned here.
+    """
+    opt_in(config, product.slug)
+    merged_version(config, catalog, product, "10.4.0")
+    distributor.sync_many([(product, product.versions["10.4.0"])], target)
+
+    # Rewrite the published map the way a pre-Phase-29 run would have left it.
+    path = target / TREE / "en-us" / product.slug / ONLINE_HELP / REDIRECT_MAP
+    document = yaml.safe_load(path.read_text(encoding="utf-8"))
+    legacy = f"{TREE}/en-us/tibco-ems/online-help/10-4-0/users-guide"
+    document["redirects"] = [
+        {"from": f"{legacy}/old.md", "to": f"{legacy}/new.md#old", "status": 301}
+    ]
+    path.write_text(yaml.safe_dump(document, sort_keys=False), encoding="utf-8")
+
+    distributor.sync_many([(product, product.versions["10.4.0"])], target)
+
+    rows = published_map(target, product)["redirects"]
+    assert len(rows) == 1
+    assert rows[0]["from"] == f"{SERVED}/tibco-ems/online-help/10-4-0/users-guide/old.html"
+
+
+def test_a_locale_splits_region_first_because_that_is_how_it_is_served() -> None:
+    """`publishing.yaml` stores language-region; the platform serves
+    country-then-language. Getting it backwards is invisible in a diff and wrong
+    in every row."""
+    from docushift.sync.redirects import region_and_language
+
+    assert region_and_language("en-us") == "us/en"
+    assert region_and_language("ja-jp") == "jp/ja"
+    # Nothing to split: left exactly as it is rather than guessed at.
+    assert region_and_language("loc") == "loc"
 
 
 def test_a_hand_added_redirect_survives_a_resync(
@@ -1253,7 +1302,7 @@ def test_the_origin_map_prefixes_the_destination_and_leaves_the_live_url_alone(
     assert [row["from"] for row in rows] == [
         "https://docs.tibco.com/pub/ems/10.4.0/doc/html/users-guide/old.htm"
     ]
-    assert rows[0]["to"] == f"{TREE}/en-us/tibco-ems/online-help/10-4-0/users-guide/new.md#old"
+    assert rows[0]["to"] == f"{SERVED}/tibco-ems/online-help/10-4-0/users-guide/new.html#old"
     assert rows[0]["status"] == 301
 
 

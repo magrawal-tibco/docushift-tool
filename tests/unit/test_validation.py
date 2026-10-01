@@ -1570,8 +1570,8 @@ def test_a_published_redirect_resolving_to_a_file_in_the_target_is_clean(
     publish(target, {"html/new.md": "# New\n"})
     published_map(
         target,
-        entry(f"{TREE}/en-us/{SLUG}/online-help/1-0-0/html/old.md",
-              f"{TREE}/en-us/{SLUG}/online-help/1-0-0/html/new.md#old"),
+        entry(f"us/en/{SLUG}/online-help/1-0-0/html/old.html",
+              f"us/en/{SLUG}/online-help/1-0-0/html/new.html#old"),
     )
 
     assert map_of(target) == []
@@ -1587,8 +1587,8 @@ def test_a_published_redirect_to_a_page_the_target_does_not_hold_is_an_error(
     publish(target, {"html/new.md": "# New\n"})
     published_map(
         target,
-        entry(f"{TREE}/en-us/{SLUG}/online-help/1-0-0/html/old.md",
-              f"{TREE}/en-us/{SLUG}/online-help/1-0-0/html/gone.md#old"),
+        entry(f"us/en/{SLUG}/online-help/1-0-0/html/old.html",
+              f"us/en/{SLUG}/online-help/1-0-0/html/gone.html#old"),
     )
 
     findings = map_of(target)
@@ -1607,8 +1607,8 @@ def test_a_redirect_out_of_this_target_is_not_resolved(tmp_path: Path) -> None:
     published_map(
         target,
         entry("legacy/widget.html", "https://elsewhere.example.com/widget"),
-        entry(f"{TREE}/en-us/{SLUG}/online-help/1-0-0/html/old.md",
-              "en-us-some-other-tree/en-us/other/online-help/1-0-0/a.md"),
+        entry(f"us/en/{SLUG}/online-help/1-0-0/html/old.html",
+              "us/en/some-other-product/online-help/1-0-0/a.html"),
     )
 
     assert map_of(target) == []
@@ -1622,8 +1622,8 @@ def test_a_host_on_the_row_does_not_stop_it_being_resolved(tmp_path: Path) -> No
     publish(target, {"html/new.md": "# New\n"})
     published_map(
         target,
-        entry(f"https://docs.example.com/{TREE}/en-us/{SLUG}/online-help/1-0-0/html/old.md",
-              f"https://docs.example.com/{TREE}/en-us/{SLUG}/online-help/1-0-0/html/gone.md"),
+        entry(f"https://docs.example.com/us/en/{SLUG}/online-help/1-0-0/html/old.html",
+              f"https://docs.example.com/us/en/{SLUG}/online-help/1-0-0/html/gone.html"),
     )
 
     assert codes(map_of(target)) == ["LINK_BROKEN"]
@@ -1636,8 +1636,8 @@ def test_a_percent_encoded_published_redirect_resolves_to_its_decoded_file(
     publish(target, {"html/release notes.md": "# Notes\n"})
     published_map(
         target,
-        entry(f"{TREE}/en-us/{SLUG}/online-help/1-0-0/html/old.md",
-              f"{TREE}/en-us/{SLUG}/online-help/1-0-0/html/release%20notes.md"),
+        entry(f"us/en/{SLUG}/online-help/1-0-0/html/old.html",
+              f"us/en/{SLUG}/online-help/1-0-0/html/release%20notes.html"),
     )
 
     assert map_of(target) == []
@@ -1696,7 +1696,7 @@ def test_an_origin_redirect_landing_on_a_published_page_is_clean(tmp_path: Path)
     published_origins(
         target,
         entry("https://docs.tibco.com/pub/ems/1.0.0/doc/html/old.htm",
-              f"{TREE}/en-us/{SLUG}/online-help/1-0-0/html/new.md#old"),
+              f"us/en/{SLUG}/online-help/1-0-0/html/new.html#old"),
     )
 
     assert origin_map_of(target) == []
@@ -1712,7 +1712,7 @@ def test_an_origin_redirect_to_a_page_the_target_does_not_hold_is_an_error(
     published_origins(
         target,
         entry("https://docs.tibco.com/pub/ems/1.0.0/doc/html/old.htm",
-              f"{TREE}/en-us/{SLUG}/online-help/1-0-0/html/gone.md#old"),
+              f"us/en/{SLUG}/online-help/1-0-0/html/gone.html#old"),
     )
 
     findings = origin_map_of(target)
@@ -1731,7 +1731,7 @@ def test_the_live_url_on_the_left_is_never_resolved_against_the_target(
     published_origins(
         target,
         entry("https://docs.tibco.com/pub/ems/1.0.0/doc/html/nowhere.htm",
-              f"{TREE}/en-us/{SLUG}/online-help/1-0-0/html/new.md"),
+              f"us/en/{SLUG}/online-help/1-0-0/html/new.html"),
     )
 
     assert origin_map_of(target) == []

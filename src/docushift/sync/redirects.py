@@ -30,11 +30,29 @@ sorts by, because a redirect map is looked up rather than read.
 `publish_base_url` yields the tree-rooted path with no scheme and no host, which
 is `apirefs.published_url`'s rule (6e) and for its reason: a map missing only its
 prefix is fixable by search-and-replace once the AEM host is known, and a map that
-was never emitted is not recoverable at all. The `.md` extension is kept, because
-every relative link inside every published page and every `toc.yml` path carries
-it -- a redirect map that guessed otherwise would be the one artifact in the tree
-disagreeing with the rest, and wrong in a way search-and-replace could not tell
-apart from right.
+was never emitted is not recoverable at all.
+
+**The served shape was wrong in three ways until Phase 29**, and all three lived
+in `published` below. It emitted `{tree}/{locale}/{product}/{doc-class}/{version}/
+path.md`; the platform serves `{region}/{lang}/{product}/{doc-class}/{version}/
+path.html`. The repository name is not in a URL. `en-us` splits **region-first**
+into `us/en`, matching the platform's country-then-language site structure, not
+language-first as the catalog stores it. And the extension is `.html`: the
+platform generates a page per node and names it so. 17,252 rows had been
+published against the old shape.
+
+That last one reversed an argument this docstring used to make -- that `.md`
+should be kept because every link and every `toc.yml` path carries it. The
+premise was right and the conclusion was wrong: those are *source* paths that
+AEM resolves, and this file is the one artifact that is not a source path but a
+served address.
+
+**Changing the prefix drags a migration with it**, because `prefix` is also how
+`owned_prefixes` decides which rows this tool may replace. Rows written under
+the old shape would stop being recognised as ours, survive as foreign rows, and
+sit beside a full set of new ones -- every map doubled, half of it pointing at
+URLs that never existed. So `owned_prefixes` claims both shapes: the old one to
+delete, the new one to write.
 """
 
 from pathlib import Path, PurePosixPath
@@ -57,6 +75,23 @@ HEADER = (
 )
 
 
+def region_and_language(locale: str) -> str:
+    """`en-us` as the platform serves it: `us/en`, region first.
+
+    The catalog stores language-region, which `publishing.yaml` says in as many
+    words, and the served URL is the other way round -- the platform's
+    country-then-language site structure. One function, because getting it
+    backwards is invisible in a diff and breaks every row.
+    """
+    parts = str(locale).split("-")
+    return f"{parts[1]}/{parts[0]}" if len(parts) == 2 else str(locale)
+
+
+def _served(path: str) -> str:
+    """A source path as the page the platform generates from it."""
+    return f"{path[:-3]}.html" if path.lower().endswith(".md") else path
+
+
 def published(base: str, tree_name: str, locale: str, slug: str,
               doc_class: str, segment: str, reference: str) -> str:
     """A version-root-relative reference as the URL it is served at.
@@ -66,11 +101,17 @@ def published(base: str, tree_name: str, locale: str, slug: str,
     it takes the same prefix -- deriving the two separately is how they come to
     disagree by a segment.
 
+    `tree_name` is accepted and **deliberately unused**: the repository name is
+    not part of a served URL. Kept in the signature because every caller passes
+    it and because dropping it would make the two shapes harder to compare while
+    the migration in `owned_prefixes` still needs both.
+
     The path is percent-encoded and the base is not: the base is a URL the config
     validated, and the path is folder names this tool invented.
     """
     path, _, fragment = str(reference).partition("#")
-    url = links.emit(f"{tree_name}/{locale}/{slug}/{doc_class}/{segment}/{path}", fragment)
+    located = f"{region_and_language(locale)}/{slug}/{doc_class}/{segment}/{_served(path)}"
+    url = links.emit(located, fragment)
     return f"{base.rstrip('/')}/{url}" if base else url
 
 
@@ -78,6 +119,19 @@ def prefix(base: str, tree_name: str, locale: str, slug: str,
            doc_class: str, segment: str) -> str:
     """Everything left of a row's own path -- what `owned_prefixes` compares on."""
     return published(base, tree_name, locale, slug, doc_class, segment, "")
+
+
+def _legacy_prefix(base: str, tree_name: str, locale: str, slug: str,
+                   doc_class: str, segment: str) -> str:
+    """The prefix rows written before Phase 29 carry.
+
+    Claimed only so those rows can be *replaced*. Nothing is ever written under
+    it again -- see the module docstring: without this a published map keeps its
+    old block, gains a new one beside it, and doubles on the first sync after the
+    URL shape was corrected.
+    """
+    url = links.emit(f"{tree_name}/{locale}/{slug}/{doc_class}/{segment}/", "")
+    return f"{base.rstrip('/')}/{url}" if base else url
 
 
 def parse(text: str) -> list[dict[str, Any]] | None:
@@ -155,9 +209,21 @@ def owned_prefixes(present: set[str], base: str, tree_name: str, locale: str,
     here is one this tool wrote and will write again; everything else -- a hand
     added redirect, a row pointing into another product, a legacy URL with no
     version segment at all -- is outside the set and survives untouched.
+
+    **Two shapes per segment since Phase 29**, and the second is a migration
+    rather than a feature. The served prefix changed -- no repository segment,
+    `us/en` rather than `en-us` -- so 17,252 already-published rows carry a
+    prefix this tool would no longer recognise as its own. Unclaimed, they would
+    survive verbatim beside a full set of replacements and double every map.
+    Claiming the old shape deletes them; only the new one is ever written.
     """
-    return [prefix(base, tree_name, locale, slug, doc_class, segment)
-            for segment in sorted(present) if segment]
+    shapes: list[str] = []
+    for segment in sorted(present):
+        if not segment:
+            continue
+        shapes.append(prefix(base, tree_name, locale, slug, doc_class, segment))
+        shapes.append(_legacy_prefix(base, tree_name, locale, slug, doc_class, segment))
+    return shapes
 
 
 def merge(existing: list[dict[str, Any]], generated: list[dict[str, Any]],
@@ -195,18 +261,33 @@ def render(rows: list[dict[str, Any]], header: str = HEADER) -> str:
     return header + body
 
 
-def relative_path(url: str, trees: set[str]) -> PurePosixPath | None:
-    """A published URL back to a path under the target, or `None` if it is not one.
+def disk_candidates(url: str, trees: set[str]) -> list[PurePosixPath]:
+    """A served URL back to the paths under the target that could satisfy it.
 
     Written for `validate`, which has the target and not the config, so it cannot
-    know what `publish_base_url` was when the map was rendered. It does not need
-    to: whatever the host, the tree name is the first path segment, so an absolute
-    URL and the tree-rooted shipped form resolve through one rule. Anything that
-    does not start at a published tree is somebody else's row and is left alone --
-    the rule the page checker already applies to an absolute link.
+    know what `publish_base_url` was when the map was rendered. Whatever the host,
+    a served row begins `{region}/{lang}/{slug}/…`.
+
+    **Plural, because the served URL has no tree segment and the disk does.**
+    This used to be `relative_path`, returning one path, on the strength of the
+    tree name being the URL's first segment. Phase 29 removed that segment -- a
+    repository name is not part of an address -- and the single-path version then
+    resolved *nothing*, so the check quietly stopped checking instead of failing.
+    One candidate per published tree, and a row is dangling only if none of them
+    exists.
+
+    Returns `[]` for a row that is not ours at all: a hand-added redirect out of
+    this target, which `sync` carries through verbatim precisely so that nothing
+    here has to adjudicate it.
     """
     path = unquote(urlsplit(str(url)).path).lstrip("/")
-    if not path:
-        return None
-    parts = PurePosixPath(path).parts
-    return PurePosixPath(path) if parts and parts[0] in trees else None
+    parts = PurePosixPath(path).parts if path else ()
+    if len(parts) < 3:
+        return []
+    region, language, rest = parts[0], parts[1], parts[2:]
+    locale = f"{language}-{region}"
+    tail = PurePosixPath(*rest)
+    if tail.suffix.lower() == ".html":
+        # The platform generates a page per source topic; on disk it is the `.md`.
+        tail = tail.with_suffix(".md")
+    return [PurePosixPath(tree, locale, tail) for tree in sorted(trees)]

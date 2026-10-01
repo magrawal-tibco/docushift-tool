@@ -3816,8 +3816,53 @@ all Runtime Agent, the longest 280. `sync` already refuses those with
 `PUBLISHED_PATH_TOO_LONG`, so they are named rather than silently truncated --
 the fix is a shorter title, which is a writer's call.
 
-Still to build: a copy per guide, the served-URL correction and its prefix
-migration, and `rename-map.csv`.
+#### Built so far — the served URL and its migration, 2026-09-30
+
+`redirects.published` now emits `{region}/{lang}/{product}/{doc-class}/{version}/
+path.html`: no repository segment, `en-us` split region-first to `us/en`, and
+`.html`. `owned_prefixes` claims the old shape as well as the new one, purely so
+the rows written under it can be deleted. `validation.artifacts` resolves a row
+through `disk_candidates`, one per published tree, because the URL no longer
+says which tree it lives in. **1,657 tests pass**, lint clean.
+
+Re-synced and verified on the real maps: **1,957 + 8,639 rows, every one in the
+served shape, zero legacy rows and zero duplicate keys.** Without the migration
+every map would have doubled, half of it pointing at URLs that never existed.
+
+Two faults found by running it. `shutil.copytree` into the `.part` staging
+directory crossed 260 characters on seven ActiveSpaces versions -- the published
+path is comfortably under, and five characters of staging suffix were taking the
+whole doc set down -- so the copy is long-path spelled on both ends. And
+`relative_path` keyed on the tree name being the URL's first segment; with that
+segment gone it resolved **nothing**, so the check passed by doing no work
+rather than by finding none.
+
+#### What this uncovered, and it is bigger than the phase
+
+With `anchors()` reading headings only, `validate` can finally say whether a
+fragment resolves the way the platform resolves it. Over the whole published
+target:
+
+| tree | fragments resolving |
+|---|---|
+| ActiveSpaces (merged) | 1,614 / 1,736 (92%) |
+| EMS (merged) | 13,821 / 14,178 (97%) |
+| **Streaming (unmerged)** | **0 / 45,248** |
+| **Runtime Agent (unmerged)** | **0 / 4,531** |
+
+**Roughly 50,000 published cross-references in the unmerged trees cannot resolve
+in AEM**, and none of them ever could. Stage 6a emits an `<a id>` for every
+source anchor and rewrites every cross-reference to point at one; the platform
+ignores markers. The merged trees are fine because Reframe now targets heading
+anchors.
+
+This is not Phase 29's to fix and must not be done quietly: the repair is for
+Stage 6a to retarget a fragment onto the nearest heading's anchor, exactly as
+`csh._value` now does, and it touches every unmerged product. **Raised as its
+own phase rather than absorbed into this one.**
+
+Still to build in 29: a copy per guide, and `rename-map.csv` with the hook for
+model-suggested names.
 
 #### Nothing is carried unverified
 
