@@ -16,6 +16,7 @@
 ---
 
 ## Documentation
+- [Quick Start: One Product, End to End](docs/quickstart.md) — start here; the whole pipeline on one product in ~15 minutes
 - [Project Context & Decisions](CONTEXT.md)
 - [System Architecture](docs/architecture.md)
 - [Design: Logic & Algorithms](docs/design.md)
