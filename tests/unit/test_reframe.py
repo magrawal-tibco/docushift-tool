@@ -808,12 +808,18 @@ def test_a_page_closed_inside_a_subtree_keeps_its_place_in_reading_order():
     assert layout(pages) == [["g/a.md"], ["g/b.md"], ["g/c.md"], ["g/d.md"]]
 
 
-def test_a_topic_listed_under_two_guides_is_packed_once_and_shared():
+def test_a_topic_listed_under_two_guides_gets_a_copy_in_each():
     """GridServer 7.2.0 lists `Typographical_Conventions.md` three times.
 
-    Packing it once per listing copies its body onto three pages, which breaks word
-    conservation and gives a reader three URLs for one topic. The first node to
-    reach it owns the content; the rest become navigation rows pointing at it.
+    This used to be packed once, with the later rows pointing at the first
+    guide's page. That was right while a URL was a file path -- one file, one
+    address, two ways to navigate to it. Phase 29 made the URL the TOC chain, so
+    the second guide's row then resolved to an address sitting under the *first*
+    guide, and a reader who navigated through B was told they were in A. A copy
+    per guide is the only shape the new model can express.
+
+    Measured corpus-wide: 36 extra copies, 32 of them DataSynapse (out of scope),
+    so 4 pages in scope -- EMS 10.4.0 and 10.4.1.
     """
     roots = [
         node("First", "g/a.md", node("Shared", "g/s.md")),
@@ -821,12 +827,31 @@ def test_a_topic_listed_under_two_guides_is_packed_once_and_shared():
     ]
 
     pages = pack(roots, sized(g__a=10, g__b=10, g__s=10), 3000)
-    located = assign(pages)
+    placements: dict[int, tuple] = {}
+    located = assign(pages, None, placements)
+    relocate(pages, roots)
 
-    assert layout(pages) == [["g/a.md", "g/s.md"], ["g/b.md"]]
-    assert retarget(roots, located)["items"][1]["children"] == [
-        # `#shared`, from the heading, not `#s` from the filename stem.
-        {"title": "Shared", "path": "g/first.md#shared"}
+    assert layout(pages) == [["g/a.md", "g/s.md"], ["g/b.md", "g/s.md"]]
+
+    merged = retarget(roots, located, placements)
+    # Each guide's row resolves to that guide's own copy, not to the other's.
+    assert merged["items"][0]["children"] == [{"title": "Shared", "path": "first.md#shared"}]
+    assert merged["items"][1]["children"] == [{"title": "Shared", "path": "second.md#shared"}]
+
+
+def test_a_topic_listed_twice_inside_one_guide_is_still_packed_once():
+    """Within a guide the second listing is a cross-reference rather than a
+    second placement: one page, and the later row points at it."""
+    roots = [node("Guide", "g/a.md", node("Shared", "g/s.md"), node("Again", "g/s.md"))]
+
+    pages = pack(roots, sized(g__a=10, g__s=10), 3000)
+    placements: dict[int, tuple] = {}
+    located = assign(pages, None, placements)
+
+    assert layout(pages) == [["g/a.md", "g/s.md"]]
+    assert retarget(roots, located, placements)["items"][0]["children"] == [
+        {"title": "Shared", "path": "g/guide.md#shared"},
+        {"title": "Again", "path": "g/guide.md#shared"},
     ]
 
 

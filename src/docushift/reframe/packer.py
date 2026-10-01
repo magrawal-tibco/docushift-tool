@@ -72,6 +72,12 @@ class Topic:
     #: belongs to -- `installation-overview` rather than a bare `overview`, which
     #: names nothing and which twenty pages in one doc set are called (Phase 29).
     parent: str = ""
+    #: `id()` of the TOC row this placement came from, or 0 for a topic that no
+    #: row placed (`carry`, and `project`'s new topics). Since a topic listed
+    #: under two guides is now packed once per guide, the source path alone no
+    #: longer identifies which page a given row resolves to -- `toc.retarget`
+    #: needs the row, and the row is what this remembers.
+    node: int = 0
     #: The heading level this topic's own H1 takes on its merged page (R2.1).
     #: An absolute level rather than a depth, because `pages.render` wants the
     #: answer and not the arithmetic -- and because `carry` and `project`'s
@@ -147,15 +153,22 @@ def pack(roots: Sequence[TocEntry], words_of: Callable[[PurePosixPath], int], ma
     from being able to invent a layout the packer would not otherwise produce.
     """
     pages: list[Page] = []
-    # A topic listed under two guides is shared, not duplicated: the first node to
-    # reach it owns the content and every later node becomes a TOC row pointing at
-    # the same `page.md#anchor` (`toc.retarget` looks the path up, so repeats fall
-    # out for free). Measured: EMS has a perfect TOC-to-disk bijection and never
-    # exercises this, but GridServer 7.2.0 lists `Typographical_Conventions.md`
-    # three times, and packing it three times copies its body onto three pages.
-    claimed: set[PurePosixPath] = set()
     prefixes = tuple(keep_separate)
     for root in roots:
+        # **One `claimed` per guide, not one per version (Phase 29).** A topic
+        # listed under two guides used to be packed once, with every later node
+        # becoming a row pointing at the first guide's page. That was right while
+        # a URL was a file path: one file, one address, two ways to navigate to
+        # it. It stopped being right when the address became the TOC chain --
+        # the second guide's node then resolves to a URL sitting under the
+        # *first* guide, so a reader who navigated through B is told they are in
+        # A. A copy per guide is the only shape the new URL model can express.
+        #
+        # Still deduped *within* a guide, where the second listing is a
+        # cross-reference rather than a second placement. Measured corpus-wide:
+        # 36 extra copies, 32 of them DataSynapse (out of scope), so 4 pages in
+        # scope -- EMS 10.4.0 and 10.4.1.
+        claimed: set[PurePosixPath] = set()
         # R1.1 is structural now: a root's recursion emits that root's pages and
         # returns, so nothing can span two roots however much room is left.
         pages.extend(_subtree(root, root.title, words_of, max_words, claimed, prefixes))
@@ -406,7 +419,7 @@ def _subtree(
         # so the merged tree needs a page here for it to point at.
         claimed.add(node.path)
         pages.append(Page(guide, [Topic(node.title, node.path, words_of(node.path),
-                                        parent=parent, level=1)]))
+                                        parent=parent, node=id(node), level=1)]))
 
     run: list[_Unit] = []
 
@@ -477,7 +490,7 @@ def _collect(
             if total > max_words:
                 return False
             topics.append(Topic(entry.title, entry.path, words, parent=parent,
-                                level=min(level, _DEEPEST)))
+                                node=id(entry), level=min(level, _DEEPEST)))
             emitted = True
         below = level + 1 if emitted else level
         # A row that contributed no topic is not a parent anybody can be named
@@ -551,6 +564,7 @@ def _one_directory(topics: Sequence[Topic]) -> bool:
 def assign(
     pages: Sequence[Page],
     headings_of: Callable[[Topic], list[str]] | None = None,
+    placements: dict[int, tuple[Page, str]] | None = None,
 ) -> dict[PurePosixPath, tuple[Page, str]]:
     """Names every page and anchors every topic. Returns source -> (page, anchor).
 
@@ -584,6 +598,7 @@ def assign(
     take a name a projected page further down the tree is going to want.
     """
     located: dict[PurePosixPath, tuple[Page, str]] = {}
+    by_node: dict[int, tuple[Page, str]] = {} if placements is None else placements
     taken_files: set[PurePosixPath] = {
         page.path for page in pages if page.path != PurePosixPath(".")
     }
@@ -626,7 +641,12 @@ def assign(
         for topic, index in zip(page.topics, owned, strict=True):
             anchor = run[index]
             page.anchors[topic.source] = anchor
-            located[topic.source] = (page, anchor)
+            # First placement wins the source-keyed entry: it is what
+            # `redirects` and `csh` resolve through, and those want one
+            # canonical destination per topic rather than a guide-specific one.
+            located.setdefault(topic.source, (page, anchor))
+            if topic.node:
+                by_node[topic.node] = (page, anchor)
     return located
 
 

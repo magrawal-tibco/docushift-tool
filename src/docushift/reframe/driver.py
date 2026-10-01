@@ -458,7 +458,8 @@ class Reframer:
             source.words,
         )
         built = packed + carried
-        located = assign(built, source.headings)
+        placements: dict[int, tuple[Page, str]] = {}
+        located = assign(built, source.headings, placements)
         # Folders mirror the TOC (Phase 29), so the repo path and the published
         # URL are the same chain. Before `render`, which resolves every relative
         # link and asset against `page.path`.
@@ -493,7 +494,7 @@ class Reframer:
         added = self._write(staging, source, built, located, counts)
         self._write_navigation(
             staging, source, roots, built, located, policy, counts, schema_name, flagged,
-            queue, self._url_for(product, version),
+            queue, self._url_for(product, version), placements,
         )
         self._write_origins(staging, product, version, located)
 
@@ -679,6 +680,7 @@ class Reframer:
         flagged: dict[PurePosixPath, list[Flag]],
         queue: list[dict[str, str]],
         url_of: Callable[[PurePosixPath], str],
+        placements: dict[int, tuple[Page, str]],
     ) -> None:
         """Copies the assets through, then writes `toc.yml` and the three sidecars.
 
@@ -694,7 +696,8 @@ class Reframer:
             destination.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(long_path(source.root / relative), destination)
 
-        manifest.write(staging / "toc.yml", manifest.TOC_HEADER, retarget(roots, located))
+        manifest.write(staging / "toc.yml", manifest.TOC_HEADER,
+                       retarget(roots, located, placements))
         manifest.write(
             staging / "reframe.yml",
             manifest.PAGES_HEADER,

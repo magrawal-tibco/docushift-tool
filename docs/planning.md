@@ -3890,7 +3890,28 @@ deterministic build reads the approved map as fixed input. The tool asserts
 byte-identical re-runs; a name that varied between runs would be a published
 address that moved on its own.
 
-Still to build in 29: a copy per guide.
+#### Built — a copy per guide, 2026-09-30
+
+`claimed` is now scoped to one top-level guide rather than to the version, so a
+topic listed under two guides is packed once per guide; `Topic.node` carries the
+TOC row that placed it and `toc.retarget` resolves each row to *its own* guide's
+copy. Within a guide a second listing is still a cross-reference, not a second
+placement. **1,663 tests pass**, lint clean.
+
+**It changed nothing on the in-scope corpus, and that is the honest result.**
+All 4 in-scope duplicates -- EMS 10.4.0 and 10.4.1 -- turn out to be listed
+twice inside the *same* guide ("User Guide"), which the rule correctly still
+shares. The rule fires where the duplicates really are cross-guide: GridServer
+7.2.0 has 13, every one of them spanning two or three guides, with
+`Typographical_Conventions.md` in all three. That product is out of scope and
+was not re-merged, so the behaviour is pinned by tests rather than by output.
+
+Worth stating plainly because the alternative reading is that the change was
+unnecessary: it was necessary and is currently inert. Under the old rule those
+13 GridServer rows would each resolve to an address sitting under whichever
+guide reached the topic first.
+
+## Phase 29 is complete.
 
 #### Nothing is carried unverified
 

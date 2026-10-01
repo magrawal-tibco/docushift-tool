@@ -110,7 +110,8 @@ class ItemsPathChildren(TocSchema):
         return out
 
 
-def retarget(roots: list[TocEntry], located: dict[Any, tuple[Any, str]]) -> dict[str, Any]:
+def retarget(roots: list[TocEntry], located: dict[Any, tuple[Any, str]],
+             placements: dict[int, tuple[Any, str]] | None = None) -> dict[str, Any]:
     """R3. The merged `toc.yml`: every node kept, every path pointed at its page.
 
     A node whose topic leads its page gets the bare `page.md`; an absorbed topic
@@ -126,19 +127,31 @@ def retarget(roots: list[TocEntry], located: dict[Any, tuple[Any, str]]) -> dict
     A TOC path with no page is left without a `path` rather than raising -- the POC
     subscripted `anchor_of` here and died on a TOC entry it had never packed. The
     audit reports the same condition as a named check failure, before the swap.
+
+    `placements` resolves a node to *its own guide's* copy. Since Phase 29 a topic
+    listed under two guides is packed once per guide, so the source path alone no
+    longer picks a page: without this, both rows would resolve to whichever copy
+    happened to be assigned last, and a reader navigating through the second guide
+    would be handed an address sitting under the first. Falls back to the
+    source-keyed map for every node the packer did not place -- `carry`'s pages
+    and `project`'s new topics.
     """
-    return {"items": [_node(root, located) for root in roots]}
+    placements = placements or {}
+    return {"items": [_node(root, located, placements) for root in roots]}
 
 
-def _node(entry: TocEntry, located: dict[Any, tuple[Any, str]]) -> dict[str, Any]:
+def _node(entry: TocEntry, located: dict[Any, tuple[Any, str]],
+          placements: dict[int, tuple[Any, str]]) -> dict[str, Any]:
     row: dict[str, Any] = {"title": entry.title}
-    found = located.get(entry.path) if entry.path is not None else None
+    found = placements.get(id(entry))
+    if found is None and entry.path is not None:
+        found = located.get(entry.path)
     if found is not None:
         page, anchor = found
         leads = bool(page.topics) and page.topics[0].source == entry.path
         row["path"] = str(page.path) if leads else f"{page.path}#{anchor}"
     if entry.children:
-        row["children"] = [_node(child, located) for child in entry.children]
+        row["children"] = [_node(child, located, placements) for child in entry.children]
     return row
 
 
