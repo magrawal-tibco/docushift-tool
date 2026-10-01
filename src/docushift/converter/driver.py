@@ -50,6 +50,7 @@ from docushift.reporting.findings import FindingsRun
 # function, and two copies of the naming rule is exactly the failure it forbids.
 from docushift.sync import apirefs
 from docushift.transforms import csh as csh_transform
+from docushift.transforms import fragments, links
 from docushift.transforms.assets import AssetCopier, Counts
 from docushift.utils.csvio import normalize_date
 from docushift.utils.slug import slugify, version_segment
@@ -321,6 +322,8 @@ class DocumentConverter:
         self._report_csh(context, result.csh)
         csh_transform.write(staging / "csh.yml", result.csh.entries)
 
+        self._retarget_fragments(context, staging)
+
         swap(staging, target)
 
         # After the swap rather than over the staging directory, so the columns
@@ -530,6 +533,69 @@ class DocumentConverter:
                     f"their words and lost their target",
             count=context.flattened_links,
         )
+
+    def _retarget_fragments(self, context: ConversionContext, staging: Path) -> None:
+        """Points every `#fragment` at a heading rather than at an inert marker.
+
+        **A whole-tree pass, after every document is written and before the
+        swap**, because a fragment names a heading in *another* file and the
+        converter emits one document at a time: at render time the target may
+        not exist yet. The same reason `csh` resolution runs here.
+
+        Measured before this existed: of Streaming 11.2.1's 5,670 internal
+        fragment links, 5,670 pointed at an `<a id>` marker and **none** at a
+        heading -- so every one of them landed at the top of a page. Across the
+        published trees it was roughly 50,000.
+
+        A fragment this cannot place is left exactly as written and counted. The
+        two reasons it cannot are a target document with no headings at all, and
+        a fragment naming no marker in it; inventing an anchor for either would
+        replace a link that fails visibly with one that fails quietly elsewhere.
+        """
+        targets: dict[PurePosixPath, dict[str, str]] = {}
+        bodies: dict[PurePosixPath, str] = {}
+        for path in sorted(staging.rglob("*.md")):
+            relative = PurePosixPath(path.relative_to(staging).as_posix())
+            bodies[relative] = path.read_text(encoding="utf-8")
+            targets[relative] = fragments.marker_targets(bodies[relative])
+
+        rewritten = unplaced = 0
+        for relative, body in bodies.items():
+            def anchor_for(raw: str, fragment: str, here: PurePosixPath = relative) -> str | None:
+                nonlocal unplaced
+                reference = links.classify(raw)
+                if reference.kind is links.ReferenceKind.ABSOLUTE:
+                    return None
+                target = here if not raw else links.resolve(here.parent, reference.path)
+                found = targets.get(PurePosixPath(target))
+                if found is None:
+                    return None
+                placed = found.get(fragment.lower())
+                if placed is None:
+                    unplaced += 1
+                return placed
+
+            updated, count = fragments.retarget(body, anchor_for)
+            if count:
+                rewritten += count
+                (staging / Path(*relative.parts)).write_text(
+                    updated, encoding="utf-8", newline=""
+                )
+
+        if rewritten:
+            context.record(
+                "FRAGMENT_RETARGETED",
+                message=f"{rewritten} cross-reference(s) pointed at a heading instead of an "
+                        f"inert anchor marker the platform does not honour",
+                count=rewritten,
+            )
+        if unplaced:
+            context.record(
+                "FRAGMENT_UNPLACEABLE",
+                message=f"{unplaced} cross-reference(s) name an anchor with no heading behind "
+                        f"it; left as written and will not resolve",
+                count=unplaced,
+            )
 
     def _report_repairs(self, context: ConversionContext) -> None:
         """One note each for Phase 27's two structural repairs to the source.

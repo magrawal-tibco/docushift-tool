@@ -62,7 +62,6 @@ from docushift.reframe.policy import ReframePolicy, policy_for
 from docushift.reframe.review import Flag, branches, inspect
 from docushift.reframe.toc import TocEntry, retarget, schema_for
 from docushift.reporting.findings import FindingsRun
-from docushift.sync import redirects as redirect_urls
 from docushift.utils.longpath import long_path, walk_files
 from docushift.utils.slug import version_segment
 from docushift.utils.swap import remove, swap
@@ -655,7 +654,13 @@ class Reframer:
         is that a reviewer can compare it against what the site actually serves.
         Two derivations would make that comparison meaningless exactly when it
         mattered.
+
+        Imported here rather than at module scope: `sync` reaches back into this
+        package, so a top-level import makes `import docushift.sync` fail with a
+        partially-initialised module depending on which side is imported first.
         """
+        from docushift.sync import redirects as redirect_urls
+
         base = str(self.config.load_publishing().get("publish_base_url") or "")
         locale = str(self.config.load_publishing().get("primary_locale") or "en-us")
         segment = version_segment(version.version)

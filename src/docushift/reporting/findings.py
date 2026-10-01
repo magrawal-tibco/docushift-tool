@@ -245,6 +245,22 @@ REGISTRY: dict[str, Code] = _codes(
     # source was malformed. 612 of 24,781 pages skip a heading level; a warning
     # would fire on 2.5% of every convert run forever, on a fault the authoring
     # team has no plan to fix and the tool has just finished repairing.
+    # Phase 30's pair, and they are two halves of one measurement. The platform
+    # generates anchors from heading text and ignores `<a id>`, so every
+    # cross-reference the converter emitted pointed at something that would
+    # never exist: 5,670 of 5,670 on one Streaming version, ~50,000 published.
+    # The first counts what was repaired, the second what could not be.
+    Code("FRAGMENT_RETARGETED", Severity.NOTE, Stage.CONVERT,
+         "Cross-references pointed at a heading instead of an inert anchor marker "
+         "the platform does not honour",
+         "planning.md Phase 30"),
+    # A warning rather than an error: the link still goes to the right *page*,
+    # and the remedy is a heading the source does not have -- which is an
+    # authoring decision this tool may name and must not make.
+    Code("FRAGMENT_UNPLACEABLE", Severity.WARNING, Stage.CONVERT,
+         "A cross-reference naming an anchor with no heading behind it; left as "
+         "written and will not resolve",
+         "planning.md Phase 30"),
     Code("HEADING_LEVEL_NORMALIZED", Severity.NOTE, Stage.CONVERT,
          "Headings renumbered to close a level the source skipped; depth and order "
          "are unchanged",

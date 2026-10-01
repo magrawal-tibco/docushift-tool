@@ -120,8 +120,17 @@ def test_the_register_carries_every_row_of_7_5() -> None:
     row for the tool *declining* to decide: a page name that came from a human
     rather than from the slug algorithm. The count is what lets a reviewer tell a
     tree that is stable from one that happened to recompute the same answer.
+
+    Phase 30 adds the 62nd and 63rd, `FRAGMENT_RETARGETED` and
+    `FRAGMENT_UNPLACEABLE`, and they are two halves of one measurement. The
+    platform ignores `<a id>` and anchors on heading text, so every
+    cross-reference the converter emitted named something that would never
+    exist -- 5,670 of 5,670 on one Streaming version, roughly 50,000 published.
+    One code counts what was repaired and the other what could not be, and the
+    second is a warning because its remedy is a heading the source does not
+    have: an authoring decision this tool may name and must not make.
     """
-    assert len(REGISTRY) == 61
+    assert len(REGISTRY) == 63
 
 
 def test_severity_comes_from_the_registry_and_not_from_the_call_site() -> None:

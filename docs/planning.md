@@ -920,6 +920,8 @@ The concrete deliverable of §7.1: every deferred "report line" in the three doc
 | `SYNC_RESIDUE`⁷ᵇ | note | validate | A `.part` staging folder left by a sync that did not finish | §7.4 |
 | `CSH_IDENTIFIER_DROPPED`⁷ᶜ | warn | validate | Present in the prior version, absent here (§7.6). One row per version; `count` is how many | this phase |
 | `CODE_LINK_FLATTENED`⁸ | note | convert | Link inside a code block kept its words and lost its target; a GFM fence cannot hold one | Phase 8 |
+| `FRAGMENT_RETARGETED`³⁰ | note | convert | Cross-references pointed at a heading instead of an inert `<a id>` the platform does not honour | Phase 30 |
+| `FRAGMENT_UNPLACEABLE`³⁰ | warn | convert | A cross-reference naming an anchor with no heading behind it; left as written and will not resolve | Phase 30 |
 | `RENAME_MAP_APPLIED`²⁹ | note | reframe | Page names taken from `rename-map.csv` rather than recomputed, so a published URL does not move when a title is edited | Phase 29 |
 | `HEADING_LEVEL_NORMALIZED`²⁷ | note | convert | Headings renumbered to close a level the source skipped; depth and order unchanged. One row per version; `count` is how many | Phase 27 |
 | `DEFINITION_TERM_RECOVERED`²⁷ | note | convert | Terms marked up as `class="dt"` rather than `<dt>`, retagged so they publish as terms instead of as prose | Phase 27 |
@@ -3925,6 +3927,70 @@ numbering is positional: on the 400 pages with a repeated heading, inserting a s
 one of them renumbers every later duplicate and moves a published anchor. No content change
 prevents it. The mitigation, if it ever bites, is editorial — make the repeated headings
 distinct — which is a writer's call and belongs in the review queue, not in the packer.
+
+---
+
+### Phase 30: Fifty Thousand Cross-References That Never Worked — **Complete, 2026-10-01**
+
+Found by Phase 29, not by a report. Once `references.anchors()` stopped counting
+the `<a id>` markers the converter itself emits, `validate` could finally say
+whether a fragment resolves the way the platform resolves it. It could not.
+
+| published tree | fragments resolving |
+|---|---:|
+| ActiveSpaces, EMS (merged) | 92%, 97% |
+| **TIBCO Streaming (unmerged)** | **0 of 45,248** |
+| **Runtime Agent (unmerged)** | **0 of 4,531** |
+
+**Roughly 50,000 published cross-references, and not one of them ever worked.**
+The platform generates anchors from heading text and ignores markers; Stage 6a
+emits a marker for every source anchor and points every cross-reference at one.
+The merged trees were fine only because Phase 29 had just taught Reframe to
+target headings.
+
+Nothing had ever reported it, and the reason is the phase's lesson: the checker
+resolved a fragment against the markers the emitter had written. **Six phases of
+green anchor checks, confirming the tool agreed with itself.**
+
+#### Decisions
+
+| decision | what got built | why not the obvious alternative |
+|---|---|---|
+| **A marker is resolved to the nearest heading** | `transforms/fragments.marker_targets`: the *next* heading if only blank space separates them, otherwise the *previous* one | Those are the two shapes the corpus has -- a target hoisted above the heading it labels (which is where `markdown.anchor_marker` puts it, so the marker cannot pollute the heading's slug), or one part-way down a section. Guessing a synthetic anchor instead would replace a link that fails visibly with one that fails quietly somewhere else. |
+| **A whole-tree pass, after every document and before the swap** | `converter.driver._retarget_fragments` | A fragment names a heading in *another* file and the converter emits one document at a time, so at render time the target may not exist yet. The same reason CSH resolution already runs there. |
+| **What cannot be placed is left alone and counted** | `FRAGMENT_UNPLACEABLE`, a warning | The link still reaches the right *page*; the remedy is a heading the source does not have, which is an authoring decision this tool may name and must not make. |
+| **This is a demotion and is documented as one** | A link that pointed at a sentence now points at the section containing it | Less precise than the author wrote, and the whole of what the platform can express -- the same trade `csh._value` took for Help buttons. The alternative on offer is not precision, it is a link that goes nowhere. |
+
+#### Built, and what it measured
+
+`transforms/fragments.py` (`marker_targets`, `retarget`) and one pass in the
+converter. Register **61 → 63**. **1,665 tests pass**, lint clean.
+
+Re-converted every eligible version: **52,930 cross-references retargeted across
+34 versions.**
+
+| tree | before | after |
+|---|---:|---:|
+| TIBCO Streaming | 0 / 45,248 | **45,248 / 45,248 (100%)** |
+| Runtime Agent | 0 / 4,531 | **4,498 / 4,531 (99%)** |
+| ActiveSpaces (unmerged) | — | 117 / 141 |
+| EMS (unmerged) | — | 1,351 / 1,464 |
+| **total** | | **51,220 / 52,015 (98%)** |
+
+**The residue is not this phase's.** 170 of the remaining links name a marker
+that is *absent from the target file altogether* -- a cross-reference to an
+anchor the source never emitted, which is the `ANCHOR_MISSING` class Phase 7b
+measured at 11.6% and which no retargeting can reach. The other 625 are
+DataSynapse, out of scope and not re-converted.
+
+**One import had to be inverted.** `transforms/fragments.py` needs
+`validation.references.mask_code` -- the masker that stops a `# comment` in a
+shell sample being read as a heading -- and `transforms` sits *below*
+`validation`. At module scope the chain sync → converter → transforms →
+validation → sync made `import docushift.sync` fail on a partially-initialised
+package. Imported inside the function instead, with the reason written down:
+reimplementing the masker would be worse, because two copies of it is how one of
+them stops being fixed.
 
 ---
 

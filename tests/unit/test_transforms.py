@@ -13,7 +13,17 @@ from bs4 import BeautifulSoup
 
 from docushift.engines.csh import CshEntry, CshFormat, CshSource, CshStatus
 from docushift.models import SourceEngine
-from docushift.transforms import callouts, code, csh, deflists, headings, links, markdown, tables
+from docushift.transforms import (
+    callouts,
+    code,
+    csh,
+    deflists,
+    fragments,
+    headings,
+    links,
+    markdown,
+    tables,
+)
 from docushift.transforms.assets import AssetCopier, AssetOutcome
 from docushift.validation import references
 from tests.unit.test_extractor import build_tree, page
@@ -1045,3 +1055,66 @@ def test_an_inline_role_that_is_not_a_term_is_not_a_term() -> None:
 
     assert deflists.normalize(body) == 0
     assert markdown.Renderer().render(body) == "Set EMS_HOME before starting."
+
+
+# -- fragment retargeting (Phase 30) -------------------------------------------
+
+
+def test_a_marker_above_a_heading_belongs_to_that_heading() -> None:
+    """Where `markdown.anchor_marker` hoists a cross-reference target: above the
+    heading it labels, so the marker cannot pollute the heading's own slug."""
+    text = '# Guide\n\n<a id="ID-2F"></a>\n\n## Cluster Awareness\n'
+
+    assert fragments.marker_targets(text) == {"id-2f": "cluster-awareness"}
+
+
+def test_a_marker_in_mid_section_belongs_to_the_section_it_is_in() -> None:
+    """Nothing follows it before prose, so the enclosing heading is the closest
+    thing a reader can actually be sent to."""
+    text = '# Guide\n\n## Settings\n\nprose\n\n<a id="deep"></a>\n\nmore prose\n'
+
+    assert fragments.marker_targets(text) == {"deep": "settings"}
+
+
+def test_a_document_with_no_headings_offers_nothing() -> None:
+    """There is no anchor to send anybody to, and inventing one would replace a
+    link that fails visibly with one that fails quietly somewhere else."""
+    assert fragments.marker_targets('<a id="x"></a>\n\njust prose\n') == {}
+
+
+def test_a_marker_is_matched_case_insensitively() -> None:
+    """Half the corpus capitalises its identifiers (`ID-2FC4B4A1`) and renderers
+    fold anchor case, so a rewrite that did not would miss them."""
+    targets = fragments.marker_targets('<a id="ID-2F"></a>\n\n# Top\n')
+
+    assert targets == {"id-2f": "top"}
+
+
+def test_every_reference_syntax_is_retargeted_and_code_is_left_alone() -> None:
+    body = (
+        "See [A](other.md#old) and [B](#old).\n\n"
+        "`[C](x.md#old)` stays.\n\n"
+        "```\n[D](y.md#old)\n```\n\n"
+        '<a href="other.md#old">html</a>\n\n'
+        "[ref]: other.md#old\n"
+    )
+
+    out, count = fragments.retarget(body, lambda path, fragment: "section-one")
+
+    assert count == 4
+    assert "](other.md#section-one)" in out
+    assert "](#section-one)" in out
+    assert '<a href="other.md#section-one">' in out
+    assert "[ref]: other.md#section-one" in out
+    # Untouched: a code span and a fence are prose, not references.
+    assert "`[C](x.md#old)`" in out
+    assert "[D](y.md#old)" in out
+
+
+def test_a_fragment_the_resolver_cannot_place_is_left_exactly_as_written() -> None:
+    """The common case and the important one: never guessed at, only reported."""
+    body = "See [A](other.md#unknown).\n"
+
+    out, count = fragments.retarget(body, lambda path, fragment: None)
+
+    assert (out, count) == (body, 0)
