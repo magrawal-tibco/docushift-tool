@@ -86,7 +86,7 @@ DocuShift integrates directly with the `docs.tibco.com` REST APIs:
    - **Conversion Policy**: By default, archived versions are inventoried with `is_archived: true` and `convert_eligible: false`. Users can flip `convert_eligible: true` on specific archived versions when needed.
 4. **Product Suites / Categories (`/api/product_list_by_suites`, `/api/bu_category_products`, `/product/categories#name=All`)**:
    - Maps products to major suite groups (e.g. `WebFOCUS`, `ibi`, `Spotfire`, `EMS`, `BusinessWorks`, `EBX`).
-   - **Advisory only.** The majority of products carry no docsite category, so this source can never be authoritative for `family`. It may promote a product from `unclassified`, but never overrides a `manual` assignment. See §3.3.
+   - **No longer read.** Until Phase 32 this promoted a product no keyword rule had matched, as an advisory source that could never override a `manual` assignment. Discovery now assigns no `family` at all, so the endpoint had no consumer left and the per-crawl request was removed with it. It had promoted zero products in the catalog as it stood. See §3.3.
 
 ### 2.1 What the payloads actually look like
 
@@ -226,20 +226,30 @@ The seven `_`-prefixed inventory columns are the deliberate exception, and the t
 
 ### 3.3 Family Classification & Provenance
 
-Classification is a **majority-manual triage job**: most products carry no docsite category, so no automated source can populate `family` reliably. `family_source` records how each assignment was reached, in strict precedence order (first match wins):
+Classification is a **manual triage job** — since Phase 32, entirely one. Nothing but a human writes a `family`.
 
-| `family_source` | Meaning | Overwritable by fetch? |
-| :--- | :--- | :--- |
-| `manual` | Set by a human | **Never** |
-| `taxonomy_rule` | Matched a keyword rule in `taxonomy.yaml` | Yes |
-| `docsite_category` | Docsite category data supplied one (minority of products) | Yes |
-| `unclassified` | Fell through everything — **needs triage** | Yes |
+That is a narrowing of what this section used to describe, and it was decided by the two times inference got it wrong rather than by principle. A bare `webfocus` token is a substring of all seven display names in that line, so one rule claimed a line that wanted five families; the obvious rule for the replacement, matching `container edition`, would have pulled sixteen TIBCO products into an ibi family. Both were caught by counting matches by hand before shipping — which is the triage the classifier existed to save. A classifier whose every edit must be audited product-by-product is not earning its place.
 
-This makes triage a spreadsheet filter, and makes progress reportable (`docushift catalog triage` → "187 of 250 unclassified").
+| `family_source` | Meaning | Still produced? | Overwritable by fetch? |
+| :--- | :--- | :--- | :--- |
+| `manual` | Set by a human, via `catalog set --product <slug> --family <key>` | **The only one** | **Never** |
+| `taxonomy_rule` | Matched a keyword rule, before Phase 32 | No | Yes |
+| `docsite_category` | Docsite category data supplied one, before Phase 32 | No | Yes |
+| `unclassified` | What every newly discovered product now gets — **needs triage** | Yes | Yes |
+
+The two retired members are kept rather than migrated. 271 products carry `taxonomy_rule` and those assignments are the accumulated result of real review; clearing them would manufacture a 271-product backlog out of work already done. Read them as "classified before Phase 32". They still parse, and still outrank `unclassified` in the merge.
+
+**`bu` is still inferred, and the asymmetry is the point.** The same rules resolve both, and the no-match fallback is `tibco`. Switching the rules off wholesale would file every new ibi, Spotfire and DataSynapse product under TIBCO — replacing a wrong family with a wrong *repository*, since `bu` is the first segment of both the workspace path and the publishing target. The brand-level signal is the half that has never been wrong; the family-level one is the half that has now been wrong twice.
+
+A matched rule's `family` key is still read, as a **suggestion**: `catalog triage` prints it beside the unclassified slug so a reviewer can agree or disagree with a name rather than inventing one from the slug. It is never written to the catalog.
+
+This keeps triage a spreadsheet filter and progress reportable (`docushift catalog triage` → "154 of 669 unclassified"), with one consequence worth stating plainly: **the backlog now grows.** Every newly discovered product joins it. The previous behaviour did not have a smaller backlog — it had an unreviewed one.
+
+**An undeclared family is now an error on the way in.** `catalog set --family` refuses a key `taxonomy.yaml` does not declare for that BU and names the declared ones. While rules could outrun the taxonomy file, accepting an unknown key with a warning was the lenient choice; with a human as the only author it is a typo, and a typo that auto-registers a workspace folder becomes a publishing repository downstream. The check is skipped when the BU declares no families at all — an empty reference means unconfigured, not "every family is a typo".
 
 Consequently `config/taxonomy.yaml` holds **family definitions and keyword inference rules only** — it no longer carries per-product mappings, since maintaining 250 hand-classified products in four-level nested YAML recreates the exact pain CSV was chosen to avoid. The ibi/WebFOCUS/Omni/iWay heuristics formerly hardcoded in `config.py:resolve_product_info()` are now YAML rule data.
 
-A rule lists `match` tokens plus the `bu` and `family` to assign. Each token is compared case-insensitively against the `product_code` as an exact match, and against the display name as a substring; the first rule to match wins, so specific rules are ordered above broad ones. A product matching nothing is written `unclassified` rather than guessed into a family.
+A rule lists `match` tokens plus the `bu` to assign and the `family` to suggest. Each token is compared case-insensitively against the `product_code` as an exact match, and against the display name as a substring; the first rule to match wins, so specific rules are ordered above broad ones. A product matching nothing gets `bu=tibco` and, like every product that does match, an `unclassified` family.
 
 Two properties of that comparison are not visible in the rule syntax and both shaped the 2026-09-28 rule set. The name half is a **raw substring** of a name that carries a `®` or `™` *inside* it — the product is `TIBCO Silver® Fabric`, so `silver fabric` matches nothing and the working token is `fabric`, and conversely a token as short as `cloud` claims every Cloud Edition in the catalog. And ordering carries an editorial decision, not just a specificity gradient: a product named after two families (`BusinessWorks Plug-in for Managed File Transfer`, `Silver Fabric Enabler for EMS`, `Spotfire Extension for OpenSpirit`) is filed with the product it **extends**, so the rules for the extended families sit above the rules for the named ones. The rule set is measured rather than reasoned about — on the 2026-09-28 catalog it moves 188 verdicts and 186 land on the family a human curated; the two that do not are mirror-image cross-named products that no ordering resolves, and both are pinned `manual`.
 

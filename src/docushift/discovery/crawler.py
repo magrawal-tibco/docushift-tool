@@ -44,7 +44,7 @@ from typing import Any
 
 from docushift.config import ConfigManager
 from docushift.discovery.client import DocsiteClient, DocsiteError
-from docushift.models import FamilySource, Product, ProductVersion
+from docushift.models import Product, ProductVersion
 from docushift.utils.csvio import normalize_date, parse_bool
 from docushift.utils.slug import slugify
 
@@ -64,7 +64,6 @@ _ARCHIVED_KEYS = ("isArchive", "is_archive", "archived")
 _ARCHIVE_EXISTS_KEYS = ("isArchiveExists", "is_archive_exists", "archive_exists", "hasArchive")
 _SIBLING_KEYS = ("siblings", "versions", "sibling_versions", "other_versions", "product_versions")
 _ARCHIVE_CHILD_KEYS = ("children", "archives", "archive_versions", "versions")
-_CATEGORY_KEYS = ("category", "category_name", "categoryName", "suite", "suite_name")
 _PUBLIC_KEYS = ("isPublicLevel", "is_public_level", "isPublic")
 _PRODUCT_LIST_KEYS = ("products", "results", "items", "data")
 # How many versions A-to-Z claims a product has. Not used to build anything --
@@ -136,7 +135,6 @@ class DocsiteCrawler:
     def discover(
         self,
         bu: str | None = None,
-        family: str | None = None,
         selectors: Collection[str] | None = None,
         on_progress: Callable[[int, int, str], None] | None = None,
     ) -> CrawlResult:
@@ -145,8 +143,12 @@ class DocsiteCrawler:
         `selectors` are docsite slugs or product codes, matched against the A-to-Z
         list *before* the per-product request -- which is why `--product` and
         `--batch` are the cheap scopes: a three-product batch is three requests,
-        not 700. `bu` and `family` can only be applied after classification, so
-        they cost a full crawl.
+        not 700. `bu` can only be applied after the keyword rules have run, so it
+        costs a full crawl.
+
+        There is no `family` filter, and since Phase 32 there cannot be: discovery
+        assigns no family, so there is nothing here to filter on. The CLI turns
+        `--family` into `selectors` by reading the catalog instead.
 
         Note that a product's code (`ems`) is usually not derivable from its slug
         (`tibco-enterprise-message-service`); the caller is expected to pass the
@@ -165,13 +167,12 @@ class DocsiteCrawler:
             entries = [e for e in entries if wanted & {e["slug"], self._code_from_slug(e["slug"])}]
 
         total = len(entries)
-        categories = self._load_categories(result) if total else {}
 
         for index, entry in enumerate(entries, start=1):
             if on_progress:
                 on_progress(index, total, entry["slug"])
             try:
-                product = self._build_product(entry, categories, result)
+                product = self._build_product(entry, result)
             except DocsiteError as exc:
                 result.errors.append(f"{entry['slug']}: {exc}")
                 continue
@@ -182,8 +183,6 @@ class DocsiteCrawler:
                     result.unversioned += 1
                 continue
             if bu and product.bu != bu.strip().lower():
-                continue
-            if family and product.family != family.strip().lower():
                 continue
             result.products.append(product)
 
@@ -240,37 +239,14 @@ class DocsiteCrawler:
             )
         return entries
 
-    def _load_categories(self, result: CrawlResult) -> dict[str, str]:
-        """Slug -> family, from the category endpoint. Advisory only.
-
-        A failure here is recorded and shrugged off: categories can only ever
-        promote an `unclassified` product (architecture §3.3), so losing them
-        degrades triage rather than the crawl.
-        """
-        if "bu_category_products" not in self.client.endpoints:
-            return {}
-        try:
-            payload = self.client.bu_category_products()
-        except DocsiteError as exc:
-            result.errors.append(f"categories (advisory, skipped): {exc}")
-            return {}
-
-        mapping: dict[str, str] = {}
-        for record in _as_records(payload, _PRODUCT_LIST_KEYS):
-            slug = _first(record, _SLUG_KEYS)
-            category = _first(record, _CATEGORY_KEYS)
-            if not slug or not category:
-                continue
-            # taxonomy.yaml keys are underscored identifiers; the folder name gets
-            # hyphenated later by utils/slug.py.
-            mapping[slug] = slugify(category).replace("-", "_")
-        return mapping
+    # The category endpoint was read here until Phase 32, to promote a product no
+    # keyword rule had matched. Nothing assigns a family at discovery any more, so
+    # the only consumer is gone and the per-crawl request with it. It had promoted
+    # zero products in the catalog as it stood.
 
     # -- one product ----------------------------------------------------------
 
-    def _build_product(
-        self, entry: dict[str, str], categories: dict[str, str], result: CrawlResult
-    ) -> Product | None:
+    def _build_product(self, entry: dict[str, str], result: CrawlResult) -> Product | None:
         """Builds one product, or `None` if the docsite publishes no versions for it."""
         slug = entry["slug"]
         detail = _unwrap(self.client.product(slug))
@@ -288,7 +264,7 @@ class DocsiteCrawler:
             return None
 
         code = self._derive_code(slug, detail, records)
-        product = self._product_shell(entry, detail, code, categories)
+        product = self._product_shell(entry, detail, code)
 
         for record in records:
             version = self._version_from_record(slug, code, record, result)
@@ -321,29 +297,27 @@ class DocsiteCrawler:
             return None
         return detail if isinstance(detail, dict) else None
 
-    def _product_shell(
-        self, entry: dict[str, str], detail: dict[str, Any], code: str, categories: dict[str, str]
-    ) -> Product:
+    def _product_shell(self, entry: dict[str, str], detail: dict[str, Any], code: str) -> Product:
         # The detail name carries the version ("... 10.5.0"); the A-to-Z name does
         # not, and a version number baked into a product row would go stale.
         display_name = entry["name"] or _first(detail, _NAME_KEYS) or code
 
+        # Phase 32: discovery resolves `bu` and stops. It assigns no family, from a
+        # keyword rule or from anything else, so every new product lands in
+        # `catalog triage` for a human. The docsite category used to be promoted
+        # here when no rule matched -- it was automatic family assignment wearing a
+        # different provenance, and removing it closes the same door. It was also
+        # inert: zero products in the catalog carried `docsite_category`. The
+        # argument for all of it is on `resolve_product_info`.
         info = self.config.resolve_product_info(code, display_name)
-        family = str(info["family"])
-        family_source = info["family_source"]
-
-        # Advisory promotion: only ever fills a gap, never overrides a rule match.
-        if family_source is FamilySource.UNCLASSIFIED and categories.get(entry["slug"]):
-            family = categories[entry["slug"]]
-            family_source = FamilySource.DOCSITE_CATEGORY
 
         return Product(
             slug=entry["slug"],
             product_code=code,
             display_name=display_name,
             bu=str(info["bu"]),
-            family=family,
-            family_source=family_source,
+            family=str(info["family"]),
+            family_source=info["family_source"],
         )
 
     def _version_from_record(

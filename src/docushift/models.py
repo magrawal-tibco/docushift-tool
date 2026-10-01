@@ -91,7 +91,15 @@ class ZipSource(StrEnum):
 
 
 class FamilySource(StrEnum):
-    """How a product's family was arrived at. Precedence: first listed wins."""
+    """How a product's family was arrived at. Precedence: first listed wins.
+
+    `TAXONOMY_RULE` and `DOCSITE_CATEGORY` are **no longer produced** -- Phase 32
+    made a family a human's call and discovery stopped assigning one. They are
+    kept because 271 products in the catalog still carry `taxonomy_rule`, and
+    those are the accumulated result of real review: the members have to parse
+    from the CSV and keep outranking `UNCLASSIFIED` in the merge. Read them as
+    "classified before Phase 32", not as something a fetch can still write.
+    """
     MANUAL = "manual"
     TAXONOMY_RULE = "taxonomy_rule"
     DOCSITE_CATEGORY = "docsite_category"

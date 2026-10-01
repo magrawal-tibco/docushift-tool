@@ -830,12 +830,27 @@ class ConfigManager:
         return family in self.families(bu)
 
     def resolve_product_info(self, product_code: str, product_name: str = "") -> dict[str, Any]:
-        """Infers `bu` and `family` for a product from the taxonomy keyword rules.
+        """Infers `bu` for a product from the taxonomy keyword rules. Never a family.
 
-        Returns `family_source` alongside them so the caller can record provenance.
-        Anything matching no rule comes back `unclassified` for manual triage --
-        deliberately, since most products carry no docsite category and guessing a
-        family is worse than flagging one for review.
+        **A family is a human's call -- Phase 32.** The rules once returned one too,
+        and the mechanism was retired after it twice assigned by coincidence rather
+        than by meaning: a bare `webfocus` token claimed all seven products of a
+        line that wanted five families, and a `container edition` token would have
+        pulled sixteen TIBCO products into an ibi family. Both were caught by
+        counting matches by hand, which is the triage the classifier existed to
+        save. So every product now comes back `unclassified` and waits for
+        `catalog set --product <slug> --family <key>`.
+
+        `bu` is still inferred, and the asymmetry is deliberate. The no-match
+        fallback is `tibco`; without rules every new ibi, Spotfire and DataSynapse
+        product would file under TIBCO, and `bu` is the first segment of both the
+        workspace path and the publishing repository. A wrong repository is worse
+        than an unset family, and the brand-level signal is the half that has never
+        been wrong -- `webfocus` really is ibi.
+
+        The matched rule's `family:` key is returned as `family_rule_hint` for the
+        triage view: it is what the rule *would* have guessed, carried as advice to
+        a human and never written to the catalog.
 
         Never returns an engine: the source toolchain is a per-version property
         detected from the package, not something a product-level rule can assert.
@@ -843,19 +858,19 @@ class ConfigManager:
         code_lower = product_code.lower().strip()
         name_lower = product_name.lower().strip()
 
-        for rule in self.load_taxonomy()["rules"]:
-            tokens = [str(t).lower().strip() for t in rule.get("match", [])]
-            if any(token == code_lower or (token and name_lower and token in name_lower) for token in tokens):
-                return {
-                    "bu": str(rule.get("bu", "tibco")).lower(),
-                    "family": str(rule.get("family", "general")).lower(),
-                    "family_source": FamilySource.TAXONOMY_RULE,
-                    "display_name": product_name or product_code,
-                }
-
-        return {
+        info: dict[str, Any] = {
             "bu": "tibco",
             "family": "general",
             "family_source": FamilySource.UNCLASSIFIED,
             "display_name": product_name or product_code,
+            "family_rule_hint": "",
         }
+
+        for rule in self.load_taxonomy()["rules"]:
+            tokens = [str(t).lower().strip() for t in rule.get("match", [])]
+            if any(token == code_lower or (token and name_lower and token in name_lower) for token in tokens):
+                info["bu"] = str(rule.get("bu", "tibco")).lower()
+                info["family_rule_hint"] = str(rule.get("family", "")).lower()
+                break
+
+        return info

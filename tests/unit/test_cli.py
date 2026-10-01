@@ -153,8 +153,11 @@ def fake_crawl(monkeypatch: pytest.MonkeyPatch):
             version_metadata={("ems", "10.4.0"): {"folder_path": "ems/10.4.0"}},
         )
 
-        def discover(self, bu=None, family=None, selectors=None, on_progress=None):
-            calls.append({"bu": bu, "family": family, "selectors": selectors})
+        # Mirrors the real signature exactly, `family` included by its absence:
+        # Phase 32 removed that parameter, and a fake that still tolerated it
+        # would let the CLI quietly start passing one again.
+        def discover(self, bu=None, selectors=None, on_progress=None):
+            calls.append({"bu": bu, "selectors": selectors})
             return result
 
         monkeypatch.setattr(DocsiteCrawler, "discover", discover)
@@ -222,6 +225,39 @@ def test_catalog_fetch_resolves_a_batch_to_crawl_selectors(
 
     assert result.exit_code == 0
     assert calls[0]["selectors"] == {"tibco-enterprise-message-service"}
+
+
+def test_catalog_fetch_resolves_a_family_to_crawl_selectors(
+    runner: CliRunner, populated_root: Path, fake_crawl
+) -> None:
+    """Phase 32. --family had to move from filtering output to scoping the crawl.
+
+    Discovery assigns no family any more, so filtering the crawl's results by one
+    would match nothing whatever the user typed. A family is a fact the catalog
+    holds, so it is read from there -- which also turns a family fetch into N
+    requests instead of 700.
+    """
+    calls = fake_crawl()
+    result = _invoke(runner, populated_root, "catalog", "fetch", "--family", "messaging")
+
+    assert result.exit_code == 0
+    assert calls[0]["selectors"] == {"tibco-enterprise-message-service"}
+
+
+def test_catalog_fetch_with_an_empty_family_fails_rather_than_crawling_everything(
+    runner: CliRunner, populated_root: Path, fake_crawl
+) -> None:
+    """The failure mode the selector rewrite had to avoid.
+
+    An unmatched family used to mean "crawl all 700 and filter to nothing". It
+    must not silently become "crawl all 700 and keep everything" either.
+    """
+    calls = fake_crawl()
+    result = _invoke(runner, populated_root, "catalog", "fetch", "--family", "fulfillment")
+
+    assert result.exit_code != 0
+    assert "fulfillment" in result.output
+    assert calls == []
 
 
 def test_catalog_fetch_with_an_unused_batch_fails(runner: CliRunner, populated_root: Path, fake_crawl) -> None:
@@ -501,6 +537,86 @@ def test_catalog_set_family_pins_provenance(runner: CliRunner, populated_root: P
 
     assert result.exit_code == 0
     assert "integration,manual" in (populated_root / "config" / "products.csv").read_text(encoding="utf-8-sig")
+
+
+def test_catalog_set_rejects_a_family_taxonomy_does_not_declare(
+    runner: CliRunner, populated_root: Path
+) -> None:
+    """Phase 32. With a human as the only author, an undeclared key is a typo.
+
+    Letting it through would auto-register a workspace folder and, downstream, a
+    publishing repository -- so the near-miss has to fail rather than warn. The
+    declared keys are named in the message because that is what makes the typo
+    obvious.
+    """
+    (populated_root / "config" / "taxonomy.yaml").write_text(
+        """version: "1.0"
+business_units:
+  tibco:
+    name: TIBCO
+    families:
+      messaging: {name: Messaging}
+rules: []
+""",
+        encoding="utf-8",
+    )
+    before = (populated_root / "config" / "products.csv").read_text(encoding="utf-8-sig")
+
+    result = _invoke(runner, populated_root, "catalog", "set", "--product", "ems", "--family", "mesaging")
+
+    assert result.exit_code != 0
+    assert "not declared in taxonomy.yaml" in result.output
+    assert "messaging" in result.output
+    assert (populated_root / "config" / "products.csv").read_text(encoding="utf-8-sig") == before
+
+
+def test_catalog_triage_suggests_a_family_without_assigning_one(
+    runner: CliRunner, populated_root: Path
+) -> None:
+    """Phase 32 kept the rules' family key as advice, so triage must actually show it."""
+    (populated_root / "config" / "taxonomy.yaml").write_text(
+        """version: "1.0"
+business_units:
+  tibco:
+    name: TIBCO
+    families:
+      messaging: {name: Messaging}
+rules:
+  - match: ["ems"]
+    bu: tibco
+    family: messaging
+""",
+        encoding="utf-8",
+    )
+    _invoke(runner, populated_root, "catalog", "set", "--product", "ems", "--family", "messaging")
+    # Back to untriaged, which is the only state a suggestion is offered for.
+    products = populated_root / "config" / "products.csv"
+    products.write_text(
+        products.read_text(encoding="utf-8-sig").replace("messaging,manual", "general,unclassified"),
+        encoding="utf-8-sig",
+    )
+
+    result = _invoke(runner, populated_root, "catalog", "triage")
+
+    assert result.exit_code == 0
+    assert "Suggestions only" in result.output
+    assert "messaging" in result.output
+    # Advice, not an assignment: nothing was written.
+    assert "general,unclassified" in products.read_text(encoding="utf-8-sig")
+
+
+def test_catalog_set_family_is_unrestricted_when_no_family_is_declared(
+    runner: CliRunner, populated_root: Path
+) -> None:
+    """An empty reference means unconfigured, not "every family is a typo".
+
+    `populated_root` ships no taxonomy.yaml, which is the state a fresh checkout
+    and most of this module are in; validating against nothing would turn the
+    Phase 32 guard into a blanket refusal.
+    """
+    result = _invoke(runner, populated_root, "catalog", "set", "--product", "ems", "--family", "anything")
+
+    assert result.exit_code == 0
 
 
 def test_catalog_set_zip_source_marks_a_hand_supplied_package(runner: CliRunner, populated_root: Path) -> None:

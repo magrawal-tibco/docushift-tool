@@ -186,9 +186,17 @@ def catalog_fetch(
     cfg: ConfigManager = ctx.obj["config"]
     manager = _catalog_manager(ctx)
 
-    # --product and --batch are resolved to crawl selectors up front so the crawler
-    # can skip the per-product request entirely; --bu/--family cannot be, because
-    # a product's family is not known until it has been classified.
+    # --product, --batch and --family are resolved to crawl selectors up front so
+    # the crawler can skip the per-product request entirely. Only --bu still costs
+    # a full crawl, because the keyword rules infer a bu for a product the catalog
+    # has never seen.
+    #
+    # --family joined them in Phase 32 and had to: discovery no longer assigns a
+    # family, so filtering the crawl's *output* by one would now match nothing
+    # whatever the user typed. A family is a fact the catalog holds, so it is read
+    # from there -- which also makes `--family ems` three requests instead of 700.
+    # The cost is that it can only reach products already catalogued, and an
+    # unknown or empty family says so rather than crawling everything.
     selectors: set[str] | None = None
     try:
         if product:
@@ -199,6 +207,22 @@ def catalog_fetch(
                 raise click.ClickException(f"No catalog versions are tagged with batch '{batch}'.")
             batch_selectors = _selectors(manager, tagged)
             selectors = batch_selectors if selectors is None else selectors & batch_selectors
+        if family:
+            wanted = family.strip().lower()
+            in_family = {
+                p.slug
+                for p in manager.load().products.values()
+                if p.family == wanted and (not bu or p.bu == bu.strip().lower())
+            }
+            if not in_family:
+                raise click.ClickException(
+                    f"No catalogued product is in family '{wanted}'"
+                    f"{f' under bu {bu}' if bu else ''}. A family is assigned by hand "
+                    f"(`catalog set --product <slug> --family {wanted}`), so a family "
+                    f"with no products cannot be fetched into existence."
+                )
+            family_selectors = _selectors(manager, in_family)
+            selectors = family_selectors if selectors is None else selectors & family_selectors
     except CatalogError as exc:
         raise click.ClickException(str(exc)) from exc
 
@@ -208,7 +232,7 @@ def catalog_fetch(
         def on_progress(index: int, total: int, slug: str) -> None:
             status.update(f"[{index}/{total}] {slug}")
 
-        result = crawler.discover(bu=bu, family=family, selectors=selectors, on_progress=on_progress)
+        result = crawler.discover(bu=bu, selectors=selectors, on_progress=on_progress)
 
     for error in result.errors:
         console.print(f"[red]![/red] {error}")
@@ -911,6 +935,21 @@ def catalog_triage(ctx: click.Context) -> None:
     console.print(f"\n[bold]{len(unclassified)} of {total}[/bold] products still need triage.")
     if unclassified:
         console.print("  " + ", ".join(unclassified[:40]) + (" ..." if len(unclassified) > 40 else ""))
+
+    # Printed as a suggestion and nothing else. A keyword rule has not assigned a
+    # family since Phase 32, but it still knows what it *would* have said, and a
+    # reviewer working through this list is better off agreeing or disagreeing
+    # with a name than inventing one from the slug.
+    hints = summary["rule_hints"]
+    if hints:
+        console.print(
+            f"\n[dim]{len(hints)} of them match a taxonomy keyword rule. Suggestions only -- "
+            f"confirm with `catalog set --product <slug> --family <key>`:[/dim]"
+        )
+        for slug, family in list(hints.items())[:20]:
+            console.print(f"  [dim]{slug} -> {family}[/dim]")
+        if len(hints) > 20:
+            console.print(f"  [dim]... and {len(hints) - 20} more[/dim]")
 
     # Scope is reported next to triage because the two answer the same question
     # for a reviewer -- how much of the catalog is actually work -- and because an

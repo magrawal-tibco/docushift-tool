@@ -83,14 +83,21 @@ returns from `_merge_product` before reading a single upstream field
 product that discovery cannot see requires.
 
 **`family` is the dangerous one.** It is resolved by *provenance rank*, not by the
-snapshot diff every other field uses. If the user left `family_source` at
-`taxonomy_rule` while changing `family`, ranks tie, control falls through to
-`_take_theirs()`, and the edit survives **only while `state.db` holds a snapshot**.
-On a fresh clone or a deleted state DB there is no base, the fetch's value wins,
-and the reassignment is gone with no warning.
+snapshot diff every other field uses. A fetch now arrives carrying
+`family_source=unclassified` on every product -- Phase 32 stopped discovery
+assigning a family at all -- so rank 3 loses to a row already at `manual` or at
+the legacy `taxonomy_rule`, and those are safe.
 
-Do not hand-edit the `*_source` cell. Use the CLI — it sets the field and pins
-provenance in one step (`catalog.py:706-712`):
+**The row still at `unclassified` is not.** Ranks tie at 3, control falls through
+to `_take_theirs()`, and a hand-typed family survives **only while `state.db`
+holds a snapshot**. On a fresh clone or a deleted state DB there is no base, the
+fetch's empty value wins, and the reassignment is gone with no warning. That is
+the common case for a spreadsheet edit, because `unclassified` is exactly what an
+untriaged product carries.
+
+Do not hand-edit the `*_source` cell. Use the CLI — it sets the field, pins
+provenance, and (for `family`) checks the key against `taxonomy.yaml` in one
+step:
 
 ```bash
 .venv/Scripts/python.exe -m docushift.cli catalog set --product <slug> --family <family>
@@ -106,10 +113,16 @@ work around it by writing the CSV yourself.
 
 ## Step 2 — Declare any new family in taxonomy.yaml
 
-A family typed into `products.csv` that `config/taxonomy.yaml` does not declare is
-*accepted*, not rejected — it warns and auto-registers a workspace folder
-(`catalog.py:957-967`, architecture §4.2). That is deliberate, and it is also how a
-one-product ghost family appears. Check the BU's `families:` block and add the key:
+**Declare it first — `catalog set --family` now rejects a key `taxonomy.yaml` does
+not carry for that BU**, and names the declared ones so a near-miss (`mesaging`)
+is obvious. Phase 32 made that an error rather than a warning: with a human as
+the only author of a family, an undeclared key is a typo, and a typo that
+auto-registers a workspace folder becomes a publishing repository downstream.
+
+A family typed *straight into the CSV* is still only warned about on `catalog
+import` (`catalog.py`, architecture §4.2) — the spreadsheet path cannot be
+intercepted — so that remains the route by which a one-product ghost family
+appears. Either way, add the key to the BU's `families:` block before setting it:
 
 ```yaml
       <family_key>:

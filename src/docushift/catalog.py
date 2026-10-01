@@ -862,7 +862,29 @@ class CatalogManager:
         if product is None:
             return False
         if name == "family":
-            product.family = value.lower()
+            family = value.lower()
+            # Phase 32 made this the *only* way a family is ever set, which changes
+            # what an undeclared key means. While rules could outrun taxonomy.yaml,
+            # accepting one with a warning was the lenient choice; now the author is
+            # a human and an undeclared key is a typo -- one that would otherwise
+            # auto-register a workspace folder and, downstream, a publishing
+            # repository. Declared keys are listed rather than just counted, because
+            # the usual cause is a near-miss ('mesaging') and the fix is visible the
+            # moment the real one is on screen.
+            #
+            # Gated on the BU having declared families at all. With none -- no
+            # taxonomy.yaml, or a BU not in it -- there is nothing to check against,
+            # and refusing every key would read as "all families are typos" in a
+            # root that is merely unconfigured. An empty reference means unknown,
+            # not invalid.
+            declared = self.config.families(product.bu) if self.config is not None else {}
+            if declared and family not in declared:
+                raise CatalogError(
+                    f"family '{family}' is not declared in taxonomy.yaml for bu '{product.bu}'. "
+                    f"Declared families for '{product.bu}': {', '.join(sorted(declared))}. "
+                    f"Add it under business_units.{product.bu}.families first."
+                )
+            product.family = family
             product.family_source = FamilySource.MANUAL
         elif name == "bu":
             product.bu = value.lower()
@@ -1100,12 +1122,24 @@ class CatalogManager:
         scope_counts = dict.fromkeys((str(s) for s in ScopeSource), 0)
         status_counts = dict.fromkeys((str(s) for s in ReleaseStatus), 0)
         unclassified = []
+        rule_hints: dict[str, str] = {}
         out_of_scope = []
         for product in catalog.products.values():
             counts[str(product.family_source)] += 1
             scope_counts[str(product.scope_source)] += 1
             if product.family_source is FamilySource.UNCLASSIFIED:
                 unclassified.append(product.slug)
+                # What a keyword rule would have guessed, had rules still been
+                # allowed to guess (Phase 32). Carried to the triage view as
+                # advice: it is the cheapest thing a reviewer can agree or
+                # disagree with, and throwing it away would make the triage of
+                # 150+ products start from nothing every time.
+                if self.config is not None:
+                    hint = self.config.resolve_product_info(
+                        product.product_code, product.display_name
+                    )["family_rule_hint"]
+                    if hint:
+                        rule_hints[product.slug] = str(hint)
             if not product.in_scope:
                 out_of_scope.append(product.slug)
             for ver in product.versions.values():
@@ -1115,6 +1149,8 @@ class CatalogManager:
             "total": len(catalog.products),
             "counts": counts,
             "unclassified": sorted(unclassified),
+            # {slug: family} -- a suggestion for a human, never written anywhere.
+            "rule_hints": dict(sorted(rule_hints.items())),
             "scope_counts": scope_counts,
             "out_of_scope": sorted(out_of_scope),
             # Over every version in the books; `versions_retired` is the subset

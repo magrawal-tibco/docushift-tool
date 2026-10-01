@@ -316,23 +316,39 @@ def test_resolve_product_info_matches_a_rule_by_product_code(config: ConfigManag
     info = config.resolve_product_info("ems", "TIBCO Enterprise Message Service")
 
     assert info["bu"] == "tibco"
-    assert info["family"] == "messaging"
-    assert info["family_source"] is FamilySource.TAXONOMY_RULE
     assert info["display_name"] == "TIBCO Enterprise Message Service"
 
 
 def test_resolve_product_info_matches_a_rule_by_display_name_substring(config: ConfigManager) -> None:
     config.taxonomy_path.write_text(RULES_YAML, encoding="utf-8")
 
-    info = config.resolve_product_info("wf-client", "ibi WebFOCUS Client")
-
-    assert (info["bu"], info["family"]) == ("ibi", "webfocus")
+    assert config.resolve_product_info("wf-client", "ibi WebFOCUS Client")["bu"] == "ibi"
 
 
 def test_resolve_product_info_is_case_insensitive(config: ConfigManager) -> None:
     config.taxonomy_path.write_text(RULES_YAML, encoding="utf-8")
 
-    assert config.resolve_product_info("EMS", "EMS")["family"] == "messaging"
+    assert config.resolve_product_info("EMS", "EMS")["bu"] == "tibco"
+
+
+def test_a_matched_rule_never_returns_a_family(config: ConfigManager) -> None:
+    """Phase 32. The rule names one; it is advice to a human, not a value.
+
+    This is the whole behaviour change, so it is asserted on a rule that *does*
+    match -- the no-match case was always unclassified and would pass either way.
+    """
+    config.taxonomy_path.write_text(RULES_YAML, encoding="utf-8")
+
+    info = config.resolve_product_info("ems", "TIBCO Enterprise Message Service")
+
+    assert info["family_source"] is FamilySource.UNCLASSIFIED
+    assert info["family_rule_hint"] == "messaging"
+
+
+def test_an_unmatched_product_carries_no_rule_hint(config: ConfigManager) -> None:
+    config.taxonomy_path.write_text(RULES_YAML, encoding="utf-8")
+
+    assert config.resolve_product_info("unknown-thing", "Some Unlisted Product")["family_rule_hint"] == ""
 
 
 def test_unmatched_products_are_unclassified_not_guessed(config: ConfigManager) -> None:
@@ -590,14 +606,32 @@ def test_the_shipped_eos_config_resolves_cleanly(repo_root: Path) -> None:
     assert report.status_for("tibco-ebx", "5.9.0") == (ReleaseStatus.RETIRED, "2024-06-30")
 
 
-def test_shipped_taxonomy_rules_classify_known_products(repo_root: Path) -> None:
-    """A guard on the real config/taxonomy.yaml, not a synthetic one."""
+def test_shipped_taxonomy_rules_resolve_the_bu_of_known_products(repo_root: Path) -> None:
+    """A guard on the real config/taxonomy.yaml, not a synthetic one.
+
+    `bu` is what the rules still decide, and getting it wrong misfiles a product
+    into another vendor's publishing repository -- a worse failure than the
+    unset family Phase 32 chose, which is why this guard narrowed rather than
+    went away.
+    """
     cfg = ConfigManager(root_dir=repo_root)
 
-    assert cfg.resolve_product_info("ems", "TIBCO Enterprise Message Service")["family"] == "messaging"
-    assert cfg.resolve_product_info("spotfire", "TIBCO Spotfire")["family"] == "analytics"
+    assert cfg.resolve_product_info("ems", "TIBCO Enterprise Message Service")["bu"] == "tibco"
+    assert cfg.resolve_product_info("spotfire", "TIBCO Spotfire")["bu"] == "spotfire"
     assert cfg.resolve_product_info("webfocus", "ibi WebFOCUS")["bu"] == "ibi"
-    assert cfg.resolve_product_info("ebx", "TIBCO EBX")["family"] == "data_management"
+    # EBX is its own BU, not TIBCO's -- the case that makes this guard worth
+    # having, since the no-match fallback would quietly answer `tibco`.
+    assert cfg.resolve_product_info("ebx", "TIBCO EBX")["bu"] == "onebx"
+
+
+def test_the_shipped_rules_assign_no_family_at_all(repo_root: Path) -> None:
+    """Every rule in the real file, not a sample -- the regression this phase guards."""
+    cfg = ConfigManager(root_dir=repo_root)
+
+    for rule in cfg.load_taxonomy()["rules"]:
+        for token in rule["match"]:
+            info = cfg.resolve_product_info(str(token), "")
+            assert info["family_source"] is FamilySource.UNCLASSIFIED, token
 
 
 # -- origin-urls.yaml (Phase 22) --------------------------------------------------

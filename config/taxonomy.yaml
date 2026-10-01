@@ -179,6 +179,24 @@ business_units:
       webfocus:
         name: "WebFOCUS"
         description: "Business intelligence and enterprise reporting"
+      # Split out of `webfocus` in Phase 31. Each of these ships on its own
+      # release train, so publishing them through one repository made a reader
+      # of any one of them page past the other six.
+      webfocus-app-studio:
+        name: "WebFOCUS App Studio"
+        description: "Windows development environment for WebFOCUS content"
+      webfocus-dsml-services:
+        name: "WebFOCUS DSML Services"
+        description: "Data science and machine learning services for WebFOCUS"
+      webfocus-reporting-server:
+        name: "WebFOCUS Reporting Server"
+        description: "Data adapters, server administration, and report execution"
+      # Grouped by packaging rather than by product: the same documentation
+      # shipped for a container runtime. This deliberately separates the DSML
+      # container edition from `webfocus-dsml-services`.
+      container-editions:
+        name: "Container Editions"
+        description: "Containerized packagings of WebFOCUS products"
       data_management:
         name: "Data Management & Quality"
         description: "Omni-Gen and iWay data quality solutions"
@@ -194,7 +212,32 @@ business_units:
 # triage. Rules never assign `engine`.
 rules:
   # -- ibi ----------------------------------------------------------------
-  - match: ["webfocus", "webfocus-app-studio", "webfocus-client", "webfocus-reporting-server"]
+  # Phase 31 split the one WebFOCUS rule into five. The bare token `webfocus` is
+  # a substring of all seven display names and first match wins, so the single
+  # rule claimed the whole line -- harmless while every row carried a `manual`
+  # pin, and silently wrong for the next product discovery adds.
+  #
+  # Matched on product_code, NOT on "container edition": that substring hits 16
+  # TIBCO products (BusinessWorks CE, BusinessConnect CE and its seven
+  # protocols, Hawk CE, LogLogic EVA CE, ...), and an ibi rule sitting this high
+  # would pull every one of them into `container-editions`.
+  - match: ["wfce", "dsmlce"]
+    bu: ibi
+    family: container-editions
+  # Above the `dsml` rule below: `dsmlce`'s display name contains "DSML
+  # Services" too, and the container edition is the more specific reading.
+  - match: ["wf-as", "app studio"]
+    bu: ibi
+    family: webfocus-app-studio
+  - match: ["dsml", "dsml services"]
+    bu: ibi
+    family: webfocus-dsml-services
+  - match: ["wf-rs", "reporting server"]
+    bu: ibi
+    family: webfocus-reporting-server
+  # The fallback it always was in practice: Client, Installer, and anything new
+  # carrying the brand but none of the tokens above.
+  - match: ["webfocus", "wf-wf", "wf-wi", "webfocus-client"]
     bu: ibi
     family: webfocus
   # Above the mainframe rule below, which would otherwise claim it on `Mainframe

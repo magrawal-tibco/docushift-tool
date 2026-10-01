@@ -563,20 +563,36 @@ def test_a_slug_is_non_public_only_when_every_record_for_it_is(crawl_config: Con
 # -- crawler: classification --------------------------------------------------
 
 
-def test_taxonomy_rules_classify_and_record_provenance(crawler: DocsiteCrawler) -> None:
+def test_a_matched_rule_sets_the_bu_and_leaves_the_family_unclassified(
+    crawler: DocsiteCrawler,
+) -> None:
+    """Phase 32: the rules resolve a bu. A family is a human's call."""
     ems = _by_code(crawler.discover(), "ems")
 
-    assert (ems.bu, ems.family) == ("tibco", "messaging")
-    assert ems.family_source is FamilySource.TAXONOMY_RULE
+    assert ems.bu == "tibco"
+    assert ems.family_source is FamilySource.UNCLASSIFIED
 
 
-def test_docsite_category_only_fills_an_unclassified_family(crawler: DocsiteCrawler) -> None:
-    """EBX matches no rule, so the advisory category may promote it; EMS may not be touched."""
+def test_discovery_assigns_no_family_to_any_product(crawler: DocsiteCrawler) -> None:
+    """The guarantee, stated over the whole crawl rather than one product.
+
+    EMS matches a keyword rule and EBX only a docsite category -- the two routes
+    that used to write a family. Neither does now, so both land in triage.
+    """
     result = crawler.discover()
 
-    assert _by_code(result, "ebx").family == "data_management"
-    assert _by_code(result, "ebx").family_source is FamilySource.DOCSITE_CATEGORY
-    assert _by_code(result, "ems").family == "messaging"
+    assert {p.family_source for p in result.products} == {FamilySource.UNCLASSIFIED}
+    assert FamilySource.TAXONOMY_RULE not in {p.family_source for p in result.products}
+    assert FamilySource.DOCSITE_CATEGORY not in {p.family_source for p in result.products}
+
+
+def test_the_category_endpoint_is_no_longer_requested(
+    crawler: DocsiteCrawler, session: FakeSession
+) -> None:
+    """Its only consumer was the promotion Phase 32 removed, so the request went too."""
+    crawler.discover()
+
+    assert "/api/bu_category_products" not in session.calls
 
 
 def test_crawler_never_sets_engine_or_zip_source(crawler: DocsiteCrawler) -> None:
@@ -614,10 +630,6 @@ def test_selectors_filter_before_the_per_product_request(crawler: DocsiteCrawler
 def test_a_selector_also_matches_a_slug_derived_code(crawler: DocsiteCrawler) -> None:
     """`--product ebx` must work even though the docsite slug is `tibco-ebx`."""
     assert [p.product_code for p in crawler.discover(selectors=["ebx"]).products] == ["ebx"]
-
-
-def test_family_filter_applies_after_classification(crawler: DocsiteCrawler) -> None:
-    assert [p.product_code for p in crawler.discover(family="messaging").products] == ["ems"]
 
 
 def test_no_include_archived_skips_the_archive_request(
@@ -687,13 +699,16 @@ def test_a_failed_archive_index_keeps_the_active_versions(
     assert any("archive index unavailable" in error for error in result.errors)
 
 
-def test_a_failed_category_lookup_is_advisory_only(session: FakeSession, crawl_config: ConfigManager) -> None:
+def test_a_missing_category_endpoint_is_not_even_noticed(
+    session: FakeSession, crawl_config: ConfigManager
+) -> None:
+    """It was advisory, then unused. Its absence must not reach the error list."""
     del session.payloads["/api/bu_category_products"]
     result = _crawl(session, crawl_config)
 
     assert len(result.products) == 2
     assert _by_code(result, "ebx").family_source is FamilySource.UNCLASSIFIED
-    assert any("advisory" in error for error in result.errors)
+    assert not [error for error in result.errors if "categor" in error.lower()]
 
 
 def test_a_failed_product_list_returns_nothing_rather_than_raising(

@@ -4,6 +4,8 @@
 > **Last Updated:** 2026-09-11  
 > **Target Environment:** TIBCO & IBI Documentation Migration to AEM
 
+> **First time through?** [`quickstart.md`](quickstart.md) walks one product from `catalog fetch` to `validate` in nine commands, and links back here at each step. This guide is the reference; that one is the path.
+
 > Wondering *why* a command behaved the way it did — which value a re-fetch kept, which versions a batch selected, how a help identifier was resolved? Every decision rule is written out step by step in [`design.md`](design.md).
 
 ---
@@ -447,7 +449,9 @@ docushift catalog set --product dsp_gridserver --version 7.1.1 --zip-source auto
 
 ### Triaging Unclassified Products
 
-Most products carry no category on the docsite, so `family` is largely assigned by hand. The `family_source` column in `products.csv` tracks how each one was set — `manual`, `taxonomy_rule`, `docsite_category`, or `unclassified`.
+**`family` is assigned by hand, and only by hand.** Nothing else writes it: a `catalog fetch` files every newly discovered product as `unclassified` and leaves the name to you. The `family_source` column in `products.csv` records how each one was set — `manual`, or `unclassified` for anything awaiting you. Two older values, `taxonomy_rule` and `docsite_category`, still appear on products classified before this changed; they are not produced any more.
+
+`catalog triage` prints a suggestion next to each unclassified product when a keyword rule in `taxonomy.yaml` recognises it. It is advice and nothing else — the family is set when you run `catalog set`, not before.
 
 ```bash
 # How much triage is left?
@@ -841,6 +845,7 @@ docushift reframe --product tibco-ems --version 10.5.1 --input ./converted --out
 | Flag | What it does |
 |---|---|
 | `--force` | Re-merge even when the converted tree and the policy are both unchanged |
+| `--renormalize` | Recompute every page name, ignoring the pins in `rename-map.csv`. **Published URLs will move** |
 | `--dry-run` | List the selection, the cap and the pin; write nothing |
 | `--input` / `--output` | Work on a standalone folder. Used together, and both need `--product` and `--version` |
 
@@ -871,7 +876,7 @@ to be tuned repeatedly. Two keys:
   clean diff — permanently. `reframe` warns when a doc set has two eligible versions and no
   pin.
 
-**What a merged tree contains.** The pages, every asset copied through untouched, and four
+**What a merged tree contains.** The pages, every asset copied through untouched, and five
 regenerated files at the version root:
 
 | File | What it is for |
@@ -879,7 +884,8 @@ regenerated files at the version root:
 | `toc.yml` | The same navigation, retargeted. A topic that led its page gets `page.md`; a topic absorbed into one gets `page.md#anchor`. A reader following the TOC cannot tell the merge happened. |
 | `redirects.yml` | One 301 per source topic, anchored — so a published URL from before the merge lands on the section that replaced it, not at the top of a twelve-section page. |
 | `reframe.yml` | Which source topic became which section of which page, plus the policy that shaped it and the link counts. This is the record to read when a boundary looks wrong. |
-| `review-queue.csv` | The pages a writer has to make a decision about, and why. Open it in a spreadsheet; it is the only one of the four meant to be edited. |
+| `rename-map.csv` | The address each merged page was given — the source topic that leads it, the path, the title, its place in the navigation, and the URL a reader will type. Only the last is not derivable from `reframe.yml`, and it is the one somebody checks when a link goes wrong. **A name written here is used, not just reported**: the next run reads it back and pins the page to that path, so a published URL does not move because somebody fixed a typo in a title. The `shortened` column flags the pages whose name lost words to the 50-character cut — 90 of 1,505 measured — which is where a human or a model can write a better one than the algorithm did. `--renormalize` recomputes every name anyway, so the pinning is a decision rather than a trap. |
+| `review-queue.csv` | The pages a writer has to make a decision about, and why. Open it in a spreadsheet. |
 
 **`301.yml`, the cutover map, appears alongside them for a product whose live URL shape has
 been declared.** `redirects.yml` answers "where did this page go inside the new tree"; `301.yml`
@@ -1328,7 +1334,9 @@ Everything it records goes into the findings register like any other run, so
 
 ## 5. Product Taxonomy Configuration (`config/taxonomy.yaml`)
 
-This file defines **which families exist** and **the keyword rules used to guess them**. It does *not* list individual products — per-product `bu`/`family` assignment lives in `config/products.csv`, where it can be bulk-edited.
+This file defines **which families exist** and **the keyword rules that resolve a product's business unit**. It does *not* list individual products — per-product `bu`/`family` assignment lives in `config/products.csv`, where it can be bulk-edited.
+
+The rules no longer assign a family. They did until the WebFOCUS split, where one rule matching the bare token `webfocus` turned out to claim all seven products of a line that wanted five families — and the obvious replacement, matching `container edition`, would have pulled sixteen unrelated TIBCO products into an ibi family. Both were caught by hand, which is the work the rules were there to save. A family is now a human's call; the rules keep the half they are reliable at.
 
 ```yaml
 version: "1.0"
@@ -1352,8 +1360,8 @@ business_units:
         name: "WebFOCUS"
         description: "Business intelligence and enterprise reporting"
 
-# Keyword inference. First match wins; only applied to products whose
-# family_source is not "manual".
+# Keyword inference. First match wins. Sets `bu`; the `family` key is kept as
+# the suggestion `catalog triage` prints, and is never written to the catalog.
 rules:
   - match: ["webfocus"]
     bu: ibi
@@ -1363,7 +1371,7 @@ rules:
     family: data_management
 ```
 
-Anything that matches no rule is written as `family_source=unclassified` for manual triage.
+Every product is written `family_source=unclassified` for manual triage, whether or not it matched a rule. A product that matched nothing also gets `bu=tibco`, which is why a new business unit needs a rule even though families no longer do.
 
 **Two things about `match` that the syntax does not show.** Each token is tested twice: as an **exact** `product_code`, and as a **raw lowercase substring** of `display_name`. Substring, not word — so a token as short as `cloud` claims every Cloud Edition in the catalog, and the tokens that work are either an exact code or a distinctive phrase. And the names carry a `®` or `™` **inside** them: the product is `TIBCO Silver® Fabric`, so `silver fabric` matches nothing and `fabric` matches everything you wanted. Nothing strips those symbols before the comparison. When you add a rule, check it against the catalog rather than reading it:
 
@@ -1374,15 +1382,17 @@ docushift catalog list --family mft # what a rule actually claimed
 
 **Order is load-bearing, and not only "specific before broad".** Many products are named after two families at once — `BusinessWorks Plug-in for Managed File Transfer`, `Silver Fabric Enabler for EMS`, `Spotfire Extension for OpenSpirit`. The catalog files each of these with the product it *extends*, not the product it names, so the `bw`/`messaging`/`spotfire` rules sit **above** the `mft`/`silver-fabric`/`openspirit` rules. Reading the list top-down is the only way to predict where a product lands.
 
-**A rule never overrides a human.** `family_source` ranks `manual > taxonomy_rule > docsite_category > unclassified`, and a fetch may only replace an assignment of equal or lower confidence. So a hand assignment left at `unclassified` *can* be re-guessed by a rule; pin it instead:
+**Setting a family is one command, and it is the only way.**
 
 ```bash
 docushift catalog set --product tibco-rtview --family monitoring   # sets family_source=manual
 ```
 
-Editing the `family` column in the spreadsheet does **not** pin it — set `family_source` to `manual` in the same row, or the next `catalog fetch` may move the product back.
+The family must already be declared under that business unit in `taxonomy.yaml`; an unknown key is rejected and the declared ones are listed. This is deliberately strict — an accepted typo would quietly create a workspace folder and, further down the pipeline, a publishing repository.
 
-> Rules assign `bu` and `family` only — never `engine`. The source toolchain
+Editing the `family` column in the spreadsheet by hand does **not** pin it — set `family_source` to `manual` in the same row, or use the command above, which does both. `family_source` still ranks `manual > taxonomy_rule > docsite_category > unclassified` in the merge, so the older rule-assigned values keep their precedence over anything left unclassified.
+
+> Rules assign `bu` only — never a `family`, and never `engine`. The source toolchain
 > differs between versions of the same product, so it is detected per version
 > from the extracted package rather than declared here. See §6.
 

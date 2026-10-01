@@ -4034,6 +4034,212 @@ them stops being fixed.
 
 ---
 
+### Phase 31: Splitting WebFOCUS into Four — **Complete, 2026-10-02**
+
+`webfocus` holds seven products that publish as one repository. Three of them
+are separate deliverables with their own release trains, and two more are
+container repackagings of products that otherwise live elsewhere. Splitting them
+out is a catalog edit, not a code change — but a catalog edit that silently
+reverts is worse than none, so the whole chain is written down here first.
+
+**The four families, and who lands in each.** Names are the user's: the three
+product splits carry their product's own name.
+
+| family key | display name | products |
+|---|---|---|
+| `webfocus-app-studio` | WebFOCUS App Studio | `ibi-webfocus-app-studio` |
+| `webfocus-dsml-services` | WebFOCUS DSML Services | `ibi-webfocus-dsml-services` |
+| `webfocus-reporting-server` | WebFOCUS Reporting Server | `ibi-webfocus-reporting-server` |
+| `container-editions` | Container Editions | `ibi-webfocus-container-edition`, `ibi-webfocus-dsml-services-container-edition` |
+
+`webfocus` is left holding `ibi-webfocus-client` and `ibi-webfocus-installer`.
+Five of the seven move; the family does not disappear.
+
+**Why `container-editions` is a family and not a suffix.** The two container
+editions are the same documentation shipped for a different runtime. Grouping
+them by packaging rather than by product keeps the DSML split clean — a reader
+looking for DSML gets the product, not the product plus its Docker variant — and
+it is a bucket the other BUs can reuse later. The cost is that
+`ibi-webfocus-dsml-services-container-edition` no longer sits beside the product
+it documents; that is the explicit trade the user chose.
+
+**The keyword rule is the part that bites.** `taxonomy.yaml:197` currently reads
+
+    - match: ["webfocus", "webfocus-app-studio", "webfocus-client", "webfocus-reporting-server"]
+      bu: ibi
+      family: webfocus
+
+First match wins and the bare token `webfocus` is a substring of every display
+name in the set, so this one rule claims all seven. A `family_source=manual` pin
+protects the five rows that exist today, but it does nothing for a product
+discovery adds tomorrow — a new "WebFOCUS App Studio" SKU would land back in
+`webfocus` and nobody would be told. The rule is therefore split into four, most
+specific first, with the bare `webfocus` token left last as the fallback it
+already is in practice.
+
+**What gets done, in the skill's order.** `catalog set --product <slug>
+--family <key>` for each of the five slugs, which pins `family_source=manual`
+and regenerates `_bu`/`_family` across every version row in one step — no
+hand-edited `*_source` cells. Then the four `families:` keys in `taxonomy.yaml`,
+then the rule split, then `catalog import` to validate, then `catalog triage` to
+confirm the `manual` count rose by exactly five.
+
+**Nothing on disk needs relocating, and that is checked rather than assumed.**
+`families/en-us-ibi-webfocus/` holds an `extracted/` directory with three empty
+product folders and no `downloads/` or `archive/` at all; there is no
+`output/en-us-ibi-webfocus/`. Nothing has been downloaded, extracted or
+converted for this family, so the four new workspaces are created empty and the
+three stale placeholders are removed. Had a single package been downloaded this
+would instead be a question for the user, not a `mv`.
+
+**One thing deliberately left at its default, flagged rather than decided.**
+`repo_slug` is unset on all four, so they publish to
+`en-us-ibi-webfocus-app-studio-userdocs` and friends — the DSML one reaching 38
+characters before the product slug is appended. The doc platform's own naming
+pressure is why `tibco` became `tib`. Shortening these is a publishing decision
+with a one-way door (changing `repo_slug` later moves both the workspace
+directory and the repository), so it is raised now and left to the user rather
+than guessed. **Decided: kept at the long defaults.**
+
+#### Outcome
+
+All five moved, `family_source=manual` on each, the `manual` count rising
+239 → 244 — exactly five rows, no collateral. `_bu`/`_family` regenerated across
+127 `versions.csv` rows (container-editions 35, app-studio 38,
+reporting-server 39, dsml-services 15; `webfocus` down to 75). The three empty
+placeholders were removed. **1,673 tests pass, 2 skipped.**
+
+**The rule split was the part worth doing carefully, and the first draft of it
+was wrong.** Matching `container-editions` on the substring "container edition"
+reads correctly and is a 16-product accident: BusinessWorks CE, BusinessConnect
+CE and its seven protocols, Hawk CE and its BW microagent, Microflow CE,
+ActiveMatrix Service Grid CE, LogLogic EVA CE, and an AWS Marketplace
+subscription all carry that phrase, and an ibi rule sitting above the TIBCO
+block in a first-match-wins list would have claimed every one of them into an
+ibi family. Caught by counting the matches before writing the rule rather than
+by reading the output afterwards; the rule ships matching the product codes
+`wfce` and `dsmlce` instead, with the count written into the comment so the next
+person to widen it sees the number first.
+
+---
+
+### Phase 32: A Family Is a Human's Call — **Complete, 2026-10-02**
+
+Phase 31 ended by splitting a keyword rule five ways, and the exercise argued
+against the mechanism it was repairing. The rule claimed seven products on a
+brand substring and would have claimed sixteen more on a packaging one; both
+were caught by counting matches by hand. A classifier whose every edit has to be
+audited product-by-product is not saving the triage it exists to save.
+
+**The decision: keyword rules never assign a family again.** A newly discovered
+product arrives `family_source=unclassified` and waits for `catalog set`. The
+271 products currently carrying `taxonomy_rule` are **not** retroactively
+unset — they are the accumulated result of real review, and clearing them would
+manufacture a 271-product backlog out of work already done.
+
+**Where it changes.** `ConfigManager.resolve_product_info`
+(`config.py:832`) is the only place a rule becomes a family; its one production
+caller is `Crawler._product_shell` (`crawler.py:331`). The merge path does not
+re-infer, so existing rows are untouched by construction — the change cannot
+reach them even if it is wrong.
+
+#### Three sub-decisions this forces, none of which should be made silently
+
+**1. `bu` must keep being inferred, or the catalog misfiles everything.** The
+same rules resolve business unit and family together, and the no-match fallback
+is `bu=tibco`. Switching the rules off wholesale would file every new ibi,
+Spotfire and DataSynapse product under TIBCO — replacing a wrong family with a
+wrong *repository*, which is worse, because `bu` is the first path segment of
+the workspace and the publishing target. **Proposal: rules still run and still
+return `bu`; only the family they name is discarded.** The BU-level signal is
+the reliable half — `webfocus` really is ibi — and the family-level one is the
+half that has twice been wrong. A rule that matches now sets `bu` with
+`family=unclassified`.
+
+**2. The docsite-category promotion is the same mechanism and should go too.**
+`_product_shell` fills an unclassified family from the docsite's own category
+(`crawler.py:336`, `FamilySource.DOCSITE_CATEGORY`). It is automatic family
+assignment by a different source, so leaving it in would reopen the door this
+phase is closing. It is also **inert**: `catalog triage` reports 0 products
+carrying it. **Proposal: remove the promotion and retire the enum member's use
+at the crawler.** Zero rows change.
+
+**3. An undeclared family should become an error on the manual path.** Today a
+family typed into `products.csv` that `taxonomy.yaml` does not declare is
+accepted with a warning and auto-registers a workspace
+(`catalog.py:957-967`). That leniency existed because rules could outrun the
+taxonomy file. With a human as the only author, a family key that is not
+declared is a typo, and a typo that silently creates a publishing repository is
+exactly the ghost-family failure the propagation skill warns about.
+**Proposal: `catalog set --family` rejects an undeclared key and names the
+declared ones**, with a flag to declare-and-set in one step if that proves
+annoying in practice. This is the only sub-decision that could block a
+legitimate workflow, so it is the one most worth arguing with.
+
+#### What stays
+
+The `rules:` block in `taxonomy.yaml` stays, now read for `bu` only. Deleting it
+would mean rebuilding BU inference from nothing. The `family:` key on each rule
+becomes documentation of what the rule *used to* guess; it is left in place and
+commented rather than stripped, so the history of a classification is still
+readable when someone triages one of the 154 unclassified products by hand.
+
+`catalog triage` becomes the primary workflow rather than a progress report, and
+its "N of M products still need triage" line stops being a number that shrinks
+on its own. Worth saying out loud: **this phase makes the backlog grow.** Every
+newly discovered product now lands in it. That is the point — the previous
+behaviour did not have a smaller backlog, it had an unreviewed one.
+
+#### Verification
+
+- A discovered product matching a rule gets that rule's `bu` and
+  `family_source=unclassified`; one matching nothing gets `bu=tibco` and the
+  same unclassified family. No path returns `TAXONOMY_RULE`.
+- The 271 existing `taxonomy_rule` rows and the 244 `manual` rows are
+  byte-identical after a `catalog import`, and `catalog triage`'s counts move
+  only by what a fetch newly discovers.
+- `catalog set --family` on an undeclared key exits non-zero and changes
+  nothing.
+- The existing `resolve_product_info` tests in `tests/unit/test_config.py`
+  (313-352, 597-600) assert the old contract and must be rewritten to the new
+  one rather than deleted — they are the specification of this behaviour.
+
+#### Outcome
+
+All three sub-decisions shipped as proposed. **1,681 tests pass, 2 skipped,
+lint clean**, and `catalog import` leaves both CSVs byte-identical — the 271
+`taxonomy_rule` and 244 `manual` rows are untouched, as the merge ranks
+guarantee: a fetch now arrives at rank 3 and loses to both.
+
+**Two things the plan did not foresee, found by the tests rather than by
+reading.**
+
+`catalog fetch --family` had become a filter over a field discovery no longer
+sets, so it would have matched nothing whatever the user typed — silently, with
+exit 0 and "no products". A family is a fact the catalog holds, so the CLI now
+resolves `--family` to crawl selectors out of `products.csv`, the way `--batch`
+already did. It is strictly better than what it replaced: `--family messaging`
+is three requests instead of 700, and a family with no products fails loudly
+instead of crawling everything to find nothing. `discover()` lost the parameter
+entirely, and the test fake's signature was narrowed to match so the CLI cannot
+quietly start passing one again.
+
+Rejecting an undeclared family had to be **gated on the BU having declared any**.
+A root with no `taxonomy.yaml` — a fresh checkout, and most of `test_cli.py` —
+declares nothing, so validating against it refused every key and turned the
+guard into a blanket refusal. An empty reference means unconfigured, not "every
+family is a typo".
+
+**The retired inference is kept as advice rather than deleted.** A matched
+rule's `family` key is returned as `family_rule_hint` and printed by `catalog
+triage` beside the slug — 56 of the 154 unclassified products get one. Throwing
+it away would have made a 154-product triage start from nothing, when the
+cheapest thing to hand a reviewer is a name to agree or disagree with. It is
+never written to the catalog, and the test asserts exactly that: the suggestion
+appears and the row stays `unclassified`.
+
+---
+
 ## 2. Validation & Testing Criteria
 - **Catalog Merge Fidelity**: 100% preservation of manual edits and toggle states when fetching updates — *without* requiring the user to have flagged them.
 - **CSV Round-Trip Fidelity**: A load-then-save cycle with no changes produces a byte-identical file (stable sort, fixed columns, normalized booleans/dates). No diff churn on repeat fetches.
