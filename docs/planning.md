@@ -4459,7 +4459,7 @@ The rule that fixes both: **the map belongs to whichever tree `sync` publishes f
 
 ---
 
-### Phase 36: `toc.yml` Speaks html-to-md's Dialect — **Built, 2026-10-02; regeneration shared with Phase 35**
+### Phase 36: `toc.yml` Speaks html-to-md's Dialect — **Complete, 2026-10-02**
 
 **Why.** A side-by-side comparison of every `toc.yml` both tools produced (2026-10-02) found the two trees agree and the files do not. Of the 36 DocuShift version TOCs, 12 have a predecessor counterpart (ActiveSpaces ×6, EMS ×6). Across those 12, every shared page sits at the same depth under the same parent in the same order (306–827 shared entries per version). The disagreement is the dialect: html-to-md writes `docs_list_title` / `docs` / `url` / `subfolderlist` in all 1,339 of its TOCs, and DocuShift writes `items` / `path` / `children`. **The user has decided DocuShift adopts html-to-md's field names.** The structural decisions stay DocuShift's own, by the user's call: one TOC per version (not one per doc class), the landing / legal / support / Unfiled nodes kept, and the documents and archives stages unchanged apart from their field names.
 
@@ -4500,6 +4500,14 @@ What the comparison found that is **not** in scope: html-to-md dropping EMS's C 
 - **Accepting `legal` + `third party`** keeps EBX's `Legal and Third-Party` (`legal_3rdparty.htm`, 168 TOCs in html-to-md). EBX is out of scope; it is kept because nothing in the corpus misfires on it.
 
 Smoke-checked on real data before committing: ActiveSpaces 5.2.0 converted standalone into a scratch folder gives top-level keys exactly `docs_list_title` / `docs`, 324 rows (the same row set as before), 0 padded labels, the JDBC topic back at depth 2 under *The ActiveSpaces JDBC Driver*, the tail Support → Legal as the source has it, and all 315 pages shared with html-to-md at the same depth and in the same order.
+
+**Verified on the regenerated trees (2026-10-02)**, after Phase 35's shared run (`convert --force` for activespaces/ems/streaming/tra, `reframe --all --force`, `sync`, `validate`):
+
+- **Dialect.** All 36 `output/` and all 14 `reframed/` TOCs have top-level keys exactly `docs_list_title` / `docs`; no row carries `items`, `path` or `children`; `docs_list_title` is `Online Help` in all 50; 0 padded labels.
+- **Against html-to-md**, over the 12 shared versions: every shared page (307–828 per version) at the same depth, under the same parent, in the same order, comparing every position a page occupies (EMS 10.4.0/10.4.1 list a few pages twice; a last-position-only check reads them as 2 differences that are not there).
+- **Legal tail.** Both third-party topics are back at depth 2 in their chapters in all 12. No `reframed/` TOC ends on a non-legal page; in `output/` only Designer Add-in 1.5.0 appears to, and that page *is* the legal page — `copyrigh.htm`, whose source opens with title-page text, so its title is the product name (a source quirk, unchanged by this phase).
+- **Merged page counts, −1 in 13 versions, and why.** `_reframed_md_files` and `_reframed_files` fall by exactly one in EMS ×6, ActiveSpaces ×6 and Runtime Agent 5.13.0 against `9d341f7`. Each is the topic the old legal test took: once moved to the top level it was a page of its own; back in its chapter it is absorbed as a section (`concepts/the-activespaces-jdbc-driver.md#using-the-activespaces-jdbc-driver-with-third-party-tools`, `user-guide/overview/routing.md#integrating-with-third-party-products`, `…/installed-components/overview.md#third-party-libraries`). **Runtime Agent 5.13.0 had the misfire too** (`Third-Party Libraries`), which the "ends on a non-legal page" count in *Why* could not see — so the bug reached 13 of the 14 merged versions, not 12. Administrator 5.13.0, which never misfired, is unchanged.
+- **`validate`**: 0 errors; of its 661 warnings (537 `ANCHOR_MISSING`, 124 `REDIRECT_SHADOWED`) none is in a `toc.yml`.
 
 ---
 
