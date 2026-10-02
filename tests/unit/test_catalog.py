@@ -208,6 +208,58 @@ def test_deletion_check_is_scoped_to_fetched_products(catalog: CatalogManager) -
     assert set(catalog.get_product("ebx").versions) == {"6.2.0"}
 
 
+def _active_only() -> Product:
+    """`sample_product` as a fetch returns it when the archive index was not read."""
+    product = make_product("tibco-ems", product_code="ems", family="messaging")
+    product.versions = {"10.4.0": make_version("tibco-ems", "10.4.0")}
+    return product
+
+
+def test_a_skipped_archive_index_is_not_a_deletion(catalog: CatalogManager, sample_product: Product) -> None:
+    """R2-06: `--no-include-archived`, or an archive 503, used to abort the whole fetch."""
+    _fetch(catalog, sample_product)
+
+    catalog.merge_fetch_results([_active_only()], archive_incomplete={"tibco-ems"})
+
+    assert set(_reload(catalog).get_product("tibco-ems").versions) == {"10.4.0", "8.6.0"}
+
+
+def test_a_skipped_archive_index_still_guards_the_active_rows(
+    catalog: CatalogManager, sample_product: Product
+) -> None:
+    """Only the archived rows are exempt: a vanished active key is still Excel's `1.10`."""
+    _fetch(catalog, sample_product)
+    archived_only = make_product("tibco-ems", product_code="ems", family="messaging")
+    archived_only.versions = {"8.6.0": make_version("tibco-ems", "8.6.0", is_archived=True)}
+
+    with pytest.raises(CatalogError, match="10.4.0"):
+        catalog.merge_fetch_results([archived_only], archive_incomplete={"tibco-ems"})
+
+
+def test_a_version_added_from_a_file_does_not_block_a_fetch(
+    catalog: CatalogManager, sample_product: Product
+) -> None:
+    """R2-07: discovery will never return it, and the user is holding the package (§3.8)."""
+    _fetch(catalog, sample_product.model_copy(deep=True))
+    catalog.add_version("tibco-ems", "99.0.0", zip_source=ZipSource.MANUAL)
+
+    stats = catalog.merge_fetch_results([sample_product])
+
+    assert "99.0.0" in _reload(catalog).get_product("tibco-ems").versions
+    assert stats.versions_hand_added == ["tibco-ems@99.0.0"]
+
+
+def test_a_manual_row_discovery_used_to_return_is_still_guarded(
+    catalog: CatalogManager, sample_product: Product
+) -> None:
+    """Only a row discovery has *never* returned is exempt; a manual pin is not a licence to vanish."""
+    _fetch(catalog, sample_product)
+    catalog.set_version_field("tibco-ems", "8.6.0", "zip_source", "manual")
+
+    with pytest.raises(CatalogError, match="8.6.0"):
+        catalog.merge_fetch_results([_active_only()])
+
+
 # -- 3-way merge: unflagged manual edits survive ------------------------------
 
 

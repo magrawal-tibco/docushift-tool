@@ -258,7 +258,12 @@ def catalog_fetch(
         raise click.ClickException(message)
 
     try:
-        stats = manager.merge_fetch_results(result.products, allow_deletes=allow_deletes, dry_run=dry_run)
+        stats = manager.merge_fetch_results(
+            result.products,
+            allow_deletes=allow_deletes,
+            dry_run=dry_run,
+            archive_incomplete=set(result.archive_incomplete),
+        )
     except CatalogError as exc:
         raise click.ClickException(str(exc)) from exc
 
@@ -274,12 +279,19 @@ def catalog_fetch(
     table.add_column("Change")
     table.add_column("Count", justify="right")
     for label, count in stats.as_dict().items():
-        if label in ("deletions_blocked", "scope_rules_unmatched", "products_fully_retired"):
+        if label in ("deletions_blocked", "versions_hand_added", "scope_rules_unmatched", "products_fully_retired"):
             continue
         table.add_row(label.replace("_", " "), str(count))
     console.print(table)
 
     _report_retirements(stats)
+
+    if stats.versions_hand_added:
+        console.print(
+            f"[dim]Kept {len(stats.versions_hand_added)} version(s) discovery has never returned, added by "
+            f"`download --from-file`: {', '.join(stats.versions_hand_added[:12])}"
+            f"{' ...' if len(stats.versions_hand_added) > 12 else ''}[/dim]"
+        )
 
     # Only conclusive over a fully fetched catalog: before that, a rule matches
     # nothing simply because its product has not been discovered yet.

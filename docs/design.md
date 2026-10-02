@@ -321,6 +321,11 @@ For each product in the fetch, compute the version keys the catalog holds that t
 - With `--allow-deletes`: remove each from the catalog and purge every trace of it from `state.db` — the purge only after both CSVs are written, and never in a dry run, which previews the removal without performing it.
 - Without: collect them, and after processing all products, **raise** with the full list and a note that this usually means a version key was mangled (Excel reading `1.10` as `1.1`).
 
+Two absences are not removals, and neither is collected (Phase 34):
+
+- **An archived row of a product whose archive index was not read** — skipped by `--no-include-archived`, or failed. The index can add versions `siblings` omits (§2.8), so without it those are missing for that reason alone. The crawler names such products in `CrawlResult.archive_incomplete`; their active rows are still checked (R2-06).
+- **A `zip_source=manual` row with no snapshot** — discovery has never returned it, because `download --from-file` added it (`architecture.md` §3.8). It is kept and named in `versions_hand_added`. A manual row that *has* a snapshot is still checked (R2-07).
+
 Two properties matter. The check is **scoped to the products actually fetched**, so `catalog fetch --product ems` cannot read every other product's absence as a removal. And the raise happens **before** snapshots are recorded and before anything is written, so a blocked fetch leaves both CSVs and the state DB exactly as they were — the fetch is all-or-nothing.
 
 ### 3.5 Whole-merge sequence — **Built**

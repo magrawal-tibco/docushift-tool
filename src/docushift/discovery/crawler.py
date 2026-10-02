@@ -112,6 +112,12 @@ class CrawlResult:
     # Entries the docsite marks as not publicly visible. Skipped before the
     # request, because fetching one just yields an SSO page.
     non_public: int = 0
+    # Slugs returned without their archive index -- skipped by
+    # `--no-include-archived`, or failed. Their archive-only versions (design
+    # §2.8) are missing from `products` for that reason alone, and the merge must
+    # not read them as deleted upstream: one product's archive 503 used to abort
+    # an `--all` fetch, with advice that, if followed, deleted its history (R2-06).
+    archive_incomplete: list[str] = field(default_factory=list)
     # Both keyed by docsite slug -- the catalog key -- so they land in `state.db`
     # under the same identifier the CSV rows use.
     product_metadata: dict[str, dict[str, str]] = field(default_factory=dict)
@@ -270,8 +276,10 @@ class DocsiteCrawler:
             version = self._version_from_record(slug, code, record, result)
             product.versions.setdefault(version.version, version)
 
-        if self.include_archived and self._archive_may_exist(detail):
-            self._apply_archive_index(product, slug, result)
+        if self._archive_may_exist(detail):
+            read = self.include_archived and self._apply_archive_index(product, slug, result)
+            if not read:
+                result.archive_incomplete.append(slug)
 
         meta = result.product_metadata.setdefault(slug, {"docsite_slug": slug})
         if entry["id"]:
@@ -390,12 +398,12 @@ class DocsiteCrawler:
         key = _present(detail, _ARCHIVE_EXISTS_KEYS)
         return True if key is None else bool(detail[key])
 
-    def _apply_archive_index(self, product: Product, slug: str, result: CrawlResult) -> None:
+    def _apply_archive_index(self, product: Product, slug: str, result: CrawlResult) -> bool:
         """Fills in archived versions' real ZIP endpoints from the archive index.
 
         The index overlaps `siblings` rather than replacing it, so a version already
         known from the detail payload is topped up in place; only genuinely new ones
-        are added.
+        are added. Returns whether the index was read at all.
         """
         try:
             payload = self.client.product_archive(slug)
@@ -403,7 +411,7 @@ class DocsiteCrawler:
             # Non-fatal: the active versions are the ones that get converted, and
             # aborting the product over its history would be a poor trade.
             result.errors.append(f"{slug}: archive index unavailable ({exc})")
-            return
+            return False
 
         for record in _as_records(_unwrap(payload), _ARCHIVE_CHILD_KEYS):
             number = _first(record, _VERSION_KEYS)
@@ -431,6 +439,7 @@ class DocsiteCrawler:
                 existing.zip_url = self.client.url(zip_path)
             if released and not existing.release_date:
                 existing.release_date = released
+        return True
 
 
 # -- tolerant payload readers -------------------------------------------------

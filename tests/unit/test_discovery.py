@@ -640,6 +640,9 @@ def test_no_include_archived_skips_the_archive_request(
 
     assert "6.0.1" not in _by_code(result, "ems").versions
     assert not [call for call in session.calls if "archive" in call]
+    # Named, so the merge does not read the archive-only versions it never asked
+    # for as deleted upstream (R2-06).
+    assert "tibco-enterprise-message-service" in result.archive_incomplete
 
 
 def test_a_false_archive_flag_saves_the_request(session: FakeSession, crawl_config: ConfigManager) -> None:
@@ -697,6 +700,13 @@ def test_a_failed_archive_index_keeps_the_active_versions(
     assert "10.5.0" in ems.versions
     assert "6.0.1" not in ems.versions
     assert any("archive index unavailable" in error for error in result.errors)
+    assert "tibco-enterprise-message-service" in result.archive_incomplete
+
+
+def test_a_read_archive_index_leaves_the_product_complete(
+    session: FakeSession, crawl_config: ConfigManager
+) -> None:
+    assert "tibco-enterprise-message-service" not in _crawl(session, crawl_config).archive_incomplete
 
 
 def test_a_missing_category_endpoint_is_not_even_noticed(

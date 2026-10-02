@@ -93,8 +93,8 @@ Useful flags:
 | Flag | Effect |
 | :--- | :--- |
 | `--dry-run` | Runs the whole crawl and merge, prints the counts, writes nothing. Worth doing first on `--all`. |
-| `--allow-deletes` | Permits removal of versions discovery no longer returns. Without it, a disappearing version **aborts** the merge — an upstream outage should not silently prune your catalog. |
-| `--no-include-archived` | Skips the archive index. Faster; leaves you without version history. |
+| `--allow-deletes` | Permits removal of versions discovery no longer returns. Without it, a disappearing version **aborts** the merge — an upstream outage should not silently prune your catalog. Two absences never count: archived versions of a product whose archive index was skipped or failed, and a version you added with `download --from-file` that discovery has never listed (named after the merge). |
+| `--no-include-archived` | Skips the archive index. Faster; leaves you without version history. Archived rows already in the catalog are kept as they are. |
 
 What it prints: a table of added / updated / unchanged / protected counts, a dim line counting entries skipped as unversioned or not publicly visible (roughly 70 of the 739 A-to-Z entries are employee-only), what support's end-of-support report retires, any catalog warnings, and — if some products could not be reached — how many. **A product that fails is left exactly as it was**, never emptied, so a partial crawl cannot look like a mass deletion.
 

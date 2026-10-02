@@ -10,6 +10,7 @@ flag required, because expecting a user to tick one on each edited row of a
 4,000-row sheet guarantees silent data loss.
 """
 
+from collections.abc import Collection
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
@@ -219,6 +220,10 @@ class MergeStats:
     fields_preserved: int = 0
     products_out_of_scope: int = 0
     deletions_blocked: list[str] = field(default_factory=list)
+    # `slug@version` rows discovery has never returned that a human added with
+    # `download --from-file` (§3.8). Kept, and named rather than counted, so the
+    # exemption from deletion detection is visible every time it applies (R2-07).
+    versions_hand_added: list[str] = field(default_factory=list)
     # Slugs in `scope.yaml` that matched no product this fetch touched. Almost
     # always an upstream rename, which is how an exclusion silently stops working.
     scope_rules_unmatched: list[str] = field(default_factory=list)
@@ -240,6 +245,7 @@ class MergeStats:
             "fields_preserved": self.fields_preserved,
             "products_out_of_scope": self.products_out_of_scope,
             "deletions_blocked": list(self.deletions_blocked),
+            "versions_hand_added": list(self.versions_hand_added),
             "scope_rules_unmatched": list(self.scope_rules_unmatched),
             "versions_retired": self.versions_retired,
             "products_fully_retired": list(self.products_fully_retired),
@@ -556,11 +562,15 @@ class CatalogManager:
         discovered: list[Product],
         allow_deletes: bool = False,
         dry_run: bool = False,
+        archive_incomplete: Collection[str] = (),
     ) -> MergeStats:
         """Snapshot-based 3-way merge of a discovery result into the catalog.
 
         Deletion is scoped to the products actually fetched, so a `--product ems`
         run can never remove anything belonging to another product.
+        `archive_incomplete` names the fetched products whose archive index was
+        not read (`CrawlResult.archive_incomplete`); their archived rows are left
+        out of deletion detection, since the fetch never asked about them.
         """
         catalog = self.load()
         stats = MergeStats()
@@ -609,7 +619,10 @@ class CatalogManager:
             # sheet must pick its verdict up on arrival rather than a command later.
             _resolve_migrate_decision(product, migration, resolved_decision)
 
-            blocked = self._collect_deletions(catalog.products[slug], incoming)
+            blocked, hand_added = self._collect_deletions(
+                catalog.products[slug], incoming, archive_complete=slug not in archive_incomplete
+            )
+            stats.versions_hand_added.extend(f"{slug}@{v}" for v in hand_added)
             if blocked:
                 if allow_deletes:
                     for gone in blocked:
@@ -892,10 +905,33 @@ class CatalogManager:
             return mine_value in (None, "")
         return _as_text(mine_value) == _as_text(base.get(name))
 
-    @staticmethod
-    def _collect_deletions(mine: Product, theirs: Product) -> list[str]:
-        """Version keys the catalog has that this fetch of the same product did not return."""
-        return sorted(set(mine.versions) - set(theirs.versions))
+    def _collect_deletions(
+        self, mine: Product, theirs: Product, archive_complete: bool = True
+    ) -> tuple[list[str], list[str]]:
+        """`(removed, hand_added)`: catalog keys this fetch of the product did not return.
+
+        Two kinds of absence are not removals, and both used to abort the fetch
+        with advice that, if followed, deleted real rows (Phase 34):
+
+        - **An archived row, when the archive index was not read** (R2-06). The
+          index can list versions `siblings` omits, so with it skipped or failed
+          those versions are missing for that reason alone. Active rows are still
+          checked: an active key cannot hide in the archive index.
+        - **A `zip_source=manual` row discovery has never returned** (R2-07) --
+          no snapshot. `download --from-file` adds one on purpose (§3.8), and
+          discovery's silence about it is the expected answer, not news. Returned
+          separately so the caller can name it. A manual row that *has* a
+          snapshot is still checked: discovery used to list it, and now does not.
+        """
+        missing = set(mine.versions) - set(theirs.versions)
+        if not archive_complete:
+            missing = {key for key in missing if not mine.versions[key].is_archived}
+        known = self.state.known_versions(mine.slug) if self.state else set()
+        hand_added = {
+            key for key in missing
+            if mine.versions[key].zip_source is ZipSource.MANUAL and key not in known
+        }
+        return sorted(missing - hand_added), sorted(hand_added)
 
     def _record_snapshots(self, discovered: list[Product]) -> None:
         """Writes the new merge base: what discovery said, this fetch.
