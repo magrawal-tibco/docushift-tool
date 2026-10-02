@@ -133,8 +133,12 @@ def test_the_register_carries_every_row_of_7_5() -> None:
     Phase 33 adds the 64th to 66th, `ORIGIN_SITEMAP_MISSING`,
     `ORIGIN_URL_UNLISTED` and `ORIGIN_PAGE_UNMAPPED`: what the docsite's own page
     list can say about the 301 map that a hand declaration never could.
+
+    Phase 34 adds the 67th and 68th, `ORIGIN_TEMPLATE_REJECTED` and
+    `ORIGIN_PATH_TOO_SHORT` (R1-07): a refused declaration that used to pass for
+    no declaration, and short sources that used to be counted as one UNDECLARED.
     """
-    assert len(REGISTRY) == 66
+    assert len(REGISTRY) == 68
 
 
 def test_severity_comes_from_the_registry_and_not_from_the_call_site() -> None:

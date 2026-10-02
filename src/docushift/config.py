@@ -70,9 +70,19 @@ PUBLISHING_DEFAULTS: dict[str, str] = {
 # maintenance retarget drops it rather than wiring it up: a short page whose subtree
 # is genuinely short is the correct answer, not a defect to pack away. Removing it is
 # what moves the count from the POC's 106 to 113.
+#
+# **Every field of `reframe.policy.ReframePolicy`, not just the two that shape the
+# baseline**, because `load_reframe` passes a `defaults:` key through only if it is
+# named here. With two names, the shipped file's own `publish: false` and
+# `keep_separate: []` never arrived, and a default `publish: true` was dropped with
+# no message (Phase 34, R1-06). Values equal the dataclass's; a test keeps the key
+# sets equal, since importing the policy here would be an import cycle.
 REFRAME_DEFAULTS: dict[str, Any] = {
     "max_words": 3000,
     "toc_schema": "",
+    "pin_layout_to": "",
+    "publish": False,
+    "keep_separate": (),
 }
 
 # A publishing suffix must be one lowercase token. A hyphen makes the family/suffix

@@ -404,6 +404,21 @@ REGISTRY: dict[str, Code] = _codes(
          "Live docsite pages no 301.yml row starts from -- API reference, PDFs, "
          "help-system frames -- each a 404 at cutover unless redirected elsewhere",
          "planning.md Phase 33"),
+    # Phase 34 (R1-07). Both split out of conditions that were silent or
+    # mislabelled. A refused declaration used to read exactly like no declaration,
+    # so the one person able to fix it -- whoever wrote it -- was never told; a
+    # warning, because the remedy is one line in `origin-urls.yaml`. Sources too
+    # short for `drop_segments` used to be counted as one UNDECLARED; each is a
+    # topic with no 301 row, so the count is per source and the severity matches
+    # ORIGIN_PAGE_UNMAPPED's.
+    Code("ORIGIN_TEMPLATE_REJECTED", Severity.WARNING, Stage.CONVERT,
+         "A declared docsite URL template failed validation and was ignored; the "
+         "version fell back to the sitemap, or wrote no 301.yml without one",
+         "planning.md Phase 34"),
+    Code("ORIGIN_PATH_TOO_SHORT", Severity.WARNING, Stage.CONVERT,
+         "Converted topics whose source path is shorter than the template's "
+         "drop_segments, so they have no 301.yml row",
+         "planning.md Phase 34"),
     Code("LINK_BROKEN", Severity.ERROR, Stage.VALIDATE,
          "Relative link resolving to nothing", "design.md §8.4"),
     # Emitted from Phase 7c, and a warning on arithmetic rather than on taste, the

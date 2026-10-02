@@ -81,19 +81,41 @@ def template_for(declared: Mapping[str, Any], slug: str) -> OriginTemplate | Non
     declared today. The caller turns it into a finding once per version, which is
     where the version is in hand and can be named.
     """
+    return declaration(declared, slug)[0]
+
+
+def declaration(declared: Mapping[str, Any], slug: str) -> tuple[OriginTemplate | None, str]:
+    """`template_for`, plus why a declaration that exists was refused.
+
+    The reason is empty when the product is simply not declared, and non-empty
+    when a human wrote an entry that failed validation (Phase 34, R1-07). The
+    two used to be one answer, so a declaration with `drop_segments: "one"` was
+    discarded without a word and the run reported "none is declared".
+    """
+    if slug not in declared:
+        return None, ""
     entry = declared.get(slug)
     if not isinstance(entry, dict):
-        return None
+        return None, "the entry is not a mapping with `template` and `drop_segments`"
     template = str(entry.get("template") or "").strip()
-    if not template or "{path}" not in template:
+    if not template:
+        return None, "the entry has no `template`"
+    if "{path}" not in template:
         # A template that cannot place the path would render one URL for every
         # topic in the product. Declining is the same answer as not declaring.
-        return None
+        return None, f"template '{template}' has no {{path}}"
+    try:
+        # Rendered once here so a stray `{version}` or a lone brace is a refused
+        # declaration, not a `KeyError` from `str.format` halfway through a run.
+        template.format(folder_path="", path="")
+    except (KeyError, IndexError, ValueError) as error:
+        return None, (f"template '{template}' does not render with only {{folder_path}} "
+                      f"and {{path}} ({type(error).__name__}: {error})")
     try:
         drop = int(entry.get("drop_segments", 0))
     except (TypeError, ValueError):
-        return None
-    return OriginTemplate(template=template, drop_segments=max(0, drop))
+        return None, f"drop_segments {entry.get('drop_segments')!r} is not a whole number"
+    return OriginTemplate(template=template, drop_segments=max(0, drop)), ""
 
 
 def folder_path(zip_url: str | None) -> str | None:
@@ -335,20 +357,30 @@ def build(
     """
     found: list[tuple[str, str, int]] = []
     folder = folder_path(zip_url)
-    template = template_for(declared, slug)
+    template, refused = declaration(declared, slug)
     derived = template is None
+    if refused:
+        # Then derived exactly as if undeclared: the sitemap's rows are each
+        # confirmed against the live list, so falling back guesses nothing. What
+        # it must not do is pass for "no declaration" -- the person who wrote
+        # one is the person who needs to hear it was thrown away.
+        found.append(("ORIGIN_TEMPLATE_REJECTED", (
+            f"config/origin-urls.yaml declares this product but the entry was "
+            f"ignored: {refused}"), 1))
+    # Says which of the two it was, so neither message below claims "none".
+    absent = "the declared one was rejected" if refused else "none is declared"
     if derived:
         if not page_urls:
             found.append(("ORIGIN_SITEMAP_MISSING", (
-                f"no Coveo sitemap page list for this version and no template in "
-                f"config/origin-urls.yaml, so no {ORIGINS} was written"), 1))
+                f"no Coveo sitemap page list for this version and no usable template "
+                f"in config/origin-urls.yaml ({absent}), so no {ORIGINS} was written"), 1))
             return Built(None, found)
         answer = derive(output_map, page_urls, folder)
         if answer.template is None:
             found.append(("ORIGIN_TEMPLATE_UNDECLARED", (
                 f"the sitemap confirms no single URL mapping ({answer.hits} of "
-                f"{answer.sources} topics placed, runner-up {answer.rival}), and none "
-                f"is declared in config/origin-urls.yaml, so no {ORIGINS} was written"), 1))
+                f"{answer.sources} topics placed, runner-up {answer.rival}), and "
+                f"{absent} in config/origin-urls.yaml, so no {ORIGINS} was written"), 1))
             return Built(None, found)
         template = answer.template
     elif folder is None:
@@ -361,10 +393,13 @@ def build(
     # The join has three inputs and a silent drop in any of them produces a short
     # map that looks entirely plausible. Asserting the count against the map it
     # was built from is the one check that catches it, and it is free.
+    # Its own code, counted per source (R1-07): it used to ride on
+    # `ORIGIN_TEMPLATE_UNDECLARED` with a count of 1, which named the wrong
+    # condition and reported one whatever the number was.
     if dropped:
-        found.append(("ORIGIN_TEMPLATE_UNDECLARED", (
+        found.append(("ORIGIN_PATH_TOO_SHORT", (
             f"{len(dropped)} source path(s) are shorter than the template's "
-            f"drop_segments and produced no URL, e.g. '{dropped[0]}'"), 1))
+            f"drop_segments and produced no URL, e.g. '{dropped[0]}'"), len(dropped)))
 
     if page_urls:
         # A derived row must be on the list to be written; a declared one was

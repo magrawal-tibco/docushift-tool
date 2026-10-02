@@ -948,6 +948,8 @@ What the run report says:
 |---|---|
 | `ORIGIN_SITEMAP_MISSING` (warning) | No declaration and no cached page list for this version — no file. Expected for archived versions and the products the docsite lists no pages for. |
 | `ORIGIN_TEMPLATE_UNDECLARED` (warning) | A page list exists but confirms no single mapping (the message gives the numbers), or a declared product's download URL is not a `/pub/` path — no file. |
+| `ORIGIN_TEMPLATE_REJECTED` (warning) | The product is declared, but the entry is unusable: no `{path}`, a placeholder other than `{folder_path}` and `{path}`, or a `drop_segments` that is not a whole number. The message says which. The declaration is ignored and the version is handled as if undeclared, so the page list is used if there is one. |
+| `ORIGIN_PATH_TOO_SHORT` (warning) | Topics whose source path has no segments left after `drop_segments`, so they get no row. The count is the number of topics. |
 | `ORIGIN_URL_UNLISTED` (note) | Rows whose live URL the list does not contain — withheld if derived, written anyway if declared. |
 | `ORIGIN_PAGE_UNMAPPED` (warning) | Listed live pages no row starts from: API reference, readmes and PDFs this tool does not convert. Each is a 404 at cutover unless something else redirects it. |
 

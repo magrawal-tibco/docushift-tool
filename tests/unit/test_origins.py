@@ -213,3 +213,65 @@ def test_a_brace_in_a_published_path_is_not_a_placeholder() -> None:
 
 def test_page_path_decodes_and_drops_the_host() -> None:
     assert origins.page_path(f"{LIVE}/API%20Activity/c.htm") == "pub/ems/10.5.1/doc/html/API Activity/c.htm"
+
+
+# -- R1-07: a declaration that fails validation is named, not ignored --------------
+
+ZIP = "https://docs.tibco.com/pub/ems/10.5.1/TIB_ems_10.5.1_docs.zip"
+
+
+def codes_of(built: origins.Built) -> list[str]:
+    return [code for code, _, _ in built.findings]
+
+
+def test_a_rejected_declaration_is_reported_and_says_why() -> None:
+    """`drop_segments: "one"` used to read as no declaration at all: the sitemap
+    took over and its message said none was declared, so the human who wrote
+    one was never told it had been thrown away."""
+    declared = {"ems": {"template": TEMPLATE, "drop_segments": "one"}}
+
+    built = origins.build(declared, "ems", ZIP, SOURCES, {}, PAGES)
+
+    rejected = [f for f in built.findings if f[0] == "ORIGIN_TEMPLATE_REJECTED"]
+    assert len(rejected) == 1 and "drop_segments" in rejected[0][1]
+    # The sitemap still answers, row by row, so the version is not left without a map.
+    assert built.rows is not None and len(built.rows) == 3
+
+
+def test_a_rejected_declaration_with_no_sitemap_does_not_claim_none_was_declared() -> None:
+    declared = {"ems": {"template": "https://docs.tibco.com/pub/{folder_path}/doc/"}}
+
+    built = origins.build(declared, "ems", ZIP, SOURCES, {}, [])
+
+    assert codes_of(built) == ["ORIGIN_TEMPLATE_REJECTED", "ORIGIN_SITEMAP_MISSING"]
+    assert "{path}" in built.findings[0][1]
+    assert "no template in" not in built.findings[1][1]
+    assert built.rows is None
+
+
+def test_a_template_naming_an_unknown_placeholder_is_rejected_rather_than_raising() -> None:
+    """`str.format` raised `KeyError` mid-run on `{version}`."""
+    declared = {"ems": {"template": "https://docs.tibco.com/pub/{version}/{path}"}}
+
+    assert origins.template_for(declared, "ems") is None
+    built = origins.build(declared, "ems", ZIP, SOURCES, {}, [])
+    assert codes_of(built)[0] == "ORIGIN_TEMPLATE_REJECTED"
+    assert "{version}" in built.findings[0][1]
+
+
+def test_an_undeclared_product_raises_no_rejection() -> None:
+    assert "ORIGIN_TEMPLATE_REJECTED" not in codes_of(
+        origins.build({}, "ems", ZIP, SOURCES, {}, PAGES))
+
+
+def test_sources_too_short_for_drop_segments_have_their_own_code_and_count() -> None:
+    """They were reported as `ORIGIN_TEMPLATE_UNDECLARED` with a count of 1 --
+    the wrong condition, and a magnitude that said one whatever the number."""
+    declared = {"ems": {"template": TEMPLATE, "drop_segments": 2}}
+    output_map = {"a.htm": "a.md", "b.htm": "b.md", "pkg/html/c.htm": "c.md"}
+
+    built = origins.build(declared, "ems", ZIP, output_map, {}, [])
+
+    short = [f for f in built.findings if f[0] == "ORIGIN_PATH_TOO_SHORT"]
+    assert len(short) == 1 and short[0][2] == 2
+    assert "ORIGIN_TEMPLATE_UNDECLARED" not in codes_of(built)

@@ -703,6 +703,34 @@ def test_a_shipped_config_reproduces_the_measured_baseline(repo_root):
     assert shipped["products"]["tibco-enterprise-message-service"]["pin_layout_to"] == "10.5.1"
 
 
+def test_every_policy_key_set_under_defaults_reaches_the_policy(config):
+    """R1-06. `load_reframe` filtered `defaults:` to two of the five keys, so a
+    default `publish: true` or `keep_separate` was dropped without a word -- and
+    the shipped file's own `publish: false` worked only by equalling the
+    dataclass default."""
+    config.reframe_path.parent.mkdir(parents=True, exist_ok=True)
+    config.reframe_path.write_text(
+        "defaults:\n  publish: true\n  keep_separate: [a/b.md]\n  pin_layout_to: '1.0'\n",
+        encoding="utf-8",
+    )
+
+    policy = policy_for(config.load_reframe(), "any-product")
+
+    assert policy.publish is True
+    assert policy.keep_separate == ("a/b.md",)
+    assert policy.pin_layout_to == "1.0"
+
+
+def test_the_loader_knows_every_field_the_policy_has():
+    """The filter is a second list beside the dataclass, which is how R1-06
+    happened; this is what keeps the two in step."""
+    from dataclasses import fields
+
+    from docushift.config import REFRAME_DEFAULTS
+
+    assert set(REFRAME_DEFAULTS) == {f.name for f in fields(ReframePolicy)}
+
+
 def test_one_eligible_version_needs_no_pin(config, catalog, flare):
     converted_tree(config, flare, "10.5.1")
     findings = FindingsRun("reframe")
