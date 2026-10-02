@@ -69,7 +69,7 @@ Versions must sort so that `10.4.0` sits above `9.1.0`, which a lexical sort inv
 3. Map each digit run to the pair `(0, <integer value>)` and each non-digit piece to `(1, <lowercased text>)`.
 4. Compare the resulting tuples.
 
-The leading `0`/`1` tag is not decoration: it keeps a numeric piece from ever being compared against a textual one, which would raise. It also orders any numeric segment ahead of any textual one at the same position, so `2.0.0` sorts above `2.0.0-rc1` — a release above its own pre-releases, which is the intuitive reading.
+The leading `0`/`1` tag is not decoration: it keeps a numeric piece from ever being compared against a textual one, which would raise. It also orders a numeric segment *below* a textual one at the same position, and a shorter key below a longer one it prefixes. So in the descending order the catalog writes, `2.0.0-rc1` sits **above** `2.0.0`, and a textual version sits above every numeric one — `spotfire-server` lists `Server` above `15.0.0`. Only the CSV row order is affected: `sync/versions.py` and `sync/archives.py` set textual versions apart before they sort, and no pre-release keys are in the catalog today.
 
 ### 1.4 Slugs and workspace folder names — **Built**
 
@@ -135,15 +135,14 @@ Three helpers absorb the API's inconsistency. All are pure functions over alread
 
 ### 2.3 The crawl — **Built**
 
-**Input:** an optional BU, family, and set of selectors (product codes and/or docsite slugs).
-**Output:** a `CrawlResult` — the products built, the errors collected, and counts of entries skipped as unversioned or non-public.
+**Input:** an optional BU and set of selectors (product codes and/or docsite slugs). There is no family input: discovery assigns no family (§2.7), so `catalog fetch --family` is turned into selectors from the catalog before the crawl.
+**Output:** a `CrawlResult` — the products built, the errors collected, counts of entries skipped as unversioned or non-public, the slugs A-to-Z advertises versions for that yielded none (`advertised_but_empty`), and the slugs returned without their archive index (`archive_incomplete`, §2.8).
 
 1. **List products** from the A-to-Z endpoint (§2.4). A failure here is fatal to the crawl and returns immediately with the error recorded; there is nothing to iterate.
-2. **Apply selectors, if given**, against the A-to-Z list. An entry matches if the selector set contains either its slug or the code derived from its slug. This filtering happens *before* any per-product request, which is what makes `--product` and `--batch` cheap: a three-product batch is three requests, not seven hundred. `bu` and `family` cannot be applied here — they are only known after classification — so they cost a full crawl.
-3. **Load category data once**, if any entries survived, and only as an advisory hint (§2.7).
-4. **For each entry**, build one product (§2.5). A `DocsiteError` is caught, recorded against the slug, and the loop continues.
-5. **Apply the BU and family filters** to each built product.
-6. Return.
+2. **Apply selectors, if given**, against the A-to-Z list. An entry matches if the selector set contains either its slug or the code derived from its slug. This filtering happens *before* any per-product request, which is what makes `--product` and `--batch` cheap: a three-product batch is three requests, not seven hundred. `bu` cannot be applied here — it is only known after the keyword rules run — so it costs a full crawl.
+3. **For each entry**, build one product (§2.5). A `DocsiteError` is caught, recorded against the slug, and the loop continues. An entry that yields no version is counted under `advertised_but_empty` if A-to-Z gave it a `versionCount`, and under `unversioned` otherwise.
+4. **Apply the BU filter** to each built product.
+5. Return.
 
 **The partial-failure policy is the important part of this loop.** A product that could not be built is *absent from the result*, never present with an empty version list. An empty list would read to the merge in §3 as "every version of this product was deleted upstream", so a transient 503 would either abort the whole fetch or, with `--allow-deletes`, delete a product's entire history.
 
@@ -151,17 +150,17 @@ Three helpers absorb the API's inconsistency. All are pure functions over alread
 
 For each record in the A-to-Z payload:
 
-1. Read the slug; **skip if absent** — the slug is the key every other endpoint is addressed by, so there is nothing to be done with an entry lacking one.
-2. **Skip if already seen.** The list contains duplicates.
-3. Read the public-visibility flag *as a key*: if the flag is declared and false, count the entry as non-public and skip it. If the flag is **absent**, treat the entry as public. 70 of the docsite's 739 entries are marked not public, and requesting one yields an SSO page as HTTP 200 — filtering here saves 70 requests and 70 spurious errors. Defaulting a *missing* flag to public means a future schema change degrades to noise rather than silently emptying the crawl.
-4. Emit `{slug, name, id}`, falling back to the slug for a missing name.
+1. Read the slug; **skip if absent** — the slug is the key every other endpoint is addressed by, so there is nothing to be done with an entry lacking one. **Group the records by slug**: the list contains duplicates.
+2. Read each record's public-visibility flag *as a key*: declared and false means not public; **absent** means public. 70 of the docsite's 739 entries are marked not public, and requesting one yields an SSO page as HTTP 200 — filtering here saves 70 requests and 70 spurious errors. Defaulting a *missing* flag to public means a future schema change degrades to noise rather than silently emptying the crawl.
+3. **Filter before de-duplicating.** A slug counts as non-public only when *every* record for it is; otherwise the first visible record wins. De-duplicating first let an admin-only stub claim `spotfire-application` and hide its 99-version public twin (`architecture.md` §2.1).
+4. Emit `{slug, name, id, version_count}`, falling back to the slug for a missing name, with `version_count` the largest any visible record claims.
 
 ### 2.5 Building one product — **Built**
 
 1. **Fetch and unwrap** the product detail. A payload that is not an object raises.
 2. **Assemble the record set.** The detail object *is* the current version — it carries `version_no` and `folder_path` itself — and every other release sits under `siblings`. So the set is `[detail] + siblings`. The siblings key is looked up **by name only**, never by the generic list search of §2.2, because that search would happily return the product's `Documents` array instead.
 3. **Drop records with no version number.**
-4. **If nothing remains, return "no product"** and count it as unversioned. These are licence pages and connector stubs: real docsite entries with nothing to convert. Counted rather than listed, because none of them are actionable.
+4. **If nothing remains, try the parent fallback**: a slug flagged `isParentProduct` carries no version itself, and `/api/products/{slug}-latest` returns the ordinary child shape with every release under `siblings` (`architecture.md` §2.1). If that yields nothing either, **return "no product"** — the caller counts it as `advertised_but_empty` when A-to-Z claimed versions for it, and as `unversioned` (licence pages, connector stubs) otherwise (§2.3).
 5. **Derive the product code** (§2.6).
 6. **Build the product shell** — display name, BU, family, provenance (§2.7).
 7. **Build one version per record** (§2.6), inserting each **only if that version number is not already present**. The detail record is first in the set, so where a version appears twice the current-version record wins.
@@ -193,21 +192,20 @@ The distinction matters because a reconstructed path is good enough to build a U
 
 Archived versions are not published under the active layout, so a templated URL for one is a plausible-looking 404 recorded in the catalog as fact and discovered three stages later. Their real endpoints come from the archive index instead.
 
-**Active ZIP URL construction.** Given a folder path, strip surrounding slashes; if either the template or the path is empty, return **nothing rather than a malformed URL**; otherwise substitute the path both verbatim and with `/` replaced by `_`, producing `/pub/ems/10.4.0/doc/zip/tib_ems_10.4.0_doc.zip`.
+**Active ZIP URL construction.** Given a folder path, strip surrounding slashes; if the template or the path is empty, or the template needs a slug or version the caller did not supply, return **nothing rather than a malformed URL**; otherwise substitute the tokens `{folder_path}`, `{slug}` and `{version_dashed}`, producing `/pub/ems/10.4.0/tibco-enterprise-message-service-10-4-0_documentation.zip` (`architecture.md` §2.2). The old `doc/zip/tib_…_doc.zip` form resolved for none of the products sampled.
 
 **Release-date candidates deliberately exclude `published_date`.** On old releases that field is a bulk-migration timestamp — every EMS 5.x and 6.x record reads `2022-05-26`. Leaving it out lets the archive index's `GA_date` supply the real month.
 
 ### 2.7 Family classification — **Built**
 
-Applied when a product shell is built, in strict precedence order. Only the last two steps happen during a crawl; `manual` is a human's edit, preserved by the merge in §3.3.
+Since Phase 32 a crawl assigns **no family** (`architecture.md` §3.3). Every product shell gets family `general` with provenance `unclassified`, and a human files it with `catalog set --family`; the merge in §3.3 preserves that `manual` assignment.
 
-1. **Keyword rules from `taxonomy.yaml`.** For each rule in file order, for each of its match tokens: the rule matches if the token equals the product code exactly (case-insensitively), or if the token appears as a substring of the display name (case-insensitively). **First rule to match wins**, so specific rules must be ordered above broad ones — the file is a decision list, not a set. A match yields `bu`, `family`, and provenance `taxonomy_rule`.
-2. **No match** yields BU `tibco`, family `general`, provenance `unclassified`. The product is *flagged for triage*, not guessed into a family: with most products carrying no category data at all, a wrong-but-confident classification is more expensive than an honest gap.
-3. **Advisory promotion.** If and only if the result is `unclassified` and the category endpoint supplied a category for this slug, take it as the family with provenance `docsite_category`. A category may fill a gap; it may never override a rule match.
+1. **Keyword rules from `taxonomy.yaml` still resolve `bu`.** For each rule in file order, for each of its match tokens: the rule matches if the token equals the product code exactly (case-insensitively), or if the token appears as a substring of the display name (case-insensitively). **First rule to match wins**, so specific rules must be ordered above broad ones — the file is a decision list, not a set. A match yields the rule's `bu`; its `family` is kept only as a suggestion, which `catalog triage` prints and nothing writes.
+2. **No match** yields BU `tibco`.
 
 **Display name** comes from the A-to-Z list in preference to the detail payload: the detail name carries the version number (`… 10.5.0`), and a version baked into a product-level row goes stale on the next release.
 
-**Category loading is best-effort.** If the endpoint is not configured, or the request fails, record the failure as an advisory note and continue with no categories. Losing them degrades triage; it must not degrade the crawl.
+The docsite category endpoint is no longer read: its only use was promoting an unclassified product's family, which Phase 32 removed.
 
 ### 2.8 Overlaying the archive index — **Built**
 
