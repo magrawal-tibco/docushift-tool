@@ -4419,6 +4419,35 @@ Its findings can then be read and fixed without loading the rest of the tool.
 
 *Exit: every unit and pass has a findings file; every finding has a triage decision; every "fix" is merged with a test; S1/S2 findings marked "defer" are recorded in `open-issues.md`; the test suite and lint are clean on the final commit.*
 
+
+### Phase 35: Every Published Version Carries Its Cutover Map — **Planned, 2026-10-02**
+
+**Why.** Phase 33 left `301.yml` where Phase 22 put it: written by Reframe into `reframed/`. Two populations never get one published:
+
+1. **Versions Reframe skips** (not Flare): Streaming ×6, Spotfire Data Streams ×2, Data Science Author 1.4.0, Administrator 5.12.x ×2, Runtime Agent 5.12.x ×3. Step 1 measured every one of them deriving cleanly.
+2. **Flare versions that publish the converted tree** (`publish: false` in `reframe.yaml`): Administrator 5.13.0 and Runtime Agent 5.13.0 got a `301.yml` in `reframed/` on 2026-10-02. **Neither reached the published scratch tree**, because `sync` copies `output/` for them. Phase 33's report counted them as covered, which was true of `reframed/` and not of what ships.
+
+The rule that fixes both: **the map belongs to whichever tree `sync` publishes from.** Only EMS and ActiveSpaces publish merged today.
+
+#### Decisions
+
+| decision | choice | why |
+|---|---|---|
+| **Where it is written** | `convert` writes `301.yml` into its staging tree before the swap, for every engine. Reframe keeps writing its own into `reframed/`, overwriting nothing it carried (`_REGENERATED` already lists it) | Same position as Reframe's: inside the tree, before the swap. Writing it in `sync` is the 20d.1 `filecmp` trap Phase 22 avoided: a file added to the published folder after the copy makes every version re-copy on every run |
+| **`to` side in `output/`** | The converted output path, unmoved (`moved = {}`) | Nothing moved. `origins.rows` already treats a missing `moved` entry this way, which is why it works for a product that never reframes |
+| **One builder, two callers** | `_write_origins`'s body moves into `origins.build(...)`, which returns the rows plus the findings to record. Reframe and convert both call it | Two copies of the declared/derived/listed rules would drift. Moving it puts the decision logic in a module with no stage dependencies |
+| **Findings** | Convert records the same four codes under `Stage.CONVERT`; Reframe keeps recording them under `Stage.REFRAME` | A Flare version reports its unmapped pages once per stage. That's accepted: each run's report should be complete on its own. The register is unchanged in size; the codes' stage becomes "convert, reframe" |
+| **Currency** | No new currency key. `301.yml` is rebuilt whenever the version reconverts; a newer sitemap needs `convert --force`, as it already needs `reframe --force` | A sitemap hash in the currency key would reconvert every version on each `catalog sitemap` refresh, for a file that is cheap to regenerate on purpose |
+| **Counts** | `_out_files` grows by one where a map is written; `_md_files` is unchanged, so `OUTPUT_COUNT_MISMATCH` arithmetic is unaffected | Recorded so the `versions.csv` diff after the re-run is expected, not a surprise |
+
+#### Steps
+
+1. `origins.build`, Reframe switched to it (no output change: re-run reframe, all 14 `301.yml` byte-identical to Phase 33's).
+2. `convert` writes `301.yml`; tests for a derived, a declared, a missing-sitemap and a not-derivable version.
+3. **Run after Phase 36's `toc.yml` format change lands**, because both phases regenerate `output/` and `reframed/` and running twice wastes ~an hour: `convert --force` and `reframe --force` over the converted catalog, `sync` to a scratch target, `validate`.
+
+*Exit: every published `online-help` version with a sitemap page list has a `301.yml` in the published tree (expected: 30 — EMS 6, ActiveSpaces 6, Streaming 6, Spotfire Data Streams 2, Data Science Author 1, Administrator 3, Runtime Agent 4, Silver Fabric/PeopleSoft/Designer Add-in excluded for having no list); every derived `from` is in its sitemap; a sample of six URLs from the newly covered layouts is confirmed live; `validate` adds no finding from any `301.yml`; Reframe's 14 maps are byte-identical to Phase 33's.*
+
 ---
 
 ## 2. Validation & Testing Criteria
