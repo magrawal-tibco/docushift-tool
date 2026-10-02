@@ -537,3 +537,65 @@ def test_a_refused_archive_leaves_nothing_behind(tmp_path: Path) -> None:
         safe_extract(archive, tmp_path / "out")
 
     assert list((tmp_path / "out").iterdir()) == []
+
+
+# -- members Windows cannot hold faithfully (Phase 34, R3-01 and R3-07) ----------
+
+
+@pytest.mark.parametrize(
+    "member",
+    ["wrapper/C:escaped.txt", "wrapper/deeper/C:escaped.txt", "wrapper\\C:escaped.txt"],
+    ids=["drive-relative", "deeper", "backslash"],
+)
+def test_a_drive_letter_later_in_the_name_is_refused(tmp_path: Path, monkeypatch, member: str) -> None:
+    """R3-01. `root.joinpath("wrapper", "C:escaped.txt")` is drive-relative on
+    Windows, and that segment *replaces* the root: the member landed in the working
+    directory on C:, outside the target, and was counted as a normal file."""
+    cwd = tmp_path / "cwd"
+    cwd.mkdir()
+    monkeypatch.chdir(cwd)
+    archive = tmp_path / "pkg.zip"
+    archive.write_bytes(zip_bytes({"wrapper/index.htm": "ok", member: "outside"}))
+
+    with pytest.raises(UnsafeArchiveError):
+        safe_extract(archive, tmp_path / "out")
+
+    assert list(cwd.iterdir()) == []
+    assert list((tmp_path / "out").iterdir()) == []
+
+
+@pytest.mark.parametrize(
+    "member",
+    ["w/html/ab:stream.htm", "w/html/trailing.", "w/html/trailing ", "w/html/a?b.htm", "w/dir./x.htm"],
+    ids=["colon", "trailing-dot", "trailing-space", "reserved-character", "dotted-directory"],
+)
+def test_a_name_windows_cannot_hold_is_refused(tmp_path: Path, member: str) -> None:
+    """R3-07. Written through the long-path prefix, `ab:stream.htm` is an empty `ab` with the
+    content in an alternate data stream, and `trailing.` is a file no unprefixed
+    reader can find. Neither is a tree anybody downstream can read."""
+    archive = tmp_path / "pkg.zip"
+    archive.write_bytes(zip_bytes({"w/html/index.htm": "ok", member: "x"}))
+
+    with pytest.raises(UnsafeArchiveError):
+        safe_extract(archive, tmp_path / "out")
+
+
+def test_two_members_that_differ_only_in_case_are_refused(tmp_path: Path) -> None:
+    """R3-07. On a case-insensitive filesystem the second silently overwrote the
+    first, and `written` still counted two files where disk held one."""
+    archive = tmp_path / "pkg.zip"
+    archive.write_bytes(zip_bytes({"w/html/Topic.htm": "upper", "w/html/topic.htm": "lower"}))
+
+    with pytest.raises(UnsafeArchiveError, match="topic.htm"):
+        safe_extract(archive, tmp_path / "out")
+
+    assert list((tmp_path / "out").iterdir()) == []
+
+
+def test_a_directory_named_in_two_cases_is_still_one_directory(tmp_path: Path) -> None:
+    """Only two *files* on one path are a collision. `Doc/a.htm` and `doc/b.htm`
+    land in one folder on Windows, and both files survive."""
+    archive = tmp_path / "pkg.zip"
+    archive.write_bytes(zip_bytes({"w/Doc/a.htm": "a", "w/doc/b.htm": "b"}))
+
+    assert safe_extract(archive, tmp_path / "out") == 2

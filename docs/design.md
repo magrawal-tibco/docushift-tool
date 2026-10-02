@@ -409,7 +409,7 @@ Extraction under `--extract` goes through the same path-traversal refusal as §6
 ### 6.1 Extract — **Built** (steps 1–3 Phase 4b-1, steps 4–5 Phase 4b-2)
 
 1. Run over **the same selection as the download**, so an archived version is neither fetched nor unpacked.
-2. Refuse any archive member whose resolved path escapes the target directory, and any absolute member path. A documentation ZIP has no legitimate reason to contain either.
+2. Refuse any archive member whose resolved path escapes the target directory, and any absolute member path. A documentation ZIP has no legitimate reason to contain either. A `:` in **any** segment counts as an escape, not only a leading drive letter: Windows reads `wrapper/C:x` as drive-relative, and that segment replaces the root (Phase 34). The same refusal covers names Windows cannot hold as written: a reserved character, a segment that ends in a dot or a space, and two files whose paths differ only in case. These are written through the long-path prefix (`architecture.md` §4.4), so nothing else would stop them. None occurs in the 54 real packages.
 3. Unpack to the canonical extract path, then record the resolved path and status `EXTRACTED`.
 4. Walk the extracted tree **once**, partitioning every file into API-reference or not, inventorying assets **by category and by destination** rather than by an extension allow-list, and locating the CSH sources (§6.2, §6.3, §6.4). One walk, so all three describe one moment; the per-file detail goes to `state.db`.
 5. Write the five inventory columns back to `versions.csv` (§6.3) — but only from a walk that finished. A directory the walk could not read leaves the columns blank, on the same rule as a failed extract.
