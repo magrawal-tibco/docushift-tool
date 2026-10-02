@@ -341,6 +341,48 @@ def test_the_archive_index_supplies_archived_zip_endpoints(crawler: DocsiteCrawl
     assert archived.release_date == "November 2022"
 
 
+def _with_siblings(session: FakeSession, *siblings: dict) -> None:
+    """Replaces the EMS detail's `siblings`, keeping the current-version fields."""
+    detail = PAYLOADS["/api/products/tibco-enterprise-message-service"]["result"]["product"]
+    session.payloads["/api/products/tibco-enterprise-message-service"] = _envelope(
+        "product", {**detail, "siblings": list(siblings)}
+    )
+
+
+def test_an_epoch_millisecond_release_date_is_stored_as_iso(
+    session: FakeSession, crawl_config: ConfigManager
+) -> None:
+    """R2-08: the real payload shape for about a fifth of versions, stored raw in 926 rows."""
+    _with_siblings(session, {"version_no": "10.4.0", "folder_path": "ems/10.4.0", "releaseDate": 1399420800000})
+
+    assert _by_code(_crawl(session, crawl_config), "ems").versions["10.4.0"].release_date == "2014-05-07"
+
+
+def test_the_bulk_migration_day_is_not_an_archived_release_date(
+    session: FakeSession, crawl_config: ConfigManager
+) -> None:
+    """R2-04: every archived EMS 5.1.0-8.4.0 row read 2022-05-26, and the index could not correct it.
+
+    Dropped on an archived record, so the archive index's `GA_date` fills the gap
+    (10.2.1), and a version the index does not date is left undated rather than
+    dated wrongly (8.2.1).
+    """
+    bulk = "2022-05-26T00:00:00.000Z"
+    _with_siblings(
+        session,
+        {"version_no": "10.2.1", "folder_path": "ems/10.2.1", "isArchive": True, "releaseDate": bulk},
+        {"version_no": "8.2.1", "folder_path": "enterprise_message_service", "isArchive": True, "releaseDate": bulk},
+        {"version_no": "10.4.0", "folder_path": "ems/10.4.0", "isArchive": False, "releaseDate": bulk},
+    )
+
+    ems = _by_code(_crawl(session, crawl_config), "ems")
+
+    assert ems.versions["10.2.1"].release_date == "November 2022"
+    assert ems.versions["8.2.1"].release_date is None
+    # An active record keeps it: the bulk day is a migration artefact of old releases only.
+    assert ems.versions["10.4.0"].release_date == "2022-05-26"
+
+
 def test_the_archive_index_can_add_versions_siblings_omits(crawler: DocsiteCrawler) -> None:
     added = _by_code(crawler.discover(), "ems").versions["6.0.1"]
 

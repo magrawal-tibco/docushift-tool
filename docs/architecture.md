@@ -102,7 +102,7 @@ Verified against the live API on 2026-09-03, using `tibco-enterprise-message-ser
 | `siblings` mixes active and archived releases, separated by an `isArchive` flag | Archive status is per record, not per endpoint. |
 | Archived siblings carry **stale** folder paths (`enterprise_message_service`, `ems-zlinux` instead of `ems/8.2.1`) | An active ZIP URL is only templated from a path that looks like `<code>/<version>`. Archived rows get their URL from the archive index instead, never from a template — a guessed URL would be recorded in the catalog as fact and fail much later. |
 | The archive index **overlaps** `siblings` rather than replacing it | The two are merged by version number: a version already known is topped up with the index's `zipPath` and `GA_date`, and an active record is never demoted to archived. |
-| `published_date` on old releases is a bulk-migration timestamp (every EMS 5.x and 6.x row reads `2022-05-26`) | It is excluded from the release-date candidates, so the archive index's `GA_date` supplies the real month. |
+| `published_date` on old releases is a bulk-migration timestamp (every EMS 5.x and 6.x row reads `2022-05-26`) | It is excluded from the release-date candidates. The same day also arrives on archived records under a key the crawler does read (all 20 archived EMS 5.1.0–8.4.0 rows held it), so on an archived record that day is skipped like an absent key, and the archive index's `GA_date` supplies the real month (design §2.8). |
 | 70 of the 739 A-to-Z entries have `isPublicLevel: false`, and requesting one returns an **SSO interstitial as HTTP 200** | They are filtered out before the request. A missing flag is treated as public, so a schema change cannot silently empty the crawl. |
 | Key spellings differ per endpoint (`version_no` / `versionNumber`, `folder_path` / `folderPath`) | Field reads match a small list of candidate names. The API is undocumented; being strict would mean a release every time a field is renamed. |
 
@@ -182,7 +182,7 @@ The code is kept as a column because it is what a human recognizes (`ems`, not `
 | `convert_batch` | **user** | Scheduling: which run this version belongs to, e.g. `poc-1`. Empty = not scheduled. Free text, lowercased on write — see §3.7 |
 | `migrate_decision` | tool (from the export), user-overridable | `migrate` \| `do_not_migrate` \| `unknown`. Somebody's editorial verdict on whether this version moves to the new docsite, re-resolved from `config/docsite-migration.yaml` on every fetch. **Gates nothing** — it is recorded so it can be read against `convert_eligible`, which it contradicts on 376 rows. See §3.12 |
 | `migrate_decision_source` | tool | `manual` \| `docsite_sheet` \| `unknown` (no row in the active export) |
-| `release_date` | tool | ISO where parseable; free text otherwise (the archive API returns values like `June 2022`) |
+| `release_date` | tool | ISO where parseable, including the epoch milliseconds the docsite writes for about a fifth of versions; free text otherwise (the archive API returns values like `June 2022`). See design §1.2 |
 | `release_status` | tool (from the report), user-overridable | `retired` \| `retirement-announced` \| `ga` \| `unknown`. Support's lifecycle verdict, re-resolved from `config/eos.yaml` on every fetch. **Only `retired` blocks conversion** — see §3.11 |
 | `retirement_date` | tool (from the report) | ISO. Populated for announced and GA rows too — the report dates every row it carries |
 | `release_status_source` | tool | `manual` \| `eos_report` \| `unknown` (no row in the active report) |

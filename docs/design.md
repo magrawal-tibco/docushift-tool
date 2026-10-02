@@ -46,13 +46,15 @@ Applied to booleans, dates, encodings and column sets:
 | Field kind | Accepted on read | Written as |
 | :--- | :--- | :--- |
 | Boolean | `true`/`1`/`yes`/`y`/`t`, any case; blank counts as false | `true` / `false`, lowercase |
-| Date | ISO date, ISO timestamp, `m/d/Y`, `d/m/Y`, `Y/m/d`, `d-m-Y`; anything else verbatim | ISO `YYYY-MM-DD`, or the original text unchanged |
+| Date | ISO date, ISO timestamp, epoch milliseconds, `m/d/Y`, `d/m/Y`, `Y/m/d`, `d-m-Y`; anything else verbatim | ISO `YYYY-MM-DD`, or the original text unchanged |
 | Encoding | UTF-8 with or without BOM | UTF-8 **with** BOM |
 | Columns | Any superset or subset of the declared set | The declared set, in declared order, nothing else |
 
 **Boolean parse.** Trim, lowercase, and test against the true-set and the false-set. A value in neither set falls back to a caller-supplied default rather than to `false` — the default is what carries the rule "a blank `convert_eligible` means eligible if the version is active and ineligible if it is archived", which a hard `false` would silently break.
 
-**Date normalization.** In order: an empty value yields empty; a value that starts with an ISO timestamp (`2025-02-06T09:21:53.000Z`) is truncated to its first ten characters, because the catalog records the day and the time of day is noise in a spreadsheet column; otherwise each format is tried in turn and the first that parses wins; and a value that parses as none of them — `June 2022`, which the archive API really returns — **passes through untouched**. Coercing or dropping it would lose the only release date some archived versions have.
+**Date normalization.** In order: an empty value yields empty; a value that starts with an ISO timestamp (`2025-02-06T09:21:53.000Z`) is truncated to its first ten characters, because the catalog records the day and the time of day is noise in a spreadsheet column; a run of 12–13 digits is epoch milliseconds — the docsite's `releaseDate` on about a fifth of versions — and becomes the UTC day it names, provided that day falls in 1990–2100; otherwise each format is tried in turn and the first that parses wins; and a value that parses as none of them — `June 2022`, which the archive API really returns — **passes through untouched**. Coercing or dropping it would lose the only release date some archived versions have.
+
+**Comparing dates of different precision** goes through `release_year`, which reads the year out of any of those forms and out of `March 2021` / `Mar 2021`, and returns empty when there is none. Slicing the normalized text instead read a month-named date as `Marc` (Phase 34, R1-05).
 
 The month-first format is tried before day-first deliberately: the hazard being defended against is a US-locale Excel rewriting `2025-11-04` as `11/4/2025`. A day greater than 12 fails the month-first attempt and falls through to day-first on its own.
 
@@ -220,6 +222,10 @@ For each archived child record, keyed by version number:
 | Version unknown | Add it: archived, eligibility from the archived default, release date from `GA_date`, ZIP URL absolutised from `zipPath` |
 | Version known and **active** | **Leave it alone.** A version listed in both places is the current one, and marking it archived would quietly make it ineligible for conversion |
 | Version known and archived | Overwrite the ZIP URL from `zipPath` if the index has one; fill the release date **only if it is currently empty** |
+
+On any archived record, sibling or index, the docsite's bulk-migration day (`2022-05-26`) is not a release date: it is skipped like an absent key, so the next date key — or the index's `GA_date` — supplies the date, and a version neither dates is left undated rather than dated wrongly (Phase 34, R2-04).
+
+If the index was skipped or the request failed, the product is named in `archive_incomplete`, so the merge does not read its archive-only versions as deleted (§3.4).
 
 The archive index *overlaps* the sibling list rather than replacing it, which is why this is an overlay with three cases rather than an append.
 

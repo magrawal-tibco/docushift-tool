@@ -903,7 +903,14 @@ class CatalogManager:
         mine_value = getattr(mine, name)
         if base is None:
             return mine_value in (None, "")
-        return _as_text(mine_value) == _as_text(base.get(name))
+        base_value = base.get(name)
+        if name == "release_date":
+            # The snapshot holds the date as discovery wrote it, and until Phase
+            # 34 that was raw epoch milliseconds on 926 rows, while the CSV now
+            # holds the ISO day it names (R1-11). Compared as text, each would
+            # read as a hand edit and freeze its date against upstream.
+            base_value = normalize_date(base_value)
+        return _as_text(mine_value) == _as_text(base_value)
 
     def _collect_deletions(
         self, mine: Product, theirs: Product, archive_complete: bool = True

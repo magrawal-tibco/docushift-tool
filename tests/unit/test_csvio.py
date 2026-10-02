@@ -18,6 +18,7 @@ from docushift.utils.csvio import (
     parse_optional_bool,
     parse_optional_int,
     read_rows,
+    release_year,
     write_rows,
 )
 
@@ -60,6 +61,35 @@ def test_normalize_date_passes_free_text_through_verbatim() -> None:
     """The archive API returns values like 'June 2022'; they must survive untouched."""
     assert normalize_date("June 2022") == "June 2022"
     assert normalize_date(None) == ""
+
+
+def test_normalize_date_converts_epoch_milliseconds() -> None:
+    """R1-11 / R2-08: 926 catalog rows arrived as `1399420800000` and were stored raw."""
+    assert normalize_date("1399420800000") == "2014-05-07"
+    assert normalize_date(1703548800000) == "2023-12-26"
+
+
+@pytest.mark.parametrize("raw", ["12345", "99999999999999", "0000000000000"])
+def test_normalize_date_leaves_implausible_digit_runs_alone(raw: str) -> None:
+    """A digit run that is not a plausible epoch is a column that changed meaning, not a date."""
+    assert normalize_date(raw) == raw
+
+
+@pytest.mark.parametrize(
+    ("raw", "year"),
+    [
+        ("2023-06-12", "2023"),
+        ("June 2023", "2023"),
+        ("Jun 2023", "2023"),
+        ("1399420800000", "2014"),
+        ("11/4/2025", "2025"),
+        ("", ""),
+        ("not a date", ""),
+    ],
+)
+def test_release_year_reads_every_dialect_the_catalog_and_homepage_use(raw: str, year: str) -> None:
+    """R1-05: the year check sliced `[:4]` and compared `June` with `2023`."""
+    assert release_year(raw) == year
 
 
 def test_natural_version_sort_puts_10_above_9() -> None:

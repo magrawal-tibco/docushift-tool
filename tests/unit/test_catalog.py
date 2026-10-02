@@ -381,6 +381,22 @@ def test_without_a_snapshot_existing_values_are_kept(
     assert stateless_catalog.get_product("tibco-ems").display_name == "TIBCO Enterprise Message Service™"
 
 
+def test_an_epoch_snapshot_and_its_iso_cell_are_the_same_date(catalog: CatalogManager) -> None:
+    """R1-11: `state.db` holds 926 bases as epoch milliseconds, and the CSV now holds ISO.
+
+    Compared as text, every one would read as a hand edit and freeze its date.
+    """
+    _fetch(catalog, make_product("ems", versions={"1.0": make_version("ems", "1.0", release_date="1399420800000")}))
+    assert catalog.state.get_version_snapshot("ems", "1.0")["release_date"] == "1399420800000"
+
+    _fetch(
+        _reload(catalog),
+        make_product("ems", versions={"1.0": make_version("ems", "1.0", release_date="2014-06-01")}),
+    )
+
+    assert _reload(catalog).get_version("ems", "1.0").release_date == "2014-06-01"
+
+
 def test_dry_run_writes_nothing(catalog: CatalogManager, sample_product: Product) -> None:
     catalog.merge_fetch_results([sample_product], dry_run=True)
 

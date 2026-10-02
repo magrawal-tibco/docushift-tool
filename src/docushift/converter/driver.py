@@ -54,7 +54,7 @@ from docushift.sync import apirefs
 from docushift.transforms import csh as csh_transform
 from docushift.transforms import fragments, links
 from docushift.transforms.assets import AssetCopier, Counts
-from docushift.utils.csvio import normalize_date
+from docushift.utils.csvio import release_year
 from docushift.utils.slug import slugify, version_segment
 from docushift.utils.swap import remove, swap
 
@@ -522,8 +522,8 @@ class DocumentConverter:
                     "METADATA_MISMATCH", path=unit.name,
                     message=f"homepage release-version {declared!r} != catalog {version.version!r}",
                 )
-            date = normalize_date(unit.metadata.get("release-date", ""))[:4]
-            catalog_date = normalize_date(version.release_date or "")[:4]
+            date = release_year(unit.metadata.get("release-date", ""))
+            catalog_date = release_year(version.release_date)
             if date and catalog_date and date != catalog_date:
                 context.record(
                     "METADATA_MISMATCH", path=unit.name,

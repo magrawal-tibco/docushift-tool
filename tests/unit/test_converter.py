@@ -15,6 +15,7 @@ engine failure. `test_flare.py` is where the engine is tested.
 
 import re
 from pathlib import Path, PurePosixPath
+from types import SimpleNamespace
 
 import pytest
 import yaml
@@ -805,3 +806,39 @@ def test_the_rewrite_is_reported_once_with_a_count(
     assert len(rows) == 1
     assert rows[0].count == 0
     assert "1 API tree(s)" in rows[0].message
+
+
+# -- the homepage date cross-check (Phase 34, R1-05) ----------------------------
+
+
+class _Recorder:
+    """Stands in for `ConversionContext`: the check needs nothing but `record`."""
+
+    def __init__(self) -> None:
+        self.messages: list[str] = []
+
+    def record(self, code: str, path: str = "", message: str = "", count: int = 1) -> None:
+        self.messages.append(f"{code}: {message}")
+
+
+def _year_check(homepage: str, catalog_date: str) -> list[str]:
+    context = _Recorder()
+    unit = SimpleNamespace(name="html", metadata={"release-date": homepage})
+    version = ProductVersion(slug="p", version="1.4.0", release_date=catalog_date)
+    DocumentConverter.__new__(DocumentConverter)._report_metadata(context, [unit], version)
+    return context.messages
+
+
+@pytest.mark.parametrize(
+    ("homepage", "catalog_date"),
+    [("June 2023", "2023-06-12"), ("May 2014", "1399420800000")],
+)
+def test_the_year_check_reads_a_month_name_and_an_epoch_date(homepage: str, catalog_date: str) -> None:
+    """It sliced `[:4]`, so `June 2023` against `2023-06-12` read `June != 2023`."""
+    assert _year_check(homepage, catalog_date) == []
+
+
+def test_a_real_year_difference_is_still_reported() -> None:
+    assert _year_check("June 2022", "2023-06-12") == [
+        "METADATA_MISMATCH: homepage release-date 2022 != catalog 2023"
+    ]

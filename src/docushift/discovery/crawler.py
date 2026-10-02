@@ -59,6 +59,13 @@ _FOLDER_KEYS = ("folder_path", "folderPath", "path")
 # 6.x record reads 2022-05-26). Leaving it out lets the archive index's `GA_date`
 # supply the real release month instead.
 _DATE_KEYS = ("releaseDate", "release_date", "GA_date", "ga_date", "date")
+# ...but leaving `published_date` out was not enough. The same bulk-migration day
+# also arrives under a key read above, on archived records: all 20 archived EMS
+# 5.1.0-8.4.0 rows read 2022-05-26, and the archive index's `GA_date` only fills
+# an *empty* date, so it could never correct them (Phase 34, R2-04). On an
+# archived record that day is therefore skipped like an absent key. An active
+# record keeps it: the bulk migration moved old releases, not current ones.
+_BULK_MIGRATION_DATES = frozenset({"2022-05-26"})
 _ZIP_KEYS = ("zipPath", "zip_path", "zipUrl", "zip_url")
 _ARCHIVED_KEYS = ("isArchive", "is_archive", "archived")
 _ARCHIVE_EXISTS_KEYS = ("isArchiveExists", "is_archive_exists", "archive_exists", "hasArchive")
@@ -351,7 +358,7 @@ class DocsiteCrawler:
             version=number,
             is_archived=archived,
             convert_eligible=self.archived_eligible if archived else self.active_eligible,
-            release_date=normalize_date(_first(record, _DATE_KEYS)) or None,
+            release_date=_release_date(record, archived),
             # Archived versions are not published under the active layout; their
             # real endpoint comes from the archive index below, and a templated
             # guess here would be a broken URL recorded as fact.
@@ -418,7 +425,7 @@ class DocsiteCrawler:
             if not number:
                 continue
             zip_path = _first(record, _ZIP_KEYS)
-            released = normalize_date(_first(record, _DATE_KEYS)) or None
+            released = _release_date(record, archived=True)
             existing = product.versions.get(number)
 
             if existing is None:
@@ -454,6 +461,22 @@ def _first(record: Any, keys: tuple[str, ...]) -> str:
         if value not in (None, "", [], {}):
             return str(value).strip()
     return ""
+
+
+def _release_date(record: dict[str, Any], archived: bool) -> str | None:
+    """The record's release date, normalized, with the bulk-migration day skipped on archived records.
+
+    Read key by key rather than through `_first`, so a record carrying the bulk
+    day under one key and a real date under a later one yields the real one.
+    """
+    for key in _DATE_KEYS:
+        value = record.get(key)
+        if value in (None, "", [], {}):
+            continue
+        released = normalize_date(value)
+        if released and not (archived and released in _BULK_MIGRATION_DATES):
+            return released
+    return None
 
 
 def _is_public(record: dict[str, Any]) -> bool:

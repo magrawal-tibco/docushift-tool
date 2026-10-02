@@ -9,7 +9,7 @@ and a stable sort so a no-op fetch produces no diff.
 import csv
 import re
 from collections.abc import Iterable, Sequence
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 
 from docushift.utils.swap import replace_file
@@ -25,6 +25,19 @@ _FALSE_TOKENS = frozenset({"false", "0", "no", "n", "f", ""})
 _DATE_FORMATS = ("%Y-%m-%d", "%m/%d/%Y", "%d/%m/%Y", "%Y/%m/%d", "%d-%m-%Y")
 
 _ISO_TIMESTAMP = re.compile(r"^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}")
+_ISO_DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+
+# The docsite writes `releaseDate` as epoch milliseconds on about a fifth of
+# versions -- 926 catalog rows held `1399420800000` and the like until Phase 34
+# (R1-11, R2-08). Twelve or thirteen digits covers 1973 to 2286; a value whose
+# year falls outside the range below is a column that changed meaning, not a
+# date, and passes through verbatim like any other unparseable text. The range
+# is `sync/versions.py`'s, which met this dialect first.
+_EPOCH_MS = re.compile(r"^\d{12,13}$")
+_EPOCH_YEARS = range(1990, 2101)
+
+# What a docsite homepage and the archive index write: `March 2021`, `Mar 2021`.
+_MONTH_YEAR_FORMATS = ("%B %Y", "%b %Y")
 
 _VERSION_PART = re.compile(r"(\d+)")
 
@@ -107,7 +120,9 @@ def normalize_date(value: object) -> str:
     """Normalizes a date to ISO, passing unparseable values through verbatim.
 
     The archive API returns values like `June 2022`, which are not full dates and
-    must survive untouched rather than being coerced or dropped.
+    must survive untouched rather than being coerced or dropped. Epoch
+    milliseconds become the UTC day they name -- UTC so that one catalog does not
+    read a different day on two machines.
     """
     if value is None:
         return ""
@@ -118,12 +133,37 @@ def normalize_date(value: object) -> str:
     # The catalog records the day; the time of day is noise in a spreadsheet column.
     if _ISO_TIMESTAMP.match(text):
         return text[:10]
+    if _EPOCH_MS.match(text):
+        try:
+            moment = datetime.fromtimestamp(int(text) / 1000, tz=UTC)
+        except (OverflowError, OSError, ValueError):
+            return text
+        return moment.date().isoformat() if moment.year in _EPOCH_YEARS else text
     for fmt in _DATE_FORMATS:
         try:
             return datetime.strptime(text, fmt).date().isoformat()
         except ValueError:
             continue
     return text
+
+
+def release_year(value: object) -> str:
+    """The year a date names, as four digits, or `""` when it names none.
+
+    For comparing two dates written at different precisions -- the converter's
+    homepage check sets `March 2021` against the catalog's `2021-03-15`. Slicing
+    `normalize_date(...)[:4]` read the first as `Marc`, so every month-named date
+    raised a false `METADATA_MISMATCH` (Phase 34, R1-05).
+    """
+    text = normalize_date(value)
+    if _ISO_DATE.match(text):
+        return text[:4]
+    for fmt in _MONTH_YEAR_FORMATS:
+        try:
+            return str(datetime.strptime(text, fmt).year)
+        except ValueError:
+            continue
+    return ""
 
 
 def natural_version_key(version: str) -> tuple:
