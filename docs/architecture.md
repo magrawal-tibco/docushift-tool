@@ -1310,7 +1310,7 @@ Two corrections to the existing spec follow from this table.
 - a **book** is a directory holding `wwhdata/`;
 - a **collection** is a directory whose `wwhelp/books.xml` names at least one `<Book directory="X"/>` with X ≠ `.`.
 
-*(This is the same error, in the same shape, as the one CONTEXT.md records for the 2026-09-07 CSH descoping: `wwhdata/` is per **book**, `ctx/` is per **doc-set**. A first pass at this survey took the parent of any `wwhelp/` to be the doc-set and reported "643 doc-sets with exactly one book, 180 with none". Both numbers were artifacts of the wrong denominator.)*
+*(This is the same error, in the same shape, as the one the decision ledger (`docs/history/ledger.md`) records for the 2026-09-07 CSH descoping: `wwhdata/` is per **book**, `ctx/` is per **doc-set**. A first pass at this survey took the parent of any `wwhelp/` to be the doc-set and reported "643 doc-sets with exactly one book, 180 with none". Both numbers were artifacts of the wrong denominator.)*
 
 **157 collections declare 602 of the 691 books, and all 602 resolve.** The remaining 89 are undeclared — books with no collection above them. The collection root carries the doc-set's own metadata:
 

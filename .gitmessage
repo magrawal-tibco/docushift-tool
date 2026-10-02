@@ -20,7 +20,7 @@ reviewer would otherwise have to reverse-engineer from the diff.>
 ;
 ;   type   feat     new capability
 ;          fix      bug fix
-;          docs     documentation only (incl. CONTEXT.md ledger entries)
+;          docs     documentation only
 ;          refactor behaviour-preserving restructure
 ;          test     adding or correcting tests
 ;          build    pyproject, deps, packaging, .gitignore
@@ -75,8 +75,10 @@ reviewer would otherwise have to reverse-engineer from the diff.>
 ;
 ; ------------------------------------------------------------------------------
 ; BEFORE COMMITTING
-;   [ ] CONTEXT.md §3 ledger has a row for any decision made here
-;   [ ] CONTEXT.md §4 and docs/planning.md checkboxes match the filesystem
+;   [ ] The phase in docs/planning.md records any decision made here (once;
+;       other docs link to it rather than restate it)
+;   [ ] A phase finished here is moved to docs/history/phases/ with its index row
+;   [ ] CONTEXT.md §3-§4 rewritten if the current state or next step changed
 ;   [ ] docs/architecture.md reflects any schema or pipeline change
 ;   [ ] docs/user-guide.md reflects any CLI or config-file change
 ;
