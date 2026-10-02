@@ -15,9 +15,12 @@ from pathlib import Path
 from docushift.utils.swap import replace_file
 
 # Excel writes TRUE/FALSE; humans write yes/y/1. Read all of them, write only
-# lowercase true/false.
+# lowercase true/false. A blank cell is in neither set, so it reads as the
+# caller's default: it held `""` until Phase 34, which made every blank `false`
+# and silently broke the one caller whose default is not -- `convert_eligible`,
+# where blank means "eligible if active" (R1-02).
 _TRUE_TOKENS = frozenset({"true", "1", "yes", "y", "t"})
-_FALSE_TOKENS = frozenset({"false", "0", "no", "n", "f", ""})
+_FALSE_TOKENS = frozenset({"false", "0", "no", "n", "f"})
 
 # Tried in order. The slash formats exist because a US-locale Excel rewrites an
 # ISO date as 11/4/2025; month-first is therefore the right first guess, and a
@@ -43,7 +46,7 @@ _VERSION_PART = re.compile(r"(\d+)")
 
 
 def parse_bool(value: object, default: bool = False) -> bool:
-    """Reads a boolean permissively. Unrecognized values fall back to `default`."""
+    """Reads a boolean permissively. Blank and unrecognized values fall back to `default`."""
     if isinstance(value, bool):
         return value
     if value is None:
@@ -78,7 +81,7 @@ def parse_optional_bool(value: object) -> bool | None:
         return None
     if token in _TRUE_TOKENS:
         return True
-    if token in _FALSE_TOKENS - {""}:
+    if token in _FALSE_TOKENS:
         return False
     return None
 

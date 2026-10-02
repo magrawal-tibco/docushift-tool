@@ -706,6 +706,22 @@ def test_scope_round_trips_through_the_csv(project_root: Path, state: StateStore
     assert (reloaded.in_scope, reloaded.scope_source) == (False, ScopeSource.SCOPE_RULE)
 
 
+def test_a_blank_convert_eligible_cell_takes_the_archive_default(
+    catalog: CatalogManager, sample_product: Product
+) -> None:
+    """R1-02: a hand-added active row with the cell left empty was silently ineligible."""
+    _fetch(catalog, sample_product)
+    rows = read_rows(catalog.versions_path)
+    for row in rows:
+        row["convert_eligible"] = ""
+    write_rows(catalog.versions_path, list(rows[0]), rows)
+
+    product = _reload(catalog).get_product("tibco-ems")
+
+    assert product.versions["10.4.0"].convert_eligible is True
+    assert product.versions["8.6.0"].convert_eligible is False
+
+
 def test_a_blank_in_scope_cell_reads_as_in_scope(catalog: CatalogManager, sample_product: Product) -> None:
     """A hand-made row must never be excluded from every stage by an empty cell."""
     _fetch(catalog, sample_product)

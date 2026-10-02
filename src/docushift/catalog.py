@@ -300,9 +300,8 @@ class CatalogManager:
                 family=row.get("family", "").strip().lower() or "general",
                 family_source=_coerce_enum(FamilySource, row.get("family_source"), FamilySource.UNCLASSIFIED),
                 # Read through the *optional* parser, then defaulted to true: only
-                # an explicit `false` excludes. `parse_bool` cannot express this --
-                # it treats a blank cell as `false` outright, ignoring its own
-                # default -- and a blank cell in a hand-added row must never
+                # an explicit `false` excludes, and an unrecognized token reads as
+                # in scope too. A blank cell in a hand-added row must never
                 # silently drop the product out of every stage of the pipeline.
                 in_scope=parse_optional_bool(row.get("in_scope")) is not False,
                 scope_source=_coerce_enum(ScopeSource, row.get("scope_source"), ScopeSource.DEFAULT),
@@ -326,6 +325,8 @@ class CatalogManager:
                 slug=slug,
                 version=version,
                 is_archived=is_archived,
+                # A blank cell takes the default a fetch would have written (§3.7):
+                # eligible if active, not if archived.
                 convert_eligible=parse_bool(row.get("convert_eligible"), default=not is_archived),
                 convert_batch=row.get("convert_batch", "").strip().lower(),
                 migrate_decision=_coerce_enum(

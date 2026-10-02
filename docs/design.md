@@ -45,12 +45,12 @@ Applied to booleans, dates, encodings and column sets:
 
 | Field kind | Accepted on read | Written as |
 | :--- | :--- | :--- |
-| Boolean | `true`/`1`/`yes`/`y`/`t`, any case; blank counts as false | `true` / `false`, lowercase |
+| Boolean | `true`/`1`/`yes`/`y`/`t` and `false`/`0`/`no`/`n`/`f`, any case; blank takes the column's default | `true` / `false`, lowercase |
 | Date | ISO date, ISO timestamp, epoch milliseconds, `m/d/Y`, `d/m/Y`, `Y/m/d`, `d-m-Y`; anything else verbatim | ISO `YYYY-MM-DD`, or the original text unchanged |
 | Encoding | UTF-8 with or without BOM | UTF-8 **with** BOM |
 | Columns | Any superset or subset of the declared set | The declared set, in declared order, nothing else |
 
-**Boolean parse.** Trim, lowercase, and test against the true-set and the false-set. A value in neither set falls back to a caller-supplied default rather than to `false` — the default is what carries the rule "a blank `convert_eligible` means eligible if the version is active and ineligible if it is archived", which a hard `false` would silently break.
+**Boolean parse.** Trim, lowercase, and test against the true-set and the false-set. A value in neither set — a blank cell included — falls back to a caller-supplied default rather than to `false`. The default is what carries the rule "a blank `convert_eligible` means eligible if the version is active and ineligible if it is archived", which a hard `false` would silently break.
 
 **Date normalization.** In order: an empty value yields empty; a value that starts with an ISO timestamp (`2025-02-06T09:21:53.000Z`) is truncated to its first ten characters, because the catalog records the day and the time of day is noise in a spreadsheet column; a run of 12–13 digits is epoch milliseconds — the docsite's `releaseDate` on about a fifth of versions — and becomes the UTC day it names, provided that day falls in 1990–2100; otherwise each format is tried in turn and the first that parses wins; and a value that parses as none of them — `June 2022`, which the archive API really returns — **passes through untouched**. Coercing or dropping it would lose the only release date some archived versions have.
 
@@ -294,7 +294,7 @@ Four details carry the weight:
 - **The lookup is a dict hit on the exact slug.** Not `in`, not `startswith`, not a regex over the display name — `architecture.md` §3.10 tabulates what each of those wrongly excludes.
 - **Step 3 actively resets.** Removing a slug from the YAML must bring the product back into scope on the next fetch; leaving `in_scope=false` behind would make the rule file removable in name only. This is safe precisely because `manual` short-circuits at step 1, so it can only ever reset a value the rule file itself set.
 - **Rules that matched nothing are collected**, not discarded: every YAML slug absent from the catalog is reported with the merge statistics and by `warnings()`. The check runs over the **whole catalog**, not the products one fetch touched — a `--product ems` fetch would otherwise call all sixty other rules dead — and is only conclusive after `catalog fetch --all`, which is what both callers say when they print it. A rule silently matching nothing is how a renamed product drifts back into scope.
-- **`in_scope` is the one boolean column read with `parse_optional_bool`.** §1.2's permissive read maps a blank cell to `false`, which is the safe default for every other flag and the dangerous one here: a hand-added row with an empty cell would vanish from every stage of the pipeline. Only an explicit `false` excludes.
+- **A blank `in_scope` reads as `true`.** Its default is `true`, so a hand-added row with an empty cell cannot vanish from every stage of the pipeline; only an explicit `false` excludes. It is read with `parse_optional_bool` and defaulted, which says the same thing as §1.2's `parse_bool(..., default=True)` more directly.
 
 New products take the same three steps, so a product first discovered *after* the rule is written is excluded on arrival rather than converted once and excluded later.
 

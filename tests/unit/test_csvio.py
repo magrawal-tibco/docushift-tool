@@ -28,8 +28,15 @@ def test_parse_bool_accepts_truthy_spellings(raw: str) -> None:
     assert parse_bool(raw) is True
 
 
-@pytest.mark.parametrize("raw", ["false", "FALSE", "0", "no", "N", "", "  "])
+@pytest.mark.parametrize("raw", ["false", "FALSE", "0", "no", "N", " f "])
 def test_parse_bool_accepts_falsy_spellings(raw: str) -> None:
+    assert parse_bool(raw, default=True) is False
+
+
+@pytest.mark.parametrize("raw", ["", "  "])
+def test_a_blank_cell_falls_back_to_the_default(raw: str) -> None:
+    """R1-02: blank read as `false` outright, so the caller's default never applied."""
+    assert parse_bool(raw, default=True) is True
     assert parse_bool(raw) is False
 
 
