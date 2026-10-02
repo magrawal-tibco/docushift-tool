@@ -270,7 +270,7 @@ Discovery owns exactly six fields, and merges only those: `display_name`, `produ
 `family` is the one field resolved by ranking rather than by comparison, because two automated sources disagree with different confidence. Ranked `manual` (0) > `taxonomy_rule` (1) > `docsite_category` (2) > `unclassified` (3):
 
 1. If the current provenance is `manual`, preserve — unconditionally.
-2. Otherwise, if the incoming provenance ranks **equal or better** than the current one, run the ordinary three-way decision on the family value. If it takes the fetched value, `family_source` and `bu` move with it — a family is meaningless without the BU it belongs to.
+2. Otherwise, if the incoming provenance ranks **equal or better** than the current one, run the ordinary three-way decision on the family value. If it takes the fetched value, `family_source` moves with it, and so does `bu` — a family is meaningless without the BU it belongs to — unless `bu` itself differs from its snapshot, in which case a human set it and it is preserved (Phase 34, R2-03).
 3. Otherwise preserve.
 
 A fetch may raise a product's classification confidence; it may never lower it.
@@ -279,7 +279,7 @@ A fetch may raise a product's classification confidence; it may never lower it.
 
 `config/scope.yaml` is loaded once per run into a `{slug: reason}` map (`architecture.md` §3.10). For each product the merge touches, resolve `in_scope` the way `family` resolves, ranked `manual` (0) > `scope_rule` (1) > `default` (2):
 
-1. If `scope_source` is already `manual`, preserve both fields — unconditionally.
+1. If `scope_source` is already `manual`, preserve both fields — unconditionally. A row whose value its source could not have written (`default` with `false`, `scope_rule` with `true`) was typed into the CSV by hand, and is pinned `manual` here first.
 2. Otherwise, if the product's `slug` is a key in the map, write `in_scope=false, scope_source=scope_rule`.
 3. Otherwise write `in_scope=true, scope_source=default`.
 
@@ -296,7 +296,7 @@ New products take the same three steps, so a product first discovered *after* th
 
 `config/eos.yaml` and the CSV it names are loaded once per run (`architecture.md` §3.11). Resolution runs immediately after §3.3.1, on every product the merge touches, and mirrors it exactly — ranked `manual` (0) > `eos_report` (1) > `unknown` (2), per **version**:
 
-1. If `release_status_source` is already `manual`, preserve all three fields — unconditionally.
+1. If `release_status_source` is already `manual`, preserve all three fields — unconditionally. A row typed into the CSV with its source left alone is pinned `manual` here first: a non-`unknown` status beside an `unknown` source, or a status that differs from what this step last wrote (`state.db` `resolved_snapshot`, recorded after each save). `migrate_decision` is resolved the same way (`architecture.md` §3.12).
 2. Otherwise, if the report carries a row for this exact `(slug, version)`, write that status and its retirement date with `release_status_source=eos_report`.
 3. Otherwise write `release_status=unknown`, `retirement_date=None`, `release_status_source=unknown`.
 

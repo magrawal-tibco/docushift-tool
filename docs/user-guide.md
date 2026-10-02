@@ -168,7 +168,7 @@ docushift catalog set --product ebx --in-scope
 
 That sets `scope_source=manual`, which outranks the rule file — no later fetch will undo it. To exclude a product not on the list, either add it to `scope.yaml` (durable, reviewable) or run `catalog set --product X --out-of-scope` for a one-off.
 
-Two things to know if you edit `products.csv` by hand. An **empty `in_scope` cell means in scope** — only the literal `false` excludes, so a row you type in yourself cannot vanish from the pipeline by omission. And **deleting a slug from `scope.yaml` really does restore the product**: the next fetch resets it to `in_scope=true, scope_source=default`. The one thing a fetch will not touch is a `manual` decision.
+Two things to know if you edit `products.csv` by hand. An **empty `in_scope` cell means in scope** — only the literal `false` excludes, so a row you type in yourself cannot vanish from the pipeline by omission. And **deleting a slug from `scope.yaml` really does restore the product**: the next fetch resets it to `in_scope=true, scope_source=default`. The one thing a fetch will not touch is a `manual` decision — and typing `true` or `false` into `in_scope` makes one: the next fetch sees a value the rule file could not have written and sets `scope_source=manual` for you.
 
 > **Slugs are matched exactly.** `slug: ebx` matches nothing, and a substring rule would be worse than useless — `ebx` appears inside `tibco-businessconnect-ebxml-protocol`, which is an unrelated product that *is* in scope. If you add an entry, copy the slug from `products.csv`. Any rule that matches no product is reported after every fetch, which is how you find out a product was renamed upstream.
 
@@ -212,7 +212,7 @@ docushift catalog list --retired
 docushift catalog set --product ems --version 8.6.0 --release-status ga
 ```
 
-The override sets `release_status_source=manual`, which outranks the report permanently — no fetch and no new report will undo it. The retirement date stays in the row, because support really did retire the version on that day; you have decided to convert it regardless. The same flag works the other way (`--release-status retired`) for a version you want skipped before the report catches up.
+The override sets `release_status_source=manual`, which outranks the report permanently — no fetch and no new report will undo it. The retirement date stays in the row, because support really did retire the version on that day; you have decided to convert it regardless. The same flag works the other way (`--release-status retired`) for a version you want skipped before the report catches up. Typing the new status straight into `versions.csv` works too: the next fetch or `catalog eos` notices that the row no longer holds what the report wrote and sets `release_status_source=manual` itself. The same goes for `migrate_decision`.
 
 Removing a row from the report, or removing a wrong alias, **restores the version** on the next `catalog eos` — the tool resets anything it set itself. And as with scope, retired versions stay fully catalogued: they keep their rows, their dates and their place in every inventory. They are just never downloaded, extracted, converted or laid out.
 

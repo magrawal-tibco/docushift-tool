@@ -24,7 +24,7 @@ from docushift.models import (
     ZipSource,
 )
 from docushift.state import StateStore
-from docushift.utils.csvio import read_rows
+from docushift.utils.csvio import read_rows, write_rows
 from tests.conftest import make_product, make_version
 
 
@@ -2149,3 +2149,134 @@ def test_a_catalog_with_no_migration_config_decides_nothing(
 
     assert stats.decided == 0
     assert stats.undecided == len(sample_product.versions)
+
+
+# -- values typed straight into the CSV (Phase 34, R2-01 / R2-03) -------------
+#
+# Excel is the expected editor (§3.6), and a human who types a value into a
+# resolver-owned column rarely edits the `*_source` column beside it. Every test
+# here edits the file the way Excel would -- the cell only -- and then runs the
+# command that re-resolves the column.
+
+
+def _type_into(path: Path, slug: str, column: str, value: str, version: str | None = None) -> None:
+    """Overwrites one cell of a catalog CSV, as a spreadsheet edit would."""
+    rows = read_rows(path)
+    for row in rows:
+        if row["slug"] == slug and (version is None or row["version"] == version):
+            row[column] = value
+    write_rows(path, list(rows[0]), rows)
+
+
+def test_a_scope_edit_typed_into_the_csv_survives_a_fetch(project_root: Path, state: StateStore) -> None:
+    """§3.10's own example: put one excluded product back by editing the CSV."""
+    _fetch(_scoped(project_root, state, "tibco-ebx"), make_product("tibco-ebx", product_code="ebx"))
+    _type_into(project_root / "config" / "products.csv", "tibco-ebx", "in_scope", "true")
+
+    _fetch(_scoped(project_root, state, "tibco-ebx"), make_product("tibco-ebx", product_code="ebx"))
+
+    product = _scoped(project_root, state, "tibco-ebx").get_product("tibco-ebx")
+    assert (product.in_scope, product.scope_source) == (True, ScopeSource.MANUAL)
+
+
+def test_an_exclusion_typed_into_the_csv_survives_a_fetch(project_root: Path, state: StateStore) -> None:
+    _fetch(_scoped(project_root, state), make_product("tibco-ems", product_code="ems"))
+    _type_into(project_root / "config" / "products.csv", "tibco-ems", "in_scope", "false")
+
+    _fetch(_scoped(project_root, state), make_product("tibco-ems", product_code="ems"))
+
+    product = _scoped(project_root, state).get_product("tibco-ems")
+    assert (product.in_scope, product.scope_source) == (False, ScopeSource.MANUAL)
+
+
+def test_a_release_status_typed_into_the_csv_survives_a_fetch(project_root: Path, state: StateStore) -> None:
+    """The reviewer's case: `retired` -> `ga` with the source left at `eos_report`."""
+    _fetch(_eos(project_root, state, RETIRED_8_6), _ems("8.6.0"))
+    _type_into(project_root / "config" / "versions.csv", "tibco-ems", "release_status", "ga", "8.6.0")
+
+    _fetch(_eos(project_root, state, RETIRED_8_6), _ems("8.6.0"))
+
+    version = _eos(project_root, state, RETIRED_8_6).get_version("tibco-ems", "8.6.0")
+    assert (version.release_status, version.release_status_source) == (
+        ReleaseStatus.GA,
+        ReleaseStatusSource.MANUAL,
+    )
+
+
+def test_a_release_status_typed_into_the_csv_survives_catalog_eos(project_root: Path, state: StateStore) -> None:
+    _fetch(_eos(project_root, state, RETIRED_8_6), _ems("10.4.0", "8.6.0"))
+    _type_into(project_root / "config" / "versions.csv", "tibco-ems", "release_status", "ga", "8.6.0")
+
+    _eos(project_root, state, RETIRED_8_6).apply_eos()
+
+    version = _eos(project_root, state, RETIRED_8_6).get_version("tibco-ems", "8.6.0")
+    assert (version.release_status, version.release_status_source) == (
+        ReleaseStatus.GA,
+        ReleaseStatusSource.MANUAL,
+    )
+
+
+def test_a_retirement_typed_over_an_unknown_row_survives(project_root: Path, state: StateStore) -> None:
+    """With no recorded base at all, a value `unknown` could not have produced is still a hand edit."""
+    _fetch(_eos(project_root, state), _ems("8.6.0"))
+    _type_into(project_root / "config" / "versions.csv", "tibco-ems", "release_status", "retired", "8.6.0")
+    with state.transaction():
+        state.connect().execute("DELETE FROM resolved_snapshot")
+
+    _eos(project_root, state).apply_eos()
+
+    version = _eos(project_root, state).get_version("tibco-ems", "8.6.0")
+    assert (version.release_status, version.release_status_source) == (
+        ReleaseStatus.RETIRED,
+        ReleaseStatusSource.MANUAL,
+    )
+
+
+def test_a_new_report_still_lands_on_an_untouched_row(project_root: Path, state: StateStore) -> None:
+    """The guard against over-reading: a verdict changed by a new report is not a hand edit."""
+    announced = (("TIBCO EMS", "8.6.0", "Retirement Announced", "12-31-2024"),)
+    _fetch(_eos(project_root, state, announced), _ems("8.6.0"))
+
+    _eos(project_root, state, RETIRED_8_6).apply_eos()
+
+    version = _eos(project_root, state, RETIRED_8_6).get_version("tibco-ems", "8.6.0")
+    assert (version.release_status, version.release_status_source) == (
+        ReleaseStatus.RETIRED,
+        ReleaseStatusSource.EOS_REPORT,
+    )
+
+
+def test_a_migrate_decision_typed_into_the_csv_survives_catalog_migrate(
+    project_root: Path, state: StateStore
+) -> None:
+    _fetch(_migration(project_root, state, MIGRATE_10_4), _ems("10.4.0", "8.6.0"))
+    _type_into(
+        project_root / "config" / "versions.csv", "tibco-ems", "migrate_decision", "do_not_migrate", "10.4.0"
+    )
+
+    _migration(project_root, state, MIGRATE_10_4).apply_migrate_decisions()
+
+    version = _migration(project_root, state, MIGRATE_10_4).get_version("tibco-ems", "10.4.0")
+    assert (version.migrate_decision, version.migrate_decision_source) == (
+        MigrateDecision.DO_NOT_MIGRATE,
+        MigrateDecisionSource.MANUAL,
+    )
+
+
+def test_a_hand_set_bu_survives_a_fetch_of_an_unclassified_product(catalog: CatalogManager) -> None:
+    """R2-03: `bu` used to ride along with `family`, so an untouched family reset it."""
+    _fetch(catalog, make_product("mystery"))
+    catalog.set_product_field("mystery", "bu", "ibi")
+
+    _fetch(catalog, make_product("mystery"))
+
+    assert _reload(catalog).get_product("mystery").bu == "ibi"
+
+
+def test_an_untouched_bu_still_follows_a_reclassification(catalog: CatalogManager) -> None:
+    _fetch(catalog, make_product("mystery"))
+
+    _fetch(catalog, make_product("mystery", bu="ibi", family="webfocus"))
+
+    product = catalog.get_product("mystery")
+    assert (product.bu, product.family) == ("ibi", "webfocus")

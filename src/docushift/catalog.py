@@ -556,6 +556,8 @@ class CatalogManager:
         scope_rules = self._scope_rules()
         eos = self._eos_report()
         migration = self._migration_sheet()
+        resolved_status = self._resolved("release_status")
+        resolved_decision = self._resolved("migrate_decision")
 
         for incoming in discovered:
             slug = incoming.slug
@@ -584,11 +586,11 @@ class CatalogManager:
             # defaults a newly discovered version to `convert_eligible=true`, so a
             # retirement recorded once and never re-checked would be undone by the
             # next crawl (§3.10, §3.11).
-            _resolve_release_status(product, eos)
+            _resolve_release_status(product, eos, resolved_status)
             # Re-applied for the reason directly above, one file over: a newly
             # discovered version arrives with no verdict, and one already in the
             # sheet must pick its verdict up on arrival rather than a command later.
-            _resolve_migrate_decision(product, migration)
+            _resolve_migrate_decision(product, migration, resolved_decision)
 
             blocked = self._collect_deletions(catalog.products[slug], incoming)
             if blocked:
@@ -616,8 +618,31 @@ class CatalogManager:
         if not dry_run:
             self._record_snapshots(discovered)
             self.save()
+            touched = [catalog.products[p.slug] for p in discovered]
+            self._record_resolved(touched, "release_status", "migrate_decision")
 
         return stats
+
+    def _resolved(self, field_name: str) -> dict[tuple[str, str], str]:
+        """What the resolver owning `field_name` last wrote, or nothing with no state."""
+        return self.state.resolved_values(field_name) if self.state else {}
+
+    def _record_resolved(self, products: list[Product], *field_names: str) -> None:
+        """Records what the resolvers just wrote, so the next run can spot a hand edit.
+
+        Called only after `save()`, and only for the products and fields a resolver
+        actually ran over. Recording anything else would launder a value a human
+        typed into the CSV into the base, and the next resolve would then reset it
+        -- the exact defect this record exists to close (R2-01).
+        """
+        if self.state is None:
+            return
+        self.state.record_resolved(
+            (product.slug, version.version, name, str(getattr(version, name)))
+            for product in products
+            for version in product.versions.values()
+            for name in field_names
+        )
 
     def _scope_rules(self) -> dict[str, str]:
         """`{slug: reason}` from `config/scope.yaml`, or empty with no config."""
@@ -697,10 +722,13 @@ class CatalogManager:
         """
         stats = MergeStats()
         eos = self._eos_report()
-        for product in self.load().products.values():
-            _resolve_release_status(product, eos)
+        resolved = self._resolved("release_status")
+        products = list(self.load().products.values())
+        for product in products:
+            _resolve_release_status(product, eos, resolved)
         stats.versions_retired, stats.products_fully_retired = self._retirement_effect()
         self.save()
+        self._record_resolved(products, "release_status")
         return stats
 
     def _migration_sheet(self) -> "MigrationSheet":
@@ -723,8 +751,10 @@ class CatalogManager:
         """
         sheet = self._migration_sheet()
         stats = MigrateStats()
-        for product in self.load().products.values():
-            _resolve_migrate_decision(product, sheet)
+        resolved = self._resolved("migrate_decision")
+        products = list(self.load().products.values())
+        for product in products:
+            _resolve_migrate_decision(product, sheet, resolved)
 
         for _product, version in self.iter_versions():
             decision = version.migrate_decision
@@ -750,6 +780,7 @@ class CatalogManager:
         }
         stats.unknown_decisions = list(sheet.unknown_decisions)
         self.save()
+        self._record_resolved(products, "migrate_decision")
         return stats
 
     def unmatched_migration_aliases(self) -> list[str]:
@@ -780,7 +811,16 @@ class CatalogManager:
             if self._take_theirs(mine, theirs, base, "family"):
                 mine.family = theirs.family
                 mine.family_source = theirs.family_source
-                mine.bu = theirs.bu
+                # `bu` still moves with `family`, but only if nobody moved it
+                # first. It used to ride along unconditionally, and since Phase 32
+                # every unclassified product ranks equal to every fetch -- so a
+                # `catalog set --bu` (or an Excel edit) on a product still at
+                # `general` was reset by the next crawl to the keyword guess
+                # (R2-03). `bu` names the workspace and the publishing repository.
+                if self._take_theirs(mine, theirs, base, "bu"):
+                    mine.bu = theirs.bu
+                else:
+                    preserved += 1
             else:
                 preserved += 1
         else:
@@ -1414,7 +1454,16 @@ def _resolve_scope(product: Product, rules: dict[str, str]) -> None:
     are live is answered separately by `unmatched_scope_rules()`, over the whole
     catalog rather than one fetch -- a scoped fetch would otherwise report every
     rule it did not visit as dead.
+
+    Step 1 also catches a value typed into the CSV with `scope_source` left as it
+    was, which is how an Excel edit arrives (R2-01). Each automated source can
+    produce exactly one value -- `default` is `true`, `scope_rule` is `false` -- so
+    a row holding the other one was set by a human, and is pinned `manual` before
+    step 3 can reset it. No record is needed to see that.
     """
+    hand_set = product.in_scope is not (product.scope_source is ScopeSource.DEFAULT)
+    if product.scope_source is not ScopeSource.MANUAL and hand_set:
+        product.scope_source = ScopeSource.MANUAL
     if product.scope_source is ScopeSource.MANUAL:
         return
 
@@ -1427,7 +1476,9 @@ def _resolve_scope(product: Product, rules: dict[str, str]) -> None:
     product.scope_source = ScopeSource.DEFAULT
 
 
-def _resolve_release_status(product: Product, report: "EosReport") -> None:
+def _resolve_release_status(
+    product: Product, report: "EosReport", resolved: dict[tuple[str, str], str] | None = None
+) -> None:
     """Applies the end-of-support report to one product's versions -- §3.11.
 
     Ranked `manual` > `eos_report` > `unknown`, first match wins, exactly as
@@ -1445,8 +1496,20 @@ def _resolve_release_status(product: Product, report: "EosReport") -> None:
     Step 3 is also why absence can never accumulate into a retirement: `unknown`
     is written, never `retired`, and 2,506 of the catalog's versions are in
     exactly that state.
+
+    `resolved` is what this function last wrote, per `(slug, version)`. A row
+    that differs from it was edited by hand with its source column left alone,
+    and step 1 pins it `manual` -- see `_typed_into_csv`.
     """
+    resolved = resolved or {}
     for version in product.versions.values():
+        if version.release_status_source is not ReleaseStatusSource.MANUAL and _typed_into_csv(
+            version.release_status,
+            version.release_status_source is ReleaseStatusSource.UNKNOWN,
+            ReleaseStatus.UNKNOWN,
+            resolved.get((product.slug, version.version)),
+        ):
+            version.release_status_source = ReleaseStatusSource.MANUAL
         if version.release_status_source is ReleaseStatusSource.MANUAL:
             continue
 
@@ -1461,7 +1524,9 @@ def _resolve_release_status(product: Product, report: "EosReport") -> None:
         version.release_status_source = ReleaseStatusSource.UNKNOWN
 
 
-def _resolve_migrate_decision(product: Product, sheet: "MigrationSheet") -> None:
+def _resolve_migrate_decision(
+    product: Product, sheet: "MigrationSheet", resolved: dict[tuple[str, str], str] | None = None
+) -> None:
     """Applies the docsite migration export to one product's versions -- §3.12.
 
     Ranked `manual` > `docsite_sheet` > `unknown`, first match wins, exactly as
@@ -1481,8 +1546,19 @@ def _resolve_migrate_decision(product: Product, sheet: "MigrationSheet") -> None
 
     Writes nothing but the two columns. `convert_eligible` is not touched here and
     is not touched anywhere else this feature reaches -- see `ProductVersion`.
+
+    A verdict typed into the CSV is pinned `manual` by step 1 exactly as
+    `_resolve_release_status` pins a status -- see `_typed_into_csv`.
     """
+    resolved = resolved or {}
     for version in product.versions.values():
+        if version.migrate_decision_source is not MigrateDecisionSource.MANUAL and _typed_into_csv(
+            version.migrate_decision,
+            version.migrate_decision_source is MigrateDecisionSource.UNKNOWN,
+            MigrateDecision.UNKNOWN,
+            resolved.get((product.slug, version.version)),
+        ):
+            version.migrate_decision_source = MigrateDecisionSource.MANUAL
         if version.migrate_decision_source is MigrateDecisionSource.MANUAL:
             continue
 
@@ -1494,6 +1570,28 @@ def _resolve_migrate_decision(product: Product, sheet: "MigrationSheet") -> None
 
         version.migrate_decision = MigrateDecision.UNKNOWN
         version.migrate_decision_source = MigrateDecisionSource.UNKNOWN
+
+
+def _typed_into_csv(value: object, source_is_unknown: bool, unknown: object, base: str | None) -> bool:
+    """Whether a report-resolved value was edited by hand, its source column untouched.
+
+    Excel is the expected editor (§3.6), and the person typing `ga` over `retired`
+    does not also retype `eos_report` as `manual`. Until Phase 34 the resolvers
+    trusted the source column alone, so the next fetch "actively reset" the edit
+    and nothing said so (R2-01). Two tests, either sufficient:
+
+    - The `unknown` source can only have written `unknown`, so any other value
+      beside it is a hand edit. Needs no record, so it also holds on a row the
+      resolver has never recorded.
+    - Otherwise the value is compared with what the resolver last wrote. Comparing
+      with the *current* report instead would read every verdict a new report
+      changes as a hand edit and pin it, and a corrected report would never land.
+
+    Not called for `manual` rows: the caller's short-circuit already preserves them.
+    """
+    if source_is_unknown and value is not unknown:
+        return True
+    return base is not None and base != str(value)
 
 
 def _as_text(value: object) -> str:

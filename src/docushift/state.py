@@ -62,6 +62,20 @@ CREATE TABLE IF NOT EXISTS version_snapshot (
     PRIMARY KEY (slug, version)
 );
 
+-- What the report resolvers last wrote into versions.csv (architecture §3.11,
+-- §3.12). Not discovery's base, so not in `version_snapshot`: the resolvers own
+-- `release_status` and `migrate_decision`, and this is the record that lets them
+-- tell a value they wrote from one a human typed over it without also editing the
+-- `*_source` column beside it (Phase 34, R2-01). One row per field, because
+-- `catalog eos` and `catalog migrate` each re-resolve only their own column.
+CREATE TABLE IF NOT EXISTS resolved_snapshot (
+    slug    TEXT NOT NULL,
+    version TEXT NOT NULL,
+    field   TEXT NOT NULL,   -- release_status | migrate_decision
+    value   TEXT NOT NULL,
+    PRIMARY KEY (slug, version, field)
+);
+
 -- Volatile per-version machine state, evicted from the catalog CSVs.
 CREATE TABLE IF NOT EXISTS version_state (
     slug   TEXT NOT NULL,
@@ -171,6 +185,17 @@ CREATE TABLE IF NOT EXISTS findings (
 
 CREATE INDEX IF NOT EXISTS findings_by_run ON findings (run_id);
 """
+
+
+# Every table keyed by `(slug, version)`, which is what `forget_version` and
+# `forget_product` must empty for a version to be gone rather than half-gone.
+_VERSION_TABLES = (
+    "version_snapshot",
+    "resolved_snapshot",
+    "version_state",
+    "version_metadata",
+    "engine_folder_map",
+)
 
 
 def _now() -> str:
@@ -406,16 +431,34 @@ class StateStore:
         )
         return {row["version"] for row in rows}
 
+    def record_resolved(self, rows: Iterable[tuple[str, str, str, str]]) -> None:
+        """Records `(slug, version, field, value)` as the value a resolver last wrote."""
+        with self._tx() as conn:
+            conn.executemany(
+                """
+                INSERT INTO resolved_snapshot (slug, version, field, value) VALUES (?, ?, ?, ?)
+                ON CONFLICT(slug, version, field) DO UPDATE SET value=excluded.value
+                """,
+                list(rows),
+            )
+
+    def resolved_values(self, field: str) -> dict[tuple[str, str], str]:
+        """`{(slug, version): value}` for one resolver-owned field, in one query."""
+        rows = self._all(
+            "SELECT slug, version, value FROM resolved_snapshot WHERE field = ?", (field,)
+        )
+        return {(row["slug"], row["version"]): row["value"] for row in rows}
+
     def forget_version(self, slug: str, version: str) -> None:
         """Drops all trace of a version. Only called on an explicit --allow-deletes."""
         with self._tx() as conn:
-            for table in ("version_snapshot", "version_state", "version_metadata", "engine_folder_map"):
+            for table in _VERSION_TABLES:
                 conn.execute(f"DELETE FROM {table} WHERE slug = ? AND version = ?", (slug, version))
 
     def forget_product(self, slug: str) -> None:
         """Drops a product and every version beneath it."""
         with self._tx() as conn:
-            for table in ("version_snapshot", "version_state", "version_metadata", "engine_folder_map"):
+            for table in _VERSION_TABLES:
                 conn.execute(f"DELETE FROM {table} WHERE slug = ?", (slug,))
             conn.execute("DELETE FROM product_snapshot WHERE slug = ?", (slug,))
             conn.execute("DELETE FROM product_metadata WHERE slug = ?", (slug,))

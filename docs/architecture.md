@@ -239,7 +239,7 @@ That is a narrowing of what this section used to describe, and it was decided by
 
 The two retired members are kept rather than migrated. 271 products carry `taxonomy_rule` and those assignments are the accumulated result of real review; clearing them would manufacture a 271-product backlog out of work already done. Read them as "classified before Phase 32". They still parse, and still outrank `unclassified` in the merge.
 
-**`bu` is still inferred, and the asymmetry is the point.** The same rules resolve both, and the no-match fallback is `tibco`. Switching the rules off wholesale would file every new ibi, Spotfire and DataSynapse product under TIBCO — replacing a wrong family with a wrong *repository*, since `bu` is the first segment of both the workspace path and the publishing target. The brand-level signal is the half that has never been wrong; the family-level one is the half that has now been wrong twice.
+**`bu` is still inferred, and the asymmetry is the point.** The same rules resolve both, and the no-match fallback is `tibco`. Switching the rules off wholesale would file every new ibi, Spotfire and DataSynapse product under TIBCO — replacing a wrong family with a wrong *repository*, since `bu` is the first segment of both the workspace path and the publishing target. The brand-level signal is the half that has never been wrong; the family-level one is the half that has now been wrong twice. An inferred `bu` is still only a default: a fetch moves it along with a reclassified `family`, but only if `bu` itself still matches its snapshot (§3.5), so a `catalog set --bu` or an Excel edit survives the next crawl.
 
 A matched rule's `family` key is still read, as a **suggestion**: `catalog triage` prints it beside the unclassified slug so a reviewer can agree or disagree with a name rather than inventing one from the slug. It is never written to the catalog.
 
@@ -514,7 +514,7 @@ Since 2026-09-10 the slug is also the catalog's primary key (§3.1), so a rule a
 | `scope_rule` | The product's slug is listed in `config/scope.yaml` | Yes |
 | `default` | Listed nowhere; in scope | Yes |
 
-So a human can put one excluded product back into scope by editing the CSV, without touching the YAML, and no later fetch will undo it. `in_scope` and `scope_source` are excluded from `product_snapshot` (§3.5): the docsite has no opinion about scope, so there is nothing to three-way-merge.
+So a human can put one excluded product back into scope by editing the CSV, without touching the YAML, and no later fetch will undo it. Editing `in_scope` alone is enough: `default` can only mean `true` and `scope_rule` only `false`, so a row holding the other value was set by hand, and the next fetch pins it `manual` before the reset can reach it (Phase 34). `in_scope` and `scope_source` are excluded from `product_snapshot` (§3.5): the docsite has no opinion about scope, so there is nothing to three-way-merge.
 
 **An out-of-scope product is still fully catalogued.** It is discovered, written to `products.csv`, given all its versions in `versions.csv`, and counted in every inventory. It is simply never downloaded, extracted, converted or laid out. This is the same choice §4.3 makes for archived versions, for the same reason: *deliberately excluded* and *never seen* must stay distinguishable, and a product missing from the catalog answers neither question.
 
@@ -620,7 +620,9 @@ Unmatched report names are reported, never guessed at.
 
 The `unknown` tier **actively resets**, which is what makes a correction land: drop a row from the report, or remove a wrong alias, and the version returns to `unknown` and converts again. That is only safe because `manual` short-circuits ahead of it.
 
-**The three columns are absent from `version_snapshot` structurally**, like `convert_batch` and the engine columns (§3.5, §3.7). Discovery does not write them, so there is no base value a 3-way merge could compare against. `state.db` is therefore unchanged by this rule — no migration, no schema version bump.
+**The three columns are absent from `version_snapshot` structurally**, like `convert_batch` and the engine columns (§3.5, §3.7). Discovery does not write them, so there is no base value a 3-way merge could compare against.
+
+**A status typed into the CSV is pinned too, with its source column untouched.** Excel is how a human edits the sheet (§3.6), and typing `ga` over `retired` does not also retype `eos_report` as `manual`. So `state.db` records, in `resolved_snapshot`, the value this rule last wrote to each row; a row that differs from it, or a non-`unknown` status beside an `unknown` source, is pinned `manual` on the next fetch or `catalog eos`. The comparison is with what the rule *wrote*, never with the current report, so a new report that changes a verdict is not mistaken for a hand edit. `resolved_snapshot` is a new table rather than a changed one, so no schema version bump (Phase 34).
 
 **A retired version is still fully catalogued**, on the same reasoning §3.10 gives for out-of-scope products and §4.3 for archived ones: *retired* and *never seen* must stay distinguishable. It keeps its row, its date, and its place in every inventory; it is simply never downloaded, extracted, converted or laid out. `docushift catalog list --retired` shows exactly that population.
 
@@ -675,7 +677,7 @@ aliases:
 | `docsite_sheet` | The active export carried a row for this exact `(slug, version)` | Yes |
 | `unknown` | It did not | Yes |
 
-`manual` is what makes the final call durable: `docushift catalog set --version X --migrate-decision migrate` pins it, and no later import moves it. The `unknown` tier actively resets, so a corrected export or a removed alias really does restore the version — safe only because `manual` short-circuits ahead of it. Both columns are absent from `version_snapshot` structurally, for §3.11's reason: a crawl of the docsite has nothing to say about a verdict a human recorded in a spreadsheet.
+`manual` is what makes the final call durable: `docushift catalog set --version X --migrate-decision migrate` pins it, and no later import moves it. A verdict typed straight into the CSV is pinned the same way, by §3.11's `resolved_snapshot` comparison. The `unknown` tier actively resets, so a corrected export or a removed alias really does restore the version — safe only because `manual` short-circuits ahead of it. Both columns are absent from `version_snapshot` structurally, for §3.11's reason: a crawl of the docsite has nothing to say about a verdict a human recorded in a spreadsheet.
 
 **Two columns the export carries and this rule ignores.** `is_archived in docsite` is already in the catalog and agrees on 3,304 of 3,312 joined rows — the eight exceptions are `tibco-control-plane` 1.3.0–1.9.0, where the export says archived and the catalog says live. `Marked Retired on support site` is §3.11's job, resolved from a report the tool already reads. Importing either would give one fact two owners.
 
