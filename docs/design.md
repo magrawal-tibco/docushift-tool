@@ -318,7 +318,7 @@ Three details then carry the same weight they do for scope:
 
 For each product in the fetch, compute the version keys the catalog holds that the fetch of *that same product* did not return.
 
-- With `--allow-deletes`: remove each from the catalog and purge every trace of it from `state.db`.
+- With `--allow-deletes`: remove each from the catalog and purge every trace of it from `state.db` — the purge only after both CSVs are written, and never in a dry run, which previews the removal without performing it.
 - Without: collect them, and after processing all products, **raise** with the full list and a note that this usually means a version key was mangled (Excel reading `1.10` as `1.1`).
 
 Two properties matter. The check is **scoped to the products actually fetched**, so `catalog fetch --product ems` cannot read every other product's absence as a removal. And the raise happens **before** snapshots are recorded and before anything is written, so a blocked fetch leaves both CSVs and the state DB exactly as they were — the fetch is all-or-nothing.
@@ -330,8 +330,8 @@ Two properties matter. The check is **scoped to the products actually fetched**,
 3. Collect deletions per product (§3.4).
 4. If deletions were blocked, raise. Nothing has been written.
 5. If this is a dry run, return the statistics without writing.
-6. Record the new snapshots — this fetch becomes the next merge's base.
-7. Save both CSVs.
+6. Save both CSVs (§3.6).
+7. Only then, in one `state.db` transaction: record the new snapshots — this fetch becomes the next merge's base — record what the resolvers wrote, and purge the versions `--allow-deletes` removed. A base recorded ahead of a save that then failed would hold values the CSV never received, and every later fetch would read the gap as a human edit (Phase 34, R2-05).
 
 The reported statistics count products and versions added and updated, fields preserved, and deletions blocked. Read `versions_updated` as *versions the fetch revisited*, not *versions that changed*; `fields_preserved` is the number that says how much of the user's work the merge protected.
 
@@ -342,6 +342,7 @@ The reported statistics count products and versions added and updated, fields pr
 3. Write the fixed column list in fixed order, regenerating `_bu` and `_family` from the product row.
 4. Normalize every value on the way out: booleans lowercased, dates to ISO, `None` to empty string.
 5. Write UTF-8 with BOM and CRLF line endings.
+6. Write both files or neither: each goes to a sibling `.tmp` first, both targets are opened for writing to surface a lock (Excel holds one on whatever it has open), and only then is each renamed into place. A file that cannot be written is a `CatalogError` naming it, with both CSVs unchanged (Phase 34, R1-04).
 
 The sort is what makes a no-op fetch produce a zero-line diff, and the zero-line diff is what makes the catalog reviewable in git rather than merely stored there.
 
@@ -1007,7 +1008,7 @@ Properties that hold across the whole tool. Each is a rule some algorithm above 
 
 1. **A load-then-save cycle with no changes produces a byte-identical file.** (§3.6)
 2. **A fetch never loses a human edit**, and never requires the human to have flagged it. (§3.2)
-3. **A fetch is all-or-nothing.** A blocked deletion leaves both CSVs and the state DB untouched. (§3.4)
+3. **A fetch is all-or-nothing.** A blocked deletion leaves both CSVs and the state DB untouched (§3.4), and so does a CSV that cannot be written (§3.5, §3.6).
 4. **No machine-local path appears in either CSV.** Locations are derived; only intent is stored. (§1.5)
 5. **An archived version is never downloaded, extracted or converted** unless a human flips its eligibility. (§4)
 6. **A version support has retired is never downloaded, extracted, converted or laid out** — including one first discovered after the report landed. Absence from the report never retires anything, and no product name is matched by anything looser than an exact slug or a reviewed alias. (§3.3.2)

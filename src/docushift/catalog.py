@@ -40,7 +40,7 @@ from docushift.utils.csvio import (
     parse_optional_bool,
     parse_optional_int,
     read_rows,
-    write_rows,
+    write_rows_together,
 )
 
 if TYPE_CHECKING:  # pragma: no cover - import kept lazy to avoid a config <-> catalog cycle
@@ -371,28 +371,28 @@ class CatalogManager:
         The sort is what makes a no-op fetch produce a zero-line diff: products by
         `(bu, family, slug)`, versions by product then version descending
         using a natural sort, so `10.4.0` sits above `9.1.0`.
+
+        Both files are written or neither is (`write_rows_together`), and a file
+        that cannot be written -- almost always one open in Excel -- is a
+        `CatalogError` naming it, not a traceback (Phase 34, R1-04/R2-05).
         """
         catalog = self.load()
 
         products = sorted(catalog.products.values(), key=lambda p: (p.bu, p.family, p.slug))
-        write_rows(
-            self.products_path,
-            PRODUCT_COLUMNS,
-            [
-                {
-                    "slug": p.slug,
-                    "product_code": p.product_code,
-                    "display_name": p.display_name,
-                    "bu": p.bu,
-                    "family": p.family,
-                    "family_source": str(p.family_source),
-                    "in_scope": format_bool(p.in_scope),
-                    "scope_source": str(p.scope_source),
-                    "custom_override": format_bool(p.custom_override),
-                }
-                for p in products
-            ],
-        )
+        product_rows = [
+            {
+                "slug": p.slug,
+                "product_code": p.product_code,
+                "display_name": p.display_name,
+                "bu": p.bu,
+                "family": p.family,
+                "family_source": str(p.family_source),
+                "in_scope": format_bool(p.in_scope),
+                "scope_source": str(p.scope_source),
+                "custom_override": format_bool(p.custom_override),
+            }
+            for p in products
+        ]
 
         version_rows = []
         for product in products:
@@ -430,7 +430,18 @@ class CatalogManager:
                         "_reframed_files": format_optional_int(version.reframed_files),
                     }
                 )
-        write_rows(self.versions_path, VERSION_COLUMNS, version_rows)
+        try:
+            write_rows_together(
+                [
+                    (self.products_path, PRODUCT_COLUMNS, product_rows),
+                    (self.versions_path, VERSION_COLUMNS, version_rows),
+                ]
+            )
+        except OSError as exc:
+            raise CatalogError(
+                f"Could not write {exc.filename or 'the catalog'} ({exc.strerror or exc}). It is usually open "
+                f"in Excel; close it and re-run. Neither CSV was changed."
+            ) from exc
 
     # -- accessors -----------------------------------------------------------
 
@@ -558,6 +569,12 @@ class CatalogManager:
         migration = self._migration_sheet()
         resolved_status = self._resolved("release_status")
         resolved_decision = self._resolved("migrate_decision")
+        # `(slug, version)` pairs removed under --allow-deletes. Taken out of the
+        # in-memory catalog at once, so a dry run previews the result, but purged
+        # from `state.db` only after the CSVs are written: `forget_version` commits
+        # on its own, and running it inline purged real state during a
+        # `--dry-run --allow-deletes` preview (R2-02).
+        forgotten: list[tuple[str, str]] = []
 
         for incoming in discovered:
             slug = incoming.slug
@@ -597,8 +614,7 @@ class CatalogManager:
                 if allow_deletes:
                     for gone in blocked:
                         del catalog.products[slug].versions[gone]
-                        if self.state:
-                            self.state.forget_version(slug, gone)
+                        forgotten.append((slug, gone))
                 else:
                     stats.deletions_blocked.extend(f"{slug}@{v}" for v in blocked)
 
@@ -615,11 +631,22 @@ class CatalogManager:
                 + "Re-run with --allow-deletes if the removal is intended."
             )
 
+        # The CSVs first, `state.db` after, and the order is the point (R2-05).
+        # The snapshots are the next merge's base: recorded ahead of a save that
+        # then failed -- `versions.csv` open in Excel -- they held values the CSV
+        # never received, so every later fetch read the gap as a human edit and
+        # kept the stale value for good. The reverse failure is benign: a CSV
+        # written and a base left behind reads as an edit that equals upstream,
+        # and the next successful fetch records the base anyway.
         if not dry_run:
-            self._record_snapshots(discovered)
             self.save()
             touched = [catalog.products[p.slug] for p in discovered]
-            self._record_resolved(touched, "release_status", "migrate_decision")
+            if self.state is not None:
+                with self.state.transaction():
+                    self._record_snapshots(discovered)
+                    self._record_resolved(touched, "release_status", "migrate_decision")
+                    for slug, gone in forgotten:
+                        self.state.forget_version(slug, gone)
 
         return stats
 

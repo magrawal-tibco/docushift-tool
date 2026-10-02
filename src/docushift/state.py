@@ -188,13 +188,20 @@ CREATE INDEX IF NOT EXISTS findings_by_run ON findings (run_id);
 
 
 # Every table keyed by `(slug, version)`, which is what `forget_version` and
-# `forget_product` must empty for a version to be gone rather than half-gone.
+# `forget_product` must empty for a version to be gone rather than half-gone. The
+# Stage 4/5 tables were missing until Phase 34 (R3-11): a version deleted and
+# later re-added counted as converted from its orphaned `output_map`, and CSH
+# resolution read rows for a package nobody holds. `findings` is deliberately
+# absent -- it is the record of past runs, keyed by run rather than by version.
 _VERSION_TABLES = (
     "version_snapshot",
     "resolved_snapshot",
     "version_state",
     "version_metadata",
     "engine_folder_map",
+    "csh_source",
+    "asset_inventory",
+    "output_map",
 )
 
 

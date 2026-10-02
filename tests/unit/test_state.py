@@ -93,6 +93,12 @@ def test_forget_version_clears_every_table(state: StateStore) -> None:
     state.set_version_state("ems", "10.4.0", status=ConversionStatus.DOWNLOADED)
     state.set_version_metadata("ems", "10.4.0", "folder_path", "ems/10.4.0")
     state.record_engine_folder("ems", "10.4.0", "admin", "flare")
+    state.record_resolved([("ems", "10.4.0", "release_status", "retired")])
+    # The Stage 4/5 tables (R3-11): left behind, a version deleted and later
+    # re-added counted as converted from its orphaned `output_map`.
+    state.record_csh_sources("ems", "10.4.0", [("Alias.xml", "admin", "flare_alias", 3, "ok")])
+    state.record_asset_inventory("ems", "10.4.0", [("admin", "image", "assets", 2, 10)])
+    state.record_output_map("ems", "10.4.0", [("admin/a.htm", "a.md", "admin")])
 
     state.forget_version("ems", "10.4.0")
 
@@ -100,18 +106,24 @@ def test_forget_version_clears_every_table(state: StateStore) -> None:
     assert state.get_version_state("ems", "10.4.0") is None
     assert state.get_version_metadata("ems", "10.4.0") == {}
     assert state.get_engine_folder_map("ems", "10.4.0") == {}
+    assert state.resolved_values("release_status") == {}
+    assert state.get_csh_sources("ems", "10.4.0") == []
+    assert state.get_asset_inventory("ems", "10.4.0") == []
+    assert state.get_output_map("ems", "10.4.0") == {}
 
 
 def test_forget_product_takes_its_versions_with_it(state: StateStore) -> None:
     state.record_product_snapshot(make_product("ems"))
     state.record_version_snapshot(make_version("ems", "10.4.0"))
     state.set_product_metadata("ems", "docsite_id", "42")
+    state.record_output_map("ems", "10.4.0", [("admin/a.htm", "a.md", "admin")])
 
     state.forget_product("ems")
 
     assert state.get_product_snapshot("ems") is None
     assert state.known_versions("ems") == set()
     assert state.get_product_metadata("ems") == {}
+    assert state.get_output_map("ems", "10.4.0") == {}
 
 
 # -- volatile machine state ----------------------------------------------------

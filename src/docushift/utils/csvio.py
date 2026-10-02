@@ -12,6 +12,8 @@ from collections.abc import Iterable, Sequence
 from datetime import datetime
 from pathlib import Path
 
+from docushift.utils.swap import replace_file
+
 # Excel writes TRUE/FALSE; humans write yes/y/1. Read all of them, write only
 # lowercase true/false.
 _TRUE_TOKENS = frozenset({"true", "1", "yes", "y", "t"})
@@ -162,3 +164,33 @@ def write_rows(path: Path, columns: Sequence[str], rows: Iterable[dict[str, str]
         writer.writeheader()
         for row in rows:
             writer.writerow({column: row.get(column, "") for column in columns})
+
+
+def write_rows_together(tables: Sequence[tuple[Path, Sequence[str], Iterable[dict[str, str]]]]) -> None:
+    """Writes several CSVs so that a failure leaves every one of them as it was.
+
+    `write_rows` truncates its target in place, so writing the catalog pair one
+    file after the other let a locked `versions.csv` -- Excel holds a write lock
+    on whatever it has open (§3.6) -- fail *after* `products.csv` had been
+    rewritten, leaving a pair that no longer joins (Phase 34, R1-04). So, in
+    three passes: every file is written to a sibling `.tmp` first, which is where
+    a full disk or an encoding failure lands; every target is then opened for
+    writing and closed, which is where a lock lands; and only then is each temp
+    file renamed into place. Not one atomic step across files -- Windows offers
+    none -- but the remaining window is two renames wide, not a whole write.
+
+    Raises the underlying `OSError`. The temp files are removed either way.
+    """
+    staged = [(path, path.with_name(path.name + ".tmp")) for path, _, _ in tables]
+    try:
+        for (_, columns, rows), (_, tmp) in zip(tables, staged, strict=True):
+            write_rows(tmp, columns, rows)
+        for path, _ in staged:
+            if path.exists():
+                with open(path, "r+b"):
+                    pass
+        for path, tmp in staged:
+            replace_file(tmp, path)
+    finally:
+        for _, tmp in staged:
+            tmp.unlink(missing_ok=True)

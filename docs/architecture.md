@@ -330,6 +330,7 @@ Excel is the expected editor, which imposes hard requirements:
 | `2025-11-04` reformatted to `11/4/2025` by locale | Parse permissively, always write ISO; pass unparseable values through verbatim |
 | Excel writes `TRUE` / `FALSE` | Read case-insensitively (`true`/`1`/`yes`/`y`); always write lowercase `true`/`false` |
 | Row deleted to mean "skip this" | Deletion requires `--allow-deletes`; the supported way to exclude is `convert_eligible=false` |
+| The file is open, and Excel holds a write lock on it | Both CSVs are staged and lock-checked before either is replaced, so a refused write changes neither file and records no snapshot; the command names the file and stops (design §3.6) |
 | Diff churn on every fetch | Fixed column order; stable sort — products by `(bu, family, slug)`, versions by `(slug, version desc)` using natural version sort so `10.4.0` sorts above `9.1.0` |
 
 ### 3.7 Selecting Versions to Convert

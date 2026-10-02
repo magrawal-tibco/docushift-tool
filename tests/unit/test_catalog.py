@@ -5,6 +5,9 @@ edit survives a fetch **without the user having flagged it**, because the last
 fetch is recorded in `state.db` and any divergence from it is read as a human edit.
 """
 
+import os
+import stat
+from contextlib import contextmanager
 from pathlib import Path
 
 import pytest
@@ -331,6 +334,62 @@ def test_dry_run_writes_nothing(catalog: CatalogManager, sample_product: Product
 
     assert not catalog.products_path.exists()
     assert catalog.state.get_product_snapshot("tibco-ems") is None
+
+
+def test_a_dry_run_with_allow_deletes_purges_nothing(catalog: CatalogManager, sample_product: Product) -> None:
+    """R2-02: previewing a destructive fetch must not perform it in state.db."""
+    _fetch(catalog, sample_product)
+    catalog.state.set_version_state("tibco-ems", "8.6.0", checksum="abc")
+    shrunk = make_product("tibco-ems", product_code="ems", family="messaging")
+    shrunk.versions = {"10.4.0": make_version("tibco-ems", "10.4.0")}
+
+    catalog.merge_fetch_results([shrunk], allow_deletes=True, dry_run=True)
+
+    assert catalog.state.get_version_snapshot("tibco-ems", "8.6.0") is not None
+    assert catalog.state.get_version_state("tibco-ems", "8.6.0")["checksum"] == "abc"
+    assert "8.6.0" in _reload(catalog).get_product("tibco-ems").versions
+
+
+@contextmanager
+def _locked(path: Path):
+    """A read-only file, standing in for one Excel holds open (§3.6)."""
+    os.chmod(path, stat.S_IREAD)
+    try:
+        yield
+    finally:
+        os.chmod(path, stat.S_IREAD | stat.S_IWRITE)
+
+
+def test_a_failed_save_leaves_both_csvs_untouched(catalog: CatalogManager, sample_product: Product) -> None:
+    """R1-04: products.csv used to be rewritten before versions.csv refused the write."""
+    _fetch(catalog, sample_product)
+    before = (catalog.products_path.read_bytes(), catalog.versions_path.read_bytes())
+    catalog.load().products["tibco-new"] = make_product("tibco-new")
+
+    with _locked(catalog.versions_path), pytest.raises(CatalogError, match="versions.csv"):
+        catalog.save()
+
+    assert (catalog.products_path.read_bytes(), catalog.versions_path.read_bytes()) == before
+    assert not list(catalog.products_path.parent.glob("*.tmp"))
+
+
+def test_a_failed_save_records_no_snapshot(catalog: CatalogManager, sample_product: Product) -> None:
+    """R2-05: a base recorded ahead of a failed write turns upstream changes into "edits" for good."""
+    _fetch(catalog, sample_product)
+    moved = make_product(
+        "tibco-ems", product_code="ems", family="messaging", family_source=FamilySource.TAXONOMY_RULE
+    )
+    moved.versions = {
+        "10.4.0": make_version("tibco-ems", "10.4.0", zip_url="https://docs.tibco.com/pub/ems/NEW.zip"),
+        "8.6.0": make_version("tibco-ems", "8.6.0", is_archived=True, convert_eligible=False),
+    }
+
+    with _locked(catalog.versions_path), pytest.raises(CatalogError):
+        _reload(catalog).merge_fetch_results([moved])
+    stats = _reload(catalog).merge_fetch_results([moved])
+
+    assert _reload(catalog).get_version("tibco-ems", "10.4.0").zip_url == "https://docs.tibco.com/pub/ems/NEW.zip"
+    assert stats.fields_preserved == 0
 
 
 # -- engine handling ---------------------------------------------------------
