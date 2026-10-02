@@ -383,6 +383,24 @@ REGISTRY: dict[str, Code] = _codes(
          "No verified docsite URL template for this product, so no 301.yml was "
          "written; a guessed origin URL is a redirect to a page that never existed",
          "planning.md Phase 22"),
+    # Phase 33. The Coveo sitemap is the second source of verified origin URLs,
+    # and these are the three things it can say that Phase 22 could not.
+    # MISSING is a warning for the reason UNDECLARED is: no 301.yml, actionable.
+    # UNLISTED is a note -- one row withheld out of hundreds written is the check
+    # working, not a fault. UNMAPPED is a warning because each one is a live page
+    # whose reader gets a 404 at cutover, and nothing else in the tree counts them.
+    Code("ORIGIN_SITEMAP_MISSING", Severity.WARNING, Stage.REFRAME,
+         "No Coveo sitemap page list for this version and no declared template, so "
+         "no 301.yml was written",
+         "planning.md Phase 33"),
+    Code("ORIGIN_URL_UNLISTED", Severity.NOTE, Stage.REFRAME,
+         "Converted topics whose origin URL the docsite sitemap does not list; a "
+         "derived row is withheld rather than written unproven",
+         "planning.md Phase 33"),
+    Code("ORIGIN_PAGE_UNMAPPED", Severity.WARNING, Stage.REFRAME,
+         "Live docsite pages no 301.yml row starts from -- API reference, PDFs, "
+         "help-system frames -- each a 404 at cutover unless redirected elsewhere",
+         "planning.md Phase 33"),
     Code("LINK_BROKEN", Severity.ERROR, Stage.VALIDATE,
          "Relative link resolving to nothing", "design.md §8.4"),
     # Emitted from Phase 7c, and a warning on arithmetic rather than on taste, the

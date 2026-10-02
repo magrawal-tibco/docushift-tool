@@ -939,6 +939,9 @@ The concrete deliverable of §7.1: every deferred "report line" in the three doc
 | `REDIRECT_SHADOWED`²⁰ᵈ | warn | validate | A redirect whose source path still exists in the published tree; a 301 loop where the two differ only in case | `REFRAME-REQUIREMENTS.md` R5 |
 | `REFRAME_KEEP_SEPARATE_UNMATCHED`²⁰ᵉ | warn | reframe | A `keep_separate` path matches no topic in this version; the merge a writer meant to undo still happened | §20e |
 | `ORIGIN_TEMPLATE_UNDECLARED`²² | warn | reframe | No verified docsite URL template for this product, so no `301.yml` was written; a guessed origin URL redirects to a page that never existed | Phase 22 |
+| `ORIGIN_SITEMAP_MISSING`³³ | warn | reframe | No Coveo sitemap page list for this version and no declared template, so no `301.yml` was written | Phase 33 |
+| `ORIGIN_URL_UNLISTED`³³ | note | reframe | Converted topics whose origin URL the docsite sitemap does not list; a derived row is withheld rather than written unproven | Phase 33 |
+| `ORIGIN_PAGE_UNMAPPED`³³ | warn | reframe | Live docsite pages no `301.yml` row starts from (API reference, PDFs, help frames) — each a 404 at cutover unless redirected elsewhere | Phase 33 |
 
 #### 7.6 Cross-version CSH regression
 
@@ -4238,7 +4241,7 @@ cheapest thing to hand a reviewer is a name to agree or disagree with. It is
 never written to the catalog, and the test asserts exactly that: the suggestion
 appears and the row stays `unclassified`.
 
-### Phase 33: The Docsite Already Lists Every Page — **Step 1 built & measured, step 2 next, 2026-10-02**
+### Phase 33: The Docsite Already Lists Every Page — **Complete, 2026-10-02**
 
 Phase 22 made the origin URL a per-product declaration because nothing on disk
 said where a topic is served today, and a guessed URL is a 404 with a success
@@ -4283,7 +4286,7 @@ those numbers before any join is written.
 | **The sitemap derives a template, per version, by agreement** | For each version, every `output_map` source path is tried against the sitemap's paths under `/pub/{folder_path}/` with 0–3 leading segments dropped and an optional served prefix (`doc/`); the one mapping that matches the most rows wins **only if** it matches ≥ 90% of the sitemap-listed `.htm`/`.html` pages and no rival comes within 10 points | This is what replaces "declared by a human" without becoming "guessed": the four layouts in Phase 22 are each a different mapping, and the sitemap is what picks between them. Per-row suffix matching was rejected — `index.htm` and `Default.htm` match in every subtree. |
 | **Every row is checked against the list** | A row is written only if its URL is in that version's sitemap. Rows not listed are counted, not written | A derived template that is right for 99% of rows is still wrong for the 1%; the list is the per-row proof Phase 22 got from a hand check. |
 | **`origin-urls.yaml` stays, and wins** | A declared template overrides derivation, and is itself checked against the sitemap; disagreement is a finding | EMS keeps working exactly as it does, and it becomes the regression test: the derived mapping must equal the declared one in all six versions. It is also the escape hatch for a product the sitemap gets wrong. |
-| **Three new codes, register 53 → 56** | `ORIGIN_SITEMAP_MISSING` (warn: no version file for this version), `ORIGIN_URL_UNLISTED` (info, counted per version: a converted topic whose URL the sitemap does not list), `ORIGIN_PAGE_UNMAPPED` (warn, counted: a listed live page no converted topic produced — a reader there gets a 404 at cutover) | `ORIGIN_TEMPLATE_UNDECLARED` stays for the case where neither a declaration nor an agreeing derivation exists. The third code is new information Phase 22 could not produce at all: the live pages the map does *not* cover. |
+| **Three new codes, register 63 → 66** | `ORIGIN_SITEMAP_MISSING` (warn: no version file for this version), `ORIGIN_URL_UNLISTED` (info, counted per version: a converted topic whose URL the sitemap does not list), `ORIGIN_PAGE_UNMAPPED` (warn, counted: a listed live page no converted topic produced — a reader there gets a 404 at cutover) | `ORIGIN_TEMPLATE_UNDECLARED` stays for the case where neither a declaration nor an agreeing derivation exists. The third code is new information Phase 22 could not produce at all: the live pages the map does *not* cover. |
 | **`d_name` is a cross-check, not an input** | The sitemap title against the converted page's title, mismatches counted in the run report | Cheap evidence that a row joins the right two pages; never used to choose a mapping, because titles repeat ("Overview"). |
 
 #### Steps
@@ -4316,6 +4319,30 @@ those numbers before any join is written.
 - **Mappings that produce the same URLs are one mapping.** In every EMS version, "drop 1 under `…/doc`" and "drop 2 under `…/doc/html`" tie exactly, because they are the same URL. Ranking groups candidates by the URL set they produce, and the rival rule compares groups.
 - **The threshold is on `output_map`, not on the leaf.** The leaf carries API reference and PDFs this tool does not convert (680 of 2,117 for EMS), so "≥ 90% of the sitemap's pages" would reject every product with an API reference. The rule becomes: the winning mapping covers ≥ 90% of the version's `output_map`, and no other group is within 10 points.
 - **Leaves are matched by version suffix** (`sitemap.match_leaf`), exact stem first, unique suffix otherwise, and never across a numeric segment.
+
+#### Steps 2–3 — **Built & verified, 2026-10-02**
+
+`origins.derive` / `listed` / `unmapped` / `page_path`, called from `reframe/driver._write_origins`, which reads `cache/coveo/` and never fetches. A declaration still wins and writes every row; a derived template writes only listed rows. Register **63 → 66**: `ORIGIN_SITEMAP_MISSING` (warning), `ORIGIN_URL_UNLISTED` (note), `ORIGIN_PAGE_UNMAPPED` (warning). One refinement found while testing: a candidate group whose URLs are a **subset** of the winner's (`c.htm` matched again under `…/API Activity` at a deeper drop) is the same answer, not a rival, and is skipped when the runner-up is counted.
+
+`reframe --all --force` over the converted catalog — Reframe runs for Flare only, so 14 versions:
+
+| product | versions | source | rows written | unlisted | unmapped (listed, not converted) |
+|---|---|---|---|---|---|
+| EMS | 6 | declared | 8,613 | 0 | 669–681 per version (API reference, readme, PDFs) |
+| ActiveSpaces | 6 | **derived** | 1,922 | 0 | 132–133 per version |
+| Administrator 5.13.0 | 1 | **derived** | 423 | 0 | 12 |
+| Runtime Agent 5.13.0 | 1 | **derived** | 643 | 0 | 26 |
+
+| exit criterion | result |
+|---|---|
+| EMS `301.yml` byte-identical to Phase 22's | **6 of 6** |
+| Derived mapping equals the declared one (EMS, declaration ignored) | **6 of 6**, same template, drop 1, identical rows, 0 rivals |
+| Every derived `from` is in its sitemap | **yes** — 0 unlisted in 8 derived versions |
+| Derived URLs live, three non-EMS layouts | **6 of 6** fetched pages (two each from ActiveSpaces, Administrator, Runtime Agent's `designerhelp`/`trahelp`) |
+| `validate` over the three families synced to a scratch target | exit 0, 0 errors; **0 findings from any `301.yml`** — the 645 warnings are pre-existing `ANCHOR_MISSING` and `redirects.yml` case-only `REDIRECT_SHADOWED` |
+| Full suite | **1,709 pass**, 2 skipped, lint clean |
+
+**Deviations.** The `d_name` title cross-check is **deferred**: nothing in the measurement called for it (0 unlisted rows, 0 rivals), and it would be a fifth code with no observed case. **Not reached by this phase:** the non-Flare converted versions (Streaming, Data Science Author, Runtime Agent 5.12.x) — `301.yml` is written by Reframe, which skips them; their mappings derive cleanly in step 1's measurement, so moving the write is a decision for a later phase, not a design question.
 
 *Exit: EMS's six `301.yml` files are byte-identical to Phase 22's; the derived mapping equals the declared one in all six versions; every other converted product either gets a `301.yml` whose every `from` appears in its sitemap, or is named with one of the four codes; a sample of derived URLs from three non-EMS layouts is confirmed live by hand; `validate` adds no findings.*
 

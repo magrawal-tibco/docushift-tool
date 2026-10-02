@@ -40,6 +40,7 @@ import yaml
 from docushift import origins
 from docushift.catalog import CatalogManager
 from docushift.config import ConfigManager
+from docushift.discovery.sitemap import SitemapCache, SitemapError
 from docushift.models import Product, ProductVersion, SourceEngine
 from docushift.reframe import csh as csh_map
 from docushift.reframe import manifest, renames, review
@@ -755,19 +756,42 @@ class Reframer:
         if self.state is None:
             return
 
-        template = origins.template_for(self.config.load_origin_urls(), slug)
-        if template is None:
-            self._record(
-                "ORIGIN_TEMPLATE_UNDECLARED", slug, number,
-                message=(
-                    f"no origin URL template for '{slug}' in config/origin-urls.yaml, so no "
-                    f"{origins.ORIGINS} was written; declare one after checking a live URL"
-                ),
-            )
-            return
+        # Phase 33: the docsite's own page list, read from the cache `catalog
+        # sitemap` filled. `None` means no list for this version, which is the
+        # routine answer for every archived version and ~60% of products.
+        try:
+            pages = SitemapCache(self.config.cache_dir / "coveo").pages(slug, number)
+        except SitemapError:
+            pages = None
+        page_urls = [page.loc for page in pages] if pages else []
 
         folder = origins.folder_path(version.zip_url)
-        if folder is None:
+        output_map = self.state.get_output_map(slug, number)
+        template = origins.template_for(self.config.load_origin_urls(), slug)
+        derived = template is None
+        if derived:
+            if not page_urls:
+                self._record(
+                    "ORIGIN_SITEMAP_MISSING", slug, number,
+                    message=(
+                        f"no Coveo sitemap page list for this version and no template in "
+                        f"config/origin-urls.yaml, so no {origins.ORIGINS} was written"
+                    ),
+                )
+                return
+            answer = origins.derive(output_map, page_urls, folder)
+            if answer.template is None:
+                self._record(
+                    "ORIGIN_TEMPLATE_UNDECLARED", slug, number,
+                    message=(
+                        f"the sitemap confirms no single URL mapping ({answer.hits} of "
+                        f"{answer.sources} topics placed, runner-up {answer.rival}), and none "
+                        f"is declared in config/origin-urls.yaml, so no {origins.ORIGINS} was written"
+                    ),
+                )
+                return
+            template = answer.template
+        elif folder is None:
             self._record(
                 "ORIGIN_TEMPLATE_UNDECLARED", slug, number,
                 message=(
@@ -777,11 +801,10 @@ class Reframer:
             )
             return
 
-        output_map = self.state.get_output_map(slug, number)
         moved = {
             str(path): f"{page.path}#{anchor}" for path, (page, anchor) in located.items()
         }
-        built, dropped = origins.rows(output_map, moved, template, folder)
+        built, dropped = origins.rows(output_map, moved, template, folder or "")
 
         # The join has three inputs and a silent drop in any of them produces a
         # short map that looks entirely plausible. Asserting the count against the
@@ -794,6 +817,29 @@ class Reframer:
                     f"drop_segments and produced no URL, e.g. '{dropped[0]}'"
                 ),
             )
+
+        if page_urls:
+            # A derived row must be on the list to be written; a declared one was
+            # checked by a human and is written regardless, the list only counting
+            # where the two disagree.
+            kept, unlisted = origins.listed(built, page_urls)
+            if derived:
+                built = kept
+            if unlisted:
+                self._record(
+                    "ORIGIN_URL_UNLISTED", slug, number, count=len(unlisted),
+                    message=(
+                        f"{len(unlisted)} origin URL(s) not in the docsite sitemap"
+                        f"{', withheld' if derived else ' (declared template, written anyway)'}"
+                        f", e.g. {unlisted[0]}"
+                    ),
+                )
+            missed = origins.unmapped(built, page_urls)
+            if missed:
+                self._record(
+                    "ORIGIN_PAGE_UNMAPPED", slug, number, count=len(missed),
+                    message=f"{len(missed)} live page(s) with no {origins.ORIGINS} row, e.g. {missed[0]}",
+                )
         manifest.write(staging / origins.ORIGINS, origins.VERSION_HEADER, origins.document(built))
 
     # -- the pieces -----------------------------------------------------------

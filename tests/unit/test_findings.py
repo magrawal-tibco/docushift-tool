@@ -129,8 +129,12 @@ def test_the_register_carries_every_row_of_7_5() -> None:
     One code counts what was repaired and the other what could not be, and the
     second is a warning because its remedy is a heading the source does not
     have: an authoring decision this tool may name and must not make.
+
+    Phase 33 adds the 64th to 66th, `ORIGIN_SITEMAP_MISSING`,
+    `ORIGIN_URL_UNLISTED` and `ORIGIN_PAGE_UNMAPPED`: what the docsite's own page
+    list can say about the 301 map that a hand declaration never could.
     """
-    assert len(REGISTRY) == 63
+    assert len(REGISTRY) == 66
 
 
 def test_severity_comes_from_the_registry_and_not_from_the_call_site() -> None:

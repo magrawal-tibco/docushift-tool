@@ -898,18 +898,33 @@ regenerated files at the version root:
 | `rename-map.csv` | The address each merged page was given — the source topic that leads it, the path, the title, its place in the navigation, and the URL a reader will type. Only the last is not derivable from `reframe.yml`, and it is the one somebody checks when a link goes wrong. **A name written here is used, not just reported**: the next run reads it back and pins the page to that path, so a published URL does not move because somebody fixed a typo in a title. The `shortened` column flags the pages whose name lost words to the 50-character cut — 90 of 1,505 measured — which is where a human or a model can write a better one than the algorithm did. `--renormalize` recomputes every name anyway, so the pinning is a decision rather than a trap. |
 | `review-queue.csv` | The pages a writer has to make a decision about, and why. Open it in a spreadsheet. |
 
-**`301.yml`, the cutover map, appears alongside them for a product whose live URL shape has
-been declared.** `redirects.yml` answers "where did this page go inside the new tree"; `301.yml`
+**`301.yml`, the cutover map, appears alongside them for a version whose live URL shape is
+known — read off the docsite's own page list, or declared.** `redirects.yml` answers "where did this page go inside the new tree"; `301.yml`
 answers the question the migration actually asks — *the reader has a bookmark to
 `docs.tibco.com`, and on cutover day it stops working.* Its left-hand side is that live address
 and nothing else, so it is the one file here that cannot be derived from the tree.
 
-It exists only where somebody has written the product's URL shape into
-`config/origin-urls.yaml` after checking a real page. Nothing is guessed: the converted catalog
-contains four different source layouts, and a rule that generalised one product's would produce
-a redirect to a page that never existed — which nothing downstream could detect. A product with
-no declaration writes no file and is named in the run report as
-`ORIGIN_TEMPLATE_UNDECLARED`.
+Nothing is guessed: the converted catalog contains four different source layouts, and a rule
+that generalised one product's would produce a redirect to a page that never existed — which
+nothing downstream could detect. The shape comes from one of two places:
+
+- **The docsite's page list** (Phase 33). If `catalog sitemap` has cached the version's Coveo
+  sitemap, Reframe finds the one way of turning source paths into listed URLs that places at
+  least 90% of the converted topics, with a clear lead over any other. It then writes **only the
+  rows the list confirms** — a mapping right for 99% of a version is still wrong for the 1%, and
+  those are the rows a reader would follow to a dead page. Reframe never goes online; run
+  `catalog sitemap` first.
+- **A declaration** in `config/origin-urls.yaml`, written after checking a real page. A
+  declaration wins over the list and writes every row; the list only counts where they disagree.
+
+What the run report says:
+
+| Code | Meaning |
+|---|---|
+| `ORIGIN_SITEMAP_MISSING` (warning) | No declaration and no cached page list for this version — no file. Expected for archived versions and the products the docsite lists no pages for. |
+| `ORIGIN_TEMPLATE_UNDECLARED` (warning) | A page list exists but confirms no single mapping (the message gives the numbers), or a declared product's download URL is not a `/pub/` path — no file. |
+| `ORIGIN_URL_UNLISTED` (note) | Rows whose live URL the list does not contain — withheld if derived, written anyway if declared. |
+| `ORIGIN_PAGE_UNMAPPED` (warning) | Listed live pages no row starts from: API reference, readmes and PDFs this tool does not convert. Each is a 404 at cutover unless something else redirects it. |
 
 ```yaml
 # config/origin-urls.yaml

@@ -1,5 +1,12 @@
 """Where a converted topic is served today, and the 301 row that replaces it.
 
+*Phase 33 addendum.* "Nothing is inferred" below is still the rule, but there is
+now a second source of verified answers: the docsite's Coveo sitemap, which lists
+every live page of a version (`discovery/sitemap.py`). `derive()` picks the one
+mapping from source path to live URL that the list confirms, and `listed()` checks
+every row against the list, so an undeclared product gets a map without anyone
+guessing. A declaration in `origin-urls.yaml` still wins.
+
 Every redirect artifact before this one is expressed in coordinates this tool
 invented. `reframe/manifest.redirects` maps a converted path to the merged page
 that absorbed it; `sync/redirects` prefixes both sides into published URLs. Both
@@ -22,11 +29,11 @@ which is the one failure mode here that a human can act on.
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
 from pathlib import PurePosixPath
 from typing import Any
-from urllib.parse import urlsplit
+from urllib.parse import unquote, urlsplit
 
 from docushift.transforms import links
 
@@ -153,3 +160,126 @@ def rows(
 def document(built: list[dict[str, Any]]) -> dict[str, Any]:
     """The file's shape. One key, so `redirects.parse` reads it unchanged."""
     return {"redirects": built}
+
+
+# -- Phase 33: derived from the Coveo sitemap ----------------------------------
+
+#: How many leading source segments `derive` will try to drop. The four layouts
+#: Phase 22 found need 0 or 1; 3 leaves room without inviting a match on a bare
+#: filename, which every subtree has.
+MAX_DROP = 3
+
+#: The winning mapping must cover this share of the version's `output_map`...
+MIN_COVERAGE = 0.90
+#: ...and no other mapping may come within this many points of it.
+MIN_MARGIN = 0.10
+
+
+@dataclass(frozen=True)
+class Derivation:
+    """`derive`'s answer: a template, or the numbers that explain why there is none."""
+
+    template: OriginTemplate | None
+    #: Sources the winning mapping placed on a listed page.
+    hits: int
+    #: The runner-up's count, from a mapping that produces a *different* URL set.
+    rival: int
+    sources: int
+
+
+def page_path(url: str) -> str:
+    """The comparison key for a live URL: its decoded path, no leading slash.
+
+    Decoded because the sitemap publishes `API Activity/x.htm` with a raw space
+    while `links.emit` writes `API%20Activity`; both are the same page.
+    """
+    return unquote(urlsplit(str(url)).path).lstrip("/")
+
+
+def derive(sources: Iterable[str], page_urls: Iterable[str], folder: str | None = None) -> Derivation:
+    """The one source-to-URL mapping a version's sitemap confirms, or none.
+
+    A candidate is "drop k leading segments of the source path, put the rest
+    under prefix P". For every source and every k, each listed page whose path
+    ends with that tail proposes its P. Candidates are then **grouped by the set
+    of URLs they produce**: in every EMS version "drop 1 under `…/doc`" and "drop
+    2 under `…/doc/html`" tie exactly, because they are the same URLs, and two
+    names for one answer are not a rival.
+
+    The winner needs `MIN_COVERAGE` of the sources and a `MIN_MARGIN` lead over
+    the next group. Coverage is measured against `output_map`, not against the
+    sitemap: a leaf also lists API reference and PDFs this tool does not convert
+    (680 of 2,117 for EMS 10.5.1), and a threshold on the leaf would reject every
+    product that ships an API reference.
+
+    `folder`, when known, must prefix the winning P (`pub/ems/10.5.1/...`). It is
+    the guard against a tail that happens to match a page of another version.
+    """
+    sources = list(sources)
+    urls = list(page_urls)
+    base = ""
+    by_tail: dict[str, set[str]] = {}
+    for url in urls:
+        if not base:
+            parts = urlsplit(url)
+            base = f"{parts.scheme}://{parts.netloc}"
+        segs = page_path(url).split("/")
+        for i in range(len(segs)):
+            by_tail.setdefault("/".join(segs[i:]), set()).add("/".join(segs[:i]))
+
+    pub = f"{_PUB}/{folder}".rstrip("/") if folder else ""
+    produced: dict[tuple[int, str], set[str]] = {}
+    for source in sources:
+        parts = PurePosixPath(str(source)).parts
+        for k in range(0, min(MAX_DROP + 1, len(parts))):
+            tail = "/".join(parts[k:])
+            for prefix in by_tail.get(tail, ()):
+                if pub and prefix != pub and not prefix.startswith(pub + "/"):
+                    continue
+                produced.setdefault((k, prefix), set()).add(f"{prefix}/{tail}" if prefix else tail)
+
+    # One representative per distinct URL set: the smallest drop, then the
+    # shortest prefix, so the same input always names the same template.
+    groups: dict[frozenset[str], tuple[int, str]] = {}
+    for key in sorted(produced, key=lambda kp: (kp[0], len(kp[1]), kp[1])):
+        groups.setdefault(frozenset(produced[key]), key)
+    ranked = sorted(((len(found), key, found) for found, key in groups.items()), key=lambda r: (-r[0], r[1]))
+
+    total = len(sources)
+    if not ranked or not total:
+        return Derivation(None, 0, 0, total)
+    hits, (drop, prefix), winner = ranked[0]
+    # A group whose URLs the winner already produces is the same answer seen
+    # through a deeper drop (`c.htm` under `.../API Activity`), not a rival.
+    rival = next((count for count, _, found in ranked[1:] if not found <= winner), 0)
+    if hits < MIN_COVERAGE * total or (hits - rival) < MIN_MARGIN * total:
+        return Derivation(None, hits, rival, total)
+    stem = f"{base}/{prefix}" if prefix else base
+    # Rendered through `str.format` like a declared template; a literal brace in
+    # a published path must not be read as a placeholder.
+    stem = stem.replace("{", "{{").replace("}", "}}")
+    return Derivation(OriginTemplate(template=stem + "/{path}", drop_segments=drop), hits, rival, total)
+
+
+def listed(built: list[dict[str, Any]], page_urls: Iterable[str]) -> tuple[list[dict[str, Any]], list[str]]:
+    """Splits rows into those whose `from` the sitemap lists and those it does not.
+
+    The per-row proof Phase 22 got from a hand check: a derived template right for
+    99% of a version is still wrong for the 1%, and those are the rows a reader
+    would follow to a dead page.
+    """
+    keys = {page_path(url) for url in page_urls}
+    kept: list[dict[str, Any]] = []
+    unlisted: list[str] = []
+    for row in built:
+        if page_path(row["from"]) in keys:
+            kept.append(row)
+        else:
+            unlisted.append(str(row["from"]))
+    return kept, unlisted
+
+
+def unmapped(built: list[dict[str, Any]], page_urls: Iterable[str]) -> list[str]:
+    """Listed live pages no row starts from -- each a 404 at cutover. Sorted."""
+    covered = {page_path(row["from"]) for row in built}
+    return sorted({url for url in page_urls if page_path(url) not in covered})

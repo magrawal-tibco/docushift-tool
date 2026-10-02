@@ -21,6 +21,12 @@
 # and is named in the run report as ORIGIN_TEMPLATE_UNDECLARED. Adding a product
 # means checking one of its URLs against the live site and writing the answer here.
 #
+# **Phase 33: most products no longer need an entry here.** When `catalog sitemap`
+# has cached a version's Coveo sitemap, Reframe derives the template from it and
+# writes only the rows the sitemap lists (origins.derive). An entry here still
+# wins over the derivation and writes every row -- declare a product when the
+# derivation is wrong or the docsite lists no pages for it.
+#
 # Per product:
 #   template       The served URL, with `{folder_path}` (the directory part of the
 #                  version's `zip_url` under `/pub/`, e.g. `ems/10.5.1`) and

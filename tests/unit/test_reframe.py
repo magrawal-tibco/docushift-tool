@@ -73,7 +73,7 @@ def all_codes(findings) -> list[str]:
 
 
 def codes(findings) -> list[str]:
-    """Every code except Phase 22's, which fires on almost every run by design.
+    """Every code except the origin map's, which fire on almost every run by design.
 
     An undeclared origin template is the expected state for sixteen of seventeen
     products, so the warning rides along with every merge in this file and says
@@ -81,7 +81,11 @@ def codes(findings) -> list[str]:
     assertion keeps the rest of the file about what it was about; the tests that
     are about the origin map use `all_codes`.
     """
-    return [code for code in all_codes(findings) if code != "ORIGIN_TEMPLATE_UNDECLARED"]
+    return [code for code in all_codes(findings) if code not in ROUTINE_ORIGIN_CODES]
+
+
+#: No declaration and no cached sitemap is this file's default state (Phase 33).
+ROUTINE_ORIGIN_CODES = {"ORIGIN_TEMPLATE_UNDECLARED", "ORIGIN_SITEMAP_MISSING"}
 
 
 @pytest.fixture
@@ -2150,9 +2154,9 @@ def test_the_origin_map_travels_with_the_merged_tree_rather_than_the_published_o
                        "rename-map.csv", "review-queue.csv", "toc.yml", "user-guide.md"]
 
 
-def test_an_undeclared_product_gets_a_warning_and_no_file(config, catalog, flare):
-    """Sixteen of seventeen products, today. A guessed origin URL is a redirect
-    to a page that never existed, and nothing downstream could tell."""
+def test_an_undeclared_product_with_no_sitemap_gets_a_warning_and_no_file(config, catalog, flare):
+    """No declaration and nothing on disk to derive one from. A guessed origin URL
+    is a redirect to a page that never existed, and nothing downstream could tell."""
     converted_tree(config, flare, "10.5.1")
     findings = FindingsRun("reframe")
 
@@ -2160,9 +2164,10 @@ def test_an_undeclared_product_gets_a_warning_and_no_file(config, catalog, flare
         flare, flare.versions["10.5.1"])
 
     assert not (result.path / "301.yml").exists()
-    named = [f for f in findings.all if f.code == "ORIGIN_TEMPLATE_UNDECLARED"]
+    named = [f for f in findings.all if f.code == "ORIGIN_SITEMAP_MISSING"]
     assert len(named) == 1 and "origin-urls.yaml" in named[0].message
     assert named[0].severity is Severity.WARNING
+    assert "ORIGIN_TEMPLATE_UNDECLARED" not in all_codes(findings.all)
 
 
 def test_a_zip_url_that_is_not_a_docsite_package_is_reported_rather_than_guessed(
@@ -2372,3 +2377,88 @@ def test_an_asset_link_is_written_against_where_the_asset_lands():
 
     assert out == "![s](shot.png)"
     assert counts.asset == 1
+
+
+# -- the origin map, derived from the sitemap (Phase 33) --------------------------
+
+LIVE = "https://docs.tibco.com/pub/flaredocs/10.5.1/doc/html"
+
+
+def cache_sitemap(config, urls: list[str]) -> None:
+    """What `catalog sitemap` leaves in `cache/coveo/` for one version."""
+    from docushift.discovery.sitemap import SitemapCache
+
+    cache = SitemapCache(config.cache_dir / "coveo")
+    body = "".join(f"<url><loc>{url}</loc></url>" for url in urls)
+    cache.write("tibco-flare-docs-10-5-1.xml", (
+        "<urlset xmlns='http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd'>"
+        f"{body}</urlset>").encode())
+    cache.save_manifest({"files": {}, "products": {"tibco-flare-docs": ["tibco-flare-docs-10-5-1"]}})
+
+
+@pytest.fixture
+def listed_flare(config, catalog, flare):
+    flare.versions["10.5.1"].zip_url = ZIP_URL
+    catalog.state.record_output_map("tibco-flare-docs", "10.5.1", SOURCES)
+    return flare
+
+
+def test_an_undeclared_product_takes_the_mapping_its_sitemap_confirms(config, catalog, listed_flare):
+    """The declared EMS shape, found without the declaration."""
+    cache_sitemap(config, [f"{LIVE}/{src.rsplit('/', 1)[1]}" for src, _, _ in SOURCES])
+    converted_tree(config, listed_flare, "10.5.1")
+    findings = FindingsRun("reframe")
+
+    result = Reframer(config, catalog, findings=findings).reframe_one(
+        listed_flare, listed_flare.versions["10.5.1"])
+
+    assert [row["from"] for row in origin_rows(result.path)] == [
+        f"{LIVE}/installation-2.htm", f"{LIVE}/installation-overvie.htm", f"{LIVE}/user-guide.htm"]
+    assert not [c for c in all_codes(findings.all) if c.startswith("ORIGIN_")]
+
+
+def test_a_derived_row_the_sitemap_does_not_list_is_withheld(config, catalog, listed_flare):
+    """Ten sources, nine listed: the mapping clears 90%, the tenth row is not written."""
+    sources = [(f"TIB_flaredocs_10.5.1/html/t{i}.htm", f"t{i}.md", "topic") for i in range(10)]
+    catalog.state.record_output_map("tibco-flare-docs", "10.5.1", sources)
+    cache_sitemap(config, [f"{LIVE}/t{i}.htm" for i in range(9)] + [f"{LIVE}/api.htm"])
+    converted_tree(config, listed_flare, "10.5.1")
+    findings = FindingsRun("reframe")
+
+    result = Reframer(config, catalog, findings=findings).reframe_one(
+        listed_flare, listed_flare.versions["10.5.1"])
+
+    froms = [row["from"] for row in origin_rows(result.path)]
+    assert len(froms) == 9 and f"{LIVE}/t9.htm" not in froms
+    by_code = {f.code: f for f in findings.all if f.code.startswith("ORIGIN_")}
+    assert set(by_code) == {"ORIGIN_URL_UNLISTED", "ORIGIN_PAGE_UNMAPPED"}
+    assert by_code["ORIGIN_URL_UNLISTED"].severity is Severity.NOTE
+    assert "withheld" in by_code["ORIGIN_URL_UNLISTED"].message
+    assert "api.htm" in by_code["ORIGIN_PAGE_UNMAPPED"].message
+
+
+def test_a_sitemap_that_confirms_no_mapping_writes_no_file(config, catalog, listed_flare):
+    cache_sitemap(config, [f"{LIVE}/unrelated.htm"])
+    converted_tree(config, listed_flare, "10.5.1")
+    findings = FindingsRun("reframe")
+
+    result = Reframer(config, catalog, findings=findings).reframe_one(
+        listed_flare, listed_flare.versions["10.5.1"])
+
+    assert not (result.path / "301.yml").exists()
+    named = [f for f in findings.all if f.code == "ORIGIN_TEMPLATE_UNDECLARED"]
+    assert len(named) == 1 and "0 of 3 topics placed" in named[0].message
+
+
+def test_a_declared_template_writes_every_row_and_the_sitemap_only_counts(config, catalog, declared):
+    """A human checked the declaration; the list disagreeing is a note, not a veto."""
+    cache_sitemap(config, [f"{LIVE}/user-guide.htm"])
+    converted_tree(config, declared, "10.5.1")
+    findings = FindingsRun("reframe")
+
+    result = Reframer(config, catalog, findings=findings).reframe_one(
+        declared, declared.versions["10.5.1"])
+
+    assert len(origin_rows(result.path)) == 3
+    unlisted = [f for f in findings.all if f.code == "ORIGIN_URL_UNLISTED"]
+    assert len(unlisted) == 1 and "written anyway" in unlisted[0].message
