@@ -1291,7 +1291,10 @@ def _report_extract(stats) -> None:
     _report_inventory(stats)
 
     for result in stats.results:
-        if result.outcome is ExtractOutcome.NO_PACKAGE:
+        # A partial walk is named too (Phase 34, R3-04): its columns are blank, and
+        # a blank row with no line to say why reads as "never extracted".
+        partial = result.inventory is not None and result.inventory.partial
+        if result.outcome is ExtractOutcome.NO_PACKAGE or partial:
             console.print(f"[yellow]![/yellow] {result.slug}@{result.version}: {result.message}")
     for result in stats.failures:
         console.print(f"[red]x[/red] {result.slug}@{result.version}: {result.message}")

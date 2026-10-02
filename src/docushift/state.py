@@ -540,6 +540,15 @@ class StateStore:
                 (slug, version, folder, str(engine)),
             )
 
+    def clear_engine_folders(self, slug: str, version: str) -> None:
+        """Drops this version's folder map before a re-detection records it afresh.
+
+        Phase 34 (R3-05). The upsert above never removes a row, so a guide folder
+        the previous package had would outlive the package that dropped it.
+        """
+        with self._tx() as conn:
+            conn.execute("DELETE FROM engine_folder_map WHERE slug = ? AND version = ?", (slug, version))
+
     def get_engine_folder_map(self, slug: str, version: str) -> dict[str, str]:
         rows = self._all(
             "SELECT folder, engine FROM engine_folder_map WHERE slug = ? AND version = ? ORDER BY folder",

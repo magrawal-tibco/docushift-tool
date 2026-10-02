@@ -599,3 +599,61 @@ def test_a_directory_named_in_two_cases_is_still_one_directory(tmp_path: Path) -
     archive.write_bytes(zip_bytes({"w/Doc/a.htm": "a", "w/doc/b.htm": "b"}))
 
     assert safe_extract(archive, tmp_path / "out") == 2
+
+
+# -- the short-circuit, guarded and settling (Phase 34, R3-08 and R3-12) ----------
+
+
+def test_a_package_that_cannot_be_hashed_is_a_failure_not_an_abort(
+    config: ConfigManager, catalog: CatalogManager, product: Product, version: ProductVersion,
+    monkeypatch,
+) -> None:
+    """R3-08. The step-3 hash sat outside the guard, so a ZIP held open by a
+    scanner raised through `pool.map` and stopped the whole batch."""
+    target = target_of(config, product, version)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_bytes(zip_bytes())
+    catalog.state.set_version_state("tibco-ems", "10.4.0", checksum="abc")
+
+    def held(path):
+        raise PermissionError(32, "The process cannot access the file")
+
+    monkeypatch.setattr("docushift.downloader.fetcher.sha256_of", held)
+
+    result = downloader(config, catalog, FakeSession()).download_one(product, version)
+
+    assert result.outcome is Outcome.FAILED
+    assert "PermissionError" in result.message
+
+
+def test_a_current_package_clears_an_error_an_earlier_run_left(
+    config: ConfigManager, catalog: CatalogManager, product: Product, version: ProductVersion
+) -> None:
+    """R3-12. After a failed `--force` re-fetch, every later plain run said
+    `current` and left the error in place, so `status` counted it for good."""
+    target = target_of(config, product, version)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_bytes(zip_bytes())
+    catalog.state.set_version_state(
+        "tibco-ems", "10.4.0", checksum=sha256_of(target), status="ERROR", error="HTTP 503"
+    )
+
+    result = downloader(config, catalog, FakeSession()).download_one(product, version)
+
+    assert result.outcome is Outcome.CURRENT
+    state = catalog.state.get_version_state("tibco-ems", "10.4.0")
+    assert state["error"] is None
+    assert state["status"] == "DOWNLOADED"
+
+
+def test_a_current_package_leaves_a_later_status_alone(
+    config: ConfigManager, catalog: CatalogManager, product: Product, version: ProductVersion
+) -> None:
+    target = target_of(config, product, version)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_bytes(zip_bytes())
+    catalog.state.set_version_state("tibco-ems", "10.4.0", checksum=sha256_of(target), status="CONVERTED")
+
+    downloader(config, catalog, FakeSession()).download_one(product, version)
+
+    assert catalog.state.get_version_state("tibco-ems", "10.4.0")["status"] == "CONVERTED"

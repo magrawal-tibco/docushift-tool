@@ -217,15 +217,32 @@ class PackageDownloader:
         # Step 3: present and unchanged. The only thing between a resumed run over
         # a completed batch and a full re-fetch.
         recorded = self._recorded_state(slug, number)
-        if (
-            not force
-            and target.exists()
-            and recorded.get("checksum")
-            and sha256_of(target) == recorded["checksum"]
-        ):
+        try:
+            current = (
+                not force
+                and target.exists()
+                and recorded.get("checksum")
+                and sha256_of(target) == recorded["checksum"]
+            )
+            size = target.stat().st_size if current else 0
+        except OSError as exc:
+            # Phase 34 (R3-08). Inside the guard like every other failure: a ZIP
+            # held open by a scanner raised through `pool.map` and stopped the batch.
+            message = f"{type(exc).__name__}: {exc}"
+            self._record(slug, number, status=ConversionStatus.ERROR, error=message)
+            return DownloadResult(slug, number, Outcome.FAILED, message=message)
+        if current:
+            # §5.1 step 3 says "mark it downloaded" (Phase 34, R3-12): a failed
+            # `--force` re-fetch left `ERROR` and its text behind, and `status`
+            # counted the version as errored for as long as the package stayed
+            # unchanged. A later status is left alone. `ERROR` does not say which
+            # stage failed, so a convert error is cleared too -- as a real
+            # re-download's `error=None` always has.
+            if recorded.get("status") in (None, ConversionStatus.DISCOVERED, ConversionStatus.ERROR):
+                self._record(slug, number, status=ConversionStatus.DOWNLOADED, error=None)
             return DownloadResult(
                 slug, number, Outcome.CURRENT, path=target,
-                size=target.stat().st_size, checksum=recorded["checksum"],
+                size=size, checksum=recorded["checksum"],
             )
 
         url = self.resolve_url(product, version)
@@ -359,9 +376,10 @@ class PackageDownloader:
     ) -> DownloadStats:
         """Runs the pool over a selection, in `iter_versions` order.
 
-        Results are collected in completion order but the summary does not depend
-        on order, and `on_result` fires from the worker thread that finished --
-        which is the only place a progress line can be honest about what is done.
+        Results arrive in selection order, not completion order: `pool.map` yields
+        in input order, on the calling thread, so `on_result` fires there and one
+        slow version holds back the progress lines of the versions queued after it
+        even once they have finished. The summary does not depend on order.
         """
         stats = DownloadStats()
         selection = list(pairs)

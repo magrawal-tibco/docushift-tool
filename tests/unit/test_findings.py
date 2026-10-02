@@ -137,8 +137,10 @@ def test_the_register_carries_every_row_of_7_5() -> None:
     Phase 34 adds the 67th and 68th, `ORIGIN_TEMPLATE_REJECTED` and
     `ORIGIN_PATH_TOO_SHORT` (R1-07): a refused declaration that used to pass for
     no declaration, and short sources that used to be counted as one UNDECLARED.
+    It adds the 69th, `INVENTORY_PARTIAL` (R3-04): a partial walk always left the
+    columns unwritten, and never said so or cleared the previous package's.
     """
-    assert len(REGISTRY) == 68
+    assert len(REGISTRY) == 69
 
 
 def test_severity_comes_from_the_registry_and_not_from_the_call_site() -> None:

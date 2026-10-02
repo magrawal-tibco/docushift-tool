@@ -780,3 +780,164 @@ def test_a_tree_extracted_before_the_rule_existed_is_recorded_on_the_next_run(
     assert result.outcome is ExtractOutcome.CURRENT
     metadata = catalog.state.get_version_metadata("tibco-ems", "10.4.0") or {}
     assert metadata["content_root"] == "tibco-ems-10-4-0"
+
+
+# -- a re-extract must not keep the previous package's measurements (Phase 34) ----
+
+
+# A package with an API tree, a second help folder and a generator string, and
+# the package that replaces it upstream with none of the three.
+OLD_PACKAGE = {
+    "w/guide/Output.mcwebhelp": "", "w/guide/Data/HelpSystem.xml": "<x/>", "w/guide/a.htm": "<html/>",
+    "w/extra/Output.mcwebhelp": "",
+    "w/api/allclasses-frame.html": "", "w/api/x.html": "",
+    "w/p.html": '<html><head><meta name="generator" content="Whizzy Docs 3"></head></html>',
+}
+NEW_PACKAGE = {
+    "w/guide/Output.mcwebhelp": "", "w/guide/Data/HelpSystem.xml": "<x/>", "w/guide/a.htm": "<html/>",
+    "w/guide/b.htm": "<html/>",
+}
+
+
+def test_a_failure_after_the_swap_is_an_outcome_and_the_next_run_measures_again(
+    config: ConfigManager, catalog: CatalogManager, product: Product, version: ProductVersion,
+    monkeypatch,
+) -> None:
+    """R3-03. `versions.csv` open in Excel made the write-back raise out of
+    `extract_one`, past the batch -- and the checksum was already written, so the
+    re-run reported `current` over the *old* package's columns for good."""
+    extractor = PackageExtractor(config, catalog)
+    place_package(config, product, version, OLD_PACKAGE)
+    extractor.extract_one(product, version)
+    place_package(config, product, version, NEW_PACKAGE)
+
+    def locked(*args, **kwargs):
+        raise PermissionError(13, "versions.csv is open in another program")
+
+    monkeypatch.setattr(catalog, "record_extract_inventory", locked)
+    failed = extractor.extract_one(product, version)
+    monkeypatch.undo()
+
+    assert failed.outcome is ExtractOutcome.FAILED
+    assert "PermissionError" in failed.message
+    assert catalog.state.get_version_state("tibco-ems", "10.4.0")["status"] == str(ConversionStatus.ERROR)
+
+    rerun = extractor.extract_one(product, version)
+
+    assert rerun.outcome is ExtractOutcome.EXTRACTED
+    assert catalog.get_version("tibco-ems", "10.4.0").api_files == 0
+
+
+def test_a_package_zipfile_cannot_read_is_a_failure_not_an_abort(
+    config: ConfigManager, catalog: CatalogManager, product: Product, version: ProductVersion,
+    monkeypatch,
+) -> None:
+    """R3-08. `zipfile` raises `NotImplementedError` for Deflate64 and
+    `RuntimeError` for an encrypted member, and neither is an `OSError`."""
+    place_package(config, product, version, FLARE_PACKAGE)
+
+    def deflate64(*args, **kwargs):
+        raise NotImplementedError("That compression method is not supported")
+
+    monkeypatch.setattr("docushift.extractor.unpacker.safe_extract", deflate64)
+
+    result = PackageExtractor(config, catalog).extract_one(product, version)
+
+    assert result.outcome is ExtractOutcome.FAILED
+    assert "NotImplementedError" in result.message
+    target = extract_dir(config, product, version)
+    assert not target.with_name(target.name + ".part").exists()
+
+
+def test_a_partial_walk_blanks_the_columns_and_says_so(
+    config: ConfigManager, catalog: CatalogManager, product: Product, version: ProductVersion,
+    monkeypatch,
+) -> None:
+    """R3-04. The columns used to keep the *previous* package's counts, with
+    `extracted` and no word said, and the next run was `current` over them."""
+    import os
+    import types
+
+    from docushift.extractor import inventory as inventory_module
+
+    extractor = PackageExtractor(config, catalog)
+    extractor.findings = FindingsRun("extract", store=None).start()
+    place_package(config, product, version, OLD_PACKAGE)
+    extractor.extract_one(product, version)
+    place_package(config, product, version, NEW_PACKAGE)
+
+    def unreadable(path):
+        if str(path).endswith("guide"):
+            raise PermissionError(5, "Access is denied")
+        return os.scandir(path)
+
+    proxy = types.SimpleNamespace(**{name: getattr(os, name) for name in dir(os) if not name.startswith("__")})
+    proxy.scandir = unreadable
+    monkeypatch.setattr(inventory_module, "os", proxy)
+    result = extractor.extract_one(product, version)
+    monkeypatch.undo()
+
+    assert result.outcome is ExtractOutcome.EXTRACTED
+    assert result.inventory.partial
+    assert "partial" in result.message
+    row = catalog.get_version("tibco-ems", "10.4.0")
+    assert (row.api_files, row.doc_files, row.csh_names) == (None, None, None)
+    assert "INVENTORY_PARTIAL" in {f.code for f in extractor.findings.all}
+
+    rerun = extractor.extract_one(product, version)
+
+    assert rerun.inventory is not None
+    assert catalog.get_version("tibco-ems", "10.4.0").doc_files == 4
+
+
+def test_a_re_extract_records_the_absence_of_what_the_old_package_had(
+    config: ConfigManager, catalog: CatalogManager, product: Product, version: ProductVersion
+) -> None:
+    """R3-05. The keys were written only when non-empty, and Stages 5 and 7 trust
+    a recorded root over a re-walk -- so a package that dropped its Javadoc tree
+    still named `w/api`. An empty value now says "measured, none"."""
+    extractor = PackageExtractor(config, catalog)
+    place_package(config, product, version, OLD_PACKAGE)
+    extractor.extract_one(product, version)
+    assert catalog.state.get_version_metadata("tibco-ems", "10.4.0")["api_roots"]
+    # A guide folder only the old package had; the map is upserted per folder.
+    catalog.state.record_engine_folder("tibco-ems", "10.4.0", "gone", "webworks")
+    place_package(config, product, version, NEW_PACKAGE)
+
+    extractor.extract_one(product, version)
+
+    metadata = catalog.state.get_version_metadata("tibco-ems", "10.4.0")
+    assert metadata["api_roots"] == ""
+    assert metadata["engine_generator_raw"] == ""
+    assert catalog.state.get_engine_folder_map("tibco-ems", "10.4.0") == {"w": "flare"}
+
+
+def test_a_current_package_clears_an_error_an_earlier_run_left(
+    config: ConfigManager, catalog: CatalogManager, product: Product, version: ProductVersion
+) -> None:
+    """R3-12. `status` counted the version under `errors` for as long as the
+    package stayed unchanged, although nothing was wrong with it."""
+    place_package(config, product, version, FLARE_PACKAGE)
+    extractor = PackageExtractor(config, catalog)
+    extractor.extract_one(product, version)
+    catalog.state.set_version_state("tibco-ems", "10.4.0", status=ConversionStatus.ERROR, error="earlier")
+
+    result = extractor.extract_one(product, version)
+
+    assert result.outcome is ExtractOutcome.CURRENT
+    state = catalog.state.get_version_state("tibco-ems", "10.4.0")
+    assert state["error"] is None
+    assert state["status"] == str(ConversionStatus.EXTRACTED)
+
+
+def test_a_current_package_does_not_walk_a_later_status_backwards(
+    config: ConfigManager, catalog: CatalogManager, product: Product, version: ProductVersion
+) -> None:
+    place_package(config, product, version, FLARE_PACKAGE)
+    extractor = PackageExtractor(config, catalog)
+    extractor.extract_one(product, version)
+    catalog.state.set_version_state("tibco-ems", "10.4.0", status=ConversionStatus.CONVERTED)
+
+    extractor.extract_one(product, version)
+
+    assert catalog.state.get_version_state("tibco-ems", "10.4.0")["status"] == str(ConversionStatus.CONVERTED)

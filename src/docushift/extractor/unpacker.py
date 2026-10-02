@@ -7,7 +7,8 @@ never accepted from a caller but derived by `ConfigManager`, the same invariant
 that lets Stage 5 find a tree without being told where it is.
 
 Shaped like `PackageDownloader` on purpose -- same selection, same "a failure is
-a returned outcome, never an exception", same five-count summary -- because the
+a returned outcome, never an exception", same outcome-count summary (with
+`measured` as a sixth row download has no use for) -- because the
 two commands are read side by side and a reader who knows one should not have to
 learn the other. It differs in one respect and deliberately: **extraction is
 serial.** The download pool exists because HTTP transfers overlap; two 900 MB
@@ -16,7 +17,6 @@ sooner for having been started early.
 """
 
 import shutil
-import zipfile
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass, field
 from enum import StrEnum
@@ -38,7 +38,7 @@ from docushift.utils.swap import remove, swap
 
 
 class ExtractOutcome(StrEnum):
-    """What happened to one version. Every run reports these five counts."""
+    """What happened to one version. Every run reports these six counts."""
 
     EXTRACTED = "extracted"
     # The ZIP's checksum matches the one the current tree was built from.
@@ -162,6 +162,26 @@ class PackageExtractor:
         if self.catalog.state is not None:
             self.catalog.state.set_version_metadata(slug, version, key, value)
 
+    def _settle(self, slug: str, version: str) -> None:
+        """A `current` package clears what an earlier failed run left (Phase 34, R3-12).
+
+        Only when the recorded status is behind this stage or is `ERROR`: a
+        version already converted keeps its later status. `ERROR` does not say
+        which stage failed, so a convert error is cleared here too -- the same
+        thing a real re-extract's `error=None` has always done.
+        """
+        if self.catalog.state is None:
+            return
+        status = (self.catalog.state.get_version_state(slug, version) or {}).get("status")
+        if status in (None, ConversionStatus.DISCOVERED, ConversionStatus.DOWNLOADED,
+                      ConversionStatus.ERROR):
+            self._record(slug, version, status=ConversionStatus.EXTRACTED, error=None)
+
+    def _failed(self, slug: str, version: str, exc: BaseException, path: Path | None) -> ExtractResult:
+        message = f"{type(exc).__name__}: {exc}"
+        self._record(slug, version, status=ConversionStatus.ERROR, error=message)
+        return ExtractResult(slug, version, ExtractOutcome.FAILED, path=path, message=message)
+
     def _record_content_root(self, slug: str, version: str, tree: Path) -> None:
         """Where this package's content starts, resolved once (Phase 15b).
 
@@ -181,7 +201,8 @@ class PackageExtractor:
     def extract_one(
         self, product: Product, version: ProductVersion, force: bool = False
     ) -> ExtractResult:
-        """`design.md` §6.1 steps 1-3, then §7. Never raises."""
+        """`design.md` §6.1 steps 1-3, then §7. Never raises -- since Phase 34
+        (R3-03, R3-08), when the steps after the unzip are guarded too."""
         slug, number = product.slug, version.version
         source = self.config.download_path(product.bu, product.family, slug, number)
         target = self.config.extract_path(product.bu, product.family, slug, number)
@@ -208,11 +229,17 @@ class PackageExtractor:
             # columns, and reporting `current` over a blank row would leave it
             # blank for good.
             if version.api_files is not None and version.doc_files is not None:
+                self._settle(slug, number)
                 return current
-            identified = self.identify(product, version, target)
+            try:
+                identified = self.identify(product, version, target)
+                current.inventory = self.measure(product, version, target, identified)
+            except Exception as exc:  # noqa: BLE001 - a failure is an outcome (R3-08)
+                return self._failed(slug, number, exc, target)
+            self._settle(slug, number)
             current.engine = identified.engine
             current.roots = len(identified.roots)
-            current.inventory = self.measure(product, version, target, identified)
+            current.message = _partial_message(current.inventory)
             return current
 
         # Unpack beside the destination and swap, never over it. A re-extract onto
@@ -228,35 +255,44 @@ class PackageExtractor:
             shutil.rmtree(staging, ignore_errors=True)
             self._record(slug, number, status=ConversionStatus.ERROR, error=str(exc))
             return ExtractResult(slug, number, ExtractOutcome.REFUSED, message=str(exc))
-        except (OSError, zipfile.BadZipFile) as exc:
+        except Exception as exc:  # noqa: BLE001 - a failure is an outcome (R3-08)
+            # Not only `OSError` and `BadZipFile`: `zipfile` raises
+            # `NotImplementedError` for Deflate64, `RuntimeError` for an encrypted
+            # member, and `EOFError` or `zlib.error` for a damaged one. Any of them
+            # escaping here stopped the whole batch with a `.part` on disk.
             shutil.rmtree(staging, ignore_errors=True)
-            message = f"{type(exc).__name__}: {exc}"
-            self._record(slug, number, status=ConversionStatus.ERROR, error=message)
-            return ExtractResult(slug, number, ExtractOutcome.FAILED, message=message)
+            return self._failed(slug, number, exc, None)
 
+        # Phase 34 (R3-03): the checksum is blanked before the swap and written
+        # only once everything after it has succeeded. It is the CURRENT test's
+        # key, and the old one -- or this package's, written early -- let a run
+        # that failed half-way pass as current over the previous package's
+        # columns and roots, which `convert` then reads.
+        self._set_metadata(slug, number, "extract_zip_checksum", "")
         try:
             swap(staging, target)
         except OSError as exc:
-            message = f"{type(exc).__name__}: {exc}"
-            self._record(slug, number, status=ConversionStatus.ERROR, error=message)
-            return ExtractResult(slug, number, ExtractOutcome.FAILED, message=message)
+            return self._failed(slug, number, exc, None)
+
+        try:
+            self._record_content_root(slug, number, target)
+            identified = self.identify(product, version, target)
+            inventory = self.measure(product, version, target, identified)
+        except Exception as exc:  # noqa: BLE001 - `versions.csv` open in Excel, say
+            return self._failed(slug, number, exc, target)
 
         self._record(
             slug, number,
             status=ConversionStatus.EXTRACTED, extract_path=str(target), error=None,
         )
-        # Written only after the tree is in place, so an interrupted extract
-        # cannot leave a checksum claiming a directory that was never built.
         self._set_metadata(slug, number, "extract_zip_checksum", checksum)
-        self._record_content_root(slug, number, target)
-
-        identified = self.identify(product, version, target)
         return ExtractResult(
             slug, number, ExtractOutcome.EXTRACTED, path=target, files=files,
             engine=identified.engine,
             engine_written=identified.written,
             roots=len(identified.roots),
-            inventory=self.measure(product, version, target, identified),
+            inventory=inventory,
+            message=_partial_message(inventory),
         )
 
     def measure_cached(self, product: Product, version: ProductVersion) -> ExtractResult:
@@ -303,13 +339,20 @@ class PackageExtractor:
                 message="already measured",
             )
 
-        identified = self.identify(product, version, target)
+        try:
+            identified = self.identify(product, version, target)
+            inventory = self.measure(product, version, target, identified)
+        except Exception as exc:  # noqa: BLE001 - a failure is an outcome (R3-08)
+            # No `version_state` write, for the reason in the docstring.
+            message = f"{type(exc).__name__}: {exc}"
+            return ExtractResult(slug, number, ExtractOutcome.FAILED, path=target, message=message)
         return ExtractResult(
             slug, number, ExtractOutcome.MEASURED, path=target,
             engine=identified.engine,
             engine_written=identified.written,
             roots=len(identified.roots),
-            inventory=self.measure(product, version, target, identified),
+            inventory=inventory,
+            message=_partial_message(inventory),
         )
 
     # -- identification (design.md §7) -----------------------------------------
@@ -330,22 +373,26 @@ class PackageExtractor:
         engine = version.engine if manual else detection.engine
 
         # §7.3 step 4: recorded regardless of whether it is unanimous. Finding out
-        # that it was not is the reason the map exists.
+        # that it was not is the reason the map exists. Cleared first (Phase 34,
+        # R3-05): a folder the previous package had and this one does not must not
+        # survive the re-extract.
         if self.catalog.state is not None:
+            self.catalog.state.clear_engine_folders(slug, number)
             for folder, folder_engine in detection.folders.items():
                 self.catalog.state.record_engine_folder(slug, number, folder, str(folder_engine))
 
-        if detection.generator_raw:
-            # `other` on its own is unactionable; the string is what a human
-            # triages a new generator from.
-            self._set_metadata(slug, number, "engine_generator_raw", detection.generator_raw)
+        # `other` on its own is unactionable; the string is what a human triages a
+        # new generator from. This key and the two root lists are written even when
+        # empty (R3-05): `""` says "measured, none", where a skipped write left the
+        # previous package's answer in place -- and Stages 5 and 7 trust a recorded
+        # root list over a re-walk.
+        self._set_metadata(slug, number, "engine_generator_raw", detection.generator_raw or "")
 
         roots = find_output_roots(tree, engine)
-        if roots:
-            self._set_metadata(
-                slug, number, "output_roots",
-                "\n".join(str(root.relative_to(tree)) for root in roots),
-            )
+        self._set_metadata(
+            slug, number, "output_roots",
+            "\n".join(str(root.relative_to(tree)) for root in roots),
+        )
 
         # §7.3 steps 1 and 3: never guess, and never override a manual value.
         # `record_detected_engine` enforces the second; refusing to write `auto`
@@ -373,16 +420,25 @@ class PackageExtractor:
         if self.catalog.state is not None:
             self.catalog.state.record_csh_sources(slug, number, inventory.csh_rows())
             self.catalog.state.record_asset_inventory(slug, number, inventory.rows())
-        if inventory.api_roots:
-            self._set_metadata(
-                slug, number, "api_roots",
-                "\n".join(str(root.relative_to(tree)) for root in inventory.api_roots),
-            )
+        self._set_metadata(
+            slug, number, "api_roots",
+            "\n".join(str(root.relative_to(tree)) for root in inventory.api_roots),
+        )
 
         # A footprint measured over part of a tree is a wrong number rather than a
         # small one, so a partial walk writes no columns at all -- the same rule
-        # that leaves a failed extract blank rather than zero.
-        if not inventory.partial:
+        # that leaves a failed extract blank rather than zero. *Blank*, not
+        # untouched (Phase 34, R3-04): skipping the write kept the previous
+        # package's counts, and the next run read them as this package measured.
+        if inventory.partial:
+            self.catalog.clear_extract_inventory(slug, number)
+            if self.findings is not None:
+                self.findings.record(
+                    "INVENTORY_PARTIAL", slug=slug, version=number,
+                    message="a directory in the extracted tree could not be read; "
+                            "the five inventory columns were left blank",
+                )
+        else:
             self.catalog.record_extract_inventory(
                 slug, number,
                 csh_sources=inventory.readable_csh_sources,
@@ -455,3 +511,10 @@ class PackageExtractor:
             if on_result is not None:
                 on_result(result)
         return stats
+
+
+def _partial_message(inventory: Inventory) -> str:
+    """The line a partial walk puts on the result, so the run says so (R3-04)."""
+    if not inventory.partial:
+        return ""
+    return "partial walk: a directory could not be read, so the inventory columns are blank"

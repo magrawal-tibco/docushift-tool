@@ -114,6 +114,13 @@ REGISTRY: dict[str, Code] = _codes(
          "CSH source present but empty -- no csh.yml written", "architecture.md §5.4.2"),
     Code("CSH_SOURCE_UNPARSED", Severity.WARNING, Stage.EXTRACT,
          "Source located but failed to parse; _has_csh still set", "design.md §6.2"),
+    # Phase 34 (R3-04). A partial walk already wrote no columns; what it did not
+    # do was say so, or clear the previous package's counts, so the row read as
+    # measured. A warning: the tree is on disk and converts, but its footprint is
+    # unknown until a re-run reads every directory.
+    Code("INVENTORY_PARTIAL", Severity.WARNING, Stage.EXTRACT,
+         "A directory in the extracted tree could not be read; the inventory columns "
+         "were left blank", "design.md §6.1"),
     Code("ENGINE_UNKNOWN", Severity.WARNING, Stage.CONVERT,
          "auto, or a named engine with no handler -- skipped, not guessed",
          "design.md invariant 7"),
