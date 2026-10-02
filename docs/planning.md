@@ -15,7 +15,9 @@ table and stays [here](#75-the-findings-register-living).
 
 ## 1. Active Phases
 
-### Phase 34: A Modular Review of the Whole Tool — **Approved 2026-10-02, not started**
+### Phase 34: A Modular Review of the Whole Tool — **In progress, 2026-10-02**
+
+**Progress.** Base tagged `review-base` (7dda975); the frozen copy is the worktree `C:\github\docushift-tool-review`. Findings land in `reports/review/`, indexed in `reports/review/INDEX.md`. **Batch 1 (R1–R3) reviewed**: 52 findings (5 S1, 10 S2, 31 S3, 6 S4), grouped into 15 fix themes; **triage approved as proposed**. Themes A–L are being fixed; batch 2 (R4–R6) running.
 
 The tool grew phase by phase, from Phase 1 to Phase 33, and each phase was
 reviewed as a change. Nobody has read the whole thing end to end since. That is
@@ -100,6 +102,7 @@ since they were written**. Phase 34 confirms or closes each one.
 |---|---|---|
 | Phase 7 | A `sync` destination path over 260 characters failed with `[WinError 3]` and left a `.part` folder. Phases 14–15's long-path work (`utils/longpath.py`, `PUBLISHED_PATH_TOO_LONG`) may have closed it | [phase-07.md](history/phases/phase-07.md) |
 | Phase 21 | A converter change does not invalidate a merged tree: `reframe`'s currency check keys on the extracted source's checksum, so a re-conversion with new converter code is not re-merged without `--force` | [phase-21.md](history/phases/phase-21.md) |
+| Phase 34 (R1–R3) | 14 fragile-but-correct items deferred at triage, theme M: R1-09, R1-10, R2-10, R2-12 – R2-18, R3-06, R3-09, R3-10, R3-13. Plus R2-09, a catalog check for the user (113 "unclassified" products already have a family typed in) | [reports/review/INDEX.md](../reports/review/INDEX.md) |
 
 ---
 
