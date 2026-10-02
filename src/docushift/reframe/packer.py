@@ -775,7 +775,8 @@ def shortened(pages: Sequence[Page]) -> set[PurePosixPath]:
     1,505 merged pages, 90 of them -- `deployment-scenario-running-activespaces`
     from "Deployment Scenario for Running ActiveSpaces Processes as Windows
     Services". Nothing here tries to do better; it says which ones a human or a
-    model should look at (`reframe/renames.py`).
+    model should look at -- in `rename-map.csv` (`reframe/renames.py`) and, since
+    R1-03, as a queueing flag in `review-queue.csv` (`reframe/review.py`).
     """
     marked: set[PurePosixPath] = set()
     for page in pages:

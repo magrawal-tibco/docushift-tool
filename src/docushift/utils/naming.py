@@ -67,6 +67,11 @@ GENERIC = frozenset({
 })
 
 
+#: The counter MadCap appends when two of its 20-character cuts would collide:
+#: `tibemsConnectionFact21`. Read off a normalized stem, so `-1` counts too.
+_COUNTER = re.compile(r"-?\d+$")
+
+
 def looks_like_a_filename(title: str) -> bool:
     """Whether a TOC "title" is really a stem somebody forgot to write out.
 
@@ -76,6 +81,29 @@ def looks_like_a_filename(title: str) -> bool:
     """
     stripped = title.strip()
     return bool(stripped) and " " not in stripped and "_" in stripped
+
+
+def truncates(stem: str, title: str) -> bool:
+    """Whether `stem` is `title` cut short -- MadCap's 20-character filename cut.
+
+    The exception to `looks_like_a_filename`, and the one that matters most in
+    practice (Phase 34, R1-03). A C API page is titled with the function's own
+    name, `tibems_SetReconnectAttemptDelay`, which has exactly the filename shape,
+    and its source stem is `tibems_SetReconnectA3`. Falling back there published
+    the truncation Phase 29 exists to remove, on 11 pages in every EMS version.
+    A stem that is a strict prefix of the title, with or without the collision
+    counter, has lost information the title still has, so it is no longer the
+    honest source. Equal strings are not a truncation: `Step_1` keeps falling
+    back and keeps having its history token stripped.
+    """
+    full = normalize(title)
+    cut = normalize(stem)
+    if not cut or cut == full:
+        return False
+    return any(
+        part and len(part) < len(full) and full.startswith(part)
+        for part in (cut, _COUNTER.sub("", cut).rstrip("-"))
+    )
 
 
 def normalize(value: str) -> str:
@@ -126,13 +154,16 @@ def slugify(title: str, fallback_stem: str = "", *, separator: str = "-",
     """The filename stem for one page. Deterministic, and at most `limit` long.
 
     The title is the source of truth; `fallback_stem` is used only when the title
-    is empty or is itself a filename, and it alone has edit-history tokens
-    stripped -- `1__Copy_Files_Before_Installation` and `Prior_to_Upgrade_` are
-    real corpus names, and a `Configuring_HTTPS_updated` that a writer typed as a
-    *title* is a word they meant.
+    is empty or is itself a filename -- unless the stem is a truncation of it
+    (`truncates`) -- and it alone has edit-history tokens stripped --
+    `1__Copy_Files_Before_Installation` and `Prior_to_Upgrade_` are real corpus
+    names, and a `Configuring_HTTPS_updated` that a writer typed as a *title* is a
+    word they meant.
     """
     source = title.strip()
-    from_stem = not source or looks_like_a_filename(source)
+    from_stem = not source or (
+        looks_like_a_filename(source) and not truncates(str(fallback_stem), source)
+    )
     if from_stem:
         source = _HISTORY.sub("", str(fallback_stem).strip())
 

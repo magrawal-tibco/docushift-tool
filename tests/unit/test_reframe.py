@@ -1642,7 +1642,7 @@ def test_the_two_universal_flags_annotate_and_never_queue_on_their_own():
     assert flagged(paged(10, 10)) == ["title-inherited"]
     assert flagged(paged(10)) == ["single-topic"]
     assert not rows([paged(10, 10), paged(10)], {})
-    assert set(QUEUEING) == {"reference-list", "oversized", "heterogeneous"}
+    assert set(QUEUEING) == {"reference-list", "oversized", "heterogeneous", "shortened"}
 
 
 def test_an_annotation_still_rides_along_on_a_page_queued_for_another_reason():
@@ -2364,6 +2364,30 @@ def test_renormalize_is_how_a_writer_asks_for_the_names_back(config, catalog, fl
     written = sorted(p.name for p in again.path.rglob("*.md"))
     assert "user-guide.md" in written
     assert "using-the-product.md" not in written
+
+
+def test_a_name_that_does_not_carry_its_title_is_queued_for_review(config, catalog, flare):
+    """R1-03. The `shortened` column alone was not a review: 66 EMS pages carried
+    it and none reached `review-queue.csv`, the one file a writer is told to work.
+    The queue and the column are two views of one measurement."""
+    from docushift.reframe import renames
+
+    converted_tree(config, flare, "10.5.1")
+    result = Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"])
+    rows_now = list(csvio.read_rows(result.path / renames.RENAME_MAP))
+    for row in rows_now:
+        if row["old_path"] == "users-guide/user-guide.md":
+            row["new_path"] = "user-gui.md"
+    renames.write(result.path / renames.RENAME_MAP, rows_now)
+
+    again = Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"], force=True)
+
+    queue = {r["page_path"]: r for r in csvio.read_rows(again.path / "review-queue.csv")}
+    assert "shortened" in queue["user-gui.md"]["flags"].split(";")
+    assert "User Guide" in queue["user-gui.md"]["detail"]
+    mapped = {r["new_path"]: r for r in csvio.read_rows(again.path / renames.RENAME_MAP)}
+    assert mapped["user-gui.md"]["shortened"] == "yes"
+    assert {path for path, row in mapped.items() if row["shortened"]} == {"user-gui.md"}
 
 
 def test_the_map_records_the_address_a_reader_will_type(config, catalog, flare):

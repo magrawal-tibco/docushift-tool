@@ -46,6 +46,41 @@ def test_a_title_becomes_the_name_a_reader_sees(title: str, stem: str, expected:
     assert slugify(title, stem) == expected
 
 
+@pytest.mark.parametrize(
+    ("title", "stem", "expected"),
+    [
+        # EMS C API reference pages (R1-03). Underscore and no space is the shape
+        # of a filename, but the stem is MadCap's 20-character cut -- with its
+        # collision counter on the end where it has one -- so the title wins.
+        ("tibems_SetReconnectAttemptDelay", "tibems_SetReconnectA3",
+         "tibems-setreconnectattemptdelay"),
+        ("tibemsConnectionFactory_Create", "tibemsConnectionFact21",
+         "tibemsconnectionfactory-create"),
+        ("tibemsMsg_Acknowledge", "tibemsMsg_Acknowledg", "tibemsmsg-acknowledge"),
+    ],
+)
+def test_a_function_name_is_not_replaced_by_its_truncated_stem(
+    title: str, stem: str, expected: str
+) -> None:
+    assert slugify(title, stem) == expected
+
+
+@pytest.mark.parametrize(
+    ("title", "stem", "expected"),
+    [
+        # Not truncations, so the fallback still applies and still strips history:
+        # the same string, and a stem that is not a prefix of the title at all.
+        ("Step_1", "Step_1", "step"),
+        ("Prior_to_Upgrade_", "Prior_to_Upgrade_", "prior-to-upgrade"),
+        ("_section_developeru0027s_guide", "developers_guide", "developers-guide"),
+    ],
+)
+def test_a_stem_that_is_not_a_truncation_still_wins_over_a_filename_title(
+    title: str, stem: str, expected: str
+) -> None:
+    assert slugify(title, stem) == expected
+
+
 def test_a_word_that_merely_looks_like_an_escape_is_left_alone() -> None:
     """`u([0-9a-f]{4})` also matches the tail of a real word. Narrowing the
     pattern to the Latin-1 and punctuation blocks is what stops a title being

@@ -21,6 +21,13 @@ structural flags queue 18 pages, against R6's own predicted 25-30.
 Widening that later is a change to `QUEUEING` and nothing else, because the
 flags themselves are computed for every page either way.
 
+**A sixth flag, `shortened`, is not R6's and does queue** (Phase 34, R1-03). A
+page whose filename does not carry its whole title publishes an address a reader
+cannot read the page off -- the 50-character cut took its last words, or a name
+pinned in `rename-map.csv` says less. That file already had the column, and 66
+EMS pages sat in it with nothing pointing a writer at them. The filename is the
+URL (Phase 29), so choosing a better one is an editorial decision like the rest.
+
 **There is no better page title available, and it was checked.** The obvious
 reading of R7.1's "emit the best title it can" is to name a page after the TOC
 node whose subtree it covers. Measured: 30 of 124 pages are exactly one subtree,
@@ -45,13 +52,15 @@ from docushift.utils.csvio import write_rows
 #: not exist yet: adding a column later is cheap, renaming one is not.
 COLUMNS = ("page_path", "guide", "n_topics", "words", "flags", "detail")
 
-#: Declared order, R6's table order. `flags` and `detail` are emitted in it, so
-#: two runs over one input cannot disagree about which clause comes first.
-FLAGS = ("reference-list", "oversized", "title-inherited", "heterogeneous", "single-topic")
+#: Declared order, R6's table order, then `shortened`. `flags` and `detail` are
+#: emitted in it, so two runs over one input cannot disagree about which clause
+#: comes first.
+FLAGS = ("reference-list", "oversized", "title-inherited", "heterogeneous", "single-topic",
+         "shortened")
 
 #: The flags that put a page in the queue. See the module docstring: the two left
 #: out are not weaker signals, they are conditions that hold for every page.
-QUEUEING = frozenset({"reference-list", "oversized", "heterogeneous"})
+QUEUEING = frozenset({"reference-list", "oversized", "heterogeneous", "shortened"})
 
 #: R6's `reference-list` thresholds. Named because they are editorial judgments
 #: that a second doc set may want tuned, not facts about Markdown.
@@ -94,8 +103,14 @@ def branches(roots: Sequence[TocEntry]) -> dict[PurePosixPath, str]:
     return found
 
 
-def inspect(page: Page, max_words: int, ancestors: dict[PurePosixPath, str]) -> list[Flag]:
-    """Every R6 flag this page raises, queueing or not, in `FLAGS` order."""
+def inspect(
+    page: Page, max_words: int, ancestors: dict[PurePosixPath, str], *, shortened: bool = False
+) -> list[Flag]:
+    """Every flag this page raises, queueing or not, in `FLAGS` order.
+
+    `shortened` is `packer.shortened`'s answer, passed in rather than recomputed
+    so the queue and `rename-map.csv`'s column cannot disagree about a page.
+    """
     found: list[Flag] = []
     count = len(page.topics)
     median = int(statistics.median([topic.words for topic in page.topics])) if page.topics else 0
@@ -125,6 +140,12 @@ def inspect(page: Page, max_words: int, ancestors: dict[PurePosixPath, str]) -> 
 
     if count == 1:
         found.append(Flag("single-topic", "one topic; no merge decision was taken"))
+    if shortened and page.topics:
+        found.append(Flag(
+            "shortened",
+            f'named "{page.path.stem}" for the title "{page.topics[0].title}"; '
+            f"a better name goes in rename-map.csv",
+        ))
     return found
 
 

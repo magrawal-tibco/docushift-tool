@@ -916,7 +916,7 @@ regenerated files at the version root:
 | `toc.yml` | The same navigation, retargeted. A topic that led its page gets `page.md`; a topic absorbed into one gets `page.md#anchor`. A reader following the TOC cannot tell the merge happened. |
 | `redirects.yml` | One 301 per source topic, anchored — so a published URL from before the merge lands on the section that replaced it, not at the top of a twelve-section page. |
 | `reframe.yml` | Which source topic became which section of which page, plus the policy that shaped it and the link counts. This is the record to read when a boundary looks wrong. |
-| `rename-map.csv` | The address each merged page was given — the source topic that leads it, the path, the title, its place in the navigation, and the URL a reader will type. Only the last is not derivable from `reframe.yml`, and it is the one somebody checks when a link goes wrong. **A name written here is used, not just reported**: the next run reads it back and pins the page to that path, so a published URL does not move because somebody fixed a typo in a title. The `shortened` column flags the pages whose name lost words to the 50-character cut — 90 of 1,505 measured — which is where a human or a model can write a better one than the algorithm did. `--renormalize` recomputes every name anyway, so the pinning is a decision rather than a trap. |
+| `rename-map.csv` | The address each merged page was given — the source topic that leads it, the path, the title, its place in the navigation, and the URL a reader will type. Only the last is not derivable from `reframe.yml`, and it is the one somebody checks when a link goes wrong. **A name written here is used, not just reported**: the next run reads it back and pins the page to that path, so a published URL does not move because somebody fixed a typo in a title. The `shortened` column flags the pages whose name does not carry their whole title — mostly words lost to the 50-character cut, 90 of 1,505 measured — which is where a human or a model can write a better one than the algorithm did. The same pages are queued in `review-queue.csv`. `--renormalize` recomputes every name anyway, so the pinning is a decision rather than a trap. |
 | `review-queue.csv` | The pages a writer has to make a decision about, and why. Open it in a spreadsheet. |
 
 **`301.yml`, the cutover map, appears alongside them for a version whose live URL shape is
@@ -982,6 +982,7 @@ out of it needing an editorial call, and `reframe` lists those rather than guess
 | `reference-list` | Twenty or more topics with a median under 100 words — usually a parameter table that would read better as an actual table, or as a page left granular. |
 | `oversized` | Over the word cap, because a single source topic is already over it. Splitting a topic body is not something the merge will do. |
 | `heterogeneous` | The page spans more than one branch of the navigation, so its sections may not belong together. |
+| `shortened` | The page's filename, which is its URL, does not carry its whole title. Write a better name into `new_path` in `rename-map.csv`; the next run uses it. |
 
 Two more flags, `title-inherited` and `single-topic`, are recorded against every page in
 `reframe.yml` but never put a page in the queue on their own: a merged page is *always*

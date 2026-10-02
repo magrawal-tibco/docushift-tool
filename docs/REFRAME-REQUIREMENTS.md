@@ -200,6 +200,7 @@ page_path, guide, n_topics, words, flags, detail
 | `title-inherited` | `n_topics > 1` and page title equals its first topic's title | a real page title |
 | `heterogeneous` | topics span more than one distinct depth-2 TOC ancestor | whether the page should split |
 | `single-topic` | `n_topics == 1` | usually fine; flags structural outliers |
+| `shortened` | the page filename does not carry its whole normalized title (added Phase 34, R1-03) | a better filename, written into `rename-map.csv` |
 
 On the reference corpus this yields roughly 25–30 rows out of 106 pages — a workable review load.
 

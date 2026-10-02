@@ -37,7 +37,11 @@ _NOT_OUTPUT = frozenset({"publish"})
 #:
 #: 1 = greedy sibling runs (Phase 20). 2 = parent-leads subtrees (Phase 28).
 #: 3 = anchors predicted from heading text, no `<a id>` markers (Phase 29).
-_ALGORITHM = 3
+#: 4 = a title is not replaced by a source stem that truncates it, and a name
+#: that does not carry its title queues for review (Phase 34, R1-03). Neither
+#: moves a boundary, but both change the tree, and a CURRENT tree would keep
+#: the old answer for good.
+_ALGORITHM = 4
 
 
 @dataclass(frozen=True)

@@ -485,8 +485,13 @@ class Reframer:
         # R6, computed before anything is written so the queue and `reframe.yml`
         # are two views of one measurement rather than two passes that could drift.
         ancestors = branches(roots)
+        cut = shortened(built)
         flagged: dict[PurePosixPath, list[Flag]] = {
-            page.path: inspect(page, policy.max_words, ancestors) for page in built
+            page.path: inspect(
+                page, policy.max_words, ancestors,
+                shortened=bool(page.topics) and page.topics[0].source in cut,
+            )
+            for page in built
         }
         queue = review.rows(built, flagged)
 
@@ -494,7 +499,7 @@ class Reframer:
         added = self._write(staging, source, built, located, counts)
         self._write_navigation(
             staging, source, roots, built, located, policy, counts, schema_name, flagged,
-            queue, self._url_for(product, version), placements,
+            queue, self._url_for(product, version), placements, cut,
         )
         self._write_origins(staging, product, version, located)
 
@@ -687,6 +692,7 @@ class Reframer:
         queue: list[dict[str, str]],
         url_of: Callable[[PurePosixPath], str],
         placements: dict[int, tuple[Page, str]],
+        cut: set[PurePosixPath],
     ) -> None:
         """Copies the assets through, then writes `toc.yml` and the three sidecars.
 
@@ -725,7 +731,7 @@ class Reframer:
         review.write(staging / "review-queue.csv", queue)
         renames.write(
             staging / renames.RENAME_MAP,
-            renames.rows(built, renames.breadcrumbs(roots), url_of, shortened(built)),
+            renames.rows(built, renames.breadcrumbs(roots), url_of, cut),
         )
 
     def _write_origins(
