@@ -904,6 +904,10 @@ answers the question the migration actually asks — *the reader has a bookmark 
 `docs.tibco.com`, and on cutover day it stops working.* Its left-hand side is that live address
 and nothing else, so it is the one file here that cannot be derived from the tree.
 
+The same file is written by `convert` into the converted tree, with every `to` pointing at the
+topic's own page, because most products publish that tree rather than the merged one (Phase 35).
+Reframe writes its own into the merged tree, pointing at the sections topics were merged into.
+
 Nothing is guessed: the converted catalog contains four different source layouts, and a rule
 that generalised one product's would produce a redirect to a page that never existed — which
 nothing downstream could detect. The shape comes from one of two places:

@@ -35,6 +35,7 @@ from enum import StrEnum
 from pathlib import Path, PurePosixPath
 from typing import Any
 
+from docushift import origins
 from docushift.apiref import find_api_roots, recorded_roots
 from docushift.catalog import CatalogManager
 from docushift.config import ConfigManager
@@ -330,6 +331,7 @@ class DocumentConverter:
         csh_transform.write(staging / "csh.yml", result.csh.entries)
 
         self._retarget_fragments(context, staging)
+        self._write_origins(staging, product, version, mapping)
 
         swap(staging, target)
 
@@ -357,6 +359,30 @@ class DocumentConverter:
         return result
 
     # -- measurement -------------------------------------------------------------
+
+    def _write_origins(
+        self, staging: Path, product: Product, version: ProductVersion, mapping: dict[str, str]
+    ) -> None:
+        """Phase 35: `301.yml` in the converted tree, which `sync` publishes for
+        every product that does not publish merged.
+
+        Into staging, before the swap, for the reason Reframe's is: written into
+        the published folder after the copy it would make `sync`'s shallow
+        `filecmp` see every version as stale on every run (20d.1). Nothing has
+        moved yet, so every `to` is the topic's own output path. Skipped without
+        `state.db` -- the standalone `--input` path -- as Reframe skips it.
+        """
+        if self.state is None:
+            return
+        slug, number = product.slug, version.version
+        built = origins.build(
+            self.config.load_origin_urls(), slug, version.zip_url, mapping, {},
+            origins.page_list(self.config.cache_dir, slug, number),
+        )
+        for code, message, count in built.findings:
+            self._record(code, slug, number, message=message, count=count)
+        if built.rows is not None:
+            origins.write(staging / origins.ORIGINS, built.rows)
 
     def _measure_output(self, slug: str, version: str, target: Path) -> tuple[int, int]:
         """One walk of the output tree, and the two columns it writes (§3.9).

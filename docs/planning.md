@@ -938,10 +938,10 @@ The concrete deliverable of §7.1: every deferred "report line" in the three doc
 | `SYNC_MERGE_UNAVAILABLE`²⁰ᵈ | warn | sync | A product set to publish merged has no current reframed tree; it publishes nothing rather than falling back | §20d |
 | `REDIRECT_SHADOWED`²⁰ᵈ | warn | validate | A redirect whose source path still exists in the published tree; a 301 loop where the two differ only in case | `REFRAME-REQUIREMENTS.md` R5 |
 | `REFRAME_KEEP_SEPARATE_UNMATCHED`²⁰ᵉ | warn | reframe | A `keep_separate` path matches no topic in this version; the merge a writer meant to undo still happened | §20e |
-| `ORIGIN_TEMPLATE_UNDECLARED`²² | warn | reframe | No verified docsite URL template for this product, so no `301.yml` was written; a guessed origin URL redirects to a page that never existed | Phase 22 |
-| `ORIGIN_SITEMAP_MISSING`³³ | warn | reframe | No Coveo sitemap page list for this version and no declared template, so no `301.yml` was written | Phase 33 |
-| `ORIGIN_URL_UNLISTED`³³ | note | reframe | Converted topics whose origin URL the docsite sitemap does not list; a derived row is withheld rather than written unproven | Phase 33 |
-| `ORIGIN_PAGE_UNMAPPED`³³ | warn | reframe | Live docsite pages no `301.yml` row starts from (API reference, PDFs, help frames) — each a 404 at cutover unless redirected elsewhere | Phase 33 |
+| `ORIGIN_TEMPLATE_UNDECLARED`²² | warn | convert ³⁵ | No verified docsite URL template for this product, so no `301.yml` was written; a guessed origin URL redirects to a page that never existed | Phase 22 |
+| `ORIGIN_SITEMAP_MISSING`³³ | warn | convert ³⁵ | No Coveo sitemap page list for this version and no declared template, so no `301.yml` was written | Phase 33 |
+| `ORIGIN_URL_UNLISTED`³³ | note | convert ³⁵ | Converted topics whose origin URL the docsite sitemap does not list; a derived row is withheld rather than written unproven | Phase 33 |
+| `ORIGIN_PAGE_UNMAPPED`³³ | warn | convert ³⁵ | Live docsite pages no `301.yml` row starts from (API reference, PDFs, help frames) — each a 404 at cutover unless redirected elsewhere | Phase 33 |
 
 #### 7.6 Cross-version CSH regression
 
@@ -4420,7 +4420,7 @@ Its findings can then be read and fixed without loading the rest of the tool.
 *Exit: every unit and pass has a findings file; every finding has a triage decision; every "fix" is merged with a test; S1/S2 findings marked "defer" are recorded in `open-issues.md`; the test suite and lint are clean on the final commit.*
 
 
-### Phase 35: Every Published Version Carries Its Cutover Map — **Planned, 2026-10-02**
+### Phase 35: Every Published Version Carries Its Cutover Map — **Steps 1–2 built, step 3 waits on Phase 36, 2026-10-02**
 
 **Why.** Phase 33 left `301.yml` where Phase 22 put it: written by Reframe into `reframed/`. Two populations never get one published:
 
@@ -4436,7 +4436,7 @@ The rule that fixes both: **the map belongs to whichever tree `sync` publishes f
 | **Where it is written** | `convert` writes `301.yml` into its staging tree before the swap, for every engine. Reframe keeps writing its own into `reframed/`, overwriting nothing it carried (`_REGENERATED` already lists it) | Same position as Reframe's: inside the tree, before the swap. Writing it in `sync` is the 20d.1 `filecmp` trap Phase 22 avoided: a file added to the published folder after the copy makes every version re-copy on every run |
 | **`to` side in `output/`** | The converted output path, unmoved (`moved = {}`) | Nothing moved. `origins.rows` already treats a missing `moved` entry this way, which is why it works for a product that never reframes |
 | **One builder, two callers** | `_write_origins`'s body moves into `origins.build(...)`, which returns the rows plus the findings to record. Reframe and convert both call it | Two copies of the declared/derived/listed rules would drift. Moving it puts the decision logic in a module with no stage dependencies |
-| **Findings** | Convert records the same four codes under `Stage.CONVERT`; Reframe keeps recording them under `Stage.REFRAME` | A Flare version reports its unmapped pages once per stage. That's accepted: each run's report should be complete on its own. The register is unchanged in size; the codes' stage becomes "convert, reframe" |
+| **Findings** | Both stages record the same four codes; their registered stage moves **reframe → convert** | A Flare version reports its unmapped pages once per run of each command. That's accepted: each run's report should be complete on its own. *Built differently from planned:* a code has exactly one stage, documented as "which command discovers the condition, not which one reports it", and after this phase that is `convert`; the run's command column already says which reported it. Register size unchanged at 66 |
 | **Currency** | No new currency key. `301.yml` is rebuilt whenever the version reconverts; a newer sitemap needs `convert --force`, as it already needs `reframe --force` | A sitemap hash in the currency key would reconvert every version on each `catalog sitemap` refresh, for a file that is cheap to regenerate on purpose |
 | **Counts** | `_out_files` grows by one where a map is written; `_md_files` is unchanged, so `OUTPUT_COUNT_MISMATCH` arithmetic is unaffected | Recorded so the `versions.csv` diff after the re-run is expected, not a surprise |
 
@@ -4445,6 +4445,15 @@ The rule that fixes both: **the map belongs to whichever tree `sync` publishes f
 1. `origins.build`, Reframe switched to it (no output change: re-run reframe, all 14 `301.yml` byte-identical to Phase 33's).
 2. `convert` writes `301.yml`; tests for a derived, a declared, a missing-sitemap and a not-derivable version.
 3. **Run after Phase 36's `toc.yml` format change lands**, because both phases regenerate `output/` and `reframed/` and running twice wastes ~an hour: `convert --force` and `reframe --force` over the converted catalog, `sync` to a scratch target, `validate`.
+
+#### Steps 1–2 — **Built, 2026-10-02**
+
+`origins.build` (the declared/derived/listed rules, returning rows plus `(code, message, count)` findings), `origins.page_list` (cache read, never a fetch) and `origins.write` (the sidecar dump options, so both stages' files are byte-comparable — `converter` cannot import `reframe.manifest` without a cycle through `reframe/__init__`). `reframe/driver._write_origins` is now a call to it; `converter/driver._write_origins` writes into staging just before the swap, skipped without `state.db` as Reframe skips it.
+
+| check | result |
+|---|---|
+| `reframe --all --force`, all 14 `301.yml` against Phase 33's | **14 of 14 byte-identical** |
+| New converter tests | derived map in `output/` with `to` = output path and the unlisted API page reported; no sitemap → no file + `ORIGIN_SITEMAP_MISSING`; unconfirmable sitemap → no file + `ORIGIN_TEMPLATE_UNDECLARED` |
 
 *Exit: every published `online-help` version with a sitemap page list has a `301.yml` in the published tree (expected: 30 — EMS 6, ActiveSpaces 6, Streaming 6, Spotfire Data Streams 2, Data Science Author 1, Administrator 3, Runtime Agent 4, Silver Fabric/PeopleSoft/Designer Add-in excluded for having no list); every derived `from` is in its sitemap; a sample of six URLs from the newly covered layouts is confirmed live; `validate` adds no finding from any `301.yml`; Reframe's 14 maps are byte-identical to Phase 33's.*
 

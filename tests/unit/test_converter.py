@@ -570,8 +570,71 @@ def test_findings_are_flushed_per_version(
     DocumentConverter(config, catalog, findings=findings).convert_one(product, version)
 
     rows = catalog.state.get_findings(findings.run_id)
-    assert {row["code"] for row in rows} == {"REFERENCE_UNRESOLVED", "ASSET_ORPHANED", "CSH_UNRESOLVED"}
+    # ORIGIN_SITEMAP_MISSING: this fixture has no declaration and no cached sitemap (Phase 35).
+    assert {row["code"] for row in rows} == {
+        "REFERENCE_UNRESOLVED", "ASSET_ORPHANED", "CSH_UNRESOLVED", "ORIGIN_SITEMAP_MISSING"}
     assert findings.pending == []
+
+
+# -- the origin map (Phase 35) ---------------------------------------------------
+
+LIVE = "https://docs.tibco.com/pub/ems/10.4.0/doc"
+
+
+def cache_sitemap(config, product, version, urls: list[str]) -> None:
+    """What `catalog sitemap` leaves in `cache/coveo/` for one version."""
+    from docushift.discovery.sitemap import SitemapCache, leaf_stem
+
+    stem = leaf_stem(product.slug, version.version)
+    cache = SitemapCache(config.cache_dir / "coveo")
+    body = "".join(f"<url><loc>{url}</loc></url>" for url in urls)
+    cache.write(f"{stem}.xml", f"<urlset>{body}</urlset>".encode())
+    cache.save_manifest({"files": {}, "products": {product.slug: [stem]}})
+
+
+def listed_urls(catalog, product, version) -> list[str]:
+    """Each converted topic's live URL, by the EMS shape: wrapper dropped, under `/doc`."""
+    output_map = catalog.state.get_output_map(product.slug, version.version)
+    return [f"{LIVE}/{source.split('/', 1)[1]}" for source in output_map]
+
+
+def test_the_converted_tree_carries_its_origin_map(
+    config, catalog, product, version, extracted, fake_engine
+) -> None:
+    """`sync` publishes `output/` for every product that does not publish merged,
+    so the map has to be in it; nothing has moved, so `to` is the output path."""
+    convert(config, catalog, product, version)
+    urls = listed_urls(catalog, product, version)
+    cache_sitemap(config, product, version, urls + [f"{LIVE}/api/index.html"])
+
+    result, findings = convert(config, catalog, product, version, force=True)
+
+    redirects = yaml.safe_load((result.path / "301.yml").read_text(encoding="utf-8"))["redirects"]
+    output_map = catalog.state.get_output_map(product.slug, version.version)
+    assert sorted(row["from"] for row in redirects) == sorted(urls)
+    assert sorted(row["to"] for row in redirects) == sorted(output_map.values())
+    origin_codes = [f.code for f in findings.all if f.code.startswith("ORIGIN_")]
+    assert origin_codes == ["ORIGIN_PAGE_UNMAPPED"]
+
+
+def test_no_sitemap_and_no_declaration_writes_no_origin_map(
+    config, catalog, product, version, extracted, fake_engine
+) -> None:
+    result, findings = convert(config, catalog, product, version)
+
+    assert not (result.path / "301.yml").exists()
+    assert "ORIGIN_SITEMAP_MISSING" in [f.code for f in findings.all]
+
+
+def test_a_sitemap_that_confirms_no_mapping_writes_no_origin_map(
+    config, catalog, product, version, extracted, fake_engine
+) -> None:
+    cache_sitemap(config, product, version, [f"{LIVE}/unrelated.htm"])
+
+    result, findings = convert(config, catalog, product, version)
+
+    assert not (result.path / "301.yml").exists()
+    assert "ORIGIN_TEMPLATE_UNDECLARED" in [f.code for f in findings.all]
 
 
 # -- the command ---------------------------------------------------------------

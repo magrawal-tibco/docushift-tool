@@ -31,9 +31,11 @@ from __future__ import annotations
 
 from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
-from pathlib import PurePosixPath
+from pathlib import Path, PurePosixPath
 from typing import Any
 from urllib.parse import unquote, urlsplit
+
+import yaml
 
 from docushift.transforms import links
 
@@ -283,3 +285,109 @@ def unmapped(built: list[dict[str, Any]], page_urls: Iterable[str]) -> list[str]
     """Listed live pages no row starts from -- each a 404 at cutover. Sorted."""
     covered = {page_path(row["from"]) for row in built}
     return sorted({url for url in page_urls if page_path(url) not in covered})
+
+
+# -- Phase 35: one builder for every stage that writes the map --------------------
+
+
+@dataclass
+class Built:
+    """`build`'s answer: rows to write (or `None` for no file), and what to report.
+
+    Findings are `(code, message, count)` and the caller records them, so this
+    module stays free of any stage's findings plumbing.
+    """
+
+    rows: list[dict[str, Any]] | None
+    findings: list[tuple[str, str, int]]
+
+
+def page_list(cache_dir: Path, slug: str, version: str) -> list[str]:
+    """A version's listed live URLs from the `catalog sitemap` cache, or `[]`.
+
+    Never fetches: the stages that write `301.yml` take no network. An unreadable
+    cached file is the same as no list -- it is reported as a missing sitemap,
+    and `catalog sitemap` replaces it on the next walk.
+    """
+    from docushift.discovery.sitemap import SitemapCache, SitemapError
+
+    try:
+        pages = SitemapCache(Path(cache_dir) / "coveo").pages(slug, version)
+    except SitemapError:
+        return []
+    return [page.loc for page in pages] if pages else []
+
+
+def build(
+    declared: Mapping[str, Any],
+    slug: str,
+    zip_url: str | None,
+    output_map: Mapping[str, str],
+    moved: Mapping[str, str],
+    page_urls: list[str],
+) -> Built:
+    """One version's `301.yml` rows, by Phase 22's and Phase 33's rules.
+
+    A declaration wins and writes every row; the sitemap only counts where they
+    disagree. Without one, the sitemap's derived mapping is used and only listed
+    rows are written. Shared by `convert` (the tree `sync` publishes for most
+    products) and `reframe` (the merged tree), so the two cannot disagree.
+    """
+    found: list[tuple[str, str, int]] = []
+    folder = folder_path(zip_url)
+    template = template_for(declared, slug)
+    derived = template is None
+    if derived:
+        if not page_urls:
+            found.append(("ORIGIN_SITEMAP_MISSING", (
+                f"no Coveo sitemap page list for this version and no template in "
+                f"config/origin-urls.yaml, so no {ORIGINS} was written"), 1))
+            return Built(None, found)
+        answer = derive(output_map, page_urls, folder)
+        if answer.template is None:
+            found.append(("ORIGIN_TEMPLATE_UNDECLARED", (
+                f"the sitemap confirms no single URL mapping ({answer.hits} of "
+                f"{answer.sources} topics placed, runner-up {answer.rival}), and none "
+                f"is declared in config/origin-urls.yaml, so no {ORIGINS} was written"), 1))
+            return Built(None, found)
+        template = answer.template
+    elif folder is None:
+        found.append(("ORIGIN_TEMPLATE_UNDECLARED", (
+            f"zip_url '{zip_url}' is not a /pub/ docsite package path, so the "
+            f"origin folder cannot be read off it and no {ORIGINS} was written"), 1))
+        return Built(None, found)
+
+    built, dropped = rows(output_map, moved, template, folder or "")
+    # The join has three inputs and a silent drop in any of them produces a short
+    # map that looks entirely plausible. Asserting the count against the map it
+    # was built from is the one check that catches it, and it is free.
+    if dropped:
+        found.append(("ORIGIN_TEMPLATE_UNDECLARED", (
+            f"{len(dropped)} source path(s) are shorter than the template's "
+            f"drop_segments and produced no URL, e.g. '{dropped[0]}'"), 1))
+
+    if page_urls:
+        # A derived row must be on the list to be written; a declared one was
+        # checked by a human and is written regardless, the list only counting
+        # where the two disagree.
+        kept, unlisted = listed(built, page_urls)
+        if derived:
+            built = kept
+        if unlisted:
+            found.append(("ORIGIN_URL_UNLISTED", (
+                f"{len(unlisted)} origin URL(s) not in the docsite sitemap"
+                f"{', withheld' if derived else ' (declared template, written anyway)'}"
+                f", e.g. {unlisted[0]}"), len(unlisted)))
+        missed = unmapped(built, page_urls)
+        if missed:
+            found.append(("ORIGIN_PAGE_UNMAPPED",
+                          f"{len(missed)} live page(s) with no {ORIGINS} row, e.g. {missed[0]}",
+                          len(missed)))
+    return Built(built, found)
+
+
+def write(path: Path, built: list[dict[str, Any]]) -> None:
+    """A version's `301.yml`, written the way `reframe/manifest.write` writes every
+    sidecar -- same dump options -- so the two stages' files are byte-comparable."""
+    body = yaml.safe_dump(document(built), sort_keys=False, allow_unicode=True, width=10**6)
+    path.write_text(VERSION_HEADER + body, encoding="utf-8", newline="\n")

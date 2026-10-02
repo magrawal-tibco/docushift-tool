@@ -379,7 +379,10 @@ REGISTRY: dict[str, Code] = _codes(
     # the shipped state, so a warning would fire on every correct run; this is a
     # property of one version, is actionable by one line in `origin-urls.yaml`,
     # and goes away for good once answered.
-    Code("ORIGIN_TEMPLATE_UNDECLARED", Severity.WARNING, Stage.REFRAME,
+    # Stage CONVERT since Phase 35: `convert` is now the first command to write
+    # `301.yml`, so it discovers these. Reframe reports them again for the merged
+    # tree; the run's command column says which.
+    Code("ORIGIN_TEMPLATE_UNDECLARED", Severity.WARNING, Stage.CONVERT,
          "No verified docsite URL template for this product, so no 301.yml was "
          "written; a guessed origin URL is a redirect to a page that never existed",
          "planning.md Phase 22"),
@@ -389,15 +392,15 @@ REGISTRY: dict[str, Code] = _codes(
     # UNLISTED is a note -- one row withheld out of hundreds written is the check
     # working, not a fault. UNMAPPED is a warning because each one is a live page
     # whose reader gets a 404 at cutover, and nothing else in the tree counts them.
-    Code("ORIGIN_SITEMAP_MISSING", Severity.WARNING, Stage.REFRAME,
+    Code("ORIGIN_SITEMAP_MISSING", Severity.WARNING, Stage.CONVERT,
          "No Coveo sitemap page list for this version and no declared template, so "
          "no 301.yml was written",
          "planning.md Phase 33"),
-    Code("ORIGIN_URL_UNLISTED", Severity.NOTE, Stage.REFRAME,
+    Code("ORIGIN_URL_UNLISTED", Severity.NOTE, Stage.CONVERT,
          "Converted topics whose origin URL the docsite sitemap does not list; a "
          "derived row is withheld rather than written unproven",
          "planning.md Phase 33"),
-    Code("ORIGIN_PAGE_UNMAPPED", Severity.WARNING, Stage.REFRAME,
+    Code("ORIGIN_PAGE_UNMAPPED", Severity.WARNING, Stage.CONVERT,
          "Live docsite pages no 301.yml row starts from -- API reference, PDFs, "
          "help-system frames -- each a 404 at cutover unless redirected elsewhere",
          "planning.md Phase 33"),
