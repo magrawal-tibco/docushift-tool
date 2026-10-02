@@ -23,6 +23,8 @@ from dataclasses import dataclass, field
 from pathlib import PurePosixPath
 from typing import Any
 
+from docushift.converter.navigation import ONLINE_HELP_LIST_TITLE
+
 # The one field `render_toc` emits that this module must round-trip verbatim: the
 # anchor is appended raw after `#`, with no percent-encoding and no case folding
 # (`converter/navigation.py::_target`). Reframe writes the same shape back.
@@ -75,8 +77,62 @@ class TocSchema(ABC):
         """The top-level rows. Only called when `matches` returned True."""
 
 
-class ItemsPathChildren(TocSchema):
-    """`items:` of `{title, path, children}` -- what DocuShift's own Stage 6a writes.
+class _Keyed(TocSchema):
+    """A dialect that differs from another only in what its three keys are called.
+
+    Both registered dialects are `{title, <link>, <children>}` trees under one list
+    key, so the walk is shared and each subclass names its keys. A dialect with a
+    different *shape* -- headless containers, links held elsewhere -- is a new
+    `TocSchema`, not a new set of key names.
+    """
+
+    rows_key = ""
+    link_key = ""
+    children_key = ""
+
+    def matches(self, document: Any) -> bool:
+        return isinstance(document, dict) and isinstance(document.get(self.rows_key), list)
+
+    def parse(self, document: Any) -> list[TocEntry]:
+        return self._rows(document.get(self.rows_key) or [])
+
+    def _rows(self, rows: Any) -> list[TocEntry]:
+        out: list[TocEntry] = []
+        for row in rows:
+            if not isinstance(row, dict):
+                continue
+            raw = str(row.get(self.link_key) or "")
+            path, _, fragment = raw.partition("#")
+            out.append(
+                TocEntry(
+                    title=str(row.get("title") or ""),
+                    path=PurePosixPath(path) if path else None,
+                    fragment=fragment,
+                    children=self._rows(row.get(self.children_key) or []),
+                )
+            )
+        return out
+
+
+class DocsUrlSubfolderlist(_Keyed):
+    """`docs:` of `{title, url, subfolderlist}` -- what Stage 6a writes since Phase 36.
+
+    html-to-md's dialect, adopted for its field names by the user's call. Its
+    `docs_list_title` is not read: Reframe only merges `online-help` trees, and
+    `retarget` writes the one value Stage 6a does.
+    """
+
+    name = "docs-url-subfolderlist"
+    rows_key = "docs"
+    link_key = "url"
+    children_key = "subfolderlist"
+
+
+class ItemsPathChildren(_Keyed):
+    """`items:` of `{title, path, children}` -- what Stage 6a wrote before Phase 36.
+
+    Kept as a reader so a converted tree still on disk in the old dialect reframes
+    rather than failing until it is reconverted. Nothing writes it any more.
 
     Verified against the reference corpus: EMS 10.5.1's `toc.yml` holds 1,441 paths,
     zero of which carry a fragment, under exactly this shape. The fragment branch is
@@ -85,29 +141,9 @@ class ItemsPathChildren(TocSchema):
     """
 
     name = "items-path-children"
-
-    def matches(self, document: Any) -> bool:
-        return isinstance(document, dict) and isinstance(document.get("items"), list)
-
-    def parse(self, document: Any) -> list[TocEntry]:
-        return self._rows(document.get("items") or [])
-
-    def _rows(self, rows: Any) -> list[TocEntry]:
-        out: list[TocEntry] = []
-        for row in rows:
-            if not isinstance(row, dict):
-                continue
-            raw = str(row.get("path") or "")
-            path, _, fragment = raw.partition("#")
-            out.append(
-                TocEntry(
-                    title=str(row.get("title") or ""),
-                    path=PurePosixPath(path) if path else None,
-                    fragment=fragment,
-                    children=self._rows(row.get("children") or []),
-                )
-            )
-        return out
+    rows_key = "items"
+    link_key = "path"
+    children_key = "children"
 
 
 def retarget(roots: list[TocEntry], located: dict[Any, tuple[Any, str]],
@@ -124,7 +160,11 @@ def retarget(roots: list[TocEntry], located: dict[Any, tuple[Any, str]],
     one shape. A second *output* dialect would be a second publishing target, not a
     second source engine.
 
-    A TOC path with no page is left without a `path` rather than raising -- the POC
+    The keys are Stage 6a's since Phase 36 -- `docs_list_title` / `docs` / `url` /
+    `subfolderlist` -- and so is the list title: Reframe only merges `online-help`
+    trees, so the value is the one constant 6a writes, not something to carry.
+
+    A TOC path with no page is left without a `url` rather than raising -- the POC
     subscripted `anchor_of` here and died on a TOC entry it had never packed. The
     audit reports the same condition as a named check failure, before the swap.
 
@@ -137,7 +177,10 @@ def retarget(roots: list[TocEntry], located: dict[Any, tuple[Any, str]],
     and `project`'s new topics.
     """
     placements = placements or {}
-    return {"items": [_node(root, located, placements) for root in roots]}
+    return {
+        "docs_list_title": ONLINE_HELP_LIST_TITLE,
+        "docs": [_node(root, located, placements) for root in roots],
+    }
 
 
 def _node(entry: TocEntry, located: dict[Any, tuple[Any, str]],
@@ -149,9 +192,9 @@ def _node(entry: TocEntry, located: dict[Any, tuple[Any, str]],
     if found is not None:
         page, anchor = found
         leads = bool(page.topics) and page.topics[0].source == entry.path
-        row["path"] = str(page.path) if leads else f"{page.path}#{anchor}"
+        row["url"] = str(page.path) if leads else f"{page.path}#{anchor}"
     if entry.children:
-        row["children"] = [_node(child, located, placements) for child in entry.children]
+        row["subfolderlist"] = [_node(child, located, placements) for child in entry.children]
     return row
 
 
@@ -184,4 +227,5 @@ def schema_for(document: Any, name: str = "") -> TocSchema | None:
     return None
 
 
+register(DocsUrlSubfolderlist())
 register(ItemsPathChildren())

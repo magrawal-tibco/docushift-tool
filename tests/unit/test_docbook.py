@@ -15,8 +15,9 @@ is wrong on real input:
   DocBook pages too and "holds a DocBook page" converts eight guides twice;
 - `span.bold` is unwrapped before it is bolded, because 3,145 of them already
   contain a `strong` and `**` around `**` is `****`;
-- the legal page comes from `div#footer`, because `is_legal_label` matches "third
-  party" and `apiguide/thirdpartylibs.html` is a topic about packaging JARs;
+- the legal page comes from `div#footer`, because `is_legal_label` matched bare
+  "third party" until Phase 36 and `apiguide/thirdpartylibs.html` is a topic
+  about packaging JARs;
 - `a.ix` is dropped whole, because its `name` is prose with spaces and 0 of 3,347
   are ever referenced.
 """
@@ -708,7 +709,7 @@ def test_a_page_nothing_reaches_is_filed_under_its_guide_and_counted(tmp_path: P
 def test_the_tail_pages_come_from_the_footer_and_not_from_the_title(
     tmp_path: Path,
 ) -> None:
-    """`is_legal_label` matches "third party", so a title search picks the wrong page.
+    """A title search picked the wrong page while `is_legal_label` matched "third party".
 
     `apiguide/thirdpartylibs.html` -- "Using Third-Party JARs and Native
     Libraries" -- is a technical topic about packaging, and it sorts first.

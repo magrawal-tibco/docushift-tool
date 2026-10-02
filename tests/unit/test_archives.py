@@ -143,9 +143,13 @@ def test_the_index_writes_its_own_frontmatter_because_nothing_converts_this_fold
 def test_the_toc_is_one_item_pointing_at_the_index(product: Product) -> None:
     """Phase 9: the same rule as the document doc-classes, applied here even though
     these entries are catalog rows rather than files."""
-    parsed = yaml.safe_load(archives.render_toc("T", _templates()))
+    parsed = yaml.safe_load(archives.render_toc("T", " TIBCO EBX™ ", _templates()))
 
-    assert parsed["items"] == [{"title": "T", "path": "index.md"}]
+    # html-to-md's dialect (Phase 36): its archives TOCs name the bare product.
+    assert parsed == {
+        "docs_list_title": "TIBCO EBX™",
+        "docs": [{"title": "T", "url": "index.md"}],
+    }
 
 
 def test_the_version_history_the_toc_stopped_listing_is_all_in_the_index(

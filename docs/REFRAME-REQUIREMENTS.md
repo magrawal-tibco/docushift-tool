@@ -217,7 +217,7 @@ flag the page `title-inherited` so a human can correct it.
 
 **Input** — a completed Stage 6 output tree:
 ```
-<src>/toc.yml          hierarchy: items / title / path / children
+<src>/toc.yml          hierarchy: docs / title / url / subfolderlist (items / path / children before Phase 36)
 <src>/metadata.yml     version-level metadata
 <src>/**/*.md          topic files, frontmatter + body
 <src>/**/images, Resources, …   assets
@@ -241,6 +241,10 @@ manifest/review-queue.csv        page_path, guide, n_topics, words, flags, detai
 > `items` / `path` / `children`. At least one other known set uses `docs` / `url` /
 > `subfolderlist` with `_section_*.md` stub container pages. Treat schema handling as a
 > pluggable adapter from the start rather than retrofitting it later.
+>
+> *As built (Phase 36, 2026-10-02):* Stage 6 now writes `docs` / `url` / `subfolderlist`
+> itself, by the user's call to match html-to-md's field names — without the stub
+> container pages. Both dialects have a registered reader; Reframe writes the new one.
 
 ---
 

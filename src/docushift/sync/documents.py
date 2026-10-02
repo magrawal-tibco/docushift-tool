@@ -53,6 +53,15 @@ DOC_CLASS_LABELS: dict[str, str] = {
     "reference-documents": "Reference Documents",
 }
 
+# What a doc-class's `toc.yml` calls itself in `docs_list_title`: html-to-md's
+# values, verbatim (Phase 36). Not `DOC_CLASS_LABELS` -- `(PDF)` belongs to the
+# navigation label html-to-md wrote, not to the index heading.
+DOC_CLASS_LIST_TITLES: dict[str, str] = {
+    "user-guides": "User Guides (PDF)",
+    "release-information": "Release Information",
+    "reference-documents": "Reference Documents",
+}
+
 # A title ending in one of these is the authoring tool's source filename, not the
 # document's name: `.book` and `.fm` are FrameMaker, `.indd` InDesign, `.mif`
 # Interleaf. Every junk title in the corpus -- 59 of them, in 35 distinct values
@@ -218,7 +227,7 @@ def render_index(entries: list[DocumentEntry], title: str, doc_class: str, templ
     )
 
 
-def render_toc(title: str, templates: Path) -> str:
+def render_toc(title: str, doc_class: str, templates: Path) -> str:
     """`toc.yml`: one item, pointing at the `index.md` beside it.
 
     It takes no entries, which is the change Phase 9 made visible. A `toc.yml` is
@@ -227,4 +236,6 @@ def render_toc(title: str, templates: Path) -> str:
     is a function of the folder's title and nothing else -- passing it the entries
     would imply it could still choose to list them.
     """
-    return template(templates, "documents_toc.yml.j2").render(title=title)
+    return template(templates, "documents_toc.yml.j2").render(
+        title=title, list_title=DOC_CLASS_LIST_TITLES.get(doc_class, "")
+    )

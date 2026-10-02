@@ -161,6 +161,25 @@ processed.
 
 ---
 
+## Silver Fabric Enabler for ActiveSpaces
+
+### The whole guide set appears twice in the navigation
+
+- **Status:** Open
+- **Owner:** unassigned
+- **Raised:** 2 Oct 2026
+- **Blocks publishing:** yes, for this product
+
+Version 1.2.0's converted output holds both guides — Installation and User's
+Guide — twice, once under an `html` folder and once without it, and the
+navigation lists both copies one after the other. A reader would see every chapter
+twice. Found while comparing DocuShift's navigation with the old tool's; the old
+tool never converted this product, so there is nothing to compare against. The
+cause is in how this older help format's folders are discovered, not in the
+navigation itself, and it has not been looked into yet.
+
+---
+
 ## Everything, eventually
 
 ### Public web address for the new site not set

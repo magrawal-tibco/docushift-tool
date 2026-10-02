@@ -103,7 +103,7 @@ are ones they'd sign off on.
 - Wire eligibility-driven version scoping
 - Validation as a genuine pipeline fail condition, not just a printed report
 - Per-doc-set configs for the sets actually queued for conversion
-- Second TOC schema adapter, if a non-`items`/`path`/`children` set is in scope
+- Second TOC schema adapter, if a non-`items`/`path`/`children` set is in scope — *done in Phase 36: `docs`/`url`/`subfolderlist` is now Stage 6's own output and the old dialect the second reader*
 
 *Exit:* a full pipeline run over a real doc set, engine-gated, validation-enforced.
 

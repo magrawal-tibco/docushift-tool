@@ -166,9 +166,31 @@ def is_legal_label(label: str, path: str = "") -> bool:
     under `legal_notices.htm`: the licence, the trademarks and the third-party
     notices. Matching the title instead would take every topic a writer called
     `Important Information` with it, so the filename is the evidence used.
+
+    **A legal notice, not a word** (Phase 36). Bare `third party` and bare `legal`
+    are topic subjects, and the callers take the *first* match in TOC order, so
+    either one hands the legal slot to a content topic that precedes the real page
+    and moves it out of its chapter. Over the 953 Flare TOCs in the predecessor's
+    cache the bare words did that in 65 roots -- `Third-Party Licenses for the
+    Container Image`, `Required Third-Party Products`, `Using the ActiveSpaces JDBC
+    Driver With Third-Party Tools` -- and `legal` alone also matches `Legal
+    Characters`, `addLegal()` and `CLIENT.ILLEGAL_PUBLISH`. `legal` therefore needs
+    `notice` or `third party` beside it; `third party notice` stands on its own.
+    And `copyrigh` is read where the paragraph above says it is evidence -- the
+    filename -- or at the very start of a label, since a DITA GUID has no name to
+    read. Anywhere in a label it took `Customizing the Company Logo and Copyright`
+    in 4 roots.
     """
-    text = f"{label} {PurePosixPath(path).stem}".lower().replace("-", " ").replace("_", " ")
-    return "legal" in text or "third party" in text or "copyrigh" in text
+    def fold(value: str) -> str:
+        return value.lower().replace("-", " ").replace("_", " ").strip()
+
+    name, title = fold(PurePosixPath(path).stem), fold(label)
+    if "copyrigh" in name or title.startswith("copyright"):
+        return True
+    text = f"{title} {name}"
+    if "third party notice" in text:
+        return True
+    return "legal" in text and ("notice" in text or "third party" in text)
 
 
 def is_support_label(label: str, path: str = "") -> bool:

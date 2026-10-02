@@ -793,6 +793,27 @@ the version once, even when six books each ship a copy of the same notice — th
 copies leave the navigation and stay on disk, since a help identifier may still open one.
 The run's per-version line reports the node count and how many pages were generated.
 
+**`toc.yml` uses html-to-md's field names.** Every generated TOC — a version's
+navigation, the three document folders' and the archives' — is a `docs` list of
+entries with `title`, `url` and `subfolderlist`, under a `docs_list_title`:
+
+```yaml
+docs_list_title: "Online Help"
+docs:
+  - title: "Installation"
+    url: "Installation/installation-2.md"
+    subfolderlist:
+      - title: "Product Overview"
+        url: "Installation/Product-Overview.md"
+```
+
+`docs_list_title` is `Online Help` for a version's navigation, `User Guides (PDF)`,
+`Release Information` or `Reference Documents` for the document folders, and the product
+name for archives — the values html-to-md used. Only the names match html-to-md; the
+structure is DocuShift's: one TOC per version, the landing page first, support and legal
+last. A TOC written before 2026-10-02 still says `items` / `path` / `children`; `reframe`
+and `validate` read it, and reconverting the version rewrites it.
+
 **Conversion copies an asset because a topic referenced it, and it copies it at the moment it writes the link.** There is no extension allow-list and no separate copying pass: the two happen together, so a relative image link in the output always has a file at the other end. Each asset keeps the path it had relative to its topic, so nothing is renamed, flattened or de-duplicated. Three things get reported rather than copied:
 
 - **Skipped skin.** Most references in a help package point at the generator's own chrome — SDL's `static/`, WebWorks' `tpl/`, Flare's `Skins/`. Half to three-quarters of all references are these. They are counted and dropped.

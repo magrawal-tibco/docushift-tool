@@ -27,9 +27,9 @@ What the corpus decided:
   javadoc and Doxygen files. Every other page is skipped **with a reason**.
 - **The tail pages come from `div#footer`, never from a title.** Matching on the
   label picks `apiguide/thirdpartylibs.html` -- "Using Third-Party JARs and Native
-  Libraries", a real technical topic -- because `is_legal_label` matches "third
-  party" and the wrong page sorts first. The footer names both pages by `li` id
-  on 100% of sampled pages, so there is nothing to guess.
+  Libraries", a real technical topic -- because `is_legal_label` matched bare
+  "third party" until Phase 36 and the wrong page sorts first. The footer names
+  both pages by `li` id on 100% of sampled pages, so there is nothing to guess.
 
 Three things measured here that are the tempting wrong answer elsewhere:
 
@@ -778,10 +778,11 @@ class DocBookEngine(BaseEngine):
               documents: dict[str, Document]) -> None:
         """Support and legal, read from `div#footer`'s declared `li` ids (§5.6.9).
 
-        Not from the label and not from the path. `is_legal_label` matches "third
-        party", so a title search finds `apiguide/thirdpartylibs.html` -- a topic
+        Not from the label and not from the path. `is_legal_label` matched bare
+        "third party" until Phase 36, so a title search found `apiguide/thirdpartylibs.html` -- a topic
         about packaging JARs -- before `welcome/legal-and-third-party-notices.html`
-        and picks the wrong one. The footer says which pages these are.
+        and picked the wrong one. The footer says which pages these are, which
+        is still better evidence than any label test.
         """
         for attribute, matches, label in (
             ("support", lambda key: key in FOOTER_SUPPORT_IDS, "support"),

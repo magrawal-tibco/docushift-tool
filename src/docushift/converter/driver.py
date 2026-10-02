@@ -61,8 +61,9 @@ from docushift.utils.swap import remove, swap
 #: A `toc.yml` row's destination. The file is generated from one Jinja template
 #: with a stable shape, so a value-level rewrite is safe and -- unlike re-emitting
 #: the YAML -- leaves every other byte alone, which is what keeps a re-convert
-#: diffable.
-_TOC_PATH = re.compile(r'path:[ \t]*"([^"\n]*)"')
+#: diffable. The key is `url` since Phase 36; it must follow the template's, or
+#: this rewrites nothing and says nothing.
+_TOC_PATH = re.compile(r'url:[ \t]*"([^"\n]*)"')
 
 
 class ConvertOutcome(StrEnum):
@@ -618,7 +619,7 @@ class DocumentConverter:
         # **And the navigation, which is where most of them are.** Measured on
         # the first run of this pass: 18,047 of 18,112 surviving broken
         # fragments came from `toc.yml` and only 65 from page bodies. A TOC node
-        # for a same-page section carries `path: "foo.md#anchor"`, and that
+        # for a same-page section carries `url: "foo.md#anchor"`, and that
         # anchor is a marker like any other. Rewriting the value in place rather
         # than re-emitting the YAML keeps the file byte-stable everywhere else,
         # which is what makes a re-convert diffable.
@@ -638,7 +639,7 @@ class DocumentConverter:
                     unplaced += 1
                     return match.group(0)
                 moved += 1
-                return f'path: "{path}#{placed}"'
+                return f'url: "{path}#{placed}"'
 
             updated = _TOC_PATH.sub(replace, text)
             if moved:

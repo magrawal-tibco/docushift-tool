@@ -20,7 +20,7 @@ from pathlib import Path, PurePosixPath
 
 import pytest
 
-from docushift.engines.base import ConversionContext, Unit
+from docushift.engines.base import ConversionContext, Unit, is_legal_label
 from docushift.engines.flare import (
     CONTENT_SELECTOR,
     FlareEngine,
@@ -1120,6 +1120,49 @@ def test_the_tail_pages_are_picked_by_the_toc_and_never_by_name(tmp_path: Path) 
     # The label is carried, never constanted: `ibi` in 49 roots, `Spotfire` in 45.
     assert result.document("_templates/Support.md").title.startswith("ibi ")
     assert "TAIL_PAGE_MISSING" not in result.codes()
+
+
+@pytest.mark.parametrize(
+    ("label", "path"),
+    [
+        ("Legal and Third-Party Notices", "_templates/Legal-and-Third-Party-Notices.htm"),
+        ("Legal and Third Party Notices", "welcome/legal-and-third-party-notices.htm"),
+        ("Legal Notices", "legal_notices.htm"),
+        ("Legal and Third-Party", "legal_3rdparty.htm"),
+        ("Important Information", "copyrigh.htm"),
+        ("TIBCO Designer™ Add-in for TIBCO Business Studio™", "copyrigh.htm"),
+        ("Legal and Third-Party Notices", "copyright.htm"),
+        ("Third-Party Notices", "notices.htm"),
+        ("Copyright and Trademarks", ""),
+    ],
+)
+def test_every_legal_label_the_corpus_ships_is_still_a_legal_page(label: str, path: str) -> None:
+    """Phase 36 narrowed the test; these are the labels it must keep matching."""
+    assert is_legal_label(label, path)
+
+
+@pytest.mark.parametrize(
+    ("label", "path"),
+    [
+        ("Using the ActiveSpaces JDBC Driver With Third-Party Tools",
+         "Concepts/Using-the-ActiveSpaces-JDBC-Driver-With-Third-Party-Tools.htm"),
+        ("Integrating with Third-Party Products", "users-guide/integrating-with-thi.htm"),
+        ("Third-Party Licenses for the Container Image",
+         "Third_Party_Licenses_for_the_Container_Image.htm"),
+        ("Third Party Libraries", "TIB_TRA_installation/install.3.15.htm"),
+        ("Legal State Transitions Shown in LVTables", "lv-devel/lv-add-drop-start.htm"),
+        ("CLIENT.ILLEGAL_PUBLISH", "CLIENT_ILLEGAL_PUBLISH.htm"),
+        ("Legal Characters", "Legal_Characters.htm"),
+        ("Customizing the Company Logo and Copyright", "customizing-logo.htm"),
+    ],
+)
+def test_a_topic_about_third_parties_or_legality_is_not_the_legal_page(
+    label: str, path: str
+) -> None:
+    """The first match in TOC order takes the slot and moves to the bottom of the
+    navigation, so each of these -- all real corpus labels -- used to drag a content
+    topic out of its chapter: 65 of 953 Flare roots in the predecessor's cache."""
+    assert not is_legal_label(label, path)
 
 
 def test_a_root_with_no_tail_pages_reports_their_absence_and_synthesizes_nothing(

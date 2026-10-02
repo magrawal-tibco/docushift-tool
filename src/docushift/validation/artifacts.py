@@ -131,19 +131,21 @@ def check_product(product: ProductFolder) -> list[Finding]:
 
 
 def _toc_paths(node: object) -> list[str]:
-    """Every `path` in a `toc.yml`, depth-first, whatever else the node carries.
+    """Every link in a `toc.yml`, depth-first, whatever else the node carries.
 
-    Shape-tolerant on purpose: `online-help` writes `{title, path, children}` and
-    `archives` writes `{version, released, available, path}`. Both are DocuShift's
-    own output, and a checker that insisted on one of them would report the other
-    as malformed.
+    Shape-tolerant on purpose. Every generated `toc.yml` is `docs` of
+    `{title, url, subfolderlist}` since Phase 36, but a tree converted before it is
+    still `items` of `{title, path, children}` until it is reconverted -- and a
+    checker that read only the new keys would find no links in it and pass it
+    clean, which is worse than reporting it.
     """
     found: list[str] = []
     if isinstance(node, dict):
-        value = node.get("path")
-        if isinstance(value, str) and value.strip():
-            found.append(value.strip())
-        for key in ("items", "children"):
+        for link in ("url", "path"):
+            value = node.get(link)
+            if isinstance(value, str) and value.strip():
+                found.append(value.strip())
+        for key in ("docs", "subfolderlist", "items", "children"):
             found.extend(_toc_paths(node.get(key)))
     elif isinstance(node, list):
         for child in node:

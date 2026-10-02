@@ -454,9 +454,32 @@ def test_render_toc_nests_children_and_survives_a_colon_in_a_title(templates) ->
     text = render_toc(nodes, templates, title="TIBCO EMS 10.4.0")
     parsed = yaml.safe_load(text)
 
-    assert [item["title"] for item in parsed["items"]] == ["Overview", "Chapter: One"]
-    assert parsed["items"][1]["children"] == [{"title": "A", "path": "ch/a.md"}]
+    assert [item["title"] for item in parsed["docs"]] == ["Overview", "Chapter: One"]
+    assert parsed["docs"][1]["subfolderlist"] == [{"title": "A", "url": "ch/a.md"}]
     assert "for TIBCO EMS 10.4.0" in text.splitlines()[0]
+
+
+def test_render_toc_writes_html_to_md_s_dialect(templates) -> None:
+    """Phase 36: `docs_list_title` / `docs` / `url` / `subfolderlist`, and nothing
+    of the old `items` / `path` / `children` left anywhere in the file."""
+    nodes = [node("Chapter", "ch/index.md", node("A", "ch/a.md"))]
+
+    text = render_toc(nodes, templates, title="TIBCO EMS 10.4.0")
+    parsed = yaml.safe_load(text)
+
+    assert list(parsed) == ["docs_list_title", "docs"]
+    assert parsed["docs_list_title"] == "Online Help"
+    assert not any(key in text for key in ("items:", "path:", "children:"))
+
+
+def test_render_toc_trims_the_padding_a_source_label_carries(templates) -> None:
+    """ActiveSpaces 4.10.x's Flare TOC labels `"Requirements "` and seven more."""
+    nodes = [node(" Requirements ", "install/req.md", node("Installing on Windows ", "install/win.md"))]
+
+    parsed = yaml.safe_load(render_toc(nodes, templates))
+
+    assert parsed["docs"][0]["title"] == "Requirements"
+    assert parsed["docs"][0]["subfolderlist"][0]["title"] == "Installing on Windows"
 
 
 def test_render_toc_keeps_the_anchor_a_node_carries(templates) -> None:
@@ -465,7 +488,7 @@ def test_render_toc_keeps_the_anchor_a_node_carries(templates) -> None:
 
     parsed = yaml.safe_load(render_toc(nodes, templates))
 
-    assert parsed["items"][0]["path"] == "guide/setup.md#step-2"
+    assert parsed["docs"][0]["url"] == "guide/setup.md#step-2"
 
 
 def test_render_metadata_writes_the_keys_it_is_given_and_no_others(templates) -> None:

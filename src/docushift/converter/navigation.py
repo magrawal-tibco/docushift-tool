@@ -374,6 +374,11 @@ def _link(parent: str, node: NavNode) -> str:
 # -- rendering ------------------------------------------------------------------
 
 
+#: `docs_list_title` of a version's `toc.yml` -- html-to-md's value for its help
+#: TOC, adopted verbatim in Phase 36 along with its field names.
+ONLINE_HELP_LIST_TITLE = "Online Help"
+
+
 def render_toc(nodes: list[NavNode], templates: Path, title: str = "") -> str:
     """`toc.yml` for one version: the tree, flattened into indented rows.
 
@@ -384,7 +389,9 @@ def render_toc(nodes: list[NavNode], templates: Path, title: str = "") -> str:
     `csh.yml` uses -- a title carrying a colon is ordinary prose and must not
     become a mapping.
     """
-    return _template(templates, "toc.yml.j2").render(title=title, rows=_rows(nodes, 0))
+    return _template(templates, "toc.yml.j2").render(
+        title=title, list_title=ONLINE_HELP_LIST_TITLE, rows=_rows(nodes, 0)
+    )
 
 
 def _rows(nodes: list[NavNode], depth: int) -> list[dict]:
@@ -392,7 +399,10 @@ def _rows(nodes: list[NavNode], depth: int) -> list[dict]:
     for node in nodes:
         rows.append({
             "indent": " " * (2 + 4 * depth),
-            "title": node.label,
+            # Trimmed here, once for all four engines: Flare TOCs pad labels
+            # (`"Requirements "`, 8 per ActiveSpaces 4.10.x version), and Reframe
+            # would copy the padding through into `reframed/`.
+            "title": node.label.strip(),
             "path": _target(node),
             "children": bool(node.children),
         })

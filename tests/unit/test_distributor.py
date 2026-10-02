@@ -325,10 +325,13 @@ def test_a_doc_class_folder_is_indexed_because_nothing_synthesizes_its_navigatio
     assert "- [Release Notes](tib_ems_relnotes.pdf)" in index
     assert "(readme.txt)" in index
     toc = yaml.safe_load(folder.joinpath("toc.yml").read_text(encoding="utf-8"))
-    assert toc["items"] == [
-        {"title": "TIBCO Enterprise Message Service™ 10.4.0 Release Information",
-         "path": "index.md"},
-    ]
+    assert toc == {
+        "docs_list_title": "Release Information",
+        "docs": [
+            {"title": "TIBCO Enterprise Message Service™ 10.4.0 Release Information",
+             "url": "index.md"},
+        ],
+    }
     metadata = yaml.safe_load(folder.joinpath("metadata.yml").read_text(encoding="utf-8"))
     assert metadata == {"csg-version": "10.4.0"}
 

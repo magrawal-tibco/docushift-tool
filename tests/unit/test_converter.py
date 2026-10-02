@@ -244,7 +244,7 @@ def test_the_version_gets_its_toc_and_metadata_inside_the_build(
     toc = yaml.safe_load((output / "toc.yml").read_text(encoding="utf-8"))
     # The landing page first, and every path relative to the version root rather
     # than to the unit the engine reported it from.
-    assert [item["path"] for item in toc["items"]] == [
+    assert [item["url"] for item in toc["docs"]] == [
         "Content/second.md", "Content/topic.md",
     ]
     assert result.nav_nodes == 2

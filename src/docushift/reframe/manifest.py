@@ -49,7 +49,7 @@ REDIRECTS_HEADER = (
 )
 
 TOC_HEADER = (
-    "# Merged by `docushift reframe` (Stage 6b). A path carrying `#` is a section of\n"
+    "# Merged by `docushift reframe` (Stage 6b). A url carrying `#` is a section of\n"
     "# a merged page and must not generate an HTML page of its own.\n"
 )
 

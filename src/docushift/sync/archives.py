@@ -126,15 +126,18 @@ def render_index(entries: list[ArchiveEntry], title: str, templates: Path) -> st
     return template(templates, "archives_index.md.j2").render(title=title, entries=entries)
 
 
-def render_toc(title: str, templates: Path) -> str:
+def render_toc(title: str, product_name: str, templates: Path) -> str:
     """`toc.yml`: one item, pointing at the `index.md` beside it.
 
     The history is a list, but it is `index.md`'s list -- see
     `archives_toc.yml.j2` for why these entries collapse despite being catalog
     rows rather than files. Entries are not a parameter for the same reason as
-    `documents.render_toc`.
+    `documents.render_toc`. `docs_list_title` is the bare product name, which is
+    what html-to-md's archives TOCs carry (Phase 36).
     """
-    return template(templates, "archives_toc.yml.j2").render(title=title)
+    return template(templates, "archives_toc.yml.j2").render(
+        title=title, list_title=product_name.strip()
+    )
 
 
 def current(entries: list[ArchiveEntry], destination: Path, index: str) -> bool:

@@ -475,6 +475,26 @@ def test_a_toc_path_that_resolves_to_nothing_is_a_link_broken(tmp_path: Path) ->
     assert "html/a.md is not in this version folder" in findings[0].message
 
 
+def test_a_toc_url_is_checked_in_the_dialect_every_toc_is_written_in(tmp_path: Path) -> None:
+    """Phase 36. Reading only the old keys would find no links in a new-dialect
+    file and pass it clean -- the failure this check exists to prevent."""
+    target = tmp_path / "target"
+    publish(
+        target,
+        {
+            "toc.yml": 'docs_list_title: "Online Help"\ndocs:\n  - title: "A"\n'
+                       '    url: "html/a.md"\n    subfolderlist:\n      - title: "B"\n'
+                       '        url: "html/b.md#nope"\n',
+            "html/b.md": "# B\n",
+        },
+    )
+
+    findings = artifacts_of(target)
+
+    assert codes(findings) == ["LINK_BROKEN", "ANCHOR_MISSING"]
+    assert "html/a.md is not in this version folder" in findings[0].message
+
+
 def test_a_toc_path_differing_only_in_case_is_the_defect_that_lost_three_topics(
     tmp_path: Path,
 ) -> None:

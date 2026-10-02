@@ -268,12 +268,33 @@ def test_the_toc_is_one_item_pointing_at_the_index(config: ConfigManager) -> Non
     folders have exactly one page -- so the nav has exactly one entry (Phase 9).
     """
     loaded = yaml.safe_load(
-        render_toc("TIBCO EMS 10.4.0 Reference Documents", config.aem_templates_dir)
+        render_toc("TIBCO EMS 10.4.0 Reference Documents", REFERENCE_DOCUMENTS,
+                   config.aem_templates_dir)
     )
 
-    assert loaded["items"] == [
-        {"title": "TIBCO EMS 10.4.0 Reference Documents", "path": "index.md"},
-    ]
+    assert loaded == {
+        "docs_list_title": "Reference Documents",
+        "docs": [{"title": "TIBCO EMS 10.4.0 Reference Documents", "url": "index.md"}],
+    }
+
+
+@pytest.mark.parametrize(
+    ("doc_class", "expected"),
+    [
+        (USER_GUIDES, "User Guides (PDF)"),
+        (RELEASE_INFORMATION, "Release Information"),
+        (REFERENCE_DOCUMENTS, "Reference Documents"),
+    ],
+)
+def test_the_list_title_is_html_to_md_s_label_not_the_index_heading(
+    config: ConfigManager, doc_class: str, expected: str
+) -> None:
+    """Phase 36: `docs_list_title` takes html-to-md's values verbatim. `(PDF)` is
+    the navigation label's, so the index heading stays `User Guides`."""
+    loaded = yaml.safe_load(render_toc("T", doc_class, config.aem_templates_dir))
+
+    assert loaded["docs_list_title"] == expected
+    assert index_title("P", "1.0", USER_GUIDES) == "P 1.0 User Guides"
 
 
 def test_the_artifacts_the_toc_stopped_listing_are_all_in_the_index(
@@ -303,6 +324,6 @@ def test_an_empty_index_renders_rather_than_raising(config: ConfigManager) -> No
     """It is never written -- an empty doc-class is absent -- but a template that
     only works on a non-empty list is a trap for whatever calls it next."""
     assert "# Nothing" in render_index([], "Nothing", USER_GUIDES, config.aem_templates_dir)
-    assert yaml.safe_load(render_toc("Nothing", config.aem_templates_dir))["items"] == [
-        {"title": "Nothing", "path": "index.md"},
-    ]
+    assert yaml.safe_load(
+        render_toc("Nothing", USER_GUIDES, config.aem_templates_dir)
+    )["docs"] == [{"title": "Nothing", "url": "index.md"}]

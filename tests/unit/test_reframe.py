@@ -46,6 +46,7 @@ from docushift.reframe.pages import (
 from docushift.reframe.policy import ReframePolicy
 from docushift.reframe.review import QUEUEING, branches, inspect, rows
 from docushift.reframe.toc import (
+    DocsUrlSubfolderlist,
     ItemsPathChildren,
     TocEntry,
     registered_schemas,
@@ -57,6 +58,20 @@ from docushift.utils import csvio
 from tests.conftest import make_product, make_version
 
 TOC = """\
+docs_list_title: "Online Help"
+docs:
+  - title: "Installation"
+    url: "installation/installation-2.md"
+    subfolderlist:
+      - title: "Installation Overview"
+        url: "installation/installation-overvie.md"
+  - title: "User Guide"
+    url: "users-guide/user-guide.md"
+"""
+
+#: The same tree in the dialect Stage 6a wrote before Phase 36. A converted tree
+#: still on disk in it must keep reframing until it is reconverted.
+OLD_TOC = """\
 items:
   - title: "Installation"
     path: "installation/installation-2.md"
@@ -105,17 +120,18 @@ def converted_tree(config: ConfigManager, product, number: str, toc: str = TOC) 
     tree.mkdir(parents=True, exist_ok=True)
     (tree / "toc.yml").write_text(toc, encoding="utf-8")
     def write(node: dict) -> None:
-        page = tree / node["path"]
+        page = tree / (node.get("url") or node["path"])
         page.parent.mkdir(parents=True, exist_ok=True)
         # The body's H1 is the node's **title**, not its path. Since Phase 29 the
         # anchor a topic gets is the platform's slug of its rendered heading, so a
         # fixture whose H1 was a file path would assert against
         # `installationinstallation-2md` and teach nothing about the real rule.
         page.write_text(f"# {node['title']}\n", encoding="utf-8")
-        for child in node.get("children") or []:
+        for child in node.get("subfolderlist") or node.get("children") or []:
             write(child)
 
-    for row in yaml.safe_load(toc).get("items") or []:
+    loaded = yaml.safe_load(toc)
+    for row in loaded.get("docs") or loaded.get("items") or []:
         write(row)
     return tree
 
@@ -184,7 +200,7 @@ def test_a_flare_set_merges_into_fewer_pages_and_says_so(config, catalog, flare)
     result = Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"])
 
     assert result.outcome is ReframeOutcome.REFRAMED
-    assert result.toc_schema == "items-path-children"
+    assert result.toc_schema == "docs-url-subfolderlist"
     assert (result.topics, result.pages) == (3, 2)
     written = sorted(p.relative_to(result.path).as_posix() for p in result.path.rglob("*") if p.is_file())
     assert written == [
@@ -236,21 +252,39 @@ def test_the_toc_points_absorbed_topics_at_a_fragment_and_leaders_at_a_page(
     result = Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"])
     document = yaml.safe_load((result.path / "toc.yml").read_text(encoding="utf-8"))
 
-    assert document == {
-        "items": [
-            {
-                "title": "Installation",
-                "path": "installation.md",
-                "children": [
-                    {
-                        "title": "Installation Overview",
-                        "path": "installation.md#installation-overview",
-                    }
-                ],
-            },
-            {"title": "User Guide", "path": "user-guide.md"},
-        ]
-    }
+    assert document == MERGED_TOC
+
+
+#: What R3 writes for `TOC`, from either input dialect: html-to-md's keys
+#: (Phase 36), with the merged section's fragment carried in `url`.
+MERGED_TOC = {
+    "docs_list_title": "Online Help",
+    "docs": [
+        {
+            "title": "Installation",
+            "url": "installation.md",
+            "subfolderlist": [
+                {
+                    "title": "Installation Overview",
+                    "url": "installation.md#installation-overview",
+                }
+            ],
+        },
+        {"title": "User Guide", "url": "user-guide.md"},
+    ],
+}
+
+
+def test_a_tree_still_in_the_old_dialect_reframes_into_the_new_one(config, catalog, flare):
+    """Phase 36. `output/` keeps `items`/`path`/`children` until it is reconverted,
+    and failing Reframe on it in the meantime would buy nothing: the old dialect
+    is read, the new one is written, and the merge is the same merge."""
+    converted_tree(config, flare, "10.5.1", OLD_TOC)
+
+    result = Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"])
+    document = yaml.safe_load((result.path / "toc.yml").read_text(encoding="utf-8"))
+
+    assert document == MERGED_TOC
 
 
 def test_every_source_topic_gets_a_redirect_with_its_anchor(config, catalog, flare):
@@ -520,7 +554,7 @@ def test_a_current_version_with_blank_columns_is_walked_anyway(config, catalog, 
 
 
 def test_the_shipped_schema_reads_what_stage_6a_writes():
-    schema = ItemsPathChildren()
+    schema = DocsUrlSubfolderlist()
     document = yaml.safe_load(TOC)
 
     assert schema.matches(document)
@@ -553,10 +587,35 @@ def test_a_row_with_no_page_keeps_its_title_and_targets_nothing():
     assert row.target == ""
 
 
+def test_the_html_to_md_dialect_reads_url_and_subfolderlist_with_their_fragment():
+    """Phase 36's reader: the same tree as the old one, under html-to-md's keys."""
+    document = yaml.safe_load(
+        'docs_list_title: "Online Help"\ndocs:\n  - title: "T"\n    url: "a/b.md"\n'
+        '    subfolderlist:\n      - title: "S"\n        url: "a/b.md#Client-Credentials"\n'
+    )
+    schema = schema_for(document)
+    row = schema.parse(document)[0]
+
+    assert isinstance(schema, DocsUrlSubfolderlist)
+    assert str(row.path) == "a/b.md"
+    assert row.children[0].fragment == "Client-Credentials"
+    assert row.children[0].target == "a/b.md#Client-Credentials"
+
+
+def test_each_dialect_declines_the_other():
+    """Neither reader half-reads the other's file: detection is by list key."""
+    new = yaml.safe_load(TOC)
+    old = yaml.safe_load(OLD_TOC)
+
+    assert not ItemsPathChildren().matches(new)
+    assert not DocsUrlSubfolderlist().matches(old)
+    assert isinstance(schema_for(old), ItemsPathChildren)
+
+
 def test_detection_declines_a_foreign_shape_rather_than_half_reading_it():
     assert schema_for({"toc": [{"label": "x"}]}) is None
     assert schema_for(None) is None
-    assert registered_schemas() == ["items-path-children"]
+    assert registered_schemas() == ["docs-url-subfolderlist", "items-path-children"]
 
 
 def test_a_configured_schema_that_is_not_registered_does_not_fall_back():
@@ -839,8 +898,8 @@ def test_a_topic_listed_under_two_guides_gets_a_copy_in_each():
 
     merged = retarget(roots, located, placements)
     # Each guide's row resolves to that guide's own copy, not to the other's.
-    assert merged["items"][0]["children"] == [{"title": "Shared", "path": "first.md#shared"}]
-    assert merged["items"][1]["children"] == [{"title": "Shared", "path": "second.md#shared"}]
+    assert merged["docs"][0]["subfolderlist"] == [{"title": "Shared", "url": "first.md#shared"}]
+    assert merged["docs"][1]["subfolderlist"] == [{"title": "Shared", "url": "second.md#shared"}]
 
 
 def test_a_topic_listed_twice_inside_one_guide_is_still_packed_once():
@@ -853,9 +912,9 @@ def test_a_topic_listed_twice_inside_one_guide_is_still_packed_once():
     located = assign(pages, None, placements)
 
     assert layout(pages) == [["g/a.md", "g/s.md"]]
-    assert retarget(roots, located, placements)["items"][0]["children"] == [
-        {"title": "Shared", "path": "g/guide.md#shared"},
-        {"title": "Again", "path": "g/guide.md#shared"},
+    assert retarget(roots, located, placements)["docs"][0]["subfolderlist"] == [
+        {"title": "Shared", "url": "g/guide.md#shared"},
+        {"title": "Again", "url": "g/guide.md#shared"},
     ]
 
 
@@ -1658,8 +1717,8 @@ def test_a_queued_page_is_reported_as_a_note_and_counted_on_the_result(
     """A note, not a warning. The queue is expected output of a *successful* merge,
     and a warning that fires on every version of every run stops being read."""
     toc = yaml.safe_load(TOC)
-    toc["items"][1]["children"] = [
-        {"title": f"Row {i}", "path": f"users-guide/row-{i}.md"} for i in range(20)
+    toc["docs"][1]["subfolderlist"] = [
+        {"title": f"Row {i}", "url": f"users-guide/row-{i}.md"} for i in range(20)
     ]
     converted_tree(config, flare, "10.5.1", yaml.safe_dump(toc))
     findings = FindingsRun("reframe")

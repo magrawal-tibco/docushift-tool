@@ -4459,7 +4459,7 @@ The rule that fixes both: **the map belongs to whichever tree `sync` publishes f
 
 ---
 
-### Phase 36: `toc.yml` Speaks html-to-md's Dialect — **Planned, 2026-10-02**
+### Phase 36: `toc.yml` Speaks html-to-md's Dialect — **Built, 2026-10-02; regeneration shared with Phase 35**
 
 **Why.** A side-by-side comparison of every `toc.yml` both tools produced (2026-10-02) found the two trees agree and the files do not. Of the 36 DocuShift version TOCs, 12 have a predecessor counterpart (ActiveSpaces ×6, EMS ×6). Across those 12, every shared page sits at the same depth under the same parent in the same order (306–827 shared entries per version). The disagreement is the dialect: html-to-md writes `docs_list_title` / `docs` / `url` / `subfolderlist` in all 1,339 of its TOCs, and DocuShift writes `items` / `path` / `children`. **The user has decided DocuShift adopts html-to-md's field names.** The structural decisions stay DocuShift's own, by the user's call: one TOC per version (not one per doc class), the landing / legal / support / Unfiled nodes kept, and the documents and archives stages unchanged apart from their field names.
 
@@ -4493,6 +4493,13 @@ What the comparison found that is **not** in scope: html-to-md dropping EMS's C 
 6. **Regenerate once, shared with Phase 35.** `convert --force` and `reframe --force` over the converted catalog, then hand the trees to Phase 35's verification so they regenerate a single time.
 
 *Exit: every `toc.yml` under `output/` and `reframed/` parses with top-level keys exactly `docs_list_title` and `docs`, and no row carries `items`, `path` or `children`; the comparison re-run over the 12 shared versions shows the same field names as html-to-md and every shared page at the same depth, parent and order; the two third-party topics are back inside their chapters and no TOC ends on a non-legal page; no TOC label has leading or trailing whitespace; `validate` reports no new `toc.yml` finding; the test suite and lint are clean.*
+
+**As built (2026-10-02).** Steps 1–5 landed in one commit; step 6 is Phase 35's regeneration run. **1,738 tests pass, 2 skipped, lint clean** (18 new: the dialect, label trimming, both readers, an old-dialect tree reframing into the new one, the validator reading `url`, and 17 corpus labels pinning the legal test either way). Two things differ from the plan, both found by measuring before writing:
+
+- **The legal test needed a third narrowing.** Dropping bare `third party` alone would have made Streaming pick `Legal State Transitions Shown in LVTables`, so bare `legal` went too (`legal` now needs `notice` or `third party` beside it). And `copyrigh` anywhere in a *label* took `Customizing the Company Logo and Copyright` in 4 roots, so it is read from the filename stem — the evidence its docstring always named — or the start of a label. Re-run over all 953 Flare roots with the shipped function: every pick is a legal notice; over the 36 converted TOCs, all 36 are right.
+- **Accepting `legal` + `third party`** keeps EBX's `Legal and Third-Party` (`legal_3rdparty.htm`, 168 TOCs in html-to-md). EBX is out of scope; it is kept because nothing in the corpus misfires on it.
+
+Smoke-checked on real data before committing: ActiveSpaces 5.2.0 converted standalone into a scratch folder gives top-level keys exactly `docs_list_title` / `docs`, 324 rows (the same row set as before), 0 padded labels, the JDBC topic back at depth 2 under *The ActiveSpaces JDBC Driver*, the tail Support → Legal as the source has it, and all 315 pages shared with html-to-md at the same depth and in the same order.
 
 ---
 
