@@ -81,3 +81,22 @@ def swap(staging: Path, target: Path, attempts: int = ATTEMPTS, delay: float = D
             if attempt == attempts - 1:
                 raise
             time.sleep(delay * (attempt + 1))
+
+
+def replace_file(staging: Path, target: Path, attempts: int = ATTEMPTS, delay: float = DELAY) -> None:
+    """`os.replace` for one file, retrying the scanner race. Still atomic per attempt.
+
+    The module note says a single-file rename needs no retry; the Coveo sitemap
+    cache disproved that (Phase 33): rewriting `manifest.json` once per product,
+    ~500 times in a row, lost to `[WinError 32]` on a file the indexer had just
+    opened. Each attempt is the same atomic `os.replace`, so the guarantee the
+    downloader keeps it for is not traded away -- only the race is retried.
+    """
+    for attempt in range(attempts):
+        try:
+            staging.replace(target)
+            return
+        except PermissionError:
+            if attempt == attempts - 1:
+                raise
+            time.sleep(delay * (attempt + 1))

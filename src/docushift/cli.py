@@ -13,6 +13,7 @@ Functional so far: ``doctor`` (Phase 1), the whole ``catalog`` group including
 also owes is 4b-2). ``convert`` onward wait on Phases 5-7.
 """
 
+import csv
 from pathlib import Path
 
 import click
@@ -24,7 +25,8 @@ from rich.table import Table
 from docushift import __version__
 from docushift.catalog import CatalogError, CatalogManager, MigrateStats
 from docushift.config import ConfigManager
-from docushift.discovery import DocsiteClient, DocsiteCrawler
+from docushift.discovery import DocsiteClient, DocsiteCrawler, DocsiteError, sitemap
+from docushift.discovery.sitemap import SitemapCache
 from docushift.models import MigrateDecision, ReleaseStatus, ScopeSource, SourceEngine, ZipSource
 from docushift.reporting.findings import REGISTRY, FindingsRun, Severity
 from docushift.state import StateStore
@@ -912,6 +914,93 @@ def catalog_batches(ctx: click.Context) -> None:
     for label, count in counts.items():
         table.add_row(label, str(count))
     console.print(table)
+
+
+@catalog.command("sitemap")
+@click.option("--product", default=None, help="One product (slug or product_code); default all in scope.")
+@click.pass_context
+def catalog_sitemap(ctx: click.Context, product: str | None) -> None:
+    """Cache the docsite's Coveo sitemap and report what it lists per version.
+
+    Planning.md Phase 33, step 1: the per-page live URLs the origin 301 map needs.
+    Writes the raw XML to `cache/coveo/` and one row per catalog version to
+    `reports/coveo-sitemap.csv`. Reads nothing back into the catalog.
+    """
+    cfg: ConfigManager = ctx.obj["config"]
+    manager = _catalog_manager(ctx)
+    root_path = str((cfg.load_docsite().get("sitemap") or {}).get("root") or "")
+    if not root_path:
+        raise click.ClickException("config/docsite.yaml declares no sitemap.root")
+
+    catalog_data = manager.load()
+    try:
+        slugs = {manager.resolve_slug(product.strip().lower())} if product else {
+            p.slug for p in catalog_data.products.values() if p.in_scope
+        }
+    except CatalogError as exc:
+        raise click.ClickException(str(exc)) from exc
+
+    cache = SitemapCache(cfg.cache_dir / "coveo")
+    with console.status("Fetching the Coveo sitemap...") as status:
+        def on_progress(index: int, total: int, slug: str) -> None:
+            status.update(f"[{index}/{total}] {slug}")
+
+        try:
+            result = sitemap.fetch(DocsiteClient(cfg.load_docsite()), cache, root_path, slugs, on_progress)
+        except (DocsiteError, sitemap.SitemapError) as exc:
+            raise click.ClickException(f"sitemap root: {exc}") from exc
+
+    for error in result.errors:
+        console.print(f"[red]![/red] {error}")
+
+    rows = []
+    for slug in sorted(slugs):
+        prod = catalog_data.products.get(slug)
+        if prod is None:
+            continue
+        listed = set(result.products.get(slug, []))
+        for ver in prod.versions.values():
+            try:
+                pages = cache.pages(slug, ver.version)
+            except sitemap.SitemapError as exc:
+                console.print(f"[red]![/red] {slug}@{ver.version}: {exc}")
+                pages = None
+            rows.append({
+                "slug": slug,
+                "version": ver.version,
+                "archived": ver.is_archived,
+                "leaf": "yes" if pages is not None else "no",
+                "pages": len(pages) if pages is not None else "",
+                "access_levels": ";".join(sorted({p.access_level for p in pages or []})),
+            })
+        catalogued = {sitemap.match_leaf(listed, slug, v.version) for v in prod.versions.values()}
+        for stem in sorted(listed - catalogued):
+            rows.append({"slug": slug, "version": f"(uncatalogued leaf {stem})", "archived": "",
+                         "leaf": "yes", "pages": "", "access_levels": ""})
+
+    report = cfg.root_dir / "reports" / "coveo-sitemap.csv"
+    report.parent.mkdir(parents=True, exist_ok=True)
+    with open(report, "w", newline="", encoding="utf-8") as fh:
+        writer = csv.DictWriter(fh, fieldnames=["slug", "version", "archived", "leaf", "pages", "access_levels"])
+        writer.writeheader()
+        writer.writerows(rows)
+
+    with_leaf = sum(1 for r in rows if r["leaf"] == "yes" and not str(r["version"]).startswith("("))
+    catalogued_rows = sum(1 for r in rows if not str(r["version"]).startswith("("))
+    console.print(
+        f"[green]Sitemap:[/green] {result.fetched} fetched, {result.reused} reused; "
+        f"{len(result.products)} of {len(slugs)} products have a sitemap; "
+        f"{with_leaf} of {catalogued_rows} catalog versions have a page list."
+    )
+    if result.missing:
+        console.print(f"  {len(result.missing)} product(s) not in the sitemap root: "
+                      + ", ".join(result.missing[:15]) + (" ..." if len(result.missing) > 15 else ""))
+    if result.not_served:
+        console.print(f"  {len(result.not_served)} file(s) answered with the docsite login page "
+                      "instead of a sitemap (no such file)")
+    if result.duplicates:
+        console.print(f"  [dim]root lists more than once (first used): {', '.join(result.duplicates)}[/dim]")
+    console.print(f"  Report: {report}")
 
 
 @catalog.command("triage")

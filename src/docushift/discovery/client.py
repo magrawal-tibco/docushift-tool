@@ -123,6 +123,29 @@ class DocsiteClient:
                 raise DocsiteError(f"GET {url} returned a sign-in page; this product is not public") from exc
             raise DocsiteError(f"GET {url} did not return JSON ({exc})") from exc
 
+    def get_bytes(self, path: str) -> bytes:
+        """GETs a docsite path and returns the raw body, or raises `DocsiteError`.
+
+        The Coveo sitemap is XML, not JSON, and is parsed by `discovery.sitemap`.
+        Same throttle and session as `get_json`, so the two cannot disagree about
+        politeness. An empty 200 is an error here: the docsite serves a missing
+        path as HTTP 200 with no body (`docsite.yaml`'s note on `legacy_template`).
+        """
+        url = self.url(path)
+        self._throttle_gate.wait()
+        try:
+            response = self.session.get(url, timeout=self.timeout)
+        except requests.RequestException as exc:
+            raise DocsiteError(f"GET {url} failed: {exc}") from exc
+        if response.status_code != 200:
+            raise DocsiteError(f"GET {url} returned HTTP {response.status_code}")
+        body = response.content or b""
+        if not body.strip():
+            raise DocsiteError(f"GET {url} returned an empty body")
+        # A login page served as 200 is returned, not raised: `discovery.sitemap`
+        # tells it apart from malformed XML and counts it as `not_served`.
+        return body
+
     def _endpoint(self, name: str, **params: str) -> str:
         template = self.endpoints.get(name)
         if not template:

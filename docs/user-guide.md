@@ -472,6 +472,17 @@ WARN newthing: family 'streaming_analytics' is not declared in taxonomy.yaml for
 
 This is a warning, not an error: the write goes through. Add the family under `business_units.<bu>.families` in `config/taxonomy.yaml` once you have settled on it, both to silence the warning and to give it a display name. The warning also catches the other case — if you see one for `mesaging`, that is a typo about to become its own folder.
 
+### Caching the Docsite's Page List (`catalog sitemap`)
+
+The 301 map has to start at the address each page is served from on docs.tibco.com today. The docsite's Coveo search sitemap lists those addresses — every page of every current version, with its title — and `catalog sitemap` downloads it into `cache/coveo/` so later stages can read it with no network.
+
+```bash
+docushift catalog sitemap                                        # every in-scope product (~2,000 files, ~20 min first time)
+docushift catalog sitemap --product tibco-enterprise-message-service
+```
+
+A re-run fetches only the files whose date changed. It writes `reports/coveo-sitemap.csv`, one row per catalog version: whether the sitemap has a page list for it, and how many pages. Expect archived versions to have none — the sitemap covers current versions only. The summary also counts the files the docsite answered with its login page instead of a sitemap; those products or versions simply have no public page list.
+
 ---
 
 ## 3. The Families Workspace
