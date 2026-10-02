@@ -542,9 +542,9 @@ One algorithm that spans two stages, kept in one place because splitting it is w
 
 **Category is decided by extension, except `skin`, which is decided by location.** A `.gif` in `Skins/Default/` is chrome and a `.gif` beside a topic is an image, and no extension can tell them apart — so the skin test runs *first*, against the file's path relative to its output root, using step 4's per-engine prefix list and step 4's whole-segment rule. Everything else falls to extension: `topic`, `image`, `media`, `document`, `archive`, `source-format`, `other`.
 
-**Destination is a precedence, not a set.** API-reference root, then engine output root, then a top-level `pdf/` or `doc/` (§10.4's document router), then unclaimed. It has to be ordered because an API tree commonly sits *inside* an output root, and a file counted under both would be counted twice.
+**Destination is a precedence, not a set.** API-reference root, then engine output root, then a top-level `pdf/` or `doc/` (§10.4's document router), then unclaimed. "Top-level" means directly under the content root, which is below the package wrapper (`architecture.md` §4.5). It has to be ordered because an API tree commonly sits *inside* an output root, and a file counted under both would be counted twice.
 
-**Step 2 — report the residue.** Files that no destination claims are counted and printed by `docushift extract`, grouped by their top path segment:
+**Step 2 — report the residue.** Files that no destination claims are counted and printed by `docushift extract`, grouped by their top path segment below the content root:
 
 ```
 Assets: 30,810 images (1.25 GB), 208 source-format, 3 archives in 1 output root

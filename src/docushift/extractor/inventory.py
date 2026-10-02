@@ -30,6 +30,7 @@ from pathlib import Path
 from docushift.apiref import has_api_marker, looks_like_api_name, swallows_output_root
 from docushift.engines.csh import CshFormat, CshSource, csh_format_of, read_csh_source
 from docushift.engines.roots import is_skin_path, owning_root
+from docushift.extractor import content_root
 from docushift.models import SourceEngine
 
 
@@ -186,6 +187,12 @@ def inventory_tree(
     inventory and the extract report cannot describe two different sets of roots.
     """
     result = Inventory()
+    # Phase 34 (R3-02). The router test and the residue grouping address content
+    # by name, so they read from where content starts rather than from the
+    # version directory -- which, in a wrapped package, is the wrapper for every
+    # file (`architecture.md` §4.5). Resolved live rather than read back: the
+    # caller recorded this same answer a moment ago, and `resolve` is one listdir.
+    content = content_root.resolve(tree)
     # Direct file count per directory, so a triage candidate's total can be
     # summed by prefix afterwards without a second traversal.
     direct: dict[Path, int] = defaultdict(int)
@@ -227,7 +234,7 @@ def inventory_tree(
                 result.partial = True
                 continue
             direct[current] += 1
-            _count_file(result, tree, path, size, engine, output_roots, api_root)
+            _count_file(result, tree, content, path, size, engine, output_roots, api_root)
             fmt = csh_format_of(path)
             if fmt is not None:
                 csh_paths.append((path, fmt))
@@ -241,6 +248,7 @@ def inventory_tree(
 def _count_file(
     result: Inventory,
     tree: Path,
+    content: Path,
     path: Path,
     size: int,
     engine: SourceEngine,
@@ -248,7 +256,6 @@ def _count_file(
     api_root: Path | None,
 ) -> None:
     """Partitions one file, and buckets it by root, category and destination."""
-    relative = path.relative_to(tree)
     if api_root is not None:
         result.api_files += 1
         # API-reference trees sit *inside* an output root as often as beside one,
@@ -265,6 +272,7 @@ def _count_file(
         _bucket(result, _rel(tree, root), category, Destination.OUTPUT_ROOT, size)
         return
 
+    relative = path.relative_to(content)
     if relative.parts[0].lower() in _ROUTER_DIRS:
         _bucket(result, "", _category(path.name), Destination.DOCUMENT_ROUTER, size)
         return

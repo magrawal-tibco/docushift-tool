@@ -187,6 +187,31 @@ def test_the_unclaimed_residue_is_grouped_by_top_segment(tmp_path: Path) -> None
     assert inventory.unclaimed["."].files == 1
 
 
+def test_a_package_wrapper_does_not_hide_the_router_folders_or_the_segments(tmp_path: Path) -> None:
+    """Phase 34, R3-02. 46 of 50 sampled packages unpack to one wrapper directory,
+    so `relative.parts[0]` was the wrapper for every file: EMS 10.4.0's 7 PDFs were
+    `unclaimed`, and every residue folded into one line under the wrapper's name.
+    Both are read from the content root now (`architecture.md` §4.5)."""
+    _tree, inventory = walk(tmp_path, {
+        "tibco-ems-10-4-0/guide/Data/HelpSystem.xml": "<x/>",
+        "tibco-ems-10-4-0/pdf/user-guide.pdf": "%PDF",
+        "tibco-ems-10-4-0/doc/readme.txt": "hi",
+        "tibco-ems-10-4-0/components-api/a.html": page(),
+        "tibco-ems-10-4-0/loose.txt": "x",
+    })
+
+    router = {
+        (category, files)
+        for _r, category, destination, files, _b in inventory.rows()
+        if destination == "document-router"
+    }
+
+    assert router == {("document", 2)}
+    assert {segment: bucket.files for segment, bucket in inventory.unclaimed.items()} == {
+        "components-api": 1, ".": 1,
+    }
+
+
 def test_an_unmarked_api_candidate_is_reported_and_its_files_stay_documentation(
     tmp_path: Path,
 ) -> None:
