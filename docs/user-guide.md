@@ -591,12 +591,16 @@ docushift extract --batch poc-1
 | `--dry-run` | List what would be unpacked, and whether each package is on disk, without writing. |
 | `--force` | Re-extract even when the package has not changed since last time. |
 
-Each run ends with five counts — extracted, already current, no package, refused, failed —
-an engine tally, and then **two named lists**: the versions left `auto`, and the versions
+Each run ends with six counts — extracted, already current, measured from cache (only
+with `--measure-only`), no package, refused, failed — an engine tally, and then **two named lists**: the versions left `auto`, and the versions
 whose engine was identified but has no converter. Those are different problems. `auto`
 means DocuShift could not tell what made the package and is worth reporting as a gap;
 a named engine with no converter is a scoping question for you, not a bug. A failure
-never stops the run.
+never stops the run. That includes a failure *after* the unzip — `versions.csv` open in
+Excel when the counts are written back, say: the version is reported failed, and the
+next run extracts it again rather than calling it current. A version whose tree could
+not be read in full is named with a `partial walk` line, and its counts are left blank
+until a later run reads every folder.
 
 **Re-running is cheap and re-running is safe.** A package whose bytes have not changed
 since the last extract is skipped entirely, so `extract --all` over a settled batch does
@@ -609,7 +613,9 @@ Extraction is deliberately serial. Downloads run in parallel because transfers o
 two large unzips onto one disk only contend, so there is no `--workers` here.
 
 **A package that tries to write outside its own folder is refused, not repaired**, and
-nothing from it is left on disk. That is counted separately from a failure because a
+nothing from it is left on disk. So is a package holding a file name Windows cannot
+store as written: a reserved character such as `:` or `?`, a name ending in a dot or a
+space, or two files whose names differ only in case. That is counted separately from a failure because a
 retry will not help — somebody needs to look at the ZIP.
 
 **Extract measures the packages it unpacked, in one walk, and prints four things.** All four name the version they came from, because a total nobody can trace back to a package is not something anybody can act on.
@@ -1170,6 +1176,12 @@ have not converted yet is a report line, not an abort: over a partially converte
 corpus that is the normal state. "Already current" is decided by comparing the two
 trees, not by a recorded hash, so a version somebody edited in the target is
 re-copied rather than skipped.
+
+A version folder that would put any file over Windows' 260-character path limit under
+your `--target-dir` is reported as failed and not copied, with the file and its length
+named (`PUBLISHED_PATH_TOO_LONG`). Nobody outside DocuShift could open such a file.
+The usual fix is a shorter target root: the deepest real pages already reach 236
+characters under a 14-character root such as `C:\tmp\p35-aem`.
 
 > **`sync` now places both trees.** In the docs tree: `online-help` from the
 > converted tree, and `user-guides`, `release-information` and `reference-documents`

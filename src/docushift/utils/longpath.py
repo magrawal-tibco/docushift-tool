@@ -23,10 +23,13 @@ rejects an escaping member by name before any path is built, which has to remain
 true: a `..` that reached a prefixed path would no longer be collapsed by the OS,
 so the prefix makes the check more load-bearing rather than less.
 
-Scoped deliberately to the two places that *write* a staged tree -- unpacking and
-the swap. A final extracted path over 260 characters would still be unreadable to
-every consumer downstream, and that is a condition to report rather than to paper
-over one call site at a time.
+It began scoped to the two places that *write* a staged tree -- unpacking and the
+swap -- and now also reaches the readers and copiers of what those wrote,
+including final writes such as `sync`'s published copy. So the prefix is no
+longer what keeps a published path under 260: `over_limit` below is, run by
+`sync` before every published folder is copied (Phase 34, `architecture.md`
+§4.4). A final path over 260 characters is unreadable to every consumer
+downstream, and that is a condition to report rather than to paper over.
 """
 
 import os

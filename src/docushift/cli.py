@@ -1241,7 +1241,7 @@ def download(ctx, bu, family, product, version, batch, select_all, force, worker
 
 
 def _report_extract(stats) -> None:
-    """The five-outcome summary, the engine tally, and the two lists a human acts on."""
+    """The six-outcome summary, the engine tally, and the two lists a human acts on."""
     from docushift.extractor import ExtractOutcome
     from docushift.models import CONVERTIBLE_ENGINES, SourceEngine
 
