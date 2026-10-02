@@ -117,9 +117,20 @@ def over_limit(destination: Path, source: Path, limit: int = PUBLISHED_PATH_LIMI
     """
     if not source.is_dir():
         return None
-    base = len(str(destination))
     for relative, _ in walk_files(source):
-        length = base + 1 + len(str(relative))
+        length = published_length(destination, relative)
         if length > limit:
             return source / relative, length
     return None
+
+
+def published_length(destination: Path, relative: "Path | str") -> int:
+    """How many characters `destination / relative` is, the way Win32 counts it.
+
+    Phase 34 (R1-08): absolutized first. `--target-dir` reaches here as typed, so
+    `../aem` used to be measured as six characters and every file under it came
+    out short by the length of the working directory -- the margin that let a
+    261-to-285-character path pass the check and then be written through
+    `long_path`.
+    """
+    return len(os.path.abspath(destination)) + 1 + len(str(relative))

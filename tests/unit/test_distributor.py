@@ -849,6 +849,67 @@ def test_a_published_path_over_the_ceiling_is_refused_and_named(
     assert not resources(target, "api-references", "10-4-0.part").exists()
 
 
+def test_a_help_tree_over_the_ceiling_is_refused_and_named(
+    config, distributor, product, target, monkeypatch
+) -> None:
+    """Phase 34, R1-01. Phase 29 put `long_path` on both ends of the help-tree copy
+    to get past the `.part` overflow, and that also let a *final* path over the
+    ceiling be written with no word said. The API trees were checked; this one
+    was not."""
+    findings = FindingsRun("sync", store=None).start()
+    distributor.findings = findings
+    convert_output(config, product, "10.4.0", **{"topics/a-deep-topic-name.md": "a\n"})
+    limit = len(str(published(target))) + len("/index.md") + 2
+    monkeypatch.setattr("docushift.sync.distributor.PUBLISHED_PATH_LIMIT", limit)
+
+    result = distributor.sync_one(product, product.versions["10.4.0"], target)
+
+    assert result.outcome is SyncOutcome.FAILED
+    assert "a-deep-topic-name.md" in result.message
+    assert [f.code for f in findings.all] == ["PUBLISHED_PATH_TOO_LONG"]
+    assert not published(target).exists()
+    assert not published(target, "10-4-0.part").exists()
+
+
+def test_a_help_tree_already_published_over_the_ceiling_is_not_reported_current(
+    config, distributor, product, target, monkeypatch
+) -> None:
+    """A tree an earlier run wrote over the line must not pass as `current` on
+    every run after. It is left where it is, and named each time."""
+    findings = FindingsRun("sync", store=None).start()
+    convert_output(config, product, "10.4.0", **{"topics/a-deep-topic-name.md": "a\n"})
+    distributor.sync_one(product, product.versions["10.4.0"], target)
+    distributor.findings = findings
+    limit = len(str(published(target))) + len("/index.md") + 2
+    monkeypatch.setattr("docushift.sync.distributor.PUBLISHED_PATH_LIMIT", limit)
+
+    result = distributor.sync_one(product, product.versions["10.4.0"], target)
+
+    assert result.outcome is SyncOutcome.FAILED
+    assert [f.code for f in findings.all] == ["PUBLISHED_PATH_TOO_LONG"]
+
+
+def test_a_document_over_the_ceiling_is_refused_and_named(
+    config, distributor, product, target, monkeypatch
+) -> None:
+    """The same rule for the document doc-classes (R1-01). Their files are flat in
+    the version folder, so the longest name is the whole question."""
+    findings = FindingsRun("sync", store=None).start()
+    distributor.findings = findings
+    long_name = "TIB_ems_10.4.0_user_guide_with_a_very_long_name.pdf"
+    extract_tree(config, product, "10.4.0", **{f"pdf/{long_name}": "%PDF-1.4"})
+    limit = len(str(published(target, doc_class=USER_GUIDES))) + len("/metadata.yml") + 2
+    monkeypatch.setattr("docushift.sync.distributor.PUBLISHED_PATH_LIMIT", limit)
+
+    (result,) = distributor.sync_documents(product, product.versions["10.4.0"], target)
+
+    assert result.outcome is SyncOutcome.FAILED
+    assert result.doc_class == USER_GUIDES
+    assert long_name in result.message
+    assert [f.code for f in findings.all] == ["PUBLISHED_PATH_TOO_LONG"]
+    assert not published(target, doc_class=USER_GUIDES).exists()
+
+
 def test_a_failed_placement_leaves_no_part_directory_behind(
     config, distributor, product, target, monkeypatch
 ) -> None:

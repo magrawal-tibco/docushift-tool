@@ -159,6 +159,23 @@ def test_the_measurement_is_of_the_destination_and_not_of_the_source(tmp_path: P
     assert over_limit(Path("C:/" + "d" * 300), source, limit=260) is not None
 
 
+def test_a_relative_destination_is_measured_from_where_it_resolves(tmp_path: Path, monkeypatch) -> None:
+    """Phase 34, R1-08. `sync --target-dir ../aem` hands over a relative path, and
+    Win32 counts the absolute one -- the working directory included."""
+    source = tmp_path / "j"
+    source.mkdir()
+    (source / "a.html").write_text("x", encoding="utf-8")
+    cwd = tmp_path / ("c" * 40)
+    cwd.mkdir()
+    monkeypatch.chdir(cwd)
+    limit = len("published") + 1 + len("a.html") + 1
+
+    found = over_limit(Path("published"), source, limit=limit)
+
+    assert found is not None
+    assert found[1] == len(str(cwd / "published" / "a.html"))
+
+
 def test_a_source_that_is_not_there_is_not_an_overflow(tmp_path: Path) -> None:
     """`select` drops roots that no longer exist; this must not raise on one."""
     assert over_limit(tmp_path / "published", tmp_path / "gone") is None

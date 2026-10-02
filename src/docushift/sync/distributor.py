@@ -77,6 +77,7 @@ from docushift.utils.longpath import (
     PUBLISHED_PATH_LIMIT,
     long_path,
     over_limit,
+    published_length,
     walk_files,
 )
 from docushift.utils.slug import is_numeric_version, slugify, version_segment
@@ -261,6 +262,16 @@ class WorkspaceDistributor:
             return SyncResult(slug, number, SyncOutcome.NO_OUTPUT, segment=segment, message=refusal)
 
         destination = self.doc_class_dir(product, target) / segment
+        # Phase 34 (R1-01). Phase 29's `long_path` on both ends of `_place` lifted
+        # the ceiling for the final copy along with the staging one, so this check
+        # is now the only thing holding a published help path to 260 (§4.4). Ahead
+        # of the currency test on purpose: a tree an earlier run wrote over the
+        # line must be named on every run, not pass as `current` from then on.
+        overflow = over_limit(destination, source, PUBLISHED_PATH_LIMIT)
+        if overflow is not None:
+            path, length = overflow
+            return self._too_long(slug, number, segment, path.relative_to(source).as_posix(), length)
+
         if not force and destination.is_dir() and _identical(source, destination):
             return SyncResult(
                 slug, number, SyncOutcome.CURRENT, path=destination, segment=segment, merged=merged
@@ -345,6 +356,22 @@ class WorkspaceDistributor:
             return "the merge or the conversion recorded no source checksum, so neither can be vouched for"
         return "the merged tree is older than the conversion beneath it; re-run `docushift reframe`"
 
+    def _too_long(
+        self, slug: str, number: str, segment: str, relative: str, length: int,
+        doc_class: str = ONLINE_HELP,
+    ) -> SyncResult:
+        """The refusal for a docs-tree folder that would publish a path over the ceiling.
+
+        Refused whole and before anything is copied, as the API trees are (Phase
+        15d): the copy goes through `long_path`, so nothing would fail on its own,
+        and a reader outside this tool would simply be unable to open the file.
+        """
+        message = (f"{doc_class}: publishing {relative} would need {length} characters, "
+                   f"over the {PUBLISHED_PATH_LIMIT} the published tree allows")
+        self._record("PUBLISHED_PATH_TOO_LONG", slug, number, message=message, path=relative)
+        return SyncResult(slug, number, SyncOutcome.FAILED, segment=segment,
+                          message=message, doc_class=doc_class)
+
     def _place(self, source: Path, destination: Path) -> tuple[int, int]:
         """Copies the tree into a staging sibling and swaps it over the target.
 
@@ -427,6 +454,14 @@ class WorkspaceDistributor:
         slug, number = product.slug, version.version
         segment = version_segment(number)
         destination = self.doc_class_dir(product, target, doc_class) / segment
+
+        # The same ceiling as `sync_one`, and ahead of the currency test for the same
+        # reason (R1-01). The folder is flat, so the published names are the routed
+        # filenames plus the three rendered files -- known before a PDF is opened.
+        for name in sorted({file.path.name for file in files} | set(_RENDERED)):
+            length = published_length(destination, name)
+            if length > PUBLISHED_PATH_LIMIT:
+                return self._too_long(slug, number, segment, name, length, doc_class)
 
         if not force and _documents_current(files, destination):
             return SyncResult(slug, number, SyncOutcome.CURRENT, path=destination,
