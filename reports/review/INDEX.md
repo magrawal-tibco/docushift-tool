@@ -39,3 +39,38 @@ Triage approved by the user 2026-10-02, as proposed.
 | **M. Fragile, correct today** | R1-09, R1-10, R2-10, R2-12, R2-13, R2-14, R2-15, R2-16, R2-17, R2-18, R3-06, R3-09, R3-10, R3-13 | defer to planning.md carried-forward items | approved: defer to planning.md carried-forward items 2026-10-02 |
 | **N. Data, not code: 113 "unclassified" products already have a family typed in** | R2-09 | user to review in the catalog | approved: user to review in the catalog 2026-10-02 |
 | **O. Cleanup (dead code, duplicates)** | R1-14, R1-15, R2-21, R3-14, R3-15 | one cleanup commit at the end of Phase 34 | approved: one cleanup commit at the end of Phase 34 2026-10-02 |
+
+## Batch 1: fixes merged (2026-10-03)
+
+All twelve fix themes are merged on `reframe-component`. Each fix carries a test that
+failed on the old code. The full suite passes (1,815 tests) and lint is clean. No finding
+turned out to be wrong.
+
+| theme | commit |
+|---|---|
+| A | 0ae08fd fix(catalog): keep values typed into the CSV when the next fetch re-resolves them |
+| B | 365afa1 fix(catalog): write both CSVs or neither, and touch state.db only after they are written |
+| C | 6dfb409 fix(catalog): stop reading a skipped archive index or a hand-added version as a deletion |
+| D | 435ce4b fix(sync): hold help and document paths to the 260-character ceiling |
+| E | 1285c1e fix(dates): store epoch-millisecond dates as ISO, drop the bulk-migration day, read "June 2023" as 2023 |
+| F | e2bce57 fix(extract): refuse ZIP members that escape through a drive letter or that Windows cannot hold |
+| G | 976b876 fix(extract): a failed or partial extract no longer leaves the old package's measurements in place |
+| H | 2da7f3a fix(extract): read the inventory's pdf/doc test and unclaimed groups below the package wrapper |
+| I | 938114e fix(csvio): let a blank convert_eligible cell take the active/archived default |
+| J | e57c9e9 fix(reframe): name C API pages after the full function name, and queue shortened names for review |
+| K | 6cdeb37 fix(config): stop dropping reframe defaults and malformed origin templates without a word |
+| L | d5be6ff, 1ecbf5c (docs), plus docstrings in 976b876 |
+
+**Data and output effects still to apply** (code is fixed; data on disk is not yet rewritten):
+- **J:** the merged trees still carry the truncated EMS names until `reframe --all --renormalize` runs. That re-run needs the user's go-ahead. No `rename-map.csv` was hand-edited after its run (all 14 checked), so `--renormalize` discards no human pin.
+- **E:** the next catalog save rewrites 926 epoch dates as ISO, and the next EMS fetch replaces 20 archived 2022-05-26 dates.
+- **H:** the inventory tables change on the next `extract --force` (e.g. TRA 5.12.2: 443 unclaimed under the wrapper becomes 13 routed, plus 161 + 269 unclaimed in the two help trees).
+- **D:** a `--target-dir` longer than ~38 characters now fails over-length versions instead of writing them.
+
+**Implementation choices the fixers flagged** (each consistent with the architecture docs):
+- R2-01 adds a `resolved_snapshot` table to state.db to tell a hand edit from a report change.
+- R2-04 drops only the known bulk date on archived rows rather than overriding all archived dates with month text.
+- F refuses a whole package with a bad member name, matching the existing escape rule.
+- J bumps the reframe algorithm version 3 → 4 (every merged tree re-merges on its next run), and the new `shortened` review flag also queues ~90 pages cut at 50 characters across families.
+- New finding codes: `ORIGIN_TEMPLATE_REJECTED`, `ORIGIN_PATH_TOO_SHORT`, `INVENTORY_PARTIAL` (register 66 → 69).
+- Known gap, not in any finding: `archive download --from-file` for an unknown version still adds a row that blocks a later fetch.

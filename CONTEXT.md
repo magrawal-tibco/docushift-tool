@@ -180,13 +180,13 @@ Per-family folders are created on demand by the downloader, not at startup: pre-
 - **Converted**: four families in `output/` (activespaces, ems, streaming, tra), three of
   them merged in `reframed/` (activespaces, ems, tra). 27 published versions carry a
   `301.yml` cutover map (Phase 35), and `toc.yml` uses html-to-md's dialect (Phase 36).
-- **Quality bar**: 1,740 tests, `ruff check src tests` clean, 66 finding codes in the
+- **Quality bar**: 1,815 tests, `ruff check src tests` clean, 69 finding codes in the
   register.
 - **Branch**: `reframe-component`. Git push and publishing are out of scope (`architecture.md` §6.0).
 
 ## 4. Next Steps
 
-1. **Phase 34, the whole-tool code review**, in progress (batch 1 fixes underway, batch 2 reviewing): twelve component units,
+1. **Phase 34, the whole-tool code review**, in progress (batch 1 fixed, batch 2 reviewing): twelve component units,
    then three cross-cutting passes, find first and fix after triage
    ([`planning.md` §1](docs/planning.md#1-active-phases)).
 2. The two carried-forward technical items are confirmed or closed during Phase 34
