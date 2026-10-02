@@ -4420,7 +4420,7 @@ Its findings can then be read and fixed without loading the rest of the tool.
 *Exit: every unit and pass has a findings file; every finding has a triage decision; every "fix" is merged with a test; S1/S2 findings marked "defer" are recorded in `open-issues.md`; the test suite and lint are clean on the final commit.*
 
 
-### Phase 35: Every Published Version Carries Its Cutover Map — **Steps 1–2 built, step 3 waits on Phase 36, 2026-10-02**
+### Phase 35: Every Published Version Carries Its Cutover Map — **Complete, 2026-10-02**
 
 **Why.** Phase 33 left `301.yml` where Phase 22 put it: written by Reframe into `reframed/`. Two populations never get one published:
 
@@ -4455,7 +4455,21 @@ The rule that fixes both: **the map belongs to whichever tree `sync` publishes f
 | `reframe --all --force`, all 14 `301.yml` against Phase 33's | **14 of 14 byte-identical** |
 | New converter tests | derived map in `output/` with `to` = output path and the unlisted API page reported; no sitemap → no file + `ORIGIN_SITEMAP_MISSING`; unconfirmable sitemap → no file + `ORIGIN_TEMPLATE_UNDECLARED` |
 
-*Exit: every published `online-help` version with a sitemap page list has a `301.yml` in the published tree (expected: 30 — EMS 6, ActiveSpaces 6, Streaming 6, Spotfire Data Streams 2, Data Science Author 1, Administrator 3, Runtime Agent 4, Silver Fabric/PeopleSoft/Designer Add-in excluded for having no list); every derived `from` is in its sitemap; a sample of six URLs from the newly covered layouts is confirmed live; `validate` adds no finding from any `301.yml`; Reframe's 14 maps are byte-identical to Phase 33's.*
+*Exit: every published `online-help` version with a sitemap page list has a `301.yml` in the published tree (expected: 30 as planned, 27 as measured — EMS 6, ActiveSpaces 6, Streaming 6, Spotfire Data Streams 2, Administrator 3, Runtime Agent 4; Data Science Author 1.4.0 is in no convert batch, see step 3, Silver Fabric/PeopleSoft/Designer Add-in excluded for having no list); every derived `from` is in its sitemap; a sample of six URLs from the newly covered layouts is confirmed live; `validate` adds no finding from any `301.yml`; Reframe's 14 maps are byte-identical to Phase 33's.*
+
+#### Step 3 — **Run, 2026-10-02**
+
+One regeneration shared with Phase 36: `convert --force` for the activespaces, ems, streaming and tra batches, `reframe --all --force`, `sync` of those four families to `C:/tmp/p35-aem`, `validate`. Every command exit 0.
+
+| check | result |
+|---|---|
+| Version-level `301.yml` in the published tree | **27**: EMS 6, ActiveSpaces 6, Streaming 6, Spotfire Data Streams 2, Administrator 3, Runtime Agent 4 (plus 6 doc-class-level published maps). Administrator 5.13.0 and Runtime Agent 5.13.0 now ship one |
+| Planned 30 vs 27 | The plan double-counted: 6+6+6+2+1+3+4 is 28, not 30. Of those 28, Data Science Author 1.4.0 is in no convert batch (`convert_batch` blank, family `statistica`); it was measured in step 1 from a one-off conversion but is not part of the published catalog. 27 is every batch version with a sitemap list |
+| Derived rows not on the sitemap | 1 row, withheld (Streaming 11.1.3, `ORIGIN_URL_UNLISTED`); every written derived `from` is listed |
+| `ORIGIN_SITEMAP_MISSING` | 9: Designer Add-in ×8, Silver Fabric 1.2.0 — the excluded products, no file written |
+| Live spot-check, newly covered layouts | **6 of 6 return 200**: Spotfire Data Streams 11.1.1, Streaming 11.1.0 and 11.2.1, Administrator 5.12.2, Runtime Agent 5.12.3 (`designerhelp`) and 5.12.4 (`trahelp`) |
+| `validate` | 208 folders, 0 errors, 661 warnings (537 `ANCHOR_MISSING`, 124 `REDIRECT_SHADOWED`, both pre-existing); **0 findings from any `301.yml`** |
+| `versions.csv` | 27 rows, `_out_files` +1 each (the map). The 13 reframed versions also show `_reframed_md_files` −1 and `_reframed_files` −1: Phase 36's legal-label fix, not this phase. In each, the third-party topic the old test lifted out as its own top-level page is back in its chapter and merged as a section (confirmed in all 13 by the Phase 36 session, Runtime Agent 5.13.0 included). None of the 661 warnings is in a `toc.yml` |
 
 ---
 
