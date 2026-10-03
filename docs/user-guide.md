@@ -769,7 +769,9 @@ with **no context-sensitive help** to emit: neither product ships a help map, so
 versions produce no `csh.yml` — which is an absence in the source, not a gap in the reader.
 
 **What it skips, and says it skipped.** In Flare: generated directories (`_globalpages/`,
-`MicroContent/`, `Resources/`), the `Default.htm` runtime stubs, any localized subtree, and
+`MicroContent/`, `Resources/`), the `Default.htm` runtime stubs, any localized subtree, any
+whole output root built for another language (`ja-jp/`, `de-de/`, `ja/`: each is named with
+a `LOCALIZED_ROOT_SKIPPED` warning; publishing them to the `loc-` tree is later work), and
 API-reference trees — the last identified by a generator marker inside the directory, never
 by its name, because `api-exchange-gateway/` is a product with 15,677 files of ordinary
 documentation. In DITA: the publication homepage, `index.html`, the TOC files themselves,

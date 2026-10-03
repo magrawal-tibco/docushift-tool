@@ -144,8 +144,11 @@ def test_the_register_carries_every_row_of_7_5() -> None:
     TOC that failed to parse with no word at all. And the 72nd,
     `TOC_SUBPROJECT_UNPLACED` (R5-11): merged-project insertion points that
     were being counted as headless nodes.
+    It adds the 73th, `LOCALIZED_ROOT_SKIPPED` (R5-01): a whole output root built
+    for another language converted into the English tree, where the subtree
+    note only ever saw a `ja/` folder inside an English root.
     """
-    assert len(REGISTRY) == 72
+    assert len(REGISTRY) == 73
 
 
 def test_severity_comes_from_the_registry_and_not_from_the_call_site() -> None:

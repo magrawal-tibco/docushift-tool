@@ -172,6 +172,13 @@ REGISTRY: dict[str, Code] = _codes(
     Code("LOCALIZED_TREE_SKIPPED", Severity.NOTE, Stage.CONVERT,
          "A localized subtree inside an English unit, not converted",
          "architecture.md §5.1.9"),
+    # Phase 34 (R5-01). A whole output root built for another language, which the
+    # subtree note above never saw: 24 in the corpus, converted into the English
+    # tree. A warning with a row each, because each names a build that publishes
+    # nowhere until the `loc-` tree exists -- a note would fold them into one line.
+    Code("LOCALIZED_ROOT_SKIPPED", Severity.WARNING, Stage.CONVERT,
+         "An output root built for another locale, not converted into this locale's tree",
+         "Phase 34 (R5-01)"),
     Code("ASSET_ORPHANED", Severity.NOTE, Stage.CONVERT,
          "Unreferenced asset -- 54.6% is normal for Flare", "architecture.md §5.5.7"),
     Code("REFERENCE_UNRESOLVED", Severity.ERROR, Stage.CONVERT,

@@ -34,7 +34,8 @@ from pathlib import Path, PurePosixPath
 from typing import Any, ClassVar
 from urllib.parse import quote
 
-from docushift.engines.roots import find_output_roots
+from docushift.config import DEFAULT_LOCALE
+from docushift.engines.roots import find_output_roots, root_locale, same_language
 from docushift.models import SourceEngine
 from docushift.reporting.findings import FindingsRun
 from docushift.transforms import links
@@ -285,6 +286,14 @@ class ConversionContext:
     # which is both the old behaviour and the right answer for a single unit whose
     # root *is* the tree.
     subtrees: dict[Path, str] = field(default_factory=dict)
+    # The run's locale. A unit root named for another language is a localized
+    # build and is not converted into this locale's tree (Phase 34, R5-01).
+    locale: str = DEFAULT_LOCALE
+    # Roots that were located and deliberately not converted -- a localized build
+    # (R5-01) -- so that nothing else converts their files or resolves their help
+    # identifiers into this version: the driver drops their CSH sources, which
+    # would otherwise be reported unresolved one identifier at a time.
+    excluded_roots: list[Path] = field(default_factory=list)
     findings: FindingsRun | None = None
     # The copier for the unit currently being converted, set by the driver before
     # each `convert_unit`. Per-unit state on a per-version object, and deliberately:
@@ -394,14 +403,54 @@ class BaseEngine(ABC):
     skips_api_references: ClassVar[bool] = True
 
     def units(self, context: ConversionContext) -> list[Path]:
-        """The units of work in this tree, outermost first."""
-        if context.output_roots:
-            return list(context.output_roots)
-        return find_output_roots(context.tree, self.engine)
+        """The units of work in this tree, outermost first, localized builds left out."""
+        roots = list(context.output_roots) or find_output_roots(context.tree, self.engine)
+        return _without_localized(context, roots)
 
     @abstractmethod
     def convert_unit(self, context: ConversionContext, root: Path) -> Unit:
         """Converts one unit. Never raises -- a failure is a reported outcome."""
+
+
+def _without_localized(context: ConversionContext, roots: list[Path]) -> list[Path]:
+    """Leaves out every root that is a build for another language, and names each.
+
+    Phase 34 (R5-01). A localized Flare build is an output root in its own right
+    -- 24 of them in the corpus, `ja-jp` alone converting 2,779 Japanese topics
+    of `wf-wf/9.3.5` into the English tree -- and the old guard only looked at the
+    first segment *inside* a root. Skipped and reported rather than converted:
+    publishing them belongs to the `loc-` tree, a later phase.
+
+    A root nested inside a skipped one goes with it, so that `sfire-dsc/7.1.0`'s
+    `doc/html/ja` cannot come back through a sub-root. The skipped roots stay in
+    `context.output_roots`, which is what keeps an outer root from claiming
+    their files as its own.
+    """
+    skipped: list[Path] = []
+    kept: list[Path] = []
+    for root in roots:
+        tag = root_locale(root)
+        inside = next((other for other in skipped if other in root.parents), None)
+        if inside is None and (not tag or same_language(tag, context.locale)):
+            kept.append(root)
+            continue
+        skipped.append(root)
+        relative = _relative_to(context.tree, root)
+        context.record(
+            "LOCALIZED_ROOT_SKIPPED", path=relative,
+            message=(f"output root for locale {tag!r} not converted into the {context.locale} tree"
+                     if inside is None else
+                     f"output root inside the localized root {_relative_to(context.tree, inside)}"),
+        )
+    context.excluded_roots.extend(skipped)
+    return kept
+
+
+def _relative_to(tree: Path, path: Path) -> str:
+    try:
+        return path.relative_to(tree).as_posix()
+    except ValueError:  # pragma: no cover - a root outside its own tree
+        return path.name
 
 
 # -- the registry -------------------------------------------------------------

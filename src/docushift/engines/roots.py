@@ -191,6 +191,37 @@ def find_output_roots(tree: Path, engine: SourceEngine) -> list[Path]:
     return sorted(roots, key=lambda path: (len(path.parts), str(path)))
 
 
+# A locale tag as a directory name: `ja`, `ja-jp`, `de-de`, `en-us`. The bare
+# two-letter form is read only for a language on this list, because `ui` or `db`
+# is a folder name long before it is a language; the language-region form needs
+# a listed language too, for the same reason. Every localized root in the corpus
+# is one of `ja`, `ja-jp`, `de-de`, `fr-fr`, `es-es` (Phase 34, R5-01).
+_LOCALE_TAG = re.compile(r"^(?P<language>[a-z]{2})(?:[-_][a-z]{2})?$")
+_LANGUAGES = frozenset({
+    "ar", "cs", "da", "de", "el", "en", "es", "fi", "fr", "he", "hu", "it", "ja",
+    "ko", "nl", "no", "pl", "pt", "ru", "sv", "th", "tr", "zh",
+})
+
+
+def root_locale(root: Path) -> str:
+    """The locale a root's own directory name declares, lowercased, or `""`.
+
+    Only the last segment is read. A localized Flare build is its own output root
+    named for its locale -- `wf-wf/9.3.5` ships `doc/html/{de-de,en-us,es-es,
+    fr-fr,ja-jp}` side by side -- so the root's name is the evidence, and a
+    segment further up (`doc/`, `html/`) never is.
+    """
+    match = _LOCALE_TAG.match(root.name.lower())
+    if match is None or match.group("language") not in _LANGUAGES:
+        return ""
+    return root.name.lower()
+
+
+def same_language(tag: str, locale: str) -> bool:
+    """Do two locale tags name one language? `en` and `en-us` do; `ja-jp` does not."""
+    return re.split(r"[-_]", tag.lower())[0] == re.split(r"[-_]", locale.lower())[0]
+
+
 def owning_root(path: Path, roots: list[Path]) -> Path | None:
     """Which root owns `path`. **The innermost one** (`architecture.md` §5.1.3).
 

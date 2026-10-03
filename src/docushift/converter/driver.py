@@ -283,6 +283,7 @@ class DocumentConverter:
             api_roots=api_roots,
             api_urls=self._api_urls(product, number, tree, api_roots),
             output_roots=output_roots,
+            locale=self.config.locale,
             findings=self.findings,
         )
 
@@ -298,6 +299,10 @@ class DocumentConverter:
         # while the list is still a generator.
         work = list(handler.units(context))
         context.subtrees = subtree_names(tree, work, version.engine)
+        # A root located and deliberately not converted (a localized build,
+        # R5-01) publishes no topic, so its help identifiers have nothing to
+        # resolve to; resolving them anyway reports each one as CSH_UNRESOLVED.
+        sources = [source for source in sources if not _excluded(tree, source, context)]
 
         for root in work:
             unit_name = context.subtree_name(root)
@@ -916,6 +921,12 @@ def _merge(total: Counts, part: Counts) -> None:
         setattr(total, name, getattr(total, name) + getattr(part, name))
     for segment, count in part.dangling_by_segment.items():
         total.dangling_by_segment[segment] = total.dangling_by_segment.get(segment, 0) + count
+
+
+def _excluded(tree: Path, source: CshSource, context: ConversionContext) -> bool:
+    """Is this help map owned by a root the engine left out of the version?"""
+    owner = tree / Path(*PurePosixPath(source.doc_set).parts) if source.doc_set else tree
+    return any(owner == root or root in owner.parents for root in context.excluded_roots)
 
 
 def _find_csh(tree: Path) -> list[tuple[Path, CshFormat]]:

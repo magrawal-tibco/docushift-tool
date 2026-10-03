@@ -36,6 +36,7 @@ from docushift.engines.base import (
     registered_engines,
     unregister,
 )
+from docushift.engines.roots import find_output_roots
 from docushift.extractor import ExtractOutcome, PackageExtractor
 from docushift.models import ConversionStatus, Product, ProductVersion, SourceEngine
 from docushift.reporting.findings import FindingsRun, Severity
@@ -842,6 +843,91 @@ def test_a_real_year_difference_is_still_reported() -> None:
     assert _year_check("June 2022", "2023-06-12") == [
         "METADATA_MISMATCH: homepage release-date 2022 != catalog 2023"
     ]
+
+
+# -- localized output roots (Phase 34, R5-01) --------------------------------------
+
+
+def _flare_roots(base: Path, *relatives: str) -> list[Path]:
+    roots = []
+    for relative in relatives:
+        root = base / relative
+        (root / "Data").mkdir(parents=True, exist_ok=True)
+        (root / "Data" / "HelpSystem.xml").write_text("<x/>", encoding="utf-8")
+        roots.append(root)
+    return roots
+
+
+def _units(tree: Path, engine_cls: type[BaseEngine] = FakeEngine) -> tuple[list[str], FindingsRun]:
+    findings = FindingsRun("convert")
+    context = ConversionContext(
+        tree=tree, output=tree.parent / "out", engine=SourceEngine.FLARE,
+        output_roots=find_output_roots(tree, SourceEngine.FLARE), findings=findings,
+    )
+    work = engine_cls().units(context)
+    return [root.relative_to(tree).as_posix() for root in work], findings
+
+
+def test_a_localized_output_root_is_skipped_and_named_with_its_locale(tmp_path: Path) -> None:
+    """`wf-wf/9.3.5`: five sibling builds, one per locale, and the `ja-jp` one alone
+    converted 2,779 Japanese topics into the English tree with no finding."""
+    _flare_roots(tmp_path, "doc/en", *(f"doc/html/{tag}" for tag in
+                                       ("de-de", "en-us", "es-es", "fr-fr", "ja-jp")))
+
+    units, findings = _units(tmp_path)
+
+    assert units == ["doc/en", "doc/html/en-us"]
+    skipped = {f.path: f.message for f in findings.all if f.code == "LOCALIZED_ROOT_SKIPPED"}
+    assert sorted(skipped) == ["doc/html/de-de", "doc/html/es-es", "doc/html/fr-fr", "doc/html/ja-jp"]
+    assert "'ja-jp'" in skipped["doc/html/ja-jp"]
+
+
+def test_a_nested_localized_root_cannot_convert_what_its_parent_skipped(tmp_path: Path) -> None:
+    """`sfire-dsc/7.1.0`: the outer root skipped `ja/` and said so, while the nested
+    root `doc/html/ja` converted the same files. Neither converts them now, and a
+    root inside the skipped one goes with it."""
+    _flare_roots(tmp_path, "doc/html", "doc/html/ja", "doc/html/ja/sub")
+
+    units, findings = _units(tmp_path, engine_for(SourceEngine.FLARE))
+
+    assert units == ["doc/html"]
+    assert sorted(f.path for f in findings.all if f.code == "LOCALIZED_ROOT_SKIPPED") == [
+        "doc/html/ja", "doc/html/ja/sub",
+    ]
+
+
+def test_a_folder_that_only_looks_like_a_language_is_converted(tmp_path: Path) -> None:
+    _flare_roots(tmp_path, "doc/ui", "doc/html")
+
+    units, findings = _units(tmp_path)
+
+    assert units == ["doc/ui", "doc/html"] or units == ["doc/html", "doc/ui"]
+    assert not findings.all
+
+
+def test_a_skipped_localized_root_contributes_no_help_identifiers(
+    config, catalog, product, version, fake_engine
+) -> None:
+    """Its `Alias.xml` would otherwise reach `csh.yml`'s resolver and report every
+    identifier unresolved, since nothing of the root was converted."""
+    place_package(config, product, version, {
+        **PACKAGE,
+        "guide/ja-jp/Data/HelpSystem.xml": "<x/>",
+        "guide/ja-jp/Data/Alias.xml": ALIAS.replace("install", "jp-install"),
+        "guide/ja-jp/Content/topic.htm": TOPIC,
+    })
+    assert PackageExtractor(config, catalog).extract_one(product, version).outcome is (
+        ExtractOutcome.EXTRACTED
+    )
+
+    result, findings = convert(config, catalog, product, version)
+
+    assert result.outcome is ConvertOutcome.CONVERTED
+    assert "jp-install" not in result.csh.entries
+    assert [f.message for f in findings.all if f.code == "CSH_UNRESOLVED"] == [
+        "1234 -> Content/gone.htm matched no produced topic"
+    ]
+    assert [f.path for f in findings.all if f.code == "LOCALIZED_ROOT_SKIPPED"] == ["guide/ja-jp"]
 
 
 # -- unit naming (Phase 34, R4-14) -----------------------------------------------
