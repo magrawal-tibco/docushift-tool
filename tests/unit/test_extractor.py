@@ -718,6 +718,26 @@ def test_a_help_map_that_cannot_be_parsed_is_a_warning_and_not_a_note(
     assert codes["CSH_SOURCE_UNPARSED"].path == "guide/Data/alias.xml"
 
 
+def test_help_entries_a_reader_skips_are_counted_and_reported(
+    config: ConfigManager, catalog: CatalogManager, product: Product, version: ProductVersion
+) -> None:
+    """A `Map` with no `Name` was passed over without a count, so "every identifier
+    is resolved or listed" could fail without a line (R4-11)."""
+    place_package(config, product, version, {
+        **FLARE_PACKAGE,
+        "guide/Data/alias.xml": (
+            '<CatapultAliasFile><Map Name="ok" Link="a.htm"/><Map Link="b.htm"/></CatapultAliasFile>'
+        ),
+    })
+    findings = FindingsRun("extract")
+
+    PackageExtractor(config, catalog, findings=findings).extract_one(product, version)
+
+    unparsed = [f for f in findings.all if f.code == "CSH_SOURCE_UNPARSED"]
+    assert [f.count for f in unparsed] == [1]
+    assert "skipped" in unparsed[0].message
+
+
 def test_an_extractor_with_no_findings_run_behaves_exactly_as_before(
     config: ConfigManager, catalog: CatalogManager, product: Product, version: ProductVersion
 ) -> None:

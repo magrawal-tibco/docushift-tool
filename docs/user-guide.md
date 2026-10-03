@@ -678,7 +678,7 @@ docushift convert \
 | :--- | :--- |
 | `--dry-run` | List what would be converted, and where, without writing. |
 | `--force` | Re-convert even when the extracted tree has not changed since last time. |
-| `--input` / `--output` | Convert one folder that never went through `extract`. Both are required together, with `--product` and `--version`. |
+| `--input` / `--output` | Convert one folder that never went through `extract`. Both are required together, with `--product` and `--version`. The folder is always read afresh: nothing `extract` recorded for the catalog's copy (roots, API trees, help maps) is applied to it, and it is never reported as current. |
 
 > **All four engines convert: MadCap Flare, SDL DITA, WebWorks and DocBook.** Between them
 > they are every eligible version in the corpus. A version whose generator DocuShift

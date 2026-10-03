@@ -1010,6 +1010,68 @@ def test_a_book_of_another_engine_is_named_once_and_not_fed_to_this_one(
     assert result.skipped.get("other-engine-root") == 3
 
 
+# -- `--input` and CSH consistency (Phase 34, R4-04, R4-05) -----------------------
+
+
+def test_a_standalone_folder_never_reads_the_catalog_trees_record(
+    config, catalog, product, version, extracted, fake_engine, tmp_path
+) -> None:
+    """The recorded roots, API roots and CSH paths describe the catalog's tree.
+    Joined to an `--input` copy laid out under a wrapper, every one of them
+    missed, and the run reported `converted` with 0 topics (R4-04). Nor does the
+    catalog tree's checksum make the other folder `current`."""
+    from tests.unit.test_extractor import build_tree
+
+    first, _ = convert(config, catalog, product, version)
+    assert first.outcome is ConvertOutcome.CONVERTED
+    loose = build_tree(tmp_path / "loose", {f"wrapper/{k}": v for k, v in PACKAGE.items()})
+    out = tmp_path / "loose-out"
+    out.mkdir()
+
+    result, _ = convert(config, catalog, product, version, tree=loose, output=out)
+
+    assert result.outcome is ConvertOutcome.CONVERTED
+    assert result.documents == 2
+    assert (out / "csh.yml").is_file()
+
+
+def _frontmatter(path: Path) -> dict:
+    text = path.read_text(encoding="utf-8")
+    return yaml.safe_load(text.split("---")[1]) if text.startswith("---") else {}
+
+
+def test_frontmatter_carries_exactly_the_identifiers_csh_yml_resolves_to_the_page(
+    config, catalog, product, version, fake_engine
+) -> None:
+    """§9.6: every identifier in a topic's frontmatter is in `csh.yml`, and the
+    reverse. Frontmatter was keyed on the link inside its own doc-set, so an
+    identifier the version-wide fallback rescued landed on no page, and the loser
+    of an ambiguity kept it while `csh.yml` pointed elsewhere (R4-05)."""
+    def alias(*maps: tuple[str, str]) -> str:
+        rows = "".join(f'<Map Name="{name}" Link="{link}"/>' for name, link in maps)
+        return f"<CatapultAliasFile>{rows}</CatapultAliasFile>"
+
+    place_package(config, product, version, {
+        "guide/Output.mcwebhelp": "",
+        "guide/Data/HelpSystem.xml": "<x/>",
+        "guide/Data/Alias.xml": alias(("ID_MAIN", "a.htm"), ("ID_BOTH", "a.htm")),
+        "guide/a.htm": "<html><body>A</body></html>",
+        "relnotes/Data/HelpSystem.xml": "<x/>",
+        "relnotes/Data/Alias.xml": alias(("ID_RESCUED", "a.htm"), ("ID_BOTH", "r.htm")),
+        "relnotes/r.htm": "<html><body>R</body></html>",
+    })
+    assert PackageExtractor(config, catalog).extract_one(product, version).outcome is (
+        ExtractOutcome.EXTRACTED
+    )
+
+    result, _ = convert(config, catalog, product, version)
+
+    output = config.output_path(product.bu, product.family, product.slug, version.version)
+    assert result.csh.entries == {"ID_BOTH": "a.md", "ID_MAIN": "a.md", "ID_RESCUED": "a.md"}
+    assert _frontmatter(output / "a.md")["csh"] == ["ID_BOTH", "ID_MAIN", "ID_RESCUED"]
+    assert "csh" not in _frontmatter(output / "relnotes" / "r.md")
+
+
 # -- unit naming (Phase 34, R4-14) -----------------------------------------------
 
 

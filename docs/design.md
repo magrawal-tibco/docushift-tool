@@ -859,7 +859,7 @@ csh: ["bw_rest_binding", "restBindingRef"]
 
 Always a list, even at length one, because a page commonly owns several. Topics with no identifier get no key at all.
 
-Identifiers are known before conversion writes the file — parsing a 24 KB alias file is cheap — so frontmatter lands in the topic's **first and only write**, not in a second read-modify-write pass over the whole output tree.
+Identifiers are known before conversion writes the file — parsing a 24 KB alias file is cheap — so frontmatter lands in the topic's **first and only write**, not in a second read-modify-write pass over the whole output tree. **The frontmatter is read off the resolved map** (Phase 34, R4-05): every unit is converted, its output paths are known, §9.3 resolves against them, and only then is any topic written — so a page carries exactly the identifiers `csh.yml` sends to it, including one the version-wide fallback rescued, and the losing page of an ambiguity carries none. Keyed instead on the link inside its own doc-set, the two disagreed for both.
 
 ### 9.6 CSH verification
 

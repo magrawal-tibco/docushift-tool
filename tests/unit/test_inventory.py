@@ -20,6 +20,7 @@ from docushift.apiref import find_api_roots, is_api_reference, looks_like_api_na
 from docushift.catalog import CatalogManager
 from docushift.config import ConfigManager
 from docushift.engines import CshFormat, CshStatus, find_output_roots
+from docushift.engines.csh import read_csh_source
 from docushift.extractor import ExtractOutcome, PackageExtractor, inventory_tree
 from docushift.models import Product, ProductVersion, SourceEngine
 
@@ -360,6 +361,40 @@ def test_a_webworks_topics_js_dispatch_chain_is_read(tmp_path: Path) -> None:
     assert inventory.csh_names == {"as400.palette.gettingstartedurl", "as400.instance.helpurl"}
     # 43% of WebWorks targets carry a Frame-generated numeric anchor.
     assert sorted(entry.anchor for entry in source.entries) == ["", "1674528"]
+
+
+def test_a_help_map_past_the_read_cap_is_unparseable_not_partly_ok(tmp_path: Path) -> None:
+    """The reader kept the first 300,000 bytes and said nothing: a 494 KB
+    `topics.js` of 12,000 cases read as 7,370 with status `ok`, and a `head.js`
+    whose contexts sit past the cap read as `empty` (R4-11)."""
+    cases = "".join(f'if(P=="id.{i:05d}")C="page{i}.htm#{i}";\n' for i in range(12000))
+    topics = tmp_path / "book" / "wwhdata" / "common" / "topics.js"
+    topics.parent.mkdir(parents=True)
+    topics.write_text(f"function  WWHBookData_MatchTopic(P)\n{{\n{cases}return C;\n}}\n",
+                      encoding="utf-8")
+    head = tmp_path / "ds" / "static" / "head.js"
+    head.parent.mkdir(parents=True)
+    head.write_text("var pad='" + "x" * 310_000 + "';\nsuitehelp.contexts={\"a\":\"GUID-1.html\"};",
+                    encoding="utf-8")
+
+    assert read_csh_source(topics, CshFormat.WEBWORKS_TOPICS).status is CshStatus.UNPARSEABLE
+    assert read_csh_source(head, CshFormat.DITA_HEAD_JS).status is CshStatus.UNPARSEABLE
+
+
+def test_entries_a_reader_passes_over_are_counted(tmp_path: Path) -> None:
+    alias = tmp_path / "guide" / "Data" / "Alias.xml"
+    alias.parent.mkdir(parents=True)
+    alias.write_text('<CatapultAliasFile><Map Name="ok" Link="a.htm"/><Map Link="b.htm"/>'
+                     "</CatapultAliasFile>", encoding="utf-8")
+    head = tmp_path / "ds" / "static" / "head.js"
+    head.parent.mkdir(parents=True)
+    head.write_text('suitehelp.contexts={"a":"GUID-1.html","b":7,"":"GUID-2.html"};', encoding="utf-8")
+
+    flare = read_csh_source(alias, CshFormat.FLARE_ALIAS)
+    dita = read_csh_source(head, CshFormat.DITA_HEAD_JS)
+
+    assert (flare.count, flare.skipped) == (1, 1)
+    assert (dita.count, dita.skipped) == (1, 2)
 
 
 def test_a_topics_js_that_returns_null_is_empty_not_broken(tmp_path: Path) -> None:

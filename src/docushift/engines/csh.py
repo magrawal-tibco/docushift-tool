@@ -45,7 +45,10 @@ _WEBWORKS_CASE = re.compile(
     re.IGNORECASE | re.DOTALL,
 )
 # 300 KB covers every source in the corpus with room to spare; the cap is here so
-# that a mis-detected binary cannot be read into memory whole.
+# that a mis-detected binary cannot be read into memory whole. A source past it is
+# `UNPARSEABLE`, never read in part (Phase 34, R4-11): a prefix of a WebWorks
+# dispatch chain parses as a shorter, `ok` one, and a `head.js` whose contexts sit
+# past the cap reads as `empty` -- both a silent loss.
 _MAX_SOURCE_BYTES = 300_000
 
 
@@ -89,6 +92,10 @@ class CshSource:
     fmt: CshFormat
     status: CshStatus = CshStatus.EMPTY
     entries: list[CshEntry] = field(default_factory=list)
+    # Entries the reader passed over: a `Map` with no `Name`, a DITA context with
+    # no key or a target that is not a string. Counted (R4-11), so "every
+    # identifier is resolved or listed" cannot fail without a line.
+    skipped: int = 0
     # The output root that owns it, relative to the extracted tree. Filled in by
     # the caller, which is the only party holding the root list.
     doc_set: str = ""
@@ -116,13 +123,16 @@ def csh_format_of(path: Path) -> CshFormat | None:
     return None
 
 
-def _read(path: Path) -> str | None:
+def _read(path: Path) -> tuple[str | None, bool]:
+    """The text, and whether the file runs past the cap (then the text is `None`)."""
     try:
         with path.open("rb") as handle:
-            raw = handle.read(_MAX_SOURCE_BYTES)
+            raw = handle.read(_MAX_SOURCE_BYTES + 1)
     except OSError:
-        return None
-    return raw.decode("utf-8", errors="replace")
+        return None, False
+    if len(raw) > _MAX_SOURCE_BYTES:
+        return None, True
+    return raw.decode("utf-8", errors="replace"), False
 
 
 def _split_fragment(link: str) -> tuple[str, str]:
@@ -135,7 +145,7 @@ def _split_fragment(link: str) -> tuple[str, str]:
     return path, anchor
 
 
-def _read_flare(text: str) -> tuple[CshStatus, list[CshEntry]]:
+def _read_flare(text: str) -> tuple[CshStatus, list[CshEntry], int]:
     """`<Map Name="TOPIC_ID" Link="path.htm" ResolvedId="1000"/>`.
 
     `ResolvedId` is parsed and discarded (§9.1): it is not unique even inside one
@@ -145,18 +155,20 @@ def _read_flare(text: str) -> tuple[CshStatus, list[CshEntry]]:
     try:
         root = ElementTree.fromstring(text)
     except ElementTree.ParseError:
-        return CshStatus.UNPARSEABLE, []
+        return CshStatus.UNPARSEABLE, [], 0
     entries = []
+    skipped = 0
     for element in root.iter("Map"):
         identifier = element.get("Name")
         if not identifier:
+            skipped += 1
             continue
         link, anchor = _split_fragment(element.get("Link", ""))
         entries.append(CshEntry(identifier, link, anchor))
-    return (CshStatus.OK if entries else CshStatus.EMPTY), entries
+    return (CshStatus.OK if entries else CshStatus.EMPTY), entries, skipped
 
 
-def _read_dita(text: str) -> tuple[CshStatus, list[CshEntry]]:
+def _read_dita(text: str) -> tuple[CshStatus, list[CshEntry], int]:
     """`suitehelp.contexts={"id":"GUID-….html", …}` -- one flat object.
 
     Located rather than executed, and the braces are matched by scanning so that
@@ -164,23 +176,25 @@ def _read_dita(text: str) -> tuple[CshStatus, list[CshEntry]]:
     """
     match = _DITA_CONTEXTS.search(text)
     if match is None:
-        return CshStatus.EMPTY, []
+        return CshStatus.EMPTY, [], 0
     body = _extract_object(text, match.start(1))
     if body is None:
-        return CshStatus.UNPARSEABLE, []
+        return CshStatus.UNPARSEABLE, [], 0
     try:
         contexts = json.loads(body)
     except ValueError:
-        return CshStatus.UNPARSEABLE, []
+        return CshStatus.UNPARSEABLE, [], 0
     if not isinstance(contexts, dict):
-        return CshStatus.UNPARSEABLE, []
+        return CshStatus.UNPARSEABLE, [], 0
     entries = []
+    skipped = 0
     for identifier, target in contexts.items():
         if not identifier or not isinstance(target, str):
+            skipped += 1
             continue
         link, anchor = _split_fragment(target)
         entries.append(CshEntry(identifier, link, anchor))
-    return (CshStatus.OK if entries else CshStatus.EMPTY), entries
+    return (CshStatus.OK if entries else CshStatus.EMPTY), entries, skipped
 
 
 def _extract_object(text: str, start: int) -> str | None:
@@ -208,7 +222,7 @@ def _extract_object(text: str, start: int) -> str | None:
     return None
 
 
-def _read_webworks(text: str) -> tuple[CshStatus, list[CshEntry]]:
+def _read_webworks(text: str) -> tuple[CshStatus, list[CshEntry], int]:
     """The generated `if(P=="<id>")C="<file>[#<anchor>]";` dispatch chain.
 
     492 of 647 files (76%) return `null` unconditionally and produce no cases at
@@ -216,16 +230,18 @@ def _read_webworks(text: str) -> tuple[CshStatus, list[CshEntry]]:
     that does not even name the function is a different matter and is
     unparseable rather than empty.
     """
+    cases = list(_WEBWORKS_CASE.finditer(text))
     entries = [
         CshEntry(match.group("id"), *_split_fragment(match.group("target")))
-        for match in _WEBWORKS_CASE.finditer(text)
+        for match in cases
         if match.group("id")
     ]
+    skipped = len(cases) - len(entries)
     if entries:
-        return CshStatus.OK, entries
+        return CshStatus.OK, entries, skipped
     if "WWHBookData_MatchTopic" in text:
-        return CshStatus.EMPTY, []
-    return CshStatus.UNPARSEABLE, []
+        return CshStatus.EMPTY, [], skipped
+    return CshStatus.UNPARSEABLE, [], skipped
 
 
 _READERS = {
@@ -238,7 +254,10 @@ _READERS = {
 def read_csh_source(path: Path, fmt: CshFormat) -> CshSource:
     """Reads one located source. **Never raises** -- a bad file is a status."""
     source = CshSource(path=path, fmt=fmt)
-    text = _read(path)
+    text, oversized = _read(path)
+    if oversized:
+        source.status = CshStatus.UNPARSEABLE
+        return source
     if text is None:
         source.status = CshStatus.UNREADABLE
         return source
@@ -246,5 +265,5 @@ def read_csh_source(path: Path, fmt: CshFormat) -> CshSource:
         # Zero-byte alias files are 31 of 863 in the corpus and are ordinary.
         source.status = CshStatus.EMPTY
         return source
-    source.status, source.entries = _READERS[fmt](text)
+    source.status, source.entries, source.skipped = _READERS[fmt](text)
     return source

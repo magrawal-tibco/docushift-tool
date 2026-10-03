@@ -485,6 +485,23 @@ class PackageExtractor:
                     + (" ..." if len(unparsed) > 5 else "")
                 ),
             )
+        # Phase 34 (R4-11): entries a reader passed over inside a map that did
+        # parse -- a `Map` with no `Name`, a context whose target is not a path.
+        # The same code, because the fact is the same one a size smaller: help
+        # that was located and did not come out.
+        partial = [s for s in inventory.csh_sources if s.skipped]
+        if partial:
+            skipped = sum(s.skipped for s in partial)
+            self.findings.record(
+                "CSH_SOURCE_UNPARSED", slug=slug, version=number, count=skipped,
+                path=partial[0].path.as_posix(),
+                message=(
+                    f"{skipped} help entr(ies) skipped by the reader (no identifier, or a "
+                    f"target that is not a path) in {len(partial)} map(s): "
+                    + ", ".join(s.path.as_posix() for s in partial[:5])
+                    + (" ..." if len(partial) > 5 else "")
+                ),
+            )
 
     # -- a run ----------------------------------------------------------------
 

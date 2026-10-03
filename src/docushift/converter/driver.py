@@ -18,7 +18,9 @@ Four rules, all of them things the driver does so that no engine has to:
   survives in the output forever. Not atomic on Windows -- build, remove, rename.
 - **CSH identifiers reach the topic's first and only write** (§9.5). They are read
   before conversion begins, because parsing a 24 KB alias file is cheap and a
-  read-modify-write pass over the whole output tree is not.
+  read-modify-write pass over the whole output tree is not -- and since Phase 34
+  (R4-05) they are *resolved* before the first topic is written too, so a topic's
+  frontmatter carries exactly what `csh.yml` sends to it.
 - **The asset copier is the driver's**, handed to the engine per unit. The engine
   resolves while it emits, which is invariant 13; the engine does not decide where
   a file lands, which would make the destination exist in two places.
@@ -194,8 +196,15 @@ class DocumentConverter:
         `tree` and `output` override the catalog's paths, which is what
         `--input`/`--output` are for; everything else about the run is identical,
         so a standalone folder is not a second code path.
+
+        Except in what it may read back (Phase 34, R4-04). Stage 4's record --
+        output roots, API roots, CSH paths, the package checksum -- describes the
+        catalog's extracted tree, and joined to another folder every path missed:
+        the run reported `converted` with 0 topics. A standalone folder is located
+        from scratch and never `current`.
         """
         slug, number = product.slug, version.version
+        standalone = tree is not None
         source = tree or self.config.extract_path(product.bu, product.family, slug, number)
         target = output or self.config.output_path(product.bu, product.family, slug, number)
 
@@ -241,8 +250,8 @@ class DocumentConverter:
         # is read as matching, as a blank prefix is.
         recorded_engine = metadata.get("convert_engine", "")
         engine_current = not recorded_engine or recorded_engine == str(version.engine)
-        if (not force and checksum and checksum == converted_from and prefix_current
-                and engine_current and target.is_dir()):
+        if (not force and not standalone and checksum and checksum == converted_from
+                and prefix_current and engine_current and target.is_dir()):
             current = ConvertResult(
                 slug, number, ConvertOutcome.CURRENT, path=target, engine=version.engine
             )
@@ -256,7 +265,9 @@ class DocumentConverter:
             return current
 
         try:
-            return self._build(product, version, handler_cls(), source, target, checksum)
+            return self._build(
+                product, version, handler_cls(), source, target, checksum, standalone
+            )
         except OSError as exc:  # pragma: no cover - filesystem failure, not logic
             message = f"{type(exc).__name__}: {exc}"
             if self.state is not None:
@@ -273,6 +284,7 @@ class DocumentConverter:
         tree: Path,
         target: Path,
         checksum: str,
+        standalone: bool = False,
     ) -> ConvertResult:
         """Converts every unit into a staging directory, then swaps it into place."""
         slug, number = product.slug, version.version
@@ -280,20 +292,19 @@ class DocumentConverter:
         remove(staging)
         staging.mkdir(parents=True, exist_ok=True)
 
-        sources = self._csh_sources(slug, number, tree)
-        owned = csh_transform.identifiers_by_source(sources)
+        sources = self._csh_sources(slug, number, tree, standalone)
 
         # Read before the context is built, because `_api_roots` needs them: an api
         # root that is also an output root is the output root's (6d).
-        output_roots = self._recorded_paths(slug, number, "output_roots", tree)
-        if not all(is_output_root(root, version.engine) for root in output_roots):
+        output_roots = [] if standalone else self._recorded_paths(slug, number, "output_roots", tree)
+        if standalone or not all(is_output_root(root, version.engine) for root in output_roots):
             # Stage 4 located these for the engine the version had then, and an
             # unchanged package never re-identifies (R4-03): a hand-corrected
             # engine was handed the old engine's roots. Every recorded root passes
             # its engine's rule by construction, so one that fails was recorded
             # for another engine, and the roots are located again for this one.
             output_roots = find_output_roots(tree, version.engine)
-        api_roots = self._api_roots(slug, number, tree, output_roots)
+        api_roots = self._api_roots(slug, number, tree, output_roots, standalone)
         context = ConversionContext(
             tree=tree,
             output=staging,
@@ -332,7 +343,6 @@ class DocumentConverter:
             copier = AssetCopier(root, version.engine, staging / unit_name if unit_name else staging)
             context.assets = copier
             unit = handler.convert_unit(context, root)
-            self._write_unit(context, unit, owned, output_rows, staging)
             result.assets += copier.copy()
             self._report_assets(context, unit_name, copier)
             _merge(result.counts, copier.counts)
@@ -346,16 +356,36 @@ class DocumentConverter:
         self._report_flattened_links(context)
         self._report_repairs(context)
 
+        # Resolution runs against what this run *just produced*, from the rows in
+        # hand rather than from the table -- the table is written below, and a
+        # read-back would resolve against the previous run on a re-convert.
+        #
+        # And before any topic is written (Phase 34, R4-05). Frontmatter used to
+        # come from the link inside the identifier's own doc-set, read before
+        # conversion, while `csh.yml` resolves through §9.3 steps 4-5: an
+        # identifier the version-wide fallback rescued reached no page, and the
+        # loser of an ambiguity kept it while `csh.yml` pointed elsewhere --
+        # against §9.6's "every identifier in frontmatter is in csh.yml, and vice
+        # versa". Every output path is known once the units are converted, so the
+        # frontmatter is now read off the resolved map, still in the first write.
+        for unit in units:
+            for document in unit.documents:
+                output_rows.append(
+                    (_relative(tree, document.source), str(_output_path(unit, document)), unit.name)
+                )
+        mapping = {source: output for source, output, _unit in output_rows}
+        result.csh = csh_transform.resolve(sources, mapping)
+        owned: dict[str, list[str]] = {}
+        for identifier, destination in result.csh.entries.items():
+            owned.setdefault(destination.partition("#")[0], []).append(identifier)
+        for unit in units:
+            self._write_unit(unit, {path: sorted(ids) for path, ids in owned.items()}, staging)
+
         # Stage 6a, and it runs here rather than in a later command because the
         # node list exists only while the units are in hand and the pages it
         # generates have to reach the staging tree before the swap.
         self._synthesize(context, units, staging, product, version, result)
 
-        # Resolution runs against what this run *just produced*, from the rows in
-        # hand rather than from the table -- the table is written below, and a
-        # read-back would resolve against the previous run on a re-convert.
-        mapping = {source: output for source, output, _unit in output_rows}
-        result.csh = csh_transform.resolve(sources, mapping)
         self._report_csh(context, result.csh)
         csh_transform.write(staging / "csh.yml", result.csh.entries)
 
@@ -444,24 +474,19 @@ class DocumentConverter:
 
     # -- writing ---------------------------------------------------------------
 
-    def _write_unit(
-        self,
-        context: ConversionContext,
-        unit: Unit,
-        owned: dict[str, list[str]],
-        output_rows: list[tuple[str, str, str]],
-        staging: Path,
-    ) -> None:
-        """Writes one unit's documents, each in a single pass (§9.5)."""
+    def _write_unit(self, unit: Unit, owned: dict[str, list[str]], staging: Path) -> None:
+        """Writes one unit's documents, each in a single pass (§9.5).
+
+        `owned` is keyed on the version-relative output path: the identifiers
+        `csh.yml` resolves to that page, and no others (R4-05).
+        """
         for document in unit.documents:
-            source = _relative(context.tree, document.source)
-            relative = PurePosixPath(unit.name) / document.relative if unit.name else document.relative
+            relative = _output_path(unit, document)
             if not document.csh:
-                document.csh = owned.get(source, [])
+                document.csh = owned.get(str(relative), [])
             path = staging / Path(*relative.parts)
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text(_render(document), encoding="utf-8")
-            output_rows.append((source, str(relative), unit.name))
 
     def _synthesize(
         self,
@@ -796,7 +821,8 @@ class DocumentConverter:
         return recorded_roots(self._metadata(slug, version), key, tree)
 
     def _api_roots(
-        self, slug: str, version: str, tree: Path, output_roots: list[Path]
+        self, slug: str, version: str, tree: Path, output_roots: list[Path],
+        standalone: bool = False,
     ) -> list[Path]:
         """Stage 4's recorded API roots, located here only when there is no record.
 
@@ -813,7 +839,7 @@ class DocumentConverter:
         they are -- the difference between a report line that explains 1,466 files
         and one that shrugs at them.
         """
-        recorded = self._recorded_paths(slug, version, "api_roots", tree)
+        recorded = [] if standalone else self._recorded_paths(slug, version, "api_roots", tree)
         return recorded or find_api_roots(tree, output_roots)
 
     def _api_prefix(self, product: Product, version: str) -> str:
@@ -869,7 +895,9 @@ class DocumentConverter:
             slugify(self.config.locale), product.slug, version_segment(version),
         )
 
-    def _csh_sources(self, slug: str, version: str, tree: Path) -> list[CshSource]:
+    def _csh_sources(
+        self, slug: str, version: str, tree: Path, standalone: bool = False
+    ) -> list[CshSource]:
         """The version's help maps, re-read from disk at the paths Stage 4 recorded.
 
         Re-read rather than re-located: `state.db` holds each source's path, format
@@ -877,10 +905,13 @@ class DocumentConverter:
         from the file itself. Entries are not stored -- 11,054 rows of Flare alias
         for one product would be a copy of a file we already have.
 
-        Falls back to locating them when there is no record, which is the
-        `--input` case: a standalone folder never went through `extract`.
+        Falls back to locating them when there is no record, and always for a
+        standalone `--input` folder, whose layout the record does not describe.
         """
-        rows = self.state.get_csh_sources(slug, version) if self.state is not None else []
+        rows = (
+            self.state.get_csh_sources(slug, version)
+            if self.state is not None and not standalone else []
+        )
         located: list[tuple[Path, CshFormat, str]] = []
         for row in rows:
             path = tree / Path(row["path"])
@@ -957,6 +988,11 @@ def _scalar(value: Any) -> str:
     if isinstance(value, list):
         return "[" + ", ".join(csh_transform.quote(str(item)) for item in value) + "]"
     return csh_transform.quote(str(value))
+
+
+def _output_path(unit: Unit, document: Document) -> PurePosixPath:
+    """A document's path in the version's output: its unit's subtree, then its own."""
+    return PurePosixPath(unit.name) / document.relative if unit.name else document.relative
 
 
 def _relative(tree: Path, path: Path) -> str:
