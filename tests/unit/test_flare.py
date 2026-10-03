@@ -907,6 +907,24 @@ def test_a_cross_reference_becomes_a_relative_markdown_path(tmp_path: Path) -> N
     assert "[the introduction](../intro.md#section)" in body
 
 
+def test_a_cross_reference_takes_the_files_letter_case_not_the_hrefs(tmp_path: Path) -> None:
+    """`dsc-stat/14.1.0`: the href said `Statistica`, the directory `statistica` (R5-06).
+
+    Resolved on Windows, the link 404s on GitHub and AEM, where paths are
+    case-sensitive.
+    """
+    files = basic()
+    files["html/Content/10-working-with-statistica-query/file-new.htm"] = topic("New")
+    files["html/Content/intro.htm"] = topic(
+        "Introduction",
+        "<p>See <a href='10-working-with-Statistica-query/File-New.htm#top'>New</a>.</p>",
+    )
+
+    body = run(tmp_path, files).body("Content/intro.md")
+
+    assert "[New](10-working-with-statistica-query/file-new.md#top)" in body
+
+
 def test_a_reference_to_a_topic_this_run_did_not_produce_keeps_its_text(
     tmp_path: Path,
 ) -> None:

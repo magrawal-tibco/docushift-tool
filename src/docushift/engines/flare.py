@@ -174,14 +174,16 @@ class FlareRenderer(markdown.Renderer):
     """MadCap's vocabulary, over `transforms/markdown.py`'s walk."""
 
     def __init__(self, engine: "FlareEngine", context: ConversionContext, unit: Unit,
-                 source: Path, output: PurePosixPath, topics: set[str], landing: bool = False):
+                 source: Path, output: PurePosixPath, topics: dict[str, str],
+                 landing: bool = False):
         self.engine = engine
         self.context = context
         self.unit = unit
         self.source = source
         self.output = output
-        # Case-folded root-relative paths of every topic this run will write. A
-        # cross-reference to anything else is a dangling link, not a `.md` path.
+        # Every topic this run will write, case-folded root-relative path -> the
+        # path as it is on disk. A cross-reference to anything else is a dangling
+        # link, not a `.md` path.
         self.topics = topics
         self.landing = landing
         self.base = PurePosixPath(source.parent.relative_to(self.unit.root).as_posix())
@@ -317,10 +319,15 @@ class FlareRenderer(markdown.Renderer):
             return self._asset(reference.raw)
 
         resolved = links.resolve(self.base, reference.path)
-        if links.escapes(resolved) or str(resolved).lower() not in self.topics:
+        planned = None if links.escapes(resolved) else self.topics.get(str(resolved).lower())
+        if planned is None:
             self.engine.dangling_link(self.context, self.unit, self.source, reference.path)
             return None
-        target = links.to_markdown(resolved)
+        # The file's letter case, not the href's (R5-06). Matched case-folded, the
+        # way Windows resolves it, and emitted as written: `dsc-stat/14.1.0` links
+        # `10-working-with-Statistica-query/` into a directory spelled in lower
+        # case, which 404s on GitHub and AEM.
+        target = links.to_markdown(PurePosixPath(planned))
         return links.emit(links.relative_to(self.output, target), reference.fragment)
 
     def image(self, tag: Tag) -> str | None:
@@ -374,8 +381,9 @@ class _Plan:
     # separately because it has to be rejected even when the source TOC references
     # it, which is true of 4 versions.
     placeholder: str = ""
-    # `topics` plus `landing`, case-folded: what a cross-reference may point at.
-    planned: set[str] = field(default_factory=set)
+    # `topics` plus `landing`, case-folded, each mapped to its on-disk spelling:
+    # what a cross-reference may point at, and the path it is emitted as.
+    planned: dict[str, str] = field(default_factory=dict)
 
 
 @register
@@ -459,9 +467,9 @@ class FlareEngine(BaseEngine):
             referenced.add(whats_new.lower())
 
         topics = self._topics(context, unit, root, referenced, landing, placeholder)
-        planned = {name.lower() for name in topics}
+        planned = {name.lower(): name for name in topics}
         if landing:
-            planned.add(landing.lower())
+            planned[landing.lower()] = landing
         return _Plan(manifest=manifest, tocs=tocs, landing=landing, topics=topics,
                      whats_new=whats_new, placeholder=placeholder, planned=planned)
 
@@ -584,7 +592,7 @@ class FlareEngine(BaseEngine):
     # -- one topic -------------------------------------------------------------
 
     def _convert(self, context: ConversionContext, unit: Unit, root: Path, relative: str,
-                 planned: set[str], landing: bool = False) -> Document | None:
+                 planned: dict[str, str], landing: bool = False) -> Document | None:
         source = root / Path(*PurePosixPath(relative).parts)
         text = _read(source)
         if text is None:

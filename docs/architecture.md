@@ -1031,7 +1031,7 @@ Flare does not preserve a semantic class vocabulary the way DITA does (§5.2.5).
 
 Two numbers, both measured **after** `#feedback-survey` removal (§5.1.6) over the 60-root sample, and both meaningless before it:
 
-- **78% of hrefs are relative `.htm`/`.html`** — the cross-references. They are rewritten to `.md` at the mirrored path (§5.1.3), which is a suffix substitution rather than a lookup precisely because the output tree mirrors the input tree.
+- **78% of hrefs are relative `.htm`/`.html`** — the cross-references. They are rewritten to `.md` at the mirrored path (§5.1.3), which is a suffix substitution rather than a lookup precisely because the output tree mirrors the input tree. The target is matched case-folded, as Windows resolves it, and **emitted in the file's letter case, not the href's** (R5-06): `dsc-stat/14.1.0` links `10-working-with-Statistica-query/` into a directory spelled in lower case, 12 links that 404 on a case-sensitive host.
 - **98.3% of them resolve to a file that exists on disk.** The 1.7% that dangle are source defects: the link is emitted as plain text and counted in the report.
 
 The remaining 22% are absolute URLs (left alone), fragment-only links (kept as in-page anchors), and links into an embedded API tree, which become absolute URLs into the `-resources` repo per §6.3/§6.4. Their exact split was not measured; the rewriting rule for each is determined by its form, not by its frequency.
