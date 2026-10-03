@@ -297,7 +297,7 @@ class DocumentConverter:
         # output root publishes at the version root, and that cannot be known
         # while the list is still a generator.
         work = list(handler.units(context))
-        context.subtrees = subtree_names(tree, work)
+        context.subtrees = subtree_names(tree, work, version.engine)
 
         for root in work:
             unit_name = context.subtree_name(root)

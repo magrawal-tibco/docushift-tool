@@ -53,6 +53,7 @@ pre-pass is a regex scan and not a parse, which is what makes a second read of
 every file affordable.
 """
 
+import filecmp
 import html as html_entities
 import os
 import posixpath
@@ -1001,9 +1002,45 @@ class WebWorksEngine(BaseEngine):
                 message="WebWorks tree with no wwhdata/ book root -- nothing to convert",
             )
             return []
-        ordered = self._order(context, roots)
+        ordered = self._order(context, self._without_copies(context, roots))
         self._scan(context)
         return ordered
+
+    def _without_copies(self, context: ConversionContext, roots: list[Path]) -> list[Path]:
+        """Drops a book that is a byte-identical copy of another, and names it.
+
+        Phase 34 (R4-01). Silver Fabric Enabler for ActiveSpaces 1.2.0 ships each
+        book at the top level and again under `html/`, byte for byte, and both
+        copies published: every guide twice in `toc.yml`, with the top-level
+        copy's pages linking into the other. DocBook's rule (§5.6.3) applied to
+        books: the copy is rejected and each rejection is a `DOCSET_SKIPPED` line.
+
+        Only same-named books are compared, and only byte identity drops one -- a
+        name alone is not evidence of a copy. The copy a collection's `books.xml`
+        declares is kept, because that is the one the help system was built from;
+        failing that, the shallowest, which is the order `find_output_roots` gives.
+        """
+        by_name: dict[str, list[Path]] = {}
+        for root in roots:
+            by_name.setdefault(root.name.lower(), []).append(root)
+        dropped: set[Path] = set()
+        for group in by_name.values():
+            if len(group) < 2:
+                continue
+            group = sorted(group, key=lambda root: (not _declared(root), len(root.parts), str(root)))
+            for index, kept in enumerate(group):
+                if kept in dropped:
+                    continue
+                for other in group[index + 1:]:
+                    if other in dropped or not _same_files(kept, other):
+                        continue
+                    dropped.add(other)
+                    context.record(
+                        "DOCSET_SKIPPED", path=_relative(context.tree, other),
+                        message=f"byte-identical duplicate of the book at "
+                                f"{_relative(context.tree, kept)}",
+                    )
+        return [root for root in roots if root not in dropped]
 
     def _order(self, context: ConversionContext, roots: list[Path]) -> list[Path]:
         """Books grouped by collection, declared order inside each (§5.3.3).
@@ -1538,6 +1575,41 @@ def _relative(tree: Path, path: Path) -> str:
         return path.relative_to(tree).as_posix()
     except ValueError:  # pragma: no cover - the driver walks from the tree
         return path.name
+
+
+def _declared(book: Path) -> bool:
+    """Does the collection beside this book declare it in its `books.xml`?"""
+    collection = read_books(book.parent / "wwhelp" / "books.xml")
+    if collection is None:
+        return False
+    return any(
+        book.parent / Path(*PurePosixPath(reference.directory).parts) == book
+        for reference in collection.books
+    )
+
+
+def _same_files(first: Path, second: Path) -> bool:
+    """Are two directories byte-identical: the same relative paths, the same bytes?
+
+    Sizes are compared before contents, so two books that differ stop at the
+    listing in almost every case and no file is read twice for nothing.
+    """
+    def listing(root: Path) -> dict[str, Path]:
+        try:
+            return {path.relative_to(root).as_posix().lower(): path
+                    for path in root.rglob("*") if path.is_file()}
+        except OSError:  # pragma: no cover - an unreadable book is not a copy
+            return {}
+
+    left, right = listing(first), listing(second)
+    if not left or left.keys() != right.keys():
+        return False
+    try:
+        if any(left[key].stat().st_size != right[key].stat().st_size for key in left):
+            return False
+        return all(filecmp.cmp(left[key], right[key], shallow=False) for key in left)
+    except OSError:  # pragma: no cover - a file that vanished mid-compare
+        return False
 
 
 __all__ = ["SPAN_TO_TAG", "WebWorksEngine", "WebWorksRenderer", "normalize"]

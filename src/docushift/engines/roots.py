@@ -206,7 +206,9 @@ def owning_root(path: Path, roots: list[Path]) -> Path | None:
     return best
 
 
-def subtree_names(tree: Path, roots: list[Path]) -> dict[Path, str]:
+def subtree_names(
+    tree: Path, roots: list[Path], engine: SourceEngine | None = None
+) -> dict[Path, str]:
     """What each unit's output subtree is called. `""` means the version root.
 
     `architecture.md` §5.1.3 used to answer this with one line -- the root's path
@@ -238,6 +240,15 @@ def subtree_names(tree: Path, roots: list[Path]) -> dict[Path, str]:
     the same last segment). Nested roots cannot use the rule at all -- the inner
     root's files are already inside the outer one, so naming the inner root as a
     sibling folder does not separate them, it just renames the collision.
+
+    **The primary is a Flare rule** (Phase 34, R4-12). The measurement above is of
+    Flare, where the second root is release notes beside the guide. A WebWorks
+    version's units are its books (§5.3.3), peers with no main one, and the
+    shallowest-path rule handed the version root to whichever sorted first --
+    Runtime Agent 5.12.4's `tib_Designer_palettes`, its pages mixed with the
+    generated `index.md` -- by path rather than by `books.xml`. So for WebWorks
+    every book of several takes its last segment, and the clash refusals apply
+    unchanged.
     """
     if not roots:
         return {}
@@ -250,6 +261,12 @@ def subtree_names(tree: Path, roots: list[Path]) -> dict[Path, str]:
         return {ordered[0]: ""}
     if any(other != root and root in other.parents for root in ordered for other in ordered):
         return full
+
+    if engine is SourceEngine.WEBWORKS:
+        names = [root.name for root in ordered]
+        if len(set(name.lower() for name in names)) != len(names):
+            return full
+        return {root: root.name for root in ordered}
 
     primary, others = ordered[0], ordered[1:]
     names = [root.name for root in others]

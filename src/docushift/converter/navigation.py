@@ -99,7 +99,7 @@ def synthesize(context: ConversionContext, units: list[Unit], templates: Path) -
 
     result = Synthesis()
     nodes = _assemble(views, documents)
-    result.dropped += _tail(views, nodes)
+    result.dropped += _tail(views, nodes, documents)
     result.landing, wants_index = _landing(views, nodes, documents)
     _whats_new(views, nodes, documents, after_landing=result.landing is not None)
 
@@ -163,7 +163,9 @@ def _assemble(views: list[_View], documents: dict[PurePosixPath, Document]) -> l
     return nodes
 
 
-def _tail(views: list[_View], nodes: list[NavNode]) -> int:
+def _tail(
+    views: list[_View], nodes: list[NavNode], documents: dict[PurePosixPath, Document]
+) -> int:
     """Support then legal, last, once per version. Moved, never appended.
 
     Positional and not content-addressed: see the module docstring. The chosen
@@ -197,8 +199,10 @@ def _tail(views: list[_View], nodes: list[NavNode]) -> int:
         if node is None:
             # Reported by the engine but never a TOC entry -- WebWorks'
             # `copyrigh.htm` is in the TOC of almost no book (§5.3.5), so the node
-            # is created here rather than lost.
-            node = NavNode(label="", document=path)
+            # is created here rather than lost. Labelled from its page, as every
+            # other node this module creates is; an empty label rendered
+            # `title: ""` (Phase 34, R4-13).
+            node = NavNode(label=_label_of(path, documents), document=path)
         nodes.append(node)
     return dropped
 

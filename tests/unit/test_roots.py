@@ -14,6 +14,7 @@ the whole version rather than a name for one root.
 from pathlib import Path
 
 from docushift.engines.roots import subtree_names
+from docushift.models import SourceEngine
 
 
 def tree(base: Path, *relatives: str) -> list[Path]:
@@ -113,3 +114,32 @@ def test_no_roots_is_an_empty_lookup_and_not_an_error(tmp_path: Path) -> None:
     as "the version tree is the single unit" -- a different fact, handled by the
     caller, and not this function's to invent a name for."""
     assert subtree_names(tmp_path, []) == {}
+
+
+# -- per engine (Phase 34, R4-12) ------------------------------------------------
+
+
+def test_every_webworks_book_of_several_gets_its_own_folder(tmp_path: Path) -> None:
+    """The shallowest-root rule was measured on Flare only (§5.1.3). WebWorks'
+    unit is the book (§5.3.3), and handing one book the version root mixed its
+    pages with the generated `index.md` and `toc.yml` -- Runtime Agent 5.12.4's
+    `tib_Designer_palettes`, chosen by path and not by `books.xml`."""
+    palettes, upgrade = tree(tmp_path, "designerhelp/tib_Designer_palettes", "trahelp/upgrade")
+
+    assert subtree_names(tmp_path, [palettes, upgrade], SourceEngine.WEBWORKS) == {
+        palettes: "tib_Designer_palettes", upgrade: "upgrade",
+    }
+
+
+def test_a_lone_webworks_book_still_publishes_at_the_version_root(tmp_path: Path) -> None:
+    roots = tree(tmp_path, "html/guide")
+
+    assert subtree_names(tmp_path, roots, SourceEngine.WEBWORKS) == {roots[0]: ""}
+
+
+def test_webworks_books_sharing_a_last_segment_keep_their_full_names(tmp_path: Path) -> None:
+    first, second = tree(tmp_path, "a/guide", "b/Guide")
+
+    assert subtree_names(tmp_path, [first, second], SourceEngine.WEBWORKS) == {
+        first: "a/guide", second: "b/Guide",
+    }

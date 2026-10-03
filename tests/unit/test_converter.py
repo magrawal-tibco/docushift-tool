@@ -842,3 +842,18 @@ def test_a_real_year_difference_is_still_reported() -> None:
     assert _year_check("June 2022", "2023-06-12") == [
         "METADATA_MISMATCH: homepage release-date 2022 != catalog 2023"
     ]
+
+
+# -- unit naming (Phase 34, R4-14) -----------------------------------------------
+
+
+def test_a_root_the_subtree_lookup_does_not_know_is_refused(tmp_path: Path) -> None:
+    """It answered `""` -- the version root -- for any root not exactly a key, so
+    an engine deriving a root differently from the list it returned would have
+    written its pages over the version root and said nothing."""
+    context = ConversionContext(tree=tmp_path, output=tmp_path / "out", engine=SourceEngine.FLARE)
+    context.subtrees = {tmp_path / "a": "", tmp_path / "b": "b"}
+
+    assert context.subtree_name(tmp_path / "b") == "b"
+    with pytest.raises(ValueError, match="not a unit"):
+        context.subtree_name(tmp_path / "c")

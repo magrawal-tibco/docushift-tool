@@ -299,6 +299,22 @@ def test_a_tail_page_the_toc_never_listed_still_reaches_the_tail(context, templa
     assert paths(result.nodes) == ["guide/a.md", "guide/copyrigh.md"]
 
 
+def test_a_tail_page_the_toc_never_listed_is_labelled_from_its_page(context, templates) -> None:
+    """Created with `label=""` it rendered `title: ""` in `toc.yml` (R4-13)."""
+    unit = book(
+        "guide",
+        pages=("a.md", ("copyrigh.md", "Important Information")),
+        nav=[node("A", "a.md")],
+        landing="a.md",
+        legal="copyrigh.md",
+    )
+
+    result = synthesize(context, [unit], templates)
+
+    assert result.nodes[-1].label == "Important Information"
+    assert 'title: ""' not in render_toc(result.nodes, templates, "EMS 10.4.0")
+
+
 # -- the landing page -----------------------------------------------------------
 
 

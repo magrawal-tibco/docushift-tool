@@ -723,7 +723,10 @@ note whose first bolded words are still "Remember:".
 **What a WebWorks version produces.** One output subtree per *book* — the directory holding
 `wwhdata/` — mirroring the source layout. A version ships **3.5 books on average** (median
 3, max 30; only 25 of 195 ship just one), which is the reverse of Flare, so several
-subtrees is the normal case rather than the exception. Where the books are gathered under a
+subtrees is the normal case rather than the exception. Where there are several, each book
+gets its own folder named after its directory; none takes the version root. A book shipped
+twice, byte for byte (at the top level and again under `html/`), is converted once and the
+copy is reported. Where the books are gathered under a
 collection, the order they appear in is the one the collection declares: it is authored,
 and it is not alphabetical in 71% of them. Book display names come from each book's own
 title file and are never invented. As with DITA there is **no landing page** — both

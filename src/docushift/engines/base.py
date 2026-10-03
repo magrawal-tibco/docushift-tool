@@ -320,9 +320,17 @@ class ConversionContext:
         topic's pages and that topic's images in different subtrees -- every image
         on the version 404s and nothing reports it, because each half is
         internally consistent.
+
+        Once the lookup is set, a root it does not hold is refused rather than
+        answered with `""` (Phase 34, R4-14): `""` is the version root, so an engine
+        that derived a unit root differently from the list it returned would have
+        written that unit's pages and images over it without a word. Raised, and
+        the driver turns any exception into a `failed` version.
         """
         if self.subtrees:
-            return self.subtrees.get(root, "")
+            if root not in self.subtrees:
+                raise ValueError(f"{root} is not a unit of this version")
+            return self.subtrees[root]
         try:
             return root.relative_to(self.tree).as_posix() if root != self.tree else ""
         except ValueError:  # pragma: no cover - a root outside its own tree

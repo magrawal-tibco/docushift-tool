@@ -243,7 +243,7 @@ def run(tmp_path: Path, files: Mapping[str, str | bytes], *, api_roots: tuple[st
     # `unit.name` and `book.name` the same string in every test -- and Phase 17a's
     # link rebase is invisible unless the two differ.
     work = list(engine.units(context))
-    context.subtrees = subtree_names(tree, work)
+    context.subtrees = subtree_names(tree, work, SourceEngine.WEBWORKS)
     for root in work:
         name = context.subtree_name(root)
         context.assets = AssetCopier(root, SourceEngine.WEBWORKS, output / name if name else output)
@@ -554,6 +554,47 @@ def test_a_nested_book_belongs_to_itself(tmp_path: Path) -> None:
     assert sorted(unit.name for unit in result.units) == ["outer", "outer/inner"]
     assert result.named("outer").skipped["nested-book"] == 1
     assert result.names(result.named("outer")) == ["t.md"]
+
+
+def _guide(prefix: str = "") -> dict[str, str | bytes]:
+    return book(
+        f"{prefix}guide",
+        topics={"t.htm": topic("Guide", heading("Guide"))},
+        files=(("Guide", "t.htm"),),
+        toc=toc_js(node("", "P", "Guide", "0")),
+    )
+
+
+def test_a_byte_identical_copy_of_a_book_is_skipped_and_named(tmp_path: Path) -> None:
+    """Silver Fabric Enabler for ActiveSpaces 1.2.0 ships every book at the top
+    level *and* under `html/`, byte for byte, and both copies published -- each
+    guide twice in `toc.yml` (R4-01). The copy the collection's `books.xml`
+    declares is the one kept; the other is a `DOCSET_SKIPPED` line, as DocBook's
+    duplicates are (§5.6.3)."""
+    files = {**_guide(), **_guide("html/"), "html/wwhelp/books.xml": books_xml(("guide", ""))}
+    result = run(tmp_path, files)
+
+    assert result.roots() == ["html/guide"]
+    skipped = [f for f in result.findings.all if f.code == "DOCSET_SKIPPED"]
+    assert [f.path for f in skipped] == ["guide"]
+    assert "html/guide" in skipped[0].message
+
+
+def test_without_a_manifest_the_shallower_identical_copy_is_kept(tmp_path: Path) -> None:
+    result = run(tmp_path, {**_guide(), **_guide("html/")})
+
+    assert result.roots() == ["guide"]
+    assert result.codes()["DOCSET_SKIPPED"] == 1
+
+
+def test_two_books_that_share_a_name_and_differ_are_both_converted(tmp_path: Path) -> None:
+    """A name is not evidence of a copy: only byte identity drops a book."""
+    files = {**_guide(), **_guide("html/")}
+    files["html/guide/t.htm"] = topic("Guide", heading("Guide, revised"))
+    result = run(tmp_path, files)
+
+    assert result.roots() == ["guide", "html/guide"]
+    assert "DOCSET_SKIPPED" not in result.codes()
 
 
 def test_a_tree_with_no_book_root_is_reported(tmp_path: Path) -> None:
@@ -902,25 +943,25 @@ def test_a_popup_is_a_cross_book_reference_and_not_a_dead_javascript_href(tmp_pa
         context="refbook",
     ))
     result = run(tmp_path, files)
-    # `guide` is the shallowest of two roots, so it publishes at the version root
-    # and `reference` beside it -- the link crosses books without climbing out of
-    # one. It read `../reference/ref.md#p9` until Phase 17b, which was this test
-    # asserting the source tree's shape rather than the published tree's.
-    assert "[the reference](reference/ref.md#p9)" in result.body("a.md", result.named(""))
+    # Each of two books publishes in its own folder (Phase 34, R4-12), so the link
+    # climbs out of `guide/` and into `reference/` -- in the published tree's
+    # coordinates, which Phase 17b made the rule.
+    assert "[the reference](../reference/ref.md#p9)" in result.body("a.md", result.named("guide"))
 
 
 # -- links are emitted in the published tree's coordinates (Phase 17a) ----------
 #
 # `book.name` is the book root relative to the extracted tree; `unit.name` is
-# `subtree_name(root)`, which gives the version root to the shallowest book and
-# the last segment to the rest (§5.1.3). The two differ for every WebWorks book
+# `subtree_name(root)`, which gives each of several books its last segment
+# (§5.1.3, Phase 34 R4-12). The two differ for every WebWorks book
 # that is not its version's only output root, and every assertion below is on the
 # second -- a link is read by whatever renders the file that was published, not
 # by the tree it was converted from.
 
 
 def two_books(**topics: Mapping[str, str]) -> dict[str, str | bytes]:
-    """`designerhelp/palettes` at the version root and `trahelp/upgrade` beside it.
+    """`designerhelp/palettes` and `trahelp/upgrade`, published as `palettes/` and
+    `upgrade/`.
 
     The `tra` family's real shape in miniature, and the smallest fixture in which
     `book.name` and `unit.name` disagree: `trahelp/upgrade` publishes as `upgrade`.
@@ -937,11 +978,10 @@ def two_books(**topics: Mapping[str, str]) -> dict[str, str | bytes]:
     return files
 
 
-def test_a_link_inside_the_book_that_took_the_version_root_is_a_bare_sibling(
-        tmp_path: Path) -> None:
+def test_a_link_inside_the_first_book_is_a_bare_sibling(tmp_path: Path) -> None:
     """The flat case, and the one that broke loudest: 795 links in one version.
 
-    `designerhelp/palettes` publishes at the version root, so its two topics are
+    `designerhelp/palettes` publishes as `palettes/`, so its two topics are
     siblings there. Resolving the target in source coordinates emitted the whole
     of `designerhelp/palettes/b.htm` as the URL, from a file sitting next to it.
     """
@@ -950,7 +990,7 @@ def test_a_link_inside_the_book_that_took_the_version_root_is_a_bare_sibling(
                  "b.htm": heading("B")},
         secondary={"t.htm": heading("T")},
     ))
-    assert "[B](b.md)" in result.body("a.md", result.named(""))
+    assert "[B](b.md)" in result.body("a.md", result.named("palettes"))
 
 
 def test_a_link_inside_a_named_unit_is_a_bare_sibling_too(tmp_path: Path) -> None:
@@ -967,26 +1007,25 @@ def test_a_link_inside_a_named_unit_is_a_bare_sibling_too(tmp_path: Path) -> Non
     assert "[U](u.md)" in result.body("t.md", result.named("upgrade"))
 
 
-def test_a_link_from_the_version_root_into_a_named_unit_descends_once(
-        tmp_path: Path) -> None:
+def test_a_link_from_one_book_into_another_climbs_once(tmp_path: Path) -> None:
+    """One `../` and not two -- the source path is two segments deep, the
+    published one is one."""
     result = run(tmp_path, two_books(
         primary={"a.htm": '<div class="Body">See '
                           '<a href="../../trahelp/upgrade/t.htm">T</a>.</div>'},
         secondary={"t.htm": heading("T")},
     ))
-    assert "[T](upgrade/t.md)" in result.body("a.md", result.named(""))
+    assert "[T](../upgrade/t.md)" in result.body("a.md", result.named("palettes"))
 
 
-def test_a_link_from_a_named_unit_back_to_the_version_root_climbs_once(
-        tmp_path: Path) -> None:
-    """One `../` and not three -- the source path is two segments deep, the
-    published one is one."""
+def test_a_link_back_into_the_first_book_climbs_once(tmp_path: Path) -> None:
+    """One `../` and not three, in the other direction."""
     result = run(tmp_path, two_books(
         primary={"a.htm": heading("A")},
         secondary={"t.htm": '<div class="Body">See '
                             '<a href="../../designerhelp/palettes/a.htm">A</a>.</div>'},
     ))
-    assert "[A](../a.md)" in result.body("t.md", result.named("upgrade"))
+    assert "[A](../palettes/a.md)" in result.body("t.md", result.named("upgrade"))
 
 
 def test_a_popup_and_a_relative_href_resolve_to_the_same_entry(tmp_path: Path) -> None:
@@ -999,9 +1038,9 @@ def test_a_popup_and_a_relative_href_resolve_to_the_same_entry(tmp_path: Path) -
                           '\'t.htm\', \'\');">pop</a>.</div>'},
         secondary={"t.htm": heading("T")},
     ))
-    body = result.body("a.md", result.named(""))
-    assert "[rel](upgrade/t.md)" in body
-    assert "[pop](upgrade/t.md)" in body
+    body = result.body("a.md", result.named("palettes"))
+    assert "[rel](../upgrade/t.md)" in body
+    assert "[pop](../upgrade/t.md)" in body
 
 
 def test_an_anchor_in_a_named_unit_is_still_emitted(tmp_path: Path) -> None:
@@ -1015,7 +1054,7 @@ def test_an_anchor_in_a_named_unit_is_still_emitted(tmp_path: Path) -> None:
                           '<a href="../../trahelp/upgrade/t.htm#s1">T</a>.</div>'},
         secondary={"t.htm": '<div class="N1Heading"><a name="s1">Section</a></div>'},
     ))
-    assert "[T](upgrade/t.md#s1)" in result.body("a.md", result.named(""))
+    assert "[T](../upgrade/t.md#s1)" in result.body("a.md", result.named("palettes"))
     assert '<a id="s1"></a>' in result.body("t.md", result.named("upgrade"))
 
 
