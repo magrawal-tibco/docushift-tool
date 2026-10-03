@@ -423,6 +423,27 @@ def test_generated_directories_and_runtime_stubs_are_skipped_but_home_is_not(
     assert result.document("_templates/Home.md").title == "Product"
 
 
+def test_runtime_stubs_named_after_the_project_are_stubs(tmp_path: Path) -> None:
+    """`<stem>.htm` and `<stem>_CSH.htm` beside `<stem>.mcwebhelp` (R5-10).
+
+    278 of them in 139 roots, none with a container: each raised a false
+    `CONTENT_MISSING`, and a link to one would emit a `.md` never written.
+    """
+    files = basic()
+    files["html/platform-ct.mcwebhelp"] = "<CatapultWebHelp />"
+    stub = "<html data-mc-runtime-file-type='Default;TriPane'><body>frameset</body></html>"
+    files["html/platform-ct.htm"] = stub
+    files["html/platform-ct_CSH.htm"] = stub
+    # The same name below the root is somebody's topic, not the runtime's.
+    files["html/Content/platform-ct.htm"] = topic("Control Tower")
+
+    result = run(tmp_path, files)
+
+    assert result.unit.skipped["runtime-stub"] == 2
+    assert "CONTENT_MISSING" not in result.codes()
+    assert result.document("Content/platform-ct.md").title == "Control Tower"
+
+
 def test_the_localized_subtree_is_skipped_and_counted(tmp_path: Path) -> None:
     """8,004 files, and the corpus's only localized tree."""
     files = basic()
@@ -1327,6 +1348,31 @@ def test_a_headless_node_keeps_its_children_and_a_childless_one_is_dropped(
     assert (concepts.label, concepts.document) == ("Concepts", None)
     assert [child.label for child in concepts.children] == ["Intro"]
     assert "Empty" not in [node.label for node in result.unit.nav]
+    assert result.codes()["NAV_NODE_DROPPED"] == 1
+
+
+def test_a_merged_project_node_is_named_for_what_it_is(tmp_path: Path) -> None:
+    """`tp/1.1.0`: six `*.flprj` keys mark where sub-projects' TOCs go (R5-11).
+
+    They were dropped as "no page and no children", which misdescribes them:
+    each is a sub-guide that converts as its own unit and loses its place.
+    """
+    files = basic()
+    files.update({f"html/{k}": v for k, v in toc_files(
+        [{"i": 1}, {"i": 2}, {"i": 3}],
+        {"Content/intro.htm": {"i": [1], "t": ["Intro"], "b": [""]},
+         "/../../../../tp-ems-capability-userdocs/ems-capability.flprj":
+             {"i": [2], "t": ["TIBCO Enterprise Message Service"], "b": [""]},
+         "___": {"i": [3], "t": ["Empty"], "b": [""]}},
+    ).items()})
+
+    result = run(tmp_path, files)
+
+    placed = [f for f in result.findings.all if f.code == "TOC_SUBPROJECT_UNPLACED"]
+    assert len(placed) == 1 and placed[0].count == 1
+    assert "TIBCO Enterprise Message Service" in placed[0].message
+    assert "ems-capability" in placed[0].message
+    # The headless one is still the ordinary drop, and counted apart.
     assert result.codes()["NAV_NODE_DROPPED"] == 1
 
 

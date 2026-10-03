@@ -144,6 +144,10 @@ REGISTRY: dict[str, Code] = _codes(
          "A Flare root's HelpSystem.xml or declared TOC is missing or did not parse; "
          "its topics are filed under Unfiled",
          "Phase 34 (R5-12)"),
+    Code("TOC_SUBPROJECT_UNPLACED", Severity.NOTE, Stage.CONVERT,
+         "A merged-project TOC node (*.flprj) marking where a sub-project's TOC "
+         "goes; the node is dropped and the sub-guide loses its place",
+         "Phase 34 (R5-11)"),
     Code("TOC_ORPHAN", Severity.NOTE, Stage.CONVERT,
          "Converted topics in no TOC entry, filed under Unfiled -- 14.1% for Flare",
          "architecture.md §5.1.4"),

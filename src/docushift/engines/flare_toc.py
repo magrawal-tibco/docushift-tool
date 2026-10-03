@@ -34,6 +34,9 @@ from docushift.transforms.links import is_topic
 HEADLESS_KEY = "___"
 
 _CHUNK_FILE = re.compile(r"_Chunk\d+\.js$", re.IGNORECASE)
+# A merged project's insertion point: `/../../../../tp-ems-capability-userdocs/
+# ems-capability.flprj` is where that sub-project's TOC goes in the parent's.
+_PROJECT_SUFFIX = ".flprj"
 _DEFINE = re.compile(r"\bdefine\s*\(")
 
 
@@ -72,14 +75,19 @@ def _slashed(value: str) -> str:
 class Entry:
     """One TOC position: a page, a label, and an optional bookmark.
 
-    `path` is empty for a headless node -- the `'___'` sentinel, or the one stray
-    `.flprj` key in the sample. `label` is kept either way, because a headless node
-    is exactly the case where the label is all there is.
+    `path` is empty for a headless node -- the `'___'` sentinel, or a `.flprj`
+    key. `label` is kept either way, because a headless node is exactly the case
+    where the label is all there is.
+
+    `project` is the `.flprj` stem when the key is one: not a stray, but the
+    point where a merged project inserts a sub-project's TOC. 121 such keys
+    across the 937 corpus roots, 6 in `tp/1.1.0` (R5-11).
     """
 
     path: str = ""
     label: str = ""
     anchor: str = ""
+    project: str = ""
 
 
 @dataclass
@@ -175,9 +183,11 @@ def _index(path: Path, document: dict[str, Any]) -> tuple[dict[int, Entry], int]
             if len(labels) < len(ids) or len(anchors) < len(ids):
                 ragged += 1
             target = _target(key)
+            project = _project(key)
             for position, identifier in enumerate(ids):
                 index[identifier] = Entry(
                     path=target,
+                    project=project,
                     label=str(labels[position]) if position < len(labels) else "",
                     anchor=str(anchors[position]).lstrip("#") if position < len(anchors) else "",
                 )
@@ -190,6 +200,12 @@ def _target(key: str) -> str:
     if not path or path == HEADLESS_KEY or not is_topic(path):
         return ""
     return path
+
+
+def _project(key: str) -> str:
+    """The sub-project a `.flprj` key names, or `""`."""
+    name = str(key).replace("\\", "/").rstrip("/").rsplit("/", 1)[-1]
+    return name[: -len(_PROJECT_SUFFIX)] if name.lower().endswith(_PROJECT_SUFFIX) else ""
 
 
 def _listed(value: Any) -> list[Any]:

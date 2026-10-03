@@ -398,6 +398,8 @@ class FlareEngine(BaseEngine):
         # which is the scope the finding is reported at.
         self._alerts: set[str] = set()
         self._dropped = 0
+        # `.flprj` insertion points dropped from the TOC, as "label (project)".
+        self._subprojects: list[str] = []
 
     def units(self, context: ConversionContext) -> list[Path]:
         roots = super().units(context)
@@ -562,6 +564,7 @@ class FlareEngine(BaseEngine):
             other for other in (context.output_roots or find_output_roots(context.tree, self.engine))
             if other != root and root in other.parents
         ]
+        stubs = _project_stubs(root)
         found: list[str] = []
         for path in _walk_files(root):
             if path.suffix.lower() not in _HTML_SUFFIXES:
@@ -573,7 +576,7 @@ class FlareEngine(BaseEngine):
                 # column that says nothing was written.
                 continue
             reason = self._rejection(path, relative, nested, context.api_roots,
-                                     referenced, placeholder)
+                                     referenced, placeholder, stubs)
             if reason:
                 unit.skip(reason)
                 continue
@@ -585,7 +588,8 @@ class FlareEngine(BaseEngine):
         return sorted(found)
 
     def _rejection(self, path: Path, relative: PurePosixPath, nested: list[Path],
-                   api_roots: list[Path], referenced: set[str], placeholder: str = "") -> str:
+                   api_roots: list[Path], referenced: set[str], placeholder: str = "",
+                   stubs: frozenset[str] = frozenset()) -> str:
         """Why this HTML file is not a topic, or `""` if it is one."""
         first = relative.parts[0].lower() if len(relative.parts) > 1 else ""
         if first in LOCALIZED_DIRECTORIES:
@@ -593,6 +597,8 @@ class FlareEngine(BaseEngine):
         if first in GENERATED_DIRECTORIES:
             return "generated-directory"
         if path.name.lower() in STUB_FILENAMES:
+            return "runtime-stub"
+        if len(relative.parts) == 1 and path.name.lower() in stubs:
             return "runtime-stub"
         if any(root in path.parents for root in nested):
             return "nested-output-root"
@@ -760,6 +766,7 @@ class FlareEngine(BaseEngine):
         filed: set[str] = set()
         nodes: list[NavNode] = []
         self._dropped = 0
+        self._subprojects = []
 
         for index, toc in enumerate(plan.tocs):
             converted = [
@@ -788,6 +795,15 @@ class FlareEngine(BaseEngine):
         if self._dropped:
             context.record("NAV_NODE_DROPPED", path=unit.name, count=self._dropped,
                            message=f"{self._dropped} node(s) with no page and no children")
+        if self._subprojects:
+            # Counted apart from the drops above, because the cause is not a
+            # missing page: the sub-project converts as a unit of its own (or is
+            # not in this version) and only its place in this TOC is lost. The
+            # file names do not match the unit names -- `control-tower.flprj` is
+            # `Subsystems/platform-ct` -- so placing it is not attempted here.
+            context.record("TOC_SUBPROJECT_UNPLACED", path=unit.name, count=len(self._subprojects),
+                           message="merged-project TOC node(s) not placed: "
+                                   + "; ".join(self._subprojects))
         return nodes
 
     def _node(self, node: TocNode, documents: dict[str, Document],
@@ -807,6 +823,10 @@ class FlareEngine(BaseEngine):
         if document is not None:
             children = [child for child in children if child.document != document.relative]
 
+        if document is None and not children and node.entry.project:
+            # A merged project's insertion point (R5-11): 121 keys over 937 roots.
+            self._subprojects.append(f"{node.entry.label} ({node.entry.project})".lstrip())
+            return None
         if document is None and not children:
             # A label with nothing under it: 7 headless nodes corpus-wide, plus any
             # node whose page was skipped. Dropped, and counted.
@@ -1248,6 +1268,22 @@ def _span(cell: Tag) -> int:
 
 
 # -- small readers -------------------------------------------------------------
+
+
+def _project_stubs(root: Path) -> frozenset[str]:
+    """The runtime stubs Flare names after the build target (R5-10).
+
+    `<stem>.htm` and `<stem>_CSH.htm` sit beside `<stem>.mcwebhelp` at the
+    root -- `platform-ct.htm` in `tp/1.1.0` -- where `STUB_FILENAMES` only knows
+    the `Default` spelling. 278 in 139 roots, none a topic, each a false
+    `CONTENT_MISSING` until now.
+    """
+    try:
+        stems = [path.stem.lower() for path in root.iterdir()
+                 if path.suffix.lower() == ".mcwebhelp" and path.is_file()]
+    except OSError:
+        return frozenset()
+    return frozenset(name for stem in stems for name in (f"{stem}.htm", f"{stem}_csh.htm"))
 
 
 def _walk_files(root: Path):

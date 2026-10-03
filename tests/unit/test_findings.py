@@ -141,9 +141,11 @@ def test_the_register_carries_every_row_of_7_5() -> None:
     columns unwritten, and never said so or cleared the previous package's.
     It adds the 70th and 71st, `CONTENT_BODY_FALLBACK` (R5-09) and
     `TOC_UNREADABLE` (R5-12): a whole root reported one topic at a time, and a
-    TOC that failed to parse with no word at all.
+    TOC that failed to parse with no word at all. And the 72nd,
+    `TOC_SUBPROJECT_UNPLACED` (R5-11): merged-project insertion points that
+    were being counted as headless nodes.
     """
-    assert len(REGISTRY) == 71
+    assert len(REGISTRY) == 72
 
 
 def test_severity_comes_from_the_registry_and_not_from_the_call_site() -> None:
