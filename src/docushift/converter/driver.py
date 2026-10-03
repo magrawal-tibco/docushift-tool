@@ -31,6 +31,7 @@ behaviour and it is honest: the spine runs end to end and the register says so.
 """
 
 import re
+import traceback
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass, field
 from enum import StrEnum
@@ -268,13 +269,23 @@ class DocumentConverter:
             return self._build(
                 product, version, handler_cls(), source, target, checksum, standalone
             )
-        except OSError as exc:  # pragma: no cover - filesystem failure, not logic
-            message = f"{type(exc).__name__}: {exc}"
-            if self.state is not None:
-                self.state.set_version_state(
-                    slug, number, status=ConversionStatus.ERROR, error=message
-                )
-            return ConvertResult(slug, number, ConvertOutcome.FAILED, message=message)
+        except Exception as exc:  # noqa: BLE001 - a failure is an outcome (R4-07)
+            # Not only `OSError`. "Never raises" was a convention nothing enforced:
+            # an engine's `ValueError` or `RecursionError` on one page stopped every
+            # remaining version, skipped `findings.finish()` and left
+            # `<version>.part` on disk. Extraction learned the same in R3-08.
+            remove(target.with_name(target.name + ".part"))
+            return self._failed(slug, number, version.engine, _describe(exc))
+
+    def _failed(
+        self, slug: str, number: str, engine: SourceEngine, message: str
+    ) -> ConvertResult:
+        """`failed`, recorded in `version_state`, with whatever findings the run held."""
+        if self.state is not None:
+            self.state.set_version_state(slug, number, status=ConversionStatus.ERROR, error=message)
+        if self.findings is not None:
+            self.findings.flush()
+        return ConvertResult(slug, number, ConvertOutcome.FAILED, engine=engine, message=message)
 
     def _build(
         self,
@@ -356,6 +367,18 @@ class DocumentConverter:
         self._report_flattened_links(context)
         self._report_repairs(context)
 
+        if not result.documents:
+            # Phase 34 (R4-06). No unit, or units with nothing in them -- a
+            # re-extract that lost `Data/HelpSystem.xml`, say -- was `converted`,
+            # and the swap replaced the last good tree with an empty one under a
+            # green CLI line. The engine's warning says why; this keeps the tree.
+            remove(staging)
+            return self._failed(
+                slug, number, version.engine,
+                f"nothing converted ({result.units} unit(s), 0 documents); "
+                f"the previous output is kept",
+            )
+
         # Resolution runs against what this run *just produced*, from the rows in
         # hand rather than from the table -- the table is written below, and a
         # read-back would resolve against the previous run on a re-convert.
@@ -394,12 +417,11 @@ class DocumentConverter:
 
         swap(staging, target)
 
-        # After the swap rather than over the staging directory, so the columns
-        # describe the tree that is actually published from. A swap that failed
-        # raised above and wrote nothing, which is the blank-not-zero rule.
-        result.md_files, result.out_files = self._measure_output(slug, number, target)
-        self._report_output_count(context, result)
-
+        # The state rows first, then the CSV (Phase 34, R4-08). The CSV write is
+        # the one a human can block -- Excel holding `versions.csv` -- and it ran
+        # first, so a failure there left the new tree beside the previous build's
+        # `output_map`, which Reframe reads, and the previous checksum. The rows
+        # describe the tree now published whatever happens to the columns.
         if self.state is not None:
             self.state.record_output_map(slug, number, output_rows)
             self.state.set_version_state(
@@ -414,6 +436,12 @@ class DocumentConverter:
                 self._api_prefix(product, number) if context.api_urls else "",
             )
             self.state.set_version_metadata(slug, number, "convert_engine", str(version.engine))
+
+        # After the swap rather than over the staging directory, so the columns
+        # describe the tree that is actually published from. A swap that failed
+        # raised above and wrote nothing, which is the blank-not-zero rule.
+        result.md_files, result.out_files = self._measure_output(slug, number, target)
+        self._report_output_count(context, result)
         if self.findings is not None:
             self.findings.flush()
         return result
@@ -988,6 +1016,13 @@ def _scalar(value: Any) -> str:
     if isinstance(value, list):
         return "[" + ", ".join(csh_transform.quote(str(item)) for item in value) + "]"
     return csh_transform.quote(str(value))
+
+
+def _describe(exc: BaseException) -> str:
+    """`ValueError: message (flare.py:812)` -- the type, the text, the innermost frame."""
+    frames = traceback.extract_tb(exc.__traceback__)
+    where = f" ({Path(frames[-1].filename).name}:{frames[-1].lineno})" if frames else ""
+    return f"{type(exc).__name__}: {exc}{where}"
 
 
 def _output_path(unit: Unit, document: Document) -> PurePosixPath:

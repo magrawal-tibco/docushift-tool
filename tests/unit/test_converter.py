@@ -1072,6 +1072,93 @@ def test_frontmatter_carries_exactly_the_identifiers_csh_yml_resolves_to_the_pag
     assert "csh" not in _frontmatter(output / "relnotes" / "r.md")
 
 
+# -- nothing converted, or a crash (Phase 34, R4-06, R4-07, R4-08) ----------------
+
+
+class _Empty(FakeEngine):
+    """Finds its unit and converts nothing in it: a re-extract that lost every topic."""
+
+    def convert_unit(self, context: ConversionContext, root: Path) -> Unit:
+        return Unit(root=root, name=context.subtree_name(root))
+
+
+class _Boom(FakeEngine):
+    def convert_unit(self, context: ConversionContext, root: Path) -> Unit:
+        raise ValueError("an engine bug on one real page")
+
+
+@pytest.fixture
+def swap_flare():
+    """Registers a stand-in Flare engine for one test and puts the real one back."""
+    previous = engine_for(SourceEngine.FLARE)
+
+    def use(engine_cls: type[BaseEngine]) -> None:
+        register(engine_cls)
+
+    yield use
+    unregister(SourceEngine.FLARE)
+    if previous is not None:
+        register(previous)
+
+
+def test_a_run_that_converts_nothing_fails_and_keeps_the_previous_output(
+    config, catalog, product, version, extracted, swap_flare
+) -> None:
+    """Zero documents was still `converted`, and the swap replaced a populated
+    tree with an empty one under a green CLI line (R4-06)."""
+    swap_flare(FakeEngine)
+    convert(config, catalog, product, version)
+    output = config.output_path(product.bu, product.family, product.slug, version.version)
+
+    swap_flare(_Empty)
+    result, _ = convert(config, catalog, product, version, force=True)
+
+    assert result.outcome is ConvertOutcome.FAILED
+    assert "nothing converted" in result.message
+    assert (output / "Content" / "topic.md").is_file()
+    assert not output.with_name(output.name + ".part").exists()
+
+
+def test_an_engine_exception_fails_one_version_and_the_batch_goes_on(
+    config, catalog, product, version, extracted, swap_flare
+) -> None:
+    """Only `OSError` was caught: a `ValueError` on one page stopped every
+    remaining version, skipped `findings.finish()` and left `<version>.part`
+    (R4-07)."""
+    swap_flare(_Boom)
+    converter = DocumentConverter(config, catalog, findings=FindingsRun("convert"))
+
+    stats = converter.convert_many([(product, version), (product, version)])
+
+    assert [r.outcome for r in stats.results] == [ConvertOutcome.FAILED] * 2
+    assert "ValueError: an engine bug on one real page" in stats.results[0].message
+    output = config.output_path(product.bu, product.family, product.slug, version.version)
+    assert not output.with_name(output.name + ".part").exists()
+    state = catalog.state.get_version_state(product.slug, version.version)
+    assert state["status"] == ConversionStatus.ERROR
+
+
+def test_bookkeeping_that_fails_after_the_swap_leaves_state_describing_the_new_tree(
+    config, catalog, product, version, extracted, fake_engine, monkeypatch
+) -> None:
+    """The CSV write (Excel holding `versions.csv`) ran before `output_map` and the
+    checksum, so a failure there left the new tree with the previous build's map,
+    which Reframe reads (R4-08)."""
+    def locked(*_args, **_kwargs):
+        raise PermissionError("versions.csv is open in another program")
+
+    monkeypatch.setattr(catalog, "record_convert_inventory", locked)
+
+    result, _ = convert(config, catalog, product, version)
+
+    assert result.outcome is ConvertOutcome.FAILED
+    assert catalog.state.get_output_map(product.slug, version.version)["guide/Content/topic.htm"] == (
+        "Content/topic.md"
+    )
+    metadata = catalog.state.get_version_metadata(product.slug, version.version)
+    assert metadata["convert_source_checksum"] == metadata["extract_zip_checksum"]
+
+
 # -- unit naming (Phase 34, R4-14) -----------------------------------------------
 
 

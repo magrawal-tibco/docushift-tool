@@ -203,9 +203,9 @@ def find_output_roots(tree: Path, engine: SourceEngine) -> list[Path]:
 
     An **empty list means no rule applies** -- either the engine has none (no
     unconvertible engine does) or the markers are absent from a tree that detected
-    on content. Callers treat that as "the version tree is the single unit of
-    work"; what they must not do is treat it as "there is nothing here", which is
-    a different fact and one this function never reports.
+    on content. The engines report that as a warning and convert nothing, and the
+    driver fails the version and keeps its previous output (Phase 34, R4-06);
+    what no caller may do is publish it as an empty tree.
 
     Roots are returned even when one nests inside another, because that is the
     measured shape of the corpus rather than a defect. `owning_root` resolves

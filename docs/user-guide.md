@@ -789,6 +789,10 @@ Each run ends with five counts — converted, already current, no extracted tree
 unknown, failed — plus the documents and assets written, the asset resolution line, and
 the findings summary. Re-running is cheap on the same terms as `extract`: a version whose
 extracted tree has not changed since it was converted is skipped, and `--force` overrides.
+A changed engine (a hand correction in `versions.csv`) counts as a change. A version that
+converts **nothing** (no unit of work, or units with no topic in them) is reported failed
+and its previous output is left in place rather than replaced by an empty tree; so is a
+version whose engine hits an unexpected error, and the run goes on to the next version.
 
 Conversion also writes the version's context-sensitive help map (`csh.yml`) and stamps the
 matching identifiers into topic frontmatter — see §7.
