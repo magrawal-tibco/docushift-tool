@@ -25,8 +25,8 @@ largest engine in the corpus by six times, and the first real consumer of Phase
 
 The ordering of the DOM passes is inherited from the predecessor's
 `scripts/lib/preprocessor.py` (§5.1.10), which is its main pipeline and has run at
-scale: strip chrome, then fake lists, then list continuations, then colspan
-splits. Its `fake_list_tables()`, `split_colspan_tables()` and `SPAN_TO_TAG`
+scale: strip chrome, then fake lists, then list continuations, then icon tables
+and text popups, then colspan splits. Its `fake_list_tables()`, `split_colspan_tables()` and `SPAN_TO_TAG`
 vocabulary are taken; its `Home.htm` skip, its missing `div.topic-frame`, its
 selector fallback chain and its hand-maintained `skip_path_segments` are not.
 
@@ -134,6 +134,16 @@ _AUTONUM_TOKEN = re.compile(r"\{[^}]*\}")
 _AUTONUM_COUNTER = re.compile(r"\{[^}]*n[^}]*\}", re.IGNORECASE)
 _ORDERED_CLASS = ("_number", "_step", "_procedure", "_numbered")
 _FAKE_LIST_CLASS = "autonumber_p_"
+# The number a step is drawn with: `data-mc-autonum="3. "`.
+_AUTONUM_NUMBER = re.compile(r"\s*(\d+)")
+# Set on each list `_fake_list_tables` builds and removed once the merge pass is
+# done, so that only those lists absorb their neighbours (R5-07). Never emitted.
+_FAKE_LIST_MARK = "data-docushift-fake-list"
+# `TableStyle-IconTable`: a callout drawn as a one-row table (R5-03).
+_ICON_TABLE_CLASS = "icontable"
+# Block children that a colspan heading's bold label cannot hold (R5-04).
+_HEADING_BLOCKS = ("p", "div", "ul", "ol", "dl", "pre", "table", "blockquote",
+                   "h1", "h2", "h3", "h4", "h5", "h6")
 # A colspan section header longer than this keeps its markup as a paragraph; a
 # short one is an identifier and becomes a bold label. The predecessor's number.
 _SHORT_HEADING = 60
@@ -602,6 +612,8 @@ class FlareEngine(BaseEngine):
         _strip_chrome(container, landing=landing)
         _fake_list_tables(container)
         _merge_list_continuations(container)
+        _icon_tables(container)
+        _text_popups(container)
         _split_colspan_tables(container)
 
         context.recovered_terms += deflists.normalize(container)
@@ -836,6 +848,13 @@ def _fake_list_tables(container: Tag) -> None:
             continue
         ordered = _is_ordered(table, names)
         replacement = _SOUP.new_tag("ol" if ordered else "ul")
+        replacement[_FAKE_LIST_MARK] = ""
+        start = _autonum_start(table) if ordered else 1
+        if start != 1:
+            # The step's drawn number. A procedure that a note or a paragraph
+            # interrupts resumes at 3 in the source and, merged with nothing,
+            # would restart at 1 here: 110 of 1,285 numbered items (R5-02).
+            replacement["start"] = str(start)
         for row in rows:
             cells = row.find_all(["td", "th"], recursive=False)
             if not cells:
@@ -860,6 +879,16 @@ def _is_ordered(table: Tag, names: str) -> bool:
     return any(name in names for name in _ORDERED_CLASS)
 
 
+def _autonum_start(table: Tag) -> int:
+    """The number the first item is drawn with, or 1 where it is a counter token."""
+    for cell in table.find_all(["td", "th"]):
+        raw = str(cell.get("data-mc-autonum") or "")
+        if raw.strip():
+            match = _AUTONUM_NUMBER.match(raw)
+            return int(match.group(1)) if match else 1
+    return 1
+
+
 def _direct_rows(table: Tag) -> list[Tag]:
     rows: list[Tag] = []
     for child in table.children:
@@ -881,10 +910,21 @@ def _merge_list_continuations(container: Tag) -> None:
     step. Two absorptions only -- a `<pre>` and a `p.ListContinue` -- and a merge
     of adjacent lists of the same kind; anything wider starts swallowing lists the
     author meant to keep apart.
+
+    **Nothing merges across prose, and only a list `_fake_list_tables` built
+    absorbs a `<pre>`** (R5-07). Prose between a list and the next block is the
+    sentence that introduces it -- skipping over it nested an example inside the
+    previous bullet and ahead of its explanation. And an authored `<ul>` was
+    never split by MadCap, so a `<pre>` after it is the author's own block: in
+    EMS it is the example for the whole list, not for its last bullet. A
+    `p.ListContinue` still joins any list, because the class is the author
+    saying so.
     """
     for parent in [container, *container.find_all(True)]:
         if not getattr(parent, "decomposed", False):
             _merge_within(parent)
+    for built in container.find_all(attrs={_FAKE_LIST_MARK: True}):
+        del built[_FAKE_LIST_MARK]
 
 
 def _merge_within(parent: Tag) -> None:
@@ -894,14 +934,16 @@ def _merge_within(parent: Tag) -> None:
 
 def _merge_once(parent: Tag) -> bool:
     children = [child for child in parent.children if isinstance(child, Tag)]
-    for index, node in enumerate(children[:-1]):
+    for node in children:
         if node.name not in ("ol", "ul"):
             continue
         items = node.find_all("li", recursive=False)
         if not items:
             continue
-        sibling = children[index + 1]
-        if sibling.name == "pre" or (
+        sibling = _adjacent(node)
+        if sibling is None:
+            continue
+        if (sibling.name == "pre" and node.has_attr(_FAKE_LIST_MARK)) or (
             sibling.name == "p" and "listcontinue" in _classes(sibling)
         ):
             items[-1].append(sibling.extract())
@@ -912,6 +954,96 @@ def _merge_once(parent: Tag) -> bool:
             sibling.decompose()
             return True
     return False
+
+
+def _adjacent(node: Tag) -> Tag | None:
+    """The next element sibling, or None when text other than whitespace comes first."""
+    sibling = node.next_sibling
+    while sibling is not None:
+        if isinstance(sibling, Tag):
+            return sibling
+        if markdown.is_text(sibling) and str(sibling).strip():
+            return None
+        sibling = sibling.next_sibling
+    return None
+
+
+def _icon_tables(container: Tag) -> None:
+    """`TableStyle-IconTable` is a callout drawn as a table (§5.1.10, R5-03).
+
+    The label is a `data-mc-autonum` paragraph in the first cell and the text is
+    in the second. As a table, the pipe path renders each cell inline, so the
+    label -- which only `_labelled` re-emits, and only in block position -- is
+    lost, and the note becomes a two-column table with an empty header. Rebuilt
+    as `div.note` carrying the label, the callout path then maps it exactly as it
+    maps any other note, including the report for a label outside the vocabulary.
+    """
+    for table in list(container.find_all("table")):
+        if _ICON_TABLE_CLASS not in " ".join(_raw_classes(table)).lower():
+            continue
+        rows = _direct_rows(table)
+        cells = rows[0].find_all(["td", "th"], recursive=False) if len(rows) == 1 else []
+        if len(cells) != 2:
+            continue
+        labelled = cells[0].find(attrs={"data-mc-autonum": True})
+        label = autonum_label(labelled) if isinstance(labelled, Tag) else ""
+        callout = _SOUP.new_tag("div", attrs={"class": "note"})
+        if label:
+            callout["data-mc-autonum"] = label
+        # The table's own targets, and any in the label cell, which is discarded.
+        targets = _orphan_targets(table) + [
+            anchor.extract() for anchor in list(cells[0].find_all("a"))
+            if not anchor.get("href") and markdown.anchor_target(anchor)
+        ]
+        for anchor in targets:
+            table.insert_before(anchor)
+        callout.extend(list(cells[1].children))
+        table.replace_with(callout)
+
+
+def _text_popups(container: Tag) -> None:
+    """A MadCap text popup becomes its trigger and a parenthetical (R5-13).
+
+    `a.MCTextPopup` holds the trigger -- usually a footnote digit the skin
+    superscripts -- and the popup body inside it, so walking it as a link that
+    goes nowhere ran the two together with the word before: "PCA Apply1This
+    operator is deprecated". The body is kept, in brackets, where it was.
+    """
+    for anchor in list(container.select("a.MCTextPopup")):
+        body = anchor.find("span", class_="MCTextPopupBody")
+        if not isinstance(body, Tag):
+            continue
+        body.extract()
+        for arrow in body.select("span.MCTextPopupArrow"):
+            arrow.decompose()
+        trigger = _text(anchor)
+        replacement: list[Tag | str] = []
+        if trigger:
+            superscript = "super" in str(anchor.get("style") or "").lower()
+            if superscript and anchor.find("sup") is None:
+                marker = _SOUP.new_tag("sup")
+                marker.string = trigger
+                replacement.append(marker)
+            else:
+                replacement.extend(list(anchor.children))
+        if _text(body):
+            _trim_edges(body)
+            replacement.append(" (")
+            replacement.extend(list(body.children))
+            replacement.append(")")
+        for node in replacement:
+            anchor.insert_before(node)
+        anchor.decompose()
+
+
+def _trim_edges(tag: Tag) -> None:
+    """Strips the source indentation at either end, which would sit inside the brackets."""
+    children = list(tag.children)
+    if children and markdown.is_text(children[0]):
+        children[0].replace_with(str(children[0]).lstrip())
+    children = list(tag.children)
+    if children and markdown.is_text(children[-1]):
+        children[-1].replace_with(str(children[-1]).rstrip())
 
 
 def _split_colspan_tables(container: Tag) -> None:
@@ -942,6 +1074,16 @@ def _split_colspan_tables(container: Tag) -> None:
             groups = groups[1:]
 
         replacements: list[Tag] = list(_orphan_targets(table))
+        caption = table.find("caption", recursive=False)
+        if isinstance(caption, Tag) and _text(caption):
+            # The table's title -- "Status Codes" -- goes ahead of the first
+            # piece rather than with the table it was on: 35 of 175 split tables
+            # in the families carried one, and lost it (R5-05).
+            title = _SOUP.new_tag("p")
+            strong = _SOUP.new_tag("strong")
+            strong.extend(list(caption.children))
+            title.append(strong)
+            replacements.append(title)
         for label, body in groups:
             if label is not None:
                 replacements.append(_heading_paragraph(label))
@@ -956,19 +1098,39 @@ def _split_colspan_tables(container: Tag) -> None:
 
 
 def _heading_paragraph(cell: Tag) -> Tag:
+    """A full-width row's cell as the label of the rows under it.
+
+    A short, inline-only cell is an identifier and becomes one bold run. Its
+    children are moved into the run rather than rebuilt from its text: rebuilding
+    dropped the `<code>` in "Use the `/MT` compiler option" and the link in every
+    EMS version's "Headers and Properties" row (R5-04). A cell holding a block --
+    a heading word over a `<p>` of prose -- keeps its markup as it stands, which
+    is what a long label always did.
+    """
     paragraph = _SOUP.new_tag("p")
     text = _text(cell)
-    if len(text) <= _SHORT_HEADING:
-        # A short label is rebuilt from the cell's *text*, which drops every child
-        # element -- including the anchor targets Flare writes into these rows.
-        # 100 of the `ems` tree's missing anchors were one of these (§5.7), so the
-        # targets are carried over ahead of the label they name. `_text` above is
-        # unaffected: an empty `<a>` contributes no text to it.
+    if len(text) <= _SHORT_HEADING and cell.find(_HEADING_BLOCKS) is None:
+        # The anchor targets Flare writes into these rows are carried over ahead
+        # of the label they name, outside the bold run: 100 of the `ems` tree's
+        # missing anchors were one of these (§5.7).
         for anchor in list(cell.find_all("a")):
             if not anchor.get("href") and markdown.anchor_target(anchor):
                 paragraph.append(anchor.extract())
         strong = _SOUP.new_tag("strong")
-        strong.string = text
+        strong.extend(list(cell.children))
+        # `<b>Receipt</b>` is the common cell; inside the run a second bold
+        # would emit `****Receipt****`.
+        for inner in strong.find_all(["b", "strong"]):
+            inner.unwrap()
+        # `<code>tibemsd </code>settings`: the code span trims its own padding,
+        # which the text rebuild never had to care about, so the space that
+        # separates the words is put back outside it.
+        for code in strong.find_all("code"):
+            inner_text = markdown.text_of(code)
+            if inner_text[:1].isspace():
+                code.insert_before(" ")
+            if inner_text[-1:].isspace():
+                code.insert_after(" ")
         paragraph.append(strong)
     else:
         paragraph.extend(list(cell.children))

@@ -384,6 +384,15 @@ def test_a_comment_is_not_prose() -> None:
     assert render("<p>kept<!-- .style { color: red } --></p>") == "kept"
 
 
+def test_an_ordered_list_honours_its_start() -> None:
+    """A procedure that resumes at step 3 is numbered from 3 (R5-02)."""
+    assert render("<ol start='3'><li>Run it.</li><li>Check it.</li></ol>") == (
+        "3. Run it.\n4. Check it."
+    )
+    assert render("<ol start='x'><li>Run it.</li></ol>") == "1. Run it."
+    assert render("<ul start='3'><li>Run it.</li></ul>") == "- Run it."
+
+
 def test_a_passthrough_table_gets_its_references_resolved() -> None:
     """Invariant 13 does not stop at the edge of a pipe table.
 

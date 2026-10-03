@@ -272,9 +272,16 @@ class Renderer:
         return self.blocks(tag)  # pragma: no cover - _BLOCKS and this switch agree
 
     def list(self, tag: Tag, ordered: bool) -> str:
-        """One list. Nested lists arrive as blocks of their `<li>` and indent."""
+        """One list. Nested lists arrive as blocks of their `<li>` and indent.
+
+        An ordered list honours `start`. Flare's step tables carry their drawn
+        number, and a procedure interrupted by a note or a paragraph resumes at
+        step 3 -- emitted from 1, 110 of 1,285 numbered items in the families
+        carried the wrong number (R5-02).
+        """
         items: list[str] = []
-        for number, child in enumerate(tag.find_all("li", recursive=False), start=1):
+        first = _start(tag) if ordered else 1
+        for number, child in enumerate(tag.find_all("li", recursive=False), start=first):
             marker = f"{number}. " if ordered else "- "
             blocks = self.blocks(child) or [""]
             body = "\n\n".join(blocks)
@@ -509,6 +516,12 @@ def wrap(text: str, marker: str) -> str:
     lead = " " if text[:1].isspace() else ""
     tail = " " if text[-1:].isspace() else ""
     return f"{lead}{marker}{stripped}{marker}{tail}"
+
+
+def _start(tag: Tag) -> int:
+    """An `<ol start>`, or 1. GFM numbers from 0 up, so nothing below that."""
+    raw = str(tag.get("start") or "").strip()
+    return int(raw) if raw.isdigit() else 1
 
 
 def _indent(text: str, width: int) -> str:

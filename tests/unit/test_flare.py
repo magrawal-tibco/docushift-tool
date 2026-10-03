@@ -690,7 +690,7 @@ def test_a_tables_own_target_survives_being_split_or_listed(tmp_path: Path) -> N
 
 
 def test_a_split_labels_anchor_target_survives_the_rebuild(tmp_path: Path) -> None:
-    """The label is rebuilt from the cell's text, and the text has no children.
+    """The label's anchor target is carried out of the bold run, ahead of it.
 
     100 of the `ems` tree's missing anchors were an `<a name=>` inside one of
     these full-width rows -- a destination discarded while every link to it
@@ -708,7 +708,165 @@ def test_a_split_labels_anchor_target_survives_the_rebuild(tmp_path: Path) -> No
     body = run(tmp_path, files).body("Content/intro.md")
 
     assert '<a id="tibemsd_P"></a>' in body
-    assert "**tibemsd settings**" in body
+    # The code formatting rides along now (R5-04), and so does the space the
+    # source put inside it.
+    assert "**`tibemsd` settings**" in body
+
+
+def _step(number: int, text: str) -> str:
+    """One `AutoNumber_p_Step` table, as EMS 10.5.1 writes it: drawn number in cell 2."""
+    return (
+        "<table class='AutoNumber_p_Step'><col/><col/><col/><tr><td valign='top'/>"
+        f"<td class='AutoNumber_p_Step'><span>{number}. </span></td>"
+        f"<td class='AutoNumber_p_Step' data-mc-autonum='{number}. '>{text}</td>"
+        "</tr></table>"
+    )
+
+
+def test_a_procedure_interrupted_by_prose_resumes_at_its_drawn_number(tmp_path: Path) -> None:
+    """EMS `Deploying-the-FTL-Server-Cluster`: step 3 came out as "1." (R5-02).
+
+    Two `div`s of prose sit between step 2's code block and step 3, so nothing
+    merges across them -- correctly -- and the third list restarted at 1.
+    """
+    files = basic()
+    files["html/Content/intro.htm"] = topic(
+        "Introduction",
+        _step(1, "Choose two directories.") + _step(2, "Configure the server.")
+        + "<pre>servers:\n  - realm:</pre>"
+        "<div style='text-indent: 0.5in;'>If not specified, both default to the</div>"
+        "<div style='text-indent: 0.5in;'>current working directory.</div>"
+        + _step(3, "Run the FTL server executable.")
+        + "<pre><code>tibftlserver -n name</code></pre>",
+    )
+
+    body = run(tmp_path, files).body("Content/intro.md")
+
+    assert "1. Choose two directories.\n\n2. Configure the server." in body
+    assert "3. Run the FTL server executable." in body
+    assert "1. Run the FTL server executable." not in body
+
+
+def test_an_icon_table_is_a_callout_with_its_label(tmp_path: Path) -> None:
+    """`TableStyle-IconTable`: label in cell 1, text in cell 2 (R5-03).
+
+    GridServer Manager 7.1.1 `About_Grid_Libraries` rendered as a pipe table with
+    an empty header, and the word "Note" was gone.
+    """
+    files = basic()
+    files["html/Content/intro.htm"] = topic(
+        "Introduction",
+        "<table class='TableStyle-IconTable' cellspacing='0'><col/><col/><tbody>"
+        "<tr class='TableStyle-IconTable-Body-Body1'>"
+        "<td><p class='IconNote' data-mc-autonum='Note'><span class='autonumber'>"
+        "<span class='noteHead'>Note</span></span>&#160;</p></td>"
+        "<td><p>If the substitution is not found in the file, the empty string is "
+        "substituted.</p></td>"
+        "</tr></tbody></table>",
+    )
+
+    body = run(tmp_path, files).body("Content/intro.md")
+
+    assert "> [!NOTE]\n> If the substitution is not found in the file" in body
+    assert "|" not in body
+
+
+def test_a_colspan_heading_cell_keeps_its_link_code_and_paragraph(tmp_path: Path) -> None:
+    """EMS `tibemsmsg`: the row became one bold run and the link was gone (R5-04)."""
+    files = basic()
+    files["html/Content/headers.htm"] = topic("Headers")
+    files["html/Content/intro.htm"] = topic(
+        "Introduction",
+        "<table>"
+        "<tr><td><code>tibemsMsg_Print</code></td><td>Print a message.</td></tr>"
+        "<tr><td colspan='2'><b>Headers and Properties</b>"
+        "<p>For details, see <code><a href='headers.htm'>Headers</a></code>.</p></td></tr>"
+        "<tr><td colspan='2'><b>Use the <code>/MT</code> compiler option.</b></td></tr>"
+        "<tr><td><code>tibemsMsg_ClearProperties</code></td><td>Clear.</td></tr>"
+        "</table>",
+    )
+
+    body = run(tmp_path, files).body("Content/intro.md")
+
+    assert "**Headers and Properties**\n\nFor details, see [`Headers`](headers.md)." in body
+    assert "**Use the `/MT` compiler option.**" in body
+
+
+def test_splitting_a_captioned_table_keeps_its_caption(tmp_path: Path) -> None:
+    """EMS `tibems-status`: "Status Codes" vanished with the table (R5-05)."""
+    files = basic()
+    files["html/Content/intro.htm"] = topic(
+        "Introduction",
+        "<table><caption><span class='tabletitle'>Status Codes</span></caption>"
+        "<thead><tr><th>Constant</th><th>Code</th></tr></thead><tbody>"
+        "<tr><td>TIBEMS_OK</td><td>0</td></tr>"
+        "<tr><td colspan='2'>TLS</td></tr>"
+        "<tr><td>TIBEMS_TLS_ERROR</td><td>51</td></tr>"
+        "</tbody></table>",
+    )
+
+    body = run(tmp_path, files).body("Content/intro.md")
+
+    assert "**Status Codes**" in body
+    assert body.index("**Status Codes**") < body.index("TIBEMS_OK")
+
+
+def test_an_authored_list_never_absorbs_code_across_the_prose_after_it(
+    tmp_path: Path,
+) -> None:
+    """ActiveSpaces `LIKE-Operator`: the example nested under a bullet (R5-07).
+
+    The `<pre>` came ahead of the sentence that introduces it, in all six
+    versions. The list is authored, and a list MadCap did not split has no
+    continuation to merge.
+    """
+    files = basic()
+    files["html/Content/intro.htm"] = topic(
+        "Introduction",
+        "<p>Two wildcard characters can be used: <ul><li>% (percent) - any characters</li>"
+        "<li>_ (underscore) - a single character</li></ul>If the pattern needs a wildcard, "
+        "specify an escape character. <pre>completed LIKE '100\\%' ESCAPE '\\'</pre></p>"
+        "<ul><li>An authored item.</li></ul><pre>authored code</pre>",
+    )
+
+    body = run(tmp_path, files).body("Content/intro.md")
+
+    assert body.index("specify an escape character") < body.index("completed LIKE")
+    assert "\n   ```" not in body and "\n  ```" not in body
+    assert "- An authored item.\n\n```\nauthored code\n```" in body
+
+
+def test_a_step_list_does_not_merge_across_prose(tmp_path: Path) -> None:
+    """A fake list absorbs its neighbour only when nothing but whitespace is between."""
+    files = basic()
+    files["html/Content/intro.htm"] = topic(
+        "Introduction",
+        "<div>" + _step(1, "Open the console.") + "Then, from a shell:"
+        "<pre>make build</pre></div>",
+    )
+
+    body = run(tmp_path, files).body("Content/intro.md")
+
+    assert body.index("Then, from a shell:") < body.index("make build")
+    assert "1. Open the console.\n\nThen, from a shell:" in body
+
+
+def test_a_text_popup_is_kept_apart_from_the_words_around_it(tmp_path: Path) -> None:
+    """`sfire-dsc/7.1.0`: "PCA Apply1This operator is deprecated" (R5-13)."""
+    files = basic()
+    files["html/Content/intro.htm"] = topic(
+        "Introduction",
+        "<div class='dd'><a href='guide/deep.htm'>PCA Apply</a>"
+        "<a href='javascript:void(0)' class='MCTextPopup popup popupHead' "
+        "style='font-size: 0.9em; vertical-align: super'>1"
+        "<span class='MCTextPopupBody MCTextPopupBody_Closed popupBody' aria-hidden='true'>"
+        "<span class='MCTextPopupArrow'> </span>This operator is deprecated. \n\t\t</span></a>"
+        "</div>",
+    )
+
+    body = run(tmp_path, files).body("Content/intro.md")
+
+    assert "[PCA Apply](guide/deep.md)<sup>1</sup> (This operator is deprecated.)" in body
 
 
 def test_a_table_that_gfm_cannot_carry_passes_through_with_its_links_resolved(
