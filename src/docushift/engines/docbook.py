@@ -39,7 +39,8 @@ Three things measured here that are the tempting wrong answer elsewhere:
    a normalize pass unwraps the redundant child and `span.emphasis` is never
    mapped at all -- its `em` already says everything the class does.
 2. **No fragment in the corpus resolves to an element `id`.** 5,548 fragments are
-   referenced; 5,539 hit a plain `a[name]`, 0 hit an `a.ix`, 9 hit nothing. So
+   referenced; 5,539 hit a plain `a[name]`, 0 hit an `a.ix`, 9 hit nothing (a
+   footnote back-link names an `<a id>`, which the plan pass reads too). So
    DITA's id-pairing pass (§5.2.8) is not needed, and the 3,347 `a.ix` index
    markers -- whose `name` is human-readable prose with spaces -- are dropped
    whole rather than emitted as anchors nothing points at.
@@ -303,7 +304,14 @@ class DocBookRenderer(markdown.Renderer):
         reference = links.classify(raw)
 
         if reference.kind is links.ReferenceKind.FRAGMENT:
-            # A bookmark into this same page -- 16 of the corpus's `div.toc` links.
+            if not reference.fragment:
+                # `href="???"`, DocBook's mark for a ulink it could not resolve
+                # (R6-14). No bookmark to drop and no page to keep: the link goes,
+                # so it is reported as a dangling link under its own spelling.
+                self.engine.dangling_link(self.context, self.unit, self.source, raw.strip())
+                return None
+            # A bookmark into this same page -- 16 of the corpus's `div.toc` links,
+            # and both halves of every footnote.
             if reference.fragment in self.page.anchors:
                 return f"#{reference.fragment}"
             self.engine.dropped_fragment(self.context, self.unit, self.source, reference.fragment)
@@ -535,9 +543,14 @@ class DocBookEngine(BaseEngine):
         )
         base = relative.parent
         for anchor in container.find_all("a"):
-            name = anchor.get("name")
-            if name and not anchor.get("href") and "ix" not in _classes(anchor):
-                page.anchors.add(str(name))
+            # Every `<a>` that names a place, `href` or not (R6-05). A footnote's
+            # two anchors both carry one -- `<a name="d0e78149"
+            # href="#ftn.d0e78149">` and `<a id="ftn.d0e78149" href="#d0e78149">`
+            # -- and the renderer writes both markers, so skipping them unlinked
+            # both halves and reported each as dangling.
+            place = markdown.anchor_target(anchor)
+            if place and "ix" not in _classes(anchor):
+                page.anchors.add(place)
             href = anchor.get("href")
             if not href:
                 continue
@@ -885,6 +898,12 @@ def _prune_anchors(container: Tag, referenced: set[str]) -> set[str]:
     kept: set[str] = set()
     for anchor in container.find_all("a"):
         if anchor.get("href"):
+            # A footnote mark or back-link is a link and a target at once (R6-05).
+            # Never pruned, because the link is content; advertised when
+            # referenced, so the kept-versus-written check covers it too.
+            target = markdown.anchor_target(anchor)
+            if target and target.lower() in referenced:
+                kept.add(target)
             continue
         name = anchor.get("name")
         if "ix" in _classes(anchor):

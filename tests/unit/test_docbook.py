@@ -662,6 +662,41 @@ def test_a_cgi_olink_is_dropped_rather_than_emitted(tmp_path: Path) -> None:
     assert any("cgi-bin" in m for m in result.messages("TOPIC_LINK_DANGLING"))
 
 
+def test_both_halves_of_a_footnote_link_to_each_other(tmp_path: Path) -> None:
+    """R6-05. A DocBook footnote's two anchors both carry an `href` -- the mark
+    names the note and the note names the mark -- so a plan pass that skipped
+    every `<a href>` knew neither target. Both links were unlinked and reported
+    dangling while both markers were written. `adaptersguide/embeddedRTPP.html`
+    (11.2.1), one of its three footnote pairs."""
+    result = one_page(tmp_path, (
+        "<p>Configure the operators.<sup>[<a name=\"d0e78149\" href=\"#ftn.d0e78149\" "
+        'class="footnote">1</a>]</sup></p>'
+        '<div class="footnotes"><br/><hr width="100" align="left"/><div class="footnote">'
+        '<p><sup>[<a id="ftn.d0e78149" href="#d0e78149" class="para">1</a>] </sup>'
+        "The RTPP protocol was initially developed by LogicaCMG.</p></div></div>"
+    ))
+    body = result.body("authoring/topic.md")
+
+    assert '<a id="d0e78149"></a>[1](#ftn.d0e78149)' in body
+    assert '<a id="ftn.d0e78149"></a>[1](#d0e78149)' in body
+    assert "TOPIC_LINK_DANGLING" not in result.codes()
+
+
+def test_an_unresolved_ulink_is_reported_as_what_it_is(tmp_path: Path) -> None:
+    """R6-14. DocBook writes `href="???"` for a ulink it could not resolve (6 in
+    `adaptersguide/embeddedInputSyslog.html`, 11.2.1). It classifies as an empty
+    fragment and was reported as a dropped bookmark on a kept link, when the link
+    is removed and there was no bookmark. It is now a dangling link, named."""
+    result = one_page(tmp_path, (
+        '<p>Facilities are defined (in <a class="ulink" href="???" target="_top">'
+        "RFC 5424</a>) as follows.</p>"
+    ))
+    body = result.body("authoring/topic.md")
+
+    assert "RFC 5424" in body and "](" not in body
+    assert result.messages("TOPIC_LINK_DANGLING") == ["topic.html -> ???"]
+
+
 def test_an_image_is_resolved_and_copied_by_the_same_call(tmp_path: Path) -> None:
     """Invariant 13: the link and the copy come out of one resolution."""
     result = one_page(

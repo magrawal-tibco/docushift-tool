@@ -311,12 +311,20 @@ class DitaRenderer(markdown.Renderer):
         cross-reference it could not resolve at publish time. Those are source
         defects, concentrated in a few doc-sets rather than spread evenly, so the
         link keeps its target file and loses only the bookmark.
+
+        **The raw fragment is tried before the de-uniqued one** (R6-03). Stripping
+        `_unique_N` is right for a link into a republished duplicate, whose file
+        is never written. But a converted topic can carry `_unique_N` on its own
+        ids -- conref-reused steps and tables -- and there only the raw value
+        matches: 196 links across the 353 cache doc-sets.
         """
         if not fragment:
             return ""
         value = _UNIQUE_ANY.sub("", fragment)
         if value.lower() == target.guid:
             return ""
+        if fragment in target.anchors:
+            return fragment
         if value in target.anchors:
             return value
         self.engine.dropped_fragment(self.context, self.unit, self.source, fragment)
@@ -422,7 +430,7 @@ class _Topic:
     # in the originals map, where the second silently overwrites the first.
     republished: bool = False
     anchors: set[str] = field(default_factory=set)
-    # Every `#fragment` this topic points at, case-folded and de-uniqued. Taken in
+    # Every `#fragment` this topic points at, case-folded, raw and de-uniqued. Taken in
     # the same read as the anchors, because whether topic A emits an anchor
     # depends on whether topic Z references it and a third pass over the doc-set
     # buys nothing the first one could not have collected.
@@ -443,7 +451,7 @@ class _Plan:
     # Every stem in the doc-set, duplicates included -> the topic whose file is
     # written. What `link()` resolves against.
     targets: dict[str, _Topic] = field(default_factory=dict)
-    # De-uniqued, case-folded fragment values anything in the doc-set points at.
+    # Case-folded fragment values, raw and de-uniqued, anything in the doc-set points at.
     # An anchor not in here is not emitted: the surface is ~8.6 per topic and
     # 27,990 `GUID__…` values corpus-wide, against 2,192 that are ever referenced.
     referenced: set[str] = field(default_factory=set)
@@ -946,16 +954,20 @@ def _anchor_values(article: str) -> set[str]:
 
 
 def _fragment_values(article: str) -> set[str]:
-    """The bookmarks this topic points at, case-folded and de-uniqued.
+    """The bookmarks this topic points at, case-folded, raw and de-uniqued.
 
     De-uniqued on the way in for the same reason `_fragment` de-uniques on the way
     out: a link to a republished duplicate carries `_unique_1` in its bookmark and
-    the file that gets written is the original, whose anchors do not.
+    the file that gets written is the original, whose anchors do not. **The raw
+    value is kept beside it** (R6-03): a converted topic whose own ids carry
+    `_unique_N` is linked by exactly that string, and without it `_prune_anchors`
+    deleted the anchor the link needed.
     """
     values: set[str] = set()
     for href in _HREF_ATTR.findall(article):
         _, separator, fragment = href.strip().partition("#")
         if separator and fragment:
+            values.add(fragment.lower())
             values.add(_UNIQUE_ANY.sub("", fragment).lower())
     return values
 

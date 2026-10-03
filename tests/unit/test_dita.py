@@ -611,6 +611,30 @@ def test_a_link_into_a_duplicate_lands_on_the_original_with_its_anchor(tmp_path:
     assert '<a id="GUID-BBB2__STEP_ONE"></a>' in result.body("installing.md")
 
 
+def test_a_unique_suffixed_anchor_in_a_converted_topic_keeps_its_links(tmp_path: Path) -> None:
+    """R6-03. A topic that is *not* a duplicate can still carry `_unique_N` on its
+    own ids -- conref-reused steps and tables. Stripping the suffix from every
+    reference matched nothing in it, so the bookmark was dropped, the anchor was
+    pruned, and "anchor absent" was reported. The shape is amx-bpm 4.3.0
+    `soahelp/GUID-E0F4606E….html`, which links its own step by filename."""
+    step = "GUID-BBB2__STEP_E06AA_unique_78"
+    result = run(tmp_path, {
+        "html/GUID-AAA1.html": topic("GUID-AAA1", "Getting Started",
+            f'<p>See <a href="GUID-BBB2.html#{step}">step 1</a>.</p>'),
+        "html/GUID-BBB2.html": topic("GUID-BBB2", "Installing", (
+            '<ol id="GUID-BBB2__STEPS_51X">'
+            f'<li class="stepexpand" id="{step}"><a name="{step}"></a> '
+            '<span class="ph cmd">Unpack the archive.</span></li></ol>'
+            f'<p>Repeat <a href="GUID-BBB2.html#{step}">Step 1</a>.</p>')),
+        **{f"html/{k}": v for k, v in toc(node("GUID-AAA1", "Getting Started")).items()},
+    })
+    assert f"[step 1](installing.md#{step})" in result.body("getting-started.md")
+    body = result.body("installing.md")
+    assert f'<a id="{step}"></a>' in body
+    assert f"[Step 1](installing.md#{step})" in body
+    assert "TOPIC_LINK_DANGLING" not in result.codes()
+
+
 def test_colliding_titles_break_by_guid_and_not_by_iteration_order(tmp_path: Path) -> None:
     """A title collision is a property of the doc-set, not of the corpus -- 6 of 30
     in one re-sample and 15 of 22 in another -- so every doc-set is treated as
