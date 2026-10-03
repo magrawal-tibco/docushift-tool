@@ -53,6 +53,7 @@ points at -- have to be settled before the first link is rewritten. Two cheap
 reads is what buys that without holding 6,152 parse trees.
 """
 
+import html
 import re
 from dataclasses import dataclass, field
 from pathlib import Path, PurePosixPath
@@ -92,6 +93,15 @@ CHROME_SELECTORS = ("div#copyright", "noscript", "div#thumbnailDialog", "div.fam
 # disagree on 86 of 2,409 shared entries and the crawler is the stale one, so it
 # is a fallback and never a supplement. Titles come from the topic either way.
 TOC_SOURCES = ("suitehelp_topic_list.html", "toc_crawler.html")
+
+# SuiteHelp's title for the licence page (§5.2.7, R6-04). `is_legal_label` does not
+# match it and must not be widened to: in WebWorks and Flare a writer's own topic
+# can carry the same words. Here all 708 `Important Information` TOC entries in the
+# 353 cache doc-sets name the licence text, at depth 0 (38), 1 (606) or 2 (64), and
+# 274 doc-sets have one -- 273 of them with no label the shared predicate matches.
+# Matched exactly, case-folded, and no deeper than the deepest measured entry.
+LEGAL_LABEL = "important information"
+LEGAL_LABEL_MAX_DEPTH = 2
 
 # `GUID-<uuid>-homepage.html`: publication metadata, not a topic (§5.2.7).
 HOMEPAGE_MARKER = "-homepage"
@@ -148,6 +158,11 @@ _TITLE_TAG = re.compile(r"<title\b[^>]*>(.*?)</title>", re.IGNORECASE | re.DOTAL
 _ARTICLE = re.compile(r"<article\b.*</article\s*>", re.IGNORECASE | re.DOTALL)
 _ANCHOR_ATTR = re.compile(r"""\b(?:id|name)\s*=\s*"([^"]+)\"""")
 _HREF_ATTR = re.compile(r"""<a\b[^>]*\bhref\s*=\s*"([^"]*)\"""", re.IGNORECASE)
+
+# An anchor in the *rendered* body. Every writer emits `<a … id="X"…>`: the
+# renderer's own marker, the pipe-table and code-span hoists, and the passthrough
+# table's rewrite -- so this reads all of them where a hook count reads one.
+_WRITTEN_ANCHOR = re.compile(r"""<a\b[^>]*\bid="([^"]*)\"""")
 
 # `GUID-…ADE1E_unique_1`: SDL republishing one topic at a second TOC position.
 # The suffix lands on the identifier and on every id and `<a name>` inside the
@@ -692,6 +707,17 @@ class DitaEngine(BaseEngine):
             # with no heading is a page whose title exists only in `toc.yml`.
             body = f"# {markdown.escape(title)}\n\n{body}".rstrip("\n")
 
+        # DocBook's Phase 19 guard, read off the body (R6-12). `_prune_anchors`
+        # pairs an id-bearing element with a marker inserted as its first child,
+        # and a `<pre>`, a list or an `<img>` renders without its stray children,
+        # so a kept anchor can vanish while `_fragment` still links into it.
+        lost = emitted - _written_anchors(body)
+        if lost:
+            context.record("ANCHOR_DROPPED", path=f"{unit.name}/{topic.output}".lstrip("/"),
+                           message=f"kept but not emitted: {', '.join(sorted(lost))}",
+                           count=len(lost))
+            emitted = emitted - lost
+
         return Document(source=topic.source, relative=topic.output, title=title,
                         body=body, anchors=emitted)
 
@@ -769,18 +795,24 @@ class DitaEngine(BaseEngine):
         The same predicates Flare uses, and from the TOC for the same reason: the
         heading is `TIBCO Documentation and Support Services` in most doc-sets and
         the filename is a GUID, so there is nothing in the path to match on.
+
+        Legal has a second, engine-local rule tried only when the shared predicate
+        finds nothing: SuiteHelp's own label for the licence page (R6-04).
         """
-        for attribute, matches, label in (
-            ("support", is_support_label, "support"),
-            ("legal", is_legal_label, "legal"),
+        for attribute, rules, label in (
+            ("support", (_shared(is_support_label),), "support"),
+            ("legal", (_shared(is_legal_label), _is_suitehelp_legal), "legal"),
         ):
             found = None
-            for entry in _walk_entries(plan.nav):
-                if not entry.href or not matches(entry.label):
-                    continue
-                guid = _guid_of(entry.href)
-                target = plan.targets.get(guid) if guid else None
-                found = documents.get(str(target.output)) if target is not None else None
+            for matches in rules:
+                for entry, depth in _walk_entries(plan.nav):
+                    if not entry.href or not matches(entry.label, depth):
+                        continue
+                    guid = _guid_of(entry.href)
+                    target = plan.targets.get(guid) if guid else None
+                    found = documents.get(str(target.output)) if target is not None else None
+                    if found is not None:
+                        break
                 if found is not None:
                     break
             if found is None:
@@ -951,13 +983,28 @@ def _assign_slugs(topics: list[_Topic]) -> None:
     by iteration order, so that re-running the
     conversion -- or running it on another machine, where `pathlib` sorts case
     differently -- produces the same filenames.
+
+    **A suffix is checked against every slug, not only its own group's** (R6-09).
+    `Fault Tab`, `Fault Tab` and `Fault Tab 2` otherwise make `fault-tab-2.md`
+    twice, and the second write replaces the first in the unit's document map
+    with no report. Every group's bare slug is claimed first, so a title that
+    *is* `fault-tab-2` keeps it and the tie-break bumps past. 0 of 353 cache
+    doc-sets hit this today, so no filename the corpus produces changes.
     """
     grouped: dict[str, list[_Topic]] = {}
     for topic in topics:
         grouped.setdefault(slugify(topic.title) or topic.stem, []).append(topic)
-    for slug, group in grouped.items():
-        for index, topic in enumerate(sorted(group, key=lambda item: item.guid), start=1):
-            topic.output = PurePosixPath(f"{slug}.md" if index == 1 else f"{slug}-{index}.md")
+    taken = {slug.lower() for slug in grouped}
+    for slug in sorted(grouped):
+        first, *rest = sorted(grouped[slug], key=lambda item: item.guid)
+        first.output = PurePosixPath(f"{slug}.md")
+        index = 1
+        for topic in rest:
+            index += 1
+            while f"{slug}-{index}".lower() in taken:
+                index += 1
+            taken.add(f"{slug}-{index}".lower())
+            topic.output = PurePosixPath(f"{slug}-{index}.md")
     topics.sort(key=lambda item: str(item.output))
 
 
@@ -1008,15 +1055,36 @@ def _read(path: Path) -> str | None:
 
 
 def _title(container: Tag) -> str:
-    """The `h1`, which is inside `<article>` in 853 of 853 sampled topics."""
+    """The `h1`, which is inside `<article>` in 853 of 853 sampled topics.
+
+    Read with `text_of` and then collapsed, never `get_text(" ")`: the separator
+    lands at every element boundary, so `Hawk<sup>®</sup>` read as `Hawk ®` and
+    14 of 2,068 amx-bpm titles disagreed with their own `<title>` (R6-02).
+    """
     heading = container.find("h1")
-    return " ".join(heading.get_text(" ").split()) if heading is not None else ""
+    return " ".join(markdown.text_of(heading).split()) if heading is not None else ""
 
 
-def _walk_entries(entries: list[_Entry]):
+def _written_anchors(body: str) -> set[str]:
+    """Every anchor id the rendered body carries, whichever hook wrote it."""
+    return {html.unescape(value) for value in _WRITTEN_ANCHOR.findall(body)}
+
+
+def _walk_entries(entries: list[_Entry], depth: int = 0):
+    """Every entry in TOC order, with its depth (0 for a top-level node)."""
     for entry in entries:
-        yield entry
-        yield from _walk_entries(entry.children)
+        yield entry, depth
+        yield from _walk_entries(entry.children, depth + 1)
+
+
+def _shared(predicate):
+    """A label-only predicate from `engines/base.py`, given the depth it ignores."""
+    return lambda label, _depth: predicate(label)
+
+
+def _is_suitehelp_legal(label: str, depth: int) -> bool:
+    """SuiteHelp's licence page: `Important Information`, near the top (R6-04)."""
+    return depth <= LEGAL_LABEL_MAX_DEPTH and label.strip().casefold() == LEGAL_LABEL
 
 
 def _relative(tree: Path, path: Path) -> str:

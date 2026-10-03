@@ -533,6 +533,25 @@ def test_a_same_page_fragment_resolves_against_this_topic_s_own_anchors(tmp_path
     assert '<a id="GUID-AAA1__LATER"></a>' in body
 
 
+def test_a_kept_anchor_the_render_never_wrote_is_reported_and_unadvertised(
+    tmp_path: Path,
+) -> None:
+    """R6-12, the Phase 19 bug class in this engine. `_prune_anchors` pairs an
+    id-bearing element with a marker inserted as its first child, and a `<pre>`
+    renders as a fence of its text alone, so the marker never reaches the body.
+    Before the check the page still listed the anchor as emitted."""
+    result = run(tmp_path, two_topics(
+        '<p>See <a href="GUID-BBB2.html#GUID-BBB2__CODE">the sample</a>.</p>'
+    ) | {"html/GUID-BBB2.html": topic(
+        "GUID-BBB2", "Installing",
+        '<pre class="pre codeblock" id="GUID-BBB2__CODE">tibcohost start</pre>')})
+
+    assert "tibcohost start" in result.body("installing.md")
+    assert result.codes()["ANCHOR_DROPPED"] == 1
+    assert any("GUID-BBB2__CODE" in m for m in result.messages("ANCHOR_DROPPED"))
+    assert result.document("installing.md").anchors == set()
+
+
 # -- images (§5.2.6) ------------------------------------------------------------
 
 
@@ -606,6 +625,22 @@ def test_colliding_titles_break_by_guid_and_not_by_iteration_order(tmp_path: Pat
     assert str(result.document("overview.md").source.name) == "GUID-AAA1.html"
 
 
+def test_a_tie_break_suffix_never_lands_on_another_topic_s_slug(tmp_path: Path) -> None:
+    """R6-09: `Fault Tab`, `Fault Tab` and `Fault Tab 2` once made `fault-tab.md`,
+    `fault-tab-2.md` and `fault-tab-2.md`, and the third topic silently overwrote
+    the second in the unit's document map. A title that *is* the slug keeps it, and
+    the tie-break bumps past it."""
+    result = run(tmp_path, {
+        "html/GUID-AAA1.html": topic("GUID-AAA1", "Fault Tab"),
+        "html/GUID-BBB2.html": topic("GUID-BBB2", "Fault Tab"),
+        "html/GUID-CCC3.html": topic("GUID-CCC3", "Fault Tab 2"),
+        **{f"html/{k}": v for k, v in toc(node("GUID-AAA1", "Fault Tab")).items()},
+    })
+    assert result.names() == ["fault-tab-2.md", "fault-tab-3.md", "fault-tab.md"]
+    assert result.document("fault-tab-2.md").source.name == "GUID-CCC3.html"
+    assert result.document("fault-tab-3.md").source.name == "GUID-BBB2.html"
+
+
 def test_the_topic_and_not_the_toc_is_authoritative_for_a_title(tmp_path: Path) -> None:
     """`h1` equals `DC.Title` in 18,351 of 18,542, while the two TOC files disagree
     with each other on 4% of shared entries. So the slug and the heading come from
@@ -617,6 +652,27 @@ def test_the_topic_and_not_the_toc_is_authoritative_for_a_title(tmp_path: Path) 
     document = result.document("installing-the-server.md")
     assert document.title == "Installing the Server"
     assert result.unit.nav[0].label == "Install"
+
+
+def test_inline_markup_in_the_heading_adds_no_space_to_the_title(tmp_path: Path) -> None:
+    """R6-02, in the two shapes amx-bpm 4.3.0 `install` has: a `<sup>` mark and a
+    `<var>` that closes after the parenthesis. Joining text nodes with a space put
+    one at every element boundary -- `Hawk ®`, `( CONFIG_HOME)` -- so the
+    frontmatter title disagreed with `<title>` and with the page's own `#` line."""
+    hawk = topic("GUID-AAA1", "Editing TIBCO Hawk® Rulebase Files").replace(
+        '"ariaid-title1">Editing TIBCO Hawk®', '"ariaid-title1">Editing TIBCO Hawk<sup>®</sup>')
+    home = topic("GUID-BBB2", "Configuration Directory (CONFIG_HOME)").replace(
+        '"ariaid-title1">Configuration Directory (CONFIG_HOME)',
+        '"ariaid-title1">Configuration Directory (<var class="varname">CONFIG_HOME)</var>')
+    result = run(tmp_path, {
+        "html/GUID-AAA1.html": hawk,
+        "html/GUID-BBB2.html": home,
+        **{f"html/{k}": v for k, v in toc(node("GUID-AAA1", "Hawk") + node("GUID-BBB2", "Home")).items()},
+    })
+    assert result.document("editing-tibco-hawk-rulebase-files.md").title == \
+        "Editing TIBCO Hawk® Rulebase Files"
+    assert result.document("configuration-directory-config-home.md").title == \
+        "Configuration Directory (CONFIG_HOME)"
 
 
 def test_dc_relation_is_related_links_and_builds_no_hierarchy(tmp_path: Path) -> None:
@@ -734,6 +790,41 @@ def test_support_and_legal_are_matched_on_the_label_because_the_path_is_a_guid(
     })
     assert str(result.unit.support) == "documentation-and-support.md"
     assert str(result.unit.legal) == "legal-and-third-party-notices.md"
+
+
+def test_suitehelp_s_important_information_entry_is_the_legal_page(tmp_path: Path) -> None:
+    """R6-04. SuiteHelp titles the licence page `Important Information` in 274 of
+    the cache's 353 doc-sets, under the book's root entry -- marketo 7.1.0 has it
+    at `User's Guide > Important Information` and again, republished, under
+    `Installation`. The shared predicate does not match that label, and must not
+    be widened to, so the engine reads it itself."""
+    result = run(tmp_path, {
+        "html/GUID-AAA1.html": topic("GUID-AAA1", "User's Guide"),
+        "html/GUID-BBB2.html": topic("GUID-BBB2", "Important Information"),
+        "html/GUID-CCC3.html": topic("GUID-CCC3", "TIBCO Documentation and Support Services"),
+        **{f"html/{k}": v for k, v in toc(node("GUID-AAA1", "User's Guide", (
+            node("GUID-BBB2", "Important Information")
+            + node("GUID-CCC3", "TIBCO Documentation and Support Services")))).items()},
+    })
+    assert str(result.unit.legal) == "important-information.md"
+    assert "TAIL_PAGE_MISSING" not in result.codes()
+
+
+def test_a_deep_important_information_topic_is_not_taken_for_the_legal_page(
+    tmp_path: Path,
+) -> None:
+    """The label is only evidence near the top of the TOC, where the 708 measured
+    entries sit (depths 0-2). Below that it is a topic a writer named."""
+    deep = node("GUID-AAA1", "Guide", node("GUID-BBB2", "Part", node(
+        "GUID-CCC3", "Chapter", node("GUID-DDD4", "Important Information"))))
+    result = run(tmp_path, {
+        "html/GUID-AAA1.html": topic("GUID-AAA1", "Guide"),
+        "html/GUID-BBB2.html": topic("GUID-BBB2", "Part"),
+        "html/GUID-CCC3.html": topic("GUID-CCC3", "Chapter"),
+        "html/GUID-DDD4.html": topic("GUID-DDD4", "Important Information"),
+        **{f"html/{k}": v for k, v in toc(deep).items()},
+    })
+    assert result.unit.legal is None
 
 
 def test_a_missing_tail_page_is_reported_and_never_synthesized(tmp_path: Path) -> None:
