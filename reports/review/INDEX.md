@@ -96,17 +96,19 @@ The orchestrator re-checked R5-02 in `output/` (EMS 10.5.1 `Deploying-the-FTL-Se
 
 ## Batch 2, grouped into fix themes
 
+Triage approved by the user 2026-10-04, as proposed, including the two choices in Q (skip and report localized roots) and T (report lost books; dual-engine conversion deferred). The user also asked to restore the TRA Runtime Agent 5.13.0 legal page's old address.
+
 | theme | findings | proposed | decision |
 |---|---|---|---|
-| **P. Content published twice or in the wrong place** | R4-01 (S1), R6-07, R4-12, R4-13, R4-14 | fix | |
-| **Q. Non-English Flare builds land in the English tree** | R5-01 (S1) | fix: skip them and report each one; publishing them to the `loc-` tree is a later phase | |
-| **R. Flare formatting lost: step numbers, note boxes, table headings and captions, code moved across prose, popups** | R5-02, R5-03, R5-04, R5-05, R5-07 (S1), R5-13 | fix | |
-| **S. Links that should work but don't** | R5-06 (S1), R5-08 (S2), R6-03 (S2), R6-05 (S2), R6-14 | fix | |
-| **T. Mixed generators and hand-corrected engines** | R4-02 (S2), R4-03 (S2), R4-09 | fix: name each book a version loses (new finding) and make an engine correction re-convert; converting two engines in one version is deferred | |
-| **U. `--input` and help-ID (CSH) consistency** | R4-04 (S2), R4-05 (S2), R4-11 | fix | |
-| **V. "Converted" with nothing converted, or a crash that leaves residue** | R4-06, R4-07, R4-08, R5-09 (S2), R5-12, R5-15 | fix | |
-| **W. DITA, before the first DITA family converts** | R6-02 (S1), R6-04 (S2), R6-09, R6-12 | fix | |
-| **X. DocBook list order and false anchor warnings** | R6-01 (S1), R6-06 | fix (code and the docs claim) | |
-| **Y. False warnings and dropped TOC nodes in Flare** | R5-10, R5-11 | fix | |
-| **Z. Fragile, correct today** | R6-08, R6-10, R6-11, R6-13 | defer to planning.md carried-forward items | |
-| **O2. Cleanup** | R4-10, R4-15, R4-16, R4-17, R5-14, R5-16, R6-15, R6-16 | add to the end-of-Phase-34 cleanup commit | |
+| **P. Content published twice or in the wrong place** | R4-01 (S1), R6-07, R4-12, R4-13, R4-14 | fix | approved: fix 2026-10-04 |
+| **Q. Non-English Flare builds land in the English tree** | R5-01 (S1) | fix: skip them and report each one; publishing them to the `loc-` tree is a later phase | approved: fix 2026-10-04 |
+| **R. Flare formatting lost: step numbers, note boxes, table headings and captions, code moved across prose, popups** | R5-02, R5-03, R5-04, R5-05, R5-07 (S1), R5-13 | fix | approved: fix 2026-10-04 |
+| **S. Links that should work but don't** | R5-06 (S1), R5-08 (S2), R6-03 (S2), R6-05 (S2), R6-14 | fix | approved: fix 2026-10-04 |
+| **T. Mixed generators and hand-corrected engines** | R4-02 (S2), R4-03 (S2), R4-09 | fix: name each book a version loses (new finding) and make an engine correction re-convert; converting two engines in one version is deferred | approved: fix 2026-10-04 |
+| **U. `--input` and help-ID (CSH) consistency** | R4-04 (S2), R4-05 (S2), R4-11 | fix | approved: fix 2026-10-04 |
+| **V. "Converted" with nothing converted, or a crash that leaves residue** | R4-06, R4-07, R4-08, R5-09 (S2), R5-12, R5-15 | fix | approved: fix 2026-10-04 |
+| **W. DITA, before the first DITA family converts** | R6-02 (S1), R6-04 (S2), R6-09, R6-12 | fix | approved: fix 2026-10-04 |
+| **X. DocBook list order and false anchor warnings** | R6-01 (S1), R6-06 | fix (code and the docs claim) | approved: fix (code and the docs claim) 2026-10-04 |
+| **Y. False warnings and dropped TOC nodes in Flare** | R5-10, R5-11 | fix | approved: fix 2026-10-04 |
+| **Z. Fragile, correct today** | R6-08, R6-10, R6-11, R6-13 | defer to planning.md carried-forward items | approved: defer to planning.md carried-forward items 2026-10-04 |
+| **O2. Cleanup** | R4-10, R4-15, R4-16, R4-17, R5-14, R5-16, R6-15, R6-16 | add to the end-of-Phase-34 cleanup commit | approved: add to the end-of-Phase-34 cleanup commit 2026-10-04 |

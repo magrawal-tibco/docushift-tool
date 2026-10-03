@@ -186,7 +186,7 @@ Per-family folders are created on demand by the downloader, not at startup: pre-
 
 ## 4. Next Steps
 
-1. **Phase 34, the whole-tool code review**, in progress (batch 1 fixed, batch 2 awaiting triage): twelve component units,
+1. **Phase 34, the whole-tool code review**, in progress (batch 2 fixing, batch 3 reviewing): twelve component units,
    then three cross-cutting passes, find first and fix after triage
    ([`planning.md` §1](docs/planning.md#1-active-phases)).
 2. The two carried-forward technical items are confirmed or closed during Phase 34
