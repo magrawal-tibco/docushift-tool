@@ -74,3 +74,11 @@ turned out to be wrong.
 - J bumps the reframe algorithm version 3 → 4 (every merged tree re-merges on its next run), and the new `shortened` review flag also queues ~90 pages cut at 50 characters across families.
 - New finding codes: `ORIGIN_TEMPLATE_REJECTED`, `ORIGIN_PATH_TOO_SHORT`, `INVENTORY_PARTIAL` (register 66 → 69).
 - Known gap, not in any finding: `archive download --from-file` for an unknown version still adds a row that blocks a later fetch.
+
+### J applied (2026-10-04)
+
+The user ran `reframe --all --renormalize` in the mainstream session. Diffed against a copy of every `rename-map.csv` taken just before:
+- **66 EMS pages renamed, exactly as predicted**: 11 C API pages × 6 versions, e.g. `tibemsmsg-setpriorit.md` → `tibemsmsg-setpriority.md`. ActiveSpaces unchanged.
+- **1 unexpected rename, not caused by J**: in TRA Runtime Agent 5.13.0, the second legal page (`trahelp/_templates/Legal-and-Third-Party-Notices`, outside the TOC) moved from `tibco-runtime-agent/legal-and-third-party-notices.md` to `trahelp/_templates/legal-and-third-party-notices-2.md`. That exposes a source folder in the URL and adds a collision suffix. J cannot reach this title (it has spaces); `--renormalize` recomputed a name an earlier run had pinned, and current naming of an out-of-TOC duplicate is worse. **Handed to R9 (reframe) for root cause.** Interim remedy: pin the old name back in that row of `rename-map.csv` and re-merge the one version.
+- Review queues grew as the new `shortened` flag predicted: EMS 118 → 119, TRA Administrator 4 → 10, TRA Runtime Agent 1 → 6.
+- The 926 epoch dates were migrated to ISO by the mainstream session (3f907d0).
