@@ -139,8 +139,11 @@ def test_the_register_carries_every_row_of_7_5() -> None:
     no declaration, and short sources that used to be counted as one UNDECLARED.
     It adds the 69th, `INVENTORY_PARTIAL` (R3-04): a partial walk always left the
     columns unwritten, and never said so or cleared the previous package's.
+    It adds the 70th and 71st, `CONTENT_BODY_FALLBACK` (R5-09) and
+    `TOC_UNREADABLE` (R5-12): a whole root reported one topic at a time, and a
+    TOC that failed to parse with no word at all.
     """
-    assert len(REGISTRY) == 69
+    assert len(REGISTRY) == 71
 
 
 def test_severity_comes_from_the_registry_and_not_from_the_call_site() -> None:

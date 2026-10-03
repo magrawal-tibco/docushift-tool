@@ -10,7 +10,8 @@
   around a JavaScript object literal: single-quoted keys, `\\u0027` escapes,
   unquoted identifiers. The parser below reads that literal and nothing else -- no
   expressions, no calls, no `eval`, no JS engine. A file that is not a literal
-  raises and the caller reports it.
+  reads as an unreadable `Toc`, and the engine reports it when it is the
+  declared tree (R5-12).
 - **The tree carries no titles.** `tree` is nested `{i,c,n}` integer ids; the
   `<Name>_Chunk<N>.js` payload maps *path* to `{i:[ids], t:[labels], b:[anchors]}`
   as **parallel arrays**. So a titled tree is an index inversion followed by a
@@ -97,6 +98,10 @@ class Toc:
     unmatched: int = 0
     # Entries whose `i`/`t`/`b` arrays disagree in length. 0 in 37,598 sampled.
     ragged: int = 0
+    # False when the file is missing, is not a `define({...})` literal, or has no
+    # `tree` -- which is how a helper script or a chunk payload beside the trees
+    # reads (R5-12). An empty but readable tree stays True.
+    readable: bool = True
 
     def walk(self):
         stack = list(reversed(self.nodes))
@@ -107,7 +112,12 @@ class Toc:
 
 
 def tree_files(root: Path) -> list[Path]:
-    """Every TOC *tree* file in `Data/Tocs`, chunk payloads excluded."""
+    """Every candidate TOC *tree* file in `Data/Tocs`, chunk payloads excluded.
+
+    A candidate, not a tree: 11 corpus roots ship helper scripts here
+    (`apply_fr.js`) and 6 ship localized payloads (`*_Chunk0_ja.js`) that the
+    chunk pattern misses. `read_toc` tells them apart by the `tree` key.
+    """
     directory = root / "Data" / "Tocs"
     try:
         found = [
@@ -124,13 +134,15 @@ def tree_files(root: Path) -> list[Path]:
 def read_toc(path: Path) -> Toc:
     """Reads one tree file and its chunks into a titled tree.
 
-    Raises nothing the caller cannot act on: a missing or malformed file comes
-    back as an empty `Toc`, which the engine reports and then treats as "every
-    topic is an orphan" rather than as a crash.
+    Raises nothing: a missing or malformed file, or one with no `tree`, comes
+    back as an empty `Toc` marked unreadable. The engine reports the declared
+    tree when it is one, skips any other, and treats every topic as an orphan
+    rather than crashing.
     """
     toc = Toc(name=path.stem)
     document = _read_define(path)
-    if not isinstance(document, dict):
+    if not isinstance(document, dict) or "tree" not in document:
+        toc.readable = False
         return toc
 
     index, toc.ragged = _index(path, document)

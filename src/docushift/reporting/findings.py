@@ -136,6 +136,14 @@ REGISTRY: dict[str, Code] = _codes(
     Code("CONTENT_MISSING", Severity.WARNING, Stage.CONVERT,
          "A topic with no content container -- not converted, never guessed at",
          "architecture.md §5.1.6"),
+    Code("CONTENT_BODY_FALLBACK", Severity.NOTE, Stage.CONVERT,
+         "A Flare root whose skin writes no content container: its MadCap topics "
+         "were converted from <body>, reported once per root",
+         "Phase 34 (R5-09)"),
+    Code("TOC_UNREADABLE", Severity.WARNING, Stage.CONVERT,
+         "A Flare root's HelpSystem.xml or declared TOC is missing or did not parse; "
+         "its topics are filed under Unfiled",
+         "Phase 34 (R5-12)"),
     Code("TOC_ORPHAN", Severity.NOTE, Stage.CONVERT,
          "Converted topics in no TOC entry, filed under Unfiled -- 14.1% for Flare",
          "architecture.md §5.1.4"),

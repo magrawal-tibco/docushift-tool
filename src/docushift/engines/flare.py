@@ -417,13 +417,16 @@ class FlareEngine(BaseEngine):
         plan = self._plan(context, unit, root)
 
         documents: dict[str, Document] = {}
+        bare: list[str] = []
         for relative in plan.topics:
-            document = self._convert(context, unit, root, relative, plan.planned)
+            document = self._guarded(context, unit, root, relative, plan.planned, bare=bare)
             if document is not None:
                 documents[relative.lower()] = document
+        if bare:
+            documents = self._bare_root(context, unit, root, plan, documents, bare)
 
         if plan.landing:
-            landing = self._convert(context, unit, root, plan.landing, plan.planned, landing=True)
+            landing = self._guarded(context, unit, root, plan.landing, plan.planned, landing=True)
             if landing is not None:
                 documents[plan.landing.lower()] = landing
                 unit.landing = landing.relative
@@ -447,7 +450,14 @@ class FlareEngine(BaseEngine):
         converted only where the TOC references it, and a cross-reference can only
         be rewritten against a set that is already known.
         """
-        manifest = read_manifest(root) or Manifest()
+        manifest = read_manifest(root)
+        if manifest is None:
+            # The file is there -- it is how the root was found -- and did not
+            # parse. No declared TOC and no landing page follow, and before R5-12
+            # only `TOC_ORPHAN` hinted at why.
+            context.record("TOC_UNREADABLE", path=unit.name,
+                           message="Data/HelpSystem.xml did not parse; no declared TOC, no landing page")
+            manifest = Manifest()
         tocs = self._tocs(context, unit, root, manifest)
         referenced = {
             node.entry.path.lower()
@@ -510,17 +520,26 @@ class FlareEngine(BaseEngine):
         `bctcm/6.2.0` the declared tree covers 53 of 106 topics, so reading it
         alone loses half the navigation and globbing alphabetically picks the wrong
         file in all three.
+
+        The declared tree is read even when it is not on disk, so that its absence
+        is reported rather than skipped (R5-12); its place stays first either way.
+        Any other file that does not read as a tree is a helper script or a chunk
+        payload the pattern missed, and is passed over without a word.
         """
         files = tree_files(root)
         declared = root / Path(*PurePosixPath(manifest.toc).parts) if manifest.toc else None
-        ordered = [path for path in files if declared is not None and path == declared]
-        ordered += [path for path in files if path not in ordered]
-        if declared is not None and not ordered:
-            ordered = [declared]
+        ordered = [declared] if declared is not None else []
+        ordered += [path for path in files if path != declared]
 
         tocs: list[Toc] = []
         for path in ordered:
             toc = read_toc(path)
+            if not toc.readable:
+                if path != declared:
+                    continue
+                context.record("TOC_UNREADABLE", path=unit.name,
+                               message=f"{manifest.toc} is missing or did not parse; "
+                                       "every topic is filed under Unfiled")
             if toc.unmatched:
                 context.record("NAV_NODE_DROPPED", path=unit.name, count=toc.unmatched,
                                message=f"{toc.unmatched} TOC id(s) with no payload entry in {path.name}")
@@ -589,10 +608,69 @@ class FlareEngine(BaseEngine):
             return "unreferenced-template"
         return ""
 
+    def _bare_root(self, context: ConversionContext, unit: Unit, root: Path, plan: _Plan,
+                   documents: dict[str, Document], bare: list[str]) -> dict[str, Document]:
+        """The topics with no container: a root's shape, or a stray file each.
+
+        The Statistica LTS roots use a skin that puts content straight in
+        `<body>` -- 292 of 293 topics in each 14.1.0 root, ~1,485 across 10 roots,
+        each one dropped and reported on its own line (R5-09). §5.1.6's 99.9% is a
+        per-topic figure and cannot see that shape. So where **no topic outside
+        `_templates/`** has the container, a MadCap `Topic` file without it is
+        converted from `<body>` and the root is reported once. The skin's own
+        templates do not count -- 14.2.0's `Home.htm` has the container and its
+        five topics do not. Anywhere else, a topic without the container is
+        still `CONTENT_MISSING`: one stray file is not evidence about a skin,
+        and the Javadoc page the fallback chain once converted carries no
+        MadCap marker at all.
+
+        The planned set is unchanged, so a cross-reference resolved against it
+        stays right. Documents keep the plan's order.
+        """
+        contained = any(
+            not key.startswith(f"{TEMPLATES_DIRECTORY}/") for key in documents
+        )
+        fallen = 0
+        for relative in bare:
+            document = self._guarded(context, unit, root, relative, plan.planned,
+                                     body=not contained)
+            if document is not None:
+                documents[relative.lower()] = document
+                fallen += 1
+        if fallen:
+            context.record("CONTENT_BODY_FALLBACK", path=unit.name, count=fallen,
+                           message=f"no topic has {CONTENT_SELECTOR}; {fallen} converted from <body>")
+        order = [relative.lower() for relative in plan.topics]
+        return {key: documents[key] for key in order if key in documents}
+
     # -- one topic -------------------------------------------------------------
 
+    def _guarded(self, context: ConversionContext, unit: Unit, root: Path, relative: str,
+                 planned: dict[str, str], **options) -> Document | None:
+        """`_convert`, with the base contract's "never raises" held per topic (R5-15).
+
+        One topic that makes bs4 or the recursive renderer fail -- a
+        `RecursionError` on deep nesting is the plausible one -- would otherwise
+        abort every root of the version. None has in ~49,000 converted documents,
+        which is why it is a skip and a report line rather than a design.
+        """
+        try:
+            return self._convert(context, unit, root, relative, planned, **options)
+        except Exception as error:  # noqa: BLE001 - reported, and the root goes on
+            unit.skip("render-error")
+            context.record("CONTENT_MISSING", path=f"{unit.name}/{relative}".lstrip("/"),
+                           message=f"could not be rendered: {type(error).__name__}: {error}")
+            return None
+
     def _convert(self, context: ConversionContext, unit: Unit, root: Path, relative: str,
-                 planned: dict[str, str], landing: bool = False) -> Document | None:
+                 planned: dict[str, str], landing: bool = False, body: bool = False,
+                 bare: list[str] | None = None) -> Document | None:
+        """One topic. `body` is `_bare_root`'s fallback; `bare` defers a container miss.
+
+        A topic with no container is appended to `bare` instead of reported when
+        the caller passes one, because whether it is a stray file or the shape of
+        the whole root is not known until every topic has been read.
+        """
         source = root / Path(*PurePosixPath(relative).parts)
         text = _read(source)
         if text is None:
@@ -603,10 +681,14 @@ class FlareEngine(BaseEngine):
 
         soup = markdown.parse(text)
         container = soup.select_one(CONTENT_SELECTOR)
-        if container is None:
+        if container is None and (landing or (body and _is_runtime_topic(soup))):
             # The landing page is the one place the invariant does not hold: 5
             # roots publish 3,444 characters of real prose in a plain `<body>`.
-            container = soup.body if landing else None
+            # The other is a root whose skin never writes the container at all.
+            container = soup.body
+        if container is None and bare is not None:
+            bare.append(relative)
+            return None
         if container is None:
             unit.skip("no-content-container")
             context.record("CONTENT_MISSING", path=f"{unit.name}/{relative}".lstrip("/"),
@@ -1185,6 +1267,12 @@ def _read(path: Path) -> str | None:
             return None
     except OSError:
         return None
+
+
+def _is_runtime_topic(soup: BeautifulSoup) -> bool:
+    """MadCap's own marker for a topic file, on `<html>`. A Javadoc page has none."""
+    html = soup.find("html")
+    return isinstance(html, Tag) and str(html.get("data-mc-runtime-file-type", "")) == "Topic"
 
 
 def _title(container: Tag) -> str:

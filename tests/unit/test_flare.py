@@ -289,6 +289,37 @@ def test_chunk_payloads_are_not_tree_files(tmp_path: Path) -> None:
     assert {path.name for path in tree_files(tmp_path)} == {"Default.js", "_HTML_gateway.js"}
 
 
+def test_an_unreadable_manifest_or_declared_toc_is_reported(tmp_path: Path) -> None:
+    """Both used to come back empty with no word; only `TOC_ORPHAN` showed it (R5-12)."""
+    broken_toc = basic()
+    broken_toc["html/Data/Tocs/Default.js"] = "define({tree:{n:[{i:1},"
+    assert run(tmp_path / "toc", broken_toc).codes()["TOC_UNREADABLE"] == 1
+
+    broken_manifest = basic()
+    broken_manifest["html/Data/HelpSystem.xml"] = "<CatapultHelpSystem Toc="
+    assert run(tmp_path / "manifest", broken_manifest).codes()["TOC_UNREADABLE"] == 1
+
+    assert "TOC_UNREADABLE" not in run(tmp_path / "fine", basic()).codes()
+
+
+def test_only_a_file_with_a_tree_is_read_as_a_toc(tmp_path: Path) -> None:
+    """11 helper scripts and 6 `*_Chunk0_ja.js` payloads sit beside the trees (R5-12).
+
+    Read as trees, the payloads are empty trees and the scripts fail to parse;
+    neither is a second navigation, and neither is a failure to report.
+    """
+    files = basic()
+    files["html/Data/Tocs/apply_fr.js"] = "function apply() { return 1; }"
+    files["html/Data/Tocs/Default_Chunk0_ja.js"] = define(
+        {"Content/intro.htm": {"i": [1], "t": ["はじめに"], "b": [""]}}
+    )
+
+    result = run(tmp_path, files)
+
+    assert [node.label for node in result.unit.nav] == ["Intro", "Deep"]
+    assert "TOC_UNREADABLE" not in result.codes()
+
+
 def test_the_manifest_is_read_by_attribute_and_forward_slashed(tmp_path: Path) -> None:
     build(tmp_path, {"Data/HelpSystem.xml": (
         '<?xml version="1.0"?><CatapultHelpSystem Toc="Data\\Tocs\\Default.js" '
@@ -451,6 +482,77 @@ def test_there_is_one_content_selector_and_a_miss_is_a_report_line(tmp_path: Pat
 
     assert [str(d.relative) for d in result.unit.documents if d.relative.name == "other.md"] == []
     assert result.unit.skipped["no-content-container"] == 1
+    assert result.codes()["CONTENT_MISSING"] == 1
+
+
+def bare_topic(title: str, body: str = "<p>Body.</p>") -> str:
+    """A MadCap topic built by a skin that puts content straight in `<body>`.
+
+    The Statistica LTS roots (`dsc-stat/14.1.0/StatLTSReleases`): runtime type
+    `Topic`, a frameset link, and no `#mc-main-content`.
+    """
+    return (
+        "<html data-mc-runtime-file-type='Topic'><head><title>x</title></head>"
+        "<body class='refbody'><p class='MCWebHelpFramesetLink MCWebHelpFramesetLinkTop'>"
+        "<a href='../Default.htm#Content/x.htm'>Open topic with navigation</a></p>"
+        f"<h1 class='referencetitle'>{title}</h1><div class='section'>{body}</div></body></html>"
+    )
+
+
+def test_a_root_built_without_the_container_converts_from_the_body_and_says_so_once(
+    tmp_path: Path,
+) -> None:
+    """10 Statistica roots: every topic was `CONTENT_MISSING`, one at a time (R5-09).
+
+    The landing page under `_templates/` carries the container, as in 14.2.0, and
+    does not count: the skin's templates do not show how the topics were built.
+    """
+    files = basic()
+    files["html/Content/intro.htm"] = bare_topic("Introduction", "<p>Visible prose.</p>")
+    files["html/Content/guide/deep.htm"] = bare_topic("Deep dive")
+
+    result = run(tmp_path, files)
+
+    body = result.body("Content/intro.md")
+    assert body == "# Introduction\n\nVisible prose."
+    assert result.document("Content/guide/deep.md").title == "Deep dive"
+    assert "CONTENT_MISSING" not in result.codes()
+    fallback = [f for f in result.findings.all if f.code == "CONTENT_BODY_FALLBACK"]
+    assert len(fallback) == 1 and fallback[0].count == 2
+
+
+def test_one_bare_topic_in_a_root_built_with_the_container_is_still_missing(
+    tmp_path: Path,
+) -> None:
+    """The fallback is a root's shape, not a per-file second chance (§5.1.6)."""
+    files = basic()
+    files["html/Content/stray.htm"] = bare_topic("Stray")
+
+    result = run(tmp_path, files)
+
+    assert result.codes()["CONTENT_MISSING"] == 1
+    assert "CONTENT_BODY_FALLBACK" not in result.codes()
+
+
+def test_a_topic_that_breaks_the_renderer_is_skipped_and_the_root_still_converts(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """`convert_unit` never raises (base contract); one topic must not end the version (R5-15)."""
+    from docushift.engines import flare
+
+    render = flare.FlareRenderer.render
+
+    def deep(self, node):
+        if self.source.name == "deep.htm":
+            raise RecursionError("maximum recursion depth exceeded")
+        return render(self, node)
+
+    monkeypatch.setattr(flare.FlareRenderer, "render", deep)
+
+    result = run(tmp_path, basic())
+
+    assert result.body("Content/intro.md") == "# Introduction\n\nBody."
+    assert result.unit.skipped["render-error"] == 1
     assert result.codes()["CONTENT_MISSING"] == 1
 
 
