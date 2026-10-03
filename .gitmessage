@@ -1,89 +1,41 @@
-<type>(<scope>): <imperative subject, no trailing period, <= 72 chars>
+<type>(<scope>): <what changed, imperative, no period, <= 60 chars>
 
-## User Requests
-- "<the ask, verbatim or closely paraphrased, that drove this commit>"
-
-## Changes
-- `<path or area>` — <what changed>
-
-## Technical Details
-<Why this approach; decisions made and alternatives rejected; anything a
-reviewer would otherwise have to reverse-engineer from the diff.>
+<Why, in 1-3 lines: the problem it fixes or the ask behind it, and the effect.>
 
 ; ==============================================================================
-; DocuShift commit template
-; Lines starting with ';' are stripped (core.commentChar=; is set locally). Delete any section you do not need.
-; ==============================================================================
+; DocuShift commit template. Lines starting with ';' are stripped
+; (core.commentChar=; is set locally).
 ;
-; SUBJECT
-;   <type>(<scope>): <subject>
+; Aim: `git log --oneline` gives the point; `git show` adds the why in a few
+; lines. The detail lives in docs/planning.md -- point at it, don't copy it.
 ;
-;   type   feat     new capability
-;          fix      bug fix
-;          docs     documentation only
-;          refactor behaviour-preserving restructure
-;          test     adding or correcting tests
-;          build    pyproject, deps, packaging, .gitignore
-;          chore    tooling, config, housekeeping
-;          perf     performance work
-;          revert   reverts a previous commit
+; SUBJECT  <type>(<scope>): <subject>
+;   type   feat | fix | docs | refactor | test | build | chore | perf | revert
+;   scope  the stage or module: catalog, discovery, downloader, extractor,
+;          engines, transforms, reframe, sync, cli, state, config, reporting,
+;          utils, docs. Omit it when the change is cross-cutting.
+;   Imperative ("add", not "added"), no trailing period, <= 60 chars (72 max).
+;   One change per commit; if the subject needs "and", consider two.
 ;
-;   scope  Pipeline stage or module, matching the source tree:
-;          catalog | discovery | downloader | extractor | engines |
-;          transforms | aem | sync | cli | state | config | taxonomy |
-;          reporting | utils | docs
-;          Omit the scope if the change is genuinely cross-cutting.
+; BODY     Why, not how -- the diff already shows how. 1-3 lines, wrapped at 72.
+;   - Add up to 3 bullets only for changes the subject doesn't cover.
+;   - No file-by-file lists, test counts or measurement tables; end with
+;     "See planning.md Phase N." when there is more to say.
+;   - Say "not yet verified" when that is true.
+;   - Quote the user's ask only when the why is not obvious without it.
 ;
-;   Imperative mood ("add", not "added"/"adds"). No trailing period.
+; Example:
+;   fix(engines): stop taking third-party topics as the legal page
 ;
-; ------------------------------------------------------------------------------
-; ## User Requests
-;   The prompt(s) that motivated this commit, so intent survives the diff.
-;   Quote the ask rather than restating the outcome — the outcome is in
-;   ## Changes. Include follow-up corrections; they are often the most
-;   informative part of the history. One bullet per distinct request.
+;   Bare "third party" and "legal" matched content topics and moved them
+;   out of their chapter in 65 of 953 Flare roots. See planning.md Phase 36.
 ;
-;   Example:
-;     - "the list should be json or csv as i prefer to edit csv when the
-;        list is too large"
-;     - "keep in mind while we are planning and executing, keep updating
-;        the documentation and context as well"
-;
-; ------------------------------------------------------------------------------
-; ## Changes
-;   One bullet per file or coherent area. Say what changed, not how it
-;   works — mechanism belongs in ## Technical Details. Group related files
-;   under one bullet rather than mirroring the diff file-by-file.
-;
-;   Example:
-;     - `docs/architecture.md` — §3 rewritten from JSON schema to the CSV
-;       schema with column-ownership and provenance tables
-;     - `config/` — `catalog.json` retired; `products.csv` + `versions.csv`
-;       added
-;
-; ------------------------------------------------------------------------------
-; ## Technical Details
-;   The reviewer's shortcut. Cover whichever apply:
-;     - design decisions and the alternatives rejected, with the reason
-;     - trade-offs knowingly accepted
-;     - migration/compatibility impact on existing data or config
-;     - known gaps, follow-ups, or anything deliberately left undone
-;     - how it was verified (tests added, commands run, or "not yet run")
-;
-;   State plainly when something is unverified. Do not imply testing that
-;   did not happen.
-;
-; ------------------------------------------------------------------------------
 ; BEFORE COMMITTING
-;   [ ] The phase in docs/planning.md records any decision made here (once;
-;       other docs link to it rather than restate it)
-;   [ ] A phase finished here is moved to docs/history/phases/ with its index row
-;   [ ] CONTEXT.md §3-§4 rewritten if the current state or next step changed
-;   [ ] docs/architecture.md reflects any schema or pipeline change
-;   [ ] docs/user-guide.md reflects any CLI or config-file change
+;   [ ] the phase in docs/planning.md records the decision (once)
+;   [ ] a finished phase is moved to docs/history/phases/ with its index row
+;   [ ] CONTEXT.md updated if the current state or next step changed
+;   [ ] architecture.md / user-guide.md updated for schema, pipeline or CLI changes
 ;
-; FOOTER
-;   Reference issues with "Refs: #123" / "Closes: #123".
-;   For AI-assisted commits, keep the trailer:
-;     Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+; FOOTER   Refs: #123 | Closes: #123
+;          AI-assisted commits keep the Co-Authored-By trailer.
 ; ==============================================================================
