@@ -82,3 +82,31 @@ The user ran `reframe --all --renormalize` in the mainstream session. Diffed aga
 - **1 unexpected rename, not caused by J**: in TRA Runtime Agent 5.13.0, the second legal page (`trahelp/_templates/Legal-and-Third-Party-Notices`, outside the TOC) moved from `tibco-runtime-agent/legal-and-third-party-notices.md` to `trahelp/_templates/legal-and-third-party-notices-2.md`. That exposes a source folder in the URL and adds a collision suffix. J cannot reach this title (it has spaces); `--renormalize` recomputed a name an earlier run had pinned, and current naming of an out-of-TOC duplicate is worse. **Handed to R9 (reframe) for root cause.** Interim remedy: pin the old name back in that row of `rename-map.csv` and re-merge the one version.
 - Review queues grew as the new `shortened` flag predicted: EMS 118 → 119, TRA Administrator 4 → 10, TRA Runtime Agent 1 → 6.
 - The 926 epoch dates were migrated to ISO by the mainstream session (3f907d0).
+
+## Batch 2 (R4–R6): counts
+
+| unit | S1 | S2 | S3 | S4 | total |
+|---|---|---|---|---|---|
+| R4 Engine framework & converter driver | 1 | 4 | 9 | 3 | 17 |
+| R5 Flare engine | 7 | 2 | 6 | 1 | 16 |
+| R6 DITA & DocBook engines | 2 | 3 | 9 | 2 | 16 |
+| **Batch 2** | **10** | **9** | **24** | **6** | **49** |
+
+The orchestrator re-checked R5-02 in `output/` (EMS 10.5.1 `Deploying-the-FTL-Server-Cluster.md`: step 3 renders as "1." after a note paragraph); it holds. R4-01 is the cause of the open issue "Silver Fabric Enabler for ActiveSpaces: the whole guide set appears twice".
+
+## Batch 2, grouped into fix themes
+
+| theme | findings | proposed | decision |
+|---|---|---|---|
+| **P. Content published twice or in the wrong place** | R4-01 (S1), R6-07, R4-12, R4-13, R4-14 | fix | |
+| **Q. Non-English Flare builds land in the English tree** | R5-01 (S1) | fix: skip them and report each one; publishing them to the `loc-` tree is a later phase | |
+| **R. Flare formatting lost: step numbers, note boxes, table headings and captions, code moved across prose, popups** | R5-02, R5-03, R5-04, R5-05, R5-07 (S1), R5-13 | fix | |
+| **S. Links that should work but don't** | R5-06 (S1), R5-08 (S2), R6-03 (S2), R6-05 (S2), R6-14 | fix | |
+| **T. Mixed generators and hand-corrected engines** | R4-02 (S2), R4-03 (S2), R4-09 | fix: name each book a version loses (new finding) and make an engine correction re-convert; converting two engines in one version is deferred | |
+| **U. `--input` and help-ID (CSH) consistency** | R4-04 (S2), R4-05 (S2), R4-11 | fix | |
+| **V. "Converted" with nothing converted, or a crash that leaves residue** | R4-06, R4-07, R4-08, R5-09 (S2), R5-12, R5-15 | fix | |
+| **W. DITA, before the first DITA family converts** | R6-02 (S1), R6-04 (S2), R6-09, R6-12 | fix | |
+| **X. DocBook list order and false anchor warnings** | R6-01 (S1), R6-06 | fix (code and the docs claim) | |
+| **Y. False warnings and dropped TOC nodes in Flare** | R5-10, R5-11 | fix | |
+| **Z. Fragile, correct today** | R6-08, R6-10, R6-11, R6-13 | defer to planning.md carried-forward items | |
+| **O2. Cleanup** | R4-10, R4-15, R4-16, R4-17, R5-14, R5-16, R6-15, R6-16 | add to the end-of-Phase-34 cleanup commit | |

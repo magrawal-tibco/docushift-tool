@@ -17,7 +17,7 @@ table and stays [here](#75-the-findings-register-living).
 
 ### Phase 34: A Modular Review of the Whole Tool — **In progress, 2026-10-02**
 
-**Progress.** Base tagged `review-base` (7dda975); the frozen copy is the worktree `C:\github\docushift-tool-review`. Findings land in `reports/review/`, indexed in `reports/review/INDEX.md`. **Batch 1 (R1–R3) reviewed**: 52 findings (5 S1, 10 S2, 31 S3, 6 S4), grouped into 15 fix themes; **triage approved as proposed**. Themes A–L are **fixed and merged** (13 commits, 1,815 tests); the EMS re-merge that applies J awaits the user. Batch 2: R4 and R6 reviewed, R5 running.
+**Progress.** Base tagged `review-base` (7dda975); the frozen copy is the worktree `C:\github\docushift-tool-review`. Findings land in `reports/review/`, indexed in `reports/review/INDEX.md`. **Batch 1 (R1–R3) reviewed**: 52 findings (5 S1, 10 S2, 31 S3, 6 S4), grouped into 15 fix themes; **triage approved as proposed**. Themes A–L are **fixed and merged** (13 commits, 1,815 tests); the EMS re-merge that applies J awaits the user. J applied by `reframe --all --renormalize` (66 EMS pages renamed). **Batch 2 (R4–R6) reviewed**: 49 findings (10 S1, 9 S2, 24 S3, 6 S4) in 12 themes, awaiting triage.
 
 The tool grew phase by phase, from Phase 1 to Phase 33, and each phase was
 reviewed as a change. Nobody has read the whole thing end to end since. That is
