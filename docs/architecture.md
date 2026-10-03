@@ -1944,7 +1944,7 @@ The root rule therefore cannot be "a directory holding DocBook pages" — that s
 
 On this corpus that rule selects **exactly `html` in 10 of 10 versions, with zero false positives**, and rejects all 42 duplicates. So DocBook is a **one-unit-per-version** engine — the simplest shape of the four, and the opposite of WebWorks, where the version holds a mean of 3.5 units (§5.3.3). `find_output_roots` gains `_is_docbook_root` and `roots.py`'s module docstring loses its claim that DocBook has nothing to anchor on; that claim was written before this survey and is false.
 
-The rejected duplicates are not silently dropped. Each one is reported once as `DOCSET_SKIPPED` with the reason `duplicate-of-html`, so the report says out loud that eight directories of real HTML were seen and deliberately not converted (invariant 10).
+The rejected duplicates are not silently dropped. Each one is reported once as `DOCSET_SKIPPED` with the reason `duplicate-of-html`, so the report says out loud that eight directories of real HTML were seen and deliberately not converted (invariant 10). **Until Phase 34 none was reported** (R6-07): real extracts add a package wrapper (`11.2.1/tibco-streaming-11-2-1/{html,adaptersguide,…}`), the duplicate search read only the tree's own children, and it skipped the wrapper because the wrapper holds the root. Every convert run had 0 `DOCSET_SKIPPED` for both streaming products. The search now covers each root's siblings as well. On the 8 DocBook versions extracted today it reports 49: 8 for each `str` version and `dochome` for `sfire-sfds/11.1.1`.
 
 `SKIN_PREFIXES[DOCBOOK]` is `(("css",),)`. There is one skin directory and it holds only stylesheets.
 

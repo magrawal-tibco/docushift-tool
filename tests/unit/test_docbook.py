@@ -233,6 +233,29 @@ def test_the_unit_is_html_and_a_duplicate_directory_is_reported(tmp_path: Path) 
     assert any("duplicate" in message for message in result.messages("DOCSET_SKIPPED"))
 
 
+def test_a_duplicate_directory_beside_html_under_the_package_wrapper_is_reported(
+    tmp_path: Path,
+) -> None:
+    """R6-07. Real extracts add a wrapper -- `11.2.1/tibco-streaming-11-2-1/{html,
+    adaptersguide,…}` -- so the duplicates sit beside `html/` one level down. The
+    search looked only at the tree's own children, skipped the wrapper for
+    holding the root, and reported none of the 8, against the 51 §5.6 records."""
+    wrapper = "tibco-streaming-11-2-1"
+    result = run(tmp_path, {
+        f"{wrapper}/html/css/sbhelp.css": "body{}",
+        f"{wrapper}/html/index.html": page("index.html", "Home", titlepage("Home")),
+        f"{wrapper}/html/authoring/topic.html": page("authoring/topic.html", "Topic", titlepage("Topic")),
+        f"{wrapper}/authoring/topic.html": page("authoring/topic.html", "Topic", titlepage("Topic")),
+        # Not DocBook: `pdf/` beside them holds no page and is not reported.
+        f"{wrapper}/pdf/guide.pdf": "%PDF",
+    })
+
+    assert [unit.name for unit in result.units] == [f"{wrapper}/html"]
+    assert result.names() == ["authoring/topic.md", "index.md"]
+    skipped = [f for f in result.findings.all if f.code == "DOCSET_SKIPPED"]
+    assert [f.path for f in skipped] == [f"{wrapper}/authoring"]
+
+
 def test_output_mirrors_the_guide_directories(tmp_path: Path) -> None:
     """The guide directory is the only hierarchy this corpus has, so it is kept.
 

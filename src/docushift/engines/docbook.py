@@ -1014,14 +1014,21 @@ def _guides(plan: _Plan) -> list[tuple[str, str, _Page | None]]:
 
 
 def _duplicate_roots(tree: Path, roots: list[Path]) -> list[Path]:
-    """Top-level directories holding DocBook pages that no output root covers.
+    """Directories beside a root holding DocBook pages that no output root covers.
 
-    All 42 in the corpus sit at depth 1 and duplicate a directory under `html/`,
-    so one level is the whole search.
+    All 42 in the corpus sit beside `html/` and duplicate a directory under it.
+    **Beside the root, not at the top of the tree** (R6-07): real extracts add a
+    package wrapper (`11.2.1/tibco-streaming-11-2-1/html`), so the duplicates
+    are one level down. Searching only the tree's own children skipped the
+    wrapper, because it holds the root, and reported none of them. The search
+    covers the tree's children and each root's siblings, one level in each.
     """
     found: list[Path] = []
+    parents = {tree} | {root.parent for root in roots
+                        if root.parent == tree or tree in root.parent.parents}
     try:
-        children = sorted(child for child in tree.iterdir() if child.is_dir())
+        children = sorted({child for parent in parents for child in parent.iterdir()
+                           if child.is_dir()})
     except OSError:  # pragma: no cover - the tree was listed moments earlier
         return found
     for child in children:
