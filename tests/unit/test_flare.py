@@ -370,6 +370,34 @@ def test_the_innermost_output_root_owns_its_files(tmp_path: Path) -> None:
     assert outer.skipped["nested-output-root"] == 1
 
 
+def test_a_link_into_another_output_root_of_the_version_is_kept(tmp_path: Path) -> None:
+    """`tp/1.1.0`: 92 of 109 "dangling" links targeted topics its nested
+    `Subsystems/*` roots convert, and 1,332 such links across 18 versions became
+    plain text (R5-08). A link across roots is emitted between the two published
+    subtrees; one to a topic no root converts is still `TOPIC_LINK_DANGLING`."""
+    files = {
+        "html/Data/HelpSystem.xml": manifest(),
+        "html/Content/outer.htm": topic("Outer", (
+            "<p><a href='../Subsystems/admin/Content/inner.htm#s1'>Inner</a> "
+            "<a href='../Subsystems/admin/Content/absent.htm'>Absent</a></p>"
+        )),
+        "html/Subsystems/admin/Data/HelpSystem.xml": manifest(),
+        "html/Subsystems/admin/Content/inner.htm": topic(
+            "Inner", "<p><a href='../../../Content/outer.htm'>Back</a></p>"
+        ),
+    }
+    files.update({f"html/{k}": v for k, v in toc_files([], {}).items()})
+
+    result = run(tmp_path, files)
+    outer, inner = result.units
+
+    assert "[Inner](../Subsystems/admin/Content/inner.md#s1)" in result.body("Content/outer.md", outer)
+    assert "[Back](../../../Content/outer.md)" in result.body("Content/inner.md", inner)
+    assert "Absent" in result.body("Content/outer.md", outer)
+    assert "absent.md" not in result.body("Content/outer.md", outer)
+    assert result.codes()["TOPIC_LINK_DANGLING"] == 1
+
+
 def test_two_roots_sharing_a_relative_path_both_convert_it(tmp_path: Path) -> None:
     """30,736 paths are shared between two roots of one version; ~15% differ."""
     files = {}

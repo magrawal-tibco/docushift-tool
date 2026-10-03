@@ -60,7 +60,7 @@ from docushift.engines.base import (
     register,
 )
 from docushift.engines.flare_toc import Manifest, Toc, TocNode, read_manifest, read_toc, tree_files
-from docushift.engines.roots import find_output_roots
+from docushift.engines.roots import find_output_roots, owning_root
 from docushift.models import SourceEngine
 from docushift.transforms import callouts, deflists, headings, links, markdown
 
@@ -321,8 +321,18 @@ class FlareRenderer(markdown.Renderer):
         resolved = links.resolve(self.base, reference.path)
         planned = None if links.escapes(resolved) else self.topics.get(str(resolved).lower())
         if planned is None:
-            self.engine.dangling_link(self.context, self.unit, self.source, reference.path)
-            return None
+            # Not this root's -- but perhaps a sibling's or a nested root's, which
+            # is where 1,332 such links in 18 versions point (Phase 34, R5-08).
+            # Emitted between the two published subtrees, and still a dangling
+            # note when no unit of the version converts the target.
+            across = self.engine.cross_root(
+                self.context, self.unit, Path(os.path.normpath(self.unit.root / resolved))
+            )
+            if across is None:
+                self.engine.dangling_link(self.context, self.unit, self.source, reference.path)
+                return None
+            here = PurePosixPath(self.unit.name) / self.output if self.unit.name else self.output
+            return links.emit(links.relative_to(here, across), reference.fragment)
         # The file's letter case, not the href's (R5-06). Matched case-folded, the
         # way Windows resolves it, and emitted as written: `dsc-stat/14.1.0` links
         # `10-working-with-Statistica-query/` into a directory spelled in lower
@@ -400,9 +410,15 @@ class FlareEngine(BaseEngine):
         self._dropped = 0
         # `.flprj` insertion points dropped from the TOC, as "label (project)".
         self._subprojects: list[str] = []
+        # Every unit of the version, and each one's plan once something has asked
+        # for it -- its own conversion, or a link from another root into it
+        # (Phase 34, R5-08). Planned once either way, so its findings are too.
+        self._roots: list[Path] = []
+        self._plans: dict[Path, tuple[Unit, _Plan]] = {}
 
     def units(self, context: ConversionContext) -> list[Path]:
         roots = super().units(context)
+        self._roots = list(roots)
         if not roots:
             # The 5 partial outputs: MadCap topics, no runtime manifest, so no TOC,
             # no CSH and no reliable root boundary. Reported for triage (§5.1.1).
@@ -415,8 +431,7 @@ class FlareEngine(BaseEngine):
     # -- one output root -------------------------------------------------------
 
     def convert_unit(self, context: ConversionContext, root: Path) -> Unit:
-        unit = Unit(root=root, name=context.subtree_name(root))
-        plan = self._plan(context, unit, root)
+        unit, plan = self._planned(context, root)
 
         documents: dict[str, Document] = {}
         bare: list[str] = []
@@ -442,6 +457,33 @@ class FlareEngine(BaseEngine):
         unit.nav = self._navigation(context, unit, plan, documents)
         self._tail(context, unit, plan, documents)
         return unit
+
+    def _planned(self, context: ConversionContext, root: Path) -> tuple[Unit, _Plan]:
+        if root not in self._plans:
+            unit = Unit(root=root, name=context.subtree_name(root))
+            self._plans[root] = (unit, self._plan(context, unit, root))
+        return self._plans[root]
+
+    def cross_root(self, context: ConversionContext, unit: Unit,
+                   target: Path) -> PurePosixPath | None:
+        """Where another unit of this version publishes `target`, version-relative.
+
+        `None` when the innermost unit holding the file is the asking one -- a
+        miss in its own plan is a real miss -- or when the unit that holds it
+        does not convert it. The path keeps the planned file's own case.
+        """
+        owner = owning_root(target, self._roots)
+        if owner is None or owner == unit.root:
+            return None
+        other, plan = self._planned(context, owner)
+        key = target.relative_to(owner).as_posix().lower()
+        if key not in plan.planned:
+            return None
+        name = next(
+            (topic for topic in (*plan.topics, plan.landing) if topic and topic.lower() == key), key
+        )
+        published = links.to_markdown(PurePosixPath(name))
+        return PurePosixPath(other.name) / published if other.name else published
 
     # -- what to convert -------------------------------------------------------
 
