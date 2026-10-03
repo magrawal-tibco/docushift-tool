@@ -290,9 +290,10 @@ class ConversionContext:
     # build and is not converted into this locale's tree (Phase 34, R5-01).
     locale: str = DEFAULT_LOCALE
     # Roots that were located and deliberately not converted -- a localized build
-    # (R5-01) -- so that nothing else converts their files or resolves their help
-    # identifiers into this version: the driver drops their CSH sources, which
-    # would otherwise be reported unresolved one identifier at a time.
+    # (R5-01), another engine's unit of work (R4-02) -- so that nothing else
+    # converts their files or resolves their help identifiers into this version:
+    # Flare skips their files inside its own root, and the driver drops their CSH
+    # sources, which would otherwise be reported unresolved one at a time.
     excluded_roots: list[Path] = field(default_factory=list)
     findings: FindingsRun | None = None
     # The copier for the unit currently being converted, set by the driver before

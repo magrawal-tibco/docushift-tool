@@ -144,11 +144,13 @@ def test_the_register_carries_every_row_of_7_5() -> None:
     TOC that failed to parse with no word at all. And the 72nd,
     `TOC_SUBPROJECT_UNPLACED` (R5-11): merged-project insertion points that
     were being counted as headless nodes.
-    It adds the 73th, `LOCALIZED_ROOT_SKIPPED` (R5-01): a whole output root built
+    It adds the 73rd, `LOCALIZED_ROOT_SKIPPED` (R5-01): a whole output root built
     for another language converted into the English tree, where the subtree
-    note only ever saw a `ja/` folder inside an English root.
+    note only ever saw a `ja/` folder inside an English root. And the 74th,
+    `ENGINE_ROOT_UNCONVERTED` (R4-02): a second engine's book, fed to the first
+    engine page by page or never looked at, is named once per root.
     """
-    assert len(REGISTRY) == 73
+    assert len(REGISTRY) == 74
 
 
 def test_severity_comes_from_the_registry_and_not_from_the_call_site() -> None:

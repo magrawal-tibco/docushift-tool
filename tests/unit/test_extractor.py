@@ -211,6 +211,23 @@ def test_an_unmapped_generator_is_other_and_keeps_its_raw_string(tmp_path: Path)
     assert result.generator_raw == "whizzy docs 3"
 
 
+def test_a_content_signature_anywhere_outranks_a_generator_tag_that_sorts_first(
+    tmp_path: Path,
+) -> None:
+    """Pass 3 is the last look (`design.md` §7.1), taken over the whole sample.
+
+    It returned on the first file with *any* generator tag, so one FrontPage cover
+    page sorting ahead of two DocBook pages decided the version (R4-09)."""
+    result = detect(tmp_path, {
+        "a-cover.html": page('<meta name="generator" content="Microsoft FrontPage 6.0">'),
+        "b-guide.html": page('<meta name="generator" content="DocBook XSL Stylesheets V1.79.1">'),
+        "c-guide.html": page('<meta name="generator" content="DocBook XSL Stylesheets V1.79.1">'),
+    })
+
+    assert result.engine is SourceEngine.DOCBOOK
+    assert result.decided_by == 2
+
+
 # -- never guess (§7.3 step 1) -----------------------------------------------
 
 

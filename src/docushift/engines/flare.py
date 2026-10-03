@@ -607,6 +607,11 @@ class FlareEngine(BaseEngine):
             if other != root and root in other.parents
         ]
         stubs = _project_stubs(root)
+        # Another engine's unit inside this root -- BusinessConnect 7.4.0's WebWorks
+        # book -- is the driver's to name, once (Phase 34, R4-02); fed to this
+        # engine it was ~80 `CONTENT_MISSING` lines, one per page.
+        foreign = [other for other in context.excluded_roots
+                   if root in other.parents and other not in nested]
         found: list[str] = []
         for path in _walk_files(root):
             if path.suffix.lower() not in _HTML_SUFFIXES:
@@ -616,6 +621,9 @@ class FlareEngine(BaseEngine):
                 # Converted, by the landing-page path rather than this one. Not a
                 # skip, and counting it as one would put a converted page in the
                 # column that says nothing was written.
+                continue
+            if any(other in path.parents for other in foreign):
+                unit.skip("other-engine-root")
                 continue
             reason = self._rejection(path, relative, nested, context.api_roots,
                                      referenced, placeholder, stubs)

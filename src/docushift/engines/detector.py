@@ -248,6 +248,12 @@ def detect_tree(tree: Path) -> Detection:
         # 200 files to confirm it buys nothing.
         return result
 
+    # Pass 2 over the whole sample before pass 3 looks at any of it (Phase 34,
+    # R4-09). Interleaved per file, the first sampled page carrying *any*
+    # generator tag decided the version -- one FrontPage cover sorting ahead of
+    # two DocBook pages read as `frontpage`. The first generator seen is kept as
+    # the sample is read, so no head is read twice.
+    first_generator = ""
     for path in survey.html:
         text = _read_head(path)
         if not text:
@@ -257,12 +263,13 @@ def detect_tree(tree: Path) -> Detection:
             result.engine = signature
             result.decided_by = 2
             return result
-        generator = _generator(text)
-        if generator:
-            result.generator_raw = generator
-            result.engine = _pass_three(generator)
-            result.decided_by = 3
-            return result
+        if not first_generator:
+            first_generator = _generator(text)
+    if first_generator:
+        result.generator_raw = first_generator
+        result.engine = _pass_three(first_generator)
+        result.decided_by = 3
+        return result
 
     result.sample_exhausted = survey.html_seen > len(survey.html)
     return result

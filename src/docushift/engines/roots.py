@@ -169,6 +169,35 @@ _RULES = {
 }
 
 
+def is_output_root(directory: Path, engine: SourceEngine) -> bool:
+    """Does this directory pass `engine`'s root rule? False for an engine with none."""
+    rule = _RULES.get(engine)
+    return rule is not None and rule(directory)
+
+
+# The roots of a *second* engine that are cheap to find: a marker file or a
+# directory name, never a read of page heads. DocBook's rule reads up to 25 pages
+# per directory, which over a 10,000-topic Flare tree is a walk nobody should pay
+# for a case the corpus has not shown (Phase 34, R4-02).
+_FOREIGN_RULES = (SourceEngine.FLARE, SourceEngine.WEBWORKS, SourceEngine.DITA)
+
+
+def foreign_roots(tree: Path, engine: SourceEngine) -> list[tuple[SourceEngine, Path]]:
+    """Units of work in `tree` that belong to another convertible engine than `engine`.
+
+    One walk for every rule in `_FOREIGN_RULES`, shallowest first. A directory
+    that is a root for `engine` itself is never reported, whatever else it holds.
+    """
+    others = [other for other in _FOREIGN_RULES if other is not engine]
+    found: list[tuple[SourceEngine, Path]] = []
+    for directory in _walk_dirs(tree):
+        matched = [other for other in others if _RULES[other](directory)]
+        # The engine's own rule last, and only on a match: DocBook's reads pages.
+        if matched and not is_output_root(directory, engine):
+            found.extend((other, directory) for other in matched)
+    return sorted(found, key=lambda item: (len(item[1].parts), str(item[1]), str(item[0])))
+
+
 def find_output_roots(tree: Path, engine: SourceEngine) -> list[Path]:
     """The output roots of `tree` for `engine`, sorted shallowest first.
 

@@ -169,6 +169,13 @@ REGISTRY: dict[str, Code] = _codes(
     Code("TAIL_PAGE_MISSING", Severity.WARNING, Stage.CONVERT,
          "No support or no legal page in the TOC -- nothing is synthesized",
          "architecture.md §5.1.5"),
+    # Phase 34 (R4-02). One engine converts a version; a unit of work another
+    # convertible engine owns used to be fed to the first engine page by page, or
+    # never looked at. A warning with a row each, because each is a book that
+    # publishes nowhere until two-engine conversion exists.
+    Code("ENGINE_ROOT_UNCONVERTED", Severity.WARNING, Stage.CONVERT,
+         "A unit of work for a second convertible engine, in a version converted "
+         "by another; not converted", "Phase 34 (R4-02)"),
     Code("LOCALIZED_TREE_SKIPPED", Severity.NOTE, Stage.CONVERT,
          "A localized subtree inside an English unit, not converted",
          "architecture.md §5.1.9"),

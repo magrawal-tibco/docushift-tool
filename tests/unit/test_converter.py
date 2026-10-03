@@ -38,7 +38,7 @@ from docushift.engines.base import (
 )
 from docushift.engines.roots import find_output_roots
 from docushift.extractor import ExtractOutcome, PackageExtractor
-from docushift.models import ConversionStatus, Product, ProductVersion, SourceEngine
+from docushift.models import ConversionStatus, EngineSource, Product, ProductVersion, SourceEngine
 from docushift.reporting.findings import FindingsRun, Severity
 from docushift.transforms import csh
 from tests.unit.test_extractor import place_package
@@ -928,6 +928,86 @@ def test_a_skipped_localized_root_contributes_no_help_identifiers(
         "1234 -> Content/gone.htm matched no produced topic"
     ]
     assert [f.path for f in findings.all if f.code == "LOCALIZED_ROOT_SKIPPED"] == ["guide/ja-jp"]
+
+
+# -- one engine per version (Phase 34, R4-02, R4-03) -------------------------------
+
+
+class _RecordingWebWorks(BaseEngine):
+    """Says which roots the driver handed it, and converts nothing."""
+
+    engine = SourceEngine.WEBWORKS
+    seen: list[Path] = []
+
+    def units(self, context: ConversionContext) -> list[Path]:
+        _RecordingWebWorks.seen = super().units(context)
+        return _RecordingWebWorks.seen
+
+    def convert_unit(self, context: ConversionContext, root: Path) -> Unit:  # pragma: no cover
+        return Unit(root=root, name=context.subtree_name(root))
+
+
+@pytest.fixture
+def recording_webworks():
+    previous = engine_for(SourceEngine.WEBWORKS)
+    register(_RecordingWebWorks)
+    yield _RecordingWebWorks
+    unregister(SourceEngine.WEBWORKS)
+    if previous is not None:
+        register(previous)
+
+
+def test_a_hand_corrected_engine_reconverts_and_ignores_the_old_engines_roots(
+    config, catalog, product, version, extracted, fake_engine, recording_webworks
+) -> None:
+    """`engine_source=manual` is §3.4's remedy for a misdetected engine, and the
+    next `convert` reported `current` and kept the old engine's tree; `--force`
+    then handed the new engine the Flare roots Stage 4 had recorded (R4-03)."""
+    first, _ = convert(config, catalog, product, version)
+    assert first.outcome is ConvertOutcome.CONVERTED
+
+    version.engine = SourceEngine.WEBWORKS
+    version.engine_source = EngineSource.MANUAL
+    second, _ = convert(config, catalog, product, version)
+
+    assert second.outcome is not ConvertOutcome.CURRENT
+    assert second.engine is SourceEngine.WEBWORKS
+    # `guide` holds `Data/HelpSystem.xml` and no `wwhdata/`: a Flare root, and
+    # nothing a WebWorks engine may be handed as a book.
+    assert recording_webworks.seen == []
+
+
+def test_a_book_of_another_engine_is_named_once_and_not_fed_to_this_one(
+    config, catalog, product, version, tmp_path
+) -> None:
+    """BusinessConnect 7.4.0 detects as Flare, and its 83-page WebWorks book inside
+    the Flare root came out as ~80 `CONTENT_MISSING` lines that read as a Flare
+    markup defect (R4-02). One engine converts a version; every unit it cannot
+    convert is one `ENGINE_ROOT_UNCONVERTED` line naming the engine and the root."""
+    files = {
+        "guide/Output.mcwebhelp": "",
+        "guide/Data/HelpSystem.xml": "<x/>",
+        "guide/Content/topic.htm": (
+            "<html><body><div role='main' id='mc-main-content'><h1>T</h1></div></body></html>"
+        ),
+        "guide/apiref/wwhdata/common/files.js": "",
+        **{f"guide/apiref/page{n}.htm": "<html><body><blockquote>x</blockquote></body></html>"
+           for n in range(3)},
+        "loose/wwhdata/common/files.js": "",
+        "loose/page.htm": "<html><body><blockquote>x</blockquote></body></html>",
+    }
+    place_package(config, product, version, files)
+    assert PackageExtractor(config, catalog).extract_one(product, version).outcome is (
+        ExtractOutcome.EXTRACTED
+    )
+
+    result, findings = convert(config, catalog, product, version)
+
+    unconverted = {f.path: f.message for f in findings.all if f.code == "ENGINE_ROOT_UNCONVERTED"}
+    assert sorted(unconverted) == ["guide/apiref", "loose"]
+    assert "webworks" in unconverted["loose"]
+    assert not [f for f in findings.all if f.code == "CONTENT_MISSING"]
+    assert result.skipped.get("other-engine-root") == 3
 
 
 # -- unit naming (Phase 34, R4-14) -----------------------------------------------

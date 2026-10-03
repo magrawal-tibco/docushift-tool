@@ -42,7 +42,13 @@ from docushift.config import ConfigManager
 from docushift.converter import navigation
 from docushift.engines.base import ConversionContext, Document, Unit, engine_for
 from docushift.engines.csh import CshFormat, CshSource, csh_format_of, read_csh_source
-from docushift.engines.roots import subtree_names
+from docushift.engines.roots import (
+    find_output_roots,
+    foreign_roots,
+    is_output_root,
+    owning_root,
+    subtree_names,
+)
 from docushift.extractor import content_root
 from docushift.models import ConversionStatus, Product, ProductVersion, SourceEngine
 from docushift.reporting.findings import FindingsRun
@@ -228,7 +234,15 @@ class DocumentConverter:
         # reconverting 1,822 versions to change the output of 41.
         recorded_prefix = metadata.get("convert_api_prefix", "")
         prefix_current = not recorded_prefix or recorded_prefix == self._api_prefix(product, number)
-        if not force and checksum and checksum == converted_from and prefix_current and target.is_dir():
+        # And the engine (Phase 34, R4-03). `engine_source=manual` is §3.4's remedy
+        # for a misdetected engine, and the package does not change when the
+        # catalog does -- so a correction reported `current` and kept the wrong
+        # engine's tree. Blank for a tree converted before the key existed, which
+        # is read as matching, as a blank prefix is.
+        recorded_engine = metadata.get("convert_engine", "")
+        engine_current = not recorded_engine or recorded_engine == str(version.engine)
+        if (not force and checksum and checksum == converted_from and prefix_current
+                and engine_current and target.is_dir()):
             current = ConvertResult(
                 slug, number, ConvertOutcome.CURRENT, path=target, engine=version.engine
             )
@@ -272,6 +286,13 @@ class DocumentConverter:
         # Read before the context is built, because `_api_roots` needs them: an api
         # root that is also an output root is the output root's (6d).
         output_roots = self._recorded_paths(slug, number, "output_roots", tree)
+        if not all(is_output_root(root, version.engine) for root in output_roots):
+            # Stage 4 located these for the engine the version had then, and an
+            # unchanged package never re-identifies (R4-03): a hand-corrected
+            # engine was handed the old engine's roots. Every recorded root passes
+            # its engine's rule by construction, so one that fails was recorded
+            # for another engine, and the roots are located again for this one.
+            output_roots = find_output_roots(tree, version.engine)
         api_roots = self._api_roots(slug, number, tree, output_roots)
         context = ConversionContext(
             tree=tree,
@@ -299,10 +320,12 @@ class DocumentConverter:
         # while the list is still a generator.
         work = list(handler.units(context))
         context.subtrees = subtree_names(tree, work, version.engine)
+        self._exclude_foreign(context, work)
         # A root located and deliberately not converted (a localized build,
-        # R5-01) publishes no topic, so its help identifiers have nothing to
-        # resolve to; resolving them anyway reports each one as CSH_UNRESOLVED.
-        sources = [source for source in sources if not _excluded(tree, source, context)]
+        # R5-01, or another engine's unit, R4-02) publishes no topic, so its help
+        # identifiers have nothing to resolve to; resolving them anyway reports
+        # each one as CSH_UNRESOLVED.
+        sources = [source for source in sources if not _excluded(tree, source, context, work)]
 
         for root in work:
             unit_name = context.subtree_name(root)
@@ -360,6 +383,7 @@ class DocumentConverter:
                 slug, number, "convert_api_prefix",
                 self._api_prefix(product, number) if context.api_urls else "",
             )
+            self.state.set_version_metadata(slug, number, "convert_engine", str(version.engine))
         if self.findings is not None:
             self.findings.flush()
         return result
@@ -479,6 +503,33 @@ class DocumentConverter:
         self._report_metadata(context, units, version)
 
     # -- reporting -------------------------------------------------------------
+
+    def _exclude_foreign(self, context: ConversionContext, work: list[Path]) -> None:
+        """Names every unit of work a second convertible engine owns (Phase 34, R4-02).
+
+        A version is converted by one engine. BusinessConnect 7.4.0 detects as
+        Flare, and the 83-page WebWorks book inside its Flare root was fed to the
+        Flare converter page by page -- about 80 `CONTENT_MISSING` lines that read
+        as a Flare markup defect -- while a book outside every Flare root was never
+        looked at. Converting both engines in one version is deferred; until then
+        each such root is one `ENGINE_ROOT_UNCONVERTED` line naming the engine,
+        and the root joins `excluded_roots` so this engine skips its files.
+
+        Not reported: a root inside an API tree, which Stage 7 copies verbatim,
+        and a root inside one already left out (a localized build).
+        """
+        for other, root in foreign_roots(context.tree, context.engine):
+            if root in work or any(
+                excluded == root or excluded in root.parents
+                for excluded in (*context.api_roots, *context.excluded_roots)
+            ):
+                continue
+            context.excluded_roots.append(root)
+            context.record(
+                "ENGINE_ROOT_UNCONVERTED", path=_relative(context.tree, root),
+                message=f"{other} unit of work in a version converted as {context.engine}; "
+                        f"not converted (one engine per version)",
+            )
 
     def _report_assets(self, context: ConversionContext, unit: str, copier: AssetCopier) -> None:
         """§6.4 steps 5 and 7, as findings rather than as terminal scrollback."""
@@ -923,10 +974,15 @@ def _merge(total: Counts, part: Counts) -> None:
         total.dangling_by_segment[segment] = total.dangling_by_segment.get(segment, 0) + count
 
 
-def _excluded(tree: Path, source: CshSource, context: ConversionContext) -> bool:
-    """Is this help map owned by a root the engine left out of the version?"""
-    owner = tree / Path(*PurePosixPath(source.doc_set).parts) if source.doc_set else tree
-    return any(owner == root or root in owner.parents for root in context.excluded_roots)
+def _excluded(tree: Path, source: CshSource, context: ConversionContext, work: list[Path]) -> bool:
+    """Is this help map inside a root the version left out, and in no unit below it?
+
+    Judged by the file's path and not its recorded doc-set: the doc-set is the
+    innermost root *of the version's engine*, so a WebWorks `topics.js` inside a
+    Flare root is recorded against the Flare root.
+    """
+    owner = owning_root(tree / source.path, [*work, *context.excluded_roots])
+    return owner is not None and owner in context.excluded_roots
 
 
 def _find_csh(tree: Path) -> list[tuple[Path, CshFormat]]:

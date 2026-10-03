@@ -269,6 +269,8 @@ It is also **detected, not declared**. Across 1,500-4,000 versions, hand-assignm
 | `detected` | `engines/detector.py` identified it from extracted content | Yes, on re-extract |
 | `auto` | Not yet determined — package not downloaded/extracted | Yes |
 
+A correction reaches the output without a re-extract (Phase 34, R4-03): `convert` records the engine it converted with as `convert_engine` and treats a different engine as a changed input, and recorded output roots that fail the new engine's root rule are located again for it rather than handed over. A tree converted before `convert_engine` existed has no record and is read as matching.
+
 **Detection signals**, ordered by reliability (marker files first, they are cheapest and least ambiguous). The version counts are a full-cache sweep of 2026-09-08 — 1,822 versions, of which 539 carry no HTML at all:
 
 | Engine | Marker files / directories | Content signature | Versions |
@@ -299,7 +301,7 @@ Verified against the cached `dsp_gridserver` 7.1.1 sample: all six Flare marker 
 
 **Pipeline consequence:** `engine` cannot be populated at Stage 1 (Discovery) because it requires the package contents. It is written back into `versions.csv` after Stage 4 (Extraction), making the catalog a mid-pipeline write target rather than a discovery-time artifact. Stage 5 then reads it to select the converter.
 
-**Granularity caveat:** one version's ZIP may bundle multiple guides. In the `dsp_gridserver` sample these are nine sibling folders (`admin-guide`, `dev-guide`, `install-guide`, `com-tutorial`, …) of a *single* Flare output, so per-version resolution is correct. Should a bundle ever mix generators across guides, the detector records the per-folder map in `state.db` and sets the dominant engine in the CSV; handling genuinely mixed bundles is deferred until one is observed.
+**Granularity caveat:** one version's ZIP may bundle multiple guides. In the `dsp_gridserver` sample these are nine sibling folders (`admin-guide`, `dev-guide`, `install-guide`, `com-tutorial`, …) of a *single* Flare output, so per-version resolution is correct. Should a bundle ever mix generators across guides, the detector records the per-folder map in `state.db` and sets the dominant engine in the CSV; handling genuinely mixed bundles is deferred until one is observed. Mixed bundles have since been observed (BusinessConnect 7.4.0: a WebWorks book inside a Flare root), and until two-engine conversion exists each unit the version's engine does not own is named once as `ENGINE_ROOT_UNCONVERTED` (Phase 34, R4-02).
 
 ### 3.5 Snapshot-Based 3-Way Merge
 
