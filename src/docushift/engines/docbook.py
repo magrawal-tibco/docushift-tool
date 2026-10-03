@@ -53,6 +53,8 @@ names, and neither can be known from the file being rewritten. 1,178 pages is
 small enough that reading twice is cheaper than holding 1,178 DOMs.
 """
 
+import html
+import re
 from dataclasses import dataclass, field
 from pathlib import Path, PurePosixPath
 
@@ -147,6 +149,11 @@ _HEADINGS = ["h1", "h2", "h3", "h4", "h5", "h6"]
 _TOC_DEPTH = 4
 _GRAPH_HOPS = 2
 
+# An anchor in the *rendered* body: `<a … id="X"…>`, which is how the renderer's
+# marker, the pipe-table and code-span hoists and the passthrough rewrite all
+# write one. `dita.py` reads its body with the same pattern.
+_WRITTEN_ANCHOR = re.compile(r"""<a\b[^>]*\bid="([^"]*)\"""")
+
 
 # -- the renderer --------------------------------------------------------------
 
@@ -163,10 +170,10 @@ class DocBookRenderer(markdown.Renderer):
         self.page = page
         self.source = page.source
         self.output = page.output
-        # Every anchor this renderer actually wrote into the body. `_prune_anchors`
-        # decided which ones to keep and the page advertises that set, but keeping
-        # an element is not emitting it -- a handler that deletes its subtree takes
-        # the anchor with it. `_convert` compares the two (§5.6.7).
+        # The anchors this renderer's own hooks wrote, so that an admonition title
+        # never writes one twice. Not the whole written set: the shared table and
+        # code-span paths write anchors too, so `_convert` reads that off the
+        # rendered body instead (§5.6.7, R6-06).
         self.emitted_anchors: set[str] = set()
 
     # -- blocks ---------------------------------------------------------------
@@ -251,9 +258,20 @@ class DocBookRenderer(markdown.Renderer):
         192 of them, each a run of rows of one or two cells holding a link or a
         code span. A pipe table with no header row is not GFM, and the content is
         a list of names -- so it is emitted as one.
+
+        **Read down the columns, not across the rows** (R6-01). DocBook XSL lays a
+        `simplelist` out column-major, its default `type="vert"`, so a row-major
+        read interleaves the list. All 9 multi-column lists in 11.2.1 are sorted
+        down their columns and none across the rows. `type="horiz"` would be
+        row-major, but the XSL writes the same `<table class="simplelist">` for
+        both and the corpus shows no horizontal one, so there is nothing to tell
+        apart. A one-column list reads the same either way.
         """
+        rows = [row.find_all(["td", "th"], recursive=False)
+                for row in tag.find_all("tr") if row.find_parent("table") is tag]
+        width = max((len(row) for row in rows), default=0)
         items: list[str] = []
-        for cell in tag.find_all(["td", "th"]):
+        for cell in (row[column] for column in range(width) for row in rows if column < len(row)):
             text = self.inline_children(cell).strip()
             if text:
                 items.append(f"- {markdown.escape_leading(text)}")
@@ -593,7 +611,12 @@ class DocBookEngine(BaseEngine):
         # That is how 152 `ANCHOR_MISSING` reached Stage 7 (Phase 19). The kept set
         # and the written set are compared here, and the `Document` stops
         # advertising what the body does not contain.
-        lost = emitted - renderer.emitted_anchors
+        #
+        # The written set is read off the body, not counted by one hook (R6-06).
+        # The pipe-table hoist, the passthrough table's `rewrite` and the code-span
+        # hoist in `transforms/markdown.py` write anchors too, and every
+        # `ANCHOR_DROPPED` the hook count ever raised was one of theirs.
+        lost = emitted - _written_anchors(body)
         if lost:
             context.record("ANCHOR_DROPPED", path=str(page.output),
                            message=f"kept but not emitted: {', '.join(sorted(lost))}",
@@ -1029,6 +1052,11 @@ def _document_title(soup: Tag) -> str:
 
 def _text(node: Tag) -> str:
     return " ".join(node.get_text(" ").split())
+
+
+def _written_anchors(body: str) -> set[str]:
+    """Every anchor id the rendered body carries, whichever path wrote it."""
+    return {html.unescape(value) for value in _WRITTEN_ANCHOR.findall(body)}
 
 
 def _raw_classes(tag: Tag) -> list[str]:

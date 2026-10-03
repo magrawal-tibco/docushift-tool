@@ -25,6 +25,8 @@ is wrong on real input:
 from collections.abc import Mapping
 from pathlib import Path
 
+import pytest
+
 from docushift.engines.base import ConversionContext, Unit
 from docushift.engines.docbook import CONTENT_ID, DocBookEngine
 from docushift.engines.roots import find_output_roots
@@ -463,6 +465,35 @@ def test_a_simplelist_table_becomes_a_list(tmp_path: Path) -> None:
     assert "|" not in body
 
 
+def test_a_multi_column_simplelist_is_read_down_its_columns(tmp_path: Path) -> None:
+    """R6-01. DocBook XSL lays a `simplelist` out column-major, its default
+    `type="vert"`, so reading the cells row by row interleaves the list. This is
+    the first table of `dochome/archive-lv-noteworthy.html` (11.2.1), trimmed to
+    seven items: the last column ends one short. All 9 multi-column lists in that
+    version read in sorted order down the columns and none across the rows."""
+    rows = (
+        ("lv_sample_alerting_advanced", "lv_sample_lv-sbd"),
+        ("lv_sample_auth", "lv_sample_lvweb"),
+        ("lv_sample_author_time_agg", "lv_sample_lvweb_themes"),
+        ("lv_sample_custom_id_generation", ""),
+    )
+    cells = "".join(
+        "<tr>" + "".join(f'<td><code class="literal">{c}</code></td>' if c else "<td></td>"
+                         for c in row) + "</tr>"
+        for row in rows
+    )
+    body = one_page(
+        tmp_path, f'<table class="simplelist" border="0" summary="Simple list">{cells}</table>'
+    ).body("authoring/topic.md")
+
+    items = [line for line in body.splitlines() if line.startswith("- ")]
+    assert items == [
+        "- `lv_sample_alerting_advanced`", "- `lv_sample_auth`",
+        "- `lv_sample_author_time_agg`", "- `lv_sample_custom_id_generation`",
+        "- `lv_sample_lv-sbd`", "- `lv_sample_lvweb`", "- `lv_sample_lvweb_themes`",
+    ]
+
+
 def test_a_figure_caption_precedes_its_content_in_italic(tmp_path: Path) -> None:
     """`div.figure` is `a + p.title + div.figure-contents`, caption first."""
     result = one_page(tmp_path, (
@@ -563,6 +594,31 @@ def test_a_kept_anchor_the_render_never_wrote_is_reported_and_unadvertised(
     assert result.codes()["ANCHOR_DROPPED"] == 1
     assert any("buried" in m for m in result.messages("ANCHOR_DROPPED"))
     assert result.document("authoring/other.md").anchors == set()
+
+
+@pytest.mark.parametrize("where", [
+    # `rtcmd/epadmin-globals.html` (11.1.3): an index anchor in a spanning cell,
+    # so the table goes through as HTML and `rewrite` writes the anchor.
+    '<table><tr><td colspan="2"><a class="indexterm" name="d0e3109"></a>'
+    '<code class="literal">discoveryhosts</code></td></tr>'
+    "<tr><td>Name</td><td>Value</td></tr></table>",
+    # A mapped `span.command`: the code-span path hoists the anchor out in front.
+    '<p>Run <span class="command"><a name="d0e3109"></a>epadmin</span> first.</p>',
+])
+def test_an_anchor_written_by_any_render_path_is_not_reported_lost(
+    tmp_path: Path, where: str,
+) -> None:
+    """R6-06. The written set came from one hook, `inline_override`, so an anchor
+    the passthrough table or a code span wrote counted as "kept but not emitted".
+    All 6 `ANCHOR_DROPPED` rows DocBook ever produced were this, and every one of
+    those anchors is in the published file. The body is now what is read."""
+    result = one_page(tmp_path, '<p>See <a class="link" href="other.html#d0e3109">it</a>.</p>', {
+        "html/authoring/other.html": page("authoring/other.html", "Other", titlepage("Other") + where),
+    })
+
+    assert 'id="d0e3109"' in result.body("authoring/other.md")
+    assert "ANCHOR_DROPPED" not in result.codes()
+    assert result.document("authoring/other.md").anchors == {"d0e3109"}
 
 
 # -- links (§5.6.8) -------------------------------------------------------------
