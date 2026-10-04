@@ -43,7 +43,7 @@ import html
 import re
 from collections.abc import Callable
 
-from docushift.utils.anchors import anchor_run
+from docushift.utils.anchors import HEADING, anchor_run
 
 
 def _mask_code(text: str) -> str:
@@ -63,7 +63,6 @@ def _mask_code(text: str) -> str:
 
 #: An anchor target the engines emit: `<a id="X"></a>` on its own, or inline.
 _MARKER = re.compile(r'<a\s+(?:id|name)\s*=\s*"([^"]*)"\s*>\s*</a>', re.IGNORECASE)
-_HEADING = re.compile(r"^[ \t]{0,3}(#{1,6})[ \t]+(.*?)[ \t]*#*[ \t]*$", re.MULTILINE)
 #: Between a marker and the heading it labels there is only blank space -- and
 #: other markers, which render nothing. Anything else means the marker sits *in*
 #: the preceding section rather than above the next one.
@@ -84,7 +83,7 @@ def marker_targets(text: str) -> dict[str, str]:
     with a link that fails quietly somewhere else.
     """
     masked = _mask_code(text)
-    headings = [(match.start(), match.group(2)) for match in _HEADING.finditer(masked)]
+    headings = [(match.start(), match.group(2)) for match in HEADING.finditer(masked)]
     if not headings:
         return {}
     anchors = anchor_run([title for _start, title in headings])

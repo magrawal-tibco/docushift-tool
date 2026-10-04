@@ -53,13 +53,10 @@ def _classed(tag: Tag, token: str) -> bool:
 
 def normalize(container: Tag) -> int:
     """Retags class-named definition lists in place. Returns the terms recovered."""
-    lists = [tag for tag in container.find_all(class_=_LIST)
-             if isinstance(tag, Tag) and tag.name != _LIST]
+    lists = [tag for tag in container.find_all(class_=_LIST) if tag.name != _LIST]
     terms = 0
     for wrapper in lists:
         for tag in wrapper.find_all(True):
-            if not isinstance(tag, Tag):
-                continue
             if _classed(tag, _TERM) and tag.name != _TERM:
                 tag.name = _TERM
                 terms += 1
@@ -70,7 +67,7 @@ def normalize(container: Tag) -> int:
         # is positional in GFM -- and leaving it as a `div` would be harmless but
         # would put a transparent container between the `dl` and its own children.
         for entry in wrapper.find_all(class_=_ENTRY):
-            if isinstance(entry, Tag) and entry.name != _LIST:
+            if entry.name != _LIST:
                 entry.unwrap()
         wrapper.name = _LIST
     return terms

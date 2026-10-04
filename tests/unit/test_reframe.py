@@ -49,7 +49,6 @@ from docushift.reframe.toc import (
     DocsUrlSubfolderlist,
     ItemsPathChildren,
     TocEntry,
-    registered_schemas,
     retarget,
     schema_for,
 )
@@ -677,7 +676,6 @@ def test_each_dialect_declines_the_other():
 def test_detection_declines_a_foreign_shape_rather_than_half_reading_it():
     assert schema_for({"toc": [{"label": "x"}]}) is None
     assert schema_for(None) is None
-    assert registered_schemas() == ["docs-url-subfolderlist", "items-path-children"]
 
 
 def test_a_configured_schema_that_is_not_registered_does_not_fall_back():

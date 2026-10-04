@@ -217,12 +217,6 @@ def register(schema: TocSchema) -> None:
     _REGISTRY[schema.name] = schema
 
 
-def registered_schemas() -> list[str]:
-    """Every registered dialect name, sorted -- what `toc_schema` in
-    `config/reframe.yaml` will accept. There is no `--toc-schema` option."""
-    return sorted(_REGISTRY)
-
-
 def schema_for(document: Any, name: str = "") -> TocSchema | None:
     """The adapter for this document, or `None`.
 

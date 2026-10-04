@@ -30,7 +30,6 @@ from __future__ import annotations
 
 import hashlib
 import json
-import re
 import shutil
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass, field
@@ -66,6 +65,7 @@ from docushift.reframe.review import Flag, branches, inspect
 from docushift.reframe.toc import TocEntry, retarget, schema_for
 from docushift.reporting.findings import FindingsRun
 from docushift.utils import textfile
+from docushift.utils.anchors import HEADING
 from docushift.utils.longpath import long_path, walk_files
 from docushift.utils.slug import version_segment
 from docushift.utils.swap import recover, remove, staging_of, swap
@@ -80,11 +80,6 @@ from docushift.validation.references import mask_code
 #: is an empirical one, and WebWorks is the plausible second answer.
 REFRAMABLE_ENGINES: tuple[SourceEngine, ...] = (SourceEngine.FLARE,)
 
-
-#: A Markdown ATX heading. Declared here rather than imported from `pages.py`
-#: because this reads the *source* body to predict anchors, while that one edits
-#: the rendered body by offset; the shapes coincide today and are free to diverge.
-_HEADINGS = re.compile(r"^[ \t]{0,3}(#{1,6})[ \t]+(.*?)[ \t]*#*[ \t]*$", re.MULTILINE)
 
 #: Written fresh by this stage, so a copy of the source's version would be stale.
 _REGENERATED = frozenset(
@@ -206,7 +201,7 @@ class _Source:
         """
         if topic.source not in self._headings:
             body = split_frontmatter(self.read(topic.source))[1]
-            found = _HEADINGS.findall(mask_code(body))
+            found = HEADING.findall(mask_code(body))
             texts = [text for _hashes, text in found]
             if not any(len(hashes) == 1 for hashes, _text in found):
                 texts.insert(0, topic.title)

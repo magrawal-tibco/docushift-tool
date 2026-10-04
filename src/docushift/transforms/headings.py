@@ -59,7 +59,9 @@ from collections.abc import Callable, Sequence
 
 from bs4 import Tag
 
-_LEVELS = {"h1": 1, "h2": 2, "h3": 3, "h4": 4, "h5": 5, "h6": 6}
+# The heading tags and their levels. The one copy: the Markdown walk and the
+# WebWorks engine read it from here (Phase 34, R8-15).
+LEVELS = {"h1": 1, "h2": 2, "h3": 3, "h4": 4, "h5": 5, "h6": 6}
 
 # GFM has no `h7`. Unreachable given the rule -- the stack holds distinct levels
 # drawn from 1..6, so depth can never exceed 6 minus the minimum, plus one -- but
@@ -103,11 +105,11 @@ def compact(levels: Sequence[int]) -> list[int]:
 
 def normalize(container: Tag, skip: Callable[[Tag], bool] | None = None) -> int:
     """Renumbers `container`'s `<hN>` by nesting depth. Returns how many moved."""
-    headings = [tag for tag in container.find_all(list(_LEVELS))
-                if isinstance(tag, Tag) and not is_empty(tag) and not (skip and skip(tag))]
+    headings = [tag for tag in container.find_all(list(LEVELS))
+                if not is_empty(tag) and not (skip and skip(tag))]
     moved = 0
-    for tag, target in zip(headings, compact([_LEVELS[tag.name] for tag in headings]), strict=True):
-        if target != _LEVELS[tag.name]:
+    for tag, target in zip(headings, compact([LEVELS[tag.name] for tag in headings]), strict=True):
+        if target != LEVELS[tag.name]:
             tag.name = f"h{target}"
             moved += 1
     return moved

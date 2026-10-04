@@ -83,7 +83,6 @@ _HTML_BLOCK_7 = re.compile(r"^[ \t]{0,3}(?:<[a-zA-Z][^>]*>|</[a-zA-Z][a-zA-Z0-9-
 _FENCE = re.compile(r"^[ \t]{0,3}(`{3,}|~{3,})")
 _CODE_SPAN = re.compile(r"(`+)(?!`)(?:[^`\n]|(?!\1)`)+\1")
 _FRONTMATTER = re.compile(r"\A---[ \t]*\r?\n.*?^---[ \t]*\r?$", re.DOTALL | re.MULTILINE)
-_HEADING = re.compile(r"^[ \t]{0,3}(#{1,6})[ \t]+(.*?)[ \t]*#*[ \t]*$", re.MULTILINE)
 
 
 @dataclass(frozen=True)
@@ -245,7 +244,7 @@ def headings(text: str) -> dict[str, tuple[int, str]]:
     """
     masked = mask_code(text)
     found: dict[str, tuple[int, str]] = {}
-    matches = list(_HEADING.finditer(masked))
+    matches = list(anchors_util.HEADING.finditer(masked))
     run = anchors_util.anchor_run([match.group(2) for match in matches])
     # Counted incrementally: one pass over the text, not one per heading.
     line, position = 1, 0
@@ -282,7 +281,7 @@ def anchors(text: str) -> set[str]:
     return {
         anchor
         for anchor in anchors_util.anchor_run(
-            [title for _level, title in _HEADING.findall(mask_code(text))]
+            [title for _level, title in anchors_util.HEADING.findall(mask_code(text))]
         )
         if anchor
     }

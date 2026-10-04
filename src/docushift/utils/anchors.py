@@ -27,6 +27,13 @@ writer making the headings distinct.
 import re
 import unicodedata
 
+#: An ATX heading, the one pattern every reader of headings shares: Reframe
+#: predicts section anchors with it and shifts heading levels by its offsets, the
+#: converter places anchor markers by it, and `validate` checks fragments by it.
+#: A predicted anchor is right only if all of them agree on what a heading is
+#: (Phase 34, R9-16).
+HEADING = re.compile(r"^[ \t]{0,3}(?P<hashes>#{1,6})[ \t]+(?P<text>.*?)[ \t]*#*[ \t]*$", re.MULTILINE)
+
 # A tag, but not an escaped `\<`: `## \<Project> Window` renders "<Project>
 # Window", and deleting `<Project>` as markup slugged it to `-window` (R8-11).
 _TAG = re.compile(r"(?<!\\)<[^>]*>")

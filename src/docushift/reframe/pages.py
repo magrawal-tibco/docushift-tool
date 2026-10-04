@@ -33,7 +33,6 @@ removes one.
 from __future__ import annotations
 
 import re
-from collections import Counter
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import PurePosixPath
@@ -43,6 +42,7 @@ import yaml
 
 from docushift.reframe.packer import Page, asset_destination
 from docushift.transforms import links
+from docushift.utils.anchors import HEADING
 from docushift.validation.references import mask_code, mask_html_blocks
 
 # Same shape as `validation/references.py`'s, with the destination named so it can
@@ -60,7 +60,6 @@ _HTML_REF = re.compile(
     r"""(?:"(?P<double>[^"]*)"|'(?P<single>[^']*)'|(?P<bare>[^\s"'>`=]+))""",
     re.IGNORECASE,
 )
-_HEADING = re.compile(r"^[ \t]{0,3}(?P<hashes>#{1,6})[ \t]+(?P<text>.*?)[ \t]*#*[ \t]*$", re.MULTILINE)
 _FRONTMATTER = re.compile(r"\A---[ \t]*\r?\n.*?^---[ \t]*\r?$\r?\n?", re.DOTALL | re.MULTILINE)
 
 #: Every destination group name, in the order a match may carry them.
@@ -166,7 +165,7 @@ def shift_headings(body: str, title: str, level: int = 2) -> tuple[str, int]:
     hashes = "#" * level
     edits: list[tuple[int, int, str]] = []
     found = False
-    for match in _HEADING.finditer(mask_code(body)):
+    for match in HEADING.finditer(mask_code(body)):
         depth = len(match.group("hashes"))
         if depth == 1 and not found:
             found = True
@@ -373,13 +372,3 @@ def _frontmatter(page: Page, csh: dict[PurePosixPath, list[str]]) -> str:
     return f"---\n{dumped}---"
 
 
-def tally(counts: LinkCounts) -> Counter[str]:
-    """The link counts as a `Counter`, for the report and the manifest."""
-    return Counter(
-        checked=counts.checked,
-        rewritten=counts.rewritten,
-        intra=counts.intra,
-        inter=counts.inter,
-        asset=counts.asset,
-        unresolved=counts.unresolved,
-    )

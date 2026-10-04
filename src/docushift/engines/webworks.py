@@ -139,7 +139,7 @@ _FLAT_HEADINGS = {"minorhead": 4, "block-title": 4}
 _LEVEL_ATTR = "data-docushift-level"
 # The other half of the vocabulary. Rare in this corpus but not absent, and where
 # it appears it is interleaved with the class-named kind on the same page.
-_REAL_HEADINGS = {"h1": 1, "h2": 2, "h3": 3, "h4": 4, "h5": 5, "h6": 6}
+_REAL_HEADINGS = headings.LEVELS
 
 # `div.<Kind>_outer`, the list shape, and `div.<Kind>_inner`, its two cells.
 _OUTER = re.compile(r"^(?P<kind>.+)_outer$")
@@ -865,13 +865,12 @@ def _roman(text: str) -> int:
 
 
 def _is_heading(tag: Tag) -> bool:
-    if tag.name in ("h1", "h2", "h3", "h4", "h5", "h6"):
+    if tag.name in _REAL_HEADINGS:
         return True
     return any(_heading_level(name) for name in _raw_classes(tag))
 
 
-def _runs(parent: Tag, starts: Callable[[Tag], bool],
-          continues: Callable[[Tag], bool] | None = None) -> list[list[Tag]]:
+def _runs(parent: Tag, starts: Callable[[Tag], bool]) -> list[list[Tag]]:
     """Maximal runs of element children, collected before anything is mutated."""
     children = [child for child in parent.children if isinstance(child, Tag)]
     found: list[list[Tag]] = []
@@ -881,9 +880,7 @@ def _runs(parent: Tag, starts: Callable[[Tag], bool],
             index += 1
             continue
         end = index + 1
-        while end < len(children) and (
-            starts(children[end]) or (continues is not None and continues(children[end]))
-        ):
+        while end < len(children) and starts(children[end]):
             end += 1
         found.append(children[index:end])
         index = end
@@ -1041,7 +1038,7 @@ class _Book:
     # normalized directory name for 612 of 646 books and something else for 34.
     context_key: str = ""
     # Lazy `files.js` title lookup, built on the first topic and kept out of repr.
-    _titles: dict[str, str] = field(default_factory=dict, repr=False)
+    _titles: dict[str, str] | None = field(default=None, repr=False)
 
     def aliases(self) -> set[str]:
         """Every normalized name a `WWHClickedPopup` may call this book.
@@ -1058,7 +1055,7 @@ class _Book:
 
     def title_of(self, relative: str) -> str:
         """The `files.js` title for one topic, which is the cleaner of the two."""
-        if not self._titles:
+        if self._titles is None:
             self._titles = {entry.href.lower(): entry.title for entry in self.files}
         return self._titles.get(relative.lower(), "")
 

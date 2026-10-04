@@ -36,6 +36,7 @@ from bs4.element import PreformattedString
 
 from docushift.transforms import code as code_transform
 from docushift.transforms import tables as tables_transform
+from docushift.transforms.headings import LEVELS as _HEADINGS
 
 # The parser every engine uses. `lxml` for speed and for its tolerance of the
 # unclosed tags a 2009 authoring tool emits, at the cost of the workaround below.
@@ -50,8 +51,6 @@ PARSER = "lxml"
 # and its contents are escaped -- text in, text out, whatever an unsampled one
 # turns out to contain.
 _CDATA = re.compile(r"<!\[CDATA\[(.*?)\]\]>", re.DOTALL)
-
-_HEADINGS = {"h1": 1, "h2": 2, "h3": 3, "h4": 4, "h5": 5, "h6": 6}
 
 # Containers with no meaning of their own: recursed into, never emitted. A `div`
 # is the whole of Flare's block structure, so this is the main path.
@@ -255,7 +254,7 @@ class Renderer:
                     out.append(override)
                 continue
             if child.name not in _BLOCKS:
-                run.append(self.inline(child))
+                run.append(self._inline_node(child))
                 continue
             flush()
             out.extend(self._block(child))
@@ -264,7 +263,9 @@ class Renderer:
 
     def _block(self, tag: Tag) -> list[str]:
         name = tag.name
-        if name in _TRANSPARENT:
+        # A paragraph, a list item and a definition hold blocks of their own, and
+        # are walked like the containers that mean nothing.
+        if name in _TRANSPARENT or name in ("p", "dd", "li", "dl"):
             return self.blocks(tag)
         if name in _HEADINGS:
             # A target inside a heading is hoisted above it rather than left in
@@ -281,16 +282,12 @@ class Renderer:
             if text:
                 out.append(f"{'#' * _HEADINGS[name]} {text}")
             return out
-        if name == "p" or name == "dd" or name == "li":
-            return self.blocks(tag)
         if name == "dt":
             term = _trim(self.inline_children(tag)).replace(_BREAK, " ")
             return [f"**{term}**"] if term else []
         if name in ("ul", "ol"):
             listed = self.list(tag, ordered=name == "ol")
             return [listed] if listed else []
-        if name == "dl":
-            return self.blocks(tag)
         if name == "pre":
             # The fence keeps its links' *words* and loses the links. Emitting the
             # block as passthrough HTML instead -- one call, exactly what `table`
@@ -431,9 +428,6 @@ class Renderer:
     def inline_children(self, tag: Tag) -> str:
         return _collapse(_join_inline(self._inline_node(child) for child in tag.children))
 
-    def inline(self, node: Tag) -> str:
-        return self._inline_node(node)
-
     def _inline_node(self, node: object) -> str:
         if is_text(node):
             return escape(str(node))
@@ -507,10 +501,9 @@ class Renderer:
 
     def _code_span_body(self, tag: Tag) -> str:
         anchors = tag.find_all("a", href=True)
-        if not anchors:
-            return code_transform.inline(text_of(tag))
-
         body = code_transform.inline(text_of(tag))
+        if not anchors:
+            return body
         if len(anchors) == 1:
             anchor = anchors[0]
             if _collapse(text_of(tag)).strip() == _collapse(text_of(anchor)).strip():
