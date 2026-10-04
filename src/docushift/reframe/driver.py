@@ -124,7 +124,12 @@ class _Source:
 
     def __init__(self, root: Path) -> None:
         self.root = root
-        paths = sorted(p.relative_to(root).as_posix() for p in root.rglob("*") if p.is_file())
+        # `walk_files`, not `rglob` (R9-10), for the reason `_measure_merged`
+        # gives: `rglob` omits a file past 260 characters without a word. Here
+        # that dropped an asset from the copy and then blamed Stage 6 for the
+        # links to it ("present before the merge"), or failed a version over a
+        # TOC topic that was on disk all along.
+        paths = sorted(relative.as_posix() for relative, _path in walk_files(root))
         self.files = frozenset(PurePosixPath(p) for p in paths)
         #: Everything copied through untouched: not a topic, and not the navigation
         #: or sidecars this stage regenerates from scratch.
@@ -146,7 +151,8 @@ class _Source:
         return relative in self.files
 
     def read(self, relative: PurePosixPath) -> str:
-        return (self.root / relative).read_text(encoding="utf-8")
+        # `long_path`, so a topic the walk can now see can also be opened.
+        return long_path(self.root / relative).read_text(encoding="utf-8")
 
     def words(self, relative: PurePosixPath) -> int:
         """Body tokens, frontmatter excluded. Memoized; never swallows a read error.
@@ -378,7 +384,10 @@ class Reframer:
 
         try:
             return self._build(product, version, policy, converted, target, converted_from)
-        except OSError as exc:  # pragma: no cover - filesystem failure, not logic
+        # `UnicodeDecodeError` too (R9-11): it is a `ValueError`, not an `OSError`,
+        # and one undecodable topic or `toc.yml` used to abort the whole
+        # selection instead of failing the one version that holds it.
+        except (OSError, UnicodeDecodeError) as exc:
             message = f"{type(exc).__name__}: {exc}"
             return ReframeResult(slug, number, ReframeOutcome.FAILED, message=message)
 
@@ -543,6 +552,19 @@ class Reframer:
             csh=csh_map.retarget(source.csh, located) if source.csh else None,
             anchors=added.anchors, mirrored=added.mirrored,
         )
+        # Every merged page is one `.md` and nothing else in the tree writes one,
+        # so the walk and the counter agree exactly on every version measured
+        # (124/124, 128/128). A disagreement means a page write landed somewhere
+        # the layout did not intend -- the failure Stage 5's equivalent check
+        # exists to catch. **Counted in the staging tree, before the swap**
+        # (R9-09): it ran after the swap, reported an error and stamped the tree
+        # current anyway, so the next run said `current` and the bad tree stood.
+        staged = sum(1 for _relative, path in walk_files(staging) if path.suffix.lower() == ".md")
+        if staged != len(built):
+            failures.append(
+                f"{len(built)} page(s) merged but {staged} Markdown file(s) in the merged "
+                f"tree; a page write landed outside the layout"
+            )
         if failures:
             # Nothing is swapped. Requirements §6: "fail the stage if any check
             # fails" -- and the staging tree is removed rather than left for
@@ -587,19 +609,6 @@ class Reframer:
         # budget here rather than in `swap` keeps the other callers' failures fast.
         swap(staging, target, attempts=8, delay=0.25)
         merged_md, merged_files = self._measure_merged(slug, number, target)
-        # Every merged page is one `.md` and nothing else in the tree writes one,
-        # so the walk and the counter agree exactly on every version measured
-        # (124/124, 128/128). A disagreement therefore means a page write landed
-        # somewhere the layout did not intend -- the failure Stage 5's equivalent
-        # check exists to catch, here for free because the walk already happened.
-        if merged_md != pages:
-            self._record(
-                "REFRAME_SELF_CHECK_FAILED", slug, number,
-                message=(
-                    f"{pages} page(s) merged but {merged_md} Markdown file(s) in the merged "
-                    f"tree; a page write landed outside the layout"
-                ),
-            )
         if self.state is not None:
             self.state.set_version_metadata(slug, number, "reframe_source_checksum", checksum)
             self.state.set_version_metadata(slug, number, "reframe_policy_key", policy.key)

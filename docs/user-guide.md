@@ -1052,8 +1052,8 @@ writing one.
 
 **It checks its own output before it swaps it in.** Words are conserved exactly, every topic
 is anchored once, no page spans two source directories, the TOC round-trips in both
-directions, every redirect resolves, and no link that worked before the merge is broken by
-it. A failure names every check that failed, deletes the staging tree, and leaves the
+directions, every redirect resolves, no link that worked before the merge is broken by
+it, and the tree holds exactly one Markdown file per page. A failure names every check that failed, deletes the staging tree, and leaves the
 previous merge — if there is one — exactly where it was. The merge is a one-way door once
 pages have been hand-edited, so the run that built a tree is the last cheap moment to reject
 it.

@@ -517,6 +517,67 @@ def test_the_total_exceeds_the_pages_by_the_artifacts_beside_them(config, catalo
     assert result.reframed_files > result.pages
 
 
+def test_a_page_written_outside_the_layout_is_refused_before_the_swap(
+    config, catalog, flare, monkeypatch
+):
+    """R9-09. The count ran after the swap: it reported an error, then stamped the
+    tree current, so the next run said `current` and the bad tree stood. Now it
+    is an acceptance check like the others -- nothing swapped, nothing stamped."""
+    from docushift.reframe.driver import Reframer as Driver
+
+    converted_tree(config, flare, "10.5.1")
+    catalog.state.set_version_metadata("tibco-flare-docs", "10.5.1", "convert_source_checksum", "abc123")
+    target = config.reframed_path(flare.bu, flare.family, flare.slug, "10.5.1")
+    original = Driver._write_origins
+
+    def stray(self, staging, *args):
+        original(self, staging, *args)
+        (staging / "stray-page.md").write_text("# Stray\n", encoding="utf-8")
+
+    monkeypatch.setattr(Driver, "_write_origins", stray)
+    findings = FindingsRun("reframe")
+
+    result = Reframer(config, catalog, findings=findings).reframe_one(flare, flare.versions["10.5.1"])
+
+    assert result.outcome is ReframeOutcome.FAILED
+    assert "a page write landed outside the layout" in result.message
+    assert "REFRAME_SELF_CHECK_FAILED" in codes(findings.all)
+    assert not target.exists()
+    assert "reframe_source_checksum" not in catalog.state.get_version_metadata(
+        "tibco-flare-docs", "10.5.1")
+
+
+def test_a_file_past_260_characters_is_still_copied(config, catalog, flare):
+    """R9-10. `_Source` inventoried with `rglob`, which omits such a file without
+    a word -- so the asset was not copied and links to it were reported as
+    broken before the merge. `walk_files` sees it."""
+    from docushift.utils.longpath import long_path
+
+    tree = converted_tree(config, flare, "10.5.1")
+    deep = PurePosixPath(*(["a-rather-long-folder-name-for-assets"] * 8), "diagram.svg")
+    assert len(str(tree / deep)) > 260
+    destination = long_path(tree / deep)
+    destination.parent.mkdir(parents=True)
+    destination.write_bytes(b"<svg/>")
+
+    result = Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"])
+
+    assert result.outcome is ReframeOutcome.REFRAMED
+    assert long_path(result.path / deep).read_bytes() == b"<svg/>"
+
+
+def test_an_undecodable_topic_fails_its_version_rather_than_raising(config, catalog, flare):
+    """R9-11. "Never raises" held only for `OSError`; `UnicodeDecodeError` is a
+    `ValueError`, so one bad topic aborted the whole selection."""
+    tree = converted_tree(config, flare, "10.5.1")
+    (tree / "users-guide/user-guide.md").write_bytes(b"# User Guide\n\n\xff\xfe broken\n")
+
+    result = Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"])
+
+    assert result.outcome is ReframeOutcome.FAILED
+    assert "UnicodeDecodeError" in result.message
+
+
 def test_a_current_version_still_reports_its_merged_counts(config, catalog, flare):
     """Phase 24's whole complaint: the second run reported nothing where the first
     reported every page, which reads as "the merge produced nothing"."""
