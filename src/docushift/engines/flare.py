@@ -64,7 +64,7 @@ from docushift.engines.flare_toc import Manifest, Toc, TocNode, read_manifest, r
 from docushift.engines.roots import find_output_roots, owning_root
 from docushift.models import SourceEngine
 from docushift.transforms import callouts, deflists, headings, links, markdown
-from docushift.utils.longpath import long_path
+from docushift.utils.longpath import long_path, walk_under
 
 # The one selector (§5.1.6). Not a list, and deliberately.
 CONTENT_SELECTOR = "div[role='main']#mc-main-content"
@@ -615,7 +615,7 @@ class FlareEngine(BaseEngine):
         foreign = [other for other in context.excluded_roots
                    if root in other.parents and other not in nested]
         found: list[str] = []
-        for path in _walk_files(root):
+        for path in walk_under(root):
             if path.suffix.lower() not in _HTML_SUFFIXES:
                 continue
             relative = PurePosixPath(path.relative_to(root).as_posix())
@@ -1347,21 +1347,6 @@ def _project_stubs(root: Path) -> frozenset[str]:
     except OSError:
         return frozenset()
     return frozenset(name for stem in stems for name in (f"{stem}.htm", f"{stem}_csh.htm"))
-
-
-def _walk_files(root: Path):
-    """Every file under `root`, long ones included, spelled under `root`.
-
-    X2-08: walked through `long_path`, because extract writes past 260
-    characters and a plain `os.walk` omits such a file, so whether a topic
-    converted depended on how long the workspace root was. Yielded under the
-    plain `root`, so every caller's `relative_to(root)` still holds.
-    """
-    base = long_path(root)
-    for directory, _, names in os.walk(base):
-        here = root / Path(directory).relative_to(base)
-        for name in sorted(names):
-            yield here / name
 
 
 def _read(path: Path) -> str | None:

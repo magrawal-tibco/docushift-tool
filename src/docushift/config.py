@@ -57,7 +57,7 @@ PUBLISHING_DEFAULTS: dict[str, str] = {
     # into the `-resources` tree crosses a repository boundary. **Empty is the
     # shipped value and a supported state** -- the host is not known yet, and 409 of
     # the 422 products a full sync selects have no api-reference tree to link into.
-    # `sync` leaves those links relative and reports it once per product; it does
+    # `sync` leaves those links relative and reports it once per version; it does
     # not fail, and it does not invent a URL. Deployment configuration, not design.
     "publish_base_url": "",
 }

@@ -34,7 +34,7 @@ downstream, and that is a condition to report rather than to paper over.
 
 import os
 import re
-from collections.abc import Iterator
+from collections.abc import Collection, Iterator
 from pathlib import Path
 
 # Win32's escape from MAX_PATH. `\\?\UNC\server\share` is its form for a network
@@ -89,6 +89,26 @@ def walk_files(root: Path) -> Iterator[tuple[Path, Path]]:
         except OSError:  # pragma: no cover - a file that vanished mid-walk
             continue
         yield path.relative_to(base), path
+
+
+def walk_under(root: Path, skip: Collection[str] = ()) -> Iterator[Path]:
+    """Every file under `root`, long ones included, spelled under the plain `root`.
+
+    The engines' walk (X2-08): through the prefix, because extract writes past 260
+    characters and a plain `os.walk` omits such a file, so whether a topic converted
+    depended on how long the workspace root was. Yielded under `root` rather than
+    the prefixed spelling `walk_files` hands back, so every caller's
+    `relative_to(root)` holds. Files in name order within a directory; a directory
+    whose lowercased name is in `skip` is not descended into, and the rest are then
+    visited in name order too.
+    """
+    base = long_path(root)
+    for directory, names, files in os.walk(base):
+        if skip:
+            names[:] = [name for name in sorted(names) if name.lower() not in skip]
+        here = root / Path(directory).relative_to(base)
+        for name in sorted(files):
+            yield here / name
 
 
 # Phase 15d. The ceiling a *published* path is measured against, and the one

@@ -13,11 +13,6 @@ endpoints:
   product: "/api/products/{slug}"
   # Archived "Other Versions": children with version_no, name, GA_date, zipPath.
   product_archive: "/api/products/archive/{slug}"
-  # Suite groupings (WebFOCUS, ibi, Spotfire, EMS, BusinessWorks, EBX).
-  product_list_by_suites: "/api/product_list_by_suites"
-  # Category data. Advisory only -- most products carry no category, so this may
-  # only promote an `unclassified` family, never override a `manual` one.
-  bu_category_products: "/api/bu_category_products"
 
 # The Coveo search-index sitemap (planning.md Phase 33). Unlike the public
 # /sitemap.xml, which lists only product landing pages, this is a three-level

@@ -165,11 +165,3 @@ class DocsiteClient:
     def product_archive(self, slug: str) -> Any:
         """One product's archived "Other Versions" records."""
         return self.get_json(self._endpoint("product_archive", slug=slug))
-
-    def product_list_by_suites(self) -> Any:
-        """Suite groupings. Advisory only -- see architecture §3.3."""
-        return self.get_json(self._endpoint("product_list_by_suites"))
-
-    def bu_category_products(self) -> Any:
-        """Category data. Advisory only -- most products carry none."""
-        return self.get_json(self._endpoint("bu_category_products"))

@@ -112,20 +112,6 @@ def test_forget_version_clears_every_table(state: StateStore) -> None:
     assert state.get_output_map("ems", "10.4.0") == {}
 
 
-def test_forget_product_takes_its_versions_with_it(state: StateStore) -> None:
-    state.record_product_snapshot(make_product("ems"))
-    state.record_version_snapshot(make_version("ems", "10.4.0"))
-    state.set_product_metadata("ems", "docsite_id", "42")
-    state.record_output_map("ems", "10.4.0", [("admin/a.htm", "a.md", "admin")])
-
-    state.forget_product("ems")
-
-    assert state.get_product_snapshot("ems") is None
-    assert state.known_versions("ems") == set()
-    assert state.get_product_metadata("ems") == {}
-    assert state.get_output_map("ems", "10.4.0") == {}
-
-
 # -- volatile machine state ----------------------------------------------------
 
 
@@ -155,23 +141,6 @@ def test_set_version_state_with_no_fields_still_creates_the_row(state: StateStor
     state.set_version_state("ems", "10.4.0")
 
     assert state.get_version_state("ems", "10.4.0")["status"] is None
-
-
-def test_versions_with_status_selects_the_work_queue(state: StateStore) -> None:
-    state.set_version_state("ems", "10.4.0", status=ConversionStatus.DOWNLOADED)
-    state.set_version_state("ems", "8.6.0", status=ConversionStatus.EXTRACTED)
-    state.set_version_state("ebx", "6.2.0", status=ConversionStatus.DOWNLOADED)
-
-    assert state.versions_with_status(ConversionStatus.DOWNLOADED) == [("ebx", "6.2.0"), ("ems", "10.4.0")]
-    assert state.versions_with_status("EXTRACTED") == [("ems", "8.6.0")]
-
-
-def test_status_counts_ignores_rows_with_no_status(state: StateStore) -> None:
-    state.set_version_state("ems", "10.4.0", status=ConversionStatus.CONVERTED)
-    state.set_version_state("ems", "8.6.0", status=ConversionStatus.CONVERTED)
-    state.set_version_state("ebx", "6.2.0")
-
-    assert state.status_counts() == {"CONVERTED": 2}
 
 
 def test_error_is_recorded_alongside_the_status(state: StateStore) -> None:
@@ -214,22 +183,6 @@ def test_engine_folder_is_upserted(state: StateStore) -> None:
     state.record_engine_folder("ems", "10.4.0", "admin", SourceEngine.FLARE)
 
     assert state.get_engine_folder_map("ems", "10.4.0") == {"admin": "flare"}
-
-
-# -- batching ------------------------------------------------------------------
-
-
-def test_batches_slices_evenly_and_keeps_the_remainder() -> None:
-    assert list(StateStore.batches(list(range(7)), 3)) == [[0, 1, 2], [3, 4, 5], [6]]
-
-
-def test_batches_of_an_empty_list_is_empty() -> None:
-    assert list(StateStore.batches([], 10)) == []
-
-
-def test_batch_size_must_be_positive() -> None:
-    with pytest.raises(ValueError, match="positive"):
-        list(StateStore.batches([1, 2], 0))
 
 
 # -- transactions ----------------------------------------------------------------

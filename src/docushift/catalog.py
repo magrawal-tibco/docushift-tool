@@ -1069,8 +1069,6 @@ class CatalogManager:
             product.bu = value.lower()
         elif name == "display_name":
             product.display_name = value
-        elif name == "slug":
-            product.slug = value or None
         elif name == "in_scope":
             # Pinned to manual either way. Putting a product back in scope has to
             # outrank scope.yaml or the next fetch would undo it; taking one out by

@@ -33,7 +33,7 @@ an intentional addition from a typo -- so it does not adjudicate.
 
 import re
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import datetime
 from pathlib import Path
 
 import yaml
@@ -43,10 +43,6 @@ from docushift.utils.csvio import natural_version_key, normalize_date
 from docushift.utils.slug import is_numeric_version, version_segment
 from docushift.utils.templating import template
 
-# An epoch value outside this range is a column that changed meaning, not a date.
-# Rendering 1970 or 55000 into a drop-down would look like data rather than like
-# the parse failure it is, so it falls through to the undated branch.
-_EPOCH_YEARS = range(1990, 2101)
 # A row DocuShift could have written: one root-relative segment and nothing else.
 _BARE_SEGMENT = re.compile(r"^/[^/]+$")
 
@@ -67,18 +63,14 @@ def release_month(value: str | None) -> str:
 
     Month precision, because that is what the title shows and what the *archived*
     side of the catalog has; synthesizing a day from an epoch would claim a
-    precision one of the two formats does not carry. UTC rather than local time,
-    so the same catalog does not render a different month on two machines.
+    precision one of the two formats does not carry. The epoch is read by
+    `normalize_date`, in UTC and within its year range, so the same catalog does
+    not render a different month on two machines, and an epoch outside the range
+    falls through to the undated branch rather than rendering 1970 as data.
     """
     text = str(value or "").strip()
     if not text:
         return ""
-    if text.isdigit():
-        try:
-            moment = datetime.fromtimestamp(int(text) / 1000, tz=UTC)
-        except (OverflowError, OSError, ValueError):
-            return ""
-        return moment.strftime("%b %Y") if moment.year in _EPOCH_YEARS else ""
     iso = normalize_date(text)
     for fmt in ("%Y-%m-%d", "%B %Y", "%b %Y"):
         try:

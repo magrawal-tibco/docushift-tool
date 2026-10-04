@@ -34,17 +34,16 @@ the descent anyway.
 
 from pathlib import Path
 
+from docushift.apiref import CONTAINER_SEGMENTS
+
 # Names that mean "content lives here", so a directory bearing one is never a
-# wrapper however alone it stands. The first three are what the four flat
-# packages in the sample have at their root; the rest are the container segments
-# `sync/apirefs.py` already knows, repeated rather than imported because
-# `extractor` must not depend on `sync`.
-CONTENT_SEGMENTS = frozenset({
-    "doc", "docs", "html", "pdf", "pdfs",
-    "api", "apis", "apidocs", "api-docs", "api_docs",
-    "api-reference", "api_reference", "apireference", "reference",
-    "javadoc", "dotnetdoc", "help", "content", "resources",
-})
+# wrapper however alone it stands: the container segments `sync/apirefs.py` drops
+# from a name, shared through `apiref` because `extractor` must not depend on
+# `sync`, plus `pdf` and `pdfs` -- with `doc` and `html`, what the four flat
+# packages in the sample have at their root -- and five more.
+CONTENT_SEGMENTS = CONTAINER_SEGMENTS | {
+    "pdf", "pdfs", "javadoc", "dotnetdoc", "help", "content", "resources",
+}
 
 # Where the answer is kept once `extract` has worked it out. Free-form metadata
 # rather than a `versions.csv` column: it describes the package's internal shape,

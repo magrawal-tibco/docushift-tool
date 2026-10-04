@@ -58,7 +58,6 @@ every file affordable.
 
 import filecmp
 import html as html_entities
-import os
 import posixpath
 import re
 from collections.abc import Callable
@@ -96,7 +95,7 @@ from docushift.engines.webworks_toc import (
 from docushift.models import SourceEngine
 from docushift.transforms import callouts, deflists, headings, links, markdown
 from docushift.transforms import tables as tables_transform
-from docushift.utils.longpath import long_path, walk_files
+from docushift.utils.longpath import walk_files, walk_under
 
 # The runtime, read for metadata and never emitted (§5.3.9). `tpl/` is skin
 # imagery; `roots.SKIN_PREFIXES` already keeps the asset copier out of it, and this
@@ -1302,7 +1301,7 @@ class WebWorksEngine(BaseEngine):
             if node.index is not None and 0 <= node.index < len(book.files)
         }
         found: list[str] = []
-        for path in _walk_files(book.root):
+        for path in walk_under(book.root, RUNTIME_DIRECTORIES):
             if path.suffix.lower() not in _HTML_SUFFIXES:
                 continue
             relative = PurePosixPath(path.relative_to(book.root).as_posix())
@@ -1630,19 +1629,6 @@ def _metadata(book: _Book) -> dict[str, str]:
         "book_title": book.title,
     }
     return {key: value for key, value in values.items() if value}
-
-
-def _walk_files(root: Path):
-    """Every file under `root` outside the runtime folders, spelled under `root`.
-
-    Through `long_path` (X2-08), for `flare._walk_files`'s reason.
-    """
-    base = long_path(root)
-    for directory, names, files in os.walk(base):
-        names[:] = [name for name in sorted(names) if name.lower() not in RUNTIME_DIRECTORIES]
-        here = root / Path(directory).relative_to(base)
-        for name in sorted(files):
-            yield here / name
 
 
 def _title(soup: BeautifulSoup) -> str:

@@ -253,9 +253,9 @@ def test_get_json_raises_on_html_served_with_a_200(session: FakeSession) -> None
         DocsiteClient(DOCSITE, session=session).a_to_z()
 
 
-def test_unknown_endpoint_names_the_config_file(client: DocsiteClient) -> None:
+def test_unknown_endpoint_names_the_config_file(session: FakeSession) -> None:
     with pytest.raises(DocsiteError, match="docsite.yaml"):
-        client.product_list_by_suites()
+        DocsiteClient({**DOCSITE, "endpoints": {}}, session=session).a_to_z()
 
 
 def test_client_throttles_between_requests(session: FakeSession) -> None:

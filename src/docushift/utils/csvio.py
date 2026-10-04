@@ -36,7 +36,8 @@ _ISO_DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 # (R1-11, R2-08). Twelve or thirteen digits covers 1973 to 2286; a value whose
 # year falls outside the range below is a column that changed meaning, not a
 # date, and passes through verbatim like any other unparseable text. The range
-# is `sync/versions.py`'s, which met this dialect first.
+# is the one `sync/versions.py` met this dialect with first; that module now reads
+# the epoch through `normalize_date` rather than with a copy of its own.
 _EPOCH_MS = re.compile(r"^\d{12,13}$")
 _EPOCH_YEARS = range(1990, 2101)
 

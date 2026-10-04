@@ -20,7 +20,7 @@ import pytest
 
 from docushift.extractor import safe_extract
 from docushift.extractor.safe_unzip import UnsafeArchiveError
-from docushift.utils.longpath import long_path, over_limit, walk_files
+from docushift.utils.longpath import long_path, over_limit, walk_files, walk_under
 from docushift.utils.swap import swap
 
 WINDOWS = os.name == "nt"
@@ -259,16 +259,16 @@ def _deep_topic(tmp_path: Path, name: str, body: bytes) -> tuple[Path, Path]:
     return root, path
 
 
-def test_the_flare_and_webworks_walks_see_a_topic_past_max_path(tmp_path: Path) -> None:
+def test_the_flare_and_webworks_walk_sees_a_topic_past_max_path(tmp_path: Path) -> None:
     """X2-08. `os.walk` over the plain spelling omits such a file, so whether a
     topic converted depended on how long the workspace root was. Yielded under
     the root as given, so `relative_to(root)` still works for every caller."""
-    from docushift.engines import flare, webworks
+    from docushift.engines.webworks import RUNTIME_DIRECTORIES
 
     root, path = _deep_topic(tmp_path, "topic.htm", b"<html/>")
 
-    assert path in list(flare._walk_files(root))
-    assert path in list(webworks._walk_files(root))
+    assert path in list(walk_under(root))
+    assert path in list(walk_under(root, RUNTIME_DIRECTORIES))
 
 
 def test_every_engine_reader_opens_a_topic_past_max_path(tmp_path: Path) -> None:

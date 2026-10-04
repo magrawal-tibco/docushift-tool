@@ -28,19 +28,14 @@ from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 
+from docushift.apiref import CONTAINER_SEGMENTS
 from docushift.transforms import links
 from docushift.utils.longpath import walk_files
 
-# Path segments that say where a generator's output was filed, not what it is.
-# Dropping them turns `html/api-reference/java` into `java` and
-# `doc/html/api/java/lib` into `java-lib`. Every one of these is a container the
-# corpus uses for more than one artefact, which is exactly why it cannot name one.
-CONTAINER_SEGMENTS = frozenset({
-    "doc", "docs", "html", "api", "apis", "api-docs", "api_docs", "apidocs",
-    "api-reference", "api_reference", "apireference", "reference",
-    # `bpmhelp` is amx-bpm's whole help tree; its three API trees sit inside it.
-    "bpmhelp",
-})
+# `apiref.CONTAINER_SEGMENTS`, dropped from a tree's name: `html/api-reference/java`
+# becomes `java` and `doc/html/api/java/lib` becomes `java-lib`. Plus `bpmhelp`,
+# amx-bpm's whole help tree, which its three API trees sit inside.
+_DROPPED_SEGMENTS = CONTAINER_SEGMENTS | {"bpmhelp"}
 
 # The doc-class name in the `-resources` tree. Not one of `DOC_CLASSES`: those are
 # the docs tree's, and this one is the reason the second tree exists.
@@ -92,7 +87,7 @@ def display_name(relative: PurePosixPath) -> str:
     the packager thought it was.
     """
     parts = [part.lower() for part in relative.parts]
-    kept = [part for part in parts if part not in CONTAINER_SEGMENTS]
+    kept = [part for part in parts if part not in _DROPPED_SEGMENTS]
     return "-".join(kept) if kept else parts[-1]
 
 

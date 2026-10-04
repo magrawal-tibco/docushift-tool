@@ -187,8 +187,8 @@ CREATE INDEX IF NOT EXISTS findings_by_run ON findings (run_id);
 """
 
 
-# Every table keyed by `(slug, version)`, which is what `forget_version` and
-# `forget_product` must empty for a version to be gone rather than half-gone. The
+# Every table keyed by `(slug, version)`, which is what `forget_version` must
+# empty for a version to be gone rather than half-gone. The
 # Stage 4/5 tables were missing until Phase 34 (R3-11): a version deleted and
 # later re-added counted as converted from its orphaned `output_map`, and CSH
 # resolution read rows for a package nobody holds. `findings` is deliberately
@@ -462,14 +462,6 @@ class StateStore:
             for table in _VERSION_TABLES:
                 conn.execute(f"DELETE FROM {table} WHERE slug = ? AND version = ?", (slug, version))
 
-    def forget_product(self, slug: str) -> None:
-        """Drops a product and every version beneath it."""
-        with self._tx() as conn:
-            for table in _VERSION_TABLES:
-                conn.execute(f"DELETE FROM {table} WHERE slug = ?", (slug,))
-            conn.execute("DELETE FROM product_snapshot WHERE slug = ?", (slug,))
-            conn.execute("DELETE FROM product_metadata WHERE slug = ?", (slug,))
-
     # -- volatile machine state ---------------------------------------------
 
     def set_version_state(self, slug: str, version: str, **fields: Any) -> None:
@@ -499,14 +491,6 @@ class StateStore:
             (slug, version),
         )
         return dict(row) if row else None
-
-    def versions_with_status(self, status: ConversionStatus | str) -> list[tuple[str, str]]:
-        """All `(slug, version)` pairs currently at a given lifecycle stage."""
-        rows = self._all(
-            "SELECT slug, version FROM version_state WHERE status = ? ORDER BY slug, version",
-            (str(status),),
-        )
-        return [(row["slug"], row["version"]) for row in rows]
 
     def progress(self) -> dict[tuple[str, str], dict[str, Any]]:
         """Per-version pipeline evidence, keyed `(slug, version)` -- `status`'s funnel.
@@ -540,13 +524,6 @@ class StateStore:
             )
             entry["converted"] = True
         return rows
-
-    def status_counts(self) -> dict[str, int]:
-        """Lifecycle histogram, for the migration dashboard."""
-        rows = self._all(
-            "SELECT status, COUNT(*) AS n FROM version_state WHERE status IS NOT NULL GROUP BY status"
-        )
-        return {row["status"]: row["n"] for row in rows}
 
     # -- metadata ------------------------------------------------------------
 
@@ -840,13 +817,3 @@ class StateStore:
                 f"DELETE FROM findings WHERE run_id IN ({placeholders})", stale
             )
             return len(stale), int(cursor.rowcount or 0)
-
-    # -- batching ------------------------------------------------------------
-
-    @staticmethod
-    def batches(items: list[Any], size: int) -> Iterator[list[Any]]:
-        """Slices work into batches, for phased runs across ~250 products."""
-        if size <= 0:
-            raise ValueError("Batch size must be positive")
-        for start in range(0, len(items), size):
-            yield items[start : start + size]

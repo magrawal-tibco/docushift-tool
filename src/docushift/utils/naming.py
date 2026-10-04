@@ -58,15 +58,6 @@ _STOPWORDS = frozenset({"a", "an", "the", "of", "for", "to", "and", "in", "on", 
 #: updated` as a title is a word the writer chose rather than a revision marker.
 _HISTORY = re.compile(r"(?:^\d+[-_]+)|(?:[-_]+(?:updated|new|old|copy|\d)$)", re.IGNORECASE)
 
-#: A slug that names nothing on its own. Prefixed with its parent, so a reader
-#: gets `/installation-overview` and not `/overview` -- and so that the twenty
-#: pages titled "Overview" in one doc set do not all collide.
-GENERIC = frozenset({
-    "overview", "introduction", "summary", "services", "requirements",
-    "before-you-begin", "prerequisites", "about", "reference", "examples",
-})
-
-
 #: The counter MadCap appends when two of its 20-character cuts would collide:
 #: `tibemsConnectionFact21`. Read off a normalized stem, so `-1` counts too.
 _COUNTER = re.compile(r"-?\d+$")
@@ -176,18 +167,3 @@ def slugify(title: str, fallback_stem: str = "", *, separator: str = "-",
         slug = slug.replace("-", separator)
     return shorten(slug, limit, separator)
 
-
-def qualify(slug: str, parent: str, *, separator: str = "-",
-            limit: int = MAX_SEGMENT) -> str:
-    """`slug` prefixed with its parent, for a collision or a generic name.
-
-    The parent is shortened first rather than the slug, because the slug is the
-    thing the page is actually about: `installation-guide` + `overview` losing
-    characters should lose them from `installation-guide`.
-    """
-    if not parent:
-        return slug
-    room = limit - len(slug) - len(separator)
-    if room < 1:
-        return slug
-    return f"{shorten(parent, room, separator)}{separator}{slug}"

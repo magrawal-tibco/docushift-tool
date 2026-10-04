@@ -223,7 +223,7 @@ REGISTRY: dict[str, Code] = _codes(
          "PDF whose Info dictionary would not parse; titled from its filename",
          "design.md §10.5"),
     # 6d's one new code, and the first one whose condition is a *configuration*
-    # rather than a document. Raised once per product that places an api-reference
+    # rather than a document. Raised once per version that places an api-reference
     # tree while `publish_base_url` is empty: the copy is published, but the help
     # topics that point into it keep relative links that cannot span two
     # repositories. A warning rather than an error because empty is the shipped,

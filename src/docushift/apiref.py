@@ -58,6 +58,18 @@ API_NAME_SEGMENTS = frozenset({
 })
 _API_NAME_SUFFIXES = ("-api", "_api", "-api-reference", "_api_ref")
 
+# Path segments that say where a generator's output was filed, not what it is.
+# Every one is a container the corpus uses for more than one artefact, which is
+# exactly why it cannot name one. Two readers, one list (Phase 34, R3-15): sync
+# drops them from an API tree's published name (`sync/apirefs.py`), and extract
+# never takes a directory bearing one for a package wrapper
+# (`extractor/content_root.py`). Each adds its own names to it; two copies had
+# already drifted apart.
+CONTAINER_SEGMENTS = frozenset({
+    "doc", "docs", "html", "api", "apis", "api-docs", "api_docs", "apidocs",
+    "api-reference", "api_reference", "apireference", "reference",
+})
+
 
 def has_api_marker(directory: Path) -> bool:
     """Does `directory` sit at the root of a generated API-reference tree?"""

@@ -12,7 +12,7 @@ The cases that look oddly specific are real corpus names.
 import pytest
 
 from docushift.utils.anchors import anchor_run, slugify_heading
-from docushift.utils.naming import MAX_SEGMENT, qualify, shorten, slugify
+from docushift.utils.naming import MAX_SEGMENT, shorten, slugify
 
 # -- filenames -----------------------------------------------------------------
 
@@ -143,27 +143,6 @@ def test_the_first_word_survives_even_when_it_is_a_stopword() -> None:
     slug = shorten("the-" + "-".join(["configuration"] * 5), 50)
 
     assert slug.startswith("the-configuration")
-
-
-# -- disambiguation -------------------------------------------------------------
-
-
-def test_a_generic_name_takes_its_parents_prefix() -> None:
-    assert qualify("overview", "installation-guide") == "installation-guide-overview"
-
-
-def test_qualifying_shortens_the_parent_and_not_the_page() -> None:
-    """The slug is what the page is *about*; the parent is context. When the pair
-    will not fit, the context gives way."""
-    slug = qualify("overview", "an-extremely-long-parent-section-title-here", limit=30)
-
-    assert slug.endswith("-overview")
-    assert len(slug) <= 30
-
-
-def test_qualifying_gives_up_rather_than_returning_a_stub() -> None:
-    """No room for even one character of parent: the bare slug beats `x-overview`."""
-    assert qualify("a" * 50, "parent") == "a" * 50
 
 
 # -- anchors --------------------------------------------------------------------

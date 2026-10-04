@@ -60,7 +60,7 @@ def test_docsite_config_declares_verified_endpoints(repo_root: Path) -> None:
 
     assert docsite["base_url"] == "https://docs.tibco.com"
     endpoints = docsite["endpoints"]
-    for key in ("a_to_z", "product", "product_archive", "product_list_by_suites", "bu_category_products"):
+    for key in ("a_to_z", "product", "product_archive"):
         assert endpoints[key].startswith("/api/")
 
     # Archived versions must never be convert-eligible by default.
