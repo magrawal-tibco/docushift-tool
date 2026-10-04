@@ -174,3 +174,28 @@ Triage approved by the user 2026-10-04, as proposed, including the AA condition 
 | **AI. Fragile, correct today** | R7-08, R7-10, R8-09, R8-10, R8-12, R9-06, R9-07, R9-08 | defer to planning.md carried-forward items | approved: defer to planning.md carried-forward items 2026-10-04 |
 | **AJ. Docs that contradict the code** | R9-13, R9-14 | fix docs | approved: fix docs 2026-10-04 |
 | **O3. Cleanup** | R7-11, R8-15, R8-16, R9-15, R9-16 | add to the end-of-Phase-34 cleanup commit | approved: add to the end-of-Phase-34 cleanup commit 2026-10-04 |
+
+## Batch 4 (R10–R12): counts
+
+Reviewed at `review-base-b4` (73cc93d): after batches 1–2's fixes, before batch 3's.
+
+| unit | S1 | S2 | S3 | S4 | total |
+|---|---|---|---|---|---|
+| R10 Publishing layout | 2 | 1 | 10 | 3 | 16 |
+| R11 Validation & reporting | 2 | 0 | 10 | 3 | 15 |
+| R12 Command layer | 0 | 5 | 11 | 2 | 18 |
+| **Batch 4** | **4** | **6** | **31** | **8** | **49** |
+
+**Does `validate` catch what the review found by hand?** (R11) It catches broken files, dead anchors and in-folder case mismatches. It misses duplicate guides (R4-01), wrong-heading fragments (R9-01) and over-long paths, all cheap to add. It reports Help buttons that open the page top (R8-04) only as warnings indistinguishable from harmless ones. It structurally cannot see missing TOC section entries (R7-01) or lost cross-topic sub-headings (R9-02), because the published tree lacks the source TOC and anchor map; those stay the converter's own responsibility and its tests'.
+
+## Batch 4, grouped into fix themes
+
+| theme | findings | proposed | decision |
+|---|---|---|---|
+| **BA. Publishing writes something wrong** | R10-01 (S1), R10-02 (S1), R10-03 (S2), R10-09, R10-11 | fix | |
+| **BB. Published copies that go stale unseen** | R10-05, R10-06, R10-10 | fix | |
+| **BC. Close `validate`'s cheap gaps** | R11-01 (S1), R11-02 (S1), R11-03, R11-04, R11-05, R11-06, R11-07, R11-08, R11-09 | fix | |
+| **BD. Command crashes, previews that write, runs left open, exit codes** | R12-01 – R12-05 (S2), R12-06, R12-07 – R12-13 | fix; `download`, `extract` and `convert` exit 1 on a failed row, like `reframe` and `sync` | |
+| **BE. Docs that contradict the code** | R10-13, R11-11, R11-12, R11-15, R12-14, R12-15, R12-16 | fix docs | |
+| **BF. Fragile, correct today, or unconfirmed** | R10-04, R10-07, R10-08, R10-12, R11-10 | defer to planning.md carried-forward items | |
+| **O4. Cleanup** | R10-14, R10-15, R10-16, R11-13, R11-14, R12-17, R12-18 | add to the end-of-Phase-34 cleanup commit | |
