@@ -33,6 +33,7 @@ downstream, and that is a condition to report rather than to paper over.
 """
 
 import os
+import re
 from collections.abc import Iterator
 from pathlib import Path
 
@@ -137,3 +138,47 @@ def published_length(destination: Path, relative: "Path | str") -> int:
     `long_path`.
     """
     return len(os.path.abspath(destination)) + 1 + len(str(relative))
+
+
+# What Win32 refuses in a file name, beyond the separators, and the device names
+# it resolves wherever they appear in a path, with or without an extension:
+# `aux.htm` written through the prefix is a file, but every plain reader opens
+# the device instead (Phase 34, X2-10).
+_RESERVED = frozenset('<>"|?*') | frozenset(chr(code) for code in range(32))
+_DEVICES = re.compile(r"(?i)^(con|prn|aux|nul|com[1-9¹²³]|lpt[1-9¹²³])(\..*)?$")
+
+
+def is_device_name(part: str) -> bool:
+    """Whether Windows reads this path segment as a device (`NUL`, `com1.txt`)."""
+    return bool(_DEVICES.match(part.rstrip(" ")))
+
+
+def segment_problem(part: str) -> str | None:
+    """Why one value cannot be used as a single folder or file name, or `None`.
+
+    Phase 34 (X2-10, X2-11). A value read from a file -- a catalog cell, a
+    sitemap `<loc>` -- and joined onto a path as one segment must stay one
+    segment: `..` made a swap delete a whole family folder, and `D:evil.xml`
+    is relative to drive D's working directory. A trailing dot is not refused
+    here, because a real catalog version (`6.0.1.`) has one; `safe_unzip`
+    refuses it for member names, where nothing depends on it.
+    """
+    if part.strip() in ("", ".", ".."):
+        return f"{part!r} is not a name"
+    if "/" in part or "\\" in part:
+        return f"a path separator in {part!r}"
+    if ":" in part:
+        return f"a drive or stream colon in {part!r}"
+    if _RESERVED & set(part):
+        return f"a character Windows reserves in {part!r}"
+    if is_device_name(part):
+        return f"a Windows device name in {part!r}"
+    return None
+
+
+def path_segment(value: str, what: str) -> str:
+    """`value`, checked to be one safe path segment; raises `ValueError` naming it if not."""
+    problem = segment_problem(value)
+    if problem is not None:
+        raise ValueError(f"{what} {value!r} cannot be used as a folder name: {problem}")
+    return value

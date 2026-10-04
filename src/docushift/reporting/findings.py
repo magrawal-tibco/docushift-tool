@@ -415,8 +415,9 @@ REGISTRY: dict[str, Code] = _codes(
     # and the run kept a different one, which is `keep_separate`'s case exactly:
     # a decision that silently did nothing looks like one that was applied.
     Code("RENAME_MAP_REFUSED", Severity.WARNING, Stage.REFRAME,
-         "Page names in rename-map.csv that another page already holds; the "
-         "computed name was kept",
+         "Page names in rename-map.csv that another page already holds (letter "
+         "case aside), or that are not a page path inside the tree; the computed "
+         "name was kept",
          "planning.md Phase 29"),
     # Phase 34, X2-02 / X3-02. The map lived only inside the tree a swap replaces,
     # so a failed or killed swap lost it and the next run recomputed every name

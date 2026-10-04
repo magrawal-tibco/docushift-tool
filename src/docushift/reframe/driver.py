@@ -561,7 +561,21 @@ class Reframer:
         # somebody fixed a typo in a title. `--renormalize` is how a writer asks
         # for the names to be recomputed anyway.
         approved = self._approved(slug, number, target, standalone)
-        pinned, refused = override(built, approved)
+        # X2-03. A `new_path` is a write path: refused before the layout sees it
+        # unless it names a page inside the tree.
+        unsafe = {old: (new, why) for old, new in approved.items()
+                  if (why := renames.refusal(new)) is not None}
+        if unsafe:
+            shown = ", ".join(f"{old} -> {new} ({why})" for old, (new, why) in list(unsafe.items())[:5])
+            self._record(
+                "RENAME_MAP_REFUSED", slug, number, path=renames.RENAME_MAP, count=len(unsafe),
+                message=(
+                    f"{len(unsafe)} name(s) in {renames.RENAME_MAP} are not a page path inside "
+                    f"the merged tree, so the computed name was kept: {shown}"
+                    f"{', ...' if len(unsafe) > 5 else ''}"
+                ),
+            )
+        pinned, refused = override(built, {old: new for old, new in approved.items() if old not in unsafe})
         if pinned:
             self._record(
                 "RENAME_MAP_APPLIED", slug, number, count=len(pinned),
@@ -577,7 +591,7 @@ class Reframer:
                 "RENAME_MAP_REFUSED", slug, number, path=renames.RENAME_MAP, count=len(refused),
                 message=(
                     f"{len(refused)} name(s) in {renames.RENAME_MAP} name a path another page "
-                    f"holds, so the computed name was kept: {shown}"
+                    f"holds (letter case aside), so the computed name was kept: {shown}"
                     f"{', ...' if len(refused) > 5 else ''}"
                 ),
             )
@@ -791,6 +805,11 @@ class Reframer:
             # limit and both the `mkdir` and the write fail with a bare
             # FileNotFoundError that names the path and not the reason.
             destination = long_path(staging / page.path)
+            # The backstop `renames.refusal` should make unreachable (X2-03), as
+            # `safe_unzip` keeps one: `long_path` absolutizes, so a `..` that got
+            # this far would be collapsed into a real path outside the tree.
+            if long_path(staging) not in destination.parents:
+                raise OSError(f"page path {page.path} leaves the merged tree; nothing written")
             destination.parent.mkdir(parents=True, exist_ok=True)
             # LF so the bytes are the same on every platform, which is half of
             # C5; the other half is that everything feeding this is sorted.

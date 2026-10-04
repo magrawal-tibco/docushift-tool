@@ -33,6 +33,7 @@ from pathlib import Path, PurePosixPath
 from urllib.parse import unquote, urlsplit
 
 from docushift.discovery.client import DocsiteClient, DocsiteError
+from docushift.utils.longpath import segment_problem
 from docushift.utils.swap import replace_file
 
 # Elements are matched on their local name, not their namespace. The leaves
@@ -218,7 +219,13 @@ class SitemapCache:
     def path(self, name: str) -> Path:
         # A name comes from a <loc> on a site this tool does not own; keep only
         # the final component so no entry can write outside the cache.
-        return self.directory / PurePosixPath(name.replace("\\", "/")).name
+        leaf = PurePosixPath(name.replace("\\", "/")).name
+        # And refuse what is still not one file name (X2-10): the name is decoded
+        # after the last segment is taken, so `D%3Aevil.xml` arrives as a
+        # drive-relative `D:evil.xml`, and `..%2F..` as `..`.
+        if (problem := unsafe_name(leaf)) is not None:
+            raise SitemapError(f"refusing to cache {name!r}: {problem}")
+        return self.directory / leaf
 
     def read(self, name: str) -> bytes | None:
         path = self.path(name)
@@ -243,6 +250,13 @@ class SitemapCache:
         return parse_urlset(data) if data is not None else None
 
 
+def unsafe_name(name: str) -> str | None:
+    """Why a decoded `<loc>` leaf cannot be a file in the cache, or `None` (X2-10)."""
+    if name.endswith((".", " ")):
+        return f"a trailing dot or space in {name!r}"
+    return segment_problem(name)
+
+
 def fetch(
     client: DocsiteClient,
     cache: SitemapCache,
@@ -262,6 +276,9 @@ def fetch(
     files: dict[str, str] = manifest["files"]
 
     def get(entry: Entry, parse: Callable[[bytes], list]) -> list | None:
+        if (problem := unsafe_name(entry.name)) is not None:
+            result.errors.append(f"{entry.loc}: not cached, {problem}")
+            return None
         # Parsed before it is cached, and again when reused: the docsite answers a
         # file it does not have with its login page and HTTP 200, and a cached
         # login page would read as a page list on every later run.

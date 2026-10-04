@@ -3314,3 +3314,54 @@ def test_a_pin_whose_topic_no_longer_leads_a_page_is_named_before_it_is_dropped(
     assert len(unmatched) == 1 and unmatched[0].severity is Severity.WARNING
     assert "users-guide/user-guide.md -> using-the-product.md" in unmatched[0].message
     assert PurePosixPath("users-guide/user-guide.md") not in renames.load(target)
+
+
+# -- a pin is a write path (Phase 34, XC) --------------------------------------------
+
+
+@pytest.mark.parametrize("wanted, why", [
+    ("../10.5.0/user-guide.md", "not a name"),
+    ("C:/outside/pwned.md", "colon"),
+    ("/abs/pwned.md", "absolute"),
+    ("users-guide/notes.txt", ".md"),
+    ("users-guide/aux.md", "device"),
+])
+def test_a_pin_that_is_not_a_page_inside_the_tree_is_refused(config, catalog, flare, wanted, why):
+    """X2-03. `../10.5.0/user-guide.md` overwrote the sibling version's merged
+    page, and an absolute path wrote wherever it named."""
+    converted_tree(config, flare, "10.5.1")
+    target = Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"]).path
+    sibling = target.parent / "10.5.0"
+    sibling.mkdir()
+    (sibling / "user-guide.md").write_text("SIBLING ORIGINAL\n", encoding="utf-8")
+    _pin_user_guide(target, wanted)
+    findings = FindingsRun("reframe")
+
+    again = Reframer(config, catalog, findings=findings).reframe_one(flare, flare.versions["10.5.1"])
+
+    assert again.outcome is ReframeOutcome.REFRAMED
+    assert (sibling / "user-guide.md").read_text(encoding="utf-8") == "SIBLING ORIGINAL\n"
+    assert (target / "user-guide.md").is_file()
+    refused = [f for f in findings.all if f.code == "RENAME_MAP_REFUSED"]
+    assert len(refused) == 1 and why in refused[0].message
+
+
+def test_a_pin_differing_only_in_case_is_refused_not_a_failed_version(config, catalog, flare):
+    """X2-12. `User-Guide.md` beside `user-guide.md` is one file on NTFS: the
+    version failed with "a page write landed outside the layout", the wrong cause."""
+    from docushift.reframe import renames
+
+    converted_tree(config, flare, "10.5.1")
+    target = Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"]).path
+    rows_now = list(csvio.read_rows(target / renames.RENAME_MAP))
+    for row in rows_now:
+        if row["old_path"] == "installation/installation-2.md":
+            row["new_path"] = "User-Guide.md"
+    renames.write(target / renames.RENAME_MAP, rows_now)
+    findings = FindingsRun("reframe")
+
+    again = Reframer(config, catalog, findings=findings).reframe_one(flare, flare.versions["10.5.1"])
+
+    assert again.outcome is ReframeOutcome.REFRAMED
+    refused = [f for f in findings.all if f.code == "RENAME_MAP_REFUSED"]
+    assert len(refused) == 1 and "User-Guide.md" in refused[0].message

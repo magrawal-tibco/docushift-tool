@@ -79,6 +79,7 @@ from docushift.utils.longpath import (
     PUBLISHED_PATH_LIMIT,
     long_path,
     over_limit,
+    path_segment,
     published_length,
     walk_files,
 )
@@ -223,7 +224,8 @@ class WorkspaceDistributor:
     def product_dir(self, product: Product, target: Path) -> Path:
         """`{target}/{docs-tree}/{locale}/{slug}/` -- the product level (§6.1)."""
         tree = self.config.docs_tree_name(product.bu, product.family)
-        return target / tree / slugify(self.config.locale) / product.slug
+        # X2-11: a slug is one folder, or a swap below here replaces what it names.
+        return target / tree / slugify(self.config.locale) / path_segment(product.slug, "slug")
 
     def doc_class_dir(self, product: Product, target: Path, doc_class: str = ONLINE_HELP) -> Path:
         return self.product_dir(product, target) / doc_class
@@ -238,7 +240,7 @@ class WorkspaceDistributor:
         localized tree carries every language and an API reference has none.
         """
         tree = self.config.resources_tree_name(product.bu, product.family)
-        return target / tree / slugify(self.config.locale) / product.slug
+        return target / tree / slugify(self.config.locale) / path_segment(product.slug, "slug")
 
     def content_tree(self, product: Product, version: ProductVersion, tree: Path) -> Path:
         """The directory inside the extracted tree where content actually starts.

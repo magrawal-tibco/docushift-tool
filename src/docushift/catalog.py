@@ -45,6 +45,7 @@ from docushift.utils.csvio import (
     read_rows,
     write_rows_together,
 )
+from docushift.utils.longpath import segment_problem
 
 if TYPE_CHECKING:  # pragma: no cover - import kept lazy to avoid a config <-> catalog cycle
     from docushift.config import ConfigManager, EosReport, MigrationSheet
@@ -220,6 +221,20 @@ class CatalogError(Exception):
     """Raised when an import would lose data, e.g. an unexplained missing row."""
 
 
+def _refuse_unsafe(value: str, what: str, sheet: str) -> None:
+    """A slug or version that is not one folder name stops the load, naming the row.
+
+    Phase 34 (X2-11). Both become workspace path segments, and a swap replaces
+    what the path names: version `..` pointed `extract`'s swap at the family's
+    whole `extracted/` folder. Refused here, before any command builds a path,
+    rather than letting the path builder's backstop raise mid-run.
+    """
+    problem = segment_problem(value)
+    if problem is not None:
+        raise CatalogError(f"{sheet}: {what} {value!r} cannot be used as a folder name "
+                           f"({problem}). Correct the row and run again.")
+
+
 @dataclass
 class MergeStats:
     """What a fetch actually changed. Reported by `docushift catalog fetch`."""
@@ -304,6 +319,7 @@ class CatalogManager:
             slug = row.get("slug", "").strip().lower()
             if not slug:
                 continue
+            _refuse_unsafe(slug, "slug", "products.csv")
             # Last row wins, and the loser is recorded rather than lost silently:
             # `validate()` reports it, so `catalog import` refuses the sheet before
             # a `save()` writes the collapsed version back over the original.
@@ -330,6 +346,7 @@ class CatalogManager:
             version = row.get("version", "").strip()
             if not slug or not version:
                 continue
+            _refuse_unsafe(version, f"version of '{slug}'", "versions.csv")
             product = catalog.products.get(slug)
             if product is None:
                 # A version row with no product row is a broken join, not a product.

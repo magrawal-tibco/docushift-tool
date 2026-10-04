@@ -797,9 +797,12 @@ def override(
 
     refused: dict[PurePosixPath, PurePosixPath] = {}
     while True:
-        holders: dict[PurePosixPath, list[Page]] = {}
+        # Keyed case-insensitively (X2-12): `User-Guide.md` and `user-guide.md`
+        # are one file on NTFS, so the second write replaced the first and the
+        # run blamed "a page write landed outside the layout".
+        holders: dict[str, list[Page]] = {}
         for page in pages:
-            holders.setdefault(moving.get(id(page), page.path), []).append(page)
+            holders.setdefault(str(moving.get(id(page), page.path)).casefold(), []).append(page)
         losers: list[Page] = []
         for held in holders.values():
             if len(held) < 2:

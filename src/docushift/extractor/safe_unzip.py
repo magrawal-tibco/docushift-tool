@@ -24,7 +24,7 @@ import shutil
 import zipfile
 from pathlib import Path, PurePosixPath
 
-from docushift.utils.longpath import long_path
+from docushift.utils.longpath import is_device_name, long_path
 
 
 class UnsafeArchiveError(Exception):
@@ -69,6 +69,10 @@ def _unwritable(member: str) -> str | None:
             return f"a character Windows reserves in {part!r}"
         if part.endswith((".", " ")):
             return f"a trailing dot or space in {part!r}"
+        # X2-10. `aux.htm` is written through the prefix as a file, and every
+        # plain reader downstream then opens the device instead.
+        if is_device_name(part):
+            return f"a Windows device name in {part!r}"
     return None
 
 

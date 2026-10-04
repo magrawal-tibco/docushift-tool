@@ -292,3 +292,20 @@ def test_the_docbook_plan_walk_sees_a_page_past_max_path(tmp_path: Path) -> None
     root, path = _deep_topic(tmp_path, "page.html", b"<html/>")
 
     assert path in docbook._candidates(root)
+@pytest.mark.parametrize("part, problem", [
+    ("..", "not a name"), (".", "not a name"), ("", "not a name"),
+    ("a/b", "separator"), ("a\\b", "separator"), ("D:evil", "colon"),
+    ("a?b", "reserves"), ("CON", "device"), ("com1.txt", "device"), ("Lpt9", "device"),
+])
+def test_a_value_that_is_not_one_segment_is_named(part: str, problem: str) -> None:
+    from docushift.utils.longpath import segment_problem
+
+    found = segment_problem(part)
+    assert found is not None and problem in found
+
+
+@pytest.mark.parametrize("part", ["6.0.1.", "Cloud\u2122", "(iPaaS)", "c++", "console", "com10", "a,b"])
+def test_the_odd_real_catalog_values_are_one_segment(part: str) -> None:
+    from docushift.utils.longpath import segment_problem
+
+    assert segment_problem(part) is None

@@ -2568,3 +2568,36 @@ def test_an_undecodable_catalog_csv_is_a_catalog_error_naming_the_file(project_r
 
     with pytest.raises(CatalogError, match="products.csv"):
         manager.load()
+@pytest.mark.parametrize("version", ["..", "5.2.0/..", "a\\b", "C:x", "nul"])
+def test_a_version_that_is_not_one_folder_name_stops_the_load(
+    catalog: CatalogManager, version: str
+) -> None:
+    """X2-11. Version `..` made `extract_path` the family's whole `extracted/`
+    folder, which a swap replaces; `5.2.0/..` the product's."""
+    catalog.products_path.write_text("slug,product_code,display_name\ntibco-ems,ems,EMS\n",
+                                     encoding="utf-8-sig", newline="")
+    catalog.versions_path.write_text(f"slug,version\ntibco-ems,{version}\n",
+                                     encoding="utf-8-sig", newline="")
+
+    with pytest.raises(CatalogError, match="versions.csv"):
+        catalog.load()
+
+
+def test_a_slug_that_is_not_one_folder_name_stops_the_load(catalog: CatalogManager) -> None:
+    catalog.products_path.write_text("slug,product_code,display_name\n../../escape,x,X\n",
+                                     encoding="utf-8-sig", newline="")
+
+    with pytest.raises(CatalogError, match="products.csv"):
+        catalog.load()
+
+
+def test_the_path_builders_refuse_a_segment_that_escapes(config: ConfigManager) -> None:
+    """The backstop where the paths are built, for a value that never came through `load`."""
+    for build in (config.extract_path, config.output_path, config.reframed_path, config.download_path):
+        with pytest.raises(ValueError, match="cannot be used as a folder name"):
+            build("tibco", "general", "tibco-ems", "..")
+    with pytest.raises(ValueError):
+        config.output_path("tibco", "general", "../../escape", "1.0")
+    # The odd real values stay usable (X2-11 measured them).
+    for version in ("Cloud\u2122", "(iPaaS)", "6.0.1."):
+        assert config.extract_path("tibco", "general", "c++", version).name == version

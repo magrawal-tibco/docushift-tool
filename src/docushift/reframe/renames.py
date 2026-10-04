@@ -43,6 +43,7 @@ from pathlib import Path, PurePosixPath
 from typing import TYPE_CHECKING
 
 from docushift.utils.csvio import NotUtf8, read_rows, write_rows
+from docushift.utils.longpath import segment_problem
 
 if TYPE_CHECKING:  # pragma: no cover - import cycle at runtime only
     from docushift.reframe.packer import Page
@@ -149,6 +150,26 @@ def load(root: Path) -> dict[PurePosixPath, PurePosixPath]:
         if old and new:
             overrides[PurePosixPath(old)] = PurePosixPath(new)
     return overrides
+
+
+def refusal(wanted: PurePosixPath) -> str | None:
+    """Why a `new_path` cannot be a page in the merged tree, or `None` (X2-03).
+
+    The map invites "a human or a model" to write names, and the path was used
+    as typed: `../10.5.0/user-guide.md` overwrote a sibling version's page and an
+    absolute path wrote wherever it named. A page path is relative, stays inside
+    the tree, and names a Markdown file; each segment is one Windows file name.
+    """
+    if wanted.is_absolute() or str(wanted).startswith(("/", chr(92))):
+        return "an absolute path"
+    for part in wanted.parts:
+        if (problem := segment_problem(part)) is not None:
+            return problem
+        if part.endswith((".", " ")):
+            return f"a trailing dot or space in {part!r}"
+    if wanted.suffix.lower() != ".md":
+        return "not a .md page"
+    return None
 
 
 def digest(approved: dict[PurePosixPath, PurePosixPath]) -> str:

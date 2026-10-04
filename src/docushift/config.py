@@ -24,6 +24,7 @@ from docushift.models import FamilySource, MigrateDecision, ReleaseStatus
 # X2-04: every file a human edits is read UTF-8 first and Windows-1252 second,
 # the code page Excel's and Notepad's default save writes here.
 from docushift.utils.csvio import read_text
+from docushift.utils.longpath import path_segment
 from docushift.utils.slug import (
     docs_tree_name,
     family_workspace_folder,
@@ -211,6 +212,19 @@ class MigrationSheet:
         return self.entries.get(slug, {}).get(version)
 
 
+def _segments(slug: str, version: str) -> str:
+    """Checks a catalog slug and version are one path segment each; returns the slug.
+
+    Phase 34 (X2-11). Both are joined onto workspace paths as typed, and a swap
+    replaces whatever the path names: a version of `..` made `extract_path` the
+    family's whole `extracted/` folder, and `5.2.0/..` the product's. The catalog
+    refuses such a row on load; this is the backstop where the paths are built.
+    """
+    path_segment(slug, "slug")
+    path_segment(version, "version")
+    return slug
+
+
 def _sheet_slug(doc_url: str, version: str) -> str:
     """The catalog slug a sheet row names, read off its `doc_url`.
 
@@ -382,6 +396,7 @@ class ConfigManager:
         a code-named ZIP would land two different products' packages on top of each
         other in one directory.
         """
+        _segments(slug, version)
         return self.downloads_dir(bu, family) / f"{slug}-{version}.zip"
 
     def archive_path(self, bu: str, family: str, slug: str, version: str) -> Path:
@@ -392,6 +407,7 @@ class ConfigManager:
         exactly like a pipeline one, but sits outside the working set so `extract`
         never mistakes it for a package awaiting conversion (§4.3).
         """
+        _segments(slug, version)
         return self.archive_dir(bu, family) / f"{slug}-{version}.zip"
 
     def extract_path(self, bu: str, family: str, slug: str, version: str) -> Path:
@@ -403,7 +419,7 @@ class ConfigManager:
         dashed one does not (`6-2-3` could be `6.2.3` or `6-2.3`). The dots-to-dashes
         conversion belongs at Stage 6, where the AEM output path is built.
         """
-        return self.extracted_dir(bu, family) / slug / version
+        return self.extracted_dir(bu, family) / _segments(slug, version) / version
 
     def output_path(self, bu: str, family: str, slug: str, version: str) -> Path:
         """The converted Markdown for one version: `output/<family>/<slug>/<version>/`.
@@ -418,7 +434,7 @@ class ConfigManager:
         at Stage 6 where the AEM path is built. A method rather than a join at the
         call site, because Stages 5, 6 and 7 all need the same answer.
         """
-        return self.output_dir / self.family_workspace_name(bu, family) / slug / version
+        return self.output_dir / self.family_workspace_name(bu, family) / _segments(slug, version) / version
 
     def reframed_path(self, bu: str, family: str, slug: str, version: str) -> Path:
         """The merged Markdown for one version: `reframed/<family>/<slug>/<version>/`.
@@ -436,7 +452,7 @@ class ConfigManager:
         folders are: an empty directory in a workspace with no Flare set in scope reads
         as a started migration.
         """
-        return self.reframed_dir / self.family_workspace_name(bu, family) / slug / version
+        return self.reframed_dir / self.family_workspace_name(bu, family) / _segments(slug, version) / version
 
     def load_taxonomy(self) -> dict[str, Any]:
         """Loads and caches taxonomy rules from taxonomy.yaml."""

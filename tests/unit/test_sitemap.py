@@ -188,3 +188,25 @@ def test_version_suffix_cannot_claim_a_longer_version():
 
     assert match_leaf(["old-name-2-1-0"], "new-name", "1.0") is None
     assert match_leaf(["old-name-2-1-0"], "new-name", "2.1.0") == "old-name-2-1-0"
+
+
+@pytest.mark.parametrize("name", ["D:evil.xml", "..", "aux.xml", "a?b.xml", "trailing."],
+                         ids=["drive", "dot-dot", "device", "reserved", "trailing-dot"])
+def test_a_name_that_is_not_one_file_is_refused_not_cached(tmp_path, name):
+    """X2-10. The name is decoded after the last segment is taken, so a `<loc>`
+    ending `D%3Aevil.xml` was joined on as a path relative to drive D."""
+    cache = SitemapCache(tmp_path / "coveo")
+
+    with pytest.raises(SitemapError):
+        cache.path(name)
+
+
+def test_fetch_records_a_refused_name_and_carries_on(tmp_path, files):
+    files[f"{BASE}/sitemap.xml"] = ROOT.replace(b"other.xml", b"D%3Aevil.xml")
+    session = FakeSession(files)
+
+    result = fetch(_client(session), SitemapCache(tmp_path / "coveo"),
+                   "/ftp_portal/coveo/sitemap.xml", ["D:evil"])
+
+    assert any("not cached" in error for error in result.errors)
+    assert not any("evil" in call for call in session.calls)

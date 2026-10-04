@@ -684,3 +684,14 @@ def test_a_current_package_leaves_a_later_status_alone(
     downloader(config, catalog, FakeSession()).download_one(product, version)
 
     assert catalog.state.get_version_state("tibco-ems", "10.4.0")["status"] == "CONVERTED"
+
+
+@pytest.mark.parametrize("member", ["w/html/aux.htm", "w/CON/x.htm", "w/html/com1", "w/nul.txt"])
+def test_a_windows_device_name_is_refused(tmp_path: Path, member: str) -> None:
+    """X2-10. `aux.htm` is written through the prefix as a file, and every plain
+    reader downstream then opens the device instead."""
+    archive = tmp_path / "pkg.zip"
+    archive.write_bytes(zip_bytes({"w/html/index.htm": "ok", member: "x"}))
+
+    with pytest.raises(UnsafeArchiveError, match="device name"):
+        safe_extract(archive, tmp_path / "out")
