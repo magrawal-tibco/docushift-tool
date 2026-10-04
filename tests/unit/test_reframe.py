@@ -2882,3 +2882,96 @@ def test_a_declared_template_writes_every_row_and_the_sitemap_only_counts(config
     assert len(origin_rows(result.path)) == 3
     unlisted = [f for f in findings.all if f.code == "ORIGIN_URL_UNLISTED"]
     assert len(unlisted) == 1 and "written anyway" in unlisted[0].message
+
+
+# -- files Excel saved or holds open (X1-06, X2-04, X2-05, X1-11) -----------------
+
+
+def _save_as_ansi(path: Path, rows: list[dict[str, str]]) -> None:
+    """What Excel's "CSV (Comma delimited)" writes: Windows-1252, no BOM."""
+    import csv
+
+    with open(path, "w", encoding="cp1252", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=list(rows[0].keys()))
+        writer.writeheader()
+        writer.writerows(rows)
+
+
+def test_a_rename_map_saved_as_ansi_is_read_and_its_names_used(config, catalog, flare):
+    """X1-06, X2-04. A `™` in a title made the currency check raise out of
+    `reframe_one` and stop the whole selection. Read through the fallback, the
+    writer's name is applied like any other."""
+    from docushift.reframe import renames
+
+    converted_tree(config, flare, "10.5.1")
+    result = Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"])
+    rows_now = list(csvio.read_rows(result.path / renames.RENAME_MAP))
+    for row in rows_now:
+        row["title"] += "\u2122"
+        if row["old_path"] == "users-guide/user-guide.md":
+            row["new_path"] = "using-the-product.md"
+    _save_as_ansi(result.path / renames.RENAME_MAP, rows_now)
+
+    again = Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"])
+
+    assert again.outcome is ReframeOutcome.REFRAMED
+    assert (again.path / "using-the-product.md").is_file()
+
+
+def test_an_undecodable_rename_map_fails_that_version_and_names_the_file(config, catalog, flare):
+    """X1-06. Not `{}`: silently dropping the writer's names would move published
+    URLs. The version fails, named; the selection goes on."""
+    from docushift.reframe import renames
+
+    converted_tree(config, flare, "10.5.1")
+    result = Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"])
+    (result.path / renames.RENAME_MAP).write_bytes(b"old_path,new_path\r\na.md,b\x81.md\r\n")
+
+    again = Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"])
+
+    assert again.outcome is ReframeOutcome.FAILED
+    assert renames.RENAME_MAP in again.message and "CSV UTF-8" in again.message
+
+
+def test_a_locked_versions_csv_fails_the_version_after_recording_its_merge(
+    config, catalog, flare, monkeypatch
+):
+    """X2-05. The inventory write is the one Excel can block, and it ran between
+    the swap and the state rows: the `CatalogError` left `reframe_one`, the
+    swapped-in tree had no record, and every later version was skipped."""
+    from docushift.catalog import CatalogError
+
+    second = make_version("tibco-flare-docs", "10.5.0", engine=SourceEngine.FLARE)
+    flare.versions["10.5.0"] = second
+    converted_tree(config, flare, "10.5.1")
+    converted_tree(config, flare, "10.5.0")
+
+    def locked(*_args, **_kwargs):
+        raise CatalogError("Could not write versions.csv. It is usually open in Excel.")
+
+    monkeypatch.setattr(catalog, "record_reframe_inventory", locked)
+
+    stats = Reframer(config, catalog).reframe_many(
+        [(flare, flare.versions["10.5.1"]), (flare, second)]
+    )
+
+    assert [r.outcome for r in stats.results] == [ReframeOutcome.FAILED] * 2
+    assert "open in Excel" in stats.results[0].message
+    target = config.reframed_path(flare.bu, flare.family, flare.slug, "10.5.1")
+    assert target.is_dir()
+    assert "reframe_policy_key" in catalog.state.get_version_metadata("tibco-flare-docs", "10.5.1")
+
+
+def test_a_corrupt_sitemap_manifest_is_named_and_does_not_stop_the_run(config, catalog, flare):
+    """X1-11. `json.loads` raised `JSONDecodeError`, which nothing caught, out of
+    `reframe_one`. Now it is the version's missing-sitemap finding, saying why."""
+    (config.cache_dir / "coveo").mkdir(parents=True)
+    (config.cache_dir / "coveo" / "manifest.json").write_text("{not json", encoding="utf-8")
+    converted_tree(config, flare, "10.5.1")
+    findings = FindingsRun("reframe")
+
+    result = Reframer(config, catalog, findings=findings).reframe_one(flare, flare.versions["10.5.1"])
+
+    assert result.outcome is ReframeOutcome.REFRAMED
+    missing = [f for f in findings.all if f.code == "ORIGIN_SITEMAP_MISSING"]
+    assert len(missing) == 1 and "manifest.json" in missing[0].message

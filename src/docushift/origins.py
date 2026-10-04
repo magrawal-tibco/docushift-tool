@@ -326,19 +326,56 @@ class Built:
 
 
 def page_list(cache_dir: Path, slug: str, version: str) -> list[str]:
-    """A version's listed live URLs from the `catalog sitemap` cache, or `[]`.
+    """A version's listed live URLs from the `catalog sitemap` cache, or `[]`."""
+    return listing(cache_dir, slug, version)[0]
+
+
+def listing(cache_dir: Path, slug: str, version: str) -> tuple[list[str], str]:
+    """`page_list`, plus why there is no list when there is none.
 
     Never fetches: the stages that write `301.yml` take no network. An unreadable
     cached file is the same as no list -- it is reported as a missing sitemap,
     and `catalog sitemap` replaces it on the next walk.
-    """
-    from docushift.discovery.sitemap import SitemapCache, SitemapError
 
+    **Never raises, and says which absence it was** (X1-11). Only `SitemapError`
+    was caught, so a corrupt `manifest.json` raised `JSONDecodeError` out of
+    `reframe_one` and stopped the whole run; and "no leaf for this version" and
+    "the leaf file is missing" were one `None`, so the finding could not say
+    which. The reason is empty only when there is a list.
+    """
+    from docushift.discovery.sitemap import (
+        MANIFEST,
+        SitemapCache,
+        SitemapError,
+        match_leaf,
+        parse_urlset,
+    )
+
+    cache = SitemapCache(Path(cache_dir) / "coveo")
+    manifest_name = f"cache/coveo/{MANIFEST}"
+    if not (cache.directory / MANIFEST).is_file():
+        return [], f"there is no {manifest_name}; run `docushift catalog sitemap`"
     try:
-        pages = SitemapCache(Path(cache_dir) / "coveo").pages(slug, version)
-    except SitemapError:
-        return []
-    return [page.loc for page in pages] if pages else []
+        stems = cache.manifest()["products"].get(slug) or []
+    except (ValueError, OSError, AttributeError, TypeError) as error:
+        return [], (f"{manifest_name} cannot be read ({type(error).__name__}: {error}); "
+                    f"re-run `docushift catalog sitemap`")
+    if not stems:
+        return [], f"{manifest_name} lists no product file for {slug}"
+    stem = match_leaf(stems, slug, version)
+    if stem is None:
+        return [], f"the cached sitemap of {slug} lists no page list for {version}"
+    leaf = f"cache/coveo/{stem}.xml"
+    try:
+        data = cache.read(f"{stem}.xml")
+        if data is None:
+            return [], f"{leaf}, which {manifest_name} names, is missing; re-run `docushift catalog sitemap`"
+        pages = parse_urlset(data)
+    except (SitemapError, OSError) as error:
+        return [], f"{leaf} cannot be read ({type(error).__name__}: {error})"
+    if not pages:
+        return [], f"{leaf} lists no page"
+    return [page.loc for page in pages], ""
 
 
 def build(
@@ -348,6 +385,7 @@ def build(
     output_map: Mapping[str, str],
     moved: Mapping[str, str],
     page_urls: list[str],
+    missing: str = "",
 ) -> Built:
     """One version's `301.yml` rows, by Phase 22's and Phase 33's rules.
 
@@ -355,6 +393,9 @@ def build(
     disagree. Without one, the sitemap's derived mapping is used and only listed
     rows are written. Shared by `convert` (the tree `sync` publishes for most
     products) and `reframe` (the merged tree), so the two cannot disagree.
+
+    `missing` is `listing`'s reason for an empty `page_urls`, carried into the
+    finding so it names which absence it was (X1-11).
     """
     found: list[tuple[str, str, int]] = []
     folder = folder_path(zip_url)
@@ -372,8 +413,9 @@ def build(
     absent = "the declared one was rejected" if refused else "none is declared"
     if derived:
         if not page_urls:
+            why = f" ({missing})" if missing else ""
             found.append(("ORIGIN_SITEMAP_MISSING", (
-                f"no Coveo sitemap page list for this version and no usable template "
+                f"no Coveo sitemap page list for this version{why} and no usable template "
                 f"in config/origin-urls.yaml ({absent}), so no {ORIGINS} was written"), 1))
             return Built(None, found)
         answer = derive(output_map, page_urls, folder)

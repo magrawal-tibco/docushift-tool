@@ -41,7 +41,7 @@ from urllib.parse import unquote
 
 from docushift import origins
 from docushift.apiref import find_api_roots, recorded_roots
-from docushift.catalog import CatalogManager
+from docushift.catalog import CatalogError, CatalogManager
 from docushift.config import ConfigManager
 from docushift.converter import navigation
 from docushift.engines.base import ConversionContext, Document, Unit, engine_for
@@ -274,7 +274,14 @@ class DocumentConverter:
             # would report `current` on every future run and stay blank for good.
             # A directory walk against a conversion is free.
             if version.md_files is None or version.out_files is None:
-                current.md_files, current.out_files = self._measure_output(slug, number, target)
+                try:
+                    current.md_files, current.out_files = self._measure_output(slug, number, target)
+                except CatalogError as exc:
+                    # X2-05: outside `_build`'s `try`, so `versions.csv` open in
+                    # Excel stopped the selection. The tree is untouched and its
+                    # state rows stand; only this row's columns are unwritten.
+                    return ConvertResult(slug, number, ConvertOutcome.FAILED,
+                                         engine=version.engine, message=str(exc))
             return current
 
         try:
@@ -479,9 +486,9 @@ class DocumentConverter:
         if self.state is None:
             return
         slug, number = product.slug, version.version
+        pages, missing = origins.listing(self.config.cache_dir, slug, number)
         built = origins.build(
-            self.config.load_origin_urls(), slug, version.zip_url, mapping, {},
-            origins.page_list(self.config.cache_dir, slug, number),
+            self.config.load_origin_urls(), slug, version.zip_url, mapping, {}, pages, missing,
         )
         for code, message, count in built.findings:
             self._record(code, slug, number, message=message, count=count)

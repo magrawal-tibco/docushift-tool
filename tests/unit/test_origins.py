@@ -275,3 +275,54 @@ def test_sources_too_short_for_drop_segments_have_their_own_code_and_count() -> 
     short = [f for f in built.findings if f[0] == "ORIGIN_PATH_TOO_SHORT"]
     assert len(short) == 1 and short[0][2] == 2
     assert "ORIGIN_TEMPLATE_UNDECLARED" not in codes_of(built)
+
+
+# -- why there is no page list (X1-11) -----------------------------------------------
+
+
+def _leaf(tmp_path, products: dict, leaves: dict[str, str]) -> None:
+    from docushift.discovery.sitemap import SitemapCache
+
+    cache = SitemapCache(tmp_path / "coveo")
+    for stem, body in leaves.items():
+        cache.write(f"{stem}.xml", body.encode())
+    cache.save_manifest({"files": {}, "products": products})
+
+
+URLSET = ("<urlset xmlns='http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd'>"
+          "<url><loc>https://docs.tibco.com/pub/ems/1.0/doc/a.htm</loc></url></urlset>")
+
+
+def test_a_corrupt_manifest_is_no_list_with_a_reason_rather_than_an_exception(tmp_path) -> None:
+    """X1-11. `json.loads` raised out of `page_list`, and only `SitemapError` was caught."""
+    (tmp_path / "coveo").mkdir()
+    (tmp_path / "coveo" / "manifest.json").write_text("{not json", encoding="utf-8")
+
+    pages, reason = origins.listing(tmp_path, "ems", "1.0")
+
+    assert pages == [] and "manifest.json cannot be read" in reason
+    assert origins.page_list(tmp_path, "ems", "1.0") == []
+
+
+def test_no_leaf_and_a_missing_leaf_file_are_told_apart(tmp_path) -> None:
+    """X1-11. Both were one `None`, so the finding could not say which."""
+    _leaf(tmp_path, {"ems": ["ems-1-0"]}, {})
+
+    assert "lists no page list for 2.0" in origins.listing(tmp_path, "ems", "2.0")[1]
+    assert "ems-1-0.xml" in origins.listing(tmp_path, "ems", "1.0")[1]
+    assert "is missing" in origins.listing(tmp_path, "ems", "1.0")[1]
+    assert "no product file for ftl" in origins.listing(tmp_path, "ftl", "1.0")[1]
+
+
+def test_a_listed_version_has_its_pages_and_no_reason(tmp_path) -> None:
+    _leaf(tmp_path, {"ems": ["ems-1-0"]}, {"ems-1-0": URLSET})
+
+    assert origins.listing(tmp_path, "ems", "1.0") == (
+        ["https://docs.tibco.com/pub/ems/1.0/doc/a.htm"], "")
+
+
+def test_the_missing_sitemap_finding_carries_the_reason() -> None:
+    built = origins.build({}, "ems", None, {"a.htm": "a.md"}, {}, [], "there is no cache/coveo/manifest.json")
+
+    assert built.rows is None
+    assert "(there is no cache/coveo/manifest.json)" in built.findings[0][1]

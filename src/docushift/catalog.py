@@ -33,6 +33,7 @@ from docushift.models import (
 )
 from docushift.state import StateStore
 from docushift.utils.csvio import (
+    NotUtf8,
     format_bool,
     format_optional_bool,
     format_optional_int,
@@ -292,7 +293,14 @@ class CatalogManager:
 
         catalog = Catalog()
         self._duplicate_slugs = []
-        for row in read_rows(self.products_path):
+        # X2-04: a sheet in neither UTF-8 nor Windows-1252 is the one-line
+        # `CatalogError` every command already prints, not a traceback.
+        try:
+            product_rows = read_rows(self.products_path)
+            version_rows = read_rows(self.versions_path)
+        except NotUtf8 as exc:
+            raise CatalogError(str(exc)) from exc
+        for row in product_rows:
             slug = row.get("slug", "").strip().lower()
             if not slug:
                 continue
@@ -317,7 +325,7 @@ class CatalogManager:
                 custom_override=parse_bool(row.get("custom_override")),
             )
 
-        for row in read_rows(self.versions_path):
+        for row in version_rows:
             slug = row.get("slug", "").strip().lower()
             version = row.get("version", "").strip()
             if not slug or not version:

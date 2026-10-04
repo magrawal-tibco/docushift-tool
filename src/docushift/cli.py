@@ -29,6 +29,7 @@ from docushift.models import MigrateDecision, ReleaseStatus, ScopeSource, Source
 from docushift.reporting.findings import REGISTRY, FindingsRun, Severity, Stage
 from docushift.state import StateStore
 from docushift.utils import textfile
+from docushift.utils.csvio import NotUtf8
 from docushift.utils.slug import version_segment
 
 # `emoji=False` tool-wide, because a finding is machine output and must survive
@@ -102,7 +103,9 @@ class _DocuShiftGroup(click.Group):
     def invoke(self, ctx: click.Context):
         try:
             return super().invoke(ctx)
-        except CatalogError as exc:
+        # `NotUtf8` too (X2-04): a config file in neither UTF-8 nor Windows-1252
+        # names itself and the fix, which a traceback did not.
+        except (CatalogError, NotUtf8) as exc:
             raise click.ClickException(str(exc)) from exc
 
 
@@ -1933,28 +1936,33 @@ def reframe(ctx, bu, family, product, version, batch, select_all, force, dry_run
         elif result.outcome is ReframeOutcome.FAILED:
             console.print(f"  [red]x[/red] {result.slug}@{result.version}")
 
-    if input_dir is not None:
-        found, ver = pairs[0]
-        stats_results = [
-            reframer.reframe_one(found, ver, force=force, source=input_dir, output=output_dir)
-        ]
-        from docushift.reframe import ReframeStats
+    # In a `finally`, as `convert` has it (R12-09; X2-05 is the reframe case):
+    # an exception after `start()` left the run open as `report --run last`.
+    failed = 1
+    try:
+        if input_dir is not None:
+            found, ver = pairs[0]
+            stats_results = [
+                reframer.reframe_one(found, ver, force=force, source=input_dir, output=output_dir)
+            ]
+            from docushift.reframe import ReframeStats
 
-        stats = ReframeStats(results=stats_results)
-        on_result(stats_results[0])
-    else:
-        stats = reframer.reframe_many(pairs, force=force, on_result=on_result)
+            stats = ReframeStats(results=stats_results)
+            on_result(stats_results[0])
+        else:
+            stats = reframer.reframe_many(pairs, force=force, on_result=on_result)
 
-    # The exit gate `sync` and `validate` use. `convert` gates on failed rows only
-    # (R12-06), not on error findings. The difference is what an error means: a
-    # converter error is one topic in a tree somebody will read a report about,
-    # and a Reframe error is a merge that produced pages nobody should publish.
-    # Integration plan §7 Q4.
-    # Rows *and* findings, the shape `sync` settled on: a version can fail on an
-    # `OSError` that no register code claims, and that row is still a doc set with
-    # no merged tree.
-    failed = len(stats.failures) or findings.counts()[Severity.ERROR]
-    findings.finish(exit_code=1 if failed else 0)
+        # The exit gate `sync` and `validate` use. `convert` gates on failed rows
+        # only (R12-06), not on error findings. The difference is what an error
+        # means: a converter error is one topic in a tree somebody will read a
+        # report about, and a Reframe error is a merge that produced pages nobody
+        # should publish. Integration plan §7 Q4.
+        # Rows *and* findings, the shape `sync` settled on: a version can fail on
+        # an `OSError` that no register code claims, and that row is still a doc
+        # set with no merged tree.
+        failed = len(stats.failures) or findings.counts()[Severity.ERROR]
+    finally:
+        findings.finish(exit_code=1 if failed else 0)
     # No manager for `--input`: that path names a catalog row only to key the
     # metadata, and the folder it merged is not the one the row was measured from.
     _report_reframe(stats, findings, manager if input_dir is None else None)

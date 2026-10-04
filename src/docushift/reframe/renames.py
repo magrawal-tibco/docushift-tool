@@ -35,12 +35,13 @@ varied between runs would be a published address that moved on its own.
 
 from __future__ import annotations
 
+import csv
 import hashlib
 from collections.abc import Callable
 from pathlib import Path, PurePosixPath
 from typing import TYPE_CHECKING
 
-from docushift.utils.csvio import read_rows, write_rows
+from docushift.utils.csvio import NotUtf8, read_rows, write_rows
 
 if TYPE_CHECKING:  # pragma: no cover - import cycle at runtime only
     from docushift.reframe.packer import Page
@@ -49,6 +50,10 @@ if TYPE_CHECKING:  # pragma: no cover - import cycle at runtime only
 #: The file, beside `reframe.yml` in the merged tree. Read from the *previous*
 #: merge and written fresh by this one, which is what makes a name persist.
 RENAME_MAP = "rename-map.csv"
+
+
+class Unreadable(ValueError):
+    """A rename map that exists but cannot be read as a CSV (X1-06)."""
 
 COLUMNS = (
     "old_path",
@@ -116,9 +121,14 @@ def write(path: Path, mapping: list[dict[str, str]]) -> None:
 def load(root: Path) -> dict[PurePosixPath, PurePosixPath]:
     """The previous merge's approved names: source topic -> page path.
 
-    Unreadable, absent or malformed all mean the same thing -- no overrides --
-    because a rename map is an *aid* to stability and must never be the reason a
-    merge refuses. A row with no `new_path` is a suggestion nobody filled in.
+    Absent means no overrides. A row with no `new_path` is a suggestion nobody
+    filled in.
+
+    **A file that does not decode raises `Unreadable`** (X1-06), and fails the one
+    version rather than reading as `{}`: dropping a writer's names in silence
+    would move every published URL they pinned. A sheet Excel saved as ANSI is
+    read, through `read_rows`'s Windows-1252 fallback (X2-04); what is left is a
+    file in neither encoding, or one the `csv` module refuses.
     """
     path = root / RENAME_MAP
     if not path.is_file():
@@ -127,6 +137,10 @@ def load(root: Path) -> dict[PurePosixPath, PurePosixPath]:
         found = read_rows(path)
     except OSError:  # pragma: no cover - unreadable on a machine that just wrote it
         return {}
+    except NotUtf8 as exc:
+        raise Unreadable(str(exc)) from exc
+    except csv.Error as exc:
+        raise Unreadable(f"{path} does not parse as a CSV ({exc}); save it again as 'CSV UTF-8'") from exc
     overrides: dict[PurePosixPath, PurePosixPath] = {}
     for row in found:
         old = str(row.get("old_path", "")).strip()

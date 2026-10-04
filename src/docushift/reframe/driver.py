@@ -38,7 +38,7 @@ from pathlib import Path, PurePosixPath
 import yaml
 
 from docushift import origins
-from docushift.catalog import CatalogManager
+from docushift.catalog import CatalogError, CatalogManager
 from docushift.config import ConfigManager
 from docushift.models import Product, ProductVersion, SourceEngine
 from docushift.reframe import csh as csh_map
@@ -358,11 +358,16 @@ class Reframer:
         # map outside the key the next run said `current` and used nothing --
         # J's re-merge only worked because it bumped the algorithm. `--renormalize`
         # asks for every name to be recomputed, which a `current` skip cannot do.
-        names_current = (
-            not self.renormalize
-            and target.is_dir()
-            and metadata.get(_RENAME_DIGEST, "") == renames.digest(renames.load(target))
-        )
+        try:
+            names_current = (
+                not self.renormalize
+                and target.is_dir()
+                and metadata.get(_RENAME_DIGEST, "") == renames.digest(renames.load(target))
+            )
+        except renames.Unreadable as exc:
+            # X1-06: this version fails, named; it no longer stops the selection.
+            return ReframeResult(slug, number, ReframeOutcome.FAILED, engine=version.engine,
+                                 message=str(exc))
         if (not force and converted_from and converted_from == merged_from and policy_current
                 and names_current):
             current = ReframeResult(
@@ -375,9 +380,14 @@ class Reframer:
             # these columns existed, or one whose row was cleared -- so the
             # common case stays a metadata read and not a tree walk.
             if version.reframed_md_files is None or version.reframed_files is None:
-                current.reframed_md_files, current.reframed_files = self._measure_merged(
-                    slug, number, target
-                )
+                try:
+                    current.reframed_md_files, current.reframed_files = self._measure_merged(
+                        slug, number, target
+                    )
+                except CatalogError as exc:
+                    # X2-05: `versions.csv` open in Excel fails this row, not the run.
+                    return ReframeResult(slug, number, ReframeOutcome.FAILED,
+                                         engine=version.engine, message=str(exc))
             else:
                 current.reframed_md_files = version.reframed_md_files
                 current.reframed_files = version.reframed_files
@@ -387,8 +397,9 @@ class Reframer:
             return self._build(product, version, policy, converted, target, converted_from)
         # `UnicodeDecodeError` too (R9-11): it is a `ValueError`, not an `OSError`,
         # and one undecodable topic or `toc.yml` used to abort the whole
-        # selection instead of failing the one version that holds it.
-        except (OSError, UnicodeDecodeError) as exc:
+        # selection instead of failing the one version that holds it. A
+        # `CatalogError` (X2-05) and an unreadable rename map (X1-06) likewise.
+        except (OSError, UnicodeDecodeError, CatalogError, renames.Unreadable) as exc:
             message = f"{type(exc).__name__}: {exc}"
             return ReframeResult(slug, number, ReframeOutcome.FAILED, message=message)
 
@@ -609,7 +620,11 @@ class Reframer:
         # real run and succeeded on a manual retry a moment later. Widening the
         # budget here rather than in `swap` keeps the other callers' failures fast.
         swap(staging, target, attempts=8, delay=0.25)
-        merged_md, merged_files = self._measure_merged(slug, number, target)
+        # The state rows first, then the CSV (X2-05), the order convert settled
+        # on in R4-08. The inventory column is the one write Excel can block, and
+        # it ran first: its `CatalogError` left the swapped-in tree with no record
+        # of what it was built from. Now the rows describe the tree whatever
+        # happens to the columns, and the failure is this version's row.
         if self.state is not None:
             self.state.set_version_metadata(slug, number, "reframe_source_checksum", checksum)
             self.state.set_version_metadata(slug, number, "reframe_policy_key", policy.key)
@@ -618,6 +633,7 @@ class Reframer:
             self.state.set_version_metadata(
                 slug, number, _RENAME_DIGEST, renames.digest(renames.load(target))
             )
+        merged_md, merged_files = self._measure_merged(slug, number, target)
         if self.findings is not None:
             self.findings.flush()
 
@@ -809,10 +825,10 @@ class Reframer:
         moved = {
             str(path): f"{page.path}#{anchor}" for path, (page, anchor) in located.items()
         }
+        pages, missing = origins.listing(self.config.cache_dir, slug, number)
         built = origins.build(
             self.config.load_origin_urls(), slug, version.zip_url,
-            self.state.get_output_map(slug, number), moved,
-            origins.page_list(self.config.cache_dir, slug, number),
+            self.state.get_output_map(slug, number), moved, pages, missing,
         )
         for code, message, count in built.findings:
             self._record(code, slug, number, message=message, count=count)

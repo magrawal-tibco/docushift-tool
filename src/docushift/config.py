@@ -9,6 +9,7 @@ itself is computed here.
 """
 
 import csv
+import io
 import os
 import re
 from dataclasses import dataclass, field
@@ -19,6 +20,10 @@ from typing import Any
 import yaml
 
 from docushift.models import FamilySource, MigrateDecision, ReleaseStatus
+
+# X2-04: every file a human edits is read UTF-8 first and Windows-1252 second,
+# the code page Excel's and Notepad's default save writes here.
+from docushift.utils.csvio import read_text
 from docushift.utils.slug import (
     docs_tree_name,
     family_workspace_folder,
@@ -442,8 +447,7 @@ class ConfigManager:
             self._taxonomy_cache = {"business_units": {}, "rules": []}
             return self._taxonomy_cache
 
-        with open(self.taxonomy_path, encoding="utf-8") as f:
-            loaded = yaml.safe_load(f) or {}
+        loaded = yaml.safe_load(read_text(self.taxonomy_path)) or {}
         loaded.setdefault("business_units", {})
         loaded.setdefault("rules", [])
         self._taxonomy_cache = loaded
@@ -458,8 +462,7 @@ class ConfigManager:
             self._docsite_cache = {}
             return self._docsite_cache
 
-        with open(self.docsite_path, encoding="utf-8") as f:
-            self._docsite_cache = yaml.safe_load(f) or {}
+        self._docsite_cache = yaml.safe_load(read_text(self.docsite_path)) or {}
         return self._docsite_cache
 
     def load_publishing(self) -> dict[str, str]:
@@ -477,8 +480,7 @@ class ConfigManager:
 
         loaded: dict[str, Any] = {}
         if self.publishing_path.exists():
-            with open(self.publishing_path, encoding="utf-8") as f:
-                loaded = yaml.safe_load(f) or {}
+            loaded = yaml.safe_load(read_text(self.publishing_path)) or {}
 
         resolved = dict(PUBLISHING_DEFAULTS)
         for key in PUBLISHING_DEFAULTS:
@@ -506,8 +508,7 @@ class ConfigManager:
 
         loaded: dict[str, Any] = {}
         if self.reframe_path.exists():
-            with open(self.reframe_path, encoding="utf-8") as f:
-                loaded = yaml.safe_load(f) or {}
+            loaded = yaml.safe_load(read_text(self.reframe_path)) or {}
 
         defaults = dict(REFRAME_DEFAULTS)
         defaults.update(
@@ -537,8 +538,7 @@ class ConfigManager:
 
         loaded: dict[str, Any] = {}
         if self.origin_urls_path.exists():
-            with open(self.origin_urls_path, encoding="utf-8") as f:
-                loaded = yaml.safe_load(f) or {}
+            loaded = yaml.safe_load(read_text(self.origin_urls_path)) or {}
 
         products = loaded.get("products") or {}
         self._origin_urls_cache = {
@@ -611,8 +611,7 @@ class ConfigManager:
             self._scope_cache = rules
             return rules
 
-        with open(self.scope_path, encoding="utf-8") as f:
-            loaded = yaml.safe_load(f) or {}
+        loaded = yaml.safe_load(read_text(self.scope_path)) or {}
 
         for entry in loaded.get("out_of_scope") or []:
             # A bare string is accepted as a slug with no reason: the list is
@@ -653,8 +652,7 @@ class ConfigManager:
             self._eos_cache = report
             return report
 
-        with open(self.eos_path, encoding="utf-8") as f:
-            loaded = yaml.safe_load(f) or {}
+        loaded = yaml.safe_load(read_text(self.eos_path)) or {}
 
         for entry in loaded.get("aliases") or []:
             name = str(entry.get("report_name", "")).strip()
@@ -695,7 +693,7 @@ class ConfigManager:
         that stays invisible.
         """
         seen_unknown: set[str] = set()
-        with open(path, encoding="utf-8-sig", newline="") as handle:
+        with io.StringIO(read_text(path), newline="") as handle:
             for row in csv.DictReader(handle):
                 name = (row.get("Product Name") or "").strip()
                 version = (row.get("Version") or "").strip()
@@ -750,8 +748,7 @@ class ConfigManager:
             self._migration_cache = sheet
             return sheet
 
-        with open(self.docsite_migration_path, encoding="utf-8") as f:
-            loaded = yaml.safe_load(f) or {}
+        loaded = yaml.safe_load(read_text(self.docsite_migration_path)) or {}
 
         for entry in loaded.get("aliases") or []:
             name = str(entry.get("sheet_slug", "")).strip().lower()
@@ -793,7 +790,7 @@ class ConfigManager:
         `_read_eos_report` enforces, for the same reason.
         """
         seen_unknown: set[str] = set()
-        with open(path, encoding="utf-8-sig", newline="") as handle:
+        with io.StringIO(read_text(path), newline="") as handle:
             reader = csv.DictReader(handle)
             if reader.fieldnames is None or column not in reader.fieldnames:
                 raise ValueError(

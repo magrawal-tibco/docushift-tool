@@ -74,6 +74,7 @@ from docushift.sync import documents as document_index
 from docushift.sync import redirects as redirect_map
 from docushift.sync import versions as version_file
 from docushift.utils import textfile
+from docushift.utils.csvio import NotUtf8, read_text
 from docushift.utils.longpath import (
     PUBLISHED_PATH_LIMIT,
     long_path,
@@ -923,7 +924,7 @@ class WorkspaceDistributor:
         path = folder / "version.yml"
         existing: list[version_file.VersionRow] | None = []
         if path.is_file():
-            existing = version_file.parse(path.read_text(encoding="utf-8"))
+            existing = _parse_edited(path, version_file.parse)
         if existing is None:
             # Left alone, deliberately. Whatever is in there is the only copy.
             stats.unparsed.append(str(path))
@@ -996,7 +997,7 @@ class WorkspaceDistributor:
                 return
             existing: list[dict[str, Any]] | None = []
         else:
-            existing = redirect_map.parse(path.read_text(encoding="utf-8"))
+            existing = _parse_edited(path, redirect_map.parse)
         if existing is None:
             # Left alone, deliberately. Whatever is in there is the only copy.
             stats.unparsed.append(str(path))
@@ -1100,6 +1101,22 @@ def _readable(exc: BaseException) -> str:
         return (f"{len(failures)} file(s) could not be copied, the first "
                 f"{Path(str(source)).name}: {reason}")
     return f"{type(exc).__name__}: {exc}"
+
+
+def _parse_edited(path: Path, parse: Callable[[str], Any]) -> Any:
+    """A file a human may have hand-edited, parsed, or `None` when it cannot be read.
+
+    X2-04. Read UTF-8 first and Windows-1252 second, as every hand-edited file
+    is, because Notepad's and Excel's default save is the ANSI code page: a
+    strict read raised `UnicodeDecodeError` out of `finish_product` after the
+    copies, and this product's and every later product's drop-down and maps went
+    unwritten. A file in neither encoding is the unparseable case, which the
+    callers leave alone and name, because it is the only copy.
+    """
+    try:
+        return parse(read_text(path))
+    except NotUtf8:
+        return None
 
 
 def _built_at(tree: Path) -> float:

@@ -1298,3 +1298,25 @@ def test_a_help_anchor_is_retargeted_onto_its_heading_like_every_other_fragment(
     # A percent-encoded fragment names the same marker as its decoded form, and
     # was left pointing at it and reported as having no heading (R8-08).
     assert "(a.md#proxy-shed)" in (output / "b.md").read_text(encoding="utf-8")
+
+
+def test_a_locked_versions_csv_on_the_current_path_fails_the_row_not_the_run(
+    config, catalog, product, version, extracted, fake_engine, monkeypatch
+) -> None:
+    """X2-05. A `current` version with blank columns writes them, and that write
+    sat outside `_build`'s `try`: `versions.csv` open in Excel raised out of
+    `convert_one` and stopped the selection."""
+    from docushift.catalog import CatalogError
+
+    convert(config, catalog, product, version)
+    catalog.clear_convert_inventory("tibco-ems", "10.4.0")
+
+    def locked(*_args, **_kwargs):
+        raise CatalogError("Could not write versions.csv. It is usually open in Excel.")
+
+    monkeypatch.setattr(catalog, "record_convert_inventory", locked)
+
+    again, _ = convert(config, catalog, product, version)
+
+    assert again.outcome is ConvertOutcome.FAILED
+    assert "open in Excel" in again.message

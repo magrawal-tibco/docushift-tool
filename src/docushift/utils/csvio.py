@@ -7,6 +7,7 @@ and a stable sort so a no-op fetch produces no diff.
 """
 
 import csv
+import io
 import re
 from collections.abc import Iterable, Sequence
 from datetime import UTC, datetime
@@ -187,12 +188,45 @@ def natural_version_key(version: str) -> tuple:
     return tuple(key)
 
 
+class NotUtf8(ValueError):
+    """A hand-edited file in neither UTF-8 nor Windows-1252, named with the fix."""
+
+
+def read_text(path: Path) -> str:
+    """A file a human may have saved from Excel or Notepad: UTF-8, else Windows-1252.
+
+    X2-04. Excel's default "CSV (Comma delimited)" save writes the ANSI code page,
+    which on these machines is Windows-1252, so `™` becomes byte 0x99 and the
+    strict `utf-8-sig` read ended every command in a traceback that named no file.
+    Read rather than refused, because the decode is exact for the code page Excel
+    actually wrote and every writer here puts UTF-8 back on the next save. UTF-8
+    is tried first and a cp1252 file almost never passes for it, so a real UTF-8
+    file is never reinterpreted. What is left -- the five bytes Windows-1252 does
+    not define -- is a clean refusal that names the file and how to re-save it.
+    """
+    raw = path.read_bytes()
+    try:
+        return raw.decode("utf-8-sig")
+    except UnicodeDecodeError:
+        pass
+    try:
+        return raw.decode("cp1252")
+    except UnicodeDecodeError as exc:
+        raise NotUtf8(
+            f"{path} is neither UTF-8 nor Windows-1252 (byte 0x{raw[exc.start]:02x} at "
+            f"offset {exc.start}). Open it and save it again as 'CSV UTF-8' (or UTF-8 text)."
+        ) from exc
+
+
 def read_rows(path: Path) -> list[dict[str, str]]:
-    """Reads a catalog CSV. `utf-8-sig` strips the BOM and tolerates its absence."""
+    """Reads a catalog CSV. `utf-8-sig` strips the BOM and tolerates its absence.
+
+    Through `read_text`, so a sheet Excel saved as ANSI reads too (X2-04).
+    """
     if not path.exists():
         return []
-    with open(path, encoding="utf-8-sig", newline="") as handle:
-        return [{(k or ""): (v or "") for k, v in row.items()} for row in csv.DictReader(handle)]
+    handle = io.StringIO(read_text(path), newline="")
+    return [{(k or ""): (v or "") for k, v in row.items()} for row in csv.DictReader(handle)]
 
 
 def write_rows(path: Path, columns: Sequence[str], rows: Iterable[dict[str, str]]) -> None:

@@ -292,6 +292,40 @@ def test_an_unparseable_drop_down_is_left_alone_and_named(config, distributor, p
     assert stats.dropdowns == 0
 
 
+
+def test_a_drop_down_saved_as_ansi_is_read_and_its_hand_written_row_kept(
+    config, distributor, product, target
+) -> None:
+    """X2-04. A `version.yml` saved by Notepad in Windows-1252 raised
+    `UnicodeDecodeError` out of `finish_product`, after the copies, so this
+    product's drop-down and 301 maps and every later product's went unwritten."""
+    convert_output(config, product, "10.4.0")
+    distributor.sync_many([(product, product.versions["10.4.0"])], target)
+    path = published(target).parent / "version.yml"
+    path.write_bytes(
+        ('versions:\n- title: "Latest\u2122"\n  path: "https://docs.example/latest"\n'
+         '- title: "10.4.0 (Feb 2026)"\n  path: "/10-4-0"\n').encode("cp1252")
+    )
+
+    distributor.sync_many([(product, product.versions["10.4.0"])], target, force=True)
+
+    loaded = yaml.safe_load(path.read_text(encoding="utf-8"))
+    assert loaded["versions"][0]["title"] == "Latest\u2122"
+
+
+def test_an_undecodable_drop_down_is_left_alone_and_named(config, distributor, product, target) -> None:
+    """X2-04. What the Windows-1252 fallback cannot read is the unparseable case:
+    left alone, because it is the only copy, and named."""
+    convert_output(config, product, "10.4.0")
+    distributor.sync_many([(product, product.versions["10.4.0"])], target)
+    path = published(target).parent / "version.yml"
+    path.write_bytes(b'versions:\n- title: "x\x81"\n  path: "/10-4-0"\n')
+
+    stats = distributor.sync_many([(product, product.versions["10.4.0"])], target, force=True)
+
+    assert stats.unparsed == [str(path)]
+
+
 # -- the document doc-classes (6c) --------------------------------------------------
 
 # One package's non-converted shipment, in the shape 1,123 of 1,822 versions use.

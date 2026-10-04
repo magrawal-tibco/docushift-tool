@@ -333,6 +333,7 @@ Excel is the expected editor, which imposes hard requirements:
 | Hazard | Defense |
 | :--- | :--- |
 | `TIBCO EBX®` renders as `TIBCO EBXÂ®` on double-click open | Write `utf-8-sig` (BOM); read `utf-8-sig`, which also tolerates a missing BOM |
+| Saved as "CSV (Comma delimited)", so `™` is the Windows-1252 byte 0x99 | Read UTF-8 first and Windows-1252 second (`csvio.read_text`), for every hand-edited CSV and YAML; the next write is UTF-8 again. A file in neither is refused with a message naming it (X2-04) |
 | Version `1.10` coerced to a number, saved back as `1.1` | Importer diffs version keys against the last-known set; orphaned keys **abort the import** rather than silently deleting |
 | `2025-11-04` reformatted to `11/4/2025` by locale | Parse permissively, always write ISO; pass unparseable values through verbatim |
 | Excel writes `TRUE` / `FALSE` | Read case-insensitively (`true`/`1`/`yes`/`y`); always write lowercase `true`/`false` |

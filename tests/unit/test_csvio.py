@@ -188,3 +188,31 @@ def test_optional_formatters_preserve_the_empty_cell() -> None:
     assert format_optional_int(None) == ""
     assert format_optional_bool(False) == "false"
     assert format_optional_int(0) == "0"
+
+
+# -- a file saved in the ANSI code page (X2-04) --------------------------------
+
+
+def test_a_csv_saved_by_excel_as_ansi_reads_through_the_cp1252_fallback(tmp_path: Path) -> None:
+    """X2-04. Excel's "CSV (Comma delimited)" writes Windows-1252, so `™` is byte
+    0x99, and the strict UTF-8 read crashed every command with a traceback that
+    named no file. The fallback reads it exactly; the next write is UTF-8 again."""
+    path = tmp_path / "products.csv"
+    path.write_bytes("slug,display_name\r\nems,TIBCO EMS\u2122\r\n".encode("cp1252"))
+
+    assert read_rows(path) == [{"slug": "ems", "display_name": "TIBCO EMS\u2122"}]
+
+
+def test_a_file_in_neither_encoding_is_refused_naming_the_file_and_the_fix(tmp_path: Path) -> None:
+    """X2-04. Five bytes are undefined in Windows-1252 too; what is left after the
+    fallback is a clean refusal that says which file and how to re-save it."""
+    from docushift.utils.csvio import NotUtf8
+
+    path = tmp_path / "versions.csv"
+    path.write_bytes(b"slug,version\r\nems,10\x81\r\n")
+
+    with pytest.raises(NotUtf8) as raised:
+        read_rows(path)
+
+    assert str(path) in str(raised.value)
+    assert "CSV UTF-8" in str(raised.value)

@@ -2557,3 +2557,14 @@ def test_triage_names_the_declared_families_with_no_product(reviewed: CatalogMan
     assert reviewed.triage_summary()["empty_families"] == [
         "spotfire/statistica", "tibco/analytics", "tibco/messaging",
     ]
+
+
+def test_an_undecodable_catalog_csv_is_a_catalog_error_naming_the_file(project_root, state):
+    """X2-04. Every command loads the catalog, so this was a traceback on every
+    command; a `CatalogError` is the one line `_DocuShiftGroup` prints."""
+    products = project_root / "config" / "products.csv"
+    products.write_bytes(b"slug,display_name\r\nems,EMS \x81\r\n")
+    manager = CatalogManager(products, project_root / "config" / "versions.csv", state)
+
+    with pytest.raises(CatalogError, match="products.csv"):
+        manager.load()
