@@ -442,6 +442,12 @@ class Reframer:
             else:
                 current.reframed_md_files = version.reframed_md_files
                 current.reframed_files = version.reframed_files
+            # A tree merged before the copy existed gets one now, so a later lost
+            # swap finds the names without waiting for a re-merge (X2-02).
+            if self.state is not None and not metadata.get(_RENAME_PINS):
+                self.state.set_version_metadata(
+                    slug, number, _RENAME_PINS, renames.dumps(renames.load(target))
+                )
             return current
 
         try:

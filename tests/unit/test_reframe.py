@@ -3365,3 +3365,20 @@ def test_a_pin_differing_only_in_case_is_refused_not_a_failed_version(config, ca
     assert again.outcome is ReframeOutcome.REFRAMED
     refused = [f for f in findings.all if f.code == "RENAME_MAP_REFUSED"]
     assert len(refused) == 1 and "User-Guide.md" in refused[0].message
+
+
+def test_a_current_merge_from_before_the_copy_existed_gets_one(config, catalog, flare):
+    """X2-02 for a workspace merged before this fix: the copy is written on the
+    next `current` run, not only on the next re-merge."""
+    from docushift.reframe import renames
+
+    converted_tree(config, flare, "10.5.1")
+    catalog.state.set_version_metadata("tibco-flare-docs", "10.5.1", "convert_build_id", "abc")
+    target = Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"]).path
+    catalog.state.set_version_metadata("tibco-flare-docs", "10.5.1", "reframe_rename_pins", "")
+
+    again = Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"])
+
+    assert again.outcome is ReframeOutcome.CURRENT
+    stored = catalog.state.get_version_metadata("tibco-flare-docs", "10.5.1")["reframe_rename_pins"]
+    assert renames.loads(stored) == renames.load(target)
