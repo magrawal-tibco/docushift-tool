@@ -2240,7 +2240,7 @@ en-us-tib-messaging-userdocs/           # docs repo — what a reader reads
 en-us-tib-messaging-userdocs-resources/ # bulk repo — generated trees and cold storage
 └── en-us/
     └── tibco-ems/
-        ├── api-references/java/10-4-0/ # Javadoc; siblings c/, golang/, tibdg/ — no generated index
+        ├── api-references/10-4-0/java/ # Javadoc; siblings c/, golang/, tibdg/ — no generated index
         └── archives/                   # archived-version ZIPs + index.md, toc.yml; no version segment
 ```
 
@@ -2262,7 +2262,7 @@ en-us-tib-messaging-userdocs-resources/ # bulk repo — generated trees and cold
 Four consequences worth stating:
 
 - **`api-references` is excluded from conversion, not merely routed differently.** Standard Javadoc is not Flare output and has its own navigation frames; running it through an engine would produce broken Markdown from working HTML. Stage 5 skips these paths and Stage 7 copies the source tree through untouched. The predecessor reached the same conclusion the hard way — `html-to-md` carries `/javadoc/`, `/Java_API/`, `/java/` in both a `skip_path_segments` and a `copy_path_segments` list.
-- **Cross-repo links must be rewritten at sync time.** Converted help routinely links into the API tree (`[…](api/java/index.html)`), and that target now lives in a separate repository (§6.3). Stage 7 owns the rewrite; it cannot be done during conversion, which does not know the publishing layout.
+- **Cross-repo links must be rewritten.** Converted help routinely links into the API tree (`[…](api/java/index.html)`), and that target now lives in a separate repository (§6.3). The rewrite runs at **conversion** time, not at sync time (§6.4.2, Phase 6e): by the time Stage 7 sees the Markdown, each engine has already dropped the reference, so a sync-time pass would find nothing. The engine is not taught the publishing layout; the driver hands it the resolved URL map, built by the same function Stage 7 names the folders with.
 - **`archives/` has no version segment.** The ZIP filename already carries the version, and unlike every other doc-class there is no per-version folder of contents to hold.
 - **Dots become dashes here and nowhere earlier** (`10.4.0` → `10-4-0`). See §4.1: the working tree's segment must round-trip to a `versions.csv` key, which a dashed version cannot.
 
@@ -2318,7 +2318,7 @@ Measured 2026-09-08 over the same 1,822 versions (scripts `C:\tmp\dc1_index.py` 
 
 **The dependency is `pypdf`, verified against `pymupdf` rather than assumed.** `pymupdf` is AGPL and a poor fit for a shipped tool, so the two were run head to head over the full 5,007: **byte-identical titles on all 5,006 files both could read (100.00%)**, identical usable/blank/junk tallies, and pypdf **4× faster** (122 s against 501 s). *Corrected 2026-09-15:* pypdf fails not on one file but on **seven, in four distinct names** — `TIB_mftcc_8.4.4_user_guide.pdf` (truncated, `PdfStreamError`), `TIB_smap_1.0.0_install_guide.pdf`, and `silver-mobile`'s user and install guides recurring across its versions (all four a bare `ValueError` from inside the parser). So the guard catches `Exception`, not a `pypdf` error type. The trade is better than the one-file version implied rather than worse: MuPDF recovered a title from six of the seven and **all six were junk**, discarded at the filter anyway, so the licence change costs one usable title in 5,007. It degrades correctly — the read is wrapped and a failure falls through to step 3, with a `DOCUMENT_UNREADABLE` note so a damaged deliverable is named rather than silently re-titled. **Adopt `pypdf`.**
 
-**Shape of the generated files.** `index.md` carries the same frontmatter as the `online-help` index (product, version, BU, family) plus `doc_class`, and renders the routed files as a linked list. Ordering is by kind rank then title, so `release-information` always leads with the release notes and `reference-documents` with the VPAT, rather than with whatever the filesystem returned first. Both files are generated from `config/aem_templates/`, as siblings of the existing `index.md.j2` and `toc.yml.j2` — the existing pair assumes Markdown targets and a nested `guides` tree, so the document doc-classes need their own templates rather than a reuse of those.
+**Shape of the generated files.** `index.md` carries the same frontmatter as the `online-help` index (`title` and `generated`) plus `doc_class`, and renders the routed files as a linked list. Ordering is by kind rank then title, so `release-information` always leads with the release notes and `reference-documents` with the VPAT, rather than with whatever the filesystem returned first. Both files are generated from `config/aem_templates/`, as siblings of the existing `index.md.j2` and `toc.yml.j2` — the existing pair assumes Markdown targets and a nested `guides` tree, so the document doc-classes need their own templates rather than a reuse of those.
 
 **`toc.yml` holds one item, pointing at the `index.md` beside it** — `title` and `url`, and no other key, under `docs_list_title` / `docs` (Phase 36; `path` under `items` before it). `docs_list_title` is html-to-md's label for the class, verbatim: `User Guides (PDF)`, `Release Information`, `Reference Documents` — the `(PDF)` is the navigation label's, so `index.md`'s heading stays `User Guides`. *(Corrected 2026-09-17, Phase 9. This section previously specified one item per file carrying `title`, `path`, `type` and `bytes`, and the generator implemented it faithfully; the first real `sync` of a family put four PDFs in a reader's navigation and the rule was wrong rather than the code.)* **A `toc.yml` is AEM's navigation, so every item in it promises the reader somewhere to land.** A PDF is a download, and one of these folders contains exactly one page — the `index.md` — which already lists every artifact as a link. The per-file TOC therefore offered four destinations where there was one, and duplicated a list that has a better home. `type` and `bytes` go with the artifacts: both described a file being published, and emitting `type: "md"` beside a generated page's byte count invites something downstream to branch on it.
 
@@ -2329,6 +2329,8 @@ This was first recorded as a **weakening of `validate`**, on the reasoning that 
 #### 6.2.3 `archives/` is indexed from the catalog, not from the directory
 
 `archives/` also gets an `index.md` and a `toc.yml` — but unlike §6.2.2's three, **it cannot be built from the files on disk**. Archived ZIPs are downloaded only on demand (§4.3), so the directory typically holds two of a product's forty archived versions. A directory-driven index would list those two and imply the rest do not exist, which inverts the folder's entire purpose: `archives/` is the *complete product history*, and the ZIP is the optional part.
+
+**As built, only for products `sync` touches.** The index is written once per product that has at least one selected version, so a product whose every version is archived gets none. Measured 2026-10-04: **759 of the 2,393 in-scope archived rows**, on 134 products, are indexed nowhere (for example `tibco-streambase`, 21 rows), and no run names them. Whether to index those products too is R10-04, deferred to the carried-forward items rather than decided.
 
 **The index is therefore built from the catalog's archived rows**, and each entry carries either a repository-relative path, if the ZIP was pulled, or the docsite URL, if it was not. Both states are listed; only the link differs.
 
@@ -2388,10 +2390,10 @@ A help-topic link into `api-references/` is rewritten to an **absolute URL** on 
 
 ```
 [Java API](api/java/index.html)
-  → [Java API]({publish_base_url}/en-us-tib-messaging-userdocs-resources/en-us/ems/api-references/java/10-4-0/index.html)
+  → [Java API]({publish_base_url}/en-us-tib-messaging-userdocs-resources/en-us/ems/api-references/10-4-0/java/index.html)
 ```
 
-**The base URL is configuration, not a constant.** `config/publishing.yaml` — which already exists, holding the naming tokens (§6.1) — gains `publish_base_url` and the doc-class-to-repo map, so the host is not compiled into the distributor and a staging target is a config edit rather than a code change. The path after the base is derived from the same `resources_tree_name(…)/{locale}/{product}/api-references/{subdir}/{version-dashed}/` template that placed the file, so the link and the copy cannot disagree — both read one function, and both compose the tree name from the same `docs_suffix`, so a link cannot name a repository that was never created.
+**The base URL is configuration, not a constant.** `config/publishing.yaml` — which already exists, holding the naming tokens (§6.1) — gains `publish_base_url` and the doc-class-to-repo map, so the host is not compiled into the distributor and a staging target is a config edit rather than a code change. The path after the base is derived from the same `resources_tree_name(…)/{locale}/{product}/api-references/{version-dashed}/{name}/` template that placed the file, so the link and the copy cannot disagree — both read one function, and both compose the tree name from the same `docs_suffix`, so a link cannot name a repository that was never created.
 
 Three consequences:
 
@@ -2401,7 +2403,7 @@ Three consequences:
 
 #### 6.4.1 An unset `publish_base_url` is reported, never fatal (as built, Phase 6d)
 
-`publish_base_url` ships empty: the AEM host is not known yet. A run that places an api-reference tree with the key still empty raises **`PUBLISH_BASE_URL_UNSET`** — one warning per product, not per link — and places the copy anyway. Since 6e the links into that copy are not dropped either: they are emitted as tree-rooted paths missing only their host (§6.4.2), and this warning is what names the prefix that has to be filled in. A warning rather than an error because empty is the shipped, supported state and failing here would make `sync --all` unrunnable for the sake of 13 products; a warning rather than a note because it is a human decision pending, not a property of the corpus.
+`publish_base_url` ships empty: the AEM host is not known yet. A run that places an api-reference tree with the key still empty raises **`PUBLISH_BASE_URL_UNSET`** — one warning per version whose API tree that run copies, not per link — and places the copy anyway. *(As built: the design said one per product, and a re-run that finds every API tree current raises none; R10-08 records the gap, deferred.)* Since 6e the links into that copy are not dropped either: they are emitted as tree-rooted paths missing only their host (§6.4.2), and this warning is what names the prefix that has to be filled in. A warning rather than an error because empty is the shipped, supported state and failing here would make `sync --all` unrunnable for the sake of 13 products; a warning rather than a note because it is a human decision pending, not a property of the corpus.
 
 #### 6.4.2 The rewrite runs at conversion time, not over the published Markdown (as built, Phase 6e)
 

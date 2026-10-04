@@ -763,7 +763,8 @@ def test_a_downloaded_zip_is_copied_in_beside_the_index(
 def test_one_run_writes_both_trees_and_places_the_api_refs_first(
     config, distributor, product, target
 ) -> None:
-    """The rewrite needs `-resources` on disk before the docs tree is staged (§6.4)."""
+    """The order was chosen for a sync-time link rewrite that moved to conversion
+    (§6.4.2); it is kept, and pinned, so the two trees are written in one known order."""
     convert_output(config, product, "10.4.0")
     javadoc_tree(config, product, "10.4.0", "html/api-docs/java")
     product.versions["9.1.0"] = ProductVersion(slug="tibco-ems", version="9.1.0", is_archived=True)

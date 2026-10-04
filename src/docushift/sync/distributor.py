@@ -764,11 +764,16 @@ class WorkspaceDistributor:
         """The product's archived-version index. **No version segment.**
 
         Per product rather than per version, and built from the *catalog* rather
-        than the directory: there are 0 archived ZIPs on disk against the 1,270
+        than the directory: there are 0 archived ZIPs on disk against the 1,634
         archived rows a full sync reaches, so indexing the disk would publish an
         empty history that reads as a complete one. A product with no archived rows
         gets no folder -- 43% of the in-scope ones, and an empty index is a claim
         that a product has no history rather than that this tool holds none of it.
+
+        Called only for a product with a selected version (`sync_many`), so a
+        product whose every version is archived gets no index: 759 of the 2,393
+        in-scope archived rows, measured 2026-10-04. R10-04 records that limit;
+        it is deferred, not decided.
 
         Returns one row or `None`. The row's `version` is empty, which is what the
         report uses to tell a product-level artifact from a version's.
@@ -1029,9 +1034,10 @@ class WorkspaceDistributor:
     ) -> SyncStats:
         """Every selected version, then every touched product's artifacts.
 
-        **API references are placed before the docs tree's doc-classes**, so that a
-        link crossing into `-resources` can be rewritten against a tree that is
-        already on disk rather than one this run intends to write (§6.4).
+        API references are placed before the docs tree's doc-classes. That order
+        was chosen so a link crossing into `-resources` could be rewritten against
+        a tree already on disk; the rewrite has since moved to conversion time
+        (§6.4.2, Phase 6e), so nothing here depends on the order any more.
         """
         stats = SyncStats()
         touched: dict[str, Product] = {}

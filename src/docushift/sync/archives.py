@@ -6,9 +6,11 @@ because the folder is the history rather than a version of it.
 
 **Built from the catalog, never from the directory.** Archived ZIPs are pulled on
 demand by `docushift archive download`, and there are **0 on disk** today against
-1,270 archived rows a full sync reaches. Indexing what is there would publish an
-empty history that looks complete; indexing the catalog publishes a complete one
-that is honest about what it can hand over. This is `version.yml`'s rule in
+1,634 archived rows a full sync reaches (of 2,393 in scope, re-measured
+2026-10-04; the rest belong to products with no selected version, R10-04).
+Indexing what is there would publish an empty history that looks complete;
+indexing the catalog publishes a complete one that is honest about what it can
+hand over. This is `version.yml`'s rule in
 reverse and for the reverse reason (`sync/versions.py`): there the directory is a
 superset of the truth, here it is a nearly-empty subset.
 
@@ -148,8 +150,8 @@ def current(entries: list[ArchiveEntry], destination: Path, index: str) -> bool:
 
     **The rendered `index.md` is compared as text**, which the other doc-classes do
     not need to do. Theirs are a function of the files they copy, so comparing the
-    copies settles it; this one is a function of the *catalog*, and 1,270 of the
-    corpus's 1,270 archived rows copy no file at all. A version retired since the
+    copies settles it; this one is a function of the *catalog*, and every archived
+    row in the corpus copies no file at all. A version retired since the
     last sync would add a row and change nothing on disk, so a file-set comparison
     would report the folder current forever. The file is a few hundred bytes.
     """

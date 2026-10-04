@@ -1146,11 +1146,12 @@ rather than from what the run happened to touch — so `sync --version 10.5.1` l
 five versions' redirects exactly as they were. Rows you add by hand are kept where you put
 them; `sync` only rewrites rows whose source sits under a version folder it published.
 
-The paths are the URLs the pages are served at, minus the host:
+The paths are the URLs the pages are served at, minus the host: region before language
+(`us/en`), no repository name, and `.html` for each page:
 
 ```yaml
-- from: en-us-tib-ems-userdocs/en-us/tibco-enterprise-message-service/online-help/10-5-1/users-guide/old.md
-  to: en-us-tib-ems-userdocs/en-us/tibco-enterprise-message-service/online-help/10-5-1/users-guide/new.md#old
+- from: us/en/tibco-enterprise-message-service/online-help/10-5-1/users-guide/old.html
+  to: us/en/tibco-enterprise-message-service/online-help/10-5-1/users-guide/new.html#old
   status: 301
 ```
 
@@ -1177,7 +1178,7 @@ published, so a legacy URL you mapped by hand is left exactly where you put it.
 
 ```yaml
 - from: https://docs.tibco.com/pub/ems/10.5.1/doc/html/users-guide/old.htm
-  to: en-us-tib-ems-userdocs/en-us/tibco-enterprise-message-service/online-help/10-5-1/users-guide/new.md#old
+  to: us/en/tibco-enterprise-message-service/online-help/10-5-1/users-guide/new.html#old
   status: 301
 ```
 
@@ -1185,9 +1186,6 @@ published, so a legacy URL you mapped by hand is left exactly where you put it.
 `LINK_BROKEN`, the same as for `redirects.yml`. It never checks the `from` side: that is a page
 on a site this tool does not own, and the only honest test of it is a network request, which
 `validate` does not make. Sample a handful by hand before you hand the map over.
-
-`validate` resolves every `to` in it against the published tree, host or no host, and a row
-naming a file that is not there is a `LINK_BROKEN` error.
 
 ### AEM Synthesis & Publishing Layout
 ```bash
@@ -1209,7 +1207,7 @@ docushift validate --target-dir ../tibco-docs-aem/
 ```
 
 `sync` ends with the same five-outcome table `download`, `extract` and `convert` do
-— synced / already current / no converted tree / skipped / failed. A version you
+— synced / already current / no source tree / skipped / failed. A version you
 have not converted yet is a report line, not an abort: over a partially converted
 corpus that is the normal state. "Already current" is decided by comparing the two
 trees, not by a recorded hash, so a version somebody edited in the target is
@@ -1227,11 +1225,12 @@ characters under a 14-character root such as `C:\tmp\p35-aem`.
 > converted tree, and `user-guides`, `release-information` and `reference-documents`
 > from the *extracted* one — so a version you have not converted still publishes its
 > PDFs and its readme. In the `-resources` sibling: `api-references/` copied verbatim
-> out of the extracted tree, and `archives/` indexed from the catalog. The one piece
-> still outstanding is the **cross-tree link rewrite** — see the last two bullets below.
+> out of the extracted tree, and `archives/` indexed from the catalog. Links from
+> help topics into `api-references/` are not rewritten by `sync`: `convert` writes
+> them already pointing at the published API tree — see the bullets below.
 
 Because the documents come from the extracted package rather than the converted
-output, one version can report `no converted tree` for `online-help` and `synced`
+output, one version can report `no source tree` for `online-help` and `synced`
 for `user-guides` in the same run. The table counts **rows, not versions**: a
 version shows up once per doc-class it had something to say about, up to four
 times. A version whose extracted package holds no documents at all is not a row —
@@ -1264,7 +1263,7 @@ en-us-tib-messaging-userdocs-resources/ # the bulk tree
                                         # no version segment: the folder is the whole history
 ```
 
-Thirteen things to expect:
+Fourteen things to expect:
 
 - **`version.yml` is the drop-down, and a scoped sync does not shrink it.** Each doc-class gets its own, listing only the versions that doc-class actually holds — so `user-guides` and `online-help` will legitimately disagree. It is rebuilt by reading the folder on disk and matching it against the catalog's active versions — plus any archived version you marked `convert_eligible`, which `sync` publishes like an active one — *not* from what the run just wrote, so `sync --product tibco-ems --version 10.4.0` updates one entry and leaves the other thirty-seven alone. Titles carry the release date (`10.4.0 (Feb 2026)`); an undated version keeps the version and drops the bracket.
 
@@ -1281,7 +1280,7 @@ Thirteen things to expect:
 
 - **Re-running sync replaces a version's folder wholesale**, so a topic deleted upstream does not survive as a stale file. It replaces exactly that folder: `version.yml`, the product's `metadata.yml`, and every other version are untouched. The same goes for a whole doc-class: if a re-extracted package no longer ships anything for `release-information` (or no longer carries an API tree), that version's folder is removed, its drop-down row goes with it, and the run lists it as `no source tree` with the word "removed". If the extracted package itself is missing, nothing is removed.
 - **API references are never converted, and the folder names come from the package.** Javadoc and the C / Go / `tibdg` trees are copied through as HTML, byte for byte, with only a `metadata.yml` added beside them. Each gets a folder named from its path inside the package with the uninformative segments removed — `html/api-reference/java` becomes `java`, `api/java/lib` becomes `java-lib` — and if two of a version's trees would end up with the same name, *all* of that version's folders fall back to their full path so the set stays readable as one scheme.
-- **A topic link into `api-references/` becomes the published URL of the resources tree**, written during `convert` rather than during `sync` — by the time the tree is placed the reference is gone, so the rewrite has to happen while the page is being converted. The host comes from `publish_base_url` in `config/publishing.yaml`. **With no host set the link is still written**, as the path without a scheme or host (`en-us-tib-messaging-userdocs-resources/en-us/ems/api-references/10-4-0/java/index.html`), and the run reports `PUBLISH_BASE_URL_UNSET` once per product so you know what is missing — a prefix you can add later, rather than a link you cannot get back. Anchors are kept, and a link to a page that is not actually in the tree is left unlinked and reported rather than pointed at a 404. **One known gap**: where the source wrote the reference inside a code span — `<code><a href="…">MessageListener</a></code>`, which is how the EMS developer guide writes all of its — the conversion flattens it to plain code and the link is not recovered. That is roughly a tenth of these references corpus-wide and all of them are in one product; it is recorded as its own fix.
+- **A topic link into `api-references/` becomes the published URL of the resources tree**, written during `convert` rather than during `sync` — by the time the tree is placed the reference is gone, so the rewrite has to happen while the page is being converted. The host comes from `publish_base_url` in `config/publishing.yaml`. **With no host set the link is still written**, as the path without a scheme or host (`en-us-tib-messaging-userdocs-resources/en-us/ems/api-references/10-4-0/java/index.html`), and `sync` reports `PUBLISH_BASE_URL_UNSET` for each version whose API tree it copies, so you know what is missing (a later run that finds the tree already current does not repeat it) — a prefix you can add later, rather than a link you cannot get back. Anchors are kept, and a link to a page that is not actually in the tree is left unlinked and reported rather than pointed at a 404. **One known gap**: where the source wrote the reference inside a code span — `<code><a href="…">MessageListener</a></code>`, which is how the EMS developer guide writes all of its — the conversion flattens it to plain code and the link is not recovered. That is roughly a tenth of these references corpus-wide and all of them are in one product; it is recorded as its own fix.
 - **Setting `publish_base_url` reconverts the versions it affects, and only those.** The host is part of what a converted tree contains, so `convert` treats a changed host the way it treats a changed package. Versions with no API tree are untouched, so setting one value does not reconvert the corpus. Each version that does rewrite reports `API_LINK_REWRITTEN` with the count — worth a glance, because a version with an API tree and a count of zero is either a product whose help never mentions its API or a sign something stopped matching.
 - **`validate` skips those absolute links by default**, and pass `--check-external` to request them over HTTP. With no `publish_base_url` set the rewritten link has no host, and `validate` resolves it against `--target-dir` instead — so it also tells you whether the API tree it names was actually synced.
 - **A broken relative asset link is a tool bug, not a content finding.** Conversion writes the link and copies the file in one step, so `validate` finding one means something downstream moved a file without moving its link — it is reported as a regression, with the stage that could have caused it. An asset that nothing links to is not an error and is not reported here; that count belongs to `convert`.

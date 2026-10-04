@@ -44,9 +44,11 @@ primary_locale: "en-us"
 # -resources one, and a relative path cannot span two repositories.
 #
 # **Empty is a supported state and is the shipped value.** The AEM host is not
-# known yet. Until it is, `sync` leaves those links exactly as the converter
-# emitted them and reports one line per affected product -- it does not fail the
-# run and it does not guess a host. Only 13 of the 422 products a full sync
+# known yet. Until it is, `convert` writes those links as tree-rooted paths with
+# no scheme or host (a prefix to add later), and `sync` warns
+# (`PUBLISH_BASE_URL_UNSET`) once per version whose API tree it copies -- it does
+# not fail the run and it does not guess a host. The published 301 maps carry no
+# host either; setting one later replaces their rows rather than adding to them. Only 13 of the 422 products a full sync
 # selects have an api-reference tree at all.
 #
 # Must be absolute (`https://...`) when set; `catalog validate` says so, because
