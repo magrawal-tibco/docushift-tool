@@ -165,10 +165,11 @@ processed.
 
 ### The whole guide set appears twice in the navigation
 
-- **Status:** Open
+- **Status:** Fixed, 4 Oct 2026 — the duplicate copy is no longer converted
+  (commit 731ad26); the re-run output holds each guide once, 46 pages, down from 97
 - **Owner:** unassigned
 - **Raised:** 2 Oct 2026
-- **Blocks publishing:** yes, for this product
+- **Blocks publishing:** no longer
 
 Version 1.2.0's converted output holds both guides — Installation and User's
 Guide — twice, once under an `html` folder and once without it, and the
