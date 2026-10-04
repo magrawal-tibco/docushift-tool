@@ -90,6 +90,9 @@ _DELIMITERS = "*`~"
 # why this is a count rather than a construct.
 _UNRENDERED = frozenset({"iframe", "video", "audio", "object", "embed", "svg", "canvas", "math"})
 
+# The `<ol type>` values GFM has no marker for. `1` is what GFM draws anyway.
+_NUMBERING = frozenset({"a", "A", "i", "I"})
+
 _WHITESPACE = re.compile(r"\s+")
 _ESCAPES = re.compile(r"([\\`*\[\]<])")
 # Only what would start a *block* if it led a line. Applied per line, after the
@@ -320,6 +323,9 @@ class Renderer:
         draws it; ahead of the first item it leads the list. Reading `<li>` alone
         dropped 62 such elements in the families without a count -- ActiveSpaces
         5.2.0's JDBC registration lost its whole procedure, sentence and code.
+
+        An `<ol type="a">` or `type="i"` is emitted as HTML around Markdown item
+        bodies (`_typed_list`), because GFM can only draw `1.` (R8-14).
         """
         lead: list[str] = []
         entries: list[list[str]] = []
@@ -339,6 +345,11 @@ class Renderer:
         place()
 
         first = _start(tag) if ordered else 1
+        style = _numbering(tag) if ordered else ""
+        if style:
+            body = _typed_list(style, first, entries) if entries else ""
+            return "\n\n".join(block for block in [*lead, body] if block)
+
         items = []
         for number, blocks in enumerate(entries, start=first):
             marker = f"{number}. " if ordered else "- "
@@ -677,6 +688,30 @@ def _start(tag: Tag) -> int:
     """An `<ol start>`, or 1. GFM numbers from 0 up, so nothing below that."""
     raw = str(tag.get("start") or "").strip()
     return int(raw) if raw.isdigit() else 1
+
+
+def _numbering(tag: Tag) -> str:
+    """An `<ol type>` GFM cannot draw -- letters or roman numerals -- or `""`."""
+    raw = str(tag.get("type") or "").strip()
+    return raw if raw in _NUMBERING else ""
+
+
+def _typed_list(style: str, first: int, entries: list[list[str]]) -> str:
+    """An ordered list numbered `a.` or `i.`, as HTML whose item bodies stay Markdown.
+
+    GFM numbers every list `1.`, and GitHub's stylesheet restyles nested lists by
+    depth rather than by type, so DocBook's `numeration="loweralpha"` sub-steps
+    read "2" where the prose says "step b": 980 lists in 10 Streaming versions
+    (Phase 34, R8-14). The blank lines around each body are what keep it
+    Markdown: an HTML block ends at the first one, so emphasis, code, links and
+    nested lists between `<li>` and `</li>` are parsed rather than shown raw.
+    """
+    start = f' start="{first}"' if first != 1 else ""
+    items = []
+    for blocks in entries:
+        body = "\n\n".join(block for block in blocks if block)
+        items.append(f"<li>\n\n{body}\n\n</li>" if body else "<li></li>")
+    return "\n".join([f'<ol type="{style}"{start}>', *items, "</ol>"])
 
 
 def _indent(text: str, width: int) -> str:

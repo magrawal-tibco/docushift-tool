@@ -491,6 +491,28 @@ def test_an_ordered_list_honours_its_start() -> None:
     assert render("<ul start='3'><li>Run it.</li></ul>") == "- Run it."
 
 
+def test_a_lettered_list_keeps_its_letters_as_html_around_markdown() -> None:
+    """DocBook's `numeration="loweralpha"` sub-steps read "2" where the prose
+    says "step b": GFM draws only `1.` (R8-14, 980 lists in Streaming). The
+    blank lines keep each item's body Markdown inside the HTML."""
+    rendered = render(
+        '<ol><li><p>Configure:</p><ol type="a"><li><p>Open <b>File</b>.</p></li>'
+        "<li><p>Save.</p></li></ol></li></ol>"
+    )
+
+    assert rendered == (
+        "1. Configure:\n\n"
+        '   <ol type="a">\n   <li>\n\n   Open **File**.\n\n   </li>\n'
+        "   <li>\n\n   Save.\n\n   </li>\n   </ol>"
+    )
+    assert render('<ol type="i" start="4"><li>Four.</li></ol>') == (
+        '<ol type="i" start="4">\n<li>\n\nFour.\n\n</li>\n</ol>'
+    )
+    # `1` is what GFM draws anyway, and an unordered list has no numbering.
+    assert render('<ol type="1"><li>One.</li></ol>') == "1. One."
+    assert render('<ul type="a"><li>One.</li></ul>') == "- One."
+
+
 def test_a_break_at_the_end_of_a_block_prints_nothing() -> None:
     """`strip` took the break's newline and left its backslash: DocBook's
     `<br class="figure-break">` alone made a paragraph of `\\`, six of them in
