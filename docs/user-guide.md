@@ -982,6 +982,10 @@ regenerated files at the version root:
 | `rename-map.csv` | The address each merged page was given — the source topic that leads it, the path, the title, its place in the navigation, and the URL a reader will type. Only the last is not derivable from `reframe.yml`, and it is the one somebody checks when a link goes wrong. **A name written here is used, not just reported**: the next run reads it back and pins the page to that path, so a published URL does not move because somebody fixed a typo in a title. Editing `new_path` is enough: the next `reframe` sees the map changed and re-merges that version, no `--force` needed. A name another page already holds cannot be used; the page keeps its computed name and the run warns `RENAME_MAP_REFUSED`, naming each one. The `shortened` column flags the pages whose name does not carry their whole title — mostly words lost to the 50-character cut, 90 of 1,505 measured — which is where a human or a model can write a better one than the algorithm did. The same pages are queued in `review-queue.csv`, and a name written into `new_path` takes the page out of both. `--renormalize` recomputes every name anyway, so the pinning is a decision rather than a trap. |
 | `review-queue.csv` | The pages a writer has to make a decision about, and why. Open it in a spreadsheet. |
 
+`reframe.yml`, `rename-map.csv` and `review-queue.csv` are working files: they stay in
+`reframed/` and `sync` does not publish them, and a copy an earlier `sync` published is removed
+the next time it runs. `toc.yml`, `redirects.yml`, `csh.yml` and `301.yml` publish with the pages.
+
 **`301.yml`, the cutover map, appears alongside them for a version whose live URL shape is
 known — read off the docsite's own page list, or declared.** `redirects.yml` answers "where did this page go inside the new tree"; `301.yml`
 answers the question the migration actually asks — *the reader has a bookmark to

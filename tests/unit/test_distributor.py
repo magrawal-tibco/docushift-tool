@@ -1026,6 +1026,34 @@ def test_an_opted_in_product_publishes_the_merged_tree_instead(
     assert (result.path / "redirects.yml").is_file()
 
 
+def test_reframes_working_files_are_not_published_and_a_published_copy_is_withdrawn(
+    config, catalog, distributor, product, target
+) -> None:
+    """X1-03. `reframe.yml`, `rename-map.csv` and `review-queue.csv` are a writer's
+    record, pin file and worklist, and every merged version shipped all three:
+    36 files in one published tree. Leaving them out must not make the version
+    look stale on every run, and a copy an earlier run published must go."""
+    working = {"reframe.yml": "pages: []\n", "rename-map.csv": "old_path\n",
+               "review-queue.csv": "page\n"}
+    convert_output(config, product, "10.4.0")
+    reframe_output(config, product, "10.4.0", **working, **{"toc.yml": "docs: []\n",
+                                                            "301.yml": "redirects: []\n"})
+    opt_in(config, product.slug)
+    current(catalog, product.slug, "10.4.0")
+    version = product.versions["10.4.0"]
+
+    first = distributor.sync_one(product, version, target)
+
+    assert first.outcome is SyncOutcome.SYNCED
+    published_names = {path.name for path in first.path.iterdir()}
+    assert published_names == {"index.md", "redirects.yml", "toc.yml", "301.yml"}
+    assert distributor.sync_one(product, version, target).outcome is SyncOutcome.CURRENT
+
+    (first.path / "reframe.yml").write_text("pages: []\n", encoding="utf-8")
+    assert distributor.sync_one(product, version, target).outcome is SyncOutcome.SYNCED
+    assert not (first.path / "reframe.yml").exists()
+
+
 def test_an_opted_in_product_with_no_merged_tree_publishes_nothing_at_all(
     config, catalog, target, product
 ) -> None:

@@ -105,6 +105,15 @@ _RENDERED = ("index.md", "toc.yml", "metadata.yml")
 # refused to publish.
 STAGING_SUFFIX = ".part"
 
+# Reframe's working files, at the merged tree's root: the merge record, the pin
+# file and the writer's worklist (X1-03). They stay in `reframed/`, where the next
+# merge reads its pins back, and are not pages: every merged version used to ship
+# all three, source topic paths included -- 36 files in one published tree.
+# Literals rather than imports from `docushift.reframe`, which this module may
+# only import lazily (see `_source`). `301.yml`, `redirects.yml`, `toc.yml` and
+# `csh.yml` still publish.
+REFRAME_WORKING_FILES = frozenset({"reframe.yml", "rename-map.csv", "review-queue.csv"})
+
 
 class SyncOutcome(StrEnum):
     """What happened to one version. Every run reports these five counts."""
@@ -404,7 +413,11 @@ class WorkspaceDistributor:
             # under it. Without the prefix the copy fails outright and takes
             # seven ActiveSpaces versions with it -- for five characters that do
             # not exist in the tree anybody reads.
-            shutil.copytree(long_path(source), long_path(staging), copy_function=shutil.copy2)
+            #
+            # Reframe's working files stay behind (X1-03); the swap then withdraws
+            # any copy an earlier run published.
+            shutil.copytree(long_path(source), long_path(staging), copy_function=shutil.copy2,
+                            ignore=_unpublished(long_path(source)))
             files = [path for _relative, path in walk_files(staging)]
             size = sum(path.stat().st_size for path in files)
             swap(staging, destination)
@@ -1118,10 +1131,22 @@ def _identical(source: Path, target: Path) -> bool:
     produces by accident.
     """
     left = {path.relative_to(source) for path in source.rglob("*") if path.is_file()}
+    left -= {Path(name) for name in REFRAME_WORKING_FILES}  # never published (X1-03)
     right = {path.relative_to(target) for path in target.rglob("*") if path.is_file()}
     if left != right:
         return False
     return all(filecmp.cmp(source / name, target / name, shallow=True) for name in left)
+
+
+def _unpublished(root: Path) -> Callable[[str, list[str]], set[str]]:
+    """`copytree`'s `ignore` for a version folder: reframe's working files, at
+    `root` only (X1-03). A page deeper down that happens to share a name is content."""
+    top = str(root)
+
+    def ignore(directory: str, names: list[str]) -> set[str]:
+        return REFRAME_WORKING_FILES.intersection(names) if str(directory) == top else set()
+
+    return ignore
 
 
 def _documents_current(
