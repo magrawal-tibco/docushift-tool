@@ -170,17 +170,19 @@ Per-family folders are created on demand by the downloader, not at startup: pre-
 
 ---
 
-## 3. Current State (2026-10-02)
+## 3. Current State (2026-10-04)
 
 - **Every pipeline stage is built**: catalog → download → extract → convert (Flare, DITA,
-  WebWorks, DocBook) → navigation → reframe (Flare merge) → sync → validate. Phases 1–33,
-  35 and 36 are finished; see the [index](docs/planning.md#finished-phases).
+  WebWorks, DocBook) → navigation → reframe (Flare merge) → sync → validate. Phases 1–33
+  and 35–37 are finished; see the [index](docs/planning.md#finished-phases).
 - **Catalog**: 669 products (604 in scope), 5,181 versions, in `config/products.csv` /
-  `config/versions.csv`. Families are assigned by hand (Phase 32).
+  `config/versions.csv`. Families are assigned by hand (Phase 32); `products.csv`
+  shows each family's name, description, size and keyword-rule suggestion beside it
+  (Phase 37), ready for the user's family review.
 - **Converted**: four families in `output/` (activespaces, ems, streaming, tra), three of
   them merged in `reframed/` (activespaces, ems, tra). 27 published versions carry a
   `301.yml` cutover map (Phase 35), and `toc.yml` uses html-to-md's dialect (Phase 36).
-- **Quality bar**: 1,932 tests, `ruff check src tests` clean, 76 finding codes in the
+- **Quality bar**: 1,942 tests, `ruff check src tests` clean, 76 finding codes in the
   register.
 - **Branch**: `reframe-component`. Git push and publishing are out of scope (`architecture.md` §6.0).
 
@@ -189,9 +191,10 @@ Per-family folders are created on demand by the downloader, not at startup: pre-
 1. **Phase 34, the whole-tool code review**, in progress (batch 4 fixing, cross-cutting passes running): twelve component units,
    then three cross-cutting passes, find first and fix after triage
    ([`planning.md` §1](docs/planning.md#1-active-phases)).
-2. **Phase 37, one sheet for the family decision**, planned and awaiting approval: four
-   read-only columns in `products.csv` (family name, description, size, rule suggestion)
-   so families can be reviewed and reassigned in one place.
+2. **The user's family review** in `products.csv`: 206 keyword-assigned products whose
+   rule now suggests another family, 154 `unclassified` ones that already carry a family,
+   and three declared families with no product (`catalog triage`). Reassign by editing
+   `family`, then propagate with the `propagate-catalog-edit` skill.
 3. The two carried-forward technical items are confirmed or closed during Phase 34
    ([list](docs/planning.md#carried-forward-open-items)).
 4. Product-level open issues, with owners: [`docs/open-issues.md`](docs/open-issues.md).
