@@ -665,6 +665,39 @@ def test_the_heading_level_is_the_numeral_in_the_class(tmp_path: Path) -> None:
     assert "### Deep" in rendered
 
 
+def test_the_heading_underscore_vocabulary_is_headings_too(tmp_path: Path) -> None:
+    """R7-03: `Heading_1` 713 topics, `Heading_2` 277, `Heading_3` 113.
+
+    osisoft-pi 1.0.0's `AdapterComponents.htm` opens on
+    `<div class="Heading_1"><a name="3_4_9_1">Adapter Components`, and rendered
+    as a plain line, with no title heading on the page.
+    """
+    body = (
+        '<div class="Heading_1"><a name="3_4_9_1">Adapter Components</a></div>'
+        '<div class="Body">The adapter has two components.</div>'
+        '<div class="Heading_2">Design-time</div>'
+        '<div class="Heading_3">Palette</div>'
+    )
+    rendered = one(tmp_path, body)
+    assert "# Adapter Components" in rendered
+    assert "## Design-time" in rendered
+    assert "### Palette" in rendered
+
+
+def test_the_not_in_toc_heading_spellings_are_headings(tmp_path: Path) -> None:
+    """R7-03: `N2HeadingNoTOC` (522 topics, mostly `copyrigh.htm`'s title) and kin."""
+    body = (
+        heading("Legal", 1)
+        + '<div class="N2HeadingNoTOC"><a name="110688">Important Information</a></div>'
+        + '<div class="N3HeadingNotInTOC">Trademarks</div>'
+        + '<div class="N2HeadingTOC">Licenses</div>'
+    )
+    rendered = one(tmp_path, body)
+    assert "## Important Information" in rendered
+    assert "### Trademarks" in rendered
+    assert "## Licenses" in rendered
+
+
 def test_a_flat_sub_heading_lands_below_the_deepest_numbered_one(tmp_path: Path) -> None:
     """`MinorHead` 19,531 and `Block-title` 12,788 carry no numeral and sit below h3."""
     rendered = one(tmp_path, heading("Deep", 3) + '<div class="MinorHead">Procedure</div>')

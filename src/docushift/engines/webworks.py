@@ -107,8 +107,16 @@ GENERATED_LIST_STEMS = frozenset({"lof", "lot", "ix"})
 _HTML_SUFFIXES = (".htm", ".html")
 
 # `N1Heading` -> 1, `N3Syntax` -> 3. The numeral in the class *is* the level, which
-# is the one place WebWorks is easier than Flare (§5.3.7).
-_HEADING_CLASS = re.compile(r"^N(\d)(?:Heading|Syntax)$")
+# is the one place WebWorks is easier than Flare (§5.3.7). Two more spellings carry
+# it (Phase 34, R7-03): `Heading_1..3` (1,103 corpus topics, loyalty and
+# osisoft-pi above all) and the TOC-flagged forms `N2HeadingNoTOC` (522, mostly
+# the "Important Information" title of `copyrigh.htm`), `N3HeadingNotInTOC` and
+# `N2HeadingTOC`. Without them every heading on such a page, its title included,
+# rendered as a body line. The suffixes are listed, not wildcarded, so an
+# unrelated `N2Heading…` class is not promoted on a guess.
+_HEADING_CLASS = re.compile(
+    r"^(?:N(\d)(?:Heading(?:NoTOC|NotInTOC|TOC)?|Syntax)|Heading_(\d))$"
+)
 # Sub-headings with no numeral: `MinorHead` 19,531 and `Block-title` 12,788, which
 # titles an error code. Both sit below `N3Heading` in every sample, so both are h4.
 _FLAT_HEADINGS = {"minorhead": 4, "block-title": 4}
@@ -1547,7 +1555,7 @@ def _renumber_headings(container: Tag) -> int:
 def _heading_level(name: str) -> int:
     match = _HEADING_CLASS.match(name)
     if match is not None:
-        return min(int(match.group(1)), 6)
+        return min(int(match.group(1) or match.group(2)), 6)
     return _FLAT_HEADINGS.get(name.lower(), 0)
 
 
