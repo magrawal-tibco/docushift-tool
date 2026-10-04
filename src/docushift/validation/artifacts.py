@@ -39,6 +39,7 @@ from pathlib import Path, PurePosixPath
 
 import yaml
 
+from docushift import origins
 from docushift.reporting.findings import Finding
 from docushift.sync import API_REFERENCES, ARCHIVES, DOCUMENT_DOC_CLASSES
 from docushift.sync import redirects as redirect_map
@@ -212,7 +213,8 @@ def _check_toc(folder: VersionFolder, index: FolderIndex) -> list[Finding]:
 # -- redirects.yml, where Reframe published one ------------------------------------
 
 
-def _check_redirects(folder: VersionFolder, index: FolderIndex) -> list[Finding]:
+def _check_redirects(folder: VersionFolder, index: FolderIndex,
+                     file_name: str = REDIRECTS) -> list[Finding]:
     """R5 at the gate: one 301 per source topic, zero dangling, none unreachable.
 
     Phase 20d. Reframe audits its own redirect map before it swaps a tree in, and
@@ -226,11 +228,17 @@ def _check_redirects(folder: VersionFolder, index: FolderIndex) -> list[Finding]
     redirect is a broken link that happens to live in a different file, and two
     codes for one condition would make `report --code LINK_BROKEN` miss half of
     them. `REDIRECT_SHADOWED` is the one genuinely new condition; see below.
+
+    `file_name` is `301.yml` for the origin map (Phase 34, R11-05), which has the
+    same `to` side, relative to this folder, and which nothing used to read: a
+    `to: about.md#gone` published with no finding, and the cutover 301 landed on
+    the page top. Its `from` is a live docsite URL rather than a path here, so
+    the shadowing check is skipped for it.
     """
-    path = folder.path / REDIRECTS
+    path = folder.path / file_name
     if not path.is_file():
         return []
-    where = (folder.relative / REDIRECTS).as_posix()
+    where = (folder.relative / file_name).as_posix()
     loaded = _load(path, folder.slug, folder.segment, where)
     if loaded.failure is not None:
         return [loaded.failure]
@@ -250,9 +258,14 @@ def _check_redirects(folder: VersionFolder, index: FolderIndex) -> list[Finding]
             continue
         target = str(refs.resolve(PurePosixPath("."), reference.path))
         if target not in index.present:
+            actual = index.actual_case(target)
+            detail = (
+                f"differs only in case from {actual}" if actual
+                else "is not in this version folder"
+            )
             findings.append(Finding(
                 "LINK_BROKEN", slug=folder.slug, version=folder.segment, path=where,
-                message=f"{raw} is not in this version folder",
+                message=f"{raw} {detail}",
             ))
             continue
         miss = (
@@ -265,7 +278,8 @@ def _check_redirects(folder: VersionFolder, index: FolderIndex) -> list[Finding]
                 "ANCHOR_MISSING", slug=folder.slug, version=folder.segment, path=where,
                 message=f"#{reference.fragment} is not an anchor in {target}{miss}",
             ))
-        findings.extend(_shadowed(folder, index, where, source, target))
+        if file_name == REDIRECTS:
+            findings.extend(_shadowed(folder, index, where, source, target))
     return findings
 
 
@@ -439,10 +453,14 @@ def check_redirect_map(product: ProductFolder, doc_class: Path, target: Path,
     301'd through, so a dangling one is `LINK_BROKEN` and an error, the same code
     and the same severity the per-version map and `toc.yml` already use.
 
-    Anchors are not checked here and are checked by the per-version map, which has
-    the folder index to check them against. Two checkers reporting one dangling
-    anchor twice would make `report --code ANCHOR_MISSING` a count of how many
-    views of the map exist rather than of how many anchors are missing.
+    Anchors are not checked here and are checked by the per-version map -- for
+    `301.yml` too since Phase 34 (R11-05); before that nothing read the
+    per-version `301.yml` and this sentence was half false. The per-version map
+    has the folder index to check them against, and `sync` assembles this file's
+    generated rows from it, so two checkers would report one dangling anchor
+    twice and make `report --code ANCHOR_MISSING` a count of how many views of
+    the map exist rather than of how many anchors are missing. A row added here
+    by hand has its file checked and its anchor checked by nobody.
 
     A row whose `to` does not start at a published tree is not resolved: it is a
     hand-added redirect out of this target, which `sync` carries through verbatim
@@ -538,4 +556,5 @@ def check(folder: VersionFolder, index: FolderIndex) -> list[Finding]:
         # Copied Javadoc. `metadata.yml` is ours and is checked above; everything
         # else in there belongs to somebody else's generator (§6.2.1).
         return findings
-    return findings + _check_toc(folder, index) + _check_redirects(folder, index) + _check_index(folder)
+    return (findings + _check_toc(folder, index) + _check_redirects(folder, index)
+            + _check_redirects(folder, index, origins.ORIGINS) + _check_index(folder))

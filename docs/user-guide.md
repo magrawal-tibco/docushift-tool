@@ -1183,7 +1183,10 @@ published, so a legacy URL you mapped by hand is left exactly where you put it.
 ```
 
 `validate` resolves every `to` against the published tree and reports a dangling one as
-`LINK_BROKEN`, the same as for `redirects.yml`. It never checks the `from` side: that is a page
+`LINK_BROKEN`, the same as for `redirects.yml`. The copy in each version folder is checked
+too, against that folder: a `to` naming a missing page is `LINK_BROKEN`, and one naming a
+section the page does not have is `ANCHOR_MISSING`, because the cutover redirect would land
+on the page top. It never checks the `from` side: that is a page
 on a site this tool does not own, and the only honest test of it is a network request, which
 `validate` does not make. Sample a handful by hand before you hand the map over.
 

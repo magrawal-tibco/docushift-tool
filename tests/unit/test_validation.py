@@ -1821,7 +1821,8 @@ def test_a_doc_class_artifact_saved_in_another_encoding_is_unparsed_not_a_crash(
     assert [(f.code, f.path.rsplit("/", 1)[-1]) for f in found] == [("ARTIFACT_UNPARSED", name)]
 
 
-@pytest.mark.parametrize("name", ["metadata.yml", "toc.yml", "redirects.yml", "csh.yml"])
+@pytest.mark.parametrize(
+    "name", ["metadata.yml", "toc.yml", "redirects.yml", "csh.yml", "301.yml"])
 def test_a_version_artifact_saved_in_another_encoding_is_unparsed_not_a_crash(
     tmp_path: Path, name: str
 ) -> None:
@@ -1980,3 +1981,46 @@ def test_toc_redirect_and_csh_anchors_are_compared_case_exactly(tmp_path: Path) 
 
     assert len(found) == 3
     assert all("differs only in case from #install" in f.message for f in found)
+
+
+# -- the per-version origin map (Phase 34, R11-05) ---------------------------------
+#
+# `301.yml` in a version folder has the same `to` side as Reframe's
+# `redirects.yml`, relative to the folder, and nothing read it: neither its file
+# half nor its anchor half was checked anywhere, while the doc-class copy's
+# docstring said its anchors were "checked by the per-version map".
+
+ORIGIN = "https://docs.tibco.com/pub/widget/1.0.0/doc/html/old.htm"
+
+
+def test_a_per_version_origin_row_landing_on_no_section_is_an_anchor_missing(
+    tmp_path: Path,
+) -> None:
+    target = tmp_path / "target"
+    publish(target, {"301.yml": redirects(entry(ORIGIN, "about.md#gone")),
+                     "about.md": "# About\n"})
+
+    findings = artifacts_of(target)
+
+    assert codes(findings) == ["ANCHOR_MISSING"]
+    assert findings[0].path.endswith("1-0-0/301.yml")
+
+
+def test_a_per_version_origin_row_to_a_missing_page_is_a_link_broken(tmp_path: Path) -> None:
+    target = tmp_path / "target"
+    publish(target, {"301.yml": redirects(entry(ORIGIN, "Gone.md")), "gone.md": "# Gone\n"})
+
+    findings = artifacts_of(target)
+
+    assert codes(findings) == ["LINK_BROKEN"]
+    assert "differs only in case from gone.md" in findings[0].message
+
+
+def test_a_per_version_origin_map_that_resolves_is_silent(tmp_path: Path) -> None:
+    """The `from` is a live docsite URL, never resolved here and never 'shadowed'."""
+    target = tmp_path / "target"
+    publish(target, {"301.yml": redirects(entry(ORIGIN, "about.md#about"),
+                                          entry("about.md", "about.md#about")),
+                     "about.md": "# About\n"})
+
+    assert artifacts_of(target) == []
