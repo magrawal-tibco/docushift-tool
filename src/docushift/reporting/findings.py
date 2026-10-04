@@ -422,6 +422,13 @@ REGISTRY: dict[str, Code] = _codes(
     # so a failed or killed swap lost it and the next run recomputed every name
     # without a word. A warning whether or not a copy rescued the names: the file a
     # writer edits is gone, and published URLs move if no copy survived.
+    # Phase 34, X1-07. A pin is keyed on its leading topic's converted path; a
+    # re-convert or a boundary change can retire that path, and the row was then
+    # neither applied nor refused, and erased from the rewritten map in silence.
+    Code("RENAME_MAP_UNMATCHED", Severity.WARNING, Stage.REFRAME,
+         "Rows in rename-map.csv whose source topic no longer leads a page; their "
+         "names were not used and the rows are dropped, each one named",
+         "planning.md §7.5"),
     Code("RENAME_MAP_MISSING", Severity.WARNING, Stage.REFRAME,
          "rename-map.csv is gone from a merged tree that had one; the names came "
          "from the copy kept in state.db, or were recomputed if none survived",

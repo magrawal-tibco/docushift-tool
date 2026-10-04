@@ -3227,3 +3227,90 @@ def test_a_map_lost_with_no_copy_anywhere_is_said_out_loud(config, catalog, flar
     missing = [f for f in findings.all if f.code == "RENAME_MAP_MISSING"]
     assert len(missing) == 1 and "recomputed" in missing[0].message
     assert missing[0].severity is Severity.WARNING
+
+
+# -- hand-edited files the stage rewrites (Phase 34, XF) -----------------------------
+
+
+def _queued_tree(config, flare) -> None:
+    toc = yaml.safe_load(TOC)
+    toc["docs"][1]["subfolderlist"] = [
+        {"title": f"Row {i}", "url": f"users-guide/row-{i}.md"} for i in range(20)
+    ]
+    converted_tree(config, flare, "10.5.1", yaml.safe_dump(toc))
+
+
+def test_a_writers_decision_column_survives_a_forced_re_merge(config, catalog, flare):
+    """X2-06. The docs call `review-queue.csv` the file meant to be edited, and
+    every re-merge rewrote it from scratch with the six stock columns."""
+    _queued_tree(config, flare)
+    target = Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"]).path
+    queue = target / "review-queue.csv"
+    rows_now = csvio.read_rows(queue)
+    assert [row["page_path"] for row in rows_now] == ["user-guide.md"]
+    rows_now[0]["decision"] = "split at Row 10"
+    rows_now[0]["detail"] = "a writer typed over the measurement"
+    csvio.write_rows(queue, [*rows_now[0].keys()], rows_now)
+
+    again = Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"], force=True)
+
+    assert again.outcome is ReframeOutcome.REFRAMED
+    written = csvio.read_rows(queue)
+    assert written[0]["decision"] == "split at Row 10"
+    assert written[0]["detail"] != "a writer typed over the measurement"  # stock columns are re-measured
+    assert queue.read_text(encoding="utf-8-sig").splitlines()[0] == (
+        "page_path,guide,n_topics,words,flags,detail,decision")
+
+
+def test_a_worked_row_whose_page_left_the_queue_is_kept(config, catalog, flare):
+    """A decision is never dropped, even once the merge stops flagging the page."""
+    from docushift.reframe.review import NO_LONGER_QUEUED
+
+    _queued_tree(config, flare)
+    target = Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"]).path
+    queue = target / "review-queue.csv"
+    rows_now = csvio.read_rows(queue)
+    rows_now[0]["decision"] = "keep as one page"
+    csvio.write_rows(queue, [*rows_now[0].keys()], rows_now)
+    converted_tree(config, flare, "10.5.1")  # the twenty rows are gone: nothing queues
+
+    Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"], force=True)
+
+    written = csvio.read_rows(queue)
+    assert [(row["page_path"], row["decision"], row["detail"]) for row in written] == [
+        ("user-guide.md", "keep as one page", NO_LONGER_QUEUED)]
+
+
+def test_an_untouched_queue_is_written_byte_for_byte_as_before(config, catalog, flare):
+    _queued_tree(config, flare)
+    target = Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"]).path
+    before = (target / "review-queue.csv").read_bytes()
+
+    Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"], force=True)
+
+    assert (target / "review-queue.csv").read_bytes() == before
+
+
+def test_a_pin_whose_topic_no_longer_leads_a_page_is_named_before_it_is_dropped(
+    config, catalog, flare
+):
+    """X1-07. A re-convert that renames a topic retires its pin: the row was
+    neither applied nor refused, and the rewritten map erased it in silence."""
+    from docushift.reframe import renames
+
+    converted_tree(config, flare, "10.5.1")
+    target = Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"]).path
+    _pin_user_guide(target, "using-the-product.md")
+    renamed = TOC.replace("users-guide/user-guide.md", "users-guide/user-guide-2.md")
+    (config.output_path(flare.bu, flare.family, flare.slug, "10.5.1")
+     / "users-guide" / "user-guide.md").unlink()
+    converted_tree(config, flare, "10.5.1", toc=renamed)
+    findings = FindingsRun("reframe")
+
+    Reframer(config, catalog, findings=findings).reframe_one(
+        flare, flare.versions["10.5.1"], force=True)
+
+    unmatched = [f for f in findings.all if f.code == "RENAME_MAP_UNMATCHED"]
+    assert len(unmatched) == 1 and unmatched[0].severity is Severity.WARNING
+    assert "users-guide/user-guide.md -> using-the-product.md" in unmatched[0].message
+    assert PurePosixPath("users-guide/user-guide.md") not in renames.load(target)

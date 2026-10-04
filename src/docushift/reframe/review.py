@@ -47,7 +47,7 @@ from pathlib import Path, PurePosixPath
 
 from docushift.reframe.packer import Page
 from docushift.reframe.toc import TocEntry
-from docushift.utils.csvio import write_rows
+from docushift.utils.csvio import read_rows, write_rows
 
 #: R6's columns, unchanged. A published contract with an editorial pass that does
 #: not exist yet: adding a column later is cheap, renaming one is not.
@@ -180,13 +180,46 @@ def rows(
     return built
 
 
-def write(path: Path, queue: Sequence[dict[str, str]]) -> None:
+#: What a row a writer worked says once its page is no longer flagged (X2-06).
+NO_LONGER_QUEUED = "no longer flagged by this merge; kept for the decision recorded in this row"
+
+
+def previous(path: Path) -> list[dict[str, str]]:
+    """The queue as it stands before a re-merge rewrites it: what a writer may have worked.
+
+    Read, not tolerated: a queue that cannot be read fails the version (the
+    driver reports it), because rewriting it would drop whatever was in it.
+    """
+    return read_rows(path) if path.is_file() else []
+
+
+def write(path: Path, queue: Sequence[dict[str, str]],
+          worked: Sequence[dict[str, str]] = ()) -> None:
     """One `review-queue.csv`. CSV and not YAML because a human edits this one.
 
     Through `csvio.write_rows`, so it gets the same BOM the catalog CSVs get --
     titles carry `®` and `™`, and Excel reads those as mojibake without it.
+
+    **A writer's own columns survive a re-merge** (Phase 34, X2-06). The docs call
+    this file the one meant to be edited, and every re-merge rewrote it from
+    scratch with the six stock columns. Any column a writer added to `worked`,
+    the queue as it stood, is carried over by `page_path`. The six stock columns
+    are this run's measurement and are rewritten. A worked row whose page is no
+    longer flagged is kept at the end, so a recorded decision is never dropped.
     """
-    write_rows(path, COLUMNS, queue)
+    extra = [column for column in dict.fromkeys(key for row in worked for key in row)
+             if column and column not in COLUMNS]
+    by_page = {row.get("page_path", ""): row for row in worked if row.get("page_path")}
+    rows = []
+    for row in queue:
+        kept = by_page.pop(row["page_path"], {})
+        rows.append({**row, **{column: kept.get(column, "") for column in extra}})
+    for page, kept in by_page.items():
+        if any(kept.get(column, "").strip() for column in extra):
+            rows.append({"page_path": page, "guide": kept.get("guide", ""),
+                         "detail": NO_LONGER_QUEUED,
+                         **{column: kept.get(column, "") for column in extra}})
+    write_rows(path, (*COLUMNS, *extra), rows)
 
 
 def tally(flagged: dict[PurePosixPath, list[Flag]]) -> dict[str, int]:

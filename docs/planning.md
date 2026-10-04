@@ -181,6 +181,7 @@ The concrete deliverable of §7.1: every deferred "report line" in the three doc
 | `FRAGMENT_UNPLACEABLE`³⁰ | warn | convert | A cross-reference naming an anchor with no heading behind it; left as written and will not resolve | Phase 30 |
 | `RENAME_MAP_APPLIED`²⁹ | note | reframe | Page names taken from `rename-map.csv` rather than recomputed, so a published URL does not move when a title is edited | Phase 29 |
 | `RENAME_MAP_REFUSED`³⁴ | warn | reframe | A name in `rename-map.csv` that another page ends up holding; the computed name is kept, and each refused pin is named | Phase 34 (R9-05) |
+| `RENAME_MAP_UNMATCHED`³⁴ | warn | reframe | A row in `rename-map.csv` whose `old_path` no longer leads a page (a re-convert renamed the topic, or a boundary change merged it); its name is not used and the row is dropped from the rewritten map, each one named old -> new | Phase 34 (X1-07) |
 | `RENAME_MAP_MISSING`³⁴ | warn | reframe | `rename-map.csv` is gone from a merged tree that had one (a failed or killed swap used to take it along); the names come from the copy `state.db` keeps, or are recomputed if none survives, and the message says which | Phase 34 (X2-02, X3-02) |
 | `HEADING_LEVEL_NORMALIZED`²⁷ | note | convert | Headings renumbered to close a level the source skipped; depth and order unchanged. One row per version; `count` is how many | Phase 27 |
 | `DEFINITION_TERM_RECOVERED`²⁷ | note | convert | Terms marked up as `class="dt"` rather than `<dt>`, retagged so they publish as terms instead of as prose | Phase 27 |

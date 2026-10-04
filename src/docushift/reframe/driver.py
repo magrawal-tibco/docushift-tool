@@ -581,7 +581,27 @@ class Reframer:
                     f"{', ...' if len(refused) > 5 else ''}"
                 ),
             )
+        # X1-07. A pin is keyed on its leading topic's converted path, which a
+        # re-convert or a boundary change can retire. Such a row was neither
+        # applied nor refused, and the rewritten map erased it, so a hand-chosen
+        # URL reverted without a word. It is still dropped -- nothing in the tree
+        # carries that topic as a page -- but named, old and new, before it goes.
+        leading = {page.topics[0].source for page in built if page.topics}
+        unmatched = {old: new for old, new in approved.items() if old not in leading}
+        if unmatched:
+            shown = ", ".join(f"{old} -> {new}" for old, new in list(unmatched.items())[:5])
+            self._record(
+                "RENAME_MAP_UNMATCHED", slug, number, path=renames.RENAME_MAP,
+                count=len(unmatched),
+                message=(
+                    f"{len(unmatched)} row(s) in {renames.RENAME_MAP} name a source topic that "
+                    f"no longer leads a page, so their names were not used and the rows are "
+                    f"dropped from the rewritten map: {shown}{', ...' if len(unmatched) > 5 else ''}"
+                ),
+            )
         unnavigated = frozenset(page.path for page in carried)
+        # Read before anything is written: the queue a writer may have worked (X2-06).
+        worked = review.previous(target / "review-queue.csv")
 
         staging = staging_of(target)
         remove(staging)
@@ -606,7 +626,7 @@ class Reframer:
         added = self._write(staging, source, built, located, counts)
         self._write_navigation(
             staging, source, roots, built, located, policy, counts, schema_name, flagged,
-            queue, self._url_for(product, version), placements, cut,
+            queue, self._url_for(product, version), placements, cut, worked,
         )
         self._write_origins(staging, product, version, located, standalone)
 
@@ -848,6 +868,7 @@ class Reframer:
         url_of: Callable[[PurePosixPath], str],
         placements: dict[int, tuple[Page, str]],
         cut: set[PurePosixPath],
+        worked: list[dict[str, str]] | None = None,
     ) -> None:
         """Copies the assets through, then writes `toc.yml` and the three sidecars.
 
@@ -883,7 +904,7 @@ class Reframer:
         # Always written, even empty: an absent file is indistinguishable from a
         # merge that predates the queue, and a writer checking for pending work
         # should see a header and no rows rather than have to ask why.
-        review.write(staging / "review-queue.csv", queue)
+        review.write(staging / "review-queue.csv", queue, worked or ())
         renames.write(
             staging / renames.RENAME_MAP,
             renames.rows(built, renames.breadcrumbs(roots), url_of, cut),
