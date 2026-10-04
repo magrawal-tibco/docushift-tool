@@ -2536,7 +2536,7 @@ The fourth row arrived in Phase 7c and is a narrowing of the third, not a fourth
 
 The boundary is load-bearing rather than tidy. `status` and `report` were both declared in Phase 1 with overlapping help text, and left that way they converge: a status screen grows a "problems" section, a report grows a progress table, and the tool ends with two commands that answer each other's question differently on the same day. So **`status` never reads the `findings` table and `report` never reads the catalog.** A `report` that needed the catalog to explain a slug would be reporting on a run in terms of state that has changed since the run — the exact confusion the run table was introduced to avoid.
 
-`validate` is the only one that gates, and that is `planning.md` §7.2's rule, not a property of how serious its findings are. A `convert` that finishes 99 of 100 versions and reports one error has done its job; failing it would make partial progress impossible and would put a skip flag in everybody's script within a week.
+`validate` is the only one whose exit code is a function of what it *found*, and that is `planning.md` §7.2's rule, not a property of how serious its findings are. A stage command's exit code says whether every version it selected *came through*: since Phase 34 (R12-06, the user's decision of 2026-10-05) a version that failed outright fails the run, while a version that converted and merely reported an error does not. A `convert` that finishes 99 of 100 versions still writes all 99; it exits 1 so a script cannot mistake the one lost version for success.
 
 ### 7.2 What `status` can and cannot know
 
@@ -2557,9 +2557,9 @@ One run is a row in `runs` and its findings are rows in `findings`, written by t
 
 Three rules, and they are three different conditions that a single "did it work" flag would collapse:
 
-1. **A stage command that did its work exits 0, even having reported errors.** Reporting is the work.
+1. **A stage command exits 1 if any selected version failed, and 0 otherwise, even having reported errors.** Reporting is the work; losing a version is not. `download`, `extract`, `convert`, `reframe` and `sync` all follow this since Phase 34 (R12-06); the per-command table is in `user-guide.md`.
 2. **A stage command whose selection matched nothing exits 1.** `--batch poc-1` against a batch nobody tagged is not a successful run of zero versions, and in a script it is indistinguishable from one unless the exit code says so. `--dry-run` is unaffected: listing what would happen *is* the work.
-3. **`validate` exits 1 if and only if it recorded at least one `error`.** The only command in the tool whose exit code is a function of what it found.
+3. **`validate` (and `csh validate`) exits 1 if and only if it recorded at least one `error`.** The only commands in the tool whose exit code is a function of what they found.
 
 ### 7.5 What `validate` walks, and what it refuses to do
 
