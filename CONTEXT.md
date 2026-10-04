@@ -189,9 +189,12 @@ Per-family folders are created on demand by the downloader, not at startup: pre-
 1. **Phase 34, the whole-tool code review**, in progress (batch 3 fixed, batch 4 awaiting triage): twelve component units,
    then three cross-cutting passes, find first and fix after triage
    ([`planning.md` §1](docs/planning.md#1-active-phases)).
-2. The two carried-forward technical items are confirmed or closed during Phase 34
+2. **Phase 37, one sheet for the family decision**, planned and awaiting approval: four
+   read-only columns in `products.csv` (family name, description, size, rule suggestion)
+   so families can be reviewed and reassigned in one place.
+3. The two carried-forward technical items are confirmed or closed during Phase 34
    ([list](docs/planning.md#carried-forward-open-items)).
-3. Product-level open issues, with owners: [`docs/open-issues.md`](docs/open-issues.md).
+4. Product-level open issues, with owners: [`docs/open-issues.md`](docs/open-issues.md).
 
 ## 5. Where to Look
 

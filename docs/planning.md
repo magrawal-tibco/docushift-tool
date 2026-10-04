@@ -92,6 +92,38 @@ Its findings can then be read and fixed without loading the rest of the tool.
 
 ---
 
+### Phase 37: One Sheet for the Family Decision — **Planned, 2026-10-04**
+
+**Why.** The user wants to review which product belongs to which family, then keep or reassign each one, from a single sheet. Today the facts needed are split. `products.csv` has the product-to-family key, and `taxonomy.yaml` has the family's name, its description and the keyword rules. Measured on 2026-10-04:
+
+- **The two files never contradict each other.** All 45 families used in `products.csv` are declared under their BU. Three declared families have no product: `tibco/analytics`, `tibco/datasynapse`, `datasynapse/general`.
+- **The keyword rules have drifted from the catalog.** For **206 of the 271** `taxonomy_rule` products, today's rules name a different family. The catalog uses the finer families and the rules still use the broad ones: `bw-plugin` 85 and `flogo-connectors` 64 → `integration`, `iprocess` 17 → `bpm`, `businessevents`/`businessworks` 8 each → `integration`, `streaming` 7 → `analytics`, `ems` 5 → `messaging`. Since Phase 32 the rules only advise, so no output is wrong, but the advice is misleading.
+- **154 products are `unclassified` but already carry a family**: 41 in `tibco/general`, and the rest spread over 11 families. This is Phase 34's deferred R2-09.
+
+#### Decisions
+
+| decision | choice | why |
+|---|---|---|
+| **Columns** | Four read-only columns after `family_source`: `_family_name` and `_family_description` (from `taxonomy.yaml`), `_family_products` (how many products share the product's `bu`/`family`), `_rule_family` (what today's keyword rules would pick) | The user's choice (2026-10-04). Placed beside `family` so each row reads left to right: current family, what it means, how big it is, what the rules say |
+| **Read-only, regenerated on every write** | Edits to them are ignored, exactly like `versions.csv`'s `_bu` / `_family` | They are views of `taxonomy.yaml` and of the catalog itself. A hand edit there would be a second, silently ignored copy of the truth. The user reassigns by editing `family`, as now |
+| **Underscore prefix** | `_family_name`, not `family_name` | The catalog's existing marker for a derived column (`_bu`, `_has_csh`, the inventory columns). It tells a spreadsheet user "don't type here" |
+| **`_rule_family` format** | The family key; `bu/family` only when the rule's BU differs from the product's; blank when no rule matches | Same-BU differences are the common case and read cleanly. A cross-BU suggestion is rare and must not read as a same-BU family of that name |
+| **An undeclared family** | `_family_name` and `_family_description` blank | The blank is the signal. `is_known_family` already warns on the write path |
+| **Empty families** | Listed by `catalog triage`, which gains a "declared, no products" section | A family with no product has no row to appear on in `products.csv` |
+| **Rules unchanged** | This phase changes nothing in `taxonomy.yaml` or any family | The user decides from the sheet. Realigning the rules to the finer families is a follow-up decision, not a side effect |
+
+#### Steps
+
+1. `catalog.py`: add the four names to `PRODUCT_COLUMNS` after `family_source`, fill them at write time from `ConfigManager` (blank when the manager has no config), and ignore them on read.
+2. `catalog triage`: add the empty-families section.
+3. Tests: header order; values for a declared, an undeclared and a cross-BU-rule product; a hand edit to a `_` column is discarded on save; load-then-save stays byte-identical; empty families listed.
+4. Regenerate `products.csv` once through `catalog import`, and diff it. Only the four new columns may change.
+5. Docs: `architecture.md` §3.2 (the column table), `user-guide.md` (how to read the sheet), and the `propagate-catalog-edit` skill (the new columns regenerate like `_family`).
+
+*Exit: `products.csv` carries the four columns on all 669 rows; every other cell is byte-identical to before; `_rule_family` disagrees with `family` on the counts measured above (206 among `taxonomy_rule`); `catalog triage` names the three empty families; tests and lint clean.*
+
+---
+
 ## Carried-Forward Open Items
 
 Technical items a finished phase recorded as *open, not fixed*. Product-level issues
