@@ -53,6 +53,15 @@ the old shape would stop being recognised as ours, survive as foreign rows, and
 sit beside a full set of new ones -- every map doubled, half of it pointing at
 URLs that never existed. So `owned_prefixes` claims both shapes: the old one to
 delete, the new one to write.
+
+**Changing the host is the same trap, and is closed the other way** (Phase 34,
+R10-02). The host is the one part of a row this tool does not know, and the
+documented next step is to fill it in. Ownership compared the whole URL against
+prefixes built from the base configured *now*, so the first sync after
+`publish_base_url` was set kept every host-less row as foreign and added a hosted
+copy beside it: 17,252 rows became 34,504 on an EMS copy, and the run reported
+success. Ownership is therefore read from the path after the scheme and host
+(`_ownable`), and a base change replaces rows instead of adding to them.
 """
 
 from pathlib import Path, PurePosixPath
@@ -132,6 +141,21 @@ def _legacy_prefix(base: str, tree_name: str, locale: str, slug: str,
     """
     url = links.emit(f"{tree_name}/{locale}/{slug}/{doc_class}/{segment}/", "")
     return f"{base.rstrip('/')}/{url}" if base else url
+
+
+def _ownable(url: str) -> str:
+    """A row's URL with any scheme and host removed -- what ownership compares on.
+
+    `https://host/us/en/…` and the host-less `us/en/…` are the same published
+    address under two values of `publish_base_url`, and a row is ours or not
+    whichever value it was written under (R10-02). The path is not decoded: both
+    sides were encoded by `links.emit`, so they agree as written.
+    """
+    text = str(url)
+    parts = urlsplit(text)
+    if parts.scheme or parts.netloc:
+        text = parts.path
+    return text.lstrip("/")
 
 
 def parse(text: str) -> list[dict[str, Any]] | None:
@@ -216,13 +240,21 @@ def owned_prefixes(present: set[str], base: str, tree_name: str, locale: str,
     prefix this tool would no longer recognise as its own. Unclaimed, they would
     survive verbatim beside a full set of replacements and double every map.
     Claiming the old shape deletes them; only the new one is ever written.
+
+    Returned in `_ownable` form, host removed, which is how `merge` compares them
+    (R10-02). Each shape is built under both the configured base and none, so a
+    base carrying a path of its own (`https://host/docs`) still claims the rows a
+    host-less run wrote.
     """
     shapes: list[str] = []
     for segment in sorted(present):
         if not segment:
             continue
-        shapes.append(prefix(base, tree_name, locale, slug, doc_class, segment))
-        shapes.append(_legacy_prefix(base, tree_name, locale, slug, doc_class, segment))
+        for under in dict.fromkeys((base, "")):
+            for shape in (prefix, _legacy_prefix):
+                owned = _ownable(shape(under, tree_name, locale, slug, doc_class, segment))
+                if owned not in shapes:
+                    shapes.append(owned)
     return shapes
 
 
@@ -240,6 +272,9 @@ def merge(existing: list[dict[str, Any]], generated: list[dict[str, Any]],
     `docs.tibco.com` URL that matches no prefix this tool could own: comparing on
     it would find nothing entitled, regenerate nothing, and append a second copy
     of every row on every run.
+
+    The row is compared in `_ownable` form, host removed, against prefixes
+    `owned_prefixes` already returns in that form (R10-02).
     """
     if not existing:
         return list(generated)
@@ -247,7 +282,7 @@ def merge(existing: list[dict[str, Any]], generated: list[dict[str, Any]],
     tail: list[dict[str, Any]] = []
     replaced = False
     for row in existing:
-        if any(str(row.get(key, "")).startswith(known) for known in prefixes):
+        if any(_ownable(row.get(key, "")).startswith(known) for known in prefixes):
             replaced = True
             continue
         (tail if replaced else head).append(row)

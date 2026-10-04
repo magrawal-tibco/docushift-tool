@@ -12,8 +12,12 @@ from docushift.sync import versions as version_file
 from docushift.sync.versions import VersionRow
 
 
-def make(number: str, date: str | None = "2025-11-04", archived: bool = False) -> ProductVersion:
-    return ProductVersion(slug="tibco-ems", version=number, release_date=date, is_archived=archived)
+def make(number: str, date: str | None = "2025-11-04", archived: bool = False,
+         eligible: bool | None = None) -> ProductVersion:
+    # An archived row defaults to not eligible, as a blank cell reads (theme I).
+    eligible = not archived if eligible is None else eligible
+    return ProductVersion(slug="tibco-ems", version=number, release_date=date,
+                          is_archived=archived, convert_eligible=eligible)
 
 
 # -- dates ----------------------------------------------------------------------
@@ -82,6 +86,17 @@ def test_an_archived_version_never_reaches_the_drop_down() -> None:
     rows = version_file.generated_rows([make("10.4.0"), make("8.6.0", archived=True)], {"10-4-0", "8-6-0"})
 
     assert [row.path for row in rows] == ["/10-4-0"]
+
+
+def test_an_archived_version_marked_for_migration_does_reach_it() -> None:
+    """R10-01. `sync` publishes an archived row whose `convert_eligible` is true,
+    so the drop-down has to list it or the folder is reachable from nowhere."""
+    versions = [make("10.4.0"), make("8.6.0", archived=True, eligible=True)]
+
+    rows = version_file.generated_rows(versions, {"10-4-0", "8-6-0"})
+
+    assert [row.path for row in rows] == ["/10-4-0", "/8-6-0"]
+    assert "/8-6-0" in version_file.owned_paths(set(), versions)
 
 
 def test_a_version_the_target_has_never_been_synced_is_absent_not_dangling() -> None:

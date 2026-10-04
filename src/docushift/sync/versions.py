@@ -102,13 +102,28 @@ def title_for(version: ProductVersion) -> str:
 # -- assembly ------------------------------------------------------------------
 
 
+def listed(version: ProductVersion) -> bool:
+    """Whether a catalog row belongs in the drop-down once its folder is published.
+
+    Active rows, and **archived rows marked for migration** (Phase 34, R10-01).
+    `sync` selects what `download` selects, and that includes an archived row
+    whose `convert_eligible` is true -- 88 of them on 45 products when this was
+    measured. Such a version is placed like any other, so leaving it out of the
+    drop-down published folders no page links to; for `tibco-designer` 5.10.0 that
+    was the product's only content. An archived row nobody marked stays out, as
+    §6.2.3 has it: its history is the archives index.
+    """
+    return not version.is_archived or version.convert_eligible
+
+
 def generated_rows(versions: list[ProductVersion], present: set[str]) -> list[VersionRow]:
-    """The catalog's active rows for one product, narrowed to what is on disk.
+    """The catalog's listed rows for one product (`listed`), narrowed to what is on disk.
 
     `present` is the set of directory names the doc-class folder holds. A version
     the catalog lists but this target has never been synced is absent rather than
-    listed pointing at nothing; a directory the catalog no longer calls active is
-    absent too, and its folder stays on disk for 6d's archives tree to reach.
+    listed pointing at nothing. A directory whose row is no longer `listed` -- a
+    version archived after it was published -- is absent too; its folder stays on
+    disk, untouched, and `validate` names it (`DROPDOWN_INCONSISTENT`).
 
     Non-numeric strings sort last (`is_numeric_version`). Re-measured 2026-09-15:
     the 20 that exist sit on 20 distinct products, one each, and only 4 of those
@@ -116,7 +131,7 @@ def generated_rows(versions: list[ProductVersion], present: set[str]) -> list[Ve
     list and "sorts last" is invisible. The run report is the only place they
     surface, which is why `VERSION_NOT_NUMERIC` is a warning and not a note.
     """
-    selected = [v for v in versions if not v.is_archived and version_segment(v.version) in present]
+    selected = [v for v in versions if listed(v) and version_segment(v.version) in present]
     numeric = sorted(
         (v for v in selected if is_numeric_version(v.version)),
         key=lambda v: natural_version_key(v.version),
@@ -191,8 +206,8 @@ def merge(existing: list[VersionRow], generated: list[VersionRow], owned: set[st
 
 
 def owned_paths(present: set[str], versions: list[ProductVersion]) -> set[str]:
-    """The `/{segment}` strings `merge` may rewrite: on disk, or active in the catalog."""
-    active = {version_segment(v.version) for v in versions if not v.is_archived}
+    """The `/{segment}` strings `merge` may rewrite: on disk, or `listed` in the catalog."""
+    active = {version_segment(v.version) for v in versions if listed(v)}
     return {f"/{segment}" for segment in (present | active) if segment}
 
 

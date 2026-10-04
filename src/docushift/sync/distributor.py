@@ -463,19 +463,22 @@ class WorkspaceDistributor:
             if length > PUBLISHED_PATH_LIMIT:
                 return self._too_long(slug, number, segment, name, length, doc_class)
 
-        if not force and _documents_current(files, destination):
-            return SyncResult(slug, number, SyncOutcome.CURRENT, path=destination,
-                              segment=segment, doc_class=doc_class)
-
-        entries, unreadable = document_index.entries_for(files)
-        for path, error in unreadable:
-            self._record(
-                "DOCUMENT_UNREADABLE", slug, number,
-                message=f"{path.name}: {error}; titled from its filename",
-            )
+        # Both reads of the source files sit inside the guard (R10-11): a routed
+        # file that vanishes or will not `stat` between routing and here raised
+        # out of `sync_many` and lost the run's findings with it.
         try:
+            if not force and _documents_current(files, destination):
+                return SyncResult(slug, number, SyncOutcome.CURRENT, path=destination,
+                                  segment=segment, doc_class=doc_class)
+
+            entries, unreadable = document_index.entries_for(files)
+            for path, error in unreadable:
+                self._record(
+                    "DOCUMENT_UNREADABLE", slug, number,
+                    message=f"{path.name}: {error}; titled from its filename",
+                )
             count, size = self._place_documents(entries, destination, product, version, doc_class)
-        except OSError as exc:  # pragma: no cover - filesystem failure, not logic
+        except OSError as exc:
             return SyncResult(slug, number, SyncOutcome.FAILED, segment=segment,
                               message=f"{type(exc).__name__}: {exc}", doc_class=doc_class)
 
@@ -732,24 +735,30 @@ class WorkspaceDistributor:
         """
         staging = destination.with_name(destination.name + STAGING_SUFFIX)
         remove(staging)
-        staging.mkdir(parents=True, exist_ok=True)
-        size = 0
-        for entry in entries:
-            if entry.source is not None:
-                shutil.copy2(entry.source, staging / entry.source.name)
-                size += entry.bytes
+        try:
+            staging.mkdir(parents=True, exist_ok=True)
+            size = 0
+            for entry in entries:
+                if entry.source is not None:
+                    shutil.copy2(entry.source, staging / entry.source.name)
+                    size += entry.bytes
 
-        templates = self.config.aem_templates_dir
-        (staging / "index.md").write_text(index, encoding="utf-8")
-        (staging / "toc.yml").write_text(
-            archive_index.render_toc(title, product.display_name, templates), encoding="utf-8"
-        )
-        (staging / "metadata.yml").write_text(
-            navigation.render_metadata([("csg-product", product.display_name)],
-                                       templates, "product"),
-            encoding="utf-8",
-        )
-        swap(staging, destination)
+            templates = self.config.aem_templates_dir
+            (staging / "index.md").write_text(index, encoding="utf-8")
+            (staging / "toc.yml").write_text(
+                archive_index.render_toc(title, product.display_name, templates), encoding="utf-8"
+            )
+            (staging / "metadata.yml").write_text(
+                navigation.render_metadata([("csg-product", product.display_name)],
+                                           templates, "product"),
+                encoding="utf-8",
+            )
+            swap(staging, destination)
+        except BaseException:
+            # The other three placers' guard, which this one lacked (R10-09): a ZIP
+            # copy that fails partway left `archives.part` in the published tree.
+            remove(staging)  # Phase 15c: never leave `.part` in a published tree.
+            raise
         return size
 
     # -- one product -----------------------------------------------------------
@@ -783,7 +792,15 @@ class WorkspaceDistributor:
         catalog_versions = list(product.versions.values())
         everywhere: set[str] = set()
         for _name, folder in folders:
-            present = {child.name for child in folder.iterdir() if child.is_dir()}
+            # A staging sibling is not a published version (R10-03). A hard-killed
+            # run never reaches `_place`'s cleanup, and its `11-1-0.part` carries a
+            # per-version `301.yml` the map assembly would otherwise publish --
+            # 1,171 of 7,070 Streaming rows pointed into one. `validate` skips the
+            # same names (`validation/tree.py`) and reports them as residue.
+            present = {
+                child.name for child in folder.iterdir()
+                if child.is_dir() and not child.name.endswith(STAGING_SUFFIX)
+            }
             everywhere |= present
             self._write_dropdown(folder, present, catalog_versions, templates, stats)
             if folder.name == ONLINE_HELP:
@@ -906,7 +923,9 @@ class WorkspaceDistributor:
         not in the file and has nothing to report.
         """
         for version in product.versions.values():
-            if version.is_archived or version_segment(version.version) not in present:
+            # `listed`, the drop-down's own test, so an archived row marked for
+            # migration is reported exactly when it is listed (R10-01).
+            if not version_file.listed(version) or version_segment(version.version) not in present:
                 continue
             if not is_numeric_version(version.version):
                 self._record(

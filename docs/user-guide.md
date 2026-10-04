@@ -1161,6 +1161,11 @@ all. The run report tells you which you got:
 17252 redirect(s) in 2 published map(s), tree-rooted (no publish_base_url set).
 ```
 
+Filling in the host later is safe. `sync` decides which rows are its own from the path after
+the host, so the next run replaces the tree-rooted rows with hosted ones rather than adding a
+second set beside them; changing or clearing the host works the same way. A `.part` folder
+left beside the versions by an interrupted run is not read into either map.
+
 `301.yml` is assembled by the same code under the same rules, with one difference that follows
 from what it holds: only the **`to`** side is rewritten into a published URL, because the
 `from` side is already an absolute address on `docs.tibco.com`. That also decides which rows
@@ -1256,7 +1261,7 @@ en-us-tib-messaging-userdocs-resources/ # the bulk tree
 
 Thirteen things to expect:
 
-- **`version.yml` is the drop-down, and a scoped sync does not shrink it.** Each doc-class gets its own, listing only the versions that doc-class actually holds — so `user-guides` and `online-help` will legitimately disagree. It is rebuilt by reading the folder on disk and matching it against the catalog's active versions, *not* from what the run just wrote, so `sync --product tibco-ems --version 10.4.0` updates one entry and leaves the other thirty-seven alone. Titles carry the release date (`10.4.0 (Feb 2026)`); an undated version keeps the version and drops the bracket.
+- **`version.yml` is the drop-down, and a scoped sync does not shrink it.** Each doc-class gets its own, listing only the versions that doc-class actually holds — so `user-guides` and `online-help` will legitimately disagree. It is rebuilt by reading the folder on disk and matching it against the catalog's active versions — plus any archived version you marked `convert_eligible`, which `sync` publishes like an active one — *not* from what the run just wrote, so `sync --product tibco-ems --version 10.4.0` updates one entry and leaves the other thirty-seven alone. Titles carry the release date (`10.4.0 (Feb 2026)`); an undated version keeps the version and drops the bracket.
 
 - **You can hand-edit `version.yml` and DocuShift will not undo it.** The AEM schema allows a row pointing at an absolute URL, so any row whose `path` is not a folder in that doc-class is preserved exactly where you put it. If the file will not parse, sync leaves it completely alone and says so in the report rather than replacing it.
 

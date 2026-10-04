@@ -1451,3 +1451,127 @@ def test_an_unparseable_published_origin_map_is_left_alone_and_named(
 
     assert (folder / ORIGIN_MAP).read_text(encoding="utf-8") == "redirects: not-a-list\n"
     assert any(ORIGIN_MAP in entry for entry in stats.unparsed)
+
+
+# -- Phase 34 review: what publishing wrote wrong (R10) ------------------------------
+
+
+def test_an_archived_version_marked_for_migration_is_listed_in_the_drop_down(
+    config, catalog, product, target
+) -> None:
+    """R10-01. `sync` selects what `download` selects, which includes an archived
+    row with `convert_eligible=true` -- 88 of them on 45 products. Placed and left
+    out of `version.yml`, its folders were published with no page linking to them;
+    for `tibco-designer` 5.10.0 that was the product's only content."""
+    archived = ProductVersion(slug="tibco-ems", version="5.10.0", is_archived=True,
+                              convert_eligible=True, release_date="")
+    product.versions = {"5.10.0": archived}
+    extract_tree(config, product, "5.10.0", **SHIPMENT)
+    findings = FindingsRun("sync")
+
+    WorkspaceDistributor(config, catalog, findings=findings).sync_many([(product, archived)], target)
+
+    for doc_class in (USER_GUIDES, RELEASE_INFORMATION):
+        path = published(target, "5-10-0", doc_class).parent / "version.yml"
+        rows = yaml.safe_load(path.read_text(encoding="utf-8"))["versions"]
+        assert [row["path"] for row in rows] == ["/5-10-0"]
+    # Reported exactly when it is listed, like any other drop-down row. (The stub
+    # PDFs are also noted as unreadable, which is not this test's business.)
+    assert "VERSION_UNDATED" in [f.code for f in findings.all]
+
+
+def test_setting_the_host_replaces_the_published_rows_instead_of_doubling_them(
+    config, catalog, distributor, product, target
+) -> None:
+    """R10-02. Ownership was decided against prefixes built from the base set
+    *now*, so the first sync after `publish_base_url` was filled in kept every
+    host-less row as foreign and wrote a hosted copy beside it: 17,252 rows became
+    34,504 on an EMS copy, and the run reported success."""
+    opt_in(config, product.slug)
+    origin_version(config, catalog, product, "10.4.0")
+    distributor.sync_many([(product, product.versions["10.4.0"])], target)
+    assert len(published_map(target, product)["redirects"]) == 1
+    assert len(published_origins(target, product)["redirects"]) == 1
+
+    def resync_under(base: str) -> None:
+        # A fresh read of `publishing.yaml`, as the next `docushift sync` would do.
+        (config.config_dir / "publishing.yaml").write_text(
+            f'publish_base_url: "{base}"\n', encoding="utf-8"
+        )
+        config._publishing_cache = None
+        distributor.sync_many([(product, product.versions["10.4.0"])], target)
+
+    resync_under("https://docs.example.com")
+
+    for rows in (published_map(target, product)["redirects"],
+                 published_origins(target, product)["redirects"]):
+        assert len(rows) == 1
+        assert rows[0]["to"].startswith("https://docs.example.com/us/en/")
+
+    # On to another host, or back to none: the path decides, not the host.
+    resync_under("https://other.example.com")
+    resync_under("")
+    rows = published_origins(target, product)["redirects"]
+    assert len(rows) == 1
+    assert rows[0]["to"].startswith(f"{SERVED}/")
+
+
+def test_a_leftover_staging_folder_is_not_published_into_the_doc_class_map(
+    config, catalog, distributor, product, target
+) -> None:
+    """R10-03. A hard-killed run never reaches `_place`'s cleanup. The next run's
+    map assembly read the staging folder's per-version `301.yml` like a published
+    version's: 1,171 of 7,070 Streaming rows pointed into `11-1-0.part`."""
+    opt_in(config, product.slug)
+    origin_version(config, catalog, product, "10.4.0")
+    distributor.sync_many([(product, product.versions["10.4.0"])], target)
+    folder = target / TREE / "en-us" / product.slug / ONLINE_HELP
+    leftover = folder / "10-3-1.part"
+    leftover.mkdir()
+    (leftover / ORIGIN_MAP).write_text(ORIGINS, encoding="utf-8")
+    (leftover / REDIRECT_MAP).write_text(MERGED, encoding="utf-8")
+
+    distributor.sync_many([(product, product.versions["10.4.0"])], target)
+
+    for rows in (published_map(target, product)["redirects"],
+                 published_origins(target, product)["redirects"]):
+        assert not any(".part" in row["to"] for row in rows)
+        assert len(rows) == 1
+
+
+def test_a_failed_archive_placement_leaves_no_part_directory_behind(
+    config, distributor, product, target, monkeypatch
+) -> None:
+    """R10-09. The other three placers remove their staging sibling on failure;
+    this one left `archives.part` in the published tree until the next run."""
+    product.versions["9.1.0"] = ProductVersion(slug="tibco-ems", version="9.1.0", is_archived=True)
+
+    def explode(*args, **kwargs):
+        raise OSError("disk full")
+
+    monkeypatch.setattr("docushift.sync.distributor.swap", explode)
+
+    result = distributor.sync_archives(product, target)
+
+    assert result.outcome is SyncOutcome.FAILED
+    assert not resources(target, "archives.part").exists()
+
+
+def test_a_document_that_cannot_be_read_fails_its_row_rather_than_the_run(
+    config, distributor, product, target, monkeypatch
+) -> None:
+    """R10-11. `sync_documents` says it never raises, but its currency check and
+    its titling both read the source files outside the guard. An `OSError` there
+    escaped `sync_many` and lost the run's findings with it."""
+    extract_tree(config, product, "10.4.0", **SHIPMENT)
+
+    def explode(files):
+        raise PermissionError("locked")
+
+    monkeypatch.setattr("docushift.sync.distributor.document_index.entries_for", explode)
+
+    stats = distributor.sync_many([(product, product.versions["10.4.0"])], target)
+
+    failed = {r.doc_class for r in stats.failures}
+    assert failed == {USER_GUIDES, RELEASE_INFORMATION, REFERENCE_DOCUMENTS}
+    assert all("locked" in r.message for r in stats.failures)

@@ -24,11 +24,14 @@ them against the 60-product API sample §10.6 was written from:
 - **`zip_url` is already absolute** in 2,086 of the 2,100, and absent in the other
   14. There is no `{base_url}{zipPath}` to compose, so nothing here touches
   `publish_base_url`.
-- **Nothing is ever cross-linked to `online-help/`.** 0 archived versions are also
+- **Nothing is cross-linked to `online-help/`.** 0 archived versions are also
   live -- the catalog keys `Product.versions` by version string, so one version
-  being both is unrepresentable -- and 0 archived rows are `convert_eligible`, so
-  no archived version is published for a link to point at. The `ARCHIVE_ALSO_LIVE`
-  code registered for that link was retired with this phase.
+  being both is unrepresentable -- and the `ARCHIVE_ALSO_LIVE` code registered for
+  that link was retired with this phase. Its second premise, that 0 archived rows
+  are `convert_eligible`, no longer holds: 88 are, on 45 products (Phase 34,
+  R10-01). `sync` publishes those like any other selected version and the
+  drop-down lists them (`versions.listed`); this index still lists them as ZIP
+  downloads only, with no link to the published folder.
 """
 
 from collections.abc import Iterable
