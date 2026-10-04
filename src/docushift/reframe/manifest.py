@@ -79,6 +79,8 @@ def summary(
             # Named separately because §6 fails on one and tolerates the other.
             "unresolved": counts.unresolved,
             "orphaned": counts.orphaned,
+            # Same-topic `#fragment`s the merge's heading numbering moved (R9-01).
+            "renumbered": counts.renumbered,
         },
         "merged": [_page(page, flagged.get(page.path, [])) for page in pages],
     }

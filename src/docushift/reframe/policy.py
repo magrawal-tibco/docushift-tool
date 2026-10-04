@@ -41,7 +41,9 @@ _NOT_OUTPUT = frozenset({"publish"})
 #: that does not carry its title queues for review (Phase 34, R1-03). Neither
 #: moves a boundary, but both change the tree, and a CURRENT tree would keep
 #: the old answer for good.
-_ALGORITHM = 4
+#: 5 = a link keeps the heading its fragment names when the merge renumbers
+#: repeated headings (Phase 34, R9-01, R9-02). Links only, no boundary.
+_ALGORITHM = 5
 
 
 @dataclass(frozen=True)

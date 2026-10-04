@@ -168,6 +168,19 @@ generated pages drops sharply.
 - Images and non-`.md` targets: recompute the relative path from the new page's directory
 - Unresolvable targets: leave unchanged and **count them** for the validation report
 
+> *As built (Phase 34, R9-01 and R9-02, 2026-10-04):* the `#anchor` a link gets is the one
+> the heading it **names** lands on, not always the topic's section anchor. Since Phase 30 a
+> converted link points at an exact heading, and since Phase 29 the anchor is the platform's
+> slug of the heading text, numbered across the whole merged page — so a topic's second
+> `## Import` becomes `import-1` once an earlier topic on the page has one. A link into
+> another topic whose fragment names one of that topic's headings keeps that heading
+> (503 links had been sent to the top of the topic instead). A pure `#…` link is no longer
+> left untouched when the heading it names was renumbered: it follows the heading (9 links
+> in 4 versions had landed on another topic's heading). A fragment that names no heading in
+> the topic — a Stage 6a marker, or one already dangling in the source — is handled as
+> before: the section anchor for a cross-topic link, untouched for a pure fragment.
+> `reframe.yml` counts the re-pointed pure fragments as `links.renumbered`.
+
 **R4.1 — Page placement.** A page is written into the directory of its **first topic's** source
 path, and all relative paths are recomputed from there. This is what keeps directory-spanning
 cases correct without special-casing.

@@ -1470,6 +1470,70 @@ def test_a_reference_definition_is_rewritten_like_an_inline_link(linked):
     assert rewrite("[ref]: b.md\n", linked, counts) == "[ref]: #b\n"
 
 
+#: Two topics that each have an `## Import` sub-heading, merged onto one page --
+#: the shape of EMS 10.5.1's Kafka page, where the platform numbers the second
+#: one `import-1` because it numbers the whole page.
+KAFKA = {
+    "k/property.md": "# Property\n\n## Import\n\nSee [import](#import).\n",
+    "k/body.md": "# Body\n\n## Import\n\nSee [import](#import) and [marker](#ID-2FC4).\n",
+    "k/other.md": "# Other\n\nSee [body import](body.md#import) and [body](body.md#nowhere).\n",
+}
+
+
+def kafka_pages():
+    read = lambda source: KAFKA[str(source)]  # noqa: E731
+    topics = [Topic("Property", PurePosixPath("k/property.md"), 5),
+              Topic("Body", PurePosixPath("k/body.md"), 5, level=1)]
+    merged = Page("G", topics)
+    other = Page("G", [Topic("Other", PurePosixPath("k/other.md"), 5, level=1)])
+
+    def headings(topic):
+        return [line.lstrip("#").strip() for line in read(topic.source).splitlines()
+                if line.startswith("#")]
+
+    located = assign([merged, other], headings)
+    return merged, other, located, read
+
+
+def test_a_same_topic_fragment_follows_its_heading_when_the_merge_renumbers_it():
+    """R9-01. `#import` named the Body topic's own Import heading on its own page.
+
+    On the merged page the bare `#import` is the *Property* topic's heading, so
+    the link would land one topic early with nothing reporting it -- the anchor
+    exists, so `validate` cannot see it. It has to follow its heading to `import-1`.
+    A fragment naming no heading (a Stage 6a marker) is left as written.
+    """
+    merged, _other, located, read = kafka_pages()
+    counts = LinkCounts()
+
+    text, _ = render(merged, read, located, frozenset(PurePosixPath(p) for p in KAFKA), counts)
+
+    property_part, body_part = text.split("# Body", 1)
+    assert "[import](#import)" in property_part
+    assert "[import](#import-1)" in body_part
+    assert "[marker](#ID-2FC4)" in body_part
+    assert counts.renumbered == 1
+
+
+def test_a_cross_topic_link_to_a_sub_heading_keeps_its_sub_heading():
+    """R9-02. A converted link names the exact heading since Phase 30.
+
+    TRA Administrator's `Advanced_Tab_.md#global-variables` was rewritten onto the
+    Advanced Tab *section* anchor, so the reader landed above the heading the
+    author named. A fragment that names no heading in the target topic still
+    falls back to the section anchor, R4's original rule.
+    """
+    merged, other, located, read = kafka_pages()
+    counts = LinkCounts()
+
+    text, _ = render(other, read, located, frozenset(PurePosixPath(p) for p in KAFKA), counts)
+
+    page = merged.path.name
+    assert f"[body import]({page}#import-1)" in text
+    assert f"[body]({page}#body)" in text
+    assert counts.inter == 2
+
+
 # -- R7: frontmatter, and C5 at the grain it is decided at ----------------------
 
 

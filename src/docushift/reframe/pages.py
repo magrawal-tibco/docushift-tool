@@ -89,6 +89,10 @@ class LinkCounts:
     #: page. This is the only breakage the merge itself can create, and it is what
     #: §6's "zero newly broken links" is measured on.
     orphaned: int = 0
+    #: Same-topic `#fragment`s re-pointed because the merge renumbered the heading
+    #: they name (R9-01). Kept out of `checked`, which counts relative references
+    #: only, so the §6 arithmetic over those stays what it was.
+    renumbered: int = 0
 
     @property
     def rewritten(self) -> int:
@@ -186,13 +190,19 @@ def rewrite_links(
     located: dict[PurePosixPath, tuple[Page, str]],
     existing: frozenset[PurePosixPath],
     counts: LinkCounts,
+    here: Page | None = None,
 ) -> str:
     """R4. Retargets every relative reference in one topic body onto the new layout.
 
-    External, server-rooted and pure-fragment references are returned untouched,
-    which is R4's first clause and also the only safe reading: a `#foo` written by
-    an author points inside the topic it was written in, and that topic's content
-    is still contiguous on the merged page.
+    External and server-rooted references are returned untouched, which is R4's
+    first clause. **A pure `#foo` is not, any more (R9-01).** It points inside the
+    topic it was written in, and that topic's content is still contiguous on the
+    merged page -- but its *anchor* is not: `anchor_run` numbers the whole page,
+    so a topic's second `#### Import` becomes `import-2` and a bare `#import`
+    lands on an earlier topic's heading. EMS 10.5.1's Kafka page did exactly that.
+    `here` is the page being rendered, whose `sections` say where this topic's
+    headings went; a fragment that names none of them (a Stage 6a marker, or one
+    already dangling in the source) is left as written.
 
     Note that R4.2 makes the asset case a near no-op in practice: every topic on a
     page shares the page's own directory, so a recomputed relative path is almost
@@ -213,7 +223,8 @@ def rewrite_links(
             if span is None:
                 continue
             start, end = span
-            replacement = _retarget(body[start:end], source, page, located, existing, counts)
+            replacement = _retarget(body[start:end], source, page, located, existing, counts,
+                                    here)
             if replacement is not None:
                 edits.append((start, end, replacement))
     return _apply(body, edits)
@@ -235,9 +246,16 @@ def _retarget(
     located: dict[PurePosixPath, tuple[Page, str]],
     existing: frozenset[PurePosixPath],
     counts: LinkCounts,
+    here: Page | None = None,
 ) -> str | None:
     """One reference's new destination, or `None` to leave it exactly as written."""
     reference = links.classify(raw)
+    if reference.kind is links.ReferenceKind.FRAGMENT and here is not None:
+        moved = here.heading(source, reference.fragment) if reference.fragment else None
+        if moved is None or moved == reference.fragment:
+            return None
+        counts.renumbered += 1
+        return "#" + moved
     if not reference.resolvable:
         return None
     counts.checked += 1
@@ -246,6 +264,14 @@ def _retarget(
     found = located.get(target)
     if found is not None:
         destination, anchor = found
+        # R9-02: a fragment naming a heading inside the target topic keeps that
+        # heading. Since Phase 30 converted links point at the exact sub-heading,
+        # and handing every one the topic's section anchor sent 503 of them to
+        # the top of the right topic instead of the section the author named.
+        # Only a fragment naming no heading there -- a marker, or none at all --
+        # falls back to the section anchor, which is R4's original rule.
+        if reference.fragment:
+            anchor = destination.heading(target, reference.fragment) or anchor
         if destination.path == page:
             counts.intra += 1
             return "#" + anchor
@@ -316,7 +342,8 @@ def render(
     added = 0
     for topic in page.topics:
         _, body = split_frontmatter(read(topic.source))
-        body = rewrite_links(body.strip(), topic.source, page.path, located, existing, counts)
+        body = rewrite_links(body.strip(), topic.source, page.path, located, existing, counts,
+                             page)
         body, extra = shift_headings(body, topic.title, topic.level)
         parts.append(body)
         added += extra

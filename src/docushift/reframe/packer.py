@@ -104,6 +104,11 @@ class Page:
     #: Source path -> anchor, unique within this page (R2). Insertion-ordered, so
     #: iterating it walks the page's sections top to bottom.
     anchors: dict[PurePosixPath, str] = field(default_factory=dict)
+    #: Source path -> {anchor on the topic's own converted page -> anchor here}.
+    #: Every heading of every topic, not only the topic's own, because since
+    #: Phase 30 a link names the exact heading it means and the merge renumbers
+    #: repeated headings across the whole page (R9-01, R9-02). Filled by `assign`.
+    sections: dict[PurePosixPath, dict[str, str]] = field(default_factory=dict)
 
     @property
     def words(self) -> int:
@@ -112,6 +117,14 @@ class Page:
     @property
     def directory(self) -> str:
         return self.topics[0].directory if self.topics else ""
+
+    def heading(self, source: PurePosixPath, fragment: str) -> str | None:
+        """Where a heading `fragment` of topic `source` landed on this page, or None.
+
+        Lower-cased before the lookup because renderers fold anchor case, which is
+        the rule `validation.references.anchors` checks by.
+        """
+        return self.sections.get(source, {}).get(fragment.lower())
 
 
 @dataclass(frozen=True)
@@ -638,9 +651,20 @@ def assign(
             titles.extend(found)
 
         run = anchor_run(titles)
-        for topic, index in zip(page.topics, owned, strict=True):
+        ends = [*owned[1:], len(titles)]
+        for topic, index, end in zip(page.topics, owned, ends, strict=True):
             anchor = run[index]
             page.anchors[topic.source] = anchor
+            # R9-01/R9-02: the topic's own run is what its converted page numbered,
+            # and so what every incoming `#fragment` names. Position i of that run
+            # is position `index + i` of the page's. A topic with no H1 has its
+            # synthesized title in slot 0 here and not on its source page, which
+            # shifts the source numbering only when a real heading repeats that
+            # title -- a shape no measured topic has (`_Source.headings`).
+            own = anchor_run(titles[index:end])
+            page.sections[topic.source] = {
+                mine: theirs for mine, theirs in zip(own, run[index:end], strict=True) if mine
+            }
             # First placement wins the source-keyed entry: it is what
             # `redirects` and `csh` resolve through, and those want one
             # canonical destination per topic rather than a guide-specific one.
