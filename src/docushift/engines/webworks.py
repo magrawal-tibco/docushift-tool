@@ -22,7 +22,8 @@ What the corpus decided, and what each costs to get wrong:
   inside another (0 of 7,341 sampled) and not one marker cell carries a `width`.
   `Step -> StepInd -> Step` and `Bullet -> ListDash -> Bullet` are the nesting
   signature, so depth is read off the kind: an `Ind` suffix or `ListDash` is one
-  level in, a trailing `_2` is level two.
+  level in, a trailing `_2` is level two, and so is a run-together `2`
+  (`Unorderedlist2`, `ListDash2`; Phase 34, R7-02).
 - **`Chapter_outer` is a heading wearing a list's clothes.** It shares the shape,
   but in 185 sampled topics that carry one, `N1Heading` is absent from **all 185**
   -- so it is the topic's own title and becomes `#`, not a bullet.
@@ -143,6 +144,8 @@ _BULLETS = frozenset({
     "-", "–", "—", "*", "o", "−", "─",
 })
 # `1.`, `2)`, `(3)`, `a.`, `iv.` -- an ordinal, however the template drew it.
+# `Unorderedlist2`, `ListDash3`, `Orderedlist21`: a level written with no underscore.
+_JOINED_LEVEL = re.compile(r"^[A-Za-z]+(\d)\d?$")
 _ORDINAL = re.compile(r"^\(?(?:\d+|[A-Za-z]|[ivxIVX]+)[.)]?$")
 # Enough of the numeral system for a list marker: no procedure reaches step 40.
 _ROMAN = {"i": 1, "v": 5, "x": 10}
@@ -583,11 +586,28 @@ def _build_list(run: list[Tag]) -> list[Tag]:
         return []
     base = min(depths)
 
+    cells_of = [_outer_cells(node) if kind is not None else None
+                for node, kind in zip(run, kinds, strict=True)]
+    items = [
+        (position, max(_list_depth(kind) - base, 0), _item_kind(_text(cells[0])),
+         _text(cells[0]))
+        for position, (kind, cells) in enumerate(zip(kinds, cells_of, strict=True))
+        if kind is not None and cells is not None
+    ]
+    placed = dict(zip((entry[0] for entry in items), _nest_interruptions(items), strict=True))
+
     out: list[Tag] = []
     stack: list[_Level] = []
 
-    def open_level(depth: int, name: str) -> None:
+    def open_level(depth: int, name: str, marker: str) -> None:
         created = _SOUP.new_tag(name)
+        if name == "ol":
+            # Numbered as the source drew it: a run the bridge could not join, or
+            # one after a heading, opens on "8." and must not print "1." (R7-02).
+            # The renderer honours `start` (Phase 34, R5-02).
+            first = _first_number(marker)
+            if first > 1:
+                created["start"] = str(first)
         parent = stack[-1].last() if stack else None
         if parent is not None:
             parent.append(created)
@@ -595,8 +615,7 @@ def _build_list(run: list[Tag]) -> list[Tag]:
             out.append(created)
         stack.append(_Level(depth=depth, name=name, tag=created))
 
-    for node, kind in zip(run, kinds, strict=True):
-        cells = _outer_cells(node) if kind is not None else None
+    for position, (node, cells) in enumerate(zip(run, cells_of, strict=True)):
         if cells is None:
             # A `ListContinue` paragraph, a note set between two numbered steps, or
             # an `_outer` that is not the two-cell shape. All three are the previous
@@ -606,7 +625,7 @@ def _build_list(run: list[Tag]) -> list[Tag]:
             (target if target is not None else out).append(node.extract())
             continue
         marker, content = cells
-        depth = max(_list_depth(kind) - base, 0)
+        depth = placed[position]
         name = _item_kind(_text(marker))
 
         while len(stack) > 1 and stack[-1].depth > depth:
@@ -614,12 +633,12 @@ def _build_list(run: list[Tag]) -> list[Tag]:
         if stack and stack[-1].depth > depth:
             stack.pop()
         if not stack or stack[-1].depth < depth:
-            open_level(depth, name)
+            open_level(depth, name, _text(marker))
         elif stack[-1].name != name:
             # A kind change at the same level is a new list beside the old one,
             # never a continuation of it: `-` items and `1.` items are not one list.
             stack.pop()
-            open_level(depth, name)
+            open_level(depth, name, _text(marker))
 
         level = stack[-1]
         if level.name == "dl":
@@ -634,6 +653,62 @@ def _build_list(run: list[Tag]) -> list[Tag]:
             item.extend(list(content.children))
             level.tag.append(item)
     return out
+
+
+def _nest_interruptions(items: list[tuple[int, int, str, str]]) -> list[int]:
+    """Each item's depth, with a run set between two steps moved under the first.
+
+    `items` is `(position, depth, kind, marker)` per list item. `Step 1.`, two
+    `Bullet`s, `Step 2.` all read as depth 0 (TRA 5.12.2 `install.3.07.htm`), and a
+    kind change at one depth is a new list -- so the procedure split and every
+    later step printed one lower (Phase 34, R7-02: 214 of 5,717 numbered TRA
+    items). When the next numbered item at that depth is the **successor** of the
+    one before the interruption, the source numbered one procedure -- the same
+    evidence `_list_runs` bridges on -- and the interruption is that step's
+    content: every item in it moves one level deeper. Without a successor nothing
+    moves.
+    """
+    depths = [depth for _, depth, _, _ in items]
+    index = 0
+    while index < len(items):
+        _, depth, kind, marker = items[index]
+        following = index + 1
+        if (kind != "ol" or following >= len(items)
+                or items[following][1] != depth or items[following][2] == "ol"):
+            index += 1
+            continue
+        end = following
+        while end < len(items) and (
+            items[end][1] > depth or (items[end][1] == depth and items[end][2] != "ol")
+        ):
+            end += 1
+        if end < len(items) and items[end][1] == depth and _succeeds(marker, items[end][3]):
+            for inner in range(following, end):
+                depths[inner] += 1
+        index = end
+    return depths
+
+
+def _succeeds(previous: str, following: str) -> bool:
+    """Whether `following` is the next number after `previous`, in one scheme."""
+    numbered = _ordinals(previous)
+    follows = _ordinals(following)
+    return any(follows.get(scheme) == value + 1 for scheme, value in numbered.items())
+
+
+def _first_number(marker: str) -> int:
+    """The number a list's first marker draws, where it draws exactly one.
+
+    Decimal wins. A lone letter or numeral counts only when it has one reading:
+    `c.` is 3, but `i.` is the ninth letter and the first numeral, and guessing
+    between them would misnumber one or the other, so it opens at 1 as before.
+    """
+    readings = _ordinals(marker)
+    if "decimal" in readings:
+        return readings["decimal"]
+    if len(readings) == 1:
+        return next(iter(readings.values()))
+    return 1
 
 
 def _item_kind(marker: str) -> str:
@@ -655,10 +730,21 @@ def _item_kind(marker: str) -> str:
 
 
 def _list_depth(kind: str) -> int:
-    """How far in a list kind sits. Measured: the name is the only signal."""
+    """How far in a list kind sits. Measured: the name is the only signal.
+
+    The level is written `Step_2` and also, with no underscore, `Unorderedlist2`
+    (263 corpus items), `ListDash2`/`ListDash3` and `Orderedlist21` -- read as
+    level 0 until Phase 34 (R7-02), which split a step from its sub-list. In the
+    run-together form the first digit is the level (`Orderedlist21` sits beside
+    `Orderedlist2`); a name holding anything but letters before its digits, such
+    as the opaque `ID-000000c3`, is not read this way.
+    """
     stem, _, trailing = kind.rpartition("_")
     if stem and trailing.isdigit():
         return max(int(trailing) - 1, 0)
+    joined = _JOINED_LEVEL.match(kind)
+    if joined is not None:
+        return max(int(joined.group(1)) - 1, 0)
     if kind.endswith("Ind") or kind == "ListDash":
         return 1
     return 0
@@ -720,9 +806,7 @@ def _bridges(previous: Tag, following: Tag, gap: list[Tag]) -> bool:
     before, after = _outer_cells(previous), _outer_cells(following)
     if before is None or after is None:
         return False
-    numbered = _ordinals(_text(before[0]))
-    follows = _ordinals(_text(after[0]))
-    return any(follows.get(scheme) == value + 1 for scheme, value in numbered.items())
+    return _succeeds(_text(before[0]), _text(after[0]))
 
 
 def _ordinals(marker: str) -> dict[str, int]:

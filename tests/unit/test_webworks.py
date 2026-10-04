@@ -842,7 +842,8 @@ def test_a_heading_between_two_steps_starts_a_new_list(tmp_path: Path) -> None:
     ))
     assert "1. First procedure" in rendered
     assert "## Second Procedure" in rendered
-    assert "1. Looks consecutive" in rendered
+    # A new list, but numbered as the source drew it (R7-02): the reader saw 2.
+    assert "2. Looks consecutive" in rendered
 
 
 def test_a_restarted_marker_is_two_lists(tmp_path: Path) -> None:
@@ -856,6 +857,67 @@ def test_a_restarted_marker_is_two_lists(tmp_path: Path) -> None:
     assert rendered.count("1. First") == 1
     assert "Prose between." in rendered
     assert rendered.rstrip().endswith("1. Fresh start")
+
+
+def test_bullets_between_two_steps_nest_under_the_first(tmp_path: Path) -> None:
+    """R7-02: TRA 5.12.2 `install.3.07.htm` runs `Step 1.`, two `Bullet`s, `Step 2.`.
+
+    All three kinds read as depth 0, so the kind change opened a new list each
+    time and "2. Extract" rendered as "1." -- every later step off by one. The
+    next step continuing the numbering is the source saying the bullets belong to
+    step 1. The same holds with an indented `ListDash` under the bullets.
+    """
+    rendered = one(tmp_path, (
+        item("Step", "1.", "Open the download page")
+        + item("Bullet", "\u2022", "TIBCO Runtime Agent")
+        + item("ListDash", "\u2212", "Optional parts")
+        + item("Bullet", "\u2022", "TIBCO Rendezvous")
+        + item("Step", "2.", "Extract the archive")
+        + item("Step", "3.", "Navigate to the folder")
+    ))
+    assert "1. Open the download page\n\n   - TIBCO Runtime Agent" in rendered
+    assert "\n     - Optional parts" in rendered
+    assert "\n2. Extract the archive" in rendered
+    assert "\n3. Navigate to the folder" in rendered
+
+
+def test_bullets_after_a_step_stay_a_list_of_their_own_when_numbering_restarts(
+    tmp_path: Path,
+) -> None:
+    """No successor after the bullets, no evidence they belong to the step."""
+    rendered = one(tmp_path, (
+        item("Step", "1.", "Only step")
+        + item("Bullet", "\u2022", "A point")
+        + item("Step", "1.", "Fresh start")
+    ))
+    assert "\n- A point" in rendered
+    assert rendered.rstrip().endswith("1. Fresh start")
+
+
+def test_a_list_that_opens_past_one_keeps_its_first_number(tmp_path: Path) -> None:
+    """R7-02: Administrator 5.12.2 `install.2.08.htm`'s "8. Click Next" rendered as 1."""
+    rendered = one(tmp_path, (
+        '<div class="Body">Continue the wizard.</div>'
+        + item("Step", "8.", "Click Next")
+        + item("Step", "9.", "Click Finish")
+    ))
+    assert "8. Click Next" in rendered
+    assert "9. Click Finish" in rendered
+
+
+def test_a_trailing_digit_without_an_underscore_is_the_level(tmp_path: Path) -> None:
+    """R7-02: `Unorderedlist2` (263), `ListDash2`/`3` and `Orderedlist21` read as level 0.
+
+    So an `Unorderedlist2` item under an `Orderedlist1` step was a kind change at
+    one depth, and split the procedure.
+    """
+    rendered = one(tmp_path, (
+        item("Orderedlist1", "1.", "First")
+        + item("Unorderedlist2", "\u2022", "Detail")
+        + item("Orderedlist1", "2.", "Second")
+    ))
+    assert "1. First\n\n   - Detail" in rendered
+    assert "\n2. Second" in rendered
 
 
 def test_a_continuation_paragraph_belongs_to_its_item(tmp_path: Path) -> None:
