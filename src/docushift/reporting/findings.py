@@ -502,7 +502,8 @@ REGISTRY: dict[str, Code] = _codes(
     # not a slug-algorithm disagreement), which is what earns the code; the rate is
     # what forbids the gate.
     Code("ANCHOR_MISSING", Severity.WARNING, Stage.VALIDATE,
-         "A #fragment naming no heading and no id= in the file it resolves to",
+         "A #fragment naming no heading in the file it resolves to (an id= or "
+         "name= attribute is not an anchor since Phase 29)",
          "planning.md §7.4"),
     # The network is not the output. A proxy, an outage or a host that dislikes
     # HEAD would otherwise decide an exit code, and an exit code that depends on

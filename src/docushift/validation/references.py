@@ -24,8 +24,9 @@ sample published tree of 2026-09-16 (`planning.md` Phase 7b):
   parse inline Markdown inside a block-level HTML block, so `[%s](%s:%d)` in a
   passthrough table row is text. Reading it as a link produced the one
   `LINK_BROKEN` on the `ems` tree, against a printf format string present
-  verbatim in the source HTML. The `<a href>` and `id=`/`name=` patterns still
-  run over those regions -- that is where most of them live.
+  verbatim in the source HTML. The `<a href>` pattern still runs over those
+  regions -- that is where most of them live. (Anchors are heading slugs only
+  since Phase 29, so no `id=`/`name=` pattern runs anywhere; see `anchors()`.)
 - **Masking preserves offsets.** Code regions are overwritten with spaces rather
   than deleted, so every match's line number is the line number in the file the
   reader will open. A finding that names the wrong line is a finding somebody

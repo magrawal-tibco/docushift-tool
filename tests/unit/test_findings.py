@@ -306,3 +306,51 @@ def test_the_published_table_carries_every_registered_code() -> None:
     )
 
     assert {code for code in REGISTRY if f"| `{code}`" not in table} == set()
+
+
+# The §7.5 table's spellings. "warn" is the table's abbreviation, and a bold
+# `**error**` is emphasis, not a different severity.
+_TABLE_SEVERITY = {"warn": Severity.WARNING, "error": Severity.ERROR, "note": Severity.NOTE}
+
+
+def _published_rows() -> dict[str, tuple[str, str]]:
+    """`{code: (severity cell, stage cell)}` out of planning.md §7.5, markup stripped.
+
+    A code cell is "`CODE`" with an optional superscript marking the phase that
+    added it, and a stage cell may carry one too (`convert ³⁵`), so everything
+    after the backticked code and every non-ASCII character is dropped.
+    """
+    text = (Path(__file__).resolve().parents[2] / "docs" / "planning.md").read_text(
+        encoding="utf-8"
+    )
+    section = text.split("## 7.5 The Findings Register", 1)[1].split("\n---", 1)[0]
+    rows: dict[str, tuple[str, str]] = {}
+    for line in section.splitlines():
+        cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
+        if len(cells) < 3 or not cells[0].startswith("`"):
+            continue
+        code = cells[0].split("`")[1]
+
+        def plain(cell: str) -> str:
+            return "".join(char for char in cell if char.isascii()).strip("* ").strip()
+
+        rows[code] = (plain(cells[1]), plain(cells[2]))
+    return rows
+
+
+def test_the_published_table_agrees_with_the_register_on_severity_and_stage() -> None:
+    """R11-12. Presence was all the test above could see, so `INDEX_UNLINKED` sat
+    in the table under `sync` while the register -- and every row `report` reads --
+    said `validate`. `report --stage sync` then found nothing the table promised.
+    A reader consults the table; the registry is what runs. They must agree on
+    every column a gate or a filter depends on."""
+    rows = _published_rows()
+
+    assert set(rows) == set(REGISTRY)
+    wrong = {
+        code: rows[code]
+        for code, row in REGISTRY.items()
+        if (_TABLE_SEVERITY.get(rows[code][0]), rows[code][1])
+        != (row.severity, str(row.stage))
+    }
+    assert wrong == {}
