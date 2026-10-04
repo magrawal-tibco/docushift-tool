@@ -978,3 +978,43 @@ def test_a_current_package_does_not_walk_a_later_status_backwards(
     extractor.extract_one(product, version)
 
     assert catalog.state.get_version_state("tibco-ems", "10.4.0")["status"] == str(ConversionStatus.CONVERTED)
+
+
+def test_a_partial_walk_records_no_help_maps_assets_or_api_roots_either(
+    config: ConfigManager, catalog: CatalogManager, product: Product, version: ProductVersion,
+    monkeypatch,
+) -> None:
+    """X1-10. The columns were blanked, but `csh_source`, `asset_inventory` and
+    `api_roots` were written from the partial walk, and convert and sync trust a
+    record over a walk of their own: a help map in the unreadable folder was
+    missing from `csh.yml` with no finding naming it."""
+    import os
+    import types
+
+    from docushift.extractor import inventory as inventory_module
+
+    alias = '<CatapultAliasFile><Map Name="x" Link="a.htm" /></CatapultAliasFile>'
+    extractor = PackageExtractor(config, catalog)
+    place_package(config, product, version, {
+        "w/guide/Output.mcwebhelp": "", "w/guide/Data/HelpSystem.xml": "<x/>",
+        "w/guide/Data/Alias.xml": alias, "w/guide/a.htm": "<html/>",
+        "w/extra/Output.mcwebhelp": "", "w/extra/Data/HelpSystem.xml": "<x/>",
+        "w/extra/Data/Alias.xml": alias, "w/extra/a.htm": "<html/>",
+        "w/api/allclasses-frame.html": "", "w/api/x.html": "",
+    })
+
+    def unreadable(path):
+        if str(path).endswith("guide"):
+            raise PermissionError(5, "Access is denied")
+        return os.scandir(path)
+
+    proxy = types.SimpleNamespace(**{name: getattr(os, name) for name in dir(os) if not name.startswith("__")})
+    proxy.scandir = unreadable
+    monkeypatch.setattr(inventory_module, "os", proxy)
+    result = extractor.extract_one(product, version)
+    monkeypatch.undo()
+
+    assert result.inventory.partial
+    assert catalog.state.get_csh_sources("tibco-ems", "10.4.0") == []
+    assert catalog.state.get_asset_inventory("tibco-ems", "10.4.0") == []
+    assert catalog.state.get_version_metadata("tibco-ems", "10.4.0").get("api_roots", "") == ""

@@ -417,12 +417,19 @@ class PackageExtractor:
         slug, number = product.slug, version.version
         inventory = inventory_tree(tree, identified.engine, identified.roots)
 
+        # R3-04's rule for the three records as well as the columns (X1-10): a
+        # partial walk's help maps and API roots are a wrong answer, not a short
+        # one, and `convert` and `sync` trust a record over a walk of their own --
+        # a help map in the folder the walk could not read was missing from
+        # `csh.yml` with nothing naming it. Recorded empty, each reader falls
+        # back to locating them itself.
+        partial = inventory.partial
         if self.catalog.state is not None:
-            self.catalog.state.record_csh_sources(slug, number, inventory.csh_rows())
-            self.catalog.state.record_asset_inventory(slug, number, inventory.rows())
+            self.catalog.state.record_csh_sources(slug, number, [] if partial else inventory.csh_rows())
+            self.catalog.state.record_asset_inventory(slug, number, [] if partial else inventory.rows())
         self._set_metadata(
             slug, number, "api_roots",
-            "\n".join(str(root.relative_to(tree)) for root in inventory.api_roots),
+            "" if partial else "\n".join(str(root.relative_to(tree)) for root in inventory.api_roots),
         )
 
         # A footprint measured over part of a tree is a wrong number rather than a
@@ -436,7 +443,9 @@ class PackageExtractor:
                 self.findings.record(
                     "INVENTORY_PARTIAL", slug=slug, version=number,
                     message="a directory in the extracted tree could not be read; "
-                            "the five inventory columns were left blank",
+                            "the five inventory columns were left blank, and no help maps, "
+                            "assets or API roots were recorded, so later stages locate them "
+                            "themselves",
                 )
         else:
             self.catalog.record_extract_inventory(
