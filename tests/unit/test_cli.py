@@ -1635,6 +1635,85 @@ def _traceback_free(result) -> bool:
     return result.exception is None or isinstance(result.exception, SystemExit)
 
 
+def test_archive_download_from_file_adds_an_unknown_version_outside_the_pipeline(
+    runner: CliRunner, populated_root: Path, tmp_path: Path
+) -> None:
+    """R12-01. The row took the model defaults -- active and convert-eligible -- so a
+    reference ZIP for an old release became `download --all` work, and `archive
+    list` did not show it."""
+    source = _zip(tmp_path / "ems-5.0.0.zip")
+
+    result = _invoke(
+        runner, populated_root, "archive", "download",
+        "--product", "ems", "--version", "5.0.0", "--from-file", str(source),
+    )
+
+    assert result.exit_code == 0
+    assert "archived row" in result.output
+    queued = _invoke(runner, populated_root, "download", "--all", "--dry-run")
+    assert "5.0.0" not in queued.output
+    listed = _invoke(runner, populated_root, "archive", "list")
+    assert "5.0.0" in listed.output
+    manager = CatalogManager(populated_root / "config" / "products.csv", populated_root / "config" / "versions.csv")
+    row = manager.get_version("tibco-enterprise-message-service", "5.0.0")
+    assert row.is_archived and not row.convert_eligible
+
+
+def test_a_fetch_keeps_a_version_archive_download_added(
+    runner: CliRunner, populated_root: Path, tmp_path: Path, fake_crawl
+) -> None:
+    """INDEX.md's batch-1 known gap: the hand-added archived row blocked the next
+    fetch as a "deletion", because discovery has never returned it."""
+    _invoke(
+        runner, populated_root, "archive", "download",
+        "--product", "ems", "--version", "5.0.0", "--from-file", str(_zip(tmp_path / "old.zip")),
+    )
+    discovered = make_product(
+        "tibco-enterprise-message-service", product_code="ems", display_name="TIBCO EMS", family="messaging"
+    )
+    discovered.versions = {
+        "10.4.0": make_version("tibco-enterprise-message-service", "10.4.0", zip_url="https://docs.tibco.com/ems.zip"),
+        "8.6.0": make_version("tibco-enterprise-message-service", "8.6.0", is_archived=True, convert_eligible=False),
+    }
+    fake_crawl(products=[discovered])
+
+    result = _invoke(runner, populated_root, "catalog", "fetch", "--product", "ems")
+
+    assert result.exit_code == 0, result.output
+    assert "5.0.0" in (populated_root / "config" / "versions.csv").read_text(encoding="utf-8-sig")
+
+
+def test_download_from_file_dry_run_writes_nothing(
+    runner: CliRunner, populated_root: Path, tmp_path: Path
+) -> None:
+    """R12-02. `--dry-run` was accepted and the real ingest ran: the ZIP copied, the
+    row added, and the version pinned manual -- exempt from every later download."""
+    before = (populated_root / "config" / "versions.csv").read_text(encoding="utf-8-sig")
+
+    result = _invoke(
+        runner, populated_root, "download", "--product", "ems", "--version", "11.0.0",
+        "--from-file", str(_zip(tmp_path / "pkg.zip")), "--dry-run",
+    )
+
+    assert result.exit_code == 0
+    assert "Would file" in result.output
+    assert not list((populated_root / "families").rglob("*.zip"))
+    assert (populated_root / "config" / "versions.csv").read_text(encoding="utf-8-sig") == before
+
+
+def test_download_from_file_refuses_a_scope_flag(
+    runner: CliRunner, populated_root: Path, tmp_path: Path
+) -> None:
+    result = _invoke(
+        runner, populated_root, "download", "--all", "--product", "ems", "--version", "10.4.0",
+        "--from-file", str(_zip(tmp_path / "pkg.zip")),
+    )
+
+    assert result.exit_code == 2
+    assert "--all" in result.output
+    assert not list((populated_root / "families").rglob("*.zip"))
+
+
 @pytest.mark.parametrize(
     "argv",
     [["catalog", "batches"], ["catalog", "triage"], ["status"], ["archive", "list"], ["catalog", "import"]],

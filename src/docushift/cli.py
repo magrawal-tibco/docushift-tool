@@ -307,7 +307,8 @@ def catalog_fetch(
     if stats.versions_hand_added:
         console.print(
             f"[dim]Kept {len(stats.versions_hand_added)} version(s) discovery has never returned, added by "
-            f"`download --from-file`: {', '.join(stats.versions_hand_added[:12])}"
+            f"`download --from-file` or `archive download --from-file`: "
+            f"{', '.join(stats.versions_hand_added[:12])}"
             f"{' ...' if len(stats.versions_hand_added) > 12 else ''}[/dim]"
         )
 
@@ -1114,13 +1115,25 @@ def catalog_triage(ctx: click.Context) -> None:
 # ---------------------------------------------------------------------------
 
 
-def _ingest_target(manager: CatalogManager, product, version):
+def _ingest_target(manager: CatalogManager, product, version, *, archived: bool = False, dry_run: bool = False):
     """Resolves `--from-file`'s `(product, version)`, adding the version row if needed.
 
     Both selectors are required: `--from-file` files one specific package, and a
     scope-shaped selector would silently pick one of several matches. The
     product/version asymmetry is `architecture.md` §3.8's -- an unknown product is
     an error, an unknown version on a known product is added with a warning.
+
+    `archived` is `archive download`'s row (Phase 34, R12-01): archived and not
+    convert-eligible, so a reference ZIP for an old release stays out of the
+    pipeline and shows in `archive list`. Before, it took the model defaults --
+    active and eligible -- and `download --all` queued a templated fetch for it.
+    It is also `zip_source=manual`, the mark `catalog fetch` reads as "added by
+    hand, never discovered" (R2-07), so a later fetch keeps the row rather than
+    refusing it as a deletion. Nothing selects an ineligible row, so the pin
+    makes no stage skip anything.
+
+    `dry_run` returns `(product, None)` for a version not yet catalogued, and adds
+    nothing.
     """
     if not product or not version:
         raise click.ClickException("--from-file needs both --product and --version.")
@@ -1132,12 +1145,19 @@ def _ingest_target(manager: CatalogManager, product, version):
             f"product row -- run `docushift catalog fetch --product {product}` first."
         )
     if version not in found.versions:
+        if dry_run:
+            return found, None
+        where = "an archived row, outside the pipeline" if archived else "the row"
         console.print(
-            f"[yellow]WARN[/yellow] {slug}: no version '{version}' in the catalog; adding the row. "
+            f"[yellow]WARN[/yellow] {slug}: no version '{version}' in the catalog; adding {where}. "
             f"You are holding the package, which is better evidence than discovery's silence."
         )
+        fields = (
+            {"is_archived": True, "convert_eligible": False, "zip_source": ZipSource.MANUAL}
+            if archived else {}
+        )
         try:
-            manager.add_version(slug, version)
+            manager.add_version(slug, version, **fields)
         except CatalogError as exc:
             raise click.ClickException(str(exc)) from exc
         found = manager.get_product(slug)
@@ -1218,9 +1238,29 @@ def download(ctx, bu, family, product, version, batch, select_all, force, worker
     manager = _catalog_manager(ctx)
 
     if from_file:
-        found, ver = _ingest_target(manager, product, version)
+        # Refused rather than ignored (Phase 34, R12-02): `--from-file` files one
+        # package, so a scope flag or a fetch tuning flag beside it means the
+        # caller expected something this path does not do.
+        stray = [
+            flag for flag, value in (
+                ("--all", select_all), ("--bu", bu), ("--family", family),
+                ("--batch", batch), ("--force", force), ("--workers", workers),
+            ) if value
+        ]
+        if stray:
+            raise click.UsageError(f"--from-file files one package; {', '.join(stray)} has no meaning with it.")
+        found, ver = _ingest_target(manager, product, version, dry_run=dry_run)
+        target = cfg.download_path(found.bu, found.family, found.slug, version)
+        if dry_run:
+            # It used to do the real ingest: copy the ZIP, add the row, and pin it
+            # manual, which exempts the version from every later `download`.
+            then = f"add version {version} to the catalog and set" if ver is None else "set"
+            console.print(
+                f"Would file {from_file} -> {target}\n"
+                f"[dim]and {then} zip_source=manual (dry run -- nothing written).[/dim]"
+            )
+            return
         downloader = PackageDownloader(cfg, manager)
-        target = cfg.download_path(found.bu, found.family, found.slug, ver.version)
         try:
             result = downloader.ingest_file(found, ver, from_file, target)
         except (OSError, CatalogError) as exc:
@@ -2892,7 +2932,10 @@ def archive_download(ctx, product, version, from_file, do_extract, force) -> Non
     cfg: ConfigManager = ctx.obj["config"]
     manager = _catalog_manager(ctx)
 
-    found, ver = _ingest_target(manager, product, version) if from_file else _archive_target(manager, product, version)
+    found, ver = (
+        _ingest_target(manager, product, version, archived=True)
+        if from_file else _archive_target(manager, product, version)
+    )
     target = cfg.archive_path(found.bu, found.family, found.slug, ver.version)
     downloader = PackageDownloader(cfg, manager)
 
