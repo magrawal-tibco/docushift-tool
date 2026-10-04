@@ -1780,3 +1780,105 @@ def test_a_doc_class_with_no_origin_map_reports_nothing(tmp_path: Path) -> None:
     publish(target, {"html/new.md": "# New\n"})
 
     assert origin_map_of(target) == []
+
+
+# -- a hand-edited artifact that is not UTF-8 (Phase 34, R11-07) -------------------
+#
+# `sync` deliberately keeps rows it does not own in `version.yml`, so somebody's
+# editor gets to save that file in whatever encoding it likes. A strict UTF-8 read
+# used to raise `UnicodeDecodeError` past every `except OSError`, abort the run and
+# leave every later folder unchecked.
+
+CP1252 = "# r\u00e9vis\u00e9 by hand\n"
+
+
+def run_findings(target: Path) -> list:
+    collected: list = []
+    validator = Validator(target)
+    validator._record = collected.extend  # type: ignore[method-assign]
+    validator.run()
+    return collected
+
+
+@pytest.mark.parametrize(
+    ("name", "body"),
+    [
+        ("version.yml", "- title: '1.0.0'\n  path: /1-0-0\n"),
+        ("redirects.yml", "redirects:\n- from: a.html\n  to: b.html\n  status: 301\n"),
+        ("301.yml", "redirects:\n- from: a.html\n  to: b.html\n  status: 301\n"),
+    ],
+)
+def test_a_doc_class_artifact_saved_in_another_encoding_is_unparsed_not_a_crash(
+    tmp_path: Path, name: str, body: str
+) -> None:
+    target = tmp_path / "target"
+    publish(target, {"page.md": "# Page\n"})
+    (target / TREE / "en-us" / SLUG / "online-help" / name).write_bytes(
+        (CP1252 + body).encode("cp1252"))
+
+    found = run_findings(target)
+
+    assert [(f.code, f.path.rsplit("/", 1)[-1]) for f in found] == [("ARTIFACT_UNPARSED", name)]
+
+
+@pytest.mark.parametrize("name", ["metadata.yml", "toc.yml", "redirects.yml", "csh.yml"])
+def test_a_version_artifact_saved_in_another_encoding_is_unparsed_not_a_crash(
+    tmp_path: Path, name: str
+) -> None:
+    target = tmp_path / "target"
+    folder = publish(target, {"page.md": "# Page\n"})
+    (folder / name).write_bytes((CP1252 + "x: 1\n").encode("cp1252"))
+
+    found = run_findings(target)
+
+    assert ("ARTIFACT_UNPARSED", f"{name}") in [
+        (f.code, f.path.rsplit("/", 1)[-1]) for f in found]
+
+
+def test_an_index_saved_in_another_encoding_is_still_read(tmp_path: Path) -> None:
+    """`index.md` is a page, and pages are read with replacement everywhere else."""
+    target = tmp_path / "target"
+    folder = publish(target, doc_class="user-guides")
+    (folder / "guide.pdf").write_bytes(b"%PDF")
+    (folder / "index.md").write_bytes(("# Guides r\u00e9vis\u00e9s\n\n[g](guide.pdf)\n")
+                                      .encode("cp1252"))
+
+    assert run_findings(target) == []
+
+
+# -- two reads that skipped `long_path` (Phase 34, R11-09) -------------------------
+#
+# The class behind the 60 false `LINK_BROKEN` already fixed in
+# `check_redirect_map`: past 260 characters an unprefixed `exists()` answers False
+# and an unprefixed read fails, for a file that is really there.
+
+# Twelve segments of twenty-two characters: past MAX_PATH under any tmp_path.
+DEEP = "/".join(["segment_of_some_length"] * 12)
+
+
+def test_a_tree_rooted_link_to_a_file_past_260_characters_resolves(tmp_path: Path) -> None:
+    from docushift.utils.longpath import long_path
+
+    target = tmp_path / "target"
+    api = publish(target, tree=RESOURCES, doc_class="api-references", segment="1-0-0")
+    deep = long_path(api / DEEP)
+    deep.mkdir(parents=True)
+    (deep / "index.html").write_text("<html></html>", encoding="utf-8")
+    reference = f"{RESOURCES}/en-us/{SLUG}/api-references/1-0-0/{DEEP}/index.html"
+    publish(target, {"guide.md": f"[api]({reference})\n"})
+
+    report, _ = links_of(target, only_docs(target))
+
+    assert report.findings == []
+
+
+def test_a_help_page_past_260_characters_has_its_frontmatter_read(tmp_path: Path) -> None:
+    from docushift.utils.longpath import long_path
+
+    target = tmp_path / "target"
+    folder = publish(target, {"csh.yml": f'help_1: "{DEEP}/a.md"\n'})
+    deep = long_path(folder / DEEP)
+    deep.mkdir(parents=True)
+    (deep / "a.md").write_text("---\ncsh: help_1\n---\n\n# A\n", encoding="utf-8")
+
+    assert csh_of(target) == []

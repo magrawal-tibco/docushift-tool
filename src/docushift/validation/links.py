@@ -211,7 +211,9 @@ def _check_file(
         head = PurePosixPath(classified.path).parts[0] if classified.path else ""
         if head in context.trees:
             report.tree_rooted += 1
-            if not (context.target / classified.path).exists():
+            # `long_path`: a Javadoc page under a long target root is past 260
+            # characters, and unprefixed `exists()` says False (R11-09).
+            if not long_path(context.target / classified.path).exists():
                 issue(
                     "LINK_BROKEN",
                     reference.line,

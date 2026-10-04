@@ -37,6 +37,7 @@ import yaml
 
 from docushift.reporting.findings import Finding
 from docushift.utils.csvio import natural_version_key
+from docushift.utils.longpath import long_path
 from docushift.validation import references
 from docushift.validation.links import FolderIndex
 from docushift.validation.tree import ProductFolder, VersionFolder
@@ -107,7 +108,11 @@ def load(folder: VersionFolder) -> MapFile:
     if not path.is_file():
         return MapFile(folder)
     try:
-        document = yaml.safe_load(path.read_text(encoding="utf-8"))
+        document = yaml.safe_load(long_path(path).read_text(encoding="utf-8"))
+    except UnicodeDecodeError as error:
+        # Not UTF-8 is "will not load", not a crash (Phase 34, R11-07).
+        return MapFile(folder, present=True,
+                       unparsed=f"is not UTF-8 (byte {error.start}): {error.reason}")
     except (OSError, yaml.YAMLError) as error:
         detail = str(error).splitlines()[0] if str(error) else "invalid YAML"
         return MapFile(folder, present=True, unparsed=detail)
@@ -193,8 +198,10 @@ def _frontmatter_index(folder: VersionFolder, index: FolderIndex) -> dict[str, s
 
 
 def _read(path: Path) -> str:
+    # `long_path`, because a mapped page past 260 characters otherwise reads as
+    # "" and every identifier on it becomes a false mismatch (Phase 34, R11-09).
     try:
-        return path.read_text(encoding="utf-8", errors="replace")
+        return long_path(path).read_text(encoding="utf-8", errors="replace")
     except OSError:  # pragma: no cover
         return ""
 

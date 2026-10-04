@@ -1422,7 +1422,8 @@ Six things to expect:
 - **Only `metadata.yml` is required.** `toc.yml`, `index.md`, `csh.yml` and
   `version.yml` are checked when they are there and never demanded, because which of
   them a doc-class carries legitimately varies. A YAML file that will not parse is
-  reported once, and the rest of that file's checks are skipped.
+  reported once, and the rest of that file's checks are skipped. A file your editor
+  saved in an encoding other than UTF-8 counts as one that will not parse.
 - **It writes nothing, and there is no `--fix`.** The published tree is regenerated
   by `sync`, so a repair applied here would be reverted by the next run.
 - **It compares each version's help map against the version below it.** An

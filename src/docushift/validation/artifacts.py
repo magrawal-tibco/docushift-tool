@@ -27,7 +27,11 @@ checking something:
 
 A file that will not parse is reported once as `ARTIFACT_UNPARSED` and the rest of
 that file's checks are skipped: the action is different -- nothing can be read at
-all -- and continuing would make every further finding about it unsound.
+all -- and continuing would make every further finding about it unsound. A file
+that is not UTF-8 is one that will not parse (Phase 34, R11-07): `version.yml`
+keeps hand-edited rows by design, so somebody's editor will one day save it in
+cp1252, and the strict read's `UnicodeDecodeError` used to escape every
+`except OSError` and abort the whole run.
 """
 
 from dataclasses import dataclass
@@ -71,12 +75,29 @@ class _Loaded:
     failure: Finding | None = None
 
 
+def _read_artifact(path: Path) -> str:
+    """An artifact's text, strictly UTF-8. Raises `OSError` or `UnicodeDecodeError`.
+
+    Strict rather than `errors="replace"`, unlike a page: a replaced character in
+    a YAML key or a `to` path would turn into a finding about the wrong thing.
+    """
+    return long_path(path).read_text(encoding="utf-8")
+
+
+def _unreadable(error: Exception) -> str:
+    """The message for an artifact that could not be read as text."""
+    if isinstance(error, UnicodeDecodeError):
+        return f"is not UTF-8 (byte {error.start}): {error.reason}"
+    return str(error)
+
+
 def _load(path: Path, slug: str, version: str, where: str) -> _Loaded:
     try:
-        text = path.read_text(encoding="utf-8")
-    except OSError as error:  # pragma: no cover - the file was just listed
+        text = _read_artifact(path)
+    except (OSError, UnicodeDecodeError) as error:
         return _Loaded(failure=Finding(
-            "ARTIFACT_UNPARSED", slug=slug, version=version, path=where, message=str(error)
+            "ARTIFACT_UNPARSED", slug=slug, version=version, path=where,
+            message=_unreadable(error),
         ))
     try:
         return _Loaded(document=yaml.safe_load(text))
@@ -313,7 +334,9 @@ def _check_index(folder: VersionFolder) -> list[Finding]:
     if not index.is_file():
         return []
     try:
-        text = index.read_text(encoding="utf-8")
+        # `index.md` is a page, so it is read the way `links.py` reads pages:
+        # with replacement, which loses no link (R11-07).
+        text = long_path(index).read_text(encoding="utf-8", errors="replace")
     except OSError:  # pragma: no cover - the file was just listed
         return []
 
@@ -353,9 +376,10 @@ def check_dropdown(product: ProductFolder, doc_class: Path) -> list[Finding]:
         return []
     where = (product.relative / doc_class.name / VERSION_FILE).as_posix()
     try:
-        text = path.read_text(encoding="utf-8")
-    except OSError:  # pragma: no cover
-        return []
+        text = _read_artifact(path)
+    except (OSError, UnicodeDecodeError) as error:
+        return [Finding("ARTIFACT_UNPARSED", slug=product.slug, path=where,
+                        message=_unreadable(error))]
     rows = version_file.parse(text)
     if rows is None:
         return [Finding("ARTIFACT_UNPARSED", slug=product.slug, path=where,
@@ -431,9 +455,10 @@ def check_redirect_map(product: ProductFolder, doc_class: Path, target: Path,
         return []
     where = (product.relative / doc_class.name / file_name).as_posix()
     try:
-        text = path.read_text(encoding="utf-8")
-    except OSError:  # pragma: no cover
-        return []
+        text = _read_artifact(path)
+    except (OSError, UnicodeDecodeError) as error:
+        return [Finding("ARTIFACT_UNPARSED", slug=product.slug, path=where,
+                        message=_unreadable(error))]
     rows = redirect_map.parse(text)
     if rows is None:
         return [Finding("ARTIFACT_UNPARSED", slug=product.slug, path=where,
