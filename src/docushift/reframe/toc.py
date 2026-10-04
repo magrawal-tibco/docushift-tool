@@ -207,7 +207,8 @@ def register(schema: TocSchema) -> None:
 
 
 def registered_schemas() -> list[str]:
-    """Every registered dialect name, sorted -- what `--toc-schema` will accept."""
+    """Every registered dialect name, sorted -- what `toc_schema` in
+    `config/reframe.yaml` will accept. There is no `--toc-schema` option."""
     return sorted(_REGISTRY)
 
 

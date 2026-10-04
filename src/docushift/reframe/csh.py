@@ -6,21 +6,15 @@ keypress resolves an identifier to a URL. Merging moves the topic into a section
 of a larger page, so the map has to move with it or every Help button in the
 application lands on a file that is no longer there.
 
-**It is not `toc.yml` and it is not `redirects.yml`, and the difference is the
-fragment.** A TOC node *is* the section it points at, so `toc.retarget` gives it
-the section anchor; `redirects.yml` does the same, because a reader following an
-old topic URL wants the section that replaced it. A CSH identifier points at its
-**own** `<a id="…">` marker, which `transforms/csh.py` wrote into the topic body
-and which travels into the merged page with that body -- measured at 108 of 108
-on `tibco-runtime-agent@5.13.0`. That marker is a more precise landing point than
-the section heading, so only the path half is rewritten. Which is why the
-redirect map, the obvious source for a rewrite that turns old paths into new
-ones, is the wrong one to use here.
-
-A value with no fragment at all falls back to the section anchor, because the
-alternative is a Help button that opens a twelve-section page at the top. None of
-the Flare sets measured has one; `tibco-runtime-agent@5.12.2` has 18 of 108, so
-the shape is real in this corpus and merely belongs to another engine.
+**Every value gets its topic's section anchor (Phase 29)**, the same answer
+`toc.retarget` and `redirects.yml` give. It used to keep the identifier's own
+fragment, on the reasoning that it named an `<a id="…">` marker which travels
+into the merged page with the topic body and is a more precise landing point
+than the section heading. The platform ignores those markers and anchors on
+heading text only, so a kept fragment resolved nowhere -- 0 of 154 -- and
+`_value` below explains the change. A value with no fragment at all gets the
+same section anchor. Measured on the merged corpus: all 154 values equal their
+source topic's section anchor (R9-13).
 
 An identifier whose topic the packer never placed keeps its value untouched and
 is reported by the audit, which is `toc.retarget`'s rule for the same condition:
@@ -40,8 +34,8 @@ CSH_FILE = "csh.yml"
 
 CSH_HEADER = (
     "# Context-sensitive help map -- retargeted onto the merged pages by\n"
-    "# `docushift reframe` (planning.md 20f). Each identifier keeps its own\n"
-    "# anchor; only the page it lives on has changed.\n"
+    "# `docushift reframe` (planning.md 20f). Each identifier points at the\n"
+    "# section its topic became: the merged page and that section's anchor.\n"
 )
 
 

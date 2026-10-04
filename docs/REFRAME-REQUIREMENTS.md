@@ -129,6 +129,14 @@ in the tree gives it (R2.1).
 - **Uniqueness scope:** must be unique within a page. (Global uniqueness is not required,
   though the reference corpus happens to achieve it.)
 
+> *As built (Phase 29):* no anchor is emitted. The publishing platform ignores `<a id>`
+> markers and generates each anchor from the **heading text** — lowercased, punctuation
+> deleted, spaces to `-` — numbering a repeated heading `-1`, `-2`, … across the whole page.
+> So the slug and dedup rules above are not Reframe's to choose: it *predicts* the platform's
+> answer (`utils/anchors.py`), over every heading on the page, sub-headings included, and
+> every TOC row, redirect, CSH value and link fragment uses that prediction. The rule still
+> loops (`-1`, `-2`, …) and is still unique within a page.
+
 **R2.1 — Heading shift.** Each topic is given a **level**: the page's root topic takes 1, and
 every other topic one below its nearest ancestor *that is also on the page*. A page holding
 more than one whole sibling subtree drops every subtree after the first by one further level,
@@ -137,6 +145,9 @@ so the second never collides with the first's H1.
 In each topic body the first `#` H1 becomes the anchored heading at that level; every other
 heading moves by the same offset; everything caps at H6. If a topic has no H1, prepend
 `{level hashes} {TOC title}` with its anchor above it.
+
+> *As built (Phase 29):* nothing is written above the heading; its anchor is the platform's
+> slug of the heading text (R2's as-built note).
 
 - Depth is counted in **what is emitted**, not in what the TOC holds: a bare container row, or
   a row whose topic an earlier guide already claimed, contributes no level. Counting those
@@ -216,7 +227,8 @@ Reframe must emit a queue of pages requiring human editorial judgment. **This is
 interface between the mechanical stage and the writer (or an editorial review skill), and it is
 on the critical path — Reframe deliberately does not resolve these cases itself.**
 
-Emit `manifest/review-queue.csv` with **only flagged pages** (a queue containing every page is
+Emit `review-queue.csv` (*as built:* at the merged tree's root, beside `toc.yml`; there is no
+`manifest/` folder) with **only flagged pages** (a queue containing every page is
 not a queue). Columns:
 
 ```
@@ -268,6 +280,13 @@ manifest/redirects.csv           old_path, new_target, type
 manifest/review-queue.csv        page_path, guide, n_topics, words, flags, detail
 ```
 
+> *As built (Phase 20–35):* every sidecar is written at the merged tree's root, and there is
+> no `manifest/` folder. `reframe.yml` carries what `pages.csv` and `topic-mapping.csv` would
+> (pages, their sections, anchors and words, the policy and the link counts);
+> `redirects.yml` replaces `redirects.csv`; `review-queue.csv` and `rename-map.csv` (page
+> names, Phase 29) sit beside them, and `csh.yml` and `301.yml` appear when the version has a
+> help map or a known live URL shape.
+
 **Config** — per doc set, not hardcoded: `MAX_WORDS`, asset directories, TOC schema adapter.
 
 > The TOC schema is **not** universal across doc sets. The reference corpus uses
@@ -287,7 +306,7 @@ Reframe must self-validate and fail the stage if any check fails.
 
 | check | pass condition |
 |---|---|
-| word conservation | output words == input words + one anchor token per topic; no content lost |
+| word conservation | output words == input words + one anchor token per topic; no content lost (*as built, Phase 29:* + the tokens each topic's scaffolding declares, which is 0 for a topic with an H1 and the synthesized heading's tokens otherwise, since no anchor marker is written) |
 | anchors | count equals topic count; unique within every page |
 | directory integrity | zero pages spanning more than one source directory |
 | TOC completeness | every source node present; every referenced page exists; every referenced anchor exists |
@@ -305,7 +324,7 @@ Reframe must self-validate and fail the stage if any check fails.
 | topics/page | median 12 · min 1 · max 60 |
 | guides | 9 |
 | pages with >20 sections | 16 |
-| words in → out | 226,517 → 227,958 (+1,441 = one anchor token per topic) |
+| words in → out | 226,517 → 227,958 (+1,441 = one anchor token per topic; since Phase 29 a topic with an H1 adds 0) |
 | links | 2,345 checked, 2,314 rewritten, 0 newly broken |
 
 Use these as a regression baseline: a reimplementation should reproduce them closely, though

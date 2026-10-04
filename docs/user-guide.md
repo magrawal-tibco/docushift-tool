@@ -899,8 +899,8 @@ docushift reframe --product tibco-ems --version 10.5.1 --input ./converted --out
 A MadCap Flare topic is an authoring unit, not a reading unit. TIBCO Enterprise Message
 Service 10.5.1 is **1,441 topics with a median of 107 words** — and once the Markdown becomes
 the source that writers maintain, that is 1,441 files somebody has to keep in step. `reframe`
-merges them by navigation subtree, so each former topic becomes an anchored `##` section of a
-larger page, and hands the pages it could not confidently decide about to a human.
+merges them by navigation subtree, so each former topic becomes a section of a larger page —
+its heading set at the depth the navigation gives it, under the page's one H1 — and hands the pages it could not confidently decide about to a human.
 
 **It only runs for Flare.** Every other engine is counted as skipped, not warned about: on a
 full catalog selection that is 1,669 of 1,683 eligible versions, and naming them would bury
@@ -911,11 +911,13 @@ tree is built. Tuning a boundary rule is a re-run, not a restore — which matte
 merge is irreversible once the pages have been hand-edited and the URLs published.
 
 The editorial policy lives in `config/reframe.yaml`, not in the code, because it is expected
-to be tuned repeatedly. Two keys:
+to be tuned repeatedly. Five keys: the two below shape every merge; `keep_separate` and
+`publish` are described further down, and `toc_schema` forces a TOC dialect where detection
+would otherwise choose (it is empty, and should stay so, for every set measured).
 
 - **`max_words`** is a **cap, not a target**. Subtree cohesion chooses the boundary; the cap
   only refuses a join that would cross it, and a source topic larger than the cap is never
-  split. Measured over EMS 10.5.1: `2000` gives 183 pages, `3000` gives 124, `6000` gives 64.
+  split. Measured over EMS 10.5.1: `2000` gives 219 pages, `3000` gives 159, `6000` gives 79.
   A 3,533-word page survives every one of those caps, because it is a single topic.
 - **`pin_layout_to`** names the version whose page layout every other version of that doc set
   reuses. EMS has six eligible Flare versions; without a pin each would be laid out by its own
@@ -982,9 +984,10 @@ serves from, and composing it a second time is how the two come to disagree.
 
 A sixth file appears when the conversion produced one: **`csh.yml`, retargeted**. A
 context-sensitive help map is what an F1 keypress in the product resolves against, so it has to
-move with the topics. Each identifier keeps its **own** anchor and only the page it sits on
-changes — unlike `toc.yml` and `redirects.yml`, which both get the *section* anchor, because a
-TOC node is the section while a CSH identifier points at its own marker inside the body. The
+move with the topics. Each identifier points at the merged page its topic became part of, and
+at that topic's *section* anchor, as `toc.yml` and `redirects.yml` do. The identifier's own
+fragment is not kept: it named an `<a id>` marker, and the platform ignores markers and anchors
+on heading text only, so a kept fragment would land nowhere (Phase 29). The
 merged page also lists every identifier it absorbed in its frontmatter `csh:` key, which is the
 mirror `validate` checks the map against. A version whose conversion has no `csh.yml` gets none,
 and a map this stage cannot parse fails that version rather than being written empty — the same
@@ -1004,7 +1007,7 @@ out of it needing an editorial call, and `reframe` lists those rather than guess
 Two more flags, `title-inherited` and `single-topic`, are recorded against every page in
 `reframe.yml` but never put a page in the queue on their own: a merged page is *always*
 titled after its first topic, and a page that merged nothing is usually fine, so queueing on
-either would queue everything. On EMS 10.5.1 the queue is 18 pages out of 124. The run
+either would queue everything. On EMS 10.5.1 the queue is 19 pages out of 159. The run
 reports the count; nothing about the queue fails the stage.
 
 **Working the queue.** A row is a question with two answers: accept the page, or take its
@@ -1032,7 +1035,7 @@ Then re-run `reframe`. A topic at or under a listed path is never joined to anyt
 nothing is ever joined to it from behind, so the subtree keeps the layout Stage 6 gave it.
 Everything around it merges as before — taking one page out does not re-granularize the guide
 it sits in. This is the setting that answers a `reference-list` row without moving `max_words`
-and re-laying out all 124 pages.
+and re-laying out all 159 pages.
 
 Write the path exactly as `reframe.yml` spells it: a file with its `.md`, a directory without
 one. Matching is on whole path segments, so `users-guide/monitor` takes the directory

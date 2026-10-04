@@ -32,8 +32,9 @@ URL (Phase 29), so choosing a better one is an editorial decision like the rest.
 reading of R7.1's "emit the best title it can" is to name a page after the TOC
 node whose subtree it covers. Measured: 30 of 124 pages are exactly one subtree,
 and in every case that node's title is the *identical string* to the first
-topic's. It has to be -- the packer walks bottom-up in reading order, so a
-subtree's own node contributes the first topic of the page it collapses into.
+topic's. It has to be -- the packer emits a subtree's own node first (top-down
+since Phase 28, bottom-up before it, and true of both), so that node contributes
+the first topic of the page it collapses into.
 The improvement R7.1 wants is a human one, which is why the flag exists.
 """
 
