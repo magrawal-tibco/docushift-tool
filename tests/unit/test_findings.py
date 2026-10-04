@@ -151,8 +151,10 @@ def test_the_register_carries_every_row_of_7_5() -> None:
     engine page by page or never looked at, is named once per root.
     It adds the 75th, `RENAME_MAP_REFUSED` (R9-05): a name a human wrote into
     `rename-map.csv` that could not be used, and was dropped without a word.
+    And the 76th, `ELEMENT_UNRENDERED` (R8-13): embedded media the walk has
+    no Markdown for, reduced to its fallback text or to nothing without a count.
     """
-    assert len(REGISTRY) == 75
+    assert len(REGISTRY) == 76
 
 
 def test_severity_comes_from_the_registry_and_not_from_the_call_site() -> None:

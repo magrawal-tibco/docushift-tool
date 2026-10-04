@@ -2174,6 +2174,12 @@ An `<a>` with neither an `href` nor a target is still unwrapped, and `_code_frag
 
 **Hard breaks.** A `<br>` is a backslash and a newline, which means something only between two lines (R8-05). At the end of a paragraph, alone in one (DocBook's `<br class="figure-break">`), or at the end of a link's text it is dropped. At the end of an emphasis run it moves outside the markers, where `**Warning\**` had escaped the closing one. In a heading it is a space, and in a pipe cell it is `<br>`. Before, 2,064 paragraphs were a lone `\`, 81 ended in one, and 42 pipe rows carried `\ ` mid-text.
 
+**Lists read everything in them** (R8-01). A paragraph, a `<pre>`, a note or a nested `<ul>` written straight into a `<ul>`/`<ol>` belongs to the item before it, which is where a browser draws it. Ahead of the first item it leads the list, unindented and unnumbered: inventing a step number for it would be worse than leaving it outside the numbering. Reading only the `<li>` children dropped 62 such elements without a count (ActiveSpaces 33, DataSynapse 19, EMS 6, TRA 4); ActiveSpaces 5.2.0's JDBC registration lost its whole procedure, sentence and code.
+
+**Adjacent inline runs are kept apart** (R8-07). GFM cannot close one run and open the next against it, so `<b>ssl</b><b>.</b>` gave `**ssl****.**`, a bold label followed by italic gave `**Default value:***none*`, and two `<code>`s gave one span holding two backticks: 353 literal `**` and 849 merged code spans. Where two runs would fuse, or where a closing `*` after punctuation meets a word (and the mirror case), the walk puts an empty comment, `<!-- -->`, between them. It renders as nothing, and the heading slug rule strips it as a tag.
+
+**Embedded media is counted** (R8-13). `iframe`, `video`, `audio`, `object`, `embed`, `svg`, `canvas` and `math` have no Markdown form. One with an absolute URL becomes a link to it, anything else keeps only its fallback text, and each version reports the total by tag as `ELEMENT_UNRENDERED` (note). None turned up in the five families the review measured, which is why this is a count and not a construct.
+
 ---
 
 ## 6. AEM Structure Synthesis & Publishing Layout

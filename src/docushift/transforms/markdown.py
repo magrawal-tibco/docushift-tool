@@ -27,6 +27,9 @@ Two rules in here are corpus-measured rather than conventional:
 """
 
 import re
+import unicodedata
+from collections import Counter
+from collections.abc import Iterable
 
 from bs4 import BeautifulSoup, NavigableString, Tag
 from bs4.element import PreformattedString
@@ -74,6 +77,18 @@ _BREAK = "\\\n"
 # always escaped as a pair, so a backslash followed by a newline is a break.
 _EDGE_BREAKS = re.compile(r"^(?:\s|\\\n)+|(?:\s|\\\n)+$")
 _EDGES = re.compile(r"((?:\s|\\\n)*)(.*?)((?:\s|\\\n)*)", re.DOTALL)
+
+# What `_join_inline` puts between two inline runs that would otherwise fuse: an
+# empty comment, which every renderer drops and every slug rule strips as a tag.
+_SEAM = "<!-- -->"
+_DELIMITERS = "*`~"
+
+# Embedded media and drawings. GFM has no syntax for any of them, so the walk
+# could only emit their fallback text or nothing -- an `<iframe>` of a video
+# vanished whole. Each is counted, and one with an absolute URL becomes a link
+# to it (Phase 34, R8-13). None was found in the five families measured, which is
+# why this is a count rather than a construct.
+_UNRENDERED = frozenset({"iframe", "video", "audio", "object", "embed", "svg", "canvas", "math"})
 
 _WHITESPACE = re.compile(r"\s+")
 _ESCAPES = re.compile(r"([\\`*\[\]<])")
@@ -168,6 +183,15 @@ class Renderer:
     # run report rather than a paragraph in a design document.
     flattened_links = 0
 
+    @property
+    def unrendered(self) -> Counter[str]:
+        """Elements this walk had no Markdown for, by tag (R8-13).
+
+        Read by the engine after the walk, as `flattened_links` is. Kept per
+        instance rather than on the class, where every renderer would share it.
+        """
+        return self.__dict__.setdefault("_unrendered", Counter())
+
     # -- hooks -----------------------------------------------------------------
 
     def block_override(self, tag: Tag) -> str | None:
@@ -201,16 +225,20 @@ class Renderer:
         rather than dropped: MadCap emits bare text beside a `<table>` often
         enough that discarding it would lose sentences.
         """
+        return self._gather(node.children)
+
+    def _gather(self, children: Iterable[object]) -> list[str]:
+        """`blocks` over any run of sibling nodes, not only a whole element's."""
         out: list[str] = []
         run: list[str] = []
 
         def flush() -> None:
-            text = _trim(_collapse("".join(run)))
+            text = _trim(_collapse(_join_inline(run)))
             run.clear()
             if text:
                 out.append(escape_leading(text))
 
-        for child in node.children:
+        for child in children:
             if is_text(child):
                 run.append(escape(str(child)))
                 continue
@@ -255,7 +283,8 @@ class Renderer:
             term = _trim(self.inline_children(tag)).replace(_BREAK, " ")
             return [f"**{term}**"] if term else []
         if name in ("ul", "ol"):
-            return [self.list(tag, ordered=name == "ol")]
+            listed = self.list(tag, ordered=name == "ol")
+            return [listed] if listed else []
         if name == "dl":
             return self.blocks(tag)
         if name == "pre":
@@ -284,21 +313,43 @@ class Renderer:
         number, and a procedure interrupted by a note or a paragraph resumes at
         step 3 -- emitted from 1, 110 of 1,285 numbered items in the families
         carried the wrong number (R5-02).
+
+        **Everything in the list is read, not only its `<li>`s** (Phase 34,
+        R8-01). A paragraph, a `<pre>`, a note or a nested `<ul>` written straight
+        into the list belongs to the item before it, which is where a browser
+        draws it; ahead of the first item it leads the list. Reading `<li>` alone
+        dropped 62 such elements in the families without a count -- ActiveSpaces
+        5.2.0's JDBC registration lost its whole procedure, sentence and code.
         """
-        items: list[str] = []
+        lead: list[str] = []
+        entries: list[list[str]] = []
+        loose_nodes: list[object] = []
+
+        def place() -> None:
+            if loose_nodes:
+                (entries[-1] if entries else lead).extend(self._gather(loose_nodes))
+                loose_nodes.clear()
+
+        for child in tag.children:
+            if isinstance(child, Tag) and child.name == "li":
+                place()
+                entries.append(self.blocks(child))
+            else:
+                loose_nodes.append(child)
+        place()
+
         first = _start(tag) if ordered else 1
-        for number, child in enumerate(tag.find_all("li", recursive=False), start=first):
+        items = []
+        for number, blocks in enumerate(entries, start=first):
             marker = f"{number}. " if ordered else "- "
-            blocks = self.blocks(child) or [""]
-            body = "\n\n".join(blocks)
+            body = "\n\n".join(blocks or [""])
             items.append(marker + _indent(body, len(marker)))
-        if not items:
-            return ""
         # Loose lists (blank line between items) render every item as a paragraph;
         # a list whose items are one block each stays tight, which is what a
         # procedure should look like.
         loose = any("\n\n" in item for item in items)
-        return ("\n\n" if loose else "\n").join(items)
+        listed = ("\n\n" if loose else "\n").join(items)
+        return "\n\n".join(block for block in [*lead, listed] if block)
 
     def table(self, tag: Tag) -> str:
         """A pipe table where GFM can carry it, the original HTML where it cannot."""
@@ -366,7 +417,7 @@ class Renderer:
     # -- inline ----------------------------------------------------------------
 
     def inline_children(self, tag: Tag) -> str:
-        return _collapse("".join(self._inline_node(child) for child in tag.children))
+        return _collapse(_join_inline(self._inline_node(child) for child in tag.children))
 
     def inline(self, node: Tag) -> str:
         return self._inline_node(node)
@@ -384,6 +435,8 @@ class Renderer:
             return _BREAK
         if name in ("script", "style"):
             return ""
+        if name in _UNRENDERED:
+            return self._unrendered_element(node)
         if name == "a":
             return self._anchor(node)
         if name == "img":
@@ -492,6 +545,22 @@ class Renderer:
             return marker
         return f"{marker}[{text}]({url})"
 
+    def _unrendered_element(self, tag: Tag) -> str:
+        """Media the walk cannot express: counted, and linked where it can be.
+
+        Only an absolute URL is linked. A relative one is a file in the source
+        layout that nothing resolved or copied, and emitting it would be a URL
+        this module invented (invariant 13). Without one the element renders
+        what it always did, its fallback text.
+        """
+        self.unrendered[tag.name] += 1
+        source = tag.find("source")
+        for value in (tag.get("src"), tag.get("data"), source.get("src") if isinstance(source, Tag) else None):
+            url = str(value or "").strip()
+            if url.lower().startswith(("http://", "https://")):
+                return f"[{escape(url)}]({url})"
+        return self.inline_children(tag)
+
     def _image(self, tag: Tag) -> str:
         url = self.image(tag)
         if not url:
@@ -521,6 +590,54 @@ def _collapse(text: str) -> str:
         for index, part in enumerate(parts)
     ]
     return _BREAK.join(trimmed)
+
+
+def _join_inline(parts: Iterable[str]) -> str:
+    """Inline runs, joined so that each one still reads as the run it is.
+
+    GFM has no way to close one run and open the next against it: `<b>ssl</b>`
+    `<b>.</b>` gave `**ssl****.**`, `<b>Default value:</b><i>none</i>` gave
+    `**Default value:***none*`, and two adjacent `<code>`s one span holding two
+    backticks -- 353 literal `**` and 849 merged code spans in the families
+    (Phase 34, R8-07). An empty HTML comment between them renders as nothing
+    and gives each delimiter a neighbour it can close or open against.
+    """
+    out: list[str] = []
+    for part in parts:
+        if not part:
+            continue
+        if out and _fuses(out[-1], part):
+            out.append(_SEAM)
+        out.append(part)
+    return "".join(out)
+
+
+def _fuses(left: str, right: str) -> bool:
+    """Would `right` written straight after `left` stop either being its own run?
+
+    Three ways, all CommonMark's flanking rules: two delimiters touching; a
+    closing `*` or `~` after punctuation with a word straight after it, which
+    cannot close; and the mirror of that for an opening one.
+    """
+    before, after = left[-1], right[0]
+    if before in _DELIMITERS and after in _DELIMITERS:
+        return True
+    if before in "*~" and _is_word(after):
+        inner = left.rstrip(before)[-1:]
+        return bool(inner) and _is_punctuation(inner)
+    if after in "*~" and _is_word(before):
+        inner = right.lstrip(after)[:1]
+        return bool(inner) and _is_punctuation(inner)
+    return False
+
+
+def _is_punctuation(char: str) -> bool:
+    """CommonMark's punctuation: the Unicode P and S categories."""
+    return unicodedata.category(char)[0] in "PS"
+
+
+def _is_word(char: str) -> bool:
+    return not char.isspace() and not _is_punctuation(char)
 
 
 def _trim(text: str) -> str:

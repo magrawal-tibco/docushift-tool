@@ -709,6 +709,7 @@ class DitaEngine(BaseEngine):
         renderer = DitaRenderer(self, context, unit, plan, topic)
         body = renderer.render(container)
         context.flattened_links += renderer.flattened_links
+        context.unrendered.update(renderer.unrendered)
         if title and not body.lstrip().startswith("#"):
             # The `h1` is inside `<article>` in 853 of 853 sampled topics, so this
             # fires on none of them. It stands for the unsampled remainder: a page

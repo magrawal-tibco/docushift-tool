@@ -768,6 +768,7 @@ class FlareEngine(BaseEngine):
         renderer = FlareRenderer(self, context, unit, source, output, planned, landing=landing)
         body = renderer.render(container)
         context.flattened_links += renderer.flattened_links
+        context.unrendered.update(renderer.unrendered)
 
         if landing:
             return self._landing_document(context, unit, soup, source, output, title, body, anchors)

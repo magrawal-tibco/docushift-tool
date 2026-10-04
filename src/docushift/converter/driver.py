@@ -365,6 +365,7 @@ class DocumentConverter:
         context.assets = None
         self._report_api_links(context)
         self._report_flattened_links(context)
+        self._report_unrendered(context)
         self._report_repairs(context)
 
         if not result.documents:
@@ -675,6 +676,23 @@ class DocumentConverter:
             message=f"{context.flattened_links} link(s) inside a code block kept "
                     f"their words and lost their target",
             count=context.flattened_links,
+        )
+
+    def _report_unrendered(self, context: ConversionContext) -> None:
+        """One note per version for the media the walk had no Markdown for (R8-13).
+
+        Named by tag, because the tag is the decision somebody would argue with:
+        a version full of `<iframe>`s wants a construct, a stray `<svg>` does not.
+        """
+        if not context.unrendered:
+            return
+        total = sum(context.unrendered.values())
+        tags = ", ".join(f"{name} {count}" for name, count in sorted(context.unrendered.items()))
+        context.record(
+            "ELEMENT_UNRENDERED",
+            message=f"{total} embedded element(s) with no Markdown form ({tags}); an absolute "
+                    f"URL became a link, anything else kept only its fallback text",
+            count=total,
         )
 
     def _retarget_fragments(self, context: ConversionContext, staging: Path) -> None:

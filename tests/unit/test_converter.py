@@ -1172,3 +1172,28 @@ def test_a_root_the_subtree_lookup_does_not_know_is_refused(tmp_path: Path) -> N
     assert context.subtree_name(tmp_path / "b") == "b"
     with pytest.raises(ValueError, match="not a unit"):
         context.subtree_name(tmp_path / "c")
+
+
+# -- what the shared walk could not render (Phase 34, R8-13) ----------------------
+
+
+class _Unrendering(FakeEngine):
+    """Merges a renderer's count into the context, as the four real engines do."""
+
+    def convert_unit(self, context: ConversionContext, root: Path) -> Unit:
+        context.unrendered.update({"iframe": 2, "svg": 1})
+        return super().convert_unit(context, root)
+
+
+def test_media_the_walk_could_not_render_is_one_note_per_version_by_tag(
+    config, catalog, product, version, extracted, swap_flare
+) -> None:
+    """An `<iframe>` of a video reached the output as nothing and nobody was told."""
+    swap_flare(_Unrendering)
+
+    result, findings = convert(config, catalog, product, version)
+
+    assert result.outcome is ConvertOutcome.CONVERTED, result.message
+    notes = [f for f in findings.all if f.code == "ELEMENT_UNRENDERED"]
+    assert [(f.count, f.severity) for f in notes] == [(3, Severity.NOTE)]
+    assert "iframe 2, svg 1" in notes[0].message

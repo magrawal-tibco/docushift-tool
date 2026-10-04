@@ -268,6 +268,14 @@ REGISTRY: dict[str, Code] = _codes(
          "Link inside a code block kept its words and lost its target; a GFM fence "
          "cannot hold a link",
          "planning.md Phase 8"),
+    # Phase 34 (R8-13), a note for `CODE_LINK_FLATTENED`'s reason: a magnitude per
+    # version, by tag. An `<iframe>` of a video reached the output as nothing and
+    # nobody was told; none turned up in the five families measured, so this is
+    # the count that says whether one ever does.
+    Code("ELEMENT_UNRENDERED", Severity.NOTE, Stage.CONVERT,
+         "Embedded media with no Markdown form (iframe, video, svg ...); an absolute "
+         "URL became a link, anything else kept only its fallback text",
+         "Phase 34 (R8-13)"),
     # Phase 27's two, both notes and both for `CODE_LINK_FLATTENED`'s reason: they
     # are magnitudes, not incidents. Nobody opens a ticket about one renumbered
     # heading -- but a structural rewrite of somebody else's document with no

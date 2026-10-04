@@ -610,6 +610,7 @@ class DocBookEngine(BaseEngine):
         renderer = DocBookRenderer(self, context, unit, plan, page)
         body = renderer.render(container)
         context.flattened_links += renderer.flattened_links
+        context.unrendered.update(renderer.unrendered)
         if page.title and heading is None:
             # No heading anywhere in the container -- unmeasured in this corpus,
             # where all 11,689 pages carry at least one, but a page with prose and

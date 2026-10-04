@@ -1293,6 +1293,7 @@ class WebWorksEngine(BaseEngine):
 
         rendered = renderer.render(container)
         context.flattened_links += renderer.flattened_links
+        context.unrendered.update(renderer.unrendered)
         if not rendered.strip():
             unit.skip("empty")
             context.record("CONTENT_MISSING", path=reported, message="converted to nothing")

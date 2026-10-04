@@ -513,6 +513,87 @@ def test_a_break_in_a_heading_is_a_space() -> None:
     assert render("<h2>Part one<br/>part two</h2>") == "## Part one part two"
 
 
+def test_content_written_straight_into_a_list_with_no_item_leads_it() -> None:
+    """ActiveSpaces 5.2.0 `Registering-the-ActiveSpaces-JDBC-Driver...`: the
+    sentence and the code sit directly in `<ol class="steps">`, and the output
+    was `**Procedure**` over nothing (R8-01)."""
+    rendered = render(
+        '<ol class="steps"><p>Use the following code snippet:</p>'
+        "<pre>// Register the ActiveSpaces JDBC Driver\nClass.forName(name);</pre></ol>"
+    )
+
+    assert rendered == (
+        "Use the following code snippet:\n\n"
+        "```\n// Register the ActiveSpaces JDBC Driver\nClass.forName(name);\n```"
+    )
+
+
+def test_content_between_list_items_belongs_to_the_item_before_it() -> None:
+    """EMS 10.5.1 `optional-post-instal2.htm` lost its note between steps 2 and 3,
+    and TRA 5.13.0 `Upgrade_Security_Vendor` both FIPS branches, a `<ul>` written
+    straight into a `<ul>` (R8-01)."""
+    steps = render(
+        "<ol><li>Run the script.</li><p><div class='note'>This script only works when your "
+        "EMS_HOME path ends with ems/10.5.</div></p><li>Restart the server.</li></ol>"
+    )
+    nested = render(
+        "<ul><li>Use the default Java security vendor.</li>"
+        "<ul><li>Set: TIBCO_SECURITY_VENDOR = j2se</li></ul></ul>"
+    )
+
+    assert steps == (
+        "1. Run the script.\n\n"
+        "   This script only works when your EMS_HOME path ends with ems/10.5.\n\n"
+        "2. Restart the server."
+    )
+    assert nested == "- Use the default Java security vendor.\n\n  - Set: TIBCO_SECURITY_VENDOR = j2se"
+
+
+@pytest.mark.parametrize(("html", "expected"), [
+    ("<p>are <b>tcp</b> and <b>ssl</b><b>.</b> For example</p>",
+     "are **tcp** and **ssl**<!-- -->**.** For example"),
+    ("<p><b>Default value:</b><i>none</i></p>", "**Default value:**<!-- -->*none*"),
+    ("<p><code>-user &lt;user_name&gt;</code><code>-password &lt;pwd&gt;</code></p>",
+     "`-user <user_name>`<!-- -->`-password <pwd>`"),
+    # A closer after punctuation cannot close against a word, nor an opener
+    # before punctuation open after one.
+    ("<p><b>Note:</b>restart it.</p>", "**Note:**<!-- -->restart it."),
+    ("<p>the<b>(optional)</b> flag</p>", "the<!-- -->**(optional)** flag"),
+    # Nothing is added where the runs already read apart.
+    ("<p><b>a</b> <i>b</i> <code>c</code>, <b>d</b>.</p>", "**a** *b* `c`, **d**."),
+])
+def test_adjacent_inline_runs_stay_apart(html: str, expected: str) -> None:
+    """`**ssl****.**` and `**Default value:***none*` read as literal asterisks,
+    and two code spans as one holding two backticks: 353 and 849 in the families
+    (R8-07). An empty comment between them renders as nothing."""
+    assert render(html) == expected
+
+
+def test_adjacent_runs_in_a_heading_keep_its_slug() -> None:
+    """The seam is a tag, so the slug rule strips it with the rest."""
+    rendered = render("<h2><b>ssl</b><b>Config</b></h2>")
+
+    assert rendered == "## **ssl**<!-- -->**Config**"
+    assert references.anchors(rendered) == {"sslconfig"}
+
+
+def test_embedded_media_is_counted_and_linked_when_its_url_is_absolute() -> None:
+    """An `<iframe>` of a video reached the output as nothing (R8-13)."""
+    renderer = markdown.Renderer()
+    rendered = render(
+        '<p>Watch:</p><iframe src="https://www.youtube.com/embed/x"></iframe>'
+        '<video src="clip.mp4">Your browser cannot play this.</video>',
+        renderer,
+    )
+
+    assert rendered == (
+        "Watch:\n\n[https://www.youtube.com/embed/x](https://www.youtube.com/embed/x)"
+        "Your browser cannot play this."
+    )
+    assert renderer.unrendered == {"iframe": 1, "video": 1}
+    assert markdown.Renderer().unrendered == {}
+
+
 def test_a_passthrough_table_gets_its_references_resolved() -> None:
     """Invariant 13 does not stop at the edge of a pipe table.
 

@@ -28,6 +28,7 @@ So the contract fixes only what all of them share:
 import os
 import re
 from abc import ABC, abstractmethod
+from collections import Counter
 from collections.abc import Iterator
 from dataclasses import dataclass, field
 from pathlib import Path, PurePosixPath
@@ -321,6 +322,11 @@ class ConversionContext:
     # level, and how many definition terms were recovered from `class="dt"`.
     renumbered_headings: int = 0
     recovered_terms: int = 0
+    # Embedded media the shared walk has no Markdown for, by tag (Phase 34,
+    # R8-13). Accumulated from each renderer for `flattened_links`' reason: an
+    # element reduced to its fallback text, or to nothing, was a loss nobody
+    # counted.
+    unrendered: Counter[str] = field(default_factory=Counter)
 
     def subtree_name(self, root: Path) -> str:
         """Where this unit's output goes, relative to the version folder.

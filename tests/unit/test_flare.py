@@ -632,6 +632,22 @@ def test_a_comment_inside_the_container_is_not_prose(tmp_path: Path) -> None:
     assert "TODO" not in run(tmp_path, files).body("Content/intro.md")
 
 
+def test_embedded_media_reaches_the_versions_count(tmp_path: Path) -> None:
+    """The walk counts what it cannot render; the engine hands it to the driver,
+    which reports it as `ELEMENT_UNRENDERED` (R8-13)."""
+    files = basic()
+    files["html/Content/intro.htm"] = topic(
+        "Introduction", '<p>Watch:</p><iframe src="https://www.youtube.com/embed/x"></iframe>'
+    )
+
+    result = run(tmp_path, files)
+
+    assert "[https://www.youtube.com/embed/x](https://www.youtube.com/embed/x)" in (
+        result.body("Content/intro.md")
+    )
+    assert result.context.unrendered == {"iframe": 1}
+
+
 # -- `data-mc-autonum` (§5.1.8) -------------------------------------------------
 
 
