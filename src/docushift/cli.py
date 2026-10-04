@@ -28,6 +28,7 @@ from docushift.discovery.sitemap import SitemapCache
 from docushift.models import MigrateDecision, ReleaseStatus, ScopeSource, SourceEngine, ZipSource
 from docushift.reporting.findings import REGISTRY, FindingsRun, Severity, Stage
 from docushift.state import StateStore
+from docushift.utils import textfile
 from docushift.utils.slug import version_segment
 
 # `emoji=False` tool-wide, because a finding is machine output and must survive
@@ -2982,7 +2983,7 @@ def report(
         text = report_view.render_markdown(run, rows, filters=filters)
         try:
             export_path.parent.mkdir(parents=True, exist_ok=True)
-            export_path.write_text(text, encoding="utf-8")
+            textfile.write_text(export_path, text)
         except OSError as exc:
             raise click.ClickException(f"Could not write {export_path}: {exc}") from exc
         console.print(f"Wrote {export_path}")

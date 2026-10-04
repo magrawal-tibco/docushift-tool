@@ -35,6 +35,7 @@ from pathlib import Path, PurePosixPath
 
 from docushift.engines.csh import CshSource, CshStatus
 from docushift.transforms import links
+from docushift.utils import textfile
 
 
 @dataclass(frozen=True)
@@ -277,7 +278,7 @@ def write(path: Path, mapping: dict[str, str]) -> bool:
             path.unlink()
         return False
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(render(mapping), encoding="utf-8")
+    textfile.write_text(path, render(mapping))
     return True
 
 

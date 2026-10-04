@@ -73,6 +73,7 @@ from docushift.sync import archives as archive_index
 from docushift.sync import documents as document_index
 from docushift.sync import redirects as redirect_map
 from docushift.sync import versions as version_file
+from docushift.utils import textfile
 from docushift.utils.longpath import (
     PUBLISHED_PATH_LIMIT,
     long_path,
@@ -567,12 +568,12 @@ class WorkspaceDistributor:
 
             templates = self.config.aem_templates_dir
             title = document_index.index_title(product.display_name, version.version, doc_class)
-            (staging / "index.md").write_text(
+            textfile.write_text(
+                staging / "index.md",
                 document_index.render_index(entries, title, doc_class, templates),
-                encoding="utf-8",
             )
             for name, text in self._catalog_rendered(product, version, doc_class).items():
-                (staging / name).write_text(text, encoding="utf-8")
+                textfile.write_text(staging / name, text)
             swap(staging, destination)
         except BaseException:
             remove(staging)  # Phase 15c: never leave `.part` in a published tree.
@@ -711,11 +712,11 @@ class WorkspaceDistributor:
                     long_path(staging / root.name),
                     copy_function=shutil.copy2,
                 )
-            (staging / "metadata.yml").write_text(
+            textfile.write_text(
+                staging / "metadata.yml",
                 navigation.render_metadata(
                     [("csg-version", version.version)], self.config.aem_templates_dir, "version"
                 ),
-                encoding="utf-8",
             )
             swap(staging, destination)
         except BaseException:
@@ -828,14 +829,14 @@ class WorkspaceDistributor:
                     size += entry.bytes
 
             templates = self.config.aem_templates_dir
-            (staging / "index.md").write_text(index, encoding="utf-8")
-            (staging / "toc.yml").write_text(
-                archive_index.render_toc(title, product.display_name, templates), encoding="utf-8"
+            textfile.write_text(staging / "index.md", index)
+            textfile.write_text(
+                staging / "toc.yml", archive_index.render_toc(title, product.display_name, templates)
             )
-            (staging / "metadata.yml").write_text(
+            textfile.write_text(
+                staging / "metadata.yml",
                 navigation.render_metadata([("csg-product", product.display_name)],
                                            templates, "product"),
-                encoding="utf-8",
             )
             swap(staging, destination)
         except BaseException:
@@ -867,9 +868,9 @@ class WorkspaceDistributor:
             return
 
         templates = self.config.aem_templates_dir
-        (root / "metadata.yml").write_text(
+        textfile.write_text(
+            root / "metadata.yml",
             navigation.render_metadata([("csg-product", product.display_name)], templates, "product"),
-            encoding="utf-8",
         )
         stats.products += 1
 
@@ -918,7 +919,7 @@ class WorkspaceDistributor:
         merged = version_file.merge(
             existing, rows, version_file.owned_paths(present, catalog_versions)
         )
-        path.write_text(version_file.render(merged, templates), encoding="utf-8")
+        textfile.write_text(path, version_file.render(merged, templates))
         stats.dropdowns += 1
 
     def _write_redirect_map(
@@ -994,7 +995,7 @@ class WorkspaceDistributor:
                                         folder.name),
             owned_key,
         )
-        path.write_text(redirect_map.render(merged, header), encoding="utf-8")
+        textfile.write_text(path, redirect_map.render(merged, header))
         stats.redirect_maps += 1
         stats.redirect_rows += len(merged)
         stats.redirect_base = base

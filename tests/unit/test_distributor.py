@@ -213,6 +213,18 @@ def test_the_product_metadata_carries_the_display_name(config, distributor, prod
     assert loaded == {"csg-product": "TIBCO Enterprise Message Service™"}
 
 
+def test_the_files_sync_writes_have_lf_line_endings(config, distributor, product, target) -> None:
+    """X2-07: the product's `metadata.yml` and the drop-down's `version.yml` were
+    written CRLF on Windows, beside merged trees written LF."""
+    convert_output(config, product, "10.4.0")
+
+    distributor.sync_many([(product, product.versions["10.4.0"])], target)
+
+    written = [target / TREE / "en-us" / "tibco-ems" / "metadata.yml",
+               published(target).parent / "version.yml"]
+    assert [path.name for path in written if b"\r" in path.read_bytes()] == []
+
+
 def test_a_product_that_published_nothing_gets_no_folder(distributor, product, target) -> None:
     """A product folder holding a `metadata.yml` and no content is a dead entry."""
     stats = distributor.sync_many([(product, product.versions["10.4.0"])], target)

@@ -63,6 +63,7 @@ from docushift.reframe.policy import ReframePolicy, policy_for
 from docushift.reframe.review import Flag, branches, inspect
 from docushift.reframe.toc import TocEntry, retarget, schema_for
 from docushift.reporting.findings import FindingsRun
+from docushift.utils import textfile
 from docushift.utils.longpath import long_path, walk_files
 from docushift.utils.slug import version_segment
 from docushift.utils.swap import remove, swap
@@ -683,9 +684,9 @@ class Reframer:
             # FileNotFoundError that names the path and not the reason.
             destination = long_path(staging / page.path)
             destination.parent.mkdir(parents=True, exist_ok=True)
-            # `newline=""` so the bytes are the same on every platform, which is
-            # half of C5; the other half is that everything feeding this is sorted.
-            destination.write_text(text, encoding="utf-8", newline="")
+            # LF so the bytes are the same on every platform, which is half of
+            # C5; the other half is that everything feeding this is sorted.
+            textfile.write_text(destination, text)
             scaffolding += added
             words += word_count(split_frontmatter(text)[1])
             if mirror:

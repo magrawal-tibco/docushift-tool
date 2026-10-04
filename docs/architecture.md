@@ -787,6 +787,14 @@ So `extract` resolves a **content root** per version and records it in `state.db
 
 The unstripped alternative was considered and rejected: hoisting the child's contents into the version directory would make the tree match what every step assumed, with no consumer changes — but then the extracted tree no longer matches the package it came from, and the next structural defect of this kind becomes unfalsifiable.
 
+### 4.6 Line Endings: LF in Every Generated Text File, CRLF in the CSVs
+
+Every Markdown page and every `.yml` the tool writes — in `output/`, `reframed/` and the published target, plus `report --export` — goes through one writer, `utils/textfile.py:write_text`: UTF-8, LF, the same bytes on every OS. It also folds a carriage return already in the text, since a converted body carries source text and a CRLF from a `<pre>` block came out `\r\r\n` through Windows' newline translation; CommonMark and YAML both read a lone CR as a line break, so folding changes no rendering.
+
+Before it (X2-07, X3-10), `write_text` without `newline=` wrote CRLF on Windows, and convert's fragment pass rewrote only the pages whose anchors moved, as LF. A tree's line endings were an accident of which pass wrote each file last — 16,061 converted pages CRLF and 6,589 LF — one added cross-reference flipped a whole page in a diff, and a tree built on another OS differed in size from one built here, which `sync`'s size-and-mtime comparison reads as stale. A tree converted before the change keeps its CRLF files until it is next re-converted.
+
+**The CSVs keep CRLF** — the catalog pair, `rename-map.csv` and `review-queue.csv` through `utils/csvio.py` (§3.6), and `reports/coveo-sitemap.csv`: they are opened in Excel, and the csv module and RFC 4180 both write CRLF. The `csvio` ones keep their BOM too, which is what keeps `®` and `™` intact on a double-click open.
+
 ---
 
 ## 5. Multi-Engine Conversion & Asset Handling

@@ -41,6 +41,7 @@ from docushift.extractor import ExtractOutcome, PackageExtractor
 from docushift.models import ConversionStatus, EngineSource, Product, ProductVersion, SourceEngine
 from docushift.reporting.findings import FindingsRun, Severity
 from docushift.transforms import csh
+from docushift.utils import textfile
 from tests.unit.test_extractor import place_package
 
 ALIAS = """<?xml version="1.0" encoding="utf-8"?>
@@ -323,6 +324,30 @@ def test_csh_yml_is_flat_quoted_and_omits_what_did_not_resolve(
     # The unresolved digit-only identifier is not in the file and is not lost.
     assert [entry.identifier for entry in result.csh.unresolved] == ["1234"]
     assert [f.code for f in findings.all if f.code == "CSH_UNRESOLVED"] == ["CSH_UNRESOLVED"]
+
+
+def test_every_text_file_convert_writes_has_lf_line_endings(
+    config, catalog, product, version, extracted, fake_engine
+) -> None:
+    """X2-07, X3-10. Topics, `toc.yml`, `metadata.yml` and `csh.yml` were written
+    CRLF on Windows, and only the pages the fragment pass rewrote came out LF, so
+    a tree's line endings depended on which pass wrote each file last."""
+    convert(config, catalog, product, version)
+
+    output = config.output_path(product.bu, product.family, product.slug, version.version)
+    written = [path for path in output.rglob("*") if path.suffix in {".md", ".yml"}]
+    assert {path.name for path in written} >= {"topic.md", "toc.yml", "metadata.yml", "csh.yml"}
+    assert [path.name for path in written if b"\r" in path.read_bytes()] == []
+
+
+def test_the_shared_writer_folds_carriage_returns_already_in_the_text(tmp_path: Path) -> None:
+    """A `\\r\\n` carried in from a source `<pre>` block came out `\\r\\r\\n` through a
+    CRLF translation. Every CR is folded, so the file is LF whatever it holds."""
+    path = tmp_path / "page.md"
+
+    textfile.write_text(path, "a\r\nb\rc\n")
+
+    assert path.read_bytes() == b"a\nb\nc\n"
 
 
 def test_identifiers_reach_the_topics_first_and_only_write(

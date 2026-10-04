@@ -38,6 +38,7 @@ from urllib.parse import unquote, urlsplit
 import yaml
 
 from docushift.transforms import links
+from docushift.utils import textfile
 
 #: The per-version and per-doc-class file. One name at two levels, for the reason
 #: `sync/redirects.REDIRECTS` carries one: it is one map, published at the level it
@@ -425,4 +426,4 @@ def write(path: Path, built: list[dict[str, Any]]) -> None:
     """A version's `301.yml`, written the way `reframe/manifest.write` writes every
     sidecar -- same dump options -- so the two stages' files are byte-comparable."""
     body = yaml.safe_dump(document(built), sort_keys=False, allow_unicode=True, width=10**6)
-    path.write_text(VERSION_HEADER + body, encoding="utf-8", newline="\n")
+    textfile.write_text(path, VERSION_HEADER + body)

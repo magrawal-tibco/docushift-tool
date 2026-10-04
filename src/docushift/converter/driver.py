@@ -64,6 +64,7 @@ from docushift.sync import apirefs
 from docushift.transforms import csh as csh_transform
 from docushift.transforms import fragments, links
 from docushift.transforms.assets import AssetCopier, Counts
+from docushift.utils import textfile
 from docushift.utils.csvio import release_year
 from docushift.utils.slug import slugify, version_segment
 from docushift.utils.swap import remove, swap
@@ -529,7 +530,7 @@ class DocumentConverter:
                 document.csh = owned.get(str(relative), [])
             path = staging / Path(*relative.parts)
             path.parent.mkdir(parents=True, exist_ok=True)
-            path.write_text(_render(document), encoding="utf-8")
+            textfile.write_text(path, _render(document))
 
     def _synthesize(
         self,
@@ -552,18 +553,18 @@ class DocumentConverter:
         for document in synthesis.documents:
             path = staging / Path(*document.relative.parts)
             path.parent.mkdir(parents=True, exist_ok=True)
-            path.write_text(_render(document), encoding="utf-8")
+            textfile.write_text(path, _render(document))
 
         title = f"{product.display_name} {version.version}".strip()
-        (staging / "toc.yml").write_text(
-            navigation.render_toc(synthesis.nodes, templates, title), encoding="utf-8"
+        textfile.write_text(
+            staging / "toc.yml", navigation.render_toc(synthesis.nodes, templates, title)
         )
         # Version level, so `csg-version` and nothing else -- `csg-product` belongs
         # to the product folder, which only the distributor (6b) creates. Dotted,
         # as the product names it; the dashed form is the publishing boundary's.
-        (staging / "metadata.yml").write_text(
+        textfile.write_text(
+            staging / "metadata.yml",
             navigation.render_metadata([("csg-version", version.version)], templates, "version"),
-            encoding="utf-8",
         )
 
         result.generated = synthesis.generated
@@ -762,9 +763,7 @@ class DocumentConverter:
             updated, count = fragments.retarget(body, anchor_for)
             if count:
                 rewritten += count
-                (staging / Path(*relative.parts)).write_text(
-                    updated, encoding="utf-8", newline=""
-                )
+                textfile.write_text(staging / Path(*relative.parts), updated)
 
         # **And the navigation, which is where most of them are.** Measured on
         # the first run of this pass: 18,047 of 18,112 surviving broken
@@ -794,7 +793,7 @@ class DocumentConverter:
             updated = _TOC_PATH.sub(replace, text)
             if moved:
                 rewritten += moved
-                toc.write_text(updated, encoding="utf-8", newline="")
+                textfile.write_text(toc, updated)
 
         # **And the help map**, rewritten in place before the caller writes it
         # (Phase 34, R8-04). Its anchor is the source's marker name, so a Help

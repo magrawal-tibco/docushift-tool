@@ -36,6 +36,7 @@ from docushift.reframe.packer import Page
 from docushift.reframe.pages import LinkCounts
 from docushift.reframe.policy import ReframePolicy
 from docushift.reframe.review import Flag
+from docushift.utils import textfile
 
 PAGES_HEADER = (
     "# Written by `docushift reframe` (Stage 6b). Do not hand-edit: this file is\n"
@@ -129,4 +130,4 @@ def redirects(located: dict[PurePosixPath, tuple[Page, str]]) -> dict[str, Any]:
 def write(path: Path, header: str, document: dict[str, Any]) -> None:
     """One sidecar, header comment first. `sort_keys=False` keeps the order above."""
     body = yaml.safe_dump(document, sort_keys=False, allow_unicode=True, width=10**6)
-    path.write_text(header + body, encoding="utf-8", newline="\n")
+    textfile.write_text(path, header + body)
