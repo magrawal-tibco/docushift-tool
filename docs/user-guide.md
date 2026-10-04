@@ -1409,6 +1409,10 @@ What to expect:
   what is left is mostly footnote and marker anchors with no heading in the source
   — worth knowing about, and nothing a re-run can fix. A file that is not there is
   a 404 and gates.
+- **A link to a heading on a merged page can land on the wrong topic.** When two
+  topics on one page share a heading, the second becomes `#import-1`; a `#import`
+  written in the second topic still works, but opens the first topic's heading.
+  That is an `ANCHOR_WRONG_HEADING` warning naming both lines.
 - **A Help button that opens the wrong place has its own warning.** A `csh.yml`
   entry whose `#anchor` is not on its page is `CSH_ANCHOR_MISSING`: the button
   opens the page top instead of the section. When the anchor only repeats the help

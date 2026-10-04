@@ -226,6 +226,31 @@ def slugify_heading(title: str) -> str:
     return anchors_util.slugify_heading(title)
 
 
+def headings(text: str) -> dict[str, tuple[int, str]]:
+    """`{anchor: (line, slug before renumbering)}` for every heading in this file.
+
+    Phase 34 (R11-02). `anchors()` answers "does `#x` exist", which is the
+    wrong question on a merged page: every topic's headings are on it, a second
+    "Import" is renumbered `import-1`, and `#import` written inside the second
+    topic resolves -- to the first topic's heading. Where each anchor sits, and
+    which title it was renumbered from, is what lets the checker see that.
+    Same masking, same heading rule and same `anchor_run` as `anchors()`, so the
+    two cannot disagree about which anchors exist.
+    """
+    masked = mask_code(text)
+    found: dict[str, tuple[int, str]] = {}
+    matches = list(_HEADING.finditer(masked))
+    run = anchors_util.anchor_run([match.group(2) for match in matches])
+    # Counted incrementally: one pass over the text, not one per heading.
+    line, position = 1, 0
+    for match, anchor in zip(matches, run, strict=True):
+        line += masked.count("\n", position, match.start())
+        position = match.start()
+        if anchor:
+            found.setdefault(anchor, (line, anchors_util.slugify_heading(match.group(2))))
+    return found
+
+
 def anchors(text: str) -> set[str]:
     """Every fragment `#foo` that resolves inside this file.
 

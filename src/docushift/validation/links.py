@@ -214,6 +214,7 @@ class FolderIndex:
         self.present: set[str] = set()
         self._folded: dict[str, str] = {}
         self._anchors: dict[str, set[str]] = {}
+        self._headings: dict[str, dict[str, tuple[int, str]]] = {}
         for relative_path, _path in walk_files(folder):
             relative = relative_path.as_posix()
             self.present.add(relative)
@@ -229,13 +230,21 @@ class FolderIndex:
     def anchors(self, relative: str) -> set[str]:
         cached = self._anchors.get(relative)
         if cached is None:
+            cached = set(self.headings(relative))
+            self._anchors[relative] = cached
+        return cached
+
+    def headings(self, relative: str) -> dict[str, tuple[int, str]]:
+        """`references.headings` for one file, parsed once (R11-02)."""
+        cached = self._headings.get(relative)
+        if cached is None:
             try:
                 text = long_path(self.folder / relative).read_text(
                     encoding="utf-8", errors="replace")
             except OSError:  # pragma: no cover - the file was just listed
                 text = ""
-            cached = references.anchors(text)
-            self._anchors[relative] = cached
+            cached = references.headings(text)
+            self._headings[relative] = cached
         return cached
 
 
@@ -306,6 +315,10 @@ def _check_file(
             miss = anchor_miss(classified.fragment, index.anchors(relative))
             if miss is None:
                 report.anchors_matched += 1
+                twin = _nearer_twin(index.headings(relative), classified.fragment,
+                                    reference.line)
+                if twin is not None:
+                    issue("ANCHOR_WRONG_HEADING", reference.line, twin)
             else:
                 issue(
                     "ANCHOR_MISSING",
@@ -356,6 +369,37 @@ def _check_file(
                     f"#{classified.fragment} is not an anchor in {target}{miss}",
                 )
     return report
+
+
+def _nearer_twin(
+    headings: dict[str, tuple[int, str]], fragment: str, line: int
+) -> str | None:
+    """Why a same-page `#fragment` lands on an earlier topic's heading, or `None`.
+
+    Phase 34 (R11-02), and R9-01's defect: a merged page renumbers a repeated
+    heading (`import`, `import-1`), and a `#import` written in the second topic
+    still resolves, to the first. The rule is the reviewer's, which flagged
+    exactly R9-01's three EMS links over p35's 13,608 pages: a heading with the
+    *same title* as the target, renumbered, sits between the target and the
+    link. "Same title" is compared on the slug before renumbering, so a heading
+    that is really called "Step 1" is not a twin of "Step". A link above the
+    duplicate (12 of the looser rule's 15 hits) is left alone: the first heading
+    is the nearest one, and that is where every reader expects to land.
+
+    Same-page only. A cross-page fragment has no position to compare with, and
+    the cross-topic case (R9-02) needs the source anchor map, which the
+    published tree does not carry.
+    """
+    target_line, title = headings[fragment]
+    twins = sorted(
+        (twin_line, anchor) for anchor, (twin_line, base) in headings.items()
+        if base == title and anchor != fragment and target_line < twin_line < line
+    )
+    if not twins:
+        return None
+    twin_line, anchor = twins[-1]
+    return (f"#{fragment} lands on the heading at line {target_line}, an earlier topic's; "
+            f"the same heading nearer this link is #{anchor} (line {twin_line})")
 
 
 def _check_tree_rooted(

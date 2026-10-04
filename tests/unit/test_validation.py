@@ -2089,3 +2089,55 @@ def test_the_length_is_measured_in_api_reference_folders_too(tmp_path: Path) -> 
     (deep / "index.html").write_text("x", encoding="utf-8")
 
     assert codes(Validator(target).check_folder(only(target)).findings) == ["PATH_TOO_LONG"]
+
+
+# -- a same-page fragment landing on an earlier topic's heading (Phase 34, R11-02) --
+#
+# A merged page carries every topic's headings, and duplicates are renumbered
+# `-1`, `-2` in document order. `#import`, written inside the second topic, still
+# resolves -- to the *first* topic's Import heading. Existence was all that was
+# checked, so EMS 10.5.1's three such links passed.
+
+MERGED = (
+    "# Kafka\n\n## Export\n\n## Import\n\nFirst topic.\n\n"
+    "# Another topic\n\n## Import\n\nSee [import](#import) below.\n"
+)
+
+
+def test_a_fragment_with_a_same_titled_heading_between_it_and_its_target_is_named(
+    tmp_path: Path,
+) -> None:
+    target = tmp_path / "target"
+    publish(target, {"a.md": MERGED})
+
+    report, _ = links_of(target)
+
+    assert codes(report.findings) == ["ANCHOR_WRONG_HEADING"]
+    finding = report.findings[0]
+    assert finding.path.endswith("a.md:13")
+    assert "#import-1" in finding.message and "line 5" in finding.message
+    assert REGISTRY["ANCHOR_WRONG_HEADING"].severity is Severity.WARNING
+    # It still resolves; the count says so and the warning says where.
+    assert report.anchors_matched == 1
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        # The link sits before the duplicate: the first heading is the nearest.
+        "# P\n\n## Example\n\nSee [e](#example).\n\n## Example\n",
+        # The link names the renumbered heading explicitly.
+        "# P\n\n## Import\n\n## Import\n\nSee [i](#import-1).\n",
+        # A heading whose own text ends in a number is not a twin.
+        "# P\n\n## Step\n\n## Step 1\n\nSee [s](#step).\n",
+    ],
+)
+def test_a_fragment_whose_target_is_the_nearest_heading_of_that_title_is_silent(
+    tmp_path: Path, text: str
+) -> None:
+    target = tmp_path / "target"
+    publish(target, {"a.md": text})
+
+    report, _ = links_of(target)
+
+    assert report.findings == []

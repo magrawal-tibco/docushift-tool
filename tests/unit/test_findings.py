@@ -156,9 +156,11 @@ def test_the_register_carries_every_row_of_7_5() -> None:
     It adds the 77th, `PATH_TOO_LONG` (R11-06): `sync`'s path ceiling read back
     from the shelf, for a tree no guard ever measured. And the 78th,
     `CSH_ANCHOR_MISSING` (R11-03): a Help button opening the page top, split out
-    of 472 `ANCHOR_MISSING` rows nobody could sort.
+    of 472 `ANCHOR_MISSING` rows nobody could sort. And the 79th,
+    `ANCHOR_WRONG_HEADING` (R11-02): a fragment that resolves, to the wrong
+    topic's heading, which existence-only matching could never see.
     """
-    assert len(REGISTRY) == 78
+    assert len(REGISTRY) == 79
 
 
 def test_severity_comes_from_the_registry_and_not_from_the_call_site() -> None:

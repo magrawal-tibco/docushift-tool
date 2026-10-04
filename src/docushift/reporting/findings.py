@@ -521,6 +521,15 @@ REGISTRY: dict[str, Code] = _codes(
     # The network is not the output. A proxy, an outage or a host that dislikes
     # HEAD would otherwise decide an exit code, and an exit code that depends on
     # the network is one nobody trusts. Only reachable under `--check-external`.
+    # Phase 34 (R11-02). R9-01's defect, which existence-only matching passed: on
+    # a merged page `#import` resolves to the first topic's Import heading, not
+    # the renumbered `import-1` beside the link. A warning, like `ANCHOR_MISSING`:
+    # the link works, it just goes somewhere wrong, and the rule is a heuristic
+    # -- exact on p35 (3 hits, all real), but not a fact a gate can rest on.
+    Code("ANCHOR_WRONG_HEADING", Severity.WARNING, Stage.VALIDATE,
+         "A same-page #fragment resolving to an earlier topic's heading: a heading "
+         "with the same title, renumbered, sits between the target and the link",
+         "planning.md Phase 34 (R11-02)"),
     Code("LINK_EXTERNAL_DEAD", Severity.WARNING, Stage.VALIDATE,
          "An absolute URL that did not respond, under --check-external",
          "planning.md §7.4"),
