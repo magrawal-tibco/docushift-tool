@@ -398,6 +398,15 @@ REGISTRY: dict[str, Code] = _codes(
          "Page names taken from rename-map.csv rather than recomputed, so a "
          "published URL does not move when a title is edited",
          "planning.md Phase 29"),
+    # Phase 34, R9-05. The other half of the row above: a name in the map that
+    # was *not* used, because another page ends up at that path and two pages at
+    # one path is a page lost. A warning, not a note -- somebody chose that name
+    # and the run kept a different one, which is `keep_separate`'s case exactly:
+    # a decision that silently did nothing looks like one that was applied.
+    Code("RENAME_MAP_REFUSED", Severity.WARNING, Stage.REFRAME,
+         "Page names in rename-map.csv that another page already holds; the "
+         "computed name was kept",
+         "planning.md Phase 29"),
     Code("REFRAME_REVIEW_QUEUED", Severity.NOTE, Stage.REFRAME,
          "Merged pages needing an editorial decision, listed in review-queue.csv",
          "REFRAME-REQUIREMENTS.md R6"),

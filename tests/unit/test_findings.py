@@ -149,8 +149,10 @@ def test_the_register_carries_every_row_of_7_5() -> None:
     note only ever saw a `ja/` folder inside an English root. And the 74th,
     `ENGINE_ROOT_UNCONVERTED` (R4-02): a second engine's book, fed to the first
     engine page by page or never looked at, is named once per root.
+    It adds the 75th, `RENAME_MAP_REFUSED` (R9-05): a name a human wrote into
+    `rename-map.csv` that could not be used, and was dropped without a word.
     """
-    assert len(REGISTRY) == 74
+    assert len(REGISTRY) == 75
 
 
 def test_severity_comes_from_the_registry_and_not_from_the_call_site() -> None:

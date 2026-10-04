@@ -89,6 +89,11 @@ _REGENERATED = frozenset(
      origins.ORIGINS, renames.RENAME_MAP}
 )
 
+#: The version-metadata key holding a digest of the `rename-map.csv` this stage
+#: last wrote (R9-04). A hand edit changes the file and so the digest, which is
+#: what makes the edit a re-merge rather than a no-op.
+_RENAME_DIGEST = "reframe_rename_digest"
+
 
 @dataclass(frozen=True)
 class _Written:
@@ -190,7 +195,8 @@ class ReframeOutcome(StrEnum):
     """What happened to one version. Every run reports these five counts."""
 
     REFRAMED = "reframed"
-    # The converted tree and the policy are both unchanged since the last merge.
+    # The converted tree, the policy and the approved names in `rename-map.csv`
+    # are all unchanged since the last merge, and `--renormalize` was not given.
     CURRENT = "current"
     # Selected, but its engine does not produce topics this stage merges (C1).
     # Not a failure and not a warning -- the overwhelming majority of the catalog.
@@ -340,7 +346,18 @@ class Reframer:
         converted_from = metadata.get("convert_source_checksum", "")
         merged_from = metadata.get("reframe_source_checksum", "")
         policy_current = metadata.get("reframe_policy_key", "") == policy.key
-        if not force and converted_from and converted_from == merged_from and policy_current and target.is_dir():
+        # R9-04. The approved names are an input too. The user guide's workflow is
+        # "write a better name into `new_path`; the next run uses it", and with the
+        # map outside the key the next run said `current` and used nothing --
+        # J's re-merge only worked because it bumped the algorithm. `--renormalize`
+        # asks for every name to be recomputed, which a `current` skip cannot do.
+        names_current = (
+            not self.renormalize
+            and target.is_dir()
+            and metadata.get(_RENAME_DIGEST, "") == renames.digest(renames.load(target))
+        )
+        if (not force and converted_from and converted_from == merged_from and policy_current
+                and names_current):
             current = ReframeResult(
                 slug, number, ReframeOutcome.CURRENT, path=target, engine=version.engine
             )
@@ -469,12 +486,25 @@ class Reframer:
         # somebody fixed a typo in a title. `--renormalize` is how a writer asks
         # for the names to be recomputed anyway.
         approved = {} if self.renormalize else renames.load(target)
-        pinned = override(built, approved)
+        pinned, refused = override(built, approved)
         if pinned:
             self._record(
-                "RENAME_MAP_APPLIED", slug, number, count=pinned,
-                message=(f"{pinned} page name(s) taken from {renames.RENAME_MAP} "
+                "RENAME_MAP_APPLIED", slug, number, count=len(pinned),
+                message=(f"{len(pinned)} page name(s) taken from {renames.RENAME_MAP} "
                          f"rather than recomputed"),
+            )
+        if refused:
+            # R9-05. A name somebody chose that silently did nothing looks exactly
+            # like one that was applied -- `keep_separate`'s argument, and the
+            # same answer: name each one.
+            shown = ", ".join(f"{source} -> {wanted}" for source, wanted in list(refused.items())[:5])
+            self._record(
+                "RENAME_MAP_REFUSED", slug, number, path=renames.RENAME_MAP, count=len(refused),
+                message=(
+                    f"{len(refused)} name(s) in {renames.RENAME_MAP} name a path another page "
+                    f"holds, so the computed name was kept: {shown}"
+                    f"{', ...' if len(refused) > 5 else ''}"
+                ),
             )
         unnavigated = frozenset(page.path for page in carried)
 
@@ -485,7 +515,9 @@ class Reframer:
         # R6, computed before anything is written so the queue and `reframe.yml`
         # are two views of one measurement rather than two passes that could drift.
         ancestors = branches(roots)
-        cut = shortened(built)
+        # R9-12: a name taken from `rename-map.csv` is a human's answer to the
+        # `shortened` flag, so it is not asked again on every run.
+        cut = shortened(built) - pinned
         flagged: dict[PurePosixPath, list[Flag]] = {
             page.path: inspect(
                 page, policy.max_words, ancestors,
@@ -571,6 +603,11 @@ class Reframer:
         if self.state is not None:
             self.state.set_version_metadata(slug, number, "reframe_source_checksum", checksum)
             self.state.set_version_metadata(slug, number, "reframe_policy_key", policy.key)
+            # Read back from the swapped-in tree rather than from `built`, so the
+            # digest is of exactly the file the next run will compare (R9-04).
+            self.state.set_version_metadata(
+                slug, number, _RENAME_DIGEST, renames.digest(renames.load(target))
+            )
         if self.findings is not None:
             self.findings.flush()
 

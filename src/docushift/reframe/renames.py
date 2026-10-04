@@ -13,7 +13,9 @@ because somebody fixed a typo in a title, which is the failure requirements §1
 calls permanent ("every layout decision is permanent") and which no amount of
 care at the naming end can prevent. `--renormalize` is how a writer asks for the
 names to be recomputed anyway, and it exists so that the pinning is a decision
-rather than a trap.
+rather than a trap. Both take effect on the next run without `--force` (R9-04):
+the approved names are part of the currency check, and `--renormalize` always
+re-merges.
 
 **The `shortened` column is the hook for a better name than an algorithm can
 write.** `utils/naming` cuts a title at 50 characters by dropping stopwords and
@@ -33,6 +35,7 @@ varied between runs would be a published address that moved on its own.
 
 from __future__ import annotations
 
+import hashlib
 from collections.abc import Callable
 from pathlib import Path, PurePosixPath
 from typing import TYPE_CHECKING
@@ -131,3 +134,14 @@ def load(root: Path) -> dict[PurePosixPath, PurePosixPath]:
         if old and new:
             overrides[PurePosixPath(old)] = PurePosixPath(new)
     return overrides
+
+
+def digest(approved: dict[PurePosixPath, PurePosixPath]) -> str:
+    """A short digest of the approved names, for the currency check (R9-04).
+
+    Over `load`'s mapping rather than the file's bytes: a reordered row or an
+    edited `title` cell changes no page's address and must not re-merge a tree,
+    while any `new_path` edit must.
+    """
+    payload = "\n".join(f"{old}\t{new}" for old, new in sorted(approved.items()))
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16]

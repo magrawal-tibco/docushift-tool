@@ -372,8 +372,9 @@ def test_a_topic_the_toc_never_lists_is_carried_through_and_named(config, catalo
     assert result.outcome is ReframeOutcome.REFRAMED
     assert codes(findings.all) == ["REFRAME_TOPIC_UNTOCKED"]
     assert findings.all[0].severity is Severity.WARNING
-    # Named from its own frontmatter title, like every other page (Phase 29).
-    carried = result.path / "users-guide/a-stray-topic.md"
+    # Named from its own frontmatter title, like every other page (Phase 29), and
+    # filed under the guide page its source folder belongs to (R9-03).
+    carried = result.path / "user-guide/a-stray-topic.md"
     assert carried.is_file()
     assert yaml.safe_load(split_frontmatter(carried.read_text(encoding="utf-8"))[0].strip("-\r\n")) == {
         "title": "A Stray Topic", "guide": UNNAVIGATED, "merged_from": 1,
@@ -2392,18 +2393,50 @@ def test_an_absorbed_topics_row_does_not_move_the_page_it_merged_into():
     assert [str(page.path) for page in pages] == ["guide.md"]
 
 
-def test_a_carried_page_is_left_where_it_was_because_no_toc_names_it():
-    """`carry`'s pages were never in the navigation, so there is no chain to put
-    them in -- and inventing one would give an unnavigated topic a more confident
-    address than a navigated one."""
-    roots = [node("Guide", "src/a.md")]
+def test_a_carried_page_no_navigated_page_shares_a_folder_with_stays_in_its_own():
+    """`carry`'s pages were never in the navigation, so there is no chain of
+    their own. With no guide page from the same source directory to borrow a
+    folder from, the source directory is all there is.
+
+    And a top-level page with the same title does not suffix it (R9-03): the two
+    are in different folders, so `-2` would guard against a clash that cannot
+    happen.
+    """
+    roots = [node("Guide", "src/a.md"), node("A Stray", "src/s.md")]
     pages = pack(roots, lambda p: 10, 3000) + carry(
         [PurePosixPath("odd/stray.md")], lambda p: "A Stray", lambda p: 10
     )
     assign(pages)
     relocate(pages, roots)
 
-    assert [str(page.path) for page in pages] == ["guide.md", "odd/a-stray.md"]
+    assert [str(page.path) for page in pages] == ["guide.md", "a-stray.md", "odd/a-stray.md"]
+
+
+def test_a_carried_page_goes_in_with_the_guide_its_source_folder_belongs_to():
+    """R9-03, TRA Runtime Agent 5.13.0. Two guides, and the converted TOC lists
+    only the first guide's legal page, as a top-level row. The second guide's own
+    legal page is untocked and carried.
+
+    It used to be named in the root scope, collide with the first guide's row and
+    land in its raw source folder: `trahelp/_templates/legal-and-third-party-
+    notices-2.md`. It now sits under the second guide's landing page, which is
+    where it was while the TOC still listed it, and where the user pinned it back.
+    """
+    roots = [
+        node("TIBCO Designer", "_templates/Home.md"),
+        node("TIBCO Runtime Agent", "trahelp/_templates/Home.md",
+             node("Installing", "trahelp/installation/install.md")),
+        node("Legal and Third-Party Notices", "_templates/Legal.md"),
+    ]
+    pages = pack(roots, lambda p: 10, 15) + carry(
+        [PurePosixPath("trahelp/_templates/Legal.md")],
+        lambda p: "Legal and Third-Party Notices", lambda p: 10,
+    )
+    assign(pages)
+    relocate(pages, roots)
+
+    assert str(pages[-1].path) == "tibco-runtime-agent/legal-and-third-party-notices.md"
+    assert "legal-and-third-party-notices.md" in [str(page.path) for page in pages]
 
 
 # -- rename-map.csv (Phase 29) --------------------------------------------------
@@ -2464,22 +2497,87 @@ def test_a_name_that_does_not_carry_its_title_is_queued_for_review(config, catal
     The queue and the column are two views of one measurement."""
     from docushift.reframe import renames
 
-    converted_tree(config, flare, "10.5.1")
+    converted_tree(config, flare, "10.5.1", toc=LONG_TITLE_TOC)
+
+    result = Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"])
+
+    mapped = {r["old_path"]: r for r in csvio.read_rows(result.path / renames.RENAME_MAP)}
+    cut = mapped["users-guide/user-guide.md"]["new_path"]
+    assert len(PurePosixPath(cut).stem) <= 50
+    assert mapped["users-guide/user-guide.md"]["shortened"] == "yes"
+    assert {row["new_path"] for row in mapped.values() if row["shortened"]} == {cut}
+    queue = {r["page_path"]: r for r in csvio.read_rows(result.path / "review-queue.csv")}
+    assert "shortened" in queue[cut]["flags"].split(";")
+    assert "Windows Services" in queue[cut]["detail"]
+
+
+#: A title the 50-character cut has to drop words from -- the measured example
+#: in `renames.py`'s docstring.
+LONG_TITLE_TOC = TOC.replace(
+    'title: "User Guide"',
+    'title: "Deployment Scenario for Running ActiveSpaces Processes as Windows Services"',
+)
+
+
+def test_a_name_a_human_wrote_answers_the_shortened_flag(config, catalog, flare):
+    """R9-12. The workflow `renames.py` describes: write
+    `activespaces-as-windows-services` into `new_path`. Judging that name against
+    the title again flagged it on every later run, so the queue never emptied."""
+    from docushift.reframe import renames
+
+    converted_tree(config, flare, "10.5.1", toc=LONG_TITLE_TOC)
     result = Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"])
     rows_now = list(csvio.read_rows(result.path / renames.RENAME_MAP))
     for row in rows_now:
         if row["old_path"] == "users-guide/user-guide.md":
-            row["new_path"] = "user-gui.md"
+            row["new_path"] = "activespaces-as-windows-services.md"
     renames.write(result.path / renames.RENAME_MAP, rows_now)
 
     again = Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"], force=True)
 
-    queue = {r["page_path"]: r for r in csvio.read_rows(again.path / "review-queue.csv")}
-    assert "shortened" in queue["user-gui.md"]["flags"].split(";")
-    assert "User Guide" in queue["user-gui.md"]["detail"]
+    assert (again.path / "activespaces-as-windows-services.md").is_file()
+    queue = {r["page_path"] for r in csvio.read_rows(again.path / "review-queue.csv")}
+    assert "activespaces-as-windows-services.md" not in queue
     mapped = {r["new_path"]: r for r in csvio.read_rows(again.path / renames.RENAME_MAP)}
-    assert mapped["user-gui.md"]["shortened"] == "yes"
-    assert {path for path, row in mapped.items() if row["shortened"]} == {"user-gui.md"}
+    assert mapped["activespaces-as-windows-services.md"]["shortened"] == ""
+
+
+def test_a_name_written_into_the_map_is_used_by_the_next_run_without_force(
+    config, catalog, flare
+):
+    """R9-04. The user guide says "the next run uses it". With the map outside
+    the currency key the next run said `current` and kept the old name."""
+    from docushift.reframe import renames
+
+    converted_tree(config, flare, "10.5.1")
+    catalog.state.set_version_metadata("tibco-flare-docs", "10.5.1", "convert_source_checksum", "abc123")
+    reframer = Reframer(config, catalog)
+    result = reframer.reframe_one(flare, flare.versions["10.5.1"])
+    assert reframer.reframe_one(flare, flare.versions["10.5.1"]).outcome is ReframeOutcome.CURRENT
+    rows_now = list(csvio.read_rows(result.path / renames.RENAME_MAP))
+    for row in rows_now:
+        if row["old_path"] == "users-guide/user-guide.md":
+            row["new_path"] = "using-the-product.md"
+    renames.write(result.path / renames.RENAME_MAP, rows_now)
+
+    again = reframer.reframe_one(flare, flare.versions["10.5.1"])
+
+    assert again.outcome is ReframeOutcome.REFRAMED
+    assert (again.path / "using-the-product.md").is_file()
+    assert not (again.path / "user-guide.md").exists()
+    # ...and once used, the edit is the recorded state, not a re-merge forever.
+    assert reframer.reframe_one(flare, flare.versions["10.5.1"]).outcome is ReframeOutcome.CURRENT
+
+
+def test_renormalize_re_merges_a_current_version_without_force(config, catalog, flare):
+    """R9-04. `--renormalize` over unchanged trees used to change nothing."""
+    converted_tree(config, flare, "10.5.1")
+    catalog.state.set_version_metadata("tibco-flare-docs", "10.5.1", "convert_source_checksum", "abc123")
+    Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"])
+
+    again = Reframer(config, catalog, renormalize=True).reframe_one(flare, flare.versions["10.5.1"])
+
+    assert again.outcome is ReframeOutcome.REFRAMED
 
 
 def test_the_map_records_the_address_a_reader_will_type(config, catalog, flare):
@@ -2514,10 +2612,52 @@ def test_an_approved_name_another_page_already_holds_is_refused():
     assign(pages)
     relocate(pages, roots)
 
-    pinned = override(pages, {PurePosixPath("g/b.md"): PurePosixPath("first.md")})
+    pinned, refused = override(pages, {PurePosixPath("g/b.md"): PurePosixPath("first.md")})
 
-    assert pinned == 0
+    assert pinned == set()
+    assert refused == {PurePosixPath("g/b.md"): PurePosixPath("first.md")}
     assert [str(page.path) for page in pages] == ["first.md", "second.md"]
+
+
+def test_a_pin_onto_a_path_another_pin_vacates_is_not_refused():
+    """R9-05. Judged against the final paths, not in page order: the first page
+    may take `second.md` because the second page is itself pinned away from it."""
+    from docushift.reframe.packer import override
+
+    roots = [node("First", "g/a.md"), node("Second", "g/b.md")]
+    pages = pack(roots, lambda p: 10, 3000)
+    assign(pages)
+    relocate(pages, roots)
+
+    pinned, refused = override(pages, {
+        PurePosixPath("g/a.md"): PurePosixPath("second.md"),
+        PurePosixPath("g/b.md"): PurePosixPath("moved.md"),
+    })
+
+    assert refused == {}
+    assert pinned == {PurePosixPath("g/a.md"), PurePosixPath("g/b.md")}
+    assert [str(page.path) for page in pages] == ["second.md", "moved.md"]
+
+
+def test_a_refused_pin_is_reported_by_name(config, catalog, flare):
+    """R9-05. A refused pin used to vanish: the run kept the computed name and
+    said nothing, so a writer's decision looked applied when it was not."""
+    from docushift.reframe import renames
+
+    converted_tree(config, flare, "10.5.1")
+    result = Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"])
+    rows_now = list(csvio.read_rows(result.path / renames.RENAME_MAP))
+    for row in rows_now:
+        if row["old_path"] == "users-guide/user-guide.md":
+            row["new_path"] = "installation.md"
+    renames.write(result.path / renames.RENAME_MAP, rows_now)
+    findings = FindingsRun("reframe")
+
+    Reframer(config, catalog, findings=findings).reframe_one(flare, flare.versions["10.5.1"])
+
+    refused = [f for f in findings.all if f.code == "RENAME_MAP_REFUSED"]
+    assert len(refused) == 1 and refused[0].severity is Severity.WARNING
+    assert "users-guide/user-guide.md -> installation.md" in refused[0].message
 
 
 def test_an_asset_lands_in_a_lower_cased_folder_so_it_matches_the_page_tree():

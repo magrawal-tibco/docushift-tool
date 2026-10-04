@@ -185,6 +185,25 @@ generated pages drops sharply.
 path, and all relative paths are recomputed from there. This is what keeps directory-spanning
 cases correct without special-casing.
 
+> *As built (Phase 29):* a page is named from its first topic's **title**, not its filename,
+> and written into a folder chain that mirrors the TOC (`installation.md` beside
+> `installation/`), because the platform builds the URL from that chain. Relative paths are
+> recomputed from wherever the page lands. A name is unique within its folder; a `-2` suffix
+> appears only for two pages with one title under one parent. A name recorded in
+> `rename-map.csv` wins over the computed name and folder.
+>
+> *As built (Phase 34, R9-03, R9-04, R9-05, 2026-10-04):* a topic `toc.yml` never lists is
+> carried through as its own page (`guide: Not in navigation`), named in the folder it is
+> written to, and filed among the children of the shallowest navigated page from its own
+> source directory — in practice its guide's landing page. TRA Runtime Agent 5.13.0's second
+> guide's legal and support pages had been named against the root TOC scope (gaining `-2`)
+> and written into the raw source folder `trahelp/_templates/`. A carried page whose source
+> directory no navigated page shares stays in that directory. An edit to `new_path` in
+> `rename-map.csv`, or `--renormalize`, re-merges the version on the next run without
+> `--force`. A name that another page ends up holding is refused, judged against the final
+> set of paths rather than in page order, and each refusal is reported as
+> `RENAME_MAP_REFUSED`.
+
 **R4.2** A page must never contain topics from more than one source directory.
 
 ### R5 — Redirects
@@ -213,7 +232,7 @@ page_path, guide, n_topics, words, flags, detail
 | `title-inherited` | `n_topics > 1` and page title equals its first topic's title | a real page title |
 | `heterogeneous` | topics span more than one distinct depth-2 TOC ancestor | whether the page should split |
 | `single-topic` | `n_topics == 1` | usually fine; flags structural outliers |
-| `shortened` | the page filename does not carry its whole normalized title (added Phase 34, R1-03) | a better filename, written into `rename-map.csv` |
+| `shortened` | the page filename does not carry its whole normalized title (added Phase 34, R1-03); not raised for a name taken from `rename-map.csv`, which is the writer's answer (R9-12) | a better filename, written into `rename-map.csv` |
 
 On the reference corpus this yields roughly 25–30 rows out of 106 pages — a workable review load.
 

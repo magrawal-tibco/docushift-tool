@@ -385,8 +385,9 @@ def carry(
     These are carried through rather than merged or dropped, and the reasoning is
     worth stating because "drop it" looks tidier. Stage 7 publishes the whole
     `output/` tree, so a topic missing from `toc.yml` is *already published* and
-    already linkable -- Runtime Agent 5.13.0 has two, one of them the target of a
-    live link. Dropping them would make Reframe delete published content as a side
+    already linkable -- Runtime Agent 5.13.0 has two, its second guide's legal and
+    support pages (since 2026-10-02; before that, one was `Third_Party_Libraries_`,
+    the target of a live link). Dropping them would make Reframe delete published content as a side
     effect of a navigation gap, which is not a trade a merge stage gets to make.
 
     They are pages, not raw copies, so their own links are rewritten onto the new
@@ -612,9 +613,6 @@ def assign(
     """
     located: dict[PurePosixPath, tuple[Page, str]] = {}
     by_node: dict[int, tuple[Page, str]] = {} if placements is None else placements
-    taken_files: set[PurePosixPath] = {
-        page.path for page in pages if page.path != PurePosixPath(".")
-    }
     # Keyed by the TOC parent, because that is the folder `relocate` will put the
     # page in and therefore the only scope a name can actually clash in.
     taken_stems: dict[str, set[str]] = {}
@@ -624,21 +622,25 @@ def assign(
     for page in pages:
         first = page.topics[0]
         if page.path == PurePosixPath("."):
-            siblings = taken_stems.setdefault(naming.slugify(first.parent), set())
-            stem = _name_for(first, siblings)
-            siblings.add(stem.lower())
             if page.guide == UNNAVIGATED:
-                # No TOC row, so `relocate` will not move it and this path is
-                # final. It is also the only case that needs a tree-wide check.
-                page.path = _unique(first.source.parent, stem, ".md", taken_files)
+                # No TOC row, so no TOC scope either (R9-03). It used to be named
+                # in the *root* scope -- `parent` is "" -- and so took a `-2` from
+                # any top-level page with its title, though it was written into
+                # another folder entirely: TRA Runtime Agent 5.13.0's second
+                # guide's legal and support pages both did. Provisional and
+                # unsuffixed, like a navigated page: `relocate` decides its folder
+                # and settles uniqueness against the pages actually in it.
+                page.path = first.source.parent / f"{_name_for(first, set())}.md"
             else:
+                siblings = taken_stems.setdefault(naming.slugify(first.parent), set())
+                stem = _name_for(first, siblings)
+                siblings.add(stem.lower())
                 # Provisional, beside the source. `relocate` moves it into the
                 # TOC's folder chain straight after this. Deliberately *not*
                 # deduped here: two pages under different parents may collide
                 # transiently, and suffixing now would carry a `-2` the final
                 # folders make unnecessary into the published URL.
                 page.path = first.source.parent / f"{stem}.md"
-            taken_files.add(page.path)
 
         titles: list[str] = []
         owned: list[int] = []
@@ -689,9 +691,17 @@ def relocate(pages: Sequence[Page], roots: Sequence[TocEntry]) -> int:
     children are `installation/requirements.md` -- `/installation` and
     `/installation/requirements` respectively, which is what a reader sees.
 
-    Pages `carry` produced are left where they are: the TOC never mentioned them,
-    so there is no chain to put them in, and inventing one would give an
-    unnavigated topic a more confident address than a navigated one.
+    **A page `carry` produced goes in with its guide (R9-03).** The TOC never
+    mentioned it, so there is no chain of its own; it used to be left in its raw
+    source folder, which published `trahelp/_templates/…` -- a folder name that
+    is MadCap's plumbing, not a place a reader navigated to. It now sits among
+    the children of the shallowest navigated page from its own source directory,
+    which is in practice that guide's landing page: TRA Runtime Agent 5.13.0's
+    second legal page lands at `tibco-runtime-agent/legal-and-third-party-
+    notices.md`, the address it held while the TOC still listed it and the one
+    the user pinned back on 2026-10-04. It stays out of `toc.yml` and keeps its
+    `Not in navigation` guide; only the folder is borrowed. A carried page whose
+    directory no navigated page shares stays in that directory, as before.
 
     Returns how many pages moved. Must run **before** `pages.render`, because the
     renderer resolves every relative link and asset path against `page.path`.
@@ -718,6 +728,20 @@ def relocate(pages: Sequence[Page], roots: Sequence[TocEntry]) -> int:
     for root in roots:
         walk(root, PurePosixPath())
 
+    # R9-03. A carried page borrows the folder of the shallowest navigated page
+    # that leads from its source directory; ties go to reading order, because
+    # `pages` is in it and `sorted` is stable. Carried pages come last in
+    # `pages`, so in the uniqueness pass below a navigated page keeps its name
+    # and a carried one takes the `-2` -- now only for a clash in that folder.
+    homes: dict[str, PurePosixPath] = {}
+    navigated = [page for page in pages if page.guide != UNNAVIGATED and page.topics]
+    for page in sorted(navigated, key=lambda page: len(placed.get(id(page), page.path).parts)):
+        where = placed.get(id(page), page.path)
+        homes.setdefault(page.directory, where.parent / where.stem)
+    for page in pages:
+        if page.guide == UNNAVIGATED and page.directory in homes:
+            placed[id(page)] = homes[page.directory] / page.path.name
+
     # Final uniqueness is settled here, not in `assign`, because here is where a
     # page's folder is actually known -- and it covers **every** page, not only
     # the ones this function moves. `assign` deliberately leaves a navigated
@@ -738,36 +762,62 @@ def relocate(pages: Sequence[Page], roots: Sequence[TocEntry]) -> int:
     return moved
 
 
-def override(pages: Sequence[Page], approved: dict[PurePosixPath, PurePosixPath]) -> int:
+def override(
+    pages: Sequence[Page], approved: dict[PurePosixPath, PurePosixPath]
+) -> tuple[set[PurePosixPath], dict[PurePosixPath, PurePosixPath]]:
     """Puts back the names a previous run recorded and a human kept.
 
     Runs after `relocate`, so an approved path wins over both the computed name
     and the computed folder: a writer who moved a page in `rename-map.csv` moved
-    it on purpose. Returns how many were pinned.
+    it on purpose. Returns `(applied, refused)`: the leading-topic sources whose
+    page took a path other than the computed one, and source -> wanted path for
+    every pin refused.
 
     Keyed on the leading topic's *source*, which is the one identity that
     survives a rename -- keying on the old path would stop matching the moment
     the override took effect, which is the first run.
 
-    An approved path that another page has already taken is refused rather than
+    An approved path that another page ends up holding is refused rather than
     applied: two pages at one path is a page silently lost, and the record is
-    not worth that. The run reports it and keeps the computed name.
+    not worth that. The caller reports each one (R9-05) and the page keeps its
+    computed name. **Judged against the final set of paths, not in page order**
+    (R9-05): a pin onto a path a later page is itself pinned away from is not a
+    clash, and refusing it was an accident of which page came first. A page
+    staying on its computed path beats any pin onto that path; between two pins
+    onto one path, reading order decides. A refusal sends that page back to its
+    computed path, which may in turn refuse another pin, hence the loop.
     """
-    if not approved:
-        return 0
-    taken = {page.path for page in pages}
-    pinned = 0
+    moving: dict[int, PurePosixPath] = {}
     for page in pages:
         if not page.topics:  # pragma: no cover - a page always leads with a topic
             continue
         wanted = approved.get(page.topics[0].source)
-        if wanted is None or wanted == page.path or wanted in taken:
-            continue
-        taken.discard(page.path)
-        taken.add(wanted)
-        page.path = wanted
-        pinned += 1
-    return pinned
+        if wanted is not None and wanted != page.path:
+            moving[id(page)] = wanted
+
+    refused: dict[PurePosixPath, PurePosixPath] = {}
+    while True:
+        holders: dict[PurePosixPath, list[Page]] = {}
+        for page in pages:
+            holders.setdefault(moving.get(id(page), page.path), []).append(page)
+        losers: list[Page] = []
+        for held in holders.values():
+            if len(held) < 2:
+                continue
+            staying = [page for page in held if id(page) not in moving]
+            keep = staying[0] if staying else held[0]
+            losers.extend(page for page in held if page is not keep and id(page) in moving)
+        if not losers:
+            break
+        for page in losers:
+            refused[page.topics[0].source] = moving.pop(id(page))
+
+    applied: set[PurePosixPath] = set()
+    for page in pages:
+        if id(page) in moving:
+            page.path = moving[id(page)]
+            applied.add(page.topics[0].source)
+    return applied, refused
 
 
 def asset_destination(source: PurePosixPath) -> PurePosixPath:
@@ -801,6 +851,10 @@ def shortened(pages: Sequence[Page]) -> set[PurePosixPath]:
     Services". Nothing here tries to do better; it says which ones a human or a
     model should look at -- in `rename-map.csv` (`reframe/renames.py`) and, since
     R1-03, as a queueing flag in `review-queue.csv` (`reframe/review.py`).
+
+    The driver drops from this set every page `override` actually moved (R9-12):
+    a name somebody wrote into `rename-map.csv` *is* the answer to the flag, and
+    judging it against the title again re-queued it on every run.
     """
     marked: set[PurePosixPath] = set()
     for page in pages:

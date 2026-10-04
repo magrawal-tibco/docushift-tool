@@ -42,7 +42,9 @@ _NOT_OUTPUT = frozenset({"publish"})
 #: moves a boundary, but both change the tree, and a CURRENT tree would keep
 #: the old answer for good.
 #: 5 = a link keeps the heading its fragment names when the merge renumbers
-#: repeated headings (Phase 34, R9-01, R9-02). Links only, no boundary.
+#: repeated headings (Phase 34, R9-01, R9-02). Links only, no boundary. The
+#: same bump covers R9-03: a page the TOC never lists is named in the folder it
+#: is written to, which it now borrows from its guide, so its path moves.
 _ALGORITHM = 5
 
 
