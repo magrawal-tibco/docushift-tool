@@ -1402,13 +1402,18 @@ rather than only that something did.
 that gates. Warnings and notes are printed and counted and change nothing, and a
 selection that matched no published folder exits 1 like every other stage.
 
-Six things to expect:
+What to expect:
 
-- **A missing file is an error; a missing anchor is a warning.** Across a real
-  published tree of 91 versions, 11.6% of links carrying a `#fragment` point at an
-  anchor that is not there — anchors the conversion dropped, worth knowing about
-  and far too common to fail a run over. A file that is not there is a 404 and
-  gates.
+- **A missing file is an error; a missing anchor is a warning.** Fewer than 1 in
+  1,000 links carrying a `#fragment` now point at an anchor that is not there, and
+  what is left is mostly footnote and marker anchors with no heading in the source
+  — worth knowing about, and nothing a re-run can fix. A file that is not there is
+  a 404 and gates.
+- **A Help button that opens the wrong place has its own warning.** A `csh.yml`
+  entry whose `#anchor` is not on its page is `CSH_ANCHOR_MISSING`: the button
+  opens the page top instead of the section. When the anchor only repeats the help
+  identifier (some Flare maps do this), no section was meant, and it is reported as
+  a plain `ANCHOR_MISSING`.
 - **Case matters, even on Windows.** The tree is published to Linux, so a link that
   differs from its file only in case resolves on your machine and 404s in
   production. The message names the file that is actually there, so the fix is one

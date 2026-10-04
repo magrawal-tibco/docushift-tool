@@ -166,6 +166,7 @@ The concrete deliverable of §7.1: every deferred "report line" in the three doc
 | `ANCHOR_MISSING`⁷ᵇ | warn | validate | A `#fragment` naming no heading in the file it resolves to (heading slugs only since Phase 29; an `id=`/`name=` attribute is not an anchor) | §7.4 |
 | `LINK_EXTERNAL_DEAD`⁷ᵇ | warn | validate | An absolute URL that did not respond, under `--check-external` | §7.4 |
 | `CSH_FRONTMATTER_MISMATCH`⁷ᵇ | warn | validate | `csh.yml` and a topic's frontmatter disagree about an identifier | `design.md` §9.6 |
+| `CSH_ANCHOR_MISSING`³⁴ | warn | validate | A `csh.yml` anchor naming no heading on its page, so the Help button opens the page top instead of the section (318 in p35, R8-04's TRA 5.12.x markers). An anchor that only repeats its identifier stays `ANCHOR_MISSING` | Phase 34 (R11-03) |
 | `METADATA_INVALID`⁷ᵇ | **error** | validate | `metadata.yml` missing, unshaped, or with an empty `csg-product`/`csg-version` | `architecture.md` §6.2 |
 | `DROPDOWN_INCONSISTENT`⁷ᵇ | warn | validate | `version.yml` disagrees with the version folders beside it | `architecture.md` §6.6 |
 | `ARTIFACT_UNPARSED`⁷ᵇ | **error** | validate | An AEM YAML artifact that would not parse; its field checks were skipped | §7.4 |

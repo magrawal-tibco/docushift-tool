@@ -102,8 +102,9 @@ _LEADING = re.compile(r"^(\s*)([#>+=|-]|\d+[.)])(\s|$)")
 
 # An anchor *target* this module emitted, recognisable so a heading can hoist it
 # back out. Written with `id=` rather than Flare's `name=`: HTML5 dropped `name`
-# on `<a>`, so no modern renderer resolves it, and the findings register defines
-# `ANCHOR_MISSING` as a fragment naming no heading and no `id=`.
+# on `<a>`, so no modern renderer resolves it. (Since Phase 29 `validate` counts
+# no attribute as an anchor at all: `ANCHOR_MISSING` is a fragment naming no
+# heading.)
 _MARKER = re.compile(r'<a id="[^"]*"></a>')
 
 

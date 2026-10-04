@@ -154,9 +154,11 @@ def test_the_register_carries_every_row_of_7_5() -> None:
     And the 76th, `ELEMENT_UNRENDERED` (R8-13): embedded media the walk has
     no Markdown for, reduced to its fallback text or to nothing without a count.
     It adds the 77th, `PATH_TOO_LONG` (R11-06): `sync`'s path ceiling read back
-    from the shelf, for a tree no guard ever measured.
+    from the shelf, for a tree no guard ever measured. And the 78th,
+    `CSH_ANCHOR_MISSING` (R11-03): a Help button opening the page top, split out
+    of 472 `ANCHOR_MISSING` rows nobody could sort.
     """
-    assert len(REGISTRY) == 77
+    assert len(REGISTRY) == 78
 
 
 def test_severity_comes_from_the_registry_and_not_from_the_call_site() -> None:

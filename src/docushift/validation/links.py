@@ -33,10 +33,14 @@ three of them:
   are compared exactly too (R11-08): every heading slug is lower case and a
   browser matches a fragment case-sensitively, so `#Install` names nothing.
 - **A missing file is an error; a missing anchor is a warning.** 1,626 of the
-  sample's 14,055 fragments do not resolve -- 11.6% -- and an 11.6% rate cannot
-  gate. They are still worth raising: spot-checks say these are anchors the
+  sample's 14,055 fragments did not resolve -- 11.6% -- and an 11.6% rate cannot
+  gate. They were still worth raising: spot-checks said these were anchors the
   conversion genuinely dropped rather than slug-algorithm disagreement, which
-  makes `ANCHOR_MISSING` the first measurement of a defect nobody had counted.
+  made `ANCHOR_MISSING` the first measurement of a defect nobody had counted.
+  The rate is 0.09% now (65 of about 68,900 page fragments in p35); what is
+  left is fragments with no heading behind them, which convert reports as
+  `FRAGMENT_UNPLACEABLE` and which only the source can fix, so it stays a
+  warning (Phase 34, R11-03).
 - **Absolute URLs are skipped and counted; only `--check-external` puts them on
   the wire.** 1,676 in the sample, and after §10.7 every link into an API
   reference on a configured host is one of these. An exit code that depends on the

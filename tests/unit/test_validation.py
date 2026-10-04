@@ -880,17 +880,47 @@ def test_a_csh_value_pointing_at_a_deleted_topic_is_a_link_broken(tmp_path: Path
 def test_a_csh_anchor_that_is_not_on_the_page_is_a_warning(tmp_path: Path) -> None:
     """33 of the sample's 47, against 0 missing file parts: the half
     `transforms/csh.py` controls is perfect and the half that depends on anchor
-    emission is not."""
+    emission is not.
+
+    Its own code since Phase 34 (R11-03): this is a Help button opening the page
+    top instead of its section -- R8-04's 318 TRA 5.12.x markers in p35 -- and as
+    `ANCHOR_MISSING` it was indistinguishable from a harmless dead fragment."""
     target = tmp_path / "target"
     publish(
         target,
         {
-            "csh.yml": 'help_1: "html/a.md#gone"\n',
+            "csh.yml": 'help_1: "html/a.md#2256565"\n',
             "html/a.md": "---\ncsh: help_1\n---\n\n# A\n",
         },
     )
 
-    assert codes(csh_of(target)) == ["ANCHOR_MISSING"]
+    findings = csh_of(target)
+
+    assert codes(findings) == ["CSH_ANCHOR_MISSING"]
+    assert "opens at the top of html/a.md" in findings[0].message
+    assert REGISTRY["CSH_ANCHOR_MISSING"].severity is Severity.WARNING
+
+
+def test_a_csh_anchor_that_only_repeats_its_identifier_is_a_dead_fragment(
+    tmp_path: Path,
+) -> None:
+    """TRA 5.13.0's Flare map writes the identifier as the anchor -- 154 values in
+    p35 -- on pages that are the topic. No section was ever meant, so the button
+    lands right; the fragment is dead, which is `ANCHOR_MISSING`'s condition, and
+    the message says why it is not the other kind."""
+    target = tmp_path / "target"
+    publish(
+        target,
+        {
+            "csh.yml": 'aa.folder.helpurl: "html/a.md#aa.folder.helpurl"\n',
+            "html/a.md": "---\ncsh: aa.folder.helpurl\n---\n\n# A\n",
+        },
+    )
+
+    findings = csh_of(target)
+
+    assert codes(findings) == ["ANCHOR_MISSING"]
+    assert "repeats the identifier" in findings[0].message
 
 
 def test_a_frontmatter_identifier_missing_from_csh_yml_is_a_mismatch(tmp_path: Path) -> None:

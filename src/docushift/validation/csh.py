@@ -5,11 +5,20 @@ enforced. The fourth -- an identifier present in the prior version and absent he
 -- needs two converted versions of one product on disk and is Phase 7c's.
 
 **CSH is checked as link integrity, because that is what it is.** A `csh.yml`
-value is `path/to/topic.md#anchor`: the file half gets `LINK_BROKEN` and the
-anchor half gets `ANCHOR_MISSING`, the same two codes and the same two severities
-the page checker uses, for the same reason. Inventing a `CSH_TARGET_MISSING`
-would mean two codes for one condition and a `report --code LINK_BROKEN` that
-misses the help buttons.
+value is `path/to/topic.md#anchor`: the file half gets `LINK_BROKEN`, the same
+code and severity the page checker uses, for the same reason. Inventing a
+`CSH_TARGET_MISSING` would mean two codes for one condition and a
+`report --code LINK_BROKEN` that misses the help buttons.
+
+**The anchor half has its own code, `CSH_ANCHOR_MISSING` (Phase 34, R11-03),**
+because it is a different condition from a dead fragment in prose: a Help
+button that opens the top of the page instead of the section it was mapped to.
+As `ANCHOR_MISSING` those were 472 rows in p35 that nobody could sort -- 318
+were R8-04's WebWorks markers (`#2256565`) never moved onto a heading, and 154
+were TRA 5.13.0's Flare map writing the identifier itself as the anchor, on a
+page that *is* the topic, so the button lands right. The second kind names no
+section and was never meant to, so it stays `ANCHOR_MISSING`, a dead fragment,
+with the reason in the message; the rule is "the anchor is the identifier".
 
 The sample tree of 2026-09-16 split exactly where the design predicted: over 215
 entries in 4 files, **0 file parts missing and 33 of 47 anchors missing**. The
@@ -166,10 +175,18 @@ def check_map(found: MapFile, index: FolderIndex) -> list[Finding]:
             continue
         anchored = anchor and PurePosixPath(target).suffix.lower() == ".md"
         miss = anchor_miss(anchor, index.anchors(target)) if anchored else None
-        if miss is not None:
+        if miss is not None and anchor == identifier:
+            # An identifier echoed as the anchor names no section (R11-03).
             findings.append(Finding(
                 "ANCHOR_MISSING", slug=folder.slug, version=folder.segment, path=where,
-                message=f"{identifier} -> #{anchor} is not an anchor in {target}{miss}",
+                message=f"{identifier} -> #{anchor} is not an anchor in {target}{miss}; "
+                        "the anchor repeats the identifier, so no section was meant",
+            ))
+        elif miss is not None:
+            findings.append(Finding(
+                "CSH_ANCHOR_MISSING", slug=folder.slug, version=folder.segment, path=where,
+                message=f"{identifier} -> #{anchor} is not an anchor in {target}{miss}, "
+                        f"so the Help button opens at the top of {target}",
             ))
         # The identifier must also be on the page it names (§9.5's mirror).
         if identifier not in pages.get(target, ()):

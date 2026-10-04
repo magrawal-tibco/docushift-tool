@@ -504,11 +504,16 @@ REGISTRY: dict[str, Code] = _codes(
     # "Measured 2026-09-16" table), on the principle that a gating command may only
     # gate on checks whose clean answer is knowable in advance.
     #
-    # A warning, not an error, and the arithmetic is why: 1,626 of the sample's
-    # 14,055 resolving fragments -- 11.6% -- name an anchor that is not there.
-    # They are real (spot-checked: the anchors were dropped in conversion, this is
-    # not a slug-algorithm disagreement), which is what earns the code; the rate is
-    # what forbids the gate.
+    # A warning, not an error. It was chosen on arithmetic -- 1,626 of the
+    # sample's 14,055 resolving fragments, 11.6%, named an anchor that was not
+    # there -- and that arithmetic no longer holds: after Phases 16, 19 and 30,
+    # p35 misses 65 of about 68,900 page fragments (0.09%). It stays a warning
+    # because of what the 65 are (Phase 34, R11-03): footnote, GUID and marker
+    # fragments with no heading behind them, the residue convert already
+    # reports as `FRAGMENT_UNPLACEABLE`. Their remedy is a heading the source
+    # does not have, and a gate on a defect nobody here can fix is a gate
+    # people switch off. A Help-button anchor meant as a section is
+    # `CSH_ANCHOR_MISSING` now.
     Code("ANCHOR_MISSING", Severity.WARNING, Stage.VALIDATE,
          "A #fragment naming no heading in the file it resolves to (an id= or "
          "name= attribute is not an anchor since Phase 29)",
@@ -519,6 +524,16 @@ REGISTRY: dict[str, Code] = _codes(
     Code("LINK_EXTERNAL_DEAD", Severity.WARNING, Stage.VALIDATE,
          "An absolute URL that did not respond, under --check-external",
          "planning.md §7.4"),
+    # Phase 34 (R11-03). A `csh.yml` anchor that names no heading: the Help button
+    # opens the page top instead of its section. Split out of `ANCHOR_MISSING`,
+    # where 318 of these (R8-04's TRA 5.12.x markers) were indistinguishable from
+    # 154 harmless identifier-echo fragments. A warning for now, and that is a
+    # decision left open rather than made: the 318 are a known, unfixed defect,
+    # so a gate would fail every run over p35 until R8-04 lands -- re-measure
+    # then, when the clean answer is knowable.
+    Code("CSH_ANCHOR_MISSING", Severity.WARNING, Stage.VALIDATE,
+         "A csh.yml anchor naming no heading on its page; the Help button opens "
+         "the page top instead of the section", "planning.md Phase 34 (R11-03)"),
     # `transforms/csh.py` writes the map and the frontmatter in one pass, so a
     # disagreement is a regression -- but it breaks one Help button rather than the
     # page, and the page is what an error should be about.
