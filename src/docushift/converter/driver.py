@@ -69,6 +69,7 @@ from docushift.transforms import fragments, links
 from docushift.transforms.assets import AssetCopier, Counts
 from docushift.utils import textfile
 from docushift.utils.csvio import release_year
+from docushift.utils.longpath import long_path, walk_files
 from docushift.utils.slug import slugify, version_segment
 from docushift.utils.swap import remove, swap
 
@@ -1096,7 +1097,8 @@ class DocumentConverter:
 
         sources = []
         for path, fmt, doc_set in sorted(located, key=lambda item: str(item[0])):
-            if not path.is_file():
+            # `long_path` (X2-08): a help map past 260 characters is on disk.
+            if not long_path(path).is_file():
                 continue
             source = read_csh_source(path, fmt)
             source.path = path.relative_to(tree)
@@ -1197,11 +1199,13 @@ def _excluded(tree: Path, source: CshSource, context: ConversionContext, work: l
 
 
 def _find_csh(tree: Path) -> list[tuple[Path, CshFormat]]:
-    """Locates help maps in a tree nobody has inventoried. `--input` only."""
+    """Locates help maps in a tree nobody has inventoried. `--input` only.
+
+    `walk_files`, not `rglob` (X2-08), which drops a file past 260 characters.
+    """
     found = []
-    for path in tree.rglob("*"):
-        if not path.is_file():
-            continue
+    for relative, _absolute in walk_files(tree):
+        path = tree / relative
         fmt = csh_format_of(path)
         if fmt is not None:
             found.append((path, fmt))

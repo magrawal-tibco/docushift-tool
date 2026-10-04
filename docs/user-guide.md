@@ -643,7 +643,8 @@ version with no package does not. That includes a failure *after* the unzip — 
 Excel when the counts are written back, say: the version is reported failed, and the
 next run extracts it again rather than calling it current. A version whose tree could
 not be read in full is named with a `partial walk` line, and its counts are left blank
-until a later run reads every folder.
+until a later run reads every folder; its help maps and API trees are not recorded either,
+so `convert` and `sync` locate them themselves.
 
 **Re-running is cheap and re-running is safe.** A package whose bytes have not changed
 since the last extract is skipped entirely, so `extract --all` over a settled batch does
@@ -1244,7 +1245,8 @@ docushift sync --all --target-dir ../tibco-docs-aem/
 docushift sync --product ems --target-dir ../tibco-docs-aem/
 docushift sync --product ems --version 10.4.0 --target-dir ../tibco-docs-aem/
 
-# See where each version would land, and how many documents it would place
+# See where each version would land, which tree it would publish (converted, merged,
+# or refused, with the reason the run would give), and how many documents it would place
 docushift sync --all --target-dir ../tibco-docs-aem/ --dry-run
 
 # Re-copy even where the published tree already matches

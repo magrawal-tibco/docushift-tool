@@ -33,6 +33,7 @@ from pathlib import Path
 
 from docushift.engines.detector import GUID_HTML_NAME
 from docushift.models import SourceEngine
+from docushift.utils.longpath import long_path
 
 # The string DocBook XSL writes into the head of every page it generates. It is
 # also what `detect_tree` decides on, so detection and root-finding agree by
@@ -113,7 +114,9 @@ def is_docbook_page(path: Path) -> bool:
     question. This is, and it is exact.
     """
     try:
-        with path.open("rb") as handle:
+        # `long_path` (X2-08): a page past 260 characters opened plainly fails,
+        # and would read as "not DocBook".
+        with long_path(path).open("rb") as handle:
             return DOCBOOK_MARKER in handle.read(_HEAD_BYTES)
     except OSError:
         return False

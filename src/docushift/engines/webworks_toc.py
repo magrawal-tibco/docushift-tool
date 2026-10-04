@@ -41,6 +41,8 @@ from xml.etree import ElementTree
 
 from bs4 import XMLParsedAsHTMLWarning
 
+from docushift.utils.longpath import long_path
+
 # `charset=iso-8859-1` in a `<meta>`, or `encoding="…"` in an XML declaration.
 # Both are ASCII by construction and both sit in the first few hundred bytes, so
 # they are matched against the raw bytes before any decode is attempted.
@@ -82,7 +84,8 @@ def read_text(path: Path, default: str = "utf-8") -> str | None:
     `WebWorksEngine._check_runtime` as `TOC_UNREADABLE` (Phase 34, R7-09).
     """
     try:
-        raw = path.read_bytes()
+        # `long_path` (X2-08): a topic past 260 characters read plainly fails.
+        raw = long_path(path).read_bytes()
     except OSError:
         return None
     head = raw[:_DECLARATION_WINDOW]

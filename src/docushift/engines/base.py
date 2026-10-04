@@ -41,6 +41,7 @@ from docushift.models import SourceEngine
 from docushift.reporting.findings import FindingsRun
 from docushift.transforms import links
 from docushift.transforms.assets import AssetCopier
+from docushift.utils.longpath import long_path
 
 
 @dataclass
@@ -403,7 +404,8 @@ class ConversionContext:
         for root, url in sorted(self.api_urls.items(), key=lambda item: -len(item[0].parts)):
             if absolute != root and not absolute.is_relative_to(root):
                 continue
-            if not absolute.exists():
+            # `long_path` (X2-08): API trees hold the corpus's longest paths.
+            if not long_path(absolute).exists():
                 return None
             tail = absolute.relative_to(root).as_posix()
             target = f"{url}/{links.encode(tail)}" if tail != "." else url

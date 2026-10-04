@@ -64,6 +64,7 @@ from docushift.engines.flare_toc import Manifest, Toc, TocNode, read_manifest, r
 from docushift.engines.roots import find_output_roots, owning_root
 from docushift.models import SourceEngine
 from docushift.transforms import callouts, deflists, headings, links, markdown
+from docushift.utils.longpath import long_path
 
 # The one selector (§5.1.6). Not a list, and deliberately.
 CONTENT_SELECTOR = "div[role='main']#mc-main-content"
@@ -1349,13 +1350,27 @@ def _project_stubs(root: Path) -> frozenset[str]:
 
 
 def _walk_files(root: Path):
-    for directory, _, names in os.walk(root):
+    """Every file under `root`, long ones included, spelled under `root`.
+
+    X2-08: walked through `long_path`, because extract writes past 260
+    characters and a plain `os.walk` omits such a file, so whether a topic
+    converted depended on how long the workspace root was. Yielded under the
+    plain `root`, so every caller's `relative_to(root)` still holds.
+    """
+    base = long_path(root)
+    for directory, _, names in os.walk(base):
+        here = root / Path(directory).relative_to(base)
         for name in sorted(names):
-            yield Path(directory) / name
+            yield here / name
 
 
 def _read(path: Path) -> str | None:
-    """UTF-8, which 4,810 of 4,810 sampled topics are. Never raises."""
+    """UTF-8, which 4,810 of 4,810 sampled topics are. Never raises.
+
+    Through `long_path` (X2-08): a plain read of a topic past 260 characters
+    fails, and that failure was reported as `CONTENT_MISSING`.
+    """
+    path = long_path(path)
     try:
         return path.read_text(encoding="utf-8-sig")
     except UnicodeDecodeError:

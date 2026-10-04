@@ -43,6 +43,7 @@ from pathlib import Path, PurePosixPath
 from docushift.engines.roots import is_skin_path
 from docushift.models import SourceEngine
 from docushift.transforms import links
+from docushift.utils.longpath import long_path
 
 # Files the copy set never contains and the orphan count never mentions: they are
 # either the input to conversion or the output of it.
@@ -161,7 +162,9 @@ class AssetCopier:
             return Resolution(AssetOutcome.SKIN)
 
         candidate = self.root / Path(*resolved.parts)
-        if not candidate.is_file():
+        # `long_path` (X2-08): an asset past 260 characters is on disk, and the
+        # plain spelling would count it dangling.
+        if not long_path(candidate).is_file():
             self.counts.dangling += 1
             segment = resolved.parts[0] if len(resolved.parts) > 1 else "."
             self.counts.dangling_by_segment[segment] = (
@@ -223,10 +226,12 @@ class AssetCopier:
         """
         written = 0
         for target, source in sorted(self.copy_set.items()):
-            landing = self.destination / Path(*target.parts)
+            landing = long_path(self.destination / Path(*target.parts))
             try:
                 landing.parent.mkdir(parents=True, exist_ok=True)
-                shutil.copy2(source, landing)
+                # Both ends prefixed (X2-08): a plain `copy2` of a long source
+                # failed and was counted as a dangling reference.
+                shutil.copy2(long_path(source), landing)
             except OSError:
                 # A copy that fails is a dangling link by invariant 13, and the
                 # emitted Markdown already claims otherwise. Counted here so the

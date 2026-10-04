@@ -243,3 +243,52 @@ def test_the_ceiling_check_now_sees_the_long_file_and_names_it_unprefixed(tmp_pa
     assert path.name == "over.html"
     assert not str(path).startswith("\\?\\")
     assert length > 260
+
+
+# -- the engines read what extract wrote (X2-08) -------------------------------------
+
+
+def _deep_topic(tmp_path: Path, name: str, body: bytes) -> tuple[Path, Path]:
+    """A file past MAX_PATH under `root`, written the only way it can be."""
+    root = tmp_path / "tree"
+    path = root / DEEP / name
+    target = long_path(path)
+    target.parent.mkdir(parents=True)
+    target.write_bytes(body)
+    assert len(str(path)) > 260
+    return root, path
+
+
+def test_the_flare_and_webworks_walks_see_a_topic_past_max_path(tmp_path: Path) -> None:
+    """X2-08. `os.walk` over the plain spelling omits such a file, so whether a
+    topic converted depended on how long the workspace root was. Yielded under
+    the root as given, so `relative_to(root)` still works for every caller."""
+    from docushift.engines import flare, webworks
+
+    root, path = _deep_topic(tmp_path, "topic.htm", b"<html/>")
+
+    assert path in list(flare._walk_files(root))
+    assert path in list(webworks._walk_files(root))
+
+
+def test_every_engine_reader_opens_a_topic_past_max_path(tmp_path: Path) -> None:
+    """X2-08. A plain `read_text` on such a path fails, and each reader turned the
+    failure into `CONTENT_MISSING` -- or, for DocBook's walk, into nothing."""
+    from docushift.engines import csh, dita, docbook, flare, webworks_toc
+    from docushift.engines.roots import DOCBOOK_MARKER, is_docbook_page
+
+    _root, path = _deep_topic(tmp_path, "page.html", b"<html>" + DOCBOOK_MARKER + b"</html>")
+
+    for read in (flare._read, docbook._read, dita._read, webworks_toc.read_text):
+        assert read(path) is not None, read.__module__
+    assert csh._read(path)[0] is not None
+    assert is_docbook_page(path)
+
+
+def test_the_docbook_plan_walk_sees_a_page_past_max_path(tmp_path: Path) -> None:
+    """X2-08. `root.rglob` drops such a page **silently** -- not even a finding."""
+    from docushift.engines import docbook
+
+    root, path = _deep_topic(tmp_path, "page.html", b"<html/>")
+
+    assert path in docbook._candidates(root)

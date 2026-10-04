@@ -34,6 +34,8 @@ from enum import StrEnum
 from pathlib import Path
 from xml.etree import ElementTree
 
+from docushift.utils.longpath import long_path
+
 # Identifiers are byte-exact strings and are never case-folded (§9.1):
 # `GatewayInstances` and `gatewayInstances` are two different live help targets
 # in TIBCO BC 7.4/7.5, and with `ResolvedId` discarded case is the only thing
@@ -126,7 +128,8 @@ def csh_format_of(path: Path) -> CshFormat | None:
 def _read(path: Path) -> tuple[str | None, bool]:
     """The text, and whether the file runs past the cap (then the text is `None`)."""
     try:
-        with path.open("rb") as handle:
+        # `long_path` (X2-08), as every reader of the extracted tree now is.
+        with long_path(path).open("rb") as handle:
             raw = handle.read(_MAX_SOURCE_BYTES + 1)
     except OSError:
         return None, False

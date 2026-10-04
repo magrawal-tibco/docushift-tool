@@ -74,6 +74,7 @@ from docushift.engines.base import (
 from docushift.engines.detector import GUID_HTML_NAME
 from docushift.models import SourceEngine
 from docushift.transforms import callouts, deflists, headings, links, markdown
+from docushift.utils.longpath import long_path
 from docushift.utils.slug import slugify
 
 # The one selector (§5.2.4). Both skins wrap their content in it -- the Bootstrap
@@ -1055,7 +1056,11 @@ def _is_suitehelp(directory: Path) -> bool:
 
 
 def _read(path: Path) -> str | None:
-    """UTF-8, which 3,742 of 3,742 sampled topics are. Never raises."""
+    """UTF-8, which 3,742 of 3,742 sampled topics are. Never raises.
+
+    Through `long_path` (X2-08), for `flare._read`'s reason.
+    """
+    path = long_path(path)
     try:
         return path.read_text(encoding="utf-8-sig")
     except UnicodeDecodeError:  # pragma: no cover - no corpus doc-set reaches it

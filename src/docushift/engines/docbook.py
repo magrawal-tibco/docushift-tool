@@ -75,6 +75,7 @@ from docushift.engines.base import (
 from docushift.engines.roots import is_docbook_page, is_skin_path
 from docushift.models import SourceEngine
 from docushift.transforms import callouts, deflists, headings, links, markdown
+from docushift.utils.longpath import long_path, walk_files
 
 # The one container (§5.6.4). Present on 1,178 of 1,178 pages, with every piece of
 # chrome outside it, so selecting it *is* the chrome removal. There is deliberately
@@ -499,8 +500,8 @@ class DocBookEngine(BaseEngine):
         inside the unit rather than beside it.
         """
         plan = _Plan()
-        for path in sorted(root.rglob("*")):
-            if not path.is_file() or path.suffix.lower() not in _HTML_SUFFIXES:
+        for path in _candidates(root):
+            if path.suffix.lower() not in _HTML_SUFFIXES:
                 continue
             relative = PurePosixPath(path.relative_to(root).as_posix())
             if is_skin_path(relative.parts, self.engine):
@@ -1045,10 +1046,19 @@ def _duplicate_roots(tree: Path, roots: list[Path]) -> list[Path]:
     return found
 
 
+def _candidates(root: Path) -> list[Path]:
+    """Every file under `root`, sorted, spelled under `root` -- long ones included.
+
+    X2-08: `root.rglob` reaches each directory through the plain spelling and
+    drops a page past 260 characters **silently**, with no finding at all.
+    """
+    return sorted(root / relative for relative, _path in walk_files(root))
+
+
 def _foreign_reason(path: Path) -> str:
     """Why a non-DocBook page under the root was not converted."""
     try:
-        with path.open("rb") as handle:
+        with long_path(path).open("rb") as handle:
             head = handle.read(_HEAD_BYTES)
     except OSError:  # pragma: no cover - the file was listed moments earlier
         return "unreadable"
@@ -1114,7 +1124,11 @@ def _consumed_heading(tag: Tag) -> bool:
 
 
 def _read(path: Path) -> str | None:
-    """UTF-8, which 1,178 of 1,178 pages declare and are. Never raises."""
+    """UTF-8, which 1,178 of 1,178 pages declare and are. Never raises.
+
+    Through `long_path` (X2-08), for `flare._read`'s reason.
+    """
+    path = long_path(path)
     try:
         return path.read_text(encoding="utf-8-sig")
     except UnicodeDecodeError:  # pragma: no cover - no corpus page reaches it
