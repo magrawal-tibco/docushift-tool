@@ -77,8 +77,9 @@ def read_text(path: Path, default: str = "utf-8") -> str | None:
     guess here and no `errors="replace"` on the first attempt. The UTF-8 default
     covers only a file reached outside that index.
 
-    Never raises: an unreadable file comes back as None, which every caller
-    already reports as `CONTENT_MISSING`.
+    Never raises: an unreadable file comes back as None. A topic's caller
+    reports it as `CONTENT_MISSING`; a runtime file's is named by
+    `WebWorksEngine._check_runtime` as `TOC_UNREADABLE` (Phase 34, R7-09).
     """
     try:
         raw = path.read_bytes()

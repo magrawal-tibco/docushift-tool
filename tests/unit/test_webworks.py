@@ -160,10 +160,12 @@ def books_xml(*declarations: tuple[str, str]) -> str:
 class Run:
     """One conversion of one extracted tree, with its units and its findings."""
 
-    def __init__(self, units: list[Unit], findings: FindingsRun, tree: Path):
+    def __init__(self, units: list[Unit], findings: FindingsRun, tree: Path,
+                 context: ConversionContext | None = None):
         self.units = units
         self.findings = findings
         self.tree = tree
+        self.context = context
 
     @property
     def unit(self) -> Unit:
@@ -248,7 +250,7 @@ def run(tmp_path: Path, files: Mapping[str, str | bytes], *, api_roots: tuple[st
         name = context.subtree_name(root)
         context.assets = AssetCopier(root, SourceEngine.WEBWORKS, output / name if name else output)
         units.append(engine.convert_unit(context, root))
-    return Run(units, findings, tree)
+    return Run(units, findings, tree, context)
 
 
 def one(tmp_path: Path, body: str, **extra: str) -> str:
@@ -569,6 +571,100 @@ def test_framesets_and_generated_lists_are_counted_by_reason(tmp_path: Path) -> 
     ))
     assert result.names() == ["t.md"]
     assert result.unit.skipped == {"runtime-stub": 2, "generated-list": 2}
+
+
+def test_a_numbered_frameset_stub_is_a_runtime_stub_and_not_a_warning(tmp_path: Path) -> None:
+    """R7-06: WebWorks 2006 writes `index_2.htm` / `index_3.htm` launchers too.
+
+    20 corpus files, all `WWHHelpFrame_LaunchHelp` framesets. Read as topics they
+    converted to nothing and each raised `CONTENT_MISSING` (lotus-notes 6.0.0: 6).
+    """
+    launcher = (
+        "<html><head><title>Help</title>"
+        '<script type="text/javascript" src="wwhelp/wwhimpl/common/scripts/switch.js"></script>'
+        "</head><body onLoad=\"WWHHelpFrame_LaunchHelp();\"></body></html>"
+    )
+    result = run(tmp_path, book(
+        "guide",
+        topics={
+            "t.htm": topic("T", heading("T")),
+            "index_2.htm": launcher,
+            "wwhsec-3.htm": launcher,
+        },
+        files=(("T", "t.htm"),),
+        toc=toc_js(node("", "P", "T", "0")),
+    ))
+    assert result.names() == ["t.md"]
+    assert result.unit.skipped == {"runtime-stub": 2}
+    assert "CONTENT_MISSING" not in result.codes()
+
+
+def test_the_cover_page_is_not_filed_under_unfiled(tmp_path: Path) -> None:
+    """R7-07: `title.htm` is in `files.js` and in no book's TOC.
+
+    So every book published an "Unfiled" branch holding its cover -- 32 in the 13
+    TRA WebWorks versions, 18 of them holding nothing else. §5.3.5: front matter
+    is dropped, not filed.
+    """
+    result = run(tmp_path, book(
+        "guide",
+        topics={
+            "t.htm": topic("T", heading("T")),
+            "title.htm": topic("Installation", '<div class="Title">TIBCO Runtime Agent</div>'
+                                              '<div class="Subtitle">Installation</div>'),
+            "title.1.1.htm": topic("Installation", '<div class="Title">Again</div>'),
+        },
+        files=(("Installation", "title.htm"), ("T", "t.htm")),
+        toc=toc_js(node("", "P", "T", "1")),
+    ))
+    assert result.names() == ["t.md"]
+    assert result.unit.skipped == {"front-matter": 2}
+    assert [n.label for n in result.unit.nav] == ["T"]
+    assert "TOC_ORPHAN" not in result.codes()
+
+
+def test_a_cover_page_the_toc_files_is_kept(tmp_path: Path) -> None:
+    """Where the author put the cover in the TOC, it is navigation, not front matter."""
+    result = run(tmp_path, book(
+        "guide",
+        topics={
+            "t.htm": topic("T", heading("T")),
+            "title.htm": topic("Cover", '<div class="Title">TIBCO Runtime Agent</div>'),
+        },
+        files=(("Cover", "title.htm"), ("T", "t.htm")),
+        toc=toc_js(node("", "P", "Cover", "0"), node("", "P", "T", "1")),
+    ))
+    assert result.names() == ["t.md", "title.md"]
+    assert "front-matter" not in result.unit.skipped
+
+
+def test_an_unreadable_files_js_is_named_rather_than_silent(tmp_path: Path) -> None:
+    """R7-09: an empty `files.js` turns every TOC node into "no page".
+
+    Every topic then lands in Unfiled and the cause was never named.
+    """
+    files = book(
+        "guide",
+        topics={"t.htm": topic("T", heading("T"))},
+        files=(("T", "t.htm"),),
+        toc=toc_js(node("", "P", "T", "0")),
+    )
+    files["guide/wwhdata/common/files.js"] = "function  FileList_Object(P)\n{\n}\n"
+    result = run(tmp_path, files)
+    messages = result.messages("TOC_UNREADABLE")
+    assert len(messages) == 1 and "files.js" in messages[0]
+
+
+def test_a_stripped_book_names_the_file_it_lacks(tmp_path: Path) -> None:
+    """R7-09: the test is the absence of `files.js`, and the message said `toc.js`."""
+    result = run(tmp_path, {
+        "guide/wwhdata/files.htm":
+            '<html><body><a href="../intro.htm">Introduction</a></body></html>',
+        "guide/intro.htm": topic("Introduction", heading("Introduction")),
+    })
+    [message] = [m for m in result.messages("NAV_NODE_DROPPED") if "stripped book" in m]
+    assert "files.js" in message
+    assert "TOC_UNREADABLE" not in result.codes()
 
 
 def test_a_topic_the_toc_never_reaches_is_kept_and_reported(tmp_path: Path) -> None:
@@ -944,6 +1040,31 @@ def test_consecutive_code_lines_are_one_fence(tmp_path: Path) -> None:
     ))
     assert rendered.count("```") == 2
     assert "bin/be-engine \\\n  --propFile x.props \\\n  --deploy" in rendered
+
+
+def test_a_link_inside_a_code_line_is_counted_when_the_fence_swallows_it(tmp_path: Path) -> None:
+    """R7-05: 1,124 corpus code lines hold a popup or a relative href.
+
+    spm 1.3.0 `install.3.20.htm`: "Refer <LiveLink popup> Create New Administrator
+    Server". A fence cannot hold a link (Phase 8), so the words stay and the
+    loss is counted -- it was swallowed before the renderer's counter could see it.
+    """
+    result = run(tmp_path, book(
+        "guide",
+        topics={
+            "page.htm": topic("Page", (
+                '<div class="CodeLine">Refer <span class="LiveLink"><a href="javascript:'
+                "WWHClickedPopup('guide', 'other.htm#1820330', '');\">"
+                "Create New Administrator Server</a></span></div>"
+                '<div class="CodeLine">and <a href="other.htm">this</a> too</div>'
+            )),
+            "other.htm": topic("Other", heading("Other")),
+        },
+        files=(("Page", "page.htm"), ("Other", "other.htm")),
+        toc=toc_js(node("", "P", "Page", "0"), node("", "P", "Other", "1")),
+    ))
+    assert "Refer Create New Administrator Server" in result.body("page.md")
+    assert result.context.flattened_links == 2
 
 
 def test_the_rule_drawn_around_a_code_block_is_not_a_thematic_break(tmp_path: Path) -> None:

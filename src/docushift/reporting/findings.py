@@ -142,9 +142,11 @@ REGISTRY: dict[str, Code] = _codes(
          "were converted from <body>, reported once per root",
          "Phase 34 (R5-09)"),
     Code("TOC_UNREADABLE", Severity.WARNING, Stage.CONVERT,
-         "A Flare root's HelpSystem.xml or declared TOC is missing or did not parse; "
-         "its topics are filed under Unfiled",
-         "Phase 34 (R5-12)"),
+         "A Flare root's HelpSystem.xml or declared TOC is missing or did not parse, "
+         "or a WebWorks book's runtime file (files.js, toc.js, title.js, context.js) "
+         "is present and could not be read or yields nothing; its topics are filed "
+         "under Unfiled, or the book loses what that file named",
+         "Phase 34 (R5-12, R7-09)"),
     Code("TOC_SUBPROJECT_UNPLACED", Severity.NOTE, Stage.CONVERT,
          "A merged-project TOC node (*.flprj) marking where a sub-project's TOC "
          "goes; the node is dropped and the sub-guide loses its place",

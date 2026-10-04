@@ -39,12 +39,14 @@ What the corpus decided, and what each costs to get wrong:
   something points at it -- 6.46% of them. Keeping all 1.32M is noise; dropping
   all of them, as the predecessor does, breaks 85,219 links and all of CSH.
 
-**Two departures from the predecessor's skip list, both deliberate.** `title.*`
-and `copyrigh.*` are dropped by `_SKIP_FILENAMES` there and converted here: they
-are 1,047 of the 1,086 files that `files.js` indexes and the TOC does not mention,
-and `copyrigh.htm` is "Important Information", which is prose and frequently the
-book's legal page (§5.3.5). `glossary` likewise. What is dropped is only what is
-*generated*: the `index.htm`/`wwhsec.htm` framesets and the `lof`/`lot`/`ix` lists.
+**Two departures from the predecessor's skip list, both deliberate.** `copyrigh.*`
+is dropped by `_SKIP_FILENAMES` there and converted here: `copyrigh.htm` is
+"Important Information", which is prose and frequently the book's legal page
+(§5.3.5). `glossary` likewise. What is dropped is what is *generated* -- the
+`index.htm`/`wwhsec.htm` framesets and the `lof`/`lot`/`ix` lists -- and the
+`title.*` cover page where no TOC entry files it, which is front matter whose
+every fact the book's node already carries. It was converted here until Phase 34
+and published an "Unfiled" branch in every book (R7-07).
 
 **One honest limit.** A book's topic set, its anchors and every reference in the
 version are settled by a raw-text pre-pass before the first DOM is parsed, so a
@@ -104,6 +106,16 @@ RUNTIME_DIRECTORIES = frozenset({"wwhdata", "wwhelp", "tpl"})
 # writes `title.1.1.htm` and `lof.2.htm` as often as `title.htm`.
 STUB_STEMS = frozenset({"index", "wwhsec"})
 GENERATED_LIST_STEMS = frozenset({"lof", "lot", "ix"})
+# WebWorks 2006 also numbers its launchers, `index_2.htm` / `index_3.htm`: 20
+# corpus files, every one a `WWHHelpFrame_LaunchHelp` frameset. Read as topics
+# they converted to nothing and each raised a false `CONTENT_MISSING` (R7-06).
+_NUMBERED_STUB = re.compile(r"^(?:index|wwhsec)[_-]\d+$")
+# The cover page: product, guide name, version and date, all of which the book's
+# node and the version already carry. In `files.js` and in no book's TOC, so it
+# used to publish an "Unfiled" branch per book -- 32 in the 13 TRA WebWorks
+# versions, 18 holding nothing else. §5.3.5: front matter is dropped, not filed
+# (Phase 34, R7-07). One a TOC entry does reach is kept: then the author filed it.
+FRONT_MATTER_STEMS = frozenset({"title"})
 
 _HTML_SUFFIXES = (".htm", ".html")
 
@@ -478,7 +490,7 @@ class WebWorksRenderer(markdown.Renderer):
 # -- the DOM passes ------------------------------------------------------------
 
 
-def normalize(container: Tag) -> None:
+def normalize(container: Tag) -> int:
     """Turns runs of siblings into the elements they stand for. Post-order.
 
     Three constructs here are *runs* rather than elements -- a code block is N
@@ -486,12 +498,16 @@ def normalize(container: Tag) -> None:
     item -- so the children are normalized before their parent is. Pre-order would
     build the outer list out of cells whose own lists had not been built yet, and
     nested procedures are common enough that the difference is visible.
+
+    Returns the links the code fences swallowed, for `flattened_links`.
     """
+    swallowed = 0
     for child in [child for child in container.children if isinstance(child, Tag)]:
-        normalize(child)
+        swallowed += normalize(child)
     _chapter_headings(container)
-    _coalesce_code(container)
+    swallowed += _coalesce_code(container)
     _group_lists(container)
+    return swallowed
 
 
 def _chapter_headings(parent: Tag) -> None:
@@ -519,15 +535,22 @@ def _chapter_headings(parent: Tag) -> None:
         child.replace_with(heading)
 
 
-def _coalesce_code(parent: Tag) -> None:
+def _coalesce_code(parent: Tag) -> int:
     """Consecutive `*CodeLine` divs are one fenced block, not one fence each.
 
     104,896 of them against 60 `<pre>` elements corpus-wide. Fencing per div -- the
     predecessor's fifth bug -- turns a five-line command into five unrunnable
     one-line fences. The fence is bare: there is no language attribute anywhere in
     the corpus to read, and guessing one would be a fabrication made 100,000 times.
+
+    The fence is built from text, so a link in a code line is gone before the
+    renderer's `flattened_links` counter could see it. Phase 8's rule is to keep
+    the words and count the target lost, so they are counted here and returned
+    (R7-05: 1,124 corpus code lines hold a popup or a relative href).
     """
+    swallowed = 0
     for run in _runs(parent, _is_code_line):
+        swallowed += sum(len(node.find_all("a", href=True)) for node in run)
         lines = [_code_text(node) for node in run]
         while lines and not lines[-1].strip():
             lines.pop()
@@ -535,6 +558,7 @@ def _coalesce_code(parent: Tag) -> None:
         block.string = "\n".join(lines)
         _drop_rules(run)
         _replace_run(run, [block])
+    return swallowed
 
 
 def _drop_rules(run: list[Tag]) -> None:
@@ -1207,22 +1231,58 @@ class WebWorksEngine(BaseEngine):
     def _read_book(self, context: ConversionContext, book: _Book) -> None:
         runtime = book.root / "wwhdata"
         files_js = runtime / "common" / "files.js"
+        toc_js = runtime / "js" / "toc.js"
         if files_js.is_file():
             book.files = read_files(files_js)
         else:
             # The 45 stripped books (§5.3.1). Reported rather than skipped: 1,395
             # topics is too many to drop, and `files.htm` titles every one of them.
+            # The test is `files.js`, so that is the file the line names (R7-09).
             book.stripped = True
             book.files = read_files_htm(runtime / "files.htm")
             context.record(
                 "NAV_NODE_DROPPED",
                 path=book.name,
-                message="stripped book: no wwhdata/js/toc.js, so no navigation",
+                message="stripped book: no wwhdata/common/files.js, so no navigation",
             )
-        book.toc = read_toc(runtime / "js" / "toc.js")
+        book.toc = read_toc(toc_js)
         book.title = read_return(runtime / "common" / "title.js")
         book.context_key = read_return(runtime / "common" / "context.js")
+        self._check_runtime(context, book, runtime)
         book.topics = self._topics(context, book)
+
+    def _check_runtime(self, context: ConversionContext, book: _Book, runtime: Path) -> None:
+        """Names a runtime file that is there and gave nothing (Phase 34, R7-09).
+
+        Every reader returns empty rather than raising, which is right for a file
+        that is absent and silent for one that is present: an unreadable or empty
+        `files.js` turns every TOC node into "no page" and every topic into an
+        orphan, and only the symptoms were reported. The corpus has none today
+        (all 1,938 runtime files decode), so this is the line that would explain
+        the day it does. Same code as Flare's unreadable TOC, for the same effect.
+        """
+        checks = (
+            ("common/files.js", lambda: bool(book.files),
+             "its topics are filed under Unfiled"),
+            ("js/toc.js", lambda: bool(book.toc), "the book has no navigation"),
+            ("common/title.js", lambda: bool(book.title),
+             "the book is labelled from its directory name"),
+            ("common/context.js", lambda: bool(book.context_key),
+             "popups that name the book by its key will not resolve"),
+        )
+        for name, yielded, effect in checks:
+            path = runtime / Path(*PurePosixPath(name).parts)
+            if not path.is_file():
+                continue
+            if read_text(path) is None:
+                problem = "could not be read"
+            elif not yielded() and name.endswith(("files.js", "toc.js")):
+                # An empty `title.js` return is a blank title, not a failure.
+                problem = "yields no entries"
+            else:
+                continue
+            context.record("TOC_UNREADABLE", path=book.name,
+                           message=f"wwhdata/{name} {problem}; {effect}")
 
     def _topics(self, context: ConversionContext, book: _Book) -> list[str]:
         """Every convertible topic under one book, book-relative and sorted.
@@ -1235,12 +1295,21 @@ class WebWorksEngine(BaseEngine):
             other for other in self._index.books.values()
             if other.root != book.root and book.root in other.root.parents
         ]
+        filed = {
+            book.files[node.index].href.lower()
+            for entry in book.toc for node in entry.walk()
+            if node.index is not None and 0 <= node.index < len(book.files)
+        }
         found: list[str] = []
         for path in _walk_files(book.root):
             if path.suffix.lower() not in _HTML_SUFFIXES:
                 continue
             relative = PurePosixPath(path.relative_to(book.root).as_posix())
             if is_skin_path(relative.parts, self.engine) or relative.parts[0] in RUNTIME_DIRECTORIES:
+                continue
+            if (relative.stem.split(".")[0].lower() in FRONT_MATTER_STEMS
+                    and str(relative).lower() not in filed):
+                book.skipped["front-matter"] = book.skipped.get("front-matter", 0) + 1
                 continue
             reason = self._rejection(path, relative, nested, context.api_roots)
             if reason:
@@ -1253,7 +1322,7 @@ class WebWorksEngine(BaseEngine):
                    api_roots: list[Path]) -> str:
         """Why this file is not a topic, or `""` if it is one (§5.3.9)."""
         stem = relative.stem.split(".")[0].lower()
-        if stem in STUB_STEMS:
+        if stem in STUB_STEMS or _NUMBERED_STUB.match(stem):
             return "runtime-stub"
         if stem in GENERATED_LIST_STEMS:
             return "generated-list"
@@ -1359,7 +1428,7 @@ class WebWorksEngine(BaseEngine):
             container = body
 
         _strip_chrome(container, whole_body=whole_body)
-        normalize(container)
+        context.flattened_links += normalize(container)
 
         # Two spaces, and the renderer needs both. `output` is where this page is
         # published -- relative to the version folder, with the book root dropped
