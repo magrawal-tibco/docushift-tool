@@ -159,16 +159,18 @@ R7-01 was checked against architecture.md §5.3.4, which requires anchored TOC e
 
 ## Batch 3, grouped into fix themes
 
+Triage approved by the user 2026-10-04, as proposed, including the AA condition (stop and ask if the toc dialect cannot carry an anchor) and renaming the TRA Runtime Agent 5.13.0 support page once AG is in.
+
 | theme | findings | proposed | decision |
 |---|---|---|---|
-| **AA. Section entries deleted from the navigation** | R7-01 (S1), and the same rule in Flare | fix: keep anchored entries in toc.yml; if the html-to-md toc dialect (Phase 36) cannot carry an anchor, report and bring back as a decision | |
-| **AB. Wrong step numbers and list types** | R7-02 (S1), R8-14 | fix | |
-| **AC. WebWorks headings rendered as paragraphs** | R7-03 (S1) | fix | |
-| **AD. Version named after the wrong collection; book groups missing from navigation** | R7-04 (S1) | fix | |
-| **AE. Text dropped or garbled by the Markdown walk** | R8-01, R8-02, R8-03, R8-05, R8-06, R8-07 (S1), R8-13 | fix | |
-| **AF. Links and Help buttons that land in the wrong place** | R8-04 (S1), R9-01 (S1), R9-02 (S1), R8-08 (S2), R8-11 | fix | |
-| **AG. Page names and pins** | R9-03 (S2), R9-04 (S2), R9-05, R9-12 | fix; then give the TRA Runtime Agent 5.13.0 support page its proper name | |
-| **AH. Silent losses, false warnings, the "Unfiled" branch** | R7-05, R7-06, R7-07, R7-09, R9-09, R9-10, R9-11 | fix | |
-| **AI. Fragile, correct today** | R7-08, R7-10, R8-09, R8-10, R8-12, R9-06, R9-07, R9-08 | defer to planning.md carried-forward items | |
-| **AJ. Docs that contradict the code** | R9-13, R9-14 | fix docs | |
-| **O3. Cleanup** | R7-11, R8-15, R8-16, R9-15, R9-16 | add to the end-of-Phase-34 cleanup commit | |
+| **AA. Section entries deleted from the navigation** | R7-01 (S1), and the same rule in Flare | fix: keep anchored entries in toc.yml; if the html-to-md toc dialect (Phase 36) cannot carry an anchor, report and bring back as a decision | approved: fix 2026-10-04 |
+| **AB. Wrong step numbers and list types** | R7-02 (S1), R8-14 | fix | approved: fix 2026-10-04 |
+| **AC. WebWorks headings rendered as paragraphs** | R7-03 (S1) | fix | approved: fix 2026-10-04 |
+| **AD. Version named after the wrong collection; book groups missing from navigation** | R7-04 (S1) | fix | approved: fix 2026-10-04 |
+| **AE. Text dropped or garbled by the Markdown walk** | R8-01, R8-02, R8-03, R8-05, R8-06, R8-07 (S1), R8-13 | fix | approved: fix 2026-10-04 |
+| **AF. Links and Help buttons that land in the wrong place** | R8-04 (S1), R9-01 (S1), R9-02 (S1), R8-08 (S2), R8-11 | fix | approved: fix 2026-10-04 |
+| **AG. Page names and pins** | R9-03 (S2), R9-04 (S2), R9-05, R9-12 | fix; then give the TRA Runtime Agent 5.13.0 support page its proper name | approved: fix 2026-10-04 |
+| **AH. Silent losses, false warnings, the "Unfiled" branch** | R7-05, R7-06, R7-07, R7-09, R9-09, R9-10, R9-11 | fix | approved: fix 2026-10-04 |
+| **AI. Fragile, correct today** | R7-08, R7-10, R8-09, R8-10, R8-12, R9-06, R9-07, R9-08 | defer to planning.md carried-forward items | approved: defer to planning.md carried-forward items 2026-10-04 |
+| **AJ. Docs that contradict the code** | R9-13, R9-14 | fix docs | approved: fix docs 2026-10-04 |
+| **O3. Cleanup** | R7-11, R8-15, R8-16, R9-15, R9-16 | add to the end-of-Phase-34 cleanup commit | approved: add to the end-of-Phase-34 cleanup commit 2026-10-04 |
