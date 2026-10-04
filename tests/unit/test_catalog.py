@@ -2423,3 +2423,137 @@ def test_an_untouched_bu_still_follows_a_reclassification(catalog: CatalogManage
 
     product = catalog.get_product("mystery")
     assert (product.bu, product.family) == ("ibi", "webfocus")
+
+
+# -- the family review columns (Phase 37) ---------------------------------------
+
+FAMILY_REVIEW_TAXONOMY = """
+business_units:
+  tibco:
+    name: TIBCO
+    families:
+      messaging: {name: Messaging, description: "Pub-sub and queues"}
+      ems: {name: EMS, description: "Enterprise Message Service"}
+      analytics: {name: Analytics, description: "Declared, never used"}
+  spotfire:
+    name: Spotfire
+    families:
+      statistica: {name: Statistica, description: "Statistica products"}
+rules:
+  - match: ["ems"]
+    bu: tibco
+    family: messaging
+  - match: ["statistica"]
+    bu: spotfire
+    family: statistica
+"""
+
+
+@pytest.fixture
+def reviewed(project_root: Path, catalog: CatalogManager) -> CatalogManager:
+    """A catalog whose config declares families with descriptions and two rules."""
+    (project_root / "config" / "taxonomy.yaml").write_text(FAMILY_REVIEW_TAXONOMY, encoding="utf-8")
+    catalog.config = ConfigManager(root_dir=project_root)
+    return catalog
+
+
+def _product_rows(catalog: CatalogManager) -> dict[str, dict[str, str]]:
+    return {row["slug"]: row for row in read_rows(catalog.products_path)}
+
+
+def test_the_family_review_columns_sit_beside_family(reviewed: CatalogManager) -> None:
+    """Phase 37: a row reads left to right -- family, what it means, size, rule."""
+    _fetch(reviewed, make_product("ems", bu="tibco", family="ems"))
+
+    header = reviewed.products_path.read_text(encoding="utf-8-sig").splitlines()[0].split(",")
+
+    start = header.index("family_source") + 1
+    assert header[start:start + 4] == [
+        "_family_name", "_family_description", "_family_products", "_rule_family",
+    ]
+
+
+def test_the_review_columns_describe_the_family_and_what_the_rules_say(
+    reviewed: CatalogManager,
+) -> None:
+    _fetch(
+        reviewed,
+        make_product("ems", product_code="ems", display_name="TIBCO EMS", bu="tibco", family="ems"),
+        make_product("ftl", product_code="ftl", display_name="TIBCO FTL", bu="tibco", family="ems"),
+    )
+
+    rows = _product_rows(reviewed)
+
+    assert rows["ems"]["_family_name"] == "EMS"
+    assert rows["ems"]["_family_description"] == "Enterprise Message Service"
+    assert rows["ems"]["_family_products"] == "2"
+    # The rules still say the broad family: the disagreement the review is for.
+    assert rows["ems"]["_rule_family"] == "messaging"
+    # No rule matches FTL here, and a blank is the honest answer.
+    assert rows["ftl"]["_rule_family"] == ""
+
+
+def test_an_undeclared_family_reads_blank_rather_than_invented(reviewed: CatalogManager) -> None:
+    _fetch(reviewed, make_product("odd", bu="tibco", family="nowhere"))
+
+    row = _product_rows(reviewed)["odd"]
+
+    assert (row["_family_name"], row["_family_description"]) == ("", "")
+    assert row["_family_products"] == "1"
+
+
+def test_a_cross_bu_rule_names_its_bu(reviewed: CatalogManager) -> None:
+    """A suggestion from another BU must not read as a same-BU family of that name."""
+    _fetch(
+        reviewed,
+        make_product("sfs", product_code="sfs", display_name="Spotfire Service for Statistica",
+                     bu="tibco", family="messaging"),
+    )
+
+    assert _product_rows(reviewed)["sfs"]["_rule_family"] == "spotfire/statistica"
+
+
+def test_edits_to_the_review_columns_are_discarded_on_save(reviewed: CatalogManager) -> None:
+    """They are views of taxonomy.yaml; a hand edit would be a second, ignored truth."""
+    _fetch(reviewed, make_product("ems", product_code="ems", display_name="TIBCO EMS",
+                                  bu="tibco", family="ems"))
+    text = reviewed.products_path.read_text(encoding="utf-8-sig")
+    reviewed.products_path.write_text(
+        text.replace("Enterprise Message Service", "typed by hand"), encoding="utf-8-sig", newline=""
+    )
+
+    reloaded = _reload(reviewed)
+    reloaded.config = reviewed.config
+    reloaded.save()
+
+    assert _product_rows(reloaded)["ems"]["_family_description"] == "Enterprise Message Service"
+
+
+def test_the_review_columns_keep_a_rewrite_byte_identical(reviewed: CatalogManager) -> None:
+    _fetch(reviewed, make_product("ems", bu="tibco", family="ems"))
+    before = reviewed.products_path.read_bytes()
+
+    reloaded = _reload(reviewed)
+    reloaded.config = reviewed.config
+    reloaded.save()
+
+    assert reviewed.products_path.read_bytes() == before
+
+
+def test_without_a_config_the_taxonomy_columns_are_blank(catalog: CatalogManager) -> None:
+    """No taxonomy to read means no name to show -- never a guessed one."""
+    _fetch(catalog, make_product("ems", bu="tibco", family="ems"))
+
+    row = _product_rows(catalog)["ems"]
+
+    assert (row["_family_name"], row["_family_description"], row["_rule_family"]) == ("", "", "")
+    assert row["_family_products"] == "1"
+
+
+def test_triage_names_the_declared_families_with_no_product(reviewed: CatalogManager) -> None:
+    """The half of the review products.csv cannot show: an empty family has no row."""
+    _fetch(reviewed, make_product("ems", bu="tibco", family="ems"))
+
+    assert reviewed.triage_summary()["empty_families"] == [
+        "spotfire/statistica", "tibco/analytics", "tibco/messaging",
+    ]

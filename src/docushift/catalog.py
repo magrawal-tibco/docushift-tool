@@ -10,6 +10,7 @@ flag required, because expecting a user to tick one on each edited row of a
 4,000-row sheet guarantees silent data loss.
 """
 
+from collections import Counter
 from collections.abc import Collection
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -57,6 +58,14 @@ PRODUCT_COLUMNS = (
     "bu",
     "family",
     "family_source",
+    # Read-only views for the family review (Phase 37), regenerated on every write
+    # and ignored on read, like `versions.csv`'s `_bu` / `_family`: what the family
+    # key means in `taxonomy.yaml`, how many products share it, and what today's
+    # keyword rules would pick. Beside `family` so a row reads left to right.
+    "_family_name",
+    "_family_description",
+    "_family_products",
+    "_rule_family",
     # The outermost selection gate (architecture.md §3.10). Resolved from
     # `config/scope.yaml` at merge time and carried here so the sheet shows the
     # answer without anyone opening the YAML.
@@ -372,6 +381,38 @@ class CatalogManager:
         self._catalog = catalog
         return catalog
 
+    def _family_views(self, products: list[Product]) -> dict[str, dict[str, str]]:
+        """The four read-only family columns of each product row (Phase 37).
+
+        Blank where there is no config to read: a catalog opened without a
+        `ConfigManager` has no taxonomy, and inventing a name would be worse than
+        leaving the cell empty. An undeclared family is blank for the same reason,
+        and the blank is the signal a reviewer filters on.
+
+        `_rule_family` is the family key alone when the rule agrees on the BU, and
+        `bu/family` when it does not, so a cross-BU suggestion cannot read as a
+        same-BU family of that name.
+        """
+        sizes = Counter((p.bu, p.family) for p in products)
+        views: dict[str, dict[str, str]] = {}
+        for p in products:
+            view = {
+                "_family_name": "",
+                "_family_description": "",
+                "_family_products": str(sizes[(p.bu, p.family)]),
+                "_rule_family": "",
+            }
+            if self.config is not None:
+                declared = self.config.families(p.bu).get(p.family) or {}
+                view["_family_name"] = str(declared.get("name") or "")
+                view["_family_description"] = str(declared.get("description") or "")
+                info = self.config.resolve_product_info(p.product_code, p.display_name)
+                hint = str(info["family_rule_hint"] or "")
+                if hint:
+                    view["_rule_family"] = hint if info["bu"] == p.bu else f"{info['bu']}/{hint}"
+            views[p.slug] = view
+        return views
+
     def save(self) -> None:
         """Writes both CSVs with a fixed column order and a stable sort.
 
@@ -386,6 +427,7 @@ class CatalogManager:
         catalog = self.load()
 
         products = sorted(catalog.products.values(), key=lambda p: (p.bu, p.family, p.slug))
+        views = self._family_views(products)
         product_rows = [
             {
                 "slug": p.slug,
@@ -394,6 +436,7 @@ class CatalogManager:
                 "bu": p.bu,
                 "family": p.family,
                 "family_source": str(p.family_source),
+                **views[p.slug],
                 "in_scope": format_bool(p.in_scope),
                 "scope_source": str(p.scope_source),
                 "custom_override": format_bool(p.custom_override),
@@ -1256,10 +1299,21 @@ class CatalogManager:
             for ver in product.versions.values():
                 status_counts[str(ver.release_status)] += 1
         retired, fully_retired = self._retirement_effect()
+        # Declared in taxonomy.yaml with no product assigned (Phase 37). The one
+        # half of the family review `products.csv` cannot show: an empty family has
+        # no row to appear on.
+        empty_families: list[str] = []
+        if self.config is not None:
+            used = {(p.bu, p.family) for p in catalog.products.values()}
+            for bu in sorted(self.config.load_taxonomy()["business_units"]):
+                for family in sorted(self.config.families(bu)):
+                    if (bu, family) not in used:
+                        empty_families.append(f"{bu}/{family}")
         return {
             "total": len(catalog.products),
             "counts": counts,
             "unclassified": sorted(unclassified),
+            "empty_families": empty_families,
             # {slug: family} -- a suggestion for a human, never written anywhere.
             "rule_hints": dict(sorted(rule_hints.items())),
             "scope_counts": scope_counts,

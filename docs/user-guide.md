@@ -460,6 +460,17 @@ docushift catalog triage
 
 Filter `products.csv` to `family_source=unclassified`, assign families in bulk, and set `family_source=manual` on those rows to pin them.
 
+**Four read-only columns beside `family` give you the whole picture in one sheet**, so you never need to open `taxonomy.yaml` to review families:
+
+| column | tells you |
+| :--- | :--- |
+| `_family_name` | what the family is called — **blank means the family isn't declared** in `taxonomy.yaml` |
+| `_family_description` | its one-line description |
+| `_family_products` | how many products share it — handy for spotting catch-alls and one-product families |
+| `_rule_family` | what the keyword rules would pick; `spotfire/statistica` means a rule in another business unit |
+
+Sort by `family`, then compare it with `_rule_family` to see where the two disagree. The tool rewrites these four columns every time it saves the catalog, so anything typed into them is lost — reassign a product by changing `family`. Families declared in `taxonomy.yaml` that no product uses are listed at the end of `docushift catalog triage`.
+
 ### Defining a New Family
 
 Type the family name straight into the `family` column of `products.csv` — it does **not** have to exist in `taxonomy.yaml` first. The workspace folder is created for it on the next download, and `catalog import` tells you what it will be called:

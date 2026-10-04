@@ -149,17 +149,22 @@ The pydantic models in `models.py` remain the in-memory representation; CSV is p
 | `bu` | **user** | The business unit, and the first segment of the workspace folder and publishing repository: `tibco`, `ibi`, `spotfire`, `datasynapse` or `onebx` in the catalog today. Inferred on discovery (§3.3), kept once a human sets it |
 | `family` | **user** | Must exist in `taxonomy.yaml` for this BU |
 | `family_source` | tool | Provenance — see §3.3 |
+| `_family_name` | tool, read-only | The family's `name` in `taxonomy.yaml`; blank if the family is undeclared or no config was loaded (Phase 37) |
+| `_family_description` | tool, read-only | The family's `description` in `taxonomy.yaml`, blank on the same terms |
+| `_family_products` | tool, read-only | How many products share this row's `bu` / `family` |
+| `_rule_family` | tool, read-only | What today's keyword rules would pick: the family key, `bu/family` when the rule's BU differs, blank when no rule matches. Advice only — rules have not assigned a family since Phase 32 |
 | `in_scope` | **user** | Policy gate above `convert_eligible`: may **any** version of this product ever be converted? Defaults `true` — see §3.10 |
 | `scope_source` | tool | Provenance — `manual` \| `scope_rule` \| `default`, see §3.10 |
 | `custom_override` | user | Explicit whole-row pin; ignore all upstream changes |
 
 ```csv
-slug,product_code,display_name,bu,family,family_source,in_scope,scope_source,custom_override
-tibco-ems,ems,TIBCO Enterprise Message Service™,tibco,messaging,manual,true,default,false
-tibco-datasynapse-gridserver,dsp_gridserver,TIBCO DataSynapse GridServer®,tibco,integration,taxonomy_rule,true,default,false
-tibco-ebx,ebx,TIBCO EBX®,tibco,data_management,taxonomy_rule,false,scope_rule,false
-ibi-webfocus,webfocus,ibi™ WebFOCUS®,ibi,webfocus,manual,true,default,true
+slug,product_code,display_name,bu,family,family_source,_family_name,_family_description,_family_products,_rule_family,in_scope,scope_source,custom_override
+tibco-ems,ems,TIBCO Enterprise Message Service™,tibco,messaging,manual,Messaging,"High-performance messaging, streaming, and pub-sub",22,messaging,true,default,false
+tibco-ebx,ebx,TIBCO EBX®,tibco,data_management,taxonomy_rule,Data Management,Master data management and data virtualization,8,data_management,false,scope_rule,false
+ibi-webfocus,webfocus,ibi™ WebFOCUS®,ibi,webfocus,manual,WebFOCUS,…,2,webfocus,true,default,true
 ```
+
+**The four `_family_*` / `_rule_family` columns are the family review's single view** (Phase 37). They are regenerated from `taxonomy.yaml` and the catalog on every write and ignored on read — the same contract as `versions.csv`'s `_bu` / `_family` — so a hand edit to them is discarded, and reassigning a product is still an edit to `family`. A blank `_family_name` marks a family `taxonomy.yaml` does not declare. A declared family with no product has no row to appear on; `catalog triage` lists those instead.
 
 The `tibco-ebx` row is the shape of an excluded product: fully catalogued, every version still discovered and counted, and `in_scope=false` so no stage ever acts on it (§3.10).
 

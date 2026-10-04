@@ -139,8 +139,15 @@ changing it later moves both the workspace directory and the repo name.
 
 `versions.csv` carries `_bu` and `_family` copied from `products.csv` so the sheet
 can be filtered without a VLOOKUP. They are tool-owned, edits to them are ignored,
-and they are rewritten on every save (`catalog.py:329`). A `family` change leaves
+and they are rewritten on every save (`CatalogManager.save`). A `family` change leaves
 them stale across every version row of that product.
+
+`products.csv` carries four more of the same kind since Phase 37: `_family_name`,
+`_family_description`, `_family_products` and `_rule_family`, read from
+`taxonomy.yaml` and the catalog. A `family` change — or a new family declared in
+Step 2 — leaves them stale too, and the same save refreshes them. Edits the user
+typed into them are discarded by design; if a reassignment was typed into
+`_family_name` instead of `family`, say so rather than letting it vanish silently.
 
 `catalog set` already saves, so Step 1 usually covers this. If the user edited the
 CSV by hand and you did not run `catalog set` (e.g. a `display_name` fix), flush

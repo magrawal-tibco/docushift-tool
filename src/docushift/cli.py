@@ -1052,6 +1052,15 @@ def catalog_triage(ctx: click.Context) -> None:
         if len(hints) > 20:
             console.print(f"  [dim]... and {len(hints) - 20} more[/dim]")
 
+    # The half of the family review products.csv cannot show (Phase 37): a family
+    # with no product has no row to carry its `_family_*` columns.
+    empty = summary["empty_families"]
+    if empty:
+        console.print(
+            f"\n[bold]{len(empty)}[/bold] famil{'y is' if len(empty) == 1 else 'ies are'} declared in "
+            f"config/taxonomy.yaml with no product assigned: " + ", ".join(empty)
+        )
+
     # Scope is reported next to triage because the two answer the same question
     # for a reviewer -- how much of the catalog is actually work -- and because an
     # out-of-scope product needs no family, so it should not read as a backlog.
