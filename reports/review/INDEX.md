@@ -143,3 +143,32 @@ All ten fix themes are merged on `reframe-component`, 14 commits, each with a te
 - Re-convert needs `--force` (converter code changes do not invalidate a converted tree), and re-merge needs `--force` too (Phase 21's carried-forward item, confirmed again by R9-04).
 
 **Flagged choices** (consistent with the docs; recorded, not decisions): R5-07 merges a following code block only into Flare step-table lists; R5-13 renders text popups as `<sup>1</sup> (body)`; R5-11 reports merged-project TOC nodes instead of placing them; R6-01 always reads multi-column lists down the columns (all 9 real ones sort that way); R6-04 accepts "Important Information" at TOC depth ≤ 2. Trees converted before the engine became part of the currency key are treated as matching. `--input` still writes the catalog version's state (outside R4-04; added to theme Z). New for X3: the converter writes ~half its files with CRLF and rewrites link-adjusted files with LF.
+
+## Batch 3 (R7–R9): counts
+
+Reviewed at `review-base-b3` (a976513), i.e. after batch 1's fixes and before batch 2's.
+
+| unit | S1 | S2 | S3 | S4 | total |
+|---|---|---|---|---|---|
+| R7 WebWorks engine | 4 | 0 | 6 | 1 | 11 |
+| R8 Transforms | 7 | 1 | 6 | 2 | 16 |
+| R9 Reframe | 2 | 2 | 10 | 2 | 16 |
+| **Batch 3** | **13** | **3** | **22** | **5** | **43** |
+
+R7-01 was checked against architecture.md §5.3.4, which requires anchored TOC entries to be kept ("discarding it collapses distinct TOC entries onto one page"), so it is a defect, not a design rule. R9-03 is the root cause of the TRA Runtime Agent 5.13.0 move. The same version's support page (`trahelp/_templates/tibco-documentation-and-support-services-2.md`) has always carried the bad name. Batch 2's R5-02 fix (lists honour `start` in every engine) already corrects part of R7-02 and 40 Streaming lists in R8's count; the fixer measures what remains.
+
+## Batch 3, grouped into fix themes
+
+| theme | findings | proposed | decision |
+|---|---|---|---|
+| **AA. Section entries deleted from the navigation** | R7-01 (S1), and the same rule in Flare | fix: keep anchored entries in toc.yml; if the html-to-md toc dialect (Phase 36) cannot carry an anchor, report and bring back as a decision | |
+| **AB. Wrong step numbers and list types** | R7-02 (S1), R8-14 | fix | |
+| **AC. WebWorks headings rendered as paragraphs** | R7-03 (S1) | fix | |
+| **AD. Version named after the wrong collection; book groups missing from navigation** | R7-04 (S1) | fix | |
+| **AE. Text dropped or garbled by the Markdown walk** | R8-01, R8-02, R8-03, R8-05, R8-06, R8-07 (S1), R8-13 | fix | |
+| **AF. Links and Help buttons that land in the wrong place** | R8-04 (S1), R9-01 (S1), R9-02 (S1), R8-08 (S2), R8-11 | fix | |
+| **AG. Page names and pins** | R9-03 (S2), R9-04 (S2), R9-05, R9-12 | fix; then give the TRA Runtime Agent 5.13.0 support page its proper name | |
+| **AH. Silent losses, false warnings, the "Unfiled" branch** | R7-05, R7-06, R7-07, R7-09, R9-09, R9-10, R9-11 | fix | |
+| **AI. Fragile, correct today** | R7-08, R7-10, R8-09, R8-10, R8-12, R9-06, R9-07, R9-08 | defer to planning.md carried-forward items | |
+| **AJ. Docs that contradict the code** | R9-13, R9-14 | fix docs | |
+| **O3. Cleanup** | R7-11, R8-15, R8-16, R9-15, R9-16 | add to the end-of-Phase-34 cleanup commit | |
