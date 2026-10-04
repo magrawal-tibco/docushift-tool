@@ -223,3 +223,11 @@ Themes AA–AH and AJ are merged, 13 commits, each with a test that failed on th
 - TRA Runtime Agent 5.13.0 support page pinned to `tibco-runtime-agent/tibco-documentation-and-support-services.md` (2026-10-05, approved), applied at the next re-merge.
 
 **Flagged choices** (consistent with the docs): R7-07 drops a `title.*` cover page unless a TOC lists it (§5.3.5); R9-03 files an out-of-TOC page under the shallowest navigated page of its own source folder; R9-12 stops flagging any name taken from rename-map.csv as `shortened`; R8-07 separates adjacent runs with `<!-- -->` and R8-14 emits lettered lists as HTML. Both assume CommonMark rendering, which markdown-it confirms; AEM's renderer is untested. Caption style is mixed: italic on unsplit pipe tables, bold on Flare split tables. One WebWorks heading with a `<br>` still splits (TRA 5.12.4 `cmd-deployment.4.04.md`).
+
+### Batches 2–3 applied (2026-10-04, runs 334–339)
+
+The user ran `convert --force` for activespaces, ems, streaming and tra, then `reframe --all --force`, in the mainstream session. Checked read-only:
+- EMS 10.5.1 `Deploying-the-FTL-Server-Cluster.md` step 3 now reads "3.".
+- TRA Runtime Agent 5.13.0: the legal and support pages both publish under `tibco-runtime-agent/`; no `trahelp/_templates/` folder remains.
+- TRA Runtime Agent 5.12.2 `toc.yml`: 651 entries, 395 of them anchored (was 271 with none); titled "TIBCO Runtime Agent™".
+- Errors: 8 `REFERENCE_UNRESOLVED`, all present on every convert since 2026-09-29 (one image per Streaming 11.1.x / Data Streams 11.1.1 version, one Silver Fabric reference). Silver Fabric went from 2 to 1 because its duplicate guide copy is gone. No new error codes. The reframe run's findings match the run before (13 warnings, 14 notes).
