@@ -199,3 +199,27 @@ Reviewed at `review-base-b4` (73cc93d): after batches 1–2's fixes, before batc
 | **BE. Docs that contradict the code** | R10-13, R11-11, R11-12, R11-15, R12-14, R12-15, R12-16 | fix docs | |
 | **BF. Fragile, correct today, or unconfirmed** | R10-04, R10-07, R10-08, R10-12, R11-10 | defer to planning.md carried-forward items | |
 | **O4. Cleanup** | R10-14, R10-15, R10-16, R11-13, R11-14, R12-17, R12-18 | add to the end-of-Phase-34 cleanup commit | |
+
+## Batch 3: fixes merged (2026-10-05)
+
+Themes AA–AH and AJ are merged, 13 commits, each with a test that failed on the old code. The full suite passes (1,932) and lint is clean. The register is 76 codes (new: `RENAME_MAP_REFUSED`, `ELEMENT_UNRENDERED`; `TOC_UNREADABLE` widened to WebWorks). No finding was wrong. Merge conflicts: the register count, and design.md invariant 17, where both the R8 and R9 sentences were kept.
+
+| theme | commits |
+|---|---|
+| AA | f523d49: the toc.yml dialect already carries `url: "page.md#anchor"` (Phase 36), so anchored entries are kept in WebWorks and Flare |
+| AB | c3cd5f0 (R7-02), dc6fa17 (R8-14) |
+| AC | 31515c0 |
+| AD | 2286d33 |
+| AE | 89158ac, 690f6a1 |
+| AF | 7c46bc8 (R8-04/08/11), 3af1a73 (R9-01/02) |
+| AG | 91e6704 |
+| AH | 731ad26 (R7-05/06/07/09), 113f72d (R9-09/10/11) |
+| AJ | 85cafa5 |
+
+**Measured on scratch copies (main tree untouched):**
+- TRA WebWorks: TOC entries 271 → 652 (Runtime Agent 5.12.2), 277 → 668 (5.12.4), 275 → 430 (Administrator 5.12.2); wrong step numbers 202 → 0 across 13 versions; Runtime Agent 5.12.2 titled "TIBCO Runtime Agent™" with "TIBCO Designer" as its own level; cover-page "Unfiled" branches gone (586 of 588 corpus covers dropped as front matter, the 2 a TOC lists are kept).
+- Transforms: EMS 10.5.1 189 of 1,441 files change; Streaming 11.2.1 321 of 1,178; TRA Runtime Agent 5.12.4 98 of 290, with Help-button anchors reaching a heading 0/90 → 89/90. Every change traced to a finding.
+- Reframe: sub-heading and same-topic links corrected, EMS 10.5.1 93 + 2, TRA Runtime Agent 5.13.0 39 + 5; pinned names still honoured; reframe algorithm 4 → 5, so every merged tree re-merges.
+- TRA Runtime Agent 5.13.0 support page pinned to `tibco-runtime-agent/tibco-documentation-and-support-services.md` (2026-10-05, approved), applied at the next re-merge.
+
+**Flagged choices** (consistent with the docs): R7-07 drops a `title.*` cover page unless a TOC lists it (§5.3.5); R9-03 files an out-of-TOC page under the shallowest navigated page of its own source folder; R9-12 stops flagging any name taken from rename-map.csv as `shortened`; R8-07 separates adjacent runs with `<!-- -->` and R8-14 emits lettered lists as HTML. Both assume CommonMark rendering, which markdown-it confirms; AEM's renderer is untested. Caption style is mixed: italic on unsplit pipe tables, bold on Flare split tables. One WebWorks heading with a `<br>` still splits (TRA 5.12.4 `cmd-deployment.4.04.md`).
