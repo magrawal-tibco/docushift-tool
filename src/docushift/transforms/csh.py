@@ -212,29 +212,6 @@ def _join(output: str, anchor: str) -> str:
     return f"{output}#{anchor}" if anchor else output
 
 
-def identifiers_by_source(sources: list[CshSource]) -> dict[str, list[str]]:
-    """Tree-relative source-HTML path -> the identifiers that topic owns (§9.5).
-
-    Runs **before** conversion, not after: the identifiers are in the alias file
-    and need no resolution, so frontmatter lands in the topic's first and only
-    write rather than in a read-modify-write pass over the whole output tree.
-    Sorted and deduplicated, so re-converting a version produces the same bytes.
-    """
-    owned: dict[str, set[str]] = {}
-    for source in sources:
-        if source.status is not CshStatus.OK:
-            continue
-        for entry in source.entries:
-            reference = links.classify(entry.link)
-            if not reference.resolvable:
-                continue
-            path = links.resolve(PurePosixPath(source.doc_set), reference.path)
-            if links.escapes(path):
-                continue
-            owned.setdefault(str(path), set()).add(entry.identifier)
-    return {path: sorted(identifiers) for path, identifiers in sorted(owned.items())}
-
-
 def quote(text: str) -> str:
     """A YAML double-quoted scalar. **Unconditional** -- never "quote if needed".
 

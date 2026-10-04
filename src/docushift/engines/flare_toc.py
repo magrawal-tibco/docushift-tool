@@ -46,11 +46,6 @@ class Manifest:
 
     toc: str = ""
     default_url: str = ""
-    alias: str = ""
-
-    @property
-    def complete(self) -> bool:
-        return bool(self.toc)
 
 
 def read_manifest(root: Path) -> Manifest | None:
@@ -63,7 +58,6 @@ def read_manifest(root: Path) -> Manifest | None:
     return Manifest(
         toc=_slashed(element.get("Toc", "")),
         default_url=_slashed(element.get("DefaultUrl", "")),
-        alias=_slashed(element.get("Alias", "")),
     )
 
 

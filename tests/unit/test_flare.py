@@ -329,10 +329,7 @@ def test_the_manifest_is_read_by_attribute_and_forward_slashed(tmp_path: Path) -
     found = read_manifest(tmp_path)
 
     assert found is not None
-    assert (found.toc, found.default_url, found.alias) == (
-        "Data/Tocs/Default.js", "_templates/Home.htm", "Data/Alias.xml",
-    )
-    assert found.complete
+    assert (found.toc, found.default_url) == ("Data/Tocs/Default.js", "_templates/Home.htm")
 
 
 def test_an_absent_or_unparseable_manifest_is_none(tmp_path: Path) -> None:

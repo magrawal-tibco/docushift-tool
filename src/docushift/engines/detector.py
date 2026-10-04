@@ -71,19 +71,43 @@ class _Survey:
     markers: set[SourceEngine] = field(default_factory=set)
     html: list[Path] = field(default_factory=list)
     html_seen: int = 0
+    # Immediate child directory name -> what the same walk saw beneath it, as if
+    # that child had been surveyed on its own. Filled only when asked for.
+    children: dict[str, "_Survey"] = field(default_factory=dict)
+
+    def mark(self, engine: SourceEngine, below: "_Survey | None") -> None:
+        self.markers.add(engine)
+        if below is not None:
+            below.markers.add(engine)
+
+    def sample(self, path: Path, below: "_Survey | None") -> None:
+        for survey in (self, below):
+            if survey is None:
+                continue
+            survey.html_seen += 1
+            if len(survey.html) < _MAX_CONTENT_FILES:
+                survey.html.append(path)
 
 
-def _survey(tree: Path) -> _Survey:
+def _survey(tree: Path, by_child: bool = False) -> _Survey:
     """Walks `tree` once, collecting pass-1 markers and a bounded HTML sample.
 
     Breadth-first and hand-rolled rather than `os.walk`, because the HTML sample
     has to be breadth-first to be representative of a multi-guide bundle, and
     doing both in one traversal means the tree is read from disk once.
+
+    `by_child` also files what is seen under each immediate child directory into
+    that child's own survey, which is the survey that child would get walked on
+    its own: a breadth-first walk keeps its order inside any one subtree. The
+    folder map is then read off the same walk instead of re-walking every child
+    (Phase 34, R4-15). A marker on the child's *own* name -- a top-level
+    `wwhdata/` -- is the tree's, not the child's, as it would be walked alone.
     """
     found = _Survey()
-    queue: deque[Path] = deque([tree])
+    # (directory, the child survey it sits under, if any)
+    queue: deque[tuple[Path, _Survey | None]] = deque([(tree, None)])
     while queue:
-        current = queue.popleft()
+        current, below = queue.popleft()
         try:
             entries = sorted(current.iterdir())
         except OSError:
@@ -94,21 +118,24 @@ def _survey(tree: Path) -> _Survey:
         for entry in entries:
             name = entry.name.lower()
             if entry.is_dir():
-                queue.append(entry)
+                if by_child and current == tree:
+                    queue.append((entry, found.children.setdefault(entry.name, _Survey())))
+                else:
+                    queue.append((entry, below))
                 # `wwhdata/` is the WebWorks rule: 195 of 195 versions, zero
                 # false positives and zero false negatives (§7.1). `wwhelp/`
                 # reaches only 178 -- it stays for corroboration, not recall.
                 if name in ("microcontent", "_globalpages"):
-                    found.markers.add(SourceEngine.FLARE)
+                    found.mark(SourceEngine.FLARE, below)
                 elif name in ("wwhelp", "wwhdata"):
-                    found.markers.add(SourceEngine.WEBWORKS)
+                    found.mark(SourceEngine.WEBWORKS, below)
                 elif name == "static":
                     try:
                         inner = {child.name.lower() for child in entry.iterdir()}
                     except OSError:
                         inner = set()
                     if {"head.js", "body.js"} <= inner:
-                        found.markers.add(SourceEngine.DITA)
+                        found.mark(SourceEngine.DITA, below)
                 # `Skins/` and `Data/` are deliberately absent. Over 1,822
                 # versions they are 91.4% and 88.0% precise and account for all
                 # 94 of the seven-marker list's false positives, while removing
@@ -117,19 +144,17 @@ def _survey(tree: Path) -> _Survey:
                 continue
             suffix = entry.suffix.lower()
             if suffix in (".mcwebhelp", ".mclog") or name == "csh.js":
-                found.markers.add(SourceEngine.FLARE)
+                found.mark(SourceEngine.FLARE, below)
             elif name in ("snext.css", "snextchm.css"):
-                found.markers.add(SourceEngine.R_HELP)
+                found.mark(SourceEngine.R_HELP, below)
             elif suffix in _HTML_SUFFIXES:
                 if GUID_HTML_NAME.match(name):
-                    found.markers.add(SourceEngine.DITA)
-                found.html_seen += 1
-                if len(found.html) < _MAX_CONTENT_FILES:
-                    found.html.append(entry)
+                    found.mark(SourceEngine.DITA, below)
+                found.sample(entry, below)
         # `static/head.js` + `static/body.js` can also sit beside their siblings
         # when the tree *is* the static folder.
         if current.name.lower() == "static" and {"head.js", "body.js"} <= names:
-            found.markers.add(SourceEngine.DITA)
+            found.mark(SourceEngine.DITA, below)
     return found
 
 
@@ -231,12 +256,13 @@ def _pass_three(generator: str) -> SourceEngine:
 
 
 def detect_tree(tree: Path) -> Detection:
-    """Detects the engine of one directory, without descending into a folder map.
+    """Detects the engine of one directory, without descending into a folder map."""
+    return _decide(_survey(tree))
 
-    The unit of detection: `detect_version` calls it once for the version and
-    once per guide folder.
-    """
-    survey = _survey(tree)
+
+def _decide(survey: _Survey) -> Detection:
+    """The three passes over one survey. The unit of detection: `detect_version`
+    runs it once for the version and once per guide folder."""
     result = Detection(html_files=survey.html_seen)
 
     engine = _pass_one(survey)
@@ -284,13 +310,10 @@ def detect_version(tree: Path) -> Detection:
     same answer. The map is recorded regardless of whether it is unanimous;
     finding out that it was not is the reason it exists.
     """
-    result = detect_tree(tree)
-    try:
-        children = sorted(child for child in tree.iterdir() if child.is_dir())
-    except OSError:
-        children = []
-    for child in children:
-        folder = detect_tree(child)
+    survey = _survey(tree, by_child=True)
+    result = _decide(survey)
+    for name, below in survey.children.items():
+        folder = _decide(below)
         if folder.engine is not SourceEngine.AUTO:
-            result.folders[child.name] = folder.engine
+            result.folders[name] = folder.engine
     return result

@@ -1108,15 +1108,6 @@ def test_frontmatter_is_always_a_list_of_quoted_strings() -> None:
     assert csh.frontmatter_value(["a", "1234"]) == '["a", "1234"]'
 
 
-def test_identifiers_are_owned_by_source_path_before_conversion_runs() -> None:
-    """§9.5: they reach the topic's first and only write."""
-    sources = [source("main", ("a", "topics/T.htm#x", ""), ("b", "topics/T.htm", ""))]
-
-    owned = csh.identifiers_by_source(sources)
-
-    assert owned == {"main/topics/T.htm": ["a", "b"]}
-
-
 # -- headings and definition lists (Phase 27) ---------------------------------
 
 

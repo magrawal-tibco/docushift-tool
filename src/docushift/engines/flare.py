@@ -380,7 +380,6 @@ def _classes(tag: Tag) -> set[str]:
 class _Plan:
     """What one root will convert, settled before the first file is parsed."""
 
-    manifest: Manifest
     tocs: list[Toc] = field(default_factory=list)
     # Root-relative source paths, sorted. The landing page is not among them.
     topics: list[str] = field(default_factory=list)
@@ -526,7 +525,7 @@ class FlareEngine(BaseEngine):
         planned = {name.lower(): name for name in topics}
         if landing:
             planned[landing.lower()] = landing
-        return _Plan(manifest=manifest, tocs=tocs, landing=landing, topics=topics,
+        return _Plan(tocs=tocs, landing=landing, topics=topics,
                      whats_new=whats_new, placeholder=placeholder, planned=planned)
 
     def _whats_new(self, context: ConversionContext, unit: Unit, root: Path,
@@ -754,7 +753,6 @@ class FlareEngine(BaseEngine):
             return None
 
         output = links.to_markdown(PurePosixPath(relative))
-        anchors = _anchors(container)
         title = _title(container)
 
         _strip_chrome(container, landing=landing)
@@ -773,12 +771,11 @@ class FlareEngine(BaseEngine):
         context.unrendered.update(renderer.unrendered)
 
         if landing:
-            return self._landing_document(context, unit, soup, source, output, title, body, anchors)
-        return Document(source=source, relative=output, title=title, body=body, anchors=anchors)
+            return self._landing_document(context, unit, soup, source, output, title, body)
+        return Document(source=source, relative=output, title=title, body=body)
 
     def _landing_document(self, context: ConversionContext, unit: Unit, soup: BeautifulSoup,
-                          source: Path, output: PurePosixPath, title: str, body: str,
-                          anchors: set[str]) -> Document:
+                          source: Path, output: PurePosixPath, title: str, body: str) -> Document:
         """The landing page, with its two fallbacks and its hero-only stub.
 
         24 landing pages have no `h1` and only 2 of those a usable `<title>`, so
@@ -801,7 +798,7 @@ class FlareEngine(BaseEngine):
         if title and not body.lstrip().startswith("#"):
             body = f"# {markdown.escape(title)}\n\n{body}".rstrip("\n")
         return Document(source=source, relative=output, title=title, body=body,
-                        anchors=anchors, frontmatter=frontmatter)
+                        frontmatter=frontmatter)
 
     # -- navigation ------------------------------------------------------------
 
@@ -1379,12 +1376,6 @@ def _title(container: Tag) -> str:
     return _text(heading) if heading is not None else ""
 
 
-def _anchors(container: Tag) -> set[str]:
-    found = {str(tag["id"]) for tag in container.find_all(id=True)}
-    found |= {str(tag["name"]) for tag in container.find_all("a", attrs={"name": True})}
-    return {anchor for anchor in found if anchor}
-
-
 def _text(node: Tag | None) -> str:
     return " ".join(node.get_text(" ").split()) if node is not None else ""
 
@@ -1449,13 +1440,6 @@ def _stem_label(stem: str) -> str:
     if name.lower().startswith("html_"):
         name = name[5:]
     return " ".join(name.replace("_", " ").replace("-", " ").split()) or stem
-
-
-def _relative(tree: Path, path: Path) -> str:
-    try:
-        return path.relative_to(tree).as_posix()
-    except ValueError:  # pragma: no cover - the driver walks from the tree
-        return path.name
 
 
 __all__ = ["CONTENT_SELECTOR", "FlareEngine", "FlareRenderer", "autonum_label"]

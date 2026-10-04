@@ -65,7 +65,8 @@ class Document:
     nav_label: str = ""
     body: str = ""
     # Anchors this topic defines, so a link into it can be checked without
-    # re-parsing the Markdown.
+    # re-parsing the Markdown. The markers the renderer emitted; Flare, which
+    # never read them, leaves it empty (Phase 34, R5-14).
     anchors: set[str] = field(default_factory=set)
     # CSH identifiers this topic owns (§9.5). Filled by `transforms/csh.py`
     # before the write, never after it.

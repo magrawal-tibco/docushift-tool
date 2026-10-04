@@ -25,10 +25,6 @@ Four rules, all of them things the driver does so that no engine has to:
 - **The asset copier is the driver's**, handed to the engine per unit. The engine
   resolves while it emits, which is invariant 13; the engine does not decide where
   a file lands, which would make the destination exist in two places.
-
-In Phase 5a no engine is registered, so every selected version reports
-`ENGINE_UNKNOWN` and nothing is written. That is the sub-phase's whole visible
-behaviour and it is honest: the spine runs end to end and the register says so.
 """
 
 import hashlib
