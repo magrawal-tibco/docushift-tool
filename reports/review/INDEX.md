@@ -281,3 +281,33 @@ Triage approved by the user 2026-10-05, as proposed (including LF line endings i
 | **XH. Reframe's working files are published into the docs tree** | X1-03 (36 files in a published tree) | fix: publish neither `reframe.yml`, `rename-map.csv` nor `review-queue.csv` | approved: fix 2026-10-05 |
 | **XI. Smaller consistency gaps** | X1-10, X1-12, X2-08 | fix | approved: fix 2026-10-05 |
 | **XJ. Fragile, correct today, or needs the network to settle** | X1-09, X1-13, X1-14, X1-15, X1-16, X3-12 | defer to planning.md carried-forward items | approved: defer to planning.md carried-forward items 2026-10-05 |
+
+## Cross-cutting: fixes merged (2026-10-05)
+
+Themes XA–XI are merged, 12 commits, each with a test that failed on the old code. The full suite passes (2,130) and lint is clean. The register is 84 codes (new: two currency notes, `RENAME_MAP_MISSING`, `RENAME_MAP_UNMATCHED`). No finding was wrong. "Anchors" and "currency" merged with two import-line conflicts. "Safety" conflicted in 8 files with both and was rebased by its own fixer onto the merged tip (628db5f), keeping every side's intent: LF writes, atomic temp-and-rename writes, new currency keys, and a building mark that overrides any key.
+
+| theme | commits |
+|---|---|
+| XA | 5081933 (rename-aside swap, building mark, `.old` recovery, pins copy in state.db), 628db5f |
+| XB | 2d845ae |
+| XC | 8130e0d |
+| XD | 58f8a33 |
+| XE | e855199 (resolves Phase 21's carried-forward item) |
+| XF | 3af3563 |
+| XG | ff49b08 |
+| XH | 6a4af2f |
+| XI | 77ca519, e0a940b, e640f09 |
+
+**Proved on scratch workspaces (main tree untouched):**
+- `review-queue.csv` or `rename-map.csv` held open during `reframe --force`: the run fails, the tree stays at 506 files (was 6), the pins survive, the next run rebuilds and the one after is current.
+- A convert or extract killed mid-swap: the tree survives intact, `sync` and `convert` refuse the unfinished one, and the next run rebuilds.
+- `convert --force` followed by plain `reframe` now re-merges.
+- Help IDs: 19 of 108 in TRA Runtime Agent 5.13.0 move to the right section (32 of 108 in the merged tree); link markers 170 of 2,446 (TRA) and 4 of 196 (EMS 10.5.1).
+- Every generated md/yml is LF (CR in 0 files, was most of them). CSVs keep CRLF and BOM for Excel.
+- `reframe.yml`, `rename-map.csv` and `review-queue.csv` are no longer published, and old copies are withdrawn.
+- A cp1252-saved CSV is read and re-saved as UTF-8; a file in neither encoding gets one Error line naming it.
+- A double run of each stage on unchanged input still reports `current`.
+
+**One-time effect:** the new currency inputs make every converted tree rebuild once on the next `convert` and every merge once on the next `reframe`; until both have run, `sync` refuses merges.
+
+**Flagged choices:** a missing rename-map with no surviving copy warns and recomputes, rather than refusing; a building mark stays after any failure until that stage re-runs; only columns a writer added to review-queue.csv are kept, not edits to the six standard columns; a slug or version that is not one safe path segment stops the catalog load with an error naming the row; a `current` run adds a note naming the run that built the tree, rather than copying its findings.
