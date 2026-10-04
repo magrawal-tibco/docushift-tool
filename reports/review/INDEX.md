@@ -233,3 +233,21 @@ The user ran `convert --force` for activespaces, ems, streaming and tra, then `r
 - TRA Runtime Agent 5.13.0: the legal and support pages both publish under `tibco-runtime-agent/`; no `trahelp/_templates/` folder remains.
 - TRA Runtime Agent 5.12.2 `toc.yml`: 651 entries, 395 of them anchored (was 271 with none); titled "TIBCO Runtime Agent™".
 - Errors: 8 `REFERENCE_UNRESOLVED`, all present on every convert since 2026-09-29 (one image per Streaming 11.1.x / Data Streams 11.1.1 version, one Silver Fabric reference). Silver Fabric went from 2 to 1 because its duplicate guide copy is gone. No new error codes. The reframe run's findings match the run before (13 warnings, 14 notes).
+
+## Batch 4: fixes merged (2026-10-05)
+
+Themes BA–BE are merged, 17 commits, each with a test that failed on the old code. The full suite passes (2,016) and lint is clean. The register is 80 codes (new: `PATH_TOO_LONG`, `CSH_ANCHOR_MISSING`, `ANCHOR_WRONG_HEADING`, `TOC_ENTRY_DUPLICATED`; the non-UTF-8 case reuses `ARTIFACT_UNPARSED`; the §7.5 table is now checked for stage and severity, not only presence). No finding was wrong. Merged after the bug-fixing session's Phase 37 (2a34945) and mainstream's count commit (8743486). One conflict: a user-guide sentence where R10-01's archived-version note and R12-15's corrected example were both kept. architecture.md §7.4 and design.md §8.4 rewritten to the R12-06 rule.
+
+| theme | commits |
+|---|---|
+| BA | b586ea0 |
+| BB | 14dc5e8 |
+| BC | cc94513, 770125a, 7b6d9cd, baa52bb, c3cc99f, 55edca0, 645eed9 |
+| BD | 1b123f8, c1f1ec4, 05518ad, e0176be |
+| BE | 40ebf85, fbe2549, 90c5f35, 4c9ed5a |
+
+**Measured on scratch copies:** 301 maps stay at 17,252 rows (EMS) whether or not `publish_base_url` is set (was 34,504); a leftover `.part` folder contributes 0 rows (was 2,909); a merge built before a `convert --force` is refused with `SYNC_MERGE_UNAVAILABLE`, while all 14 real merged versions still count as current; an archived migrated version appears in its drop-down. `validate` over both published trees: `ANCHOR_MISSING` 537 → 219, `CSH_ANCHOR_MISSING` 0 → 318 (TRA 5.12.x, trees published before R8-04), `TOC_ENTRY_DUPLICATED` 0 → 10, `ANCHOR_WRONG_HEADING` 0 → 3 (exactly R9-01's EMS links), errors 0. Every new hit was checked by hand.
+
+**Exit codes now:** `download`, `extract`, `convert`, `reframe`, `sync` exit 1 on a failed version; `validate` and `csh validate` exit 1 on an error finding; any stage with an empty selection exits 1; a catalog error prints one Error line and exits 1.
+
+**Flagged choices:** a migrated archived version joins the drop-down; a folder the package no longer feeds is withdrawn, as sync already replaces a version's folder; sync now refuses a merge older than its converted tree, so after `convert --force` a `reframe --force` is needed before `sync` (plain `reframe` still reports current; this is X3's currency question); the three new validate checks are warnings, `PATH_TOO_LONG` an error; R11-01 skips 23 same-title groups it cannot prove duplicate; `archive download --from-file` files an unknown version archived, not eligible, `zip_source=manual`.
