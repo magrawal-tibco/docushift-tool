@@ -90,7 +90,25 @@ def _scope_options(func):
     return func
 
 
-@click.group()
+class _DocuShiftGroup(click.Group):
+    """The top-level group: turns a `CatalogError` from any command into `Error: ...`.
+
+    `CatalogManager.load()` raises one for a version row whose product row is
+    missing, and `save()` for a CSV held open in Excel -- the case the user guide
+    documents. Wrapping each call site missed six commands, which ended in a
+    traceback (Phase 34, R12-03); catching it once here reaches every command,
+    including the next one written. The per-site catches that remain are
+    harmless: they raise the same `ClickException` this would.
+    """
+
+    def invoke(self, ctx: click.Context):
+        try:
+            return super().invoke(ctx)
+        except CatalogError as exc:
+            raise click.ClickException(str(exc)) from exc
+
+
+@click.group(cls=_DocuShiftGroup)
 @click.version_option(__version__, prog_name="docushift")
 @click.option(
     "--root",

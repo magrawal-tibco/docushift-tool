@@ -1617,3 +1617,65 @@ def test_a_version_whose_conversion_was_never_measured_contributes_nothing() -> 
     stats = ReframeStats(results=[_merged("ems", "10.5.1", 124, 163)])
 
     assert _funnel_line(stats, _Rows({("ems", "10.5.1"): (0, 0)})) == ""
+
+
+# -- the command layer (Phase 34, R12) ---------------------------------------
+
+
+def _runs(root: Path) -> list[dict]:
+    store = StateStore(root / "cache" / "state.db")
+    try:
+        return store.recent_runs()
+    finally:
+        store.close()
+
+
+def _traceback_free(result) -> bool:
+    """True when the command ended through Click, not an uncaught exception."""
+    return result.exception is None or isinstance(result.exception, SystemExit)
+
+
+@pytest.mark.parametrize(
+    "argv",
+    [["catalog", "batches"], ["catalog", "triage"], ["status"], ["archive", "list"], ["catalog", "import"]],
+    ids=lambda a: " ".join(a),
+)
+def test_a_version_row_with_no_product_row_is_an_error_line_not_a_traceback(
+    runner: CliRunner, populated_root: Path, argv: list[str]
+) -> None:
+    """R12-03. `load()` raises `CatalogError` for a version whose slug has no product
+    row; these commands let it escape as a Python traceback."""
+    versions = populated_root / "config" / "versions.csv"
+    lines = versions.read_text(encoding="utf-8-sig").splitlines()
+    lines.append(lines[1].replace("tibco-enterprise-message-service", "tibco-enterprise-message-servce", 1))
+    versions.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+    result = _invoke(runner, populated_root, *argv)
+
+    assert result.exit_code == 1
+    assert _traceback_free(result), repr(result.exception)
+    assert "Error:" in result.output
+
+
+@pytest.mark.parametrize(
+    "argv",
+    [["catalog", "enable", "--product", "ems", "--version", "8.6.0"], ["catalog", "import"]],
+    ids=lambda a: " ".join(a[:2]),
+)
+def test_a_catalog_held_open_in_excel_is_an_error_line_not_a_traceback(
+    runner: CliRunner, populated_root: Path, monkeypatch, argv: list[str]
+) -> None:
+    """R12-03. `save()` raises `CatalogError` for a locked CSV (R1-04); `catalog
+    enable` and `catalog import` did not catch it."""
+    from docushift.catalog import CatalogError
+
+    def locked(self):
+        raise CatalogError("config/versions.csv is open in another program (Excel?)")
+
+    monkeypatch.setattr(CatalogManager, "save", locked)
+
+    result = _invoke(runner, populated_root, *argv)
+
+    assert result.exit_code == 1
+    assert _traceback_free(result), repr(result.exception)
+    assert "open in another program" in result.output
