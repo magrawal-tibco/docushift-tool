@@ -190,15 +190,17 @@ Reviewed at `review-base-b4` (73cc93d): after batches 1–2's fixes, before batc
 
 ## Batch 4, grouped into fix themes
 
+Triage approved by the user 2026-10-05, as proposed, including the exit-code change in BD (`download`, `extract`, `convert` exit 1 on a failed row).
+
 | theme | findings | proposed | decision |
 |---|---|---|---|
-| **BA. Publishing writes something wrong** | R10-01 (S1), R10-02 (S1), R10-03 (S2), R10-09, R10-11 | fix | |
-| **BB. Published copies that go stale unseen** | R10-05, R10-06, R10-10 | fix | |
-| **BC. Close `validate`'s cheap gaps** | R11-01 (S1), R11-02 (S1), R11-03, R11-04, R11-05, R11-06, R11-07, R11-08, R11-09 | fix | |
-| **BD. Command crashes, previews that write, runs left open, exit codes** | R12-01 – R12-05 (S2), R12-06, R12-07 – R12-13 | fix; `download`, `extract` and `convert` exit 1 on a failed row, like `reframe` and `sync` | |
-| **BE. Docs that contradict the code** | R10-13, R11-11, R11-12, R11-15, R12-14, R12-15, R12-16 | fix docs | |
-| **BF. Fragile, correct today, or unconfirmed** | R10-04, R10-07, R10-08, R10-12, R11-10 | defer to planning.md carried-forward items | |
-| **O4. Cleanup** | R10-14, R10-15, R10-16, R11-13, R11-14, R12-17, R12-18 | add to the end-of-Phase-34 cleanup commit | |
+| **BA. Publishing writes something wrong** | R10-01 (S1), R10-02 (S1), R10-03 (S2), R10-09, R10-11 | fix | approved: fix 2026-10-05 |
+| **BB. Published copies that go stale unseen** | R10-05, R10-06, R10-10 | fix | approved: fix 2026-10-05 |
+| **BC. Close `validate`'s cheap gaps** | R11-01 (S1), R11-02 (S1), R11-03, R11-04, R11-05, R11-06, R11-07, R11-08, R11-09 | fix | approved: fix 2026-10-05 |
+| **BD. Command crashes, previews that write, runs left open, exit codes** | R12-01 – R12-05 (S2), R12-06, R12-07 – R12-13 | fix; `download`, `extract` and `convert` exit 1 on a failed row, like `reframe` and `sync` | approved: fix 2026-10-05 |
+| **BE. Docs that contradict the code** | R10-13, R11-11, R11-12, R11-15, R12-14, R12-15, R12-16 | fix docs | approved: fix docs 2026-10-05 |
+| **BF. Fragile, correct today, or unconfirmed** | R10-04, R10-07, R10-08, R10-12, R11-10 | defer to planning.md carried-forward items | approved: defer to planning.md carried-forward items 2026-10-05 |
+| **O4. Cleanup** | R10-14, R10-15, R10-16, R11-13, R11-14, R12-17, R12-18 | add to the end-of-Phase-34 cleanup commit | approved: add to the end-of-Phase-34 cleanup commit 2026-10-05 |
 
 ## Batch 3: fixes merged (2026-10-05)
 
