@@ -168,6 +168,12 @@ def frontmatter(text: str) -> str:
     return "\n".join(lines[1:-1])
 
 
+def strip_frontmatter(text: str) -> str:
+    """The page with its frontmatter block removed -- what a reader sees."""
+    matter = _FRONTMATTER.match(text)
+    return text[matter.end():].lstrip("\r\n") if matter else text
+
+
 def _value(match: re.Match[str], *groups: int) -> str:
     for index in groups:
         found = match.group(index)

@@ -1409,6 +1409,11 @@ What to expect:
   what is left is mostly footnote and marker anchors with no heading in the source
   — worth knowing about, and nothing a re-run can fix. A file that is not there is
   a 404 and gates.
+- **The same guide listed twice is named.** Two entries side by side in `toc.yml`
+  with the same title, opening two pages with the same content, are a
+  `TOC_ENTRY_DUPLICATED` warning: the guide was published twice, and one copy
+  should go. Two entries that share a title but open different content are left
+  alone.
 - **A link to a heading on a merged page can land on the wrong topic.** When two
   topics on one page share a heading, the second becomes `#import-1`; a `#import`
   written in the second topic still works, but opens the first topic's heading.

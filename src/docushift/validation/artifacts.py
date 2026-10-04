@@ -207,7 +207,79 @@ def _check_toc(folder: VersionFolder, index: FolderIndex) -> list[Finding]:
                     "ANCHOR_MISSING", slug=folder.slug, version=folder.segment, path=where,
                     message=f"#{reference.fragment} is not an anchor in {target}{miss}",
                 ))
+    return findings + _duplicated(folder, index, where, loaded.document)
+
+
+def _toc_siblings(node: object) -> list[list[dict]]:
+    """Every list of sibling entries in a `toc.yml`, in either dialect."""
+    found: list[list[dict]] = []
+    if isinstance(node, dict):
+        for key in ("docs", "subfolderlist", "items", "children"):
+            found.extend(_toc_siblings(node.get(key)))
+    elif isinstance(node, list):
+        entries = [child for child in node if isinstance(child, dict)]
+        if entries:
+            found.append(entries)
+        for child in entries:
+            found.extend(_toc_siblings(child))
+    return found
+
+
+def _duplicated(
+    folder: VersionFolder, index: FolderIndex, where: str, document: object
+) -> list[Finding]:
+    """Sibling entries with one title, opening different pages that say the same thing.
+
+    Phase 34 (R11-01). Nothing compared one entry with another, so a guide
+    published twice passed clean: SFAS 1.2.0 lists "Installation" and "User's
+    Guide" twice each, over 96 pages that are two copies of 48, and Streaming
+    lists `index.md` and a byte-identical `lvindex.md` side by side at the root.
+
+    The rule is narrow on purpose, because p35 has 33 sibling groups sharing a
+    title and only the identical ones are provably a duplicate. Two pages with
+    one title that say different things (EMS's two "Message Translation"
+    topics) may be a mis-title or may be the source's own structure; two
+    entries naming sections of one page are a mis-titled entry, a different
+    defect. Neither is reported. Bodies are compared without the frontmatter,
+    which differs between copies only in what the converter wrote about them.
+    """
+    findings: list[Finding] = []
+    for siblings in _toc_siblings(document):
+        pages_by_title: dict[str, list[str]] = {}
+        for entry in siblings:
+            title = str(entry.get("title") or "").strip()
+            raw = entry.get("url") or entry.get("path")
+            if not title or not isinstance(raw, str):
+                continue
+            reference = refs.classify(raw.strip())
+            if reference.kind is not refs.ReferenceKind.RELATIVE:
+                continue
+            page = str(refs.resolve(PurePosixPath("."), reference.path))
+            if page in index.present:
+                pages_by_title.setdefault(title, [])
+                if page not in pages_by_title[title]:
+                    pages_by_title[title].append(page)
+        for title, pages in pages_by_title.items():
+            if len(pages) < 2:
+                continue
+            bodies = {_body(folder.path / page) for page in pages}
+            if len(bodies) == 1 and None not in bodies:
+                findings.append(Finding(
+                    "TOC_ENTRY_DUPLICATED", slug=folder.slug, version=folder.segment,
+                    path=where,
+                    message=f"{len(pages)} sibling entries titled {title!r} open identical "
+                            f"pages: {', '.join(pages)}",
+                ))
     return findings
+
+
+def _body(path: Path) -> str | None:
+    """A page's text without its frontmatter, or `None` when it cannot be read."""
+    try:
+        text = long_path(path).read_text(encoding="utf-8", errors="replace")
+    except OSError:  # pragma: no cover - the file was just listed
+        return None
+    return md.strip_frontmatter(text)
 
 
 # -- redirects.yml, where Reframe published one ------------------------------------

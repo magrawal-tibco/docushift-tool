@@ -2141,3 +2141,78 @@ def test_a_fragment_whose_target_is_the_nearest_heading_of_that_title_is_silent(
     report, _ = links_of(target)
 
     assert report.findings == []
+
+
+# -- the same guide published twice (Phase 34, R11-01) -----------------------------
+#
+# SFAS 1.2.0 ships every guide twice (`Tib_sfas_*` and `html/Tib_sfas_*`), both in
+# `toc.yml` under the same titles, 96 pages that are two copies of 48. Nothing
+# compared one entry with another, so it validated with no finding at all.
+
+GUIDE = "# Installation\n\nInstall the enabler.\n"
+
+
+def test_sibling_entries_with_one_title_opening_identical_pages_are_named(
+    tmp_path: Path,
+) -> None:
+    target = tmp_path / "target"
+    publish(
+        target,
+        {
+            "toc.yml": (
+                'docs:\n  - title: "Installation"\n    url: "html/guide/installation.md"\n'
+                '  - title: "Installation"\n    url: "guide/installation.md"\n'
+            ),
+            "html/guide/installation.md": "---\ntitle: Installation\n---\n\n" + GUIDE,
+            "guide/installation.md": "---\ntitle: Installation\nguide: x\n---\n\n" + GUIDE,
+        },
+    )
+
+    findings = artifacts_of(target)
+
+    assert codes(findings) == ["TOC_ENTRY_DUPLICATED"]
+    assert "html/guide/installation.md" in findings[0].message
+    assert findings[0].path.endswith("1-0-0/toc.yml")
+    assert REGISTRY["TOC_ENTRY_DUPLICATED"].severity is Severity.WARNING
+
+
+def test_duplicates_are_found_at_any_depth_and_in_the_old_toc_dialect(tmp_path: Path) -> None:
+    target = tmp_path / "target"
+    publish(
+        target,
+        {
+            "toc.yml": (
+                'items:\n  - title: "Docs"\n    path: "index.md"\n    children:\n'
+                '      - title: "Docs home"\n        path: "index.md"\n'
+                '      - title: "Docs home"\n        path: "lvindex.md"\n'
+            ),
+            "index.md": GUIDE,
+            "lvindex.md": GUIDE,
+        },
+    )
+
+    assert codes(artifacts_of(target)) == ["TOC_ENTRY_DUPLICATED"]
+
+
+@pytest.mark.parametrize(
+    ("second_url", "files"),
+    [
+        # One title, two pages that say different things: EMS's two "Message
+        # Translation" topics. Possibly a mis-title, not provably a duplicate.
+        ("b.md", {"a.md": GUIDE, "b.md": "# Installation\n\nSomething else.\n"}),
+        # One title, two sections of one page: a mis-titled entry, which is a
+        # different defect from a guide published twice.
+        ("a.md#other", {"a.md": GUIDE + "\n## Other\n"}),
+    ],
+)
+def test_one_title_on_pages_that_differ_is_not_a_duplicate(
+    tmp_path: Path, second_url: str, files: dict[str, str]
+) -> None:
+    target = tmp_path / "target"
+    toc = (
+        'docs:\n  - title: "Installation"\n    url: "a.md"\n'
+        f'  - title: "Installation"\n    url: "{second_url}"\n'
+    )
+    publish(target, {"toc.yml": toc, **files})
+
+    assert artifacts_of(target) == []

@@ -543,6 +543,17 @@ REGISTRY: dict[str, Code] = _codes(
     Code("CSH_ANCHOR_MISSING", Severity.WARNING, Stage.VALIDATE,
          "A csh.yml anchor naming no heading on its page; the Help button opens "
          "the page top instead of the section", "planning.md Phase 34 (R11-03)"),
+    # Phase 34 (R11-01). The same guide published twice: sibling `toc.yml` entries
+    # with one title opening different pages whose bodies are identical (SFAS
+    # 1.2.0's two copies of every guide, Streaming's `index.md`/`lvindex.md`). A
+    # warning: every link works, the reader just meets everything twice, and
+    # which copy to drop is a decision about the source, not a gate. Narrow on
+    # purpose -- p35 has 33 sibling groups sharing a title and only the identical
+    # ones are provably duplicates.
+    Code("TOC_ENTRY_DUPLICATED", Severity.WARNING, Stage.VALIDATE,
+         "Sibling toc.yml entries with one title opening different pages with "
+         "identical bodies; the same page or guide published twice",
+         "planning.md Phase 34 (R11-01)"),
     # `transforms/csh.py` writes the map and the frontmatter in one pass, so a
     # disagreement is a regression -- but it breaks one Help button rather than the
     # page, and the page is what an error should be about.

@@ -158,9 +158,11 @@ def test_the_register_carries_every_row_of_7_5() -> None:
     `CSH_ANCHOR_MISSING` (R11-03): a Help button opening the page top, split out
     of 472 `ANCHOR_MISSING` rows nobody could sort. And the 79th,
     `ANCHOR_WRONG_HEADING` (R11-02): a fragment that resolves, to the wrong
-    topic's heading, which existence-only matching could never see.
+    topic's heading, which existence-only matching could never see. And the
+    80th, `TOC_ENTRY_DUPLICATED` (R11-01): a guide published twice, which no
+    check compared one entry with another to see.
     """
-    assert len(REGISTRY) == 79
+    assert len(REGISTRY) == 80
 
 
 def test_severity_comes_from_the_registry_and_not_from_the_call_site() -> None:
