@@ -178,10 +178,11 @@ class Validator:
         for name in sorted({folder.doc_class for folder in entry.versions}):
             found.extend(artifacts.check_dropdown(entry, entry.path / name))
             found.extend(artifacts.check_redirect_map(
-                entry, entry.path / name, self.target, self.context.trees))
+                entry, entry.path / name, self.target, self.context.trees,
+                paths=self.context.paths))
             found.extend(artifacts.check_redirect_map(
                 entry, entry.path / name, self.target, self.context.trees,
-                origins.ORIGINS))
+                origins.ORIGINS, paths=self.context.paths))
         return found
 
     def _residue(self, entry: ProductFolder) -> list[Finding]:

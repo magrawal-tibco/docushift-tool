@@ -25,7 +25,13 @@ three of them:
   Linux. A link differing from its file only in case resolves on the developer's
   Windows machine and 404s in production, which is precisely the defect class a
   linter is for. Where a case-insensitive match exists the message names the file
-  that is actually there, so the fix is one rename rather than a search.
+  that is actually there, so the fix is one rename rather than a search. Nothing
+  asks the filesystem whether a path exists, because on Windows it folds case:
+  a file inside the version folder is looked up in `FolderIndex`, and one
+  elsewhere in the target (a tree-rooted link, a doc-class redirect) in
+  `TargetPaths`, both built from directory listings (Phase 34, R11-04). Anchors
+  are compared exactly too (R11-08): every heading slug is lower case and a
+  browser matches a fragment case-sensitively, so `#Install` names nothing.
 - **A missing file is an error; a missing anchor is a warning.** 1,626 of the
   sample's 14,055 fragments do not resolve -- 11.6% -- and an 11.6% rate cannot
   gate. They are still worth raising: spot-checks say these are anchors the
@@ -40,6 +46,8 @@ three of them:
 Javadoc, not this tool's output.
 """
 
+import os
+import posixpath
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path, PurePosixPath
@@ -55,6 +63,87 @@ from docushift.validation.tree import VersionFolder
 _ANCHORED = (".md",)
 
 
+def anchor_miss(fragment: str, anchors: set[str]) -> str | None:
+    """`None` when `fragment` names an anchor; otherwise what to add to the message.
+
+    Exact, never folded (R11-08). A fragment that matches only once lower-cased
+    is still a miss -- the browser will not find it -- but the message names the
+    anchor that is there, the way a case-only file miss names the file.
+    """
+    if fragment in anchors:
+        return None
+    if fragment.lower() in anchors:
+        return f"; it differs only in case from #{fragment.lower()}"
+    return ""
+
+
+class TargetPaths:
+    """Paths anywhere under the target root, resolved by exact-case listing.
+
+    Phase 34 (R11-04). A tree-rooted link and a doc-class redirect name a file
+    outside the version folder, so `FolderIndex` cannot answer for them, and the
+    `exists()` that did folds case on Windows: `Index.html` satisfied a link to
+    `index.html` that 404s on the host. This walks the path one component at a
+    time through cached directory listings instead, so the answer is the same on
+    every platform, and a case-only near miss can name the file that is there.
+    Listings go through `long_path`, because a Javadoc page under a long target
+    root is past 260 characters (R11-09).
+    """
+
+    def __init__(self, target: Path) -> None:
+        self.target = target
+        # Directory (exact case, relative to the target) -> its entries, and the
+        # same entries keyed lower-case. `None` for a directory that is not there.
+        self._listings: dict[str, tuple[set[str], dict[str, str]] | None] = {}
+        self._anchors: dict[str, set[str]] = {}
+
+    def _listing(self, directory: str) -> tuple[set[str], dict[str, str]] | None:
+        if directory not in self._listings:
+            try:
+                names = os.listdir(long_path(self.target / directory))
+            except OSError:
+                self._listings[directory] = None
+            else:
+                folded: dict[str, str] = {}
+                for name in sorted(names):
+                    folded.setdefault(name.lower(), name)
+                self._listings[directory] = (set(names), folded)
+        return self._listings[directory]
+
+    def actual(self, relative: str) -> str | None:
+        """The path as it is spelled on disk, or `None` when nothing is there.
+
+        Equal to `relative`, normalized, when it resolves exactly; differing only
+        in case when that is the only way it resolves.
+        """
+        normal = posixpath.normpath(relative)
+        if normal.startswith("..") or normal in (".", ""):
+            return None
+        current = ""
+        for part in normal.split("/"):
+            listing = self._listing(current or ".")
+            if listing is None:
+                return None
+            names, folded = listing
+            found = part if part in names else folded.get(part.lower())
+            if found is None:
+                return None
+            current = f"{current}/{found}" if current else found
+        return current
+
+    def anchors(self, relative: str) -> set[str]:
+        cached = self._anchors.get(relative)
+        if cached is None:
+            try:
+                text = long_path(self.target / relative).read_text(
+                    encoding="utf-8", errors="replace")
+            except OSError:  # pragma: no cover - resolved a moment ago
+                text = ""
+            cached = references.anchors(text)
+            self._anchors[relative] = cached
+        return cached
+
+
 @dataclass
 class LinkContext:
     """Everything the checker needs that is not the folder itself."""
@@ -67,6 +156,13 @@ class LinkContext:
     # `--check-external` is set, because the count is worth reporting either way
     # and the set is what the flag would work through.
     external: set[str] = field(default_factory=set)
+    # Case-exact lookups outside the version folder, shared by the whole run so
+    # each directory is listed once (R11-04).
+    paths: TargetPaths | None = None
+
+    def __post_init__(self) -> None:
+        if self.paths is None:
+            self.paths = TargetPaths(self.target)
 
 
 @dataclass
@@ -198,27 +294,21 @@ def _check_file(
             continue
         if classified.kind is refs.ReferenceKind.FRAGMENT:
             report.fragments += 1
-            if classified.fragment.lower() in index.anchors(relative):
+            miss = anchor_miss(classified.fragment, index.anchors(relative))
+            if miss is None:
                 report.anchors_matched += 1
             else:
                 issue(
                     "ANCHOR_MISSING",
                     reference.line,
-                    f"#{classified.fragment} is not an anchor in this page",
+                    f"#{classified.fragment} is not an anchor in this page{miss}",
                 )
             continue
 
         head = PurePosixPath(classified.path).parts[0] if classified.path else ""
         if head in context.trees:
             report.tree_rooted += 1
-            # `long_path`: a Javadoc page under a long target root is past 260
-            # characters, and unprefixed `exists()` says False (R11-09).
-            if not long_path(context.target / classified.path).exists():
-                issue(
-                    "LINK_BROKEN",
-                    reference.line,
-                    f"{classified.path} names a published tree this target does not hold",
-                )
+            _check_tree_rooted(context, classified, reference.line, report, issue)
             continue
 
         resolved = refs.resolve(base, classified.path)
@@ -247,15 +337,48 @@ def _check_file(
             report.fragments += 1
             if PurePosixPath(target).suffix.lower() not in _ANCHORED:
                 continue
-            if classified.fragment.lower() in index.anchors(target):
+            miss = anchor_miss(classified.fragment, index.anchors(target))
+            if miss is None:
                 report.anchors_matched += 1
             else:
                 issue(
                     "ANCHOR_MISSING",
                     reference.line,
-                    f"#{classified.fragment} is not an anchor in {target}",
+                    f"#{classified.fragment} is not an anchor in {target}{miss}",
                 )
     return report
+
+
+def _check_tree_rooted(
+    context: LinkContext, classified: refs.Reference, line: int, report: LinkReport,
+    issue: Callable[[str, int, str], None],
+) -> None:
+    """A host-less published URL, resolved against the target root, case-exactly.
+
+    Its fragment is checked too when it names a page (R11-04): 300 of p35's 820
+    tree-rooted links carry one, and none used to be looked at.
+    """
+    assert context.paths is not None
+    actual = context.paths.actual(classified.path)
+    if actual is None:
+        issue("LINK_BROKEN", line,
+              f"{classified.path} names a published tree this target does not hold")
+        return
+    if actual != posixpath.normpath(classified.path):
+        issue("LINK_BROKEN", line,
+              f"{classified.path} differs only in case from {actual}, which will 404 on Linux")
+        return
+    if not classified.fragment:
+        return
+    report.fragments += 1
+    if PurePosixPath(actual).suffix.lower() not in _ANCHORED:
+        return
+    miss = anchor_miss(classified.fragment, context.paths.anchors(actual))
+    if miss is None:
+        report.anchors_matched += 1
+    else:
+        issue("ANCHOR_MISSING", line,
+              f"#{classified.fragment} is not an anchor in {actual}{miss}")
 
 
 # -- the external pass ---------------------------------------------------------

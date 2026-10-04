@@ -39,7 +39,7 @@ from docushift.reporting.findings import Finding
 from docushift.utils.csvio import natural_version_key
 from docushift.utils.longpath import long_path
 from docushift.validation import references
-from docushift.validation.links import FolderIndex
+from docushift.validation.links import FolderIndex, anchor_miss
 from docushift.validation.tree import ProductFolder, VersionFolder
 
 CSH_FILE = "csh.yml"
@@ -165,10 +165,11 @@ def check_map(found: MapFile, index: FolderIndex) -> list[Finding]:
                                     path=where, message=f"{identifier} -> {target} {detail}"))
             continue
         anchored = anchor and PurePosixPath(target).suffix.lower() == ".md"
-        if anchored and anchor.lower() not in index.anchors(target):
+        miss = anchor_miss(anchor, index.anchors(target)) if anchored else None
+        if miss is not None:
             findings.append(Finding(
                 "ANCHOR_MISSING", slug=folder.slug, version=folder.segment, path=where,
-                message=f"{identifier} -> #{anchor} is not an anchor in {target}",
+                message=f"{identifier} -> #{anchor} is not an anchor in {target}{miss}",
             ))
         # The identifier must also be on the page it names (§9.5's mirror).
         if identifier not in pages.get(target, ()):

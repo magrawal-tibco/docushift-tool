@@ -1409,7 +1409,9 @@ Six things to expect:
 - **Case matters, even on Windows.** The tree is published to Linux, so a link that
   differs from its file only in case resolves on your machine and 404s in
   production. The message names the file that is actually there, so the fix is one
-  rename. This is not theoretical: the check's first run found three TOC entries
+  rename. The same goes for links into another published tree, for the published
+  redirect maps, and for `#fragments`: a heading's anchor is lower case, and
+  `#Install` does not reach it. This is not theoretical: the check's first run found three TOC entries
   like that, and the cause turned out to be a converter bug that had been writing a
   generated page over a real topic.
 - **`.part` folders are skipped and counted, not checked.** A sync that failed

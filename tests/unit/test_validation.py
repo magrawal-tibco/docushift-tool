@@ -1882,3 +1882,101 @@ def test_a_help_page_past_260_characters_has_its_frontmatter_read(tmp_path: Path
     (deep / "a.md").write_text("---\ncsh: help_1\n---\n\n# A\n", encoding="utf-8")
 
     assert csh_of(target) == []
+
+
+# -- case-exact on every platform, for every check (Phase 34, R11-04, R11-08) ------
+#
+# The target is published to a case-sensitive host. Two existence checks still
+# went through the filesystem, which folds case on Windows, and every anchor was
+# lower-cased on both sides before it was compared.
+
+
+def test_a_tree_rooted_link_differing_only_in_case_is_broken(tmp_path: Path) -> None:
+    target = tmp_path / "target"
+    api = publish(target, tree=RESOURCES, doc_class="api-references", segment="1-0-0")
+    (api / "Index.html").write_text("<html></html>", encoding="utf-8")
+    reference = f"{RESOURCES}/en-us/{SLUG}/api-references/1-0-0/index.html"
+    publish(target, {"guide.md": f"[api]({reference})\n"})
+
+    report, _ = links_of(target, only_docs(target))
+
+    assert codes(report.findings) == ["LINK_BROKEN"]
+    assert "differs only in case from" in report.findings[0].message
+    assert "1-0-0/Index.html" in report.findings[0].message
+
+
+def test_a_tree_rooted_link_differing_in_a_directory_name_is_broken(tmp_path: Path) -> None:
+    target = tmp_path / "target"
+    api = publish(target, tree=RESOURCES, doc_class="api-references", segment="1-0-0")
+    (api / "Docs").mkdir()
+    (api / "Docs" / "index.html").write_text("<html></html>", encoding="utf-8")
+    reference = f"{RESOURCES}/en-us/{SLUG}/api-references/1-0-0/docs/index.html"
+    publish(target, {"guide.md": f"[api]({reference})\n"})
+
+    report, _ = links_of(target, only_docs(target))
+
+    assert codes(report.findings) == ["LINK_BROKEN"]
+    assert "differs only in case" in report.findings[0].message
+
+
+def test_a_tree_rooted_fragment_is_checked_against_the_page_it_names(tmp_path: Path) -> None:
+    """300 of p35's 820 tree-rooted links carry a fragment, and none was checked."""
+    target = tmp_path / "target"
+    publish(target, {"guide.md": "# Guide\n\n## Install\n"}, slug="other",
+            product_metadata=PRODUCT_METADATA)
+    base = f"{TREE}/en-us/other/online-help/1-0-0/guide.md"
+    publish(target, {"a.md": f"[ok]({base}#install)\n[gone]({base}#nowhere)\n"})
+    folder = next(f for e in walk(target) if e.slug == SLUG for f in e.versions)
+
+    report, _ = links_of(target, folder)
+
+    assert codes(report.findings) == ["ANCHOR_MISSING"]
+    assert "#nowhere" in report.findings[0].message
+    assert (report.fragments, report.anchors_matched) == (2, 1)
+
+
+def test_a_published_redirect_differing_only_in_case_is_broken(tmp_path: Path) -> None:
+    target = tmp_path / "target"
+    publish(target, {"html/page.md": "# Page\n"})
+    published_map(
+        target,
+        entry(f"us/en/{SLUG}/online-help/1-0-0/html/old.html",
+              f"us/en/{SLUG}/online-help/1-0-0/html/PAGE.html#page"),
+    )
+
+    findings = map_of(target)
+
+    assert codes(findings) == ["LINK_BROKEN"]
+    assert "differs only in case from" in findings[0].message
+
+
+def test_an_anchor_differing_only_in_case_is_missing_and_says_so(tmp_path: Path) -> None:
+    """Browsers match a fragment to an id case-sensitively, and every heading slug
+    is lower case. On p35 no matched fragment depended on the folding."""
+    target = tmp_path / "target"
+    publish(target, {"a.md": "# Top\n\n## Install\n\n[s](#Install)\n[o](b.md#Top)\n",
+                     "b.md": "# Top\n"})
+
+    report, _ = links_of(target)
+
+    assert codes(report.findings) == ["ANCHOR_MISSING", "ANCHOR_MISSING"]
+    assert all("differs only in case from #" in f.message for f in report.findings)
+    assert (report.fragments, report.anchors_matched) == (2, 0)
+
+
+def test_toc_redirect_and_csh_anchors_are_compared_case_exactly(tmp_path: Path) -> None:
+    target = tmp_path / "target"
+    publish(
+        target,
+        {
+            "toc.yml": 'docs:\n  - title: "A"\n    url: "a.md#Install"\n',
+            "redirects.yml": redirects(entry("old.md", "a.md#Install")),
+            "csh.yml": 'help_1: "a.md#Install"\n',
+            "a.md": "---\ncsh: help_1\n---\n\n# A\n\n## Install\n",
+        },
+    )
+
+    found = artifacts_of(target) + csh_of(target)
+
+    assert len(found) == 3
+    assert all("differs only in case from #install" in f.message for f in found)

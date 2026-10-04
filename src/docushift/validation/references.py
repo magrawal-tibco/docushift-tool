@@ -227,7 +227,7 @@ def slugify_heading(title: str) -> str:
 
 
 def anchors(text: str) -> set[str]:
-    """Every fragment `#foo` that resolves inside this file, lower-cased.
+    """Every fragment `#foo` that resolves inside this file.
 
     **Computed heading slugs, and nothing else (Phase 29).** This used to add the
     explicit `id=` / `name=` attributes the engines pass through, on the reasonable
@@ -243,8 +243,10 @@ def anchors(text: str) -> set[str]:
     Dropping them raises `ANCHOR_MISSING` on every mid-topic Flare anchor
     (`#ID-000071DF`, `#top`) that no heading backs. Those links genuinely do not
     work, there is nothing in the content that can make them work, and a warning
-    naming them is the only honest output. Lower-cased on both sides because
-    renderers fold anchor case.
+    naming them is the only honest output. The slugs are lower case by
+    construction, and callers compare a fragment to them exactly (Phase 34,
+    R11-08): this used to fold both sides on the belief that renderers fold
+    anchor case, but a browser matches a fragment to an id case-sensitively.
     """
     return {
         anchor

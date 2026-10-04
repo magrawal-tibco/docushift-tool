@@ -49,7 +49,7 @@ from docushift.utils.csvio import natural_version_key
 from docushift.utils.longpath import long_path
 from docushift.utils.slug import is_numeric_version
 from docushift.validation import references as md
-from docushift.validation.links import FolderIndex
+from docushift.validation.links import FolderIndex, TargetPaths, anchor_miss
 from docushift.validation.tree import ProductFolder, VersionFolder
 
 METADATA = "metadata.yml"
@@ -200,10 +200,11 @@ def _check_toc(folder: VersionFolder, index: FolderIndex) -> list[Finding]:
             findings.append(Finding("LINK_BROKEN", slug=folder.slug, version=folder.segment,
                                     path=where, message=f"{raw} {detail}"))
         elif reference.fragment and PurePosixPath(target).suffix.lower() == ".md":
-            if reference.fragment.lower() not in index.anchors(target):
+            miss = anchor_miss(reference.fragment, index.anchors(target))
+            if miss is not None:
                 findings.append(Finding(
                     "ANCHOR_MISSING", slug=folder.slug, version=folder.segment, path=where,
-                    message=f"#{reference.fragment} is not an anchor in {target}",
+                    message=f"#{reference.fragment} is not an anchor in {target}{miss}",
                 ))
     return findings
 
@@ -254,14 +255,15 @@ def _check_redirects(folder: VersionFolder, index: FolderIndex) -> list[Finding]
                 message=f"{raw} is not in this version folder",
             ))
             continue
-        if (
-            reference.fragment
-            and PurePosixPath(target).suffix.lower() == ".md"
-            and reference.fragment.lower() not in index.anchors(target)
-        ):
+        miss = (
+            anchor_miss(reference.fragment, index.anchors(target))
+            if reference.fragment and PurePosixPath(target).suffix.lower() == ".md"
+            else None
+        )
+        if miss is not None:
             findings.append(Finding(
                 "ANCHOR_MISSING", slug=folder.slug, version=folder.segment, path=where,
-                message=f"#{reference.fragment} is not an anchor in {target}",
+                message=f"#{reference.fragment} is not an anchor in {target}{miss}",
             ))
         findings.extend(_shadowed(folder, index, where, source, target))
     return findings
@@ -428,7 +430,8 @@ def check_dropdown(product: ProductFolder, doc_class: Path) -> list[Finding]:
 
 def check_redirect_map(product: ProductFolder, doc_class: Path, target: Path,
                        trees: set[str],
-                       file_name: str = redirect_map.REDIRECTS) -> list[Finding]:
+                       file_name: str = redirect_map.REDIRECTS,
+                       paths: TargetPaths | None = None) -> list[Finding]:
     """`{slug}/{doc-class}/redirects.yml` -- the published 301 map (20d.1).
 
     One question, and it is the only one this file can be asked here: does every
@@ -449,7 +452,12 @@ def check_redirect_map(product: ProductFolder, doc_class: Path, target: Path,
     side and the same contract. Its `from` side is checked by nothing, here or
     anywhere: it is a live `docs.tibco.com` URL, and the only honest test of it is
     a network fetch, which `validate` does not do.
+
+    The `to` is resolved through `TargetPaths`, by exact-case listing, and not by
+    `exists()`, which folds case on Windows (Phase 34, R11-04): a row naming
+    `PAGE.html` passed against `page.md` and 301'd readers into a 404.
     """
+    paths = paths if paths is not None else TargetPaths(target)
     path = doc_class / file_name
     if not path.is_file():
         return []
@@ -479,17 +487,27 @@ def check_redirect_map(product: ProductFolder, doc_class: Path, target: Path,
         # TOC, so a deep page's path is past Windows' 260 characters and an
         # unprefixed `exists()` answers False for a file that is really there --
         # 60 `LINK_BROKEN` against redirects that resolve perfectly well.
+        # (`TargetPaths` lists through the prefix too.)
         candidates = [
             candidate for candidate in redirect_map.disk_candidates(to, trees)
             if long_path(
                 target / candidate.parts[0] / candidate.parts[1] / candidate.parts[2]
             ).is_dir()
         ]
-        if candidates and not any(long_path(target / c).exists() for c in candidates):
-            findings.append(Finding(
-                "LINK_BROKEN", slug=product.slug, path=where,
-                message=f"{row.get('from', '')} redirects to {to}, which this target does not hold",
-            ))
+        if not candidates:
+            continue
+        spelled = [(c.as_posix(), paths.actual(c.as_posix())) for c in candidates]
+        if any(wanted == actual for wanted, actual in spelled):
+            continue
+        near = next((actual for _wanted, actual in spelled if actual), None)
+        detail = (
+            f"which differs only in case from {near}" if near
+            else "which this target does not hold"
+        )
+        findings.append(Finding(
+            "LINK_BROKEN", slug=product.slug, path=where,
+            message=f"{row.get('from', '')} redirects to {to}, {detail}",
+        ))
     return findings
 
 
