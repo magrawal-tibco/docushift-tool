@@ -267,15 +267,17 @@ Reviewed at `review-base-x` (30f906b): after batches 1–3's fixes, before batch
 
 ## Cross-cutting, grouped into fix themes
 
+Triage approved by the user 2026-10-05, as proposed (including LF line endings in XG and not publishing reframe's three working files in XH).
+
 | theme | findings | proposed | decision |
 |---|---|---|---|
-| **XA. Replacing a folder can gut it or lose its pins; an interrupted run's tree is reported current** | X2-01 (S1), X2-02 (S1), X3-01 (S1), X3-02 (S1), X3-03 (S2), X2-09, X2-13, X2-14, X2-15, X3-09 | fix: move the old tree aside, move the new one in, then delete the old; mark a version as building before the swap so an interrupted tree is never `current`; carry pins across a failed swap | |
-| **XB. Help buttons and links open the section before the one they name** | X1-01 (S1), X1-04, X1-05 | fix | |
-| **XC. Values from files used as write paths without checks** | X2-03 (S2), X2-10, X2-11, X2-12 | fix | |
-| **XD. Files saved by Excel (ANSI encoding) or held open crash or stop a run** | X2-04 (S2), X2-05 (S2), X1-06, X1-11 | fix | |
-| **XE. A tree that should be rebuilt is reported current** | X3-04 (S2; Phase 21's carried-forward item), X3-05 / X1-08 (S2), X1-02 (S2), X3-06, X3-07, X3-08, X3-11 | fix | |
-| **XF. Hand-edited files the tool overwrites or drops** | X2-06 (S2: review-queue.csv rewritten from scratch), X1-07 (a stale pin erased silently) | fix: keep a writer's decisions across a re-merge; report a dropped pin | |
-| **XG. Mixed line endings** | X2-07, X3-10 | fix: write every text output with LF | |
-| **XH. Reframe's working files are published into the docs tree** | X1-03 (36 files in a published tree) | fix: publish neither `reframe.yml`, `rename-map.csv` nor `review-queue.csv` | |
-| **XI. Smaller consistency gaps** | X1-10, X1-12, X2-08 | fix | |
-| **XJ. Fragile, correct today, or needs the network to settle** | X1-09, X1-13, X1-14, X1-15, X1-16, X3-12 | defer to planning.md carried-forward items | |
+| **XA. Replacing a folder can gut it or lose its pins; an interrupted run's tree is reported current** | X2-01 (S1), X2-02 (S1), X3-01 (S1), X3-02 (S1), X3-03 (S2), X2-09, X2-13, X2-14, X2-15, X3-09 | fix: move the old tree aside, move the new one in, then delete the old; mark a version as building before the swap so an interrupted tree is never `current`; carry pins across a failed swap | approved: fix 2026-10-05 |
+| **XB. Help buttons and links open the section before the one they name** | X1-01 (S1), X1-04, X1-05 | fix | approved: fix 2026-10-05 |
+| **XC. Values from files used as write paths without checks** | X2-03 (S2), X2-10, X2-11, X2-12 | fix | approved: fix 2026-10-05 |
+| **XD. Files saved by Excel (ANSI encoding) or held open crash or stop a run** | X2-04 (S2), X2-05 (S2), X1-06, X1-11 | fix | approved: fix 2026-10-05 |
+| **XE. A tree that should be rebuilt is reported current** | X3-04 (S2; Phase 21's carried-forward item), X3-05 / X1-08 (S2), X1-02 (S2), X3-06, X3-07, X3-08, X3-11 | fix | approved: fix 2026-10-05 |
+| **XF. Hand-edited files the tool overwrites or drops** | X2-06 (S2: review-queue.csv rewritten from scratch), X1-07 (a stale pin erased silently) | fix: keep a writer's decisions across a re-merge; report a dropped pin | approved: fix 2026-10-05 |
+| **XG. Mixed line endings** | X2-07, X3-10 | fix: write every text output with LF | approved: fix 2026-10-05 |
+| **XH. Reframe's working files are published into the docs tree** | X1-03 (36 files in a published tree) | fix: publish neither `reframe.yml`, `rename-map.csv` nor `review-queue.csv` | approved: fix 2026-10-05 |
+| **XI. Smaller consistency gaps** | X1-10, X1-12, X2-08 | fix | approved: fix 2026-10-05 |
+| **XJ. Fragile, correct today, or needs the network to settle** | X1-09, X1-13, X1-14, X1-15, X1-16, X3-12 | defer to planning.md carried-forward items | approved: defer to planning.md carried-forward items 2026-10-05 |
