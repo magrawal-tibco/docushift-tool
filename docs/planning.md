@@ -134,7 +134,7 @@ The concrete deliverable of §7.1: every deferred "report line" in the three doc
 | `INVENTORY_PARTIAL`³⁴ | warn | extract | A directory in the extracted tree could not be read; the inventory columns are left blank, not the previous package's | Phase 34 (R3-04) |
 | `ENGINE_UNKNOWN` | warn | convert | `auto`, or a named engine with no handler — skipped, not guessed | invariant 7 |
 | `DOCSET_SKIPPED` | warn | convert | A file-named doc-set reaching the engine guard | `architecture.md` §5.2 |
-| `NAV_NODE_DROPPED` | note | convert | A node with no page and no children — DITA's `lof`/`lot`/`ix` (first top-level node in 246 books), Flare's 7 childless headless nodes and 30 same-page children | Phase 5 |
+| `NAV_NODE_DROPPED` | note | convert | A node with no page and no children — DITA's `lof`/`lot`/`ix` (first top-level node in 246 books), Flare's 7 childless headless nodes — or a Flare/WebWorks child that repeats its parent's page *and* bookmark exactly. A child pointing at a section of its parent's page is kept as `page.md#anchor` (Phase 34, R7-01) | Phase 5, Phase 34 |
 | `OUTPUT_ROOT_MISSING`⁵ᵇ | warn | convert | Engine detected, no unit of work found — the 5 partial Flare outputs | `architecture.md` §5.1.1 |
 | `CONTENT_MISSING`⁵ᵇ | warn | convert | A topic with no content container — reported, never guessed at | `architecture.md` §5.1.6 |
 | `CONTENT_BODY_FALLBACK`³⁴ | note | convert | A Flare root whose skin writes no content container; its MadCap topics were converted from `<body>`, one row per root (10 Statistica roots, ~1,485 topics) | Phase 34 (R5-09) |
