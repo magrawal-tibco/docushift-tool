@@ -483,6 +483,55 @@ def test_the_generated_index_prefers_the_name_the_collection_gave_itself(context
     assert result.documents[-1].title == "TIBCO Adapter for SAP"
 
 
+def _collection_book(name: str, collection: str, label: str, group: str = "") -> Unit:
+    metadata = {"collection": collection, "collection_name": label, "book_title": name.title()}
+    if group:
+        metadata["book_group"] = group
+    return book(name, title=name.title(), pages=(f"{name}.md",),
+                nav=[node(name.title(), f"{name}.md")], metadata=metadata)
+
+
+def test_two_collections_get_a_level_each_and_the_index_takes_the_product_name(
+    context, templates
+) -> None:
+    """R7-04: TRA Runtime Agent 5.12.2 ships `designerhelp/` and `trahelp/`.
+
+    The version index was titled "TIBCO Designer" because that collection sorted
+    first, and the six TRA books sat flat beside the Designer ones.
+    """
+    units = [
+        _collection_book("palettes", "pkg/designerhelp", "TIBCO Designer"),
+        _collection_book("usr", "pkg/designerhelp", "TIBCO Designer"),
+        _collection_book("install", "pkg/trahelp", "TIBCO Runtime Agent"),
+        _collection_book("cluster", "pkg/trahelp", "TIBCO Runtime Agent"),
+    ]
+
+    result = synthesize(context, units, templates)
+
+    assert labels(result.nodes) == [
+        "TIBCO Enterprise Message Service", "TIBCO Designer", "TIBCO Runtime Agent",
+    ]
+    assert labels(result.nodes[1].children) == ["Palettes", "Usr"]
+    assert labels(result.nodes[2].children) == ["Install", "Cluster"]
+    # Both collection levels get a generated page, as any childed node does.
+    assert all(top.document is not None for top in result.nodes)
+
+
+def test_a_collection_with_two_book_groups_gets_a_level_per_group(context, templates) -> None:
+    """§5.3.3: a BookGroup level is emitted when a collection declares more than one."""
+    units = [
+        _collection_book("admin", "docs", "Product Docs", group="Administration"),
+        _collection_book("ops", "docs", "Product Docs", group="Administration"),
+        _collection_book("dev", "docs", "Product Docs", group="Development"),
+    ]
+
+    result = synthesize(context, units, templates)
+
+    assert labels(result.nodes) == ["Product Docs", "Administration", "Development"]
+    assert labels(result.nodes[1].children) == ["Admin", "Ops"]
+    assert labels(result.nodes[2].children) == ["Dev"]
+
+
 # -- rendering ------------------------------------------------------------------
 
 

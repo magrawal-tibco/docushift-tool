@@ -146,7 +146,7 @@ def _assemble(views: list[_View], documents: dict[PurePosixPath, Document]) -> l
     if len(views) == 1:
         return list(views[0].nodes)
 
-    nodes = []
+    wrapped = []
     for view in views:
         children = list(view.nodes)
         if view.landing is not None:
@@ -155,12 +155,57 @@ def _assemble(views: list[_View], documents: dict[PurePosixPath, Document]) -> l
             # from inside goes, the way a Flare container drops a child pointing
             # at its own page (§5.1.4). One page, one position.
             children = _without(children, view.landing)
-        nodes.append(NavNode(
+        wrapped.append(NavNode(
             label=_unit_label(view, documents),
             document=view.landing,
             children=children,
         ))
-    return nodes
+    return _levels(views, wrapped)
+
+
+def _levels(views: list[_View], nodes: list[NavNode]) -> list[NavNode]:
+    """The collection and `BookGroup` levels §5.3.3 promises, over the unit nodes.
+
+    Until Phase 34 (R7-04) the engine recorded both and nothing read them, so
+    TRA Runtime Agent 5.12.2's `designerhelp/` and `trahelp/` books sat flat
+    under one index named after whichever collection sorted first. A version
+    with **more than one collection** gets a level per collection, labelled with
+    `books.xml`'s root `name`; a collection that declares **more than one
+    `BookGroup`** gets a level per group (the engine leaves `book_group` blank for
+    a single group, which is flattened). Books with neither stay where they are.
+    The test is on the siblings, as §5.3.3 words it: once a version has two
+    collections, each is a level, even one holding a single book, so the two read
+    alike. Order is first appearance, which is the engine's `books.xml` order.
+    """
+    collections = {
+        view.unit.metadata.get("collection", "")
+        for view in views
+        if view.unit.metadata.get("collection_name")
+    }
+    split = len(collections) > 1
+
+    result: list[NavNode] = []
+    levels: dict[tuple[str, ...], NavNode] = {}
+    for view, node in zip(views, nodes, strict=True):
+        metadata = view.unit.metadata
+        name = metadata.get("collection_name", "")
+        collection = metadata.get("collection", "")
+        siblings = result
+        if name and split:
+            level = levels.get(("collection", collection))
+            if level is None:
+                level = levels[("collection", collection)] = NavNode(label=name)
+                siblings.append(level)
+            siblings = level.children
+        group = metadata.get("book_group", "") if name else ""
+        if group:
+            level = levels.get(("group", collection, group))
+            if level is None:
+                level = levels[("group", collection, group)] = NavNode(label=group)
+                siblings.append(level)
+            siblings = level.children
+        siblings.append(node)
+    return result
 
 
 def _tail(
@@ -499,12 +544,17 @@ def _version_label(context: ConversionContext, views: list[_View]) -> str:
 
     WebWorks names the collection in `books.xml` and that is the better answer
     where it exists: it is what the collection called itself. The catalog's
-    display name is the fallback, and the slug the last resort.
+    display name is the fallback, and the slug the last resort. A version with
+    **two** collections is neither of them -- TRA Runtime Agent's index was
+    "TIBCO Designer" because `designerhelp/` sorts before `trahelp/` (Phase 34,
+    R7-04) -- so it takes the catalog's name, and each collection names its own
+    level instead (`_levels`).
     """
-    for view in views:
-        name = view.unit.metadata.get("collection_name", "")
-        if name:
-            return name
+    names = list(dict.fromkeys(
+        name for view in views if (name := view.unit.metadata.get("collection_name", ""))
+    ))
+    if len(names) == 1:
+        return names[0]
     return context.product_name or _pretty(context.slug) or "Documentation"
 
 
