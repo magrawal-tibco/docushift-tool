@@ -73,6 +73,7 @@ from docushift.engines.base import (
     Document,
     NavNode,
     Unit,
+    fold_same_page,
     is_legal_label,
     is_support_label,
     register,
@@ -1318,6 +1319,7 @@ class WebWorksEngine(BaseEngine):
         """
         filed: set[str] = set()
         self._dropped = 0
+        self._folded = 0
         nodes = [
             node for node in (self._node(entry, book, documents, filed) for entry in book.toc)
             if node is not None
@@ -1337,6 +1339,11 @@ class WebWorksEngine(BaseEngine):
         if self._dropped:
             context.record("NAV_NODE_DROPPED", path=unit.name, count=self._dropped,
                            message=f"{self._dropped} node(s) with no page and no children")
+        if self._folded:
+            context.record("NAV_NODE_DROPPED", path=unit.name, count=self._folded,
+                           message=f"{self._folded} child node(s) repeating the parent's "
+                                   "page with no bookmark of their own, folded into it "
+                                   "(same page)")
         return nodes
 
     def _node(self, entry: TocEntry, book: _Book, documents: dict[str, Document],
@@ -1353,8 +1360,12 @@ class WebWorksEngine(BaseEngine):
             (self._node(child, book, documents, filed) for child in entry.children)
             if child is not None
         ]
-        if document is not None:
-            children = [child for child in children if child.document != document.relative]
+        # Only an exact repeat folds; a bookmark into this page is a section
+        # entry and stays (§5.3.4, R7-01).
+        children, folded = fold_same_page(
+            children, document.relative if document is not None else None, entry.anchor
+        )
+        self._folded += folded
         if document is None and not children:
             self._dropped += 1
             return None

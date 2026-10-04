@@ -186,8 +186,10 @@ def _tail(
         node = _find(nodes, path)
         # A tail page with children is not a tail page; it is a section that
         # happens to be named like one, and dropping it would take its children
-        # out of the navigation with it. Left where the engine filed it.
-        if node is None or node.children:
+        # out of the navigation with it. Left where the engine filed it. Children
+        # that are bookmarks into the page itself do not count: they are the
+        # page's own sections, kept since R7-01, and go with it.
+        if node is None or any(child.document != path for child in node.walk()):
             continue
         _extract(nodes, path)
         dropped += 1
@@ -473,7 +475,8 @@ def _extract(nodes: list[NavNode], path: PurePosixPath) -> NavNode | None:
 def _without(nodes: list[NavNode], path: PurePosixPath) -> list[NavNode]:
     kept = []
     for node in nodes:
-        if node.document == path and not node.children:
+        # Its own sections (anchored children on the same page) go with it.
+        if all(child.document == path for child in node.walk()):
             continue
         node.children = _without(node.children, path)
         kept.append(node)

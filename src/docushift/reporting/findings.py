@@ -128,7 +128,8 @@ REGISTRY: dict[str, Code] = _codes(
          "A file-named doc-set reaching the engine guard", "architecture.md §5.2"),
     Code("NAV_NODE_DROPPED", Severity.NOTE, Stage.CONVERT,
          "A navigation node with no page and no children -- DITA's lof/lot/ix, "
-         "Flare's childless headless node and its same-page child",
+         "Flare's childless headless node -- or a Flare/WebWorks child repeating "
+         "its parent's page with no bookmark of its own",
          "planning.md Phase 5"),
     Code("OUTPUT_ROOT_MISSING", Severity.WARNING, Stage.CONVERT,
          "Engine detected and no unit of work found -- a partial output",

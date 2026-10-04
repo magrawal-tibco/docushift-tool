@@ -53,6 +53,7 @@ from docushift.engines.base import (
     Document,
     NavNode,
     Unit,
+    fold_same_page,
     is_legal_label,
     is_placeholder_whats_new,
     is_support_label,
@@ -817,6 +818,7 @@ class FlareEngine(BaseEngine):
         filed: set[str] = set()
         nodes: list[NavNode] = []
         self._dropped = 0
+        self._folded = 0
         self._subprojects = []
 
         for index, toc in enumerate(plan.tocs):
@@ -846,6 +848,11 @@ class FlareEngine(BaseEngine):
         if self._dropped:
             context.record("NAV_NODE_DROPPED", path=unit.name, count=self._dropped,
                            message=f"{self._dropped} node(s) with no page and no children")
+        if self._folded:
+            context.record("NAV_NODE_DROPPED", path=unit.name, count=self._folded,
+                           message=f"{self._folded} child node(s) repeating the parent's "
+                                   "page with no bookmark of their own, folded into it "
+                                   "(same page)")
         if self._subprojects:
             # Counted apart from the drops above, because the cause is not a
             # missing page: the sub-project converts as a unit of its own (or is
@@ -870,9 +877,13 @@ class FlareEngine(BaseEngine):
             if child is not None
         ]
         # 30 containers point at the same page as one of their own children. The
-        # parent keeps the page and the child node goes, so the topic appears once.
-        if document is not None:
-            children = [child for child in children if child.document != document.relative]
+        # parent keeps the page and the child node goes, so the topic appears once
+        # -- but only an exact repeat: a child with its own bookmark is a section
+        # entry, and §5.3.4 keeps it (R7-01).
+        children, folded = fold_same_page(
+            children, document.relative if document is not None else None, node.entry.anchor
+        )
+        self._folded += folded
 
         if document is None and not children and node.entry.project:
             # A merged project's insertion point (R5-11): 121 keys over 937 roots.

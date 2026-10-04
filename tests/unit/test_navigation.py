@@ -284,6 +284,32 @@ def test_a_duplicate_tail_page_that_has_children_is_left_where_it_is(context, te
     assert result.dropped == 0
 
 
+def test_a_duplicate_tail_page_whose_children_are_its_own_sections_is_dropped(
+    context, templates
+) -> None:
+    """Sections of the page are the page (R7-01 keeps them): it is still a duplicate.
+
+    Every TRA book's support page lists its own headings as anchored children;
+    reading those as "a section named like a tail page" would leave seven
+    support pages in one version's navigation.
+    """
+    section = NavNode(label="How to Contact", document=PurePosixPath("support.md"),
+                      anchor="1062")
+    units = [
+        book("one", title="One", pages=("a.md", "support.md"),
+             nav=[node("A", "a.md"), node("Support", "support.md")], support="support.md"),
+        book("two", title="Two", pages=("b.md", "support.md"),
+             nav=[node("B", "b.md"), node("Support", "support.md", section)],
+             support="support.md"),
+    ]
+
+    result = synthesize(context, units, templates)
+
+    assert str(result.nodes[-1].document) == "one/support.md"
+    assert not any(str(n.document) == "two/support.md" for top in result.nodes for n in top.walk())
+    assert result.dropped == 1
+
+
 def test_a_tail_page_the_toc_never_listed_still_reaches_the_tail(context, templates) -> None:
     """WebWorks' `copyrigh.htm` is in the TOC of almost no book (§5.3.5)."""
     unit = book(

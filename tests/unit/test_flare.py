@@ -1436,6 +1436,26 @@ def test_a_container_pointing_at_its_own_child_s_page_keeps_the_topic_once(
 
     assert str(parent.document) == "Content/intro.md"
     assert [child.label for child in parent.children] == ["Deep"]
+    # Counted, not silent (invariant 10).
+    assert any("same page" in f.message for f in result.findings.all
+               if f.code == "NAV_NODE_DROPPED")
+
+
+def test_an_anchored_child_on_its_container_s_page_is_kept(tmp_path: Path) -> None:
+    """R7-01's Flare copy: a bookmark into the parent's page is a section entry (§5.3.4)."""
+    files = basic()
+    files.update({f"html/{k}": v for k, v in toc_files(
+        [{"i": 1, "n": [{"i": 2}]}],
+        {"Content/intro.htm": {"i": [1, 2], "t": ["Introduction", "Requirements"],
+                               "b": ["", "#requirements"]}},
+    ).items()})
+
+    result = run(tmp_path, files)
+    parent = result.unit.nav[0]
+
+    assert [(child.label, str(child.document), child.anchor) for child in parent.children] == [
+        ("Requirements", "Content/intro.md", "requirements"),
+    ]
 
 
 def test_the_bookmark_on_a_toc_entry_survives(tmp_path: Path) -> None:

@@ -370,6 +370,57 @@ def test_a_node_with_neither_page_nor_children_is_counted_not_silent(tmp_path: P
     assert result.codes()["NAV_NODE_DROPPED"] == 1
 
 
+def test_an_anchored_entry_on_its_parent_s_page_is_kept(tmp_path: Path) -> None:
+    """R7-01: 47.7% of corpus `toc.js` entries are sections of the parent's page.
+
+    TRA 5.12.2's installation guide lists "Installation Modes" (`5#1812329`) and
+    "Disk Space" under "Installation Modes and Disk Space" (`5`). Both are
+    distinct navigation targets, and §5.3.4 keeps the bookmark for exactly that.
+    """
+    result = run(tmp_path, book(
+        "guide",
+        topics={"install.htm": topic("Installation Modes and Disk Space",
+                                     heading("Installation Modes and Disk Space"))},
+        files=(("Installation Modes and Disk Space", "install.htm"),),
+        toc=toc_js(
+            node("A", "P", "Installation Modes and Disk Space", "0"),
+            node("", "A", "Installation Modes", "0#1812329"),
+            node("", "A", "Disk Space", "0#1812345"),
+        ),
+    ))
+    [parent] = result.unit.nav
+    assert [(child.label, str(child.document), child.anchor) for child in parent.children] == [
+        ("Installation Modes", "install.md", "1812329"),
+        ("Disk Space", "install.md", "1812345"),
+    ]
+    assert "NAV_NODE_DROPPED" not in result.codes()
+
+
+def test_an_unanchored_entry_on_its_parent_s_page_is_folded_and_counted(tmp_path: Path) -> None:
+    """The same page twice with no bookmark is one position, and the fold is counted.
+
+    Its own children are not the duplicate, so they move up to the parent rather
+    than leaving the navigation with it.
+    """
+    result = run(tmp_path, book(
+        "guide",
+        topics={
+            "intro.htm": topic("Introduction", heading("Introduction")),
+            "deep.htm": topic("Deep", heading("Deep")),
+        },
+        files=(("Introduction", "intro.htm"), ("Deep", "deep.htm")),
+        toc=toc_js(
+            node("A", "P", "Introduction", "0"),
+            node("B", "A", "Overview", "0"),
+            node("", "B", "Deep", "1"),
+        ),
+    ))
+    [parent] = result.unit.nav
+    assert [child.label for child in parent.children] == ["Deep"]
+    assert result.codes()["NAV_NODE_DROPPED"] == 1
+    assert any("same page" in message for message in result.messages("NAV_NODE_DROPPED"))
+
+
 def test_percent_encoded_hrefs_and_directories_are_decoded(tmp_path: Path) -> None:
     """One rule, two places: 22 `<Book directory>` values and every `files.js` href.
 

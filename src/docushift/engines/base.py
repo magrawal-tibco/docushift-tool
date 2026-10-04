@@ -99,6 +99,34 @@ class NavNode:
             yield from child.walk()
 
 
+def fold_same_page(children: list[NavNode], document: PurePosixPath | None,
+                   anchor: str = "") -> tuple[list[NavNode], int]:
+    """A parent's children, minus the ones that repeat the parent's own target.
+
+    A child is a repeat only when it names the parent's page **and** the parent's
+    bookmark. A child with a bookmark of its own is a section entry -- "Installation
+    Modes" at `5#1812329` under "Installation Modes and Disk Space" at `5` -- and
+    §5.3.4 keeps it: 47.7% of WebWorks `toc.js` entries are that shape, and both
+    engines once deleted all of them, uncounted (Phase 34, R7-01). The Phase 5 rule
+    was measured on 30 un-anchored Flare duplicates and is kept for exactly those.
+
+    A repeat's own children are not repeats, so they take its place rather than
+    leaving the navigation with it. Returns the kept list and how many folded, so
+    the engine can count them (invariant 10).
+    """
+    if document is None:
+        return children, 0
+    kept: list[NavNode] = []
+    folded = 0
+    for child in children:
+        if child.document == document and child.anchor == anchor:
+            kept.extend(child.children)
+            folded += 1
+        else:
+            kept.append(child)
+    return kept, folded
+
+
 @dataclass
 class Unit:
     """One unit of work, converted: a Flare output root, a DITA doc-set, a WebWorks book.
