@@ -16,7 +16,7 @@ unzips onto one disk contend rather than overlap, and the second one arrives no
 sooner for having been started early.
 """
 
-import shutil
+import contextlib
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass, field
 from enum import StrEnum
@@ -34,7 +34,7 @@ from docushift.extractor.inventory import Inventory, inventory_tree
 from docushift.extractor.safe_unzip import UnsafeArchiveError, safe_extract
 from docushift.models import ConversionStatus, EngineSource, Product, ProductVersion, SourceEngine
 from docushift.reporting.findings import FindingsRun
-from docushift.utils.swap import remove, swap
+from docushift.utils.swap import recover, remove, staging_of, swap
 
 
 class ExtractOutcome(StrEnum):
@@ -211,6 +211,14 @@ class PackageExtractor:
             message = f"no package at {source}; run `docushift download` first"
             return ExtractResult(slug, number, ExtractOutcome.NO_PACKAGE, message=message)
 
+        # Before the currency test, so a `current` run sweeps a killed run's `.part`
+        # too (X3-09), and a tree left at `.old` by a kill inside the swap is back
+        # in place before anything decides about it (X2-01).
+        try:
+            recover(target)
+        except OSError as exc:
+            return self._failed(slug, number, exc, None)
+
         checksum = sha256_of(source)
         recorded = self._metadata(slug, number)
         # A ZIP that has not changed since the tree was built is a no-op, which is
@@ -244,15 +252,14 @@ class PackageExtractor:
 
         # Unpack beside the destination and swap, never over it. A re-extract onto
         # a live directory leaves the *previous* package's files in place, so a
-        # guide deleted upstream survives forever and converts. The swap is not
-        # atomic on Windows -- build, remove, rename -- so an interrupted run can
-        # leave a `.part` directory; the next run removes it before it starts.
-        staging = target.with_name(target.name + ".part")
+        # guide deleted upstream survives forever and converts. An interrupted run
+        # can leave a `.part` directory; the next run removes it before it starts.
+        staging = staging_of(target)
         try:
             remove(staging)
             files = safe_extract(source, staging)
         except UnsafeArchiveError as exc:
-            shutil.rmtree(staging, ignore_errors=True)
+            _discard(staging)
             self._record(slug, number, status=ConversionStatus.ERROR, error=str(exc))
             return ExtractResult(slug, number, ExtractOutcome.REFUSED, message=str(exc))
         except Exception as exc:  # noqa: BLE001 - a failure is an outcome (R3-08)
@@ -260,7 +267,7 @@ class PackageExtractor:
             # `NotImplementedError` for Deflate64, `RuntimeError` for an encrypted
             # member, and `EOFError` or `zlib.error` for a damaged one. Any of them
             # escaping here stopped the whole batch with a `.part` on disk.
-            shutil.rmtree(staging, ignore_errors=True)
+            _discard(staging)
             return self._failed(slug, number, exc, None)
 
         # Phase 34 (R3-03): the checksum is blanked before the swap and written
@@ -269,6 +276,11 @@ class PackageExtractor:
         # that failed half-way pass as current over the previous package's
         # columns and roots, which `convert` then reads.
         self._set_metadata(slug, number, "extract_zip_checksum", "")
+        # And the version is marked as building until the same point (X3-01): a
+        # blank checksum stops `extract` calling the tree current, but `convert`
+        # read it as "no claim" and converted a half-replaced tree.
+        if self.catalog.state is not None:
+            self.catalog.state.mark_building(slug, number, "extract")
         try:
             swap(staging, target)
         except OSError as exc:
@@ -286,6 +298,8 @@ class PackageExtractor:
             status=ConversionStatus.EXTRACTED, extract_path=str(target), error=None,
         )
         self._set_metadata(slug, number, "extract_zip_checksum", checksum)
+        if self.catalog.state is not None:
+            self.catalog.state.clear_building(slug, number, "extract")
         return ExtractResult(
             slug, number, ExtractOutcome.EXTRACTED, path=target, files=files,
             engine=identified.engine,
@@ -537,6 +551,17 @@ class PackageExtractor:
             if on_result is not None:
                 on_result(result)
         return stats
+
+
+def _discard(staging: Path) -> None:
+    """Removes a failed extract's `.part`, long paths included (X2-15). Best effort.
+
+    `shutil.rmtree` through the plain path silently skipped EMS's 265-character
+    members; `remove` is long-path spelled. A tree that still will not go is
+    removed by the next run's `recover`, and the failure being reported matters more.
+    """
+    with contextlib.suppress(OSError):
+        remove(staging)
 
 
 def _partial_message(inventory: Inventory) -> str:

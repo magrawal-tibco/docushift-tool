@@ -263,6 +263,33 @@ def test_a_download_lands_at_the_derived_path_and_records_state(
     assert recorded["zip_etag"] == '"abc"'
 
 
+def test_a_scanner_holding_the_fresh_zip_is_waited_out(
+    config: ConfigManager, catalog: CatalogManager, product: Product, version: ProductVersion,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """X2-14. The final rename was the one `os.replace` without the scanner retry,
+    on exactly the kind of large, freshly closed file the scanner opens."""
+    from docushift.utils import swap as swap_module
+
+    real = Path.replace
+    denials = []
+
+    def scanned(self: Path, other):
+        if self.name.endswith(".zip.part") and not denials:
+            denials.append(self.name)
+            raise PermissionError(32, "The process cannot access the file")
+        return real(self, other)
+
+    monkeypatch.setattr(Path, "replace", scanned)
+    monkeypatch.setattr(swap_module.time, "sleep", lambda _seconds: None)
+    session = FakeSession(FakeResponse(zip_bytes(), headers={"ETag": '"abc"'}))
+
+    result = downloader(config, catalog, session).download_one(product, version)
+
+    assert denials and result.outcome is Outcome.DOWNLOADED
+    assert target_of(config, product, version).is_file()
+
+
 def test_last_modified_stands_in_for_a_missing_etag(
     config: ConfigManager, catalog: CatalogManager, product: Product, version: ProductVersion
 ) -> None:

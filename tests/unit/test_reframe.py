@@ -3095,3 +3095,135 @@ def test_a_current_run_points_at_the_run_that_holds_the_trees_findings(config, c
     (pointer,) = [f for f in second.all if f.code == "REFRAME_FINDINGS_IN_EARLIER_RUN"]
     assert pointer.severity is Severity.NOTE
     assert f"run {first.run_id}" in pointer.message and "warning" in pointer.message
+# -- a failed or interrupted swap keeps the tree and its pins (Phase 34, XA) ------
+
+
+def _pin_user_guide(target: Path, new_path: str) -> None:
+    from docushift.reframe import renames
+
+    rows_now = list(csvio.read_rows(target / renames.RENAME_MAP))
+    for row in rows_now:
+        if row["old_path"] == "users-guide/user-guide.md":
+            row["new_path"] = new_path
+    renames.write(target / renames.RENAME_MAP, rows_now)
+
+
+def _tree(root: Path) -> list[str]:
+    return sorted(path.relative_to(root).as_posix() for path in root.rglob("*") if path.is_file())
+
+
+@pytest.mark.skipif(__import__("sys").platform != "win32",
+                    reason="a held handle blocks a rename only on Windows")
+def test_a_queue_held_open_during_a_forced_merge_keeps_the_tree_and_its_pins(
+    config, catalog, flare, monkeypatch
+):
+    """X2-01, X2-02. The documented way to work `review-queue.csv` is a
+    spreadsheet; with it open, `reframe --force` deleted everything that sorted
+    before it -- `rename-map.csv` included -- and the next run recomputed the
+    pinned name. CPython opens without `FILE_SHARE_DELETE`, as Excel does."""
+    from docushift.utils import swap as swap_module
+
+    monkeypatch.setattr(swap_module.time, "sleep", lambda _seconds: None)
+    converted_tree(config, flare, "10.5.1")
+    catalog.state.set_version_metadata("tibco-flare-docs", "10.5.1", "convert_build_id", "abc")
+    target = Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"]).path
+    _pin_user_guide(target, "users-guide/my-chosen-name.md")
+    pinned = Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"])
+    assert pinned.outcome is ReframeOutcome.REFRAMED
+    before = _tree(target)
+
+    with (target / "review-queue.csv").open("rb"):
+        forced = Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"], force=True)
+
+    assert forced.outcome is ReframeOutcome.FAILED
+    assert _tree(target) == before
+    nxt = Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"])
+    assert nxt.outcome is ReframeOutcome.REFRAMED  # still marked as building: rebuilt
+    assert (target / "users-guide" / "my-chosen-name.md").is_file()
+    assert Reframer(config, catalog).reframe_one(
+        flare, flare.versions["10.5.1"]).outcome is ReframeOutcome.CURRENT
+
+
+def test_a_merge_killed_after_its_swap_is_rebuilt_not_current(config, catalog, flare):
+    """X3-03: the checksums from the previous build still matched, so a tree a
+    kill had interrupted was `current` -- and `sync` published it."""
+    converted_tree(config, flare, "10.5.1")
+    catalog.state.set_version_metadata("tibco-flare-docs", "10.5.1", "convert_build_id", "abc")
+    Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"])
+    assert not catalog.state.is_building("tibco-flare-docs", "10.5.1", "reframe")
+    catalog.state.mark_building("tibco-flare-docs", "10.5.1", "reframe")
+
+    again = Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"])
+
+    assert again.outcome is ReframeOutcome.REFRAMED
+    assert not catalog.state.is_building("tibco-flare-docs", "10.5.1", "reframe")
+
+
+def test_a_tree_from_an_unfinished_convert_is_refused(config, catalog, flare):
+    converted_tree(config, flare, "10.5.1")
+    catalog.state.mark_building("tibco-flare-docs", "10.5.1", "convert")
+
+    result = Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"])
+
+    assert result.outcome is ReframeOutcome.FAILED
+    assert "convert that did not finish" in result.message
+
+
+def test_a_lost_rename_map_is_restored_from_state_and_reported(config, catalog, flare):
+    """X2-02. The map lived only inside the swapped tree; when it went, every
+    name was recomputed and the published URL moved without a word."""
+    from docushift.reframe import renames
+
+    converted_tree(config, flare, "10.5.1")
+    target = Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"]).path
+    _pin_user_guide(target, "using-the-product.md")
+    Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"])
+    (target / renames.RENAME_MAP).unlink()
+    findings = FindingsRun("reframe")
+
+    again = Reframer(config, catalog, findings=findings).reframe_one(flare, flare.versions["10.5.1"])
+
+    assert again.outcome is ReframeOutcome.REFRAMED
+    assert (target / "using-the-product.md").is_file()
+    missing = [f for f in findings.all if f.code == "RENAME_MAP_MISSING"]
+    assert len(missing) == 1 and "state.db" in missing[0].message
+
+
+def test_pins_an_older_tools_interrupted_swap_left_in_part_are_used(config, catalog, flare):
+    """X3-02, the state the old swap left: target removed, a complete `.part`
+    holding the only copy of the pins. The next run deleted it and recomputed."""
+    from docushift.reframe import renames
+
+    converted_tree(config, flare, "10.5.1")
+    target = Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"]).path
+    _pin_user_guide(target, "designer-home.md")
+    Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"])
+    # A state.db written before the copy existed.
+    catalog.state.set_version_metadata("tibco-flare-docs", "10.5.1", "reframe_rename_pins", "")
+    target.rename(target.with_name(target.name + ".part"))
+    findings = FindingsRun("reframe")
+
+    again = Reframer(config, catalog, findings=findings).reframe_one(flare, flare.versions["10.5.1"])
+
+    assert again.outcome is ReframeOutcome.REFRAMED
+    assert (target / "designer-home.md").is_file()
+    assert not target.with_name(target.name + ".part").exists()
+    assert renames.load(target)[PurePosixPath("users-guide/user-guide.md")] == PurePosixPath(
+        "designer-home.md")
+    assert "RENAME_MAP_MISSING" in all_codes(findings.all)
+
+
+def test_a_map_lost_with_no_copy_anywhere_is_said_out_loud(config, catalog, flare):
+    from docushift.reframe import renames
+
+    converted_tree(config, flare, "10.5.1")
+    target = Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"]).path
+    catalog.state.set_version_metadata("tibco-flare-docs", "10.5.1", "reframe_rename_pins", "")
+    (target / renames.RENAME_MAP).unlink()
+    findings = FindingsRun("reframe")
+
+    Reframer(config, catalog, findings=findings).reframe_one(flare, flare.versions["10.5.1"])
+
+    missing = [f for f in findings.all if f.code == "RENAME_MAP_MISSING"]
+    assert len(missing) == 1 and "recomputed" in missing[0].message
+    assert missing[0].severity is Severity.WARNING

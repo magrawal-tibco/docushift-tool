@@ -44,7 +44,7 @@ from docushift.reporting.findings import Finding
 from docushift.sync import API_REFERENCES, ARCHIVES, DOCUMENT_DOC_CLASSES
 from docushift.sync import redirects as redirect_map
 from docushift.sync import versions as version_file
-from docushift.sync.distributor import STAGING_SUFFIX
+from docushift.sync.distributor import RESIDUE_SUFFIXES
 from docushift.transforms import links as refs
 from docushift.utils.csvio import natural_version_key
 from docushift.utils.longpath import long_path
@@ -475,7 +475,7 @@ def check_dropdown(product: ProductFolder, doc_class: Path) -> list[Finding]:
 
     present = {
         child.name for child in doc_class.iterdir()
-        if child.is_dir() and not child.name.endswith(STAGING_SUFFIX)
+        if child.is_dir() and not child.name.endswith(RESIDUE_SUFFIXES)
     }
     owned = [row for row in rows if _bare_segment(row.path)]
     named = [_bare_segment(row.path) or "" for row in owned]

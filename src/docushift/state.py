@@ -579,6 +579,30 @@ class StateStore:
         )
         return {row["key"]: row["value"] for row in rows}
 
+    # -- trees being replaced (X3-01, X3-03) ------------------------------------
+
+    @staticmethod
+    def building_key(stage: str) -> str:
+        """The version-metadata key marking `stage`'s tree as mid-replacement."""
+        return f"{stage}_building"
+
+    def mark_building(self, slug: str, version: str, stage: str) -> None:
+        """Set before a stage swaps a version's tree in; cleared once its bookkeeping is done.
+
+        A run killed in between leaves the mark, and the mark is what the next run
+        believes over the checksums: a convert after an interrupted re-extract
+        converted the half-deleted tree, and a later good extract made that output
+        `current` for good (X3-01). A version still marked is rebuilt by its own
+        stage and refused by every stage that reads its tree.
+        """
+        self.set_version_metadata(slug, version, self.building_key(stage), "yes")
+
+    def clear_building(self, slug: str, version: str, stage: str) -> None:
+        self.set_version_metadata(slug, version, self.building_key(stage), "")
+
+    def is_building(self, slug: str, version: str, stage: str) -> bool:
+        return bool(self.get_version_metadata(slug, version).get(self.building_key(stage)))
+
     # -- engine detection ----------------------------------------------------
 
     def record_engine_folder(self, slug: str, version: str, folder: str, engine: str) -> None:

@@ -18,12 +18,21 @@ then raises, which leaves the genuine failures (a full disk, a denied
 directory, a target open in an editor) reported exactly as before. On POSIX the
 first attempt succeeds and the loop is never entered.
 
-`download` stages one *file* and keeps `os.replace` directly: a single-file
-rename over an existing name is atomic, and routing it through here would trade
-that guarantee -- the one that stops a killed run leaving a truncated ZIP at the
-canonical path -- for a retry it does not need.
+**The live tree is moved aside, never deleted first** (Phase 34, X2-01). The
+swap used to `rmtree` the target and then rename: `rmtree` deletes file by file
+and stops at the first locked one, so a `rename-map.csv` open in Excel left a
+199-file merged tree holding 6 files, and a kill inside the delete left a tree
+the next run called `current`. Now the target is renamed to `<target>.old`, the
+staging tree is renamed in, and only then is `.old` deleted. A locked file makes
+the first rename fail with nothing touched; a failed second rename puts `.old`
+back. The window with no target is two renames wide, and `recover` closes even
+that on the next visit.
+
+Single files go through `replace_file`, the same atomic `os.replace` with the
+scanner retry -- the downloader's ZIP included since X2-14.
 """
 
+import contextlib
 import shutil
 import time
 from pathlib import Path
@@ -58,39 +67,115 @@ def remove(path: Path, attempts: int = ATTEMPTS, delay: float = DELAY) -> None:
             time.sleep(delay * (attempt + 1))
 
 
+#: The sibling the live tree is renamed to while its replacement moves in (X2-01).
+ASIDE_SUFFIX = ".old"
+
+#: The sibling every stage builds in before the swap.
+STAGING_SUFFIX = ".part"
+
+
+def aside_of(target: Path) -> Path:
+    """`<target>.old`: where the live tree waits while the new one is renamed in."""
+    return target.with_name(target.name + ASIDE_SUFFIX)
+
+
+def staging_of(target: Path) -> Path:
+    """`<target>.part`: where a stage builds the tree that replaces `target`."""
+    return target.with_name(target.name + STAGING_SUFFIX)
+
+
 def swap(staging: Path, target: Path, attempts: int = ATTEMPTS, delay: float = DELAY) -> None:
     """Moves `staging` onto `target`, replacing whatever is there.
 
-    Not atomic on Windows -- remove, then rename -- so an interrupted run can
-    leave the target missing and the staging directory present. That is the
-    same window the callers already documented; the retry narrows it rather
-    than closing it.
+    Rename the target aside, rename staging in, delete what was set aside
+    (X2-01). Nothing is deleted until the new tree is in place: a file held open
+    in the old tree fails the first rename and leaves the old tree whole, and a
+    failed second rename renames the old tree back before raising. A run killed
+    between the two renames leaves `<target>.old` and no target, which `recover`
+    puts back on the next visit.
 
     Both ends are long-path spelled (Phase 14b). The staging tree is the longer
     of the two by the width of `.part`, which is the whole reason the limit is
     reachable here at all.
     """
     staging, target = long_path(staging), long_path(target)
+    old = long_path(aside_of(target))
+    # Beside a live target, a `.old` is residue of a run killed after its swap.
+    # Beside a missing one it is the last good tree, kept until the new one is in.
+    if old.exists() and target.exists():
+        remove(old)
     for attempt in range(attempts):
         try:
-            remove(target, attempts=1)
+            if target.exists():
+                target.replace(old)
             target.parent.mkdir(parents=True, exist_ok=True)
-            staging.replace(target)
-            return
+            try:
+                staging.replace(target)
+            except OSError:
+                _restore(old, target)
+                raise
+            break
         except OSError:
             if attempt == attempts - 1:
                 raise
             time.sleep(delay * (attempt + 1))
+    # The new tree is in and the stage has succeeded; a scanner still holding a
+    # file of the old one costs residue, not the run. `recover` sweeps it.
+    with contextlib.suppress(OSError):
+        remove(old)
+
+
+def _restore(old: Path, target: Path) -> None:
+    """Puts the set-aside tree back after a failed rename-in. Best effort.
+
+    If this rename loses a race too, the old tree is still whole at `.old`, and
+    `recover` renames it back on the next visit; raising here would only hide the
+    error that matters.
+    """
+    if old.exists() and not target.exists():
+        with contextlib.suppress(OSError):
+            old.replace(target)
+
+
+def recover(target: Path, keep_orphan_staging: bool = False) -> None:
+    """Undoes what an interrupted run left beside `target`, before a stage looks at it.
+
+    Every stage calls this first, `current` included (X3-09): a run killed while
+    building left `<target>.part`, and a `current` decision used to leave it
+    there until a forced rebuild -- 715 files in `extracted/`, and in the
+    published tree a folder whose `301.yml` rows were served.
+
+    * a `.old` with no target is the last good tree, from a run killed between
+      `swap`'s two renames: renamed back, so the target is exactly as it was;
+    * a `.old` beside a target is residue of a run killed after its swap: removed;
+    * a `.part` is an unfinished build: removed -- unless `keep_orphan_staging`
+      and there is no target, which is the state an older tool's interrupted
+      swap left, and Reframe reads its pins out of that `.part` first (X3-02).
+
+    Raises only when the old tree cannot be put back; residue that will not go
+    is left for the next visit, and the stage's own `remove(staging)` before a
+    build still raises on it.
+    """
+    target = long_path(target)
+    old = long_path(aside_of(target))
+    if old.is_dir() and not target.exists():
+        old.replace(target)
+    if keep_orphan_staging and not target.exists():
+        return
+    for residue in (old, long_path(staging_of(target))):
+        with contextlib.suppress(OSError):
+            remove(residue)
 
 
 def replace_file(staging: Path, target: Path, attempts: int = ATTEMPTS, delay: float = DELAY) -> None:
     """`os.replace` for one file, retrying the scanner race. Still atomic per attempt.
 
-    The module note says a single-file rename needs no retry; the Coveo sitemap
+    A single-file rename was once thought to need no retry; the Coveo sitemap
     cache disproved that (Phase 33): rewriting `manifest.json` once per product,
     ~500 times in a row, lost to `[WinError 32]` on a file the indexer had just
     opened. Each attempt is the same atomic `os.replace`, so the guarantee the
-    downloader keeps it for is not traded away -- only the race is retried.
+    downloader relies on -- no truncated ZIP at the canonical path -- is not
+    traded away; only the race is retried (X2-14).
     """
     for attempt in range(attempts):
         try:

@@ -37,6 +37,7 @@ from __future__ import annotations
 
 import csv
 import hashlib
+import json
 from collections.abc import Callable
 from pathlib import Path, PurePosixPath
 from typing import TYPE_CHECKING
@@ -159,3 +160,26 @@ def digest(approved: dict[PurePosixPath, PurePosixPath]) -> str:
     """
     payload = "\n".join(f"{old}\t{new}" for old, new in sorted(approved.items()))
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16]
+
+
+def dumps(approved: dict[PurePosixPath, PurePosixPath]) -> str:
+    """The approved names as text, for the copy `state.db` keeps (X2-02).
+
+    The map lives inside the tree a swap replaces, so it was lost with any swap
+    that failed or was killed. The copy is written after every successful merge
+    and read only when the file is gone; the file stays the one a writer edits.
+    """
+    return json.dumps(sorted([str(old), str(new)] for old, new in approved.items()),
+                      ensure_ascii=False, separators=(",", ":"))
+
+
+def loads(text: str) -> dict[PurePosixPath, PurePosixPath]:
+    """`dumps`, read back. Anything unreadable is no copy at all."""
+    try:
+        pairs = json.loads(text)
+    except ValueError:
+        return {}
+    return {
+        PurePosixPath(old): PurePosixPath(new)
+        for old, new in pairs if isinstance(old, str) and isinstance(new, str) and old and new
+    }

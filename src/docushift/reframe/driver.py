@@ -68,7 +68,7 @@ from docushift.reporting.findings import FindingsRun
 from docushift.utils import textfile
 from docushift.utils.longpath import long_path, walk_files
 from docushift.utils.slug import version_segment
-from docushift.utils.swap import remove, swap
+from docushift.utils.swap import recover, remove, staging_of, swap
 
 # The same function `validate` resolves CSH fragments with, so the audit and the
 # gate three stages later cannot disagree about what an anchor is.
@@ -107,6 +107,9 @@ _MERGED_FROM = "reframe_convert_build"
 #: policy (X3-05, X3-07): what `301.yml` is built from, and the publishing
 #: host and locale `rename-map.csv` prints its addresses with.
 _INPUTS_KEY = "reframe_inputs_key"
+#: And a copy of that map's names, outside the tree a swap replaces (X2-02). Read
+#: only when `rename-map.csv` is gone, so the file stays the one a writer edits.
+_RENAME_PINS = "reframe_rename_pins"
 
 
 @dataclass(frozen=True)
@@ -357,6 +360,23 @@ class Reframer:
             message = f"no converted tree at {converted}; run `docushift convert` first"
             return ReframeResult(slug, number, ReframeOutcome.NO_OUTPUT, message=message)
 
+        # Before the currency test, for `convert`'s reasons (X2-01, X3-09) -- except
+        # that a `.part` with no target beside it is kept: an older tool's
+        # interrupted swap left the only copy of the pins in it (X3-02).
+        try:
+            recover(target, keep_orphan_staging=True)
+        except OSError as exc:
+            return ReframeResult(slug, number, ReframeOutcome.FAILED,
+                                 message=f"{type(exc).__name__}: {exc}")
+        # X3-03. A convert killed between its swap and its bookkeeping left a tree
+        # its checksums do not describe; merging it would vouch for it.
+        if source is None and self._building(slug, number, "convert"):
+            return ReframeResult(
+                slug, number, ReframeOutcome.FAILED, engine=version.engine,
+                message="the converted tree is from a convert that did not finish; "
+                        "run `docushift convert` first",
+            )
+
         policy = policy_for(self.reframe_config, slug)
         # X1-02. A standalone folder is not the catalog row's tree, so nothing is
         # read back for it and nothing is recorded: `convert`'s R4-04 guard. It
@@ -393,8 +413,11 @@ class Reframer:
             # X1-06: this version fails, named; it no longer stops the selection.
             return ReframeResult(slug, number, ReframeOutcome.FAILED, engine=version.engine,
                                  message=str(exc))
+        # A version still marked as building was interrupted after its swap, so
+        # the keys describe some other tree, whatever they say (X3-03).
         if (not force and converted_from and converted_from == merged_from and policy_current
-                and inputs_current and names_current):
+                and inputs_current and names_current
+                and not self._building(slug, number, "reframe")):
             current = ReframeResult(
                 slug, number, ReframeOutcome.CURRENT, path=target, engine=version.engine
             )
@@ -537,7 +560,7 @@ class Reframer:
         # name and the computed folder: a published URL must not move because
         # somebody fixed a typo in a title. `--renormalize` is how a writer asks
         # for the names to be recomputed anyway.
-        approved = {} if self.renormalize else renames.load(target)
+        approved = self._approved(slug, number, target, standalone)
         pinned, refused = override(built, approved)
         if pinned:
             self._record(
@@ -560,7 +583,7 @@ class Reframer:
             )
         unnavigated = frozenset(page.path for page in carried)
 
-        staging = target.with_name(target.name + ".part")
+        staging = staging_of(target)
         remove(staging)
         staging.parent.mkdir(parents=True, exist_ok=True)
 
@@ -650,6 +673,12 @@ class Reframer:
         # 10.5.1 -- 1,441 files -- failed all five default attempts on the first
         # real run and succeeded on a manual retry a moment later. Widening the
         # budget here rather than in `swap` keeps the other callers' failures fast.
+        #
+        # Marked as building first, and cleared only once every key below is
+        # written (X3-01, X3-03): a run killed in between is rebuilt by the next
+        # `reframe` and refused by `sync`, never called `current`.
+        if self.state is not None and not standalone:
+            self.state.mark_building(slug, number, "reframe")
         swap(staging, target, attempts=8, delay=0.25)
         # The state rows first, then the CSV (X2-05), the order convert settled
         # on in R4-08. The inventory column is the one write Excel can block, and
@@ -664,13 +693,16 @@ class Reframer:
             self.state.set_version_metadata(slug, number, "reframe_policy_key", policy.key)
             # Read back from the swapped-in tree rather than from `built`, so the
             # digest is of exactly the file the next run will compare (R9-04).
-            self.state.set_version_metadata(
-                slug, number, _RENAME_DIGEST, renames.digest(renames.load(target))
-            )
+            written = renames.load(target)
+            self.state.set_version_metadata(slug, number, _RENAME_DIGEST, renames.digest(written))
+            self.state.set_version_metadata(slug, number, _RENAME_PINS, renames.dumps(written))
             # X3-11: the run whose findings describe this tree.
             if self.findings is not None and self.findings.run_id:
                 self.state.set_version_metadata(slug, number, "reframe_run", self.findings.run_id)
         merged_md, merged_files = self._measure_merged(slug, number, target, record=not standalone)
+        # Cleared only now, with every row and column written (X3-01, X3-03).
+        if self.state is not None and not standalone:
+            self.state.clear_building(slug, number, "reframe")
         if self.findings is not None:
             self.findings.flush()
 
@@ -1051,6 +1083,42 @@ class Reframer:
         if self.state is None:
             return {}
         return self.state.get_version_metadata(slug, number)
+
+    def _building(self, slug: str, number: str, stage: str) -> bool:
+        return self.state is not None and self.state.is_building(slug, number, stage)
+
+    def _approved(
+        self, slug: str, number: str, target: Path, standalone: bool = False
+    ) -> dict[PurePosixPath, PurePosixPath]:
+        """The names a previous merge kept -- and never silently none when it kept some.
+
+        X2-02, X3-02. `rename-map.csv` lives inside the tree a swap replaces, so a
+        failed or killed swap took it along, and the next run recomputed every
+        name: the published URLs moved and nothing said so. Every merge writes a
+        row per page, so a version with a recorded digest had a map. When the
+        file is gone, the names come from the copy `state.db` keeps, or from the
+        `.part` an older tool's interrupted swap left; either way the run warns.
+        """
+        if self.renormalize:
+            return {}
+        if (target / renames.RENAME_MAP).is_file() or standalone:
+            return renames.load(target)
+        metadata = self._metadata(slug, number)
+        if metadata.get(_RENAME_DIGEST, "") in ("", renames.digest({})):
+            return {}
+        orphan = staging_of(target)
+        approved, where = renames.loads(metadata.get(_RENAME_PINS, "")), "the copy state.db keeps"
+        if not approved and (orphan / renames.RENAME_MAP).is_file():
+            approved, where = renames.load(orphan), f"the unfinished merge in {orphan.name}"
+        if approved:
+            message = (f"{renames.RENAME_MAP} is missing from the merged tree; "
+                       f"{len(approved)} name(s) taken from {where}")
+        else:
+            message = (f"{renames.RENAME_MAP} is missing from the merged tree and no copy "
+                       f"survives, so every page name was recomputed and published URLs may "
+                       f"move; restore the file, or accept the new names with --renormalize")
+        self._record("RENAME_MAP_MISSING", slug, number, path=renames.RENAME_MAP, message=message)
+        return approved
 
     def _record(self, code: str, slug: str, number: str, path: str = "", message: str = "",
                 count: int = 1) -> None:

@@ -15,7 +15,8 @@ Four rules, all of them things the driver does so that no engine has to:
 - **Output is built at `<output>.part/` and swapped**, the rule 4b-1 established
   for extraction, for the reason it established it: a re-convert over a live
   directory leaves the previous run's topics in place, so a guide dropped upstream
-  survives in the output forever. Not atomic on Windows -- build, remove, rename.
+  survives in the output forever. The old tree is renamed aside, never deleted
+  first (X2-01), so a locked file fails the run and leaves the tree whole.
 - **CSH identifiers reach the topic's first and only write** (§9.5). They are read
   before conversion begins, because parsing a 24 KB alias file is cheap and a
   read-modify-write pass over the whole output tree is not -- and since Phase 34
@@ -71,7 +72,7 @@ from docushift.utils import textfile
 from docushift.utils.csvio import release_year
 from docushift.utils.longpath import long_path, walk_files
 from docushift.utils.slug import slugify, version_segment
-from docushift.utils.swap import remove, swap
+from docushift.utils.swap import recover, remove, swap
 
 #: A `toc.yml` row's destination. The file is generated from one Jinja template
 #: with a stable shape, so a value-level rewrite is safe and -- unlike re-emitting
@@ -212,6 +213,9 @@ class DocumentConverter:
         if self.findings is not None:
             self.findings.record(code, slug=slug, version=version, **fields)
 
+    def _building(self, slug: str, version: str, stage: str) -> bool:
+        return self.state is not None and self.state.is_building(slug, version, stage)
+
     # -- one version -----------------------------------------------------------
 
     def convert_one(
@@ -258,6 +262,23 @@ class DocumentConverter:
                 slug, number, ConvertOutcome.ENGINE_UNKNOWN, engine=version.engine, message=reason
             )
 
+        # Before the currency test: a `current` run sweeps a killed build's `.part`
+        # (X3-09), and a tree a kill left at `.old` is back before it is judged.
+        try:
+            recover(target)
+        except OSError as exc:
+            return self._failed(slug, number, version.engine, _describe(exc))
+        # X3-01. An extract that did not finish leaves its mark, and the tree under
+        # it may be half the old package and half the new. Converting it reported
+        # `converted` with a whole book missing, and once `extract` re-unpacked the
+        # same package the damaged output read as `current` for good.
+        if not standalone and self._building(slug, number, "extract"):
+            return self._failed(
+                slug, number, version.engine,
+                "the extracted tree is from an extract that did not finish; "
+                "run `docushift extract` first",
+            )
+
         metadata = self._metadata(slug, number)
         checksum = metadata.get("extract_zip_checksum", "")
         converted_from = metadata.get("convert_source_checksum", "")
@@ -288,8 +309,12 @@ class DocumentConverter:
         # invalidate trees, and one built before the key existed is one of them.
         inputs_key = self._inputs_key(product, version)
         inputs_current = metadata.get("convert_inputs_key", "") == inputs_key
+        # A version still marked as building was interrupted between its swap and
+        # its bookkeeping, so the keys describe some other tree (X3-03), whatever
+        # they say.
         if (not force and not standalone and checksum and checksum == converted_from
-                and prefix_current and engine_current and inputs_current and target.is_dir()):
+                and prefix_current and engine_current and inputs_current and target.is_dir()
+                and not self._building(slug, number, "convert")):
             current = ConvertResult(
                 slug, number, ConvertOutcome.CURRENT, path=target, engine=version.engine
             )
@@ -475,6 +500,11 @@ class DocumentConverter:
         csh_transform.write(staging / "csh.yml", result.csh.entries)
         self._write_origins(staging, product, version, mapping)
 
+        # Marked before the swap and cleared only once every row and column below
+        # is written (X3-01, X3-03): a run killed in between is rebuilt by the next
+        # `convert` and refused by `reframe` and `sync`, never called `current`.
+        if self.state is not None and not standalone:
+            self.state.mark_building(slug, number, "convert")
         swap(staging, target)
 
         # The state rows first, then the CSV (Phase 34, R4-08). The CSV write is
@@ -511,6 +541,8 @@ class DocumentConverter:
         # describe the tree that is actually published from. A swap that failed
         # raised above and wrote nothing, which is the blank-not-zero rule.
         result.md_files, result.out_files = self._measure_output(slug, number, target)
+        if self.state is not None and not standalone:
+            self.state.clear_building(slug, number, "convert")
         self._report_output_count(context, result)
         if self.findings is not None:
             self.findings.flush()

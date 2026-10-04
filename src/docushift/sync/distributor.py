@@ -83,7 +83,7 @@ from docushift.utils.longpath import (
     walk_files,
 )
 from docushift.utils.slug import is_numeric_version, slugify, version_segment
-from docushift.utils.swap import remove, swap
+from docushift.utils.swap import ASIDE_SUFFIX, recover, remove, replace_file, swap
 
 # The converted doc-class. Named here rather than inlined at four call sites,
 # because 6c added three more and the difference between "the doc-class we place"
@@ -114,6 +114,10 @@ STAGING_SUFFIX = ".part"
 # only import lazily (see `_source`). `301.yml`, `redirects.yml`, `toc.yml` and
 # `csh.yml` still publish.
 REFRAME_WORKING_FILES = frozenset({"reframe.yml", "rename-map.csv", "review-queue.csv"})
+# Every sibling a swap can leave beside a version folder: the staging tree, and
+# since X2-01 the live tree set aside while its replacement is renamed in. Neither
+# is a published version, and both are residue once the run that made them is gone.
+RESIDUE_SUFFIXES = (STAGING_SUFFIX, ASIDE_SUFFIX)
 
 
 class SyncOutcome(StrEnum):
@@ -283,6 +287,11 @@ class WorkspaceDistributor:
             path, length = overflow
             return self._too_long(slug, number, segment, path.relative_to(source).as_posix(), length)
 
+        # Before the currency test (X3-09): a killed sync's `5-13-0.part` stayed
+        # published through every `current` run, and its 301 rows were served.
+        if (failure := _recovered(destination)) is not None:
+            return SyncResult(slug, number, SyncOutcome.FAILED, segment=segment, message=failure)
+
         if not force and destination.is_dir() and _identical(source, destination):
             return SyncResult(
                 slug, number, SyncOutcome.CURRENT, path=destination, segment=segment, merged=merged
@@ -298,6 +307,11 @@ class WorkspaceDistributor:
             slug, number, SyncOutcome.SYNCED, path=destination, segment=segment,
             files=files, bytes=size, merged=merged,
         )
+
+    def _extract_unfinished(self, slug: str, number: str) -> bool:
+        """Whether an extract was killed between its swap and its bookkeeping (X3-01)."""
+        state = self.catalog.state
+        return state is not None and state.is_building(slug, number, "extract")
 
     def _source(self, product: Product, version: ProductVersion) -> tuple[Path, bool, str | None]:
         """Which tree `online-help` publishes from, and why it might publish none.
@@ -324,9 +338,15 @@ class WorkspaceDistributor:
         converted = self.config.output_path(product.bu, product.family, slug, number)
         policy = policy_for(self.config.load_reframe(), slug)
 
+        # X3-03. A stage killed between its swap and its bookkeeping leaves its
+        # mark, and the tree under it is not one any stage has vouched for.
+        state = self.catalog.state
         if not policy.publish:
             if not converted.is_dir():
                 return converted, False, f"no converted tree at {converted}; run `docushift convert` first"
+            if state is not None and state.is_building(slug, number, "convert"):
+                return converted, False, ("the converted tree is from a convert that did not "
+                                          "finish; run `docushift convert` first")
             return converted, False, None
 
         merged = self.config.reframed_path(product.bu, product.family, slug, number)
@@ -334,6 +354,10 @@ class WorkspaceDistributor:
         # not one Stage 7 can vouch for. The message carries which.
         if not merged.is_dir():
             detail = f"no merged tree at {merged}; run `docushift reframe` first"
+        elif state is not None and (stage := next(
+            (name for name in ("convert", "reframe") if state.is_building(slug, number, name)), None
+        )) is not None:
+            detail = f"the {stage} that built its tree did not finish; run `docushift {stage}` first"
         elif (stale := self._stale(slug, number, converted, merged)) is not None:
             detail = stale
         else:
@@ -466,6 +490,10 @@ class WorkspaceDistributor:
             message = f"no extracted tree at {tree}; run `docushift extract` first"
             return [SyncResult(slug, number, SyncOutcome.NO_OUTPUT, segment=segment,
                                message=message, doc_class="")]
+        if self._extract_unfinished(slug, number):
+            message = "the extracted tree is from an extract that did not finish; run `docushift extract` first"
+            return [SyncResult(slug, number, SyncOutcome.NO_OUTPUT, segment=segment,
+                               message=message, doc_class="")]
 
         grouped = document_index.group(
             router.route_version(self.content_tree(product, version, tree), version.engine)
@@ -543,6 +571,7 @@ class WorkspaceDistributor:
         # file that vanishes or will not `stat` between routing and here raised
         # out of `sync_many` and lost the run's findings with it.
         try:
+            recover(destination)  # X3-09, as `sync_one`
             rendered = self._catalog_rendered(product, version, doc_class)
             if not force and _documents_current(files, destination, rendered):
                 return SyncResult(slug, number, SyncOutcome.CURRENT, path=destination,
@@ -651,9 +680,9 @@ class WorkspaceDistributor:
             return []
 
         tree = self.config.extract_path(product.bu, product.family, slug, number)
-        if not tree.is_dir():
+        if not tree.is_dir() or self._extract_unfinished(slug, number):
             # Also silent: `sync_documents` raises the one `NO_OUTPUT` row for a
-            # missing extracted tree, and that absence is a fact about the version.
+            # missing or unfinished extracted tree, a fact about the version.
             return []
 
         # The recorded roots are resolved against the version directory, which is
@@ -671,6 +700,9 @@ class WorkspaceDistributor:
             )
             return [withdrawn] if withdrawn is not None else []
 
+        if (failure := _recovered(destination)) is not None:
+            return [SyncResult(slug, number, SyncOutcome.FAILED, segment=segment,
+                               message=failure, doc_class=apirefs.API_REFERENCES)]
         if not force and apirefs.current(roots, destination):
             return [SyncResult(slug, number, SyncOutcome.CURRENT, path=destination,
                                segment=segment, doc_class=apirefs.API_REFERENCES)]
@@ -811,6 +843,9 @@ class WorkspaceDistributor:
         index = archive_index.render_index(entries, title, templates)
         destination = self.resources_dir(product, target) / archive_index.ARCHIVES
 
+        if (failure := _recovered(destination)) is not None:
+            return SyncResult(product.slug, "", SyncOutcome.FAILED, message=failure,
+                              doc_class=archive_index.ARCHIVES)
         if not force and archive_index.current(entries, destination, index):
             return SyncResult(product.slug, "", SyncOutcome.CURRENT, path=destination,
                               doc_class=archive_index.ARCHIVES)
@@ -887,7 +922,7 @@ class WorkspaceDistributor:
             return
 
         templates = self.config.aem_templates_dir
-        textfile.write_text(
+        _replace_text(
             root / "metadata.yml",
             navigation.render_metadata([("csg-product", product.display_name)], templates, "product"),
         )
@@ -903,7 +938,7 @@ class WorkspaceDistributor:
             # same names (`validation/tree.py`) and reports them as residue.
             present = {
                 child.name for child in folder.iterdir()
-                if child.is_dir() and not child.name.endswith(STAGING_SUFFIX)
+                if child.is_dir() and not child.name.endswith(RESIDUE_SUFFIXES)
             }
             everywhere |= present
             self._write_dropdown(folder, present, catalog_versions, templates, stats)
@@ -938,7 +973,7 @@ class WorkspaceDistributor:
         merged = version_file.merge(
             existing, rows, version_file.owned_paths(present, catalog_versions)
         )
-        textfile.write_text(path, version_file.render(merged, templates))
+        _replace_text(path, version_file.render(merged, templates))
         stats.dropdowns += 1
 
     def _write_redirect_map(
@@ -1014,7 +1049,7 @@ class WorkspaceDistributor:
                                         folder.name),
             owned_key,
         )
-        textfile.write_text(path, redirect_map.render(merged, header))
+        _replace_text(path, redirect_map.render(merged, header))
         stats.redirect_maps += 1
         stats.redirect_rows += len(merged)
         stats.redirect_base = base
@@ -1152,12 +1187,42 @@ def _identical(source: Path, target: Path) -> bool:
     differently, an edit that preserved size and mtime, is not a case a filesystem
     produces by accident.
     """
-    left = {path.relative_to(source) for path in source.rglob("*") if path.is_file()}
-    left -= {Path(name) for name in REFRAME_WORKING_FILES}  # never published (X1-03)
-    right = {path.relative_to(target) for path in target.rglob("*") if path.is_file()}
-    if left != right:
+    # `walk_files`, not `rglob` (X2-09): `rglob` reaches each directory through the
+    # unprefixed spelling and omits a file past 260 characters, so a merged tree
+    # holding one (TRA Runtime Agent 5.13.0 has a 262) never read as current.
+    left = dict(walk_files(source))
+    for name in REFRAME_WORKING_FILES:  # never published (X1-03)
+        left.pop(Path(name), None)
+    right = dict(walk_files(target))
+    if left.keys() != right.keys():
         return False
-    return all(filecmp.cmp(source / name, target / name, shallow=True) for name in left)
+    return all(filecmp.cmp(left[name], right[name], shallow=True) for name in left)
+
+
+def _recovered(destination: Path) -> str | None:
+    """`recover` for a published folder, as a message rather than a raise."""
+    try:
+        recover(destination)
+    except OSError as exc:
+        return f"{type(exc).__name__}: {exc}"
+    return None
+
+
+def _replace_text(path: Path, text: str) -> None:
+    """Writes a product-level artifact through a temp file and a rename (X2-13), as LF.
+
+    `version.yml` and the doc-class 301 maps keep hand-edited rows, and are the
+    only copy of them. `write_text` truncates first, so a kill or a full disk
+    mid-write left a short file, and a short YAML that still parsed lost the
+    rows it no longer held on the next merge, without a word.
+    """
+    tmp = path.with_name(path.name + ".tmp")
+    try:
+        textfile.write_text(tmp, text)  # LF, as every generated file (X2-07)
+        replace_file(tmp, path)
+    except BaseException:
+        tmp.unlink(missing_ok=True)  # never leave the temp file in a published tree
+        raise
 
 
 def _unpublished(root: Path) -> Callable[[str, list[str]], set[str]]:

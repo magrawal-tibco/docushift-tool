@@ -1018,3 +1018,71 @@ def test_a_partial_walk_records_no_help_maps_assets_or_api_roots_either(
     assert catalog.state.get_csh_sources("tibco-ems", "10.4.0") == []
     assert catalog.state.get_asset_inventory("tibco-ems", "10.4.0") == []
     assert catalog.state.get_version_metadata("tibco-ems", "10.4.0").get("api_roots", "") == ""
+# -- an interrupted swap is never current (Phase 34, X2-01, X3-01, X3-09) ------
+
+
+def test_a_current_run_sweeps_a_killed_runs_part(
+    config: ConfigManager, catalog: CatalogManager, product: Product, version: ProductVersion
+) -> None:
+    """X3-09. A `current` decision left a killed run's `.part` (715 files, 19 MB)
+    until somebody forced a rebuild."""
+    place_package(config, product, version, FLARE_PACKAGE)
+    extractor = PackageExtractor(config, catalog)
+    extractor.extract_one(product, version)
+    target = extract_dir(config, product, version)
+    staging = target.with_name(target.name + ".part")
+    staging.mkdir()
+    (staging / "half-written.htm").write_text("", encoding="utf-8")
+
+    result = extractor.extract_one(product, version)
+
+    assert result.outcome is ExtractOutcome.CURRENT
+    assert not staging.exists()
+
+
+def test_a_tree_a_kill_left_set_aside_is_put_back_first(
+    config: ConfigManager, catalog: CatalogManager, product: Product, version: ProductVersion
+) -> None:
+    """X2-01. A kill between the swap's two renames leaves the whole old tree at
+    `.old` and no target; the next run sees the tree exactly as it was."""
+    place_package(config, product, version, FLARE_PACKAGE)
+    extractor = PackageExtractor(config, catalog)
+    extractor.extract_one(product, version)
+    target = extract_dir(config, product, version)
+    target.rename(target.with_name(target.name + ".old"))
+
+    result = extractor.extract_one(product, version)
+
+    assert result.outcome is ExtractOutcome.CURRENT
+    assert (target / "guide" / "a.htm").is_file()
+    assert not target.with_name(target.name + ".old").exists()
+
+
+def test_the_building_mark_is_cleared_only_by_a_finished_extract(
+    config: ConfigManager, catalog: CatalogManager, product: Product, version: ProductVersion,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """X3-01. Set before the swap; a failure after it leaves the mark, and the mark
+    is what `convert` and `sync` refuse on."""
+    from docushift.extractor import unpacker
+
+    place_package(config, product, version, FLARE_PACKAGE)
+    extractor = PackageExtractor(config, catalog)
+    extractor.extract_one(product, version)
+    assert not catalog.state.is_building("tibco-ems", "10.4.0", "extract")
+
+    def interrupted(staging, target, **_kwargs):
+        raise PermissionError(5, "Access is denied")
+
+    monkeypatch.setattr(unpacker, "swap", interrupted)
+    failed = extractor.extract_one(product, version, force=True)
+
+    assert failed.outcome is ExtractOutcome.FAILED
+    assert catalog.state.is_building("tibco-ems", "10.4.0", "extract")
+    assert (extract_dir(config, product, version) / "guide" / "a.htm").is_file()
+
+    monkeypatch.undo()
+    again = extractor.extract_one(product, version)
+
+    assert again.outcome is ExtractOutcome.EXTRACTED
+    assert not catalog.state.is_building("tibco-ems", "10.4.0", "extract")

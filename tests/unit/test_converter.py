@@ -1443,3 +1443,52 @@ def test_a_current_run_points_at_the_run_that_holds_the_trees_findings(
     (pointer,) = [f for f in second.all if f.code == "CONVERT_FINDINGS_IN_EARLIER_RUN"]
     assert f"run {first.run_id}" in pointer.message and "error" in pointer.message
     assert f"docushift report --run {first.run_id}" in pointer.message
+# -- an interrupted stage is never current (Phase 34, X3-01, X3-03, X3-09) -----
+
+
+def test_a_tree_from_an_unfinished_extract_is_refused_not_converted(
+    config, catalog, product, version, extracted, fake_engine
+) -> None:
+    """X3-01. A blank checksum read as "no claim", so a convert after an
+    interrupted re-extract converted the half-deleted tree -- a whole book gone --
+    and a later good extract made that output `current` for good."""
+    catalog.state.mark_building("tibco-ems", "10.4.0", "extract")
+
+    result, _ = convert(config, catalog, product, version)
+
+    assert result.outcome is ConvertOutcome.FAILED
+    assert "extract that did not finish" in result.message
+    assert not config.output_path(product.bu, product.family, product.slug, version.version).exists()
+
+
+def test_a_version_still_marked_as_building_is_rebuilt_not_current(
+    config, catalog, product, version, extracted, fake_engine
+) -> None:
+    """X3-03. A kill between the swap and the bookkeeping left checksums that
+    still matched, and the next run called a partly replaced tree `current`."""
+    first, _ = convert(config, catalog, product, version)
+    assert first.outcome is ConvertOutcome.CONVERTED
+    assert not catalog.state.is_building("tibco-ems", "10.4.0", "convert")
+    catalog.state.mark_building("tibco-ems", "10.4.0", "convert")
+
+    again, _ = convert(config, catalog, product, version)
+    settled, _ = convert(config, catalog, product, version)
+
+    assert again.outcome is ConvertOutcome.CONVERTED
+    assert settled.outcome is ConvertOutcome.CURRENT
+
+
+def test_a_current_run_sweeps_a_killed_builds_part(
+    config, catalog, product, version, extracted, fake_engine
+) -> None:
+    """X3-09: a 163-file `5.12.2.part` outlived every `current` run."""
+    convert(config, catalog, product, version)
+    output = config.output_path(product.bu, product.family, product.slug, version.version)
+    staging = output.with_name(output.name + ".part")
+    staging.mkdir()
+    (staging / "half.md").write_text("", encoding="utf-8")
+
+    again, _ = convert(config, catalog, product, version)
+
+    assert again.outcome is ConvertOutcome.CURRENT
+    assert not staging.exists()

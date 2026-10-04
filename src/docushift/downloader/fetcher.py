@@ -30,6 +30,7 @@ from docushift.discovery.client import DocsiteClient
 from docushift.models import ConversionStatus, Product, ProductVersion, ZipSource
 from docushift.reporting.findings import FindingsRun
 from docushift.utils.http import Throttle, build_session
+from docushift.utils.swap import replace_file
 
 # Read in 1 MiB blocks. The corpus's packages run to 900 MB, so the hash is
 # computed on the way past rather than in a second pass over the file.
@@ -335,7 +336,10 @@ class PackageDownloader:
 
         # Step 7: atomic move. A killed run must never leave a truncated file at the
         # canonical path, where the step-3 checksum test would later trust it.
-        partial.replace(target)
+        # `replace_file`, not a bare `replace` (X2-14): the scanner opens exactly
+        # this kind of freshly closed large file, and Phase 33 showed one rename
+        # losing that race. Each attempt is still the same atomic rename.
+        replace_file(partial, target)
         return _Transfer(
             size=target.stat().st_size,
             checksum=digest.hexdigest(),
@@ -429,7 +433,7 @@ class PackageDownloader:
         # leave a truncated file at a path the pipeline would treat as complete.
         staged = target.with_suffix(target.suffix + ".part")
         shutil.copyfile(source, staged)
-        staged.replace(target)
+        replace_file(staged, target)
 
         checksum = sha256_of(target)
         size = target.stat().st_size

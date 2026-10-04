@@ -418,6 +418,14 @@ REGISTRY: dict[str, Code] = _codes(
          "Page names in rename-map.csv that another page already holds; the "
          "computed name was kept",
          "planning.md Phase 29"),
+    # Phase 34, X2-02 / X3-02. The map lived only inside the tree a swap replaces,
+    # so a failed or killed swap lost it and the next run recomputed every name
+    # without a word. A warning whether or not a copy rescued the names: the file a
+    # writer edits is gone, and published URLs move if no copy survived.
+    Code("RENAME_MAP_MISSING", Severity.WARNING, Stage.REFRAME,
+         "rename-map.csv is gone from a merged tree that had one; the names came "
+         "from the copy kept in state.db, or were recomputed if none survived",
+         "planning.md §7.5"),
     Code("REFRAME_REVIEW_QUEUED", Severity.NOTE, Stage.REFRAME,
          "Merged pages needing an editorial decision, listed in review-queue.csv",
          "REFRAME-REQUIREMENTS.md R6"),

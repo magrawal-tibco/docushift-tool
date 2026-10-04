@@ -28,7 +28,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from docushift.sync import API_REFERENCES, ARCHIVES, DOC_CLASSES
-from docushift.sync.distributor import STAGING_SUFFIX
+from docushift.sync.distributor import RESIDUE_SUFFIXES
 
 # Every doc-class a published tree can hold, across both repositories. The docs
 # tree's four (`distributor.DOC_CLASSES`) plus the `-resources` sibling's two.
@@ -132,7 +132,7 @@ def walk(
                     continue
                 entry = ProductFolder(slug, tree.name, locale.name, slug.name)
                 for folder in _subdirs(slug):
-                    if folder.name.endswith(STAGING_SUFFIX):
+                    if folder.name.endswith(RESIDUE_SUFFIXES):
                         entry.residue.append(folder)
                         continue
                     if folder.name not in PUBLISHED_DOC_CLASSES:
@@ -144,7 +144,7 @@ def walk(
                     )
                     entry.residue.extend(
                         child for child in _subdirs(folder)
-                        if child.name.endswith(STAGING_SUFFIX)
+                        if child.name.endswith(RESIDUE_SUFFIXES)
                     )
                 if entry.versions or entry.residue:
                     found.append(entry)
@@ -161,7 +161,7 @@ def _units(
             yield VersionFolder(folder, product.tree, product.locale, product.slug, folder.name)
         return
     for child in _subdirs(folder):
-        if child.name.endswith(STAGING_SUFFIX):
+        if child.name.endswith(RESIDUE_SUFFIXES):
             continue
         if wanted_segment is not None and child.name != wanted_segment:
             continue

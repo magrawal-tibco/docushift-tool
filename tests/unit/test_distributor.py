@@ -1753,3 +1753,110 @@ def test_a_catalog_rename_is_not_reported_current_by_the_document_indexes(
     # And once rewritten, current again.
     again = distributor.sync_many([(product, product.versions["10.4.0"])], target)
     assert {r.outcome for r in again.results if r.doc_class == USER_GUIDES} == {SyncOutcome.CURRENT}
+
+
+# -- residue, unfinished upstream stages, long paths (Phase 34, XA) ---------------
+
+
+def test_a_current_run_sweeps_a_killed_syncs_staging_folder(config, distributor, product, target) -> None:
+    """X3-09. `5-13-0.part` stayed published through every `current` run, and its
+    per-version `301.yml` rows were served."""
+    convert_output(config, product, "10.4.0")
+    distributor.sync_one(product, product.versions["10.4.0"], target)
+    residue = published(target).with_name("10-4-0.part")
+    residue.mkdir()
+    (residue / "301.yml").write_text("redirects: []\n", encoding="utf-8")
+    aside = published(target).with_name("10-4-0.old")
+    aside.mkdir()
+
+    result = distributor.sync_one(product, product.versions["10.4.0"], target)
+
+    assert result.outcome is SyncOutcome.CURRENT
+    assert not residue.exists() and not aside.exists()
+
+
+def test_a_tree_from_an_unfinished_convert_is_not_published(config, catalog, product, target) -> None:
+    """X3-03: a convert killed in its swap left 615 of 621 files, `convert` said
+    `current`, and `sync` published them."""
+    convert_output(config, product, "10.4.0")
+    catalog.state.mark_building("tibco-ems", "10.4.0", "convert")
+
+    result = WorkspaceDistributor(config, catalog).sync_one(product, product.versions["10.4.0"], target)
+
+    assert result.outcome is SyncOutcome.NO_OUTPUT
+    assert "did not finish" in result.message
+    assert not published(target).exists()
+
+
+def test_a_set_aside_folder_is_not_a_published_version(
+    config, catalog, distributor, product, target
+) -> None:
+    """A sync killed after its swap leaves `<segment>.old`; the 301 maps must not
+    read it, as they do not read `.part` (R10-03)."""
+    opt_in(config, product.slug)
+    origin_version(config, catalog, product, "10.4.0")
+    distributor.sync_many([(product, product.versions["10.4.0"])], target)
+    folder = target / TREE / "en-us" / product.slug / ONLINE_HELP
+    leftover = folder / "10-3-1.old"
+    leftover.mkdir()
+    (leftover / ORIGIN_MAP).write_text(ORIGINS, encoding="utf-8")
+    (leftover / REDIRECT_MAP).write_text(MERGED, encoding="utf-8")
+
+    distributor.finish_product(product, target, distributor.sync_many([], target))
+
+    for rows in (published_map(target, product)["redirects"],
+                 published_origins(target, product)["redirects"]):
+        assert not any(".old" in row["to"] for row in rows)
+
+
+def test_a_file_past_260_characters_does_not_make_a_tree_stale_forever(
+    config, distributor, product, target
+) -> None:
+    """X2-09. `rglob` omits such a file on the source side and lists it on the
+    published side, so the two never matched and every run re-copied."""
+    from docushift.sync.distributor import _identical
+    from docushift.utils.longpath import long_path
+
+    source = convert_output(config, product, "10.4.0")
+    copy = target / "c"
+    # A relative path that crosses 260 under the (longer) source root but not
+    # under the published one -- TRA Runtime Agent 5.13.0's shape.
+    room = 262 - len(str(source))
+    assert len(str(copy)) + room < 255, "the tmp root leaves no margin for this test"
+    relative = Path("d" * (room - 10), "page.md")
+    deep = source / relative
+    long_path(deep.parent).mkdir(parents=True)
+    long_path(deep).write_text("x", encoding="utf-8")
+    shutil.copytree(long_path(source), long_path(copy), copy_function=shutil.copy2)
+
+    assert len(str(deep)) > 260 and len(str(copy / relative)) < 260
+    assert _identical(source, copy)
+
+
+def test_a_write_cut_short_leaves_the_hand_edited_drop_down_whole(
+    config, distributor, product, target, monkeypatch
+) -> None:
+    """X2-13. `write_text` truncated `version.yml` -- the only copy of its hand
+    rows -- before writing, so a kill or a full disk left a short file."""
+    convert_output(config, product, "10.4.0")
+    distributor.sync_many([(product, product.versions["10.4.0"])], target)
+    path = published(target).parent / "version.yml"
+    hand = ('versions:\n- title: "Latest"\n  path: "https://docs.example/latest"\n'
+            '- title: "10.4.0 (Feb 2026)"\n  path: "/10-4-0"\n')
+    path.write_text(hand, encoding="utf-8")
+    real = Path.write_text
+
+    def cut_short(self: Path, text: str, *args, **kwargs):
+        if self.name.startswith("version.yml"):
+            real(self, text[:10], *args, **kwargs)
+            raise OSError(28, "No space left on device")
+        return real(self, text, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "write_text", cut_short)
+
+    with pytest.raises(OSError):
+        distributor.sync_many([(product, product.versions["10.4.0"])], target, force=True)
+
+    monkeypatch.undo()
+    assert path.read_text(encoding="utf-8") == hand
+    assert not path.with_name("version.yml.tmp").exists()

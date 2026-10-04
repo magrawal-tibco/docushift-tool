@@ -650,8 +650,14 @@ so `convert` and `sync` locate them themselves.
 since the last extract is skipped entirely, so `extract --all` over a settled batch does
 almost no work. When a package *has* changed, the new tree is built beside the old one and
 swapped in, so files the new package no longer ships are gone rather than lingering — a
-guide dropped upstream does not quietly survive and convert. If a run is killed mid-swap
-you may find a a `.part` directory left behind; the next run removes it before it starts.
+guide dropped upstream does not quietly survive and convert. The old tree is renamed aside
+rather than deleted, and deleted only once the new one is in place, so a file you have open
+in the old tree makes the run fail and leaves the tree whole. If a run is killed you may find
+a `.part` or `.old` directory beside the version; the next run of any kind, even one that
+reports `current`, puts an `.old` back or removes the leftover. A version whose extract, convert
+or merge was interrupted after its swap is rebuilt by the next run of that stage, and the
+stages after it refuse it ("did not finish; run `docushift extract` first") rather than
+trusting it.
 
 Extraction is deliberately serial. Downloads run in parallel because transfers overlap;
 two large unzips onto one disk only contend, so there is no `--workers` here.
@@ -987,7 +993,7 @@ regenerated files at the version root:
 | `toc.yml` | The same navigation, retargeted. A topic that led its page gets `page.md`; a topic absorbed into one gets `page.md#anchor`. An entry that pointed at a section of its topic keeps pointing at that section. A reader following the TOC cannot tell the merge happened. |
 | `redirects.yml` | One 301 per source topic, anchored — so a published URL from before the merge lands on the section that replaced it, not at the top of a twelve-section page. |
 | `reframe.yml` | Which source topic became which section of which page, plus the policy that shaped it and the link counts. This is the record to read when a boundary looks wrong. |
-| `rename-map.csv` | The address each merged page was given — the source topic that leads it, the path, the title, its place in the navigation, and the URL a reader will type. Only the last is not derivable from `reframe.yml`, and it is the one somebody checks when a link goes wrong. **A name written here is used, not just reported**: the next run reads it back and pins the page to that path, so a published URL does not move because somebody fixed a typo in a title. Editing `new_path` is enough: the next `reframe` sees the map changed and re-merges that version, no `--force` needed. A name another page already holds cannot be used; the page keeps its computed name and the run warns `RENAME_MAP_REFUSED`, naming each one. The `shortened` column flags the pages whose name does not carry their whole title — mostly words lost to the 50-character cut, 90 of 1,505 measured — which is where a human or a model can write a better one than the algorithm did. The same pages are queued in `review-queue.csv`, and a name written into `new_path` takes the page out of both. `--renormalize` recomputes every name anyway, so the pinning is a decision rather than a trap. |
+| `rename-map.csv` | The address each merged page was given — the source topic that leads it, the path, the title, its place in the navigation, and the URL a reader will type. Only the last is not derivable from `reframe.yml`, and it is the one somebody checks when a link goes wrong. **A name written here is used, not just reported**: the next run reads it back and pins the page to that path, so a published URL does not move because somebody fixed a typo in a title. Editing `new_path` is enough: the next `reframe` sees the map changed and re-merges that version, no `--force` needed. A name another page already holds cannot be used; the page keeps its computed name and the run warns `RENAME_MAP_REFUSED`, naming each one. The `shortened` column flags the pages whose name does not carry their whole title — mostly words lost to the 50-character cut, 90 of 1,505 measured — which is where a human or a model can write a better one than the algorithm did. The same pages are queued in `review-queue.csv`, and a name written into `new_path` takes the page out of both. `--renormalize` recomputes every name anyway, so the pinning is a decision rather than a trap. `state.db` keeps a copy of the names from the last successful merge: if the file goes missing (a failed swap used to take it along), the next run takes the names from that copy and warns `RENAME_MAP_MISSING`; if no copy survives either, it warns that every name was recomputed. |
 | `review-queue.csv` | The pages a writer has to make a decision about, and why. Open it in a spreadsheet. |
 
 `reframe.yml`, `rename-map.csv` and `review-queue.csv` are working files: they stay in
@@ -1213,8 +1219,9 @@ all. The run report tells you which you got:
 
 Filling in the host later is safe. `sync` decides which rows are its own from the path after
 the host, so the next run replaces the tree-rooted rows with hosted ones rather than adding a
-second set beside them; changing or clearing the host works the same way. A `.part` folder
-left beside the versions by an interrupted run is not read into either map.
+second set beside them; changing or clearing the host works the same way. A `.part` or `.old`
+folder left beside the versions by an interrupted run is not read into either map, and the
+next `sync` removes it.
 
 `301.yml` is assembled by the same code under the same rules, with one difference that follows
 from what it holds: only the **`to`** side is rewritten into a published URL, because the
@@ -1506,8 +1513,8 @@ What to expect:
   `#Install` does not reach it. This is not theoretical: the check's first run found three TOC entries
   like that, and the cause turned out to be a converter bug that had been writing a
   generated page over a real topic.
-- **`.part` folders are skipped and counted, not checked.** A sync that failed
-  leaves its staging folder behind; the swap refused to publish it, so validating it
+- **`.part` and `.old` folders are skipped and counted, not checked.** A sync that failed
+  leaves its staging folder behind (or, killed inside the swap, the set-aside old one); the swap refused to publish it, so validating it
   would report problems a re-run cures. You get one note per folder saying it is
   there.
 - **`api-references/` is not link-checked.** It is copied Javadoc — not this tool's
