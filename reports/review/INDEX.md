@@ -311,3 +311,11 @@ Themes XA–XI are merged, 12 commits, each with a test that failed on the old c
 **One-time effect:** the new currency inputs make every converted tree rebuild once on the next `convert` and every merge once on the next `reframe`; until both have run, `sync` refuses merges.
 
 **Flagged choices:** a missing rename-map with no surviving copy warns and recomputes, rather than refusing; a building mark stays after any failure until that stage re-runs; only columns a writer added to review-queue.csv are kept, not edits to the six standard columns; a slug or version that is not one safe path segment stops the catalog load with an error naming the row; a `current` run adds a note naming the run that built the tree, rather than copying its findings.
+
+## Cleanup merged (2026-10-05)
+
+Themes O–O4, 4 commits (6df2103, c85b7c1, 7ce676c, d5e9858), net −242 lines across 45 files. The full suite passes (2,120; 10 tests went with the dead code they covered) and lint is clean. **Behaviour-preserving, proven byte-identical** on a scratch workspace before and after: TRA Runtime Agent 5.13.0 converted and merged (1,035 + 506 files), TRA Runtime Agent 5.12.2 (621), Streaming 11.2.1 (2,539), the synced tree (6,685) and validate's findings per code; every `--help` output is unchanged; the single-walk engine detection agrees with the old one on all 60 extracted versions and 487 cache versions.
+
+**Done:** R1-14, R1-15, R2-21 (part), R3-14 (part), R3-15, R4-15, R4-17, R5-14, R5-16, `transforms/csh.identifiers_by_source`, R7-11 (3 of 4), R8-15 (part), R9-15, R9-16 (part), R10-14, R10-15, R11-13, R11-14, R12-17, R12-18 (part), plus two stale "once per product" comments.
+
+**Skipped, each because it would change state, output or printed text, or is now deliberate:** R2-21 `docsite_id`, R3-14 `engine_generator_raw`, R4-10 (still written to state.db); R4-16 (the empty CSH record is now relied on by X1-10's fix); R6-15, R6-16, R8-16, R7-11's `lstrip("./")` (would change output); R8-15's two `_MARKER`/`_BLOCKS` (differ on purpose); R9-16's redirect check and R12-18's single footer (would change checks or text); R10-16, the Phase 29 legacy-prefix migration, is kept: the 7 published maps here hold 0 old-shape rows, but published copies elsewhere can't be ruled out.
