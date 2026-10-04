@@ -29,6 +29,8 @@ which is the one failure mode here that a human can act on.
 
 from __future__ import annotations
 
+import hashlib
+import json
 from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
@@ -376,6 +378,27 @@ def listing(cache_dir: Path, slug: str, version: str) -> tuple[list[str], str]:
     if not pages:
         return [], f"{leaf} lists no page"
     return [page.loc for page in pages], ""
+
+
+def fingerprint(
+    declared: Mapping[str, Any], slug: str, zip_url: str | None, page_urls: Iterable[str]
+) -> str:
+    """A short digest of what `build` reads besides the output map, for currency.
+
+    X3-05 / X1-08. `301.yml` is a function of the version's declaration in
+    `origin-urls.yaml`, its docsite folder and its cached page list, and none of
+    them was in `convert`'s or `reframe`'s key: a version built before
+    `catalog sitemap` kept no `301.yml` for good, and a template edit or a
+    sitemap refresh was missed the same way. Both stages fold this into their
+    keys, so one digest of one set of inputs. The declaration is taken as
+    written, not validated, so a fix to a rejected entry is a change too.
+    """
+    payload = json.dumps(
+        {"declared": declared.get(slug), "folder": folder_path(zip_url),
+         "pages": sorted(page_urls)},
+        sort_keys=True, separators=(",", ":"), default=str,
+    )
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16]
 
 
 def build(

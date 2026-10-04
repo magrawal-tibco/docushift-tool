@@ -444,7 +444,7 @@ def test_a_policy_edit_invalidates_an_otherwise_current_merge(config, catalog, f
     tree reporting `current` would make the tuning loop silently a no-op.
     """
     converted_tree(config, flare, "10.5.1")
-    catalog.state.set_version_metadata("tibco-flare-docs", "10.5.1", "convert_source_checksum", "abc123")
+    catalog.state.set_version_metadata("tibco-flare-docs", "10.5.1", "convert_build_id", "abc123")
     reframer = Reframer(config, catalog)
 
     assert reframer.reframe_one(flare, flare.versions["10.5.1"]).outcome is ReframeOutcome.REFRAMED
@@ -459,7 +459,7 @@ def test_a_policy_edit_invalidates_an_otherwise_current_merge(config, catalog, f
 
 def test_force_re_merges_a_current_version(config, catalog, flare):
     converted_tree(config, flare, "10.5.1")
-    catalog.state.set_version_metadata("tibco-flare-docs", "10.5.1", "convert_source_checksum", "abc123")
+    catalog.state.set_version_metadata("tibco-flare-docs", "10.5.1", "convert_build_id", "abc123")
     reframer = Reframer(config, catalog)
     reframer.reframe_one(flare, flare.versions["10.5.1"])
 
@@ -526,7 +526,7 @@ def test_a_page_written_outside_the_layout_is_refused_before_the_swap(
     from docushift.reframe.driver import Reframer as Driver
 
     converted_tree(config, flare, "10.5.1")
-    catalog.state.set_version_metadata("tibco-flare-docs", "10.5.1", "convert_source_checksum", "abc123")
+    catalog.state.set_version_metadata("tibco-flare-docs", "10.5.1", "convert_build_id", "abc123")
     target = config.reframed_path(flare.bu, flare.family, flare.slug, "10.5.1")
     original = Driver._write_origins
 
@@ -543,7 +543,7 @@ def test_a_page_written_outside_the_layout_is_refused_before_the_swap(
     assert "a page write landed outside the layout" in result.message
     assert "REFRAME_SELF_CHECK_FAILED" in codes(findings.all)
     assert not target.exists()
-    assert "reframe_source_checksum" not in catalog.state.get_version_metadata(
+    assert "reframe_convert_build" not in catalog.state.get_version_metadata(
         "tibco-flare-docs", "10.5.1")
 
 
@@ -582,7 +582,7 @@ def test_a_current_version_still_reports_its_merged_counts(config, catalog, flar
     """Phase 24's whole complaint: the second run reported nothing where the first
     reported every page, which reads as "the merge produced nothing"."""
     converted_tree(config, flare, "10.5.1")
-    catalog.state.set_version_metadata("tibco-flare-docs", "10.5.1", "convert_source_checksum", "abc123")
+    catalog.state.set_version_metadata("tibco-flare-docs", "10.5.1", "convert_build_id", "abc123")
     reframer = Reframer(config, catalog)
     built = reframer.reframe_one(flare, flare.versions["10.5.1"])
 
@@ -598,7 +598,7 @@ def test_a_current_version_with_blank_columns_is_walked_anyway(config, catalog, 
     without the backfill it would stay blank for good -- §3.9.2's rule, third time.
     """
     converted_tree(config, flare, "10.5.1")
-    catalog.state.set_version_metadata("tibco-flare-docs", "10.5.1", "convert_source_checksum", "abc123")
+    catalog.state.set_version_metadata("tibco-flare-docs", "10.5.1", "convert_build_id", "abc123")
     reframer = Reframer(config, catalog)
     built = reframer.reframe_one(flare, flare.versions["10.5.1"])
     catalog.clear_reframe_inventory("tibco-flare-docs", "10.5.1")
@@ -2655,7 +2655,7 @@ def test_a_name_written_into_the_map_is_used_by_the_next_run_without_force(
     from docushift.reframe import renames
 
     converted_tree(config, flare, "10.5.1")
-    catalog.state.set_version_metadata("tibco-flare-docs", "10.5.1", "convert_source_checksum", "abc123")
+    catalog.state.set_version_metadata("tibco-flare-docs", "10.5.1", "convert_build_id", "abc123")
     reframer = Reframer(config, catalog)
     result = reframer.reframe_one(flare, flare.versions["10.5.1"])
     assert reframer.reframe_one(flare, flare.versions["10.5.1"]).outcome is ReframeOutcome.CURRENT
@@ -2677,7 +2677,7 @@ def test_a_name_written_into_the_map_is_used_by_the_next_run_without_force(
 def test_renormalize_re_merges_a_current_version_without_force(config, catalog, flare):
     """R9-04. `--renormalize` over unchanged trees used to change nothing."""
     converted_tree(config, flare, "10.5.1")
-    catalog.state.set_version_metadata("tibco-flare-docs", "10.5.1", "convert_source_checksum", "abc123")
+    catalog.state.set_version_metadata("tibco-flare-docs", "10.5.1", "convert_build_id", "abc123")
     Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"])
 
     again = Reframer(config, catalog, renormalize=True).reframe_one(flare, flare.versions["10.5.1"])
@@ -2975,3 +2975,123 @@ def test_a_corrupt_sitemap_manifest_is_named_and_does_not_stop_the_run(config, c
     assert result.outcome is ReframeOutcome.REFRAMED
     missing = [f for f in findings.all if f.code == "ORIGIN_SITEMAP_MISSING"]
     assert len(missing) == 1 and "manifest.json" in missing[0].message
+
+
+# -- a tree that should be rebuilt is not reported current (XE) -------------------
+
+
+def built_by_convert(catalog, build: str = "build-1") -> None:
+    """What `convert` records after every build: its tree's identity (X3-04)."""
+    catalog.state.set_version_metadata("tibco-flare-docs", "10.5.1", "convert_build_id", build)
+
+
+def test_a_re_conversion_makes_the_merge_stale_without_force(config, catalog, flare):
+    """X3-04, Phase 21's carried item. Keyed on the package checksum, which
+    `convert --force` writes again unchanged, `reframe` called the old merge
+    current over a re-converted tree. Keyed on the conversion's build, it is not."""
+    converted_tree(config, flare, "10.5.1")
+    built_by_convert(catalog)
+    catalog.state.set_version_metadata("tibco-flare-docs", "10.5.1", "convert_source_checksum", "abc123")
+    reframer = Reframer(config, catalog)
+
+    assert reframer.reframe_one(flare, flare.versions["10.5.1"]).outcome is ReframeOutcome.REFRAMED
+    assert reframer.reframe_one(flare, flare.versions["10.5.1"]).outcome is ReframeOutcome.CURRENT
+
+    built_by_convert(catalog, "build-2")
+
+    assert reframer.reframe_one(flare, flare.versions["10.5.1"]).outcome is ReframeOutcome.REFRAMED
+    assert reframer.reframe_one(flare, flare.versions["10.5.1"]).outcome is ReframeOutcome.CURRENT
+
+
+def test_a_sitemap_arriving_after_the_merge_makes_it_stale(config, catalog, listed_flare):
+    """X3-05. Merged before `catalog sitemap`, the version had no `301.yml`, and
+    every later run said `current` and kept it that way."""
+    converted_tree(config, listed_flare, "10.5.1")
+    built_by_convert(catalog)
+    reframer = Reframer(config, catalog)
+    first = reframer.reframe_one(listed_flare, listed_flare.versions["10.5.1"])
+    assert not (first.path / "301.yml").exists()
+    assert reframer.reframe_one(listed_flare, listed_flare.versions["10.5.1"]).outcome is (
+        ReframeOutcome.CURRENT)
+
+    cache_sitemap(config, [f"{LIVE}/{src.rsplit('/', 1)[1]}" for src, _, _ in SOURCES])
+    again = reframer.reframe_one(listed_flare, listed_flare.versions["10.5.1"])
+
+    assert again.outcome is ReframeOutcome.REFRAMED
+    assert (again.path / "301.yml").is_file()
+
+
+def test_an_origin_template_edit_makes_the_merge_stale(config, catalog, declared):
+    """X1-08. `origin-urls.yaml` shapes `301.yml` and was outside the key."""
+    converted_tree(config, declared, "10.5.1")
+    built_by_convert(catalog)
+    reframer = Reframer(config, catalog)
+    reframer.reframe_one(declared, declared.versions["10.5.1"])
+    assert reframer.reframe_one(declared, declared.versions["10.5.1"]).outcome is (
+        ReframeOutcome.CURRENT)
+
+    (config.config_dir / "origin-urls.yaml").write_text(
+        ORIGINS_CONFIG.replace("/doc/{path}", "/doc/html/{path}"), encoding="utf-8")
+    config._origin_urls_cache = None
+
+    assert reframer.reframe_one(declared, declared.versions["10.5.1"]).outcome is (
+        ReframeOutcome.REFRAMED)
+
+
+def test_a_publish_base_url_edit_makes_the_merge_stale(config, catalog, flare):
+    """X3-07. The host goes into `rename-map.csv`'s `expected_aem_url`."""
+    converted_tree(config, flare, "10.5.1")
+    built_by_convert(catalog)
+    reframer = Reframer(config, catalog)
+    reframer.reframe_one(flare, flare.versions["10.5.1"])
+    assert reframer.reframe_one(flare, flare.versions["10.5.1"]).outcome is ReframeOutcome.CURRENT
+
+    config.publishing_path.write_text("publish_base_url: https://x3.example.com\n", encoding="utf-8")
+    config._publishing_cache = None
+
+    assert reframer.reframe_one(flare, flare.versions["10.5.1"]).outcome is ReframeOutcome.REFRAMED
+
+
+def test_a_standalone_merge_records_nothing_against_the_catalog_row(
+    config, catalog, listed_flare, tmp_path
+):
+    """X1-02. `--input` wrote the catalog version's merge state from whatever tree
+    it was handed, so `sync` published a stale `reframed/` tree as current; it
+    also wrote a `301.yml` its docstring said it did not, and a second run to the
+    same `--output` said `current` without reading its input."""
+    cache_sitemap(config, [f"{LIVE}/{src.rsplit('/', 1)[1]}" for src, _, _ in SOURCES])
+    source = converted_tree(config, listed_flare, "10.5.1")
+    built_by_convert(catalog)
+    before = catalog.state.get_version_metadata("tibco-flare-docs", "10.5.1")
+    reframer = Reframer(config, catalog)
+
+    results = [
+        reframer.reframe_one(listed_flare, listed_flare.versions["10.5.1"],
+                             source=source, output=tmp_path / "merged")
+        for _ in range(2)
+    ]
+
+    assert [r.outcome for r in results] == [ReframeOutcome.REFRAMED] * 2
+    assert catalog.state.get_version_metadata("tibco-flare-docs", "10.5.1") == before
+    assert catalog.get_version("tibco-flare-docs", "10.5.1").reframed_md_files is None
+    assert not (tmp_path / "merged" / "301.yml").exists()
+
+
+def test_a_current_run_points_at_the_run_that_holds_the_trees_findings(config, catalog, flare):
+    """X3-11. A `current` run recorded nothing, so `report --run last` showed none
+    of the warnings the tree still has. It now names the run that built it."""
+    converted_tree(config, flare, "10.5.1")
+    built_by_convert(catalog)
+    first = FindingsRun("reframe", store=catalog.state).start()
+    Reframer(config, catalog, findings=first).reframe_one(flare, flare.versions["10.5.1"])
+    first.finish()
+    assert first.counts()[Severity.WARNING]
+
+    second = FindingsRun("reframe", store=catalog.state).start()
+    result = Reframer(config, catalog, findings=second).reframe_one(flare, flare.versions["10.5.1"])
+    second.finish()
+
+    assert result.outcome is ReframeOutcome.CURRENT
+    (pointer,) = [f for f in second.all if f.code == "REFRAME_FINDINGS_IN_EARLIER_RUN"]
+    assert pointer.severity is Severity.NOTE
+    assert f"run {first.run_id}" in pointer.message and "warning" in pointer.message

@@ -1023,10 +1023,11 @@ def opt_in(config: ConfigManager, slug: str) -> None:
     )
 
 
-def current(catalog, slug: str, number: str, checksum: str = "abc123") -> None:
-    """Both stages' recorded source checksums agreeing -- what `_stale` reads."""
-    catalog.state.set_version_metadata(slug, number, "convert_source_checksum", checksum)
-    catalog.state.set_version_metadata(slug, number, "reframe_source_checksum", checksum)
+def current(catalog, slug: str, number: str, build: str = "abc123") -> None:
+    """The conversion's build and the build the merge was made from agreeing --
+    what `_stale` reads, and what `reframe` keys its own currency on (X3-04)."""
+    catalog.state.set_version_metadata(slug, number, "convert_build_id", build)
+    catalog.state.set_version_metadata(slug, number, "reframe_convert_build", build)
 
 
 def test_a_product_that_has_not_opted_in_publishes_the_converted_tree(
@@ -1119,8 +1120,8 @@ def test_a_merged_tree_older_than_the_conversion_beneath_it_is_refused(
     convert_output(config, product, "10.4.0")
     reframe_output(config, product, "10.4.0")
     opt_in(config, product.slug)
-    catalog.state.set_version_metadata(product.slug, "10.4.0", "convert_source_checksum", "new")
-    catalog.state.set_version_metadata(product.slug, "10.4.0", "reframe_source_checksum", "old")
+    catalog.state.set_version_metadata(product.slug, "10.4.0", "convert_build_id", "new")
+    catalog.state.set_version_metadata(product.slug, "10.4.0", "reframe_convert_build", "old")
     findings = FindingsRun("sync")
     distributor = WorkspaceDistributor(config, catalog, findings=findings)
 
@@ -1135,8 +1136,8 @@ def test_a_merge_with_no_recorded_checksum_cannot_claim_currency(
     config, catalog, target, product
 ) -> None:
     """No recorded provenance, no currency claim -- the rule `reframe` inherited
-    from `convert`, and the safe direction. The six DataSynapse Flare versions have
-    no `convert_source_checksum` at all and land here."""
+    from `convert`, and the safe direction. A tree converted before build
+    identities were recorded (X3-04) lands here until it is converted again."""
     convert_output(config, product, "10.4.0")
     reframe_output(config, product, "10.4.0")
     opt_in(config, product.slug)
@@ -1146,7 +1147,7 @@ def test_a_merge_with_no_recorded_checksum_cannot_claim_currency(
     result = distributor.sync_one(product, product.versions["10.4.0"], target)
 
     assert result.outcome is SyncOutcome.NO_OUTPUT
-    assert "no source checksum" in result.message
+    assert "no build identity" in result.message
 
 
 def test_opting_in_does_not_re_merge_anything(config) -> None:

@@ -612,6 +612,18 @@ REGISTRY: dict[str, Code] = _codes(
     Code("INDEX_UNLINKED", Severity.NOTE, Stage.VALIDATE,
          "A published file in a generated doc-class folder that index.md links to nowhere",
          "planning.md Phase 10b"),
+    # X3-11. A `current` re-run records nothing about the version, so `report
+    # --run last` stopped showing the errors and warnings the unchanged tree
+    # still has. A note pointing at the run that built the tree, rather than a
+    # copy of its rows: a copied error would make a `current` reframe exit 1.
+    Code("CONVERT_FINDINGS_IN_EARLIER_RUN", Severity.NOTE, Stage.CONVERT,
+         "A current version's tree was built by an earlier run, which holds its "
+         "errors and warnings; the note names that run",
+         "reports/review X3-11"),
+    Code("REFRAME_FINDINGS_IN_EARLIER_RUN", Severity.NOTE, Stage.REFRAME,
+         "A current version's merged tree was built by an earlier run, which holds "
+         "its errors and warnings; the note names that run",
+         "reports/review X3-11"),
 )
 
 # The register's remaining debt, stated as the *complement* of what is written.
@@ -744,6 +756,29 @@ class FindingsRun:
         self.recorded.extend(self.pending)
         self.pending.clear()
         self._notes.clear()
+
+    def point_back(self, code: str, slug: str, version: str, built_in: str) -> None:
+        """On a `current` re-run, a note naming the run that built the tree (X3-11).
+
+        The building run's errors and warnings still describe the tree, and the
+        report defaults to the last run, which has none of them. Only when there
+        is something to point at: a run id recorded, still holding error or
+        warning rows for this version. `report --prune` can still drop those rows,
+        and then there is nothing to say.
+        """
+        if self.store is None or not built_in.isdigit() or int(built_in) == self.run_id:
+            return
+        run_id = int(built_in)
+        tally = {Severity.ERROR: 0, Severity.WARNING: 0}
+        for row in self.store.query_findings(run_id, slug=slug):
+            severity = Severity(row["severity"])
+            if row["version"] == version and severity in tally:
+                tally[severity] += 1
+        parts = [f"{n} {severity}{'s' if n != 1 else ''}" for severity, n in tally.items() if n]
+        if parts:
+            self.record(code, slug=slug, version=version, message=(
+                f"unchanged since run {run_id}, which recorded {' and '.join(parts)} for it; "
+                f"`docushift report --run {run_id} --slug {slug}`"))
 
     def finish(self, exit_code: int = 0) -> None:
         self.flush()

@@ -28,6 +28,8 @@ audit removes the staging tree and leaves the previous merge, if any, untouched.
 
 from __future__ import annotations
 
+import hashlib
+import json
 import re
 import shutil
 from collections.abc import Callable, Iterable
@@ -94,6 +96,17 @@ _REGENERATED = frozenset(
 #: last wrote (R9-04). A hand edit changes the file and so the digest, which is
 #: what makes the edit a re-merge rather than a no-op.
 _RENAME_DIGEST = "reframe_rename_digest"
+
+#: The `convert_build_id` of the converted tree this merge was built from
+#: (X3-04). `convert` writes a new one on every build, so a re-convert -- with
+#: or without a new package -- makes the merge stale. `sync` compares the same
+#: two keys before it publishes a merge.
+_MERGED_FROM = "reframe_convert_build"
+
+#: A digest of what shapes the merged tree besides the conversion and the
+#: policy (X3-05, X3-07): what `301.yml` is built from, and the publishing
+#: host and locale `rename-map.csv` prints its addresses with.
+_INPUTS_KEY = "reframe_inputs_key"
 
 
 @dataclass(frozen=True)
@@ -345,14 +358,26 @@ class Reframer:
             return ReframeResult(slug, number, ReframeOutcome.NO_OUTPUT, message=message)
 
         policy = policy_for(self.reframe_config, slug)
-        metadata = self._metadata(slug, number)
+        # X1-02. A standalone folder is not the catalog row's tree, so nothing is
+        # read back for it and nothing is recorded: `convert`'s R4-04 guard. It
+        # wrote the row's merge state from whatever `--input` named, and `sync`
+        # then published the stale `reframed/` tree as current.
+        standalone = source is not None
+        metadata = {} if standalone else self._metadata(slug, number)
         # Keyed on what produced the input plus what shaped the output. The first
         # alone would leave a tuned `reframe.yaml` looking current over a tree laid
         # out by the old rules, and the boundary rules are expected to be tuned
         # repeatedly -- so that would be the common case, not a corner of it.
-        converted_from = metadata.get("convert_source_checksum", "")
-        merged_from = metadata.get("reframe_source_checksum", "")
+        #
+        # What produced the input is the *conversion's* build (X3-04, Phase 21's
+        # carried item), not the package checksum: `convert --force` wrote that
+        # unchanged, so a re-converted tree was not re-merged and the old merge
+        # reported current. No recorded build, no currency claim.
+        converted_from = metadata.get("convert_build_id", "")
+        merged_from = metadata.get(_MERGED_FROM, "")
         policy_current = metadata.get("reframe_policy_key", "") == policy.key
+        inputs_key = self._inputs_key(product, version)
+        inputs_current = metadata.get(_INPUTS_KEY, "") == inputs_key
         # R9-04. The approved names are an input too. The user guide's workflow is
         # "write a better name into `new_path`; the next run uses it", and with the
         # map outside the key the next run said `current` and used nothing --
@@ -369,10 +394,13 @@ class Reframer:
             return ReframeResult(slug, number, ReframeOutcome.FAILED, engine=version.engine,
                                  message=str(exc))
         if (not force and converted_from and converted_from == merged_from and policy_current
-                and names_current):
+                and inputs_current and names_current):
             current = ReframeResult(
                 slug, number, ReframeOutcome.CURRENT, path=target, engine=version.engine
             )
+            if self.findings is not None:
+                self.findings.point_back("REFRAME_FINDINGS_IN_EARLIER_RUN", slug, number,
+                                         metadata.get("reframe_run", ""))
             # Phase 24. Without this the second `reframe` over an unchanged tree
             # reports nothing where the first reported 747 pages, which reads as
             # "the merge produced nothing" rather than "the merge already ran".
@@ -394,7 +422,8 @@ class Reframer:
             return current
 
         try:
-            return self._build(product, version, policy, converted, target, converted_from)
+            return self._build(product, version, policy, converted, target, converted_from,
+                               inputs_key, standalone)
         # `UnicodeDecodeError` too (R9-11): it is a `ValueError`, not an `OSError`,
         # and one undecodable topic or `toc.yml` used to abort the whole
         # selection instead of failing the one version that holds it. A
@@ -410,7 +439,9 @@ class Reframer:
         policy: ReframePolicy,
         converted: Path,
         target: Path,
-        checksum: str,
+        built_from: str,
+        inputs_key: str = "",
+        standalone: bool = False,
     ) -> ReframeResult:
         """Reads the navigation, packs, writes the tree, audits it, swaps it in."""
         slug, number = product.slug, version.version
@@ -554,7 +585,7 @@ class Reframer:
             staging, source, roots, built, located, policy, counts, schema_name, flagged,
             queue, self._url_for(product, version), placements, cut,
         )
-        self._write_origins(staging, product, version, located)
+        self._write_origins(staging, product, version, located, standalone)
 
         failures = audit(
             built, located, roots,
@@ -625,15 +656,21 @@ class Reframer:
         # it ran first: its `CatalogError` left the swapped-in tree with no record
         # of what it was built from. Now the rows describe the tree whatever
         # happens to the columns, and the failure is this version's row.
-        if self.state is not None:
-            self.state.set_version_metadata(slug, number, "reframe_source_checksum", checksum)
+        # Nothing for a standalone folder (X1-02): neither the rows nor the
+        # catalog columns describe it.
+        if self.state is not None and not standalone:
+            self.state.set_version_metadata(slug, number, _MERGED_FROM, built_from)
+            self.state.set_version_metadata(slug, number, _INPUTS_KEY, inputs_key)
             self.state.set_version_metadata(slug, number, "reframe_policy_key", policy.key)
             # Read back from the swapped-in tree rather than from `built`, so the
             # digest is of exactly the file the next run will compare (R9-04).
             self.state.set_version_metadata(
                 slug, number, _RENAME_DIGEST, renames.digest(renames.load(target))
             )
-        merged_md, merged_files = self._measure_merged(slug, number, target)
+            # X3-11: the run whose findings describe this tree.
+            if self.findings is not None and self.findings.run_id:
+                self.state.set_version_metadata(slug, number, "reframe_run", self.findings.run_id)
+        merged_md, merged_files = self._measure_merged(slug, number, target, record=not standalone)
         if self.findings is not None:
             self.findings.flush()
 
@@ -645,7 +682,9 @@ class Reframer:
 
     # -- measurement -----------------------------------------------------------
 
-    def _measure_merged(self, slug: str, version: str, target: Path) -> tuple[int, int]:
+    def _measure_merged(
+        self, slug: str, version: str, target: Path, record: bool = True
+    ) -> tuple[int, int]:
         """One walk of the merged tree, and the two columns it writes (§3.9).
 
         **Walked, not derived**, and the arithmetic here is wronger than the one
@@ -672,7 +711,8 @@ class Reframer:
             reframed_files += 1
             if path.suffix.lower() == ".md":
                 reframed_md += 1
-        self.catalog.record_reframe_inventory(slug, version, reframed_md, reframed_files)
+        if record:
+            self.catalog.record_reframe_inventory(slug, version, reframed_md, reframed_files)
         return reframed_md, reframed_files
 
     # -- writing --------------------------------------------------------------
@@ -711,6 +751,26 @@ class Reframer:
                     name for topic in page.topics for name in mirror.get(topic.source, ())
                 )
         return _Written(words, scaffolding, anchors, mirrored)
+
+    def _inputs_key(self, product: Product, version: ProductVersion) -> str:
+        """A digest of what shapes the merged tree besides the conversion and policy.
+
+        X3-05 / X1-08: what `301.yml` is built from (`origins.fingerprint`, the
+        same digest `convert` keys on). X3-07: the publishing host and locale,
+        which `rename-map.csv` prints every page's address with. Each changed the
+        tree and left the merge `current`.
+        """
+        publishing = self.config.load_publishing()
+        shaping = {
+            "origins": origins.fingerprint(
+                self.config.load_origin_urls(), product.slug, version.zip_url,
+                origins.page_list(self.config.cache_dir, product.slug, version.version),
+            ),
+            "publish_base_url": str(publishing.get("publish_base_url") or ""),
+            "primary_locale": str(publishing.get("primary_locale") or ""),
+        }
+        payload = json.dumps(shaping, sort_keys=True, separators=(",", ":"))
+        return hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16]
 
     def _url_for(
         self, product: Product, version: ProductVersion
@@ -803,6 +863,7 @@ class Reframer:
         product: Product,
         version: ProductVersion,
         located: dict[PurePosixPath, tuple[Page, str]],
+        standalone: bool = False,
     ) -> None:
         """Phase 22's `301.yml`: the live docsite URL of every converted topic.
 
@@ -814,12 +875,14 @@ class Reframer:
         reachable. Written into the staging tree it is copied like any other file
         and the comparison stays true.
 
-        Without `state.db` (the standalone `--input` path) nothing is written.
-        Otherwise the rules -- declared beats derived, derived rows only if the
-        sitemap lists them -- are `origins.build`'s, shared with `convert` (Phase 35).
+        Without `state.db`, or for a standalone `--input` folder, nothing is
+        written: the recorded output map is the catalog tree's, not that folder's
+        (X1-02 -- the docstring said so and the code wrote one anyway). Otherwise
+        the rules -- declared beats derived, derived rows only if the sitemap
+        lists them -- are `origins.build`'s, shared with `convert` (Phase 35).
         """
         slug, number = product.slug, version.version
-        if self.state is None:
+        if self.state is None or standalone:
             return
 
         moved = {

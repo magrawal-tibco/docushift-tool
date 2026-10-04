@@ -30,8 +30,11 @@ In Phase 5a no engine is registered, so every selected version reports
 behaviour and it is honest: the spine runs end to end and the register says so.
 """
 
+import hashlib
+import json
 import re
 import traceback
+import uuid
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass, field
 from enum import StrEnum
@@ -75,6 +78,20 @@ from docushift.utils.swap import remove, swap
 #: diffable. The key is `url` since Phase 36; it must follow the template's, or
 #: this rewrites nothing and says nothing.
 _TOC_PATH = re.compile(r'url:[ \t]*"([^"\n]*)"')
+
+#: The converter's output, versioned (X3-06). Bumped by any commit that changes
+#: what a converted tree holds -- an engine fix, a transform, a template rule --
+#: so `convert --all` rebuilds every tree rather than reporting it `current`
+#: over output the old code wrote. `reframe/policy.py:_ALGORITHM` is the same
+#: hole closed for the merge; before this, a converter fix reached a tree only
+#: through a `--force` somebody remembered.
+#:
+#: 1 = the first versioned key (X3-04 to X3-08, 2026-10-05).
+_CONVERTER_VERSION = 1
+
+#: The `config/aem_templates/` files the converter renders (X3-07). Named, not
+#: the whole folder: `sync`'s own templates must not re-convert every tree.
+_TEMPLATES = ("index.md.j2", "metadata.yml.j2", "toc.yml.j2")
 
 
 def _fragment_key(fragment: str) -> str:
@@ -263,11 +280,21 @@ class DocumentConverter:
         # is read as matching, as a blank prefix is.
         recorded_engine = metadata.get("convert_engine", "")
         engine_current = not recorded_engine or recorded_engine == str(version.engine)
+        # And everything else that shapes the tree without being in the package
+        # (X3-05, X3-06, X3-07): the converter's own version, the display name,
+        # the templates and what `301.yml` is built from. **Blank is a mismatch**
+        # here, unlike the two keys above: the code-version half exists to
+        # invalidate trees, and one built before the key existed is one of them.
+        inputs_key = self._inputs_key(product, version)
+        inputs_current = metadata.get("convert_inputs_key", "") == inputs_key
         if (not force and not standalone and checksum and checksum == converted_from
-                and prefix_current and engine_current and target.is_dir()):
+                and prefix_current and engine_current and inputs_current and target.is_dir()):
             current = ConvertResult(
                 slug, number, ConvertOutcome.CURRENT, path=target, engine=version.engine
             )
+            if self.findings is not None:
+                self.findings.point_back("CONVERT_FINDINGS_IN_EARLIER_RUN", slug, number,
+                                         metadata.get("convert_run", ""))
             # An unchanged conversion is a no-op *unless* nobody has counted it.
             # This is 4b-1's rule for `extract`, and Phase 12 is what happens
             # without it: a version converted before the output columns existed
@@ -285,8 +312,9 @@ class DocumentConverter:
             return current
 
         try:
-            return self._build(
-                product, version, handler_cls(), source, target, checksum, standalone
+            result = self._build(
+                product, version, handler_cls(), source, target, checksum, standalone,
+                inputs_key,
             )
         except Exception as exc:  # noqa: BLE001 - a failure is an outcome (R4-07)
             # Not only `OSError`. "Never raises" was a convention nothing enforced:
@@ -295,6 +323,13 @@ class DocumentConverter:
             # `<version>.part` on disk. Extraction learned the same in R3-08.
             remove(target.with_name(target.name + ".part"))
             return self._failed(slug, number, version.engine, _describe(exc))
+        if not checksum and not standalone and result.outcome is ConvertOutcome.CONVERTED:
+            # X3-08. Correct, but rebuilt on every run under a plain `converted`
+            # line: `extract --measure-only` and a failed post-swap extract leave
+            # no package checksum, and without one nothing can be called current.
+            result.message = ("no package checksum recorded, so this version is rebuilt on "
+                              "every run; `docushift extract --force` records one")
+        return result
 
     def _failed(
         self, slug: str, number: str, engine: SourceEngine, message: str
@@ -315,6 +350,7 @@ class DocumentConverter:
         target: Path,
         checksum: str,
         standalone: bool = False,
+        inputs_key: str = "",
     ) -> ConvertResult:
         """Converts every unit into a staging directory, then swaps it into place."""
         slug, number = product.slug, version.version
@@ -459,6 +495,16 @@ class DocumentConverter:
                 self._api_prefix(product, number) if context.api_urls else "",
             )
             self.state.set_version_metadata(slug, number, "convert_engine", str(version.engine))
+            self.state.set_version_metadata(slug, number, "convert_inputs_key", inputs_key)
+            # X3-04. The converted tree's identity, new on every build, which is
+            # what `reframe` and `sync` key a merge on. The package checksum they
+            # used is unchanged by `convert --force`, so a re-converted tree was
+            # merged by nothing and the old merge reported current.
+            self.state.set_version_metadata(slug, number, "convert_build_id", uuid.uuid4().hex)
+            # X3-11. The run whose findings describe this tree, for the note a
+            # `current` re-run records in place of them.
+            if self.findings is not None and self.findings.run_id:
+                self.state.set_version_metadata(slug, number, "convert_run", self.findings.run_id)
 
         # After the swap rather than over the staging directory, so the columns
         # describe the tree that is actually published from. A swap that failed
@@ -936,6 +982,33 @@ class DocumentConverter:
         """
         recorded = [] if standalone else self._recorded_paths(slug, version, "api_roots", tree)
         return recorded or find_api_roots(tree, output_roots)
+
+    def _inputs_key(self, product: Product, version: ProductVersion) -> str:
+        """A digest of what shapes the converted tree besides the package (X3-05/06/07).
+
+        The converter's version, the display name (it titles the version's
+        `toc.yml` and index), the templates the converter renders, and what
+        `301.yml` is built from -- each changed the output and left the stage
+        `current`. Read fresh per version: a template is three small files and
+        the page list one cached leaf, against a conversion.
+        """
+        slug, number = product.slug, version.version
+        templates = hashlib.sha256()
+        for name in _TEMPLATES:
+            path = self.config.aem_templates_dir / name
+            templates.update(name.encode("utf-8") + b"\0")
+            templates.update(path.read_bytes() if path.is_file() else b"")
+        shaping = {
+            "converter": _CONVERTER_VERSION,
+            "display_name": product.display_name,
+            "templates": templates.hexdigest()[:16],
+            "origins": origins.fingerprint(
+                self.config.load_origin_urls(), slug, version.zip_url,
+                origins.page_list(self.config.cache_dir, slug, number),
+            ),
+        }
+        payload = json.dumps(shaping, sort_keys=True, separators=(",", ":"))
+        return hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16]
 
     def _api_prefix(self, product: Product, version: str) -> str:
         """The publishing coordinates every one of this version's API URLs shares.

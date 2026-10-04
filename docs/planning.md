@@ -101,7 +101,7 @@ since they were written**. Phase 34 confirms or closes each one.
 | from | item | where |
 |---|---|---|
 | Phase 7 | A `sync` destination path over 260 characters failed with `[WinError 3]` and left a `.part` folder. Phases 14–15's long-path work (`utils/longpath.py`, `PUBLISHED_PATH_TOO_LONG`) may have closed it | [phase-07.md](history/phases/phase-07.md) |
-| Phase 21 | A converter change does not invalidate a merged tree: `reframe`'s currency check keys on the extracted source's checksum, so a re-conversion with new converter code is not re-merged without `--force` | [phase-21.md](history/phases/phase-21.md) |
+| Phase 21 | **Resolved by X3-04 (2026-10-05).** A converter change did not invalidate a merged tree: `reframe`'s currency check keyed on the extracted source's checksum, so a re-conversion with new converter code was not re-merged without `--force`. `reframe` now keys on the conversion's build identity (`convert_build_id`), so any re-convert makes the merge stale | [phase-21.md](history/phases/phase-21.md) |
 | Phase 34 (R1–R3) | 14 fragile-but-correct items deferred at triage, theme M: R1-09, R1-10, R2-10, R2-12 – R2-18, R3-06, R3-09, R3-10, R3-13. Plus R2-09, a catalog check for the user (113 "unclassified" products already have a family typed in) | [reports/review/INDEX.md](../reports/review/INDEX.md) |
 | Phase 34 (R4–R6) | 4 fragile-but-correct DITA/DocBook items deferred at triage, theme Z: R6-08, R6-10, R6-11, R6-13. Also deferred by decision: publishing non-English Flare builds to the `loc-` tree (Q), and converting a version that mixes two generators with both engines (T) | [reports/review/INDEX.md](../reports/review/INDEX.md) |
 | Phase 34 (R7–R9) | 8 fragile-but-correct items deferred at triage, theme AI: R7-08, R7-10, R8-09, R8-10, R8-12, R9-06, R9-07, R9-08 | [reports/review/INDEX.md](../reports/review/INDEX.md) |
@@ -202,6 +202,8 @@ The concrete deliverable of §7.1: every deferred "report line" in the three doc
 | `ORIGIN_PAGE_UNMAPPED`³³ | warn | convert ³⁵ | Live docsite pages no `301.yml` row starts from (API reference, PDFs, help frames) — each a 404 at cutover unless redirected elsewhere | Phase 33 |
 | `ORIGIN_TEMPLATE_REJECTED`³⁴ | warn | convert | A declared docsite URL template failed validation and was ignored; the version fell back to the sitemap, or wrote no `301.yml` without one | Phase 34 (R1-07) |
 | `ORIGIN_PATH_TOO_SHORT`³⁴ | warn | convert | Converted topics whose source path is shorter than the template's `drop_segments`, so they have no `301.yml` row; counted per source | Phase 34 (R1-07) |
+| `CONVERT_FINDINGS_IN_EARLIER_RUN`³⁴ | note | convert | A `current` version whose tree was built by an earlier run that recorded errors or warnings for it; names that run, so `report --run last` is not silent about a tree that still has them | Phase 34 (X3-11) |
+| `REFRAME_FINDINGS_IN_EARLIER_RUN`³⁴ | note | reframe | The same for a `current` merged tree | Phase 34 (X3-11) |
 
 ---
 

@@ -520,7 +520,7 @@ docushift catalog sitemap                                        # every in-scop
 docushift catalog sitemap --product tibco-enterprise-message-service
 ```
 
-A re-run fetches only the files whose date changed. It writes `reports/coveo-sitemap.csv`, one row per catalog version: whether the sitemap has a page list for it, and how many pages. Expect archived versions to have none — the sitemap covers current versions only. The summary also counts the files the docsite answered with its login page instead of a sitemap; those products or versions simply have no public page list.
+A re-run fetches only the files whose date changed. A version whose page list is new or has changed is rebuilt by the next plain `convert` and `reframe`; no `--force` is needed. It writes `reports/coveo-sitemap.csv`, one row per catalog version: whether the sitemap has a page list for it, and how many pages. Expect archived versions to have none — the sitemap covers current versions only. The summary also counts the files the docsite answered with its login page instead of a sitemap; those products or versions simply have no public page list.
 
 ---
 
@@ -833,7 +833,13 @@ Each run ends with five counts — converted, already current, no extracted tree
 unknown, failed — plus the documents and assets written, the asset resolution line, and
 the findings summary. Re-running is cheap on the same terms as `extract`: a version whose
 extracted tree has not changed since it was converted is skipped, and `--force` overrides.
-A changed engine (a hand correction in `versions.csv`) counts as a change. A version that
+A changed engine (a hand correction in `versions.csv`) counts as a change, and so do a new
+converter release, a `display_name` edit, an edit to the templates in `config/aem_templates/`,
+a new or refreshed `catalog sitemap` and an `origin-urls.yaml` edit: each changes what the tree
+holds, so the next plain `convert` rebuilds it. A version with no recorded package checksum
+(after `extract --measure-only`, say) is rebuilt on every run, and its line says so. A version reported current
+whose build recorded errors or warnings gets a note naming that run (`report --run N`), so
+the last run's report is not silent about a tree that still has them; `reframe` does the same. A version that
 converts **nothing** (no unit of work, or units with no topic in them) is reported failed
 and its previous output is left in place rather than replaced by an empty tree; so is a
 version whose engine hits an unexpected error, and the run goes on to the next version.
@@ -1123,9 +1129,13 @@ the same source folder, usually the guide's landing page (TRA Runtime Agent 5.13
 legal page is `tibco-runtime-agent/legal-and-third-party-notices.md`). With no such page it
 stays in its source folder. It still has no TOC row.
 
-A version whose conversion has no recorded source checksum — a set converted through
-`--input`, for instance — is re-merged on every run rather than reported as current. That is
-`convert`'s rule too: no recorded provenance, no currency claim.
+A merge is current only while the conversion beneath it is the one it was built from: every
+`convert` build, `--force` included, records a new identity for its tree, so the next plain
+`reframe` re-merges it. A new or changed `catalog sitemap`, an `origin-urls.yaml` edit and a
+`publish_base_url` change re-merge too. A conversion with no recorded identity — one made before
+this was recorded — is re-merged on every run rather than reported as current: no recorded
+provenance, no currency claim. A standalone `--input` merge records nothing against the catalog
+row, writes no `301.yml` and is never reported current.
 
 **Merging changes nothing about what gets published until you say so.** `sync` reads the
 Stage 6 tree for every product, and goes on doing that however many merged trees are sitting
@@ -1149,9 +1159,7 @@ older than the conversion beneath it, that version's `online-help` publishes **n
 the run says why — its PDFs and other documents still ship, because those come from the
 extracted package and a merge has nothing to say about them. The alternative, quietly
 publishing the unmerged topics instead, would un-merge URLs that are already live.
-"Older" includes a `convert --force` run after the merge: the package has not changed, so
-`reframe` on its own still calls the merge current, and the message tells you to run
-`docushift reframe --force` for that version.
+"Older" includes a `convert --force` run after the merge, and a plain `reframe` rebuilds it.
 
 `validate` then checks `redirects.yml` against the tree that actually shipped: a redirect
 pointing at a page or a section that is not there is a `LINK_BROKEN` error and fails the gate,

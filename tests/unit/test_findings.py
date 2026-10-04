@@ -160,9 +160,11 @@ def test_the_register_carries_every_row_of_7_5() -> None:
     `ANCHOR_WRONG_HEADING` (R11-02): a fragment that resolves, to the wrong
     topic's heading, which existence-only matching could never see. And the
     80th, `TOC_ENTRY_DUPLICATED` (R11-01): a guide published twice, which no
-    check compared one entry with another to see.
+    check compared one entry with another to see. The 81st and 82nd,
+    `CONVERT_FINDINGS_IN_EARLIER_RUN` and `REFRAME_FINDINGS_IN_EARLIER_RUN`
+    (X3-11): a `current` re-run naming the run whose findings describe the tree.
     """
-    assert len(REGISTRY) == 80
+    assert len(REGISTRY) == 82
 
 
 def test_severity_comes_from_the_registry_and_not_from_the_call_site() -> None:

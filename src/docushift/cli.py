@@ -1745,6 +1745,9 @@ def convert(ctx, bu, family, product, version, batch, select_all, force, dry_run
                 + (f", {result.generated} generated" if result.generated else "")
                 + f" -> {result.out_files} file(s)"
             )
+            # X3-08: why a version is rebuilt on every run, on the line itself.
+            if result.message:
+                console.print(f"    [dim]{escape(result.message)}[/dim]")
         elif result.outcome is ConvertOutcome.FAILED:
             console.print(f"  [red]x[/red] {result.slug}@{result.version}")
 

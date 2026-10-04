@@ -1320,3 +1320,126 @@ def test_a_locked_versions_csv_on_the_current_path_fails_the_row_not_the_run(
 
     assert again.outcome is ConvertOutcome.FAILED
     assert "open in Excel" in again.message
+
+
+# -- a tree that should be rebuilt is not reported current (XE) -------------------
+
+
+def test_a_sitemap_arriving_after_conversion_makes_the_tree_stale(
+    config, catalog, product, version, extracted, fake_engine
+) -> None:
+    """X3-05. Converted before `catalog sitemap`, the version had no `301.yml`
+    and every later run said `current` and kept it that way."""
+    first, _ = convert(config, catalog, product, version)
+    assert not (first.path / "301.yml").exists()
+    assert convert(config, catalog, product, version)[0].outcome is ConvertOutcome.CURRENT
+
+    cache_sitemap(config, product, version, listed_urls(catalog, product, version))
+    again, _ = convert(config, catalog, product, version)
+
+    assert again.outcome is ConvertOutcome.CONVERTED
+    assert (again.path / "301.yml").is_file()
+    assert convert(config, catalog, product, version)[0].outcome is ConvertOutcome.CURRENT
+
+
+def test_an_origin_template_edit_makes_the_tree_stale(
+    config, catalog, product, version, extracted, fake_engine
+) -> None:
+    """X1-08. `origin-urls.yaml` shapes `301.yml` and was outside the key."""
+    convert(config, catalog, product, version)
+    (config.config_dir / "origin-urls.yaml").write_text(
+        "products:\n  tibco-ems:\n    template: 'https://docs.tibco.com/pub/{folder_path}/doc/{path}'\n"
+        "    drop_segments: 1\n", encoding="utf-8")
+    config._origin_urls_cache = None
+
+    assert convert(config, catalog, product, version)[0].outcome is ConvertOutcome.CONVERTED
+
+
+def test_a_display_name_edit_makes_the_tree_stale(
+    config, catalog, product, version, extracted, fake_engine
+) -> None:
+    """X3-07. The display name titles the version's `toc.yml`."""
+    convert(config, catalog, product, version)
+    renamed = catalog.get_product("tibco-ems")
+    renamed.display_name = "Spotfire EMS"
+
+    again, _ = convert(config, catalog, renamed, version)
+
+    assert again.outcome is ConvertOutcome.CONVERTED
+    assert "Spotfire EMS" in (again.path / "toc.yml").read_text(encoding="utf-8")
+
+
+def test_a_template_edit_makes_the_tree_stale(
+    config, catalog, product, version, extracted, fake_engine
+) -> None:
+    """X3-07. `config/aem_templates/` renders the generated pages and `toc.yml`."""
+    convert(config, catalog, product, version)
+    template = config.aem_templates_dir / "metadata.yml.j2"
+    template.write_text(template.read_text(encoding="utf-8") + "\n# edited\n", encoding="utf-8")
+
+    assert convert(config, catalog, product, version)[0].outcome is ConvertOutcome.CONVERTED
+
+
+def test_a_converter_version_bump_makes_every_tree_stale(
+    config, catalog, product, version, extracted, fake_engine, monkeypatch
+) -> None:
+    """X3-06. Reframe has `_ALGORITHM`; convert had nothing, so a converter fix
+    reached a converted tree only through a `--force` somebody remembered."""
+    from docushift.converter import driver
+
+    convert(config, catalog, product, version)
+    monkeypatch.setattr(driver, "_CONVERTER_VERSION", driver._CONVERTER_VERSION + 1)
+
+    assert convert(config, catalog, product, version)[0].outcome is ConvertOutcome.CONVERTED
+
+
+def test_every_build_records_a_new_identity_and_a_current_run_keeps_it(
+    config, catalog, product, version, extracted, fake_engine
+) -> None:
+    """X3-04. What `reframe` keys on: the identity of the converted tree, which
+    a `convert --force` changes even when the package does not."""
+    def build_id() -> str:
+        return catalog.state.get_version_metadata("tibco-ems", "10.4.0").get("convert_build_id", "")
+
+    convert(config, catalog, product, version)
+    first = build_id()
+    convert(config, catalog, product, version)
+    assert first and build_id() == first
+
+    convert(config, catalog, product, version, force=True)
+
+    assert build_id() and build_id() != first
+
+
+def test_a_version_with_no_package_checksum_says_why_it_is_rebuilt(
+    config, catalog, product, version, extracted, fake_engine
+) -> None:
+    """X3-08. Such a version is rebuilt on every run, correctly, under a plain
+    `converted` line that never said why."""
+    catalog.state.set_version_metadata("tibco-ems", "10.4.0", "extract_zip_checksum", "")
+
+    first, _ = convert(config, catalog, product, version)
+    again, _ = convert(config, catalog, product, version)
+
+    assert [first.outcome, again.outcome] == [ConvertOutcome.CONVERTED] * 2
+    assert "no package checksum" in again.message
+
+
+def test_a_current_run_points_at_the_run_that_holds_the_trees_findings(
+    config, catalog, product, version, extracted, fake_engine
+) -> None:
+    """X3-11. Run 1 "1 error, 10 warnings", run 2 nothing: `report --run last`
+    stopped showing errors the tree still had. A note now names the run."""
+    first = FindingsRun("convert", store=catalog.state).start()
+    DocumentConverter(config, catalog, findings=first).convert_one(product, version)
+    first.finish()
+    assert first.counts()[Severity.ERROR]
+
+    second = FindingsRun("convert", store=catalog.state).start()
+    result = DocumentConverter(config, catalog, findings=second).convert_one(product, version)
+    second.finish()
+
+    assert result.outcome is ConvertOutcome.CURRENT
+    (pointer,) = [f for f in second.all if f.code == "CONVERT_FINDINGS_IN_EARLIER_RUN"]
+    assert f"run {first.run_id}" in pointer.message and "error" in pointer.message
+    assert f"docushift report --run {first.run_id}" in pointer.message

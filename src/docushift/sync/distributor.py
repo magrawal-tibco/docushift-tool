@@ -351,31 +351,36 @@ class WorkspaceDistributor:
         same version metadata, so a merge `docushift reframe` would rebuild is one
         `sync` declines to publish.
 
-        **The second is what the first cannot see** (Phase 34, R10-06). Both
-        checksums are the *package's*, and `convert --force` re-converts without
-        changing it, so a merge built from the previous conversion still matched
-        and was published as current. Which tree was built last is read from the
-        trees themselves (`_built_at`). Here `sync` is stricter than `reframe`,
-        which does not yet notice a forced re-convert either (Phase 21's carried
-        item); the message names `--force` for that reason.
+        Those two values are the conversion's build identity and the one the
+        merge was built from (X3-04). They were the *package's* checksum on both
+        sides, which `convert --force` writes again unchanged, so `reframe` called
+        a merge current over a re-converted tree; both stages now key on the
+        build, so a plain `reframe` rebuilds what this refuses.
+
+        **The second is what the first cannot see** (Phase 34, R10-06): which tree
+        was built last, read from the trees themselves (`_built_at`). With the
+        build identity in the first test it now catches only a tree changed
+        without its record -- a conversion interrupted between its swap and its
+        state rows -- and the message names `--force` for that case.
 
         This lives in `sync` rather than in `validate` because `validate` takes no
         catalog on purpose (§7.1, "the target is the evidence"). A checker that
         needed the state DB could not check the one tree somebody most wants checked.
         """
         metadata = self.catalog.state.get_version_metadata(slug, number) if self.catalog.state else {}
-        converted_from = metadata.get("convert_source_checksum", "")
-        merged_from = metadata.get("reframe_source_checksum", "")
+        converted_from = metadata.get("convert_build_id", "")
+        merged_from = metadata.get("reframe_convert_build", "")
         if merged_from and converted_from and merged_from == converted_from:
             if _built_at(converted) > _built_at(merged):
                 return ("the merged tree was built before the conversion beneath it was re-run; "
                         "re-run `docushift reframe --force`")
             return None
         # No recorded provenance, no currency claim -- the rule `reframe` inherited
-        # from `convert` and the safe direction. The six DataSynapse Flare versions
-        # have no `convert_source_checksum` at all and land here.
+        # from `convert` and the safe direction. A tree converted or merged before
+        # build identities were recorded (X3-04) lands here until both re-run.
         if not merged_from or not converted_from:
-            return "the merge or the conversion recorded no source checksum, so neither can be vouched for"
+            return ("the merge or the conversion beneath it recorded no build identity, so "
+                    "neither can be vouched for; re-run `docushift convert`, then `docushift reframe`")
         return "the merged tree is older than the conversion beneath it; re-run `docushift reframe`"
 
     def _too_long(
