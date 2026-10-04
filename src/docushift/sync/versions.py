@@ -32,6 +32,7 @@ an intentional addition from a typo -- so it does not adjudicate.
 """
 
 import re
+from collections.abc import Iterable
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
@@ -108,6 +109,25 @@ def listed(version: ProductVersion) -> bool:
     return not version.is_archived or version.convert_eligible
 
 
+def ordered(versions: Iterable[ProductVersion]) -> list[ProductVersion]:
+    """Newest first by version, with non-numeric strings last in plain order.
+
+    The drop-down's order and the archives index's, from one function so the two
+    cannot drift apart (Phase 34, R10-15).
+    """
+    rows = list(versions)
+    numeric = sorted(
+        (v for v in rows if is_numeric_version(v.version)),
+        key=lambda v: natural_version_key(v.version),
+        reverse=True,
+    )
+    trailing = sorted(
+        (v for v in rows if not is_numeric_version(v.version)),
+        key=lambda v: v.version.lower(),
+    )
+    return [*numeric, *trailing]
+
+
 def generated_rows(versions: list[ProductVersion], present: set[str]) -> list[VersionRow]:
     """The catalog's listed rows for one product (`listed`), narrowed to what is on disk.
 
@@ -124,18 +144,9 @@ def generated_rows(versions: list[ProductVersion], present: set[str]) -> list[Ve
     surface, which is why `VERSION_NOT_NUMERIC` is a warning and not a note.
     """
     selected = [v for v in versions if listed(v) and version_segment(v.version) in present]
-    numeric = sorted(
-        (v for v in selected if is_numeric_version(v.version)),
-        key=lambda v: natural_version_key(v.version),
-        reverse=True,
-    )
-    trailing = sorted(
-        (v for v in selected if not is_numeric_version(v.version)),
-        key=lambda v: v.version.lower(),
-    )
     return [
         VersionRow(title=title_for(v), path=f"/{version_segment(v.version)}")
-        for v in (*numeric, *trailing)
+        for v in ordered(selected)
     ]
 
 

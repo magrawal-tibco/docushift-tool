@@ -12,6 +12,7 @@ their errors describe one file in a version that otherwise did its work.
 """
 
 import csv
+from collections.abc import Callable
 from pathlib import Path
 
 import click
@@ -43,14 +44,6 @@ console = Console(emoji=False)
 DIR_PATH = click.Path(file_okay=False, path_type=Path)
 
 
-def _pending(command: str, phase: str) -> None:
-    """Aborts with a clear message for a command that is scaffolded but not built."""
-    raise click.ClickException(
-        f"`docushift {command}` is not implemented yet (scheduled for {phase}). "
-        f"See docs/planning.md for the roadmap."
-    )
-
-
 def _no_selection(command: str) -> None:
     """Exits 1 for a selection that matched nothing -- `architecture.md` §7.4.
 
@@ -69,24 +62,77 @@ def _no_selection(command: str) -> None:
     raise click.exceptions.Exit(1)
 
 
-def _scope_options(func):
-    """Shared --bu / --family / --product / --version / --batch / --all selection options."""
-    for option in reversed(
-        [
-            click.option("--all", "select_all", is_flag=True, help="Apply to the whole catalog."),
-            click.option("--bu", default=None, help="Restrict to a business unit (tibco | ibi)."),
-            click.option("--family", default=None, help="Restrict to a product family."),
-            click.option("--product", "product", default=None, help="Restrict to one product (slug or product_code)."),
-            click.option("--version", default=None, help="Restrict to a single version."),
-            click.option(
-                "--batch",
-                default=None,
-                help="Restrict to versions tagged with this convert_batch label, e.g. poc-1.",
-            ),
-        ]
-    ):
+def _product_selectors() -> list:
+    """--bu / --family / --product: the part of a selection that names products."""
+    return [
+        click.option("--bu", default=None, help="Restrict to a business unit (tibco | ibi)."),
+        click.option("--family", default=None, help="Restrict to a product family."),
+        click.option("--product", "product", default=None, help="Restrict to one product (slug or product_code)."),
+    ]
+
+
+def _with_options(func, options: list):
+    """Applies `options` so that `--help` lists them in the order given."""
+    for option in reversed(options):
         func = option(func)
     return func
+
+
+def _scope_options(func):
+    """Shared --bu / --family / --product / --version / --batch / --all selection options."""
+    return _with_options(func, [
+        click.option("--all", "select_all", is_flag=True, help="Apply to the whole catalog."),
+        *_product_selectors(),
+        click.option("--version", default=None, help="Restrict to a single version."),
+        click.option(
+            "--batch",
+            default=None,
+            help="Restrict to versions tagged with this convert_batch label, e.g. poc-1.",
+        ),
+    ])
+
+
+def _product_options(func):
+    """--bu / --family / --product alone, for a command that lists products' rows."""
+    return _with_options(func, _product_selectors())
+
+
+def _target_options(target_help: str = "Synced workspace to read."):
+    """The target and three selectors `validate` takes, shared with the three `csh`
+    subcommands. Only the target's help line differs between them."""
+    return lambda func: _with_options(func, [
+        click.option("--target-dir", type=DIR_PATH, required=True, help=target_help),
+        click.option("--product", "product", default=None,
+                     help="Restrict to one published product slug."),
+        click.option("--version", default=None,
+                     help="Restrict to one version (10.4.0 or 10-4-0)."),
+        click.option("--doc-class", "doc_class", default=None,
+                     help="Restrict to one doc-class folder."),
+    ])
+
+
+def _input_options(input_dir: Path | None, output_dir: Path | None, product, version) -> None:
+    """The `--input` rules `convert` and `reframe` share (Phase 34, R12-18)."""
+    if (input_dir is None) != (output_dir is None):
+        raise click.ClickException("--input and --output are used together, or not at all.")
+    if input_dir is not None and not (product and version):
+        raise click.ClickException("--input needs --product and --version to name the catalog row.")
+
+
+def _run_rows(pairs, input_dir: Path | None, one: Callable, many: Callable, stats_type,
+              on_result: Callable):
+    """The one `--input` row, or the whole selection, as a stats object.
+
+    `--input` names a single catalog row by `--product` and `--version`, so its
+    selection is that row; `one` runs it, `many` runs everything else.
+    """
+    if input_dir is None:
+        return many()
+    found, ver = pairs[0]
+    result = one(found, ver)
+    stats = stats_type(results=[result])
+    on_result(result)
+    return stats
 
 
 class _DocuShiftGroup(click.Group):
@@ -1701,15 +1747,12 @@ def convert(ctx, bu, family, product, version, batch, select_all, force, dry_run
     A version whose engine has no registered converter is skipped and named --
     never guessed at.
     """
-    from docushift.converter import ConvertOutcome, DocumentConverter
+    from docushift.converter import ConvertOutcome, ConvertStats, DocumentConverter
 
     cfg: ConfigManager = ctx.obj["config"]
     manager = _catalog_manager(ctx)
 
-    if (input_dir is None) != (output_dir is None):
-        raise click.ClickException("--input and --output are used together, or not at all.")
-    if input_dir is not None and not (product and version):
-        raise click.ClickException("--input needs --product and --version to name the catalog row.")
+    _input_options(input_dir, output_dir, product, version)
 
     pairs = _download_selection(manager, bu, family, product, version, batch, select_all)
     if not pairs:
@@ -1755,17 +1798,13 @@ def convert(ctx, bu, family, product, version, batch, select_all, force, dry_run
     # `start()` left the run open, and it became `report --run last`.
     exit_code = 1
     try:
-        if input_dir is not None:
-            found, ver = pairs[0]
-            stats_results = [
-                converter.convert_one(found, ver, force=force, tree=input_dir, output=output_dir)
-            ]
-            from docushift.converter import ConvertStats
-
-            stats = ConvertStats(results=stats_results)
-            on_result(stats_results[0])
-        else:
-            stats = converter.convert_many(pairs, force=force, on_result=on_result)
+        stats = _run_rows(
+            pairs, input_dir,
+            lambda found, ver: converter.convert_one(found, ver, force=force, tree=input_dir,
+                                                     output=output_dir),
+            lambda: converter.convert_many(pairs, force=force, on_result=on_result),
+            ConvertStats, on_result,
+        )
         exit_code = 1 if stats.failures else 0
     finally:
         findings.finish(exit_code=exit_code)
@@ -1890,15 +1929,12 @@ def reframe(ctx, bu, family, product, version, batch, select_all, force, dry_run
     warned about. The converted tree is read and never written to, so a boundary
     rule can be tuned and the merge re-run without re-converting anything.
     """
-    from docushift.reframe import ReframeOutcome, Reframer, policy_for
+    from docushift.reframe import ReframeOutcome, Reframer, ReframeStats, policy_for
 
     cfg: ConfigManager = ctx.obj["config"]
     manager = _catalog_manager(ctx)
 
-    if (input_dir is None) != (output_dir is None):
-        raise click.ClickException("--input and --output are used together, or not at all.")
-    if input_dir is not None and not (product and version):
-        raise click.ClickException("--input needs --product and --version to name the catalog row.")
+    _input_options(input_dir, output_dir, product, version)
 
     pairs = _download_selection(manager, bu, family, product, version, batch, select_all)
     if not pairs:
@@ -1943,17 +1979,13 @@ def reframe(ctx, bu, family, product, version, batch, select_all, force, dry_run
     # an exception after `start()` left the run open as `report --run last`.
     failed = 1
     try:
-        if input_dir is not None:
-            found, ver = pairs[0]
-            stats_results = [
-                reframer.reframe_one(found, ver, force=force, source=input_dir, output=output_dir)
-            ]
-            from docushift.reframe import ReframeStats
-
-            stats = ReframeStats(results=stats_results)
-            on_result(stats_results[0])
-        else:
-            stats = reframer.reframe_many(pairs, force=force, on_result=on_result)
+        stats = _run_rows(
+            pairs, input_dir,
+            lambda found, ver: reframer.reframe_one(found, ver, force=force, source=input_dir,
+                                                    output=output_dir),
+            lambda: reframer.reframe_many(pairs, force=force, on_result=on_result),
+            ReframeStats, on_result,
+        )
 
         # The exit gate `sync` and `validate` use. `convert` gates on failed rows
         # only (R12-06), not on error findings. The difference is what an error
@@ -2141,9 +2173,7 @@ def sync(ctx, bu, family, product, version, batch, select_all, target_dir, force
         # line per selected version would repeat one product's history N times.
         if resources:
             for found in {p.slug: p for p, _ in pairs}.values():
-                entries = archive_index.entries_for(
-                    found, cfg.archive_dir(found.bu, found.family)
-                )
+                entries = archive_index.entries_for(found, distributor.archive_path_of(found))
                 if entries:
                     console.print(
                         f"[dim]{found.slug}: {len(entries)} archived version(s) -> "
@@ -2182,10 +2212,7 @@ def sync(ctx, bu, family, product, version, batch, select_all, target_dir, force
 
 
 @main.command()
-@click.option("--target-dir", type=DIR_PATH, required=True, help="Synced workspace to validate.")
-@click.option("--product", "product", default=None, help="Restrict to one published product slug.")
-@click.option("--version", default=None, help="Restrict to one version (10.4.0 or 10-4-0).")
-@click.option("--doc-class", "doc_class", default=None, help="Restrict to one doc-class folder.")
+@_target_options("Synced workspace to validate.")
 @click.option(
     "--check-external",
     is_flag=True,
@@ -2408,21 +2435,8 @@ def _published(target_dir: Path, product, version, doc_class, command: str):
     return selection
 
 
-def _target_options(func):
-    """The three selectors `validate` takes, shared by all three subcommands."""
-    func = click.option("--doc-class", "doc_class", default=None,
-                        help="Restrict to one doc-class folder.")(func)
-    func = click.option("--version", default=None,
-                        help="Restrict to one version (10.4.0 or 10-4-0).")(func)
-    func = click.option("--product", "product", default=None,
-                        help="Restrict to one published product slug.")(func)
-    func = click.option("--target-dir", type=DIR_PATH, required=True,
-                        help="Synced workspace to read.")(func)
-    return func
-
-
 @csh_group.command("list")
-@_target_options
+@_target_options()
 @click.option(
     "--identifier",
     default=None,
@@ -2537,7 +2551,7 @@ def _csh_lookup(maps, identifier: str) -> None:
 
 
 @csh_group.command("report")
-@_target_options
+@_target_options()
 @click.option(
     "--since",
     default=None,
@@ -2639,7 +2653,7 @@ def _csh_since(coverages, since: str) -> None:
 
 
 @csh_group.command("validate")
-@_target_options
+@_target_options()
 @click.pass_context
 def csh_validate(ctx: click.Context, target_dir: Path, product, version, doc_class) -> None:
     """The CSH checks alone: `csh.yml`, the frontmatter mirror, and §7.6's regression.
@@ -3030,9 +3044,7 @@ def archive() -> None:
 
 
 @archive.command("list")
-@click.option("--bu", default=None, help="Restrict to a business unit (tibco | ibi).")
-@click.option("--family", default=None, help="Restrict to a product family.")
-@click.option("--product", "product", default=None, help="Restrict to one product (slug or product_code).")
+@_product_options
 @click.pass_context
 def archive_list(ctx: click.Context, bu, family, product) -> None:
     """List archived versions and their ZIP endpoints."""

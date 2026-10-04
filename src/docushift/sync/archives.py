@@ -36,15 +36,13 @@ them against the 60-product API sample §10.6 was written from:
   downloads only, with no link to the published folder.
 """
 
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 from pathlib import Path
 from urllib.parse import quote
 
 from docushift.models import Product, ProductVersion
-from docushift.sync.versions import release_month
-from docushift.utils.csvio import natural_version_key
-from docushift.utils.slug import is_numeric_version
+from docushift.sync.versions import ordered, release_month
 from docushift.utils.templating import template
 
 ARCHIVES = "archives"
@@ -76,7 +74,7 @@ class ArchiveEntry:
 
 def entries_for(
     product: Product,
-    archive_path: Path | None = None,
+    archive_path: Callable[[str], Path] | None = None,
     versions: Iterable[ProductVersion] | None = None,
 ) -> list[ArchiveEntry]:
     """One product's archived rows, newest first.
@@ -87,23 +85,17 @@ def entries_for(
     same rule `version.yml` follows, because they are upstream parse artifacts
     rather than versions and putting them first would head the history with one.
 
-    `archive_path` is called per row to locate a downloaded ZIP; passing `None`
-    means nothing is on disk, which is the whole corpus's state today.
+    `archive_path` is called with each row's version to locate a downloaded ZIP --
+    `ConfigManager.archive_path`, the path `archive download` writes, so the two
+    cannot disagree about the name (R10-14). Passing `None` means nothing is on
+    disk, which is the whole corpus's state today.
     """
     rows = [v for v in (versions if versions is not None else product.versions.values())
             if v.is_archived]
-    numeric = sorted(
-        (v for v in rows if is_numeric_version(v.version)),
-        key=lambda v: natural_version_key(v.version),
-        reverse=True,
-    )
-    trailing = sorted(
-        (v for v in rows if not is_numeric_version(v.version)), key=lambda v: v.version.lower()
-    )
 
     entries: list[ArchiveEntry] = []
-    for version in (*numeric, *trailing):
-        local = archive_path / f"{product.slug}-{version.version}.zip" if archive_path else None
+    for version in ordered(rows):
+        local = archive_path(version.version) if archive_path else None
         on_disk = local is not None and local.is_file()
         entries.append(
             ArchiveEntry(

@@ -54,7 +54,8 @@ the only place in Stage 7 that has heard of Reframe.
 
 import filecmp
 import shutil
-from collections.abc import Callable, Iterable
+from collections.abc import Callable, Iterable, Iterator
+from contextlib import contextmanager
 from dataclasses import dataclass, field
 from enum import StrEnum
 from pathlib import Path
@@ -241,6 +242,10 @@ class WorkspaceDistributor:
         """
         tree = self.config.resources_tree_name(product.bu, product.family)
         return target / tree / slugify(self.config.locale) / path_segment(product.slug, "slug")
+
+    def archive_path_of(self, product: Product) -> Callable[[str], Path]:
+        """Where `archive download` puts one of `product`'s archived ZIPs, by version."""
+        return lambda number: self.config.archive_path(product.bu, product.family, product.slug, number)
 
     def content_tree(self, product: Product, version: ProductVersion, tree: Path) -> Path:
         """The directory inside the extracted tree where content actually starts.
@@ -432,9 +437,7 @@ class WorkspaceDistributor:
         must not survive in the published tree, and `version.yml` one level up must
         not be reached by the replacement that removes it.
         """
-        staging = destination.with_name(destination.name + STAGING_SUFFIX)
-        remove(staging)
-        try:
+        with _staged(destination) as staging:
             staging.parent.mkdir(parents=True, exist_ok=True)
             # `copy2` rather than `copy`, so mtime survives the copy -- which is
             # what makes `_identical` able to tell a re-sync from a human's edit.
@@ -452,10 +455,6 @@ class WorkspaceDistributor:
                             ignore=_unpublished(long_path(source)))
             files = [path for _relative, path in walk_files(staging)]
             size = sum(path.stat().st_size for path in files)
-            swap(staging, destination)
-        except BaseException:
-            remove(staging)  # Phase 15c: never leave `.part` in a published tree.
-            raise
         return len(files), size
 
     # -- one version's documents (6c) ------------------------------------------
@@ -607,9 +606,7 @@ class WorkspaceDistributor:
         `_documents_current` compares mtime, and only a copy that preserves it can
         tell a re-sync from a human's edit.
         """
-        staging = destination.with_name(destination.name + STAGING_SUFFIX)
-        remove(staging)
-        try:
+        with _staged(destination) as staging:
             staging.mkdir(parents=True, exist_ok=True)
             size = 0
             for entry in entries:
@@ -624,10 +621,6 @@ class WorkspaceDistributor:
             )
             for name, text in self._catalog_rendered(product, version, doc_class).items():
                 textfile.write_text(staging / name, text)
-            swap(staging, destination)
-        except BaseException:
-            remove(staging)  # Phase 15c: never leave `.part` in a published tree.
-            raise
         return len(entries), size
 
     def _catalog_rendered(
@@ -749,9 +742,7 @@ class WorkspaceDistributor:
         folder* rather than the content, and leaving it out would make this the one
         version folder in the layout that carries no version.
         """
-        staging = destination.with_name(destination.name + STAGING_SUFFIX)
-        remove(staging)
-        try:
+        with _staged(destination) as staging:
             staging.mkdir(parents=True, exist_ok=True)
             for root in roots:
                 # Both ends prefixed, for two different reasons (Phase 15e). The
@@ -771,15 +762,6 @@ class WorkspaceDistributor:
                     [("csg-version", version.version)], self.config.aem_templates_dir, "version"
                 ),
             )
-            swap(staging, destination)
-        except BaseException:
-            # The staging tree is this tool's private vocabulary, and `destination`
-            # is a directory it does not own. A half-copied `.part` left in a
-            # published workspace is unreadable litter to whoever looks next, and
-            # `remove` on the way *in* only cleans it up if there is a next run
-            # (Phase 15c).
-            remove(staging)
-            raise
         return sum(root.files for root in roots), sum(root.bytes for root in roots)
 
     def _overflowing(
@@ -834,9 +816,7 @@ class WorkspaceDistributor:
         """
         if not self.config.publishes_resources():
             return None
-        entries = archive_index.entries_for(
-            product, self.config.archive_dir(product.bu, product.family)
-        )
+        entries = archive_index.entries_for(product, self.archive_path_of(product))
         if not entries:
             return None
 
@@ -874,9 +854,7 @@ class WorkspaceDistributor:
         `csg-product` at product level, not `csg-version`: this folder spans every
         version the product ever had, so there is no version for it to carry.
         """
-        staging = destination.with_name(destination.name + STAGING_SUFFIX)
-        remove(staging)
-        try:
+        with _staged(destination) as staging:
             staging.mkdir(parents=True, exist_ok=True)
             size = 0
             for entry in entries:
@@ -894,12 +872,6 @@ class WorkspaceDistributor:
                 navigation.render_metadata([("csg-product", product.display_name)],
                                            templates, "product"),
             )
-            swap(staging, destination)
-        except BaseException:
-            # The other three placers' guard, which this one lacked (R10-09): a ZIP
-            # copy that fails partway left `archives.part` in the published tree.
-            remove(staging)  # Phase 15c: never leave `.part` in a published tree.
-            raise
         return size
 
     # -- one product -----------------------------------------------------------
@@ -1199,6 +1171,27 @@ def _identical(source: Path, target: Path) -> bool:
     if left.keys() != right.keys():
         return False
     return all(filecmp.cmp(left[name], right[name], shallow=True) for name in left)
+
+
+@contextmanager
+def _staged(destination: Path) -> Iterator[Path]:
+    """`destination`'s staging sibling, for the caller to build, then swapped in.
+
+    The one build-and-swap all four placers share (Phase 34, R10-15), so none can
+    lose the cleanup again, as the archives placer once did (R10-09). On any
+    failure the staging tree is removed: it is this tool's private vocabulary,
+    and `destination` is a directory it does not own. A half-copied `.part` left
+    in a published workspace is unreadable litter to whoever looks next, and the
+    `remove` on the way *in* only cleans it up if there is a next run (Phase 15c).
+    """
+    staging = destination.with_name(destination.name + STAGING_SUFFIX)
+    remove(staging)
+    try:
+        yield staging
+        swap(staging, destination)
+    except BaseException:
+        remove(staging)  # Phase 15c: never leave `.part` in a published tree.
+        raise
 
 
 def _recovered(destination: Path) -> str | None:

@@ -189,25 +189,32 @@ def _check_toc(folder: VersionFolder, index: FolderIndex) -> list[Finding]:
         reference = refs.classify(raw)
         if reference.kind is not refs.ReferenceKind.RELATIVE:
             continue
-        # A `toc.yml` path is written from the version folder's root, not from the
-        # file that carries it -- there is only one such file, and it is at the root.
-        target = str(refs.resolve(PurePosixPath("."), reference.path))
-        if target not in index.present:
-            actual = index.actual_case(target)
-            detail = (
-                f"differs only in case from {actual}" if actual
-                else "is not in this version folder"
-            )
-            findings.append(Finding("LINK_BROKEN", slug=folder.slug, version=folder.segment,
-                                    path=where, message=f"{raw} {detail}"))
-        elif reference.fragment and PurePosixPath(target).suffix.lower() == ".md":
-            miss = anchor_miss(reference.fragment, index.anchors(target))
-            if miss is not None:
-                findings.append(Finding(
-                    "ANCHOR_MISSING", slug=folder.slug, version=folder.segment, path=where,
-                    message=f"#{reference.fragment} is not an anchor in {target}{miss}",
-                ))
+        _target, finding = _check_path(folder, index, where, raw, reference)
+        if finding is not None:
+            findings.append(finding)
     return findings + _duplicated(folder, index, where, loaded.document)
+
+
+def _check_path(folder: VersionFolder, index: FolderIndex, where: str, raw: str,
+                reference: refs.Reference) -> tuple[str, Finding | None]:
+    """One `toc.yml` or redirect path: its target, and the finding it earns, if any.
+
+    The path is written from the version folder's root, not from the file that
+    carries it -- there is only one such file, and it is at the root.
+    """
+    target = str(refs.resolve(PurePosixPath("."), reference.path))
+    detail = index.missing(target)
+    if detail is not None:
+        return target, Finding("LINK_BROKEN", slug=folder.slug, version=folder.segment,
+                               path=where, message=f"{raw} {detail}")
+    if reference.fragment and PurePosixPath(target).suffix.lower() == ".md":
+        miss = anchor_miss(reference.fragment, index.anchors(target))
+        if miss is not None:
+            return target, Finding(
+                "ANCHOR_MISSING", slug=folder.slug, version=folder.segment, path=where,
+                message=f"#{reference.fragment} is not an anchor in {target}{miss}",
+            )
+    return target, None
 
 
 def _toc_siblings(node: object) -> list[list[dict]]:
@@ -328,28 +335,11 @@ def _check_redirects(folder: VersionFolder, index: FolderIndex,
         reference = refs.classify(raw)
         if reference.kind is not refs.ReferenceKind.RELATIVE:
             continue
-        target = str(refs.resolve(PurePosixPath("."), reference.path))
-        if target not in index.present:
-            actual = index.actual_case(target)
-            detail = (
-                f"differs only in case from {actual}" if actual
-                else "is not in this version folder"
-            )
-            findings.append(Finding(
-                "LINK_BROKEN", slug=folder.slug, version=folder.segment, path=where,
-                message=f"{raw} {detail}",
-            ))
-            continue
-        miss = (
-            anchor_miss(reference.fragment, index.anchors(target))
-            if reference.fragment and PurePosixPath(target).suffix.lower() == ".md"
-            else None
-        )
-        if miss is not None:
-            findings.append(Finding(
-                "ANCHOR_MISSING", slug=folder.slug, version=folder.segment, path=where,
-                message=f"#{reference.fragment} is not an anchor in {target}{miss}",
-            ))
+        target, finding = _check_path(folder, index, where, raw, reference)
+        if finding is not None:
+            findings.append(finding)
+            if finding.code == "LINK_BROKEN":
+                continue
         if file_name == REDIRECTS:
             findings.extend(_shadowed(folder, index, where, source, target))
     return findings

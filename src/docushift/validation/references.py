@@ -51,9 +51,6 @@ _HTML_REF = re.compile(
     r"<(?:a|img|source|iframe|link|embed|video|audio)\b[^>]*?\b(?:href|src|poster)\s*=\s*" + _ATTR,
     re.IGNORECASE,
 )
-# `id=` and `name=` on any tag: an anchor target the engines emit 11,887 times in
-# 2,036 files of the sample, and the reason an anchor check can work at all.
-_HTML_ANCHOR = re.compile(r"<[a-zA-Z][^>]*?\b(?:id|name)\s*=\s*" + _ATTR, re.IGNORECASE)
 
 # Inline link or image. The destination is either `<bracketed>` or bare, and an
 # optional title follows in any of Markdown's three quotings.
@@ -217,18 +214,6 @@ def references(text: str) -> list[RawReference]:
     for match in _HTML_REF.finditer(masked):
         found.append(RawReference(_value(match, 1, 2, 3), line_of(match.start()), "html"))
     return [ref for ref in found if ref.raw.strip()]
-
-
-def slugify_heading(title: str) -> str:
-    """A heading's anchor, GitHub's way: tags out, punctuation out, spaces to dashes.
-
-    Re-exported from `utils/anchors.py` rather than defined here. It used to live
-    in this module, which was right while the checker was its only caller; once
-    Reframe had to *emit* the same anchor (Phase 29) a second copy would have let
-    the writer and the checker agree with each other and both be wrong about what
-    the platform does.
-    """
-    return anchors_util.slugify_heading(title)
 
 
 def headings(text: str) -> dict[str, tuple[int, str]]:

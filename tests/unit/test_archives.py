@@ -111,7 +111,8 @@ def test_a_downloaded_zip_is_preferred_over_the_docsite(product: Product, tmp_pa
     local = tmp_path / "tibco-ems-8.5.0.zip"
     local.write_bytes(b"PK" * 40)
 
-    entries = {entry.version: entry for entry in archives.entries_for(product, tmp_path)}
+    located = archives.entries_for(product, lambda number: tmp_path / f"tibco-ems-{number}.zip")
+    entries = {entry.version: entry for entry in located}
 
     assert entries["8.5.0"].available
     assert entries["8.5.0"].url == "tibco-ems-8.5.0.zip"

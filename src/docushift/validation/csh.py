@@ -164,12 +164,8 @@ def check_map(found: MapFile, index: FolderIndex) -> list[Finding]:
     findings: list[Finding] = []
     for identifier, value in sorted(mapping.items()):
         target, _, anchor = value.partition("#")
-        if target not in index.present:
-            actual = index.actual_case(target)
-            detail = (
-                f"differs only in case from {actual}" if actual
-                else "is not in this version folder"
-            )
+        detail = index.missing(target)
+        if detail is not None:
             findings.append(Finding("LINK_BROKEN", slug=folder.slug, version=folder.segment,
                                     path=where, message=f"{identifier} -> {target} {detail}"))
             continue

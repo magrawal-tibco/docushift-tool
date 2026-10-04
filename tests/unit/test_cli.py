@@ -20,15 +20,6 @@ from docushift.discovery import CrawlResult, DocsiteCrawler
 from docushift.state import StateStore
 from tests.conftest import REPO_ROOT, make_product, make_version
 
-# `download` and `archive download` left this list in Phase 4a, `extract` in 4b-1,
-# `convert` in 5a, `sync` in 6b, `status`/`report` in 7a, and `validate` in 7b.
-#
-# **The list is empty and the test over it still runs.** Kept rather than deleted
-# because `_pending` is still in `cli.py` and Phase 7c's `csh` group will use it:
-# an empty parametrization is the honest record that every declared command is now
-# built, and the harness is here for the next one that is not.
-PENDING_COMMANDS: list[list[str]] = []
-
 
 @pytest.fixture
 def runner() -> CliRunner:
@@ -123,14 +114,6 @@ def test_batch_is_a_selector_on_every_stage(runner: CliRunner, command: str) -> 
 
     assert result.exit_code == 0
     assert "--batch" in result.output
-
-
-@pytest.mark.parametrize("argv", PENDING_COMMANDS, ids=lambda a: " ".join(a[:2]))
-def test_unimplemented_stages_exit_nonzero(runner: CliRunner, argv: list[str], tmp_path: Path) -> None:
-    result = _invoke(runner, tmp_path, *argv)
-
-    assert result.exit_code != 0
-    assert "not implemented yet" in result.output
 
 
 # -- catalog fetch -------------------------------------------------------------

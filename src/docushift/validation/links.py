@@ -227,6 +227,18 @@ class FolderIndex:
         """The file that is there, when only its casing differs. `None` otherwise."""
         return self._folded.get(relative.lower())
 
+    def missing(self, relative: str) -> str | None:
+        """`None` when `relative` is in the folder; otherwise why not, for the message.
+
+        The one resolve-in-this-folder answer the `toc.yml`, redirect and
+        `csh.yml` checks share (Phase 34, R11-14): four copies had drifted, one
+        losing the case-only hint the others give.
+        """
+        if relative in self.present:
+            return None
+        actual = self.actual_case(relative)
+        return f"differs only in case from {actual}" if actual else "is not in this version folder"
+
     def anchors(self, relative: str) -> set[str]:
         cached = self._anchors.get(relative)
         if cached is None:
