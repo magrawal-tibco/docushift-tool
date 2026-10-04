@@ -153,8 +153,10 @@ def test_the_register_carries_every_row_of_7_5() -> None:
     `rename-map.csv` that could not be used, and was dropped without a word.
     And the 76th, `ELEMENT_UNRENDERED` (R8-13): embedded media the walk has
     no Markdown for, reduced to its fallback text or to nothing without a count.
+    It adds the 77th, `PATH_TOO_LONG` (R11-06): `sync`'s path ceiling read back
+    from the shelf, for a tree no guard ever measured.
     """
-    assert len(REGISTRY) == 76
+    assert len(REGISTRY) == 77
 
 
 def test_severity_comes_from_the_registry_and_not_from_the_call_site() -> None:

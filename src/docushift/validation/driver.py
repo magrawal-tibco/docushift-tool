@@ -94,6 +94,9 @@ class Validator:
         """
         index = FolderIndex(folder.path)
         result = FolderResult(folder)
+        # Every doc-class, Javadoc included: the index has already listed every
+        # file, and a path nobody can open is ours to report wherever it is.
+        result.findings.extend(links.check_lengths(folder, index))
         if folder.doc_class == API_REFERENCES:
             result.findings.extend(artifacts.check(folder, index))
             return result

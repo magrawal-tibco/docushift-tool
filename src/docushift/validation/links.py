@@ -54,7 +54,12 @@ from pathlib import Path, PurePosixPath
 
 from docushift.reporting.findings import Finding
 from docushift.transforms import links as refs
-from docushift.utils.longpath import long_path, walk_files
+from docushift.utils.longpath import (
+    PUBLISHED_PATH_LIMIT,
+    long_path,
+    published_length,
+    walk_files,
+)
 from docushift.validation import references
 from docushift.validation.tree import VersionFolder
 
@@ -379,6 +384,33 @@ def _check_tree_rooted(
     else:
         issue("ANCHOR_MISSING", line,
               f"#{classified.fragment} is not an anchor in {actual}{miss}")
+
+
+# -- path length ---------------------------------------------------------------
+
+
+def check_lengths(folder: VersionFolder, index: FolderIndex) -> list[Finding]:
+    """Every file whose absolute path is past the 260 characters Win32 can open.
+
+    Phase 34 (R11-06). `sync` refuses to publish such a tree (Phase 15d,
+    `PUBLISHED_PATH_TOO_LONG`), but a tree synced before that guard, or by
+    another tool, validated clean -- and the defect is the reader's, not the
+    host's: the documentation team opens the tree on Windows. Measured the way
+    `sync` measures it, `utils/longpath.published_length` under the target
+    actually being validated, so a clean `sync` and a clean `validate` agree.
+    Run over `api-references/` too, which is otherwise only metadata-checked.
+    """
+    findings: list[Finding] = []
+    for relative in sorted(index.present):
+        length = published_length(folder.path, relative)
+        if length > PUBLISHED_PATH_LIMIT:
+            findings.append(Finding(
+                "PATH_TOO_LONG", slug=folder.slug, version=folder.segment,
+                path=f"{folder.relative.as_posix()}/{relative}",
+                message=f"is {length} characters as published here; Windows opens "
+                        f"at most {PUBLISHED_PATH_LIMIT}",
+            ))
+    return findings
 
 
 # -- the external pass ---------------------------------------------------------

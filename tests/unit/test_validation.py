@@ -2024,3 +2024,38 @@ def test_a_per_version_origin_map_that_resolves_is_silent(tmp_path: Path) -> Non
                      "about.md": "# About\n"})
 
     assert artifacts_of(target) == []
+
+
+# -- published path length (Phase 34, R11-06) --------------------------------------
+#
+# Only `sync` measured it, so a tree synced before that guard, or by another
+# machine, validated clean with a file no Windows reader can open.
+
+
+def test_a_published_file_past_260_characters_is_an_error(tmp_path: Path) -> None:
+    from docushift.utils.longpath import long_path
+
+    target = tmp_path / "target"
+    folder = publish(target, {"page.md": "# Page\n"})
+    deep = long_path(folder / DEEP)
+    deep.mkdir(parents=True)
+    (deep / "a.png").write_bytes(b"x")
+
+    result = Validator(target).check_folder(only(target))
+
+    assert codes(result.findings) == ["PATH_TOO_LONG"]
+    assert result.findings[0].path.endswith(f"{DEEP}/a.png")
+    assert REGISTRY["PATH_TOO_LONG"].severity is Severity.ERROR
+
+
+def test_the_length_is_measured_in_api_reference_folders_too(tmp_path: Path) -> None:
+    """Not link-checked, but a path nobody can open is a path nobody can open."""
+    from docushift.utils.longpath import long_path
+
+    target = tmp_path / "target"
+    api = publish(target, tree=RESOURCES, doc_class="api-references")
+    deep = long_path(api / DEEP)
+    deep.mkdir(parents=True)
+    (deep / "index.html").write_text("x", encoding="utf-8")
+
+    assert codes(Validator(target).check_folder(only(target)).findings) == ["PATH_TOO_LONG"]

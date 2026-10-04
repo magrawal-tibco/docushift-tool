@@ -474,6 +474,14 @@ REGISTRY: dict[str, Code] = _codes(
          "planning.md Phase 34"),
     Code("LINK_BROKEN", Severity.ERROR, Stage.VALIDATE,
          "Relative link resolving to nothing", "design.md §8.4"),
+    # Phase 34 (R11-06). `sync`'s `PUBLISHED_PATH_TOO_LONG` read back from the
+    # shelf, for a tree synced before that guard or by something else. An error
+    # for the reason that one is: nothing downstream can open the file. And it
+    # can gate, because its clean answer is knowable -- the longest path in
+    # either published tree is 236 characters.
+    Code("PATH_TOO_LONG", Severity.ERROR, Stage.VALIDATE,
+         "A published file whose absolute path exceeds 260 characters; Windows "
+         "readers cannot open it", "planning.md Phase 34 (R11-06)"),
     # Emitted from Phase 7c, and a warning on arithmetic rather than on taste, the
     # same way 7b's six were. Measured over the whole cache: 51 of 317 adjacent
     # version pairs (16.1%) drop at least one identifier -- 11.9% even when the

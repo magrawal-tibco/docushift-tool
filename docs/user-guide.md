@@ -1424,6 +1424,9 @@ Six things to expect:
 - **`api-references/` is not link-checked.** It is copied Javadoc — not this tool's
   output and not fixable from here. Its `metadata.yml` is checked, because that file
   is ours.
+- **A path longer than 260 characters is an error, everywhere.** Windows cannot open
+  it, and the documentation team reads the tree on Windows. It is measured under the
+  `--target-dir` you gave, the way `sync` measures it before it copies.
 - **Only `metadata.yml` is required.** `toc.yml`, `index.md`, `csh.yml` and
   `version.yml` are checked when they are there and never demanded, because which of
   them a doc-class carries legitimately varies. A YAML file that will not parse is
