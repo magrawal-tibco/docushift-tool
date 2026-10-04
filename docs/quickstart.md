@@ -33,6 +33,10 @@ docushift doctor
 reads `family workspaces: none yet` — that is correct; per-family folders are created when
 a stage first needs one.
 
+Every command works on the **current directory** as the project root. Run them from the
+checkout, or name the root with the global `--root` option, which goes before the command:
+`docushift --root D:\docushift-tool doctor`.
+
 If you intend to commit, also set the commit template — see
 [User Guide §1](user-guide.md#1-quickstart--installation).
 
@@ -243,8 +247,8 @@ docushift validate        --target-dir ../tibco-docs-aem/
 
 ## Scaling up from here
 
-Every stage from `download` onward takes the **same selectors**, so widening the run is a
-flag change, not a different procedure:
+Every stage from `download` to `sync` takes the **same selectors**, so widening the run is a
+flag change, not a different procedure (`validate` takes the published tree instead):
 
 | Flag | Selects |
 | :--- | :--- |
@@ -256,5 +260,10 @@ flag change, not a different procedure:
 | `--batch poc-1` | Every version tagged into that run |
 
 The usual next step is a **batch**: tag a handful of versions with a `convert_batch` label
-in `versions.csv`, then run the same seven commands with `--batch poc-1`. Add `--dry-run`
-to any stage first to see the selection without writing anything.
+in `versions.csv`, then run the five pipeline stages — `download`, `extract`, `convert`,
+`reframe`, `sync` — with `--batch poc-1`, and `validate` over the target as before. Add
+`--dry-run` to any stage first to see the selection without writing anything.
+
+Each stage exits **1** when a version in it failed, or when the selection matched nothing,
+so chaining them with `&&` stops at the first stage that lost a version. The full table is
+under "Exit codes" in [User Guide §4](user-guide.md#4-end-to-end-migration-commands).

@@ -37,7 +37,14 @@ docushift doctor
 
 Prints the resolved project paths (`config/`, `cache/`, `families/`, `output/`, `state.db`), the active locale, and which family workspaces exist so far. The working directories are created on first run; per-family folders are not, so an untouched project reads `family workspaces: none yet`.
 
-> **Implementation status.** The command tree below is the full intended surface and `--help` reflects it. Implemented today: `doctor`, the **whole `catalog` group, `fetch` included** — discovery talks to the live docsite — **`download` and `archive download`**, including `--from-file`, and **`extract`** in full — it unpacks a package, detects its engine, inventories its assets and CSH sources, and writes the five inventory columns back to `versions.csv`. **`convert` converts all four engines — MadCap Flare, SDL DITA, WebWorks and DocBook** — the engine-neutral spine (asset resolution, CSH, frontmatter, the build-and-swap, the report and the findings register) plus four engines' readers, which between them are every eligible version in the corpus. A version on a recognised but unconvertible engine reports `Engine unknown` and is skipped by name (see §4). Everything downstream of `convert` is not built at all. Every unbuilt command exits non-zero naming the phase that will build it (see `docs/planning.md`); commands are never silently no-op.
+**Pointing the tool at a project.** Every command reads `config/` and writes `cache/`, `families/` and `output/` under the **project root**, which is the current directory unless you pass the global `--root` option. It goes before the command name, not after it:
+
+```bash
+docushift --root D:\docushift-project doctor
+docushift --root D:\docushift-project convert --batch poc-1
+```
+
+Run from the wrong directory without it and the tool quietly starts a fresh, empty project there — `doctor` shows which root it resolved.
 
 ---
 
@@ -68,6 +75,9 @@ docushift catalog fetch --all
 # List catalog products and versions
 docushift catalog list
 docushift catalog show --product businessevents-enterprise
+
+# Only what the pipeline stages will work on: convert_eligible, in scope, not retired
+docushift catalog list --eligible-only
 
 # Re-apply support's end-of-support report without re-crawling
 docushift catalog eos
@@ -129,7 +139,7 @@ Use `convert_eligible` for permanent policy — this version is out of scope, fu
 ```bash
 # Scope a POC to two versions
 docushift catalog set --product ems --version 10.4.0 --batch poc-1
-docushift catalog set --product dsp_gridserver --version 7.1.1 --batch poc-1
+docushift catalog set --product businessevents-enterprise --version 6.4.0 --batch poc-1
 
 # Check the scope before running anything
 docushift catalog batches
@@ -358,6 +368,17 @@ That one does **not** set `zip_source=manual`, because `zip_source` says where t
 that — pinning it would make `download` skip a version whose real package you never
 supplied.
 
+The exception is a version the catalog has never heard of. `archive download --from-file`
+adds it as an **archived, not convert-eligible** row with `zip_source=manual`: archived so
+it shows in `archive list` and no pipeline stage picks it up, and manual because that is
+how `catalog fetch` knows a row was added by hand and keeps it instead of refusing the
+fetch as a deletion. Nothing selects an ineligible row, so the pin skips nothing. To
+convert it later, `catalog enable` it and set `--zip-source auto` if the docsite does
+publish a package for it.
+
+`download --from-file --dry-run` says where the ZIP would be filed and whether a row would
+be added, and writes nothing.
+
 Notes:
 
 - **`zip_source=manual` means "never fetch this".** The row is exempt from the
@@ -444,8 +465,14 @@ docushift catalog set --product ems --version 8.6.0 --engine webworks
 docushift catalog set --product ems --version 8.6.0 --zip-url https://internal/mirror.zip
 docushift catalog set --product ems --version 10.4.0 --batch poc-1
 docushift catalog set --product ems --version 8.6.0 --release-status ga    # convert it despite the report
-docushift catalog set --product dsp_gridserver --version 7.1.1 --zip-source auto   # undo a manual pin
+docushift catalog set --product dsp-gridserver --version 7.1.1 --zip-source auto   # undo a manual pin
 ```
+
+Every value is checked before anything is written, so a call that fails writes nothing:
+an unknown version, a `--bu` that `taxonomy.yaml` does not declare under
+`business_units`, and a `--family` not declared for the bu the call leaves behind are all
+refused. Both names decide the workspace folder and the publishing repository, which is
+why a typo is an error rather than a warning.
 
 ### Triaging Unclassified Products
 
@@ -533,7 +560,7 @@ A ZIP you supplied with `--from-file` sits in `downloads/` under the same name a
 
 ### Selecting what a command acts on
 
-`download`, `extract`, `convert`, and `sync` all take the same selectors, which combine:
+`download`, `extract`, `convert`, `reframe` and `sync` all take the same selectors, which combine. `--product` takes either the docsite slug or the product code (`ems` or `tibco-enterprise-message-service`); `validate` and `csh` are different, see below.
 
 | Flag | Selects |
 | :--- | :--- |
@@ -566,10 +593,10 @@ docushift download --product ebx --version 6.2.0 --from-file "D:\downloads\ebx-d
 
 | Flag | Effect |
 | :--- | :--- |
-| `--dry-run` | Prints the product, version, source and target path for every version the selector picks, and stops. |
+| `--dry-run` | Prints the product, version, source and target path for every version the selector picks, and stops. With `--from-file` it names where the ZIP would be filed and whether a version row would be added, and writes nothing. |
 | `--force` | Re-fetches even when the local ZIP's checksum still matches. Does **not** override a `zip_source=manual` pin. |
 | `--workers N` | How many versions download at once. Defaults to `crawl.max_concurrent_requests` in `config/docsite.yaml` (4). |
-| `--from-file PATH` | Files a ZIP you already have instead of fetching. Needs both `--product` and `--version`. |
+| `--from-file PATH` | Files a ZIP you already have instead of fetching. Needs both `--product` and `--version`; `--all`, `--bu`, `--family`, `--batch`, `--force` and `--workers` are refused beside it. |
 
 Archived versions are never downloaded here — use `docushift archive download` for those.
 Versions pinned with `zip_source=manual` are skipped: their package is already in place.
@@ -577,7 +604,9 @@ Versions pinned with `zip_source=manual` are skipped: their package is already i
 Every run ends with five counts — downloaded, already current, skipped (manual), no
 `zip_url`, failed — and the last two are listed by name, because those are the rows you
 have to do something about. **A failure never stops the run**: one unreachable product
-out of two hundred is a report line, not an aborted batch.
+out of two hundred is a report line, not an aborted batch. It does change the exit code:
+a run with a failed version exits **1** at the end, so `download && extract` stops there.
+A version with no ZIP endpoint is a report line and does not.
 
 Downloads resume. An interrupted transfer leaves a `.part` file next to the target and
 the next run continues from where it stopped, provided the server still reports the same
@@ -601,13 +630,15 @@ docushift extract --batch poc-1
 | :--- | :--- |
 | `--dry-run` | List what would be unpacked, and whether each package is on disk, without writing. |
 | `--force` | Re-extract even when the package has not changed since last time. |
+| `--measure-only` | Unpack nothing: walk the trees already in `extracted/` and fill their inventory columns. For a workspace whose trees outlived their packages. Cannot be combined with `--force`. |
 
 Each run ends with six counts — extracted, already current, measured from cache (only
 with `--measure-only`), no package, refused, failed — an engine tally, and then **two named lists**: the versions left `auto`, and the versions
 whose engine was identified but has no converter. Those are different problems. `auto`
 means DocuShift could not tell what made the package and is worth reporting as a gap;
 a named engine with no converter is a scoping question for you, not a bug. A failure
-never stops the run. That includes a failure *after* the unzip — `versions.csv` open in
+never stops the run, but a failed or refused package makes it exit **1** at the end; a
+version with no package does not. That includes a failure *after* the unzip — `versions.csv` open in
 Excel when the counts are written back, say: the version is reported failed, and the
 next run extracts it again rather than calling it current. A version whose tree could
 not be read in full is named with a `partial walk` line, and its counts are left blank
@@ -680,7 +711,7 @@ docushift convert --product businessevents-enterprise --version 6.4.0
 docushift convert --batch poc-1
 
 # Convert a local standalone folder directly
-docushift convert \
+docushift convert --product businessevents-enterprise --version 6.4.0 \
   --input ./families/en-us-tib-integration/extracted/businessevents-enterprise/6.4.0 \
   --output ./output/tibco/integration/businessevents-enterprise/6.4.0
 ```
@@ -695,8 +726,9 @@ docushift convert \
 > they are every eligible version in the corpus. A version whose generator DocuShift
 > recognises but has no converter for — RoboHelp, R help, MkDocs and the rest of the list in
 > §8 — reports **`Engine unknown`**, and is skipped and named rather than guessed at. So does
-> a version whose engine was never determined. The command exits 0 either way: one
-> unconvertible version must not stop a 200-version run.
+> a version whose engine was never determined. Neither changes the exit code: one
+> unconvertible version must not stop a 200-version run. A version that **failed** does —
+> `convert` exits 1 when any version failed, so `convert && reframe` stops there.
 
 **What a Flare version produces.** One output subtree per *output root* — the directory
 holding `Data/HelpSystem.xml` — mirroring the source layout, because filename stems collide
@@ -865,7 +897,7 @@ emitting the whole block as HTML — would cost every code block in the tree its
 copy-pasteability to preserve what is almost always a decorative type cross-reference in a
 C function signature. So the fence is kept and each version reports a
 `Link inside a code block…` note carrying the count, rather than losing them quietly:
-about 4,964 corpus-wide, 1,179 of them in `tibco-ems` 10.4.0 alone.
+about 4,964 corpus-wide, 1,179 of them in EMS 10.4.0 alone.
 
 **About half the tables stay as HTML, and they carry structure only.** GFM's pipe table has
 no merged cells, no table inside a cell and no cell holding more than one paragraph, a list
@@ -900,7 +932,7 @@ docushift reframe --product tibco-enterprise-message-service --version 10.5.1
 docushift reframe --all --dry-run
 
 # A frozen converted folder, with no catalog paths involved
-docushift reframe --product tibco-ems --version 10.5.1 --input ./converted --output ./merged
+docushift reframe --product ems --version 10.5.1 --input ./converted --output ./merged
 ```
 
 | Flag | What it does |
@@ -1196,8 +1228,8 @@ on a site this tool does not own, and the only honest test of it is a network re
 docushift sync --all --target-dir ../tibco-docs-aem/
 
 # One product, or one version of it -- the same selectors every stage takes
-docushift sync --product tibco-ems --target-dir ../tibco-docs-aem/
-docushift sync --product tibco-ems --version 10.4.0 --target-dir ../tibco-docs-aem/
+docushift sync --product ems --target-dir ../tibco-docs-aem/
+docushift sync --product ems --version 10.4.0 --target-dir ../tibco-docs-aem/
 
 # See where each version would land, and how many documents it would place
 docushift sync --all --target-dir ../tibco-docs-aem/ --dry-run
@@ -1268,7 +1300,7 @@ en-us-tib-messaging-userdocs-resources/ # the bulk tree
 
 Fourteen things to expect:
 
-- **`version.yml` is the drop-down, and a scoped sync does not shrink it.** Each doc-class gets its own, listing only the versions that doc-class actually holds — so `user-guides` and `online-help` will legitimately disagree. It is rebuilt by reading the folder on disk and matching it against the catalog's active versions — plus any archived version you marked `convert_eligible`, which `sync` publishes like an active one — *not* from what the run just wrote, so `sync --product tibco-ems --version 10.4.0` updates one entry and leaves the other thirty-seven alone. Titles carry the release date (`10.4.0 (Feb 2026)`); an undated version keeps the version and drops the bracket.
+- **`version.yml` is the drop-down, and a scoped sync does not shrink it.** Each doc-class gets its own, listing only the versions that doc-class actually holds — so `user-guides` and `online-help` will legitimately disagree. It is rebuilt by reading the folder on disk and matching it against the catalog's active versions — plus any archived version you marked `convert_eligible`, which `sync` publishes like an active one — *not* from what the run just wrote, so `sync --product ems --version 10.4.0` updates one entry and leaves the other thirty-seven alone. Titles carry the release date (`10.4.0 (Feb 2026)`); an undated version keeps the version and drops the bracket.
 
 - **You can hand-edit `version.yml` and DocuShift will not undo it.** The AEM schema allows a row pointing at an absolute URL, so any row whose `path` is not a folder in that doc-class is preserved exactly where you put it. If the file will not parse, sync leaves it completely alone and says so in the report rather than replacing it.
 
@@ -1312,7 +1344,7 @@ docushift report --run last
 
 # Narrow it: one stage, one severity, one code, one product
 docushift report --stage convert --severity error
-docushift report --code TOPIC_LINK_DANGLING --slug ems
+docushift report --code TOPIC_LINK_DANGLING --slug tibco-enterprise-message-service
 
 # What is this code, and who promised it?
 docushift report --explain CSH_UNRESOLVED
@@ -1321,12 +1353,18 @@ docushift report --explain CSH_UNRESOLVED
 docushift report --run last --export ./reports/convert-2026-09-16.md
 ```
 
+`--stage` takes one of `catalog`, `download`, `extract`, `convert`, `reframe`, `sync`
+and `validate`, in any case. `--code` is upper-cased for you and refused if the register
+does not know it. `--slug` is matched exactly against what the run recorded, which is the
+docsite slug, never the product code: `report` reads no catalog, so it cannot translate
+`ems`, and says so rather than reporting a clean run. `--keep` takes 0 or more.
+
 Findings are grouped by stage, then by code, errors first. Each one carries a
 severity that belongs to the **code**, never to the place that raised it:
 
 | Severity | Meaning | Effect on the exit code |
 | :--- | :--- | :--- |
-| `error` | The output is wrong or unpublishable | `validate` exits 1; nothing else gates |
+| `error` | The output is wrong or unpublishable | `reframe`, `sync`, `validate` and `csh validate` exit 1 |
 | `warning` | The run succeeded and a human decision is pending | Printed and counted |
 | `note` | Normal for this corpus, recorded so a change in magnitude shows | Counted only |
 
@@ -1352,13 +1390,29 @@ Findings are kept across runs, so old ones stay queryable by run id.
 `docushift report --prune --keep 10` drops the findings of everything older — the
 run rows survive, so a pruned run is still a dated record that something ran.
 
-**Exit codes.** A stage that did its work exits 0 even when it recorded errors:
-the errors are in the report, and that is what `report` is for. A selection that
-matched nothing exits **1** — before Phase 7a a typo in `--product` was
-indistinguishable from a clean run — and `--dry-run` is not exempt, because it is
-the same mistake discovered one command earlier. `report` itself exits 1 only for
-a run that is not there or an export it could not write. Only `validate` gates on
-what it found.
+**Exit codes.** Every working command exits **1** when a version it worked on failed,
+so a chained script (`extract --batch b && convert --batch b && reframe --batch b`) stops
+at the first stage that lost a version. A selection that matched nothing exits **1**
+too — before Phase 7a a typo in `--product` was indistinguishable from a clean run — and
+`--dry-run` is not exempt, because it is the same mistake discovered one command earlier.
+A version the stage could not start on (no ZIP endpoint, no package, no extracted tree,
+an engine with no converter) is a named report line, not a failure. A bad option value
+exits **2**, Click's usage error.
+
+| Command | Exits 1 when |
+| :--- | :--- |
+| `download` | A version failed, or the selection matched nothing |
+| `extract` | A package failed or was refused as unsafe, or the selection matched nothing |
+| `convert` | A version failed, or the selection matched nothing. An `error` finding alone does not: it is one topic in a tree that otherwise converted |
+| `reframe` | A version failed or an `error` was recorded, or the selection matched nothing |
+| `sync` | A row failed or an `error` was recorded, or the selection matched nothing |
+| `validate`, `csh validate` | An `error` was recorded, or no published folder matched |
+| `csh list`, `csh report` | No published folder matched |
+| `catalog fetch` | Discovery returned nothing, or the merge refused (e.g. unexplained deletions). Unreachable products alone do not |
+| `catalog eos`, `migrate`, `import`, `enable`, `set`, `sitemap` | A config or catalog problem: a CSV open in Excel, an unknown version, an undeclared bu or family, a missing report |
+| `archive download` | The fetch or the unpack failed, or the version is not catalogued (without `--from-file`) |
+| `status`, `catalog list`, `archive list`, `catalog triage`, `catalog batches` | Only when the catalog cannot be read. No matching rows exits 0 |
+| `report` | The run is not there, the export could not be written, or `--code` is not a registered code. It never gates on what the run found |
 
 ### Is the output correct?
 
@@ -1371,8 +1425,8 @@ still has help on the shelf that can be checked.
 docushift validate --target-dir ../tibco-docs-aem/
 
 # Narrow it -- the walk costs about a second per 120 files, so this matters
-docushift validate --target-dir ../tibco-docs-aem/ --product tibco-ems
-docushift validate --target-dir ../tibco-docs-aem/ --product tibco-ems --version 10.4.0
+docushift validate --target-dir ../tibco-docs-aem/ --product tibco-enterprise-message-service
+docushift validate --target-dir ../tibco-docs-aem/ --product tibco-enterprise-message-service --version 10.4.0
 docushift validate --target-dir ../tibco-docs-aem/ --doc-class online-help
 
 # What would it walk? Reads no file
@@ -1381,6 +1435,11 @@ docushift validate --target-dir ../tibco-docs-aem/ --dry-run
 # Also request every absolute URL once. Off by default; no network without it
 docushift validate --target-dir ../tibco-docs-aem/ --check-external
 ```
+
+`--product` here is the **published folder name**, which is the product's docsite slug
+(`tibco-enterprise-message-service`) — not the product code. `validate` and `csh` match
+folder names on disk and never open the catalog, so `--product ems` matches nothing. Every
+catalog-backed command takes either spelling.
 
 `--version` takes `10.4.0` or `10-4-0`: the dashed form is what is on disk and the
 dotted form is what you have in hand.
@@ -1398,9 +1457,10 @@ done
 Each run gates on its own exit code, so a loop tells you *which* product failed
 rather than only that something did.
 
-**It exits 1 if and only if it recorded an error** — the only command in the tool
-that gates. Warnings and notes are printed and counted and change nothing, and a
-selection that matched no published folder exits 1 like every other stage.
+**It exits 1 if and only if it recorded an error** — it has no versions to fail, so
+its findings are its only gate (the full table is under "Exit codes" above). Warnings
+and notes are printed and counted and change nothing, and a selection that matched no
+published folder exits 1 like every other stage.
 
 What to expect:
 
@@ -1607,11 +1667,11 @@ A version whose package contains no help map — around a quarter of them do not
 
 ### Inspecting and checking it
 
-**`docushift csh` reads a published tree, so every subcommand takes `--target-dir`** — the same directory `sync` wrote and `validate` checks. It never opens the catalog, which means you can point it at a tree another machine synced. The three selectors are `validate`'s: `--product`, `--version` (dotted or dashed) and `--doc-class`.
+**`docushift csh` reads a published tree, so every subcommand takes `--target-dir`** — the same directory `sync` wrote and `validate` checks. It never opens the catalog, which means you can point it at a tree another machine synced. The three selectors are `validate`'s: `--product` (the published folder name, i.e. the docsite slug — not the product code), `--version` (dotted or dashed) and `--doc-class`.
 
 ```bash
 # What identifiers does this version publish, and are their targets on disk?
-docushift csh list --target-dir /publish --product businessworks --version 6.12.0
+docushift csh list --target-dir /publish --product tibco-activematrix-businessworks --version 6.12.0
 
 # Coverage across the shelf: versions published, versions mapped, identifiers,
 # target pages, comparable version pairs, and identifiers dropped
@@ -1619,7 +1679,7 @@ docushift csh report --target-dir /publish
 
 # Integrity: every mapped topic exists, frontmatter and csh.yml agree,
 # and nothing the version below published has gone missing
-docushift csh validate --target-dir /publish --product businessworks
+docushift csh validate --target-dir /publish --product tibco-activematrix-businessworks
 ```
 
 **The query worth remembering is `--identifier`.** A ticket says the Help button for `Gateway.BusinessAgreements` broke in 6.11.0; this says where it went, across every published version at once:
@@ -1635,7 +1695,7 @@ It prints the versions that carry it with its target and whether that file is th
 **To see what changed between two versions, name the older one:**
 
 ```bash
-docushift csh report --target-dir /publish --product businessworks --since 6.11.0
+docushift csh report --target-dir /publish --product tibco-activematrix-businessworks --since 6.11.0
 ```
 
 That prints the diff identifier by identifier — dropped, added, and **retargeted**, meaning the identifier survived but now opens a different page. Retargeting is normal (it is pages being renamed between releases, 12.9% of surviving identifiers) and is never reported as a problem; it is shown here because when a Help button opens the wrong topic, this is where you see it.

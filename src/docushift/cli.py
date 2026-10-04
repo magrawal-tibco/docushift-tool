@@ -1,16 +1,14 @@
 """Click CLI entrypoint for DocuShift.
 
 The command tree mirrors the pipeline in docs/architecture.md and the surface
-documented in docs/user-guide.md. It is declared in full in Phase 1 so the console
-script installs and ``--help`` is an accurate contract; each stage is wired up in
-its own phase (see docs/planning.md). Unimplemented commands fail loudly -- a
-``convert`` that exits 0 while converting nothing hides how far along the pipeline
-actually is.
+documented in docs/user-guide.md, and every declared command is built. Each stage
+was wired up in its own phase (see docs/planning.md).
 
-Functional so far: ``doctor`` (Phase 1), the whole ``catalog`` group including
-``fetch`` (Phase 3), ``download`` and ``archive download`` (Phase 4a), and
-``extract`` (Phase 4b-1, unpack and engine detection -- the inventory walk it
-also owes is 4b-2). ``convert`` onward wait on Phases 5-7.
+Exit codes follow one rule across the pipeline stages (user guide, "Exit
+codes"): 1 for a selection that matched nothing, and 1 when a version (or a
+`sync` row) failed. `reframe`, `sync`, `validate` and `csh validate` also exit 1
+on a recorded error finding; `download`, `extract` and `convert` do not, because
+their errors describe one file in a version that otherwise did its work.
 """
 
 import csv
