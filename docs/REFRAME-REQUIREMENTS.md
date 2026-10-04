@@ -191,6 +191,10 @@ generated pages drops sharply.
 > the topic — a Stage 6a marker, or one already dangling in the source — is handled as
 > before: the section anchor for a cross-topic link, untouched for a pure fragment.
 > `reframe.yml` counts the re-pointed pure fragments as `links.renumbered`.
+>
+> The same lookup applies to the two files that carry a fragment beside the pages (X1-04,
+> X1-05): a `csh.yml` value and a `toc.yml` entry whose fragment names a heading of its topic
+> keep that heading, renumbered; one naming no heading falls back to the section anchor.
 
 **R4.1 — Page placement.** A page is written into the directory of its **first topic's** source
 path, and all relative paths are recomputed from there. This is what keeps directory-spanning

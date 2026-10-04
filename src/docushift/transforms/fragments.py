@@ -27,7 +27,8 @@ labels -- which is where `markdown.anchor_marker` hoists it, precisely so the
 marker cannot pollute the heading's own slug -- or part-way down a section, in
 which case the section's heading is the closest thing a reader can be sent to.
 So: the next heading if one follows before any prose, otherwise the previous
-one.
+one. Other markers are not prose: a run of them above a heading all belong to
+it (X1-01).
 
 **This is a demotion, not a repair, and it should be read as one.** A link that
 pointed at a sentence now points at the section containing it. That is less
@@ -63,9 +64,9 @@ def _mask_code(text: str) -> str:
 #: An anchor target the engines emit: `<a id="X"></a>` on its own, or inline.
 _MARKER = re.compile(r'<a\s+(?:id|name)\s*=\s*"([^"]*)"\s*>\s*</a>', re.IGNORECASE)
 _HEADING = re.compile(r"^[ \t]{0,3}(#{1,6})[ \t]+(.*?)[ \t]*#*[ \t]*$", re.MULTILINE)
-#: Between a marker and the heading it labels there is only blank space. Anything
-#: else means the marker sits *in* the preceding section rather than above the
-#: next one.
+#: Between a marker and the heading it labels there is only blank space -- and
+#: other markers, which render nothing. Anything else means the marker sits *in*
+#: the preceding section rather than above the next one.
 _ONLY_BLANK = re.compile(r"\A[\s]*\Z")
 
 
@@ -98,7 +99,13 @@ def marker_targets(text: str) -> dict[str, str]:
         chosen: int | None = None
         if after:
             index = after[0]
-            if _ONLY_BLANK.match(masked[marker.end():headings[index][0]]):
+            # Sibling markers are stripped from the gap first (X1-01). The
+            # heading hoist writes a run of them on one line, and Flare puts three
+            # or four on a heading, so counting them as prose sent every marker
+            # but the last to the previous section: 391 markers across the
+            # converted trees, and 19 of TRA Runtime Agent 5.13.0's 108 Help IDs.
+            gap = _MARKER.sub("", masked[marker.end():headings[index][0]])
+            if _ONLY_BLANK.match(gap):
                 chosen = index
         if chosen is None:
             chosen = before[-1] if before else (after[0] if after else None)

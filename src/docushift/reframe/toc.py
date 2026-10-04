@@ -152,8 +152,10 @@ def retarget(roots: list[TocEntry], located: dict[Any, tuple[Any, str]],
 
     A node whose topic leads its page gets the bare `page.md`; an absorbed topic
     gets `page.md#anchor`, which is the signal to the site generator that the node
-    is a section and must not become an HTML page of its own. Nothing is dropped --
-    navigation is identical, only the number of generated pages falls.
+    is a section and must not become an HTML page of its own. A node whose
+    converted entry named a heading of its topic keeps that heading (X1-05).
+    Nothing is dropped -- navigation is identical, only the number of generated
+    pages falls.
 
     Reading goes through the adapter seam because the input dialect varies; writing
     does not, because the output is DocuShift's own tree and Stage 7 reads exactly
@@ -192,7 +194,16 @@ def _node(entry: TocEntry, located: dict[Any, tuple[Any, str]],
     if found is not None:
         page, anchor = found
         leads = bool(page.topics) and page.topics[0].source == entry.path
-        row["url"] = str(page.path) if leads else f"{page.path}#{anchor}"
+        # X1-05: a converted entry can point at a section of its topic (`a.md#s1`,
+        # kept for Flare and WebWorks since batch 3), and collapsing it onto the
+        # topic's head turned two rows for two sections into two rows for one.
+        # Renumbered as the merge renumbers it, as a link's fragment is (R9-02);
+        # one naming no heading there, or the topic's own, keeps the old answer.
+        section = page.heading(entry.path, entry.fragment) if entry.fragment else None
+        if section is not None and section != anchor:
+            row["url"] = f"{page.path}#{section}"
+        else:
+            row["url"] = str(page.path) if leads else f"{page.path}#{anchor}"
     if entry.children:
         row["subfolderlist"] = [_node(child, located, placements) for child in entry.children]
     return row

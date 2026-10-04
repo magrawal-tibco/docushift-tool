@@ -1008,6 +1008,36 @@ def test_a_topic_listed_twice_inside_one_guide_is_still_packed_once():
     ]
 
 
+def test_a_toc_entry_naming_a_section_keeps_that_section_after_the_merge():
+    """X1-05. A converted entry can point at a section (`a.md#s1`, batch 3's
+    R7-01), and the rewrite used to collapse it onto its topic's head, so two
+    rows for two sections became two rows for one place. A fragment naming no
+    heading there, or the topic's own, keeps the old answer."""
+    page = Page(
+        "Guide",
+        [Topic("A", PurePosixPath("g/a.md"), 10), Topic("B", PurePosixPath("g/b.md"), 10)],
+        path=PurePosixPath("g/merged.md"),
+        sections={
+            PurePosixPath("g/a.md"): {"a": "a", "s1": "s1", "s2": "s2"},
+            PurePosixPath("g/b.md"): {"b": "b", "s1": "s1-1"},
+        },
+    )
+    located = {PurePosixPath("g/a.md"): (page, "a"), PurePosixPath("g/b.md"): (page, "b")}
+    a, b = PurePosixPath("g/a.md"), PurePosixPath("g/b.md")
+    roots = [TocEntry("A", a, children=[
+        TocEntry("S1", a, "s1"), TocEntry("S2", a, "S2"), TocEntry("Head", a, "a"),
+        TocEntry("Marker", a, "id-2f"), TocEntry("B", b), TocEntry("B S1", b, "s1"),
+    ])]
+
+    merged = retarget(roots, located)
+
+    assert merged["docs"][0]["url"] == "g/merged.md"
+    assert [row["url"] for row in merged["docs"][0]["subfolderlist"]] == [
+        "g/merged.md#s1", "g/merged.md#s2", "g/merged.md", "g/merged.md",
+        "g/merged.md#b", "g/merged.md#s1-1",
+    ]
+
+
 def levels(pages) -> list[list[int]]:
     return [[topic.level for topic in page.topics] for page in pages]
 
@@ -2110,6 +2140,20 @@ def test_a_value_with_no_fragment_lands_on_the_section_and_not_the_page_top():
     located = placed("g/merged.md", ("g/a.md", "a-section"), ("g/b.md", "b-section"))
 
     assert csh_map.retarget({"help.b": "g/b.md"}, located) == {"help.b": "g/merged.md#b-section"}
+
+
+def test_a_csh_value_naming_a_heading_keeps_that_heading_on_the_merged_page():
+    """X1-04. Since R8-04 convert writes the heading a marker belongs to, not the
+    marker, so the fragment is reachable and is the section the Help button
+    means: all eight of TRA's `aa.txcontrolpool.*` landed on one section after
+    the merge. Renumbered as the merge renumbers it, as a link's is (R9-02)."""
+    located = placed("g/merged.md", ("g/a.md", "a-section"), ("g/b.md", "b-section"))
+    page = located[PurePosixPath("g/b.md")][0]
+    page.sections[PurePosixPath("g/b.md")] = {"b-section": "b-section", "null-pool": "null-pool-1"}
+
+    out = csh_map.retarget({"pool": "g/b.md#Null-Pool", "marker": "g/b.md#help.b"}, located)
+
+    assert out == {"pool": "g/merged.md#null-pool-1", "marker": "g/merged.md#b-section"}
 
 
 def test_an_identifier_whose_topic_was_never_placed_is_left_exactly_as_it_was():

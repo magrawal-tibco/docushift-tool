@@ -14,7 +14,9 @@ than the section heading. The platform ignores those markers and anchors on
 heading text only, so a kept fragment resolved nowhere -- 0 of 154 -- and
 `_value` below explains the change. A value with no fragment at all gets the
 same section anchor. Measured on the merged corpus: all 154 values equal their
-source topic's section anchor (R9-13).
+source topic's section anchor (R9-13). Since convert retargets the map onto
+headings (R8-04), a fragment naming a heading of its topic keeps that heading
+instead (X1-04).
 
 An identifier whose topic the packer never placed keeps its value untouched and
 is reported by the audit, which is `toc.retarget`'s rule for the same condition:
@@ -94,17 +96,27 @@ def _value(value: str, located: dict[PurePosixPath, tuple[Any, str]]) -> str:
     that was confirmed: **0 of 154 identifiers resolved.** Every Help button in
     every published set landed nowhere.
 
-    So the fragment becomes the section anchor unconditionally. A reader arrives
-    at the topic's own heading instead of at a spot part-way down it, which is
-    less precise than the author asked for and is the whole of what the platform
-    can express. §9.6's rule is that a Help button may move and may never
-    disappear; keeping an unreachable fragment was the disappearing case.
+    So a marker fragment becomes the section anchor. A reader arrives at the
+    topic's own heading instead of at a spot part-way down it, which is less
+    precise than the author asked for and is the whole of what the platform can
+    express. §9.6's rule is that a Help button may move and may never disappear;
+    keeping an unreachable fragment was the disappearing case.
+
+    **A fragment that names a heading is kept, renumbered as the merge renumbers
+    it (X1-04).** Since R8-04 convert writes the heading a marker belongs to
+    rather than the marker, so the fragment is now reachable and is the section
+    the Help button means. Dropping it put all eight of TRA Runtime Agent
+    5.13.0's `aa.txcontrolpool.*` on one section, and 27 of its 108 identifiers
+    lost theirs. The same lookup a link's fragment takes (`pages._retarget`,
+    R9-02).
     """
-    target, _separator, _fragment = value.partition("#")
+    target, _separator, fragment = value.partition("#")
     found = located.get(PurePosixPath(target))
     if found is None:
         return value
     page, anchor = found
+    if fragment:
+        anchor = page.heading(PurePosixPath(target), fragment) or anchor
     return f"{page.path}#{anchor}"
 
 

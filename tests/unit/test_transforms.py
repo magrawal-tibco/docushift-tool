@@ -1308,6 +1308,32 @@ def test_a_marker_in_mid_section_belongs_to_the_section_it_is_in() -> None:
     assert fragments.marker_targets(text) == {"deep": "settings"}
 
 
+def test_every_marker_in_a_run_belongs_to_the_heading_below_it() -> None:
+    """X1-01. The heading hoist writes a run of markers on one line -- Flare puts
+    three or four on a heading -- and the sibling markers used to count as
+    "something" between a marker and its heading, so every marker but the last
+    went to the previous section: `nullcontrol` opened `#odbc-control-pool`."""
+    text = (
+        "# Transaction Controls\n\n## ODBC Control Pool\n\nprose\n\n"
+        '<a id="nullcontrol"></a><a id="Null_Control_Pool"></a>\n\n'
+        '<a id="third"></a>\n\n## Null Control Pool\n'
+    )
+
+    assert fragments.marker_targets(text) == {
+        "nullcontrol": "null-control-pool",
+        "null_control_pool": "null-control-pool",
+        "third": "null-control-pool",
+    }
+
+
+def test_a_marker_run_followed_by_prose_stays_in_its_section() -> None:
+    """Only other markers are transparent: a run that sits above prose is part
+    of the section it is in, exactly as a single marker is (X1-01)."""
+    text = '# Guide\n\n## Settings\n\n<a id="a"></a><a id="b"></a>\n\nprose\n\n## Next\n'
+
+    assert fragments.marker_targets(text) == {"a": "settings", "b": "settings"}
+
+
 def test_a_document_with_no_headings_offers_nothing() -> None:
     """There is no anchor to send anybody to, and inventing one would replace a
     link that fails visibly with one that fails quietly somewhere else."""
