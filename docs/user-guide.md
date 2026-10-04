@@ -855,9 +855,10 @@ C function signature. So the fence is kept and each version reports a
 about 4,964 corpus-wide, 1,179 of them in `tibco-ems` 10.4.0 alone.
 
 **About half the tables stay as HTML, and they carry structure only.** GFM's pipe table has
-no merged cells, no table inside a cell and no cell holding more than one paragraph, so a
-table that uses any of those is written as HTML rather than flattened into a pipe table that
-would read plausibly and be wrong. What passes through is **what the table means, never how
+no merged cells, no table inside a cell and no cell holding more than one paragraph, a list
+or a code block, so a table that uses any of those is written as HTML rather than flattened
+into a pipe table that would read plausibly and be wrong. A table's caption is kept either
+way: as an italic line above a pipe table, or inside the HTML one. What passes through is **what the table means, never how
 the authoring tool drew it**: merged-cell spans, header scopes, links, anchors and the
 handful of class names that carry meaning the plain text has lost (`varname`, a
 cross-reference, the note styles) are kept. Everything else goes — the generated

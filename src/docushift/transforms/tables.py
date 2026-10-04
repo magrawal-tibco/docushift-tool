@@ -17,6 +17,7 @@ module. Discriminating them needs engine-specific class names, and a generic
 from older output with it.
 """
 
+import re
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import StrEnum
@@ -28,6 +29,19 @@ from bs4 import NavigableString, Tag
 # pipe row cannot carry.
 _BLOCKS = frozenset({"p", "div", "ul", "ol", "dl", "pre", "blockquote", "table", "h1",
                      "h2", "h3", "h4", "h5", "h6"})
+
+# Blocks a pipe row cannot carry *wherever* they sit in the cell. Counting the
+# top level only called a lone `<ul>`, a lone `<pre>` and `div > ul` one block,
+# and the row ran the list items together and printed the code as escaped prose:
+# 2,183 such cells in the families (Phase 34, R8-02).
+_STRUCTURE = ("ul", "ol", "dl", "pre", "blockquote", "table")
+
+# The walk's hard line break (`markdown._BREAK`), spelled out because this module
+# sits below the walk and cannot import it.
+_BREAK = "\\\n"
+# Hard breaks and whitespace at either end of a cell: a break with no line after
+# it is not a break, and in a pipe row it printed a stray backslash (R8-05).
+_EDGE_BREAKS = re.compile(r"^(?:\s|\\\n)+|(?:\s|\\\n)+$")
 
 
 class Unsafe(StrEnum):
@@ -74,6 +88,7 @@ def read(table: Tag, header_row: int | None = None) -> Table:
     every parent look ragged.
     """
     model = Table(header_row=header_row)
+    head: int | None = None
     for row in table.find_all("tr"):
         if row.find_parent("table") is not table:
             continue
@@ -83,9 +98,17 @@ def read(table: Tag, header_row: int | None = None) -> Table:
             for cell in row.find_all(["td", "th"], recursive=False)
         ]
         if cells:
+            if head is None and row.find_parent("thead") is not None:
+                head = len(model.rows)
             model.rows.append(cells)
-    if model.header_row is None and model.rows and all(c.header for c in model.rows[0]):
-        model.header_row = 0
+    if model.header_row is None and model.rows:
+        # A `<thead>` says which row is the header whatever its cells are called.
+        # Reading only the `<th>` test emitted `<thead><tr><td>Parameter` as a data
+        # row under an empty header: 65 tables in 4 sampled versions (R8-06).
+        if head is not None:
+            model.header_row = head
+        elif all(c.header for c in model.rows[0]):
+            model.header_row = 0
     return model
 
 
@@ -110,10 +133,14 @@ def unsafe_reason(model: Table) -> Unsafe | None:
 def _block_count(cell: Tag) -> int:
     """Top-level block children, plus any loose text beside them.
 
-    Counted at the top level only: a `<ul>` inside the cell's single `<p>` is one
-    block with a list in it as far as a pipe row is concerned, and descending
-    would call every ordinary paragraph multi-block.
+    A wrapper is still one block -- `<td><p>` and `<td><div><p>` are the common
+    cells and unwrap cleanly -- but what it wraps is not: a list, a `<pre>` or a
+    second paragraph anywhere in the cell makes it multi-block, because a pipe row
+    has no syntax for any of them (R8-02). lxml never nests a list in a `<p>`, so
+    the real shapes are a bare `<ul>` and `div > ul`, and both used to pass.
     """
+    if cell.find(_STRUCTURE) is not None or len(cell.find_all("p")) > 1:
+        return 2
     blocks = sum(1 for child in cell.children
                  if isinstance(child, Tag) and child.name in _BLOCKS)
     if blocks and any(isinstance(child, NavigableString) and child.strip()
@@ -129,11 +156,15 @@ def is_gfm_safe(model: Table) -> bool:
 def escape(text: str) -> str:
     """Makes one cell's rendered Markdown survive a pipe row.
 
-    A newline ends the row, so it becomes `<br>` -- which GFM passes through and
-    every renderer honours. A `|` would start a new column.
+    A newline ends the row. A hard break becomes `<br>`, which GFM passes through
+    and every renderer honours: the walk's break is a backslash and a newline, and
+    folding only the newline left a literal backslash in 42 pipe rows (R8-05). A break
+    at either end of the cell is dropped, and any other newline is whitespace. A
+    `|` would start a new column.
     """
-    collapsed = " ".join(text.replace("\r\n", "\n").replace("\r", "\n").split("\n"))
-    return " ".join(collapsed.split()).replace("|", r"\|")
+    text = _EDGE_BREAKS.sub("", text.replace("\r\n", "\n").replace("\r", "\n"))
+    lines = [" ".join(line.split()) for line in text.split(_BREAK)]
+    return "<br>".join(lines).replace("|", r"\|")
 
 
 def to_pipe(model: Table, render: Callable[[Tag], str]) -> str:
@@ -297,6 +328,44 @@ def passthrough(table: Tag, keep: frozenset[str] = SEMANTIC_CLASSES,
     *sequencing*, and the sequence has now happened: the classes went first and
     were verified byte-for-byte, so this change stands on its own and the
     published stylesheet sizes the tables.
+
+    **No blank line, and no indented line, as of Phase 34 (R8-03).** A GFM HTML
+    block ends at the first blank line, and the next line, indented by Flare's
+    `\t\t\t\t  </td>`, became an indented code block: a grey box holding a
+    literal `</td>`, in 154 tables of 140 files. So whitespace in the markup is
+    folded -- a run holding a newline to one newline, any other run to a space,
+    which HTML reads identically -- and a blank line inside a `<pre>`, where
+    whitespace is content, is written as `&#10;` so the line is not empty.
     """
     scrub(table, keep, attrs)
-    return str(table)
+    _fold_whitespace(table)
+    return _PRE.sub(_fill_blank_lines, str(table))
+
+
+# HTML's own whitespace, which is ASCII: `&nbsp;` is content (WebWorks indents
+# code lines with it) and folding it would move the code.
+_RUN = re.compile(r"[ \t\n\r\f]+")
+_PRE = re.compile(r"<pre\b.*?</pre>", re.DOTALL | re.IGNORECASE)
+_BLANK_LINE = re.compile(r"\n([ \t]*)\n")
+
+
+def _fold_whitespace(table: Tag) -> None:
+    """Folds the markup's whitespace outside `<pre>`, as an HTML renderer would.
+
+    Adjacent text nodes are merged first: `scrub` removes every bare `<col>`,
+    and the indentation each one sat between is left as separate newline-only
+    nodes that, folded one by one, still made a blank line. A comment keeps its
+    class: re-inserted as plain text it would become prose.
+    """
+    table.smooth()
+    for text in list(table.find_all(string=True)):
+        if text.find_parent("pre") is not None:
+            continue
+        folded = _RUN.sub(lambda run: "\n" if "\n" in run.group() else " ", str(text))
+        if folded != str(text):
+            text.replace_with(type(text)(folded))
+
+
+def _fill_blank_lines(match: re.Match[str]) -> str:
+    """A `<pre>`'s empty lines, each given the newline it stands for as `&#10;`."""
+    return _BLANK_LINE.sub(lambda line: f"\n{line.group(1)}&#10;", match.group())

@@ -6,6 +6,7 @@ these tests pin are the ones all four engines share, and each one of them is a
 corpus measurement rather than a convention.
 """
 
+import re
 from pathlib import Path, PurePosixPath
 
 import pytest
@@ -346,6 +347,103 @@ def test_a_pipe_and_a_newline_survive_a_cell() -> None:
     assert tables.escape("a | b\nc") == r"a \| b c"
 
 
+def test_a_hard_break_in_a_cell_is_a_br_and_not_a_backslash() -> None:
+    """The walk's break is `\\` plus a newline; folding only the newline printed
+    `call to\\ [tibems...]` in 42 pipe rows (R8-05). At the cell's end it goes."""
+    assert tables.escape("one\\\ntwo\\\n") == "one<br>two"
+    assert render(
+        "<table><tr><th>a</th><th>b</th></tr><tr><td>x</td><td>one<br/>two<br/></td></tr></table>"
+    ).splitlines()[-1] == "| x | one<br>two |"
+
+
+@pytest.mark.parametrize("cell", [
+    "<ul><li><code>Error</code>: A human readable error message.</li>"
+    "<li><code>Topic</code>: The current topic.</li></ul>",
+    "<pre>INSERT INTO &lt;table_name&gt;\n  [(column1 [, ...])]</pre>",
+    "<div><ul><li>one</li><li>two</li></ul></div>",
+    "<div><p>First paragraph.</p><p>Second paragraph.</p></div>",
+])
+def test_a_cell_holding_a_list_or_code_anywhere_is_multi_block(cell: str) -> None:
+    """Streaming 11.2.1's ClusterPubSubAdapter ran two bullets into one line and
+    ActiveSpaces' SQL INSERT syntax became escaped prose: a lone `<ul>`, a lone
+    `<pre>` and `div > ul` each counted as one block (R8-02, 2,183 cells)."""
+    model = tables.read(soup(f"<table><tr><th>a</th><th>b</th></tr><tr><td>x</td><td>{cell}</td></tr></table>"))
+
+    assert tables.unsafe_reason(model) is tables.Unsafe.MULTI_BLOCK
+
+
+def test_a_cell_holding_a_list_passes_through_with_its_items_apart() -> None:
+    rendered = render(
+        "<table><tr><th>a</th><th>b</th></tr>"
+        "<tr><td>x</td><td><ul><li>one</li><li>two</li></ul></td></tr></table>"
+    )
+
+    assert "<li>one</li><li>two</li>" in rendered
+    assert "onetwo" not in rendered
+
+
+def test_a_passthrough_table_has_no_blank_and_no_indented_line() -> None:
+    """A GFM HTML block ends at its first blank line, and the next line, indented
+    by Flare's tabs, rendered as a code block holding a literal `</td>`: EMS 10.4.0
+    `ems-message-properti.md` and 153 other tables (R8-03). The `<col>`s `scrub`
+    removes leave their indentation behind as separate text nodes."""
+    rendered = render(
+        '<table>\n\t<col style="width: 169px;" />\n\t<col style="width: 300px;" />\n'
+        '\t<tr>\n\t\t<td rowspan="2">\n\t\t\t<p>Sent by TIBCO Rendezvous.\n\n\n'
+        "\t\t\t  </p>\n\t\t</td>\n\t\t<td>y</td>\n\t</tr>\n\t<tr>\n\t\t<td>z</td>\n\t</tr>\n</table>"
+    )
+
+    assert not re.search(r"\n[ \t]*\n", rendered)
+    assert not re.search(r"^(?: {4}|\t)", rendered, re.MULTILINE)
+    assert "<p>Sent by TIBCO Rendezvous.\n</p>" in rendered
+
+
+def test_a_pre_in_a_passthrough_table_keeps_its_blank_lines_as_content() -> None:
+    """Whitespace is content in a `<pre>`, so an empty line is written as the
+    newline it stands for rather than folded away -- and is no longer empty."""
+    rendered = render(
+        "<table><tr><td rowspan='2'><pre>first\n\n    indented</pre></td><td>y</td></tr>"
+        "<tr><td>z&nbsp;&nbsp;w</td></tr></table>"
+    )
+
+    assert "<pre>first\n&#10;    indented</pre>" in rendered
+    assert not re.search(r"\n[ \t]*\n", rendered)
+    # `&nbsp;` is content too; WebWorks indents code lines with it.
+    assert "z\xa0\xa0w" in rendered
+
+
+def test_a_pipe_table_keeps_its_caption_as_an_italic_line_ahead_of_it() -> None:
+    """TRA 5.13.0 `Advanced_Panel_1.md` lost "Processing Instruction": `read`
+    sees rows and cells, and 237 captions vanished on the pipe path (R8-06)."""
+    rendered = render(
+        "<table><caption><p class='TableTitle'><a name='T1'></a>Processing Instruction</p></caption>"
+        "<tr><th>Field</th></tr><tr><td>Name</td></tr></table>"
+    )
+
+    assert rendered == '<a id="T1"></a>\n\n*Processing Instruction*\n\n| Field |\n| --- |\n| Name |'
+    # The target is taken from the tag, not from the collapsed caption text: one
+    # EMS target has a pasted table, newlines and all, in its name.
+    pasted = render(
+        "<table><caption><a name='Event_Value_\n   _Description_'></a>Values</caption>"
+        "<tr><th>Field</th></tr><tr><td>Name</td></tr></table>"
+    )
+    assert pasted.startswith('<a id="Event_Value_\n   _Description_"></a>\n\n*Values*')
+
+
+def test_a_thead_row_of_td_cells_is_the_header() -> None:
+    """TRA 5.13.0 `tramodify_Utility` showed "Parameter | Description" as a data
+    row under a blank header: only an all-`<th>` row counted (R8-06)."""
+    model = tables.read(soup(
+        "<table><thead><tr><td>Parameter</td><td>Description</td></tr></thead>"
+        "<tbody><tr><td>-v</td><td>Verbose.</td></tr></tbody></table>"
+    ))
+
+    assert model.header_row == 0
+    assert tables.to_pipe(model, lambda cell: cell.get_text()).splitlines() == [
+        "| Parameter | Description |", "| --- | --- |", "| -v | Verbose. |",
+    ]
+
+
 # -- the markdown walk (§5.1, invariant 13) -----------------------------------
 
 
@@ -391,6 +489,28 @@ def test_an_ordered_list_honours_its_start() -> None:
     )
     assert render("<ol start='x'><li>Run it.</li></ol>") == "1. Run it."
     assert render("<ul start='3'><li>Run it.</li></ul>") == "- Run it."
+
+
+def test_a_break_at_the_end_of_a_block_prints_nothing() -> None:
+    """`strip` took the break's newline and left its backslash: DocBook's
+    `<br class="figure-break">` alone made a paragraph of `\\`, six of them in
+    Streaming 11.1.0 `sec-ldap.md` (R8-05, 2,064 in the families)."""
+    assert render("<p>Before.<br/></p><p><br class='figure-break'/></p><p>After.</p>") == (
+        "Before.\n\nAfter."
+    )
+    assert render("<p>one<br/>two</p>") == "one\\\ntwo"
+
+
+def test_a_break_at_the_end_of_bold_moves_outside_the_markers() -> None:
+    """`**Warning\\**`: the backslash escaped the closing marker (R8-05)."""
+    assert render("<p><b>Warning: Action required<br/></b>You must update.</p>") == (
+        "**Warning: Action required**\\\nYou must update."
+    )
+
+
+def test_a_break_in_a_heading_is_a_space() -> None:
+    """A heading is one line; a break split it into a heading and a paragraph."""
+    assert render("<h2>Part one<br/>part two</h2>") == "## Part one part two"
 
 
 def test_a_passthrough_table_gets_its_references_resolved() -> None:

@@ -69,6 +69,11 @@ _KEEP_AS_HTML = frozenset({"sub", "sup"})
 # spaces, because invisible whitespace is the one Markdown construct an editor
 # silently eats.
 _BREAK = "\\\n"
+# Whitespace and hard breaks at the ends of a run, where a break means nothing.
+# After `_collapse` every newline is part of a break, and a text backslash is
+# always escaped as a pair, so a backslash followed by a newline is a break.
+_EDGE_BREAKS = re.compile(r"^(?:\s|\\\n)+|(?:\s|\\\n)+$")
+_EDGES = re.compile(r"((?:\s|\\\n)*)(.*?)((?:\s|\\\n)*)", re.DOTALL)
 
 _WHITESPACE = re.compile(r"\s+")
 _ESCAPES = re.compile(r"([\\`*\[\]<])")
@@ -200,7 +205,7 @@ class Renderer:
         run: list[str] = []
 
         def flush() -> None:
-            text = _collapse("".join(run)).strip()
+            text = _trim(_collapse("".join(run)))
             run.clear()
             if text:
                 out.append(escape_leading(text))
@@ -235,8 +240,9 @@ class Renderer:
             # id="X"></a>Configuring Users` would change `#configuring-users` --
             # breaking every fragment that resolves today in the act of fixing
             # 424 that do not. Out here both anchors work and the slug is the
-            # same string it was.
-            inline = self.inline_children(tag).strip()
+            # same string it was. A `<br>` is a space: a heading is one line, and
+            # a break in it split the title from its second half (R8-13).
+            inline = _trim(self.inline_children(tag)).replace(_BREAK, " ")
             markers = "".join(_MARKER.findall(inline))
             text = _MARKER.sub("", inline).strip()
             out = [markers] if markers else []
@@ -246,7 +252,7 @@ class Renderer:
         if name == "p" or name == "dd" or name == "li":
             return self.blocks(tag)
         if name == "dt":
-            term = self.inline_children(tag).strip()
+            term = _trim(self.inline_children(tag)).replace(_BREAK, " ")
             return [f"**{term}**"] if term else []
         if name in ("ul", "ol"):
             return [self.list(tag, ordered=name == "ol")]
@@ -308,8 +314,21 @@ class Renderer:
                 for found in tag.find_all("a")
                 if found.find_parent(["td", "th"]) is None
             )
-            pipe = tables_transform.to_pipe(model, self.inline_children)
-            return f"{markers}\n\n{pipe}" if markers else pipe
+            blocks = [markers] if markers else []
+            # The caption, which `read` cannot see either: an italic line ahead of
+            # the table, as WebWorks writes its own. 237 captions in three families
+            # vanished on this path without a word (Phase 34, R8-06). Its target
+            # is already among the hoisted markers above, taken from the tag
+            # rather than from the rendered text, whose whitespace is collapsed:
+            # one EMS target has a pasted table, newlines and all, in its name.
+            caption = tag.find("caption", recursive=False)
+            if isinstance(caption, Tag):
+                text = _trim(self.inline_children(caption)).replace(_BREAK, " ")
+                text = _MARKER.sub("", text).strip()
+                if text:
+                    blocks.append(wrap(text, "*"))
+            blocks.append(tables_transform.to_pipe(model, self.inline_children))
+            return "\n\n".join(blocks)
         return tables_transform.passthrough(self.rewrite(tag))
 
     def rewrite(self, tag: Tag) -> Tag:
@@ -378,7 +397,7 @@ class Renderer:
         if name in ("code", "tt", "kbd", "samp"):
             return self.code_span(node)
         if name in _KEEP_AS_HTML:
-            inner = self.inline_children(node).strip()
+            inner = _trim(self.inline_children(node))
             return f"<{name}>{inner}</{name}>" if inner else ""
         return self.inline_children(node)
 
@@ -462,7 +481,7 @@ class Renderer:
         targets while every `href="#..."` pointing at them survived (Phase 16).
         The marker leads, so it sits *before* the text it labels.
         """
-        text = self.inline_children(tag).strip()
+        text = _trim(self.inline_children(tag))
         url = self.link(tag)
         marker = anchor_marker(anchor_target(tag))
         if not url:
@@ -504,18 +523,37 @@ def _collapse(text: str) -> str:
     return _BREAK.join(trimmed)
 
 
+def _trim(text: str) -> str:
+    """`str.strip`, plus any hard break at either end.
+
+    A break is a backslash and a newline, and only means something between two
+    lines. `strip` took the newline and left the backslash, so a paragraph ending
+    in `<br>` printed a `\\`, and DocBook's `<br class="figure-break">` alone made
+    a paragraph of one: 2,064 such paragraphs and 81 trailing ones in the
+    families (Phase 34, R8-05).
+    """
+    return _EDGE_BREAKS.sub("", text)
+
+
 def wrap(text: str, marker: str) -> str:
     """Emphasis, with the surrounding spaces moved outside the markers.
 
     `** bold **` is not bold in any GFM renderer, and MadCap's spans routinely
-    include the trailing space.
+    include the trailing space. A hard break at either end moves out with them:
+    `<b>Warning<br/></b>` left it inside as `**Warning\\**`, whose backslash
+    escaped the closing marker (R8-05).
     """
-    stripped = text.strip()
+    head, stripped, rear = _EDGES.fullmatch(text).groups()  # type: ignore[union-attr]
     if not stripped:
         return " " if text else ""
-    lead = " " if text[:1].isspace() else ""
-    tail = " " if text[-1:].isspace() else ""
-    return f"{lead}{marker}{stripped}{marker}{tail}"
+    return f"{_padding(head)}{marker}{stripped}{marker}{_padding(rear)}"
+
+
+def _padding(edge: str) -> str:
+    """What one end of an emphasis run leaves outside it: a break, a space, or nothing."""
+    if _BREAK in edge:
+        return _BREAK
+    return " " if edge else ""
 
 
 def _start(tag: Tag) -> int:

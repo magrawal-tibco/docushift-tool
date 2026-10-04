@@ -1030,7 +1030,7 @@ Flare does not preserve a semantic class vocabulary the way DITA does (§5.2.5).
 
 **DITA-style task structure survives as autonum labels, not as classes**: `Procedure` 702, `Subtopics` 467, `Before you begin` 244, `What to do next` 137, `Result` 88. These become bold run-in labels or `###` headings depending on what follows; they are the only structure a Flare task topic has left.
 
-**Tables.** 98% of ordinary tables carry `TableStyle-Table`, which is styling and carries no semantics. **57% are GFM-safe** — every cell single-paragraph inline content, no `colspan` or `rowspan`. The rest are passed through as HTML verbatim, on §5.2.5's reasoning: silently flattening a `rowspan` changes what the table says. `colspan`-only tables are split where the split is unambiguous, following the predecessor's `split_colspan_tables` pass, which is one of the parts of it worth keeping (§5.1.10). A full-width row of 60 characters or fewer with no block inside becomes one bold label, and its children move into it: `<code>` and links survive (R5-04). A row holding a block (a bold word over a `<p>` of prose) keeps its markup as it stands. The table's `<caption>` becomes a bold paragraph ahead of the first piece (R5-05). The pipe-table path for an unsplit table still drops a caption (an R8 matter).
+**Tables.** 98% of ordinary tables carry `TableStyle-Table`, which is styling and carries no semantics. **57% are GFM-safe** — every cell single-paragraph inline content, no `colspan` or `rowspan`. The rest are passed through as HTML verbatim, on §5.2.5's reasoning: silently flattening a `rowspan` changes what the table says. `colspan`-only tables are split where the split is unambiguous, following the predecessor's `split_colspan_tables` pass, which is one of the parts of it worth keeping (§5.1.10). A full-width row of 60 characters or fewer with no block inside becomes one bold label, and its children move into it: `<code>` and links survive (R5-04). A row holding a block (a bold word over a `<p>` of prose) keeps its markup as it stands. The table's `<caption>` becomes a bold paragraph ahead of the first piece (R5-05). An unsplit pipe table keeps its caption as an italic line ahead of it, in every engine (§5.8, R8-06).
 
 **Code fences are bare.** 1,565 of roughly 1,600 `<pre>` blocks carry no language attribute. Guessing one would be a fabrication applied 1,565 times.
 
@@ -2160,6 +2160,19 @@ Output growth is bounded and small: over the 8,613 HTML files Stage 5 converts, 
 An `<a>` with neither an `href` nor a target is still unwrapped, and `_code_fragment` is unchanged: inside a `<code>` that is *emitted as HTML* the target has already been hoisted out in front of the span.
 
 **One of the 84 was not the converter's at all.** `transforms/links.classify` percent-decodes the fragment on the `RELATIVE` path and, until Phase 16, left it raw on the `FRAGMENT` path — so a same-page `#Event_Reason…%0A%20%20%20…` was compared against an anchor holding a literal newline and three spaces, and `links.emit` re-encoded the raw form on the way out, double-encoding it. One corpus anchor has an entire pasted table in its `name`, which is the only reason anything in 17,213 references reached the asymmetry.
+
+### 5.8 What the Shared Walk Does With Structure GFM Cannot Hold (Phase 34)
+
+**A sibling of §5.7, for the same reason**: these are rules of `transforms/markdown.py` and `transforms/tables.py`, so they hold for all four engines. Each one replaced a silent loss that the Phase 34 review (R8) measured by rendering the published trees with a CommonMark + GFM parser and searching the token stream for the failure.
+
+**Tables.**
+
+- **A cell is multi-block if it holds a list, a `<pre>`, a definition list, a blockquote or a second paragraph anywhere in it** (R8-02), not only at its top level. A lone `<ul>`, a lone `<pre>` and `div > ul` each counted as one block, so the pipe row ran the list items together and printed code as escaped prose: 2,183 cells (Streaming 1,220 lists; DataSynapse, EMS and ActiveSpaces mostly `<pre>`). The table now takes the passthrough branch, which is §5.1.7's rule applied to what the cell actually holds.
+- **A passthrough table has no blank line and no indented line** (R8-03). A GFM HTML block ends at its first blank line, and the next line, indented by Flare's tabs, rendered as a code block holding a literal `</td>` (154 tables in 140 files). Whitespace in the markup is folded as an HTML renderer folds it: a run holding a newline becomes one newline, any other run a space, and `&nbsp;` is left alone. A blank line inside a `<pre>` is written as `&#10;`, the newline it stood for.
+- **A pipe table keeps its `<caption>`** as an italic line ahead of it, which is what WebWorks already did (R8-06; 237 captions in TRA, EMS and DataSynapse). Flare's split tables keep theirs as a bold line (§5.1.7, R5-05). A target inside the caption is hoisted out of the emphasis, as a heading's is (§5.7).
+- **A `<thead>` row is the header whatever its cells are called** (R8-06). Only an all-`<th>` row counted, so `<thead><tr><td>Parameter` was emitted as a data row under an empty header (65 tables in 4 sampled versions). WebWorks still names its own header row (§5.3.7).
+
+**Hard breaks.** A `<br>` is a backslash and a newline, which means something only between two lines (R8-05). At the end of a paragraph, alone in one (DocBook's `<br class="figure-break">`), or at the end of a link's text it is dropped. At the end of an emphasis run it moves outside the markers, where `**Warning\**` had escaped the closing one. In a heading it is a space, and in a pipe cell it is `<br>`. Before, 2,064 paragraphs were a lone `\`, 81 ended in one, and 42 pipe rows carried `\ ` mid-text.
 
 ---
 
