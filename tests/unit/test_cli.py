@@ -1301,6 +1301,28 @@ def test_sync_dry_run_names_the_destination_without_writing(
     assert not (workspace / "en-us-tibco-messaging-userdocs").exists()
 
 
+
+def test_sync_dry_run_reports_the_tree_the_run_would_publish(
+    runner: CliRunner, populated_root: Path, tmp_path: Path
+) -> None:
+    """X1-12. The dry run tested `output/` for every product, so a product that
+    publishes merged, with no merge, read "present" and the real run refused it."""
+    _convert_output(populated_root, "10.4.0", {"index.md": "# x\n"})
+    (populated_root / "config" / "reframe.yaml").write_text(
+        "products:\n  tibco-enterprise-message-service:\n    publish: true\n", encoding="utf-8")
+    workspace = tmp_path / "workspace"
+    workspace.mkdir()
+
+    result = _invoke(
+        runner, populated_root, "sync", "--product", "tibco-enterprise-message-service",
+        "--version", "10.4.0", "--target-dir", str(workspace), "--dry-run"
+    )
+
+    assert result.exit_code == 0
+    assert "present" not in result.output
+    assert "refused" in result.output
+    assert "publishes merged and no merged tree" in " ".join(result.output.split())
+
 def test_sync_exits_non_zero_when_a_version_fails(
     runner: CliRunner, populated_root: Path, tmp_path: Path, monkeypatch
 ) -> None:

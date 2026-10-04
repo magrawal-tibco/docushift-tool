@@ -2096,10 +2096,21 @@ def sync(ctx, bu, family, product, version, batch, select_all, target_dir, force
 
         resources = cfg.publishes_resources()
         table = Table(title=f"Would sync ({len(pairs)})")
-        for column in ("Product", "Version", "Converted", "Documents", "API refs", "Destination"):
+        for column in ("Product", "Version", "Online help", "Documents", "API refs", "Destination"):
             table.add_column(column)
+        refused: list[str] = []
         for found, ver in pairs:
-            source = cfg.output_path(found.bu, found.family, found.slug, ver.version)
+            # X1-12: the run's own decision, not a second one. Testing `output/`
+            # said "present" for a product that publishes merged, with no merge
+            # or a stale one, and the real run then refused it.
+            _source, merged, refusal = distributor._source(found, ver)
+            if refusal and merged:
+                online_help = "[yellow]refused[/yellow]"
+                refused.append(f"{found.slug}@{ver.version}: {refusal}")
+            elif refusal:
+                online_help = "[yellow]missing[/yellow]"
+            else:
+                online_help = "merged" if merged else "present"
             tree = cfg.extract_path(found.bu, found.family, found.slug, ver.version)
             segment = version_segment(ver.version)
             destination = distributor.doc_class_dir(found, target_dir, ONLINE_HELP) / segment
@@ -2117,12 +2128,14 @@ def sync(ctx, bu, family, product, version, batch, select_all, target_dir, force
             table.add_row(
                 found.slug,
                 ver.version,
-                "present" if source.is_dir() else "[yellow]missing[/yellow]",
+                online_help,
                 ", ".join(f"{name} {len(files)}" for name, files in grouped.items()) or "[dim]-[/dim]",
                 ", ".join(root.name for root in roots) or "[dim]-[/dim]",
                 str(destination),
             )
         console.print(table)
+        for line in refused:
+            console.print(f"[yellow]![/yellow] {escape(line)}")
 
         # Per product, not per version: the folder has no version segment, and one
         # line per selected version would repeat one product's history N times.
