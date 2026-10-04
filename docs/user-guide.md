@@ -1112,6 +1112,9 @@ older than the conversion beneath it, that version's `online-help` publishes **n
 the run says why — its PDFs and other documents still ship, because those come from the
 extracted package and a merge has nothing to say about them. The alternative, quietly
 publishing the unmerged topics instead, would un-merge URLs that are already live.
+"Older" includes a `convert --force` run after the merge: the package has not changed, so
+`reframe` on its own still calls the merge current, and the message tells you to run
+`docushift reframe --force` for that version.
 
 `validate` then checks `redirects.yml` against the tree that actually shipped: a redirect
 pointing at a page or a section that is not there is a `LINK_BROKEN` error and fails the gate,
@@ -1210,7 +1213,9 @@ docushift validate --target-dir ../tibco-docs-aem/
 have not converted yet is a report line, not an abort: over a partially converted
 corpus that is the normal state. "Already current" is decided by comparing the two
 trees, not by a recorded hash, so a version somebody edited in the target is
-re-copied rather than skipped.
+re-copied rather than skipped. For the PDF doc-classes it also compares the index
+title, so renaming a product in `products.csv` rewrites their `index.md` and `toc.yml`
+on the next run without `--force`.
 
 A version folder that would put any file over Windows' 260-character path limit under
 your `--target-dir` is reported as failed and not copied, with the file and its length
@@ -1274,7 +1279,7 @@ Thirteen things to expect:
 - **`archives/` is indexed from the catalog, so it lists every archived version — including the ones you have not downloaded.** Entries whose ZIP is not in the repository link to the docsite instead, and the index says which is which. That is deliberate: `archives/` exists to be the complete product history, and `archive download` is what fills it in. `api-references/` gets no generated index — Javadoc ships its own.
 - **Versions are dashed here** (`10.4.0` → `10-4-0`) and nowhere else. The catalog and the `families/` workspace keep the dots. Two versions in the catalog are not version numbers at all — `Cloud™` and `(iPaaS)`, upstream parse artifacts — and those are reduced further to `cloud` and `ipaas`, because a trademark glyph and a bracket pair cannot be a URL path. Any version that is not `N.N.N` is named in the run report, whether it was reshaped or just sorted to the bottom of the drop-down.
 
-- **Re-running sync replaces a version's folder wholesale**, so a topic deleted upstream does not survive as a stale file. It replaces exactly that folder: `version.yml`, the product's `metadata.yml`, and every other version are untouched.
+- **Re-running sync replaces a version's folder wholesale**, so a topic deleted upstream does not survive as a stale file. It replaces exactly that folder: `version.yml`, the product's `metadata.yml`, and every other version are untouched. The same goes for a whole doc-class: if a re-extracted package no longer ships anything for `release-information` (or no longer carries an API tree), that version's folder is removed, its drop-down row goes with it, and the run lists it as `no source tree` with the word "removed". If the extracted package itself is missing, nothing is removed.
 - **API references are never converted, and the folder names come from the package.** Javadoc and the C / Go / `tibdg` trees are copied through as HTML, byte for byte, with only a `metadata.yml` added beside them. Each gets a folder named from its path inside the package with the uninformative segments removed — `html/api-reference/java` becomes `java`, `api/java/lib` becomes `java-lib` — and if two of a version's trees would end up with the same name, *all* of that version's folders fall back to their full path so the set stays readable as one scheme.
 - **A topic link into `api-references/` becomes the published URL of the resources tree**, written during `convert` rather than during `sync` — by the time the tree is placed the reference is gone, so the rewrite has to happen while the page is being converted. The host comes from `publish_base_url` in `config/publishing.yaml`. **With no host set the link is still written**, as the path without a scheme or host (`en-us-tib-messaging-userdocs-resources/en-us/ems/api-references/10-4-0/java/index.html`), and the run reports `PUBLISH_BASE_URL_UNSET` once per product so you know what is missing — a prefix you can add later, rather than a link you cannot get back. Anchors are kept, and a link to a page that is not actually in the tree is left unlinked and reported rather than pointed at a 404. **One known gap**: where the source wrote the reference inside a code span — `<code><a href="…">MessageListener</a></code>`, which is how the EMS developer guide writes all of its — the conversion flattens it to plain code and the link is not recovered. That is roughly a tenth of these references corpus-wide and all of them are in one product; it is recorded as its own fix.
 - **Setting `publish_base_url` reconverts the versions it affects, and only those.** The host is part of what a converted tree contains, so `convert` treats a changed host the way it treats a changed package. Versions with no API tree are untouched, so setting one value does not reconvert the corpus. Each version that does rewrite reports `API_LINK_REWRITTEN` with the count — worth a glance, because a version with an API tree and a count of zero is either a product whose help never mentions its API or a sign something stopped matching.

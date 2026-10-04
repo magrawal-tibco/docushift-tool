@@ -323,7 +323,7 @@ class WorkspaceDistributor:
         # not one Stage 7 can vouch for. The message carries which.
         if not merged.is_dir():
             detail = f"no merged tree at {merged}; run `docushift reframe` first"
-        elif (stale := self._stale(slug, number)) is not None:
+        elif (stale := self._stale(slug, number, converted, merged)) is not None:
             detail = stale
         else:
             return merged, True, None
@@ -332,13 +332,21 @@ class WorkspaceDistributor:
         self._record("SYNC_MERGE_UNAVAILABLE", slug, number, message=message)
         return merged, True, message
 
-    def _stale(self, slug: str, number: str) -> str | None:
+    def _stale(self, slug: str, number: str, converted: Path, merged: Path) -> str | None:
         """Whether the merged tree predates the conversion beneath it.
 
-        The same two values Reframe compares for its own currency
-        (`reframe/driver.py`), read from the same version metadata -- so a merge that
-        `docushift reframe` would rebuild is one `sync` declines to publish, and the
-        two stages cannot disagree about what "current" means.
+        Two tests, and the merge must pass both. The first is the two values
+        Reframe compares for its own currency (`reframe/driver.py`), read from the
+        same version metadata, so a merge `docushift reframe` would rebuild is one
+        `sync` declines to publish.
+
+        **The second is what the first cannot see** (Phase 34, R10-06). Both
+        checksums are the *package's*, and `convert --force` re-converts without
+        changing it, so a merge built from the previous conversion still matched
+        and was published as current. Which tree was built last is read from the
+        trees themselves (`_built_at`). Here `sync` is stricter than `reframe`,
+        which does not yet notice a forced re-convert either (Phase 21's carried
+        item); the message names `--force` for that reason.
 
         This lives in `sync` rather than in `validate` because `validate` takes no
         catalog on purpose (§7.1, "the target is the evidence"). A checker that
@@ -348,6 +356,9 @@ class WorkspaceDistributor:
         converted_from = metadata.get("convert_source_checksum", "")
         merged_from = metadata.get("reframe_source_checksum", "")
         if merged_from and converted_from and merged_from == converted_from:
+            if _built_at(converted) > _built_at(merged):
+                return ("the merged tree was built before the conversion beneath it was re-run; "
+                        "re-run `docushift reframe --force`")
             return None
         # No recorded provenance, no currency claim -- the rule `reframe` inherited
         # from `convert` and the safe direction. The six DataSynapse Flare versions
@@ -418,7 +429,9 @@ class WorkspaceDistributor:
         that is gone is one `NO_OUTPUT` row naming `docushift extract`, because it
         is recoverable; a tree that is present and routes nothing gets no row,
         because 156 of 1,822 versions are in that state and reporting them would
-        put 156 recoverable-looking failures in every full run.
+        put 156 recoverable-looking failures in every full run. The exception is a
+        doc-class an earlier run published and the package no longer feeds: that
+        folder is removed and gets one `NO_OUTPUT` row saying so (`_withdraw`).
         """
         slug, number = product.slug, version.version
         segment = version_segment(number)
@@ -438,9 +451,52 @@ class WorkspaceDistributor:
             router.route_version(self.content_tree(product, version, tree), version.engine)
         )
         results = []
-        for doc_class, files in grouped.items():
-            results.append(self._sync_doc_class(product, version, target, doc_class, files, force))
+        for doc_class in router.DOCUMENT_DOC_CLASSES:
+            if doc_class in grouped:
+                results.append(self._sync_doc_class(
+                    product, version, target, doc_class, grouped[doc_class], force
+                ))
+                continue
+            # A doc-class this package no longer feeds (R10-05). The extracted tree
+            # is present and routed, so this is the wholesale replacement with an
+            # empty folder, which §6.2.2 expresses by absence -- the same rule that
+            # drops a readme from a folder that still holds a PDF.
+            withdrawn = self._withdraw(
+                slug, number, segment, self.doc_class_dir(product, target, doc_class) / segment,
+                doc_class, "the extracted package no longer ships a document for it",
+            )
+            if withdrawn is not None:
+                results.append(withdrawn)
         return results
+
+    def _withdraw(
+        self, slug: str, number: str, segment: str, destination: Path, doc_class: str, why: str,
+    ) -> SyncResult | None:
+        """Removes a version folder whose source no longer produces it, and says so.
+
+        Phase 34, R10-05. The swap replaces a version folder only when its source
+        still yields something, so a doc-class or API tree that dropped out of the
+        package kept its old files, its drop-down row and no report row. Removing
+        it is `_place`'s wholesale replacement, scoped exactly as that is -- one
+        version folder, never `version.yml` or a sibling -- and the drop-down loses
+        the row on this run's `finish_product`, which lists the folders after this.
+
+        Only called once the extracted tree is known to be present. A missing tree
+        is the recoverable `NO_OUTPUT` that leaves the published folder alone.
+        `None` when there was nothing published to withdraw, which is the common
+        case and gets no row, as before.
+        """
+        if not destination.is_dir():
+            return None
+        try:
+            remove(destination)
+        except OSError as exc:  # pragma: no cover - filesystem failure, not logic
+            return SyncResult(slug, number, SyncOutcome.FAILED, segment=segment,
+                              message=f"{type(exc).__name__}: {exc}", doc_class=doc_class)
+        return SyncResult(
+            slug, number, SyncOutcome.NO_OUTPUT, segment=segment, doc_class=doc_class,
+            message=f"{doc_class}/{segment}/ removed: {why}",
+        )
 
     def _sync_doc_class(
         self,
@@ -467,7 +523,8 @@ class WorkspaceDistributor:
         # file that vanishes or will not `stat` between routing and here raised
         # out of `sync_many` and lost the run's findings with it.
         try:
-            if not force and _documents_current(files, destination):
+            rendered = self._catalog_rendered(product, version, doc_class)
+            if not force and _documents_current(files, destination, rendered):
                 return SyncResult(slug, number, SyncOutcome.CURRENT, path=destination,
                                   segment=segment, doc_class=doc_class)
 
@@ -514,18 +571,33 @@ class WorkspaceDistributor:
                 document_index.render_index(entries, title, doc_class, templates),
                 encoding="utf-8",
             )
-            (staging / "toc.yml").write_text(
-                document_index.render_toc(title, doc_class, templates), encoding="utf-8"
-            )
-            (staging / "metadata.yml").write_text(
-                navigation.render_metadata([("csg-version", version.version)], templates, "version"),
-                encoding="utf-8",
-            )
+            for name, text in self._catalog_rendered(product, version, doc_class).items():
+                (staging / name).write_text(text, encoding="utf-8")
             swap(staging, destination)
         except BaseException:
             remove(staging)  # Phase 15c: never leave `.part` in a published tree.
             raise
         return len(entries), size
+
+    def _catalog_rendered(
+        self, product: Product, version: ProductVersion, doc_class: str
+    ) -> dict[str, str]:
+        """The two rendered files that need no PDF read: `toc.yml` and `metadata.yml`.
+
+        One place for both the placer and the currency check (R10-10). They are a
+        function of the catalog -- the product's `display_name` and the version --
+        so a rename in `products.csv` changes them with every copied file still
+        current, and `_documents_current` compares them as text the way
+        `archives.current` compares its index.
+        """
+        templates = self.config.aem_templates_dir
+        title = document_index.index_title(product.display_name, version.version, doc_class)
+        return {
+            "toc.yml": document_index.render_toc(title, doc_class, templates),
+            "metadata.yml": navigation.render_metadata(
+                [("csg-version", version.version)], templates, "version"
+            ),
+        }
 
     # -- one version's API references (6d) -------------------------------------
 
@@ -546,7 +618,8 @@ class WorkspaceDistributor:
 
         At most one row, and none at all for a version with no API tree -- 409 of
         the 422 products a full sync selects are in that state, and a row each
-        would bury the 13 that have something to publish.
+        would bury the 13 that have something to publish. A version whose earlier
+        API tree is gone from the package gets one row, for its withdrawal.
         """
         slug, number = product.slug, version.version
         if not self.config.publishes_resources():
@@ -568,10 +641,16 @@ class WorkspaceDistributor:
         roots = apirefs.select(
             self.content_tree(product, version, tree), self.api_roots(slug, number, tree)
         )
-        if not roots:
-            return []
-
         destination = self.resources_dir(product, target) / apirefs.API_REFERENCES / segment
+        if not roots:
+            # An API tree published by an earlier run whose package no longer
+            # carries one is withdrawn, as a document doc-class is (R10-05).
+            withdrawn = self._withdraw(
+                slug, number, segment, destination, apirefs.API_REFERENCES,
+                "the extracted package no longer carries an API tree",
+            )
+            return [withdrawn] if withdrawn is not None else []
+
         if not force and apirefs.current(roots, destination):
             return [SyncResult(slug, number, SyncOutcome.CURRENT, path=destination,
                                segment=segment, doc_class=apirefs.API_REFERENCES)]
@@ -1003,6 +1082,24 @@ def _readable(exc: BaseException) -> str:
     return f"{type(exc).__name__}: {exc}"
 
 
+def _built_at(tree: Path) -> float:
+    """When a converted or merged tree was built: its newest top-level file's mtime.
+
+    R10-06. Top level only, because that is where each stage writes files of its
+    own on every run -- `convert` its `csh.yml`, `reframe` its `toc.yml`,
+    `reframe.yml` and `redirects.yml` -- while what either copies with `copy2`
+    keeps an older mtime and cannot raise the maximum. One directory listing, not
+    a walk of 1,441 topics. `0.0` for a tree with no file at its root, which
+    makes no claim either way.
+    """
+    try:
+        return max(
+            (child.stat().st_mtime for child in tree.iterdir() if child.is_file()), default=0.0
+        )
+    except OSError:  # pragma: no cover - unreadable tree, makes no claim
+        return 0.0
+
+
 def _identical(source: Path, target: Path) -> bool:
     """Whether the published tree still matches the converted one, file for file.
 
@@ -1020,7 +1117,9 @@ def _identical(source: Path, target: Path) -> bool:
     return all(filecmp.cmp(source / name, target / name, shallow=True) for name in left)
 
 
-def _documents_current(files: list[router.RoutedFile], destination: Path) -> bool:
+def _documents_current(
+    files: list[router.RoutedFile], destination: Path, rendered: dict[str, str]
+) -> bool:
     """Whether a document doc-class folder still matches what routing found.
 
     **Compared before anything is built**, which is the whole reason this is not
@@ -1029,10 +1128,13 @@ def _documents_current(files: list[router.RoutedFile], destination: Path) -> boo
     comparing after -- `online-help`'s shape -- would pay that on every run to
     answer a question the file metadata already answers.
 
-    The inference the cheap check rests on: the three rendered files are a pure
-    function of the routed filenames and the PDFs' contents, so if every copied
-    file is byte-for-byte current by size and mtime and the three exist, they are
-    current too. A *template* change is the one thing that escapes it, and
+    The inference the cheap check rests on: `index.md` is a function of the routed
+    files, the PDFs' contents and the title, so if every copied file is current by
+    size and mtime and the title is unchanged, it is current too. The title comes
+    from the catalog, not from the files (R10-10): a `display_name` edit renamed
+    every published PDF index while each folder reported `current`. `rendered`
+    is the two files that carry the title and need no PDF read, and they are
+    compared as text. An `index.md` *template* change is what still escapes, and
     `--force` is the answer to that, as it is to a changed engine.
     """
     if not destination.is_dir():
@@ -1044,6 +1146,12 @@ def _documents_current(files: list[router.RoutedFile], destination: Path) -> boo
         return False
     if published != expected | set(_RENDERED):
         return False
+    for name, text in rendered.items():
+        try:
+            if (destination / name).read_text(encoding="utf-8") != text:
+                return False
+        except (OSError, UnicodeDecodeError):  # unreadable or hand-damaged: rebuild it
+            return False
     return all(
         filecmp.cmp(entry.path, destination / entry.path.name, shallow=True) for entry in files
     )

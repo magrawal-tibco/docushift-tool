@@ -5,6 +5,9 @@ dangerous bug here is not a copy that fails -- it is a copy that succeeds and
 quietly unlinks the thirty-seven versions the run did not touch.
 """
 
+import os
+import shutil
+import time
 from pathlib import Path
 
 import pytest
@@ -1575,3 +1578,102 @@ def test_a_document_that_cannot_be_read_fails_its_row_rather_than_the_run(
     failed = {r.doc_class for r in stats.failures}
     assert failed == {USER_GUIDES, RELEASE_INFORMATION, REFERENCE_DOCUMENTS}
     assert all("locked" in r.message for r in stats.failures)
+
+
+# -- Phase 34 review: published copies that went stale unseen (R10) -------------------
+
+
+def test_a_doc_class_the_package_no_longer_feeds_is_withdrawn_and_reported(
+    config, distributor, product, target
+) -> None:
+    """R10-05. The swap replaced a version folder only when its doc-class still
+    routed something, so a re-extracted package that dropped its readme and release
+    notes kept `release-information/10-4-0/`, its drop-down row, and no report row."""
+    source = extract_tree(config, product, "10.4.0", **SHIPMENT)
+    distributor.sync_many([(product, product.versions["10.4.0"])], target)
+    (source / "doc" / "readme.txt").unlink()
+    (source / "pdf" / "tib_ems_relnotes.pdf").unlink()
+
+    stats = distributor.sync_many([(product, product.versions["10.4.0"])], target)
+
+    (row,) = [r for r in stats.results if r.doc_class == RELEASE_INFORMATION]
+    assert row.outcome is SyncOutcome.NO_OUTPUT
+    assert "removed" in row.message
+    assert not published(target, doc_class=RELEASE_INFORMATION).exists()
+    dropdown = published(target, doc_class=RELEASE_INFORMATION).parent / "version.yml"
+    assert not (yaml.safe_load(dropdown.read_text(encoding="utf-8")) or {}).get("versions")
+    # The doc-classes the package still feeds are untouched by the withdrawal.
+    assert published(target, doc_class=USER_GUIDES).is_dir()
+
+
+def test_a_missing_extracted_tree_withdraws_nothing(config, distributor, product, target) -> None:
+    """The other absence, and it stays recoverable: a tree that is gone says
+    nothing about what the package ships, so the published folders are left."""
+    source = extract_tree(config, product, "10.4.0", **SHIPMENT)
+    distributor.sync_many([(product, product.versions["10.4.0"])], target)
+    shutil.rmtree(source)
+
+    distributor.sync_many([(product, product.versions["10.4.0"])], target)
+
+    assert published(target, doc_class=RELEASE_INFORMATION).is_dir()
+    assert published(target, doc_class=USER_GUIDES).is_dir()
+
+
+def test_an_api_tree_the_package_no_longer_carries_is_withdrawn_and_reported(
+    config, distributor, product, target
+) -> None:
+    """R10-05, in the `-resources` tree: `return []` once no API root remained
+    left the old Javadoc published with no row."""
+    source = javadoc_tree(config, product, "10.4.0", "html/api-docs/java")
+    version = product.versions["10.4.0"]
+    distributor.sync_api_references(product, version, target)
+    shutil.rmtree(source / "html")
+
+    (row,) = distributor.sync_api_references(product, version, target)
+
+    assert row.outcome is SyncOutcome.NO_OUTPUT
+    assert "removed" in row.message
+    assert not resources(target, "api-references", "10-4-0").exists()
+
+
+def test_a_merge_built_before_a_forced_re_conversion_is_refused(
+    config, catalog, target, product
+) -> None:
+    """R10-06. Both recorded checksums are the *package's*, and `convert --force`
+    leaves it unchanged, so a merge built from the previous conversion matched and
+    was published as current. Which tree was built last is read off the trees."""
+    opt_in(config, product.slug)
+    merged_version(config, catalog, product, "10.4.0")
+    later = time.time() + 60
+    converted = config.output_path(product.bu, product.family, product.slug, "10.4.0")
+    os.utime(converted / "index.md", (later, later))  # `convert --force`, after the merge
+    findings = FindingsRun("sync")
+    distributor = WorkspaceDistributor(config, catalog, findings=findings)
+
+    result = distributor.sync_one(product, product.versions["10.4.0"], target)
+
+    assert result.outcome is SyncOutcome.NO_OUTPUT
+    assert "reframe --force" in result.message
+    assert [f.code for f in findings.all] == ["SYNC_MERGE_UNAVAILABLE"]
+
+
+def test_a_catalog_rename_is_not_reported_current_by_the_document_indexes(
+    config, distributor, product, target
+) -> None:
+    """R10-10. The index title comes from `display_name`, not from the files, so a
+    rename in `products.csv` left every copied file current and the three document
+    indexes publishing the old name until `--force`."""
+    extract_tree(config, product, "10.4.0", **SHIPMENT)
+    distributor.sync_many([(product, product.versions["10.4.0"])], target)
+    product.display_name = "Spotfire Enterprise Message Service"
+
+    stats = distributor.sync_many([(product, product.versions["10.4.0"])], target)
+
+    documents = [r for r in stats.results if r.doc_class == USER_GUIDES]
+    assert [r.outcome for r in documents] == [SyncOutcome.SYNCED]
+    folder = published(target, doc_class=USER_GUIDES)
+    assert "Spotfire Enterprise Message Service 10.4.0" in (folder / "toc.yml").read_text(encoding="utf-8")
+    assert "Spotfire Enterprise Message Service 10.4.0" in (folder / "index.md").read_text(encoding="utf-8")
+    # And once rewritten, current again.
+    again = distributor.sync_many([(product, product.versions["10.4.0"])], target)
+    assert {r.outcome for r in again.results if r.doc_class == USER_GUIDES} == {SyncOutcome.CURRENT}
