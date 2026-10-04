@@ -38,6 +38,7 @@ alternative on offer is not precision, it is a link that goes nowhere.
 
 from __future__ import annotations
 
+import html
 import re
 from collections.abc import Callable
 
@@ -73,7 +74,9 @@ def marker_targets(text: str) -> dict[str, str]:
 
     Keyed lower-case on both sides, because renderers fold anchor case and a
     rewrite that did not would miss the half of the corpus that capitalises its
-    identifiers (`ID-2FC4B4A1`).
+    identifiers (`ID-2FC4B4A1`). And keyed on the name as written, not as
+    `markdown.anchor_marker` HTML-escaped it into the attribute: `R&amp;D` is
+    the target `R&D` (Phase 34, beside R8-08).
 
     A document with no headings at all yields nothing: there is no anchor to
     send anybody to, and inventing one would replace a link that fails visibly
@@ -87,7 +90,7 @@ def marker_targets(text: str) -> dict[str, str]:
 
     found: dict[str, str] = {}
     for marker in _MARKER.finditer(masked):
-        name = marker.group(1).strip()
+        name = html.unescape(marker.group(1)).strip()
         if not name:
             continue
         after = [index for index, (start, _t) in enumerate(headings) if start >= marker.end()]
@@ -131,6 +134,10 @@ def retarget(body: str, anchor_for: Callable[[str, str], str | None]) -> tuple[s
     fragment or `None` to leave the reference exactly as written. Returning
     `None` is the common case and the important one -- a fragment this pass
     cannot place is reported, never guessed at.
+
+    Both arguments arrive as written in the Markdown, so percent-encoded:
+    decoding is the resolver's job, as it is for every other reader of a URL
+    (R8-08). The replacement is a heading slug, which never needs encoding.
 
     Fence-aware through `mask_code`, matching on the mask and editing the
     original by offset, so a `](#x)` inside a shell sample is prose.

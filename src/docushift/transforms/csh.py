@@ -203,10 +203,10 @@ def _target(
 def _join(output: str, anchor: str) -> str:
     """Path plus anchor, as one string.
 
-    The anchor is the **source's**, unmodified. Whatever slug the engine gave the
-    heading is the engine's business; this module has no way to know it and
-    guessing would produce a link that looks right and lands nowhere. Tracked as
-    an Open in §9.4.
+    The anchor is the **source's**, unmodified, here. Resolution runs before the
+    tree is complete, so this module cannot know which heading a marker sits
+    under; the converter's fragment pass retargets the anchor onto that heading
+    once every page is written, before `csh.yml` is (Phase 34, R8-04).
     """
     return f"{output}#{anchor}" if anchor else output
 

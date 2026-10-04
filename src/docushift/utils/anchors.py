@@ -27,7 +27,15 @@ writer making the headings distinct.
 import re
 import unicodedata
 
-_TAG = re.compile(r"<[^>]*>")
+# A tag, but not an escaped `\<`: `## \<Project> Window` renders "<Project>
+# Window", and deleting `<Project>` as markup slugged it to `-window` (R8-11).
+_TAG = re.compile(r"(?<!\\)<[^>]*>")
+# An image renders no text, and a link renders only its label; slugging the
+# Markdown kept the URL in both (R8-11, TRA's image-only WebWorks headings).
+_IMAGE = re.compile(r"!\[(?:[^\]\\]|\\.)*\]\([^)]*\)")
+_LINK = re.compile(r"\[((?:[^\]\\]|\\.)*)\]\([^)]*\)")
+# A backslash escape renders as the character it escapes.
+_ESCAPE = re.compile(r"\\([!-/:-@\[-`{-~])")
 # Inline Markdown that renders to nothing in a heading: `**bold**`, `` `code` ``,
 # a link's brackets. Removed rather than replaced, so `**Bold** Term` gives
 # `bold-term` and not `-bold--term`.
@@ -56,7 +64,8 @@ def slugify_heading(title: str) -> str:
     does not, and never did; the code below has always dropped them. Corrected
     when a test written against the sentence failed against the function.)
     """
-    text = _TAG.sub("", title)
+    text = _LINK.sub(r"\1", _IMAGE.sub("", title))
+    text = _ESCAPE.sub(r"\1", _TAG.sub("", text))
     text = _INLINE_MARKUP.sub("", text)
     text = unicodedata.normalize("NFKD", text).strip().lower()
     text = _DROP.sub("", text)

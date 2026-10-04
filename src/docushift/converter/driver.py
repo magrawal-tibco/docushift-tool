@@ -37,6 +37,7 @@ from dataclasses import dataclass, field
 from enum import StrEnum
 from pathlib import Path, PurePosixPath
 from typing import Any
+from urllib.parse import unquote
 
 from docushift import origins
 from docushift.apiref import find_api_roots, recorded_roots
@@ -73,6 +74,16 @@ from docushift.utils.swap import remove, swap
 #: diffable. The key is `url` since Phase 36; it must follow the template's, or
 #: this rewrites nothing and says nothing.
 _TOC_PATH = re.compile(r'url:[ \t]*"([^"\n]*)"')
+
+
+def _fragment_key(fragment: str) -> str:
+    """A `#fragment` as `fragments.marker_targets` keys it: decoded, lower-cased.
+
+    A link emits its fragment percent-encoded (`links.emit`), a marker holds the
+    name as written; comparing the two raw missed every target whose name has a
+    space in it (Phase 34, R8-08).
+    """
+    return unquote(fragment).lower()
 
 
 class ConvertOutcome(StrEnum):
@@ -410,10 +421,13 @@ class DocumentConverter:
         # generates have to reach the staging tree before the swap.
         self._synthesize(context, units, staging, product, version, result)
 
+        # The help map is written after the fragment pass, which retargets its
+        # anchors as it does every link's (Phase 34, R8-04). Written before, it
+        # kept the marker names the platform ignores, and every Help button in an
+        # unmerged tree opened the top of its page.
         self._report_csh(context, result.csh)
+        self._retarget_fragments(context, staging, result.csh.entries)
         csh_transform.write(staging / "csh.yml", result.csh.entries)
-
-        self._retarget_fragments(context, staging)
         self._write_origins(staging, product, version, mapping)
 
         swap(staging, target)
@@ -695,7 +709,9 @@ class DocumentConverter:
             count=total,
         )
 
-    def _retarget_fragments(self, context: ConversionContext, staging: Path) -> None:
+    def _retarget_fragments(
+        self, context: ConversionContext, staging: Path, help_map: dict[str, str] | None = None
+    ) -> None:
         """Points every `#fragment` at a heading rather than at an inert marker.
 
         **A whole-tree pass, after every document is written and before the
@@ -712,6 +728,13 @@ class DocumentConverter:
         two reasons it cannot are a target document with no headings at all, and
         a fragment naming no marker in it; inventing an anchor for either would
         replace a link that fails visibly with one that fails quietly elsewhere.
+
+        A fragment is looked up decoded (R8-08). Links emit it percent-encoded
+        and markers hold the name as written, so `#tibdg%20proxy%20shed` missed
+        `<a id="tibdg proxy shed">` and was counted here as having no heading:
+        53 of the 201 encoded fragments in the published trees.
+
+        `help_map`, the resolved `csh.yml` entries, is retargeted in place.
         """
         targets: dict[PurePosixPath, dict[str, str]] = {}
         bodies: dict[PurePosixPath, str] = {}
@@ -731,7 +754,7 @@ class DocumentConverter:
                 found = targets.get(PurePosixPath(target))
                 if found is None:
                     return None
-                placed = found.get(fragment.lower())
+                placed = found.get(_fragment_key(fragment))
                 if placed is None:
                     unplaced += 1
                 return placed
@@ -761,7 +784,7 @@ class DocumentConverter:
                 if not separator or not fragment:
                     return match.group(0)
                 found = targets.get(PurePosixPath(path))
-                placed = found.get(fragment.lower()) if found is not None else None
+                placed = found.get(_fragment_key(fragment)) if found is not None else None
                 if placed is None:
                     unplaced += 1
                     return match.group(0)
@@ -773,6 +796,26 @@ class DocumentConverter:
                 rewritten += moved
                 toc.write_text(updated, encoding="utf-8", newline="")
 
+        # **And the help map**, rewritten in place before the caller writes it
+        # (Phase 34, R8-04). Its anchor is the source's marker name, so a Help
+        # button pointed at the inert marker and opened the top of the page: 345
+        # entries in all 7 TRA versions, which publish unmerged. Reframe already
+        # retargets the map for merged trees (`reframe/csh.py`); this is the same
+        # repair for the trees that never reach it, with the same lookup as a
+        # link's and the same count for what it cannot place.
+        entries = help_map if help_map is not None else {}
+        for identifier, value in list(entries.items()):
+            path, separator, fragment = value.partition("#")
+            if not separator or not fragment:
+                continue
+            found = targets.get(PurePosixPath(path))
+            placed = found.get(_fragment_key(fragment)) if found is not None else None
+            if placed is None:
+                unplaced += 1
+                continue
+            rewritten += 1
+            entries[identifier] = f"{path}#{placed}"
+
         if rewritten:
             context.record(
                 "FRAGMENT_RETARGETED",
@@ -783,8 +826,8 @@ class DocumentConverter:
         if unplaced:
             context.record(
                 "FRAGMENT_UNPLACEABLE",
-                message=f"{unplaced} cross-reference(s) name an anchor with no heading behind "
-                        f"it; left as written and will not resolve",
+                message=f"{unplaced} cross-reference(s) name no anchor marker with a heading "
+                        f"behind it in their target; left as written and will not resolve",
                 count=unplaced,
             )
 

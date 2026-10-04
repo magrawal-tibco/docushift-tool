@@ -183,6 +183,17 @@ def test_inline_markup_leaves_no_trace_in_an_anchor() -> None:
     assert slugify_heading("**Bold** and `code`") == "bold-and-code"
 
 
+def test_an_anchor_is_slugged_from_the_text_the_heading_renders() -> None:
+    """TRA 5.13.0 `Window_Menu.md`'s `## \\<Project> Window` slugged to `-window`,
+    `<Project>` deleted as a tag, and WebWorks' image-only heading took its slug
+    from the image path (R8-11). The platform slugs what the reader sees."""
+    assert slugify_heading(r"\<Project> Window") == "project-window"
+    assert slugify_heading('<a id="2051068"></a>![](images/palettes-menu.gif)') == ""
+    assert slugify_heading("See [the guide](guide.md#top) first") == "see-the-guide-first"
+    # An escape that was never a tag reads as before.
+    assert slugify_heading(r"Use \*args and MY\_VAR") == "use-args-and-my_var"
+
+
 def test_a_repeated_heading_is_numbered_from_the_second_occurrence() -> None:
     """First bare, then `-1`, `-2`: the platform's rule, and the reason the suffix
     is positional and moves when a section is inserted above."""

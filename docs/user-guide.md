@@ -795,7 +795,9 @@ and its previous output is left in place rather than replaced by an empty tree; 
 version whose engine hits an unexpected error, and the run goes on to the next version.
 
 Conversion also writes the version's context-sensitive help map (`csh.yml`) and stamps the
-matching identifiers into topic frontmatter — see §7.
+matching identifiers into topic frontmatter — see §7. A help identifier that points part-way
+down a page lands on the heading of the section it sits in, as every cross-reference does,
+because the publishing platform ignores the source's anchor markers.
 
 **Conversion also builds the version's navigation.** `toc.yml` and `metadata.yml` are
 written by `convert`, not by `sync`, because the navigation tree exists only while the

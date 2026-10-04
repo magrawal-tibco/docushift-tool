@@ -1322,6 +1322,14 @@ def test_a_marker_is_matched_case_insensitively() -> None:
     assert targets == {"id-2f": "top"}
 
 
+def test_a_marker_name_is_read_as_the_text_it_was_written_from() -> None:
+    """`anchor_marker` HTML-escapes the name, so `R&D` is written `R&amp;D`; read
+    back raw it matched no fragment naming the target (R8-08's neighbour)."""
+    targets = fragments.marker_targets(f"{markdown.anchor_marker('R&D notes')}\n\n## Research\n")
+
+    assert targets == {"r&d notes": "research"}
+
+
 def test_every_reference_syntax_is_retargeted_and_code_is_left_alone() -> None:
     body = (
         "See [A](other.md#old) and [B](#old).\n\n"

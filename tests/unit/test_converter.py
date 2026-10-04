@@ -1197,3 +1197,69 @@ def test_media_the_walk_could_not_render_is_one_note_per_version_by_tag(
     notes = [f for f in findings.all if f.code == "ELEMENT_UNRENDERED"]
     assert [(f.count, f.severity) for f in notes] == [(3, Severity.NOTE)]
     assert "iframe 2, svg 1" in notes[0].message
+
+
+# -- Help buttons and encoded fragments land on a heading (Phase 34, R8-04, R8-08) --
+
+
+class _Sections(FakeEngine):
+    """Pages with targets part-way down: the marker-above-a-heading shape every
+    real engine emits, and a link to a target whose name holds spaces."""
+
+    def convert_unit(self, context: ConversionContext, root: Path) -> Unit:
+        unit = super().convert_unit(context, root)
+        for document in unit.documents:
+            if document.relative.name == "a.md":
+                document.body = (
+                    "# Folder Reference\n\nIntro.\n\n<a id=\"1684753\"></a>\n\n"
+                    "## Adapter Services Folder\n\nText.\n\n"
+                    "<a id=\"tibdg proxy shed\"></a>\n\n## Proxy Shed\n\nMore.\n"
+                )
+            else:
+                document.body = "# Methods\n\nSee [shedding](a.md#tibdg%20proxy%20shed).\n"
+        return unit
+
+
+def _alias(*maps: tuple[str, str]) -> str:
+    rows = "".join(f'<Map Name="{name}" Link="{link}"/>' for name, link in maps)
+    return f"<CatapultAliasFile>{rows}</CatapultAliasFile>"
+
+
+def test_a_help_anchor_is_retargeted_onto_its_heading_like_every_other_fragment(
+    config, catalog, product, version, swap_flare
+) -> None:
+    """TRA Runtime Agent 5.12.4's `aa.adapter.services.folder.helpurl` named marker
+    1684753, which the platform ignores, so the Help button opened the top of
+    "Folder Reference": 345 entries in all 7 TRA versions (R8-04). `csh.yml` was
+    written before the fragment pass and never revisited."""
+    place_package(config, product, version, {
+        "guide/Output.mcwebhelp": "",
+        "guide/Data/HelpSystem.xml": "<x/>",
+        "guide/Data/Alias.xml": _alias(
+            ("aa.adapter.services.folder.helpurl", "a.htm#1684753"),
+            ("page.only", "a.htm"),
+            ("gone", "a.htm#nowhere"),
+        ),
+        "guide/a.htm": "<html><body>A</body></html>",
+        "guide/b.htm": "<html><body>B</body></html>",
+    })
+    assert PackageExtractor(config, catalog).extract_one(product, version).outcome is (
+        ExtractOutcome.EXTRACTED
+    )
+    swap_flare(_Sections)
+
+    result, findings = convert(config, catalog, product, version)
+
+    output = config.output_path(product.bu, product.family, product.slug, version.version)
+    assert result.csh.entries == {
+        "aa.adapter.services.folder.helpurl": "a.md#adapter-services-folder",
+        "gone": "a.md#nowhere",
+        "page.only": "a.md",
+    }
+    assert csh.render(result.csh.entries) == (output / "csh.yml").read_text(encoding="utf-8")
+    # The one it cannot place is left as written and counted, never guessed at.
+    unplaced = [f for f in findings.all if f.code == "FRAGMENT_UNPLACEABLE"]
+    assert [f.count for f in unplaced] == [1]
+    # A percent-encoded fragment names the same marker as its decoded form, and
+    # was left pointing at it and reported as having no heading (R8-08).
+    assert "(a.md#proxy-shed)" in (output / "b.md").read_text(encoding="utf-8")
