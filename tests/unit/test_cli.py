@@ -1775,6 +1775,82 @@ def test_a_download_run_is_recorded_as_finished(runner: CliRunner, populated_roo
     assert run["exit_code"] == 0
 
 
+def _stub_sitemap(root: Path, monkeypatch) -> None:
+    """A docsite.yaml with a sitemap root, and a fetch that reaches no network."""
+    from types import SimpleNamespace
+
+    (root / "config" / "docsite.yaml").write_text("sitemap:\n  root: /sitemap.xml\n", encoding="utf-8")
+    monkeypatch.setattr(
+        "docushift.cli.sitemap.fetch",
+        lambda *args, **kwargs: SimpleNamespace(
+            errors=[], products={}, fetched=0, reused=0, missing=[], not_served=0, duplicates=[]
+        ),
+    )
+
+
+def test_catalog_sitemap_reports_a_report_held_open_in_excel(
+    runner: CliRunner, populated_root: Path, monkeypatch
+) -> None:
+    """R12-05. The report write was bare, so a locked CSV ended the run in a
+    `PermissionError` traceback after the whole fetch."""
+    _stub_sitemap(populated_root, monkeypatch)
+    report = populated_root / "reports" / "coveo-sitemap.csv"
+    report.parent.mkdir()
+    report.write_text("slug,version\n", encoding="utf-8")
+    report.chmod(0o444)
+    try:
+        result = _invoke(runner, populated_root, "catalog", "sitemap")
+    finally:
+        report.chmod(0o666)
+
+    assert result.exit_code == 1
+    assert _traceback_free(result), repr(result.exception)
+    assert "open in Excel" in result.output
+
+
+def test_catalog_sitemap_refuses_a_product_the_catalog_does_not_hold(
+    runner: CliRunner, populated_root: Path, monkeypatch
+) -> None:
+    """R12-12. An unknown code resolved to itself, matched no row, exited 0, and
+    rewrote the whole-catalog report with its header alone."""
+    _stub_sitemap(populated_root, monkeypatch)
+    report = populated_root / "reports" / "coveo-sitemap.csv"
+    report.parent.mkdir()
+    report.write_text("slug,version,archived,leaf,pages,access_levels\nother,1.0,False,no,,\n", encoding="utf-8")
+
+    result = _invoke(runner, populated_root, "catalog", "sitemap", "--product", "tibco-ems")
+
+    assert result.exit_code == 1
+    assert "No product 'tibco-ems'" in result.output
+    assert "other,1.0" in report.read_text(encoding="utf-8")
+
+
+def test_catalog_sitemap_for_one_product_keeps_every_other_products_rows(
+    runner: CliRunner, populated_root: Path, monkeypatch
+) -> None:
+    """R12-12. `--product X` replaced the whole-catalog report with X's rows."""
+    _stub_sitemap(populated_root, monkeypatch)
+    report = populated_root / "reports" / "coveo-sitemap.csv"
+    report.parent.mkdir()
+    report.write_text(
+        "slug,version,archived,leaf,pages,access_levels\n"
+        "aaa-other,1.0,False,no,,\n"
+        "tibco-enterprise-message-service,0.1,False,no,,\n"
+        "zzz-other,2.0,False,yes,4,public\n",
+        encoding="utf-8",
+    )
+
+    result = _invoke(runner, populated_root, "catalog", "sitemap", "--product", "ems")
+
+    assert result.exit_code == 0, result.output
+    lines = report.read_text(encoding="utf-8").splitlines()
+    assert lines[1].startswith("aaa-other,1.0")
+    assert lines[-1].startswith("zzz-other,2.0")
+    ems = [line.split(",")[1] for line in lines if line.startswith("tibco-enterprise-message-service,")]
+    # The stale 0.1 row is replaced by the catalog's own versions.
+    assert sorted(ems) == ["10.4.0", "8.6.0"]
+
+
 def test_extract_exits_one_when_a_package_fails(runner: CliRunner, populated_root: Path) -> None:
     """R12-06, the user's call: `download`, `extract` and `convert` exit 1 on a failed
     version, like `reframe` and `sync`. A corrupt ZIP reported `Failed 1` and exit 0."""
@@ -1846,6 +1922,39 @@ def test_convert_finishes_its_run_when_the_batch_raises(
     assert run["finished_at"] is not None and run["exit_code"] == 1
 
 
+def test_catalog_set_refuses_a_bu_taxonomy_does_not_declare(
+    runner: CliRunner, populated_root: Path
+) -> None:
+    """R12-07. `--bu` took any value, and an unknown bu declares no families, which
+    switched the `--family` typo guard off: the workspace silently moved."""
+    shutil.copyfile(REPO_ROOT / "config" / "taxonomy.yaml", populated_root / "config" / "taxonomy.yaml")
+    before = (populated_root / "config" / "products.csv").read_text(encoding="utf-8-sig")
+
+    alone = _invoke(runner, populated_root, "catalog", "set", "--product", "ems", "--bu", "tibcoo")
+    paired = _invoke(runner, populated_root, "catalog", "set", "--product", "ems",
+                     "--bu", "tibcoo", "--family", "nosuchfam")
+
+    for result in (alone, paired):
+        assert result.exit_code == 1
+        assert "bu 'tibcoo' is not declared" in result.output
+    assert (populated_root / "config" / "products.csv").read_text(encoding="utf-8-sig") == before
+
+
+def test_catalog_set_writes_nothing_when_the_version_is_unknown(
+    runner: CliRunner, populated_root: Path
+) -> None:
+    """R12-08. Each field saved on its own, so the product edit landed before the
+    version was found missing."""
+    before = (populated_root / "config" / "products.csv").read_text(encoding="utf-8-sig")
+
+    result = _invoke(runner, populated_root, "catalog", "set", "--product", "ems",
+                     "--display-name", "CHANGED", "--version", "9.9.9", "--batch", "poc")
+
+    assert result.exit_code == 1
+    assert "No version '9.9.9'" in result.output
+    assert (populated_root / "config" / "products.csv").read_text(encoding="utf-8-sig") == before
+
+
 def test_catalog_eos_leaves_no_open_run_when_the_report_is_missing(
     runner: CliRunner, populated_root: Path
 ) -> None:
@@ -1885,3 +1994,61 @@ def test_catalog_fetch_dry_run_names_no_run_id(
     assert result.exit_code == 0
     assert "--run 0" not in result.output
     assert "Would record" in result.output
+
+
+def test_report_normalises_a_lower_case_code(runner: CliRunner, populated_root: Path) -> None:
+    """R12-11. `--code output_root_missing` matched nothing and read as a clean run."""
+    _unconvertible_flare_tree(runner, populated_root)
+    _invoke(runner, populated_root, "convert", "--product", "ems")
+
+    result = _invoke(runner, populated_root, "report", "--code", "output_root_missing")
+
+    assert result.exit_code == 0
+    assert "Nothing to report" not in result.output
+    assert "OUTPUT_ROOT_MISSING" in result.output
+
+
+def test_report_refuses_a_code_the_register_does_not_know(runner: CliRunner, populated_root: Path) -> None:
+    _unconvertible_flare_tree(runner, populated_root)
+    _invoke(runner, populated_root, "convert", "--product", "ems")
+
+    result = _invoke(runner, populated_root, "report", "--code", "OUTPUT_ROOT_MISING")
+
+    assert result.exit_code == 1
+    assert "not a registered finding code" in result.output
+
+
+def test_report_takes_a_stage_in_any_case_and_refuses_an_unknown_one(
+    runner: CliRunner, populated_root: Path
+) -> None:
+    _unconvertible_flare_tree(runner, populated_root)
+    _invoke(runner, populated_root, "convert", "--product", "ems")
+
+    capitalised = _invoke(runner, populated_root, "report", "--stage", "Convert")
+    unknown = _invoke(runner, populated_root, "report", "--stage", "conversion")
+
+    assert capitalised.exit_code == 0
+    assert "OUTPUT_ROOT_MISSING" in capitalised.output
+    assert unknown.exit_code == 2
+
+
+def test_report_says_when_a_slug_matches_no_finding_in_the_run(
+    runner: CliRunner, populated_root: Path
+) -> None:
+    """`report` reads no catalog, so `--slug ems` stays exact -- but it must not read
+    as "nothing to report" when the run's findings are keyed on the full slug."""
+    _unconvertible_flare_tree(runner, populated_root)
+    _invoke(runner, populated_root, "convert", "--product", "ems")
+
+    result = _invoke(runner, populated_root, "report", "--slug", "ems")
+
+    assert "Nothing to report" not in result.output
+    assert "No finding in this run is about slug 'ems'" in result.output
+
+
+def test_report_prune_refuses_a_negative_keep(runner: CliRunner, populated_root: Path) -> None:
+    """R12-13. A negative `--keep` reached the store and ended in a traceback."""
+    result = _invoke(runner, populated_root, "report", "--prune", "--keep", "-1")
+
+    assert result.exit_code == 2
+    assert _traceback_free(result), repr(result.exception)

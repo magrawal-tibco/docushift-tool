@@ -28,7 +28,7 @@ from docushift.config import ConfigManager
 from docushift.discovery import DocsiteClient, DocsiteCrawler, DocsiteError, sitemap
 from docushift.discovery.sitemap import SitemapCache
 from docushift.models import MigrateDecision, ReleaseStatus, ScopeSource, SourceEngine, ZipSource
-from docushift.reporting.findings import REGISTRY, FindingsRun, Severity
+from docushift.reporting.findings import REGISTRY, FindingsRun, Severity, Stage
 from docushift.state import StateStore
 from docushift.utils.slug import version_segment
 
@@ -892,6 +892,38 @@ def catalog_set(
         )
 
     slug = _resolve(manager, product)
+    # Every check runs before the first write (Phase 34, R12-08). Each field is
+    # saved on its own, so a mixed edit that failed on the version used to leave
+    # the product edit written behind an `Error:` line.
+    found = manager.get_product(slug)
+    if found is None:
+        raise click.ClickException(f"No product '{product}' in the catalog.")
+    if any(v is not None for v in version_edits.values()) and found.versions.get(version) is None:
+        raise click.ClickException(f"No version '{version}' for product '{slug}'.")
+    cfg: ConfigManager = ctx.obj["config"]
+    new_bu = bu.strip().lower() if bu is not None else found.bu
+    # `--bu` is checked for `--family`'s reason (R12-07): it names the workspace
+    # folder and the publishing repository, so a typo is not a harmless label. It
+    # also decides which families `--family` is checked against, and an unknown bu
+    # declares none, which used to switch that check off. Gated, like the family
+    # check, on taxonomy.yaml declaring business units at all.
+    units = cfg.load_taxonomy()["business_units"]
+    if bu is not None and units and new_bu not in units:
+        raise click.ClickException(
+            f"bu '{new_bu}' is not declared in taxonomy.yaml. "
+            f"Declared business units: {', '.join(sorted(units))}."
+        )
+    if family is not None:
+        # The rule `set_product_field` applies, asked here against the bu this
+        # call leaves behind, so a refused family writes nothing at all.
+        declared = cfg.families(new_bu)
+        if declared and family.lower() not in declared:
+            raise click.ClickException(
+                f"family '{family.lower()}' is not declared in taxonomy.yaml for bu '{new_bu}'. "
+                f"Declared families for '{new_bu}': {', '.join(sorted(declared))}. "
+                f"Add it under business_units.{new_bu}.families first."
+            )
+
     try:
         for name, value in product_edits.items():
             if value is not None and not manager.set_product_field(slug, name, value):
@@ -979,6 +1011,11 @@ def catalog_sitemap(ctx: click.Context, product: str | None) -> None:
         }
     except CatalogError as exc:
         raise click.ClickException(str(exc)) from exc
+    if product and not slugs & set(catalog_data.products):
+        # Refused as `catalog show` refuses it (Phase 34, R12-12). An unknown code
+        # resolves to itself, matches no row, and used to rewrite the report with
+        # its header alone.
+        raise click.ClickException(f"No product '{product}' in the catalog.")
 
     cache = SitemapCache(cfg.cache_dir / "coveo")
     with console.status("Fetching the Coveo sitemap...") as status:
@@ -1019,11 +1056,26 @@ def catalog_sitemap(ctx: click.Context, product: str | None) -> None:
                          "leaf": "yes", "pages": "", "access_levels": ""})
 
     report = cfg.root_dir / "reports" / "coveo-sitemap.csv"
-    report.parent.mkdir(parents=True, exist_ok=True)
-    with open(report, "w", newline="", encoding="utf-8") as fh:
-        writer = csv.DictWriter(fh, fieldnames=["slug", "version", "archived", "leaf", "pages", "access_levels"])
-        writer.writeheader()
-        writer.writerows(rows)
+    fieldnames = ["slug", "version", "archived", "leaf", "pages", "access_levels"]
+    try:
+        # `--product` refreshes that product's rows and keeps every other one
+        # (R12-12). The report is the whole catalog's; rewriting it from one
+        # product's rows turned a 500-line report into a handful.
+        kept = []
+        if product and report.is_file():
+            with open(report, newline="", encoding="utf-8") as fh:
+                kept = [row for row in csv.DictReader(fh) if row.get("slug") not in slugs]
+        report.parent.mkdir(parents=True, exist_ok=True)
+        with open(report, "w", newline="", encoding="utf-8") as fh:
+            writer = csv.DictWriter(fh, fieldnames=fieldnames, extrasaction="ignore")
+            writer.writeheader()
+            # Stable on slug, so each product's rows keep the order they were built in.
+            writer.writerows(sorted([*kept, *rows], key=lambda row: row["slug"] or ""))
+    except OSError as exc:
+        # Guarded as `report --export` is (R12-05). The write comes after the whole
+        # fetch, and the report is the file somebody has open in Excel; the cached
+        # XML survives, so a re-run once it is closed costs no requests.
+        raise click.ClickException(f"Could not write {report} (open in Excel?): {exc}") from exc
 
     with_leaf = sum(1 for r in rows if r["leaf"] == "yes" and not str(r["version"]).startswith("("))
     catalogued_rows = sum(1 for r in rows if not str(r["version"]).startswith("("))
@@ -2753,7 +2805,14 @@ def _resolve_run(store: StateStore, which: str) -> dict:
 @main.command()
 @click.option("--run", "which_run", default="last", help="Which run to report on: `last` or a run id.")
 @click.option("--runs", "list_runs", is_flag=True, help="List recent runs and their finding counts.")
-@click.option("--stage", default=None, help="Only findings discovered by this stage.")
+@click.option(
+    "--stage",
+    # A `Choice`, so `--stage Convert` or a typo cannot read as a clean run
+    # (Phase 34, R12-11). Case-insensitive; Click hands back the stored spelling.
+    type=click.Choice([str(s) for s in Stage], case_sensitive=False),
+    default=None,
+    help="Only findings discovered by this stage.",
+)
 @click.option(
     "--severity",
     type=click.Choice([str(s) for s in Severity]),
@@ -2761,7 +2820,12 @@ def _resolve_run(store: StateStore, which: str) -> dict:
     help="Only findings at this severity.",
 )
 @click.option("--code", default=None, help="Only this finding code, e.g. TOPIC_LINK_DANGLING.")
-@click.option("--slug", default=None, help="Only findings about this product slug.")
+@click.option(
+    "--slug",
+    default=None,
+    help="Only findings about this product slug, exactly as the run recorded it "
+    "(e.g. tibco-enterprise-message-service, not ems).",
+)
 @click.option("--explain", "explain_code", default=None, help="Describe one code and stop.")
 @click.option(
     "--export",
@@ -2771,7 +2835,15 @@ def _resolve_run(store: StateStore, which: str) -> dict:
     help="Write the report as Markdown to this file.",
 )
 @click.option("--prune", is_flag=True, help="Drop the findings of older runs. Use with --keep.")
-@click.option("--keep", type=int, default=10, show_default=True, help="Runs to keep findings for.")
+@click.option(
+    "--keep",
+    # Not a bare `int`: a negative value reached the store and ended in a
+    # traceback (Phase 34, R12-13).
+    type=click.IntRange(min=0),
+    default=10,
+    show_default=True,
+    help="Runs to keep findings for.",
+)
 @click.pass_context
 def report(
     ctx: click.Context,
@@ -2844,10 +2916,21 @@ def report(
         console.print(table)
         return
 
+    if code is not None:
+        # Normalised as `--explain` normalises it, and refused when the register
+        # does not know it (R12-11): `--code topic_link_dangling` matched nothing
+        # and printed a green "Nothing to report". A retired code is still let
+        # through when the run holds it -- old runs keep the codes they wrote.
+        code = code.strip().upper()
     run = _resolve_run(store, which_run)
     rows = store.query_findings(
         run["run_id"], stage=stage, severity=severity, code=code, slug=slug
     )
+    if code is not None and code not in REGISTRY and not store.query_findings(run["run_id"], code=code):
+        raise click.ClickException(
+            f"{code} is not a registered finding code. `docushift report --explain <CODE>` "
+            f"describes one; see docs/planning.md §7.5."
+        )
     filters = ", ".join(
         f"{name}={value}"
         for name, value in (("stage", stage), ("severity", severity), ("code", code), ("slug", slug))
@@ -2859,7 +2942,16 @@ def report(
         console.print(f"[dim]Filtered by {filters}.[/dim]")
     console.print(f"[dim]{report_view.summarize(rows)}.[/dim]")
 
-    if not rows:
+    if not rows and slug and not store.query_findings(run["run_id"], slug=slug):
+        # Said apart from a clean result (R12-11). `report` reads no catalog, so
+        # it cannot resolve `ems` to its slug; the likeliest cause of a slug no
+        # row in the run carries is a product code typed in its place.
+        console.print(
+            f"[yellow]No finding in this run is about slug '{escape(slug)}'.[/yellow] "
+            f"Findings are keyed on the docs.tibco.com slug "
+            f"(`tibco-enterprise-message-service`, not `ems`); `catalog list` shows them."
+        )
+    elif not rows:
         console.print("[green]Nothing to report for this selection.[/green]")
     for stage_group in report_view.group(rows):
         table = Table(title=stage_group.stage)
