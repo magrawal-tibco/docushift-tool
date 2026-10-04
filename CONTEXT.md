@@ -188,7 +188,7 @@ Per-family folders are created on demand by the downloader, not at startup: pre-
 
 ## 4. Next Steps
 
-1. **Phase 34, the whole-tool code review**, in progress (all 12 units fixed, cross-cutting passes finishing): twelve component units,
+1. **Phase 34, the whole-tool code review**, in progress (all 12 units fixed; cross-cutting findings awaiting triage): twelve component units,
    then three cross-cutting passes, find first and fix after triage
    ([`planning.md` §1](docs/planning.md#1-active-phases)).
 2. **The user's family review** in `products.csv`: 206 keyword-assigned products whose
