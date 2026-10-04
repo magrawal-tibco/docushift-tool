@@ -645,7 +645,14 @@ def test_a_sitemap_that_confirms_no_mapping_writes_no_origin_map(
 def test_convert_reports_engine_unknown_and_still_exits_zero(
     config, catalog, product, version, extracted, tmp_path
 ) -> None:
-    """One unconvertible version does not stop a 200-version batch."""
+    """One unconvertible version does not stop a 200-version batch.
+
+    The engine is named by hand because the fixture package is Flare, which has
+    converted since 5b: left as detected, this version *fails* (nothing converted),
+    and since Phase 34 (R12-06) a failed version exits 1. An engine with no
+    converter is a report line and still exits 0.
+    """
+    catalog.set_version_field(product.slug, version.version, "engine", "robohelp")
     runner = CliRunner()
 
     result = runner.invoke(
@@ -655,6 +662,9 @@ def test_convert_reports_engine_unknown_and_still_exits_zero(
 
     assert result.exit_code == 0, result.output
     assert "Engine unknown" in result.output
+    # The table label prints either way; the named line is what says which row it was.
+    assert "! tibco-ems@10.4.0" in result.output
+    assert "nothing converted" not in result.output
 
 
 def test_convert_dry_run_writes_nothing(

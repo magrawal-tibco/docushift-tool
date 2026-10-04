@@ -1758,3 +1758,130 @@ def test_a_catalog_held_open_in_excel_is_an_error_line_not_a_traceback(
     assert result.exit_code == 1
     assert _traceback_free(result), repr(result.exception)
     assert "open in another program" in result.output
+
+
+def test_a_download_run_is_recorded_as_finished(runner: CliRunner, populated_root: Path) -> None:
+    """R12-04. `finish()` was never called, so every download read back as "did not
+    finish" -- the display for a crashed run."""
+    _invoke(runner, populated_root, "catalog", "set", "--product", "ems", "--version", "10.4.0",
+            "--zip-source", "manual")
+
+    result = _invoke(runner, populated_root, "download", "--product", "ems")
+
+    assert result.exit_code == 0
+    run = _runs(populated_root)[0]
+    assert run["command"] == "download"
+    assert run["finished_at"] is not None
+    assert run["exit_code"] == 0
+
+
+def test_extract_exits_one_when_a_package_fails(runner: CliRunner, populated_root: Path) -> None:
+    """R12-06, the user's call: `download`, `extract` and `convert` exit 1 on a failed
+    version, like `reframe` and `sync`. A corrupt ZIP reported `Failed 1` and exit 0."""
+    downloads = populated_root / "families" / "en-us-tibco-messaging" / "downloads"
+    downloads.mkdir(parents=True)
+    (downloads / "tibco-enterprise-message-service-10.4.0.zip").write_bytes(b"PK\x03\x04not-a-zip")
+
+    result = _invoke(runner, populated_root, "extract", "--product", "ems")
+
+    assert result.exit_code == 1
+    assert _runs(populated_root)[0]["exit_code"] == 1
+
+
+def _unconvertible_flare_tree(runner: CliRunner, root: Path) -> None:
+    """A Flare version whose tree holds nothing convertible: a failed convert row
+    whose only finding is `OUTPUT_ROOT_MISSING`, about the full product slug."""
+    _invoke(runner, root, "catalog", "set", "--product", "ems", "--version", "10.4.0", "--engine", "flare")
+    tree = root / "families" / "en-us-tibco-messaging" / "extracted" / "tibco-enterprise-message-service" / "10.4.0"
+    tree.mkdir(parents=True)
+    (tree / "junk.txt").write_text("x", encoding="utf-8")
+
+
+def test_convert_exits_one_when_a_version_fails(runner: CliRunner, populated_root: Path) -> None:
+    """R12-06. A Flare tree with nothing convertible is a failed version; `convert`
+    exited 0 and its run recorded exit 0."""
+    _unconvertible_flare_tree(runner, populated_root)
+
+    result = _invoke(runner, populated_root, "convert", "--product", "ems")
+
+    assert result.exit_code == 1
+    assert "Failed" in result.output
+    run = _runs(populated_root)[0]
+    assert run["command"] == "convert" and run["exit_code"] == 1
+
+
+def test_download_exits_one_when_a_version_fails(
+    runner: CliRunner, populated_root: Path, monkeypatch
+) -> None:
+    """R12-06."""
+    from docushift.downloader import PackageDownloader
+
+    def unreachable(self, *args, **kwargs):
+        raise OSError("connection refused")
+
+    monkeypatch.setattr(PackageDownloader, "resolve_url", lambda self, product, version: "https://x.invalid/a.zip")
+    monkeypatch.setattr(PackageDownloader, "_fetch", unreachable)
+
+    result = _invoke(runner, populated_root, "download", "--product", "ems")
+
+    assert result.exit_code == 1
+    run = _runs(populated_root)[0]
+    assert run["finished_at"] is not None and run["exit_code"] == 1
+
+
+def test_convert_finishes_its_run_when_the_batch_raises(
+    runner: CliRunner, populated_root: Path, monkeypatch
+) -> None:
+    """R12-09. `finish()` was not in a `finally`, so an exception left the run open."""
+    from docushift.converter import DocumentConverter
+
+    def explode(self, *args, **kwargs):
+        raise RuntimeError("boom")
+
+    monkeypatch.setattr(DocumentConverter, "convert_many", explode)
+
+    _invoke(runner, populated_root, "convert", "--product", "ems")
+
+    run = _runs(populated_root)[0]
+    assert run["finished_at"] is not None and run["exit_code"] == 1
+
+
+def test_catalog_eos_leaves_no_open_run_when_the_report_is_missing(
+    runner: CliRunner, populated_root: Path
+) -> None:
+    """R12-09. The run opened before the report was read, so a missing report left
+    a run with no finish time, which became `report --run last`."""
+    (populated_root / "config" / "eos.yaml").write_text("report: eos/missing.csv\n", encoding="utf-8")
+
+    result = _invoke(runner, populated_root, "catalog", "eos")
+
+    assert result.exit_code == 1
+    assert all(run["finished_at"] is not None for run in _runs(populated_root))
+
+
+def test_catalog_migrate_leaves_no_open_run_when_the_sheet_is_missing(
+    runner: CliRunner, populated_root: Path
+) -> None:
+    (populated_root / "config" / "docsite-migration.yaml").write_text(
+        "sheet: migration/missing.csv\ndecision_column: X\naliases: []\n", encoding="utf-8"
+    )
+
+    result = _invoke(runner, populated_root, "catalog", "migrate")
+
+    assert result.exit_code == 1
+    assert all(run["finished_at"] is not None for run in _runs(populated_root))
+
+
+def test_catalog_fetch_dry_run_names_no_run_id(
+    runner: CliRunner, populated_root: Path, fake_crawl
+) -> None:
+    """R12-10. A dry run records nothing, yet it said `report --run 0`."""
+    _invoke(runner, populated_root, "catalog", "set", "--product", "ems", "--version", "8.6.0",
+            "--batch", "poc-1")
+    fake_crawl()
+
+    result = _invoke(runner, populated_root, "catalog", "fetch", "--product", "ems", "--dry-run")
+
+    assert result.exit_code == 0
+    assert "--run 0" not in result.output
+    assert "Would record" in result.output

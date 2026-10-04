@@ -56,9 +56,8 @@ def _no_selection(command: str) -> None:
 
     Until Phase 7a every stage printed this and exited 0, which meant a typo in
     `--product` was indistinguishable from a clean run in any script that checked
-    the status. Exit 1 is "you asked for nothing", not "something went wrong": a
-    stage that ran and found errors still exits 0, because it did its work and the
-    errors are in the report.
+    the status. Exit 1 here is "you asked for nothing"; a stage that ran exits 1
+    only when a version failed (and `reframe`/`sync` on an error finding too).
 
     `--dry-run` is deliberately not exempt. A dry run over an empty selection is
     the same mistake, discovered one command earlier.
@@ -560,11 +559,14 @@ def catalog_eos(ctx: click.Context) -> None:
     changed, this is the whole update.
     """
     manager = _catalog_manager(ctx)
-    findings = FindingsRun("catalog", store=manager.state).start()
     try:
         stats = manager.apply_eos()
     except (CatalogError, ValueError) as exc:
         raise click.ClickException(str(exc)) from exc
+    # Opened only once the report has applied (Phase 34, R12-09). Opened before,
+    # a missing or malformed report left a run with no finish time, and that run
+    # became `report --run last`, labelled "did not finish".
+    findings = FindingsRun("catalog", store=manager.state).start()
 
     # Conclusive here in a way it is not during a scoped fetch: this command reads
     # the catalog on disk, so a rule that matches nothing really matches nothing.
@@ -659,11 +661,13 @@ def catalog_migrate(ctx: click.Context) -> None:
     `catalog set --migrate-decision` or `catalog enable/--disable`, row by row.
     """
     manager = _catalog_manager(ctx)
-    findings = FindingsRun("catalog", store=manager.state).start()
     try:
         stats = manager.apply_migrate_decisions()
     except (CatalogError, ValueError) as exc:
         raise click.ClickException(str(exc)) from exc
+    # After the apply step, for `catalog eos`'s reason: a missing sheet must not
+    # leave an open run behind (R12-09).
+    findings = FindingsRun("catalog", store=manager.state).start()
 
     _record_migration_findings(manager, findings, stats)
     findings.finish()
@@ -711,6 +715,11 @@ def _report_findings(findings: FindingsRun) -> None:
     """The one line that makes a run's findings findable again."""
     summary = findings.summary()
     if not summary:
+        return
+    if not findings.run_id:
+        # A dry run opens no run (`store=None`), so there is no id to point at,
+        # and `report --run 0` would answer "No run 0" (Phase 34, R12-10).
+        console.print(f"[dim]Would record {summary}; a dry run records nothing.[/dim]")
         return
     console.print(f"[dim]Recorded {summary} -- `docushift report --run {findings.run_id}`.[/dim]")
 
@@ -1314,9 +1323,23 @@ def download(ctx, bu, family, product, version, batch, select_all, force, worker
         elif result.outcome is Outcome.FAILED:
             console.print(f"  [red]x[/red] {result.slug}@{result.version}")
 
-    _report_download(downloader.download_many(pairs, force=force, on_result=on_result))
-    findings.flush()
+    # The run is finished on every path (Phase 34, R12-04): it never was, so every
+    # `download` read back as "did not finish", the display for a crashed run. An
+    # exception escaping the batch records exit 1.
+    exit_code = 1
+    try:
+        stats = downloader.download_many(pairs, force=force, on_result=on_result)
+        exit_code = 1 if stats.failures else 0
+    finally:
+        findings.finish(exit_code=exit_code)
+    _report_download(stats)
     _report_findings(findings)
+    # Exit 1 on a failed version, like `reframe` and `sync` (R12-06, the user's
+    # call): a chained `download && extract` must not carry on past a package
+    # that never arrived. A version with no endpoint is a report line, not a
+    # failure, as a missing package is in `extract`.
+    if exit_code:
+        raise click.exceptions.Exit(1)
 
 
 def _report_extract(stats) -> None:
@@ -1531,13 +1554,20 @@ def extract(ctx, bu, family, product, version, batch, select_all, force, measure
         elif result.outcome in (ExtractOutcome.FAILED, ExtractOutcome.REFUSED):
             console.print(f"  [red]x[/red] {result.slug}@{result.version}")
 
+    exit_code = 1
     try:
-        _report_extract(extractor.extract_many(
+        stats = extractor.extract_many(
             pairs, force=force, on_result=on_result, measure_only=measure_only,
-        ))
+        )
+        exit_code = 1 if stats.failures else 0
     finally:
-        findings.finish()
+        findings.finish(exit_code=exit_code)
+    _report_extract(stats)
     _report_findings(findings)
+    # A failed or refused package exits 1 (R12-06), as `download` does. A version
+    # with no package is a report line, not a failure.
+    if exit_code:
+        raise click.exceptions.Exit(1)
 
 
 def _report_convert(stats, findings) -> None:
@@ -1664,20 +1694,30 @@ def convert(ctx, bu, family, product, version, batch, select_all, force, dry_run
         elif result.outcome is ConvertOutcome.FAILED:
             console.print(f"  [red]x[/red] {result.slug}@{result.version}")
 
-    if input_dir is not None:
-        found, ver = pairs[0]
-        stats_results = [
-            converter.convert_one(found, ver, force=force, tree=input_dir, output=output_dir)
-        ]
-        from docushift.converter import ConvertStats
+    # In a `finally`, as `extract` has it (Phase 34, R12-09): an exception after
+    # `start()` left the run open, and it became `report --run last`.
+    exit_code = 1
+    try:
+        if input_dir is not None:
+            found, ver = pairs[0]
+            stats_results = [
+                converter.convert_one(found, ver, force=force, tree=input_dir, output=output_dir)
+            ]
+            from docushift.converter import ConvertStats
 
-        stats = ConvertStats(results=stats_results)
-        on_result(stats_results[0])
-    else:
-        stats = converter.convert_many(pairs, force=force, on_result=on_result)
-
-    findings.finish()
+            stats = ConvertStats(results=stats_results)
+            on_result(stats_results[0])
+        else:
+            stats = converter.convert_many(pairs, force=force, on_result=on_result)
+        exit_code = 1 if stats.failures else 0
+    finally:
+        findings.finish(exit_code=exit_code)
     _report_convert(stats, findings)
+    # A failed version exits 1 (R12-06, the user's call), so `convert && reframe`
+    # stops at it. Error *findings* still do not gate here, unlike `reframe`: a
+    # converter error is one topic in a tree that otherwise converted.
+    if exit_code:
+        raise click.exceptions.Exit(1)
 
 
 # --- Reframe (Phase 20) ------------------------------------------------------
@@ -1854,10 +1894,11 @@ def reframe(ctx, bu, family, product, version, batch, select_all, force, dry_run
     else:
         stats = reframer.reframe_many(pairs, force=force, on_result=on_result)
 
-    # The exit gate `sync` and `validate` use, and `convert` deliberately does not.
-    # The difference is what an error means: a converter error is one topic in a
-    # tree somebody will read a report about, and a Reframe error is a merge that
-    # produced pages nobody should publish. Integration plan §7 Q4.
+    # The exit gate `sync` and `validate` use. `convert` gates on failed rows only
+    # (R12-06), not on error findings. The difference is what an error means: a
+    # converter error is one topic in a tree somebody will read a report about,
+    # and a Reframe error is a merge that produced pages nobody should publish.
+    # Integration plan §7 Q4.
     # Rows *and* findings, the shape `sync` settled on: a version can fail on an
     # `OSError` that no register code claims, and that row is still a doc set with
     # no merged tree.
@@ -2085,9 +2126,10 @@ def validate(ctx, target_dir, product, version, doc_class, check_external, dry_r
     `versions.csv` agreement required -- which is the point, because a published
     tree outlives the row that produced it.
 
-    The only command in the tool that gates: it exits 1 if and only if it recorded
-    at least one error. Warnings and notes do not change the exit code, and a
-    selection that matched no published folder exits 1 like every other stage.
+    Exits 1 if and only if it recorded at least one error -- it has no rows to
+    fail, so findings are its only gate. Warnings and notes do not change the exit
+    code, and a selection that matched no published folder exits 1 like every
+    other stage.
 
     Writes nothing into the target. There is no `--fix`: the published tree is
     regenerated by `sync`, and a repair applied here would be reverted by the next
