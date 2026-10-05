@@ -49,6 +49,9 @@ business_units:
       bw-plugin:
         name: "BusinessWorks Plug-ins"
         description: "ActiveMatrix BusinessWorks plug-ins, connectors, and extensions"
+      flogo:
+        name: "Flogo"
+        description: "The Flogo app development platform and runtime"
       flogo-connectors:
         name: "Flogo Connectors"
         description: "Flogo connections and connectors to external services"
