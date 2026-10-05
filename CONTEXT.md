@@ -1,6 +1,6 @@
 # Project Context: DocuShift Tool
 
-> **Last Updated:** 2026-10-02
+> **Last Updated:** 2026-10-05
 > **Primary Runtime:** Python 3.11+ (Active: Python 3.13)
 > **Business Scope:** TIBCO & IBI Documentation Migration (~250 Products) to AEM on GitHub — DocuShift produces the repo-shaped trees; publishing them is a separate step
 
@@ -170,33 +170,38 @@ Per-family folders are created on demand by the downloader, not at startup: pre-
 
 ---
 
-## 3. Current State (2026-10-04)
+## 3. Current State (2026-10-05)
 
 - **Every pipeline stage is built**: catalog → download → extract → convert (Flare, DITA,
-  WebWorks, DocBook) → navigation → reframe (Flare merge) → sync → validate. Phases 1–33
-  and 35–37 are finished; see the [index](docs/planning.md#finished-phases).
+  WebWorks, DocBook) → navigation → reframe (Flare merge) → sync → validate. Phases 1–37
+  are finished; see the [index](docs/planning.md#finished-phases).
+- **Reviewed end to end (Phase 34)**: 236 findings, every serious and significant one
+  fixed with a test, the rest deferred or cleaned up; see `reports/review/INDEX.md`.
+  Replacing a tree is now crash- and lock-safe, a re-convert re-merges on its own, and
+  `validate` catches duplicate guides, wrong-heading links and over-long paths.
 - **Catalog**: 669 products (604 in scope), 5,181 versions, in `config/products.csv` /
   `config/versions.csv`. Families are assigned by hand (Phase 32); `products.csv`
   shows each family's name, description, size and keyword-rule suggestion beside it
   (Phase 37), ready for the user's family review.
 - **Converted**: four families in `output/` (activespaces, ems, streaming, tra), three of
-  them merged in `reframed/` (activespaces, ems, tra). 27 published versions carry a
-  `301.yml` cutover map (Phase 35), and `toc.yml` uses html-to-md's dialect (Phase 36).
-- **Quality bar**: 1,942 tests, `ruff check src tests` clean, 76 finding codes in the
+  them merged in `reframed/` (activespaces, ems, tra), all rebuilt 2026-10-05 with every
+  Phase 34 fix. 301 maps and `toc.yml` as in Phases 35–36.
+- **Quality bar**: 2,120 tests, `ruff check src tests` clean, 84 finding codes in the
   register.
-- **Branch**: `reframe-component`. Git push and publishing are out of scope (`architecture.md` §6.0).
+- **Branch**: `reframe-component`, not pushed. Git push and publishing are out of scope
+  (`architecture.md` §6.0).
 
 ## 4. Next Steps
 
-1. **Phase 34, the whole-tool code review**, in progress (all findings fixed and cleaned up; final re-convert next): twelve component units,
-   then three cross-cutting passes, find first and fix after triage
-   ([`planning.md` §1](docs/planning.md#1-active-phases)).
-2. **The user's family review** in `products.csv`: 206 keyword-assigned products whose
+1. **The user's family review** in `products.csv`: 206 keyword-assigned products whose
    rule now suggests another family, 154 `unclassified` ones that already carry a family,
    and three declared families with no product (`catalog triage`). Reassign by editing
    `family`, then propagate with the `propagate-catalog-edit` skill.
-3. The two carried-forward technical items are confirmed or closed during Phase 34
-   ([list](docs/planning.md#carried-forward-open-items)).
+2. **Re-publish** with `sync`: the published trees at `C:\github\tibco-docs-aem` predate
+   the Phase 34 fixes. `sync` now refuses a merge older than its converted tree and no
+   longer publishes reframe's working files.
+3. Phase 34's deferred findings, each fragile but correct today:
+   [carried-forward items](docs/planning.md#carried-forward-open-items).
 4. Product-level open issues, with owners: [`docs/open-issues.md`](docs/open-issues.md).
 
 ## 5. Where to Look

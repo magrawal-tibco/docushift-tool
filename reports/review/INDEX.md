@@ -319,3 +319,30 @@ Themes O–O4, 4 commits (6df2103, c85b7c1, 7ce676c, d5e9858), net −242 lines 
 **Done:** R1-14, R1-15, R2-21 (part), R3-14 (part), R3-15, R4-15, R4-17, R5-14, R5-16, `transforms/csh.identifiers_by_source`, R7-11 (3 of 4), R8-15 (part), R9-15, R9-16 (part), R10-14, R10-15, R11-13, R11-14, R12-17, R12-18 (part), plus two stale "once per product" comments.
 
 **Skipped, each because it would change state, output or printed text, or is now deliberate:** R2-21 `docsite_id`, R3-14 `engine_generator_raw`, R4-10 (still written to state.db); R4-16 (the empty CSH record is now relied on by X1-10's fix); R6-15, R6-16, R8-16, R7-11's `lstrip("./")` (would change output); R8-15's two `_MARKER`/`_BLOCKS` (differ on purpose); R9-16's redirect check and R12-18's single footer (would change checks or text); R10-16, the Phase 29 legacy-prefix migration, is kept: the 7 published maps here hold 0 old-shape rows, but published copies elsewhere can't be ruled out.
+
+### Final re-convert check (2026-10-05, runs 340–345)
+
+The user ran `convert --family` for activespaces, ems, streaming and tra, then `reframe --all`, **without `--force`**, in the mainstream session. The new currency keys (XE) found every tree stale on their own, which is itself the proof of X3-04 on real data. Checked read-only:
+- Every converted and merged file was rewritten that day; 0 `.md`/`.yml` files hold a CR (EMS 10.5.1 1,444 files, TRA Runtime Agent 5.12.2 274, the merged TRA Runtime Agent 5.13.0 123).
+- **Run 343, a TRA convert, stopped partway** (after Runtime Agent 5.13.0, before 5.12.x) and run 344 re-ran TRA in full. Afterwards no `.old` or `.part` folder remains anywhere under `families/`, `output/` or `reframed/`, and no version carries a building mark. This was an unplanned real-world test of XA, and it held.
+- TRA Runtime Agent 5.13.0: 108 Help IDs reach 93 distinct sections, as XB predicted; the legal and support pages publish at their pinned `tibco-runtime-agent/` addresses.
+- Errors: only the known `REFERENCE_UNRESOLVED` (one per Streaming 11.1.x / Data Streams 11.1.1 version, one Silver Fabric). `REFRAME_LINK_UNRESOLVED` is the same 12 as every merge run since 2026-10-01.
+
+## Outcome
+
+| | findings | S1 | S2 | S3 | S4 |
+|---|---|---|---|---|---|
+| Batch 1 (R1–R3) | 52 | 5 | 10 | 31 | 6 |
+| Batch 2 (R4–R6) | 49 | 10 | 9 | 24 | 6 |
+| Batch 3 (R7–R9) | 43 | 13 | 3 | 22 | 5 |
+| Batch 4 (R10–R12) | 49 | 4 | 6 | 31 | 8 |
+| Cross-cutting (X1–X3) | 43 | 5 | 8 | 24 | 6 |
+| **Total** | **236** | **37** | **36** | **132** | **31** |
+
+- **Every S1 and S2 is fixed** (73), each with a test that failed on the old code. 95 S3s were fixed beside them.
+- **37 S3s were deferred at triage** (themes M, Z, AI, BF, XJ) and sit in `planning.md`'s carried-forward items. One catalog check is the user's (R2-09). About 20 S4 cleanups were done; 11 were skipped because each would change state, output or text.
+- **No finding turned out to be wrong.** Every S1/S2 was confirmed against real data, by the reviewer or the orchestrator.
+- **Tests 1,687 → 2,120; finding codes 66 → 84.** Since `review-base`, `src/` grew by about 4,200 net lines and `tests/` by about 5,700 (this includes Phase 37's small catalog change, made in parallel by another session), all on `reframe-component`, not pushed.
+- `validate` now catches duplicate guides, wrong-heading fragments, misplaced Help anchors and over-long paths. It structurally cannot see missing TOC section entries or lost cross-topic sub-headings; those rest on the converter's tests.
+- Carried forward from before the review: Phase 7's over-260 sync path is closed by R1-01 and XA, and Phase 21's stale merge by X3-04.
+
