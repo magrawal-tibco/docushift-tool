@@ -162,7 +162,7 @@ docushift-tool/
 │       ├── review-queue.csv # the pages a writer must decide about — the only file meant to be edited
 │       ├── csh.yml         # carried through where the version had one
 │       └── <doc-set>/…     # the merged pages, assets copied through untouched
-├── reports/                # Generated analyses kept for reference (versions-analytics.html)
+├── reports/                # Generated analyses kept for reference (versions-analytics.html; conversion-status.html, rebuilt by scratch/build_conversion_status.py)
 └── scratch/                # Throwaway investigation scripts; nothing here is imported
 ```
 

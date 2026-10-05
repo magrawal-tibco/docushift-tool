@@ -1,7 +1,7 @@
 # Quick Start: One Product, End to End
 
 > **Document Status:** Living Quick Start
-> **Last Updated:** 2026-10-01
+> **Last Updated:** 2026-10-05
 
 This is the shortest path from an empty checkout to published-shaped folders for **one
 product**, so you can see the whole pipeline work before pointing it at the catalog. It
@@ -228,6 +228,27 @@ Then, for the two standing questions:
 docushift status   # where is everything now, from the catalog
 docushift report   # what happened, from the last runs
 ```
+
+---
+
+## 9. Share the status (`reports/conversion-status.html`)
+
+```bash
+python scratch/build_conversion_status.py --target-dir ../tibco-docs-aem/
+```
+
+Rebuilds the status page for a business audience. Open
+`reports/conversion-status.html` in any browser to present it, or print it to PDF. It
+shows how far the whole programme has got, from the catalogue to published: progress by
+family, what has been converted, what is blocked and why, where we disagree with the
+docsite team's migration list, and the decisions still open. Filters at the top narrow
+it to one business unit or one family.
+
+The page holds the figures from the moment it was built and does not refresh itself, so
+rebuild it before each meeting. Its counts follow the same rules as `docushift status`, so
+the two always agree. It needs only Python's standard library, not the installed tool.
+`--target-dir` defaults to `C:\github\tibco-docs-aem`. Without that folder the page
+shows nothing as published.
 
 ---
 

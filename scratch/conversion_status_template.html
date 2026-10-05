@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Documentation migration — conversion status</title>
+<style>
+/* Roles, not raw hex. Every colour below was run through the dataviz palette
+   validator: the converted -> published pair as an ordinal ramp in both modes,
+   and the fixed "serious" status colour for blocked work against both blues
+   (adjacent CVD dE 19.0 light / 23.7 dark, target 8). */
+.viz-root {
+  color-scheme: light;
+  --surface-1:      #fcfcfb;
+  --plane:          #f9f9f7;
+  --text-primary:   #0b0b0b;
+  --text-secondary: #52514e;
+  --text-muted:     #898781;
+  --grid:           #e1e0d9;
+  --axis:           #c3c2b7;
+  --border:         rgba(11,11,11,0.10);
+  --series-1:       #2a78d6;   /* single-series bars (categorical slot 1) */
+  --deemph:         #c3c2b7;   /* context bars: the scoping gates */
+  --ord-lo:         #2a78d6;   /* converted, not yet published  (ordinal low)  */
+  --ord-hi:         #104281;   /* published                     (ordinal high) */
+  --blocked:        #ec835a;   /* status: serious -- always with icon + label   */
+  --track:          #e1e0d9;   /* not yet converted: the unfilled track         */
+  --heat:           42,120,214;
+}
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) .viz-root { color-scheme: dark;
+    --surface-1:#1a1a19; --plane:#0d0d0d; --text-primary:#ffffff; --text-secondary:#c3c2b7;
+    --text-muted:#898781; --grid:#2c2c2a; --axis:#383835; --border:rgba(255,255,255,0.10);
+    --series-1:#3987e5; --deemph:#4a4a46; --ord-lo:#256abf; --ord-hi:#86b6ef;
+    --blocked:#ec835a; --track:#2c2c2a; --heat:57,135,229; }
+}
+:root[data-theme="dark"] .viz-root { color-scheme: dark;
+    --surface-1:#1a1a19; --plane:#0d0d0d; --text-primary:#ffffff; --text-secondary:#c3c2b7;
+    --text-muted:#898781; --grid:#2c2c2a; --axis:#383835; --border:rgba(255,255,255,0.10);
+    --series-1:#3987e5; --deemph:#4a4a46; --ord-lo:#256abf; --ord-hi:#86b6ef;
+    --blocked:#ec835a; --track:#2c2c2a; --heat:57,135,229; }
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; -webkit-font-smoothing: antialiased; }
+.viz-root { background: var(--plane); color: var(--text-primary); min-height: 100vh; padding: 28px 24px 56px; }
+.wrap { max-width: 1180px; margin: 0 auto; }
+
+.head { display: flex; align-items: flex-start; gap: 24px; flex-wrap: wrap; margin-bottom: 18px; }
+.head h1 { font-size: 22px; font-weight: 650; margin: 0 0 5px; letter-spacing: -0.01em; }
+.head p { margin: 0; font-size: 13px; color: var(--text-secondary); max-width: 78ch; line-height: 1.5; }
+.head .spacer { flex: 1 1 auto; }
+
+.filters { display: flex; align-items: flex-end; gap: 14px; flex-wrap: wrap;
+  padding: 12px 14px; margin-bottom: 18px;
+  background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; }
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+select, .btn { font: inherit; font-size: 13px; color: var(--text-primary);
+  background: var(--surface-1); border: 1px solid var(--axis);
+  border-radius: 7px; padding: 6px 10px; min-height: 32px; cursor: pointer; }
+select { min-width: 200px; }
+.btn:focus-visible, select:focus-visible, .tbtn:focus-visible, th button:focus-visible
+  { outline: 2px solid var(--series-1); outline-offset: 2px; }
+.filters .spacer { flex: 1 1 auto; }
+.filters .note { font-size: 12px; color: var(--text-muted); align-self: center; }
+
+.kpis { display: grid; grid-template-columns: 1.7fr repeat(4, 1fr); gap: 12px; margin-bottom: 18px; }
+.tile { background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px 15px; min-width: 0; }
+.tile .k { font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; line-height: 1.3; }
+.tile .v { font-size: 30px; font-weight: 640; letter-spacing: -0.02em; line-height: 1; }
+.tile .s { font-size: 12px; color: var(--text-muted); margin-top: 8px; line-height: 1.4; }
+.tile.hero .v { font-size: 52px; }
+.tile.hero .v small { font-size: 18px; font-weight: 560; color: var(--text-secondary); letter-spacing: 0; margin-left: 6px; }
+.icon { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px;
+  border-radius: 50%; background: var(--blocked); color: #0b0b0b; font-size: 11px; font-weight: 800;
+  margin-right: 6px; vertical-align: -2px; flex: none; }
+
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.card { background: var(--surface-1); border: 1px solid var(--border);
+        border-radius: 10px; padding: 16px 18px 16px; min-width: 0; }
+.card.wide { grid-column: 1 / -1; }
+.card h2 { font-size: 15px; font-weight: 620; margin: 0 0 3px; }
+.card .sub { font-size: 12.5px; color: var(--text-secondary); margin: 0 0 14px; line-height: 1.5; max-width: 96ch; }
+.cardhead { display: flex; align-items: flex-start; gap: 12px; }
+.cardhead .spacer { flex: 1 1 auto; }
+.tbtn { font: inherit; font-size: 11px; color: var(--text-secondary); background: none;
+        border: 1px solid var(--border); border-radius: 6px; padding: 3px 8px; cursor: pointer; white-space: nowrap; }
+.tbtn:hover { color: var(--text-primary); }
+
+.legend { display: flex; gap: 18px; flex-wrap: wrap; margin: 0 0 10px; padding: 0; list-style: none; }
+.legend li { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--text-secondary); }
+.legend li b { color: var(--text-primary); font-weight: 620; font-variant-numeric: tabular-nums; }
+.legend .key { width: 11px; height: 11px; border-radius: 2px; flex: none; }
+.legend .dotkey { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+
+svg { display: block; width: 100%; height: auto; overflow: visible; }
+.grid-line { stroke: var(--grid); stroke-width: 1; shape-rendering: crispEdges; }
+.axis-line { stroke: var(--axis); stroke-width: 1; shape-rendering: crispEdges; }
+.tick { font-size: 11px; fill: var(--text-muted); font-variant-numeric: tabular-nums; }
+.cat  { font-size: 12.5px; fill: var(--text-primary); }
+.cat2 { font-size: 11.5px; fill: var(--text-muted); }
+.val  { font-size: 12.5px; fill: var(--text-primary); font-weight: 600; }
+.drop { font-size: 11.5px; fill: var(--text-secondary); }
+.mark { transition: opacity .09s ease; }
+.hover-dim .mark { opacity: .45; }
+.hover-dim .mark.on { opacity: 1; }
+
+/* One stacked bar as HTML: 2px surface gaps, 4px rounded data-ends. */
+.stack { display: flex; gap: 2px; height: 22px; width: 100%; }
+.stack.thin { height: 12px; gap: 2px; }
+.stack > span { display: block; height: 100%; min-width: 2px; }
+.stack > span:first-child { border-radius: 4px 0 0 4px; }
+.stack > span:last-child  { border-radius: 0 4px 4px 0; }
+.stack > span:only-child  { border-radius: 4px; }
+.seg-published { background: var(--ord-hi); }
+.seg-converted { background: var(--ord-lo); }
+.seg-blocked   { background: var(--blocked); }
+.seg-pending   { background: var(--track); }
+.stack-labels { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted); margin-top: 6px; }
+
+.tip { position: fixed; z-index: 40; pointer-events: none; opacity: 0; transition: opacity .08s ease;
+  min-width: 160px; max-width: 320px; background: var(--surface-1); color: var(--text-primary);
+  border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 6px 20px rgba(0,0,0,.16); padding: 9px 11px; }
+.tip .t { font-size: 12px; font-weight: 620; margin-bottom: 6px; }
+.tip .r { display: flex; align-items: center; gap: 8px; font-size: 12px; margin-top: 4px; }
+.tip .r .ln { width: 12px; height: 2px; border-radius: 1px; flex: none; }
+.tip .r .nu { font-weight: 660; font-variant-numeric: tabular-nums; }
+.tip .r .nm { color: var(--text-secondary); }
+
+.tbl { display: none; margin-top: 12px; }
+.tbl.on { display: block; }
+.scroll { max-height: 560px; overflow: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 12.5px; }
+th, td { text-align: right; padding: 6px 9px; border-bottom: 1px solid var(--grid); font-variant-numeric: tabular-nums; vertical-align: middle; }
+th.l, td.l { text-align: left; font-variant-numeric: normal; }
+thead th { position: sticky; top: 0; background: var(--surface-1); color: var(--text-secondary); font-weight: 600; z-index: 1; }
+th button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+th button[aria-sort]::after { content: " ↓"; color: var(--text-muted); }
+th button[aria-sort="ascending"]::after { content: " ↑"; }
+td .muted, .muted { color: var(--text-muted); }
+td.bar { width: 26%; min-width: 160px; }
+tr.started td.l:first-child { font-weight: 600; }
+tfoot td { font-weight: 640; border-top: 1px solid var(--axis); border-bottom: 0; }
+
+.heat td.cell { text-align: center; font-size: 15px; font-weight: 620; padding: 12px 9px; border: 2px solid var(--surface-1); }
+.heat td.cell .tag { display: block; font-size: 11px; font-weight: 600; margin-top: 3px; }
+.heat th.l { width: 30%; }
+
+.callout { margin-top: 14px; padding: 11px 13px; border-radius: 8px; display: flex; gap: 6px;
+           border: 1px solid var(--blocked); font-size: 12.5px; line-height: 1.5; color: var(--text-secondary); }
+.callout b { color: var(--text-primary); font-weight: 620; }
+
+.qual { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px; }
+.qual .tile { padding: 11px 13px; }
+.qual .tile .v { font-size: 24px; }
+ul.plain { margin: 0; padding-left: 18px; font-size: 12.5px; line-height: 1.6; color: var(--text-secondary); }
+ul.plain b { color: var(--text-primary); font-weight: 620; }
+
+.dec { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+.dec h3 { font-size: 13px; font-weight: 640; margin: 0 0 8px; }
+.dec ol { margin: 0; padding-left: 20px; font-size: 12.5px; line-height: 1.55; color: var(--text-secondary); }
+.dec li { margin-bottom: 9px; }
+.dec li b { color: var(--text-primary); font-weight: 620; }
+.dec .rec { display: block; color: var(--text-primary); margin-top: 2px; }
+
+.foot { margin-top: 20px; font-size: 12px; color: var(--text-muted); line-height: 1.6; }
+.foot b { color: var(--text-secondary); font-weight: 600; }
+.empty { font-size: 13px; color: var(--text-muted); padding: 22px 0; text-align: center; }
+
+@media (max-width: 980px) { .kpis { grid-template-columns: 1fr 1fr; } .tile.hero { grid-column: 1 / -1; } }
+@media (max-width: 880px) { .grid, .dec { grid-template-columns: 1fr; } .qual { grid-template-columns: 1fr; } }
+@media (forced-colors: active) { .stack > span, .mark { forced-color-adjust: none; } }
+@media print {
+  .viz-root { padding: 0; background: #fff; }
+  .filters .btn, .tbtn, #theme { display: none; }
+  .card, .tile { break-inside: avoid; }
+  .scroll { max-height: none; overflow: visible; }
+}
+</style>
+</head>
+<body>
+<div class="viz-root">
+<div class="wrap">
+
+  <div class="head">
+    <div>
+      <h1>Documentation migration &mdash; conversion status</h1>
+      <p id="lede"></p>
+    </div>
+    <div class="spacer"></div>
+    <button class="btn" id="theme" aria-pressed="false">Dark</button>
+  </div>
+
+  <div class="filters">
+    <div class="field"><label for="f-bu">Business unit</label>
+      <select id="f-bu"><option value="">All business units</option></select></div>
+    <div class="field"><label for="f-family">Product family</label>
+      <select id="f-family"><option value="">All families</option></select></div>
+    <div class="spacer"></div>
+    <span class="note" id="f-note"></span>
+  </div>
+
+  <div class="kpis" id="kpis"></div>
+
+  <div class="grid">
+
+    <div class="card wide">
+      <div class="cardhead">
+        <div><h2>From the full catalogue to published</h2>
+          <p class="sub">Every documentation version on the docsite, and how many survive each step.
+            The grey bars are <b>scoping decisions</b> that set the size of the job; the blue bars
+            are <b>progress</b> on that job.</p></div>
+        <div class="spacer"></div>
+        <button class="tbtn" data-table="t-funnel" aria-expanded="false">Table</button>
+      </div>
+      <div id="c-funnel"></div>
+      <div class="tbl" id="t-funnel"></div>
+    </div>
+
+    <div class="card wide">
+      <div class="cardhead">
+        <div><h2>Where the selected versions stand</h2>
+          <p class="sub" id="prog-sub"></p></div>
+        <div class="spacer"></div>
+        <button class="tbtn" data-table="t-prog" aria-expanded="false">Table</button>
+      </div>
+      <ul class="legend" id="lg-prog"></ul>
+      <div id="c-prog"></div>
+      <div class="tbl" id="t-prog"></div>
+    </div>
+
+    <div class="card wide">
+      <div class="cardhead">
+        <div><h2>Progress by product family</h2>
+          <p class="sub" id="fam-sub"></p></div>
+      </div>
+      <ul class="legend" id="lg-fam"></ul>
+      <div class="scroll" id="c-fam"></div>
+    </div>
+
+    <div class="card wide">
+      <div class="cardhead">
+        <div><h2>What has been converted</h2>
+          <p class="sub">Each product with at least one converted version. A <b>topic</b> is one page of the
+            old help system; <b>merged pages</b> are what the reader sees after related topics are combined
+            into longer, maintainable pages (done so far for the MadCap Flare products).</p></div>
+      </div>
+      <div id="c-conv"></div>
+    </div>
+
+    <div class="card">
+      <div class="cardhead">
+        <div><h2>Merging topics into pages</h2>
+          <p class="sub">Old topics against new pages, all converted versions of each product added
+            together. Fewer, longer pages are easier for writers to maintain.</p></div>
+        <div class="spacer"></div>
+        <button class="tbtn" data-table="t-merge" aria-expanded="false">Table</button>
+      </div>
+      <ul class="legend" id="lg-merge"></ul>
+      <div id="c-merge"></div>
+      <div class="tbl" id="t-merge"></div>
+    </div>
+
+    <div class="card">
+      <div class="cardhead">
+        <div><h2>Quality check of published content</h2>
+          <p class="sub" id="qual-sub"></p></div>
+      </div>
+      <div id="c-qual"></div>
+    </div>
+
+    <div class="card wide">
+      <div class="cardhead">
+        <div><h2><span class="icon" aria-hidden="true">!</span>Blocked versions</h2>
+          <p class="sub">Versions the tool tried and could not finish. Each needs a person, not a re-run.</p></div>
+      </div>
+      <div id="c-blocked"></div>
+    </div>
+
+    <div class="card wide">
+      <div class="cardhead">
+        <div><h2>Agreement with the docsite team&rsquo;s migration list</h2>
+          <p class="sub">Our conversion plan set against the docsite team&rsquo;s own &ldquo;migrate / do not
+            migrate&rdquo; list. Darker cells hold more versions. The flagged cells are where the two
+            disagree.</p></div>
+      </div>
+      <div id="c-heat"></div>
+    </div>
+
+    <div class="card wide">
+      <div class="cardhead">
+        <div><h2>Decisions needed and next steps</h2>
+          <p class="sub">As of the report date. Counts are read from the data; the items themselves come from
+            the project&rsquo;s open-issues list and plan.</p></div>
+      </div>
+      <div id="c-dec"></div>
+    </div>
+
+  </div>
+
+  <p class="foot" id="foot"></p>
+</div>
+</div>
+
+<div class="tip" id="tip" role="status" aria-live="polite"></div>
+
+<script>
+"use strict";
+const DATA = /*__DATA__*/null;
+
+/* -- helpers --------------------------------------------------------------- */
+const $ = id => document.getElementById(id);
+const fmt = n => n.toLocaleString("en-US");
+const pct = (n, d) => d ? (n / d * 100) : 0;
+const pctTxt = (n, d) => {
+  if (!d) return "–";
+  const p = pct(n, d);
+  return (p > 0 && p < 1 ? p.toFixed(1) : Math.round(p)) + "%";
+};
+const compact = n => n >= 10000 ? (n / 1000).toFixed(1).replace(/\.0$/, "") + "K" : fmt(n);
+const DATE = d => new Date(d + "T00:00:00").toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+function el(tag, attrs = {}, ...kids) {
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === "class") n.className = v;
+    else if (k === "style") n.style.cssText = v;
+    else n.setAttribute(k, v);
+  }
+  for (const k of kids) if (k != null) n.append(k.nodeType ? k : document.createTextNode(String(k)));
+  return n;
+}
+const SVGNS = "http://www.w3.org/2000/svg";
+function sv(tag, attrs = {}, text) {
+  const n = document.createElementNS(SVGNS, tag);
+  for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v);
+  if (text != null) n.textContent = text;
+  return n;
+}
+function cssVar(name) { return getComputedStyle(document.querySelector(".viz-root")).getPropertyValue(name).trim(); }
+
+/* -- tooltip: values lead, labels follow; textContent only ----------------- */
+const tip = $("tip");
+function showTip(evt, title, rows) {
+  tip.replaceChildren(el("div", { class: "t" }, title));
+  for (const [color, value, name] of rows) {
+    const r = el("div", { class: "r" });
+    if (color) r.append(el("span", { class: "ln", style: `background:${color}` }));
+    r.append(el("span", { class: "nu" }, value), el("span", { class: "nm" }, name));
+    tip.append(r);
+  }
+  const rect = evt.target.getBoundingClientRect ? evt.target.getBoundingClientRect() : null;
+  const x = evt.clientX ?? (rect ? rect.left + rect.width / 2 : 0);
+  const y = evt.clientY ?? (rect ? rect.top : 0);
+  tip.style.opacity = 1;
+  const w = tip.offsetWidth, h = tip.offsetHeight;
+  tip.style.left = Math.min(window.innerWidth - w - 8, x + 14) + "px";
+  tip.style.top = Math.max(8, y - h - 12) + "px";
+}
+function hideTip() { tip.style.opacity = 0; }
+function hoverable(node, title, rows) {
+  node.setAttribute("tabindex", "0");
+  node.addEventListener("pointermove", e => showTip(e, title, rows()));
+  node.addEventListener("focus", e => showTip(e, title, rows()));
+  node.addEventListener("pointerleave", hideTip);
+  node.addEventListener("blur", hideTip);
+}
+
+/* -- the model ------------------------------------------------------------- */
+const FAM = Object.fromEntries(DATA.families.map(f => [f.key, f]));
+const PROGRESS = [
+  { key: "published", label: "Published",                        cls: "seg-published", color: () => cssVar("--ord-hi") },
+  { key: "converted", label: "Converted, not yet published",     cls: "seg-converted", color: () => cssVar("--ord-lo") },
+  { key: "blocked",   label: "Blocked",                          cls: "seg-blocked",   color: () => cssVar("--blocked"), icon: true },
+  { key: "pending",   label: "Not yet converted",                cls: "seg-pending",   color: () => cssVar("--axis") },
+];
+const progressKey = stage =>
+  stage === "published" ? "published" :
+  stage === "converted" ? "converted" :
+  stage.startsWith("blocked") ? "blocked" :
+  (stage === "not_started" || stage === "in_progress") ? "pending" : null;
+
+const state = { bu: "", family: "" };
+const inSlice = famKey => {
+  const f = FAM[famKey];
+  return (!state.bu || f.bu === state.bu) && (!state.family || famKey === state.family);
+};
+
+function summarise(rows) {
+  const s = { catalogued: 0, outOfScope: 0, retired: 0, notSelected: 0, selected: 0,
+              published: 0, converted: 0, blocked: 0, blockedDownload: 0, blockedFormat: 0, pending: 0, started: 0 };
+  for (const [, stage] of rows) {
+    s.catalogued++;
+    if (stage === "out_of_scope") { s.outOfScope++; continue; }
+    if (stage === "retired") { s.retired++; continue; }
+    if (stage === "not_selected") { s.notSelected++; continue; }
+    s.selected++;
+    const k = progressKey(stage);
+    s[k]++;
+    if (stage === "blocked_download") s.blockedDownload++;
+    if (stage === "blocked_format") s.blockedFormat++;
+    if (stage !== "not_started") s.started++;
+  }
+  s.done = s.published + s.converted;
+  return s;
+}
+
+/* -- filters --------------------------------------------------------------- */
+function initFilters() {
+  const bus = [...new Set(DATA.families.map(f => f.bu))].sort();
+  for (const b of bus) $("f-bu").append(el("option", { value: b }, b));
+  fillFamilies();
+  $("f-bu").addEventListener("change", e => { state.bu = e.target.value; state.family = ""; fillFamilies(); render(); });
+  $("f-family").addEventListener("change", e => { state.family = e.target.value; render(); });
+}
+function fillFamilies() {
+  const sel = $("f-family");
+  sel.replaceChildren(el("option", { value: "" }, "All families"));
+  const fams = DATA.families.filter(f => !state.bu || f.bu === state.bu)
+    .sort((a, b) => a.name.localeCompare(b.name));
+  for (const f of fams) sel.append(el("option", { value: f.key }, state.bu ? f.name : `${f.name} (${f.bu})`));
+  sel.value = state.family;
+}
+
+/* -- KPI row --------------------------------------------------------------- */
+function renderKpis(s, slice) {
+  const fams = DATA.families.filter(f => inSlice(f.key));
+  const productsIn = fams.reduce((a, f) => a + f.inScope, 0);
+  const productsAll = fams.reduce((a, f) => a + f.products, 0);
+  const topics = DATA.converted.filter(c => inSlice(c.family)).reduce((a, c) => a + c.topics, 0);
+  const famWork = new Set(slice.filter(r => !["out_of_scope", "retired", "not_selected"].includes(r[1])).map(r => r[0]));
+  const famDone = new Set(slice.filter(r => r[1] === "published" || r[1] === "converted").map(r => r[0]));
+
+  const hero = el("div", { class: "tile hero" },
+    el("div", { class: "k" }, "Versions converted"),
+    el("div", { class: "v" }, fmt(s.done), el("small", {}, `of ${fmt(s.selected)} selected · ${pctTxt(s.done, s.selected)}`)));
+  hero.append(stackBar([s.published, s.converted, s.blocked, s.pending], "thin", "Selected versions"));
+  hero.append(el("div", { class: "s" }, `${fmt(s.published)} of them are already published to the target repositories.`));
+
+  const blockedTile = el("div", { class: "tile" },
+    el("div", { class: "k" }, el("span", { class: "icon", "aria-hidden": "true" }, "!"), "Versions blocked"),
+    el("div", { class: "v" }, fmt(s.blocked)),
+    el("div", { class: "s" }, `${fmt(s.blockedDownload)} cannot be downloaded · ${fmt(s.blockedFormat)} in a format the tool does not recognise`));
+
+  $("kpis").replaceChildren(
+    hero,
+    tile("Versions published", fmt(s.published), "live in the target repositories, ready for review"),
+    tile("Help topics converted", compact(topics), "individual pages of the old help, now in Markdown"),
+    blockedTile,
+    tile("Families started", `${famDone.size} of ${famWork.size}`, `families with work to do; ${fmt(productsIn)} of ${fmt(productsAll)} products in scope`),
+  );
+}
+function tile(k, v, s) {
+  return el("div", { class: "tile" }, el("div", { class: "k" }, k), el("div", { class: "v" }, v), el("div", { class: "s" }, s));
+}
+
+/* A stacked bar in HTML. Widths are true shares; a tiny non-zero share keeps a
+   2px sliver so it is not silently dropped. Each segment is its own hover target. */
+function stackBar(values, size, title) {
+  const total = values.reduce((a, b) => a + b, 0);
+  const bar = el("div", { class: "stack" + (size ? " " + size : ""), role: "img",
+    "aria-label": `${title}: ` + PROGRESS.map((p, i) => `${p.label} ${values[i]}`).join(", ") });
+  PROGRESS.forEach((p, i) => {
+    if (!values[i]) return;
+    const seg = el("span", { class: p.cls, style: `flex:${values[i]} 1 0` });
+    hoverable(seg, title, () => [[p.color(), fmt(values[i]), `${p.label} · ${pctTxt(values[i], total)}`]]);
+    bar.append(seg);
+  });
+  return bar;
+}
+
+/* -- 1. the funnel --------------------------------------------------------- */
+function renderFunnel(s) {
+  const steps = [
+    { label: "Catalogued", n: s.catalogued, gate: true, sub: "every version on the docsite" },
+    { label: "Product in scope", n: s.catalogued - s.outOfScope, gate: true,
+      drop: s.outOfScope, why: "in products not being migrated (mostly Spotfire and EBX)" },
+    { label: "Still supported", n: s.catalogued - s.outOfScope - s.retired, gate: true,
+      drop: s.retired, why: "retired by Support's end-of-support list" },
+    { label: "Selected for conversion", n: s.selected, gate: true,
+      drop: s.notSelected, why: "older versions kept on record only" },
+    { label: "Work started", n: s.started, drop: s.selected - s.started, why: "not yet attempted" },
+    { label: "Converted", n: s.done, drop: s.started - s.done, why: "blocked (see below)" },
+    { label: "Published", n: s.published, drop: s.done - s.published, why: "converted, awaiting publishing" },
+  ];
+  const W = 1120, L = 196, R = 300, ROW = 40, BAR = 20, top = 6;
+  const H = top + steps.length * ROW + 24;
+  const max = Math.max(1, s.catalogued);
+  const x = n => n / max * (W - L - R);
+  const svg = sv("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Versions surviving each step, from catalogued to published" });
+  // gridlines at clean ticks
+  const tickStep = niceStep(max, 5);
+  for (let t = 0; t <= max; t += tickStep) {
+    svg.append(sv("line", { class: "grid-line", x1: L + x(t), x2: L + x(t), y1: top, y2: H - 22 }));
+    svg.append(sv("text", { class: "tick", x: L + x(t), y: H - 6, "text-anchor": "middle" }, fmt(t)));
+  }
+  svg.append(sv("line", { class: "axis-line", x1: L, x2: L, y1: top, y2: H - 22 }));
+  steps.forEach((st, i) => {
+    const y = top + i * ROW + (ROW - BAR) / 2;
+    const g = sv("g", { class: "mark" });
+    g.append(sv("text", { class: "cat", x: L - 12, y: y + BAR / 2 + 4, "text-anchor": "end" }, st.label));
+    const w = Math.max(st.n ? 2 : 0, x(st.n));
+    g.append(sv("path", { d: barPath(L, y, w, BAR), fill: st.gate ? cssVar("--deemph") : cssVar("--series-1") }));
+    g.append(sv("text", { class: "val", x: L + w + 8, y: y + BAR / 2 + 4 }, fmt(st.n)));
+    if (st.drop) {
+      const vx = L + w + 8 + String(fmt(st.n)).length * 7.6 + 12;
+      g.append(sv("text", { class: "drop", x: vx, y: y + BAR / 2 + 4 }, `− ${fmt(st.drop)} ${st.why}`));
+    }
+    const hit = sv("rect", { x: 0, y: top + i * ROW, width: W, height: ROW, fill: "transparent" });
+    g.append(hit);
+    hoverable(hit, st.label, () => {
+      const rows = [[st.gate ? cssVar("--deemph") : cssVar("--series-1"), fmt(st.n), `versions · ${pctTxt(st.n, s.catalogued)} of catalogue`]];
+      if (st.drop) rows.push([null, `− ${fmt(st.drop)}`, st.why]);
+      return rows;
+    });
+    svg.append(g);
+  });
+  $("c-funnel").replaceChildren(svg);
+  $("t-funnel").replaceChildren(table(
+    ["Step", "Versions", "Share of catalogue", "Dropped at this step", "Why"],
+    steps.map(st => [st.label, fmt(st.n), pctTxt(st.n, s.catalogued), st.drop ? fmt(st.drop) : "", st.why || st.sub || ""]),
+    [false, true, true, true, false]));
+}
+// 4px rounded data-end, square at the baseline.
+function barPath(x, y, w, h) {
+  const r = Math.min(4, w / 2, h / 2);
+  return `M${x},${y} H${x + w - r} Q${x + w},${y} ${x + w},${y + r} V${y + h - r} Q${x + w},${y + h} ${x + w - r},${y + h} H${x} Z`;
+}
+function niceStep(max, n) {
+  const raw = max / n, p = Math.pow(10, Math.floor(Math.log10(raw)));
+  const m = raw / p;
+  return (m <= 1 ? 1 : m <= 2 ? 2 : m <= 2.5 ? 2.5 : m <= 5 ? 5 : 10) * p;
+}
+
+/* -- 2. overall progress --------------------------------------------------- */
+function legend(id, s) {
+  const vals = s ? [s.published, s.converted, s.blocked, s.pending] : [];
+  $(id).replaceChildren(...PROGRESS.map((p, i) => el("li", {},
+    p.icon ? el("span", { class: "icon", "aria-hidden": "true" }, "!") : el("span", { class: "key " + p.cls }),
+    p.label, s ? el("b", {}, fmt(vals[i])) : null)));
+}
+function renderProgress(s) {
+  $("prog-sub").textContent = `The ${fmt(s.selected)} versions selected for conversion, by where each one is today. ` +
+    (s.selected ? `${pctTxt(s.done, s.selected)} are converted; the grey remainder is the work still ahead.` : "");
+  legend("lg-prog", s);
+  const box = el("div");
+  box.append(stackBar([s.published, s.converted, s.blocked, s.pending], "", "Selected versions"));
+  box.append(el("div", { class: "stack-labels" }, el("span", {}, "0"), el("span", {}, `${fmt(s.selected)} versions`)));
+  $("c-prog").replaceChildren(box);
+  $("t-prog").replaceChildren(table(["State", "Versions", "Share"],
+    PROGRESS.map((p, i) => { const v = [s.published, s.converted, s.blocked, s.pending][i]; return [p.label, fmt(v), pctTxt(v, s.selected)]; }),
+    [false, true, true]));
+}
+
+/* -- 3. family table ------------------------------------------------------- */
+const famSort = { key: "done", dir: -1 };
+function renderFamilies(slice) {
+  const by = {};
+  for (const r of slice) (by[r[0]] ||= []).push(r);
+  const rows = Object.entries(by).map(([k, rs]) => ({ key: k, f: FAM[k], s: summarise(rs) }))
+    .filter(r => r.s.selected > 0);
+  const empty = Object.keys(by).length - rows.length;
+  const getters = {
+    name: r => r.f.name, bu: r => r.f.bu, products: r => r.f.inScope, selected: r => r.s.selected,
+    done: r => pct(r.s.done, r.s.selected) * 1e6 + r.s.selected, published: r => r.s.published,
+    blocked: r => r.s.blocked, pending: r => r.s.pending,
+  };
+  rows.sort((a, b) => {
+    const g = getters[famSort.key], va = g(a), vb = g(b);
+    const c = typeof va === "string" ? va.localeCompare(vb) : va - vb;
+    return c * famSort.dir || b.s.selected - a.s.selected;
+  });
+  const started = rows.filter(r => r.s.done > 0).length;
+  $("fam-sub").textContent = `${rows.length} families have versions selected for conversion; ${started} have work converted. ` +
+    `Each bar is that family's own selected versions, so progress compares across families of any size. ` +
+    (empty ? `${empty} more famil${empty === 1 ? "y has" : "ies have"} nothing selected and ${empty === 1 ? "is" : "are"} not listed. ` : "") +
+    `Click a column heading to sort.`;
+  legend("lg-fam");
+
+  const cols = [
+    ["name", "Family", true], ["bu", "Business unit", true], ["products", "Products", false],
+    ["selected", "Versions selected", false], ["bar", "Progress", true], ["done", "Converted", false],
+    ["published", "Published", false], ["blocked", "Blocked", false], ["pending", "Not yet converted", false],
+  ];
+  const thead = el("tr");
+  for (const [key, label, left] of cols) {
+    const th = el("th", { class: left ? "l" : "" });
+    if (key === "bar") th.append(label);
+    else {
+      const b = el("button", { type: "button" }, label);
+      if (famSort.key === key) b.setAttribute("aria-sort", famSort.dir < 0 ? "descending" : "ascending");
+      b.addEventListener("click", () => {
+        famSort.dir = famSort.key === key ? -famSort.dir : (typeof getters[key](rows[0] || { f: {}, s: {} }) === "string" ? 1 : -1);
+        famSort.key = key; render();
+      });
+      th.append(b);
+    }
+    thead.append(th);
+  }
+  const tbody = el("tbody");
+  const tot = summarise(slice);
+  for (const r of rows) {
+    const tr = el("tr", { class: r.s.done ? "started" : "" });
+    tr.append(el("td", { class: "l" }, r.f.name), el("td", { class: "l muted" }, r.f.bu),
+      el("td", {}, fmt(r.f.inScope)), el("td", {}, fmt(r.s.selected)));
+    const bar = el("td", { class: "bar" });
+    bar.append(stackBar([r.s.published, r.s.converted, r.s.blocked, r.s.pending], "thin", r.f.name));
+    tr.append(bar,
+      el("td", {}, r.s.done ? `${fmt(r.s.done)} (${pctTxt(r.s.done, r.s.selected)})` : el("span", { class: "muted" }, "0")),
+      el("td", {}, r.s.published ? fmt(r.s.published) : el("span", { class: "muted" }, "0")),
+      el("td", {}, r.s.blocked ? fmt(r.s.blocked) : el("span", { class: "muted" }, "0")),
+      el("td", {}, fmt(r.s.pending)));
+    tbody.append(tr);
+  }
+  const tfoot = el("tfoot", {}, el("tr", {},
+    el("td", { class: "l" }, "Total"), el("td", {}), el("td", {}, fmt(rows.reduce((a, r) => a + r.f.inScope, 0))),
+    el("td", {}, fmt(tot.selected)), el("td", {}),
+    el("td", {}, `${fmt(tot.done)} (${pctTxt(tot.done, tot.selected)})`), el("td", {}, fmt(tot.published)),
+    el("td", {}, fmt(tot.blocked)), el("td", {}, fmt(tot.pending))));
+  $("c-fam").replaceChildren(rows.length
+    ? el("table", {}, el("thead", {}, thead), tbody, tfoot)
+    : el("div", { class: "empty" }, "Nothing in this selection is selected for conversion."));
+}
+
+/* -- 4. converted products ------------------------------------------------- */
+function convertedByProduct() {
+  const by = {};
+  for (const c of DATA.converted.filter(c => inSlice(c.family))) {
+    const p = by[c.slug] ||= { product: c.product, family: c.family, engines: new Set(), versions: 0,
+                               published: 0, topics: 0, pages: 0, mergedTopics: 0, list: [] };
+    if (c.engine && c.engine !== "auto") p.engines.add(c.engine);
+    p.versions++; p.published += c.published ? 1 : 0; p.topics += c.topics; p.list.push(c.version);
+    if (c.pages) { p.pages += c.pages; p.mergedTopics += c.topics; }
+  }
+  return Object.values(by).sort((a, b) => b.topics - a.topics);
+}
+function renderConverted() {
+  const ps = convertedByProduct();
+  if (!ps.length) { $("c-conv").replaceChildren(el("div", { class: "empty" }, "Nothing converted in this selection yet.")); return; }
+  const body = ps.map(p => [
+    p.product, FAM[p.family].name, [...p.engines].join(", ") || "not recorded",
+    `${fmt(p.versions)}`, p.published ? `${fmt(p.published)} of ${fmt(p.versions)}` : "not yet",
+    p.topics ? fmt(p.topics) : "not recorded",
+    p.pages ? `${fmt(p.pages)} (from ${fmt(p.mergedTopics)} topics)` : "–",
+  ]);
+  const t = table(["Product", "Family", "Help format", "Versions converted", "Published", "Topics converted", "Merged pages"],
+    body, [false, false, false, true, true, true, true]);
+  t.querySelectorAll("tbody tr").forEach((tr, i) => tr.title = "Versions: " + ps[i].list.join(", "));
+  $("c-conv").replaceChildren(el("div", { class: "scroll" }, t));
+}
+
+/* -- 5. merge dumbbell ----------------------------------------------------- */
+function renderMerge() {
+  const ps = convertedByProduct().filter(p => p.pages).sort((a, b) => b.mergedTopics - a.mergedTopics);
+  $("lg-merge").replaceChildren(
+    el("li", {}, el("span", { class: "dotkey", style: "background:var(--ord-lo)" }), "Topics before merging"),
+    el("li", {}, el("span", { class: "dotkey", style: "background:var(--ord-hi)" }), "Pages after merging"));
+  if (!ps.length) { $("c-merge").replaceChildren(el("div", { class: "empty" }, "No merged products in this selection.")); $("t-merge").replaceChildren(); return; }
+  const W = 540, L = 186, R = 60, ROW = 46, top = 8;
+  const H = top + ps.length * ROW + 24;
+  const max = Math.max(...ps.map(p => p.mergedTopics));
+  const step = niceStep(max, 4), xmax = Math.ceil(max / step) * step;
+  const x = n => L + n / xmax * (W - L - R);
+  const svg = sv("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Topics before and pages after merging, per product" });
+  for (let t = 0; t <= xmax; t += step) {
+    svg.append(sv("line", { class: "grid-line", x1: x(t), x2: x(t), y1: top, y2: H - 22 }));
+    svg.append(sv("text", { class: "tick", x: x(t), y: H - 6, "text-anchor": "middle" }, compact(t)));
+  }
+  ps.forEach((p, i) => {
+    const cy = top + i * ROW + ROW / 2;
+    const g = sv("g", { class: "mark" });
+    const name = shortName(p.product);
+    g.append(sv("text", { class: "cat", x: L - 12, y: cy + 4, "text-anchor": "end" }, name.length > 28 ? name.slice(0, 27) + "…" : name));
+    g.append(sv("line", { x1: x(p.pages), x2: x(p.mergedTopics), y1: cy, y2: cy, stroke: cssVar("--axis"), "stroke-width": 2, "stroke-linecap": "round" }));
+    g.append(sv("circle", { cx: x(p.mergedTopics), cy, r: 5, fill: cssVar("--ord-lo"), stroke: cssVar("--surface-1"), "stroke-width": 2 }));
+    g.append(sv("circle", { cx: x(p.pages), cy, r: 5, fill: cssVar("--ord-hi"), stroke: cssVar("--surface-1"), "stroke-width": 2 }));
+    g.append(sv("text", { class: "val", x: x(p.mergedTopics) + 10, y: cy + 4 }, `−${Math.round((1 - p.pages / p.mergedTopics) * 100)}%`));
+    const hit = sv("rect", { x: 0, y: top + i * ROW, width: W, height: ROW, fill: "transparent" });
+    g.append(hit);
+    hoverable(hit, p.product, () => [
+      [cssVar("--ord-lo"), fmt(p.mergedTopics), "topics before"],
+      [cssVar("--ord-hi"), fmt(p.pages), "pages after"],
+      [null, `${p.list.length}`, "versions added together"]]);
+    svg.append(g);
+  });
+  $("c-merge").replaceChildren(svg);
+  $("t-merge").replaceChildren(table(["Product", "Topics before", "Pages after", "Reduction"],
+    ps.map(p => [p.product, fmt(p.mergedTopics), fmt(p.pages), `${Math.round((1 - p.pages / p.mergedTopics) * 100)}%`]),
+    [false, true, true, true]));
+}
+
+const shortName = n => n.replace(/[®™]/g, "").replace(/^(TIBCO|ibi)\s*/i, "")
+  .replace(/\s*-?\s*Enterprise Edition$/i, "").trim();
+// White or ink on a translucent heat cell, whichever contrasts more with the blend.
+function inkOn(rgb, a) {
+  const surf = cssVar("--surface-1").match(/\w\w/g).map(h => parseInt(h, 16));
+  const c = rgb.split(",").map((v, i) => +v * a + surf[i] * (1 - a));
+  const lin = v => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; };
+  const L = 0.2126 * lin(c[0]) + 0.7152 * lin(c[1]) + 0.0722 * lin(c[2]);
+  const ink = cssVar("--text-primary") === "#ffffff" ? 1 : 0.0037;
+  const vsWhite = 1.05 / (L + 0.05), vsInk = ink > 0.5 ? 1.05 / (L + 0.05) : (L + 0.05) / (ink + 0.05);
+  return ink > 0.5 || vsWhite < vsInk ? "var(--text-primary)" : "#ffffff";
+}
+
+/* -- 6. quality ------------------------------------------------------------ */
+const CODE_TEXT = {
+  ANCHOR_MISSING: "links that point at a section heading which does not exist (most are broken in the source documents too)",
+  REDIRECT_SHADOWED: "forwarding addresses that a real page sits on top of, so they never fire",
+};
+function renderQuality() {
+  const q = DATA.validation;
+  if (!q) { $("qual-sub").textContent = "No quality check has been run yet."; $("c-qual").replaceChildren(); return; }
+  $("qual-sub").textContent = `The automated check of everything published, last run ${DATE(q.date)}. It covers all ` +
+    `published content and is not affected by the filters above.`;
+  const box = el("div");
+  box.append(el("div", { class: "qual" },
+    tile("Errors", fmt(q.errors), q.errors ? "must be fixed before publishing" : "nothing that stops publishing"),
+    tile("Warnings", fmt(q.warnings), "worth a writer's look; none stops publishing"),
+    tile("Last checked", DATE(q.date), "re-run after each rebuild")));
+  const ul = el("ul", { class: "plain" });
+  for (const [code, n] of Object.entries(q.codes).sort((a, b) => b[1] - a[1]))
+    ul.append(el("li", {}, el("b", {}, fmt(n)), " " + (CODE_TEXT[code] || code.toLowerCase().replace(/_/g, " "))));
+  box.append(ul);
+  $("c-qual").replaceChildren(box);
+}
+
+/* -- 7. blocked ------------------------------------------------------------ */
+const BLOCK_TEXT = {
+  blocked_download: ["Cannot be downloaded", "The docsite returns a sign-in or error page instead of the documentation package.",
+                     "Someone with docsite access downloads the package by hand; the tool can take it in directly."],
+  blocked_format:   ["Format not recognised", "The package downloaded, but its help format is not one the tool knows how to read.",
+                     "Look at the package and decide: teach the tool the format, or leave these versions out."],
+};
+function renderBlocked() {
+  const bs = DATA.blocked.filter(b => inSlice(b.family));
+  if (!bs.length) { $("c-blocked").replaceChildren(el("div", { class: "empty" }, "Nothing blocked in this selection.")); return; }
+  const rows = bs.map(b => {
+    const [label, why, fix] = BLOCK_TEXT[b.kind];
+    return [b.product, FAM[b.family].name, label, why, fix, String(b.versions.length), b.versions.join(", ")];
+  });
+  const t = table(["Product", "Family", "Problem", "What happens", "What unblocks it", "Versions", "Which versions"],
+    rows, [false, false, false, false, false, true, false]);
+  t.querySelectorAll("tbody tr").forEach(tr => {
+    const c = tr.children[2];
+    c.prepend(el("span", { class: "icon", "aria-hidden": "true" }, "!"));
+    c.style.whiteSpace = "nowrap";
+    tr.children[6].className = "l muted";
+  });
+  $("c-blocked").replaceChildren(el("div", { class: "scroll" }, t));
+}
+
+/* -- 8. docsite agreement heat table --------------------------------------- */
+function renderHeat(slice) {
+  const ours = [
+    ["selected", "We are converting"], ["not_selected", "We are not converting (older, kept on record)"],
+    ["retired", "Retired by Support"], ["out_of_scope", "Product not being migrated"],
+  ];
+  const theirs = [["migrate", "Migrate"], ["do_not_migrate", "Do not migrate"], ["unknown", "Not decided yet"]];
+  const ourKey = st => ["out_of_scope", "retired", "not_selected"].includes(st) ? st : "selected";
+  const m = {};
+  for (const [, st, md] of slice) { const k = ourKey(st) + "|" + md; m[k] = (m[k] || 0) + 1; }
+  const max = Math.max(1, ...Object.values(m));
+  const conflict = (o, t) => (o === "selected" && t === "do_not_migrate") || (o !== "selected" && t === "migrate");
+  const heat = cssVar("--heat");
+  let conflicts = { declined: 0, wanted: 0 };
+  const tbody = el("tbody");
+  for (const [ok, olabel] of ours) {
+    const tr = el("tr", {}, el("th", { class: "l", scope: "row" }, olabel));
+    for (const [tk] of theirs) {
+      const n = m[ok + "|" + tk] || 0;
+      const a = n ? 0.10 + 0.80 * Math.sqrt(n / max) : 0;
+      const td = el("td", { class: "cell", style: n ? `background:rgba(${heat},${a.toFixed(2)})` : "" });
+      td.style.color = n ? inkOn(heat, a) : "var(--text-primary)";
+      td.append(n ? fmt(n) : el("span", { class: "muted" }, "–"));
+      if (n && conflict(ok, tk)) {
+        td.append(el("span", { class: "tag" }, el("span", { class: "icon", "aria-hidden": "true" }, "!"), "needs a decision"));
+        if (ok === "selected") conflicts.declined += n; else conflicts.wanted += n;
+      }
+      const ol = olabel, tl = theirs.find(t => t[0] === tk)[1];
+      hoverable(td, `${ol} · docsite team: ${tl}`, () => [[null, fmt(n), "versions"]]);
+      tr.append(td);
+    }
+    tbody.append(tr);
+  }
+  const thead = el("thead", {}, el("tr", {}, el("th", { class: "l" }, "Our plan  ↓   ·   docsite team →"),
+    ...theirs.map(([, l]) => el("th", { style: "text-align:center" }, l))));
+  const box = el("div", {}, el("table", { class: "heat" }, thead, tbody));
+  const total = conflicts.declined + conflicts.wanted;
+  if (total) box.append(el("div", { class: "callout" }, el("span", { class: "icon", "aria-hidden": "true" }, "!"),
+    el("span", {}, el("b", {}, `${fmt(total)} versions need a decision. `),
+      `${fmt(conflicts.declined)} are on our conversion plan but the docsite team marked them “do not migrate”; ` +
+      `${fmt(conflicts.wanted)} are wanted by the docsite team but are retired or out of scope on our side.`)));
+  $("c-heat").replaceChildren(box);
+  return conflicts;
+}
+
+/* -- 9. decisions & next steps (whole programme, not filtered) ------------- */
+function renderDecisions() {
+  const all = summarise(DATA.rows);
+  const conflicts = (() => {
+    let d = 0, w = 0;
+    for (const [, st, md] of DATA.rows) {
+      const sel = !["out_of_scope", "retired", "not_selected"].includes(st);
+      if (sel && md === "do_not_migrate") d++;
+      if (!sel && md === "migrate") w++;
+    }
+    return { d, w };
+  })();
+  const by = {};
+  for (const [k, st] of DATA.rows) if (st === "not_started") by[k] = (by[k] || 0) + 1;
+  const next = Object.entries(by).sort((a, b) => b[1] - a[1]).slice(0, 4)
+    .map(([k, n]) => `${FAM[k].name} (${fmt(n)})`).join(", ");
+  const li = (head, body, rec) => el("li", {}, el("b", {}, head + " "), body, rec ? el("span", { class: "rec" }, "Recommended: " + rec) : null);
+  $("c-dec").replaceChildren(el("div", { class: "dec" },
+    el("div", {}, el("h3", {}, "Decisions needed"), el("ol", {},
+      li("Docsite team disagreement.", `${fmt(conflicts.d + conflicts.w)} versions are planned differently by us and by the docsite team (${fmt(conflicts.d)} we convert that they declined, ${fmt(conflicts.w)} they want that we do not).`,
+         "agree one owner for the final list; the disagreement does not hold up current work."),
+      li("Product grouping review.", "Roughly a third of products may sit in the wrong family, which decides the repository they publish into.",
+         "finish the review before converting further families, so nothing has to be moved after publishing."),
+      li("Publishing for real.", `${fmt(all.published)} versions are in the target repositories for checking only; publishing to the real destination needs an owner and a date.`, null),
+      li("Old web addresses.", "Seventeen products have no recorded live address pattern, and the new site's address is not set, so old links cannot yet be forwarded.",
+         "record both before the first real publication."))),
+    el("div", {}, el("h3", {}, "Next steps"), el("ol", {},
+      li("Unblock what failed.", `${fmt(all.blockedDownload)} versions need their packages downloaded by hand; ${fmt(all.blockedFormat)} need a decision on their help format.`, null),
+      li("Convert the next families.", `The largest families not yet started: ${next}.`, null),
+      li("Extend page merging.", "Merging is done for three families; apply it to the other converted MadCap Flare products.", null),
+      li("Re-check quality after each rebuild.", "Run the automated check again so the warnings above reflect the latest content.", null)))));
+}
+
+/* -- shared table builder -------------------------------------------------- */
+function table(head, rows, numeric) {
+  const t = el("table");
+  t.append(el("thead", {}, el("tr", {}, ...head.map((h, i) => el("th", { class: numeric[i] ? "" : "l" }, h)))));
+  const b = el("tbody");
+  for (const r of rows) b.append(el("tr", {}, ...r.map((c, i) => el("td", { class: numeric[i] ? "" : "l" }, c))));
+  t.append(b);
+  return t;
+}
+
+/* -- render ---------------------------------------------------------------- */
+function render() {
+  const slice = DATA.rows.filter(r => inSlice(r[0]));
+  const s = summarise(slice);
+  const scope = state.family ? FAM[state.family].name : state.bu || "";
+  $("f-note").textContent = scope ? `Showing ${scope} only` : "Showing the whole programme";
+  renderKpis(s, slice);
+  renderFunnel(s);
+  renderProgress(s);
+  renderFamilies(slice);
+  renderConverted();
+  renderMerge();
+  renderBlocked();
+  renderHeat(slice);
+}
+
+function init() {
+  $("lede").textContent = `Status as of ${DATE(DATA.asOf)}. Moving TIBCO and IBI product documentation from docs.tibco.com ` +
+    `to the new documentation repositories. Every number here is read from the migration catalogue, the conversion ` +
+    `tool's records and the target repositories — nothing is typed in by hand.`;
+  $("foot").replaceChildren(
+    el("b", {}, "How to read the counts. "),
+    "One unit is one documentation version of one product (for example, Enterprise Message Service 10.4.0). " +
+    "“Selected for conversion” means in scope, still supported, and marked for conversion. “Converted” means the tool " +
+    "has produced Markdown for it; “published” means that Markdown is laid out in the target repositories. " +
+    "“Blocked” means the tool tried and could not finish. A history chart is deliberately absent: every rebuild " +
+    "refreshes the tool's timestamps, so it would show all work as done on the latest rebuild day.");
+  initFilters();
+  renderQuality();
+  renderDecisions();
+  render();
+  document.querySelectorAll(".tbtn[data-table]").forEach(b => b.addEventListener("click", () => {
+    const t = $(b.dataset.table), on = !t.classList.contains("on");
+    t.classList.toggle("on", on); b.setAttribute("aria-expanded", on); b.textContent = on ? "Chart only" : "Table";
+  }));
+  const themeBtn = $("theme");
+  const isDark = () => document.documentElement.dataset.theme
+    ? document.documentElement.dataset.theme === "dark"
+    : matchMedia("(prefers-color-scheme: dark)").matches;
+  const syncBtn = () => { themeBtn.textContent = isDark() ? "Light" : "Dark"; themeBtn.setAttribute("aria-pressed", isDark()); };
+  themeBtn.addEventListener("click", () => {
+    document.documentElement.dataset.theme = isDark() ? "light" : "dark";
+    syncBtn(); render();
+  });
+  syncBtn();
+}
+init();
+</script>
+</body>
+</html>
