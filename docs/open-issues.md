@@ -161,6 +161,29 @@ processed.
 
 ---
 
+## Spotfire Data Science – Author, ActiveMatrix Adapter Service Engine for PeopleSoft
+
+### Counted as converted, but the converted files are gone
+
+- **Status:** Open (deferred by decision, 5 Oct 2026)
+- **Owner:** unassigned
+- **Raised:** 5 Oct 2026
+- **Blocks publishing:** no
+
+One version of each product, Data Science – Author 1.4.0 and the PeopleSoft adapter
+6.0.0, was converted in an early trial on 12 Sep 2026 from a folder supplied by hand.
+Those converted files have since been deleted, but the tool still remembers the
+conversion. So the versions sheet shows both as "converted" and never synced, and the
+status report counts two more converted versions than really exist.
+
+Neither package has ever been downloaded or unpacked in the working area, and the tool
+does not yet know their help format. Fixing this means running the full sequence for
+both: download, unpack, convert, then sync. The PeopleSoft package sits at an unusual
+web address, so it may have to be downloaded by hand. Decided on 5 Oct 2026 to leave
+both as they are for now.
+
+---
+
 ## Silver Fabric Enabler for ActiveSpaces
 
 ### The whole guide set appears twice in the navigation
