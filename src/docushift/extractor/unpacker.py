@@ -547,6 +547,11 @@ class PackageExtractor:
                 self.measure_cached(product, version) if measure_only
                 else self.extract_one(product, version, force=force)
             )
+            ok = {ExtractOutcome.EXTRACTED: True, ExtractOutcome.FAILED: False,
+                  ExtractOutcome.REFUSED: False}.get(result.outcome)
+            if ok is not None and self.catalog.state is not None:
+                # Dated for `_status_date` (Phase 38); a current tree keeps its old date.
+                self.catalog.state.record_stage(result.slug, result.version, "extract", ok)
             stats.results.append(result)
             if on_result is not None:
                 on_result(result)

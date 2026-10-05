@@ -2,10 +2,12 @@
 
 A reader, never a writer: it reads config/products.csv, config/versions.csv,
 cache/state.db and the published tree, and embeds what it found into the page.
-Counts follow the rules of `docushift status` (reporting/status.py), so the two
-agree; it uses only the standard library so it runs without the tool installed.
+Where each version stands is read from versions.csv's `_status` and `_sync_status`
+columns (Phase 38), which the tool derives with the same rules as `docushift
+status`, so the page, the sheet and the command cannot disagree. Standard library
+only, so it runs without the tool installed.
 
-    python scratch/build_conversion_status.py [--target-dir C:/github/tibco-docs-aem]
+    python scratch/build_conversion_status.py
 """
 
 import argparse
@@ -18,26 +20,12 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 BU_NAMES = {"tibco": "TIBCO", "ibi": "IBI", "spotfire": "Spotfire", "datasynapse": "DataSynapse", "onebx": "EBX"}
-CONVERTIBLE = {"flare", "webworks", "docbook", "dita"}  # models.CONVERTIBLE_ENGINES
 ENGINE_NAMES = {"flare": "MadCap Flare", "webworks": "WebWorks", "docbook": "DocBook", "dita": "DITA (SuiteHelp)"}
 
 
 def read_csv(path: Path) -> list[dict]:
     with path.open(encoding="utf-8-sig", newline="") as handle:
         return list(csv.DictReader(handle))
-
-
-def progress(db_path: Path) -> dict[tuple[str, str], dict]:
-    """The same evidence StateStore.progress() reads: what each stage recorded."""
-    db = sqlite3.connect(db_path)
-    rows: dict[tuple[str, str], dict] = {}
-    for slug, version, download, extract, error in db.execute(
-        "SELECT slug, version, download_path, extract_path, error FROM version_state"
-    ):
-        rows[(slug, version)] = {"d": bool(download), "x": bool(extract), "c": False, "e": error}
-    for slug, version in db.execute("SELECT DISTINCT slug, version FROM output_map"):
-        rows.setdefault((slug, version), {"d": False, "x": False, "c": False, "e": None})["c"] = True
-    return rows
 
 
 def validation_summary(db_path: Path) -> dict | None:
@@ -58,22 +46,22 @@ def validation_summary(db_path: Path) -> dict | None:
     }
 
 
-def published_versions(target: Path | None) -> set[tuple[str, str]]:
-    """(slug, dashed-version) for every version folder under <repo>/<loc>/<slug>/online-help/."""
-    found: set[tuple[str, str]] = set()
-    if target is None or not target.is_dir():
-        return found
-    for folder in target.glob("*/*/*/online-help/*"):
-        if folder.is_dir():
-            found.add((folder.parent.parent.name, folder.name))
-    return found
+# `_status` -> the page's stage. A converted or merged version counts as published
+# once `sync` has placed it (`out-of-date` is still placed, just rebuilt since).
+STAGE_OF = {
+    "out-of-scope": "out_of_scope", "retired": "retired", "not-selected": "not_selected",
+    "not-started": "not_started", "downloaded": "in_progress", "extracted": "in_progress",
+    "download-failed": "blocked_download", "format-unknown": "blocked_format",
+    "extract-failed": "blocked_failed", "convert-failed": "blocked_failed",
+    "merge-failed": "blocked_failed", "converted": "converted", "merged": "converted",
+}
 
 
-def build(target: Path | None) -> dict:
+def build() -> dict:
     products = {row["slug"]: row for row in read_csv(ROOT / "config/products.csv")}
     versions = read_csv(ROOT / "config/versions.csv")
-    state = progress(ROOT / "cache/state.db")
-    published = published_versions(target)
+    if versions and "_status" not in versions[0]:
+        raise SystemExit("versions.csv has no _status column; run `docushift catalog refresh` first.")
 
     gates = collections.Counter()
     rows = []  # one per catalogued version, packed for the page's filters
@@ -94,35 +82,9 @@ def build(target: Path | None) -> dict:
         if product["in_scope"] == "true":
             families[fam_key]["in_scope"].add(v["slug"])
 
-        in_scope = product["in_scope"] == "true"
-        retired = v["release_status"] == "retired"
-        eligible = in_scope and not retired and v["convert_eligible"] == "true"
-        # Where the version stops: a gate, or a pipeline state for the eligible ones.
-        if not in_scope:
-            stage = "out_of_scope"
-        elif retired:
-            stage = "retired"
-        elif not eligible:
-            stage = "not_selected"
-        else:
-            rec = state.get((v["slug"], v["version"]), {})
-            is_pub = (v["slug"], v["version"].replace(".", "-")) in published
-            if is_pub:
-                stage = "published"
-            elif rec.get("c"):
-                stage = "converted"
-            elif rec.get("x") and v["engine"] not in CONVERTIBLE:
-                # Unpacked, and the detector found no engine it can convert. An
-                # unpacked version with a convertible engine is only waiting for `convert`.
-                stage = "blocked_format"
-            elif rec.get("x"):
-                stage = "in_progress"
-            elif rec.get("e") and not rec.get("d"):
-                stage = "blocked_download"
-            elif rec.get("d"):
-                stage = "in_progress"
-            else:
-                stage = "not_started"
+        stage = STAGE_OF.get(v["_status"], "not_started")
+        if stage == "converted" and v["_sync_status"] in ("synced", "out-of-date"):
+            stage = "published"
         gates[stage] += 1
 
         if stage in ("published", "converted"):
@@ -135,16 +97,26 @@ def build(target: Path | None) -> dict:
                 "topics": int(v["_md_files"] or 0),
                 "pages": int(v["_reframed_md_files"] or 0),
                 "published": stage == "published",
+                "built": v["_status_date"],
+                "sync": v["_sync_status"],
+                "synced": v["_sync_date"],
             })
-        if stage in ("blocked_format", "blocked_download"):
+        if stage.startswith("blocked_"):
             entry = blocked[(product["display_name"], stage)]
             entry["versions"].append(v["version"])
+            entry.setdefault("dates", []).append(v["_status_date"])
             entry["family"] = fam_key
 
+        # Packed for size: the page filters 5,181 of these. The last four are the
+        # sheet's own status columns, verbatim, so the page speaks the sheet's words.
         rows.append([
             fam_key,
             stage,
             v["migrate_decision"],
+            v["_status"],
+            v["_status_date"],
+            v["_sync_status"],
+            v["_sync_date"],
         ])
 
     family_list = [
@@ -153,7 +125,8 @@ def build(target: Path | None) -> dict:
         for k, f in families.items()
     ]
     blocked_list = [
-        {"product": name, "kind": kind, "family": e["family"], "versions": e["versions"]}
+        {"product": name, "kind": kind, "family": e["family"], "versions": e["versions"],
+         "last": max(e["dates"])}
         for (name, kind), e in sorted(blocked.items(), key=lambda kv: (-len(kv[1]["versions"]), kv[0][0]))
     ]
     in_scope_products = sum(1 for p in products.values() if p["in_scope"] == "true")
@@ -172,10 +145,9 @@ def build(target: Path | None) -> dict:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--target-dir", type=Path, default=Path("C:/github/tibco-docs-aem"))
     parser.add_argument("--out", type=Path, default=ROOT / "reports/conversion-status.html")
     args = parser.parse_args()
-    data = build(args.target_dir)
+    data = build()
     template = (ROOT / "scratch/conversion_status_template.html").read_text(encoding="utf-8")
     page = template.replace("/*__DATA__*/null", json.dumps(data, separators=(",", ":"), ensure_ascii=False))
     args.out.write_text(page, encoding="utf-8")

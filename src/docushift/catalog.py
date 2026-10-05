@@ -31,6 +31,7 @@ from docushift.models import (
     SourceEngine,
     ZipSource,
 )
+from docushift.reporting.status import StatusEvidence, VersionStatus, version_status
 from docushift.state import StateStore
 from docushift.utils.csvio import (
     NotUtf8,
@@ -107,6 +108,14 @@ VERSION_COLUMNS = (
     "custom_override",
     "_bu",
     "_family",
+    # Where the version stands and when it got there, then when `sync` last placed
+    # it (Phase 38, architecture.md §3.2). Regenerated on every write from
+    # `state.db`, like `_bu`/`_family`. Beside the family rather than at the end
+    # of the row, because it is the first thing a spreadsheet user filters on.
+    "_status",
+    "_status_date",
+    "_sync_status",
+    "_sync_date",
     # Stage 4 inventory (architecture.md §3.9). Underscored like `_bu`/`_family`
     # because they are tool-owned and edits are ignored, but unlike those two they
     # are *not* regenerated on every write -- they persist between extract runs,
@@ -298,6 +307,10 @@ class CatalogManager:
         # hand-edit can produce one -- discovery's keys are unique -- and it is
         # reported by `validate()` rather than raised, so the sheet stays openable.
         self._duplicate_slugs: list[str] = []
+        # The four status columns as last read, keyed `(slug, version)`. Written back
+        # unchanged only when there is no `state.db` to derive them from, so a save
+        # without one cannot blank what a save with one wrote.
+        self._read_status: dict[tuple[str, str], VersionStatus] = {}
 
     # -- load / save ---------------------------------------------------------
 
@@ -308,6 +321,7 @@ class CatalogManager:
 
         catalog = Catalog()
         self._duplicate_slugs = []
+        self._read_status = {}
         # X2-04: a sheet in neither UTF-8 nor Windows-1252 is the one-line
         # `CatalogError` every command already prints, not a traceback.
         try:
@@ -355,6 +369,10 @@ class CatalogManager:
                     f"Add the product to products.csv or remove the orphaned version row."
                 )
             is_archived = parse_bool(row.get("is_archived"))
+            self._read_status[(slug, version)] = VersionStatus(
+                row.get("_status", ""), row.get("_status_date", ""),
+                row.get("_sync_status", ""), row.get("_sync_date", ""),
+            )
             product.versions[version] = ProductVersion(
                 slug=slug,
                 version=version,
@@ -438,6 +456,36 @@ class CatalogManager:
             views[p.slug] = view
         return views
 
+    def _statuses(self, products: list[Product]) -> dict[tuple[str, str], dict[str, str]]:
+        """The four status cells for every version, read from `state.db` in one pass."""
+        evidence = StatusEvidence.read(self.state) if self.state is not None else None
+        cells = {}
+        for product in products:
+            for version in product.versions.values():
+                key = (product.slug, version.version)
+                if evidence is not None:
+                    status = version_status(product, version, evidence)
+                else:
+                    status = self._read_status.get(key, VersionStatus(""))
+                cells[key] = {
+                    "_status": status.status,
+                    "_status_date": status.status_date,
+                    "_sync_status": status.sync_status,
+                    "_sync_date": status.sync_date,
+                }
+        return cells
+
+    def status_rows(self, slug: str | None = None) -> list[dict[str, str]]:
+        """The four status cells per version, plus the target `sync` last placed it in."""
+        products = [p for p in self.load().products.values() if slug is None or p.slug == slug]
+        events = self.state.stage_events() if self.state is not None else {}
+        rows = []
+        for (row_slug, number), cells in self._statuses(products).items():
+            placed = events.get((row_slug, number), {}).get(("sync", "ok"))
+            rows.append({"slug": row_slug, "version": number, **cells,
+                         "_sync_target": placed[1] if placed else ""})
+        return rows
+
     def save(self) -> None:
         """Writes both CSVs with a fixed column order and a stable sort.
 
@@ -469,6 +517,7 @@ class CatalogManager:
             for p in products
         ]
 
+        statuses = self._statuses(products)
         version_rows = []
         for product in products:
             for version in sorted(
@@ -494,6 +543,7 @@ class CatalogManager:
                         "custom_override": format_bool(version.custom_override),
                         "_bu": product.bu,
                         "_family": product.family,
+                        **statuses[(product.slug, version.version)],
                         "_has_csh": format_optional_bool(version.has_csh),
                         "_csh_names": format_optional_int(version.csh_names),
                         "_has_api_ref": format_optional_bool(version.has_api_ref),

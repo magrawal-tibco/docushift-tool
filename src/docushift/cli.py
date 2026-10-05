@@ -221,6 +221,42 @@ def _catalog_manager(ctx: click.Context) -> CatalogManager:
     return CatalogManager(cfg.products_path, cfg.versions_path, StateStore(cfg.state_db_path), config=cfg)
 
 
+def _refresh_status(manager: CatalogManager) -> None:
+    """Rewrites `versions.csv`'s status columns after a stage that does not otherwise save.
+
+    Phase 38. A sheet held open in Excel is a warning, never a failure: the stage's
+    work is done, and the columns describe it on the next save that succeeds.
+    """
+    try:
+        manager.save()
+    except CatalogError as exc:
+        console.print(
+            f"[yellow]The status columns in versions.csv were not refreshed: {exc} "
+            f"`docushift catalog refresh` updates them.[/yellow]"
+        )
+
+
+@catalog.command("refresh")
+@click.pass_context
+def catalog_refresh(ctx: click.Context) -> None:
+    """Rewrite the tool's own columns from state.db and products.csv; nothing you typed changes.
+
+    For after a stage could not refresh `_status` and the columns beside it, which
+    is almost always the sheet being open in Excel at the end of the run.
+    """
+    from collections import Counter
+
+    manager = _catalog_manager(ctx)
+    manager.save()
+    counts = Counter(row.get("_status", "") for row in manager.status_rows())
+    table = Table(title="versions.csv refreshed")
+    table.add_column("_status")
+    table.add_column("Versions", justify="right")
+    for status, count in sorted(counts.items(), key=lambda item: (-item[1], item[0])):
+        table.add_row(status or "-", str(count))
+    console.print(table)
+
+
 @catalog.command("fetch")
 @_scope_options
 @click.option("--include-archived/--no-include-archived", default=True, help="Also inventory archived versions.")
@@ -823,6 +859,21 @@ def catalog_show(ctx: click.Context, product: str) -> None:
         )
     console.print(table)
 
+    # Phase 38: the sheet's four status columns, in a table of their own so the
+    # catalog table above keeps its width.
+    where = Table(title="Where each version stands")
+    for column in ("Version", "_status", "Since", "_sync_status", "Placed"):
+        where.add_column(column)
+    progress = {row["version"]: row for row in manager.status_rows(slug)}
+    for _, ver in manager.iter_versions(slug=slug):
+        row = progress.get(ver.version, {})
+        where.add_row(ver.version, row.get("_status") or "-", row.get("_status_date") or "-",
+                      row.get("_sync_status") or "-", row.get("_sync_date") or "-")
+    console.print(where)
+    targets = sorted({row["_sync_target"] for row in progress.values() if row.get("_sync_target")})
+    if targets:
+        console.print("[dim]Last placed by `sync` in: " + ", ".join(targets) + "[/dim]")
+
 
 @catalog.command("enable")
 @click.option("--product", "product", required=True, help="Product to modify (slug or product_code).")
@@ -1378,6 +1429,7 @@ def download(ctx, bu, family, product, version, batch, select_all, force, worker
             f"Filed {from_file} -> {result.path}\n"
             f"[dim]sha256 {result.checksum}  {result.size / 1_048_576:.1f} MiB  zip_source=manual[/dim]"
         )
+        _refresh_status(manager)
         return
 
     pairs = _download_selection(manager, bu, family, product, version, batch, select_all)
@@ -1434,6 +1486,7 @@ def download(ctx, bu, family, product, version, batch, select_all, force, worker
         findings.finish(exit_code=exit_code)
     _report_download(stats)
     _report_findings(findings)
+    _refresh_status(manager)
     # Exit 1 on a failed version, like `reframe` and `sync` (R12-06, the user's
     # call): a chained `download && extract` must not carry on past a package
     # that never arrived. A version with no endpoint is a report line, not a
@@ -2207,6 +2260,7 @@ def sync(ctx, bu, family, product, version, batch, select_all, target_dir, force
     failed = len(stats.failures) or findings.counts()[Severity.ERROR]
     findings.finish(exit_code=1 if failed else 0)
     _report_sync(stats, findings)
+    _refresh_status(manager)
     if failed:
         raise click.exceptions.Exit(1)
 

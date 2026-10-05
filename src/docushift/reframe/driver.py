@@ -1183,6 +1183,10 @@ class Reframer:
         stats = ReframeStats()
         for product, version in pairs:
             result = self.reframe_one(product, version, force=force)
+            ok = {ReframeOutcome.REFRAMED: True, ReframeOutcome.FAILED: False}.get(result.outcome)
+            if ok is not None and self.state is not None:
+                # Dated for `_status_date` (Phase 38); `reframe --input` records nothing.
+                self.state.record_stage(result.slug, result.version, "reframe", ok)
             stats.results.append(result)
             if on_result is not None:
                 on_result(result)

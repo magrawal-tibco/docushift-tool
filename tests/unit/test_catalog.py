@@ -1256,6 +1256,14 @@ def test_the_shipped_report_retires_the_measured_set(repo_root: Path) -> None:
 
     The rule's verdict is therefore untouched in both directions; the convertible
     population it is measured over is what a human changed.
+
+    *Re-baselined 2026-10-05: `versions_retired` 133 -> 123 and
+    `products_fully_retired` 10 -> 9.* Again the user's scope edits, in `f00eb60`, and
+    again no `release_status` moved. Nine retired `tibco-nimbus` versions (8.1.2-8.1.5,
+    9.0.1, 9.1.0-9.1.2, 9.2.0) went `convert_eligible` -> false ("Nimbus <10.0.0 not
+    eligible"), and `tibco-partnerexpress` went out of scope, taking its one retired
+    eligible version, 6.0.0, and its place on the fully-retired list with it.
+    Confirmed with the user as intended.
     """
     manager = CatalogManager(
         repo_root / "config" / "products.csv",
@@ -1265,8 +1273,8 @@ def test_the_shipped_report_retires_the_measured_set(repo_root: Path) -> None:
 
     summary = manager.triage_summary()
 
-    assert summary["versions_retired"] == 133
-    assert len(summary["products_fully_retired"]) == 10
+    assert summary["versions_retired"] == 123
+    assert len(summary["products_fully_retired"]) == 9
     assert manager.eos_coverage() == (270, 669)
 
 

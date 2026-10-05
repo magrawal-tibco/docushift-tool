@@ -184,6 +184,22 @@ CREATE TABLE IF NOT EXISTS findings (
 );
 
 CREATE INDEX IF NOT EXISTS findings_by_run ON findings (run_id);
+
+-- Phase 38: when each stage last succeeded and last failed for a version, which
+-- is what `versions.csv`'s `_status_date` / `_sync_*` columns are read from. Two
+-- rows per stage rather than one, so a failed re-sync cannot erase the date of
+-- the last placement that worked. For `sync` this is an *event* -- this tool
+-- placed the version in `target` on this day -- never a claim that the target
+-- still matches (architecture.md §7.2).
+CREATE TABLE IF NOT EXISTS stage_event (
+    slug    TEXT NOT NULL,
+    version TEXT NOT NULL,
+    stage   TEXT NOT NULL,   -- download | extract | convert | reframe | sync
+    outcome TEXT NOT NULL,   -- ok | failed
+    at      TEXT NOT NULL,
+    target  TEXT NOT NULL DEFAULT '',
+    PRIMARY KEY (slug, version, stage, outcome)
+);
 """
 
 
@@ -202,6 +218,7 @@ _VERSION_TABLES = (
     "csh_source",
     "asset_inventory",
     "output_map",
+    "stage_event",
 )
 
 
@@ -505,7 +522,8 @@ class StateStore:
         """
         rows: dict[tuple[str, str], dict[str, Any]] = {}
         for row in self._all(
-            "SELECT slug, version, status, download_path, extract_path, error FROM version_state"
+            "SELECT slug, version, status, download_path, extract_path, error, updated_at "
+            "FROM version_state"
         ):
             rows[(row["slug"], row["version"])] = {
                 "status": row["status"],
@@ -513,6 +531,7 @@ class StateStore:
                 "extracted": bool(row["extract_path"]),
                 "converted": False,
                 "error": row["error"],
+                "updated_at": row["updated_at"],
             }
         for row in self._all(
             "SELECT DISTINCT slug, version FROM output_map"
@@ -520,10 +539,47 @@ class StateStore:
             entry = rows.setdefault(
                 (row["slug"], row["version"]),
                 {"status": None, "downloaded": False, "extracted": False,
-                 "converted": False, "error": None},
+                 "converted": False, "error": None, "updated_at": None},
             )
             entry["converted"] = True
         return rows
+
+    # -- stage events (Phase 38) ---------------------------------------------
+
+    def record_stage(self, slug: str, version: str, stage: str, ok: bool, target: str = "") -> None:
+        """Dates one stage's outcome for one version: the last success or the last failure."""
+        with self._tx() as conn:
+            conn.execute(
+                "INSERT INTO stage_event (slug, version, stage, outcome, at, target) "
+                "VALUES (?, ?, ?, ?, ?, ?) ON CONFLICT(slug, version, stage, outcome) "
+                "DO UPDATE SET at = excluded.at, target = excluded.target",
+                (slug, version, stage, "ok" if ok else "failed", _now(), target),
+            )
+
+    def stage_events(self) -> dict[tuple[str, str], dict[tuple[str, str], tuple[str, str]]]:
+        """`{(slug, version): {(stage, outcome): (at, target)}}` for every recorded event."""
+        events: dict[tuple[str, str], dict[tuple[str, str], tuple[str, str]]] = {}
+        for row in self._all("SELECT slug, version, stage, outcome, at, target FROM stage_event"):
+            events.setdefault((row["slug"], row["version"]), {})[(row["stage"], row["outcome"])] = (
+                row["at"], row["target"],
+            )
+        return events
+
+    def run_dates(self) -> dict[tuple[str, str], dict[str, str]]:
+        """When the run that last built each version's converted / merged tree started.
+
+        The only dated record of a build from before `stage_event` existed, so it is
+        what a version with no event of its own is dated by.
+        """
+        dates: dict[tuple[str, str], dict[str, str]] = {}
+        for row in self._all(
+            "SELECT m.slug, m.version, m.key, r.started_at FROM version_metadata m "
+            "JOIN runs r ON r.run_id = CAST(m.value AS INTEGER) "
+            "WHERE m.key IN ('convert_run', 'reframe_run') AND m.value != ''"
+        ):
+            stage = "convert" if row["key"] == "convert_run" else "reframe"
+            dates.setdefault((row["slug"], row["version"]), {})[stage] = row["started_at"]
+        return dates
 
     # -- metadata ------------------------------------------------------------
 

@@ -70,6 +70,130 @@ class Engines:
         return sorted(self.counts.items(), key=lambda item: (-item[1], item[0]))
 
 
+# -- the per-version answer: versions.csv's four status columns (Phase 38) ----
+
+# Pipeline order, and the word each stage's failure is reported under.
+_STAGES = ("download", "extract", "convert", "reframe")
+_FAILED = {"download": "download-failed", "extract": "extract-failed",
+           "convert": "convert-failed", "reframe": "merge-failed"}
+
+Events = dict[tuple[str, str], tuple[str, str]]
+
+
+@dataclass(frozen=True)
+class VersionStatus:
+    """The four `versions.csv` columns for one version. Dates are ISO days, UTC."""
+
+    status: str
+    status_date: str = ""
+    sync_status: str = ""
+    sync_date: str = ""
+
+
+@dataclass
+class StatusEvidence:
+    """Everything `version_status` reads, fetched from `state.db` once per save."""
+
+    progress: dict = field(default_factory=dict)
+    events: dict = field(default_factory=dict)
+    run_dates: dict = field(default_factory=dict)
+
+    @classmethod
+    def read(cls, state) -> "StatusEvidence":
+        return cls(state.progress(), state.stage_events(), state.run_dates())
+
+
+def gate(product, version) -> str | None:
+    """Which gate keeps this version out of the work, outside in (§3.7), or None.
+
+    Shared with `funnel`, so the sheet and `docushift status` count alike.
+    """
+    if not product.in_scope:
+        return "out-of-scope"
+    if version.release_status is ReleaseStatus.RETIRED:
+        return "retired"
+    if not version.convert_eligible:
+        return "not-selected"
+    return None
+
+
+def _day(stamp: str | None) -> str:
+    return (stamp or "")[:10]
+
+
+def _built(events: Events, runs: dict[str, str], stage: str) -> str:
+    """When the stage last succeeded: its event, else the start of the run that built it."""
+    ok = events.get((stage, "ok"))
+    return ok[0] if ok else (runs.get(stage) or "")
+
+
+def _current_failure(events: Events, stage: str) -> str | None:
+    """The failure's time when the stage's last attempt failed, else None."""
+    failed, ok = events.get((stage, "failed")), events.get((stage, "ok"))
+    if failed and (not ok or failed[0] >= ok[0]):
+        return failed[0]
+    return None
+
+
+def version_status(product, version, evidence: StatusEvidence) -> VersionStatus:
+    """Where one version stands, and when it got there.
+
+    A gate wins. Otherwise a failure at a stage beyond the furthest one that
+    succeeded, otherwise that furthest stage. Success is read from what each stage
+    left behind (`StateStore.progress`, `_reframed_md_files`), the same evidence as
+    the funnel; `stage_event` supplies the dates and the failures.
+    """
+    key = (product.slug, version.version)
+    events: Events = evidence.events.get(key, {})
+    runs: dict[str, str] = evidence.run_dates.get(key, {})
+    sync_status, sync_date = _sync(events, runs)
+
+    blocked = gate(product, version)
+    if blocked:
+        return VersionStatus(blocked, "", sync_status, sync_date)
+
+    recorded = evidence.progress.get(key) or {}
+    if recorded.get("converted") and version.reframed_md_files is not None:
+        furthest, status = "reframe", "merged"
+    elif recorded.get("converted"):
+        furthest, status = "convert", "converted"
+    elif recorded.get("extracted"):
+        furthest = "extract"
+        status = "extracted" if version.engine in CONVERTIBLE_ENGINES else "format-unknown"
+    elif recorded.get("downloaded"):
+        furthest, status = "download", "downloaded"
+    else:
+        furthest, status = None, "not-started"
+
+    date = (_built(events, runs, furthest) or recorded.get("updated_at")) if furthest else ""
+
+    beyond = _STAGES[_STAGES.index(furthest) + 1:] if furthest else _STAGES
+    failures = [(at, stage) for stage in beyond if (at := _current_failure(events, stage))]
+    if failures:
+        at, stage = max(failures)
+        status, date = _FAILED[stage], at
+    elif recorded.get("error") and not any(outcome == "failed" for _, outcome in events):
+        # Recorded before `stage_event` existed: `version_state` holds the error but
+        # not its stage, so the stage is the one after the furthest evidence.
+        legacy = {None: "download", "download": "extract", "extract": "convert"}.get(furthest)
+        if legacy and not (legacy == "convert" and status == "format-unknown"):
+            status, date = _FAILED[legacy], recorded.get("updated_at")
+
+    return VersionStatus(status, _day(date), sync_status, sync_date)
+
+
+def _sync(events: Events, runs: dict[str, str]) -> tuple[str, str]:
+    """`_sync_status` and `_sync_date`: this tool's own placements, never the target."""
+    failed_at = _current_failure(events, "sync")
+    if failed_at:
+        return "sync-failed", _day(failed_at)
+    placed = events.get(("sync", "ok"))
+    if not placed:
+        return "", ""
+    rebuilt = max(_built(events, runs, "convert"), _built(events, runs, "reframe"))
+    return ("out-of-date" if rebuilt > placed[0] else "synced"), _day(placed[0])
+
+
 def funnel(
     catalog: "CatalogManager",
     bu: str | None = None,
@@ -87,13 +211,14 @@ def funnel(
 
     for product, version in catalog.iter_versions(bu=bu, family=family):
         result.catalogued += 1
-        if not product.in_scope:
+        blocked = gate(product, version)
+        if blocked == "out-of-scope":
             continue
         result.in_scope += 1
-        if version.release_status is ReleaseStatus.RETIRED:
+        if blocked == "retired":
             continue
         result.not_retired += 1
-        if not version.convert_eligible:
+        if blocked == "not-selected":
             continue
         result.eligible += 1
 

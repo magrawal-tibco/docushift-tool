@@ -193,6 +193,12 @@ class PackageDownloader:
         if self.catalog.state is not None:
             self.catalog.state.set_version_state(slug, version, **fields)
 
+    def _date(self, result: "DownloadResult") -> None:
+        """Dates the outcome for `_status_date` (Phase 38). A current package keeps its old date."""
+        ok = {Outcome.DOWNLOADED: True, Outcome.FAILED: False, Outcome.NO_URL: False}.get(result.outcome)
+        if ok is not None and self.catalog.state is not None:
+            self.catalog.state.record_stage(result.slug, result.version, "download", ok)
+
     def _recorded_state(self, slug: str, version: str) -> dict[str, Any]:
         if self.catalog.state is None:
             return {}
@@ -393,6 +399,7 @@ class PackageDownloader:
         width = max(1, min(self.workers, len(selection)))
         with ThreadPoolExecutor(max_workers=width) as pool:
             for result in pool.map(lambda pv: self.download_one(*pv, force=force), selection):
+                self._date(result)
                 stats.results.append(result)
                 if on_result is not None:
                     on_result(result)
@@ -453,4 +460,6 @@ class PackageDownloader:
             # `version_state` column: it is detail for the rows that have it, not a
             # field every version carries, so it costs no SCHEMA_VERSION bump.
             self.catalog.state.set_version_metadata(slug, number, "zip_origin_path", str(source.resolve()))
-        return DownloadResult(slug, number, Outcome.DOWNLOADED, path=target, size=size, checksum=checksum)
+        result = DownloadResult(slug, number, Outcome.DOWNLOADED, path=target, size=size, checksum=checksum)
+        self._date(result)
+        return result

@@ -1151,6 +1151,11 @@ class DocumentConverter:
         stats = ConvertStats()
         for product, version in pairs:
             result = self.convert_one(product, version, force=force)
+            ok = {ConvertOutcome.CONVERTED: True, ConvertOutcome.FAILED: False}.get(result.outcome)
+            if ok is not None and self.state is not None:
+                # Dated for `_status_date` (Phase 38). Only the catalog's own trees:
+                # `convert --input` runs `convert_one` directly and records nothing.
+                self.state.record_stage(result.slug, result.version, "convert", ok)
             stats.results.append(result)
             if on_result is not None:
                 on_result(result)

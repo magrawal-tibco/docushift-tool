@@ -761,6 +761,18 @@ The scan is the weaker of the two and is kept honest about it: **it proves a cod
 
 ---
 
+### 8.8 Where each version stands — **Built** (Phase 38)
+
+`versions.csv`'s `_status`, `_status_date`, `_sync_status` and `_sync_date`, derived by `reporting/status.py:version_status` on every catalog save. Success is read from what the stages left behind, the same evidence as `status`'s funnel; `state.db`'s `stage_event` supplies the dates and the failures (one row per stage for the last success, one for the last failure).
+
+1. **A gate wins**, outside in: `out-of-scope`, `retired`, `not-selected` — `gate()`, shared with the funnel. No date.
+2. **Otherwise the furthest stage with evidence:** an `output_map` row and `_reframed_md_files` → `merged`; an `output_map` row → `converted`; an extracted tree → `extracted`, or `format-unknown` when the engine is `auto` or has no converter; a package → `downloaded`; nothing → `not-started`.
+3. **A failure beats it only beyond it.** If a later stage's last attempt failed (its failure newer than its last success), the status is that failure: `download-failed`, `extract-failed`, `convert-failed`, `merge-failed`, the most recent if several. A failed rebuild of a tree still on disk does not hide the tree.
+4. **The date** is the stage's success or failure event. A version with no event — built before Phase 38 — is dated by the run that built it (`convert_run`, `reframe_run`), else by `version_state.updated_at`. A `version_state.error` with no failure event is attributed to the stage after the furthest evidence.
+5. **Sync:** the last sync failure, if newer than the last placement, is `sync-failed`. Otherwise a placement is `out-of-date` when a convert or merge succeeded after it, else `synced`; the date is the placement's. Placed means `SYNCED` or `CURRENT` on `online-help`; any failed row is a failed sync; `NO_OUTPUT` and `SKIPPED` record nothing. `convert --input` and `reframe --input` record nothing: they build trees the catalog does not own.
+
+Without a `state.db` a save writes the four cells back as it read them, so a stateless save cannot blank them. `download` and `sync` save once at the end of a run; a save that fails (the sheet open in Excel) is a warning, and `catalog refresh` rewrites the columns later.
+
 ## 9. Context-Sensitive Help
 
 **Built, §9.6 included** — its first three rules in Phase 7b and its fourth in 7c (§8.7). The readers landed with Stage 4 (§9.2, Phase 4b-2); the schema, the resolver, the writer and the frontmatter landed in Phase 5a as `transforms/csh.py`. This is the most intricate algorithm in the tool, and the one grounded most directly in measurement — now re-measured over the whole cache: **863 `Alias.xml` files, 387 with content, 11,054 entries, 2,396 distinct names**, superseding the 2026-09-04 subset of 272 files / 7,220 entries. **Scope: all three HTML engines — Flare, DITA and WebWorks** (§9.2). The full evidence table and the reasoning are in `architecture.md` §5.4; what follows is the procedure.
@@ -1114,6 +1126,7 @@ Most rows are **Built** or **Specified**. One is neither, and is marked as such 
 | 9.3 | CSH resolution | Built | `transforms/csh.py:resolve`, `order_doc_sets` |
 | 9.4–9.5 | `csh.yml` and frontmatter | Built | `transforms/csh.py:render`, `write`, `frontmatter_value` |
 | 9.6 | CSH verification, single-version (three rules) | Built | `validation/csh.py:check`, `check_map` |
+| 8.8 | Where each version stands — `versions.csv`'s four status columns | Built | `reporting/status.py:version_status`, `state.py:stage_event`, `catalog.py:_statuses`; `architecture.md` §3.2, §7.2 |
 | 8.7, 9.6 | CSH verification, cross-version — the diff, the predecessor rule, coverage | Built | `validation/csh.py:diff`, `pairs`, `check_regression`, `coverage`; `docushift csh` in `cli.py`; `architecture.md` §7.6 |
 | 9.2 | CSH readers (**Flare, DITA, WebWorks**) | Built | `engines/csh.py`; the schema, resolver and writer stay Phase 5 |
 | 10 | AEM synthesis and sync | Specified | Phases 6b–7 |
