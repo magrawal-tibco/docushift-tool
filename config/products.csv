@@ -309,17 +309,19 @@ tibco-businessworks-cobol-copybook-plug-in,businessworks-cobol-copybook-plugin,T
 tibco-businessworks-integrationmanager-plug-in,businessworks-integrationmanager-plugin,TIBCO BusinessWorks™ IntegrationManager Plug-in,tibco,bw-plugin,taxonomy_rule,BusinessWorks Plug-ins,"ActiveMatrix BusinessWorks plug-ins, connectors, and extensions",88,integration,true,default,false
 tibco-businessworks-plug-in-for-ai,bwpluginai,TIBCO BusinessWorks™ Plug-in for AI,tibco,bw-plugin,taxonomy_rule,BusinessWorks Plug-ins,"ActiveMatrix BusinessWorks plug-ins, connectors, and extensions",88,integration,true,default,false
 tibco-businessworks-plug-in-for-tibco-auditsafe-for-tibco-platform,bwpluginauditsafeplatform,TIBCO BusinessWorks™ Plug-in for TIBCO® AuditSafe for TIBCO® Platform,tibco,bw-plugin,taxonomy_rule,BusinessWorks Plug-ins,"ActiveMatrix BusinessWorks plug-ins, connectors, and extensions",88,integration,true,default,false
-tibco-cloud,cloud,TIBCO Cloud™,tibco,cloud,manual,TIBCO Cloud,"TIBCO Cloud services: API Modeler, Bus, Events, Messaging, Metadata, Passport",11,,true,default,false
-tibco-cloud-administration,cloud-administration,TIBCO Cloud™ Administration,tibco,cloud,manual,TIBCO Cloud,"TIBCO Cloud services: API Modeler, Bus, Events, Messaging, Metadata, Passport",11,cloud,true,default,false
-tibco-cloud-api-modeler,tcam,TIBCO Cloud™ API Modeler,tibco,cloud,manual,TIBCO Cloud,"TIBCO Cloud services: API Modeler, Bus, Events, Messaging, Metadata, Passport",11,cloud,true,default,false
-tibco-cloud-bus,cloud-bus,TIBCO Cloud Bus™,tibco,cloud,manual,TIBCO Cloud,"TIBCO Cloud services: API Modeler, Bus, Events, Messaging, Metadata, Passport",11,cloud,true,default,false
-tibco-cloud-data-streams,cloud-data-streams,TIBCO Cloud™ Data Streams,tibco,cloud,manual,TIBCO Cloud,"TIBCO Cloud services: API Modeler, Bus, Events, Messaging, Metadata, Passport",11,cloud,true,default,false
-tibco-cloud-events,cloud-events,TIBCO Cloud™ Events,tibco,cloud,manual,TIBCO Cloud,"TIBCO Cloud services: API Modeler, Bus, Events, Messaging, Metadata, Passport",11,cloud,true,manual,false
-tibco-cloud-integration-for-salesforce,tcisf,TIBCO Cloud™ Integration for Salesforce,tibco,cloud,manual,TIBCO Cloud,"TIBCO Cloud services: API Modeler, Bus, Events, Messaging, Metadata, Passport",11,cloud,false,manual,false
-tibco-cloud-integration-ipaas,cloud-integration-ipaas,TIBCO® Cloud Integration (iPaaS),tibco,cloud,manual,TIBCO Cloud,"TIBCO Cloud services: API Modeler, Bus, Events, Messaging, Metadata, Passport",11,cloud,true,default,false
-tibco-cloud-messaging,cloud-messaging,TIBCO Cloud™ Messaging,tibco,cloud,manual,TIBCO Cloud,"TIBCO Cloud services: API Modeler, Bus, Events, Messaging, Metadata, Passport",11,cloud,true,default,false
-tibco-cloud-metadata,cloud-metadata,TIBCO Cloud™ Metadata,tibco,cloud,manual,TIBCO Cloud,"TIBCO Cloud services: API Modeler, Bus, Events, Messaging, Metadata, Passport",11,cloud,true,default,false
-tibco-cloud-passport,cloud-passport,TIBCO Cloud™ Passport,tibco,cloud,manual,TIBCO Cloud,"TIBCO Cloud services: API Modeler, Bus, Events, Messaging, Metadata, Passport",11,cloud,true,default,false
+tibco-cloud,cloud,TIBCO Cloud™,tibco,cloud,manual,TIBCO Cloud,"TIBCO Cloud services: API Modeler, Bus, Events, Messaging, Metadata, Passport",13,,true,default,false
+tibco-cloud-administration,cloud-administration,TIBCO Cloud™ Administration,tibco,cloud,manual,TIBCO Cloud,"TIBCO Cloud services: API Modeler, Bus, Events, Messaging, Metadata, Passport",13,cloud,true,default,false
+tibco-cloud-api-modeler,tcam,TIBCO Cloud™ API Modeler,tibco,cloud,manual,TIBCO Cloud,"TIBCO Cloud services: API Modeler, Bus, Events, Messaging, Metadata, Passport",13,cloud,true,default,false
+tibco-cloud-bus,cloud-bus,TIBCO Cloud Bus™,tibco,cloud,manual,TIBCO Cloud,"TIBCO Cloud services: API Modeler, Bus, Events, Messaging, Metadata, Passport",13,cloud,true,default,false
+tibco-cloud-data-streams,cloud-data-streams,TIBCO Cloud™ Data Streams,tibco,cloud,manual,TIBCO Cloud,"TIBCO Cloud services: API Modeler, Bus, Events, Messaging, Metadata, Passport",13,cloud,true,default,false
+tibco-cloud-events,cloud-events,TIBCO Cloud™ Events,tibco,cloud,manual,TIBCO Cloud,"TIBCO Cloud services: API Modeler, Bus, Events, Messaging, Metadata, Passport",13,cloud,true,manual,false
+tibco-cloud-integration-businessworks-payg,bwce-aws,TIBCO Cloud™ Integration - BusinessWorks™ (PAYG),tibco,cloud,manual,TIBCO Cloud,"TIBCO Cloud services: API Modeler, Bus, Events, Messaging, Metadata, Passport",13,integration,true,default,false
+tibco-cloud-integration-flogo-payg,tci-flogo-payg,TIBCO Cloud™ Integration - Flogo® (PAYG),tibco,cloud,manual,TIBCO Cloud,"TIBCO Cloud services: API Modeler, Bus, Events, Messaging, Metadata, Passport",13,integration,true,default,false
+tibco-cloud-integration-for-salesforce,tcisf,TIBCO Cloud™ Integration for Salesforce,tibco,cloud,manual,TIBCO Cloud,"TIBCO Cloud services: API Modeler, Bus, Events, Messaging, Metadata, Passport",13,cloud,false,manual,false
+tibco-cloud-integration-ipaas,cloud-integration-ipaas,TIBCO® Cloud Integration (iPaaS),tibco,cloud,manual,TIBCO Cloud,"TIBCO Cloud services: API Modeler, Bus, Events, Messaging, Metadata, Passport",13,cloud,true,default,false
+tibco-cloud-messaging,cloud-messaging,TIBCO Cloud™ Messaging,tibco,cloud,manual,TIBCO Cloud,"TIBCO Cloud services: API Modeler, Bus, Events, Messaging, Metadata, Passport",13,cloud,true,default,false
+tibco-cloud-metadata,cloud-metadata,TIBCO Cloud™ Metadata,tibco,cloud,manual,TIBCO Cloud,"TIBCO Cloud services: API Modeler, Bus, Events, Messaging, Metadata, Passport",13,cloud,true,default,false
+tibco-cloud-passport,cloud-passport,TIBCO Cloud™ Passport,tibco,cloud,manual,TIBCO Cloud,"TIBCO Cloud services: API Modeler, Bus, Events, Messaging, Metadata, Passport",13,cloud,true,default,false
 ibi-mdm-add-on-for-global-data-synchronization,cim-gdsn,ibi™ MDM Add-on for Global Data Synchronization,tibco,data_management,taxonomy_rule,Data Management,Master data management and data virtualization,8,data_management,true,default,false
 tibco-cloud-mdm,mdm-cloud,TIBCO® Cloud MDM,tibco,data_management,taxonomy_rule,Data Management,Master data management and data virtualization,8,data_management,true,default,false
 tibco-data-virtualization,sdv,TIBCO® Data Virtualization,tibco,data_management,taxonomy_rule,Data Management,Master data management and data virtualization,8,data_management,true,default,false
@@ -444,55 +446,53 @@ tibco-product-and-service-catalog,cim-ac,TIBCO® Product and Service Catalog,tib
 tibco-product-and-service-catalog-powered-by-tibco-ebx,psc-ebx,TIBCO® Product and Service Catalog powered by TIBCO EBX®,tibco,fulfillment,manual,Fulfillment,"Order management, fulfillment orchestration, and provisioning",27,onebx/data_management,true,default,false
 tibco-product-and-service-inventory,fsi,TIBCO® Product and Service Inventory,tibco,fulfillment,manual,Fulfillment,"Order management, fulfillment orchestration, and provisioning",27,,true,default,false
 tibco-product-and-service-inventory-2-1-0,fsi,TIBCO® Product and Service Inventory 2.1.0,tibco,fulfillment,manual,Fulfillment,"Order management, fulfillment orchestration, and provisioning",27,,true,default,false
-"tibbr,-tibbr-service,-tibbr-community,-and-tibbrcommunity-service",tibbr,"tibbr®, tibbr® Service, tibbr® Community, and tibbr®Community Service",tibco,general,unclassified,General,Not yet triaged into a family,49,,true,default,false
-tibbr-for-ios,tibbr-for-ios,tibbr® for iOS,tibco,general,unclassified,General,Not yet triaged into a family,49,,true,default,false
-tibbr-for-microsoft-outlook,tibbr-for-microsoft-outlook,tibbr® for Microsoft Outlook,tibco,general,unclassified,General,Not yet triaged into a family,49,,true,default,false
-tibbr-for-microsoft-sharepoint,tibbr-for-microsoft-sharepoint,tibbr® for Microsoft SharePoint,tibco,general,unclassified,General,Not yet triaged into a family,49,,true,default,false
-tibbr-for-salesforce-com-app,tibbr-for-salesforce-com-app,tibbr® for Salesforce.com App,tibco,general,unclassified,General,Not yet triaged into a family,49,,true,default,false
-tibbr-ideas,tibbr-ideas,tibbr® Ideas,tibco,general,unclassified,General,Not yet triaged into a family,49,,true,default,false
-tibbr-pages,tibbr-pages,tibbr® Pages,tibco,general,unclassified,General,Not yet triaged into a family,49,,true,default,false
-tibbr-tasks,tibbr-tasks,tibbr® Tasks,tibco,general,unclassified,General,Not yet triaged into a family,49,,true,default,false
-tibco-activation-service,tibco-activation,TIBCO® Activation Service,tibco,general,unclassified,General,Not yet triaged into a family,49,,true,default,false
-tibco-analytics,sfire-analyst-suite,TIBCO® Analytics,tibco,general,unclassified,General,Not yet triaged into a family,49,,true,default,false
-tibco-analytics-business-author-add-on,sfire-bauthor-suite,TIBCO® Analytics - Business Author Add-on,tibco,general,unclassified,General,Not yet triaged into a family,49,,true,default,false
-tibco-analytics-consumer-add-on,sfire-consumer-suite,TIBCO® Analytics - Consumer Add-on,tibco,general,unclassified,General,Not yet triaged into a family,49,,true,default,false
-tibco-api-exchange-gateway,api-exchange-gateway,TIBCO® API Exchange Gateway,tibco,general,manual,General,Not yet triaged into a family,49,integration,true,default,false
-tibco-api-exchange-manager,api-exchange-manager,TIBCO® API Exchange Manager,tibco,general,manual,General,Not yet triaged into a family,49,integration,true,default,false
-tibco-clarity,clarity-dt,TIBCO® Clarity,tibco,general,unclassified,General,Not yet triaged into a family,49,,true,default,false
-tibco-clarity-cloud-edition,clarity,TIBCO® Clarity - Cloud Edition,tibco,general,unclassified,General,Not yet triaged into a family,49,,true,default,false
-tibco-clarity-enterprise-edition,clarity-dt,TIBCO® Clarity - Enterprise Edition,tibco,general,unclassified,General,Not yet triaged into a family,49,,true,default,false
-tibco-cloud-integration-businessworks-payg,bwce-aws,TIBCO Cloud™ Integration - BusinessWorks™ (PAYG),tibco,general,manual,General,Not yet triaged into a family,49,integration,true,default,false
-tibco-cloud-integration-flogo-payg,tci-flogo-payg,TIBCO Cloud™ Integration - Flogo® (PAYG),tibco,general,manual,General,Not yet triaged into a family,49,integration,true,default,false
-tibco-computedb-enterprise-edition,compute,TIBCO ComputeDB™ - Enterprise Edition,tibco,general,unclassified,General,Not yet triaged into a family,49,,true,default,false
-tibco-configuration-tool,cofiguration-tool,TIBCO Configuration Tool,tibco,general,unclassified,General,Not yet triaged into a family,49,,true,default,false
-tibco-dq-service-provider-dqs-add-on,tdqsp,TIBCO® DQ Service Provider - DQS Add-on,tibco,general,unclassified,General,Not yet triaged into a family,49,,true,default,false
-tibco-enterprise-administrator,tea,TIBCO® Enterprise Administrator,tibco,general,unclassified,General,Not yet triaged into a family,49,,true,default,false
-tibco-enterprise-administrator-sdk,tea-sdk,TIBCO® Enterprise Administrator SDK,tibco,general,unclassified,General,Not yet triaged into a family,49,,true,default,false
-tibco-formvine,formvine,TIBCO Formvine®,tibco,general,manual,General,Not yet triaged into a family,49,,true,default,false
-tibco-general-interface-enterprise-edition,general-interface-enterprise-edition,TIBCO® General Interface - Enterprise Edition,tibco,general,unclassified,General,Not yet triaged into a family,49,,true,default,false
-tibco-geoanalytics,geo,TIBCO GeoAnalytics,tibco,general,unclassified,General,Not yet triaged into a family,49,,true,default,false
-tibco-geoanalytics-builder,geo-build,TIBCO GeoAnalytics Builder,tibco,general,unclassified,General,Not yet triaged into a family,49,,true,default,false
-tibco-graph-database-community-edition,tgdb-ce,TIBCO® Graph Database - Community Edition,tibco,general,unclassified,General,Not yet triaged into a family,49,,true,default,false
-tibco-graph-database-enterprise-edition,tgdb,TIBCO® Graph Database - Enterprise Edition,tibco,general,unclassified,General,Not yet triaged into a family,49,,true,default,false
-tibco-health-essentials-cloud,health-essentials-cloud,TIBCO® Health Essentials Cloud,tibco,general,unclassified,General,Not yet triaged into a family,49,,true,default,false
-tibco-kabira-adapter-factory-for-java,kabira-jaf,TIBCO Kabira® Adapter Factory for JAVA,tibco,general,unclassified,General,Not yet triaged into a family,49,,true,default,false
-tibco-kabira-adapter-factory-for-persistence,kabira-paf,TIBCO Kabira® Adapter Factory for Persistence,tibco,general,unclassified,General,Not yet triaged into a family,49,,true,default,false
-tibco-kabira-adapter-factory-for-snmp,kabira-snmpaf,TIBCO Kabira® Adapter Factory for SNMP,tibco,general,unclassified,General,Not yet triaged into a family,49,,true,default,false
-tibco-kabira-builder,kab-p-builder,TIBCO Kabira® Builder,tibco,general,unclassified,General,Not yet triaged into a family,49,,true,default,false
-tibco-live-datamart,sb-lv,TIBCO® Live Datamart,tibco,general,unclassified,General,Not yet triaged into a family,49,,true,default,false
-tibco-live-datamart-standard-edition,sb-lv-std,TIBCO® Live Datamart Standard Edition,tibco,general,unclassified,General,Not yet triaged into a family,49,,true,default,false
-tibco-loglogic,loglmi,TIBCO LogLogic®,tibco,general,unclassified,General,Not yet triaged into a family,49,,true,default,false
-tibco-loglogic-compliance-manager,loglogic-compliance-manager,TIBCO LogLogic® Compliance Manager,tibco,general,unclassified,General,Not yet triaged into a family,49,,true,default,false
-tibco-microflow-container-edition,microflow-container-edition,TIBCO Microflow™ Container Edition,tibco,general,unclassified,General,Not yet triaged into a family,49,,true,default,false
-tibco-orchestra-networks,orchestra-networks,TIBCO® Orchestra Networks,tibco,general,unclassified,General,Not yet triaged into a family,49,,true,default,false
-tibco-patterns,tps,TIBCO® Patterns,tibco,general,unclassified,General,Not yet triaged into a family,49,,true,default,false
-tibco-service-gateway-for-files,service-gateway-for-files,TIBCO Service Gateway™ for Files,tibco,general,unclassified,General,Not yet triaged into a family,49,,false,manual,false
-tibco-silver-fabric-enabler-for-activematrix-businessworks,sfbw,TIBCO Silver® Fabric Enabler for ActiveMatrix BusinessWorks™,tibco,general,manual,General,Not yet triaged into a family,49,integration,true,default,false
-tibco-silver-fabric-enabler-for-spotfire-web-player,silver-fabric-spotfire,TIBCO Silver® Fabric Enabler for Spotfire® Web Player,tibco,general,taxonomy_rule,General,Not yet triaged into a family,49,spotfire/analytics,false,scope_rule,false
-tibco-silver-fabric-enabler-for-tibco-api-exchange-gateway,sfax,TIBCO Silver® Fabric Enabler for TIBCO® API Exchange Gateway,tibco,general,manual,General,Not yet triaged into a family,49,integration,true,default,false
-tibco-silver-fabric-enabler-for-tibco-businessevents,sfbe,TIBCO Silver® Fabric Enabler for TIBCO BusinessEvents®,tibco,general,manual,General,Not yet triaged into a family,49,integration,true,default,false
-tibco-slingshot,slingshot,TIBCO Slingshot™,tibco,general,unclassified,General,Not yet triaged into a family,49,,true,default,false
-tibco-vault,vault,TIBCO® Vault,tibco,general,unclassified,General,Not yet triaged into a family,49,,true,default,false
+"tibbr,-tibbr-service,-tibbr-community,-and-tibbrcommunity-service",tibbr,"tibbr®, tibbr® Service, tibbr® Community, and tibbr®Community Service",tibco,general,unclassified,General,Not yet triaged into a family,47,,true,default,false
+tibbr-for-ios,tibbr-for-ios,tibbr® for iOS,tibco,general,unclassified,General,Not yet triaged into a family,47,,true,default,false
+tibbr-for-microsoft-outlook,tibbr-for-microsoft-outlook,tibbr® for Microsoft Outlook,tibco,general,unclassified,General,Not yet triaged into a family,47,,true,default,false
+tibbr-for-microsoft-sharepoint,tibbr-for-microsoft-sharepoint,tibbr® for Microsoft SharePoint,tibco,general,unclassified,General,Not yet triaged into a family,47,,true,default,false
+tibbr-for-salesforce-com-app,tibbr-for-salesforce-com-app,tibbr® for Salesforce.com App,tibco,general,unclassified,General,Not yet triaged into a family,47,,true,default,false
+tibbr-ideas,tibbr-ideas,tibbr® Ideas,tibco,general,unclassified,General,Not yet triaged into a family,47,,true,default,false
+tibbr-pages,tibbr-pages,tibbr® Pages,tibco,general,unclassified,General,Not yet triaged into a family,47,,true,default,false
+tibbr-tasks,tibbr-tasks,tibbr® Tasks,tibco,general,unclassified,General,Not yet triaged into a family,47,,true,default,false
+tibco-activation-service,tibco-activation,TIBCO® Activation Service,tibco,general,unclassified,General,Not yet triaged into a family,47,,true,default,false
+tibco-analytics,sfire-analyst-suite,TIBCO® Analytics,tibco,general,unclassified,General,Not yet triaged into a family,47,,true,default,false
+tibco-analytics-business-author-add-on,sfire-bauthor-suite,TIBCO® Analytics - Business Author Add-on,tibco,general,unclassified,General,Not yet triaged into a family,47,,true,default,false
+tibco-analytics-consumer-add-on,sfire-consumer-suite,TIBCO® Analytics - Consumer Add-on,tibco,general,unclassified,General,Not yet triaged into a family,47,,true,default,false
+tibco-api-exchange-gateway,api-exchange-gateway,TIBCO® API Exchange Gateway,tibco,general,manual,General,Not yet triaged into a family,47,integration,true,default,false
+tibco-api-exchange-manager,api-exchange-manager,TIBCO® API Exchange Manager,tibco,general,manual,General,Not yet triaged into a family,47,integration,true,default,false
+tibco-clarity,clarity-dt,TIBCO® Clarity,tibco,general,unclassified,General,Not yet triaged into a family,47,,true,default,false
+tibco-clarity-cloud-edition,clarity,TIBCO® Clarity - Cloud Edition,tibco,general,unclassified,General,Not yet triaged into a family,47,,true,default,false
+tibco-clarity-enterprise-edition,clarity-dt,TIBCO® Clarity - Enterprise Edition,tibco,general,unclassified,General,Not yet triaged into a family,47,,true,default,false
+tibco-computedb-enterprise-edition,compute,TIBCO ComputeDB™ - Enterprise Edition,tibco,general,unclassified,General,Not yet triaged into a family,47,,true,default,false
+tibco-configuration-tool,cofiguration-tool,TIBCO Configuration Tool,tibco,general,unclassified,General,Not yet triaged into a family,47,,true,default,false
+tibco-dq-service-provider-dqs-add-on,tdqsp,TIBCO® DQ Service Provider - DQS Add-on,tibco,general,unclassified,General,Not yet triaged into a family,47,,true,default,false
+tibco-enterprise-administrator,tea,TIBCO® Enterprise Administrator,tibco,general,unclassified,General,Not yet triaged into a family,47,,true,default,false
+tibco-enterprise-administrator-sdk,tea-sdk,TIBCO® Enterprise Administrator SDK,tibco,general,unclassified,General,Not yet triaged into a family,47,,true,default,false
+tibco-formvine,formvine,TIBCO Formvine®,tibco,general,manual,General,Not yet triaged into a family,47,,true,default,false
+tibco-general-interface-enterprise-edition,general-interface-enterprise-edition,TIBCO® General Interface - Enterprise Edition,tibco,general,unclassified,General,Not yet triaged into a family,47,,true,default,false
+tibco-geoanalytics,geo,TIBCO GeoAnalytics,tibco,general,unclassified,General,Not yet triaged into a family,47,,true,default,false
+tibco-geoanalytics-builder,geo-build,TIBCO GeoAnalytics Builder,tibco,general,unclassified,General,Not yet triaged into a family,47,,true,default,false
+tibco-graph-database-community-edition,tgdb-ce,TIBCO® Graph Database - Community Edition,tibco,general,unclassified,General,Not yet triaged into a family,47,,true,default,false
+tibco-graph-database-enterprise-edition,tgdb,TIBCO® Graph Database - Enterprise Edition,tibco,general,unclassified,General,Not yet triaged into a family,47,,true,default,false
+tibco-health-essentials-cloud,health-essentials-cloud,TIBCO® Health Essentials Cloud,tibco,general,unclassified,General,Not yet triaged into a family,47,,true,default,false
+tibco-kabira-adapter-factory-for-java,kabira-jaf,TIBCO Kabira® Adapter Factory for JAVA,tibco,general,unclassified,General,Not yet triaged into a family,47,,true,default,false
+tibco-kabira-adapter-factory-for-persistence,kabira-paf,TIBCO Kabira® Adapter Factory for Persistence,tibco,general,unclassified,General,Not yet triaged into a family,47,,true,default,false
+tibco-kabira-adapter-factory-for-snmp,kabira-snmpaf,TIBCO Kabira® Adapter Factory for SNMP,tibco,general,unclassified,General,Not yet triaged into a family,47,,true,default,false
+tibco-kabira-builder,kab-p-builder,TIBCO Kabira® Builder,tibco,general,unclassified,General,Not yet triaged into a family,47,,true,default,false
+tibco-live-datamart,sb-lv,TIBCO® Live Datamart,tibco,general,unclassified,General,Not yet triaged into a family,47,,true,default,false
+tibco-live-datamart-standard-edition,sb-lv-std,TIBCO® Live Datamart Standard Edition,tibco,general,unclassified,General,Not yet triaged into a family,47,,true,default,false
+tibco-loglogic,loglmi,TIBCO LogLogic®,tibco,general,unclassified,General,Not yet triaged into a family,47,,true,default,false
+tibco-loglogic-compliance-manager,loglogic-compliance-manager,TIBCO LogLogic® Compliance Manager,tibco,general,unclassified,General,Not yet triaged into a family,47,,true,default,false
+tibco-microflow-container-edition,microflow-container-edition,TIBCO Microflow™ Container Edition,tibco,general,unclassified,General,Not yet triaged into a family,47,,true,default,false
+tibco-orchestra-networks,orchestra-networks,TIBCO® Orchestra Networks,tibco,general,unclassified,General,Not yet triaged into a family,47,,true,default,false
+tibco-patterns,tps,TIBCO® Patterns,tibco,general,unclassified,General,Not yet triaged into a family,47,,true,default,false
+tibco-service-gateway-for-files,service-gateway-for-files,TIBCO Service Gateway™ for Files,tibco,general,unclassified,General,Not yet triaged into a family,47,,false,manual,false
+tibco-silver-fabric-enabler-for-activematrix-businessworks,sfbw,TIBCO Silver® Fabric Enabler for ActiveMatrix BusinessWorks™,tibco,general,manual,General,Not yet triaged into a family,47,integration,true,default,false
+tibco-silver-fabric-enabler-for-spotfire-web-player,silver-fabric-spotfire,TIBCO Silver® Fabric Enabler for Spotfire® Web Player,tibco,general,taxonomy_rule,General,Not yet triaged into a family,47,spotfire/analytics,false,scope_rule,false
+tibco-silver-fabric-enabler-for-tibco-api-exchange-gateway,sfax,TIBCO Silver® Fabric Enabler for TIBCO® API Exchange Gateway,tibco,general,manual,General,Not yet triaged into a family,47,integration,true,default,false
+tibco-silver-fabric-enabler-for-tibco-businessevents,sfbe,TIBCO Silver® Fabric Enabler for TIBCO BusinessEvents®,tibco,general,manual,General,Not yet triaged into a family,47,integration,true,default,false
+tibco-slingshot,slingshot,TIBCO Slingshot™,tibco,general,unclassified,General,Not yet triaged into a family,47,,true,default,false
+tibco-vault,vault,TIBCO® Vault,tibco,general,unclassified,General,Not yet triaged into a family,47,,true,default,false
 tibco-hawk-activematrix-plug-in,hawk-activematrix-plugin,TIBCO Hawk ActiveMatrix® Plug-in,tibco,hawk,manual,Hawk,"Infrastructure monitoring agents, adapters, and plug-ins",9,,true,default,false
 tibco-hawk-container-edition,hkce,TIBCO Hawk® - Container Edition,tibco,hawk,unclassified,Hawk,"Infrastructure monitoring agents, adapters, and plug-ins",9,,true,default,false
 tibco-hawk-database-adapter,hawkdbhma,TIBCO Hawk® Database Adapter,tibco,hawk,unclassified,Hawk,"Infrastructure monitoring agents, adapters, and plug-ins",9,,true,default,false
