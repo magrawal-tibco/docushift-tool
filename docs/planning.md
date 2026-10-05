@@ -183,6 +183,7 @@ The concrete deliverable of §7.1: every deferred "report line" in the three doc
 | 36 | `toc.yml` Speaks html-to-md's Dialect | Complete, 2026-10-02 | [phase-36.md](history/phases/phase-36.md) |
 | 37 | One Sheet for the Family Decision | Complete, 2026-10-04 | [phase-37.md](history/phases/phase-37.md) |
 | 38 | Where Each Version Stands, on the Sheet | Complete, 2026-10-05 | [phase-38.md](history/phases/phase-38.md) |
+| 39 | A PDF-Only Package Is Not Blocked | Complete, 2026-10-05 | [phase-39.md](history/phases/phase-39.md) |
 
 ---
 

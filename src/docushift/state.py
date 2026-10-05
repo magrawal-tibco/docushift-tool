@@ -565,6 +565,22 @@ class StateStore:
             )
         return events
 
+    def content_kinds(self) -> dict[tuple[str, str], tuple[int, int]]:
+        """`(topic files, document files)` per extracted version, from the Stage 4 inventory.
+
+        What tells a PDF-only package (no topics, some documents) from HTML the tool
+        cannot convert (Phase 39). Read from the inventory, never from the tree.
+        """
+        kinds: dict[tuple[str, str], tuple[int, int]] = {}
+        for row in self._all(
+            "SELECT slug, version, "
+            "SUM(CASE WHEN category = 'topic' THEN files ELSE 0 END) AS topics, "
+            "SUM(CASE WHEN category = 'document' THEN files ELSE 0 END) AS documents "
+            "FROM asset_inventory GROUP BY slug, version"
+        ):
+            kinds[(row["slug"], row["version"])] = (row["topics"] or 0, row["documents"] or 0)
+        return kinds
+
     def run_dates(self) -> dict[tuple[str, str], dict[str, str]]:
         """When the run that last built each version's converted / merged tree started.
 

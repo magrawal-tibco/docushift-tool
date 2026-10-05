@@ -173,7 +173,7 @@ Per-family folders are created on demand by the downloader, not at startup: pre-
 ## 3. Current State (2026-10-05)
 
 - **Every pipeline stage is built**: catalog → download → extract → convert (Flare, DITA,
-  WebWorks, DocBook) → navigation → reframe (Flare merge) → sync → validate. Phases 1–38
+  WebWorks, DocBook) → navigation → reframe (Flare merge) → sync → validate. Phases 1–39
   are finished; see the [index](docs/planning.md#finished-phases).
 - **Reviewed end to end (Phase 34)**: 236 findings, every serious and significant one
   fixed with a test, the rest deferred or cleaned up; see `reports/review/INDEX.md`.
@@ -184,11 +184,11 @@ Per-family folders are created on demand by the downloader, not at startup: pre-
   shows each family's name, description, size and keyword-rule suggestion beside it
   (Phase 37), ready for the user's family review. `versions.csv` shows where each
   version stands, since when, and when `sync` last placed it (`_status`, `_sync_status`;
-  Phase 38).
+  Phase 38); a package of only PDFs reads `pdf-only`, not blocked (Phase 39).
 - **Converted**: four families in `output/` (activespaces, ems, streaming, tra), three of
   them merged in `reframed/` (activespaces, ems, tra), all rebuilt 2026-10-05 with every
   Phase 34 fix. 301 maps and `toc.yml` as in Phases 35–36.
-- **Quality bar**: 2,136 tests, `ruff check src tests` clean, 84 finding codes in the
+- **Quality bar**: 2,140 tests, `ruff check src tests` clean, 84 finding codes in the
   register.
 - **Branch**: `reframe-component`, not pushed. Git push and publishing are out of scope
   (`architecture.md` §6.0).

@@ -51,7 +51,7 @@ def validation_summary(db_path: Path) -> dict | None:
 STAGE_OF = {
     "out-of-scope": "out_of_scope", "retired": "retired", "not-selected": "not_selected",
     "not-started": "not_started", "downloaded": "in_progress", "extracted": "in_progress",
-    "download-failed": "blocked_download", "format-unknown": "blocked_format",
+    "download-failed": "blocked_download", "format-unknown": "blocked_format", "pdf-only": "pdf_only",
     "extract-failed": "blocked_failed", "convert-failed": "blocked_failed",
     "merge-failed": "blocked_failed", "converted": "converted", "merged": "converted",
 }
@@ -82,7 +82,12 @@ def build() -> dict:
         if product["in_scope"] == "true":
             families[fam_key]["in_scope"].add(v["slug"])
 
-        stage = STAGE_OF.get(v["_status"], "not_started")
+        if v["_status"] not in STAGE_OF:
+            # A value this page does not know is a new status the tool learned; counting
+            # it as anything would misreport it, so stop and say which.
+            raise SystemExit(f"Unknown _status '{v['_status']}' on {v['slug']}@{v['version']}; "
+                             f"add it to STAGE_OF in this script.")
+        stage = STAGE_OF[v["_status"]]
         if stage == "converted" and v["_sync_status"] in ("synced", "out-of-date"):
             stage = "published"
         gates[stage] += 1

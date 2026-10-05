@@ -1060,18 +1060,23 @@ class WorkspaceDistributor:
         """Records this run's placement as an event (Phase 38, architecture.md §7.2).
 
         Placed means the converted help reached the target or already matched it
-        there (`SYNCED`, `CURRENT` on `online-help`). Any failed row is a failed
-        sync. `NO_OUTPUT` and `SKIPPED` record nothing: nothing was attempted.
-        This vouches for what the tool did on the day, never for the target since.
+        there (`SYNCED`, `CURRENT` on `online-help`). Placing any document
+        doc-class is recorded apart, as `sync-docs`, which is what a PDF-only
+        version reads (Phase 39). Any failed row is a failed sync. `NO_OUTPUT` and
+        `SKIPPED` record nothing: nothing was attempted. This vouches for what the
+        tool did on the day, never for the target since.
         """
         state = self.catalog.state
         if state is None:
             return
         if any(r.outcome is SyncOutcome.FAILED for r in results):
             state.record_stage(product.slug, version.version, "sync", False, str(target))
-        elif any(r.doc_class == ONLINE_HELP and r.outcome in (SyncOutcome.SYNCED, SyncOutcome.CURRENT)
-                 for r in results):
+            return
+        placed = {r.doc_class for r in results if r.outcome in (SyncOutcome.SYNCED, SyncOutcome.CURRENT)}
+        if ONLINE_HELP in placed:
             state.record_stage(product.slug, version.version, "sync", True, str(target))
+        if placed & set(router.DOCUMENT_DOC_CLASSES):
+            state.record_stage(product.slug, version.version, "sync-docs", True, str(target))
 
     def sync_many(
         self,

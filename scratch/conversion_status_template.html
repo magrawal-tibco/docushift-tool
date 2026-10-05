@@ -8,7 +8,9 @@
 /* Roles, not raw hex. Every colour below was run through the dataviz palette
    validator: the converted -> published pair as an ordinal ramp in both modes,
    and the fixed "serious" status colour for blocked work against both blues
-   (adjacent CVD dE 19.0 light / 23.7 dark, target 8). */
+   (adjacent CVD dE 19.0 light / 23.7 dark, target 8). The violet PDF-only segment
+   sits between converted and blocked: worst adjacent CVD dE 13.0 light / 11.7 dark,
+   normal-vision 16.3 both. Aqua was tried there first and failed beside the orange. */
 .viz-root {
   color-scheme: light;
   --surface-1:      #fcfcfb;
@@ -23,6 +25,7 @@
   --deemph:         #c3c2b7;   /* context bars: the scoping gates */
   --ord-lo:         #2a78d6;   /* converted, not yet published  (ordinal low)  */
   --ord-hi:         #104281;   /* published                     (ordinal high) */
+  --pdf:            #4a3aa7;   /* PDF only, nothing to convert (categorical slot 7, violet) */
   --blocked:        #ec835a;   /* status: serious -- always with icon + label   */
   --track:          #e1e0d9;   /* not yet converted: the unfilled track         */
   --heat:           42,120,214;
@@ -31,13 +34,13 @@
   :root:where(:not([data-theme="light"])) .viz-root { color-scheme: dark;
     --surface-1:#1a1a19; --plane:#0d0d0d; --text-primary:#ffffff; --text-secondary:#c3c2b7;
     --text-muted:#898781; --grid:#2c2c2a; --axis:#383835; --border:rgba(255,255,255,0.10);
-    --series-1:#3987e5; --deemph:#4a4a46; --ord-lo:#256abf; --ord-hi:#86b6ef;
+    --series-1:#3987e5; --deemph:#4a4a46; --ord-lo:#256abf; --ord-hi:#86b6ef; --pdf:#9085e9;
     --blocked:#ec835a; --track:#2c2c2a; --heat:57,135,229; }
 }
 :root[data-theme="dark"] .viz-root { color-scheme: dark;
     --surface-1:#1a1a19; --plane:#0d0d0d; --text-primary:#ffffff; --text-secondary:#c3c2b7;
     --text-muted:#898781; --grid:#2c2c2a; --axis:#383835; --border:rgba(255,255,255,0.10);
-    --series-1:#3987e5; --deemph:#4a4a46; --ord-lo:#256abf; --ord-hi:#86b6ef;
+    --series-1:#3987e5; --deemph:#4a4a46; --ord-lo:#256abf; --ord-hi:#86b6ef; --pdf:#9085e9;
     --blocked:#ec835a; --track:#2c2c2a; --heat:57,135,229; }
 
 * { box-sizing: border-box; }
@@ -115,6 +118,7 @@ svg { display: block; width: 100%; height: auto; overflow: visible; }
 .stack > span:only-child  { border-radius: 4px; }
 .seg-published { background: var(--ord-hi); }
 .seg-converted { background: var(--ord-lo); }
+.seg-pdf       { background: var(--pdf); }
 .seg-blocked   { background: var(--blocked); }
 .seg-pending   { background: var(--track); }
 .stack-labels { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted); margin-top: 6px; }
@@ -393,15 +397,18 @@ const FAM = Object.fromEntries(DATA.families.map(f => [f.key, f]));
 const PROGRESS = [
   { key: "published", label: "Synced to the target",             cls: "seg-published", color: () => cssVar("--ord-hi") },
   { key: "converted", label: "Converted, not yet synced",        cls: "seg-converted", color: () => cssVar("--ord-lo") },
+  { key: "pdf",       label: "PDF only, nothing to convert",    cls: "seg-pdf",       color: () => cssVar("--pdf") },
   { key: "blocked",   label: "Blocked",                          cls: "seg-blocked",   color: () => cssVar("--blocked"), icon: true },
   { key: "pending",   label: "Not yet converted",                cls: "seg-pending",   color: () => cssVar("--axis") },
 ];
 const progressKey = stage =>
   stage === "published" ? "published" :
   stage === "converted" ? "converted" :
+  stage === "pdf_only" ? "pdf" :
   stage.startsWith("blocked") ? "blocked" :
   (stage === "not_started" || stage === "in_progress") ? "pending" : null;
 
+const vec = s => [s.published, s.converted, s.pdf, s.blocked, s.pending];
 const state = { bu: "", family: "" };
 const inSlice = famKey => {
   const f = FAM[famKey];
@@ -410,7 +417,7 @@ const inSlice = famKey => {
 
 function summarise(rows) {
   const s = { catalogued: 0, outOfScope: 0, retired: 0, notSelected: 0, selected: 0,
-              published: 0, converted: 0, blocked: 0, blockedDownload: 0, blockedFormat: 0, pending: 0, started: 0 };
+              published: 0, converted: 0, pdf: 0, blocked: 0, blockedDownload: 0, blockedFormat: 0, pending: 0, started: 0 };
   for (const [, stage] of rows) {
     s.catalogued++;
     if (stage === "out_of_scope") { s.outOfScope++; continue; }
@@ -456,8 +463,9 @@ function renderKpis(s, slice) {
   const hero = el("div", { class: "tile hero" },
     el("div", { class: "k" }, "Versions converted"),
     el("div", { class: "v" }, fmt(s.done), el("small", {}, `of ${fmt(s.selected)} selected · ${pctTxt(s.done, s.selected)}`)));
-  hero.append(stackBar([s.published, s.converted, s.blocked, s.pending], "thin", "Selected versions"));
-  hero.append(el("div", { class: "s" }, `${fmt(s.published)} of them are already synced to the target repositories.`));
+  hero.append(stackBar(vec(s), "thin", "Selected versions"));
+  hero.append(el("div", { class: "s" }, `${fmt(s.published)} of them are already synced to the target repositories.` +
+    (s.pdf ? ` ${fmt(s.pdf)} more hold only PDFs, so there is nothing to convert.` : "")));
 
   const blockedTile = el("div", { class: "tile" },
     el("div", { class: "k" }, el("span", { class: "icon", "aria-hidden": "true" }, "!"), "Versions blocked"),
@@ -517,7 +525,9 @@ function renderFunnel(s) {
     { label: "Selected for conversion", n: s.selected, gate: true,
       drop: s.notSelected, why: "older versions kept on record only" },
     { label: "Work started", n: s.started, drop: s.selected - s.started, why: "not yet attempted" },
-    { label: "Converted", n: s.done, drop: s.started - s.done, why: "blocked (see below)" },
+    { label: "Converted", n: s.done, drop: s.started - s.done,
+      why: "not converted: " + [s.pdf && `${fmt(s.pdf)} PDF only, nothing to convert`,
+                                 s.blocked && `${fmt(s.blocked)} blocked (see below)`].filter(Boolean).join(" · ") },
     { label: "Synced", n: s.published, drop: s.done - s.published, why: "converted, not yet synced" },
   ];
   const W = 1120, L = 196, R = 300, ROW = 40, BAR = 20, top = 6;
@@ -571,7 +581,7 @@ function niceStep(max, n) {
 
 /* -- 2. overall progress --------------------------------------------------- */
 function legend(id, s) {
-  const vals = s ? [s.published, s.converted, s.blocked, s.pending] : [];
+  const vals = s ? vec(s) : [];
   $(id).replaceChildren(...PROGRESS.map((p, i) => el("li", {},
     p.icon ? el("span", { class: "icon", "aria-hidden": "true" }, "!") : el("span", { class: "key " + p.cls }),
     p.label, s ? el("b", {}, fmt(vals[i])) : null)));
@@ -581,11 +591,11 @@ function renderProgress(s) {
     (s.selected ? `${pctTxt(s.done, s.selected)} are converted; the grey remainder is the work still ahead.` : "");
   legend("lg-prog", s);
   const box = el("div");
-  box.append(stackBar([s.published, s.converted, s.blocked, s.pending], "", "Selected versions"));
+  box.append(stackBar(vec(s), "", "Selected versions"));
   box.append(el("div", { class: "stack-labels" }, el("span", {}, "0"), el("span", {}, `${fmt(s.selected)} versions`)));
   $("c-prog").replaceChildren(box);
   $("t-prog").replaceChildren(table(["State", "Versions", "Share"],
-    PROGRESS.map((p, i) => { const v = [s.published, s.converted, s.blocked, s.pending][i]; return [p.label, fmt(v), pctTxt(v, s.selected)]; }),
+    PROGRESS.map((p, i) => { const v = vec(s)[i]; return [p.label, fmt(v), pctTxt(v, s.selected)]; }),
     [false, true, true]));
 }
 
@@ -593,10 +603,11 @@ function renderProgress(s) {
    The `_status` and `_sync_status` values exactly as `versions.csv` writes them, so
    a reader can filter the sheet on the same word the page shows. */
 const SHEET_STATUS = [
-  ["Done", [["merged", "Converted, and topics merged into pages"], ["converted", "Converted to Markdown"]]],
+  ["Done", [["merged", "Converted, and topics merged into pages"], ["converted", "Converted to Markdown"],
+    ["pdf-only", "Only PDFs in the package; nothing to convert, the PDFs publish as documents"]]],
   ["Waiting for the next step", [["extracted", "Unpacked, waiting for conversion"],
     ["downloaded", "Downloaded, waiting to be unpacked"], ["not-started", "Selected, nothing done yet"]]],
-  ["Stuck: needs a person", [["format-unknown", "Unpacked, but in a format the tool cannot convert"],
+  ["Stuck: needs a person", [["format-unknown", "HTML help in a format the tool cannot convert"],
     ["download-failed", "The docsite did not return a usable package"],
     ["extract-failed", "The package could not be unpacked"], ["convert-failed", "Conversion failed on its last attempt"],
     ["merge-failed", "Merging pages failed on its last attempt"]]],
@@ -608,7 +619,7 @@ const SYNC_STATUS = [
   ["synced", "Placed in the target, nothing rebuilt since"],
   ["out-of-date", "Rebuilt after it was placed; sync again"],
   ["sync-failed", "The last sync attempt failed"],
-  ["", "Converted, never synced"],
+  ["", "Converted or PDF only, never synced"],
 ];
 function statusTable(groups, counts, dates, label) {
   const max = Math.max(1, ...Object.values(counts));
@@ -641,14 +652,14 @@ function renderSheet(slice) {
   for (const [, stage, , st, sd, ss, ssd] of slice) {
     counts[st] = (counts[st] || 0) + 1;
     if (sd > (dates[st] || "")) dates[st] = sd;
-    if (ss || st === "converted" || st === "merged") {
+    if (ss || st === "converted" || st === "merged" || st === "pdf-only") {
       syncCounts[ss] = (syncCounts[ss] || 0) + 1;
       if (ssd > (syncDates[ss] || "")) syncDates[ss] = ssd;
     }
   }
   $("sheet-sub").textContent = "Every version in this selection, by the exact word in the versions sheet's " +
     "_status column, so you can filter the sheet on it. “Latest” is the most recent day any of them reached that status. " +
-    "On the right, the converted versions by _sync_status.";
+    "On the right, the converted and PDF-only versions by _sync_status.";
   $("c-sheet").replaceChildren(el("h3", {}, "_status"), statusTable(SHEET_STATUS, counts, dates, "Status"));
   $("c-sync").replaceChildren(el("h3", {}, "_sync_status"),
     statusTable([["", SYNC_STATUS]], syncCounts, syncDates, "Sync status"),
@@ -669,7 +680,7 @@ function renderFamilies(slice) {
   const getters = {
     name: r => r.f.name, bu: r => r.f.bu, products: r => r.f.inScope, selected: r => r.s.selected,
     done: r => pct(r.s.done, r.s.selected) * 1e6 + r.s.selected, published: r => r.s.published,
-    blocked: r => r.s.blocked, pending: r => r.s.pending, last: r => r.last,
+    pdf: r => r.s.pdf, blocked: r => r.s.blocked, pending: r => r.s.pending, last: r => r.last,
   };
   rows.sort((a, b) => {
     const g = getters[famSort.key], va = g(a), vb = g(b);
@@ -686,7 +697,7 @@ function renderFamilies(slice) {
   const cols = [
     ["name", "Family", true], ["bu", "Business unit", true], ["products", "Products", false],
     ["selected", "Versions selected", false], ["bar", "Progress", true], ["done", "Converted", false],
-    ["published", "Synced", false], ["blocked", "Blocked", false], ["pending", "Not yet converted", false],
+    ["published", "Synced", false], ["pdf", "PDF only", false], ["blocked", "Blocked", false], ["pending", "Not yet converted", false],
     ["last", "Last activity", false],
   ];
   const thead = el("tr");
@@ -711,10 +722,11 @@ function renderFamilies(slice) {
     tr.append(el("td", { class: "l" }, r.f.name), el("td", { class: "l muted" }, r.f.bu),
       el("td", {}, fmt(r.f.inScope)), el("td", {}, fmt(r.s.selected)));
     const bar = el("td", { class: "bar" });
-    bar.append(stackBar([r.s.published, r.s.converted, r.s.blocked, r.s.pending], "thin", r.f.name));
+    bar.append(stackBar(vec(r.s), "thin", r.f.name));
     tr.append(bar,
       el("td", {}, r.s.done ? `${fmt(r.s.done)} (${pctTxt(r.s.done, r.s.selected)})` : el("span", { class: "muted" }, "0")),
       el("td", {}, r.s.published ? fmt(r.s.published) : el("span", { class: "muted" }, "0")),
+      el("td", {}, r.s.pdf ? fmt(r.s.pdf) : el("span", { class: "muted" }, "0")),
       el("td", {}, r.s.blocked ? fmt(r.s.blocked) : el("span", { class: "muted" }, "0")),
       el("td", {}, fmt(r.s.pending)),
       el("td", { style: "white-space:nowrap" }, r.last ? DATE(r.last) : el("span", { class: "muted" }, "–")));
@@ -724,7 +736,7 @@ function renderFamilies(slice) {
     el("td", { class: "l" }, "Total"), el("td", {}), el("td", {}, fmt(rows.reduce((a, r) => a + r.f.inScope, 0))),
     el("td", {}, fmt(tot.selected)), el("td", {}),
     el("td", {}, `${fmt(tot.done)} (${pctTxt(tot.done, tot.selected)})`), el("td", {}, fmt(tot.published)),
-    el("td", {}, fmt(tot.blocked)), el("td", {}, fmt(tot.pending)),
+    el("td", {}, fmt(tot.pdf)), el("td", {}, fmt(tot.blocked)), el("td", {}, fmt(tot.pending)),
     el("td", {}, (l => l ? DATE(l) : "–")(latest(slice.flatMap(r => [r[4], r[6]]))))));
   $("c-fam").replaceChildren(rows.length
     ? el("table", {}, el("thead", {}, thead), tbody, tfoot)
@@ -848,7 +860,7 @@ const BLOCK_TEXT = {
                      "Someone with docsite access downloads the package by hand; the tool can take it in directly."],
   blocked_failed:   ["Failed during processing", "A step after the download failed on its last attempt.",
                      "Read the run report for the error, fix the cause, and re-run that step."],
-  blocked_format:   ["Format not recognised", "The package downloaded, but its help format is not one the tool knows how to read.",
+  blocked_format:   ["Format not recognised", "The package holds HTML help in a format the tool does not know how to read.",
                      "Look at the package and decide: teach the tool the format, or leave these versions out."],
 };
 function renderBlocked() {

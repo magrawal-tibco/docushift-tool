@@ -187,6 +187,56 @@ def test_a_build_with_no_event_is_dated_by_the_run_that_built_it(catalog: Catalo
     assert _status(catalog).status_date == "2026-09-12"
 
 
+def _inventory(catalog: CatalogManager, *rows: tuple[str, int]) -> None:
+    catalog.state.record_asset_inventory(
+        "ems", "10.4.0", [("", category, "output-root", files, files * 100) for category, files in rows]
+    )
+
+
+def test_a_package_of_only_pdfs_is_pdf_only_not_format_unknown(catalog: CatalogManager) -> None:
+    """Phase 39: no HTML help means nothing to convert, which is not being stuck."""
+    catalog.state.set_version_state("ems", "10.4.0", download_path="a.zip", extract_path="tree")
+    catalog.get_version("ems", "10.4.0").engine = SourceEngine.AUTO
+    _inventory(catalog, ("document", 3), ("other", 2))
+
+    assert _status(catalog).status == "pdf-only"
+
+
+def test_html_the_tool_cannot_convert_is_still_format_unknown(catalog: CatalogManager) -> None:
+    catalog.state.set_version_state("ems", "10.4.0", download_path="a.zip", extract_path="tree")
+    catalog.get_version("ems", "10.4.0").engine = SourceEngine.DOXIA
+    _inventory(catalog, ("topic", 141), ("document", 2))
+
+    assert _status(catalog).status == "format-unknown"
+
+
+def test_a_pdf_only_version_is_synced_by_its_documents_and_dated_against_extract(
+    catalog: CatalogManager, clock
+) -> None:
+    state = catalog.state
+    state.set_version_state("ems", "10.4.0", download_path="a.zip", extract_path="tree")
+    catalog.get_version("ems", "10.4.0").engine = SourceEngine.AUTO
+    _inventory(catalog, ("document", 3))
+    clock.today = 1
+    state.record_stage("ems", "10.4.0", "extract", True)
+    clock.today = 2
+    state.record_stage("ems", "10.4.0", "sync-docs", True, "D:/target")
+    assert (_status(catalog).sync_status, _status(catalog).sync_date) == ("synced", "2026-10-02")
+
+    clock.today = 3
+    state.record_stage("ems", "10.4.0", "extract", True)  # new PDFs since the placement
+    assert _status(catalog).sync_status == "out-of-date"
+
+
+def test_a_converted_version_is_not_synced_by_its_documents_alone(catalog: CatalogManager, clock) -> None:
+    state = catalog.state
+    state.set_version_state("ems", "10.4.0", download_path="a.zip", extract_path="tree")
+    state.record_output_map("ems", "10.4.0", [("a.htm", "a.md", "guide")])
+    state.record_stage("ems", "10.4.0", "sync-docs", True, "D:/target")
+
+    assert _status(catalog).sync_status == ""
+
+
 # -- _sync_status ---------------------------------------------------------------
 
 
@@ -230,7 +280,9 @@ def test_sync_records_a_placement_only_for_the_converted_help(catalog: CatalogMa
 
     documents = SyncResult("ems", "10.4.0", SyncOutcome.SYNCED, doc_class="user-guides")
     distributor._date(product, version, target, [documents])
-    assert catalog.state.stage_events() == {}
+    recorded = catalog.state.stage_events()[("ems", "10.4.0")]
+    assert ("sync", "ok") not in recorded  # the help was not placed
+    assert ("sync-docs", "ok") in recorded  # Phase 39: what a PDF-only version reads
 
     distributor._date(product, version, target, [SyncResult("ems", "10.4.0", SyncOutcome.CURRENT)])
     clock.today = 2

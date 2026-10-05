@@ -97,10 +97,11 @@ class StatusEvidence:
     progress: dict = field(default_factory=dict)
     events: dict = field(default_factory=dict)
     run_dates: dict = field(default_factory=dict)
+    content: dict = field(default_factory=dict)
 
     @classmethod
     def read(cls, state) -> "StatusEvidence":
-        return cls(state.progress(), state.stage_events(), state.run_dates())
+        return cls(state.progress(), state.stage_events(), state.run_dates(), state.content_kinds())
 
 
 def gate(product, version) -> str | None:
@@ -146,20 +147,28 @@ def version_status(product, version, evidence: StatusEvidence) -> VersionStatus:
     key = (product.slug, version.version)
     events: Events = evidence.events.get(key, {})
     runs: dict[str, str] = evidence.run_dates.get(key, {})
-    sync_status, sync_date = _sync(events, runs)
+    recorded = evidence.progress.get(key) or {}
+    topics, documents = evidence.content.get(key, (0, 0))
+    # Phase 39: unpacked, nothing the tool converts, and nothing but documents in the
+    # package. Not stuck -- there is no HTML help to convert.
+    pdf_only = (
+        bool(recorded.get("extracted")) and not recorded.get("converted")
+        and version.engine not in CONVERTIBLE_ENGINES and not topics and documents > 0
+    )
+    sync_status, sync_date = _sync(events, runs, pdf_only)
 
     blocked = gate(product, version)
     if blocked:
         return VersionStatus(blocked, "", sync_status, sync_date)
 
-    recorded = evidence.progress.get(key) or {}
     if recorded.get("converted") and version.reframed_md_files is not None:
         furthest, status = "reframe", "merged"
     elif recorded.get("converted"):
         furthest, status = "convert", "converted"
     elif recorded.get("extracted"):
         furthest = "extract"
-        status = "extracted" if version.engine in CONVERTIBLE_ENGINES else "format-unknown"
+        status = ("extracted" if version.engine in CONVERTIBLE_ENGINES
+                  else "pdf-only" if pdf_only else "format-unknown")
     elif recorded.get("downloaded"):
         furthest, status = "download", "downloaded"
     else:
@@ -176,21 +185,29 @@ def version_status(product, version, evidence: StatusEvidence) -> VersionStatus:
         # Recorded before `stage_event` existed: `version_state` holds the error but
         # not its stage, so the stage is the one after the furthest evidence.
         legacy = {None: "download", "download": "extract", "extract": "convert"}.get(furthest)
-        if legacy and not (legacy == "convert" and status == "format-unknown"):
+        if legacy and not (legacy == "convert" and status in ("format-unknown", "pdf-only")):
             status, date = _FAILED[legacy], recorded.get("updated_at")
 
     return VersionStatus(status, _day(date), sync_status, sync_date)
 
 
-def _sync(events: Events, runs: dict[str, str]) -> tuple[str, str]:
-    """`_sync_status` and `_sync_date`: this tool's own placements, never the target."""
+def _sync(events: Events, runs: dict[str, str], pdf_only: bool = False) -> tuple[str, str]:
+    """`_sync_status` and `_sync_date`: this tool's own placements, never the target.
+
+    A converted version is placed when its help is (`sync`); a PDF-only one when its
+    documents are (`sync-docs`, Phase 39), and is rebuilt by a re-extract rather than
+    a re-convert, because that is where its PDFs come from.
+    """
     failed_at = _current_failure(events, "sync")
     if failed_at:
         return "sync-failed", _day(failed_at)
-    placed = events.get(("sync", "ok"))
+    placed = events.get(("sync-docs" if pdf_only else "sync", "ok"))
     if not placed:
         return "", ""
-    rebuilt = max(_built(events, runs, "convert"), _built(events, runs, "reframe"))
+    if pdf_only:
+        rebuilt = _built(events, runs, "extract")
+    else:
+        rebuilt = max(_built(events, runs, "convert"), _built(events, runs, "reframe"))
     return ("out-of-date" if rebuilt > placed[0] else "synced"), _day(placed[0])
 
 
