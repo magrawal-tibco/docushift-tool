@@ -18,6 +18,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 BU_NAMES = {"tibco": "TIBCO", "ibi": "IBI", "spotfire": "Spotfire", "datasynapse": "DataSynapse", "onebx": "EBX"}
+CONVERTIBLE = {"flare", "webworks", "docbook", "dita"}  # models.CONVERTIBLE_ENGINES
 ENGINE_NAMES = {"flare": "MadCap Flare", "webworks": "WebWorks", "docbook": "DocBook", "dita": "DITA (SuiteHelp)"}
 
 
@@ -110,8 +111,12 @@ def build(target: Path | None) -> dict:
                 stage = "published"
             elif rec.get("c"):
                 stage = "converted"
-            elif rec.get("x"):
+            elif rec.get("x") and v["engine"] not in CONVERTIBLE:
+                # Unpacked, and the detector found no engine it can convert. An
+                # unpacked version with a convertible engine is only waiting for `convert`.
                 stage = "blocked_format"
+            elif rec.get("x"):
+                stage = "in_progress"
             elif rec.get("e") and not rec.get("d"):
                 stage = "blocked_download"
             elif rec.get("d"):
