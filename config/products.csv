@@ -5,29 +5,30 @@ tibco-datasynapse-gridserver-manager,dsp-gridserver,TIBCO DataSynapse GridServer
 tibco-datasynapse-high-performance-computing-cloud-adapter,ds-highperf-comp-cloud,TIBCO DataSynapse™ High-Performance Computing Cloud Adapter,datasynapse,datasynapse,manual,DataSynapse,GridServer grid computing and HPC workload management,4,,false,manual,false
 ibi-webfocus-container-edition,wfce,ibi™ WebFOCUS® - Container Edition,ibi,container-editions,manual,Container Editions,Containerized packagings of WebFOCUS products,2,container-editions,true,default,false
 ibi-webfocus-dsml-services-container-edition,dsmlce,ibi™ WebFOCUS® DSML Services - Container Edition,ibi,container-editions,manual,Container Editions,Containerized packagings of WebFOCUS products,2,container-editions,true,default,false
-ibi-iway-service-manager,sm,ibi™ iWay® Service Manager,ibi,data_management,taxonomy_rule,Data Management & Quality,Omni-Gen and iWay data quality solutions,11,data_management,true,default,false
-ibi-iway-service-manager-edi-add-on,sm-edi,ibi™ iWay® Service Manager EDI Add-on,ibi,data_management,taxonomy_rule,Data Management & Quality,Omni-Gen and iWay data quality solutions,11,data_management,true,default,false
-ibi-omni-gen,og,ibi™ Omni-Gen®,ibi,data_management,taxonomy_rule,Data Management & Quality,Omni-Gen and iWay data quality solutions,11,data_management,true,default,false
-ibi-omni-gen-mdm,og-mdm,ibi™ Omni-Gen® MDM,ibi,data_management,taxonomy_rule,Data Management & Quality,Omni-Gen and iWay data quality solutions,11,data_management,true,default,false
-ibi-omni-healthdata,ohd,ibi™ Omni-HealthData®,ibi,data_management,taxonomy_rule,Data Management & Quality,Omni-Gen and iWay data quality solutions,11,data_management,true,default,false
-ibi-omni-healthdata-business-release,ohd-br,ibi™ Omni-HealthData® Business Release,ibi,data_management,taxonomy_rule,Data Management & Quality,Omni-Gen and iWay data quality solutions,11,data_management,true,default,false
-tibco-iway-business-activity-monitor,sm-bam,TIBCO iWay® Business Activity Monitor,ibi,data_management,taxonomy_rule,Data Management & Quality,Omni-Gen and iWay data quality solutions,11,data_management,true,default,false
-tibco-iway-trading-partner-manager,sm-tpm,TIBCO iWay® Trading Partner Manager,ibi,data_management,taxonomy_rule,Data Management & Quality,Omni-Gen and iWay data quality solutions,11,data_management,true,default,false
-tibco-omni-healthdata-cohort-builder,ohcb,TIBCO Omni-HealthData® Cohort Builder,ibi,data_management,taxonomy_rule,Data Management & Quality,Omni-Gen and iWay data quality solutions,11,data_management,true,default,false
-tibco-omni-healthdata-healthviews,ohhv,TIBCO Omni-HealthData® Healthviews,ibi,data_management,taxonomy_rule,Data Management & Quality,Omni-Gen and iWay data quality solutions,11,data_management,true,default,false
-tibco-omni-healthdata-reference-data,ohrd,TIBCO Omni-HealthData® Reference Data,ibi,data_management,taxonomy_rule,Data Management & Quality,Omni-Gen and iWay data quality solutions,11,data_management,true,default,false
-ibi-ai-assistant,ibiai,ibi™ AI Assistant,ibi,general,taxonomy_rule,General,Not yet triaged into a family,7,general,true,default,false
-ibi-data-intelligence,ibi-di,ibi™ Data Intelligence,ibi,general,taxonomy_rule,General,Not yet triaged into a family,7,general,true,default,false
-ibi-data-quality,tdq,ibi™ Data Quality,ibi,general,taxonomy_rule,General,Not yet triaged into a family,7,general,true,default,false
-ibi-focus,focus,ibi™ FOCUS®,ibi,general,taxonomy_rule,General,Not yet triaged into a family,7,general,true,default,false
-ibi-omni-insurance,oin,ibi Omni-Insurance™,ibi,general,taxonomy_rule,General,Not yet triaged into a family,7,general,true,default,false
-ibi-open-data-hub-for-mainframe-connectors,odh-mf-cnct,ibi™ Open Data Hub for Mainframe Connectors,ibi,general,taxonomy_rule,General,Not yet triaged into a family,7,general,true,default,false
-ibi-web-query-for-ibm-i,wq,ibi™ Web Query for IBM i,ibi,general,taxonomy_rule,General,Not yet triaged into a family,7,general,true,default,false
-ibi-webfocus-client,wf-wf,ibi™ WebFOCUS® Client,ibi,webfocus,taxonomy_rule,WebFOCUS,Business intelligence and enterprise reporting,2,webfocus,true,default,false
-ibi-webfocus-installer,wf-wi,ibi™ WebFOCUS® Installer,ibi,webfocus,taxonomy_rule,WebFOCUS,Business intelligence and enterprise reporting,2,webfocus,true,default,false
-ibi-webfocus-app-studio,wf-as,ibi™ WebFOCUS® App Studio,ibi,webfocus-app-studio,manual,WebFOCUS App Studio,Windows development environment for WebFOCUS content,1,webfocus-app-studio,true,default,false
-ibi-webfocus-dsml-services,dsml,ibi™ WebFOCUS® DSML Services,ibi,webfocus-dsml-services,manual,WebFOCUS DSML Services,Data science and machine learning services for WebFOCUS,1,webfocus-dsml-services,true,default,false
-ibi-webfocus-reporting-server,wf-rs,ibi™ WebFOCUS® Reporting Server,ibi,webfocus-reporting-server,manual,WebFOCUS Reporting Server,"Data adapters, server administration, and report execution",1,webfocus-reporting-server,true,default,false
+ibi-data-intelligence,ibi-di,ibi™ Data Intelligence,ibi,di-ism,manual,Data Intelligence & iWay Service Manager,"ibi Data Intelligence, Data Quality, iWay Service Manager, and its EDI Add-on",4,di-ism,true,default,false
+ibi-data-quality,tdq,ibi™ Data Quality,ibi,di-ism,manual,Data Intelligence & iWay Service Manager,"ibi Data Intelligence, Data Quality, iWay Service Manager, and its EDI Add-on",4,di-ism,true,default,false
+ibi-iway-service-manager,sm,ibi™ iWay® Service Manager,ibi,di-ism,manual,Data Intelligence & iWay Service Manager,"ibi Data Intelligence, Data Quality, iWay Service Manager, and its EDI Add-on",4,di-ism,true,default,false
+ibi-iway-service-manager-edi-add-on,sm-edi,ibi™ iWay® Service Manager EDI Add-on,ibi,di-ism,manual,Data Intelligence & iWay Service Manager,"ibi Data Intelligence, Data Quality, iWay Service Manager, and its EDI Add-on",4,di-ism,true,default,false
+ibi-focus,focus,ibi™ FOCUS®,ibi,focus,manual,FOCUS,The FOCUS 4GL reporting and application environment,1,focus,true,default,false
+ibi-omni-gen,og,ibi™ Omni-Gen®,ibi,legacy,manual,Legacy,"Omni-Gen, Omni-HealthData, Omni-Insurance, iWay BAM and Trading Partner Manager, and Web Query for IBM i",12,legacy,true,default,false
+ibi-omni-gen-mdm,og-mdm,ibi™ Omni-Gen® MDM,ibi,legacy,manual,Legacy,"Omni-Gen, Omni-HealthData, Omni-Insurance, iWay BAM and Trading Partner Manager, and Web Query for IBM i",12,legacy,true,default,false
+ibi-omni-healthdata,ohd,ibi™ Omni-HealthData®,ibi,legacy,manual,Legacy,"Omni-Gen, Omni-HealthData, Omni-Insurance, iWay BAM and Trading Partner Manager, and Web Query for IBM i",12,legacy,true,default,false
+ibi-omni-healthdata-business-release,ohd-br,ibi™ Omni-HealthData® Business Release,ibi,legacy,manual,Legacy,"Omni-Gen, Omni-HealthData, Omni-Insurance, iWay BAM and Trading Partner Manager, and Web Query for IBM i",12,legacy,true,default,false
+ibi-omni-insurance,oin,ibi Omni-Insurance™,ibi,legacy,manual,Legacy,"Omni-Gen, Omni-HealthData, Omni-Insurance, iWay BAM and Trading Partner Manager, and Web Query for IBM i",12,legacy,true,default,false
+ibi-web-query-for-ibm-i,wq,ibi™ Web Query for IBM i,ibi,legacy,manual,Legacy,"Omni-Gen, Omni-HealthData, Omni-Insurance, iWay BAM and Trading Partner Manager, and Web Query for IBM i",12,legacy,true,default,false
+tibco-iway-business-activity-monitor,sm-bam,TIBCO iWay® Business Activity Monitor,ibi,legacy,manual,Legacy,"Omni-Gen, Omni-HealthData, Omni-Insurance, iWay BAM and Trading Partner Manager, and Web Query for IBM i",12,legacy,true,default,false
+tibco-iway-trading-partner-manager,sm-tpm,TIBCO iWay® Trading Partner Manager,ibi,legacy,manual,Legacy,"Omni-Gen, Omni-HealthData, Omni-Insurance, iWay BAM and Trading Partner Manager, and Web Query for IBM i",12,legacy,true,default,false
+tibco-omni-healthdata-cohort-builder,ohcb,TIBCO Omni-HealthData® Cohort Builder,ibi,legacy,manual,Legacy,"Omni-Gen, Omni-HealthData, Omni-Insurance, iWay BAM and Trading Partner Manager, and Web Query for IBM i",12,legacy,true,default,false
+tibco-omni-healthdata-healthviews,ohhv,TIBCO Omni-HealthData® Healthviews,ibi,legacy,manual,Legacy,"Omni-Gen, Omni-HealthData, Omni-Insurance, iWay BAM and Trading Partner Manager, and Web Query for IBM i",12,legacy,true,default,false
+tibco-omni-healthdata-reference-data,ohrd,TIBCO Omni-HealthData® Reference Data,ibi,legacy,manual,Legacy,"Omni-Gen, Omni-HealthData, Omni-Insurance, iWay BAM and Trading Partner Manager, and Web Query for IBM i",12,legacy,true,default,false
+tibco-omni-insurance-business-release,oin-br,TIBCO Omni-Insurance™ Business Release,ibi,legacy,manual,Legacy,"Omni-Gen, Omni-HealthData, Omni-Insurance, iWay BAM and Trading Partner Manager, and Web Query for IBM i",12,legacy,true,default,false
+ibi-ai-assistant,ibiai,ibi™ AI Assistant,ibi,webfocus,manual,WebFOCUS,Business intelligence and enterprise reporting,6,webfocus,true,default,false
+ibi-open-data-hub-for-mainframe-connectors,odh-mf-cnct,ibi™ Open Data Hub for Mainframe Connectors,ibi,webfocus,manual,WebFOCUS,Business intelligence and enterprise reporting,6,webfocus,true,default,false
+ibi-webfocus-app-studio,wf-as,ibi™ WebFOCUS® App Studio,ibi,webfocus,manual,WebFOCUS,Business intelligence and enterprise reporting,6,webfocus,true,default,false
+ibi-webfocus-client,wf-wf,ibi™ WebFOCUS® Client,ibi,webfocus,taxonomy_rule,WebFOCUS,Business intelligence and enterprise reporting,6,webfocus,true,default,false
+ibi-webfocus-dsml-services,dsml,ibi™ WebFOCUS® DSML Services,ibi,webfocus,manual,WebFOCUS,Business intelligence and enterprise reporting,6,webfocus,true,default,false
+ibi-webfocus-installer,wf-wi,ibi™ WebFOCUS® Installer,ibi,webfocus,taxonomy_rule,WebFOCUS,Business intelligence and enterprise reporting,6,webfocus,true,default,false
+ibi-webfocus-reporting-server,wf-rs,ibi™ WebFOCUS® Reporting Server,ibi,wf-reporting-server,manual,WebFOCUS Reporting Server,"Data adapters, server administration, and report execution",1,wf-reporting-server,true,default,false
 tibco-cloud-ebx,cloudebx,TIBCO Cloud™ EBX®,onebx,data_management,manual,Data Management,"EBX master data management, on-premises and cloud",4,data_management,false,scope_rule,false
 tibco-ebx,ebx,TIBCO EBX™,onebx,data_management,manual,Data Management,"EBX master data management, on-premises and cloud",4,data_management,false,scope_rule,false
 tibco-ebx-add-ons,ebx-addon,TIBCO EBX™ Add-ons,onebx,data_management,manual,Data Management,"EBX master data management, on-premises and cloud",4,data_management,false,scope_rule,false
@@ -312,7 +313,7 @@ tibco-cloud-api-modeler,tcam,TIBCO Cloud™ API Modeler,tibco,cloud,manual,TIBCO
 tibco-cloud-bus,cloud-bus,TIBCO Cloud Bus™,tibco,cloud,manual,TIBCO Cloud,"TIBCO Cloud services: API Modeler, Bus, Events, Messaging, Metadata, Passport",11,cloud,true,default,false
 tibco-cloud-data-streams,cloud-data-streams,TIBCO Cloud™ Data Streams,tibco,cloud,manual,TIBCO Cloud,"TIBCO Cloud services: API Modeler, Bus, Events, Messaging, Metadata, Passport",11,cloud,true,default,false
 tibco-cloud-events,cloud-events,TIBCO Cloud™ Events,tibco,cloud,manual,TIBCO Cloud,"TIBCO Cloud services: API Modeler, Bus, Events, Messaging, Metadata, Passport",11,cloud,true,manual,false
-tibco-cloud-integration-for-salesforce,tcisf,TIBCO Cloud™ Integration for Salesforce,tibco,cloud,manual,TIBCO Cloud,"TIBCO Cloud services: API Modeler, Bus, Events, Messaging, Metadata, Passport",11,cloud,true,default,false
+tibco-cloud-integration-for-salesforce,tcisf,TIBCO Cloud™ Integration for Salesforce,tibco,cloud,manual,TIBCO Cloud,"TIBCO Cloud services: API Modeler, Bus, Events, Messaging, Metadata, Passport",11,cloud,false,manual,false
 tibco-cloud-integration-ipaas,cloud-integration-ipaas,TIBCO® Cloud Integration (iPaaS),tibco,cloud,manual,TIBCO Cloud,"TIBCO Cloud services: API Modeler, Bus, Events, Messaging, Metadata, Passport",11,cloud,true,default,false
 tibco-cloud-messaging,cloud-messaging,TIBCO Cloud™ Messaging,tibco,cloud,manual,TIBCO Cloud,"TIBCO Cloud services: API Modeler, Bus, Events, Messaging, Metadata, Passport",11,cloud,true,default,false
 tibco-cloud-metadata,cloud-metadata,TIBCO Cloud™ Metadata,tibco,cloud,manual,TIBCO Cloud,"TIBCO Cloud services: API Modeler, Bus, Events, Messaging, Metadata, Passport",11,cloud,true,default,false
@@ -442,48 +443,47 @@ tibco-product-and-service-catalog,cim-ac,TIBCO® Product and Service Catalog,tib
 tibco-product-and-service-catalog-powered-by-tibco-ebx,psc-ebx,TIBCO® Product and Service Catalog powered by TIBCO EBX®,tibco,fulfillment,manual,Fulfillment,"Order management, fulfillment orchestration, and provisioning",27,onebx/data_management,true,default,false
 tibco-product-and-service-inventory,fsi,TIBCO® Product and Service Inventory,tibco,fulfillment,manual,Fulfillment,"Order management, fulfillment orchestration, and provisioning",27,,true,default,false
 tibco-product-and-service-inventory-2-1-0,fsi,TIBCO® Product and Service Inventory 2.1.0,tibco,fulfillment,manual,Fulfillment,"Order management, fulfillment orchestration, and provisioning",27,,true,default,false
-"tibbr,-tibbr-service,-tibbr-community,-and-tibbrcommunity-service",tibbr,"tibbr®, tibbr® Service, tibbr® Community, and tibbr®Community Service",tibco,general,unclassified,General,Not yet triaged into a family,42,,true,default,false
-tibbr-for-ios,tibbr-for-ios,tibbr® for iOS,tibco,general,unclassified,General,Not yet triaged into a family,42,,true,default,false
-tibbr-for-microsoft-outlook,tibbr-for-microsoft-outlook,tibbr® for Microsoft Outlook,tibco,general,unclassified,General,Not yet triaged into a family,42,,true,default,false
-tibbr-for-microsoft-sharepoint,tibbr-for-microsoft-sharepoint,tibbr® for Microsoft SharePoint,tibco,general,unclassified,General,Not yet triaged into a family,42,,true,default,false
-tibbr-for-salesforce-com-app,tibbr-for-salesforce-com-app,tibbr® for Salesforce.com App,tibco,general,unclassified,General,Not yet triaged into a family,42,,true,default,false
-tibbr-ideas,tibbr-ideas,tibbr® Ideas,tibco,general,unclassified,General,Not yet triaged into a family,42,,true,default,false
-tibbr-pages,tibbr-pages,tibbr® Pages,tibco,general,unclassified,General,Not yet triaged into a family,42,,true,default,false
-tibbr-tasks,tibbr-tasks,tibbr® Tasks,tibco,general,unclassified,General,Not yet triaged into a family,42,,true,default,false
-tibco-activation-service,tibco-activation,TIBCO® Activation Service,tibco,general,unclassified,General,Not yet triaged into a family,42,,true,default,false
-tibco-analytics,sfire-analyst-suite,TIBCO® Analytics,tibco,general,unclassified,General,Not yet triaged into a family,42,,true,default,false
-tibco-analytics-business-author-add-on,sfire-bauthor-suite,TIBCO® Analytics - Business Author Add-on,tibco,general,unclassified,General,Not yet triaged into a family,42,,true,default,false
-tibco-analytics-consumer-add-on,sfire-consumer-suite,TIBCO® Analytics - Consumer Add-on,tibco,general,unclassified,General,Not yet triaged into a family,42,,true,default,false
-tibco-clarity,clarity-dt,TIBCO® Clarity,tibco,general,unclassified,General,Not yet triaged into a family,42,,true,default,false
-tibco-clarity-cloud-edition,clarity,TIBCO® Clarity - Cloud Edition,tibco,general,unclassified,General,Not yet triaged into a family,42,,true,default,false
-tibco-clarity-enterprise-edition,clarity-dt,TIBCO® Clarity - Enterprise Edition,tibco,general,unclassified,General,Not yet triaged into a family,42,,true,default,false
-tibco-computedb-enterprise-edition,compute,TIBCO ComputeDB™ - Enterprise Edition,tibco,general,unclassified,General,Not yet triaged into a family,42,,true,default,false
-tibco-configuration-tool,cofiguration-tool,TIBCO Configuration Tool,tibco,general,unclassified,General,Not yet triaged into a family,42,,true,default,false
-tibco-dq-service-provider-dqs-add-on,tdqsp,TIBCO® DQ Service Provider - DQS Add-on,tibco,general,unclassified,General,Not yet triaged into a family,42,,true,default,false
-tibco-enterprise-administrator,tea,TIBCO® Enterprise Administrator,tibco,general,unclassified,General,Not yet triaged into a family,42,,true,default,false
-tibco-enterprise-administrator-sdk,tea-sdk,TIBCO® Enterprise Administrator SDK,tibco,general,unclassified,General,Not yet triaged into a family,42,,true,default,false
-tibco-general-interface-enterprise-edition,general-interface-enterprise-edition,TIBCO® General Interface - Enterprise Edition,tibco,general,unclassified,General,Not yet triaged into a family,42,,true,default,false
-tibco-geoanalytics,geo,TIBCO GeoAnalytics,tibco,general,unclassified,General,Not yet triaged into a family,42,,true,default,false
-tibco-geoanalytics-builder,geo-build,TIBCO GeoAnalytics Builder,tibco,general,unclassified,General,Not yet triaged into a family,42,,true,default,false
-tibco-graph-database-community-edition,tgdb-ce,TIBCO® Graph Database - Community Edition,tibco,general,unclassified,General,Not yet triaged into a family,42,,true,default,false
-tibco-graph-database-enterprise-edition,tgdb,TIBCO® Graph Database - Enterprise Edition,tibco,general,unclassified,General,Not yet triaged into a family,42,,true,default,false
-tibco-health-essentials-cloud,health-essentials-cloud,TIBCO® Health Essentials Cloud,tibco,general,unclassified,General,Not yet triaged into a family,42,,true,default,false
-tibco-kabira-adapter-factory-for-java,kabira-jaf,TIBCO Kabira® Adapter Factory for JAVA,tibco,general,unclassified,General,Not yet triaged into a family,42,,true,default,false
-tibco-kabira-adapter-factory-for-persistence,kabira-paf,TIBCO Kabira® Adapter Factory for Persistence,tibco,general,unclassified,General,Not yet triaged into a family,42,,true,default,false
-tibco-kabira-adapter-factory-for-snmp,kabira-snmpaf,TIBCO Kabira® Adapter Factory for SNMP,tibco,general,unclassified,General,Not yet triaged into a family,42,,true,default,false
-tibco-kabira-builder,kab-p-builder,TIBCO Kabira® Builder,tibco,general,unclassified,General,Not yet triaged into a family,42,,true,default,false
-tibco-live-datamart,sb-lv,TIBCO® Live Datamart,tibco,general,unclassified,General,Not yet triaged into a family,42,,true,default,false
-tibco-live-datamart-standard-edition,sb-lv-std,TIBCO® Live Datamart Standard Edition,tibco,general,unclassified,General,Not yet triaged into a family,42,,true,default,false
-tibco-loglogic,loglmi,TIBCO LogLogic®,tibco,general,unclassified,General,Not yet triaged into a family,42,,true,default,false
-tibco-loglogic-compliance-manager,loglogic-compliance-manager,TIBCO LogLogic® Compliance Manager,tibco,general,unclassified,General,Not yet triaged into a family,42,,true,default,false
-tibco-microflow-container-edition,microflow-container-edition,TIBCO Microflow™ Container Edition,tibco,general,unclassified,General,Not yet triaged into a family,42,,true,default,false
-tibco-omni-insurance-business-release,oin-br,TIBCO Omni-Insurance™ Business Release,tibco,general,unclassified,General,Not yet triaged into a family,42,,true,default,false
-tibco-orchestra-networks,orchestra-networks,TIBCO® Orchestra Networks,tibco,general,unclassified,General,Not yet triaged into a family,42,,true,default,false
-tibco-patterns,tps,TIBCO® Patterns,tibco,general,unclassified,General,Not yet triaged into a family,42,,true,default,false
-tibco-service-gateway-for-files,service-gateway-for-files,TIBCO Service Gateway™ for Files,tibco,general,unclassified,General,Not yet triaged into a family,42,,false,manual,false
-tibco-silver-fabric-enabler-for-spotfire-web-player,silver-fabric-spotfire,TIBCO Silver® Fabric Enabler for Spotfire® Web Player,tibco,general,taxonomy_rule,General,Not yet triaged into a family,42,spotfire/analytics,false,scope_rule,false
-tibco-slingshot,slingshot,TIBCO Slingshot™,tibco,general,unclassified,General,Not yet triaged into a family,42,,true,default,false
-tibco-vault,vault,TIBCO® Vault,tibco,general,unclassified,General,Not yet triaged into a family,42,,true,default,false
+"tibbr,-tibbr-service,-tibbr-community,-and-tibbrcommunity-service",tibbr,"tibbr®, tibbr® Service, tibbr® Community, and tibbr®Community Service",tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibbr-for-ios,tibbr-for-ios,tibbr® for iOS,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibbr-for-microsoft-outlook,tibbr-for-microsoft-outlook,tibbr® for Microsoft Outlook,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibbr-for-microsoft-sharepoint,tibbr-for-microsoft-sharepoint,tibbr® for Microsoft SharePoint,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibbr-for-salesforce-com-app,tibbr-for-salesforce-com-app,tibbr® for Salesforce.com App,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibbr-ideas,tibbr-ideas,tibbr® Ideas,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibbr-pages,tibbr-pages,tibbr® Pages,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibbr-tasks,tibbr-tasks,tibbr® Tasks,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibco-activation-service,tibco-activation,TIBCO® Activation Service,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibco-analytics,sfire-analyst-suite,TIBCO® Analytics,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibco-analytics-business-author-add-on,sfire-bauthor-suite,TIBCO® Analytics - Business Author Add-on,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibco-analytics-consumer-add-on,sfire-consumer-suite,TIBCO® Analytics - Consumer Add-on,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibco-clarity,clarity-dt,TIBCO® Clarity,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibco-clarity-cloud-edition,clarity,TIBCO® Clarity - Cloud Edition,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibco-clarity-enterprise-edition,clarity-dt,TIBCO® Clarity - Enterprise Edition,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibco-computedb-enterprise-edition,compute,TIBCO ComputeDB™ - Enterprise Edition,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibco-configuration-tool,cofiguration-tool,TIBCO Configuration Tool,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibco-dq-service-provider-dqs-add-on,tdqsp,TIBCO® DQ Service Provider - DQS Add-on,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibco-enterprise-administrator,tea,TIBCO® Enterprise Administrator,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibco-enterprise-administrator-sdk,tea-sdk,TIBCO® Enterprise Administrator SDK,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibco-general-interface-enterprise-edition,general-interface-enterprise-edition,TIBCO® General Interface - Enterprise Edition,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibco-geoanalytics,geo,TIBCO GeoAnalytics,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibco-geoanalytics-builder,geo-build,TIBCO GeoAnalytics Builder,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibco-graph-database-community-edition,tgdb-ce,TIBCO® Graph Database - Community Edition,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibco-graph-database-enterprise-edition,tgdb,TIBCO® Graph Database - Enterprise Edition,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibco-health-essentials-cloud,health-essentials-cloud,TIBCO® Health Essentials Cloud,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibco-kabira-adapter-factory-for-java,kabira-jaf,TIBCO Kabira® Adapter Factory for JAVA,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibco-kabira-adapter-factory-for-persistence,kabira-paf,TIBCO Kabira® Adapter Factory for Persistence,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibco-kabira-adapter-factory-for-snmp,kabira-snmpaf,TIBCO Kabira® Adapter Factory for SNMP,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibco-kabira-builder,kab-p-builder,TIBCO Kabira® Builder,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibco-live-datamart,sb-lv,TIBCO® Live Datamart,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibco-live-datamart-standard-edition,sb-lv-std,TIBCO® Live Datamart Standard Edition,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibco-loglogic,loglmi,TIBCO LogLogic®,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibco-loglogic-compliance-manager,loglogic-compliance-manager,TIBCO LogLogic® Compliance Manager,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibco-microflow-container-edition,microflow-container-edition,TIBCO Microflow™ Container Edition,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibco-orchestra-networks,orchestra-networks,TIBCO® Orchestra Networks,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibco-patterns,tps,TIBCO® Patterns,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibco-service-gateway-for-files,service-gateway-for-files,TIBCO Service Gateway™ for Files,tibco,general,unclassified,General,Not yet triaged into a family,41,,false,manual,false
+tibco-silver-fabric-enabler-for-spotfire-web-player,silver-fabric-spotfire,TIBCO Silver® Fabric Enabler for Spotfire® Web Player,tibco,general,taxonomy_rule,General,Not yet triaged into a family,41,spotfire/analytics,false,scope_rule,false
+tibco-slingshot,slingshot,TIBCO Slingshot™,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibco-vault,vault,TIBCO® Vault,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
 tibco-hawk-activematrix-plug-in,hawk-activematrix-plugin,TIBCO Hawk ActiveMatrix® Plug-in,tibco,hawk,manual,Hawk,"Infrastructure monitoring agents, adapters, and plug-ins",9,,true,default,false
 tibco-hawk-container-edition,hkce,TIBCO Hawk® - Container Edition,tibco,hawk,unclassified,Hawk,"Infrastructure monitoring agents, adapters, and plug-ins",9,,true,default,false
 tibco-hawk-database-adapter,hawkdbhma,TIBCO Hawk® Database Adapter,tibco,hawk,unclassified,Hawk,"Infrastructure monitoring agents, adapters, and plug-ins",9,,true,default,false

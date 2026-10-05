@@ -181,25 +181,26 @@ business_units:
         description: "Business intelligence and enterprise reporting"
       # Split out of `webfocus` in Phase 31. Each of these ships on its own
       # release train, so publishing them through one repository made a reader
-      # of any one of them page past the other six.
-      webfocus-app-studio:
-        name: "WebFOCUS App Studio"
-        description: "Windows development environment for WebFOCUS content"
-      webfocus-dsml-services:
-        name: "WebFOCUS DSML Services"
-        description: "Data science and machine learning services for WebFOCUS"
-      webfocus-reporting-server:
+      # of any one of them page past the others. App Studio and DSML Services
+      # were folded back into `webfocus` by hand in Oct 2026.
+      wf-reporting-server:
         name: "WebFOCUS Reporting Server"
         description: "Data adapters, server administration, and report execution"
       # Grouped by packaging rather than by product: the same documentation
       # shipped for a container runtime. This deliberately separates the DSML
-      # container edition from `webfocus-dsml-services`.
+      # container edition from DSML Services in `webfocus`.
       container-editions:
         name: "Container Editions"
         description: "Containerized packagings of WebFOCUS products"
-      data_management:
-        name: "Data Management & Quality"
-        description: "Omni-Gen and iWay data quality solutions"
+      focus:
+        name: "FOCUS"
+        description: "The FOCUS 4GL reporting and application environment"
+      di-ism:
+        name: "Data Intelligence & iWay Service Manager"
+        description: "ibi Data Intelligence, Data Quality, iWay Service Manager, and its EDI Add-on"
+      legacy:
+        name: "Legacy"
+        description: "Omni-Gen, Omni-HealthData, Omni-Insurance, iWay BAM and Trading Partner Manager, and Web Query for IBM i"
       general:
         name: "General"
         description: "Not yet triaged into a family"
@@ -224,30 +225,30 @@ rules:
   - match: ["wfce", "dsmlce"]
     bu: ibi
     family: container-editions
-  # Above the `dsml` rule below: `dsmlce`'s display name contains "DSML
-  # Services" too, and the container edition is the more specific reading.
-  - match: ["wf-as", "app studio"]
-    bu: ibi
-    family: webfocus-app-studio
-  - match: ["dsml", "dsml services"]
-    bu: ibi
-    family: webfocus-dsml-services
   - match: ["wf-rs", "reporting server"]
     bu: ibi
-    family: webfocus-reporting-server
+    family: wf-reporting-server
   # The fallback it always was in practice: Client, Installer, and anything new
   # carrying the brand but none of the tokens above.
   - match: ["webfocus", "wf-wf", "wf-wi", "webfocus-client"]
     bu: ibi
     family: webfocus
+  # Below `webfocus`: every WebFOCUS display name contains "focus" too.
+  - match: ["focus"]
+    bu: ibi
+    family: focus
   # Above the mainframe rule below, which would otherwise claim it on `Mainframe
   # Connectors`; ibi owns the product regardless of what it connects to.
-  - match: ["open data hub"]
+  - match: ["open data hub", "ai assistant"]
     bu: ibi
-    family: general
-  - match: ["omni-gen", "omni-healthdata", "omni gen", "omni-healthdata", "iway", "dqm", "data quality center"]
+    family: webfocus
+  # Above `legacy`, which claims every other `iway` product.
+  - match: ["service manager", "data intelligence", "data quality", "dqm"]
     bu: ibi
-    family: data_management
+    family: di-ism
+  - match: ["omni-gen", "omni gen", "omni-healthdata", "omni-insurance", "iway", "web query for ibm i"]
+    bu: ibi
+    family: legacy
 
   # -- TIBCO messaging ----------------------------------------------------
   # Above the broad `activespaces` token in the messaging rule below, which was
