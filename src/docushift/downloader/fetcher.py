@@ -27,6 +27,7 @@ import requests
 from docushift.catalog import CatalogManager
 from docushift.config import ConfigManager
 from docushift.discovery.client import DocsiteClient
+from docushift.discovery.sitemap import SitemapCache, match_leaf
 from docushift.models import ConversionStatus, Product, ProductVersion, ZipSource
 from docushift.reporting.findings import FindingsRun
 from docushift.utils.http import Throttle, build_session
@@ -52,6 +53,16 @@ class Outcome(StrEnum):
     # Eligible, but there is nothing to fetch from.
     NO_URL = "no-url"
     FAILED = "failed"
+
+
+class NotAPackage(OSError):
+    """The URL answered, and what it answered was not this version's package.
+
+    A non-success status, or a body that is not a ZIP -- on this docsite usually a
+    200 over nothing, because the name is wrong. The one failure that says to try
+    the next candidate URL (Phase 40). A dropped connection says nothing about the
+    name, and moving on would discard a partial that could have resumed.
+    """
 
 
 @dataclass
@@ -143,11 +154,18 @@ class PackageDownloader:
         # The same builder discovery templates with, so the endpoint the downloader
         # derives and the one a fetch would record cannot drift apart.
         self._urls = DocsiteClient(config.load_docsite(), session=self.session)
+        # Phase 40: each version's published package name, read from the Coveo
+        # sitemap `catalog sitemap` cached. Read once, here, and never fetched: a
+        # product the cache does not hold keeps the template's name.
+        try:
+            self._leaves = SitemapCache(config.cache_dir / "coveo").manifest()["products"]
+        except (OSError, ValueError):
+            self._leaves = {}
 
     # -- the endpoint ---------------------------------------------------------
 
-    def resolve_url(self, product: Product, version: ProductVersion) -> str | None:
-        """Which URL to fetch this version from, and where that answer comes from.
+    def resolve_urls(self, product: Product, version: ProductVersion) -> list[tuple[str, str]]:
+        """Which URLs to try for this version, in order, each with where it came from.
 
         The stored `zip_url` is *not* the default. Every active row in the catalog
         was templated by discovery, and until 2026-09-19 discovery's template was
@@ -160,17 +178,32 @@ class PackageDownloader:
            by upstream and never templated (`crawler._version_from_record`).
         3. otherwise -- derive. See architecture.md §2.2.
 
+        An active version gets up to two candidates (Phase 40). First `sitemap`:
+        the template with the version's Coveo leaf as the filename, which is the
+        name it was published under -- 449 of 449 measured, where one is listed.
+        Then `template`: the catalog slug plus the dashed version, right for 455
+        of 496 measured and wrong for exactly the versions published before a
+        rebrand or rename. Where the two agree there is one candidate.
+
         Deriving rather than reading is what keeps the fix to zero catalog rows.
         The stale column is left where it is: the next `catalog fetch` rewrites it
         through the corrected template, and a blanked cell would be
         indistinguishable from "discovery found nothing".
         """
         if version.is_archived:
-            return version.zip_url or None
+            return [("archive", version.zip_url)] if version.zip_url else []
 
         folder = self._folder_path(product, version)
+        candidates: list[tuple[str, str]] = []
+        stem = match_leaf(self._leaves.get(product.slug, []), product.slug, version.version)
+        if stem:
+            published = self._urls.active_zip_url(folder, stem=stem)
+            if published:
+                candidates.append(("sitemap", published))
         derived = self._urls.active_zip_url(folder, product.slug, version.version)
-        return derived or None
+        if derived and all(url != derived for _, url in candidates):
+            candidates.append(("template", derived))
+        return candidates
 
     def _folder_path(self, product: Product, version: ProductVersion) -> str:
         """The docsite's `<code>/<version>` folder for this version.
@@ -252,8 +285,8 @@ class PackageDownloader:
                 size=size, checksum=recorded["checksum"],
             )
 
-        url = self.resolve_url(product, version)
-        if not url:
+        candidates = self.resolve_urls(product, version)
+        if not candidates:
             # A report line, not an abort: some products resolve under no known
             # pattern -- 7 of 35 sampled -- and `--from-file` is the answer. The
             # shape is a directory-segment problem rather than a filename one,
@@ -265,12 +298,21 @@ class PackageDownloader:
                 self.findings.record("ZIP_URL_UNRESOLVED", slug=slug, version=number, message=message)
             return DownloadResult(slug, number, Outcome.NO_URL, message=message)
 
-        try:
-            return self._fetch(product, version, target, url, force=force)
-        except Exception as exc:  # noqa: BLE001 - every failure is a report line
-            message = f"{type(exc).__name__}: {exc}"
-            self._record(slug, number, status=ConversionStatus.ERROR, error=message)
-            return DownloadResult(slug, number, Outcome.FAILED, message=message)
+        # Phase 40: the next candidate only when this one served no package. Any
+        # other failure ends the version, as before; the message names every URL
+        # that was tried, so a failure is never reported against just one.
+        tried: list[str] = []
+        for _source, url in candidates:
+            try:
+                return self._fetch(product, version, target, url, force=force)
+            except NotAPackage as exc:
+                tried.append(f"{type(exc).__name__}: {exc}")
+            except Exception as exc:  # noqa: BLE001 - every failure is a report line
+                tried.append(f"{type(exc).__name__}: {exc}")
+                break
+        message = "; ".join(tried)
+        self._record(slug, number, status=ConversionStatus.ERROR, error=message)
+        return DownloadResult(slug, number, Outcome.FAILED, message=message)
 
     def fetch_to(self, url: str, target: Path, known_etag: str | None = None, force: bool = False):
         """Streams one URL to one path, with resume, verification and an atomic move.
@@ -300,7 +342,7 @@ class PackageDownloader:
         response = self.session.get(url, headers=headers, stream=True, timeout=self.timeout)
         try:
             if response.status_code not in (200, 206):
-                raise OSError(f"GET {url} returned HTTP {response.status_code}")
+                raise NotAPackage(f"GET {url} returned HTTP {response.status_code}")
 
             etag = _validator(response.headers)
             # A 200 to a Range request means the server declined it -- the file
@@ -335,7 +377,7 @@ class PackageDownloader:
             # The partial is not a resumable prefix of anything -- it is a whole
             # wrong answer, so unlike a transport failure it is removed.
             partial.unlink(missing_ok=True)
-            raise OSError(
+            raise NotAPackage(
                 f"{url} did not return a readable ZIP "
                 f"(most often an error or sign-in page served as HTTP 200)"
             )

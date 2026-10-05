@@ -240,6 +240,114 @@ def test_an_unresolved_endpoint_records_the_register_code(
     assert findings.all[0].version == "10.4.0"
 
 
+# -- the published name (Phase 40) --------------------------------------------
+
+TEMPLATE_URL = "https://docs.tibco.com/pub/ems/10.4.0/tibco-ems-10-4-0_documentation.zip"
+PUBLISHED_URL = "https://docs.tibco.com/pub/ems/10.4.0/tibco-old-ems-10-4-0_documentation.zip"
+
+
+def cache_sitemap(config: ConfigManager, leaves: dict[str, list[str]]) -> None:
+    """What `catalog sitemap` leaves behind: product slug -> the version leaves it listed."""
+    from docushift.discovery.sitemap import SitemapCache
+
+    SitemapCache(config.cache_dir / "coveo").save_manifest({"files": {}, "products": leaves})
+
+
+def test_the_sitemap_name_is_tried_before_the_template(
+    config: ConfigManager, catalog: CatalogManager, product: Product, version: ProductVersion
+) -> None:
+    """`ibi-focus` 9.1.0 is published as `tibco-focus-9-1-0`; the sitemap leaf says so."""
+    cache_sitemap(config, {"tibco-ems": ["tibco-old-ems-10-4-0", "tibco-ems-10-5-0"]})
+    session = FakeSession(FakeResponse(zip_bytes()))
+
+    result = downloader(config, catalog, session).download_one(product, version)
+
+    assert result.outcome is Outcome.DOWNLOADED
+    assert [c["url"] for c in session.calls] == [PUBLISHED_URL]
+
+
+def test_the_template_is_tried_when_the_sitemap_name_serves_no_package(
+    config: ConfigManager, catalog: CatalogManager, product: Product, version: ProductVersion
+) -> None:
+    """The docsite answers a wrong name with 200 over nothing; that is the signal to move on."""
+    cache_sitemap(config, {"tibco-ems": ["tibco-old-ems-10-4-0"]})
+    session = FakeSession(FakeResponse(b""), FakeResponse(zip_bytes()))
+
+    result = downloader(config, catalog, session).download_one(product, version)
+
+    assert result.outcome is Outcome.DOWNLOADED
+    assert [c["url"] for c in session.calls] == [PUBLISHED_URL, TEMPLATE_URL]
+
+
+def test_a_failure_names_every_url_tried(
+    config: ConfigManager, catalog: CatalogManager, product: Product, version: ProductVersion
+) -> None:
+    cache_sitemap(config, {"tibco-ems": ["tibco-old-ems-10-4-0"]})
+    session = FakeSession(FakeResponse(b""), FakeResponse(b"", status_code=404))
+
+    result = downloader(config, catalog, session).download_one(product, version)
+
+    assert result.outcome is Outcome.FAILED
+    assert PUBLISHED_URL in result.message and TEMPLATE_URL in result.message
+
+
+def test_a_dropped_connection_does_not_move_on_to_the_next_name(
+    config: ConfigManager, catalog: CatalogManager, product: Product, version: ProductVersion
+) -> None:
+    """It says nothing about the name, and a second URL would discard a resumable partial."""
+    cache_sitemap(config, {"tibco-ems": ["tibco-old-ems-10-4-0"]})
+    session = FakeSession(FakeResponse(zip_bytes(), truncate_after=10))
+
+    result = downloader(config, catalog, session).download_one(product, version)
+
+    assert result.outcome is Outcome.FAILED
+    assert len(session.calls) == 1
+
+
+def test_a_sitemap_name_equal_to_the_template_is_one_candidate(
+    config: ConfigManager, catalog: CatalogManager, product: Product, version: ProductVersion
+) -> None:
+    cache_sitemap(config, {"tibco-ems": ["tibco-ems-10-4-0"]})
+
+    candidates = downloader(config, catalog, FakeSession()).resolve_urls(product, version)
+
+    assert candidates == [("sitemap", TEMPLATE_URL)]
+
+
+def test_without_a_cached_leaf_the_template_is_the_only_candidate(
+    config: ConfigManager, catalog: CatalogManager, product: Product, version: ProductVersion
+) -> None:
+    cache_sitemap(config, {"tibco-other": ["tibco-other-10-4-0"]})
+
+    candidates = downloader(config, catalog, FakeSession()).resolve_urls(product, version)
+
+    assert candidates == [("template", TEMPLATE_URL)]
+
+
+def test_an_archived_version_ignores_the_sitemap(
+    config: ConfigManager, catalog: CatalogManager, product: Product, version: ProductVersion
+) -> None:
+    cache_sitemap(config, {"tibco-ems": ["tibco-old-ems-10-4-0"]})
+    version.is_archived = True
+    version.zip_url = "https://docs.example/archive/ems-7.0.zip"
+
+    candidates = downloader(config, catalog, FakeSession()).resolve_urls(product, version)
+
+    assert candidates == [("archive", "https://docs.example/archive/ems-7.0.zip")]
+
+
+def test_a_template_with_no_slug_version_pair_takes_no_stem() -> None:
+    """The legacy `doc/zip/` form has nowhere to put a published name, so it builds none."""
+    from docushift.discovery.client import DocsiteClient
+
+    client = DocsiteClient({
+        "base_url": "https://docs.tibco.com",
+        "zip_urls": {"active_template": "/pub/{folder_path}/doc/zip/tib_{folder_slug}_doc.zip"},
+    })
+
+    assert client.active_zip_url("ems/10.4.0", stem="tibco-old-ems-10-4-0") is None
+
+
 # -- the transfer ------------------------------------------------------------
 
 

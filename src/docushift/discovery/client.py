@@ -19,6 +19,9 @@ from docushift.utils.http import Throttle, build_session
 # products that are not publicly visible.
 _AUTH_MARKERS = ("pureauth", "sign in", "signin", "log in", "login", "sso")
 
+#: The part of `active_template` that a published filename stem replaces.
+_STEM_TOKENS = "{slug}-{version_dashed}"
+
 
 class DocsiteError(Exception):
     """A docsite request failed, or returned something that was not JSON."""
@@ -59,7 +62,9 @@ class DocsiteClient:
             return text
         return f"{self.base_url}/{text.lstrip('/')}"
 
-    def active_zip_url(self, folder_path: str, slug: str = "", version: str = "") -> str | None:
+    def active_zip_url(
+        self, folder_path: str, slug: str = "", version: str = "", stem: str = ""
+    ) -> str | None:
         """Builds an active version's "Download All Docs" URL.
 
         `ems/10.4.0` + `tibco-enterprise-message-service` ->
@@ -77,11 +82,21 @@ class DocsiteClient:
         publishes the same string as each version's `slug`, and a second
         slugifier would be one more thing to keep in step with `utils.slug`.
         See architecture.md §2.2.
+
+        `stem` replaces `{slug}-{version_dashed}` with the name the version was
+        actually published under -- its Coveo sitemap leaf (Phase 40). A version
+        published before a rebrand or rename keeps the old name: `ibi-focus` 9.1.0
+        is `tibco-focus-9-1-0`. A template without that pair has nowhere to put a
+        stem, so the answer is `None` rather than the template's own guess.
         """
         template = self.zip_urls.get("active_template")
         folder = str(folder_path or "").strip().strip("/")
         if not template or not folder:
             return None
+        if stem:
+            if _STEM_TOKENS not in template:
+                return None
+            template = template.replace(_STEM_TOKENS, stem.replace("{", "").replace("}", ""))
 
         tokens = {
             "folder_path": folder,

@@ -633,7 +633,7 @@ docushift download --product ebx --version 6.2.0 --from-file "D:\downloads\ebx-d
 
 | Flag | Effect |
 | :--- | :--- |
-| `--dry-run` | Prints the product, version, source and target path for every version the selector picks, and stops. With `--from-file` it names where the ZIP would be filed and whether a version row would be added, and writes nothing. |
+| `--dry-run` | Prints the product, version, source and target path for every version the selector picks, and stops. `From` says where the URL's name came from (`sitemap`, `template`, `archive`, or `manual`), with the totals underneath. With `--from-file` it names where the ZIP would be filed and whether a version row would be added, and writes nothing. |
 | `--force` | Re-fetches even when the local ZIP's checksum still matches. Does **not** override a `zip_source=manual` pin. |
 | `--workers N` | How many versions download at once. Defaults to `crawl.max_concurrent_requests` in `config/docsite.yaml` (4). |
 | `--from-file PATH` | Files a ZIP you already have instead of fetching. Needs both `--product` and `--version`; `--all`, `--bu`, `--family`, `--batch`, `--force` and `--workers` are refused beside it. |
@@ -647,6 +647,15 @@ have to do something about. **A failure never stops the run**: one unreachable p
 out of two hundred is a report line, not an aborted batch. It does change the exit code:
 a run with a failed version exits **1** at the end, so `download && extract` stops there.
 A version with no ZIP endpoint is a report line and does not.
+
+**Which name is fetched.** A version is published under the product's name *at the
+time*, so one released before a rebrand or rename keeps the old name: FOCUS 9.1.0 is
+`tibco-focus-9-1-0_documentation.zip`, not `ibi-focus-…`. `download` therefore tries the
+name the docsite's sitemap lists for that version first, and the name built from the
+catalog slug second, moving on only when the first served no package (Phase 40). It reads
+the sitemap from `cache/coveo/`, never from the network, so **run `catalog sitemap`
+before a large download**: a product it has not cached gets only the catalog-slug name,
+and that is wrong for about 8% of versions. A failure message lists every URL tried.
 
 Downloads resume. An interrupted transfer leaves a `.part` file next to the target and
 the next run continues from where it stopped, provided the server still reports the same

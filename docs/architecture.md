@@ -123,7 +123,7 @@ baseUrl   = location.href.split("doc/html")[0]      // -> /pub/{code}/{version}/
 download  = baseUrl + finalSlug + "_documentation.zip"
 ```
 
-The ZIP therefore sits at the **version root**, not under `doc/zip/`, and its filename repeats the version in dashed form. `finalSlug` is not re-derived by this tool: the docsite API already publishes it as the per-version `slug` (`tibco-ebx-add-ons-6-2-3`), and in every case measured it equals the catalog's `slug` plus the dashed version — so a second slugifier, kept in agreement with `utils/slug.py`, buys nothing.
+The ZIP therefore sits at the **version root**, not under `doc/zip/`, and its filename repeats the version in dashed form. `finalSlug` is not re-derived by this tool: the docsite API already publishes it as the per-version `slug` (`tibco-ebx-add-ons-6-2-3`), so a second slugifier, kept in agreement with `utils/slug.py`, buys nothing. **It is not always the catalog's `slug` plus the dashed version.** `productName` is the name at publication, so a version published before a rebrand or rename keeps the old one: measured 2026-10-05 against 496 real package names, 41 differ (`tibco-focus-9-1-0` under catalog slug `ibi-focus`; `…-adapter-for-sap-7-3-1` under `…-plug-in-for-sap-solutions`). The Coveo sitemap's per-version leaf carries the published name in every case it lists (449 of 449), so `download` tries that name first and the slug-built one second, moving on only when a URL serves no package (Phase 40). The sitemap is read from `cache/coveo/`, never fetched by `download`.
 
 Three consequences:
 

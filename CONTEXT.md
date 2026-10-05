@@ -195,16 +195,19 @@ Per-family folders are created on demand by the downloader, not at startup: pre-
 
 ## 4. Next Steps
 
-1. **The user's family review** in `products.csv`: 206 keyword-assigned products whose
+1. **Phase 40, built; two network runs left**: `download` takes each version's package
+   name from the Coveo sitemap, so pre-rebrand and renamed versions stop failing
+   (96 of the 1,435 still to download). Run `catalog sitemap` before a large download. See [`planning.md`](docs/planning.md#1-active-phases).
+2. **The user's family review** in `products.csv`: 206 keyword-assigned products whose
    rule now suggests another family, 154 `unclassified` ones that already carry a family,
    and three declared families with no product (`catalog triage`). Reassign by editing
    `family`, then propagate with the `propagate-catalog-edit` skill.
-2. **Re-publish** with `sync`: the published trees at `C:\github\tibco-docs-aem` predate
+3. **Re-publish** with `sync`: the published trees at `C:\github\tibco-docs-aem` predate
    the Phase 34 fixes. `sync` now refuses a merge older than its converted tree and no
    longer publishes reframe's working files.
-3. Phase 34's deferred findings, each fragile but correct today:
+4. Phase 34's deferred findings, each fragile but correct today:
    [carried-forward items](docs/planning.md#carried-forward-open-items).
-4. Product-level open issues, with owners: [`docs/open-issues.md`](docs/open-issues.md).
+5. Product-level open issues, with owners: [`docs/open-issues.md`](docs/open-issues.md).
 
 ## 5. Where to Look
 

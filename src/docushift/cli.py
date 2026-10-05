@@ -12,6 +12,7 @@ their errors describe one file in a version that otherwise did its work.
 """
 
 import csv
+from collections import Counter
 from collections.abc import Callable
 from pathlib import Path
 
@@ -244,8 +245,6 @@ def catalog_refresh(ctx: click.Context) -> None:
     For after a stage could not refresh `_status` and the columns beside it, which
     is almost always the sheet being open in Excel at the end of the run.
     """
-    from collections import Counter
-
     manager = _catalog_manager(ctx)
     manager.save()
     counts = Counter(row.get("_status", "") for row in manager.status_rows())
@@ -853,7 +852,7 @@ def catalog_show(ctx: click.Context, product: str) -> None:
             #
             # "stored", not "the endpoint": on an active `auto` row this is what
             # the last `catalog fetch` templated, and `download` derives its own
-            # (`PackageDownloader.resolve_url`). `download --dry-run` is the
+            # (`PackageDownloader.resolve_urls`). `download --dry-run` is the
             # column to read for what would actually be fetched.
             ver.zip_url or (f"[dim]{ver.zip_source}[/dim]" if ver.zip_source is not ZipSource.AUTO else "-"),
         )
@@ -1440,22 +1439,31 @@ def download(ctx, bu, family, product, version, batch, select_all, force, worker
         # The Source column asks the downloader rather than reading `zip_url`, so a
         # dry run shows the endpoint the real run would fetch. Reading the column
         # is how the wrong template survived a phase of spot-checks (§2.2).
+        #
+        # `From` says which name the URL carries (Phase 40): `sitemap` is the name
+        # the version was published under, `template` the catalog slug's. Only the
+        # first candidate is shown; the template is tried after it if it fails.
         resolver = PackageDownloader(cfg, manager)
         table = Table(title=f"Would download ({len(pairs)})")
-        for column in ("Product", "Version", "Source", "Target"):
+        for column in ("Product", "Version", "From", "Source", "Target"):
             table.add_column(column)
+        origins: Counter[str] = Counter()
         for found, ver in pairs:
             if ver.zip_source is not ZipSource.AUTO:
-                source = str(ver.zip_source)
+                origin, source = str(ver.zip_source), str(ver.zip_source)
             else:
-                source = resolver.resolve_url(found, ver) or "[yellow]unresolved[/yellow]"
+                candidates = resolver.resolve_urls(found, ver)
+                origin, source = candidates[0] if candidates else ("-", "[yellow]unresolved[/yellow]")
+            origins[origin] += 1
             table.add_row(
                 found.slug,
                 ver.version,
+                origin,
                 source,
                 str(cfg.download_path(found.bu, found.family, found.slug, ver.version)),
             )
         console.print(table)
+        console.print(", ".join(f"{count} {origin}" for origin, count in origins.most_common()))
         return
 
     findings = FindingsRun("download", batch=batch or "", store=manager.state).start()

@@ -941,6 +941,23 @@ def test_download_dry_run_lists_targets_without_writing(runner: CliRunner, popul
     assert not (populated_root / "families" / "en-us-tibco-messaging").exists()
 
 
+def test_download_dry_run_says_which_name_each_url_carries(runner: CliRunner, populated_root: Path) -> None:
+    """Phase 40: a version the sitemap lists under an older name shows it, labelled `sitemap`."""
+    from docushift.discovery.sitemap import SitemapCache
+
+    # The shipped template: without one neither name can be built.
+    shutil.copy(REPO_ROOT / "config" / "docsite.yaml", populated_root / "config" / "docsite.yaml")
+    SitemapCache(populated_root / "cache" / "coveo").save_manifest(
+        {"files": {}, "products": {"tibco-enterprise-message-service": ["tibco-ems-old-10-4-0"]}}
+    )
+
+    result = _invoke(runner, populated_root, "download", "--all", "--dry-run")
+
+    assert result.exit_code == 0
+    # The totals line, not the URL cell: a narrow console wraps the cell.
+    assert "1 sitemap" in result.output
+
+
 def test_download_from_file_files_the_package_and_pins_the_row(
     runner: CliRunner, populated_root: Path, tmp_path: Path
 ) -> None:
@@ -1900,7 +1917,9 @@ def test_download_exits_one_when_a_version_fails(
     def unreachable(self, *args, **kwargs):
         raise OSError("connection refused")
 
-    monkeypatch.setattr(PackageDownloader, "resolve_url", lambda self, product, version: "https://x.invalid/a.zip")
+    monkeypatch.setattr(
+        PackageDownloader, "resolve_urls", lambda self, product, version: [("template", "https://x.invalid/a.zip")]
+    )
     monkeypatch.setattr(PackageDownloader, "_fetch", unreachable)
 
     result = _invoke(runner, populated_root, "download", "--product", "ems")

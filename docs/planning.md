@@ -15,7 +15,60 @@ table and stays [here](#75-the-findings-register-living).
 
 ## 1. Active Phases
 
-None. The next phase is planned here when the user approves it.
+### Phase 40: The Download Is Named for the Version, Not the Product — **Built, 2026-10-05; network steps pending**
+
+**Why.** Converting FOCUS on 2026-10-05, 9.1.0 and 9.1.1 failed to download: the docsite
+publishes them as `tibco-focus-9-1-0_documentation.zip`, from before the ibi rebrand, while
+`download` builds `ibi-focus-9-1-0` from the catalog slug. `architecture.md` §2.2 says the
+package name "in every case measured" equals the slug plus the dashed version. The cases
+measured were current versions only.
+
+Measured 2026-10-05 (`C:\tmp\an_zip_names.py`, `an_sitemap_resolve.py`) against the 582
+real package names in the html-to-md ZIP cache, 496 of which match a catalog row:
+
+- **455 match** the template. **41 do not**: 18 are a brand swap (`ibi-`↔`tibco-`, e.g.
+  Web Query for IBM i 9.0.x, MDM 10/11), and 23 are an older product name
+  (`…-adapter-for-sap-7-3-1` for today's `…-plug-in-for-sap-solutions`). A prefix swap
+  would fix fewer than half.
+- **The Coveo sitemap names every version correctly.** Each product's index file lists one
+  leaf per version, and the leaf's stem *is* the package name: `ibi-focus.xml` lists
+  `tibco-focus-9-1-0`. Matched with the existing `sitemap.match_leaf`, the leaf equals the
+  real name in **449 of 449** cases where one exists, and is never wrong. It fixes 37 of the
+  41. It also explains the 4 `tibco-streambase-high-performance-fix-engine` versions
+  already in `download-failed`: they are published as `spotfire-streambase-…`.
+- **Ahead of us:** of the 1,435 active versions not yet downloaded, the sitemap gives a
+  name different from the template for **96** (82 `tibco-`, 7 `ibi-`, 7 `spotfire-`).
+  **615 have no leaf**, because `cache/coveo/` holds 288 products, not the whole scope.
+
+#### Decisions
+
+| decision | choice | why |
+|---|---|---|
+| **Where the name comes from** | For an active version, `download` tries the sitemap leaf's stem first, then the template, and takes the first that returns a readable ZIP. Archived rows and `zip_source=manual` are unchanged | The leaf was never wrong, but the template is the tested path for the 92% it covers, so it stays as the fallback. A second request happens only when the first fails |
+| **No network for the sitemap** | `download` reads `cache/coveo/manifest.json` only. A product the cache does not hold gets today's behaviour | The sitemap already has a command with its own caching (`catalog sitemap`); `download` fetching it too would be two ways to fill one cache |
+| **What the user sees** | `download --dry-run` prints which source each URL came from (`sitemap` or `template`). A failure lists every URL it tried | A failed fetch that names one URL hides that another was tried |
+| **The stored `zip_url` column** | Unchanged. It stays the template's answer, as §2.2 already says for active rows | Writing the resolved URL back is a catalog-wide rewrite for a column `download` does not read |
+| **No new finding code** | The existing failure line and `ZIP_URL_UNRESOLVED` cover it | The success case needs no report row; the dry-run is where to look |
+| **FOCUS 9.1.0 / 9.1.1** | Stay `zip_source=manual`. The files on disk are the ones the sitemap name would fetch | Unpinning would re-download identical bytes |
+
+#### Steps
+
+1. `downloader/fetcher.py`: `resolve_urls()` returns the ordered candidates with their source; `download_one` tries each and records every failure in the message. `discovery/client.py`: `active_zip_url` takes the filename stem as an optional argument, so both sources share one template.
+2. `--dry-run` output gains the source column.
+3. Tests: sitemap name preferred; template used when the cache has no leaf; template tried after a sitemap URL fails; archived and manual rows unaffected; dry-run labels.
+4. Measure: `download --all --dry-run` shows 96 rows sourced `sitemap`. Re-run `download` for the 4 StreamBase FIX Engine versions; they should land.
+5. The user runs `catalog sitemap` over the whole scope (network, ~20 min) to fill the 615, then the dry-run is repeated.
+6. Docs: `architecture.md` §2.2 (correct the "in every case" claim), `user-guide.md` download section, `CONTEXT.md`.
+
+*Exit: the 4 StreamBase versions download; the dry-run counts match the measurement; tests and lint clean.*
+
+**As built (2026-10-05).** The user approved the plan as written. Steps 1–3 and 6 done; 4 half done; 5 is the user's.
+
+- **Only a "not a package" answer moves on.** `fetch_to` raises `NotAPackage` (an `OSError`) for a non-success status or a body that is not a ZIP. Any other failure ends the version as before, so a dropped connection keeps its resumable `.part` instead of losing it to the second URL.
+- **`resolve_url` is now `resolve_urls`**, returning `(source, url)` pairs. The one test that patched the old name was updated. A sitemap name equal to the template's gives one candidate, labelled `sitemap`.
+- **Dry run, measured.** `download --all --dry-run`: 1,665 versions, 930 `sitemap`, 627 `template`, 88 `archive`, 20 `manual`. Of the `sitemap` rows, **96 carry a name different from the template**, exactly the 96 predicted, including all 4 StreamBase FIX Engine failures (`spotfire-streambase-…`).
+- **Tests:** 8 new in `test_downloader.py`, 1 in `test_cli.py`. Full suite 2,149 passed, lint clean.
+- **Pending (network):** re-download the 4 StreamBase versions; `catalog sitemap` over the whole scope, then repeat the dry run.
 
 ---
 
