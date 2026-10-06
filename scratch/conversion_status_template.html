@@ -604,7 +604,7 @@ function renderProgress(s) {
    a reader can filter the sheet on the same word the page shows. */
 const SHEET_STATUS = [
   ["Done", [["merged", "Converted, and topics merged into pages"], ["converted", "Converted to Markdown"],
-    ["pdf-only", "Only PDFs in the package; nothing to convert, the PDFs publish as documents"]]],
+    ["pdf-ready", "Only PDFs in the package; nothing to convert, the PDFs publish as documents"]]],
   ["Waiting for the next step", [["extracted", "Unpacked, waiting for conversion"],
     ["downloaded", "Downloaded, waiting to be unpacked"], ["not-started", "Selected, nothing done yet"]]],
   ["Stuck: needs a person", [["format-unknown", "HTML help in a format the tool cannot convert"],
@@ -652,7 +652,7 @@ function renderSheet(slice) {
   for (const [, stage, , st, sd, ss, ssd] of slice) {
     counts[st] = (counts[st] || 0) + 1;
     if (sd > (dates[st] || "")) dates[st] = sd;
-    if (ss || st === "converted" || st === "merged" || st === "pdf-only") {
+    if (ss || st === "converted" || st === "merged" || st === "pdf-ready") {
       syncCounts[ss] = (syncCounts[ss] || 0) + 1;
       if (ssd > (syncDates[ss] || "")) syncDates[ss] = ssd;
     }

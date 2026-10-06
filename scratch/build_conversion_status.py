@@ -51,7 +51,7 @@ def validation_summary(db_path: Path) -> dict | None:
 STAGE_OF = {
     "out-of-scope": "out_of_scope", "retired": "retired", "not-selected": "not_selected",
     "not-started": "not_started", "downloaded": "in_progress", "extracted": "in_progress",
-    "download-failed": "blocked_download", "format-unknown": "blocked_format", "pdf-only": "pdf_only",
+    "download-failed": "blocked_download", "format-unknown": "blocked_format", "pdf-only": "pdf_only", "pdf-ready": "pdf_only",
     "extract-failed": "blocked_failed", "convert-failed": "blocked_failed",
     "merge-failed": "blocked_failed", "converted": "converted", "merged": "converted",
 }
