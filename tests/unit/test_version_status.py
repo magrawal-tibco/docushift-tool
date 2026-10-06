@@ -199,7 +199,7 @@ def test_a_package_of_only_pdfs_is_pdf_only_not_format_unknown(catalog: CatalogM
     catalog.get_version("ems", "10.4.0").engine = SourceEngine.AUTO
     _inventory(catalog, ("document", 3), ("other", 2))
 
-    assert _status(catalog).status == "pdf-only"
+    assert _status(catalog).status == "pdf-ready"
 
 
 def test_html_the_tool_cannot_convert_is_still_format_unknown(catalog: CatalogManager) -> None:

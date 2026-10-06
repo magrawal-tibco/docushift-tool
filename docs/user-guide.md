@@ -290,7 +290,7 @@ catalog, and `download` and `sync` save once at the end of each run.
 | `not-started` | Selected, nothing done yet |
 | `downloaded` · `extracted` | Waiting for the next stage |
 | `converted` · `merged` | Markdown produced; `merged` also has Reframe's merged pages |
-| `pdf-only` | The package holds only PDFs, so there is nothing to convert. Its PDFs publish through `sync` as documents. Not stuck |
+| `pdf-ready` | Finished, the PDF counterpart of `converted`: the package holds only PDFs, so there is nothing to convert, and its PDFs are ready to publish through `sync` as documents |
 | `download-failed` | The docsite did not return a usable package; supply it with `download --from-file` |
 | `format-unknown` | The package has HTML help in a format the tool cannot convert — a person decides |
 | `extract-failed` · `convert-failed` · `merge-failed` | The last attempt at that stage failed; `docushift report` has the error |
@@ -299,7 +299,7 @@ catalog, and `download` and `sync` save once at the end of each run.
 columns existed is dated by the run that built it, or by the tool's last record of the
 version.
 
-`_sync_status` is `synced` once `sync` has placed the version in a target (for a `pdf-only` version, its PDFs), `out-of-date`
+`_sync_status` is `synced` once `sync` has placed the version in a target (for a `pdf-ready` version, its PDFs), `out-of-date`
 when it was converted or merged again after that, and `sync-failed` when the last sync
 failed. `_sync_date` is the day of that placement or failure. `catalog show` prints all
 four, plus the target the version was last placed in.

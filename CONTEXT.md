@@ -184,7 +184,7 @@ Per-family folders are created on demand by the downloader, not at startup: pre-
   shows each family's name, description, size and keyword-rule suggestion beside it
   (Phase 37), ready for the user's family review. `versions.csv` shows where each
   version stands, since when, and when `sync` last placed it (`_status`, `_sync_status`;
-  Phase 38); a package of only PDFs reads `pdf-only`, not blocked (Phase 39).
+  Phase 38); a package of only PDFs reads `pdf-ready`, not blocked (Phase 39).
 - **Converted**: four families in `output/` (activespaces, ems, streaming, tra), three of
   them merged in `reframed/` (activespaces, ems, tra), all rebuilt 2026-10-05 with every
   Phase 34 fix. 301 maps and `toc.yml` as in Phases 35–36.

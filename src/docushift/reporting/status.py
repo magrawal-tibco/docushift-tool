@@ -168,7 +168,7 @@ def version_status(product, version, evidence: StatusEvidence) -> VersionStatus:
     elif recorded.get("extracted"):
         furthest = "extract"
         status = ("extracted" if version.engine in CONVERTIBLE_ENGINES
-                  else "pdf-only" if pdf_only else "format-unknown")
+                  else "pdf-ready" if pdf_only else "format-unknown")
     elif recorded.get("downloaded"):
         furthest, status = "download", "downloaded"
     else:
@@ -185,7 +185,7 @@ def version_status(product, version, evidence: StatusEvidence) -> VersionStatus:
         # Recorded before `stage_event` existed: `version_state` holds the error but
         # not its stage, so the stage is the one after the furthest evidence.
         legacy = {None: "download", "download": "extract", "extract": "convert"}.get(furthest)
-        if legacy and not (legacy == "convert" and status in ("format-unknown", "pdf-only")):
+        if legacy and not (legacy == "convert" and status in ("format-unknown", "pdf-ready")):
             status, date = _FAILED[legacy], recorded.get("updated_at")
 
     return VersionStatus(status, _day(date), sync_status, sync_date)
