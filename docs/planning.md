@@ -72,6 +72,88 @@ real package names in the html-to-md ZIP cache, 496 of which match a catalog row
 
 ---
 
+### Phase 42: Merged Pages Are the TIBCO Default, for Flare and DITA — **Built, 2026-10-06; runs in progress**
+
+**Why.** The user's decision, 2026-10-06: reframe applies to every TIBCO product except the
+Streaming family, for **Flare and DITA** versions; WebWorks stays unmerged. Today `publish`
+in `config/reframe.yaml` is set per product (EMS and ActiveSpaces only), the only wider
+switch is `defaults`, which would also cover IBI, and the stage merges Flare only
+(requirement C1). Three things stand in the way:
+
+- **A version reframe does not merge would not publish at all.** With `publish: true`,
+  `sync` (`distributor.py`, the merged-tree branch) refuses a version with no merged tree
+  (`SYNC_MERGE_UNAVAILABLE`) and does not fall back. Engines are per version, and mixed:
+  of the BusinessWorks plug-in versions detected so far, 145 are Flare, 64 DITA, 42
+  WebWorks; TRA has 2 Flare and 13 WebWorks.
+- **A multi-version product needs a hand-written pin** (`pin_layout_to`, R1.4), or each
+  version is laid out on its own and raises `REFRAME_LAYOUT_UNPINNED`. With 85 plug-ins
+  alone, writing those by hand does not scale.
+- **DITA output repeats its support and legal pages in the TOC**, which reframe's
+  acceptance check refuses.
+
+**DITA, measured 2026-10-06** over the converted plug-ins (scratch root `C:\tmp\rf-dita`, the
+engine gate opened in-process, the real workspace untouched):
+
+- **The benefit equals Flare's.** Median words per converted topic: DITA 177, Flare 180,
+  WebWorks 234; topics under 300 words: 71%, 70%, 57%. This is why WebWorks stays out.
+- **The merge itself needs no change.** `plug-in-for-database` 8.5.0 merged as it stands,
+  185 pages to 34 (81.6% fewer), with the TOC dialect detected and no error. The Flare
+  control (`plug-in-for-snowflake` 6.3.1) merged 65 to 18.
+- **Three of four failed for one reason.** `smartmapper` 7.1.2, `mongodb` 6.4.2 and `mdm`
+  6.3.1 each fail `REFRAME_SELF_CHECK_FAILED` with exactly two more anchors than topics,
+  and those two pages "not reachable from the TOC". In `mdm` 6.3.1's converted `toc.yml`,
+  `important-information.md` and `tibco-documentation-and-support-services.md` are listed
+  inside the Installation guide *and* again at the tail. `converter/navigation.py:_tail`
+  is meant to move those pages ("Moved, never appended"); for DITA it does not find the
+  existing entry and appends a second one. A conversion defect, visible in the unmerged
+  TOC too.
+- **Scale.** 64 DITA versions are known (all plug-ins). 1,115 TIBCO versions are not yet
+  unpacked, so their engine is unknown; at the plug-in ratio that is roughly 200–300 DITA
+  versions in all. Corpus-wide, DITA is the second engine: 371 versions to Flare's 595
+  (`design.md` §7).
+
+#### Decisions
+
+| decision | choice | why |
+|---|---|---|
+| **Which engines merge** | Flare and DITA (`REFRAMABLE_ENGINES`). WebWorks, DocBook and the rest pass through, as today | Measured above. Requirement C1 is rewritten to say so |
+| **Where the switch lives** | Two new optional blocks in `reframe.yaml`, between `defaults` and `products`: `bus: {tibco: {publish: true}}` and `families: {streaming: {publish: false}}`. Resolution order: defaults, BU, family, product, each key overriding the one before | Keeps the decision a reviewable line in the policy file, as the file's own comment requires. A per-product line still wins, so one product can be held back |
+| **`publish` for a version reframe does not merge** | Publish the converted tree, as if `publish` were off, and record nothing. Only a Flare or DITA version is held to the merged tree | Nothing will ever merge it, so refusing it blocks the version for good. A Flare or DITA version keeps today's refusal when its merge is missing or stale, which is what protects live merged URLs |
+| **Pinning** | When no `pin_layout_to` is written, the layout pins to the newest eligible Flare or DITA version, chosen by the same order `iter_versions` yields. A written pin still wins. `REFRAME_LAYOUT_UNPINNED` becomes a note naming the chosen version | This is the rule all four hand-written pins already follow. The cost: a newer version arriving later re-cuts the older ones. That is free until merged URLs go live, and writing the pin freezes it |
+| **Mixed Flare/DITA products** | The pin is chosen among Flare and DITA versions together; a version whose layout cannot be projected from the pin falls back to its own layout, as a pin naming an unlayable version already does (`driver.py`, the pin check) | No special case. Whether any product mixes the two is not known until its packages are unpacked |
+| **The DITA tail fix** | In conversion, not in reframe: `_tail` moves the DITA entry as it moves Flare's. `_CONVERTER_VERSION` is bumped, as every converter-output change is | Fixes the unmerged TOC as well. Working around it in reframe would leave every unmerged DITA TOC with duplicate entries |
+| **The sign-off gate** | The user's decision stands in for each product's review-queue sign-off. Review queues are still written, for writers to work later | The file currently says publishing waits for a writer's review. This changes that policy, so the comment in the file is rewritten to say so |
+| **IBI** | Unchanged: no BU block, so `publish: false` | Out of the decision |
+
+**Side effect of the converter bump.** Every converted tree is stale to `convert` afterwards,
+but `convert` only rebuilds what is unpacked, so families whose unpacked files were deleted
+after publishing (wf-reporting-server, bw-plugin) are not touched. The fix changes DITA
+TOCs only, so nothing else needs rebuilding. The 64 DITA plug-in versions must be
+re-downloaded and unpacked (about 0.5 GB) to be re-converted.
+
+#### Steps
+
+1. `converter/navigation.py` (and `engines/dita.py` if the path it reports is the cause): the DITA support/legal entry is moved, not duplicated. Bump `_CONVERTER_VERSION`.
+2. `reframe/driver.py`: `REFRAMABLE_ENGINES` gains DITA; the automatic pin and its note.
+3. `reframe/policy.py`: `policy_for` takes the product's BU and family and applies the two new blocks. Callers in `reframe/driver.py` and `sync/distributor.py` pass them.
+4. `sync/distributor.py`: a version whose engine is not reframable publishes its converted tree under any `publish` value.
+5. `config/reframe.yaml`: the `bus` and `families` blocks; rewrite the sign-off comment.
+6. Tests: a DITA TOC whose support/legal pages sit inside a guide comes out with each listed once, at the tail; resolution order (BU, family, product override); a WebWorks version under `publish: true` syncs its converted tree; a Flare or DITA version with no merge is still refused; the automatic pin picks the newest eligible version, and a written pin overrides it; a DITA tree merges end to end.
+7. Measure before switching on: re-download, unpack and re-convert the 64 DITA plug-in versions (batch label `bwp-dita`), then `reframe` them. Exit for this step: no `REFRAME_SELF_CHECK_FAILED`, the merge ratio reported beside Flare's, and `csh.yml` entries surviving the merge on the DITA versions that carry context-sensitive help.
+8. Run: `reframe --bu tibco` over everything converted (BusinessWorks plug-ins, TRA; EMS and ActiveSpaces are already current), then `sync --bu tibco --target-dir C:\github\tibco-docs-aem`, then `validate`. Streaming is left out by the family block.
+9. Docs: `REFRAME-REQUIREMENTS.md` C1, `architecture.md` §6.6 (sync tree choice), `user-guide.md` reframe section, `CONTEXT.md`.
+
+*Exit: every converted TIBCO Flare and DITA version except Streaming publishes merged pages; every other engine publishes converted pages; no `SYNC_MERGE_UNAVAILABLE` for a version reframe does not merge; tests and lint clean.*
+
+#### As built (2026-10-06)
+
+- **Steps 1–6 and 9 done.** `navigation._tail` now removes every further copy of the moved support or legal page (`NAV_NODE_DROPPED` counts them); `_CONVERTER_VERSION` is 2. MDM 6.3.1 re-converted lists each back page once and merges 67 topics into 11 pages with no self-check failure.
+- **Two additions to the decisions.** The automatic pin prefers the newest eligible version that is *converted*, because an unconverted reference would fail every sibling. An automatic pin that cannot be laid out falls back to each version's own layout and still reports `REFRAME_PIN_UNAVAILABLE`; a written pin keeps today's refusal.
+- **`REFRAME_LAYOUT_UNPINNED` is a note**, naming the chosen version. `reframe --dry-run` shows automatic pins in its Pinned column.
+- **Step 7 scope.** 55 of the 64 DITA plug-in versions are in `bwp-dita`. MDM 6.3.1 was done by hand. The 8 that never converted are blocked by the Windows path-length defect in root finding and engine detection, and wait for that fix.
+
+---
+
 ## Carried-Forward Open Items
 
 Technical items a finished phase recorded as *open, not fixed*. Product-level issues
@@ -170,7 +252,7 @@ The concrete deliverable of §7.1: every deferred "report line" in the three doc
 | `WHATS_NEW_PLACEHOLDER`¹¹ᵃ | note | convert | What's New shipped as the unfilled MadCap template (167 of 648 roots); not published | Phase 11a |
 | `OUTPUT_COUNT_MISMATCH`¹³ | warn | convert | Fewer Markdown files on disk than documents converted; two writes landed on one path | Phase 13 |
 | `REFRAME_TOC_SCHEMA_UNKNOWN`²⁰ᵃ | error | reframe | No TOC adapter matches this version's `toc.yml`; refusing to merge a partly-understood tree | `REFRAME-INTEGRATION-PLAN.md` §4 Phase 0 |
-| `REFRAME_LAYOUT_UNPINNED`²⁰ᵃ | warn | reframe | More than one eligible version of this doc set and no pinned layout; versions may not correspond | `REFRAME-REQUIREMENTS.md` R1.4 |
+| `REFRAME_LAYOUT_UNPINNED`²⁰ᵃ | note | reframe | More than one eligible version and no pin in `reframe.yaml`; laid out on the newest eligible version, chosen automatically (Phase 42) | `REFRAME-REQUIREMENTS.md` R1.4 |
 | `REFRAME_PIN_UNAVAILABLE`²⁶ | error | reframe | `pin_layout_to` names a version whose layout cannot be computed; the versions pinned to it are refused rather than merged on their own boundaries | `REFRAME-REQUIREMENTS.md` R1.4 |
 | `REFRAME_SELF_CHECK_FAILED`²⁰ᵇ | error | reframe | A §6 acceptance check failed; the merged tree was discarded rather than swapped in | `REFRAME-REQUIREMENTS.md` §6 |
 | `REFRAME_LINK_UNRESOLVED`²⁰ᵇ | warn | reframe | Relative references pointing outside the converted tree, left as written; present before the merge | `REFRAME-REQUIREMENTS.md` R4, §8 |

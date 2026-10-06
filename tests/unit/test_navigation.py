@@ -310,6 +310,38 @@ def test_a_duplicate_tail_page_whose_children_are_its_own_sections_is_dropped(
     assert result.dropped == 1
 
 
+def test_a_tail_page_one_toc_lists_twice_is_moved_once_and_the_copy_dropped(
+    context, templates
+) -> None:
+    """A DITA help set lists its back pages under two GUIDs that are one file.
+
+    30 of 56 converted DITA TOCs do; moving only the first copy left the second
+    mid-tree, and the merged page then failed its self-check (Phase 42).
+    """
+    unit = book(
+        "guide",
+        pages=("a.md", "legal.md", "support.md", "b.md"),
+        nav=[
+            node("A", "a.md"),
+            node("Important Information", "legal.md"),
+            node("Support", "support.md"),
+            node("B", "b.md", node("Important Information", "legal.md"),
+                 node("Support", "support.md")),
+        ],
+        landing="a.md",
+        support="support.md",
+        legal="legal.md",
+    )
+
+    result = synthesize(context, [unit], templates)
+
+    assert paths(result.nodes) == [
+        "guide/a.md", "guide/b.md", "guide/support.md", "guide/legal.md",
+    ]
+    assert result.nodes[1].children == []
+    assert result.dropped == 2
+
+
 def test_a_tail_page_the_toc_never_listed_still_reaches_the_tail(context, templates) -> None:
     """WebWorks' `copyrigh.htm` is in the TOC of almost no book (§5.3.5)."""
     unit = book(

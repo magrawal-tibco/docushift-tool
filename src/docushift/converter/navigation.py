@@ -250,6 +250,15 @@ def _tail(
             # other node this module creates is; an empty label rendered
             # `title: ""` (Phase 34, R4-13).
             node = NavNode(label=_label_of(path, documents), document=path)
+        # The same page listed twice in one TOC -- a DITA help set re-publishes
+        # its back pages under a second GUID that resolves to the same file (30
+        # of 56 converted DITA TOCs). Moving only the first copy left the second
+        # in place, and the merged page then failed its self-check (Phase 42).
+        while (copy := _find(nodes, path)) is not None and all(
+            child.document == path for child in copy.walk()
+        ):
+            _extract(nodes, path)
+            dropped += 1
         nodes.append(node)
     return dropped
 

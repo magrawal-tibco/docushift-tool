@@ -195,6 +195,10 @@ Per-family folders are created on demand by the downloader, not at startup: pre-
 
 ## 4. Next Steps
 
+0. **Phase 42, built 2026-10-06; runs in progress**: merged pages are the default for every
+   TIBCO product except Streaming, for Flare and DITA versions (WebWorks stays unmerged),
+   with automatic layout pins and a DITA TOC fix. Left: re-convert and merge the DITA
+   plug-ins (`bwp-dita`), then `reframe --bu tibco`, `sync --bu tibco`, `validate`. See [`planning.md`](docs/planning.md#1-active-phases).
 1. **Phase 40, built; two network runs left**: `download` takes each version's package
    name from the Coveo sitemap, so pre-rebrand and renamed versions stop failing
    (96 of the 1,435 still to download). Run `catalog sitemap` before a large download. See [`planning.md`](docs/planning.md#1-active-phases).

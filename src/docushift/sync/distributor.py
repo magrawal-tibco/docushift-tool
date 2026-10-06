@@ -333,22 +333,27 @@ class WorkspaceDistributor:
         reason this returns a refusal instead of a second path. Falling back
         republishes the unmerged topics over URLs the merge already took, un-merging
         live pages as a side effect of a merge that simply had not been re-run; the
-        version publishing nothing is recoverable and that is not.
+        version publishing nothing is recoverable and that is not. A version of an
+        engine Reframe does not merge is the exception: it has no merged URLs to
+        protect, and publishes its converted tree (Phase 42).
         """
         # Imported here and not at module scope: `reframe` reads
         # `validation.references` for its fence-aware masking, and `validation`
         # reads this module for `STAGING_SUFFIX`. A top-level import closes that
         # loop and nothing in `docushift.validation` will load.
-        from docushift.reframe import policy_for
+        from docushift.reframe import REFRAMABLE_ENGINES, policy_for
 
         slug, number = product.slug, version.version
         converted = self.config.output_path(product.bu, product.family, slug, number)
-        policy = policy_for(self.config.load_reframe(), slug)
+        policy = policy_for(self.config.load_reframe(), slug, product.bu, product.family)
 
         # X3-03. A stage killed between its swap and its bookkeeping leaves its
         # mark, and the tree under it is not one any stage has vouched for.
         state = self.catalog.state
-        if not policy.publish:
+        # Phase 42. `publish` is set for a whole BU, and a WebWorks version under it
+        # will never have a merged tree; holding it to one would block it for good.
+        # Only an engine Reframe merges is held to the merged tree.
+        if not policy.publish or version.engine not in REFRAMABLE_ENGINES:
             if not converted.is_dir():
                 return converted, False, f"no converted tree at {converted}; run `docushift convert` first"
             if state is not None and state.is_building(slug, number, "convert"):

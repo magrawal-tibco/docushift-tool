@@ -170,10 +170,11 @@ def test_the_gate_holds_on_the_standalone_path(config, catalog, product, version
     assert not (tmp_path / "out").exists()
 
 
-def test_flare_is_the_only_reframable_engine(config, catalog, flare):
+def test_flare_and_dita_are_the_reframable_engines(config, catalog, flare):
+    """Phase 42. WebWorks stays out: its converted topics are a third larger."""
     from docushift.reframe import REFRAMABLE_ENGINES
 
-    assert REFRAMABLE_ENGINES == (SourceEngine.FLARE,)
+    assert REFRAMABLE_ENGINES == (SourceEngine.FLARE, SourceEngine.DITA)
     assert flare.versions["10.5.1"].engine in REFRAMABLE_ENGINES
 
 
@@ -800,24 +801,59 @@ def test_one_eligible_version_needs_no_pin(config, catalog, flare):
     assert codes(findings.all) == []
 
 
-def test_two_eligible_versions_with_no_pin_are_warned_about(config, catalog, flare):
-    """R1.4, and the reference product is the case: EMS has six eligible versions.
+def test_two_eligible_versions_with_no_pin_are_pinned_to_the_newest(config, catalog, flare):
+    """R1.4, automatic since Phase 42: 85 plug-ins do not get hand-written pins.
 
     Counted off the catalog rather than off disk, because the second version not
-    being converted yet is exactly when pinning is still cheap to decide.
+    being converted yet is exactly when pinning is still cheap to decide. The note
+    names the chosen version, so a writer can freeze it.
     """
     flare.versions["10.5.0"] = make_version("tibco-flare-docs", "10.5.0", engine=SourceEngine.FLARE)
     catalog.merge_fetch_results([flare])
     reloaded = catalog.get_product("tibco-flare-docs")
     converted_tree(config, reloaded, "10.5.1")
+    converted_tree(config, reloaded, "10.5.0")
+    findings = FindingsRun("reframe")
+    reframer = Reframer(config, catalog, findings=findings)
+
+    result = reframer.reframe_one(reloaded, reloaded.versions["10.5.0"])
+
+    assert result.outcome is ReframeOutcome.REFRAMED
+    assert reframer._policy(reloaded).pin_layout_to == "10.5.1"
+    assert codes(findings.all) == ["REFRAME_LAYOUT_UNPINNED"]
+    assert findings.all[0].severity is Severity.NOTE
+    assert "10.5.1" in findings.all[0].message
+
+
+def test_the_automatic_pin_prefers_a_converted_version(config, catalog, flare):
+    """An unconverted reference cannot be laid out, and would fail every sibling."""
+    flare.versions["10.6.0"] = make_version("tibco-flare-docs", "10.6.0", engine=SourceEngine.FLARE)
+    flare.versions["10.5.0"] = make_version("tibco-flare-docs", "10.5.0", engine=SourceEngine.FLARE)
+    catalog.merge_fetch_results([flare])
+    reloaded = catalog.get_product("tibco-flare-docs")
+    converted_tree(config, reloaded, "10.5.1")
+    converted_tree(config, reloaded, "10.5.0")
+
+    assert Reframer(config, catalog)._policy(reloaded).pin_layout_to == "10.5.1"
+
+
+def test_an_automatic_pin_that_cannot_be_laid_out_falls_back_to_the_versions_own(
+    config, catalog, flare
+):
+    """A pin the tool chose is not an instruction: refusing would block the set."""
+    flare.versions["10.5.0"] = make_version("tibco-flare-docs", "10.5.0", engine=SourceEngine.FLARE)
+    catalog.merge_fetch_results([flare])
+    reloaded = catalog.get_product("tibco-flare-docs")
+    converted_tree(config, reloaded, "10.5.1", toc="nonsense: true\n")
+    converted_tree(config, reloaded, "10.5.0")
     findings = FindingsRun("reframe")
 
-    Reframer(config, catalog, findings=findings).reframe_one(
-        reloaded, reloaded.versions["10.5.1"]
+    result = Reframer(config, catalog, findings=findings).reframe_one(
+        reloaded, reloaded.versions["10.5.0"]
     )
 
-    assert codes(findings.all) == ["REFRAME_LAYOUT_UNPINNED"]
-    assert findings.all[0].severity is Severity.WARNING
+    assert result.outcome is ReframeOutcome.REFRAMED
+    assert "REFRAME_PIN_UNAVAILABLE" in codes(findings.all)
 
 
 def test_a_pinned_product_is_not_warned_about(config, catalog, flare):
@@ -836,6 +872,67 @@ def test_a_pinned_product_is_not_warned_about(config, catalog, flare):
     )
 
     assert codes(findings.all) == []
+    assert Reframer(config, catalog)._policy(reloaded).pin_layout_to == "10.5.1"
+
+
+def test_a_written_pin_wins_over_the_automatic_one(config, catalog, flare):
+    flare.versions["10.5.0"] = make_version("tibco-flare-docs", "10.5.0", engine=SourceEngine.FLARE)
+    catalog.merge_fetch_results([flare])
+    reloaded = catalog.get_product("tibco-flare-docs")
+    converted_tree(config, reloaded, "10.5.1")
+    config.reframe_path.parent.mkdir(parents=True, exist_ok=True)
+    config.reframe_path.write_text(
+        'products:\n  tibco-flare-docs:\n    pin_layout_to: "10.5.0"\n', encoding="utf-8"
+    )
+
+    assert Reframer(config, catalog)._policy(reloaded).pin_layout_to == "10.5.0"
+
+
+def test_policy_resolves_defaults_then_bu_then_family_then_product():
+    """Phase 42: TIBCO on, Streaming off, and one product can still be held back."""
+    reframe = {
+        "defaults": {"publish": False, "max_words": 3000},
+        "bus": {"tibco": {"publish": True, "max_words": 2000}},
+        "families": {"streaming": {"publish": False}},
+        "products": {"tibco-held-back": {"publish": False}},
+    }
+
+    assert policy_for(reframe, "tibco-ems", "tibco", "messaging").publish is True
+    assert policy_for(reframe, "tibco-ems", "tibco", "messaging").max_words == 2000
+    assert policy_for(reframe, "tibco-streambase", "tibco", "streaming").publish is False
+    assert policy_for(reframe, "tibco-streambase", "tibco", "streaming").max_words == 2000
+    assert policy_for(reframe, "tibco-held-back", "tibco", "messaging").publish is False
+    assert policy_for(reframe, "ibi-webfocus", "ibi", "webfocus").publish is False
+    assert policy_for(reframe, "tibco-ems").publish is False
+
+
+def test_the_loader_passes_the_bu_and_family_blocks_through(config):
+    config.reframe_path.parent.mkdir(parents=True, exist_ok=True)
+    config.reframe_path.write_text(
+        "bus:\n  tibco:\n    publish: true\nfamilies:\n  streaming:\n    publish: false\n",
+        encoding="utf-8",
+    )
+
+    loaded = config.load_reframe()
+
+    assert policy_for(loaded, "x", "tibco", "bw-plugin").publish is True
+    assert policy_for(loaded, "x", "tibco", "streaming").publish is False
+
+
+def test_a_dita_version_is_merged(config, catalog):
+    """Phase 42: DITA's converted topics are Flare-sized, and its TOC is the same dialect."""
+    built = make_product("tibco-dita-docs", product_code="ditadocs", family="bw-plugin")
+    built.versions = {
+        "8.5.0": make_version("tibco-dita-docs", "8.5.0", engine=SourceEngine.DITA),
+    }
+    catalog.merge_fetch_results([built])
+    dita = catalog.get_product("tibco-dita-docs")
+    converted_tree(config, dita, "8.5.0")
+
+    result = Reframer(config, catalog).reframe_one(dita, dita.versions["8.5.0"])
+
+    assert result.outcome is ReframeOutcome.REFRAMED
+    assert result.topics == 3
 
 
 # -- the selection ------------------------------------------------------------

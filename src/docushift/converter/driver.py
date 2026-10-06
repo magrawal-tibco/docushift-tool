@@ -85,7 +85,9 @@ _TOC_PATH = re.compile(r'url:[ \t]*"([^"\n]*)"')
 #: through a `--force` somebody remembered.
 #:
 #: 1 = the first versioned key (X3-04 to X3-08, 2026-10-05).
-_CONVERTER_VERSION = 1
+#: 2 = a support/legal page the TOC lists twice is moved once, not left in place
+#:     (Phase 42, 2026-10-06).
+_CONVERTER_VERSION = 2
 
 #: The `config/aem_templates/` files the converter renders (X3-07). Named, not
 #: the whole folder: `sync`'s own templates must not re-convert every tree.

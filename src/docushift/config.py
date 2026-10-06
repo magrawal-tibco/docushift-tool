@@ -509,9 +509,10 @@ class ConfigManager:
     def load_reframe(self) -> dict[str, Any]:
         """Loads `reframe.yaml` -- the editorial policy Stage 6b merges topics by.
 
-        Two blocks: `defaults`, and `products` keyed by slug. Resolution is
-        default-then-override per key, which `reframe.policy_for` does; this method
-        only reads and shapes, so a caller that wants to print the file gets the file.
+        Four blocks: `defaults`, `bus` keyed by BU, `families` keyed by family, and
+        `products` keyed by slug. Resolution is default-then-override per key,
+        which `reframe.policy_for` does; this method only reads and shapes, so a caller
+        that wants to print the file gets the file.
 
         A missing file yields the built-in defaults rather than an error. That is the
         deliberate choice `load_scope` makes and `load_publishing` makes, and it is
@@ -530,7 +531,14 @@ class ConfigManager:
         defaults.update(
             {k: v for k, v in (loaded.get("defaults") or {}).items() if k in REFRAME_DEFAULTS}
         )
-        self._reframe_cache = {"defaults": defaults, "products": loaded.get("products") or {}}
+        self._reframe_cache = {
+            "defaults": defaults,
+            # Phase 42: the BU and family levels, between the two. Passed through as
+            # written; `policy_for` reads only the keys it knows.
+            "bus": loaded.get("bus") or {},
+            "families": loaded.get("families") or {},
+            "products": loaded.get("products") or {},
+        }
         return self._reframe_cache
 
     def load_origin_urls(self) -> dict[str, dict[str, Any]]:

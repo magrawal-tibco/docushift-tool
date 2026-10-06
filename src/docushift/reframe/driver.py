@@ -32,7 +32,7 @@ import hashlib
 import json
 import shutil
 from collections.abc import Callable, Iterable
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from enum import StrEnum
 from pathlib import Path, PurePosixPath
 
@@ -75,10 +75,10 @@ from docushift.utils.swap import recover, remove, staging_of, swap
 from docushift.validation.references import anchors as anchors_in
 from docushift.validation.references import mask_code
 
-#: The one engine Reframe runs for (C1). A tuple rather than a bare constant
-#: because the question "which engines produce topics small enough to need this?"
-#: is an empirical one, and WebWorks is the plausible second answer.
-REFRAMABLE_ENGINES: tuple[SourceEngine, ...] = (SourceEngine.FLARE,)
+#: The engines Reframe runs for (C1). The question "which engines produce topics
+#: small enough to need this?" is an empirical one: DITA's median converted topic
+#: is 177 words to Flare's 180, WebWorks' 234 (Phase 42, measured 2026-10-06).
+REFRAMABLE_ENGINES: tuple[SourceEngine, ...] = (SourceEngine.FLARE, SourceEngine.DITA)
 
 
 #: Written fresh by this stage, so a copy of the source's version would be stale.
@@ -320,6 +320,10 @@ class Reframer:
         # (slug, reference version) and holding `None` for a reference that could not
         # be read, so the failure is reported once per product rather than per version.
         self._layouts: dict[tuple[str, str], list[tuple[PurePosixPath, tuple[PurePosixPath, ...]]] | None] = {}
+        # Phase 42. The effective policy per product, automatic pin included, and
+        # which products got their pin that way rather than from `reframe.yaml`.
+        self._policies: dict[str, ReframePolicy] = {}
+        self._automatic: set[str] = set()
 
     # -- one version ----------------------------------------------------------
 
@@ -372,7 +376,7 @@ class Reframer:
                         "run `docushift convert` first",
             )
 
-        policy = policy_for(self.reframe_config, slug)
+        policy = self._policy(product)
         # X1-02. A standalone folder is not the catalog row's tree, so nothing is
         # read back for it and nothing is recorded: `convert`'s R4-04 guard. It
         # wrote the row's merge state from whatever `--input` named, and `sync`
@@ -1023,6 +1027,11 @@ class Reframer:
             return pack(roots, source.words, policy.max_words, policy.keep_separate)
         reference = self._reference_layout(product, policy)
         if reference is None:
+            # A pin the tool chose is not an instruction it was given: the version
+            # is laid out on its own, as it would have been before Phase 42. The
+            # unavailable reference is still reported.
+            if product.slug in self._automatic:
+                return pack(roots, source.words, policy.max_words, policy.keep_separate)
             return None
         return project(reference, roots, source.words, policy.max_words, policy.keep_separate)
 
@@ -1094,29 +1103,57 @@ class Reframer:
         assign(packed + carried, source.headings)
         return layout_of(packed)
 
-    def _check_pin(self, product: Product, policy: ReframePolicy) -> None:
-        """R1.4. A doc set with two eligible versions and no pin drifts, permanently.
+    def _policy(self, product: Product) -> ReframePolicy:
+        """`policy_for`, plus the automatic pin (R1.4, Phase 42). Once per product.
+
+        A doc set with two eligible versions and no pin drifts, permanently. When
+        `reframe.yaml` names no pin, the newest eligible Flare or DITA version is
+        pinned -- the rule all four hand-written pins follow -- preferring one that
+        is converted, since an unconverted reference cannot be laid out.
 
         Counted off the catalog rather than off disk: the question is how many
-        versions *will* be merged, and the second one not being converted yet is
-        precisely when pinning is still cheap to decide. Narrowed to the engines
-        this stage merges for the same reason -- five `auto` versions beside one
-        Flare version cannot drift apart, because only one of them is ever laid out.
+        versions *will* be merged. Narrowed to the engines this stage merges for
+        the same reason -- five `auto` versions beside one Flare version cannot
+        drift apart, because only one of them is ever laid out. A single eligible
+        version is left unpinned rather than pinned to itself.
         """
-        if policy.pin_layout_to:
-            return
-        eligible = [
-            version
-            for _, version in self.catalog.iter_versions(slug=product.slug, eligible_only=True)
-            if version.engine in REFRAMABLE_ENGINES
-        ]
-        if len(eligible) < 2:
+        cached = self._policies.get(product.slug)
+        if cached is not None:
+            return cached
+        policy = policy_for(self.reframe_config, product.slug, product.bu, product.family)
+        if not policy.pin_layout_to:
+            eligible = [
+                version
+                for _, version in self.catalog.iter_versions(slug=product.slug, eligible_only=True)
+                if version.engine in REFRAMABLE_ENGINES
+            ]
+            if len(eligible) >= 2:
+                converted = [
+                    version for version in eligible
+                    if self.config.output_path(
+                        product.bu, product.family, product.slug, version.version
+                    ).is_dir()
+                ]
+                chosen = (converted or eligible)[0]
+                policy = replace(policy, pin_layout_to=chosen.version)
+                self._automatic.add(product.slug)
+        self._policies[product.slug] = policy
+        return policy
+
+    def _check_pin(self, product: Product, policy: ReframePolicy) -> None:
+        """A note naming the pin the tool chose, so a writer can make it permanent.
+
+        Writing it into `reframe.yaml` freezes the layout; left automatic, a newer
+        version arriving re-cuts every older one, which is free until merged URLs
+        go live and not afterwards.
+        """
+        if product.slug not in self._automatic:
             return
         self._record(
             "REFRAME_LAYOUT_UNPINNED", product.slug, "",
             message=(
-                f"{len(eligible)} eligible Flare versions and no `pin_layout_to` in "
-                f"config/reframe.yaml"
+                f"no `pin_layout_to` in config/reframe.yaml; laid out on "
+                f"{policy.pin_layout_to}, the newest eligible version"
             ),
         )
 

@@ -1935,7 +1935,7 @@ def _report_reframe(stats, findings, manager=None) -> None:
     for outcome, label in (
         (ReframeOutcome.REFRAMED, "Reframed"),
         (ReframeOutcome.CURRENT, "Already current"),
-        (ReframeOutcome.NOT_FLARE, "Not Flare (skipped)"),
+        (ReframeOutcome.NOT_FLARE, "Not Flare or DITA (skipped)"),
         (ReframeOutcome.NO_OUTPUT, "No converted tree"),
         (ReframeOutcome.FAILED, "Failed"),
     ):
@@ -1990,7 +1990,7 @@ def reframe(ctx, bu, family, product, version, batch, select_all, force, dry_run
     warned about. The converted tree is read and never written to, so a boundary
     rule can be tuned and the merge re-run without re-converting anything.
     """
-    from docushift.reframe import ReframeOutcome, Reframer, ReframeStats, policy_for
+    from docushift.reframe import REFRAMABLE_ENGINES, ReframeOutcome, Reframer, ReframeStats
 
     cfg: ConfigManager = ctx.obj["config"]
     manager = _catalog_manager(ctx)
@@ -2002,23 +2002,25 @@ def reframe(ctx, bu, family, product, version, batch, select_all, force, dry_run
         _no_selection("reframe")
 
     if dry_run:
-        reframe_config = cfg.load_reframe()
+        # The Reframer's own resolution, so the Pinned column shows an automatic
+        # pin too (Phase 42). Constructing one reads config and writes nothing.
+        planner = Reframer(cfg, manager)
         table = Table(title=f"Would reframe ({len(pairs)})")
         for column in ("Product", "Version", "Engine", "Converted", "Cap", "Pinned", "Target"):
             table.add_column(column)
         for found, ver in pairs:
-            policy = policy_for(reframe_config, found.slug)
+            policy = planner._policy(found)
             source = input_dir or cfg.output_path(found.bu, found.family, found.slug, ver.version)
             target = output_dir or cfg.reframed_path(found.bu, found.family, found.slug, ver.version)
-            flare = ver.engine is SourceEngine.FLARE
+            merged = ver.engine in REFRAMABLE_ENGINES
             table.add_row(
                 found.slug,
                 ver.version,
-                str(ver.engine) if flare else f"[dim]{ver.engine}[/dim]",
+                str(ver.engine) if merged else f"[dim]{ver.engine}[/dim]",
                 "present" if source.is_dir() else "[yellow]missing[/yellow]",
-                str(policy.max_words) if flare else "[dim]-[/dim]",
+                str(policy.max_words) if merged else "[dim]-[/dim]",
                 policy.pin_layout_to or "[dim]-[/dim]",
-                str(target) if flare else "[dim]skipped[/dim]",
+                str(target) if merged else "[dim]skipped[/dim]",
             )
         console.print(table)
         return

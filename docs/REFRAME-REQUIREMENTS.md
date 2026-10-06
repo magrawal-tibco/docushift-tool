@@ -39,7 +39,7 @@ Two consequences that drive every requirement below:
 
 | # | Constraint |
 |---|---|
-| **C1** | **Reframe runs only for the MadCap Flare conversion engine.** For every other engine it must no-op and pass its input through untouched. |
+| **C1** | **Reframe runs only for the MadCap Flare and DITA conversion engines** (DITA since Phase 42, `planning.md`: its converted topics are as small as Flare's). For every other engine it must no-op and pass its input through untouched. |
 | **C2** | The engine check must exist **inside Reframe**, not only in the pipeline orchestrator. Reframe is independently runnable by design, and a standalone run is exactly when someone points it at the wrong doc set. |
 | **C3** | Version scope comes from DocuShift's **existing conversion-eligibility mechanism**. Reframe must not introduce its own version-selection policy. |
 | **C4** | Reframe must never write to its input tree. Source is read-only. |

@@ -342,15 +342,13 @@ REGISTRY: dict[str, Code] = _codes(
          "No TOC adapter matches this version's toc.yml; refusing to merge a tree "
          "that was only partly understood",
          "REFRAME-INTEGRATION-PLAN.md §4 Phase 0"),
-    # R1.4, and a warning rather than an error because the first run of a doc set
-    # legitimately has nothing to pin to. It matters because the reference product
-    # is the case: `tibco-enterprise-message-service` has six convert-eligible
-    # Flare versions, so an unpinned merge lays 10.4.0 out by its own subtree sizes
-    # and 10.5.1 by its own, and the two stop being diffable -- permanently, since
-    # the Markdown is hand-edited from here. Cheap now, impossible later.
-    Code("REFRAME_LAYOUT_UNPINNED", Severity.WARNING, Stage.REFRAME,
-         "More than one eligible version of this doc set and no pinned layout; "
-         "versions may be merged into non-corresponding pages",
+    # R1.4. A note since Phase 42: an unpinned multi-version doc set is now pinned
+    # automatically to its newest eligible version, so the versions stay diffable.
+    # What is left to say is that the pin is the tool's choice, and a newer
+    # version arriving will re-cut the older ones until a writer freezes it.
+    Code("REFRAME_LAYOUT_UNPINNED", Severity.NOTE, Stage.REFRAME,
+         "More than one eligible version of this doc set and no pin in reframe.yaml; "
+         "laid out on the newest eligible version, chosen automatically",
          "REFRAME-REQUIREMENTS.md R1.4"),
     # The other half of R1.4, and an error where the one above is a warning. There
     # the pin is missing and the stage has no instruction; here it has one and

@@ -1306,7 +1306,11 @@ def test_sync_dry_run_reports_the_tree_the_run_would_publish(
     runner: CliRunner, populated_root: Path, tmp_path: Path
 ) -> None:
     """X1-12. The dry run tested `output/` for every product, so a product that
-    publishes merged, with no merge, read "present" and the real run refused it."""
+    publishes merged, with no merge, read "present" and the real run refused it.
+
+    Flare, since Phase 42: only an engine Reframe merges is held to the merged tree."""
+    _invoke(runner, populated_root, "catalog", "set", "--product", "ems",
+            "--version", "10.4.0", "--engine", "flare")
     _convert_output(populated_root, "10.4.0", {"index.md": "# x\n"})
     (populated_root / "config" / "reframe.yaml").write_text(
         "products:\n  tibco-enterprise-message-service:\n    publish: true\n", encoding="utf-8")

@@ -1,8 +1,9 @@
 # Reframe -- Stage 6b editorial policy (docs/REFRAME-REQUIREMENTS.md, planning.md Phase 20).
 #
-# Reframe merges granular MadCap Flare topics into fewer, larger pages, each former
-# topic becoming an anchored `##` section. It runs only for the Flare engine, reads
-# Stage 6's `output/` tree, and writes a sibling `reframed/` tree -- never its input.
+# Reframe merges granular MadCap Flare and DITA topics into fewer, larger pages, each
+# former topic becoming an anchored `##` section. It runs only for those two engines
+# (Phase 42), reads Stage 6's `output/` tree, and writes a sibling `reframed/` tree --
+# never its input.
 #
 # This file carries the editorial judgement. It is expected to be tuned repeatedly,
 # which is exactly why it is a file and not a constant in the packer: a boundary pass
@@ -25,18 +26,22 @@ defaults:
   toc_schema: ""
 
   # Whether `docushift sync` publishes the *merged* tree for this product instead of
-  # Stage 6's. Off as the default, and overridden for exactly one product below:
-  # `tibco-enterprise-message-service`, the pilot doc set, signed off 2026-09-25.
+  # Stage 6's. Off as the default; on for the TIBCO BU below (Phase 42), off again for
+  # its Streaming family. A version of an engine Reframe does not merge (WebWorks and
+  # the rest) publishes its converted tree whatever this says.
   #
-  # This is the writer sign-off gate. Merging is reversible right up until the moment
+  # This was the writer sign-off gate, one product at a time. Merging is reversible right up until the moment
   # a merged page is served under an old topic's URL, and after that it is not: the
   # redirects are live and the pages have been hand-edited. So publishing is not a
   # property of an invocation -- a `--reframed` flag would be re-decided by whoever
   # next runs `sync --all` -- it is a property of the doc set, recorded here, where
   # turning it on is a reviewable and revertable commit.
   #
-  # Turn it on for a product only after a writer has worked its `review-queue.csv`.
-  # `sync` then refuses to publish that product at all if the merged tree is missing
+  # Until Phase 42 it was turned on for a product only after a writer had worked its
+  # `review-queue.csv`. On 2026-10-06 the user's decision to merge every TIBCO doc set
+  # except Streaming took the place of those per-product sign-offs; the queues are
+  # still written, for writers to work later. For a Flare or DITA version, `sync` then
+  # refuses to publish that product at all if the merged tree is missing
   # or older than the conversion beneath it, rather than quietly falling back to the
   # unmerged pages -- which would un-merge URLs that are already live.
   publish: false
@@ -61,6 +66,18 @@ defaults:
   # not here -- the topics are one doc set's.
   keep_separate: []
 
+# Phase 42. Two levels between `defaults` and `products`, each overriding the one
+# before, key by key: defaults, then the BU, then the family, then the product. A
+# product line still wins, so one doc set can be held back with `publish: false`.
+bus:
+  # The user's decision, 2026-10-06: merged pages are the TIBCO default. IBI has no
+  # block here and stays unmerged.
+  tibco:
+    publish: true
+families:
+  # The one TIBCO family left out of that decision.
+  streaming:
+    publish: false
 products:
   # R1.4 -- layout pinning. This product has six convert-eligible Flare versions
   # (10.4.0, 10.4.1, 10.4.3, 10.4.4, 10.5.0, 10.5.1), so an unpinned merge would lay
@@ -78,9 +95,10 @@ products:
 
   # The other three multi-version Flare sets, pinned on the same rule -- the newest
   # eligible version, which is the one `iter_versions` yields first and the one a
-  # fix gets written against. The remaining Flare products have a single eligible
-  # version each and are left unpinned rather than pinned to themselves;
-  # `REFRAME_LAYOUT_UNPINNED` will name them if a second version ever arrives.
+  # fix gets written against. Since Phase 42 a multi-version Flare or DITA product
+  # with no line here is pinned the same way automatically, and
+  # `REFRAME_LAYOUT_UNPINNED` (a note) names the version chosen. Writing the pin
+  # here freezes it: left automatic, a newer version arriving re-cuts the older ones.
   #
   # Six convert-eligible Flare versions. Unpinned, the same
   # 322-330 topics came out as 46, 56, 56, 51, 47 and 47 pages sharing 41 names at

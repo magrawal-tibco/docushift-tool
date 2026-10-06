@@ -89,15 +89,26 @@ class ReframePolicy:
         return hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16]
 
 
-def policy_for(reframe: dict[str, Any], slug: str) -> ReframePolicy:
+def policy_for(
+    reframe: dict[str, Any], slug: str, bu: str = "", family: str = ""
+) -> ReframePolicy:
     """Resolves `ConfigManager.load_reframe()` down to one product's policy.
 
     Default-then-override, key by key, so a product block naming only
     `pin_layout_to` keeps the shipped `max_words` rather than falling back to the
     dataclass's -- the two agree today and a silent divergence when they stop
     agreeing is the kind of thing that is only noticed as a page-count change.
+
+    Four levels, outside in: defaults, the BU, the family, the product (Phase 42).
+    A family block is keyed by the family name alone, so `streaming` would also
+    match an IBI family of that name -- none exists, and keying by `bu/family`
+    would make the common case harder to read for a collision nobody has.
     """
     values: dict[str, Any] = dict(reframe.get("defaults") or {})
+    if bu:
+        values.update((reframe.get("bus") or {}).get(bu) or {})
+    if family:
+        values.update((reframe.get("families") or {}).get(family) or {})
     values.update((reframe.get("products") or {}).get(slug) or {})
 
     return ReframePolicy(

@@ -14,7 +14,7 @@ import pytest
 import yaml
 
 from docushift.config import ConfigManager
-from docushift.models import Product, ProductVersion
+from docushift.models import Product, ProductVersion, SourceEngine
 from docushift.reporting.findings import FindingsRun
 from docushift.sync import (
     ONLINE_HELP,
@@ -33,6 +33,8 @@ SERVED = "us/en"
 
 @pytest.fixture
 def product() -> Product:
+    """Flare, so the merged-tree tests hold: since Phase 42 only an engine Reframe
+    merges is held to the merged tree."""
     return Product(
         slug="tibco-ems",
         product_code="ems",
@@ -40,8 +42,10 @@ def product() -> Product:
         bu="tibco",
         family="messaging",
         versions={
-            "10.4.0": ProductVersion(slug="tibco-ems", version="10.4.0", release_date="2026-02-06"),
-            "10.3.1": ProductVersion(slug="tibco-ems", version="10.3.1", release_date="2025-08-11"),
+            "10.4.0": ProductVersion(slug="tibco-ems", version="10.4.0", release_date="2026-02-06",
+                                     engine=SourceEngine.FLARE),
+            "10.3.1": ProductVersion(slug="tibco-ems", version="10.3.1", release_date="2025-08-11",
+                                     engine=SourceEngine.FLARE),
         },
     )
 
@@ -1108,6 +1112,26 @@ def test_an_opted_in_product_with_no_merged_tree_publishes_nothing_at_all(
     assert "docushift reframe" in result.message
     assert [f.code for f in findings.all] == ["SYNC_MERGE_UNAVAILABLE"]
     assert not (target / TREE).exists()
+
+
+def test_an_engine_reframe_does_not_merge_publishes_its_converted_tree_when_opted_in(
+    config, catalog, target, product
+) -> None:
+    """Phase 42. `publish` is set for a whole BU, and a WebWorks version under it
+    never gets a merged tree; refusing it would block it for good."""
+    version = product.versions["10.4.0"]
+    version.engine = SourceEngine.WEBWORKS
+    convert_output(config, product, "10.4.0")
+    config.reframe_path.write_text("bus:\n  tibco:\n    publish: true\n", encoding="utf-8")
+    findings = FindingsRun("sync")
+    distributor = WorkspaceDistributor(config, catalog, findings=findings)
+
+    result = distributor.sync_one(product, version, target)
+
+    assert result.outcome is SyncOutcome.SYNCED
+    assert not result.merged
+    assert (result.path / "index.md").read_text(encoding="utf-8") == "# 10.4.0\n"
+    assert findings.all == []
 
 
 def test_a_merged_tree_older_than_the_conversion_beneath_it_is_refused(

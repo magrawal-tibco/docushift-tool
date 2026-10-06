@@ -1010,9 +1010,9 @@ the source that writers maintain, that is 1,441 files somebody has to keep in st
 merges them by navigation subtree, so each former topic becomes a section of a larger page —
 its heading set at the depth the navigation gives it, under the page's one H1 — and hands the pages it could not confidently decide about to a human.
 
-**It only runs for Flare.** Every other engine is counted as skipped, not warned about: on a
-full catalog selection that is 1,669 of 1,683 eligible versions, and naming them would bury
-the rows worth reading.
+**It only runs for Flare and DITA** (DITA since Phase 42: its converted topics are as small
+as Flare's, a median of 177 words to 180). Every other engine, WebWorks included, is counted as
+skipped, not warned about, because naming them would bury the rows worth reading.
 
 **It never writes to its input.** Stage 6's `output/` tree is read and a sibling `reframed/`
 tree is built. Tuning a boundary rule is a re-run, not a restore — which matters because the
@@ -1030,8 +1030,12 @@ would otherwise choose (it is empty, and should stay so, for every set measured)
 - **`pin_layout_to`** names the version whose page layout every other version of that doc set
   reuses. EMS has six eligible Flare versions; without a pin each would be laid out by its own
   subtree sizes, the versions would stop being diffable, and porting a fix would stop being a
-  clean diff — permanently. `reframe` warns when a doc set has two eligible versions and no
-  pin.
+  clean diff — permanently. When a doc set has two or more eligible Flare or DITA versions and
+  no pin is written, `reframe` pins it to the newest eligible version that is converted, and a
+  `REFRAME_LAYOUT_UNPINNED` note names the version it chose. Write that version into
+  `reframe.yaml` to freeze it: left automatic, a newer version arriving re-cuts the older ones.
+  If an automatic pin cannot be laid out, each version is laid out on its own instead; a
+  written pin that cannot be laid out still fails the version.
 
 **What a merged tree contains.** The pages, every asset copied through untouched, and five
 regenerated files at the version root:
@@ -1195,9 +1199,17 @@ row, writes no `301.yml` and is never reported current.
 
 **Merging changes nothing about what gets published until you say so.** `sync` reads the
 Stage 6 tree for every product, and goes on doing that however many merged trees are sitting
-in `reframed/`. A product publishes its merged pages only when `config/reframe.yaml` says so:
+in `reframed/`. A product publishes its merged pages only when `config/reframe.yaml` says so.
+The switch can be set at four levels, each overriding the one before: `defaults`, a BU, a
+family, a product. Since Phase 42 the TIBCO BU is on and its Streaming family is off:
 
 ```yaml
+bus:
+  tibco:
+    publish: true
+families:
+  streaming:
+    publish: false
 products:
   tibco-enterprise-message-service:
     pin_layout_to: "10.5.1"
@@ -1205,12 +1217,15 @@ products:
 ```
 
 Turning it on is a commit, which is the point: merging is reversible right up until a merged
-page is served under an old topic's URL, and after that it is not. **One product has it on** —
-`tibco-enterprise-message-service`, signed off on 2026-09-25 after its 18-row queue was read
-and every page accepted as merged. Every other Flare set is still `false`, and the commit that
-changes that should say who read which queue.
+page is served under an old topic's URL, and after that it is not. Until 2026-10-06 it was
+turned on one product at a time, after a writer had worked that product's review queue. The
+decision to merge every TIBCO doc set except Streaming replaced those sign-offs; the queues
+are still written for writers to work later. To hold one product back, give it its own
+`publish: false` line.
 
-Once a product has opted in, `sync` will not fall back. If the merged tree is missing, or is
+**`publish` only applies to a Flare or DITA version.** A WebWorks version (or any other
+engine) under `publish: true` publishes its converted pages, because nothing will ever merge
+it. For a Flare or DITA version, `sync` will not fall back. If the merged tree is missing, or is
 older than the conversion beneath it, that version's `online-help` publishes **nothing** and
 the run says why — its PDFs and other documents still ship, because those come from the
 extracted package and a merge has nothing to say about them. The alternative, quietly
