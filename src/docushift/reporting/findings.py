@@ -141,6 +141,11 @@ REGISTRY: dict[str, Code] = _codes(
          "A Flare root whose skin writes no content container: its MadCap topics "
          "were converted from <body>, reported once per root",
          "Phase 34 (R5-09)"),
+    Code("CONTENT_SOURCE_TOPIC", Severity.NOTE, Stage.CONVERT,
+         "A Flare root shipping authored source topics: each converted from <body>, "
+         "its variables and conditions settled from the root's built topics, "
+         "reported once per root",
+         "Phase 41"),
     Code("TOC_UNREADABLE", Severity.WARNING, Stage.CONVERT,
          "A Flare root's HelpSystem.xml or declared TOC is missing or did not parse, "
          "or a WebWorks book's runtime file (files.js, toc.js, title.js, context.js) "

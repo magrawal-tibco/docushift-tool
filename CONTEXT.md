@@ -174,7 +174,7 @@ Per-family folders are created on demand by the downloader, not at startup: pre-
 
 - **Every pipeline stage is built**: catalog → download → extract → convert (Flare, DITA,
   WebWorks, DocBook) → navigation → reframe (Flare merge) → sync → validate. Phases 1–39
-  are finished; see the [index](docs/planning.md#finished-phases).
+  and 41 are finished; see the [index](docs/planning.md#finished-phases).
 - **Reviewed end to end (Phase 34)**: 236 findings, every serious and significant one
   fixed with a test, the rest deferred or cleaned up; see `reports/review/INDEX.md`.
   Replacing a tree is now crash- and lock-safe, a re-convert re-merges on its own, and
@@ -188,7 +188,7 @@ Per-family folders are created on demand by the downloader, not at startup: pre-
 - **Converted**: four families in `output/` (activespaces, ems, streaming, tra), three of
   them merged in `reframed/` (activespaces, ems, tra), all rebuilt 2026-10-05 with every
   Phase 34 fix. 301 maps and `toc.yml` as in Phases 35–36.
-- **Quality bar**: 2,140 tests, `ruff check src tests` clean, 84 finding codes in the
+- **Quality bar**: 2,153 tests, `ruff check src tests` clean, 85 finding codes in the
   register.
 - **Branch**: `reframe-component`, not pushed. Git push and publishing are out of scope
   (`architecture.md` §6.0).

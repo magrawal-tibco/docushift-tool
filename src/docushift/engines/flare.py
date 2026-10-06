@@ -38,13 +38,16 @@ holding 8,485 parsed DOMs to defer every link decision -- costs more than it buy
 `validate` (Phase 7) re-resolves the emitted links and would name the residue.
 """
 
+import html
 import os
 import re
+import warnings
+from collections import Counter
 from dataclasses import dataclass, field
 from pathlib import Path, PurePosixPath
 
-from bs4 import BeautifulSoup, Tag
-from bs4.element import PreformattedString
+from bs4 import BeautifulSoup, Tag, XMLParsedAsHTMLWarning
+from bs4.element import PreformattedString, ProcessingInstruction
 
 from docushift.apiref import is_api_reference
 from docushift.engines.base import (
@@ -416,6 +419,10 @@ class FlareEngine(BaseEngine):
         # (Phase 34, R5-08). Planned once either way, so its findings are too.
         self._roots: list[Path] = []
         self._plans: dict[Path, tuple[Unit, _Plan]] = {}
+        # Phase 41: what each root's built topics fill in for a shipped source
+        # topic, read only once a root turns out to hold one, and what was done.
+        self._terms: dict[Path, _SourceTerms] = {}
+        self._sourced: dict[Path, _SourceTally] = {}
 
     def units(self, context: ConversionContext) -> list[Path]:
         roots = super().units(context)
@@ -453,6 +460,11 @@ class FlareEngine(BaseEngine):
             found = documents.get(plan.whats_new.lower())
             if found is not None:
                 unit.whats_new = found.relative
+
+        tally = self._sourced.pop(root, None)
+        if tally is not None:
+            context.record("CONTENT_SOURCE_TOPIC", path=unit.name, count=tally.topics,
+                           message=tally.message())
 
         unit.documents = list(documents.values())
         unit.nav = self._navigation(context, unit, plan, documents)
@@ -736,13 +748,15 @@ class FlareEngine(BaseEngine):
                            message="could not be read")
             return None
 
-        soup = markdown.parse(text)
+        soup = _parse(text)
         container = soup.select_one(CONTENT_SELECTOR)
         if container is None and (landing or (body and _is_runtime_topic(soup))):
             # The landing page is the one place the invariant does not hold: 5
             # roots publish 3,444 characters of real prose in a plain `<body>`.
             # The other is a root whose skin never writes the container at all.
             container = soup.body
+        if container is None and _is_source_topic(soup):
+            container = self._source_body(unit, root, soup)
         if container is None and bare is not None:
             bare.append(relative)
             return None
@@ -773,6 +787,48 @@ class FlareEngine(BaseEngine):
         if landing:
             return self._landing_document(context, unit, soup, source, output, title, body)
         return Document(source=source, relative=output, title=title, body=body)
+
+    def _source_body(self, unit: Unit, root: Path, soup: BeautifulSoup) -> Tag | None:
+        """A shipped source topic's `<body>`, finished the way its build would have.
+
+        Phase 41: 24 English pages in 11 ibi versions are the authored `.htm`, not
+        the built one. Their variables are empty elements and their conditional
+        text is all still there, so both are settled from what the root's built
+        topics show before the page goes through the ordinary passes.
+        """
+        if root not in self._terms:
+            plan = self._plans.get(root)
+            self._terms[root] = _source_terms(root, plan[1].topics if plan else [])
+        terms = self._terms[root]
+        tally = self._sourced.setdefault(root, _SourceTally())
+        tally.topics += 1
+
+        for keyword in soup.find_all("madcap:keyword"):
+            keyword.decompose()
+        for element in soup.find_all(attrs={"madcap:conditions": True}):
+            if element.decomposed:
+                continue
+            tags = _condition_tags(str(element["madcap:conditions"]))
+            if tags & terms.kept:
+                continue
+            if tags & terms.known:
+                element.decompose()
+                tally.removed += 1
+            else:
+                # No built topic shows the tag, kept or dropped: removing the
+                # element would delete text on a guess.
+                tally.unknown.update(tags)
+        for variable in soup.find_all("madcap:variable"):
+            name = str(variable.get("name", ""))
+            value = terms.variables.get(name)
+            if value:
+                variable.replace_with(value)
+            else:
+                tally.unresolved[name] += 1
+                variable.decompose()
+        for xref in soup.find_all("madcap:xref"):
+            xref.name = "a"
+        return soup.body
 
     def _landing_document(self, context: ConversionContext, unit: Unit, soup: BeautifulSoup,
                           source: Path, output: PurePosixPath, title: str, body: str) -> Document:
@@ -1362,6 +1418,101 @@ def _read(path: Path) -> str | None:
             return None
     except OSError:
         return None
+
+
+def _parse(text: str) -> BeautifulSoup:
+    """`markdown.parse`, quiet about a source topic's XML declaration (Phase 41).
+
+    Reading one as HTML is the intended behaviour, so bs4's advice to switch to
+    an XML parser is noise in every convert log that meets one.
+    """
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", XMLParsedAsHTMLWarning)
+        return markdown.parse(text)
+
+
+def _is_source_topic(soup: BeautifulSoup) -> bool:
+    """An authored Flare topic the build copied into its output (Phase 41).
+
+    An XML declaration, the MadCap namespace on `<html>`, and no runtime marker.
+    All 55 such files in `families/` qualify and no built topic does; a Javadoc
+    page has no MadCap namespace, so §5.1.6's no-fallback rule still holds for it.
+    """
+    root = soup.find("html")
+    if not isinstance(root, Tag) or root.get("data-mc-runtime-file-type"):
+        return False
+    if not any(str(name).lower() == "xmlns:madcap" for name in root.attrs):
+        return False
+    return any(
+        isinstance(node, ProcessingInstruction) and str(node).lower().startswith("xml")
+        for node in soup.contents
+    )
+
+
+@dataclass
+class _SourceTerms:
+    """What a root's built topics say its build filled in and kept (Phase 41)."""
+
+    # Variable name -> the value its `span.mc-variable` shows most often.
+    variables: dict[str, str] = field(default_factory=dict)
+    # Condition tags some built element carries on its own: the build included them.
+    kept: frozenset[str] = frozenset()
+    # Every tag a built element carries. Known but not kept means excluded.
+    known: frozenset[str] = frozenset()
+
+
+@dataclass
+class _SourceTally:
+    """One root's source topics, for its single `CONTENT_SOURCE_TOPIC` row."""
+
+    topics: int = 0
+    removed: int = 0
+    unresolved: Counter[str] = field(default_factory=Counter)
+    unknown: Counter[str] = field(default_factory=Counter)
+
+    def message(self) -> str:
+        parts = [f"{self.topics} source topic(s) converted from <body>",
+                 f"{self.removed} element(s) of excluded conditions removed"]
+        if self.unresolved:
+            parts.append(f"{sum(self.unresolved.values())} variable(s) unresolved: "
+                         + ", ".join(sorted(self.unresolved)))
+        if self.unknown:
+            parts.append("condition tag(s) no built topic shows, left in: "
+                         + ", ".join(sorted(self.unknown)))
+        return "; ".join(parts)
+
+
+_VARIABLE_SPAN = re.compile(
+    r"""<span\b[^>]*\bclass=["']mc-variable\s+([^"'\s]+)[^"']*["'][^>]*>([^<]*)</span>""")
+_CONDITIONS = re.compile(r"""data-mc-conditions=["']([^"']*)["']""")
+
+
+def _condition_tags(raw: str) -> frozenset[str]:
+    return frozenset(tag.strip() for tag in raw.split(",") if tag.strip())
+
+
+def _source_terms(root: Path, topics: list[str]) -> _SourceTerms:
+    """Reads the root's built topics as text; a source topic has no container."""
+    values: dict[str, Counter[str]] = {}
+    kept: set[str] = set()
+    known: set[str] = set()
+    for relative in topics:
+        text = _read(root / Path(*PurePosixPath(relative).parts))
+        if text is None or "mc-main-content" not in text:
+            continue
+        for name, value in _VARIABLE_SPAN.findall(text):
+            value = " ".join(html.unescape(value).split())
+            if value:
+                values.setdefault(name, Counter())[value] += 1
+        for raw in _CONDITIONS.findall(text):
+            tags = _condition_tags(raw)
+            known.update(tags)
+            if len(tags) == 1:
+                kept.update(tags)
+    return _SourceTerms(
+        variables={name: counts.most_common(1)[0][0] for name, counts in values.items()},
+        kept=frozenset(kept), known=frozenset(known),
+    )
 
 
 def _is_runtime_topic(soup: BeautifulSoup) -> bool:

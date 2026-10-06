@@ -580,6 +580,86 @@ def test_one_bare_topic_in_a_root_built_with_the_container_is_still_missing(
     assert "CONTENT_BODY_FALLBACK" not in result.codes()
 
 
+# -- source topics shipped in the output (Phase 41) ----------------------------
+
+
+def source_topic(body: str) -> str:
+    """A Flare topic as authored, copied into the output by the build.
+
+    `designer-user/Link_Tile_8207.htm` in Client 9.3.2: an XML declaration, the
+    MadCap namespace, no runtime marker, no container.
+    """
+    return (
+        '\ufeff<?xml version="1.0" encoding="utf-8"?>\n'
+        '<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" class="concept">'
+        f"<head><title>x</title></head><body>{body}</body></html>"
+    )
+
+
+def built_terms() -> str:
+    """A built topic showing one variable's value and the build's conditions."""
+    return topic("Built", (
+        "<p>Use <span class='mc-variable ibi-productNames.focus-3rd variable'>FOCUS</span>.</p>"
+        "<p data-mc-conditions='Product.focus'>Kept alone.</p>"
+        "<p data-mc-conditions='Product.webfocus,Product.focus'>Shared.</p>"
+    ))
+
+
+def test_a_shipped_source_topic_is_converted_and_finished_from_its_built_siblings(
+    tmp_path: Path,
+) -> None:
+    """FOCUS 9.3.0 `DisplayFormats114`: linked, planned, and dropped until Phase 41."""
+    files = basic()
+    files["html/Content/intro.htm"] = built_terms()
+    files["html/Content/raw.htm"] = source_topic(
+        "<h1>Raw page</h1>"
+        "<p><MadCap:keyword term='Index entry' />Run <MadCap:variable name='ibi-productNames.focus-3rd' /> now.</p>"
+        "<p MadCap:conditions='Product.focus'>For FOCUS.</p>"
+        "<p MadCap:conditions='Product.webfocus'>For WebFOCUS only.</p>"
+        "<p MadCap:conditions='releaseNumber.8205'>Unknown tag.</p>"
+        "<p>See <MadCap:xref href='guide/deep.htm'>the deep dive</MadCap:xref>.</p>"
+    )
+
+    result = run(tmp_path, files)
+
+    body = result.body("Content/raw.md")
+    assert body.startswith("# Raw page\n\nRun FOCUS now.")
+    assert "For FOCUS." in body and "Unknown tag." in body
+    assert "WebFOCUS only" not in body and "Index entry" not in body
+    assert "[the deep dive](guide/deep.md)" in body
+    assert "CONTENT_MISSING" not in result.codes()
+    [note] = [f for f in result.findings.all if f.code == "CONTENT_SOURCE_TOPIC"]
+    assert note.count == 1
+    assert "1 element(s) of excluded conditions removed" in note.message
+    assert "left in: releaseNumber.8205" in note.message
+
+
+def test_a_variable_no_built_topic_shows_is_dropped_and_counted(tmp_path: Path) -> None:
+    files = basic()
+    files["html/Content/raw.htm"] = source_topic(
+        "<h1>Raw</h1><p>Run <MadCap:variable name='globalvar.unknown' /> now.</p>"
+    )
+
+    result = run(tmp_path, files)
+
+    assert "Run now." in " ".join(result.body("Content/raw.md").split())
+    [note] = [f for f in result.findings.all if f.code == "CONTENT_SOURCE_TOPIC"]
+    assert "1 variable(s) unresolved: globalvar.unknown" in note.message
+
+
+def test_an_xml_page_without_the_madcap_namespace_is_still_missing(tmp_path: Path) -> None:
+    """A Javadoc page has no MadCap marker; §5.1.6 still has no fallback for it."""
+    files = basic()
+    files["html/Content/other.htm"] = (
+        '<?xml version="1.0" encoding="utf-8"?>\n<html><body><h1>Other</h1></body></html>'
+    )
+
+    result = run(tmp_path, files)
+
+    assert result.codes()["CONTENT_MISSING"] == 1
+    assert "CONTENT_SOURCE_TOPIC" not in result.codes()
+
+
 def test_a_topic_that_breaks_the_renderer_is_skipped_and_the_root_still_converts(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
 ) -> None:

@@ -1,7 +1,7 @@
 # DocuShift Master Planning & Roadmap
 
 > **Document Status:** Active Roadmap
-> **Last Updated:** 2026-10-05
+> **Last Updated:** 2026-10-06
 > **Target:** Multi-Stage Documentation Migration Pipeline (TIBCO & IBI -> AEM)
 
 **This file holds open work only.** A phase is written here in full while it is planned
@@ -120,6 +120,7 @@ The concrete deliverable of §7.1: every deferred "report line" in the three doc
 | `OUTPUT_ROOT_MISSING`⁵ᵇ | warn | convert | Engine detected, no unit of work found — the 5 partial Flare outputs | `architecture.md` §5.1.1 |
 | `CONTENT_MISSING`⁵ᵇ | warn | convert | A topic with no content container — reported, never guessed at | `architecture.md` §5.1.6 |
 | `CONTENT_BODY_FALLBACK`³⁴ | note | convert | A Flare root whose skin writes no content container; its MadCap topics were converted from `<body>`, one row per root (10 Statistica roots, ~1,485 topics) | Phase 34 (R5-09) |
+| `CONTENT_SOURCE_TOPIC` | note | convert | A Flare root shipping authored source topics: each converted from `<body>`, variables and conditions settled from the root's built topics, one row per root | Phase 41 |
 | `TOC_UNREADABLE`³⁴ | warn | convert | A Flare root's `HelpSystem.xml` or declared TOC is missing or did not parse; or a WebWorks book's `files.js`, `toc.js`, `title.js` or `context.js` is present and unreadable, or (`files.js`/`toc.js`) yields no entries. Its topics are filed under Unfiled, or the book loses what that file named | Phase 34 (R5-12, R7-09) |
 | `TOC_SUBPROJECT_UNPLACED`³⁴ | note | convert | A merged-project TOC node (`*.flprj`, 121 over 937 roots) marking where a sub-project's TOC goes; dropped, so the sub-guide loses its place in the parent's navigation | Phase 34 (R5-11) |
 | `TOC_ORPHAN`⁵ᵇ | note | convert | Converted topics in no TOC entry, filed under Unfiled — 14.1% for Flare | `architecture.md` §5.1.4 |
@@ -237,6 +238,7 @@ The concrete deliverable of §7.1: every deferred "report line" in the three doc
 | 37 | One Sheet for the Family Decision | Complete, 2026-10-04 | [phase-37.md](history/phases/phase-37.md) |
 | 38 | Where Each Version Stands, on the Sheet | Complete, 2026-10-05 | [phase-38.md](history/phases/phase-38.md) |
 | 39 | A PDF-Only Package Is Not Blocked | Complete, 2026-10-05 | [phase-39.md](history/phases/phase-39.md) |
+| 41 | Flare Source Topics Shipped in the Output | Complete, 2026-10-06 | [phase-41.md](history/phases/phase-41.md) |
 
 ---
 
