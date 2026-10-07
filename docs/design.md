@@ -539,6 +539,7 @@ Observed spellings: `api`, `apidocs`, `api-docs`, `api_reference`, `api-referenc
 | JSDoc | `styles/jsdoc-default.css` |
 | godoc | `lib/godoc/godocs.js` |
 | Sandcastle (.NET) | `fti/FTI_*.json`, `Help/html/<guid>.htm` |
+| TIBCO function catalog | `functions.css` **and** an `index.html` that imports it with `class="category"` (Phase 45). The stylesheet alone also sits in 4 RTView user-guide folders that are documentation; the pair matches the 12 catalogs in the corpus and nothing else |
 
 This is the same conclusion §7 reaches for engine detection, for the same reason: **what a tree contains is knowable; what someone named it is not.**
 

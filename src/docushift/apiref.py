@@ -42,6 +42,13 @@ _MARKER_DIRS = frozenset({
 _DOXYGEN_HEADER = re.compile(r"^.+_8h\.html?$")
 # Sandcastle's full-text index shards.
 _SANDCASTLE_INDEX = re.compile(r"^fti_.+\.json$")
+# TIBCO's function-catalog generator (BusinessEvents, the Decisions add-in): one
+# page per catalog function, under a root holding `functions.css` and a catalog
+# index. The stylesheet alone is not enough -- RTView user guides ship a 12-file
+# `CORE/Functions/` with one, and those are documentation (Phase 45).
+_FUNCTION_CATALOG_CSS = "functions.css"
+_FUNCTION_CATALOG_INDEX = "index.html"
+_FUNCTION_CATALOG_HEAD = 4096
 # Markers that are a nested path rather than a name in the directory itself.
 _MARKER_PATHS = (
     ("styles", "jsdoc-default.css"),   # JSDoc
@@ -91,12 +98,29 @@ def has_api_marker(directory: Path) -> bool:
             return True
     if any((directory / Path(*parts)).is_file() for parts in _MARKER_PATHS):
         return True
+    if _is_function_catalog(directory, entries):
+        return True
     # Sandcastle shards live in `fti/`, one JSON per index bucket.
     fti = directory / "fti"
     try:
         return fti.is_dir() and any(_SANDCASTLE_INDEX.match(c.name.lower()) for c in fti.iterdir())
     except OSError:
         return False
+
+
+def _is_function_catalog(directory: Path, entries: list[Path]) -> bool:
+    """A function-catalog root: `functions.css` plus an index that imports it as a category page."""
+    if not any(entry.name.lower() == _FUNCTION_CATALOG_CSS for entry in entries):
+        return False
+    index = next((e for e in entries if e.name.lower() == _FUNCTION_CATALOG_INDEX), None)
+    if index is None:
+        return False
+    try:
+        with index.open("rb") as handle:
+            head = handle.read(_FUNCTION_CATALOG_HEAD).lower()
+    except OSError:
+        return False
+    return b"functions.css" in head and b'class="category"' in head
 
 
 def recorded_roots(metadata: Mapping[str, str], key: str, tree: Path) -> list[Path]:

@@ -199,6 +199,9 @@ Per-family folders are created on demand by the downloader, not at startup: pre-
    TIBCO product except Streaming, for Flare and DITA versions (WebWorks stays unmerged),
    with automatic layout pins and a DITA TOC fix. Left: re-convert and merge the DITA
    plug-ins (`bwp-dita`), then `reframe --bu tibco`, `sync --bu tibco`, `validate`. See [`planning.md`](docs/planning.md#1-active-phases).
+0c. **Phase 45, built and run 2026-10-07; sync pending**: the BusinessEvents function catalog (`functions/`)
+   becomes an API reference, copied verbatim to `-resources` like Javadoc, instead of
+   ~1,300 dropped pages per version. Re-run done; publishes with the family syncs.
 1. **Phase 40, built; two network runs left**: `download` takes each version's package
    name from the Coveo sitemap, so pre-rebrand and renamed versions stop failing
    (96 of the 1,435 still to download). Run `catalog sitemap` before a large download. See [`planning.md`](docs/planning.md#1-active-phases).

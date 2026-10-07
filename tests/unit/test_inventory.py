@@ -86,6 +86,41 @@ def test_a_nested_generator_tree_is_counted_once_through_its_outermost_root(tmp_
     assert find_api_roots(tree) == [tree / "html" / "api-reference"]
 
 
+CATALOG_INDEX = (
+    '<html><head><style type="text/css">@import "functions.css";</style></head>'
+    '<body class="category"><h1>TIBCO BusinessEvents 6.4.0</h1></body></html>'
+)
+
+
+def test_a_function_catalog_is_an_api_reference(tmp_path: Path) -> None:
+    """Phase 45: BusinessEvents' `functions/` is generated reference, copied like Javadoc."""
+    tree = build_tree(tmp_path / "be", {
+        "functions/functions.css": "",
+        "functions/index.html": CATALOG_INDEX,
+        "functions/Standard/Math/absInt.html": page(),
+        "html/functions/functions.css": "",
+        "html/functions/index.html": CATALOG_INDEX,
+        "html/topic.htm": page(),
+    })
+
+    roots = find_api_roots(tree)
+
+    assert roots == [tree / "functions", tree / "html" / "functions"]
+    assert is_api_reference(tree / "functions" / "Standard" / "Math" / "absInt.html", roots)
+    assert not is_api_reference(tree / "html" / "topic.htm", roots)
+
+
+def test_a_functions_stylesheet_without_a_catalog_index_is_documentation(tmp_path: Path) -> None:
+    """RTView's `CORE/Functions/` carries `functions.css` and is part of a user guide."""
+    tree = build_tree(tmp_path / "rtview", {
+        "guide/CORE/Functions/functions.css": "",
+        "guide/CORE/Functions/index.html": page(),
+        "guide/CORE/Functions/Abs.htm": page(),
+    })
+
+    assert find_api_roots(tree) == []
+
+
 @pytest.mark.parametrize("segment", ["API", "api", "JavaDoc", "javadoc", "Java_API", "C", "c"])
 def test_api_ish_names_are_compared_case_insensitively(segment: str) -> None:
     """Finding 3. Paths fold case; §9.1's identifiers never do."""

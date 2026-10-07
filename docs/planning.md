@@ -152,6 +152,58 @@ re-downloaded and unpacked (about 0.5 GB) to be re-converted.
 - **`REFRAME_LAYOUT_UNPINNED` is a note**, naming the chosen version. `reframe --dry-run` shows automatic pins in its Pinned column.
 - **Step 7 scope.** 55 of the 64 DITA plug-in versions are in `bwp-dita`. MDM 6.3.1 was done by hand. The 8 that never converted are blocked by the Windows path-length defect in root finding and engine detection, and wait for that fix.
 
+### Phase 45: A Function Catalog Is an API Reference — **Built and run 2026-10-07; sync pending**
+
+**Why.** BusinessEvents ships its catalog functions (signature, domain, description, one
+page per function) as a generated HTML tree, `functions/`, with no Flare markers. The
+converter drops each page as `no-content-container` and raises `CONTENT_MISSING` for it:
+5,234 warnings in the first BusinessEvents run (run 476), and no function reference in the
+output. The user's decision, 2026-10-07: treat it as Javadoc is treated, copied verbatim and
+published to the `-resources` repo.
+
+**Measured 2026-10-07** over `html-to-md/cache/pub` (`C:\tmp\an_funccat.py`):
+
+- 16 directories hold `functions.css`. 12 also have an `index.html` that imports
+  `functions.css` and opens `<body class="category">`: businessevents-enterprise 6.2.2–6.4.0
+  (`functions/` and an identical `html/functions/` in each) and bstudio-decisions-addin 1.3.0
+  and 1.4.0 (`Functions/`). The other 4 are 12-file `CORE/Functions` folders inside RTView
+  6.9.0–7.1.0 user guides, which are documentation. So `functions.css` alone is not a marker;
+  the pair is.
+- In the catalog: 6 versions convert (BE Enterprise 6.3.0, 6.3.1, 6.3.2, 6.4.0; Decisions
+  add-in 1.3.0, 1.4.0). BE 6.2.2 is retired.
+
+#### Decisions
+
+| decision | choice | why |
+|---|---|---|
+| **Marker** | A directory holding `functions.css` and an `index.html` whose first 4 KB imports `functions.css` and has `class="category"`. Added to `apiref.has_api_marker` beside the Javadoc and Doxygen markers | Matches the 12 catalogs and none of RTView's folders. A marker decides, a name never does (§6.3) |
+| **Both BE copies** | Both become API roots; sync's existing de-duplication publishes one | The two are byte-identical (checked on 6.4.0); sync already drops a root's duplicate |
+| **Published name** | From the path, as for every API tree: `functions` (Decisions add-in: `Functions`) | Existing rule in `sync/apirefs.py` |
+| **Links into it** | Rewritten to the `-resources` URL during `convert`, as for Javadoc | Existing behaviour once the root is recorded |
+
+#### Steps
+
+1. `apiref.py`: the function-catalog marker.
+2. Tests: a catalog fixture is an API root; an RTView-shaped `Functions/` with `functions.css` and no catalog index is not.
+3. Runs (the user): `extract --force` then `convert --force` for `tibco-businessevents-enterprise-edition` and `tibco-business-studio-activematrix-decisions-add-in`. The roots are recorded at extract, so a plain re-run would not see them.
+4. Docs: `design.md` §6.3.1 Finding 5 marker list, `user-guide.md` API-reference paragraph.
+
+*Exit: no `CONTENT_MISSING` under `functions/` in the six versions; their `_api_files` include the catalog; sync places one `functions` tree per version in `-resources`.*
+
+#### As built (2026-10-07)
+
+- Steps 1, 2 and 4 done. On the extracted trees the marker finds `functions/` and
+  `html/functions/` in BE Enterprise 6.4.0 and `Functions/` in Decisions add-in 1.4.0, and
+  nothing in the cached RTView 7.1.0.
+- **Step 3, runs (2026-10-07).** `extract --force` and `convert --force` for both products:
+  6 converted, 0 failed. BE Enterprise warnings 5,252 → 11 (run 476 → 478), no
+  `CONTENT_MISSING` left; `api-reference` skips 215 → 1,533 per version (1,491 in 6.3.0),
+  and `_api_files` now 3,106 (3,020 in 6.3.0). Topic output unchanged (same resolved counts).
+  Decisions add-in 1.4.0: `_api_files` 197. 1.3.0's inventory stays blank from an older
+  partial walk (unreadable WebWorks `wwhelp/wwhimpl/common/` folders, not this phase);
+  `find_api_roots` still finds its `Functions/`, which later stages locate themselves.
+  Exit met except the sync check, which waits for the family syncs.
+
 ---
 
 ## Carried-Forward Open Items
