@@ -20,7 +20,7 @@ import pytest
 
 from docushift.extractor import safe_extract
 from docushift.extractor.safe_unzip import UnsafeArchiveError
-from docushift.utils.longpath import long_path, over_limit, walk_files, walk_under
+from docushift.utils.longpath import long_path, long_paths_enabled, over_limit, walk_files, walk_under
 from docushift.utils.swap import swap
 
 WINDOWS = os.name == "nt"
@@ -192,6 +192,9 @@ def test_the_walk_finds_a_file_that_rglob_silently_drops(tmp_path: Path) -> None
     the prefix, and those 3 are exactly the files `copytree` then failed on. A
     check that cannot see the longest files in the tree it is checking passes.
     """
+    # Measured before the tree exists. With long paths on (Phase 46) the plain
+    # walk sees the file too, and only the prefixed walk's half is asserted.
+    limited = WINDOWS and not long_paths_enabled(tmp_path)
     deep = long_path(tmp_path / DEEP)
     deep.mkdir(parents=True)
     (deep / "over-the-ceiling.html").write_text("x", encoding="utf-8")
@@ -200,7 +203,7 @@ def test_the_walk_finds_a_file_that_rglob_silently_drops(tmp_path: Path) -> None
     plain = {path.name for path in tmp_path.rglob("*") if path.is_file()}
 
     assert "over-the-ceiling.html" in walked
-    if WINDOWS:
+    if limited:
         assert "over-the-ceiling.html" not in plain, "the unprefixed walk should miss it"
 
 
@@ -309,3 +312,28 @@ def test_the_odd_real_catalog_values_are_one_segment(part: str) -> None:
     from docushift.utils.longpath import segment_problem
 
     assert segment_problem(part) is None
+
+
+# -- Phase 46: the probe -------------------------------------------------------
+
+
+@pytest.mark.skipif(WINDOWS, reason="everywhere else there is no limit to probe")
+def test_the_probe_passes_where_there_is_no_limit(tmp_path: Path) -> None:
+    assert long_paths_enabled(tmp_path)
+
+
+def test_the_probe_leaves_nothing_behind(tmp_path: Path) -> None:
+    long_paths_enabled(tmp_path)
+
+    assert list(tmp_path.iterdir()) == []
+
+
+@pytest.mark.skipif(not WINDOWS, reason="the probe only runs on Windows")
+def test_the_probe_fails_when_a_long_path_cannot_be_written(tmp_path: Path, monkeypatch) -> None:
+    def refuse(self, *args, **kwargs):
+        raise FileNotFoundError(str(self))
+
+    monkeypatch.setattr(Path, "write_text", refuse)
+
+    assert not long_paths_enabled(tmp_path)
+    assert list(tmp_path.iterdir()) == []

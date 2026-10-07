@@ -136,6 +136,20 @@ def _run_rows(pairs, input_dir: Path | None, one: Callable, many: Callable, stat
     return stats
 
 
+class _LongPathsOff(click.ClickException):
+    """Exit 2: the machine cannot be trusted to see every file (Phase 46)."""
+
+    exit_code = 2
+
+
+def _require_long_paths(cfg: ConfigManager) -> None:
+    """Stops a command that reads or writes workspace trees when long paths are off."""
+    from docushift.utils.longpath import LONG_PATHS_OFF, long_paths_enabled
+
+    if not long_paths_enabled(cfg.cache_dir):
+        raise _LongPathsOff(LONG_PATHS_OFF)
+
+
 class _DocuShiftGroup(click.Group):
     """The top-level group: turns a `CatalogError` from any command into `Error: ...`.
 
@@ -1657,6 +1671,7 @@ def extract(ctx, bu, family, product, version, batch, select_all, force, measure
     from docushift.extractor import ExtractOutcome, PackageExtractor
 
     cfg: ConfigManager = ctx.obj["config"]
+    _require_long_paths(cfg)
     manager = _catalog_manager(ctx)
 
     # Opposites, not variants: one insists on re-reading the package, the other
@@ -1811,6 +1826,7 @@ def convert(ctx, bu, family, product, version, batch, select_all, force, dry_run
     from docushift.converter import ConvertOutcome, ConvertStats, DocumentConverter
 
     cfg: ConfigManager = ctx.obj["config"]
+    _require_long_paths(cfg)
     manager = _catalog_manager(ctx)
 
     _input_options(input_dir, output_dir, product, version)
@@ -1993,6 +2009,7 @@ def reframe(ctx, bu, family, product, version, batch, select_all, force, dry_run
     from docushift.reframe import REFRAMABLE_ENGINES, ReframeOutcome, Reframer, ReframeStats
 
     cfg: ConfigManager = ctx.obj["config"]
+    _require_long_paths(cfg)
     manager = _catalog_manager(ctx)
 
     _input_options(input_dir, output_dir, product, version)
@@ -2176,6 +2193,7 @@ def sync(ctx, bu, family, product, version, batch, select_all, target_dir, force
     from docushift.sync import ONLINE_HELP, WorkspaceDistributor
 
     cfg: ConfigManager = ctx.obj["config"]
+    _require_long_paths(cfg)
     manager = _catalog_manager(ctx)
 
     pairs = _download_selection(manager, bu, family, product, version, batch, select_all)
@@ -2308,6 +2326,9 @@ def validate(ctx, target_dir, product, version, doc_class, check_external, dry_r
     # here would make a target whose products left `versions.csv` unvalidatable,
     # which is the one tree somebody most wants checked.
     cfg: ConfigManager = ctx.obj["config"]
+    # A dry run opens no file, so it cannot miss one.
+    if not dry_run:
+        _require_long_paths(cfg)
     validator = Validator(target_dir)
     selection = validator.selection(product, version, doc_class)
     folders = [folder for entry in selection for folder in entry.versions]
@@ -3264,6 +3285,14 @@ def doctor(ctx: click.Context) -> None:
         + ("" if primary else " [dim](localized -- no -resources tree)[/dim]")
     )
     console.print("family workspaces: " + (", ".join(workspaces) if workspaces else "[dim]none yet[/dim]"))
+
+    from docushift.utils.longpath import LONG_PATHS_OFF, long_paths_enabled
+
+    if long_paths_enabled(cfg.cache_dir):
+        console.print("long paths: [green]on[/green]")
+    else:
+        console.print("long paths: [red]off[/red] -- extract, convert, reframe, sync and validate will refuse to run.")
+        console.print(LONG_PATHS_OFF, markup=False)
 
 
 if __name__ == "__main__":

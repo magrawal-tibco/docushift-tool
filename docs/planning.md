@@ -204,6 +204,50 @@ published to the `-resources` repo.
   `find_api_roots` still finds its `Functions/`, which later stages locate themselves.
   Exit met except the sync check, which waits for the family syncs.
 
+### Phase 46: Long Paths Are Read, or the Run Stops — **Built 2026-10-07; runs pending**
+
+**Why.** Windows hides any file whose full path is 260 characters or longer unless
+long-path support is turned on, and on this machine it is off (`LongPathsEnabled=0`).
+`Path.is_file()` and `iterdir()` then report the file as absent rather than failing, so the
+tool skips it without a word. Adapter for Files (Business Studio) 1.3.0 converted nothing:
+all 209 of its pages sit at 260–277 characters, because the slug appears twice, once in the
+workspace folder and once in the package's own wrapper folder. The user's decision,
+2026-10-07: turn the setting on, and make the tool refuse to run when it is off.
+
+**Measured 2026-10-07** over `families/*/extracted/` (`scratch/long-path-versions.tsv`):
+1,792 files and folders at 260+ characters in **50 versions**: 21 container-editions, 6 each
+activematrix, bw-plugin and ems, 4 each businessevents and di-ism, 3 adapters. All 50 have
+been processed: 37 `converted`, 12 `merged`, 1 `convert-failed`. They include ActiveMatrix
+Service Grid 3.4.3 and 3.4.4 (116 each; likely the cause of their 126
+`REFERENCE_UNRESOLVED` each), JD Edwards 6.0.0 and 6.1.0, and both Decisions add-in
+versions (their partial walks). Long-path support was confirmed absent by probe: 0 of 209
+pages pass `is_file()`.
+
+#### Decisions
+
+| decision | choice | why |
+|---|---|---|
+| **Read long paths** | Windows long-path support turned on (`HKLM\SYSTEM\CurrentControlSet\Control\FileSystem\LongPathsEnabled=1`, or the Group Policy "Enable Win32 long paths"). No code change to read them | `utils/longpath.long_path` already lifts the limit with the `\\?\` prefix (§4.4), but only where a call site uses it. `engines/roots._is_dita_root` and `apiref` do not, and a missed site fails silently. The setting covers every site at once, including ones not yet found |
+| **The guard** | `utils/longpaths.py` (new): a probe that writes and reads back a file at 300+ characters under the workspace's `cache/`, once per run. `extract`, `convert`, `reframe`, `sync` and `validate` stop with exit 2 and the fix in the message when it fails. Always passes off Windows | A probe tests what the running Python can actually do, which a registry read does not. A stop rather than a warning, because the failure is silent data loss |
+| **Re-run** | The 50 versions tagged `convert_batch=p46`, then extracted and converted with `--force`, reframed and re-synced | Their inventories, conversions and merges were all made from a partial view |
+
+#### Steps
+
+1. `utils/longpaths.py` and the guard in the five commands.
+2. Tests: the probe passes on a filesystem that keeps long paths; each guarded command exits 2 with the message when the probe fails; `download` and `catalog` are not guarded.
+3. The user turns the setting on (admin). Check: the probe passes, and Files 1.3.0's 209 pages pass `is_file()`.
+4. Runs (the user): tag the 50 versions `p46`; `extract --force --batch p46`; `convert --force --batch p46`; `reframe --batch p46`; then each family's `sync` and `validate`.
+5. Docs: `user-guide.md` §1 installation (the setting is a prerequisite on Windows), `architecture.md` where the workspace layout is described.
+
+*Exit: no file at 260+ characters is missing from `_doc_files`; Files 1.3.0 converts; Service Grid 3.4.3/3.4.4's `REFERENCE_UNRESOLVED` re-measured; no partial walk among the 50.*
+
+#### As built (2026-10-07)
+
+- Steps 1, 2 and 5 done. `utils/longpath.long_paths_enabled` is the probe; `cli._require_long_paths` raises exit 2 with `LONG_PATHS_OFF`. `validate --dry-run` is not probed, because it opens no file. `doctor` prints `long paths: on/off`.
+- An existing test (`test_the_walk_finds_a_file_that_rglob_silently_drops`) asserted that a plain walk misses a long file; it now asserts that only when the probe fails.
+- Step 3 done: the user turned the setting on. A new process sees all 209 of Files 1.3.0's pages, `find_output_roots` finds its `html/`, and the probe passes.
+- Step 4 (the runs) is next.
+
 ---
 
 ## Carried-Forward Open Items

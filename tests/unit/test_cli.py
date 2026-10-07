@@ -2080,3 +2080,44 @@ def test_report_prune_refuses_a_negative_keep(runner: CliRunner, populated_root:
 
     assert result.exit_code == 2
     assert _traceback_free(result), repr(result.exception)
+
+
+# -- Phase 46: a machine that cannot see long paths does not run --------------
+
+
+@pytest.mark.parametrize("command", ["extract", "convert", "reframe", "sync", "validate"])
+def test_a_tree_command_stops_when_long_paths_are_off(
+    runner: CliRunner, populated_root: Path, monkeypatch: pytest.MonkeyPatch, command: str
+) -> None:
+    monkeypatch.setattr("docushift.utils.longpath.long_paths_enabled", lambda scratch: False)
+    argv = [command, "--target-dir", str(populated_root)] if command in ("sync", "validate") else [command]
+    if command != "validate":
+        argv.append("--all")
+
+    result = _invoke(runner, populated_root, *argv)
+
+    assert result.exit_code == 2
+    assert "long-path support is off" in result.output
+    assert "LongPathsEnabled" in result.output
+
+
+def test_download_is_not_held_to_the_long_path_check(
+    runner: CliRunner, populated_root: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A ZIP lands at a short path; only commands that walk extracted trees need the setting."""
+    monkeypatch.setattr("docushift.utils.longpath.long_paths_enabled", lambda scratch: False)
+
+    result = _invoke(runner, populated_root, "download", "--all", "--dry-run")
+
+    assert "long-path support is off" not in result.output
+
+
+def test_doctor_says_when_long_paths_are_off(
+    runner: CliRunner, populated_root: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr("docushift.utils.longpath.long_paths_enabled", lambda scratch: False)
+
+    result = _invoke(runner, populated_root, "doctor")
+
+    assert result.exit_code == 0
+    assert "long paths: off" in result.output

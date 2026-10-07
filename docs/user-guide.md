@@ -29,6 +29,17 @@ git config --local core.commentChar ';'
 > `#`, which would strip the template's `## User Requests` / `## Changes` /
 > `## Technical Details` headers out of every commit message.
 
+**On Windows, turn on long-path support first** (once per machine, admin PowerShell):
+
+```powershell
+New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" -Name LongPathsEnabled -Value 1 -PropertyType DWORD -Force
+```
+
+Without it, Windows hides every file whose full path is 260 characters or longer, and some
+packages go well past that. `extract`, `convert`, `reframe`, `sync` and `validate` check at
+start and refuse to run (exit 2) when it is off; `doctor` shows `long paths: on` or `off`.
+Start a new shell after changing it.
+
 ### Verify the installation
 
 ```bash

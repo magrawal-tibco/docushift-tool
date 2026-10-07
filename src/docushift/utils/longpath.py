@@ -34,6 +34,7 @@ downstream, and that is a condition to report rather than to paper over.
 
 import os
 import re
+import shutil
 from collections.abc import Collection, Iterator
 from pathlib import Path
 
@@ -202,3 +203,45 @@ def path_segment(value: str, what: str) -> str:
     if problem is not None:
         raise ValueError(f"{what} {value!r} cannot be used as a folder name: {problem}")
     return value
+
+
+# Phase 46. The prefix above reaches only the call sites that use it, and a site
+# that forgets it does not fail: `is_file()` and `iterdir()` report a long path as
+# absent. Adapter for Files 1.3.0 converted nothing that way, and 49 other versions
+# lost files, all without a message. With Windows long-path support turned on, an
+# unprefixed path works at any length, so a run checks that once and refuses to
+# start without it.
+_PROBE_DEPTH = 300
+LONG_PATHS_OFF = (
+    "Windows long-path support is off, so files at 260+ characters would be skipped "
+    "without a warning. Turn it on (admin PowerShell):\n"
+    '  New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" '
+    "-Name LongPathsEnabled -Value 1 -PropertyType DWORD -Force\n"
+    'or the Group Policy "Enable Win32 long paths", then start a new shell.'
+)
+
+
+def long_paths_enabled(scratch: Path) -> bool:
+    """Can this process read and write a path past 260 characters without the prefix?
+
+    A probe rather than a registry read: what matters is what the running Python
+    can do, and that also depends on its manifest. It writes one file under
+    `scratch` through the *plain* spelling, reads it back, and removes it through
+    the prefix, so a failed probe leaves nothing behind. Always true off Windows.
+    """
+    if os.name != "nt":
+        return True
+    base = Path(os.path.abspath(scratch)) / f"longpath-probe-{os.getpid()}"
+    filler = "x" * 100
+    probe = base
+    while len(str(probe)) < _PROBE_DEPTH:
+        probe = probe / filler
+    probe = probe / "probe.txt"
+    try:
+        probe.parent.mkdir(parents=True, exist_ok=True)
+        probe.write_text("ok", encoding="utf-8")
+        return probe.read_text(encoding="utf-8") == "ok"
+    except OSError:
+        return False
+    finally:
+        shutil.rmtree(long_path(base), ignore_errors=True)

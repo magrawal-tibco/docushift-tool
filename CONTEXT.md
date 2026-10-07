@@ -202,6 +202,9 @@ Per-family folders are created on demand by the downloader, not at startup: pre-
 0c. **Phase 45, built and run 2026-10-07; sync pending**: the BusinessEvents function catalog (`functions/`)
    becomes an API reference, copied verbatim to `-resources` like Javadoc, instead of
    ~1,300 dropped pages per version. Re-run done; publishes with the family syncs.
+0d. **Phase 46, built 2026-10-07; runs pending**: Windows hides files at 260+ characters when long-path
+   support is off, and 50 processed versions lost files that way without a warning. Turn the
+   setting on (done); the tool now refuses to run without it. Next: re-run the 50.
 1. **Phase 40, built; two network runs left**: `download` takes each version's package
    name from the Coveo sitemap, so pre-rebrand and renamed versions stop failing
    (96 of the 1,435 still to download). Run `catalog sitemap` before a large download. See [`planning.md`](docs/planning.md#1-active-phases).
