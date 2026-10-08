@@ -158,6 +158,9 @@ business_units:
       messaging:
         name: "Messaging"
         description: "Data sources bridging Spotfire onto the messaging products"
+      data-virtualization:
+        name: "Data Virtualization"
+        description: "TIBCO Data Virtualization, moved to the Spotfire BU in Oct 2026"
 
   onebx:
     name: "OneBX"

@@ -20,7 +20,8 @@
 # `docushift catalog set --product <code> --in-scope`, which records
 # scope_source=manual and outranks everything here.
 #
-# 126 products: 64 Flogo connectors retired 2026-10-08, and 62 EBX/Spotfire.
+# 129 products: 64 Flogo connectors retired 2026-10-08, 3 moved to Spotfire the
+# same day, and 62 EBX/Spotfire.
 # 61 of the latter were verified against the live docs.tibco.com A-to-Z index on
 # 2026-09-09: 61/61 matched 1:1, all publicly visible, 0 ambiguous.
 
@@ -413,3 +414,15 @@ out_of_scope:
   - slug: tibco-flogo-connector-for-zuora
     display_name: "TIBCO Flogo® Connector for Zuora"
     reason: "Flogo connectors retired (2026-10-08)"
+
+  # Moved to the Spotfire BU and out of scope, 2026-10-08. The SAP BW connector,
+  # moved with them, was already listed above.
+  - slug: tibco-analytics
+    display_name: "TIBCO® Analytics"
+    reason: "Moved to the Spotfire BU, out of scope (2026-10-08)"
+  - slug: tibco-analytics-business-author-add-on
+    display_name: "TIBCO® Analytics - Business Author Add-on"
+    reason: "Moved to the Spotfire BU, out of scope (2026-10-08)"
+  - slug: tibco-analytics-consumer-add-on
+    display_name: "TIBCO® Analytics - Consumer Add-on"
+    reason: "Moved to the Spotfire BU, out of scope (2026-10-08)"

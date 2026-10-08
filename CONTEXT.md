@@ -17,7 +17,7 @@ phase that made them (`docs/planning.md` while open, `docs/history/phases/` once
 1. **Catalog & Discovery (On-Demand & Additive)**:
    - Queries `docs.tibco.com/a_z_products` and underlying APIs (`/api/a_to_z`, `/api/products/{slug}`, `/api/products/archive/{slug}`, `/api/product_list_by_suites`).
    - Discovers **Active Versions** (with "Download All Docs" ZIP endpoints) and **Archived Versions** ("Other Versions" archive index).
-   - **Product Scope**: 126 products (62 EBX/Spotfire, and 64 Flogo connectors retired 2026-10-08) are permanently excluded from conversion via `config/scope.yaml`, matched by exact docsite slug and recorded as `in_scope=false` in `products.csv`. They stay fully catalogued — excluded is not absent (`architecture.md` §3.10).
+   - **Product Scope**: 129 products (62 EBX/Spotfire, 64 Flogo connectors retired 2026-10-08, and 3 Analytics products moved to Spotfire the same day) are permanently excluded from conversion via `config/scope.yaml`, matched by exact docsite slug and recorded as `in_scope=false` in `products.csv`. They stay fully catalogued — excluded is not absent (`architecture.md` §3.10).
    - **End-of-Support**: support's retirement report is committed under `config/eos/` and re-applied by `catalog eos`, which resolves `release_status` / `retirement_date` / `release_status_source` onto each version row. A `retired` version is skipped by every working command; **only `retired` gates** — a dated retirement *announcement* still converts, and a version with no row is `unknown`, never retired (`architecture.md` §3.11).
    - **Conversion Policy**: Active versions are flagged `convert_eligible: true` by default; archived versions are captured for full inventory (`is_archived: true`, `convert_eligible: false` by default, convertable only if explicitly marked).
    - **Smart Merge**: Additive snapshot-based 3-way merge into `config/products.csv` and `config/versions.csv` that preserves manual user edits without requiring a manual override flag.
@@ -55,7 +55,7 @@ docushift-tool/
 │   ├── versions.csv        # Master Version registry (one row per version; convert_eligible toggles)
 │   ├── taxonomy.yaml       # Family definitions per BU + keyword inference rules (no per-product rows)
 │   ├── docsite.yaml        # docs.tibco.com discovery endpoints & crawling rules
-│   ├── scope.yaml          # 126 products never converted, matched by exact docsite slug (§3.10)
+│   ├── scope.yaml          # 129 products never converted, matched by exact docsite slug (§3.10)
 │   ├── eos.yaml            # Points at the support report + 14 reviewed name aliases (§3.11)
 │   ├── eos/                # Support's end-of-support report, committed as received
 │   ├── docsite-migration.yaml # Points at the docsite team's export + its column mapping
