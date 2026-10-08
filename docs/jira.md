@@ -28,9 +28,8 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 **Log** (newest first, one line per session):
 
 - 2026-10-08 — This session's reconcile and handoff work logged as DOCOPS-208 (Done, 0.5 SP,
-  under DOCOPS-101). Not yet reflected on DOCOPS-120: another session's catalog commits
-  f8d6dc8, e072d1c, 3c3df40, 68a9d11 (22 products reassigned, empty families dropped,
-  Flogo below 2.26.0 and retired versions disabled).
+  under DOCOPS-101). DOCOPS-120 progress comment brought up to 68a9d11 (22 products
+  reassigned, empty families dropped, Flogo below 2.26.0 and 90 retired versions disabled).
 
 - 2026-10-08 — Family/catalog gap check. Created DOCOPS-206 (Phase 48, Flogo retirement) and
   DOCOPS-207 (ibi family regroup, 2026-10-05), both Done, no `retro`. Progress comment on
