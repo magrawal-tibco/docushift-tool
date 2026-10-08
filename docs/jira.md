@@ -27,6 +27,9 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 **Log** (newest first, one line per session):
 
+- 2026-10-08 — DOCOPS-120 progress comment: added the pre-2016 ineligibility (3fe7d90) and
+  the Service Grid + Container Edition move to bpm (73d111c).
+
 - 2026-10-08 — This session's reconcile and handoff work logged as DOCOPS-208 (Done, 0.5 SP,
   under DOCOPS-101). DOCOPS-120 progress comment brought up to 68a9d11 (22 products
   reassigned, empty families dropped, Flogo below 2.26.0 and 90 retired versions disabled).
