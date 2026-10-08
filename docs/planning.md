@@ -467,6 +467,65 @@ Reproduced in a private root (`C:\tmp\sgroot`, staging kept) on 2026-10-07. Four
   and IBM MQ (2): those topics no longer lead a page under the per-guide layout; neither
   merge had been published. Exit met; both `open-issues.md` entries closed.
 
+### Phase 48: Flogo Connectors Retire; the VS Code Extension Joins Flogo — **Done 2026-10-08**
+
+**Why.** A business change on 2026-10-08: the Flogo Extension for Visual Studio Code
+(`flogo-vscode`) moves to the Flogo family, and only its latest version gets converted. The
+other 64 Flogo Connectors products are retired, so none of them get converted.
+
+**Measured 2026-10-08:** `flogo-connectors` holds 65 products, assigned by `taxonomy_rule`.
+The 64 that are not `flogo-vscode` have 153 versions: 103 merged, 6 `pdf-ready`, 5
+`download-failed`, 39 not eligible. `flogo-vscode` has 11 eligible versions (1.0.0–1.3.5),
+all merged. All of this work sits under `en-us-tib-flogo-connectors` in `families/`,
+`output/` and `reframed/`. No `en-us-tib-flogo` workspace exists yet. This phase needs no
+code change.
+
+#### Decisions
+
+| decision | choice | why |
+|---|---|---|
+| **Retire the 64** | Add one `scope.yaml` `out_of_scope` entry per slug, with the reason "Flogo connectors retired (2026-10-08)" | One reviewable file. It also excludes versions a later fetch discovers, which a per-version `release_status=retired` would miss (user, 2026-10-08) |
+| **Move `flogo-vscode`** | `catalog set --family flogo`, which pins `family_source=manual` | `flogo` is already declared in `taxonomy.yaml`, so no new family and no new `repo_slug` |
+| **Only 1.3.5** | `catalog enable --disable` for 1.0.0–1.3.4; 1.3.5 stays eligible | A one-off choice for this product, not a "latest only" rule (user, 2026-10-08). The disable survives a fetch through the snapshot (`set_conversion_eligibility`), not through a pin |
+| **Existing connector work** | After the `flogo-vscode` 1.3.5 work has moved, delete `en-us-tib-flogo-connectors` from `families/`, `output/` and `reframed/` | The user's call (2026-10-08). The catalog rows stay, as for every out-of-scope product |
+| **`flogo-vscode` 1.0.0–1.3.4 work** | Delete with the rest; do not move it | Not eligible any more, so nothing would read it |
+| **`flogo-connectors` in `taxonomy.yaml`** | Keep the family | Its 64 products are still in the catalog and still belong to it; only the work stops |
+
+#### Steps
+
+1. `config/scope.yaml`: 64 entries (slug, display name, reason), and update the header count
+   (62 → 126).
+2. `catalog set --product flogo-vscode --family flogo`; `catalog enable --disable` for the
+   ten older versions; then `catalog import` so `in_scope` and the `_family` columns update.
+3. Move `flogo-vscode` 1.3.5 (the ZIP, the extracted tree, the converted output and the
+   reframed output) from `en-us-tib-flogo-connectors` to `en-us-tib-flogo`. Read the paths
+   from the stage layouts before moving anything.
+4. Check, read-only: `catalog show --product flogo-vscode`, `catalog list --eligible-only
+   --family flogo-connectors` (expect empty), and that `reframe` / `sync` dry runs find
+   1.3.5 under the new workspace without re-converting it.
+5. Delete the three `en-us-tib-flogo-connectors` folders (the user, as `!` commands).
+6. Docs: `CONTEXT.md` (the scope count), `docs/open-issues.md` (close any Flogo connector
+   items), `docs/jira.md` if this is logged.
+
+*Exit: no `flogo-connectors` version is eligible; `flogo-vscode` sits in `flogo` with 1.3.5 as
+its only eligible version, and its output resolves in `en-us-tib-flogo`; the old connector
+workspace is gone.*
+
+#### As built (2026-10-08)
+
+- Steps 1–4 done. `catalog import` does not read `scope.yaml`; only the fetch merge does, so
+  step 2 also ran `catalog fetch --family flogo-connectors`: 64 products to
+  `in_scope=false (scope_rule)`, 0 added, 0 removed. The `versions.csv` changes are only
+  `_status` (163), `_status_date`, `_family` (11) and `convert_eligible` (10).
+- Moved 1.3.5 in all four stages. `state.db` keeps the old download and extract paths for
+  information only (stages compute paths from the family), and they were rewritten for the
+  one row; a backup is at `C:\tmp\state-before-p48.db`.
+- Dry runs: `convert` and `reframe` resolve 1.3.5 under `en-us-tib-flogo`, with both trees
+  present. `sync` would place it, merged, in `en-us-tib-flogo-userdocs`. No connector
+  version had been synced, so no target repo holds connector pages.
+- `docs/open-issues.md` has no Flogo entries. Step 5 done by the user (2026-10-08); only
+  `en-us-tib-flogo` remains, holding 1.3.5.
+
 ---
 
 ## Carried-Forward Open Items

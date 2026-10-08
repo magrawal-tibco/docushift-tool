@@ -20,7 +20,8 @@
 # `docushift catalog set --product <code> --in-scope`, which records
 # scope_source=manual and outranks everything here.
 #
-# 62 products. 61 were verified against the live docs.tibco.com A-to-Z index on
+# 126 products: 64 Flogo connectors retired 2026-10-08, and 62 EBX/Spotfire.
+# 61 of the latter were verified against the live docs.tibco.com A-to-Z index on
 # 2026-09-09: 61/61 matched 1:1, all publicly visible, 0 ambiguous.
 
 out_of_scope:
@@ -217,3 +218,198 @@ out_of_scope:
   - slug: tibco-spotfire-web-player
     display_name: "TIBCO Spotfire® Web Player"
     reason: "EBX and Spotfire are out of scope for migration (2026-09-09)"
+
+  # Flogo Connectors, retired 2026-10-08 (planning.md Phase 48). Every product of the
+  # family except flogo-vscode, which moved to `flogo`.
+  - slug: tibco-flogo-connection-for-microsoft-azure
+    display_name: "TIBCO Flogo® Connection for Microsoft Azure"
+    reason: "Flogo connectors retired (2026-10-08)"
+  - slug: tibco-flogo-connection-for-sap
+    display_name: "TIBCO Flogo® Connection for SAP"
+    reason: "Flogo connectors retired (2026-10-08)"
+  - slug: tibco-flogo-connector-db-service
+    display_name: "TIBCO Flogo® Connector DB Service"
+    reason: "Flogo connectors retired (2026-10-08)"
+  - slug: tibco-flogo-connector-for-amazon-dynamodb
+    display_name: "TIBCO Flogo® Connector for Amazon DynamoDB"
+    reason: "Flogo connectors retired (2026-10-08)"
+  - slug: tibco-flogo-connector-for-amazon-elastic-file-system
+    display_name: "TIBCO Flogo® Connector for Amazon Elastic File System"
+    reason: "Flogo connectors retired (2026-10-08)"
+  - slug: tibco-flogo-connector-for-amazon-glacier
+    display_name: "TIBCO Flogo® Connector for Amazon Glacier"
+    reason: "Flogo connectors retired (2026-10-08)"
+  - slug: tibco-flogo-connector-for-amazon-kinesis
+    display_name: "TIBCO Flogo® Connector for Amazon Kinesis"
+    reason: "Flogo connectors retired (2026-10-08)"
+  - slug: tibco-flogo-connector-for-amazon-redshift
+    display_name: "TIBCO Flogo® Connector for Amazon Redshift"
+    reason: "Flogo connectors retired (2026-10-08)"
+  - slug: tibco-flogo-connector-for-amazon-s3
+    display_name: "TIBCO Flogo® Connector for Amazon S3"
+    reason: "Flogo connectors retired (2026-10-08)"
+  - slug: tibco-flogo-connector-for-amazon-sns
+    display_name: "TIBCO Flogo® Connector for Amazon SNS"
+    reason: "Flogo connectors retired (2026-10-08)"
+  - slug: tibco-flogo-connector-for-amazon-sqs
+    display_name: "TIBCO Flogo® Connector for Amazon SQS"
+    reason: "Flogo connectors retired (2026-10-08)"
+  - slug: tibco-flogo-connector-for-apache-avro
+    display_name: "TIBCO Flogo® Connector for Apache Avro"
+    reason: "Flogo connectors retired (2026-10-08)"
+  - slug: tibco-flogo-connector-for-apache-couchdb
+    display_name: "TIBCO Flogo® Connector for Apache CouchDB"
+    reason: "Flogo connectors retired (2026-10-08)"
+  - slug: tibco-flogo-connector-for-apache-kafka
+    display_name: "TIBCO Flogo® Connector for Apache Kafka"
+    reason: "Flogo connectors retired (2026-10-08)"
+  - slug: tibco-flogo-connector-for-apache-pulsar
+    display_name: "TIBCO Flogo® Connector for Apache Pulsar"
+    reason: "Flogo connectors retired (2026-10-08)"
+  - slug: tibco-flogo-connector-for-apache-solr
+    display_name: "TIBCO Flogo® Connector for Apache Solr"
+    reason: "Flogo connectors retired (2026-10-08)"
+  - slug: tibco-flogo-connector-for-data-conversion
+    display_name: "TIBCO Flogo® Connector for Data Conversion"
+    reason: "Flogo connectors retired (2026-10-08)"
+  - slug: tibco-flogo-connector-for-docusign
+    display_name: "TIBCO Flogo® Connector for DocuSign"
+    reason: "Flogo connectors retired (2026-10-08)"
+  - slug: tibco-flogo-connector-for-github
+    display_name: "TIBCO Flogo® Connector for GitHub"
+    reason: "Flogo connectors retired (2026-10-08)"
+  - slug: tibco-flogo-connector-for-google-cloud-pub-sub
+    display_name: "TIBCO Flogo® Connector for Google Cloud Pub/Sub"
+    reason: "Flogo connectors retired (2026-10-08)"
+  - slug: tibco-flogo-connector-for-google-cloud-sql
+    display_name: "TIBCO Flogo® Connector for Google Cloud SQL"
+    reason: "Flogo connectors retired (2026-10-08)"
+  - slug: tibco-flogo-connector-for-google-cloud-storage
+    display_name: "TIBCO Flogo® Connector for Google Cloud Storage"
+    reason: "Flogo connectors retired (2026-10-08)"
+  - slug: tibco-flogo-connector-for-google-docs
+    display_name: "TIBCO Flogo® Connector for Google Docs"
+    reason: "Flogo connectors retired (2026-10-08)"
+  - slug: tibco-flogo-connector-for-google-sheets
+    display_name: "TIBCO Flogo® Connector for Google Sheets"
+    reason: "Flogo connectors retired (2026-10-08)"
+  - slug: tibco-flogo-connector-for-greenplum-database
+    display_name: "TIBCO Flogo® Connector for Greenplum Database"
+    reason: "Flogo connectors retired (2026-10-08)"
+  - slug: tibco-flogo-connector-for-http
+    display_name: "TIBCO Flogo® Connector for HTTP"
+    reason: "Flogo connectors retired (2026-10-08)"
+  - slug: tibco-flogo-connector-for-hubspot
+    display_name: "TIBCO Flogo® Connector for HubSpot"
+    reason: "Flogo connectors retired (2026-10-08)"
+  - slug: tibco-flogo-connector-for-ibm-mq
+    display_name: "TIBCO Flogo® Connector for IBM MQ"
+    reason: "Flogo connectors retired (2026-10-08)"
+  - slug: tibco-flogo-connector-for-jira
+    display_name: "TIBCO Flogo® Connector for Jira"
+    reason: "Flogo connectors retired (2026-10-08)"
+  - slug: tibco-flogo-connector-for-magento
+    display_name: "TIBCO Flogo® Connector for Magento"
+    reason: "Flogo connectors retired (2026-10-08)"
+  - slug: tibco-flogo-connector-for-mailchimp
+    display_name: "TIBCO Flogo® Connector for MailChimp"
+    reason: "Flogo connectors retired (2026-10-08)"
+  - slug: tibco-flogo-connector-for-marketo
+    display_name: "TIBCO Flogo® Connector for Marketo"
+    reason: "Flogo connectors retired (2026-10-08)"
+  - slug: tibco-flogo-connector-for-microsoft-azure-data-factory
+    display_name: "TIBCO Flogo® Connector for Microsoft Azure Data Factory"
+    reason: "Flogo connectors retired (2026-10-08)"
+  - slug: tibco-flogo-connector-for-microsoft-azure-service-bus
+    display_name: "TIBCO Flogo® Connector for Microsoft Azure Service Bus"
+    reason: "Flogo connectors retired (2026-10-08)"
+  - slug: tibco-flogo-connector-for-microsoft-azure-storage
+    display_name: "TIBCO Flogo® Connector for Microsoft Azure Storage"
+    reason: "Flogo connectors retired (2026-10-08)"
+  - slug: tibco-flogo-connector-for-microsoft-sql-server
+    display_name: "TIBCO Flogo® Connector for Microsoft SQL Server"
+    reason: "Flogo connectors retired (2026-10-08)"
+  - slug: tibco-flogo-connector-for-mongodb
+    display_name: "TIBCO Flogo® Connector for MongoDB"
+    reason: "Flogo connectors retired (2026-10-08)"
+  - slug: tibco-flogo-connector-for-mqtt
+    display_name: "TIBCO Flogo® Connector for MQTT"
+    reason: "Flogo connectors retired (2026-10-08)"
+  - slug: tibco-flogo-connector-for-odata
+    display_name: "TIBCO Flogo® Connector for OData"
+    reason: "Flogo connectors retired (2026-10-08)"
+  - slug: tibco-flogo-connector-for-oracle-database
+    display_name: "TIBCO Flogo® Connector for Oracle Database"
+    reason: "Flogo connectors retired (2026-10-08)"
+  - slug: tibco-flogo-connector-for-oracle-mysql
+    display_name: "TIBCO Flogo® Connector for Oracle MySQL"
+    reason: "Flogo connectors retired (2026-10-08)"
+  - slug: tibco-flogo-connector-for-postgresql
+    display_name: "TIBCO Flogo® Connector for PostgreSQL"
+    reason: "Flogo connectors retired (2026-10-08)"
+  - slug: tibco-flogo-connector-for-redis
+    display_name: "TIBCO Flogo® Connector for Redis"
+    reason: "Flogo connectors retired (2026-10-08)"
+  - slug: tibco-flogo-connector-for-riak
+    display_name: "TIBCO Flogo® Connector for Riak"
+    reason: "Flogo connectors retired (2026-10-08)"
+  - slug: tibco-flogo-connector-for-salesforce-com
+    display_name: "TIBCO Flogo® Connector for Salesforce.com"
+    reason: "Flogo connectors retired (2026-10-08)"
+  - slug: tibco-flogo-connector-for-salesforce-com-einstein-analytics
+    display_name: "TIBCO Flogo® Connector for Salesforce.com Einstein Analytics"
+    reason: "Flogo connectors retired (2026-10-08)"
+  - slug: tibco-flogo-connector-for-salesforce-pardot
+    display_name: "TIBCO Flogo® Connector for Salesforce Pardot"
+    reason: "Flogo connectors retired (2026-10-08)"
+  - slug: tibco-flogo-connector-for-sap-cloud-for-customer
+    display_name: "TIBCO Flogo® Connector for SAP Cloud for Customer"
+    reason: "Flogo connectors retired (2026-10-08)"
+  - slug: tibco-flogo-connector-for-sap-hana-database
+    display_name: "TIBCO Flogo® Connector for SAP HANA Database"
+    reason: "Flogo connectors retired (2026-10-08)"
+  - slug: tibco-flogo-connector-for-sap-s-4hana-cloud
+    display_name: "TIBCO Flogo® Connector for SAP S/4HANA Cloud"
+    reason: "Flogo connectors retired (2026-10-08)"
+  - slug: tibco-flogo-connector-for-sap-successfactors
+    display_name: "TIBCO Flogo® Connector for SAP SuccessFactors"
+    reason: "Flogo connectors retired (2026-10-08)"
+  - slug: tibco-flogo-connector-for-sftp
+    display_name: "TIBCO Flogo® Connector for sFTP"
+    reason: "Flogo connectors retired (2026-10-08)"
+  - slug: tibco-flogo-connector-for-slack
+    display_name: "TIBCO Flogo® Connector for Slack"
+    reason: "Flogo connectors retired (2026-10-08)"
+  - slug: tibco-flogo-connector-for-snowflake
+    display_name: "TIBCO Flogo® Connector for Snowflake"
+    reason: "Flogo connectors retired (2026-10-08)"
+  - slug: tibco-flogo-connector-for-stripe
+    display_name: "TIBCO Flogo® Connector for Stripe"
+    reason: "Flogo connectors retired (2026-10-08)"
+  - slug: tibco-flogo-connector-for-sugarcrm
+    display_name: "TIBCO Flogo® Connector for SugarCRM"
+    reason: "Flogo connectors retired (2026-10-08)"
+  - slug: tibco-flogo-connector-for-tibco-cloud-auditsafe
+    display_name: "TIBCO Flogo® Connector for TIBCO Cloud™ AuditSafe"
+    reason: "Flogo connectors retired (2026-10-08)"
+  - slug: tibco-flogo-connector-for-tibco-cloud-messaging
+    display_name: "TIBCO Flogo® Connector for TIBCO Cloud™ Messaging"
+    reason: "Flogo connectors retired (2026-10-08)"
+  - slug: tibco-flogo-connector-for-tibco-data-virtualization
+    display_name: "TIBCO Flogo® Connector for TIBCO® Data Virtualization"
+    reason: "Flogo connectors retired (2026-10-08)"
+  - slug: tibco-flogo-connector-for-tibco-enterprise-message-service
+    display_name: "TIBCO Flogo® Connector for TIBCO Enterprise Message Service™"
+    reason: "Flogo connectors retired (2026-10-08)"
+  - slug: tibco-flogo-connector-for-twilio
+    display_name: "TIBCO Flogo® Connector for Twilio"
+    reason: "Flogo connectors retired (2026-10-08)"
+  - slug: tibco-flogo-connector-for-websockets
+    display_name: "TIBCO Flogo® Connector for WebSockets"
+    reason: "Flogo connectors retired (2026-10-08)"
+  - slug: tibco-flogo-connector-for-zoho-crm
+    display_name: "TIBCO Flogo® Connector for Zoho CRM"
+    reason: "Flogo connectors retired (2026-10-08)"
+  - slug: tibco-flogo-connector-for-zuora
+    display_name: "TIBCO Flogo® Connector for Zuora"
+    reason: "Flogo connectors retired (2026-10-08)"
