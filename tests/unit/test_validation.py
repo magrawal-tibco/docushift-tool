@@ -111,6 +111,13 @@ def test_a_reference_on_an_indented_line_is_checked_and_one_in_a_fence_is_not() 
     assert found == {"media/indented.png"}
 
 
+def test_a_linked_image_yields_the_image_and_the_link_around_it() -> None:
+    """Phase 44: the inline pattern alone never saw the outer destination."""
+    text = "[![shot](media/a_thumb.png)](media/a.png)\n"
+
+    assert sorted(r.raw for r in refs.references(text)) == ["media/a.png", "media/a_thumb.png"]
+
+
 def test_frontmatter_is_masked_so_a_yaml_value_is_not_read_as_a_link() -> None:
     text = '---\ntitle: "[a](b.md)"\n---\n\n[real](c.md)\n'
 
@@ -275,6 +282,23 @@ def test_a_reference_climbing_out_of_the_version_folder_is_broken(tmp_path: Path
 
     assert codes(report.findings) == ["LINK_BROKEN"]
     assert "climbs out" in report.findings[0].message
+
+
+def test_a_link_into_unfiled_is_a_note_and_unfiled_pages_linking_out_are_not(
+    tmp_path: Path,
+) -> None:
+    """Phase 43: the link resolves on disk and breaks on AEM, so it is recorded."""
+    target = tmp_path / "target"
+    publish(target, {
+        "guide/a.md": "[hidden](../unfiled/guide/hidden.md)\n",
+        "unfiled/guide/hidden.md": "# Hidden\n\n[back](../../guide/a.md)\n",
+    })
+
+    report, _ = links_of(target)
+
+    assert codes(report.findings) == ["LINK_TO_UNFILED"]
+    assert report.findings[0].path.endswith("guide/a.md:1")
+    assert REGISTRY["LINK_TO_UNFILED"].severity is Severity.NOTE
 
 
 def test_a_host_less_tree_rooted_link_resolves_against_the_target_root(tmp_path: Path) -> None:

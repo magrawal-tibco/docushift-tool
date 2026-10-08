@@ -45,7 +45,9 @@ _NOT_OUTPUT = frozenset({"publish"})
 #: repeated headings (Phase 34, R9-01, R9-02). Links only, no boundary. The
 #: same bump covers R9-03: a page the TOC never lists is named in the folder it
 #: is written to, which it now borrows from its guide, so its path moves.
-_ALGORITHM = 5
+#: 6 = the outer link of a linked image, `[![alt](src)](href)`, is re-pathed
+#: (Phase 44). Links only.
+_ALGORITHM = 6
 
 
 @dataclass(frozen=True)

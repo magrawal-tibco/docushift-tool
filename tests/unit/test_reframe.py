@@ -20,6 +20,7 @@ import pytest
 import yaml
 
 from docushift.config import ConfigManager
+from docushift.converter.orphans import INBOUND
 from docushift.models import SourceEngine
 from docushift.reframe import ReframeOutcome, Reframer, policy_for
 from docushift.reframe import csh as csh_map
@@ -383,6 +384,26 @@ def test_a_topic_the_toc_never_lists_is_carried_through_and_named(config, catalo
     # what was in it. Carrying it through is not the same as inventing a TOC row.
     document = yaml.safe_load((result.path / "toc.yml").read_text(encoding="utf-8"))
     assert "stray" not in yaml.safe_dump(document)
+
+
+def test_links_from_merged_pages_into_unfiled_are_listed_in_the_merged_tree(config, catalog, flare):
+    """Phase 43: the merged pages link from new places, so the list is rebuilt."""
+    tree = converted_tree(config, flare, "10.5.1")
+    (tree / "users-guide/user-guide.md").write_text(
+        "# User Guide\n\nSee [Smart Engine](../unfiled/src/Smart_Engine.md).\n", encoding="utf-8")
+    (tree / "unfiled/src").mkdir(parents=True)
+    (tree / "unfiled/src/Smart_Engine.md").write_text(
+        "---\ntitle: Smart Engine\n---\n\n# Smart Engine\n", encoding="utf-8")
+
+    result = Reframer(config, catalog, findings=FindingsRun("reframe")).reframe_one(
+        flare, flare.versions["10.5.1"]
+    )
+
+    assert result.outcome is ReframeOutcome.REFRAMED
+    rows = csvio.read_rows(result.path / INBOUND)
+    assert [(row["link_text"], row["orphan"], row["orphan_title"]) for row in rows] == [
+        ("Smart Engine", "unfiled/src/Smart_Engine.md", "Smart Engine")]
+    assert (result.path / rows[0]["page"]).is_file()
 
 
 def test_an_asset_of_any_shape_is_copied_through(config, catalog, flare):
@@ -1087,27 +1108,6 @@ def test_a_topic_listed_under_two_guides_gets_a_copy_in_each():
     assert merged["docs"][1]["subfolderlist"] == [{"title": "Shared", "url": "second.md#shared"}]
 
 
-def test_a_topic_listed_twice_inside_one_guide_is_still_packed_once():
-    """Within a guide the second listing is a cross-reference rather than a
-    second placement: one page, and the later row points at it."""
-    roots = [node("Guide", "g/a.md", node("Shared", "g/s.md"), node("Again", "g/s.md"))]
-
-    pages = pack(roots, sized(g__a=10, g__s=10), 3000)
-    placements: dict[int, tuple] = {}
-    located = assign(pages, None, placements)
-
-    assert layout(pages) == [["g/a.md", "g/s.md"]]
-    assert retarget(roots, located, placements)["docs"][0]["subfolderlist"] == [
-        {"title": "Shared", "url": "g/guide.md#shared"},
-        {"title": "Again", "url": "g/guide.md#shared"},
-    ]
-
-
-def test_a_toc_entry_naming_a_section_keeps_that_section_after_the_merge():
-    """X1-05. A converted entry can point at a section (`a.md#s1`, batch 3's
-    R7-01), and the rewrite used to collapse it onto its topic's head, so two
-    rows for two sections became two rows for one place. A fragment naming no
-    heading there, or the topic's own, keeps the old answer."""
 def two_guides():
     return [
         node("First", "g/a.md", node("Shared", "g/s.md")),
@@ -1196,6 +1196,27 @@ def test_a_projected_page_seven_rows_down_still_opens_at_h1():
     assert [topic.level for topic in page.topics] == [1, 2]
 
 
+def test_a_topic_listed_twice_inside_one_guide_is_still_packed_once():
+    """Within a guide the second listing is a cross-reference rather than a
+    second placement: one page, and the later row points at it."""
+    roots = [node("Guide", "g/a.md", node("Shared", "g/s.md"), node("Again", "g/s.md"))]
+
+    pages = pack(roots, sized(g__a=10, g__s=10), 3000)
+    placements: dict[int, tuple] = {}
+    located = assign(pages, None, placements)
+
+    assert layout(pages) == [["g/a.md", "g/s.md"]]
+    assert retarget(roots, located, placements)["docs"][0]["subfolderlist"] == [
+        {"title": "Shared", "url": "g/guide.md#shared"},
+        {"title": "Again", "url": "g/guide.md#shared"},
+    ]
+
+
+def test_a_toc_entry_naming_a_section_keeps_that_section_after_the_merge():
+    """X1-05. A converted entry can point at a section (`a.md#s1`, batch 3's
+    R7-01), and the rewrite used to collapse it onto its topic's head, so two
+    rows for two sections became two rows for one place. A fragment naming no
+    heading there, or the topic's own, keeps the old answer."""
     page = Page(
         "Guide",
         [Topic("A", PurePosixPath("g/a.md"), 10), Topic("B", PurePosixPath("g/b.md"), 10)],
@@ -1687,6 +1708,15 @@ def test_a_link_onto_another_page_is_repathed_and_keeps_an_anchor(linked):
 
     assert rewrite("see [C](../h/c.md).", linked, counts) == "see [C](../h/other-topics.md#c)."
     assert counts.inter == 1
+
+
+def test_the_link_around_an_image_is_repathed_like_any_link(linked):
+    """Phase 44: `[![alt](src)](href)`, where only `src` used to be read."""
+    counts = LinkCounts()
+
+    assert (rewrite("[![C](img.png)](../h/c.md)", linked, counts)
+            == "[![C](img.png)](../h/other-topics.md#c)")
+    assert (counts.inter, counts.asset) == (1, 1)
 
 
 def test_an_asset_reference_is_recomputed_from_the_new_page(linked):
@@ -2725,6 +2755,22 @@ def test_a_carried_page_goes_in_with_the_guide_its_source_folder_belongs_to():
 
     assert str(pages[-1].path) == "tibco-runtime-agent/legal-and-third-party-notices.md"
     assert "legal-and-third-party-notices.md" in [str(page.path) for page in pages]
+
+
+
+def test_an_unfiled_orphan_keeps_its_converted_path_unmerged():
+    """Phase 43. An orphan is copied through as one page at the path `convert`
+    gave it, so both trees publish it at one address -- never renamed after its
+    title and never moved into a guide's folder."""
+    roots = [node("Guide", "src/a.md")]
+    pages = pack(roots, lambda p: 10, 3000) + carry(
+        [PurePosixPath("unfiled/src/Smart_Engine.md")], lambda p: "Smart Engine", lambda p: 10
+    )
+    assign(pages)
+    relocate(pages, roots)
+
+    assert [str(page.path) for page in pages] == ["guide.md", "unfiled/src/Smart_Engine.md"]
+    assert [len(page.topics) for page in pages] == [1, 1]
 
 
 # -- rename-map.csv (Phase 29) --------------------------------------------------

@@ -41,6 +41,7 @@ import yaml
 from docushift import origins
 from docushift.catalog import CatalogError, CatalogManager
 from docushift.config import ConfigManager
+from docushift.converter.orphans import write_inbound
 from docushift.models import Product, ProductVersion, SourceEngine
 from docushift.reframe import csh as csh_map
 from docushift.reframe import manifest, renames, review
@@ -67,6 +68,7 @@ from docushift.reporting.findings import FindingsRun
 from docushift.utils import textfile
 from docushift.utils.anchors import HEADING
 from docushift.utils.longpath import long_path, walk_files
+from docushift.utils.naming import is_unfiled
 from docushift.utils.slug import version_segment
 from docushift.utils.swap import recover, remove, staging_of, swap
 
@@ -540,13 +542,16 @@ class Reframer:
         stranded = [
             path for path in source.topics if path not in {entry.path for entry in nodes}
         ]
-        if stranded:
-            shown = ", ".join(str(path) for path in stranded[:5])
+        # Phase 43: a topic in `unfiled/` is out of the TOC by decision, so it is
+        # carried like the rest but is not news.
+        untocked = [path for path in stranded if not is_unfiled(path)]
+        if untocked:
+            shown = ", ".join(str(path) for path in untocked[:5])
             self._record(
                 "REFRAME_TOPIC_UNTOCKED", slug, number,
                 message=(
-                    f"{len(stranded)} topic(s) absent from toc.yml, carried through as "
-                    f"single-topic pages: {shown}{', ...' if len(stranded) > 5 else ''}"
+                    f"{len(untocked)} topic(s) absent from toc.yml, carried through as "
+                    f"single-topic pages: {shown}{', ...' if len(untocked) > 5 else ''}"
                 ),
             )
         carried = carry(
@@ -648,6 +653,8 @@ class Reframer:
             queue, self._url_for(product, version), placements, cut, worked,
         )
         self._write_origins(staging, product, version, located, standalone)
+        # The merged pages link differently from the converted ones (Phase 43).
+        write_inbound(staging)
 
         failures = audit(
             built, located, roots,

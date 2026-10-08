@@ -150,15 +150,17 @@ REGISTRY: dict[str, Code] = _codes(
          "A Flare root's HelpSystem.xml or declared TOC is missing or did not parse, "
          "or a WebWorks book's runtime file (files.js, toc.js, title.js, context.js) "
          "is present and could not be read or yields nothing; its topics are filed "
-         "under Unfiled, or the book loses what that file named",
+         "under an Unfiled node, or the book loses what that file named",
          "Phase 34 (R5-12, R7-09)"),
     Code("TOC_SUBPROJECT_UNPLACED", Severity.NOTE, Stage.CONVERT,
          "A merged-project TOC node (*.flprj) marking where a sub-project's TOC "
          "goes; the node is dropped and the sub-guide loses its place",
          "Phase 34 (R5-11)"),
     Code("TOC_ORPHAN", Severity.NOTE, Stage.CONVERT,
-         "Converted topics in no TOC entry, filed under Unfiled -- 14.1% for Flare",
-         "architecture.md §5.1.4"),
+         "Converted topics in no TOC entry, kept out of toc.yml and unmerged under "
+         "unfiled/ -- 5.9% for Flare; left in an Unfiled node only when the version "
+         "has no other TOC entry",
+         "architecture.md §5.1.4, Phase 43"),
     Code("TOPIC_LINK_DANGLING", Severity.NOTE, Stage.CONVERT,
          "A cross-reference to a topic this run did not produce; text kept, link dropped",
          "architecture.md §5.1.3"),
@@ -198,11 +200,11 @@ REGISTRY: dict[str, Code] = _codes(
          "Unreferenced asset -- 54.6% is normal for Flare", "architecture.md §5.5.7"),
     Code("REFERENCE_UNRESOLVED", Severity.ERROR, Stage.CONVERT,
          "A reference producing neither link nor copy", "design.md invariant 13"),
-    Code("CSH_UNRESOLVED", Severity.WARNING, Stage.CONVERT,
-         "Identifier matched no produced topic", "planning.md Phase 6 contract"),
     Code("REFERENCE_PAGE_SEGMENT_DROPPED", Severity.NOTE, Stage.CONVERT,
          "A reference naming a page as a folder (`a.htm/b.png`), resolved without that segment",
          "planning.md Phase 47"),
+    Code("CSH_UNRESOLVED", Severity.WARNING, Stage.CONVERT,
+         "Identifier matched no produced topic", "planning.md Phase 6 contract"),
     Code("CSH_AMBIGUOUS", Severity.NOTE, Stage.CONVERT,
          "Identifier claimed by 2+ doc-sets; first ordered doc-set wins",
          "planning.md Phase 6 contract"),
@@ -496,6 +498,12 @@ REGISTRY: dict[str, Code] = _codes(
          "planning.md Phase 34"),
     Code("LINK_BROKEN", Severity.ERROR, Stage.VALIDATE,
          "Relative link resolving to nothing", "design.md §8.4"),
+    # Phase 43. The link resolves in the tree and breaks on AEM, which does not
+    # publish `unfiled/`. A note: the user let these break; this is the record.
+    Code("LINK_TO_UNFILED", Severity.NOTE, Stage.VALIDATE,
+         "A listed page links to an orphan under unfiled/, which AEM does not publish; "
+         "listed in that version's unfiled/inbound-links.csv",
+         "planning.md Phase 43"),
     # Phase 34 (R11-06). `sync`'s `PUBLISHED_PATH_TOO_LONG` read back from the
     # shelf, for a tree synced before that guard or by something else. An error
     # for the reason that one is: nothing downstream can open the file. And it

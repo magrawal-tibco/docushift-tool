@@ -1492,3 +1492,96 @@ def test_a_current_run_sweeps_a_killed_builds_part(
 
     assert again.outcome is ConvertOutcome.CURRENT
     assert not staging.exists()
+
+
+# -- Phase 43: orphans out of the TOC, into `unfiled/` ---------------------------------
+
+
+class OrphanEngine(FakeEngine):
+    """The fake engine with its last topic left out of the TOC, as the four real
+    engines report one: under an "Unfiled" node."""
+
+    def convert_unit(self, context: ConversionContext, root: Path) -> Unit:
+        unit = super().convert_unit(context, root)
+        *filed, orphan = unit.documents
+        unit.nav = [NavNode(label=document.title, document=document.relative) for document in filed]
+        unit.nav.append(NavNode(label="Unfiled", children=[
+            NavNode(label=orphan.title, document=orphan.relative)]))
+        return unit
+
+
+@pytest.fixture
+def orphan_engine():
+    previous = engine_for(SourceEngine.FLARE)
+    register(OrphanEngine)
+    yield OrphanEngine
+    unregister(SourceEngine.FLARE)
+    if previous is not None:
+        register(previous)
+
+
+def test_a_converted_orphan_is_shelved_under_unfiled_and_mapped_there(
+    config, catalog, product, version, extracted, orphan_engine
+) -> None:
+    result, _ = convert(config, catalog, product, version)
+
+    output = config.output_path(product.bu, product.family, product.slug, version.version)
+    assert result.outcome is ConvertOutcome.CONVERTED
+    assert (output / "unfiled" / "Content" / "topic.md").is_file()
+    assert not (output / "Content" / "topic.md").exists()
+    assert "Unfiled" not in (output / "toc.yml").read_text(encoding="utf-8")
+    # Its images still resolve from the new folder.
+    body = (output / "unfiled" / "Content" / "topic.md").read_text(encoding="utf-8")
+    assert "](../../Content/images/shot.png)" in body
+    rows = catalog.state.get_output_map("tibco-ems", "10.4.0")
+    assert rows == {"guide/Content/second.htm": "Content/second.md",
+                    "guide/Content/topic.htm": "unfiled/Content/topic.md"}
+
+
+def test_reshelving_a_tree_written_before_phase_43_stamps_it_current(
+    config, catalog, product, version, extracted, fake_engine
+) -> None:
+    """The ~160 versions no longer unpacked are fixed from their output alone,
+    and a tree that differs from a fresh build only by this pass is current."""
+    from docushift.converter import driver
+
+    convert(config, catalog, product, version)
+    output = config.output_path(product.bu, product.family, product.slug, version.version)
+    # Put the tree back the way converter version 2 wrote it.
+    textfile.write_text(output / "toc.yml", (
+        'docs_list_title: "Online Help"\ndocs:\n'
+        '  - title: "second"\n    url: "Content/second.md"\n'
+        '  - title: "Unfiled"\n    url: "Content/unfiled.md"\n    subfolderlist:\n'
+        '      - title: "topic"\n        url: "Content/topic.md"\n'))
+    textfile.write_text(output / "Content" / "unfiled.md",
+                        '---\ntitle: "Unfiled"\ngenerated: true\n---\n\n# Unfiled\n\n- [topic](topic.md)\n')
+    converter = DocumentConverter(config, catalog, findings=FindingsRun("convert"))
+    old_key = converter._inputs_key(product, version, driver._CONVERTER_VERSION - 1)
+    catalog.state.set_version_metadata("tibco-ems", "10.4.0", "convert_inputs_key", old_key)
+    build = catalog.state.get_version_metadata("tibco-ems", "10.4.0")["convert_build_id"]
+
+    result = converter.reshelve_one(product, version)
+
+    assert result.outcome is ConvertOutcome.CONVERTED, result.message
+    assert (output / "unfiled" / "Content" / "topic.md").is_file()
+    metadata = catalog.state.get_version_metadata("tibco-ems", "10.4.0")
+    assert metadata["convert_build_id"] != build
+    assert catalog.state.get_output_map("tibco-ems", "10.4.0")["guide/Content/topic.htm"] == \
+        "unfiled/Content/topic.md"
+    again, _ = convert(config, catalog, product, version)
+    assert again.outcome is ConvertOutcome.CURRENT
+    assert converter.reshelve_one(product, version).outcome is ConvertOutcome.CURRENT
+
+
+def test_convert_reshelve_orphans_runs_over_the_selection_and_refuses_force(
+    config, catalog, product, version, extracted, orphan_engine
+) -> None:
+    convert(config, catalog, product, version)
+    root = ["--root", str(config.root_dir), "convert", "--product", "tibco-ems"]
+
+    refused = CliRunner().invoke(main, [*root, "--reshelve-orphans", "--force"])
+    result = CliRunner().invoke(main, [*root, "--reshelve-orphans"])
+
+    assert refused.exit_code == 2 and "--reshelve-orphans" in refused.output
+    assert result.exit_code == 0, result.output
+    assert "1 nothing to move" in result.output

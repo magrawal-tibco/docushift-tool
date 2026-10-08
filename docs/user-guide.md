@@ -788,6 +788,7 @@ docushift convert --product businessevents-enterprise --version 6.4.0 \
 | `--dry-run` | List what would be converted, and where, without writing. |
 | `--force` | Re-convert even when the extracted tree has not changed since last time. |
 | `--input` / `--output` | Convert one folder that never went through `extract`. Both are required together, with `--product` and `--version`. The folder is always read afresh: nothing `extract` recorded for the catalog's copy (roots, API trees, help maps) is applied to it, and it is never reported as current. |
+| `--reshelve-orphans` | Move the orphan topics of trees already converted to `unfiled/` and out of the TOC, without the source files. Takes no `--force`, `--dry-run`, `--input` or `--output`. A version with nothing to move reports `nothing to move`. |
 
 > **All four engines convert: MadCap Flare, SDL DITA, WebWorks and DocBook.** Between them
 > they are every eligible version in the corpus. A version whose generator DocuShift
@@ -805,9 +806,14 @@ the paths they share: 30,736 of those overlap and about 15% differ in content, s
 de-duplicating them would drop one release's notes on top of another's. Alongside the
 topics: the landing page as the first navigation node, a generated section page for each
 navigation node that has children and no page of its own, and the support and legal pages
-identified as the last two. Topics in no TOC entry are filed under **Unfiled** and counted
-rather than dropped — Flare's TOC covers 86% of its own topics, so this is the normal case
-and not an error.
+identified as the last two. Topics in no TOC entry are counted rather than dropped and
+kept under an **`unfiled/`** folder, out of the navigation and never merged — Flare's TOC
+covers 86% of its own topics, so this is the normal case and not an error. AEM does not
+publish `unfiled/`, so a link from a listed page into one of these topics breaks there; the
+links sampled were all made by mistake. Every such link is listed in that version's
+`unfiled/inbound-links.csv` (linking page, line, link text, orphan, orphan title), rebuilt by
+`convert` and `reframe`, and `validate` reports each one as a `LINK_TO_UNFILED` note. For a tree converted before this rule,
+`docushift convert --bu tibco --reshelve-orphans` moves them without re-converting.
 
 **What a DITA version produces**, and how it differs. One output subtree per *doc-set* —
 a directory holding `GUID-*.html`, which sits at `html`, `doc/html`, `html_v3` or `en-US`
@@ -818,7 +824,7 @@ collide, so ties break with a `-2` suffix in a fixed order — two runs of the s
 produce the same filenames. There is **no landing page**: a DITA doc-set's front page is a
 metadata file rather than a topic, and its navigation is a forest of several top-level
 entries rather than one root, so the version's landing node is generated later in the
-pipeline instead of hoisted from the source. Topics in no TOC entry go under **Unfiled**
+pipeline instead of hoisted from the source. Topics in no TOC entry go to **`unfiled/`**
 and are counted, as in Flare; DITA's own TOC covers about 97%.
 
 A few DITA-specific behaviours worth knowing. Where SDL republished one topic at a second
@@ -841,7 +847,7 @@ collection, the order they appear in is the one the collection declares: it is a
 and it is not alphabetical in 71% of them. Book display names come from each book's own
 title file and are never invented. As with DITA there is **no landing page** — both
 candidates in a WebWorks tree are frameset stubs with no content — so the version's landing
-node is generated later in the pipeline. Topics in no TOC entry go under **Unfiled**;
+node is generated later in the pipeline. Topics in no TOC entry go to **`unfiled/`**;
 WebWorks' own TOC covers about 87%.
 
 WebWorks is the oldest generator in the corpus and **nothing in its output is semantic

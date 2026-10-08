@@ -44,6 +44,7 @@ import re
 from collections.abc import Callable
 
 from docushift.utils.anchors import HEADING, anchor_run
+from docushift.utils.mdlinks import MD_LINKED_IMAGE
 
 
 def _mask_code(text: str) -> str:
@@ -118,7 +119,7 @@ def marker_targets(text: str) -> dict[str, str]:
 #: reason: `validation.references`' patterns are tuned for *counting* and expose
 #: no span to edit.
 _MD_INLINE = re.compile(
-    r"!?\[(?:[^\]\\]|\\.)*\]\(\s*(?:<(?P<angle>[^>\n]*)>|(?P<bare>[^)\s]*))"
+    r"!?\[(?P<text>(?:[^\]\\]|\\.)*)\]\(\s*(?:<(?P<angle>[^>\n]*)>|(?P<bare>[^)\s]*))"
     r"""(?:\s+(?:"[^"]*"|'[^']*'|\([^)]*\)))?\s*\)"""
 )
 _MD_REFDEF = re.compile(
@@ -148,9 +149,75 @@ def retarget(body: str, anchor_for: Callable[[str, str], str | None]) -> tuple[s
     Fence-aware through `mask_code`, matching on the mask and editing the
     original by offset, so a `](#x)` inside a shell sample is prose.
     """
-    masked = _mask_code(body)
     edits: list[tuple[int, int, str]] = []
-    for pattern in (_MD_INLINE, _MD_REFDEF, _HTML_REF):
+    for start, end, raw in _destinations(body):
+        path, separator, fragment = raw.partition("#")
+        if not separator or not fragment:
+            continue
+        replacement = anchor_for(path, fragment)
+        if replacement is None or replacement == fragment:
+            continue
+        edits.append((start + len(path) + 1, end, replacement))
+    return _splice(body, edits), len(edits)
+
+
+def repath(body: str, destination_for: Callable[[str], str | None]) -> tuple[str, int]:
+    """Rewrites whole destinations, for a page or its target that moved (Phase 43).
+
+    `destination_for(raw)` gets each destination as written and returns its
+    replacement, or `None` to leave it. Same patterns and the same masking as
+    `retarget`, so the two passes agree on what a reference is.
+    """
+    edits: list[tuple[int, int, str]] = []
+    for start, end, raw in _destinations(body):
+        replacement = destination_for(raw)
+        if replacement is not None and replacement != raw:
+            edits.append((start, end, replacement))
+    return _splice(body, edits), len(edits)
+
+
+#: An HTML link and its text, for `labelled`.
+_HTML_LINK = re.compile(
+    r"""<a\b[^>]*?\bhref\s*=\s*(?:"(?P<double>[^"]*)"|'(?P<single>[^']*)'|(?P<bare>[^\s"'>`=]+))"""
+    r"[^>]*>(?P<text>.*?)</a\s*>",
+    re.IGNORECASE | re.DOTALL,
+)
+_TAG = re.compile(r"<[^>]+>")
+
+
+def labelled(body: str) -> list[tuple[int, str, str]]:
+    """Every link in `body` as `(line, destination, text)`, code masked (Phase 43).
+
+    Inline Markdown and HTML `<a>` only: an image is not a link, and a reference
+    definition has no text of its own. The text is flattened to one line with
+    tags removed, for a sheet.
+    """
+    masked = _mask_code(body)
+    found: list[tuple[int, int, str, str]] = []
+    for pattern in (_MD_INLINE, MD_LINKED_IMAGE, _HTML_LINK):
+        for match in pattern.finditer(masked):
+            # An image, or `_MD_INLINE` reading the inner image of a linked one
+            # as a link whose text is `![alt`.
+            if pattern is _MD_INLINE and (match.group(0).startswith("!")
+                                          or match.group("text").startswith("![")):
+                continue
+            name = next((group for group in _GROUPS
+                         if group in pattern.groupindex and match.group(group) is not None), None)
+            if name is None:
+                continue
+            # From the original, not the mask, which blanks inline code.
+            raw = body[match.start(name):match.end(name)]
+            text = body[match.start("text"):match.end("text")]
+            text = html.unescape(" ".join(_TAG.sub("", text).split()))
+            found.append((match.start(), body.count("\n", 0, match.start()) + 1, raw, text))
+    return [(line, raw, text) for _start, line, raw, text in sorted(found)]
+
+
+def _destinations(body: str) -> list[tuple[int, int, str]]:
+    """Every reference destination in `body`, as `(start, end, raw)`, code masked."""
+    masked = _mask_code(body)
+    found: list[tuple[int, int, str]] = []
+    for pattern in (_MD_INLINE, MD_LINKED_IMAGE, _MD_REFDEF, _HTML_REF):
         for match in pattern.finditer(masked):
             for name in _GROUPS:
                 try:
@@ -159,17 +226,15 @@ def retarget(body: str, anchor_for: Callable[[str, str], str | None]) -> tuple[s
                     continue
                 if raw is None:
                     continue
-                path, separator, fragment = raw.partition("#")
-                if not separator or not fragment:
-                    continue
-                replacement = anchor_for(path, fragment)
-                if replacement is None or replacement == fragment:
-                    continue
-                start = match.start(name)
-                edits.append((start + len(path) + 1, match.end(name), replacement))
+                found.append((match.start(name), match.end(name), body[match.start(name):match.end(name)]))
                 break
+    return found
+
+
+def _splice(body: str, edits: list[tuple[int, int, str]]) -> str:
+    """`body` with non-overlapping `(start, end, text)` edits applied."""
     if not edits:
-        return body, 0
+        return body
     out: list[str] = []
     cursor = 0
     for start, end, text in sorted(edits):
@@ -179,4 +244,4 @@ def retarget(body: str, anchor_for: Callable[[str, str], str | None]) -> tuple[s
         out.append(text)
         cursor = end
     out.append(body[cursor:])
-    return "".join(out), len(edits)
+    return "".join(out)

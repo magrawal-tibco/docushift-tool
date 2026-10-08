@@ -64,6 +64,7 @@ from docushift.utils.longpath import (
     published_length,
     walk_files,
 )
+from docushift.utils.naming import is_unfiled
 from docushift.validation import references
 from docushift.validation.tree import VersionFolder
 
@@ -366,6 +367,12 @@ def _check_file(
             else:
                 issue("LINK_BROKEN", reference.line, f"{target} is not in this version folder")
             continue
+
+        # Resolves on disk and breaks on AEM, which does not publish `unfiled/`
+        # (Phase 43). `unfiled/inbound-links.csv` lists the same links.
+        if is_unfiled(target) and not is_unfiled(relative):
+            issue("LINK_TO_UNFILED", reference.line,
+                  f"{target} is an orphan topic under unfiled/, which AEM does not publish")
 
         if classified.fragment:
             report.fragments += 1

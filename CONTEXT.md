@@ -46,6 +46,7 @@ docushift-tool/
 │   ├── user-guide.md       # CLI reference, batch workflows, manual catalog editing
 │   ├── planning.md         # Open phases in full; finished phases as a one-line index
 │   ├── open-issues.md      # What is outstanding per product, and who owns it
+│   ├── jira.md             # Which phase/run is logged in Jira DOCOPS, and the logging rules
 │   ├── history/            # Archive, read on demand: ledger.md + phases/phase-NN.md
 │   ├── REFRAME-REQUIREMENTS.md     # Stage 6b's requirements, numbered; the audit cites these
 │   └── REFRAME-INTEGRATION-PLAN.md # How reframe was folded into the existing stage sequence
@@ -197,8 +198,15 @@ Per-family folders are created on demand by the downloader, not at startup: pre-
 
 0. **Phase 42, built 2026-10-06; runs in progress**: merged pages are the default for every
    TIBCO product except Streaming, for Flare and DITA versions (WebWorks stays unmerged),
-   with automatic layout pins and a DITA TOC fix. Left: re-convert and merge the DITA
-   plug-ins (`bwp-dita`), then `reframe --bu tibco`, `sync --bu tibco`, `validate`. See [`planning.md`](docs/planning.md#1-active-phases).
+   with automatic layout pins and a DITA TOC fix. `reframe --bu tibco` ran (6 failures from
+   orphan topics); `sync --bu tibco` and `validate` wait for Phase 43. See [`planning.md`](docs/planning.md#1-active-phases).
+0a. **Phase 43, built 2026-10-07; runs pending**: orphan topics (in no source TOC entry)
+   leave the TOC and are never merged; each stays one page under `unfiled/`, which AEM does not
+   publish; links into it are listed in `unfiled/inbound-links.csv`. TIBCO reshelve ran
+   2026-10-07 (161 versions); 25 had broken image links, fixed by Phase 44.
+0b. **Phase 44, done 2026-10-07**: the link around a thumbnail image (`[![alt](src)](href)`)
+   is re-pathed by reshelve and reframe and checked by validate. 98 repaired in reshelved trees,
+   643 fixed by the TIBCO re-merge. Next: `sync --bu tibco`, `validate`.
 0c. **Phase 45, built and run 2026-10-07; sync pending**: the BusinessEvents function catalog (`functions/`)
    becomes an API reference, copied verbatim to `-resources` like Javadoc, instead of
    ~1,300 dropped pages per version. Re-run done; publishes with the family syncs.

@@ -40,6 +40,7 @@ import re
 from dataclasses import dataclass
 
 from docushift.utils import anchors as anchors_util
+from docushift.utils.mdlinks import MD_LINKED_IMAGE
 
 # A quoted or bare HTML attribute value. Three groups, one per quoting style; the
 # bare form exists because hand-written passthrough HTML in the corpus uses it.
@@ -207,6 +208,8 @@ def references(text: str) -> list[RawReference]:
     found: list[RawReference] = []
     for match in _MD_INLINE.finditer(prose):
         found.append(RawReference(_value(match, 1, 2), line_of(match.start()), "markdown"))
+    for match in MD_LINKED_IMAGE.finditer(prose):
+        found.append(RawReference(_value(match, 2, 3), line_of(match.start()), "markdown"))
     for match in _MD_REFDEF.finditer(prose):
         found.append(RawReference(_value(match, 1, 2), line_of(match.start()), "markdown"))
     for match in _AUTOLINK.finditer(prose):

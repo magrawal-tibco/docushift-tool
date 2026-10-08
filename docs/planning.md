@@ -151,6 +151,110 @@ re-downloaded and unpacked (about 0.5 GB) to be re-converted.
 - **Two additions to the decisions.** The automatic pin prefers the newest eligible version that is *converted*, because an unconverted reference would fail every sibling. An automatic pin that cannot be laid out falls back to each version's own layout and still reports `REFRAME_PIN_UNAVAILABLE`; a written pin keeps today's refusal.
 - **`REFRAME_LAYOUT_UNPINNED` is a note**, naming the chosen version. `reframe --dry-run` shows automatic pins in its Pinned column.
 - **Step 7 scope.** 55 of the 64 DITA plug-in versions are in `bwp-dita`. MDM 6.3.1 was done by hand. The 8 that never converted are blocked by the Windows path-length defect in root finding and engine detection, and wait for that fix.
+- **Step 8, first run (2026-10-06).** `reframe --bu tibco`: 138 reframed, 70 already current, 6 failed `REFRAME_SELF_CHECK_FAILED` (Kafka 5.0.0, Database 7.2.1/7.3.1/7.3.2, SAP 7.3.2, FTL 5.0.0). All six are orphan topics merged into an Unfiled page with blank titles, so two topics anchor to `""`. Phase 43 removes the cause. Sync waits for it.
+
+### Phase 43: Orphan Topics Stay Out of the TOC and Unmerged — **Built 2026-10-07; runs pending**
+
+**Why.** The user's decision, 2026-10-06: a topic that is in no source TOC entry may be an
+orphan the authors meant to hide, so the tool must not add it to the navigation or merge it
+into other pages, because both change the content of the docset. Orphans are kept as their
+own files in an `unfiled/` folder and left out of `toc.yml`. This reverses
+`architecture.md` §5.2.3, which appends them under an explicit "Unfiled" node.
+
+**Measured 2026-10-06** over the converted output (`scratch/orphan_survey.py`):
+
+| engine | versions with orphans | orphan topics | share of topics | linked from a TOC page | CSH targets | in `301.yml` |
+|---|---|---|---|---|---|---|
+| Flare | 224 of 253 | 5,950 | 5.9% | 588 | 359 | 4,451 |
+| WebWorks | 11 of 53 | 141 | 1.5% | 0 | 0 | 113 |
+| DITA | 9 of 56 | 19 | 0.4% | 1 | 0 | 17 |
+| DocBook | 0 of 8 | 0 | — | — | — | — |
+
+- **The Unfiled node does harm today.** 461 of its entries in 49 Flare versions have a blank
+  title, because the topic has no `h1` and the node takes the label from the topic. 6 TIBCO
+  merges fail on it (Phase 42, step 8). Merged ActiveSpaces 4.10.0 lists a topic named
+  `temp_tibDateTime_ExcludeFromTOC`.
+- **Orphans are still reached.** 588 are linked from a page the TOC lists, 359 open from
+  product help (CSH), and 4,451 are where an old docsite URL redirects. The user checked the
+  39 samples in `reports/orphan-link-examples.csv` (2026-10-07): all were links made by
+  mistake.
+- **244 converted versions carry an Unfiled node**: bw-plugin 152, webfocus 39,
+  container-editions 18, wf-reporting-server 9, focus 9, di-ism 8, activespaces 6, ems 2,
+  tra 1. About 160 of them (most of bw-plugin, all of wf-reporting-server) are no longer
+  unpacked, so `convert` cannot rebuild them.
+
+#### Decisions
+
+| decision | choice | why |
+|---|---|---|
+| **Navigation** | No "Unfiled" node and no generated `unfiled.md` in any published `toc.yml`. The engines still build the node, and the pass removes it, so one mechanism serves new and old trees. `TOC_ORPHAN` still counts orphans, as a note | The user's rule |
+| **Where orphans go** | `unfiled/` at the version root, keeping the topic's path below it: `users-guide/Smart_Engine.md` becomes `unfiled/users-guide/Smart_Engine.md` | One folder holds every page a reader cannot navigate to. Keeping the path avoids name clashes and keeps the file easy to trace to its source |
+| **Links, CSH, redirects** | Links re-pathed so the tree stays consistent; AEM does not publish `unfiled/`, so links from listed pages break there. `csh.yml` retargeted. `301.yml` rows into orphans dropped, in `convert` and `reframe` (`origins.build`) | The user, 2026-10-07: "let the link break, AEM doesn't automatically publish unfiled topics". A redirect to an unpublished page only trades one 404 for another |
+| **Merging** | Reframe copies each orphan through as one page at the same `unfiled/` path. It never merges it. The self-check skips the TOC-reachability test for `unfiled/` and checks the rest | Same URL in both trees. An orphan's content is unchanged |
+| **How the move is done** | A pass over a written version tree (move the files, rewrite links in every page, rewrite `csh.yml` and `301.yml`, drop the node). `convert` runs it on its staging tree before the swap, and a new `docushift convert --reshelve-orphans` runs it on output already written | The pass needs no source files, so the ~160 versions that are no longer unpacked are fixed without a re-download |
+| **Converter version** | `_CONVERTER_VERSION` 3 | Every converter-output change bumps it. A reshelved tree whose key matched version 2 is restamped current, so it is not rebuilt for this change alone |
+| **TOC lost** | A version whose `toc.yml` lists nothing but the Unfiled node is left as converted | Its topics are orphans only because the TOC did not read (`TOC_UNREADABLE`); shelving all of them would publish an empty version |
+| **Inbound links recorded** | Every link from a listed page into `unfiled/` is written to `unfiled/inbound-links.csv` in that version (linking page, line, link text, orphan, orphan title), and `validate` reports each one as `LINK_TO_UNFILED`, a note | The user, 2026-10-07: these links break on AEM, so they must be on record. The file is written where the tree is built, `convert` (and `--reshelve-orphans`) and `reframe`, in the staging tree before the swap, because `validate` never writes. It ships with the tree; AEM does not publish `unfiled/`. `validate` reads the tree itself, not the file |
+| **Published trees** | Re-synced. The old `unfiled.md` and the orphan files at their old paths are removed from `tibco-docs-aem` and `ibi-docs-aem`. Their `301.yml` points at the new paths | Sync already removes files a version no longer ships |
+
+#### Steps
+
+1. `converter/orphans.py` (new): the reshelve pass over a written version tree. Called from `converter/driver.py` before the swap. Remove the Unfiled node from `engines/flare.py`, `dita.py`, `webworks.py`, `docbook.py`. Bump `_CONVERTER_VERSION`.
+2. `cli.py`: `convert --reshelve-orphans` over a selection, for output already written; it stamps the converter version.
+3. `reframe/`: topics under `unfiled/` are copied through unmerged; the self-check skips the reachability test for them; links and CSH resolve to them; no redirect targets them.
+4. Tests: an orphan moves to `unfiled/` with a link into it and a CSH id rewritten and its `301.yml` row dropped; no Unfiled node in any engine's TOC; a reframed tree copies an orphan unmerged; reshelving twice changes nothing.
+5. Run: `convert --reshelve-orphans` over the 244 versions; `reframe --bu tibco`; `sync` to `tibco-docs-aem` and `ibi-docs-aem`; `validate`. Exit for this step: no `REFRAME_SELF_CHECK_FAILED` from orphans, no blank TOC title, no new `LINK_BROKEN`.
+6. Docs: `architecture.md` §5.2.3 and the WebWorks and DocBook orphan paragraphs, `user-guide.md`, findings register (`TOC_ORPHAN` text), `CONTEXT.md`.
+
+*Exit: no converted or merged `toc.yml` lists an orphan; every orphan is one page under `unfiled/`, every link and CSH entry to it resolves in the tree, and no redirect targets it; Phase 42 step 8 completes.*
+
+#### As built (2026-10-07)
+
+- `converter/orphans.py` is the pass; `transforms/fragments.repath` is the link rewrite it shares with the fragment pass. `utils/naming.UNFILED` names the folder for `convert`, `reframe` and `origins`.
+- Steps 1–4 and 6 done. Step 1 differs from the plan: the engines are unchanged and keep building the Unfiled node, which the pass removes.
+- Checked on copies of EMS 10.4.0 (24 orphans) and FOCUS 9.3.4 (99 orphans, two Unfiled nodes): no Unfiled left, `toc.yml` parses, unresolved references unchanged (90 and 0). A second run changes nothing.
+- **Inbound links recorded** (the user, 2026-10-07). `orphans.write_inbound` writes `unfiled/inbound-links.csv` at the end of the pass and again in `reframe`'s staging tree; it is removed when no link remains. `validate` reports each link as `LINK_TO_UNFILED`, from the tree, not the file. `fragments.labelled` gives each link's text.
+- Step 5 (the runs) is next.
+- **Step 5, first run (2026-10-07).** `convert --bu tibco --reshelve-orphans`: 161 reshelved, 114 nothing to move, 1,149 no tree. A read-only check of all 161 (`C:\tmp\reshelve-check\check.py`) passed TOC, links into orphans, CSH, `301.yml` and `inbound-links.csv` in 136; 25 had 98 broken links in moved pages, all one shape (Phase 44).
+
+### Phase 44: A Link Around an Image Is a Link — **Done 2026-10-07**
+
+**Why.** `[![thumb](images/a_thumb.png)](images/a.png)` is a thumbnail that opens the full
+picture. The three inline-link patterns (`transforms/fragments.py`, `reframe/pages.py`,
+`validation/references.py`) cannot hold a `]` in the link text, so each reads only the inner
+image and never sees the outer destination. Whatever moves a page re-paths the thumbnail and
+leaves the click-through pointing at nothing, and `validate` never reports it.
+
+**Measured 2026-10-07:**
+
+- Reshelved output: 98 broken click-through links in moved pages, in 25 versions, all
+  BusinessWorks plug-ins. Every image is still at its original path.
+- Merged tree (`reframed/`): 643 of 788 linked images have a broken click-through, in 34
+  versions. These are published pages.
+
+#### Decisions
+
+| decision | choice | why |
+|---|---|---|
+| **One pattern** | `utils/mdlinks.MD_LINKED_IMAGE` reads the outer destination of a linked image; the three readers use it beside their inline pattern | The three copies drifted together once; one definition keeps them agreeing |
+| **Repair written trees** | `reshelve` also re-paths a link in an `unfiled/` page that no longer resolves but resolves from the page's old path. `convert --reshelve-orphans` reports such a version as reshelved, with a new build id | Re-running the pass finds no Unfiled node, so without this the 25 trees stay broken. It needs no source, like the pass itself |
+| **Re-merge** | `reframe/policy._ALGORITHM` 6 | The merged trees were written by the faulty pattern; a bump is how a merge-rule change re-merges every version |
+
+#### Steps
+
+1. `MD_LINKED_IMAGE` in `utils/mdlinks.py`; used by `references()`, `fragments._destinations` and `labelled`, and `reframe/pages.py`.
+2. `converter/orphans.py`: the repair; `reshelve_one` counts it.
+3. `_ALGORITHM` 6.
+4. Tests: each reader sees the outer destination; a reshelved and a merged linked image resolve; the repair fixes a tree from the faulty pass and a second run changes nothing.
+5. Runs (the user): `convert --bu tibco --reshelve-orphans`; `reframe --bu tibco`. Exit: the check script and the linked-image scan find no broken click-through.
+
+#### As built (2026-10-07)
+
+- Steps 1–4 done. The pattern is in a leaf module, `utils/mdlinks.py`, because `transforms` importing `validation` was circular.
+- Tried on copies of Plug-in Development Kit 6.3.1 and SharePoint 6.3.1: the repair fixed exactly the 6 and 8 broken links, changed no other line, and a second run repaired 0. Swift 6.8.0, the worst case: 29 of 29.
+- `validate` now checks these links, so the next run may report new `LINK_BROKEN` from trees not yet repaired or re-merged.
+- **Step 5, repair run (2026-10-07).** `convert --bu tibco --reshelve-orphans`: 25 reshelved, 98 links repaired, 0 failed. The check passes in all 161 reshelved versions and no broken click-through remains in the converted bw-plugin output. 
+- **Step 5, re-merge (2026-10-07).** `reframe --bu tibco`: 214 reframed, 0 failed, no `REFRAME_SELF_CHECK_FAILED`. 0 of 788 linked images broken in `reframed/` (was 643). The moved-pages check passes in 148 of the 150 merged trees; the other 2 (ActiveSpaces plug-in 7.1.1, Twitter 6.1.2) are the check, not the tree: a merged listed page took the name an orphan had, and every link and redirect to it lands on a real heading. Phase 44 exit met; `sync` and `validate` are next.
 
 ### Phase 45: A Function Catalog Is an API Reference — **Built and run 2026-10-07; sync pending**
 
@@ -246,7 +350,24 @@ pages pass `is_file()`.
 - Steps 1, 2 and 5 done. `utils/longpath.long_paths_enabled` is the probe; `cli._require_long_paths` raises exit 2 with `LONG_PATHS_OFF`. `validate --dry-run` is not probed, because it opens no file. `doctor` prints `long paths: on/off`.
 - An existing test (`test_the_walk_finds_a_file_that_rglob_silently_drops`) asserted that a plain walk misses a long file; it now asserts that only when the probe fails.
 - Step 3 done: the user turned the setting on. A new process sees all 209 of Files 1.3.0's pages, `find_output_roots` finds its `html/`, and the probe passes.
-- Step 4 (the runs) is next.
+- **Step 4, re-run (2026-10-07, `scratch/p46-rerun.sh`, named versions rather than a `p46`
+  tag because 6 of the 50 carry `bwp-dita`).** 50 converted, 12 re-merged, 0 failed, no partial
+  walk, no reframe error. Files 1.3.0: `convert-failed` → `converted`, 206 pages. Service Grid
+  3.4.3/3.4.4 and Decisions add-in 1.3.0 now have their inventory. 31 versions (container
+  editions, iWay, EMS 10.4–10.5) have no package left, so `extract --force` skipped them; their
+  trees were complete (unpacking already used the prefix) and convert read them in full, but
+  their inventory columns are from the old walk.
+- The 21 container-edition and 4 iWay versions show one page fewer: the generated `unfiled.md`,
+  gone because a forced convert applies Phase 43, which had only run for TIBCO. No content lost
+  (checked against `ibi-docs-aem` for WFCE 9.3.8 and iWay EDI 9.3.0).
+- **Service Grid's 126 `REFERENCE_UNRESOLVED` each are unchanged**, so long paths were not
+  their cause; still open. JD Edwards 6.0.0/6.1.0 keep their 1 each.
+- `extract --measure-only` for the 31 changed nothing: it fills blank columns only, every one
+  was `already measured`, and `--force` is refused beside it. What the old walk missed in them:
+  389 files (216 png, 70 jpg, 103 htm/html), no CSH source and no API marker. The topics did
+  convert (checked: WFCE 1.3.0's two long-named topics are in `output/`), since the engines
+  walk through the prefix. So only `_doc_files`/`_total_files` are low, by 389 across 31 rows.
+- Left: sync and validate for the affected families.
 
 ### Phase 47: Service Grid Merges — One Topic in Two Guides, Deep Pages, Page-as-Folder Links — **Done 2026-10-08**
 
@@ -362,6 +483,7 @@ Phase 21's stale merge). Closing an item means deleting its row.
 | Phase 34 (R4–R6) | 4 fragile-but-correct DITA/DocBook items deferred at triage, theme Z: R6-08, R6-10, R6-11, R6-13. Also deferred by decision: publishing non-English Flare builds to the `loc-` tree (Q), and converting a version that mixes two generators with both engines (T) | [reports/review/INDEX.md](../reports/review/INDEX.md) |
 | Phase 34 (R7–R9) | 8 fragile-but-correct items deferred at triage, theme AI: R7-08, R7-10, R8-09, R8-10, R8-12, R9-06, R9-07, R9-08 | [reports/review/INDEX.md](../reports/review/INDEX.md) |
 | Phase 34 (R10–R12) | 5 items deferred at triage, theme BF: R10-04 (all-archived products get no archives page), R10-07 (API link URL shape, unconfirmed), R10-08, R10-12, R11-10 | [reports/review/INDEX.md](../reports/review/INDEX.md) |
+| flogo-connectors run, 2026-10-07 | `OUTPUT_COUNT_MISMATCH` false alarms: 43 Flare versions, 1 each. 9 are an unfilled What's New template (`WHATS_NEW_PLACEHOLDER`, not published by design), 34 Flare's sample `MicroContent/.../what-is-micro-content.htm` (a `GENERATED_DIRECTORIES` folder). Both are counted as converted documents but never written. Checked by diffing source topics against `output/` for HTTP 1.1.1, SNS 1.0.1, Kafka 1.3.1, VS Code 1.3.5 | run 629 |
 | Phase 34 (X1–X3) | 6 items deferred at triage, theme XJ: X1-09 (two sources for the docsite folder; 11 active rows disagree, needs the network to settle), X1-13, X1-14, X1-15, X1-16, X3-12 | [reports/review/INDEX.md](../reports/review/INDEX.md) |
 
 ---
@@ -399,7 +521,7 @@ The concrete deliverable of §7.1: every deferred "report line" in the three doc
 | `CONTENT_SOURCE_TOPIC` | note | convert | A Flare root shipping authored source topics: each converted from `<body>`, variables and conditions settled from the root's built topics, one row per root | Phase 41 |
 | `TOC_UNREADABLE`³⁴ | warn | convert | A Flare root's `HelpSystem.xml` or declared TOC is missing or did not parse; or a WebWorks book's `files.js`, `toc.js`, `title.js` or `context.js` is present and unreadable, or (`files.js`/`toc.js`) yields no entries. Its topics are filed under Unfiled, or the book loses what that file named | Phase 34 (R5-12, R7-09) |
 | `TOC_SUBPROJECT_UNPLACED`³⁴ | note | convert | A merged-project TOC node (`*.flprj`, 121 over 937 roots) marking where a sub-project's TOC goes; dropped, so the sub-guide loses its place in the parent's navigation | Phase 34 (R5-11) |
-| `TOC_ORPHAN`⁵ᵇ | note | convert | Converted topics in no TOC entry, filed under Unfiled — 14.1% for Flare | `architecture.md` §5.1.4 |
+| `TOC_ORPHAN`⁵ᵇ | note | convert | Converted topics in no TOC entry, kept out of `toc.yml` and unmerged under `unfiled/` — 5.9% for Flare; left in an Unfiled node only when the version has no other TOC entry | `architecture.md` §5.1.4, Phase 43 |
 | `TOPIC_LINK_DANGLING`⁵ᵇ | note | convert | A cross-reference to a topic this run did not produce; text kept, link dropped | `architecture.md` §5.1.3 |
 | `ALERT_LABEL_UNMAPPED`⁵ᵇ | warn | convert | An admonition label outside the five GitHub renders; rendered as NOTE | `transforms/callouts.py` |
 | `ANCHOR_DROPPED`¹⁹ | warn | convert | A referenced anchor the engine kept and then did not emit; its links now dangle | `planning.md` Phase 19 |
@@ -421,6 +543,7 @@ The concrete deliverable of §7.1: every deferred "report line" in the three doc
 | `PUBLISH_BASE_URL_UNSET`⁶ᵈ | warn | sync | `api-references` placed with no `publish_base_url`; cross-tree links have no host | `architecture.md` §6.4 |
 | `API_LINK_REWRITTEN`⁶ᵉ | note | convert | Link into an api-reference tree pointed at its published `-resources` URL | `design.md` §10.7 |
 | `LINK_BROKEN` | **error** | validate | Relative link resolving to nothing | `design.md` §8.4 |
+| `LINK_TO_UNFILED` | note | validate | A listed page links to an orphan under `unfiled/`, which AEM does not publish; listed in that version's `unfiled/inbound-links.csv` | Phase 43 |
 | `PATH_TOO_LONG`³⁴ | **error** | validate | A published file whose absolute path under `--target-dir` exceeds 260 characters, measured as `sync` measures it; Windows readers cannot open it (longest today: 236) | Phase 34 (R11-06) |
 | `ANCHOR_MISSING`⁷ᵇ | warn | validate | A `#fragment` naming no heading in the file it resolves to (heading slugs only since Phase 29; an `id=`/`name=` attribute is not an anchor) | §7.4 |
 | `ANCHOR_WRONG_HEADING`³⁴ | warn | validate | A same-page `#fragment` that resolves, but to an earlier topic's heading: a heading with the same title, renumbered `-N` by the merge, sits between the target and the link (R9-01; 3 in p35, all real) | Phase 34 (R11-02) |

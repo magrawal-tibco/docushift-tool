@@ -43,6 +43,7 @@ import yaml
 from docushift.reframe.packer import Page, asset_destination
 from docushift.transforms import links
 from docushift.utils.anchors import HEADING
+from docushift.utils.mdlinks import MD_LINKED_IMAGE
 from docushift.validation.references import mask_code, mask_html_blocks
 
 # Same shape as `validation/references.py`'s, with the destination named so it can
@@ -214,6 +215,7 @@ def rewrite_links(
     edits: list[tuple[int, int, str]] = []
     for pattern, masked in (
         (_MD_INLINE, masked_markdown),
+        (MD_LINKED_IMAGE, masked_markdown),
         (_MD_REFDEF, masked_markdown),
         (_HTML_REF, masked_html),
     ):

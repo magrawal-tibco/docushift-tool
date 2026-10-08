@@ -749,6 +749,15 @@ class StateStore:
         )
         return {row["source"]: row["output"] for row in rows}
 
+    def get_output_rows(self, slug: str, version: str) -> list[tuple[str, str, str]]:
+        """`(source, output, unit)` rows, as `record_output_map` takes them back."""
+        rows = self._all(
+            "SELECT source, output, unit FROM output_map WHERE slug = ? AND version = ? "
+            "ORDER BY source",
+            (slug, version),
+        )
+        return [(row["source"], row["output"], row["unit"]) for row in rows]
+
     # -- findings (planning.md §7.1) -------------------------------------------
 
     def start_run(self, command: str, batch: str = "") -> int:

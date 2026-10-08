@@ -326,3 +326,18 @@ def test_the_missing_sitemap_finding_carries_the_reason() -> None:
 
     assert built.rows is None
     assert "(there is no cache/coveo/manifest.json)" in built.findings[0][1]
+
+
+# -- Phase 43: an orphan in `unfiled/` gets no redirect --------------------------------
+
+
+def test_a_row_into_unfiled_is_dropped_and_its_page_still_counts_as_mapped() -> None:
+    """AEM does not publish `unfiled/`, so the redirect would land on a 404. The
+    live page is still accounted for, not reported `ORIGIN_PAGE_UNMAPPED`."""
+    output_map = dict(SOURCES, **{"tib_ems_docs/html/b.htm": "unfiled/out/b.htm"})
+
+    built = origins.build(EMS, "tibco-enterprise-message-service", ZIP, output_map, {}, PAGES[:3])
+
+    assert built.rows is not None
+    assert [row["to"] for row in built.rows] == ["out/API Activity/c.htm", "out/a.htm"]
+    assert "ORIGIN_PAGE_UNMAPPED" not in codes_of(built)

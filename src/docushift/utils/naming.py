@@ -62,6 +62,16 @@ _HISTORY = re.compile(r"(?:^\d+[-_]+)|(?:[-_]+(?:updated|new|old|copy|\d)$)", re
 #: `tibemsConnectionFact21`. Read off a normalized stem, so `-1` counts too.
 _COUNTER = re.compile(r"-?\d+$")
 
+#: The version-root folder a topic in no source TOC entry is kept in (Phase 43).
+#: Out of `toc.yml`, never merged, and not published by AEM, which publishes
+#: what the TOC lists. Read by `convert`, `reframe` and `origins` alike.
+UNFILED = "unfiled"
+
+
+def is_unfiled(path: object) -> bool:
+    """Is this version-relative path (a `#fragment` allowed) inside `unfiled/`?"""
+    return str(path).replace("\\", "/").split("/", 1)[0] == UNFILED
+
 
 def looks_like_a_filename(title: str) -> bool:
     """Whether a TOC "title" is really a stem somebody forgot to write out.

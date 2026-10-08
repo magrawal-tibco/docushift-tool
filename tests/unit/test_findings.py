@@ -168,10 +168,12 @@ def test_the_register_carries_every_row_of_7_5() -> None:
     `RENAME_MAP_UNMATCHED` (X1-07): a pin whose topic no longer leads a page,
     erased from the map in silence. The 85th, `CONTENT_SOURCE_TOPIC` (Phase 41): a
     Flare source topic shipped in the output, converted instead of dropped. The
-    86th, `REFERENCE_PAGE_SEGMENT_DROPPED` (Phase 47): a reference naming a page
-    as a folder, resolved without that segment.
+    86th, `LINK_TO_UNFILED` (Phase 43): a link that resolves in the tree and
+    breaks on AEM, which does not publish `unfiled/`. The 87th,
+    `REFERENCE_PAGE_SEGMENT_DROPPED` (Phase 47): a reference naming a page as a
+    folder, resolved without that segment.
     """
-    assert len(REGISTRY) == 86
+    assert len(REGISTRY) == 87
 
 
 def test_severity_comes_from_the_registry_and_not_from_the_call_site() -> None:

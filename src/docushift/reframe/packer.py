@@ -55,6 +55,7 @@ from docushift.reframe.toc import TocEntry
 from docushift.transforms.headings import compact
 from docushift.utils import naming
 from docushift.utils.anchors import anchor_run
+from docushift.utils.naming import is_unfiled
 
 
 @dataclass(frozen=True)
@@ -661,6 +662,10 @@ def assign(
                 # unsuffixed, like a navigated page: `relocate` decides its folder
                 # and settles uniqueness against the pages actually in it.
                 page.path = first.source.parent / f"{_name_for(first, set())}.md"
+                if is_unfiled(first.source):
+                    # Phase 43: an orphan keeps its converted path, so the two
+                    # trees agree and nothing about it changes but its links.
+                    page.path = first.source
             else:
                 siblings = taken_stems.setdefault(naming.slugify(first.parent), set())
                 stem = _name_for(first, siblings)

@@ -1814,8 +1814,11 @@ def _report_convert(stats, findings) -> None:
 @click.option("--dry-run", is_flag=True, help="List what would be converted without writing.")
 @click.option("--input", "input_dir", type=DIR_PATH, default=None, help="Convert a standalone extracted folder.")
 @click.option("--output", "output_dir", type=DIR_PATH, default=None, help="Destination for the converted GFM.")
+@click.option("--reshelve-orphans", is_flag=True,
+              help="Move orphan topics of trees already converted to unfiled/, out of the TOC (Phase 43).")
 @click.pass_context
-def convert(ctx, bu, family, product, version, batch, select_all, force, dry_run, input_dir, output_dir) -> None:
+def convert(ctx, bu, family, product, version, batch, select_all, force, dry_run, input_dir, output_dir,
+            reshelve_orphans) -> None:
     """Convert extracted HTML to AEM-ready GFM in output/.
 
     Runs over the same selection as `download` and `extract`, narrowed to what has
@@ -1830,6 +1833,9 @@ def convert(ctx, bu, family, product, version, batch, select_all, force, dry_run
     manager = _catalog_manager(ctx)
 
     _input_options(input_dir, output_dir, product, version)
+    if reshelve_orphans and (input_dir or output_dir or force or dry_run):
+        raise click.UsageError("--reshelve-orphans works on the catalog's converted trees; "
+                               "it takes no --input, --output, --force or --dry-run")
 
     pairs = _download_selection(manager, bu, family, product, version, batch, select_all)
     if not pairs:
@@ -1854,6 +1860,9 @@ def convert(ctx, bu, family, product, version, batch, select_all, force, dry_run
 
     findings = FindingsRun("convert", batch=batch or "", store=manager.state).start()
     converter = DocumentConverter(cfg, manager, findings=findings)
+    if reshelve_orphans:
+        _reshelve(converter, pairs, findings)
+        return
     console.print(f"Converting {len(pairs)} version(s)...")
 
     def on_result(result) -> None:
@@ -1889,6 +1898,37 @@ def convert(ctx, bu, family, product, version, batch, select_all, force, dry_run
     # A failed version exits 1 (R12-06, the user's call), so `convert && reframe`
     # stops at it. Error *findings* still do not gate here, unlike `reframe`: a
     # converter error is one topic in a tree that otherwise converted.
+    if exit_code:
+        raise click.exceptions.Exit(1)
+
+
+def _reshelve(converter, pairs, findings) -> None:
+    """`convert --reshelve-orphans`: Phase 43's pass over trees already written."""
+    from docushift.converter import ConvertOutcome
+
+    console.print(f"Reshelving orphans in {len(pairs)} version(s)...")
+    counts: dict[str, int] = {}
+    exit_code = 1
+    try:
+        for found, ver in pairs:
+            try:
+                result = converter.reshelve_one(found, ver)
+            except Exception as exc:  # noqa: BLE001 - one version, not the run
+                result = converter._failed(found.slug, ver.version, ver.engine, str(exc))
+            label = {ConvertOutcome.CONVERTED: "reshelved",
+                     ConvertOutcome.CURRENT: "nothing to move"}.get(result.outcome, str(result.outcome))
+            counts[label] = counts.get(label, 0) + 1
+            if result.outcome is ConvertOutcome.CONVERTED:
+                console.print(f"  [green]v[/green] {result.slug}@{result.version}: {escape(result.message)}")
+            elif result.outcome is ConvertOutcome.FAILED:
+                console.print(f"  [red]x[/red] {result.slug}@{result.version}: {escape(result.message)}")
+            elif result.message:
+                console.print(f"  [yellow]![/yellow] {result.slug}@{result.version}: "
+                              f"{escape(result.message)}")
+        exit_code = 1 if counts.get(str(ConvertOutcome.FAILED)) else 0
+    finally:
+        findings.finish(exit_code=exit_code)
+    console.print(", ".join(f"{count} {label}" for label, count in sorted(counts.items())))
     if exit_code:
         raise click.exceptions.Exit(1)
 

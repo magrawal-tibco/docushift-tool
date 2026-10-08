@@ -41,6 +41,7 @@ import yaml
 
 from docushift.transforms import links
 from docushift.utils import textfile
+from docushift.utils.naming import is_unfiled
 
 #: The per-version and per-doc-class file. One name at two levels, for the reason
 #: `sync/redirects.REDIRECTS` carries one: it is one map, published at the level it
@@ -484,7 +485,10 @@ def build(
             found.append(("ORIGIN_PAGE_UNMAPPED",
                           f"{len(missed)} live page(s) with no {ORIGINS} row, e.g. {missed[0]}",
                           len(missed)))
-    return Built(built, found)
+    # Phase 43. A topic in `unfiled/` is not published, so a redirect to it only
+    # trades one 404 for another. Dropped last, so its live page still counts as
+    # mapped above rather than inflating `ORIGIN_PAGE_UNMAPPED`.
+    return Built([row for row in built if not is_unfiled(row["to"])], found)
 
 
 def write(path: Path, built: list[dict[str, Any]]) -> None:

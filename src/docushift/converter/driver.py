@@ -30,6 +30,7 @@ Four rules, all of them things the driver does so that no engine has to:
 import hashlib
 import json
 import re
+import shutil
 import traceback
 import uuid
 from collections.abc import Callable, Iterable
@@ -44,6 +45,7 @@ from docushift.apiref import find_api_roots, recorded_roots
 from docushift.catalog import CatalogError, CatalogManager
 from docushift.config import ConfigManager
 from docushift.converter import navigation
+from docushift.converter.orphans import reshelve
 from docushift.engines.base import ConversionContext, Document, Unit, engine_for
 from docushift.engines.csh import CshFormat, CshSource, csh_format_of, read_csh_source
 from docushift.engines.roots import (
@@ -87,7 +89,8 @@ _TOC_PATH = re.compile(r'url:[ \t]*"([^"\n]*)"')
 #: 1 = the first versioned key (X3-04 to X3-08, 2026-10-05).
 #: 2 = a support/legal page the TOC lists twice is moved once, not left in place
 #:     (Phase 42, 2026-10-06).
-_CONVERTER_VERSION = 2
+#: 3 = orphan topics leave the TOC for `unfiled/` (Phase 43, 2026-10-07).
+_CONVERTER_VERSION = 3
 
 #: The `config/aem_templates/` files the converter renders (X3-07). Named, not
 #: the whole folder: `sync`'s own templates must not re-convert every tree.
@@ -355,6 +358,83 @@ class DocumentConverter:
                               "every run; `docushift extract --force` records one")
         return result
 
+    def reshelve_one(self, product: Product, version: ProductVersion) -> ConvertResult:
+        """Phase 43 over a tree already converted: orphans out of the TOC, into `unfiled/`.
+
+        No source is read, so a version whose extracted tree is gone is fixed
+        without a re-download. Copied to `.part`, passed, swapped, with the same
+        building mark and the same new build id a conversion gets, so `reframe`
+        and `sync` see a new tree. `CURRENT` when there is nothing to move and
+        nothing to repair (Phase 44).
+
+        The inputs key is restamped only where it matched the previous
+        converter version: that tree differs from a fresh build by this pass
+        alone. A key stale for any other reason stays stale.
+        """
+        slug, number = product.slug, version.version
+        target = self.config.output_path(product.bu, product.family, slug, number)
+        try:
+            recover(target)
+        except OSError as exc:
+            return self._failed(slug, number, version.engine, _describe(exc))
+        if not target.is_dir():
+            return ConvertResult(slug, number, ConvertOutcome.NO_TREE, engine=version.engine,
+                                 message=f"no converted tree at {target}")
+        if self._building(slug, number, "convert"):
+            return self._failed(slug, number, version.engine,
+                                "the converted tree is from a run that did not finish; "
+                                "run `docushift convert` first")
+        staging = target.with_name(target.name + ".part")
+        try:
+            remove(staging)
+            shutil.copytree(long_path(target), long_path(staging))
+            shelved = reshelve(staging)
+        except Exception as exc:  # noqa: BLE001 - a failure is an outcome (R4-07)
+            remove(staging)
+            return self._failed(slug, number, version.engine, _describe(exc))
+        result = ConvertResult(slug, number, ConvertOutcome.CONVERTED, path=target,
+                               engine=version.engine)
+        if not shelved.removed and not shelved.repaired:
+            remove(staging)
+            result.outcome = ConvertOutcome.CURRENT
+            result.message = shelved.kept
+            if shelved.kept:
+                self._record("TOC_ORPHAN", slug, number, message=f"orphans not reshelved: {shelved.kept}")
+            self._restamp(product, version)
+            return result
+
+        if self.state is not None:
+            self.state.mark_building(slug, number, "convert")
+        swap(staging, target)
+        if self.state is not None:
+            moved = shelved.moved
+            self.state.record_output_map(slug, number, [
+                (source, moved.get(output, output), unit)
+                for source, output, unit in self.state.get_output_rows(slug, number)
+            ])
+            self.state.set_version_metadata(slug, number, "convert_build_id", uuid.uuid4().hex)
+        self._restamp(product, version)
+        result.md_files, result.out_files = self._measure_output(slug, number, target)
+        if self.state is not None:
+            self.state.clear_building(slug, number, "convert")
+        result.documents = len(shelved.moved)
+        result.message = (f"{len(shelved.moved)} orphan(s) to unfiled/, {shelved.links} link(s) "
+                          f"re-pathed, {shelved.csh} help id(s) retargeted, "
+                          f"{shelved.redirects} redirect(s) dropped")
+        if shelved.repaired:
+            result.message += f", {shelved.repaired} link(s) in unfiled/ repaired"
+        return result
+
+    def _restamp(self, product: Product, version: ProductVersion) -> None:
+        """The current inputs key, for a tree that was current one converter version ago."""
+        if self.state is None:
+            return
+        slug, number = product.slug, version.version
+        recorded = self._metadata(slug, number).get("convert_inputs_key", "")
+        if recorded and recorded == self._inputs_key(product, version, _CONVERTER_VERSION - 1):
+            self.state.set_version_metadata(slug, number, "convert_inputs_key",
+                                            self._inputs_key(product, version))
+
     def _failed(
         self, slug: str, number: str, engine: SourceEngine, message: str
     ) -> ConvertResult:
@@ -496,6 +576,13 @@ class DocumentConverter:
         self._report_csh(context, result.csh)
         self._retarget_fragments(context, staging, result.csh.entries)
         csh_transform.write(staging / "csh.yml", result.csh.entries)
+        # Phase 43. Orphans leave the TOC for `unfiled/`, after every file that
+        # names them is written and before `301.yml`, which drops their rows.
+        shelved = reshelve(staging).moved
+        if shelved:
+            output_rows = [(source, shelved.get(output, output), unit_name)
+                           for source, output, unit_name in output_rows]
+            mapping = {source: output for source, output, _unit in output_rows}
         self._write_origins(staging, product, version, mapping)
 
         # Marked before the swap and cleared only once every row and column below
@@ -693,6 +780,14 @@ class DocumentConverter:
                 message=f"{count} reference(s) resolved to nothing",
                 count=count,
             )
+        if copier.counts.page_segment_dropped:
+            context.record(
+                "REFERENCE_PAGE_SEGMENT_DROPPED",
+                path=unit,
+                message=f"{copier.counts.page_segment_dropped} asset reference(s) named a page "
+                        f"as a folder; resolved without it",
+                count=copier.counts.page_segment_dropped,
+            )
         orphans = copier.orphans()
         if orphans:
             # A note, aggregated: 54.6% of Flare's images are orphans by the
@@ -780,14 +875,6 @@ class DocumentConverter:
     def _report_unrendered(self, context: ConversionContext) -> None:
         """One note per version for the media the walk had no Markdown for (R8-13).
 
-        if copier.counts.page_segment_dropped:
-            context.record(
-                "REFERENCE_PAGE_SEGMENT_DROPPED",
-                path=unit,
-                message=f"{copier.counts.page_segment_dropped} asset reference(s) named a page "
-                        f"as a folder; resolved without it",
-                count=copier.counts.page_segment_dropped,
-            )
         Named by tag, because the tag is the decision somebody would argue with:
         a version full of `<iframe>`s wants a construct, a stray `<svg>` does not.
         """
@@ -1022,7 +1109,9 @@ class DocumentConverter:
         recorded = [] if standalone else self._recorded_paths(slug, version, "api_roots", tree)
         return recorded or find_api_roots(tree, output_roots)
 
-    def _inputs_key(self, product: Product, version: ProductVersion) -> str:
+    def _inputs_key(
+        self, product: Product, version: ProductVersion, converter: int | None = None
+    ) -> str:
         """A digest of what shapes the converted tree besides the package (X3-05/06/07).
 
         The converter's version, the display name (it titles the version's
@@ -1038,7 +1127,7 @@ class DocumentConverter:
             templates.update(name.encode("utf-8") + b"\0")
             templates.update(path.read_bytes() if path.is_file() else b"")
         shaping = {
-            "converter": _CONVERTER_VERSION,
+            "converter": _CONVERTER_VERSION if converter is None else converter,
             "display_name": product.display_name,
             "templates": templates.hexdigest()[:16],
             "origins": origins.fingerprint(
