@@ -5,6 +5,32 @@
 > `C:\github\confluence-mcp\reports\docushift-claude-atlassian-context.md`; this file
 > does not repeat them. It answers one question: **is this piece of work in Jira, and where?**
 
+## Handoff — read first, update last
+
+Any session that touches Jira, closes a phase, or lands a run updates this section before it
+ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled* above.
+
+**Waiting** (Jira changes due when the event happens):
+
+| When this happens | Do this in Jira |
+|---|---|
+| Phase 47 re-runs (8 versions) pass | DOCOPS-187 → Done |
+| Phase 40 network runs finish | DOCOPS-123 → Done |
+| 50 long-path + 8 DITA versions re-run | DOCOPS-188 → Done |
+| `sync --bu tibco` + `validate` run | DOCOPS-134, DOCOPS-135; refresh counts in DOCOPS-122, 125–127 |
+| ibi re-sync | DOCOPS-200 → Done |
+| Family review finished | DOCOPS-120 → Done, then DOCOPS-130 |
+| A new phase is opened | One sub-task under the matching story, In Progress, no `retro` |
+
+**Left alone on purpose:** DOCOPS-8 is a Task where its siblings are Stories.
+
+**Log** (newest first, one line per session):
+
+- 2026-10-08 — Full reconcile against Jira, `versions.csv`, phase history. Created DOCOPS-192–200,
+  fixed counts (122, 125–127, 129), statuses (87, 120, 187), labels on all run tasks, broken
+  DOCOPS-20/21 references (14, 15, 17, 19, 76). Retro rule set to "finished before the current
+  month"; 27 retro tasks remain. Shared guide in confluence-mcp updated to match.
+
 ## How to log work
 
 - **Where:** DOCOPS-74 Docushift, DOCOPS-75 Reframe, DOCOPS-5 TIBCO runs, DOCOPS-139 ibi runs.

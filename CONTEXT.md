@@ -196,6 +196,8 @@ Per-family folders are created on demand by the downloader, not at startup: pre-
 
 ## 4. Next Steps
 
+Jira (DOCOPS) status and what to file next: the handoff at the top of [`docs/jira.md`](docs/jira.md).
+
 0. **Phase 42, built 2026-10-06; runs in progress**: merged pages are the default for every
    TIBCO product except Streaming, for Flare and DITA versions (WebWorks stays unmerged),
    with automatic layout pins and a DITA TOC fix. `reframe --bu tibco` ran (6 failures from
