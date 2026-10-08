@@ -483,19 +483,19 @@ tibco-geoanalytics-builder,geo-build,TIBCO GeoAnalytics Builder,tibco,general,un
 tibco-graph-database-community-edition,tgdb-ce,TIBCO® Graph Database - Community Edition,tibco,general,unclassified,General,Not yet triaged into a family,40,,true,default,false
 tibco-graph-database-enterprise-edition,tgdb,TIBCO® Graph Database - Enterprise Edition,tibco,general,unclassified,General,Not yet triaged into a family,40,,true,default,false
 tibco-health-essentials-cloud,health-essentials-cloud,TIBCO® Health Essentials Cloud,tibco,general,unclassified,General,Not yet triaged into a family,40,,true,default,false
-tibco-it-operations-analytics,it-oa-suite,TIBCO® IT Operations Analytics,tibco,general,manual,General,Not yet triaged into a family,40,monitoring,true,default,false
+tibco-it-operations-analytics,it-oa-suite,TIBCO® IT Operations Analytics,tibco,general,manual,General,Not yet triaged into a family,40,,true,default,false
 tibco-kabira-adapter-factory-for-java,kabira-jaf,TIBCO Kabira® Adapter Factory for JAVA,tibco,general,unclassified,General,Not yet triaged into a family,40,,true,default,false
 tibco-kabira-adapter-factory-for-persistence,kabira-paf,TIBCO Kabira® Adapter Factory for Persistence,tibco,general,unclassified,General,Not yet triaged into a family,40,,true,default,false
 tibco-kabira-adapter-factory-for-snmp,kabira-snmpaf,TIBCO Kabira® Adapter Factory for SNMP,tibco,general,unclassified,General,Not yet triaged into a family,40,,true,default,false
 tibco-kabira-builder,kab-p-builder,TIBCO Kabira® Builder,tibco,general,unclassified,General,Not yet triaged into a family,40,,true,default,false
 tibco-microflow-container-edition,microflow-container-edition,TIBCO Microflow™ Container Edition,tibco,general,unclassified,General,Not yet triaged into a family,40,,true,default,false
-tibco-monitoring-1-0-0,mon-suite,TIBCO® Monitoring 1.0.0,tibco,general,manual,General,Not yet triaged into a family,40,monitoring,true,default,false
+tibco-monitoring-1-0-0,mon-suite,TIBCO® Monitoring 1.0.0,tibco,general,manual,General,Not yet triaged into a family,40,,true,default,false
 tibco-orchestra-networks,orchestra-networks,TIBCO® Orchestra Networks,tibco,general,unclassified,General,Not yet triaged into a family,40,,true,default,false
 tibco-patterns,tps,TIBCO® Patterns,tibco,general,unclassified,General,Not yet triaged into a family,40,,true,default,false
-tibco-reward,loyalty,TIBCO® Reward,tibco,general,manual,General,Not yet triaged into a family,40,reward,true,default,false
-tibco-rtview,rtview,TIBCO® RTView®,tibco,general,manual,General,Not yet triaged into a family,40,monitoring,true,default,false
+tibco-reward,loyalty,TIBCO® Reward,tibco,general,manual,General,Not yet triaged into a family,40,,true,default,false
+tibco-rtview,rtview,TIBCO® RTView®,tibco,general,manual,General,Not yet triaged into a family,40,,true,default,false
 tibco-service-gateway-for-files,service-gateway-for-files,TIBCO Service Gateway™ for Files,tibco,general,unclassified,General,Not yet triaged into a family,40,,false,manual,false
-tibco-service-performance-manager,activematrix-service-performance-manager,TIBCO® Service Performance Manager,tibco,general,manual,General,Not yet triaged into a family,40,monitoring,true,default,false
+tibco-service-performance-manager,activematrix-service-performance-manager,TIBCO® Service Performance Manager,tibco,general,manual,General,Not yet triaged into a family,40,,true,default,false
 tibco-slingshot,slingshot,TIBCO Slingshot™,tibco,general,unclassified,General,Not yet triaged into a family,40,,true,default,false
 tibco-vault,vault,TIBCO® Vault,tibco,general,unclassified,General,Not yet triaged into a family,40,,true,default,false
 tibco-hawk-activematrix-plug-in,hawk-activematrix-plugin,TIBCO Hawk ActiveMatrix® Plug-in,tibco,hawk,manual,Hawk,"Infrastructure monitoring agents, adapters, and plug-ins",9,,true,default,false

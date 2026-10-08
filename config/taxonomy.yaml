@@ -120,9 +120,6 @@ business_units:
       mft:
         name: "Managed File Transfer"
         description: "Command Center, Internet Server, and the platform servers"
-      monitoring:
-        name: "Monitoring"
-        description: "RTView, Service Performance Manager, and IT operations analytics"
       mainframe:
         name: "Mainframe"
         description: "Mainframe WebUI, RED, TCP Library, Substation ES, and the z/OS transaction interfaces"
@@ -135,9 +132,6 @@ business_units:
       silver-mobile:
         name: "Silver Mobile"
         description: "Silver Mobile server and the Android and iOS device cores"
-      reward:
-        name: "Reward"
-        description: "Loyalty and customer reward marketing"
       general:
         name: "General"
         description: "Not yet triaged into a family"
@@ -364,9 +358,6 @@ rules:
   - match: ["managed file transfer"]
     bu: tibco
     family: mft
-  - match: ["rtview", "service performance manager", "it-oa-suite", "mon-suite"]
-    bu: tibco
-    family: monitoring
   # Above `adapters`: `Binding Type for Adapters` and `Implementation Type for
   # TIBCO Adapters` are ActiveMatrix runtime pieces, not adapters.
   - match: ["service grid", "binding type", "implementation type", "management agent", "policy director", "uddi"]
@@ -375,9 +366,6 @@ rules:
   - match: ["adapter for", "adapter service engine", "adapter framework", "adapter sdk", "adapter migration"]
     bu: tibco
     family: adapters
-  - match: ["reward"]
-    bu: tibco
-    family: reward
   - match:
       - "hybrid integration"
       - "tibco-int"
