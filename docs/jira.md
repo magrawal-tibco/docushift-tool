@@ -19,12 +19,17 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | 50 long-path + 8 DITA versions re-run | DOCOPS-188 → Done |
 | `sync --bu tibco` + `validate` run | DOCOPS-134, DOCOPS-135; refresh counts in DOCOPS-122, 125–127 |
 | ibi re-sync | DOCOPS-200 → Done |
+| A family reassignment is committed | Add a dated line to the progress comment on DOCOPS-120 |
 | Family review finished | DOCOPS-120 → Done, then DOCOPS-130 |
 | A new phase is opened | One sub-task under the matching story, In Progress, no `retro` |
 
 **Left alone on purpose:** DOCOPS-8 is a Task where its siblings are Stories.
 
 **Log** (newest first, one line per session):
+
+- 2026-10-08 — Family/catalog gap check. Created DOCOPS-206 (Phase 48, Flogo retirement) and
+  DOCOPS-207 (ibi family regroup, 2026-10-05), both Done, no `retro`. Progress comment on
+  DOCOPS-120 lists the TIBCO reassignments so far.
 
 - 2026-10-08 — Full reconcile against Jira, `versions.csv`, phase history. Created DOCOPS-192–200,
   fixed counts (122, 125–127, 129), statuses (87, 120, 187), labels on all run tasks, broken
@@ -84,8 +89,10 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | 45 | Function catalogs as API reference | DOCOPS-186 |
 | 46 | Long-path refusal | build DOCOPS-184; re-runs DOCOPS-188 |
 | 47 | Service Grid merges | DOCOPS-187 (in progress) |
+| 48 | Flogo connectors retired; VS Code extension to flogo | DOCOPS-206 |
 
-Other logged work: stakeholder status page DOCOPS-197; family reassignments DOCOPS-120 (in progress).
+Other logged work: stakeholder status page DOCOPS-197; TIBCO family reassignments DOCOPS-120
+(in progress, progress kept as comments); ibi family regroup DOCOPS-207.
 
 ## Open run tasks (as of 2026-10-08)
 
