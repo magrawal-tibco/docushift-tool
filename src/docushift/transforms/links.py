@@ -115,6 +115,27 @@ def escapes(path: PurePosixPath) -> bool:
     return str(path).startswith("..")
 
 
+# A page named where a folder belongs: `setting-the-value-of.htm/ellipsis.png`.
+_PAGE_SEGMENT = re.compile(r"\.html?$", re.IGNORECASE)
+
+
+def without_page_segments(path: PurePosixPath) -> PurePosixPath | None:
+    """`path` with any page-named folder segment removed, or None if it has none.
+
+    Phase 47. Service Grid 3.4.3/3.4.4's Composite Development Guide addresses its
+    pictures and pages through the page that uses them, as if the page were a
+    folder: 292 references per version, every one of which resolves once the
+    `*.htm` segment is dropped, and no other unpacked version has the shape. The
+    callers retry with this only after the reference failed, and keep it only if
+    the shortened path resolves.
+    """
+    *folders, leaf = path.parts or ("",)
+    kept = [part for part in folders if not _PAGE_SEGMENT.search(part)]
+    if len(kept) == len(folders):
+        return None
+    return PurePosixPath(*kept, leaf)
+
+
 def is_topic(path: str) -> bool:
     return PurePosixPath(path).suffix.lower() in TOPIC_SUFFIXES
 

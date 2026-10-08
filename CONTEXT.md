@@ -205,6 +205,8 @@ Per-family folders are created on demand by the downloader, not at startup: pre-
 0d. **Phase 46, built 2026-10-07; runs pending**: Windows hides files at 260+ characters when long-path
    support is off, and 50 processed versions lost files that way without a warning. Turn the
    setting on (done); the tool now refuses to run without it. Next: re-run the 50.
+0e. **Phase 47, done 2026-10-08**: the three ActiveMatrix merges that failed now pass (one
+   copy per guide, deep-page headings), and Service Grid 3.4.x keeps its 126 pictures.
 1. **Phase 40, built; two network runs left**: `download` takes each version's package
    name from the Coveo sitemap, so pre-rebrand and renamed versions stop failing
    (96 of the 1,435 still to download). Run `catalog sitemap` before a large download. See [`planning.md`](docs/planning.md#1-active-phases).

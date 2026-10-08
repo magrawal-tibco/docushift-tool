@@ -248,6 +248,104 @@ pages pass `is_file()`.
 - Step 3 done: the user turned the setting on. A new process sees all 209 of Files 1.3.0's pages, `find_output_roots` finds its `html/`, and the probe passes.
 - Step 4 (the runs) is next.
 
+### Phase 47: Service Grid Merges — One Topic in Two Guides, Deep Pages, Page-as-Folder Links — **Done 2026-10-08**
+
+**Why.** Three ActiveMatrix merges failed `REFRAME_SELF_CHECK_FAILED` on 2026-10-07, and
+Service Grid 3.4.3/3.4.4 each lose 126 pictures at conversion (`docs/open-issues.md`).
+Reproduced in a private root (`C:\tmp\sgroot`, staging kept) on 2026-10-07. Four causes:
+
+1. **Per-guide copies fail the audit.** Since Phase 29 `pack` gives a topic listed under two
+   guides one copy per guide (`claimed` is per root). `assign` keeps only the first copy in
+   `located` (the per-node copies are in `placements`), and `audit._anchors` and
+   `_navigation` still read `located`: the second copy counts as an extra anchor and its
+   page as unreachable. Hits 3.4.4 ("1856 topics located, 1866 anchored") and CE 1.0.1
+   (`cloud-deployment-guide/activematrix-service-grid-container-edition-2.md`).
+2. **`project` does not make the copies.** A version laid out from a pin dedupes across the
+   whole version (`claimed` over all roots), so the Phase 29 rule holds only in the
+   reference version. CE 1.0.0 passes for that reason, with the topic placed once.
+3. **Heading levels on a TOC deeper than six.** `_relevel` runs `compact` on raw TOC depths,
+   and `compact` caps at H6 before `_relevel` rebases. With a shallowest depth of 7 the first
+   topic gets level 0, so it renders as a plain line and the next one comes out at the wrong level.
+   3.4.3's "difference -2" is two such pages. Pinned versions only.
+4. **Page-as-folder references in the source.** The Composite Development Guide writes
+   `setting-the-value-of.htm/ellipsis.png` and `tibco-business-studi5.htm/tibco-business-studi3.htm`:
+   126 pictures (`REFERENCE_UNRESOLVED`) and 166 links (`TOPIC_LINK_DANGLING`) per version.
+
+**Measured 2026-10-07/08:**
+
+- Cause 4: across every unpacked version, 584 references of this shape, all in Service Grid
+  3.4.3 and 3.4.4 (292 each). Dropping the `*.htm` segment resolves all 292 in each.
+- Cause 2: 3 of the 352 merged versions have a topic under two guides (SmartMapper 7.1.2,
+  IBM MQ 8.7.0, CE 1.0.0, one topic each); these change when `project` makes copies.
+- Cause 3: no merged tree is affected; the audit fails every such page, as it did for 3.4.3.
+
+#### Decisions
+
+| decision | choice | why |
+|---|---|---|
+| **Audit** | `_anchors` and `_navigation` count placements per TOC node (`placements`), not per source topic: every anchor belongs to one placement, every placed page is reachable from its own node. `located` stays first-copy for redirects and CSH | The copies are intended (Phase 29); the check has to expect them |
+| **`project`** | Dedupes per guide, like `pack`; a pin group is keyed by guide and source, so each guide's copy follows its own reference page | One rule for both paths. Changes 3 merged versions |
+| **`_relevel`** | Rebase depths to 1 before `compact` | The cap must apply to page levels, not to raw TOC depth |
+| **Page-as-folder references** | In `transforms/assets.resolve` and the Flare topic-link resolver: when a reference does not resolve and a path segment ending `.htm`/`.html` names an existing file, retry without that segment, and count it (`page_segment_dropped`) as a note | The pictures and pages exist; only the address is wrong. Measured to touch only these two versions |
+| **Re-running** | No `_ALGORITHM` or `_CONVERTER_VERSION` bump. The affected versions are re-run with `--force`: convert 3.4.3, 3.4.4; reframe 3.4.3, 3.4.4, CE 1.0.0, CE 1.0.1, SmartMapper 7.1.2, IBM MQ 8.7.0 | A bump re-merges or re-converts every version for output that changes in 8. Departs from the Phase 44 practice, so it is stated here |
+
+#### Steps
+
+1. `reframe/audit.py`: anchors and reachability from `placements`; the driver passes them.
+2. `reframe/packer.project`: per-guide dedupe, pin groups keyed by guide.
+3. `reframe/packer._relevel`: rebase before `compact`.
+4. `transforms/assets.py` and `engines/flare.py`: the page-segment retry and its note.
+5. Tests: a topic under two guides passes the audit in `pack` and in `project`, with one copy per guide; a page whose topics sit at depth 7+ gets H1 then H2; `a.htm/img.png` resolves to `img.png` beside `a.htm`, and a reference with no such file stays dangling.
+6. Runs (the user): `convert --force` for Service Grid 3.4.3 and 3.4.4; `reframe --force` for the six versions above.
+7. Docs: `architecture.md` (audit, projection), `docs/open-issues.md` (close both entries).
+
+*Exit: the three versions merge with no `REFRAME_SELF_CHECK_FAILED`; 3.4.3/3.4.4 report 0 `REFERENCE_UNRESOLVED` from the Composite Development Guide; the three re-merged versions pass and each has one copy per guide.*
+
+#### As built (2026-10-08)
+
+- Steps 1–5 done. `audit._anchors` compares anchored and located *sources* as sets;
+  `_navigation` reaches each row's own copy through `placements`. `project` keys pin groups
+  by (guide, source), with a path-only fallback for a source on exactly one reference page
+  so a guide retitled between versions keeps its pins, and never places one topic twice on
+  a page. `_Reference` gained the guide. `_relevel` reads depths by row (`Topic.node`, now
+  set by `project`) and rebases before `compact`.
+- **Found while verifying: `relocate` filed the second copy in the first guide's folder.**
+  Its owner map was keyed by source, so the last copy owned both rows. Now keyed by row
+  first. CE's Quick Start copy moves from `cloud-deployment-guide/…-2.md` to
+  `quick-start/introduction/containerizing-activematrix-service-grid/…`.
+- **Known limit:** `rename-map.csv` and the copy `state.db` keeps are keyed by source topic,
+  so a kept name cannot tell two copies apart; a pin recorded for a copy's source applies
+  to whichever copy leads a page. Seen only in the private test root, where an earlier run
+  had pinned the old path; neither CE version has such a pin in the workspace.
+- Step 4 as built: the retry keeps the shortened path only if it resolves; it does not
+  separately check that the dropped segment names a file. New code `REFERENCE_PAGE_SEGMENT_DROPPED`
+  (note); the register is 87.
+- Verified in `C:\tmp\sgroot` (renormalized for CE): all four Service Grid versions merge
+  with no self-check failure; 3.4.3's deep page opens `#` then `##`; converting 3.4.4 gives
+  0 `REFERENCE_UNRESOLVED` (was 126), `TOPIC_LINK_DANGLING` 1 (was 167), 292
+  `REFERENCE_PAGE_SEGMENT_DROPPED`; the re-merge from that conversion passes.
+- `architecture.md` has no section on the audit or the pin, so step 7 is this entry and
+  `open-issues.md`.
+- **Step 6, first run (2026-10-08).** Converts: 3.4.3 and 3.4.4, 0 `REFERENCE_UNRESOLVED`,
+  `TOPIC_LINK_DANGLING` 1 each, 292 `REFERENCE_PAGE_SEGMENT_DROPPED` each. Re-merges: all six
+  passed, and CE 1.0.0/1.0.1 file the Quick Start copy under `quick-start/`. **But IBM MQ
+  8.7.0 regressed:** its reference (8.8.2) lists the shared topic in the first guide only, so
+  the path-only fallback put the *second* guide's copy on a first-guide page
+  (`setting-up-log-levels.md`). The audit passed it: no check compared a topic's guide with
+  its page's.
+- **Fixed (2026-10-08).** The fallback applies only to a topic's first appearance in the
+  version; a later guide's copy matches its own guide or is packed as new in that guide. A
+  run of new topics is flushed at a guide change. New audit check `_guides` ("guide
+  integrity"): every row-placed topic sits on a page of its own row's guide. Re-checked in
+  the private root: IBM MQ 8.7.0 has one copy in each of its two guides, SmartMapper 7.1.2
+  one in each of three. 2,201 tests pass. The six re-merges are to be run again.
+- **Step 6, re-run (2026-10-08).** All six re-merged with no `REFRAME_SELF_CHECK_FAILED`.
+  Every copy sits on a page of its own guide: Service Grid 3.4.3/3.4.4 10 topics each (Java and
+  Spring guides), CE 1.0.0/1.0.1 one (Cloud Deployment, Quick Start), SmartMapper 7.1.2 one
+  in three guides, IBM MQ 8.7.0 one in two. `RENAME_MAP_UNMATCHED` in SmartMapper (4 rows)
+  and IBM MQ (2): those topics no longer lead a page under the per-guide layout; neither
+  merge had been published. Exit met; both `open-issues.md` entries closed.
+
 ---
 
 ## Carried-Forward Open Items
@@ -312,6 +410,7 @@ The concrete deliverable of §7.1: every deferred "report line" in the three doc
 | `LOCALIZED_ROOT_SKIPPED`³⁴ | warn | convert | An output root built for another locale (24 in the corpus: `ja`, `ja-jp`, `de-de`, `fr-fr`, `es-es`), not converted into this locale's tree; one row per root, naming its locale | Phase 34 (R5-01) |
 | `ASSET_ORPHANED` | note | convert | Unreferenced asset — 54.6% is normal for Flare | `architecture.md` §5.5.7 |
 | `REFERENCE_UNRESOLVED` | **error** | convert | A reference producing neither link nor copy | invariant 13 |
+| `REFERENCE_PAGE_SEGMENT_DROPPED`⁴⁷ | note | convert | A reference naming a page as a folder (`a.htm/b.png`), resolved without that segment (Service Grid 3.4.3/3.4.4 only, 292 each) | Phase 47 |
 | `CSH_UNRESOLVED` | warn | convert | Identifier matched no produced topic | Phase 6 contract |
 | `CSH_AMBIGUOUS` | note | convert | Identifier claimed by 2+ doc-sets; first ordered doc-set wins | Phase 6 contract |
 | `DOC_REFERENCE_MISSING` | warn | sync | Flare escape pointing at a document the ZIP never shipped (152) | `architecture.md` §5.5.8 |

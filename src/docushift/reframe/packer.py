@@ -73,7 +73,7 @@ class Topic:
     #: names nothing and which twenty pages in one doc set are called (Phase 29).
     parent: str = ""
     #: `id()` of the TOC row this placement came from, or 0 for a topic that no
-    #: row placed (`carry`, and `project`'s new topics). Since a topic listed
+    #: row placed (`carry`). Since a topic listed
     #: under two guides is now packed once per guide, the source path alone no
     #: longer identifies which page a given row resolves to -- `toc.retarget`
     #: needs the row, and the row is what this remembers.
@@ -188,10 +188,12 @@ def pack(roots: Sequence[TocEntry], words_of: Callable[[PurePosixPath], int], ma
     return pages
 
 
-#: One reference page as the pin carries it: where it was written, and which source
-#: topics shared it. Must be taken *after* `assign`, since the name is what `assign`
-#: decided and half the point of pinning is that the name does not move either.
-_Reference = tuple[PurePosixPath, tuple[PurePosixPath, ...]]
+#: One reference page as the pin carries it: where it was written, which source
+#: topics shared it, and which guide it belongs to. Must be taken *after* `assign`,
+#: since the name is what `assign` decided and half the point of pinning is that
+#: the name does not move either. The guide is there because a topic listed under
+#: two guides is on two reference pages, one per guide (Phase 47).
+_Reference = tuple[PurePosixPath, tuple[PurePosixPath, ...], str]
 
 
 def layout_of(pages: Sequence[Page]) -> list[_Reference]:
@@ -205,7 +207,7 @@ def layout_of(pages: Sequence[Page]) -> list[_Reference]:
     different URL. Measured on ActiveSpaces: two pages per version, which is two
     broken cross-version links per version for no editorial reason at all.
     """
-    return [(page.path, tuple(topic.source for topic in page.topics)) for page in pages]
+    return [(page.path, tuple(topic.source for topic in page.topics), page.guide) for page in pages]
 
 
 def project(
@@ -242,38 +244,61 @@ def project(
     page here too, exactly as in `pack`.
     """
     prefixes = tuple(keep_separate)
-    group_of: dict[PurePosixPath, int] = {}
-    rank_of: dict[PurePosixPath, int] = {}
-    for index, (_, group) in enumerate(reference):
+    # Keyed by guide as well as source (Phase 47): a topic under two guides sits on
+    # one reference page per guide, and each guide's copy follows its own.
+    # A source on exactly one reference page still matches by path alone, as it
+    # did before, so a guide retitled between versions keeps its pinned pages.
+    group_of: dict[tuple[str, PurePosixPath], int] = {}
+    rank_of: dict[tuple[str, PurePosixPath], int] = {}
+    pages_of: dict[PurePosixPath, list[int]] = {}
+    for index, (_, group, guide) in enumerate(reference):
         for rank, source in enumerate(group):
-            if source not in group_of:
-                group_of[source] = index
-                rank_of[source] = rank
+            if (guide, source) not in group_of:
+                group_of[guide, source] = index
+                rank_of[guide, source] = rank
+            pages_of.setdefault(source, []).append(index)
+    only_of = {source: indexes[0] for source, indexes in pages_of.items() if len(set(indexes)) == 1}
 
-    # This version's reading order, deduped the way `pack` dedupes: the first node
-    # to reach a path owns it and later nodes become TOC rows pointing at it.
-    claimed: set[PurePosixPath] = set()
-    order: list[tuple[PurePosixPath, str, str]] = []
-    depth_of: dict[PurePosixPath, int] = {}
+    # This version's reading order, deduped the way `pack` dedupes: per guide, so
+    # the first node in a guide to reach a path owns it there and later nodes in
+    # that guide become TOC rows pointing at it. `node` and the depth are kept per
+    # row, because with one copy per guide the path no longer names one placement.
+    order: list[tuple[PurePosixPath, str, str, int, bool]] = []
+    depth_of: dict[int, int] = {}
+    earlier: set[PurePosixPath] = set()
     for root in roots:
+        claimed: set[PurePosixPath] = set()
         for depth, entry in _walk_depth(root):
             if entry.path is None or entry.path in claimed:
                 continue
             claimed.add(entry.path)
-            depth_of[entry.path] = depth
-            order.append((entry.path, entry.title, root.title))
+            depth_of[id(entry)] = depth
+            order.append((entry.path, entry.title, root.title, id(entry), entry.path in earlier))
+        earlier |= claimed
 
-    def projected(path: PurePosixPath) -> int | None:
-        index = group_of.get(path)
+    def projected(path: PurePosixPath, guide: str, copy: bool) -> int | None:
+        # A later guide's copy matches its own guide only. Through the path-only
+        # match it would land on the first guide's reference page, which is one
+        # guide's topic on another guide's page (IBM MQ 8.7.0, Phase 47).
+        index = group_of.get((guide, path), None if copy else only_of.get(path))
         return None if index is None or separated(path, prefixes) else index
+
+    def rank(index: int, source: PurePosixPath) -> int:
+        _, group, guide = reference[index]
+        return rank_of.get((guide, source), group.index(source))
 
     members: dict[int, list[Topic]] = {}
     guide_of: dict[int, str] = {}
-    for path, title, guide in order:
-        index = projected(path)
+    for path, title, guide, node, copy in order:
+        index = projected(path, guide, copy)
         if index is None:
             continue
-        members.setdefault(index, []).append(Topic(title, path, words_of(path)))
+        group = members.setdefault(index, [])
+        # Two guides reaching one reference page through the path-only match: the
+        # page holds the topic once, and the second guide's row points at it.
+        if any(topic.source == path for topic in group):
+            continue
+        group.append(Topic(title, path, words_of(path), node=node))
         guide_of.setdefault(index, guide)
 
     pages: list[Page] = []
@@ -288,16 +313,19 @@ def project(
             pending = []
             pending_guide = ""
 
-    for path, title, guide in order:
-        index = projected(path)
+    for path, title, guide, node, copy in order:
+        index = projected(path, guide, copy)
         if index is None:
+            # R1.1: a run of new topics never spans two guides either.
+            if pending and pending_guide != guide:
+                flush()
             if not pending:
                 pending_guide = guide
             # `level=1`: a topic the reference does not have is packed on its own
             # merits, so the first on its page supplies that page's H1 and
             # `_close_run` drops the rest below it. Left at the `Topic` default
             # these published 43 pages opening at `##` with nothing above them.
-            pending.append(_Unit((Topic(title, path, words_of(path), level=1),),
+            pending.append(_Unit((Topic(title, path, words_of(path), node=node, level=1),),
                                  separate=separated(path, prefixes)))
             continue
         if index in emitted:
@@ -306,13 +334,13 @@ def project(
         # A run of new topics never spans a projected boundary, which is what keeps
         # the projection intact rather than merely mostly intact.
         flush()
-        topics = sorted(members[index], key=lambda topic: rank_of[topic.source])
+        topics = sorted(members[index], key=lambda topic: rank(index, topic.source))
         pages.append(Page(guide_of[index], _relevel(topics, depth_of), path=reference[index][0]))
     flush()
     return pages
 
 
-def _relevel(topics: Sequence[Topic], depth_of: dict[PurePosixPath, int]) -> list[Topic]:
+def _relevel(topics: Sequence[Topic], depth_of: dict[int, int]) -> list[Topic]:
     """Heading levels for a projected page, read off *this* version's own TOC.
 
     The pin carries which topics share a page and what that page is called; it
@@ -328,13 +356,15 @@ def _relevel(topics: Sequence[Topic], depth_of: dict[PurePosixPath, int]) -> lis
     """
     if not topics:
         return []
-    depths = [depth_of.get(topic.source, 1) for topic in topics]
+    depths = [depth_of.get(topic.node, 1) for topic in topics]
     base = min(depths)
     # `compact` is Phase 27's rule, reused rather than re-derived: the page holds
     # only the topics this version has, so the TOC rows between two of them may
     # be absent and their raw depths gap. Compacting by nesting depth closes that
-    # the same way it closes an authored `h3 -> h6`.
-    levels = [level - base + 1 for level in compact(depths)]
+    # the same way it closes an authored `h3 -> h6`. Rebased to 1 *before* it,
+    # because `compact` caps at H6: on raw depths a page seven rows down came out
+    # at level 0, a heading with no `#` (Phase 47, Service Grid 3.4.3).
+    levels = compact([depth - base + 1 for depth in depths])
     seen_root = False
     demote = False
     out: list[Topic] = []
@@ -706,15 +736,21 @@ def relocate(pages: Sequence[Page], roots: Sequence[TocEntry]) -> int:
     Returns how many pages moved. Must run **before** `pages.render`, because the
     renderer resolves every relative link and asset path against `page.path`.
     """
+    # By row first: a topic under two guides has one copy per guide, and keyed by
+    # source alone the last copy owned both rows, so the second guide's copy was
+    # filed in the first guide's folder (Phase 47).
     owner: dict[PurePosixPath, Page] = {}
+    owner_of_row: dict[int, Page] = {}
     for page in pages:
         for topic in page.topics:
-            owner[topic.source] = page
+            owner.setdefault(topic.source, page)
+            if topic.node:
+                owner_of_row[topic.node] = page
 
     placed: dict[int, PurePosixPath] = {}
 
     def walk(entry: TocEntry, folder: PurePosixPath) -> None:
-        page = owner.get(entry.path) if entry.path is not None else None
+        page = owner_of_row.get(id(entry)) or (owner.get(entry.path) if entry.path is not None else None)
         # Only the page's *leading* topic puts it in the tree: an absorbed topic
         # is a section, and its TOC row must not move the page it was merged into.
         below = folder

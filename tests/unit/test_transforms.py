@@ -891,6 +891,38 @@ def test_a_dangling_reference_emits_neither_link_nor_copy_and_is_counted(tmp_pat
     assert copier.counts.dangling_by_segment == {"Content": 1}
 
 
+def test_a_page_named_as_a_folder_resolves_without_that_segment(tmp_path: Path) -> None:
+    """Phase 47: Service Grid writes `topic.htm/images/shot.png` for its pictures."""
+    copier, root = copier_for(tmp_path)
+
+    resolution = copier.resolve(
+        root / "Content" / "topic.htm", PurePosixPath("Content/topic.md"), "topic.htm/images/shot.png"
+    )
+
+    assert resolution.outcome is AssetOutcome.RESOLVED
+    assert resolution.target == PurePosixPath("Content/images/shot.png")
+    assert copier.counts.page_segment_dropped == 1
+    assert copier.counts.dangling == 0
+
+
+def test_a_page_named_as_a_folder_with_no_file_behind_it_stays_dangling(tmp_path: Path) -> None:
+    copier, root = copier_for(tmp_path)
+
+    resolution = copier.resolve(
+        root / "Content" / "topic.htm", PurePosixPath("Content/topic.md"), "topic.htm/images/gone.png"
+    )
+
+    assert resolution.outcome is AssetOutcome.DANGLING
+    assert copier.counts.page_segment_dropped == 0
+
+
+def test_only_page_named_segments_are_dropped() -> None:
+    assert links.without_page_segments(PurePosixPath("g/a.htm/b.png")) == PurePosixPath("g/b.png")
+    assert links.without_page_segments(PurePosixPath("g/A.HTML/c/b.htm")) == PurePosixPath("g/c/b.htm")
+    assert links.without_page_segments(PurePosixPath("g/images/b.png")) is None
+    assert links.without_page_segments(PurePosixPath("b.htm")) is None
+
+
 def test_chrome_is_dropped_before_it_can_be_reported_missing(tmp_path: Path) -> None:
     """Skin is checked first; otherwise 76.2% of WebWorks goes in the failure column."""
     copier, root = copier_for(tmp_path)

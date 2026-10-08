@@ -103,6 +103,8 @@ class Counts:
     # corpus's actual failure shape: 2,706 of Flare's 2,905 come from one tree
     # that is broken in its own source and the remaining rate is 0.37%.
     dangling_by_segment: dict[str, int] = field(default_factory=dict)
+    #: Resolved only after dropping a page-named folder segment (Phase 47).
+    page_segment_dropped: int = 0
 
 
 class AssetCopier:
@@ -164,6 +166,11 @@ class AssetCopier:
         candidate = self.root / Path(*resolved.parts)
         # `long_path` (X2-08): an asset past 260 characters is on disk, and the
         # plain spelling would count it dangling.
+        if not long_path(candidate).is_file():
+            retry = links.without_page_segments(resolved)
+            if retry is not None and long_path(self.root / Path(*retry.parts)).is_file():
+                self.counts.page_segment_dropped += 1
+                resolved, candidate = retry, self.root / Path(*retry.parts)
         if not long_path(candidate).is_file():
             self.counts.dangling += 1
             segment = resolved.parts[0] if len(resolved.parts) > 1 else "."

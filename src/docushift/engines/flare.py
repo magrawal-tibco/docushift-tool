@@ -325,6 +325,12 @@ class FlareRenderer(markdown.Renderer):
 
         resolved = links.resolve(self.base, reference.path)
         planned = None if links.escapes(resolved) else self.topics.get(str(resolved).lower())
+        retry = links.without_page_segments(resolved) if planned is None else None
+        if retry is not None and not links.escapes(retry) and str(retry).lower() in self.topics:
+            # Phase 47: `a.htm/b.htm` addressing a page through another one.
+            planned = self.topics[str(retry).lower()]
+            self.context.record("REFERENCE_PAGE_SEGMENT_DROPPED", path=self.unit.name, count=1,
+                                message=f"{self.source.name} -> {reference.path}")
         if planned is None:
             # Not this root's -- but perhaps a sibling's or a nested root's, which
             # is where 1,332 such links in 18 versions point (Phase 34, R5-08).

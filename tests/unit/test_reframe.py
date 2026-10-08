@@ -23,7 +23,7 @@ from docushift.config import ConfigManager
 from docushift.models import SourceEngine
 from docushift.reframe import ReframeOutcome, Reframer, policy_for
 from docushift.reframe import csh as csh_map
-from docushift.reframe.audit import audit
+from docushift.reframe.audit import _anchors, _guides, _navigation, audit
 from docushift.reframe.packer import (
     UNNAVIGATED,
     Page,
@@ -1108,6 +1108,94 @@ def test_a_toc_entry_naming_a_section_keeps_that_section_after_the_merge():
     R7-01), and the rewrite used to collapse it onto its topic's head, so two
     rows for two sections became two rows for one place. A fragment naming no
     heading there, or the topic's own, keeps the old answer."""
+def two_guides():
+    return [
+        node("First", "g/a.md", node("Shared", "g/s.md")),
+        node("Second", "h/b.md", node("Shared", "g/s.md")),
+    ]
+
+
+def checked(pages, roots):
+    """`assign`, `relocate`, and the two audit checks a copy per guide used to fail."""
+    placements: dict[int, tuple] = {}
+    located = assign(pages, None, placements)
+    relocate(pages, roots)
+    failures = _anchors(pages, located) + _navigation(pages, located, roots, frozenset(), placements)
+    return located, placements, failures
+
+
+def test_a_copy_per_guide_passes_the_audit_and_sits_in_its_own_guides_folder():
+    """Phase 47. Service Grid CE 1.0.1 lists one topic under two guides; the audit
+    read only the first copy, so it counted an extra anchor and called the second
+    copy's page unreachable, and `relocate` filed that page in the first guide."""
+    roots = two_guides()
+    pages = pack(roots, sized(g__a=10, h__b=9000, g__s=10), 3000)
+
+    _, _, failures = checked(pages, roots)
+
+    assert failures == []
+    copies = [page for page in pages if [str(t.source) for t in page.topics] == ["g/s.md"]]
+    assert len(copies) == 1
+    assert copies[0].path.parts[0] == "second"
+
+
+def test_a_projected_version_makes_the_same_copy_per_guide_as_its_reference():
+    """Phase 47: `project` deduped across the whole version, so a pinned version
+    placed the topic once while its reference had a copy per guide."""
+    roots = two_guides()
+    words = sized(g__a=10, h__b=9000, g__s=10)
+    reference = pinned(roots, words)
+
+    pages = project(reference, roots, words, 3000)
+    located, placements, failures = checked(pages, roots)
+
+    assert failures == []
+    assert sum(1 for page in pages for topic in page.topics if str(topic.source) == "g/s.md") == 2
+    merged = retarget(roots, located, placements)
+    assert merged["docs"][1]["subfolderlist"][0]["url"].startswith("second/")
+
+
+def test_a_later_guides_copy_never_lands_on_the_first_guides_reference_page():
+    """Phase 47, IBM MQ 8.7.0: the reference lists the topic in the first guide
+    only, so the path-only match sent the second guide's copy onto a first-guide
+    page. A copy matches its own guide or is packed as new, in its own guide."""
+    reference = pinned([node("First", "g/a.md", node("Shared", "g/s.md"))], sized(g__a=10, g__s=10))
+    roots = two_guides()
+
+    pages = project(reference, roots, sized(g__a=10, h__b=10, g__s=10), 3000)
+    _, _, failures = checked(pages, roots)
+
+    assert failures == []
+    assert [page.guide for page in pages if any(str(t.source) == "g/s.md" for t in page.topics)] == [
+        "First", "Second"]
+
+
+def test_the_audit_names_a_topic_on_another_guides_page():
+    roots = two_guides()
+    pages = pack(roots, sized(g__a=10, h__b=9000, g__s=10), 3000)
+    stray = next(page for page in pages if page.guide == "Second")
+    stray.guide = "First"
+
+    assert any(failure.startswith("guide integrity") for failure in _guides(pages, roots))
+
+
+def test_a_projected_page_seven_rows_down_still_opens_at_h1():
+    """Phase 47, Service Grid 3.4.3: `compact` capped raw TOC depth at 6 before
+    `_relevel` rebased it, so the page's first topic came out at level 0."""
+    deep = node("D7", "g/d7.md", node("D8", "g/d8.md"))
+    for depth in range(6, 0, -1):
+        deep = node(f"D{depth}", f"g/d{depth}.md", deep)
+    roots = [deep]
+    words = sized(g__d1=10, g__d2=10, g__d3=10, g__d4=10, g__d5=10, g__d6=10, g__d7=10, g__d8=10)
+    reference = [(PurePosixPath(f"g/d{n}.md"), (PurePosixPath(f"g/d{n}.md"),), "D1") for n in range(1, 7)]
+    reference.append((PurePosixPath("g/d7.md"), (PurePosixPath("g/d7.md"), PurePosixPath("g/d8.md")), "D1"))
+
+    pages = project(reference, roots, words, 3000)
+
+    page = next(page for page in pages if str(page.topics[0].source) == "g/d7.md")
+    assert [topic.level for topic in page.topics] == [1, 2]
+
+
     page = Page(
         "Guide",
         [Topic("A", PurePosixPath("g/a.md"), 10), Topic("B", PurePosixPath("g/b.md"), 10)],

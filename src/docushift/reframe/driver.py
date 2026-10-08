@@ -655,7 +655,7 @@ class Reframer:
             words_out=added.words, added=added.scaffolding, counts=counts,
             unnavigated=unnavigated, queue=queue,
             csh=csh_map.retarget(source.csh, located) if source.csh else None,
-            anchors=added.anchors, mirrored=added.mirrored,
+            anchors=added.anchors, mirrored=added.mirrored, placements=placements,
         )
         # Every merged page is one `.md` and nothing else in the tree writes one,
         # so the walk and the counter agree exactly on every version measured

@@ -46,18 +46,25 @@ def audit(
     csh: dict[str, str] | None = None,
     anchors: dict[PurePosixPath, frozenset[str]] | None = None,
     mirrored: dict[PurePosixPath, frozenset[str]] | None = None,
+    placements: dict[int, tuple[Page, str]] | None = None,
 ) -> list[str]:
     """Every §6 check that failed, named. An empty list is a passing merge.
 
     `unnavigated` names the pages carried through from topics the TOC never listed
     (`packer.carry`). They are exempt from reachability and from nothing else --
     they must still be anchored, single-directory, redirected and word-conserving.
+
+    `placements` is `assign`'s per-row record. A topic listed under two guides has
+    one copy per guide (Phase 29) but one entry in `located`, the first; the
+    anchor and reachability checks read the rows so the second copy counts
+    (Phase 47).
     """
     failures: list[str] = []
     failures.extend(_words(words_in, words_out, added))
     failures.extend(_anchors(pages, located))
     failures.extend(_directories(pages))
-    failures.extend(_navigation(pages, located, roots, unnavigated))
+    failures.extend(_guides(pages, roots))
+    failures.extend(_navigation(pages, located, roots, unnavigated, placements or {}))
     failures.extend(_links(counts))
     failures.extend(_redirects(pages, located))
     failures.extend(_queue(pages, queue))
@@ -89,8 +96,12 @@ def _anchors(pages: Sequence[Page], located: dict[PurePosixPath, tuple[Page, str
     topics = sum(len(page.topics) for page in pages)
     if total != topics:
         failures.append(f"anchors: {total} anchors for {topics} topics")
-    if total != len(located):
-        failures.append(f"anchors: {len(located)} topics located, {total} anchored")
+    # Every anchored topic is located, and nothing is located that no page anchors.
+    # Compared as sets of sources: a topic under two guides is anchored once per
+    # copy and located once (Phase 47), so the counts legitimately differ.
+    anchored = {source for page in pages for source in page.anchors}
+    if anchored != set(located):
+        failures.append(f"anchors: {len(located)} topics located, {len(anchored)} anchored")
     for page in pages:
         seen = list(page.anchors.values())
         if len(set(seen)) != len(seen):
@@ -109,11 +120,30 @@ def _directories(pages: Sequence[Page]) -> list[str]:
     return failures
 
 
+def _guides(pages: Sequence[Page], roots: Sequence[TocEntry]) -> list[str]:
+    """R1.1: every topic a TOC row placed sits on a page of that row's own guide.
+
+    Phase 47. `project`'s path-only match put IBM MQ 8.7.0's second-guide copy on a
+    first-guide page, and no other check could see it: anchors, reachability and
+    words all still added up. Topics no row placed (`node` 0) are not checked.
+    """
+    guide_of_row = {id(entry): root.title for root in roots for entry in root.walk()}
+    failures = []
+    for page in pages:
+        strays = sorted({str(topic.source) for topic in page.topics
+                         if topic.node and guide_of_row.get(topic.node, page.guide) != page.guide})
+        if strays:
+            failures.append(f"guide integrity: {page.path} ({page.guide}) holds {', '.join(strays[:3])} "
+                            f"from another guide")
+    return failures
+
+
 def _navigation(
     pages: Sequence[Page],
     located: dict[PurePosixPath, tuple[Page, str]],
     roots: Sequence[TocEntry],
     unnavigated: frozenset[PurePosixPath],
+    placements: dict[int, tuple[Page, str]],
 ) -> list[str]:
     """TOC completeness and reachability, checked in both directions.
 
@@ -133,7 +163,12 @@ def _navigation(
             f"{', ...' if len(missing) > 5 else ''})"
         )
 
-    reachable = {located[entry.path][0].path for entry in nodes if entry.path in located} | unnavigated
+    # Each row reaches the copy placed for it, else the first copy (a row deduped
+    # within its guide places nothing of its own).
+    reachable = {
+        placements.get(id(entry), located.get(entry.path))[0].path
+        for entry in nodes if entry.path in located
+    } | unnavigated
     orphaned = sorted(str(page.path) for page in pages if page.path not in reachable)
     if orphaned:
         shown = ", ".join(orphaned[:5])

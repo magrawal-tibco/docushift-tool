@@ -780,6 +780,14 @@ class DocumentConverter:
     def _report_unrendered(self, context: ConversionContext) -> None:
         """One note per version for the media the walk had no Markdown for (R8-13).
 
+        if copier.counts.page_segment_dropped:
+            context.record(
+                "REFERENCE_PAGE_SEGMENT_DROPPED",
+                path=unit,
+                message=f"{copier.counts.page_segment_dropped} asset reference(s) named a page "
+                        f"as a folder; resolved without it",
+                count=copier.counts.page_segment_dropped,
+            )
         Named by tag, because the tag is the decision somebody would argue with:
         a version full of `<iframe>`s wants a construct, a stray `<svg>` does not.
         """
