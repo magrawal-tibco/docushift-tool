@@ -20,7 +20,7 @@
 # `docushift catalog eos`. The dated filename is what makes the change a
 # reviewable diff rather than a silent re-decision of a thousand rows.
 
-report: eos/EOS-Report-2026-09-10.csv
+report: eos/EOS-Report-2026-10-09.csv
 
 # Report names that do not slugify to a catalog slug, reviewed one at a time.
 #
