@@ -34,6 +34,7 @@ Then step 4's two outputs, step 5's per-root counts, step 6's case check --
 are reported and never copied: 54.6% of Flare's images and 673 MB.
 """
 
+import hashlib
 import os
 import shutil
 from dataclasses import dataclass, field
@@ -43,7 +44,7 @@ from pathlib import Path, PurePosixPath
 from docushift.engines.roots import is_skin_path
 from docushift.models import SourceEngine
 from docushift.transforms import links
-from docushift.utils.longpath import long_path
+from docushift.utils.longpath import PUBLISHED_PATH_LIMIT, long_path
 
 # Files the copy set never contains and the orphan count never mentions: they are
 # either the input to conversion or the output of it.
@@ -76,7 +77,8 @@ class Resolution:
     # The file to copy, absolute. Set only on RESOLVED.
     source: Path | None = None
     # Where it goes, relative to the unit's subtree. The *same* relative path it
-    # had in the source -- never flattened, never renamed.
+    # had in the source -- never flattened, and renamed only when that path could
+    # not be published at all (Phase 49, `shortened`).
     target: PurePosixPath | None = None
     # Resolved, but the reference spells it differently from the file. Works on
     # this Windows cache and 404s after publishing. 14 corpus-wide.
@@ -117,10 +119,17 @@ class AssetCopier:
     copy set would silently pick one release's file for both.
     """
 
-    def __init__(self, root: Path, engine: SourceEngine, destination: Path):
+    def __init__(self, root: Path, engine: SourceEngine, destination: Path, published: int = 0):
         self.root = root
         self.engine = engine
         self.destination = destination
+        # Phase 49. The length of the folder this unit publishes to, the way
+        # `published_length` counts it; 0 when it is not known, which renames
+        # nothing.
+        self.published = published
+        # Source path -> the shorter target it was given, for the few assets whose
+        # source path would publish past the limit.
+        self.renamed: dict[PurePosixPath, PurePosixPath] = {}
         self.counts = Counts()
         # target -> source. A dict, so two topics referencing one image copy it
         # once; keyed on the target, so a collision is impossible by construction.
@@ -183,14 +192,44 @@ class AssetCopier:
         if mismatch:
             self.counts.case_mismatch += 1
         self.counts.resolved += 1
-        self.copy_set[resolved] = candidate
+        target = self._publishable(resolved)
+        self.copy_set[target] = candidate
         return Resolution(
             AssetOutcome.RESOLVED,
-            url=links.emit(links.relative_to(topic_output, resolved), reference.fragment),
+            url=links.emit(links.relative_to(topic_output, target), reference.fragment),
             source=candidate,
-            target=resolved,
+            target=target,
             case_mismatch=mismatch,
         )
+
+    # -- a path too long to publish (Phase 49) ----------------------------------
+
+    def _publishable(self, resolved: PurePosixPath) -> PurePosixPath:
+        """`resolved`, or a shorter name in the same folder when it cannot be published.
+
+        The one exception to "never renamed": `sync` refuses a whole version over a
+        single file past `PUBLISHED_PATH_LIMIT`, and an image, unlike a page, has no
+        `rename-map.csv`. The name is cut to fit and given the first 8 hex digits of
+        the SHA-256 of the source path, so a re-run writes the same name and two
+        cut names cannot collide. Decided here, in the one resolution that writes
+        both the link and the copy, so the two cannot disagree (invariant 13).
+        """
+        if resolved in self.renamed:
+            return self.renamed[resolved]
+        length = self.published + 1 + len(str(resolved))
+        if not self.published or length <= PUBLISHED_PATH_LIMIT:
+            return resolved
+        tag = "-" + hashlib.sha256(str(resolved).encode("utf-8")).hexdigest()[:8]
+        name = PurePosixPath(resolved.name)
+        keep = len(name.stem) - (length - PUBLISHED_PATH_LIMIT) - len(tag)
+        stem = name.stem[:max(keep, 0)].rstrip(" .-_")
+        shorter = resolved.with_name((stem + tag if stem else tag[1:]) + name.suffix)
+        # A folder too long on its own leaves nothing to cut. The source name is
+        # kept, and `sync` names the file when it refuses the version.
+        if len(str(shorter)) >= len(str(resolved)):
+            return resolved
+        self.renamed[resolved] = shorter
+        return shorter
 
     # -- case, checked and not corrected (§6.4 step 6) --------------------------
 
@@ -284,7 +323,7 @@ class AssetCopier:
                     continue
                 if is_skin_path(relative.parts, self.engine):
                     continue
-                if relative in self.copy_set:
+                if relative in self.copy_set or relative in self.renamed:
                     continue
                 found.append((relative, size))
         found.sort()

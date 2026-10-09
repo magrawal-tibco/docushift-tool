@@ -1264,6 +1264,14 @@ def test_the_shipped_report_retires_the_measured_set(repo_root: Path) -> None:
     eligible"), and `tibco-partnerexpress` went out of scope, taking its one retired
     eligible version, 6.0.0, and its place on the fully-retired list with it.
     Confirmed with the user as intended.
+
+    *Re-baselined 2026-10-09: `versions_retired` 123 -> 115, `products_fully_retired`
+    9 -> 5, coverage 270 -> 274 products.* Two steps. The 2026-10-08 catalog edits
+    (versions before 2016 ineligible, `3fe7d90`; the Flogo connectors out of scope,
+    Phase 48) and the user's `convert_eligible` hand edits took it to 93 and 2, before
+    any report changed. Then the 2026-10-09 report (`5d8b461`) retired 22 more
+    eligible versions and emptied the Facebook, Marketo and Twitter plug-ins, which
+    the user confirmed should be dropped.
     """
     manager = CatalogManager(
         repo_root / "config" / "products.csv",
@@ -1273,9 +1281,9 @@ def test_the_shipped_report_retires_the_measured_set(repo_root: Path) -> None:
 
     summary = manager.triage_summary()
 
-    assert summary["versions_retired"] == 123
-    assert len(summary["products_fully_retired"]) == 9
-    assert manager.eos_coverage() == (270, 669)
+    assert summary["versions_retired"] == 115
+    assert len(summary["products_fully_retired"]) == 5
+    assert manager.eos_coverage() == (274, 669)
 
 
 def test_the_shipped_report_never_retires_a_look_alike(repo_root: Path) -> None:

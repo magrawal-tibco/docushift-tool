@@ -165,8 +165,10 @@ def test_publishing_defaults_apply_with_no_file(config: ConfigManager) -> None:
         "localized_prefix": "loc",
         "primary_locale": "en-us",
         "publish_base_url": "",
+        "published_root_length": "24",
     }
     assert config.publish_base_url() == ""
+    assert config.published_root_length() == 24
 
 
 def test_a_partial_publishing_file_falls_back_key_by_key(project_root: Path) -> None:
@@ -412,8 +414,10 @@ def test_shipped_scope_lists_the_ebx_and_spotfire_products(repo_root: Path) -> N
     # one was missing because the duplicate-slug defect in `_list_products` kept
     # Spotfire Analyst out of every catalog the list could be compiled from --
     # exactness stops a rule matching the wrong product, and says nothing about a
-    # product missing from the list. See architecture.md §3.10.
-    assert len(rules) == 62
+    # product missing from the list. See architecture.md §3.10. Then 67 on
+    # 2026-10-08: the 64 Flogo connectors (Phase 48) and 3 Analytics products moved
+    # to Spotfire.
+    assert len(rules) == 129
     for slug in ("tibco-ebx", "spotfire", "spotfire-server", "spotfire-desktop", "tibco-spotfire-for-apple-ipad"):
         assert slug in rules
     assert "spotfire-application" in rules
@@ -596,7 +600,10 @@ def test_the_shipped_eos_config_resolves_cleanly(repo_root: Path) -> None:
     """A guard on the real config/eos.yaml and the report it names."""
     report = ConfigManager(root_dir=repo_root).load_eos()
 
-    assert len(report.report_names) == 528
+    # 528 names in the 2026-09-10 report; 535 in the 2026-10-09 one, which adds
+    # seven (Amazon Redshift plug-in, Cloud AuditSafe, Cloud Nimbus, two iProcess
+    # clients, the iProcess Spotfire library and a `z_DoNotUse_` Streaming row).
+    assert len(report.report_names) == 535
     assert report.unmatched_aliases == []
     assert report.unknown_statuses == []
     # The reviewed rename, and the look-alike the review rejected: `Spotfire

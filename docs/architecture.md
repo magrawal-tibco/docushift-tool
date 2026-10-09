@@ -1837,6 +1837,8 @@ Two consequences: **each output root gets its own subtree** in the version's `on
 
 **Filenames are kept as they are** — no slugification. `alt` text is not a filename source in any engine (§5.1.8, §5.2.6, §5.3.8), the corpus contains **no non-ASCII asset filename** in 792,607 assets, and renaming would break the one property §5.5.3 exists to guarantee.
 
+**One exception: a file that could not be published under its own name** (Phase 49). `sync` refuses a whole version when one file's published path would pass 260 characters (§4.4), and an image, unlike a page, has no `rename-map.csv`. So `convert` measures each asset where it will be published, with `published_root_length` in `publishing.yaml` standing in for `sync`'s `--target-dir`, and copies one that is over under a shorter name in the same folder: the name cut to fit, plus `-` and 8 hex digits of the SHA-256 of its source path. The rename happens in the same resolution that writes the link, so §5.5.3 holds, and each one is reported as `ASSET_RENAMED_FOR_LENGTH`. On 2026-10-09 this is one image in the whole converted corpus (BusinessConnect EDI Container Edition 1.5.0–1.6.1).
+
 #### 5.5.6 The five ways a reference goes wrong, all measured
 
 | | Flare (sample) | SDL DITA | WebWorks |

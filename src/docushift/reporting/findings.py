@@ -200,6 +200,9 @@ REGISTRY: dict[str, Code] = _codes(
          "Unreferenced asset -- 54.6% is normal for Flare", "architecture.md §5.5.7"),
     Code("REFERENCE_UNRESOLVED", Severity.ERROR, Stage.CONVERT,
          "A reference producing neither link nor copy", "design.md invariant 13"),
+    Code("ASSET_RENAMED_FOR_LENGTH", Severity.NOTE, Stage.CONVERT,
+         "An asset whose published path would pass 260 characters, copied under a shorter name",
+         "planning.md Phase 49"),
     Code("REFERENCE_PAGE_SEGMENT_DROPPED", Severity.NOTE, Stage.CONVERT,
          "A reference naming a page as a folder (`a.htm/b.png`), resolved without that segment",
          "planning.md Phase 47"),
@@ -434,6 +437,10 @@ REGISTRY: dict[str, Code] = _codes(
     # Phase 34, X1-07. A pin is keyed on its leading topic's converted path; a
     # re-convert or a boundary change can retire that path, and the row was then
     # neither applied nor refused, and erased from the rewritten map in silence.
+    # Phase 50. A topic leading two pages, and a row that does not say which.
+    Code("RENAME_MAP_AMBIGUOUS", Severity.WARNING, Stage.REFRAME,
+         "Rows in rename-map.csv for a source topic that leads more than one page, with no "
+         "page_key to say which; no page took the name", "planning.md Phase 50"),
     Code("RENAME_MAP_UNMATCHED", Severity.WARNING, Stage.REFRAME,
          "Rows in rename-map.csv whose source topic no longer leads a page; their "
          "names were not used and the rows are dropped, each one named",

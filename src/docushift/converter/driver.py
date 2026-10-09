@@ -508,9 +508,13 @@ class DocumentConverter:
         # each one as CSH_UNRESOLVED.
         sources = [source for source in sources if not _excluded(tree, source, context, work)]
 
+        published = self._published_length(product, number)
         for root in work:
             unit_name = context.subtree_name(root)
-            copier = AssetCopier(root, version.engine, staging / unit_name if unit_name else staging)
+            copier = AssetCopier(
+                root, version.engine, staging / unit_name if unit_name else staging,
+                published=published + 1 + len(unit_name) if published and unit_name else published,
+            )
             context.assets = copier
             unit = handler.convert_unit(context, root)
             result.assets += copier.copy()
@@ -771,8 +775,32 @@ class DocumentConverter:
                         f"not converted (one engine per version)",
             )
 
+    def _published_length(self, product: Product, number: str) -> int:
+        """How long this version's `online-help` folder will be once published (Phase 49).
+
+        The path `sync` measures (`published_length`), with `published_root_length`
+        standing in for its `--target-dir`. 0 -- shorten nothing -- when the root
+        length is unset or the version yields no folder name.
+        """
+        # Imported here: `sync.distributor` imports this package's navigation.
+        from docushift.sync.distributor import ONLINE_HELP
+
+        root = self.config.published_root_length()
+        segment = version_segment(number)
+        if not root or not segment:
+            return 0
+        parts = (self.config.docs_tree_name(product.bu, product.family),
+                 slugify(self.config.locale), product.slug, ONLINE_HELP, segment)
+        return root + sum(1 + len(part) for part in parts)
+
     def _report_assets(self, context: ConversionContext, unit: str, copier: AssetCopier) -> None:
         """§6.4 steps 5 and 7, as findings rather than as terminal scrollback."""
+        for source, target in sorted(copier.renamed.items()):
+            context.record(
+                "ASSET_RENAMED_FOR_LENGTH",
+                path=f"{unit}/{target}" if unit else str(target),
+                message=f"{source} would publish past the path limit; copied as {target.name}",
+            )
         for segment, count in sorted(copier.counts.dangling_by_segment.items()):
             context.record(
                 "REFERENCE_UNRESOLVED",

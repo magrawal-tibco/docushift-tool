@@ -528,6 +528,111 @@ workspace is gone.*
 
 ---
 
+### Phase 49: An Image Too Long to Publish Gets a Shorter Name — **Built 2026-10-09; runs pending**
+
+**Why.** The BusinessConnect run (2026-10-09) could not publish 11 merged versions: their
+paths would pass Windows' 260-character limit under `C:\github\tibco-docs-aem`
+(`PUBLISHED_PATH_TOO_LONG`). 39 of the 42 files are pages, and `rename-map.csv` already lets
+a person give a page a shorter address. The other 3 are one image,
+`GatewayConfiguration/Images/Figure_1_Features_of_TIBCO_BusinessConnect_EDI_Protocol_powered_by_Instream.jpg`
+(264 characters published), in EDI Protocol Container Edition 1.5.0, 1.6.0 and 1.6.1. Nothing
+can rename an image: `transforms/assets.py` keeps every asset's source path, "never
+flattened, never renamed". So those three versions cannot publish at all.
+
+**Measured 2026-10-09**, every non-page file in `output/` and `reframed/`, at its published
+length under `C:\github\tibco-docs-aem`: this image is the only one over 260, in 3 versions.
+732 in-scope versions are not converted yet, so it will not be the last.
+
+#### Decisions
+
+| decision | choice | why |
+|---|---|---|
+| **Where** | `convert`, in the asset resolution that writes both the copy and the link | One resolution, two outputs (invariant 13). Renaming at `sync` would mean rewriting Markdown there, and `sync` copies verbatim |
+| **When** | Only when the asset's published path would pass the limit; every other asset keeps its source path | The rule stays "never renamed" for all but the files that cannot be published otherwise |
+| **How long** | Measure against the layout from `publishing.yaml` plus a root allowance, a new `publishing.yaml` key set to the length of the root the published repos live under | `convert` does not know `sync`'s `--target-dir`; `sync` still checks the real length and still refuses |
+| **New name** | Same folder and extension; the name cut to fit, then `-` and the first 8 hex characters of the SHA-256 of the source path | Deterministic, so a re-run produces identical output, and two cut names cannot collide |
+| **Reported** | A new note, `ASSET_RENAMED_FOR_LENGTH`, naming the source path and the new one | A renamed file should be findable |
+| **Reframe** | No change: it copies the converted tree's assets and links as they are | The new name is already in the converted page |
+
+#### Steps
+
+1. `publishing.yaml`: the root-allowance key, documented in place.
+2. `transforms/assets.py`: compute the published length; shorten the target when it is over;
+   record the note. Register the code in `reporting/findings.py` and §7.5.
+3. Tests: an over-long asset is renamed and its link follows; an asset under the limit is
+   untouched; the same input gives the same name twice; two long names that cut to the same
+   text still get different names.
+4. Docs: the asset rule in `design.md` §6.4 and `architecture.md` §5.5; the `sync` note in
+   `user-guide.md` (line ~1356) says the tool now shortens images on its own.
+5. Re-run (the user, as `!` commands) `convert`, `reframe`, `sync` for the three EDI versions;
+   then check, read-only, that they publish and `validate` is clean.
+
+*Exit: the three EDI Container Edition versions publish; no other asset in the corpus changes
+name; `ruff` and the test suite pass.*
+
+#### As built (2026-10-09)
+
+- Steps 1–4 done. The key is `published_root_length: 24`; 0 or a value that is not a whole
+  number turns the shortening off, and `catalog validate` names a bad value.
+- One rule added while testing: when the file name is too short to cut (the folder alone is
+  over), the tagged name would be *longer*, so the source name is kept and `sync` still names
+  the file when it refuses the version.
+- The register is 89 codes. Three guard tests on the shipped catalog were re-baselined in the
+  same change, for the 2026-10-08 and 2026-10-09 catalog edits, not for this phase: scope
+  62 → 129 rules, the EOS report 528 → 535 names, retired-and-eligible 123 → 115.
+- Step 5 waits for the user's run.
+
+---
+
+### Phase 50: A Topic That Leads Two Pages Can Be Named Per Page — **Built 2026-10-09; runs pending**
+
+**Why.** The BusinessConnect re-run (2026-10-09) left ebXML Protocol Container Edition 1.2.1
+and 1.3.0 unpublished. Their page for "Creating a Process Invoker" (265 characters) was given
+a shorter name in `rename-map.csv`, and the merge dropped it without a warning. Since Phase 47
+one source topic can lead a page in two guides. `rename-map.csv` has one row per page, but
+`renames.load` keys the names by source topic alone, so the second row overwrites the first.
+`toc_breadcrumb` is keyed the same way, so both rows also show the first guide's breadcrumb.
+
+**Measured 2026-10-09** over every `rename-map.csv` in `reframed/`: 5 versions have a source
+topic that leads more than one page, 30 rows in all.
+
+#### Decisions
+
+| decision | choice | why |
+|---|---|---|
+| **Key** | A topic that leads one page stays keyed by `old_path`. A topic that leads several is keyed by `old_path` plus the page's computed name, written to a new `page_key` column | The computed name comes from the converted tree alone, so it is stable across runs; existing maps keep working unchanged |
+| **Ambiguous rows** | A row for a shared topic with no `page_key` (every map written before this phase) pins nothing and warns `RENAME_MAP_AMBIGUOUS`, naming the rows | Guessing which page a name meant could move the wrong page's URL |
+| **Breadcrumb** | Written per page, from that page's own place in the TOC | Two rows showing the same breadcrumb hide which page is which |
+
+#### Steps
+
+1. `reframe/renames.py`: write `page_key` for shared topics; `load` returns per-page keys;
+   breadcrumbs per page. `packer.override` and the driver's refused / unmatched checks use the
+   new key.
+2. Register `RENAME_MAP_AMBIGUOUS` in `reporting/findings.py` and §7.5.
+3. Tests: two pages led by one topic take two different pinned names; an old map without
+   `page_key` warns and pins neither; a topic leading one page behaves exactly as today.
+4. Docs: `rename-map.csv` in `user-guide.md` (line ~1065) and `design.md`.
+5. Re-run `reframe` (the user) for the 5 versions; write the BusinessConnect name into the new
+   row; then `reframe` and `sync` for ebXML 1.2.1 and 1.3.0; check read-only.
+
+*Exit: ebXML Container Edition 1.2.1 and 1.3.0 publish; the other 3 versions merge to
+identical trees; `ruff` and the test suite pass.*
+
+#### As built (2026-10-09)
+
+- Steps 1–4 done. `page_key` is the last column, so a sheet saved before it reads unchanged.
+  A topic that leads one page keeps its plain key, so every existing map, its digest and the
+  copy in `state.db` are unchanged, and no version re-merges because of this phase.
+- `design.md` has no `rename-map.csv` section; the rule is documented in `user-guide.md` only.
+- Step 5: `page_key` was written by hand into the two shared rows of the ebXML 1.2.1 and 1.3.0
+  maps (each row's current path, which is the computed one, since neither pin took effect),
+  and `process-invoker.md` onto the ebMS2 row, so one `reframe` applies it. The other 3
+  versions with a shared topic keep their maps; they warn `RENAME_MAP_AMBIGUOUS` once on their
+  next re-merge, and their pages keep the computed names they already have.
+
+---
+
 ## Carried-Forward Open Items
 
 Technical items a finished phase recorded as *open, not fixed*. Product-level issues
@@ -591,6 +696,7 @@ The concrete deliverable of §7.1: every deferred "report line" in the three doc
 | `LOCALIZED_ROOT_SKIPPED`³⁴ | warn | convert | An output root built for another locale (24 in the corpus: `ja`, `ja-jp`, `de-de`, `fr-fr`, `es-es`), not converted into this locale's tree; one row per root, naming its locale | Phase 34 (R5-01) |
 | `ASSET_ORPHANED` | note | convert | Unreferenced asset — 54.6% is normal for Flare | `architecture.md` §5.5.7 |
 | `REFERENCE_UNRESOLVED` | **error** | convert | A reference producing neither link nor copy | invariant 13 |
+| `ASSET_RENAMED_FOR_LENGTH`⁴⁹ | note | convert | An asset whose published path would pass 260 characters, copied under a shorter name in the same folder (cut, plus 8 hex digits of its source path); its link follows. One image in the corpus on 2026-10-09 | Phase 49 |
 | `REFERENCE_PAGE_SEGMENT_DROPPED`⁴⁷ | note | convert | A reference naming a page as a folder (`a.htm/b.png`), resolved without that segment (Service Grid 3.4.3/3.4.4 only, 292 each) | Phase 47 |
 | `CSH_UNRESOLVED` | warn | convert | Identifier matched no produced topic | Phase 6 contract |
 | `CSH_AMBIGUOUS` | note | convert | Identifier claimed by 2+ doc-sets; first ordered doc-set wins | Phase 6 contract |
@@ -621,6 +727,7 @@ The concrete deliverable of §7.1: every deferred "report line" in the three doc
 | `FRAGMENT_UNPLACEABLE`³⁰ | warn | convert | A cross-reference naming an anchor with no heading behind it; left as written and will not resolve | Phase 30 |
 | `RENAME_MAP_APPLIED`²⁹ | note | reframe | Page names taken from `rename-map.csv` rather than recomputed, so a published URL does not move when a title is edited | Phase 29 |
 | `RENAME_MAP_REFUSED`³⁴ | warn | reframe | A name in `rename-map.csv` that another page ends up holding; the computed name is kept, and each refused pin is named | Phase 34 (R9-05) |
+| `RENAME_MAP_AMBIGUOUS`⁵⁰ | warn | reframe | A row in `rename-map.csv` for a source topic that leads more than one page, with no `page_key` to say which; no page takes the name, each row named | Phase 50 |
 | `RENAME_MAP_UNMATCHED`³⁴ | warn | reframe | A row in `rename-map.csv` whose `old_path` no longer leads a page (a re-convert renamed the topic, or a boundary change merged it); its name is not used and the row is dropped from the rewritten map, each one named old -> new | Phase 34 (X1-07) |
 | `RENAME_MAP_MISSING`³⁴ | warn | reframe | `rename-map.csv` is gone from a merged tree that had one (a failed or killed swap used to take it along); the names come from the copy `state.db` keeps, or are recomputed if none survives, and the message says which | Phase 34 (X2-02, X3-02) |
 | `HEADING_LEVEL_NORMALIZED`²⁷ | note | convert | Headings renumbered to close a level the source skipped; depth and order unchanged. One row per version; `count` is how many | Phase 27 |

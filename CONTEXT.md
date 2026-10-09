@@ -189,7 +189,7 @@ Per-family folders are created on demand by the downloader, not at startup: pre-
 - **Converted**: four families in `output/` (activespaces, ems, streaming, tra), three of
   them merged in `reframed/` (activespaces, ems, tra), all rebuilt 2026-10-05 with every
   Phase 34 fix. 301 maps and `toc.yml` as in Phases 35–36.
-- **Quality bar**: 2,153 tests, `ruff check src tests` clean, 85 finding codes in the
+- **Quality bar**: 2,215 tests, `ruff check src tests` clean, 89 finding codes in the
   register.
 - **Branch**: `reframe-component`, not pushed. Git push and publishing are out of scope
   (`architecture.md` §6.0).
@@ -217,6 +217,10 @@ Jira (DOCOPS) status and what to file next: the handoff at the top of [`docs/jir
    setting on (done); the tool now refuses to run without it. Next: re-run the 50.
 0e. **Phase 47, done 2026-10-08**: the three ActiveMatrix merges that failed now pass (one
    copy per guide, deep-page headings), and Service Grid 3.4.x keeps its 126 pictures.
+0f. **Phases 49 and 50, built 2026-10-09; runs pending**: an image whose published path would
+   pass 260 characters is copied under a shorter name, and a topic that leads two pages can be
+   named per page in `rename-map.csv`. BusinessConnect: 39 of 44 versions published; the last 5
+   wait for this run. See [`planning.md`](docs/planning.md#1-active-phases).
 1. **Phase 40, built; two network runs left**: `download` takes each version's package
    name from the Coveo sitemap, so pre-rebrand and renamed versions stop failing
    (96 of the 1,435 still to download). Run `catalog sitemap` before a large download. See [`planning.md`](docs/planning.md#1-active-phases).

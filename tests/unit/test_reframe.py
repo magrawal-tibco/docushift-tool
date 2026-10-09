@@ -2973,6 +2973,92 @@ def test_a_pin_onto_a_path_another_pin_vacates_is_not_refused():
     assert [str(page.path) for page in pages] == ["second.md", "moved.md"]
 
 
+# -- a topic that leads two pages (Phase 50) ----------------------------------
+
+
+def shared_pages():
+    """`g/s.md` is big enough to be its own page in both guides."""
+    roots = two_guides()
+    pages = pack(roots, sized(g__a=4000, h__b=4000, g__s=4000), 3000)
+    assign(pages)
+    relocate(pages, roots)
+    return roots, pages
+
+
+def test_two_pages_led_by_one_topic_take_two_different_names():
+    """BusinessConnect ebXML CE 1.3.0: one name was given, the other row overwrote it."""
+    from docushift.reframe import renames
+    from docushift.reframe.packer import override
+
+    _roots, pages = shared_pages()
+    keys = renames.page_keys(pages)
+    shared = PurePosixPath("g/s.md")
+    approved, ambiguous = renames.matched({
+        renames.PageKey(shared, "first/shared.md"): PurePosixPath("first/one.md"),
+        renames.PageKey(shared, "second/shared.md"): PurePosixPath("second/two.md"),
+    }, keys)
+
+    pinned, refused = override(pages, approved, key=lambda page: keys[id(page)])
+
+    assert ambiguous == {} and refused == {}
+    assert len(pinned) == 2
+    assert [str(page.path) for page in pages] == ["first.md", "first/one.md", "second.md", "second/two.md"]
+
+
+def test_a_row_without_page_key_for_a_shared_topic_pins_neither_page():
+    """A map written before Phase 50: guessing which page it meant could move the wrong URL."""
+    from docushift.reframe import renames
+    from docushift.reframe.packer import override
+
+    _roots, pages = shared_pages()
+    keys = renames.page_keys(pages)
+    approved, ambiguous = renames.matched({PurePosixPath("g/s.md"): PurePosixPath("short.md")}, keys)
+
+    pinned, _refused = override(pages, approved, key=lambda page: keys[id(page)])
+
+    assert ambiguous == {PurePosixPath("g/s.md"): PurePosixPath("short.md")}
+    assert pinned == set()
+    assert [str(page.path) for page in pages] == ["first.md", "first/shared.md", "second.md", "second/shared.md"]
+
+
+def test_a_topic_leading_one_page_keeps_its_plain_key_and_digest():
+    """Every map written before Phase 50 must read, and digest, exactly as it did."""
+    import hashlib
+
+    from docushift.reframe import renames
+
+    roots = [node("First", "g/a.md"), node("Second", "g/b.md")]
+    pages = pack(roots, lambda p: 10, 3000)
+    assign(pages)
+    relocate(pages, roots)
+    approved = {PurePosixPath("g/b.md"): PurePosixPath("moved.md"), PurePosixPath("g/a.md"): PurePosixPath("a.md")}
+
+    assert set(renames.page_keys(pages).values()) == {PurePosixPath("g/a.md"), PurePosixPath("g/b.md")}
+    assert renames.matched(approved, renames.page_keys(pages)) == (approved, {})
+    before = "\n".join(f"{old}\t{new}" for old, new in sorted(approved.items()))
+    assert renames.digest(approved) == hashlib.sha256(before.encode("utf-8")).hexdigest()[:16]
+    assert renames.loads(renames.dumps(approved)) == approved
+
+
+def test_a_shared_topics_rows_carry_their_page_and_their_own_breadcrumb(tmp_path):
+    from docushift.reframe import renames
+
+    roots, pages = shared_pages()
+    rows = renames.rows(pages, renames.breadcrumbs(roots), lambda path: str(path), set())
+
+    shared = [row for row in rows if row["old_path"] == "g/s.md"]
+    assert [(row["page_key"], row["toc_breadcrumb"]) for row in shared] == [
+        ("first/shared.md", "First > Shared"),
+        ("second/shared.md", "Second > Shared"),
+    ]
+    assert {row["page_key"] for row in rows if row["old_path"] != "g/s.md"} == {""}
+
+    renames.write(tmp_path / renames.RENAME_MAP, rows)
+    loaded = renames.load(tmp_path)
+    assert renames.PageKey(PurePosixPath("g/s.md"), "second/shared.md") in loaded
+    assert renames.loads(renames.dumps(loaded)) == loaded
+
+
 def test_a_refused_pin_is_reported_by_name(config, catalog, flare):
     """R9-05. A refused pin used to vanish: the run kept the computed name and
     said nothing, so a writer's decision looked applied when it was not."""

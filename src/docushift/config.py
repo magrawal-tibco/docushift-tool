@@ -60,6 +60,11 @@ PUBLISHING_DEFAULTS: dict[str, str] = {
     # `sync` leaves those links relative and reports it once per version; it does
     # not fail, and it does not invent a URL. Deployment configuration, not design.
     "publish_base_url": "",
+    # Phase 49. How long the folder the published repos live in is, counted the
+    # way `published_length` counts it. `convert` cannot see `sync`'s
+    # `--target-dir`, so it shortens an image whose path would pass 260 under a
+    # root this long. 24 is `C:\github\tibco-docs-aem`.
+    "published_root_length": "24",
 }
 
 # Stage 6b's editorial policy, duplicated from `config/reframe.yaml` for the reason
@@ -363,6 +368,15 @@ class ConfigManager:
         """
         return self.load_publishing()["publish_base_url"].rstrip("/")
 
+    def published_root_length(self) -> int:
+        """How long the published repos' parent folder is (Phase 49); 0 if unset or bad.
+
+        0 turns the shortening off rather than guessing a root. `catalog validate`
+        names a value that is not a whole number.
+        """
+        value = self.load_publishing()["published_root_length"]
+        return int(value) if value.isdigit() else 0
+
     def family_dir(self, bu: str, family: str) -> Path:
         """`families/en-us-<bu>-<family>/` -- the root of one family's working set."""
         return self.families_dir / self.family_workspace_name(bu, family)
@@ -597,6 +611,13 @@ class ConfigManager:
                 f"config/publishing.yaml: publish_base_url '{base}' is not an absolute URL. "
                 f"It is prefixed to every link that crosses from the docs tree into "
                 f"-resources, so a relative value publishes links that resolve nowhere."
+            )
+
+        if not publishing["published_root_length"].isdigit():
+            problems.append(
+                f"config/publishing.yaml: published_root_length "
+                f"'{publishing['published_root_length']}' is not a whole number. "
+                f"Images whose published path would pass 260 characters are not shortened."
             )
 
         for bu in sorted(self.load_taxonomy()["business_units"]):

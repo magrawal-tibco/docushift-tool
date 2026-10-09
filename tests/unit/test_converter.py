@@ -13,6 +13,7 @@ and asserting on MadCap output here would make a driver failure look like an
 engine failure. `test_flare.py` is where the engine is tested.
 """
 
+import os
 import re
 from pathlib import Path, PurePosixPath
 from types import SimpleNamespace
@@ -164,6 +165,23 @@ def convert(config, catalog, product, version, **kwargs):
         product, version, **kwargs
     )
     return result, findings
+
+
+def test_convert_measures_an_image_where_sync_will_publish_it(
+    config: ConfigManager, catalog: CatalogManager, product: Product, version: ProductVersion
+) -> None:
+    """Phase 49: the folder length `convert` shortens against is the one `sync` checks."""
+    from docushift.sync.distributor import WorkspaceDistributor
+    from docushift.utils.longpath import published_length
+    from docushift.utils.slug import version_segment
+
+    root = "C:/github/tibco-docs-aem"  # 24 characters, the shipped `published_root_length`
+    folder = WorkspaceDistributor(config, catalog).doc_class_dir(product, Path(root)) / version_segment(version.version)
+    measured = DocumentConverter(config, catalog)._published_length(product, version.version)
+
+    # Re-based on the literal root, because off Windows `C:/...` is relative and
+    # `published_length` prefixes the working directory.
+    assert measured == published_length(folder, "") - 1 - len(os.path.abspath(root)) + len(root)
 
 
 # -- with no engine registered for the version's generator ---------------------

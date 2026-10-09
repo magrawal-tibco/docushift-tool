@@ -38,9 +38,10 @@ from __future__ import annotations
 import csv
 import hashlib
 import json
-from collections.abc import Callable
+from collections import Counter
+from collections.abc import Callable, Sequence
 from pathlib import Path, PurePosixPath
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, NamedTuple
 
 from docushift.utils.csvio import NotUtf8, read_rows, write_rows
 from docushift.utils.longpath import segment_problem
@@ -64,22 +65,89 @@ COLUMNS = (
     "toc_breadcrumb",
     "expected_aem_url",
     "shortened",
+    # Phase 50. Last, so a sheet saved before it existed reads unchanged.
+    "page_key",
 )
 
 
-def breadcrumbs(roots: list[TocEntry]) -> dict[PurePosixPath, str]:
-    """Each topic's place in the navigation, as ` > ` joined titles.
+class PageKey(NamedTuple):
+    """One page of a source topic that leads more than one page (Phase 50).
+
+    Since Phase 47 a topic in two guides leads a page in each, and keyed by the
+    source alone the second row of `rename-map.csv` overwrote the first: a name a
+    writer gave one of them was dropped without a word. `page` is the page's
+    *computed* path, which comes from the converted tree alone and so is the same
+    on every run. A topic that leads one page keeps its plain source key, which
+    leaves every map written before this phase, and its digest, as it was.
+    """
+
+    source: PurePosixPath
+    page: str
+
+    def __str__(self) -> str:
+        return f"{self.source} ({self.page})"
+
+
+#: How a page is named in the approved map: its source, or a `PageKey`.
+Key = PurePosixPath | PageKey
+
+
+def page_keys(pages: Sequence[Page]) -> dict[int, Key]:
+    """Each page's key, by `id`. Read after `relocate` and before `override`.
+
+    A shared topic's pages are told apart by the path the layout computed for
+    them, not the one a pin then gave them.
+    """
+    leading = Counter(page.topics[0].source for page in pages if page.topics)
+    return {
+        id(page): (PageKey(page.topics[0].source, str(page.path))
+                   if leading[page.topics[0].source] > 1 else page.topics[0].source)
+        for page in pages if page.topics
+    }
+
+
+def matched(
+    approved: dict[Key, PurePosixPath], keys: dict[int, Key]
+) -> tuple[dict[Key, PurePosixPath], dict[Key, PurePosixPath]]:
+    """The approved names this layout can use, and the ambiguous ones it cannot.
+
+    A plain row for a topic that now leads several pages could mean any of them,
+    and pinning the wrong one moves a published URL, so it pins nothing and is
+    returned to be named (`RENAME_MAP_AMBIGUOUS`). A `PageKey` row for a topic
+    that leads one page again names that page.
+    """
+    shared = {key.source for key in keys.values() if isinstance(key, PageKey)}
+    usable: dict[Key, PurePosixPath] = {}
+    ambiguous: dict[Key, PurePosixPath] = {}
+    for key, new in approved.items():
+        if isinstance(key, PageKey):
+            usable[key if key.source in shared else key.source] = new
+        elif key in shared:
+            ambiguous[key] = new
+        else:
+            usable[key] = new
+    return usable, ambiguous
+
+
+def _order(key: Key) -> tuple[PurePosixPath, str]:
+    """Sorts plain keys exactly as before Phase 50, so their digest is unchanged."""
+    return (key.source, key.page) if isinstance(key, PageKey) else (key, "")
+
+
+def breadcrumbs(roots: list[TocEntry]) -> dict[PurePosixPath, list[str]]:
+    """Each topic's places in the navigation, as ` > ` joined titles, in TOC order.
 
     For the report rather than for the layout: a reviewer deciding whether
     `overview` is a good name needs to know which Overview it is, and the page
-    path alone no longer tells them once folders are slugs.
+    path alone no longer tells them once folders are slugs. A list, because a
+    topic in two guides leads a page in each, and each row shows its own (Phase 50).
     """
-    found: dict[PurePosixPath, str] = {}
+    found: dict[PurePosixPath, list[str]] = {}
 
     def walk(entry: TocEntry, trail: list[str]) -> None:
         here = [*trail, entry.title] if entry.title else list(trail)
-        if entry.path is not None and entry.path not in found:
-            found[entry.path] = " > ".join(here)
+        if entry.path is not None:
+            found.setdefault(entry.path, []).append(" > ".join(here))
         for child in entry.children:
             walk(child, here)
 
@@ -90,29 +158,39 @@ def breadcrumbs(roots: list[TocEntry]) -> dict[PurePosixPath, str]:
 
 def rows(
     pages: list[Page],
-    trail_of: dict[PurePosixPath, str],
+    trail_of: dict[PurePosixPath, list[str]],
     url_of: Callable[[PurePosixPath], str],
     shortened: set[PurePosixPath],
+    keys: dict[int, Key] | None = None,
 ) -> list[dict[str, str]]:
     """One row per page, keyed on the source topic that leads it.
 
     Keyed on the *source* rather than on the new path, because the source is the
-    stable identity: the new path is precisely the thing a row may change.
+    stable identity: the new path is precisely the thing a row may change. A
+    topic leading several pages adds `page_key` (Phase 50), and its rows take
+    its breadcrumbs in page order.
     """
+    keys = keys if keys is not None else page_keys(pages)
+    seen: Counter[PurePosixPath] = Counter()
     out: list[dict[str, str]] = []
     for page in pages:
         if not page.topics:  # pragma: no cover - a page always leads with a topic
             continue
         first = page.topics[0]
+        trails = trail_of.get(first.source, [])
+        trail = trails[min(seen[first.source], len(trails) - 1)] if trails else ""
+        seen[first.source] += 1
+        key = keys.get(id(page), first.source)
         out.append({
             "old_path": str(first.source),
             "new_path": str(page.path),
             "title": first.title,
-            "toc_breadcrumb": trail_of.get(first.source, ""),
+            "toc_breadcrumb": trail,
             "expected_aem_url": url_of(page.path),
             "shortened": "yes" if first.source in shortened else "",
+            "page_key": key.page if isinstance(key, PageKey) else "",
         })
-    out.sort(key=lambda row: row["old_path"])
+    out.sort(key=lambda row: (row["old_path"], row["page_key"]))
     return out
 
 
@@ -120,8 +198,8 @@ def write(path: Path, mapping: list[dict[str, str]]) -> None:
     write_rows(path, COLUMNS, mapping)
 
 
-def load(root: Path) -> dict[PurePosixPath, PurePosixPath]:
-    """The previous merge's approved names: source topic -> page path.
+def load(root: Path) -> dict[Key, PurePosixPath]:
+    """The previous merge's approved names: source topic (or `PageKey`) -> page path.
 
     Absent means no overrides. A row with no `new_path` is a suggestion nobody
     filled in.
@@ -143,12 +221,13 @@ def load(root: Path) -> dict[PurePosixPath, PurePosixPath]:
         raise Unreadable(str(exc)) from exc
     except csv.Error as exc:
         raise Unreadable(f"{path} does not parse as a CSV ({exc}); save it again as 'CSV UTF-8'") from exc
-    overrides: dict[PurePosixPath, PurePosixPath] = {}
+    overrides: dict[Key, PurePosixPath] = {}
     for row in found:
         old = str(row.get("old_path", "")).strip()
         new = str(row.get("new_path", "")).strip()
+        page = str(row.get("page_key", "") or "").strip()
         if old and new:
-            overrides[PurePosixPath(old)] = PurePosixPath(new)
+            overrides[PageKey(PurePosixPath(old), page) if page else PurePosixPath(old)] = PurePosixPath(new)
     return overrides
 
 
@@ -172,35 +251,45 @@ def refusal(wanted: PurePosixPath) -> str | None:
     return None
 
 
-def digest(approved: dict[PurePosixPath, PurePosixPath]) -> str:
+def digest(approved: dict[Key, PurePosixPath]) -> str:
     """A short digest of the approved names, for the currency check (R9-04).
 
     Over `load`'s mapping rather than the file's bytes: a reordered row or an
     edited `title` cell changes no page's address and must not re-merge a tree,
     while any `new_path` edit must.
     """
-    payload = "\n".join(f"{old}\t{new}" for old, new in sorted(approved.items()))
+    payload = "\n".join(
+        f"{key.source}\t{key.page}\t{new}" if isinstance(key, PageKey) else f"{key}\t{new}"
+        for key, new in sorted(approved.items(), key=lambda item: _order(item[0]))
+    )
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16]
 
 
-def dumps(approved: dict[PurePosixPath, PurePosixPath]) -> str:
+def dumps(approved: dict[Key, PurePosixPath]) -> str:
     """The approved names as text, for the copy `state.db` keeps (X2-02).
 
     The map lives inside the tree a swap replaces, so it was lost with any swap
     that failed or was killed. The copy is written after every successful merge
     and read only when the file is gone; the file stays the one a writer edits.
     """
-    return json.dumps(sorted([str(old), str(new)] for old, new in approved.items()),
-                      ensure_ascii=False, separators=(",", ":"))
+    return json.dumps(
+        [[str(key.source), key.page, str(new)] if isinstance(key, PageKey) else [str(key), str(new)]
+         for key, new in sorted(approved.items(), key=lambda item: _order(item[0]))],
+        ensure_ascii=False, separators=(",", ":"))
 
 
-def loads(text: str) -> dict[PurePosixPath, PurePosixPath]:
+def loads(text: str) -> dict[Key, PurePosixPath]:
     """`dumps`, read back. Anything unreadable is no copy at all."""
     try:
         pairs = json.loads(text)
     except ValueError:
         return {}
-    return {
-        PurePosixPath(old): PurePosixPath(new)
-        for old, new in pairs if isinstance(old, str) and isinstance(new, str) and old and new
-    }
+    found: dict[Key, PurePosixPath] = {}
+    for entry in pairs if isinstance(pairs, list) else []:
+        if not isinstance(entry, list) or not all(isinstance(part, str) and part for part in entry):
+            continue
+        if len(entry) == 2:
+            found[PurePosixPath(entry[0])] = PurePosixPath(entry[1])
+        elif len(entry) == 3:
+            found[PageKey(PurePosixPath(entry[0]), entry[1])] = PurePosixPath(entry[2])
+    return found

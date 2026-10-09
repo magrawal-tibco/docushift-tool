@@ -1010,7 +1010,87 @@ def test_one_asset_referenced_twice_is_copied_once(tmp_path: Path) -> None:
     assert copier.counts.resolved == 2
 
 
-# -- CSH (§9.3-§9.5) ----------------------------------------------------------
+# -- an asset too long to publish (Phase 49) ----------------------------------
+#
+# A path is published at folder + separator + path: `Content/images/shot.png`
+# (23 characters) under a folder of 236 lands at exactly 260.
+
+
+LONG_IMAGE = "Figure_1_Features_of_TIBCO_BusinessConnect_EDI_Protocol_powered_by_Instream.jpg"
+
+
+def test_an_asset_that_would_publish_past_260_gets_a_shorter_name(tmp_path: Path) -> None:
+    root = flare_unit(tmp_path)
+    (root / "Content" / "images" / LONG_IMAGE).write_text("x", encoding="utf-8")
+    copier = AssetCopier(root, SourceEngine.FLARE, tmp_path / "out" / "guide", published=180)
+
+    resolution = copier.resolve(
+        root / "Content" / "topic.htm", PurePosixPath("Content/topic.md"), f"images/{LONG_IMAGE}"
+    )
+
+    target = resolution.target
+    assert target is not None and target.parent == PurePosixPath("Content/images")
+    assert target.suffix == ".jpg" and target.name.startswith("Figure_1_Features")
+    assert 180 + 1 + len(str(target)) <= 260
+    assert resolution.url == f"images/{target.name}"
+    assert copier.renamed == {PurePosixPath(f"Content/images/{LONG_IMAGE}"): target}
+    assert copier.copy() == 1
+    assert (tmp_path / "out" / "guide" / Path(*target.parts)).is_file()
+    assert f"Content/images/{LONG_IMAGE}" not in [str(path) for path, _size in copier.orphans()]
+
+
+def test_a_name_too_short_to_cut_is_left_for_sync_to_refuse(tmp_path: Path) -> None:
+    """The folder alone is over: an 8-digit tag would make `shot.png` longer, not shorter."""
+    root = flare_unit(tmp_path)
+    copier = AssetCopier(root, SourceEngine.FLARE, tmp_path / "out" / "guide", published=240)
+
+    resolution = copier.resolve(root / "Content" / "topic.htm", PurePosixPath("Content/topic.md"), "images/shot.png")
+
+    assert resolution.target == PurePosixPath("Content/images/shot.png")
+    assert copier.renamed == {}
+
+
+def test_an_asset_that_fits_keeps_its_source_name(tmp_path: Path) -> None:
+    root = flare_unit(tmp_path)
+    copier = AssetCopier(root, SourceEngine.FLARE, tmp_path / "out" / "guide", published=236)
+
+    resolution = copier.resolve(root / "Content" / "topic.htm", PurePosixPath("Content/topic.md"), "images/shot.png")
+
+    assert resolution.target == PurePosixPath("Content/images/shot.png")
+    assert copier.renamed == {}
+
+
+def test_a_shortened_name_is_the_same_on_every_run(tmp_path: Path) -> None:
+    root = flare_unit(tmp_path)
+    (root / "Content" / "images" / LONG_IMAGE).write_text("x", encoding="utf-8")
+    names = []
+    for _run in range(2):
+        copier = AssetCopier(root, SourceEngine.FLARE, tmp_path / "out" / "guide", published=180)
+        names.append(copier.resolve(
+            root / "Content" / "topic.htm", PurePosixPath("Content/topic.md"), f"images/{LONG_IMAGE}"
+        ).target)
+
+    assert names[0] == names[1] != PurePosixPath(f"Content/images/{LONG_IMAGE}")
+
+
+def test_two_long_names_cut_to_the_same_text_stay_apart(tmp_path: Path) -> None:
+    root = flare_unit(tmp_path)
+    stem = "Figure_1_Features_of_TIBCO_BusinessConnect_EDI_Protocol"
+    for suffix in ("_one", "_two"):
+        (root / "Content" / "images" / f"{stem}{suffix}.jpg").write_text("x", encoding="utf-8")
+    copier = AssetCopier(root, SourceEngine.FLARE, tmp_path / "out" / "guide", published=200)
+
+    first, second = (
+        copier.resolve(root / "Content" / "topic.htm", PurePosixPath("Content/topic.md"),
+                       f"images/{stem}{suffix}.jpg").target
+        for suffix in ("_one", "_two")
+    )
+
+    assert first != second
+    assert len(copier.copy_set) == 2
+
+
+# -- CSH (§9.3-§9.5)----------------------------------------------------------
 
 
 def source(doc_set: str, *entries: tuple[str, str, str], status=CshStatus.OK) -> CshSource:

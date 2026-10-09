@@ -171,9 +171,12 @@ def test_the_register_carries_every_row_of_7_5() -> None:
     86th, `LINK_TO_UNFILED` (Phase 43): a link that resolves in the tree and
     breaks on AEM, which does not publish `unfiled/`. The 87th,
     `REFERENCE_PAGE_SEGMENT_DROPPED` (Phase 47): a reference naming a page as a
-    folder, resolved without that segment.
+    folder, resolved without that segment. The 88th, `ASSET_RENAMED_FOR_LENGTH`
+    (Phase 49): an image copied under a shorter name because its own would not
+    publish. The 89th, `RENAME_MAP_AMBIGUOUS` (Phase 50): a row for a topic that
+    leads two pages, with nothing to say which.
     """
-    assert len(REGISTRY) == 87
+    assert len(REGISTRY) == 89
 
 
 def test_severity_comes_from_the_registry_and_not_from_the_call_site() -> None:

@@ -54,3 +54,12 @@ primary_locale: "en-us"
 # Must be absolute (`https://...`) when set; `catalog validate` says so, because
 # this value is concatenated into every cross-tree link without further checking.
 publish_base_url: ""
+
+# How long the folder the published repos live in is, counted the way Windows
+# counts a path (drive letter and separators included). 24 is
+# `C:\github\tibco-docs-aem`. `convert` cannot see `sync`'s `--target-dir`, so it
+# uses this to find the rare image whose published path would pass 260
+# characters, and copies that one under a shorter name (planning.md Phase 49).
+# `sync` still measures the real path and refuses what is over. 0 turns the
+# shortening off.
+published_root_length: 24

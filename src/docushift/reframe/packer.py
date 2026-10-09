@@ -47,7 +47,7 @@ The POC's `MIN_WORDS` is not reimplemented (R1.2), and its unused basename-keyed
 
 from __future__ import annotations
 
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Hashable, Sequence
 from dataclasses import dataclass, field, replace
 from pathlib import PurePosixPath
 
@@ -804,8 +804,10 @@ def relocate(pages: Sequence[Page], roots: Sequence[TocEntry]) -> int:
 
 
 def override(
-    pages: Sequence[Page], approved: dict[PurePosixPath, PurePosixPath]
-) -> tuple[set[PurePosixPath], dict[PurePosixPath, PurePosixPath]]:
+    pages: Sequence[Page],
+    approved: dict[Hashable, PurePosixPath],
+    key: Callable[[Page], Hashable] | None = None,
+) -> tuple[set[Hashable], dict[Hashable, PurePosixPath]]:
     """Puts back the names a previous run recorded and a human kept.
 
     Runs after `relocate`, so an approved path wins over both the computed name
@@ -816,7 +818,9 @@ def override(
 
     Keyed on the leading topic's *source*, which is the one identity that
     survives a rename -- keying on the old path would stop matching the moment
-    the override took effect, which is the first run.
+    the override took effect, which is the first run. `key` replaces that for a
+    topic leading more than one page (`renames.page_keys`, Phase 50); applied and
+    refused are reported in whichever key was used.
 
     An approved path that another page ends up holding is refused rather than
     applied: two pages at one path is a page silently lost, and the record is
@@ -828,11 +832,12 @@ def override(
     onto one path, reading order decides. A refusal sends that page back to its
     computed path, which may in turn refuse another pin, hence the loop.
     """
+    key_of: Callable[[Page], Hashable] = key or (lambda page: page.topics[0].source)
     moving: dict[int, PurePosixPath] = {}
     for page in pages:
         if not page.topics:  # pragma: no cover - a page always leads with a topic
             continue
-        wanted = approved.get(page.topics[0].source)
+        wanted = approved.get(key_of(page))
         if wanted is not None and wanted != page.path:
             moving[id(page)] = wanted
 
@@ -854,13 +859,13 @@ def override(
         if not losers:
             break
         for page in losers:
-            refused[page.topics[0].source] = moving.pop(id(page))
+            refused[key_of(page)] = moving.pop(id(page))
 
-    applied: set[PurePosixPath] = set()
+    applied: set[Hashable] = set()
     for page in pages:
         if id(page) in moving:
             page.path = moving[id(page)]
-            applied.add(page.topics[0].source)
+            applied.add(key_of(page))
     return applied, refused
 
 

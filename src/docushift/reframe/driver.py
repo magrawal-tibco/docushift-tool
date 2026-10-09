@@ -570,7 +570,21 @@ class Reframer:
         # name and the computed folder: a published URL must not move because
         # somebody fixed a typo in a title. `--renormalize` is how a writer asks
         # for the names to be recomputed anyway.
-        approved = self._approved(slug, number, target, standalone)
+        # Phase 50. Keyed before any pin moves a page: a topic leading two pages
+        # tells them apart by the path the layout computed.
+        keys = renames.page_keys(built)
+        approved, ambiguous = renames.matched(self._approved(slug, number, target, standalone), keys)
+        if ambiguous:
+            shown = ", ".join(f"{old} -> {new}" for old, new in list(ambiguous.items())[:5])
+            self._record(
+                "RENAME_MAP_AMBIGUOUS", slug, number, path=renames.RENAME_MAP, count=len(ambiguous),
+                message=(
+                    f"{len(ambiguous)} row(s) in {renames.RENAME_MAP} name a source topic that leads "
+                    f"more than one page, with no page_key to say which, so no page took the name: "
+                    f"{shown}{', ...' if len(ambiguous) > 5 else ''}. Write it again on the row "
+                    f"for the page you meant"
+                ),
+            )
         # X2-03. A `new_path` is a write path: refused before the layout sees it
         # unless it names a page inside the tree.
         unsafe = {old: (new, why) for old, new in approved.items()
@@ -585,7 +599,10 @@ class Reframer:
                     f"{', ...' if len(unsafe) > 5 else ''}"
                 ),
             )
-        pinned, refused = override(built, {old: new for old, new in approved.items() if old not in unsafe})
+        pinned, refused = override(
+            built, {old: new for old, new in approved.items() if old not in unsafe},
+            key=lambda page: keys[id(page)],
+        )
         if pinned:
             self._record(
                 "RENAME_MAP_APPLIED", slug, number, count=len(pinned),
@@ -610,7 +627,7 @@ class Reframer:
         # applied nor refused, and the rewritten map erased it, so a hand-chosen
         # URL reverted without a word. It is still dropped -- nothing in the tree
         # carries that topic as a page -- but named, old and new, before it goes.
-        leading = {page.topics[0].source for page in built if page.topics}
+        leading = set(keys.values())
         unmatched = {old: new for old, new in approved.items() if old not in leading}
         if unmatched:
             shown = ", ".join(f"{old} -> {new}" for old, new in list(unmatched.items())[:5])
@@ -636,7 +653,7 @@ class Reframer:
         ancestors = branches(roots)
         # R9-12: a name taken from `rename-map.csv` is a human's answer to the
         # `shortened` flag, so it is not asked again on every run.
-        cut = shortened(built) - pinned
+        cut = shortened(built) - {key.source if isinstance(key, renames.PageKey) else key for key in pinned}
         flagged: dict[PurePosixPath, list[Flag]] = {
             page.path: inspect(
                 page, policy.max_words, ancestors,
@@ -650,7 +667,7 @@ class Reframer:
         added = self._write(staging, source, built, located, counts)
         self._write_navigation(
             staging, source, roots, built, located, policy, counts, schema_name, flagged,
-            queue, self._url_for(product, version), placements, cut, worked,
+            queue, self._url_for(product, version), placements, cut, worked, keys,
         )
         self._write_origins(staging, product, version, located, standalone)
         # The merged pages link differently from the converted ones (Phase 43).
@@ -900,6 +917,7 @@ class Reframer:
         placements: dict[int, tuple[Page, str]],
         cut: set[PurePosixPath],
         worked: list[dict[str, str]] | None = None,
+        keys: dict[int, renames.Key] | None = None,
     ) -> None:
         """Copies the assets through, then writes `toc.yml` and the three sidecars.
 
@@ -938,7 +956,7 @@ class Reframer:
         review.write(staging / "review-queue.csv", queue, worked or ())
         renames.write(
             staging / renames.RENAME_MAP,
-            renames.rows(built, renames.breadcrumbs(roots), url_of, cut),
+            renames.rows(built, renames.breadcrumbs(roots), url_of, cut, keys),
         )
 
     def _write_origins(
