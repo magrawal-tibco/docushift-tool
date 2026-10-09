@@ -21,11 +21,21 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | ibi re-sync | DOCOPS-200 → Done |
 | A family reassignment is committed | Add a dated line to the progress comment on DOCOPS-120 |
 | Family review finished | DOCOPS-120 → Done, then DOCOPS-130 |
+| Edit to DOCOPS-217 is allowed (blocked by a permission check on 2026-10-09) | DOCOPS-217: append the 2026-10-09 publish note → Done |
+| A follow-up from the BusinessConnect warnings is planned | DOCOPS-220 → In Progress |
 | A new phase is opened | One sub-task under the matching story, In Progress, no `retro` |
 
 **Left alone on purpose:** DOCOPS-8 is a Task where its siblings are Stories.
 
 **Log** (newest first, one line per session):
+
+- 2026-10-09 — Last 5 BusinessConnect versions re-run and published (44 of 44). DOCOPS-218 and
+  DOCOPS-219 → Done (219 now 0.5 SP for the warning check); DOCOPS-220 created (Backlog, 0.25 SP,
+  under DOCOPS-101) for three deferred follow-ups. DOCOPS-217 still In Progress: its edit was blocked.
+
+- 2026-10-09 — Phases 49 and 50 (built, runs pending) logged as DOCOPS-217 (under DOCOPS-96) and
+  DOCOPS-218 (under DOCOPS-114); the BusinessConnect run as DOCOPS-219 (under DOCOPS-7, 39 of
+  44 published). All In Progress, 0.25 SP each.
 
 - 2026-10-09 — Catalog refresh and the 2026-10-09 end-of-support report (5d8b461) logged as
   DOCOPS-215 (Done, 0.25 SP, under DOCOPS-6). Facebook, Marketo and Twitter plug-ins dropped.
@@ -100,6 +110,8 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | 46 | Long-path refusal | build DOCOPS-184; re-runs DOCOPS-188 |
 | 47 | Service Grid merges | DOCOPS-187 (in progress) |
 | 48 | Flogo connectors retired; VS Code extension to flogo | DOCOPS-206 |
+| 49 | Images too long to publish get a shorter name | DOCOPS-217 (in progress) |
+| 50 | Per-page names for a topic in two guides | DOCOPS-218 |
 
 Other logged work: Jira reconcile and this handoff DOCOPS-208; stakeholder status page DOCOPS-197; TIBCO family reassignments DOCOPS-120
 (in progress, progress kept as comments); ibi family regroup DOCOPS-207; catalog refresh and 2026-10-09 end-of-support report DOCOPS-215.
