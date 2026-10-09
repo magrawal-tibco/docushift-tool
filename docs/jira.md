@@ -1,6 +1,6 @@
 # Jira Tracking — What Is Logged in DOCOPS
 
-> **Last reconciled:** 2026-10-08, against Jira and `config/versions.csv`.
+> **Last reconciled:** 2026-10-09, against Jira and `config/versions.csv`.
 > Conventions (site, cloud ID, story points, transitions, who owns what) live in
 > `C:\github\confluence-mcp\reports\docushift-claude-atlassian-context.md`; this file
 > does not repeat them. It answers one question: **is this piece of work in Jira, and where?**
@@ -26,6 +26,9 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 **Left alone on purpose:** DOCOPS-8 is a Task where its siblings are Stories.
 
 **Log** (newest first, one line per session):
+
+- 2026-10-09 — Catalog refresh and the 2026-10-09 end-of-support report (5d8b461) logged as
+  DOCOPS-215 (Done, 0.25 SP, under DOCOPS-6). Facebook, Marketo and Twitter plug-ins dropped.
 
 - 2026-10-08 — DOCOPS-120 progress comment: added the pre-2016 ineligibility (3fe7d90) and
   the Service Grid + Container Edition move to bpm (73d111c).
@@ -99,7 +102,7 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | 48 | Flogo connectors retired; VS Code extension to flogo | DOCOPS-206 |
 
 Other logged work: Jira reconcile and this handoff DOCOPS-208; stakeholder status page DOCOPS-197; TIBCO family reassignments DOCOPS-120
-(in progress, progress kept as comments); ibi family regroup DOCOPS-207.
+(in progress, progress kept as comments); ibi family regroup DOCOPS-207; catalog refresh and 2026-10-09 end-of-support report DOCOPS-215.
 
 ## Open run tasks (as of 2026-10-08)
 
