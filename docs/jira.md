@@ -29,6 +29,9 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 **Log** (newest first, one line per session):
 
+- 2026-10-12 — DOCOPS-120 progress comment: retired Gemini, FTL and eFTL versions ineligible,
+  14 versions (5dc8f76).
+
 - 2026-10-12 — DOCOPS-120 progress comment: legacy Messaging Monitor, Schema Repository and
   Messaging Manager 1.0.0/1.1.0 ineligible, 20 versions (543601e).
 
