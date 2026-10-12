@@ -29,6 +29,9 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 **Log** (newest first, one line per session):
 
+- 2026-10-12 — DOCOPS-120 progress comment: LogLogic decommissioned, all 136 versions ineligible
+  (e2e1fc1).
+
 - 2026-10-12 — Cloud family run logged as DOCOPS-222 (Done, 0.25 SP, under DOCOPS-7): 5 of 5
   real versions published. DOCOPS-120 progress comment: newest version only for cloud and
   integration platform (42cdaa4, 195 versions ineligible).
