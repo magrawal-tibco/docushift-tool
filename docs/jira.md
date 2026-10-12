@@ -29,6 +29,9 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 **Log** (newest first, one line per session):
 
+- 2026-10-12 — DOCOPS-120 progress comment: Messaging Bridge (Kafka, Pulsar) end of life, 15 versions
+  ineligible (86081fd).
+
 - 2026-10-12 — DOCOPS-120 progress comment: LogLogic decommissioned, all 136 versions ineligible
   (e2e1fc1).
 
