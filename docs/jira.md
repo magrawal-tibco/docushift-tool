@@ -29,6 +29,9 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 **Log** (newest first, one line per session):
 
+- 2026-10-12 — EMS, FTL and Messaging run logged as DOCOPS-223 (Done, 0.5 SP, under DOCOPS-7):
+  39 of 44 published; 7 leftover issues in docs/open-issues.md.
+
 - 2026-10-12 — DOCOPS-120 progress comment: retired Gemini, FTL and eFTL versions ineligible,
   14 versions (5dc8f76).
 
@@ -130,7 +133,7 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | 50 | Per-page names for a topic in two guides | DOCOPS-218 |
 
 Other logged work: Jira reconcile and this handoff DOCOPS-208; stakeholder status page DOCOPS-197; TIBCO family reassignments DOCOPS-120
-(in progress, progress kept as comments); ibi family regroup DOCOPS-207; catalog refresh and 2026-10-09 end-of-support report DOCOPS-215; cloud family run DOCOPS-222.
+(in progress, progress kept as comments); ibi family regroup DOCOPS-207; catalog refresh and 2026-10-09 end-of-support report DOCOPS-215; cloud family run DOCOPS-222; EMS, FTL and Messaging run DOCOPS-223.
 
 ## Open run tasks (as of 2026-10-08)
 
