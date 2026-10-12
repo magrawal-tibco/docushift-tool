@@ -1,6 +1,6 @@
 # Jira Tracking — What Is Logged in DOCOPS
 
-> **Last reconciled:** 2026-10-09, against Jira and `config/versions.csv`.
+> **Last reconciled:** 2026-10-12, against Jira and `config/versions.csv`.
 > Conventions (site, cloud ID, story points, transitions, who owns what) live in
 > `C:\github\confluence-mcp\reports\docushift-claude-atlassian-context.md`; this file
 > does not repeat them. It answers one question: **is this piece of work in Jira, and where?**
@@ -28,6 +28,10 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 **Left alone on purpose:** DOCOPS-8 is a Task where its siblings are Stories.
 
 **Log** (newest first, one line per session):
+
+- 2026-10-12 — Cloud family run logged as DOCOPS-222 (Done, 0.25 SP, under DOCOPS-7): 5 of 5
+  real versions published. DOCOPS-120 progress comment: newest version only for cloud and
+  integration platform (42cdaa4, 195 versions ineligible).
 
 - 2026-10-09 — Last 5 BusinessConnect versions re-run and published (44 of 44). DOCOPS-218 and
   DOCOPS-219 → Done (219 now 0.5 SP for the warning check); DOCOPS-220 created (Backlog, 0.25 SP,
@@ -114,7 +118,7 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | 50 | Per-page names for a topic in two guides | DOCOPS-218 |
 
 Other logged work: Jira reconcile and this handoff DOCOPS-208; stakeholder status page DOCOPS-197; TIBCO family reassignments DOCOPS-120
-(in progress, progress kept as comments); ibi family regroup DOCOPS-207; catalog refresh and 2026-10-09 end-of-support report DOCOPS-215.
+(in progress, progress kept as comments); ibi family regroup DOCOPS-207; catalog refresh and 2026-10-09 end-of-support report DOCOPS-215; cloud family run DOCOPS-222.
 
 ## Open run tasks (as of 2026-10-08)
 
