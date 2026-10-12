@@ -204,6 +204,125 @@ navigation itself, and it has not been looked into yet.
 
 ---
 
+## Messaging Manager
+
+### Online help for 4.0.0 and 3.1.1 not published
+
+- **Status:** Open
+- **Owner:** unassigned
+- **Raised:** 12 Oct 2026
+- **Blocks publishing:** yes, for the online help (the PDFs are published)
+
+Three command pages in the User's Guide are titled with a single symbol: `!`, `/`
+and `#`. When topics are merged into larger pages, each topic gets a link target
+built from its title, and a title made only of symbols produces an empty one. The
+Getting Started page then holds several topics with the same empty target, and the
+safety check rightly refuses to publish it. The fix is a small tool change: fall
+back to the topic's file name (exclamation point, forward slash, pound sign) when
+the title gives nothing usable. Not yet planned.
+
+---
+
+## eFTL Enterprise Edition
+
+### Link to the Python API page is broken in every version
+
+- **Status:** Open
+- **Owner:** unassigned
+- **Raised:** 12 Oct 2026
+- **Blocks publishing:** no
+
+In all six published versions (7.1.0 to 7.3.0), the API Documentation page links to
+the Python connection page. That page sits in the API reference folder but was not
+recognised as part of it, so it was neither converted nor linked to its published
+copy. Readers who follow the link get nothing. The API reference itself is
+published; the link needs pointing at it, which is a tool change.
+
+---
+
+## FTL Enterprise Edition
+
+### 7.1.1 is missing its .NET API reference
+
+- **Status:** Open
+- **Owner:** unassigned
+- **Raised:** 12 Oct 2026
+- **Blocks publishing:** no
+
+Version 7.1.1 ships its .NET API reference loose at the top of the package instead
+of in an API folder, about 206 generated pages. The tool did not recognise them as
+an API reference and skipped them, so this version publishes without it. The prose
+help is complete, and the other five versions are not affected.
+
+---
+
+## GEMS, Graphical Rendezvous
+
+### Help format not supported
+
+- **Status:** Open
+- **Owner:** unassigned
+- **Raised:** 12 Oct 2026
+- **Blocks publishing:** yes, for the online help of GEMS 1.1.0 and Graphical Rendezvous 1.1.0
+
+Both are built with Docusaurus, a help format the tool recognises but has no
+converter for. Their PDFs and readme files are published; the online help is not.
+To decide: mark them out of scope, or build a converter. Two versions are unlikely
+to justify a converter on their own.
+
+---
+
+## Messaging Suite
+
+### No package for 1.23.0
+
+- **Status:** Open
+- **Owner:** unassigned
+- **Raised:** 12 Oct 2026
+- **Blocks publishing:** yes, for this one version
+
+The documentation site does not return a package for 1.23.0, while 1.21.0, 1.22.0
+and 1.24.0 onwards all download normally. Every Messaging Suite package holds only
+PDFs, so what is missing is a handful of PDFs. To decide: mark the version out of
+scope, or get the package by hand.
+
+---
+
+## Rendezvous
+
+### Some links land on the wrong section of the right page
+
+- **Status:** Open
+- **Owner:** unassigned
+- **Raised:** 12 Oct 2026
+- **Blocks publishing:** no
+
+Several long Rendezvous pages repeat the same section heading, for example
+"Forward RVCM administrative messages across network boundaries". A link meant for
+a later occurrence opens the page at the first one. Measured on 12 Oct 2026: 288
+links across 8.8.0, 8.8.1 and 9.0.0. The reader reaches the right page, then has to
+scroll. To decide: accept it, or change the tool so repeated headings get distinct
+link targets.
+
+---
+
+## Cloud API Modeler
+
+### Three links point to topics readers cannot reach
+
+- **Status:** Open
+- **Owner:** unassigned (editorial)
+- **Raised:** 12 Oct 2026
+- **Blocks publishing:** no
+
+In 1.5.0, three pages link to topics the original help shipped but never listed in
+its table of contents: Security (from Managing Resources), Modes of Editing (from
+Modeling an API) and Managing Requests (from Reference Schema). Those topics are
+kept aside and not published, so the three links go nowhere. A writer should either
+add the topics to the navigation or remove the links.
+
+---
+
 ## Everything, eventually
 
 ### Public web address for the new site not set
