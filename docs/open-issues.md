@@ -325,67 +325,35 @@ add the topics to the navigation or remove the links.
 
 ## Foresight Instream
 
-### 9.3.0 and 9.4.0 held back until they are re-run with the fix
+### 9.4.0: two Business Rules pages still show the previous release's text
 
-- **Status:** Fix built 13 Oct 2026; re-run pending
+- **Status:** Open; accepted for now
 - **Owner:** unassigned
 - **Raised:** 13 Oct 2026
-- **Blocks publishing:** yes, until the re-run (the PDF-only 9.1.0 and 9.0.0 are published)
+- **Blocks publishing:** no (9.4.0 is published)
 
-Instream's online help is one main help system that pulls in 14 smaller ones. Each
-smaller one carries a copy of the guides from the previous release's build (the 9.4.0
-package's copies say 9.3.0). The tool converted each smaller system on its own and did
-not follow the main table of contents into them. So 394 of the 778 navigation entries
-came from those older copies, appended at the end as 14 sections all titled "TIBCO
-Foresight Instream", while the current pages sat outside the navigation. (The 13 Oct
-note that most of the content would be missing was wrong: it counted pages after
-merging.) The tool now follows the main table of contents. In a trial on 9.4.0, every
-guide sits under its own heading with the current text, and the older copies are not
-converted. About half the pages still sit outside the table of contents. These are
-guides for other Foresight products (Standards Editor, EDISIM tutorials, Analyzer,
-Comparator) that ship in Instream's package but that Instream's own table of contents
-never lists. That is correct, and they stay unpublished.
-
-### 9.2.0 can be published as it is
-
-- **Status:** Open; recommended to publish
-- **Owner:** unassigned
-- **Raised:** 13 Oct 2026
-- **Blocks publishing:** no
-
-9.2.0 is not built from smaller help systems. The pages it leaves out are the same
-other-product guides as in 9.4.0, which its table of contents never lists.
+The 9.4.0 help keeps an older copy of the Business Rules guide alongside the current
+one. The current pages carry a different file name, and the tool now matches the usual
+renaming, so the guide shows the current text. Two pages, Local Variables and ICD
+Business Rules, were renamed in a way that could also fit a different page with the
+same title, so they were not matched and still show the 9.3.0 text. Matching them by
+hand is a one-line change each, if anyone needs it.
 
 ---
 
 ## Foresight Transaction Insight
 
-### 5.5.0 and 6.0.0 held back; nothing was missing
-
-- **Status:** Fix built 13 Oct 2026; re-run pending
-- **Owner:** unassigned
-- **Raised:** 13 Oct 2026
-- **Blocks publishing:** no (held on 13 Oct on a wrong reading; can publish either way)
-
-Built like Instream, but the two smaller help systems (Archive and Retrieval System,
-Operational Monitor) hold their own guides, not copies. They were converted and in the
-navigation all along: 821 entries before the fix, 819 after, with a quarter of pages
-outside the table of contents both times. The 13 Oct note that half to three-quarters
-would go unpublished was wrong: it counted pages after merging. The fix places the two
-guides where the main table of contents puts them, instead of at the end, and drops up
-to 115 duplicate pages.
-
 ### 5.4.0: the hotfix addendum is not in the online help
 
-- **Status:** Open; recommended to publish without it
+- **Status:** Open; published without it
 - **Owner:** unassigned
 - **Raised:** 13 Oct 2026
 - **Blocks publishing:** no
 
-5.4.0 is not built from smaller help systems. Its table of contents does not list the
-release notes or the hotfix addendum (43 pages), and no other page links to them. The
-release notes also ship as a PDF, which is published. The hotfix addendum has no PDF,
-so it reaches readers only if someone decides to add it to the navigation by hand.
+5.4.0's table of contents does not list the release notes or the hotfix addendum
+(43 pages), and no other page links to them. The release notes also ship as a PDF,
+which is published. The hotfix addendum has no PDF, so it reaches readers only if
+someone decides to add it to the navigation by hand.
 
 ---
 
