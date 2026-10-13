@@ -633,6 +633,75 @@ identical trees; `ruff` and the test suite pass.*
 
 ---
 
+### Phase 51: A Merged Help System's Guides Are in Its Subsystems' TOCs — **Proposed 2026-10-13**
+
+**Why.** The Foresight run (2026-10-13, DOCOPS-228) held back Instream 9.2–9.4 and
+Transaction Insight 5.4–6.0: 89–98% and 50–78% of their pages landed in `unfiled/`, which AEM
+does not publish. Instream 9.4.0 would publish about 170 pages, without its user guides.
+
+**Cause, read 2026-10-13.** These are Flare runtime-merged outputs. The master's
+`Data/HelpSystem.xml` lists its subsystems in `<Subsystems><Url Source=…mcwebhelp TocPath="">`,
+and its TOC places each one as a node `{i:15,r:1,m:0}`, where `m` indexes that list. The chunk
+file maps those ids to a `.flprj` key (`/../../../../foresight_shared/foresight_shared.flprj`).
+`flare_toc._node` reads only `i` and `n`. `_project()` turns the key into a sub-project, and
+`flare.py:948-951` drops the node with `TOC_SUBPROJECT_UNPLACED`; placing it was never
+attempted. Each subsystem's own TOC lists only its own guide (EDIWrap: 3 entries of 474 `.htm`),
+so the master's guide topics are reached by no TOC and become orphans (`flare.py:896-907`).
+Each subsystem is also converted as its own root. In Instream 9.4.0 each one carries a full
+copy of the guides from an older build: it says 9.3.0, and the master says 9.4.0.
+
+**Measured 2026-10-13** over the html-to-md cache (`cache/pub`, every docsite package): 31 roots
+place a subsystem through a `.flprj` node, in two shapes.
+
+| shape | versions | today |
+|---|---|---|
+| **Shared library**: the subsystem TOC lists a few of its pages; the guides live in the master (Instream: 3–228 of 467 listed, 362 also in the master) | Instream 9.3.0, 9.4.0; Transaction Insight 5.5.0, 6.0.0 | 50–90% of topics unfiled; held |
+| **Self-contained**: the subsystem TOC lists nearly all its own pages, none shared (Control Plane 1.17.0: 25–63 of 29–70 listed, 0 shared) | ibi FOCUS 9.3.4–9.3.8 (published); Control Plane 1.3.0–1.17.0, TIBCO Platform 1.1.0, Platform CLI 1.2.0, iProcess Engine 11.9.0–11.10.0 (all not started) | Every page converts, as the subsystem's own unit; only its place in the master's navigation is lost |
+
+No version published before this run lost pages to this cause. **Instream 9.2.0 and Transaction
+Insight 5.4.0 are not merged.** Their unfiled guides (analyzer-user-guide, SE-user-guide, …) are
+named by no TOC at all, so this phase does not change them; see step 6.
+
+#### Decisions
+
+| decision | choice | why |
+|---|---|---|
+| **Placing a merge node** | Resolve `m` to `<Subsystems>[m]`, read that root's TOC, and splice its tree in at the node | That is what the Flare runtime does when a reader opens the help |
+| **Which copy a spliced entry points at** | The master's own file at the same relative path; the subsystem's file only where the master has none | The master copy is the current build; the Instream subsystems carry a stale one. Transaction Insight's `fsp_archive` and `fsp_opmon` are mostly separate guides with no master copy |
+| **A subsystem listed in `<Subsystems>`** | Not converted as its own unit. Its files feed the master, as above | Converting it publishes each guide up to 14 more times, from an older build |
+| **A merge node that cannot be resolved** (no `m`, index out of range, root missing) | Keep today's behaviour: drop the node and report `TOC_SUBPROJECT_UNPLACED` | No guessing; the finding already names it |
+| **Links into `Subsystems/X/…`** | Rewritten to the master path when the master copy is the one converted | Otherwise a link points at a page that is no longer published |
+
+#### Steps
+
+1. `engines/flare_toc.py`: keep `m` on `TocNode`; `read_manifest` reads `<Subsystems>` (Source
+   and TocPath).
+2. `engines/flare.py`: in `_plan` / `_tocs`, splice each resolved subsystem TOC at its node, with
+   paths re-rooted to the master; file entries against the master's documents first. Skip
+   subsystem roots listed in the manifest from both conversion and the parent's exclusion.
+   Rewrite cross-root links.
+3. Tests: a fixture with a master and two subsystems, `m:` nodes and a `.flprj` key. The spliced
+   guides are in the nav. A topic with a master copy comes from the master; one without comes
+   from the subsystem. No subsystem converts on its own. An out-of-range `m` still reports
+   `TOC_SUBPROJECT_UNPLACED`. Update `test_flare.py:1476-1492` to match.
+4. Regression: re-convert ibi FOCUS 9.3.4–9.3.8 to a scratch folder and diff against
+   `output/`. Expect the same pages, with the HTML5 Charts guide moved to its place in the
+   navigation. Convert Control Plane 1.17.0 from the cache the same way and check that each
+   capability guide sits where the master places it.
+5. Docs: the merged-help rule in `user-guide.md` (Flare section, near the `unfiled/` paragraph)
+   and `design.md`; register nothing new unless step 2 needs a finding.
+6. Instream 9.2.0 and Transaction Insight 5.4.0: check whether any landing page or the docsite
+   links the untocced guides. Record the call in `docs/open-issues.md`: publish without them,
+   or treat them as a separate fix.
+7. Runs (the user): `convert --force`, `reframe` and `sync` for Instream 9.3.0 and 9.4.0 and
+   Transaction Insight 5.5.0 and 6.0.0; then `validate`, checked read-only.
+
+*Exit: the four versions publish with under 15% of pages unfiled, each guide once; ibi FOCUS
+9.3.4–9.3.8 keep every page; `ruff` and the test suite pass; DOCOPS gets a new sub-task
+linking DOCOPS-228.*
+
+---
+
 ## Carried-Forward Open Items
 
 Technical items a finished phase recorded as *open, not fixed*. Product-level issues
