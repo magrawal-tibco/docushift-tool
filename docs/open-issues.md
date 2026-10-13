@@ -390,16 +390,6 @@ once the docsite is fixed; otherwise the package has to be obtained by hand.
 
 ## BusinessWorks
 
-### 6.12.0 and 6.13.0 online help blocked by over-long page names
-
-- **Status:** Fix in progress (shorter names, 14 Oct 2026)
-- **Owner:** unassigned
-- **Raised:** 14 Oct 2026
-- **Blocks publishing:** yes, for the online help (the PDFs are published)
-
-16 pages in 6.12.0 and 11 in 6.13.0 would have paths over Windows' 260-character
-limit in the publishing repository. The fix is the usual one: shorter page names.
-
 ### Container Edition Buildpack for PCF 2.2.1 and FormBuilder 5.3.2 have no package
 
 - **Status:** Open
@@ -413,17 +403,18 @@ As with Flogo 3.0.1, the docsite returns a web page instead of a ZIP.
 
 ## Fulfillment
 
-### Product and Service Catalog 5.1.0 online help blocked by over-long paths
+### Product and Service Catalog 5.1.0: 399 images will not load once published
 
-- **Status:** Fix in progress (shorter folder and page names, 14 Oct 2026)
+- **Status:** Open; tool change proposed (Phase 52)
 - **Owner:** unassigned
 - **Raised:** 14 Oct 2026
-- **Blocks publishing:** yes, for the online help
+- **Blocks publishing:** no (published 14 Oct), but the images are broken
 
-15 pages are too long, up to 427 characters. Most of the length is in folder names that
-are themselves pages ("Import of TIBCO Product and Service Catalog Data", "Types of
-Import...", "Partial Import..."), so the folders have to be shortened as well as the
-pages under them.
+The pages link their images through a folder spelled `html-opd`, and the folder is
+`html-OPD`. Windows treats the two as one, and the publishing platform does not, so
+every one of those images fails to load. The online help itself was blocked by
+over-long paths at first. Shorter names for 20 pages and folders fixed that, and it is
+published.
 
 ### Product and Service Inventory 2.1.0 has no package
 
@@ -440,7 +431,7 @@ As with Flogo 3.0.1, the docsite returns a web page instead of a ZIP.
 
 ### Platform Server for z/Linux 8.1.0 package cannot be unpacked on Windows
 
-- **Status:** Open; tool change proposed
+- **Status:** Open; tool change proposed (Phase 52)
 - **Owner:** unassigned
 - **Raised:** 14 Oct 2026
 - **Blocks publishing:** yes, for 8.1.0 (8.1.1 and 8.1.2 are published)

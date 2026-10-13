@@ -747,6 +747,46 @@ pages were Instream's own. About 900 are other products' guides its TOC never li
 
 ---
 
+### Phase 52: Letter Case the Source Gets Wrong — **Proposed 2026-10-14**
+
+**Why.** Two failures from the 2026-10-14 run of the Flogo, BusinessWorks, Fulfillment and
+MFT families, both about names that differ only in letter case:
+
+1. **Product and Service Catalog 5.1.0 publishes 399 broken images.** Its topics link
+   `html-opd/...` and the folder is `html-OPD/`. Windows resolves it, and AEM, on Linux,
+   will 404. `validate` reports each one as an error. `design.md` §6.4 step 6 chose to
+   check and not correct case, because the corpus held 14 such references. One version
+   now holds 399.
+2. **MFT Platform Server for z/Linux 8.1.0 is refused at extract.** The ZIP holds
+   `SourceSansPro-Regular.otf` and `sourcesanspro-regular.otf` in one folder, which
+   Windows writes to one file. Extract refuses any such package, by design, so nothing
+   is guessed.
+
+#### Decisions
+
+| decision | choice | why |
+|---|---|---|
+| **An asset reference spelled in the wrong case** | Emit the file's on-disk spelling, as page links already do (R5-06), and copy the file under that spelling. Still counted, now as corrected | The page-link rule is the same problem, already solved. Uncorrected, the link breaks on publish |
+| **Two ZIP members that differ only in case** | Extract keeps one when the two are byte-identical, or when both sit under a skin path (`Resources/Stylesheets`, `Skins`, …) that is never published. Any other pair still refuses the package | Neither case loses content. Anything else is a real choice between two files, and stays a human's |
+| **Reporting** | A new note for each tolerated pair, naming both members and which was kept | Nothing silent |
+
+#### Steps
+
+1. `transforms/assets.py`: on a case mismatch, emit and copy under the on-disk spelling
+   from `_case_differs`' listing walk; keep the count. Update `design.md` §6.4 step 6.
+2. `extractor/`: on a case-only clash, compare the two members (CRC and size from the ZIP
+   directory); keep the first if identical or both skin, record the note, and otherwise
+   refuse as today.
+3. Tests for each rule, including the refusal that remains.
+4. Runs (handed over 2026-10-14): `extract --force` for z/Linux 8.1.0, then convert,
+   reframe and sync it; `convert --force`, reframe and sync for Product and Service
+   Catalog 5.1.0. Then `validate`.
+
+*Exit: PSC 5.1.0 validates with no image errors; z/Linux 8.1.0 publishes; `ruff` and the
+suite pass.*
+
+---
+
 ## Carried-Forward Open Items
 
 Technical items a finished phase recorded as *open, not fixed*. Product-level issues
