@@ -1,6 +1,6 @@
 # Jira Tracking — What Is Logged in DOCOPS
 
-> **Last reconciled:** 2026-10-12, against Jira and `config/versions.csv`.
+> **Last reconciled:** 2026-10-13, against Jira and `config/versions.csv`.
 > Conventions (site, cloud ID, story points, transitions, who owns what) live in
 > `C:\github\confluence-mcp\reports\docushift-claude-atlassian-context.md`; this file
 > does not repeat them. It answers one question: **is this piece of work in Jira, and where?**
@@ -23,12 +23,15 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | Family review finished | DOCOPS-120 → Done, then DOCOPS-130 |
 | Edit to DOCOPS-217 is allowed (blocked by a permission check on 2026-10-09) | DOCOPS-217: append the 2026-10-09 publish note → Done |
 | A follow-up from the BusinessConnect warnings is planned | DOCOPS-220 → In Progress |
-| Foresight run (2026-10-13) is logged | Sub-task under DOCOPS-7 like DOCOPS-223: 33 of 39 published, Instream 9.2–9.4 and Transaction Insight 5.4–6.0 held; DOCOPS-120 comment: HIPAA Validator Desktop 9.0.0–9.2.0 made eligible |
+| Instream 9.2–9.4 and Transaction Insight 5.4–6.0 fixed and published | New sub-task under DOCOPS-7 linking DOCOPS-228 (Done, no reopen) |
 | A new phase is opened | One sub-task under the matching story, In Progress, no `retro` |
 
 **Left alone on purpose:** DOCOPS-8 is a Task where its siblings are Stories.
 
 **Log** (newest first, one line per session):
+
+- 2026-10-13 — Foresight run logged as DOCOPS-228 (Done, 0.5 SP, under DOCOPS-7): 33 of 39
+  published, 6 held; DOCOPS-120 progress comment: HIPAA Validator Desktop 9.0.0–9.2.0 eligible.
 
 - 2026-10-12 — EMS, FTL and Messaging run logged as DOCOPS-223 (Done, 0.5 SP, under DOCOPS-7):
   39 of 44 published; 7 leftover issues in docs/open-issues.md.
