@@ -500,7 +500,7 @@ class DocumentConverter:
         # output root publishes at the version root, and that cannot be known
         # while the list is still a generator.
         work = list(handler.units(context))
-        context.subtrees = subtree_names(tree, work, version.engine)
+        context.subtrees = subtree_names(tree, handler.naming_roots(work), version.engine)
         self._exclude_foreign(context, work)
         # A root located and deliberately not converted (a localized build,
         # R5-01, or another engine's unit, R4-02) publishes no topic, so its help

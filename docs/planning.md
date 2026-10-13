@@ -633,11 +633,16 @@ identical trees; `ruff` and the test suite pass.*
 
 ---
 
-### Phase 51: A Merged Help System's Guides Are in Its Subsystems' TOCs — **Proposed 2026-10-13**
+### Phase 51: A Merged Help System's Guides Are in Its Subsystems' TOCs — **Built 2026-10-13; runs pending**
 
 **Why.** The Foresight run (2026-10-13, DOCOPS-228) held back Instream 9.2–9.4 and
-Transaction Insight 5.4–6.0: 89–98% and 50–78% of their pages landed in `unfiled/`, which AEM
-does not publish. Instream 9.4.0 would publish about 170 pages, without its user guides.
+Transaction Insight 5.4–6.0, on a reading of the *reframed* trees: 89–98% and 50–78% of their
+pages in `unfiled/`. That overstated it. Merging packs listed topics into few pages and leaves
+each orphan as its own page. **Corrected, measured on the converted trees:** Instream 9.4.0's
+navigation had 778 entries, 394 of them from the subsystems' copies, which are the older 9.3.0
+build. They were appended at the end as 14 sections all titled "TIBCO Foresight® Instream®",
+while the master's current pages sat in `unfiled/`. Transaction Insight lost nothing: 821
+entries, 26% unfiled, and its subsystems are separate guides.
 
 **Cause, read 2026-10-13.** These are Flare runtime-merged outputs. The master's
 `Data/HelpSystem.xml` lists its subsystems in `<Subsystems><Url Source=…mcwebhelp TocPath="">`,
@@ -655,8 +660,8 @@ place a subsystem through a `.flprj` node, in two shapes.
 
 | shape | versions | today |
 |---|---|---|
-| **Shared library**: the subsystem TOC lists a few of its pages; the guides live in the master (Instream: 3–228 of 467 listed, 362 also in the master) | Instream 9.3.0, 9.4.0; Transaction Insight 5.5.0, 6.0.0 | 50–90% of topics unfiled; held |
-| **Self-contained**: the subsystem TOC lists nearly all its own pages, none shared (Control Plane 1.17.0: 25–63 of 29–70 listed, 0 shared) | ibi FOCUS 9.3.4–9.3.8 (published); Control Plane 1.3.0–1.17.0, TIBCO Platform 1.1.0, Platform CLI 1.2.0, iProcess Engine 11.9.0–11.10.0 (all not started) | Every page converts, as the subsystem's own unit; only its place in the master's navigation is lost |
+| **Shared library**: the subsystem TOC lists a few of its pages; the guides live in the master (Instream: 3–228 of 467 listed, 362 also in the master) | Instream 9.3.0, 9.4.0 | 90% of topics unfiled; half the navigation from the stale copies; held |
+| **Self-contained**: the subsystem TOC lists nearly all its own pages, none shared (Control Plane 1.17.0: 25–63 of 29–70 listed, 0 shared) | Transaction Insight 5.5.0, 6.0.0 (held); ibi FOCUS 9.3.4–9.3.8 (published); Control Plane 1.3.0–1.17.0, TIBCO Platform 1.1.0, Platform CLI 1.2.0, iProcess Engine 11.9.0–11.10.0 (all not started) | Every page converts, as the subsystem's own unit; only its place in the master's navigation is lost |
 
 No version published before this run lost pages to this cause. **Instream 9.2.0 and Transaction
 Insight 5.4.0 are not merged.** Their unfiled guides (analyzer-user-guide, SE-user-guide, …) are
@@ -696,9 +701,41 @@ named by no TOC at all, so this phase does not change them; see step 6.
 7. Runs (the user): `convert --force`, `reframe` and `sync` for Instream 9.3.0 and 9.4.0 and
    Transaction Insight 5.5.0 and 6.0.0; then `validate`, checked read-only.
 
-*Exit: the four versions publish with under 15% of pages unfiled, each guide once; ibi FOCUS
-9.3.4–9.3.8 keep every page; `ruff` and the test suite pass; DOCOPS gets a new sub-task
-linking DOCOPS-228.*
+*Exit: every TOC entry of the four versions resolves to the master's current page, each guide
+once; ibi FOCUS 9.3.4–9.3.8 keep every page and URL; `ruff` and the test suite pass; DOCOPS
+gets a new sub-task linking DOCOPS-228. (Was "under 15% unfiled", which assumed the unfiled
+pages were Instream's own. About 900 are other products' guides its TOC never lists.)*
+
+#### As built (2026-10-13)
+
+- Steps 1–6 done. `TocNode.merge` and `Manifest.subsystems` in `flare_toc.py`. In `flare.py`,
+  `_merged_subsystems` finds each subsystem a master's TOC places, `units()` drops it, and
+  `_spliced` / `_rerooted` splice its TOC in. A new `naming_roots` hook (`base.py`, used by
+  the driver) keeps subtree names computed over all roots, so no URL moves.
+- Two rules found on real trees that the plan did not have. **Grouping:** a merge node that
+  is the only child of a labelled entry is replaced by the subsystem's entries (Instream).
+  One with siblings keeps several entries under its own label (ibi FOCUS HTML5 Charts:
+  18 entries). **Repeated unlisted pages:** an unlisted subsystem page an earlier subsystem
+  already holds is skipped. Instream's 13 subsystems repeat 87 stale pages each.
+- Trials in a scratch workspace (`--root`, so nothing reached `cache/state.db`; plain
+  `convert --input` records against the catalog row and is not safe for this):
+  - Instream 9.4.0: 8,094 to 1,748 topics, 764 entries, 1 dropped node.
+  - Instream 9.3.0: 8,381 to 1,845 topics.
+  - Transaction Insight 6.0.0: 1,117 to 1,093 topics.
+  - Transaction Insight 5.5.0: 1,315 to 1,200 topics.
+  - ibi FOCUS 9.3.8: every URL kept except 4 function pages (HEXTR, HMASK, MIRR, XIRR),
+    whose subsystem copy is dropped for the master's. The 2 legacy `unfiled.md` pages are
+    also gone, and HTML5 Charts sits in place.
+  - Control Plane 1.17.0 (from the cache): the capability guides sit under "Managing
+    Capabilities".
+- Step 6: Instream 9.2.0's unlisted pages are the same other-product guides; publish. In
+  Transaction Insight 5.4.0 the release notes (also a PDF) and a 43-page hotfix addendum are
+  in no TOC and linked from nowhere; publish, with the addendum recorded in `open-issues.md`.
+- Full suite: 2,219 passed. One failure is not from this phase:
+  `test_the_shipped_report_retires_the_measured_set` expects 115 retired, and the catalog now
+  gives 112 after the 2026-10-12 ineligibility commits. It fails at HEAD too, and needs a
+  re-baseline.
+- Step 7, and re-converting ibi FOCUS 9.3.4–9.3.8 under this rule, are the user's runs.
 
 ---
 

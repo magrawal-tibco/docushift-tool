@@ -42,10 +42,14 @@ _DEFINE = re.compile(r"\bdefine\s*\(")
 
 @dataclass(frozen=True)
 class Manifest:
-    """What `Data/HelpSystem.xml` declares. Attributes only -- the skin is chrome."""
+    """What `Data/HelpSystem.xml` declares. Attributes, and the subsystem list."""
 
     toc: str = ""
     default_url: str = ""
+    # Phase 51: the directory of each `<Subsystems><Url Source=...mcwebhelp>`, in
+    # document order. A TOC node's `m` indexes this list -- the runtime merge
+    # Instream 9.4.0 places its 14 guides through.
+    subsystems: tuple[str, ...] = ()
 
 
 def read_manifest(root: Path) -> Manifest | None:
@@ -58,6 +62,11 @@ def read_manifest(root: Path) -> Manifest | None:
     return Manifest(
         toc=_slashed(element.get("Toc", "")),
         default_url=_slashed(element.get("DefaultUrl", "")),
+        subsystems=tuple(
+            _slashed(source).rpartition("/")[0]
+            for source in (url.get("Source", "") for url in element.iter("Url"))
+            if source.lower().endswith(".mcwebhelp")
+        ),
     )
 
 
@@ -88,6 +97,9 @@ class Entry:
 class TocNode:
     entry: Entry
     children: list["TocNode"] = field(default_factory=list)
+    # The node's `m`: which `Manifest.subsystems` entry a `.flprj` insertion
+    # point merges in. None on every other node (Phase 51).
+    merge: int | None = None
 
 
 @dataclass
@@ -231,7 +243,9 @@ def _node(raw: Any, index: dict[int, Entry], toc: Toc) -> TocNode | None:
         toc.unmatched += 1
         entry = Entry()
     children = [node for node in (_node(child, index, toc) for child in _listed(raw.get("n"))) if node]
-    return TocNode(entry=entry, children=children)
+    merge = raw.get("m")
+    return TocNode(entry=entry, children=children,
+                   merge=merge if isinstance(merge, int) and not isinstance(merge, bool) else None)
 
 
 # -- the literal reader --------------------------------------------------------

@@ -445,6 +445,15 @@ class BaseEngine(ABC):
         roots = list(context.output_roots) or find_output_roots(context.tree, self.engine)
         return _without_localized(context, roots)
 
+    def naming_roots(self, work: list[Path]) -> list[Path]:
+        """The roots the units' subtree names are computed over: `work`, by default.
+
+        Flare adds the subsystems it folds into their master (Phase 51), so that
+        a master keeps the name it had as one root of several and no published
+        URL moves.
+        """
+        return work
+
     @abstractmethod
     def convert_unit(self, context: ConversionContext, root: Path) -> Unit:
         """Converts one unit. Never raises -- a failure is a reported outcome."""

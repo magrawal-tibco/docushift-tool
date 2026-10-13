@@ -1497,6 +1497,127 @@ def test_a_merged_project_node_is_named_for_what_it_is(tmp_path: Path) -> None:
     assert result.codes()["NAV_NODE_DROPPED"] == 1
 
 
+# -- Phase 51: a runtime-merged help system -------------------------------------
+
+
+def merged_manifest(*subsystems: str) -> str:
+    """A master's `HelpSystem.xml`, listing the subsystems its TOC merges in."""
+    urls = "".join(f'<Url Source="{s}/{s.rsplit("/", 1)[-1]}.mcwebhelp" TocPath="" />'
+                   for s in subsystems)
+    return (
+        '<?xml version="1.0" encoding="utf-8"?>\n'
+        '<CatapultHelpSystem Toc="Data/Tocs/Default.js" DefaultUrl="">'
+        f"<Subsystems>{urls}</Subsystems></CatapultHelpSystem>\n"
+    )
+
+
+def merged_tree(master_merge: list) -> dict[str, str]:
+    """Instream 9.4.0 in miniature: a master and two subsystems.
+
+    `rules` is the shared-library shape -- its TOC lists a page whose current copy
+    is the master's, and it repeats an unlisted stale page. `extra` is the
+    self-contained shape (Control Plane): its pages are its own.
+    """
+    files = {
+        "html/Data/HelpSystem.xml": merged_manifest("Subsystems/rules", "Subsystems/extra"),
+        "html/Content/intro.htm": topic("Intro", (
+            "<p><a href='../Subsystems/rules/rules/a.htm'>Copy</a></p>"
+        )),
+        "html/rules/a.htm": topic("Rule A", "<p>Current build.</p>"),
+        "html/Subsystems/rules/Data/HelpSystem.xml": manifest(),
+        "html/Subsystems/rules/rules/a.htm": topic("Rule A", "<p>Older build.</p>"),
+        "html/Subsystems/rules/stale/old.htm": topic("Old"),
+        "html/Subsystems/extra/Data/HelpSystem.xml": manifest(),
+        "html/Subsystems/extra/extra/only.htm": topic("Only here"),
+        "html/Subsystems/extra/extra/two.htm": topic("Two"),
+        "html/Subsystems/extra/stale/old.htm": topic("Old"),
+    }
+    files.update({f"html/{k}": v for k, v in toc_files(
+        master_merge,
+        {"Content/intro.htm": {"i": [1], "t": ["Intro"], "b": [""]},
+         "___": {"i": [2], "t": ["Business Rules"], "b": [""]},
+         "/../../../../shared/shared.flprj": {"i": [3, 4], "t": ["rules", "Extras"], "b": ["", ""]}},
+    ).items()})
+    files.update({f"html/Subsystems/rules/{k}": v for k, v in toc_files(
+        [{"i": 1}], {"/rules/a.htm": {"i": [1], "t": ["Rule A"], "b": [""]}},
+    ).items()})
+    files.update({f"html/Subsystems/extra/{k}": v for k, v in toc_files(
+        [{"i": 1}, {"i": 2}],
+        {"/extra/only.htm": {"i": [1], "t": ["Only here"], "b": [""]},
+         "/extra/two.htm": {"i": [2], "t": ["Two"], "b": [""]}},
+    ).items()})
+    return files
+
+
+def test_the_manifest_lists_its_subsystems_and_a_node_keeps_its_merge_index(tmp_path: Path) -> None:
+    """`<Subsystems><Url Source>` in document order; `m` indexes it."""
+    build(tmp_path, {"Data/HelpSystem.xml": merged_manifest("Subsystems/a", "Subsystems/b"),
+                     **toc_files([{"i": 1, "m": 1}, {"i": 2}],
+                                 {"/x/p.flprj": {"i": [1], "t": ["P"], "b": [""]},
+                                  "Content/q.htm": {"i": [2], "t": ["Q"], "b": [""]}})})
+
+    found = read_manifest(tmp_path)
+    nodes = read_toc(tmp_path / "Data/Tocs/Default.js").nodes
+
+    assert found is not None and found.subsystems == ("Subsystems/a", "Subsystems/b")
+    assert [(node.entry.project, node.merge) for node in nodes] == [("p", 1), ("", None)]
+
+
+def test_a_merged_subsystem_s_toc_is_spliced_in_where_the_master_places_it(tmp_path: Path) -> None:
+    """Instream 9.4.0: 14 merge nodes dropped left 97% of the pages unfiled."""
+    result = run(tmp_path, merged_tree(
+        [{"i": 1}, {"i": 2, "n": [{"i": 3, "m": 0}]}, {"i": 4, "m": 1}],
+    ))
+
+    # One unit: a merged subsystem is part of its master, never its own.
+    assert len(result.units) == 1
+    nav = result.unit.nav
+    assert [node.label for node in nav[:3]] == ["Intro", "Business Rules", "Extras"]
+    # The only child of a labelled node: the merge label `rules` is never shown.
+    assert [(c.label, str(c.document)) for c in nav[1].children] == [("Rule A", "rules/a.md")]
+    # Several entries beside siblings stay together under the merge label.
+    assert [(c.label, str(c.document)) for c in nav[2].children] == [
+        ("Only here", "Subsystems/extra/extra/only.md"),
+        ("Two", "Subsystems/extra/extra/two.md"),
+    ]
+    assert "TOC_SUBPROJECT_UNPLACED" not in result.codes()
+
+
+def test_a_subsystem_copy_of_a_master_page_is_not_converted(tmp_path: Path) -> None:
+    """Every Instream subsystem copy is an older build of the master's page.
+
+    An unlisted page several subsystems repeat converts once, as an orphan."""
+    result = run(tmp_path, merged_tree(
+        [{"i": 1}, {"i": 2, "n": [{"i": 3, "m": 0}]}, {"i": 4, "m": 1}],
+    ))
+
+    assert "Current build." in result.body("rules/a.md")
+    converted = sorted(str(d.relative) for d in result.unit.documents)
+    assert "Subsystems/rules/rules/a.md" not in converted
+    assert [p for p in converted if p.endswith("stale/old.md")] == ["Subsystems/extra/stale/old.md"]
+    assert result.unit.skipped["merged-subsystem-copy"] == 2
+
+
+def test_a_link_into_a_subsystem_copy_reaches_the_master_page(tmp_path: Path) -> None:
+    result = run(tmp_path, merged_tree(
+        [{"i": 1}, {"i": 2, "n": [{"i": 3, "m": 0}]}, {"i": 4, "m": 1}],
+    ))
+
+    assert "[Copy](../rules/a.md)" in result.body("Content/intro.md")
+    assert "TOPIC_LINK_DANGLING" not in result.codes()
+
+
+def test_a_merge_node_naming_no_shipped_subsystem_stays_unplaced(tmp_path: Path) -> None:
+    """An `m` out of range: nothing to splice, so today's report, and the
+    subsystem roots still convert as units of their own."""
+    result = run(tmp_path, merged_tree(
+        [{"i": 1}, {"i": 2, "n": [{"i": 3, "m": 5}]}, {"i": 4}],
+    ))
+
+    assert len(result.units) == 3
+    assert result.codes()["TOC_SUBPROJECT_UNPLACED"] == 2
+
+
 def test_a_container_pointing_at_its_own_child_s_page_keeps_the_topic_once(
     tmp_path: Path,
 ) -> None:

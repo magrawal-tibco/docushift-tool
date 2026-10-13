@@ -43,7 +43,7 @@ import os
 import re
 import warnings
 from collections import Counter
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from pathlib import Path, PurePosixPath
 
 from bs4 import BeautifulSoup, Tag, XMLParsedAsHTMLWarning
@@ -63,7 +63,15 @@ from docushift.engines.base import (
     is_whats_new,
     register,
 )
-from docushift.engines.flare_toc import Manifest, Toc, TocNode, read_manifest, read_toc, tree_files
+from docushift.engines.flare_toc import (
+    Entry,
+    Manifest,
+    Toc,
+    TocNode,
+    read_manifest,
+    read_toc,
+    tree_files,
+)
 from docushift.engines.roots import find_output_roots, owning_root
 from docushift.models import SourceEngine
 from docushift.transforms import callouts, deflists, headings, links, markdown
@@ -420,6 +428,9 @@ class FlareEngine(BaseEngine):
         self._dropped = 0
         # `.flprj` insertion points dropped from the TOC, as "label (project)".
         self._subprojects: list[str] = []
+        # Phase 51: each subsystem root a master's TOC merges in, mapped to that
+        # master. Converted as part of the master, never as a unit of its own.
+        self._merged: dict[Path, Path] = {}
         # Every unit of the version, and each one's plan once something has asked
         # for it -- its own conversion, or a link from another root into it
         # (Phase 34, R5-08). Planned once either way, so its findings are too.
@@ -432,6 +443,8 @@ class FlareEngine(BaseEngine):
 
     def units(self, context: ConversionContext) -> list[Path]:
         roots = super().units(context)
+        self._merged = _merged_subsystems(roots)
+        roots = [root for root in roots if root not in self._merged]
         self._roots = list(roots)
         if not roots:
             # The 5 partial outputs: MadCap topics, no runtime manifest, so no TOC,
@@ -441,6 +454,9 @@ class FlareEngine(BaseEngine):
                 message="Flare tree with no Data/HelpSystem.xml -- partial output, not converted",
             )
         return roots
+
+    def naming_roots(self, work: list[Path]) -> list[Path]:
+        return [*work, *self._merged]
 
     # -- one output root -------------------------------------------------------
 
@@ -522,6 +538,10 @@ class FlareEngine(BaseEngine):
                            message="Data/HelpSystem.xml did not parse; no declared TOC, no landing page")
             manifest = Manifest()
         tocs = self._tocs(context, unit, root, manifest)
+        merged = self._merged_into(root)
+        if merged:
+            for toc in tocs:
+                toc.nodes = self._spliced(root, manifest, toc.nodes)
         referenced = {
             node.entry.path.lower()
             for toc in tocs for node in toc.walk() if node.entry.path
@@ -543,6 +563,16 @@ class FlareEngine(BaseEngine):
         planned = {name.lower(): name for name in topics}
         if landing:
             planned[landing.lower()] = landing
+        if merged:
+            # A link into a subsystem's copy of a master page reaches the master
+            # page -- the copy is not converted. A page the subsystem alone holds
+            # keeps its own key, which `setdefault` leaves in place.
+            prefixes = [f"{_inside(root, other).lower()}/" for other in merged]
+            own = [(key, name) for key, name in planned.items()
+                   if not any(key.startswith(prefix) for prefix in prefixes)]
+            for prefix in prefixes:
+                for key, name in own:
+                    planned.setdefault(prefix + key, name)
         return _Plan(tocs=tocs, landing=landing, topics=topics,
                      whats_new=whats_new, placeholder=placeholder, planned=planned)
 
@@ -612,6 +642,35 @@ class FlareEngine(BaseEngine):
             tocs.append(toc)
         return tocs
 
+    def _merged_into(self, root: Path) -> list[Path]:
+        """The subsystem roots `root`'s TOC merges in, sorted (Phase 51)."""
+        return sorted(other for other, master in self._merged.items() if master == root)
+
+    def _spliced(self, root: Path, manifest: Manifest, nodes: list[TocNode]) -> list[TocNode]:
+        """`nodes`, with each merge node replaced by its subsystem's TOC.
+
+        The node is where the subsystem's top-level entries go. Where it is the
+        only child of a labelled node -- each of Instream's 14 sits under its
+        guide's title -- they go in as that node's children and the merge label
+        (`business-rules`, `apf (Master)`) is never shown. Where it has siblings,
+        several entries are kept together under it: ibi FOCUS places its 18-entry
+        HTML5 Charts guide among 16 other guides. A merge node whose subsystem
+        was not found stays, and is reported as unplaced as before.
+        """
+        out: list[TocNode] = []
+        for node in nodes:
+            other = _merge_target(root, manifest, node)
+            if other is not None and self._merged.get(other) == root:
+                spliced = _rerooted(root, other, _subsystem_nodes(other))
+                if len(spliced) > 1 and len(nodes) > 1 and node.entry.label:
+                    out.append(TocNode(entry=Entry(label=node.entry.label), children=spliced))
+                else:
+                    out.extend(spliced)
+                continue
+            node.children = self._spliced(root, manifest, node.children)
+            out.append(node)
+        return out
+
     def _topics(self, context: ConversionContext, unit: Unit, root: Path,
                 referenced: set[str], landing: str, placeholder: str = "") -> list[str]:
         """Every HTML file under `root` that is a topic, root-relative and sorted.
@@ -621,11 +680,21 @@ class FlareEngine(BaseEngine):
         files and the 8,004-file `ja` tree, and each of those numbers is a claim
         the report has to be able to make.
         """
+        merged = self._merged_into(root)
         nested = [
             other for other in (context.output_roots or find_output_roots(context.tree, self.engine))
-            if other != root and root in other.parents
+            if other != root and root in other.parents and other not in merged
         ]
         stubs = _project_stubs(root)
+        # Each merged subsystem is read as the root it was built as: its own
+        # stubs, its own `_templates/`, and the TOC entries that point into it.
+        inner = {
+            other: (_project_stubs(other), {
+                key[len(prefix):] for key in referenced if key.startswith(prefix)
+            })
+            for other in merged
+            for prefix in (f"{_inside(root, other).lower()}/",)
+        }
         # Another engine's unit inside this root -- BusinessConnect 7.4.0's WebWorks
         # book -- is the driver's to name, once (Phase 34, R4-02); fed to this
         # engine it was ~80 `CONTENT_MISSING` lines, one per page.
@@ -644,8 +713,25 @@ class FlareEngine(BaseEngine):
             if any(other in path.parents for other in foreign):
                 unit.skip("other-engine-root")
                 continue
-            reason = self._rejection(path, relative, nested, context.api_roots,
-                                     referenced, placeholder, stubs)
+            holder = next((other for other in merged if other in path.parents), None)
+            if holder is not None:
+                own = PurePosixPath(path.relative_to(holder).as_posix())
+                if long_path(root / Path(*own.parts)).is_file() or (
+                    str(own).lower() not in inner[holder][1]
+                    and any(long_path(other / Path(*own.parts)).is_file()
+                            for other in merged[:merged.index(holder)])
+                ):
+                    # The master ships the same page -- in Instream 9.4.0 every
+                    # subsystem copy is an older build (9.3.0) of the master's --
+                    # or an earlier subsystem already holds this unlisted one:
+                    # Instream's 13 subsystems repeat 87 stale pages each.
+                    unit.skip("merged-subsystem-copy")
+                    continue
+                reason = self._rejection(path, own, [], context.api_roots,
+                                         inner[holder][1], "", inner[holder][0])
+            else:
+                reason = self._rejection(path, relative, nested, context.api_roots,
+                                         referenced, placeholder, stubs)
             if reason:
                 unit.skip(reason)
                 continue
@@ -915,10 +1001,9 @@ class FlareEngine(BaseEngine):
                                    "(same page)")
         if self._subprojects:
             # Counted apart from the drops above, because the cause is not a
-            # missing page: the sub-project converts as a unit of its own (or is
-            # not in this version) and only its place in this TOC is lost. The
-            # file names do not match the unit names -- `control-tower.flprj` is
-            # `Subsystems/platform-ct` -- so placing it is not attempted here.
+            # missing page: the node names no `<Subsystems>` entry this version
+            # ships, so there is nothing to splice in. Every node that does is
+            # placed by `_spliced` (Phase 51) and never reaches here.
             context.record("TOC_SUBPROJECT_UNPLACED", path=unit.name, count=len(self._subprojects),
                            message="merged-project TOC node(s) not placed: "
                                    + "; ".join(self._subprojects))
@@ -1390,6 +1475,67 @@ def _span(cell: Tag) -> int:
 
 
 # -- small readers -------------------------------------------------------------
+
+
+def _merged_subsystems(roots: list[Path]) -> dict[Path, Path]:
+    """Each subsystem root a master's TOC merges in, mapped to that master.
+
+    Phase 51. A merge node is a `.flprj` key whose tree node carries `m`, the
+    index into the master's `<Subsystems>` list. Measured over the html-to-md
+    cache on 2026-10-13: 31 roots, every one with `m`. Only a subsystem that is
+    itself an output root of this version is taken; anything else stays a node
+    that cannot be placed.
+    """
+    known = set(roots)
+    merged: dict[Path, Path] = {}
+    for root in roots:
+        manifest = read_manifest(root)
+        if manifest is None or not manifest.subsystems:
+            continue
+        for path in tree_files(root):
+            for node in read_toc(path).walk():
+                other = _merge_target(root, manifest, node)
+                if other is not None and other in known and other != root:
+                    merged.setdefault(other, root)
+    return merged
+
+
+def _merge_target(root: Path, manifest: Manifest, node: TocNode) -> Path | None:
+    """The subsystem root a merge node names, or None when it is not one."""
+    if not node.entry.project or node.merge is None:
+        return None
+    if not 0 <= node.merge < len(manifest.subsystems):
+        return None
+    return root / Path(*PurePosixPath(manifest.subsystems[node.merge]).parts)
+
+
+def _subsystem_nodes(root: Path) -> list[TocNode]:
+    """A subsystem's TOC: its declared tree first, then any other, as in `_tocs`."""
+    manifest = read_manifest(root) or Manifest()
+    declared = root / Path(*PurePosixPath(manifest.toc).parts) if manifest.toc else None
+    ordered = [declared] if declared is not None else []
+    ordered += [path for path in tree_files(root) if path != declared]
+    nodes: list[TocNode] = []
+    for path in ordered:
+        toc = read_toc(path)
+        if toc.readable:
+            nodes.extend(toc.nodes)
+    return nodes
+
+
+def _rerooted(root: Path, subsystem: Path, nodes: list[TocNode]) -> list[TocNode]:
+    """Subsystem TOC entries as paths in the master: the master's copy if it has one."""
+    prefix = _inside(root, subsystem)
+    for node in nodes:
+        path = node.entry.path
+        if path and not long_path(root / Path(*PurePosixPath(path).parts)).is_file():
+            node.entry = replace(node.entry, path=f"{prefix}/{path}")
+        _rerooted(root, subsystem, node.children)
+    return nodes
+
+
+def _inside(root: Path, other: Path) -> str:
+    return other.relative_to(root).as_posix()
 
 
 def _project_stubs(root: Path) -> frozenset[str]:

@@ -815,6 +815,21 @@ links sampled were all made by mistake. Every such link is listed in that versio
 `convert` and `reframe`, and `validate` reports each one as a `LINK_TO_UNFILED` note. For a tree converted before this rule,
 `docushift convert --bu tibco --reshelve-orphans` moves them without re-converting.
 
+**A merged help system** (Phase 51) lists its subsystems in `Data/HelpSystem.xml` and
+places each one with a TOC node that points at a `.flprj`. The subsystem's TOC is spliced
+in at that node, and the subsystem is converted as part of its master rather than as an
+output root of its own. Each entry takes the master's copy of the page where the master
+ships one, and the subsystem's own page otherwise. A subsystem page the master also
+ships is skipped as `merged-subsystem-copy`, and so is an unlisted page an earlier
+subsystem already holds. A link into a skipped copy reaches the master's page. When the
+node is the only child of a labelled entry, the subsystem's entries become that entry's
+children. When it has siblings and several entries, they are grouped under the node's
+label. A node naming no subsystem the version ships is still dropped and reported as
+`TOC_SUBPROJECT_UNPLACED`. Subtree names are computed as if the subsystems were still
+roots, so a master keeps the URL it had. Measured 2026-10-13: Instream 9.4.0 goes from
+8,094 topics to 1,748. Its 764 navigation entries now point at the current build, where 394
+of the previous 778 pointed at the subsystems' 9.3.0 copies.
+
 **What a DITA version produces**, and how it differs. One output subtree per *doc-set* —
 a directory holding `GUID-*.html`, which sits at `html`, `doc/html`, `html_v3` or `en-US`
 depending on the product, and 23 of 319 versions ship several. Inside it the layout is

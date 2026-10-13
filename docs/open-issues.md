@@ -325,37 +325,83 @@ add the topics to the navigation or remove the links.
 
 ## Foresight Instream
 
-### 9.2.0, 9.3.0 and 9.4.0 held back: most of the content would be missing
+### 9.3.0 and 9.4.0 held back until they are re-run with the fix
 
-- **Status:** Open
+- **Status:** Fix built 13 Oct 2026; re-run pending
 - **Owner:** unassigned
 - **Raised:** 13 Oct 2026
-- **Blocks publishing:** yes, for these three versions (the PDF-only 9.1.0 and 9.0.0 are published)
+- **Blocks publishing:** yes, until the re-run (the PDF-only 9.1.0 and 9.0.0 are published)
 
-Instream's online help is one main help system that pulls in about a dozen smaller
-ones at the moment a reader opens it. The main table of contents lists only those
-smaller systems, not their pages, and the tool does not follow the reference into
-them. Everything inside them is therefore treated as outside the table of contents
-and left unpublished: 89–98% of the pages, including whole user guides. Published as
-is, 9.4.0 would show about 170 pages. In 9.4.0, each of the smaller systems also
-carries a near-complete copy of the guides, so the fix must avoid publishing the
-same page a dozen times. This is a tool change; it needs a plan before any work.
+Instream's online help is one main help system that pulls in 14 smaller ones. Each
+smaller one carries a copy of the guides from the previous release's build (the 9.4.0
+package's copies say 9.3.0). The tool converted each smaller system on its own and did
+not follow the main table of contents into them. So 394 of the 778 navigation entries
+came from those older copies, appended at the end as 14 sections all titled "TIBCO
+Foresight Instream", while the current pages sat outside the navigation. (The 13 Oct
+note that most of the content would be missing was wrong: it counted pages after
+merging.) The tool now follows the main table of contents. In a trial on 9.4.0, every
+guide sits under its own heading with the current text, and the older copies are not
+converted. About half the pages still sit outside the table of contents. These are
+guides for other Foresight products (Standards Editor, EDISIM tutorials, Analyzer,
+Comparator) that ship in Instream's package but that Instream's own table of contents
+never lists. That is correct, and they stay unpublished.
+
+### 9.2.0 can be published as it is
+
+- **Status:** Open; recommended to publish
+- **Owner:** unassigned
+- **Raised:** 13 Oct 2026
+- **Blocks publishing:** no
+
+9.2.0 is not built from smaller help systems. The pages it leaves out are the same
+other-product guides as in 9.4.0, which its table of contents never lists.
 
 ---
 
 ## Foresight Transaction Insight
 
-### 5.4.0, 5.5.0 and 6.0.0 held back: same cause as Instream
+### 5.5.0 and 6.0.0 held back; nothing was missing
 
-- **Status:** Open
+- **Status:** Fix built 13 Oct 2026; re-run pending
 - **Owner:** unassigned
 - **Raised:** 13 Oct 2026
-- **Blocks publishing:** yes, for all three versions
+- **Blocks publishing:** no (held on 13 Oct on a wrong reading; can publish either way)
 
-Built the same way as Instream: one main help system that pulls in the Archive and
-Retrieval System and Operational Monitor help. Half to three-quarters of the pages
-fall outside the table of contents and would not be published. The Instream fix
-covers this too.
+Built like Instream, but the two smaller help systems (Archive and Retrieval System,
+Operational Monitor) hold their own guides, not copies. They were converted and in the
+navigation all along: 821 entries before the fix, 819 after, with a quarter of pages
+outside the table of contents both times. The 13 Oct note that half to three-quarters
+would go unpublished was wrong: it counted pages after merging. The fix places the two
+guides where the main table of contents puts them, instead of at the end, and drops up
+to 115 duplicate pages.
+
+### 5.4.0: the hotfix addendum is not in the online help
+
+- **Status:** Open; recommended to publish without it
+- **Owner:** unassigned
+- **Raised:** 13 Oct 2026
+- **Blocks publishing:** no
+
+5.4.0 is not built from smaller help systems. Its table of contents does not list the
+release notes or the hotfix addendum (43 pages), and no other page links to them. The
+release notes also ship as a PDF, which is published. The hotfix addendum has no PDF,
+so it reaches readers only if someone decides to add it to the navigation by hand.
+
+---
+
+## BusinessWorks plug-ins
+
+### SAP BTP 6.0.0 and OData for SAP S/4HANA 6.3.0 and 6.4.0 lost their navigation
+
+- **Status:** Open; not investigated
+- **Owner:** unassigned
+- **Raised:** 13 Oct 2026
+- **Blocks publishing:** yes, for these three versions (not published; marked out of date)
+
+Converted on 7 Oct 2026, each came out with a table of contents of two entries (Home
+and What's New), and 96–97% of its pages fell outside it. The source table of contents
+in the docsite package is complete: 53 entries for SAP BTP 6.0.0. The extracted files
+are gone from this workspace, so finding the cause needs a fresh download.
 
 ---
 
