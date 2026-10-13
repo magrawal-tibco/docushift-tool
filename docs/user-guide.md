@@ -819,7 +819,8 @@ links sampled were all made by mistake. Every such link is listed in that versio
 places each one with a TOC node that points at a `.flprj`. The subsystem's TOC is spliced
 in at that node, and the subsystem is converted as part of its master rather than as an
 output root of its own. Each entry takes the master's copy of the page where the master
-ships one, and the subsystem's own page otherwise. A subsystem page the master also
+ships one, at the same path or under Flare's `_1` rename of it, and the subsystem's own
+page otherwise. A subsystem page the master also
 ships is skipped as `merged-subsystem-copy`, and so is an unlisted page an earlier
 subsystem already holds. A link into a skipped copy reaches the master's page. When the
 node is the only child of a labelled entry, the subsystem's entries become that entry's

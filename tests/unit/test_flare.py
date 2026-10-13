@@ -1607,6 +1607,22 @@ def test_a_link_into_a_subsystem_copy_reaches_the_master_page(tmp_path: Path) ->
     assert "TOPIC_LINK_DANGLING" not in result.codes()
 
 
+def test_a_subsystem_entry_takes_the_master_s_underscore_one_rename(tmp_path: Path) -> None:
+    """Instream 9.4.0: the master writes 68 Business Rules pages as `<stem>_1.htm`
+    while the subsystem's TOC still names `<stem>.htm`, an older build of it."""
+    files = merged_tree([{"i": 1}, {"i": 2, "n": [{"i": 3, "m": 0}]}, {"i": 4, "m": 1}])
+    files["html/rules/a_1.htm"] = files.pop("html/rules/a.htm")
+    files["html/Content/intro.htm"] = topic("Intro", "<p><a href='../Subsystems/rules/rules/a.htm'>Copy</a></p>")
+
+    result = run(tmp_path, files)
+
+    rules = result.unit.nav[1]
+    assert [(c.label, str(c.document)) for c in rules.children] == [("Rule A", "rules/a_1.md")]
+    assert "Current build." in result.body("rules/a_1.md")
+    assert "Subsystems/rules/rules/a.md" not in [str(d.relative) for d in result.unit.documents]
+    assert "[Copy](../rules/a_1.md)" in result.body("Content/intro.md")
+
+
 def test_a_merge_node_naming_no_shipped_subsystem_stays_unplaced(tmp_path: Path) -> None:
     """An `m` out of range: nothing to splice, so today's report, and the
     subsystem roots still convert as units of their own."""

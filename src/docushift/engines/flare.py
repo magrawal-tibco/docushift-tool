@@ -573,6 +573,9 @@ class FlareEngine(BaseEngine):
             for prefix in prefixes:
                 for key, name in own:
                     planned.setdefault(prefix + key, name)
+                    renamed = _RENAMED.match(key)
+                    if renamed:
+                        planned.setdefault(prefix + renamed.group(1) + renamed.group(2), name)
         return _Plan(tocs=tocs, landing=landing, topics=topics,
                      whats_new=whats_new, placeholder=placeholder, planned=planned)
 
@@ -716,15 +719,16 @@ class FlareEngine(BaseEngine):
             holder = next((other for other in merged if other in path.parents), None)
             if holder is not None:
                 own = PurePosixPath(path.relative_to(holder).as_posix())
-                if long_path(root / Path(*own.parts)).is_file() or (
+                if _master_copy(root, str(own)) or (
                     str(own).lower() not in inner[holder][1]
                     and any(long_path(other / Path(*own.parts)).is_file()
                             for other in merged[:merged.index(holder)])
                 ):
                     # The master ships the same page -- in Instream 9.4.0 every
-                    # subsystem copy is an older build (9.3.0) of the master's --
-                    # or an earlier subsystem already holds this unlisted one:
-                    # Instream's 13 subsystems repeat 87 stale pages each.
+                    # subsystem copy is an older build (9.3.0) of the master's,
+                    # 68 of them under Flare's `_1` rename -- or an earlier
+                    # subsystem already holds this unlisted one: Instream's 13
+                    # subsystems repeat 87 stale pages each.
                     unit.skip("merged-subsystem-copy")
                     continue
                 reason = self._rejection(path, own, [], context.api_roots,
@@ -1528,10 +1532,29 @@ def _rerooted(root: Path, subsystem: Path, nodes: list[TocNode]) -> list[TocNode
     prefix = _inside(root, subsystem)
     for node in nodes:
         path = node.entry.path
-        if path and not long_path(root / Path(*PurePosixPath(path).parts)).is_file():
-            node.entry = replace(node.entry, path=f"{prefix}/{path}")
+        if path:
+            node.entry = replace(node.entry, path=_master_copy(root, path) or f"{prefix}/{path}")
         _rerooted(root, subsystem, node.children)
     return nodes
+
+
+# Flare's answer to two merged topics with one file name: the later one is written
+# as `<stem>_1`. Instream 9.4.0's master holds 68 Business Rules pages that way
+# while its subsystem's TOC still names the plain file.
+_RENAMED = re.compile(r"^(.*)_1(\.[^./]+)$")
+
+
+def _master_copy(root: Path, path: str) -> str:
+    """The master's copy of a subsystem page, root-relative, or `""`.
+
+    The same path first, then Flare's `_1` rename of it.
+    """
+    candidate = PurePosixPath(path)
+    renamed = candidate.with_name(f"{candidate.stem}_1{candidate.suffix}")
+    for option in (candidate, renamed):
+        if long_path(root / Path(*option.parts)).is_file():
+            return str(option)
+    return ""
 
 
 def _inside(root: Path, other: Path) -> str:

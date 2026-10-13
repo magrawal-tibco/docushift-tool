@@ -735,6 +735,14 @@ pages were Instream's own. About 900 are other products' guides its TOC never li
   `test_the_shipped_report_retires_the_measured_set` expects 115 retired, and the catalog now
   gives 112 after the 2026-10-12 ineligibility commits. It fails at HEAD too, and needs a
   re-baseline.
+- **Flare's `_1` rename** (added after the first real re-run, 2026-10-13). Instream 9.4.0's
+  Business Rules guide still came from the subsystem: the master writes 68 of those pages as
+  `<stem>_1.htm`, and the subsystem's TOC names `<stem>.htm`. 64 of the pairs differ in text.
+  A subsystem page's master copy is now the same path or its `_1` rename. That is used for
+  the TOC entry, the copy skip and the link alias. With it, 11 of 764 entries still point
+  into a subsystem. About 9 of those have no master equivalent. 2 have master copies under
+  `_2` / `_3` and are deliberately not matched, because a higher number can be a different
+  topic with the same name. ibi FOCUS 9.3.8 and Control Plane 1.17.0 are unchanged by it.
 - Step 7, and re-converting ibi FOCUS 9.3.4–9.3.8 under this rule, are the user's runs.
 
 ---
