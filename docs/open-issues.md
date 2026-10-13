@@ -373,6 +373,86 @@ are gone from this workspace, so finding the cause needs a fresh download.
 
 ---
 
+## Flogo
+
+### 3.0.1 has no downloadable package
+
+- **Status:** Open
+- **Owner:** unassigned
+- **Raised:** 14 Oct 2026
+- **Blocks publishing:** yes, for 3.0.1
+
+The docsite's package link for 3.0.1 returns a web page instead of a ZIP, most often a
+sign-in or error page. The other five Flogo versions are published. A retry may work
+once the docsite is fixed; otherwise the package has to be obtained by hand.
+
+---
+
+## BusinessWorks
+
+### 6.12.0 and 6.13.0 online help blocked by over-long page names
+
+- **Status:** Fix in progress (shorter names, 14 Oct 2026)
+- **Owner:** unassigned
+- **Raised:** 14 Oct 2026
+- **Blocks publishing:** yes, for the online help (the PDFs are published)
+
+16 pages in 6.12.0 and 11 in 6.13.0 would have paths over Windows' 260-character
+limit in the publishing repository. The fix is the usual one: shorter page names.
+
+### Container Edition Buildpack for PCF 2.2.1 and FormBuilder 5.3.2 have no package
+
+- **Status:** Open
+- **Owner:** unassigned
+- **Raised:** 14 Oct 2026
+- **Blocks publishing:** yes, for these two versions
+
+As with Flogo 3.0.1, the docsite returns a web page instead of a ZIP.
+
+---
+
+## Fulfillment
+
+### Product and Service Catalog 5.1.0 online help blocked by over-long paths
+
+- **Status:** Fix in progress (shorter folder and page names, 14 Oct 2026)
+- **Owner:** unassigned
+- **Raised:** 14 Oct 2026
+- **Blocks publishing:** yes, for the online help
+
+15 pages are too long, up to 427 characters. Most of the length is in folder names that
+are themselves pages ("Import of TIBCO Product and Service Catalog Data", "Types of
+Import...", "Partial Import..."), so the folders have to be shortened as well as the
+pages under them.
+
+### Product and Service Inventory 2.1.0 has no package
+
+- **Status:** Open
+- **Owner:** unassigned
+- **Raised:** 14 Oct 2026
+- **Blocks publishing:** yes, for 2.1.0
+
+As with Flogo 3.0.1, the docsite returns a web page instead of a ZIP.
+
+---
+
+## Managed File Transfer
+
+### Platform Server for z/Linux 8.1.0 package cannot be unpacked on Windows
+
+- **Status:** Open; tool change proposed
+- **Owner:** unassigned
+- **Raised:** 14 Oct 2026
+- **Blocks publishing:** yes, for 8.1.0 (8.1.1 and 8.1.2 are published)
+
+The package holds two copies of one font file whose names differ only in capital
+letters (`SourceSansPro-Regular.otf` and `sourcesanspro-regular.otf`). Windows cannot
+store both, so the tool refuses the whole package rather than guess which to keep. The
+font is styling the tool never publishes, so the fix is to allow this one case: two files
+that differ only in capitals and that are byte-for-byte identical, or that are styling.
+
+---
+
 ## Everything, eventually
 
 ### Public web address for the new site not set
