@@ -23,12 +23,14 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | Family review finished | DOCOPS-120 → Done, then DOCOPS-130 |
 | Edit to DOCOPS-217 is allowed (blocked by a permission check on 2026-10-09) | DOCOPS-217: append the 2026-10-09 publish note → Done |
 | A follow-up from the BusinessConnect warnings is planned | DOCOPS-220 → In Progress |
-| Instream 9.2–9.4 and Transaction Insight 5.4–6.0 fixed and published | New sub-task under DOCOPS-7 linking DOCOPS-228 (Done, no reopen) |
 | A new phase is opened | One sub-task under the matching story, In Progress, no `retro` |
 
 **Left alone on purpose:** DOCOPS-8 is a Task where its siblings are Stories.
 
 **Log** (newest first, one line per session):
+
+- 2026-10-13 — Phase 51 and the 6 held Foresight versions logged as DOCOPS-229 (Done, 1 SP, under
+  DOCOPS-7); correction note on DOCOPS-228; DOCOPS-120 comment: older MFT versions ineligible (398d550).
 
 - 2026-10-13 — Foresight run logged as DOCOPS-228 (Done, 0.5 SP, under DOCOPS-7): 33 of 39
   published, 6 held; DOCOPS-120 progress comment: HIPAA Validator Desktop 9.0.0–9.2.0 eligible.
@@ -135,6 +137,7 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | 48 | Flogo connectors retired; VS Code extension to flogo | DOCOPS-206 |
 | 49 | Images too long to publish get a shorter name | DOCOPS-217 (in progress) |
 | 50 | Per-page names for a topic in two guides | DOCOPS-218 |
+| 51 | Merged Flare help systems: subsystem TOCs spliced into the master | DOCOPS-229 |
 
 Other logged work: Jira reconcile and this handoff DOCOPS-208; stakeholder status page DOCOPS-197; TIBCO family reassignments DOCOPS-120
 (in progress, progress kept as comments); ibi family regroup DOCOPS-207; catalog refresh and 2026-10-09 end-of-support report DOCOPS-215; cloud family run DOCOPS-222; EMS, FTL and Messaging run DOCOPS-223.
