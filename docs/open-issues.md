@@ -323,6 +323,42 @@ add the topics to the navigation or remove the links.
 
 ---
 
+## Foresight Instream
+
+### 9.2.0, 9.3.0 and 9.4.0 held back: most of the content would be missing
+
+- **Status:** Open
+- **Owner:** unassigned
+- **Raised:** 13 Oct 2026
+- **Blocks publishing:** yes, for these three versions (the PDF-only 9.1.0 and 9.0.0 are published)
+
+Instream's online help is one main help system that pulls in about a dozen smaller
+ones at the moment a reader opens it. The main table of contents lists only those
+smaller systems, not their pages, and the tool does not follow the reference into
+them. Everything inside them is therefore treated as outside the table of contents
+and left unpublished: 89–98% of the pages, including whole user guides. Published as
+is, 9.4.0 would show about 170 pages. In 9.4.0, each of the smaller systems also
+carries a near-complete copy of the guides, so the fix must avoid publishing the
+same page a dozen times. This is a tool change; it needs a plan before any work.
+
+---
+
+## Foresight Transaction Insight
+
+### 5.4.0, 5.5.0 and 6.0.0 held back: same cause as Instream
+
+- **Status:** Open
+- **Owner:** unassigned
+- **Raised:** 13 Oct 2026
+- **Blocks publishing:** yes, for all three versions
+
+Built the same way as Instream: one main help system that pulls in the Archive and
+Retrieval System and Operational Monitor help. Half to three-quarters of the pages
+fall outside the table of contents and would not be published. The Instream fix
+covers this too.
+
+---
+
 ## Everything, eventually
 
 ### Public web address for the new site not set

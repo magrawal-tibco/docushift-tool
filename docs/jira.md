@@ -23,6 +23,7 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | Family review finished | DOCOPS-120 → Done, then DOCOPS-130 |
 | Edit to DOCOPS-217 is allowed (blocked by a permission check on 2026-10-09) | DOCOPS-217: append the 2026-10-09 publish note → Done |
 | A follow-up from the BusinessConnect warnings is planned | DOCOPS-220 → In Progress |
+| Foresight run (2026-10-13) is logged | Sub-task under DOCOPS-7 like DOCOPS-223: 33 of 39 published, Instream 9.2–9.4 and Transaction Insight 5.4–6.0 held; DOCOPS-120 comment: HIPAA Validator Desktop 9.0.0–9.2.0 made eligible |
 | A new phase is opened | One sub-task under the matching story, In Progress, no `retro` |
 
 **Left alone on purpose:** DOCOPS-8 is a Task where its siblings are Stories.
