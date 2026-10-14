@@ -23,12 +23,14 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | Family review finished | DOCOPS-120 → Done, then DOCOPS-130 |
 | Edit to DOCOPS-217 is allowed (blocked by a permission check on 2026-10-09) | DOCOPS-217: append the 2026-10-09 publish note → Done |
 | A follow-up from the BusinessConnect warnings is planned | DOCOPS-220 → In Progress |
-| Phase 52 runs pass (PSC 5.1.0 validates clean, z/Linux 8.1.0 publishes) | DOCOPS-232 → Done |
 | A new phase is opened | One sub-task under the matching story, In Progress, no `retro` |
 
 **Left alone on purpose:** DOCOPS-8 is a Task where its siblings are Stories.
 
 **Log** (newest first, one line per session):
+
+- 2026-10-14 — DOCOPS-232 → Done: Phase 52 runs passed (PSC 5.1.0 0 image errors, z/Linux 8.1.0
+  published).
 
 - 2026-10-14 — Flogo, BusinessWorks, Fulfillment and MFT run logged as DOCOPS-231 (Done, 0.5 SP):
   38 of 43 published. Phase 52 opened as DOCOPS-232 (In Progress, 0.5 SP).
