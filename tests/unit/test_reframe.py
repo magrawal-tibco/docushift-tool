@@ -3097,6 +3097,24 @@ def test_an_asset_lands_in_a_lower_cased_folder_so_it_matches_the_page_tree():
     assert str(asset_destination(PurePosixPath("img/a.png"))) == "img/a.png"
 
 
+def test_an_asset_takes_the_spelling_of_a_page_folder_of_the_same_name():
+    """Phase 52. Product and Service Catalog 5.1.0: a carried legal page keeps
+    `html-OPD/_templates/`, so the tree holds `html-OPD/` before the copier writes
+    `html-opd/`. On Windows the copy lands in it and the link reads `html-opd/`;
+    published, 399 images 404. The page folder's spelling wins, for copy and link."""
+    from docushift.reframe.packer import asset_destination, page_folders
+
+    legal = Page(UNNAVIGATED, [Topic("Legal", PurePosixPath("html-OPD/_templates/legal.md"), 1)])
+    legal.path = PurePosixPath("html-OPD/_templates/legal.md")
+    folders = page_folders({legal.path: (legal, "")})
+
+    assert str(asset_destination(PurePosixPath("html-OPD/guide/a.png"), folders)) == (
+        "html-OPD/guide/a.png"
+    )
+    # A folder no page holds keeps the lower-cased rule.
+    assert str(asset_destination(PurePosixPath("Concepts/b.png"), folders)) == "concepts/b.png"
+
+
 def test_an_asset_link_is_written_against_where_the_asset_lands():
     """The copier and the rewriter through one function, because the whole
     failure was the two disagreeing."""

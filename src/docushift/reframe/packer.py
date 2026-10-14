@@ -869,7 +869,8 @@ def override(
     return applied, refused
 
 
-def asset_destination(source: PurePosixPath) -> PurePosixPath:
+def asset_destination(source: PurePosixPath,
+                      folders: dict[tuple[str, ...], tuple[str, ...]] | None = None) -> PurePosixPath:
     """Where an asset lands in the merged tree: lower-cased directories, same file.
 
     **A folder, not a file, is renamed here**, and only in case. §6.4's rule that
@@ -886,8 +887,31 @@ def asset_destination(source: PurePosixPath) -> PurePosixPath:
 
     One function, called by the copier and by `pages.rewrite_links`, because the
     whole failure was the two disagreeing.
+
+    **A page folder of the same name wins** (Phase 52). A page that keeps its
+    source folder -- a carried support or legal page -- can create `html-OPD/`
+    before the copier writes `html-opd/`. On Windows the copy lands in the
+    existing folder while the link reads `html-opd/`, and Product and Service
+    Catalog 5.1.0 published 399 broken images that way. `folders`, from
+    `page_folders`, gives the spelling the tree already holds.
     """
-    return PurePosixPath(*(part.lower() for part in source.parent.parts), source.name)
+    lowered = tuple(part.lower() for part in source.parent.parts)
+    if folders:
+        for length in range(len(lowered), 0, -1):
+            spelled = folders.get(lowered[:length])
+            if spelled is not None:
+                return PurePosixPath(*spelled, *lowered[length:], source.name)
+    return PurePosixPath(*lowered, source.name)
+
+
+def page_folders(located: dict[PurePosixPath, tuple[Page, str]]) -> dict[tuple[str, ...], tuple[str, ...]]:
+    """Every folder a page lands in, case-folded, mapped to its spelling (Phase 52)."""
+    folders: dict[tuple[str, ...], tuple[str, ...]] = {}
+    for page, _anchor in located.values():
+        parts = page.path.parent.parts
+        for length in range(1, len(parts) + 1):
+            folders.setdefault(tuple(part.lower() for part in parts[:length]), parts[:length])
+    return folders
 
 
 def shortened(pages: Sequence[Page]) -> set[PurePosixPath]:

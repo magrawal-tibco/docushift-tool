@@ -747,7 +747,7 @@ pages were Instream's own. About 900 are other products' guides its TOC never li
 
 ---
 
-### Phase 52: Letter Case the Source Gets Wrong — **Proposed 2026-10-14**
+### Phase 52: Letter Case the Source Gets Wrong — **Done 2026-10-14**
 
 **Why.** Two failures from the 2026-10-14 run of the Flogo, BusinessWorks, Fulfillment and
 MFT families, both about names that differ only in letter case:
@@ -784,6 +784,26 @@ MFT families, both about names that differ only in letter case:
 
 *Exit: PSC 5.1.0 validates with no image errors; z/Linux 8.1.0 publishes; `ruff` and the
 suite pass.*
+
+#### As built (2026-10-14)
+
+- **Extract** (`safe_unzip.py`, `unpacker.py`): a case-only pair with the same CRC-32 and
+  size writes once and records `ZIP_CASE_DUPLICATE_SKIPPED`. The skin half of the decision
+  was not built. The one package needing the rule has identical members, and letting
+  through two *different* files because of where they sit would choose content for a human.
+- **Convert** (`transforms/assets.py`): `_on_disk` returns the filesystem's spelling, and
+  the link and the copy use it.
+- **A second cause, found on the run.** After convert was fixed, the reframed pages still
+  read `html-opd/`. Reframe lower-cases every asset folder (`asset_destination`, the
+  ActiveSpaces fix), and a carried legal page had already created `html-OPD/` in the
+  staging tree, so on Windows the copy landed there. `page_folders` now maps each page
+  folder case-folded to its spelling, and `asset_destination` takes that spelling when an
+  asset's folder matches one. Both callers, the copier and `pages.rewrite_links`, get the
+  same map.
+- Runs: z/Linux 8.1.0 extracted (1 duplicate skipped), converted, reframed and published;
+  0 validate errors. PSC 5.1.0 re-converted and re-merged (`--force`); validate went from
+  399 errors to 0.
+- Suite: 2,223 passed; the one failure is the catalog re-baseline noted under Phase 51.
 
 ---
 

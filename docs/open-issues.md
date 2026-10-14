@@ -403,19 +403,6 @@ As with Flogo 3.0.1, the docsite returns a web page instead of a ZIP.
 
 ## Fulfillment
 
-### Product and Service Catalog 5.1.0: 399 images will not load once published
-
-- **Status:** Open; tool change proposed (Phase 52)
-- **Owner:** unassigned
-- **Raised:** 14 Oct 2026
-- **Blocks publishing:** no (published 14 Oct), but the images are broken
-
-The pages link their images through a folder spelled `html-opd`, and the folder is
-`html-OPD`. Windows treats the two as one, and the publishing platform does not, so
-every one of those images fails to load. The online help itself was blocked by
-over-long paths at first. Shorter names for 20 pages and folders fixed that, and it is
-published.
-
 ### Product and Service Inventory 2.1.0 has no package
 
 - **Status:** Open
@@ -424,23 +411,6 @@ published.
 - **Blocks publishing:** yes, for 2.1.0
 
 As with Flogo 3.0.1, the docsite returns a web page instead of a ZIP.
-
----
-
-## Managed File Transfer
-
-### Platform Server for z/Linux 8.1.0 package cannot be unpacked on Windows
-
-- **Status:** Open; tool change proposed (Phase 52)
-- **Owner:** unassigned
-- **Raised:** 14 Oct 2026
-- **Blocks publishing:** yes, for 8.1.0 (8.1.1 and 8.1.2 are published)
-
-The package holds two copies of one font file whose names differ only in capital
-letters (`SourceSansPro-Regular.otf` and `sourcesanspro-regular.otf`). Windows cannot
-store both, so the tool refuses the whole package rather than guess which to keep. The
-font is styling the tool never publishes, so the fix is to allow this one case: two files
-that differ only in capitals and that are byte-for-byte identical, or that are styling.
 
 ---
 

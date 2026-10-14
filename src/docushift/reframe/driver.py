@@ -55,6 +55,7 @@ from docushift.reframe.packer import (
     layout_of,
     override,
     pack,
+    page_folders,
     project,
     relocate,
     separated,
@@ -823,12 +824,13 @@ class Reframer:
         """Renders every page into the staging tree. Returns the word accounting."""
         existing = source.files
         mirror = csh_map.by_topic(source.csh) if source.csh else {}
+        folders = page_folders(located)
         words = 0
         scaffolding = 0
         anchors: dict[PurePosixPath, frozenset[str]] = {}
         mirrored: dict[PurePosixPath, frozenset[str]] = {}
         for page in built:
-            text, added = render(page, source.read, located, existing, counts, mirror)
+            text, added = render(page, source.read, located, existing, counts, mirror, folders)
             # `long_path` since Phase 29: folders mirror the TOC, so a page seven
             # levels down a Runtime Agent guide lands past Windows' 260-character
             # limit and both the `mkdir` and the write fail with a bare
@@ -928,8 +930,9 @@ class Reframer:
         checked. This corpus has three asset directories under two conventions and
         another set will have others, so the rule has to be structural.
         """
+        folders = page_folders(located)
         for relative in source.assets:
-            destination = long_path(staging / asset_destination(relative))
+            destination = long_path(staging / asset_destination(relative, folders))
             destination.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(long_path(source.root / relative), destination)
 

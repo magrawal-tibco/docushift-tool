@@ -191,6 +191,7 @@ def rewrite_links(
     existing: frozenset[PurePosixPath],
     counts: LinkCounts,
     here: Page | None = None,
+    folders: dict[tuple[str, ...], tuple[str, ...]] | None = None,
 ) -> str:
     """R4. Retargets every relative reference in one topic body onto the new layout.
 
@@ -225,7 +226,7 @@ def rewrite_links(
                 continue
             start, end = span
             replacement = _retarget(body[start:end], source, page, located, existing, counts,
-                                    here)
+                                    here, folders)
             if replacement is not None:
                 edits.append((start, end, replacement))
     return _apply(body, edits)
@@ -248,6 +249,7 @@ def _retarget(
     existing: frozenset[PurePosixPath],
     counts: LinkCounts,
     here: Page | None = None,
+    folders: dict[tuple[str, ...], tuple[str, ...]] | None = None,
 ) -> str | None:
     """One reference's new destination, or `None` to leave it exactly as written."""
     reference = links.classify(raw)
@@ -299,7 +301,7 @@ def _retarget(
     # pages in lower-cased slug folders and the copier lower-cases the asset's
     # directory to match. Computing this from the source path is how a link came
     # to read `../Concepts/x.png` for a file written to `concepts/x.png`.
-    moved = links.relative_to(page, asset_destination(target))
+    moved = links.relative_to(page, asset_destination(target, folders))
     emitted = links.emit(moved, reference.fragment)
     return f"{emitted}?{reference.query}" if reference.query else emitted
 
@@ -331,6 +333,7 @@ def render(
     existing: frozenset[PurePosixPath],
     counts: LinkCounts,
     csh: dict[PurePosixPath, list[str]] | None = None,
+    folders: dict[tuple[str, ...], tuple[str, ...]] | None = None,
 ) -> tuple[str, int]:
     """One merged page's full text, and the tokens its scaffolding added.
 
@@ -344,7 +347,7 @@ def render(
     for topic in page.topics:
         _, body = split_frontmatter(read(topic.source))
         body = rewrite_links(body.strip(), topic.source, page.path, located, existing, counts,
-                             page)
+                             page, folders)
         body, extra = shift_headings(body, topic.title, topic.level)
         parts.append(body)
         added += extra
