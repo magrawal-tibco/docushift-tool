@@ -581,7 +581,7 @@ If it does not exist, emit **neither**: no link, no copy. The alt text or link l
 
 **Step 5 — count, per output root.** Resolved, skin, escaped, dangling, and — after the topic loop — orphan (on disk, not in the copy set). Dangling references are grouped by **top path segment** in the report, not only totalled. A total hides the corpus's actual failure shape: 2,706 of Flare's 2,905 dangling references are one generated tree that is broken in its own source, and the remaining rate is 0.37% (`architecture.md` §5.5.6).
 
-**Step 6 — case is checked, not corrected.** Where a reference resolves but its spelling differs from the file's, count it and name it. The extracted cache is on Windows, so these work locally and 404 after publishing. There are 14 in the whole corpus, so this is a report line and not a resolution strategy.
+**Step 6 — case is checked and corrected** *(changed 2026-10-14, Phase 52; it was "checked, not corrected")*. Where a reference resolves but its spelling differs from the file's, the link and the copy take the file's own spelling, as page links do (R5-06), and the reference is still counted. The extracted cache is on Windows, so these work locally and 404 after publishing. The corpus once held 14, which made a report line enough. Product and Service Catalog 5.1.0 then links `html-opd/` 399 times into `html-OPD/`.
 
 **Step 7 — orphans are reported, never copied.** Count and size everything on disk inside the output root that the copy set does not contain. This is 54.6% of Flare's images by count and 673 MB by size, and copying it would put unreachable files in the docs repo (`architecture.md` §5.5.7).
 

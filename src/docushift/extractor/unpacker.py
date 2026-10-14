@@ -257,7 +257,8 @@ class PackageExtractor:
         staging = staging_of(target)
         try:
             remove(staging)
-            files = safe_extract(source, staging)
+            duplicates: list[tuple[str, str]] = []
+            files = safe_extract(source, staging, duplicates)
         except UnsafeArchiveError as exc:
             _discard(staging)
             self._record(slug, number, status=ConversionStatus.ERROR, error=str(exc))
@@ -285,6 +286,11 @@ class PackageExtractor:
             swap(staging, target)
         except OSError as exc:
             return self._failed(slug, number, exc, None)
+        if duplicates and self.findings is not None:
+            self.findings.record(
+                "ZIP_CASE_DUPLICATE_SKIPPED", slug=slug, version=number, count=len(duplicates),
+                message="; ".join(f"kept {kept}, skipped {dropped}" for kept, dropped in duplicates),
+            )
 
         try:
             self._record_content_root(slug, number, target)

@@ -30,7 +30,8 @@ path leading with `..` matches no root-relative skin prefix -- so the order betw
 them is free, and only their position *before* the existence test carries meaning.
 
 Then step 4's two outputs, step 5's per-root counts, step 6's case check --
-**checked, not corrected**, 14 in the whole corpus -- and step 7's orphans, which
+corrected to the file's spelling since Phase 52 (399 in one version), and still
+counted -- and step 7's orphans, which
 are reported and never copied: 54.6% of Flare's images and 673 MB.
 """
 
@@ -188,9 +189,14 @@ class AssetCopier:
             )
             return Resolution(AssetOutcome.DANGLING)
 
-        mismatch = self._case_differs(resolved)
+        # Phase 52: published under the file's own spelling, as page links are
+        # (R5-06). Product and Service Catalog 5.1.0 links `html-opd/` 399 times
+        # into `html-OPD/`, which Windows resolves and AEM 404s.
+        actual = self._on_disk(resolved)
+        mismatch = actual is not None and actual != resolved
         if mismatch:
             self.counts.case_mismatch += 1
+            resolved = actual
         self.counts.resolved += 1
         target = self._publishable(resolved)
         self.copy_set[target] = candidate
@@ -231,25 +237,24 @@ class AssetCopier:
         self.renamed[resolved] = shorter
         return shorter
 
-    # -- case, checked and not corrected (§6.4 step 6) --------------------------
+    # -- case, checked and corrected (§6.4 step 6, Phase 52) ---------------------
 
-    def _case_differs(self, resolved: PurePosixPath) -> bool:
-        """Does the reference spell the path differently from the filesystem?
+    def _on_disk(self, resolved: PurePosixPath) -> PurePosixPath | None:
+        """`resolved` as the filesystem spells it, or None when a segment is not listed.
 
         Walked segment by segment against real directory listings, because the
         extracted cache is on Windows: `candidate.is_file()` succeeds on the wrong
         casing, and the mismatch only shows up as a 404 after publishing.
         """
         current = self.root
+        spelled: list[str] = []
         for part in resolved.parts:
-            listing = self._listing(current)
-            actual = listing.get(part.lower())
+            actual = self._listing(current).get(part.lower())
             if actual is None:
-                return False
-            if actual != part:
-                return True
-            current = current / part
-        return False
+                return None
+            spelled.append(actual)
+            current = current / actual
+        return PurePosixPath(*spelled)
 
     def _listing(self, directory: Path) -> dict[str, str]:
         cached = self._listings.get(directory)

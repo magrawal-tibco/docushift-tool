@@ -727,6 +727,19 @@ def test_two_members_that_differ_only_in_case_are_refused(tmp_path: Path) -> Non
     assert list((tmp_path / "out").iterdir()) == []
 
 
+def test_two_identical_members_that_differ_only_in_case_are_written_once(tmp_path: Path) -> None:
+    """Phase 52. MFT Platform Server for z/Linux 8.1.0 ships one font twice, as
+    `SourceSansPro-Regular.otf` and `sourcesanspro-regular.otf`, with the same bytes."""
+    archive = tmp_path / "pkg.zip"
+    archive.write_bytes(zip_bytes({"w/fonts/Font.otf": "same", "w/fonts/font.otf": "same",
+                                   "w/html/index.htm": "ok"}))
+    duplicates: list[tuple[str, str]] = []
+
+    assert safe_extract(archive, tmp_path / "out", duplicates) == 2
+    assert duplicates == [("w/fonts/Font.otf", "w/fonts/font.otf")]
+    assert [p.name for p in (tmp_path / "out" / "w" / "fonts").iterdir()] == ["Font.otf"]
+
+
 def test_a_directory_named_in_two_cases_is_still_one_directory(tmp_path: Path) -> None:
     """Only two *files* on one path are a collision. `Doc/a.htm` and `doc/b.htm`
     land in one folder on Windows, and both files survive."""

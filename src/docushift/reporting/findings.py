@@ -110,6 +110,9 @@ REGISTRY: dict[str, Code] = _codes(
     Code("ZIP_URL_UNRESOLVED", Severity.WARNING, Stage.DOWNLOAD,
          "No ZIP endpoint could be derived for an active version; supply it with "
          "download --from-file", "planning.md Phase 14a"),
+    Code("ZIP_CASE_DUPLICATE_SKIPPED", Severity.NOTE, Stage.EXTRACT,
+         "Two ZIP members differing only in letter case and holding the same bytes; "
+         "the second was not written", "planning.md Phase 52"),
     Code("CSH_SOURCE_EMPTY", Severity.NOTE, Stage.EXTRACT,
          "CSH source present but empty -- no csh.yml written", "architecture.md §5.4.2"),
     Code("CSH_SOURCE_UNPARSED", Severity.WARNING, Stage.EXTRACT,

@@ -174,9 +174,10 @@ def test_the_register_carries_every_row_of_7_5() -> None:
     folder, resolved without that segment. The 88th, `ASSET_RENAMED_FOR_LENGTH`
     (Phase 49): an image copied under a shorter name because its own would not
     publish. The 89th, `RENAME_MAP_AMBIGUOUS` (Phase 50): a row for a topic that
-    leads two pages, with nothing to say which.
+    leads two pages, with nothing to say which. The 90th, `ZIP_CASE_DUPLICATE_SKIPPED`
+    (Phase 52): an identical member a package ships twice under two spellings.
     """
-    assert len(REGISTRY) == 89
+    assert len(REGISTRY) == 90
 
 
 def test_severity_comes_from_the_registry_and_not_from_the_call_site() -> None:

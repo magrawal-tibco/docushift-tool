@@ -18,6 +18,11 @@ filesystem unparsed, so nothing else stops them: a `:` is a drive or an
 alternate data stream, a trailing dot or space makes a file no unprefixed reader
 can find, and two members that differ only in case are one file on NTFS. None
 occurs in the 54 real packages, which is why refusing costs nothing.
+
+Phase 52 lets one case-only pair through: two members with the same CRC-32 and
+size are one file, so the second is not written and is reported instead. MFT
+Platform Server for z/Linux 8.1.0 ships `SourceSansPro-Regular.otf` twice that way.
+A pair that differs in content is still refused.
 """
 
 import shutil
@@ -76,11 +81,20 @@ def _unwritable(member: str) -> str | None:
     return None
 
 
-def safe_extract(zip_path: Path, target_dir: Path) -> int:
+def _identical(first: zipfile.ZipInfo, second: zipfile.ZipInfo) -> bool:
+    """Do two members hold the same bytes, by the ZIP directory's CRC-32 and size?"""
+    return first.CRC == second.CRC and first.file_size == second.file_size
+
+
+def safe_extract(zip_path: Path, target_dir: Path,
+                 duplicates: list[tuple[str, str]] | None = None) -> int:
     """Unpacks `zip_path` into `target_dir`, refusing escaping members.
 
     Returns the number of files written. Directories are not counted -- the number
     that matters downstream is the file count the inventory will walk.
+
+    `duplicates`, when given, receives `(kept, skipped)` for each identical
+    case-only pair (Phase 52), so the caller can report it.
 
     Raises `UnsafeArchiveError` naming the offending member, and `zipfile.BadZipFile`
     for an archive that is not readable. Neither is caught here: the caller decides
@@ -91,6 +105,8 @@ def safe_extract(zip_path: Path, target_dir: Path) -> int:
     written = 0
     with zipfile.ZipFile(zip_path) as archive:
         members = archive.namelist()
+        infos = {info.filename: info for info in archive.infolist()}
+        skipped: set[str] = set()
         # Every member is checked *before* any is written, so a malicious archive
         # cannot leave half a tree on disk before being refused. This runs on the
         # raw names and stays ahead of `long_path` on purpose: `\\?\` suppresses
@@ -110,6 +126,11 @@ def safe_extract(zip_path: Path, target_dir: Path) -> int:
             # the first and `written` would count both (R3-07). Directories may
             # differ in case -- they merge -- so only the whole file path counts.
             key = member.replace("\\", "/").casefold()
+            if key in seen and _identical(infos[seen[key]], infos[member]):
+                skipped.add(member)
+                if duplicates is not None:
+                    duplicates.append((seen[key], member))
+                continue
             if key in seen:
                 raise UnsafeArchiveError(
                     f"{zip_path.name} holds two members Windows would write to one file: "
@@ -117,7 +138,7 @@ def safe_extract(zip_path: Path, target_dir: Path) -> int:
                 )
             seen[key] = member
         for member in members:
-            if member.endswith("/"):
+            if member.endswith("/") or member in skipped:
                 continue
             # Written here rather than by `ZipFile.extract`, which joins the
             # member onto an unprefixed target of its own making and so puts the

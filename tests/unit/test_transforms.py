@@ -965,8 +965,10 @@ def test_an_external_reference_is_emitted_unchanged_and_never_copied(tmp_path: P
     assert copier.copy_set == {}
 
 
-def test_case_is_checked_and_not_corrected(tmp_path: Path) -> None:
-    """Works on this Windows cache, 404s after publishing. 14 corpus-wide."""
+def test_case_is_checked_and_corrected(tmp_path: Path) -> None:
+    """Works on this Windows cache, 404s after publishing. Phase 52: Product and
+    Service Catalog 5.1.0 holds 399, so the file's own spelling is emitted and
+    copied, as page links already are (R5-06), and the reference is still counted."""
     copier, root = copier_for(tmp_path)
 
     resolution = copier.resolve(
@@ -975,8 +977,9 @@ def test_case_is_checked_and_not_corrected(tmp_path: Path) -> None:
 
     assert resolution.outcome is AssetOutcome.RESOLVED
     assert resolution.case_mismatch
-    # Not corrected: the reference's own spelling is what gets emitted.
-    assert resolution.url == "images/cased.png"
+    assert resolution.url == "images/Cased.PNG"
+    assert PurePosixPath("Content/images/Cased.PNG") in copier.copy_set
+    assert copier.counts.case_mismatch == 1
 
 
 def test_assets_keep_their_source_relative_path(tmp_path: Path) -> None:
