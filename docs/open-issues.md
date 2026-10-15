@@ -474,3 +474,32 @@ In practice this means a refresh of the product list could silently move those
 products into a different group. Nothing is broken today and no product we are
 actively working on is affected, but this needs a proper pass before the catalogue
 is refreshed in bulk.
+
+---
+
+## Business Studio Community Edition
+
+### 4.2.0 has no package
+
+- **Status:** Open
+- **Owner:** unassigned
+- **Raised:** 15 Oct 2026
+- **Blocks publishing:** yes, for 4.2.0, the only Community Edition version
+
+As with Flogo 3.0.1, the docsite returns a web page instead of a ZIP.
+
+---
+
+## ActiveMatrix BPM
+
+### 4.2.0 is refused at unpacking: two different files with one name
+
+- **Status:** Open
+- **Owner:** unassigned
+- **Raised:** 15 Oct 2026
+- **Blocks publishing:** yes, for 4.2.0
+
+The package holds RESTServiceConfig.properties and restserviceconfig.properties in the
+same folder, with different contents (507 and 568 bytes). Windows cannot keep both, and the
+tool does not pick one on a writer's behalf. It is a configuration sample, not a help page,
+so keeping either is likely harmless, but someone has to say which. 4.3.0 converted.
