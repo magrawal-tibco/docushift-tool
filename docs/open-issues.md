@@ -414,43 +414,6 @@ As with Flogo 3.0.1, the docsite returns a web page instead of a ZIP.
 
 ---
 
-## MDM
-
-### Online help for 11.1.0, 11.0.0, 10.0.0 and 9.3.2 not published
-
-- **Status:** Open — shorter names drafted in
-  `scratch/data-management-rename-proposals.csv`, awaiting review
-- **Owner:** unassigned
-- **Raised:** 15 Oct 2026
-- **Blocks publishing:** yes, for the online help (the PDFs, release notes and API
-  reference are published)
-
-39 page addresses across the four versions are longer than Windows allows (up to
-312 characters against 260). Nearly all sit under the installation-requirements
-guide, whose folder name appears twice in a row, plus two long folder names for
-configuring WebSphere and JBoss. Renaming those three folders shortens 176 pages
-and brings the longest to 256. As with BusinessConnect, the new names are a
-person's call because they become the web addresses.
-
-### Some packages hold the whole guide set two or three times
-
-- **Status:** Open — fix not yet planned
-- **Owner:** unassigned
-- **Raised:** 15 Oct 2026
-- **Blocks publishing:** no
-
-The download for MDM 10.0.0 contains the full guide set three times (under the
-main, release notes and custom-installation folders); MDM Studio 6.1.1, 6.0.0 and
-5.3.0 contain it twice (main and release notes). Newer packages carry only the
-release notes in that folder. Navigation is unaffected — each guide is listed once —
-but the extra copies are not in any navigation, so they are filed as unlisted pages
-and still published to the repository: about 5,300 extra pages for MDM 10.0.0 and
-about 930 for each Studio version. The copies are not byte-identical (each was built
-separately, with its own generated help files), so a fix would recognise a copy by
-its matching pages, not by identical files.
-
----
-
 ## Enterprise MDM
 
 ### 1.0.0 has no documentation
@@ -466,6 +429,20 @@ convert. The licence files are published as reference documents.
 ---
 
 ## Everything, eventually
+
+### A withdrawn version stays in the drop-downs and redirect maps
+
+- **Status:** Open
+- **Owner:** unassigned
+- **Raised:** 15 Oct 2026
+- **Blocks publishing:** no
+
+When a published version is made ineligible and its folders are removed by hand, the
+next publish keeps its entries in the version drop-down and the redirect maps: the
+tool treats an entry it no longer recognises as hand-written and leaves it alone. MDM
+Studio 5.3.0's entries (4 drop-downs, about 2,700 redirects) were removed by hand on
+15 Oct 2026. Withdrawing a version should be a tool step, so this is not repeated by
+hand for every family.
 
 ### Public web address for the new site not set
 
