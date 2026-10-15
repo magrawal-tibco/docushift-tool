@@ -807,6 +807,126 @@ suite pass.*
 
 ---
 
+### Phase 53: What the TIBCO-Wide Sync Could Not Publish — **Planned 2026-10-14**
+
+**Why.** The first `reframe --bu tibco` and `sync --bu tibco` (2026-10-14, logs
+`scratch/tibco-reframe.log`, `scratch/tibco-sync.log`) held back 7 versions for two
+reasons:
+
+1. **Messaging Manager 3.1.1 and 4.0.0 fail the merge self-check.** The user guide's
+   msgmx command summary has three topics titled `!`, `/` and `#`. A heading that is
+   only punctuation slugs to nothing (`utils/anchors.anchor_run` returns `""`), all three
+   land on `users-guide/getting-started.md`, and `_anchors` fails the page for repeating
+   `""`. The check is right: AEM derives an anchor from the heading text, so no link can
+   reach a section headed `!`.
+2. **5 versions publish paths over 260 characters** under `C:\github\tibco-docs-aem`
+   (`PUBLISHED_PATH_TOO_LONG`). `sync` names the first file per version; all of them,
+   measured 2026-10-14 against each merged tree:
+
+   | version | over 260 | longest |
+   |---|---|---|
+   | Service Grid 3.4.3, 3.4.4 | 11 pages each | 364, under `running-enterprise-deployment-health-check-using-2/` |
+   | Service Grid 3.4.3, 3.4.4, API reference | 1 tree each | 276, `AttributedURI.html` |
+   | BusinessEvents Enterprise 6.3.2 | 6 pages | 307 |
+   | BusinessEvents Enterprise 6.4.0 | 4 pages | 307 |
+   | Runtime Agent 5.13.0 | 3 pages | 280 |
+
+   TRA 5.13.0 still has the copy an earlier sync published, so it serves stale help until
+   it publishes again.
+
+Service Grid's API reference is four javadoc trees under
+`html/Mediation-Java-API-Reference/mediation_api/javadoc/` (plus the Admin web service
+tree). Each tree is named by its whole path, so one is
+`mediation-java-api-reference-mediation_api-javadoc-com.tibco.amf.platform.runtime.extension`,
+91 characters before the javadoc's own package folders start.
+
+Not in this phase: 7 BW plug-in versions (AWS Common Services 6.0.0–6.1.0, Files 8.3.0,
+Oracle E-Business Suite 6.1.2, Oracle Fusion Cloud 6.0.0) are `convert-failed`, "nothing
+converted (0 units)", and are counted in DOCOPS-122.
+
+#### Decisions
+
+| decision | choice | why |
+|---|---|---|
+| **A topic whose heading slugs to nothing** | It leads a page of its own and is never absorbed into another. Links to it go to the page, with no fragment | A section headed `!` has no anchor anywhere, so it can only be reached as a page. Rewriting the heading would change what the doc says |
+| **Over-long pages** | No code. Shorter names go into each version's `rename-map.csv`, as for BusinessConnect (Phases 49–50). I draft them in `scratch/tibco-rename-proposals.csv` for the user's review first | A page name is its URL, and the tool leaves URLs to a person. Most of the 35 share a few long parent folders, so renaming those parents shortens the rest |
+| **An over-long API tree name** | When any tree in a version would publish a path over the limit, every tree in that version is named by its first and last segments (`mediation-java-api-reference-com.tibco.amf.platform.runtime.extension`, 276 → 254). If two trees end up with the same name, the version keeps its current names and `sync` still refuses it | Uniform within a version, as `_named` already is. Measured with `published_root_length`, as Phase 49 does, so `convert`'s `url_map` and `sync` reach the same name |
+| **Reported** | A note when a tree is named short, naming both names | A renamed folder should be findable |
+
+#### Steps
+
+1. `reframe/packer.py`: a topic whose `anchor_run` slot is `""` starts a page and ends it.
+   Test: the three msgmx topics become three pages and the audit passes; a page with no such
+   topic merges exactly as today.
+2. `sync/apirefs.py`: the short-name rule in `_named`, with the length measured from
+   `publishing.yaml`; register the note in `reporting/findings.py` and §7.5. Tests: an
+   over-long version gets short names and `url_map` agrees with them; a version under the
+   limit is unchanged; a collision keeps the long names.
+3. Draft `scratch/tibco-rename-proposals.csv` (35 rows, old and new path, length before and
+   after) for the user's review. Once approved, write the names into the five versions'
+   `rename-map.csv`.
+4. Docs: the boundary rule in `design.md`; API tree names in `architecture.md` and
+   `user-guide.md`.
+5. Runs (the user, as `!` commands): `reframe` for Messaging Manager 3.1.1 and 4.0.0 and the
+   five renamed versions; `convert --force` and `reframe` for Service Grid 3.4.3 and 3.4.4;
+   then `sync --bu tibco` and `validate`. Then I check the results without writing anything.
+
+*Exit: all 7 versions publish; no other version's API tree name or page layout changes;
+`ruff` and the suite pass.*
+
+---
+
+### Phase 54: A Release-Notes Root That Copies the Main Guides — **Planned 2026-10-15**
+
+**Why.** The Data Management run (2026-10-15, logs `scratch/data-management-*.log`)
+found Flare packages whose `relnotes/` output root holds the whole guide set as well as
+the release notes. Flare built that target with the full project instead of only its
+TOC's topics. The release-notes TOC lists only `Release-Notes/` and `_templates/`; every
+other page in the root is an orphan, so Phase 43 moves it to `unfiled/` and it is
+published there. Measured against `output/`:
+
+| version | relnotes orphans | under a folder its TOC never enters, also a main-guide folder | left |
+|---|---|---|---|
+| MDM Studio 6.1.1 | 922 | 913 (Installation 26, Process-Designer 189, Repository-Designer 274, Rulebase-Designer 311, UI-Builder 113) | 8 `Release-Notes/`, 1 `_templates/` |
+| MDM Studio 6.0.0 | 901 | 896 | 5 `Release-Notes/` |
+| MDM 9.3.2, 11.1.0, 11.0.0; Studio 6.1.0, 5.2.0; GDSN 4.0.0 | 0–12 | 0 | unchanged |
+
+MDM 10.0.0 had two such copies (`relnotes/`, `Custom-installation/`) and MDM Studio 5.3.0
+one. The user made both ineligible instead (2026-10-15).
+
+The copies are not byte-identical to the main guides: each target was built separately,
+with its own generated pages (`diff -r` differs on ~1,200 files for Studio 6.1.1). Page
+names match; byte comparison cannot be the test.
+
+#### Decisions
+
+| decision | choice | why |
+|---|---|---|
+| **Which orphans are copies** | An orphan under a top-level folder of a secondary output root when (a) the version's TOC lists no page under that folder in that root, and (b) another output root of the version has a folder of the same name with pages the TOC lists | The user's description: the root should hold only what its TOC holds. Folder-level, not page-level: a page the main guide also leaves unlisted is still part of the copied folder. Genuine orphans in folders the TOC does enter (`Release-Notes/Known-Issues123.md`) are untouched |
+| **What happens to a copy** | Dropped, not moved to `unfiled/` | It is a build artefact, not content its authors hid |
+| **Links, `csh.yml`, `301.yml` into a copy** | Retargeted to the same path in the listed root when that page exists; otherwise as a Phase 43 move to nothing: links break and are listed, identifiers keep the copy's twin folder, redirect rows are dropped | The copy and its twin are the same page; a reader landing on either wants the listed one |
+| **Reported** | One note per version: the root, the folders dropped and the page count | Nothing silent |
+
+#### Steps
+
+1. `converter/orphans.py`: in `_shelve`, before the move, find the copy folders by the rule
+   above and drop their orphans; retarget references as decided. Register the note in
+   `reporting/findings.py` and §7.5.
+2. Tests: a relnotes root with a copied guide folder drops it and keeps its genuine
+   release-notes orphan; a folder the root's TOC enters is never dropped; a folder with no
+   listed twin elsewhere is shelved as today; a link from a release-notes page into the copy
+   lands on the listed page.
+3. Docs: the rule beside Phase 43 in `architecture.md` §5.1.4 and `user-guide.md`.
+4. Runs (the user, as `!` commands): `convert --reshelve-orphans` for Studio 6.1.1 and 6.0.0
+   (no re-download needed), then `reframe` and `sync` for the family. The sync swaps each
+   version folder wholesale, so the published copies go. Then I check the results without
+   writing anything.
+
+*Exit: Studio 6.1.1 and 6.0.0 publish without the copied folders; no other Data Management
+version's output changes; `ruff` and the suite pass.*
+
+---
+
 ## Carried-Forward Open Items
 
 Technical items a finished phase recorded as *open, not fixed*. Product-level issues
