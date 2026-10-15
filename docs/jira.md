@@ -29,6 +29,8 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 **Log** (newest first, one line per session):
 
+- 2026-10-15 — DOCOPS-120 progress comment: 12 Hawk versions ineligible (f298b81).
+
 - 2026-10-15 — DOCOPS-120 progress comment: MDM 10.0.0 and MDM Studio 5.3.0 ineligible
   (fbcd6f6); 12 retired BPM versions switched off (78e02b3).
 
