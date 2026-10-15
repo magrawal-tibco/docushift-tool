@@ -175,9 +175,10 @@ def test_the_register_carries_every_row_of_7_5() -> None:
     (Phase 49): an image copied under a shorter name because its own would not
     publish. The 89th, `RENAME_MAP_AMBIGUOUS` (Phase 50): a row for a topic that
     leads two pages, with nothing to say which. The 90th, `ZIP_CASE_DUPLICATE_SKIPPED`
-    (Phase 52): an identical member a package ships twice under two spellings.
+    (Phase 52): an identical member a package ships twice under two spellings. The
+    91st, `ROOT_COPY_DROPPED` (Phase 54): a release-notes root's copy of the guides.
     """
-    assert len(REGISTRY) == 90
+    assert len(REGISTRY) == 91
 
 
 def test_severity_comes_from_the_registry_and_not_from_the_call_site() -> None:

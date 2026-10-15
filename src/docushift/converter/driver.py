@@ -45,7 +45,7 @@ from docushift.apiref import find_api_roots, recorded_roots
 from docushift.catalog import CatalogError, CatalogManager
 from docushift.config import ConfigManager
 from docushift.converter import navigation
-from docushift.converter.orphans import reshelve
+from docushift.converter.orphans import Reshelved, reshelve
 from docushift.engines.base import ConversionContext, Document, Unit, engine_for
 from docushift.engines.csh import CshFormat, CshSource, csh_format_of, read_csh_source
 from docushift.engines.roots import (
@@ -213,6 +213,13 @@ class DocumentConverter:
     def _record(self, code: str, slug: str, version: str, **fields: Any) -> None:
         if self.findings is not None:
             self.findings.record(code, slug=slug, version=version, **fields)
+
+    def _record_copies(self, slug: str, version: str, shelved: Reshelved) -> None:
+        """Phase 54: one note naming the copied folders a version dropped."""
+        if shelved.copies:
+            self._record("ROOT_COPY_DROPPED", slug, version, count=len(shelved.copies),
+                         message=f"{len(shelved.copies)} page(s) dropped as copies of a main "
+                                 f"guide's, under {', '.join(shelved.copy_folders)}")
 
     def _building(self, slug: str, version: str, stage: str) -> bool:
         return self.state is not None and self.state.is_building(slug, version, stage)
@@ -407,7 +414,7 @@ class DocumentConverter:
             self.state.mark_building(slug, number, "convert")
         swap(staging, target)
         if self.state is not None:
-            moved = shelved.moved
+            moved = shelved.paths
             self.state.record_output_map(slug, number, [
                 (source, moved.get(output, output), unit)
                 for source, output, unit in self.state.get_output_rows(slug, number)
@@ -417,10 +424,13 @@ class DocumentConverter:
         result.md_files, result.out_files = self._measure_output(slug, number, target)
         if self.state is not None:
             self.state.clear_building(slug, number, "convert")
+        self._record_copies(slug, number, shelved)
         result.documents = len(shelved.moved)
         result.message = (f"{len(shelved.moved)} orphan(s) to unfiled/, {shelved.links} link(s) "
                           f"re-pathed, {shelved.csh} help id(s) retargeted, "
                           f"{shelved.redirects} redirect(s) dropped")
+        if shelved.copies:
+            result.message += f", {len(shelved.copies)} copied page(s) dropped"
         if shelved.repaired:
             result.message += f", {shelved.repaired} link(s) in unfiled/ repaired"
         return result
@@ -582,7 +592,9 @@ class DocumentConverter:
         csh_transform.write(staging / "csh.yml", result.csh.entries)
         # Phase 43. Orphans leave the TOC for `unfiled/`, after every file that
         # names them is written and before `301.yml`, which drops their rows.
-        shelved = reshelve(staging).moved
+        reshelved = reshelve(staging)
+        self._record_copies(slug, number, reshelved)
+        shelved = reshelved.paths
         if shelved:
             output_rows = [(source, shelved.get(output, output), unit_name)
                            for source, output, unit_name in output_rows]

@@ -164,6 +164,11 @@ REGISTRY: dict[str, Code] = _codes(
          "unfiled/ -- 5.9% for Flare; left in an Unfiled node only when the version "
          "has no other TOC entry",
          "architecture.md §5.1.4, Phase 43"),
+    Code("ROOT_COPY_DROPPED", Severity.NOTE, Stage.CONVERT,
+         "Unlisted pages of a secondary output root that copy a main guide's pages "
+         "(a Flare target built from the whole project) -- dropped, their links, help "
+         "ids and redirects pointed at the twin",
+         "architecture.md §5.1.4, Phase 54"),
     Code("TOPIC_LINK_DANGLING", Severity.NOTE, Stage.CONVERT,
          "A cross-reference to a topic this run did not produce; text kept, link dropped",
          "architecture.md §5.1.3"),

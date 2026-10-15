@@ -241,3 +241,101 @@ def test_a_link_an_earlier_pass_left_behind_is_repaired_once(tmp_path: Path) -> 
     assert "[peer](peer.md) [other](../../guide/other.md) [gone](nowhere.md)" in hidden
     assert (result.removed, result.repaired) == (False, 2)
     assert reshelve(root).repaired == 0
+
+
+# -- Phase 54: a release-notes root that copies the main guides -----------------
+
+COPY_TOC = """\
+# AEM table of contents
+docs_list_title: "Online Help"
+docs:
+  - title: "Designer"
+    url: "Designer/start.md"
+    subfolderlist:
+      - title: "Setup"
+        url: "Designer/guide/setup.md"
+  - title: "Release Notes"
+    url: "relnotes/Release-Notes/new.md"
+  - title: "Unfiled"
+    url: "unfiled.md"
+    subfolderlist:
+      - title: "Hidden"
+        url: "Designer/guide/hidden.md"
+      - title: "Setup"
+        url: "relnotes/Designer/guide/setup.md"
+      - title: "Hidden"
+        url: "relnotes/Designer/guide/hidden.md"
+      - title: "Only here"
+        url: "relnotes/Designer/guide/only-here.md"
+      - title: "Known issues"
+        url: "relnotes/Release-Notes/known.md"
+      - title: "Own"
+        url: "relnotes/Other/own.md"
+"""
+
+COPY_FILES = {
+    "toc.yml": COPY_TOC,
+    "unfiled.md": UNFILED_PAGE,
+    "Designer/start.md": "# Start\n",
+    "Designer/guide/setup.md": "# Setup\n\n## Step\n",
+    "Designer/guide/hidden.md": "# Hidden\n",
+    "relnotes/Release-Notes/new.md": "# New\n\nSee [setup](../Designer/guide/setup.md#step).\n",
+    "relnotes/Release-Notes/known.md": "# Known\n",
+    "relnotes/Designer/guide/setup.md": "# Setup\n\n## Step\n\nCopy, own skin.\n",
+    "relnotes/Designer/guide/hidden.md": "# Hidden\n",
+    "relnotes/Designer/guide/only-here.md": "# Only here\n",
+    "relnotes/Other/own.md": "# Own\n",
+    "csh.yml": '"setup": "relnotes/Designer/guide/setup.md#step"\n',
+    "301.yml": "# header\nredirects:\n"
+               "- from: https://docs.example/pub/x/relnotes/setup.htm\n"
+               "  to: relnotes/Designer/guide/setup.md#step\n  status: 301\n"
+               "- from: https://docs.example/pub/x/relnotes/hidden.htm\n"
+               "  to: relnotes/Designer/guide/hidden.md\n  status: 301\n",
+}
+
+
+def test_a_copied_guide_folder_is_dropped_and_genuine_orphans_are_shelved(tmp_path: Path) -> None:
+    root = _tree(tmp_path, COPY_FILES)
+
+    result = reshelve(root)
+
+    assert result.copies == {
+        "relnotes/Designer/guide/setup.md": "Designer/guide/setup.md",
+        "relnotes/Designer/guide/hidden.md": "unfiled/Designer/guide/hidden.md",
+    }
+    assert result.copy_folders == ["relnotes/Designer"]
+    assert not (root / "relnotes" / "Designer" / "guide" / "setup.md").exists()
+    assert not (root / "unfiled" / "relnotes" / "Designer" / "guide" / "setup.md").exists()
+    # A page in the copied folder with no twin, a folder the root's TOC enters,
+    # and a folder with no listed twin elsewhere are all shelved as before.
+    assert set(result.moved) == {"Designer/guide/hidden.md",
+                                 "relnotes/Designer/guide/only-here.md",
+                                 "relnotes/Release-Notes/known.md", "relnotes/Other/own.md"}
+    assert (root / "unfiled" / "relnotes" / "Release-Notes" / "known.md").is_file()
+    assert result.paths == {**result.moved, **result.copies}
+
+
+def test_links_help_ids_and_redirects_into_a_copy_land_on_its_twin(tmp_path: Path) -> None:
+    files = dict(COPY_FILES)
+    files["relnotes/Release-Notes/new.md"] = (
+        "# New\n\nSee [setup](../Designer/guide/setup.md#step).\n")
+    root = _tree(tmp_path, files)
+
+    reshelve(root)
+
+    new = (root / "relnotes" / "Release-Notes" / "new.md").read_text(encoding="utf-8")
+    assert "[setup](../../Designer/guide/setup.md#step)" in new
+    csh = yaml.safe_load((root / "csh.yml").read_text(encoding="utf-8"))
+    assert csh == {"setup": "Designer/guide/setup.md#step"}
+    rows = yaml.safe_load((root / "301.yml").read_text(encoding="utf-8"))["redirects"]
+    # Into a listed twin: retargeted. Into a twin that is itself unfiled: dropped.
+    assert [row["to"] for row in rows] == ["Designer/guide/setup.md#step"]
+
+
+def test_a_version_with_no_copied_root_is_shelved_exactly_as_before(tmp_path: Path) -> None:
+    root = _tree(tmp_path)
+
+    result = reshelve(root)
+
+    assert result.copies == {} and result.copy_folders == []
+    assert result.moved == {"guide/hidden.md": "unfiled/guide/hidden.md"}

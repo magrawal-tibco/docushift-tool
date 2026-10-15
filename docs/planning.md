@@ -876,7 +876,7 @@ converted (0 units)", and are counted in DOCOPS-122.
 
 ---
 
-### Phase 54: A Release-Notes Root That Copies the Main Guides — **Planned 2026-10-15**
+### Phase 54: A Release-Notes Root That Copies the Main Guides — **Done 2026-10-15**
 
 **Why.** The Data Management run (2026-10-15, logs `scratch/data-management-*.log`)
 found Flare packages whose `relnotes/` output root holds the whole guide set as well as
@@ -924,6 +924,21 @@ names match; byte comparison cannot be the test.
 
 *Exit: Studio 6.1.1 and 6.0.0 publish without the copied folders; no other Data Management
 version's output changes; `ruff` and the suite pass.*
+
+#### As built (2026-10-15)
+
+- `converter/orphans.py` `_copies`: the folder gate as decided, then page by page: an
+  orphan in a copied folder is a copy only when the same path exists in the twin folder
+  (listed or not). One without a twin is shelved as before, so nothing is lost on a guess.
+  A copy goes where its twin goes; `Reshelved.paths` carries both kinds of move into
+  `output_map`. Note `ROOT_COPY_DROPPED`.
+- **Step 4 changed.** `--reshelve-orphans` finds no Unfiled node in a tree already
+  shelved, so it cannot reach these copies. Studio 6.1.1 and 6.0.0 need `convert --force`
+  (their extracted trees are still on disk).
+- Suite: 2,227 passed; the one failure is the catalog re-baseline noted under Phase 51.
+- Runs: Studio 6.1.1 and 6.0.0 re-converted, re-merged and published. 913 and 896 copies
+  dropped, as measured; 1,006 → 93 and 988 → 92 merged pages. 4 and 2 pages in the copied
+  folders had no twin and are shelved. No other version re-merged.
 
 ---
 
@@ -981,6 +996,7 @@ The concrete deliverable of §7.1: every deferred "report line" in the three doc
 | `TOC_UNREADABLE`³⁴ | warn | convert | A Flare root's `HelpSystem.xml` or declared TOC is missing or did not parse; or a WebWorks book's `files.js`, `toc.js`, `title.js` or `context.js` is present and unreadable, or (`files.js`/`toc.js`) yields no entries. Its topics are filed under Unfiled, or the book loses what that file named | Phase 34 (R5-12, R7-09) |
 | `TOC_SUBPROJECT_UNPLACED`³⁴ | note | convert | A merged-project TOC node (`*.flprj`, 121 over 937 roots) marking where a sub-project's TOC goes; dropped, so the sub-guide loses its place in the parent's navigation | Phase 34 (R5-11) |
 | `TOC_ORPHAN`⁵ᵇ | note | convert | Converted topics in no TOC entry, kept out of `toc.yml` and unmerged under `unfiled/` — 5.9% for Flare; left in an Unfiled node only when the version has no other TOC entry | `architecture.md` §5.1.4, Phase 43 |
+| `ROOT_COPY_DROPPED` | note | convert | Unlisted pages of a secondary output root that copy a main guide's pages (a Flare target built from the whole project); dropped, their links, help ids and redirects pointed at the twin | `architecture.md` §5.1.4, Phase 54 |
 | `TOPIC_LINK_DANGLING`⁵ᵇ | note | convert | A cross-reference to a topic this run did not produce; text kept, link dropped | `architecture.md` §5.1.3 |
 | `ALERT_LABEL_UNMAPPED`⁵ᵇ | warn | convert | An admonition label outside the five GitHub renders; rendered as NOTE | `transforms/callouts.py` |
 | `ANCHOR_DROPPED`¹⁹ | warn | convert | A referenced anchor the engine kept and then did not emit; its links now dangle | `planning.md` Phase 19 |

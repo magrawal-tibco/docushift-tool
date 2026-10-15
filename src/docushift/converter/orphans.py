@@ -27,6 +27,9 @@ What follows each move:
   decide each one. `reframe` calls it again for the merged tree, whose linking
   pages differ, and `validate` reports the same links as `LINK_TO_UNFILED`.
 
+Phase 54: an orphan that is a secondary root's copy of a main guide's page is
+dropped instead, and everything that named it follows its twin (`_copies`).
+
 Running it twice changes nothing: the second run finds no Unfiled node.
 """
 
@@ -81,6 +84,15 @@ class Reshelved:
     kept: str = ""
     # Links in `unfiled/` pages repaired after an earlier pass missed them.
     repaired: int = 0
+    # Phase 54: version-relative copy -> where its twin landed, one per page
+    # dropped as a copy of a main guide's, and the copied folders, sorted.
+    copies: dict[str, str] = field(default_factory=dict)
+    copy_folders: list[str] = field(default_factory=list)
+
+    @property
+    def paths(self) -> dict[str, str]:
+        """Every page that left its path: moved orphans and dropped copies alike."""
+        return {**self.moved, **self.copies}
 
 
 def reshelve(root: Path) -> Reshelved:
@@ -117,12 +129,16 @@ def _shelve(root: Path, result: Reshelved) -> None:
         result.kept = "no topic outside the Unfiled node, so the TOC was not read"
         return
 
-    moves: dict[PurePosixPath, PurePosixPath] = {}
-    for orphan in orphans:
-        if orphan in listed or orphan in moves or is_unfiled(orphan):
-            continue
-        if long_path(root / orphan).is_file():
-            moves[orphan] = PurePosixPath(UNFILED) / orphan
+    present = [orphan for orphan in dict.fromkeys(orphans)
+               if orphan not in listed and not is_unfiled(orphan)
+               and long_path(root / orphan).is_file()]
+    twins, folders = _copies(root, listed, present)
+    moves: dict[PurePosixPath, PurePosixPath] = {
+        orphan: PurePosixPath(UNFILED) / orphan for orphan in present if orphan not in twins
+    }
+    # A copy goes wherever its twin goes: to its listed page, or to `unfiled/`
+    # with it when the main guide leaves it unlisted too.
+    copies = {copy: moves.get(twin, twin) for copy, twin in twins.items()}
 
     long_path(toc_path).write_text(textfile.lf(_without_nodes(text, pages)),
                                    encoding="utf-8", newline="\n")
@@ -131,14 +147,58 @@ def _shelve(root: Path, result: Reshelved) -> None:
         target = long_path(root / page)
         if target.is_file():
             target.unlink()
+    for copy in copies:
+        long_path(root / copy).unlink()
 
-    result.links = _repath_pages(root, moves, pages)
-    result.csh = _retarget_csh(root, moves)
-    result.redirects = _drop_redirects(root, moves)
-    for old in moves:
+    every = {**moves, **copies}
+    result.links = _repath_pages(root, every, pages)
+    result.csh = _retarget_csh(root, every)
+    result.redirects = _drop_redirects(root, moves, copies)
+    for old in every:
         _prune(root, old.parent)
     result.moved = {str(old): str(new) for old, new in moves.items()}
+    result.copies = {str(old): str(new) for old, new in copies.items()}
+    result.copy_folders = sorted(str(folder) for folder in folders)
     write_inbound(root)
+
+
+def _copies(root: Path, listed: set[PurePosixPath], orphans: list[PurePosixPath],
+            ) -> tuple[dict[PurePosixPath, PurePosixPath], set[PurePosixPath]]:
+    """Phase 54: orphans that are a secondary root's copy of a main guide's page.
+
+    Flare can build a target -- MDM Studio's `relnotes/` -- from the whole project
+    rather than its own TOC, so the root carries every guide beside its release
+    notes, unlisted. An orphan `R/F/rest` is a copy when the TOC lists something
+    under `R/` but nothing under `R/F/`, another place (`F/` at the top, or `G/F/`
+    in another top-level folder) has pages the TOC lists, and the same `rest`
+    exists there. The twin is not byte-identical -- each target was built apart,
+    with its own generated pages -- so the test is the path, never the bytes.
+
+    Returns copy -> twin, and the copied folders. An orphan in such a folder with
+    no twin is not a copy and is shelved as any other.
+    """
+    entered: set[PurePosixPath] = set()
+    for page in listed:
+        entered.update(page.parents)
+    tops = {folder for folder in entered if len(folder.parts) == 1}
+    twins: dict[PurePosixPath, PurePosixPath] = {}
+    folders: set[PurePosixPath] = set()
+    for orphan in orphans:
+        parts = orphan.parts
+        if len(parts) < 3:
+            continue
+        top, folder = PurePosixPath(parts[0]), PurePosixPath(*parts[:2])
+        if top not in entered or folder in entered:
+            continue
+        rest = PurePosixPath(*parts[2:])
+        homes = [PurePosixPath(parts[1])] + sorted(
+            other / parts[1] for other in tops if other != top)
+        for home in homes:
+            if home in entered and long_path(root / home / rest).is_file():
+                twins[orphan] = home / rest
+                folders.add(folder)
+                break
+    return twins, folders
 
 
 def inbound(root: Path) -> list[dict[str, str]]:
@@ -387,18 +447,36 @@ def _retarget_csh(root: Path, moves: dict[PurePosixPath, PurePosixPath]) -> int:
     return count
 
 
-def _drop_redirects(root: Path, moves: dict[PurePosixPath, PurePosixPath]) -> int:
+def _drop_redirects(root: Path, moves: dict[PurePosixPath, PurePosixPath],
+                    copies: dict[PurePosixPath, PurePosixPath] | None = None) -> int:
+    """Drops `301.yml` rows into an orphan; points a row into a copy at its twin.
+
+    A twin that is itself unfiled takes the row with it, as an orphan's would.
+    Returns the rows dropped.
+    """
+    copies = copies or {}
     path = long_path(root / origins.ORIGINS)
-    if not moves or not path.is_file():
+    if not (moves or copies) or not path.is_file():
         return 0
     loaded = yaml.safe_load(path.read_text(encoding="utf-8"))
     rows = loaded.get("redirects") if isinstance(loaded, dict) else None
     if not isinstance(rows, list):
         return 0
-    kept = [row for row in rows
-            if not (isinstance(row, dict)
-                    and PurePosixPath(str(row.get("to") or "").partition("#")[0]) in moves)]
-    if len(kept) != len(rows):
+    kept: list[Any] = []
+    changed = False
+    for row in rows:
+        if not isinstance(row, dict):
+            kept.append(row)
+            continue
+        target, separator, anchor = str(row.get("to") or "").partition("#")
+        landed = copies.get(PurePosixPath(target))
+        if landed is not None and not is_unfiled(landed):
+            # The copy's anchor names a heading its twin has too.
+            kept.append({**row, "to": f"{landed}{separator}{anchor}"})
+            changed = True
+        elif landed is None and PurePosixPath(target) not in moves:
+            kept.append(row)
+    if changed or len(kept) != len(rows):
         origins.write(path, kept)
     return len(rows) - len(kept)
 
