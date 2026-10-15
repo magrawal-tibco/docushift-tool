@@ -29,6 +29,9 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 **Log** (newest first, one line per session):
 
+- 2026-10-15 — DOCOPS-120 progress comment: MDM 10.0.0 and MDM Studio 5.3.0 ineligible
+  (fbcd6f6); 12 retired BPM versions switched off (78e02b3).
+
 - 2026-10-15 — DOCOPS-238 and DOCOPS-239 → Done: MDM 11.1.0/11.0.0/9.3.2 help published after
   renames; Phase 54 dropped 913 and 896 copied pages from MDM Studio 6.1.1 and 6.0.0.
 
