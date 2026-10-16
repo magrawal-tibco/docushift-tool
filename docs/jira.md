@@ -23,7 +23,6 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | Family review finished | DOCOPS-120 → Done, then DOCOPS-130 |
 | Edit to DOCOPS-217 is allowed (blocked by a permission check on 2026-10-09) | DOCOPS-217: append the 2026-10-09 publish note → Done |
 | A follow-up from the BusinessConnect warnings is planned | DOCOPS-220 → In Progress |
-| Messaging removal `06cc7ad` pushed | DOCOPS-120: drop "not yet pushed" from the 2026-10-16 comment |
 | A new phase is opened | One sub-task under the matching story, In Progress, no `retro` |
 
 **Left alone on purpose:** DOCOPS-8 is a Task where its siblings are Stories.
@@ -37,7 +36,7 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
   (0cbe145); Kafka connector retired verdict overridden to GA (cbcf82f).
 
 - 2026-10-16 — DOCOPS-120 progress comment: 14 Messaging versions ineligible (7d20e92);
-  13 published ones removed from en-us-tib-messaging-userdocs (06cc7ad, not pushed).
+  13 published ones removed from en-us-tib-messaging-userdocs (06cc7ad, pushed 2026-10-17).
 
 - 2026-10-15 — DOCOPS-120 progress comment: 12 Hawk versions ineligible (f298b81).
 
