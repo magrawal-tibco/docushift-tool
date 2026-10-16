@@ -30,7 +30,7 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 **Log** (newest first, one line per session):
 
 - 2026-10-16 — DOCOPS-120 progress comment: 14 Messaging versions ineligible (7d20e92);
-  11 were already published and their folders not yet removed.
+  13 published ones removed from en-us-tib-messaging-userdocs (06cc7ad, not pushed).
 
 - 2026-10-15 — DOCOPS-120 progress comment: 12 Hawk versions ineligible (f298b81).
 
