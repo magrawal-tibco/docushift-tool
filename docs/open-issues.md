@@ -492,6 +492,20 @@ As with Flogo 3.0.1, the docsite returns a web page instead of a ZIP.
 
 ## ActiveMatrix BPM
 
+### 4.3.0 online help not published: 179 pages too deep for Windows
+
+- **Status:** Open
+- **Owner:** unassigned
+- **Raised:** 17 Oct 2026
+- **Blocks publishing:** yes, for 4.3.0's online help (its PDFs and API reference are published)
+
+The help nests topics up to nine folders deep, and 179 of its 1,340 pages would end up past
+Windows' 260-character path limit in the publishing repo. That is too many to rename by hand,
+so it needs a rule, planned as a phase. The main guide's folder is also named
+"tibco-activematrix-bpm-2", which is a poor web address in its own right.
+
+---
+
 ### 4.2.0 is refused at unpacking: two different files with one name
 
 - **Status:** Open
@@ -503,3 +517,18 @@ The package holds RESTServiceConfig.properties and restserviceconfig.properties 
 same folder, with different contents (507 and 568 bytes). Windows cannot keep both, and the
 tool does not pick one on a writer's behalf. It is a configuration sample, not a help page,
 so keeping either is likely harmless, but someone has to say which. 4.3.0 converted.
+
+---
+
+## Business Studio BPM Edition
+
+### 5.6.0, 5.6.1 and 5.7.0 online help waits on three shorter folder names
+
+- **Status:** Waiting, on approval of the proposed names
+- **Owner:** unassigned
+- **Raised:** 17 Oct 2026
+- **Blocks publishing:** yes, for these three versions' online help (their PDFs are published)
+
+Three pages per version would end up past Windows' 260-character path limit. Shorter names
+for three folders in the case-data chapter fix all of them; the proposal is drafted for
+review. 4.3.5 is published.
