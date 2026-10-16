@@ -1,6 +1,6 @@
 # Jira Tracking — What Is Logged in DOCOPS
 
-> **Last reconciled:** 2026-10-16, against Jira and `config/versions.csv`.
+> **Last reconciled:** 2026-10-17, against Jira and `config/versions.csv`.
 > Conventions (site, cloud ID, story points, transitions, who owns what) live in
 > `C:\github\confluence-mcp\reports\docushift-claude-atlassian-context.md`; this file
 > does not repeat them. It answers one question: **is this piece of work in Jira, and where?**
@@ -29,6 +29,9 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 **Left alone on purpose:** DOCOPS-8 is a Task where its siblings are Stories.
 
 **Log** (newest first, one line per session):
+
+- 2026-10-17 — DOCOPS-120 comment (2026-10-16 Messaging) extended: resources repo holds nothing
+  from the removed versions; downloads pages kept, including for products with no version left.
 
 - 2026-10-16 — DOCOPS-120 comment: ActiveSpaces Kafka and Pulsar connector 1.0.0 eligible
   (0cbe145); Kafka connector retired verdict overridden to GA (cbcf82f).
