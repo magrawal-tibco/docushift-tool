@@ -30,6 +30,9 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 **Log** (newest first, one line per session):
 
+- 2026-10-16 — DOCOPS-120 comment: ActiveSpaces Kafka and Pulsar connector 1.0.0 eligible
+  (0cbe145); Kafka connector retired verdict overridden to GA (cbcf82f).
+
 - 2026-10-16 — DOCOPS-120 progress comment: 14 Messaging versions ineligible (7d20e92);
   13 published ones removed from en-us-tib-messaging-userdocs (06cc7ad, not pushed).
 
