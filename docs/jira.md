@@ -23,12 +23,14 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | Family review finished | DOCOPS-120 → Done, then DOCOPS-130 |
 | Edit to DOCOPS-217 is allowed (blocked by a permission check on 2026-10-09) | DOCOPS-217: append the 2026-10-09 publish note → Done |
 | A follow-up from the BusinessConnect warnings is planned | DOCOPS-220 → In Progress |
-| Redtail 7.5.0 and 6.3.1 online help published | DOCOPS-241 → Done |
 | A new phase is opened | One sub-task under the matching story, In Progress, no `retro` |
 
 **Left alone on purpose:** DOCOPS-8 is a Task where its siblings are Stories.
 
 **Log** (newest first, one line per session):
+
+- 2026-10-19 — DOCOPS-241 → Done: Redtail 7.5.0/6.3.1 online help published after three folder renames
+  (9a96b26, f3bff8f).
 
 - 2026-10-19 — Hawk run logged as DOCOPS-241 (In Progress, 0.25 SP, under DOCOPS-7): 7 converted and
   pushed, Redtail 7.5.0/6.3.1 online help held on long paths; DOCOPS-120 comment: 4 Hawk versions
