@@ -539,12 +539,19 @@ review. 4.3.5 is published.
 
 ### Redtail 7.5.0 and 6.3.1 online help waits on six shorter folder names
 
-- **Status:** Open
+- **Status:** Resolved, 19 Oct 2026
 - **Owner:** unassigned
 - **Raised:** 19 Oct 2026
-- **Blocks publishing:** yes, for both versions' online help (their PDFs and API reference are published)
+- **Blocks publishing:** no longer; both versions' online help is published
 
 Four of 7.5.0's 297 pages and two of 6.3.1's 582 would end up past Windows' 260-character
 path limit in the publishing repo (the longest at 280). Few enough to rename by hand, as was
 proposed for Business Studio BPM Edition. Several folders carry a "-2" suffix that is a poor
 web address in its own right.
+
+Resolved by three folder names written into each version's rename-map.csv, approved by the
+user: `com-tibco-hawk-tibjms-hawklistener-microagent` → `hawklistener-microagent` (6.3.1),
+`configuration-tibco-oi-hawk-redtail-enterprise` → `configuration-enterprise` and its `-2` twin
+→ `configuration-ce` (7.5.0). Longest published path is now 259. The `-2` guide in 7.5.0 looks
+like the Container Edition's version of the installation guide (its pages cover containerized
+components), unconfirmed; its other pages keep the `-2` suffix.
