@@ -29,6 +29,9 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 **Log** (newest first, one line per session):
 
+- 2026-10-19 — Mainframe run logged as DOCOPS-242 (Done, 0.25 SP, under DOCOPS-7): 11 of 11 converted and
+  published across 7 products (80f7f38); DOCOPS-120 comment: 8 versions ineligible, 3 made eligible.
+
 - 2026-10-19 — DOCOPS-241 note: Redtail 7.5.0 Container Edition guide confirmed and renamed (b9fe2b1).
 
 - 2026-10-19 — DOCOPS-241 → Done: Redtail 7.5.0/6.3.1 online help published after three folder renames
@@ -182,7 +185,7 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | 54 | A release-notes folder that copies the main guides | DOCOPS-239 |
 
 Other logged work: Jira reconcile and this handoff DOCOPS-208; stakeholder status page DOCOPS-197; TIBCO family reassignments DOCOPS-120
-(in progress, progress kept as comments); ibi family regroup DOCOPS-207; catalog refresh and 2026-10-09 end-of-support report DOCOPS-215; cloud family run DOCOPS-222; EMS, FTL and Messaging run DOCOPS-223; Data Management run DOCOPS-238; FTL, ActiveSpaces, EMS and Messaging re-run DOCOPS-240; Hawk run DOCOPS-241.
+(in progress, progress kept as comments); ibi family regroup DOCOPS-207; catalog refresh and 2026-10-09 end-of-support report DOCOPS-215; cloud family run DOCOPS-222; EMS, FTL and Messaging run DOCOPS-223; Data Management run DOCOPS-238; FTL, ActiveSpaces, EMS and Messaging re-run DOCOPS-240; Hawk run DOCOPS-241; Mainframe run DOCOPS-242.
 
 ## Open run tasks (as of 2026-10-08)
 
