@@ -561,33 +561,15 @@ redirect.
 
 ---
 
-## iProcess Engine, iProcess Technology Plug-ins
+## iProcess Suite
 
-### Online help held back by over-long page paths
+### 1.0.0 is a suite landing page only
 
-- **Status:** Open
+- **Status:** Accepted
 - **Owner:** unassigned
-- **Raised:** 19 Oct 2026
-- **Blocks publishing:** yes, for the online help of five versions (their PDFs are published)
+- **Raised:** 20 Oct 2026
+- **Blocks publishing:** no
 
-Some pages would end up past Windows' 260-character path limit in the publishing repo, so the
-online help of Engine 11.10.0, 11.9.2 and 11.9.1 and Technology Plug-ins 11.10.0 and 11.9.2 was
-not published. Engine 11.10.0 has about 11 such files across 8 folders. Each of the other four
-has 2 or 3. The deepest folder names come from the Objects Director section of the
-Administrator's Guide (Engine) and the BusinessWorks step pages (Plug-ins). To decide: shorten
-those folder names by hand, the way Redtail 7.5.0 and 6.3.1 were fixed.
-
----
-
-## iProcess Server Objects (Java), iProcess Suite
-
-### No package for Server Objects (Java) 11.9.0 or Suite 1.0.0
-
-- **Status:** Open
-- **Owner:** unassigned
-- **Raised:** 19 Oct 2026
-- **Blocks publishing:** yes, for these two versions
-
-The documentation site returns an error page instead of a package for both. Server Objects
-(Java) 11.10.0 downloads normally, and the Server Objects packages hold only PDFs, so 11.9.0
-is missing a few PDFs. To decide: mark the versions out of scope, or get the packages by hand.
+The iProcess Suite 1.0.0 entry on the documentation site is only a suite page, a single HTML page
+with no documentation package. There is nothing to convert, so the version is marked not
+eligible (confirmed by the user, 20 Oct 2026).
