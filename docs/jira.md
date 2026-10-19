@@ -23,15 +23,15 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | Family review finished | DOCOPS-120 → Done, then DOCOPS-130 |
 | Edit to DOCOPS-217 is allowed (blocked by a permission check on 2026-10-09) | DOCOPS-217: append the 2026-10-09 publish note → Done |
 | A follow-up from the BusinessConnect warnings is planned | DOCOPS-220 → In Progress |
-| User approves | DOCOPS-120 progress comment: 7 versions ineligible (0db0b7c) |
 | A new phase is opened | One sub-task under the matching story, In Progress, no `retro` |
 
 **Left alone on purpose:** DOCOPS-8 is a Task where its siblings are Stories.
 
 **Log** (newest first, one line per session):
 
-- 2026-10-19 — No Jira change. FTL, ActiveSpaces, EMS, Messaging convert/reframe/sync re-run
-  (4120d41); 7 versions ineligible (0db0b7c), DOCOPS-120 comment pending.
+- 2026-10-19 — FTL, ActiveSpaces, EMS and Messaging re-run logged as DOCOPS-240 (Done, 0.25 SP,
+  under DOCOPS-7): 31 of 35 converted, 5 ActiveSpaces versions pushed (a0267c6); DOCOPS-120
+  progress comment: 7 versions ineligible (0db0b7c).
 
 - 2026-10-17 — DOCOPS-120 comment (2026-10-16 Messaging) extended: resources repo holds nothing
   from the removed versions; downloads pages kept, including for products with no version left.
@@ -173,7 +173,7 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | 54 | A release-notes folder that copies the main guides | DOCOPS-239 |
 
 Other logged work: Jira reconcile and this handoff DOCOPS-208; stakeholder status page DOCOPS-197; TIBCO family reassignments DOCOPS-120
-(in progress, progress kept as comments); ibi family regroup DOCOPS-207; catalog refresh and 2026-10-09 end-of-support report DOCOPS-215; cloud family run DOCOPS-222; EMS, FTL and Messaging run DOCOPS-223; Data Management run DOCOPS-238.
+(in progress, progress kept as comments); ibi family regroup DOCOPS-207; catalog refresh and 2026-10-09 end-of-support report DOCOPS-215; cloud family run DOCOPS-222; EMS, FTL and Messaging run DOCOPS-223; Data Management run DOCOPS-238; FTL, ActiveSpaces, EMS and Messaging re-run DOCOPS-240.
 
 ## Open run tasks (as of 2026-10-08)
 
