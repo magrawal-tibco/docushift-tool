@@ -1,6 +1,6 @@
 # Jira Tracking — What Is Logged in DOCOPS
 
-> **Last reconciled:** 2026-10-19, against Jira and `config/versions.csv`.
+> **Last reconciled:** 2026-10-20, against Jira and `config/versions.csv`.
 > Conventions (site, cloud ID, story points, transitions, who owns what) live in
 > `C:\github\confluence-mcp\reports\docushift-claude-atlassian-context.md`; this file
 > does not repeat them. It answers one question: **is this piece of work in Jira, and where?**
@@ -23,12 +23,14 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | Family review finished | DOCOPS-120 → Done, then DOCOPS-130 |
 | Edit to DOCOPS-217 is allowed (blocked by a permission check on 2026-10-09) | DOCOPS-217: append the 2026-10-09 publish note → Done |
 | A follow-up from the BusinessConnect warnings is planned | DOCOPS-220 → In Progress |
-| iProcess long-path online help (5 versions) published and 2 missing packages settled | DOCOPS-243 → Done |
 | A new phase is opened | One sub-task under the matching story, In Progress, no `retro` |
 
 **Left alone on purpose:** DOCOPS-8 is a Task where its siblings are Stories.
 
 **Log** (newest first, one line per session):
+
+- 2026-10-20 — DOCOPS-243 → Done: 5 held iProcess online help sets published after approved folder
+  renames; Server Objects (Java) 11.9.0 added by hand; Suite 1.0.0 ineligible, suite page only (a370481).
 
 - 2026-10-19 — iProcess run logged as DOCOPS-243 (In Progress, 0.25 SP, under DOCOPS-7): 13 of 18
   converted, 8 online help sets published, 5 held on long paths, 2 packages missing (53ba810);
