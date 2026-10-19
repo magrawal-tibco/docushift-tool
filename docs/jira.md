@@ -31,6 +31,7 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 - 2026-10-20 — DOCOPS-243 → Done: 5 held iProcess online help sets published after approved folder
   renames; Server Objects (Java) 11.9.0 added by hand; Suite 1.0.0 ineligible, suite page only (a370481).
+  Pushed to en-us-tib-iprocess-userdocs (126927e); comment added to DOCOPS-243.
 
 - 2026-10-19 — iProcess run logged as DOCOPS-243 (In Progress, 0.25 SP, under DOCOPS-7): 13 of 18
   converted, 8 online help sets published, 5 held on long paths, 2 packages missing (53ba810);
