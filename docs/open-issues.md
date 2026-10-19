@@ -552,6 +552,9 @@ web address in its own right.
 Resolved by three folder names written into each version's rename-map.csv, approved by the
 user: `com-tibco-hawk-tibjms-hawklistener-microagent` → `hawklistener-microagent` (6.3.1),
 `configuration-tibco-oi-hawk-redtail-enterprise` → `configuration-enterprise` and its `-2` twin
-→ `configuration-ce` (7.5.0). Longest published path is now 259. The `-2` guide in 7.5.0 looks
-like the Container Edition's version of the installation guide (its pages cover containerized
-components), unconfirmed; its other pages keep the `-2` suffix.
+→ `configuration-ce` (7.5.0). Longest published path is now 259. The `-2` guide in 7.5.0 is the Container Edition's
+installation guide (its pages cover containerized
+components); the user confirmed it, and the guide was renamed `installation-configuration-administration-ce`
+with the `-2` suffixes dropped from its 17 pages (longest path 255 within it). The redirect maps send
+docs.tibco.com addresses to the new paths; the interim `-2` addresses, live for about an hour, get no
+redirect.
