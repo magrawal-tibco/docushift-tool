@@ -23,14 +23,16 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | Family review finished | DOCOPS-120 → Done, then DOCOPS-130 |
 | Edit to DOCOPS-217 is allowed (blocked by a permission check on 2026-10-09) | DOCOPS-217: append the 2026-10-09 publish note → Done |
 | A follow-up from the BusinessConnect warnings is planned | DOCOPS-220 → In Progress |
+| Redtail 7.5.0 and 6.3.1 online help published | DOCOPS-241 → Done |
 | A new phase is opened | One sub-task under the matching story, In Progress, no `retro` |
 
 **Left alone on purpose:** DOCOPS-8 is a Task where its siblings are Stories.
 
 **Log** (newest first, one line per session):
 
-- 2026-10-19 — No Jira change yet. Hawk run (4fdc258): 7 converted, Redtail 7.5.0/6.3.1 online help
-  held on long paths; 4 Hawk versions ineligible (62943c2). Publishing repos committed, not pushed.
+- 2026-10-19 — Hawk run logged as DOCOPS-241 (In Progress, 0.25 SP, under DOCOPS-7): 7 converted and
+  pushed, Redtail 7.5.0/6.3.1 online help held on long paths; DOCOPS-120 comment: 4 Hawk versions
+  ineligible (62943c2).
 
 - 2026-10-19 — FTL, ActiveSpaces, EMS and Messaging re-run logged as DOCOPS-240 (Done, 0.25 SP,
   under DOCOPS-7): 31 of 35 converted, 5 ActiveSpaces versions pushed (a0267c6); DOCOPS-120
@@ -176,7 +178,7 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | 54 | A release-notes folder that copies the main guides | DOCOPS-239 |
 
 Other logged work: Jira reconcile and this handoff DOCOPS-208; stakeholder status page DOCOPS-197; TIBCO family reassignments DOCOPS-120
-(in progress, progress kept as comments); ibi family regroup DOCOPS-207; catalog refresh and 2026-10-09 end-of-support report DOCOPS-215; cloud family run DOCOPS-222; EMS, FTL and Messaging run DOCOPS-223; Data Management run DOCOPS-238; FTL, ActiveSpaces, EMS and Messaging re-run DOCOPS-240.
+(in progress, progress kept as comments); ibi family regroup DOCOPS-207; catalog refresh and 2026-10-09 end-of-support report DOCOPS-215; cloud family run DOCOPS-222; EMS, FTL and Messaging run DOCOPS-223; Data Management run DOCOPS-238; FTL, ActiveSpaces, EMS and Messaging re-run DOCOPS-240; Hawk run DOCOPS-241.
 
 ## Open run tasks (as of 2026-10-08)
 
