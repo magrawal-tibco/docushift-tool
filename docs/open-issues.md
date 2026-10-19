@@ -532,3 +532,19 @@ so keeping either is likely harmless, but someone has to say which. 4.3.0 conver
 Three pages per version would end up past Windows' 260-character path limit. Shorter names
 for three folders in the case-data chapter fix all of them; the proposal is drafted for
 review. 4.3.5 is published.
+
+---
+
+## Hawk
+
+### Redtail 7.5.0 and 6.3.1 online help waits on six shorter folder names
+
+- **Status:** Open
+- **Owner:** unassigned
+- **Raised:** 19 Oct 2026
+- **Blocks publishing:** yes, for both versions' online help (their PDFs and API reference are published)
+
+Four of 7.5.0's 297 pages and two of 6.3.1's 582 would end up past Windows' 260-character
+path limit in the publishing repo (the longest at 280). Few enough to rename by hand, as was
+proposed for Business Studio BPM Edition. Several folders carry a "-2" suffix that is a poor
+web address in its own right.
