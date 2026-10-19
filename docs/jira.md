@@ -1,6 +1,6 @@
 # Jira Tracking — What Is Logged in DOCOPS
 
-> **Last reconciled:** 2026-10-17, against Jira and `config/versions.csv`.
+> **Last reconciled:** 2026-10-19, against Jira and `config/versions.csv`.
 > Conventions (site, cloud ID, story points, transitions, who owns what) live in
 > `C:\github\confluence-mcp\reports\docushift-claude-atlassian-context.md`; this file
 > does not repeat them. It answers one question: **is this piece of work in Jira, and where?**
@@ -23,11 +23,15 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | Family review finished | DOCOPS-120 → Done, then DOCOPS-130 |
 | Edit to DOCOPS-217 is allowed (blocked by a permission check on 2026-10-09) | DOCOPS-217: append the 2026-10-09 publish note → Done |
 | A follow-up from the BusinessConnect warnings is planned | DOCOPS-220 → In Progress |
+| User approves | DOCOPS-120 progress comment: 7 versions ineligible (0db0b7c) |
 | A new phase is opened | One sub-task under the matching story, In Progress, no `retro` |
 
 **Left alone on purpose:** DOCOPS-8 is a Task where its siblings are Stories.
 
 **Log** (newest first, one line per session):
+
+- 2026-10-19 — No Jira change. FTL, ActiveSpaces, EMS, Messaging convert/reframe/sync re-run
+  (4120d41); 7 versions ineligible (0db0b7c), DOCOPS-120 comment pending.
 
 - 2026-10-17 — DOCOPS-120 comment (2026-10-16 Messaging) extended: resources repo holds nothing
   from the removed versions; downloads pages kept, including for products with no version left.
