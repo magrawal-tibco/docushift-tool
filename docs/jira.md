@@ -29,6 +29,9 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 **Log** (newest first, one line per session):
 
+- 2026-10-19 — No Jira change yet. Hawk run (4fdc258): 7 converted, Redtail 7.5.0/6.3.1 online help
+  held on long paths; 4 Hawk versions ineligible (62943c2). Publishing repos committed, not pushed.
+
 - 2026-10-19 — FTL, ActiveSpaces, EMS and Messaging re-run logged as DOCOPS-240 (Done, 0.25 SP,
   under DOCOPS-7): 31 of 35 converted, 5 ActiveSpaces versions pushed (a0267c6); DOCOPS-120
   progress comment: 7 versions ineligible (0db0b7c).
