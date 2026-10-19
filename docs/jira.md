@@ -29,6 +29,8 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 **Log** (newest first, one line per session):
 
+- 2026-10-19 — DOCOPS-241 note: Redtail 7.5.0 Container Edition guide confirmed and renamed (b9fe2b1).
+
 - 2026-10-19 — DOCOPS-241 → Done: Redtail 7.5.0/6.3.1 online help published after three folder renames
   (9a96b26, f3bff8f).
 
