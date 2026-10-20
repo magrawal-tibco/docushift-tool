@@ -29,6 +29,10 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 **Log** (newest first, one line per session):
 
+- 2026-10-20 — Platform run logged as DOCOPS-244 (Done, 0.25 SP, under DOCOPS-7): 7 of 7 converted and
+  published, 4 folders renamed for long paths (9b9f6d1); pushed to en-us-tib-platform-userdocs (0407104).
+  DOCOPS-120 comment: OpenSpirit made wholly ineligible.
+
 - 2026-10-20 — DOCOPS-243 → Done: 5 held iProcess online help sets published after approved folder
   renames; Server Objects (Java) 11.9.0 added by hand; Suite 1.0.0 ineligible, suite page only (a370481).
   Pushed to en-us-tib-iprocess-userdocs (126927e); comment added to DOCOPS-243.
@@ -193,7 +197,7 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | 54 | A release-notes folder that copies the main guides | DOCOPS-239 |
 
 Other logged work: Jira reconcile and this handoff DOCOPS-208; stakeholder status page DOCOPS-197; TIBCO family reassignments DOCOPS-120
-(in progress, progress kept as comments); ibi family regroup DOCOPS-207; catalog refresh and 2026-10-09 end-of-support report DOCOPS-215; cloud family run DOCOPS-222; EMS, FTL and Messaging run DOCOPS-223; Data Management run DOCOPS-238; FTL, ActiveSpaces, EMS and Messaging re-run DOCOPS-240; Hawk run DOCOPS-241; Mainframe run DOCOPS-242; iProcess run DOCOPS-243.
+(in progress, progress kept as comments); ibi family regroup DOCOPS-207; catalog refresh and 2026-10-09 end-of-support report DOCOPS-215; cloud family run DOCOPS-222; EMS, FTL and Messaging run DOCOPS-223; Data Management run DOCOPS-238; FTL, ActiveSpaces, EMS and Messaging re-run DOCOPS-240; Hawk run DOCOPS-241; Mainframe run DOCOPS-242; iProcess run DOCOPS-243; Platform run DOCOPS-244.
 
 ## Open run tasks (as of 2026-10-08)
 
