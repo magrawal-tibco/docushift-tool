@@ -68,7 +68,8 @@ real package names in the html-to-md ZIP cache, 496 of which match a catalog row
 - **`resolve_url` is now `resolve_urls`**, returning `(source, url)` pairs. The one test that patched the old name was updated. A sitemap name equal to the template's gives one candidate, labelled `sitemap`.
 - **Dry run, measured.** `download --all --dry-run`: 1,665 versions, 930 `sitemap`, 627 `template`, 88 `archive`, 20 `manual`. Of the `sitemap` rows, **96 carry a name different from the template**, exactly the 96 predicted, including all 4 StreamBase FIX Engine failures (`spotfire-streambase-…`).
 - **Tests:** 8 new in `test_downloader.py`, 1 in `test_cli.py`. Full suite 2,149 passed, lint clean.
-- **Pending (network):** re-download the 4 StreamBase versions; `catalog sitemap` over the whole scope, then repeat the dry run.
+- **StreamBase, done 2026-10-21:** the 4 versions downloaded under the sitemap name. Each is PDF-only (readme, licence, VPAT) like its siblings, and is published.
+- **Pending (network):** `catalog sitemap` over the whole scope, then repeat the dry run.
 
 ---
 
