@@ -426,3 +426,8 @@ out_of_scope:
   - slug: tibco-analytics-consumer-add-on
     display_name: "TIBCO® Analytics - Consumer Add-on"
     reason: "Moved to the Spotfire BU, out of scope (2026-10-08)"
+
+  # Out of scope on dev input, 2026-10-21.
+  - slug: spotfire-statistics-services
+    display_name: "Spotfire® Statistics Services"
+    reason: "Out of scope on dev input (2026-10-21)"
