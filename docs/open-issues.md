@@ -576,6 +576,22 @@ eligible (confirmed by the user, 20 Oct 2026).
 
 ---
 
+## General family
+
+### API references wait on a resources repository
+
+- **Status:** Open
+- **Owner:** unassigned
+- **Raised:** 21 Oct 2026
+- **Blocks publishing:** yes, for the API references of Enterprise Administrator 2.4.2 and 2.4.3
+  and Patterns 6.1.2 and 6.2.0 (their help, guides and release notes are published)
+
+The General family's resources folder has no GitHub repository behind it, so what the run
+placed there cannot be pushed. Once someone creates and clones the repository, the folder can be
+pushed as it is.
+
+---
+
 ## Health Essentials Cloud
 
 ### The Cloud version has no package

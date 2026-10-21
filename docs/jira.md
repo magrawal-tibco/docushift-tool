@@ -1,6 +1,6 @@
 # Jira Tracking — What Is Logged in DOCOPS
 
-> **Last reconciled:** 2026-10-20, against Jira and `config/versions.csv`.
+> **Last reconciled:** 2026-10-21, against Jira and `config/versions.csv`.
 > Conventions (site, cloud ID, story points, transitions, who owns what) live in
 > `C:\github\confluence-mcp\reports\docushift-claude-atlassian-context.md`; this file
 > does not repeat them. It answers one question: **is this piece of work in Jira, and where?**
@@ -23,11 +23,16 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | Family review finished | DOCOPS-120 → Done, then DOCOPS-130 |
 | Edit to DOCOPS-217 is allowed (blocked by a permission check on 2026-10-09) | DOCOPS-217: append the 2026-10-09 publish note → Done |
 | A follow-up from the BusinessConnect warnings is planned | DOCOPS-220 → In Progress |
+| General: Health Essentials Cloud and Patterns 5.7.1 published or made ineligible; resources repo pushed | DOCOPS-245: dated note → Done |
 | A new phase is opened | One sub-task under the matching story, In Progress, no `retro` |
 
 **Left alone on purpose:** DOCOPS-8 is a Task where its siblings are Stories.
 
 **Log** (newest first, one line per session):
+
+- 2026-10-21 — General run logged as DOCOPS-245 (In Progress, 0.25 SP, due 24 Oct, under DOCOPS-7): 11 of 13
+  published after 2 folder renames (1c29b02), pushed to en-us-tib-general-userdocs (a7d2916); 2 held
+  as open issues. DOCOPS-120 comment: 52 General versions switched off.
 
 - 2026-10-20 — Platform run logged as DOCOPS-244 (Done, 0.25 SP, under DOCOPS-7): 7 of 7 converted and
   published, 4 folders renamed for long paths (9b9f6d1); pushed to en-us-tib-platform-userdocs (0407104).
@@ -197,7 +202,7 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | 54 | A release-notes folder that copies the main guides | DOCOPS-239 |
 
 Other logged work: Jira reconcile and this handoff DOCOPS-208; stakeholder status page DOCOPS-197; TIBCO family reassignments DOCOPS-120
-(in progress, progress kept as comments); ibi family regroup DOCOPS-207; catalog refresh and 2026-10-09 end-of-support report DOCOPS-215; cloud family run DOCOPS-222; EMS, FTL and Messaging run DOCOPS-223; Data Management run DOCOPS-238; FTL, ActiveSpaces, EMS and Messaging re-run DOCOPS-240; Hawk run DOCOPS-241; Mainframe run DOCOPS-242; iProcess run DOCOPS-243; Platform run DOCOPS-244.
+(in progress, progress kept as comments); ibi family regroup DOCOPS-207; catalog refresh and 2026-10-09 end-of-support report DOCOPS-215; cloud family run DOCOPS-222; EMS, FTL and Messaging run DOCOPS-223; Data Management run DOCOPS-238; FTL, ActiveSpaces, EMS and Messaging re-run DOCOPS-240; Hawk run DOCOPS-241; Mainframe run DOCOPS-242; iProcess run DOCOPS-243; Platform run DOCOPS-244; General run DOCOPS-245.
 
 ## Open run tasks (as of 2026-10-08)
 
