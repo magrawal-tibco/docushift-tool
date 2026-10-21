@@ -161,7 +161,7 @@ processed.
 
 ---
 
-## Spotfire Data Science – Author, ActiveMatrix Adapter Service Engine for PeopleSoft
+## ActiveMatrix Adapter Service Engine for PeopleSoft
 
 ### Counted as converted, but the converted files are gone
 
@@ -170,17 +170,15 @@ processed.
 - **Raised:** 5 Oct 2026
 - **Blocks publishing:** no
 
-One version of each product, Data Science – Author 1.4.0 and the PeopleSoft adapter
-6.0.0, was converted in an early trial on 12 Sep 2026 from a folder supplied by hand.
-Those converted files have since been deleted, but the tool still remembers the
-conversion. So the versions sheet shows both as "converted" and never synced, and the
-status report counts two more converted versions than really exist.
+Version 6.0.0 was converted in an early trial on 12 Sep 2026 from a folder supplied by
+hand. Those converted files have since been deleted, but the tool still remembers the
+conversion. So the versions sheet shows it as "converted" and never synced, and the
+status report counts one more converted version than really exists.
 
-Neither package has ever been downloaded or unpacked in the working area, and the tool
-does not yet know their help format. Fixing this means running the full sequence for
-both: download, unpack, convert, then sync. The PeopleSoft package sits at an unusual
-web address, so it may have to be downloaded by hand. Decided on 5 Oct 2026 to leave
-both as they are for now.
+The package has never been downloaded or unpacked in the working area, and the tool
+does not yet know its help format. Fixing this means running the full sequence:
+download, unpack, convert, then sync. The package sits at an unusual web address, so it
+may have to be downloaded by hand. Decided on 5 Oct 2026 to leave it as it is for now.
 
 ---
 
@@ -578,3 +576,20 @@ marked not eligible (decided by the user, 21 Oct 2026).
 The package holds the Learn user interface guide twice, in folders named "learning-UI" and
 "learning-ui", with different text on all 40 pages. Rather than pick a copy, 5.7.1 is marked
 not eligible; 6.2.0 and 6.1.2 are published (decided by the user, 21 Oct 2026).
+
+---
+
+## Statistica family
+
+### Publishing never removes a version that stops being eligible
+
+- **Status:** Open
+- **Owner:** unassigned
+- **Raised:** 22 Oct 2026
+- **Blocks publishing:** no, but a withdrawn version stays published unless removed by hand
+
+On 21 Oct 2026 the developers withdrew 22 Statistica and Data Science versions after
+many had already been published. Publishing only adds and replaces versions, so the
+withdrawn ones stayed. This time both Statistica publishing folders were deleted and
+republished, leaving the 19 approved versions. A family that is already pushed cannot be
+cleared that way, so the tool needs to remove withdrawn versions itself.
