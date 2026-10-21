@@ -450,40 +450,14 @@ is refreshed in bulk.
 
 ---
 
-## Business Studio Community Edition
-
-### 4.2.0 waits on the BPM docs repository
-
-- **Status:** Open
-- **Owner:** unassigned
-- **Raised:** 15 Oct 2026
-- **Blocks publishing:** yes, for 4.2.0, the only Community Edition version
-
-The package was obtained by hand on 21 Oct 2026. It holds only PDFs and a readme, which are
-placed in the BPM docs repository, and goes live when that repository is first pushed (below).
-
----
-
 ## ActiveMatrix BPM
-
-### The BPM docs repository has never been pushed
-
-- **Status:** Open
-- **Owner:** unassigned
-- **Raised:** 21 Oct 2026
-- **Blocks publishing:** yes, for every BPM product's online help and PDFs
-
-The BPM docs repository on GitHub was empty on 21 Oct 2026, and the local copy has no commits:
-everything synced for the family sits there uncommitted. Only the resources repository (API
-references, archives) is published. A first commit and push is needed, on `main` like the other
-families (the local copy is on `master`).
 
 ### 4.3.0 online help not published: 179 pages too deep for Windows
 
 - **Status:** Open
 - **Owner:** unassigned
 - **Raised:** 17 Oct 2026
-- **Blocks publishing:** yes, for 4.3.0's online help (its API reference is published; its PDFs wait on the repository above)
+- **Blocks publishing:** yes, for 4.3.0's online help (its PDFs and API reference are published)
 
 The help nests topics up to nine folders deep, and 179 of its 1,340 pages would end up past
 Windows' 260-character path limit in the publishing repo. That is too many to rename by hand,

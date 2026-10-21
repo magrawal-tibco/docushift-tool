@@ -30,6 +30,10 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 **Log** (newest first, one line per session):
 
+- 2026-10-21 — DOCOPS-246 (Done, 0.25 SP, under DOCOPS-7): Flogo 3.0.1, FormBuilder 5.3.2, PSI 2.1.0
+  and Business Studio CE 4.2.0 from hand-obtained packages; BPM docs repo first pushed (4cc5f3a).
+  DOCOPS-122 note: 7 download-failed left. DOCOPS-120 comment: Buildpack for PCF 2.2.1 ineligible.
+
 - 2026-10-21 — DOCOPS-123 note: 4 StreamBase FIX Engine versions re-downloaded, PDF-only, published
   (df0b381, d24b83c); stays In Progress for `catalog sitemap`. DOCOPS-122 note: 12 download-failed left.
 
@@ -208,7 +212,7 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | 54 | A release-notes folder that copies the main guides | DOCOPS-239 |
 
 Other logged work: Jira reconcile and this handoff DOCOPS-208; stakeholder status page DOCOPS-197; TIBCO family reassignments DOCOPS-120
-(in progress, progress kept as comments); ibi family regroup DOCOPS-207; catalog refresh and 2026-10-09 end-of-support report DOCOPS-215; cloud family run DOCOPS-222; EMS, FTL and Messaging run DOCOPS-223; Data Management run DOCOPS-238; FTL, ActiveSpaces, EMS and Messaging re-run DOCOPS-240; Hawk run DOCOPS-241; Mainframe run DOCOPS-242; iProcess run DOCOPS-243; Platform run DOCOPS-244; General run DOCOPS-245.
+(in progress, progress kept as comments); ibi family regroup DOCOPS-207; catalog refresh and 2026-10-09 end-of-support report DOCOPS-215; cloud family run DOCOPS-222; EMS, FTL and Messaging run DOCOPS-223; Data Management run DOCOPS-238; FTL, ActiveSpaces, EMS and Messaging re-run DOCOPS-240; Hawk run DOCOPS-241; Mainframe run DOCOPS-242; iProcess run DOCOPS-243; Platform run DOCOPS-244; General run DOCOPS-245; hand-obtained packages and first BPM push DOCOPS-246.
 
 ## Open run tasks (as of 2026-10-08)
 
