@@ -30,6 +30,10 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 **Log** (newest first, one line per session):
 
+- 2026-10-21 — DOCOPS-247 (Done, 0.25 SP, under DOCOPS-7): last 6 download-failed versions published
+  from hand-obtained packages (1e077dd); DOCOPS-147 → Done (ibi DSML 1.0.7). DOCOPS-122 note: 0
+  download-failed left. DOCOPS-120 comment: B2B 1.1.0 ineligible.
+
 - 2026-10-21 — DOCOPS-246 note: BPM resources repo, empty on GitHub since 19 Oct, first pushed
   (15a525f, 3,626 files); stale local backup folder removed; no validate errors across BPM.
 
@@ -215,7 +219,7 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | 54 | A release-notes folder that copies the main guides | DOCOPS-239 |
 
 Other logged work: Jira reconcile and this handoff DOCOPS-208; stakeholder status page DOCOPS-197; TIBCO family reassignments DOCOPS-120
-(in progress, progress kept as comments); ibi family regroup DOCOPS-207; catalog refresh and 2026-10-09 end-of-support report DOCOPS-215; cloud family run DOCOPS-222; EMS, FTL and Messaging run DOCOPS-223; Data Management run DOCOPS-238; FTL, ActiveSpaces, EMS and Messaging re-run DOCOPS-240; Hawk run DOCOPS-241; Mainframe run DOCOPS-242; iProcess run DOCOPS-243; Platform run DOCOPS-244; General run DOCOPS-245; hand-obtained packages and first BPM push DOCOPS-246.
+(in progress, progress kept as comments); ibi family regroup DOCOPS-207; catalog refresh and 2026-10-09 end-of-support report DOCOPS-215; cloud family run DOCOPS-222; EMS, FTL and Messaging run DOCOPS-223; Data Management run DOCOPS-238; FTL, ActiveSpaces, EMS and Messaging re-run DOCOPS-240; Hawk run DOCOPS-241; Mainframe run DOCOPS-242; iProcess run DOCOPS-243; Platform run DOCOPS-244; General run DOCOPS-245; hand-obtained packages and first BPM push DOCOPS-246; last 6 download failures DOCOPS-247.
 
 ## Open run tasks (as of 2026-10-08)
 
