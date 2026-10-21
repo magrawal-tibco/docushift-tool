@@ -15,7 +15,7 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | When this happens | Do this in Jira |
 |---|---|
 | Phase 47 re-runs (8 versions) pass | DOCOPS-187 → Done |
-| Phase 40 network runs finish | DOCOPS-123 → Done |
+| `catalog sitemap` over the whole scope run (StreamBase half done 2026-10-21) | DOCOPS-123 → Done |
 | 50 long-path + 8 DITA versions re-run | DOCOPS-188 → Done |
 | `sync --bu tibco` + `validate` run | DOCOPS-134, DOCOPS-135; refresh counts in DOCOPS-122, 125–127 |
 | ibi re-sync | DOCOPS-200 → Done |
@@ -29,6 +29,9 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 **Left alone on purpose:** DOCOPS-8 is a Task where its siblings are Stories.
 
 **Log** (newest first, one line per session):
+
+- 2026-10-21 — DOCOPS-123 note: 4 StreamBase FIX Engine versions re-downloaded, PDF-only, published
+  (df0b381, d24b83c); stays In Progress for `catalog sitemap`. DOCOPS-122 note: 12 download-failed left.
 
 - 2026-10-21 — DOCOPS-245 note: Health Essentials Cloud and Patterns 5.7.1 made ineligible, 11 of 11
   published (2dc18e1); still waits on the General resources repo. DOCOPS-120 comment added.
