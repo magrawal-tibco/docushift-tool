@@ -373,44 +373,17 @@ are gone from this workspace, so finding the cause needs a fresh download.
 
 ---
 
-## Flogo
-
-### 3.0.1 has no downloadable package
-
-- **Status:** Open
-- **Owner:** unassigned
-- **Raised:** 14 Oct 2026
-- **Blocks publishing:** yes, for 3.0.1
-
-The docsite's package link for 3.0.1 returns a web page instead of a ZIP, most often a
-sign-in or error page. The other five Flogo versions are published. A retry may work
-once the docsite is fixed; otherwise the package has to be obtained by hand.
-
----
-
 ## BusinessWorks
 
-### Container Edition Buildpack for PCF 2.2.1 and FormBuilder 5.3.2 have no package
+### Container Edition Buildpack for PCF 2.2.1 has no package
 
-- **Status:** Open
+- **Status:** Accepted
 - **Owner:** unassigned
 - **Raised:** 14 Oct 2026
-- **Blocks publishing:** yes, for these two versions
+- **Blocks publishing:** no
 
-As with Flogo 3.0.1, the docsite returns a web page instead of a ZIP.
-
----
-
-## Fulfillment
-
-### Product and Service Inventory 2.1.0 has no package
-
-- **Status:** Open
-- **Owner:** unassigned
-- **Raised:** 14 Oct 2026
-- **Blocks publishing:** yes, for 2.1.0
-
-As with Flogo 3.0.1, the docsite returns a web page instead of a ZIP.
+The docsite returns a web page instead of a ZIP, so there is nothing to convert. The version is
+marked not eligible (decided by the user, 21 Oct 2026).
 
 ---
 
@@ -479,25 +452,38 @@ is refreshed in bulk.
 
 ## Business Studio Community Edition
 
-### 4.2.0 has no package
+### 4.2.0 waits on the BPM docs repository
 
 - **Status:** Open
 - **Owner:** unassigned
 - **Raised:** 15 Oct 2026
 - **Blocks publishing:** yes, for 4.2.0, the only Community Edition version
 
-As with Flogo 3.0.1, the docsite returns a web page instead of a ZIP.
+The package was obtained by hand on 21 Oct 2026. It holds only PDFs and a readme, which are
+placed in the BPM docs repository, and goes live when that repository is first pushed (below).
 
 ---
 
 ## ActiveMatrix BPM
+
+### The BPM docs repository has never been pushed
+
+- **Status:** Open
+- **Owner:** unassigned
+- **Raised:** 21 Oct 2026
+- **Blocks publishing:** yes, for every BPM product's online help and PDFs
+
+The BPM docs repository on GitHub was empty on 21 Oct 2026, and the local copy has no commits:
+everything synced for the family sits there uncommitted. Only the resources repository (API
+references, archives) is published. A first commit and push is needed, on `main` like the other
+families (the local copy is on `master`).
 
 ### 4.3.0 online help not published: 179 pages too deep for Windows
 
 - **Status:** Open
 - **Owner:** unassigned
 - **Raised:** 17 Oct 2026
-- **Blocks publishing:** yes, for 4.3.0's online help (its PDFs and API reference are published)
+- **Blocks publishing:** yes, for 4.3.0's online help (its API reference is published; its PDFs wait on the repository above)
 
 The help nests topics up to nine folders deep, and 179 of its 1,340 pages would end up past
 Windows' 260-character path limit in the publishing repo. That is too many to rename by hand,
