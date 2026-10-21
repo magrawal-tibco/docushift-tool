@@ -30,6 +30,9 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 **Log** (newest first, one line per session):
 
+- 2026-10-21 — DOCOPS-246 note: BPM resources repo, empty on GitHub since 19 Oct, first pushed
+  (15a525f, 3,626 files); stale local backup folder removed; no validate errors across BPM.
+
 - 2026-10-21 — DOCOPS-246 (Done, 0.25 SP, under DOCOPS-7): Flogo 3.0.1, FormBuilder 5.3.2, PSI 2.1.0
   and Business Studio CE 4.2.0 from hand-obtained packages; BPM docs repo first pushed (4cc5f3a).
   DOCOPS-122 note: 7 download-failed left. DOCOPS-120 comment: Buildpack for PCF 2.2.1 ineligible.
