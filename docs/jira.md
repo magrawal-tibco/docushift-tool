@@ -1,6 +1,6 @@
 # Jira Tracking — What Is Logged in DOCOPS
 
-> **Last reconciled:** 2026-10-21, against Jira and `config/versions.csv`.
+> **Last reconciled:** 2026-10-22, against Jira and `config/versions.csv`.
 > Conventions (site, cloud ID, story points, transitions, who owns what) live in
 > `C:\github\confluence-mcp\reports\docushift-claude-atlassian-context.md`; this file
 > does not repeat them. It answers one question: **is this piece of work in Jira, and where?**
@@ -29,6 +29,10 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 **Left alone on purpose:** DOCOPS-8 is a Task where its siblings are Stories.
 
 **Log** (newest first, one line per session):
+
+- 2026-10-22 — Statistica run logged on DOCOPS-128 (Done, 0.5 SP, under DOCOPS-7): on dev input
+  Statistics Services out of scope and 22 versions ineligible (461168f); 19 published, 0 validate
+  errors. DOCOPS-120 comment added. Publish-gap open issue (1cb344b) has no Jira task yet.
 
 - 2026-10-21 — DOCOPS-247 (Done, 0.25 SP, under DOCOPS-7): last 6 download-failed versions published
   from hand-obtained packages (1e077dd); DOCOPS-147 → Done (ibi DSML 1.0.7). DOCOPS-122 note: 0
@@ -219,7 +223,7 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | 54 | A release-notes folder that copies the main guides | DOCOPS-239 |
 
 Other logged work: Jira reconcile and this handoff DOCOPS-208; stakeholder status page DOCOPS-197; TIBCO family reassignments DOCOPS-120
-(in progress, progress kept as comments); ibi family regroup DOCOPS-207; catalog refresh and 2026-10-09 end-of-support report DOCOPS-215; cloud family run DOCOPS-222; EMS, FTL and Messaging run DOCOPS-223; Data Management run DOCOPS-238; FTL, ActiveSpaces, EMS and Messaging re-run DOCOPS-240; Hawk run DOCOPS-241; Mainframe run DOCOPS-242; iProcess run DOCOPS-243; Platform run DOCOPS-244; General run DOCOPS-245; hand-obtained packages and first BPM push DOCOPS-246; last 6 download failures DOCOPS-247.
+(in progress, progress kept as comments); ibi family regroup DOCOPS-207; catalog refresh and 2026-10-09 end-of-support report DOCOPS-215; cloud family run DOCOPS-222; EMS, FTL and Messaging run DOCOPS-223; Data Management run DOCOPS-238; FTL, ActiveSpaces, EMS and Messaging re-run DOCOPS-240; Hawk run DOCOPS-241; Mainframe run DOCOPS-242; iProcess run DOCOPS-243; Platform run DOCOPS-244; General run DOCOPS-245; hand-obtained packages and first BPM push DOCOPS-246; last 6 download failures DOCOPS-247; Statistica run DOCOPS-128.
 
 ## Open run tasks (as of 2026-10-08)
 
@@ -231,7 +235,6 @@ Other logged work: Jira reconcile and this handoff DOCOPS-208; stakeholder statu
 | DOCOPS-134 | TIBCO re-sync | 214 `out-of-date` |
 | DOCOPS-200 | ibi re-sync | 25 `out-of-date` |
 | DOCOPS-147 | ibi download | 1 `download-failed` |
-| DOCOPS-128 | Spotfire | 42 `not-started` |
 
 ## Not in Jira, by choice
 
