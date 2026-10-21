@@ -23,12 +23,15 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | Family review finished | DOCOPS-120 → Done, then DOCOPS-130 |
 | Edit to DOCOPS-217 is allowed (blocked by a permission check on 2026-10-09) | DOCOPS-217: append the 2026-10-09 publish note → Done |
 | A follow-up from the BusinessConnect warnings is planned | DOCOPS-220 → In Progress |
-| General: Health Essentials Cloud and Patterns 5.7.1 published or made ineligible; resources repo pushed | DOCOPS-245: dated note → Done |
+| General resources repo created and pushed (4 API references) | DOCOPS-245: dated note → Done |
 | A new phase is opened | One sub-task under the matching story, In Progress, no `retro` |
 
 **Left alone on purpose:** DOCOPS-8 is a Task where its siblings are Stories.
 
 **Log** (newest first, one line per session):
+
+- 2026-10-21 — DOCOPS-245 note: Health Essentials Cloud and Patterns 5.7.1 made ineligible, 11 of 11
+  published (2dc18e1); still waits on the General resources repo. DOCOPS-120 comment added.
 
 - 2026-10-21 — General run logged as DOCOPS-245 (In Progress, 0.25 SP, due 24 Oct, under DOCOPS-7): 11 of 13
   published after 2 folder renames (1c29b02), pushed to en-us-tib-general-userdocs (a7d2916); 2 held
