@@ -596,13 +596,13 @@ pushed as it is.
 
 ### The Cloud version has no package
 
-- **Status:** Open
+- **Status:** Accepted
 - **Owner:** unassigned
 - **Raised:** 21 Oct 2026
-- **Blocks publishing:** yes, for the only eligible version
+- **Blocks publishing:** no
 
-As with Business Studio Community Edition 4.2.0, the docsite returns a web page instead of a
-ZIP. It needs a hand-supplied package, or the version marked not eligible.
+The docsite returns a web page instead of a ZIP, so there is nothing to convert. The version is
+marked not eligible (decided by the user, 21 Oct 2026).
 
 ---
 
@@ -610,13 +610,11 @@ ZIP. It needs a hand-supplied package, or the version marked not eligible.
 
 ### 5.7.1 is refused at unpacking: one folder in two letter cases
 
-- **Status:** Open
+- **Status:** Accepted
 - **Owner:** unassigned
 - **Raised:** 21 Oct 2026
-- **Blocks publishing:** yes, for 5.7.1 (6.2.0 and 6.1.2 are published)
+- **Blocks publishing:** no
 
 The package holds the Learn user interface guide twice, in folders named "learning-UI" and
-"learning-ui". The 40 images are identical, but every one of the 40 pages differs: the
-lowercase copy is about 6 KB larger each time. Windows cannot keep both, and the tool does
-not pick one on a writer's behalf. Someone has to say which copy is current, or mark 5.7.1
-not eligible now that two newer versions are published.
+"learning-ui", with different text on all 40 pages. Rather than pick a copy, 5.7.1 is marked
+not eligible; 6.2.0 and 6.1.2 are published (decided by the user, 21 Oct 2026).
