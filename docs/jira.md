@@ -30,6 +30,10 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 **Log** (newest first, one line per session):
 
+- 2026-10-22 — DOCOPS-248 (Done, 0.25 SP, under DOCOPS-7): AWS Common Services 6.0.0–6.1.0 reframed and
+  published; Oracle EBS 6.1.2, Oracle Fusion Cloud 6.0.0, Files 8.3.0 re-run to publish; one Files 8.3.0
+  page pinned shorter in rename-map.csv. bw-plugin sync 0 errors; validate clean.
+
 - 2026-10-22 — Statistica run logged on DOCOPS-128 (Done, 0.5 SP, under DOCOPS-7): on dev input
   Statistics Services out of scope and 22 versions ineligible (461168f); 19 published, 0 validate
   errors. DOCOPS-120 comment added. Publish-gap open issue (1cb344b) has no Jira task yet.
