@@ -101,6 +101,23 @@ The product segment is the **slug** and not `product_code`, because a path has t
 
 Derivation rather than passing is what lets a resumed run, a manually supplied ZIP, and a fresh download all land on the same location with no coordination (`architecture.md` §3.8, §4.1). The resolved path is *recorded* in `state.db` afterwards for audit and for resume, but it is never the authority — the layout function is.
 
+### 1.6 Callouts: a bold label, the body on the next line — **Built (Phase 56)**
+
+Every engine finds its admonitions its own way and hands `transforms/callouts.py` a kind and a body. `render` writes one form for all of them:
+
+```
+> **Note:**
+> The body, starting on the very next line.
+```
+
+**Not a GitHub alert.** AEM reads `> [!NOTE]` as an empty key reference: the reader got the text with no label (Phase 55's probe). A bold run inside a quote is something staging already renders.
+
+**No blank line after the label**, so the label and the body's first paragraph read as one: "**Note:** The body…". A blank line further down keeps its `>`, or the quote ends there. **The one exception is a table:** a table line directly after the label would make the label its header row, so a table-first body gets exactly one blank quote line.
+
+**The label is the kind's word** (`Note`, `Tip`, `Important`, `Warning`, `Caution`), **unless the source authored a more specific one the vocabulary knows** (`Remember`, `Fastpath`), which is then the label. An authored label the vocabulary does not know (`Best practice`) stays the body's first bolded run under `Note`, and is reported as `ALERT_LABEL_UNMAPPED`.
+
+**`fix_markdown` is the same rule applied to text already written** with the old marker, so a repaired tree reads exactly as a fresh conversion would. It rewrites a marker line, takes an authored `**Remember:**` that opened the body as the label, and removes a blank quote line directly after any label line. It leaves fenced code alone and keeps line endings. A second run is a no-op. `docushift fix-callouts` runs it over folders.
+
 ---
 
 ## 2. Stage 1: Discovery

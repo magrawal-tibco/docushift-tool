@@ -67,7 +67,7 @@ docushift-tool/
 ├── src/                    # Source code
 │   └── docushift/
 │       ├── __init__.py
-│       ├── cli.py          # Click CLI entrypoint (catalog, download, extract, convert, reframe, sync, validate, csh, archive, status, report, doctor)
+│       ├── cli.py          # Click CLI entrypoint (catalog, download, extract, convert, reframe, sync, validate, fix-callouts, csh, archive, status, report, doctor)
 │       ├── config.py       # Configuration & taxonomy manager
 │       ├── catalog.py      # Additive Catalog Manager (CSV read/write + snapshot 3-way merge)
 │       ├── state.py        # State engine (SQLite: fetch snapshots, etags, sizes, per-stage status)
@@ -113,7 +113,7 @@ docushift-tool/
 │       │   ├── references.py # Asset references against the files actually placed
 │       │   └── csh.py      # Every identifier in csh.yml still lands on a page that exists
 │       ├── transforms/     # GFM Transformations (engine-neutral)
-│       │   ├── callouts.py # Note/Warning/Tip to GFM alerts
+│       │   ├── callouts.py # Note/Warning/Tip to `> **Note:**`; fix_markdown repairs old `> [!NOTE]`
 │       │   ├── tables.py   # Table normalizer
 │       │   ├── code.py     # Code syntax highlighter
 │       │   ├── links.py    # Reference classification, resolution & percent-encoded emission
@@ -221,6 +221,12 @@ Jira (DOCOPS) status and what to file next: the handoff at the top of [`docs/jir
    pass 260 characters is copied under a shorter name, and a topic that leads two pages can be
    named per page in `rename-map.csv`. BusinessConnect: 39 of 44 versions published; the last 5
    wait for this run. See [`planning.md`](docs/planning.md#1-active-phases).
+0g. **Phase 55, planned 2026-10-22**: `docushift verify` proves that converted ibi docs lost no
+   topic, text, image or TOC structure on the way from docs.tibco.com to stg-docs.ibi.com. Next:
+   a read-only probe of the staging site, then a pilot product. See [`planning.md`](docs/planning.md#1-active-phases).
+0h. **Phase 56, built 2026-10-22; runs pending**: AEM does not render GitHub alerts, so notes lost
+   their "Note"/"Tip" label. The converter now writes `> **Note:**` with the text on the next line;
+   `fix-callouts` repairs `output/`, `reframed/` and the published repos with no re-conversion.
 1. **Phase 40, built; two network runs left**: `download` takes each version's package
    name from the Coveo sitemap, so pre-rebrand and renamed versions stop failing
    (96 of the 1,435 still to download). Run `catalog sitemap` before a large download. See [`planning.md`](docs/planning.md#1-active-phases).

@@ -124,7 +124,112 @@ def test_an_unmapped_label_is_not_silently_a_note() -> None:
 def test_every_body_line_including_blanks_is_quoted() -> None:
     rendered = callouts.render(callouts.Alert.WARNING, "first\n\nsecond")
 
-    assert rendered == "> [!WARNING]\n> first\n>\n> second"
+    assert rendered == "> **Warning:**\n> first\n>\n> second"
+
+
+@pytest.mark.parametrize("kind", list(callouts.Alert))
+def test_each_kind_is_a_bold_label_aem_renders(kind) -> None:
+    """AEM reads `> [!TIP]` as an empty key reference and drops the label (Phase 56)."""
+    rendered = callouts.render(kind, "Body.")
+
+    assert rendered == f"> **{kind.value.capitalize()}:**\n> Body."
+    assert "[!" not in rendered
+
+
+@pytest.mark.parametrize("body", ["Text.", "- one\n- two", "```\ncode\n```", "First.\n\nSecond."])
+def test_the_body_follows_the_label_with_no_blank_line(body: str) -> None:
+    """The user's rule: "**Note:** text" reads as one paragraph, never a label alone."""
+    lines = callouts.render(callouts.Alert.NOTE, body).split("\n")
+
+    assert lines[1] != ">"
+
+
+def test_a_table_first_body_keeps_one_blank_line_or_the_label_is_its_header() -> None:
+    rendered = callouts.render(callouts.Alert.NOTE, "| a | b |\n| --- | --- |\n| 1 | 2 |")
+
+    assert rendered.startswith("> **Note:**\n>\n> | a | b |")
+
+
+def test_an_authored_label_replaces_the_kind_word_and_its_colon_is_written_once() -> None:
+    assert callouts.render(callouts.Alert.NOTE, "Keep it.", label="Remember:") == (
+        "> **Remember:**\n> Keep it."
+    )
+
+
+# -- fix_markdown: notes already written as `> [!KIND]` (Phase 56) --------------
+
+
+def test_a_marker_line_becomes_the_label_and_nothing_else_moves() -> None:
+    fixed = callouts.fix_markdown("Intro.\n\n> [!TIP]\n> Body one.\n>\n> Body two.\n")
+
+    assert fixed.text == "Intro.\n\n> **Tip:**\n> Body one.\n>\n> Body two.\n"
+    assert (fixed.markers, fixed.blanks, fixed.changed) == (1, 0, True)
+
+
+def test_the_fix_matches_what_a_fresh_conversion_writes() -> None:
+    old = "> [!WARNING]\n> first\n>\n> second"
+
+    assert callouts.fix_markdown(old).text == callouts.render(callouts.Alert.WARNING, "first\n\nsecond")
+
+
+def test_a_marker_inside_a_list_item_keeps_its_indent() -> None:
+    fixed = callouts.fix_markdown("1. Step\n\n   > [!NOTE]\n   > Watch out.\n")
+
+    assert fixed.text == "1. Step\n\n   > **Note:**\n   > Watch out.\n"
+
+
+def test_a_marker_in_a_code_sample_is_content() -> None:
+    text = "```markdown\n> [!NOTE]\n> Example.\n```\n"
+
+    assert callouts.fix_markdown(text).text == text
+
+
+def test_a_blank_line_after_the_label_is_removed_whoever_wrote_it() -> None:
+    """The predecessor wrote `> **Note:**`, `>`, then the text (html-to-md EBX output)."""
+    assert callouts.fix_markdown("> [!NOTE]\n>\n> Text.\n").text == "> **Note:**\n> Text.\n"
+    fixed = callouts.fix_markdown("> **Note:**\n>\n> Text.\n")
+    assert fixed.text == "> **Note:**\n> Text.\n"
+    assert (fixed.markers, fixed.blanks) == (0, 1)
+
+
+def test_a_bold_line_that_is_not_a_label_keeps_its_blank_line() -> None:
+    text = "> **Step 1:**\n>\n> Do this.\n"
+
+    assert callouts.fix_markdown(text).text == text
+
+
+def test_a_table_first_note_keeps_one_blank_line_and_is_counted() -> None:
+    fixed = callouts.fix_markdown("> [!NOTE]\n> | a |\n> | --- |\n")
+
+    assert fixed.text == "> **Note:**\n>\n> | a |\n> | --- |\n"
+    assert fixed.tables == 1
+
+
+def test_an_authored_run_in_label_becomes_the_label() -> None:
+    """What DITA wrote for `remember`/`fastpath`, now the label (`dita.py::_callout`)."""
+    assert callouts.fix_markdown("> [!NOTE]\n> **Remember:** Save.\n").text == (
+        "> **Remember:**\n> Save.\n"
+    )
+    assert callouts.fix_markdown("> [!TIP]\n> **Fastpath:**\n>\n> - one\n").text == (
+        "> **Fastpath:**\n> - one\n"
+    )
+
+
+def test_an_unknown_run_in_label_and_a_docbook_caption_stay_in_the_body() -> None:
+    assert callouts.fix_markdown("> [!NOTE]\n> **Best practice:** Proxy.\n").text == (
+        "> **Note:**\n> **Best practice:** Proxy.\n"
+    )
+    assert callouts.fix_markdown("> [!CAUTION]\n> **Caution 2**\n>\n> Second.\n").text == (
+        "> **Caution:**\n> **Caution 2**\n>\n> Second.\n"
+    )
+
+
+def test_line_endings_are_kept_and_a_second_run_changes_nothing() -> None:
+    once = callouts.fix_markdown("> [!NOTE]\r\n>\r\n> Text.\r\n").text
+
+    assert once == "> **Note:**\r\n> Text.\r\n"
+    again = callouts.fix_markdown(once)
+    assert again.text == once and not again.changed
 
 
 # -- code fences --------------------------------------------------------------

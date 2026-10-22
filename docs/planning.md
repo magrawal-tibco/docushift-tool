@@ -943,6 +943,245 @@ version's output changes; `ruff` and the suite pass.*
 
 ---
 
+### Phase 55: Verify — Nothing Lost Between docs.tibco.com and stg-docs.ibi.com — **Planned 2026-10-22**
+
+**Why.** ibi docs are converted and published through AEM to stg-docs.ibi.com. The
+business needs evidence that **no topic, text or image was dropped**, and that **the
+table of contents keeps its structure** (entries, parents, order), from the old site to
+the staging site. Today nothing compares content:
+
+- `validate` checks that links, images and the AEM files exist, not that the text is all there.
+- `reframe/audit.py` checks word counts and TOC reachability inside the merge only.
+- `ORIGIN_PAGE_UNMAPPED` (`origins.py`) checks page coverage against the live sitemap, not content.
+- Nothing reads what stg-docs.ibi.com actually serves.
+- The predecessor's `html-to-md/scripts/compare_html_md.py` passes a page at 20% of its text, which is too loose to prove anything.
+
+User decisions (2026-10-22): stg-docs.ibi.com needs no login. The baseline is the local
+downloaded HTML for every page, plus a sample of live docs.tibco.com pages. Start with one
+pilot product.
+
+A new command, `docushift verify`, makes three comparisons:
+
+```
+live docs.tibco.com --(C: sample)--> downloaded HTML --(A: every page)--> Markdown in ibi-docs-aem --(B: every page)--> stg-docs.ibi.com
+```
+
+**Known drops are not findings.** The tool already records intentional drops in `state.db`:
+`NAV_NODE_DROPPED`, `TOC_SUBPROJECT_UNPLACED`, `ROOT_COPY_DROPPED` and `TOC_ORPHAN`. A topic
+with one of these codes is classed as a **known drop**, not as missing. `TOC_ORPHAN` pages are
+published under `unfiled/` but have no menu entry (Phase 43), so the report lists them
+separately for a decision instead of hiding them.
+
+**A. Old page vs. converted page (local, every page).** `output_map` gives source to
+output, and `reframe.yml` / `redirects.yml` give output to merged page. For each source topic:
+
+1. **Topic:** it reaches a published page or is a known drop. Otherwise `VERIFY_TOPIC_MISSING`.
+2. **Text:** both sides are normalised. Normalising strips markup and the chrome (with the
+   engines' own content selectors), lowercases, collapses whitespace, and evens out quotes and
+   dashes. Then the text is cut into 8-word shingles. Source shingles must appear somewhere
+   in the target page, so a merged page needs no special handling. If at least one whole
+   source sentence is missing, the result is `VERIFY_TEXT_DROPPED`, listing the missing
+   sentences. Coverage % is reported but does not decide anything.
+   - Hidden source text (Flare dropdowns, togglers, popups) counts on both sides.
+   - Tables are compared cell by cell.
+   - Text the converter rewrites on purpose (expanded variables, inlined snippets,
+     generated titles) is allowlisted up front from the conversion settings.
+3. **Images:** each source `<img>` is matched by content hash, so a renamed file still
+   matches. It must be referenced on the target page and present in the repo; otherwise
+   `VERIFY_IMAGE_MISSING`.
+4. **Counts** of headings, tables, code blocks and list items are reported, never flagged.
+5. **TOC structure, old TOC vs. `toc.yml`:** the old TOC is rebuilt with the readers
+   conversion already uses (`engines/flare_toc.py`, `engines/webworks_toc.py`, DITA/DocBook
+   nav). It is compared with `toc.yml` entry by entry on parent, sibling order and title. An
+   entry whose topic was merged matches if it points at the merged page's `#anchor`. A
+   regrouping recorded in `reframe.yml` is not flagged.
+
+**B. Converted page vs. stg-docs.ibi.com (every page).**
+
+0. B compares against the `ibi-docs-aem` commit staging was published from, not the latest
+   one. Otherwise every later edit would read as a loss. If that commit is unknown, B's text
+   findings drop to warnings and the report says why.
+1. Each page's staging URL is derived from its `toc.yml` position, not its repo path (see the
+   probe below). A non-200 response is `VERIFY_PUBLISHED_PAGE_MISSING`.
+2. The local Markdown text must appear in the served main content; otherwise
+   `VERIFY_PUBLISHED_TEXT_DIFF`. This catches AEM rendering drops such as raw-HTML
+   tables, includes and snippets.
+3. Every `<img>` on the served page must return 200 and match the local file. Matching is
+   by byte hash, or by dimensions/perceptual hash if AEM serves resized renditions.
+   Otherwise `VERIFY_PUBLISHED_IMAGE_BROKEN`.
+4. **TOC structure, `toc.yml` vs. served menu:** same comparison as A5, with the
+   `VERIFY_PUBLISHED_TOC_*` codes. A5 and B4 together cover old TOC → `toc.yml` → staging
+   menu, so a fault is pinned to conversion or to AEM.
+
+**C. Live docs.tibco.com vs. downloaded copy (sample).** About 20 pages per version are
+sampled from the origin URLs (`origins.py` / `301.yml`). A text gap against the extracted
+HTML is `VERIFY_LIVE_DRIFT`, meaning the download was not what readers saw. A page served as
+the SSO login page (`_AUTH_MARKERS`, `discovery/client.py`) is "not checkable", not drift.
+The download date is shown so an update on the live site can be told apart from a loss.
+Page-level coverage against the live sitemap stays with `ORIGIN_PAGE_UNMAPPED`.
+
+All fetching is throttled and cached under `cache/verify/`, so a re-run costs nothing.
+
+#### Decisions
+
+| decision | choice | why |
+|---|---|---|
+| **When text counts as dropped** | At least one whole source sentence missing from the target. Coverage % is shown, not used to decide | One changed word on a 60-word page costs ~15% of 8-word shingles, so a 99% cutoff would flag every short page |
+| **Merged pages** | Source text must appear *somewhere* in the merged target | No section-by-section alignment is needed, and a merge cannot hide a drop |
+| **Known drops** | Read from the findings already in `state.db`; not re-flagged | They were decided when they happened; re-flagging them would bury real losses |
+| **TOC check** | Structure (parent, order, title) at both hops, not just "is it present" | An entry can exist under the wrong parent or out of order, and a presence check would pass it |
+| **Staging baseline** | The published commit, not HEAD | Edits since publishing are not losses |
+| **Staging host** | New key `verify_base_url` in `config/publishing.yaml`, apart from `publish_base_url` | `publish_base_url` (empty, `config.py:62`) drives link rewriting; the check must not change links. The predecessor only knew `stg-docs.onebx.com` |
+| **Severity** | Errors: `VERIFY_TOPIC_MISSING`, `VERIFY_TEXT_DROPPED`, `VERIFY_IMAGE_MISSING`, `VERIFY_TOC_ENTRY_MISSING`, `VERIFY_PUBLISHED_PAGE_MISSING`, `VERIFY_PUBLISHED_IMAGE_BROKEN`. Warnings: `VERIFY_PUBLISHED_TEXT_DIFF`, `VERIFY_PUBLISHED_ALT_DROPPED`, `VERIFY_PUBLISHED_CALLOUT_UNRENDERED` (both added by the probe), `VERIFY_TOC_MOVED`, `VERIFY_TOC_ORDER`, `VERIFY_LIVE_DRIFT`. Note: `VERIFY_TOC_TITLE_CHANGED`. `VERIFY_PUBLISHED_TOC_*` mirror the A5 severities | Loss is an error; a change a person may have intended is a warning. Errors set exit code 1, as `validate` does. Pilot tuning may move a code, recorded here |
+
+#### Steps
+
+0. **Read-only probe** (me): fetch one stg-docs.ibi.com page and one image, and find out:
+   - the repo-path → URL pattern and the main-content selector, and that there is no login;
+   - how the menu is built (in the page HTML, a nav JSON endpoint, or JavaScript that needs a
+     headless browser) and whether it loads in full;
+   - whether AEM serves the original image bytes or resized renditions;
+   - whether the converter copies image bytes unchanged;
+   - which `ibi-docs-aem` commit staging reflects.
+   The findings are written into this phase before building.
+1. `src/docushift/verify/`: `text.py` (normalise, shingles, sentences), `images.py`,
+   `toc.py` (tree comparison for A5 and B4), `driver.py`. Then A, with tests on small fixtures:
+   - a merged page, a renamed image and a dropped paragraph;
+   - a moved TOC entry and a reordered one;
+   - a known-drop topic;
+   - a clean fixture, and one with only known drops, that both produce no findings.
+2. `published.py` (B) and `live.py` (C), with fetch tests on recorded responses.
+3. `cli.py`: `verify --target-dir --product [--skip-published] [--live-sample N]`, next to
+   `validate`. Register the codes in `reporting/findings.py` under a new Verify stage and in
+   §7.5.
+4. Output: `reports/verify-<product>.csv`, one row per old page. Columns: old URL, local
+   source, new path, staging URL, text %, missing-sentence count, images found/expected, TOC
+   parent and position matched, published status, skip reason, missing sentences. Also a
+   short HTML summary of the lowest-scoring pages, linking each old and new page.
+5. **Pilot** (the user, as a `!` command): `docushift verify --product <pilot> --target-dir
+   C:/github/ibi-docs-aem`. We review the CSV together, then tune chrome stripping and the
+   allowlist.
+   - Mutation check: in a scratch copy, delete a paragraph and an image reference, and move a
+     `toc.yml` entry under another parent. All three must be flagged.
+   - Spot-check about 10 pages and one guide's menu by eye, old against staging.
+6. Roll out to every ibi product. Summarise in plain language: pages and images checked,
+   what is missing, what needs a decision.
+7. Docs: the command in `user-guide.md`, the stage in `architecture.md`, the comparison rules
+   in `design.md`. Jira: a DOCOPS sub-task, with `docs/jira.md` Handoff and Log updated.
+
+*Exit: the pilot's report is reviewed with no unexplained finding; the mutation check flags
+all three; every ibi product is verified and summarised; `ruff` and the suite pass.*
+
+#### Probe (2026-10-22, pilot ibi™ AI Assistant 9.3.8)
+
+The pilot is 24 pages in `en-us-ibi-webfocus-userdocs/en-us/ibi-ai-assistant/online-help/9-3-8`.
+The probe read `home.html` and `user_guide/chapter-2.html`.
+
+| question | answer |
+|---|---|
+| Login | None. Pages are served openly. An unknown path returns the docs home page with HTTP 200, not a 404, so "page missing" must be detected by content (title/H1), not status |
+| URL pattern | `https://stg-docs.ibi.com/us/en/<product>/<doc-class>/<version>/…` (`en-us` → `us/en`). Below the version, the path follows **`toc.yml`**, not the repo: a top-level entry is `<page-stem>.html` (`_templates/Home.md` → `home.html`), and a child is `<parent-page-stem>/<page-stem>.html` (`installation/overview.md` under `_templates/installation_guide.md` → `installation_guide/overview.html`). Deeper levels and anchors are still to be confirmed in the pilot |
+| Menu | Rendered in the page HTML, fully expanded (all 23 entries of the online-help `toc.yml`, matching titles and order). No headless browser needed. Each doc-class (release information, user guides) has its own menu |
+| Images | Served from `/content/dam/ibi/us/en/<product>/<doc-class>/<version>/<repo path>`, keeping the repo's folder and file name (`webfocus-aiassistant/images/hub-welcome_324x734.png`) |
+| Converter image bytes | Unchanged: 18 of 18 images in the repo match the extracted source by SHA-256 |
+| Staging image bytes | Unchanged: `hub-welcome_324x734.png` from staging matches the repo copy by SHA-256. AEM serves originals, so B3 compares by byte hash |
+| Published commit | The page footer shows "Last published : Oct 15, 2026". The product's only content commit is `3ee14c2c` (2026-10-06), so staging serves that commit. The deploy state is kept in a cloud bucket we cannot read (`last_deployed_sha.txt`), so `verify` takes the last commit touching the product **before the page's "Last published" date** |
+| Main content | `main#section-topic div.topic-renderer__content`: the article body only, one `div.cmp-text` per block. Everything else is chrome (the `cmp-navigation` menu, breadcrumb, "In this article", feedback, PDF/share/print, the authoring modal, prev/next). The page path is in `main[data-page-path]` (`/content/ibi/us/en/…/user_guide/chapter-2`) |
+| Menu markup | `nav.cmp-navigation` → nested `ul.cmp-navigation__group` / `li.cmp-navigation__item--level-N` / `a.cmp-navigation__item-link`. Parent entries with a page are links too. B4 reads this |
+| Spot check, chapter-2 | 4 images (source 4, Markdown 4, staging 4); 3 tables (Markdown 3, staging 3); headings in the same order. The caption "A typical answer…" has no picture under it at **every** step, source included, so it is a gap in the source and not a loss |
+| **Alt text dropped** (confirmed) | Staging serves no `alt` on 2 of the 4 images in chapter-2 (`hub-slash-menu`, `hub-context`); the Markdown has alt text for all 4. The two are the only ones on the page whose alt contains `⌘` or `:`, a guess the pilot tests on all 18 images. B adds **`VERIFY_PUBLISHED_ALT_DROPPED`** (warning): an image whose Markdown alt text is missing on staging |
+| **Note boxes not rendered** (confirmed; fixed by Phase 56) | All 5 GFM alerts in chapter-2 (`> [!TIP]`, `> [!NOTE]`) render as a plain quote holding an empty link (`<a class="xref" data-attr-keyref="!TIP"></a>`). The text survives; the "Tip"/"Note" label and the box are gone. Every converted note uses this syntax (`transforms/callouts.py`; ~1,700 in the corpus, `architecture.md` §5.1). The predecessor wrote `> **Note:**`, which AEM shows as a bold label. B adds **`VERIFY_PUBLISHED_CALLOUT_UNRENDERED`** (warning), one per page with the count. The fix (a different syntax from the converter, or GFM alert support in AEM) is a decision for the user and the AEM owners, outside this phase |
+
+---
+
+### Phase 56: A Note Shows Its Label on AEM — **Built 2026-10-22; runs pending**
+
+**Why.** Phase 55's probe found that AEM does not render GitHub alerts. `> [!TIP]` becomes a
+plain quote holding an empty link (`<a class="xref" data-attr-keyref="!TIP"></a>`), so the
+reader sees the text with no "Tip" or "Note" label and no box. Every note the converter writes
+uses that syntax: one function, `transforms/callouts.py::render`, called by all four engines,
+for ~1,700 notes in the corpus (`architecture.md` §5.1). The predecessor wrote `> **Note:**`.
+Staging renders bold inside a quote (`<b class="ph b">` in `div.lq`), so that form keeps the
+label.
+
+User decision (2026-10-22): fix it in the converter for future conversions. For trees already
+converted and published, use a small utility that rewrites the notes in place, with no
+re-conversion.
+
+#### Decisions
+
+| decision | choice | why |
+|---|---|---|
+| **Target syntax** | The marker line `> [!NOTE]` becomes `> **Note:**`, and nothing else in the note changes. Labels: Note, Tip, Important, Warning, Caution | The smallest change that keeps the label. Staging already renders bold in a quote. The note's body, line breaks and nesting stay byte-identical, so the converter and the utility produce the same text |
+| **No blank line after the label** (user, 2026-10-22) | The label line is followed directly by the note's first line: `> **Note:**` then `> text`, never `> **Note:**` then `>` then `> text`. Markdown then joins them into one paragraph, which reads "**Note:** text". The utility also removes a blank quote line found directly after a label line, whether the label came from the marker or was already a `> **Note:**`-style line (the predecessor wrote the blank line, e.g. `html-to-md` EBX output) | A blank line makes the label a paragraph of its own above the text. Measured 2026-10-22 over a sample of `output/` and `reframed/`: the converter never writes one today, and the first line after a marker was text 663 times, a list 54 and bold 8. A list may follow a paragraph line directly in CommonMark, so it needs no blank line. **The one exception is a table:** GFM would read the label line as the table's header row. No note in the sample opens with a table; any that does keeps its blank line and is listed in the report for review |
+| **Authored labels that collapse** | `remember`, `attention`, `restriction` keep their own word as the label (`> **Remember:**`). Today they are `> [!NOTE]` followed by `**Remember**` as the first bolded word | With the GFM label gone, `**Note:** **Remember** …` would say two labels. The authored word is the more specific one |
+| **A styled box** | Not in this phase. The AEM owners are asked whether their Markdown pipeline has a note syntax that renders a box. If it does, `render` and the utility's output change in one place each | Only AEM can say. `**Note:**` loses nothing in the meantime |
+| **Where the utility runs** | Any folder of `.md` files: the published repos (`C:\github\ibi-docs-aem\*`, `C:\github\tibco-docs-aem\*`) **and** the local `output/` and `reframed/` trees | `sync` re-copies a page that differs from its local source (`_identical`), so fixing only the repos would be undone by the next sync. `sync`'s stale-tree check reads root files only (`_built_at`), so editing pages does not trip it |
+| **What the utility touches** | Only marker lines: `> [!KIND]` at any indent and quote depth (a note inside a list item), outside fenced code blocks. Line endings and encoding are kept. Running it twice changes nothing | A page that documents Markdown may show `> [!NOTE]` in a code sample, which is content. Idempotence makes a partial run safe to repeat |
+| **Git** | The utility edits files only. Committing and pushing the repos stays with the user | `architecture.md` §6.0: git is out of scope |
+
+#### Steps
+
+1. `transforms/callouts.py`: `render(kind, body, label=None)` writes `> **<Label>:**` in place
+   of `> [!KIND]`. `dita.py` passes the authored label instead of prefixing it to the body.
+   The other engines need no change. The module docstring and the `Alert` docstring stop
+   saying "GitHub renders". Tests: one per kind; a collapsed label; the label line is followed
+   directly by content, with no blank `>` line, for a text, list and multi-paragraph body; a
+   multi-paragraph note keeps `>` on its blank lines further down; a table-first body keeps one
+   blank line; engine tests that assert `[!NOTE]` updated.
+2. `transforms/callouts.py`: `fix_markdown(text) -> (text, count)` holds the rewrite rule, so
+   the converter and the utility share one label table. A marker followed by a first line that
+   opens with `**Remember**`, `**Attention**` or `**Restriction**` takes that word as its label
+   and drops it from the line. A blank quote line directly after a label line (from a marker,
+   or an existing `> **Note:**`-style line) is removed, except before a table. Tests: indented
+   and nested markers; a marker inside a fenced block left alone; a predecessor-style
+   `> **Note:**` / `>` / `> text` loses its blank line; a table-first note keeps it; CRLF kept;
+   a second run is a no-op.
+3. `cli.py`: `docushift fix-callouts PATH... [--dry-run]`. It walks `*.md` under each path and
+   rewrites what `fix_markdown` changes. It prints notes and files changed per top folder and
+   writes `reports/fix-callouts-<date>.csv` (file, markers rewritten, blank lines removed,
+   table-first notes left for review). `--dry-run` writes nothing.
+4. Docs: `architecture.md` §5.1 and `design.md` (callouts are a bold label, and why);
+   `user-guide.md` (the command); `ALERT_LABEL_UNMAPPED`'s wording in §7.5 if it names GFM.
+5. Runs (the user, as `!` commands): `--dry-run` over each folder first, counts reviewed, then
+   the real run over `output/`, `reframed/`, `ibi-docs-aem` and `tibco-docs-aem`. Then I check,
+   read-only, that no `[!KIND]` marker remains outside code blocks. The user commits and pushes
+   the repos; AEM republishes.
+6. After the republish: Phase 55's `VERIFY_PUBLISHED_CALLOUT_UNRENDERED` is 0 for the pilot,
+   and one page is checked by eye on staging.
+
+*Exit: a fresh conversion writes `> **Note:**` with the content on the next line; the utility
+has run over all four folders with no marker and no blank line after a label left (table-first
+notes excepted and listed); the staging pilot shows the labels; `ruff` and the suite pass.*
+
+#### As built (2026-10-22)
+
+- `transforms/callouts.py`: `render(kind, body, label=None)` writes `> **Note:**` with the
+  body on the next line, plus one blank quote line only before a table. `fix_markdown` holds
+  the repair rule and returns what it changed (`markers`, `blanks`, `tables`).
+- `engines/dita.py`: an authored label the vocabulary knows (`Remember`, `Fastpath`) is the
+  label; an unknown one (`Best practice`) stays the body's first bolded run, which is also what
+  `fix_markdown` leaves. DocBook captions (`**Caution 2**`) stay in the body: `fix_markdown`
+  takes a run-in label only when it carries a colon, and captions have none.
+- `cli.py`: `docushift fix-callouts PATH... [--dry-run]`, skipping dot-folders such as `.git`.
+- Docs: `design.md` §1.6, `architecture.md` §5.1/§5.2/§5.6, `user-guide.md`, §7.5 wording.
+- Tests: 15 new test functions (`test_transforms.py`, `test_cli.py`); 20 engine assertions moved from
+  `[!KIND]` to the label. `ruff` clean. The full suite passes except two catalog-data tests
+  that fail without this change: `test_shipped_scope_lists_the_ebx_and_spotfire_products`
+  expects 129 out-of-scope products where Statistica (`461168f`) made 130, and
+  `test_the_shipped_report_retires_the_measured_set` reads the uncommitted `versions.csv`.
+- Measured, read-only: the pilot product (ibi™ AI Assistant) has 61 notes in 20 files. On a
+  copy of `chapter-2.md` exactly its 5 marker lines changed and nothing else.
+- Run, Statistica first (2026-10-22, `scratch/statistica-fix-callouts.log`, 37 minutes per pass,
+  disk-bound: 87,208 pages in `output/` alone): 6,199 labels in `output/`, 6,199 in `reframed/`,
+  4,175 in `en-us-spotfire-statistica-userdocs` (3,408 files), 0 in `-resources`; no blank line or
+  table-first note. Checked read-only: the repo diff is only `[!NOTE]`→`**Note:**` (4,166) and
+  `[!TIP]`→`**Tip:**` (9), line endings unchanged; no marker left in any of the four folders.
+  Waiting: commit and push, AEM republish, then the other families.
+
+
+---
+
 ## Carried-Forward Open Items
 
 Technical items a finished phase recorded as *open, not fixed*. Product-level issues
@@ -999,7 +1238,7 @@ The concrete deliverable of §7.1: every deferred "report line" in the three doc
 | `TOC_ORPHAN`⁵ᵇ | note | convert | Converted topics in no TOC entry, kept out of `toc.yml` and unmerged under `unfiled/` — 5.9% for Flare; left in an Unfiled node only when the version has no other TOC entry | `architecture.md` §5.1.4, Phase 43 |
 | `ROOT_COPY_DROPPED` | note | convert | Unlisted pages of a secondary output root that copy a main guide's pages (a Flare target built from the whole project); dropped, their links, help ids and redirects pointed at the twin | `architecture.md` §5.1.4, Phase 54 |
 | `TOPIC_LINK_DANGLING`⁵ᵇ | note | convert | A cross-reference to a topic this run did not produce; text kept, link dropped | `architecture.md` §5.1.3 |
-| `ALERT_LABEL_UNMAPPED`⁵ᵇ | warn | convert | An admonition label outside the five GitHub renders; rendered as NOTE | `transforms/callouts.py` |
+| `ALERT_LABEL_UNMAPPED`⁵ᵇ | warn | convert | An admonition label outside the five kinds; rendered as NOTE | `transforms/callouts.py` |
 | `ANCHOR_DROPPED`¹⁹ | warn | convert | A referenced anchor the engine kept and then did not emit; its links now dangle | `planning.md` Phase 19 |
 | `LANDING_PAGE_EMPTY`⁵ᵇ | note | convert | A landing page with nothing past its hero — a stub was generated (4.5% measured) | `architecture.md` §5.1.5 |
 | `TAIL_PAGE_MISSING`⁵ᵇ | warn | convert | No support or no legal page in the TOC — nothing is synthesized | `architecture.md` §5.1.5 |

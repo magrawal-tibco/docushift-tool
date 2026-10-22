@@ -260,10 +260,10 @@ def test_a_topic_with_no_article_is_reported_and_not_converted(tmp_path: Path) -
 # -- callouts (§5.2.5) ----------------------------------------------------------
 
 
-def test_a_callout_loses_its_label_span_because_gfm_draws_the_label(tmp_path: Path) -> None:
+def test_a_callout_loses_its_label_span_because_render_writes_the_label(tmp_path: Path) -> None:
     """1:1 in every kind measured -- 364 `span.notetitle` for 364 `div.note`.
 
-    Left in, the output reads `> [!NOTE]` and then `**Note:** Note: Save first.`
+    Left in, the output reads `> **Note:**` and then `Note: Save first.`
     """
     result = run(tmp_path, {
         "html/GUID-AAA1.html": topic("GUID-AAA1", "Getting Started",
@@ -271,9 +271,8 @@ def test_a_callout_loses_its_label_span_because_gfm_draws_the_label(tmp_path: Pa
         **{f"html/{k}": v for k, v in toc(node("GUID-AAA1", "Getting Started")).items()},
     })
     body = result.body("getting-started.md")
-    assert "> [!NOTE]" in body
-    assert "> Save first." in body
-    assert "Note:" not in body
+    assert "> **Note:**\n> Save first." in body
+    assert "Note: Save" not in body
 
 
 @pytest.mark.parametrize(
@@ -286,7 +285,7 @@ def test_each_alert_kind_maps_to_its_own_admonition(tmp_path: Path, kind: str, a
             f'<div class="note {kind}"><span class="{kind}title">{kind.title()}:</span> Mind this.</div>'),
         **{f"html/{k}": v for k, v in toc(node("GUID-AAA1", "Getting Started")).items()},
     })
-    assert f"> [!{alert}]" in result.body("getting-started.md")
+    assert f"> **{alert.capitalize()}:**" in result.body("getting-started.md")
 
 
 @pytest.mark.parametrize(
@@ -296,16 +295,16 @@ def test_each_alert_kind_maps_to_its_own_admonition(tmp_path: Path, kind: str, a
 )
 def test_a_collapsed_kind_keeps_its_authored_label(tmp_path: Path, kind: str,
                                                    alert: str, label: str) -> None:
-    """GitHub has five alerts and DITA has eight. The collapse loses the rendering,
-    not the word: `remember` becomes a NOTE whose first bolded run says Remember."""
+    """Five kinds and DITA has eight. The collapse loses the kind, not the word:
+    `remember` is a NOTE whose label says Remember (Phase 56)."""
     result = run(tmp_path, {
         "html/GUID-AAA1.html": topic("GUID-AAA1", "Getting Started",
             f'<div class="note {kind}"><span class="{kind}title">{label}</span> Mind this.</div>'),
         **{f"html/{k}": v for k, v in toc(node("GUID-AAA1", "Getting Started")).items()},
     })
     body = result.body("getting-started.md")
-    assert f"> [!{alert}]" in body
-    assert f"> **{label}** Mind this." in body
+    assert f"> **{label}**" + chr(10) + "> Mind this." in body
+    assert f"**{alert.capitalize()}:**" not in body
 
 
 def test_a_window_title_is_content_and_survives_the_label_sweep(tmp_path: Path) -> None:
@@ -335,8 +334,8 @@ def test_a_dtd_kind_this_corpus_lacks_is_still_mapped_by_the_shared_vocabulary(
         **{f"html/{k}": v for k, v in toc(node("GUID-AAA1", "Getting Started")).items()},
     })
     body = result.body("getting-started.md")
-    assert "> [!TIP]" in body
-    assert "> **Fastpath:** Skip ahead." in body
+    assert "> **Fastpath:**\n> Skip ahead." in body
+    assert "**Tip" not in body
     assert "ALERT_LABEL_UNMAPPED" not in result.codes()
 
 
@@ -353,8 +352,7 @@ def test_a_kind_the_vocabulary_has_never_seen_is_reported_once(tmp_path: Path) -
         **{f"html/{k}": v for k, v in toc(node("GUID-AAA1", "Getting Started")).items()},
     })
     body = result.body("getting-started.md")
-    assert "> [!NOTE]" in body
-    assert "> **Best practice:** Use a proxy." in body
+    assert "> **Note:**\n> **Best practice:** Use a proxy." in body
     assert result.codes()["ALERT_LABEL_UNMAPPED"] == 1
 
 
@@ -367,7 +365,7 @@ def test_the_admonition_family_class_never_wins_over_its_type(tmp_path: Path) ->
             '<div class="note warning"><span class="warningtitle">Warning:</span> Careful.</div>'),
         **{f"html/{k}": v for k, v in toc(node("GUID-AAA1", "Getting Started")).items()},
     })
-    assert "> [!WARNING]" in result.body("getting-started.md")
+    assert "> **Warning:**" in result.body("getting-started.md")
 
 
 # -- the class vocabulary (§5.2.5, corrected) -----------------------------------

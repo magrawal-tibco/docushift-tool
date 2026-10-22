@@ -2121,3 +2121,38 @@ def test_doctor_says_when_long_paths_are_off(
 
     assert result.exit_code == 0
     assert "long paths: off" in result.output
+
+
+# -- fix-callouts (Phase 56) -----------------------------------------------------
+
+
+def test_fix_callouts_rewrites_published_notes_in_place(
+    runner: CliRunner, populated_root: Path, tmp_path: Path
+) -> None:
+    """A published tree is repaired without a re-conversion; CRLF and code samples kept."""
+    repo = tmp_path / "repo"
+    (repo / "guide").mkdir(parents=True)
+    (repo / ".git").mkdir()
+    page = repo / "guide" / "page.md"
+    page.write_bytes(b"> [!TIP]\r\n>\r\n> Dock it.\r\n\r\n```\r\n> [!NOTE]\r\n```\r\n")
+    (repo / ".git" / "skip.md").write_bytes(b"> [!NOTE]\n> Not a page.\n")
+    clean = repo / "guide" / "clean.md"
+    clean.write_bytes(b"No notes.\n")
+
+    dry = _invoke(runner, populated_root, "fix-callouts", str(repo), "--dry-run")
+    assert dry.exit_code == 0, dry.output
+    assert b"[!TIP]" in page.read_bytes()
+
+    result = _invoke(runner, populated_root, "fix-callouts", str(repo))
+
+    assert result.exit_code == 0, result.output
+    assert page.read_bytes() == b"> **Tip:**\r\n> Dock it.\r\n\r\n```\r\n> [!NOTE]\r\n```\r\n"
+    assert (repo / ".git" / "skip.md").read_bytes() == b"> [!NOTE]\n> Not a page.\n"
+    reports = list((populated_root / "reports").glob("fix-callouts-*.csv"))
+    assert len(reports) == 1
+    text = reports[0].read_text(encoding="utf-8-sig")
+    assert "page.md" in text and "clean.md" not in text
+
+    again = _invoke(runner, populated_root, "fix-callouts", str(repo))
+    assert again.exit_code == 0
+    assert page.read_bytes() == b"> **Tip:**\r\n> Dock it.\r\n\r\n```\r\n> [!NOTE]\r\n```\r\n"

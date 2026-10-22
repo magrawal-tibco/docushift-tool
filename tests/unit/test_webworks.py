@@ -926,7 +926,7 @@ def test_a_note_between_two_steps_does_not_restart_the_numbering(tmp_path: Path)
     ))
     assert "1. First step" in rendered
     assert "2. Second step" in rendered
-    assert "   > [!NOTE]\n   > Watch out." in rendered
+    assert "   > **Note:**\n   > Watch out." in rendered
 
 
 def test_a_heading_between_two_steps_starts_a_new_list(tmp_path: Path) -> None:
@@ -1083,7 +1083,7 @@ def test_nbsp_indentation_in_a_code_line_becomes_spaces(tmp_path: Path) -> None:
 def test_an_icon_table_reads_the_cell_the_icon_is_not_in(tmp_path: Path) -> None:
     """The predecessor's fourth bug: reading the icon cell empties 12,866 alerts."""
     rendered = one(tmp_path, note("Back up the store first.", icon="IconWarning"))
-    assert rendered.strip() == "> [!WARNING]\n> Back up the store first."
+    assert rendered.strip() == "> **Warning:**\n> Back up the store first."
 
 
 def test_an_unmapped_icon_falls_back_to_a_note_and_is_reported(tmp_path: Path) -> None:
@@ -1098,7 +1098,7 @@ def test_an_unmapped_icon_falls_back_to_a_note_and_is_reported(tmp_path: Path) -
         files=(("Page", "page.htm"),),
         toc=toc_js(node("", "P", "Page", "0")),
     ))
-    assert result.body("page.md").startswith("> [!NOTE]")
+    assert result.body("page.md").startswith("> **Note:**")
     assert any("Security" in message for message in result.messages("ALERT_LABEL_UNMAPPED"))
 
 

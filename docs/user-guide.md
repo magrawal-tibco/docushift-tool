@@ -1641,6 +1641,32 @@ What to expect:
 Everything it records goes into the findings register like any other run, so
 `docushift report --run last` reads it back and `--export` writes it out.
 
+### Repairing notes already published (`fix-callouts`)
+
+Until Phase 56 the converter wrote each note as a GitHub alert, `> [!NOTE]`. AEM does
+not render that: the reader sees the text with no "Note" or "Tip" label. A conversion
+now writes `> **Note:**` with the text on the next line. `fix-callouts` applies the same
+rule to Markdown already written, with no re-conversion:
+
+```bash
+# How many notes would change? Writes nothing
+docushift fix-callouts ../ibi-docs-aem/en-us-ibi-webfocus-userdocs --dry-run
+
+# Every tree that holds old notes: the published repos AND the local trees.
+# Fix only the repos and the next `sync` copies the old notes back.
+docushift fix-callouts output reframed ../tibco-docs-aem ../ibi-docs-aem
+```
+
+- **Only note lines change.** `> [!TIP]` becomes `> **Tip:**`, and a blank line directly
+  after a label is removed so the label and the text read as one paragraph. A
+  `**Remember:**`-style label that opened the note becomes its label. Line endings are kept,
+  code samples are left alone, and `.git` and other dot-folders are skipped.
+- **A note that opens with a table keeps one blank line** after the label, or the label
+  would become the table's header row. Each one is printed for review.
+- **Running it twice changes nothing**, so an interrupted run is safe to repeat.
+- **It does not commit.** Review the change with `git diff` and commit and push the repo as
+  usual. The run writes `reports/fix-callouts-<date>.csv`, one row per file changed.
+
 
 ---
 

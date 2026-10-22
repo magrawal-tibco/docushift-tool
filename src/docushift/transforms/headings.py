@@ -34,7 +34,7 @@ alternative rule tested produced something worse.
 
 **A heading the engine is going to consume is not a heading**, and `skip` is how
 an engine says so. DocBook's admonition label is an `h3.title` inside `div.note`
-that `_admonition` deletes on its way to rendering `> [!NOTE]` -- it is still an
+that `_admonition` deletes on its way to rendering `> **Note:**` -- it is still an
 `<h3>` in the DOM when this runs, and letting it take a rung would renumber the
 real sections around a heading no reader ever sees. It is also the entire reason
 the 5,022-file HTML census was wrong. Flare, DITA and WebWorks carry their

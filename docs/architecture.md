@@ -41,7 +41,7 @@ flowchart TD
 
     subgraph Convert["Multi-Engine Conversion & Transforms"]
         EX3 --> C1["Profile Selector\n(Flare | DITA | WebWorks | DocBook)"]
-        C1 --> C2["Core Transforms\n- Chrome Stripping & Callouts (> [!NOTE])\n- HTML Tables to GFM\n- Link & Anchor Resolution\n- CSH Mapping to MD Anchors\n- Asset Relinking"]
+        C1 --> C2["Core Transforms\n- Chrome Stripping & Callouts (> **Note:**)\n- HTML Tables to GFM\n- Link & Anchor Resolution\n- CSH Mapping to MD Anchors\n- Asset Relinking"]
         C2 --> C3["Clean GFM Markdown Files\n(+ csh frontmatter)"]
         C3 --> C4["csh.yml per version\n(identifier -> topic map)"]
     end
@@ -1042,7 +1042,7 @@ After chrome removal, a topic averages **1.1 links**. That is the real link dens
 
 Flare does not preserve a semantic class vocabulary the way DITA does (§5.2.5). Its semantics live in **`data-mc-autonum`** — an attribute carrying the label text, which the skin's CSS renders. Nothing renders it in Markdown, so the engine must read it and re-emit the label itself. This is the structural difference from DITA, where the label is already a `span` in the DOM and must be *deleted* (§5.2.5) rather than recovered.
 
-**Callouts** are `div.note`, `div.noteNote`, `div.warning`, `div.noteWarning`, `div.caution`, `div.noteCaution`, `div.tip`, `div.noteTip`, `div.important`, `div.noteImportant`. Observed distribution over the sample: **Note 1,574, Warning 30, Tip 28, Important 21**, the rest in single digits. They map to GFM alerts (`> [!NOTE]`, `> [!WARNING]`, `> [!TIP]`, `> [!IMPORTANT]`, `> [!CAUTION]`) with the label taken from `data-mc-autonum` where the class is ambiguous.
+**Callouts** are `div.note`, `div.noteNote`, `div.warning`, `div.noteWarning`, `div.caution`, `div.noteCaution`, `div.tip`, `div.noteTip`, `div.important`, `div.noteImportant`. Observed distribution over the sample: **Note 1,574, Warning 30, Tip 28, Important 21**, the rest in single digits. They map to five kinds -- Note, Warning, Tip, Important, Caution -- with the kind taken from `data-mc-autonum` where the class is ambiguous, and are written as a bold label in a blockquote, `> **Note:**`, with the body on the very next line. **Not GFM alerts** (`> [!NOTE]`), which is what this section specified until Phase 56: AEM reads `[!NOTE]` as an empty key reference and the reader loses the label (Phase 55's probe). `docushift fix-callouts` rewrites trees written the old way.
 
 **MadCap emits lists as tables.** `AutoNumber_p_*` single-column tables are the fake-list construct: **1,321 of them in 7% of sampled topics** — `Bullet` 753, `Step` 480, `ListDash` 82, `StepInd` 6 — against 1,809 real `<ul>` and 1,201 real `<ol>`. Converting them as tables produces a one-column pipe table where a list belongs. `data-mc-autonum` on the content cell is the ground truth for ordered-versus-bulleted; the class name alone is not (`Step` and `Bullet` both appear with and without numbering).
 
@@ -1223,7 +1223,7 @@ DITA's `@class` survives into the HTML as CSS class names, which makes semantic 
 | :--- | :--- |
 | `topictitle1` / `topictitle2` / `sectiontitle` | `#` / `##` / `###`, with `h1` used once per file |
 | `shortdesc` (2% of topics) | Lead paragraph, unwrapped |
-| `note`, `tip`, `important`, `warning`, `caution`, `remember`, `attention`, `restriction` | GFM alerts (§5.1) |
+| `note`, `tip`, `important`, `warning`, `caution`, `remember`, `attention`, `restriction` | Bold-label blockquotes (§5.1) |
 | `codeblock`, `msgblock` | Fenced block, **no language** |
 | `codeph`, `msgph`, `filepath`, `varname`, `parmname`, `cmdname`, `apiname`, `userinput`, `sysout`, `option` | Inline code |
 | `uicontrol`, `wintitle`, `menucascade`, `term`, `dlterm` | Bold |
@@ -1233,7 +1233,7 @@ DITA's `@class` survives into the HTML as CSS class names, which makes semantic 
 
 **Callouts.** Observed distribution: `note` 1,674, `tip` 42, `important` 15, `warning` 13, `remember` 8, `attention` 8, `caution` 3, `restriction` 1. No `danger`, `fastpath`, `notice`, or `trouble` appears anywhere in the corpus, so the mapping covers what ships. GFM has five alert types; `remember`, `attention` and `restriction` map to `[!NOTE]` and keep their original label as the first bolded word, so no information is lost to the collapse.
 
-**Every callout carries its own label span** — 1,674 `span.notetitle` for 1,674 `note` divs, a 1:1 match. That span **must be removed**, because GFM renders the label itself. Leaving it produces `> [!NOTE]` followed by `**Note:** Note: …`.
+**Every callout carries its own label span** — 1,674 `span.notetitle` for 1,674 `note` divs, a 1:1 match. That span **must be removed**, because `callouts.render` writes the label itself. Leaving it produces `> **Note:**` followed by `Note: …`. Where the authored label says more than the kind (`Remember`, `Attention`, `Restriction`), that word is the label: `> **Remember:**` (Phase 56).
 
 **Code fences are bare.** Of 864 `<pre>` blocks, essentially all are `class="codeblock"` with no language attribute — the entire corpus yields exactly one `lang="x-soap"` and one `class="msgblock"`. Guessing a language from content would be a fabrication applied 864 times; fences are emitted unlabelled.
 
@@ -2059,13 +2059,13 @@ The generator is one stylesheet at one version (`V1.76.1`), so the vocabulary is
 
 | Class | Occurrences | Maps to |
 | :--- | ---: | :--- |
-| `div.note` | 535 | `> [!NOTE]` |
+| `div.note` | 535 | `> **Note:**` |
 | `div.caution` | 239 | `> [!CAUTION]` |
 | `div.important` | 211 | `> [!IMPORTANT]` |
 | `div.tip` | 52 | `> [!TIP]` |
 | `div.warning` | 33 | `> [!WARNING]` |
 
-The `h3.title` holds the printed label ("Note", "Caution") and must be **deleted**, not rendered — GFM's alert syntax supplies the label. DocBook's admonition vocabulary is closed at these five and all five map, so **`ALERT_LABEL_UNMAPPED` is not reachable from this engine**; that is a property of the source, not an omission.
+The `h3.title` holds the printed label ("Note", "Caution") and must be **deleted**, not rendered — `callouts.render` writes the label. DocBook's admonition vocabulary is closed at these five and all five map, so **`ALERT_LABEL_UNMAPPED` is not reachable from this engine**; that is a property of the source, not an omission.
 
 **Deleting the `h3.title` also deletes the anchor, and that is a known defect (measured 2026-09-23, `planning.md` Phase 18e).** A minority of admonitions carry a *custom* title, and the anchor for the whole box lives on it and nowhere else — `<div class="note"><h3 class="title"><a name="mapsUsageNote"></a>Usage Note</h3>…`. The rule above removes the `h3`, so the alert is emitted with neither the custom label nor an addressable id, while every inbound `…#mapsUsageNote` link survives the conversion and resolves to nothing. `validate` over the published `streaming` family reports these as **152 `ANCHOR_MISSING` warnings, and they are its only findings** — 4 distinct anchors, of the **5** titled-anchored admonitions in the whole 11.2.1 source. **Fixed, Phase 19 (2026-09-23), and the title turned out to be carrying two things.**
 

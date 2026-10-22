@@ -24,11 +24,20 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | Edit to DOCOPS-217 is allowed (blocked by a permission check on 2026-10-09) | DOCOPS-217: append the 2026-10-09 publish note → Done |
 | A follow-up from the BusinessConnect warnings is planned | DOCOPS-220 → In Progress |
 | General resources repo created and pushed (4 API references) | DOCOPS-245: dated note → Done |
+| `fix-callouts` has run over output/, reframed/ and both repos, pushed, and labels show on staging | DOCOPS-250: dated note → Done |
+| Phase 55 pilot reviewed and all ibi products verified | DOCOPS-249 → Done; DOCOPS-150 (ibi staging check): dated note with the verify result |
 | A new phase is opened | One sub-task under the matching story, In Progress, no `retro` |
 
 **Left alone on purpose:** DOCOPS-8 is a Task where its siblings are Stories.
 
 **Log** (newest first, one line per session):
+
+- 2026-10-22 — DOCOPS-250 note: Statistica notes fixed (6,199 labels in output/ and reframed/, 4,175 in
+  en-us-spotfire-statistica-userdocs), pushed as 0114ea66; stays In Progress for staging check and other families.
+
+- 2026-10-22 — Phases 55 and 56 logged under DOCOPS-96: DOCOPS-249 (verify against stg-docs.ibi.com,
+  In Progress, 1 SP, due 30 Oct) and DOCOPS-250 (note labels + `fix-callouts`, built, In Progress,
+  0.5 SP, due 27 Oct; runs pending, Statistica first). DOCOPS-150 left alone, waits on the Phase 55 pilot.
 
 - 2026-10-22 — DOCOPS-248 (Done, 0.25 SP, under DOCOPS-7): AWS Common Services 6.0.0–6.1.0 reframed and
   published; Oracle EBS 6.1.2, Oracle Fusion Cloud 6.0.0, Files 8.3.0 re-run to publish; one Files 8.3.0
@@ -225,6 +234,8 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | 51 | Merged Flare help systems: subsystem TOCs spliced into the master | DOCOPS-229 |
 | 52 | Letter case the source gets wrong: image links, ZIP name clashes | DOCOPS-232 |
 | 54 | A release-notes folder that copies the main guides | DOCOPS-239 |
+| 55 | `verify`: converted ibi docs against stg-docs.ibi.com | DOCOPS-249 (in progress) |
+| 56 | Note labels AEM shows; `fix-callouts` repairs published docs | DOCOPS-250 (in progress) |
 
 Other logged work: Jira reconcile and this handoff DOCOPS-208; stakeholder status page DOCOPS-197; TIBCO family reassignments DOCOPS-120
 (in progress, progress kept as comments); ibi family regroup DOCOPS-207; catalog refresh and 2026-10-09 end-of-support report DOCOPS-215; cloud family run DOCOPS-222; EMS, FTL and Messaging run DOCOPS-223; Data Management run DOCOPS-238; FTL, ActiveSpaces, EMS and Messaging re-run DOCOPS-240; Hawk run DOCOPS-241; Mainframe run DOCOPS-242; iProcess run DOCOPS-243; Platform run DOCOPS-244; General run DOCOPS-245; hand-obtained packages and first BPM push DOCOPS-246; last 6 download failures DOCOPS-247; Statistica run DOCOPS-128.

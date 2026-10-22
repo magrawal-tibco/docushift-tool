@@ -215,9 +215,9 @@ class DitaRenderer(markdown.Renderer):
 
         **Every callout carries its own label span**, 1:1 in every kind measured:
         364 `span.notetitle` for 364 `div.note`, 9 `tiptitle` for 9 `tip`, and so
-        on through `warning`, `important`, `attention` and `remember`. GFM renders
-        the label itself, so leaving the span emits `> [!NOTE]` and then
-        `**Note:** Note: …`. It is matched as `span.<kind>title` and never as
+        on through `warning`, `important`, `attention` and `remember`. `render` writes
+        the label itself, so leaving the span emits `> **Note:**` and then
+        `Note: …`. It is matched as `span.<kind>title` and never as
         `span[class$=title]`, which would also delete the 265 `wintitle` spans in
         the same sample -- those are content, and window names at that.
         """
@@ -232,10 +232,15 @@ class DitaRenderer(markdown.Renderer):
             kind = callouts.Alert.NOTE
 
         blocks = self.blocks(tag)
-        # `remember`, `attention` and `restriction` have no GitHub alert of their
-        # own and collapse onto NOTE and IMPORTANT. Their authored label is kept
-        # as the first bolded run so the collapse loses the rendering, not the word.
+        # `remember`, `attention` and `restriction` have no kind of their own and
+        # collapse onto NOTE and IMPORTANT. Their authored word is the more
+        # specific one, so it *is* the label (`**Remember:**`, Phase 56). A label
+        # the vocabulary has never seen (`Best practice`) stays the first bolded
+        # run under NOTE, as `fix_markdown` leaves it, so the collapse loses the
+        # rendering, not the word.
         if label and str(kind).lower() != name:
+            if callouts.alert_for(label) is not None:
+                return callouts.render(kind, "\n\n".join(blocks), label=markdown.escape(label))
             blocks = _prefixed(f"**{markdown.escape(label)}**", blocks)
         return callouts.render(kind, "\n\n".join(blocks))
 

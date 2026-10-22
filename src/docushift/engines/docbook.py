@@ -200,8 +200,8 @@ class DocBookRenderer(markdown.Renderer):
     def _admonition(self, tag: Tag, name: str) -> str:
         """One admonition, with its printed label deleted (§5.6.7).
 
-        The `h3.title` reads "Note", "Caution" and so on, and GFM's alert syntax
-        draws that label itself -- leaving it emits `> [!NOTE]` followed by
+        The `h3.title` reads "Note", "Caution" and so on, and `callouts.render`
+        writes that label itself -- leaving it emits `> **Note:**` followed by
         `### Note`. All five kinds map, so `alert_for` never returns None here and
         there is no unmapped-label branch to report from.
 
@@ -238,8 +238,8 @@ class DocBookRenderer(markdown.Renderer):
             blocks.insert(0, markdown.wrap(markdown.escape(caption), "**"))
         alert = callouts.render(kind, "\n\n".join(blocks))
         # Above the box, not inside it: an `<a id>` on its own line is block-level
-        # HTML every renderer resolves, and it cannot perturb GFM's alert parsing,
-        # which is sensitive to what follows `> [!NOTE]`. Landing the reader at the
+        # HTML every renderer resolves, and it cannot split the label from the
+        # body that follows `> **Note:**`. Landing the reader at the
         # top of the box is also what the DocBook anchor meant.
         return "\n\n".join([*markers, alert])
 

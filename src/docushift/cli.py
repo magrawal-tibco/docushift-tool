@@ -3285,6 +3285,91 @@ def _archive_target(manager: CatalogManager, product: str, version: str):
     return found, ver
 
 
+@main.command("fix-callouts")
+@click.argument("paths", nargs=-1, required=True,
+                type=click.Path(exists=True, file_okay=False, path_type=Path))
+@click.option("--dry-run", is_flag=True, help="Count what would change; write nothing.")
+@click.pass_context
+def fix_callouts(ctx: click.Context, paths: tuple[Path, ...], dry_run: bool) -> None:
+    """Rewrite `> [!NOTE]` notes as `> **Note:**` in Markdown already written (Phase 56).
+
+    AEM does not render GitHub alerts, so a published note lost its label. This
+    applies the converter's current rule to any folder of `.md` files -- the
+    published repos, and `output/` and `reframed/` too, or the next `sync` copies
+    the old notes back -- with no re-conversion. It also drops a blank line found
+    directly after a label. Only those lines change; line endings are kept, code
+    samples are left alone, and a second run changes nothing.
+
+    Edits files only: committing and pushing a repo stays with the user. Writes
+    `reports/fix-callouts-<date>.csv` unless `--dry-run`. Exits 1 if a file could
+    not be read or written.
+    """
+    import datetime
+    import os
+
+    from docushift.transforms import callouts
+    from docushift.utils.csvio import write_rows
+
+    cfg: ConfigManager = ctx.obj["config"]
+    _require_long_paths(cfg)
+
+    rows: list[dict[str, str]] = []
+    failed: list[str] = []
+    table = Table(title="fix-callouts" + (" (dry run)" if dry_run else ""))
+    for column in ("folder", "files changed", "labels rewritten", "blank lines removed",
+                   "table-first notes"):
+        table.add_column(column, justify="left" if column == "folder" else "right")
+
+    for root in paths:
+        files = markers = blanks = tables = read = 0
+        console.print(f"Reading {escape(str(root))}")
+        for current, dirs, names in os.walk(root):
+            # `.git` holds no page and is the largest folder in a repo.
+            dirs[:] = sorted(d for d in dirs if not d.startswith("."))
+            for name in sorted(names):
+                if not name.lower().endswith(".md"):
+                    continue
+                path = Path(current) / name
+                read += 1
+                # One family's converted tree alone is 87,208 pages (Statistica), and
+                # the walk is disk-bound: say it is moving.
+                if read % 10000 == 0:
+                    console.print(f"  {read:,} files read, {files:,} to change")
+                try:
+                    fixed = callouts.fix_markdown(path.read_bytes().decode("utf-8"))
+                    if fixed.changed and not dry_run:
+                        path.write_bytes(fixed.text.encode("utf-8"))
+                except (OSError, UnicodeDecodeError) as exc:
+                    failed.append(f"{path}: {exc}")
+                    continue
+                if not fixed.changed and not fixed.tables:
+                    continue
+                files += fixed.changed
+                markers += fixed.markers
+                blanks += fixed.blanks
+                tables += fixed.tables
+                if fixed.tables:
+                    console.print(f"[yellow]table-first note, blank line kept:[/yellow] {escape(str(path))}")
+                rows.append({
+                    "folder": str(root), "file": str(path.relative_to(root)),
+                    "labels_rewritten": str(fixed.markers), "blank_lines_removed": str(fixed.blanks),
+                    "table_first_notes": str(fixed.tables),
+                    "written": "yes" if fixed.changed and not dry_run else "no",
+                })
+        table.add_row(escape(str(root)), str(files), str(markers), str(blanks), str(tables))
+
+    console.print(table)
+    if not dry_run:
+        report = cfg.root_dir / "reports" / f"fix-callouts-{datetime.date.today().isoformat()}.csv"
+        write_rows(report, ["folder", "file", "labels_rewritten", "blank_lines_removed",
+                            "table_first_notes", "written"], rows)
+        console.print(f"Report: {escape(str(report))}")
+    for line in failed:
+        console.print(f"[red]failed:[/red] {escape(line)}")
+    if failed:
+        ctx.exit(1)
+
+
 @main.command()
 @click.pass_context
 def doctor(ctx: click.Context) -> None:

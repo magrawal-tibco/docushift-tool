@@ -736,7 +736,7 @@ def test_a_note_div_carrying_a_warning_autonum_is_a_warning(tmp_path: Path) -> N
         "<div class='note' data-mc-autonum='Warning: '><p>Data is lost.</p></div>",
     )
 
-    assert "> [!WARNING]\n> Data is lost." in run(tmp_path, files).body("Content/intro.md")
+    assert "> **Warning:**\n> Data is lost." in run(tmp_path, files).body("Content/intro.md")
 
 
 def test_the_note_prefix_comes_off_the_class_before_the_vocabulary_sees_it(
@@ -747,7 +747,7 @@ def test_the_note_prefix_comes_off_the_class_before_the_vocabulary_sees_it(
         "Introduction", "<div class='noteCaution'><p>Careful.</p></div>"
     )
 
-    assert "> [!CAUTION]\n> Careful." in run(tmp_path, files).body("Content/intro.md")
+    assert "> **Caution:**\n> Careful." in run(tmp_path, files).body("Content/intro.md")
 
 
 def test_an_unmapped_callout_falls_back_to_note_and_is_reported_once(tmp_path: Path) -> None:
@@ -767,7 +767,7 @@ def test_an_unmapped_callout_falls_back_to_note_and_is_reported_once(tmp_path: P
 
     result = run(tmp_path, files)
 
-    assert "> [!NOTE]\n> Prefer this." in result.body("Content/intro.md")
+    assert "> **Note:**\n> Prefer this." in result.body("Content/intro.md")
     assert [f.code for f in result.findings.all].count("ALERT_LABEL_UNMAPPED") == 1
 
 
@@ -1011,7 +1011,7 @@ def test_an_icon_table_is_a_callout_with_its_label(tmp_path: Path) -> None:
 
     body = run(tmp_path, files).body("Content/intro.md")
 
-    assert "> [!NOTE]\n> If the substitution is not found in the file" in body
+    assert "> **Note:**\n> If the substitution is not found in the file" in body
     assert "|" not in body
 
 

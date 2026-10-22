@@ -412,7 +412,7 @@ def test_a_page_that_already_has_a_heading_gains_no_second_one(tmp_path: Path) -
 
 
 def test_every_admonition_class_maps_and_the_printed_label_is_deleted(tmp_path: Path) -> None:
-    """The class is the kind and the `h3.title` is the label GFM draws itself."""
+    """The class is the kind and the `h3.title` is the label `callouts.render` writes itself."""
     body = one_page(tmp_path, "".join(
         f'<div class="{kind}"><h3 class="title">{kind.title()}</h3>'
         f"<p>{kind} text.</p></div>"
@@ -420,7 +420,7 @@ def test_every_admonition_class_maps_and_the_printed_label_is_deleted(tmp_path: 
     )).body("authoring/topic.md")
 
     for kind in ("NOTE", "TIP", "IMPORTANT", "WARNING", "CAUTION"):
-        assert f"> [!{kind}]" in body
+        assert f"> **{kind.capitalize()}:**" + chr(10) + f"> {kind.lower()} text." in body
     assert "### Note" not in body
     assert "ALERT_LABEL_UNMAPPED" not in body
 
@@ -444,11 +444,11 @@ def test_a_title_that_is_not_the_kind_label_is_kept_and_one_that_is_is_not(
         '<div class="warning"><h3 class="title">WARNING</h3><p>Shouty.</p></div>'
     )).body("authoring/topic.md")
 
-    assert "> [!IMPORTANT]\n> **Disclaimer**\n>\n> As is." in body
-    assert "> [!CAUTION]\n> **Caution 2**\n>\n> Second." in body
-    assert "> [!NOTE]\n> Plain." in body
-    assert "> [!WARNING]\n> Shouty." in body
-    assert "**Note" not in body and "**WARNING**" not in body
+    assert "> **Important:**\n> **Disclaimer**\n>\n> As is." in body
+    assert "> **Caution:**\n> **Caution 2**\n>\n> Second." in body
+    assert "> **Note:**\n> Plain." in body
+    assert "> **Warning:**\n> Shouty." in body
+    assert "**Note:** Plain" not in body and "**WARNING**" not in body
 
 
 def test_a_mapped_span_is_unwrapped_before_it_is_wrapped(tmp_path: Path) -> None:
@@ -589,7 +589,7 @@ def test_an_admonition_keeps_the_anchor_its_title_carried(tmp_path: Path) -> Non
     body = result.body("authoring/other.md")
 
     # Above the box: block-level HTML, and it cannot perturb the alert's parsing.
-    assert '<a id="mapsUsageNote"></a>\n\n> [!NOTE]' in body
+    assert '<a id="mapsUsageNote"></a>\n\n> **Note:**' in body
     assert result.document("authoring/other.md").anchors == {"mapsUsageNote"}
     assert "[it](other.md#mapsUsageNote)" in result.body("authoring/topic.md")
     assert "ANCHOR_DROPPED" not in result.codes()
