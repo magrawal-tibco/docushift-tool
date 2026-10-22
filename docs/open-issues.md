@@ -258,15 +258,15 @@ help is complete, and the other five versions are not affected.
 
 ### Help format not supported
 
-- **Status:** Open
+- **Status:** Accepted
 - **Owner:** unassigned
 - **Raised:** 12 Oct 2026
-- **Blocks publishing:** yes, for the online help of GEMS 1.1.0 and Graphical Rendezvous 1.1.0
+- **Blocks publishing:** no
 
 Both are built with Docusaurus, a help format the tool recognises but has no
-converter for. Their PDFs and readme files are published; the online help is not.
-To decide: mark them out of scope, or build a converter. Two versions are unlikely
-to justify a converter on their own.
+converter for. On 22 Oct 2026 the user marked both versions as not for conversion,
+so their online help is not migrated. Their PDFs and readme files are published.
+Revisit if more Docusaurus products appear.
 
 ---
 
@@ -591,5 +591,28 @@ not eligible; 6.2.0 and 6.1.2 are published (decided by the user, 21 Oct 2026).
 On 21 Oct 2026 the developers withdrew 22 Statistica and Data Science versions after
 many had already been published. Publishing only adds and replaces versions, so the
 withdrawn ones stayed. This time both Statistica publishing folders were deleted and
+
+---
+
+## WebFOCUS, Data Virtualization (translated documentation)
+
+### Translated pages that are on the live site but not in any package
+
+- **Status:** Waiting
+- **Owner:** docs team
+- **Raised:** 22 Oct 2026
+- **Blocks publishing:** yes, for these translations only
+
+The tool converts what the download packages contain. Three sets of Japanese
+documentation are on docs.tibco.com but in no package, so they cannot be migrated:
+
+- Data Virtualization 8.8.0 and 8.8.1, Japanese online help: 6,917 pages
+- WebFOCUS Client 9.3.5 to 9.3.7, Japanese release notes: 252 pages
+- WebFOCUS 9.1.2 to 9.3.4, Japanese PDFs: 121 files
+
+Decided by the user, 22 Oct 2026: ask the docs team for packages rather than copy the
+pages from the live site. When a package arrives it goes through the normal
+conversion into the matching translated repository. Data Virtualization's,
+`loc-spotfire-data-virtualization-userdocs`, does not exist yet and must be created first.
 republished, leaving the 19 approved versions. A family that is already pushed cannot be
 cleared that way, so the tool needs to remove withdrawn versions itself.

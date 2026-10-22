@@ -439,7 +439,8 @@ def _link(parent: str, node: NavNode) -> str:
 ONLINE_HELP_LIST_TITLE = "Online Help"
 
 
-def render_toc(nodes: list[NavNode], templates: Path, title: str = "") -> str:
+def render_toc(nodes: list[NavNode], templates: Path, title: str = "",
+               list_title: str = ONLINE_HELP_LIST_TITLE) -> str:
     """`toc.yml` for one version: the tree, flattened into indented rows.
 
     Flattened in Python rather than recursed in Jinja because the depth is the
@@ -450,7 +451,7 @@ def render_toc(nodes: list[NavNode], templates: Path, title: str = "") -> str:
     become a mapping.
     """
     return _template(templates, "toc.yml.j2").render(
-        title=title, list_title=ONLINE_HELP_LIST_TITLE, rows=_rows(nodes, 0)
+        title=title, list_title=list_title, rows=_rows(nodes, 0)
     )
 
 

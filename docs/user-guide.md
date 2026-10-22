@@ -903,7 +903,8 @@ versions produce no `csh.yml` — which is an absence in the source, not a gap i
 **What it skips, and says it skipped.** In Flare: generated directories (`_globalpages/`,
 `MicroContent/`, `Resources/`), the `Default.htm` runtime stubs, any localized subtree, any
 whole output root built for another language (`ja-jp/`, `de-de/`, `ja/`: each is named with
-a `LOCALIZED_ROOT_SKIPPED` warning; publishing them to the `loc-` tree is later work), and
+a `LOCALIZED_ROOT_SKIPPED` warning and converted by its own `--locale` run, see
+[Translated documentation](#translated-documentation---locale)), and
 API-reference trees — the last identified by a generator marker inside the directory, never
 by its name, because `api-exchange-gateway/` is a product with 15,677 files of ordinary
 documentation. In DITA: the publication homepage, `index.html`, the TOC files themselves,
@@ -1640,6 +1641,62 @@ What to expect:
 
 Everything it records goes into the findings register like any other run, so
 `docushift report --run last` reads it back and `--export` writes it out.
+
+### Translated documentation (`--locale`)
+
+Phase 57. Some packages ship translated help next to the English: every WebFOCUS Client,
+App Studio and Reporting Server 9.3.x package has `html/ja-jp/` beside `html/en-us/`, and
+WebFOCUS Client 9.3.5–9.3.8 also has `de-de`, `fr-fr` and `es-es`. An ordinary run converts
+the English and skips each translated build with a `LOCALIZED_ROOT_SKIPPED` warning. A run
+with `--locale` converts one language:
+
+```bash
+docushift --locale ja-jp convert --product ibi-webfocus-client --version 9.3.6
+docushift --locale ja-jp sync --product ibi-webfocus-client --version 9.3.6 --target-dir ../ibi-docs-aem
+docushift --locale ja-jp validate --target-dir ../ibi-docs-aem --product ibi-webfocus-client --version 9.3.6
+docushift --locale ja-jp status --bu ibi --family webfocus
+```
+
+`--locale` goes before the command name.
+
+**Where things go.** One shared tree per family holds every language, with one folder per
+language inside it: `loc-ibi-webfocus-userdocs/ja-jp/ibi-webfocus-client/online-help/9-3-6/`.
+
+**What it reads, and what it writes:**
+- It reads the English package. A translated build ships inside the English ZIP, so you do
+  not run `download` or `extract` again.
+- It writes its own Markdown to `output/ja-jp-ibi-webfocus/`.
+- It keeps its own run records in `cache/state-ja-jp.db`. `report` and `status` read that
+  file when given the same `--locale`.
+- It never writes `versions.csv`, which stays the English view.
+
+**What it converts:** only roots named for its language. A root that names no language,
+such as `Release-Notes-93x`, is English and is left to the ordinary run, with one note.
+
+**Only the online help is published.** The PDFs and release notes in the package are the
+English ones, and they publish through the ordinary run.
+
+**Page names match the English, file for file within the guide.** The English tree can have
+one extra folder level, `9-3-6/en-us/…`, when its package holds more than one guide set.
+
+**Partly translated builds are published as shipped.** `LOCALIZED_SHARE_UNTRANSLATED` says
+how many pages are identical to the English build's page of the same name, and how many have
+no English counterpart. Convert the English version first: without it, the share is not
+measured, and the finding says so.
+
+**Images the translated build does not ship come from the English build.** WebFOCUS's
+Japanese builds lack about half their screenshots. Any image a translated page references
+but its build lacks is copied from the English build at the same path, and the run counts
+those in a `LOCALIZED_IMAGE_BORROWED` note.
+
+**One label is written by the tool:** the help TOC's "Online Help". It stays English, with a
+`LOCALIZED_LABEL_UNTRANSLATED` note, until `config/locales.yaml` carries the text for that
+language. Adding it re-converts that language on the next run.
+
+**Not available with `--locale`:**
+- `catalog` and `reframe`. Translated trees are not merged.
+- `download`, except with `--from-file` for a separately supplied translated package. That
+  package lands in `families/ja-jp-…/` and is read in preference to the English one.
 
 ### Repairing notes already published (`fix-callouts`)
 

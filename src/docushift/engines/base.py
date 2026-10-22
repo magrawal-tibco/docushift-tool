@@ -320,6 +320,9 @@ class ConversionContext:
     # The run's locale. A unit root named for another language is a localized
     # build and is not converted into this locale's tree (Phase 34, R5-01).
     locale: str = DEFAULT_LOCALE
+    # Whether `locale` is the primary one (Phase 57). The primary run also keeps
+    # roots whose name declares no language; a localized run keeps only its own.
+    primary: bool = True
     # Roots that were located and deliberately not converted -- a localized build
     # (R5-01), another engine's unit of work (R4-02) -- so that nothing else
     # converts their files or resolves their help identifiers into this version:
@@ -474,10 +477,18 @@ def _without_localized(context: ConversionContext, roots: list[Path]) -> list[Pa
     their files as its own.
     """
     skipped: list[Path] = []
+    untagged: list[Path] = []
     kept: list[Path] = []
     for root in roots:
         tag = root_locale(root)
         inside = next((other for other in skipped if other in root.parents), None)
+        if inside is None and not tag and not context.primary:
+            # Phase 57. A root that names no language is the English build's:
+            # `Release-Notes-93x` beside `html/ja-jp/`. It belongs to the primary
+            # run. Not added to `skipped`, so a localized root nested inside it
+            # is still found.
+            untagged.append(root)
+            continue
         if inside is None and (not tag or same_language(tag, context.locale)):
             kept.append(root)
             continue
@@ -489,7 +500,15 @@ def _without_localized(context: ConversionContext, roots: list[Path]) -> list[Pa
                      if inside is None else
                      f"output root inside the localized root {_relative_to(context.tree, inside)}"),
         )
-    context.excluded_roots.extend(skipped)
+    if untagged:
+        context.record(
+            "LOCALIZED_UNTAGGED_ROOT_LEFT",
+            count=len(untagged),
+            message=(f"{len(untagged)} output root(s) name no language and belong to the primary "
+                     f"locale's run, not the {context.locale} tree: "
+                     + ", ".join(_relative_to(context.tree, root) for root in untagged)),
+        )
+    context.excluded_roots.extend(skipped + untagged)
     return kept
 
 

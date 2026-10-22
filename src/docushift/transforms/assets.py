@@ -108,6 +108,8 @@ class Counts:
     dangling_by_segment: dict[str, int] = field(default_factory=dict)
     #: Resolved only after dropping a page-named folder segment (Phase 47).
     page_segment_dropped: int = 0
+    #: Missing from a localized build and copied from its English build (Phase 57).
+    borrowed: int = 0
 
 
 class AssetCopier:
@@ -120,8 +122,14 @@ class AssetCopier:
     copy set would silently pick one release's file for both.
     """
 
-    def __init__(self, root: Path, engine: SourceEngine, destination: Path, published: int = 0):
+    def __init__(self, root: Path, engine: SourceEngine, destination: Path, published: int = 0,
+                 fallback: Path | None = None):
         self.root = root
+        # Phase 57. A localized build's English sibling root (`html/en-us/` beside
+        # `html/ja-jp/`). WebFOCUS ships its Japanese build without half its
+        # screenshots, at the same paths the English build has them; the user's
+        # decision (2026-10-22) was to publish the English image over a broken one.
+        self.fallback = fallback
         self.engine = engine
         self.destination = destination
         # Phase 49. The length of the folder this unit publishes to, the way
@@ -181,6 +189,11 @@ class AssetCopier:
             if retry is not None and long_path(self.root / Path(*retry.parts)).is_file():
                 self.counts.page_segment_dropped += 1
                 resolved, candidate = retry, self.root / Path(*retry.parts)
+        borrowed = False
+        if not long_path(candidate).is_file() and self.fallback is not None:
+            english = self.fallback / Path(*resolved.parts)
+            if long_path(english).is_file():
+                candidate, borrowed = english, True
         if not long_path(candidate).is_file():
             self.counts.dangling += 1
             segment = resolved.parts[0] if len(resolved.parts) > 1 else "."
@@ -192,8 +205,9 @@ class AssetCopier:
         # Phase 52: published under the file's own spelling, as page links are
         # (R5-06). Product and Service Catalog 5.1.0 links `html-opd/` 399 times
         # into `html-OPD/`, which Windows resolves and AEM 404s.
-        actual = self._on_disk(resolved)
+        actual = None if borrowed else self._on_disk(resolved)
         mismatch = actual is not None and actual != resolved
+        self.counts.borrowed += borrowed
         if mismatch:
             self.counts.case_mismatch += 1
             resolved = actual

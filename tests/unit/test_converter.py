@@ -1603,3 +1603,132 @@ def test_convert_reshelve_orphans_runs_over_the_selection_and_refuses_force(
     assert refused.exit_code == 2 and "--reshelve-orphans" in refused.output
     assert result.exit_code == 0, result.output
     assert "1 nothing to move" in result.output
+
+
+# -- localized runs (Phase 57) -----------------------------------------------------
+
+
+def test_a_localized_run_converts_its_own_root_and_leaves_the_rest(tmp_path: Path) -> None:
+    """`wf-wf/9.3.7` as a `ja-jp` run: its own root only. The English build and an
+    untagged root (`Release-Notes-93x`) belong to the primary run."""
+    _flare_roots(tmp_path, "html/en-us", "html/ja-jp", "html/de-de", "Release-Notes-93x")
+    findings = FindingsRun("convert")
+    context = ConversionContext(
+        tree=tmp_path, output=tmp_path.parent / "out", engine=SourceEngine.FLARE,
+        output_roots=find_output_roots(tmp_path, SourceEngine.FLARE), findings=findings,
+        locale="ja-jp", primary=False,
+    )
+
+    work = FakeEngine().units(context)
+
+    assert [root.relative_to(tmp_path).as_posix() for root in work] == ["html/ja-jp"]
+    assert sorted(f.path for f in findings.all if f.code == "LOCALIZED_ROOT_SKIPPED") == [
+        "html/de-de", "html/en-us",
+    ]
+    [left] = [f for f in findings.all if f.code == "LOCALIZED_UNTAGGED_ROOT_LEFT"]
+    assert "Release-Notes-93x" in left.message
+    assert tmp_path / "Release-Notes-93x" in context.excluded_roots
+
+
+LOCALIZED_PACKAGE = {
+    "guide/en-us/Output.mcwebhelp": "",
+    "guide/en-us/Data/HelpSystem.xml": "<x/>",
+    "guide/en-us/Content/same.htm": "<html><body>same</body></html>",
+    "guide/en-us/Content/translated.htm": "<html><body>english</body></html>",
+    "guide/ja-jp/Data/HelpSystem.xml": "<x/>",
+    "guide/ja-jp/Content/same.htm": "<html><body>same</body></html>",
+    "guide/ja-jp/Content/translated.htm": "<html><body><img src='jp.png'/></body></html>",
+    "guide/ja-jp/Content/jp.png": "png",
+    "guide/ja-jp/Content/only-here.htm": "<html><body>new</body></html>",
+    "guide/en-us/Content/shot.png": "png",
+    "guide/ja-jp/Content/borrows.htm": "<html><body><img src='shot.png'/></body></html>",
+    "notes/Data/HelpSystem.xml": "<x/>",
+    "notes/release.htm": "<html><body>notes</body></html>",
+}
+
+
+def test_a_localized_run_reads_the_english_package_and_touches_nothing_english(
+    project_root: Path, config, catalog, product, version, fake_engine
+) -> None:
+    """The whole seam: one English package, two runs. The `ja-jp` run reads the
+    English extract, writes its own state file and workspace, and leaves the
+    English state rows and `versions.csv` exactly as they were."""
+    place_package(config, product, version, LOCALIZED_PACKAGE)
+    assert PackageExtractor(config, catalog).extract_one(product, version).outcome is (
+        ExtractOutcome.EXTRACTED
+    )
+    english, _ = convert(config, catalog, product, version)
+    assert english.outcome is ConvertOutcome.CONVERTED
+    english_rows = catalog.state.get_output_rows(product.slug, version.version)
+    sheet = (project_root / "config" / "versions.csv").read_bytes()
+
+    japanese = ConfigManager(root_dir=project_root, locale="ja-jp")
+    store = japanese.state_store()
+    local = CatalogManager(japanese.products_path, japanese.versions_path, store, config=japanese)
+    result, findings = convert(japanese, local, local.get_product(product.slug),
+                               local.get_product(product.slug).versions[version.version])
+
+    assert result.outcome is ConvertOutcome.CONVERTED, result.message
+    target = project_root / "output" / "ja-jp-tibco-messaging" / "tibco-ems" / "10.4.0"
+    assert result.path == target
+    assert sorted(path.relative_to(target).as_posix() for path in target.rglob("*.md")
+                  if "generated: true" not in path.read_text(encoding="utf-8")) == [
+        "Content/borrows.md", "Content/only-here.md", "Content/same.md", "Content/translated.md",
+    ]
+    # An image the Japanese build does not ship comes from the English build.
+    assert (target / "Content" / "shot.png").read_text(encoding="utf-8") == "png"
+    [borrowed] = [f for f in findings.all if f.code == "LOCALIZED_IMAGE_BORROWED"]
+    assert borrowed.count == 1
+    assert not [f for f in findings.all if f.code == "REFERENCE_UNRESOLVED"]
+    assert 'docs_list_title: "Online Help"' in (target / "toc.yml").read_text(encoding="utf-8")
+    assert [f.code for f in findings.all if f.code == "LOCALIZED_LABEL_UNTRANSLATED"]
+    [share] = [f for f in findings.all if f.code == "LOCALIZED_SHARE_UNTRANSLATED"]
+    assert share.message.startswith("1 of 4 page(s) (25%) are identical")
+    assert "2 have no English counterpart" in share.message
+
+    assert (project_root / "cache" / "state-ja-jp.db").is_file()
+    assert catalog.state.get_output_rows(product.slug, version.version) == english_rows
+    assert len(store.get_output_rows(product.slug, version.version)) == 4
+    assert (project_root / "config" / "versions.csv").read_bytes() == sheet
+    store.close()
+
+
+def test_a_translated_label_is_written_and_not_reported(
+    project_root: Path, config, catalog, product, version, fake_engine
+) -> None:
+    (project_root / "config" / "locales.yaml").write_text(
+        'labels:\n  online_help:\n    ja-jp: "オンラインヘルプ"\n', encoding="utf-8")
+    place_package(config, product, version, LOCALIZED_PACKAGE)
+    PackageExtractor(config, catalog).extract_one(product, version)
+
+    japanese = ConfigManager(root_dir=project_root, locale="ja-jp")
+    store = japanese.state_store()
+    local = CatalogManager(japanese.products_path, japanese.versions_path, store, config=japanese)
+    found = local.get_product(product.slug)
+    result, findings = convert(japanese, local, found, found.versions[version.version])
+
+    toc = (result.path / "toc.yml").read_text(encoding="utf-8")
+    assert 'docs_list_title: "オンラインヘルプ"' in toc
+    assert not [f for f in findings.all if f.code == "LOCALIZED_LABEL_UNTRANSLATED"]
+    # No English conversion to measure against: said, not guessed.
+    [share] = [f for f in findings.all if f.code == "LOCALIZED_SHARE_UNTRANSLATED"]
+    assert share.count == 0 and "not converted" in share.message
+    store.close()
+
+
+def test_a_heading_with_no_latin_letters_still_names_its_generated_page() -> None:
+    """`_slug` keeps `[a-z0-9]`, so a Japanese TOC label slugs to nothing. The page
+    is named `index`, then `index-2`, never an empty name."""
+    from docushift.converter.navigation import _free, _slug
+
+    assert _slug("インストール") == ""
+    taken = {PurePosixPath("guide/index.md")}
+    assert _free("guide", _slug("インストール"), taken) == PurePosixPath("guide/index-2.md")
+
+
+def test_the_localized_command_line_refuses_the_catalog_and_reframe(project_root: Path) -> None:
+    runner = CliRunner()
+    for command in (["catalog", "list"], ["reframe", "--all"]):
+        result = runner.invoke(main, ["--root", str(project_root), "--locale", "ja-jp", *command])
+        assert result.exit_code == 2, result.output
+        assert "primary locale only" in result.output

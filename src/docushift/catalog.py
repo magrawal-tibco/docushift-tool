@@ -496,7 +496,13 @@ class CatalogManager:
         Both files are written or neither is (`write_rows_together`), and a file
         that cannot be written -- almost always one open in Excel -- is a
         `CatalogError` naming it, not a traceback (Phase 34, R1-04/R2-05).
+
+        A localized run writes neither (Phase 57). The CSVs are the English view:
+        their status and count columns describe the primary locale's tree, and a
+        `--locale ja-jp` convert recording its own counts would overwrite them.
         """
+        if self.config is not None and not self.config.is_primary_locale():
+            return
         catalog = self.load()
 
         products = sorted(catalog.products.values(), key=lambda p: (p.bu, p.family, p.slug))

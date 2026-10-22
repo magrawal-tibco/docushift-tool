@@ -44,7 +44,7 @@ from docushift import origins
 from docushift.apiref import find_api_roots, recorded_roots
 from docushift.catalog import CatalogError, CatalogManager
 from docushift.config import ConfigManager
-from docushift.converter import navigation
+from docushift.converter import navigation, translation
 from docushift.converter.orphans import Reshelved, reshelve
 from docushift.engines.base import ConversionContext, Document, Unit, engine_for
 from docushift.engines.csh import CshFormat, CshSource, csh_format_of, read_csh_source
@@ -357,6 +357,9 @@ class DocumentConverter:
             # `<version>.part` on disk. Extraction learned the same in R3-08.
             remove(target.with_name(target.name + ".part"))
             return self._failed(slug, number, version.engine, _describe(exc))
+        if (not standalone and result.outcome is ConvertOutcome.CONVERTED
+                and not self.config.is_primary_locale()):
+            self._report_translation(product, version, target)
         if not checksum and not standalone and result.outcome is ConvertOutcome.CONVERTED:
             # X3-08. Correct, but rebuilt on every run under a plain `converted`
             # line: `extract --measure-only` and a failed post-swap extract leave
@@ -364,6 +367,32 @@ class DocumentConverter:
             result.message = ("no package checksum recorded, so this version is rebuilt on "
                               "every run; `docushift extract --force` records one")
         return result
+
+    def _report_translation(self, product: Product, version: ProductVersion, target: Path) -> None:
+        """Phase 57: how much of a localized build is its English build, unchanged.
+
+        Measured against the primary locale's converted tree, so a version whose
+        English has not been converted is a note, not a guess.
+        """
+        slug, number = product.slug, version.version
+        english_dir = self.config.primary().output_path(product.bu, product.family, slug, number)
+        base = getattr(self.state, "base", None)
+        if base is None or not english_dir.is_dir():
+            self._record("LOCALIZED_SHARE_UNTRANSLATED", slug, number, count=0,
+                         message="the English version is not converted, so the untranslated "
+                                 "share was not measured")
+            return
+        share = translation.measure(
+            self.state.get_output_map(slug, number), base.get_output_map(slug, number),
+            target, english_dir, self.config.locale,
+        )
+        if share.identical or share.unmatched:
+            self._record(
+                "LOCALIZED_SHARE_UNTRANSLATED", slug, number, count=share.identical,
+                message=(f"{share.identical} of {share.pages} page(s) ({share.percent}%) are "
+                         f"identical to the English build; {share.unmatched} have no English "
+                         f"counterpart"),
+            )
 
     def reshelve_one(self, product: Product, version: ProductVersion) -> ConvertResult:
         """Phase 43 over a tree already converted: orphans out of the TOC, into `unfiled/`.
@@ -496,6 +525,7 @@ class DocumentConverter:
             api_urls=self._api_urls(product, number, tree, api_roots),
             output_roots=output_roots,
             locale=self.config.locale,
+            primary=self.config.is_primary_locale(),
             findings=self.findings,
         )
 
@@ -524,6 +554,7 @@ class DocumentConverter:
             copier = AssetCopier(
                 root, version.engine, staging / unit_name if unit_name else staging,
                 published=published + 1 + len(unit_name) if published and unit_name else published,
+                fallback=None if self.config.is_primary_locale() else translation.english_root(root),
             )
             context.assets = copier
             unit = handler.convert_unit(context, root)
@@ -667,6 +698,8 @@ class DocumentConverter:
             return
         slug, number = product.slug, version.version
         pages, missing = origins.listing(self.config.cache_dir, slug, number)
+        if not self.config.is_primary_locale():
+            pages = origins.in_locale(pages, self.config.locale)
         built = origins.build(
             self.config.load_origin_urls(), slug, version.zip_url, mapping, {}, pages, missing,
         )
@@ -743,8 +776,15 @@ class DocumentConverter:
             textfile.write_text(path, _render(document))
 
         title = f"{product.display_name} {version.version}".strip()
+        list_title, translated = self.config.label("online_help", navigation.ONLINE_HELP_LIST_TITLE)
+        if not translated:
+            self._record("LOCALIZED_LABEL_UNTRANSLATED", product.slug, version.version,
+                         path="toc.yml",
+                         message=f"no {self.config.locale} text for 'online_help' in "
+                                 f"config/locales.yaml; written as {list_title!r}")
         textfile.write_text(
-            staging / "toc.yml", navigation.render_toc(synthesis.nodes, templates, title)
+            staging / "toc.yml",
+            navigation.render_toc(synthesis.nodes, templates, title, list_title),
         )
         # Version level, so `csg-version` and nothing else -- `csg-product` belongs
         # to the product folder, which only the distributor (6b) creates. Dotted,
@@ -807,6 +847,12 @@ class DocumentConverter:
 
     def _report_assets(self, context: ConversionContext, unit: str, copier: AssetCopier) -> None:
         """§6.4 steps 5 and 7, as findings rather than as terminal scrollback."""
+        if copier.counts.borrowed:
+            context.record(
+                "LOCALIZED_IMAGE_BORROWED", path=unit, count=copier.counts.borrowed,
+                message=f"{copier.counts.borrowed} reference(s) to a file this build does not "
+                        f"ship, copied from the English build at the same path",
+            )
         for source, target in sorted(copier.renamed.items()):
             context.record(
                 "ASSET_RENAMED_FOR_LENGTH",
@@ -1172,11 +1218,21 @@ class DocumentConverter:
             "templates": templates.hexdigest()[:16],
             "origins": origins.fingerprint(
                 self.config.load_origin_urls(), slug, version.zip_url,
-                origins.page_list(self.config.cache_dir, slug, number),
+                self._pages(slug, number),
             ),
         }
+        if not self.config.is_primary_locale():
+            # Phase 57: a translation added to `locales.yaml` changes the tree.
+            # Only for a localized run, so no English key moves.
+            shaping["online_help"] = self.config.label(
+                "online_help", navigation.ONLINE_HELP_LIST_TITLE)[0]
         payload = json.dumps(shaping, sort_keys=True, separators=(",", ":"))
         return hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16]
+
+    def _pages(self, slug: str, number: str) -> list[str]:
+        """The cached live page list, narrowed to this run's language when localized."""
+        pages = origins.page_list(self.config.cache_dir, slug, number)
+        return pages if self.config.is_primary_locale() else origins.in_locale(pages, self.config.locale)
 
     def _api_prefix(self, product: Product, version: str) -> str:
         """The publishing coordinates every one of this version's API URLs shares.

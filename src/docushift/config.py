@@ -15,7 +15,7 @@ import re
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import yaml
 
@@ -33,10 +33,13 @@ from docushift.utils.slug import (
     slugify,
 )
 
+if TYPE_CHECKING:
+    from docushift.state import StateStore
+
 # Every folder name is locale-prefixed because the predecessor `html-to-md` project
-# publishes `fr-fr` and `ja-jp` trees alongside `en-us`. Nothing in the pipeline is
-# multi-locale yet; the prefix reserves the shape so adding one is not a rename of
-# every folder on disk.
+# publishes `fr-fr` and `ja-jp` trees alongside `en-us`. Since Phase 57 a run takes
+# `--locale`: a localized run converts its own language's roots, keeps its own state
+# file and output workspace, and publishes into the shared `loc-` tree.
 #
 # Language-region, and used verbatim: there is no locale mapping table anywhere in
 # the tool. Its only content would be the value the caller already has, and it
@@ -281,10 +284,11 @@ class ConfigManager:
         self.publishing_path = self.config_dir / "publishing.yaml"
         self.reframe_path = self.config_dir / "reframe.yaml"
         self.origin_urls_path = self.config_dir / "origin-urls.yaml"
+        self.locales_path = self.config_dir / "locales.yaml"
         self.aem_templates_dir = self.config_dir / "aem_templates"
         self.products_path = self.config_dir / "products.csv"
         self.versions_path = self.config_dir / "versions.csv"
-        self.state_db_path = self.cache_dir / "state.db"
+        self.primary_state_db_path = self.cache_dir / "state.db"
 
         # Ensure directories exist. Per-family subfolders are created on demand by
         # the downloader, not up front -- pre-creating a folder for all ~12 declared
@@ -301,6 +305,21 @@ class ConfigManager:
         self._publishing_cache: dict[str, str] | None = None
         self._reframe_cache: dict[str, Any] | None = None
         self._origin_urls_cache: dict[str, dict[str, Any]] | None = None
+        self._primary_cache: ConfigManager | None = None
+
+    @property
+    def state_db_path(self) -> Path:
+        """This run's state file. Phase 57: one per locale.
+
+        Every table is keyed `(slug, version)`, and a second language under that
+        key would overwrite the English row's status, output map and findings. A
+        localized run reads Stage 3-4's facts from the primary file and writes its
+        own. A property, not set in `__init__`, so `publishing.yaml` is not read
+        before a caller has had the chance to write it.
+        """
+        if self.is_primary_locale():
+            return self.primary_state_db_path
+        return self.cache_dir / f"state-{slugify(self.locale)}.db"
 
     # -- publishing tokens ----------------------------------------------------
 
@@ -356,7 +375,44 @@ class ConfigManager:
 
     def publishes_resources(self) -> bool:
         """Whether this run's locale gets a `-resources` tree at all."""
+        return self.is_primary_locale()
+
+    def is_primary_locale(self) -> bool:
+        """Is this run the primary locale's (`en-us`), or a localized one (Phase 57)?"""
         return is_primary_locale(self.locale, self.load_publishing()["primary_locale"])
+
+    def label(self, key: str, english: str) -> tuple[str, bool]:
+        """A label the tool writes, in this run's language: `(text, translated)`.
+
+        Phase 57. From `config/locales.yaml`; `english` and `False` when the file,
+        the label or this locale's entry is missing, so a localized run is never
+        held up by a translation nobody has supplied yet.
+        """
+        if self.is_primary_locale():
+            return english, True
+        loaded: dict[str, Any] = {}
+        if self.locales_path.exists():
+            loaded = yaml.safe_load(read_text(self.locales_path)) or {}
+        entries = (loaded.get("labels") or {}).get(key) or {}
+        text = str(entries.get(slugify(self.locale), "") or "").strip()
+        return (text, True) if text else (english, False)
+
+    def primary(self) -> "ConfigManager":
+        """This project at its primary locale: the workspace a localized run reads from."""
+        if self.is_primary_locale():
+            return self
+        if self._primary_cache is None:
+            self._primary_cache = ConfigManager(
+                root_dir=self.root_dir, locale=self.load_publishing()["primary_locale"])
+        return self._primary_cache
+
+    def state_store(self) -> "StateStore":
+        """The run's state: `state.db`, or a localized run's own file over it (Phase 57)."""
+        from docushift.state import LocaleStateStore, StateStore
+
+        if self.is_primary_locale():
+            return StateStore(self.state_db_path)
+        return LocaleStateStore(self.state_db_path, StateStore(self.primary_state_db_path))
 
     def publish_base_url(self) -> str:
         """The AEM host, without a trailing slash. Empty means "not configured yet".
@@ -411,7 +467,8 @@ class ConfigManager:
         other in one directory.
         """
         _segments(slug, version)
-        return self.downloads_dir(bu, family) / f"{slug}-{version}.zip"
+        own = self.downloads_dir(bu, family) / f"{slug}-{version}.zip"
+        return self._or_primary(own, lambda primary: primary.download_path(bu, family, slug, version))
 
     def archive_path(self, bu: str, family: str, slug: str, version: str) -> Path:
         """The ZIP path for one archived version: `.../archive/<slug>-<version>.zip`.
@@ -433,7 +490,20 @@ class ConfigManager:
         dashed one does not (`6-2-3` could be `6.2.3` or `6-2.3`). The dots-to-dashes
         conversion belongs at Stage 6, where the AEM output path is built.
         """
-        return self.extracted_dir(bu, family) / _segments(slug, version) / version
+        own = self.extracted_dir(bu, family) / _segments(slug, version) / version
+        return self._or_primary(own, lambda primary: primary.extract_path(bu, family, slug, version))
+
+    def _or_primary(self, own: Path, resolve: Any) -> Path:
+        """A localized run's own package path, or the primary workspace's when it has none.
+
+        Phase 57. Every localized build measured ships *inside* the English ZIP
+        (`html/ja-jp/` beside `html/en-us/`), so a `--locale ja-jp` run reads the
+        English download and tree. A separate localized package filed with
+        `download --from-file` lands in the run's own workspace and wins.
+        """
+        if self.is_primary_locale() or own.exists():
+            return own
+        return resolve(self.primary())
 
     def output_path(self, bu: str, family: str, slug: str, version: str) -> Path:
         """The converted Markdown for one version: `output/<family>/<slug>/<version>/`.

@@ -333,6 +333,18 @@ def page_list(cache_dir: Path, slug: str, version: str) -> list[str]:
     return listing(cache_dir, slug, version)[0]
 
 
+def in_locale(pages: list[str], locale: str) -> list[str]:
+    """The live pages of one localized build: those with a path segment naming it.
+
+    Phase 57. A version's sitemap lists every language the docsite serves for it
+    (`…/doc/html/ja-jp/…` beside `…/doc/html/en-us/…`). A localized run maps only
+    its own, or every English page would be reported unmapped from its tree.
+    """
+    wanted = locale.lower()
+    return [url for url in pages
+            if wanted in (segment.lower() for segment in urlsplit(url).path.split("/"))]
+
+
 def listing(cache_dir: Path, slug: str, version: str) -> tuple[list[str], str]:
     """`page_list`, plus why there is no list when there is none.
 

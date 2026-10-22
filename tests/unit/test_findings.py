@@ -177,8 +177,13 @@ def test_the_register_carries_every_row_of_7_5() -> None:
     leads two pages, with nothing to say which. The 90th, `ZIP_CASE_DUPLICATE_SKIPPED`
     (Phase 52): an identical member a package ships twice under two spellings. The
     91st, `ROOT_COPY_DROPPED` (Phase 54): a release-notes root's copy of the guides.
+    Phase 57 adds three for localized runs: `LOCALIZED_UNTAGGED_ROOT_LEFT` (an
+    English root left to the primary run), `LOCALIZED_SHARE_UNTRANSLATED` (pages
+    identical to the English build's) and `LOCALIZED_LABEL_UNTRANSLATED` (a label
+    with no text for the locale), and a fourth after its pilot,
+    `LOCALIZED_IMAGE_BORROWED` (an image the build lacks, copied from the English).
     """
-    assert len(REGISTRY) == 91
+    assert len(REGISTRY) == 95
 
 
 def test_severity_comes_from_the_registry_and_not_from_the_call_site() -> None:

@@ -8,6 +8,7 @@ which families exist and how to guess one. See docs/architecture.md §3.3.
 from pathlib import Path
 
 import pytest
+import yaml
 
 from docushift.config import ConfigManager
 from docushift.models import FamilySource, ReleaseStatus
@@ -680,3 +681,55 @@ def test_a_row_that_is_not_a_mapping_is_dropped_rather_than_carried(
     )
 
     assert config.load_origin_urls() == {}
+
+
+# -- localized runs (Phase 57) -----------------------------------------------------
+
+
+def test_a_localized_run_keeps_its_own_state_file(project_root: Path) -> None:
+    primary = ConfigManager(root_dir=project_root)
+    japanese = ConfigManager(root_dir=project_root, locale="ja-jp")
+
+    assert primary.state_db_path == project_root / "cache" / "state.db"
+    assert japanese.state_db_path == project_root / "cache" / "state-ja-jp.db"
+    assert japanese.primary_state_db_path == primary.state_db_path
+    assert type(primary.state_store()).__name__ == "StateStore"
+    store = japanese.state_store()
+    assert store.db_path == japanese.state_db_path
+    assert store.base.db_path == primary.state_db_path
+
+
+def test_a_localized_run_reads_the_english_package_until_it_has_its_own(project_root: Path) -> None:
+    """Every localized build measured ships inside the English ZIP; a separate
+    localized package filed in the run's own workspace wins."""
+    primary = ConfigManager(root_dir=project_root)
+    japanese = ConfigManager(root_dir=project_root, locale="ja-jp")
+    english_tree = primary.extract_path("ibi", "webfocus", "ibi-webfocus-client", "9.3.6")
+
+    assert japanese.extract_path("ibi", "webfocus", "ibi-webfocus-client", "9.3.6") == english_tree
+    assert japanese.download_path("ibi", "webfocus", "ibi-webfocus-client", "9.3.6") == (
+        primary.download_path("ibi", "webfocus", "ibi-webfocus-client", "9.3.6"))
+    assert "ja-jp-ibi-webfocus" in str(japanese.output_path("ibi", "webfocus", "ibi-webfocus-client", "9.3.6"))
+
+    own = japanese.extracted_dir("ibi", "webfocus") / "ibi-webfocus-client" / "9.3.6"
+    own.mkdir(parents=True)
+    assert japanese.extract_path("ibi", "webfocus", "ibi-webfocus-client", "9.3.6") == own
+
+
+def test_a_label_falls_back_to_english_until_it_is_translated(project_root: Path) -> None:
+    japanese = ConfigManager(root_dir=project_root, locale="ja-jp")
+    assert japanese.label("online_help", "Online Help") == ("Online Help", False)
+    assert ConfigManager(root_dir=project_root).label("online_help", "Online Help") == (
+        "Online Help", True)
+
+    (project_root / "config" / "locales.yaml").write_text(
+        'labels:\n  online_help:\n    ja-jp: "オンラインヘルプ"\n', encoding="utf-8")
+    assert japanese.label("online_help", "Online Help") == ("オンラインヘルプ", True)
+    assert ConfigManager(root_dir=project_root, locale="de-de").label(
+        "online_help", "Online Help") == ("Online Help", False)
+
+
+def test_the_shipped_locales_file_parses_and_starts_english_only() -> None:
+    shipped = yaml.safe_load((Path(__file__).parents[2] / "config" / "locales.yaml").read_text(
+        encoding="utf-8"))
+    assert shipped["labels"]["online_help"] == {"en-us": "Online Help"}

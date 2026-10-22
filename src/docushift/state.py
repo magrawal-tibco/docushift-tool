@@ -898,3 +898,83 @@ class StateStore:
                 f"DELETE FROM findings WHERE run_id IN ({placeholders})", stale
             )
             return len(stale), int(cursor.rowcount or 0)
+
+
+class LocaleStateStore(StateStore):
+    """A localized run's state file, read over the primary one (Phase 57).
+
+    Every table is keyed `(slug, version)`, so a second language converted under
+    the same key would overwrite the English row's status, output map and
+    findings. A localized run therefore writes everything to its own file
+    (`state-ja-jp.db`) and reads from `base` only what Stages 1-4 recorded about
+    the package both languages share: the catalog snapshots, the extract-stage
+    metadata, the help-map sources, the engine map and the asset inventory.
+
+    Metadata is the one table both stages write, so it is read as the base's
+    keys overlaid with the run's own: `extract_zip_checksum` and `output_roots`
+    come from the English extract, `convert_*` from this locale's convert.
+    """
+
+    def __init__(self, db_path: Path, base: StateStore):
+        super().__init__(db_path)
+        self.base = base
+
+    def close(self) -> None:
+        super().close()
+        self.base.close()
+
+    # -- what Stages 1-4 recorded, read from the primary file ------------------
+
+    def get_product_snapshot(self, slug: str) -> Any:
+        return self.base.get_product_snapshot(slug)
+
+    def get_version_snapshot(self, slug: str, version: str) -> Any:
+        return self.base.get_version_snapshot(slug, version)
+
+    def known_versions(self, *args: Any, **kwargs: Any) -> Any:
+        return self.base.known_versions(*args, **kwargs)
+
+    def resolved_values(self, *args: Any, **kwargs: Any) -> Any:
+        return self.base.resolved_values(*args, **kwargs)
+
+    def get_version_metadata(self, slug: str, version: str) -> dict[str, str]:
+        return {**self.base.get_version_metadata(slug, version),
+                **super().get_version_metadata(slug, version)}
+
+    def get_engine_folder_map(self, slug: str, version: str) -> dict[str, str]:
+        return self.base.get_engine_folder_map(slug, version)
+
+    def get_csh_sources(self, slug: str, version: str) -> list[dict[str, Any]]:
+        return self.base.get_csh_sources(slug, version)
+
+    def get_asset_inventory(self, slug: str, version: str) -> list[dict[str, Any]]:
+        return self.base.get_asset_inventory(slug, version)
+
+    def content_kinds(self) -> dict[tuple[str, str], tuple[int, int]]:
+        return self.base.content_kinds()
+
+    # -- the funnel: Stages 3-4 from the primary file, the rest from this one ----
+
+    def progress(self) -> dict[tuple[str, str], dict[str, Any]]:
+        """`status`'s funnel for this locale: downloaded and extracted as the shared
+        package was, converted and failed as this locale's own run left them."""
+        own = super().progress()
+        merged: dict[tuple[str, str], dict[str, Any]] = {}
+        for key, entry in self.base.progress().items():
+            merged[key] = {**entry, "status": None, "converted": False, "error": None}
+        for key, entry in own.items():
+            row = merged.setdefault(key, {"downloaded": False, "extracted": False})
+            row.update(status=entry["status"], converted=entry["converted"],
+                       error=entry["error"], updated_at=entry["updated_at"])
+        return merged
+
+    def stage_events(self) -> dict[tuple[str, str], dict[tuple[str, str], tuple[str, str]]]:
+        """Download and extract events from the primary file; every later stage's from this one."""
+        events: dict[tuple[str, str], dict[tuple[str, str], tuple[str, str]]] = {}
+        for key, recorded in self.base.stage_events().items():
+            shared = {event: at for event, at in recorded.items() if event[0] in ("download", "extract")}
+            if shared:
+                events[key] = shared
+        for key, recorded in super().stage_events().items():
+            events.setdefault(key, {}).update(recorded)
+        return events

@@ -200,10 +200,23 @@ REGISTRY: dict[str, Code] = _codes(
     # Phase 34 (R5-01). A whole output root built for another language, which the
     # subtree note above never saw: 24 in the corpus, converted into the English
     # tree. A warning with a row each, because each names a build that publishes
-    # nowhere until the `loc-` tree exists -- a note would fold them into one line.
+    # only through its own `--locale` run (Phase 57) -- a note would fold them
+    # into one line.
     Code("LOCALIZED_ROOT_SKIPPED", Severity.WARNING, Stage.CONVERT,
          "An output root built for another locale, not converted into this locale's tree",
          "Phase 34 (R5-01)"),
+    Code("LOCALIZED_UNTAGGED_ROOT_LEFT", Severity.NOTE, Stage.CONVERT,
+         "A root naming no language, left to the primary locale's run by a localized one",
+         "Phase 57"),
+    Code("LOCALIZED_SHARE_UNTRANSLATED", Severity.WARNING, Stage.CONVERT,
+         "Pages of a localized build identical to the English build's, published as shipped",
+         "Phase 57"),
+    Code("LOCALIZED_IMAGE_BORROWED", Severity.NOTE, Stage.CONVERT,
+         "A file a localized build references but does not ship, copied from its English build",
+         "Phase 57"),
+    Code("LOCALIZED_LABEL_UNTRANSLATED", Severity.NOTE, Stage.CONVERT,
+         "A label the tool writes, kept in English: no text for the locale in locales.yaml",
+         "Phase 57"),
     Code("ASSET_ORPHANED", Severity.NOTE, Stage.CONVERT,
          "Unreferenced asset -- 54.6% is normal for Flare", "architecture.md §5.5.7"),
     Code("REFERENCE_UNRESOLVED", Severity.ERROR, Stage.CONVERT,

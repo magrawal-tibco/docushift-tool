@@ -12,7 +12,7 @@ from pathlib import Path
 import pytest
 
 from docushift.models import ConversionStatus, SourceEngine
-from docushift.state import StateStore
+from docushift.state import LocaleStateStore, StateStore
 from tests.conftest import make_product, make_version
 
 
@@ -281,3 +281,42 @@ def test_reads_interleaved_with_writes_do_not_corrupt_the_shared_connection(
         assert state.get_version_state(f"product-{worker}", "1.0")["checksum"] == (
             f"{worker}-{rounds - 1}"
         )
+
+
+# -- a localized run's state file (Phase 57) ---------------------------------------
+
+
+def test_a_localized_store_reads_stage_4_from_the_primary_and_writes_only_its_own(
+    tmp_path: Path,
+) -> None:
+    base = StateStore(tmp_path / "state.db")
+    base.set_version_state("wf", "9.3.6", status=ConversionStatus.CONVERTED,
+                           download_path="d.zip", extract_path="tree")
+    base.set_version_metadata("wf", "9.3.6", "extract_zip_checksum", "abc")
+    base.set_version_metadata("wf", "9.3.6", "convert_source_checksum", "abc")
+    base.record_csh_sources("wf", "9.3.6", [("html/ja-jp/Data/Alias.xml", "html/ja-jp",
+                                             "flare_alias", 3, "ok")])
+    base.record_output_map("wf", "9.3.6", [("html/en-us/a.htm", "en-us/a.md", "en-us")])
+    base.record_stage("wf", "9.3.6", "extract", True)
+    base.record_stage("wf", "9.3.6", "convert", True)
+    local = LocaleStateStore(tmp_path / "state-ja-jp.db", base)
+
+    # Stage 4's facts come through; the English conversion's do not.
+    assert local.get_version_metadata("wf", "9.3.6")["extract_zip_checksum"] == "abc"
+    assert local.get_csh_sources("wf", "9.3.6")[0]["doc_set"] == "html/ja-jp"
+    assert local.get_output_rows("wf", "9.3.6") == []
+    progress = local.progress()[("wf", "9.3.6")]
+    assert progress["downloaded"] and progress["extracted"] and not progress["converted"]
+    assert set(local.stage_events()[("wf", "9.3.6")]) == {("extract", "ok")}
+
+    # Its own run overlays them, and the primary file never sees it.
+    local.set_version_metadata("wf", "9.3.6", "convert_source_checksum", "ja")
+    local.record_output_map("wf", "9.3.6", [("html/ja-jp/a.htm", "a.md", "ja-jp")])
+    local.record_stage("wf", "9.3.6", "convert", False)
+    assert local.get_version_metadata("wf", "9.3.6")["convert_source_checksum"] == "ja"
+    assert local.progress()[("wf", "9.3.6")]["converted"]
+    assert local.stage_events()[("wf", "9.3.6")][("convert", "failed")]
+    assert base.get_version_metadata("wf", "9.3.6")["convert_source_checksum"] == "abc"
+    assert base.get_output_rows("wf", "9.3.6") == [("html/en-us/a.htm", "en-us/a.md", "en-us")]
+    assert ("convert", "failed") not in base.stage_events()[("wf", "9.3.6")]
+    local.close()

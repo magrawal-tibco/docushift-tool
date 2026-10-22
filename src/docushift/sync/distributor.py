@@ -353,7 +353,10 @@ class WorkspaceDistributor:
         # Phase 42. `publish` is set for a whole BU, and a WebWorks version under it
         # will never have a merged tree; holding it to one would block it for good.
         # Only an engine Reframe merges is held to the merged tree.
-        if not policy.publish or version.engine not in REFRAMABLE_ENGINES:
+        # Phase 57: localized trees are not merged, so a `--locale` run publishes
+        # its converted tree whatever the product's English policy is.
+        if (not policy.publish or version.engine not in REFRAMABLE_ENGINES
+                or not self.config.is_primary_locale()):
             if not converted.is_dir():
                 return converted, False, f"no converted tree at {converted}; run `docushift convert` first"
             if state is not None and state.is_building(slug, number, "convert"):
@@ -483,6 +486,11 @@ class WorkspaceDistributor:
         doc-class an earlier run published and the package no longer feeds: that
         folder is removed and gets one `NO_OUTPUT` row saying so (`_withdraw`).
         """
+        # Phase 57. A localized run publishes online help only: the PDFs and
+        # release notes beside a localized build in its package are the English
+        # ones, and they already publish through the primary run.
+        if not self.config.is_primary_locale():
+            return []
         slug, number = product.slug, version.version
         segment = version_segment(number)
         if not segment:

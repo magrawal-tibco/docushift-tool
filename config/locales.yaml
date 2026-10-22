@@ -1,0 +1,13 @@
+# Labels the tool writes itself into a localized (`--locale`) tree (Phase 57).
+#
+# Only what a reader of a `loc-` tree sees. A localized run publishes online help
+# alone -- the PDFs and release notes beside it in the package are English -- so
+# the document-class titles never reach a `loc-` tree and are not listed here.
+#
+# One block per label, keyed by locale. A locale missing from a block keeps the
+# English text and the run says so (`LOCALIZED_LABEL_UNTRANSLATED`). Translations
+# come from the docs team; the tool never invents one.
+labels:
+  # `docs_list_title` of each version's `toc.yml`.
+  online_help:
+    en-us: "Online Help"
