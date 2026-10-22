@@ -227,10 +227,10 @@ Jira (DOCOPS) status and what to file next: the handoff at the top of [`docs/jir
 0h. **Phase 56, built 2026-10-22; runs pending**: AEM does not render GitHub alerts, so notes lost
    their "Note"/"Tip" label. The converter now writes `> **Note:**` with the text on the next line;
    `fix-callouts` repairs `output/`, `reframed/` and the published repos with no re-conversion.
-0i. **Phase 57, built 2026-10-22; pilot pending**: translated help (61,425 pages in 27 Japanese,
+0i. **Phase 57, built 2026-10-22**: translated help (61,425 pages in 27 Japanese,
    German, French and Spanish builds, all inside IBI WebFOCUS packages) converts per language
    with `docushift --locale ja-jp …` into `loc-ibi-*-userdocs`, with its own
-   `cache/state-<locale>.db`. Next: the WebFOCUS Client 9.3.6 ja-jp pilot. See [`planning.md`](docs/planning.md#1-active-phases).
+   `cache/state-<locale>.db`. 22 Client/App Studio language versions are committed to `loc-ibi-webfocus-userdocs` (not pushed); Reporting Server waits for its repository. See [`planning.md`](docs/planning.md#1-active-phases).
 1. **Phase 40, built; two network runs left**: `download` takes each version's package
    name from the Coveo sitemap, so pre-rebrand and renamed versions stop failing
    (96 of the 1,435 still to download). Run `catalog sitemap` before a large download. See [`planning.md`](docs/planning.md#1-active-phases).

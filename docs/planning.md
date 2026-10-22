@@ -1182,7 +1182,7 @@ notes excepted and listed); the staging pilot shows the labels; `ruff` and the s
 
 ---
 
-### Phase 57: Translated Help Is Published to the `loc-` Tree — **Built 2026-10-22; pilot pending**
+### Phase 57: Translated Help Is Published to the `loc-` Tree — **Built 2026-10-22; WebFOCUS Client and App Studio published, Reporting Server pending**
 
 **Why.** The user, 2026-10-22: languages other than English must be migrated too, for IBI
 as well as TIBCO. Today every non-English build is skipped on purpose (`LOCALIZED_ROOT_SKIPPED`,
@@ -1368,6 +1368,30 @@ Approved by the user 2026-10-22. Steps 1-6 done; steps 7-8 are the user's runs.
   missing file found there is copied to the same target, counted as
   `LOCALIZED_IMAGE_BORROWED`, and is not case-checked against the localized root. The
   package does not change, so the pilot needs `convert --force` to pick it up.
+- **Full run, 2026-10-22** (`scratch/loc-full-convert.sh`, `loc-full-sync.sh`): 22 localized
+  versions converted, synced and validated into `loc-ibi-webfocus-userdocs` on `main`
+  (commits `2e49354` and `e5144e9`; not pushed).
+
+  | builds | pages per version | images from English | errors |
+  |---|---|---|---|
+  | ja-jp: Client 9.3.0–9.3.8, App Studio 9.3.0–9.3.8 | 257–3,366 | up to 893 (Client 9.3.6/9.3.7) | 0 |
+  | de-de, fr-fr, es-es: Client 9.3.5–9.3.8 | 2,708–3,257 | about 1,550 (9.3.6/9.3.7) | 0 |
+
+  Every version has a `301.yml`; Japanese Client alone has 11,431 redirects.
+
+  The warning-heavy versions match their English twins, finding for finding:
+  - Client 9.3.5 has about 2,100 `ANCHOR_MISSING` per language, against 2,066 in English.
+  - Japanese Client 9.3.0 has 1,024, against 2,129.
+  - Japanese App Studio 9.3.0 has 341, against 305.
+  - Client 9.3.8 has 128–136 `REFERENCE_UNRESOLVED` per language, against 129 in English:
+    the functions chapter's images ship in no language.
+
+  **The share understates English text in 9.3.8.** Only about half of the de/fr/es and
+  Japanese 9.3.8 pages are body-identical to English (1,593–1,596 of 3,257–3,366, 47–49%).
+  The inventory's sample read de/fr/es 9.3.8 as 97–100% English, so the other half differs
+  from the English build without being translated. The figure is a floor.
+
+  Reporting Server waits for `loc-ibi-wf-reporting-server-userdocs` and a re-download.
 - **Codes:** `LOCALIZED_UNTAGGED_ROOT_LEFT`, `LOCALIZED_SHARE_UNTRANSLATED`,
   `LOCALIZED_LABEL_UNTRANSLATED` and `LOCALIZED_IMAGE_BORROWED`, registered in §7.5.
   Register 91 → 95.
