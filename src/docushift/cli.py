@@ -32,7 +32,7 @@ from docushift.reporting.findings import REGISTRY, FindingsRun, Severity, Stage
 from docushift.state import StateStore
 from docushift.utils import textfile
 from docushift.utils.csvio import NotUtf8
-from docushift.utils.slug import version_segment
+from docushift.utils.slug import slugify, version_segment
 
 # `emoji=False` tool-wide, because a finding is machine output and must survive
 # the terminal byte for byte. Rich substitutes `:shortcode:` by default, so
@@ -178,11 +178,35 @@ class _DocuShiftGroup(click.Group):
     default=None,
     help="Project root holding config/, cache/, and output/. Defaults to the current directory.",
 )
+@click.option(
+    "--locale",
+    default=None,
+    metavar="LOCALE",
+    help="Run for one language build, e.g. ja-jp (Phase 57). Defaults to publishing.yaml's "
+         "primary_locale. A localized run converts only that language's roots, keeps its own "
+         "cache/state-<locale>.db and publishes into the shared loc- tree.",
+)
 @click.pass_context
-def main(ctx: click.Context, root: Path | None) -> None:
+def main(ctx: click.Context, root: Path | None, locale: str | None) -> None:
     """DocuShift: TIBCO & ibi documentation migration pipeline (docs.tibco.com -> AEM GFM)."""
     ctx.ensure_object(dict)
-    ctx.obj["config"] = ConfigManager(root_dir=root)
+    config = ConfigManager(root_dir=root)
+    if locale and slugify(locale) != slugify(config.locale):
+        config = ConfigManager(root_dir=root, locale=slugify(locale))
+    ctx.obj["config"] = config
+
+
+def _primary_only(ctx: click.Context, what: str) -> None:
+    """Refuses a command a localized run has no use for (Phase 57).
+
+    The catalog CSVs are the English view, and merging is not built for
+    localized trees: every one measured is IBI, which publishes unmerged.
+    """
+    cfg: ConfigManager = ctx.obj["config"]
+    if not cfg.is_primary_locale():
+        raise click.UsageError(
+            f"{what} runs for the primary locale only; drop --locale {cfg.locale}."
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -191,8 +215,10 @@ def main(ctx: click.Context, root: Path | None) -> None:
 
 
 @main.group()
-def catalog() -> None:
+@click.pass_context
+def catalog(ctx: click.Context) -> None:
     """Discover, inspect, and edit config/products.csv and config/versions.csv."""
+    _primary_only(ctx, "catalog")
 
 
 def _status_cell(ver) -> str:
@@ -233,7 +259,7 @@ def _eligible_cell(ver) -> str:
 
 def _catalog_manager(ctx: click.Context) -> CatalogManager:
     cfg: ConfigManager = ctx.obj["config"]
-    return CatalogManager(cfg.products_path, cfg.versions_path, StateStore(cfg.state_db_path), config=cfg)
+    return CatalogManager(cfg.products_path, cfg.versions_path, cfg.state_store(), config=cfg)
 
 
 def _refresh_status(manager: CatalogManager) -> None:
@@ -1405,6 +1431,8 @@ def download(ctx, bu, family, product, version, batch, select_all, force, worker
     Archived versions are never downloaded here -- pull one on demand with
     `docushift archive download` instead.
     """
+    if from_file is None:
+        _primary_only(ctx, "download (other than --from-file)")
     from docushift.downloader import Outcome, PackageDownloader
 
     cfg: ConfigManager = ctx.obj["config"]
@@ -2046,6 +2074,7 @@ def reframe(ctx, bu, family, product, version, batch, select_all, force, dry_run
     warned about. The converted tree is read and never written to, so a boundary
     rule can be tuned and the merge re-run without re-converting anything.
     """
+    _primary_only(ctx, "reframe")
     from docushift.reframe import REFRAMABLE_ENGINES, ReframeOutcome, Reframer, ReframeStats
 
     cfg: ConfigManager = ctx.obj["config"]
@@ -2391,7 +2420,7 @@ def validate(ctx, target_dir, product, version, doc_class, check_external, dry_r
             console.print(f"[dim]{residue} .part folder(s) would be skipped as sync residue.[/dim]")
         return
 
-    findings = FindingsRun("validate", store=StateStore(cfg.state_db_path)).start()
+    findings = FindingsRun("validate", store=cfg.state_store()).start()
     validator.findings = findings
     console.print(f"Validating {len(folders)} published folder(s) in {target_dir}...")
 
@@ -2799,7 +2828,7 @@ def csh_validate(ctx: click.Context, target_dir: Path, product, version, doc_cla
 
     cfg: ConfigManager = ctx.obj["config"]
     selection = _published(target_dir, product, version, doc_class, "csh validate")
-    findings = FindingsRun("csh validate", store=StateStore(cfg.state_db_path)).start()
+    findings = FindingsRun("csh validate", store=cfg.state_store()).start()
 
     folders = 0
     mapped = 0
@@ -3033,7 +3062,7 @@ def report(
     from docushift.reporting import report as report_view
 
     cfg: ConfigManager = ctx.obj["config"]
-    store = StateStore(cfg.state_db_path)
+    store = cfg.state_store()
 
     if explain_code is not None:
         # Answered from the register, so it needs no run and no database -- which
@@ -3391,7 +3420,7 @@ def doctor(ctx: click.Context) -> None:
         ("cache", cfg.cache_dir),
         ("families", cfg.families_dir),
         ("output", cfg.output_dir),
-        ("state.db", cfg.state_db_path),
+        (cfg.state_db_path.name, cfg.state_db_path),
     ]:
         present = "[green]yes[/green]" if path.exists() else "[yellow]no[/yellow]"
         table.add_row(label, str(path), present)

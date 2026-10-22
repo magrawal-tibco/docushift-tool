@@ -1182,6 +1182,207 @@ notes excepted and listed); the staging pilot shows the labels; `ruff` and the s
 
 ---
 
+### Phase 57: Translated Help Is Published to the `loc-` Tree — **Built 2026-10-22; pilot pending**
+
+**Why.** The user, 2026-10-22: languages other than English must be migrated too, for IBI
+as well as TIBCO. Today every non-English build is skipped on purpose (`LOCALIZED_ROOT_SKIPPED`,
+Phase 34 R5-01, deferred as item Q). The tree it should go to has been named since Phase 3.8,
+`loc-{bu}-{family}-userdocs`, one tree shared by every non-English locale
+(`architecture.md` §6.1). But nothing sets a locale: `ConfigManager(locale=…)` has no CLI
+flag, so every run is `en-us`.
+
+**Measured 2026-10-22** over the 739 eligible versions: extracted trees, the html-to-md
+cache, `state.db` and the Coveo sitemaps.
+
+- **Inside the packages: IBI only. Three WebFOCUS products, 15 versions, 27 localized
+  roots, 61,425 pages.** All are MadCap Flare output roots at `html/<locale>/`, next to
+  `html/en-us/`, each with its own `Data/HelpSystem.xml`, UTF-8 and `lang="ja-jp"` in the
+  page head.
+
+  | product | versions | locales | pages |
+  |---|---|---|---|
+  | WebFOCUS Client (`ibi-webfocus-client`) | 9.3.0 | ja-jp | 1,425 |
+  | WebFOCUS Client | 9.3.5–9.3.8 | ja-jp, de-de, fr-fr, es-es | 46,397 |
+  | WebFOCUS App Studio (`ibi-webfocus-app-studio`) | 9.3.0, 9.3.5–9.3.8 | ja-jp | 1,615 |
+  | WebFOCUS Reporting Server (`ibi-webfocus-reporting-server`) | 9.3.0, 9.3.5–9.3.8 | ja-jp | 11,879 (from `asset_inventory`; the tree is no longer on disk) |
+
+  WebFOCUS Client 9.3.7 and 9.3.8 also ship 8 more locale folders (es-mx, fr-ca, id-id,
+  it-it, ko-ko, pt-br, zh-cn, zh-tw) plus en-au/en-ca/en-gb. Each holds a single
+  `Default.htm` redirect stub, with no topics.
+- **TIBCO and Spotfire packages: none.** That covers 129 more versions read from the
+  html-to-md cache. 55 eligible versions have no tree to read: 30 BusinessWorks plug-ins,
+  23 Reporting Server versions older than 9.3, App Studio 9.2.8 and Scribe. None of them has
+  a localized page in Coveo.
+- **Live on docs.tibco.com, not in any package:**
+  - Data Virtualization 8.8.0/8.8.1 Japanese: 6,917 pages.
+  - WebFOCUS Client 9.3.5–9.3.7 Japanese release notes (`relnotes/ja`): 252 pages.
+  - Japanese PDFs in WebFOCUS 9.1.2–9.3.4: 121.
+- **Not all of it is translated.** These figures come from a 100-topic sample per root,
+  classified by script and keywords, so they are approximate:
+
+  | | de-de / fr-fr / es-es | ja-jp |
+  |---|---|---|
+  | 9.3.5–9.3.7 | 97–100% translated | 98–100% Japanese |
+  | WebFOCUS Client 9.3.8 | 0–3% translated | ~56% Japanese |
+  | App Studio 9.3.8 | — | ~39% Japanese |
+  | App Studio 9.3.0 | — | ~46% Japanese |
+
+  App Studio 9.3.0's ja-jp root has 340 of 459 pages with no en-us counterpart.
+- **Repositories:** `loc-ibi-webfocus-userdocs` exists (empty, `ibi-docs-aem`). There is no
+  `loc-ibi-wf-reporting-server-userdocs`, and no TIBCO `loc-` repo.
+- **The architecture doc's count is out of date.** §5.1's "24 localized roots" is now 27
+  eligible: Reporting Server's 5 were added, and Team Studio's 2 left when it retired.
+
+User decisions, 2026-10-22:
+- Content that is live but not in a package: ask the docs team for packages, and don't
+  crawl the site.
+- Partly translated builds are published as shipped, with the untranslated share reported.
+- Translated pages keep the English page names, so each locale's addresses mirror en-us.
+
+#### Decisions
+
+| decision | choice | why |
+|---|---|---|
+| **Locale is a run setting** | `--locale ja-jp` on `convert`, `sync`, `validate`, `status` and `report`, default `primary_locale`. It sets `ConfigManager(locale=…)`, which already routes `docs_tree_name` to `loc-…` and the inner folder to `ja-jp/` | The naming machinery exists and is tested (Phase 3.8). One run converts one language, so every stage, check and finding stays per language, exactly as English is today |
+| **A localized run reads the English package** | A non-primary run takes the download and extracted tree of the **primary** workspace (`families/en-us-…`) whenever its own `families/ja-jp-…` has none. A separate localized ZIP, if the docs team ever ships one, still lands in its own workspace, as §6.1 always said | Every localized build measured ships *inside* the English ZIP. Downloading and unpacking it a second time would only duplicate 1 GB per version |
+| **Which roots a run converts** | A primary run keeps untagged roots and its own language's, as today. A localized run keeps **only roots tagged with its locale**: an untagged root such as `Release-Notes-93x` or `_templates` is English and belongs to the en-us run. A tagged root with no topics (the 8 stubs) is reported and left out | The skip rule today keeps untagged roots for every run, which would publish the English release notes into the Japanese tree |
+| **State is kept per locale** | A localized run writes its own state file, `cache/state-<locale>.db`, with the same schema. It reads extract-stage facts (`version_metadata` output roots and engine, `csh_source`, `asset_inventory`) from `state.db`. `versions.csv` stays the English view; `status --locale` reports the rest | Every table is keyed `(slug, version)`, and a second language under the same key would overwrite the English row's status, output map and findings. Adding a locale column means changing every query that state.py keys on `(slug, version)` (17 of them), in the middle of the English runs, while a separate file leaves the English pipeline byte-identical. The cost is two files, and `report`/`status` must be told which one to read |
+| **Page names** (user) | Every converted topic is named from its source path, as Flare already does, so `html/ja-jp/bi-portal/x.htm` publishes as `ja-jp/<slug>/online-help/<ver>/bi-portal/x.md`, the en-us name. A **generated** page (a TOC heading with no topic) takes the name of the en-us node at the same TOC position, when the two TOCs have the same shape, and otherwise a positional name (`section-2-3`) | Measured: `navigation._slug` keeps `[a-z0-9]` only, so a Japanese TOC label slugs to nothing today. Positional fallback keeps names stable across re-runs without using title text |
+| **Translated-share report** (user: publish as shipped) | A page whose converted body is identical to the en-us page of the same name counts as untranslated. One finding per root gives the count and share, and a page with no en-us counterpart is counted separately | It needs no language detection: the English build is the reference. It works the same for German as for Japanese |
+| **Labels the tool writes** | "Unfiled", "Online Help", "Documentation", the doc-class index titles and the release-notes, readme and licence labels move into `config/locales.yaml`, one block per language. A missing entry falls back to English with a note, and the first runs publish with English labels | The translations have to come from the docs team, so the tool must not invent them. The fallback means the work does not wait for them |
+| **Merging** | Localized trees follow the product's English merge policy. Every localized build today is IBI, which is not merged (`reframe.yaml` publishes only TIBCO), so `reframe` gets no `--locale` in this phase | The word cap counts words by spaces, which is meaningless for Japanese. Fixing that is only worth doing once a merged product has a translation |
+| **Redirects** | Each localized version gets its `301.yml` from its own live URLs (`…/doc/html/ja-jp/…`), through the same Coveo derivation as English. `redirects.region_and_language` already maps `ja-jp` to `jp/ja` | The Japanese live pages are in the sitemaps (measured), so nothing new is needed beyond running it per locale |
+| **CSH** | Each locale's `Alias.xml` gives that locale's `csh.yml`, in its own version folder | Today a localized root's help map is dropped (R5-01), so it can't reach the English map. The loc tree has its own folders, so the maps can't collide |
+| **Heading anchors** | No change until staging shows one Japanese page. If AEM keeps voiced kana (ガ) in an anchor and we strip them (`anchors.slugify_heading` folds to NFKD), the fold becomes ASCII-only | Only the platform can say what anchor it generates. The pilot in step 7 answers it |
+| **New repositories** | `loc-ibi-webfocus-userdocs` exists. The doc platform is asked for `loc-ibi-wf-reporting-server-userdocs`. TIBCO needs none until a package with a translation arrives | Creating repositories is outside this tool (§6.0) |
+
+#### Steps
+
+1. **Run setting.** `--locale` on the five commands. `ConfigManager` takes it and derives
+   `state_db_path` for it. `doctor` prints the locale and the state file. The primary
+   workspace becomes the fallback source for download and extract paths. Tests: the en-us
+   paths don't change. A ja-jp run resolves the en-us extracted tree, writes
+   `output/ja-jp-ibi-webfocus/…` and `state-ja-jp.db`, and gives
+   `loc-ibi-webfocus-userdocs/ja-jp/…` in sync.
+2. **Root selection.** `_without_localized` becomes "keep the run's own language". A localized
+   run drops untagged roots, reported in one note per version. A tagged root with no topic is
+   reported as a stub. Tests use the wf-wf 9.3.7 layout: en-us, ja-jp, 4 full roots and 8
+   stubs.
+3. **State split.** A `SourceStore` view reads extract-stage tables from `state.db`. Convert,
+   sync and validate write to the run's store. Tests: an en-us convert after a ja-jp convert
+   leaves the en-us `output_map`, `stage_event` and findings unchanged, and the reverse.
+4. **Names and generated pages.** Generated pages are named from the en-us TOC by position,
+   with the positional fallback. Tests: an identical-shape TOC mirrors the English names; a
+   reshaped one falls back; a Japanese label never produces an empty name.
+5. **Labels and the translated share.** `config/locales.yaml`, read where each label is
+   written today (`orphans.py`, `navigation.py`, `sync/documents.py`, `sync/router.py`, the
+   four engines' "Unfiled"). The share comparison runs after convert against the en-us
+   output, and is skipped with a note when the en-us version isn't converted. New codes:
+   `LOCALIZED_SHARE_UNTRANSLATED` (warning, per root), `LOCALIZED_ROOT_STUB` (note),
+   `LOCALIZED_LABEL_UNTRANSLATED` (note), `LOCALIZED_UNTAGGED_ROOT_LEFT` (note). Each goes into
+   §7.5 as it is built.
+6. **Docs.** `architecture.md`: §5.1, root selection and the 27-root count. §6.1, localized
+   runs read the primary workspace. A new subsection on per-locale state.
+   `user-guide.md`: `--locale`, with a worked WebFOCUS example. `design.md`: the same, marked
+   Built. `open-issues.md`: the content that is live but not in a package.
+7. **Pilot run** (the user). WebFOCUS Client 9.3.6 ja-jp: `convert --locale ja-jp`, then
+   `sync --locale ja-jp` into `ibi-docs-aem`, then `validate`. I check, read-only, the page
+   count against the root (2,833), the names against en-us, `301.yml`, `csh.yml`, and that
+   the en-us tree and `state.db` are unchanged. The user pushes the branch, and one page is
+   checked on staging, including the anchor question.
+8. **Full run** (the user). Every remaining WebFOCUS Client and App Studio locale into
+   `loc-ibi-webfocus-userdocs`. Reporting Server is first re-downloaded and re-extracted, then
+   converted once `loc-ibi-wf-reporting-server-userdocs` exists. A per-version table of the
+   translated share goes to the docs team.
+
+**Not in this phase:**
+- The content that is live but not in a package, until the docs team supplies packages.
+  It then goes through `download --from-file` into its own locale workspace.
+- Merging localized trees.
+- Translating product names (they are brand names and stay as published).
+
+#### As built (2026-10-22)
+
+Approved by the user 2026-10-22. Steps 1-6 done; steps 7-8 are the user's runs.
+
+- **`--locale` is a global option**, `docushift --locale ja-jp convert …`, rather than one
+  flag per command. Every command sees the same setting, so each one either works per
+  locale or refuses it:
+  - `catalog` and `reframe` refuse it (`_primary_only`, exit 2).
+  - `download` accepts it only with `--from-file`.
+  - `status` and `report` read the locale's state file.
+- **State:** `ConfigManager.state_db_path` became a property, so `publishing.yaml` is not read
+  at construction; reading it there broke a test that writes the file afterwards. It gives
+  `cache/state-ja-jp.db` for a localized run, built by `cfg.state_store()`.
+  `state.LocaleStateStore` reads these from `state.db`:
+  - catalog snapshots, help-map sources, engine map and asset inventory;
+  - metadata, as the base's keys overlaid with the run's own;
+  - the downloaded and extracted halves of `status`'s funnel and events.
+
+  `CatalogManager.save` is a no-op for a localized run, so `versions.csv` stays the English
+  view. Measured: an en-us convert's state rows and `versions.csv` are byte-identical after a
+  ja-jp convert of the same version (test).
+- **The package path falls back** to the primary workspace in `download_path` and
+  `extract_path` when the run's own has none (`ConfigManager._or_primary`).
+- **Roots:** a localized run keeps only roots tagged with its language. Untagged roots go to
+  `excluded_roots` with one `LOCALIZED_UNTAGGED_ROOT_LEFT` note, but not to the
+  nested-root cascade, so a localized root inside one is still found.
+- **The 8 one-file locale folders are not output roots** (no `Data/HelpSystem.xml`), so
+  nothing picks them up and no stub code was needed. Dropped from the plan.
+- **Generated-page names: no TOC mirroring.** A label that slugs to nothing is already named
+  `index`, `index-2`, … by `_free`, never empty (test). English WebFOCUS Client 9.3.6 has 2
+  generated pages, both `unfiled.md` or template pages, so mirroring had nothing to mirror.
+  Dropped.
+- **Page paths mirror the English *within* the guide.** The English tree has one extra folder
+  level when its package holds more than one guide set: WebFOCUS Client publishes
+  `9-3-6/en-us/bi-portal/x.md` because `Release-Notes-93x` is a second unit. The Japanese
+  run has one unit, so it publishes `9-3-6/bi-portal/x.md`.
+- **Labels:** `config/locales.yaml` holds the one label a `loc-` tree shows, `toc.yml`'s
+  `docs_list_title` ("Online Help"), read by `ConfigManager.label`. The other labels the
+  plan listed never reach a `loc-` tree:
+  - `sync_documents` publishes nothing for a localized run, because the package's PDFs and
+    release notes are English and publish through the primary run.
+  - The "Unfiled" node is shelved out of the TOC (Phase 43).
+
+  The label is folded into a localized run's inputs key only, so no English key moves.
+- **Redirects:** `origins.in_locale` narrows a version's sitemap to its own language before
+  `301.yml` is built and fingerprinted. Measured on WebFOCUS Client 9.3.6: 2,833 ja-jp
+  pages, the same as the root's page count; 2,716 de-de; 2,779 en-us of 13,972. The English
+  run's list is unchanged on purpose: narrowing it would move the inputs key of every
+  WebFOCUS and Data Virtualization version.
+- **Sync:** a localized run publishes its converted tree whatever the product's merge
+  policy says.
+- **Pilot convert, WebFOCUS Client 9.3.6 ja-jp (2026-10-22, run by the user):**
+  - Converted: 2,825 topics, 1 unit. All 2,722 TOC links resolve, with Japanese titles.
+  - `301.yml` has 2,686 rows and 8 live pages unmapped. The English 9.3.6 has no `301.yml`
+    (`ORIGIN_TEMPLATE_UNDECLARED`), because its page list mixes 5 languages.
+  - `csh.yml` has 135 identifiers.
+  - The share: 1 page identical to English, 76 with no English counterpart.
+  - The English tree, `state.db` rows and `versions.csv` row are unchanged.
+  - **900 `REFERENCE_UNRESOLVED`, against 0 in English.** The Japanese build ships 1,605
+    PNGs to the English build's 3,059, and every missing one checked is present in
+    `html/en-us/` at the same path.
+
+  User decision, 2026-10-22: use the English image. `AssetCopier` takes a `fallback` root,
+  which the driver sets to `translation.english_root(root)` for a localized run only. A
+  missing file found there is copied to the same target, counted as
+  `LOCALIZED_IMAGE_BORROWED`, and is not case-checked against the localized root. The
+  package does not change, so the pilot needs `convert --force` to pick it up.
+- **Codes:** `LOCALIZED_UNTAGGED_ROOT_LEFT`, `LOCALIZED_SHARE_UNTRANSLATED`,
+  `LOCALIZED_LABEL_UNTRANSLATED` and `LOCALIZED_IMAGE_BORROWED`, registered in §7.5.
+  Register 91 → 95.
+- **Tests:** `test_converter.py`, `test_config.py` and `test_state.py`, all in Phase 57
+  sections. The suite has 2,261 passed; the 2 failures were already failing at HEAD before
+  this phase (`test_the_shipped_report_retires_the_measured_set`,
+  `test_shipped_scope_lists_the_ebx_and_spotfire_products`, both catalog counts).
+
+*Exit: all 27 localized roots are converted
+and synced into their `loc-` trees, with English names, redirects and help maps. The 8 stubs
+and the untranslated share are reported. A second en-us run of a WebFOCUS version produces
+no diff. The staging pilot renders one Japanese page. `ruff` and the suite pass.*
+
+---
+
 ## Carried-Forward Open Items
 
 Technical items a finished phase recorded as *open, not fixed*. Product-level issues
@@ -1193,7 +1394,7 @@ Phase 21's stale merge). Closing an item means deleting its row.
 | from | item | where |
 |---|---|---|
 | Phase 34 (R1–R3) | 14 fragile-but-correct items deferred at triage, theme M: R1-09, R1-10, R2-10, R2-12 – R2-18, R3-06, R3-09, R3-10, R3-13. Plus R2-09, a catalog check for the user (113 "unclassified" products already have a family typed in) | [reports/review/INDEX.md](../reports/review/INDEX.md) |
-| Phase 34 (R4–R6) | 4 fragile-but-correct DITA/DocBook items deferred at triage, theme Z: R6-08, R6-10, R6-11, R6-13. Also deferred by decision: publishing non-English Flare builds to the `loc-` tree (Q), and converting a version that mixes two generators with both engines (T) | [reports/review/INDEX.md](../reports/review/INDEX.md) |
+| Phase 34 (R4–R6) | 4 fragile-but-correct DITA/DocBook items deferred at triage, theme Z: R6-08, R6-10, R6-11, R6-13. Also deferred by decision: publishing non-English Flare builds to the `loc-` tree (Q, now planned as Phase 57), and converting a version that mixes two generators with both engines (T) | [reports/review/INDEX.md](../reports/review/INDEX.md) |
 | Phase 34 (R7–R9) | 8 fragile-but-correct items deferred at triage, theme AI: R7-08, R7-10, R8-09, R8-10, R8-12, R9-06, R9-07, R9-08 | [reports/review/INDEX.md](../reports/review/INDEX.md) |
 | Phase 34 (R10–R12) | 5 items deferred at triage, theme BF: R10-04 (all-archived products get no archives page), R10-07 (API link URL shape, unconfirmed), R10-08, R10-12, R11-10 | [reports/review/INDEX.md](../reports/review/INDEX.md) |
 | flogo-connectors run, 2026-10-07 | `OUTPUT_COUNT_MISMATCH` false alarms: 43 Flare versions, 1 each. 9 are an unfilled What's New template (`WHATS_NEW_PLACEHOLDER`, not published by design), 34 Flare's sample `MicroContent/.../what-is-micro-content.htm` (a `GENERATED_DIRECTORIES` folder). Both are counted as converted documents but never written. Checked by diffing source topics against `output/` for HTTP 1.1.1, SNS 1.0.1, Kafka 1.3.1, VS Code 1.3.5 | run 629 |
@@ -1245,6 +1446,10 @@ The concrete deliverable of §7.1: every deferred "report line" in the three doc
 | `ENGINE_ROOT_UNCONVERTED`³⁴ | warn | convert | A unit of work for a second convertible engine (a WebWorks book inside or beside a Flare root, as in BusinessConnect 7.4.0), in a version converted by another; not converted, one row per root naming the engine | Phase 34 (R4-02) |
 | `LOCALIZED_TREE_SKIPPED`⁵ᵇ | note | convert | A localized subtree inside an English unit, not converted | `architecture.md` §5.1.9 |
 | `LOCALIZED_ROOT_SKIPPED`³⁴ | warn | convert | An output root built for another locale (24 in the corpus: `ja`, `ja-jp`, `de-de`, `fr-fr`, `es-es`), not converted into this locale's tree; one row per root, naming its locale | Phase 34 (R5-01) |
+| `LOCALIZED_UNTAGGED_ROOT_LEFT`⁵⁷ | note | convert | A localized run's root that names no language (`Release-Notes-93x`), left to the primary run; one row per version, naming the roots | Phase 57 |
+| `LOCALIZED_SHARE_UNTRANSLATED`⁵⁷ | warn | convert | A localized version's pages whose body is identical to the English build's page of the same source name, counted with those that have no English counterpart; published as shipped (user, 2026-10-22). Also a count-0 row when the English version is not converted, so the share was not measured | Phase 57 |
+| `LOCALIZED_LABEL_UNTRANSLATED`⁵⁷ | note | convert | A label the tool writes into a `loc-` tree (`toc.yml`'s "Online Help") kept in English, because `config/locales.yaml` has no text for the run's locale | Phase 57 |
+| `LOCALIZED_IMAGE_BORROWED`⁵⁷ | note | convert | A file a localized build references but does not ship, copied from its English sibling root at the same path (user, 2026-10-22); one row per unit with the count | Phase 57 |
 | `ASSET_ORPHANED` | note | convert | Unreferenced asset — 54.6% is normal for Flare | `architecture.md` §5.5.7 |
 | `REFERENCE_UNRESOLVED` | **error** | convert | A reference producing neither link nor copy | invariant 13 |
 | `ASSET_RENAMED_FOR_LENGTH`⁴⁹ | note | convert | An asset whose published path would pass 260 characters, copied under a shorter name in the same folder (cut, plus 8 hex digits of its source path); its link follows. One image in the corpus on 2026-10-09 | Phase 49 |
