@@ -64,8 +64,13 @@ publish_base_url: ""
 # shortening off.
 published_root_length: 24
 
-# The staging host `docushift verify` compares the published trees against
-# (planning.md Phase 55). Kept apart from `publish_base_url` on purpose: that one
-# is written into links, and a check must never change what is published.
-# `--base-url` overrides it for one run.
-verify_base_url: "https://stg-docs.ibi.com"
+# The staging host `docushift verify` compares the published trees against, per
+# business unit (planning.md Phases 55, 58): a product is checked against its own
+# BU's site and never another's. Kept apart from `publish_base_url` on purpose:
+# that one is written into links, and a check must never change what is published.
+# `--base-url` overrides it for one run. A BU with no entry gets no staging check.
+verify_base_urls:
+  ibi: "https://stg-docs.ibi.com"
+  # Uncomment once stg-docs.tibco.com has real content (it had none on 2026-10-23);
+  # until then every TIBCO page would read as "not served".
+  # tibco: "https://stg-docs.tibco.com"

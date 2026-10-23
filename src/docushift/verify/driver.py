@@ -15,6 +15,8 @@ message for the reviewer to reconcile.
 
 from __future__ import annotations
 
+import subprocess
+from collections import Counter
 from dataclasses import dataclass, field
 from pathlib import Path, PurePosixPath
 
@@ -30,11 +32,12 @@ from docushift.engines.flare import CONTENT_SELECTOR as FLARE_CONTENT
 from docushift.engines.flare import LANDING_CHROME, PORTAL_BLOCKS
 from docushift.models import SourceEngine
 from docushift.reframe.toc import schema_for
-from docushift.reporting.findings import FindingsRun
+from docushift.reporting.findings import FindingsRun, Severity
+from docushift.utils.csvio import natural_version_key
 from docushift.utils.slug import version_segment
 from docushift.validation.tree import VersionFolder, walk
 from docushift.verify import images as pictures
-from docushift.verify import live, published
+from docushift.verify import live, published, triage
 from docushift.verify import text as texts
 from docushift.verify.fetch import Fetcher
 from docushift.verify.toc import Node, by_page, root
@@ -61,7 +64,7 @@ _CHROME: dict[SourceEngine, tuple[str, ...]] = {
 COLUMNS = [
     "slug", "version", "old_url", "local_source", "new_path", "staging_url", "text_percent",
     "missing_sentences_count", "images_found", "images_expected", "toc_parent_matched",
-    "toc_position_matched", "published_status", "skip_reason", "missing_sentences",
+    "toc_position_matched", "published_status", "skip_reason", "findings", "triage", "missing_sentences",
 ]
 
 
@@ -71,26 +74,77 @@ class VersionResult:
     version: str = ""
     skipped: str = ""
     rows: list[dict[str, str]] = field(default_factory=list)
+    #: Unexplained errors and warnings; `explained` counts the triaged ones of both.
     errors: int = 0
+    warnings: int = 0
+    explained: int = 0
+    codes: Counter = field(default_factory=Counter)
+    scope: str = "local"
+    commit: str = ""
+    #: page -> [(code, triage label)], for the report's per-page columns.
+    on_page: dict[str, list[tuple[str, str]]] = field(default_factory=dict)
+
+    @property
+    def outcome(self) -> str:
+        """`lost` > `issues` > `explained` > `clean` (Phase 58; notes never count)."""
+        if self.errors:
+            return "lost"
+        if self.warnings:
+            return "issues"
+        return "explained" if self.explained else "clean"
 
 
 class Verifier:
     def __init__(self, cfg, catalog, state, target: Path, findings: FindingsRun,
-                 fetcher: Fetcher | None = None, base_url: str = "", live_sample: int = 0) -> None:
+                 fetcher: Fetcher | None = None, base_url: str = "", live_sample: int = 0,
+                 triaged: list[triage.Entry] | None = None, base_urls: dict[str, str] | None = None) -> None:
         self.cfg, self.catalog, self.state = cfg, catalog, state
         self.target, self.findings = target, findings
         self.fetcher, self.base_url, self.live_sample = fetcher, base_url, live_sample
+        self.triaged = triaged or []
+        #: Staging host per business unit (Phase 58); `base_url` overrides all of them.
+        self.base_urls = base_urls or {}
 
-    def selection(self, product: str | None, version: str | None) -> list[VersionFolder]:
-        return [v for entry in walk(self.target, product, version, DOC_CLASS) for v in entry.versions]
+    def selection(self, product: str | None, version: str | None, *, bu: str | None = None,
+                  family: str | None = None, latest_only: bool = False,
+                  statuses: dict[tuple[str, str], str] | None = None, wanted: tuple[str, ...] = (),
+                  limit: int = 0) -> list[VersionFolder]:
+        """The published version folders a wave covers (Phase 58).
+
+        Read from the target, then narrowed through the catalog: `bu`, `family`,
+        the newest published version of each product only, and `wanted`
+        `_verify_status` values (`not-verified`, `stale`...), from `statuses`.
+        `limit` caps the wave. A folder the catalog does not know is kept, so
+        `version` can say why it is skipped.
+        """
+        folders = [v for entry in walk(self.target, product, version, DOC_CLASS) for v in entry.versions]
+        picked: list[VersionFolder] = []
+        for folder in folders:
+            prod = self.catalog.products.get(folder.slug)
+            if prod is not None and ((bu and prod.bu != bu) or (family and prod.family != family)):
+                continue
+            if wanted and statuses is not None:
+                number = _number(prod, folder.segment)
+                if (statuses.get((folder.slug, number or ""), "not-verified") or "not-verified") not in wanted:
+                    continue
+            picked.append(folder)
+        if latest_only:
+            newest: dict[str, VersionFolder] = {}
+            for folder in picked:
+                prod = self.catalog.products.get(folder.slug)
+                held = newest.get(folder.slug)
+                if held is None or natural_version_key(_number(prod, folder.segment) or folder.segment) > \
+                        natural_version_key(_number(prod, held.segment) or held.segment):
+                    newest[folder.slug] = folder
+            picked = [f for f in picked if newest.get(f.slug) is f]
+        return picked[:limit] if limit > 0 else picked
 
     # -- one version ------------------------------------------------------------
 
     def version(self, folder: VersionFolder) -> VersionResult:
         result = VersionResult(folder)
         product = self.catalog.products.get(folder.slug)
-        number = next((v for v in (product.versions if product else {})
-                       if version_segment(v) == folder.segment), None)
+        number = _number(product, folder.segment)
         if product is None or number is None:
             result.skipped = "not in the catalog"
             return result
@@ -158,15 +212,23 @@ class Verifier:
             self._record(result, "VERIFY_TOC_UNCHECKED", folder, "",
                          f"engine {engine}: no old-TOC reader in verify yet")
 
-        # B: staging.
-        if self.fetcher is not None and self.base_url:
-            self._published(result, folder, rows)
+        # B: staging, against the product's own business unit's site.
+        host = self.base_url or self.base_urls.get(product.bu, "")
+        if self.fetcher is not None and host:
+            self._published(result, folder, rows, host)
+            result.scope += "+staging"
 
         # C: a sample of the live site.
         if self.fetcher is not None and self.live_sample > 0:
             self._live(result, folder, extracted, outmap, key_of, selector, chrome)
+            result.scope += "+live"
 
+        for row in rows.values():
+            hits = result.on_page.get(row["new_path"].partition("#")[0], [])
+            row["findings"] = " ".join(sorted({code for code, _ in hits}))
+            row["triage"] = " ".join(sorted({label for _, label in hits if label}))
         result.rows = list(rows.values())
+        result.commit = _commit(folder.path)
         return result
 
     def _compare(self, result, folder, source: Path, md_path: Path, page: str, selector: str,
@@ -203,11 +265,11 @@ class Verifier:
         for picture in pictures.broken(new):
             self._record(result, "VERIFY_IMAGE_MISSING", folder, page, f"{picture.src} not in the tree")
 
-    def _published(self, result: VersionResult, folder: VersionFolder, rows) -> None:
+    def _published(self, result: VersionResult, folder: VersionFolder, rows, host: str) -> None:
         toc = _toc_tree(folder.path / "toc.yml")
         if toc is None:
             return
-        urls = published.entry_urls(self.base_url, folder.locale, folder.slug, folder.doc_class,
+        urls = published.entry_urls(host, folder.locale, folder.slug, folder.doc_class,
                                     folder.segment, toc)
         checked = published.check(self.fetcher, urls, toc, folder.path)
         if not checked.reachable:
@@ -268,14 +330,41 @@ class Verifier:
 
     def _record(self, result: VersionResult, code: str, folder: VersionFolder, path: str,
                 message: str, count: int = 1) -> None:
-        finding = self.findings.record(code, folder.slug, result.version or folder.segment,
+        version = result.version or folder.segment
+        decided = triage.match(self.triaged, code, folder.slug, version, path)
+        if decided is not None:
+            message = f"{message} [triage: {decided.label}]"
+        finding = self.findings.record(code, folder.slug, version,
                                        (folder.relative / path).as_posix() if path else folder.relative.as_posix(),
                                        message, count)
-        if finding.severity == "error":
+        result.codes[code] += count
+        result.on_page.setdefault(path.partition("#")[0], []).append((code, decided.label if decided else ""))
+        if finding.severity is Severity.NOTE:
+            return
+        if decided is not None:
+            result.explained += 1
+        elif finding.severity is Severity.ERROR:
             result.errors += 1
+        else:
+            result.warnings += 1
 
 
 # -- helpers ----------------------------------------------------------------------
+
+
+def _number(product, segment: str) -> str | None:
+    """The catalog's version for a published segment (`9-3-8` -> `9.3.8`), or None."""
+    return next((v for v in (product.versions if product else {}) if version_segment(v) == segment), None)
+
+
+def _commit(path: Path) -> str:
+    """The last commit touching the published folder, or "" outside git (Phase 58)."""
+    try:
+        done = subprocess.run(["git", "-C", str(path), "log", "-1", "--format=%h", "--", "."],
+                              capture_output=True, text=True, timeout=60)
+    except (OSError, subprocess.SubprocessError):
+        return ""
+    return done.stdout.strip() if done.returncode == 0 else ""
 
 
 def _row(folder: VersionFolder, number: str, source: str, key: str, old_url: str) -> dict[str, str]:

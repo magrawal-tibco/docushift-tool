@@ -1756,12 +1756,43 @@ docushift verify --target-dir ../ibi-docs-aem --product ibi-ai-assistant --refre
   their alt text are reported too.
 - **Requests are throttled and cached** under `cache/verify/`. A second run asks the
   network for nothing it has seen.
-- **Output:**
-  - `reports/verify-<product>.csv`, one row per old page: old URL, new page, staging
-    URL, text %, images found of expected, TOC match, staging status, the missing
-    sentences;
-  - `reports/verify-<product>.html`, the lowest-scoring pages with links to old and new.
-- **Exit code:** 1 if anything was lost (an error finding).
+- **Every result is kept** (Phase 58):
+  - `reports/verify/<bu>/<product>/<version>-<date>.csv`, one row per old page: old
+    URL, new page, staging URL, text %, images found of expected, TOC match, staging
+    status, findings, their triage, the missing sentences. A `.html` beside it lists
+    the lowest-scoring pages with links to old and new;
+  - `reports/verify/INDEX.html` (and `INDEX.csv`): every published version and its
+    latest result, verified or not, so the rollout's progress is one page;
+  - `_verify_status` and `_verify_date` in `versions.csv`, filterable in Excel.
+- **What a status means:**
+  - `lost`: something is gone that nobody has explained;
+  - `issues`: unexplained warnings only;
+  - `explained`: every finding is in the triage file;
+  - `clean`: nothing found;
+  - `stale`: the version was published again after it was checked;
+  - `not-verified`: published, never checked.
+- **The triage file, `config/verify-triage.yaml`,** records what a kind of finding is:
+  ours to fix, the AEM owners' (with their Jira key), in the source documents, or
+  accepted (with who decided and why). A triaged finding is still in every report,
+  marked with its decision. It just stops counting as a new problem. Delete an entry
+  once what it describes is fixed.
+- **Staging host per business unit:** `verify_base_urls` in `publishing.yaml`. A
+  business unit with no host gets the local and live checks only.
+- **Exit code:** 1 if something was lost and is not in the triage file.
+
+**Rolling out in waves.** Pick the versions with the catalog's selectors and carry on
+where the last wave stopped:
+
+```bash
+# What would this wave check? Reads nothing else
+docushift verify --target-dir ../ibi-docs-aem --bu ibi --family webfocus --latest-only --dry-run
+
+# The newest version of every WebFOCUS product not verified yet, 10 at a time
+docushift verify --target-dir ../ibi-docs-aem --family webfocus --latest-only --status not-verified --max 10
+
+# Re-check what was published again since it was verified
+docushift verify --target-dir ../ibi-docs-aem --bu ibi --status stale
+```
 
 
 ---

@@ -39,6 +39,42 @@ tracker, and the way it loses trust is by filling up.
 
 ---
 
+## AEM platform (every product)
+
+Problems in how the staging site shows pages, found by the "nothing lost" check.
+They affect every product, so they live here once rather than under each
+product. The check records each one as already explained, so it does not hide a
+new loss; the decisions are kept in the tool's triage file.
+
+### Picture descriptions dropped when they contain `/`, `:` or `⌘`
+
+- **Status:** Waiting
+- **Owner:** AEM owners (tracked as DOCOPS-255)
+- **Raised:** 23 Oct 2026
+- **Blocks publishing:** no
+
+The staging site shows some pictures without their description, the text a
+screen reader reads out. On ibi™ AI Assistant 9.3.8 that is 5 of 16 pictures.
+Every description it drops contains a slash, a colon or the ⌘ sign; every one it
+keeps contains none of them. The converted pages carry the descriptions
+correctly, so nothing needs to change on our side. When it is fixed, the check
+stops reporting it.
+
+### Notes shown without their "Note" or "Tip" label
+
+- **Status:** In progress
+- **Owner:** this project (tracked as DOCOPS-250)
+- **Raised:** 22 Oct 2026
+- **Blocks publishing:** no
+
+The staging site did not understand the way notes were written, so readers saw
+the note text with no label. The converter now writes notes the way the site
+shows them, and the published products are being corrected one family at a time
+(Statistica and ibi™ AI Assistant so far). Each product clears once the site
+republishes it.
+
+---
+
 ## ActiveSpaces
 
 ### Never published to the real destination

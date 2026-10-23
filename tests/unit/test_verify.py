@@ -381,3 +381,139 @@ def test_the_selection_reads_only_online_help(config, state) -> None:
 
     folders = [v for e in walk(target, SLUG, None, "online-help") for v in e.versions]
     assert [f.doc_class for f in folders] == ["online-help"]
+
+
+# -- Phase 58: records, status, triage, waves ---------------------------------------
+
+
+def test_a_verify_result_is_kept_per_run_and_the_latest_is_read_back(state) -> None:
+    base = {"slug": "prod", "version": "1.0.0", "scope": "local", "outcome": "lost", "errors": 2}
+    state.record_verify({**base, "run_id": 1, "at": "2026-10-20T10:00:00+00:00"})
+    state.record_verify({**base, "run_id": 2, "at": "2026-10-23T10:00:00+00:00", "outcome": "clean", "errors": 0})
+
+    latest = state.verify_latest()[("prod", "1.0.0")]
+
+    assert (latest["run_id"], latest["outcome"]) == (2, "clean")
+    assert len(state._all("SELECT * FROM verify_result")) == 2
+
+
+def test_verify_status_reads_not_verified_the_outcome_and_stale_after_a_later_sync() -> None:
+    from docushift.reporting.status import _verify
+
+    placed = {("sync", "ok"): ("2026-10-22T09:00:00+00:00", "target")}
+    checked = {"at": "2026-10-23T10:00:00+00:00", "outcome": "explained"}
+
+    assert _verify(None, {}, "") == ("", "")
+    assert _verify(None, placed, "2026-10-22") == ("not-verified", "")
+    assert _verify(checked, placed, "2026-10-22") == ("explained", "2026-10-23")
+    resynced = {("sync", "ok"): ("2026-10-24T09:00:00+00:00", "target")}
+    assert _verify(checked, resynced, "2026-10-24") == ("stale", "2026-10-23")
+
+
+def test_the_shipped_triage_file_loads(repo_root: Path) -> None:
+    from docushift.verify import triage
+
+    entries = triage.load(repo_root / "config" / "verify-triage.yaml")
+
+    assert {e.code for e in entries} >= {"VERIFY_PUBLISHED_ALT_DROPPED", "VERIFY_PUBLISHED_CALLOUT_UNRENDERED"}
+
+
+def test_a_malformed_triage_entry_stops_the_run_naming_it(tmp_path: Path) -> None:
+    import pytest
+
+    from docushift.verify import triage
+
+    path = tmp_path / "verify-triage.yaml"
+    path.write_text("triage:\n  - code: VERIFY_TEXT_DROPPED\n    decision: platform\n    reason: AEM\n",
+                    encoding="utf-8")
+
+    with pytest.raises(triage.TriageError, match="entry 1: a `platform` decision needs"):
+        triage.load(path)
+
+
+def test_triage_matches_by_code_and_narrows_by_product_and_path() -> None:
+    from docushift.verify import triage
+
+    entries = [triage.Entry("VERIFY_TEXT_DROPPED", "accepted", "intro rewritten", slug="prod",
+                            path="*/intro.md")]
+
+    assert triage.match(entries, "VERIFY_TEXT_DROPPED", "prod", "1.0.0", "guide/intro.md") is entries[0]
+    assert triage.match(entries, "VERIFY_TEXT_DROPPED", "other", "1.0.0", "guide/intro.md") is None
+    assert triage.match(entries, "VERIFY_IMAGE_MISSING", "prod", "1.0.0", "guide/intro.md") is None
+
+
+def test_a_triaged_loss_is_reported_and_the_version_reads_explained(config, state) -> None:
+    from docushift.verify import triage
+
+    target = _fixture(config, state, drop_paragraph=True)
+    product = make_product(SLUG, bu="ibi", family="webfocus")
+    product.versions = {NUMBER: make_version(SLUG, NUMBER, engine=SourceEngine.FLARE)}
+    findings = FindingsRun("verify")
+    entries = [triage.Entry("VERIFY_TEXT_DROPPED", "accepted", "rewritten on purpose", path="one.md")]
+    verifier = Verifier(config, Catalog(products={SLUG: product}), state, target, findings, triaged=entries)
+
+    result = verifier.version(verifier.selection(SLUG, None)[0])
+    findings.flush()
+
+    assert result.outcome == "explained" and (result.errors, result.explained) == (0, 1)
+    assert "[triage: accepted]" in findings.recorded[0].message
+    assert next(r for r in result.rows if r["new_path"] == "one.md")["triage"] == "accepted"
+
+
+def test_an_unexplained_loss_reads_lost(config, state) -> None:
+    target = _fixture(config, state, drop_image=True)
+    product = make_product(SLUG, bu="ibi", family="webfocus")
+    product.versions = {NUMBER: make_version(SLUG, NUMBER, engine=SourceEngine.FLARE)}
+    verifier = Verifier(config, Catalog(products={SLUG: product}), state, target, FindingsRun("verify"))
+
+    assert verifier.version(verifier.selection(SLUG, None)[0]).outcome == "lost"
+
+
+def test_a_wave_selects_by_bu_status_newest_version_and_size(config, state) -> None:
+    target = _fixture(config, state)
+    older = target / "en-us-ibi-webfocus-userdocs/en-us" / SLUG / "online-help/0-9-0"
+    older.mkdir(parents=True)
+    product = make_product(SLUG, bu="ibi", family="webfocus")
+    product.versions = {NUMBER: make_version(SLUG, NUMBER), "0.9.0": make_version(SLUG, "0.9.0")}
+    verifier = Verifier(config, Catalog(products={SLUG: product}), state, target, FindingsRun("verify"))
+
+    def segments(**kw) -> list[str]:
+        return [f.segment for f in verifier.selection(None, None, **kw)]
+
+    assert segments() == ["0-9-0", "1-0-0"]
+    assert segments(latest_only=True) == ["1-0-0"]
+    assert segments(bu="tibco") == []
+    statuses = {(SLUG, NUMBER): "explained", (SLUG, "0.9.0"): "not-verified"}
+    assert segments(statuses=statuses, wanted=("not-verified",)) == ["0-9-0"]
+    assert segments(limit=1) == ["0-9-0"]
+
+
+def test_each_run_keeps_its_own_report_and_the_index_links_it(config, state, tmp_path: Path) -> None:
+    from docushift.verify import report
+
+    target = _fixture(config, state)
+    product = make_product(SLUG, bu="ibi", family="webfocus")
+    product.versions = {NUMBER: make_version(SLUG, NUMBER, engine=SourceEngine.FLARE)}
+    verifier = Verifier(config, Catalog(products={SLUG: product}), state, target, FindingsRun("verify"))
+    result = verifier.version(verifier.selection(SLUG, None)[0])
+
+    first = report.write_version(tmp_path, "ibi", result, "2026-10-23")
+    second = report.write_version(tmp_path, "ibi", result, "2026-10-30")
+    _, html = report.write_index(tmp_path, [{
+        "bu": "ibi", "family": "webfocus", "slug": SLUG, "version": NUMBER, "verify_status": "clean",
+        "verify_date": "2026-10-30", "scope": "local", "pages": "3", "errors": "0", "warnings": "0",
+        "explained": "0", "findings": "", "commit": "", "report": "reports/verify/ibi/prod/1.0.0-2026-10-30.csv"}])
+
+    assert first != second and first.is_file() and second.is_file()
+    assert 'href="ibi/prod/1.0.0-2026-10-30.html"' in html.read_text(encoding="utf-8")
+
+
+def test_the_staging_host_is_chosen_by_business_unit(project_root: Path) -> None:
+    from docushift.config import ConfigManager
+
+    (project_root / "config" / "publishing.yaml").write_text(
+        'verify_base_urls:\n  ibi: "https://stg-docs.ibi.com/"\n  tibco: "https://stg-docs.tibco.com"\n',
+        encoding="utf-8")
+
+    assert ConfigManager(root_dir=project_root).verify_base_urls() == {
+        "ibi": "https://stg-docs.ibi.com", "tibco": "https://stg-docs.tibco.com"}

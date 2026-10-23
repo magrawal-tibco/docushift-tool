@@ -1479,6 +1479,111 @@ no diff. The staging pilot renders one Japanese page. `ruff` and the suite pass.
 
 ---
 
+### Phase 58: Every Verification Is Kept, Triaged and Tracked Per Version — **Built 2026-10-23 (records, triage, waves); TIBCO readiness and first wave pending**
+
+**Why.** Phase 55's `verify` runs one product at a time and overwrites
+`reports/verify-<product>.csv`; its findings sit in `state.db` by run. That is enough
+for one pilot. It is not enough for the rollout: product by product, version by
+version, over weeks, with some findings fixed by us, some by the AEM owners, some
+accepted. Five questions have no answer today:
+
+1. Which versions have been verified, when, against which published commit, and how
+   far (local only, or staging and live too)?
+2. Is an earlier result still true, or has the version been re-published since?
+3. Which findings are explained (a deliberate converter change, an accepted
+   difference, an AEM defect with a ticket), and which are new?
+4. What is left to do, by whom, and is it blocking?
+5. How far has the rollout got, by family and by business unit?
+
+The pilot already produced one finding of each kind: a tool fix (three `verify`
+misreadings), an AEM defect (alt text dropped when it holds `/`, `:` or `⌘`), and
+one we fix ourselves and confirm later (note labels, Phase 56).
+
+#### Decisions
+
+| decision | choice | why |
+|---|---|---|
+| **Where a version's verify result lives** | `state.db`, a new `verify_results` table: one row per version per run. Columns: slug, version, run, date, published commit, scope (local / staging / live), pages, error and warning counts by code, outcome | `state.db` already holds what each stage did per version, and `report` reads it. One row per run keeps the history, so a version that got worse is visible |
+| **Seeing progress in Excel** | Two derived columns in `versions.csv`: `_verify_status` and `_verify_date`, like `_sync_status` (Phase 38). Values: `not-verified` / `clean` / `explained` / `issues` / `lost` / `stale` | The catalog is where progress is already read and filtered. **`stale`** = verified before the version was last synced, or before the last commit to its published folder, so an old "clean" never hides a new loss |
+| **Reports kept, not overwritten** | `reports/verify/<bu>/<slug>/<version>-<date>.csv` per run. `reports/verify/INDEX.csv` and `INDEX.html` hold the latest result per version, filterable by family, with links to the per-version CSVs | One file per run is the evidence trail. The index is what a business reader opens |
+| **Triage: what each finding is** | A hand-kept `config/verify-triage.yaml`. Each entry matches findings (code, and optionally slug, version, path pattern) and gives a decision: `ours` (a phase or open issue fixes it), `platform` (the AEM owners, with a Jira key), `source` (in the source documents), or `accepted` (a reason and who decided). `verify` tags each matching finding and counts it as explained | Without this, every re-run re-raises the same 61 note labels and 5 alt texts, and a new loss drowns among them. A file, not a database: it is a decision, it is reviewed in a diff, and it outlives `state.db` |
+| **What a status counts** | `lost`: an unexplained error (topic, text, image or TOC entry gone). `issues`: unexplained warnings only. `explained`: every finding is triaged. `clean`: no findings | Triage never deletes a finding. It changes how one is counted, and the report still lists it, with its decision |
+| **Where follow-ups are written** | Unchanged rules: judgement goes in `docs/open-issues.md`, work for the tool in a phase, and Jira tracks both. New: an **AEM platform** section in `open-issues.md` for defects that cross products (alt text; note labels until republished), each linked to its triage entry and Jira key | `open-issues.md` already says a finding is written down only when someone must decide or act; the triage file is what makes that link checkable |
+| **Rollout order** | ibi first: one family at a time, the newest version of each product first, then the older ones. TIBCO follows once the TIBCO-readiness steps below pass. Each wave is one `verify` run plus a short plain-language summary | Newest first covers what readers use most and finds systematic problems early. One family per wave keeps a summary readable |
+| **A staging host per business unit** (user, 2026-10-23: TIBCO is `stg-docs.tibco.com`) | `publishing.yaml` key `verify_base_urls`, a map by BU: `ibi: https://stg-docs.ibi.com`, `tibco: https://stg-docs.tibco.com`. The host is chosen from the product's catalog `bu`. Phase 55's single `verify_base_url` is read as the `ibi` entry. `--base-url` still overrides for one run | One run can then cover both BUs, and a product is never checked against the other BU's site |
+| **TIBCO is probed before it is verified** (user, 2026-10-23: stg-docs.tibco.com has no real content yet, so the probe and the staging half of the pilots wait for it; the local half runs with `--skip-published`) | One read-only probe of stg-docs.tibco.com, as Phase 55's Step 0 did for ibi: login, the URL pattern, the menu markup, the article and title selectors, the DAM image path, how notes and alt text render. Recorded in this phase before the first TIBCO wave | The ibi rules (`published.py`) were read off one site; nothing says the TIBCO site is built the same way. Shared AEM components make it likely, not certain |
+| **Every engine's old TOC is read** | `verify/toc.py` gains old-TOC readers for DITA, WebWorks and DocBook, using the engines' own readers as the Flare one does. Until each exists, its versions keep `VERIFY_TOC_UNCHECKED` | Of the 572 published TIBCO versions (measured 2026-10-23), 320 are Flare, 95 DITA, 72 WebWorks and 8 DocBook; 77 have no engine recorded. Without the readers, about a third of TIBCO would get no TOC check |
+| **One pilot per kind before a TIBCO wave** | Before the TIBCO rollout: one merged Flare product (merges have only been unit-tested), and one each of DITA, WebWorks and DocBook. Each pilot is tuned the way Phase 55's was (every finding traced) before its kind is rolled out | 415 of the 572 published TIBCO versions are merged pages. Each engine has its own container and chrome, and a WebWorks `body` is the least certain container |
+| **Selecting a wave** | `verify` takes the catalog selectors `--bu`, `--family`, `--product`, `--version`, plus `--latest-only`, `--status not-verified|stale|issues|lost` and `--max N` | The same selectors as the other stages, plus "carry on where we stopped", which is what a slow rollout needs |
+
+#### Steps
+
+1. `state.py`: the `verify_results` table and its writer, called once per version by
+   `verify`. Tests: a re-run appends a row, and the latest row is read back.
+2. `catalog.py`: `_verify_status` / `_verify_date`, derived as `_sync_status` is,
+   including `stale`. Tests: each status, and `stale` after a later sync.
+3. `verify/triage.py` and `config/verify-triage.yaml`, seeded with the pilot's two
+   platform entries (note labels → DOCOPS-250, alt text → the new AEM ticket) and the
+   converter's known cuts. The driver tags each finding; the CSV gains `triage` and
+   `ticket` columns. Tests: a matched finding is explained, an unmatched one is not, and
+   a malformed entry stops the run with its line number.
+4. `verify/report.py`: the per-run CSV path and the two index files. `cli.py`: the
+   selectors above. Tests: two runs keep two CSVs; the index shows the latest.
+5. `docs/open-issues.md`: an "AEM platform" section with the alt-text defect and note
+   labels. `docs/jira.md`: a "verify waves" table (wave, versions, outcome, Jira).
+6. Docs: `user-guide.md` (selectors, triage file, statuses), `design.md` (status rules).
+7. First wave: ibi WebFOCUS, newest versions (the user, as a `!` command). Then one
+   plain-language summary: pages and images checked, what is lost, explained or open.
+8. **TIBCO readiness**, before the first TIBCO wave:
+   - `verify_base_urls` by BU, with the host chosen from the catalog; test both BUs in
+     one run.
+   - A read-only probe of stg-docs.tibco.com, recorded here; `published.py` adjusted
+     only where the TIBCO site differs.
+   - Old-TOC readers for DITA, WebWorks and DocBook, each tested on a small fixture.
+   - Pilots: one merged Flare product, then one DITA, one WebWorks and one DocBook
+     version, each traced to zero unexplained findings.
+
+*Exit: a re-run of the pilot shows `explained` (both platform defects triaged) and keeps
+both CSVs; `versions.csv` shows `_verify_status` for every ibi version; the first wave
+is summarised; the TIBCO probe and four pilots are recorded and clean; `ruff` and the
+suite pass.*
+
+#### As built (2026-10-23)
+
+- **Records:**
+  - `state.py`: the `verify_result` table (one row per version per run, in
+    `_VERSION_TABLES`), `record_verify` and `verify_latest`;
+  - `reporting/status.py` derives `_verify_status` / `_verify_date`, and
+    `catalog.py` writes them after `_sync_date`;
+  - `verify` refreshes `versions.csv` (`_refresh_status`) after each wave.
+- **Triage:** `verify/triage.py` and `config/verify-triage.yaml`, seeded with the
+  pilot's two entries: `VERIFY_PUBLISHED_ALT_DROPPED` is `platform`, DOCOPS-255, and
+  `VERIFY_PUBLISHED_CALLOUT_UNRENDERED` is `ours`, DOCOPS-250. A malformed entry stops
+  the run naming its position; a `platform` entry without a ticket is malformed.
+- **Reports:** `reports/verify/<bu>/<slug>/<version>-<date>.csv` and `.html` per run,
+  each stored relative to the project in `verify_result.report`. `reports/verify/INDEX`
+  `.csv` and `.html` cover every published version. The page CSV gains `findings` and
+  `triage` columns. The Phase 55 `reports/verify-<product>.*` are gone.
+- **Waves:** `--bu`, `--family`, `--latest-only`, `--status` (repeatable), `--max`,
+  `--dry-run`. Exit 1 only on an unexplained error.
+- **Hosts:** `publishing.yaml` `verify_base_urls` by BU (`ibi` set; `tibco` commented
+  out until stg-docs.tibco.com has content). `config.verify_base_urls()` also reads
+  Phase 55's single `verify_base_url` as `ibi`.
+- **Follow-ups written down:** an "AEM platform" section in `docs/open-issues.md` (alt
+  text, note labels), and a "Verify waves" table in `docs/jira.md`.
+- **Pilot re-run (2026-10-23):** ibi™ AI Assistant 9.3.8 is `explained`: 0 lost, 0
+  warnings, 25 explained (5 alt texts, 20 pages of note labels), scope
+  `local+staging+live`, commit `7cac70dc`. `versions.csv` now shows `_verify_status` on
+  814 published versions: 1 explained, 813 `not-verified` (197 ibi, 581 TIBCO, 35
+  Spotfire).
+- Tests: 10 new in `tests/unit/test_verify.py` (37 in all). `ruff` clean.
+- **Left:**
+  - Step 7, the first wave (ibi WebFOCUS, newest versions);
+  - Step 8, TIBCO readiness: the DITA, WebWorks and DocBook old-TOC readers and the
+    local pilots now; the staging probe once stg-docs.tibco.com has content.
+
+---
+
 ## Carried-Forward Open Items
 
 Technical items a finished phase recorded as *open, not fixed*. Product-level issues

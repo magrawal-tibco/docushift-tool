@@ -120,7 +120,8 @@ docushift-tool/
 │       │   ├── live.py     # A sample of docs.tibco.com against the downloaded copy
 │       │   ├── fetch.py    # Throttled GETs, cached under cache/verify/
 │       │   ├── driver.py   # Verifier: one published version folder, A then B then C
-│       │   └── report.py   # reports/verify-<product>.csv and its HTML summary
+│       │   ├── triage.py   # config/verify-triage.yaml: what each finding is (ours, AEM, source, accepted)
+│       │   └── report.py   # reports/verify/<bu>/<slug>/<version>-<date>.csv, and INDEX.html for every version
 │       ├── transforms/     # GFM Transformations (engine-neutral)
 │       │   ├── callouts.py # Note/Warning/Tip to `> **Note:**`; fix_markdown repairs old `> [!NOTE]`
 │       │   ├── tables.py   # Table normalizer
@@ -230,10 +231,12 @@ Jira (DOCOPS) status and what to file next: the handoff at the top of [`docs/jir
    pass 260 characters is copied under a shorter name, and a topic that leads two pages can be
    named per page in `rename-map.csv`. BusinessConnect: 39 of 44 versions published; the last 5
    wait for this run. See [`planning.md`](docs/planning.md#1-active-phases).
-0g. **Phase 55, built 2026-10-23; staging pilot pending**: `docushift verify` proves that converted
-   ibi docs lost no topic, text, image or TOC structure on the way from docs.tibco.com to
-   stg-docs.ibi.com. The pilot (ibi™ AI Assistant) is clean locally. Next: the staging and live run,
-   then all ibi products. See [`planning.md`](docs/planning.md#1-active-phases).
+0g. **Phase 55, built 2026-10-23; pilot run, rollout pending**: `docushift verify` proves that
+   converted ibi docs lost no topic, text, image or TOC structure on the way from docs.tibco.com to
+   stg-docs.ibi.com. Pilot (ibi™ AI Assistant): nothing lost; AEM drops alt text holding `/`, `:` or
+   `⌘` on 5 images. **Phase 58, built 2026-10-23 (first wave and TIBCO readiness pending)**: each version's verify result kept and
+   triaged (`_verify_status` in `versions.csv`, `config/verify-triage.yaml`, `reports/verify/INDEX`),
+   then the rollout family by family. See [`planning.md`](docs/planning.md#1-active-phases).
 0h. **Phase 56, built 2026-10-22; runs pending**: AEM does not render GitHub alerts, so notes lost
    their "Note"/"Tip" label. The converter now writes `> **Note:**` with the text on the next line;
    `fix-callouts` repairs `output/`, `reframed/` and the published repos with no re-conversion.

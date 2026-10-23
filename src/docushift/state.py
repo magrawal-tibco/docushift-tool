@@ -200,6 +200,28 @@ CREATE TABLE IF NOT EXISTS stage_event (
     target  TEXT NOT NULL DEFAULT '',
     PRIMARY KEY (slug, version, stage, outcome)
 );
+
+-- Phase 58: one row per version per `verify` run, so a rollout over weeks keeps
+-- every result and `versions.csv`'s `_verify_status` / `_verify_date` can be read
+-- back. `outcome` is the triaged verdict (clean | explained | issues | lost);
+-- `codes` is a JSON object of finding code -> count, triaged ones included.
+CREATE TABLE IF NOT EXISTS verify_result (
+    slug       TEXT NOT NULL,
+    version    TEXT NOT NULL,
+    run_id     INTEGER NOT NULL,
+    at         TEXT NOT NULL,
+    scope      TEXT NOT NULL,            -- local | local+staging | local+staging+live ...
+    target     TEXT NOT NULL DEFAULT '',  -- the published version folder
+    commit_id  TEXT NOT NULL DEFAULT '',  -- its last commit, when it is in git
+    pages      INTEGER NOT NULL DEFAULT 0,
+    errors     INTEGER NOT NULL DEFAULT 0,  -- unexplained
+    warnings   INTEGER NOT NULL DEFAULT 0,  -- unexplained
+    explained  INTEGER NOT NULL DEFAULT 0,  -- triaged errors and warnings
+    outcome    TEXT NOT NULL,
+    codes      TEXT NOT NULL DEFAULT '{}',
+    report     TEXT NOT NULL DEFAULT '',
+    PRIMARY KEY (slug, version, run_id)
+);
 """
 
 
@@ -219,6 +241,7 @@ _VERSION_TABLES = (
     "asset_inventory",
     "output_map",
     "stage_event",
+    "verify_result",
 )
 
 
@@ -748,6 +771,26 @@ class StateStore:
             (slug, version),
         )
         return {row["source"]: row["output"] for row in rows}
+
+    def record_verify(self, row: dict[str, Any]) -> None:
+        """One version's `verify` result (Phase 58). A re-run in the same run replaces it."""
+        columns = ("slug", "version", "run_id", "at", "scope", "target", "commit_id", "pages",
+                   "errors", "warnings", "explained", "outcome", "codes", "report")
+        values = tuple(row.get(c, "") if c not in ("run_id", "pages", "errors", "warnings", "explained")
+                       else int(row.get(c) or 0) for c in columns)
+        with self._tx() as conn:
+            conn.execute(
+                f"INSERT OR REPLACE INTO verify_result ({', '.join(columns)}) "
+                f"VALUES ({', '.join('?' for _ in columns)})", values)
+
+    def verify_latest(self) -> dict[tuple[str, str], dict[str, Any]]:
+        """`{(slug, version): row}` -- each version's most recent `verify` result."""
+        rows = self._all(
+            "SELECT v.* FROM verify_result v JOIN (SELECT slug, version, MAX(at) AS at "
+            "FROM verify_result GROUP BY slug, version) m "
+            "ON v.slug = m.slug AND v.version = m.version AND v.at = m.at"
+        )
+        return {(row["slug"], row["version"]): dict(row) for row in rows}
 
     def latest_counts(self, slug: str, version: str, codes: Iterable[str]) -> dict[str, int]:
         """Each code's count for one version, from the most recent run that recorded it.

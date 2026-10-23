@@ -88,6 +88,8 @@ class VersionStatus:
     status_date: str = ""
     sync_status: str = ""
     sync_date: str = ""
+    verify_status: str = ""
+    verify_date: str = ""
 
 
 @dataclass
@@ -98,10 +100,12 @@ class StatusEvidence:
     events: dict = field(default_factory=dict)
     run_dates: dict = field(default_factory=dict)
     content: dict = field(default_factory=dict)
+    verify: dict = field(default_factory=dict)
 
     @classmethod
     def read(cls, state) -> "StatusEvidence":
-        return cls(state.progress(), state.stage_events(), state.run_dates(), state.content_kinds())
+        return cls(state.progress(), state.stage_events(), state.run_dates(), state.content_kinds(),
+                   state.verify_latest())
 
 
 def gate(product, version) -> str | None:
@@ -156,10 +160,11 @@ def version_status(product, version, evidence: StatusEvidence) -> VersionStatus:
         and version.engine not in CONVERTIBLE_ENGINES and not topics and documents > 0
     )
     sync_status, sync_date = _sync(events, runs, pdf_only)
+    verified = _verify(evidence.verify.get(key), events, sync_date)
 
     blocked = gate(product, version)
     if blocked:
-        return VersionStatus(blocked, "", sync_status, sync_date)
+        return VersionStatus(blocked, "", sync_status, sync_date, *verified)
 
     if recorded.get("converted") and version.reframed_md_files is not None:
         furthest, status = "reframe", "merged"
@@ -188,7 +193,23 @@ def version_status(product, version, evidence: StatusEvidence) -> VersionStatus:
         if legacy and not (legacy == "convert" and status in ("format-unknown", "pdf-ready")):
             status, date = _FAILED[legacy], recorded.get("updated_at")
 
-    return VersionStatus(status, _day(date), sync_status, sync_date)
+    return VersionStatus(status, _day(date), sync_status, sync_date, *verified)
+
+
+def _verify(result: dict | None, events: Events, sync_date: str) -> tuple[str, str]:
+    """`_verify_status` and `_verify_date` (Phase 58).
+
+    The latest `verify` outcome -- clean, explained, issues or lost -- unless the
+    version was placed again after it: then `stale`, because a re-published tree is
+    not the one that was checked. A published version never verified is
+    `not-verified`; one never published has nothing to verify and stays blank.
+    """
+    if result is None:
+        return ("not-verified", "") if sync_date else ("", "")
+    placed = events.get(("sync", "ok"))
+    if placed and placed[0] > result["at"]:
+        return "stale", _day(result["at"])
+    return result["outcome"], _day(result["at"])
 
 
 def _sync(events: Events, runs: dict[str, str], pdf_only: bool = False) -> tuple[str, str]:

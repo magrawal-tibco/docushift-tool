@@ -26,6 +26,9 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | General resources repo created and pushed (4 API references) | DOCOPS-245: dated note → Done |
 | `fix-callouts` has run over output/, reframed/ and both repos, pushed, and labels show on staging | DOCOPS-250: dated note → Done |
 | Phase 55 pilot reviewed and all ibi products verified | DOCOPS-249 → Done; DOCOPS-150 (ibi staging check): dated note with the verify result |
+| AEM owners fix alt text with `/`, `:` or `⌘` and a verify re-run shows none dropped | DOCOPS-255: dated note → Done |
+| Phase 58 built (records, triage, selectors) and the first ibi wave summarised | DOCOPS-256 → In Progress while building, then Done |
+| stg-docs.tibco.com has real content | DOCOPS-257: run the TIBCO staging probe and staging pilots |
 | Staging shows one Japanese and one German WebFOCUS page correctly | DOCOPS-148: dated note → Done |
 | Data Virtualization team answers the error report and the 3 versions are published | DOCOPS-254: dated note → Done |
 | A new phase is opened | One sub-task under the matching story, In Progress, no `retro` |
@@ -33,6 +36,10 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 **Left alone on purpose:** DOCOPS-8 is a Task where its siblings are Stories.
 
 **Log** (newest first, one line per session):
+
+- 2026-10-23 — Phase 55 built (422e406): DOCOPS-249 note (pilot: nothing lost; AEM drops 5 alts). DOCOPS-250 note
+  (ibi AI Assistant notes fixed, 7cac70dc). New: DOCOPS-255 (AEM alt text, In Progress, 0.25, under DOCOPS-149),
+  DOCOPS-256 and DOCOPS-257 (Phase 58 records/triage and TIBCO readiness, Backlog, 0.5 and 1, under DOCOPS-96).
 
 - 2026-10-23 — Phase 57 logged as DOCOPS-253 (Done, 1 SP, under DOCOPS-11). DOCOPS-148 (translated WebFOCUS,
   1 SP) → In Progress, due 28 Oct: all 27 language builds published to both loc- repos, pushed (main + wip);
@@ -247,6 +254,7 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | 54 | A release-notes folder that copies the main guides | DOCOPS-239 |
 | 55 | `verify`: converted ibi docs against stg-docs.ibi.com | DOCOPS-249 (in progress) |
 | 56 | Note labels AEM shows; `fix-callouts` repairs published docs | DOCOPS-250 (in progress) |
+| 58 | `verify` results kept, triaged, tracked per version; TIBCO readiness | DOCOPS-256, DOCOPS-257 |
 | 57 | Translated help to the `loc-` tree (`--locale`) | build DOCOPS-253; runs DOCOPS-148 (in progress) |
 
 Other logged work: Jira reconcile and this handoff DOCOPS-208; stakeholder status page DOCOPS-197; TIBCO family reassignments DOCOPS-120
@@ -262,6 +270,16 @@ Other logged work: Jira reconcile and this handoff DOCOPS-208; stakeholder statu
 | DOCOPS-134 | TIBCO re-sync | 214 `out-of-date` |
 | DOCOPS-200 | ibi re-sync | 25 `out-of-date` |
 | DOCOPS-147 | ibi download | 1 `download-failed` |
+
+## Verify waves (Phase 58)
+
+One row per `docushift verify` wave. The per-version results are in
+`reports/verify/INDEX.html` and `versions.csv` (`_verify_status`); this table only
+says which wave covered what and where it is logged.
+
+| Wave | Date | Selection | Versions | Outcome | Jira |
+|---|---|---|---|---|---|
+| Pilot | 2026-10-23 | ibi™ AI Assistant 9.3.8, local + staging + live | 1 | explained (5 alt texts → DOCOPS-255; 61 note labels → DOCOPS-250) | DOCOPS-249 |
 
 ## Not in Jira, by choice
 

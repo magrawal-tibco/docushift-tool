@@ -12,6 +12,7 @@ their errors describe one file in a version that otherwise did its work.
 """
 
 import csv
+import json
 from collections import Counter
 from collections.abc import Callable
 from pathlib import Path
@@ -3314,68 +3315,111 @@ def _archive_target(manager: CatalogManager, product: str, version: str):
     return found, ver
 
 
+VERIFY_STATUSES = ("not-verified", "stale", "lost", "issues", "explained", "clean")
+
+
 @main.command()
 @click.option("--target-dir", type=DIR_PATH, required=True,
               help="Folder holding the published repos, e.g. ../ibi-docs-aem.")
 @click.option("--product", "product", default=None, help="Restrict to one published product slug.")
 @click.option("--version", default=None, help="Restrict to one version (9.3.8 or 9-3-8).")
+@click.option("--bu", default=None, help="Restrict to one business unit (ibi, tibco).")
+@click.option("--family", default=None, help="Restrict to one family.")
+@click.option("--latest-only", is_flag=True, help="Only the newest published version of each product.")
+@click.option("--status", "statuses", multiple=True, type=click.Choice(VERIFY_STATUSES),
+              help="Only versions whose _verify_status is this; repeatable (e.g. not-verified, stale).")
+@click.option("--max", "limit", type=int, default=0, help="At most this many versions in this wave.")
 @click.option("--skip-published", is_flag=True, help="Local comparison only; do not read the staging site.")
 @click.option("--live-sample", type=int, default=20, show_default=True,
               help="docs.tibco.com pages to compare per version; 0 skips the live check.")
-@click.option("--base-url", default=None, help="Staging host; default publishing.yaml's verify_base_url.")
+@click.option("--base-url", default=None,
+              help="Staging host for this run; default publishing.yaml's verify_base_urls by BU.")
 @click.option("--refresh", is_flag=True, help="Fetch again what cache/verify/ already holds.")
+@click.option("--dry-run", is_flag=True, help="List the versions this wave would verify, and stop.")
 @click.pass_context
-def verify(ctx, target_dir, product, version, skip_published, live_sample, base_url, refresh) -> None:
-    """Prove nothing was lost: old pages vs published pages vs staging (Phase 55).
+def verify(ctx, target_dir, product, version, bu, family, latest_only, statuses, limit, skip_published,
+           live_sample, base_url, refresh, dry_run) -> None:
+    """Prove nothing was lost: old pages vs published pages vs staging (Phases 55, 58).
 
-    For every published online-help version: each old page's topic, text and
-    images against the page it became, and the old TOC's structure against
-    `toc.yml` (local); each page and the menu against what the staging site serves;
-    and a sample of docs.tibco.com pages against the downloaded copy.
+    For every selected published online-help version: each old page's topic, text
+    and images against the page it became, and the old TOC's structure against
+    `toc.yml` (local); each page and the menu against what the product's staging
+    site serves; and a sample of docs.tibco.com pages against the downloaded copy.
 
-    Writes `reports/verify-<product>.csv` (one row per old page) and an HTML summary
-    of the lowest-scoring pages. Reads the network only for the staging and live
-    checks, throttled and cached under `cache/verify/`. Exits 1 on an error finding.
+    Each version's result is kept: `reports/verify/<bu>/<slug>/<version>-<date>.csv`
+    (one row per old page) and `.html`, a row in `state.db`, and `_verify_status` /
+    `_verify_date` in versions.csv. `reports/verify/INDEX.html` shows every published
+    version's latest status. Findings listed in `config/verify-triage.yaml` are
+    still reported and count as explained. Exits 1 on an unexplained error.
     """
-    from docushift.verify import report
+    import datetime
+
+    from docushift.verify import report, triage
     from docushift.verify.driver import Verifier
     from docushift.verify.fetch import Fetcher
 
     cfg: ConfigManager = ctx.obj["config"]
     _require_long_paths(cfg)
-    base = "" if skip_published else (base_url or cfg.verify_base_url()).rstrip("/")
+    try:
+        triaged = triage.load(cfg.config_dir / "verify-triage.yaml")
+    except triage.TriageError as exc:
+        raise click.ClickException(str(exc)) from exc
+    hosts = {} if skip_published else cfg.verify_base_urls()
+    base = "" if skip_published else (base_url or "").rstrip("/")
     fetcher = None
-    if base or live_sample > 0:
+    if hosts or base or live_sample > 0:
         crawl = dict(cfg.load_docsite().get("crawl") or {})
         fetcher = Fetcher(cfg.cache_dir / "verify", crawl, refresh=refresh)
     manager = _catalog_manager(ctx)
-    findings = FindingsRun("verify", store=cfg.state_store()).start()
-    verifier = Verifier(cfg, manager.load(), cfg.state_store(), target_dir, findings,
-                        fetcher=fetcher, base_url=base, live_sample=live_sample)
-    folders = verifier.selection(product, version)
+    state = cfg.state_store()
+    status_of = {(r["slug"], r["version"]): r.get("_verify_status", "") for r in manager.status_rows()}
+    findings = FindingsRun("verify", store=state)
+    verifier = Verifier(cfg, manager.load(), state, target_dir, findings, fetcher=fetcher, base_url=base,
+                        live_sample=live_sample, triaged=triaged, base_urls=hosts)
+    folders = verifier.selection(product, version, bu=bu, family=family, latest_only=latest_only,
+                                 statuses=status_of, wanted=tuple(statuses), limit=limit)
     if not folders:
         console.print(f"[yellow]No published online-help folders match this selection in {target_dir}.[/yellow]")
-        findings.finish(exit_code=1)
         raise click.exceptions.Exit(1)
+    if dry_run:
+        table = Table(title=f"Would verify ({len(folders)})")
+        for column in ("Product", "Version"):
+            table.add_column(column)
+        for folder in folders:
+            table.add_row(folder.slug, folder.segment)
+        console.print(table)
+        return
 
-    console.print(f"Verifying {len(folders)} version(s)"
-                  + (f" against {base}" if base else ", local only") + "...")
-    rows: list[dict[str, str]] = []
+    findings.start()
+    where = base or ", ".join(f"{b}: {h}" for b, h in sorted(hosts.items())) or "local only"
+    console.print(f"Verifying {len(folders)} version(s) ({where}); {len(triaged)} triage entr(ies)...")
+    day = datetime.date.today().isoformat()
     for folder in folders:
         result = verifier.version(folder)
         findings.flush()
         if result.skipped:
             console.print(f"  [dim]-[/dim] {folder.relative.as_posix()}: skipped, {result.skipped}")
             continue
-        rows.extend(result.rows)
-        marker = "[red]x[/red]" if result.errors else "[green]ok[/green]"
-        console.print(f"  {marker} {folder.relative.as_posix()}: {len(result.rows)} old page(s), "
-                      f"{result.errors} error(s)")
+        prod = verifier.catalog.products[folder.slug]
+        path = report.write_version(cfg.root_dir / "reports", prod.bu, result, day)
+        state.record_verify({
+            "slug": folder.slug, "version": result.version, "run_id": findings.run_id,
+            "at": datetime.datetime.now(datetime.UTC).isoformat(timespec="seconds"),
+            "scope": result.scope, "target": str(folder.path), "commit_id": result.commit,
+            "pages": len(result.rows), "errors": result.errors, "warnings": result.warnings,
+            "explained": result.explained, "outcome": result.outcome,
+            "codes": json.dumps(dict(result.codes), sort_keys=True),
+            "report": path.relative_to(cfg.root_dir).as_posix(),
+        })
+        marker = {"lost": "[red]x[/red]", "issues": "[yellow]![/yellow]"}.get(result.outcome, "[green]ok[/green]")
+        console.print(f"  {marker} {folder.relative.as_posix()}: {result.outcome}, {len(result.rows)} old page(s), "
+                      f"{result.errors} lost, {result.warnings} warning(s), {result.explained} explained")
 
-    totals = Counter()
+    _refresh_status(manager)
+    _, index_html = report.write_index(cfg.root_dir / "reports", _verify_index(manager, state))
+    totals: Counter = Counter()
     for finding in findings.recorded:
         totals[finding.code] += finding.count
-    csv_path, html_path = report.write(cfg.root_dir / "reports", product or "all", rows, dict(totals))
     table = Table(title="verify")
     table.add_column("Finding")
     table.add_column("Count", justify="right")
@@ -3384,11 +3428,35 @@ def verify(ctx, target_dir, product, version, skip_published, live_sample, base_
     console.print(table)
     if fetcher is not None:
         console.print(f"[dim]{fetcher.requests} request(s) made; the rest came from cache/verify/.[/dim]")
-    console.print(f"Report: {escape(str(csv_path))}\nSummary: {escape(str(html_path))}")
-    errors = findings.counts()[Severity.ERROR]
+    console.print(f"Index: {escape(str(index_html))}")
+    errors = sum(1 for f in findings.recorded if f.severity is Severity.ERROR and "[triage:" not in f.message)
     findings.finish(exit_code=1 if errors else 0)
     if errors:
         raise click.exceptions.Exit(1)
+
+
+def _verify_index(manager: CatalogManager, state) -> list[dict[str, str]]:
+    """One row per published version: its `_verify_status` and, if verified, its latest result."""
+    catalog = manager.load()
+    latest = state.verify_latest()
+    rows = []
+    for status in manager.status_rows():
+        if not status.get("_verify_status"):
+            continue  # never published: nothing to verify
+        key = (status["slug"], status["version"])
+        product = catalog.products.get(status["slug"])
+        found = latest.get(key) or {}
+        codes = json.loads(found.get("codes") or "{}")
+        rows.append({
+            "bu": product.bu if product else "", "family": product.family if product else "",
+            "slug": key[0], "version": key[1], "verify_status": status["_verify_status"],
+            "verify_date": status.get("_verify_date", ""), "scope": found.get("scope", ""),
+            "pages": str(found.get("pages", "")), "errors": str(found.get("errors", "")),
+            "warnings": str(found.get("warnings", "")), "explained": str(found.get("explained", "")),
+            "findings": " ".join(f"{c}={n}" for c, n in sorted(codes.items())),
+            "commit": found.get("commit_id", ""), "report": found.get("report", ""),
+        })
+    return rows
 
 
 @main.command("fix-callouts")

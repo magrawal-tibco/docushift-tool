@@ -431,6 +431,24 @@ class ConfigManager:
         """The staging host `verify` compares against, without a trailing slash (Phase 55)."""
         return self.load_publishing()["verify_base_url"].rstrip("/")
 
+    def verify_base_urls(self) -> dict[str, str]:
+        """The staging host per business unit, `{bu: host}` (Phase 58).
+
+        From `publishing.yaml`'s `verify_base_urls` map. Phase 55's single
+        `verify_base_url` was the ibi site's and still counts as the `ibi` entry, so a
+        file written before the map keeps working. A BU with no host gets no staging
+        check -- never another BU's site.
+        """
+        loaded: dict[str, Any] = {}
+        if self.publishing_path.exists():
+            loaded = yaml.safe_load(read_text(self.publishing_path)) or {}
+        hosts = {str(bu): str(url).strip().rstrip("/")
+                 for bu, url in (loaded.get("verify_base_urls") or {}).items() if str(url or "").strip()}
+        single = self.verify_base_url()
+        if single:
+            hosts.setdefault("ibi", single)
+        return hosts
+
     def published_root_length(self) -> int:
         """How long the published repos' parent folder is (Phase 49); 0 if unset or bad.
 

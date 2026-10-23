@@ -1,0 +1,32 @@
+# What each kind of `docushift verify` finding is (planning.md Phase 58).
+#
+# Hand-kept. One entry per decision, not per finding: an entry matches by `code`,
+# and optionally narrows by `slug`, `version` and `path` (shell-style patterns,
+# `*` by default). The first matching entry wins.
+#
+#   decision: ours      -- this project fixes it (say how in `reason`)
+#             platform  -- the AEM owners fix it; `ticket` is required
+#             source    -- it is in the documents we received
+#             accepted  -- we live with it; `reason` says who decided and why
+#
+# A triaged finding is still listed in every report, with its decision. It stops
+# counting toward `lost` or `issues`, so a version whose every finding is
+# understood reads `explained` in versions.csv's `_verify_status`.
+#
+# Delete an entry when what it describes is fixed: the next run will say so, by
+# no longer raising the finding.
+
+triage:
+  - code: VERIFY_PUBLISHED_ALT_DROPPED
+    decision: platform
+    ticket: DOCOPS-255
+    reason: >-
+      AEM serves no alt text when it contains /, : or the command sign (found on
+      ibi AI Assistant 9.3.8, 2026-10-23). The Markdown is right; AEM drops it.
+
+  - code: VERIFY_PUBLISHED_CALLOUT_UNRENDERED
+    decision: ours
+    ticket: DOCOPS-250
+    reason: >-
+      Notes written as GitHub alerts, which AEM does not render (Phase 56).
+      Repaired by `docushift fix-callouts`; this clears once AEM republishes.

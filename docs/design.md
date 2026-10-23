@@ -813,6 +813,22 @@ under a different parent is `moved`, siblings out of order are one `order` per p
 (moved rows excluded), and a retitled row is a note. `toc.yml` and the served menu are
 matched **by title**, because the menu's links are AEM URLs; that match is also where
 each page's staging URL comes from.
+### 8.10 What a verify result counts as — **Built** (Phase 58)
+
+Each version's result is one of four verdicts, from its findings, **notes never
+counting**: `lost` if any error is unexplained, else `issues` if any warning is,
+else `explained` if any error or warning was triaged, else `clean`. A finding is
+**explained** when an entry in `config/verify-triage.yaml` matches it: the first
+entry, in file order, whose code matches and whose product, version and path
+patterns match. Triage changes the count, never the report: the finding is still
+recorded, its message ends with `[triage: <decision> <ticket>]`, and the page's CSV
+row names it.
+
+`_verify_status` is that verdict, with two more states. **`stale`**: the version was
+synced after it was checked, so the published tree is not the one that passed.
+**`not-verified`**: it has been synced and never checked. A version never synced has
+nothing to verify and stays blank. The verdict is stored per run in
+`verify_result`, so a version that got worse shows in its history.
 
 ## 9. Context-Sensitive Help
 
