@@ -119,6 +119,9 @@ VERSION_COLUMNS = (
     # Phase 58: the latest `verify` verdict, or `stale` after a later sync.
     "_verify_status",
     "_verify_date",
+    # Phase 59: the repairs this version still needs, `R001(1404)`, and the census date.
+    "_repairs_pending",
+    "_repairs_date",
     # Stage 4 inventory (architecture.md §3.9). Underscored like `_bu`/`_family`
     # because they are tool-owned and edits are ignored, but unlike those two they
     # are *not* regenerated on every write -- they persist between extract runs,
@@ -376,6 +379,7 @@ class CatalogManager:
                 row.get("_status", ""), row.get("_status_date", ""),
                 row.get("_sync_status", ""), row.get("_sync_date", ""),
                 row.get("_verify_status", ""), row.get("_verify_date", ""),
+                row.get("_repairs_pending", ""), row.get("_repairs_date", ""),
             )
             product.versions[version] = ProductVersion(
                 slug=slug,
@@ -478,6 +482,8 @@ class CatalogManager:
                     "_sync_date": status.sync_date,
                     "_verify_status": status.verify_status,
                     "_verify_date": status.verify_date,
+                    "_repairs_pending": status.repairs_pending,
+                    "_repairs_date": status.repairs_date,
                 }
         return cells
 

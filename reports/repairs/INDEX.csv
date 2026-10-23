@@ -1,0 +1,795 @@
+﻿bu,family,slug,version,R001
+ibi,container-editions,ibi-webfocus-container-edition,1.0.0,none
+ibi,container-editions,ibi-webfocus-container-edition,1.0.2,none
+ibi,container-editions,ibi-webfocus-container-edition,1.0.3,none
+ibi,container-editions,ibi-webfocus-container-edition,1.0.4,none
+ibi,container-editions,ibi-webfocus-container-edition,1.0.5,none
+ibi,container-editions,ibi-webfocus-container-edition,1.1.0,none
+ibi,container-editions,ibi-webfocus-container-edition,1.1.1,none
+ibi,container-editions,ibi-webfocus-container-edition,1.1.2,none
+ibi,container-editions,ibi-webfocus-container-edition,1.2.0,none
+ibi,container-editions,ibi-webfocus-container-edition,1.2.1,none
+ibi,container-editions,ibi-webfocus-container-edition,1.2.2,none
+ibi,container-editions,ibi-webfocus-container-edition,1.2.3,none
+ibi,container-editions,ibi-webfocus-container-edition,1.2.4,none
+ibi,container-editions,ibi-webfocus-container-edition,1.2.5,none
+ibi,container-editions,ibi-webfocus-container-edition,1.3.0,none
+ibi,container-editions,ibi-webfocus-container-edition,1.3.1,none
+ibi,container-editions,ibi-webfocus-container-edition,1.3.2,none
+ibi,container-editions,ibi-webfocus-container-edition,1.3.3,none
+ibi,container-editions,ibi-webfocus-container-edition,1.3.4,none
+ibi,container-editions,ibi-webfocus-container-edition,9.3.5,none
+ibi,container-editions,ibi-webfocus-container-edition,9.3.6,none
+ibi,container-editions,ibi-webfocus-container-edition,9.3.7,none
+ibi,container-editions,ibi-webfocus-dsml-services-container-edition,1.0.3,none
+ibi,container-editions,ibi-webfocus-dsml-services-container-edition,1.0.4,none
+ibi,container-editions,ibi-webfocus-dsml-services-container-edition,1.0.5,none
+ibi,container-editions,ibi-webfocus-dsml-services-container-edition,1.0.6,none
+ibi,container-editions,ibi-webfocus-dsml-services-container-edition,9.3.5,none
+ibi,container-editions,ibi-webfocus-dsml-services-container-edition,9.3.6,none
+ibi,container-editions,ibi-webfocus-dsml-services-container-edition,9.3.7,none
+ibi,container-editions,ibi-webfocus-dsml-services-container-edition,9.3.8,none
+ibi,di-ism,ibi-data-intelligence,1.0.0,none
+ibi,di-ism,ibi-data-intelligence,1.1.0,none
+ibi,di-ism,ibi-data-intelligence,1.2.0,none
+ibi,di-ism,ibi-data-intelligence,2.0.0,none
+ibi,di-ism,ibi-data-intelligence,2.1.0,none
+ibi,di-ism,ibi-data-quality,3.0.0,none
+ibi,di-ism,ibi-data-quality,3.1.0,none
+ibi,di-ism,ibi-data-quality,5.0.0,none
+ibi,di-ism,ibi-data-quality,5.1.0,none
+ibi,di-ism,ibi-data-quality,5.1.1,none
+ibi,di-ism,ibi-data-quality,5.2.0,none
+ibi,di-ism,ibi-data-quality,5.2.1,none
+ibi,di-ism,ibi-data-quality,5.2.2,none
+ibi,di-ism,ibi-iway-service-manager,8.0.5,none
+ibi,di-ism,ibi-iway-service-manager,8.0.6,none
+ibi,di-ism,ibi-iway-service-manager,8.0.7,none
+ibi,di-ism,ibi-iway-service-manager,8.1.0,none
+ibi,di-ism,ibi-iway-service-manager,9.0.0,none
+ibi,di-ism,ibi-iway-service-manager,9.1.0,none
+ibi,di-ism,ibi-iway-service-manager,9.2.0,none
+ibi,di-ism,ibi-iway-service-manager,9.3.0,none
+ibi,di-ism,ibi-iway-service-manager-edi-add-on,9.1.1,none
+ibi,di-ism,ibi-iway-service-manager-edi-add-on,9.3.0,none
+ibi,focus,ibi-focus,9.1.0,none
+ibi,focus,ibi-focus,9.1.1,none
+ibi,focus,ibi-focus,9.1.2,none
+ibi,focus,ibi-focus,9.1.3,none
+ibi,focus,ibi-focus,9.2.0,none
+ibi,focus,ibi-focus,9.2.1,none
+ibi,focus,ibi-focus,9.2.2,none
+ibi,focus,ibi-focus,9.2.3,none
+ibi,focus,ibi-focus,9.2.4,none
+ibi,focus,ibi-focus,9.2.5,none
+ibi,focus,ibi-focus,9.3.0,needed (2)
+ibi,focus,ibi-focus,9.3.1,needed (9)
+ibi,focus,ibi-focus,9.3.2,needed (1172)
+ibi,focus,ibi-focus,9.3.3,needed (1259)
+ibi,focus,ibi-focus,9.3.4,needed (1438)
+ibi,focus,ibi-focus,9.3.5,needed (1318)
+ibi,focus,ibi-focus,9.3.6,needed (1319)
+ibi,focus,ibi-focus,9.3.7,needed (1319)
+ibi,focus,ibi-focus,9.3.8,needed (1300)
+ibi,legacy,ibi-omni-gen,4.3.0,none
+ibi,legacy,ibi-omni-gen-mdm,4.3.0,none
+ibi,legacy,ibi-omni-healthdata,4.3.0,none
+ibi,legacy,ibi-omni-healthdata-business-release,2023.1.0,none
+ibi,legacy,ibi-omni-healthdata-business-release,2023.2.0,none
+ibi,legacy,ibi-omni-healthdata-business-release,2023.3.0,none
+ibi,legacy,ibi-omni-insurance,4.3.0,none
+ibi,legacy,ibi-web-query-for-ibm-i,8207.28.09,none
+ibi,legacy,ibi-web-query-for-ibm-i,8207.28.11,none
+ibi,legacy,ibi-web-query-for-ibm-i,8207.28.12,none
+ibi,legacy,ibi-web-query-for-ibm-i,8207.28.13,none
+ibi,legacy,ibi-web-query-for-ibm-i,8207.28.14,none
+ibi,legacy,ibi-web-query-for-ibm-i,9.0.1,none
+ibi,legacy,ibi-web-query-for-ibm-i,9.0.2,none
+ibi,legacy,ibi-web-query-for-ibm-i,9.0.3,none
+ibi,legacy,ibi-web-query-for-ibm-i,9.0.4,none
+ibi,legacy,ibi-web-query-for-ibm-i,9.1.0,none
+ibi,legacy,ibi-web-query-for-ibm-i,9.1.1,none
+ibi,legacy,ibi-web-query-for-ibm-i,9.1.2,none
+ibi,legacy,ibi-web-query-for-ibm-i,9.2.0,none
+ibi,legacy,ibi-web-query-for-ibm-i,9.2.1,none
+ibi,webfocus,ibi-ai-assistant,9.3.8,fixed
+ibi,webfocus,ibi-open-data-hub-for-mainframe-connectors,1.0.0,none
+ibi,webfocus,ibi-open-data-hub-for-mainframe-connectors,1.0.1,none
+ibi,webfocus,ibi-open-data-hub-for-mainframe-connectors,1.0.2,none
+ibi,webfocus,ibi-open-data-hub-for-mainframe-connectors,1.0.3,needed (2)
+ibi,webfocus,ibi-open-data-hub-for-mainframe-connectors,1.0.4,needed (6)
+ibi,webfocus,ibi-open-data-hub-for-mainframe-connectors,1.0.5,needed (21)
+ibi,webfocus,ibi-open-data-hub-for-mainframe-connectors,1.0.6,none
+ibi,webfocus,ibi-open-data-hub-for-mainframe-connectors,1.0.7,needed (75)
+ibi,webfocus,ibi-open-data-hub-for-mainframe-connectors,1.0.8,needed (75)
+ibi,webfocus,ibi-open-data-hub-for-mainframe-connectors,1.0.9,needed (75)
+ibi,webfocus,ibi-open-data-hub-for-mainframe-connectors,1.3.4,needed (75)
+ibi,webfocus,ibi-open-data-hub-for-mainframe-connectors,1.3.5,needed (85)
+ibi,webfocus,ibi-open-data-hub-for-mainframe-connectors,1.3.6,needed (82)
+ibi,webfocus,ibi-open-data-hub-for-mainframe-connectors,1.3.7,needed (82)
+ibi,webfocus,ibi-open-data-hub-for-mainframe-connectors,1.3.8,needed (21)
+ibi,webfocus,ibi-webfocus-app-studio,9.1.0,none
+ibi,webfocus,ibi-webfocus-app-studio,9.1.1,none
+ibi,webfocus,ibi-webfocus-app-studio,9.1.2,none
+ibi,webfocus,ibi-webfocus-app-studio,9.1.3,none
+ibi,webfocus,ibi-webfocus-app-studio,9.1.4,none
+ibi,webfocus,ibi-webfocus-app-studio,9.2.0,none
+ibi,webfocus,ibi-webfocus-app-studio,9.2.1,none
+ibi,webfocus,ibi-webfocus-app-studio,9.2.2,none
+ibi,webfocus,ibi-webfocus-app-studio,9.2.3,none
+ibi,webfocus,ibi-webfocus-app-studio,9.2.4,none
+ibi,webfocus,ibi-webfocus-app-studio,9.2.5,none
+ibi,webfocus,ibi-webfocus-app-studio,9.2.6,none
+ibi,webfocus,ibi-webfocus-app-studio,9.2.7,none
+ibi,webfocus,ibi-webfocus-app-studio,9.3.0,needed (11)
+ibi,webfocus,ibi-webfocus-app-studio,9.3.1,needed (11)
+ibi,webfocus,ibi-webfocus-app-studio,9.3.2,needed (11)
+ibi,webfocus,ibi-webfocus-app-studio,9.3.3,needed (468)
+ibi,webfocus,ibi-webfocus-app-studio,9.3.4,needed (474)
+ibi,webfocus,ibi-webfocus-app-studio,9.3.5,needed (475)
+ibi,webfocus,ibi-webfocus-app-studio,9.3.6,needed (474)
+ibi,webfocus,ibi-webfocus-app-studio,9.3.7,needed (469)
+ibi,webfocus,ibi-webfocus-app-studio,9.3.8,needed (476)
+ibi,webfocus,ibi-webfocus-client,9.1.0,none
+ibi,webfocus,ibi-webfocus-client,9.1.1,none
+ibi,webfocus,ibi-webfocus-client,9.1.2,none
+ibi,webfocus,ibi-webfocus-client,9.1.3,none
+ibi,webfocus,ibi-webfocus-client,9.1.4,none
+ibi,webfocus,ibi-webfocus-client,9.2.0,none
+ibi,webfocus,ibi-webfocus-client,9.2.1,none
+ibi,webfocus,ibi-webfocus-client,9.2.2,none
+ibi,webfocus,ibi-webfocus-client,9.2.3,none
+ibi,webfocus,ibi-webfocus-client,9.2.4,none
+ibi,webfocus,ibi-webfocus-client,9.2.5,none
+ibi,webfocus,ibi-webfocus-client,9.2.6,none
+ibi,webfocus,ibi-webfocus-client,9.2.7,none
+ibi,webfocus,ibi-webfocus-client,9.3.0,needed (154)
+ibi,webfocus,ibi-webfocus-client,9.3.1,needed (192)
+ibi,webfocus,ibi-webfocus-client,9.3.2,needed (2863)
+ibi,webfocus,ibi-webfocus-client,9.3.3,needed (2989)
+ibi,webfocus,ibi-webfocus-client,9.3.4,needed (3063)
+ibi,webfocus,ibi-webfocus-client,9.3.5,needed (3006)
+ibi,webfocus,ibi-webfocus-client,9.3.6,needed (2785)
+ibi,webfocus,ibi-webfocus-client,9.3.7,needed (2904)
+ibi,webfocus,ibi-webfocus-client,9.3.8,needed (2703)
+ibi,webfocus,ibi-webfocus-dsml-services,9.1.0,none
+ibi,webfocus,ibi-webfocus-dsml-services,9.2.0,none
+ibi,webfocus,ibi-webfocus-dsml-services,9.3.0,none
+ibi,webfocus,ibi-webfocus-dsml-services,9.3.2,needed (12)
+ibi,webfocus,ibi-webfocus-dsml-services,9.3.3,needed (17)
+ibi,webfocus,ibi-webfocus-dsml-services,9.3.4,needed (16)
+ibi,webfocus,ibi-webfocus-dsml-services,9.3.5,needed (25)
+ibi,webfocus,ibi-webfocus-dsml-services,9.3.6,needed (16)
+ibi,webfocus,ibi-webfocus-dsml-services,9.3.7,needed (14)
+ibi,webfocus,ibi-webfocus-dsml-services,9.3.8,needed (14)
+ibi,webfocus,ibi-webfocus-installer,9.1.0,none
+ibi,webfocus,ibi-webfocus-installer,9.1.1,none
+ibi,webfocus,ibi-webfocus-installer,9.1.2,none
+ibi,webfocus,ibi-webfocus-installer,9.1.3,none
+ibi,webfocus,ibi-webfocus-installer,9.1.4,none
+ibi,webfocus,ibi-webfocus-installer,9.2.0,none
+ibi,webfocus,ibi-webfocus-installer,9.2.1,none
+ibi,webfocus,ibi-webfocus-installer,9.2.2,none
+ibi,webfocus,ibi-webfocus-installer,9.2.3,none
+ibi,webfocus,ibi-webfocus-installer,9.2.4,none
+ibi,webfocus,ibi-webfocus-installer,9.2.5,none
+ibi,webfocus,ibi-webfocus-installer,9.2.6,none
+ibi,webfocus,ibi-webfocus-installer,9.3.0,none
+ibi,webfocus,ibi-webfocus-installer,9.3.1,needed (17)
+ibi,webfocus,ibi-webfocus-installer,9.3.2,needed (27)
+ibi,webfocus,ibi-webfocus-installer,9.3.3,needed (27)
+ibi,webfocus,ibi-webfocus-installer,9.3.4,needed (27)
+ibi,webfocus,ibi-webfocus-installer,9.3.5,needed (27)
+ibi,webfocus,ibi-webfocus-installer,9.3.6,needed (27)
+ibi,wf-reporting-server,ibi-webfocus-reporting-server,9.1.0,none
+ibi,wf-reporting-server,ibi-webfocus-reporting-server,9.1.1,none
+ibi,wf-reporting-server,ibi-webfocus-reporting-server,9.1.2,none
+ibi,wf-reporting-server,ibi-webfocus-reporting-server,9.1.3,none
+ibi,wf-reporting-server,ibi-webfocus-reporting-server,9.1.4,none
+ibi,wf-reporting-server,ibi-webfocus-reporting-server,9.2.0,none
+ibi,wf-reporting-server,ibi-webfocus-reporting-server,9.2.1,none
+ibi,wf-reporting-server,ibi-webfocus-reporting-server,9.2.2,none
+ibi,wf-reporting-server,ibi-webfocus-reporting-server,9.2.3,none
+ibi,wf-reporting-server,ibi-webfocus-reporting-server,9.2.4,none
+ibi,wf-reporting-server,ibi-webfocus-reporting-server,9.2.5,none
+ibi,wf-reporting-server,ibi-webfocus-reporting-server,9.2.6,none
+ibi,wf-reporting-server,ibi-webfocus-reporting-server,9.2.7,none
+ibi,wf-reporting-server,ibi-webfocus-reporting-server,9.3.0,needed (266)
+ibi,wf-reporting-server,ibi-webfocus-reporting-server,9.3.1,needed (293)
+ibi,wf-reporting-server,ibi-webfocus-reporting-server,9.3.2,needed (1651)
+ibi,wf-reporting-server,ibi-webfocus-reporting-server,9.3.3,needed (1659)
+ibi,wf-reporting-server,ibi-webfocus-reporting-server,9.3.4,needed (1674)
+ibi,wf-reporting-server,ibi-webfocus-reporting-server,9.3.5,needed (1674)
+ibi,wf-reporting-server,ibi-webfocus-reporting-server,9.3.6,needed (1652)
+ibi,wf-reporting-server,ibi-webfocus-reporting-server,9.3.7,needed (1680)
+ibi,wf-reporting-server,ibi-webfocus-reporting-server,9.3.8,needed (1943)
+spotfire,statistica,spotfire-data-science-author,1.5.0,fixed
+spotfire,statistica,spotfire-data-science-author,2.2.0,fixed
+spotfire,statistica,spotfire-data-science-for-life-science-author,1.5.0,fixed
+spotfire,statistica,spotfire-data-science-for-life-science-author,2.2.0,fixed
+spotfire,statistica,spotfire-data-science-for-life-science-operations,1.5.0,fixed
+spotfire,statistica,spotfire-data-science-for-life-science-operations,2.2.0,fixed
+spotfire,statistica,spotfire-data-science-operations,1.5.0,fixed
+spotfire,statistica,spotfire-data-science-operations,2.2.0,fixed
+spotfire,statistica,spotfire-data-science-workbench,14.1.0,fixed
+spotfire,statistica,spotfire-data-science-workbench,14.4.0,fixed
+spotfire,statistica,spotfire-statistica,14.1.0,fixed
+spotfire,statistica,spotfire-statistica,14.4.0,fixed
+spotfire,statistica,spotfire-statistica-all-servers,14.1.0,fixed
+spotfire,statistica,spotfire-statistica-all-servers,14.4.0,none
+spotfire,statistica,spotfire-statistica-integration,14.4.0,fixed
+spotfire,statistica,spotfire-statistica-integration,14.5.0,fixed
+spotfire,statistica,tibco-data-science-for-tibco-spotfire-analyst,14.1.0,fixed
+spotfire,statistica,tibco-data-science-service-for-tibco-spotfire,14.1.0,fixed
+spotfire,statistica,tibco-statistica-language-packs,14.1.0,none
+tibco,activespaces,tibco-activespaces-enterprise-edition,4.10.0,needed (94)
+tibco,activespaces,tibco-activespaces-enterprise-edition,4.10.1,needed (94)
+tibco,activespaces,tibco-activespaces-enterprise-edition,5.0.0,needed (96)
+tibco,activespaces,tibco-activespaces-enterprise-edition,5.1.0,needed (96)
+tibco,activespaces,tibco-activespaces-enterprise-edition,5.1.1,needed (96)
+tibco,activespaces,tibco-activespaces-enterprise-edition,5.2.0,needed (94)
+tibco,activespaces,tibco-silver-fabric-enabler-for-activespaces-enterprise-edition,1.2.0,needed (43)
+tibco,adapters,adapter-code-for-tibco-api-exchange-and-joomla,2.3.3,none
+tibco,adapters,adapter-code-for-tibco-api-exchange-and-joomla,2.3.4,needed (33)
+tibco,adapters,tibco-activematrix-adapter-for-database-tibco-business-studio,1.3.0,needed (100)
+tibco,adapters,tibco-activematrix-adapter-for-files-for-unix-win-tibco-business-studio,1.3.0,needed (55)
+tibco,adapters,tibco-activematrix-adapter-for-ibm-i,6.2.0,needed (19)
+tibco,adapters,tibco-activematrix-adapter-for-ibm-i,6.2.1,none
+tibco,adapters,tibco-activematrix-adapter-for-ibm-i,6.2.2,needed (18)
+tibco,adapters,tibco-activematrix-adapter-for-ibm-i,6.3.0,needed (18)
+tibco,adapters,tibco-activematrix-adapter-for-ibm-i,6.4.0,needed (18)
+tibco,adapters,tibco-activematrix-adapter-for-jd-edwards-enterpriseone,6.1.0,needed (20)
+tibco,adapters,tibco-activematrix-adapter-for-sap-tibco-business-studio,1.3.0,needed (63)
+tibco,adapters,tibco-activematrix-adapter-framework,1.3.0,needed (21)
+tibco,adapters,tibco-activematrix-adapter-framework,1.3.1,needed (34)
+tibco,adapters,tibco-activematrix-adapter-framework,1.3.2,needed (34)
+tibco,adapters,tibco-activematrix-adapter-framework,1.4.0,needed (47)
+tibco,adapters,tibco-activematrix-adapter-framework,1.4.1,needed (47)
+tibco,adapters,tibco-activematrix-adapter-framework,1.4.2,needed (47)
+tibco,adapters,tibco-activematrix-adapter-framework,1.6.0,needed (44)
+tibco,adapters,tibco-activematrix-adapter-framework,1.6.1,needed (47)
+tibco,adapters,tibco-adapter-for-files-ibm-i,5.0.1,needed (28)
+tibco,adapters,tibco-adapter-migration,1.7.0,needed (12)
+tibco,adapters,tibco-adapter-migration,1.8.0,needed (9)
+tibco,adapters,tibco-adapter-migration,1.8.1,needed (9)
+tibco,adapters,tibco-adapter-sdk,5.8.0,none
+tibco,bpm,tibco-activematrix-bpm,4.2.0,none
+tibco,bpm,tibco-activematrix-bpm,4.3.0,none
+tibco,bpm,tibco-activematrix-service-grid,3.4.3,none
+tibco,bpm,tibco-activematrix-service-grid,3.4.4,none
+tibco,bpm,tibco-bpm-enterprise,4.3.5,needed (1404)
+tibco,bpm,tibco-bpm-enterprise,5.6.0,needed (206)
+tibco,bpm,tibco-bpm-enterprise,5.6.1,needed (210)
+tibco,bpm,tibco-bpm-enterprise,5.7.0,needed (218)
+tibco,bpm,tibco-bpm-suite,4.2.0,none
+tibco,bpm,tibco-bpm-suite,4.3.0,none
+tibco,bpm,tibco-bpm-suite,4.3.1,none
+tibco,bpm,tibco-bpm-suite,4.3.2,none
+tibco,bpm,tibco-business-studio-analyst-edition,4.2.0,none
+tibco,bpm,tibco-business-studio-analyst-edition,4.3.0,none
+tibco,bpm,tibco-business-studio-bpm-edition,4.3.5,needed (626)
+tibco,bpm,tibco-business-studio-bpm-edition,5.6.0,needed (526)
+tibco,bpm,tibco-business-studio-bpm-edition,5.6.1,needed (526)
+tibco,bpm,tibco-business-studio-bpm-edition,5.7.0,needed (526)
+tibco,bpm,tibco-business-studio-community-edition,4.2.0,none
+tibco,businessconnect,tibco-businessconnect,7.4.0,needed (5)
+tibco,businessconnect,tibco-businessconnect,7.5.0,needed (47)
+tibco,businessconnect,tibco-businessconnect-configstore-management-interface-protocol,6.1.0,needed (12)
+tibco,businessconnect,tibco-businessconnect-container-edition,1.6.1,needed (101)
+tibco,businessconnect,tibco-businessconnect-container-edition,1.7.0,needed (107)
+tibco,businessconnect,tibco-businessconnect-container-edition,1.7.1,needed (106)
+tibco,businessconnect,tibco-businessconnect-container-edition-configstore-management-interface-protocol,1.1.0,needed (7)
+tibco,businessconnect,tibco-businessconnect-container-edition-configstore-management-interface-protocol,1.2.0,needed (7)
+tibco,businessconnect,tibco-businessconnect-container-edition-configstore-management-interface-protocol,1.2.1,needed (7)
+tibco,businessconnect,tibco-businessconnect-container-edition-ebxml-protocol,1.2.1,needed (73)
+tibco,businessconnect,tibco-businessconnect-container-edition-ebxml-protocol,1.3.0,needed (73)
+tibco,businessconnect,tibco-businessconnect-container-edition-edi-protocol-hipaa-edition-powered-by-instream,1.2.0,needed (11)
+tibco,businessconnect,tibco-businessconnect-container-edition-edi-protocol-hipaa-edition-powered-by-instream,1.3.0,needed (11)
+tibco,businessconnect,tibco-businessconnect-container-edition-edi-protocol-powered-by-instream,1.5.0,needed (68)
+tibco,businessconnect,tibco-businessconnect-container-edition-edi-protocol-powered-by-instream,1.6.0,needed (68)
+tibco,businessconnect,tibco-businessconnect-container-edition-edi-protocol-powered-by-instream,1.6.1,needed (72)
+tibco,businessconnect,tibco-businessconnect-container-edition-rosettanet-protocol,1.6.0,needed (18)
+tibco,businessconnect,tibco-businessconnect-container-edition-rosettanet-protocol,1.7.0,needed (18)
+tibco,businessconnect,tibco-businessconnect-container-edition-services-plug-in,1.6.0,needed (40)
+tibco,businessconnect,tibco-businessconnect-container-edition-services-plug-in,1.7.0,needed (40)
+tibco,businessconnect,tibco-businessconnect-container-edition-soap-protocol,1.2.1,needed (35)
+tibco,businessconnect,tibco-businessconnect-container-edition-soap-protocol,1.3.0,needed (33)
+tibco,businessconnect,tibco-businessconnect-cxml-protocol,6.1.0,needed (57)
+tibco,businessconnect,tibco-businessconnect-ebxml-protocol,6.3.0,needed (64)
+tibco,businessconnect,tibco-businessconnect-ebxml-protocol,6.4.0,none
+tibco,businessconnect,tibco-businessconnect-edi-protocol-hipaa-edition-powered-by-instream,6.7.0,needed (16)
+tibco,businessconnect,tibco-businessconnect-edi-protocol-powered-by-instream,6.10.0,needed (124)
+tibco,businessconnect,tibco-businessconnect-edi-protocol-powered-by-instream,6.11.0,none
+tibco,businessconnect,tibco-businessconnect-palette,6.5.0,needed (7)
+tibco,businessconnect,tibco-businessconnect-palette,6.6.0,needed (8)
+tibco,businessconnect,tibco-businessconnect-partner-management-portal,1.0.0,needed (20)
+tibco,businessconnect,tibco-businessconnect-partner-management-portal,1.1.0,needed (20)
+tibco,businessconnect,tibco-businessconnect-partner-management-portal,1.1.1,needed (20)
+tibco,businessconnect,tibco-businessconnect-plug-in-for-ftp-server,1.0.1,needed (3)
+tibco,businessconnect,tibco-businessconnect-plug-in-for-ssh-server,1.1.0,needed (5)
+tibco,businessconnect,tibco-businessconnect-rosettanet-protocol,5.3.0,needed (28)
+tibco,businessconnect,tibco-businessconnect-services-plug-in,6.3.0,needed (44)
+tibco,businessconnect,tibco-businessconnect-services-plug-in,6.4.0,needed (42)
+tibco,businessconnect,tibco-businessconnect-soap-protocol,7.1.0,needed (36)
+tibco,businessconnect,tibco-businessconnect-soap-protocol,7.2.0,needed (3)
+tibco,businessconnect,tibco-businessconnect-trading-community-management,6.1.0,needed (19)
+tibco,businessconnect,tibco-businessconnect-trading-community-management,6.1.1,needed (36)
+tibco,businessconnect,tibco-businessconnect-trading-community-management,6.2.0,needed (18)
+tibco,businessconnect,tibco-trading-partner-management-rest-api,1.1.0,needed (15)
+tibco,businessevents,tibco-businessevents-enterprise-edition,6.3.2,none
+tibco,businessevents,tibco-businessevents-enterprise-edition,6.4.0,none
+tibco,businessworks,premium-subscription-for-tibco-businessworks-container-edition-and-plug-ins-for-aws-marketplace,2.3.1,none
+tibco,businessworks,tibco-activematrix-businessworks,5.16.1,needed (236)
+tibco,businessworks,tibco-activematrix-businessworks,6.12.0,needed (1366)
+tibco,businessworks,tibco-activematrix-businessworks,6.13.0,needed (1271)
+tibco,businessworks,tibco-businessworks-enterprise,3.10.0,none
+tibco,businessworks,tibco-businessworks-enterprise,3.11.0,none
+tibco,businessworks,tibco-businessworks-enterprise,3.12.0,none
+tibco,businessworks,tibco-businessworks-formbuilder,5.3.2,needed (59)
+tibco,businessworks,tibco-integration,3.16.0,none
+tibco,bw-plugin,tibco-activematrix-businessworks-activeaspects-plug-in,1.0,needed (29)
+tibco,bw-plugin,tibco-activematrix-businessworks-activeaspects-plug-in,1.1,needed (35)
+tibco,bw-plugin,tibco-activematrix-businessworks-activeaspects-plug-in,1.2,needed (54)
+tibco,bw-plugin,tibco-activematrix-businessworks-bpel-extension,5.7.0,needed (20)
+tibco,bw-plugin,tibco-activematrix-businessworks-bpel-extension,5.7.1,needed (21)
+tibco,bw-plugin,tibco-activematrix-businessworks-bpel-extension,5.8.0,needed (21)
+tibco,bw-plugin,tibco-activematrix-businessworks-bpel-extension,5.9,needed (22)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-component-for-aws-common-services,6.0.0,needed (15)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-component-for-aws-common-services,6.0.1,needed (14)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-component-for-aws-common-services,6.0.2,needed (15)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-component-for-aws-common-services,6.1.0,needed (16)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-component-for-aws-common-services,6.1.1,needed (24)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-development-kit,6.2.1,needed (29)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-development-kit,6.3.0,needed (30)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-development-kit,6.3.1,needed (57)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-activespaces,2.2.0,needed (16)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-activespaces,7.1.1,needed (51)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-activespaces,7.2.0,needed (21)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-activespaces,7.2.1,needed (21)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-activespaces,7.2.2,needed (24)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-activespaces,7.3.0,needed (33)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-activespaces,7.3.1,needed (36)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-activespaces,7.3.2,needed (37)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-activespaces,8.0.2,needed (33)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-activespaces,8.0.3,needed (38)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-activespaces,8.1.0,needed (39)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-activespaces,8.1.1,needed (40)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-amazon-redshift,6.1.0,needed (27)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-amazon-s3,6.5.1,needed (24)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-amazon-s3,6.6.0,needed (31)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-amazon-s3,6.7.0,needed (31)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-amazon-sqs-and-sns,6.5.2,needed (24)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-amazon-sqs-and-sns,6.6.0,needed (30)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-amazon-sqs-and-sns,6.6.1,needed (30)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-amqp,5.0.0,needed (23)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-amqp,6.3.0,needed (24)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-amqp,6.3.1,needed (25)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-amqp,6.4.0,needed (24)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-amqp,6.5.0,needed (24)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-amqp,6.5.1,needed (26)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-amqp,6.5.2,needed (26)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-amqp,6.5.3,needed (27)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-apache-cassandra,6.3.2,needed (25)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-apache-cassandra,6.3.3,needed (25)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-apache-kafka,5.0.0,needed (34)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-apache-kafka,5.0.1,needed (32)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-apache-kafka,6.5.2,needed (18)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-apache-kafka,6.6.0,needed (24)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-apache-kafka,6.7.0,needed (24)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-apache-kafka,6.8.0,needed (25)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-apache-kafka,6.8.1,needed (27)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-apache-kafka,6.8.2,needed (40)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-apache-pulsar,5.0.0,needed (16)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-apache-pulsar,6.0.0,needed (23)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-apache-pulsar,6.1.0,needed (23)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-apache-pulsar,6.2.0,needed (24)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-apache-pulsar,6.2.1,needed (24)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-applicability-statement-2-as2-protocol,6.0.0,needed (32)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-big-data,6.6.1,needed (33)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-businessconnect,6.3.0,needed (20)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-businessconnect,6.3.1,needed (31)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-businessconnect,6.3.2,needed (31)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-businessconnect,6.3.3,needed (31)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-businessconnect,6.4.0,needed (32)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-change-data-capture,6.1.0,needed (50)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-change-data-capture,6.2.0,needed (40)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-cics,1.2.2,needed (10)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-cics,1.5.0,needed (16)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-cics,2.5.0,needed (27)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-confidentiality,6.1.1,needed (20)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-data-conversion,3.6.0,needed (84)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-data-conversion,4.6.0,needed (61)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-data-conversion,4.7.0,needed (61)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-data-conversion,4.8.0,needed (64)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-data-conversion,4.8.1,needed (65)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-data-conversion,5.0.0,needed (64)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-database,7.2.1,needed (116)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-database,7.3.1,needed (116)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-database,7.3.2,needed (114)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-database,8.5.0,needed (49)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-database,8.6.0,needed (64)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-edi,6.3.0,needed (18)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-edi-healthcare-edition,6.3.1,none
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-edi-standard-edition,6.3.1,none
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-ejb,5.4.0,needed (4)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-ejb,6.1.1,needed (25)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-files-for-unix-and-windows,8.3.0,needed (38)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-google-bigquery,6.1.0,needed (37)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-google-cloud-pub-sub,6.0.1,needed (15)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-google-cloud-pub-sub,6.0.2,needed (20)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-google-cloud-storage,6.0.0,needed (36)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-hl7-with-fhir,6.0.0,needed (16)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-hl7-with-fhir,7.0.0,needed (14)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-hl7-with-fhir,7.3.0,needed (16)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-hl7-with-fhir,8.2.0,needed (36)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-hl7-with-fhir,8.2.1,needed (36)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-hl7-with-fhir,8.3.0,needed (36)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-hl7-with-fhir,8.4.0,needed (39)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-hl7-with-fhir,8.5.0,needed (62)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-hl7-with-fhir,8.6.0,needed (70)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-ibm-i,7.3.0,needed (29)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-ibm-mq,7.7.3,needed (40)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-ibm-mq,7.8.0,needed (19)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-ibm-mq,8.7.0,needed (36)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-ibm-mq,8.8.0,needed (33)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-ibm-mq,8.8.1,needed (37)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-ibm-mq,8.8.2,needed (42)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-jd-edwards-enterpriseone,7.1.0,needed (25)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-large-xml,1.1.0,needed (4)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-large-xml,6.1.4,needed (26)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-ldap,6.1.2,needed (29)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-ldap,7.3.0,needed (29)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-mdm,6.3.1,needed (36)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-mdm,7.0.0,needed (60)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-mdm,7.0.1,needed (60)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-mdm,7.0.2,needed (58)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-microsoft-dynamics-crm,6.10.0,needed (51)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-microsoft-dynamics-crm,6.10.1,needed (50)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-microsoft-dynamics-crm,6.9.3,needed (64)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-microsoft-dynamics-crm,6.9.4,needed (65)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-microsoft-excel,6.1.1,needed (18)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-microsoft-sharepoint,6.3.0,needed (78)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-microsoft-sharepoint,6.3.1,needed (86)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-microsoft-sharepoint,6.4.0,needed (56)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-mobile-integration,1.2.2,needed (6)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-mobile-integration,1.3.0,needed (6)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-mobile-integration,1.4.0,needed (6)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-mobile-integration,6.3.0,needed (11)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-mobile-integration,6.4.0,needed (25)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-mongodb,1.2.0,needed (11)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-mongodb,6.1.0,needed (12)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-mongodb,6.4.2,needed (20)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-mongodb,6.5.0,needed (26)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-mqtt,6.0.0,needed (26)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-netsuite,1.0.0,needed (6)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-netsuite,1.1.0,needed (15)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-netsuite,1.2.0,needed (14)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-netsuite,1.3.0,needed (14)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-netsuite,6.3.6,needed (46)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-netsuite,6.4.0,needed (44)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-odata,6.3.0,needed (41)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-odata,6.5.0,needed (48)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-odata,6.6.0,needed (48)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-odata,6.7.0,needed (48)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-odata,6.8.0,needed (48)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-odata-services-for-sap-s-4hana,6.3.0,needed (55)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-odata-services-for-sap-s-4hana,6.4.0,needed (55)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-oracle-e-business-suite,1.3.0,none
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-oracle-e-business-suite,6.1.2,needed (77)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-oracle-fusion-cloud-applications-suite,6.0.0,needed (30)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-oracle-tuxedo,6.1.1,needed (40)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-oracle-tuxedo,6.1.2,needed (12)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-oracle-tuxedo,8.2.0,needed (57)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-oracle-tuxedo,8.3.0,needed (63)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-osb,5.0.0,none
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-osb,6.0.0,needed (8)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-osisoft-pi-system,1.1.0,none
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-osisoft-pi-system,6.5.0,needed (47)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-pdf,6.2.2,needed (18)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-pdf,6.2.3,needed (24)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-peoplesoft,6.1.0,needed (46)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-peoplesoft,7.2.0,needed (29)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-peoplesoft,7.3.0,needed (39)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-peoplesoft,7.4.0,needed (43)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-redis,6.0.0,needed (26)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-redis,6.1.0,needed (27)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-rest-and-json,2.1.0,needed (33)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-salesforce-com,2.5.0,needed (22)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-salesforce-com,2.6.0,needed (22)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-salesforce-com,6.10.0,needed (48)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-salesforce-com,6.11.0,needed (50)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-salesforce-com,6.9.3,needed (39)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-sap-ariba,6.0.0,needed (22)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-sap-business-technology-platform,6.0.0,needed (53)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-sap-hana-database,6.1.0,needed (36)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-sap-solutions,7.3.1,needed (110)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-sap-solutions,7.3.2,needed (113)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-sap-solutions,8.6.0,needed (96)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-sap-solutions,8.7.0,needed (101)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-sap-solutions,8.8.0,needed (104)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-sap-successfactors,6.1.0,needed (36)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-servicenow,6.1.0,needed (12)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-sftp,1.1.0,needed (3)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-sftp,1.1.1,needed (28)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-sftp,6.1.4,needed (20)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-sftp,6.2.0,needed (28)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-siebel,6.1.0,needed (82)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-siebel,7.3.0,needed (59)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-smartmapper,6.0.0,needed (50)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-smartmapper,7.1.2,needed (80)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-smartmapper,7.1.3,needed (91)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-smpp,6.0.3,needed (23)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-snowflake,6.2.0,needed (46)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-snowflake,6.3.0,needed (48)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-snowflake,6.3.1,needed (48)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-swift,5.11.0,needed (59)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-swift,5.22.0,needed (36)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-swift,5.23.0,needed (35)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-swift,5.24.0,needed (35)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-swift,5.25.0,needed (33)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-swift,6.10.0,needed (47)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-swift,6.11.0,needed (47)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-swift,6.8.0,needed (40)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-swift,6.9.0,needed (43)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-tibco-auditsafe,6.1.0,needed (17)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-tibco-auditsafe,6.2.0,needed (18)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-tibco-auditsafe,6.3.0,needed (18)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-tibco-auditsafe,6.3.1,needed (20)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-tibco-auditsafe,6.3.2,needed (35)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-tibco-auditsafe,6.4.0,needed (33)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-tibco-auditsafe,6.4.1,needed (33)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-tibco-auditsafe,6.4.2,needed (33)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-tibco-clarity,6.1.1,needed (16)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-tibco-eftl,6.0.0,needed (12)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-tibco-ftl,5.0.0,needed (23)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-tibco-ftl,6.4.4,needed (13)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-tibco-ftl,6.5.0,needed (15)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-tibco-ftl,6.6.0,needed (14)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-tibco-ftl,6.7.0,needed (20)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-tibco-ftl,6.7.1,needed (21)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-tibco-ftl,6.7.2,needed (21)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-tibco-ftl,6.7.3,needed (22)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-tibco-ftl,6.7.4,needed (28)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-tibco-managed-file-transfer,1.0.0,needed (13)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-tibco-managed-file-transfer,6.0.0,none
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-tibco-managed-file-transfer,6.0.1,none
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-tibco-managed-file-transfer,6.3.0,needed (25)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-tibco-managed-file-transfer,6.3.1,needed (33)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-tibco-patterns,1.0.0,needed (8)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-tibco-patterns,1.1.0,needed (9)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-tibco-patterns,1.2.0,needed (9)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-tibco-patterns,1.5.0,needed (3)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-tibco-patterns,2.0.0,needed (3)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-tibco-patterns,2.1.0,needed (10)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-tibco-patterns,2.1.2,needed (10)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-tibco-patterns,5.4.0,none
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-tibco-patterns,5.6.1,none
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-tibco-patterns,5.7.0,none
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-tibco-patterns,6.0.0,none
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-tibco-patterns,6.1.0,needed (9)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-tibco-patterns,6.1.2,needed (9)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-tibco-patterns,6.2.0,needed (12)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-transaction-insight,6.0.0,needed (7)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-transaction-insight,6.0.1,needed (19)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-trillium,6.0.0,needed (15)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-workday,1.0.0,needed (14)
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-workday,6.0.1,needed (19)
+tibco,bw-plugin,tibco-activematrix-businessworks-service-engine-plug-in-for-smartmapper,5.5,none
+tibco,bw-plugin,tibco-businessworks-integrationmanager-plug-in,1.0,none
+tibco,bw-plugin,tibco-businessworks-plug-in-for-ai,6.0.0,needed (23)
+tibco,bw-plugin,tibco-businessworks-plug-in-for-ai,6.0.1,needed (24)
+tibco,bw-plugin,tibco-businessworks-plug-in-for-tibco-auditsafe-for-tibco-platform,6.0.0,needed (29)
+tibco,cloud,tibco-cloud-api-modeler,1.5.0,needed (24)
+tibco,cloud,tibco-cloud-integration-businessworks-payg,2.8.0,needed (20)
+tibco,cloud,tibco-cloud-integration-flogo-payg,2.11.0,needed (132)
+tibco,cloud,tibco-cloud-integration-hybrid,3.12.0,none
+tibco,cloud,tibco-cloud-integration-hybrid-connectivity-add-on,3.10.0,none
+tibco,data_management,ibi-mdm-add-on-for-global-data-synchronization,4.0.0,needed (19)
+tibco,data_management,tibco-enterprise-mdm,1.0.0,none
+tibco,data_management,tibco-mdm,11.0.0,needed (778)
+tibco,data_management,tibco-mdm,11.1.0,needed (784)
+tibco,data_management,tibco-mdm,9.3.2,needed (1016)
+tibco,data_management,tibco-mdm-studio,5.2.0,needed (134)
+tibco,data_management,tibco-mdm-studio,6.0.0,needed (137)
+tibco,data_management,tibco-mdm-studio,6.1.0,needed (143)
+tibco,data_management,tibco-mdm-studio,6.1.1,needed (143)
+tibco,ems,tibco-ems-client-for-ibm-i,8.6.0,needed (9)
+tibco,ems,tibco-enterprise-message-service,10.4.0,needed (483)
+tibco,ems,tibco-enterprise-message-service,10.4.1,needed (488)
+tibco,ems,tibco-enterprise-message-service,10.4.3,needed (486)
+tibco,ems,tibco-enterprise-message-service,10.4.4,needed (486)
+tibco,ems,tibco-enterprise-message-service,10.5.0,needed (494)
+tibco,ems,tibco-enterprise-message-service,10.5.1,needed (495)
+tibco,flogo,tibco-flogo,2.26.6,needed (406)
+tibco,flogo,tibco-flogo,2.26.7,needed (421)
+tibco,flogo,tibco-flogo,2.26.8,needed (434)
+tibco,flogo,tibco-flogo,3.0.0,needed (391)
+tibco,flogo,tibco-flogo,3.0.1,needed (409)
+tibco,flogo,tibco-flogo-extension-for-visual-studio-code,1.3.5,needed (278)
+tibco,foresight,tibco-enterprise-foresight,1.0.0,none
+tibco,foresight,tibco-enterprise-foresight,1.1.0,none
+tibco,foresight,tibco-enterprise-foresight-healthcare-add-on,1.0.0,none
+tibco,foresight,tibco-enterprise-foresight-healthcare-add-on,1.1.0,none
+tibco,foresight,tibco-foresight-archive-and-retrieval-system,5.4.0,needed (11)
+tibco,foresight,tibco-foresight-archive-and-retrieval-system,5.5.0,needed (15)
+tibco,foresight,tibco-foresight-archive-and-retrieval-system,6.0.0,needed (17)
+tibco,foresight,tibco-foresight-connect-with-fhir,1.0.0,needed (6)
+tibco,foresight,tibco-foresight-connect-with-fhir,1.0.1,needed (6)
+tibco,foresight,tibco-foresight-edisim,6.19.0,none
+tibco,foresight,tibco-foresight-edisim,6.20.0,none
+tibco,foresight,tibco-foresight-edisim,6.21.0,needed (43)
+tibco,foresight,tibco-foresight-hipaa-validator-desktop,9.0.0,none
+tibco,foresight,tibco-foresight-hipaa-validator-desktop,9.1.0,none
+tibco,foresight,tibco-foresight-hipaa-validator-desktop,9.2.0,needed (46)
+tibco,foresight,tibco-foresight-instream,9.0.0,none
+tibco,foresight,tibco-foresight-instream,9.1.0,none
+tibco,foresight,tibco-foresight-instream,9.2.0,needed (163)
+tibco,foresight,tibco-foresight-instream,9.3.0,needed (167)
+tibco,foresight,tibco-foresight-instream,9.4.0,needed (130)
+tibco,foresight,tibco-foresight-operational-monitor,5.4.0,none
+tibco,foresight,tibco-foresight-operational-monitor,5.5.0,none
+tibco,foresight,tibco-foresight-operational-monitor,6.0.0,none
+tibco,foresight,tibco-foresight-rest-api,1.0.3,needed (5)
+tibco,foresight,tibco-foresight-rest-api,1.1.0,needed (29)
+tibco,foresight,tibco-foresight-rest-api,1.2.0,needed (39)
+tibco,foresight,tibco-foresight-studio,9.0.0,none
+tibco,foresight,tibco-foresight-studio,9.0.1,none
+tibco,foresight,tibco-foresight-studio,9.1.0,none
+tibco,foresight,tibco-foresight-studio,9.2.0,needed (32)
+tibco,foresight,tibco-foresight-studio,9.3.0,needed (37)
+tibco,foresight,tibco-foresight-transaction-insight,5.4.0,needed (159)
+tibco,foresight,tibco-foresight-transaction-insight,5.5.0,needed (207)
+tibco,foresight,tibco-foresight-transaction-insight,6.0.0,needed (219)
+tibco,foresight,tibco-foresight-translator,4.0.0,none
+tibco,foresight,tibco-foresight-translator,4.1.0,none
+tibco,foresight,tibco-foresight-translator,4.2.0,needed (15)
+tibco,foresight,tibco-foresight-translator-attachment-adapter,2.0.0,needed (4)
+tibco,foresight,tibco-foresight-translator-attachment-adapter,3.0.0,needed (7)
+tibco,ftl,tibco-eftl-enterprise-edition,7.1.0,needed (20)
+tibco,ftl,tibco-eftl-enterprise-edition,7.1.1,needed (20)
+tibco,ftl,tibco-eftl-enterprise-edition,7.1.2,needed (20)
+tibco,ftl,tibco-eftl-enterprise-edition,7.1.3,needed (19)
+tibco,ftl,tibco-eftl-enterprise-edition,7.2.0,needed (19)
+tibco,ftl,tibco-eftl-enterprise-edition,7.3.0,needed (19)
+tibco,ftl,tibco-ftl-enterprise-edition,7.1.0,needed (173)
+tibco,ftl,tibco-ftl-enterprise-edition,7.1.1,needed (176)
+tibco,ftl,tibco-ftl-enterprise-edition,7.1.2,needed (175)
+tibco,ftl,tibco-ftl-enterprise-edition,7.1.3,needed (157)
+tibco,ftl,tibco-ftl-enterprise-edition,7.2.0,needed (157)
+tibco,ftl,tibco-ftl-enterprise-edition,7.3.0,needed (187)
+tibco,fulfillment,tibco-enterprise-fulfillment-orchestration-suite,1.1.0,none
+tibco,fulfillment,tibco-fulfillment-provisioning,3.10.0,needed (115)
+tibco,fulfillment,tibco-fulfillment-provisioning,3.9.0,needed (117)
+tibco,fulfillment,tibco-offer-and-price-engine,6.0.0,needed (70)
+tibco,fulfillment,tibco-order-management,5.0.1,needed (185)
+tibco,fulfillment,tibco-order-management,6.0.0,needed (302)
+tibco,fulfillment,tibco-order-management,6.0.1,needed (334)
+tibco,fulfillment,tibco-order-management,6.1.0,needed (351)
+tibco,fulfillment,tibco-product-and-service-catalog,5.1.0,needed (402)
+tibco,fulfillment,tibco-product-and-service-catalog-powered-by-tibco-ebx,1.0.0,needed (16)
+tibco,fulfillment,tibco-product-and-service-catalog-powered-by-tibco-ebx,1.1.0,needed (16)
+tibco,fulfillment,tibco-product-and-service-inventory,2.1.0,needed (39)
+tibco,fulfillment,tibco-product-and-service-inventory-2-1-0,2.1.0,needed (39)
+tibco,general,tibco-activation-service,1.0.0,needed (21)
+tibco,general,tibco-activation-service,1.1.0,needed (23)
+tibco,general,tibco-api-exchange-gateway,2.5.1,needed (226)
+tibco,general,tibco-enterprise-administrator,2.4.2,needed (143)
+tibco,general,tibco-enterprise-administrator,2.4.3,needed (143)
+tibco,general,tibco-patterns,6.1.2,needed (122)
+tibco,general,tibco-patterns,6.2.0,needed (118)
+tibco,general,tibco-reward,22.2.0,needed (292)
+tibco,general,tibco-reward,22.3.0,needed (292)
+tibco,general,tibco-rtview,7.5.0,none
+tibco,general,tibco-rtview,7.6.0,none
+tibco,hawk,tibco-hawk-database-adapter,6.2.0,needed (28)
+tibco,hawk,tibco-hawk-database-adapter,6.2.1,needed (32)
+tibco,hawk,tibco-hawk-microagent-for-tibco-activematrix-businessworks-6,6.7.2,needed (6)
+tibco,hawk,tibco-hawk-microagent-for-tibco-activematrix-businessworks-6,6.8.0,needed (6)
+tibco,hawk,tibco-hawk-microagent-for-tibco-businessworks-container-edition,2.2.0,needed (5)
+tibco,hawk,tibco-operational-intelligence-hawk-redtail,6.3.1,needed (10)
+tibco,hawk,tibco-operational-intelligence-hawk-redtail,7.5.0,needed (162)
+tibco,iprocess,tibco-iprocess-engine,11.10.0,needed (374)
+tibco,iprocess,tibco-iprocess-engine,11.9.1,needed (337)
+tibco,iprocess,tibco-iprocess-engine,11.9.2,needed (388)
+tibco,iprocess,tibco-iprocess-server-objects-java,11.10.0,none
+tibco,iprocess,tibco-iprocess-server-objects-java,11.9.0,none
+tibco,iprocess,tibco-iprocess-server-objects-net,11.10.0,none
+tibco,iprocess,tibco-iprocess-server-objects-net,11.9.0,none
+tibco,iprocess,tibco-iprocess-technology-plug-ins,11.10.0,needed (121)
+tibco,iprocess,tibco-iprocess-technology-plug-ins,11.9.2,needed (122)
+tibco,iprocess,tibco-iprocess-web-services-client-plug-in,11.9.0,needed (59)
+tibco,iprocess,tibco-iprocess-web-services-server-plug-in,11.9.0,needed (94)
+tibco,iprocess,tibco-iprocess-workspace-browser,11.10.0,needed (199)
+tibco,iprocess,tibco-iprocess-workspace-browser,11.9.0,needed (168)
+tibco,iprocess,tibco-iprocess-workspace-plug-ins,11.10.0,needed (16)
+tibco,iprocess,tibco-iprocess-workspace-plug-ins,11.9.0,needed (16)
+tibco,iprocess,tibco-iprocess-workspace-windows,11.10.0,needed (578)
+tibco,iprocess,tibco-iprocess-workspace-windows,11.9.2,needed (536)
+tibco,mainframe,tibco-mainframe-red,2.5.1,needed (57)
+tibco,mainframe,tibco-mainframe-red,3.1.0,needed (70)
+tibco,mainframe,tibco-mainframe-tcp-library,2.5.0,needed (13)
+tibco,mainframe,tibco-mainframe-tcp-library,3.0.0,needed (13)
+tibco,mainframe,tibco-mainframe-webui,2.5.0,needed (48)
+tibco,mainframe,tibco-mainframe-webui,3.0.0,needed (48)
+tibco,mainframe,tibco-red-enabled-for-ziip,2.5.0,needed (1)
+tibco,mainframe,tibco-red-enabled-for-ziip,3.1.0,needed (1)
+tibco,mainframe,tibco-substation-es,2.14.0,needed (149)
+tibco,mainframe,tibco-transaction-interface-for-cics,2.14.0,needed (149)
+tibco,mainframe,tibco-transaction-interface-for-ims,2.14.0,needed (149)
+tibco,messaging,tibco-gems,1.1.0,none
+tibco,messaging,tibco-graphical-rendezvous,1.1.0,none
+tibco,messaging,tibco-messaging,1.31.0,none
+tibco,messaging,tibco-messaging-enterprise-edition,3.4.0,none
+tibco,messaging,tibco-messaging-schema-repository-for-apache-kafka-enterprise-edition,2.0.0,needed (25)
+tibco,messaging,tibco-messaging-schema-repository-for-apache-kafka-enterprise-edition,2.1.0,needed (16)
+tibco,messaging,tibco-rendezvous,8.8.0,needed (3)
+tibco,messaging,tibco-rendezvous,8.8.1,needed (6)
+tibco,messaging,tibco-rendezvous,9.0.0,needed (7)
+tibco,messaging,tibco-rendezvous-network-service,2.1.0,needed (12)
+tibco,messaging,tibco-rendezvous-network-service,2.2.0,needed (13)
+tibco,mft,tibco-managed-file-transfer-command-center,8.6.0,needed (487)
+tibco,mft,tibco-managed-file-transfer-command-center,8.7.0,needed (496)
+tibco,mft,tibco-managed-file-transfer-command-center,8.7.1,needed (495)
+tibco,mft,tibco-managed-file-transfer-internet-server,8.6.0,needed (486)
+tibco,mft,tibco-managed-file-transfer-internet-server,8.7.0,needed (495)
+tibco,mft,tibco-managed-file-transfer-internet-server,8.7.1,needed (494)
+tibco,mft,tibco-managed-file-transfer-platform-server-for-unix,8.1.1,needed (101)
+tibco,mft,tibco-managed-file-transfer-platform-server-for-unix,8.1.2,needed (101)
+tibco,mft,tibco-managed-file-transfer-platform-server-for-unix,8.2.0,needed (112)
+tibco,mft,tibco-managed-file-transfer-platform-server-for-windows,8.1.0,needed (66)
+tibco,mft,tibco-managed-file-transfer-platform-server-for-windows,8.2.0,needed (66)
+tibco,mft,tibco-managed-file-transfer-platform-server-for-z-linux,8.1.0,needed (103)
+tibco,mft,tibco-managed-file-transfer-platform-server-for-z-linux,8.1.1,needed (101)
+tibco,mft,tibco-managed-file-transfer-platform-server-for-z-linux,8.1.2,needed (103)
+tibco,platform,tibco-control-plane,1.18.0,needed (380)
+tibco,platform,tibco-control-plane,1.19.0,needed (394)
+tibco,platform,tibco-control-plane,1.20.0,needed (438)
+tibco,platform,tibco-platform-add-on-for-business-process-management,1.0.0,none
+tibco,platform,tibco-platform-add-on-for-event-processing,1.9.0,none
+tibco,platform,tibco-platform-command-line-interface,1.1.0,none
+tibco,platform,tibco-platform-command-line-interface,1.2.0,needed (325)
+tibco,streaming,spotfire-data-streams,11.1.0,needed (1004)
+tibco,streaming,spotfire-data-streams,11.1.1,needed (1016)
+tibco,streaming,spotfire-liveview-web-enterprise-edition,1.7.0,none
+tibco,streaming,spotfire-liveview-web-enterprise-edition,1.7.1,none
+tibco,streaming,tibco-enterprise-streaming,11.1.2,none
+tibco,streaming,tibco-enterprise-streaming,11.1.3,none
+tibco,streaming,tibco-enterprise-streaming,11.2.0,none
+tibco,streaming,tibco-enterprise-streaming,11.2.1,none
+tibco,streaming,tibco-enterprise-streaming-high-performance-fix-engine,11.1.2,none
+tibco,streaming,tibco-enterprise-streaming-high-performance-fix-engine,11.1.3,none
+tibco,streaming,tibco-enterprise-streaming-high-performance-fix-engine,11.2.0,none
+tibco,streaming,tibco-enterprise-streaming-high-performance-fix-engine,11.2.1,none
+tibco,streaming,tibco-modelops,1.3.0,none
+tibco,streaming,tibco-streambase-high-performance-fix-engine,10.6.4,none
+tibco,streaming,tibco-streambase-high-performance-fix-engine,10.6.5,none
+tibco,streaming,tibco-streambase-high-performance-fix-engine,10.6.6,none
+tibco,streaming,tibco-streambase-high-performance-fix-engine,11.0.1,none
+tibco,streaming,tibco-streambase-high-performance-fix-engine,11.1.0,none
+tibco,streaming,tibco-streambase-high-performance-fix-engine,11.1.1,none
+tibco,streaming,tibco-streambase-high-performance-fix-engine,11.1.2,none
+tibco,streaming,tibco-streambase-high-performance-fix-engine,11.1.3,none
+tibco,streaming,tibco-streambase-high-performance-fix-engine,11.2.0,none
+tibco,streaming,tibco-streambase-high-performance-fix-engine,11.2.1,none
+tibco,streaming,tibco-streaming,11.1.0,needed (1004)
+tibco,streaming,tibco-streaming,11.1.1,needed (1016)
+tibco,streaming,tibco-streaming,11.1.2,needed (1018)
+tibco,streaming,tibco-streaming,11.1.3,needed (1022)
+tibco,streaming,tibco-streaming,11.2.0,needed (1021)
+tibco,streaming,tibco-streaming,11.2.1,needed (1023)
+tibco,streaming,tibco-streaming-for-3gpp,1.1.0,none
+tibco,tra,tibco-administrator-enterprise-edition,5.12.2,needed (152)
+tibco,tra,tibco-administrator-enterprise-edition,5.12.4,needed (154)
+tibco,tra,tibco-administrator-enterprise-edition,5.13.0,needed (155)
+tibco,tra,tibco-designer-add-in-for-tibco-business-studio,1.0.0,needed (9)
+tibco,tra,tibco-designer-add-in-for-tibco-business-studio,1.1.0,needed (12)
+tibco,tra,tibco-designer-add-in-for-tibco-business-studio,1.1.1,needed (12)
+tibco,tra,tibco-designer-add-in-for-tibco-business-studio,1.2.0,needed (16)
+tibco,tra,tibco-designer-add-in-for-tibco-business-studio,1.3.1,needed (11)
+tibco,tra,tibco-designer-add-in-for-tibco-business-studio,1.3.2,needed (11)
+tibco,tra,tibco-designer-add-in-for-tibco-business-studio,1.4.0,needed (11)
+tibco,tra,tibco-designer-add-in-for-tibco-business-studio,1.5.0,needed (11)
+tibco,tra,tibco-runtime-agent,5.12.2,needed (272)
+tibco,tra,tibco-runtime-agent,5.12.3,needed (198)
+tibco,tra,tibco-runtime-agent,5.12.4,needed (278)
+tibco,tra,tibco-runtime-agent,5.13.0,needed (277)

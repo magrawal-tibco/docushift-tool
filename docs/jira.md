@@ -37,6 +37,9 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 **Log** (newest first, one line per session):
 
+- 2026-10-23 — DOCOPS-256 note: Phase 58 built (9a3af4d); Phase 59 (repairs) built and logged on it, no new task.
+  R001 census: 538 versions / 97,694 notes needed, 18 fixed. DOCOPS-256 stays Backlog until the first wave.
+
 - 2026-10-23 — Phase 55 built (422e406): DOCOPS-249 note (pilot: nothing lost; AEM drops 5 alts). DOCOPS-250 note
   (ibi AI Assistant notes fixed, 7cac70dc). New: DOCOPS-255 (AEM alt text, In Progress, 0.25, under DOCOPS-149),
   DOCOPS-256 and DOCOPS-257 (Phase 58 records/triage and TIBCO readiness, Backlog, 0.5 and 1, under DOCOPS-96).
@@ -255,6 +258,7 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | 55 | `verify`: converted ibi docs against stg-docs.ibi.com | DOCOPS-249 (in progress) |
 | 56 | Note labels AEM shows; `fix-callouts` repairs published docs | DOCOPS-250 (in progress) |
 | 58 | `verify` results kept, triaged, tracked per version; TIBCO readiness | DOCOPS-256, DOCOPS-257 |
+| 59 | Repairs: generic fixes registered, censused and applied per version | folded: DOCOPS-256 |
 | 57 | Translated help to the `loc-` tree (`--locale`) | build DOCOPS-253; runs DOCOPS-148 (in progress) |
 
 Other logged work: Jira reconcile and this handoff DOCOPS-208; stakeholder status page DOCOPS-197; TIBCO family reassignments DOCOPS-120

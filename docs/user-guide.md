@@ -315,6 +315,13 @@ when it was converted or merged again after that, and `sync-failed` when the las
 failed. `_sync_date` is the day of that placement or failure. `catalog show` prints all
 four, plus the target the version was last placed in.
 
+`_verify_status` says whether `docushift verify` has checked the published version, and
+what it found: `clean`, `explained` (every finding is in the triage file), `issues`,
+`lost`, `stale` (published again since it was checked) or `not-verified`.
+`_repairs_pending` lists the generic fixes the version still needs, such as `R001(1404)`;
+filter it for non-empty to get the to-do list. See "Did anything get lost?" and "Fixing
+a generic problem in every published version" below.
+
 > **The sync columns say what this tool did, not what the target holds now.** A hand edit
 > in the published repository is invisible to the sheet. To check what is actually there,
 > use `docushift status --target-dir` and `docushift validate`.
@@ -1779,6 +1786,42 @@ docushift verify --target-dir ../ibi-docs-aem --product ibi-ai-assistant --refre
 - **Staging host per business unit:** `verify_base_urls` in `publishing.yaml`. A
   business unit with no host gets the local and live checks only.
 - **Exit code:** 1 if something was lost and is not in the triage file.
+
+### Fixing a generic problem in every published version (`repair`)
+
+A problem the converter used to make -- like notes written in a format AEM does not
+show -- is in every version converted before the fix. Re-converting hundreds of
+versions for a one-line rewrite is the wrong cost, so each such fix is a registered
+**repair** (Phase 59), applied to the published versions in place:
+
+```bash
+# The register: each repair, its ticket, and how many versions are in each state
+docushift repair list
+
+# Count every repair in every published version (read-only; about a minute per repo folder)
+docushift repair census --target-dir ../tibco-docs-aem
+
+# Fix one family: preview, then for real. Repo, output/ and reframed/ are fixed together
+docushift repair apply R001 --target-dir ../tibco-docs-aem --family bpm --dry-run
+docushift repair apply R001 --target-dir ../tibco-docs-aem --family bpm
+```
+
+- **Each version moves `needed` -> `fixed` -> `confirmed`**, or is `none` if it
+  never had the problem:
+  - `fixed` means the repo no longer has it;
+  - `confirmed` means a later `verify` against staging saw it fixed for readers, so
+    it comes after AEM republishes.
+- **`versions.csv`'s `_repairs_pending`** lists what each version still needs, e.g.
+  `R001(1404)`. Filter it for non-empty to get the to-do list. `_repairs_date` is the
+  last census.
+- **`reports/repairs/INDEX.html`** shows every version against every repair, by family.
+- **`apply` never commits.** Review with `git diff`, commit, push. It refuses a version
+  synced after its last census: run `census` first.
+- **A repair changes matched lines only.** Everything else stays byte for byte, code
+  samples are left alone, and a second run changes nothing. A fix that moves pages
+  (menu, merges, names) is not a repair: re-convert and re-sync those versions.
+- `fix-callouts` still exists and rewrites the folders you give it, but it records
+  nothing. Use `repair apply R001` so the status follows.
 
 **Rolling out in waves.** Pick the versions with the catalog's selectors and carry on
 where the last wave stopped:

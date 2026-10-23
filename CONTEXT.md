@@ -67,7 +67,7 @@ docushift-tool/
 ├── src/                    # Source code
 │   └── docushift/
 │       ├── __init__.py
-│       ├── cli.py          # Click CLI entrypoint (catalog, download, extract, convert, reframe, sync, validate, verify, fix-callouts, csh, archive, status, report, doctor)
+│       ├── cli.py          # Click CLI entrypoint (catalog, download, extract, convert, reframe, sync, validate, verify, repair, fix-callouts, csh, archive, status, report, doctor)
 │       ├── config.py       # Configuration & taxonomy manager
 │       ├── catalog.py      # Additive Catalog Manager (CSV read/write + snapshot 3-way merge)
 │       ├── state.py        # State engine (SQLite: fetch snapshots, etags, sizes, per-stage status)
@@ -112,6 +112,7 @@ docushift-tool/
 │       │   ├── links.py    # Relative links resolve; absolute ones only with --check-external
 │       │   ├── references.py # Asset references against the files actually placed
 │       │   └── csh.py      # Every identifier in csh.yml still lands on a page that exists
+│       ├── repairs/        # Phase 59: registered generic fixes -- census, apply, per-version state
 │       ├── verify/         # `verify` (Phase 55): old site vs published tree vs staging, nothing lost
 │       │   ├── text.py     # Blocks, normalising, sentences, 8-word shingles: what text a page lost
 │       │   ├── images.py   # Pictures matched by content hash, so a rename still matches
@@ -244,6 +245,10 @@ Jira (DOCOPS) status and what to file next: the handoff at the top of [`docs/jir
    German, French and Spanish builds, all inside IBI WebFOCUS packages) converts per language
    with `docushift --locale ja-jp …` into `loc-ibi-*-userdocs`, with its own
    `cache/state-<locale>.db`. All 27 language builds are committed: 22 Client/App Studio in `loc-ibi-webfocus-userdocs`, 5 Reporting Server in `loc-ibi-wf-reporting-server-userdocs` (neither pushed). See [`planning.md`](docs/planning.md#1-active-phases).
+0j. **Phase 59, built 2026-10-23; R001 waves pending**: a generic fix (like Phase 56's note labels) is a registered
+   repair: counted in every published version in minutes, applied in waves to the repo and both local
+   trees, confirmed on staging by `verify`, tracked in `versions.csv` `_repairs_pending`. Versions
+   still needing R001 (`repair census`, 2026-10-23): 538, with 97,694 old-style notes; 18 are fixed.
 1. **Phase 40, built; two network runs left**: `download` takes each version's package
    name from the Coveo sitemap, so pre-rebrand and renamed versions stop failing
    (96 of the 1,435 still to download). Run `catalog sitemap` before a large download. See [`planning.md`](docs/planning.md#1-active-phases).

@@ -90,6 +90,8 @@ class VersionStatus:
     sync_date: str = ""
     verify_status: str = ""
     verify_date: str = ""
+    repairs_pending: str = ""
+    repairs_date: str = ""
 
 
 @dataclass
@@ -101,11 +103,15 @@ class StatusEvidence:
     run_dates: dict = field(default_factory=dict)
     content: dict = field(default_factory=dict)
     verify: dict = field(default_factory=dict)
+    repairs: dict = field(default_factory=dict)
 
     @classmethod
     def read(cls, state) -> "StatusEvidence":
+        by_version: dict = {}
+        for (slug, version, _), row in state.repair_rows().items():
+            by_version.setdefault((slug, version), []).append(row)
         return cls(state.progress(), state.stage_events(), state.run_dates(), state.content_kinds(),
-                   state.verify_latest())
+                   state.verify_latest(), by_version)
 
 
 def gate(product, version) -> str | None:
@@ -160,7 +166,7 @@ def version_status(product, version, evidence: StatusEvidence) -> VersionStatus:
         and version.engine not in CONVERTIBLE_ENGINES and not topics and documents > 0
     )
     sync_status, sync_date = _sync(events, runs, pdf_only)
-    verified = _verify(evidence.verify.get(key), events, sync_date)
+    verified = (*_verify(evidence.verify.get(key), events, sync_date), *_repairs(evidence.repairs.get(key)))
 
     blocked = gate(product, version)
     if blocked:
@@ -210,6 +216,20 @@ def _verify(result: dict | None, events: Events, sync_date: str) -> tuple[str, s
     if placed and placed[0] > result["at"]:
         return "stale", _day(result["at"])
     return result["outcome"], _day(result["at"])
+
+
+def _repairs(rows: list[dict] | None) -> tuple[str, str]:
+    """`_repairs_pending` and `_repairs_date` (Phase 59): what the version still needs.
+
+    One cell for every repair, `R001(1404) R002(12)`, rather than a column per
+    repair. Only `needed` is listed: `fixed` and `confirmed` are done as far as the
+    repo goes, and `reports/repairs/INDEX` shows them. The date is the last census.
+    """
+    if not rows:
+        return "", ""
+    pending = " ".join(f"{r['repair']}({r['remaining']})" for r in sorted(rows, key=lambda r: r["repair"])
+                       if r["state"] == "needed")
+    return pending, _day(max(r["checked_at"] for r in rows))
 
 
 def _sync(events: Events, runs: dict[str, str], pdf_only: bool = False) -> tuple[str, str]:

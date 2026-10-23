@@ -199,6 +199,8 @@ The code is kept as a column because it is what a human recognizes (`ems`, not `
 | `_bu`, `_family` | **tool, read-only** | Denormalized from `products.csv` so you can filter by family without a VLOOKUP. Regenerated on every write; **edits here are ignored** — change them in `products.csv` |
 | `_status`, `_status_date` | **tool, read-only** | Phase 38. Where the version stands and the ISO day (UTC) it got there: a gate (`out-of-scope`, `retired`, `not-selected`), a stage (`not-started`, `downloaded`, `extracted`, `converted`, `merged`), `pdf-ready` (finished, like `converted`: unpacked, only PDFs, nothing to convert; Phase 39), or where it is stuck (`download-failed`, `extract-failed`, `format-unknown`, `convert-failed`, `merge-failed`). Regenerated on every write from `state.db` (`reporting/status.py:version_status`); the rules are in `design.md` §8.8 |
 | `_sync_status`, `_sync_date` | **tool, read-only** | Phase 38. When `sync` last placed this version's help — or, for a `pdf-ready` version, its documents (Phase 39) — (`synced`), whether it was converted or merged again since (`out-of-date`), or that the last sync failed (`sync-failed`). An event this tool recorded, never a claim about the target (§7.2) |
+| `_verify_status`, `_verify_date` | **tool, read-only** | Phase 58. The latest `docushift verify` verdict for a published version — `clean`, `explained` (every finding triaged), `issues` (unexplained warnings), `lost` (an unexplained error) — or `stale` (synced again since it was checked) or `not-verified`. Blank for a version never synced. Read from `state.db`'s `verify_result` (§7.7) |
+| `_repairs_pending`, `_repairs_date` | **tool, read-only** | Phase 59. The registered repairs this version still needs, with their counts (`R001(1404)`), blank when none; and the day of the last `repair census`. One cell for every repair, never a column per repair (§7.8) |
 | `_has_csh` | **tool, read-only** | Stage 4: a CSH source file was found in this package — Flare `Alias.xml`, DITA `head.js` or WebWorks `topics.js` — even an empty one. Blank until extracted — see §3.9 |
 | `_csh_names` | **tool, read-only** | Stage 4: distinct help identifiers parsed out of those sources |
 | `_has_api_ref` | **tool, read-only** | Stage 4: the package carries an API-reference tree (Javadoc, C / Go / `tibdg`) — never converted, routed to the `api-references` doc-class (§6.2) |
@@ -208,8 +210,8 @@ The code is kept as a column because it is what a human recognizes (`ems`, not `
 | `_out_files` | **tool, read-only** | Stage 5: **every** file in that tree — the Markdown, the assets that were copied, and `toc.yml` / `metadata.yml` / `csh.yml` |
 
 ```csv
-slug,version,is_archived,convert_eligible,convert_batch,migrate_decision,migrate_decision_source,release_date,release_status,retirement_date,release_status_source,engine,engine_source,zip_url,zip_source,custom_override,_bu,_family,_status,_status_date,_sync_status,_sync_date,_has_csh,_csh_names,_has_api_ref,_api_files,_doc_files,_md_files,_out_files,_reframed_md_files,_reframed_files
-tibco-ems,10.4.0,false,true,poc-1,migrate,docsite_sheet,2025-11-04,ga,2030-12-31,eos_report,flare,detected,https://docs.tibco.com/pub/ems/10.4.0/doc/zip/tib_ems_10.4.0_doc.zip,auto,false,tibco,messaging,converted,2026-10-05,synced,2026-10-05,true,412,true,4310,19776,2841,3196,,
+slug,version,is_archived,convert_eligible,convert_batch,migrate_decision,migrate_decision_source,release_date,release_status,retirement_date,release_status_source,engine,engine_source,zip_url,zip_source,custom_override,_bu,_family,_status,_status_date,_sync_status,_sync_date,_verify_status,_verify_date,_repairs_pending,_repairs_date,_has_csh,_csh_names,_has_api_ref,_api_files,_doc_files,_md_files,_out_files,_reframed_md_files,_reframed_files
+tibco-ems,10.4.0,false,true,poc-1,migrate,docsite_sheet,2025-11-04,ga,2030-12-31,eos_report,flare,detected,https://docs.tibco.com/pub/ems/10.4.0/doc/zip/tib_ems_10.4.0_doc.zip,auto,false,tibco,messaging,converted,2026-10-05,synced,2026-10-05,not-verified,,R001(57),2026-10-23,true,412,true,4310,19776,2841,3196,,
 tibco-ems,10.2.1,true,false,,migrate,docsite_sheet,2023-06-12,retirement-announced,2027-12-31,eos_report,auto,auto,https://docs.tibco.com/pub/ems/tibco-ems-10-2-1_documentation.zip,auto,false,tibco,messaging,,,,,,,,,
 tibco-ems,8.6.0,true,false,,do_not_migrate,docsite_sheet,2020-04-30,retired,2024-12-31,eos_report,webworks,detected,https://docs.tibco.com/pub/ems/tibco-ems-8-6-0_documentation.zip,auto,false,tibco,messaging,,,,,,,,,
 tibco-datasynapse-gridserver,7.1.1,false,true,poc-1,unknown,unknown,2025-09-30,unknown,,unknown,flare,detected,,manual,false,tibco,integration,true,0,false,0,1458,930,981,,
@@ -2656,3 +2658,30 @@ It refuses three assumptions:
   no path, so they are quoted beside a missing topic, never subtracted from it.
 
 The comparison rules are `design.md` §8.9.
+
+### 7.8 Repairs: generic fixes for what is already published (Phase 59)
+
+Almost every in-scope version was converted before the problems `verify` finds were
+known, so a converter fix alone reaches nothing already published. A **repair** is
+the catch-up: a module under `src/docushift/repairs/` that can find a problem in a
+Markdown text, rewrite it, and name the `verify` finding that proves the rewrite
+reached readers. The same fix always goes into the converter too, so new conversions
+never need it.
+
+- **What a repair may change** is narrow on purpose: matched lines only, every other
+  byte identical, fenced code untouched, and running it twice changes nothing. A fix
+  that moves pages (the menu, merges, file names) is not a repair; those versions
+  are re-converted and re-synced.
+- **Every published copy at once.** `repair apply` rewrites the published version
+  folder and its `output/` and `reframed/` trees together. `sync` re-copies a page
+  that differs from its local source, so a fix in the repo alone would be undone.
+- **Measured, not assumed.** `repair census` counts each repair in every published
+  version from the repos' git index, so each version's state (`needed`, `fixed`,
+  `confirmed`, `none`) is a measurement. `apply` refuses a version synced since its
+  last census.
+- **Confirmed by readers' view.** A version is `confirmed` only when `verify` sees
+  the repair's finding gone on staging. AEM republishes later than we commit, so
+  "fixed in the repo" and "fixed for readers" stay two states.
+
+The state rules are `design.md` §8.11.
+

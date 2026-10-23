@@ -40,6 +40,9 @@ class Entry:
     version: str = "*"
     path: str = "*"
     ticket: str = ""
+    #: Phase 59: the repair that fixes it. Then the entry excuses the finding only on
+    #: versions the repair has reached (`fixed`); on one still `needed` it is an issue.
+    repair: str = ""
 
     def matches(self, code: str, slug: str, version: str, path: str) -> bool:
         return (code == self.code and fnmatchcase(slug, self.slug)
@@ -79,6 +82,7 @@ def load(path: Path) -> list[Entry]:
             code, decision, reason,
             str(row.get("slug") or "*"), str(row.get("version") or "*"),
             str(row.get("path") or "*"), str(row.get("ticket") or "").strip(),
+            str(row.get("repair") or "").strip().upper(),
         ))
     return entries
 

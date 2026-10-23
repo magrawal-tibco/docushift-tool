@@ -222,6 +222,24 @@ CREATE TABLE IF NOT EXISTS verify_result (
     report     TEXT NOT NULL DEFAULT '',
     PRIMARY KEY (slug, version, run_id)
 );
+
+-- Phase 59: one row per version per repair. `state` is needed | fixed | confirmed |
+-- none: measured by `repair census`, moved to fixed by `repair apply` (and by a
+-- census that finds none left where some were), to confirmed by a staging `verify`.
+CREATE TABLE IF NOT EXISTS repair_status (
+    slug         TEXT NOT NULL,
+    version      TEXT NOT NULL,
+    repair       TEXT NOT NULL,
+    state        TEXT NOT NULL,
+    remaining    INTEGER NOT NULL DEFAULT 0,
+    checked_at   TEXT NOT NULL DEFAULT '',
+    fixed_at     TEXT NOT NULL DEFAULT '',
+    fixed_count  INTEGER NOT NULL DEFAULT 0,
+    commit_id    TEXT NOT NULL DEFAULT '',
+    confirmed_at TEXT NOT NULL DEFAULT '',
+    target       TEXT NOT NULL DEFAULT '',
+    PRIMARY KEY (slug, version, repair)
+);
 """
 
 
@@ -242,6 +260,7 @@ _VERSION_TABLES = (
     "output_map",
     "stage_event",
     "verify_result",
+    "repair_status",
 )
 
 
@@ -791,6 +810,51 @@ class StateStore:
             "ON v.slug = m.slug AND v.version = m.version AND v.at = m.at"
         )
         return {(row["slug"], row["version"]): dict(row) for row in rows}
+
+    def repair_rows(self) -> dict[tuple[str, str, str], dict[str, Any]]:
+        """`{(slug, version, repair): row}` for every recorded repair status (Phase 59)."""
+        return {(r["slug"], r["version"], r["repair"]): dict(r)
+                for r in self._all("SELECT * FROM repair_status")}
+
+    def record_census(self, slug: str, version: str, repair: str, remaining: int, at: str,
+                      target: str = "", commit: str = "", fixed: int = 0) -> str:
+        """One measured count, and the state it implies; returns that state.
+
+        `remaining > 0` is `needed`. None left is `fixed` when this version ever
+        needed the repair -- a census row before, or `fixed` > 0 from `apply` -- and
+        `none` when it never did. A `confirmed` version stays confirmed while none is
+        left; one found needing it again goes back to `needed`.
+        """
+        old = self.repair_rows().get((slug, version, repair))
+        fixed_count = (old["fixed_count"] if old else 0) + fixed
+        if remaining > 0:
+            state, fixed_at, confirmed_at = "needed", old["fixed_at"] if old else "", ""
+        elif old is not None and old["state"] == "confirmed":
+            state, fixed_at, confirmed_at = "confirmed", old["fixed_at"], old["confirmed_at"]
+        elif fixed or (old is not None and old["state"] in ("needed", "fixed")) or fixed_count:
+            state = "fixed"
+            fixed_at = at if fixed else (old["fixed_at"] if old and old["fixed_at"] else at)
+            confirmed_at = ""
+        else:
+            state, fixed_at, confirmed_at = "none", "", ""
+        with self._tx() as conn:
+            conn.execute(
+                "INSERT OR REPLACE INTO repair_status (slug, version, repair, state, remaining, checked_at, "
+                "fixed_at, fixed_count, commit_id, confirmed_at, target) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+                (slug, version, repair, state, remaining, at, fixed_at, fixed_count,
+                 commit or (old["commit_id"] if old else ""), confirmed_at, target or (old["target"] if old else "")),
+            )
+        return state
+
+    def confirm_repair(self, slug: str, version: str, repair: str, at: str) -> bool:
+        """`fixed` -> `confirmed` after a clean staging check; False if it was not `fixed`."""
+        with self._tx() as conn:
+            done = conn.execute(
+                "UPDATE repair_status SET state = 'confirmed', confirmed_at = ? "
+                "WHERE slug = ? AND version = ? AND repair = ? AND state = 'fixed'",
+                (at, slug, version, repair),
+            )
+            return done.rowcount > 0
 
     def latest_counts(self, slug: str, version: str, codes: Iterable[str]) -> dict[str, int]:
         """Each code's count for one version, from the most recent run that recorded it.

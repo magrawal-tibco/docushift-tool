@@ -1584,6 +1584,102 @@ suite pass.*
 
 ---
 
+### Phase 59: A Generic Fix Is a Repair, Applied to Every Published Version — **Built 2026-10-23; R001 waves pending**
+
+**Why.** Nearly every in-scope version is converted and published. A generic problem
+found now, like the note labels AEM did not render (Phase 56), is in hundreds of
+published versions at once, and re-converting all of them for a one-line rewrite is
+the wrong cost. Phase 56 solved one such problem with one command (`fix-callouts`)
+and no record of which versions it reached. Repeating that per problem would mean a
+command, a report and a `versions.csv` column for each, and still no answer to
+"which versions still need which fix".
+
+Measured 2026-10-23 with `git grep` over every published repo, in under a minute:
+**517 versions still hold 92,581 old-style notes** (60 ibi versions, 46,021 notes;
+457 TIBCO versions, 46,560 notes). Statistica and ibi™ AI Assistant, already
+repaired, hold none.
+
+#### Decisions
+
+| decision | choice | why |
+|---|---|---|
+| **A generic fix is a registered repair** | A module under `src/docushift/repairs/` with an ID, a title, its ticket, and three parts: **detect** (a count per Markdown file, with a `git grep` pattern where one can express it), **fix** (a text rewrite), **confirm** (the `verify` finding whose absence on staging proves it reached readers). R001 is Phase 56's note labels: detect `> [!KIND]`, fix `callouts.fix_markdown`, confirm no `VERIFY_PUBLISHED_CALLOUT_UNRENDERED` | One shape for every fix, so a new problem is a new module, not a new command, report and column |
+| **The converter is fixed too** | A repair ships with the matching converter change, as Phase 56 did, so a new conversion never needs it. A repair's detect test runs on fresh converter output and must find 0 | A repair is the catch-up for trees already written, not a second place the fix lives |
+| **What a repair may change** | Text-level only: matched lines rewritten, everything else byte-identical, line endings kept, fenced code untouched, idempotent (`fix_markdown`'s rules). A fix that changes the menu, page merges or file names is **not** a repair: those versions are re-converted and re-synced through the pipeline, and `verify --status stale` re-checks them | A repair is safe to run over hundreds of versions because it cannot move a page. Anything that can goes through the stages that own it |
+| **Status per version per repair** | One `state.db` table, `repair_status`: slug, version, repair, state, count left, checked at, fixed at, commit, confirmed at. States: `needed` -> `fixed` (repo has none left) -> `confirmed` (a staging `verify` after the fix shows the confirm finding gone); `none` if the version never had it | One row shape for every repair. `fixed` and `confirmed` stay apart because AEM republishes later than we commit |
+| **`versions.csv`: two columns for all repairs** | `_repairs_pending` lists what a version still needs with its count (`R001(1404) R002(12)`), blank when nothing is pending; `_repairs_date` is the last census | A column per repair grows without end. Filtering one column for non-empty is the to-do list |
+| **One command group** | `docushift repair list` (the register, each repair's ticket and how many versions need it), `repair census --target-dir` (count every repair in every published version, read-only, `git grep` per repo), `repair apply <ID>` with `verify`'s selectors (`--bu`, `--family`, `--product`, `--version`, `--status needed`, `--max`, `--dry-run`). `fix-callouts` stays as an alias for `repair apply R001` | Waves work the same way as `verify` waves; nothing new to learn per repair |
+| **All three copies at once** | `repair apply` rewrites the published version folder **and** its `output/` and `reframed/` trees, found through the catalog. It never commits: committing and pushing stay with the user | `sync` re-copies a page that differs from its local source, so fixing only the repo is undone by the next sync (the Phase 56 lesson) |
+| **Census first, apply second** | `apply` refuses a version whose census is older than the version's last sync, and reruns the census for the folders it touched | The status shown is always measured, never assumed from a run that may have stopped halfway |
+| **Progress on one page** | `reports/repairs/INDEX.csv` and `.html`: versions against repairs (needed / fixed / confirmed), filterable by family, linked from `reports/verify/INDEX.html` | One page answers "where are we with each fix" for a business reader |
+| **How a finding becomes a repair** | A `verify` finding triaged `ours` whose fix is a text rewrite becomes a repair. Its triage entry gets `repair: R00N`, and `verify` counts it as explained only on versions whose repair is `fixed` but not yet `confirmed`. On a version still `needed`, it is a real issue again | Ties the two records together. A triage entry can no longer quietly excuse a version the fix never reached |
+
+#### Steps
+
+1. `repairs/__init__.py` (the register, the `Repair` shape) and `repairs/r001_note_labels.py`
+   from `callouts.fix_markdown`. `fix-callouts` becomes the alias. Tests: detect, fix and
+   idempotence for R001; a fresh conversion detects 0.
+2. `state.py`: `repair_status` and its reader. `reporting/status.py` / `catalog.py`:
+   `_repairs_pending`, `_repairs_date`. Tests: each state, and pending blank after a fix.
+3. `repair census`: per repo `git grep -c` with each repair's pattern, a file walk where a
+   repair has none; records every published version, 0 counts included. Tests on a small
+   git repo fixture: counts per version folder, and a version with none reads `none`.
+4. `repair apply`: selection, the three copies, census after, `--dry-run`. Tests: the
+   three trees rewritten in step; a stale census refuses; a second run changes nothing.
+5. `verify`: a version's R001 moves to `confirmed` when its staging check shows no
+   unlabelled note; triage entries take `repair:`. Tests: confirmed after a clean staging
+   run; a `needed` version's finding counts as an issue.
+6. `repair list`, `reports/repairs/INDEX.*`. Docs: `user-guide.md` (the command group, how
+   to add a repair), `design.md` (states, what a repair may change), `architecture.md`.
+7. Runs (the user, as `!` commands): `repair census` over both repo folders; then R001 in
+   waves, a family at a time: `apply`, commit, push, and `verify` after AEM republishes.
+
+*Exit: the census covers every published version; R001 is applied to the first wave and
+confirmed on staging for one product; `versions.csv` shows `_repairs_pending`; `ruff` and
+the suite pass.*
+
+#### As built (2026-10-23)
+
+- `src/docushift/repairs/`:
+  - `__init__.py`, the register and the `Repair` shape;
+  - `r001_note_labels.py`, detect and fix through `callouts.fix_markdown`;
+  - `run.py`, census and apply;
+  - `report.py`, `reports/repairs/INDEX.*`.
+
+  `state.py` gains `repair_status` (`record_census`, `confirm_repair`, `repair_rows`);
+  `versions.csv` gains `_repairs_pending` and `_repairs_date`.
+- `docushift repair list | census | apply`. `verify` confirms a `fixed` repair when its
+  staging check shows the repair's confirm finding gone. A triage entry with
+  `repair: R001` excuses the finding only where R001 is no longer `needed`.
+  `config/verify-triage.yaml`'s note-label entry now names R001.
+- **The census counts with `git grep -c`.** The first version opened every matched
+  file: 17,253 files took a minute of file opens on Windows, and ibi alone took five
+  minutes. Counting from git's index takes ibi to 50 seconds and both repo folders
+  to about 2.5 minutes. The pattern also matches inside fenced code, so versions
+  already recorded as no longer needing the repair are counted exactly, and a code
+  sample never turns them back to `needed`.
+- **CRLF:** the first pattern ended `[[:blank:]]*$`, which a CRLF line's `` fails, so
+  a CRLF checkout read as having no notes. It now ends `[[:space:]]*$`. Four ibi repos
+  hold 4,110 CRLF Markdown files; checked, they carry the predecessor's `> **Note:**`
+  and no `[!NOTE]`, so the counts did not change.
+- **Backfill:** the two Phase 56 runs (`reports/fix-callouts-2026-10-2*.csv`) were
+  recorded as `fixed`: ibi™ AI Assistant 9.3.8 and 17 Statistica-family versions.
+- **Census, 2026-10-23:** R001 is **needed in 538 versions, 97,694 notes** (ibi 60 /
+  46,021; TIBCO 478 / 51,673). It is fixed in 18, and none in 238. This is more than
+  the quick count of 517 / 92,581 because `--untracked` also reads files not yet
+  committed in the repos.
+- **Not built as planned:** `fix-callouts` was not turned into an alias. It still
+  rewrites the folders it is given and records nothing; `repair apply R001` is the
+  tracked way, and the user guide says so.
+- **A candidate R002:** the predecessor's notes (ibi CRLF repos) put a blank line after
+  `> **Note:**`, which the user asked to avoid (Phase 56). Its own repair, if wanted.
+- Tests: `tests/unit/test_repairs.py`, 10 tests (a real git repo fixture, CRLF
+  included). `ruff` clean.
+- **Left:** R001 waves, run by the user: `repair apply R001 --family ...`, commit, push,
+  then `verify` after AEM republishes.
+
+---
+
 ## Carried-Forward Open Items
 
 Technical items a finished phase recorded as *open, not fixed*. Product-level issues

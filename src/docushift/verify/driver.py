@@ -97,13 +97,16 @@ class VersionResult:
 class Verifier:
     def __init__(self, cfg, catalog, state, target: Path, findings: FindingsRun,
                  fetcher: Fetcher | None = None, base_url: str = "", live_sample: int = 0,
-                 triaged: list[triage.Entry] | None = None, base_urls: dict[str, str] | None = None) -> None:
+                 triaged: list[triage.Entry] | None = None, base_urls: dict[str, str] | None = None,
+                 repair_states: dict[tuple[str, str, str], str] | None = None) -> None:
         self.cfg, self.catalog, self.state = cfg, catalog, state
         self.target, self.findings = target, findings
         self.fetcher, self.base_url, self.live_sample = fetcher, base_url, live_sample
         self.triaged = triaged or []
         #: Staging host per business unit (Phase 58); `base_url` overrides all of them.
         self.base_urls = base_urls or {}
+        #: `(slug, version, repair) -> state` (Phase 59), for triage entries naming a repair.
+        self.repair_states = repair_states or {}
 
     def selection(self, product: str | None, version: str | None, *, bu: str | None = None,
                   family: str | None = None, latest_only: bool = False,
@@ -332,6 +335,12 @@ class Verifier:
                 message: str, count: int = 1) -> None:
         version = result.version or folder.segment
         decided = triage.match(self.triaged, code, folder.slug, version, path)
+        needed = decided is not None and decided.repair and \
+            self.repair_states.get((folder.slug, version, decided.repair)) == "needed"
+        if needed:
+            # The repair that explains it has not reached this version yet.
+            message = f"{message} [repair {decided.repair} still needed here]"
+            decided = None
         if decided is not None:
             message = f"{message} [triage: {decided.label}]"
         finding = self.findings.record(code, folder.slug, version,

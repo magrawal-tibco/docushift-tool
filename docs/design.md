@@ -829,6 +829,20 @@ synced after it was checked, so the published tree is not the one that passed.
 **`not-verified`**: it has been synced and never checked. A version never synced has
 nothing to verify and stays blank. The verdict is stored per run in
 `verify_result`, so a version that got worse shows in its history.
+### 8.11 Repairs: what one may change, and how its state moves — **Built** (Phase 59)
+
+**A repair rewrites matched lines and nothing else**, the rules `callouts.fix_markdown`
+set: other bytes identical, line endings kept, fenced code untouched, a second run a
+no-op. It cannot move a page, so it is safe over hundreds of versions. A fix that
+changes the menu, a merge or a file name goes back through the pipeline instead.
+
+**State, per version per repair:** a census count above 0 is `needed`. None left is
+`fixed` when the version ever needed it (an earlier `needed`, or `apply` fixed some),
+else `none`. `verify` moves `fixed` to `confirmed` when a staging check shows the
+repair's confirm finding gone. A `confirmed` version found needing it again is
+`needed`. Counts come from `git grep -c` on each repo; versions no longer `needed`
+are counted exactly, file by file, so a match in a code sample cannot revive them.
+
 
 ## 9. Context-Sensitive Help
 

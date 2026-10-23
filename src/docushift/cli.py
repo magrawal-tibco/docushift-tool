@@ -3374,8 +3374,11 @@ def verify(ctx, target_dir, product, version, bu, family, latest_only, statuses,
     state = cfg.state_store()
     status_of = {(r["slug"], r["version"]): r.get("_verify_status", "") for r in manager.status_rows()}
     findings = FindingsRun("verify", store=state)
+    from docushift import repairs as repair_register
+
+    repair_states = {key: row["state"] for key, row in state.repair_rows().items()}
     verifier = Verifier(cfg, manager.load(), state, target_dir, findings, fetcher=fetcher, base_url=base,
-                        live_sample=live_sample, triaged=triaged, base_urls=hosts)
+                        live_sample=live_sample, triaged=triaged, base_urls=hosts, repair_states=repair_states)
     folders = verifier.selection(product, version, bu=bu, family=family, latest_only=latest_only,
                                  statuses=status_of, wanted=tuple(statuses), limit=limit)
     if not folders:
@@ -3411,6 +3414,13 @@ def verify(ctx, target_dir, product, version, bu, family, latest_only, statuses,
             "codes": json.dumps(dict(result.codes), sort_keys=True),
             "report": path.relative_to(cfg.root_dir).as_posix(),
         })
+        # Phase 59: a clean staging check confirms each repair this version had fixed.
+        if "+staging" in result.scope:
+            for repair in repair_register.registered():
+                if repair.confirm and not result.codes.get(repair.confirm) and state.confirm_repair(
+                        folder.slug, result.version, repair.id,
+                        datetime.datetime.now(datetime.UTC).isoformat(timespec="seconds")):
+                    console.print(f"    {repair.id} confirmed on staging")
         marker = {"lost": "[red]x[/red]", "issues": "[yellow]![/yellow]"}.get(result.outcome, "[green]ok[/green]")
         console.print(f"  {marker} {folder.relative.as_posix()}: {result.outcome}, {len(result.rows)} old page(s), "
                       f"{result.errors} lost, {result.warnings} warning(s), {result.explained} explained")
@@ -3457,6 +3467,202 @@ def _verify_index(manager: CatalogManager, state) -> list[dict[str, str]]:
             "commit": found.get("commit_id", ""), "report": found.get("report", ""),
         })
     return rows
+
+
+@main.group("repair")
+def repair_group() -> None:
+    """Generic text fixes for versions already published, tracked per version (Phase 59).
+
+    A repair is registered once (`src/docushift/repairs/`): how to find the problem,
+    how to rewrite it, and the `verify` finding that confirms it on staging. `census`
+    measures every published version, `apply` fixes them in waves, and versions.csv's
+    `_repairs_pending` says what each version still needs.
+    """
+
+
+def _repair_or_fail(repair_id: str):
+    from docushift import repairs
+
+    found = repairs.get(repair_id)
+    if found is None:
+        known = ", ".join(r.id for r in repairs.registered())
+        raise click.ClickException(f"No repair {repair_id!r}; registered: {known}.")
+    return found
+
+
+def _repairs_index(cfg: ConfigManager, manager: CatalogManager) -> Path:
+    from docushift import repairs
+    from docushift.repairs import report as repair_report
+
+    _, html = repair_report.write_index(cfg.root_dir / "reports", repairs.registered(),
+                                        manager.state.repair_rows(), manager.load())
+    return html
+
+
+@repair_group.command("list")
+@click.pass_context
+def repair_list(ctx: click.Context) -> None:
+    """The register: each repair, its ticket, and how many versions are in each state."""
+    from docushift import repairs
+
+    manager = _catalog_manager(ctx)
+    rows = manager.state.repair_rows()
+    table = Table(title="Repairs")
+    for column in ("ID", "Fixes", "Ticket", "needed", "left", "fixed", "confirmed", "none"):
+        table.add_column(column, justify="right" if column in ("needed", "left", "fixed", "confirmed", "none")
+                         else "left")
+    for repair in repairs.registered():
+        mine = [r for (_, _, rid), r in rows.items() if rid == repair.id]
+        states = Counter(r["state"] for r in mine)
+        left = sum(r["remaining"] for r in mine if r["state"] == "needed")
+        table.add_row(repair.id, repair.title, repair.ticket, str(states["needed"]), f"{left:,}",
+                      str(states["fixed"]), str(states["confirmed"]), str(states["none"]))
+    console.print(table)
+    if not rows:
+        console.print("[dim]No census yet: `docushift repair census --target-dir ...`.[/dim]")
+
+
+@repair_group.command("census")
+@click.option("--target-dir", type=DIR_PATH, required=True, help="Folder holding the published repos.")
+@click.option("--repair", "repair_id", default=None, help="One repair; default every registered one.")
+@click.option("--product", "product", default=None, help="Restrict to one published product slug.")
+@click.pass_context
+def repair_census(ctx: click.Context, target_dir: Path, repair_id: str | None, product: str | None) -> None:
+    """Count every repair in every published version (read-only; `git grep` per repo)."""
+    import datetime
+
+    from docushift import repairs
+    from docushift.repairs import run
+    from docushift.verify.driver import _number
+
+    cfg: ConfigManager = ctx.obj["config"]
+    _require_long_paths(cfg)
+    manager = _catalog_manager(ctx)
+    catalog = manager.load()
+    chosen = [_repair_or_fail(repair_id)] if repair_id else repairs.registered()
+    versions = run.published_versions(target_dir, product)
+    at = datetime.datetime.now(datetime.UTC).isoformat(timespec="seconds")
+    table = Table(title=f"Census of {len(versions)} published version(s) in {target_dir}")
+    for column in ("Repair", "needed", "left", "fixed", "confirmed", "none", "not catalogued"):
+        table.add_column(column, justify="left" if column == "Repair" else "right")
+    recorded = manager.state.repair_rows()
+    for repair in chosen:
+        # Versions recorded as no longer needing it are counted exactly (`run.census`).
+        exact = {(slug, segment) for (slug, segment) in versions
+                 if (row := recorded.get((slug, _number(catalog.products.get(slug), segment) or "", repair.id)))
+                 and row["state"] != "needed"}
+        counts = run.census(target_dir, repair, versions, exact)
+        states: Counter = Counter()
+        left = unknown = 0
+        for (slug, segment), count in counts.items():
+            number = _number(catalog.products.get(slug), segment)
+            if number is None:
+                unknown += 1
+                continue
+            folder = versions[(slug, segment)][0]
+            states[manager.state.record_census(slug, number, repair.id, count, at,
+                                               target=str(folder.path))] += 1
+            left += count
+        table.add_row(repair.id, str(states["needed"]), f"{left:,}", str(states["fixed"]),
+                      str(states["confirmed"]), str(states["none"]), str(unknown))
+    console.print(table)
+    _refresh_status(manager)
+    console.print(f"Index: {escape(str(_repairs_index(cfg, manager)))}")
+
+
+@repair_group.command("apply")
+@click.argument("repair_id")
+@click.option("--target-dir", type=DIR_PATH, required=True, help="Folder holding the published repos.")
+@click.option("--product", "product", default=None, help="Restrict to one published product slug.")
+@click.option("--version", default=None, help="Restrict to one version (10.4.0 or 10-4-0).")
+@click.option("--bu", default=None, help="Restrict to one business unit.")
+@click.option("--family", default=None, help="Restrict to one family.")
+@click.option("--max", "limit", type=int, default=0, help="At most this many versions in this wave.")
+@click.option("--dry-run", is_flag=True, help="Count what would change; write nothing.")
+@click.pass_context
+def repair_apply(ctx: click.Context, repair_id: str, target_dir: Path, product, version, bu, family,
+                 limit: int, dry_run: bool) -> None:
+    """Fix one repair in the versions that need it: published repo, output/ and reframed/ together.
+
+    Only versions the last census found `needed`, and only when that census is newer
+    than the version's last sync (otherwise run `repair census` first). Never commits:
+    review with `git diff`, then commit and push. Writes
+    `reports/repairs/apply-<ID>-<date>.csv`.
+    """
+    import datetime
+
+    from docushift.repairs import run
+    from docushift.utils.csvio import write_rows
+    from docushift.utils.slug import version_segment
+    from docushift.verify.driver import _number
+
+    repair = _repair_or_fail(repair_id)
+    cfg: ConfigManager = ctx.obj["config"]
+    _require_long_paths(cfg)
+    manager = _catalog_manager(ctx)
+    catalog = manager.load()
+    status = manager.state.repair_rows()
+    events = manager.state.stage_events()
+    wanted_segment = version_segment(version) if version else None
+    versions = run.published_versions(target_dir, product)
+
+    selected, refused = [], []
+    for (slug, segment), folders in sorted(versions.items()):
+        prod = catalog.products.get(slug)
+        number = _number(prod, segment)
+        if prod is None or number is None or (wanted_segment and segment != wanted_segment):
+            continue
+        if (bu and prod.bu != bu) or (family and prod.family != family):
+            continue
+        row = status.get((slug, number, repair.id))
+        if row is None or row["state"] != "needed":
+            continue
+        placed = events.get((slug, number), {}).get(("sync", "ok"))
+        if placed and placed[0] > row["checked_at"]:
+            refused.append(f"{slug} {number}: synced after the last census")
+            continue
+        selected.append((prod, number, folders))
+    if limit > 0:
+        selected = selected[:limit]
+    for line in refused:
+        console.print(f"[yellow]skipped[/yellow] {escape(line)} -- run `repair census` first")
+    if not selected:
+        console.print(f"[yellow]No version needs {repair.id} in this selection.[/yellow]")
+        raise click.exceptions.Exit(1 if refused else 0)
+
+    at = datetime.datetime.now(datetime.UTC).isoformat(timespec="seconds")
+    table = Table(title=f"{repair.id} {'(dry run) ' if dry_run else ''}over {len(selected)} version(s)")
+    for column in ("Product", "Version", "files", "fixed (repo)", "fixed (local)", "left"):
+        table.add_column(column, justify="left" if column in ("Product", "Version") else "right")
+    report_rows, failed = [], []
+    for prod, number, folders in selected:
+        done = run.Applied()
+        for folder in folders:
+            run.apply_tree(folder.path, repair, dry_run, published=True, into=done)
+        for local in (cfg.output_path(prod.bu, prod.family, prod.slug, number),
+                      cfg.reframed_path(prod.bu, prod.family, prod.slug, number)):
+            if local.is_dir():
+                run.apply_tree(local, repair, dry_run, published=False, into=done)
+        left = sum(run.count_tree(folder.path, repair) for folder in folders)
+        if not dry_run:
+            manager.state.record_census(prod.slug, number, repair.id, left, at,
+                                        target=str(folders[0].path), fixed=done.published_fixed)
+        failed.extend(done.failed)
+        for row in done.rows:
+            report_rows.append({"slug": prod.slug, "version": number, **row})
+        table.add_row(prod.slug, number, str(done.files), f"{done.published_fixed:,}",
+                      f"{done.fixed - done.published_fixed:,}", str(left))
+    console.print(table)
+    if not dry_run:
+        report = cfg.root_dir / "reports" / "repairs" / f"apply-{repair.id}-{at[:10]}.csv"
+        write_rows(report, ["slug", "version", "tree", "published", "files_changed", "fixed"], report_rows)
+        _refresh_status(manager)
+        console.print(f"Report: {escape(str(report))}\nIndex: {escape(str(_repairs_index(cfg, manager)))}")
+        console.print("[dim]Nothing is committed: review with `git diff` in each repo, then commit and push.[/dim]")
+    for line in failed:
+        console.print(f"[red]failed:[/red] {escape(line)}")
+    if failed:
+        raise click.exceptions.Exit(1)
 
 
 @main.command("fix-callouts")

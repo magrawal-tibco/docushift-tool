@@ -27,6 +27,8 @@ triage:
   - code: VERIFY_PUBLISHED_CALLOUT_UNRENDERED
     decision: ours
     ticket: DOCOPS-250
+    repair: R001
     reason: >-
       Notes written as GitHub alerts, which AEM does not render (Phase 56).
-      Repaired by `docushift fix-callouts`; this clears once AEM republishes.
+      Repair R001 rewrites them; this clears once AEM republishes. Excused only on
+      versions R001 has reached -- on a version it has not, it is an issue.
