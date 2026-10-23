@@ -26,11 +26,18 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | General resources repo created and pushed (4 API references) | DOCOPS-245: dated note → Done |
 | `fix-callouts` has run over output/, reframed/ and both repos, pushed, and labels show on staging | DOCOPS-250: dated note → Done |
 | Phase 55 pilot reviewed and all ibi products verified | DOCOPS-249 → Done; DOCOPS-150 (ibi staging check): dated note with the verify result |
+| Staging shows one Japanese and one German WebFOCUS page correctly | DOCOPS-148: dated note → Done |
+| Data Virtualization team answers the error report and the 3 versions are published | DOCOPS-254: dated note → Done |
 | A new phase is opened | One sub-task under the matching story, In Progress, no `retro` |
 
 **Left alone on purpose:** DOCOPS-8 is a Task where its siblings are Stories.
 
 **Log** (newest first, one line per session):
+
+- 2026-10-23 — Phase 57 logged as DOCOPS-253 (Done, 1 SP, under DOCOPS-11). DOCOPS-148 (translated WebFOCUS,
+  1 SP) → In Progress, due 28 Oct: all 27 language builds published to both loc- repos, pushed (main + wip);
+  staging check left. DOCOPS-254 (Data Virtualization run, In Progress, 0.25 SP, due 28 Oct, under DOCOPS-7).
+  DOCOPS-120 comment: GEMS and Graphical Rendezvous not for conversion.
 
 - 2026-10-23 — DOCOPS-251 (Done, 0.25 SP, under DOCOPS-7): Business Studio BPM 5.6.0/5.6.1/5.7.0 online
   help published after 3 approved folder renames; ActiveMatrix BPM 4.2.0 from a repaired package (case clash),
@@ -240,9 +247,10 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | 54 | A release-notes folder that copies the main guides | DOCOPS-239 |
 | 55 | `verify`: converted ibi docs against stg-docs.ibi.com | DOCOPS-249 (in progress) |
 | 56 | Note labels AEM shows; `fix-callouts` repairs published docs | DOCOPS-250 (in progress) |
+| 57 | Translated help to the `loc-` tree (`--locale`) | build DOCOPS-253; runs DOCOPS-148 (in progress) |
 
 Other logged work: Jira reconcile and this handoff DOCOPS-208; stakeholder status page DOCOPS-197; TIBCO family reassignments DOCOPS-120
-(in progress, progress kept as comments); ibi family regroup DOCOPS-207; catalog refresh and 2026-10-09 end-of-support report DOCOPS-215; cloud family run DOCOPS-222; EMS, FTL and Messaging run DOCOPS-223; Data Management run DOCOPS-238; FTL, ActiveSpaces, EMS and Messaging re-run DOCOPS-240; Hawk run DOCOPS-241; Mainframe run DOCOPS-242; iProcess run DOCOPS-243; Platform run DOCOPS-244; General run DOCOPS-245; hand-obtained packages and first BPM push DOCOPS-246; last 6 download failures DOCOPS-247; Statistica run DOCOPS-128.
+(in progress, progress kept as comments); ibi family regroup DOCOPS-207; catalog refresh and 2026-10-09 end-of-support report DOCOPS-215; cloud family run DOCOPS-222; EMS, FTL and Messaging run DOCOPS-223; Data Management run DOCOPS-238; FTL, ActiveSpaces, EMS and Messaging re-run DOCOPS-240; Hawk run DOCOPS-241; Mainframe run DOCOPS-242; iProcess run DOCOPS-243; Platform run DOCOPS-244; General run DOCOPS-245; hand-obtained packages and first BPM push DOCOPS-246; last 6 download failures DOCOPS-247; Statistica run DOCOPS-128; Data Virtualization run DOCOPS-254.
 
 ## Open run tasks (as of 2026-10-08)
 
