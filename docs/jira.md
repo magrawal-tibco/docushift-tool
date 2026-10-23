@@ -1,6 +1,6 @@
 # Jira Tracking — What Is Logged in DOCOPS
 
-> **Last reconciled:** 2026-10-22, against Jira and `config/versions.csv`.
+> **Last reconciled:** 2026-10-23, against Jira and `config/versions.csv`.
 > Conventions (site, cloud ID, story points, transitions, who owns what) live in
 > `C:\github\confluence-mcp\reports\docushift-claude-atlassian-context.md`; this file
 > does not repeat them. It answers one question: **is this piece of work in Jira, and where?**
@@ -31,6 +31,10 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 **Left alone on purpose:** DOCOPS-8 is a Task where its siblings are Stories.
 
 **Log** (newest first, one line per session):
+
+- 2026-10-23 — DOCOPS-251 (Done, 0.25 SP, under DOCOPS-7): Business Studio BPM 5.6.0/5.6.1/5.7.0 online
+  help published after 3 approved folder renames; ActiveMatrix BPM 4.2.0 from a repaired package (case clash),
+  all but online help published (111 long-path pages, with 4.3.0). Validate: 0 errors for both.
 
 - 2026-10-22 — DOCOPS-250 note: Statistica notes fixed (6,199 labels in output/ and reframed/, 4,175 in
   en-us-spotfire-statistica-userdocs), pushed as 0114ea66; stays In Progress for staging check and other families.

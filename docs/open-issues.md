@@ -450,46 +450,25 @@ is refreshed in bulk.
 
 ## ActiveMatrix BPM
 
-### 4.3.0 online help not published: 179 pages too deep for Windows
+### 4.3.0 and 4.2.0 online help not published: pages too deep for Windows
 
 - **Status:** Open
 - **Owner:** unassigned
 - **Raised:** 17 Oct 2026
-- **Blocks publishing:** yes, for 4.3.0's online help (its PDFs and API reference are published)
+- **Blocks publishing:** yes, for the online help of 4.3.0 and 4.2.0 (their PDFs and API references are published)
 
 The help nests topics up to nine folders deep, and 179 of its 1,340 pages would end up past
 Windows' 260-character path limit in the publishing repo. That is too many to rename by hand,
 so it needs a rule, planned as a phase. The main guide's folder is also named
 "tibco-activematrix-bpm-2", which is a poor web address in its own right.
 
----
-
-### 4.2.0 is refused at unpacking: two different files with one name
-
-- **Status:** Open
-- **Owner:** unassigned
-- **Raised:** 15 Oct 2026
-- **Blocks publishing:** yes, for 4.2.0
-
-The package holds RESTServiceConfig.properties and restserviceconfig.properties in the
-same folder, with different contents (507 and 568 bytes). Windows cannot keep both, and the
-tool does not pick one on a writer's behalf. It is a configuration sample, not a help page,
-so keeping either is likely harmless, but someone has to say which. 4.3.0 converted.
-
----
-
-## Business Studio BPM Edition
-
-### 5.6.0, 5.6.1 and 5.7.0 online help waits on three shorter folder names
-
-- **Status:** Waiting, on approval of the proposed names
-- **Owner:** unassigned
-- **Raised:** 17 Oct 2026
-- **Blocks publishing:** yes, for these three versions' online help (their PDFs are published)
-
-Three pages per version would end up past Windows' 260-character path limit. Shorter names
-for three folders in the case-data chapter fix all of them; the proposal is drafted for
-review. 4.3.5 is published.
+**4.2.0 joined on 22 Oct 2026.** It used to be refused at unpacking because two copies of a
+sample settings file differed only in letter case. The user chose to keep
+RESTServiceConfig.properties, the spelling the help links to and the only one 4.3.0 ships,
+and a repaired copy of the package without the other one was supplied by hand. It then
+unpacked, converted and merged (1,286 pages), and its PDFs, release notes and API reference
+were published. Its online help is held the same way: 111 pages over the limit, longest 371.
+The same naming rule will fix both versions.
 
 ---
 
