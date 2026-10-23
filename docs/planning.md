@@ -1658,7 +1658,8 @@ the suite pass.*
   to about 2.5 minutes. The pattern also matches inside fenced code, so versions
   already recorded as no longer needing the repair are counted exactly, and a code
   sample never turns them back to `needed`.
-- **CRLF:** the first pattern ended `[[:blank:]]*$`, which a CRLF line's `` fails, so
+- **CRLF:** the first pattern ended `[[:blank:]]*$`, which a CRLF line's `
+` fails, so
   a CRLF checkout read as having no notes. It now ends `[[:space:]]*$`. Four ibi repos
   hold 4,110 CRLF Markdown files; checked, they carry the predecessor's `> **Note:**`
   and no `[!NOTE]`, so the counts did not change.
@@ -1677,6 +1678,81 @@ the suite pass.*
   included). `ruff` clean.
 - **Left:** R001 waves, run by the user: `repair apply R001 --family ...`, commit, push,
   then `verify` after AEM republishes.
+
+### Phase 60: Every Redirect Lands Where the Old Page Was — **Planned 2026-10-23; design to be finalised; DOCOPS-271**
+
+**Why.** Every published version carries a `301.yml` (91 in `ibi-docs-aem`, 532 in
+`tibco-docs-aem`), and a doc-class `301.yml` assembles them for the site. Nothing checks
+them end to end. `verify` reads a `301.yml` only to find each page's old URL. A wrong row
+sends a reader from a working page to a 404 or the wrong topic, and nobody sees it until
+cutover.
+
+**What it checks, per version, for ibi and TIBCO:**
+
+1. **Coverage.** Every page the old site serves (the cached Coveo sitemap, Phase 33) has a
+   row, or is named with a reason (orphan, API tree, landing page).
+2. **The `from` side was real.** Each `from` is a URL the sitemap lists. A sample is also
+   fetched live, as `verify` does now.
+3. **The `to` side exists.** It resolves to a page in the published tree, after the
+   doc-class prefix (`us/en/...`, `.html`) is undone.
+4. **Same topic.** The `to` page holds the `from` page's text, by `verify`'s sentence
+   comparison. A row into the wrong page is the failure this phase exists for.
+5. **Served.** On staging, `to` answers with the page and not the home page, where the BU
+   has a staging host. TIBCO has none yet (DOCOPS-257), so TIBCO gets checks 1–4.
+
+**Decisions to make:**
+
+- A sub-command (`verify redirects`) or part of every `verify` run. Proposed: part of
+  `verify`, with its own findings (`VERIFY_REDIRECT_*`), so a version's status covers its
+  redirects and the triage file and waves apply unchanged.
+- Whether to check the doc-class `301.yml` (what AEM would serve) or only the per-version
+  files. Proposed: both, since a sync bug would only show in the assembled one.
+- Testing the redirect itself (request `from`, expect a 301 to `to`) can only happen
+  after cutover. Out of scope; recorded as a follow-up.
+
+### Phase 61: Help Buttons Keep Working — a Redirect Map for CSH URLs — **Planned 2026-10-23; design to be finalised; DOCOPS-272**
+
+**Why.** A product's Help button opens a context-sensitive help (CSH) URL on
+docs.tibco.com. `convert` already records each identifier's topic in `csh.yml` (313
+in `tibco-docs-aem`, 40 in `ibi-docs-aem`). But `301.yml` only maps page URLs, so at
+cutover every Help button lands on a dead page.
+
+**What it produces:** a `csh-301.yml` beside each version's `301.yml`, one row per
+identifier. Each row has the old CSH URL in the form the product calls it, and the new
+page URL with its anchor. `sync` assembles it at doc-class level the way it does
+`301.yml`.
+
+**The design question that decides the shape:** Flare's CSH URLs carry the identifier
+in the fragment (`Default.htm#cshid=<id>`, or `Default_CSH.htm#<alias>`). A browser
+never sends the fragment to the server, so a server-side 301 cannot see it. The options
+are a client-side page at the old address that reads the fragment and forwards, query-form
+URLs that AEM can match, or a per-identifier map that the AEM owners serve some other way.
+**This needs the AEM owners' answer before building.** Steps:
+
+1. Measure the CSH URL forms in the corpus, per engine (Flare `cshid=`, `Default_CSH.htm`,
+   WebWorks and DITA maps), and which products' help actually calls which form.
+2. Agree the served form with the AEM owners.
+3. Write `csh-301.yml` in `convert`/`reframe`, and assemble it in `sync`.
+
+### Phase 62: Verify CSH — Every Help Identifier Opens the Same Topic — **Planned 2026-10-23; design to be finalised; DOCOPS-273**
+
+**Why.** `csh validate` (and `validate`'s `CSH_*` checks) prove that `csh.yml` resolves
+inside the local tree. Nothing proves that an identifier opens the topic it opened on
+docs.tibco.com, or that staging serves it.
+
+**What it checks, per version, for ibi and TIBCO:**
+
+1. **Old side.** A sample of identifiers is opened live through the old site's CSH
+   entry point. The topic it opened is recorded (the CSH readers already know the
+   source topic; the live check confirms the old site agrees).
+2. **New side.** The identifier's target page exists, its anchor exists, and the text
+   matches the old topic, using `verify`'s comparison.
+3. **Served.** On staging, the target page and anchor are served.
+4. **Redirect.** Once Phase 61 exists, the `csh-301.yml` row for the identifier lands on
+   the same page and anchor.
+
+**Decision:** part of `verify` (findings `VERIFY_CSH_*`, in the same status and triage).
+Checks 1–3 do not depend on Phase 61, and are built first.
 
 ---
 

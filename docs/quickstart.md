@@ -1,7 +1,7 @@
 # Quick Start: One Product, End to End
 
 > **Document Status:** Living Quick Start
-> **Last Updated:** 2026-10-05
+> **Last Updated:** 2026-10-23
 
 This is the shortest path from an empty checkout to published-shaped folders for **one
 product**, so you can see the whole pipeline work before pointing it at the catalog. It
@@ -231,7 +231,57 @@ docushift report   # what happened, from the last runs
 
 ---
 
-## 9. Share the status (`reports/conversion-status.html`)
+## 9. Prove nothing was lost (`verify`)
+
+```bash
+docushift verify --target-dir ../tibco-docs-aem/ --product tibco-enterprise-message-service --version 10.5.1
+```
+
+`validate` checks that the published tree is consistent with itself. `verify` checks
+it against where it came from. Every old page is compared with the page it became:
+topic, text sentence by sentence, pictures and menu position. A sample of live
+docs.tibco.com pages is compared too, and so is the staging site for business units
+that have one (ibi today; TIBCO is checked locally and live only).
+
+The result is one status per version in `versions.csv` (`_verify_status`): `clean`,
+`explained`, `issues`, `lost`, `stale` or `not-verified`. Per-version reports are under
+`reports/verify/`, with every version on one page in `reports/verify/INDEX.html`. A
+finding that is known and decided goes in `config/verify-triage.yaml`, so it stops
+counting as new. Requests are cached under `cache/verify/`, so a second run is fast.
+
+**`lost` on a version published before its latest conversion usually means the published
+copy is stale, not that conversion lost anything.** Check `_sync_status` first: if it reads
+`out-of-date`, re-run `sync` and verify again. See
+[User Guide §4](user-guide.md#did-anything-get-lost-verify).
+
+---
+
+## 10. Fix a known problem everywhere (`repair`)
+
+```bash
+docushift repair list
+docushift repair census --target-dir ../tibco-docs-aem/
+docushift repair apply R001 --target-dir ../tibco-docs-aem/ --product tibco-enterprise-message-service --dry-run
+docushift repair apply R001 --target-dir ../tibco-docs-aem/ --product tibco-enterprise-message-service
+```
+
+Some problems the converter used to make are in every version converted before the fix.
+R001 is the first: notes written in a form AEM shows without their "Note" label.
+Re-converting for that is the wrong cost, so each fix is a registered **repair**. It
+changes only the matched lines, in the published repo, `output/` and `reframed/` together.
+
+`list` shows each repair and how many versions need it. `census` counts it in every
+published version (read-only). `apply` fixes the versions that need it. Each version
+moves `needed` → `fixed` → `confirmed` (`confirmed` once `verify` sees the fix on
+staging), tracked in `versions.csv`'s `_repairs_pending`.
+
+**`apply` never commits** and refuses a version synced after its last census, so run
+`census` after every `sync`. See
+[User Guide §4](user-guide.md#fixing-a-generic-problem-in-every-published-version-repair).
+
+---
+
+## 11. Share the status (`reports/conversion-status.html`)
 
 ```bash
 python scratch/build_conversion_status.py
@@ -265,6 +315,8 @@ docushift convert         --product tibco-enterprise-message-service --version 1
 docushift reframe         --product tibco-enterprise-message-service --version 10.5.1
 docushift sync            --product tibco-enterprise-message-service --version 10.5.1 --target-dir ../tibco-docs-aem/
 docushift validate        --target-dir ../tibco-docs-aem/
+docushift verify          --target-dir ../tibco-docs-aem/ --product tibco-enterprise-message-service --version 10.5.1
+docushift repair census   --target-dir ../tibco-docs-aem/
 ```
 
 ## Scaling up from here
@@ -287,5 +339,7 @@ in `versions.csv`, then run the five pipeline stages — `download`, `extract`, 
 `--dry-run` to any stage first to see the selection without writing anything.
 
 Each stage exits **1** when a version in it failed, or when the selection matched nothing,
-so chaining them with `&&` stops at the first stage that lost a version. The full table is
+so chaining them with `&&` stops at the first stage that lost a version. `verify` and
+`repair apply` take `--target-dir` plus the same `--bu` / `--family` / `--product` /
+`--version` selectors, and `--max` for waves. The full table is
 under "Exit codes" in [User Guide §4](user-guide.md#4-end-to-end-migration-commands).

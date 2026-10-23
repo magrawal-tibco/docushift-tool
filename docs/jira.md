@@ -26,6 +26,12 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | General resources repo created and pushed (4 API references) | DOCOPS-245: dated note → Done |
 | `fix-callouts` has run over output/, reframed/ and both repos, pushed, and labels show on staging | DOCOPS-250: dated note → Done |
 | Phase 55 pilot reviewed and all ibi products verified | DOCOPS-249 → Done; DOCOPS-150 (ibi staging check): dated note with the verify result |
+| An ibi family's versions all read `clean` or `explained` | Its sub-task (DOCOPS-258–263): dated note → Done |
+| Container Editions re-synced and re-verified | DOCOPS-258: dated note with the new statuses |
+| An ibi family's R001 is applied, pushed and confirmed by `verify` | Its sub-task (DOCOPS-264–269): dated note → Done |
+| Container Editions re-synced | Re-run `repair census`; dated note on DOCOPS-267 with the count |
+| Phase 60, 61 or 62 is planned in full and approved | Its sub-task (DOCOPS-271–273) → In Progress |
+| Phase 60 built | DOCOPS-270 → In Progress |
 | AEM owners fix alt text with `/`, `:` or `⌘` and a verify re-run shows none dropped | DOCOPS-255: dated note → Done |
 | Phase 58 built (records, triage, selectors) and the first ibi wave summarised | DOCOPS-256 → In Progress while building, then Done |
 | stg-docs.tibco.com has real content | DOCOPS-257: run the TIBCO staging probe and staging pilots |
@@ -36,6 +42,12 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 **Left alone on purpose:** DOCOPS-8 is a Task where its siblings are Stories.
 
 **Log** (newest first, one line per session):
+
+- 2026-10-23 — Via docops-plan.csv: R001 per ibi family DOCOPS-264–269 (under DOCOPS-144, 0.25 each), ibi redirect
+  lists DOCOPS-270 (under DOCOPS-149, 0.5), tool phases 60–62 DOCOPS-271–273 (under DOCOPS-96, 1 each). All Backlog.
+
+- 2026-10-23 — ibi verification split per family: DOCOPS-258–263 under DOCOPS-149 (0.25 SP each, WebFOCUS 0.5),
+  via docops-plan.csv. DOCOPS-258 (Container Editions) In Progress: first wave, 20 versions `lost` from a stale publish.
 
 - 2026-10-23 — DOCOPS-256 note: Phase 58 built (9a3af4d); Phase 59 (repairs) built and logged on it, no new task.
   R001 census: 538 versions / 97,694 notes needed, 18 fixed. DOCOPS-256 stays Backlog until the first wave.
@@ -259,6 +271,9 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | 56 | Note labels AEM shows; `fix-callouts` repairs published docs | DOCOPS-250 (in progress) |
 | 58 | `verify` results kept, triaged, tracked per version; TIBCO readiness | DOCOPS-256, DOCOPS-257 |
 | 59 | Repairs: generic fixes registered, censused and applied per version | folded: DOCOPS-256 |
+| 60 | `verify` checks redirects (`301.yml`), ibi and TIBCO (planned) | DOCOPS-271 |
+| 61 | Redirect map for CSH (Help button) URLs (planned) | DOCOPS-272 |
+| 62 | `verify` checks CSH identifiers, ibi and TIBCO (planned) | DOCOPS-273 |
 | 57 | Translated help to the `loc-` tree (`--locale`) | build DOCOPS-253; runs DOCOPS-148 (in progress) |
 
 Other logged work: Jira reconcile and this handoff DOCOPS-208; stakeholder status page DOCOPS-197; TIBCO family reassignments DOCOPS-120
@@ -279,11 +294,19 @@ Other logged work: Jira reconcile and this handoff DOCOPS-208; stakeholder statu
 
 One row per `docushift verify` wave. The per-version results are in
 `reports/verify/INDEX.html` and `versions.csv` (`_verify_status`); this table only
-says which wave covered what and where it is logged.
+says which wave covered what and where it is logged. Each ibi family's verification is its
+own sub-task under DOCOPS-149: Container Editions DOCOPS-258, Data Intelligence & iWay Service
+Manager DOCOPS-259, FOCUS DOCOPS-260, Legacy DOCOPS-261, WebFOCUS DOCOPS-262, WebFOCUS
+Reporting Server DOCOPS-263. DOCOPS-256 is the tool, not the waves.
+Applying R001 (note labels) to each ibi family is its own sub-task under DOCOPS-144 (ibi: convert
+content): WebFOCUS DOCOPS-264, Reporting Server DOCOPS-265, FOCUS DOCOPS-266, Container Editions
+DOCOPS-267, Data Intelligence & iWay Service Manager DOCOPS-268, Legacy DOCOPS-269. Checking the
+ibi redirect lists is DOCOPS-270 (under DOCOPS-149), and waits on Phase 60.
 
 | Wave | Date | Selection | Versions | Outcome | Jira |
 |---|---|---|---|---|---|
 | Pilot | 2026-10-23 | ibi™ AI Assistant 9.3.8, local + staging + live | 1 | explained (5 alt texts → DOCOPS-255; 61 note labels → DOCOPS-250) | DOCOPS-249 |
+| Container Editions | 2026-10-23 | `--bu ibi --family container-editions`, local + staging + live | 20 | all `lost`: published copy (5 Oct) predates the conversion (7 Oct); front pages and link text are the old copy's losses. Re-sync, then re-check. Staging serves 2 of 20 | DOCOPS-258 |
 
 ## Not in Jira, by choice
 
