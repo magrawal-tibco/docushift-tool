@@ -606,6 +606,8 @@ not eligible; 6.2.0 and 6.1.2 are published (decided by the user, 21 Oct 2026).
 On 21 Oct 2026 the developers withdrew 22 Statistica and Data Science versions after
 many had already been published. Publishing only adds and replaces versions, so the
 withdrawn ones stayed. This time both Statistica publishing folders were deleted and
+republished, leaving the 19 approved versions. A family that is already pushed cannot be
+cleared that way, so the tool needs to remove withdrawn versions itself.
 
 ---
 
@@ -629,5 +631,3 @@ Decided by the user, 22 Oct 2026: ask the docs team for packages rather than cop
 pages from the live site. When a package arrives it goes through the normal
 conversion into the matching translated repository. Data Virtualization's,
 `loc-spotfire-data-virtualization-userdocs`, does not exist yet and must be created first.
-republished, leaving the 19 approved versions. A family that is already pushed cannot be
-cleared that way, so the tool needs to remove withdrawn versions itself.
