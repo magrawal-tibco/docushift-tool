@@ -943,7 +943,7 @@ version's output changes; `ruff` and the suite pass.*
 
 ---
 
-### Phase 55: Verify — Nothing Lost Between docs.tibco.com and stg-docs.ibi.com — **Planned 2026-10-22**
+### Phase 55: Verify — Nothing Lost Between docs.tibco.com and stg-docs.ibi.com — **Built 2026-10-23; staging pilot pending**
 
 **Why.** ibi docs are converted and published through AEM to stg-docs.ibi.com. The
 business needs evidence that **no topic, text or image was dropped**, and that **the
@@ -1092,6 +1092,53 @@ The probe read `home.html` and `user_guide/chapter-2.html`.
 | **Alt text dropped** (confirmed) | Staging serves no `alt` on 2 of the 4 images in chapter-2 (`hub-slash-menu`, `hub-context`); the Markdown has alt text for all 4. The two are the only ones on the page whose alt contains `⌘` or `:`, a guess the pilot tests on all 18 images. B adds **`VERIFY_PUBLISHED_ALT_DROPPED`** (warning): an image whose Markdown alt text is missing on staging |
 | **Note boxes not rendered** (confirmed; fixed by Phase 56) | All 5 GFM alerts in chapter-2 (`> [!TIP]`, `> [!NOTE]`) render as a plain quote holding an empty link (`<a class="xref" data-attr-keyref="!TIP"></a>`). The text survives; the "Tip"/"Note" label and the box are gone. Every converted note uses this syntax (`transforms/callouts.py`; ~1,700 in the corpus, `architecture.md` §5.1). The predecessor wrote `> **Note:**`, which AEM shows as a bold label. B adds **`VERIFY_PUBLISHED_CALLOUT_UNRENDERED`** (warning), one per page with the count. The fix (a different syntax from the converter, or GFM alert support in AEM) is a decision for the user and the AEM owners, outside this phase |
 
+
+#### As built (2026-10-23)
+
+- `src/docushift/verify/`: `text.py` (blocks, normalising, sentences, 8-word shingles),
+  `images.py`, `toc.py` (`by_page` for A5, `by_title` for B4), `fetch.py` (throttled,
+  cached under `cache/verify/`), `published.py` (B), `live.py` (C), `driver.py`,
+  `report.py`. `docushift verify --target-dir [--product] [--version] [--skip-published]
+  [--live-sample N] [--base-url] [--refresh]`. `state.py` gains `latest_counts`;
+  `publishing.yaml` gains `verify_base_url: "https://stg-docs.ibi.com"`.
+- 20 codes under a new `verify` stage (§7.5). Two more than planned:
+  `VERIFY_TOC_UNCHECKED` and `VERIFY_TOPIC_UNFILED`, and `VERIFY_LIVE_UNCHECKABLE` for
+  the sign-in case.
+- **Changed from the plan:**
+  - **Known drops are per topic only where provable.** The conversion's drop findings
+    are per-version counts with no path (`NAV_NODE_DROPPED` "58 node(s)"), so they cannot
+    excuse one topic. A page under `unfiled/` is an orphan (`VERIFY_TOPIC_UNFILED`). A TOC
+    row with no page, or repeating its parent's page, is skipped. Anything else is
+    `VERIFY_TOPIC_MISSING`, with the version's recorded drop counts in the message.
+  - **Staging URLs come from the served menu, not from a rule.** The menu is read once
+    per version and matched to `toc.yml` by title, which gives each page's URL.
+  - **The old-TOC check (A5) reads Flare only.** Other engines get `VERIFY_TOC_UNCHECKED`.
+    96 ibi versions are recorded as Flare; DITA, DocBook and WebWorks readers are a
+    follow-up.
+  - **The supporting counts (A4) are not built.** Merged pages make heading and table
+    counts differ by design, so as warnings they would only be noise.
+- **Deliberate converter changes, applied up front:**
+  - the Flare landing page is cut at the converter's own `PORTAL_BLOCKS` and stripped of
+    `LANDING_CHROME`;
+  - each engine's `CHROME_SELECTORS` are removed inside the container;
+  - the help skin's pictures (`Skins/`) are not content;
+  - HTML comments are not text, and Markdown inline code is read verbatim.
+- **Pilot, local (2026-10-23):** ibi™ AI Assistant 9.3.8, 24 old pages, **0 findings**:
+  every page 100% text, every image found, the TOC's structure equal.
+  - Before the tuning above, the run reported a landing page missing 7 sentences and
+    4 images, and 4 pages missing a sentence each. Every one was traced to a deliberate
+    cut or to a reading error in `verify`, not a loss.
+  - Mutation check on a copy of the published folder: deleting one paragraph, one image
+    reference and moving one TOC entry gave exactly `VERIFY_TEXT_DROPPED` (quoting both
+    sentences), `VERIFY_IMAGE_MISSING` and `VERIFY_TOC_MOVED`.
+- Staging parsing is tested on the probe's saved page: the 23-entry menu, the
+  page-path check and the 5 unlabelled notes.
+- Tests: `tests/unit/test_verify.py`, 24 tests. `ruff` clean.
+- **Left:**
+  - the staging and live runs over the pilot (the user, as a `!` command), then all ibi
+    products;
+  - old-TOC readers for the other engines.
+
 ---
 
 ### Phase 56: A Note Shows Its Label on AEM — **Built 2026-10-22; runs pending**
@@ -1182,7 +1229,7 @@ notes excepted and listed); the staging pilot shows the labels; `ruff` and the s
 
 ---
 
-### Phase 57: Translated Help Is Published to the `loc-` Tree — **Built 2026-10-22; WebFOCUS Client and App Studio published, Reporting Server pending**
+### Phase 57: Translated Help Is Published to the `loc-` Tree — **Done 2026-10-23; all 27 roots committed, push and staging check pending**
 
 **Why.** The user, 2026-10-22: languages other than English must be migrated too, for IBI
 as well as TIBCO. Today every non-English build is skipped on purpose (`LOCALIZED_ROOT_SKIPPED`,
@@ -1391,7 +1438,14 @@ Approved by the user 2026-10-22. Steps 1-6 done; steps 7-8 are the user's runs.
   The inventory's sample read de/fr/es 9.3.8 as 97–100% English, so the other half differs
   from the English build without being translated. The figure is a floor.
 
-  Reporting Server waits for `loc-ibi-wf-reporting-server-userdocs` and a re-download.
+  Reporting Server, 2026-10-23: the five 9.3.x packages were re-downloaded and re-extracted, then
+  Japanese converted, synced and committed (`15711ad` in `loc-ibi-wf-reporting-server-userdocs`,
+  not pushed). 1,746–2,904 pages per version; up to 792 images from English. 0 errors in the
+  Japanese folders. The 15 `LINK_BROKEN` the run reported are in the English folders, which
+  `validate` walks too. Share: 9.3.0 10% and 9.3.8 29% identical to English; 9.3.5–9.3.7 0%.
+  Japanese 9.3.6 has 27 unresolved images against English's 1: old screenshots only the
+  Japanese pages still reference, shipped in neither build. All 27 eligible localized roots
+  are now published.
 - **Codes:** `LOCALIZED_UNTAGGED_ROOT_LEFT`, `LOCALIZED_SHARE_UNTRANSLATED`,
   `LOCALIZED_LABEL_UNTRANSLATED` and `LOCALIZED_IMAGE_BORROWED`, registered in §7.5.
   Register 91 → 95.
@@ -1533,6 +1587,26 @@ The concrete deliverable of §7.1: every deferred "report line" in the three doc
 | `ORIGIN_PATH_TOO_SHORT`³⁴ | warn | convert | Converted topics whose source path is shorter than the template's `drop_segments`, so they have no `301.yml` row; counted per source | Phase 34 (R1-07) |
 | `CONVERT_FINDINGS_IN_EARLIER_RUN`³⁴ | note | convert | A `current` version whose tree was built by an earlier run that recorded errors or warnings for it; names that run, so `report --run last` is not silent about a tree that still has them | Phase 34 (X3-11) |
 | `REFRAME_FINDINGS_IN_EARLIER_RUN`³⁴ | note | reframe | The same for a `current` merged tree | Phase 34 (X3-11) |
+| `VERIFY_TOPIC_MISSING`⁵⁵ | error | verify | An old TOC topic or converted topic with no published page and no recorded reason; the message carries the version's recorded drop counts | Phase 55 (A1) |
+| `VERIFY_TEXT_DROPPED`⁵⁵ | error | verify | Whole sentences of an old page found nowhere on the page it became; the message quotes them | Phase 55 (A2) |
+| `VERIFY_IMAGE_MISSING`⁵⁵ | error | verify | An old page's picture, matched by content hash, not referenced by the page it became, or referenced and not in the tree | Phase 55 (A3) |
+| `VERIFY_TOC_ENTRY_MISSING`⁵⁵ | error | verify | An old TOC entry whose page has no toc.yml entry | Phase 55 (A5) |
+| `VERIFY_TOC_MOVED`⁵⁵ | warn | verify | A toc.yml entry under a different parent than in the old TOC | Phase 55 (A5) |
+| `VERIFY_TOC_ORDER`⁵⁵ | warn | verify | Siblings in a different order than in the old TOC, once per parent | Phase 55 (A5) |
+| `VERIFY_TOC_TITLE_CHANGED`⁵⁵ | note | verify | A toc.yml entry titled differently from the old TOC's | Phase 55 (A5) |
+| `VERIFY_TOC_UNCHECKED`⁵⁵ | note | verify | A version whose old TOC verify cannot read yet (engine other than Flare); its TOC structure was not compared | Phase 55, as built |
+| `VERIFY_TOPIC_UNFILED`⁵⁵ | note | verify | Converted topics kept under unfiled/ (TOC_ORPHAN): in the tree, in no menu | Phase 55, known drops |
+| `VERIFY_PUBLISHED_PAGE_MISSING`⁵⁵ | error | verify | A published page, or the version itself, not served by staging (non-200, or the home-page fallback) | Phase 55 (B1) |
+| `VERIFY_PUBLISHED_TEXT_DIFF`⁵⁵ | warn | verify | Sentences of a published page missing from what staging serves | Phase 55 (B2) |
+| `VERIFY_PUBLISHED_IMAGE_BROKEN`⁵⁵ | error | verify | A page's image not on the served page, not served, or served with other bytes | Phase 55 (B3) |
+| `VERIFY_PUBLISHED_ALT_DROPPED`⁵⁵ | warn | verify | An image whose Markdown alt text staging serves empty | Phase 55 (probe) |
+| `VERIFY_PUBLISHED_CALLOUT_UNRENDERED`⁵⁵ | warn | verify | GitHub alerts AEM rendered with no label, counted per page; fix-callouts repairs them (Phase 56) | Phase 55 (probe) |
+| `VERIFY_PUBLISHED_TOC_ENTRY_MISSING`⁵⁵ | error | verify | A toc.yml entry with no row in the menu staging serves | Phase 55 (B4) |
+| `VERIFY_PUBLISHED_TOC_MOVED`⁵⁵ | warn | verify | A toc.yml entry the served menu shows under another parent | Phase 55 (B4) |
+| `VERIFY_PUBLISHED_TOC_ORDER`⁵⁵ | warn | verify | Menu siblings in a different order than toc.yml, once per parent | Phase 55 (B4) |
+| `VERIFY_PUBLISHED_TOC_TITLE_CHANGED`⁵⁵ | note | verify | A menu row titled differently from its toc.yml entry | Phase 55 (B4) |
+| `VERIFY_LIVE_DRIFT`⁵⁵ | warn | verify | A sampled docs.tibco.com page holding sentences the downloaded copy lacks; updated since download, or not what was downloaded | Phase 55 (C) |
+| `VERIFY_LIVE_UNCHECKABLE`⁵⁵ | note | verify | Sampled docs.tibco.com pages that answered with the sign-in page or an error | Phase 55 (C) |
 
 ---
 

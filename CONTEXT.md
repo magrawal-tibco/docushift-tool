@@ -67,7 +67,7 @@ docushift-tool/
 ├── src/                    # Source code
 │   └── docushift/
 │       ├── __init__.py
-│       ├── cli.py          # Click CLI entrypoint (catalog, download, extract, convert, reframe, sync, validate, fix-callouts, csh, archive, status, report, doctor)
+│       ├── cli.py          # Click CLI entrypoint (catalog, download, extract, convert, reframe, sync, validate, verify, fix-callouts, csh, archive, status, report, doctor)
 │       ├── config.py       # Configuration & taxonomy manager
 │       ├── catalog.py      # Additive Catalog Manager (CSV read/write + snapshot 3-way merge)
 │       ├── state.py        # State engine (SQLite: fetch snapshots, etags, sizes, per-stage status)
@@ -112,6 +112,15 @@ docushift-tool/
 │       │   ├── links.py    # Relative links resolve; absolute ones only with --check-external
 │       │   ├── references.py # Asset references against the files actually placed
 │       │   └── csh.py      # Every identifier in csh.yml still lands on a page that exists
+│       ├── verify/         # `verify` (Phase 55): old site vs published tree vs staging, nothing lost
+│       │   ├── text.py     # Blocks, normalising, sentences, 8-word shingles: what text a page lost
+│       │   ├── images.py   # Pictures matched by content hash, so a rename still matches
+│       │   ├── toc.py      # TOC as a tree: old vs toc.yml by page, toc.yml vs served menu by title
+│       │   ├── published.py # stg-docs.ibi.com: menu, page check, unlabelled notes, alt text, image bytes
+│       │   ├── live.py     # A sample of docs.tibco.com against the downloaded copy
+│       │   ├── fetch.py    # Throttled GETs, cached under cache/verify/
+│       │   ├── driver.py   # Verifier: one published version folder, A then B then C
+│       │   └── report.py   # reports/verify-<product>.csv and its HTML summary
 │       ├── transforms/     # GFM Transformations (engine-neutral)
 │       │   ├── callouts.py # Note/Warning/Tip to `> **Note:**`; fix_markdown repairs old `> [!NOTE]`
 │       │   ├── tables.py   # Table normalizer
@@ -221,16 +230,17 @@ Jira (DOCOPS) status and what to file next: the handoff at the top of [`docs/jir
    pass 260 characters is copied under a shorter name, and a topic that leads two pages can be
    named per page in `rename-map.csv`. BusinessConnect: 39 of 44 versions published; the last 5
    wait for this run. See [`planning.md`](docs/planning.md#1-active-phases).
-0g. **Phase 55, planned 2026-10-22**: `docushift verify` proves that converted ibi docs lost no
-   topic, text, image or TOC structure on the way from docs.tibco.com to stg-docs.ibi.com. Next:
-   a read-only probe of the staging site, then a pilot product. See [`planning.md`](docs/planning.md#1-active-phases).
+0g. **Phase 55, built 2026-10-23; staging pilot pending**: `docushift verify` proves that converted
+   ibi docs lost no topic, text, image or TOC structure on the way from docs.tibco.com to
+   stg-docs.ibi.com. The pilot (ibi™ AI Assistant) is clean locally. Next: the staging and live run,
+   then all ibi products. See [`planning.md`](docs/planning.md#1-active-phases).
 0h. **Phase 56, built 2026-10-22; runs pending**: AEM does not render GitHub alerts, so notes lost
    their "Note"/"Tip" label. The converter now writes `> **Note:**` with the text on the next line;
    `fix-callouts` repairs `output/`, `reframed/` and the published repos with no re-conversion.
 0i. **Phase 57, built 2026-10-22**: translated help (61,425 pages in 27 Japanese,
    German, French and Spanish builds, all inside IBI WebFOCUS packages) converts per language
    with `docushift --locale ja-jp …` into `loc-ibi-*-userdocs`, with its own
-   `cache/state-<locale>.db`. 22 Client/App Studio language versions are committed to `loc-ibi-webfocus-userdocs` (not pushed); Reporting Server waits for its repository. See [`planning.md`](docs/planning.md#1-active-phases).
+   `cache/state-<locale>.db`. All 27 language builds are committed: 22 Client/App Studio in `loc-ibi-webfocus-userdocs`, 5 Reporting Server in `loc-ibi-wf-reporting-server-userdocs` (neither pushed). See [`planning.md`](docs/planning.md#1-active-phases).
 1. **Phase 40, built; two network runs left**: `download` takes each version's package
    name from the Coveo sitemap, so pre-rebrand and renamed versions stop failing
    (96 of the 1,435 still to download). Run `catalog sitemap` before a large download. See [`planning.md`](docs/planning.md#1-active-phases).
