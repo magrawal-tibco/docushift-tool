@@ -182,8 +182,11 @@ def test_the_register_carries_every_row_of_7_5() -> None:
     identical to the English build's) and `LOCALIZED_LABEL_UNTRANSLATED` (a label
     with no text for the locale), and a fourth after its pilot,
     `LOCALIZED_IMAGE_BORROWED` (an image the build lacks, copied from the English).
+    Phase 55 adds twenty at once under a new `verify` stage, for the same reason
+    7b did: it is the first command whose job is to compare the old site, the
+    published tree and staging, so none of its conditions had a code before.
     """
-    assert len(REGISTRY) == 95
+    assert len(REGISTRY) == 115
 
 
 def test_severity_comes_from_the_registry_and_not_from_the_call_site() -> None:

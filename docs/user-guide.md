@@ -1724,6 +1724,45 @@ docushift fix-callouts output reframed ../tibco-docs-aem ../ibi-docs-aem
 - **It does not commit.** Review the change with `git diff` and commit and push the repo as
   usual. The run writes `reports/fix-callouts-<date>.csv`, one row per file changed.
 
+### Did anything get lost? (`verify`)
+
+`verify` proves that nothing was lost between the old site and the published help: no
+topic, sentence, picture or menu entry (Phase 55). It reads the published repos, the
+downloaded packages, and two websites. Those are the staging site, and a sample of
+docs.tibco.com for comparison with the downloaded copy.
+
+```bash
+# Local only: old pages against the published repo. No network.
+docushift verify --target-dir ../ibi-docs-aem --product ibi-ai-assistant --skip-published --live-sample 0
+
+# Everything: local, the staging site (verify_base_url in publishing.yaml), 20 live pages per version
+docushift verify --target-dir ../ibi-docs-aem --product ibi-ai-assistant
+
+# After a re-publish: fetch again what cache/verify/ already holds
+docushift verify --target-dir ../ibi-docs-aem --product ibi-ai-assistant --refresh
+```
+
+- **Text is compared sentence by sentence.** A page is flagged when a whole sentence
+  of the old page is nowhere on the new one, and the finding quotes it. A changed word
+  or two is forgiven. The landing page's portal sections, which the converter cuts on
+  purpose, are not counted.
+- **Pictures are compared by content**, so an image renamed for length still matches.
+- **The menu is compared as a tree**: every old entry, under the same parent, in the
+  same order. For now this reads Flare TOCs only; other engines get a
+  `VERIFY_TOC_UNCHECKED` note.
+- **Staging is read through its own menu.** Each page's address comes from the menu
+  staging serves, so nothing is guessed. A page staging answers with its home page
+  counts as not served. Notes shown without their label and pictures served without
+  their alt text are reported too.
+- **Requests are throttled and cached** under `cache/verify/`. A second run asks the
+  network for nothing it has seen.
+- **Output:**
+  - `reports/verify-<product>.csv`, one row per old page: old URL, new page, staging
+    URL, text %, images found of expected, TOC match, staging status, the missing
+    sentences;
+  - `reports/verify-<product>.html`, the lowest-scoring pages with links to old and new.
+- **Exit code:** 1 if anything was lost (an error finding).
+
 
 ---
 

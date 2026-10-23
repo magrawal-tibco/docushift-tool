@@ -749,6 +749,26 @@ class StateStore:
         )
         return {row["source"]: row["output"] for row in rows}
 
+    def latest_counts(self, slug: str, version: str, codes: Iterable[str]) -> dict[str, int]:
+        """Each code's count for one version, from the most recent run that recorded it.
+
+        Phase 55 reads the drops a conversion recorded (`NAV_NODE_DROPPED`,
+        `ROOT_COPY_DROPPED`...) to explain a missing topic. Summing every run would
+        count one re-converted version several times, so only the latest run per
+        code is read.
+        """
+        out: dict[str, int] = {}
+        for code in codes:
+            rows = self._all(
+                "SELECT COALESCE(SUM(count), 0) AS n FROM findings WHERE code = ? AND slug = ? "
+                "AND version = ? AND run_id = (SELECT MAX(run_id) FROM findings "
+                "WHERE code = ? AND slug = ? AND version = ?)",
+                (code, slug, version, code, slug, version),
+            )
+            if rows and rows[0]["n"]:
+                out[code] = int(rows[0]["n"])
+        return out
+
     def get_output_rows(self, slug: str, version: str) -> list[tuple[str, str, str]]:
         """`(source, output, unit)` rows, as `record_output_map` takes them back."""
         rows = self._all(

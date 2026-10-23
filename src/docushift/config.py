@@ -68,6 +68,9 @@ PUBLISHING_DEFAULTS: dict[str, str] = {
     # `--target-dir`, so it shortens an image whose path would pass 260 under a
     # root this long. 24 is `C:\github\tibco-docs-aem`.
     "published_root_length": "24",
+    # Phase 55. The staging host `verify` reads, kept apart from `publish_base_url`
+    # on purpose: that one rewrites links, and a check must not change the output.
+    "verify_base_url": "",
 }
 
 # Stage 6b's editorial policy, duplicated from `config/reframe.yaml` for the reason
@@ -423,6 +426,10 @@ class ConfigManager:
         output of 13.
         """
         return self.load_publishing()["publish_base_url"].rstrip("/")
+
+    def verify_base_url(self) -> str:
+        """The staging host `verify` compares against, without a trailing slash (Phase 55)."""
+        return self.load_publishing()["verify_base_url"].rstrip("/")
 
     def published_root_length(self) -> int:
         """How long the published repos' parent folder is (Phase 49); 0 if unset or bad.

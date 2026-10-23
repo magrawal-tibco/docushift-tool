@@ -167,8 +167,10 @@ def test_publishing_defaults_apply_with_no_file(config: ConfigManager) -> None:
         "primary_locale": "en-us",
         "publish_base_url": "",
         "published_root_length": "24",
+        "verify_base_url": "",
     }
     assert config.publish_base_url() == ""
+    assert config.verify_base_url() == ""
     assert config.published_root_length() == 24
 
 

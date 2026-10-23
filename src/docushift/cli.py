@@ -3314,6 +3314,83 @@ def _archive_target(manager: CatalogManager, product: str, version: str):
     return found, ver
 
 
+@main.command()
+@click.option("--target-dir", type=DIR_PATH, required=True,
+              help="Folder holding the published repos, e.g. ../ibi-docs-aem.")
+@click.option("--product", "product", default=None, help="Restrict to one published product slug.")
+@click.option("--version", default=None, help="Restrict to one version (9.3.8 or 9-3-8).")
+@click.option("--skip-published", is_flag=True, help="Local comparison only; do not read the staging site.")
+@click.option("--live-sample", type=int, default=20, show_default=True,
+              help="docs.tibco.com pages to compare per version; 0 skips the live check.")
+@click.option("--base-url", default=None, help="Staging host; default publishing.yaml's verify_base_url.")
+@click.option("--refresh", is_flag=True, help="Fetch again what cache/verify/ already holds.")
+@click.pass_context
+def verify(ctx, target_dir, product, version, skip_published, live_sample, base_url, refresh) -> None:
+    """Prove nothing was lost: old pages vs published pages vs staging (Phase 55).
+
+    For every published online-help version: each old page's topic, text and
+    images against the page it became, and the old TOC's structure against
+    `toc.yml` (local); each page and the menu against what the staging site serves;
+    and a sample of docs.tibco.com pages against the downloaded copy.
+
+    Writes `reports/verify-<product>.csv` (one row per old page) and an HTML summary
+    of the lowest-scoring pages. Reads the network only for the staging and live
+    checks, throttled and cached under `cache/verify/`. Exits 1 on an error finding.
+    """
+    from docushift.verify import report
+    from docushift.verify.driver import Verifier
+    from docushift.verify.fetch import Fetcher
+
+    cfg: ConfigManager = ctx.obj["config"]
+    _require_long_paths(cfg)
+    base = "" if skip_published else (base_url or cfg.verify_base_url()).rstrip("/")
+    fetcher = None
+    if base or live_sample > 0:
+        crawl = dict(cfg.load_docsite().get("crawl") or {})
+        fetcher = Fetcher(cfg.cache_dir / "verify", crawl, refresh=refresh)
+    manager = _catalog_manager(ctx)
+    findings = FindingsRun("verify", store=cfg.state_store()).start()
+    verifier = Verifier(cfg, manager.load(), cfg.state_store(), target_dir, findings,
+                        fetcher=fetcher, base_url=base, live_sample=live_sample)
+    folders = verifier.selection(product, version)
+    if not folders:
+        console.print(f"[yellow]No published online-help folders match this selection in {target_dir}.[/yellow]")
+        findings.finish(exit_code=1)
+        raise click.exceptions.Exit(1)
+
+    console.print(f"Verifying {len(folders)} version(s)"
+                  + (f" against {base}" if base else ", local only") + "...")
+    rows: list[dict[str, str]] = []
+    for folder in folders:
+        result = verifier.version(folder)
+        findings.flush()
+        if result.skipped:
+            console.print(f"  [dim]-[/dim] {folder.relative.as_posix()}: skipped, {result.skipped}")
+            continue
+        rows.extend(result.rows)
+        marker = "[red]x[/red]" if result.errors else "[green]ok[/green]"
+        console.print(f"  {marker} {folder.relative.as_posix()}: {len(result.rows)} old page(s), "
+                      f"{result.errors} error(s)")
+
+    totals = Counter()
+    for finding in findings.recorded:
+        totals[finding.code] += finding.count
+    csv_path, html_path = report.write(cfg.root_dir / "reports", product or "all", rows, dict(totals))
+    table = Table(title="verify")
+    table.add_column("Finding")
+    table.add_column("Count", justify="right")
+    for code, count in sorted(totals.items()):
+        table.add_row(code, str(count))
+    console.print(table)
+    if fetcher is not None:
+        console.print(f"[dim]{fetcher.requests} request(s) made; the rest came from cache/verify/.[/dim]")
+    console.print(f"Report: {escape(str(csv_path))}\nSummary: {escape(str(html_path))}")
+    errors = findings.counts()[Severity.ERROR]
+    findings.finish(exit_code=1 if errors else 0)
+    if errors:
+        raise click.exceptions.Exit(1)
+
+
 @main.command("fix-callouts")
 @click.argument("paths", nargs=-1, required=True,
                 type=click.Path(exists=True, file_okay=False, path_type=Path))

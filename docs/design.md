@@ -791,6 +791,29 @@ The scan is the weaker of the two and is kept honest about it: **it proves a cod
 
 Without a `state.db` a save writes the four cells back as it read them, so a stateless save cannot blank them. `download` and `sync` save once at the end of a run; a save that fails (the sheet open in Excel) is a warning, and `catalog refresh` rewrites the columns later.
 
+### 8.9 Nothing lost: how `verify` decides — **Built** (Phase 55)
+
+**Text.** Both sides become blocks: a paragraph, list item, heading or table cell. The
+HTML side is read inside the engine's content container, with the engine's own chrome
+removed and comments ignored. The Markdown side is read by pattern, not by the
+converter's renderer, so the check does not trust the code it checks. A source sentence
+is **present** when its words appear in the target in order, or when 80% of its 8-word
+shingles do. A page is flagged by the whole sentences it lost (at least 4 words), never
+by a percentage: one changed word on a 60-word page costs ~15% of its shingles.
+
+**Deliberate changes are applied to the source first, from the converter's own lists:**
+the landing page's `PORTAL_BLOCKS` cut and `LANDING_CHROME`; each engine's
+`CHROME_SELECTORS`; the help skin's pictures.
+
+**Pictures** are compared by SHA-256, so a rename (Phase 49) still matches and a
+re-encode does not.
+
+**TOC.** The old TOC and `toc.yml` are matched **by the page each row opens**: a row
+under a different parent is `moved`, siblings out of order are one `order` per parent
+(moved rows excluded), and a retitled row is a note. `toc.yml` and the served menu are
+matched **by title**, because the menu's links are AEM URLs; that match is also where
+each page's staging URL comes from.
+
 ## 9. Context-Sensitive Help
 
 **Built, §9.6 included** — its first three rules in Phase 7b and its fourth in 7c (§8.7). The readers landed with Stage 4 (§9.2, Phase 4b-2); the schema, the resolver, the writer and the frontmatter landed in Phase 5a as `transforms/csh.py`. This is the most intricate algorithm in the tool, and the one grounded most directly in measurement — now re-measured over the whole cache: **863 `Alias.xml` files, 387 with content, 11,054 entries, 2,396 distinct names**, superseding the 2026-09-04 subset of 272 files / 7,220 entries. **Scope: all three HTML engines — Flare, DITA and WebWorks** (§9.2). The full evidence table and the reasoning are in `architecture.md` §5.4; what follows is the procedure.

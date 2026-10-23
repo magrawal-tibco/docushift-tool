@@ -2632,3 +2632,27 @@ Five refusals, each of them measured rather than assumed (`design.md` §8.4, `pl
 `report --since` prints the §7.6 comparison in full — dropped, added and retargeted, every identifier named. That is the half the finding cannot carry: `CSH_IDENTIFIER_DROPPED` is one row per version with the magnitude in its count, because 784 per-identifier rows over the corpus would be 376 from two products re-keying their help (`design.md` §8.7). The register carries the magnitude; the command carries the detail.
 
 `csh validate` runs exactly the functions `docushift validate` runs — `validation/csh.py` holds the only implementation of the comparison in the tool, and two implementations would be two answers to "did this Help button survive". What it does differently is skip the link, anchor, asset and artifact passes, which is its whole independent value and the phase claims no more for it. It gates by §7.4's third rule and on nothing else: a value naming a file that is not there is an error, a dropped identifier is a warning and never fails a run.
+
+### 7.7 What `verify` compares, and what it refuses to assume (Phase 55)
+
+`validate` asks whether the published tree holds together; `verify` asks whether it
+says everything the old site said. Three comparisons, each against what a reader sees:
+
+- **Old page -> published page** (local, every page): topic, text, pictures, and the
+  old TOC's tree against `toc.yml`.
+- **Published page -> staging** (every page): the page is served, its text is all
+  there, its pictures are served with the repo's bytes and their alt text, its notes
+  carry a label, and the served menu has `toc.yml`'s shape.
+- **Live docs.tibco.com -> downloaded copy** (a sample): the starting point was what
+  readers saw.
+
+It refuses three assumptions:
+
+- **No staging URL is derived.** Below the version, AEM's paths follow the menu, not
+  the repo, so each URL is read from the served menu.
+- **No HTTP 200 is trusted.** An unknown path is served the home page with 200, so a
+  page is found only when it names its own path.
+- **No version-level drop count excuses a topic.** The conversion's drop findings carry
+  no path, so they are quoted beside a missing topic, never subtracted from it.
+
+The comparison rules are `design.md` §8.9.

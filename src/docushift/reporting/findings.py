@@ -46,6 +46,7 @@ class Stage(StrEnum):
     REFRAME = "reframe"
     SYNC = "sync"
     VALIDATE = "validate"
+    VERIFY = "verify"
 
 
 @dataclass(frozen=True)
@@ -682,6 +683,63 @@ REGISTRY: dict[str, Code] = _codes(
          "A current version's merged tree was built by an earlier run, which holds "
          "its errors and warnings; the note names that run",
          "reports/review X3-11"),
+    # Phase 55. `verify`: the old site, the published tree and staging compared by
+    # what a reader sees. Loss is an error; a change a person may have meant is a
+    # warning; a change that loses nothing is a note.
+    Code("VERIFY_TOPIC_MISSING", Severity.ERROR, Stage.VERIFY,
+         "An old TOC topic or converted topic with no published page and no recorded "
+         "reason; the message carries the version's recorded drop counts",
+         "planning.md Phase 55 (A1)"),
+    Code("VERIFY_TEXT_DROPPED", Severity.ERROR, Stage.VERIFY,
+         "Whole sentences of an old page found nowhere on the page it became; the "
+         "message quotes them", "planning.md Phase 55 (A2)"),
+    Code("VERIFY_IMAGE_MISSING", Severity.ERROR, Stage.VERIFY,
+         "An old page's picture, matched by content hash, not referenced by the "
+         "page it became, or referenced and not in the tree", "planning.md Phase 55 (A3)"),
+    Code("VERIFY_TOC_ENTRY_MISSING", Severity.ERROR, Stage.VERIFY,
+         "An old TOC entry whose page has no toc.yml entry", "planning.md Phase 55 (A5)"),
+    Code("VERIFY_TOC_MOVED", Severity.WARNING, Stage.VERIFY,
+         "A toc.yml entry under a different parent than in the old TOC", "planning.md Phase 55 (A5)"),
+    Code("VERIFY_TOC_ORDER", Severity.WARNING, Stage.VERIFY,
+         "Siblings in a different order than in the old TOC, once per parent",
+         "planning.md Phase 55 (A5)"),
+    Code("VERIFY_TOC_TITLE_CHANGED", Severity.NOTE, Stage.VERIFY,
+         "A toc.yml entry titled differently from the old TOC's", "planning.md Phase 55 (A5)"),
+    Code("VERIFY_TOC_UNCHECKED", Severity.NOTE, Stage.VERIFY,
+         "A version whose old TOC verify cannot read yet (engine other than Flare); "
+         "its TOC structure was not compared", "planning.md Phase 55, as built"),
+    Code("VERIFY_TOPIC_UNFILED", Severity.NOTE, Stage.VERIFY,
+         "Converted topics kept under unfiled/ (TOC_ORPHAN): in the tree, in no menu",
+         "planning.md Phase 55, known drops"),
+    Code("VERIFY_PUBLISHED_PAGE_MISSING", Severity.ERROR, Stage.VERIFY,
+         "A published page, or the version itself, not served by staging (non-200, or "
+         "the home-page fallback)", "planning.md Phase 55 (B1)"),
+    Code("VERIFY_PUBLISHED_TEXT_DIFF", Severity.WARNING, Stage.VERIFY,
+         "Sentences of a published page missing from what staging serves",
+         "planning.md Phase 55 (B2)"),
+    Code("VERIFY_PUBLISHED_IMAGE_BROKEN", Severity.ERROR, Stage.VERIFY,
+         "A page's image not on the served page, not served, or served with other bytes",
+         "planning.md Phase 55 (B3)"),
+    Code("VERIFY_PUBLISHED_ALT_DROPPED", Severity.WARNING, Stage.VERIFY,
+         "An image whose Markdown alt text staging serves empty", "planning.md Phase 55 (probe)"),
+    Code("VERIFY_PUBLISHED_CALLOUT_UNRENDERED", Severity.WARNING, Stage.VERIFY,
+         "GitHub alerts AEM rendered with no label, counted per page; fix-callouts "
+         "repairs them (Phase 56)", "planning.md Phase 55 (probe)"),
+    Code("VERIFY_PUBLISHED_TOC_ENTRY_MISSING", Severity.ERROR, Stage.VERIFY,
+         "A toc.yml entry with no row in the menu staging serves", "planning.md Phase 55 (B4)"),
+    Code("VERIFY_PUBLISHED_TOC_MOVED", Severity.WARNING, Stage.VERIFY,
+         "A toc.yml entry the served menu shows under another parent", "planning.md Phase 55 (B4)"),
+    Code("VERIFY_PUBLISHED_TOC_ORDER", Severity.WARNING, Stage.VERIFY,
+         "Menu siblings in a different order than toc.yml, once per parent",
+         "planning.md Phase 55 (B4)"),
+    Code("VERIFY_PUBLISHED_TOC_TITLE_CHANGED", Severity.NOTE, Stage.VERIFY,
+         "A menu row titled differently from its toc.yml entry", "planning.md Phase 55 (B4)"),
+    Code("VERIFY_LIVE_DRIFT", Severity.WARNING, Stage.VERIFY,
+         "A sampled docs.tibco.com page holding sentences the downloaded copy lacks; "
+         "updated since download, or not what was downloaded", "planning.md Phase 55 (C)"),
+    Code("VERIFY_LIVE_UNCHECKABLE", Severity.NOTE, Stage.VERIFY,
+         "Sampled docs.tibco.com pages that answered with the sign-in page or an error",
+         "planning.md Phase 55 (C)"),
 )
 
 # The register's remaining debt, stated as the *complement* of what is written.

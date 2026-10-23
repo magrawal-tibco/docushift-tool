@@ -943,7 +943,7 @@ version's output changes; `ruff` and the suite pass.*
 
 ---
 
-### Phase 55: Verify — Nothing Lost Between docs.tibco.com and stg-docs.ibi.com — **Built 2026-10-23; staging pilot pending**
+### Phase 55: Verify — Nothing Lost Between docs.tibco.com and stg-docs.ibi.com — **Built 2026-10-23; pilot run, rollout pending**
 
 **Why.** ibi docs are converted and published through AEM to stg-docs.ibi.com. The
 business needs evidence that **no topic, text or image was dropped**, and that **the
@@ -1134,9 +1134,27 @@ The probe read `home.html` and `user_guide/chapter-2.html`.
 - Staging parsing is tested on the probe's saved page: the 23-entry menu, the
   page-path check and the 5 unlabelled notes.
 - Tests: `tests/unit/test_verify.py`, 24 tests. `ruff` clean.
+- **Pilot, staging and live (2026-10-23, `reports/verify-ibi-ai-assistant.csv`):**
+  - The staging note fix (`7cac70dc`, pushed to `wip`) is not yet republished, so the 61
+    `VERIFY_PUBLISHED_CALLOUT_UNRENDERED` warnings (20 pages) are expected and set aside.
+  - All 23 menu entries matched `toc.yml`. Every page is served, all text is there, and
+    every image is served with the repo's bytes. All 20 live pages match the download.
+  - **5 images are served with no alt text** (`VERIFY_PUBLISHED_ALT_DROPPED`), on
+    chapter-2, -3 and -5. Every dropped alt contains `/`, `:` or `⌘`; none of the 11
+    alts AEM keeps contains one, while `(`, `'` and `-` survive. That is an AEM rendering
+    defect for the AEM owners, not a conversion one.
+  - Three fixes to `verify` came out of the first staging run:
+    - the version URL is a landing stub with no menu, so the menu is now read from the
+      first `toc.yml` row's page (`home.html`), with the stub as fallback;
+    - AEM renders the page title above the article, so `h1#topic-title` is now included
+      in the staging text;
+    - AEM renders a Markdown hard line break as two blocks, so a trailing `\` now ends a
+      block on the Markdown side.
+
+    Before these fixes the run reported 7 false text gaps.
 - **Left:**
-  - the staging and live runs over the pilot (the user, as a `!` command), then all ibi
-    products;
+  - confirm the note labels after AEM republishes;
+  - all ibi products;
   - old-TOC readers for the other engines.
 
 ---
