@@ -351,7 +351,18 @@ def render(
         body, extra = shift_headings(body, topic.title, topic.level)
         parts.append(body)
         added += extra
+    if page.listing:
+        # Phase 63: a title-only parent lists its immediate children. Scaffolding,
+        # so word conservation counts it as added rather than as lost input.
+        listing = "\n".join(f"- [{_label(label)}]({link})" for label, link in page.listing)
+        parts.append(listing)
+        added += word_count(listing)
     return "\n\n".join(parts) + "\n", added
+
+
+def _label(text: str) -> str:
+    """Link text with the characters that would end it escaped."""
+    return re.sub(r"([\\\[\]])", r"\\\1", text)
 
 
 def _frontmatter(page: Page, csh: dict[PurePosixPath, list[str]]) -> str:

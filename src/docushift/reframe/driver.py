@@ -53,6 +53,7 @@ from docushift.reframe.packer import (
     assign,
     carry,
     layout_of,
+    list_children,
     override,
     pack,
     page_folders,
@@ -60,6 +61,7 @@ from docushift.reframe.packer import (
     relocate,
     separated,
     shortened,
+    single,
 )
 from docushift.reframe.pages import LinkCounts, render, split_frontmatter, title_of, word_count
 from docushift.reframe.policy import ReframePolicy, policy_for
@@ -82,6 +84,27 @@ from docushift.validation.references import mask_code
 #: small enough to need this?" is an empirical one: DITA's median converted topic
 #: is 177 words to Flare's 180, WebWorks' 234 (Phase 42, measured 2026-10-06).
 REFRAMABLE_ENGINES: tuple[SourceEngine, ...] = (SourceEngine.FLARE, SourceEngine.DITA)
+
+#: Phase 63. Engines laid out by the stage but never merged: the TOC-shaped
+#: folders, names and redirects are a property of the address, not of how small
+#: the topics are.
+LAYOUT_ENGINES: tuple[SourceEngine, ...] = (SourceEngine.WEBWORKS, SourceEngine.DOCBOOK)
+
+
+def merges(engine: SourceEngine | str | None, policy: ReframePolicy) -> bool:
+    """Whether this version's topics are merged, rather than one page per TOC row."""
+    return policy.merge and engine in REFRAMABLE_ENGINES
+
+
+def reframes(engine: SourceEngine | str | None, policy: ReframePolicy) -> bool:
+    """Whether a version of this engine goes through the stage under this policy.
+
+    A merged version always does. An unmerged one does once its family has
+    rolled out Phase 63 (`toc_folders`); until then it is skipped, as before.
+    """
+    if merges(engine, policy):
+        return True
+    return policy.toc_folders and engine in REFRAMABLE_ENGINES + LAYOUT_ENGINES
 
 
 #: Written fresh by this stage, so a copy of the source's version would be stale.
@@ -180,6 +203,11 @@ class _Source:
         if relative not in self._words:
             self._words[relative] = word_count(split_frontmatter(self.read(relative))[1])
         return self._words[relative]
+
+    def blank(self, relative: PurePosixPath) -> bool:
+        """Whether a topic is its heading and nothing else (Phase 63)."""
+        lines = [line for line in split_frontmatter(self.read(relative))[1].splitlines() if line.strip()]
+        return not lines or (len(lines) == 1 and lines[0].lstrip().startswith("#"))
 
     def headings(self, topic: Topic) -> list[str]:
         """Every heading this topic will render, in order. Memoized like `words`.
@@ -349,10 +377,12 @@ class Reframer:
         # C2: the gate is the first thing the stage does, before it has looked at a
         # path, and it is checked against the version in hand rather than trusting
         # that the selection already filtered. `--input` is the case that matters.
-        if version.engine not in REFRAMABLE_ENGINES:
+        policy = self._policy(product)
+        if not reframes(version.engine, policy):
             return ReframeResult(
                 slug, number, ReframeOutcome.NOT_FLARE, engine=version.engine,
-                message=f"{version.engine} topics are not merged by this stage",
+                message=(f"{version.engine} topics are not merged by this stage, and its family "
+                         f"has not turned on `toc_folders`"),
             )
 
         converted = source or self.config.output_path(product.bu, product.family, slug, number)
@@ -379,7 +409,6 @@ class Reframer:
                         "run `docushift convert` first",
             )
 
-        policy = self._policy(product)
         # X1-02. A standalone folder is not the catalog row's tree, so nothing is
         # read back for it and nothing is recorded: `convert`'s R4-04 guard. It
         # wrote the row's merge state from whatever `--input` named, and `sync`
@@ -641,6 +670,9 @@ class Reframer:
                     f"dropped from the rewritten map: {shown}{', ...' if len(unmatched) > 5 else ''}"
                 ),
             )
+        # Phase 63, once every path is final: a title-only parent page lists its
+        # immediate children rather than publishing blank.
+        unlisted = list_children(roots, located, placements, source.blank)
         unnavigated = frozenset(page.path for page in carried)
         # Read before anything is written: the queue a writer may have worked (X2-06).
         worked = review.previous(target / "review-queue.csv")
@@ -662,7 +694,8 @@ class Reframer:
             )
             for page in built
         }
-        queue = review.rows(built, flagged)
+        # Unmerged, there is no merge for a writer to review (Phase 63).
+        queue = review.rows(built, flagged) if merges(version.engine, policy) else []
 
         counts = LinkCounts()
         added = self._write(staging, source, built, located, counts)
@@ -681,6 +714,10 @@ class Reframer:
             unnavigated=unnavigated, queue=queue,
             csh=csh_map.retarget(source.csh, located) if source.csh else None,
             anchors=added.anchors, mirrored=added.mirrored, placements=placements,
+        )
+        failures.extend(
+            f"{path} is a title-only page whose TOC children resolve to no page, so it would "
+            f"publish blank" for path in unlisted
         )
         # Every merged page is one `.md` and nothing else in the tree writes one,
         # so the walk and the counter agree exactly on every version measured
@@ -1051,6 +1088,8 @@ class Reframer:
         some distance -- it produces a plausible tree with silently different
         boundaries, and a boundary is the one decision this stage cannot take back.
         """
+        if not merges(version.engine, policy):
+            return single(roots, source.words)
         if not policy.pin_layout_to or policy.pin_layout_to == version.version:
             return pack(roots, source.words, policy.max_words, policy.keep_separate)
         reference = self._reference_layout(product, policy)
@@ -1149,7 +1188,8 @@ class Reframer:
         if cached is not None:
             return cached
         policy = policy_for(self.reframe_config, product.slug, product.bu, product.family)
-        if not policy.pin_layout_to:
+        # Unmerged, every version is one page per row and cannot drift (Phase 63).
+        if not policy.pin_layout_to and policy.merge:
             eligible = [
                 version
                 for _, version in self.catalog.iter_versions(slug=product.slug, eligible_only=True)

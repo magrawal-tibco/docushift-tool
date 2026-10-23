@@ -100,6 +100,8 @@ REFRAME_DEFAULTS: dict[str, Any] = {
     "pin_layout_to": "",
     "publish": False,
     "keep_separate": (),
+    "merge": True,
+    "toc_folders": False,
 }
 
 # A publishing suffix must be one lowercase token. A hyphen makes the family/suffix

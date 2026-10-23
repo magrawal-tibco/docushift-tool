@@ -1134,6 +1134,28 @@ def test_an_engine_reframe_does_not_merge_publishes_its_converted_tree_when_opte
     assert findings.all == []
 
 
+def test_a_rolled_out_webworks_version_is_held_to_its_laid_out_tree(
+    config, catalog, target, product
+) -> None:
+    """Phase 63. With `toc_folders` on, the converted tree's folders no longer match
+    the addresses its redirects name, so falling back to it is refused too."""
+    version = product.versions["10.4.0"]
+    version.engine = SourceEngine.WEBWORKS
+    convert_output(config, product, "10.4.0")
+    config.reframe_path.write_text(
+        "bus:\n  tibco:\n    publish: true\n    toc_folders: true\n", encoding="utf-8"
+    )
+    distributor = WorkspaceDistributor(config, catalog, findings=FindingsRun("sync"))
+
+    assert distributor.sync_one(product, version, target).outcome is SyncOutcome.NO_OUTPUT
+
+    reframe_output(config, product, "10.4.0")
+    current(catalog, product.slug, "10.4.0")
+    result = distributor.sync_one(product, version, target)
+
+    assert result.outcome is SyncOutcome.SYNCED and result.merged
+
+
 def test_a_merged_tree_older_than_the_conversion_beneath_it_is_refused(
     config, catalog, target, product
 ) -> None:

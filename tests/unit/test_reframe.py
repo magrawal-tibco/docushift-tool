@@ -3715,3 +3715,124 @@ def test_a_current_merge_from_before_the_copy_existed_gets_one(config, catalog, 
     assert again.outcome is ReframeOutcome.CURRENT
     stored = catalog.state.get_version_metadata("tibco-flare-docs", "10.5.1")["reframe_rename_pins"]
     assert renames.loads(stored) == renames.load(target)
+
+
+# -- Phase 63: doc sets published unmerged ------------------------------------
+
+
+def test_merge_left_on_does_not_change_the_policy_digest():
+    """The field's arrival must not re-cut every merged tree on disk; turning it
+    off must, because every page boundary moves."""
+    plain = policy_for({}, "x")
+    on = policy_for({"defaults": {"merge": True}}, "x")
+    off = policy_for({"bus": {"ibi": {"merge": False}}}, "x", bu="ibi")
+
+    assert plain.merge and on.merge and not off.merge
+    assert plain.key == on.key != off.key
+
+
+def test_unmerged_is_one_page_per_row_and_one_copy_per_guide():
+    roots = [
+        node("A", "g/a.md", node("B", "g/b.md", node("C", "g/c.md"))),
+        node("D", "h/d.md", node("B again", "g/b.md"), node("Heading only", None, node("E", "h/e.md"))),
+    ]
+
+    from docushift.reframe.packer import single
+
+    pages = single(roots, sized(g__a=10, g__b=10, g__c=10, h__d=10, h__e=10))
+
+    assert layout(pages) == [["g/a.md"], ["g/b.md"], ["g/c.md"], ["h/d.md"], ["g/b.md"], ["h/e.md"]]
+    assert all(page.topics[0].level == 1 for page in pages)
+    assert [page.guide for page in pages] == ["A", "A", "A", "D", "D", "D"]
+    # A heading-only row is no parent anybody can be named after.
+    assert pages[-1].topics[0].parent == "D"
+
+
+def _unmerged(config) -> None:
+    config.reframe_path.parent.mkdir(parents=True, exist_ok=True)
+    config.reframe_path.write_text(
+        "families:\n  messaging:\n    merge: false\n    toc_folders: true\n", encoding="utf-8"
+    )
+
+
+def test_an_unmerged_version_is_skipped_until_its_family_rolls_out(config, catalog, flare):
+    """`toc_folders` off: the version publishes its converted tree, as before Phase 63."""
+    config.reframe_path.parent.mkdir(parents=True, exist_ok=True)
+    config.reframe_path.write_text("families:\n  messaging:\n    merge: false\n", encoding="utf-8")
+    converted_tree(config, flare, "10.5.1")
+
+    result = Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"])
+
+    assert result.outcome is ReframeOutcome.NOT_FLARE
+
+
+def test_webworks_is_laid_out_one_page_per_row_once_rolled_out(config, catalog):
+    """WebWorks is never merged, whatever the BU decided for Flare (Phase 63)."""
+    from docushift.reframe import reframes
+
+    on = policy_for({"defaults": {"toc_folders": True}}, "x")
+    off = policy_for({}, "x")
+
+    assert reframes(SourceEngine.WEBWORKS, on) and not reframes(SourceEngine.WEBWORKS, off)
+    assert reframes(SourceEngine.FLARE, off)
+    assert on.key == off.key
+
+
+def test_an_unmerged_version_keeps_every_topic_and_mirrors_the_toc(config, catalog, flare):
+    """Phase 63: the folders AEM addresses by, without the merge the BU declined."""
+    _unmerged(config)
+    converted_tree(config, flare, "10.5.1")
+
+    result = Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"])
+
+    assert result.outcome is ReframeOutcome.REFRAMED, result.message
+    assert result.topics == result.pages == 3
+    assert _tree(result.path / "installation") == ["installation-overview.md"]
+    assert (result.path / "installation.md").is_file()
+    assert (result.path / "user-guide.md").is_file()
+    assert list(csvio.read_rows(result.path / "review-queue.csv")) == []
+
+
+def test_a_title_only_parent_lists_its_immediate_children_only(config, catalog, flare):
+    """Flare's hero-only landing stub published blank above its children (11 in
+    ibi WebFOCUS). It now links each child -- not the grandchildren, which the
+    menu already shows under the child."""
+    _unmerged(config)
+    converted_tree(config, flare, "10.5.1", toc="""\
+docs_list_title: "Online Help"
+docs:
+  - title: "Release Notes"
+    url: "rn/release-notes.md"
+    subfolderlist:
+      - title: "Version 9.3.6"
+        url: "rn/v936.md"
+        subfolderlist:
+          - title: "New Features"
+            url: "rn/new-features.md"
+      - title: "Version [9.3.5]"
+        url: "rn/v935.md"
+""")
+    tree = config.output_path(flare.bu, flare.family, flare.slug, "10.5.1")
+    (tree / "rn" / "v936.md").write_text("# Version 9.3.6\n\nWhat changed.\n", encoding="utf-8")
+
+    result = Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"])
+
+    assert result.outcome is ReframeOutcome.REFRAMED, result.message
+    landing = split_frontmatter((result.path / "release-notes.md").read_text(encoding="utf-8"))[1]
+    assert "- [Version 9.3.6](release-notes/version-9-3-6.md)" in landing
+    assert r"- [Version \[9.3.5\]](release-notes/version-9-3-5.md)" in landing
+    assert "New Features" not in landing
+    # A parent with a body of its own is not given a list.
+    v936 = (result.path / "release-notes" / "version-9-3-6.md").read_text(encoding="utf-8")
+    assert "](" not in v936
+
+
+def test_a_merged_parent_with_a_body_of_sections_gets_no_list(config, catalog, flare):
+    """Merged, the parent absorbs its children as sections: that is its body."""
+    converted_tree(config, flare, "10.5.1")
+
+    result = Reframer(config, catalog).reframe_one(flare, flare.versions["10.5.1"])
+
+    page = (result.path / "installation.md").read_text(encoding="utf-8")
+    assert "## Installation Overview" in page and "](" not in page
+

@@ -66,18 +66,36 @@ defaults:
   # not here -- the topics are one doc set's.
   keep_separate: []
 
+  # Phase 63. `merge: false` keeps a doc set one page per TOC row -- the BU's
+  # decision for ibi, Streaming and Data Virtualization -- while the stage still
+  # names the pages, lays the folders out as the TOC and writes the redirects,
+  # which AEM needs whatever the merge. WebWorks and DocBook are never merged.
+  merge: true
+
+  # Phase 63's rollout switch. On for a family, its unmerged versions (above, or
+  # WebWorks and DocBook) go through `reframe`, and where `publish` is on, `sync`
+  # publishes that tree and refuses a missing or stale one. Off, they are skipped
+  # and publish their converted tree. Turned on family by family after the pilot.
+  toc_folders: false
+
 # Phase 42. Two levels between `defaults` and `products`, each overriding the one
 # before, key by key: defaults, then the BU, then the family, then the product. A
 # product line still wins, so one doc set can be held back with `publish: false`.
 bus:
-  # The user's decision, 2026-10-06: merged pages are the TIBCO default. IBI has no
-  # block here and stays unmerged.
+  # The user's decision, 2026-10-06: merged pages are the TIBCO default. IBI stays
+  # unmerged.
   tibco:
     publish: true
+  ibi:
+    merge: false
 families:
   # The one TIBCO family left out of that decision.
   streaming:
     publish: false
+    merge: false
+  # Spotfire's Data Virtualization, published unmerged (Phase 63).
+  data-virtualization:
+    merge: false
 products:
   # R1.4 -- layout pinning. This product has six convert-eligible Flare versions
   # (10.4.0, 10.4.1, 10.4.3, 10.4.4, 10.5.0, 10.5.1), so an unpinned merge would lay

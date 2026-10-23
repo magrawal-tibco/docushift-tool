@@ -37,11 +37,18 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | stg-docs.tibco.com has real content | DOCOPS-257: run the TIBCO staging probe and staging pilots |
 | Staging shows one Japanese and one German WebFOCUS page correctly | DOCOPS-148: dated note → Done |
 | Data Virtualization team answers the error report and the 3 versions are published | DOCOPS-254: dated note → Done |
+| Phase 63 built and its pilot passes | DOCOPS-274: dated note; Done once every family is re-synced |
+| Translated WebFOCUS layout phase is opened | New sub-task under DOCOPS-11 (deferred from Phase 63) |
 | A new phase is opened | One sub-task under the matching story, In Progress, no `retro` |
 
 **Left alone on purpose:** DOCOPS-8 is a Task where its siblings are Stories.
 
 **Log** (newest first, one line per session):
+
+- 2026-10-23 — DOCOPS-274 (Backlog, 1 SP, under DOCOPS-11): TOC-shaped folders for the 148 unmerged versions
+  (ibi, WebWorks, Streaming, Data Virtualization); only reframe builds them today, and reframe would also merge.
+  Planned as Phase 63 (reframe with merging off; parent pages link their immediate children). Approved same day:
+  title names, translated help deferred; DOCOPS-274 → In Progress.
 
 - 2026-10-23 — Via docops-plan.csv: R001 per ibi family DOCOPS-264–269 (under DOCOPS-144, 0.25 each), ibi redirect
   lists DOCOPS-270 (under DOCOPS-149, 0.5), tool phases 60–62 DOCOPS-271–273 (under DOCOPS-96, 1 each). All Backlog.

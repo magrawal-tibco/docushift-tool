@@ -30,6 +30,7 @@ from docushift.reframe.driver import (
     Reframer,
     ReframeResult,
     ReframeStats,
+    reframes,
 )
 from docushift.reframe.policy import ReframePolicy, policy_for
 
@@ -41,4 +42,5 @@ __all__ = [
     "ReframeStats",
     "Reframer",
     "policy_for",
+    "reframes",
 ]

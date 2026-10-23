@@ -23,7 +23,9 @@ from typing import Any
 #: it would re-merge a whole doc set on a sign-off commit -- and invalidate every
 #: tree already built, because the field's arrival changes the digest of every
 #: policy that does not name it. The default stays "every field counts".
-_NOT_OUTPUT = frozenset({"publish"})
+#: `toc_folders` is the same kind of switch: it decides whether an unmerged version
+#: goes through the stage at all, not what the stage writes when it does.
+_NOT_OUTPUT = frozenset({"publish", "toc_folders"})
 
 #: The packer's boundary rule, versioned. Bumped whenever a *code* change moves a
 #: page boundary or a heading level.
@@ -47,7 +49,9 @@ _NOT_OUTPUT = frozenset({"publish"})
 #: is written to, which it now borrows from its guide, so its path moves.
 #: 6 = the outer link of a linked image, `[![alt](src)](href)`, is re-pathed
 #: (Phase 44). Links only.
-_ALGORITHM = 6
+#: 7 = a title-only page whose TOC row has children lists them, one link per
+#: immediate child (Phase 63). No boundary moves; blank parents gain a body.
+_ALGORITHM = 7
 
 
 @dataclass(frozen=True)
@@ -73,6 +77,16 @@ class ReframePolicy:
     #: reordering the list in the file is not a re-merge -- the currency key reads
     #: this field, unlike `publish`, because it changes every byte downstream.
     keep_separate: tuple[str, ...] = ()
+    #: Phase 63. Off for a doc set published unmerged by decision: every TOC row
+    #: becomes its own page, and the stage still names pages, lays the folders out
+    #: as the TOC and writes the redirects -- the part AEM needs whatever the merge.
+    merge: bool = True
+    #: Phase 63's rollout switch, per family. On, a version the stage does not merge
+    #: -- `merge: false`, or a WebWorks or DocBook one -- is laid out here and
+    #: `publish` holds it to that tree; off, it is skipped and publishes its
+    #: converted tree, as before the phase. Moves to `defaults` when every family
+    #: has rolled out.
+    toc_folders: bool = False
 
     @property
     def key(self) -> str:
@@ -87,6 +101,10 @@ class ReframePolicy:
         """
         shaping: dict[str, Any] = {"algorithm": _ALGORITHM}
         shaping.update({k: v for k, v in asdict(self).items() if k not in _NOT_OUTPUT})
+        # Only when off: a field arriving at its default must not change the digest
+        # of every policy that does not name it, which would re-cut every merged tree.
+        if self.merge:
+            del shaping["merge"]
         payload = json.dumps(shaping, sort_keys=True, separators=(",", ":"))
         return hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16]
 
@@ -119,6 +137,8 @@ def policy_for(
         pin_layout_to=str(values.get("pin_layout_to") or "").strip(),
         publish=bool(values.get("publish") or False),
         keep_separate=_paths(values.get("keep_separate")),
+        merge=values.get("merge") is not False,
+        toc_folders=bool(values.get("toc_folders") or False),
     )
 
 

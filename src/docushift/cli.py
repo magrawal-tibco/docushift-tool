@@ -2076,7 +2076,7 @@ def reframe(ctx, bu, family, product, version, batch, select_all, force, dry_run
     rule can be tuned and the merge re-run without re-converting anything.
     """
     _primary_only(ctx, "reframe")
-    from docushift.reframe import REFRAMABLE_ENGINES, ReframeOutcome, Reframer, ReframeStats
+    from docushift.reframe import ReframeOutcome, Reframer, ReframeStats, reframes
 
     cfg: ConfigManager = ctx.obj["config"]
     _require_long_paths(cfg)
@@ -2099,7 +2099,7 @@ def reframe(ctx, bu, family, product, version, batch, select_all, force, dry_run
             policy = planner._policy(found)
             source = input_dir or cfg.output_path(found.bu, found.family, found.slug, ver.version)
             target = output_dir or cfg.reframed_path(found.bu, found.family, found.slug, ver.version)
-            merged = ver.engine in REFRAMABLE_ENGINES
+            merged = reframes(ver.engine, policy)
             table.add_row(
                 found.slug,
                 ver.version,

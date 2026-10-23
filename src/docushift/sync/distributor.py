@@ -341,7 +341,7 @@ class WorkspaceDistributor:
         # `validation.references` for its fence-aware masking, and `validation`
         # reads this module for `STAGING_SUFFIX`. A top-level import closes that
         # loop and nothing in `docushift.validation` will load.
-        from docushift.reframe import REFRAMABLE_ENGINES, policy_for
+        from docushift.reframe import policy_for, reframes
 
         slug, number = product.slug, version.version
         converted = self.config.output_path(product.bu, product.family, slug, number)
@@ -352,10 +352,11 @@ class WorkspaceDistributor:
         state = self.catalog.state
         # Phase 42. `publish` is set for a whole BU, and a WebWorks version under it
         # will never have a merged tree; holding it to one would block it for good.
-        # Only an engine Reframe merges is held to the merged tree.
+        # Only an engine Reframe merges is held to the merged tree -- or, for a doc
+        # set left unmerged, one it lays out (Phase 63).
         # Phase 57: localized trees are not merged, so a `--locale` run publishes
         # its converted tree whatever the product's English policy is.
-        if (not policy.publish or version.engine not in REFRAMABLE_ENGINES
+        if (not policy.publish or not reframes(version.engine, policy)
                 or not self.config.is_primary_locale()):
             if not converted.is_dir():
                 return converted, False, f"no converted tree at {converted}; run `docushift convert` first"

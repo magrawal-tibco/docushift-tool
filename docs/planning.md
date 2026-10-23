@@ -1754,6 +1754,99 @@ docs.tibco.com, or that staging serves it.
 **Decision:** part of `verify` (findings `VERIFY_CSH_*`, in the same status and triage).
 Checks 1–3 do not depend on Phase 61, and are built first.
 
+### Phase 63: Unmerged Doc Sets Get TOC-Shaped Folders Too — **Approved 2026-10-23; building; DOCOPS-274**
+
+**Why.** AEM serves a page at the chain of TOC node filenames. Since Phase 29 `reframe`
+lays folders out the same way (`packer.relocate`), so the repo path *is* the address, and
+`301.yml`, `csh.yml` and `rename-map.csv` are right by construction. Only merged versions
+get this. The 148 in-scope versions published unmerged by decision — ibi 96 (Flare),
+TIBCO WebWorks 41, Streaming 8 (DocBook), Data Virtualization 3 — keep the source
+layout: a rough check found 0.6% of their TOC entries in a TOC-matching folder (the same
+check scores merged sets 68%). 120 are synced. Their `301.yml` targets are computed from
+the repo path (`sync.redirects.published`), so they point at addresses AEM will not serve
+and the redirects fail at cutover. The Phase 55 verify pilot cannot show this: its sets
+already follow the TOC almost exactly.
+
+**Approach (proposed): reframe with merging switched off.** A new `reframe.yaml` key,
+`merge` (default `true`), set `false` for ibi, Streaming and Data Virtualization. Such a
+version goes through `reframe` with every topic its own page, so naming, `relocate`,
+link and anchor rewriting, `rename-map.csv`, `301.yml` and CSH come from the one code
+path that already does them. `publish` then means "publish the reframed tree" and is
+turned on for these sets. A separate layout step in `convert` was rejected: it would be
+a second path calculation beside reframe's, which is the drift Phase 29 removed.
+
+**Parent pages list their immediate children.** Every TOC node with children has a
+page. Where the source gives it none, the generated page holds its title and one link
+per immediate child — no grandchildren. `convert` already writes containers this way
+(`index.md.j2`); this phase makes it hold for every parent the layout creates, in
+merged and unmerged trees, and `reframe`'s self-check fails a parent page with no child
+links. **Measured 2026-10-23:** of 2,597 generated pages in `output/`, 11 are blank
+parents — Flare's hero-only landing stub (`LANDING_PAGE_EMPTY`, `flare.py`
+`_landing_document`) writes a title and nothing else even when the TOC gives the page
+children, e.g. ibi WebFOCUS Client 9.3.5–9.3.8 `_templates/releaseNotes.md`. That stub
+gets the same child list.
+
+**Steps:**
+
+1. `merge: false` in `reframe.yaml` and the packer: one topic per page, no absorption;
+   the review queue is not written.
+2. The engine gate (`REFRAMABLE_ENGINES`, Flare and DITA) widens for unmerged runs to
+   WebWorks and DocBook. Measure first whether their `toc.yml` and anchors read cleanly;
+   if not, they follow in a second step.
+3. Parent pages as above, with the self-check.
+4. Pilot on the synced versions whose layout differs most from their TOC (one ibi Flare,
+   one TIBCO WebWorks), chosen by measurement. Then family by family: reframe, sync,
+   `validate`, re-apply Phase 59 repairs, re-run `verify`.
+
+**Decided 2026-10-23:**
+
+- **Page names come from titles**, the same rule as merged sets, so every file name in
+  these sets changes along with its folder.
+- **Translated WebFOCUS is the next phase, not this one.** The 27 `loc-` roots stay in
+  the source layout until `reframe` gains `--locale` for unmerged runs.
+
+#### Built 2026-10-23
+
+- **`merge`** (`reframe.yaml`, default on; off for ibi, Streaming, Data Virtualization).
+  Off, or for a WebWorks or DocBook version, `packer.single` makes one page per TOC row
+  and no review queue is written. Left out of the policy digest while on, so its
+  arrival re-cuts nothing.
+- **`toc_folders`**, the rollout switch, off everywhere. The merge setting is per
+  product, but TRA, Adapters and others hold Flare versions (merged) beside WebWorks
+  ones (never merged), and holding every TIBCO WebWorks version to a reframed tree on
+  commit would have stopped those syncs. Off, an unmerged version is skipped and
+  publishes its converted tree as before; on for a family, it goes through `reframe`
+  and `sync` refuses a missing or stale reframed tree. `reframes()` is the one gate
+  `reframe`, `sync` and the dry run share. Not in the digest.
+- **Parent pages.** `packer.list_children` gives a title-only page whose TOC row has
+  children one link per immediate child; the self-check fails one left with none.
+  **Merged trees have them too: 2,422 title-only pages in 119 merged versions**
+  (measured over `reframed/`; not all are parents). `_ALGORITHM` 6 → 7, so every
+  merged version re-cuts on its next `reframe`; boundaries do not move.
+
+**Trial, 2026-10-23** (standalone, scratch output, merging off): WebFOCUS Client 9.3.8
+(Flare), ActiveMatrix Adapter for IBM i 6.4.0 (WebWorks), Data Streams 11.1.1 (DocBook)
+all `REFRAMED`, pages equal to `_md_files` (2,962 / 173 / 1,179), every self-check
+passed. The blank Release Notes landing now lists its four version pages. `validate`
+over the trial trees: no new link or anchor errors (Data Streams' 35 `LINK_BROKEN`
+were links into its `-resources` repo, absent from the scratch target). **One real
+problem: path length.** WebFOCUS Client's deep TOC put 50 pages past 260 characters
+even under the short scratch root; `sync` skips such a version
+(`PUBLISHED_PATH_TOO_LONG`).
+
+**Path lengths, all 148, measured 2026-10-23** (layout only, at each version's current
+published root; 5 not published yet): **60 of 143 versions would have pages over 260
+characters, 4,129 pages in all.** WF Reporting Server 9/9 versions (2,645 pages), WebFOCUS
+21/45 (1,183), FOCUS 9/9 (176), Container Editions 13/20 (31), BW plugins 4/19 (79),
+BusinessConnect 3/12 (14), Adapters 1/6 (1); DI-ISM, Streaming, TRA, BusinessWorks and
+Hawk none. Hand pins in `rename-map.csv` cannot cover 4,129 pages, so the rollout needs a
+decision on long paths before those 60 versions move (below). The other 83 can go first.
+
+**Open decision — long paths:** (a) shorten names automatically when a page's published
+path would pass 260 (shorter segments, so shorter AEM addresses too), or (b) lift the
+260 limit for these repos and require `core.longpaths` on Windows checkouts, since AEM
+publishes from Linux. Proposed: (a), because it keeps every checkout readable.
+
 ---
 
 ## Carried-Forward Open Items

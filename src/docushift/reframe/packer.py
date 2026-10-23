@@ -47,6 +47,7 @@ The POC's `MIN_WORDS` is not reimplemented (R1.2), and its unused basename-keyed
 
 from __future__ import annotations
 
+import posixpath
 from collections.abc import Callable, Hashable, Sequence
 from dataclasses import dataclass, field, replace
 from pathlib import PurePosixPath
@@ -110,6 +111,10 @@ class Page:
     #: Phase 30 a link names the exact heading it means and the merge renumbers
     #: repeated headings across the whole page (R9-01, R9-02). Filled by `assign`.
     sections: dict[PurePosixPath, dict[str, str]] = field(default_factory=dict)
+    #: Phase 63. `(label, link)` per immediate TOC child, for a page that is only a
+    #: title and would otherwise publish blank above children of its own. Links are
+    #: relative to this page and set once every path is final.
+    listing: list[tuple[str, str]] = field(default_factory=list)
 
     @property
     def words(self) -> int:
@@ -187,6 +192,30 @@ def pack(roots: Sequence[TocEntry], words_of: Callable[[PurePosixPath], int], ma
         # returns, so nothing can span two roots however much room is left.
         pages.extend(_subtree(root, root.title, words_of, max_words, claimed, prefixes))
     return pages
+
+
+def single(roots: Sequence[TocEntry], words_of: Callable[[PurePosixPath], int]) -> list[Page]:
+    """Every page of a version that is not merged (Phase 63): one per TOC row.
+
+    Reading order and the per-guide dedupe are `pack`'s, so a topic under two
+    guides is a copy in each and the same `assign`, `relocate` and redirects
+    follow. Every topic is its own page's H1, as `_subtree` makes a node alone.
+    """
+    pages: list[Page] = []
+    for root in roots:
+        _single(root, root.title, "", words_of, set(), pages)
+    return pages
+
+
+def _single(entry: TocEntry, guide: str, parent: str, words_of: Callable[[PurePosixPath], int],
+            claimed: set[PurePosixPath], pages: list[Page]) -> None:
+    emitted = entry.path is not None and entry.path not in claimed
+    if emitted:
+        claimed.add(entry.path)
+        pages.append(Page(guide, [Topic(entry.title, entry.path, words_of(entry.path),
+                                        parent=parent, node=id(entry), level=1)]))
+    for child in entry.children:
+        _single(child, guide, entry.title if emitted else parent, words_of, claimed, pages)
 
 
 #: One reference page as the pin carries it: where it was written, which source
@@ -801,6 +830,55 @@ def relocate(pages: Sequence[Page], roots: Sequence[TocEntry]) -> int:
             page.path = target
             moved += 1
     return moved
+
+
+def list_children(
+    roots: Sequence[TocEntry],
+    located: dict[PurePosixPath, tuple[Page, str]],
+    placements: dict[int, tuple[Page, str]],
+    blank: Callable[[PurePosixPath], bool],
+) -> list[PurePosixPath]:
+    """Gives every title-only parent page a link to each immediate TOC child (Phase 63).
+
+    A page AEM shows above children of its own must not open blank: Flare's
+    hero-only landing stub was 11 of them in ibi WebFOCUS. Immediate children
+    only -- the menu already shows the levels below -- and a page holding more
+    than its own topic is not a candidate, because its sections are its body.
+
+    Runs after `override`, when every page path is final. Returns the blank
+    parents left with nothing to list, which the caller fails the version on.
+    """
+    empty: list[PurePosixPath] = []
+
+    def resolve(entry: TocEntry) -> tuple[Page, str] | None:
+        found = placements.get(id(entry))
+        if found is None and entry.path is not None:
+            found = located.get(entry.path)
+        return found
+
+    def walk(entry: TocEntry) -> None:
+        found = resolve(entry) if entry.children else None
+        if found is not None:
+            page = found[0]
+            if (len(page.topics) == 1 and page.topics[0].source == entry.path
+                    and not page.listing and blank(page.topics[0].source)):
+                for child in entry.children:
+                    target = resolve(child)
+                    if target is None or target[0] is page:
+                        continue
+                    child_page, anchor = target
+                    link = posixpath.relpath(str(child_page.path), str(page.path.parent))
+                    if anchor and child_page.topics[0].source != child.path:
+                        link = f"{link}#{anchor}"
+                    page.listing.append((child.title, link))
+                if not page.listing:
+                    empty.append(page.path)
+        for child in entry.children:
+            walk(child)
+
+    for root in roots:
+        walk(root)
+    return empty
 
 
 def override(
