@@ -3,34 +3,34 @@ ibi,container-editions,ibi-webfocus-container-edition,1.0.0,not-verified,,,,,,,,
 ibi,container-editions,ibi-webfocus-container-edition,1.0.2,not-verified,,,,,,,,,
 ibi,container-editions,ibi-webfocus-container-edition,1.0.3,not-verified,,,,,,,,,
 ibi,container-editions,ibi-webfocus-container-edition,1.0.4,not-verified,,,,,,,,,
-ibi,container-editions,ibi-webfocus-container-edition,1.0.5,not-verified,,,,,,,,,
+ibi,container-editions,ibi-webfocus-container-edition,1.0.5,lost,2026-10-23,local+staging+live,37,12,23,0,VERIFY_PUBLISHED_PAGE_MISSING=1 VERIFY_TEXT_DROPPED=6 VERIFY_TOC_ENTRY_MISSING=2 VERIFY_TOC_MOVED=23 VERIFY_TOPIC_MISSING=3 VERIFY_TOPIC_UNFILED=4,ba59c77,reports/verify/ibi/ibi-webfocus-container-edition/1.0.5-2026-10-23.csv
 ibi,container-editions,ibi-webfocus-container-edition,1.1.0,not-verified,,,,,,,,,
 ibi,container-editions,ibi-webfocus-container-edition,1.1.1,not-verified,,,,,,,,,
 ibi,container-editions,ibi-webfocus-container-edition,1.1.2,not-verified,,,,,,,,,
 ibi,container-editions,ibi-webfocus-container-edition,1.2.0,not-verified,,,,,,,,,
 ibi,container-editions,ibi-webfocus-container-edition,1.2.1,not-verified,,,,,,,,,
-ibi,container-editions,ibi-webfocus-container-edition,1.2.2,not-verified,,,,,,,,,
-ibi,container-editions,ibi-webfocus-container-edition,1.2.3,not-verified,,,,,,,,,
-ibi,container-editions,ibi-webfocus-container-edition,1.2.4,not-verified,,,,,,,,,
-ibi,container-editions,ibi-webfocus-container-edition,1.2.5,not-verified,,,,,,,,,
-ibi,container-editions,ibi-webfocus-container-edition,1.3.0,not-verified,,,,,,,,,
-ibi,container-editions,ibi-webfocus-container-edition,1.3.1,not-verified,,,,,,,,,
-ibi,container-editions,ibi-webfocus-container-edition,1.3.2,not-verified,,,,,,,,,
-ibi,container-editions,ibi-webfocus-container-edition,1.3.3,not-verified,,,,,,,,,
-ibi,container-editions,ibi-webfocus-container-edition,1.3.4,not-verified,,,,,,,,,
-ibi,container-editions,ibi-webfocus-container-edition,9.3.5,not-verified,,,,,,,,,
-ibi,container-editions,ibi-webfocus-container-edition,9.3.6,not-verified,,,,,,,,,
-ibi,container-editions,ibi-webfocus-container-edition,9.3.7,not-verified,,,,,,,,,
+ibi,container-editions,ibi-webfocus-container-edition,1.2.2,lost,2026-10-23,local+staging+live,40,15,27,0,VERIFY_PUBLISHED_PAGE_MISSING=1 VERIFY_TEXT_DROPPED=7 VERIFY_TOC_ENTRY_MISSING=3 VERIFY_TOC_MOVED=27 VERIFY_TOPIC_MISSING=4 VERIFY_TOPIC_UNFILED=2,ba59c77,reports/verify/ibi/ibi-webfocus-container-edition/1.2.2-2026-10-23.csv
+ibi,container-editions,ibi-webfocus-container-edition,1.2.3,lost,2026-10-23,local+staging+live,40,15,27,0,VERIFY_PUBLISHED_PAGE_MISSING=1 VERIFY_TEXT_DROPPED=7 VERIFY_TOC_ENTRY_MISSING=3 VERIFY_TOC_MOVED=27 VERIFY_TOPIC_MISSING=4 VERIFY_TOPIC_UNFILED=2,ba59c77,reports/verify/ibi/ibi-webfocus-container-edition/1.2.3-2026-10-23.csv
+ibi,container-editions,ibi-webfocus-container-edition,1.2.4,lost,2026-10-23,local+staging+live,48,17,24,0,VERIFY_IMAGE_MISSING=1 VERIFY_PUBLISHED_PAGE_MISSING=1 VERIFY_TEXT_DROPPED=8 VERIFY_TOC_ENTRY_MISSING=3 VERIFY_TOC_MOVED=24 VERIFY_TOPIC_MISSING=4 VERIFY_TOPIC_UNFILED=8,ba59c77,reports/verify/ibi/ibi-webfocus-container-edition/1.2.4-2026-10-23.csv
+ibi,container-editions,ibi-webfocus-container-edition,1.2.5,lost,2026-10-23,local+staging+live,48,16,24,0,VERIFY_PUBLISHED_PAGE_MISSING=1 VERIFY_TEXT_DROPPED=8 VERIFY_TOC_ENTRY_MISSING=3 VERIFY_TOC_MOVED=24 VERIFY_TOPIC_MISSING=4 VERIFY_TOPIC_UNFILED=8,ba59c77,reports/verify/ibi/ibi-webfocus-container-edition/1.2.5-2026-10-23.csv
+ibi,container-editions,ibi-webfocus-container-edition,1.3.0,lost,2026-10-23,local+staging+live,57,17,26,0,VERIFY_PUBLISHED_PAGE_MISSING=1 VERIFY_TEXT_DROPPED=9 VERIFY_TOC_ENTRY_MISSING=3 VERIFY_TOC_MOVED=26 VERIFY_TOPIC_MISSING=4 VERIFY_TOPIC_UNFILED=10,ba59c77,reports/verify/ibi/ibi-webfocus-container-edition/1.3.0-2026-10-23.csv
+ibi,container-editions,ibi-webfocus-container-edition,1.3.1,lost,2026-10-23,local+staging+live,56,16,38,0,VERIFY_PUBLISHED_TEXT_DIFF=11 VERIFY_TEXT_DROPPED=9 VERIFY_TOC_ENTRY_MISSING=3 VERIFY_TOC_MOVED=27 VERIFY_TOPIC_MISSING=4 VERIFY_TOPIC_UNFILED=8,ba59c77,reports/verify/ibi/ibi-webfocus-container-edition/1.3.1-2026-10-23.csv
+ibi,container-editions,ibi-webfocus-container-edition,1.3.2,lost,2026-10-23,local+staging+live,59,20,29,0,VERIFY_PUBLISHED_PAGE_MISSING=1 VERIFY_TEXT_DROPPED=12 VERIFY_TOC_ENTRY_MISSING=3 VERIFY_TOC_MOVED=29 VERIFY_TOPIC_MISSING=4 VERIFY_TOPIC_UNFILED=8,ba59c77,reports/verify/ibi/ibi-webfocus-container-edition/1.3.2-2026-10-23.csv
+ibi,container-editions,ibi-webfocus-container-edition,1.3.3,lost,2026-10-23,local+staging+live,61,21,31,0,VERIFY_PUBLISHED_PAGE_MISSING=1 VERIFY_TEXT_DROPPED=13 VERIFY_TOC_ENTRY_MISSING=3 VERIFY_TOC_MOVED=31 VERIFY_TOPIC_MISSING=4 VERIFY_TOPIC_UNFILED=8,ba59c77,reports/verify/ibi/ibi-webfocus-container-edition/1.3.3-2026-10-23.csv
+ibi,container-editions,ibi-webfocus-container-edition,1.3.4,lost,2026-10-23,local+staging+live,62,23,32,0,VERIFY_PUBLISHED_PAGE_MISSING=1 VERIFY_TEXT_DROPPED=15 VERIFY_TOC_ENTRY_MISSING=3 VERIFY_TOC_MOVED=32 VERIFY_TOPIC_MISSING=4 VERIFY_TOPIC_UNFILED=8,ba59c77,reports/verify/ibi/ibi-webfocus-container-edition/1.3.4-2026-10-23.csv
+ibi,container-editions,ibi-webfocus-container-edition,9.3.5,lost,2026-10-23,local+staging+live,65,25,31,0,VERIFY_PUBLISHED_PAGE_MISSING=1 VERIFY_TEXT_DROPPED=17 VERIFY_TOC_ENTRY_MISSING=3 VERIFY_TOC_MOVED=31 VERIFY_TOPIC_MISSING=4 VERIFY_TOPIC_UNFILED=10,ba59c77,reports/verify/ibi/ibi-webfocus-container-edition/9.3.5-2026-10-23.csv
+ibi,container-editions,ibi-webfocus-container-edition,9.3.6,lost,2026-10-23,local+staging+live,68,26,31,0,VERIFY_PUBLISHED_PAGE_MISSING=1 VERIFY_TEXT_DROPPED=19 VERIFY_TOC_ENTRY_MISSING=2 VERIFY_TOC_MOVED=31 VERIFY_TOPIC_MISSING=4 VERIFY_TOPIC_UNFILED=10,ba59c77,reports/verify/ibi/ibi-webfocus-container-edition/9.3.6-2026-10-23.csv
+ibi,container-editions,ibi-webfocus-container-edition,9.3.7,lost,2026-10-23,local+staging+live,63,24,51,0,VERIFY_PUBLISHED_TEXT_DIFF=19 VERIFY_PUBLISHED_TOC_ORDER=1 VERIFY_TEXT_DROPPED=19 VERIFY_TOC_ENTRY_MISSING=2 VERIFY_TOC_MOVED=31 VERIFY_TOPIC_MISSING=3 VERIFY_TOPIC_UNFILED=5,ba59c77,reports/verify/ibi/ibi-webfocus-container-edition/9.3.7-2026-10-23.csv
 ibi,container-editions,ibi-webfocus-container-edition,9.3.8,not-verified,,,,,,,,,
 ibi,container-editions,ibi-webfocus-dsml-services-container-edition,1.0.3,not-verified,,,,,,,,,
-ibi,container-editions,ibi-webfocus-dsml-services-container-edition,1.0.4,not-verified,,,,,,,,,
-ibi,container-editions,ibi-webfocus-dsml-services-container-edition,1.0.5,not-verified,,,,,,,,,
-ibi,container-editions,ibi-webfocus-dsml-services-container-edition,1.0.6,not-verified,,,,,,,,,
+ibi,container-editions,ibi-webfocus-dsml-services-container-edition,1.0.4,lost,2026-10-23,local+staging+live,17,9,8,0,VERIFY_PUBLISHED_PAGE_MISSING=1 VERIFY_TEXT_DROPPED=1 VERIFY_TOC_ENTRY_MISSING=3 VERIFY_TOC_MOVED=8 VERIFY_TOPIC_MISSING=4 VERIFY_TOPIC_UNFILED=1,ba59c77,reports/verify/ibi/ibi-webfocus-dsml-services-container-edition/1.0.4-2026-10-23.csv
+ibi,container-editions,ibi-webfocus-dsml-services-container-edition,1.0.5,lost,2026-10-23,local+staging+live,19,10,9,0,VERIFY_PUBLISHED_PAGE_MISSING=1 VERIFY_TEXT_DROPPED=2 VERIFY_TOC_ENTRY_MISSING=3 VERIFY_TOC_MOVED=9 VERIFY_TOPIC_MISSING=4 VERIFY_TOPIC_UNFILED=2,ba59c77,reports/verify/ibi/ibi-webfocus-dsml-services-container-edition/1.0.5-2026-10-23.csv
+ibi,container-editions,ibi-webfocus-dsml-services-container-edition,1.0.6,lost,2026-10-23,local+staging+live,18,10,9,0,VERIFY_PUBLISHED_PAGE_MISSING=1 VERIFY_TEXT_DROPPED=2 VERIFY_TOC_ENTRY_MISSING=3 VERIFY_TOC_MOVED=9 VERIFY_TOPIC_MISSING=4 VERIFY_TOPIC_UNFILED=1,ba59c77,reports/verify/ibi/ibi-webfocus-dsml-services-container-edition/1.0.6-2026-10-23.csv
 ibi,container-editions,ibi-webfocus-dsml-services-container-edition,1.0.7,not-verified,,,,,,,,,
-ibi,container-editions,ibi-webfocus-dsml-services-container-edition,9.3.5,not-verified,,,,,,,,,
-ibi,container-editions,ibi-webfocus-dsml-services-container-edition,9.3.6,not-verified,,,,,,,,,
-ibi,container-editions,ibi-webfocus-dsml-services-container-edition,9.3.7,not-verified,,,,,,,,,
-ibi,container-editions,ibi-webfocus-dsml-services-container-edition,9.3.8,not-verified,,,,,,,,,
+ibi,container-editions,ibi-webfocus-dsml-services-container-edition,9.3.5,lost,2026-10-23,local+staging+live,21,13,11,0,VERIFY_PUBLISHED_PAGE_MISSING=1 VERIFY_TEXT_DROPPED=5 VERIFY_TOC_ENTRY_MISSING=3 VERIFY_TOC_MOVED=11 VERIFY_TOPIC_MISSING=4,ba59c77,reports/verify/ibi/ibi-webfocus-dsml-services-container-edition/9.3.5-2026-10-23.csv
+ibi,container-editions,ibi-webfocus-dsml-services-container-edition,9.3.6,lost,2026-10-23,local+staging+live,21,12,11,0,VERIFY_PUBLISHED_PAGE_MISSING=1 VERIFY_TEXT_DROPPED=5 VERIFY_TOC_ENTRY_MISSING=2 VERIFY_TOC_MOVED=11 VERIFY_TOPIC_MISSING=4,ba59c77,reports/verify/ibi/ibi-webfocus-dsml-services-container-edition/9.3.6-2026-10-23.csv
+ibi,container-editions,ibi-webfocus-dsml-services-container-edition,9.3.7,lost,2026-10-23,local+staging+live,22,12,12,0,VERIFY_PUBLISHED_PAGE_MISSING=1 VERIFY_TEXT_DROPPED=6 VERIFY_TOC_ENTRY_MISSING=2 VERIFY_TOC_MOVED=12 VERIFY_TOPIC_MISSING=3,ba59c77,reports/verify/ibi/ibi-webfocus-dsml-services-container-edition/9.3.7-2026-10-23.csv
+ibi,container-editions,ibi-webfocus-dsml-services-container-edition,9.3.8,lost,2026-10-23,local+staging+live,24,13,12,0,VERIFY_PUBLISHED_PAGE_MISSING=1 VERIFY_TEXT_DROPPED=7 VERIFY_TOC_ENTRY_MISSING=2 VERIFY_TOC_MOVED=12 VERIFY_TOPIC_MISSING=3 VERIFY_TOPIC_UNFILED=3,ba59c77,reports/verify/ibi/ibi-webfocus-dsml-services-container-edition/9.3.8-2026-10-23.csv
 ibi,di-ism,ibi-data-intelligence,1.0.0,not-verified,,,,,,,,,
 ibi,di-ism,ibi-data-intelligence,1.1.0,not-verified,,,,,,,,,
 ibi,di-ism,ibi-data-intelligence,1.2.0,not-verified,,,,,,,,,
