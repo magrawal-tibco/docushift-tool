@@ -1,0 +1,306 @@
+﻿Version,Page (source),Problem,Link as written,Link text,Likely intended page
+8.9.0,AdapterHelp/DynamicsGP/83Views.html,Link target is just a number,4,ApplicantApplication,83ApplicantApplication.html or 84ApplicantApplication.html
+8.9.0,AdapterHelp/DynamicsGP/83Views.html,Link target is just a number,5,ApplicantApplications,84ApplicantApplications.html or 85ApplicantApplications.html
+8.9.0,AdapterHelp/DynamicsGP/83Views.html,Page name and section glued together,39GLTransaction.htmlines,GLTransactionLines,120GLTransactionLines.html or 121GLTransactionLines.html
+8.9.0,AdapterHelp/DynamicsGP/83Views.html,Page name and section glued together,151ProjectContract.htmbillingcycles,ProjectContractBillingCycles,152ProjectContractBillingCycles.html or 153ProjectContractBillingCycles.html
+8.9.0,AdapterHelp/Googleads/194ConnectionStringOptions.html,Page name and section glued together,213OAuthJWTCert.htmlType,OAuthJWTCertType,214OAuthJWTCertType.html
+8.9.0,AdapterHelp/Googleads/194ConnectionStringOptions.html,Page name and section glued together,213OAuthJWTCert.htmlPassword,OAuthJWTCertPassword,215OAuthJWTCertPassword.html
+8.9.0,AdapterHelp/Googleads/194ConnectionStringOptions.html,Page name and section glued together,213OAuthJWTCert.htmlSubject,OAuthJWTCertSubject,216OAuthJWTCertSubject.html
+8.9.0,AdapterHelp/Googleads/212JWTOAuth.html,Page name and section glued together,213OAuthJWTCert.htmlType,OAuthJWTCertType,214OAuthJWTCertType.html
+8.9.0,AdapterHelp/Googleads/212JWTOAuth.html,Page name and section glued together,213OAuthJWTCert.htmlPassword,OAuthJWTCertPassword,215OAuthJWTCertPassword.html
+8.9.0,AdapterHelp/Googleads/212JWTOAuth.html,Page name and section glued together,213OAuthJWTCert.htmlSubject,OAuthJWTCertSubject,216OAuthJWTCertSubject.html
+8.9.0,AdapterHelp/Googleads/213OAuthJWTCert.html,Page name and section glued together,213OAuthJWTCert.htmlType,OAuthJWTCertType,214OAuthJWTCertType.html
+8.9.0,AdapterHelp/Googleads/213OAuthJWTCert.html,Page name and section glued together,213OAuthJWTCert.htmlPassword,OAuthJWTCertPassword,215OAuthJWTCertPassword.html
+8.9.0,AdapterHelp/Googleads/213OAuthJWTCert.html,Page name and section glued together,213OAuthJWTCert.htmlSubject,OAuthJWTCertSubject,216OAuthJWTCertSubject.html
+8.9.0,AdapterHelp/Googleads/213OAuthJWTCert.html,Page name and section glued together,213OAuthJWTCert.htmlSubject,OAuthJWTCertSubject,216OAuthJWTCertSubject.html
+8.9.0,AdapterHelp/Googleads/213OAuthJWTCert.html,Page name and section glued together,213OAuthJWTCert.htmlSubject,OAuthJWTCertSubject,216OAuthJWTCertSubject.html
+8.9.0,AdapterHelp/Googleads/215OAuthJWTCertPassword.html,Page name and section glued together,213OAuthJWTCert.htmlType,OAuthJWTCertType,214OAuthJWTCertType.html
+8.9.0,AdapterHelp/Googleads/217OAuthJWTIssuer.html,Page name and section glued together,213OAuthJWTCert.htmlType,OAuthJWTCertType,214OAuthJWTCertType.html
+8.9.0,AdapterHelp/Googleads/217OAuthJWTIssuer.html,Page name and section glued together,213OAuthJWTCert.htmlType,OAuthJWTCertType,214OAuthJWTCertType.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,23AccountBudget.htmlproposal,AccountBudgetProposal,24AccountBudgetProposal.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,28AdGroup.htmlad,AdGroupAd,29AdGroupAd.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,28AdGroup.htmladassetcombinationview,AdGroupAdAssetCombinationView,30AdGroupAdAssetCombinationView.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,28AdGroup.htmladassetview,AdGroupAdAssetView,31AdGroupAdAssetView.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,28AdGroup.htmladlabel,AdGroupAdLabel,32AdGroupAdLabel.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,28AdGroup.htmlasset,AdGroupAsset,33AdGroupAsset.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,28AdGroup.htmlassetset,AdGroupAssetSet,34AdGroupAssetSet.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,28AdGroup.htmlaudienceview,AdGroupAudienceView,35AdGroupAudienceView.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,28AdGroup.htmlbidmodifier,AdGroupBidModifier,36AdGroupBidModifier.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,28AdGroup.htmlcriterion,AdGroupCriterion,37AdGroupCriterion.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,28AdGroup.htmlcriterioncustomizer,AdGroupCriterionCustomizer,38AdGroupCriterionCustomizer.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,28AdGroup.htmlcriterionlabel,AdGroupCriterionLabel,39AdGroupCriterionLabel.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,28AdGroup.htmlcriterionsimulation,AdGroupCriterionSimulation,40AdGroupCriterionSimulation.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,28AdGroup.htmlcustomizer,AdGroupCustomizer,41AdGroupCustomizer.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,28AdGroup.htmlextensionsetting,AdGroupExtensionSetting,42AdGroupExtensionSetting.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,28AdGroup.htmlfeed,AdGroupFeed,43AdGroupFeed.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,28AdGroup.htmlhourlystatsreport,AdGroupHourlyStatsReport,44AdGroupHourlyStatsReport.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,28AdGroup.htmllabel,AdGroupLabel,45AdGroupLabel.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,28AdGroup.htmlsimulation,AdGroupSimulation,46AdGroupSimulation.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,28AdGroup.htmlstatsreport,AdGroupStatsReport,47AdGroupStatsReport.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,52Asset.htmlfieldtypeview,AssetFieldTypeView,53AssetFieldTypeView.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,52Asset.htmlgroup,AssetGroup,54AssetGroup.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,52Asset.htmlgroupasset,AssetGroupAsset,55AssetGroupAsset.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,52Asset.htmlgrouplistinggroupfilter,AssetGroupListingGroupFilter,56AssetGroupListingGroupFilter.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,52Asset.htmlgroupsignal,AssetGroupSignal,57AssetGroupSignal.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,52Asset.htmlset,AssetSet,58AssetSet.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,52Asset.htmlsetasset,AssetSetAsset,59AssetSetAsset.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,52Asset.htmlsettypeview,AssetSetTypeView,60AssetSetTypeView.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,61Audience.htmlstatsreport,AudienceStatsReport,62AudienceStatsReport.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,66BiddingStrategy.htmlsimulation,BiddingStrategySimulation,67BiddingStrategySimulation.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,70Campaign.htmlasset,CampaignAsset,71CampaignAsset.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,70Campaign.htmlassetset,CampaignAssetSet,72CampaignAssetSet.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,70Campaign.htmlaudienceview,CampaignAudienceView,73CampaignAudienceView.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,70Campaign.htmlbidmodifier,CampaignBidModifier,74CampaignBidModifier.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,70Campaign.htmlbudget,CampaignBudget,75CampaignBudget.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,70Campaign.htmlconversiongoal,CampaignConversionGoal,76CampaignConversionGoal.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,70Campaign.htmlcriterion,CampaignCriterion,77CampaignCriterion.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,70Campaign.htmlcustomizer,CampaignCustomizer,78CampaignCustomizer.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,70Campaign.htmldraft,CampaignDraft,79CampaignDraft.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,70Campaign.htmlextensionsetting,CampaignExtensionSetting,80CampaignExtensionSetting.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,70Campaign.htmlfeed,CampaignFeed,81CampaignFeed.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,70Campaign.htmlgroup,CampaignGroup,82CampaignGroup.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,70Campaign.htmlhourlystatsreport,CampaignHourlyStatsReport,83CampaignHourlyStatsReport.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,70Campaign.htmllabel,CampaignLabel,84CampaignLabel.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,70Campaign.htmlsharedset,CampaignSharedSet,85CampaignSharedSet.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,70Campaign.htmlsimulation,CampaignSimulation,86CampaignSimulation.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,70Campaign.htmlstatsreport,CampaignStatsReport,87CampaignStatsReport.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,91ClickView.htmlfilteredreport,ClickViewFilteredReport,92ClickViewFilteredReport.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,97ConversionValueRule.htmlset,ConversionValueRuleSet,98ConversionValueRuleSet.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,102Customer.htmlasset,CustomerAsset,103CustomerAsset.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,102Customer.htmlassetset,CustomerAssetSet,104CustomerAssetSet.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,102Customer.htmlclient,CustomerClient,105CustomerClient.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,102Customer.htmlclientlink,CustomerClientLink,106CustomerClientLink.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,102Customer.htmlconversiongoal,CustomerConversionGoal,107CustomerConversionGoal.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,102Customer.htmlcustomizer,CustomerCustomizer,108CustomerCustomizer.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,102Customer.htmlextensionsetting,CustomerExtensionSetting,109CustomerExtensionSetting.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,102Customer.htmlfeed,CustomerFeed,110CustomerFeed.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,102Customer.htmllabel,CustomerLabel,111CustomerLabel.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,102Customer.htmlmanagerlink,CustomerManagerLink,112CustomerManagerLink.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,102Customer.htmlnegativecriterion,CustomerNegativeCriterion,113CustomerNegativeCriterion.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,102Customer.htmluseraccess,CustomerUserAccess,114CustomerUserAccess.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,102Customer.htmluseraccessinvitation,CustomerUserAccessInvitation,115CustomerUserAccessInvitation.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,125Experiment.htmlarm,ExperimentArm,126ExperimentArm.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,128Feed.htmlitem,FeedItem,129FeedItem.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,128Feed.htmlitemset,FeedItemSet,130FeedItemSet.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,128Feed.htmlitemsetlink,FeedItemSetLink,131FeedItemSetLink.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,128Feed.htmlitemtarget,FeedItemTarget,132FeedItemTarget.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,128Feed.htmlmapping,FeedMapping,133FeedMapping.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,128Feed.htmlplaceholderview,FeedPlaceholderView,134FeedPlaceholderView.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,143KeywordPlan.htmladgroup,KeywordPlanAdGroup,144KeywordPlanAdGroup.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,143KeywordPlan.htmladgroupkeyword,KeywordPlanAdGroupKeyword,145KeywordPlanAdGroupKeyword.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,143KeywordPlan.htmlcampaign,KeywordPlanCampaign,146KeywordPlanCampaign.html
+8.9.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,143KeywordPlan.htmlcampaignkeyword,KeywordPlanCampaignKeyword,147KeywordPlanCampaignKeyword.html
+8.9.0,AdapterHelp/Hubspot/22DataModel.html,Page name and section glued together,23HubSpotDataModel.htmv3,HubSpot V3 Data Model,106HubSpotV3DataModel.html
+8.9.0,AdapterHelp/Webbased/Defining_SOAP_Message_Pipelines.html,Image missing from package,SOAP_message_pipeline.png,,
+8.9.0,AdapterHelp/Webbased/Defining_SOAP_Message_Pipelines.html,Image missing from package,messagePipeline.png,,
+8.9.0,AdapterHelp/Webbased/Google_OAuth_Example.html,Image missing from package,OAUTH_google_sample.png,,
+8.9.0,AdapterHelp/Webbased/Partial_Example_of_Using_OAuth_Customized_Flow_for_WSDL__SOAP__and_REST.html,Image missing from package,OAUTH_custom.png,,
+8.9.0,AdapterHelp/Webbased/Salesforce_OAuth_Example.html,Image missing from package,OAUTH_salesforce.png,,
+8.9.0,AdapterHelp/Webbased/TDV_OAuth_Tab_XML_Processors_Field_Reference.html,Image missing from package,OAUTH_processors.png,,
+8.9.0,onlinedocs/Installation/Launching_TDV_Containers.html,Web address without https://,edelivery.tibco.com,https://www.spotfire.com/downloads,https://edelivery.tibco.com
+8.9.0,onlinedocs/Installation/Launching_TDV_Containers.html,Web address without https://,edelivery.tibco.com,https://www.spotfire.com/downloads,https://edelivery.tibco.com
+8.9.0,onlinedocs/Installation/Launching_TDV_Containers__Single_Node____Using_Docker_Compose.html,Web address without https://,edelivery.tibco.com,edelivery site,https://edelivery.tibco.com
+8.8.1,AdapterHelp/DynamicsGP/83Views.html,Link target is just a number,4,ApplicantApplication,83ApplicantApplication.html or 84ApplicantApplication.html
+8.8.1,AdapterHelp/DynamicsGP/83Views.html,Link target is just a number,5,ApplicantApplications,84ApplicantApplications.html or 85ApplicantApplications.html
+8.8.1,AdapterHelp/DynamicsGP/83Views.html,Page name and section glued together,39GLTransaction.htmlines,GLTransactionLines,120GLTransactionLines.html or 121GLTransactionLines.html
+8.8.1,AdapterHelp/DynamicsGP/83Views.html,Page name and section glued together,151ProjectContract.htmbillingcycles,ProjectContractBillingCycles,152ProjectContractBillingCycles.html or 153ProjectContractBillingCycles.html
+8.8.1,AdapterHelp/Googleads/194ConnectionStringOptions.html,Page name and section glued together,213OAuthJWTCert.htmlType,OAuthJWTCertType,214OAuthJWTCertType.html
+8.8.1,AdapterHelp/Googleads/194ConnectionStringOptions.html,Page name and section glued together,213OAuthJWTCert.htmlPassword,OAuthJWTCertPassword,215OAuthJWTCertPassword.html
+8.8.1,AdapterHelp/Googleads/194ConnectionStringOptions.html,Page name and section glued together,213OAuthJWTCert.htmlSubject,OAuthJWTCertSubject,216OAuthJWTCertSubject.html
+8.8.1,AdapterHelp/Googleads/212JWTOAuth.html,Page name and section glued together,213OAuthJWTCert.htmlType,OAuthJWTCertType,214OAuthJWTCertType.html
+8.8.1,AdapterHelp/Googleads/212JWTOAuth.html,Page name and section glued together,213OAuthJWTCert.htmlPassword,OAuthJWTCertPassword,215OAuthJWTCertPassword.html
+8.8.1,AdapterHelp/Googleads/212JWTOAuth.html,Page name and section glued together,213OAuthJWTCert.htmlSubject,OAuthJWTCertSubject,216OAuthJWTCertSubject.html
+8.8.1,AdapterHelp/Googleads/213OAuthJWTCert.html,Page name and section glued together,213OAuthJWTCert.htmlType,OAuthJWTCertType,214OAuthJWTCertType.html
+8.8.1,AdapterHelp/Googleads/213OAuthJWTCert.html,Page name and section glued together,213OAuthJWTCert.htmlPassword,OAuthJWTCertPassword,215OAuthJWTCertPassword.html
+8.8.1,AdapterHelp/Googleads/213OAuthJWTCert.html,Page name and section glued together,213OAuthJWTCert.htmlSubject,OAuthJWTCertSubject,216OAuthJWTCertSubject.html
+8.8.1,AdapterHelp/Googleads/213OAuthJWTCert.html,Page name and section glued together,213OAuthJWTCert.htmlSubject,OAuthJWTCertSubject,216OAuthJWTCertSubject.html
+8.8.1,AdapterHelp/Googleads/213OAuthJWTCert.html,Page name and section glued together,213OAuthJWTCert.htmlSubject,OAuthJWTCertSubject,216OAuthJWTCertSubject.html
+8.8.1,AdapterHelp/Googleads/215OAuthJWTCertPassword.html,Page name and section glued together,213OAuthJWTCert.htmlType,OAuthJWTCertType,214OAuthJWTCertType.html
+8.8.1,AdapterHelp/Googleads/217OAuthJWTIssuer.html,Page name and section glued together,213OAuthJWTCert.htmlType,OAuthJWTCertType,214OAuthJWTCertType.html
+8.8.1,AdapterHelp/Googleads/217OAuthJWTIssuer.html,Page name and section glued together,213OAuthJWTCert.htmlType,OAuthJWTCertType,214OAuthJWTCertType.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,23AccountBudget.htmlproposal,AccountBudgetProposal,24AccountBudgetProposal.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,28AdGroup.htmlad,AdGroupAd,29AdGroupAd.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,28AdGroup.htmladassetcombinationview,AdGroupAdAssetCombinationView,30AdGroupAdAssetCombinationView.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,28AdGroup.htmladassetview,AdGroupAdAssetView,31AdGroupAdAssetView.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,28AdGroup.htmladlabel,AdGroupAdLabel,32AdGroupAdLabel.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,28AdGroup.htmlasset,AdGroupAsset,33AdGroupAsset.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,28AdGroup.htmlassetset,AdGroupAssetSet,34AdGroupAssetSet.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,28AdGroup.htmlaudienceview,AdGroupAudienceView,35AdGroupAudienceView.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,28AdGroup.htmlbidmodifier,AdGroupBidModifier,36AdGroupBidModifier.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,28AdGroup.htmlcriterion,AdGroupCriterion,37AdGroupCriterion.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,28AdGroup.htmlcriterioncustomizer,AdGroupCriterionCustomizer,38AdGroupCriterionCustomizer.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,28AdGroup.htmlcriterionlabel,AdGroupCriterionLabel,39AdGroupCriterionLabel.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,28AdGroup.htmlcriterionsimulation,AdGroupCriterionSimulation,40AdGroupCriterionSimulation.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,28AdGroup.htmlcustomizer,AdGroupCustomizer,41AdGroupCustomizer.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,28AdGroup.htmlextensionsetting,AdGroupExtensionSetting,42AdGroupExtensionSetting.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,28AdGroup.htmlfeed,AdGroupFeed,43AdGroupFeed.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,28AdGroup.htmlhourlystatsreport,AdGroupHourlyStatsReport,44AdGroupHourlyStatsReport.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,28AdGroup.htmllabel,AdGroupLabel,45AdGroupLabel.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,28AdGroup.htmlsimulation,AdGroupSimulation,46AdGroupSimulation.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,28AdGroup.htmlstatsreport,AdGroupStatsReport,47AdGroupStatsReport.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,52Asset.htmlfieldtypeview,AssetFieldTypeView,53AssetFieldTypeView.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,52Asset.htmlgroup,AssetGroup,54AssetGroup.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,52Asset.htmlgroupasset,AssetGroupAsset,55AssetGroupAsset.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,52Asset.htmlgrouplistinggroupfilter,AssetGroupListingGroupFilter,56AssetGroupListingGroupFilter.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,52Asset.htmlgroupsignal,AssetGroupSignal,57AssetGroupSignal.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,52Asset.htmlset,AssetSet,58AssetSet.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,52Asset.htmlsetasset,AssetSetAsset,59AssetSetAsset.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,52Asset.htmlsettypeview,AssetSetTypeView,60AssetSetTypeView.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,61Audience.htmlstatsreport,AudienceStatsReport,62AudienceStatsReport.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,66BiddingStrategy.htmlsimulation,BiddingStrategySimulation,67BiddingStrategySimulation.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,70Campaign.htmlasset,CampaignAsset,71CampaignAsset.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,70Campaign.htmlassetset,CampaignAssetSet,72CampaignAssetSet.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,70Campaign.htmlaudienceview,CampaignAudienceView,73CampaignAudienceView.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,70Campaign.htmlbidmodifier,CampaignBidModifier,74CampaignBidModifier.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,70Campaign.htmlbudget,CampaignBudget,75CampaignBudget.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,70Campaign.htmlconversiongoal,CampaignConversionGoal,76CampaignConversionGoal.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,70Campaign.htmlcriterion,CampaignCriterion,77CampaignCriterion.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,70Campaign.htmlcustomizer,CampaignCustomizer,78CampaignCustomizer.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,70Campaign.htmldraft,CampaignDraft,79CampaignDraft.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,70Campaign.htmlextensionsetting,CampaignExtensionSetting,80CampaignExtensionSetting.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,70Campaign.htmlfeed,CampaignFeed,81CampaignFeed.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,70Campaign.htmlgroup,CampaignGroup,82CampaignGroup.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,70Campaign.htmlhourlystatsreport,CampaignHourlyStatsReport,83CampaignHourlyStatsReport.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,70Campaign.htmllabel,CampaignLabel,84CampaignLabel.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,70Campaign.htmlsharedset,CampaignSharedSet,85CampaignSharedSet.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,70Campaign.htmlsimulation,CampaignSimulation,86CampaignSimulation.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,70Campaign.htmlstatsreport,CampaignStatsReport,87CampaignStatsReport.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,91ClickView.htmlfilteredreport,ClickViewFilteredReport,92ClickViewFilteredReport.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,97ConversionValueRule.htmlset,ConversionValueRuleSet,98ConversionValueRuleSet.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,102Customer.htmlasset,CustomerAsset,103CustomerAsset.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,102Customer.htmlassetset,CustomerAssetSet,104CustomerAssetSet.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,102Customer.htmlclient,CustomerClient,105CustomerClient.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,102Customer.htmlclientlink,CustomerClientLink,106CustomerClientLink.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,102Customer.htmlconversiongoal,CustomerConversionGoal,107CustomerConversionGoal.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,102Customer.htmlcustomizer,CustomerCustomizer,108CustomerCustomizer.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,102Customer.htmlextensionsetting,CustomerExtensionSetting,109CustomerExtensionSetting.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,102Customer.htmlfeed,CustomerFeed,110CustomerFeed.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,102Customer.htmllabel,CustomerLabel,111CustomerLabel.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,102Customer.htmlmanagerlink,CustomerManagerLink,112CustomerManagerLink.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,102Customer.htmlnegativecriterion,CustomerNegativeCriterion,113CustomerNegativeCriterion.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,102Customer.htmluseraccess,CustomerUserAccess,114CustomerUserAccess.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,102Customer.htmluseraccessinvitation,CustomerUserAccessInvitation,115CustomerUserAccessInvitation.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,125Experiment.htmlarm,ExperimentArm,126ExperimentArm.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,128Feed.htmlitem,FeedItem,129FeedItem.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,128Feed.htmlitemset,FeedItemSet,130FeedItemSet.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,128Feed.htmlitemsetlink,FeedItemSetLink,131FeedItemSetLink.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,128Feed.htmlitemtarget,FeedItemTarget,132FeedItemTarget.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,128Feed.htmlmapping,FeedMapping,133FeedMapping.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,128Feed.htmlplaceholderview,FeedPlaceholderView,134FeedPlaceholderView.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,143KeywordPlan.htmladgroup,KeywordPlanAdGroup,144KeywordPlanAdGroup.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,143KeywordPlan.htmladgroupkeyword,KeywordPlanAdGroupKeyword,145KeywordPlanAdGroupKeyword.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,143KeywordPlan.htmlcampaign,KeywordPlanCampaign,146KeywordPlanCampaign.html
+8.8.1,AdapterHelp/Googleads/21Views.html,Page name and section glued together,143KeywordPlan.htmlcampaignkeyword,KeywordPlanCampaignKeyword,147KeywordPlanCampaignKeyword.html
+8.8.1,AdapterHelp/Hubspot/22DataModel.html,Page name and section glued together,23HubSpotDataModel.htmv3,HubSpot V3 Data Model,106HubSpotV3DataModel.html
+8.8.1,AdapterHelp/Webbased/Defining_SOAP_Message_Pipelines.html,Image missing from package,SOAP_message_pipeline.png,,
+8.8.1,AdapterHelp/Webbased/Defining_SOAP_Message_Pipelines.html,Image missing from package,messagePipeline.png,,
+8.8.1,AdapterHelp/Webbased/Google_OAuth_Example.html,Image missing from package,OAUTH_google_sample.png,,
+8.8.1,AdapterHelp/Webbased/Partial_Example_of_Using_OAuth_Customized_Flow_for_WSDL__SOAP__and_REST.html,Image missing from package,OAUTH_custom.png,,
+8.8.1,AdapterHelp/Webbased/Salesforce_OAuth_Example.html,Image missing from package,OAUTH_salesforce.png,,
+8.8.1,AdapterHelp/Webbased/TDV_OAuth_Tab_XML_Processors_Field_Reference.html,Image missing from package,OAUTH_processors.png,,
+8.8.1,StudioHelp/Installation/Building_TDV_Docker_Images.html,Web address without https://,edelivery.tibco.com,edelivery.tibco.com,https://edelivery.tibco.com
+8.8.1,StudioHelp/Installation/Launching_TDV_Containers.html,Web address without https://,edelivery.tibco.com,edelivery.tibco.com site.,https://edelivery.tibco.com
+8.8.1,StudioHelp/Installation/Launching_TDV_Containers.html,Web address without https://,edelivery.tibco.com,edelivery.tibco.com site.,https://edelivery.tibco.com
+8.8.1,StudioHelp/Installation/Launching_TDV_Containers__Single_Node____Using_Docker_Compose.html,Web address without https://,edelivery.tibco.com,edelivery site,https://edelivery.tibco.com
+8.8.0,AdapterHelp/DynamicsGP/83Views.htm,Link target is just a number,4,ApplicantApplication,83ApplicantApplication.htm or 84ApplicantApplication.htm
+8.8.0,AdapterHelp/DynamicsGP/83Views.htm,Link target is just a number,5,ApplicantApplications,84ApplicantApplications.htm or 85ApplicantApplications.htm
+8.8.0,AdapterHelp/DynamicsGP/83Views.htm,Page name and section glued together,39GLTransaction.htmlines,GLTransactionLines,120GLTransactionLines.htm or 121GLTransactionLines.htm
+8.8.0,AdapterHelp/DynamicsGP/83Views.htm,Page name and section glued together,151ProjectContract.htmbillingcycles,ProjectContractBillingCycles,152ProjectContractBillingCycles.htm or 153ProjectContractBillingCycles.htm
+8.8.0,AdapterHelp/Googleads/194ConnectionStringOptions.html,Page name and section glued together,213OAuthJWTCert.htmlType,OAuthJWTCertType,214OAuthJWTCertType.html
+8.8.0,AdapterHelp/Googleads/194ConnectionStringOptions.html,Page name and section glued together,213OAuthJWTCert.htmlPassword,OAuthJWTCertPassword,215OAuthJWTCertPassword.html
+8.8.0,AdapterHelp/Googleads/194ConnectionStringOptions.html,Page name and section glued together,213OAuthJWTCert.htmlSubject,OAuthJWTCertSubject,216OAuthJWTCertSubject.html
+8.8.0,AdapterHelp/Googleads/212JWTOAuth.html,Page name and section glued together,213OAuthJWTCert.htmlType,OAuthJWTCertType,214OAuthJWTCertType.html
+8.8.0,AdapterHelp/Googleads/212JWTOAuth.html,Page name and section glued together,213OAuthJWTCert.htmlPassword,OAuthJWTCertPassword,215OAuthJWTCertPassword.html
+8.8.0,AdapterHelp/Googleads/212JWTOAuth.html,Page name and section glued together,213OAuthJWTCert.htmlSubject,OAuthJWTCertSubject,216OAuthJWTCertSubject.html
+8.8.0,AdapterHelp/Googleads/213OAuthJWTCert.html,Page name and section glued together,213OAuthJWTCert.htmlType,OAuthJWTCertType,214OAuthJWTCertType.html
+8.8.0,AdapterHelp/Googleads/213OAuthJWTCert.html,Page name and section glued together,213OAuthJWTCert.htmlPassword,OAuthJWTCertPassword,215OAuthJWTCertPassword.html
+8.8.0,AdapterHelp/Googleads/213OAuthJWTCert.html,Page name and section glued together,213OAuthJWTCert.htmlSubject,OAuthJWTCertSubject,216OAuthJWTCertSubject.html
+8.8.0,AdapterHelp/Googleads/213OAuthJWTCert.html,Page name and section glued together,213OAuthJWTCert.htmlSubject,OAuthJWTCertSubject,216OAuthJWTCertSubject.html
+8.8.0,AdapterHelp/Googleads/213OAuthJWTCert.html,Page name and section glued together,213OAuthJWTCert.htmlSubject,OAuthJWTCertSubject,216OAuthJWTCertSubject.html
+8.8.0,AdapterHelp/Googleads/215OAuthJWTCertPassword.html,Page name and section glued together,213OAuthJWTCert.htmlType,OAuthJWTCertType,214OAuthJWTCertType.html
+8.8.0,AdapterHelp/Googleads/217OAuthJWTIssuer.html,Page name and section glued together,213OAuthJWTCert.htmlType,OAuthJWTCertType,214OAuthJWTCertType.html
+8.8.0,AdapterHelp/Googleads/217OAuthJWTIssuer.html,Page name and section glued together,213OAuthJWTCert.htmlType,OAuthJWTCertType,214OAuthJWTCertType.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,23AccountBudget.htmlproposal,AccountBudgetProposal,24AccountBudgetProposal.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,28AdGroup.htmlad,AdGroupAd,29AdGroupAd.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,28AdGroup.htmladassetcombinationview,AdGroupAdAssetCombinationView,30AdGroupAdAssetCombinationView.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,28AdGroup.htmladassetview,AdGroupAdAssetView,31AdGroupAdAssetView.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,28AdGroup.htmladlabel,AdGroupAdLabel,32AdGroupAdLabel.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,28AdGroup.htmlasset,AdGroupAsset,33AdGroupAsset.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,28AdGroup.htmlassetset,AdGroupAssetSet,34AdGroupAssetSet.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,28AdGroup.htmlaudienceview,AdGroupAudienceView,35AdGroupAudienceView.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,28AdGroup.htmlbidmodifier,AdGroupBidModifier,36AdGroupBidModifier.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,28AdGroup.htmlcriterion,AdGroupCriterion,37AdGroupCriterion.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,28AdGroup.htmlcriterioncustomizer,AdGroupCriterionCustomizer,38AdGroupCriterionCustomizer.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,28AdGroup.htmlcriterionlabel,AdGroupCriterionLabel,39AdGroupCriterionLabel.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,28AdGroup.htmlcriterionsimulation,AdGroupCriterionSimulation,40AdGroupCriterionSimulation.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,28AdGroup.htmlcustomizer,AdGroupCustomizer,41AdGroupCustomizer.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,28AdGroup.htmlextensionsetting,AdGroupExtensionSetting,42AdGroupExtensionSetting.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,28AdGroup.htmlfeed,AdGroupFeed,43AdGroupFeed.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,28AdGroup.htmlhourlystatsreport,AdGroupHourlyStatsReport,44AdGroupHourlyStatsReport.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,28AdGroup.htmllabel,AdGroupLabel,45AdGroupLabel.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,28AdGroup.htmlsimulation,AdGroupSimulation,46AdGroupSimulation.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,28AdGroup.htmlstatsreport,AdGroupStatsReport,47AdGroupStatsReport.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,52Asset.htmlfieldtypeview,AssetFieldTypeView,53AssetFieldTypeView.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,52Asset.htmlgroup,AssetGroup,54AssetGroup.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,52Asset.htmlgroupasset,AssetGroupAsset,55AssetGroupAsset.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,52Asset.htmlgrouplistinggroupfilter,AssetGroupListingGroupFilter,56AssetGroupListingGroupFilter.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,52Asset.htmlgroupsignal,AssetGroupSignal,57AssetGroupSignal.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,52Asset.htmlset,AssetSet,58AssetSet.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,52Asset.htmlsetasset,AssetSetAsset,59AssetSetAsset.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,52Asset.htmlsettypeview,AssetSetTypeView,60AssetSetTypeView.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,61Audience.htmlstatsreport,AudienceStatsReport,62AudienceStatsReport.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,66BiddingStrategy.htmlsimulation,BiddingStrategySimulation,67BiddingStrategySimulation.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,70Campaign.htmlasset,CampaignAsset,71CampaignAsset.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,70Campaign.htmlassetset,CampaignAssetSet,72CampaignAssetSet.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,70Campaign.htmlaudienceview,CampaignAudienceView,73CampaignAudienceView.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,70Campaign.htmlbidmodifier,CampaignBidModifier,74CampaignBidModifier.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,70Campaign.htmlbudget,CampaignBudget,75CampaignBudget.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,70Campaign.htmlconversiongoal,CampaignConversionGoal,76CampaignConversionGoal.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,70Campaign.htmlcriterion,CampaignCriterion,77CampaignCriterion.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,70Campaign.htmlcustomizer,CampaignCustomizer,78CampaignCustomizer.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,70Campaign.htmldraft,CampaignDraft,79CampaignDraft.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,70Campaign.htmlextensionsetting,CampaignExtensionSetting,80CampaignExtensionSetting.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,70Campaign.htmlfeed,CampaignFeed,81CampaignFeed.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,70Campaign.htmlgroup,CampaignGroup,82CampaignGroup.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,70Campaign.htmlhourlystatsreport,CampaignHourlyStatsReport,83CampaignHourlyStatsReport.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,70Campaign.htmllabel,CampaignLabel,84CampaignLabel.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,70Campaign.htmlsharedset,CampaignSharedSet,85CampaignSharedSet.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,70Campaign.htmlsimulation,CampaignSimulation,86CampaignSimulation.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,70Campaign.htmlstatsreport,CampaignStatsReport,87CampaignStatsReport.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,91ClickView.htmlfilteredreport,ClickViewFilteredReport,92ClickViewFilteredReport.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,97ConversionValueRule.htmlset,ConversionValueRuleSet,98ConversionValueRuleSet.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,102Customer.htmlasset,CustomerAsset,103CustomerAsset.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,102Customer.htmlassetset,CustomerAssetSet,104CustomerAssetSet.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,102Customer.htmlclient,CustomerClient,105CustomerClient.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,102Customer.htmlclientlink,CustomerClientLink,106CustomerClientLink.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,102Customer.htmlconversiongoal,CustomerConversionGoal,107CustomerConversionGoal.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,102Customer.htmlcustomizer,CustomerCustomizer,108CustomerCustomizer.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,102Customer.htmlextensionsetting,CustomerExtensionSetting,109CustomerExtensionSetting.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,102Customer.htmlfeed,CustomerFeed,110CustomerFeed.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,102Customer.htmllabel,CustomerLabel,111CustomerLabel.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,102Customer.htmlmanagerlink,CustomerManagerLink,112CustomerManagerLink.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,102Customer.htmlnegativecriterion,CustomerNegativeCriterion,113CustomerNegativeCriterion.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,102Customer.htmluseraccess,CustomerUserAccess,114CustomerUserAccess.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,102Customer.htmluseraccessinvitation,CustomerUserAccessInvitation,115CustomerUserAccessInvitation.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,125Experiment.htmlarm,ExperimentArm,126ExperimentArm.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,128Feed.htmlitem,FeedItem,129FeedItem.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,128Feed.htmlitemset,FeedItemSet,130FeedItemSet.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,128Feed.htmlitemsetlink,FeedItemSetLink,131FeedItemSetLink.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,128Feed.htmlitemtarget,FeedItemTarget,132FeedItemTarget.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,128Feed.htmlmapping,FeedMapping,133FeedMapping.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,128Feed.htmlplaceholderview,FeedPlaceholderView,134FeedPlaceholderView.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,143KeywordPlan.htmladgroup,KeywordPlanAdGroup,144KeywordPlanAdGroup.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,143KeywordPlan.htmladgroupkeyword,KeywordPlanAdGroupKeyword,145KeywordPlanAdGroupKeyword.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,143KeywordPlan.htmlcampaign,KeywordPlanCampaign,146KeywordPlanCampaign.html
+8.8.0,AdapterHelp/Googleads/21Views.html,Page name and section glued together,143KeywordPlan.htmlcampaignkeyword,KeywordPlanCampaignKeyword,147KeywordPlanCampaignKeyword.html
+8.8.0,AdapterHelp/Hubspot/22DataModel.htm,Page name and section glued together,23HubSpotDataModel.htmv3,HubSpot V3 Data Model,106HubSpotV3DataModel.htm
+8.8.0,AdapterHelp/Webbased/Defining_SOAP_Message_Pipelines.htm,Image missing from package,SOAP_message_pipeline.png,,
+8.8.0,AdapterHelp/Webbased/Defining_SOAP_Message_Pipelines.htm,Image missing from package,messagePipeline.png,,
+8.8.0,AdapterHelp/Webbased/Google_OAuth_Example.htm,Image missing from package,OAUTH_google_sample.png,,
+8.8.0,AdapterHelp/Webbased/Partial_Example_of_Using_OAuth_Customized_Flow_for_WSDL__SOAP__and_REST.htm,Image missing from package,OAUTH_custom.png,,
+8.8.0,AdapterHelp/Webbased/Salesforce_OAuth_Example.htm,Image missing from package,OAUTH_salesforce.png,,
+8.8.0,AdapterHelp/Webbased/TDV_OAuth_Tab_XML_Processors_Field_Reference.htm,Image missing from package,OAUTH_processors.png,,
+8.8.0,StudioHelp/Installation/Building_TDV_Docker_Images.html,Web address without https://,edelivery.tibco.com,edelivery.tibco.com.,https://edelivery.tibco.com
+8.8.0,StudioHelp/Installation/Launching_TDV_Containers.html,Web address without https://,edelivery.tibco.com,edelivery.tibco.com site.,https://edelivery.tibco.com
+8.8.0,StudioHelp/Installation/Launching_TDV_Containers.html,Web address without https://,edelivery.tibco.com,edelivery.tibco.com site.,https://edelivery.tibco.com
+8.8.0,StudioHelp/Installation/Launching_TDV_Containers__Single_Node____Using_Docker_Compose.html,Web address without https://,edelivery.tibco.com,edelivery site,https://edelivery.tibco.com
