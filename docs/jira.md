@@ -1,6 +1,6 @@
 # Jira Tracking — What Is Logged in DOCOPS
 
-> **Last reconciled:** 2026-10-23, against Jira and `config/versions.csv`.
+> **Last reconciled:** 2026-10-24, against Jira and `config/versions.csv`.
 > Conventions (site, cloud ID, story points, transitions, who owns what) live in
 > `C:\github\confluence-mcp\reports\docushift-claude-atlassian-context.md`; this file
 > does not repeat them. It answers one question: **is this piece of work in Jira, and where?**
@@ -44,6 +44,9 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 **Left alone on purpose:** DOCOPS-8 is a Task where its siblings are Stories.
 
 **Log** (newest first, one line per session):
+
+- 2026-10-24 — DOCOPS-274 note: Phase 63 built (cd939ba, 8acf926) incl. automatic name shortening for
+  paths past 260 (all 148 fit); stays In Progress for pilot and family rollout.
 
 - 2026-10-23 — DOCOPS-274 (Backlog, 1 SP, under DOCOPS-11): TOC-shaped folders for the 148 unmerged versions
   (ibi, WebWorks, Streaming, Data Virtualization); only reframe builds them today, and reframe would also merge.
