@@ -52,6 +52,7 @@ from docushift.reframe.packer import (
     asset_destination,
     assign,
     carry,
+    fit,
     layout_of,
     list_children,
     override,
@@ -84,6 +85,9 @@ from docushift.validation.references import mask_code
 #: small enough to need this?" is an empirical one: DITA's median converted topic
 #: is 177 words to Flare's 180, WebWorks' 234 (Phase 42, measured 2026-10-06).
 REFRAMABLE_ENGINES: tuple[SourceEngine, ...] = (SourceEngine.FLARE, SourceEngine.DITA)
+
+#: What Windows opens, and what `sync` holds a published path to (Phase 15d).
+MAX_PUBLISHED_PATH = 260
 
 #: Phase 63. Engines laid out by the stage but never merged: the TOC-shaped
 #: folders, names and redirects are a property of the address, not of how small
@@ -596,6 +600,9 @@ class Reframer:
         # URL are the same chain. Before `render`, which resolves every relative
         # link and asset against `page.path`.
         relocate(built, roots)
+        # Phase 63: a chain that would publish past 260 characters gets shorter
+        # names, before any pin -- a name a human chose still wins.
+        self._fit(product, version, built)
         # A name a human kept in `rename-map.csv` wins over both the computed
         # name and the computed folder: a published URL must not move because
         # somebody fixed a typo in a title. `--renormalize` is how a writer asks
@@ -910,6 +917,28 @@ class Reframer:
         }
         payload = json.dumps(shaping, sort_keys=True, separators=(",", ":"))
         return hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16]
+
+    def _fit(self, product: Product, version: ProductVersion, built: list[Page]) -> None:
+        """`packer.fit` against this version's published folder, with its findings."""
+        from docushift.sync.distributor import published_help_length
+
+        slug, number = product.slug, version.version
+        base = published_help_length(self.config, product, number)
+        cap, moved, unfit = fit(built, MAX_PUBLISHED_PATH - base - 1 if base else 0)
+        if moved:
+            self._record(
+                "REFRAME_PATH_SHORTENED", slug, number, count=moved,
+                message=(f"{moved} page(s) on chains past {MAX_PUBLISHED_PATH} characters published "
+                         f"took names cut to {cap} characters"),
+            )
+        if unfit:
+            shown = ", ".join(str(path) for path in unfit[:5])
+            self._record(
+                "REFRAME_PATH_TOO_LONG", slug, number, count=len(unfit),
+                message=(f"{len(unfit)} page(s) still past {MAX_PUBLISHED_PATH} characters published "
+                         f"with every name cut; `sync` will refuse the version: {shown}"
+                         f"{', ...' if len(unfit) > 5 else ''}"),
+            )
 
     def _url_for(
         self, product: Product, version: ProductVersion

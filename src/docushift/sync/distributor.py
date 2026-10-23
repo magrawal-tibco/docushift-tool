@@ -92,6 +92,23 @@ from docushift.utils.swap import ASIDE_SUFFIX, recover, remove, replace_file, sw
 # and "the doc-class this file is for" started mattering.
 ONLINE_HELP = "online-help"
 
+
+def published_help_length(config: ConfigManager, product: Product, number: str) -> int:
+    """How long a version's `online-help` folder will be once published (Phase 49).
+
+    The path `sync` measures (`published_length`), with `published_root_length`
+    standing in for its `--target-dir`, which `convert` and `reframe` cannot see.
+    0 -- shorten nothing -- when the root length is unset or the version yields
+    no folder name.
+    """
+    root = config.published_root_length()
+    segment = version_segment(number)
+    if not root or not segment:
+        return 0
+    parts = (config.docs_tree_name(product.bu, product.family),
+             slugify(config.locale), product.slug, ONLINE_HELP, segment)
+    return root + sum(1 + len(part) for part in parts)
+
 # Every doc-class in the docs tree, in the order a reader meets them. A fixed
 # tuple rather than "whatever directories are there": a stray folder somebody
 # dropped beside `online-help` must not acquire a `version.yml` and become a

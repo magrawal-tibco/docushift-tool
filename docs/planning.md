@@ -1842,10 +1842,21 @@ BusinessConnect 3/12 (14), Adapters 1/6 (1); DI-ISM, Streaming, TRA, BusinessWor
 Hawk none. Hand pins in `rename-map.csv` cannot cover 4,129 pages, so the rollout needs a
 decision on long paths before those 60 versions move (below). The other 83 can go first.
 
-**Open decision — long paths:** (a) shorten names automatically when a page's published
-path would pass 260 (shorter segments, so shorter AEM addresses too), or (b) lift the
-260 limit for these repos and require `core.longpaths` on Windows checkouts, since AEM
-publishes from Linux. Proposed: (a), because it keeps every checkout readable.
+**Decided 2026-10-23: shorten names automatically.** Built as `packer.fit`, run after
+`relocate` and before `override` (a pinned name still wins). Only chains with a page past
+the limit are cut, all of each chain: a folder and the page it is named after are one
+name. Every name on those chains is cut by `naming.shorten` to one cap per version, the
+longest cap that makes every page fit; a cut name meeting a sibling takes a suffix. The
+budget is `published_help_length` (moved from `convert` to `sync.distributor`, so both
+stages measure the same folder) under `published_root_length`. Findings
+`REFRAME_PATH_SHORTENED` (note) and `REFRAME_PATH_TOO_LONG` (warn, if a chain cannot fit
+even at 8 characters a name).
+
+**Re-measured, all 148, 2026-10-24:** every page fits. 66 versions take shorter names
+(more than the 60 over the limit, since the configured root is `tibco-docs-aem`'s 24
+characters, 2 more than `ibi-docs-aem`): 33,289 of their 104,274 pages move, most of
+them descendants of a cut folder. Caps run from 49 characters down to 20 (WF Reporting
+Server 9.3.8, 2,954 of 3,020 pages; 9.3.3–9.3.7 at 25).
 
 ---
 
@@ -1947,6 +1958,8 @@ The concrete deliverable of §7.1: every deferred "report line" in the three doc
 | `ELEMENT_UNRENDERED`³⁴ | note | convert | Embedded media with no Markdown form (`iframe`, `video`, `svg` …); an absolute URL became a link, anything else kept only its fallback text. One row per version, counted by tag | Phase 34 (R8-13) |
 | `FRAGMENT_RETARGETED`³⁰ | note | convert | Cross-references pointed at a heading instead of an inert `<a id>` the platform does not honour | Phase 30 |
 | `FRAGMENT_UNPLACEABLE`³⁰ | warn | convert | A cross-reference naming an anchor with no heading behind it; left as written and will not resolve | Phase 30 |
+| `REFRAME_PATH_SHORTENED`⁶³ | note | reframe | Pages on a TOC chain that would publish past 260 characters took shorter names, the folders along the chain with them | Phase 63 |
+| `REFRAME_PATH_TOO_LONG`⁶³ | warn | reframe | Pages still past 260 characters published with every name on the chain cut; `sync` will refuse the version | Phase 63 |
 | `RENAME_MAP_APPLIED`²⁹ | note | reframe | Page names taken from `rename-map.csv` rather than recomputed, so a published URL does not move when a title is edited | Phase 29 |
 | `RENAME_MAP_REFUSED`³⁴ | warn | reframe | A name in `rename-map.csv` that another page ends up holding; the computed name is kept, and each refused pin is named | Phase 34 (R9-05) |
 | `RENAME_MAP_AMBIGUOUS`⁵⁰ | warn | reframe | A row in `rename-map.csv` for a source topic that leads more than one page, with no `page_key` to say which; no page takes the name, each row named | Phase 50 |

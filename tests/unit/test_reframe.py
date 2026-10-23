@@ -3836,3 +3836,67 @@ def test_a_merged_parent_with_a_body_of_sections_gets_no_list(config, catalog, f
     page = (result.path / "installation.md").read_text(encoding="utf-8")
     assert "## Installation Overview" in page and "](" not in page
 
+
+
+def _paged(*paths: str) -> list[Page]:
+    return [Page("G", [Topic("T", PurePosixPath(path), 1)], path=PurePosixPath(path)) for path in paths]
+
+
+def test_a_tree_that_fits_keeps_every_name():
+    from docushift.reframe.packer import fit
+
+    pages = _paged("guide.md", "guide/installing-the-server.md")
+
+    assert fit(pages, 200) == (0, 0, [])
+    assert [str(page.path) for page in pages] == ["guide.md", "guide/installing-the-server.md"]
+
+
+def test_a_long_chain_is_cut_as_one_and_its_neighbours_keep_their_names():
+    """Phase 63: WF Reporting Server's deep TOC put 2,645 pages past 260. The
+    folder and the page it is named after are one name, so both are cut; a
+    sibling chain that already fits is left alone."""
+    from docushift.reframe.packer import fit
+
+    pages = _paged(
+        "configuring-the-reporting-server.md",
+        "configuring-the-reporting-server/security-providers-and-authentication.md",
+        "configuring-the-reporting-server/security-providers-and-authentication/"
+        "ldap-provider-settings-for-active-directory.md",
+        "release-notes.md",
+    )
+
+    cap, moved, unfit = fit(pages, 90)
+
+    # The top name is under the cap that fits, so it keeps its name.
+    assert unfit == [] and moved == 2
+    assert all(len(str(page.path)) <= 90 for page in pages)
+    first, second, third, notes = (str(page.path) for page in pages)
+    assert third.startswith(second[:-3] + "/") and second.startswith(first[:-3] + "/")
+    assert notes == "release-notes.md"
+    # The longest cap that fits: one more character would not.
+    assert len(third) > 90 - 10
+
+
+def test_two_names_cut_onto_one_are_told_apart():
+    from docushift.reframe.packer import fit
+
+    pages = _paged(
+        "g/configuring-ldap-authentication-for-the-console.md",
+        "g/configuring-ldap-authentication-for-the-server.md",
+    )
+
+    fit(pages, 30)
+
+    names = [page.path.stem for page in pages]
+    assert len({name.lower() for name in names}) == 2
+    assert all(len(str(page.path)) <= 30 for page in pages)
+
+
+def test_a_chain_that_cannot_fit_is_returned_not_hidden():
+    from docushift.reframe.packer import fit
+
+    pages = _paged("/".join(["deeply-nested-section"] * 12) + ".md")
+
+    _, _, unfit = fit(pages, 60)
+
+    assert unfit == [pages[0].path]

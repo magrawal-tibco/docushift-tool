@@ -438,6 +438,14 @@ REGISTRY: dict[str, Code] = _codes(
     # *not* deciding something: a name here came from a human, and the run says
     # how many so that a reviewer can tell a stable tree from one that happened
     # to recompute the same answer.
+    Code("REFRAME_PATH_SHORTENED", Severity.NOTE, Stage.REFRAME,
+         "Pages on a TOC chain that would publish past 260 characters took shorter "
+         "names, the folders along the chain with them",
+         "planning.md Phase 63"),
+    Code("REFRAME_PATH_TOO_LONG", Severity.WARNING, Stage.REFRAME,
+         "Pages still past 260 characters published with every name on the chain cut; "
+         "sync will refuse the version",
+         "planning.md Phase 63"),
     Code("RENAME_MAP_APPLIED", Severity.NOTE, Stage.REFRAME,
          "Page names taken from rename-map.csv rather than recomputed, so a "
          "published URL does not move when a title is edited",

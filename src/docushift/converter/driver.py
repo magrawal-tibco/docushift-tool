@@ -828,22 +828,11 @@ class DocumentConverter:
             )
 
     def _published_length(self, product: Product, number: str) -> int:
-        """How long this version's `online-help` folder will be once published (Phase 49).
-
-        The path `sync` measures (`published_length`), with `published_root_length`
-        standing in for its `--target-dir`. 0 -- shorten nothing -- when the root
-        length is unset or the version yields no folder name.
-        """
+        """How long this version's `online-help` folder will be once published (Phase 49)."""
         # Imported here: `sync.distributor` imports this package's navigation.
-        from docushift.sync.distributor import ONLINE_HELP
+        from docushift.sync.distributor import published_help_length
 
-        root = self.config.published_root_length()
-        segment = version_segment(number)
-        if not root or not segment:
-            return 0
-        parts = (self.config.docs_tree_name(product.bu, product.family),
-                 slugify(self.config.locale), product.slug, ONLINE_HELP, segment)
-        return root + sum(1 + len(part) for part in parts)
+        return published_help_length(self.config, product, number)
 
     def _report_assets(self, context: ConversionContext, unit: str, copier: AssetCopier) -> None:
         """§6.4 steps 5 and 7, as findings rather than as terminal scrollback."""

@@ -832,6 +832,79 @@ def relocate(pages: Sequence[Page], roots: Sequence[TocEntry]) -> int:
     return moved
 
 
+#: The shortest a segment is cut to before `fit` gives up on a chain.
+_SHORTEST_SEGMENT = 8
+
+
+def fit(pages: Sequence[Page], budget: int) -> tuple[int, int, list[PurePosixPath]]:
+    """Shortens the names along every chain that would publish past the path limit.
+
+    Phase 63. A page's published path is its folder chain, and since the folders
+    mirror the TOC a deep guide passes Windows' 260 characters: 60 of the 143
+    unmerged versions measured, 4,129 pages, too many to pin by hand in
+    `rename-map.csv`. `budget` is what the page path may take after the version's
+    published folder; 0 turns this off.
+
+    **Only the chains that are too long, and all of each one.** A folder and the
+    page it is named after are one name -- the address is the TOC chain of
+    filenames -- so a folder cut on a long chain renames its parent page too,
+    while a sibling chain that fits keeps every name it had. Each name on those
+    chains is cut to one cap with `naming.shorten`, word boundaries and all, and
+    the cap is the longest that makes every page fit, so the names lose as little
+    as the limit asks. A cut name that meets a sibling is suffixed, as `assign`
+    suffixes a clash. Deterministic: the same tree and budget give the same names,
+    which is what lets `rename-map.csv` key on them.
+
+    Runs after `relocate` and before `override`, so a name a human pinned still
+    wins. Returns the cap used (0 if nothing was long), how many pages moved, and
+    the pages still too long at the shortest cap.
+    """
+    keys = [str(page.path.with_suffix("")) for page in pages]
+    long = [key for page, key in zip(pages, keys, strict=True) if budget and len(str(page.path)) > budget]
+    if not long:
+        return 0, 0, []
+
+    # Every name in the tree -- a folder, or a page's own stem -- in reading order,
+    # keyed by its path from the version root. Siblings share a parent key.
+    order: dict[str, None] = {}
+    for key in keys:
+        parts = key.split("/")
+        for depth in range(1, len(parts) + 1):
+            order.setdefault("/".join(parts[:depth]))
+    chains = {"/".join(key.split("/")[:depth]) for key in long for depth in range(1, key.count("/") + 2)}
+
+    def renamed(cap: int) -> dict[str, str]:
+        names: dict[str, str] = {}
+        taken: dict[str, set[str]] = {}
+        # The names that keep theirs first, so a cut name never takes one from them.
+        for entry in sorted(order, key=lambda entry: entry in chains):
+            parent, _, name = entry.rpartition("/")
+            seen = taken.setdefault(parent, set())
+            if entry in chains and len(name) > cap:
+                name = naming.shorten(name, cap)
+                if name.lower() in seen:
+                    name = _suffixed(naming.shorten(name, cap - 2), seen)
+            seen.add(name.lower())
+            names[entry] = name
+        return names
+
+    def moved(names: dict[str, str], key: str) -> str:
+        parts = key.split("/")
+        return "/".join(names["/".join(parts[:depth])] for depth in range(1, len(parts) + 1))
+
+    for cap in range(naming.MAX_SEGMENT - 1, _SHORTEST_SEGMENT - 1, -1):
+        names = renamed(cap)
+        if all(len(moved(names, key)) + 3 <= budget for key in long):
+            break
+    count = 0
+    for page, key in zip(pages, keys, strict=True):
+        target = PurePosixPath(moved(names, key) + page.path.suffix)
+        if target != page.path:
+            page.path = target
+            count += 1
+    return cap, count, [page.path for page in pages if len(str(page.path)) > budget]
+
+
 def list_children(
     roots: Sequence[TocEntry],
     located: dict[PurePosixPath, tuple[Page, str]],
