@@ -75,6 +75,34 @@ republishes it.
 
 ---
 
+## ibi™ WebFOCUS® Container Edition
+
+### Three notes still without their label
+
+- **Status:** Open
+- **Owner:** unassigned (tracked under DOCOPS-267)
+- **Raised:** 25 Oct 2026
+- **Blocks publishing:** no
+
+The note-label correction was applied to every Container Editions version on 25
+Oct 2026, but it does not reach a note that sits inside another quote or inside a
+list item. Three such notes will show without their label:
+
+- 1.3.4, Installation and Deployment Guide › WebFOCUS Container Edition Health
+  Check Tool — the note near the end of the page
+  (`online-help/1-3-4/installation-and-deployment-guide/webfocus-container-edition-health-check-tool.md`, line 301)
+- 9.3.5, the same page and the same note
+  (`online-help/9-3-5/installation-and-deployment-guide/webfocus-container-edition-health-check-tool.md`, line 301)
+- 9.3.8, Installation and Deployment Guide › Enable FIPS Mode Support — the
+  "Important" note in the list at the top of the page
+  (`online-help/9-3-8/installation-and-deployment-guide/enable-fips-mode-support-webfocus-container.md`, line 17)
+
+They can be fixed by hand in the published repository, or by teaching the
+correction to handle nested notes. A hand fix is undone by the next republish of
+that version, so the second is the lasting one.
+
+---
+
 ## ActiveSpaces
 
 ### Never published to the real destination
