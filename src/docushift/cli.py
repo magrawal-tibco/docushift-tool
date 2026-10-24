@@ -3668,6 +3668,13 @@ def repair_apply(ctx: click.Context, repair_id: str, target_dir: Path, product, 
     console.print(table)
     if not dry_run:
         report = cfg.root_dir / "reports" / "repairs" / f"apply-{repair.id}-{at[:10]}.csv"
+        # One file per repair per (UTC) day, so a second run that day -- one product
+        # after another -- adds its rows rather than replacing the first run's.
+        if report.is_file():
+            import csv
+
+            with report.open(encoding="utf-8-sig", newline="") as handle:
+                report_rows = [*csv.DictReader(handle), *report_rows]
         write_rows(report, ["slug", "version", "tree", "published", "files_changed", "fixed"], report_rows)
         _refresh_status(manager)
         console.print(f"Report: {escape(str(report))}\nIndex: {escape(str(_repairs_index(cfg, manager)))}")

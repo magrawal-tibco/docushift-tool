@@ -232,6 +232,39 @@ def test_line_endings_are_kept_and_a_second_run_changes_nothing() -> None:
     assert again.text == once and not again.changed
 
 
+def test_a_note_in_a_list_item_inside_a_note_is_fixed() -> None:
+    """WFCE 1.3.4's health-check page: four spaces between the two `>` (2026-10-25)."""
+    text = "> 1. Run it:\n>\n>    > [!NOTE]\n>    > On Windows, use the .exe.\n>\n> Next.\n"
+
+    fixed = callouts.fix_markdown(text)
+
+    assert fixed.text == "> 1. Run it:\n>\n>    > **Note:**\n>    > On Windows, use the .exe.\n>\n> Next.\n"
+    assert callouts.fix_markdown(fixed.text).text == fixed.text
+
+
+def test_a_note_opening_a_list_item_keeps_its_bullet() -> None:
+    """WFCE 9.3.8's FIPS page: `- > [!IMPORTANT]` (2026-10-25)."""
+    text = "- Root privileges.\n- > [!IMPORTANT]\n  > Enable FIPS at install.\n\n1. Verify.\n"
+
+    fixed = callouts.fix_markdown(text)
+
+    assert fixed.text == "- Root privileges.\n- > **Important:**\n  > Enable FIPS at install.\n\n1. Verify.\n"
+    assert fixed.markers == 1
+    assert callouts.fix_markdown(fixed.text).text == fixed.text
+
+
+def test_a_list_note_opening_with_a_table_does_not_start_a_new_item() -> None:
+    fixed = callouts.fix_markdown("1. > [!NOTE]\n   > | a |\n   > | --- |\n")
+
+    assert fixed.text == "1. > **Note:**\n   >\n   > | a |\n   > | --- |\n"
+
+
+def test_a_plain_list_item_is_not_a_note() -> None:
+    text = "- **Note:** this is a list item, not a quote.\n- > Just a quote.\n"
+
+    assert callouts.fix_markdown(text).text == text
+
+
 # -- code fences --------------------------------------------------------------
 
 

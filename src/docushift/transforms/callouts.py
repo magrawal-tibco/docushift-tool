@@ -110,20 +110,33 @@ def render(kind: Alert, body: str, label: str | None = None) -> str:
 
 # -- repairing Markdown written with `> [!KIND]` (Phase 56) --------------------
 
-#: The quote prefix of a line: any indent (a note inside a list item), then one or
-#: more `>` with their optional space. Group `quote` is reused verbatim, so the
-#: rewritten line sits exactly where the old one did.
-_MARKER = re.compile(r"^(?P<quote>[ \t]*(?:>[ \t]?)+)\[!(?P<kind>[A-Za-z]+)\][ \t]*$")
-_LABEL_LINE = re.compile(r"^(?P<quote>[ \t]*(?:>[ \t]?)+)\*\*(?P<word>[^*\n]+?):\*\*[ \t]*$")
+#: The quote prefix of a line: any indent (a note inside a list item), an optional
+#: list marker (a note opening a list item, `- > [!IMPORTANT]`), then one or more
+#: `>` with any spaces between them (`>    > [!NOTE]`, a note in a list item inside
+#: a note). Group `quote` is reused verbatim, so the rewritten line sits exactly
+#: where the old one did. The list marker and the wide spacing were added when the
+#: Container Editions wave left three such notes unlabelled (2026-10-25).
+_QUOTE = r"(?P<quote>[ \t]*(?:(?:[-*+]|\d+[.)])[ \t]+)?(?:>[ \t]*)+)"
+_MARKER = re.compile(rf"^{_QUOTE}\[!(?P<kind>[A-Za-z]+)\][ \t]*$")
+_LABEL_LINE = re.compile(rf"^{_QUOTE}\*\*(?P<word>[^*\n]+?):\*\*[ \t]*$")
 #: An authored label the engine put first in the body (`**Remember:** text`): DITA
 #: wrote one wherever the label said more than the kind. The colon is required --
 #: DocBook's captions (`**Caution 2**`) are titles, not labels, and have none.
-_RUN_IN = re.compile(r"^(?P<quote>[ \t]*(?:>[ \t]?)+)\*\*(?P<word>[^*\n]+?):\*\*(?:[ \t]+(?P<rest>.*))?$")
+_RUN_IN = re.compile(rf"^{_QUOTE}\*\*(?P<word>[^*\n]+?):\*\*(?:[ \t]+(?P<rest>.*))?$")
 _FENCE = re.compile(r"^[ \t]*(?:>[ \t]?)*[ \t]*(?P<fence>`{3,}|~{3,})")
 
 
 def _depth(quote: str) -> int:
     return quote.count(">")
+
+
+_BULLET = re.compile(r"^([ \t]*)((?:[-*+]|\d+[.)])[ \t]+)")
+
+
+def _continued(quote: str) -> str:
+    """`quote` as a following line writes it: a list marker becomes its width in
+    spaces, or the line would open a new list item (`- >` under `- > **Note:**`)."""
+    return _BULLET.sub(lambda m: m[1] + " " * len(m[2]), quote, count=1)
 
 
 def _blank_quote(line: str, depth: int) -> bool:
@@ -222,7 +235,7 @@ def fix_markdown(text: str) -> Fixed:
             # the label the table's header row.
             result.tables += 1
             result.blanks += max(blanks - 1, 0)
-            out.append(f"{quote.rstrip()}{_eol(line) or chr(10)}")
+            out.append(f"{_continued(quote).rstrip()}{_eol(line) or chr(10)}")
         else:
             result.blanks += blanks
     result.text = "".join(out)

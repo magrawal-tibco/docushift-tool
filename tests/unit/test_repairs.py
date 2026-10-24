@@ -109,6 +109,17 @@ def test_the_census_counts_per_version_from_git_and_exactly_where_asked(target: 
     assert run.census(target, R001, versions, exact={(SLUG, "8-6-0")})[(SLUG, "8-6-0")] == 0
 
 
+def test_the_census_pattern_finds_notes_nested_in_a_list_or_a_note(tmp_path: Path) -> None:
+    """The two shapes the Container Editions wave left behind (2026-10-25)."""
+    root = tmp_path / "repos"
+    _published(root, "10-4-0", "- > [!IMPORTANT]\n  > One.\n\n> 1. Step\n>\n>    > [!NOTE]\n>    > Two.\n")
+    repo = root / "en-us-tib-messaging-userdocs"
+    _git(repo, "init", "-q")
+    _git(repo, "add", "-A")
+
+    assert run.census(root, R001, run.published_versions(root)) == {(SLUG, "10-4-0"): 2}
+
+
 def test_a_tree_outside_git_is_counted_by_walking_it(tmp_path: Path) -> None:
     _published(tmp_path, "10-4-0", "> [!NOTE]\n> One.\n")
 
@@ -134,9 +145,20 @@ def test_census_then_apply_fixes_the_repo_and_the_local_tree_together(
     assert "[!NOTE]" in (target / "en-us-tib-messaging-userdocs/en-us" / SLUG
                          / "online-help/10-4-0/page.md").read_text(encoding="utf-8")
 
+    # An earlier run the same day, for another product, keeps its row (2026-10-25).
+    import datetime
+
+    day = datetime.datetime.now(datetime.UTC).date().isoformat()
+    earlier = populated_root / "reports" / "repairs" / f"apply-R001-{day}.csv"
+    earlier.parent.mkdir(parents=True, exist_ok=True)
+    earlier.write_text("slug,version,tree,published,files_changed,fixed\nother,1.0.0,x,yes,1,1\n",
+                       encoding="utf-8")
+
     done = invoke("repair", "apply", "R001", "--target-dir", str(target))
 
     assert done.exit_code == 0, done.output
+    report = earlier.read_text(encoding="utf-8-sig").splitlines()
+    assert report[1].startswith("other,1.0.0,") and any(line.startswith(f"{SLUG},") for line in report[2:])
     page = target / "en-us-tib-messaging-userdocs/en-us" / SLUG / "online-help/10-4-0/page.md"
     assert page.read_text(encoding="utf-8") == "# Page\n\n> **Note:**\n> One.\n\n> **Tip:**\n> Two.\n"
     assert (local / "page.md").read_text(encoding="utf-8") == "> **Note:**\n> One.\n"

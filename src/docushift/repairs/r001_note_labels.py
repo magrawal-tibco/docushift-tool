@@ -27,8 +27,10 @@ R001 = register(Repair(
     # POSIX ERE for `git grep -E`: `[[:blank:]]`, because `\t` inside brackets is a
     # backslash or a "t" there, not a tab. The line may end `\r` in a CRLF checkout,
     # which `[[:blank:]]` does not match -- hence `[[:space:]]*$` at the end
-    # (2026-10-23: a CRLF file read as having no notes at all).
-    pattern=r"^[[:blank:]]*(>[[:blank:]]?)+\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\][[:space:]]*$",
+    # (2026-10-23: a CRLF file read as having no notes at all). An optional list
+    # marker and any spacing between `>`s, as `callouts._QUOTE` (2026-10-25).
+    pattern=(r"^[[:blank:]]*([-*+][[:blank:]]+|[0-9]+[.)][[:blank:]]+)?(>[[:blank:]]*)+"
+             r"\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\][[:space:]]*$"),
     detect=detect,
     fix=fix,
     confirm="VERIFY_PUBLISHED_CALLOUT_UNRENDERED",
