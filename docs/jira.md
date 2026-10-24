@@ -45,6 +45,9 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 **Log** (newest first, one line per session):
 
+- 2026-10-25 — DOCOPS-267 note: R001 reaches nested notes; the 3 Container Editions notes fixed (pilot branch
+  10d3308); same-day apply reports now accumulate.
+
 - 2026-10-25 — Phase 60 built: DOCOPS-271 note → Done; DOCOPS-270 → In Progress. Container Editions rolled out
   on branch phase63-pilot-wfce-938 (22 versions, R001, all verify clean): notes on DOCOPS-274, 267, 258.
 

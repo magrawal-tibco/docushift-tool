@@ -1679,6 +1679,45 @@ the suite pass.*
 - **Left:** R001 waves, run by the user: `repair apply R001 --family ...`, commit, push,
   then `verify` after AEM republishes.
 
+#### R001 reaches nested notes — **Built 2026-10-25; DOCOPS-267**
+
+**Why.** The Container Editions wave (2026-10-25) left 3 notes as `[!NOTE]`
+(`open-issues.md`). `callouts.fix_markdown` and R001's `git grep` pattern both accept a
+marker line only when it is indent plus `>` marks with at most one space after each.
+Two real shapes fail:
+
+- `>    > [!NOTE]` -- a note in a list item inside a note: four spaces between the `>`s.
+- `- > [!IMPORTANT]` -- a note opening a list item: the bullet comes before the `>`.
+
+**Change.** One quote-prefix rule shared by the marker, label and run-in patterns:
+optional indent, an optional list marker (`-`, `*`, `+`, `1.`, `1)`), then `>` marks
+with any spaces or tabs between them. The prefix is reused verbatim, so the rewritten
+line keeps its place (`- > **Important:**`, `>    > **Note:**`); depth is still the count
+of `>`, so the body lines (`  > …`, `>    > …`) are matched at the same depth as before.
+The `git grep` pattern widens the same way. Nothing else in `fix_markdown` changes.
+
+**Measured before building:** how many such markers the published repos hold, so the
+next census's jump is expected rather than alarming.
+
+**Exit:** the three Container Editions notes fixed by `repair apply R001`, census and
+`verify` clean on that family, the `open-issues.md` entry deleted; tests for both
+shapes, a second run changing nothing, and the existing R001 tests unchanged.
+
+**Built.** `callouts._QUOTE`, shared by the three patterns; `_continued` writes the blank
+line before a table under a list note as `   >`, since `- >` would open a new item. The
+`git grep` pattern widened to match. Census then apply on Container Editions fixed
+exactly the 3 (`10d3308` on the pilot branch); `verify` clean on 1.3.4, 9.3.5, 9.3.8;
+`open-issues.md` entry deleted. Tests: 4 in `test_transforms.py`, 1 in
+`test_repairs.py`, the rest unchanged. **Measured, first 6 of ~64 repos:** the wider
+rule finds 50 more notes than the old one (FOCUS 7, WebFOCUS 37, Adapters 2,
+BusinessWorks 33, BW plug-ins 8, beyond Container Editions' 3) -- small against each
+repo's count; every family's next `repair census` includes them.
+- **Found while building: same-day apply reports overwrote each other.** The report is
+  `apply-<repair>-<UTC date>.csv`, rewritten by every run, so applying R001 product by
+  product kept only the last product. Now a run adds its rows to that day's file. The
+  2026-10-24 file had already lost the WFCE rows of the first Container Editions run
+  (`state.db` still records each version as fixed); it now holds DSML's and today's.
+
 ### Phase 60: Every Redirect Lands Where the Old Page Was — **Built 2026-10-24; DOCOPS-271**
 
 **Why.** Every published version carries a `301.yml` (91 in `ibi-docs-aem`, 532 in
