@@ -16,6 +16,7 @@ page (Phase 55, Decisions).
 
 from __future__ import annotations
 
+import html
 import re
 import unicodedata
 from dataclasses import dataclass, field
@@ -49,6 +50,7 @@ _QUOTES = str.maketrans({
     "\u2122": "", "\u00ae": "", "\u00a9": "",
 })
 _WORD = re.compile(r"[a-z0-9]+(?:['.\-_/][a-z0-9]+)*")
+_ALNUM = re.compile(r"[a-z0-9]+")
 _SENTENCE_END = re.compile(r"(?<=[.!?:;])\s+(?=\S)")
 
 
@@ -87,7 +89,15 @@ class Text:
 
     def __post_init__(self) -> None:
         self._joined = ""
+        self._compact = ""
         self._shingles: set[tuple[str, ...]] | None = None
+
+    @property
+    def compact(self) -> str:
+        """The page's letters and digits only, block breaks and word breaks gone (Phase 60)."""
+        if not self._compact:
+            self._compact = "".join(_compact(block) for block in self.blocks)
+        return self._compact
 
     @property
     def joined(self) -> str:
@@ -129,10 +139,21 @@ def present(sentence: str, target: Text) -> bool:
         return True
     if f" {' '.join(tokens)} " in f" {target.joined} ":
         return True
+    # The same letters in the same order, only the breaks differ (Phase 60): a source
+    # that runs a label into its text ("ResultYou") against "**Result** You"; a
+    # `<span>` splitting `wfs-etc-9.3.7`; a sentence a hard break or a `\` line
+    # continuation splits into two blocks on the page. The cost: a page that lost
+    # the spaces between words reads as present here.
+    if len(tokens) >= MIN_SENTENCE_WORDS and _compact(sentence) in target.compact:
+        return True
     if len(tokens) < SHINGLE:
         return False
     mine = shingles(tokens)
     return len(mine & target.shingle_set) >= SHINGLE_HIT * len(mine)
+
+
+def _compact(text: str) -> str:
+    return "".join(_ALNUM.findall(normalise(text)))
 
 
 def coverage(source: Text, target: Text, ignore: frozenset[str] = frozenset()) -> Coverage:
@@ -224,7 +245,11 @@ def html_text(html: str, selector: str, drop: tuple[str, ...] = ()) -> Text | No
 _FRONTMATTER = re.compile(r"\A---\r?\n.*?\r?\n---\r?\n", re.DOTALL)
 _IMAGE = re.compile(r"!\[[^\]]*\]\([^)]*\)")
 _LINK = re.compile(r"\[([^\]]*)\]\([^)]*\)")
-_TAG = re.compile(r"<[^>]+>")
+# Not an escaped `\<`: `\<webfocus-ce>/scripts` renders "<webfocus-ce>/scripts", and
+# deleting it as a tag read the sentence as dropped (Phase 60).
+_TAG = re.compile(r"(?<!\\)<[^>]+>")
+# A cell boundary, but not a `\|` inside a cell (Phase 60).
+_CELL = re.compile(r"(?<!\\)\|")
 _PREFIX = re.compile(r"^[ \t]*(?:>[ \t]?)*[ \t]*(?:#{1,6}[ \t]+|[-*+][ \t]+|\d+[.)][ \t]+)?")
 _FENCE = re.compile(r"^[ \t>]*(`{3,}|~{3,})")
 _RULE = re.compile(r"^[ \t>]*(?:[-*_][ \t]*){3,}$")
@@ -274,7 +299,7 @@ def markdown_text(text: str) -> Text:
         stripped = raw.lstrip(" \t>")
         if stripped.startswith("|"):
             flush()
-            cells = (" ".join(_inline(c).split()) for c in stripped.strip().strip("|").split("|"))
+            cells = (" ".join(_inline(c).split()) for c in _CELL.split(stripped.strip().strip("|")))
             blocks.extend(cell for cell in cells if cell)
             continue
         if _PREFIX.match(raw).group(0).strip(" \t>"):
@@ -311,6 +336,9 @@ def _markup(part: str) -> str:
     part = _IMAGE.sub(" ", part)
     part = _LINK.sub(r"\1", part)
     part = _TAG.sub(" ", part)
+    # Raw HTML in a page writes `&lt;webfocus-ce&gt;`; the source's text is the
+    # character (Phase 60). After the tags are gone, so a decoded `<` is text.
+    part = html.unescape(part)
     part = _ESCAPE.sub(r"\1", part)
     return part.replace("**", "").replace("__", "")
 

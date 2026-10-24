@@ -23,6 +23,7 @@ from pathlib import Path, PurePosixPath
 import yaml
 from bs4 import BeautifulSoup
 
+from docushift import origins
 from docushift.engines import flare_toc
 from docushift.engines.dita import CHROME_SELECTORS as DITA_CHROME
 from docushift.engines.dita import CONTENT_SELECTOR as DITA_CONTENT
@@ -35,9 +36,11 @@ from docushift.reframe.toc import schema_for
 from docushift.reporting.findings import FindingsRun, Severity
 from docushift.utils.csvio import natural_version_key
 from docushift.utils.slug import version_segment
+from docushift.validation import references
 from docushift.validation.tree import VersionFolder, walk
 from docushift.verify import images as pictures
 from docushift.verify import live, published, triage
+from docushift.verify import redirects as redirect_maps
 from docushift.verify import text as texts
 from docushift.verify.fetch import Fetcher
 from docushift.verify.toc import Node, by_page, root
@@ -46,6 +49,7 @@ from docushift.verify.toc import Node, by_page, root
 DOC_CLASS = "online-help"
 DROP_CODES = ("NAV_NODE_DROPPED", "ROOT_COPY_DROPPED", "TOC_ORPHAN", "TOC_SUBPROJECT_UNPLACED")
 UNFILED = "unfiled/"
+PRIMARY_LOCALE = "en-us"
 _PORTAL = frozenset(" ".join(texts.words(label)) for label in PORTAL_BLOCKS)
 _SELECTORS = {
     SourceEngine.FLARE: FLARE_CONTENT,
@@ -98,7 +102,8 @@ class Verifier:
     def __init__(self, cfg, catalog, state, target: Path, findings: FindingsRun,
                  fetcher: Fetcher | None = None, base_url: str = "", live_sample: int = 0,
                  triaged: list[triage.Entry] | None = None, base_urls: dict[str, str] | None = None,
-                 repair_states: dict[tuple[str, str, str], str] | None = None) -> None:
+                 repair_states: dict[tuple[str, str, str], str] | None = None,
+                 redirect_sample: int = 0, seed: int = 0) -> None:
         self.cfg, self.catalog, self.state = cfg, catalog, state
         self.target, self.findings = target, findings
         self.fetcher, self.base_url, self.live_sample = fetcher, base_url, live_sample
@@ -107,6 +112,8 @@ class Verifier:
         self.base_urls = base_urls or {}
         #: `(slug, version, repair) -> state` (Phase 59), for triage entries naming a repair.
         self.repair_states = repair_states or {}
+        #: Phase 60: `301.yml` rows followed per version, and the seed that picks them.
+        self.redirect_sample, self.seed = redirect_sample, seed
 
     def selection(self, product: str | None, version: str | None, *, bu: str | None = None,
                   family: str | None = None, latest_only: bool = False,
@@ -168,9 +175,18 @@ class Verifier:
         drops = self.state.latest_counts(folder.slug, number, DROP_CODES) if self.state else {}
         old_urls = {to: url for url, to in live.origins(folder.path / "301.yml")}
 
+        tops: dict[str, str] = {}
+
         def key_of(source: str) -> str:
             out = outmap[source]
-            return redirects.get(out, out)
+            key = redirects.get(out, out)
+            # Phase 60. A topic that opens its page is mapped to the page's own top
+            # heading (`introduction.md#introduction`), and `toc.yml` lists the page
+            # bare -- so every unmerged reframed page read as missing from the TOC.
+            page, _, fragment = key.partition("#")
+            if fragment and fragment == _top_anchor(folder.path / PurePosixPath(page), tops):
+                return page
+            return key
 
         # A1-A3: every converted topic against the page it became.
         rows: dict[str, dict[str, str]] = {}
@@ -178,7 +194,9 @@ class Verifier:
         for source in sorted(outmap):
             key = key_of(source)
             page = key.partition("#")[0]
-            row = _row(folder, number, source, key, old_urls.get(page, old_urls.get(outmap[source], "")))
+            old_url = next((old_urls[k] for k in (key, page, redirects.get(outmap[source], ""), outmap[source])
+                            if k in old_urls), "")
+            row = _row(folder, number, source, key, old_url)
             rows[source] = row
             if page.startswith(UNFILED):
                 unfiled += 1
@@ -215,8 +233,11 @@ class Verifier:
             self._record(result, "VERIFY_TOC_UNCHECKED", folder, "",
                          f"engine {engine}: no old-TOC reader in verify yet")
 
-        # B: staging, against the product's own business unit's site.
+        # Phase 60: both 301 maps, every run; a sample of their rows followed.
         host = self.base_url or self.base_urls.get(product.bu, "")
+        self._redirect_maps(result, folder, number, outmap, key_of, extracted, selector, chrome, host)
+
+        # B: staging, against the product's own business unit's site.
         if self.fetcher is not None and host:
             self._published(result, folder, rows, host)
             result.scope += "+staging"
@@ -305,6 +326,20 @@ class Verifier:
                 row["published_status"] = check.status if check.status != "ok" else (
                     "ok" if not check.missing else f"text {check.text_percent}%")
 
+    def _redirect_maps(self, result, folder, number: str, outmap, key_of, extracted: Path, selector: str,
+                       chrome: tuple[str, ...], host: str) -> None:
+        pages = origins.page_list(self.cfg.cache_dir, folder.slug, number)
+        if folder.locale.lower() != PRIMARY_LOCALE:
+            pages = origins.in_locale(pages, folder.locale)
+        ctx = redirect_maps.Context(
+            folder=folder.path, locale=folder.locale, slug=folder.slug, doc_class=folder.doc_class,
+            segment=folder.segment, base=self.cfg.publish_base_url(), pages=pages,
+            sources={source: key_of(source) for source in outmap}, extracted=extracted,
+            selector=selector, chrome=chrome)
+        checked = redirect_maps.check(ctx, self.redirect_sample, self.seed, self.fetcher, host)
+        for issue in checked.issues:
+            self._record(result, issue.code, folder, issue.path, issue.message, count=issue.count)
+
     def _live(self, result, folder, extracted: Path, outmap, key_of, selector: str,
               chrome: tuple[str, ...]) -> None:
         by_page: dict[str, str] = {}
@@ -380,6 +415,18 @@ def _row(folder: VersionFolder, number: str, source: str, key: str, old_url: str
     row = dict.fromkeys(COLUMNS, "")
     row.update(slug=folder.slug, version=number, old_url=old_url, local_source=source, new_path=key)
     return row
+
+
+def _top_anchor(md_path: Path, cache: dict[str, str]) -> str:
+    """The anchor AEM gives the first heading of a published page, or ""."""
+    key = md_path.as_posix()
+    if key not in cache:
+        try:
+            text = md_path.read_text(encoding="utf-8")
+        except OSError:
+            text = ""
+        cache[key] = next(iter(references.headings(text)), "")
+    return cache[key]
 
 
 def _redirects(reframed: Path) -> dict[str, str]:

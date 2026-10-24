@@ -186,9 +186,10 @@ def test_the_register_carries_every_row_of_7_5() -> None:
     7b did: it is the first command whose job is to compare the old site, the
     published tree and staging, so none of its conditions had a code before.
     Phase 63 adds two for names cut to fit the path limit: `REFRAME_PATH_SHORTENED`
-    and `REFRAME_PATH_TOO_LONG`.
+    and `REFRAME_PATH_TOO_LONG`. Phase 60 adds ten `VERIFY_REDIRECT_*`, one per thing
+    `verify` checks about the 301 maps.
     """
-    assert len(REGISTRY) == 117
+    assert len(REGISTRY) == 127
 
 
 def test_severity_comes_from_the_registry_and_not_from_the_call_site() -> None:

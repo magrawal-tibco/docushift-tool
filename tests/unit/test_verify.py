@@ -12,10 +12,12 @@ from pathlib import Path
 from bs4 import BeautifulSoup
 
 from docushift.models import Catalog, SourceEngine
+from docushift.sync import redirects
 from docushift.reporting.findings import FindingsRun
 from docushift.validation.tree import walk
 from docushift.verify import images, live, published
 from docushift.verify import text as texts
+from docushift.verify import redirects as redirect_maps
 from docushift.verify.driver import Verifier
 from docushift.verify.fetch import Fetched
 from docushift.verify.toc import Node, by_page, by_title, root
@@ -294,7 +296,8 @@ def test_a_sign_in_page_is_uncheckable_not_drift() -> None:
 SLUG, NUMBER = "prod", "1.0.0"
 
 
-def _fixture(config, state, *, drop_paragraph=False, drop_image=False, move_entry=False, orphan=False):
+def _fixture(config, state, *, drop_paragraph=False, drop_image=False, move_entry=False, orphan=False,
+             maps=True):
     """A Flare package, its recorded conversion, and the published version folder."""
     extracted = config.extracted_dir("ibi", "webfocus") / SLUG / NUMBER
     html = extracted / "pkg/html"
@@ -337,14 +340,32 @@ def _fixture(config, state, *, drop_paragraph=False, drop_image=False, move_entr
         toc = ('docs:\n  - title: "Guide"\n    url: "guide.md"\n    subfolderlist:\n'
                '      - title: "One"\n        url: "one.md"\n      - title: "Two"\n        url: "two.md"\n')
     (folder / "toc.yml").write_text(toc, encoding="utf-8")
+    if maps:
+        _maps(folder, {f"{OLD}/{name}.htm": f"{name}.md#{name}" for name in ("guide", "one", "two")})
     return config.root_dir / "repos"
 
 
-def _verify(config, state, target: Path) -> FindingsRun:
+OLD = "https://docs.tibco.com/pub/prod/1.0.0/doc/html"
+
+
+def _maps(folder: Path, rows: dict[str, str], product: dict[str, str] | None = None) -> None:
+    """The version's `301.yml` and its product's, as `sync` writes them."""
+    def write(path: Path, pairs: dict[str, str]) -> None:
+        body = "".join(f"- from: {frm}\n  to: {to}\n  status: 301\n" for frm, to in pairs.items())
+        path.write_text("redirects:\n" + body, encoding="utf-8")
+
+    write(folder / "301.yml", rows)
+    served = {frm: redirects.published("", "", "en-us", SLUG, "online-help", folder.name, to)
+              for frm, to in rows.items()}
+    write(folder.parent / "301.yml", served if product is None else product)
+
+
+def _verify(config, state, target: Path, sample: int = 10, fetcher=None, host: str = "") -> FindingsRun:
     product = make_product(SLUG, bu="ibi", family="webfocus")
     product.versions = {NUMBER: make_version(SLUG, NUMBER, engine=SourceEngine.FLARE)}
     findings = FindingsRun("verify")
-    verifier = Verifier(config, Catalog(products={SLUG: product}), state, target, findings)
+    verifier = Verifier(config, Catalog(products={SLUG: product}), state, target, findings, fetcher=fetcher,
+                        base_url=host, redirect_sample=sample, seed=7)
     for folder in verifier.selection(SLUG, None):
         verifier.version(folder)
     findings.flush()
@@ -352,7 +373,7 @@ def _verify(config, state, target: Path) -> FindingsRun:
 
 
 def _codes(findings: FindingsRun) -> list[str]:
-    return sorted(f.code for f in findings.recorded)
+    return sorted(f.code for f in findings.recorded if f.code != "VERIFY_REDIRECT_SAMPLED")
 
 
 def test_a_clean_version_produces_no_findings(config, state) -> None:
@@ -517,3 +538,132 @@ def test_the_staging_host_is_chosen_by_business_unit(project_root: Path) -> None
 
     assert ConfigManager(root_dir=project_root).verify_base_urls() == {
         "ibi": "https://stg-docs.ibi.com", "tibco": "https://stg-docs.tibco.com"}
+
+
+# -- Phase 60: the 301 maps ----------------------------------------------------------
+
+
+def _version_folder(target: Path) -> Path:
+    return target / "en-us-ibi-webfocus-userdocs/en-us" / SLUG / "online-help/1-0-0"
+
+
+def test_a_version_without_its_301_map_is_lost(config, state) -> None:
+    target = _fixture(config, state, maps=False)
+
+    assert _codes(_verify(config, state, target)) == ["VERIFY_REDIRECT_MAP_MISSING"]
+
+
+def test_a_product_map_missing_or_disagreeing_with_the_version_is_incomplete(config, state) -> None:
+    target = _fixture(config, state)
+    folder = _version_folder(target)
+    _maps(folder, {f"{OLD}/guide.htm": "guide.md#guide", f"{OLD}/one.htm": "one.md#one"},
+          product={f"{OLD}/guide.htm": "us/en/prod/online-help/1-0-0/two.html#two"})
+
+    findings = _verify(config, state, target)
+
+    assert _codes(findings) == ["VERIFY_REDIRECT_MAP_INCOMPLETE", "VERIFY_REDIRECT_MAP_INCOMPLETE"]
+    (folder.parent / "301.yml").unlink()
+    assert _codes(_verify(config, state, target)) == ["VERIFY_REDIRECT_MAP_MISSING"]
+
+
+def test_a_sampled_row_into_a_missing_anchor_or_the_wrong_page_is_found(config, state) -> None:
+    target = _fixture(config, state)
+    _maps(_version_folder(target), {f"{OLD}/guide.htm": "guide.md#nowhere", f"{OLD}/one.htm": "two.md#two",
+                                    f"{OLD}/two.htm": "gone.md"})
+
+    findings = _verify(config, state, target)
+
+    assert _codes(findings) == ["VERIFY_REDIRECT_TARGET_MISSING", "VERIFY_REDIRECT_TARGET_MISSING",
+                                "VERIFY_REDIRECT_WRONG_PAGE"]
+
+
+def test_a_zero_sample_checks_only_that_the_maps_are_there(config, state) -> None:
+    target = _fixture(config, state)
+    _maps(_version_folder(target), {f"{OLD}/one.htm": "two.md#two"})
+
+    assert _codes(_verify(config, state, target, sample=0)) == []
+
+
+def test_the_sample_is_repeatable_from_its_seed(tmp_path) -> None:
+    rows = [(f"{OLD}/p{i}.htm", f"p{i}.md") for i in range(40)]
+    ctx = redirect_maps.Context(tmp_path, "en-us", SLUG, "online-help", "1-0-0", "", [], {}, tmp_path, "body")
+
+    assert redirect_maps._pick(rows, 5, 7, ctx) == redirect_maps._pick(rows, 5, 7, ctx)
+    assert redirect_maps._pick(rows, 5, 7, ctx) != redirect_maps._pick(rows, 5, 8, ctx)
+    assert len(redirect_maps._pick(rows, 50, 7, ctx)) == 40
+
+
+def test_coverage_names_a_published_topic_with_no_row_and_counts_the_rest(tmp_path) -> None:
+    folder = tmp_path / "online-help/1-0-0"
+    folder.mkdir(parents=True)
+    _maps(folder, {f"{OLD}/one.htm": "one.md"})
+    pages = [f"{OLD}/one.htm", f"{OLD}/two.htm", f"{OLD}/orphan.htm", f"{OLD}/api/index.html"]
+    sources = {"pkg/html/one.htm": "one.md", "pkg/html/two.htm": "two.md",
+               "pkg/html/orphan.htm": "unfiled/orphan.md"}
+    ctx = redirect_maps.Context(folder, "en-us", SLUG, "online-help", "1-0-0", "", pages, sources,
+                                tmp_path, "body")
+
+    issues = redirect_maps.check(ctx, 0, 1).issues
+
+    assert [(i.code, i.path) for i in issues] == [("VERIFY_REDIRECT_UNMAPPED", "two.md"),
+                                                  ("VERIFY_REDIRECT_UNCONVERTED", "")]
+    assert "1 more are unpublished orphans" in issues[1].message
+
+
+def test_staging_that_serves_no_target_is_not_yet_there_and_one_gap_is_unserved(config, state) -> None:
+    target = _fixture(config, state)
+    nothing = FakeFetcher({})
+
+    assert "VERIFY_REDIRECT_NOT_ON_STAGING" in _codes(_verify(config, state, target, fetcher=nothing, host=BASE))
+
+    guide = f"{BASE}/us/en/{SLUG}/online-help/1-0-0/guide.html"
+    some = FakeFetcher({guide: (200, _served("/guide").encode())})
+    codes = _codes(_verify(config, state, target, fetcher=some, host=BASE))
+    assert codes.count("VERIFY_REDIRECT_UNSERVED") == 2
+    assert "VERIFY_REDIRECT_NOT_ON_STAGING" not in codes
+
+
+def test_a_page_opening_at_its_own_top_heading_matches_the_bare_toc_entry(config, state) -> None:
+    """Phase 63's unmerged reframe maps a topic to `page.md#top`; the TOC lists `page.md`."""
+    target = _fixture(config, state)
+    reframed = config.reframed_path("ibi", "webfocus", SLUG, NUMBER)
+    reframed.mkdir(parents=True, exist_ok=True)
+    (reframed / "redirects.yml").write_text(
+        "redirects:\n" + "".join(f"- from: {n}.md\n  to: {n}.md#{n}\n" for n in ("guide", "one", "two")),
+        encoding="utf-8")
+
+    assert _codes(_verify(config, state, target)) == []
+
+
+def test_escaped_markdown_and_a_run_together_label_are_not_dropped_text() -> None:
+    source = texts.Text(["Copy the driver inside the <webfocus-ce>/wfs/lib folder now.",
+                         "ResultYou can see five images loaded to your docker.",
+                         "The URL is solr.{{ env | default }}.svc.cluster.local for the search."])
+    page = texts.markdown_text("1. Copy the driver inside the \\<webfocus-ce>/wfs/lib folder now.\n\n"
+                               "**Result** You can see five images loaded to your docker.\n\n"
+                               "| Key | The URL is solr.{{ env \\| default }}.svc.cluster.local for the search. |\n")
+
+    assert texts.coverage(source, page).missing == []
+
+
+def test_a_heading_only_parent_given_a_page_is_the_same_parent() -> None:
+    """Phase 63 gives a heading-only TOC row a generated page; its children did not move."""
+    old = root([Node("Guide", None, [Node("One", "one.md"), Node("Two", "two.md")])])
+    new = root([Node("Guide", "guide.md", [Node("One", "one.md"), Node("Two", "two.md")])])
+
+    assert by_page(old, new).issues == []
+    other = root([Node("Other", "other.md", [Node("One", "one.md"), Node("Two", "two.md")])])
+    assert [i.kind for i in by_page(old, other).issues] == ["moved", "moved"]
+
+
+def test_raw_html_entities_split_tokens_and_continued_lines_are_not_dropped_text() -> None:
+    source = texts.Text(["All values come from <webfocus-ce>/scripts/helmfile and the defaults.",
+                         "ETC_TAG = wfs-etc-9.3.7 (From export-defaults.sh)",
+                         "NFS server with connectivity to PCF is available, You can check it using this command."])
+    page = texts.markdown_text("<td>All values come from <code>&lt;webfocus-ce&gt;/scripts/helmfile</code> "
+                               "and the defaults.</td>\n\n"
+                               "<td>ETC_TAG = wfs-etc-<span>9.3.7</span> (From export-defaults.sh)</td>\n\n"
+                               "NFS server with connectivity to PCF is available,\\\n"
+                               "You can check it using this command.\n")
+
+    assert texts.coverage(source, page).missing == []

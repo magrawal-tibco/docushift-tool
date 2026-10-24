@@ -93,7 +93,10 @@ def by_page(old: Node, new: Node, skip: set[str] = frozenset()) -> Comparison:
         twin, new_parent = hit
         result.matched[id(node)] = twin
         was, now = _identity(_parent(old, parent)), _identity(_parent(new, new_parent))
-        if was != now:
+        # A heading-only row that the new tree gives a page of its own (Phase 63's
+        # parent pages) is the same parent under its title, not a move (Phase 60).
+        if was != now and not (parent.key is None and parent.title and
+                               same_title(parent.title, new_parent.title)):
             # Reported once, as a move. Its siblings' order is judged without it.
             result.issues.append(Issue("moved", node.key, f"under {was} -> {now}"))
             continue

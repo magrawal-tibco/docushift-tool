@@ -3332,19 +3332,27 @@ VERIFY_STATUSES = ("not-verified", "stale", "lost", "issues", "explained", "clea
 @click.option("--skip-published", is_flag=True, help="Local comparison only; do not read the staging site.")
 @click.option("--live-sample", type=int, default=20, show_default=True,
               help="docs.tibco.com pages to compare per version; 0 skips the live check.")
+@click.option("--redirect-sample", type=int, default=10, show_default=True,
+              help="301.yml rows followed per version; 0 checks only that both maps are there.")
+@click.option("--seed", type=int, default=None,
+              help="Seed for the redirect sample; printed on every run so it can be repeated.")
 @click.option("--base-url", default=None,
               help="Staging host for this run; default publishing.yaml's verify_base_urls by BU.")
 @click.option("--refresh", is_flag=True, help="Fetch again what cache/verify/ already holds.")
 @click.option("--dry-run", is_flag=True, help="List the versions this wave would verify, and stop.")
 @click.pass_context
 def verify(ctx, target_dir, product, version, bu, family, latest_only, statuses, limit, skip_published,
-           live_sample, base_url, refresh, dry_run) -> None:
+           live_sample, redirect_sample, seed, base_url, refresh, dry_run) -> None:
     """Prove nothing was lost: old pages vs published pages vs staging (Phases 55, 58).
 
     For every selected published online-help version: each old page's topic, text
     and images against the page it became, and the old TOC's structure against
     `toc.yml` (local); each page and the menu against what the product's staging
     site serves; and a sample of docs.tibco.com pages against the downloaded copy.
+
+    Every version's `301.yml` and its product's are checked for presence, and a
+    random sample of rows is followed (Phase 60): the old URL is listed, the target
+    page and anchor exist, the page holds the old text, and staging serves it.
 
     Each version's result is kept: `reports/verify/<bu>/<slug>/<version>-<date>.csv`
     (one row per old page) and `.html`, a row in `state.db`, and `_verify_status` /
@@ -3353,6 +3361,7 @@ def verify(ctx, target_dir, product, version, bu, family, latest_only, statuses,
     still reported and count as explained. Exits 1 on an unexplained error.
     """
     import datetime
+    import random
 
     from docushift.verify import report, triage
     from docushift.verify.driver import Verifier
@@ -3364,6 +3373,8 @@ def verify(ctx, target_dir, product, version, bu, family, latest_only, statuses,
         triaged = triage.load(cfg.config_dir / "verify-triage.yaml")
     except triage.TriageError as exc:
         raise click.ClickException(str(exc)) from exc
+    if seed is None:
+        seed = random.SystemRandom().randrange(1_000_000)
     hosts = {} if skip_published else cfg.verify_base_urls()
     base = "" if skip_published else (base_url or "").rstrip("/")
     fetcher = None
@@ -3378,7 +3389,8 @@ def verify(ctx, target_dir, product, version, bu, family, latest_only, statuses,
 
     repair_states = {key: row["state"] for key, row in state.repair_rows().items()}
     verifier = Verifier(cfg, manager.load(), state, target_dir, findings, fetcher=fetcher, base_url=base,
-                        live_sample=live_sample, triaged=triaged, base_urls=hosts, repair_states=repair_states)
+                        live_sample=live_sample, triaged=triaged, base_urls=hosts, repair_states=repair_states,
+                        redirect_sample=redirect_sample, seed=seed)
     folders = verifier.selection(product, version, bu=bu, family=family, latest_only=latest_only,
                                  statuses=status_of, wanted=tuple(statuses), limit=limit)
     if not folders:
@@ -3395,7 +3407,8 @@ def verify(ctx, target_dir, product, version, bu, family, latest_only, statuses,
 
     findings.start()
     where = base or ", ".join(f"{b}: {h}" for b, h in sorted(hosts.items())) or "local only"
-    console.print(f"Verifying {len(folders)} version(s) ({where}); {len(triaged)} triage entr(ies)...")
+    console.print(f"Verifying {len(folders)} version(s) ({where}); {len(triaged)} triage entr(ies); "
+                  f"redirect sample {redirect_sample}, seed {seed}...")
     day = datetime.date.today().isoformat()
     for folder in folders:
         result = verifier.version(folder)
