@@ -144,3 +144,10 @@ products:
 
   tibco-datasynapse-high-performance-computing-cloud-adapter:
     pin_layout_to: "2.2.0"
+
+  # Phase 63 pilot (DOCOPS-274), 2026-10-24: the first unmerged version laid out as
+  # its TOC. Covers all of the product's versions; only 9.3.8 is reframed so far, so
+  # `sync` refuses the others until they are.
+  ibi-webfocus-container-edition:
+    publish: true
+    toc_folders: true

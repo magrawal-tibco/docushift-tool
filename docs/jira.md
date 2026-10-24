@@ -37,13 +37,17 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | stg-docs.tibco.com has real content | DOCOPS-257: run the TIBCO staging probe and staging pilots |
 | Staging shows one Japanese and one German WebFOCUS page correctly | DOCOPS-148: dated note → Done |
 | Data Virtualization team answers the error report and the 3 versions are published | DOCOPS-254: dated note → Done |
-| Phase 63 built and its pilot passes | DOCOPS-274: dated note; Done once every family is re-synced |
+| Phase 63 pilot branch reaches staging and its redirects load | DOCOPS-274: dated note with the staging result |
+| Phase 63 rolled out and every family re-synced | DOCOPS-274 → Done |
 | Translated WebFOCUS layout phase is opened | New sub-task under DOCOPS-11 (deferred from Phase 63) |
 | A new phase is opened | One sub-task under the matching story, In Progress, no `retro` |
 
 **Left alone on purpose:** DOCOPS-8 is a Task where its siblings are Stories.
 
 **Log** (newest first, one line per session):
+
+- 2026-10-24 — DOCOPS-274 note: Phase 63 pilot, WFCE 9.3.7 and 9.3.8 on branch phase63-pilot-wfce-938 (not wip);
+  155/155 redirects resolve on disk; staging addresses all change under title names; R001 held for verify.
 
 - 2026-10-24 — DOCOPS-274 note: Phase 63 built (cd939ba, 8acf926) incl. automatic name shortening for
   paths past 260 (all 148 fit); stays In Progress for pilot and family rollout.

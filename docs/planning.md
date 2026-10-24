@@ -1858,6 +1858,29 @@ characters, 2 more than `ibi-docs-aem`): 33,289 of their 104,274 pages move, mos
 them descendants of a cut folder. Caps run from 49 characters down to 20 (WF Reporting
 Server 9.3.8, 2,954 of 3,020 pages; 9.3.3–9.3.7 at 25).
 
+**Pilot, 2026-10-24: WebFOCUS Container Edition 9.3.7 and 9.3.8.** `toc_folders` and
+`publish` on for that product only (`reframe.yaml`), so `sync` refuses its other 18
+versions until they are reframed. Both reframed (59 → 64 and 100 → 110 pages; 9.3.8
+shortened 48 names) and synced to the branch `phase63-pilot-wfce-938` of
+`en-us-ibi-container-editions-userdocs`, pushed, **not `wip`**: the staging build runs
+from `wip`, production from `main` (`cloudbuild-*.yaml`). 9.3.8 had never been committed.
+
+- **Redirects.** Each `301.yml` `to` prefixed with `https://stg-docs.ibi.com/` resolves
+  to a page and a heading anchor in the published tree: 155 of 155. No live page lacks a
+  row except the 3 generated parents per version and the `unfiled/` orphans (5 and 9),
+  which the 2026-10-07 rule leaves unpublished. Resolved on disk only; the staging check
+  waits for the layout to reach staging.
+- **Staging addresses all change.** AEM already serves these sets at the TOC chain, but of
+  *file* names (`_section_installation_and_deployment_guide/using-images-for-docker/…`).
+  Of 55 comparable 9.3.7 pages none keeps its staging address: 26 differ by a cut name,
+  29 by the title rule alone. Title names were kept (the user, 2026-10-24); if docs.ibi.com
+  serves those addresses publicly, they need redirects too, which `301.yml` does not carry.
+- **`validate`.** 9.3.7 clean. 9.3.8: 66 `ANCHOR_MISSING`, all the in-page contents links of
+  one orphan, `unfiled/temp/WebFOCUS_Container_Edition.md`, unchanged by this phase.
+- **R001 reverted by the sync.** `wip`'s 9.3.7 carried the note-label fix in 38 pages; the
+  re-sync rewrote 39 back to `> [!NOTE]`, and 9.3.8 never had it. Held until `verify`
+  shows whether other repairs are needed.
+
 ---
 
 ## Carried-Forward Open Items
