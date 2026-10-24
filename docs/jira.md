@@ -1,6 +1,6 @@
 # Jira Tracking — What Is Logged in DOCOPS
 
-> **Last reconciled:** 2026-10-24, against Jira and `config/versions.csv`.
+> **Last reconciled:** 2026-10-25, against Jira and `config/versions.csv`.
 > Conventions (site, cloud ID, story points, transitions, who owns what) live in
 > `C:\github\confluence-mcp\reports\docushift-claude-atlassian-context.md`; this file
 > does not repeat them. It answers one question: **is this piece of work in Jira, and where?**
@@ -30,14 +30,13 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | Container Editions re-synced and re-verified | DOCOPS-258: dated note with the new statuses |
 | An ibi family's R001 is applied, pushed and confirmed by `verify` | Its sub-task (DOCOPS-264–269): dated note → Done |
 | Container Editions re-synced | Re-run `repair census`; dated note on DOCOPS-267 with the count |
-| Phase 60, 61 or 62 is planned in full and approved | Its sub-task (DOCOPS-271–273) → In Progress |
-| Phase 60 built | DOCOPS-270 → In Progress |
+| Phase 61 or 62 is planned in full and approved | Its sub-task (DOCOPS-272–273) → In Progress |
 | AEM owners fix alt text with `/`, `:` or `⌘` and a verify re-run shows none dropped | DOCOPS-255: dated note → Done |
 | Phase 58 built (records, triage, selectors) and the first ibi wave summarised | DOCOPS-256 → In Progress while building, then Done |
 | stg-docs.tibco.com has real content | DOCOPS-257: run the TIBCO staging probe and staging pilots |
 | Staging shows one Japanese and one German WebFOCUS page correctly | DOCOPS-148: dated note → Done |
 | Data Virtualization team answers the error report and the 3 versions are published | DOCOPS-254: dated note → Done |
-| Phase 63 pilot branch reaches staging and its redirects load | DOCOPS-274: dated note with the staging result |
+| Branch `phase63-pilot-wfce-938` (Container Editions, new layout + R001) reaches staging | `verify` with staging: DOCOPS-274 note; DOCOPS-258 → Done if clean; DOCOPS-267 → Done if labels show |
 | Phase 63 rolled out and every family re-synced | DOCOPS-274 → Done |
 | Translated WebFOCUS layout phase is opened | New sub-task under DOCOPS-11 (deferred from Phase 63) |
 | A new phase is opened | One sub-task under the matching story, In Progress, no `retro` |
@@ -45,6 +44,12 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 **Left alone on purpose:** DOCOPS-8 is a Task where its siblings are Stories.
 
 **Log** (newest first, one line per session):
+
+- 2026-10-25 — Phase 60 built: DOCOPS-271 note → Done; DOCOPS-270 → In Progress. Container Editions rolled out
+  on branch phase63-pilot-wfce-938 (22 versions, R001, all verify clean): notes on DOCOPS-274, 267, 258.
+
+- 2026-10-24 — DOCOPS-271 → In Progress: Phase 60 approved (301.yml presence every run, rows by sample of 10,
+  plus the two verify false positives from the Phase 63 pilot).
 
 - 2026-10-24 — DOCOPS-274 note: Phase 63 pilot, WFCE 9.3.7 and 9.3.8 on branch phase63-pilot-wfce-938 (not wip);
   155/155 redirects resolve on disk; staging addresses all change under title names; R001 held for verify.

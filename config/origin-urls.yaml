@@ -50,3 +50,15 @@ products:
     template: "https://docs.tibco.com/pub/{folder_path}/doc/{path}"
     drop_segments: 1
     verified: "https://docs.tibco.com/pub/ems/10.5.1/doc/html/_shared/about-this-product.htm (2026-09-28, serves 'About this Product')"
+
+  # DSML Services 1.0.7 has no page list in the docsite sitemap (checked by the user,
+  # 2026-10-25), so nothing derived a 301.yml for it. Its package records sources as
+  # `doc/html/...` where the others record `<package-root>/html/...`: one wrapper
+  # segment either way. Against the seven versions that do have a sitemap this
+  # template gives every listed URL and no other (17/17 ... 24/24), so they are
+  # unchanged. **Not fetched live for 1.0.7**: built from the package layout at the
+  # user's direction; check one URL before cutover.
+  ibi-webfocus-dsml-services-container-edition:
+    template: "https://docs.tibco.com/pub/{folder_path}/doc/{path}"
+    drop_segments: 1
+    verified: "against the sitemaps of 1.0.4-1.0.6 and 9.3.5-9.3.8 (2026-10-25); 1.0.7 not fetched"

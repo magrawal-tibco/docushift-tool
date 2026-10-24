@@ -1679,7 +1679,7 @@ the suite pass.*
 - **Left:** R001 waves, run by the user: `repair apply R001 --family ...`, commit, push,
   then `verify` after AEM republishes.
 
-### Phase 60: Every Redirect Lands Where the Old Page Was — **Planned 2026-10-23; design to be finalised; DOCOPS-271**
+### Phase 60: Every Redirect Lands Where the Old Page Was — **Built 2026-10-24; DOCOPS-271**
 
 **Why.** Every published version carries a `301.yml` (91 in `ibi-docs-aem`, 532 in
 `tibco-docs-aem`), and a doc-class `301.yml` assembles them for the site. Nothing checks
@@ -1687,28 +1687,75 @@ them end to end. `verify` reads a `301.yml` only to find each page's old URL. A 
 sends a reader from a working page to a 404 or the wrong topic, and nobody sees it until
 cutover.
 
+**The AEM side consumes `301.yml` (confirmed 2026-10-24), so the tool keeps writing it** and
+`verify` makes sure it is there and works.
+
 **What it checks, per version, for ibi and TIBCO:**
 
+0. **Present.** The version folder has a `301.yml` and the doc-class `301.yml` carries that
+   version's rows, both parseable. A version published without one is lost, not warned:
+   a missing map is every old URL breaking at once.
 1. **Coverage.** Every page the old site serves (the cached Coveo sitemap, Phase 33) has a
    row, or is named with a reason (orphan, API tree, landing page).
 2. **The `from` side was real.** Each `from` is a URL the sitemap lists. A sample is also
    fetched live, as `verify` does now.
 3. **The `to` side exists.** It resolves to a page in the published tree, after the
-   doc-class prefix (`us/en/...`, `.html`) is undone.
+   doc-class prefix (`us/en/...`, `.html`) is undone, and its `#anchor` is one the page
+   has by `utils/anchors` — the rule AEM follows. The Phase 63 pilot did this by hand
+   (`scratch/check_301_staging.py`): 155/155 on WFCE 9.3.7 and 9.3.8.
 4. **Same topic.** The `to` page holds the `from` page's text, by `verify`'s sentence
    comparison. A row into the wrong page is the failure this phase exists for.
-5. **Served.** On staging, `to` answers with the page and not the home page, where the BU
-   has a staging host. TIBCO has none yet (DOCOPS-257), so TIBCO gets checks 1–4.
+5. **Served.** On staging, `stg-docs.ibi.com/` + `to` answers with the page and not the
+   home page, where the BU has a staging host. TIBCO has none yet (DOCOPS-257), so TIBCO
+   gets checks 0–4. A version whose layout is not on staging yet (a pilot branch, not
+   `wip`) is reported as not checked, not as failing; `--skip-published` skips it.
 
-**Decisions to make:**
+**Decided 2026-10-24 (the user):**
 
-- A sub-command (`verify redirects`) or part of every `verify` run. Proposed: part of
-  `verify`, with its own findings (`VERIFY_REDIRECT_*`), so a version's status covers its
-  redirects and the triage file and waves apply unchanged.
-- Whether to check the doc-class `301.yml` (what AEM would serve) or only the per-version
-  files. Proposed: both, since a sync bug would only show in the assembled one.
-- Testing the redirect itself (request `from`, expect a 301 to `to`) can only happen
-  after cutover. Out of scope; recorded as a follow-up.
+- **Presence always, rows by sample.** Every `verify` checks both `301.yml` files (check
+  0) for every version. Checks 2–5 run on a **random sample of 10 rows per version**
+  (`--redirect-sample N`, 0 skips), because checking every row is too slow; the seed is
+  recorded in the report so a run can be repeated. Check 1 compares sets, not rows, so it
+  stays whole.
+- **Part of every `verify` run**, not a sub-command, with its own findings
+  (`VERIFY_REDIRECT_*`), so a version's status covers its redirects and the triage file
+  and waves apply unchanged.
+- **Both files checked**: the per-version `301.yml` and the doc-class one AEM reads, since a
+  sync bug would only show in the assembled one.
+- **The redirect itself** (request `from`, expect a 301 to `to`) can only happen after
+  cutover. Out of scope; recorded as a follow-up.
+
+**Two `verify` false positives the Phase 63 pilot found, fixed here** (WFCE 9.3.7, 69
+"lost", none real):
+
+- **TOC match on unmerged reframed trees (57).** `verify` keys a page by its redirect
+  target, which carries the top heading's anchor (`introduction.md#introduction`); the
+  TOC lists the page bare, so every page read as `VERIFY_TOC_ENTRY_MISSING`. A fragment
+  naming the page's top heading is dropped before matching.
+- **Text compare on escaped Markdown (12).** Sentences with `\<placeholder>`, a table
+  `\|`, or a bold label ("**Result** You" against the old "ResultYou") read as dropped
+  though the text is there. Escapes are removed and a label is split from its sentence
+  on both sides before comparing.
+
+#### Built 2026-10-24
+
+- **`verify/redirects.py`**, run by every `verify` (`--redirect-sample`, default 10;
+  `--seed`, printed with each run and recorded in `VERIFY_REDIRECT_SAMPLED`). Presence
+  and product-map agreement read every row (two files, no I/O per row); coverage
+  compares the sitemap's page list with the rows, finding each live page's source by
+  path, never through the map. Ten codes `VERIFY_REDIRECT_*` (below).
+- **Staging (check 5) does not check anchors.** Whether AEM's served anchor matches
+  `utils/anchors` needs a deployed page to look at; open until one is on staging.
+- **Three more false positives found on the pilot, fixed:** a heading-only TOC row
+  that Phase 63 gives a page read as every child `VERIFY_TOC_MOVED` (31 in 9.3.7);
+  raw HTML in a page (`&lt;webfocus-ce&gt;`, `wfs-etc-<span>9.3.7</span>`); and a
+  sentence split across blocks by a hard break or a `\` continuation. The text
+  compare now falls back to letters and digits only, so a page that lost the spaces
+  between words reads as present -- the price. WFCE 9.3.8's "qualifiedimage
+  referencethat" is in the source (OKE chapters 6, 7), not a conversion loss.
+- **Result:** WFCE 9.3.7 69 lost → **clean**; 9.3.8 **clean**. Both: maps present and
+  agreeing, 10 rows followed, no published topic unmapped (11 and 14 live pages never
+  converted; 5 and 10 orphans).
 
 ### Phase 61: Help Buttons Keep Working — a Redirect Map for CSH URLs — **Planned 2026-10-23; design to be finalised; DOCOPS-272**
 
@@ -1881,6 +1928,16 @@ from `wip`, production from `main` (`cloudbuild-*.yaml`). 9.3.8 had never been c
   re-sync rewrote 39 back to `> [!NOTE]`, and 9.3.8 never had it. Held until `verify`
   shows whether other repairs are needed.
 
+**Container Editions rolled out, 2026-10-25.** `toc_folders` and `publish` moved from the
+product to the family. 20 more versions reframed (729 topics → 823 pages; 13 shortened
+names), the 22 online-help versions synced to the same branch, R001 applied after the
+sync (`repair census` first: its record still said "none"), pushed as `ec9b89f`. `verify`
+with Phase 60: **22 of 22 clean**. Open: R001 skips 3 notes nested in a quote or list
+(WFCE 1.3.4 and 9.3.5 health-check page, 9.3.8 FIPS page). DSML Services 1.0.7 has no
+sitemap page list (confirmed by the user), so it got its `301.yml` from a template
+declared in `origin-urls.yaml` that reproduces every sitemap URL of the other seven
+versions; no 1.0.7 URL was fetched.
+
 ---
 
 ## Carried-Forward Open Items
@@ -2031,6 +2088,16 @@ The concrete deliverable of §7.1: every deferred "report line" in the three doc
 | `VERIFY_PUBLISHED_TOC_TITLE_CHANGED`⁵⁵ | note | verify | A menu row titled differently from its toc.yml entry | Phase 55 (B4) |
 | `VERIFY_LIVE_DRIFT`⁵⁵ | warn | verify | A sampled docs.tibco.com page holding sentences the downloaded copy lacks; updated since download, or not what was downloaded | Phase 55 (C) |
 | `VERIFY_LIVE_UNCHECKABLE`⁵⁵ | note | verify | Sampled docs.tibco.com pages that answered with the sign-in page or an error | Phase 55 (C) |
+| `VERIFY_REDIRECT_MAP_MISSING`⁶⁰ | error | verify | A version or its product publishes no readable `301.yml` | Phase 60 |
+| `VERIFY_REDIRECT_MAP_INCOMPLETE`⁶⁰ | error | verify | The product `301.yml` lacks a version's rows or sends them elsewhere | Phase 60 |
+| `VERIFY_REDIRECT_UNMAPPED`⁶⁰ | error | verify | A live page of a published topic that no row starts from | Phase 60 |
+| `VERIFY_REDIRECT_UNCONVERTED`⁶⁰ | note | verify | Live pages with no row that were never converted | Phase 60 |
+| `VERIFY_REDIRECT_FROM_UNLISTED`⁶⁰ | warn | verify | A sampled row from a URL the sitemap does not list | Phase 60 |
+| `VERIFY_REDIRECT_TARGET_MISSING`⁶⁰ | error | verify | A sampled row into a page or anchor the tree lacks | Phase 60 |
+| `VERIFY_REDIRECT_WRONG_PAGE`⁶⁰ | error | verify | A sampled row's target holds under half the old page's text | Phase 60 |
+| `VERIFY_REDIRECT_UNSERVED`⁶⁰ | error | verify | A sampled target staging does not serve, where it serves others | Phase 60 |
+| `VERIFY_REDIRECT_NOT_ON_STAGING`⁶⁰ | note | verify | No sampled target served: the layout has not reached staging | Phase 60 |
+| `VERIFY_REDIRECT_SAMPLED`⁶⁰ | note | verify | Rows checked and the seed that picked them | Phase 60 |
 
 ---
 
