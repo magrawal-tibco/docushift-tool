@@ -1977,6 +1977,24 @@ sitemap page list (confirmed by the user), so it got its `301.yml` from a templa
 declared in `origin-urls.yaml` that reproduces every sitemap URL of the other seven
 versions; no 1.0.7 URL was fetched.
 
+**Rest of ibi rolled out, 2026-10-25** (run handed over by the user). WebFOCUS 45
+versions (30,723 pages), Reporting Server 9 (22,105), FOCUS 9 (17,998), DI-ISM 11
+(4,198): all `REFRAMED`, none failed; each synced to its repo's `phase63-<family>`
+branch, R001 applied after the sync, pushed (not `wip`). Legacy is PDF-only and left
+off. `verify` ran local-only (`--skip-published`), as for Container Editions. Found:
+
+- **`verify` counts translated topics as lost.** WebFOCUS 9.3.5+ (and App Studio 9.3.0)
+  and Reporting Server packages put ja/de/fr/es topics in the one TOC; the English check
+  reports each as `VERIFY_TOPIC_MISSING` (~68,000 rows for WebFOCUS, ~9,400 for Reporting
+  Server). The real English findings are tens per product. Needs a fix in `verify`.
+- **`sync` copies whatever a PDF version's `doc/` holds.** WebFOCUS Client 9.1.0 and
+  9.1.1 carry a 530 MB help-server zip each (a packaging mistake, `open-issues.md`);
+  GitHub refused the push and they were removed by hand. Needs `sync` to skip archives.
+- **R001 re-runs after every sync** because `output/` and `reframed/` still hold the
+  unfixed notes (49k local fixes for WebFOCUS alone).
+- No `301.yml` for the 5-language versions (`ORIGIN_TEMPLATE_UNDECLARED`), as before:
+  WebFOCUS 9 versions, Reporting Server 4.
+
 ---
 
 ## Carried-Forward Open Items

@@ -1,6 +1,6 @@
 # Jira Tracking — What Is Logged in DOCOPS
 
-> **Last reconciled:** 2026-10-25, against Jira and `config/versions.csv`.
+> **Last reconciled:** 2026-10-25 (evening), against Jira and `config/versions.csv`.
 > Conventions (site, cloud ID, story points, transitions, who owns what) live in
 > `C:\github\confluence-mcp\reports\docushift-claude-atlassian-context.md`; this file
 > does not repeat them. It answers one question: **is this piece of work in Jira, and where?**
@@ -37,6 +37,7 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | Staging shows one Japanese and one German WebFOCUS page correctly | DOCOPS-148: dated note → Done |
 | Data Virtualization team answers the error report and the 3 versions are published | DOCOPS-254: dated note → Done |
 | Branch `phase63-pilot-wfce-938` (Container Editions, new layout + R001) reaches staging | `verify` with staging: DOCOPS-274 note; DOCOPS-258 → Done if clean; DOCOPS-267 → Done if labels show |
+| Branches `phase63-webfocus`, `-wf-reporting-server`, `-focus`, `-di-ism` merged to `wip` and on staging | `verify` with staging per family: notes on DOCOPS-259/260/262/263; R001 sub-tasks DOCOPS-264/265/266/268 → Done if labels show |
 | Phase 63 rolled out and every family re-synced | DOCOPS-274 → Done |
 | Translated WebFOCUS layout phase is opened | New sub-task under DOCOPS-11 (deferred from Phase 63) |
 | A new phase is opened | One sub-task under the matching story, In Progress, no `retro` |
@@ -44,6 +45,10 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 **Left alone on purpose:** DOCOPS-8 is a Task where its siblings are Stories.
 
 **Log** (newest first, one line per session):
+
+- 2026-10-25 — Phase 63 rolled out to the rest of ibi (WebFOCUS, Reporting Server, FOCUS, DI-ISM) on
+  phase63-<family> branches: notes on DOCOPS-274; R001 notes and In Progress on DOCOPS-264/265/266/268;
+  verify notes on DOCOPS-259/260/262/263.
 
 - 2026-10-25 — DOCOPS-267 note: R001 reaches nested notes; the 3 Container Editions notes fixed (pilot branch
   10d3308); same-day apply reports now accumulate.

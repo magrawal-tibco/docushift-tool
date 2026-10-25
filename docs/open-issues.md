@@ -631,3 +631,53 @@ Decided by the user, 22 Oct 2026: ask the docs team for packages rather than cop
 pages from the live site. When a package arrives it goes through the normal
 conversion into the matching translated repository. Data Virtualization's,
 `loc-spotfire-data-virtualization-userdocs`, does not exist yet and must be created first.
+
+---
+
+## WebFOCUS
+
+### The newest versions have no redirects from their old web addresses
+
+- **Status:** Open
+- **Owner:** unassigned
+- **Raised:** 25 Oct 2026
+- **Blocks publishing:** no, but it blocks cutover for these versions
+
+Nine versions have no redirect file: WebFOCUS Client and App Studio 9.3.5 to 9.3.8,
+and DSML Services 9.3.8. On docs.tibco.com their page lists mix five languages, so the
+tool cannot settle on one rule for turning an old address into a new one, and writes
+no redirects rather than guessed ones. Readers following an old link to these
+versions would land on nothing after cutover. This was already the case before the
+new folder layout; the layout did not cause it.
+
+The fix is the one DSML Services Container Edition got: someone confirms the old
+address pattern for these products once, it is recorded, and the redirects follow.
+
+### Open Data Hub and Reporting Server: one link broken in the source
+
+- **Status:** Not ours
+- **Owner:** authoring team (not yet contacted)
+- **Raised:** 25 Oct 2026
+- **Blocks publishing:** no
+
+In Open Data Hub 1.0.3 to 1.3.4 and Reporting Server 9.3.0 to 9.3.4, the shared z/OS
+installation pages link to an
+"Optional Low-Level Qualifier Changes" page that is not in the documents we receive.
+The link is broken in the source, before any conversion.
+
+### Client 9.1.0 and 9.1.1 packages include a help server by mistake
+
+- **Status:** Not ours
+- **Owner:** authoring team (not yet contacted)
+- **Raised:** 25 Oct 2026
+- **Blocks publishing:** no
+
+The 9.1.0 and 9.1.1 download packages each carry a 530 MB zip file beside the PDF
+guides. Inside is the installable help server customers deploy on their own systems,
+not a document, and help should never ship as a zip. It was put in the package by
+mistake. Our copy step published every file in that folder, so the zips reached the
+WebFOCUS branch, and the repository host refused them for size. They were taken out
+by hand on 25 Oct 2026; nothing else in any ibi package is like them.
+
+Until the copy step skips such files, they come back on every copy of these two
+versions and have to be taken out again before publishing.
