@@ -1031,6 +1031,8 @@ Validated against the full corpus, the residue in `user-guides` after routing is
 
 **What the corpus publishes that is not a document: six files.** After the output-root skip, `reference-documents` receives `context.xml`, `t1.aspx` ×2 and `rtview`'s chrome pages. They are accepted rather than filtered by extension, because the same deny-list would drop the corpus's five genuine HTML release notes and a `license.htm` — six strays across 1,822 versions is the cheaper error, and `reference-documents` is the catch-all by design.
 
+**What is never published: archives, installers, and files of 100 MB or more (Phase 64).** WebFOCUS Client 9.1.0 and 9.1.1 ship their help server as a 530 MB zip in `doc/`, a packaging mistake; published, GitHub refused the push. `router.unpublishable` skips `.zip .war .jar .ear .tar .gz .tgz .7z .rar .exe .msi .dmg` and anything at or over GitHub's 100 MB limit, and `sync` reports each as `SYNC_DOCUMENT_SKIPPED`. Still a deny-list, for the reason above: across every extracted package the four document folders hold 4,900 PDF, 1,215 TXT, 13 Excel, 1 Word and those 2 zips (2026-10-26), and nothing else is over 100 MB.
+
 ### 10.5 Step 3, the document doc-class index — **Built (Phase 6c)**
 
 Each of `user-guides`, `release-information` and `reference-documents` gets a flat `index.md`, a `toc.yml` and a `metadata.yml` built from its routed file list, because a copied PDF with no index is unreachable. Grounded in a 2026-09-08 survey of the same 1,822 versions, re-measured on 2026-09-15 (`architecture.md` §6.2.2). Built as `sync/documents.py`, placed by `sync/distributor.py:sync_documents`.

@@ -36,7 +36,7 @@ from typing import Any, ClassVar
 from urllib.parse import quote
 
 from docushift.config import DEFAULT_LOCALE
-from docushift.engines.roots import find_output_roots, root_locale, same_language
+from docushift.engines.roots import by_language, find_output_roots, root_locale
 from docushift.models import SourceEngine
 from docushift.reporting.findings import FindingsRun
 from docushift.transforms import links
@@ -476,23 +476,10 @@ def _without_localized(context: ConversionContext, roots: list[Path]) -> list[Pa
     `context.output_roots`, which is what keeps an outer root from claiming
     their files as its own.
     """
-    skipped: list[Path] = []
-    untagged: list[Path] = []
-    kept: list[Path] = []
-    for root in roots:
+    kept, skipped, untagged = by_language(roots, context.locale, context.primary)
+    for i, root in enumerate(skipped):
         tag = root_locale(root)
-        inside = next((other for other in skipped if other in root.parents), None)
-        if inside is None and not tag and not context.primary:
-            # Phase 57. A root that names no language is the English build's:
-            # `Release-Notes-93x` beside `html/ja-jp/`. It belongs to the primary
-            # run. Not added to `skipped`, so a localized root nested inside it
-            # is still found.
-            untagged.append(root)
-            continue
-        if inside is None and (not tag or same_language(tag, context.locale)):
-            kept.append(root)
-            continue
-        skipped.append(root)
+        inside = next((other for other in skipped[:i] if other in root.parents), None)
         relative = _relative_to(context.tree, root)
         context.record(
             "LOCALIZED_ROOT_SKIPPED", path=relative,

@@ -39,6 +39,7 @@ from urllib.parse import unquote, urlsplit
 
 import yaml
 
+from docushift.engines.roots import root_locale, same_language
 from docushift.transforms import links
 from docushift.utils import textfile
 from docushift.utils.naming import is_unfiled
@@ -343,6 +344,26 @@ def in_locale(pages: list[str], locale: str) -> list[str]:
     wanted = locale.lower()
     return [url for url in pages
             if wanted in (segment.lower() for segment in urlsplit(url).path.split("/"))]
+
+
+def for_locale(pages: list[str], locale: str, primary: bool) -> list[str]:
+    """The live pages a `locale` run's `301.yml` is built and checked from.
+
+    A localized run keeps its own (`in_locale`). Phase 64: so does the primary
+    run, when the list also names another language -- WebFOCUS 9.3.5+ lists
+    `html/{de-de,en-us,es-es,fr-fr,ja-jp}`, and handed all five `derive` found
+    "under en-us" and "under ja-jp" tied (Client 9.3.5: 2,788 against 2,788) and
+    wrote nothing. A list naming no `locale` segment is used whole, as before, so
+    a single-language version's list, and its digests, do not change.
+    """
+    if not primary:
+        return in_locale(pages, locale)
+    own = in_locale(pages, locale)
+    if not own:
+        return pages
+    tags = {segment.lower() for url in pages for segment in urlsplit(url).path.split("/")
+            if root_locale(PurePosixPath(segment))}
+    return own if any(not same_language(tag, locale) for tag in tags) else pages
 
 
 def listing(cache_dir: Path, slug: str, version: str) -> tuple[list[str], str]:

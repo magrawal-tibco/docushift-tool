@@ -254,6 +254,34 @@ def same_language(tag: str, locale: str) -> bool:
     return re.split(r"[-_]", tag.lower())[0] == re.split(r"[-_]", locale.lower())[0]
 
 
+def by_language(roots: list[Path], locale: str, primary: bool) -> tuple[list[Path], list[Path], list[Path]]:
+    """Which roots a `locale` run converts: `(kept, skipped, untagged)`.
+
+    Kept: untagged roots, on the primary run, and roots of `locale`'s language.
+    Skipped: another language's roots, and any root nested inside one, so that
+    `sfire-dsc/7.1.0`'s `doc/html/ja` cannot come back through a sub-root.
+    Untagged, on a localized run: roots naming no language, which are the primary
+    run's (`Release-Notes-93x` beside `html/ja-jp/`); kept out of `skipped`, so a
+    localized root nested inside one is still found.
+
+    One rule for `convert` and `verify` (Phase 64): reading every root reported
+    each translated topic as missing from the English folder.
+    """
+    skipped: list[Path] = []
+    untagged: list[Path] = []
+    kept: list[Path] = []
+    for root in roots:
+        tag = root_locale(root)
+        inside = any(other in root.parents for other in skipped)
+        if not inside and not tag and not primary:
+            untagged.append(root)
+        elif not inside and (not tag or same_language(tag, locale)):
+            kept.append(root)
+        else:
+            skipped.append(root)
+    return kept, skipped, untagged
+
+
 def owning_root(path: Path, roots: list[Path]) -> Path | None:
     """Which root owns `path`. **The innermost one** (`architecture.md` §5.1.3).
 

@@ -341,3 +341,26 @@ def test_a_row_into_unfiled_is_dropped_and_its_page_still_counts_as_mapped() -> 
     assert built.rows is not None
     assert [row["to"] for row in built.rows] == ["out/API Activity/c.htm", "out/a.htm"]
     assert "ORIGIN_PAGE_UNMAPPED" not in codes_of(built)
+
+
+def test_an_english_run_derives_from_the_english_pages_of_a_five_language_list() -> None:
+    """Phase 64. WebFOCUS Client 9.3.5 lists every language; "under en-us" and
+    "under ja-jp" placed the same topics and tied, so no `301.yml` was written."""
+    sources = {f"pkg/html/en-us/t{i}.htm": "" for i in range(3)}
+    live = "https://docs.tibco.com/pub/wf/9.3.5/doc/html"
+    pages = [f"{live}/{tag}/t{i}.htm" for tag in ("en-us", "ja-jp") for i in range(3)]
+
+    assert origins.derive(sources, pages, "wf/9.3.5").template is None
+    english = origins.for_locale(pages, "en-us", primary=True)
+    assert english == pages[:3]
+    assert origins.derive(sources, english, "wf/9.3.5").template is not None
+
+
+def test_a_list_in_one_language_is_used_whole() -> None:
+    """No other language listed, or no `en-us` segment at all: nothing narrows, so
+    no single-language version's digest moves."""
+    english = [f"{LIVE}/en-us/a.htm", f"{LIVE}/b.htm"]
+    assert origins.for_locale(english, "en-us", primary=True) == english
+    assert origins.for_locale(PAGES, "en-us", primary=True) == PAGES
+    assert origins.for_locale([f"{LIVE}/ja-jp/a.htm", f"{LIVE}/en-us/a.htm"], "ja-jp",
+                              primary=False) == [f"{LIVE}/ja-jp/a.htm"]

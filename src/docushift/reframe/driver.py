@@ -910,7 +910,8 @@ class Reframer:
         shaping = {
             "origins": origins.fingerprint(
                 self.config.load_origin_urls(), product.slug, version.zip_url,
-                origins.page_list(self.config.cache_dir, product.slug, version.version),
+                origins.for_locale(origins.page_list(self.config.cache_dir, product.slug, version.version),
+                                   self.config.locale, self.config.is_primary_locale()),
             ),
             "publish_base_url": str(publishing.get("publish_base_url") or ""),
             "primary_locale": str(publishing.get("primary_locale") or ""),
@@ -1060,6 +1061,7 @@ class Reframer:
             str(path): f"{page.path}#{anchor}" for path, (page, anchor) in located.items()
         }
         pages, missing = origins.listing(self.config.cache_dir, slug, number)
+        pages = origins.for_locale(pages, self.config.locale, self.config.is_primary_locale())
         built = origins.build(
             self.config.load_origin_urls(), slug, version.zip_url,
             self.state.get_output_map(slug, number), moved, pages, missing,

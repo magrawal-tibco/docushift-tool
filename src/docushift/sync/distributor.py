@@ -527,9 +527,13 @@ class WorkspaceDistributor:
             return [SyncResult(slug, number, SyncOutcome.NO_OUTPUT, segment=segment,
                                message=message, doc_class="")]
 
+        skipped: list[tuple[Path, str]] = []
         grouped = document_index.group(
-            router.route_version(self.content_tree(product, version, tree), version.engine)
+            router.route_version(self.content_tree(product, version, tree), version.engine, skipped)
         )
+        for path, reason in skipped:
+            self._record("SYNC_DOCUMENT_SKIPPED", slug, number, path=path.name,
+                         message=f"{path.name} not published: {reason}")
         results = []
         for doc_class in router.DOCUMENT_DOC_CLASSES:
             if doc_class in grouped:

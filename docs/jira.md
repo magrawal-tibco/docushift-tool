@@ -46,6 +46,8 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 **Log** (newest first, one line per session):
 
+- 2026-10-26 — Phase 64 approved: DOCOPS-275 created under DOCOPS-11 (1 SP, docushift), In Progress.
+
 - 2026-10-25 — Phase 63 rolled out to the rest of ibi (WebFOCUS, Reporting Server, FOCUS, DI-ISM) on
   phase63-<family> branches: notes on DOCOPS-274; R001 notes and In Progress on DOCOPS-264/265/266/268;
   verify notes on DOCOPS-259/260/262/263.
@@ -301,6 +303,7 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | 60 | `verify` checks redirects (`301.yml`), ibi and TIBCO (planned) | DOCOPS-271 |
 | 61 | Redirect map for CSH (Help button) URLs (planned) | DOCOPS-272 |
 | 62 | `verify` checks CSH identifiers, ibi and TIBCO (planned) | DOCOPS-273 |
+| 64 | `verify` reads one language; `301.yml` from English pages; `sync` skips archives | DOCOPS-275 |
 | 57 | Translated help to the `loc-` tree (`--locale`) | build DOCOPS-253; runs DOCOPS-148 (in progress) |
 
 Other logged work: Jira reconcile and this handoff DOCOPS-208; stakeholder status page DOCOPS-197; TIBCO family reassignments DOCOPS-120

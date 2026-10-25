@@ -442,6 +442,13 @@ REGISTRY: dict[str, Code] = _codes(
          "Pages on a TOC chain that would publish past 260 characters took shorter "
          "names, the folders along the chain with them",
          "planning.md Phase 63"),
+    # Phase 64. WebFOCUS Client 9.1.0 and 9.1.1 ship a 530 MB help-server zip in
+    # `doc/` by mistake; published, GitHub refused the push. A warning: the rest
+    # of the doc-class publishes, and the file is the package's fault.
+    Code("SYNC_DOCUMENT_SKIPPED", Severity.WARNING, Stage.SYNC,
+         "A file in a document folder was not published: an archive or installer, "
+         "or 100 MB or more (GitHub's limit)",
+         "planning.md Phase 64"),
     Code("REFRAME_PATH_TOO_LONG", Severity.WARNING, Stage.REFRAME,
          "Pages still past 260 characters published with every name on the chain cut; "
          "sync will refuse the version",

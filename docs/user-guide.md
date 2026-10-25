@@ -1440,6 +1440,7 @@ Fourteen things to expect:
 
 - **`nav.yml` is gone and `meta.yml` is now `metadata.yml`.** The AEM spec arrived on 2026-09-10 and named neither of the two placeholder templates the project started with. Nothing consumed `nav.yml`, so it was deleted rather than kept; `metadata.yml` replaces `meta.yml` and carries exactly two keys — `csg-product` beside the product's doc-classes, and `csg-version` in each version folder, dotted (`10.4.0`) even though the folder around it is dashed. The eleven fields the old placeholder invented are not there and are not coming back. If you built anything against `meta.yml`, it needs rewriting.
 - **The PDF doc-classes get an index too.** `user-guides/`, `release-information/` and `reference-documents/` each receive a generated `index.md`, `toc.yml` and `metadata.yml` beside their files, so a copied PDF is reachable. Titles come from the document kind where the name identifies one (Release Notes, VPAT, License Agreement), otherwise from the PDF's own metadata, otherwise from the filename with its separators opened out. A doc-class with no files gets no folder at all rather than an empty index. A PDF that will not open is still copied and still listed, titled from its filename and named in the report as a note — it means the shipped file is damaged, which is worth knowing and is not worth failing a run over.
+- **Archives and very large files are not published.** A zip, war, jar or installer in a package's `doc/` or `pdf/` folder, or any file of 100 MB or more, is skipped and named as `SYNC_DOCUMENT_SKIPPED`: help is never shipped zipped, and GitHub refuses a file that large (Phase 64).
 
 - **What goes where is decided by the folder it shipped in, not by the extension.** Everything directly inside the package's `pdf/` is a user guide unless its name says VPAT, licence, reminder notice or release note; everything directly inside `doc/` is a reference document unless it is a readme or a release note. So a licence PDF and a licence `.txt` land together, and a user-guide PDF and a readme do not. Files in subdirectories are left to the converter.
 - **`archives/` is indexed from the catalog, so it lists every archived version — including the ones you have not downloaded.** Entries whose ZIP is not in the repository link to the docsite instead, and the index says which is which. That is deliberate: `archives/` exists to be the complete product history, and `archive download` is what fills it in. `api-references/` gets no generated index — Javadoc ships its own.
@@ -1520,7 +1521,9 @@ leaving you to wonder.
 Findings are kept across runs, so old ones stay queryable by run id.
 `docushift report --runs` lists the recent ones with their counts, and
 `docushift report --prune --keep 10` drops the findings of everything older — the
-run rows survive, so a pruned run is still a dated record that something ran.
+run rows survive, so a pruned run is still a dated record that something ran. Each
+version's latest conversion drop counts are kept however old, because `verify`
+explains missing topics from them, and the file is compacted afterwards (Phase 64).
 
 **Exit codes.** Every working command exits **1** when a version it worked on failed,
 so a chained script (`extract --batch b && convert --batch b && reframe --batch b`) stops
@@ -1747,7 +1750,15 @@ docushift verify --target-dir ../ibi-docs-aem --product ibi-ai-assistant
 
 # After a re-publish: fetch again what cache/verify/ already holds
 docushift verify --target-dir ../ibi-docs-aem --product ibi-ai-assistant --refresh
+
+# English folders only: after an English-only change, skip the loc- trees
+docushift --locale en-us verify --target-dir ../ibi-docs-aem --bu ibi --family webfocus --skip-published
 ```
+
+- **One language per folder.** A package can ship one help build per language
+  (WebFOCUS 9.3.5+: `html/{de-de,en-us,es-es,fr-fr,ja-jp}`). An English folder is
+  compared with the English build only, and its redirects with the English pages of
+  the old site, so translated topics are not reported lost (Phase 64).
 
 - **Text is compared sentence by sentence.** A page is flagged when a whole sentence
   of the old page is nowhere on the new one, and the finding quotes it. A changed word

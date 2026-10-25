@@ -698,8 +698,7 @@ class DocumentConverter:
             return
         slug, number = product.slug, version.version
         pages, missing = origins.listing(self.config.cache_dir, slug, number)
-        if not self.config.is_primary_locale():
-            pages = origins.in_locale(pages, self.config.locale)
+        pages = origins.for_locale(pages, self.config.locale, self.config.is_primary_locale())
         built = origins.build(
             self.config.load_origin_urls(), slug, version.zip_url, mapping, {}, pages, missing,
         )
@@ -1219,9 +1218,9 @@ class DocumentConverter:
         return hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16]
 
     def _pages(self, slug: str, number: str) -> list[str]:
-        """The cached live page list, narrowed to this run's language when localized."""
+        """The cached live page list, narrowed to this run's language (`origins.for_locale`)."""
         pages = origins.page_list(self.config.cache_dir, slug, number)
-        return pages if self.config.is_primary_locale() else origins.in_locale(pages, self.config.locale)
+        return origins.for_locale(pages, self.config.locale, self.config.is_primary_locale())
 
     def _api_prefix(self, product: Product, version: str) -> str:
         """The publishing coordinates every one of this version's API URLs shares.

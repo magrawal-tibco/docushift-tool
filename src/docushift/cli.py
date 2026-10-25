@@ -3359,6 +3359,9 @@ def verify(ctx, target_dir, product, version, bu, family, latest_only, statuses,
     `_verify_date` in versions.csv. `reports/verify/INDEX.html` shows every published
     version's latest status. Findings listed in `config/verify-triage.yaml` are
     still reported and count as explained. Exits 1 on an unexplained error.
+
+    `docushift --locale en-us verify ...` checks only that language's folders
+    (Phase 64); without `--locale`, every published language is checked.
     """
     import datetime
     import random
@@ -3392,7 +3395,8 @@ def verify(ctx, target_dir, product, version, bu, family, latest_only, statuses,
                         live_sample=live_sample, triaged=triaged, base_urls=hosts, repair_states=repair_states,
                         redirect_sample=redirect_sample, seed=seed)
     folders = verifier.selection(product, version, bu=bu, family=family, latest_only=latest_only,
-                                 statuses=status_of, wanted=tuple(statuses), limit=limit)
+                                 statuses=status_of, wanted=tuple(statuses), limit=limit,
+                                 locale=cfg.locale if ctx.parent.params.get("locale") else None)
     if not folders:
         console.print(f"[yellow]No published online-help folders match this selection in {target_dir}.[/yellow]")
         raise click.exceptions.Exit(1)

@@ -186,8 +186,32 @@ def _files_directly_in(directory: Path) -> list[Path]:
         return []
 
 
-def route_version(tree: Path, engine: SourceEngine) -> list[RoutedFile]:
+#: Phase 64. Never a document: an archive or installer in `doc/` is a packaging
+#: mistake (WebFOCUS Client 9.1.0/9.1.1's 530 MB help-server zip), and help is
+#: never shipped zipped. A denylist, so an unexpected document type still publishes.
+UNPUBLISHED_SUFFIXES = frozenset({
+    ".zip", ".war", ".jar", ".ear", ".tar", ".gz", ".tgz", ".7z", ".rar", ".exe", ".msi", ".dmg",
+})
+#: GitHub refuses a push holding a file this large or larger.
+MAX_PUBLISHED_BYTES = 100 * 1024 * 1024
+
+
+def unpublishable(path: Path) -> str:
+    """Why `path` must not be published as a document, or `""`."""
+    if path.suffix.lower() in UNPUBLISHED_SUFFIXES:
+        return f"{path.suffix.lower()} is an archive or installer, not a document"
+    size = path.stat().st_size
+    if size >= MAX_PUBLISHED_BYTES:
+        return f"{size / 1_048_576:.0f} MB is over GitHub's 100 MB file limit"
+    return ""
+
+
+def route_version(tree: Path, engine: SourceEngine,
+                  skipped: list[tuple[Path, str]] | None = None) -> list[RoutedFile]:
     """Every document in one extracted version, in root-before-nested order.
+
+    A file `unpublishable` names is left out, and added to `skipped` with the
+    reason when the caller passes a list to report it from (Phase 64).
 
     Duplicates are **not** removed here: the caller de-duplicates per doc-class
     (`design.md` §10.5, `sync/documents.py`), and the order this returns is what
@@ -205,6 +229,10 @@ def route_version(tree: Path, engine: SourceEngine) -> list[RoutedFile]:
             if roots is None:
                 roots = find_output_roots(tree, engine)
             if owning_root(path, roots) is not None:
+                continue
+            if reason := unpublishable(path):
+                if skipped is not None:
+                    skipped.append((path, reason))
                 continue
             stem = path.stem
             routed.append(

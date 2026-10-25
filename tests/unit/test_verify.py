@@ -380,6 +380,20 @@ def test_a_clean_version_produces_no_findings(config, state) -> None:
     assert _codes(_verify(config, state, _fixture(config, state))) == []
 
 
+def test_another_languages_root_in_the_package_is_not_the_english_folders_loss(config, state) -> None:
+    """Phase 64. WebFOCUS 9.3.5+ ships `html/ja-jp` as a Flare root of its own; the
+    English folder was converted without it, so its topics are not missing."""
+    target = _fixture(config, state)
+    ja = config.extracted_dir("ibi", "webfocus") / SLUG / NUMBER / "pkg/html/ja-jp"
+    build(ja, {
+        "Data/HelpSystem.xml": manifest(default_url="Home.htm"),
+        **toc_files([{"i": 1}], {"/guide.htm": {"i": [1], "t": ["ガイド"], "b": [""]}}),
+        "guide.htm": topic("ガイド", "<p>製品の概要です。</p>"),
+    })
+
+    assert _codes(_verify(config, state, target)) == []
+
+
 def test_only_known_drops_produce_no_loss(config, state) -> None:
     target = _fixture(config, state, orphan=True)
 
@@ -402,6 +416,17 @@ def test_the_selection_reads_only_online_help(config, state) -> None:
 
     folders = [v for e in walk(target, SLUG, None, "online-help") for v in e.versions]
     assert [f.doc_class for f in folders] == ["online-help"]
+
+
+def test_a_locale_keeps_only_that_languages_folders(config, state) -> None:
+    """Phase 64. An English-only change is checked without re-reading the `loc-` tree."""
+    target = _fixture(config, state)
+    (target / "loc-ibi-webfocus-userdocs/ja-jp" / SLUG / "online-help/1-0-0").mkdir(parents=True)
+    product = make_product(SLUG, bu="ibi", family="webfocus")
+    verifier = Verifier(config, Catalog(products={SLUG: product}), state, target, FindingsRun("verify"))
+
+    assert [f.locale for f in verifier.selection(SLUG, None)] == ["en-us", "ja-jp"]
+    assert [f.locale for f in verifier.selection(SLUG, None, locale="en-us")] == ["en-us"]
 
 
 # -- Phase 58: records, status, triage, waves ---------------------------------------

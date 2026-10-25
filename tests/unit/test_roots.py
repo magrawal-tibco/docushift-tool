@@ -13,7 +13,7 @@ the whole version rather than a name for one root.
 
 from pathlib import Path
 
-from docushift.engines.roots import subtree_names
+from docushift.engines.roots import by_language, subtree_names
 from docushift.models import SourceEngine
 
 
@@ -143,3 +143,14 @@ def test_webworks_books_sharing_a_last_segment_keep_their_full_names(tmp_path: P
     assert subtree_names(tmp_path, [first, second], SourceEngine.WEBWORKS) == {
         first: "a/guide", second: "b/Guide",
     }
+
+
+def test_a_run_keeps_its_own_language_and_the_untagged_roots() -> None:
+    html = Path("v/doc/html")
+    roots = [html / "en-us", html / "ja-jp", html / "ja-jp/sub", Path("v/doc/Release-Notes")]
+
+    assert by_language(roots, "en-us", primary=True) == (
+        [html / "en-us", Path("v/doc/Release-Notes")], [html / "ja-jp", html / "ja-jp/sub"], [])
+    # An untagged root is the primary run's even nested in `ja-jp` (Phase 57's rule).
+    assert by_language(roots, "ja-jp", primary=False) == (
+        [html / "ja-jp"], [html / "en-us"], [html / "ja-jp/sub", Path("v/doc/Release-Notes")])

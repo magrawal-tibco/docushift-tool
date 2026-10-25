@@ -25,6 +25,7 @@ from bs4 import BeautifulSoup
 
 from docushift import origins
 from docushift.engines import flare_toc
+from docushift.engines.roots import by_language
 from docushift.engines.dita import CHROME_SELECTORS as DITA_CHROME
 from docushift.engines.dita import CONTENT_SELECTOR as DITA_CONTENT
 from docushift.engines.docbook import CONTENT_ID as DOCBOOK_CONTENT_ID
@@ -34,8 +35,9 @@ from docushift.engines.flare import LANDING_CHROME, PORTAL_BLOCKS
 from docushift.models import SourceEngine
 from docushift.reframe.toc import schema_for
 from docushift.reporting.findings import FindingsRun, Severity
+from docushift.state import READ_BACK_CODES
 from docushift.utils.csvio import natural_version_key
-from docushift.utils.slug import version_segment
+from docushift.utils.slug import is_primary_locale, version_segment
 from docushift.validation import references
 from docushift.validation.tree import VersionFolder, walk
 from docushift.verify import images as pictures
@@ -47,7 +49,7 @@ from docushift.verify.toc import Node, by_page, root
 
 #: The doc-class `verify` reads. The others hold PDFs and generated index pages.
 DOC_CLASS = "online-help"
-DROP_CODES = ("NAV_NODE_DROPPED", "ROOT_COPY_DROPPED", "TOC_ORPHAN", "TOC_SUBPROJECT_UNPLACED")
+DROP_CODES = READ_BACK_CODES
 UNFILED = "unfiled/"
 PRIMARY_LOCALE = "en-us"
 _PORTAL = frozenset(" ".join(texts.words(label)) for label in PORTAL_BLOCKS)
@@ -118,16 +120,19 @@ class Verifier:
     def selection(self, product: str | None, version: str | None, *, bu: str | None = None,
                   family: str | None = None, latest_only: bool = False,
                   statuses: dict[tuple[str, str], str] | None = None, wanted: tuple[str, ...] = (),
-                  limit: int = 0) -> list[VersionFolder]:
+                  limit: int = 0, locale: str | None = None) -> list[VersionFolder]:
         """The published version folders a wave covers (Phase 58).
 
         Read from the target, then narrowed through the catalog: `bu`, `family`,
         the newest published version of each product only, and `wanted`
         `_verify_status` values (`not-verified`, `stale`...), from `statuses`.
         `limit` caps the wave. A folder the catalog does not know is kept, so
-        `version` can say why it is skipped.
+        `version` can say why it is skipped. `locale` keeps one language's folders
+        (Phase 64): an English-only change need not re-read the `loc-` trees.
         """
         folders = [v for entry in walk(self.target, product, version, DOC_CLASS) for v in entry.versions]
+        if locale:
+            folders = [f for f in folders if f.locale.lower() == locale.lower()]
         picked: list[VersionFolder] = []
         for folder in folders:
             prod = self.catalog.products.get(folder.slug)
@@ -167,8 +172,12 @@ class Verifier:
             return result
 
         redirects = _redirects(self.cfg.reframed_path(product.bu, product.family, folder.slug, number))
-        roots = sorted(p.parent.parent for p in extracted.rglob("Data/HelpSystem.xml"))
-        engine = ver.engine if ver.engine in _SELECTORS else (SourceEngine.FLARE if roots else ver.engine)
+        found = sorted(p.parent.parent for p in extracted.rglob("Data/HelpSystem.xml"))
+        engine = ver.engine if ver.engine in _SELECTORS else (SourceEngine.FLARE if found else ver.engine)
+        # Phase 64. A package can ship one Flare root per language
+        # (`html/{de-de,en-us,ja-jp}`); this folder is one of them, so only its
+        # own language's roots, and the unlabelled ones, are its old TOC.
+        roots = by_language(found, folder.locale, is_primary_locale(folder.locale, PRIMARY_LOCALE))[0]
         selector = _SELECTORS.get(engine, "body")
         chrome = _CHROME.get(engine, ())
         landings = _landings(roots, extracted)
@@ -329,8 +338,7 @@ class Verifier:
     def _redirect_maps(self, result, folder, number: str, outmap, key_of, extracted: Path, selector: str,
                        chrome: tuple[str, ...], host: str) -> None:
         pages = origins.page_list(self.cfg.cache_dir, folder.slug, number)
-        if folder.locale.lower() != PRIMARY_LOCALE:
-            pages = origins.in_locale(pages, folder.locale)
+        pages = origins.for_locale(pages, folder.locale, is_primary_locale(folder.locale, PRIMARY_LOCALE))
         ctx = redirect_maps.Context(
             folder=folder.path, locale=folder.locale, slug=folder.slug, doc_class=folder.doc_class,
             segment=folder.segment, base=self.cfg.publish_base_url(), pages=pages,

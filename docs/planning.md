@@ -1990,10 +1990,111 @@ off. `verify` ran local-only (`--skip-published`), as for Container Editions. Fo
 - **`sync` copies whatever a PDF version's `doc/` holds.** WebFOCUS Client 9.1.0 and
   9.1.1 carry a 530 MB help-server zip each (a packaging mistake, `open-issues.md`);
   GitHub refused the push and they were removed by hand. Needs `sync` to skip archives.
-- **R001 re-runs after every sync** because `output/` and `reframed/` still hold the
-  unfixed notes (49k local fixes for WebFOCUS alone).
+- R001 fixed 49k notes in `output/` and `reframed/` for WebFOCUS: a one-time catch-up
+  (it had never been applied there); `apply` fixes all three trees, so a later sync
+  does not revert it. All 96 ibi versions read nothing pending.
 - No `301.yml` for the 5-language versions (`ORIGIN_TEMPLATE_UNDECLARED`), as before:
   WebFOCUS 9 versions, Reporting Server 4.
+
+### Phase 64: One Language Per Check, and No Archives Published — **Approved 2026-10-26; building; DOCOPS-275**
+
+**Why.** The ibi rollout of Phase 63 (2026-10-25) turned up three faults with one
+shape — a step that reads a multi-language or mixed package as if it were one English
+doc set — and one cost. Measured on the rollout:
+
+- **`verify` reports translated topics as lost.** WebFOCUS 9.3.5+ (and App Studio
+  9.3.0) and Reporting Server ship `html/{de-de,en-us,es-es,fr-fr,ja-jp}` as separate
+  Flare roots. `convert` keeps the English root (`roots.root_locale`), but
+  `verify.driver._flare_tree` reads every root's TOC and reports each non-English
+  entry `VERIFY_TOPIC_MISSING`: ~68,000 rows for WebFOCUS, ~9,400 for Reporting Server,
+  against tens of real findings per product. Every such version reads `lost`.
+- **No `301.yml` for 13 versions** (WebFOCUS 9, Reporting Server 4;
+  `ORIGIN_TEMPLATE_UNDECLARED`). `origins.derive` is handed all five languages' pages,
+  so "under `html/en-us`" and "under `html/ja-jp`" place the same topics and tie
+  (Client 9.3.5: 2,788 against 2,788). **Measured 2026-10-26 with `derive` on the
+  `en-us` pages only: 11 of 13 get a template** with no runner-up. The two that do
+  not: App Studio 9.3.8 (257 of 323 placed, under the 90% `MIN_COVERAGE`) and DSML
+  Services 9.3.8 (its 18 listed pages have no `en-us` segment).
+- **`sync` publishes any file in a document folder.** WebFOCUS Client 9.1.0 and 9.1.1
+  ship a 530 MB help-server zip in `doc/` (a packaging mistake, `open-issues.md`).
+  It reached the branch and GitHub refused the push. Across every extracted package
+  the four document folders hold 4,900 PDF, 1,215 TXT, 13 Excel, 1 Word and those
+  2 zips; no other file is over 100 MB.
+- **The cost was `verify`, not `reframe`.** From `runs`: reframe 66 min for 74
+  versions, sync 41, validate 31, verify ~880 (of which 619 was one family-wide run
+  against staging, killed). A local `--product` run of WebFOCUS Client took 87 min,
+  partly re-checking its 27 unchanged `loc-` folders. `state.db` is 857 MB; 1.35M
+  of its 1.70M `findings` rows are `verify`'s, and `report --prune` deletes rows
+  without `VACUUM`, so the file never shrinks.
+
+**Steps:**
+
+1. **`verify` reads one language.** `_flare_tree` takes only the roots whose
+   `root_locale` is empty or `same_language` as the folder's locale — the rule
+   `convert` already applies. Test: a two-root (en-us, ja-jp) fixture reports no
+   `ja-jp` entry for the English folder and no English entry for the `ja-jp` one.
+2. **`verify` honours `--locale`**, the selector `convert`/`sync` already take. Default
+   unchanged (every published folder); `--locale en-us` skips the `loc-` trees, for a
+   check after an English-only change.
+3. **`derive` sees one language.** In `origins.build`, an English run whose page list
+   has an `en-us` segment and another locale's derives from `in_locale(pages,
+   "en-us")`; a list with no `en-us` segment is used whole, as now. Localized runs
+   already filter (Phase 57). Test with the Client 9.3.5 tie. Then measure the whole
+   catalog for versions whose `301.yml` appears or changes, before any re-run.
+4. **`sync` skips archives and oversized files.** In `router.route_version`: skip
+   `.zip .war .jar .ear .tar .gz .tgz .7z .rar .exe .msi .dmg`, and anything of
+   100 MB or more (GitHub's limit), with a new finding `SYNC_DOCUMENT_SKIPPED` (warn,
+   §7.5) naming the file and size. A denylist rather than an allowlist, so an
+   unexpected document type is still published.
+5. **`report --prune` compacts.** `VACUUM` after the delete. First confirm Phase 58's
+   kept results (`verify_result`, `reports/verify/`) do not read pruned `findings`
+   rows.
+
+**Runs after the build** (the user, as `!` commands, unless handed over):
+
+- Re-reframe and re-sync the 11 versions that gain a `301.yml` onto their
+  `phase63-<family>` branches; push.
+- `docushift --locale en-us verify --bu ibi --skip-published` over WebFOCUS and
+  Reporting Server; expected: no translated-topic rows, `lost` only where real.
+- Declare a template for DSML Services 9.3.8 and look at App Studio 9.3.8 by hand.
+- `report --prune --keep 50`; record the `state.db` size before and after.
+
+**Not in this phase:** running `reframe` versions in parallel (66 min was not the
+bottleneck), and the R001 re-run (not needed; see the rollout note above).
+
+**Docs:** `user-guide.md` (`verify --locale`; sync skips archives), `design.md` §10.4
+(the skip rule), §7.5 (`SYNC_DOCUMENT_SKIPPED`).
+
+*Exit: the ibi English verify shows no translated-topic rows; 11 more versions publish a
+`301.yml`; a package's archive is reported, not published; `state.db` shrinks on prune.*
+
+#### Built 2026-10-26
+
+- **One root rule.** `engines.roots.by_language` is convert's `_without_localized`
+  selection lifted out unchanged (findings and messages as before); `verify` reads
+  its old TOC and landings from the roots it keeps.
+- **`--locale` is the existing top-level option, not a new `verify` one.** Phase 57's
+  `docushift --locale` already names a run's language (and its `state-<locale>.db`); a
+  second `--locale` on `verify` would have meant something else under the same name.
+  Given, `verify` keeps that language's folders; absent, every language, as before.
+- **`origins.for_locale`** replaces the four "narrow if localized" sites (convert,
+  convert's inputs key, reframe, reframe's inputs key) and `verify`'s. **Measured over
+  all 562 converted versions:** 17 page lists narrow, all multi-language: the 11
+  that gain a template, App Studio 9.3.8 (still 257 of 323), WebFOCUS Client, App
+  Studio and Reporting Server 9.3.0 and Data Virtualization 8.8.0/8.8.1 (template
+  already derived; same answer). Every other version's list, and so its digests, is
+  unchanged. Those 17 read as changed inputs: `reframe` re-cuts the 15 ibi ones on
+  its next run, and `convert` would re-convert all 17 if run over them.
+- **`sync`** skips archives and files of 100 MB or more (`router.unpublishable`),
+  reported as `SYNC_DOCUMENT_SKIPPED` (§7.5).
+- **Pruning, changed from the plan after its check:** `verify` does read pruned rows.
+  `latest_counts` explains a missing topic from the drops its *conversion* recorded,
+  usually weeks and hundreds of runs back, so "keep the newest N runs" would have made
+  every known drop read as lost. `prune_findings` now keeps each version's latest rows
+  of `READ_BACK_CODES` (the codes `verify` reads, one constant for both), then
+  `VACUUM`s.
+- Tests: roots selection, the two-root package, `--locale` selection, the 9.3.5 tie
+  and a single-language list, the archive skip, prune keeping drops and shrinking.
 
 ---
 
@@ -2097,6 +2198,7 @@ The concrete deliverable of §7.1: every deferred "report line" in the three doc
 | `FRAGMENT_UNPLACEABLE`³⁰ | warn | convert | A cross-reference naming an anchor with no heading behind it; left as written and will not resolve | Phase 30 |
 | `REFRAME_PATH_SHORTENED`⁶³ | note | reframe | Pages on a TOC chain that would publish past 260 characters took shorter names, the folders along the chain with them | Phase 63 |
 | `REFRAME_PATH_TOO_LONG`⁶³ | warn | reframe | Pages still past 260 characters published with every name on the chain cut; `sync` will refuse the version | Phase 63 |
+| `SYNC_DOCUMENT_SKIPPED`⁶⁴ | warn | sync | A file in a document folder was not published: an archive or installer, or 100 MB or more (GitHub's limit) | Phase 64 |
 | `RENAME_MAP_APPLIED`²⁹ | note | reframe | Page names taken from `rename-map.csv` rather than recomputed, so a published URL does not move when a title is edited | Phase 29 |
 | `RENAME_MAP_REFUSED`³⁴ | warn | reframe | A name in `rename-map.csv` that another page ends up holding; the computed name is kept, and each refused pin is named | Phase 34 (R9-05) |
 | `RENAME_MAP_AMBIGUOUS`⁵⁰ | warn | reframe | A row in `rename-map.csv` for a source topic that leads more than one page, with no `page_key` to say which; no page takes the name, each row named | Phase 50 |

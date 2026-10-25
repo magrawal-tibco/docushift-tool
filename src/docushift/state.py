@@ -1007,6 +1007,11 @@ class StateStore:
         rather than a rowid alias is for: a pruned run is still a dated record that
         something ran, and a report can still say its findings are gone rather than
         that the run never happened.
+
+        Phase 64. A version's latest `READ_BACK_CODES` rows are kept wherever they
+        sit -- a conversion weeks old is still what `verify` explains drops from --
+        and the file is compacted after: a delete alone left it at its largest
+        size (857 MB on 2026-10-25, 1.35M of its 1.70M rows `verify`'s).
         """
         if keep < 0:
             raise ValueError("--keep cannot be negative")
@@ -1020,11 +1025,25 @@ class StateStore:
         if not stale:
             return 0, 0
         placeholders = ",".join("?" * len(stale))
+        codes = ",".join("?" * len(READ_BACK_CODES))
         with self._tx() as conn:
             cursor = conn.execute(
-                f"DELETE FROM findings WHERE run_id IN ({placeholders})", stale
+                f"DELETE FROM findings WHERE run_id IN ({placeholders}) AND NOT ("
+                f"code IN ({codes}) AND run_id = (SELECT MAX(f.run_id) FROM findings f "
+                f"WHERE f.code = findings.code AND f.slug = findings.slug "
+                f"AND f.version = findings.version))",
+                [*stale, *READ_BACK_CODES],
             )
-            return len(stale), int(cursor.rowcount or 0)
+            deleted = int(cursor.rowcount or 0)
+        with self._lock:
+            self.connect().execute("VACUUM")
+        return len(stale), deleted
+
+
+#: Codes a later stage reads back from an earlier run (`latest_counts`): `verify`
+#: explains a missing topic by the drops its conversion recorded (Phase 55).
+#: Pruning keeps each version's latest rows of these, however old the run.
+READ_BACK_CODES = ("NAV_NODE_DROPPED", "ROOT_COPY_DROPPED", "TOC_ORPHAN", "TOC_SUBPROJECT_UNPLACED")
 
 
 class LocaleStateStore(StateStore):

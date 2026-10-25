@@ -310,3 +310,26 @@ def test_query_findings_filters_in_sql_and_prune_keeps_the_run_rows(tmp_path: Pa
     # The run is still a dated record that something ran.
     assert store.get_run(first.run_id) is not None
     store.close()
+
+
+def test_pruning_keeps_the_drops_verify_reads_and_compacts_the_file(tmp_path: Path) -> None:
+    """Phase 64. A conversion weeks old is still what `verify` explains a missing
+    topic from, so its latest drop counts survive any prune."""
+    store = StateStore(tmp_path / "state.db")
+    convert = FindingsRun("convert", store=store).start()
+    convert.record("NAV_NODE_DROPPED", slug="wf", version="9.3.5", count=2)
+    convert.record("ENGINE_UNKNOWN", slug="wf", version="9.3.5")
+    convert.finish()
+    for _ in range(2):
+        run = FindingsRun("verify", store=store).start()
+        for i in range(500):
+            run.record("VERIFY_TOPIC_MISSING", slug="wf", version="9.3.5", path=f"ja-jp/t{i}.htm")
+        run.finish()
+    before = (tmp_path / "state.db").stat().st_size
+
+    runs, rows = store.prune_findings(keep=1)
+
+    assert (runs, rows) == (2, 501)
+    assert store.latest_counts("wf", "9.3.5", ("NAV_NODE_DROPPED",)) == {"NAV_NODE_DROPPED": 2}
+    assert (tmp_path / "state.db").stat().st_size < before
+    store.close()

@@ -213,3 +213,20 @@ def test_a_file_an_engine_output_root_owns_is_not_a_document(tmp_path: Path) -> 
         RELEASE_INFORMATION: ["readme.txt"],
         REFERENCE_DOCUMENTS: ["Default.htm", "tp-html.mclog"],
     }
+
+
+def test_an_archive_or_an_oversized_file_is_skipped_and_named(tmp_path: Path, monkeypatch) -> None:
+    """Phase 64. WebFOCUS Client 9.1.0 shipped its help server as a 530 MB zip in
+    `doc/`; GitHub refused it. The guides beside it still publish."""
+    from docushift.sync import router
+
+    tree = write(tmp_path, "pdf/wf_users_guide.pdf", "doc/ibi_help910.zip", "doc/TIB_wf_license.pdf")
+    (tree / "pdf/huge_guide.pdf").write_bytes(b"x" * 10)
+    monkeypatch.setattr(router, "MAX_PUBLISHED_BYTES", 10)
+    skipped: list[tuple[Path, str]] = []
+
+    names = [item.path.name for item in route_version(tree, SourceEngine.AUTO, skipped)]
+
+    assert names == ["wf_users_guide.pdf", "TIB_wf_license.pdf"]
+    assert [(path.name, "archive" in why or "MB" in why) for path, why in skipped] == [
+        ("huge_guide.pdf", True), ("ibi_help910.zip", True)]
