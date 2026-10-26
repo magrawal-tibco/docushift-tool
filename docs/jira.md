@@ -41,11 +41,15 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | Phase 63 rolled out and every family re-synced | DOCOPS-274 → Done |
 | Translated WebFOCUS layout phase is opened | New sub-task under DOCOPS-11 (deferred from Phase 63) |
 | Phase 64 re-runs pushed and English-only verify run on WebFOCUS and Reporting Server | DOCOPS-275: dated note with statuses → Done; notes on DOCOPS-262/263 |
+| A redirect source is decided for each Go URL with several destinations, and the Go URL redirects are built | DOCOPS-279: dated note → Done |
 | A new phase is opened | One sub-task under the matching story, In Progress, no `retro` |
 
 **Left alone on purpose:** DOCOPS-8 is a Task where its siblings are Stories.
 
 **Log** (newest first, one line per session):
+
+- 2026-10-26 — DOCOPS-279 created under DOCOPS-9 (0.5 SP, Content Migration), In Progress: Go URL list
+  (3,557 rows) in reports/redirects/go-urls-2026-10-26.csv; /emp/ vs /pub/ choice open.
 
 - 2026-10-26 — DOCOPS-275 note: Phase 64 built (0d45fbb); re-runs onto phase63 branches pending.
 
@@ -310,7 +314,7 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | 57 | Translated help to the `loc-` tree (`--locale`) | build DOCOPS-253; runs DOCOPS-148 (in progress) |
 
 Other logged work: Jira reconcile and this handoff DOCOPS-208; stakeholder status page DOCOPS-197; TIBCO family reassignments DOCOPS-120
-(in progress, progress kept as comments); ibi family regroup DOCOPS-207; catalog refresh and 2026-10-09 end-of-support report DOCOPS-215; cloud family run DOCOPS-222; EMS, FTL and Messaging run DOCOPS-223; Data Management run DOCOPS-238; FTL, ActiveSpaces, EMS and Messaging re-run DOCOPS-240; Hawk run DOCOPS-241; Mainframe run DOCOPS-242; iProcess run DOCOPS-243; Platform run DOCOPS-244; General run DOCOPS-245; hand-obtained packages and first BPM push DOCOPS-246; last 6 download failures DOCOPS-247; Statistica run DOCOPS-128; Data Virtualization run DOCOPS-254.
+(in progress, progress kept as comments); ibi family regroup DOCOPS-207; catalog refresh and 2026-10-09 end-of-support report DOCOPS-215; cloud family run DOCOPS-222; EMS, FTL and Messaging run DOCOPS-223; Data Management run DOCOPS-238; FTL, ActiveSpaces, EMS and Messaging re-run DOCOPS-240; Hawk run DOCOPS-241; Mainframe run DOCOPS-242; iProcess run DOCOPS-243; Platform run DOCOPS-244; General run DOCOPS-245; hand-obtained packages and first BPM push DOCOPS-246; last 6 download failures DOCOPS-247; Statistica run DOCOPS-128; Data Virtualization run DOCOPS-254; TIBCO Go URL list for redirects DOCOPS-279 (in progress).
 
 ## Open run tasks (as of 2026-10-08)
 
