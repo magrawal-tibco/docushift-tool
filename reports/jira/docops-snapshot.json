@@ -1,0 +1,3822 @@
+{
+ "fetched": "2026-10-26",
+ "issues": [
+  {
+   "key": "DOCOPS-5",
+   "summary": "TIBCO Docs migration to AEM",
+   "type": "Epic",
+   "parent": null,
+   "status": "In Progress",
+   "category": "indeterminate",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "tibco"
+   ],
+   "created": "2026-09-25",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": null
+  },
+  {
+   "key": "DOCOPS-6",
+   "summary": "Assess TIBCO Docs for AEM migration gaps and unsupported features",
+   "type": "Story",
+   "parent": "DOCOPS-5",
+   "status": "In Progress",
+   "category": "indeterminate",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "tibco"
+   ],
+   "created": "2026-09-28",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": null
+  },
+  {
+   "key": "DOCOPS-7",
+   "summary": "Migrate TIBCO Docs content into AEM",
+   "type": "Story",
+   "parent": "DOCOPS-5",
+   "status": "In Progress",
+   "category": "indeterminate",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "tibco"
+   ],
+   "created": "2026-09-28",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": null
+  },
+  {
+   "key": "DOCOPS-8",
+   "summary": "Update content structure, metadata, and templates for AEM",
+   "type": "Task",
+   "parent": "DOCOPS-5",
+   "status": "In Progress",
+   "category": "indeterminate",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "tibco"
+   ],
+   "created": "2026-09-28",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": null
+  },
+  {
+   "key": "DOCOPS-9",
+   "summary": "Fix links, assets, and redirects during the migration",
+   "type": "Story",
+   "parent": "DOCOPS-5",
+   "status": "In Progress",
+   "category": "indeterminate",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "tibco"
+   ],
+   "created": "2026-09-28",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": null
+  },
+  {
+   "key": "DOCOPS-10",
+   "summary": "Validate migrated TIBCO Docs in AEM before release",
+   "type": "Story",
+   "parent": "DOCOPS-5",
+   "status": "New",
+   "category": "new",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "tibco"
+   ],
+   "created": "2026-09-28",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": null
+  },
+  {
+   "key": "DOCOPS-11",
+   "summary": "Docushift core: conversion framework and engines",
+   "type": "Story",
+   "parent": "DOCOPS-74",
+   "status": "Resolved",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift"
+   ],
+   "created": "2026-09-28",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": null
+  },
+  {
+   "key": "DOCOPS-12",
+   "summary": "Reframe merge engine",
+   "type": "Story",
+   "parent": "DOCOPS-75",
+   "status": "Resolved",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "reframe"
+   ],
+   "created": "2026-09-28",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": null
+  },
+  {
+   "key": "DOCOPS-13",
+   "summary": "Define Docushift conversion scope and Markdown output specification",
+   "type": "Sub-task",
+   "parent": "DOCOPS-11",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift",
+    "retro"
+   ],
+   "created": "2026-09-28",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-14",
+   "summary": "Implement the core document-to-Markdown conversion pipeline",
+   "type": "Sub-task",
+   "parent": "DOCOPS-11",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift",
+    "retro"
+   ],
+   "created": "2026-09-28",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 1.5
+  },
+  {
+   "key": "DOCOPS-15",
+   "summary": "Package Docushift as a runnable tool for migration use",
+   "type": "Sub-task",
+   "parent": "DOCOPS-11",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift",
+    "retro"
+   ],
+   "created": "2026-09-28",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-16",
+   "summary": "Add handling for embedded assets and references",
+   "type": "Sub-task",
+   "parent": "DOCOPS-11",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift",
+    "retro"
+   ],
+   "created": "2026-09-28",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-17",
+   "summary": "Implement cleanup for formatting and edge cases",
+   "type": "Sub-task",
+   "parent": "DOCOPS-11",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift",
+    "retro"
+   ],
+   "created": "2026-09-28",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 1.0
+  },
+  {
+   "key": "DOCOPS-18",
+   "summary": "Create validation tests with representative TIBCO documentation samples",
+   "type": "Sub-task",
+   "parent": "DOCOPS-11",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift",
+    "retro"
+   ],
+   "created": "2026-09-28",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 1.5
+  },
+  {
+   "key": "DOCOPS-19",
+   "summary": "Document usage and conversion guidelines for migration contributors",
+   "type": "Sub-task",
+   "parent": "DOCOPS-11",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift",
+    "retro"
+   ],
+   "created": "2026-09-28",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-74",
+   "summary": "Docushift: HTML-to-Markdown migration tool",
+   "type": "Epic",
+   "parent": null,
+   "status": "In Progress",
+   "category": "indeterminate",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift"
+   ],
+   "created": "2026-10-07",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": null
+  },
+  {
+   "key": "DOCOPS-75",
+   "summary": "Reframe: merge small topics to reduce file count",
+   "type": "Epic",
+   "parent": null,
+   "status": "In Progress",
+   "category": "indeterminate",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "reframe"
+   ],
+   "created": "2026-10-07",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": null
+  },
+  {
+   "key": "DOCOPS-76",
+   "summary": "Full-corpus scale run (performance, resumability)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-101",
+   "status": "Backlog",
+   "category": "new",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift"
+   ],
+   "created": "2026-10-07",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-77",
+   "summary": "Generate a per-file conversion report",
+   "type": "Sub-task",
+   "parent": "DOCOPS-101",
+   "status": "Backlog",
+   "category": "new",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift"
+   ],
+   "created": "2026-10-07",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-78",
+   "summary": "Implement engine auto-detection",
+   "type": "Sub-task",
+   "parent": "DOCOPS-11",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift",
+    "retro"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-79",
+   "summary": "Implement Flare engine (MadCap WebHelp2 → Markdown)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-11",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift",
+    "retro"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 1.5
+  },
+  {
+   "key": "DOCOPS-80",
+   "summary": "Implement DITA engine (SDL Trisoft WebHelp Responsive → Markdown)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-11",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift",
+    "retro"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-81",
+   "summary": "Implement WebWorks engine (FrameMaker/ePublisher → Markdown)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-11",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift",
+    "retro"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-82",
+   "summary": "Implement DocBook engine (DocBook HTML → Markdown)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-11",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift",
+    "retro"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-83",
+   "summary": "Docushift: discovery and catalog",
+   "type": "Story",
+   "parent": "DOCOPS-74",
+   "status": "Resolved",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": null
+  },
+  {
+   "key": "DOCOPS-84",
+   "summary": "Crawler and sitemap discovery from docs.tibco.com",
+   "type": "Sub-task",
+   "parent": "DOCOPS-83",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-85",
+   "summary": "Catalog CSVs, 3-way merge, and scope selection",
+   "type": "Sub-task",
+   "parent": "DOCOPS-83",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift",
+    "retro"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-86",
+   "summary": "Product-family classification rules",
+   "type": "Sub-task",
+   "parent": "DOCOPS-83",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-87",
+   "summary": "Docushift: acquisition and extraction",
+   "type": "Story",
+   "parent": "DOCOPS-74",
+   "status": "Resolved",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-08",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": null
+  },
+  {
+   "key": "DOCOPS-88",
+   "summary": "Resumable documentation ZIP download",
+   "type": "Sub-task",
+   "parent": "DOCOPS-87",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift",
+    "retro"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-89",
+   "summary": "Safe unzip, file inventory, and root finding",
+   "type": "Sub-task",
+   "parent": "DOCOPS-87",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift",
+    "retro"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-90",
+   "summary": "Fix Windows path-length bug in root finding (blocks 8 DITA versions)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-87",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-08",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-91",
+   "summary": "Docushift: post-processing and navigation",
+   "type": "Story",
+   "parent": "DOCOPS-74",
+   "status": "Resolved",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": null
+  },
+  {
+   "key": "DOCOPS-92",
+   "summary": "Link rewriting (.htm to .md) and token stripping",
+   "type": "Sub-task",
+   "parent": "DOCOPS-91",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift",
+    "retro"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-93",
+   "summary": "toc.yml generation per engine",
+   "type": "Sub-task",
+   "parent": "DOCOPS-91",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-94",
+   "summary": "CSH mapping and 301 redirect maps",
+   "type": "Sub-task",
+   "parent": "DOCOPS-91",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-95",
+   "summary": "Orphan-topic reshelving (Phase 43)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-91",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-96",
+   "summary": "Docushift: sync and validation",
+   "type": "Story",
+   "parent": "DOCOPS-74",
+   "status": "In Progress",
+   "category": "indeterminate",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift"
+   ],
+   "created": "2026-10-07",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": null
+  },
+  {
+   "key": "DOCOPS-97",
+   "summary": "Filesystem distributor to tibco-docs-aem and ibi-docs-aem",
+   "type": "Sub-task",
+   "parent": "DOCOPS-96",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift",
+    "retro"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-98",
+   "summary": "Validation findings register (85 finding codes)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-96",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift",
+    "retro"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-99",
+   "summary": "Git branch, commit, and push to AEM Guides repos",
+   "type": "Sub-task",
+   "parent": "DOCOPS-96",
+   "status": "Backlog",
+   "category": "new",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift"
+   ],
+   "created": "2026-10-07",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 1.0
+  },
+  {
+   "key": "DOCOPS-100",
+   "summary": "Conversion-status report as a CLI command",
+   "type": "Sub-task",
+   "parent": "DOCOPS-96",
+   "status": "Backlog",
+   "category": "new",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift"
+   ],
+   "created": "2026-10-07",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-101",
+   "summary": "Docushift: hardening and release engineering",
+   "type": "Story",
+   "parent": "DOCOPS-74",
+   "status": "In Progress",
+   "category": "indeterminate",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift"
+   ],
+   "created": "2026-10-07",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": null
+  },
+  {
+   "key": "DOCOPS-102",
+   "summary": "Whole-tool review and fixes (Phase 34, 236 findings)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-101",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 2.0
+  },
+  {
+   "key": "DOCOPS-103",
+   "summary": "Integration tests beyond the pipeline smoke test",
+   "type": "Sub-task",
+   "parent": "DOCOPS-101",
+   "status": "Backlog",
+   "category": "new",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift"
+   ],
+   "created": "2026-10-07",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 1.0
+  },
+  {
+   "key": "DOCOPS-104",
+   "summary": "Measure test coverage against the 90% target",
+   "type": "Sub-task",
+   "parent": "DOCOPS-101",
+   "status": "Backlog",
+   "category": "new",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift"
+   ],
+   "created": "2026-10-07",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-105",
+   "summary": "CI pipeline and CONTRIBUTING guide",
+   "type": "Sub-task",
+   "parent": "DOCOPS-101",
+   "status": "Backlog",
+   "category": "new",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift"
+   ],
+   "created": "2026-10-07",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 1.0
+  },
+  {
+   "key": "DOCOPS-106",
+   "summary": "Resolve 37 deferred review findings",
+   "type": "Sub-task",
+   "parent": "DOCOPS-101",
+   "status": "Backlog",
+   "category": "new",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift"
+   ],
+   "created": "2026-10-07",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 1.0
+  },
+  {
+   "key": "DOCOPS-107",
+   "summary": "Handle doxia and mixed-engine versions",
+   "type": "Sub-task",
+   "parent": "DOCOPS-101",
+   "status": "Backlog",
+   "category": "new",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift"
+   ],
+   "created": "2026-10-07",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-108",
+   "summary": "Reframe contracts and policy config (reframe.yaml)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-12",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "reframe",
+    "retro"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-109",
+   "summary": "Port packing algorithm from docrestruct POC (anchors, layout pin)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-12",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "reframe",
+    "retro"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 1.0
+  },
+  {
+   "key": "DOCOPS-110",
+   "summary": "Reframe TOC regeneration, link/asset rewrite, redirects, rename-map",
+   "type": "Sub-task",
+   "parent": "DOCOPS-12",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "reframe",
+    "retro"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-111",
+   "summary": "Reframe review queue (review-queue.csv)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-12",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "reframe",
+    "retro"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-112",
+   "summary": "Integrate Reframe into the pipeline (Flare/DITA only)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-12",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "reframe",
+    "retro"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-113",
+   "summary": "CSH carry-over and keep_separate overrides",
+   "type": "Sub-task",
+   "parent": "DOCOPS-12",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "reframe",
+    "retro"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-114",
+   "summary": "Reframe: rollout and value measurement",
+   "type": "Story",
+   "parent": "DOCOPS-75",
+   "status": "In Progress",
+   "category": "indeterminate",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "reframe"
+   ],
+   "created": "2026-10-07",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": null
+  },
+  {
+   "key": "DOCOPS-115",
+   "summary": "Re-run the 6 merge-failed TIBCO versions after Phase 43",
+   "type": "Sub-task",
+   "parent": "DOCOPS-114",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "reframe"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-08",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-116",
+   "summary": "Writer review of Reframe review queues (optional pilot sign-off)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-114",
+   "status": "Backlog",
+   "category": "new",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "reframe"
+   ],
+   "created": "2026-10-07",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-117",
+   "summary": "Before/after file-count and word-count report per family",
+   "type": "Sub-task",
+   "parent": "DOCOPS-114",
+   "status": "Backlog",
+   "category": "new",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "reframe"
+   ],
+   "created": "2026-10-07",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-118",
+   "summary": "Inventory and engine classification of 558 TIBCO products",
+   "type": "Sub-task",
+   "parent": "DOCOPS-6",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "retro",
+    "tibco"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-119",
+   "summary": "Per-product open-issues register",
+   "type": "Sub-task",
+   "parent": "DOCOPS-6",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "retro",
+    "tibco"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-120",
+   "summary": "TIBCO product-family review (re-suggested, unclassified, empty families)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-6",
+   "status": "In Progress",
+   "category": "indeterminate",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "tibco"
+   ],
+   "created": "2026-10-07",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 1.0
+  },
+  {
+   "key": "DOCOPS-121",
+   "summary": "TIBCO wave 1: bw-plugin, tra, streaming, activespaces, ems, adapters (270 versions)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-7",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "tibco"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 1.0
+  },
+  {
+   "key": "DOCOPS-122",
+   "summary": "Fix 12 convert-failed and 23 download-failed TIBCO versions",
+   "type": "Sub-task",
+   "parent": "DOCOPS-7",
+   "status": "Backlog",
+   "category": "new",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "tibco"
+   ],
+   "created": "2026-10-07",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-123",
+   "summary": "Phase 40: sitemap mapping for 615 versions and StreamBase re-download",
+   "type": "Sub-task",
+   "parent": "DOCOPS-7",
+   "status": "In Progress",
+   "category": "indeterminate",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "tibco"
+   ],
+   "created": "2026-10-07",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-124",
+   "summary": "Phase 43: orphan reshelve run over 244 versions",
+   "type": "Sub-task",
+   "parent": "DOCOPS-7",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "tibco"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-08",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-125",
+   "summary": "TIBCO wave 2a: convert ~300 remaining versions",
+   "type": "Sub-task",
+   "parent": "DOCOPS-7",
+   "status": "In Progress",
+   "category": "indeterminate",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "tibco"
+   ],
+   "created": "2026-10-07",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 1.0
+  },
+  {
+   "key": "DOCOPS-126",
+   "summary": "TIBCO wave 2b: convert ~300 remaining versions",
+   "type": "Sub-task",
+   "parent": "DOCOPS-7",
+   "status": "Backlog",
+   "category": "new",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "tibco"
+   ],
+   "created": "2026-10-07",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 1.0
+  },
+  {
+   "key": "DOCOPS-127",
+   "summary": "TIBCO wave 2c: convert ~300 remaining versions",
+   "type": "Sub-task",
+   "parent": "DOCOPS-7",
+   "status": "Backlog",
+   "category": "new",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "tibco"
+   ],
+   "created": "2026-10-07",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 1.0
+  },
+  {
+   "key": "DOCOPS-128",
+   "summary": "Convert Spotfire (42 versions)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-7",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "tibco"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-21",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-129",
+   "summary": "Apply Reframe to TIBCO Flare/DITA versions (352 merged)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-8",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "reframe",
+    "tibco"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-130",
+   "summary": "Frontmatter and taxonomy alignment after family review",
+   "type": "Sub-task",
+   "parent": "DOCOPS-8",
+   "status": "Backlog",
+   "category": "new",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "tibco"
+   ],
+   "created": "2026-10-07",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-131",
+   "summary": "301 redirect maps from docs.tibco.com URLs",
+   "type": "Sub-task",
+   "parent": "DOCOPS-9",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "tibco"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-132",
+   "summary": "Resolve broken internal links from validate findings",
+   "type": "Sub-task",
+   "parent": "DOCOPS-9",
+   "status": "Backlog",
+   "category": "new",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "tibco"
+   ],
+   "created": "2026-10-07",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-133",
+   "summary": "Set the public base URL for TIBCO docs",
+   "type": "Sub-task",
+   "parent": "DOCOPS-9",
+   "status": "Backlog",
+   "category": "new",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "tibco"
+   ],
+   "created": "2026-10-07",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-134",
+   "summary": "Re-sync 214 out-of-date TIBCO trees to tibco-docs-aem",
+   "type": "Sub-task",
+   "parent": "DOCOPS-10",
+   "status": "Backlog",
+   "category": "new",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "tibco"
+   ],
+   "created": "2026-10-07",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-135",
+   "summary": "Full validate run after TIBCO re-sync",
+   "type": "Sub-task",
+   "parent": "DOCOPS-10",
+   "status": "Backlog",
+   "category": "new",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "tibco"
+   ],
+   "created": "2026-10-07",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-136",
+   "summary": "AEM Guides staging build and ditamap activation check (TIBCO)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-10",
+   "status": "Backlog",
+   "category": "new",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "tibco"
+   ],
+   "created": "2026-10-07",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-137",
+   "summary": "Writer spot-check of migrated TIBCO docs per family",
+   "type": "Sub-task",
+   "parent": "DOCOPS-10",
+   "status": "Backlog",
+   "category": "new",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "tibco"
+   ],
+   "created": "2026-10-07",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 5.0
+  },
+  {
+   "key": "DOCOPS-138",
+   "summary": "TIBCO production publish and sign-off",
+   "type": "Sub-task",
+   "parent": "DOCOPS-10",
+   "status": "Backlog",
+   "category": "new",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "tibco"
+   ],
+   "created": "2026-10-07",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-139",
+   "summary": "ibi docs migration to AEM",
+   "type": "Epic",
+   "parent": null,
+   "status": "In Progress",
+   "category": "indeterminate",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "ibi"
+   ],
+   "created": "2026-10-07",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": null
+  },
+  {
+   "key": "DOCOPS-140",
+   "summary": "ibi: assess and scope catalog",
+   "type": "Story",
+   "parent": "DOCOPS-139",
+   "status": "Resolved",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "ibi"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": null
+  },
+  {
+   "key": "DOCOPS-141",
+   "summary": "Scope 26 ibi products and select versions",
+   "type": "Sub-task",
+   "parent": "DOCOPS-140",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "ibi"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-142",
+   "summary": "WebFOCUS family split",
+   "type": "Sub-task",
+   "parent": "DOCOPS-140",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "ibi"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-143",
+   "summary": "Map pre-rebrand tibco- package names for ibi",
+   "type": "Sub-task",
+   "parent": "DOCOPS-140",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "ibi"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-144",
+   "summary": "ibi: convert content",
+   "type": "Story",
+   "parent": "DOCOPS-139",
+   "status": "In Progress",
+   "category": "indeterminate",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "ibi"
+   ],
+   "created": "2026-10-07",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": null
+  },
+  {
+   "key": "DOCOPS-145",
+   "summary": "Convert 95 ibi Flare versions",
+   "type": "Sub-task",
+   "parent": "DOCOPS-144",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "ibi"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-146",
+   "summary": "Sync 197 ibi versions to ibi-docs-aem",
+   "type": "Sub-task",
+   "parent": "DOCOPS-144",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "ibi"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-147",
+   "summary": "Recover 1 download-failed ibi version",
+   "type": "Sub-task",
+   "parent": "DOCOPS-144",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "ibi"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-21",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-148",
+   "summary": "Localized WebFOCUS (loc- tree)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-144",
+   "status": "In Progress",
+   "category": "indeterminate",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "ibi"
+   ],
+   "created": "2026-10-07",
+   "resolved": "",
+   "due": "2026-10-28",
+   "assignee": "Mayur Agrawal",
+   "sp": 1.0
+  },
+  {
+   "key": "DOCOPS-149",
+   "summary": "ibi: validate and publish in AEM",
+   "type": "Story",
+   "parent": "DOCOPS-139",
+   "status": "New",
+   "category": "new",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "ibi"
+   ],
+   "created": "2026-10-07",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": null
+  },
+  {
+   "key": "DOCOPS-150",
+   "summary": "AEM staging build check (ibi)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-149",
+   "status": "Backlog",
+   "category": "new",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "ibi"
+   ],
+   "created": "2026-10-07",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-151",
+   "summary": "Writer spot-check of migrated ibi docs",
+   "type": "Sub-task",
+   "parent": "DOCOPS-149",
+   "status": "Backlog",
+   "category": "new",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "ibi"
+   ],
+   "created": "2026-10-07",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 2.0
+  },
+  {
+   "key": "DOCOPS-152",
+   "summary": "ibi production publish and sign-off",
+   "type": "Sub-task",
+   "parent": "DOCOPS-149",
+   "status": "Backlog",
+   "category": "new",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "ibi"
+   ],
+   "created": "2026-10-07",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-153",
+   "summary": "EBX (OneBX) docs migration to AEM",
+   "type": "Epic",
+   "parent": null,
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "ebx",
+    "html-to-md",
+    "retro"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": null
+  },
+  {
+   "key": "DOCOPS-154",
+   "summary": "EBX: convert en-us (13 versions)",
+   "type": "Story",
+   "parent": "DOCOPS-153",
+   "status": "Resolved",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "ebx",
+    "html-to-md",
+    "retro"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": null
+  },
+  {
+   "key": "DOCOPS-155",
+   "summary": "EBX manifest and ZIP download",
+   "type": "Sub-task",
+   "parent": "DOCOPS-154",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "ebx",
+    "html-to-md",
+    "retro"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-156",
+   "summary": "Convert EBX and rewrite Java API links",
+   "type": "Sub-task",
+   "parent": "DOCOPS-154",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "ebx",
+    "html-to-md",
+    "retro"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 1.0
+  },
+  {
+   "key": "DOCOPS-157",
+   "summary": "EBX restructure script",
+   "type": "Sub-task",
+   "parent": "DOCOPS-154",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "ebx",
+    "html-to-md",
+    "retro"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-158",
+   "summary": "EBX TOC build",
+   "type": "Sub-task",
+   "parent": "DOCOPS-154",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "ebx",
+    "html-to-md",
+    "retro"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-159",
+   "summary": "EBX: convert add-ons (7 versions, 17 add-ons)",
+   "type": "Story",
+   "parent": "DOCOPS-153",
+   "status": "Resolved",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "ebx",
+    "html-to-md",
+    "retro"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": null
+  },
+  {
+   "key": "DOCOPS-160",
+   "summary": "Convert EBX add-ons",
+   "type": "Sub-task",
+   "parent": "DOCOPS-159",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "ebx",
+    "html-to-md",
+    "retro"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-161",
+   "summary": "EBX add-on restructure",
+   "type": "Sub-task",
+   "parent": "DOCOPS-159",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "ebx",
+    "html-to-md",
+    "retro"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-162",
+   "summary": "Copy EBX add-on PDFs",
+   "type": "Sub-task",
+   "parent": "DOCOPS-159",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "ebx",
+    "html-to-md",
+    "retro"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-163",
+   "summary": "EBX: localized docs (fr-fr, ja-jp)",
+   "type": "Story",
+   "parent": "DOCOPS-153",
+   "status": "Resolved",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "ebx",
+    "html-to-md",
+    "retro"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": null
+  },
+  {
+   "key": "DOCOPS-164",
+   "summary": "Publish EBX fr-fr (13 versions)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-163",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "ebx",
+    "html-to-md",
+    "retro"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-165",
+   "summary": "Publish EBX ja-jp (3 versions)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-163",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "ebx",
+    "html-to-md",
+    "retro"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-166",
+   "summary": "EBX: publish to AEM",
+   "type": "Story",
+   "parent": "DOCOPS-153",
+   "status": "Resolved",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "ebx",
+    "html-to-md",
+    "retro"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": null
+  },
+  {
+   "key": "DOCOPS-167",
+   "summary": "EBX publishing repos and Cloud Build pipelines",
+   "type": "Sub-task",
+   "parent": "DOCOPS-166",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "ebx",
+    "html-to-md",
+    "retro"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 1.5
+  },
+  {
+   "key": "DOCOPS-168",
+   "summary": "EBX Javadoc resources repos",
+   "type": "Sub-task",
+   "parent": "DOCOPS-166",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "ebx",
+    "html-to-md",
+    "retro"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-169",
+   "summary": "EBX UAT and QA",
+   "type": "Sub-task",
+   "parent": "DOCOPS-166",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "ebx",
+    "html-to-md",
+    "retro"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 1.0
+  },
+  {
+   "key": "DOCOPS-170",
+   "summary": "DataSynapse docs migration to AEM",
+   "type": "Epic",
+   "parent": null,
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "datasynapse",
+    "html-to-md",
+    "retro"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": null
+  },
+  {
+   "key": "DOCOPS-171",
+   "summary": "html-to-md: build gen-1 converter",
+   "type": "Story",
+   "parent": "DOCOPS-170",
+   "status": "Resolved",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "datasynapse",
+    "html-to-md",
+    "retro"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": null
+  },
+  {
+   "key": "DOCOPS-172",
+   "summary": "html-to-md manifest builder",
+   "type": "Sub-task",
+   "parent": "DOCOPS-171",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "datasynapse",
+    "html-to-md",
+    "retro"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-173",
+   "summary": "html-to-md ZIP download",
+   "type": "Sub-task",
+   "parent": "DOCOPS-171",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "datasynapse",
+    "html-to-md",
+    "retro"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-174",
+   "summary": "html-to-md conversion engine",
+   "type": "Sub-task",
+   "parent": "DOCOPS-171",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "datasynapse",
+    "html-to-md",
+    "retro"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 2.0
+  },
+  {
+   "key": "DOCOPS-175",
+   "summary": "html-to-md QA scripts (compare_html_md, compare_toc, qa_check)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-171",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "datasynapse",
+    "html-to-md",
+    "retro"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-176",
+   "summary": "DataSynapse: convert GridServer 7.1.1, 7.2.0 and LogViewer 1.0.0",
+   "type": "Story",
+   "parent": "DOCOPS-170",
+   "status": "Resolved",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "datasynapse",
+    "html-to-md",
+    "retro"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": null
+  },
+  {
+   "key": "DOCOPS-177",
+   "summary": "Convert and post-process GridServer and LogViewer",
+   "type": "Sub-task",
+   "parent": "DOCOPS-176",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "datasynapse",
+    "html-to-md",
+    "retro"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 1.0
+  },
+  {
+   "key": "DOCOPS-178",
+   "summary": "DataSynapse: convert HPC Cloud Adapter 2.0-2.2",
+   "type": "Story",
+   "parent": "DOCOPS-170",
+   "status": "Resolved",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "datasynapse",
+    "html-to-md",
+    "retro"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": null
+  },
+  {
+   "key": "DOCOPS-179",
+   "summary": "Convert HPC Cloud Adapter",
+   "type": "Sub-task",
+   "parent": "DOCOPS-178",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "datasynapse",
+    "html-to-md",
+    "retro"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-180",
+   "summary": "DataSynapse: publish to AEM",
+   "type": "Story",
+   "parent": "DOCOPS-170",
+   "status": "Resolved",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "datasynapse",
+    "html-to-md",
+    "retro"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": null
+  },
+  {
+   "key": "DOCOPS-181",
+   "summary": "DataSynapse publishing repos and pipelines",
+   "type": "Sub-task",
+   "parent": "DOCOPS-180",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "datasynapse",
+    "html-to-md",
+    "retro"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 1.0
+  },
+  {
+   "key": "DOCOPS-182",
+   "summary": "DataSynapse ditamap activation and PDF-split fixes",
+   "type": "Sub-task",
+   "parent": "DOCOPS-180",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "datasynapse",
+    "html-to-md",
+    "retro"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-183",
+   "summary": "DataSynapse UAT",
+   "type": "Sub-task",
+   "parent": "DOCOPS-180",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "datasynapse",
+    "html-to-md",
+    "retro"
+   ],
+   "created": "2026-10-07",
+   "resolved": "2026-10-07",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 1.0
+  },
+  {
+   "key": "DOCOPS-184",
+   "summary": "Long-path probe: refuse to run when long paths are off (Phase 46)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-87",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift"
+   ],
+   "created": "2026-10-08",
+   "resolved": "2026-10-08",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-185",
+   "summary": "Re-path links around images (Phase 44)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-91",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift"
+   ],
+   "created": "2026-10-08",
+   "resolved": "2026-10-08",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-186",
+   "summary": "Treat function catalogs as API references (Phase 45)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-91",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift"
+   ],
+   "created": "2026-10-08",
+   "resolved": "2026-10-08",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-187",
+   "summary": "Service Grid merges: 3 self-check failures and 126 lost images (Phase 47)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-114",
+   "status": "In Progress",
+   "category": "indeterminate",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "reframe"
+   ],
+   "created": "2026-10-08",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-188",
+   "summary": "Re-run 50 long-path versions and 8 blocked DITA versions",
+   "type": "Sub-task",
+   "parent": "DOCOPS-7",
+   "status": "Backlog",
+   "category": "new",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "tibco"
+   ],
+   "created": "2026-10-08",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-192",
+   "summary": "Convert Flare source topics shipped in the output (Phase 41)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-11",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift"
+   ],
+   "created": "2026-10-08",
+   "resolved": "2026-10-08",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-193",
+   "summary": "End-of-support exclusions from support's retirement report (Phase 3.7)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-83",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift",
+    "retro"
+   ],
+   "created": "2026-10-08",
+   "resolved": "2026-10-08",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-194",
+   "summary": "Family-review columns, version status columns and PDF-ready status (Phases 37-39)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-83",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift"
+   ],
+   "created": "2026-10-08",
+   "resolved": "2026-10-08",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-195",
+   "summary": "Download each version under its published package name from the sitemap (Phase 40)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-87",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift"
+   ],
+   "created": "2026-10-08",
+   "resolved": "2026-10-08",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-196",
+   "summary": "Repair cross-reference anchors that never resolved, about 50,000 links (Phase 30)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-91",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift"
+   ],
+   "created": "2026-10-08",
+   "resolved": "2026-10-08",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-197",
+   "summary": "Stakeholder conversion-status page (reports/conversion-status.html)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-96",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift"
+   ],
+   "created": "2026-10-08",
+   "resolved": "2026-10-08",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-198",
+   "summary": "Merge DITA as well as Flare, with automatic layout pins (Phase 42)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-12",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "reframe"
+   ],
+   "created": "2026-10-08",
+   "resolved": "2026-10-08",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-199",
+   "summary": "Resolve 2 unrecognised-format TIBCO versions and 1 failed sync",
+   "type": "Sub-task",
+   "parent": "DOCOPS-7",
+   "status": "Backlog",
+   "category": "new",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "tibco"
+   ],
+   "created": "2026-10-08",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-200",
+   "summary": "Re-sync 25 out-of-date ibi versions to ibi-docs-aem",
+   "type": "Sub-task",
+   "parent": "DOCOPS-144",
+   "status": "Backlog",
+   "category": "new",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "ibi"
+   ],
+   "created": "2026-10-08",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-206",
+   "summary": "Retire 64 Flogo connectors; VS Code extension to the flogo family (Phase 48)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-6",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "tibco"
+   ],
+   "created": "2026-10-08",
+   "resolved": "2026-10-08",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-207",
+   "summary": "Regroup ibi families (di-ism, legacy, focus) and trim scope",
+   "type": "Sub-task",
+   "parent": "DOCOPS-140",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "ibi"
+   ],
+   "created": "2026-10-08",
+   "resolved": "2026-10-08",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-208",
+   "summary": "Reconcile DOCOPS with the repo and keep a Jira handoff (docs/jira.md)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-101",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift"
+   ],
+   "created": "2026-10-08",
+   "resolved": "2026-10-08",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-215",
+   "summary": "Catalog refresh and 2026-10-09 end-of-support report",
+   "type": "Sub-task",
+   "parent": "DOCOPS-6",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "tibco"
+   ],
+   "created": "2026-10-09",
+   "resolved": "2026-10-09",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-217",
+   "summary": "Shorten images too long to publish (Phase 49)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-96",
+   "status": "In Progress",
+   "category": "indeterminate",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift"
+   ],
+   "created": "2026-10-09",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-218",
+   "summary": "Rename each page of a topic used in two guides (Phase 50)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-114",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "reframe"
+   ],
+   "created": "2026-10-09",
+   "resolved": "2026-10-09",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-219",
+   "summary": "TIBCO BusinessConnect family: download to publish (44 versions)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-7",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "tibco"
+   ],
+   "created": "2026-10-09",
+   "resolved": "2026-10-09",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-220",
+   "summary": "Follow-ups from BusinessConnect run warnings",
+   "type": "Sub-task",
+   "parent": "DOCOPS-101",
+   "status": "Backlog",
+   "category": "new",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift"
+   ],
+   "created": "2026-10-09",
+   "resolved": "",
+   "due": "2026-10-30",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-222",
+   "summary": "TIBCO Cloud family: download to publish (5 versions)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-7",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "tibco"
+   ],
+   "created": "2026-10-12",
+   "resolved": "2026-10-12",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-223",
+   "summary": "TIBCO EMS, FTL and Messaging families: download to publish (44 versions)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-7",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "tibco"
+   ],
+   "created": "2026-10-12",
+   "resolved": "2026-10-12",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-228",
+   "summary": "TIBCO Foresight family: download to publish (39 versions)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-7",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "tibco"
+   ],
+   "created": "2026-10-13",
+   "resolved": "2026-10-13",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-229",
+   "summary": "Phase 51: merged Flare help systems; publish 6 held Foresight versions",
+   "type": "Sub-task",
+   "parent": "DOCOPS-7",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift",
+    "tibco"
+   ],
+   "created": "2026-10-13",
+   "resolved": "2026-10-13",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 1.0
+  },
+  {
+   "key": "DOCOPS-231",
+   "summary": "TIBCO Flogo, BusinessWorks, Fulfillment and MFT families: download to publish (43 versions)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-7",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "tibco"
+   ],
+   "created": "2026-10-14",
+   "resolved": "2026-10-14",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-232",
+   "summary": "Phase 52: letter case the source gets wrong (image links, ZIP name clashes)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-7",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift",
+    "tibco"
+   ],
+   "created": "2026-10-14",
+   "resolved": "2026-10-14",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-238",
+   "summary": "TIBCO Data Management family: download to publish (11 versions)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-7",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "tibco"
+   ],
+   "created": "2026-10-15",
+   "resolved": "2026-10-15",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-239",
+   "summary": "Phase 54: a release-notes folder that copies the main guides",
+   "type": "Sub-task",
+   "parent": "DOCOPS-7",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift",
+    "tibco"
+   ],
+   "created": "2026-10-15",
+   "resolved": "2026-10-15",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-240",
+   "summary": "TIBCO FTL, ActiveSpaces, EMS and Messaging families: re-run on current tool (35 versions)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-7",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "tibco"
+   ],
+   "created": "2026-10-19",
+   "resolved": "2026-10-19",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-241",
+   "summary": "TIBCO Hawk family: download to publish (7 versions)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-7",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "tibco"
+   ],
+   "created": "2026-10-19",
+   "resolved": "2026-10-19",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-242",
+   "summary": "TIBCO Mainframe family: download to publish (11 versions)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-7",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "tibco"
+   ],
+   "created": "2026-10-19",
+   "resolved": "2026-10-19",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-243",
+   "summary": "TIBCO iProcess family: download to publish (18 versions)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-7",
+   "status": "Done",
+   "category": "done",
+   "components": [],
+   "labels": [
+    "docushift",
+    "tibco"
+   ],
+   "created": "2026-10-19",
+   "resolved": "2026-10-19",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-244",
+   "summary": "TIBCO Platform family: download to publish (7 versions)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-7",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "tibco"
+   ],
+   "created": "2026-10-20",
+   "resolved": "2026-10-20",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-245",
+   "summary": "TIBCO General family: download to publish (13 versions)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-7",
+   "status": "In Progress",
+   "category": "indeterminate",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "tibco"
+   ],
+   "created": "2026-10-21",
+   "resolved": "",
+   "due": "2026-10-24",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-246",
+   "summary": "4 hand-obtained TIBCO packages published (Flogo, BusinessWorks, Fulfillment, BPM)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-7",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "tibco"
+   ],
+   "created": "2026-10-21",
+   "resolved": "2026-10-21",
+   "due": "2026-10-24",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-247",
+   "summary": "Last 6 download-failed versions published from hand-obtained packages",
+   "type": "Sub-task",
+   "parent": "DOCOPS-7",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "ibi",
+    "tibco"
+   ],
+   "created": "2026-10-21",
+   "resolved": "2026-10-21",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-248",
+   "summary": "TIBCO bw-plugin: AWS Common Services and 3 long-path re-runs published",
+   "type": "Sub-task",
+   "parent": "DOCOPS-7",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "tibco"
+   ],
+   "created": "2026-10-22",
+   "resolved": "2026-10-22",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-249",
+   "summary": "Verify converted ibi docs against stg-docs.ibi.com (Phase 55)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-96",
+   "status": "In Progress",
+   "category": "indeterminate",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift",
+    "ibi"
+   ],
+   "created": "2026-10-22",
+   "resolved": "",
+   "due": "2026-10-30",
+   "assignee": "Mayur Agrawal",
+   "sp": 1.0
+  },
+  {
+   "key": "DOCOPS-250",
+   "summary": "Notes show their label on AEM; fix-callouts repairs published docs (Phase 56)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-96",
+   "status": "In Progress",
+   "category": "indeterminate",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift"
+   ],
+   "created": "2026-10-22",
+   "resolved": "",
+   "due": "2026-10-27",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-251",
+   "summary": "TIBCO bpm: Business Studio 5.x help and ActiveMatrix BPM 4.2.0 published",
+   "type": "Sub-task",
+   "parent": "DOCOPS-7",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "tibco"
+   ],
+   "created": "2026-10-23",
+   "resolved": "2026-10-23",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-253",
+   "summary": "Translated help published to the loc- tree (Phase 57)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-11",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift"
+   ],
+   "created": "2026-10-23",
+   "resolved": "2026-10-23",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 1.0
+  },
+  {
+   "key": "DOCOPS-254",
+   "summary": "Spotfire Data Virtualization: convert 3 versions, error report for the team",
+   "type": "Sub-task",
+   "parent": "DOCOPS-7",
+   "status": "In Progress",
+   "category": "indeterminate",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "tibco"
+   ],
+   "created": "2026-10-23",
+   "resolved": "",
+   "due": "2026-10-28",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-255",
+   "summary": "AEM drops image alt text containing /, : or ⌘ (stg-docs.ibi.com)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-149",
+   "status": "In Progress",
+   "category": "indeterminate",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "ibi"
+   ],
+   "created": "2026-10-23",
+   "resolved": "",
+   "due": "2026-10-28",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-256",
+   "summary": "Keep, triage and track verify results per version (Phase 58)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-96",
+   "status": "Backlog",
+   "category": "new",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift"
+   ],
+   "created": "2026-10-23",
+   "resolved": "",
+   "due": "2026-10-30",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-257",
+   "summary": "Verify readiness for TIBCO: stg-docs.tibco.com, all engines' TOCs, pilots (Phase 58)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-96",
+   "status": "Backlog",
+   "category": "new",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift",
+    "tibco"
+   ],
+   "created": "2026-10-23",
+   "resolved": "",
+   "due": "2026-11-05",
+   "assignee": "Mayur Agrawal",
+   "sp": 1.0
+  },
+  {
+   "key": "DOCOPS-258",
+   "summary": "Verify published ibi docs: Container Editions (32 versions)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-149",
+   "status": "In Progress",
+   "category": "indeterminate",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "ibi"
+   ],
+   "created": "2026-10-23",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-259",
+   "summary": "Verify published ibi docs: Data Intelligence & iWay Service Manager (22 versions)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-149",
+   "status": "Backlog",
+   "category": "new",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "ibi"
+   ],
+   "created": "2026-10-23",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-260",
+   "summary": "Verify published ibi docs: FOCUS (19 versions)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-149",
+   "status": "Backlog",
+   "category": "new",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "ibi"
+   ],
+   "created": "2026-10-23",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-261",
+   "summary": "Verify published ibi docs: Legacy (14 versions)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-149",
+   "status": "Backlog",
+   "category": "new",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "ibi"
+   ],
+   "created": "2026-10-23",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-262",
+   "summary": "Verify published ibi docs: WebFOCUS (89 versions)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-149",
+   "status": "Backlog",
+   "category": "new",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "ibi"
+   ],
+   "created": "2026-10-23",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-263",
+   "summary": "Verify published ibi docs: WebFOCUS Reporting Server (22 versions)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-149",
+   "status": "Backlog",
+   "category": "new",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "ibi"
+   ],
+   "created": "2026-10-23",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-264",
+   "summary": "Note labels fixed in published ibi docs: WebFOCUS (R001)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-144",
+   "status": "In Progress",
+   "category": "indeterminate",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "ibi"
+   ],
+   "created": "2026-10-23",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-265",
+   "summary": "Note labels fixed in published ibi docs: WebFOCUS Reporting Server (R001)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-144",
+   "status": "In Progress",
+   "category": "indeterminate",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "ibi"
+   ],
+   "created": "2026-10-23",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-266",
+   "summary": "Note labels fixed in published ibi docs: FOCUS (R001)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-144",
+   "status": "In Progress",
+   "category": "indeterminate",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "ibi"
+   ],
+   "created": "2026-10-23",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-267",
+   "summary": "Note labels fixed in published ibi docs: Container Editions (R001)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-144",
+   "status": "Backlog",
+   "category": "new",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "ibi"
+   ],
+   "created": "2026-10-23",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-268",
+   "summary": "Note labels fixed in published ibi docs: Data Intelligence & iWay Service Manager (R001)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-144",
+   "status": "In Progress",
+   "category": "indeterminate",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "ibi"
+   ],
+   "created": "2026-10-23",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-269",
+   "summary": "Note labels fixed in published ibi docs: Legacy (R001)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-144",
+   "status": "Backlog",
+   "category": "new",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "ibi"
+   ],
+   "created": "2026-10-23",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-270",
+   "summary": "Verify ibi redirect lists (301.yml)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-149",
+   "status": "In Progress",
+   "category": "indeterminate",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "ibi"
+   ],
+   "created": "2026-10-23",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-271",
+   "summary": "Verify redirects: every 301 lands where the old page was (Phase 60)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-96",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift"
+   ],
+   "created": "2026-10-23",
+   "resolved": "2026-10-24",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 1.0
+  },
+  {
+   "key": "DOCOPS-272",
+   "summary": "Redirect map for CSH (Help button) URLs (Phase 61)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-96",
+   "status": "Backlog",
+   "category": "new",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift"
+   ],
+   "created": "2026-10-23",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 1.0
+  },
+  {
+   "key": "DOCOPS-273",
+   "summary": "Verify CSH: every help identifier opens the same topic (Phase 62)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-96",
+   "status": "Backlog",
+   "category": "new",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift"
+   ],
+   "created": "2026-10-23",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 1.0
+  },
+  {
+   "key": "DOCOPS-274",
+   "summary": "TOC-shaped folders for versions that are not merged",
+   "type": "Sub-task",
+   "parent": "DOCOPS-11",
+   "status": "In Progress",
+   "category": "indeterminate",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift"
+   ],
+   "created": "2026-10-23",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 1.0
+  },
+  {
+   "key": "DOCOPS-275",
+   "summary": "One language per check, and no archives published (Phase 64)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-11",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift"
+   ],
+   "created": "2026-10-25",
+   "resolved": "2026-10-26",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 1.0
+  },
+  {
+   "key": "DOCOPS-279",
+   "summary": "TIBCO Go URL list for redirects on the new site",
+   "type": "Sub-task",
+   "parent": "DOCOPS-9",
+   "status": "In Progress",
+   "category": "indeterminate",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [],
+   "created": "2026-10-26",
+   "resolved": "",
+   "due": "",
+   "assignee": "",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-280",
+   "summary": "Migration overview page with drill-down and Jira work analytics",
+   "type": "Sub-task",
+   "parent": "DOCOPS-96",
+   "status": "In Progress",
+   "category": "indeterminate",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift"
+   ],
+   "created": "2026-10-26",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  }
+ ]
+}

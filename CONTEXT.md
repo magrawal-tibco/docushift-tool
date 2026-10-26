@@ -174,7 +174,7 @@ docushift-tool/
 │       ├── review-queue.csv # the pages a writer must decide about — the only file meant to be edited
 │       ├── csh.yml         # carried through where the version had one
 │       └── <doc-set>/…     # the merged pages, assets copied through untouched
-├── reports/                # Generated analyses kept for reference (versions-analytics.html; conversion-status.html, rebuilt by scratch/build_conversion_status.py)
+├── reports/                # Generated analyses kept for reference (versions-analytics.html; conversion-status.html — where the migration stands, drill-down to each version, Jira work done — rebuilt by scratch/build_conversion_status.py from jira/docops-snapshot.json, which scratch/fetch_docops.py writes)
 └── scratch/                # Throwaway investigation scripts; nothing here is imported
 ```
 

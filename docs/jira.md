@@ -47,6 +47,9 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 **Log** (newest first, one line per session):
 
+- 2026-10-26 — DOCOPS-280 created under DOCOPS-96 (0.5 SP, AI & Content Intelligence) and closed the same
+  day: Phase 65 overview page with drill-down and Jira work analytics; note with counts.
+
 - 2026-10-26 — Container Editions `phase63-pilot-wfce-938` merged to `wip` by the user (PR #1, 2c31e9f). All five ibi
   families now on `wip`; staging verify not yet run.
 

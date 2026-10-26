@@ -2112,6 +2112,110 @@ Pushed `phase63-webfocus` b9ba879c, `phase63-wf-reporting-server` a4da3240.
 
 ---
 
+### Phase 65: One Page Says Where the Migration Stands, Down to the Version — **Done 2026-10-26; DOCOPS-280**
+
+**Why.** The user asked for one overall view of the migration with drill-down to the
+details. `reports/conversion-status.html` (DOCOPS-197) was built before Phases 55–59
+and its stages end at "synced". It cannot show `verify` or `repair`, and its five
+summary sections each slice the same versions a different way. Measured on
+`config/versions.csv`, 2026-10-26:
+
+- **5,192 versions catalogued**: 1,284 out of scope, 1,505 retired, 1,664 not
+  selected, **739 in the migration**. Of those 739: 4 not started, 1 format unknown,
+  52 converted, 510 merged, 172 PDF-only.
+- **Placed in the repo trees:** 724 of the 739; 7 more `sync-failed`. **Verified:**
+  54 clean, 38 `lost`, the rest not yet verified. 431 have repairs pending (R001).
+- **81 placed versions are no longer in the migration**: 77 `not-selected` and 4
+  `retired` that `sync` placed before they were deselected. No page shows them today.
+
+**The page — one stage ladder, read the same way at every level.** A version is at the
+furthest step it has reached: *not started → downloaded → built* (converted, merged or
+PDF-only) *→ placed* (synced) *→ verified clean*. Separately from the ladder, a version
+can be marked *needs attention* for any of: blocked (download, format or failure),
+`sync-failed`, `lost`, repairs pending, or placed but no longer selected. Each mark is
+shown with an icon and a label, never by colour alone.
+
+1. **Headline row**: four number tiles (in the migration, placed, verified clean,
+   needs attention), plus one line of text giving the catalogue context (out of scope /
+   retired / not selected). These are numbers, not a chart.
+2. **Where it stands**: one horizontal bar across the 739, split by ladder step. One
+   hue running light to dark, with a legend and labels on the segments. Clicking a
+   segment filters the table below.
+3. **Drill-down table**: business unit → family → product → version, each level
+   expanding in place. A row shows its version count, a small copy of the same bar, and
+   its needs-attention count. A version row shows each step with its date, the engine,
+   the verify result, the repairs pending and the reason it is blocked. Filters sit in
+   one row above the table: business unit, family, step, needs attention only, and a
+   search box. Every bar segment has a hover tooltip.
+4. **Kept from the old page, below the table:** merging topics into pages, the quality
+   check, agreement with the docsite team's list, and decisions needed. **Dropped:** the
+   four sections the table now covers (selected versions, the sheet's status, family
+   progress, what has been converted).
+5. **Work done, from Jira** (added by the user 2026-10-26).
+   The data is DOCOPS sub-tasks with story points (1 SP = 8 h). It covers only the
+   descendants of this work's epics (DOCOPS-5, 74, 75, 139, 153, 170), never another
+   team's issues. Shown as:
+   - number tiles: SP done, SP in progress and SP not started, plus sub-tasks done of
+     total;
+   - SP by story, as one horizontal bar per story split done / in progress / not
+     started, sorted by total. Click a story to list its sub-tasks (key linking to
+     Jira, status, SP, resolved date);
+   - SP finished per week, as columns. **Caveat:** most sub-tasks were logged on
+     2026-10-07 for work already done, so their resolved date is the logging date. Work
+     labelled `retro` therefore shows as one "before October" column instead of a
+     spike on 7 October.
+
+   The page builder has no Jira access. `scratch/fetch_docops.py` writes
+   `reports/jira/docops-snapshot.json` (one paged search, using the API token kept
+   beside `apply_docops_plan.py`, never copied into this repo). The builder reads the
+   snapshot and the page shows its date, so a rebuild works offline.
+
+**Steps:**
+
+1. `build_conversion_status.py`: one function places each version on the ladder and
+   collects its attention reasons from `_status`, `_sync_status`, `_verify_status`
+   and `_repairs_pending`. An unknown value stops the build and names the value, as it
+   does today. Rows are packed for size, as now.
+2. Template: the four sections above. Light and dark themes. The colours are checked
+   with the dataviz validator for both themes, and the page is rendered and screenshotted
+   at both widths before it counts as done.
+3. Rebuild `reports/conversion-status.html`. Check its totals against a direct count of
+   `versions.csv` (739, 724, 54, and the attention count).
+
+**Not in this phase:** GitHub push, AEM publish and redirect go-live as steps (the tool
+holds no record of them; the user chose verify as the end point); a `docushift
+report` command (DOCOPS-197's open item).
+
+**Docs:** `CONTEXT.md` §2's `reports/` line (what the page shows). No CLI change.
+
+*Exit: the page opens on the headline and the bar, its numbers match versions.csv, and
+any version can be reached in three clicks from its business unit.*
+
+#### Built 2026-10-26
+
+- **Steps as built:** `place()` in the builder; `issues` and `stale` verify results
+  (Phase 58) are handled too: `issues` is an attention reason, `stale` stays "placed".
+  `explained` counts as checked. A merge that failed keeps its "built" step.
+- **Measured on the rebuild:** 54 checked, 240 placed, 430 fixes pending, 10 built, 1
+  downloaded, 4 not started (739). 127 need attention: 81 deselected, 38 lost, 7
+  sync-failed, 1 format unknown.
+- **Merge chart** counts only versions with fewer pages than topics. The families laid
+  out unmerged (Phase 63) have one page per topic and would read as "−0%".
+- **Dropped from the old page:** the funnel, sheet status, family table, converted and
+  blocked sections (the drill-down covers them), and two hand-written decisions (family
+  review, old web addresses). Every decision and next step is now worked out from the data.
+- **Only this migration's issues are kept** (user, 2026-10-26). `fetch_docops.py` keeps the
+  six work epics and what sits under them before writing: 192 of DOCOPS's 276 issues. No
+  other team's issue reaches the snapshot or the page.
+- **Jira:** the user ran `fetch_docops.py` (it reads the API token), 276 issues. 162
+  sub-tasks are under this work's epics. 3 more are excluded: TIBCO release work
+  (DOCOPS-202) and Citrix (DOCOPS-65). 52.75 SP done (102 sub-tasks; with the 3 excluded
+  this matches Jira's 105 done), 10 in progress, 26.25 not started. `retro` work: 29.25 SP.
+- **Weeks are bucketed in UTC.** Local dates in IST put every week on a Sunday and
+  doubled the empty weeks.
+
+---
+
 ## Carried-Forward Open Items
 
 Technical items a finished phase recorded as *open, not fixed*. Product-level issues
