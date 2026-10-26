@@ -2093,6 +2093,11 @@ bottleneck), and the R001 re-run (not needed; see the rollout note above).
   every known drop read as lost. `prune_findings` now keeps each version's latest rows
   of `READ_BACK_CODES` (the codes `verify` reads, one constant for both), then
   `VACUUM`s.
+- **Run 2026-10-26:** `report --prune --keep 50` took 45 min: the keep rule ran a
+  per-row "latest run" subquery with no index. Pruned 327,801 rows from 712 runs,
+  kept the 945 drop rows (350 versions); `state.db` 886 → 789 MB, most rows being in
+  the newest 50 runs. Rewritten as one grouped query: 12 s on a copy, where
+  `--keep 20` gave 185 MB.
 - Tests: roots selection, the two-root package, `--locale` selection, the 9.3.5 tie
   and a single-language list, the archive skip, prune keeping drops and shrinking.
 

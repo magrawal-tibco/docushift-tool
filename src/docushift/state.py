@@ -1026,15 +1026,26 @@ class StateStore:
             return 0, 0
         placeholders = ",".join("?" * len(stale))
         codes = ",".join("?" * len(READ_BACK_CODES))
+        # The rows to keep, found in one grouped pass: a per-row "latest run"
+        # subquery has no index to use and took 45 minutes on 1.7M rows.
         with self._tx() as conn:
+            kept = [row[0] for row in conn.execute(
+                f"SELECT f.id FROM findings f JOIN (SELECT code, slug, version, MAX(run_id) AS run_id "
+                f"FROM findings WHERE code IN ({codes}) GROUP BY code, slug, version) latest "
+                f"ON f.code = latest.code AND f.slug = latest.slug AND f.version = latest.version "
+                f"AND f.run_id = latest.run_id",
+                READ_BACK_CODES,
+            )]
+            conn.execute("CREATE TEMP TABLE IF NOT EXISTS prune_keep (id INTEGER PRIMARY KEY)")
+            conn.execute("DELETE FROM prune_keep")
+            conn.executemany("INSERT INTO prune_keep (id) VALUES (?)", ((i,) for i in kept))
             cursor = conn.execute(
-                f"DELETE FROM findings WHERE run_id IN ({placeholders}) AND NOT ("
-                f"code IN ({codes}) AND run_id = (SELECT MAX(f.run_id) FROM findings f "
-                f"WHERE f.code = findings.code AND f.slug = findings.slug "
-                f"AND f.version = findings.version))",
-                [*stale, *READ_BACK_CODES],
+                f"DELETE FROM findings WHERE run_id IN ({placeholders}) "
+                f"AND id NOT IN (SELECT id FROM prune_keep)",
+                stale,
             )
             deleted = int(cursor.rowcount or 0)
+            conn.execute("DROP TABLE prune_keep")
         with self._lock:
             self.connect().execute("VACUUM")
         return len(stale), deleted
