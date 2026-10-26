@@ -37,7 +37,7 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | Staging shows one Japanese and one German WebFOCUS page correctly | DOCOPS-148: dated note → Done |
 | Data Virtualization team answers the error report and the 3 versions are published | DOCOPS-254: dated note → Done |
 | Branch `phase63-pilot-wfce-938` (Container Editions, new layout + R001) reaches staging | `verify` with staging: DOCOPS-274 note; DOCOPS-258 → Done if clean; DOCOPS-267 → Done if labels show |
-| Branches `phase63-webfocus`, `-wf-reporting-server`, `-focus`, `-di-ism` merged to `wip` and on staging | `verify` with staging per family: notes on DOCOPS-259/260/262/263; R001 sub-tasks DOCOPS-264/265/266/268 → Done if labels show |
+| Staging has rebuilt from `wip` (the four ibi `phase63-*` branches merged 2026-10-26) | `verify` with staging per family: notes on DOCOPS-259/260/262/263; R001 sub-tasks DOCOPS-264/265/266/268 → Done if labels show |
 | Phase 63 rolled out and every family re-synced | DOCOPS-274 → Done |
 | Translated WebFOCUS layout phase is opened | New sub-task under DOCOPS-11 (deferred from Phase 63) |
 | A redirect source is decided for each Go URL with several destinations, and the Go URL redirects are built | DOCOPS-279: dated note → Done |
@@ -46,6 +46,8 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 **Left alone on purpose:** DOCOPS-8 is a Task where its siblings are Stories.
 
 **Log** (newest first, one line per session):
+
+- 2026-10-26 — Four ibi phase63 branches fast-forwarded to `wip`; DOCOPS-274 note. Staging verify not yet run.
 
 - 2026-10-26 — DOCOPS-275 → Done (Phase 64 runs pushed); results noted on DOCOPS-262 and 263.
 
