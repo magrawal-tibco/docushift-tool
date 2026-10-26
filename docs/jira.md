@@ -1,6 +1,6 @@
 # Jira Tracking — What Is Logged in DOCOPS
 
-> **Last reconciled:** 2026-10-25 (evening), against Jira and `config/versions.csv`.
+> **Last reconciled:** 2026-10-26, against Jira and `config/versions.csv`.
 > Conventions (site, cloud ID, story points, transitions, who owns what) live in
 > `C:\github\confluence-mcp\reports\docushift-claude-atlassian-context.md`; this file
 > does not repeat them. It answers one question: **is this piece of work in Jira, and where?**
@@ -35,7 +35,7 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | Phase 58 built (records, triage, selectors) and the first ibi wave summarised | DOCOPS-256 → In Progress while building, then Done |
 | stg-docs.tibco.com has real content | DOCOPS-257: run the TIBCO staging probe and staging pilots |
 | Staging shows one Japanese and one German WebFOCUS page correctly | DOCOPS-148: dated note → Done |
-| Data Virtualization team answers the error report and the 3 versions are published | DOCOPS-254: dated note → Done |
+| Data Virtualization team answers the error report and the corrections are republished (published as-is 2026-10-26) | DOCOPS-254: dated note → Done |
 | Branch `phase63-pilot-wfce-938` (Container Editions, new layout + R001) reaches staging | `verify` with staging: DOCOPS-274 note; DOCOPS-258 → Done if clean; DOCOPS-267 → Done if labels show |
 | Staging has rebuilt from `wip` (the four ibi `phase63-*` branches merged 2026-10-26) | `verify` with staging per family: notes on DOCOPS-259/260/262/263; R001 sub-tasks DOCOPS-264/265/266/268 → Done if labels show |
 | Phase 63 rolled out and every family re-synced | DOCOPS-274 → Done |
@@ -46,6 +46,9 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 **Left alone on purpose:** DOCOPS-8 is a Task where its siblings are Stories.
 
 **Log** (newest first, one line per session):
+
+- 2026-10-26 — DOCOPS-254 note: Data Virtualization 8.9.0/8.8.1/8.8.0 published in the TOC layout with the
+  source errors as-is, pushed (1ac1167a); stays In Progress for the team's answer. Verify's "lost" is a false alarm.
 
 - 2026-10-26 — DOCOPS-280 created under DOCOPS-96 (0.5 SP, AI & Content Intelligence) and closed the same
   day: Phase 65 overview page with drill-down and Jira work analytics; note with counts.

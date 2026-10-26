@@ -611,6 +611,42 @@ cleared that way, so the tool needs to remove withdrawn versions itself.
 
 ---
 
+## Data Virtualization
+
+### 102 errors per version in the source, waiting on the team
+
+- **Status:** Waiting
+- **Owner:** Data Virtualization docs team
+- **Raised:** 23 Oct 2026; published with them 26 Oct 2026
+- **Blocks publishing:** no
+
+8.9.0, 8.8.1 and 8.8.0 were published on 26 Oct 2026 with the source's own errors as
+they are, by the user's decision: 92 links pointing at the wrong page, 6 images missing
+from the package, 4 web addresses without `https://`. Readers see the links' text with
+no link and the pages without the images. The report and spreadsheet of suggested fixes
+went to the team (`reports/data-virtualization-conversion-errors.md`). Once they confirm,
+the corrections are applied and the versions republished. The 4 web addresses need no
+one's answer.
+
+### The check reads "lost" when nothing is lost
+
+- **Status:** Open
+- **Owner:** unassigned (tool)
+- **Raised:** 26 Oct 2026
+- **Blocks publishing:** no, but every Data Virtualization version reads "lost" on the status page
+
+The check that compares published pages with the old site reported about 3,500 lost
+contents entries per version. Looked at one by one, nothing was lost: the check
+compares old entries that point at a heading inside a page with new entries that point
+at the page; it matches folder names only in the source's exact capital letters; and it
+reads the escaped form of text like `<install directory>` as different text. The check
+needs fixing before its verdict means anything for this product, and the same causes
+would hit any other product with the same source habits.
+
+One real slip found along the way: on the XML "Text Escaping" page, three examples
+whose point is the escaped form (`&amp;`, `&gt;`, `&quot;`) display as the plain
+characters, in every version.
+
 ## WebFOCUS, Data Virtualization (translated documentation)
 
 ### Translated pages that are on the live site but not in any package

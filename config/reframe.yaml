@@ -93,9 +93,12 @@ families:
   streaming:
     publish: false
     merge: false
-  # Spotfire's Data Virtualization, published unmerged (Phase 63).
+  # Spotfire's Data Virtualization, published unmerged (Phase 63). Laid out as its
+  # TOC from its first publish, 2026-10-26 (DOCOPS-254).
   data-virtualization:
     merge: false
+    publish: true
+    toc_folders: true
   # Phase 63 rollout (DOCOPS-274), 2026-10-24: the first family laid out as its TOC,
   # after the WFCE 9.3.7/9.3.8 pilot. `sync` publishes the reframed tree and refuses
   # a version without one.

@@ -3,6 +3,7 @@
 **Product:** TIBCO® Data Virtualization (moved to the Spotfire business unit, Oct 2026)
 **Versions:** 8.9.0, 8.8.1, 8.8.0, the three versions still in support
 **Converted:** 2026-10-21/22, from the "Download All Docs" packages on docs.tibco.com
+**Published:** 2026-10-26 to `en-us-spotfire-data-virtualization-userdocs`, with these errors as they are; corrections follow once confirmed
 **Attachment:** `data-virtualization-broken-references.csv`, every broken reference with the page it is on and the page it most likely meant
 
 ## Summary
@@ -21,9 +22,10 @@ fixes are the same each time.
 | A web address written without `https://` | 4 (3 in 8.9.0) | Installation guide (Docker pages) | None. It can be corrected to `https://edelivery.tibco.com` |
 | A stylesheet that refers to a missing file (`Spotfire.css`) | 1 (8.9.0 only) | Shared styles of the main guide set | None. It affects appearance only and the new site uses its own styling |
 
-Readers see these as links that go nowhere or images that do not show. Because the
-problems are in the source, the same pages are very likely broken on the current
-docs.tibco.com too.
+On docs.tibco.com these are links that go nowhere and images that do not show. On the
+new site the conversion keeps each broken link's text but drops the link, and leaves the
+missing images out, so readers see plain text where a link should be. Nothing is lost
+that is not already broken today.
 
 ## 1. Links with the page name and section glued together (90 per version)
 
@@ -51,7 +53,7 @@ Where they are:
 **Ask:** confirm that the "Likely intended page" column in the CSV is right. Where
 two pages are suggested, the package holds two near-identical copies of that page
 under different numbers, so please say which one is current. Once confirmed, the
-links can be repointed during migration and need not stay broken on the new site.
+links are repointed and the three versions republished.
 
 ## 2. Links whose target is just a number (2 per version)
 
@@ -76,15 +78,15 @@ These six pages show an image that was never included in the documentation packa
 None of the six exists anywhere in the package under any folder.
 
 **Ask:** if the source project still has these images, send them and they will be
-added. Otherwise the pages publish without them.
+added. Until then the pages are published without them.
 
 ## 4. Web addresses without `https://` (4 per version; 3 in 8.9.0)
 
 On the Docker installation pages (*Building TDV Docker Images*, *Launching TDV
 Containers*, *Launching TDV Containers (Single Node) Using Docker Compose*), the link
 to the download site is written as `edelivery.tibco.com`. Without `https://` a
-browser treats it as a file next to the page, so the link fails. No decision is
-needed; the fix is mechanical.
+browser treats it as a file next to the page, so the link fails; on the new site it
+shows as plain text. No decision is needed; the fix is mechanical.
 
 ## Other findings (warnings, not errors)
 
@@ -114,10 +116,10 @@ None of these block publishing. They are listed so the team knows they exist.
   **Ask:** can the docs team supply the Japanese 8.8.0 and 8.8.1 help as packages? When
   they arrive, they are converted like the English and published to a new repository,
   `loc-spotfire-data-virtualization-userdocs`. That repository must be created first.
-- **Links to a section that does not exist:** 83 (8.9.0), 88 (8.8.1), 62 (8.8.0).
+- **Links to a section that does not exist:** 45 (8.9.0), 50 (8.8.1), 50 (8.8.0).
   The page opens, but not at the intended section.
-- **Pages not in any table of contents:** about 750–850 per version. They are
-  converted and kept, but readers can only reach them from links.
+- **Pages not in any table of contents:** 1,448 (8.9.0), 938 (8.8.1), 917 (8.8.0). They
+  are published under `unfiled/`, but readers can only reach them from links.
 - **Help-button maps are empty:** the five "context-sensitive help" maps in each
   package contain no entries, so no in-product Help button links carry over.
   **Ask:** confirm whether Data Virtualization's product UI opens help by topic ID.
@@ -130,7 +132,10 @@ None of these block publishing. They are listed so the team knows they exist.
 
 ## What happens next
 
+The three versions are published as they are (2026-10-26), laid out in five sections
+that follow the help's own table of contents: `adapters`, `user-guides`,
+`business-directory`, `deployment-manager` and `web-ui`.
+
 1. The team confirms the link targets in the CSV and says whether the 6 images exist.
-2. The confirmed corrections are applied and the three versions are re-checked.
-3. The versions are published to the `en-us-spotfire-data-virtualization-userdocs`
-   repository.
+2. The confirmed corrections and the 4 web addresses are applied, the three versions are
+   re-checked, and the corrected pages are republished.

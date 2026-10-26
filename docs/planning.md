@@ -1996,6 +1996,31 @@ off. `verify` ran local-only (`--skip-published`), as for Container Editions. Fo
 - No `301.yml` for the 5-language versions (`ORIGIN_TEMPLATE_UNDECLARED`), as before:
   WebFOCUS 9 versions, Reporting Server 4.
 
+**Data Virtualization, approved 2026-10-26 (DOCOPS-254).** First publish of 8.9.0, 8.8.1
+and 8.8.0, straight into the new layout, with the 102 source errors per version left as
+they are (the team is told; fixes follow). Trial on 8.9.0 into `C:/tmp`: `REFRAMED`,
+10,152 topics → 11,056 pages, ~5 min; longest path 143 characters inside the version,
+so nothing near 260. **One fault: the package's five help systems are all titled
+"Spotfire® Data Virtualization"**, so their top folders came out `spotfire-data`, `-2`,
+`spotfire-data-virtualization`, `-3`, `-4` in reading order. Named by the help system
+their landing page comes from: adapter guides (6,478 pages) `adapters`, `onlinedocs` (2,966)
+`user-guides`, `BusDirHelp` (76) `business-directory`, `DeployManHelp` (41)
+`deployment-manager`, `WebUI_onlinehelp` (39) `web-ui`; in 8.8.x the main guides are
+`StudioHelp` and the Web UI `WebUI`, titled "TIBCO Data Virtualization". A `rename-map.csv`
+pin moves one page, not its folder, so every page under each is pinned — a prefix swap
+over the map's `new_path` (9,605 rows in 8.9.0, 9,574 in 8.8.1, 9,567 in 8.8.0). 1,448 topics in no TOC go to `unfiled/` (Phase 43). Steps: `toc_folders` and
+`publish` on for the family; `reframe`; swap the prefixes in the three maps; `reframe`
+again; `sync`; R001; `validate`; `verify --skip-published`.
+**Run and pushed the same day** (repo `main`, 1ac1167a, 33,776 files): 32,058 pages,
+`RENAME_MAP_APPLIED` 28,746, none refused; R001 none needed (census). `validate`: 6
+`LINK_BROKEN`, all the example `<a:->` read as a link; 145 `ANCHOR_MISSING`. `verify`
+reads all three `lost`, every cause a fault in the check (`open-issues.md`): 10,488 of
+10,510 `VERIFY_TOC_ENTRY_MISSING` are old TOC links to `page#anchor` against a toc.yml
+row for the page; 25 `VERIFY_TOPIC_MISSING` are TOC paths in other letter case
+(`FileDatasources` for `FileDataSources`), published and in the TOC; `VERIFY_TEXT_DROPPED`
+reads `\<` as different text. Real: `&amp;`/`&gt;`/`&quot;` on Text Escaping render as
+the characters.
+
 ### Phase 64: One Language Per Check, and No Archives Published — **Done 2026-10-26; DOCOPS-275**
 
 **Why.** The ibi rollout of Phase 63 (2026-10-25) turned up three faults with one

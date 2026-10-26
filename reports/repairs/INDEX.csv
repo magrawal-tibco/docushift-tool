@@ -205,6 +205,9 @@ ibi,wf-reporting-server,ibi-webfocus-reporting-server,9.3.5,fixed
 ibi,wf-reporting-server,ibi-webfocus-reporting-server,9.3.6,fixed
 ibi,wf-reporting-server,ibi-webfocus-reporting-server,9.3.7,fixed
 ibi,wf-reporting-server,ibi-webfocus-reporting-server,9.3.8,fixed
+spotfire,data-virtualization,tibco-data-virtualization,8.8.0,none
+spotfire,data-virtualization,tibco-data-virtualization,8.8.1,none
+spotfire,data-virtualization,tibco-data-virtualization,8.9.0,none
 spotfire,statistica,spotfire-data-science-author,1.5.0,fixed
 spotfire,statistica,spotfire-data-science-author,2.2.0,fixed
 spotfire,statistica,spotfire-data-science-for-life-science-author,1.5.0,fixed
