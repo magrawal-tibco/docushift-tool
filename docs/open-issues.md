@@ -636,22 +636,26 @@ conversion into the matching translated repository. Data Virtualization's,
 
 ## WebFOCUS
 
-### The newest versions have no redirects from their old web addresses
+### Three gaps left in redirects from old web addresses
 
 - **Status:** Open
 - **Owner:** unassigned
-- **Raised:** 25 Oct 2026
-- **Blocks publishing:** no, but it blocks cutover for these versions
+- **Raised:** 25 Oct 2026; narrowed 26 Oct 2026
+- **Blocks publishing:** no, but it blocks cutover for the pages named
 
-Nine versions have no redirect file: WebFOCUS Client and App Studio 9.3.5 to 9.3.8,
-and DSML Services 9.3.8. On docs.tibco.com their page lists mix five languages, so the
-tool cannot settle on one rule for turning an old address into a new one, and writes
-no redirects rather than guessed ones. Readers following an old link to these
-versions would land on nothing after cutover. This was already the case before the
-new folder layout; the layout did not cause it.
+Old-site page lists that mix five languages left 13 WebFOCUS and Reporting Server
+versions with no redirects. Since 26 Oct the tool reads only the English pages, and
+11 of them now have redirects. What is left:
 
-The fix is the one DSML Services Container Edition got: someone confirms the old
-address pattern for these products once, it is recorded, and the redirects follow.
+- **App Studio 9.3.8** still has none: only 257 of its 323 pages are in the old
+  site's English list, too few for the tool to trust a rule.
+- **DSML Services 9.3.8** still has none: its page list has no English folder at all.
+- **Client 9.3.8 and Reporting Server 9.3.8 release notes**: 66 pages each have no
+  redirect. In 9.3.8 the release notes moved to their own address on the old site,
+  apart from the main help, and the tool builds one address rule per version.
+
+The fix for all three is the one DSML Services Container Edition got: someone
+confirms the old address pattern once, it is recorded, and the redirects follow.
 
 ### Open Data Hub and Reporting Server: one link broken in the source
 

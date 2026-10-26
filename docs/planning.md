@@ -1996,7 +1996,7 @@ off. `verify` ran local-only (`--skip-published`), as for Container Editions. Fo
 - No `301.yml` for the 5-language versions (`ORIGIN_TEMPLATE_UNDECLARED`), as before:
   WebFOCUS 9 versions, Reporting Server 4.
 
-### Phase 64: One Language Per Check, and No Archives Published — **Approved 2026-10-26; building; DOCOPS-275**
+### Phase 64: One Language Per Check, and No Archives Published — **Done 2026-10-26; DOCOPS-275**
 
 **Why.** The ibi rollout of Phase 63 (2026-10-25) turned up three faults with one
 shape — a step that reads a multi-language or mixed package as if it were one English
@@ -2100,6 +2100,15 @@ bottleneck), and the R001 re-run (not needed; see the rollout note above).
   `--keep 20` gave 185 MB.
 - Tests: roots selection, the two-root package, `--locale` selection, the 9.3.5 tie
   and a single-language list, the archive skip, prune keeping drops and shrinking.
+
+**Runs, 2026-10-26** (the user). `reframe` re-cut exactly the 15 changed versions;
+the 11 gained `301.yml`; `sync` re-copied those 11 and reported both help-server
+zips as `SYNC_DOCUMENT_SKIPPED`; census: R001 nothing pending. English-only `verify`
+(45 + 9 versions): no translated-topic rows; losses 0-20 per version, except Client
+and Reporting Server 9.3.8 (83, 77): 66 each are `VERIFY_REDIRECT_UNMAPPED`, release
+notes the old site moved to `/relnotes/en-us/` in 9.3.8, outside the one template a
+version derives. Left open (`open-issues.md`) with App Studio 9.3.8 and DSML 9.3.8.
+Pushed `phase63-webfocus` b9ba879c, `phase63-wf-reporting-server` a4da3240.
 
 ---
 

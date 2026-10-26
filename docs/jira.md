@@ -40,13 +40,14 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | Branches `phase63-webfocus`, `-wf-reporting-server`, `-focus`, `-di-ism` merged to `wip` and on staging | `verify` with staging per family: notes on DOCOPS-259/260/262/263; R001 sub-tasks DOCOPS-264/265/266/268 → Done if labels show |
 | Phase 63 rolled out and every family re-synced | DOCOPS-274 → Done |
 | Translated WebFOCUS layout phase is opened | New sub-task under DOCOPS-11 (deferred from Phase 63) |
-| Phase 64 re-runs pushed and English-only verify run on WebFOCUS and Reporting Server | DOCOPS-275: dated note with statuses → Done; notes on DOCOPS-262/263 |
 | A redirect source is decided for each Go URL with several destinations, and the Go URL redirects are built | DOCOPS-279: dated note → Done |
 | A new phase is opened | One sub-task under the matching story, In Progress, no `retro` |
 
 **Left alone on purpose:** DOCOPS-8 is a Task where its siblings are Stories.
 
 **Log** (newest first, one line per session):
+
+- 2026-10-26 — DOCOPS-275 → Done (Phase 64 runs pushed); results noted on DOCOPS-262 and 263.
 
 - 2026-10-26 — DOCOPS-279 created under DOCOPS-9 (0.5 SP, Content Migration), In Progress: Go URL list
   (3,557 rows) in reports/redirects/go-urls-2026-10-26.csv; /emp/ vs /pub/ choice open.
@@ -310,7 +311,7 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | 60 | `verify` checks redirects (`301.yml`), ibi and TIBCO (planned) | DOCOPS-271 |
 | 61 | Redirect map for CSH (Help button) URLs (planned) | DOCOPS-272 |
 | 62 | `verify` checks CSH identifiers, ibi and TIBCO (planned) | DOCOPS-273 |
-| 64 | `verify` reads one language; `301.yml` from English pages; `sync` skips archives | DOCOPS-275 |
+| 64 | `verify` reads one language; `301.yml` from English pages; `sync` skips archives | DOCOPS-275 (done) |
 | 57 | Translated help to the `loc-` tree (`--locale`) | build DOCOPS-253; runs DOCOPS-148 (in progress) |
 
 Other logged work: Jira reconcile and this handoff DOCOPS-208; stakeholder status page DOCOPS-197; TIBCO family reassignments DOCOPS-120
