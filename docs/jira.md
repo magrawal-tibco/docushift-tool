@@ -47,6 +47,9 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 **Log** (newest first, one line per session):
 
+- 2026-10-26 — Container Editions `phase63-pilot-wfce-938` merged to `wip` by the user (PR #1, 2c31e9f). All five ibi
+  families now on `wip`; staging verify not yet run.
+
 - 2026-10-26 — Four ibi phase63 branches fast-forwarded to `wip`; DOCOPS-274 note. Staging verify not yet run.
 
 - 2026-10-26 — DOCOPS-275 → Done (Phase 64 runs pushed); results noted on DOCOPS-262 and 263.
