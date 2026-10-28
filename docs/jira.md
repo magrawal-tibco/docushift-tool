@@ -26,7 +26,7 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | General resources repo created and pushed (4 API references) | DOCOPS-245: dated note → Done |
 | `fix-callouts` has run over output/, reframed/ and both repos, pushed, and labels show on staging | DOCOPS-250: dated note → Done |
 | Phase 55 pilot reviewed and all ibi products verified | DOCOPS-249 → Done; DOCOPS-150 (ibi staging check): dated note with the verify result |
-| An ibi family's versions all read `clean` or `explained` | Its sub-task (DOCOPS-259–263): dated note → Done |
+| An ibi family's versions all read `clean` or `explained` | Its sub-task (DOCOPS-259, 260, 262, 263): dated note → Done |
 | An ibi family's R001 is applied, pushed and confirmed by `verify` | Its sub-task (DOCOPS-264–269): dated note → Done |
 | Container Editions re-synced | Re-run `repair census`; dated note on DOCOPS-267 with the count |
 | Phase 61 or 62 is planned in full and approved | Its sub-task (DOCOPS-272–273) → In Progress |
@@ -47,6 +47,9 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 **Left alone on purpose:** DOCOPS-8 is a Task where its siblings are Stories.
 
 **Log** (newest first, one line per session):
+
+- 2026-10-28 — Phase 66 verify notes on DOCOPS-259, 260, 262, 263 (stay open: help-page losses); DOCOPS-261
+  (Legacy, 14/14 clean) → Done.
 
 - 2026-10-28 — Client 9.3.8 translated menus (~1,069 dead entries per language) triaged as source; open issue
   for the authoring team. No Jira change.
@@ -377,7 +380,7 @@ ibi redirect lists is DOCOPS-270 (under DOCOPS-149), and waits on Phase 60.
 |---|---|---|---|---|---|
 | Pilot | 2026-10-23 | ibi™ AI Assistant 9.3.8, local + staging + live | 1 | explained (5 alt texts → DOCOPS-255; 61 note labels → DOCOPS-250) | DOCOPS-249 |
 | ibi translated, Phase 66 | 2026-10-28 | `--locale` ja-jp (Reporting Server, WebFOCUS), de-de, fr-fr, es-es (WebFOCUS), local | 23 | all `lost` from page findings; Client 9.3.8 ~1,070 per language are menu entries to pages the language never shipped | DOCOPS-262, 263 |
-| ibi, Phase 66 | 2026-10-27 | `--bu ibi` per family, local only; translated folders not checked (open issue) | 196 | PDF-only: 102 of 102 `clean` (iWay BAM and TPM 8.0.5 were on remote `wip` since 26 Oct; the local checkout was behind). No document finding anywhere. Help: Container Editions 32/32 and Legacy clean; `lost` from page findings: WebFOCUS 22, Reporting Server 9, FOCUS 9, DI-ISM 2 | DOCOPS-258 Done; 259–263 open |
+| ibi, Phase 66 | 2026-10-27 | `--bu ibi` per family, local only; translated folders not checked (open issue) | 196 | PDF-only: 102 of 102 `clean` (iWay BAM and TPM 8.0.5 were on remote `wip` since 26 Oct; the local checkout was behind). No document finding anywhere. Help: Container Editions 32/32 and Legacy clean; `lost` from page findings: WebFOCUS 22, Reporting Server 9, FOCUS 9, DI-ISM 2 | DOCOPS-258, 261 Done; 259, 260, 262, 263 noted, open |
 | Container Editions | 2026-10-23 | `--bu ibi --family container-editions`, local + staging + live | 20 | all `lost`: published copy (5 Oct) predates the conversion (7 Oct); front pages and link text are the old copy's losses. Re-sync, then re-check. Staging serves 2 of 20 | DOCOPS-258 |
 
 ## Not in Jira, by choice
