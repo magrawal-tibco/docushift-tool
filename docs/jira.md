@@ -48,6 +48,9 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 **Log** (newest first, one line per session):
 
+- 2026-10-28 — Empty version lists left by a withdrawal fixed in sync (Phase 66 follow-up, DOCOPS-285); the three
+  Omni user-guides lists removed from Legacy `wip` and pushed. No Jira change.
+
 - 2026-10-28 — Phase 66 verify notes on DOCOPS-259, 260, 262, 263 (stay open: help-page losses); DOCOPS-261
   (Legacy, 14/14 clean) → Done.
 

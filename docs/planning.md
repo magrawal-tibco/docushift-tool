@@ -2339,6 +2339,29 @@ PDF waits until one served PDF's URL has been read from its served index page.
   version on one day share a file name, so only es-es's is kept (open issue).
 - Run time: under 2 h for 6 families (18:27–20:21, a first Reporting Server pass included); WebFOCUS 37 min, Reporting Server 28.
 
+**Follow-up, done 2026-10-28: an emptied doc-class leaves no version list.** Found re-publishing Omni-Gen 4.3.0. `_withdraw` removes a version folder
+the package no longer feeds, but not the doc-class folder around it. `finish_product`
+then lists every doc-class folder that exists and `_write_dropdown` writes its
+`version.yml` from the version folders present: none, so `versions:` with no rows. AEM
+shows the product a User Guides section with nothing in it. Measured 2026-10-28 over every
+tracked `version.yml` in both publishing trees: **3**, Omni-Gen, Omni-Gen MDM and
+Omni-HealthData `user-guides/` (Legacy).
+
+1. **`finish_product`: a doc-class folder with no version folders publishes nothing.**
+   Its rows are merged as now; if nothing survives (no hand-written row), its
+   `version.yml` is removed and so is the folder, if that leaves it empty. A version
+   list that keeps a hand-written row is left as the merge writes it, which is today's
+   rule (`versions.merge`: a row nobody regenerates is somebody's only copy).
+2. **Tests:** withdrawing the last `user-guides` version leaves no `user-guides/`; the
+   same with a hand-written row keeps `version.yml` with only that row; a doc-class with
+   versions is unchanged.
+3. **Clean the 3.** Fetch the Legacy repo, re-sync the three 4.3.0 versions (no content
+   change, `finish_product` removes the empty folders), commit to `wip` and push. Then
+   the open issue closes.
+
+Logged on DOCOPS-285: found by this phase's runs, and small. Built as
+`Distributor._drop_emptied`; the 3 removed from Legacy `wip` (pushed) the same day.
+
 ---
 
 ## Carried-Forward Open Items

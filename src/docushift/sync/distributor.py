@@ -950,6 +950,8 @@ class WorkspaceDistributor:
                 if child.is_dir() and not child.name.endswith(RESIDUE_SUFFIXES)
             }
             everywhere |= present
+            if not present and self._drop_emptied(folder, catalog_versions):
+                continue
             self._write_dropdown(folder, present, catalog_versions, templates, stats)
             if folder.name == ONLINE_HELP:
                 self._write_redirect_map(product, folder, present, stats)
@@ -960,6 +962,28 @@ class WorkspaceDistributor:
         # times would make the report's warning count a function of how many PDFs
         # the package happened to ship.
         self._report_rows(product, everywhere)
+
+    def _drop_emptied(self, folder: Path, catalog_versions: list[ProductVersion]) -> bool:
+        """Removes a doc-class folder whose last version was withdrawn; True if it did.
+
+        Phase 66. `_withdraw` removes the version folder and leaves the doc-class
+        around it, so the drop-down came out as `versions:` with no rows, and AEM
+        showed an empty section. A hand-written row keeps the file -- it is somebody's
+        only copy, the rule `versions.merge` exists for -- and so does one that will
+        not parse; `_write_dropdown` handles both as before. So does a folder holding
+        anything else, which this tool did not put there.
+        """
+        path = folder / "version.yml"
+        if any(child.name != path.name for child in folder.iterdir()):
+            return False
+        if path.is_file():
+            existing = _parse_edited(path, version_file.parse)
+            if existing is None or version_file.merge(
+                existing, [], version_file.owned_paths(set(), catalog_versions)
+            ):
+                return False
+        remove(folder)
+        return True
 
     def _write_dropdown(
         self,

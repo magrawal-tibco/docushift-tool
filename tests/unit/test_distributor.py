@@ -1722,10 +1722,30 @@ def test_a_doc_class_the_package_no_longer_feeds_is_withdrawn_and_reported(
     assert row.outcome is SyncOutcome.NO_OUTPUT
     assert "removed" in row.message
     assert not published(target, doc_class=RELEASE_INFORMATION).exists()
-    dropdown = published(target, doc_class=RELEASE_INFORMATION).parent / "version.yml"
-    assert not (yaml.safe_load(dropdown.read_text(encoding="utf-8")) or {}).get("versions")
+    # Phase 66: its last version gone, the doc-class goes too -- no empty drop-down.
+    assert not published(target, doc_class=RELEASE_INFORMATION).parent.exists()
     # The doc-classes the package still feeds are untouched by the withdrawal.
     assert published(target, doc_class=USER_GUIDES).is_dir()
+    assert (published(target, doc_class=USER_GUIDES).parent / "version.yml").is_file()
+
+
+def test_an_emptied_doc_class_keeps_a_hand_written_drop_down_row(
+    config, distributor, product, target
+) -> None:
+    """Phase 66. A row this tool did not write is somebody's only copy: the file stays,
+    holding that row alone."""
+    source = extract_tree(config, product, "10.4.0", **SHIPMENT)
+    distributor.sync_many([(product, product.versions["10.4.0"])], target)
+    dropdown = published(target, doc_class=RELEASE_INFORMATION).parent / "version.yml"
+    dropdown.write_text(dropdown.read_text(encoding="utf-8") + '- title: "Latest"\n'
+                        '  path: "https://docs.example/latest"\n', encoding="utf-8")
+    (source / "doc" / "readme.txt").unlink()
+    (source / "pdf" / "tib_ems_relnotes.pdf").unlink()
+
+    distributor.sync_many([(product, product.versions["10.4.0"])], target)
+
+    rows = yaml.safe_load(dropdown.read_text(encoding="utf-8"))["versions"]
+    assert rows == [{"title": "Latest", "path": "https://docs.example/latest"}]
 
 
 def test_a_missing_extracted_tree_withdraws_nothing(config, distributor, product, target) -> None:

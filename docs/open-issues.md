@@ -739,24 +739,6 @@ by hand on 25 Oct 2026; nothing else in any ibi package is like them.
 Until the copy step skips such files, they come back on every copy of these two
 versions and have to be taken out again before publishing.
 
-## Legacy (ibi)
-
-### A moved document leaves an empty version list behind
-
-- **Status:** Open
-- **Owner:** unassigned
-- **Raised:** 27 Oct 2026
-- **Blocks publishing:** no, but the product shows a User Guides section with no versions
-
-Omni-Gen, Omni-Gen MDM and Omni-HealthData 4.3.0 had their release notes published
-under User Guides. A re-publish on 27 Oct 2026 moved them to Release Information and
-removed the old folder, but each product keeps a User Guides version list with nothing
-in it. Publishing should remove the list when its last version goes.
-
-The same re-publish brought these three products' pages to the current format. The
-rest of the Legacy family is still the first draft from 16 Sep 2026 and needs a
-re-publish to match.
-
 ## Verify (tool)
 
 ### Translated folders are never checked
@@ -773,3 +755,18 @@ English one. Seen on 27 Oct 2026 for WebFOCUS (Japanese, German, French, Spanish
 Reporting Server (Japanese). Checking without `--locale` is worse: translated pages are
 compared with the English conversion and read thousands of topics lost, and their
 result replaces the English result for the same version. Its report file does too.
+
+## Legacy (ibi)
+
+### Most Legacy products are still the first-draft format
+
+- **Status:** Open
+- **Owner:** docushift
+- **Raised:** 27 Oct 2026
+- **Blocks publishing:** no
+
+The Legacy repository holds the first draft published on 16 Sep 2026. Only Omni-Gen,
+Omni-Gen MDM, Omni-HealthData (re-published 27 Oct 2026) and iWay BAM and Trading Partner
+Manager are in the current format: product labels with the product's name rather than
+its short code, and index pages with the current headings. The rest of the family needs
+a re-publish to match.
