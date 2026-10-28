@@ -50,7 +50,8 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 - 2026-10-28 — DOCOPS-258 (Container Editions) → Done: 32/32 clean, help and documents, local check. iWay BAM and
   TPM 8.0.5 synced to Legacy `wip` and clean. Translated folders verified after the fix (23 `lost`, see Verify
-  waves). Notes on DOCOPS-259–263 not posted.
+  waves). Notes on DOCOPS-259–263 not posted. Committed: tool 90d6736 (reframe-component), Legacy e314b79
+  (`wip`, not pushed).
 
 - 2026-10-27 — Phase 66 runs (no Jira change yet): Omni-Gen/MDM/HealthData 4.3.0 re-synced (release notes to
   release-information, Legacy `wip`, not committed); Reporting Server 9.1.0–9.3.4 and BW EDI 6.3.1 re-extracted;
