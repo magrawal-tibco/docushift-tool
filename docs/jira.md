@@ -18,7 +18,6 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | `catalog sitemap` over the whole scope run (StreamBase half done 2026-10-21) | DOCOPS-123 → Done |
 | 50 long-path + 8 DITA versions re-run | DOCOPS-188 → Done |
 | `sync --bu tibco` + `validate` run | DOCOPS-134, DOCOPS-135; refresh counts in DOCOPS-122, 125–127 |
-| ibi re-sync (left: Reporting Server 9.1.0–9.2.7, 13 out of date from a re-extract only) | DOCOPS-200 → Done |
 | A family reassignment is committed | Add a dated line to the progress comment on DOCOPS-120 |
 | Family review finished | DOCOPS-120 → Done, then DOCOPS-130 |
 | Edit to DOCOPS-217 is allowed (blocked by a permission check on 2026-10-09) | DOCOPS-217: append the 2026-10-09 publish note → Done |
@@ -47,8 +46,11 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 **Log** (newest first, one line per session):
 
+- 2026-10-28 — DOCOPS-200 → Done: Reporting Server 9.1.0–9.2.7 re-synced (no repo change); all 198 published
+  ibi versions synced. `content-fix` pushed in all 8 ibi repos.
+
 - 2026-10-28 — ibi repos: `content-fix` branch created from `wip` in all 8 and checked out; from now on fixes
-  go there, never to `wip` directly (local only so far). No Jira change.
+  go there, never to `wip` directly. No Jira change.
 
 - 2026-10-28 — All ibi repos switched to `wip`; the five merged `phase63-*` branches deleted, local and remote
   (each had 0 commits outside `wip`). No Jira change.
@@ -375,7 +377,7 @@ Other logged work: Jira reconcile and this handoff DOCOPS-208; stakeholder statu
 | DOCOPS-122 | Failed TIBCO versions | 12 `convert-failed`, 23 `download-failed` |
 | DOCOPS-199 | Leftover TIBCO versions | 2 `format-unknown`, 1 `sync-failed` |
 | DOCOPS-134 | TIBCO re-sync | 214 `out-of-date` |
-| DOCOPS-200 | ibi re-sync | 25 `out-of-date` |
+| DOCOPS-200 | ibi re-sync | Done 2026-10-28: 0 `out-of-date` (198 synced) |
 | DOCOPS-147 | ibi download | 1 `download-failed` |
 
 ## Verify waves (Phase 58)
