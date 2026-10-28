@@ -48,6 +48,9 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 **Log** (newest first, one line per session):
 
+- 2026-10-28 — Client 9.3.8 translated menus (~1,069 dead entries per language) triaged as source; open issue
+  for the authoring team. No Jira change.
+
 - 2026-10-28 — DOCOPS-258 (Container Editions) → Done: 32/32 clean, help and documents, local check. iWay BAM and
   TPM 8.0.5 clean (already on remote `wip`). Translated folders verified after the fix (23 `lost`, see Verify
   waves). Notes on DOCOPS-259–263 not posted. Pushed: tool 2865b0a (reframe-component), Legacy 46ce249

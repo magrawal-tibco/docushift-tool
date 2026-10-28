@@ -705,6 +705,23 @@ installation pages link to an
 "Optional Low-Level Qualifier Changes" page that is not in the documents we receive.
 The link is broken in the source, before any conversion.
 
+### Translated 9.3.8 help: the Functions Reference menu points to pages that do not exist
+
+- **Status:** Not ours
+- **Owner:** authoring team (not yet contacted)
+- **Raised:** 28 Oct 2026
+- **Blocks publishing:** no
+
+In the German, Spanish, French and Japanese WebFOCUS Client 9.3.8 help, the Functions
+Reference menu is an older version than the English one. Instead of grouping functions
+by category, it splits them into WebFOCUS Server, WebFOCUS Client and FOCUS sections.
+About 1,070 of its entries in each language lead nowhere: the FOCUS section points to a
+`focus-functions` folder, and the three section headings point to temporary pages, and
+neither is in the documents we receive. The function pages themselves are there under
+another folder and are published. These entries were already broken on the old site;
+the full list is `reports/verify/ibi/ibi-webfocus-client/9.3.8-translated-menu-gaps.csv`.
+The check counts them as a known source problem, not a loss.
+
 ### Client 9.1.0 and 9.1.1 packages include a help server by mistake
 
 - **Status:** Not ours

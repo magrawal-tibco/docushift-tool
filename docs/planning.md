@@ -2330,7 +2330,12 @@ PDF waits until one served PDF's URL has been read from its served index page.
   one source fault: Client 9.3.8's de/es/fr/ja TOCs list ~1,020 pages their language folder
   does not ship (`html/ja-jp/dev-reporting-apps/INDEX.htm` is only under `html/en-us`),
   so each reads 1,072 `VERIFY_TOPIC_MISSING` beside the convert's `NAV_NODE_DROPPED` 1,018.
-  They were dead menu entries on the old site too. The four languages' reports for one
+  They were dead menu entries on the old site too. Correction, same day: 1,069 of the 1,072
+  are in no language folder, English included. The translated packages ship an older
+  Functions Reference menu (`focus-functions/`, `_z-temp-pages/`; the pages ship under
+  `functions/`). Triaged as `source` in `verify-triage.yaml`; list in
+  `reports/verify/ibi/ibi-webfocus-client/9.3.8-translated-menu-gaps.csv`. Re-checked:
+  1,069 explained, still `lost` on 18 (3 English-only pages, 7 images, 8 text). The four languages' reports for one
   version on one day share a file name, so only es-es's is kept (open issue).
 - Run time: under 2 h for 6 families (18:27–20:21, a first Reporting Server pass included); WebFOCUS 37 min, Reporting Server 28.
 

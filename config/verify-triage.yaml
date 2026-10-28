@@ -32,3 +32,25 @@ triage:
       Notes written as GitHub alerts, which AEM does not render (Phase 56).
       Repair R001 rewrites them; this clears once AEM republishes. Excused only on
       versions R001 has reached -- on a version it has not, it is an issue.
+
+  # Phase 66, 2026-10-28: list in reports/verify/ibi/ibi-webfocus-client/9.3.8-translated-menu-gaps.csv.
+  - code: VERIFY_TOPIC_MISSING
+    decision: source
+    slug: ibi-webfocus-client
+    version: 9.3.8
+    path: "*/html/*/focus-functions/*"
+    reason: >-
+      The de-de, es-es, fr-fr and ja-jp 9.3.8 packages ship an older Functions
+      Reference menu whose FOCUS branch points to focus-functions/, a folder no
+      language ships (164 pages, ~1,014 entries per language). The pages ship and
+      are published under functions/ and using-functions/. Dead on the old site too.
+
+  - code: VERIFY_TOPIC_MISSING
+    decision: source
+    slug: ibi-webfocus-client
+    version: 9.3.8
+    path: "*/html/*/_z-temp-pages/*"
+    reason: >-
+      The same translated Functions Reference menu heads its wf-server, wf-client
+      and focus branches with _z-temp-pages/ pages no package ships (55 entries per
+      language). Dead on the old site too.
