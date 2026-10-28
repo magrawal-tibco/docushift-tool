@@ -48,6 +48,9 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 **Log** (newest first, one line per session):
 
+- 2026-10-28 — Verify: a run without `--locale` checks each language on its own state; translated reports
+  named per language (Phase 66 follow-up 2, DOCOPS-285). No Jira change.
+
 - 2026-10-28 — Empty version lists left by a withdrawal fixed in sync (Phase 66 follow-up, DOCOPS-285); the three
   Omni user-guides lists removed from Legacy `wip` and pushed. No Jira change.
 

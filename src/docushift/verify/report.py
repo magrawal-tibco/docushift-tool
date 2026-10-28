@@ -24,16 +24,22 @@ INDEX_COLUMNS = ["bu", "family", "slug", "version", "verify_status", "verify_dat
                  "errors", "warnings", "explained", "findings", "commit", "report"]
 
 
-def version_paths(root: Path, bu: str, slug: str, version: str, day: str) -> tuple[Path, Path]:
+def version_paths(root: Path, bu: str, slug: str, version: str, day: str, locale: str = "") -> tuple[Path, Path]:
+    """`<version>-<date>`, or `<version>-<locale>-<date>` for a translated folder (Phase 66).
+
+    Four languages of one version checked on one day otherwise share one name, and
+    each overwrote the last.
+    """
     folder = root / "verify" / bu / slug
-    return folder / f"{version}-{day}.csv", folder / f"{version}-{day}.html"
+    stem = f"{version}-{locale}-{day}" if locale else f"{version}-{day}"
+    return folder / f"{stem}.csv", folder / f"{stem}.html"
 
 
-def write_version(root: Path, bu: str, result: VersionResult, day: str) -> Path:
-    csv_path, html_path = version_paths(root, bu, result.folder.slug, result.version, day)
+def write_version(root: Path, bu: str, result: VersionResult, day: str, locale: str = "") -> Path:
+    csv_path, html_path = version_paths(root, bu, result.folder.slug, result.version, day, locale)
     csv_path.parent.mkdir(parents=True, exist_ok=True)
     write_rows(csv_path, COLUMNS, result.rows)
-    name = f"{result.folder.slug} {result.version}"
+    name = " ".join(part for part in (result.folder.slug, result.version, locale) if part)
     html_path.write_text(_html(name, result.rows, dict(result.codes), result.outcome),
                          encoding="utf-8", newline="\n")
     return csv_path

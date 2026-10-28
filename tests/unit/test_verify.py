@@ -834,3 +834,44 @@ def test_a_translated_folder_reads_the_english_package_it_ships_in(config, state
     assert [(r.folder.locale, r.skipped, len(r.rows)) for r in results] == [("ja-jp", "", 3)]
     assert set(results[0].codes) == {"VERIFY_TOC_UNCHECKED", "VERIFY_REDIRECT_MAP_MISSING"}
     ja_state.close()
+
+
+def test_a_default_run_checks_each_language_against_its_own_conversion(config, state, catalog) -> None:
+    """Phase 66. Without `--locale` a `ja-jp` folder was read with the English output map
+    and its result replaced the English one in `state.db`; its report, another
+    language's of the same day. Each language now runs on its own state and report."""
+    import datetime
+    import shutil
+
+    from click.testing import CliRunner
+
+    from docushift.cli import main
+    from docushift.config import ConfigManager
+    from docushift.state import StateStore
+
+    target = _fixture(config, state)
+    english = target / "en-us-ibi-webfocus-userdocs/en-us" / SLUG / "online-help/1-0-0"
+    shutil.copytree(english, target / "loc-ibi-webfocus-userdocs/ja-jp" / SLUG / "online-help/1-0-0")
+    ja_state = ConfigManager(root_dir=config.root_dir, locale="ja-jp").state_store()
+    ja_state.record_output_map(SLUG, NUMBER, [("pkg/html/guide.htm", "guide.md", "")])
+    ja_state.close()
+    built = make_product(SLUG, bu="ibi", family="webfocus")
+    built.versions = {NUMBER: make_version(SLUG, NUMBER, engine=SourceEngine.FLARE)}
+    catalog.merge_fetch_results([built])
+
+    result = CliRunner().invoke(main, ["--root", str(config.root_dir), "verify", "--target-dir", str(target),
+                                       "--skip-published", "--live-sample", "0", "--redirect-sample", "0"],
+                                color=False)
+
+    assert "Traceback" not in result.output, result.output
+    english_result = StateStore(config.state_db_path).verify_latest()[(SLUG, NUMBER)]
+    ja = ConfigManager(root_dir=config.root_dir, locale="ja-jp").state_store()
+    japanese_result = ja.verify_latest()[(SLUG, NUMBER)]
+    ja.close()
+    assert "/en-us/" in english_result["target"].replace("\\", "/")
+    assert "/ja-jp/" in japanese_result["target"].replace("\\", "/")
+    # Each against its own output map: three English pages, one Japanese.
+    assert (english_result["pages"], japanese_result["pages"]) == (3, 1)
+    day = datetime.date.today().isoformat()
+    reports = sorted(p.name for p in (config.root_dir / "reports/verify/ibi" / SLUG).glob("*.csv"))
+    assert reports == [f"{NUMBER}-{day}.csv", f"{NUMBER}-ja-jp-{day}.csv"]

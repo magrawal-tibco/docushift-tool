@@ -1758,7 +1758,10 @@ docushift --locale en-us verify --target-dir ../ibi-docs-aem --bu ibi --family w
 - **One language per folder.** A package can ship one help build per language
   (WebFOCUS 9.3.5+: `html/{de-de,en-us,es-es,fr-fr,ja-jp}`). An English folder is
   compared with the English build only, and its redirects with the English pages of
-  the old site, so translated topics are not reported lost (Phase 64).
+  the old site, so translated topics are not reported lost (Phase 64). A translated
+  folder is checked against its own language's conversion and its result kept with that
+  language's (`cache/state-ja-jp.db`), whether or not you pass `--locale`; `versions.csv`
+  and `reports/verify/INDEX` show English only (Phase 66).
 
 - **Text is compared sentence by sentence.** A page is flagged when a whole sentence
   of the old page is nowhere on the new one, and the finding quotes it. A changed word
@@ -1775,7 +1778,8 @@ docushift --locale en-us verify --target-dir ../ibi-docs-aem --bu ibi --family w
 - **Requests are throttled and cached** under `cache/verify/`. A second run asks the
   network for nothing it has seen.
 - **Every result is kept** (Phase 58):
-  - `reports/verify/<bu>/<product>/<version>-<date>.csv`, one row per old page: old
+  - `reports/verify/<bu>/<product>/<version>-<date>.csv` (`<version>-<locale>-<date>.csv`
+    for a translated folder, Phase 66), one row per old page: old
     URL, new page, staging URL, text %, images found of expected, TOC match, staging
     status, findings, their triage, the missing sentences. A `.html` beside it lists
     the lowest-scoring pages with links to old and new;

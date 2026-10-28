@@ -2362,6 +2362,37 @@ Omni-HealthData `user-guides/` (Legacy).
 Logged on DOCOPS-285: found by this phase's runs, and small. Built as
 `Distributor._drop_emptied`; the 3 removed from Legacy `wip` (pushed) the same day.
 
+**Follow-up 2, done 2026-10-28: each language checked against its own conversion, and
+its own report.** Both found in the ibi run above.
+
+- *Without `--locale`* (the default, "every published language"), a `loc-` folder is
+  verified with the primary run's state: the English `output_map` (so a WebFOCUS ja-jp
+  folder read ~4,000 topics lost), and its result recorded in `state.db` under the same
+  `(slug, version)`, replacing the English result that `_verify_status` reads.
+- *With several `--locale` runs on one day*, every language writes
+  `reports/verify/<bu>/<slug>/<version>-<date>.csv`, so only the last is kept (Client
+  9.3.5–9.3.8: es-es overwrote ja-jp, de-de and fr-fr on 2026-10-28).
+
+1. **The default run checks each language with its own state.** The CLI groups the
+   selected folders by locale. Primary-locale folders run as now. Each other locale gets
+   its own `ConfigManager(locale=…)`, `state_store()` and `FindingsRun`, the same objects a
+   `docushift --locale ja-jp verify` builds, so its findings and `verify_result` go to
+   `state-ja-jp.db` and nothing of it reaches `state.db` or `versions.csv`. `--locale`
+   keeps narrowing to one language, as in Phase 64.
+2. **A translated report is named for its language:**
+   `<version>-<locale>-<date>.csv` / `.html` for a non-primary locale; the primary
+   name is unchanged, so existing links in `INDEX` hold.
+3. **Tests:** a default run over an English and a `ja-jp` folder records the English
+   result in the primary state and the `ja-jp` one in the locale state, each compared
+   with its own output map; two locales on one day write two report files.
+
+Built in the `verify` command (`run_for`) and `report.version_paths`; the CLI test fails
+on the old code (the `ja-jp` result is not in `state-ja-jp.db`).
+
+Not in this follow-up: `reports/verify/INDEX` and `_verify_status` stay English-only, as
+`versions.csv` is (Phase 57); a translated result is read from its report and
+`state-<locale>.db`.
+
 ---
 
 ## Carried-Forward Open Items

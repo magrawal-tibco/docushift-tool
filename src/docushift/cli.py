@@ -3415,20 +3415,42 @@ def verify(ctx, target_dir, product, version, bu, family, latest_only, statuses,
         return
 
     findings.start()
+    # Phase 66: each language against its own conversion. A folder in another locale
+    # than this run's gets that locale's config, state and findings -- what
+    # `docushift --locale ja-jp verify` builds -- so its output map is its own and
+    # its result never lands in `state.db` under the English version's key.
+    runs = {slugify(cfg.locale): (cfg, state, findings, verifier)}
+
+    def run_for(locale: str):
+        key = slugify(locale)
+        if key not in runs:
+            own = ConfigManager(root_dir=cfg.root_dir, locale=key)
+            own_state = own.state_store()
+            own_findings = FindingsRun("verify", store=own_state)
+            own_findings.start()
+            runs[key] = (own, own_state, own_findings, Verifier(
+                own, verifier.catalog, own_state, target_dir, own_findings, fetcher=fetcher, base_url=base,
+                live_sample=live_sample, triaged=triaged, base_urls=hosts,
+                repair_states={k: row["state"] for k, row in own_state.repair_rows().items()},
+                redirect_sample=redirect_sample, seed=seed))
+        return runs[key]
+
     where = base or ", ".join(f"{b}: {h}" for b, h in sorted(hosts.items())) or "local only"
     console.print(f"Verifying {len(folders)} version(s) ({where}); {len(triaged)} triage entr(ies); "
                   f"redirect sample {redirect_sample}, seed {seed}...")
     day = datetime.date.today().isoformat()
     for folder in folders:
-        result = verifier.version(folder)
-        findings.flush()
+        run_cfg, run_state, run_findings, run_verifier = run_for(folder.locale)
+        result = run_verifier.version(folder)
+        run_findings.flush()
         if result.skipped:
             console.print(f"  [dim]-[/dim] {folder.relative.as_posix()}: skipped, {result.skipped}")
             continue
         prod = verifier.catalog.products[folder.slug]
-        path = report.write_version(cfg.root_dir / "reports", prod.bu, result, day)
-        state.record_verify({
-            "slug": folder.slug, "version": result.version, "run_id": findings.run_id,
+        path = report.write_version(cfg.root_dir / "reports", prod.bu, result, day,
+                                    locale="" if run_cfg.is_primary_locale() else run_cfg.locale)
+        run_state.record_verify({
+            "slug": folder.slug, "version": result.version, "run_id": run_findings.run_id,
             "at": datetime.datetime.now(datetime.UTC).isoformat(timespec="seconds"),
             "scope": result.scope, "target": str(folder.path), "commit_id": result.commit,
             "pages": len(result.rows), "errors": result.errors, "warnings": result.warnings,
@@ -3439,7 +3461,7 @@ def verify(ctx, target_dir, product, version, bu, family, latest_only, statuses,
         # Phase 59: a clean staging check confirms each repair this version had fixed.
         if "+staging" in result.scope:
             for repair in repair_register.registered():
-                if repair.confirm and not result.codes.get(repair.confirm) and state.confirm_repair(
+                if repair.confirm and not result.codes.get(repair.confirm) and run_state.confirm_repair(
                         folder.slug, result.version, repair.id,
                         datetime.datetime.now(datetime.UTC).isoformat(timespec="seconds")):
                     console.print(f"    {repair.id} confirmed on staging")
@@ -3449,8 +3471,9 @@ def verify(ctx, target_dir, product, version, bu, family, latest_only, statuses,
 
     _refresh_status(manager)
     _, index_html = report.write_index(cfg.root_dir / "reports", _verify_index(manager, state))
+    recorded = [f for _, _, run_findings, _ in runs.values() for f in run_findings.recorded]
     totals: Counter = Counter()
-    for finding in findings.recorded:
+    for finding in recorded:
         totals[finding.code] += finding.count
     table = Table(title="verify")
     table.add_column("Finding")
@@ -3461,8 +3484,11 @@ def verify(ctx, target_dir, product, version, bu, family, latest_only, statuses,
     if fetcher is not None:
         console.print(f"[dim]{fetcher.requests} request(s) made; the rest came from cache/verify/.[/dim]")
     console.print(f"Index: {escape(str(index_html))}")
-    errors = sum(1 for f in findings.recorded if f.severity is Severity.ERROR and "[triage:" not in f.message)
-    findings.finish(exit_code=1 if errors else 0)
+    errors = sum(1 for f in recorded if f.severity is Severity.ERROR and "[triage:" not in f.message)
+    for _, run_state, run_findings, _ in runs.values():
+        run_findings.finish(exit_code=1 if errors else 0)
+        if run_state is not state:
+            run_state.close()
     if errors:
         raise click.exceptions.Exit(1)
 
