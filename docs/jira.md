@@ -35,8 +35,7 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | stg-docs.tibco.com has real content | DOCOPS-257: run the TIBCO staging probe and staging pilots |
 | Staging shows one Japanese and one German WebFOCUS page correctly | DOCOPS-148: dated note → Done |
 | Data Virtualization team answers the error report and the corrections are republished (published as-is 2026-10-26) | DOCOPS-254: dated note → Done |
-| Branch `phase63-pilot-wfce-938` (Container Editions, new layout + R001) reaches staging | `verify` with staging: DOCOPS-274 note; DOCOPS-258 → Done if clean; DOCOPS-267 → Done if labels show |
-| Staging has rebuilt from `wip` (the four ibi `phase63-*` branches merged 2026-10-26) | `verify` with staging per family: notes on DOCOPS-259/260/262/263; R001 sub-tasks DOCOPS-264/265/266/268 → Done if labels show |
+| Staging has rebuilt from `wip` (all five ibi `phase63-*` branches merged 2026-10-26, deleted 2026-10-28) | `verify` with staging per family: DOCOPS-274 note; notes on DOCOPS-259/260/262/263; R001 sub-tasks DOCOPS-264/265/266/267/268 → Done if labels show |
 | Phase 63 rolled out and every family re-synced | DOCOPS-274 → Done |
 | Translated WebFOCUS layout phase is opened | New sub-task under DOCOPS-11 (deferred from Phase 63) |
 | A redirect source is decided for each Go URL with several destinations, and the Go URL redirects are built | DOCOPS-279: dated note → Done |
@@ -47,6 +46,9 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 **Left alone on purpose:** DOCOPS-8 is a Task where its siblings are Stories.
 
 **Log** (newest first, one line per session):
+
+- 2026-10-28 — All ibi repos switched to `wip`; the five merged `phase63-*` branches deleted, local and remote
+  (each had 0 commits outside `wip`). No Jira change.
 
 - 2026-10-28 — DOCOPS-200 note: Legacy re-published in the current format (`wip` 9d9f217), 14/14 clean; 9
   unselected Web Query versions removed (dbf87e4). Left: re-sync Reporting Server 9.1.0–9.2.7 (13 out of date
