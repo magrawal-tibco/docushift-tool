@@ -18,7 +18,7 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | `catalog sitemap` over the whole scope run (StreamBase half done 2026-10-21) | DOCOPS-123 → Done |
 | 50 long-path + 8 DITA versions re-run | DOCOPS-188 → Done |
 | `sync --bu tibco` + `validate` run | DOCOPS-134, DOCOPS-135; refresh counts in DOCOPS-122, 125–127 |
-| ibi re-sync | DOCOPS-200 → Done |
+| ibi re-sync (left: Reporting Server 9.1.0–9.2.7, 13 out of date from a re-extract only) | DOCOPS-200 → Done |
 | A family reassignment is committed | Add a dated line to the progress comment on DOCOPS-120 |
 | Family review finished | DOCOPS-120 → Done, then DOCOPS-130 |
 | Edit to DOCOPS-217 is allowed (blocked by a permission check on 2026-10-09) | DOCOPS-217: append the 2026-10-09 publish note → Done |
@@ -48,8 +48,9 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 **Log** (newest first, one line per session):
 
-- 2026-10-28 — Legacy re-published in the current format (9 versions, `wip` 9d9f217), verified 14/14 clean.
-  Belongs to DOCOPS-200 (ibi re-sync); no Jira change yet. 9 unselected Web Query versions left as they were.
+- 2026-10-28 — DOCOPS-200 note: Legacy re-published in the current format (`wip` 9d9f217), 14/14 clean; 9
+  unselected Web Query versions removed (dbf87e4). Left: re-sync Reporting Server 9.1.0–9.2.7 (13 out of date
+  only from the 27 Oct re-extract). Stays Backlog.
 
 - 2026-10-28 — Verify: a run without `--locale` checks each language on its own state; translated reports
   named per language (Phase 66 follow-up 2, DOCOPS-285). No Jira change.

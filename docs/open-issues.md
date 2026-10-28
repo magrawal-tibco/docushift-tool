@@ -739,18 +739,3 @@ by hand on 25 Oct 2026; nothing else in any ibi package is like them.
 Until the copy step skips such files, they come back on every copy of these two
 versions and have to be taken out again before publishing.
 
-## Legacy (ibi)
-
-### Nine Web Query versions stay published in the first-draft format
-
-- **Status:** Open; waiting on a decision
-- **Owner:** docushift
-- **Raised:** 27 Oct 2026
-- **Blocks publishing:** no
-
-The whole Legacy family was re-published in the current format on 28 Oct 2026, except
-Web Query for IBM i 8207.28.09–8207.28.14 and 9.0.1–9.0.4. They are still published from
-the 16 Sep 2026 first draft but are no longer selected for migration, so publishing does
-not touch them (their packages are not on disk either). Either they are selected again
-and re-published, or removed from the repository; publishing never removes a version on
-its own (see Statistica).
