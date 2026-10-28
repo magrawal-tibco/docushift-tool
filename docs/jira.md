@@ -48,6 +48,9 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 **Log** (newest first, one line per session):
 
+- 2026-10-28 — Legacy re-published in the current format (9 versions, `wip` 9d9f217), verified 14/14 clean.
+  Belongs to DOCOPS-200 (ibi re-sync); no Jira change yet. 9 unselected Web Query versions left as they were.
+
 - 2026-10-28 — Verify: a run without `--locale` checks each language on its own state; translated reports
   named per language (Phase 66 follow-up 2, DOCOPS-285). No Jira change.
 

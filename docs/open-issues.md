@@ -741,15 +741,16 @@ versions and have to be taken out again before publishing.
 
 ## Legacy (ibi)
 
-### Most Legacy products are still the first-draft format
+### Nine Web Query versions stay published in the first-draft format
 
-- **Status:** Open
+- **Status:** Open; waiting on a decision
 - **Owner:** docushift
 - **Raised:** 27 Oct 2026
 - **Blocks publishing:** no
 
-The Legacy repository holds the first draft published on 16 Sep 2026. Only Omni-Gen,
-Omni-Gen MDM, Omni-HealthData (re-published 27 Oct 2026) and iWay BAM and Trading Partner
-Manager are in the current format: product labels with the product's name rather than
-its short code, and index pages with the current headings. The rest of the family needs
-a re-publish to match.
+The whole Legacy family was re-published in the current format on 28 Oct 2026, except
+Web Query for IBM i 8207.28.09–8207.28.14 and 9.0.1–9.0.4. They are still published from
+the 16 Sep 2026 first draft but are no longer selected for migration, so publishing does
+not touch them (their packages are not on disk either). Either they are selected again
+and re-published, or removed from the repository; publishing never removes a version on
+its own (see Statistica).
