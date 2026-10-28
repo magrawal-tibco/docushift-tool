@@ -47,6 +47,9 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 **Log** (newest first, one line per session):
 
+- 2026-10-28 — ibi repos: `content-fix` branch created from `wip` in all 8 and checked out; from now on fixes
+  go there, never to `wip` directly (local only so far). No Jira change.
+
 - 2026-10-28 — All ibi repos switched to `wip`; the five merged `phase63-*` branches deleted, local and remote
   (each had 0 commits outside `wip`). No Jira change.
 
