@@ -2316,8 +2316,8 @@ PDF waits until one served PDF's URL has been read from its served index page.
 **ibi run, 2026-10-27** (local, per family; `jira.md` Verify waves has the per-family row):
 
 - **PDF-only: 102 of 102 synced versions `clean`.** First the three Omni-Gen versions were
-  re-synced and Reporting Server 9.1.0–9.2.7 re-extracted. iWay BAM and TPM 8.0.5 were on
-  the Legacy repo's `main` only; synced to `wip` 2026-10-28, then clean.
+  re-synced and Reporting Server 9.1.0–9.2.7 re-extracted. iWay BAM and TPM 8.0.5 looked
+  absent because the local `wip` was behind: the team had pushed them on 26 Oct. Clean.
 - **No `VERIFY_DOCUMENT_*` finding in any ibi version**, help versions included.
 - **Translated folders were not checked.** `version` read the package from
   `extracted_dir`, which has no primary fallback, so `--locale ja-jp` skipped every version

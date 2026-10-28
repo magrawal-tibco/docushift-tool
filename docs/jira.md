@@ -49,9 +49,9 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 **Log** (newest first, one line per session):
 
 - 2026-10-28 — DOCOPS-258 (Container Editions) → Done: 32/32 clean, help and documents, local check. iWay BAM and
-  TPM 8.0.5 synced to Legacy `wip` and clean. Translated folders verified after the fix (23 `lost`, see Verify
-  waves). Notes on DOCOPS-259–263 not posted. Committed: tool 90d6736 (reframe-component), Legacy e314b79
-  (`wip`, not pushed).
+  TPM 8.0.5 clean (already on remote `wip`). Translated folders verified after the fix (23 `lost`, see Verify
+  waves). Notes on DOCOPS-259–263 not posted. Pushed: tool 2865b0a (reframe-component), Legacy 46ce249
+  (`wip`). iWay BAM/TPM were already on remote `wip` (dabab3e, 26 Oct); the local copy was unfetched.
 
 - 2026-10-27 — Phase 66 runs (no Jira change yet): Omni-Gen/MDM/HealthData 4.3.0 re-synced (release notes to
   release-information, Legacy `wip`, not committed); Reporting Server 9.1.0–9.3.4 and BW EDI 6.3.1 re-extracted;
@@ -374,7 +374,7 @@ ibi redirect lists is DOCOPS-270 (under DOCOPS-149), and waits on Phase 60.
 |---|---|---|---|---|---|
 | Pilot | 2026-10-23 | ibi™ AI Assistant 9.3.8, local + staging + live | 1 | explained (5 alt texts → DOCOPS-255; 61 note labels → DOCOPS-250) | DOCOPS-249 |
 | ibi translated, Phase 66 | 2026-10-28 | `--locale` ja-jp (Reporting Server, WebFOCUS), de-de, fr-fr, es-es (WebFOCUS), local | 23 | all `lost` from page findings; Client 9.3.8 ~1,070 per language are menu entries to pages the language never shipped | DOCOPS-262, 263 |
-| ibi, Phase 66 | 2026-10-27 | `--bu ibi` per family, local only; translated folders not checked (open issue) | 196 | PDF-only: 102 of 102 `clean` (iWay BAM and TPM 8.0.5 synced to `wip` 2026-10-28). No document finding anywhere. Help: Container Editions 32/32 and Legacy clean; `lost` from page findings: WebFOCUS 22, Reporting Server 9, FOCUS 9, DI-ISM 2 | DOCOPS-258 Done; 259–263 open |
+| ibi, Phase 66 | 2026-10-27 | `--bu ibi` per family, local only; translated folders not checked (open issue) | 196 | PDF-only: 102 of 102 `clean` (iWay BAM and TPM 8.0.5 were on remote `wip` since 26 Oct; the local checkout was behind). No document finding anywhere. Help: Container Editions 32/32 and Legacy clean; `lost` from page findings: WebFOCUS 22, Reporting Server 9, FOCUS 9, DI-ISM 2 | DOCOPS-258 Done; 259–263 open |
 | Container Editions | 2026-10-23 | `--bu ibi --family container-editions`, local + staging + live | 20 | all `lost`: published copy (5 Oct) predates the conversion (7 Oct); front pages and link text are the old copy's losses. Re-sync, then re-check. Staging serves 2 of 20 | DOCOPS-258 |
 
 ## Not in Jira, by choice
