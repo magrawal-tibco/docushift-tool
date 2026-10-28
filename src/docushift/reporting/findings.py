@@ -785,6 +785,19 @@ REGISTRY: dict[str, Code] = _codes(
     Code("VERIFY_REDIRECT_SAMPLED", Severity.NOTE, Stage.VERIFY,
          "How many 301.yml rows were checked, and the seed that picked them",
          "planning.md Phase 60"),
+    # Phase 66: a PDF-only version's documents against its package.
+    Code("VERIFY_DOCUMENT_MISSING", Severity.ERROR, Stage.VERIFY,
+         "A document the package ships is not in the published folder",
+         "planning.md Phase 66 (3)"),
+    Code("VERIFY_DOCUMENT_CHANGED", Severity.ERROR, Stage.VERIFY,
+         "A published document's bytes differ from the package's copy",
+         "planning.md Phase 66 (3)"),
+    Code("VERIFY_DOCUMENT_UNLISTED", Severity.WARNING, Stage.VERIFY,
+         "A published document the folder's index.md does not link",
+         "planning.md Phase 66 (3)"),
+    Code("VERIFY_DOCUMENT_EXTRA", Severity.WARNING, Stage.VERIFY,
+         "A file in a published document folder that sync would not place there",
+         "planning.md Phase 66 (3)"),
 )
 
 # The register's remaining debt, stated as the *complement* of what is written.

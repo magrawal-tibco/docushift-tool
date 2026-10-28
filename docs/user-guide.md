@@ -1789,6 +1789,12 @@ docushift --locale en-us verify --target-dir ../ibi-docs-aem --bu ibi --family w
   - `clean`: nothing found;
   - `stale`: the version was published again after it was checked;
   - `not-verified`: published, never checked.
+- **Documents are checked too** (Phase 66): every PDF, readme and licence the package
+  ships is in its published folder (User Guides, Release Information, Reference
+  Documents) with the same bytes and is listed on that folder's index page. A missing
+  or altered file is `lost`. This covers versions with online help, and lets a PDF-only
+  (`pdf-ready`) version be verified at all. The report has one row per file after the
+  page rows. Staging is not checked for documents yet.
 - **The triage file, `config/verify-triage.yaml`,** records what a kind of finding is:
   ours to fix, the AEM owners' (with their Jira key), in the source documents, or
   accepted (with who decided and why). A triaged finding is still in every report,

@@ -116,7 +116,7 @@ def published_help_length(config: ConfigManager, product: Product, number: str) 
 DOC_CLASSES = (ONLINE_HELP, *router.DOCUMENT_DOC_CLASSES)
 
 # The three files a document doc-class folder gets beside its copied files.
-_RENDERED = ("index.md", "toc.yml", "metadata.yml")
+RENDERED = ("index.md", "toc.yml", "metadata.yml")
 
 # The staging sibling a version folder is built in before the swap. A constant
 # rather than four literals because Phase 7b's `validate` has to recognize one: a
@@ -598,7 +598,7 @@ class WorkspaceDistributor:
         # The same ceiling as `sync_one`, and ahead of the currency test for the same
         # reason (R1-01). The folder is flat, so the published names are the routed
         # filenames plus the three rendered files -- known before a PDF is opened.
-        for name in sorted({file.path.name for file in files} | set(_RENDERED)):
+        for name in sorted({file.path.name for file in files} | set(RENDERED)):
             length = published_length(destination, name)
             if length > PUBLISHED_PATH_LIMIT:
                 return self._too_long(slug, number, segment, name, length, doc_class)
@@ -1318,7 +1318,7 @@ def _documents_current(
         published = {child.name for child in destination.iterdir() if child.is_file()}
     except OSError:  # pragma: no cover - unreadable target, treated as not current
         return False
-    if published != expected | set(_RENDERED):
+    if published != expected | set(RENDERED):
         return False
     for name, text in rendered.items():
         try:

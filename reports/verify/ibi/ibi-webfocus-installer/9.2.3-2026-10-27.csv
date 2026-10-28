@@ -1,0 +1,6 @@
+﻿slug,version,old_url,local_source,new_path,staging_url,text_percent,missing_sentences_count,images_found,images_expected,toc_parent_matched,toc_position_matched,published_status,skip_reason,findings,triage,missing_sentences
+ibi-webfocus-installer,9.2.3,,ibi-webfocus-installer-9-2-3/pdf/IBI_wf-wi_9.2.3_integrated_install.pdf,user-guides/IBI_wf-wi_9.2.3_integrated_install.pdf,,,,,,,,ok,,,,
+ibi-webfocus-installer,9.2.3,,ibi-webfocus-installer-9-2-3/pdf/IBI_wf-wi_9.2.3_relnotes.pdf,release-information/IBI_wf-wi_9.2.3_relnotes.pdf,,,,,,,,ok,,,,
+ibi-webfocus-installer,9.2.3,,ibi-webfocus-installer-9-2-3/doc/IBI_wf-wi_9.2.3_readme.txt,release-information/IBI_wf-wi_9.2.3_readme.txt,,,,,,,,ok,,,,
+ibi-webfocus-installer,9.2.3,,ibi-webfocus-installer-9-2-3/pdf/IBI_wf-wi_9.2.3_license.pdf,reference-documents/IBI_wf-wi_9.2.3_license.pdf,,,,,,,,ok,,,,
+ibi-webfocus-installer,9.2.3,,ibi-webfocus-installer-9-2-3/doc/IBI_wf-wi_ReminderNotice.txt,reference-documents/IBI_wf-wi_ReminderNotice.txt,,,,,,,,ok,,,,

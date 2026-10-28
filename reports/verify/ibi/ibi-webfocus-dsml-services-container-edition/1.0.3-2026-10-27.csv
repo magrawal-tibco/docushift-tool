@@ -1,0 +1,6 @@
+﻿slug,version,old_url,local_source,new_path,staging_url,text_percent,missing_sentences_count,images_found,images_expected,toc_parent_matched,toc_position_matched,published_status,skip_reason,findings,triage,missing_sentences
+ibi-webfocus-dsml-services-container-edition,1.0.3,,ibi-webfocus-dsml-services-container-edition-1-0-3/pdf/IBI_WF_DSML_CE_Deployment_Guide_v103_Linux_x86_64.pdf,user-guides/IBI_WF_DSML_CE_Deployment_Guide_v103_Linux_x86_64.pdf,,,,,,,,ok,,,,
+ibi-webfocus-dsml-services-container-edition,1.0.3,,ibi-webfocus-dsml-services-container-edition-1-0-3/pdf/IBI_WF_DSML_CE_Deployment_Guide_v103_PowerPC_64.pdf,user-guides/IBI_WF_DSML_CE_Deployment_Guide_v103_PowerPC_64.pdf,,,,,,,,ok,,,,
+ibi-webfocus-dsml-services-container-edition,1.0.3,,ibi-webfocus-dsml-services-container-edition-1-0-3/doc/TIB_dsmlce_1.0.3_readme.txt,release-information/TIB_dsmlce_1.0.3_readme.txt,,,,,,,,ok,,,,
+ibi-webfocus-dsml-services-container-edition,1.0.3,,ibi-webfocus-dsml-services-container-edition-1-0-3/pdf/TIB_dsmlce_1.0.3_license.pdf,reference-documents/TIB_dsmlce_1.0.3_license.pdf,,,,,,,,ok,,,,
+ibi-webfocus-dsml-services-container-edition,1.0.3,,ibi-webfocus-dsml-services-container-edition-1-0-3/doc/TIB_dsmlce_ReminderNotice.txt,reference-documents/TIB_dsmlce_ReminderNotice.txt,,,,,,,,ok,,,,

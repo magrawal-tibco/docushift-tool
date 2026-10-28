@@ -1,0 +1,5 @@
+﻿slug,version,old_url,local_source,new_path,staging_url,text_percent,missing_sentences_count,images_found,images_expected,toc_parent_matched,toc_position_matched,published_status,skip_reason,findings,triage,missing_sentences
+ibi-open-data-hub-for-mainframe-connectors,1.0.0,,ibi-open-data-hub-for-mainframe-connectors-1-0-0/pdf/IBI_odh-mf-cnct_1.0.0_user_guide.pdf,user-guides/IBI_odh-mf-cnct_1.0.0_user_guide.pdf,,,,,,,,ok,,,,
+ibi-open-data-hub-for-mainframe-connectors,1.0.0,,ibi-open-data-hub-for-mainframe-connectors-1-0-0/doc/IBI_odh-mf-cnct_1.0.0_readme.txt,release-information/IBI_odh-mf-cnct_1.0.0_readme.txt,,,,,,,,ok,,,,
+ibi-open-data-hub-for-mainframe-connectors,1.0.0,,ibi-open-data-hub-for-mainframe-connectors-1-0-0/pdf/IBI_odh-mf-cnct_1.0.0_license.pdf,reference-documents/IBI_odh-mf-cnct_1.0.0_license.pdf,,,,,,,,ok,,,,
+ibi-open-data-hub-for-mainframe-connectors,1.0.0,,ibi-open-data-hub-for-mainframe-connectors-1-0-0/doc/IBI_odh-mf-cnct_ReminderNotice.txt,reference-documents/IBI_odh-mf-cnct_ReminderNotice.txt,,,,,,,,ok,,,,

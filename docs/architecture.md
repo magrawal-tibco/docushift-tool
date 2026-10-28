@@ -2638,7 +2638,7 @@ Five refusals, each of them measured rather than assumed (`design.md` §8.4, `pl
 ### 7.7 What `verify` compares, and what it refuses to assume (Phase 55)
 
 `validate` asks whether the published tree holds together; `verify` asks whether it
-says everything the old site said. Three comparisons, each against what a reader sees:
+says everything the old site said. Four comparisons, each against what a reader sees:
 
 - **Old page -> published page** (local, every page): topic, text, pictures, and the
   old TOC's tree against `toc.yml`.
@@ -2647,6 +2647,9 @@ says everything the old site said. Three comparisons, each against what a reader
   carry a label, and the served menu has `toc.yml`'s shape.
 - **Live docs.tibco.com -> downloaded copy** (a sample): the starting point was what
   readers saw.
+- **Package -> published documents** (every version, Phase 66): every
+  document `sync`'s router would publish is there, byte for byte, and listed in
+  `index.md`. Local only.
 
 It refuses three assumptions:
 

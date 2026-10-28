@@ -209,11 +209,13 @@ def _verify(result: dict | None, events: Events, sync_date: str) -> tuple[str, s
     version was placed again after it: then `stale`, because a re-published tree is
     not the one that was checked. A published version never verified is
     `not-verified`; one never published has nothing to verify and stays blank.
+    Placing either its help (`sync`) or its documents (`sync-docs`) counts: `verify`
+    checks both (Phase 66).
     """
     if result is None:
         return ("not-verified", "") if sync_date else ("", "")
-    placed = events.get(("sync", "ok"))
-    if placed and placed[0] > result["at"]:
+    placed = max((events[key][0] for key in (("sync", "ok"), ("sync-docs", "ok")) if events.get(key)), default="")
+    if placed > result["at"]:
         return "stale", _day(result["at"])
     return result["outcome"], _day(result["at"])
 

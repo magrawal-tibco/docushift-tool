@@ -15,27 +15,33 @@ message for the reviewer to reconcile.
 
 from __future__ import annotations
 
+import filecmp
+import re
 import subprocess
 from collections import Counter
 from dataclasses import dataclass, field
 from pathlib import Path, PurePosixPath
+from urllib.parse import unquote
 
 import yaml
 from bs4 import BeautifulSoup
 
 from docushift import origins
 from docushift.engines import flare_toc
-from docushift.engines.roots import by_language
 from docushift.engines.dita import CHROME_SELECTORS as DITA_CHROME
 from docushift.engines.dita import CONTENT_SELECTOR as DITA_CONTENT
 from docushift.engines.docbook import CONTENT_ID as DOCBOOK_CONTENT_ID
 from docushift.engines.flare import CHROME_SELECTORS as FLARE_CHROME
 from docushift.engines.flare import CONTENT_SELECTOR as FLARE_CONTENT
 from docushift.engines.flare import LANDING_CHROME, PORTAL_BLOCKS
+from docushift.engines.roots import by_language
+from docushift.extractor import content_root
 from docushift.models import SourceEngine
 from docushift.reframe.toc import schema_for
 from docushift.reporting.findings import FindingsRun, Severity
 from docushift.state import READ_BACK_CODES
+from docushift.sync import distributor, router
+from docushift.sync import documents as document_index
 from docushift.utils.csvio import natural_version_key
 from docushift.utils.slug import is_primary_locale, version_segment
 from docushift.validation import references
@@ -47,8 +53,11 @@ from docushift.verify import text as texts
 from docushift.verify.fetch import Fetcher
 from docushift.verify.toc import Node, by_page, root
 
-#: The doc-class `verify` reads. The others hold PDFs and generated index pages.
+#: The doc-class `verify` reads. The others hold PDFs and generated index pages,
+#: read only for a version with no online help (Phase 66).
 DOC_CLASS = "online-help"
+#: `index.md` links its documents as `- [title](link)`.
+_INDEX_LINK = re.compile(r"\]\(([^)\s]+)\)")
 DROP_CODES = READ_BACK_CODES
 UNFILED = "unfiled/"
 PRIMARY_LOCALE = "en-us"
@@ -129,8 +138,12 @@ class Verifier:
         `limit` caps the wave. A folder the catalog does not know is kept, so
         `version` can say why it is skipped. `locale` keeps one language's folders
         (Phase 64): an English-only change need not re-read the `loc-` trees.
+
+        A version with no online-help folder but documents (a PDF-only version,
+        Phase 66) is selected once, by its first document folder; `version` reads
+        all of them.
         """
-        folders = [v for entry in walk(self.target, product, version, DOC_CLASS) for v in entry.versions]
+        folders = _version_folders(walk(self.target, product, version))
         if locale:
             folders = [f for f in folders if f.locale.lower() == locale.lower()]
         picked: list[VersionFolder] = []
@@ -157,6 +170,8 @@ class Verifier:
     # -- one version ------------------------------------------------------------
 
     def version(self, folder: VersionFolder) -> VersionResult:
+        if folder.doc_class != DOC_CLASS:
+            return self.documents(folder)
         result = VersionResult(folder)
         product = self.catalog.products.get(folder.slug)
         number = _number(product, folder.segment)
@@ -165,7 +180,9 @@ class Verifier:
             return result
         result.version = number
         ver = product.versions[number]
-        extracted = self.cfg.extracted_dir(product.bu, product.family) / folder.slug / number
+        # Phase 66: `extract_path`, not `extracted_dir`, so a `--locale ja-jp` run falls
+        # back to the English package its translated help ships inside.
+        extracted = self.cfg.extract_path(product.bu, product.family, folder.slug, number)
         outmap = self.state.get_output_map(folder.slug, number) if self.state else {}
         if not outmap or not extracted.is_dir():
             result.skipped = "no converted output recorded" if not outmap else "extracted package not on disk"
@@ -261,8 +278,86 @@ class Verifier:
             row["findings"] = " ".join(sorted({code for code, _ in hits}))
             row["triage"] = " ".join(sorted({label for _, label in hits if label}))
         result.rows = list(rows.values())
+        # Phase 66: the documents beside the help, which `sync` publishes for the
+        # primary language only.
+        if is_primary_locale(folder.locale, PRIMARY_LOCALE):
+            result.rows += self._documents(result, folder, product, number)
         result.commit = _commit(folder.path)
         return result
+
+    def documents(self, folder: VersionFolder) -> VersionResult:
+        """A PDF-only version (Phase 66): only its documents to check."""
+        result = VersionResult(folder)
+        product = self.catalog.products.get(folder.slug)
+        number = _number(product, folder.segment)
+        if product is None or number is None:
+            result.skipped = "not in the catalog"
+            return result
+        result.version = number
+        if not self.cfg.extract_path(product.bu, product.family, folder.slug, number).is_dir():
+            result.skipped = "extracted package not on disk"
+            return result
+        result.rows = self._documents(result, folder, product, number)
+        result.commit = _commit(folder.path)
+        return result
+
+    def _documents(self, result: VersionResult, folder: VersionFolder, product, number: str) -> list[dict[str, str]]:
+        """The package's documents, published as shipped (Phase 66); one row per file.
+
+        The expected set is what `sync` would place, from its own router and
+        de-duplication, so the two cannot disagree on a name. Each document must be
+        in its doc-class folder with the package's bytes and linked from `index.md`;
+        nothing else may be there but the files `sync` renders. `folder` is any of
+        the version's published folders: the doc-class folders are its siblings.
+        """
+        tree = self.cfg.extract_path(product.bu, product.family, folder.slug, number)
+        metadata = self.state.get_version_metadata(folder.slug, number) if self.state else {}
+        content = content_root.of(tree, metadata.get(content_root.METADATA_KEY))
+        grouped = document_index.group(router.route_version(content, product.versions[number].engine))
+
+        rows: list[dict[str, str]] = []
+        for doc_class in router.DOCUMENT_DOC_CLASSES:
+            place = VersionFolder(folder.path.parent.parent / doc_class / folder.segment, folder.tree,
+                                  folder.locale, folder.slug, doc_class, folder.segment)
+            expected = grouped.get(doc_class, [])
+            if not expected and not place.path.is_dir():
+                continue
+            listed = _index_links(place.path / "index.md")
+            names = {item.path.name for item in expected}
+            here: list[dict[str, str]] = []
+            for item in expected:
+                name = item.path.name
+                row = _row(place, number, item.path.relative_to(tree).as_posix(), f"{doc_class}/{name}", "")
+                published = place.path / name
+                if not published.is_file():
+                    self._record(result, "VERIFY_DOCUMENT_MISSING", place, name,
+                                 f"{name}: shipped in the package, not in the published folder")
+                    row["published_status"] = "missing locally"
+                elif not filecmp.cmp(item.path, published, shallow=False):
+                    self._record(result, "VERIFY_DOCUMENT_CHANGED", place, name,
+                                 f"{name}: published bytes differ from the package's")
+                    row["published_status"] = "changed"
+                else:
+                    row["published_status"] = "ok"
+                    if name not in listed:
+                        self._record(result, "VERIFY_DOCUMENT_UNLISTED", place, name,
+                                     f"{name}: not linked from index.md")
+                here.append(row)
+            extra = sorted(p.name for p in place.path.iterdir()
+                           if p.is_file() and p.name not in names and p.name not in distributor.RENDERED) \
+                if place.path.is_dir() else []
+            for name in extra:
+                self._record(result, "VERIFY_DOCUMENT_EXTRA", place, name,
+                             f"{name}: in the published folder, but sync would not place it here")
+                here.append(_row(place, number, "", f"{doc_class}/{name}", "") | {"published_status": "extra"})
+            # `on_page` is keyed by filename, and one name can be in two doc-classes
+            # (a release note moved between them), so each class takes its own now.
+            for row in here:
+                hits = result.on_page.pop(row["new_path"].partition("/")[2], [])
+                row["findings"] = " ".join(sorted({code for code, _ in hits}))
+                row["triage"] = " ".join(sorted({label for _, label in hits if label}))
+            rows += here
+        return rows
 
     def _compare(self, result, folder, source: Path, md_path: Path, page: str, selector: str,
                  chrome: tuple[str, ...], landing: bool, row: dict[str, str]) -> None:
@@ -402,6 +497,36 @@ class Verifier:
 
 
 # -- helpers ----------------------------------------------------------------------
+
+
+def _version_folders(products) -> list[VersionFolder]:
+    """Each product's online-help version folders, and one per PDF-only version (Phase 66).
+
+    A version is PDF-only here when it has a document folder and no online-help
+    folder for the same segment. Only the primary locale: `sync` publishes no
+    documents to a `loc-` tree.
+    """
+    picked: list[VersionFolder] = []
+    for entry in products:
+        helps = {v.segment for v in entry.versions if v.doc_class == DOC_CLASS}
+        picked += [v for v in entry.versions if v.doc_class == DOC_CLASS]
+        if not is_primary_locale(entry.locale, PRIMARY_LOCALE):
+            continue
+        seen: set[str] = set()
+        for v in entry.versions:
+            if v.doc_class in router.DOCUMENT_DOC_CLASSES and v.segment not in helps | seen:
+                seen.add(v.segment)
+                picked.append(v)
+    return picked
+
+
+def _index_links(index: Path) -> set[str]:
+    """The filenames `index.md` links, unquoted; empty when there is no index."""
+    try:
+        text = index.read_text(encoding="utf-8")
+    except OSError:
+        return set()
+    return {unquote(link) for link in _INDEX_LINK.findall(text)}
 
 
 def _number(product, segment: str) -> str | None:

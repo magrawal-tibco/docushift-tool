@@ -721,3 +721,38 @@ by hand on 25 Oct 2026; nothing else in any ibi package is like them.
 
 Until the copy step skips such files, they come back on every copy of these two
 versions and have to be taken out again before publishing.
+
+## Legacy (ibi)
+
+### A moved document leaves an empty version list behind
+
+- **Status:** Open
+- **Owner:** unassigned
+- **Raised:** 27 Oct 2026
+- **Blocks publishing:** no, but the product shows a User Guides section with no versions
+
+Omni-Gen, Omni-Gen MDM and Omni-HealthData 4.3.0 had their release notes published
+under User Guides. A re-publish on 27 Oct 2026 moved them to Release Information and
+removed the old folder, but each product keeps a User Guides version list with nothing
+in it. Publishing should remove the list when its last version goes.
+
+The same re-publish brought these three products' pages to the current format. The
+rest of the Legacy family is still the first draft from 16 Sep 2026 and needs a
+re-publish to match.
+
+## Verify (tool)
+
+### Translated folders are never checked
+
+- **Status:** Partly fixed 28 Oct 2026 (Phase 66): `--locale` now finds the package
+- **Owner:** docushift
+- **Raised:** 27 Oct 2026
+- **Blocks publishing:** no, but no translated version has a check result
+
+Checking a translated folder (`docushift --locale ja-jp verify ...`) skips every version
+as "extracted package not on disk". The translated help ships inside the English
+package, and the check looks only in the language's own working folder, never in the
+English one. Seen on 27 Oct 2026 for WebFOCUS (Japanese, German, French, Spanish) and
+Reporting Server (Japanese). Checking without `--locale` is worse: translated pages are
+compared with the English conversion and read thousands of topics lost, and their
+result replaces the English result for the same version. Its report file does too.

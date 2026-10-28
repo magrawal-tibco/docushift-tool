@@ -1,6 +1,6 @@
 # Jira Tracking — What Is Logged in DOCOPS
 
-> **Last reconciled:** 2026-10-26, against Jira and `config/versions.csv`.
+> **Last reconciled:** 2026-10-27, against Jira and `config/versions.csv`.
 > Conventions (site, cloud ID, story points, transitions, who owns what) live in
 > `C:\github\confluence-mcp\reports\docushift-claude-atlassian-context.md`; this file
 > does not repeat them. It answers one question: **is this piece of work in Jira, and where?**
@@ -26,8 +26,7 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | General resources repo created and pushed (4 API references) | DOCOPS-245: dated note → Done |
 | `fix-callouts` has run over output/, reframed/ and both repos, pushed, and labels show on staging | DOCOPS-250: dated note → Done |
 | Phase 55 pilot reviewed and all ibi products verified | DOCOPS-249 → Done; DOCOPS-150 (ibi staging check): dated note with the verify result |
-| An ibi family's versions all read `clean` or `explained` | Its sub-task (DOCOPS-258–263): dated note → Done |
-| Container Editions re-synced and re-verified | DOCOPS-258: dated note with the new statuses |
+| An ibi family's versions all read `clean` or `explained` | Its sub-task (DOCOPS-259–263): dated note → Done |
 | An ibi family's R001 is applied, pushed and confirmed by `verify` | Its sub-task (DOCOPS-264–269): dated note → Done |
 | Container Editions re-synced | Re-run `repair census`; dated note on DOCOPS-267 with the count |
 | Phase 61 or 62 is planned in full and approved | Its sub-task (DOCOPS-272–273) → In Progress |
@@ -42,10 +41,27 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | Translated WebFOCUS layout phase is opened | New sub-task under DOCOPS-11 (deferred from Phase 63) |
 | A redirect source is decided for each Go URL with several destinations, and the Go URL redirects are built | DOCOPS-279: dated note → Done |
 | A new phase is opened | One sub-task under the matching story, In Progress, no `retro` |
+| Phase 66 runs: every synced PDF-only version verified (15 after a re-extract, 3 Omni-Gen after a re-sync) | DOCOPS-285: dated note with the counts → Done; per-BU results on the BU's verify issue |
+| Every family in a BU has its source ZIPs backed up | DOCOPS-281 (ibi), DOCOPS-282 (TIBCO), DOCOPS-283 (Spotfire, DataSynapse): dated note with gaps → Done |
 
 **Left alone on purpose:** DOCOPS-8 is a Task where its siblings are Stories.
 
 **Log** (newest first, one line per session):
+
+- 2026-10-28 — DOCOPS-258 (Container Editions) → Done: 32/32 clean, help and documents, local check. iWay BAM and
+  TPM 8.0.5 synced to Legacy `wip` and clean. Translated folders verified after the fix (23 `lost`, see Verify
+  waves). Notes on DOCOPS-259–263 not posted.
+
+- 2026-10-27 — Phase 66 runs (no Jira change yet): Omni-Gen/MDM/HealthData 4.3.0 re-synced (release notes to
+  release-information, Legacy `wip`, not committed); Reporting Server 9.1.0–9.3.4 and BW EDI 6.3.1 re-extracted;
+  ibi verified locally per family (see Verify waves). Notes on DOCOPS-258–263 proposed, not posted.
+
+- 2026-10-27 — DOCOPS-285 created under DOCOPS-96 (0.5 SP, AI & Content Intelligence), In Progress: Phase 66,
+  `verify` checks PDF-only versions. Built; read-only probe: ibi 84 clean, 3 lost; TIBCO 77 clean. Extended the
+  same day to every version's documents (EMS 7/7, WebFOCUS 45/45 clean in a probe). Runs pending.
+
+- 2026-10-27 — ZIP backup tasks DOCOPS-281/282/283 created. ibi downloaded family by family: 181 of 200 ZIPs on disk
+  (~21 GB); the 19 hand-obtained ones are not fetched. General has none eligible. DOCOPS-281 not yet noted or closed.
 
 - 2026-10-26 — DOCOPS-254 note: Data Virtualization 8.9.0/8.8.1/8.8.0 published in the TOC layout with the
   source errors as-is, pushed (1ac1167a); stays In Progress for the team's answer. Verify's "lost" is a false alarm.
@@ -323,6 +339,7 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | 61 | Redirect map for CSH (Help button) URLs (planned) | DOCOPS-272 |
 | 62 | `verify` checks CSH identifiers, ibi and TIBCO (planned) | DOCOPS-273 |
 | 64 | `verify` reads one language; `301.yml` from English pages; `sync` skips archives | DOCOPS-275 (done) |
+| 66 | `verify` checks every version's documents, PDF-only versions included | DOCOPS-285 (in progress) |
 | 57 | Translated help to the `loc-` tree (`--locale`) | build DOCOPS-253; runs DOCOPS-148 (in progress) |
 
 Other logged work: Jira reconcile and this handoff DOCOPS-208; stakeholder status page DOCOPS-197; TIBCO family reassignments DOCOPS-120
@@ -355,6 +372,8 @@ ibi redirect lists is DOCOPS-270 (under DOCOPS-149), and waits on Phase 60.
 | Wave | Date | Selection | Versions | Outcome | Jira |
 |---|---|---|---|---|---|
 | Pilot | 2026-10-23 | ibi™ AI Assistant 9.3.8, local + staging + live | 1 | explained (5 alt texts → DOCOPS-255; 61 note labels → DOCOPS-250) | DOCOPS-249 |
+| ibi translated, Phase 66 | 2026-10-28 | `--locale` ja-jp (Reporting Server, WebFOCUS), de-de, fr-fr, es-es (WebFOCUS), local | 23 | all `lost` from page findings; Client 9.3.8 ~1,070 per language are menu entries to pages the language never shipped | DOCOPS-262, 263 |
+| ibi, Phase 66 | 2026-10-27 | `--bu ibi` per family, local only; translated folders not checked (open issue) | 196 | PDF-only: 102 of 102 `clean` (iWay BAM and TPM 8.0.5 synced to `wip` 2026-10-28). No document finding anywhere. Help: Container Editions 32/32 and Legacy clean; `lost` from page findings: WebFOCUS 22, Reporting Server 9, FOCUS 9, DI-ISM 2 | DOCOPS-258 Done; 259–263 open |
 | Container Editions | 2026-10-23 | `--bu ibi --family container-editions`, local + staging + live | 20 | all `lost`: published copy (5 Oct) predates the conversion (7 Oct); front pages and link text are the old copy's losses. Re-sync, then re-check. Staging serves 2 of 20 | DOCOPS-258 |
 
 ## Not in Jira, by choice

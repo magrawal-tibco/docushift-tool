@@ -2239,6 +2239,101 @@ any version can be reached in three clicks from its business unit.*
 - **Weeks are bucketed in UTC.** Local dates in IST put every week on a Sunday and
   doubled the empty weeks.
 
+### Phase 66: Every Version's Documents Are Verified, PDF-Only Versions Included — **Built 2026-10-27; runs pending; DOCOPS-285**
+
+**Why.** `verify` read only `online-help` folders (`driver.DOC_CLASS`), but
+`_verify_status` reads `not-verified` for every published version it has no result for
+(`reporting.status._verify`). A `pdf-ready` version publishes only to `user-guides`,
+`release-information` and `reference-documents` (Phase 39), so it could never leave
+`not-verified`. Measured on `config/versions.csv`, 2026-10-27: **172 `pdf-ready`
+versions are synced, all `not-verified`**: 102 ibi, 68 TIBCO, 2 Spotfire. And a version
+with online help had its documents (PDFs, readmes, licences) beside it unchecked, so a
+missing or misplaced PDF could not show.
+
+**What "clean" means for documents.** What the package ships is what readers get: every
+document `sync` would publish is in its doc-class folder with the package's bytes,
+`index.md` links to it, and nothing else is there. Same verdicts as online help: `lost`
+for a missing or altered document, `issues` for a listing or leftover problem. A version
+with online help reads `clean` only when its pages and its documents both are.
+
+**Steps:**
+
+1. **Selection.** `Verifier.selection` takes every online-help version folder, as
+   before, plus each PDF-only version once: a primary-locale `(slug, segment)` with a
+   folder under any `router.DOCUMENT_DOC_CLASSES` and no `online-help` folder. `--bu`,
+   `--family`, `--latest-only`, `--status`, `--max` and `--product`/`--version` apply
+   unchanged.
+2. **Every version's documents are checked.** A version with online help runs the
+   document check after its page checks, primary locale only (`sync` publishes no
+   documents to a `loc-` tree), and its findings count toward the one verdict. A
+   PDF-only version runs the document check alone.
+3. **The expected set comes from `sync`'s own routing.** `router.route_version` over the
+   extracted tree, grouped per doc-class as `_sync_doc_class` groups it, so verify and sync
+   cannot disagree on names. Files `unpublishable` skips (archives, over 100 MB, Phase 64)
+   are not expected. No extracted tree: skipped with "extracted package not on disk",
+   as online help is.
+4. **Four checks per doc-class folder**, with the codes in the
+   [register](#75-the-findings-register-living): `VERIFY_DOCUMENT_MISSING` and
+   `VERIFY_DOCUMENT_CHANGED` (byte for byte) are errors; `VERIFY_DOCUMENT_UNLISTED`
+   (not linked from `index.md`) and `VERIFY_DOCUMENT_EXTRA` (any file but the documents
+   and `sync.distributor.RENDERED`) are warnings. Triage works as for any code.
+5. **Recorded like any version.** One `verify_result` row; the per-version CSV has one
+   row per document after the page rows (`old_url` blank, `local_source` the package
+   path, `new_path` `<doc-class>/<file>`, `published_status`). Scope is unchanged:
+   the document check is local in every scope.
+6. **`stale` reads both placements.** `_verify` compared the result's date with `sync`'s
+   event only; it now takes the later of `sync` and `sync-docs`, so re-publishing either
+   the help or the documents after the check reads `stale`.
+7. **Tests:** a PDF-only fixture reading `clean`; one per code; a release note moved
+   between doc-classes; a help version with a missing PDF selected once and reading
+   `lost`; `stale` after a later `sync` or `sync-docs`.
+8. **Run** per business unit: `docushift verify --target-dir ../ibi-docs-aem --bu ibi`
+   (and `../tibco-docs-aem` for TIBCO and Spotfire). The 54 `clean` and 41 `lost`
+   help results recorded before this phase keep their verdict until their versions are
+   verified again. Results noted on each BU's docs issue.
+
+**Not in this phase: staging.** AEM serves PDFs from paths the repo does not name, and
+verify derives no staging URL (`architecture.md` §7.7). Checking that staging serves each
+PDF waits until one served PDF's URL has been read from its served index page.
+
+**Measured 2026-10-27**, read-only runs of the document check (nothing recorded):
+
+- **PDF-only versions — ibi: 84 clean, 3 `lost`, 23 not checkable. TIBCO: 77 clean,
+  7 not checkable.**
+- **The 3 `lost` are real**: Omni-Gen, Omni-Gen MDM and Omni-HealthData 4.3.0 publish
+  their release notes under `user-guides`, where today's router sends them to
+  `release-information`. Published before that rule; a `sync` of the three fixes them.
+- **15 synced `pdf-ready` versions have no extracted package on disk**, so nothing to
+  compare: Reporting Server 9.1.0–9.2.7 (13) and BusinessWorks EDI Healthcare and
+  Standard 6.3.1. They need `extract` before `verify`. The other 15 not checkable
+  are `not-selected`.
+- **Help versions, two families: all clean.** TIBCO EMS 7 of 7 (6–7 files each),
+  ibi WebFOCUS 45 of 45 (4–30 files each).
+- **The cost is small beside the page checks.** EMS ~1.5 s a version; WebFOCUS ~3 min
+  for 45, most under 2 s, the worst 20 s (Client 9.3.5). Most of it is
+  `route_version` finding the help roots in a large package, which `sync` pays too.
+
+**ibi run, 2026-10-27** (local, per family; `jira.md` Verify waves has the per-family row):
+
+- **PDF-only: 102 of 102 synced versions `clean`.** First the three Omni-Gen versions were
+  re-synced and Reporting Server 9.1.0–9.2.7 re-extracted. iWay BAM and TPM 8.0.5 were on
+  the Legacy repo's `main` only; synced to `wip` 2026-10-28, then clean.
+- **No `VERIFY_DOCUMENT_*` finding in any ibi version**, help versions included.
+- **Translated folders were not checked.** `version` read the package from
+  `extracted_dir`, which has no primary fallback, so `--locale ja-jp` skipped every version
+  ("extracted package not on disk"). Fixed 2026-10-28: `cfg.extract_path`, which falls back
+  and is the same path for English, with a test. Still open: without `--locale`,
+  translated folders are compared with the English output map and their result replaces
+  the English one (same `(slug, version)` key and report file name).
+- **Translated folders, 2026-10-28, after the fix: all 23 `lost`**, from help-page findings
+  (Reporting Server ja-jp 5; WebFOCUS ja-jp 10, de-de, fr-fr, es-es 4 each). Most of it is
+  one source fault: Client 9.3.8's de/es/fr/ja TOCs list ~1,020 pages their language folder
+  does not ship (`html/ja-jp/dev-reporting-apps/INDEX.htm` is only under `html/en-us`),
+  so each reads 1,072 `VERIFY_TOPIC_MISSING` beside the convert's `NAV_NODE_DROPPED` 1,018.
+  They were dead menu entries on the old site too. The four languages' reports for one
+  version on one day share a file name, so only es-es's is kept (open issue).
+- Run time: under 2 h for 6 families (18:27–20:21, a first Reporting Server pass included); WebFOCUS 37 min, Reporting Server 28.
+
 ---
 
 ## Carried-Forward Open Items
@@ -2400,6 +2495,10 @@ The concrete deliverable of §7.1: every deferred "report line" in the three doc
 | `VERIFY_REDIRECT_UNSERVED`⁶⁰ | error | verify | A sampled target staging does not serve, where it serves others | Phase 60 |
 | `VERIFY_REDIRECT_NOT_ON_STAGING`⁶⁰ | note | verify | No sampled target served: the layout has not reached staging | Phase 60 |
 | `VERIFY_REDIRECT_SAMPLED`⁶⁰ | note | verify | Rows checked and the seed that picked them | Phase 60 |
+| `VERIFY_DOCUMENT_MISSING`⁶⁶ | error | verify | A document the package ships is not in its published doc-class folder | Phase 66 |
+| `VERIFY_DOCUMENT_CHANGED`⁶⁶ | error | verify | A published document's bytes differ from the package's copy | Phase 66 |
+| `VERIFY_DOCUMENT_UNLISTED`⁶⁶ | warn | verify | A published document the folder's `index.md` does not link | Phase 66 |
+| `VERIFY_DOCUMENT_EXTRA`⁶⁶ | warn | verify | A file in a published document folder that `sync` would not place there | Phase 66 |
 
 ---
 

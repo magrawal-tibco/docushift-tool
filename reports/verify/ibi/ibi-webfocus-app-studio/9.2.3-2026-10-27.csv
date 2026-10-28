@@ -1,0 +1,10 @@
+﻿slug,version,old_url,local_source,new_path,staging_url,text_percent,missing_sentences_count,images_found,images_expected,toc_parent_matched,toc_position_matched,published_status,skip_reason,findings,triage,missing_sentences
+ibi-webfocus-app-studio,9.2.3,,ibi-webfocus-app-studio-9-2-3/pdf/IBI_wf-as_9.2.3_installation.pdf,user-guides/IBI_wf-as_9.2.3_installation.pdf,,,,,,,,ok,,,,
+ibi-webfocus-app-studio,9.2.3,,ibi-webfocus-app-studio-9-2-3/pdf/IBI_wf-as_9.2.3_maintain_getting_started.pdf,user-guides/IBI_wf-as_9.2.3_maintain_getting_started.pdf,,,,,,,,ok,,,,
+ibi-webfocus-app-studio,9.2.3,,ibi-webfocus-app-studio-9-2-3/pdf/IBI_wf-as_9.2.3_maintain_language.pdf,user-guides/IBI_wf-as_9.2.3_maintain_language.pdf,,,,,,,,ok,,,,
+ibi-webfocus-app-studio,9.2.3,,ibi-webfocus-app-studio-9-2-3/pdf/IBI_wf-as_9.2.3_transition_guide.pdf,user-guides/IBI_wf-as_9.2.3_transition_guide.pdf,,,,,,,,ok,,,,
+ibi-webfocus-app-studio,9.2.3,,ibi-webfocus-app-studio-9-2-3/pdf/IBI_wf-as_9.2.3_users_guide.pdf,user-guides/IBI_wf-as_9.2.3_users_guide.pdf,,,,,,,,ok,,,,
+ibi-webfocus-app-studio,9.2.3,,ibi-webfocus-app-studio-9-2-3/pdf/IBI_wf-as_9.2.3_relnotes.pdf,release-information/IBI_wf-as_9.2.3_relnotes.pdf,,,,,,,,ok,,,,
+ibi-webfocus-app-studio,9.2.3,,ibi-webfocus-app-studio-9-2-3/doc/IBI_wf-as_9.2.3_readme.txt,release-information/IBI_wf-as_9.2.3_readme.txt,,,,,,,,ok,,,,
+ibi-webfocus-app-studio,9.2.3,,ibi-webfocus-app-studio-9-2-3/pdf/IBI_wf-as_9.2.3_license.pdf,reference-documents/IBI_wf-as_9.2.3_license.pdf,,,,,,,,ok,,,,
+ibi-webfocus-app-studio,9.2.3,,ibi-webfocus-app-studio-9-2-3/doc/IBI_wf-as_ReminderNotice.txt,reference-documents/IBI_wf-as_ReminderNotice.txt,,,,,,,,ok,,,,

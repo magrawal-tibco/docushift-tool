@@ -1,0 +1,5 @@
+﻿slug,version,old_url,local_source,new_path,staging_url,text_percent,missing_sentences_count,images_found,images_expected,toc_parent_matched,toc_position_matched,published_status,skip_reason,findings,triage,missing_sentences
+ibi-webfocus-container-edition,1.0.4,,tibco-webfocus-container-edition-1-0-4/pdf/TIB_wfce_1.0.4_deployment_guide.pdf,user-guides/TIB_wfce_1.0.4_deployment_guide.pdf,,,,,,,,ok,,,,
+ibi-webfocus-container-edition,1.0.4,,tibco-webfocus-container-edition-1-0-4/doc/TIB_wfce_1.0.4_readme.txt,release-information/TIB_wfce_1.0.4_readme.txt,,,,,,,,ok,,,,
+ibi-webfocus-container-edition,1.0.4,,tibco-webfocus-container-edition-1-0-4/pdf/TIB_wfce_1.0.4_license.pdf,reference-documents/TIB_wfce_1.0.4_license.pdf,,,,,,,,ok,,,,
+ibi-webfocus-container-edition,1.0.4,,tibco-webfocus-container-edition-1-0-4/doc/TIB_wfce_ReminderNotice.txt,reference-documents/TIB_wfce_ReminderNotice.txt,,,,,,,,ok,,,,

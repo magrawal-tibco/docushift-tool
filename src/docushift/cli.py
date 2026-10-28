@@ -3354,6 +3354,11 @@ def verify(ctx, target_dir, product, version, bu, family, latest_only, statuses,
     random sample of rows is followed (Phase 60): the old URL is listed, the target
     page and anchor exist, the page holds the old text, and staging serves it.
 
+    Every version's documents (PDFs, readmes, licences) are checked against its
+    package too (Phase 66): each published byte for byte in its doc-class folder,
+    listed in that folder's `index.md`, and nothing else there. A version with no
+    online help is checked on its documents alone. Local only.
+
     Each version's result is kept: `reports/verify/<bu>/<slug>/<version>-<date>.csv`
     (one row per old page) and `.html`, a row in `state.db`, and `_verify_status` /
     `_verify_date` in versions.csv. `reports/verify/INDEX.html` shows every published
@@ -3398,7 +3403,7 @@ def verify(ctx, target_dir, product, version, bu, family, latest_only, statuses,
                                  statuses=status_of, wanted=tuple(statuses), limit=limit,
                                  locale=cfg.locale if ctx.parent.params.get("locale") else None)
     if not folders:
-        console.print(f"[yellow]No published online-help folders match this selection in {target_dir}.[/yellow]")
+        console.print(f"[yellow]No published version folders match this selection in {target_dir}.[/yellow]")
         raise click.exceptions.Exit(1)
     if dry_run:
         table = Table(title=f"Would verify ({len(folders)})")

@@ -692,3 +692,145 @@ def test_raw_html_entities_split_tokens_and_continued_lines_are_not_dropped_text
                                "You can check it using this command.\n")
 
     assert texts.coverage(source, page).missing == []
+
+
+# -- Phase 66: PDF-only versions -------------------------------------------------------
+
+PDFS = {"install guide.pdf": b"%PDF install", "admin.pdf": b"%PDF admin"}
+
+
+def _pdf_fixture(config, *, published=None, listed=None, extra=None) -> Path:
+    """A package of PDFs only, and its `user-guides` folder as `sync` writes it."""
+    package = config.extract_path("ibi", "webfocus", SLUG, NUMBER) / "pdf"
+    package.mkdir(parents=True)
+    for name, data in PDFS.items():
+        (package / name).write_bytes(data)
+    target = config.root_dir / "repos"
+    folder = target / "en-us-ibi-webfocus-userdocs/en-us" / SLUG / "user-guides/1-0-0"
+    folder.mkdir(parents=True)
+    for name, data in (PDFS if published is None else published).items():
+        (folder / name).write_bytes(data)
+    for name, data in (extra or {}).items():
+        (folder / name).write_bytes(data)
+    links = "".join(f"- [{n}]({n.replace(' ', '%20')})\n" for n in (PDFS if listed is None else listed))
+    (folder / "index.md").write_text(f"---\ntitle: Guides\n---\n\n# Guides\n\n{links}", encoding="utf-8")
+    (folder / "toc.yml").write_text("docs: []\n", encoding="utf-8")
+    (folder / "metadata.yml").write_text("{}\n", encoding="utf-8")
+    return target
+
+
+def _verify_pdfs(config, state, target: Path):
+    product = make_product(SLUG, bu="ibi", family="webfocus")
+    product.versions = {NUMBER: make_version(SLUG, NUMBER, engine=SourceEngine.OTHER)}
+    findings = FindingsRun("verify")
+    verifier = Verifier(config, Catalog(products={SLUG: product}), state, target, findings)
+    results = [verifier.version(folder) for folder in verifier.selection(SLUG, None)]
+    findings.flush()
+    return findings, results
+
+
+def test_a_pdf_only_version_published_as_shipped_is_clean(config, state) -> None:
+    findings, results = _verify_pdfs(config, state, _pdf_fixture(config))
+
+    assert _codes(findings) == []
+    assert [(r.version, r.outcome) for r in results] == [(NUMBER, "clean")]
+    assert sorted(row["new_path"] for row in results[0].rows) == [
+        "user-guides/admin.pdf", "user-guides/install guide.pdf"]
+    assert {row["published_status"] for row in results[0].rows} == {"ok"}
+
+
+def test_a_missing_or_altered_pdf_is_lost(config, state) -> None:
+    target = _pdf_fixture(config, published={"install guide.pdf": b"%PDF other"})
+
+    findings, results = _verify_pdfs(config, state, target)
+
+    assert _codes(findings) == ["VERIFY_DOCUMENT_CHANGED", "VERIFY_DOCUMENT_MISSING"]
+    assert results[0].outcome == "lost"
+    status = {row["new_path"]: (row["published_status"], row["findings"]) for row in results[0].rows}
+    assert status["user-guides/admin.pdf"] == ("missing locally", "VERIFY_DOCUMENT_MISSING")
+
+
+def test_an_unlisted_pdf_and_a_leftover_file_are_issues(config, state) -> None:
+    target = _pdf_fixture(config, listed={"admin.pdf": b""}, extra={"old.pdf": b"%PDF old"})
+
+    findings, results = _verify_pdfs(config, state, target)
+
+    assert _codes(findings) == ["VERIFY_DOCUMENT_EXTRA", "VERIFY_DOCUMENT_UNLISTED"]
+    assert results[0].outcome == "issues"
+
+
+def test_a_version_with_help_and_pdfs_is_selected_once_and_both_are_checked(config, state) -> None:
+    target = _fixture(config, state)
+    package = config.extract_path("ibi", "webfocus", SLUG, NUMBER) / "pdf"
+    package.mkdir(parents=True)
+    (package / "admin.pdf").write_bytes(b"%PDF admin")
+    guides = target / "en-us-ibi-webfocus-userdocs/en-us" / SLUG / "user-guides/1-0-0"
+    guides.mkdir(parents=True)
+    (guides / "index.md").write_text("# Guides\n\n- [Admin](admin.pdf)\n", encoding="utf-8")
+    product = make_product(SLUG, bu="ibi", family="webfocus")
+    product.versions = {NUMBER: make_version(SLUG, NUMBER, engine=SourceEngine.FLARE)}
+    findings = FindingsRun("verify")
+    verifier = Verifier(config, Catalog(products={SLUG: product}), state, target, findings)
+
+    folders = verifier.selection(SLUG, None)
+    result = verifier.version(folders[0])
+
+    assert [f.doc_class for f in folders] == ["online-help"]
+    assert result.outcome == "lost"
+    assert result.codes == {"VERIFY_DOCUMENT_MISSING": 1}
+    assert [row["new_path"] for row in result.rows][-1] == "user-guides/admin.pdf"
+
+
+def test_placing_the_help_or_the_documents_after_the_check_reads_stale() -> None:
+    from docushift.reporting.status import _verify
+
+    checked = {"at": "2026-10-23T10:00:00+00:00", "outcome": "clean"}
+    before = ("2026-10-22T09:00:00+00:00", "target")
+    after = ("2026-10-24T09:00:00+00:00", "target")
+
+    assert _verify(checked, {("sync-docs", "ok"): after}, "2026-10-24") == ("stale", "2026-10-23")
+    assert _verify(checked, {("sync", "ok"): before, ("sync-docs", "ok"): after}, "2026-10-22") == \
+        ("stale", "2026-10-23")
+    assert _verify(checked, {("sync", "ok"): before, ("sync-docs", "ok"): before}, "2026-10-22") == \
+        ("clean", "2026-10-23")
+
+
+def test_a_release_note_published_under_user_guides_is_missing_from_its_own_folder(config, state) -> None:
+    """Measured on Omni-Gen 4.3.0: published before release notes had their own folder."""
+    target = _pdf_fixture(config, extra={"prod_1.0.0_release_notes.pdf": b"%PDF notes"})
+    (config.extract_path("ibi", "webfocus", SLUG, NUMBER) / "pdf/prod_1.0.0_release_notes.pdf").write_bytes(
+        b"%PDF notes")
+
+    _, results = _verify_pdfs(config, state, target)
+
+    status = {row["new_path"]: (row["published_status"], row["findings"]) for row in results[0].rows}
+    assert status["user-guides/prod_1.0.0_release_notes.pdf"] == ("extra", "VERIFY_DOCUMENT_EXTRA")
+    assert status["release-information/prod_1.0.0_release_notes.pdf"] == ("missing locally",
+                                                                          "VERIFY_DOCUMENT_MISSING")
+
+
+def test_a_translated_folder_reads_the_english_package_it_ships_in(config, state) -> None:
+    """Phase 66. A `--locale ja-jp` run has no extracted tree of its own: the translated
+    help ships inside the English package, so the check must find it there."""
+    import shutil
+
+    from docushift.config import ConfigManager
+
+    target = _fixture(config, state)
+    english = target / "en-us-ibi-webfocus-userdocs/en-us" / SLUG / "online-help/1-0-0"
+    shutil.copytree(english, target / "loc-ibi-webfocus-userdocs/ja-jp" / SLUG / "online-help/1-0-0")
+    localized = ConfigManager(root_dir=config.root_dir, locale="ja-jp")
+    ja_state = localized.state_store()
+    ja_state.record_output_map(SLUG, NUMBER, [("pkg/html/guide.htm", "guide.md", ""),
+                                              ("pkg/html/one.htm", "one.md", ""), ("pkg/html/two.htm", "two.md", "")])
+    product = make_product(SLUG, bu="ibi", family="webfocus")
+    product.versions = {NUMBER: make_version(SLUG, NUMBER, engine=SourceEngine.FLARE)}
+    verifier = Verifier(localized, Catalog(products={SLUG: product}), ja_state, target, FindingsRun("verify"))
+
+    results = [verifier.version(f) for f in verifier.selection(SLUG, None, locale="ja-jp")]
+
+    # Compared page by page, nothing lost; the fixture has no `ja-jp` Flare root or
+    # product-level 301.yml, which is what the two other codes say.
+    assert [(r.folder.locale, r.skipped, len(r.rows)) for r in results] == [("ja-jp", "", 3)]
+    assert set(results[0].codes) == {"VERIFY_TOC_UNCHECKED", "VERIFY_REDIRECT_MAP_MISSING"}
+    ja_state.close()

@@ -249,6 +249,9 @@ Jira (DOCOPS) status and what to file next: the handoff at the top of [`docs/jir
    repair: counted in every published version in minutes, applied in waves to the repo and both local
    trees, confirmed on staging by `verify`, tracked in `versions.csv` `_repairs_pending`. Versions
    still needing R001 (`repair census`, 2026-10-23): 538, with 97,694 old-style notes; 18 are fixed.
+0k. **Phase 66, built 2026-10-27; runs pending**: `verify` checks every version's
+   documents (each shipped PDF or readme published byte for byte and listed), so the 172
+   synced `pdf-ready` versions can leave `not-verified`. 15 need `extract` first; 3 Omni-Gen need a re-sync. See [`planning.md`](docs/planning.md#1-active-phases).
 1. **Phase 40, built; two network runs left**: `download` takes each version's package
    name from the Coveo sitemap, so pre-rebrand and renamed versions stop failing
    (96 of the 1,435 still to download). Run `catalog sitemap` before a large download. See [`planning.md`](docs/planning.md#1-active-phases).
