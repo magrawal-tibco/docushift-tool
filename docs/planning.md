@@ -2506,6 +2506,10 @@ online help to publish… PDF-only"), shows *PDF-only* in `--dry-run`, and is on
 line in the report instead of a warning per version. 9.2.8 (never unpacked; may have an
 updated doc set) is left for now.
 
+**Decided 2026-10-29 (the user):** Data Intelligence 1.1.0/1.2.0 have 104 topics each outside the
+TOC (`unfiled/`), so no `301.yml` row; that is accepted, not a gap to fix. ibi pushed to
+`content-fix` (DI/ISM 9af82a3 for the two re-merged versions).
+
 ---
 
 ## Carried-Forward Open Items
