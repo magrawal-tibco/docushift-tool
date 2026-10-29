@@ -47,6 +47,9 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 **Log** (newest first, one line per session):
 
+- 2026-10-29 — TIBCO repos: `wip` pushed (main untouched) in businessevents, tra, bpm, bpm-resources, bw-plugin
+  userdocs; Business Studio 5.6.0–5.7.0 case-object page renamed (260 chars); path limit now 259.
+
 - 2026-10-29 — DOCOPS-122 note: Phase 67 built (API refs publish past 260); Service Grid 3.4.3/3.4.4 synced in full.
   8 of 9 resolved; BPM parked. Repo changes uncommitted.
 
