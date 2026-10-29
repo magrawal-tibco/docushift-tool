@@ -48,6 +48,10 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 **Log** (newest first, one line per session):
 
+- 2026-10-29 — DOCOPS-292 note: ibi re-sync after unfiled help entries dropped; pushed to `content-fix` (Focus
+  e1f1d021, WebFOCUS 95a86c00, RS 4512e1fa). RS 9.2.8 is PDF-only, published. The 2 WebFOCUS Client warnings are 9.1.0/9.1.1 help
+  `.war` ZIPs (~500 MB); user kept both versions PDF-only.
+
 - 2026-10-29 — Phase 68 ibi run: maps rooted in 5 repos, pushed to `content-fix` (WFCE d96e0cc, DI/ISM 80247ae, Focus
   44be2105, WebFOCUS f6e0c87e, RS 05ce789c). Left: DI 1.1.0/1.2.0 (stale merge), TIBCO run. No Jira change yet.
 - 2026-10-29 — DOCOPS-292 created under DOCOPS-96 (0.5 SP, AI & Content Intelligence), In Progress: Phase 68,
