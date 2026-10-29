@@ -2393,6 +2393,41 @@ Not in this follow-up: `reports/verify/INDEX` and `_verify_status` stay English-
 `versions.csv` is (Phase 57); a translated result is read from its report and
 `state-<locale>.db`.
 
+### Phase 67: API References Publish Verbatim Past 260 Characters — **Built 2026-10-28; run pending; DOCOPS-122**
+
+**Why.** User decision, 2026-10-28: API references are published exactly as the developers
+ship them, and the system must handle paths over 260 characters rather than refuse them.
+Today `sync` refuses an API tree whole when any file would publish past 260
+(`_overflowing`, `PUBLISHED_PATH_TOO_LONG`), and `validate` reports `PATH_TOO_LONG` on
+`api-references/` too. Measured on `state.db`, 2026-10-28: the only API trees refused are
+Service Grid 3.4.3 and 3.4.4 (Mediation Java API, `…/com.tibco.amf.platform.runtime.extension/…`,
+276 characters at worst). Their help pages already publish.
+
+**The cost, said plainly.** §4.4's rule was "published paths are held to 260" because a
+reader outside this tool may not open a longer one. Lifting it for API trees moves that
+burden downstream: `git` on Windows needs `core.longpaths=true` in each `-resources` repo
+(not set today in `en-us-tib-bpm-userdocs-resources`, so `git add` would fail with
+"Filename too long"), and anyone opening the tree in Explorer needs Windows long-path
+support on. Online help and the three document doc-classes keep the 260 rule.
+
+**Steps:**
+
+1. **`sync`.** `sync_api_references` no longer refuses an over-limit tree. The copy already
+   goes through `long_path` on both ends. In place of the refusal it records one note per
+   version, `PUBLISHED_PATH_LONG`, with the count of files past 260 and the longest.
+2. **`validate`.** `check_lengths` skips `api-references/` folders; the same note, not an error.
+3. **Currency.** No change: `apirefs.current` already measures the published copy through
+   `walk_files` (`measure`), so a long file is counted and the tree is current on the next run.
+4. **Git.** `sync` warns (`GIT_LONGPATHS_OFF`) when it publishes a long API path into a git
+   repo whose `core.longpaths` is not `true`. It does not change git config itself; the
+   user runs `git -C <repo> config core.longpaths true` once per repo.
+5. **Tests:** an API tree with a 270-character file publishes and is current on the second
+   run; online help with the same length is still refused; `validate` gives the note, not an error.
+6. **Docs:** `architecture.md` §4.4 (the rule now has an API exception), `user-guide.md` sync section.
+7. **Run:** `sync` Service Grid 3.4.3 and 3.4.4 after setting `core.longpaths` in the resources repo.
+
+*Exit: both Service Grid versions read `synced`; online-help is still held to 260; tests and lint clean.*
+
 ---
 
 ## Carried-Forward Open Items
@@ -2434,7 +2469,9 @@ The concrete deliverable of §7.1: every deferred "report line" in the three doc
 | `MIGRATE_ALIAS_STALE`²⁵ | warn | catalog | An alias naming a slug the active export lacks | Phase 25 |
 | `MIGRATE_DECISION_CONFLICT`²⁵ | warn | catalog | `migrate_decision` disagrees with `convert_eligible` (376 versions; 458 on the first apply) | Phase 25 |
 | `ZIP_URL_UNRESOLVED`¹⁴ᵃ | warn | download | No ZIP endpoint could be derived for an active version (7 of 35 sampled products); supply it with `--from-file` | Phase 14a |
-| `PUBLISHED_PATH_TOO_LONG`¹⁵ᵈ | error | sync | A file's published path would exceed 260 characters; the tree is skipped rather than half-copied | Phase 15d |
+| `PUBLISHED_PATH_TOO_LONG`¹⁵ᵈ | error | sync | A file's published path would exceed 260 characters; the tree is skipped rather than half-copied (API trees excepted since Phase 67) | Phase 15d |
+| `PUBLISHED_PATH_LONG` | note | sync | An API reference published with paths over 260 characters, as shipped; count and longest | Phase 67 |
+| `GIT_LONGPATHS_OFF` | warn | sync | Long API paths published into a git repository without `core.longpaths=true` | Phase 67 |
 | `ZIP_CASE_DUPLICATE_SKIPPED`⁵² | note | extract | Two ZIP members differing only in letter case with the same CRC-32 and size; the second is not written. One package on 2026-10-14 (MFT z/Linux 8.1.0, a font) | Phase 52 |
 | `CSH_SOURCE_EMPTY` | note | extract | CSH source present but empty — no `csh.yml` written | `architecture.md` §5.4.2 |
 | `CSH_SOURCE_UNPARSED` | warn | extract | Source located but failed to parse; `_has_csh` still set | `design.md` §6.2 |
@@ -2478,6 +2515,7 @@ The concrete deliverable of §7.1: every deferred "report line" in the three doc
 | `LINK_BROKEN` | **error** | validate | Relative link resolving to nothing | `design.md` §8.4 |
 | `LINK_TO_UNFILED` | note | validate | A listed page links to an orphan under `unfiled/`, which AEM does not publish; listed in that version's `unfiled/inbound-links.csv` | Phase 43 |
 | `PATH_TOO_LONG`³⁴ | **error** | validate | A published file whose absolute path under `--target-dir` exceeds 260 characters, measured as `sync` measures it; Windows readers cannot open it (longest today: 236) | Phase 34 (R11-06) |
+| `API_PATH_LONG` | note | validate | `PATH_TOO_LONG` in an `api-references/` folder, published as shipped on purpose; one per folder | Phase 67 |
 | `ANCHOR_MISSING`⁷ᵇ | warn | validate | A `#fragment` naming no heading in the file it resolves to (heading slugs only since Phase 29; an `id=`/`name=` attribute is not an anchor) | §7.4 |
 | `ANCHOR_WRONG_HEADING`³⁴ | warn | validate | A same-page `#fragment` that resolves, but to an earlier topic's heading: a heading with the same title, renumbered `-N` by the merge, sits between the target and the link (R9-01; 3 in p35, all real) | Phase 34 (R11-02) |
 | `LINK_EXTERNAL_DEAD`⁷ᵇ | warn | validate | An absolute URL that did not respond, under `--check-external` | §7.4 |

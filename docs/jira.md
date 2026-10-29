@@ -1,6 +1,6 @@
 # Jira Tracking — What Is Logged in DOCOPS
 
-> **Last reconciled:** 2026-10-27, against Jira and `config/versions.csv`.
+> **Last reconciled:** 2026-10-29, against Jira and `config/versions.csv`.
 > Conventions (site, cloud ID, story points, transitions, who owns what) live in
 > `C:\github\confluence-mcp\reports\docushift-claude-atlassian-context.md`; this file
 > does not repeat them. It answers one question: **is this piece of work in Jira, and where?**
@@ -17,6 +17,7 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | Phase 47 re-runs (8 versions) pass | DOCOPS-187 → Done |
 | `catalog sitemap` over the whole scope run (StreamBase half done 2026-10-21) | DOCOPS-123 → Done |
 | 50 long-path + 8 DITA versions re-run | DOCOPS-188 → Done |
+| BPM 4.2.0/4.3.0 long paths fixed and published | DOCOPS-122: dated note → Done if nothing else failing |
 | `sync --bu tibco` + `validate` run | DOCOPS-134, DOCOPS-135; refresh counts in DOCOPS-122, 125–127 |
 | A family reassignment is committed | Add a dated line to the progress comment on DOCOPS-120 |
 | Family review finished | DOCOPS-120 → Done, then DOCOPS-130 |
@@ -45,6 +46,12 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 **Left alone on purpose:** DOCOPS-8 is a Task where its siblings are Stories.
 
 **Log** (newest first, one line per session):
+
+- 2026-10-29 — DOCOPS-122 note: Phase 67 built (API refs publish past 260); Service Grid 3.4.3/3.4.4 synced in full.
+  8 of 9 resolved; BPM parked. Repo changes uncommitted.
+
+- 2026-10-28 — DOCOPS-122 note: 7 of 9 failed/out-of-date TIBCO versions published (EDI x2; BusinessEvents EE
+  6.4.0/6.3.2 and Runtime Agent 5.13.0 via shorter rename-map folders); Service Grid API refs and BPM open.
 
 - 2026-10-28 — DOCOPS-200 → Done: Reporting Server 9.1.0–9.2.7 re-synced (no repo change); all 198 published
   ibi versions synced. `content-fix` pushed in all 8 ibi repos.

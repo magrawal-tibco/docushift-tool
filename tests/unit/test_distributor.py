@@ -882,25 +882,41 @@ def test_an_api_tree_is_not_named_after_the_wrapper_it_shipped_in(
     assert resources(target, "api-references", "10-4-0", "dotnetdoc").is_dir()
 
 
-def test_a_published_path_over_the_ceiling_is_refused_and_named(
+def test_an_api_tree_past_the_ceiling_is_published_as_shipped_and_named(
     config, distributor, product, target, monkeypatch
 ) -> None:
-    """The error the wrapper fix removes the only known occurrence of. Refused
-    *before* the copy, because `copytree` writes what fits and raises at the end,
-    which publishes a partial API tree as though it were whole (Phase 15d)."""
+    """Phase 67, reversing Phase 15d for API trees only: an API reference is
+    published exactly as the developers shipped it, so a path past the ceiling
+    is copied whole and noted once, not refused. Current on the next run."""
     findings = FindingsRun("sync", store=None).start()
     distributor.findings = findings
     javadoc_tree(config, product, "10.4.0", "html/api-docs/java")
     monkeypatch.setattr("docushift.sync.distributor.PUBLISHED_PATH_LIMIT", 40)
+    monkeypatch.setattr("docushift.sync.distributor.git_longpaths_off", lambda path: None)
 
     (result,) = distributor.sync_api_references(product, product.versions["10.4.0"], target)
 
-    assert result.outcome is SyncOutcome.FAILED
-    assert "over the 40" in result.message
-    assert [f.code for f in findings.all] == ["PUBLISHED_PATH_TOO_LONG"]
-    # Nothing half-written, and no staging tree left in a workspace we do not own.
-    assert not resources(target, "api-references", "10-4-0").exists()
-    assert not resources(target, "api-references", "10-4-0.part").exists()
+    assert result.outcome is SyncOutcome.SYNCED
+    assert resources(target, "api-references", "10-4-0", "java").is_dir()
+    assert [f.code for f in findings.all] == ["PUBLISHED_PATH_LONG", "PUBLISH_BASE_URL_UNSET"]
+    (again,) = distributor.sync_api_references(product, product.versions["10.4.0"], target)
+    assert again.outcome is SyncOutcome.CURRENT
+
+
+def test_a_long_api_path_into_a_repo_without_longpaths_is_warned(
+    config, distributor, product, target, monkeypatch
+) -> None:
+    """`git add` on Windows refuses a path past 260 unless `core.longpaths` is on.
+    `sync` changes no git config; it says which repository needs the setting."""
+    findings = FindingsRun("sync", store=None).start()
+    distributor.findings = findings
+    javadoc_tree(config, product, "10.4.0", "html/api-docs/java")
+    monkeypatch.setattr("docushift.sync.distributor.PUBLISHED_PATH_LIMIT", 40)
+    monkeypatch.setattr("docushift.sync.distributor.git_longpaths_off", lambda path: target)
+
+    distributor.sync_api_references(product, product.versions["10.4.0"], target)
+
+    assert "GIT_LONGPATHS_OFF" in [f.code for f in findings.all]
 
 
 def test_a_help_tree_over_the_ceiling_is_refused_and_named(

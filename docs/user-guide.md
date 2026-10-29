@@ -1380,6 +1380,9 @@ on the next run without `--force`.
 A version folder that would put any file over Windows' 260-character path limit under
 your `--target-dir` is reported as failed and not copied, with the file and its length
 named (`PUBLISHED_PATH_TOO_LONG`). Nobody outside DocuShift could open such a file.
+API references are the exception: they are published as shipped, long paths included, with
+one `PUBLISHED_PATH_LONG` note. If the receiving repository does not have long paths on,
+`sync` warns `GIT_LONGPATHS_OFF`; run `git -C <repo> config core.longpaths true` once before committing.
 For a merged page, give it a shorter `new_path` in `rename-map.csv` and re-run
 `reframe`. An image is shortened by `convert` on its own (Phase 49): when its path
 would pass the limit under a root `published_root_length` characters long (24,

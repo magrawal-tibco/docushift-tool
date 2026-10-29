@@ -78,6 +78,8 @@ from docushift.utils import textfile
 from docushift.utils.csvio import NotUtf8, read_text
 from docushift.utils.longpath import (
     PUBLISHED_PATH_LIMIT,
+    beyond_limit,
+    git_longpaths_off,
     long_path,
     over_limit,
     path_segment,
@@ -737,23 +739,16 @@ class WorkspaceDistributor:
             return [SyncResult(slug, number, SyncOutcome.CURRENT, path=destination,
                                segment=segment, doc_class=apirefs.API_REFERENCES)]
 
-        # Measured before anything is copied, because the failure it prevents is
-        # a partial tree: `copytree` writes what fits and raises at the end
-        # (Phase 15d).
-        overflow = self._overflowing(roots, destination)
-        if overflow is not None:
-            root, path, length = overflow
-            message = (f"{root.name}: publishing {path.name} would need {length} characters, "
-                       f"over the {PUBLISHED_PATH_LIMIT} the published tree allows")
-            self._record("PUBLISHED_PATH_TOO_LONG", slug, number, message=message, path=str(path))
-            return [SyncResult(slug, number, SyncOutcome.FAILED, segment=segment,
-                               message=message, doc_class=apirefs.API_REFERENCES)]
-
         try:
             files, size = self._place_api_references(roots, destination, version)
         except OSError as exc:  # pragma: no cover - filesystem failure, not logic
             return [SyncResult(slug, number, SyncOutcome.FAILED, segment=segment,
                                message=_readable(exc), doc_class=apirefs.API_REFERENCES)]
+
+        # Phase 67: an API tree is published as the developers shipped it, so a
+        # path past the ceiling is copied (through `long_path`, both ends) and
+        # named, not refused. Online help and the documents keep the 260 rule.
+        self._note_long_paths(slug, number, roots, destination)
 
         if not self.config.publish_base_url():
             self._record(
@@ -783,9 +778,8 @@ class WorkspaceDistributor:
                 # Both ends prefixed, for two different reasons (Phase 15e). The
                 # source holds files at 265 characters, written there by
                 # `safe_extract` through the same prefix and openable by nothing
-                # else. The destination is short by construction -- `_overflowing`
-                # ran first -- but staging adds `.part` to it, which is 14b's
-                # transient overflow exactly, in a second writer of a staged tree.
+                # else. The destination may be past 260 too: an API tree is
+                # published as shipped (Phase 67), and staging adds `.part` on top.
                 shutil.copytree(
                     long_path(root.source),
                     long_path(staging / root.name),
@@ -799,20 +793,31 @@ class WorkspaceDistributor:
             )
         return sum(root.files for root in roots), sum(root.bytes for root in roots)
 
-    def _overflowing(
-        self, roots: list[apirefs.ApiRoot], destination: Path
-    ) -> tuple[apirefs.ApiRoot, Path, int] | None:
-        """The first API tree that would publish a path over the ceiling, if any.
-
-        One root is enough to stop the version: the folders are staged and swapped
-        together, so publishing the ones that fit would leave the version's
-        `api-references` claiming to hold trees it does not.
-        """
+    def _note_long_paths(
+        self, slug: str, number: str, roots: list[apirefs.ApiRoot], destination: Path
+    ) -> None:
+        """One note for the API paths published past the ceiling, and one warning
+        when the repository they went into cannot `git add` them (Phase 67)."""
+        count, longest, most = 0, "", 0
         for root in roots:
-            found = over_limit(destination / root.name, root.source, PUBLISHED_PATH_LIMIT)
-            if found is not None:
-                return root, found[0], found[1]
-        return None
+            found, path, length = beyond_limit(destination / root.name, root.source, PUBLISHED_PATH_LIMIT)
+            count += found
+            if length > most:
+                longest, most = f"{root.name}/{path}", length
+        if not count:
+            return
+        self._record(
+            "PUBLISHED_PATH_LONG", slug, number, count=count, path=longest,
+            message=f"{count} API reference file(s) published past {PUBLISHED_PATH_LIMIT} "
+                    f"characters, as shipped; the longest is {most}",
+        )
+        repository = git_longpaths_off(destination)
+        if repository is not None:
+            self._record(
+                "GIT_LONGPATHS_OFF", slug, number, path=str(repository),
+                message=f"{repository} does not set core.longpaths=true; run "
+                        f"`git -C {repository.as_posix()} config core.longpaths true` before committing",
+            )
 
     def api_roots(self, slug: str, version: str, tree: Path) -> list[Path]:
         """Stage 4's recorded API roots, located here only when there is no record.

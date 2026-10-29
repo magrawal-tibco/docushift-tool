@@ -2102,8 +2102,9 @@ def test_a_published_file_past_260_characters_is_an_error(tmp_path: Path) -> Non
     assert REGISTRY["PATH_TOO_LONG"].severity is Severity.ERROR
 
 
-def test_the_length_is_measured_in_api_reference_folders_too(tmp_path: Path) -> None:
-    """Not link-checked, but a path nobody can open is a path nobody can open."""
+def test_a_long_path_in_an_api_reference_folder_is_a_note(tmp_path: Path) -> None:
+    """Phase 67: an API reference is published as shipped, past 260 on purpose,
+    so it is one note per folder and never an error."""
     from docushift.utils.longpath import long_path
 
     target = tmp_path / "target"
@@ -2112,7 +2113,8 @@ def test_the_length_is_measured_in_api_reference_folders_too(tmp_path: Path) -> 
     deep.mkdir(parents=True)
     (deep / "index.html").write_text("x", encoding="utf-8")
 
-    assert codes(Validator(target).check_folder(only(target)).findings) == ["PATH_TOO_LONG"]
+    assert codes(Validator(target).check_folder(only(target)).findings) == ["API_PATH_LONG"]
+    assert REGISTRY["API_PATH_LONG"].severity is Severity.NOTE
 
 
 # -- a same-page fragment landing on an earlier topic's heading (Phase 34, R11-02) --

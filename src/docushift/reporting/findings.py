@@ -280,6 +280,20 @@ REGISTRY: dict[str, Code] = _codes(
     Code("PUBLISHED_PATH_TOO_LONG", Severity.ERROR, Stage.SYNC,
          "a file's published path exceeds 260 characters; the tree was not copied",
          "planning.md Phase 15d"),
+    # Phase 67. The API-tree exception to the code above: an API reference is
+    # published as the developers shipped it, so a path past 260 is copied, not
+    # refused. A note, because nobody acts on it per version; the count and the
+    # longest file are what a reader of the run wants.
+    Code("PUBLISHED_PATH_LONG", Severity.NOTE, Stage.SYNC,
+         "an API reference was published with paths over 260 characters, as shipped",
+         "planning.md Phase 67"),
+    # Phase 67. A long API path published into a git repository whose
+    # `core.longpaths` is not `true`: `git add` on Windows refuses the file with
+    # "Filename too long". A warning, because the remedy is one command the user
+    # runs; `sync` runs no git command and changes no git config (§6.0).
+    Code("GIT_LONGPATHS_OFF", Severity.WARNING, Stage.SYNC,
+         "paths over 260 characters were published into a git repository without "
+         "core.longpaths=true; git on Windows cannot add them", "planning.md Phase 67"),
     # 6e's one new code, and a note for the reason 6c's is: nobody acts on one
     # rewritten link and everybody wants the magnitude. Notes aggregate into a
     # single row with a count (§7.1), which is the shape this needs -- because the
@@ -556,6 +570,12 @@ REGISTRY: dict[str, Code] = _codes(
     Code("PATH_TOO_LONG", Severity.ERROR, Stage.VALIDATE,
          "A published file whose absolute path exceeds 260 characters; Windows "
          "readers cannot open it", "planning.md Phase 34 (R11-06)"),
+    # Phase 67. `PATH_TOO_LONG` in an `api-references/` folder, where the long
+    # path is published on purpose (`PUBLISHED_PATH_LONG`). A note, so it neither
+    # gates nor reads as a defect.
+    Code("API_PATH_LONG", Severity.NOTE, Stage.VALIDATE,
+         "An API reference holds paths over 260 characters, published as shipped",
+         "planning.md Phase 67"),
     # Emitted from Phase 7c, and a warning on arithmetic rather than on taste, the
     # same way 7b's six were. Measured over the whole cache: 51 of 317 adjacent
     # version pairs (16.1%) drop at least one identifier -- 11.9% even when the

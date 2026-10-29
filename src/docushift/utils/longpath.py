@@ -149,6 +149,57 @@ def over_limit(destination: Path, source: Path, limit: int = PUBLISHED_PATH_LIMI
     return None
 
 
+def beyond_limit(
+    destination: Path, source: Path, limit: int = PUBLISHED_PATH_LIMIT
+) -> tuple[int, str, int]:
+    """Every file in `source` past the ceiling: `(count, longest relative, its length)`.
+
+    Phase 67. `over_limit` stops at the first offender because it refuses the
+    tree; an API tree is published past the line on purpose, so the note it gets
+    wants the whole count. `(0, "", 0)` when everything fits.
+    """
+    count, longest, most = 0, "", 0
+    if not source.is_dir():
+        return count, longest, most
+    for relative, _ in walk_files(source):
+        length = published_length(destination, relative)
+        if length > limit:
+            count += 1
+            if length > most:
+                longest, most = relative.as_posix(), length
+    return count, longest, most
+
+
+_LONGPATHS_ON = re.compile(r"(?im)^\s*longpaths\s*=\s*(true|yes|on|1)\s*$")
+
+
+def git_longpaths_off(path: Path) -> Path | None:
+    """The git repository holding `path` when its `core.longpaths` is not on, else `None`.
+
+    Phase 67. Read from the repository's own `.git/config` and the user's
+    `~/.gitconfig`, never by running git: `sync` runs no git command (§6.0). A
+    `longpaths = true` line anywhere in either file counts; the setting has no
+    other meaning outside `[core]`. `None` too when `path` is in no repository.
+    """
+    current = Path(os.path.abspath(path))
+    for folder in (current, *current.parents):
+        marker = folder / ".git"
+        if marker.exists():
+            break
+    else:
+        return None
+    configs = [Path.home() / ".gitconfig"]
+    if marker.is_dir():
+        configs.append(marker / "config")
+    for config in configs:
+        try:
+            if _LONGPATHS_ON.search(config.read_text(encoding="utf-8", errors="replace")):
+                return None
+        except OSError:
+            continue
+    return folder
+
+
 def published_length(destination: Path, relative: "Path | str") -> int:
     """How many characters `destination / relative` is, the way Win32 counts it.
 

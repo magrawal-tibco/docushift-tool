@@ -337,3 +337,36 @@ def test_the_probe_fails_when_a_long_path_cannot_be_written(tmp_path: Path, monk
 
     assert not long_paths_enabled(tmp_path)
     assert list(tmp_path.iterdir()) == []
+
+
+# -- Phase 67: API trees published past the ceiling --
+
+
+def test_beyond_limit_counts_every_file_past_the_ceiling(tmp_path: Path) -> None:
+    from docushift.utils.longpath import beyond_limit, published_length
+
+    source = tmp_path / "src"
+    (source / "deep").mkdir(parents=True)
+    (source / "a.html").write_text("x", encoding="utf-8")
+    (source / "deep" / "longer-name.html").write_text("x", encoding="utf-8")
+    destination = tmp_path / "out"
+    limit = published_length(destination, "a.html")
+
+    assert beyond_limit(destination, source, limit) == (
+        1, "deep/longer-name.html", published_length(destination, "deep/longer-name.html"))
+    assert beyond_limit(destination, source, 10_000) == (0, "", 0)
+
+
+def test_git_longpaths_off_reads_the_repository_config(tmp_path: Path, monkeypatch) -> None:
+    from docushift.utils.longpath import git_longpaths_off
+
+    monkeypatch.setattr(Path, "home", lambda: tmp_path / "home")
+    repo = tmp_path / "repo"
+    (repo / ".git").mkdir(parents=True)
+    (repo / ".git" / "config").write_text("[core]\n\tbare = false\n", encoding="utf-8")
+    inside = repo / "en-us" / "x"
+
+    assert git_longpaths_off(inside) == repo
+    (repo / ".git" / "config").write_text("[core]\n\tlongpaths = true\n", encoding="utf-8")
+    assert git_longpaths_off(inside) is None
+    assert git_longpaths_off(tmp_path / "elsewhere") is None

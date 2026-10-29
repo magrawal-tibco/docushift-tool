@@ -57,6 +57,7 @@ from dataclasses import dataclass, field
 from pathlib import Path, PurePosixPath
 
 from docushift.reporting.findings import Finding
+from docushift.sync.apirefs import API_REFERENCES
 from docushift.transforms import links as refs
 from docushift.utils.longpath import (
     PUBLISHED_PATH_LIMIT,
@@ -465,9 +466,24 @@ def check_lengths(folder: VersionFolder, index: FolderIndex) -> list[Finding]:
     host's: the documentation team opens the tree on Windows. Measured the way
     `sync` measures it, `utils/longpath.published_length` under the target
     actually being validated, so a clean `sync` and a clean `validate` agree.
-    Run over `api-references/` too, which is otherwise only metadata-checked.
+    Run over `api-references/` too, which is otherwise only metadata-checked; there
+    a long path is published on purpose (Phase 67), so it is one `API_PATH_LONG`
+    note per folder rather than an error per file.
     """
     findings: list[Finding] = []
+    if folder.doc_class == API_REFERENCES:
+        lengths = {relative: published_length(folder.path, relative) for relative in index.present}
+        long = sorted((length, relative) for relative, length in lengths.items()
+                      if length > PUBLISHED_PATH_LIMIT)
+        if long:
+            most, longest = long[-1]
+            findings.append(Finding(
+                "API_PATH_LONG", slug=folder.slug, version=folder.segment,
+                path=f"{folder.relative.as_posix()}/{longest}",
+                message=f"{len(long)} file(s) past {PUBLISHED_PATH_LIMIT} characters, "
+                        f"published as shipped; the longest is {most}",
+            ))
+        return findings
     for relative in sorted(index.present):
         length = published_length(folder.path, relative)
         if length > PUBLISHED_PATH_LIMIT:
