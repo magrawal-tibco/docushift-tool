@@ -1290,11 +1290,12 @@ is a different file, and `sync` writes it one level up, beside `version.yml`:
 ```
 en-us-tib-ems-userdocs/en-us/tibco-enterprise-message-service/online-help/
 ├── redirects.yml          ← every merged version's redirects, as served URLs
-├── 301.yml                ← every merged version's live docsite URLs, same shape
+├── 301.yml                ← every version's live docsite URLs; `to` from the repo root
 ├── version.yml
 ├── 10-5-1/
 │   ├── redirects.yml      ← this version's, relative to this folder
-│   └── 301.yml            ← this version's cutover map, `to` relative to this folder
+│   ├── 301.yml            ← this version's cutover map; `to` from the repo root
+│   └── csh.yml            ← help identifiers; paths from the repo root
 └── 10-5-0/…
 ```
 
@@ -1329,16 +1330,27 @@ folder left beside the versions by an interrupted run is not read into either ma
 next `sync` removes it.
 
 `301.yml` is assembled by the same code under the same rules, with one difference that follows
-from what it holds: only the **`to`** side is rewritten into a published URL, because the
-`from` side is already an absolute address on `docs.tibco.com`. That also decides which rows
-`sync` may rewrite — a row it owns is one whose *destination* sits under a version folder it
-published, so a legacy URL you mapped by hand is left exactly where you put it.
+from what it holds: only the **`to`** side is rewritten, because the `from` side is already an
+absolute address on `docs.tibco.com`. That also decides which rows `sync` may rewrite — a row
+it owns is one whose *destination* sits under a version folder it published, so a legacy URL
+you mapped by hand is left exactly where you put it.
+
+**`to` is the Markdown file's path from the repository root** (Phase 68, the AEM team's
+format): forward slashes, a leading `/`, the `.md` file and its anchor. No host, so
+`publish_base_url` does not apply to it. The same form is used in every version folder's
+`301.yml` and `csh.yml` in the published repo:
 
 ```yaml
 - from: https://docs.tibco.com/pub/ems/10.5.1/doc/html/users-guide/old.htm
-  to: us/en/tibco-enterprise-message-service/online-help/10-5-1/users-guide/new.html#old
+  to: /en-us/tibco-enterprise-message-service/online-help/10-5-1/users-guide/new.md#old
   status: 301
 ```
+
+Only the published copies are written this way. `output/` and `reframed/` keep paths relative
+to the version folder; `sync` rewrites the two files as it places a version. A version whose
+pages already match and whose only change is one of these maps is refreshed in place (reported
+as **maps refreshed**) instead of being copied again. Rows written in the older `us/en/….html`
+shape are replaced on the next `sync`, not kept beside the new ones.
 
 `validate` resolves every `to` against the published tree and reports a dangling one as
 `LINK_BROKEN`, the same as for `redirects.yml`. The copy in each version folder is checked
@@ -1369,7 +1381,10 @@ docushift validate --target-dir ../tibco-docs-aem/
 ```
 
 `sync` ends with the same five-outcome table `download`, `extract` and `convert` do
-— synced / already current / no source tree / skipped / failed. A version you
+— synced / already current / no source tree / skipped / failed — plus *maps refreshed*,
+for a version whose pages matched and only its published `301.yml` / `csh.yml` were rewritten. A PDF-only version
+(no HTML help in a format DocuShift converts) is counted in one line, "no online help to
+publish", rather than told to convert. A version you
 have not converted yet is a report line, not an abort: over a partially converted
 corpus that is the normal state. "Already current" is decided by comparing the two
 trees, not by a recorded hash, so a version somebody edited in the target is

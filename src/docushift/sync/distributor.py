@@ -67,9 +67,9 @@ from docushift.catalog import CatalogManager
 from docushift.config import ConfigManager
 from docushift.converter import navigation
 from docushift.extractor import content_root
-from docushift.models import Product, ProductVersion
+from docushift.models import CONVERTIBLE_ENGINES, Product, ProductVersion
 from docushift.reporting.findings import FindingsRun
-from docushift.sync import apirefs, router
+from docushift.sync import apirefs, rooted, router
 from docushift.sync import archives as archive_index
 from docushift.sync import documents as document_index
 from docushift.sync import redirects as redirect_map
@@ -135,6 +135,11 @@ STAGING_SUFFIX = ".part"
 # only import lazily (see `_source`). `301.yml`, `redirects.yml`, `toc.yml` and
 # `csh.yml` still publish.
 REFRAME_WORKING_FILES = frozenset({"reframe.yml", "rename-map.csv", "review-queue.csv"})
+# A version whose package was unpacked and holds no HTML help in a format this
+# tool converts -- the PDF-only versions (Phase 39). "Run convert first" sent
+# people to re-run a stage that has nothing to do; nothing is missing.
+NO_HTML_HELP = ("no online help to publish: the package has no HTML help in a format "
+                "DocuShift converts (PDF-only); its documents publish as usual")
 # Every sibling a swap can leave beside a version folder: the staging tree, and
 # since X2-01 the live tree set aside while its replacement is renamed in. Neither
 # is a published version, and both are residue once the run that made them is gone.
@@ -147,6 +152,9 @@ class SyncOutcome(StrEnum):
     SYNCED = "synced"
     # The published tree already matches the converted one, file for file.
     CURRENT = "current"
+    # Every page already matched; only the published `301.yml` / `csh.yml` were
+    # stale, and were rewritten in place rather than the folder re-copied (Phase 68).
+    MAPS_REFRESHED = "maps-refreshed"
     # Selected and eligible, but `convert` has not produced a tree yet.
     NO_OUTPUT = "no-output"
     # The version string yields no publishable folder name. Named, never guessed
@@ -174,6 +182,9 @@ class SyncResult:
     # Whether the tree published was Reframe's rather than Stage 6's (20d). Only
     # ever true for `online-help`, and only for a product that opted in.
     merged: bool = False
+    # A `NO_OUTPUT` that is the version's normal state, not a stage left to run:
+    # a PDF-only version has no online help to publish. Reported, not warned.
+    expected: bool = False
     # Which doc-class this row is about. A run reports one row per (version,
     # doc-class) that had something to say, so a version appears up to four times.
     # Empty means the row is about the version rather than one of its doc-classes
@@ -300,7 +311,8 @@ class WorkspaceDistributor:
 
         source, merged, refusal = self._source(product, version)
         if refusal is not None:
-            return SyncResult(slug, number, SyncOutcome.NO_OUTPUT, segment=segment, message=refusal)
+            return SyncResult(slug, number, SyncOutcome.NO_OUTPUT, segment=segment, message=refusal,
+                              expected=refusal == NO_HTML_HELP)
 
         destination = self.doc_class_dir(product, target) / segment
         # Phase 34 (R1-01). Phase 29's `long_path` on both ends of `_place` lifted
@@ -318,13 +330,33 @@ class WorkspaceDistributor:
         if (failure := _recovered(destination)) is not None:
             return SyncResult(slug, number, SyncOutcome.FAILED, segment=segment, message=failure)
 
-        if not force and destination.is_dir() and _identical(source, destination):
-            return SyncResult(
-                slug, number, SyncOutcome.CURRENT, path=destination, segment=segment, merged=merged
-            )
+        # Phase 68: the two maps publish with paths from the repo root, so they are
+        # compared, and written, as rewritten text rather than as the source file.
+        tree_root = self.product_dir(product, target).parent.parent
+        maps = rooted.published_maps(source, "/" + destination.relative_to(tree_root).as_posix() + "/")
+
+        if not force and destination.is_dir():
+            pages_same, stale = _compare(source, destination, maps)
+            if pages_same and not stale:
+                return SyncResult(
+                    slug, number, SyncOutcome.CURRENT, path=destination, segment=segment, merged=merged
+                )
+            if pages_same:
+                # Every page matches and only a map is out of date: rewrite the map,
+                # not the folder. The first sync after Phase 68 is this, everywhere.
+                try:
+                    for name in stale:
+                        _replace_text(destination / name, maps[name])
+                except OSError as exc:  # pragma: no cover - filesystem failure, not logic
+                    message = f"{type(exc).__name__}: {exc}"
+                    return SyncResult(slug, number, SyncOutcome.FAILED, segment=segment, message=message)
+                return SyncResult(
+                    slug, number, SyncOutcome.MAPS_REFRESHED, path=destination, segment=segment,
+                    files=len(stale), merged=merged,
+                )
 
         try:
-            files, size = self._place(source, destination)
+            files, size = self._place(source, destination, maps)
         except OSError as exc:  # pragma: no cover - filesystem failure, not logic
             message = f"{type(exc).__name__}: {exc}"
             return SyncResult(slug, number, SyncOutcome.FAILED, segment=segment, message=message)
@@ -378,6 +410,9 @@ class WorkspaceDistributor:
         if (not policy.publish or not reframes(version.engine, policy)
                 or not self.config.is_primary_locale()):
             if not converted.is_dir():
+                extracted = self.config.extract_path(product.bu, product.family, slug, number)
+                if version.engine not in CONVERTIBLE_ENGINES and extracted.is_dir():
+                    return converted, False, NO_HTML_HELP
                 return converted, False, f"no converted tree at {converted}; run `docushift convert` first"
             if state is not None and state.is_building(slug, number, "convert"):
                 return converted, False, ("the converted tree is from a convert that did not "
@@ -458,7 +493,8 @@ class WorkspaceDistributor:
         return SyncResult(slug, number, SyncOutcome.FAILED, segment=segment,
                           message=message, doc_class=doc_class)
 
-    def _place(self, source: Path, destination: Path) -> tuple[int, int]:
+    def _place(self, source: Path, destination: Path,
+               maps: dict[str, str] | None = None) -> tuple[int, int]:
         """Copies the tree into a staging sibling and swaps it over the target.
 
         Wholesale replacement, exactly one directory deep: a topic deleted upstream
@@ -481,6 +517,9 @@ class WorkspaceDistributor:
             # any copy an earlier run published.
             shutil.copytree(long_path(source), long_path(staging), copy_function=shutil.copy2,
                             ignore=_unpublished(long_path(source)))
+            # Phase 68: the published maps name pages from the repo root.
+            for name, text in (maps or {}).items():
+                textfile.write_text(staging / name, text)
             files = [path for _relative, path in walk_files(staging)]
             size = sum(path.stat().st_size for path in files)
         return len(files), size
@@ -1041,19 +1080,22 @@ class WorkspaceDistributor:
         The same assembly as `redirects.yml` and the same four rules, over the file
         Reframe writes beside it. It differs in exactly two places, both because the
         `from` side is somebody else's address rather than one of ours: only `to` is
-        prefixed into a published URL, and entitlement is read off `to`.
+        rewritten -- as the Markdown file's path from the repo root since Phase 68,
+        not a served URL -- and entitlement is read off `to`.
         """
         self._assemble_map(
             product, folder, present, stats,
             file_name=origins.ORIGINS,
             header=origins.PUBLISHED_HEADER,
-            prefix_keys=("to",),
+            prefix_keys=(),
             owned_key="to",
+            rooted_keys=("to",),
         )
 
     def _assemble_map(
         self, product: Product, folder: Path, present: set[str], stats: SyncStats,
         *, file_name: str, header: str, prefix_keys: tuple[str, ...], owned_key: str,
+        rooted_keys: tuple[str, ...] = (),
     ) -> None:
         """Both doc-class 301 maps: read the version folders, merge, write.
 
@@ -1065,7 +1107,8 @@ class WorkspaceDistributor:
         tree = self.config.docs_tree_name(product.bu, product.family)
         locale = slugify(self.config.locale)
         rows, unparsed = redirect_map.generated_rows(
-            folder, present, base, tree, locale, product.slug, file_name, prefix_keys
+            folder, present, base, tree, locale, product.slug, file_name, prefix_keys,
+            rooted_keys,
         )
         stats.unparsed.extend(unparsed)
 
@@ -1136,7 +1179,8 @@ class WorkspaceDistributor:
         if any(r.outcome is SyncOutcome.FAILED for r in results):
             state.record_stage(product.slug, version.version, "sync", False, str(target))
             return
-        placed = {r.doc_class for r in results if r.outcome in (SyncOutcome.SYNCED, SyncOutcome.CURRENT)}
+        placed = {r.doc_class for r in results
+                  if r.outcome in (SyncOutcome.SYNCED, SyncOutcome.CURRENT, SyncOutcome.MAPS_REFRESHED)}
         if ONLINE_HELP in placed:
             state.record_stage(product.slug, version.version, "sync", True, str(target))
         if placed & set(router.DOCUMENT_DOC_CLASSES):
@@ -1240,8 +1284,9 @@ def _built_at(tree: Path) -> float:
         return 0.0
 
 
-def _identical(source: Path, target: Path) -> bool:
-    """Whether the published tree still matches the converted one, file for file.
+def _compare(source: Path, target: Path,
+             maps: dict[str, str] | None = None) -> tuple[bool, list[str]]:
+    """Whether the published pages still match the converted ones, and which maps do not.
 
     Size and mtime, not content: `_place` copies with `copy2`, so a file this tool
     published carries the source's mtime and a file a human edited does not. A
@@ -1249,7 +1294,14 @@ def _identical(source: Path, target: Path) -> bool:
     question the metadata already answers -- and the one case it answers
     differently, an edit that preserved size and mtime, is not a case a filesystem
     produces by accident.
+
+    **The maps are the exception (Phase 68).** `301.yml` and `csh.yml` publish as
+    rewritten text, so they are compared by content against that text and
+    returned by name when they differ. The first value is about everything else:
+    `(True, ["301.yml"])` is a version whose pages are current and whose map is
+    not, which `sync_one` rewrites in place rather than re-copying the folder.
     """
+    maps = maps or {}
     # `walk_files`, not `rglob` (X2-09): `rglob` reaches each directory through the
     # unprefixed spelling and omits a file past 260 characters, so a merged tree
     # holding one (TRA Runtime Agent 5.13.0 has a 262) never read as current.
@@ -1258,8 +1310,25 @@ def _identical(source: Path, target: Path) -> bool:
         left.pop(Path(name), None)
     right = dict(walk_files(target))
     if left.keys() != right.keys():
+        return False, []
+    rewritten = {Path(name) for name in maps}
+    pages_same = all(filecmp.cmp(left[name], right[name], shallow=True)
+                     for name in left if name not in rewritten)
+    stale = [name for name in sorted(maps) if not _holds(right[Path(name)], maps[name])]
+    return pages_same, stale
+
+
+def _holds(path: Path, text: str) -> bool:
+    try:
+        return path.read_text(encoding="utf-8") == text
+    except (OSError, UnicodeDecodeError):
         return False
-    return all(filecmp.cmp(left[name], right[name], shallow=True) for name in left)
+
+
+def _identical(source: Path, target: Path, maps: dict[str, str] | None = None) -> bool:
+    """Whether the published tree matches the converted one, maps included."""
+    pages_same, stale = _compare(source, target, maps)
+    return pages_same and not stale
 
 
 @contextmanager

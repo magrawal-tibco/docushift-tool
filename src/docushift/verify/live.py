@@ -18,18 +18,24 @@ from pathlib import Path
 import yaml
 
 from docushift.discovery.client import _looks_like_auth_page
+from docushift.sync import rooted
 from docushift.verify import text as texts
 from docushift.verify.fetch import Fetcher
 
 
-def origins(path: Path) -> list[tuple[str, str]]:
-    """`(live URL, new path)` from a `301.yml`; empty when there is none."""
+def origins(path: Path, prefix: str = "") -> list[tuple[str, str]]:
+    """`(live URL, new path)` from a `301.yml`; empty when there is none.
+
+    `prefix` is the version folder from the repo root: a published `to` names its
+    page from there (Phase 68), and is read back folder-relative.
+    """
     try:
         document = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
     except (OSError, yaml.YAMLError):
         return []
     rows = document.get("redirects") if isinstance(document, dict) else None
-    return [(str(r.get("from") or ""), str(r.get("to") or "")) for r in rows or []
+    return [(str(r.get("from") or ""), rooted.unroot(prefix, str(r.get("to") or "")) if prefix
+             else str(r.get("to") or "")) for r in rows or []
             if isinstance(r, dict) and r.get("from") and r.get("to")]
 
 

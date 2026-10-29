@@ -41,7 +41,7 @@ import yaml
 
 from docushift import origins
 from docushift.reporting.findings import Finding
-from docushift.sync import API_REFERENCES, ARCHIVES, DOCUMENT_DOC_CLASSES
+from docushift.sync import API_REFERENCES, ARCHIVES, DOCUMENT_DOC_CLASSES, rooted
 from docushift.sync import redirects as redirect_map
 from docushift.sync import versions as version_file
 from docushift.sync.distributor import RESIDUE_SUFFIXES
@@ -324,12 +324,14 @@ def _check_redirects(folder: VersionFolder, index: FolderIndex,
 
     document = loaded.document
     entries = document.get("redirects") if isinstance(document, dict) else None
+    prefix = rooted.folder_prefix(folder.locale, folder.slug, folder.doc_class, folder.segment)
     findings: list[Finding] = []
     for entry in entries or []:
         if not isinstance(entry, dict):
             continue
         source = str(entry.get("from") or "").strip()
-        raw = str(entry.get("to") or "").strip()
+        # Phase 68: a published map names the page from the repo root.
+        raw = rooted.unroot(prefix, str(entry.get("to") or "").strip())
         if not raw:
             continue
         reference = refs.classify(raw)

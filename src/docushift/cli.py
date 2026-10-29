@@ -2189,6 +2189,7 @@ def _report_sync(stats, findings) -> None:
     for outcome, label in (
         (SyncOutcome.SYNCED, "Synced"),
         (SyncOutcome.CURRENT, "Already current"),
+        (SyncOutcome.MAPS_REFRESHED, "Maps refreshed"),
         (SyncOutcome.NO_OUTPUT, "No source tree"),
         (SyncOutcome.SKIPPED, "Skipped"),
         (SyncOutcome.FAILED, "Failed"),
@@ -2226,8 +2227,12 @@ def _report_sync(stats, findings) -> None:
     # exactly the rows somebody has to look at.
     for path in stats.unparsed:
         console.print(f"[yellow]![/yellow] {path}: could not be parsed, left unchanged")
+    expected = [r for r in stats.results if r.outcome is SyncOutcome.NO_OUTPUT and r.expected]
+    if expected:
+        console.print(f"[dim]{len(expected)} PDF-only version(s): no online help to publish; "
+                      f"their documents publish as usual.[/dim]")
     for result in stats.results:
-        if result.outcome in (SyncOutcome.NO_OUTPUT, SyncOutcome.SKIPPED):
+        if result.outcome in (SyncOutcome.NO_OUTPUT, SyncOutcome.SKIPPED) and not result.expected:
             console.print(f"[yellow]![/yellow] {_who(result)}: {result.message}")
     for result in stats.failures:
         console.print(f"[red]x[/red] {_who(result)}: {result.message}")
@@ -2261,6 +2266,7 @@ def sync(ctx, bu, family, product, version, batch, select_all, target_dir, force
     repository and runs no git command (`architecture.md` §6.0).
     """
     from docushift.sync import ONLINE_HELP, WorkspaceDistributor
+    from docushift.sync.distributor import NO_HTML_HELP
 
     cfg: ConfigManager = ctx.obj["config"]
     _require_long_paths(cfg)
@@ -2290,6 +2296,8 @@ def sync(ctx, bu, family, product, version, batch, select_all, target_dir, force
             if refusal and merged:
                 online_help = "[yellow]refused[/yellow]"
                 refused.append(f"{found.slug}@{ver.version}: {refusal}")
+            elif refusal == NO_HTML_HELP:
+                online_help = "[dim]PDF-only[/dim]"
             elif refusal:
                 online_help = "[yellow]missing[/yellow]"
             else:
@@ -2346,6 +2354,9 @@ def sync(ctx, bu, family, product, version, batch, select_all, target_dir, force
                 f"  [green]v[/green] {_who(result)} -> {where} "
                 f"{result.files} file(s), {_gb(result.bytes)}"
             )
+        elif result.outcome is SyncOutcome.MAPS_REFRESHED:
+            console.print(f"  [green]v[/green] {_who(result)} -> {result.doc_class}/{result.segment} "
+                          f"{result.files} map(s) refreshed in place")
         elif result.outcome is SyncOutcome.FAILED:
             console.print(f"  [red]x[/red] {_who(result)} ({result.doc_class})")
 

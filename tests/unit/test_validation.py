@@ -2242,3 +2242,40 @@ def test_one_title_on_pages_that_differ_is_not_a_duplicate(
     publish(target, {"toc.yml": toc, **files})
 
     assert artifacts_of(target) == []
+
+
+# -- Phase 68: published maps name the page from the repo root -------------------
+
+ROOT = f"/en-us/{SLUG}/online-help/1-0-0/"
+
+
+def test_a_repo_rooted_product_origin_row_is_resolved_like_a_served_one(tmp_path: Path) -> None:
+    target = tmp_path / "target"
+    publish(target, {"html/new.md": "# New\n"})
+    published_origins(target, entry(ORIGIN, f"{ROOT}html/new.md#old"),
+                      entry(ORIGIN + "?2", f"{ROOT}html/gone.md#old"))
+
+    findings = origin_map_of(target)
+
+    assert codes(findings) == ["LINK_BROKEN"]
+    assert "html/gone.md" in findings[0].message
+
+
+def test_a_repo_rooted_per_version_origin_row_is_checked_against_its_folder(tmp_path: Path) -> None:
+    target = tmp_path / "target"
+    publish(target, {"301.yml": redirects(entry(ORIGIN, f"{ROOT}about.md#about"),
+                                          entry(ORIGIN + "?2", f"{ROOT}about.md#gone")),
+                     "about.md": "# About\n"})
+
+    assert codes(artifacts_of(target)) == ["ANCHOR_MISSING"]
+
+
+def test_a_repo_rooted_csh_value_resolves_against_its_folder(tmp_path: Path) -> None:
+    target = tmp_path / "target"
+    publish(target, {"csh.yml": f'"help_1": "{ROOT}html/a.md"\n"help_2": "{ROOT}html/gone.md"\n',
+                     "html/a.md": "---\ncsh:\n  - \"help_1\"\n  - \"help_2\"\n---\n\n# A\n"})
+
+    findings = csh_of(target)
+
+    assert codes(findings) == ["LINK_BROKEN"]
+    assert "help_2 -> html/gone.md" in findings[0].message

@@ -169,7 +169,7 @@ docushift-tool/
 │       ├── metadata.yml
 │       ├── reframe.yml     # which topic became which section of which page, plus the policy
 │       ├── redirects.yml   # one anchored 301 per source topic, in this tool's coordinates
-│       ├── 301.yml         # the cutover map, in live docs.tibco.com URLs; only where declared
+│       ├── 301.yml         # the cutover map, live docs.tibco.com URL -> page; `sync` publishes `to` from the repo root
 │       ├── rename-map.csv  # the address each page was given; a human can pin one
 │       ├── review-queue.csv # the pages a writer must decide about — the only file meant to be edited
 │       ├── csh.yml         # carried through where the version had one

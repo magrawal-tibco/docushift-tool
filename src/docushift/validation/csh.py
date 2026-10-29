@@ -45,6 +45,7 @@ from pathlib import Path, PurePosixPath
 import yaml
 
 from docushift.reporting.findings import Finding
+from docushift.sync import rooted
 from docushift.utils.csvio import natural_version_key
 from docushift.utils.longpath import long_path
 from docushift.validation import references
@@ -130,9 +131,12 @@ def load(folder: VersionFolder) -> MapFile:
     if not isinstance(document, dict):
         return MapFile(folder, present=True,
                        unparsed="is not the flat identifier map §9.4 specifies")
+    # Phase 68: a published map names the page from the repo root; read it back
+    # as the folder-relative path every check below resolves.
+    prefix = rooted.folder_prefix(folder.locale, folder.slug, folder.doc_class, folder.segment)
     return MapFile(
         folder,
-        entries={str(key): str(value) for key, value in document.items()},
+        entries={str(key): rooted.unroot(prefix, str(value)) for key, value in document.items()},
         present=True,
     )
 

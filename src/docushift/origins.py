@@ -58,7 +58,8 @@ VERSION_HEADER = (
 PUBLISHED_HEADER = (
     "# Published origin 301 map -- assembled by `docushift sync` from the version\n"
     "# folders beneath this one (planning.md Phase 22). `from` is the live docsite\n"
-    "# URL that stops working at cutover. Rows are regenerated per version segment;\n"
+    "# URL that stops working at cutover; `to` is the Markdown file's path from the\n"
+    "# repository root (Phase 68). Rows are regenerated per version segment;\n"
     "# anything else here is left exactly as it was found.\n"
 )
 

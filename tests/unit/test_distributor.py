@@ -405,6 +405,24 @@ def test_a_version_that_never_converted_still_publishes_its_pdfs(
     assert (published(target, doc_class=USER_GUIDES) / "tib_ems_users_guide.pdf").is_file()
 
 
+def test_a_pdf_only_version_is_not_told_to_convert(config, distributor, product, target) -> None:
+    """Unpacked, and no HTML help in a format the tool converts: nothing is left to
+    run, so the report says so instead of sending somebody back to `convert`.
+    A Flare version with no converted tree still is -- that one has work left."""
+    extract_tree(config, product, "10.4.0", **SHIPMENT)
+    pdf_only = ProductVersion(slug="tibco-ems", version="10.4.0", release_date="2026-02-06",
+                              engine=SourceEngine.AUTO)
+
+    result = distributor.sync_one(product, pdf_only, target)
+
+    assert result.outcome is SyncOutcome.NO_OUTPUT
+    assert result.expected
+    assert "PDF-only" in result.message and "docushift convert" not in result.message
+
+    flare = distributor.sync_one(product, product.versions["10.4.0"], target)
+    assert not flare.expected and "docushift convert" in flare.message
+
+
 def test_an_extracted_tree_that_routes_nothing_gets_no_row_at_all(
     config, distributor, product, target
 ) -> None:
@@ -1507,7 +1525,8 @@ def test_the_origin_map_prefixes_the_destination_and_leaves_the_live_url_alone(
     assert [row["from"] for row in rows] == [
         "https://docs.tibco.com/pub/ems/10.4.0/doc/html/users-guide/old.htm"
     ]
-    assert rows[0]["to"] == f"{SERVED}/tibco-ems/online-help/10-4-0/users-guide/new.html#old"
+    # Phase 68: the Markdown file from the repo root, not the served URL.
+    assert rows[0]["to"] == "/en-us/tibco-ems/online-help/10-4-0/users-guide/new.md#old"
     assert rows[0]["status"] == 301
 
 
@@ -1644,17 +1663,21 @@ def test_setting_the_host_replaces_the_published_rows_instead_of_doubling_them(
 
     resync_under("https://docs.example.com")
 
-    for rows in (published_map(target, product)["redirects"],
-                 published_origins(target, product)["redirects"]):
-        assert len(rows) == 1
-        assert rows[0]["to"].startswith("https://docs.example.com/us/en/")
+    rows = published_map(target, product)["redirects"]
+    assert len(rows) == 1
+    assert rows[0]["to"].startswith("https://docs.example.com/us/en/")
+    # Phase 68: `301.yml` names the file from the repo root, so no host at all.
+    rows = published_origins(target, product)["redirects"]
+    assert len(rows) == 1
+    assert rows[0]["to"].startswith("/en-us/")
 
     # On to another host, or back to none: the path decides, not the host.
     resync_under("https://other.example.com")
     resync_under("")
-    rows = published_origins(target, product)["redirects"]
+    rows = published_map(target, product)["redirects"]
     assert len(rows) == 1
     assert rows[0]["to"].startswith(f"{SERVED}/")
+    assert len(published_origins(target, product)["redirects"]) == 1
 
 
 def test_a_leftover_staging_folder_is_not_published_into_the_doc_class_map(
@@ -1942,3 +1965,122 @@ def test_a_write_cut_short_leaves_the_hand_edited_drop_down_whole(
     monkeypatch.undo()
     assert path.read_text(encoding="utf-8") == hand
     assert not path.with_name("version.yml.tmp").exists()
+
+
+# -- Phase 68: the published maps name the Markdown file from the repo root ------
+
+ROOTED = "/en-us/tibco-ems/online-help/10-4-0/"
+CSH = '"help_one": "users-guide/new.md#old"\n"1234": "index.md"\n'
+
+
+def version_folder(target: Path, product: Product, segment: str = "10-4-0") -> Path:
+    return target / TREE / "en-us" / product.slug / ONLINE_HELP / segment
+
+
+def test_the_per_version_maps_publish_from_the_repo_root(
+    config, catalog, distributor, product, target
+) -> None:
+    opt_in(config, product.slug)
+    origin_version(config, catalog, product, "10.4.0")
+    reframed = config.reframed_path(product.bu, product.family, product.slug, "10.4.0")
+    (reframed / "csh.yml").write_text("# reframe header\n" + CSH, encoding="utf-8")
+
+    distributor.sync_many([(product, product.versions["10.4.0"])], target)
+
+    folder = version_folder(target, product)
+    origins_text = (folder / ORIGIN_MAP).read_text(encoding="utf-8")
+    assert "from the repository root" in origins_text
+    assert yaml.safe_load(origins_text)["redirects"][0]["to"] == f"{ROOTED}users-guide/new.md#old"
+    csh_text = (folder / "csh.yml").read_text(encoding="utf-8")
+    assert csh_text.startswith("# reframe header\n")
+    # Quoting kept: a digit-only identifier stays a string.
+    assert yaml.safe_load(csh_text) == {
+        "help_one": f"{ROOTED}users-guide/new.md#old",
+        "1234": f"{ROOTED}index.md",
+    }
+    # The working tree is not touched: it stays version-relative.
+    assert (reframed / ORIGIN_MAP).read_text(encoding="utf-8") == ORIGINS
+    # And a second run finds it all current.
+    results = distributor.sync_many([(product, product.versions["10.4.0"])], target).results
+    assert [r.outcome for r in results if r.doc_class == ONLINE_HELP] == [SyncOutcome.CURRENT]
+
+
+def test_a_version_whose_only_change_is_its_maps_is_refreshed_in_place(
+    config, catalog, distributor, product, target
+) -> None:
+    """The first sync after Phase 68: every page matches, and only the maps are in
+    the old shape. They are rewritten; the folder is not re-copied."""
+    opt_in(config, product.slug)
+    origin_version(config, catalog, product, "10.4.0")
+    distributor.sync_many([(product, product.versions["10.4.0"])], target)
+    folder = version_folder(target, product)
+    (folder / ORIGIN_MAP).write_text(ORIGINS, encoding="utf-8")  # a pre-Phase-68 copy
+    page = folder / "users-guide" / "new.md"
+    before = page.stat().st_mtime_ns
+
+    results = distributor.sync_many([(product, product.versions["10.4.0"])], target).results
+
+    help_rows = [r for r in results if r.doc_class == ONLINE_HELP]
+    assert [r.outcome for r in help_rows] == [SyncOutcome.MAPS_REFRESHED]
+    assert help_rows[0].files == 1
+    assert page.stat().st_mtime_ns == before
+    rows = yaml.safe_load((folder / ORIGIN_MAP).read_text(encoding="utf-8"))["redirects"]
+    assert rows[0]["to"] == f"{ROOTED}users-guide/new.md#old"
+
+
+def test_a_page_change_still_copies_the_whole_version(
+    config, catalog, distributor, product, target
+) -> None:
+    opt_in(config, product.slug)
+    origin_version(config, catalog, product, "10.4.0")
+    distributor.sync_many([(product, product.versions["10.4.0"])], target)
+    folder = version_folder(target, product)
+    (folder / ORIGIN_MAP).write_text(ORIGINS, encoding="utf-8")
+    reframed = config.reframed_path(product.bu, product.family, product.slug, "10.4.0")
+    (reframed / "users-guide" / "new.md").write_text("# new, longer\n", encoding="utf-8")
+
+    results = distributor.sync_many([(product, product.versions["10.4.0"])], target).results
+
+    assert [r.outcome for r in results if r.doc_class == ONLINE_HELP] == [SyncOutcome.SYNCED]
+    assert (folder / "users-guide" / "new.md").read_text(encoding="utf-8") == "# new, longer\n"
+    rows = yaml.safe_load((folder / ORIGIN_MAP).read_text(encoding="utf-8"))["redirects"]
+    assert rows[0]["to"] == f"{ROOTED}users-guide/new.md#old"
+
+
+def test_served_rows_in_the_product_map_are_replaced_not_doubled(
+    config, catalog, distributor, product, target
+) -> None:
+    """17k+ rows were published as `us/en/…html` before Phase 68. The first sync
+    claims them as its own and writes the rooted rows in their place."""
+    opt_in(config, product.slug)
+    origin_version(config, catalog, product, "10.4.0")
+    product_map = target / TREE / "en-us" / product.slug / ONLINE_HELP / ORIGIN_MAP
+    product_map.parent.mkdir(parents=True, exist_ok=True)
+    product_map.write_text(
+        "redirects:\n"
+        "- from: https://hand.example.com/kept\n  to: somewhere/else.html\n  status: 301\n"
+        "- from: https://docs.tibco.com/pub/ems/10.4.0/doc/html/users-guide/old.htm\n"
+        f"  to: {SERVED}/tibco-ems/online-help/10-4-0/users-guide/new.html#old\n  status: 301\n",
+        encoding="utf-8",
+    )
+
+    distributor.sync_many([(product, product.versions["10.4.0"])], target)
+
+    rows = published_origins(target, product)["redirects"]
+    assert [row["to"] for row in rows] == [
+        "somewhere/else.html", f"{ROOTED}users-guide/new.md#old",
+    ]
+
+
+
+def test_rooting_is_idempotent_and_leaves_urls_and_bad_maps_alone() -> None:
+    from docushift.sync import rooted
+
+    assert rooted.rooted(ROOTED, "a b.md#x") == f"{ROOTED}a b.md#x"  # a file, not encoded
+    assert rooted.rooted(ROOTED, f"{ROOTED}a.md") == f"{ROOTED}a.md"
+    assert rooted.rooted(ROOTED, "https://elsewhere/a.html") == "https://elsewhere/a.html"
+    assert rooted.unroot(ROOTED, f"{ROOTED}a.md#x") == "a.md#x"
+    assert rooted.unroot(ROOTED, "/en-us/other/online-help/1-0-0/a.md") == \
+        "/en-us/other/online-help/1-0-0/a.md"
+    assert rooted.origins_text("redirects: [unclosed\n", ROOTED) is None
+    assert rooted.csh_text("- a list\n", ROOTED) is None

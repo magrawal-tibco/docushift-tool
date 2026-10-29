@@ -875,3 +875,19 @@ def test_a_default_run_checks_each_language_against_its_own_conversion(config, s
     day = datetime.date.today().isoformat()
     reports = sorted(p.name for p in (config.root_dir / "reports/verify/ibi" / SLUG).glob("*.csv"))
     assert reports == [f"{NUMBER}-{day}.csv", f"{NUMBER}-ja-jp-{day}.csv"]
+
+
+def test_repo_rooted_maps_read_like_folder_relative_ones(config, state) -> None:
+    """Phase 68: `sync` publishes `to` from the repo root. The checks read it back
+    folder-relative, and a wrong anchor is still found through the prefix."""
+    target = _fixture(config, state, maps=False)
+    folder = _version_folder(target)
+    root = f"/en-us/{SLUG}/online-help/1-0-0/"
+    rows = {f"{OLD}/{name}.htm": f"{root}{name}.md#{name}" for name in ("guide", "one", "two")}
+    _maps(folder, rows, product=rows)
+
+    assert _codes(_verify(config, state, target)) == []
+
+    rows[f"{OLD}/one.htm"] = f"{root}one.md#nowhere"
+    _maps(folder, rows, product=rows)
+    assert _codes(_verify(config, state, target)) == ["VERIFY_REDIRECT_TARGET_MISSING"]

@@ -19,6 +19,7 @@ from pathlib import Path, PurePosixPath
 
 from docushift import origins
 from docushift.sync import redirects as served
+from docushift.sync import rooted
 from docushift.validation import references
 from docushift.verify import live, published
 from docushift.verify import text as texts
@@ -105,7 +106,7 @@ def check(ctx: Context, sample: int, seed: int, fetcher: Fetcher | None = None, 
 
 def _maps(ctx: Context, result: Check) -> list[tuple[str, str]] | None:
     mine = ctx.folder / FILE
-    rows = live.origins(mine)
+    rows = live.origins(mine, _prefix(ctx))
     if not rows:
         why = "no" if not mine.is_file() else "an unreadable or empty"
         result.add("VERIFY_REDIRECT_MAP_MISSING", FILE, f"the version has {why} {FILE}")
@@ -118,7 +119,7 @@ def _maps(ctx: Context, result: Check) -> list[tuple[str, str]] | None:
                    f"{ctx.doc_class} has {why} product-level {FILE} beside version.yml")
         return rows
     absent = [frm for frm, _ in rows if frm not in assembled]
-    moved = [frm for frm, to in rows if frm in assembled and assembled[frm] != _served(ctx, to)]
+    moved = [frm for frm, to in rows if frm in assembled and assembled[frm] not in _assembled(ctx, to)]
     if absent:
         result.add("VERIFY_REDIRECT_MAP_INCOMPLETE", "",
                    f"{len(absent)} of {len(rows)} row(s) missing from the product {FILE}, e.g. {absent[0]}",
@@ -131,8 +132,18 @@ def _maps(ctx: Context, result: Check) -> list[tuple[str, str]] | None:
 
 
 def _served(ctx: Context, to: str) -> str:
-    """A version-root `to` as the product map writes it -- `sync`'s own rule."""
+    """A version-root `to` as the platform serves it -- what staging is asked for."""
     return served.published(ctx.base, "", ctx.locale, ctx.slug, ctx.doc_class, ctx.segment, to)
+
+
+def _prefix(ctx: Context) -> str:
+    return rooted.folder_prefix(ctx.locale, ctx.slug, ctx.doc_class, ctx.segment)
+
+
+def _assembled(ctx: Context, to: str) -> tuple[str, str]:
+    """A version-root `to` as the product map writes it: from the repo root since
+    Phase 68, or the served URL a map not yet re-synced still carries."""
+    return rooted.rooted(_prefix(ctx), to), _served(ctx, to)
 
 
 # -- 1: every live page of a published topic has a row ---------------------------

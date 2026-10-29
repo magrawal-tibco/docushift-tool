@@ -2430,6 +2430,82 @@ support on. Online help and the three document doc-classes keep the 260 rule.
 
 **As built (2026-10-28/29).** Service Grid 3.4.3/3.4.4 synced (124 long API files each, longest 311). Follow-up the same week: git for Windows refused three Business Studio pages at exactly 260, because MAX_PATH counts the terminating null, so `PUBLISHED_PATH_LIMIT` is now **259**. The page was renamed `finding-a-case-object-by-case-id.md` in the 5.6.0, 5.6.1 and 5.7.0 rename maps.
 
+### Phase 68: Redirect and Help Maps Name the Markdown File From the Repo Root — **Built 2026-10-29; run pending; DOCOPS-292**
+
+**Why.** AEM team requirement: every path a published `301.yml` or `csh.yml` points to must be
+the Markdown file's path from the root of the docs repo, anchor kept, so all redirect targets
+are written one standard way. Today the published repos use three shapes (measured in
+`en-us-ibi-focus-userdocs`, 2026-10-29):
+
+| File | `to` / value today | Wanted |
+|---|---|---|
+| doc-class `301.yml` | `us/en/ibi-focus/online-help/9-3-0/ibi-focus.html#ibitm-focus` (served URL) | `/en-us/ibi-focus/online-help/9-3-0/ibi-focus.md#ibitm-focus` |
+| per-version `301.yml` | `introduction-…/unfiled/changes-in-functionality.md#…` (version-relative) | `/en-us/ibi-focus/online-help/9-3-8/introduction-…/unfiled/changes-in-functionality.md#…` |
+| per-version `csh.yml` | version-relative, as above | repo-rooted, as above |
+
+**Decided 2026-10-29 (the user):** forward slashes with a leading `/`
+(`/{locale}/{slug}/{doc-class}/{segment}/{path}.md#anchor`); all three files change. `from`
+is unchanged (the live `docs.tibco.com` URL). This reverses Phase 29's `.html` choice for
+`301.yml` only.
+
+**Where the change lives: `sync`, not `convert`/`reframe`.** The working trees (`output/`,
+`reframed/`) keep version-relative paths, so convert's and reframe's self-checks, orphan
+handling and `csh validate` on them are untouched, and a re-convert does not depend on where
+the tree will be published. `sync` rewrites the two files as it places a version — the one
+point where locale, slug, doc-class and segment are all known.
+
+**Steps:**
+
+1. **One function** `sync/redirects.rooted(locale, slug, doc_class, segment, ref)` →
+   `/en-us/…/{ref}`, **not** percent-encoded (it names a file, not a URL), no host:
+   `publish_base_url` no longer applies to these two maps.
+2. **Per-version files.** `_place` rewrites `301.yml` (`to` only) and `csh.yml` (every value)
+   in the staging copy, keeping their header comments. `_identical` compares those two files
+   by their rewritten content rather than size/mtime, so an unchanged version still reads
+   `current`.
+2a. **Maps-only refresh (decided 2026-10-29, the user).** When every other file in a version
+   is identical and only `301.yml` / `csh.yml` differ, `sync` rewrites those two files in
+   place instead of re-copying and swapping the whole folder. Reported as its own outcome
+   (`maps refreshed`) so the run says how many versions took the short path. A version with
+   any page change still gets the full copy and swap. Without this, the first sync after
+   this phase re-copies every version that has a map (91 in ibi, 532 in TIBCO) for a
+   change git sees as a few hundred small files.
+3. **Doc-class `301.yml`.** `_write_origin_map` uses `rooted` instead of `published`.
+   `owned_prefixes` claims the new shape plus the two old ones (`us/en/…`, and pre-Phase 29),
+   so the first sync **replaces** the 17k+ existing rows rather than doubling them.
+   `redirects.yml` (Reframe's internal moves) keeps the served shape; it was not asked for.
+4. **Readers of the published repos accept the rooted form** (and still the old one, until
+   every repo is re-synced): `validate` (`artifacts._check_redirects`, `disk_candidates`,
+   `validation/csh.py`) and `verify` (`verify/redirects.py`, `verify/live.py`,
+   `verify/driver.py`). A `/`-rooted reference resolves from the tree root.
+5. **Tests:** both per-version files rooted after sync, header kept; second sync `current`;
+   a version with only stale maps is refreshed in place (no swap), one with a page change is not;
+   doc-class map replaced, not doubled, starting from an old-shape map; validate/verify pass
+   on a rooted tree and on an old one.
+6. **Docs:** `architecture.md` §5.4.2 (the published `csh.yml` path is repo-rooted; working
+   copy unchanged), `design.md` §9.4, the `sync/redirects.py` docstring (Phase 29's `.html`
+   argument), `user-guide.md` sync section.
+7. **Run (user, as `!` commands):** `sync` both BUs. Versions with no page changes take the
+   maps-only refresh (2a). Then `validate` + a `verify` sample, read-only. Push to
+   `content-fix` (ibi) and `wip` (TIBCO) after `git fetch` and comparing with the remote.
+
+*Exit: no published `301.yml` or `csh.yml` holds a version-relative path or a `us/en/…html`
+URL; every `to` and CSH value resolves to a file from the repo root; second sync all `current`;
+tests and lint clean.*
+
+**As built (2026-10-29).** New `sync/rooted.py` (`folder_prefix`, `rooted`, `unroot`, and the
+two file rewriters); `sync_one` compares and refreshes through `_compare`, with the new
+`SyncOutcome.MAPS_REFRESHED`. The published per-version `301.yml` gets a header saying `to`
+is from the repo root; `csh.yml` keeps its comments and order and gains one note line. 10 new
+tests (sync, validate, verify).
+
+**Follow-up, same day (the user):** the Reporting Server dry run told its 14 PDF-only versions
+(9.1.0–9.2.7) to "run `docushift convert` first", though there is no HTML help to convert.
+An unpacked version whose engine is not a convertible one now reads `NO_HTML_HELP` ("no
+online help to publish… PDF-only"), shows *PDF-only* in `--dry-run`, and is one dim summary
+line in the report instead of a warning per version. 9.2.8 (never unpacked; may have an
+updated doc set) is left for now.
+
 ---
 
 ## Carried-Forward Open Items

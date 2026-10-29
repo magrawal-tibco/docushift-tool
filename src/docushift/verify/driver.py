@@ -40,7 +40,7 @@ from docushift.models import SourceEngine
 from docushift.reframe.toc import schema_for
 from docushift.reporting.findings import FindingsRun, Severity
 from docushift.state import READ_BACK_CODES
-from docushift.sync import distributor, router
+from docushift.sync import distributor, rooted, router
 from docushift.sync import documents as document_index
 from docushift.utils.csvio import natural_version_key
 from docushift.utils.slug import is_primary_locale, version_segment
@@ -199,7 +199,7 @@ class Verifier:
         chrome = _CHROME.get(engine, ())
         landings = _landings(roots, extracted)
         drops = self.state.latest_counts(folder.slug, number, DROP_CODES) if self.state else {}
-        old_urls = {to: url for url, to in live.origins(folder.path / "301.yml")}
+        old_urls = {to: url for url, to in live.origins(folder.path / "301.yml", _rooted_prefix(folder))}
 
         tops: dict[str, str] = {}
 
@@ -449,7 +449,7 @@ class Verifier:
         for source in outmap:
             by_page.setdefault(key_of(source).partition("#")[0], source)
         uncheckable = 0
-        for url, to in live.sample(live.origins(folder.path / "301.yml"), self.live_sample):
+        for url, to in live.sample(live.origins(folder.path / "301.yml", _rooted_prefix(folder)), self.live_sample):
             source = by_page.get(to.partition("#")[0])
             local = None
             if source is not None:
@@ -650,3 +650,8 @@ def _counts(drops: dict[str, int]) -> str:
 def _quote(sentences: list[str]) -> str:
     shown = " | ".join(f'"{s[:140]}"' for s in sentences[:3])
     return shown + (f" and {len(sentences) - 3} more" if len(sentences) > 3 else "")
+
+
+def _rooted_prefix(folder) -> str:
+    """The version folder from the repo root -- how a published `301.yml` names pages (Phase 68)."""
+    return rooted.folder_prefix(folder.locale, folder.slug, folder.doc_class, folder.segment)

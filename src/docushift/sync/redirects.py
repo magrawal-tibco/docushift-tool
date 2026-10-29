@@ -47,6 +47,12 @@ premise was right and the conclusion was wrong: those are *source* paths that
 AEM resolves, and this file is the one artifact that is not a source path but a
 served address.
 
+**Phase 68 took `301.yml` back to `.md`.** The AEM team asked for every 301 target
+as the Markdown file's path from the repository root (`sync/rooted.py`), so the
+origin map is written that way and `published` now serves `redirects.yml` only.
+`owned_prefixes` claims the served shape as well, so the rows published under it
+are replaced rather than doubled.
+
 **Changing the prefix drags a migration with it**, because `prefix` is also how
 `owned_prefixes` decides which rows this tool may replace. Rows written under
 the old shape would stop being recognised as ours, survive as foreign rows, and
@@ -70,6 +76,7 @@ from urllib.parse import unquote, urlsplit
 
 import yaml
 
+from docushift.sync import rooted
 from docushift.transforms import links
 
 #: The doc-class file this module writes, and the per-version file it reads. The
@@ -190,6 +197,7 @@ def parse(text: str) -> list[dict[str, Any]] | None:
 def generated_rows(folder: Path, present: set[str], base: str, tree_name: str,
                    locale: str, slug: str, file_name: str = REDIRECTS,
                    prefix_keys: tuple[str, ...] = ("from", "to"),
+                   rooted_keys: tuple[str, ...] = (),
                    ) -> tuple[list[dict[str, Any]], list[str]]:
     """Every merged version folder's map, rewritten into served URLs.
 
@@ -203,6 +211,11 @@ def generated_rows(folder: Path, present: set[str], base: str, tree_name: str,
     whose `from` is already an absolute `docs.tibco.com` URL -- prefixing it
     would produce a published path with a live docsite URL embedded in the middle
     of it, which is the one shape that is neither valid nor obviously wrong.
+
+    `rooted_keys` is which sides are written as the Markdown file's path from the
+    repository root instead (Phase 68) -- `("to",)` for `301.yml` since the AEM
+    team asked for it. `rooted` is idempotent, so a version file `sync` already
+    rewrote reads the same as one it has not.
     """
     rows: list[dict[str, Any]] = []
     unparsed: list[str] = []
@@ -220,6 +233,9 @@ def generated_rows(folder: Path, present: set[str], base: str, tree_name: str,
             for key in prefix_keys:
                 moved[key] = published(base, tree_name, locale, slug, doc_class,
                                        segment, str(row[key]))
+            for key in rooted_keys:
+                moved[key] = rooted.rooted(
+                    rooted.folder_prefix(locale, slug, doc_class, segment), str(row[key]))
             rows.append(moved)
     rows.sort(key=lambda row: str(row["from"]))
     return rows, unparsed
@@ -245,6 +261,10 @@ def owned_prefixes(present: set[str], base: str, tree_name: str, locale: str,
     (R10-02). Each shape is built under both the configured base and none, so a
     base carrying a path of its own (`https://host/docs`) still claims the rows a
     host-less run wrote.
+
+    **A third shape since Phase 68**, the repo-rooted `/{locale}/{slug}/…` that
+    `301.yml` is now written in. The served shape stays claimed so the rows it
+    replaces are deleted rather than kept beside their replacements.
     """
     shapes: list[str] = []
     for segment in sorted(present):
@@ -255,6 +275,9 @@ def owned_prefixes(present: set[str], base: str, tree_name: str, locale: str,
                 owned = _ownable(shape(under, tree_name, locale, slug, doc_class, segment))
                 if owned not in shapes:
                     shapes.append(owned)
+        owned = _ownable(rooted.folder_prefix(locale, slug, doc_class, segment))
+        if owned not in shapes:
+            shapes.append(owned)
     return shapes
 
 
@@ -314,8 +337,17 @@ def disk_candidates(url: str, trees: set[str]) -> list[PurePosixPath]:
     Returns `[]` for a row that is not ours at all: a hand-added redirect out of
     this target, which `sync` carries through verbatim precisely so that nothing
     here has to adjudicate it.
+
+    A repo-rooted `/{locale}/{slug}/…/page.md` (Phase 68) is already the disk path
+    below the tree, and is not decoded: it names a file, not a URL.
     """
-    path = unquote(urlsplit(str(url)).path).lstrip("/")
+    text = str(url)
+    if text.startswith("/") and not text.startswith("//"):
+        rooted_path = PurePosixPath(text.partition("#")[0].lstrip("/"))
+        if len(rooted_path.parts) < 3:
+            return []
+        return [PurePosixPath(tree, rooted_path) for tree in sorted(trees)]
+    path = unquote(urlsplit(text).path).lstrip("/")
     parts = PurePosixPath(path).parts if path else ()
     if len(parts) < 3:
         return []

@@ -41,12 +41,16 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | A redirect source is decided for each Go URL with several destinations, and the Go URL redirects are built | DOCOPS-279: dated note → Done |
 | A new phase is opened | One sub-task under the matching story, In Progress, no `retro` |
 | Phase 66 runs: every synced PDF-only version verified (15 after a re-extract, 3 Omni-Gen after a re-sync) | DOCOPS-285: dated note with the counts → Done; per-BU results on the BU's verify issue |
+| Phase 68 built, both BUs re-synced, validated and pushed | DOCOPS-292: dated note with counts → Done |
 | Every family in a BU has its source ZIPs backed up | DOCOPS-281 (ibi), DOCOPS-282 (TIBCO), DOCOPS-283 (Spotfire, DataSynapse): dated note with gaps → Done |
 
 **Left alone on purpose:** DOCOPS-8 is a Task where its siblings are Stories.
 
 **Log** (newest first, one line per session):
 
+- 2026-10-29 — DOCOPS-292 created under DOCOPS-96 (0.5 SP, AI & Content Intelligence), In Progress: Phase 68,
+  `301.yml`/`csh.yml` targets as repo-rooted `.md` paths (AEM request); built, sync runs pending. Component set by
+  edit; create rejects it.
 - 2026-10-29 — TIBCO repos: `wip` pushed (main untouched) in businessevents, tra, bpm, bpm-resources, bw-plugin
   userdocs; Business Studio 5.6.0–5.7.0 case-object page renamed (260 chars); path limit now 259.
 
@@ -374,6 +378,7 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | 62 | `verify` checks CSH identifiers, ibi and TIBCO (planned) | DOCOPS-273 |
 | 64 | `verify` reads one language; `301.yml` from English pages; `sync` skips archives | DOCOPS-275 (done) |
 | 66 | `verify` checks every version's documents, PDF-only versions included | DOCOPS-285 (in progress) |
+| 68 | `301.yml` / `csh.yml` targets are repo-rooted `.md` paths (AEM) | DOCOPS-292 (in progress) |
 | 57 | Translated help to the `loc-` tree (`--locale`) | build DOCOPS-253; runs DOCOPS-148 (in progress) |
 
 Other logged work: Jira reconcile and this handoff DOCOPS-208; stakeholder status page DOCOPS-197; TIBCO family reassignments DOCOPS-120
