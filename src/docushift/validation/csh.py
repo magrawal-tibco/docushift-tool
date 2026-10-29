@@ -236,6 +236,10 @@ def _orphan_frontmatter(
     known = set(mapping)
     findings: list[Finding] = []
     for relative, identifiers in sorted(pages.items()):
+        if rooted.in_unfiled(relative):
+            # Not in the TOC, so `sync` drops its identifiers from the map (the
+            # user, 2026-10-29); the frontmatter is the record of what they were.
+            continue
         missing = sorted(identifiers - known)
         if not missing:
             continue

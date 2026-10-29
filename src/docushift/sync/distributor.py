@@ -346,7 +346,10 @@ class WorkspaceDistributor:
                 # not the folder. The first sync after Phase 68 is this, everywhere.
                 try:
                     for name in stale:
-                        _replace_text(destination / name, maps[name])
+                        if maps[name] == rooted.NOT_PUBLISHED:
+                            (destination / name).unlink()
+                        else:
+                            _replace_text(destination / name, maps[name])
                 except OSError as exc:  # pragma: no cover - filesystem failure, not logic
                     message = f"{type(exc).__name__}: {exc}"
                     return SyncResult(slug, number, SyncOutcome.FAILED, segment=segment, message=message)
@@ -519,7 +522,10 @@ class WorkspaceDistributor:
                             ignore=_unpublished(long_path(source)))
             # Phase 68: the published maps name pages from the repo root.
             for name, text in (maps or {}).items():
-                textfile.write_text(staging / name, text)
+                if text == rooted.NOT_PUBLISHED:
+                    (staging / name).unlink(missing_ok=True)
+                else:
+                    textfile.write_text(staging / name, text)
             files = [path for _relative, path in walk_files(staging)]
             size = sum(path.stat().st_size for path in files)
         return len(files), size
@@ -1309,12 +1315,16 @@ def _compare(source: Path, target: Path,
     for name in REFRAME_WORKING_FILES:  # never published (X1-03)
         left.pop(Path(name), None)
     right = dict(walk_files(target))
-    if left.keys() != right.keys():
+    # A map that is not published is expected absent; one still there is stale.
+    withheld = {Path(name) for name, text in maps.items() if text == rooted.NOT_PUBLISHED}
+    if left.keys() - withheld != right.keys() - withheld:
         return False, []
     rewritten = {Path(name) for name in maps}
     pages_same = all(filecmp.cmp(left[name], right[name], shallow=True)
                      for name in left if name not in rewritten)
-    stale = [name for name in sorted(maps) if not _holds(right[Path(name)], maps[name])]
+    stale = [name for name in sorted(maps)
+             if (Path(name) in right if Path(name) in withheld
+                 else not _holds(right[Path(name)], maps[name]))]
     return pages_same, stale
 
 

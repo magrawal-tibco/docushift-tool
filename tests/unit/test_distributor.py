@@ -2084,3 +2084,30 @@ def test_rooting_is_idempotent_and_leaves_urls_and_bad_maps_alone() -> None:
         "/en-us/other/online-help/1-0-0/a.md"
     assert rooted.origins_text("redirects: [unclosed\n", ROOTED) is None
     assert rooted.csh_text("- a list\n", ROOTED) is None
+
+
+def test_help_entries_into_unfiled_pages_are_not_published(
+    config, catalog, distributor, product, target
+) -> None:
+    """The user, 2026-10-29: a Help button must not open a page left out of the
+    TOC. Any depth -- a doc set laid out alone has its own `unfiled/` (Phase 63).
+    A map with nothing left publishes no file, and a published one is removed."""
+    opt_in(config, product.slug)
+    origin_version(config, catalog, product, "10.4.0")
+    reframed = config.reframed_path(product.bu, product.family, product.slug, "10.4.0")
+    csh = reframed / "csh.yml"
+    csh.write_text('"kept": "index.md"\n"gone": "guide/unfiled/x.md#y"\n"top": "unfiled/z.md"\n',
+                   encoding="utf-8")
+
+    distributor.sync_many([(product, product.versions["10.4.0"])], target)
+
+    folder = version_folder(target, product)
+    assert yaml.safe_load((folder / "csh.yml").read_text(encoding="utf-8")) == {"kept": f"{ROOTED}index.md"}
+
+    csh.write_text('"gone": "guide/unfiled/x.md#y"\n', encoding="utf-8")
+    results = distributor.sync_many([(product, product.versions["10.4.0"])], target).results
+    assert [r.outcome for r in results if r.doc_class == ONLINE_HELP] == [SyncOutcome.MAPS_REFRESHED]
+    assert not (folder / "csh.yml").exists()
+
+    results = distributor.sync_many([(product, product.versions["10.4.0"])], target).results
+    assert [r.outcome for r in results if r.doc_class == ONLINE_HELP] == [SyncOutcome.CURRENT]

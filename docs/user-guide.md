@@ -1346,6 +1346,8 @@ format): forward slashes, a leading `/`, the `.md` file and its anchor. No host,
   status: 301
 ```
 
+Help entries that point into an `unfiled/` folder (a page left out of the table of contents)
+are dropped from the published `csh.yml`; a version left with none publishes no `csh.yml`.
 Only the published copies are written this way. `output/` and `reframed/` keep paths relative
 to the version folder; `sync` rewrites the two files as it places a version. A version whose
 pages already match and whose only change is one of these maps is refreshed in place (reported

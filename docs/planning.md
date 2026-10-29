@@ -2507,7 +2507,16 @@ line in the report instead of a warning per version. 9.2.8 (never unpacked; may 
 updated doc set) is left for now.
 
 **Decided 2026-10-29 (the user):** Data Intelligence 1.1.0/1.2.0 have 104 topics each outside the
-TOC (`unfiled/`), so no `301.yml` row; that is accepted, not a gap to fix. ibi pushed to
+TOC (`unfiled/`), so no `301.yml` row; that is accepted, not a gap to fix.
+
+**Follow-up 2 (the user, 2026-10-29): no help entry into `unfiled/`.** Focus 9.3.6–9.3.8's
+`csh.yml` pointed only at `unfiled/` pages. `sync` now drops every CSH entry whose page is in an
+`unfiled/` folder at any depth (`rooted.in_unfiled`), and publishes no `csh.yml` when none is
+left (and removes a published one). `validate` no longer reads an unfiled page's own `csh`
+frontmatter as a mismatch. Measured before: Focus 4 of 4 per version, Reporting Server 9.3.8
+346 of 532, WebFOCUS Client 9.3.0/9.3.1 9 and 8, Reporting Server 9.3.3/9.3.4/9.3.6/9.3.7 2–8.
+Open: `301.yml` drops only a top-level `unfiled/` (`naming.is_unfiled`), so rows into a doc
+set's own `unfiled/` (Focus) are still written. ibi pushed to
 `content-fix` (DI/ISM 9af82a3 for the two re-merged versions).
 
 ---

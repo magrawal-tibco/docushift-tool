@@ -22,12 +22,13 @@ repositories are re-synced.
 
 from __future__ import annotations
 
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any
 
 import yaml
 
 from docushift.transforms.csh import quote
+from docushift.utils.naming import UNFILED
 
 #: Literals rather than imports from `origins` / `reframe.csh`: `sync` imports
 #: those lazily, and the names are a published contract that does not move.
@@ -41,6 +42,18 @@ ORIGINS_HEADER = (
 )
 
 CSH_NOTE = "# Paths are from the repository root (planning.md Phase 68).\n"
+
+#: `published_maps`' answer for a map that must not be published at all.
+NOT_PUBLISHED = ""
+
+
+def in_unfiled(reference: str) -> bool:
+    """Whether a version-relative page sits in an `unfiled/` folder, at any depth.
+
+    Any depth, not only the top: since Phase 63 a doc set laid out on its own has
+    its own `{doc-set}/unfiled/`, which `naming.is_unfiled` does not see.
+    """
+    return UNFILED in PurePosixPath(str(reference).partition("#")[0]).parts
 
 
 def folder_prefix(locale: str, slug: str, doc_class: str, segment: str) -> str:
@@ -108,6 +121,11 @@ def origins_text(text: str, prefix: str) -> str | None:
 def csh_text(text: str, prefix: str) -> str | None:
     """A version's `csh.yml` with every value rooted. `None` if it does not parse.
 
+    **Entries into `unfiled/` are dropped** (the user, 2026-10-29): a page left out
+    of the TOC is not one a Help button should open -- the rule `301.yml` follows
+    (Phase 43). A map with nothing left is `NOT_PUBLISHED`: no file, not an empty
+    one, for `transforms/csh.write`'s reason.
+
     The source's order and comments are kept -- `reframe` writes its map in the
     source's order and `convert` sorts, and either is a reviewer's diff -- and every
     scalar is quoted as `transforms/csh.render` quotes it (7.5% of identifiers are
@@ -121,11 +139,14 @@ def csh_text(text: str, prefix: str) -> str | None:
         return None
     if not isinstance(document, dict):
         return None
+    kept = {key: value for key, value in document.items() if not in_unfiled(str(value))}
+    if not kept:
+        return NOT_PUBLISHED
     header = _leading_comments(text)
     if CSH_NOTE not in header:
         header += CSH_NOTE
     lines = [f"{quote(str(key))}: {quote(rooted(prefix, str(value)))}"
-             for key, value in document.items()]
+             for key, value in kept.items()]
     return header + "\n".join(lines) + "\n"
 
 
@@ -134,6 +155,8 @@ _REWRITERS = {ORIGINS: origins_text, CSH: csh_text}
 
 def published_maps(source: Path, prefix: str) -> dict[str, str]:
     """`{file name: published text}` for the maps a converted version folder has.
+
+    `NOT_PUBLISHED` for a map that exists in the source and must not be published.
 
     A map that will not parse is left out, so it is copied through verbatim and
     `validate` names it -- the rule every other artifact `sync` cannot read follows.

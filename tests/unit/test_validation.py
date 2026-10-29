@@ -2279,3 +2279,12 @@ def test_a_repo_rooted_csh_value_resolves_against_its_folder(tmp_path: Path) -> 
 
     assert codes(findings) == ["LINK_BROKEN"]
     assert "help_2 -> html/gone.md" in findings[0].message
+
+
+def test_an_unfiled_page_keeps_its_identifiers_without_a_map_entry(tmp_path: Path) -> None:
+    """`sync` drops help entries into `unfiled/` (2026-10-29); the page's own
+    frontmatter still names them, and that is not a mismatch."""
+    target = tmp_path / "target"
+    publish(target, {"guide/unfiled/a.md": "---\ncsh:\n  - \"help_1\"\n---\n\n# A\n"})
+
+    assert csh_of(target) == []
