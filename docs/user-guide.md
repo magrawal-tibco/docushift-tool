@@ -1060,8 +1060,9 @@ tree is built. Tuning a boundary rule is a re-run, not a restore — which matte
 merge is irreversible once the pages have been hand-edited and the URLs published.
 
 The editorial policy lives in `config/reframe.yaml`, not in the code, because it is expected
-to be tuned repeatedly. Five keys: the two below shape every merge; `keep_separate` and
-`publish` are described further down, and `toc_schema` forces a TOC dialect where detection
+to be tuned repeatedly. The two keys below shape every merge; `keep_separate`, `guide_names`
+and `publish` are described further down, `merge` and `toc_folders` in `planning.md`
+Phase 63, and `toc_schema` forces a TOC dialect where detection
 would otherwise choose (it is empty, and should stay so, for every set measured).
 
 - **`max_words`** is a **cap, not a target**. Subtree cohesion chooses the boundary; the cap
@@ -1206,6 +1207,27 @@ path right for 10.5.1 and absent from 10.4.0.
 Editing the list re-merges the doc set, deliberately — it is part of the currency key, unlike
 `publish`, because it changes every page boundary downstream. Reordering the list does not:
 it is sorted and de-duplicated before it is digested, so grouping lines by guide is free.
+
+**A guide's top folder can be given a shorter name** (Phase 69). A guide's folder is named
+after its landing page's title, so a guide titled like the product comes out
+`tibco-activematrix-bpm-2`, and that name sits on every path below it. `guide_names`, in a
+product block only, maps the computed name (as `toc.yml` shows it, without `.md`) to the one
+to publish under; the page and its folder move together, before long paths are cut, so the cut
+then works on the short name:
+
+```yaml
+products:
+  tibco-activematrix-bpm:
+    guide_names:
+      tibco-activematrix-bpm-2: bpm
+```
+
+A name another top-level page or folder already holds (letter case aside), or one that is not
+a valid file name, is refused with `REFRAME_GUIDE_NAME_REFUSED` and the guide keeps its
+computed name; a name matching no guide in a version is a `REFRAME_GUIDE_NAME_UNMATCHED` note.
+Editing it re-merges the product. On a version already published, the saved names in
+`rename-map.csv` still win, so the new name takes effect only with `--renormalize`, which
+moves the published URLs.
 
 `oversized` is the one flag `keep_separate` cannot answer. That page is a single source topic
 larger than the cap, and the merge does not split topic bodies; the decision there is a

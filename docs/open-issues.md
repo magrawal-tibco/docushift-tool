@@ -488,10 +488,10 @@ is refreshed in bulk.
 
 ### 4.3.0 and 4.2.0 online help not published: pages too deep for Windows
 
-- **Status:** Open
+- **Status:** Resolved 29 Oct 2026 (Phase 69): both versions' online help published
 - **Owner:** unassigned
 - **Raised:** 17 Oct 2026
-- **Blocks publishing:** yes, for the online help of 4.3.0 and 4.2.0 (their PDFs and API references are published)
+- **Blocks publishing:** no longer
 
 The help nests topics up to nine folders deep, and 179 of its 1,340 pages would end up past
 Windows' 260-character path limit in the publishing repo. That is too many to rename by hand,
@@ -505,6 +505,12 @@ and a repaired copy of the package without the other one was supplied by hand. I
 unpacked, converted and merged (1,286 pages), and its PDFs, release notes and API reference
 were published. Its online help is held the same way: 111 pages over the limit, longest 371.
 The same naming rule will fix both versions.
+
+**Fix (29 Oct 2026).** Counted again at the 259 limit: 187 pages in 4.3.0 and 115 in 4.2.0.
+The four guide folders get short names (`bpm`, `installation`, `soa-development`,
+`tutorials`), which also ends the `-2` address, and the automatic shortening trims what is
+left: every page fits, and 311 and 251 pages take shorter names. Neither version's help was
+published before, so no live address moves.
 
 ---
 

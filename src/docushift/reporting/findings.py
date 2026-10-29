@@ -452,8 +452,18 @@ REGISTRY: dict[str, Code] = _codes(
     # *not* deciding something: a name here came from a human, and the run says
     # how many so that a reviewer can tell a stable tree from one that happened
     # to recompute the same answer.
+    # Phase 69. A guide name a writer chose that did nothing is a warning, as for
+    # keep_separate; one that names a guide this version lacks is only a note,
+    # since versions add and drop guides.
+    Code("REFRAME_GUIDE_NAME_REFUSED", Severity.WARNING, Stage.REFRAME,
+         "A guide name in reframe.yaml clashes with another top-level name or is not "
+         "a valid page name, so the guide kept its computed name",
+         "planning.md Phase 69"),
+    Code("REFRAME_GUIDE_NAME_UNMATCHED", Severity.NOTE, Stage.REFRAME,
+         "A guide name in reframe.yaml names no guide in this version",
+         "planning.md Phase 69"),
     Code("REFRAME_PATH_SHORTENED", Severity.NOTE, Stage.REFRAME,
-         "Pages on a TOC chain that would publish past 260 characters took shorter "
+         "Pages on a TOC chain that would publish past 259 characters took shorter "
          "names, the folders along the chain with them",
          "planning.md Phase 63"),
     # Phase 64. WebFOCUS Client 9.1.0 and 9.1.1 ship a 530 MB help-server zip in
@@ -464,7 +474,7 @@ REGISTRY: dict[str, Code] = _codes(
          "or 100 MB or more (GitHub's limit)",
          "planning.md Phase 64"),
     Code("REFRAME_PATH_TOO_LONG", Severity.WARNING, Stage.REFRAME,
-         "Pages still past 260 characters published with every name on the chain cut; "
+         "Pages still past 259 characters published with every name on the chain cut; "
          "sync will refuse the version",
          "planning.md Phase 63"),
     Code("RENAME_MAP_APPLIED", Severity.NOTE, Stage.REFRAME,

@@ -102,6 +102,8 @@ REFRAME_DEFAULTS: dict[str, Any] = {
     "keep_separate": (),
     "merge": True,
     "toc_folders": False,
+    # Read from a product block only (Phase 69); a `defaults:` value is ignored.
+    "guide_names": {},
 }
 
 # A publishing suffix must be one lowercase token. A hyphen makes the family/suffix

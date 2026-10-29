@@ -169,3 +169,15 @@ products:
 
   tibco-datasynapse-high-performance-computing-cloud-adapter:
     pin_layout_to: "2.2.0"
+
+  # Phase 69 (2026-10-29). 4.2.0 and 4.3.0 online help could not publish: 115 and
+  # 187 pages past 259 characters. The four guide folders took up to 38 of them on
+  # every chain (`-2` because the main guide's title repeats the product landing
+  # page's). Short names here first, then Phase 63's cut: every page fits, 251 and
+  # 311 pages renamed. 4.2.0 has no installation guide (a note, not a fault).
+  tibco-activematrix-bpm:
+    guide_names:
+      tibco-activematrix-bpm-2: bpm
+      tibco-activematrix-bpm-installation: installation
+      tibco-activematrix-bpm-soa-development: soa-development
+      tibco-activematrix-bpm-tutorials: tutorials

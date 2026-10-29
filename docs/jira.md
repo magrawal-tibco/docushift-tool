@@ -17,7 +17,6 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | Phase 47 re-runs (8 versions) pass | DOCOPS-187 → Done |
 | `catalog sitemap` over the whole scope run (StreamBase half done 2026-10-21) | DOCOPS-123 → Done |
 | 50 long-path + 8 DITA versions re-run | DOCOPS-188 → Done |
-| BPM 4.2.0/4.3.0 long paths fixed and published | DOCOPS-122: dated note → Done if nothing else failing |
 | `sync --bu tibco` + `validate` run | DOCOPS-134, DOCOPS-135; refresh counts in DOCOPS-122, 125–127 |
 | A family reassignment is committed | Add a dated line to the progress comment on DOCOPS-120 |
 | Family review finished | DOCOPS-120 → Done, then DOCOPS-130 |
@@ -48,6 +47,10 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 **Log** (newest first, one line per session):
 
+- 2026-10-29 — DOCOPS-297 → Done, DOCOPS-122 → Done (9 of 9): BPM 4.2.0/4.3.0 help re-merged, synced, validate 0
+  errors, pushed to `wip` (bpm-userdocs 98790f5); 311/251 pages shortened, longest 259. Selected TIBCO: 514 synced.
+- 2026-10-29 — DOCOPS-297 created under DOCOPS-12 (0.5 SP, AI & Content Intelligence, `reframe` `tibco`), In
+  Progress: Phase 69, BPM guide folders shortened + reframe limit 259; built, run pending. Component set by edit.
 - 2026-10-29 — DOCOPS-292 note: ibi re-sync after unfiled help entries dropped; pushed to `content-fix` (Focus
   e1f1d021, WebFOCUS 95a86c00, RS 4512e1fa). RS 9.2.8 is PDF-only, published. The 2 WebFOCUS Client warnings are 9.1.0/9.1.1 help
   `.war` ZIPs (~500 MB); user kept both versions PDF-only.
@@ -385,6 +388,7 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | 64 | `verify` reads one language; `301.yml` from English pages; `sync` skips archives | DOCOPS-275 (done) |
 | 66 | `verify` checks every version's documents, PDF-only versions included | DOCOPS-285 (in progress) |
 | 68 | `301.yml` / `csh.yml` targets are repo-rooted `.md` paths (AEM) | DOCOPS-292 (in progress) |
+| 69 | ActiveMatrix BPM help fits: short guide folders (`guide_names`), reframe cuts to 259 | DOCOPS-297 (done) |
 | 57 | Translated help to the `loc-` tree (`--locale`) | build DOCOPS-253; runs DOCOPS-148 (in progress) |
 
 Other logged work: Jira reconcile and this handoff DOCOPS-208; stakeholder status page DOCOPS-197; TIBCO family reassignments DOCOPS-120

@@ -60,6 +60,7 @@ from docushift.reframe.packer import (
     page_folders,
     project,
     relocate,
+    rename_guides,
     separated,
     shortened,
     single,
@@ -71,7 +72,7 @@ from docushift.reframe.toc import TocEntry, retarget, schema_for
 from docushift.reporting.findings import FindingsRun
 from docushift.utils import textfile
 from docushift.utils.anchors import HEADING
-from docushift.utils.longpath import long_path, walk_files
+from docushift.utils.longpath import PUBLISHED_PATH_LIMIT, long_path, walk_files
 from docushift.utils.naming import is_unfiled
 from docushift.utils.slug import version_segment
 from docushift.utils.swap import recover, remove, staging_of, swap
@@ -85,9 +86,6 @@ from docushift.validation.references import mask_code
 #: small enough to need this?" is an empirical one: DITA's median converted topic
 #: is 177 words to Flare's 180, WebWorks' 234 (Phase 42, measured 2026-10-06).
 REFRAMABLE_ENGINES: tuple[SourceEngine, ...] = (SourceEngine.FLARE, SourceEngine.DITA)
-
-#: What Windows opens, and what `sync` holds a published path to (Phase 15d).
-MAX_PUBLISHED_PATH = 260
 
 #: Phase 63. Engines laid out by the stage but never merged: the TOC-shaped
 #: folders, names and redirects are a property of the address, not of how small
@@ -600,7 +598,10 @@ class Reframer:
         # URL are the same chain. Before `render`, which resolves every relative
         # link and asset against `page.path`.
         relocate(built, roots)
-        # Phase 63: a chain that would publish past 260 characters gets shorter
+        # Phase 69: a guide `reframe.yaml` names moves, page and folder, before the
+        # cut below, so the cut works on the short name.
+        self._rename_guides(slug, number, policy, built)
+        # Phase 63: a chain that would publish past the limit gets shorter
         # names, before any pin -- a name a human chose still wins.
         self._fit(product, version, built)
         # A name a human kept in `rename-map.csv` wins over both the computed
@@ -919,24 +920,41 @@ class Reframer:
         payload = json.dumps(shaping, sort_keys=True, separators=(",", ":"))
         return hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16]
 
+    def _rename_guides(self, slug: str, number: str, policy: ReframePolicy, built: list[Page]) -> None:
+        """`packer.rename_guides` with the policy's names, and its findings."""
+        if not policy.guide_names:
+            return
+        _, refused, unmatched = rename_guides(built, policy.guide_names)
+        if refused:
+            shown = ", ".join(f"{old} ({why})" for old, why in refused.items())
+            self._record(
+                "REFRAME_GUIDE_NAME_REFUSED", slug, number, path="reframe.yaml", count=len(refused),
+                message=f"{len(refused)} guide name(s) in reframe.yaml not used, the computed name kept: {shown}",
+            )
+        if unmatched:
+            self._record(
+                "REFRAME_GUIDE_NAME_UNMATCHED", slug, number, path="reframe.yaml", count=len(unmatched),
+                message=f"{len(unmatched)} guide name(s) in reframe.yaml match no guide here: {', '.join(unmatched)}",
+            )
+
     def _fit(self, product: Product, version: ProductVersion, built: list[Page]) -> None:
         """`packer.fit` against this version's published folder, with its findings."""
         from docushift.sync.distributor import published_help_length
 
         slug, number = product.slug, version.version
         base = published_help_length(self.config, product, number)
-        cap, moved, unfit = fit(built, MAX_PUBLISHED_PATH - base - 1 if base else 0)
+        cap, moved, unfit = fit(built, PUBLISHED_PATH_LIMIT - base - 1 if base else 0)
         if moved:
             self._record(
                 "REFRAME_PATH_SHORTENED", slug, number, count=moved,
-                message=(f"{moved} page(s) on chains past {MAX_PUBLISHED_PATH} characters published "
+                message=(f"{moved} page(s) on chains past {PUBLISHED_PATH_LIMIT} characters published "
                          f"took names cut to {cap} characters"),
             )
         if unfit:
             shown = ", ".join(str(path) for path in unfit[:5])
             self._record(
                 "REFRAME_PATH_TOO_LONG", slug, number, count=len(unfit),
-                message=(f"{len(unfit)} page(s) still past {MAX_PUBLISHED_PATH} characters published "
+                message=(f"{len(unfit)} page(s) still past {PUBLISHED_PATH_LIMIT} characters published "
                          f"with every name cut; `sync` will refuse the version: {shown}"
                          f"{', ...' if len(unfit) > 5 else ''}"),
             )

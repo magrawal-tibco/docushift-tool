@@ -2519,6 +2519,94 @@ Open: `301.yml` drops only a top-level `unfiled/` (`naming.is_unfiled`), so rows
 set's own `unfiled/` (Focus) are still written. ibi pushed to
 `content-fix` (DI/ISM 9af82a3 for the two re-merged versions).
 
+### Phase 69: ActiveMatrix BPM Help Fits — Short Guide Folders, Then Phase 63's Cut — **Done 2026-10-29; DOCOPS-297**
+
+**Why.** ActiveMatrix BPM 4.2.0 and 4.3.0 are the last of DOCOPS-122's nine: their PDFs,
+release notes and API references are published, their online help is not, because pages
+publish past the limit (`open-issues.md`, ActiveMatrix BPM). Too many to pin by hand.
+
+**Measured 2026-10-29** (`reframed/`, at `C:\github\tibco-docs-aem`, limit 259; scripts in
+`C:\tmp\bpm-depth\`):
+
+- **Over the limit:** 4.3.0 187 of 1,347 pages, longest 371; 4.2.0 115 of 1,286. The
+  issue's 179 was at 260. By guide (4.3.0): main guide 128, installation 35, SOA 21, tutorials 3.
+- **Phase 63's `packer.fit` has never run on them.** Both merged before it (17 and 22 Oct).
+  A plain re-merge would not help either: `rename-map.csv` writes every page's computed
+  path into `new_path` (1,347 and 1,286 rows, all filled, none edited since), and `override`
+  runs after `fit`, so the old long names come back.
+- **`fit` alone is too blunt here.** One cap per version, set by the deepest chain: cap 23,
+  1,344 of 4.3.0's 1,347 pages renamed, names such as `ping-tibco.md`, `creating-process.md`.
+  The top folders cost the most: `tibco-activematrix-bpm-2` (24 characters; `-2` because
+  the guide's title repeats the product landing page's), `tibco-activematrix-bpm-installation`
+  (35), `…-soa-development` (38), `…-tutorials` (32).
+- **Short guide folders first, then `fit`:** with `bpm`, `installation`, `soa-development`,
+  `tutorials`, over the limit drops to 85 (4.3.0) and 52 (4.2.0); `fit` then cuts at 29,
+  renames 311 and 251 pages, every page fits, longest 259. Names stay readable:
+  `…/running-enterprise/running-enterprise-2/ping-tibco-activematrix.md`.
+- **Reframe still measures against 260.** `driver.MAX_PUBLISHED_PATH = 260`, while sync's
+  `PUBLISHED_PATH_LIMIT` became 259 on 2026-10-29. `fit` would leave BPM's longest page at
+  260, and `sync` would refuse it.
+- **Why not run `fit` after the pins.** Tried as an alternative: 11 published ibi versions
+  (WebFOCUS Container Edition, Open Data Hub, App Studio 9.3.8) have a page at exactly 260 by
+  the configured 24-character root, though `ibi-docs-aem` is 22 and they publish at 258. Cutting
+  after the pins would re-cut those and move live ibi addresses.
+
+Approved 2026-10-29 as proposed, names included.
+
+#### Decisions
+
+| decision | choice | why |
+|---|---|---|
+| **Guide folder names** | New per-product `reframe.yaml` key `guide_names`, computed top-level name → wanted name. Applied to the guide's page and its folder after `relocate`, before `fit`. A wanted name that clashes with another top-level name, or fails `renames.refusal`, is refused with a warning; a key matching no guide in a version is a note | A policy line a person reviews, as the file asks. Product-scoped, so no other version moves. Before `fit`, so the cut works on the short names |
+| **The four names** | `tibco-activematrix-bpm-2` → `bpm`, `tibco-activematrix-bpm-installation` → `installation`, `tibco-activematrix-bpm-soa-development` → `soa-development`, `tibco-activematrix-bpm-tutorials` → `tutorials`. Same for both versions (4.2.0 has no installation guide; note only) | Measured above. Also removes the `-2` address the open issue calls poor. **Your call: change any name** |
+| **The old pins** | `reframe --product tibco-activematrix-bpm --renormalize` | Neither version's online help was ever published, so no live address moves. Every other product keeps its pins |
+| **Limit in reframe** | `driver` uses `PUBLISHED_PATH_LIMIT` (259), not its own 260 | One number for both stages. Merged versions keep their pins, so the 11 ibi pages at 260 do not move |
+| **Not changed** | `fit`'s algorithm, the order `fit` → `override`, the ibi root length (22 vs. the configured 24) | Each would touch published versions. The root length is a separate fix if wanted |
+
+#### Steps
+
+1. `reframe/policy.py`: read `guide_names` (product level only); register the warning and the
+   note in `reporting/findings.py` and §7.5. `guide_names` joins the version's shaping digest,
+   so only BPM re-merges.
+2. `reframe/driver.py`: apply the names after `relocate`, before `_fit`; replace
+   `MAX_PUBLISHED_PATH` with `PUBLISHED_PATH_LIMIT`.
+3. `config/reframe.yaml`: the BPM block with the four names.
+4. Tests: a renamed guide moves its page and every child, links and `toc.yml` follow; a
+   clashing or refused name keeps the computed one and warns; `fit` budget gives ≤ 259;
+   a product without `guide_names` merges byte-identically.
+5. Docs: `user-guide.md` (`reframe.yaml` keys), `design.md` (reframe naming), `open-issues.md`
+   (BPM entry: counts at 259, closed when published).
+6. Run (the user, as `!` commands): `reframe --product tibco-activematrix-bpm --renormalize`;
+   `sync --product tibco-activematrix-bpm`; `validate`. Then I check read-only: both
+   versions' online help `synced`, longest path ≤ 259, the two `REFRAME_PATH_SHORTENED`
+   counts as measured. Push `en-us-tib-bpm-userdocs` to `wip` after `git fetch` and a
+   comparison with the remote.
+
+*Exit: ActiveMatrix BPM 4.2.0 and 4.3.0 online help published; no other version re-merged;
+tests and lint clean; DOCOPS-122 can close (9 of 9).*
+
+**As built (2026-10-29).** `packer.rename_guides`, called by `driver._rename_guides` between
+`relocate` and `_fit`; `ReframePolicy.guide_names` (sorted pairs, left out of the digest when
+empty, so no other version re-merges); `driver.MAX_PUBLISHED_PATH` removed in favour of
+`PUBLISHED_PATH_LIMIT`. Register 137 codes. 10 new tests. Re-measured with the built code on
+both page lists: every page fits, longest 259, cut at 29 (311 and 251 pages); 4.2.0 reports the
+installation name as unmatched. `design.md` has no reframe naming section, so the rule is in
+`user-guide.md` only, as for `rename-map.csv`. Two catalog guard tests fail on catalog edits
+older than this phase (scope 130 vs 129, retired 70 vs 115), not on this change.
+
+**Run (2026-10-29, logs `scratch/bpm-phase69-*.log`).** Reframe: 2 re-merged, findings as
+measured (311 and 251 shortened at 29; the 4.2.0 installation note; six warnings all present
+before). Sync: both versions' help published (5,269 and 4,687 files), 0 failed. Validate: 0
+errors, 86 warnings (anchors 82, redirects shadowed 4). Published tree: 0 files past 259,
+longest 259. No `csh.yml` (the package has no CSH map) and no `301.yml` (no origin sitemap).
+Pushed to `wip`, `en-us-tib-bpm-userdocs` 98790f5.
+
+**Seen while measuring, not in scope:** other reframed trees with a page over 259 by this
+estimate (Statistica and Data Science Workbench 14.x, Service Grid Container Edition 1.0.x,
+BusinessEvents EE 6.3.0/6.3.1, MDM 10.0.0, Transaction Insight 6.0.0). Not yet checked against
+the catalog (published, retired or held); the estimate uses `{family}-userdocs` for the repo
+name.
+
 ---
 
 ## Carried-Forward Open Items
@@ -2622,8 +2710,10 @@ The concrete deliverable of §7.1: every deferred "report line" in the three doc
 | `ELEMENT_UNRENDERED`³⁴ | note | convert | Embedded media with no Markdown form (`iframe`, `video`, `svg` …); an absolute URL became a link, anything else kept only its fallback text. One row per version, counted by tag | Phase 34 (R8-13) |
 | `FRAGMENT_RETARGETED`³⁰ | note | convert | Cross-references pointed at a heading instead of an inert `<a id>` the platform does not honour | Phase 30 |
 | `FRAGMENT_UNPLACEABLE`³⁰ | warn | convert | A cross-reference naming an anchor with no heading behind it; left as written and will not resolve | Phase 30 |
-| `REFRAME_PATH_SHORTENED`⁶³ | note | reframe | Pages on a TOC chain that would publish past 260 characters took shorter names, the folders along the chain with them | Phase 63 |
-| `REFRAME_PATH_TOO_LONG`⁶³ | warn | reframe | Pages still past 260 characters published with every name on the chain cut; `sync` will refuse the version | Phase 63 |
+| `REFRAME_GUIDE_NAME_REFUSED`⁶⁹ | warn | reframe | A guide name in `reframe.yaml` clashes with another top-level name or is not a valid page name; the guide kept its computed name | Phase 69 |
+| `REFRAME_GUIDE_NAME_UNMATCHED`⁶⁹ | note | reframe | A guide name in `reframe.yaml` names no guide in this version | Phase 69 |
+| `REFRAME_PATH_SHORTENED`⁶³ | note | reframe | Pages on a TOC chain that would publish past 259 characters took shorter names, the folders along the chain with them | Phase 63 |
+| `REFRAME_PATH_TOO_LONG`⁶³ | warn | reframe | Pages still past 259 characters published with every name on the chain cut; `sync` will refuse the version | Phase 63 |
 | `SYNC_DOCUMENT_SKIPPED`⁶⁴ | warn | sync | A file in a document folder was not published: an archive or installer, or 100 MB or more (GitHub's limit) | Phase 64 |
 | `RENAME_MAP_APPLIED`²⁹ | note | reframe | Page names taken from `rename-map.csv` rather than recomputed, so a published URL does not move when a title is edited | Phase 29 |
 | `RENAME_MAP_REFUSED`³⁴ | warn | reframe | A name in `rename-map.csv` that another page ends up holding; the computed name is kept, and each refused pin is named | Phase 34 (R9-05) |

@@ -190,9 +190,10 @@ def test_the_register_carries_every_row_of_7_5() -> None:
     `verify` checks about the 301 maps. Phase 66 adds four `VERIFY_DOCUMENT_*` for
     a PDF-only version's documents. Phase 67 adds three for API references
     published past 260 characters: `PUBLISHED_PATH_LONG`, `GIT_LONGPATHS_OFF` and
-    `API_PATH_LONG`.
+    `API_PATH_LONG`. Phase 69 adds two for guide names in `reframe.yaml`:
+    `REFRAME_GUIDE_NAME_REFUSED` and `REFRAME_GUIDE_NAME_UNMATCHED`.
     """
-    assert len(REGISTRY) == 135
+    assert len(REGISTRY) == 137
 
 
 def test_severity_comes_from_the_registry_and_not_from_the_call_site() -> None:

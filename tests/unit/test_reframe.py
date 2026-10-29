@@ -3900,3 +3900,142 @@ def test_a_chain_that_cannot_fit_is_returned_not_hidden():
     _, _, unfit = fit(pages, 60)
 
     assert unfit == [pages[0].path]
+
+
+# -- Phase 69: guide names from reframe.yaml -----------------------------------
+
+
+def test_a_named_guide_moves_its_page_and_every_child():
+    from docushift.reframe.packer import rename_guides
+
+    pages = _paged("tibco-activematrix-bpm-2.md", "tibco-activematrix-bpm-2/concepts.md",
+                   "tibco-activematrix-bpm-2/concepts/bpm-concepts.md", "tibco-activematrix-bpm.md")
+
+    moved, refused, unmatched = rename_guides(pages, [("tibco-activematrix-bpm-2", "bpm")])
+
+    assert (moved, refused, unmatched) == (3, {}, [])
+    assert [str(page.path) for page in pages] == [
+        "bpm.md", "bpm/concepts.md", "bpm/concepts/bpm-concepts.md", "tibco-activematrix-bpm.md"]
+
+
+def test_a_guide_name_another_top_level_name_holds_is_refused():
+    """`User-Guide` and `user-guide` are one folder on Windows."""
+    from docushift.reframe.packer import rename_guides
+
+    pages = _paged("installation.md", "installation/overview.md", "user-guide.md")
+
+    moved, refused, _ = rename_guides(pages, [("installation", "User-Guide")])
+
+    assert moved == 0 and list(refused) == ["installation"]
+    assert str(pages[1].path) == "installation/overview.md"
+
+
+def test_two_guides_given_one_name_keep_the_first_only():
+    from docushift.reframe.packer import rename_guides
+
+    pages = _paged("a.md", "b.md")
+
+    moved, refused, _ = rename_guides(pages, [("a", "guide"), ("b", "guide")])
+
+    assert moved == 1 and list(refused) == ["b"]
+    assert [str(page.path) for page in pages] == ["guide.md", "b.md"]
+
+
+def test_a_guide_name_that_is_not_a_page_name_is_refused():
+    from docushift.reframe.packer import rename_guides
+
+    pages = _paged("a.md")
+
+    for bad in ("con", "x/y", "../up"):
+        _, refused, _ = rename_guides(pages, [("a", bad)])
+        assert list(refused) == ["a"], bad
+    assert str(pages[0].path) == "a.md"
+
+
+def test_a_guide_name_for_a_guide_this_version_lacks_is_returned():
+    from docushift.reframe.packer import rename_guides
+
+    pages = _paged("a.md")
+
+    assert rename_guides(pages, [("installation", "install")]) == (0, {}, ["installation"])
+
+
+def test_guide_names_are_read_from_the_product_block_only():
+    """The names are a product's own TOC's names; a default would rename every
+    product's guide of that name."""
+    shared = policy_for({"defaults": {"guide_names": {"a": "b"}}}, "x")
+    own = policy_for({"products": {"x": {"guide_names": {"a.md": "b", "c": "", "d": "d"}}}}, "x")
+
+    assert shared.guide_names == ()
+    assert own.guide_names == (("a", "b"),)
+
+
+def test_no_guide_names_leaves_every_existing_digest_unchanged():
+    """The field's arrival must not re-merge every tree on disk: an empty one is
+    left out of the digest, exactly as it was before Phase 69."""
+    import hashlib
+    import json
+    from dataclasses import asdict
+
+    from docushift.reframe import policy as policy_module
+
+    plain = ReframePolicy(keep_separate=("g",))
+    before = {"algorithm": policy_module._ALGORITHM,
+              **{k: v for k, v in asdict(plain).items()
+                 if k not in {"publish", "toc_folders", "merge", "guide_names"}}}
+    payload = json.dumps(before, sort_keys=True, separators=(",", ":"))
+
+    assert plain.key == hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16]
+    assert ReframePolicy(guide_names=(("a", "b"),)).key != ReframePolicy().key
+
+
+def name_guides(config, slug: str, names: dict[str, str]) -> None:
+    (config.config_dir / "reframe.yaml").write_text(
+        "defaults:\n  max_words: 3000\nproducts:\n  " + slug + ":\n    keep_separate: [installation]\n"
+        "    guide_names:\n" + "".join(f"      {old}: {new}\n" for old, new in names.items()),
+        encoding="utf-8",
+    )
+
+
+def test_a_named_guide_reaches_the_tree_and_its_toc(config, catalog, flare):
+    """End to end: the page, its folder and `toc.yml` all take the new name."""
+    converted_tree(config, flare, "10.5.1")
+    name_guides(config, flare.slug, {"installation": "setup"})
+    findings = FindingsRun("reframe")
+
+    result = Reframer(config, catalog, findings=findings).reframe_one(flare, flare.versions["10.5.1"])
+
+    assert result.outcome is ReframeOutcome.REFRAMED
+    written = sorted(p.relative_to(result.path).as_posix() for p in result.path.rglob("*.md"))
+    assert written == ["setup.md", "setup/installation-overview.md", "user-guide.md"]
+    toc = (result.path / "toc.yml").read_text(encoding="utf-8")
+    assert "url: setup/installation-overview.md" in toc and "installation.md" not in toc
+    assert "REFRAME_GUIDE_NAME_REFUSED" not in codes(findings.all)
+
+
+def test_a_refused_or_unmatched_guide_name_is_named(config, catalog, flare):
+    converted_tree(config, flare, "10.5.1")
+    name_guides(config, flare.slug, {"installation": "user-guide", "tutorials": "learn"})
+    findings = FindingsRun("reframe")
+
+    result = Reframer(config, catalog, findings=findings).reframe_one(flare, flare.versions["10.5.1"])
+
+    written = sorted(p.relative_to(result.path).as_posix() for p in result.path.rglob("*.md"))
+    assert written == ["installation.md", "installation/installation-overview.md", "user-guide.md"]
+    found = codes(findings.all)
+    assert "REFRAME_GUIDE_NAME_REFUSED" in found and "REFRAME_GUIDE_NAME_UNMATCHED" in found
+
+
+def test_reframe_cuts_to_the_limit_sync_holds_a_path_to(config, catalog, flare, monkeypatch):
+    """Phase 69. Reframe measured against 260 after `sync` moved to 259, so a page
+    cut to exactly 260 was refused at publish time."""
+    from docushift.sync import distributor
+
+    monkeypatch.setattr(distributor, "published_help_length", lambda *_: 200)
+    # 200 + "/" + 59 = 260 characters: one over.
+    pages = _paged("guide/" + "a" * 50 + ".md")
+    assert len(str(pages[0].path)) == 59
+
+    Reframer(config, catalog)._fit(flare, flare.versions["10.5.1"], pages)
+
+    assert 200 + 1 + len(str(pages[0].path)) <= 259

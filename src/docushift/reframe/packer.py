@@ -52,6 +52,7 @@ from collections.abc import Callable, Hashable, Sequence
 from dataclasses import dataclass, field, replace
 from pathlib import PurePosixPath
 
+from docushift.reframe import renames
 from docushift.reframe.toc import TocEntry
 from docushift.transforms.headings import compact
 from docushift.utils import naming
@@ -830,6 +831,50 @@ def relocate(pages: Sequence[Page], roots: Sequence[TocEntry]) -> int:
             page.path = target
             moved += 1
     return moved
+
+
+def rename_guides(
+    pages: Sequence[Page], names: Sequence[tuple[str, str]]
+) -> tuple[int, dict[str, str], list[str]]:
+    """Gives a guide's top-level page and folder the name `reframe.yaml` chose.
+
+    Phase 69. A guide's folder is named after its landing page's title, and when
+    that title repeats the product's (`tibco-activematrix-bpm-2`) it is both long
+    and a poor address -- and it sits on every chain below it, so `fit` cuts every
+    page in the guide to make room. Moved as one name, page and folder together,
+    after `relocate` and before `fit`.
+
+    A wanted name another top-level name already holds (letter case aside), or one
+    that is not a valid page name, is refused and the guide keeps its computed
+    name. Returns how many pages moved, the refused `computed -> why`, and the
+    computed names that match no guide here (a version without that guide).
+    """
+    tops = {page.path.parts[0] if len(page.path.parts) > 1 else page.path.stem for page in pages}
+    wanted = dict(names)
+    unmatched = [old for old in wanted if old not in tops]
+    refused: dict[str, str] = {}
+    staying = {top.lower() for top in tops if top not in wanted}
+    applied: dict[str, str] = {}
+    for old, new in sorted(wanted.items()):
+        if old not in tops:
+            continue
+        if (why := renames.refusal(PurePosixPath(new + ".md"))) is not None or "/" in new:
+            refused[old] = why or "more than one folder"
+        elif new.lower() in staying or new.lower() in {n.lower() for n in applied.values()}:
+            refused[old] = f"{new!r} is already a top-level name"
+        else:
+            applied[old] = new
+    moved = 0
+    for page in pages:
+        parts = page.path.parts
+        if len(parts) > 1 and parts[0] in applied:
+            page.path = PurePosixPath(applied[parts[0]], *parts[1:])
+        elif len(parts) == 1 and page.path.stem in applied:
+            page.path = PurePosixPath(applied[page.path.stem] + page.path.suffix)
+        else:
+            continue
+        moved += 1
+    return moved, refused, unmatched
 
 
 #: The shortest a segment is cut to before `fit` gives up on a chain.

@@ -87,6 +87,11 @@ class ReframePolicy:
     #: converted tree, as before the phase. Moves to `defaults` when every family
     #: has rolled out.
     toc_folders: bool = False
+    #: Phase 69. A guide's computed top-level name -> the one it publishes under, as
+    #: sorted pairs. Its page and its folder move together, before Phase 63's cut, so
+    #: the cut works on the short name. Product level only: the names are the ones a
+    #: product's own TOC produced.
+    guide_names: tuple[tuple[str, str], ...] = ()
 
     @property
     def key(self) -> str:
@@ -105,6 +110,8 @@ class ReframePolicy:
         # of every policy that does not name it, which would re-cut every merged tree.
         if self.merge:
             del shaping["merge"]
+        if not self.guide_names:
+            del shaping["guide_names"]
         payload = json.dumps(shaping, sort_keys=True, separators=(",", ":"))
         return hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16]
 
@@ -129,7 +136,8 @@ def policy_for(
         values.update((reframe.get("bus") or {}).get(bu) or {})
     if family:
         values.update((reframe.get("families") or {}).get(family) or {})
-    values.update((reframe.get("products") or {}).get(slug) or {})
+    own: dict[str, Any] = (reframe.get("products") or {}).get(slug) or {}
+    values.update(own)
 
     return ReframePolicy(
         max_words=int(values.get("max_words") or ReframePolicy.max_words),
@@ -139,7 +147,21 @@ def policy_for(
         keep_separate=_paths(values.get("keep_separate")),
         merge=values.get("merge") is not False,
         toc_folders=bool(values.get("toc_folders") or False),
+        guide_names=_names(own.get("guide_names")),
     )
+
+
+def _names(value: Any) -> tuple[tuple[str, str], ...]:
+    """The `guide_names` mapping as sorted `(computed, wanted)` pairs.
+
+    Sorted because the digest reads it; blank or non-string entries are dropped
+    rather than guessed at. A `.md` typed on either side is the same name.
+    """
+    if not isinstance(value, dict):
+        return ()
+    pairs = {(str(old).strip().removesuffix(".md"), str(new).strip().removesuffix(".md"))
+             for old, new in value.items()}
+    return tuple(sorted((old, new) for old, new in pairs if old and new and old != new))
 
 
 def _paths(value: Any) -> tuple[str, ...]:
