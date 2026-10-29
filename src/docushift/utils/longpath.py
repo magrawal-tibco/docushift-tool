@@ -118,8 +118,10 @@ def walk_under(root: Path, skip: Collection[str] = ()) -> Iterator[Path]:
 # it, so the limit is a property of the consumer; enforcing it only under
 # `os.name == "nt"` would let a Linux runner write a tree its readers cannot
 # open, and silently. 260 is the Win32 value, counted the way Win32 counts it --
-# the whole absolute path, the drive letter included.
-PUBLISHED_PATH_LIMIT = 260
+# the whole absolute path, the drive letter included. 259, not 260 (2026-10-29):
+# MAX_PATH counts the terminating null, so git for Windows refused three
+# Business Studio pages at exactly 260 that this check had let through.
+PUBLISHED_PATH_LIMIT = 259
 
 
 def over_limit(destination: Path, source: Path, limit: int = PUBLISHED_PATH_LIMIT) -> tuple[Path, int] | None:

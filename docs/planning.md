@@ -2428,6 +2428,8 @@ support on. Online help and the three document doc-classes keep the 260 rule.
 
 *Exit: both Service Grid versions read `synced`; online-help is still held to 260; tests and lint clean.*
 
+**As built (2026-10-28/29).** Service Grid 3.4.3/3.4.4 synced (124 long API files each, longest 311). Follow-up the same week: git for Windows refused three Business Studio pages at exactly 260, because MAX_PATH counts the terminating null, so `PUBLISHED_PATH_LIMIT` is now **259**. The page was renamed `finding-a-case-object-by-case-id.md` in the 5.6.0, 5.6.1 and 5.7.0 rename maps.
+
 ---
 
 ## Carried-Forward Open Items
