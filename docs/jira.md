@@ -27,6 +27,8 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | Phase 55 pilot reviewed and all ibi products verified | DOCOPS-249 → Done; DOCOPS-150 (ibi staging check): dated note with the verify result |
 | An ibi family's versions all read `clean` or `explained` | Its sub-task (DOCOPS-259, 260, 262, 263): dated note → Done |
 | An ibi family's R001 is applied, pushed and confirmed by `verify` | Its sub-task (DOCOPS-264–269): dated note → Done |
+| A TIBCO family's R001 is applied and pushed | DOCOPS-313: dated note (family, versions, notes); In Progress since 2026-10-30 |
+| Every synced TIBCO version's `_repairs_pending` is blank and staging shows the labels | DOCOPS-313 → Done |
 | Container Editions re-synced | Re-run `repair census`; dated note on DOCOPS-267 with the count |
 | Phase 61 or 62 is planned in full and approved | Its sub-task (DOCOPS-272–273) → In Progress |
 | AEM owners fix alt text with `/`, `:` or `⌘` and a verify re-run shows none dropped | DOCOPS-255: dated note → Done |
@@ -48,6 +50,10 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 **Log** (newest first, one line per session):
 
+- 2026-10-30 — DOCOPS-313 → In Progress, note: R001 BW plug-ins pushed to bw-plugin `wip` (41c7d31a), 205 versions
+  + 34 deselected, 23,539 notes. Census: 225 TIBCO versions / ~46,400 notes left. Oracle Fusion 6.0.0: 3 notes left (bad fence).
+- 2026-10-30 — DOCOPS-313 created under DOCOPS-7 (1 SP, Content Migration, `tibco`), Backlog: R001 for all TIBCO
+  families in one issue (user's choice); census 2026-10-23: 431 versions, ~50,100 notes, 22 families.
 - 2026-10-30 — DOCOPS-310 created under DOCOPS-7 (0.25 SP, AI & Content Intelligence, `ibi`) and → Done: App Studio
   9.2.8 PDF-only, synced, validate 0 findings, pushed to WebFOCUS `content-fix` (92676b5d). No version left unconverted.
 - 2026-10-30 — DOCOPS-302 → Done (note with counts): Scribe Online first published to en-us-tib-scribe-userdocs
@@ -427,7 +433,8 @@ Manager DOCOPS-259, FOCUS DOCOPS-260, Legacy DOCOPS-261, WebFOCUS DOCOPS-262, We
 Reporting Server DOCOPS-263. DOCOPS-256 is the tool, not the waves.
 Applying R001 (note labels) to each ibi family is its own sub-task under DOCOPS-144 (ibi: convert
 content): WebFOCUS DOCOPS-264, Reporting Server DOCOPS-265, FOCUS DOCOPS-266, Container Editions
-DOCOPS-267, Data Intelligence & iWay Service Manager DOCOPS-268, Legacy DOCOPS-269. Checking the
+DOCOPS-267, Data Intelligence & iWay Service Manager DOCOPS-268, Legacy DOCOPS-269. TIBCO's R001 is one
+sub-task for all families, DOCOPS-313 (under DOCOPS-7). Checking the
 ibi redirect lists is DOCOPS-270 (under DOCOPS-149), and waits on Phase 60.
 
 | Wave | Date | Selection | Versions | Outcome | Jira |
