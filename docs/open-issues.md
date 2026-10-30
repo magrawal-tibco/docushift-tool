@@ -75,6 +75,33 @@ republishes it.
 
 ---
 
+## Publishing repositories (every TIBCO product)
+
+### Resources folders that hold only archived-version lists come back on every publish
+
+- **Status:** Open, to be decided
+- **Owner:** unassigned
+- **Raised:** 30 Oct 2026
+- **Blocks publishing:** no
+
+Every product with older, archived versions gets a short page listing them, and
+publishing puts that page in the product family's resources folder, beside the
+API references. For families that have no API references, that page is all the
+folder holds. On 30 Oct 2026 that was true of 16 folders, for example
+BusinessWorks, Foresight, iProcess, MFT and TRA, plus folders left behind by
+family names no longer in use (Integration Platform, OpenSpirit, Silver Fabric,
+Monitoring, Reward). Most have no repository to go to, and the user is removing
+them by hand.
+
+The next publish will create them again. To decide: stop publishing a resources
+folder that would hold only the archived-version list, or put that list
+somewhere else, such as the family's own documentation repository. Six of these
+folders also have repositories on GitHub (BusinessWorks, Foresight, Fulfillment,
+iProcess, MFT and TRA resources); whether to delete or archive those is the
+platform team's call.
+
+---
+
 ## ActiveSpaces
 
 ### Never published to the real destination
