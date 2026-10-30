@@ -1,6 +1,6 @@
 # Jira Tracking — What Is Logged in DOCOPS
 
-> **Last reconciled:** 2026-10-29, against Jira and `config/versions.csv`.
+> **Last reconciled:** 2026-10-30, against Jira and `config/versions.csv`.
 > Conventions (site, cloud ID, story points, transitions, who owns what) live in
 > `C:\github\confluence-mcp\reports\docushift-claude-atlassian-context.md`; this file
 > does not repeat them. It answers one question: **is this piece of work in Jira, and where?**
@@ -42,11 +42,15 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | Phase 66 runs: every synced PDF-only version verified (15 after a re-extract, 3 Omni-Gen after a re-sync) | DOCOPS-285: dated note with the counts → Done; per-BU results on the BU's verify issue |
 | A fix for merged links whose target contains parentheses is planned | New sub-task under DOCOPS-12, In Progress; Data Management re-published |
 | Every family in a BU has its source ZIPs backed up | DOCOPS-281 (ibi), DOCOPS-282 (TIBCO), DOCOPS-283 (Spotfire, DataSynapse): dated note with gaps → Done |
+| Scribe Online and Azure ADLS Gen2 plug-in 6.0.0 reframed, synced and validated | DOCOPS-302: dated note with page counts → Done |
 
 **Left alone on purpose:** DOCOPS-8 is a Task where its siblings are Stories.
 
 **Log** (newest first, one line per session):
 
+- 2026-10-30 — DOCOPS-302 created under DOCOPS-7 (0.25 SP, AI & Content Intelligence), In Progress: Scribe Online
+  filed from a hand-obtained ZIP, Azure ADLS Gen2 plug-in 6.0.0 re-downloaded; both Flare, converted (470 / 55 pages).
+  DOCOPS-120 comment: Amazon Redshift plug-in 6.0.0 made ineligible.
 - 2026-10-30 — DOCOPS-292 → Done, DOCOPS-135 → Done (notes with counts); DOCOPS-134 note, transition blocked; DOCOPS-125
   counts note. TIBCO re-sync pushed to `wip` in 24 repos (14 new `wip`; Data Management x2 and General resources first
   published, `main` + `wip`). Validate per product: 211, 0 new errors.
