@@ -2430,7 +2430,7 @@ support on. Online help and the three document doc-classes keep the 260 rule.
 
 **As built (2026-10-28/29).** Service Grid 3.4.3/3.4.4 synced (124 long API files each, longest 311). Follow-up the same week: git for Windows refused three Business Studio pages at exactly 260, because MAX_PATH counts the terminating null, so `PUBLISHED_PATH_LIMIT` is now **259**. The page was renamed `finding-a-case-object-by-case-id.md` in the 5.6.0, 5.6.1 and 5.7.0 rename maps.
 
-### Phase 68: Redirect and Help Maps Name the Markdown File From the Repo Root — **Built 2026-10-29; run pending; DOCOPS-292**
+### Phase 68: Redirect and Help Maps Name the Markdown File From the Repo Root — **Done 2026-10-30; DOCOPS-292**
 
 **Why.** AEM team requirement: every path a published `301.yml` or `csh.yml` points to must be
 the Markdown file's path from the root of the docs repo, anchor kept, so all redirect targets
@@ -2515,6 +2515,14 @@ TOC (`unfiled/`), so no `301.yml` row; that is accepted, not a gap to fix.
 left (and removes a published one). `validate` no longer reads an unfiled page's own `csh`
 frontmatter as a mismatch. Measured before: Focus 4 of 4 per version, Reporting Server 9.3.8
 346 of 532, WebFOCUS Client 9.3.0/9.3.1 9 and 8, Reporting Server 9.3.3/9.3.4/9.3.6/9.3.7 2–8.
+**TIBCO run (2026-10-29/30, `scratch/tibco-sync.log`).** 384 versions maps-only refresh, 94 synced, 276,827
+redirects in 299 maps. 6 failed on images cut at 260 before the limit became 259 (EDI Protocol CE 1.5.0–1.6.1,
+Transaction Insight 5.5.0/6.0.0, Platform CLI 1.2.0): re-converted with `--force`, re-merged, published; TI 6.0.0
+also needed one pinned page renamed (`installing-operational-monitor.md`, the user's choice). The whole-tree
+`validate` was stopped for low memory; run per product instead (`scratch/tibco-validate-repos.log`): 211 products,
+no error the re-sync introduced. Pushed to `wip` in 24 repos after `git fetch`; 14 had no remote `wip` and got one
+(the user's choice), the three empty repos got `main` then `wip`.
+
 Open: `301.yml` drops only a top-level `unfiled/` (`naming.is_unfiled`), so rows into a doc
 set's own `unfiled/` (Focus) are still written. ibi pushed to
 `content-fix` (DI/ISM 9af82a3 for the two re-merged versions).
@@ -2624,6 +2632,8 @@ Phase 21's stale merge). Closing an item means deleting its row.
 | Phase 34 (R7–R9) | 8 fragile-but-correct items deferred at triage, theme AI: R7-08, R7-10, R8-09, R8-10, R8-12, R9-06, R9-07, R9-08 | [reports/review/INDEX.md](../reports/review/INDEX.md) |
 | Phase 34 (R10–R12) | 5 items deferred at triage, theme BF: R10-04 (all-archived products get no archives page), R10-07 (API link URL shape, unconfirmed), R10-08, R10-12, R11-10 | [reports/review/INDEX.md](../reports/review/INDEX.md) |
 | flogo-connectors run, 2026-10-07 | `OUTPUT_COUNT_MISMATCH` false alarms: 43 Flare versions, 1 each. 9 are an unfilled What's New template (`WHATS_NEW_PLACEHOLDER`, not published by design), 34 Flare's sample `MicroContent/.../what-is-micro-content.htm` (a `GENERATED_DIRECTORIES` folder). Both are counted as converted documents but never written. Checked by diffing source topics against `output/` for HTTP 1.1.1, SNS 1.0.1, Kafka 1.3.1, VS Code 1.3.5 | run 629 |
+| Phase 68 TIBCO run, 2026-10-30 | A merged link whose target contains parentheses (`Globalization-(G11n).md`) is not rewritten, so it points at the converted name: 5 links in Data Management (GDSN add-on 4.0.0, MDM 9.3.2/11.0.0/11.1.0). The pages' content is published | `scratch/tibco-validate-repos.log` |
+| Phase 68 TIBCO run, 2026-10-30 | Broken links already on GitHub before the run, unchanged by it: iProcess Workspace (Windows) 550 into the unconverted `XPDLExtAttrSchemaDoc`, eFTL 7.1.0 6 to a Python API reference not in the package, ActiveAspects 4, OData for SAP S/4HANA 2, HIPAA Validator Desktop 9.2.0 1 image | `scratch/tibco-validate-repos.log` |
 | Phase 34 (X1–X3) | 6 items deferred at triage, theme XJ: X1-09 (two sources for the docsite folder; 11 active rows disagree, needs the network to settle), X1-13, X1-14, X1-15, X1-16, X3-12 | [reports/review/INDEX.md](../reports/review/INDEX.md) |
 
 ---

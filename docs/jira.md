@@ -17,7 +17,7 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | Phase 47 re-runs (8 versions) pass | DOCOPS-187 → Done |
 | `catalog sitemap` over the whole scope run (StreamBase half done 2026-10-21) | DOCOPS-123 → Done |
 | 50 long-path + 8 DITA versions re-run | DOCOPS-188 → Done |
-| `sync --bu tibco` + `validate` run | DOCOPS-134, DOCOPS-135; refresh counts in DOCOPS-122, 125–127 |
+| Moving DOCOPS-134 to Done is allowed (blocked by a permission check on 2026-10-30; note already posted) | DOCOPS-134 → Done |
 | A family reassignment is committed | Add a dated line to the progress comment on DOCOPS-120 |
 | Family review finished | DOCOPS-120 → Done, then DOCOPS-130 |
 | Edit to DOCOPS-217 is allowed (blocked by a permission check on 2026-10-09) | DOCOPS-217: append the 2026-10-09 publish note → Done |
@@ -40,13 +40,16 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | A redirect source is decided for each Go URL with several destinations, and the Go URL redirects are built | DOCOPS-279: dated note → Done |
 | A new phase is opened | One sub-task under the matching story, In Progress, no `retro` |
 | Phase 66 runs: every synced PDF-only version verified (15 after a re-extract, 3 Omni-Gen after a re-sync) | DOCOPS-285: dated note with the counts → Done; per-BU results on the BU's verify issue |
-| Phase 68 built, both BUs re-synced, validated and pushed | DOCOPS-292: dated note with counts → Done |
+| A fix for merged links whose target contains parentheses is planned | New sub-task under DOCOPS-12, In Progress; Data Management re-published |
 | Every family in a BU has its source ZIPs backed up | DOCOPS-281 (ibi), DOCOPS-282 (TIBCO), DOCOPS-283 (Spotfire, DataSynapse): dated note with gaps → Done |
 
 **Left alone on purpose:** DOCOPS-8 is a Task where its siblings are Stories.
 
 **Log** (newest first, one line per session):
 
+- 2026-10-30 — DOCOPS-292 → Done, DOCOPS-135 → Done (notes with counts); DOCOPS-134 note, transition blocked; DOCOPS-125
+  counts note. TIBCO re-sync pushed to `wip` in 24 repos (14 new `wip`; Data Management x2 and General resources first
+  published, `main` + `wip`). Validate per product: 211, 0 new errors.
 - 2026-10-29 — DOCOPS-297 → Done, DOCOPS-122 → Done (9 of 9): BPM 4.2.0/4.3.0 help re-merged, synced, validate 0
   errors, pushed to `wip` (bpm-userdocs 98790f5); 311/251 pages shortened, longest 259. Selected TIBCO: 514 synced.
 - 2026-10-29 — DOCOPS-297 created under DOCOPS-12 (0.5 SP, AI & Content Intelligence, `reframe` `tibco`), In
@@ -387,7 +390,7 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | 62 | `verify` checks CSH identifiers, ibi and TIBCO (planned) | DOCOPS-273 |
 | 64 | `verify` reads one language; `301.yml` from English pages; `sync` skips archives | DOCOPS-275 (done) |
 | 66 | `verify` checks every version's documents, PDF-only versions included | DOCOPS-285 (in progress) |
-| 68 | `301.yml` / `csh.yml` targets are repo-rooted `.md` paths (AEM) | DOCOPS-292 (in progress) |
+| 68 | `301.yml` / `csh.yml` targets are repo-rooted `.md` paths (AEM) | DOCOPS-292 (done) |
 | 69 | ActiveMatrix BPM help fits: short guide folders (`guide_names`), reframe cuts to 259 | DOCOPS-297 (done) |
 | 57 | Translated help to the `loc-` tree (`--locale`) | build DOCOPS-253; runs DOCOPS-148 (in progress) |
 
