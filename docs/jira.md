@@ -43,6 +43,7 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | A fix for merged links whose target contains parentheses is planned | New sub-task under DOCOPS-12, In Progress; Data Management re-published |
 | Every family in a BU has its source ZIPs backed up | DOCOPS-281 (ibi), DOCOPS-282 (TIBCO), DOCOPS-283 (Spotfire, DataSynapse): dated note with gaps → Done |
 | Scribe Online and Azure ADLS Gen2 plug-in 6.0.0 reframed, synced and validated | DOCOPS-302: dated note with page counts → Done |
+| help.scribesoft.com ownership transferred (decided 2026-10-30) | DOCOPS-302 (or its follow-up): dated note; point the host at the new site so Scribe's 375 `301.yml` rows apply |
 
 **Left alone on purpose:** DOCOPS-8 is a Task where its siblings are Stories.
 

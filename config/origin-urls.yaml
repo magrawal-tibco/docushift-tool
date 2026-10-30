@@ -67,7 +67,8 @@ products:
   # its package was obtained by hand (DOCOPS-302). Source paths are recorded from the
   # help root (`home/scr_features.htm`), so nothing is dropped. The live site opens
   # topics in a frameset (`index.htm#home/scr_features.htm`); a fragment never reaches
-  # a server, so the redirect source is the topic's own address.
+  # a server, so the redirect source is the topic's own address. The rows take effect
+  # only once help.scribesoft.com's ownership is transferred to us (decided 2026-10-30).
   tibco-scribe:
     template: "https://help.scribesoft.com/scribe/en/{path}"
     drop_segments: 0
