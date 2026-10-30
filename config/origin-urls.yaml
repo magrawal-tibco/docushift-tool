@@ -71,4 +71,4 @@ products:
   tibco-scribe:
     template: "https://help.scribesoft.com/scribe/en/{path}"
     drop_segments: 0
-    verified: "user-supplied https://help.scribesoft.com/scribe/en/index.htm#home/scr_features.htm (2026-10-30); topic URL not fetched by the tool"
+    verified: "user-confirmed direct topic URL https://help.scribesoft.com/scribe/en/sol/general/whitelist_reqs.htm (2026-10-30)"
