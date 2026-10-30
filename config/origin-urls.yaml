@@ -62,3 +62,13 @@ products:
     template: "https://docs.tibco.com/pub/{folder_path}/doc/{path}"
     drop_segments: 1
     verified: "against the sitemaps of 1.0.4-1.0.6 and 9.3.5-9.3.8 (2026-10-25); 1.0.7 not fetched"
+
+  # Scribe Online is not on docs.tibco.com: its help is served from its own host, and
+  # its package was obtained by hand (DOCOPS-302). Source paths are recorded from the
+  # help root (`home/scr_features.htm`), so nothing is dropped. The live site opens
+  # topics in a frameset (`index.htm#home/scr_features.htm`); a fragment never reaches
+  # a server, so the redirect source is the topic's own address.
+  tibco-scribe:
+    template: "https://help.scribesoft.com/scribe/en/{path}"
+    drop_segments: 0
+    verified: "user-supplied https://help.scribesoft.com/scribe/en/index.htm#home/scr_features.htm (2026-10-30); topic URL not fetched by the tool"
