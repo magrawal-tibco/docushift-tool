@@ -3929,6 +3929,46 @@
    "due": "",
    "assignee": "",
    "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-302",
+   "summary": "Scribe Online from hand-obtained ZIP; Azure ADLS Gen2 plug-in re-download",
+   "type": "Sub-task",
+   "parent": "DOCOPS-7",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift",
+    "tibco"
+   ],
+   "created": "2026-10-30",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-310",
+   "summary": "ibi WebFOCUS App Studio 9.2.8 published as PDF-only",
+   "type": "Sub-task",
+   "parent": "DOCOPS-7",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift",
+    "ibi"
+   ],
+   "created": "2026-10-30",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
   }
  ]
 }

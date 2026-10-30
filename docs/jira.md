@@ -48,6 +48,8 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 **Log** (newest first, one line per session):
 
+- 2026-10-30 — DOCOPS-310 created under DOCOPS-7 (0.25 SP, AI & Content Intelligence, `ibi`) and → Done: App Studio
+  9.2.8 PDF-only, synced, validate 0 findings, pushed to WebFOCUS `content-fix` (92676b5d). No version left unconverted.
 - 2026-10-30 — DOCOPS-302 → Done (note with counts): Scribe Online first published to en-us-tib-scribe-userdocs
   `main` + `wip` (e3418fe), 288 pages, validate 0 errors; Azure ADLS Gen2 6.0.0 to bw-plugin `wip` (c819a786), 21 pages,
   0 findings. Scribe 301.yml (375 rows, help.scribesoft.com) waits on that host's transfer.
