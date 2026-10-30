@@ -28,7 +28,7 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | An ibi family's versions all read `clean` or `explained` | Its sub-task (DOCOPS-259, 260, 262, 263): dated note → Done |
 | An ibi family's R001 is applied, pushed and confirmed by `verify` | Its sub-task (DOCOPS-264–269): dated note → Done |
 | A TIBCO family's R001 is applied and pushed | DOCOPS-313: dated note (family, versions, notes); In Progress since 2026-10-30 |
-| Every synced TIBCO version's `_repairs_pending` is blank and staging shows the labels | DOCOPS-313 → Done |
+| `content-fix` reaches `wip` in the TIBCO repos and staging shows the labels (`_repairs_pending` blank for all TIBCO since 2026-10-30) | DOCOPS-313 → Done |
 | Container Editions re-synced | Re-run `repair census`; dated note on DOCOPS-267 with the count |
 | Phase 61 or 62 is planned in full and approved | Its sub-task (DOCOPS-272–273) → In Progress |
 | AEM owners fix alt text with `/`, `:` or `⌘` and a verify re-run shows none dropped | DOCOPS-255: dated note → Done |
@@ -50,6 +50,8 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 **Log** (newest first, one line per session):
 
+- 2026-10-30 — DOCOPS-313 note: R001 on all remaining TIBCO families, pushed to `content-fix` in 18 repos. No TIBCO
+  version needs R001 (500 fixed, 95 none); 40 notes in 16 pages left for a hand edit (bad code fences).
 - 2026-10-30 — DOCOPS-313 note: R001 MFT (3b5cfdd) and Data Management (4ea48bb) pushed to TIBCO `content-fix`.
   184 versions / ~23,700 notes left; MFT Platform Server `access-control.md` x6 left for a hand edit.
 - 2026-10-30 — DOCOPS-313 note: R001 Streaming (1cfa47a) and BPM (3330ac5) on new TIBCO `content-fix` branch, created

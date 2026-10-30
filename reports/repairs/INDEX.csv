@@ -227,36 +227,36 @@ spotfire,statistica,spotfire-statistica-integration,14.5.0,fixed
 spotfire,statistica,tibco-data-science-for-tibco-spotfire-analyst,14.1.0,fixed
 spotfire,statistica,tibco-data-science-service-for-tibco-spotfire,14.1.0,fixed
 spotfire,statistica,tibco-statistica-language-packs,14.1.0,none
-tibco,activespaces,tibco-activespaces-enterprise-edition,4.10.0,needed (94)
-tibco,activespaces,tibco-activespaces-enterprise-edition,4.10.1,needed (94)
-tibco,activespaces,tibco-activespaces-enterprise-edition,5.0.0,needed (96)
-tibco,activespaces,tibco-activespaces-enterprise-edition,5.1.0,needed (96)
-tibco,activespaces,tibco-activespaces-enterprise-edition,5.1.1,needed (96)
-tibco,activespaces,tibco-activespaces-enterprise-edition,5.2.0,needed (94)
-tibco,activespaces,tibco-silver-fabric-enabler-for-activespaces-enterprise-edition,1.2.0,needed (86)
+tibco,activespaces,tibco-activespaces-enterprise-edition,4.10.0,fixed
+tibco,activespaces,tibco-activespaces-enterprise-edition,4.10.1,fixed
+tibco,activespaces,tibco-activespaces-enterprise-edition,5.0.0,fixed
+tibco,activespaces,tibco-activespaces-enterprise-edition,5.1.0,fixed
+tibco,activespaces,tibco-activespaces-enterprise-edition,5.1.1,fixed
+tibco,activespaces,tibco-activespaces-enterprise-edition,5.2.0,fixed
+tibco,activespaces,tibco-silver-fabric-enabler-for-activespaces-enterprise-edition,1.2.0,fixed
 tibco,adapters,adapter-code-for-tibco-api-exchange-and-joomla,2.3.3,none
-tibco,adapters,adapter-code-for-tibco-api-exchange-and-joomla,2.3.4,needed (33)
-tibco,adapters,tibco-activematrix-adapter-for-database-tibco-business-studio,1.3.0,needed (100)
-tibco,adapters,tibco-activematrix-adapter-for-files-for-unix-win-tibco-business-studio,1.3.0,needed (55)
-tibco,adapters,tibco-activematrix-adapter-for-ibm-i,6.2.0,needed (19)
+tibco,adapters,adapter-code-for-tibco-api-exchange-and-joomla,2.3.4,fixed
+tibco,adapters,tibco-activematrix-adapter-for-database-tibco-business-studio,1.3.0,fixed
+tibco,adapters,tibco-activematrix-adapter-for-files-for-unix-win-tibco-business-studio,1.3.0,fixed
+tibco,adapters,tibco-activematrix-adapter-for-ibm-i,6.2.0,fixed
 tibco,adapters,tibco-activematrix-adapter-for-ibm-i,6.2.1,none
-tibco,adapters,tibco-activematrix-adapter-for-ibm-i,6.2.2,needed (18)
-tibco,adapters,tibco-activematrix-adapter-for-ibm-i,6.3.0,needed (18)
-tibco,adapters,tibco-activematrix-adapter-for-ibm-i,6.4.0,needed (18)
-tibco,adapters,tibco-activematrix-adapter-for-jd-edwards-enterpriseone,6.1.0,needed (20)
-tibco,adapters,tibco-activematrix-adapter-for-sap-tibco-business-studio,1.3.0,needed (63)
-tibco,adapters,tibco-activematrix-adapter-framework,1.3.0,needed (21)
-tibco,adapters,tibco-activematrix-adapter-framework,1.3.1,needed (35)
-tibco,adapters,tibco-activematrix-adapter-framework,1.3.2,needed (35)
-tibco,adapters,tibco-activematrix-adapter-framework,1.4.0,needed (47)
-tibco,adapters,tibco-activematrix-adapter-framework,1.4.1,needed (47)
-tibco,adapters,tibco-activematrix-adapter-framework,1.4.2,needed (47)
-tibco,adapters,tibco-activematrix-adapter-framework,1.6.0,needed (44)
-tibco,adapters,tibco-activematrix-adapter-framework,1.6.1,needed (47)
-tibco,adapters,tibco-adapter-for-files-ibm-i,5.0.1,needed (28)
-tibco,adapters,tibco-adapter-migration,1.7.0,needed (12)
-tibco,adapters,tibco-adapter-migration,1.8.0,needed (9)
-tibco,adapters,tibco-adapter-migration,1.8.1,needed (9)
+tibco,adapters,tibco-activematrix-adapter-for-ibm-i,6.2.2,fixed
+tibco,adapters,tibco-activematrix-adapter-for-ibm-i,6.3.0,fixed
+tibco,adapters,tibco-activematrix-adapter-for-ibm-i,6.4.0,fixed
+tibco,adapters,tibco-activematrix-adapter-for-jd-edwards-enterpriseone,6.1.0,fixed
+tibco,adapters,tibco-activematrix-adapter-for-sap-tibco-business-studio,1.3.0,fixed
+tibco,adapters,tibco-activematrix-adapter-framework,1.3.0,fixed
+tibco,adapters,tibco-activematrix-adapter-framework,1.3.1,fixed
+tibco,adapters,tibco-activematrix-adapter-framework,1.3.2,fixed
+tibco,adapters,tibco-activematrix-adapter-framework,1.4.0,fixed
+tibco,adapters,tibco-activematrix-adapter-framework,1.4.1,fixed
+tibco,adapters,tibco-activematrix-adapter-framework,1.4.2,fixed
+tibco,adapters,tibco-activematrix-adapter-framework,1.6.0,fixed
+tibco,adapters,tibco-activematrix-adapter-framework,1.6.1,fixed
+tibco,adapters,tibco-adapter-for-files-ibm-i,5.0.1,fixed
+tibco,adapters,tibco-adapter-migration,1.7.0,fixed
+tibco,adapters,tibco-adapter-migration,1.8.0,fixed
+tibco,adapters,tibco-adapter-migration,1.8.1,fixed
 tibco,adapters,tibco-adapter-sdk,5.8.0,none
 tibco,bpm,tibco-activematrix-bpm,4.2.0,none
 tibco,bpm,tibco-activematrix-bpm,4.3.0,fixed
@@ -277,60 +277,60 @@ tibco,bpm,tibco-business-studio-bpm-edition,5.6.0,fixed
 tibco,bpm,tibco-business-studio-bpm-edition,5.6.1,fixed
 tibco,bpm,tibco-business-studio-bpm-edition,5.7.0,fixed
 tibco,bpm,tibco-business-studio-community-edition,4.2.0,none
-tibco,businessconnect,tibco-businessconnect,7.4.0,needed (5)
-tibco,businessconnect,tibco-businessconnect,7.5.0,needed (47)
-tibco,businessconnect,tibco-businessconnect-configstore-management-interface-protocol,6.1.0,needed (12)
-tibco,businessconnect,tibco-businessconnect-container-edition,1.6.1,needed (101)
-tibco,businessconnect,tibco-businessconnect-container-edition,1.7.0,needed (107)
-tibco,businessconnect,tibco-businessconnect-container-edition,1.7.1,needed (106)
-tibco,businessconnect,tibco-businessconnect-container-edition-configstore-management-interface-protocol,1.1.0,needed (7)
-tibco,businessconnect,tibco-businessconnect-container-edition-configstore-management-interface-protocol,1.2.0,needed (7)
-tibco,businessconnect,tibco-businessconnect-container-edition-configstore-management-interface-protocol,1.2.1,needed (7)
-tibco,businessconnect,tibco-businessconnect-container-edition-ebxml-protocol,1.2.1,needed (73)
-tibco,businessconnect,tibco-businessconnect-container-edition-ebxml-protocol,1.3.0,needed (73)
-tibco,businessconnect,tibco-businessconnect-container-edition-edi-protocol-hipaa-edition-powered-by-instream,1.2.0,needed (11)
-tibco,businessconnect,tibco-businessconnect-container-edition-edi-protocol-hipaa-edition-powered-by-instream,1.3.0,needed (11)
+tibco,businessconnect,tibco-businessconnect,7.4.0,fixed
+tibco,businessconnect,tibco-businessconnect,7.5.0,fixed
+tibco,businessconnect,tibco-businessconnect-configstore-management-interface-protocol,6.1.0,fixed
+tibco,businessconnect,tibco-businessconnect-container-edition,1.6.1,fixed
+tibco,businessconnect,tibco-businessconnect-container-edition,1.7.0,fixed
+tibco,businessconnect,tibco-businessconnect-container-edition,1.7.1,fixed
+tibco,businessconnect,tibco-businessconnect-container-edition-configstore-management-interface-protocol,1.1.0,fixed
+tibco,businessconnect,tibco-businessconnect-container-edition-configstore-management-interface-protocol,1.2.0,fixed
+tibco,businessconnect,tibco-businessconnect-container-edition-configstore-management-interface-protocol,1.2.1,fixed
+tibco,businessconnect,tibco-businessconnect-container-edition-ebxml-protocol,1.2.1,fixed
+tibco,businessconnect,tibco-businessconnect-container-edition-ebxml-protocol,1.3.0,fixed
+tibco,businessconnect,tibco-businessconnect-container-edition-edi-protocol-hipaa-edition-powered-by-instream,1.2.0,fixed
+tibco,businessconnect,tibco-businessconnect-container-edition-edi-protocol-hipaa-edition-powered-by-instream,1.3.0,fixed
 tibco,businessconnect,tibco-businessconnect-container-edition-edi-protocol-powered-by-instream,1.5.0,fixed
 tibco,businessconnect,tibco-businessconnect-container-edition-edi-protocol-powered-by-instream,1.6.0,fixed
 tibco,businessconnect,tibco-businessconnect-container-edition-edi-protocol-powered-by-instream,1.6.1,fixed
-tibco,businessconnect,tibco-businessconnect-container-edition-rosettanet-protocol,1.6.0,needed (18)
-tibco,businessconnect,tibco-businessconnect-container-edition-rosettanet-protocol,1.7.0,needed (18)
-tibco,businessconnect,tibco-businessconnect-container-edition-services-plug-in,1.6.0,needed (40)
-tibco,businessconnect,tibco-businessconnect-container-edition-services-plug-in,1.7.0,needed (40)
-tibco,businessconnect,tibco-businessconnect-container-edition-soap-protocol,1.2.1,needed (35)
-tibco,businessconnect,tibco-businessconnect-container-edition-soap-protocol,1.3.0,needed (33)
-tibco,businessconnect,tibco-businessconnect-cxml-protocol,6.1.0,needed (57)
-tibco,businessconnect,tibco-businessconnect-ebxml-protocol,6.3.0,needed (64)
+tibco,businessconnect,tibco-businessconnect-container-edition-rosettanet-protocol,1.6.0,fixed
+tibco,businessconnect,tibco-businessconnect-container-edition-rosettanet-protocol,1.7.0,fixed
+tibco,businessconnect,tibco-businessconnect-container-edition-services-plug-in,1.6.0,fixed
+tibco,businessconnect,tibco-businessconnect-container-edition-services-plug-in,1.7.0,fixed
+tibco,businessconnect,tibco-businessconnect-container-edition-soap-protocol,1.2.1,fixed
+tibco,businessconnect,tibco-businessconnect-container-edition-soap-protocol,1.3.0,fixed
+tibco,businessconnect,tibco-businessconnect-cxml-protocol,6.1.0,fixed
+tibco,businessconnect,tibco-businessconnect-ebxml-protocol,6.3.0,fixed
 tibco,businessconnect,tibco-businessconnect-ebxml-protocol,6.4.0,none
-tibco,businessconnect,tibco-businessconnect-edi-protocol-hipaa-edition-powered-by-instream,6.7.0,needed (16)
-tibco,businessconnect,tibco-businessconnect-edi-protocol-powered-by-instream,6.10.0,needed (124)
+tibco,businessconnect,tibco-businessconnect-edi-protocol-hipaa-edition-powered-by-instream,6.7.0,fixed
+tibco,businessconnect,tibco-businessconnect-edi-protocol-powered-by-instream,6.10.0,fixed
 tibco,businessconnect,tibco-businessconnect-edi-protocol-powered-by-instream,6.11.0,none
-tibco,businessconnect,tibco-businessconnect-palette,6.5.0,needed (7)
-tibco,businessconnect,tibco-businessconnect-palette,6.6.0,needed (8)
-tibco,businessconnect,tibco-businessconnect-partner-management-portal,1.0.0,needed (20)
-tibco,businessconnect,tibco-businessconnect-partner-management-portal,1.1.0,needed (20)
-tibco,businessconnect,tibco-businessconnect-partner-management-portal,1.1.1,needed (20)
-tibco,businessconnect,tibco-businessconnect-plug-in-for-ftp-server,1.0.1,needed (3)
-tibco,businessconnect,tibco-businessconnect-plug-in-for-ssh-server,1.1.0,needed (5)
-tibco,businessconnect,tibco-businessconnect-rosettanet-protocol,5.3.0,needed (28)
-tibco,businessconnect,tibco-businessconnect-services-plug-in,6.3.0,needed (44)
-tibco,businessconnect,tibco-businessconnect-services-plug-in,6.4.0,needed (42)
-tibco,businessconnect,tibco-businessconnect-soap-protocol,7.1.0,needed (36)
-tibco,businessconnect,tibco-businessconnect-soap-protocol,7.2.0,needed (3)
-tibco,businessconnect,tibco-businessconnect-trading-community-management,6.1.0,needed (19)
-tibco,businessconnect,tibco-businessconnect-trading-community-management,6.1.1,needed (36)
-tibco,businessconnect,tibco-businessconnect-trading-community-management,6.2.0,needed (18)
-tibco,businessconnect,tibco-trading-partner-management-rest-api,1.1.0,needed (15)
-tibco,businessevents,tibco-businessevents-enterprise-edition,6.3.2,needed (527)
-tibco,businessevents,tibco-businessevents-enterprise-edition,6.4.0,needed (534)
+tibco,businessconnect,tibco-businessconnect-palette,6.5.0,fixed
+tibco,businessconnect,tibco-businessconnect-palette,6.6.0,fixed
+tibco,businessconnect,tibco-businessconnect-partner-management-portal,1.0.0,fixed
+tibco,businessconnect,tibco-businessconnect-partner-management-portal,1.1.0,fixed
+tibco,businessconnect,tibco-businessconnect-partner-management-portal,1.1.1,fixed
+tibco,businessconnect,tibco-businessconnect-plug-in-for-ftp-server,1.0.1,fixed
+tibco,businessconnect,tibco-businessconnect-plug-in-for-ssh-server,1.1.0,fixed
+tibco,businessconnect,tibco-businessconnect-rosettanet-protocol,5.3.0,fixed
+tibco,businessconnect,tibco-businessconnect-services-plug-in,6.3.0,fixed
+tibco,businessconnect,tibco-businessconnect-services-plug-in,6.4.0,fixed
+tibco,businessconnect,tibco-businessconnect-soap-protocol,7.1.0,fixed
+tibco,businessconnect,tibco-businessconnect-soap-protocol,7.2.0,fixed
+tibco,businessconnect,tibco-businessconnect-trading-community-management,6.1.0,fixed
+tibco,businessconnect,tibco-businessconnect-trading-community-management,6.1.1,fixed
+tibco,businessconnect,tibco-businessconnect-trading-community-management,6.2.0,fixed
+tibco,businessconnect,tibco-trading-partner-management-rest-api,1.1.0,fixed
+tibco,businessevents,tibco-businessevents-enterprise-edition,6.3.2,fixed
+tibco,businessevents,tibco-businessevents-enterprise-edition,6.4.0,fixed
 tibco,businessworks,premium-subscription-for-tibco-businessworks-container-edition-and-plug-ins-for-aws-marketplace,2.3.1,none
-tibco,businessworks,tibco-activematrix-businessworks,5.16.1,needed (236)
-tibco,businessworks,tibco-activematrix-businessworks,6.12.0,needed (1389)
-tibco,businessworks,tibco-activematrix-businessworks,6.13.0,needed (1281)
+tibco,businessworks,tibco-activematrix-businessworks,5.16.1,fixed
+tibco,businessworks,tibco-activematrix-businessworks,6.12.0,fixed
+tibco,businessworks,tibco-activematrix-businessworks,6.13.0,fixed
 tibco,businessworks,tibco-businessworks-enterprise,3.10.0,none
 tibco,businessworks,tibco-businessworks-enterprise,3.11.0,none
 tibco,businessworks,tibco-businessworks-enterprise,3.12.0,none
-tibco,businessworks,tibco-businessworks-formbuilder,5.3.2,needed (59)
+tibco,businessworks,tibco-businessworks-formbuilder,5.3.2,fixed
 tibco,businessworks,tibco-integration,3.16.0,none
 tibco,bw-plugin,tibco-activematrix-businessworks-activeaspects-plug-in,1.0,fixed
 tibco,bw-plugin,tibco-activematrix-businessworks-activeaspects-plug-in,1.1,fixed
@@ -585,9 +585,9 @@ tibco,bw-plugin,tibco-businessworks-integrationmanager-plug-in,1.0,none
 tibco,bw-plugin,tibco-businessworks-plug-in-for-ai,6.0.0,fixed
 tibco,bw-plugin,tibco-businessworks-plug-in-for-ai,6.0.1,fixed
 tibco,bw-plugin,tibco-businessworks-plug-in-for-tibco-auditsafe-for-tibco-platform,6.0.0,fixed
-tibco,cloud,tibco-cloud-api-modeler,1.5.0,needed (24)
-tibco,cloud,tibco-cloud-integration-businessworks-payg,2.8.0,needed (20)
-tibco,cloud,tibco-cloud-integration-flogo-payg,2.11.0,needed (132)
+tibco,cloud,tibco-cloud-api-modeler,1.5.0,fixed
+tibco,cloud,tibco-cloud-integration-businessworks-payg,2.8.0,fixed
+tibco,cloud,tibco-cloud-integration-flogo-payg,2.11.0,fixed
 tibco,cloud,tibco-cloud-integration-hybrid,3.12.0,none
 tibco,cloud,tibco-cloud-integration-hybrid-connectivity-add-on,3.10.0,none
 tibco,data_management,ibi-mdm-add-on-for-global-data-synchronization,4.0.0,fixed
@@ -599,140 +599,140 @@ tibco,data_management,tibco-mdm-studio,5.2.0,fixed
 tibco,data_management,tibco-mdm-studio,6.0.0,fixed
 tibco,data_management,tibco-mdm-studio,6.1.0,fixed
 tibco,data_management,tibco-mdm-studio,6.1.1,fixed
-tibco,ems,tibco-ems-client-for-ibm-i,8.6.0,needed (9)
-tibco,ems,tibco-enterprise-message-service,10.4.0,needed (483)
-tibco,ems,tibco-enterprise-message-service,10.4.1,needed (488)
-tibco,ems,tibco-enterprise-message-service,10.4.3,needed (486)
-tibco,ems,tibco-enterprise-message-service,10.4.4,needed (486)
-tibco,ems,tibco-enterprise-message-service,10.5.0,needed (494)
-tibco,ems,tibco-enterprise-message-service,10.5.1,needed (495)
-tibco,flogo,tibco-flogo,2.26.6,needed (409)
-tibco,flogo,tibco-flogo,2.26.7,needed (424)
-tibco,flogo,tibco-flogo,2.26.8,needed (437)
-tibco,flogo,tibco-flogo,3.0.0,needed (393)
-tibco,flogo,tibco-flogo,3.0.1,needed (411)
-tibco,flogo,tibco-flogo-extension-for-visual-studio-code,1.3.5,needed (279)
+tibco,ems,tibco-ems-client-for-ibm-i,8.6.0,fixed
+tibco,ems,tibco-enterprise-message-service,10.4.0,fixed
+tibco,ems,tibco-enterprise-message-service,10.4.1,fixed
+tibco,ems,tibco-enterprise-message-service,10.4.3,fixed
+tibco,ems,tibco-enterprise-message-service,10.4.4,fixed
+tibco,ems,tibco-enterprise-message-service,10.5.0,fixed
+tibco,ems,tibco-enterprise-message-service,10.5.1,fixed
+tibco,flogo,tibco-flogo,2.26.6,fixed
+tibco,flogo,tibco-flogo,2.26.7,fixed
+tibco,flogo,tibco-flogo,2.26.8,fixed
+tibco,flogo,tibco-flogo,3.0.0,fixed
+tibco,flogo,tibco-flogo,3.0.1,fixed
+tibco,flogo,tibco-flogo-extension-for-visual-studio-code,1.3.5,fixed
 tibco,foresight,tibco-enterprise-foresight,1.0.0,none
 tibco,foresight,tibco-enterprise-foresight,1.1.0,none
 tibco,foresight,tibco-enterprise-foresight-healthcare-add-on,1.0.0,none
 tibco,foresight,tibco-enterprise-foresight-healthcare-add-on,1.1.0,none
-tibco,foresight,tibco-foresight-archive-and-retrieval-system,5.4.0,needed (11)
-tibco,foresight,tibco-foresight-archive-and-retrieval-system,5.5.0,needed (15)
-tibco,foresight,tibco-foresight-archive-and-retrieval-system,6.0.0,needed (17)
-tibco,foresight,tibco-foresight-connect-with-fhir,1.0.0,needed (6)
-tibco,foresight,tibco-foresight-connect-with-fhir,1.0.1,needed (6)
+tibco,foresight,tibco-foresight-archive-and-retrieval-system,5.4.0,fixed
+tibco,foresight,tibco-foresight-archive-and-retrieval-system,5.5.0,fixed
+tibco,foresight,tibco-foresight-archive-and-retrieval-system,6.0.0,fixed
+tibco,foresight,tibco-foresight-connect-with-fhir,1.0.0,fixed
+tibco,foresight,tibco-foresight-connect-with-fhir,1.0.1,fixed
 tibco,foresight,tibco-foresight-edisim,6.19.0,none
 tibco,foresight,tibco-foresight-edisim,6.20.0,none
-tibco,foresight,tibco-foresight-edisim,6.21.0,needed (43)
+tibco,foresight,tibco-foresight-edisim,6.21.0,fixed
 tibco,foresight,tibco-foresight-hipaa-validator-desktop,9.0.0,none
 tibco,foresight,tibco-foresight-hipaa-validator-desktop,9.1.0,none
-tibco,foresight,tibco-foresight-hipaa-validator-desktop,9.2.0,needed (46)
+tibco,foresight,tibco-foresight-hipaa-validator-desktop,9.2.0,fixed
 tibco,foresight,tibco-foresight-instream,9.0.0,none
 tibco,foresight,tibco-foresight-instream,9.1.0,none
-tibco,foresight,tibco-foresight-instream,9.2.0,needed (163)
-tibco,foresight,tibco-foresight-instream,9.3.0,needed (167)
-tibco,foresight,tibco-foresight-instream,9.4.0,needed (130)
+tibco,foresight,tibco-foresight-instream,9.2.0,fixed
+tibco,foresight,tibco-foresight-instream,9.3.0,fixed
+tibco,foresight,tibco-foresight-instream,9.4.0,fixed
 tibco,foresight,tibco-foresight-operational-monitor,5.4.0,none
 tibco,foresight,tibco-foresight-operational-monitor,5.5.0,none
 tibco,foresight,tibco-foresight-operational-monitor,6.0.0,none
-tibco,foresight,tibco-foresight-rest-api,1.0.3,needed (5)
-tibco,foresight,tibco-foresight-rest-api,1.1.0,needed (29)
-tibco,foresight,tibco-foresight-rest-api,1.2.0,needed (39)
+tibco,foresight,tibco-foresight-rest-api,1.0.3,fixed
+tibco,foresight,tibco-foresight-rest-api,1.1.0,fixed
+tibco,foresight,tibco-foresight-rest-api,1.2.0,fixed
 tibco,foresight,tibco-foresight-studio,9.0.0,none
 tibco,foresight,tibco-foresight-studio,9.0.1,none
 tibco,foresight,tibco-foresight-studio,9.1.0,none
-tibco,foresight,tibco-foresight-studio,9.2.0,needed (32)
-tibco,foresight,tibco-foresight-studio,9.3.0,needed (37)
-tibco,foresight,tibco-foresight-transaction-insight,5.4.0,needed (162)
+tibco,foresight,tibco-foresight-studio,9.2.0,fixed
+tibco,foresight,tibco-foresight-studio,9.3.0,fixed
+tibco,foresight,tibco-foresight-transaction-insight,5.4.0,fixed
 tibco,foresight,tibco-foresight-transaction-insight,5.5.0,fixed
 tibco,foresight,tibco-foresight-transaction-insight,6.0.0,fixed
 tibco,foresight,tibco-foresight-translator,4.0.0,none
 tibco,foresight,tibco-foresight-translator,4.1.0,none
-tibco,foresight,tibco-foresight-translator,4.2.0,needed (15)
-tibco,foresight,tibco-foresight-translator-attachment-adapter,2.0.0,needed (4)
-tibco,foresight,tibco-foresight-translator-attachment-adapter,3.0.0,needed (7)
-tibco,ftl,tibco-eftl-enterprise-edition,7.1.0,needed (20)
-tibco,ftl,tibco-eftl-enterprise-edition,7.1.1,needed (20)
-tibco,ftl,tibco-eftl-enterprise-edition,7.1.2,needed (20)
-tibco,ftl,tibco-eftl-enterprise-edition,7.1.3,needed (19)
-tibco,ftl,tibco-eftl-enterprise-edition,7.2.0,needed (19)
-tibco,ftl,tibco-eftl-enterprise-edition,7.3.0,needed (19)
-tibco,ftl,tibco-ftl-enterprise-edition,7.1.0,needed (173)
-tibco,ftl,tibco-ftl-enterprise-edition,7.1.1,needed (176)
-tibco,ftl,tibco-ftl-enterprise-edition,7.1.2,needed (175)
-tibco,ftl,tibco-ftl-enterprise-edition,7.1.3,needed (157)
-tibco,ftl,tibco-ftl-enterprise-edition,7.2.0,needed (157)
-tibco,ftl,tibco-ftl-enterprise-edition,7.3.0,needed (187)
+tibco,foresight,tibco-foresight-translator,4.2.0,fixed
+tibco,foresight,tibco-foresight-translator-attachment-adapter,2.0.0,fixed
+tibco,foresight,tibco-foresight-translator-attachment-adapter,3.0.0,fixed
+tibco,ftl,tibco-eftl-enterprise-edition,7.1.0,fixed
+tibco,ftl,tibco-eftl-enterprise-edition,7.1.1,fixed
+tibco,ftl,tibco-eftl-enterprise-edition,7.1.2,fixed
+tibco,ftl,tibco-eftl-enterprise-edition,7.1.3,fixed
+tibco,ftl,tibco-eftl-enterprise-edition,7.2.0,fixed
+tibco,ftl,tibco-eftl-enterprise-edition,7.3.0,fixed
+tibco,ftl,tibco-ftl-enterprise-edition,7.1.0,fixed
+tibco,ftl,tibco-ftl-enterprise-edition,7.1.1,fixed
+tibco,ftl,tibco-ftl-enterprise-edition,7.1.2,fixed
+tibco,ftl,tibco-ftl-enterprise-edition,7.1.3,fixed
+tibco,ftl,tibco-ftl-enterprise-edition,7.2.0,fixed
+tibco,ftl,tibco-ftl-enterprise-edition,7.3.0,fixed
 tibco,fulfillment,tibco-enterprise-fulfillment-orchestration-suite,1.1.0,none
-tibco,fulfillment,tibco-fulfillment-provisioning,3.10.0,needed (115)
-tibco,fulfillment,tibco-fulfillment-provisioning,3.9.0,needed (117)
-tibco,fulfillment,tibco-offer-and-price-engine,6.0.0,needed (70)
-tibco,fulfillment,tibco-order-management,5.0.1,needed (187)
-tibco,fulfillment,tibco-order-management,6.0.0,needed (303)
-tibco,fulfillment,tibco-order-management,6.0.1,needed (335)
-tibco,fulfillment,tibco-order-management,6.1.0,needed (352)
-tibco,fulfillment,tibco-product-and-service-catalog,5.1.0,needed (405)
-tibco,fulfillment,tibco-product-and-service-catalog-powered-by-tibco-ebx,1.0.0,needed (16)
-tibco,fulfillment,tibco-product-and-service-catalog-powered-by-tibco-ebx,1.1.0,needed (16)
-tibco,fulfillment,tibco-product-and-service-inventory,2.1.0,needed (39)
-tibco,fulfillment,tibco-product-and-service-inventory-2-1-0,2.1.0,needed (39)
-tibco,general,tibco-activation-service,1.0.0,needed (21)
-tibco,general,tibco-activation-service,1.1.0,needed (23)
-tibco,general,tibco-api-exchange-gateway,2.5.1,needed (227)
-tibco,general,tibco-enterprise-administrator,2.4.2,needed (143)
-tibco,general,tibco-enterprise-administrator,2.4.3,needed (143)
-tibco,general,tibco-patterns,6.1.2,needed (122)
-tibco,general,tibco-patterns,6.2.0,needed (118)
-tibco,general,tibco-reward,22.2.0,needed (292)
-tibco,general,tibco-reward,22.3.0,needed (292)
+tibco,fulfillment,tibco-fulfillment-provisioning,3.10.0,fixed
+tibco,fulfillment,tibco-fulfillment-provisioning,3.9.0,fixed
+tibco,fulfillment,tibco-offer-and-price-engine,6.0.0,fixed
+tibco,fulfillment,tibco-order-management,5.0.1,fixed
+tibco,fulfillment,tibco-order-management,6.0.0,fixed
+tibco,fulfillment,tibco-order-management,6.0.1,fixed
+tibco,fulfillment,tibco-order-management,6.1.0,fixed
+tibco,fulfillment,tibco-product-and-service-catalog,5.1.0,fixed
+tibco,fulfillment,tibco-product-and-service-catalog-powered-by-tibco-ebx,1.0.0,fixed
+tibco,fulfillment,tibco-product-and-service-catalog-powered-by-tibco-ebx,1.1.0,fixed
+tibco,fulfillment,tibco-product-and-service-inventory,2.1.0,fixed
+tibco,fulfillment,tibco-product-and-service-inventory-2-1-0,2.1.0,fixed
+tibco,general,tibco-activation-service,1.0.0,fixed
+tibco,general,tibco-activation-service,1.1.0,fixed
+tibco,general,tibco-api-exchange-gateway,2.5.1,fixed
+tibco,general,tibco-enterprise-administrator,2.4.2,fixed
+tibco,general,tibco-enterprise-administrator,2.4.3,fixed
+tibco,general,tibco-patterns,6.1.2,fixed
+tibco,general,tibco-patterns,6.2.0,fixed
+tibco,general,tibco-reward,22.2.0,fixed
+tibco,general,tibco-reward,22.3.0,fixed
 tibco,general,tibco-rtview,7.5.0,none
 tibco,general,tibco-rtview,7.6.0,none
-tibco,hawk,tibco-hawk-database-adapter,6.2.0,needed (28)
-tibco,hawk,tibco-hawk-database-adapter,6.2.1,needed (32)
-tibco,hawk,tibco-hawk-microagent-for-tibco-activematrix-businessworks-6,6.7.2,needed (6)
-tibco,hawk,tibco-hawk-microagent-for-tibco-activematrix-businessworks-6,6.8.0,needed (6)
-tibco,hawk,tibco-hawk-microagent-for-tibco-businessworks-container-edition,2.2.0,needed (5)
-tibco,hawk,tibco-operational-intelligence-hawk-redtail,6.3.1,needed (10)
-tibco,hawk,tibco-operational-intelligence-hawk-redtail,7.5.0,needed (162)
-tibco,iprocess,tibco-iprocess-engine,11.10.0,needed (374)
-tibco,iprocess,tibco-iprocess-engine,11.9.1,needed (337)
-tibco,iprocess,tibco-iprocess-engine,11.9.2,needed (388)
+tibco,hawk,tibco-hawk-database-adapter,6.2.0,fixed
+tibco,hawk,tibco-hawk-database-adapter,6.2.1,fixed
+tibco,hawk,tibco-hawk-microagent-for-tibco-activematrix-businessworks-6,6.7.2,fixed
+tibco,hawk,tibco-hawk-microagent-for-tibco-activematrix-businessworks-6,6.8.0,fixed
+tibco,hawk,tibco-hawk-microagent-for-tibco-businessworks-container-edition,2.2.0,fixed
+tibco,hawk,tibco-operational-intelligence-hawk-redtail,6.3.1,fixed
+tibco,hawk,tibco-operational-intelligence-hawk-redtail,7.5.0,fixed
+tibco,iprocess,tibco-iprocess-engine,11.10.0,fixed
+tibco,iprocess,tibco-iprocess-engine,11.9.1,fixed
+tibco,iprocess,tibco-iprocess-engine,11.9.2,fixed
 tibco,iprocess,tibco-iprocess-server-objects-java,11.10.0,none
 tibco,iprocess,tibco-iprocess-server-objects-java,11.9.0,none
 tibco,iprocess,tibco-iprocess-server-objects-net,11.10.0,none
 tibco,iprocess,tibco-iprocess-server-objects-net,11.9.0,none
-tibco,iprocess,tibco-iprocess-technology-plug-ins,11.10.0,needed (121)
-tibco,iprocess,tibco-iprocess-technology-plug-ins,11.9.2,needed (122)
-tibco,iprocess,tibco-iprocess-web-services-client-plug-in,11.9.0,needed (59)
-tibco,iprocess,tibco-iprocess-web-services-server-plug-in,11.9.0,needed (94)
-tibco,iprocess,tibco-iprocess-workspace-browser,11.10.0,needed (199)
-tibco,iprocess,tibco-iprocess-workspace-browser,11.9.0,needed (168)
-tibco,iprocess,tibco-iprocess-workspace-plug-ins,11.10.0,needed (16)
-tibco,iprocess,tibco-iprocess-workspace-plug-ins,11.9.0,needed (16)
-tibco,iprocess,tibco-iprocess-workspace-windows,11.10.0,needed (578)
-tibco,iprocess,tibco-iprocess-workspace-windows,11.9.2,needed (536)
-tibco,mainframe,tibco-mainframe-red,2.5.1,needed (57)
-tibco,mainframe,tibco-mainframe-red,3.1.0,needed (70)
-tibco,mainframe,tibco-mainframe-tcp-library,2.5.0,needed (13)
-tibco,mainframe,tibco-mainframe-tcp-library,3.0.0,needed (13)
-tibco,mainframe,tibco-mainframe-webui,2.5.0,needed (48)
-tibco,mainframe,tibco-mainframe-webui,3.0.0,needed (48)
-tibco,mainframe,tibco-red-enabled-for-ziip,2.5.0,needed (1)
-tibco,mainframe,tibco-red-enabled-for-ziip,3.1.0,needed (1)
-tibco,mainframe,tibco-substation-es,2.14.0,needed (149)
-tibco,mainframe,tibco-transaction-interface-for-cics,2.14.0,needed (149)
-tibco,mainframe,tibco-transaction-interface-for-ims,2.14.0,needed (149)
+tibco,iprocess,tibco-iprocess-technology-plug-ins,11.10.0,fixed
+tibco,iprocess,tibco-iprocess-technology-plug-ins,11.9.2,fixed
+tibco,iprocess,tibco-iprocess-web-services-client-plug-in,11.9.0,fixed
+tibco,iprocess,tibco-iprocess-web-services-server-plug-in,11.9.0,fixed
+tibco,iprocess,tibco-iprocess-workspace-browser,11.10.0,fixed
+tibco,iprocess,tibco-iprocess-workspace-browser,11.9.0,fixed
+tibco,iprocess,tibco-iprocess-workspace-plug-ins,11.10.0,fixed
+tibco,iprocess,tibco-iprocess-workspace-plug-ins,11.9.0,fixed
+tibco,iprocess,tibco-iprocess-workspace-windows,11.10.0,fixed
+tibco,iprocess,tibco-iprocess-workspace-windows,11.9.2,fixed
+tibco,mainframe,tibco-mainframe-red,2.5.1,fixed
+tibco,mainframe,tibco-mainframe-red,3.1.0,fixed
+tibco,mainframe,tibco-mainframe-tcp-library,2.5.0,fixed
+tibco,mainframe,tibco-mainframe-tcp-library,3.0.0,fixed
+tibco,mainframe,tibco-mainframe-webui,2.5.0,fixed
+tibco,mainframe,tibco-mainframe-webui,3.0.0,fixed
+tibco,mainframe,tibco-red-enabled-for-ziip,2.5.0,fixed
+tibco,mainframe,tibco-red-enabled-for-ziip,3.1.0,fixed
+tibco,mainframe,tibco-substation-es,2.14.0,fixed
+tibco,mainframe,tibco-transaction-interface-for-cics,2.14.0,fixed
+tibco,mainframe,tibco-transaction-interface-for-ims,2.14.0,fixed
 tibco,messaging,tibco-gems,1.1.0,none
 tibco,messaging,tibco-graphical-rendezvous,1.1.0,none
 tibco,messaging,tibco-messaging,1.31.0,none
 tibco,messaging,tibco-messaging-enterprise-edition,3.4.0,none
-tibco,messaging,tibco-messaging-schema-repository-for-apache-kafka-enterprise-edition,2.0.0,needed (25)
-tibco,messaging,tibco-messaging-schema-repository-for-apache-kafka-enterprise-edition,2.1.0,needed (16)
-tibco,messaging,tibco-rendezvous,8.8.0,needed (3)
-tibco,messaging,tibco-rendezvous,8.8.1,needed (6)
-tibco,messaging,tibco-rendezvous,9.0.0,needed (7)
-tibco,messaging,tibco-rendezvous-network-service,2.1.0,needed (12)
-tibco,messaging,tibco-rendezvous-network-service,2.2.0,needed (13)
+tibco,messaging,tibco-messaging-schema-repository-for-apache-kafka-enterprise-edition,2.0.0,fixed
+tibco,messaging,tibco-messaging-schema-repository-for-apache-kafka-enterprise-edition,2.1.0,fixed
+tibco,messaging,tibco-rendezvous,8.8.0,fixed
+tibco,messaging,tibco-rendezvous,8.8.1,fixed
+tibco,messaging,tibco-rendezvous,9.0.0,fixed
+tibco,messaging,tibco-rendezvous-network-service,2.1.0,fixed
+tibco,messaging,tibco-rendezvous-network-service,2.2.0,fixed
 tibco,mft,tibco-managed-file-transfer-command-center,8.6.0,fixed
 tibco,mft,tibco-managed-file-transfer-command-center,8.7.0,fixed
 tibco,mft,tibco-managed-file-transfer-command-center,8.7.1,fixed
@@ -747,9 +747,9 @@ tibco,mft,tibco-managed-file-transfer-platform-server-for-windows,8.2.0,fixed
 tibco,mft,tibco-managed-file-transfer-platform-server-for-z-linux,8.1.0,fixed
 tibco,mft,tibco-managed-file-transfer-platform-server-for-z-linux,8.1.1,fixed
 tibco,mft,tibco-managed-file-transfer-platform-server-for-z-linux,8.1.2,fixed
-tibco,platform,tibco-control-plane,1.18.0,needed (380)
-tibco,platform,tibco-control-plane,1.19.0,needed (394)
-tibco,platform,tibco-control-plane,1.20.0,needed (438)
+tibco,platform,tibco-control-plane,1.18.0,fixed
+tibco,platform,tibco-control-plane,1.19.0,fixed
+tibco,platform,tibco-control-plane,1.20.0,fixed
 tibco,platform,tibco-platform-add-on-for-business-process-management,1.0.0,none
 tibco,platform,tibco-platform-add-on-for-event-processing,1.9.0,none
 tibco,platform,tibco-platform-command-line-interface,1.1.0,none
@@ -785,18 +785,18 @@ tibco,streaming,tibco-streaming,11.1.3,fixed
 tibco,streaming,tibco-streaming,11.2.0,fixed
 tibco,streaming,tibco-streaming,11.2.1,fixed
 tibco,streaming,tibco-streaming-for-3gpp,1.1.0,none
-tibco,tra,tibco-administrator-enterprise-edition,5.12.2,needed (152)
-tibco,tra,tibco-administrator-enterprise-edition,5.12.4,needed (154)
-tibco,tra,tibco-administrator-enterprise-edition,5.13.0,needed (155)
-tibco,tra,tibco-designer-add-in-for-tibco-business-studio,1.0.0,needed (9)
-tibco,tra,tibco-designer-add-in-for-tibco-business-studio,1.1.0,needed (12)
-tibco,tra,tibco-designer-add-in-for-tibco-business-studio,1.1.1,needed (12)
-tibco,tra,tibco-designer-add-in-for-tibco-business-studio,1.2.0,needed (16)
-tibco,tra,tibco-designer-add-in-for-tibco-business-studio,1.3.1,needed (11)
-tibco,tra,tibco-designer-add-in-for-tibco-business-studio,1.3.2,needed (11)
-tibco,tra,tibco-designer-add-in-for-tibco-business-studio,1.4.0,needed (11)
-tibco,tra,tibco-designer-add-in-for-tibco-business-studio,1.5.0,needed (11)
-tibco,tra,tibco-runtime-agent,5.12.2,needed (272)
-tibco,tra,tibco-runtime-agent,5.12.3,needed (198)
-tibco,tra,tibco-runtime-agent,5.12.4,needed (278)
-tibco,tra,tibco-runtime-agent,5.13.0,needed (277)
+tibco,tra,tibco-administrator-enterprise-edition,5.12.2,fixed
+tibco,tra,tibco-administrator-enterprise-edition,5.12.4,fixed
+tibco,tra,tibco-administrator-enterprise-edition,5.13.0,fixed
+tibco,tra,tibco-designer-add-in-for-tibco-business-studio,1.0.0,fixed
+tibco,tra,tibco-designer-add-in-for-tibco-business-studio,1.1.0,fixed
+tibco,tra,tibco-designer-add-in-for-tibco-business-studio,1.1.1,fixed
+tibco,tra,tibco-designer-add-in-for-tibco-business-studio,1.2.0,fixed
+tibco,tra,tibco-designer-add-in-for-tibco-business-studio,1.3.1,fixed
+tibco,tra,tibco-designer-add-in-for-tibco-business-studio,1.3.2,fixed
+tibco,tra,tibco-designer-add-in-for-tibco-business-studio,1.4.0,fixed
+tibco,tra,tibco-designer-add-in-for-tibco-business-studio,1.5.0,fixed
+tibco,tra,tibco-runtime-agent,5.12.2,fixed
+tibco,tra,tibco-runtime-agent,5.12.3,fixed
+tibco,tra,tibco-runtime-agent,5.12.4,fixed
+tibco,tra,tibco-runtime-agent,5.13.0,fixed
