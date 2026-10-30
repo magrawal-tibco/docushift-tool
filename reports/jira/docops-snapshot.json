@@ -1,5 +1,5 @@
 {
- "fetched": "2026-10-28",
+ "fetched": "2026-10-30",
  "issues": [
   {
    "key": "DOCOPS-5",
@@ -1239,8 +1239,8 @@
    "summary": "Fix 12 convert-failed and 23 download-failed TIBCO versions",
    "type": "Sub-task",
    "parent": "DOCOPS-7",
-   "status": "Backlog",
-   "category": "new",
+   "status": "Done",
+   "category": "done",
    "components": [
     "Content Migration"
    ],
@@ -1249,7 +1249,7 @@
     "tibco"
    ],
    "created": "2026-10-07",
-   "resolved": "",
+   "resolved": "2026-10-29",
    "due": "",
    "assignee": "Mayur Agrawal",
    "sp": 0.5
@@ -1499,8 +1499,8 @@
    "summary": "Full validate run after TIBCO re-sync",
    "type": "Sub-task",
    "parent": "DOCOPS-10",
-   "status": "Backlog",
-   "category": "new",
+   "status": "Done",
+   "category": "done",
    "components": [
     "Content Migration"
    ],
@@ -1509,7 +1509,7 @@
     "tibco"
    ],
    "created": "2026-10-07",
-   "resolved": "",
+   "resolved": "2026-10-30",
    "due": "",
    "assignee": "Mayur Agrawal",
    "sp": 0.25
@@ -3887,6 +3887,45 @@
    ],
    "created": "2026-10-27",
    "resolved": "",
+   "due": "",
+   "assignee": "",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-292",
+   "summary": "Redirect and help maps name the Markdown file from the repo root (Phase 68)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-96",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift"
+   ],
+   "created": "2026-10-29",
+   "resolved": "2026-10-30",
+   "due": "",
+   "assignee": "",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-297",
+   "summary": "Phase 69: ActiveMatrix BPM help fits — short guide folders, then Phase 63 cut",
+   "type": "Sub-task",
+   "parent": "DOCOPS-12",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "reframe",
+    "tibco"
+   ],
+   "created": "2026-10-29",
+   "resolved": "2026-10-29",
    "due": "",
    "assignee": "",
    "sp": 0.5
