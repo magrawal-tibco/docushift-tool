@@ -50,6 +50,8 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 **Log** (newest first, one line per session):
 
+- 2026-10-30 — DOCOPS-313 note: R001 MFT (3b5cfdd) and Data Management (4ea48bb) pushed to TIBCO `content-fix`.
+  184 versions / ~23,700 notes left; MFT Platform Server `access-control.md` x6 left for a hand edit.
 - 2026-10-30 — DOCOPS-313 note: R001 Streaming (1cfa47a) and BPM (3330ac5) on new TIBCO `content-fix` branch, created
   from `wip` and pushed in all 41 TIBCO repos with a `wip` (AEM now uploads from `wip`). 206 versions / ~30,500 notes left.
 - 2026-10-30 — DOCOPS-313 → In Progress, note: R001 BW plug-ins pushed to bw-plugin `wip` (41c7d31a), 205 versions

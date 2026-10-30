@@ -590,15 +590,15 @@ tibco,cloud,tibco-cloud-integration-businessworks-payg,2.8.0,needed (20)
 tibco,cloud,tibco-cloud-integration-flogo-payg,2.11.0,needed (132)
 tibco,cloud,tibco-cloud-integration-hybrid,3.12.0,none
 tibco,cloud,tibco-cloud-integration-hybrid-connectivity-add-on,3.10.0,none
-tibco,data_management,ibi-mdm-add-on-for-global-data-synchronization,4.0.0,needed (19)
+tibco,data_management,ibi-mdm-add-on-for-global-data-synchronization,4.0.0,fixed
 tibco,data_management,tibco-enterprise-mdm,1.0.0,none
-tibco,data_management,tibco-mdm,11.0.0,needed (778)
-tibco,data_management,tibco-mdm,11.1.0,needed (784)
-tibco,data_management,tibco-mdm,9.3.2,needed (1016)
-tibco,data_management,tibco-mdm-studio,5.2.0,needed (134)
-tibco,data_management,tibco-mdm-studio,6.0.0,needed (137)
-tibco,data_management,tibco-mdm-studio,6.1.0,needed (143)
-tibco,data_management,tibco-mdm-studio,6.1.1,needed (143)
+tibco,data_management,tibco-mdm,11.0.0,fixed
+tibco,data_management,tibco-mdm,11.1.0,fixed
+tibco,data_management,tibco-mdm,9.3.2,fixed
+tibco,data_management,tibco-mdm-studio,5.2.0,fixed
+tibco,data_management,tibco-mdm-studio,6.0.0,fixed
+tibco,data_management,tibco-mdm-studio,6.1.0,fixed
+tibco,data_management,tibco-mdm-studio,6.1.1,fixed
 tibco,ems,tibco-ems-client-for-ibm-i,8.6.0,needed (9)
 tibco,ems,tibco-enterprise-message-service,10.4.0,needed (483)
 tibco,ems,tibco-enterprise-message-service,10.4.1,needed (488)
@@ -733,20 +733,20 @@ tibco,messaging,tibco-rendezvous,8.8.1,needed (6)
 tibco,messaging,tibco-rendezvous,9.0.0,needed (7)
 tibco,messaging,tibco-rendezvous-network-service,2.1.0,needed (12)
 tibco,messaging,tibco-rendezvous-network-service,2.2.0,needed (13)
-tibco,mft,tibco-managed-file-transfer-command-center,8.6.0,needed (487)
-tibco,mft,tibco-managed-file-transfer-command-center,8.7.0,needed (496)
-tibco,mft,tibco-managed-file-transfer-command-center,8.7.1,needed (495)
-tibco,mft,tibco-managed-file-transfer-internet-server,8.6.0,needed (486)
-tibco,mft,tibco-managed-file-transfer-internet-server,8.7.0,needed (495)
-tibco,mft,tibco-managed-file-transfer-internet-server,8.7.1,needed (494)
-tibco,mft,tibco-managed-file-transfer-platform-server-for-unix,8.1.1,needed (101)
-tibco,mft,tibco-managed-file-transfer-platform-server-for-unix,8.1.2,needed (101)
-tibco,mft,tibco-managed-file-transfer-platform-server-for-unix,8.2.0,needed (112)
-tibco,mft,tibco-managed-file-transfer-platform-server-for-windows,8.1.0,needed (66)
-tibco,mft,tibco-managed-file-transfer-platform-server-for-windows,8.2.0,needed (66)
-tibco,mft,tibco-managed-file-transfer-platform-server-for-z-linux,8.1.0,needed (103)
-tibco,mft,tibco-managed-file-transfer-platform-server-for-z-linux,8.1.1,needed (101)
-tibco,mft,tibco-managed-file-transfer-platform-server-for-z-linux,8.1.2,needed (103)
+tibco,mft,tibco-managed-file-transfer-command-center,8.6.0,fixed
+tibco,mft,tibco-managed-file-transfer-command-center,8.7.0,fixed
+tibco,mft,tibco-managed-file-transfer-command-center,8.7.1,fixed
+tibco,mft,tibco-managed-file-transfer-internet-server,8.6.0,fixed
+tibco,mft,tibco-managed-file-transfer-internet-server,8.7.0,fixed
+tibco,mft,tibco-managed-file-transfer-internet-server,8.7.1,fixed
+tibco,mft,tibco-managed-file-transfer-platform-server-for-unix,8.1.1,fixed
+tibco,mft,tibco-managed-file-transfer-platform-server-for-unix,8.1.2,fixed
+tibco,mft,tibco-managed-file-transfer-platform-server-for-unix,8.2.0,fixed
+tibco,mft,tibco-managed-file-transfer-platform-server-for-windows,8.1.0,fixed
+tibco,mft,tibco-managed-file-transfer-platform-server-for-windows,8.2.0,fixed
+tibco,mft,tibco-managed-file-transfer-platform-server-for-z-linux,8.1.0,fixed
+tibco,mft,tibco-managed-file-transfer-platform-server-for-z-linux,8.1.1,fixed
+tibco,mft,tibco-managed-file-transfer-platform-server-for-z-linux,8.1.2,fixed
 tibco,platform,tibco-control-plane,1.18.0,needed (380)
 tibco,platform,tibco-control-plane,1.19.0,needed (394)
 tibco,platform,tibco-control-plane,1.20.0,needed (438)
