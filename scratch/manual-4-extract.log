@@ -1,0 +1,136 @@
+Extracting 1 version(s)...
+  v tibco-flogo@3.0.1 1826 file(s), flare, 1 root(s)
+                Extract                
++-------------------------------------+
+| Outcome                  | Versions |
+|--------------------------+----------|
+| Extracted                |        1 |
+| Already current          |        0 |
+| Measured from cache      |        0 |
+| No package               |        0 |
+| Refused (unsafe archive) |        0 |
+| Failed                   |        0 |
++-------------------------------------+
+1826 file(s) written.
+       Engines       
++-------------------+
+| Engine | Versions |
+|--------+----------|
+| flare  |        1 |
++-------------------+
+CSH: 1 source(s), 1 identifier(s).
+                       Assets                        
++---------------------------------------------------+
+| Category      | Destination     | Files |    Size |
+|---------------+-----------------+-------+---------|
+| topic         | output-root     |   862 | 17.8 MB |
+| image         | output-root     |   556 | 30.8 MB |
+| media         | output-root     |     4 |  2.8 MB |
+| source-format | output-root     |     1 |  0.1 MB |
+| skin          | output-root     |   383 | 16.5 MB |
+| other         | output-root     |    12 |  0.6 MB |
+| document      | document-router |     8 | 30.9 MB |
++---------------------------------------------------+
+Extracting 1 version(s)...
+  v tibco-businessworks-formbuilder@5.3.2 1168 file(s), webworks, 2 root(s)
+                Extract                
++-------------------------------------+
+| Outcome                  | Versions |
+|--------------------------+----------|
+| Extracted                |        1 |
+| Already current          |        0 |
+| Measured from cache      |        0 |
+| No package               |        0 |
+| Refused (unsafe archive) |        0 |
+| Failed                   |        0 |
++-------------------------------------+
+1168 file(s) written.
+        Engines        
++---------------------+
+| Engine   | Versions |
+|----------+----------|
+| webworks |        1 |
++---------------------+
+CSH: 2 source(s), 63 identifier(s).
+                    Assets                     
++---------------------------------------------+
+| Category | Destination     | Files |   Size |
+|----------+-----------------+-------+--------|
+| topic    | output-root     |   173 | 2.4 MB |
+| image    | output-root     |   280 | 3.1 MB |
+| skin     | output-root     |   524 | 2.4 MB |
+| other    | output-root     |    29 | 1.4 MB |
+| document | document-router |     5 | 4.3 MB |
+| topic    | unclaimed       |    38 | 0.1 MB |
+| image    | unclaimed       |    71 | 0.0 MB |
+| other    | unclaimed       |    48 | 0.6 MB |
++---------------------------------------------+
+? tibco-businessworks-formbuilder@5.3.2: 157 unclaimed file(s) in html/ (0.7 
+MB) -- no destination
+Recorded 1 note -- `docushift report --run 987`.
+Extracting 1 version(s)...
+  v tibco-product-and-service-inventory-2-1-0@2.1.0 749 file(s), flare, 1 
+root(s)
+                Extract                
++-------------------------------------+
+| Outcome                  | Versions |
+|--------------------------+----------|
+| Extracted                |        1 |
+| Already current          |        0 |
+| Measured from cache      |        0 |
+| No package               |        0 |
+| Refused (unsafe archive) |        0 |
+| Failed                   |        0 |
++-------------------------------------+
+749 file(s) written.
+       Engines       
++-------------------+
+| Engine | Versions |
+|--------+----------|
+| flare  |        1 |
++-------------------+
+CSH: 1 source(s), 0 identifier(s).
+                     Assets                     
++----------------------------------------------+
+| Category | Destination     | Files |    Size |
+|----------+-----------------+-------+---------|
+| topic    | output-root     |   253 |  5.2 MB |
+| image    | output-root     |   249 | 11.3 MB |
+| skin     | output-root     |   224 |  4.9 MB |
+| other    | output-root     |    12 |  0.6 MB |
+| document | document-router |     4 |  4.9 MB |
+| document | unclaimed       |     7 |  4.0 MB |
++----------------------------------------------+
+? tibco-product-and-service-inventory-2-1-0@2.1.0: 5 unclaimed file(s) in ./ 
+(0.2 MB) -- no destination
+? tibco-product-and-service-inventory-2-1-0@2.1.0: 2 unclaimed file(s) in 
+license/ (3.9 MB) -- no destination
+Recorded 1 note -- `docushift report --run 988`.
+Extracting 1 version(s)...
+  v tibco-business-studio-community-edition@4.2.0 3 file(s), auto
+                Extract                
++-------------------------------------+
+| Outcome                  | Versions |
+|--------------------------+----------|
+| Extracted                |        1 |
+| Already current          |        0 |
+| Measured from cache      |        0 |
+| No package               |        0 |
+| Refused (unsafe archive) |        0 |
+| Failed                   |        0 |
++-------------------------------------+
+3 file(s) written.
+       Engines       
++-------------------+
+| Engine | Versions |
+|--------+----------|
+| auto   |        1 |
++-------------------+
+? tibco-business-studio-community-edition@4.2.0: engine undetected (`auto`)
+CSH: 0 source(s), 0 identifier(s).
+                    Assets                     
++---------------------------------------------+
+| Category | Destination     | Files |   Size |
+|----------+-----------------+-------+--------|
+| document | document-router |     3 | 1.7 MB |
++---------------------------------------------+

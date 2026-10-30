@@ -1,0 +1,95 @@
+Syncing 3 version(s) into ..\tibco-docs-aem...
+  x tibco-control-plane@1.20.0 (online-help)
+  v tibco-control-plane@1.20.0 -> reference-documents/1-20-0 2 file(s), 9.2 MB
+  v tibco-control-plane@1.19.0 -> online-help/1-19-0 663 file(s), 45.4 MB
+  v tibco-control-plane@1.19.0 -> reference-documents/1-19-0 2 file(s), 8.7 MB
+  v tibco-control-plane@1.18.0 -> online-help/1-18-0 642 file(s), 43.0 MB
+  v tibco-control-plane@1.18.0 -> reference-documents/1-18-0 2 file(s), 8.5 MB
+                             Sync                             
++------------------------------------------------------------+
+| Outcome         | Rows | online-help | reference-documents |
+|-----------------+------+-------------+---------------------|
+| Synced          |    5 |           2 |                   3 |
+| Already current |    0 |           0 |                   0 |
+| No source tree  |    0 |           0 |                   0 |
+| Skipped         |    0 |           0 |                   0 |
+| Failed          |    1 |           1 |                   0 |
++------------------------------------------------------------+
+1311 file(s), 114.8 MB copied.
+1 product metadata.yml, 2 version.yml written.
+Published merged (Stage 6b): tibco-control-plane.
+2000 redirect(s) in 2 published map(s), tree-rooted (no publish_base_url set).
+x tibco-control-plane@1.20.0: online-help: publishing 
+managing-control-tower-data-planes/control-tower-data-plane-products/tibco-acti
+vematrix-businessworks-5-tibco/manage-application-configuration-overview/managi
+ng-folders.md would need 269 characters, over the 260 the published tree allows
+Findings: 1 error.
+Syncing 2 version(s) into ..\tibco-docs-aem...
+  x tibco-platform-command-line-interface@1.2.0 (online-help)
+  v tibco-platform-command-line-interface@1.2.0 -> reference-documents/1-2-0 1 
+file(s), 0.1 MB
+  v tibco-platform-command-line-interface@1.1.0 -> release-information/1-1-0 1 
+file(s), 0.0 MB
+  v tibco-platform-command-line-interface@1.1.0 -> reference-documents/1-1-0 2 
+file(s), 0.1 MB
+                                     Sync                                      
++-----------------------------------------------------------------------------+
+| Outcome         | Rows | online-help | release-informat… | reference-docum… |
+|-----------------+------+-------------+-------------------+------------------|
+| Synced          |    3 |           0 |                 1 |                2 |
+| Already current |    0 |           0 |                 0 |                0 |
+| No source tree  |    1 |           1 |                 0 |                0 |
+| Skipped         |    0 |           0 |                 0 |                0 |
+| Failed          |    1 |           1 |                 0 |                0 |
++-----------------------------------------------------------------------------+
+4 file(s), 0.1 MB copied.
+1 product metadata.yml, 2 version.yml written.
+! tibco-platform-command-line-interface@1.1.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-platform\tibco-platform-command-line-
+interface\1.1.0; run `docushift convert` first
+x tibco-platform-command-line-interface@1.2.0: online-help: publishing 
+managing-control-tower-data-planes/control-tower-data-plane-products/tibco-acti
+vematrix-businessworks-5-tibco/manage-application-configuration-overview.md 
+would need 269 characters, over the 260 the published tree allows
+Findings: 1 error.
+Syncing 1 version(s) into ..\tibco-docs-aem...
+  v tibco-platform-add-on-for-business-process-management@1.0.0 -> 
+release-information/1-0-0 1 file(s), 0.0 MB
+  v tibco-platform-add-on-for-business-process-management@1.0.0 -> 
+reference-documents/1-0-0 4 file(s), 0.2 MB
+                                     Sync                                      
++-----------------------------------------------------------------------------+
+| Outcome         | Rows | online-help | release-informat… | reference-docum… |
+|-----------------+------+-------------+-------------------+------------------|
+| Synced          |    2 |           0 |                 1 |                1 |
+| Already current |    0 |           0 |                 0 |                0 |
+| No source tree  |    1 |           1 |                 0 |                0 |
+| Skipped         |    0 |           0 |                 0 |                0 |
+| Failed          |    0 |           0 |                 0 |                0 |
++-----------------------------------------------------------------------------+
+5 file(s), 0.2 MB copied.
+1 product metadata.yml, 2 version.yml written.
+! tibco-platform-add-on-for-business-process-management@1.0.0: no converted 
+tree at 
+C:\github\docushift-tool\output\en-us-tib-platform\tibco-platform-add-on-for-bu
+siness-process-management\1.0.0; run `docushift convert` first
+Syncing 1 version(s) into ..\tibco-docs-aem...
+  v tibco-platform-add-on-for-event-processing@1.9.0 -> 
+release-information/1-9-0 1 file(s), 0.0 MB
+  v tibco-platform-add-on-for-event-processing@1.9.0 -> 
+reference-documents/1-9-0 4 file(s), 0.2 MB
+                                     Sync                                      
++-----------------------------------------------------------------------------+
+| Outcome         | Rows | online-help | release-informat… | reference-docum… |
+|-----------------+------+-------------+-------------------+------------------|
+| Synced          |    2 |           0 |                 1 |                1 |
+| Already current |    0 |           0 |                 0 |                0 |
+| No source tree  |    1 |           1 |                 0 |                0 |
+| Skipped         |    0 |           0 |                 0 |                0 |
+| Failed          |    0 |           0 |                 0 |                0 |
++-----------------------------------------------------------------------------+
+5 file(s), 0.2 MB copied.
+1 product metadata.yml, 2 version.yml written.
+! tibco-platform-add-on-for-event-processing@1.9.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-platform\tibco-platform-add-on-for-ev
+ent-processing\1.9.0; run `docushift convert` first

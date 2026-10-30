@@ -1,0 +1,113 @@
+Extracting 39 version(s)...
+  v tibco-enterprise-foresight@1.1.0 4 file(s), auto
+  v tibco-enterprise-foresight@1.0.0 5 file(s), auto
+  v tibco-enterprise-foresight-healthcare-add-on@1.1.0 4 file(s), auto
+  v tibco-enterprise-foresight-healthcare-add-on@1.0.0 5 file(s), auto
+  v tibco-foresight-archive-and-retrieval-system@6.0.0 582 file(s), flare, 1 
+root(s)
+  v tibco-foresight-archive-and-retrieval-system@5.5.0 543 file(s), flare, 1 
+root(s)
+  v tibco-foresight-archive-and-retrieval-system@5.4.0 536 file(s), flare, 1 
+root(s)
+  v tibco-foresight-connect-with-fhir@1.0.1 251 file(s), flare, 1 root(s)
+  v tibco-foresight-connect-with-fhir@1.0.0 51 file(s), dita, 1 root(s)
+  v tibco-foresight-edisim@6.21.0 4275 file(s), flare, 1 root(s)
+  v tibco-foresight-edisim@6.20.0 27 file(s), auto
+  v tibco-foresight-edisim@6.19.0 27 file(s), auto
+  v tibco-foresight-hipaa-validator-desktop@9.2.0 3536 file(s), flare, 1 
+root(s)
+  v tibco-foresight-hipaa-validator-desktop@9.1.0 24 file(s), auto
+  v tibco-foresight-hipaa-validator-desktop@9.0.0 24 file(s), auto
+  v tibco-foresight-instream@9.4.0 42606 file(s), flare, 15 root(s)
+  v tibco-foresight-instream@9.3.0 42932 file(s), flare, 15 root(s)
+  v tibco-foresight-instream@9.2.0 6107 file(s), flare, 1 root(s)
+  v tibco-foresight-instream@9.1.0 53 file(s), auto
+  v tibco-foresight-instream@9.0.0 50 file(s), auto
+  v tibco-foresight-operational-monitor@6.0.0 330 file(s), flare, 1 root(s)
+  v tibco-foresight-operational-monitor@5.5.0 307 file(s), flare, 1 root(s)
+  v tibco-foresight-operational-monitor@5.4.0 304 file(s), flare, 1 root(s)
+  v tibco-foresight-rest-api@1.2.0 367 file(s), flare, 1 root(s)
+  v tibco-foresight-rest-api@1.1.0 347 file(s), flare, 1 root(s)
+  v tibco-foresight-rest-api@1.0.3 274 file(s), flare, 1 root(s)
+  v tibco-foresight-studio@9.3.0 1155 file(s), flare, 1 root(s)
+  v tibco-foresight-studio@9.2.0 1451 file(s), flare, 1 root(s)
+  v tibco-foresight-studio@9.1.0 14 file(s), auto
+  v tibco-foresight-studio@9.0.1 6 file(s), auto
+  v tibco-foresight-studio@9.0.0 15 file(s), auto
+  v tibco-foresight-transaction-insight@6.0.0 3953 file(s), flare, 3 root(s)
+  v tibco-foresight-transaction-insight@5.5.0 4595 file(s), flare, 4 root(s)
+  v tibco-foresight-transaction-insight@5.4.0 2825 file(s), flare, 1 root(s)
+  v tibco-foresight-translator@4.2.0 3209 file(s), flare, 1 root(s)
+  v tibco-foresight-translator@4.1.0 13 file(s), auto
+  v tibco-foresight-translator@4.0.0 13 file(s), auto
+  v tibco-foresight-translator-attachment-adapter@3.0.0 351 file(s), flare, 1 
+root(s)
+  v tibco-foresight-translator-attachment-adapter@2.0.0 80 file(s), dita, 1 
+root(s)
+                Extract                
++-------------------------------------+
+| Outcome                  | Versions |
+|--------------------------+----------|
+| Extracted                |       39 |
+| Already current          |        0 |
+| Measured from cache      |        0 |
+| No package               |        0 |
+| Refused (unsafe archive) |        0 |
+| Failed                   |        0 |
++-------------------------------------+
+121251 file(s) written.
+       Engines       
++-------------------+
+| Engine | Versions |
+|--------+----------|
+| flare  |       22 |
+| auto   |       15 |
+| dita   |        2 |
++-------------------+
+? tibco-enterprise-foresight@1.1.0: engine undetected (`auto`)
+? tibco-enterprise-foresight@1.0.0: engine undetected (`auto`)
+? tibco-enterprise-foresight-healthcare-add-on@1.1.0: engine undetected 
+(`auto`)
+? tibco-enterprise-foresight-healthcare-add-on@1.0.0: engine undetected 
+(`auto`)
+? tibco-foresight-edisim@6.20.0: engine undetected (`auto`)
+? tibco-foresight-edisim@6.19.0: engine undetected (`auto`)
+? tibco-foresight-hipaa-validator-desktop@9.1.0: engine undetected (`auto`)
+? tibco-foresight-hipaa-validator-desktop@9.0.0: engine undetected (`auto`)
+? tibco-foresight-instream@9.1.0: engine undetected (`auto`)
+? tibco-foresight-instream@9.0.0: engine undetected (`auto`)
+? tibco-foresight-studio@9.1.0: engine undetected (`auto`)
+? tibco-foresight-studio@9.0.1: engine undetected (`auto`)
+? tibco-foresight-studio@9.0.0: engine undetected (`auto`)
+? tibco-foresight-translator@4.1.0: engine undetected (`auto`)
+? tibco-foresight-translator@4.0.0: engine undetected (`auto`)
+CSH: 56 source(s), 0 identifier(s).
+                     Assets                      
++-----------------------------------------------+
+| Category | Destination     | Files |     Size |
+|----------+-----------------+-------+----------|
+| topic    | output-root     | 25464 | 524.0 MB |
+| image    | output-root     | 77836 | 1.568 GB |
+| skin     | output-root     | 16605 | 553.2 MB |
+| other    | output-root     |   655 |  35.3 MB |
+| document | document-router |   691 | 753.9 MB |
++-----------------------------------------------+
+? tibco-foresight-instream@9.4.0: 
+tibco-foresight-instream-9-4-0/html/instream-api/ 6 file(s), no known generator
+marker
+? tibco-foresight-instream@9.4.0: 
+tibco-foresight-instream-9-4-0/html/instream-api/Instream_REST_API/ 1 file(s), 
+no known generator marker
+? tibco-foresight-instream@9.3.0: 
+tibco-foresight-instream-9-3-0/html/instream-api/ 10 file(s), no known 
+generator marker
+? tibco-foresight-instream@9.3.0: 
+tibco-foresight-instream-9-3-0/html/instream-api/Instream_REST_API/ 2 file(s), 
+no known generator marker
+? tibco-foresight-instream@9.2.0: 
+tibco-foresight-instream-9-2-0/html/instream-api/ 10 file(s), no known 
+generator marker
+? tibco-foresight-instream@9.2.0: 
+tibco-foresight-instream-9-2-0/html/instream-api/Instream_REST_API/ 2 file(s), 
+no known generator marker
+Recorded 23 notes -- `docushift report --run 750`.

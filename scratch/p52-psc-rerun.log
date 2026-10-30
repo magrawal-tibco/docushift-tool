@@ -1,0 +1,37 @@
+Reframing 1 version(s)...
+  v tibco-product-and-service-catalog@5.1.0 542 topic(s) -> 1397 page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |        1 |
+| Already current             |        0 |
+| Not Flare or DITA (skipped) |        0 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+542 topic(s) read into 1397 page(s).
+Files: 5044 source doc -> 1869 converted -> 1397 merged (25.3% fewer at the 
+merge, 72.3% end to end); 2401 file(s) standing in the measured merged tree(s).
+512 page(s) queued for editorial review:
+  tibco-product-and-service-catalog@5.1.0: 512 of 1397 -- see review-queue.csv
+Findings: 2 warnings, 2 notes.
+Syncing 1 version(s) into ..\tibco-docs-aem...
+  v tibco-product-and-service-catalog@5.1.0 -> online-help/5-1-0 2398 file(s), 
+39.7 MB
+                                     Sync                                      
++-----------------------------------------------------------------------------+
+| Outcome   | Rows | online-h… | user-gui… | release-… | referenc… | archives |
+|-----------+------+-----------+-----------+-----------+-----------+----------|
+| Synced    |    1 |         1 |         0 |         0 |         0 |        0 |
+| Already   |    4 |         0 |         1 |         1 |         1 |        1 |
+| current   |      |           |           |           |           |          |
+| No source |    0 |         0 |         0 |         0 |         0 |        0 |
+| tree      |      |           |           |           |           |          |
+| Skipped   |    0 |         0 |         0 |         0 |         0 |        0 |
+| Failed    |    0 |         0 |         0 |         0 |         0 |        0 |
++-----------------------------------------------------------------------------+
+2398 file(s), 39.7 MB copied.
+1 product metadata.yml, 4 version.yml written.
+Published merged (Stage 6b): tibco-product-and-service-catalog.
+2409 redirect(s) in 2 published map(s), tree-rooted (no publish_base_url set).

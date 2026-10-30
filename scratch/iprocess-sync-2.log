@@ -1,0 +1,44 @@
+Syncing 17 version(s) into ..\tibco-docs-aem...
+  v tibco-iprocess-engine@11.10.0 -> online-help/11-10-0 1076 file(s), 17.9 MB
+  v tibco-iprocess-engine@11.9.2 -> online-help/11-9-2 966 file(s), 18.7 MB
+  v tibco-iprocess-engine@11.9.1 -> online-help/11-9-1 920 file(s), 15.3 MB
+  v tibco-iprocess-server-objects-java@11.9.0 -> user-guides/11-9-0 3 file(s), 
+6.6 MB
+  v tibco-iprocess-server-objects-java@11.9.0 -> release-information/11-9-0 2 
+file(s), 0.3 MB
+  v tibco-iprocess-server-objects-java@11.9.0 -> reference-documents/11-9-0 2 
+file(s), 0.1 MB
+  v tibco-iprocess-technology-plug-ins@11.10.0 -> online-help/11-10-0 176 
+file(s), 5.0 MB
+  v tibco-iprocess-technology-plug-ins@11.9.2 -> online-help/11-9-2 228 
+file(s), 4.9 MB
+                                     Sync                                      
++-----------------------------------------------------------------------------+
+| Outcome   | Rows | online-h… | user-gui… | release-… | referenc… | archives |
+|-----------+------+-----------+-----------+-----------+-----------+----------|
+| Synced    |    8 |         5 |         1 |         1 |         1 |        0 |
+| Already   |   65 |         8 |        16 |        16 |        16 |        9 |
+| current   |      |           |           |           |           |          |
+| No source |    4 |         4 |         0 |         0 |         0 |        0 |
+| tree      |      |           |           |           |           |          |
+| Skipped   |    0 |         0 |         0 |         0 |         0 |        0 |
+| Failed    |    0 |         0 |         0 |         0 |         0 |        0 |
++-----------------------------------------------------------------------------+
+3373 file(s), 68.8 MB copied.
+9 product metadata.yml, 34 version.yml written.
+Published merged (Stage 6b): tibco-iprocess-engine, 
+tibco-iprocess-technology-plug-ins.
+18187 redirect(s) in 12 published map(s), tree-rooted (no publish_base_url 
+set).
+! tibco-iprocess-server-objects-java@11.10.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-iprocess\tibco-iprocess-server-object
+s-java\11.10.0; run `docushift convert` first
+! tibco-iprocess-server-objects-java@11.9.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-iprocess\tibco-iprocess-server-object
+s-java\11.9.0; run `docushift convert` first
+! tibco-iprocess-server-objects-net@11.10.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-iprocess\tibco-iprocess-server-object
+s-net\11.10.0; run `docushift convert` first
+! tibco-iprocess-server-objects-net@11.9.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-iprocess\tibco-iprocess-server-object
+s-net\11.9.0; run `docushift convert` first

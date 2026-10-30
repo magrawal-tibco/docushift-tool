@@ -1,0 +1,22 @@
+Reframing 4 version(s)...
+  v tibco-business-studio-bpm-edition@5.7.0 1109 topic(s) -> 196 page(s)
+  v tibco-business-studio-bpm-edition@5.6.1 1104 topic(s) -> 196 page(s)
+  v tibco-business-studio-bpm-edition@5.6.0 1104 topic(s) -> 196 page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |        3 |
+| Already current             |        1 |
+| Not Flare or DITA (skipped) |        0 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+3317 topic(s) read into 588 page(s).
+Files: 11589 source doc -> 4556 converted -> 706 merged (84.5% fewer at the 
+merge, 93.9% end to end); 3750 file(s) standing in the measured merged tree(s).
+30 page(s) queued for editorial review:
+  tibco-business-studio-bpm-edition@5.7.0: 10 of 196 -- see review-queue.csv
+  tibco-business-studio-bpm-edition@5.6.1: 10 of 196 -- see review-queue.csv
+  tibco-business-studio-bpm-edition@5.6.0: 10 of 196 -- see review-queue.csv
+Findings: 3 warnings, 10 notes.

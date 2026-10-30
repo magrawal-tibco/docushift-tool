@@ -1,0 +1,58 @@
+Validating 22 published folder(s) in ..\tibco-docs-aem...
+  ! en-us-tib-flogo-userdocs/en-us/tibco-flogo/online-help/2-26-6 6 finding(s),
+0 error(s)
+  ! en-us-tib-flogo-userdocs/en-us/tibco-flogo/online-help/2-26-7 6 finding(s),
+0 error(s)
+  ! en-us-tib-flogo-userdocs/en-us/tibco-flogo/online-help/2-26-8 6 finding(s),
+0 error(s)
+  ! en-us-tib-flogo-userdocs/en-us/tibco-flogo/online-help/3-0-0 3 finding(s), 
+0 error(s)
+  ! en-us-tib-flogo-userdocs/en-us/tibco-flogo/online-help/3-0-1 3 finding(s), 
+0 error(s)
+                                   Validate                                    
++-----------------------------------------------------------------------------+
+|      Walked | Files | References | HTML | External | Tree-root… |   Anchors |
+|-------------+-------+------------+------+----------+------------+-----------|
+|          22 |  1237 |       4955 |  498 |      818 |          0 | 2818/2823 |
+|   folder(s) |       |            |      |          |            |           |
++-----------------------------------------------------------------------------+
+ANCHOR_MISSING 5 row(s), 5 occurrence(s)
+ANCHOR_WRONG_HEADING 10 row(s), 10 occurrence(s)
+LINK_TO_UNFILED 3 row(s), 9 occurrence(s)
+Findings: 15 warnings, 3 notes.
+exit tibco-flogo 0
+Validating 2 published folder(s) in ..\tibco-docs-aem...
+  ! 
+en-us-tib-fulfillment-userdocs/en-us/tibco-product-and-service-inventory-2-1-0/
+online-help/2-1-0 2 finding(s), 0 error(s)
+                                   Validate                                   
++----------------------------------------------------------------------------+
+|      Walked | Files | References | HTML | External | Tree-rooted | Anchors |
+|-------------+-------+------------+------+----------+-------------+---------|
+| 2 folder(s) |   100 |        462 |   11 |       20 |           0 | 262/262 |
++----------------------------------------------------------------------------+
+LINK_TO_UNFILED 1 row(s), 2 occurrence(s)
+Findings: 1 note.
+exit tibco-product-and-service-inventory-2-1-0 0
+Validating 4 published folder(s) in ..\tibco-docs-aem...
+  ! 
+en-us-tib-businessworks-userdocs/en-us/tibco-businessworks-formbuilder/online-h
+elp/5-3-2 1 finding(s), 0 error(s)
+                                   Validate                                   
++----------------------------------------------------------------------------+
+|      Walked | Files | References | HTML | External | Tree-rooted | Anchors |
+|-------------+-------+------------+------+----------+-------------+---------|
+| 4 folder(s) |   171 |        603 |   29 |        4 |           0 | 277/277 |
++----------------------------------------------------------------------------+
+ANCHOR_MISSING 1 row(s), 1 occurrence(s)
+Findings: 1 warning.
+exit tibco-businessworks-formbuilder 0
+Validating 3 published folder(s) in ..\tibco-docs-aem...
+                                   Validate                                   
++----------------------------------------------------------------------------+
+|      Walked | Files | References | HTML | External | Tree-rooted | Anchors |
+|-------------+-------+------------+------+----------+-------------+---------|
+| 3 folder(s) |     3 |          3 |    0 |        0 |           0 |     0/0 |
++----------------------------------------------------------------------------+
+Findings: none.
+exit tibco-business-studio-community-edition 0

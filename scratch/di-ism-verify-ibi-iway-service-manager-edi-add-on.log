@@ -1,0 +1,18 @@
+Verifying 2 version(s) (local only); 2 triage entr(ies); redirect sample 10, 
+seed 587325...
+  ok 
+en-us-ibi-di-ism-userdocs/en-us/ibi-iway-service-manager-edi-add-on/online-help
+/9-1-1: clean, 25 old page(s), 0 lost, 0 warning(s), 0 explained
+  ok 
+en-us-ibi-di-ism-userdocs/en-us/ibi-iway-service-manager-edi-add-on/online-help
+/9-3-0: clean, 25 old page(s), 0 lost, 0 warning(s), 0 explained
+                verify                 
+┌─────────────────────────────┬───────┐
+│ Finding                     │ Count │
+├─────────────────────────────┼───────┤
+│ VERIFY_REDIRECT_SAMPLED     │     2 │
+│ VERIFY_REDIRECT_UNCONVERTED │    22 │
+│ VERIFY_TOPIC_UNFILED        │     2 │
+└─────────────────────────────┴───────┘
+40 request(s) made; the rest came from cache/verify/.
+Index: C:\github\docushift-tool\reports\verify\INDEX.html

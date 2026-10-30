@@ -1,0 +1,19 @@
+Syncing 1 version(s) into C:\github\tibco-docs-aem...
+  v tibco-cloud-integration-flogo-payg@2.11.0 -> online-help/2-11-0 220 
+file(s), 7.1 MB
+                                     Sync                                      
++-----------------------------------------------------------------------------+
+| Outcome     | Rows | online-help | user-guides | release-in… | reference-d… |
+|-------------+------+-------------+-------------+-------------+--------------|
+| Synced      |    1 |           1 |           0 |           0 |            0 |
+| Already     |    3 |           0 |           1 |           1 |            1 |
+| current     |      |             |             |             |              |
+| No source   |    0 |           0 |           0 |           0 |            0 |
+| tree        |      |             |             |             |              |
+| Skipped     |    0 |           0 |           0 |           0 |            0 |
+| Failed      |    0 |           0 |           0 |           0 |            0 |
++-----------------------------------------------------------------------------+
+220 file(s), 7.1 MB copied.
+1 product metadata.yml, 4 version.yml written.
+Published merged (Stage 6b): tibco-cloud-integration-flogo-payg.
+266 redirect(s) in 1 published map(s), tree-rooted (no publish_base_url set).

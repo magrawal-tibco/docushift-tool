@@ -1,0 +1,21 @@
+Reframing 9 version(s)...
+  v tibco-mdm-studio@6.1.1 933 topic(s) -> 93 page(s)
+  v tibco-mdm-studio@6.0.0 913 topic(s) -> 92 page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |        2 |
+| Already current             |        6 |
+| Not Flare or DITA (skipped) |        1 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+1846 topic(s) read into 185 page(s).
+Files: 45211 source doc -> 12341 converted -> 2011 merged (83.7% fewer at the 
+merge, 95.6% end to end); 11390 file(s) standing in the measured merged 
+tree(s).
+71 page(s) queued for editorial review:
+  tibco-mdm-studio@6.1.1: 33 of 93 -- see review-queue.csv
+  tibco-mdm-studio@6.0.0: 38 of 92 -- see review-queue.csv
+Findings: 6 warnings, 10 notes.

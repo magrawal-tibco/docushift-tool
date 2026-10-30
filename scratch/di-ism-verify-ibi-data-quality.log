@@ -1,0 +1,16 @@
+Verifying 2 version(s) (local only); 2 triage entr(ies); redirect sample 10, 
+seed 326872...
+  ok en-us-ibi-di-ism-userdocs/en-us/ibi-data-quality/online-help/5-2-1: clean,
+39 old page(s), 0 lost, 0 warning(s), 0 explained
+  ok en-us-ibi-di-ism-userdocs/en-us/ibi-data-quality/online-help/5-2-2: clean,
+40 old page(s), 0 lost, 0 warning(s), 0 explained
+                verify                 
+┌─────────────────────────────┬───────┐
+│ Finding                     │ Count │
+├─────────────────────────────┼───────┤
+│ VERIFY_LIVE_UNCHECKABLE     │     1 │
+│ VERIFY_REDIRECT_SAMPLED     │     2 │
+│ VERIFY_REDIRECT_UNCONVERTED │    22 │
+└─────────────────────────────┴───────┘
+40 request(s) made; the rest came from cache/verify/.
+Index: C:\github\docushift-tool\reports\verify\INDEX.html

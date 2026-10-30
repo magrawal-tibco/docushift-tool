@@ -1,0 +1,86 @@
+Downloading 47 version(s) with 4 worker(s)...
+  x adapter-code-for-tibco-api-exchange-and-joomla@2.3.4
+  x adapter-code-for-tibco-api-exchange-and-joomla@2.3.3
+  v tibco-activematrix-adapter-for-database-tibco-business-studio@1.3.0 17.1 
+MiB
+  v tibco-activematrix-adapter-for-database-tibco-business-studio@1.2.0 18.4 
+MiB
+  v 
+tibco-activematrix-adapter-for-files-for-unix-win-tibco-business-studio@1.3.0 
+5.4 MiB
+  v 
+tibco-activematrix-adapter-for-files-for-unix-win-tibco-business-studio@1.2.0 
+4.7 MiB
+  v tibco-activematrix-adapter-for-ibm-i@6.4.0 6.8 MiB
+  v tibco-activematrix-adapter-for-ibm-i@6.3.0 6.1 MiB
+  v tibco-activematrix-adapter-for-ibm-i@6.2.2 6.1 MiB
+  v tibco-activematrix-adapter-for-ibm-i@6.2.1 2.5 MiB
+  v tibco-activematrix-adapter-for-ibm-i@6.2.0 5.4 MiB
+  v tibco-activematrix-adapter-for-ibm-i@6.1.0 8.9 MiB
+  x tibco-activematrix-adapter-for-ibm-i@6.0.0
+  v tibco-activematrix-adapter-for-jd-edwards-enterpriseone@6.1.0 5.1 MiB
+  v tibco-activematrix-adapter-for-jd-edwards-enterpriseone@6.0.0 4.2 MiB
+  x tibco-activematrix-adapter-for-jd-edwards-enterpriseone@5.3
+  v tibco-activematrix-adapter-for-kenan-bp@6.0.0 6.9 MiB
+  v tibco-activematrix-adapter-for-sap-tibco-business-studio@1.3.0 6.8 MiB
+  v tibco-activematrix-adapter-for-sap-tibco-business-studio@1.2.0 6.2 MiB
+  v tibco-activematrix-adapter-framework@1.6.1 6.2 MiB
+  v tibco-activematrix-adapter-framework@1.6.0 4.8 MiB
+  v tibco-activematrix-adapter-framework@1.4.2 4.9 MiB
+  v tibco-activematrix-adapter-framework@1.4.1 4.8 MiB
+  v tibco-activematrix-adapter-framework@1.4.0 4.9 MiB
+  v tibco-activematrix-adapter-framework@1.3.2 4.7 MiB
+  v tibco-activematrix-adapter-framework@1.3.1 4.7 MiB
+  v tibco-activematrix-adapter-framework@1.3.0 5.3 MiB
+  v tibco-activematrix-adapter-framework@1.2.0 4.9 MiB
+  v tibco-activematrix-adapter-framework@1.1.2 35.1 MiB
+  v tibco-activematrix-adapter-framework@1.1.1 34.9 MiB
+  v tibco-activematrix-adapter-framework@1.1.0 34.9 MiB
+  v tibco-activematrix-adapter-service-engine-for-files@6.0.0 5.8 MiB
+  v tibco-activematrix-adapter-service-engine-for-ibm-i@6.0.0 3.1 MiB
+  v tibco-activematrix-adapter-service-engine-for-lotus-notes@6.0.0 4.6 MiB
+  v tibco-activematrix-adapter-service-engine-for-peoplesoft@6.0.0 4.8 MiB
+  v tibco-activematrix-adapter-service-engine-for-sap@6.0.0 3.8 MiB
+  v tibco-activematrix-adapter-service-engine-for-siebel@6.0.0 3.5 MiB
+  v tibco-activematrix-adapter-service-engine-for-tuxedo@6.0.0 3.3 MiB
+  v tibco-activematrix-adapter-service-engine-for-websphere-mq@6.0.0 3.3 MiB
+  v tibco-adapter-for-files-ibm-i@5.0.1 2.2 MiB
+  v tibco-adapter-for-files-z-os-mvs@4.7 2.8 MiB
+  x tibco-adapter-for-infranet-5-2-0@5.2.0
+  v tibco-adapter-for-oracle-applications@5.4.1 14.9 MiB
+  v tibco-adapter-migration@1.8.1 1.6 MiB
+  v tibco-adapter-migration@1.8.0 1.6 MiB
+  v tibco-adapter-migration@1.7.0 1.0 MiB
+  v tibco-adapter-sdk@5.8.0 0.9 MiB
+           Download            
++-----------------------------+
+| Outcome          | Versions |
+|------------------+----------|
+| Downloaded       |       42 |
+| Already current  |        0 |
+| Skipped (manual) |        0 |
+| No ZIP endpoint  |        0 |
+| Failed           |        5 |
++-----------------------------+
+317.6 MiB written.
+! adapter-code-for-tibco-api-exchange-and-joomla@2.3.4: NotAPackage: 
+https://docs.tibco.com/pub/api-exchange-joomla-adapter/2.3.4/adapter-code-for-t
+ibco-api-exchange-and-joomla-2-3-4_documentation.zip did not return a readable 
+ZIP (most often an error or sign-in page served as HTTP 200)
+! adapter-code-for-tibco-api-exchange-and-joomla@2.3.3: NotAPackage: 
+https://docs.tibco.com/pub/api-exchange-joomla-adapter/2.3.3/adapter-code-for-t
+ibco-api-exchange-and-joomla-2-3-3_documentation.zip did not return a readable 
+ZIP (most often an error or sign-in page served as HTTP 200)
+! tibco-activematrix-adapter-for-ibm-i@6.0.0: NotAPackage: 
+https://docs.tibco.com/pub/activematrix-adapter-for-ibm-i/6.0.0-march-2010/tibc
+o-activematrix-adapter-for-ibm-i-6-0-0_documentation.zip did not return a 
+readable ZIP (most often an error or sign-in page served as HTTP 200)
+! tibco-activematrix-adapter-for-jd-edwards-enterpriseone@5.3: NotAPackage: 
+https://docs.tibco.com/pub/adapter-for-jdedwards-oneworld-xe/5.3.0-december-200
+7/tibco-activematrix-adapter-for-jd-edwards-enterpriseone-5-3_documentation.zip
+ did not return a readable ZIP (most often an error or sign-in page served as 
+HTTP 200)
+! tibco-adapter-for-infranet-5-2-0@5.2.0: NotAPackage: 
+https://docs.tibco.com/pub/adapter-for-infranet/5.2.0-june-2007/tibco-adapter-f
+or-infranet-5-2-0-5-2-0_documentation.zip did not return a readable ZIP (most 
+often an error or sign-in page served as HTTP 200)

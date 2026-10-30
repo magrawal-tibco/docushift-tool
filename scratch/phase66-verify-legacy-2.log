@@ -1,0 +1,30 @@
+Verifying 23 version(s) (local only); 4 triage entr(ies); redirect sample 10, seed 41120...
+  ok en-us-ibi-legacy-userdocs/en-us/ibi-omni-gen/reference-documents/4-3-0: clean, 4 old page(s), 0 lost, 0 warning(s), 0 explained
+  ok en-us-ibi-legacy-userdocs/en-us/ibi-omni-gen-mdm/reference-documents/4-3-0: clean, 4 old page(s), 0 lost, 0 warning(s), 0 explained
+  ok en-us-ibi-legacy-userdocs/en-us/ibi-omni-healthdata/reference-documents/4-3-0: clean, 4 old page(s), 0 lost, 0 warning(s), 0 explained
+  ok en-us-ibi-legacy-userdocs/en-us/ibi-omni-healthdata-business-release/reference-documents/2023-1-0: clean, 3 old page(s), 0 lost, 0 warning(s), 0 explained
+  ok en-us-ibi-legacy-userdocs/en-us/ibi-omni-healthdata-business-release/reference-documents/2023-2-0: clean, 3 old page(s), 0 lost, 0 warning(s), 0 explained
+  ok en-us-ibi-legacy-userdocs/en-us/ibi-omni-healthdata-business-release/reference-documents/2023-3-0: clean, 3 old page(s), 0 lost, 0 warning(s), 0 explained
+  ok en-us-ibi-legacy-userdocs/en-us/ibi-omni-insurance/reference-documents/4-3-0: clean, 3 old page(s), 0 lost, 0 warning(s), 0 explained
+  - en-us-ibi-legacy-userdocs/en-us/ibi-web-query-for-ibm-i/reference-documents/8207-28-09: skipped, extracted package not on disk
+  - en-us-ibi-legacy-userdocs/en-us/ibi-web-query-for-ibm-i/reference-documents/8207-28-11: skipped, extracted package not on disk
+  - en-us-ibi-legacy-userdocs/en-us/ibi-web-query-for-ibm-i/reference-documents/8207-28-12: skipped, extracted package not on disk
+  - en-us-ibi-legacy-userdocs/en-us/ibi-web-query-for-ibm-i/reference-documents/8207-28-13: skipped, extracted package not on disk
+  - en-us-ibi-legacy-userdocs/en-us/ibi-web-query-for-ibm-i/reference-documents/8207-28-14: skipped, extracted package not on disk
+  - en-us-ibi-legacy-userdocs/en-us/ibi-web-query-for-ibm-i/reference-documents/9-0-1: skipped, extracted package not on disk
+  - en-us-ibi-legacy-userdocs/en-us/ibi-web-query-for-ibm-i/reference-documents/9-0-2: skipped, extracted package not on disk
+  - en-us-ibi-legacy-userdocs/en-us/ibi-web-query-for-ibm-i/reference-documents/9-0-3: skipped, extracted package not on disk
+  - en-us-ibi-legacy-userdocs/en-us/ibi-web-query-for-ibm-i/reference-documents/9-0-4: skipped, extracted package not on disk
+  ok en-us-ibi-legacy-userdocs/en-us/ibi-web-query-for-ibm-i/reference-documents/9-1-0: clean, 3 old page(s), 0 lost, 0 warning(s), 0 explained
+  ok en-us-ibi-legacy-userdocs/en-us/ibi-web-query-for-ibm-i/reference-documents/9-1-1: clean, 3 old page(s), 0 lost, 0 warning(s), 0 explained
+  ok en-us-ibi-legacy-userdocs/en-us/ibi-web-query-for-ibm-i/reference-documents/9-1-2: clean, 3 old page(s), 0 lost, 0 warning(s), 0 explained
+  ok en-us-ibi-legacy-userdocs/en-us/ibi-web-query-for-ibm-i/reference-documents/9-2-0: clean, 3 old page(s), 0 lost, 0 warning(s), 0 explained
+  ok en-us-ibi-legacy-userdocs/en-us/ibi-web-query-for-ibm-i/reference-documents/9-2-1: clean, 3 old page(s), 0 lost, 0 warning(s), 0 explained
+  ok en-us-ibi-legacy-userdocs/en-us/tibco-iway-business-activity-monitor/reference-documents/8-0-5: clean, 6 old page(s), 0 lost, 0 warning(s), 0 explained
+  ok en-us-ibi-legacy-userdocs/en-us/tibco-iway-trading-partner-manager/reference-documents/8-0-5: clean, 5 old page(s), 0 lost, 0 warning(s), 0 explained
+      verify       
++-----------------+
+| Finding | Count |
+|---------+-------|
++-----------------+
+Index: C:\github\docushift-tool\reports\verify\INDEX.html

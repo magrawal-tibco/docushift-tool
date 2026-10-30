@@ -1,0 +1,23 @@
+Syncing 4 version(s) into ..\tibco-docs-aem...
+  v tibco-business-studio-bpm-edition@5.7.0 -> online-help/5-7-0 920 file(s), 
+12.6 MB
+  v tibco-business-studio-bpm-edition@5.6.1 -> online-help/5-6-1 909 file(s), 
+11.9 MB
+  v tibco-business-studio-bpm-edition@5.6.0 -> online-help/5-6-0 909 file(s), 
+11.9 MB
+                                     Sync                                      
++-----------------------------------------------------------------------------+
+| Outcome   | Rows | online-h… | user-gui… | release-… | referenc… | archives |
+|-----------+------+-----------+-----------+-----------+-----------+----------|
+| Synced    |    3 |         3 |         0 |         0 |         0 |        0 |
+| Already   |   14 |         1 |         4 |         4 |         4 |        1 |
+| current   |      |           |           |           |           |          |
+| No source |    0 |         0 |         0 |         0 |         0 |        0 |
+| tree      |      |           |           |           |           |          |
+| Skipped   |    0 |         0 |         0 |         0 |         0 |        0 |
+| Failed    |    0 |         0 |         0 |         0 |         0 |        0 |
++-----------------------------------------------------------------------------+
+2738 file(s), 36.4 MB copied.
+1 product metadata.yml, 4 version.yml written.
+Published merged (Stage 6b): tibco-business-studio-bpm-edition.
+9049 redirect(s) in 2 published map(s), tree-rooted (no publish_base_url set).

@@ -1,0 +1,27 @@
+== spotfire-data-science-author
+Findings: none.
+== spotfire-data-science-for-life-science-author
+Findings: none.
+== spotfire-data-science-for-life-science-operations
+Findings: none.
+== spotfire-data-science-operations
+Findings: none.
+== spotfire-data-science-workbench
+-help/14-1-0 544 finding(s), 0 error(s)
+-help/14-4-0 544 finding(s), 0 error(s)
+Findings: 6 warnings, 2 notes.
+== spotfire-statistica
+544 finding(s), 0 error(s)
+544 finding(s), 0 error(s)
+Findings: 6 warnings, 2 notes.
+== spotfire-statistica-all-servers
+Findings: none.
+== spotfire-statistica-integration
+-help/14-5-0 1 finding(s), 0 error(s)
+Findings: 1 warning.
+== tibco-data-science-for-tibco-spotfire-analyst
+Findings: none.
+== tibco-data-science-service-for-tibco-spotfire
+Findings: none.
+== tibco-statistica-language-packs
+Findings: none.

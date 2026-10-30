@@ -1,0 +1,70 @@
+Converting 7 version(s)...
+  v tibco-hawk-database-adapter@6.2.1 199 topic(s), 42 asset(s), 1 unit(s), 207
+nav node(s), 4 generated -> 246 file(s)
+C:\github\docushift-tool\src\docushift\transforms\markdown.py:112: XMLParsedAsHTMLWarning: It looks like you're using an HTML parser to parse an XML document.
+
+Assuming this really is an XML document, what you're doing might work, but you should know that using an XML parser will be more reliable. To parse this document as XML, make sure you have the Python package 'lxml' installed, and pass the keyword argument `features="xml"` into the BeautifulSoup constructor.
+
+If you want or need to use an HTML parser on this document, you can make this warning go away by filtering it. To do that, run this code before calling the BeautifulSoup constructor:
+
+    from bs4 import XMLParsedAsHTMLWarning
+    import warnings
+
+    warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+  return BeautifulSoup(_CDATA.sub(_unwrap_cdata, text), PARSER)
+  v tibco-hawk-database-adapter@6.2.0 168 topic(s), 18 asset(s), 3 unit(s), 226
+nav node(s), 5 generated -> 193 file(s)
+  v tibco-hawk-microagent-for-tibco-activematrix-businessworks-6@6.8.0 57 
+topic(s), 2 asset(s), 1 unit(s), 58 nav node(s), 1 generated -> 62 file(s)
+  v tibco-hawk-microagent-for-tibco-activematrix-businessworks-6@6.7.2 55 
+topic(s), 2 asset(s), 1 unit(s), 56 nav node(s), 1 generated -> 60 file(s)
+  v tibco-hawk-microagent-for-tibco-businessworks-container-edition@2.2.0 14 
+topic(s), 0 asset(s), 1 unit(s), 15 nav node(s), 1 generated -> 17 file(s)
+  v tibco-operational-intelligence-hawk-redtail@7.5.0 757 topic(s), 137 
+asset(s), 1 unit(s), 790 nav node(s), 13 generated -> 909 file(s)
+  v tibco-operational-intelligence-hawk-redtail@6.3.1 1067 topic(s), 251 
+asset(s), 1 unit(s), 1080 nav node(s), 10 generated -> 1331 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        7 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+2317 topic(s), 452 asset(s) written.
+2818 file(s) standing in the measured output tree(s).
+tibco-hawk-database-adapter@6.2.1: 42 resolved, 0 skin, 8 escaped, 0 dangling, 
+0 case-mismatch, 53 orphan (1.4 MB)
+tibco-hawk-database-adapter@6.2.1: skipped 3 generated-directory, 1 
+placeholder-template, 2 runtime-stub
+tibco-hawk-database-adapter@6.2.0: 21 resolved, 9 skin, 0 escaped, 0 dangling, 
+0 case-mismatch, 43 orphan (0.6 MB)
+tibco-hawk-database-adapter@6.2.0: skipped 3 front-matter, 1 generated-list, 6 
+runtime-stub
+tibco-hawk-microagent-for-tibco-activematrix-businessworks-6@6.8.0: 2 resolved,
+0 skin, 6 escaped, 0 dangling, 0 case-mismatch, 73 orphan (2.9 MB)
+tibco-hawk-microagent-for-tibco-activematrix-businessworks-6@6.8.0: skipped 4 
+generated-directory, 1 placeholder-template, 2 runtime-stub
+tibco-hawk-microagent-for-tibco-activematrix-businessworks-6@6.7.2: 2 resolved,
+0 skin, 6 escaped, 0 dangling, 0 case-mismatch, 40 orphan (1.4 MB)
+tibco-hawk-microagent-for-tibco-activematrix-businessworks-6@6.7.2: skipped 3 
+generated-directory, 1 placeholder-template, 2 runtime-stub
+tibco-hawk-microagent-for-tibco-businessworks-container-edition@2.2.0: 0 
+resolved, 0 skin, 4 escaped, 0 dangling, 0 case-mismatch, 55 orphan (1.4 MB)
+tibco-hawk-microagent-for-tibco-businessworks-container-edition@2.2.0: skipped 
+3 generated-directory, 1 placeholder-template, 2 runtime-stub
+tibco-operational-intelligence-hawk-redtail@7.5.0: 168 resolved, 0 skin, 17 
+escaped, 0 dangling, 0 case-mismatch, 214 orphan (17.5 MB)
+tibco-operational-intelligence-hawk-redtail@7.5.0: skipped 3 
+generated-directory, 2 runtime-stub
+tibco-operational-intelligence-hawk-redtail@6.3.1: 260 resolved, 0 skin, 14 
+escaped, 0 dangling, 0 case-mismatch, 127 orphan (7.0 MB)
+tibco-operational-intelligence-hawk-redtail@6.3.1: CSH 13 resolved, 0 
+unresolved, 0 ambiguous
+tibco-operational-intelligence-hawk-redtail@6.3.1: skipped 3 
+generated-directory, 1 placeholder-template, 2 runtime-stub
+Findings: 14 warnings, 35 notes.

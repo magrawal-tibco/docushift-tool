@@ -1,0 +1,20 @@
+Reframing 2 version(s)...
+  v tibco-activematrix-bpm@4.3.0 8263 topic(s) -> 1347 page(s)
+  v tibco-activematrix-bpm@4.2.0 7414 topic(s) -> 1286 page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |        2 |
+| Already current             |        0 |
+| Not Flare or DITA (skipped) |        0 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+15677 topic(s) read into 2633 page(s).
+Files: 105315 source doc -> 15410 converted -> 2633 merged (82.9% fewer at the 
+merge, 97.5% end to end); 9962 file(s) standing in the measured merged tree(s).
+463 page(s) queued for editorial review:
+  tibco-activematrix-bpm@4.3.0: 241 of 1347 -- see review-queue.csv
+  tibco-activematrix-bpm@4.2.0: 222 of 1286 -- see review-queue.csv
+Findings: 6 warnings, 7 notes.

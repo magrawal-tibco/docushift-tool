@@ -1,0 +1,93 @@
+Extracting 19 version(s)...
+  v tibco-activematrix-bpm@4.3.0 28803 file(s), dita, 4 root(s)
+  x tibco-activematrix-bpm@4.2.0
+  v tibco-bpm-enterprise@5.7.0 6616 file(s), flare, 1 root(s)
+  v tibco-bpm-enterprise@5.6.1 5979 file(s), flare, 1 root(s)
+  v tibco-bpm-enterprise@5.6.0 6482 file(s), flare, 1 root(s)
+  v tibco-bpm-enterprise@4.3.5 9140 file(s), flare, 1 root(s)
+  v tibco-bpm-suite@4.3.2 4 file(s), auto
+  v tibco-bpm-suite@4.3.1 4 file(s), auto
+  v tibco-bpm-suite@4.3.0 4 file(s), auto
+  v tibco-bpm-suite@4.2.0 3 file(s), auto
+  v tibco-business-studio-analyst-edition@4.3.0 6 file(s), auto
+  v tibco-business-studio-analyst-edition@4.2.0 6 file(s), auto
+  v tibco-business-studio-bpm-edition@5.7.0 2811 file(s), flare, 1 root(s)
+  v tibco-business-studio-bpm-edition@5.6.1 2793 file(s), flare, 1 root(s)
+  v tibco-business-studio-bpm-edition@5.6.0 2792 file(s), flare, 1 root(s)
+  v tibco-business-studio-bpm-edition@4.3.5 3193 file(s), flare, 1 root(s)
+                Extract                
++-------------------------------------+
+| Outcome                  | Versions |
+|--------------------------+----------|
+| Extracted                |       15 |
+| Already current          |        2 |
+| Measured from cache      |        0 |
+| No package               |        1 |
+| Refused (unsafe archive) |        1 |
+| Failed                   |        0 |
++-------------------------------------+
+68636 file(s) written.
+       Engines       
++-------------------+
+| Engine | Versions |
+|--------+----------|
+| flare  |       10 |
+| auto   |        6 |
+| dita   |        1 |
++-------------------+
+? tibco-bpm-suite@4.3.2: engine undetected (`auto`)
+? tibco-bpm-suite@4.3.1: engine undetected (`auto`)
+? tibco-bpm-suite@4.3.0: engine undetected (`auto`)
+? tibco-bpm-suite@4.2.0: engine undetected (`auto`)
+? tibco-business-studio-analyst-edition@4.3.0: engine undetected (`auto`)
+? tibco-business-studio-analyst-edition@4.2.0: engine undetected (`auto`)
+CSH: 12 source(s), 0 identifier(s).
+                     Assets                      
++-----------------------------------------------+
+| Category | Destination     | Files |     Size |
+|----------+-----------------+-------+----------|
+| topic    | api-reference   |  3572 | 317.0 MB |
+| image    | api-reference   |     7 |   0.7 MB |
+| document | api-reference   |     1 |   0.0 MB |
+| other    | api-reference   |    24 |   0.3 MB |
+| topic    | output-root     | 24547 | 409.5 MB |
+| image    | output-root     | 21733 | 354.1 MB |
+| document | output-root     |     5 |   0.3 MB |
+| archive  | output-root     |     5 |   0.5 MB |
+| skin     | output-root     |  2859 | 127.5 MB |
+| other    | output-root     |   137 |  36.5 MB |
+| document | document-router |   182 | 407.0 MB |
+| other    | document-router |     1 |   0.0 MB |
+| topic    | unclaimed       |    31 |   0.1 MB |
+| image    | unclaimed       | 13634 | 176.7 MB |
+| media    | unclaimed       |     6 |  10.2 MB |
+| document | unclaimed       |     9 |   0.0 MB |
+| other    | unclaimed       |  1883 | 189.5 MB |
++-----------------------------------------------+
+? tibco-bpm-enterprise@5.7.0: 5426 unclaimed file(s) in components-api/ (129.5 
+MB) -- no destination
+? tibco-bpm-enterprise@5.6.1: 4816 unclaimed file(s) in components-api/ (121.4 
+MB) -- no destination
+? tibco-bpm-enterprise@5.6.0: 5321 unclaimed file(s) in components-api/ (125.6 
+MB) -- no destination
+? tibco-activematrix-bpm@4.3.0: 
+tibco-activematrix-bpm-4-3-0/bpmhelp/apischemas/ 8233 file(s), no known 
+generator marker
+? tibco-activematrix-bpm@4.3.0: 
+tibco-activematrix-bpm-4-3-0/bpmhelp/public_api/ 2 file(s), no known generator 
+marker
+? tibco-bpm-enterprise@5.7.0: tibco-bpm-enterprise-5-7-0/components-api/ 5426 
+file(s), no known generator marker
+? tibco-bpm-enterprise@5.6.1: tibco-bpm-enterprise-5-6-1/components-api/ 4816 
+file(s), no known generator marker
+? tibco-bpm-enterprise@5.6.0: tibco-bpm-enterprise-5-6-0/components-api/ 5321 
+file(s), no known generator marker
+! tibco-business-studio-community-edition@4.2.0: no package at 
+C:\github\docushift-tool\families\en-us-tib-bpm\downloads\tibco-business-studio
+-community-edition-4.2.0.zip; run `docushift download` first
+x tibco-activematrix-bpm@4.2.0: tibco-activematrix-bpm-4.2.0.zip holds two 
+members Windows would write to one file: 
+'tibco-activematrix-bpm-4-2-0/bpmhelp/properties/RESTServiceConfig.properties' 
+and 
+'tibco-activematrix-bpm-4-2-0/bpmhelp/properties/restserviceconfig.properties'
+Recorded 9 notes -- `docushift report --run 885`.

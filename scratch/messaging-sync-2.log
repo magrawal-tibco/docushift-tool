@@ -1,0 +1,28 @@
+Syncing 10 version(s) into ..\tibco-docs-aem...
+                                     Sync                                      
++-----------------------------------------------------------------------------+
+| Outcome | Rows | online… | user-g… | releas… | refere… | api-ref… | archiv… |
+|---------+------+---------+---------+---------+---------+----------+---------|
+| Synced  |    0 |       0 |       0 |       0 |       0 |        0 |       0 |
+| Already |   37 |       6 |       6 |       9 |      10 |        1 |       5 |
+| current |      |         |         |         |         |          |         |
+| No      |    4 |       4 |       0 |       0 |       0 |        0 |       0 |
+| source  |      |         |         |         |         |          |         |
+| tree    |      |         |         |         |         |          |         |
+| Skipped |    0 |       0 |       0 |       0 |       0 |        0 |       0 |
+| Failed  |    0 |       0 |       0 |       0 |       0 |        0 |       0 |
++-----------------------------------------------------------------------------+
+7 product metadata.yml, 19 version.yml written.
+10135 redirect(s) in 6 published map(s), tree-rooted (no publish_base_url set).
+! tibco-gems@1.1.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-messaging\tibco-gems\1.1.0; run 
+`docushift convert` first
+! tibco-graphical-rendezvous@1.1.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-messaging\tibco-graphical-rendezvous\
+1.1.0; run `docushift convert` first
+! tibco-messaging@1.31.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-messaging\tibco-messaging\1.31.0; run
+`docushift convert` first
+! tibco-messaging-enterprise-edition@3.4.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-messaging\tibco-messaging-enterprise-
+edition\3.4.0; run `docushift convert` first

@@ -1,0 +1,21 @@
+Downloading 6 version(s) with 4 worker(s)...
+  x tibco-flogo@3.0.1
+  v tibco-flogo@3.0.0 59.1 MiB
+  v tibco-flogo@2.26.8 78.4 MiB
+  v tibco-flogo@2.26.7 78.2 MiB
+  v tibco-flogo@2.26.6 78.0 MiB
+           Download            
++-----------------------------+
+| Outcome          | Versions |
+|------------------+----------|
+| Downloaded       |        4 |
+| Already current  |        1 |
+| Skipped (manual) |        0 |
+| No ZIP endpoint  |        0 |
+| Failed           |        1 |
++-----------------------------+
+293.6 MiB written.
+! tibco-flogo@3.0.1: NotAPackage: 
+https://docs.tibco.com/pub/flogo/3.0.1/tibco-flogo-3-0-1_documentation.zip did 
+not return a readable ZIP (most often an error or sign-in page served as HTTP 
+200)

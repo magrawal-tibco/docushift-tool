@@ -1,0 +1,58 @@
+Downloading 42 version(s) with 4 worker(s)...
+  v spotfire-data-science-author@2.2.0 4.1 MiB
+  v spotfire-data-science-author@2.1.0 4.1 MiB
+  v spotfire-data-science-author@2.0.0 4.1 MiB
+  v spotfire-data-science-author@1.5.0 4.1 MiB
+  v spotfire-data-science-author@1.4.0 0.6 MiB
+  v spotfire-data-science-for-life-science-author@2.2.0 4.1 MiB
+  v spotfire-data-science-for-life-science-author@2.1.0 4.1 MiB
+  v spotfire-data-science-for-life-science-author@2.0.0 4.1 MiB
+  v spotfire-data-science-for-life-science-author@1.5.0 4.1 MiB
+  v spotfire-data-science-for-life-science-author@1.4.0 0.6 MiB
+  v spotfire-data-science-for-life-science-operations@2.2.0 4.1 MiB
+  v spotfire-data-science-for-life-science-operations@2.1.0 4.1 MiB
+  v spotfire-data-science-for-life-science-operations@2.0.0 4.1 MiB
+  v spotfire-data-science-for-life-science-operations@1.5.0 4.1 MiB
+  v spotfire-data-science-for-life-science-operations@1.4.0 0.6 MiB
+  v spotfire-data-science-operations@2.2.0 4.1 MiB
+  v spotfire-data-science-operations@2.1.0 4.1 MiB
+  v spotfire-data-science-operations@2.0.0 4.1 MiB
+  v spotfire-data-science-operations@1.5.0 4.1 MiB
+  v spotfire-data-science-operations@1.4.0 0.6 MiB
+  v spotfire-data-science-workbench@14.4.0 225.2 MiB
+  v spotfire-data-science-workbench@14.3.0 225.3 MiB
+  v spotfire-data-science-workbench@14.1.0 231.3 MiB
+  v spotfire-statistica@14.4.0 224.6 MiB
+  v spotfire-statistica@14.3.0 224.7 MiB
+  v spotfire-statistica@14.1.0 230.7 MiB
+  v spotfire-statistica-all-servers@14.4.0 33.3 MiB
+  v spotfire-statistica-all-servers@14.3.0 33.5 MiB
+  v spotfire-statistica-all-servers@14.2.0 35.4 MiB
+  v spotfire-statistica-all-servers@14.1.0 42.5 MiB
+  v spotfire-statistica-estore-edition@14.1.0 0.7 MiB
+  v spotfire-statistica-integration@14.5.0 13.2 MiB
+  v spotfire-statistica-integration@14.4.0 11.3 MiB
+  v spotfire-statistica-integration@14.3.0 9.2 MiB
+  v spotfire-statistica-integration@14.2.0 9.6 MiB
+  x spotfire-statistics-services@Services
+  v spotfire-statistics-services@14.0.0 3.6 MiB
+  v tibco-data-science-for-tibco-spotfire-analyst@14.1.0 26.4 MiB
+  v tibco-data-science-service-for-tibco-spotfire@14.1.0 23.3 MiB
+  v tibco-statistica-language-packs@14.1.0 0.1 MiB
+  v tibco-statistica-language-packs@14.0.0 0.1 MiB
+  v tibco-statistica-language-packs@13.5.0 0.0 MiB
+           Download            
++-----------------------------+
+| Outcome          | Versions |
+|------------------+----------|
+| Downloaded       |       41 |
+| Already current  |        0 |
+| Skipped (manual) |        0 |
+| No ZIP endpoint  |        0 |
+| Failed           |        1 |
++-----------------------------+
+1672.1 MiB written.
+! spotfire-statistics-services@Services: NotAPackage: 
+https://docs.tibco.com/pub/sf-statsvcs/Services/spotfire-statistics-services-Se
+rvices_documentation.zip did not return a readable ZIP (most often an error or 
+sign-in page served as HTTP 200)

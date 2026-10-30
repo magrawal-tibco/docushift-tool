@@ -1,0 +1,11 @@
+Verifying 4 version(s) (local only); 2 triage entr(ies); redirect sample 10, seed 466885...
+  - loc-ibi-webfocus-userdocs/fr-fr/ibi-webfocus-client/online-help/9-3-5: skipped, extracted package not on disk
+  - loc-ibi-webfocus-userdocs/fr-fr/ibi-webfocus-client/online-help/9-3-6: skipped, extracted package not on disk
+  - loc-ibi-webfocus-userdocs/fr-fr/ibi-webfocus-client/online-help/9-3-7: skipped, extracted package not on disk
+  - loc-ibi-webfocus-userdocs/fr-fr/ibi-webfocus-client/online-help/9-3-8: skipped, extracted package not on disk
+      verify       
++-----------------+
+| Finding | Count |
+|---------+-------|
++-----------------+
+Index: C:\github\docushift-tool\reports\verify\INDEX.html

@@ -1,0 +1,106 @@
+Extracting 25 version(s)...
+  v tibco-gemini-powered-by-apache-cassandra@5.0.2 285 file(s), flare, 1 
+root(s)
+  v tibco-gems@1.1.0 36 file(s), docusaurus
+  v tibco-graphical-rendezvous@1.1.0 42 file(s), docusaurus
+  v tibco-messaging@1.31.0 4 file(s), auto
+  v tibco-messaging@1.30.0 4 file(s), auto
+  v tibco-messaging@1.27.0 4 file(s), auto
+  v tibco-messaging@1.26.0 4 file(s), auto
+  v tibco-messaging@1.25.0 4 file(s), auto
+  v tibco-messaging@1.24.0 4 file(s), auto
+  v tibco-messaging@1.22.0 4 file(s), auto
+  v tibco-messaging@1.21.0 4 file(s), auto
+  v 
+tibco-messaging-eclipse-mosquitto-distribution-bridge-enterprise-edition@2.0.7 
+58 file(s), dita, 1 root(s)
+  v 
+tibco-messaging-eclipse-mosquitto-distribution-core-enterprise-edition@2.0.7 58
+file(s), dita, 1 root(s)
+  v tibco-messaging-enterprise-edition@3.4.0 1 file(s), auto
+  v tibco-messaging-enterprise-edition@3.3.0 1 file(s), auto
+  v tibco-messaging-manager@4.0.0 356 file(s), flare, 1 root(s)
+  v tibco-messaging-manager@3.1.1 403 file(s), flare, 1 root(s)
+  v tibco-messaging-schema-repository-for-apache-kafka-enterprise-edition@2.1.0
+409 file(s), flare, 1 root(s)
+  v tibco-messaging-schema-repository-for-apache-kafka-enterprise-edition@2.0.0
+389 file(s), flare, 1 root(s)
+  v tibco-rendezvous@9.0.0 2639 file(s), flare, 1 root(s)
+  v tibco-rendezvous@8.8.1 2633 file(s), flare, 1 root(s)
+  v tibco-rendezvous@8.8.0 2634 file(s), flare, 1 root(s)
+  v tibco-rendezvous-network-service@2.2.0 299 file(s), flare, 1 root(s)
+  v tibco-rendezvous-network-service@2.1.0 303 file(s), flare, 1 root(s)
+                Extract                
++-------------------------------------+
+| Outcome                  | Versions |
+|--------------------------+----------|
+| Extracted                |       24 |
+| Already current          |        0 |
+| Measured from cache      |        0 |
+| No package               |        1 |
+| Refused (unsafe archive) |        0 |
+| Failed                   |        0 |
++-------------------------------------+
+10578 file(s) written.
+         Engines         
++-----------------------+
+| Engine     | Versions |
+|------------+----------|
+| auto       |       10 |
+| flare      |       10 |
+| dita       |        2 |
+| docusaurus |        2 |
++-----------------------+
+? tibco-messaging@1.31.0: engine undetected (`auto`)
+? tibco-messaging@1.30.0: engine undetected (`auto`)
+? tibco-messaging@1.27.0: engine undetected (`auto`)
+? tibco-messaging@1.26.0: engine undetected (`auto`)
+? tibco-messaging@1.25.0: engine undetected (`auto`)
+? tibco-messaging@1.24.0: engine undetected (`auto`)
+? tibco-messaging@1.22.0: engine undetected (`auto`)
+? tibco-messaging@1.21.0: engine undetected (`auto`)
+? tibco-messaging-enterprise-edition@3.4.0: engine undetected (`auto`)
+? tibco-messaging-enterprise-edition@3.3.0: engine undetected (`auto`)
+! tibco-gems@1.1.0: docusaurus is identified but has no converter
+! tibco-graphical-rendezvous@1.1.0: docusaurus is identified but has no 
+converter
+CSH: 10 source(s), 360 identifier(s).
+                        Assets                        
++----------------------------------------------------+
+| Category      | Destination     | Files |     Size |
+|---------------+-----------------+-------+----------|
+| topic         | api-reference   |   108 |   1.5 MB |
+| image         | api-reference   |     2 |   0.0 MB |
+| other         | api-reference   |    21 |   0.2 MB |
+| topic         | output-root     |  5431 | 133.6 MB |
+| image         | output-root     |  1210 |  47.1 MB |
+| source-format | output-root     |    10 |   0.7 MB |
+| skin          | output-root     |  3118 | 103.9 MB |
+| other         | output-root     |   451 |  32.1 MB |
+| document      | document-router |   148 | 124.6 MB |
+| topic         | unclaimed       |    14 |   0.3 MB |
+| image         | unclaimed       |    14 |   2.9 MB |
+| other         | unclaimed       |    51 |   5.6 MB |
++----------------------------------------------------+
+? tibco-gems@1.1.0: 32 unclaimed file(s) in html/ (3.3 MB) -- no destination
+? tibco-graphical-rendezvous@1.1.0: 38 unclaimed file(s) in html/ (2.4 MB) -- 
+no destination
+? tibco-rendezvous@9.0.0: 3 unclaimed file(s) in rv/ (1.0 MB) -- no destination
+? tibco-rendezvous@8.8.1: 3 unclaimed file(s) in rv/ (1.0 MB) -- no destination
+? tibco-rendezvous@8.8.0: 3 unclaimed file(s) in rv/ (1.0 MB) -- no destination
+? tibco-messaging-schema-repository-for-apache-kafka-enterprise-edition@2.1.0: 
+tibco-messaging-schema-repository-for-apache-kafka-enterprise-edition-2-1-0/htm
+l/api-docs/ 85 file(s), no known generator marker
+? tibco-messaging-schema-repository-for-apache-kafka-enterprise-edition@2.0.0: 
+tibco-messaging-schema-repository-for-apache-kafka-enterprise-edition-2-0-0/htm
+l/api-docs/ 48 file(s), no known generator marker
+? tibco-rendezvous@9.0.0: tibco-rendezvous-9-0-0/html/API-reference/ 6 file(s),
+no known generator marker
+? tibco-rendezvous@8.8.1: tibco-rendezvous-8-8-1/html/API-reference/ 3 file(s),
+no known generator marker
+? tibco-rendezvous@8.8.0: tibco-rendezvous-8-8-0/html/API-reference/ 3 file(s),
+no known generator marker
+! tibco-messaging@1.23.0: no package at 
+C:\github\docushift-tool\families\en-us-tib-messaging\downloads\tibco-messaging
+-1.23.0.zip; run `docushift download` first
+Recorded 7 notes -- `docushift report --run 730`.

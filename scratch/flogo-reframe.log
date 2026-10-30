@@ -1,0 +1,28 @@
+Reframing 6 version(s)...
+  v tibco-flogo@3.0.0 790 topic(s) -> 206 page(s)
+  v tibco-flogo@2.26.8 822 topic(s) -> 257 page(s)
+  v tibco-flogo@2.26.7 812 topic(s) -> 258 page(s)
+  v tibco-flogo@2.26.6 805 topic(s) -> 250 page(s)
+  v tibco-flogo-extension-for-visual-studio-code@1.3.5 624 topic(s) -> 158 
+page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |        5 |
+| Already current             |        0 |
+| Not Flare or DITA (skipped) |        1 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+3853 topic(s) read into 1129 page(s).
+Files: 9389 source doc -> 4007 converted -> 1129 merged (71.8% fewer at the 
+merge, 88.0% end to end); 2205 file(s) standing in the measured merged tree(s).
+250 page(s) queued for editorial review:
+  tibco-flogo@3.0.0: 29 of 206 -- see review-queue.csv
+  tibco-flogo@2.26.8: 67 of 257 -- see review-queue.csv
+  tibco-flogo@2.26.7: 67 of 258 -- see review-queue.csv
+  tibco-flogo@2.26.6: 67 of 250 -- see review-queue.csv
+  tibco-flogo-extension-for-visual-studio-code@1.3.5: 20 of 158 -- see 
+review-queue.csv
+Findings: 5 warnings, 9 notes.

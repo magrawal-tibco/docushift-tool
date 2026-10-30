@@ -1,0 +1,34 @@
+Verifying 7 version(s) (ibi: https://stg-docs.ibi.com); 2 triage entr(ies); 
+redirect sample 10, seed 979876...
+  x en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-installer/online-help/9-3-0:
+lost, 11 old page(s), 7 lost, 0 warning(s), 0 explained
+    R001 confirmed on staging
+  x en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-installer/online-help/9-3-1:
+lost, 11 old page(s), 7 lost, 0 warning(s), 0 explained
+    R001 confirmed on staging
+  x en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-installer/online-help/9-3-2:
+lost, 10 old page(s), 7 lost, 0 warning(s), 0 explained
+    R001 confirmed on staging
+  x en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-installer/online-help/9-3-3:
+lost, 10 old page(s), 7 lost, 0 warning(s), 0 explained
+    R001 confirmed on staging
+  x en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-installer/online-help/9-3-4:
+lost, 10 old page(s), 7 lost, 0 warning(s), 0 explained
+    R001 confirmed on staging
+  x en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-installer/online-help/9-3-5:
+lost, 7 old page(s), 7 lost, 0 warning(s), 0 explained
+    R001 confirmed on staging
+  x en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-installer/online-help/9-3-6:
+lost, 7 old page(s), 7 lost, 0 warning(s), 0 explained
+                 verify                  
+┌───────────────────────────────┬───────┐
+│ Finding                       │ Count │
+├───────────────────────────────┼───────┤
+│ VERIFY_PUBLISHED_PAGE_MISSING │     7 │
+│ VERIFY_REDIRECT_SAMPLED       │     7 │
+│ VERIFY_REDIRECT_UNCONVERTED   │    77 │
+│ VERIFY_REDIRECT_UNSERVED      │    42 │
+│ VERIFY_TOPIC_UNFILED          │    15 │
+└───────────────────────────────┴───────┘
+0 request(s) made; the rest came from cache/verify/.
+Index: C:\github\docushift-tool\reports\verify\INDEX.html

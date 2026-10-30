@@ -1,0 +1,30 @@
+Reframing 7 version(s)...
+  v tibco-ems-client-for-ibm-i@8.6.0 45 topic(s) -> 9 page(s)
+  v tibco-enterprise-message-service@10.5.1 1441 topic(s) -> 159 page(s)
+  v tibco-enterprise-message-service@10.5.0 1441 topic(s) -> 159 page(s)
+  v tibco-enterprise-message-service@10.4.4 1429 topic(s) -> 158 page(s)
+  v tibco-enterprise-message-service@10.4.3 1429 topic(s) -> 158 page(s)
+  v tibco-enterprise-message-service@10.4.1 1431 topic(s) -> 170 page(s)
+  v tibco-enterprise-message-service@10.4.0 1434 topic(s) -> 187 page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |        7 |
+| Already current             |        0 |
+| Not Flare or DITA (skipped) |        0 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+8650 topic(s) read into 1000 page(s).
+Files: 13640 source doc -> 8682 converted -> 1000 merged (88.5% fewer at the 
+merge, 92.7% end to end); 1248 file(s) standing in the measured merged tree(s).
+142 page(s) queued for editorial review:
+  tibco-ems-client-for-ibm-i@8.6.0: 2 of 9 -- see review-queue.csv
+  tibco-enterprise-message-service@10.5.1: 19 of 159 -- see review-queue.csv
+  tibco-enterprise-message-service@10.5.0: 19 of 159 -- see review-queue.csv
+  tibco-enterprise-message-service@10.4.4: 19 of 158 -- see review-queue.csv
+  tibco-enterprise-message-service@10.4.3: 19 of 158 -- see review-queue.csv
+  tibco-enterprise-message-service@10.4.1: 26 of 170 -- see review-queue.csv
+  tibco-enterprise-message-service@10.4.0: 38 of 187 -- see review-queue.csv
+Findings: 13 warnings, 7 notes.

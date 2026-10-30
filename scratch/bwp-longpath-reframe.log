@@ -1,0 +1,62 @@
+Reframing 1 version(s)...
+  v 
+tibco-activematrix-businessworks-plug-in-for-files-for-unix-and-windows@8.3.0 
+102 topic(s) -> 21 page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |        1 |
+| Already current             |        0 |
+| Not Flare or DITA (skipped) |        0 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+102 topic(s) read into 21 page(s).
+Files: 160 source doc -> 103 converted -> 21 merged (79.6% fewer at the merge, 
+86.9% end to end); 56 file(s) standing in the measured merged tree(s).
+10 page(s) queued for editorial review:
+  tibco-activematrix-businessworks-plug-in-for-files-for-unix-and-windows@8.3.0
+: 10 of 21 -- see review-queue.csv
+Findings: 1 warning, 1 note.
+Reframing 1 version(s)...
+  v tibco-activematrix-businessworks-plug-in-for-oracle-e-business-suite@6.1.2 
+98 topic(s) -> 22 page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |        1 |
+| Already current             |        0 |
+| Not Flare or DITA (skipped) |        0 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+98 topic(s) read into 22 page(s).
+Files: 249 source doc -> 98 converted -> 22 merged (77.6% fewer at the merge, 
+91.2% end to end); 115 file(s) standing in the measured merged tree(s).
+7 page(s) queued for editorial review:
+  tibco-activematrix-businessworks-plug-in-for-oracle-e-business-suite@6.1.2: 7
+of 22 -- see review-queue.csv
+Findings: 1 warning, 1 note.
+Reframing 1 version(s)...
+  v 
+tibco-activematrix-businessworks-plug-in-for-oracle-fusion-cloud-applications-s
+uite@6.0.0 52 topic(s) -> 16 page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |        1 |
+| Already current             |        0 |
+| Not Flare or DITA (skipped) |        0 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+52 topic(s) read into 16 page(s).
+Files: 366 source doc -> 58 converted -> 16 merged (72.4% fewer at the merge, 
+95.6% end to end); 47 file(s) standing in the measured merged tree(s).
+9 page(s) queued for editorial review:
+  tibco-activematrix-businessworks-plug-in-for-oracle-fusion-cloud-applications
+-suite@6.0.0: 9 of 16 -- see review-queue.csv
+Findings: 1 warning, 1 note.

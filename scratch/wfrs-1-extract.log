@@ -1,0 +1,47 @@
+Extracting 5 version(s)...
+  v ibi-webfocus-reporting-server@9.3.8 16804 file(s), flare, 3 root(s)
+  v ibi-webfocus-reporting-server@9.3.7 16367 file(s), flare, 2 root(s)
+  v ibi-webfocus-reporting-server@9.3.6 14534 file(s), flare, 2 root(s)
+  v ibi-webfocus-reporting-server@9.3.5 15116 file(s), flare, 2 root(s)
+  v ibi-webfocus-reporting-server@9.3.4 8384 file(s), flare, 1 root(s)
+                Extract                
++-------------------------------------+
+| Outcome                  | Versions |
+|--------------------------+----------|
+| Extracted                |        5 |
+| Already current          |        0 |
+| Measured from cache      |        0 |
+| No package               |        0 |
+| Refused (unsafe archive) |        0 |
+| Failed                   |        0 |
++-------------------------------------+
+71205 file(s) written.
+       Engines       
++-------------------+
+| Engine | Versions |
+|--------+----------|
+| flare  |        5 |
++-------------------+
+CSH: 10 source(s), 1940 identifier(s).
+                     Assets                      
++-----------------------------------------------+
+| Category | Destination     | Files |     Size |
+|----------+-----------------+-------+----------|
+| topic    | output-root     | 22752 | 567.0 MB |
+| image    | output-root     | 36610 | 1.294 GB |
+| document | output-root     |     4 |   0.0 MB |
+| skin     | output-root     | 11600 | 875.2 MB |
+| other    | output-root     |   150 |   5.7 MB |
+| document | document-router |    69 | 453.8 MB |
+| topic    | unclaimed       |     4 |   0.0 MB |
+| other    | unclaimed       |    16 |   0.1 MB |
++-----------------------------------------------+
+? ibi-webfocus-reporting-server@9.3.8: 5 unclaimed file(s) in html/ (0.0 MB) --
+no destination
+? ibi-webfocus-reporting-server@9.3.7: 5 unclaimed file(s) in html/ (0.0 MB) --
+no destination
+? ibi-webfocus-reporting-server@9.3.6: 5 unclaimed file(s) in html/ (0.0 MB) --
+no destination
+? ibi-webfocus-reporting-server@9.3.5: 5 unclaimed file(s) in html/ (0.0 MB) --
+no destination
+Recorded 1 note -- `docushift report --run 411`.

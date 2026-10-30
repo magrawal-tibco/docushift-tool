@@ -1,0 +1,39 @@
+=== tibco-flogo
+Findings: 12 warnings, 3 notes.
+=== tibco-flogo-extension-for-visual-studio-code
+Findings: 2 warnings, 1 note.
+=== premium-subscription-for-tibco-businessworks-container-edition-and-plug-ins-for-aws-marketplace
+Findings: none.
+=== tibco-activematrix-businessworks
+Findings: 14 warnings, 1 note.
+=== tibco-businessworks-container-edition-buildpack-for-pcf
+=== tibco-businessworks-enterprise
+Findings: none.
+=== tibco-businessworks-formbuilder
+=== tibco-integration
+Findings: none.
+=== tibco-enterprise-fulfillment-orchestration-suite
+Findings: none.
+=== tibco-fulfillment-provisioning
+Findings: 22 warnings.
+=== tibco-offer-and-price-engine
+Findings: 1 note.
+=== tibco-order-management
+Findings: 3 warnings, 1 note.
+=== tibco-product-and-service-catalog
+Findings: none.
+=== tibco-product-and-service-catalog-powered-by-tibco-ebx
+Findings: 2 warnings, 2 notes.
+=== tibco-product-and-service-inventory
+Findings: 1 note.
+=== tibco-product-and-service-inventory-2-1-0
+=== tibco-managed-file-transfer-command-center
+Findings: none.
+=== tibco-managed-file-transfer-internet-server
+Findings: 3 notes.
+=== tibco-managed-file-transfer-platform-server-for-unix
+Findings: 122 warnings, 3 notes.
+=== tibco-managed-file-transfer-platform-server-for-windows
+Findings: 1 warning.
+=== tibco-managed-file-transfer-platform-server-for-z-linux
+Findings: 74 warnings, 2 notes.

@@ -1,0 +1,61 @@
+Verifying 14 version(s) (local only); 2 triage entr(ies); redirect sample 10, 
+seed 447152...
+  x 
+en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/onli
+ne-help/9-3-0: lost, 2293 old page(s), 1201 lost, 37 warning(s), 0 explained
+  - 
+en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/onli
+ne-help/9-3-1: skipped, extracted package not on disk
+  - 
+en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/onli
+ne-help/9-3-2: skipped, extracted package not on disk
+  - 
+en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/onli
+ne-help/9-3-3: skipped, extracted package not on disk
+  - 
+en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/onli
+ne-help/9-3-4: skipped, extracted package not on disk
+  x 
+en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/onli
+ne-help/9-3-5: lost, 2393 old page(s), 2324 lost, 37 warning(s), 0 explained
+  x 
+en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/onli
+ne-help/9-3-6: lost, 2375 old page(s), 2332 lost, 37 warning(s), 0 explained
+  x 
+en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/onli
+ne-help/9-3-7: lost, 2394 old page(s), 2347 lost, 37 warning(s), 0 explained
+  x 
+en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/onli
+ne-help/9-3-8: lost, 3019 old page(s), 1208 lost, 63 warning(s), 0 explained
+  x 
+loc-ibi-wf-reporting-server-userdocs/ja-jp/ibi-webfocus-reporting-server/online
+-help/9-3-0: lost, 2293 old page(s), 5669 lost, 0 warning(s), 0 explained
+  x 
+loc-ibi-wf-reporting-server-userdocs/ja-jp/ibi-webfocus-reporting-server/online
+-help/9-3-5: lost, 2393 old page(s), 6910 lost, 0 warning(s), 0 explained
+  x 
+loc-ibi-wf-reporting-server-userdocs/ja-jp/ibi-webfocus-reporting-server/online
+-help/9-3-6: lost, 2375 old page(s), 6930 lost, 0 warning(s), 0 explained
+  x 
+loc-ibi-wf-reporting-server-userdocs/ja-jp/ibi-webfocus-reporting-server/online
+-help/9-3-7: lost, 2394 old page(s), 6955 lost, 0 warning(s), 0 explained
+  x 
+loc-ibi-wf-reporting-server-userdocs/ja-jp/ibi-webfocus-reporting-server/online
+-help/9-3-8: lost, 3019 old page(s), 6694 lost, 0 warning(s), 0 explained
+                verify                 
+┌─────────────────────────────┬───────┐
+│ Finding                     │ Count │
+├─────────────────────────────┼───────┤
+│ VERIFY_LIVE_UNCHECKABLE     │   100 │
+│ VERIFY_REDIRECT_MAP_MISSING │     4 │
+│ VERIFY_REDIRECT_SAMPLED     │     6 │
+│ VERIFY_REDIRECT_UNCONVERTED │  4537 │
+│ VERIFY_TEXT_DROPPED         │    39 │
+│ VERIFY_TOC_ENTRY_MISSING    │ 11702 │
+│ VERIFY_TOC_MOVED            │   210 │
+│ VERIFY_TOC_ORDER            │     1 │
+│ VERIFY_TOPIC_MISSING        │ 30825 │
+│ VERIFY_TOPIC_UNFILED        │   770 │
+└─────────────────────────────┴───────┘
+120 request(s) made; the rest came from cache/verify/.
+Index: C:\github\docushift-tool\reports\verify\INDEX.html

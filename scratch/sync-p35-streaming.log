@@ -1,0 +1,216 @@
+Syncing 30 version(s) into C:\tmp\p35-aem...
+  v spotfire-data-streams@11.1.1 -> api-references/11-1-1 2715 file(s), 46.8 MB
+  v spotfire-data-streams@11.1.1 -> online-help/11-1-1 2548 file(s), 57.8 MB
+  v spotfire-data-streams@11.1.1 -> release-information/11-1-1 1 file(s), 0.0 
+MB
+  v spotfire-data-streams@11.1.1 -> reference-documents/11-1-1 3 file(s), 1.7 
+MB
+  v spotfire-data-streams@11.1.0 -> api-references/11-1-0 2715 file(s), 46.8 MB
+  v spotfire-data-streams@11.1.0 -> online-help/11-1-0 2538 file(s), 56.8 MB
+  v spotfire-data-streams@11.1.0 -> release-information/11-1-0 1 file(s), 0.0 
+MB
+  v spotfire-data-streams@11.1.0 -> reference-documents/11-1-0 3 file(s), 2.3 
+MB
+  v spotfire-liveview-web-enterprise-edition@1.7.1 -> user-guides/1-7-1 2 
+file(s), 0.5 MB
+  v spotfire-liveview-web-enterprise-edition@1.7.1 -> release-information/1-7-1
+1 file(s), 0.0 MB
+  v spotfire-liveview-web-enterprise-edition@1.7.1 -> reference-documents/1-7-1
+2 file(s), 0.2 MB
+  v spotfire-liveview-web-enterprise-edition@1.7.0 -> user-guides/1-7-0 2 
+file(s), 0.4 MB
+  v spotfire-liveview-web-enterprise-edition@1.7.0 -> release-information/1-7-0
+1 file(s), 0.0 MB
+  v spotfire-liveview-web-enterprise-edition@1.7.0 -> reference-documents/1-7-0
+3 file(s), 0.2 MB
+  v tibco-enterprise-streaming@11.2.1 -> release-information/11-2-1 1 file(s), 
+0.0 MB
+  v tibco-enterprise-streaming@11.2.1 -> reference-documents/11-2-1 3 file(s), 
+0.2 MB
+  v tibco-enterprise-streaming@11.2.0 -> release-information/11-2-0 1 file(s), 
+0.0 MB
+  v tibco-enterprise-streaming@11.2.0 -> reference-documents/11-2-0 3 file(s), 
+0.2 MB
+  v tibco-enterprise-streaming@11.1.3 -> release-information/11-1-3 1 file(s), 
+0.0 MB
+  v tibco-enterprise-streaming@11.1.3 -> reference-documents/11-1-3 3 file(s), 
+0.1 MB
+  v tibco-enterprise-streaming@11.1.2 -> release-information/11-1-2 1 file(s), 
+0.0 MB
+  v tibco-enterprise-streaming@11.1.2 -> reference-documents/11-1-2 4 file(s), 
+0.1 MB
+  v tibco-enterprise-streaming-high-performance-fix-engine@11.2.1 -> 
+release-information/11-2-1 1 file(s), 0.0 MB
+  v tibco-enterprise-streaming-high-performance-fix-engine@11.2.1 -> 
+reference-documents/11-2-1 3 file(s), 0.2 MB
+  v tibco-enterprise-streaming-high-performance-fix-engine@11.2.0 -> 
+release-information/11-2-0 1 file(s), 0.0 MB
+  v tibco-enterprise-streaming-high-performance-fix-engine@11.2.0 -> 
+reference-documents/11-2-0 3 file(s), 0.2 MB
+  v tibco-enterprise-streaming-high-performance-fix-engine@11.1.3 -> 
+release-information/11-1-3 1 file(s), 0.0 MB
+  v tibco-enterprise-streaming-high-performance-fix-engine@11.1.3 -> 
+reference-documents/11-1-3 3 file(s), 0.1 MB
+  v tibco-enterprise-streaming-high-performance-fix-engine@11.1.2 -> 
+release-information/11-1-2 1 file(s), 0.0 MB
+  v tibco-enterprise-streaming-high-performance-fix-engine@11.1.2 -> 
+reference-documents/11-1-2 4 file(s), 0.1 MB
+  v tibco-modelops@1.3.0 -> release-information/1-3-0 1 file(s), 0.0 MB
+  v tibco-modelops@1.3.0 -> reference-documents/1-3-0 3 file(s), 3.6 MB
+  v tibco-streambase-high-performance-fix-engine@11.2.1 -> 
+release-information/11-2-1 1 file(s), 0.0 MB
+  v tibco-streambase-high-performance-fix-engine@11.2.1 -> 
+reference-documents/11-2-1 2 file(s), 0.1 MB
+  v tibco-streambase-high-performance-fix-engine@11.2.0 -> 
+release-information/11-2-0 1 file(s), 0.0 MB
+  v tibco-streambase-high-performance-fix-engine@11.2.0 -> 
+reference-documents/11-2-0 2 file(s), 0.1 MB
+  v tibco-streambase-high-performance-fix-engine@11.1.3 -> 
+release-information/11-1-3 1 file(s), 0.0 MB
+  v tibco-streambase-high-performance-fix-engine@11.1.3 -> 
+reference-documents/11-1-3 1 file(s), 0.2 MB
+  v tibco-streambase-high-performance-fix-engine@11.1.2 -> 
+release-information/11-1-2 1 file(s), 0.0 MB
+  v tibco-streambase-high-performance-fix-engine@11.1.2 -> 
+reference-documents/11-1-2 1 file(s), 0.2 MB
+  v tibco-streambase-high-performance-fix-engine@11.0.1 -> 
+release-information/11-0-1 1 file(s), 0.0 MB
+  v tibco-streambase-high-performance-fix-engine@11.0.1 -> 
+reference-documents/11-0-1 3 file(s), 0.1 MB
+  v tibco-streambase-high-performance-fix-engine@10.6.4 -> 
+release-information/10-6-4 1 file(s), 0.0 MB
+  v tibco-streambase-high-performance-fix-engine@10.6.4 -> 
+reference-documents/10-6-4 3 file(s), 0.2 MB
+  v tibco-streaming@11.2.1 -> api-references/11-2-1 2419 file(s), 42.6 MB
+  v tibco-streaming@11.2.1 -> online-help/11-2-1 2539 file(s), 56.7 MB
+  v tibco-streaming@11.2.1 -> release-information/11-2-1 1 file(s), 0.0 MB
+  v tibco-streaming@11.2.1 -> reference-documents/11-2-1 2 file(s), 6.6 MB
+  v tibco-streaming@11.2.0 -> api-references/11-2-0 2419 file(s), 42.6 MB
+  v tibco-streaming@11.2.0 -> online-help/11-2-0 2535 file(s), 56.6 MB
+  v tibco-streaming@11.2.0 -> release-information/11-2-0 1 file(s), 0.0 MB
+  v tibco-streaming@11.2.0 -> reference-documents/11-2-0 2 file(s), 6.6 MB
+  v tibco-streaming@11.1.3 -> api-references/11-1-3 2654 file(s), 45.3 MB
+  v tibco-streaming@11.1.3 -> online-help/11-1-3 2556 file(s), 57.4 MB
+  v tibco-streaming@11.1.3 -> release-information/11-1-3 1 file(s), 0.0 MB
+  v tibco-streaming@11.1.3 -> reference-documents/11-1-3 1 file(s), 2.2 MB
+  v tibco-streaming@11.1.2 -> api-references/11-1-2 2654 file(s), 45.3 MB
+  v tibco-streaming@11.1.2 -> online-help/11-1-2 2551 file(s), 57.3 MB
+  v tibco-streaming@11.1.2 -> release-information/11-1-2 1 file(s), 0.0 MB
+  v tibco-streaming@11.1.2 -> reference-documents/11-1-2 1 file(s), 2.2 MB
+  v tibco-streaming@11.1.1 -> api-references/11-1-1 2715 file(s), 46.8 MB
+  v tibco-streaming@11.1.1 -> online-help/11-1-1 2548 file(s), 57.8 MB
+  v tibco-streaming@11.1.1 -> release-information/11-1-1 1 file(s), 0.0 MB
+  v tibco-streaming@11.1.1 -> reference-documents/11-1-1 3 file(s), 2.8 MB
+  v tibco-streaming@11.1.0 -> api-references/11-1-0 2715 file(s), 46.8 MB
+  v tibco-streaming@11.1.0 -> online-help/11-1-0 2538 file(s), 56.8 MB
+  v tibco-streaming@11.1.0 -> release-information/11-1-0 1 file(s), 0.0 MB
+  v tibco-streaming@11.1.0 -> reference-documents/11-1-0 3 file(s), 2.3 MB
+  v tibco-streaming-for-3gpp@1.1.0 -> release-information/1-1-0 1 file(s), 0.0 
+MB
+  v tibco-streaming-for-3gpp@1.1.0 -> reference-documents/1-1-0 2 file(s), 2.7 
+MB
+  v spotfire-data-streams -> archives 14 file(s), 0.0 MB
+  v spotfire-liveview-web-enterprise-edition -> archives 16 file(s), 0.0 MB
+  v tibco-modelops -> archives 3 file(s), 0.0 MB
+  v tibco-streambase-high-performance-fix-engine -> archives 26 file(s), 0.0 MB
+  v tibco-streaming -> archives 16 file(s), 0.0 MB
+  v tibco-streaming-for-3gpp -> archives 1 file(s), 0.0 MB
+                                     Sync                                      
+┌─────────┬──────┬─────────┬─────────┬─────────┬─────────┬──────────┬─────────┐
+│ Outcome │ Rows │ online… │ user-g… │ releas… │ refere… │ api-ref… │ archiv… │
+├─────────┼──────┼─────────┼─────────┼─────────┼─────────┼──────────┼─────────┤
+│ Synced  │   76 │       8 │       2 │      26 │      26 │        8 │       6 │
+│ Already │    0 │       0 │       0 │       0 │       0 │        0 │       0 │
+│ current │      │         │         │         │         │          │         │
+│ No      │   26 │      22 │       0 │       0 │       0 │        0 │       0 │
+│ source  │      │         │         │         │         │          │         │
+│ tree    │      │         │         │         │         │          │         │
+│ Skipped │    0 │       0 │       0 │       0 │       0 │        0 │       0 │
+│ Failed  │    0 │       0 │       0 │       0 │       0 │        0 │       0 │
+└─────────┴──────┴─────────┴─────────┴─────────┴─────────┴──────────┴─────────┘
+41531 file(s), 856.7 MB copied.
+8 product metadata.yml, 19 version.yml written.
+9420 redirect(s) in 2 published map(s), tree-rooted (no publish_base_url set).
+! spotfire-liveview-web-enterprise-edition@1.7.1: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-streaming\spotfire-liveview-web-enter
+prise-edition\1.7.1; run `docushift convert` first
+! spotfire-liveview-web-enterprise-edition@1.7.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-streaming\spotfire-liveview-web-enter
+prise-edition\1.7.0; run `docushift convert` first
+! tibco-enterprise-streaming@11.2.1: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-streaming\tibco-enterprise-streaming\
+11.2.1; run `docushift convert` first
+! tibco-enterprise-streaming@11.2.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-streaming\tibco-enterprise-streaming\
+11.2.0; run `docushift convert` first
+! tibco-enterprise-streaming@11.1.3: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-streaming\tibco-enterprise-streaming\
+11.1.3; run `docushift convert` first
+! tibco-enterprise-streaming@11.1.2: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-streaming\tibco-enterprise-streaming\
+11.1.2; run `docushift convert` first
+! tibco-enterprise-streaming-high-performance-fix-engine@11.2.1: no converted 
+tree at 
+C:\github\docushift-tool\output\en-us-tib-streaming\tibco-enterprise-streaming-
+high-performance-fix-engine\11.2.1; run `docushift convert` first
+! tibco-enterprise-streaming-high-performance-fix-engine@11.2.0: no converted 
+tree at 
+C:\github\docushift-tool\output\en-us-tib-streaming\tibco-enterprise-streaming-
+high-performance-fix-engine\11.2.0; run `docushift convert` first
+! tibco-enterprise-streaming-high-performance-fix-engine@11.1.3: no converted 
+tree at 
+C:\github\docushift-tool\output\en-us-tib-streaming\tibco-enterprise-streaming-
+high-performance-fix-engine\11.1.3; run `docushift convert` first
+! tibco-enterprise-streaming-high-performance-fix-engine@11.1.2: no converted 
+tree at 
+C:\github\docushift-tool\output\en-us-tib-streaming\tibco-enterprise-streaming-
+high-performance-fix-engine\11.1.2; run `docushift convert` first
+! tibco-modelops@1.3.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-streaming\tibco-modelops\1.3.0; run 
+`docushift convert` first
+! tibco-streambase-high-performance-fix-engine@11.2.1: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-streaming\tibco-streambase-high-perfo
+rmance-fix-engine\11.2.1; run `docushift convert` first
+! tibco-streambase-high-performance-fix-engine@11.2.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-streaming\tibco-streambase-high-perfo
+rmance-fix-engine\11.2.0; run `docushift convert` first
+! tibco-streambase-high-performance-fix-engine@11.1.3: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-streaming\tibco-streambase-high-perfo
+rmance-fix-engine\11.1.3; run `docushift convert` first
+! tibco-streambase-high-performance-fix-engine@11.1.2: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-streaming\tibco-streambase-high-perfo
+rmance-fix-engine\11.1.2; run `docushift convert` first
+! tibco-streambase-high-performance-fix-engine@11.1.1: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-streaming\tibco-streambase-high-perfo
+rmance-fix-engine\11.1.1; run `docushift convert` first
+! tibco-streambase-high-performance-fix-engine@11.1.1: no extracted tree at 
+C:\github\docushift-tool\families\en-us-tib-streaming\extracted\tibco-streambas
+e-high-performance-fix-engine\11.1.1; run `docushift extract` first
+! tibco-streambase-high-performance-fix-engine@11.1.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-streaming\tibco-streambase-high-perfo
+rmance-fix-engine\11.1.0; run `docushift convert` first
+! tibco-streambase-high-performance-fix-engine@11.1.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-tib-streaming\extracted\tibco-streambas
+e-high-performance-fix-engine\11.1.0; run `docushift extract` first
+! tibco-streambase-high-performance-fix-engine@11.0.1: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-streaming\tibco-streambase-high-perfo
+rmance-fix-engine\11.0.1; run `docushift convert` first
+! tibco-streambase-high-performance-fix-engine@10.6.6: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-streaming\tibco-streambase-high-perfo
+rmance-fix-engine\10.6.6; run `docushift convert` first
+! tibco-streambase-high-performance-fix-engine@10.6.6: no extracted tree at 
+C:\github\docushift-tool\families\en-us-tib-streaming\extracted\tibco-streambas
+e-high-performance-fix-engine\10.6.6; run `docushift extract` first
+! tibco-streambase-high-performance-fix-engine@10.6.5: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-streaming\tibco-streambase-high-perfo
+rmance-fix-engine\10.6.5; run `docushift convert` first
+! tibco-streambase-high-performance-fix-engine@10.6.5: no extracted tree at 
+C:\github\docushift-tool\families\en-us-tib-streaming\extracted\tibco-streambas
+e-high-performance-fix-engine\10.6.5; run `docushift extract` first
+! tibco-streambase-high-performance-fix-engine@10.6.4: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-streaming\tibco-streambase-high-perfo
+rmance-fix-engine\10.6.4; run `docushift convert` first
+! tibco-streaming-for-3gpp@1.1.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-streaming\tibco-streaming-for-3gpp\1.
+1.0; run `docushift convert` first
+Findings: 8 warnings.

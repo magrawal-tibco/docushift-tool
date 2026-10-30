@@ -1,0 +1,105 @@
+Converting 19 version(s)...
+C:\github\docushift-tool\src\docushift\transforms\markdown.py:112: XMLParsedAsHTMLWarning: It looks like you're using an HTML parser to parse an XML document.
+
+Assuming this really is an XML document, what you're doing might work, but you should know that using an XML parser will be more reliable. To parse this document as XML, make sure you have the Python package 'lxml' installed, and pass the keyword argument `features="xml"` into the BeautifulSoup constructor.
+
+If you want or need to use an HTML parser on this document, you can make this warning go away by filtering it. To do that, run this code before calling the BeautifulSoup constructor:
+
+    from bs4 import XMLParsedAsHTMLWarning
+    import warnings
+
+    warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+  return BeautifulSoup(_CDATA.sub(_unwrap_cdata, text), PARSER)
+  v tibco-activematrix-bpm@4.3.0 8096 topic(s), 3919 asset(s), 4 unit(s), 8263 
+nav node(s), 5 generated -> 12022 file(s)
+  v tibco-activematrix-service-grid@3.4.4 1839 topic(s), 698 asset(s), 1 
+unit(s), 1885 nav node(s), 18 generated -> 2559 file(s)
+  v tibco-activematrix-service-grid@3.4.3 1839 topic(s), 698 asset(s), 1 
+unit(s), 1886 nav node(s), 18 generated -> 2559 file(s)
+  v tibco-bpm-enterprise@5.7.0 456 topic(s), 253 asset(s), 1 unit(s), 470 nav 
+node(s), 9 generated -> 720 file(s)
+  v tibco-bpm-enterprise@5.6.1 442 topic(s), 248 asset(s), 1 unit(s), 456 nav 
+node(s), 9 generated -> 701 file(s)
+  v tibco-bpm-enterprise@5.6.0 440 topic(s), 248 asset(s), 1 unit(s), 454 nav 
+node(s), 9 generated -> 699 file(s)
+  v tibco-bpm-enterprise@4.3.5 4880 topic(s), 2219 asset(s), 1 unit(s), 4899 
+nav node(s), 1 generated -> 7102 file(s)
+  v tibco-business-studio-bpm-edition@5.7.0 1108 topic(s), 719 asset(s), 1 
+unit(s), 1124 nav node(s), 6 generated -> 1836 file(s)
+  v tibco-business-studio-bpm-edition@5.6.1 1104 topic(s), 708 asset(s), 1 
+unit(s), 1120 nav node(s), 6 generated -> 1821 file(s)
+  v tibco-business-studio-bpm-edition@5.6.0 1104 topic(s), 708 asset(s), 1 
+unit(s), 1120 nav node(s), 6 generated -> 1821 file(s)
+  v tibco-business-studio-bpm-edition@4.3.5 1224 topic(s), 877 asset(s), 1 
+unit(s), 1226 nav node(s), 2 generated -> 2106 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |       11 |
+| Already current   |        0 |
+| No extracted tree |        2 |
+| Engine unknown    |        6 |
+| Failed            |        0 |
++------------------------------+
+22532 topic(s), 11295 asset(s) written.
+33946 file(s) standing in the measured output tree(s).
+tibco-activematrix-bpm@4.3.0: 4834 resolved, 0 skin, 0 escaped, 7 dangling, 0 
+case-mismatch, 7443 orphan (66.9 MB)
+tibco-activematrix-bpm@4.3.0: skipped 8 not-a-topic, 4 publication-homepage, 
+214 republished-duplicate
+tibco-activematrix-service-grid@3.4.4: 873 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 705 orphan (45.3 MB)
+tibco-activematrix-service-grid@3.4.4: CSH 96 resolved, 0 unresolved, 0 
+ambiguous
+tibco-activematrix-service-grid@3.4.4: skipped 775 api-reference, 3 
+generated-directory, 7 runtime-stub, 1 unreferenced-template
+tibco-activematrix-service-grid@3.4.3: 873 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 705 orphan (45.3 MB)
+tibco-activematrix-service-grid@3.4.3: CSH 96 resolved, 0 unresolved, 0 
+ambiguous
+tibco-activematrix-service-grid@3.4.3: skipped 775 api-reference, 3 
+generated-directory, 7 runtime-stub, 1 unreferenced-template
+tibco-bpm-enterprise@5.7.0: 353 resolved, 0 skin, 12 escaped, 0 dangling, 0 
+case-mismatch, 168 orphan (6.8 MB)
+tibco-bpm-enterprise@5.7.0: skipped 4 generated-directory, 2 runtime-stub
+tibco-bpm-enterprise@5.6.1: 348 resolved, 0 skin, 12 escaped, 0 dangling, 0 
+case-mismatch, 165 orphan (6.7 MB)
+tibco-bpm-enterprise@5.6.1: skipped 3 generated-directory, 2 runtime-stub
+tibco-bpm-enterprise@5.6.0: 348 resolved, 0 skin, 12 escaped, 0 dangling, 0 
+case-mismatch, 165 orphan (6.7 MB)
+tibco-bpm-enterprise@5.6.0: skipped 3 generated-directory, 2 runtime-stub
+tibco-bpm-enterprise@4.3.5: 2599 resolved, 0 skin, 0 escaped, 1 dangling, 0 
+case-mismatch, 1644 orphan (44.0 MB)
+tibco-bpm-enterprise@4.3.5: skipped 3 generated-directory, 1 
+placeholder-template, 2 runtime-stub
+tibco-business-studio-bpm-edition@5.7.0: 864 resolved, 0 skin, 10 escaped, 0 
+dangling, 0 case-mismatch, 597 orphan (13.7 MB)
+tibco-business-studio-bpm-edition@5.7.0: skipped 3 generated-directory, 1 
+no-content-container, 1 runtime-stub
+tibco-business-studio-bpm-edition@5.6.1: 853 resolved, 0 skin, 10 escaped, 0 
+dangling, 0 case-mismatch, 594 orphan (13.5 MB)
+tibco-business-studio-bpm-edition@5.6.1: skipped 3 generated-directory, 1 
+no-content-container, 1 runtime-stub
+tibco-business-studio-bpm-edition@5.6.0: 853 resolved, 0 skin, 10 escaped, 0 
+dangling, 0 case-mismatch, 594 orphan (13.5 MB)
+tibco-business-studio-bpm-edition@5.6.0: skipped 3 generated-directory, 1 
+no-content-container, 1 runtime-stub
+tibco-business-studio-bpm-edition@4.3.5: 1011 resolved, 0 skin, 4 escaped, 0 
+dangling, 0 case-mismatch, 643 orphan (12.4 MB)
+tibco-business-studio-bpm-edition@4.3.5: skipped 4 generated-directory, 1 
+no-content-container, 1 runtime-stub, 1 unreferenced-template
+! tibco-activematrix-bpm@4.2.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-tib-bpm\extracted\tibco-activematrix-bp
+m\4.2.0; run `docushift extract` first
+! tibco-bpm-suite@4.3.2: engine undetected (`auto`)
+! tibco-bpm-suite@4.3.1: engine undetected (`auto`)
+! tibco-bpm-suite@4.3.0: engine undetected (`auto`)
+! tibco-bpm-suite@4.2.0: engine undetected (`auto`)
+! tibco-business-studio-analyst-edition@4.3.0: engine undetected (`auto`)
+! tibco-business-studio-analyst-edition@4.2.0: engine undetected (`auto`)
+! tibco-business-studio-community-edition@4.2.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-tib-bpm\extracted\tibco-business-studio
+-community-edition\4.2.0; run `docushift extract` first
+Findings: 6 errors, 47 warnings, 66 notes.

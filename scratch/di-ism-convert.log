@@ -1,0 +1,103 @@
+Converting 22 version(s)...
+  v ibi-data-intelligence@2.1.0 50 topic(s), 161 asset(s), 1 unit(s), 52 nav 
+node(s), 2 generated -> 216 file(s)
+  v ibi-data-intelligence@2.0.0 145 topic(s), 264 asset(s), 1 unit(s), 148 nav 
+node(s), 3 generated -> 415 file(s)
+  v ibi-data-intelligence@1.2.0 147 topic(s), 267 asset(s), 1 unit(s), 150 nav 
+node(s), 3 generated -> 420 file(s)
+  v ibi-data-intelligence@1.1.0 147 topic(s), 262 asset(s), 1 unit(s), 150 nav 
+node(s), 3 generated -> 415 file(s)
+  v ibi-data-intelligence@1.0.0 102 topic(s), 93 asset(s), 1 unit(s), 104 nav 
+node(s), 2 generated -> 200 file(s)
+  v ibi-data-quality@5.2.2 40 topic(s), 151 asset(s), 1 unit(s), 41 nav 
+node(s), 1 generated -> 195 file(s)
+  v ibi-data-quality@5.2.1 39 topic(s), 119 asset(s), 1 unit(s), 39 nav node(s)
+-> 161 file(s)
+  v ibi-iway-service-manager@9.3.0 1687 topic(s), 3964 asset(s), 1 unit(s), 
+1733 nav node(s), 43 generated -> 5697 file(s)
+  v ibi-iway-service-manager@9.2.0 1693 topic(s), 3910 asset(s), 1 unit(s), 
+1737 nav node(s), 41 generated -> 5647 file(s)
+  v ibi-iway-service-manager-edi-add-on@9.3.0 25 topic(s), 242 asset(s), 1 
+unit(s), 27 nav node(s), 2 generated -> 272 file(s)
+  v ibi-iway-service-manager-edi-add-on@9.1.1 25 topic(s), 242 asset(s), 1 
+unit(s), 27 nav node(s), 2 generated -> 272 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |       11 |
+| Already current   |        0 |
+| No extracted tree |        8 |
+| Engine unknown    |        3 |
+| Failed            |        0 |
++------------------------------+
+4100 topic(s), 9675 asset(s) written.
+13910 file(s) standing in the measured output tree(s).
+ibi-data-intelligence@2.1.0: 164 resolved, 0 skin, 0 escaped, 0 dangling, 0 
+case-mismatch, 311 orphan (20.4 MB)
+ibi-data-intelligence@2.1.0: skipped 5 generated-directory, 2 runtime-stub
+ibi-data-intelligence@2.0.0: 275 resolved, 0 skin, 0 escaped, 0 dangling, 0 
+case-mismatch, 480 orphan (25.0 MB)
+ibi-data-intelligence@2.0.0: skipped 5 generated-directory, 2 runtime-stub
+ibi-data-intelligence@1.2.0: 282 resolved, 0 skin, 6 escaped, 0 dangling, 0 
+case-mismatch, 474 orphan (23.7 MB)
+ibi-data-intelligence@1.2.0: skipped 4 generated-directory, 2 runtime-stub
+ibi-data-intelligence@1.1.0: 277 resolved, 0 skin, 6 escaped, 0 dangling, 0 
+case-mismatch, 469 orphan (23.2 MB)
+ibi-data-intelligence@1.1.0: skipped 4 generated-directory, 2 runtime-stub, 1 
+unreferenced-template
+ibi-data-intelligence@1.0.0: 101 resolved, 0 skin, 7 escaped, 0 dangling, 0 
+case-mismatch, 174 orphan (11.6 MB)
+ibi-data-intelligence@1.0.0: skipped 3 generated-directory, 2 runtime-stub, 1 
+unreferenced-template
+ibi-data-quality@5.2.2: 151 resolved, 0 skin, 0 escaped, 0 dangling, 0 
+case-mismatch, 231 orphan (9.4 MB)
+ibi-data-quality@5.2.2: skipped 3 generated-directory, 2 runtime-stub, 1 
+unreferenced-template
+ibi-data-quality@5.2.1: 119 resolved, 0 skin, 1 escaped, 0 dangling, 0 
+case-mismatch, 159 orphan (6.5 MB)
+ibi-data-quality@5.2.1: skipped 3 generated-directory, 1 placeholder-template, 
+2 runtime-stub, 2 unreferenced-template
+ibi-iway-service-manager@9.3.0: 4295 resolved, 0 skin, 4 escaped, 0 dangling, 0
+case-mismatch, 3036 orphan (102.1 MB)
+ibi-iway-service-manager@9.3.0: skipped 5 generated-directory, 2 runtime-stub
+ibi-iway-service-manager@9.2.0: 4283 resolved, 0 skin, 13 escaped, 0 dangling, 
+0 case-mismatch, 2944 orphan (102.1 MB)
+ibi-iway-service-manager@9.2.0: skipped 4 generated-directory, 2 runtime-stub, 
+2 unreferenced-template
+ibi-iway-service-manager-edi-add-on@9.3.0: 249 resolved, 0 skin, 4 escaped, 0 
+dangling, 0 case-mismatch, 461 orphan (21.2 MB)
+ibi-iway-service-manager-edi-add-on@9.3.0: skipped 5 generated-directory, 2 
+runtime-stub
+ibi-iway-service-manager-edi-add-on@9.1.1: 249 resolved, 0 skin, 5 escaped, 0 
+dangling, 0 case-mismatch, 416 orphan (17.4 MB)
+ibi-iway-service-manager-edi-add-on@9.1.1: skipped 3 generated-directory, 2 
+runtime-stub, 1 unreferenced-template
+! ibi-data-quality@5.2.0: engine undetected (`auto`)
+! ibi-data-quality@5.1.1: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-di-ism\extracted\ibi-data-quality\5
+.1.1; run `docushift extract` first
+! ibi-data-quality@5.1.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-di-ism\extracted\ibi-data-quality\5
+.1.0; run `docushift extract` first
+! ibi-data-quality@5.0.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-di-ism\extracted\ibi-data-quality\5
+.0.0; run `docushift extract` first
+! ibi-data-quality@3.1.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-di-ism\extracted\ibi-data-quality\3
+.1.0; run `docushift extract` first
+! ibi-data-quality@3.0.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-di-ism\extracted\ibi-data-quality\3
+.0.0; run `docushift extract` first
+! ibi-iway-service-manager@9.1.0: engine undetected (`auto`)
+! ibi-iway-service-manager@8.1.0: engine undetected (`auto`)
+! ibi-iway-service-manager@8.0.7: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-di-ism\extracted\ibi-iway-service-m
+anager\8.0.7; run `docushift extract` first
+! ibi-iway-service-manager@8.0.6: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-di-ism\extracted\ibi-iway-service-m
+anager\8.0.6; run `docushift extract` first
+! ibi-iway-service-manager@8.0.5: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-di-ism\extracted\ibi-iway-service-m
+anager\8.0.5; run `docushift extract` first
+Findings: 23 warnings, 46 notes.

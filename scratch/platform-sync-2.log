@@ -1,0 +1,40 @@
+Syncing 3 version(s) into ..\tibco-docs-aem...
+  x tibco-control-plane@1.20.0 (online-help)
+                             Sync                             
++------------------------------------------------------------+
+| Outcome         | Rows | online-help | reference-documents |
+|-----------------+------+-------------+---------------------|
+| Synced          |    0 |           0 |                   0 |
+| Already current |    5 |           2 |                   3 |
+| No source tree  |    0 |           0 |                   0 |
+| Skipped         |    0 |           0 |                   0 |
+| Failed          |    1 |           1 |                   0 |
++------------------------------------------------------------+
+1 product metadata.yml, 2 version.yml written.
+2000 redirect(s) in 2 published map(s), tree-rooted (no publish_base_url set).
+x tibco-control-plane@1.20.0: online-help: publishing 
+managing-control-tower-data-planes/control-tower-data-plane-products/bw5-and-ad
+apters/manage-application-configuration-overview/upload-and-configure-an-applic
+ation.md would need 264 characters, over the 260 the published tree allows
+Findings: 1 error.
+Syncing 2 version(s) into ..\tibco-docs-aem...
+  x tibco-platform-command-line-interface@1.2.0 (online-help)
+                                     Sync                                      
++-----------------------------------------------------------------------------+
+| Outcome         | Rows | online-help | release-informat… | reference-docum… |
+|-----------------+------+-------------+-------------------+------------------|
+| Synced          |    0 |           0 |                 0 |                0 |
+| Already current |    3 |           0 |                 1 |                2 |
+| No source tree  |    1 |           1 |                 0 |                0 |
+| Skipped         |    0 |           0 |                 0 |                0 |
+| Failed          |    1 |           1 |                 0 |                0 |
++-----------------------------------------------------------------------------+
+1 product metadata.yml, 2 version.yml written.
+! tibco-platform-command-line-interface@1.1.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-platform\tibco-platform-command-line-
+interface\1.1.0; run `docushift convert` first
+x tibco-platform-command-line-interface@1.2.0: online-help: publishing 
+managing-capabilities/tibco-developer-hub/tibco-software-catalog/managing-softw
+are-catalog-entities/viewing-and-managing-systems-in-the-catalog.md would need 
+261 characters, over the 260 the published tree allows
+Findings: 1 error.

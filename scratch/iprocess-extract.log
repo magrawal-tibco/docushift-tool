@@ -1,0 +1,69 @@
+Extracting 18 version(s)...
+  v tibco-iprocess-engine@11.10.0 4453 file(s), flare, 4 root(s)
+  v tibco-iprocess-engine@11.9.2 4396 file(s), flare, 4 root(s)
+  v tibco-iprocess-engine@11.9.1 4309 file(s), flare, 4 root(s)
+  v tibco-iprocess-server-objects-java@11.10.0 7 file(s), auto
+  v tibco-iprocess-server-objects-net@11.10.0 7 file(s), auto
+  v tibco-iprocess-server-objects-net@11.9.0 7 file(s), auto
+  v tibco-iprocess-technology-plug-ins@11.10.0 740 file(s), flare, 1 root(s)
+  v tibco-iprocess-technology-plug-ins@11.9.2 741 file(s), flare, 1 root(s)
+  v tibco-iprocess-web-services-client-plug-in@11.9.0 582 file(s), flare, 1 
+root(s)
+  v tibco-iprocess-web-services-server-plug-in@11.9.0 639 file(s), flare, 1 
+root(s)
+  v tibco-iprocess-workspace-browser@11.10.0 1982 file(s), flare, 1 root(s)
+  v tibco-iprocess-workspace-browser@11.9.0 2622 file(s), flare, 1 root(s)
+  v tibco-iprocess-workspace-plug-ins@11.10.0 300 file(s), flare, 1 root(s)
+  v tibco-iprocess-workspace-plug-ins@11.9.0 271 file(s), flare, 1 root(s)
+  v tibco-iprocess-workspace-windows@11.10.0 3229 file(s), flare, 1 root(s)
+  v tibco-iprocess-workspace-windows@11.9.2 3057 file(s), flare, 1 root(s)
+                Extract                
++-------------------------------------+
+| Outcome                  | Versions |
+|--------------------------+----------|
+| Extracted                |       16 |
+| Already current          |        0 |
+| Measured from cache      |        0 |
+| No package               |        2 |
+| Refused (unsafe archive) |        0 |
+| Failed                   |        0 |
++-------------------------------------+
+27342 file(s) written.
+       Engines       
++-------------------+
+| Engine | Versions |
+|--------+----------|
+| flare  |       13 |
+| auto   |        3 |
++-------------------+
+? tibco-iprocess-server-objects-java@11.10.0: engine undetected (`auto`)
+? tibco-iprocess-server-objects-net@11.10.0: engine undetected (`auto`)
+? tibco-iprocess-server-objects-net@11.9.0: engine undetected (`auto`)
+CSH: 22 source(s), 55 identifier(s).
+                        Assets                        
++----------------------------------------------------+
+| Category      | Destination     | Files |     Size |
+|---------------+-----------------+-------+----------|
+| topic         | output-root     | 10913 | 241.6 MB |
+| image         | output-root     |  9537 | 229.8 MB |
+| source-format | output-root     |     9 |   0.8 MB |
+| skin          | output-root     |  6259 | 194.7 MB |
+| other         | output-root     |   425 |  63.2 MB |
+| document      | document-router |   199 | 423.3 MB |
++----------------------------------------------------+
+? tibco-iprocess-engine@11.10.0: 
+tibco-iprocess-engine-11-10-0/html/user-validation-api/ 34 file(s), no known 
+generator marker
+? tibco-iprocess-engine@11.9.2: 
+tibco-iprocess-engine-11-9-2/html/user-validation-api/ 34 file(s), no known 
+generator marker
+? tibco-iprocess-engine@11.9.1: 
+tibco-iprocess-engine-11-9-1/html/user-validation-api/ 34 file(s), no known 
+generator marker
+! tibco-iprocess-server-objects-java@11.9.0: no package at 
+C:\github\docushift-tool\families\en-us-tib-iprocess\downloads\tibco-iprocess-s
+erver-objects-java-11.9.0.zip; run `docushift download` first
+! tibco-iprocess-suite@1.0.0: no package at 
+C:\github\docushift-tool\families\en-us-tib-iprocess\downloads\tibco-iprocess-s
+uite-1.0.0.zip; run `docushift download` first
+Recorded 7 notes -- `docushift report --run 919`.

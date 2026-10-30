@@ -1,0 +1,127 @@
+docs_list_title: Online Help
+docs:
+- title: What's New
+  url: Whats-New.md
+- title: Installation and Deployment Guide
+  url: _section_installation_and_deployment_guide.md
+  subfolderlist:
+  - title: Introduction
+    url: _shared-wfce-dsmlce/Introduction.md
+  - title: Requirements and Prerequisites
+    url: _shared-wfce-dsmlce/requirements-and-prerequisites.md
+  - title: Component Version Reference
+    url: wfce-installation-and-deployment-guide/Component_Version_Reference.md
+  - title: Key Components/Systems
+    url: _shared-wfce-dsmlce/key-components-systems.md
+  - title: Creating or Using Docker Images
+    url: _shared-wfce-dsmlce/Using-images-for-docker.md
+    subfolderlist:
+    - title: Building and Loading ibi WebFOCUS - Container Edition Images using Podman
+      url: _shared-wfce-dsmlce/Building_and_Loading_DSMLCE_images_using_Podman.md
+    - title: Docker Image Multi-Arch Verification
+      url: wfce-installation-and-deployment-guide/docker-image-multi-arch-verification.md
+  - title: Pushing and Pulling Docker Images from Docker Registry
+    url: wfce-installation-and-deployment-guide/Push_docker_images_in_docker_registry.md
+  - title: Image Customization Using Docker Scripts
+    url: wfce-installation-and-deployment-guide/Image_Customisation.md
+  - title: Deploying ibi WebFOCUS - Container Edition
+    url: wfce-installation-and-deployment-guide/Deploying_WFCE.md
+    subfolderlist:
+    - title: Deploying ibi WebFOCUS - Container Edition on Kubernetes Cluster
+      url: wfce-installation-and-deployment-guide/Deploying_ibi_WFCE_on_Kubernetes_Cluster.md
+    - title: Deploying ibi WebFOCUS - Container Edition Using Docker Compose
+      url: _shared-wfce-dsmlce/deploying-dsmlce-using-docker-compose.md
+    - title: Deploying ibi WebFOCUS - Container Edition with Podman and Podman Compose
+        On RHEL 9
+      url: _shared-wfce-dsmlce/Podman_deployment.md
+    - title: Deploying ibi WebFOCUS - Container Edition with Red Hat OpenShift Cluster
+      url: wfce-installation-and-deployment-guide/Deploying_WFCE_with_Red_Hat_OpenShift_Cluster_using__Internal_Registry.md
+      subfolderlist:
+      - title: Deploying Custom Metrics Horizontal Pod Autoscaling in the Red Hat
+          OpenShift Cluster
+        url: wfce-installation-and-deployment-guide/Deploy_Custom_Metric_Horizontal_Pod_Autoscaling_in_the_Red_Hat_OpenShift_Cluster.md
+    - title: Deploying ibi WebFOCUS - Container Edition Appserver with MS-SQL server
+        or Oracle as a Repository Database
+      url: wfce-installation-and-deployment-guide/Deploy_WFCE_using_MS-SQL_server_as_an_external_database.md
+    - title: Deploying ibi WebFOCUS - Container Edition using Docker Compose with
+        External MS-SQL or Oracle Database
+      url: wfce-installation-and-deployment-guide/Deploying_ibi_WebFOCUS_-_Container_Edition_using_Docker_Compose_with_External_Database.md
+    - title: Deploying ibi WebFOCUS - Container Edition on Cloud Environment
+      url: wfce-installation-and-deployment-guide/Deploying_to_an_Amazon_Web_Services_AWS_Environment.md
+    - title: Deploying ibi WebFOCUS - Container Edition with External Solr Server
+      url: wfce-installation-and-deployment-guide/Steps_for_using_external_solr_search.md
+    - title: Deploying ibi WebFOCUS - Container Edition for Prometheus in Different
+        Namespace and Same Cluster
+      url: wfce-installation-and-deployment-guide/Deploying_WFCE_for_Prometheus_in_different_Namespace_and_Same_Cluster.md
+    - title: Deploying ibi WebFOCUS - Container Edition with Existing PVC
+      url: wfce-installation-and-deployment-guide/WFCE_deployment_with_pre-created_PVC.md
+    - title: Deploying ibi WebFOCUS On Pivotal Cloud Foundry
+      url: wfce-installation-and-deployment-guide/Deploying_WFCE_on_Cloud_Foundry.md
+    - title: Deploying WebFOCUS - Container Edition with Kyverno Policies
+      url: wfce-installation-and-deployment-guide/deploying_webfocus_container_edition_with_Kyverno_policies.md
+    - title: WebFOCUS - Container Edition Helm Chart Deployment
+      url: wfce-installation-and-deployment-guide/deploying_using_helm_charts.md
+  - title: Securing ibi WebFOCUS - Container Edition with Service Mesh
+    url: wfce-installation-and-deployment-guide/Securing_WFCE_with_Service_Mesh__Linkerd_.md
+  - title: Updating Expired License
+    url: wfce-installation-and-deployment-guide/Replacing_Expired_License_File.md
+  - title: Installing Python 3.9 in ibi WebFOCUS Reporting Server Docker Image
+    url: wfce-installation-and-deployment-guide/Installing_Python_3.9_in_ibi_WebFOCUS_Reporting_Server_Docker_Image.md
+  - title: Using the Swego Utility
+    url: wfce-installation-and-deployment-guide/Using_the_Swego_Utility.md
+  - title: Configuring an Air Gap Installation Using Images From a Single Repository
+    url: wfce-installation-and-deployment-guide/Configuring_an_Air_Gap_Installation_Using_Images_From_a_Single_Repository.md
+  - title: Using Your Own PostgreSQL Database
+    url: wfce-installation-and-deployment-guide/Using_Your_Own_PostgreSQL_Database.md
+  - title: Install NGINX with Helm
+    url: wfce-installation-and-deployment-guide/Using_the_NGINX_Ingress_Controller.md
+  - title: Common Deployment Scenarios (Use Cases) for Kubernetes Clusters
+    url: wfce-installation-and-deployment-guide/Common_Deployment_Scenarios_Use_Cases_for_Kubernetes_Clusters.md
+  - title: Testing Specifications
+    url: wfce-installation-and-deployment-guide/Testing_Specifications.md
+  - title: Helmfile Environments Reference
+    url: wfce-installation-and-deployment-guide/Helmfile_Environments_Reference.md
+  - title: Post-Deployment Configuration Options
+    url: wfce-installation-and-deployment-guide/Post_Deployment_Configuration_Options.md
+  - title: Removing (Undeploying) ibi WebFOCUS - Container Edition
+    url: wfce-installation-and-deployment-guide/Removing_Undeploying_WebFOCUS_Container_Edition.md
+  - title: Upgrading ibi WebFOCUS - Container Edition
+    url: wfce-installation-and-deployment-guide/Upgrading_WebFOCUS_Container_Edition.md
+  - title: Performing a Health Check or Smoke Test in the Kubernetes Cluster
+    url: wfce-installation-and-deployment-guide/Performing_a_Health_Check_or_Smoke_Test_in_the_Kubernetes_Cluster_130.md
+  - title: Updating Docker Images Without Destroying a Kubernetes Cluster
+    url: wfce-installation-and-deployment-guide/Updating_Docker_Images_Without_Destroying_a_Kubernetes_Cluster.md
+  - title: WebFOCUS - Container Edition Tool
+    url: wfce-installation-and-deployment-guide/WebFOCUS_CE_Health_Check_Tool_130.md
+  - title: Adding Option to Mount Extra Volume to the ibi WebFOCUS Reporting Server
+      (Edaserver) Pod
+    url: wfce-installation-and-deployment-guide/Adding_option_to_mount_extra_volumes_to_the_pods.md
+  - title: Backing Up and Restoring Kubernetes Cluster on AWS S3 using Velero
+    url: wfce-installation-and-deployment-guide/Backup_and_restore_using_velero.md
+  - title: Creating Kubernetes User with Limited Permissions
+    url: wfce-installation-and-deployment-guide/Create_Kubernetes_User_with_Restrict_Permissions.md
+  - title: Adding Grafana Dashboard in the Red Hat OpenShift Cluster
+    url: wfce-installation-and-deployment-guide/Grafana_using_Prometheus.md
+  - title: Third-Party Licenses for the Container Image
+    url: _shared-wfce-dsmlce/third-party-licenses-for-container-image.md
+  - title: Troubleshooting
+    url: wfce-installation-and-deployment-guide/Troubleshooting.md
+  - title: 'Appendix A: Configuration Parameters Reference'
+    url: wfce-installation-and-deployment-guide/Appendix_A_Configuration_Parameters_Reference.md
+    subfolderlist:
+    - title: Export Environment Variable Parameters
+      url: wfce-installation-and-deployment-guide/Export_Environment_Variable_Parameters.md
+    - title: Common Parameters
+      url: wfce-installation-and-deployment-guide/Common_Parameters.md
+    - title: Global Parameters
+      url: wfce-installation-and-deployment-guide/Global_Parameters.md
+    - title: ibi WebFOCUS Client (AppServer) Parameters
+      url: wfce-installation-and-deployment-guide/WebFOCUS_Client_AppServer_Parameters.md
+    - title: ibi WebFOCUS Reporting Server (Edaserver) Parameters
+      url: wfce-installation-and-deployment-guide/WebFOCUS_Reporting_Server_Edaserver_Parameters.md
+    - title: Cluster Manager (CLM) Parameters
+      url: wfce-installation-and-deployment-guide/Cluster_Manager_CLM_Parameters.md
+    - title: Initialized Database Parameters (Application Server / WebFOCUS Client)
+      url: wfce-installation-and-deployment-guide/Initialized_Database_Parameters_Application_Server_WebFOCUS_Client.md
+    - title: Resource (CPU and Memory) Parameters
+      url: _shared-wfce-dsmlce/resource-cp-_and-memory-parameters.md

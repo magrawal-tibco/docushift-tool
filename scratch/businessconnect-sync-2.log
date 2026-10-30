@@ -1,0 +1,73 @@
+Syncing 44 version(s) into C:\github\tibco-docs-aem...
+  x tibco-businessconnect-container-edition-ebxml-protocol@1.3.0 (online-help)
+  x tibco-businessconnect-container-edition-ebxml-protocol@1.2.1 (online-help)
+  x 
+tibco-businessconnect-container-edition-edi-protocol-powered-by-instream@1.6.1 
+(online-help)
+  x 
+tibco-businessconnect-container-edition-edi-protocol-powered-by-instream@1.6.0 
+(online-help)
+  x 
+tibco-businessconnect-container-edition-edi-protocol-powered-by-instream@1.5.0 
+(online-help)
+  v tibco-businessconnect-container-edition-rosettanet-protocol@1.7.0 -> 
+online-help/1-7-0 50 file(s), 0.6 MB
+  v tibco-businessconnect-container-edition-rosettanet-protocol@1.6.0 -> 
+online-help/1-6-0 55 file(s), 0.6 MB
+  v tibco-businessconnect-edi-protocol-powered-by-instream@6.11.0 -> 
+online-help/6-11-0 298 file(s), 5.6 MB
+  v tibco-businessconnect-partner-management-portal@1.1.1 -> online-help/1-1-1 
+116 file(s), 1.0 MB
+  v tibco-businessconnect-partner-management-portal@1.1.0 -> online-help/1-1-0 
+117 file(s), 1.0 MB
+  v tibco-businessconnect-partner-management-portal@1.0.0 -> online-help/1-0-0 
+114 file(s), 1.0 MB
+                                     Sync                                      
++-----------------------------------------------------------------------------+
+| Outcome | Rows | online… | user-g… | releas… | refere… | api-ref… | archiv… |
+|---------+------+---------+---------+---------+---------+----------+---------|
+| Synced  |    6 |       6 |       0 |       0 |       0 |        0 |       0 |
+| Already |  193 |      33 |      44 |      44 |      44 |       11 |      17 |
+| current |      |         |         |         |         |          |         |
+| No      |    0 |       0 |       0 |       0 |       0 |        0 |       0 |
+| source  |      |         |         |         |         |          |         |
+| tree    |      |         |         |         |         |          |         |
+| Skipped |    0 |       0 |       0 |       0 |       0 |        0 |       0 |
+| Failed  |    5 |       5 |       0 |       0 |       0 |        0 |       0 |
++-----------------------------------------------------------------------------+
+750 file(s), 9.8 MB copied.
+23 product metadata.yml, 90 version.yml written.
+Published merged (Stage 6b): 
+tibco-businessconnect-container-edition-rosettanet-protocol, 
+tibco-businessconnect-edi-protocol-powered-by-instream, 
+tibco-businessconnect-partner-management-portal.
+8125 redirect(s) in 29 published map(s), tree-rooted (no publish_base_url set).
+x tibco-businessconnect-container-edition-ebxml-protocol@1.3.0: online-help: 
+publishing 
+user-guide-ebms2-standard/tutorial-tibco-activematrix-businessworks-private/run
+ning-the-tutorial/creating-a-process-invoker.md would need 265 characters, over
+the 260 the published tree allows
+x tibco-businessconnect-container-edition-ebxml-protocol@1.2.1: online-help: 
+publishing 
+user-guide-ebms2-standard/tutorial-tibco-activematrix-businessworks-private/run
+ning-the-tutorial/creating-a-process-invoker.md would need 265 characters, over
+the 260 the published tree allows
+x 
+tibco-businessconnect-container-edition-edi-protocol-powered-by-instream@1.6.1:
+online-help: publishing 
+gatewayconfiguration/images/Figure_1_Features_of_TIBCO_BusinessConnect_EDI_Prot
+ocol_powered_by_Instream.jpg would need 264 characters, over the 260 the 
+published tree allows
+x 
+tibco-businessconnect-container-edition-edi-protocol-powered-by-instream@1.6.0:
+online-help: publishing 
+gatewayconfiguration/images/Figure_1_Features_of_TIBCO_BusinessConnect_EDI_Prot
+ocol_powered_by_Instream.jpg would need 264 characters, over the 260 the 
+published tree allows
+x 
+tibco-businessconnect-container-edition-edi-protocol-powered-by-instream@1.5.0:
+online-help: publishing 
+gatewayconfiguration/images/Figure_1_Features_of_TIBCO_BusinessConnect_EDI_Prot
+ocol_powered_by_Instream.jpg would need 264 characters, over the 260 the 
+published tree allows
+Findings: 5 errors.

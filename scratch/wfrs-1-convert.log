@@ -1,0 +1,54 @@
+Converting 5 version(s)...
+  v ibi-webfocus-reporting-server@9.3.8 3019 topic(s), 1969 asset(s), 2 
+unit(s), 3060 nav node(s), 1 generated -> 4992 file(s)
+  v ibi-webfocus-reporting-server@9.3.7 2394 topic(s), 1797 asset(s), 1 
+unit(s), 2445 nav node(s), 12 generated -> 4206 file(s)
+  v ibi-webfocus-reporting-server@9.3.6 2375 topic(s), 1715 asset(s), 1 
+unit(s), 2416 nav node(s), 2 generated -> 4095 file(s)
+  v ibi-webfocus-reporting-server@9.3.5 2393 topic(s), 1961 asset(s), 1 
+unit(s), 2433 nav node(s), 1 generated -> 4358 file(s)
+  v ibi-webfocus-reporting-server@9.3.4 2388 topic(s), 1993 asset(s), 1 
+unit(s), 2439 nav node(s), 12 generated -> 4397 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        5 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+12569 topic(s), 9435 asset(s) written.
+22048 file(s) standing in the measured output tree(s).
+ibi-webfocus-reporting-server@9.3.8: 2235 resolved, 0 skin, 0 escaped, 82 
+dangling, 0 case-mismatch, 1993 orphan (90.6 MB)
+ibi-webfocus-reporting-server@9.3.8: CSH 531 resolved, 0 unresolved, 0 
+ambiguous
+ibi-webfocus-reporting-server@9.3.8: skipped 12 generated-directory, 1 
+no-content-container, 4 runtime-stub, 3 unreferenced-template
+ibi-webfocus-reporting-server@9.3.7: 1923 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 3088 orphan (128.6 MB)
+ibi-webfocus-reporting-server@9.3.7: CSH 523 resolved, 0 unresolved, 0 
+ambiguous
+ibi-webfocus-reporting-server@9.3.7: skipped 5 generated-directory, 1 
+no-content-container, 2 runtime-stub, 1 unreferenced-template
+ibi-webfocus-reporting-server@9.3.6: 1837 resolved, 0 skin, 0 escaped, 1 
+dangling, 0 case-mismatch, 2654 orphan (113.4 MB)
+ibi-webfocus-reporting-server@9.3.6: CSH 513 resolved, 0 unresolved, 0 
+ambiguous
+ibi-webfocus-reporting-server@9.3.6: skipped 5 generated-directory, 2 
+runtime-stub, 1 unreferenced-template
+ibi-webfocus-reporting-server@9.3.5: 2106 resolved, 0 skin, 0 escaped, 1 
+dangling, 0 case-mismatch, 2612 orphan (113.2 MB)
+ibi-webfocus-reporting-server@9.3.5: CSH 183 resolved, 0 unresolved, 0 
+ambiguous
+ibi-webfocus-reporting-server@9.3.5: skipped 5 generated-directory, 1 
+no-content-container, 2 runtime-stub, 3 unreferenced-template
+ibi-webfocus-reporting-server@9.3.4: 2139 resolved, 0 skin, 15 escaped, 1 
+dangling, 0 case-mismatch, 2619 orphan (113.7 MB)
+ibi-webfocus-reporting-server@9.3.4: CSH 190 resolved, 0 unresolved, 0 
+ambiguous
+ibi-webfocus-reporting-server@9.3.4: skipped 4 generated-directory, 1 
+no-content-container, 2 runtime-stub
+Findings: 6 errors, 18 warnings, 35 notes.

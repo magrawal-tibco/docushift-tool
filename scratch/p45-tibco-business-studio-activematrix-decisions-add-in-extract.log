@@ -1,0 +1,46 @@
+Extracting 2 version(s)...
+  v tibco-business-studio-activematrix-decisions-add-in@1.4.0 1235 file(s), 
+webworks, 3 root(s)
+  v tibco-business-studio-activematrix-decisions-add-in@1.3.0 1333 file(s), 
+webworks, 3 root(s)
+                Extract                
++-------------------------------------+
+| Outcome                  | Versions |
+|--------------------------+----------|
+| Extracted                |        2 |
+| Already current          |        0 |
+| Measured from cache      |        0 |
+| No package               |        0 |
+| Refused (unsafe archive) |        0 |
+| Failed                   |        0 |
++-------------------------------------+
+2568 file(s) written.
+        Engines        
++---------------------+
+| Engine   | Versions |
+|----------+----------|
+| webworks |        2 |
++---------------------+
+CSH: 6 source(s), 0 identifier(s).
+                     Assets                     
++----------------------------------------------+
+| Category | Destination     | Files |    Size |
+|----------+-----------------+-------+---------|
+| topic    | api-reference   |   388 |  1.1 MB |
+| other    | api-reference   |     6 |  0.0 MB |
+| topic    | output-root     |   243 |  2.1 MB |
+| image    | output-root     |   293 |  6.4 MB |
+| skin     | output-root     |  1207 |  5.0 MB |
+| other    | output-root     |    46 |  1.9 MB |
+| document | document-router |    15 | 21.1 MB |
+| topic    | unclaimed       |    76 |  0.2 MB |
+| image    | unclaimed       |   143 |  0.0 MB |
+| other    | unclaimed       |    96 |  1.2 MB |
++----------------------------------------------+
+? tibco-business-studio-activematrix-decisions-add-in@1.4.0: 157 unclaimed 
+file(s) in html/ (0.7 MB) -- no destination
+? tibco-business-studio-activematrix-decisions-add-in@1.3.0: 158 unclaimed 
+file(s) in html/ (0.7 MB) -- no destination
+! tibco-business-studio-activematrix-decisions-add-in@1.3.0: partial walk: a 
+directory could not be read, so the inventory columns are blank
+Recorded 1 warning, 2 notes -- `docushift report --run 479`.

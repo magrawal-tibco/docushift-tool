@@ -1,0 +1,17 @@
+Syncing 5 version(s) into C:\github\ibi-docs-aem...
+                                        Sync                                        
++----------------------------------------------------------------------------------+
+| Outcome         | Rows | online-help | release-information | reference-documents |
+|-----------------+------+-------------+---------------------+---------------------|
+| Synced          |    0 |           0 |                   0 |                   0 |
+| Already current |   10 |           0 |                   5 |                   5 |
+| No source tree  |    5 |           5 |                   0 |                   0 |
+| Skipped         |    0 |           0 |                   0 |                   0 |
+| Failed          |    0 |           0 |                   0 |                   0 |
++----------------------------------------------------------------------------------+
+1 product metadata.yml, 2 version.yml written.
+! ibi-web-query-for-ibm-i@9.2.1: no converted tree at C:\github\docushift-tool\output\en-us-ibi-legacy\ibi-web-query-for-ibm-i\9.2.1; run `docushift convert` first
+! ibi-web-query-for-ibm-i@9.2.0: no converted tree at C:\github\docushift-tool\output\en-us-ibi-legacy\ibi-web-query-for-ibm-i\9.2.0; run `docushift convert` first
+! ibi-web-query-for-ibm-i@9.1.2: no converted tree at C:\github\docushift-tool\output\en-us-ibi-legacy\ibi-web-query-for-ibm-i\9.1.2; run `docushift convert` first
+! ibi-web-query-for-ibm-i@9.1.1: no converted tree at C:\github\docushift-tool\output\en-us-ibi-legacy\ibi-web-query-for-ibm-i\9.1.1; run `docushift convert` first
+! ibi-web-query-for-ibm-i@9.1.0: no converted tree at C:\github\docushift-tool\output\en-us-ibi-legacy\ibi-web-query-for-ibm-i\9.1.0; run `docushift convert` first

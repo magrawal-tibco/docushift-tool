@@ -1,0 +1,39 @@
+Extracting 6 version(s)...
+  v tibco-flogo@3.0.0 1763 file(s), flare, 1 root(s)
+  v tibco-flogo@2.26.8 2115 file(s), flare, 1 root(s)
+  v tibco-flogo@2.26.7 2104 file(s), flare, 1 root(s)
+  v tibco-flogo@2.26.6 2088 file(s), flare, 1 root(s)
+                Extract                
++-------------------------------------+
+| Outcome                  | Versions |
+|--------------------------+----------|
+| Extracted                |        4 |
+| Already current          |        1 |
+| Measured from cache      |        0 |
+| No package               |        1 |
+| Refused (unsafe archive) |        0 |
+| Failed                   |        0 |
++-------------------------------------+
+8070 file(s) written.
+       Engines       
++-------------------+
+| Engine | Versions |
+|--------+----------|
+| flare  |        5 |
++-------------------+
+CSH: 4 source(s), 4 identifier(s).
+                        Assets                        
++----------------------------------------------------+
+| Category      | Destination     | Files |     Size |
+|---------------+-----------------+-------+----------|
+| topic         | output-root     |  3384 |  70.9 MB |
+| image         | output-root     |  3036 | 178.5 MB |
+| media         | output-root     |    16 |  11.1 MB |
+| source-format | output-root     |     4 |   0.4 MB |
+| skin          | output-root     |  1550 |  67.4 MB |
+| other         | output-root     |    48 |   2.2 MB |
+| document      | document-router |    32 | 119.7 MB |
++----------------------------------------------------+
+! tibco-flogo@3.0.1: no package at 
+C:\github\docushift-tool\families\en-us-tib-flogo\downloads\tibco-flogo-3.0.1.z
+ip; run `docushift download` first

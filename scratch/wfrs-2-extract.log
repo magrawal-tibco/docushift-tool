@@ -1,0 +1,40 @@
+Extracting 4 version(s)...
+  v ibi-webfocus-reporting-server@9.3.3 8392 file(s), flare, 1 root(s)
+  v ibi-webfocus-reporting-server@9.3.2 8388 file(s), flare, 1 root(s)
+  v ibi-webfocus-reporting-server@9.3.1 8378 file(s), flare, 1 root(s)
+  v ibi-webfocus-reporting-server@9.3.0 13211 file(s), flare, 2 root(s)
+                Extract                
++-------------------------------------+
+| Outcome                  | Versions |
+|--------------------------+----------|
+| Extracted                |        4 |
+| Already current          |        0 |
+| Measured from cache      |        0 |
+| No package               |        0 |
+| Refused (unsafe archive) |        0 |
+| Failed                   |        0 |
++-------------------------------------+
+38369 file(s) written.
+       Engines       
++-------------------+
+| Engine | Versions |
+|--------+----------|
+| flare  |        4 |
++-------------------+
+CSH: 5 source(s), 573 identifier(s).
+                     Assets                      
++-----------------------------------------------+
+| Category | Destination     | Files |     Size |
+|----------+-----------------+-------+----------|
+| topic    | output-root     | 11238 | 279.8 MB |
+| image    | output-root     | 20855 | 738.8 MB |
+| document | output-root     |     1 |   0.0 MB |
+| skin     | output-root     |  6146 | 469.3 MB |
+| other    | output-root     |    64 |   2.7 MB |
+| document | document-router |    60 | 454.2 MB |
+| topic    | unclaimed       |     1 |   0.0 MB |
+| other    | unclaimed       |     4 |   0.0 MB |
++-----------------------------------------------+
+? ibi-webfocus-reporting-server@9.3.0: 5 unclaimed file(s) in html/ (0.0 MB) --
+no destination
+Recorded 1 note -- `docushift report --run 416`.

@@ -1,0 +1,106 @@
+Syncing 13 version(s) into ..\tibco-docs-aem...
+  v tibco-enterprise-fulfillment-orchestration-suite@1.1.0 -> 
+release-information/1-1-0 1 file(s), 0.0 MB
+  v tibco-enterprise-fulfillment-orchestration-suite@1.1.0 -> 
+reference-documents/1-1-0 3 file(s), 0.2 MB
+  v tibco-fulfillment-provisioning@3.10.0 -> online-help/3-10-0 166 file(s), 
+4.8 MB
+  v tibco-fulfillment-provisioning@3.10.0 -> user-guides/3-10-0 3 file(s), 14.4
+MB
+  v tibco-fulfillment-provisioning@3.10.0 -> release-information/3-10-0 2 
+file(s), 1.8 MB
+  v tibco-fulfillment-provisioning@3.10.0 -> reference-documents/3-10-0 2 
+file(s), 0.2 MB
+  v tibco-fulfillment-provisioning@3.9.0 -> online-help/3-9-0 131 file(s), 8.1 
+MB
+  v tibco-fulfillment-provisioning@3.9.0 -> user-guides/3-9-0 3 file(s), 8.5 MB
+  v tibco-fulfillment-provisioning@3.9.0 -> release-information/3-9-0 2 
+file(s), 0.4 MB
+  v tibco-fulfillment-provisioning@3.9.0 -> reference-documents/3-9-0 1 
+file(s), 0.6 MB
+  v tibco-offer-and-price-engine@6.0.0 -> online-help/6-0-0 174 file(s), 5.7 MB
+  v tibco-offer-and-price-engine@6.0.0 -> user-guides/6-0-0 5 file(s), 5.9 MB
+  v tibco-offer-and-price-engine@6.0.0 -> release-information/6-0-0 2 file(s), 
+0.1 MB
+  v tibco-offer-and-price-engine@6.0.0 -> reference-documents/6-0-0 3 file(s), 
+4.2 MB
+  v tibco-order-management@6.1.0 -> online-help/6-1-0 1339 file(s), 35.6 MB
+  v tibco-order-management@6.1.0 -> user-guides/6-1-0 7 file(s), 38.7 MB
+  v tibco-order-management@6.1.0 -> release-information/6-1-0 2 file(s), 1.5 MB
+  v tibco-order-management@6.1.0 -> reference-documents/6-1-0 2 file(s), 2.7 MB
+  v tibco-order-management@6.0.1 -> online-help/6-0-1 1282 file(s), 34.3 MB
+  v tibco-order-management@6.0.1 -> user-guides/6-0-1 7 file(s), 38.5 MB
+  v tibco-order-management@6.0.1 -> release-information/6-0-1 2 file(s), 1.5 MB
+  v tibco-order-management@6.0.1 -> reference-documents/6-0-1 2 file(s), 2.7 MB
+  v tibco-order-management@6.0.0 -> online-help/6-0-0 1222 file(s), 33.0 MB
+  v tibco-order-management@6.0.0 -> user-guides/6-0-0 7 file(s), 21.4 MB
+  v tibco-order-management@6.0.0 -> release-information/6-0-0 2 file(s), 0.2 MB
+  v tibco-order-management@6.0.0 -> reference-documents/6-0-0 3 file(s), 2.9 MB
+  v tibco-order-management@5.0.1 -> online-help/5-0-1 554 file(s), 21.2 MB
+  v tibco-order-management@5.0.1 -> user-guides/5-0-1 7 file(s), 20.1 MB
+  v tibco-order-management@5.0.1 -> release-information/5-0-1 2 file(s), 0.2 MB
+  v tibco-order-management@5.0.1 -> reference-documents/5-0-1 3 file(s), 1.9 MB
+  x tibco-product-and-service-catalog@5.1.0 (online-help)
+  v tibco-product-and-service-catalog@5.1.0 -> user-guides/5-1-0 7 file(s), 
+15.5 MB
+  v tibco-product-and-service-catalog@5.1.0 -> release-information/5-1-0 2 
+file(s), 0.2 MB
+  v tibco-product-and-service-catalog@5.1.0 -> reference-documents/5-1-0 3 
+file(s), 0.9 MB
+  v tibco-product-and-service-catalog-powered-by-tibco-ebx@1.1.0 -> 
+online-help/1-1-0 402 file(s), 5.9 MB
+  v tibco-product-and-service-catalog-powered-by-tibco-ebx@1.1.0 -> 
+user-guides/1-1-0 3 file(s), 0.8 MB
+  v tibco-product-and-service-catalog-powered-by-tibco-ebx@1.1.0 -> 
+release-information/1-1-0 2 file(s), 0.1 MB
+  v tibco-product-and-service-catalog-powered-by-tibco-ebx@1.1.0 -> 
+reference-documents/1-1-0 3 file(s), 1.2 MB
+  v tibco-product-and-service-catalog-powered-by-tibco-ebx@1.0.0 -> 
+online-help/1-0-0 402 file(s), 5.9 MB
+  v tibco-product-and-service-catalog-powered-by-tibco-ebx@1.0.0 -> 
+user-guides/1-0-0 3 file(s), 0.8 MB
+  v tibco-product-and-service-catalog-powered-by-tibco-ebx@1.0.0 -> 
+release-information/1-0-0 2 file(s), 0.1 MB
+  v tibco-product-and-service-catalog-powered-by-tibco-ebx@1.0.0 -> 
+reference-documents/1-0-0 3 file(s), 1.2 MB
+  v tibco-product-and-service-inventory@2.1.0 -> online-help/2-1-0 274 file(s),
+9.4 MB
+  v tibco-product-and-service-inventory@2.1.0 -> user-guides/2-1-0 4 file(s), 
+4.9 MB
+  v tibco-product-and-service-inventory@2.1.0 -> release-information/2-1-0 2 
+file(s), 0.1 MB
+  v tibco-product-and-service-inventory@2.1.0 -> reference-documents/2-1-0 3 
+file(s), 1.7 MB
+                                     Sync                                      
++-----------------------------------------------------------------------------+
+| Outcome   | Rows | online-h… | user-gui… | release-… | referenc… | archives |
+|-----------+------+-----------+-----------+-----------+-----------+----------|
+| Synced    |   45 |        10 |        11 |        12 |        12 |        0 |
+| Already   |    6 |         0 |         0 |         0 |         0 |        6 |
+| current   |      |           |           |           |           |          |
+| No source |    3 |         2 |         0 |         0 |         0 |        0 |
+| tree      |      |           |           |           |           |          |
+| Skipped   |    0 |         0 |         0 |         0 |         0 |        0 |
+| Failed    |    1 |         1 |         0 |         0 |         0 |        0 |
++-----------------------------------------------------------------------------+
+6056 file(s), 360.3 MB copied.
+7 product metadata.yml, 25 version.yml written.
+Published merged (Stage 6b): tibco-fulfillment-provisioning, 
+tibco-offer-and-price-engine, tibco-order-management, 
+tibco-product-and-service-catalog-powered-by-tibco-ebx, 
+tibco-product-and-service-inventory.
+10310 redirect(s) in 9 published map(s), tree-rooted (no publish_base_url set).
+! tibco-enterprise-fulfillment-orchestration-suite@1.1.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-fulfillment\tibco-enterprise-fulfillm
+ent-orchestration-suite\1.1.0; run `docushift convert` first
+! tibco-product-and-service-inventory-2-1-0@2.1.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-fulfillment\tibco-product-and-service
+-inventory-2-1-0\2.1.0; run `docushift convert` first
+! tibco-product-and-service-inventory-2-1-0@2.1.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-tib-fulfillment\extracted\tibco-product
+-and-service-inventory-2-1-0\2.1.0; run `docushift extract` first
+x tibco-product-and-service-catalog@5.1.0: online-help: publishing 
+tibco-product-and-service-catalog/user-guide/administrator-options/import-of-ti
+bco-product-and-service-catalog-data/customization-workflow-for-import.md would
+need 266 characters, over the 260 the published tree allows
+Findings: 1 error.

@@ -1,0 +1,50 @@
+Extracting 16 version(s)...
+  v tibco-mainframe-red@3.1.0 573 file(s), flare, 1 root(s)
+  v tibco-mainframe-tcp-library@3.0.0 97 file(s), dita, 1 root(s)
+  v tibco-mainframe-tcp-library@2.5.0 96 file(s), dita, 1 root(s)
+  v tibco-mainframe-tcp-library@2.1.0 95 file(s), dita, 1 root(s)
+  v tibco-mainframe-webui@3.0.0 156 file(s), dita, 1 root(s)
+  v tibco-mainframe-webui@2.5.0 154 file(s), dita, 1 root(s)
+  v tibco-mainframe-webui@2.4.0 154 file(s), dita, 1 root(s)
+  v tibco-mainframe-webui@2.1.0 216 file(s), dita, 1 root(s)
+  v tibco-red-enabled-for-ziip@3.1.0 286 file(s), flare, 1 root(s)
+  v tibco-substation-es@2.14.0 653 file(s), dita, 1 root(s)
+  v tibco-transaction-interface-for-ims@2.14.0 653 file(s), dita, 1 root(s)
+  v tibco-transaction-interface-for-ims@2.13.0 614 file(s), dita, 1 root(s)
+  v tibco-transaction-interface-for-ims@2.12.0 606 file(s), dita, 1 root(s)
+  v tibco-transaction-interface-for-ims@2.11.0 596 file(s), dita, 1 root(s)
+  v tibco-transaction-interface-for-ims@2.10.0 581 file(s), dita, 1 root(s)
+                Extract                
++-------------------------------------+
+| Outcome                  | Versions |
+|--------------------------+----------|
+| Extracted                |       15 |
+| Already current          |        0 |
+| Measured from cache      |        0 |
+| No package               |        1 |
+| Refused (unsafe archive) |        0 |
+| Failed                   |        0 |
++-------------------------------------+
+5530 file(s) written.
+       Engines       
++-------------------+
+| Engine | Versions |
+|--------+----------|
+| dita   |       13 |
+| flare  |        2 |
++-------------------+
+CSH: 15 source(s), 0 identifier(s).
+                     Assets                     
++----------------------------------------------+
+| Category | Destination     | Files |    Size |
+|----------+-----------------+-------+---------|
+| topic    | output-root     |  4222 | 55.2 MB |
+| image    | output-root     |   452 | 15.4 MB |
+| skin     | output-root     |   701 | 23.4 MB |
+| other    | output-root     |    39 | 20.8 MB |
+| document | document-router |   116 | 59.0 MB |
++----------------------------------------------+
+! tibco-mainframe-webui@2.2.0: no package at 
+C:\github\docushift-tool\families\en-us-tib-mainframe\downloads\tibco-mainframe
+-webui-2.2.0.zip; run `docushift download` first
+Recorded 15 notes -- `docushift report --run 911`.

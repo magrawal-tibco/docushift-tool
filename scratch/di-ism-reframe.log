@@ -1,0 +1,27 @@
+Reframing 22 version(s)...
+  v ibi-data-intelligence@2.1.0 52 topic(s) -> 52 page(s)
+  v ibi-data-intelligence@2.0.0 148 topic(s) -> 148 page(s)
+  v ibi-data-intelligence@1.2.0 150 topic(s) -> 150 page(s)
+  v ibi-data-intelligence@1.1.0 150 topic(s) -> 150 page(s)
+  v ibi-data-intelligence@1.0.0 104 topic(s) -> 104 page(s)
+  v ibi-data-quality@5.2.2 41 topic(s) -> 41 page(s)
+  v ibi-data-quality@5.2.1 39 topic(s) -> 39 page(s)
+  v ibi-iway-service-manager@9.3.0 1674 topic(s) -> 1729 page(s)
+  v ibi-iway-service-manager@9.2.0 1666 topic(s) -> 1733 page(s)
+  v ibi-iway-service-manager-edi-add-on@9.3.0 25 topic(s) -> 26 page(s)
+  v ibi-iway-service-manager-edi-add-on@9.1.1 25 topic(s) -> 26 page(s)
+                 Reframe                  
+┌─────────────────────────────┬──────────┐
+│ Outcome                     │ Versions │
+├─────────────────────────────┼──────────┤
+│ Reframed                    │       11 │
+│ Already current             │        0 │
+│ Not Flare or DITA (skipped) │       11 │
+│ No converted tree           │        0 │
+│ Failed                      │        0 │
+└─────────────────────────────┴──────────┘
+4074 topic(s) read into 4198 page(s).
+Files: 27782 source doc -> 4198 converted -> 4198 merged (0.0% fewer at the 
+merge, 84.9% end to end); 13954 file(s) standing in the measured merged 
+tree(s).
+Findings: 11 warnings, 2 notes.

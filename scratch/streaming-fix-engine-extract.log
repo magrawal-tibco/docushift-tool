@@ -1,0 +1,36 @@
+| Category | Destination     | Files |   Size |
+|----------+-----------------+-------+--------|
+| document | document-router |     4 | 0.2 MB |
++---------------------------------------------+
+| Category | Destination     | Files |   Size |
+|----------+-----------------+-------+--------|
+| document | document-router |     4 | 0.2 MB |
++---------------------------------------------+
+| Category | Destination     | Files |   Size |
+|----------+-----------------+-------+--------|
+| document | document-router |     4 | 0.2 MB |
++---------------------------------------------+
+| Category | Destination     | Files |   Size |
+|----------+-----------------+-------+--------|
+| document | document-router |     4 | 0.2 MB |
++---------------------------------------------+
+Extracting 1 version(s)...
+                Extract                
++-------------------------------------+
+| Outcome                  | Versions |
+|--------------------------+----------|
+| Extracted                |        0 |
+| Already current          |        1 |
+| Measured from cache      |        0 |
+| No package               |        0 |
+| Refused (unsafe archive) |        0 |
+| Failed                   |        0 |
++-------------------------------------+
+       Engines       
++-------------------+
+| Engine | Versions |
+|--------+----------|
+| auto   |        1 |
++-------------------+
+? tibco-streambase-high-performance-fix-engine@10.6.5: engine undetected 
+(`auto`)

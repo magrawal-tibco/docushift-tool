@@ -1,0 +1,55 @@
+Verifying 14 version(s) (local only); 2 triage entr(ies); redirect sample 10, 
+seed 66368...
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-app-studio/online-help/9-3-0: 
+lost, 298 old page(s), 234 lost, 0 warning(s), 0 explained
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-app-studio/online-help/9-3-1: 
+lost, 297 old page(s), 1 lost, 0 warning(s), 0 explained
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-app-studio/online-help/9-3-2: 
+lost, 297 old page(s), 1 lost, 0 warning(s), 0 explained
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-app-studio/online-help/9-3-3: 
+lost, 297 old page(s), 4 lost, 0 warning(s), 0 explained
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-app-studio/online-help/9-3-4: 
+lost, 297 old page(s), 2 lost, 0 warning(s), 0 explained
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-app-studio/online-help/9-3-5: 
+lost, 303 old page(s), 299 lost, 0 warning(s), 0 explained
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-app-studio/online-help/9-3-6: 
+lost, 302 old page(s), 258 lost, 0 warning(s), 0 explained
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-app-studio/online-help/9-3-7: 
+lost, 262 old page(s), 258 lost, 0 warning(s), 0 explained
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-app-studio/online-help/9-3-8: 
+lost, 323 old page(s), 261 lost, 17 warning(s), 0 explained
+  x loc-ibi-webfocus-userdocs/ja-jp/ibi-webfocus-app-studio/online-help/9-3-0: 
+lost, 298 old page(s), 818 lost, 0 warning(s), 0 explained
+  x loc-ibi-webfocus-userdocs/ja-jp/ibi-webfocus-app-studio/online-help/9-3-5: 
+lost, 303 old page(s), 892 lost, 0 warning(s), 0 explained
+  x loc-ibi-webfocus-userdocs/ja-jp/ibi-webfocus-app-studio/online-help/9-3-6: 
+lost, 302 old page(s), 770 lost, 0 warning(s), 0 explained
+  x loc-ibi-webfocus-userdocs/ja-jp/ibi-webfocus-app-studio/online-help/9-3-7: 
+lost, 262 old page(s), 769 lost, 0 warning(s), 0 explained
+  x loc-ibi-webfocus-userdocs/ja-jp/ibi-webfocus-app-studio/online-help/9-3-8: 
+lost, 323 old page(s), 900 lost, 0 warning(s), 0 explained
+                verify                 
+┌─────────────────────────────┬───────┐
+│ Finding                     │ Count │
+├─────────────────────────────┼───────┤
+│ VERIFY_LIVE_UNCHECKABLE     │   100 │
+│ VERIFY_REDIRECT_MAP_MISSING │     4 │
+│ VERIFY_REDIRECT_SAMPLED     │    10 │
+│ VERIFY_REDIRECT_UNCONVERTED │   926 │
+│ VERIFY_TEXT_DROPPED         │    14 │
+│ VERIFY_TOC_ENTRY_MISSING    │  1424 │
+│ VERIFY_TOC_MOVED            │    17 │
+│ VERIFY_TOPIC_MISSING        │  4025 │
+│ VERIFY_TOPIC_UNFILED        │   134 │
+└─────────────────────────────┴───────┘
+0 request(s) made; the rest came from cache/verify/.
+Index: C:\github\docushift-tool\reports\verify\INDEX.html

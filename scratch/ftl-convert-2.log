@@ -1,0 +1,86 @@
+Converting 12 version(s)...
+  v tibco-eftl-enterprise-edition@7.3.0 138 topic(s), 12 asset(s), 1 unit(s), 
+143 nav node(s), 4 generated -> 157 file(s)
+  v tibco-eftl-enterprise-edition@7.2.0 138 topic(s), 13 asset(s), 1 unit(s), 
+143 nav node(s), 4 generated -> 158 file(s)
+  v tibco-eftl-enterprise-edition@7.1.3 138 topic(s), 12 asset(s), 1 unit(s), 
+143 nav node(s), 4 generated -> 156 file(s)
+  v tibco-eftl-enterprise-edition@7.1.2 145 topic(s), 12 asset(s), 1 unit(s), 
+151 nav node(s), 5 generated -> 164 file(s)
+  v tibco-eftl-enterprise-edition@7.1.1 145 topic(s), 12 asset(s), 1 unit(s), 
+151 nav node(s), 5 generated -> 164 file(s)
+  v tibco-eftl-enterprise-edition@7.1.0 143 topic(s), 12 asset(s), 1 unit(s), 
+149 nav node(s), 5 generated -> 162 file(s)
+  v tibco-ftl-enterprise-edition@7.3.0 796 topic(s), 78 asset(s), 1 unit(s), 
+882 nav node(s), 7 generated -> 884 file(s)
+  v tibco-ftl-enterprise-edition@7.2.0 744 topic(s), 90 asset(s), 1 unit(s), 
+830 nav node(s), 7 generated -> 844 file(s)
+  v tibco-ftl-enterprise-edition@7.1.3 746 topic(s), 90 asset(s), 1 unit(s), 
+832 nav node(s), 7 generated -> 845 file(s)
+  v tibco-ftl-enterprise-edition@7.1.2 788 topic(s), 92 asset(s), 1 unit(s), 
+874 nav node(s), 8 generated -> 891 file(s)
+  v tibco-ftl-enterprise-edition@7.1.1 813 topic(s), 95 asset(s), 1 unit(s), 
+904 nav node(s), 9 generated -> 920 file(s)
+  v tibco-ftl-enterprise-edition@7.1.0 810 topic(s), 95 asset(s), 1 unit(s), 
+901 nav node(s), 9 generated -> 917 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |       12 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+5544 topic(s), 613 asset(s) written.
+6262 file(s) standing in the measured output tree(s).
+tibco-eftl-enterprise-edition@7.3.0: 12 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 252 orphan (9.4 MB)
+tibco-eftl-enterprise-edition@7.3.0: skipped 134 api-reference, 4 
+generated-directory, 2 no-content-container, 5 runtime-stub
+tibco-eftl-enterprise-edition@7.2.0: 13 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 209 orphan (5.1 MB)
+tibco-eftl-enterprise-edition@7.2.0: skipped 135 api-reference, 4 
+generated-directory, 2 no-content-container, 5 runtime-stub
+tibco-eftl-enterprise-edition@7.1.3: 12 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 208 orphan (5.0 MB)
+tibco-eftl-enterprise-edition@7.1.3: skipped 135 api-reference, 4 
+generated-directory, 2 no-content-container, 5 runtime-stub
+tibco-eftl-enterprise-edition@7.1.2: 12 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 208 orphan (5.0 MB)
+tibco-eftl-enterprise-edition@7.1.2: skipped 135 api-reference, 4 
+generated-directory, 2 no-content-container, 5 runtime-stub
+tibco-eftl-enterprise-edition@7.1.1: 12 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 235 orphan (5.5 MB)
+tibco-eftl-enterprise-edition@7.1.1: skipped 191 api-reference, 4 
+generated-directory, 2 no-content-container, 6 runtime-stub
+tibco-eftl-enterprise-edition@7.1.0: 12 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 224 orphan (5.3 MB)
+tibco-eftl-enterprise-edition@7.1.0: skipped 191 api-reference, 4 
+generated-directory, 2 no-content-container, 6 runtime-stub
+tibco-ftl-enterprise-edition@7.3.0: 81 resolved, 0 skin, 0 escaped, 0 dangling,
+0 case-mismatch, 436 orphan (23.9 MB)
+tibco-ftl-enterprise-edition@7.3.0: skipped 374 api-reference, 4 
+generated-directory, 1 no-content-container, 4 runtime-stub
+tibco-ftl-enterprise-edition@7.2.0: 94 resolved, 0 skin, 0 escaped, 0 dangling,
+0 case-mismatch, 374 orphan (18.2 MB)
+tibco-ftl-enterprise-edition@7.2.0: skipped 373 api-reference, 4 
+generated-directory, 1 no-content-container, 4 runtime-stub
+tibco-ftl-enterprise-edition@7.1.3: 94 resolved, 0 skin, 0 escaped, 0 dangling,
+0 case-mismatch, 374 orphan (18.0 MB)
+tibco-ftl-enterprise-edition@7.1.3: skipped 375 api-reference, 4 
+generated-directory, 1 no-content-container, 4 runtime-stub
+tibco-ftl-enterprise-edition@7.1.2: 99 resolved, 0 skin, 0 escaped, 2 dangling,
+0 case-mismatch, 366 orphan (17.6 MB)
+tibco-ftl-enterprise-edition@7.1.2: skipped 375 api-reference, 3 
+generated-directory, 1 no-content-container, 4 runtime-stub
+tibco-ftl-enterprise-edition@7.1.1: 102 resolved, 0 skin, 0 escaped, 2 
+dangling, 0 case-mismatch, 443 orphan (19.7 MB)
+tibco-ftl-enterprise-edition@7.1.1: skipped 373 api-reference, 3 
+generated-directory, 206 no-content-container, 4 runtime-stub
+tibco-ftl-enterprise-edition@7.1.0: 102 resolved, 0 skin, 0 escaped, 2 
+dangling, 0 case-mismatch, 369 orphan (18.1 MB)
+tibco-ftl-enterprise-edition@7.1.0: skipped 373 api-reference, 3 
+generated-directory, 1 no-content-container, 4 runtime-stub
+Findings: 3 errors, 247 warnings, 67 notes.

@@ -1,0 +1,159 @@
+Converting 30 version(s)...
+  v tibco-administrator-enterprise-edition@5.13.0 423 topic(s), 114 asset(s), 1
+unit(s), 426 nav node(s), 3 generated -> 544 file(s)
+C:\github\docushift-tool\src\docushift\transforms\markdown.py:89: XMLParsedAsHTMLWarning: It looks like you're using an HTML parser to parse an XML document.
+
+Assuming this really is an XML document, what you're doing might work, but you should know that using an XML parser will be more reliable. To parse this document as XML, make sure you have the Python package 'lxml' installed, and pass the keyword argument `features="xml"` into the BeautifulSoup constructor.
+
+If you want or need to use an HTML parser on this document, you can make this warning go away by filtering it. To do that, run this code before calling the BeautifulSoup constructor:
+
+    from bs4 import XMLParsedAsHTMLWarning
+    import warnings
+
+    warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+  return BeautifulSoup(_CDATA.sub(_unwrap_cdata, text), PARSER)
+  v tibco-administrator-enterprise-edition@5.12.4 271 topic(s), 112 asset(s), 3
+unit(s), 274 nav node(s), 7 generated -> 394 file(s)
+  v tibco-administrator-enterprise-edition@5.12.2 271 topic(s), 112 asset(s), 3
+unit(s), 274 nav node(s), 7 generated -> 394 file(s)
+  v tibco-designer-add-in-for-tibco-business-studio@1.5.0 41 topic(s), 45 
+asset(s), 2 unit(s), 43 nav node(s), 3 generated -> 91 file(s)
+  v tibco-designer-add-in-for-tibco-business-studio@1.4.0 43 topic(s), 45 
+asset(s), 2 unit(s), 47 nav node(s), 5 generated -> 95 file(s)
+  v tibco-designer-add-in-for-tibco-business-studio@1.3.2 36 topic(s), 45 
+asset(s), 1 unit(s), 38 nav node(s), 2 generated -> 85 file(s)
+  v tibco-designer-add-in-for-tibco-business-studio@1.3.1 36 topic(s), 45 
+asset(s), 1 unit(s), 38 nav node(s), 2 generated -> 85 file(s)
+  v tibco-designer-add-in-for-tibco-business-studio@1.2.0 36 topic(s), 45 
+asset(s), 1 unit(s), 38 nav node(s), 2 generated -> 85 file(s)
+  v tibco-designer-add-in-for-tibco-business-studio@1.1.1 34 topic(s), 41 
+asset(s), 1 unit(s), 36 nav node(s), 2 generated -> 79 file(s)
+  v tibco-designer-add-in-for-tibco-business-studio@1.1.0 34 topic(s), 41 
+asset(s), 1 unit(s), 36 nav node(s), 2 generated -> 79 file(s)
+  v tibco-designer-add-in-for-tibco-business-studio@1.0.0 34 topic(s), 41 
+asset(s), 1 unit(s), 36 nav node(s), 2 generated -> 79 file(s)
+  v tibco-runtime-agent@5.13.0 643 topic(s), 380 asset(s), 2 unit(s), 649 nav 
+node(s), 8 generated -> 1035 file(s)
+  v tibco-runtime-agent@5.12.4 273 topic(s), 346 asset(s), 8 unit(s), 276 nav 
+node(s), 17 generated -> 640 file(s)
+  v tibco-runtime-agent@5.12.3 115 topic(s), 248 asset(s), 2 unit(s), 118 nav 
+node(s), 5 generated -> 372 file(s)
+  v tibco-runtime-agent@5.12.2 267 topic(s), 347 asset(s), 8 unit(s), 270 nav 
+node(s), 17 generated -> 635 file(s)
+            Convert             
+┌───────────────────┬──────────┐
+│ Outcome           │ Versions │
+├───────────────────┼──────────┤
+│ Converted         │       15 │
+│ Already current   │        0 │
+│ No extracted tree │       15 │
+│ Engine unknown    │        0 │
+│ Failed            │        0 │
+└───────────────────┴──────────┘
+2557 topic(s), 2007 asset(s) written.
+4692 file(s) standing in the measured output tree(s).
+tibco-administrator-enterprise-edition@5.13.0: 114 resolved, 0 skin, 7 escaped,
+0 dangling, 0 case-mismatch, 102 orphan (3.6 MB)
+tibco-administrator-enterprise-edition@5.13.0: CSH 46 resolved, 0 unresolved, 0
+ambiguous
+tibco-administrator-enterprise-edition@5.13.0: skipped 4 generated-directory, 2
+runtime-stub
+tibco-administrator-enterprise-edition@5.12.4: 114 resolved, 1 skin, 0 escaped,
+0 dangling, 0 case-mismatch, 48 orphan (0.8 MB)
+tibco-administrator-enterprise-edition@5.12.4: CSH 46 resolved, 0 unresolved, 0
+ambiguous
+tibco-administrator-enterprise-edition@5.12.4: skipped 4 generated-list, 6 
+runtime-stub
+tibco-administrator-enterprise-edition@5.12.2: 114 resolved, 1 skin, 0 escaped,
+0 dangling, 0 case-mismatch, 48 orphan (0.8 MB)
+tibco-administrator-enterprise-edition@5.12.2: CSH 46 resolved, 0 unresolved, 0
+ambiguous
+tibco-administrator-enterprise-edition@5.12.2: skipped 4 generated-list, 6 
+runtime-stub
+tibco-designer-add-in-for-tibco-business-studio@1.5.0: 48 resolved, 6 skin, 0 
+escaped, 0 dangling, 0 case-mismatch, 30 orphan (0.5 MB)
+tibco-designer-add-in-for-tibco-business-studio@1.5.0: skipped 4 runtime-stub
+tibco-designer-add-in-for-tibco-business-studio@1.4.0: 48 resolved, 6 skin, 0 
+escaped, 0 dangling, 0 case-mismatch, 30 orphan (0.5 MB)
+tibco-designer-add-in-for-tibco-business-studio@1.4.0: skipped 4 runtime-stub
+tibco-designer-add-in-for-tibco-business-studio@1.3.2: 48 resolved, 3 skin, 0 
+escaped, 0 dangling, 0 case-mismatch, 21 orphan (0.5 MB)
+tibco-designer-add-in-for-tibco-business-studio@1.3.2: skipped 1 runtime-stub
+tibco-designer-add-in-for-tibco-business-studio@1.3.1: 48 resolved, 3 skin, 0 
+escaped, 0 dangling, 0 case-mismatch, 18 orphan (0.5 MB)
+tibco-designer-add-in-for-tibco-business-studio@1.3.1: skipped 2 runtime-stub
+tibco-designer-add-in-for-tibco-business-studio@1.2.0: 48 resolved, 3 skin, 0 
+escaped, 0 dangling, 0 case-mismatch, 18 orphan (0.5 MB)
+tibco-designer-add-in-for-tibco-business-studio@1.2.0: skipped 1 runtime-stub
+tibco-designer-add-in-for-tibco-business-studio@1.1.1: 44 resolved, 3 skin, 0 
+escaped, 0 dangling, 0 case-mismatch, 18 orphan (0.5 MB)
+tibco-designer-add-in-for-tibco-business-studio@1.1.1: skipped 1 runtime-stub
+tibco-designer-add-in-for-tibco-business-studio@1.1.0: 44 resolved, 3 skin, 0 
+escaped, 0 dangling, 0 case-mismatch, 18 orphan (0.5 MB)
+tibco-designer-add-in-for-tibco-business-studio@1.1.0: skipped 1 runtime-stub
+tibco-designer-add-in-for-tibco-business-studio@1.0.0: 44 resolved, 3 skin, 0 
+escaped, 0 dangling, 0 case-mismatch, 18 orphan (0.4 MB)
+tibco-designer-add-in-for-tibco-business-studio@1.0.0: skipped 1 runtime-stub
+tibco-runtime-agent@5.13.0: 380 resolved, 0 skin, 9 escaped, 0 dangling, 0 
+case-mismatch, 182 orphan (7.6 MB)
+tibco-runtime-agent@5.13.0: CSH 108 resolved, 0 unresolved, 0 ambiguous
+tibco-runtime-agent@5.13.0: skipped 8 generated-directory, 4 runtime-stub
+tibco-runtime-agent@5.12.4: 379 resolved, 0 skin, 0 escaped, 0 dangling, 0 
+case-mismatch, 125 orphan (2.0 MB)
+tibco-runtime-agent@5.12.4: CSH 108 resolved, 0 unresolved, 0 ambiguous
+tibco-runtime-agent@5.12.4: skipped 5 empty, 10 generated-list, 16 runtime-stub
+tibco-runtime-agent@5.12.3: 276 resolved, 0 skin, 0 escaped, 0 dangling, 0 
+case-mismatch, 35 orphan (0.5 MB)
+tibco-runtime-agent@5.12.3: CSH 108 resolved, 0 unresolved, 0 ambiguous
+tibco-runtime-agent@5.12.3: skipped 4 generated-list, 4 runtime-stub
+tibco-runtime-agent@5.12.2: 380 resolved, 0 skin, 0 escaped, 0 dangling, 0 
+case-mismatch, 124 orphan (2.0 MB)
+tibco-runtime-agent@5.12.2: CSH 108 resolved, 0 unresolved, 0 ambiguous
+tibco-runtime-agent@5.12.2: skipped 10 generated-list, 16 runtime-stub
+! tibco-administrator-enterprise-edition@5.12.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-tib-tra\extracted\tibco-administrator-e
+nterprise-edition\5.12.0; run `docushift extract` first
+! tibco-administrator-enterprise-edition@5.11.3: no extracted tree at 
+C:\github\docushift-tool\families\en-us-tib-tra\extracted\tibco-administrator-e
+nterprise-edition\5.11.3; run `docushift extract` first
+! tibco-administrator-enterprise-edition@5.11.2: no extracted tree at 
+C:\github\docushift-tool\families\en-us-tib-tra\extracted\tibco-administrator-e
+nterprise-edition\5.11.2; run `docushift extract` first
+! tibco-administrator-enterprise-edition@5.11.1: no extracted tree at 
+C:\github\docushift-tool\families\en-us-tib-tra\extracted\tibco-administrator-e
+nterprise-edition\5.11.1; run `docushift extract` first
+! tibco-administrator-enterprise-edition@5.10.3: no extracted tree at 
+C:\github\docushift-tool\families\en-us-tib-tra\extracted\tibco-administrator-e
+nterprise-edition\5.10.3; run `docushift extract` first
+! tibco-administrator-enterprise-edition@5.10.2: no extracted tree at 
+C:\github\docushift-tool\families\en-us-tib-tra\extracted\tibco-administrator-e
+nterprise-edition\5.10.2; run `docushift extract` first
+! tibco-designer@5.10.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-tib-tra\extracted\tibco-designer\5.10.0
+; run `docushift extract` first
+! tibco-runtime-agent@5.12.1: no extracted tree at 
+C:\github\docushift-tool\families\en-us-tib-tra\extracted\tibco-runtime-agent\5
+.12.1; run `docushift extract` first
+! tibco-runtime-agent@5.12.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-tib-tra\extracted\tibco-runtime-agent\5
+.12.0; run `docushift extract` first
+! tibco-runtime-agent@5.11.3: no extracted tree at 
+C:\github\docushift-tool\families\en-us-tib-tra\extracted\tibco-runtime-agent\5
+.11.3; run `docushift extract` first
+! tibco-runtime-agent@5.11.2: no extracted tree at 
+C:\github\docushift-tool\families\en-us-tib-tra\extracted\tibco-runtime-agent\5
+.11.2; run `docushift extract` first
+! tibco-runtime-agent@5.11.1: no extracted tree at 
+C:\github\docushift-tool\families\en-us-tib-tra\extracted\tibco-runtime-agent\5
+.11.1; run `docushift extract` first
+! tibco-runtime-agent@5.11.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-tib-tra\extracted\tibco-runtime-agent\5
+.11.0; run `docushift extract` first
+! tibco-runtime-agent@5.10.3: no extracted tree at 
+C:\github\docushift-tool\families\en-us-tib-tra\extracted\tibco-runtime-agent\5
+.10.3; run `docushift extract` first
+! tibco-runtime-agent@5.10.2: no extracted tree at 
+C:\github\docushift-tool\families\en-us-tib-tra\extracted\tibco-runtime-agent\5
+.10.2; run `docushift extract` first
+Findings: 37 warnings, 65 notes.

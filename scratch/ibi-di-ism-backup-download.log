@@ -1,0 +1,26 @@
+Downloading 22 version(s) with 4 worker(s)...
+  v ibi-data-intelligence@2.1.0 46.9 MiB
+  v ibi-data-intelligence@2.0.0 56.5 MiB
+  v ibi-data-intelligence@1.2.0 56.9 MiB
+  v ibi-data-intelligence@1.1.0 46.7 MiB
+  v ibi-data-intelligence@1.0.0 29.6 MiB
+  v ibi-data-quality@5.2.2 22.9 MiB
+  v ibi-data-quality@5.2.1 16.2 MiB
+  v ibi-data-quality@5.2.0 4.6 MiB
+  v ibi-iway-service-manager@9.3.0 370.7 MiB
+  v ibi-iway-service-manager@9.2.0 371.8 MiB
+  v ibi-iway-service-manager@9.1.0 120.2 MiB
+  v ibi-iway-service-manager@8.1.0 85.2 MiB
+  v ibi-iway-service-manager-edi-add-on@9.3.0 45.2 MiB
+  v ibi-iway-service-manager-edi-add-on@9.1.1 31.3 MiB
+           Download            
++-----------------------------+
+| Outcome          | Versions |
+|------------------+----------|
+| Downloaded       |       14 |
+| Already current  |        0 |
+| Skipped (manual) |        8 |
+| No ZIP endpoint  |        0 |
+| Failed           |        0 |
++-----------------------------+
+1304.8 MiB written.

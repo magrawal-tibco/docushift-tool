@@ -1,0 +1,46 @@
+Extracting 22 version(s)...
+  v ibi-data-quality@5.1.1 5 file(s), auto
+  v ibi-data-quality@5.1.0 5 file(s), auto
+  v ibi-data-quality@5.0.0 4 file(s), auto
+  v ibi-data-quality@3.1.0 4 file(s), auto
+  v ibi-data-quality@3.0.0 3 file(s), auto
+  v ibi-iway-service-manager@8.0.7 4 file(s), auto
+  v ibi-iway-service-manager@8.0.6 29 file(s), auto
+  v ibi-iway-service-manager@8.0.5 5 file(s), auto
+                Extract                
++-------------------------------------+
+| Outcome                  | Versions |
+|--------------------------+----------|
+| Extracted                |        8 |
+| Already current          |       14 |
+| Measured from cache      |        0 |
+| No package               |        0 |
+| Refused (unsafe archive) |        0 |
+| Failed                   |        0 |
++-------------------------------------+
+59 file(s) written.
+       Engines       
++-------------------+
+| Engine | Versions |
+|--------+----------|
+| auto   |       11 |
+| flare  |       11 |
++-------------------+
+? ibi-data-quality@5.2.0: engine undetected (`auto`)
+? ibi-data-quality@5.1.1: engine undetected (`auto`)
+? ibi-data-quality@5.1.0: engine undetected (`auto`)
+? ibi-data-quality@5.0.0: engine undetected (`auto`)
+? ibi-data-quality@3.1.0: engine undetected (`auto`)
+? ibi-data-quality@3.0.0: engine undetected (`auto`)
+? ibi-iway-service-manager@9.1.0: engine undetected (`auto`)
+? ibi-iway-service-manager@8.1.0: engine undetected (`auto`)
+? ibi-iway-service-manager@8.0.7: engine undetected (`auto`)
+? ibi-iway-service-manager@8.0.6: engine undetected (`auto`)
+? ibi-iway-service-manager@8.0.5: engine undetected (`auto`)
+CSH: 0 source(s), 0 identifier(s).
+                     Assets                      
++-----------------------------------------------+
+| Category | Destination     | Files |     Size |
+|----------+-----------------+-------+----------|
+| document | document-router |    59 | 105.6 MB |
++-----------------------------------------------+

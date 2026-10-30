@@ -18,3 +18,6 @@ dist/
 .ruff_cache/
 .coverage
 htmlcov/
+
+# Hand-repaired vendor package (667 MB, over GitHub's 100 MB limit); kept local only.
+scratch/bpm-4.2.0-repaired/

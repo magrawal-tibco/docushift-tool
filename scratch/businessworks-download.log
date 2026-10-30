@@ -1,0 +1,32 @@
+Downloading 10 version(s) with 4 worker(s)...
+  v 
+premium-subscription-for-tibco-businessworks-container-edition-and-plug-ins-for
+-aws-marketplace@2.3.1 0.0 MiB
+  v tibco-activematrix-businessworks@6.13.0 379.2 MiB
+  v tibco-activematrix-businessworks@6.12.0 389.8 MiB
+  v tibco-activematrix-businessworks@5.16.1 83.8 MiB
+  x tibco-businessworks-container-edition-buildpack-for-pcf@2.2.1
+  v tibco-businessworks-enterprise@3.12.0 0.2 MiB
+  v tibco-businessworks-enterprise@3.11.0 0.2 MiB
+  v tibco-businessworks-enterprise@3.10.0 0.2 MiB
+  x tibco-businessworks-formbuilder@5.3.2
+  v tibco-integration@3.16.0 0.1 MiB
+           Download            
++-----------------------------+
+| Outcome          | Versions |
+|------------------+----------|
+| Downloaded       |        8 |
+| Already current  |        0 |
+| Skipped (manual) |        0 |
+| No ZIP endpoint  |        0 |
+| Failed           |        2 |
++-----------------------------+
+853.5 MiB written.
+! tibco-businessworks-container-edition-buildpack-for-pcf@2.2.1: NotAPackage: 
+https://docs.tibco.com/pub/bwce-pcf/2.2.1/tibco-businessworks-container-edition
+-buildpack-for-pcf-2-2-1_documentation.zip did not return a readable ZIP (most 
+often an error or sign-in page served as HTTP 200)
+! tibco-businessworks-formbuilder@5.3.2: NotAPackage: 
+https://docs.tibco.com/pub/formbuilder/5.3.2/tibco-businessworks-formbuilder-5-
+3-2_documentation.zip did not return a readable ZIP (most often an error or 
+sign-in page served as HTTP 200)

@@ -1,0 +1,68 @@
+Extracting 11 version(s)...
+  v ibi-mdm-add-on-for-global-data-synchronization@4.0.0 791 file(s), flare, 1 
+root(s)
+  v tibco-enterprise-mdm@1.0.0 5 file(s), auto
+  v tibco-mdm@11.1.0 7146 file(s), flare, 3 root(s)
+  v tibco-mdm@11.0.0 7005 file(s), flare, 3 root(s)
+  v tibco-mdm@10.0.0 16202 file(s), flare, 3 root(s)
+  v tibco-mdm@9.3.2 7569 file(s), flare, 3 root(s)
+  v tibco-mdm-studio@6.1.1 8351 file(s), flare, 2 root(s)
+  v tibco-mdm-studio@6.1.0 4382 file(s), flare, 1 root(s)
+  v tibco-mdm-studio@6.0.0 8316 file(s), flare, 2 root(s)
+  v tibco-mdm-studio@5.3.0 8163 file(s), flare, 2 root(s)
+  v tibco-mdm-studio@5.2.0 2146 file(s), dita, 2 root(s)
+                Extract                
++-------------------------------------+
+| Outcome                  | Versions |
+|--------------------------+----------|
+| Extracted                |       11 |
+| Already current          |        0 |
+| Measured from cache      |        0 |
+| No package               |        0 |
+| Refused (unsafe archive) |        0 |
+| Failed                   |        0 |
++-------------------------------------+
+70076 file(s) written.
+       Engines       
++-------------------+
+| Engine | Versions |
+|--------+----------|
+| flare  |        9 |
+| auto   |        1 |
+| dita   |        1 |
++-------------------+
+? tibco-enterprise-mdm@1.0.0: engine undetected (`auto`)
+CSH: 22 source(s), 558 identifier(s).
+                        Assets                        
++----------------------------------------------------+
+| Category      | Destination     | Files |     Size |
+|---------------+-----------------+-------+----------|
+| topic         | api-reference   |   648 |   7.7 MB |
+| other         | api-reference   |    12 |   0.1 MB |
+| topic         | output-root     | 24006 | 409.2 MB |
+| image         | output-root     | 29604 | 748.1 MB |
+| document      | output-root     |     4 |   0.2 MB |
+| source-format | output-root     |   942 | 110.5 MB |
+| skin          | output-root     | 14471 | 470.8 MB |
+| other         | output-root     |   241 |  21.3 MB |
+| document      | document-router |   148 | 383.6 MB |
++----------------------------------------------------+
+? tibco-mdm@11.1.0: tibco-mdm-11-1-0/Custom-installation/API-Reference/ 1 
+file(s), no known generator marker
+? tibco-mdm@11.1.0: tibco-mdm-11-1-0/html/API-Reference/ 1 file(s), no known 
+generator marker
+? tibco-mdm@11.0.0: ibi-mdm-11-0-0/Custom-installation/API-Reference/ 1 
+file(s), no known generator marker
+? tibco-mdm@11.0.0: ibi-mdm-11-0-0/html/API-Reference/ 1 file(s), no known 
+generator marker
+? tibco-mdm@11.0.0: ibi-mdm-11-0-0/relnotes/API-Reference/ 1 file(s), no known 
+generator marker
+? tibco-mdm@10.0.0: ibi-mdm-10-0-0/Custom-installation/API-Reference/ 1 
+file(s), no known generator marker
+? tibco-mdm@10.0.0: ibi-mdm-10-0-0/html/API-Reference/ 1 file(s), no known 
+generator marker
+? tibco-mdm@10.0.0: ibi-mdm-10-0-0/relnotes/API-Reference/ 1 file(s), no known 
+generator marker
+? tibco-mdm@9.3.2: tibco-mdm-9-3-2/html/API-Reference/ 1 file(s), no known 
+generator marker
+Recorded 9 notes -- `docushift report --run 874`.

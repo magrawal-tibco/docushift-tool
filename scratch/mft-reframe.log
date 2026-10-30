@@ -1,0 +1,68 @@
+Reframing 14 version(s)...
+  v tibco-managed-file-transfer-command-center@8.7.1 759 topic(s) -> 399 
+page(s)
+  v tibco-managed-file-transfer-command-center@8.7.0 758 topic(s) -> 399 
+page(s)
+  v tibco-managed-file-transfer-command-center@8.6.0 751 topic(s) -> 399 
+page(s)
+  v tibco-managed-file-transfer-internet-server@8.7.1 758 topic(s) -> 389 
+page(s)
+  v tibco-managed-file-transfer-internet-server@8.7.0 757 topic(s) -> 389 
+page(s)
+  v tibco-managed-file-transfer-internet-server@8.6.0 750 topic(s) -> 389 
+page(s)
+  v tibco-managed-file-transfer-platform-server-for-unix@8.2.0 205 topic(s) -> 
+63 page(s)
+  v tibco-managed-file-transfer-platform-server-for-unix@8.1.2 198 topic(s) -> 
+63 page(s)
+  v tibco-managed-file-transfer-platform-server-for-unix@8.1.1 198 topic(s) -> 
+63 page(s)
+  v tibco-managed-file-transfer-platform-server-for-windows@8.2.0 166 topic(s) 
+-> 42 page(s)
+  v tibco-managed-file-transfer-platform-server-for-windows@8.1.0 168 topic(s) 
+-> 45 page(s)
+  v tibco-managed-file-transfer-platform-server-for-z-linux@8.1.2 202 topic(s) 
+-> 58 page(s)
+  v tibco-managed-file-transfer-platform-server-for-z-linux@8.1.1 198 topic(s) 
+-> 60 page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |       13 |
+| Already current             |        0 |
+| Not Flare or DITA (skipped) |        1 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+5868 topic(s) read into 2758 page(s).
+Files: 16748 source doc -> 7313 converted -> 2758 merged (62.3% fewer at the 
+merge, 83.5% end to end); 4273 file(s) standing in the measured merged tree(s).
+647 page(s) queued for editorial review:
+  tibco-managed-file-transfer-command-center@8.7.1: 70 of 399 -- see 
+review-queue.csv
+  tibco-managed-file-transfer-command-center@8.7.0: 69 of 399 -- see 
+review-queue.csv
+  tibco-managed-file-transfer-command-center@8.6.0: 69 of 399 -- see 
+review-queue.csv
+  tibco-managed-file-transfer-internet-server@8.7.1: 99 of 389 -- see 
+review-queue.csv
+  tibco-managed-file-transfer-internet-server@8.7.0: 99 of 389 -- see 
+review-queue.csv
+  tibco-managed-file-transfer-internet-server@8.6.0: 99 of 389 -- see 
+review-queue.csv
+  tibco-managed-file-transfer-platform-server-for-unix@8.2.0: 25 of 63 -- see 
+review-queue.csv
+  tibco-managed-file-transfer-platform-server-for-unix@8.1.2: 25 of 63 -- see 
+review-queue.csv
+  tibco-managed-file-transfer-platform-server-for-unix@8.1.1: 25 of 63 -- see 
+review-queue.csv
+  tibco-managed-file-transfer-platform-server-for-windows@8.2.0: 11 of 42 -- 
+see review-queue.csv
+  tibco-managed-file-transfer-platform-server-for-windows@8.1.0: 10 of 45 -- 
+see review-queue.csv
+  tibco-managed-file-transfer-platform-server-for-z-linux@8.1.2: 23 of 58 -- 
+see review-queue.csv
+  tibco-managed-file-transfer-platform-server-for-z-linux@8.1.1: 23 of 60 -- 
+see review-queue.csv
+Findings: 13 warnings, 26 notes.

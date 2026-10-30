@@ -1,0 +1,17 @@
+Converting 5 version(s)...
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        0 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        5 |
+| Failed            |        0 |
++------------------------------+
+! ibi-webfocus-reporting-server@9.1.4: engine undetected (`auto`)
+! ibi-webfocus-reporting-server@9.1.3: engine undetected (`auto`)
+! ibi-webfocus-reporting-server@9.1.2: engine undetected (`auto`)
+! ibi-webfocus-reporting-server@9.1.1: engine undetected (`auto`)
+! ibi-webfocus-reporting-server@9.1.0: engine undetected (`auto`)
+Findings: 5 warnings.

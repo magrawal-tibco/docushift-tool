@@ -1,0 +1,34 @@
+Syncing 1 version(s) into C:\github\ibi-docs-aem...
+  v tibco-iway-business-activity-monitor@8.0.5 -> user-guides/8-0-5 1 file(s), 3.8 MB
+  v tibco-iway-business-activity-monitor@8.0.5 -> release-information/8-0-5 3 file(s), 0.3 MB
+  v tibco-iway-business-activity-monitor@8.0.5 -> reference-documents/8-0-5 2 file(s), 0.1 MB
+                                               Sync                                               
++------------------------------------------------------------------------------------------------+
+| Outcome         | Rows | online-help | user-guides | release-information | reference-documents |
+|-----------------+------+-------------+-------------+---------------------+---------------------|
+| Synced          |    3 |           0 |           1 |                   1 |                   1 |
+| Already current |    0 |           0 |           0 |                   0 |                   0 |
+| No source tree  |    1 |           1 |           0 |                   0 |                   0 |
+| Skipped         |    0 |           0 |           0 |                   0 |                   0 |
+| Failed          |    0 |           0 |           0 |                   0 |                   0 |
++------------------------------------------------------------------------------------------------+
+6 file(s), 4.1 MB copied.
+1 product metadata.yml, 3 version.yml written.
+! tibco-iway-business-activity-monitor@8.0.5: no converted tree at C:\github\docushift-tool\output\en-us-ibi-legacy\tibco-iway-business-activity-monitor\8.0.5; run `docushift convert` first
+Syncing 1 version(s) into C:\github\ibi-docs-aem...
+  v tibco-iway-trading-partner-manager@8.0.5 -> user-guides/8-0-5 1 file(s), 6.0 MB
+  v tibco-iway-trading-partner-manager@8.0.5 -> release-information/8-0-5 2 file(s), 0.1 MB
+  v tibco-iway-trading-partner-manager@8.0.5 -> reference-documents/8-0-5 2 file(s), 0.1 MB
+                                               Sync                                               
++------------------------------------------------------------------------------------------------+
+| Outcome         | Rows | online-help | user-guides | release-information | reference-documents |
+|-----------------+------+-------------+-------------+---------------------+---------------------|
+| Synced          |    3 |           0 |           1 |                   1 |                   1 |
+| Already current |    0 |           0 |           0 |                   0 |                   0 |
+| No source tree  |    1 |           1 |           0 |                   0 |                   0 |
+| Skipped         |    0 |           0 |           0 |                   0 |                   0 |
+| Failed          |    0 |           0 |           0 |                   0 |                   0 |
++------------------------------------------------------------------------------------------------+
+5 file(s), 6.2 MB copied.
+1 product metadata.yml, 3 version.yml written.
+! tibco-iway-trading-partner-manager@8.0.5: no converted tree at C:\github\docushift-tool\output\en-us-ibi-legacy\tibco-iway-trading-partner-manager\8.0.5; run `docushift convert` first

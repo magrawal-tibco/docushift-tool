@@ -1,0 +1,23 @@
+Downloading 11 version(s) with 4 worker(s)...
+  v ibi-mdm-add-on-for-global-data-synchronization@4.0.0 8.5 MiB
+  v tibco-enterprise-mdm@1.0.0 0.1 MiB
+  v tibco-mdm@11.1.0 123.6 MiB
+  v tibco-mdm@11.0.0 117.7 MiB
+  v tibco-mdm@10.0.0 193.0 MiB
+  v tibco-mdm@9.3.2 126.8 MiB
+  v tibco-mdm-studio@6.1.1 178.2 MiB
+  v tibco-mdm-studio@6.1.0 107.0 MiB
+  v tibco-mdm-studio@6.0.0 154.8 MiB
+  v tibco-mdm-studio@5.3.0 148.7 MiB
+  v tibco-mdm-studio@5.2.0 51.6 MiB
+           Download            
++-----------------------------+
+| Outcome          | Versions |
+|------------------+----------|
+| Downloaded       |       11 |
+| Already current  |        0 |
+| Skipped (manual) |        0 |
+| No ZIP endpoint  |        0 |
+| Failed           |        0 |
++-----------------------------+
+1210.0 MiB written.

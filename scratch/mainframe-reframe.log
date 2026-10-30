@@ -1,0 +1,39 @@
+Reframing 11 version(s)...
+  v tibco-mainframe-red@3.1.0 229 topic(s) -> 86 page(s)
+  v tibco-mainframe-red@2.5.1 201 topic(s) -> 31 page(s)
+  v tibco-mainframe-tcp-library@3.0.0 59 topic(s) -> 11 page(s)
+  v tibco-mainframe-tcp-library@2.5.0 59 topic(s) -> 11 page(s)
+  v tibco-mainframe-webui@3.0.0 117 topic(s) -> 23 page(s)
+  v tibco-mainframe-webui@2.5.0 117 topic(s) -> 23 page(s)
+  v tibco-red-enabled-for-ziip@3.1.0 16 topic(s) -> 5 page(s)
+  v tibco-red-enabled-for-ziip@2.5.0 14 topic(s) -> 6 page(s)
+  v tibco-substation-es@2.14.0 569 topic(s) -> 125 page(s)
+  v tibco-transaction-interface-for-cics@2.14.0 569 topic(s) -> 125 page(s)
+  v tibco-transaction-interface-for-ims@2.14.0 569 topic(s) -> 125 page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |       11 |
+| Already current             |        0 |
+| Not Flare or DITA (skipped) |        0 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+2519 topic(s) read into 571 page(s).
+Files: 3603 source doc -> 2533 converted -> 571 merged (77.5% fewer at the 
+merge, 84.2% end to end); 815 file(s) standing in the measured merged tree(s).
+96 page(s) queued for editorial review:
+  tibco-mainframe-red@3.1.0: 12 of 86 -- see review-queue.csv
+  tibco-mainframe-red@2.5.1: 11 of 31 -- see review-queue.csv
+  tibco-mainframe-tcp-library@3.0.0: 2 of 11 -- see review-queue.csv
+  tibco-mainframe-tcp-library@2.5.0: 2 of 11 -- see review-queue.csv
+  tibco-mainframe-webui@3.0.0: 3 of 23 -- see review-queue.csv
+  tibco-mainframe-webui@2.5.0: 3 of 23 -- see review-queue.csv
+  tibco-red-enabled-for-ziip@3.1.0: 1 of 5 -- see review-queue.csv
+  tibco-red-enabled-for-ziip@2.5.0: 2 of 6 -- see review-queue.csv
+  tibco-substation-es@2.14.0: 20 of 125 -- see review-queue.csv
+  tibco-transaction-interface-for-cics@2.14.0: 20 of 125 -- see 
+review-queue.csv
+  tibco-transaction-interface-for-ims@2.14.0: 20 of 125 -- see review-queue.csv
+Findings: 11 warnings, 19 notes.

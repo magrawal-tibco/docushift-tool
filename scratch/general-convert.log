@@ -1,0 +1,73 @@
+Converting 13 version(s)...
+  v tibco-activation-service@1.1.0 36 topic(s), 6 asset(s), 1 unit(s), 37 nav 
+node(s), 1 generated -> 44 file(s)
+  v tibco-activation-service@1.0.0 32 topic(s), 6 asset(s), 1 unit(s), 33 nav 
+node(s), 1 generated -> 41 file(s)
+  v tibco-api-exchange-gateway@2.5.1 874 topic(s), 81 asset(s), 1 unit(s), 877 
+nav node(s), 3 generated -> 959 file(s)
+  v tibco-enterprise-administrator@2.4.3 286 topic(s), 38 asset(s), 1 unit(s), 
+300 nav node(s), 6 generated -> 332 file(s)
+  v tibco-enterprise-administrator@2.4.2 280 topic(s), 38 asset(s), 1 unit(s), 
+293 nav node(s), 5 generated -> 326 file(s)
+  v tibco-patterns@6.2.0 333 topic(s), 32 asset(s), 1 unit(s), 348 nav node(s),
+7 generated -> 374 file(s)
+  v tibco-patterns@6.1.2 355 topic(s), 30 asset(s), 1 unit(s), 371 nav node(s),
+7 generated -> 394 file(s)
+  v tibco-reward@22.3.0 1668 topic(s), 432 asset(s), 2 unit(s), 1676 nav 
+node(s), 9 generated -> 1481 file(s)
+  v tibco-reward@22.2.0 1668 topic(s), 432 asset(s), 2 unit(s), 1676 nav 
+node(s), 9 generated -> 1481 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        9 |
+| Already current   |        0 |
+| No extracted tree |        2 |
+| Engine unknown    |        2 |
+| Failed            |        0 |
++------------------------------+
+5532 topic(s), 1095 asset(s) written.
+5432 file(s) standing in the measured output tree(s).
+tibco-activation-service@1.1.0: 6 resolved, 0 skin, 5 escaped, 0 dangling, 0 
+case-mismatch, 117 orphan (3.9 MB)
+tibco-activation-service@1.1.0: skipped 4 generated-directory, 2 runtime-stub
+tibco-activation-service@1.0.0: 6 resolved, 0 skin, 0 escaped, 0 dangling, 0 
+case-mismatch, 117 orphan (4.0 MB)
+tibco-activation-service@1.0.0: skipped 4 generated-directory, 2 runtime-stub
+tibco-api-exchange-gateway@2.5.1: 110 resolved, 0 skin, 0 escaped, 0 dangling, 
+0 case-mismatch, 107 orphan (3.0 MB)
+tibco-api-exchange-gateway@2.5.1: skipped 3 generated-directory, 1 
+placeholder-template, 2 runtime-stub
+tibco-enterprise-administrator@2.4.3: 46 resolved, 0 skin, 9 escaped, 0 
+dangling, 0 case-mismatch, 107 orphan (4.0 MB)
+tibco-enterprise-administrator@2.4.3: skipped 3 generated-directory, 2 
+runtime-stub
+tibco-enterprise-administrator@2.4.2: 46 resolved, 0 skin, 5 escaped, 0 
+dangling, 0 case-mismatch, 107 orphan (4.0 MB)
+tibco-enterprise-administrator@2.4.2: skipped 3 generated-directory, 2 
+runtime-stub
+tibco-patterns@6.2.0: 32 resolved, 0 skin, 10 escaped, 0 dangling, 0 
+case-mismatch, 690 orphan (22.7 MB)
+tibco-patterns@6.2.0: skipped 527 api-reference, 4 generated-directory, 10 
+runtime-stub
+tibco-patterns@6.1.2: 30 resolved, 0 skin, 11 escaped, 1 dangling, 0 
+case-mismatch, 530 orphan (20.6 MB)
+tibco-patterns@6.1.2: skipped 489 api-reference, 3 generated-directory, 10 
+runtime-stub
+tibco-reward@22.3.0: 548 resolved, 0 skin, 0 escaped, 0 dangling, 0 
+case-mismatch, 212 orphan (7.8 MB)
+tibco-reward@22.3.0: skipped 8 generated-directory, 4 runtime-stub, 4 
+unreferenced-template
+tibco-reward@22.2.0: 548 resolved, 0 skin, 0 escaped, 0 dangling, 0 
+case-mismatch, 212 orphan (7.8 MB)
+tibco-reward@22.2.0: skipped 8 generated-directory, 4 runtime-stub
+! tibco-health-essentials-cloud@Cloud: no extracted tree at 
+C:\github\docushift-tool\families\en-us-tib-general\extracted\tibco-health-esse
+ntials-cloud\Cloud; run `docushift extract` first
+! tibco-patterns@5.7.1: no extracted tree at 
+C:\github\docushift-tool\families\en-us-tib-general\extracted\tibco-patterns\5.
+7.1; run `docushift extract` first
+! tibco-rtview@7.6.0: engine undetected (`auto`)
+! tibco-rtview@7.5.0: engine undetected (`auto`)
+Findings: 1 error, 22 warnings, 49 notes.

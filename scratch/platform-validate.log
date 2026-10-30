@@ -1,0 +1,49 @@
+Validating 6 published folder(s) in ..\tibco-docs-aem...
+  ! en-us-tib-platform-userdocs/en-us/tibco-control-plane/online-help/1-18-0 6 
+finding(s), 0 error(s)
+  ! en-us-tib-platform-userdocs/en-us/tibco-control-plane/online-help/1-19-0 6 
+finding(s), 0 error(s)
+  ! en-us-tib-platform-userdocs/en-us/tibco-control-plane/online-help/1-20-0 6 
+finding(s), 0 error(s)
+                                   Validate                                    
++-----------------------------------------------------------------------------+
+|      Walked | Files | References | HTML | External | Tree-root… |   Anchors |
+|-------------+-------+------------+------+----------+------------+-----------|
+| 6 folder(s) |   473 |       4910 |  209 |      936 |          0 | 2160/2175 |
++-----------------------------------------------------------------------------+
+ANCHOR_MISSING 15 row(s), 15 occurrence(s)
+LINK_TO_UNFILED 3 row(s), 3 occurrence(s)
+Findings: 15 warnings, 3 notes.
+exit 0
+Validating 4 published folder(s) in ..\tibco-docs-aem...
+  ! 
+en-us-tib-platform-userdocs/en-us/tibco-platform-command-line-interface/online-
+help/1-2-0 6 finding(s), 0 error(s)
+                                   Validate                                   
++----------------------------------------------------------------------------+
+|      Walked | Files | References | HTML | External | Tree-rooted | Anchors |
+|-------------+-------+------------+------+----------+-------------+---------|
+| 4 folder(s) |   164 |       1326 |   70 |      256 |           0 | 566/571 |
++----------------------------------------------------------------------------+
+ANCHOR_MISSING 5 row(s), 5 occurrence(s)
+LINK_TO_UNFILED 1 row(s), 1 occurrence(s)
+Findings: 5 warnings, 1 note.
+exit 0
+Validating 2 published folder(s) in ..\tibco-docs-aem...
+                                   Validate                                   
++----------------------------------------------------------------------------+
+|      Walked | Files | References | HTML | External | Tree-rooted | Anchors |
+|-------------+-------+------------+------+----------+-------------+---------|
+| 2 folder(s) |     2 |          5 |    0 |        0 |           0 |     0/0 |
++----------------------------------------------------------------------------+
+Findings: none.
+exit 0
+Validating 2 published folder(s) in ..\tibco-docs-aem...
+                                   Validate                                   
++----------------------------------------------------------------------------+
+|      Walked | Files | References | HTML | External | Tree-rooted | Anchors |
+|-------------+-------+------------+------+----------+-------------+---------|
+| 2 folder(s) |     2 |          5 |    0 |        0 |           0 |     0/0 |
++----------------------------------------------------------------------------+
+Findings: none.
+exit 0

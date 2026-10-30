@@ -1,0 +1,31 @@
+Reframing 9 version(s)...
+  v ibi-webfocus-dsml-services-container-edition@9.3.8 22 topic(s) -> 25 
+page(s)
+  v ibi-webfocus-dsml-services-container-edition@9.3.7 23 topic(s) -> 23 
+page(s)
+  v ibi-webfocus-dsml-services-container-edition@9.3.6 22 topic(s) -> 22 
+page(s)
+  v ibi-webfocus-dsml-services-container-edition@9.3.5 22 topic(s) -> 22 
+page(s)
+  v ibi-webfocus-dsml-services-container-edition@1.0.7 20 topic(s) -> 21 
+page(s)
+  v ibi-webfocus-dsml-services-container-edition@1.0.6 18 topic(s) -> 19 
+page(s)
+  v ibi-webfocus-dsml-services-container-edition@1.0.5 18 topic(s) -> 20 
+page(s)
+  v ibi-webfocus-dsml-services-container-edition@1.0.4 17 topic(s) -> 18 
+page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |        8 |
+| Already current             |        0 |
+| Not Flare or DITA (skipped) |        1 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+162 topic(s) read into 170 page(s).
+Files: 2509 source doc -> 170 converted -> 170 merged (0.0% fewer at the merge,
+93.2% end to end); 257 file(s) standing in the measured merged tree(s).
+Findings: 7 warnings, 8 notes.

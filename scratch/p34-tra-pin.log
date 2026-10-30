@@ -1,0 +1,18 @@
+Reframing 1 version(s)...
+  v tibco-runtime-agent@5.13.0 649 topic(s) -> 117 page(s)
+             Reframe              
++--------------------------------+
+| Outcome             | Versions |
+|---------------------+----------|
+| Reframed            |        1 |
+| Already current     |        0 |
+| Not Flare (skipped) |        0 |
+| No converted tree   |        0 |
+| Failed              |        0 |
++--------------------------------+
+649 topic(s) read into 117 page(s).
+Files: 1722 source doc -> 651 converted -> 117 merged (82.0% fewer at the 
+merge, 93.2% end to end); 505 file(s) standing in the measured merged tree(s).
+6 page(s) queued for editorial review:
+  tibco-runtime-agent@5.13.0: 6 of 117 -- see review-queue.csv
+Findings: 2 warnings, 2 notes.

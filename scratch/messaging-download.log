@@ -1,0 +1,47 @@
+Downloading 25 version(s) with 4 worker(s)...
+  v tibco-gemini-powered-by-apache-cassandra@5.0.2 5.8 MiB
+  v tibco-gems@1.1.0 4.8 MiB
+  v tibco-graphical-rendezvous@1.1.0 4.7 MiB
+  v tibco-messaging@1.31.0 0.1 MiB
+  v tibco-messaging@1.30.0 0.1 MiB
+  v tibco-messaging@1.27.0 0.2 MiB
+  v tibco-messaging@1.26.0 0.2 MiB
+  v tibco-messaging@1.25.0 0.2 MiB
+  v tibco-messaging@1.24.0 0.1 MiB
+  x tibco-messaging@1.23.0
+  v tibco-messaging@1.22.0 0.1 MiB
+  v tibco-messaging@1.21.0 0.1 MiB
+  v 
+tibco-messaging-eclipse-mosquitto-distribution-bridge-enterprise-edition@2.0.7 
+0.9 MiB
+  v 
+tibco-messaging-eclipse-mosquitto-distribution-core-enterprise-edition@2.0.7 
+0.9 MiB
+  v tibco-messaging-enterprise-edition@3.4.0 0.0 MiB
+  v tibco-messaging-enterprise-edition@3.3.0 0.0 MiB
+  v tibco-messaging-manager@4.0.0 2.9 MiB
+  v tibco-messaging-manager@3.1.1 11.9 MiB
+  v tibco-messaging-schema-repository-for-apache-kafka-enterprise-edition@2.1.0
+10.3 MiB
+  v tibco-messaging-schema-repository-for-apache-kafka-enterprise-edition@2.0.0
+10.9 MiB
+  v tibco-rendezvous@9.0.0 39.9 MiB
+  v tibco-rendezvous@8.8.1 41.3 MiB
+  v tibco-rendezvous@8.8.0 41.3 MiB
+  v tibco-rendezvous-network-service@2.2.0 6.5 MiB
+  v tibco-rendezvous-network-service@2.1.0 6.2 MiB
+           Download            
++-----------------------------+
+| Outcome          | Versions |
+|------------------+----------|
+| Downloaded       |       24 |
+| Already current  |        0 |
+| Skipped (manual) |        0 |
+| No ZIP endpoint  |        0 |
+| Failed           |        1 |
++-----------------------------+
+189.5 MiB written.
+! tibco-messaging@1.23.0: NotAPackage: 
+https://docs.tibco.com/pub/messaging-suite/1.23.0/tibco-messaging-1-23-0_docume
+ntation.zip did not return a readable ZIP (most often an error or sign-in page 
+served as HTTP 200)

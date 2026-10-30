@@ -1,0 +1,41 @@
+Syncing 3 version(s) into C:\github\ibi-docs-aem...
+  v ibi-webfocus-reporting-server@9.2.2 -> user-guides/9-2-2 9 file(s), 114.3 
+MB
+  v ibi-webfocus-reporting-server@9.2.2 -> release-information/9-2-2 2 file(s),
+1.8 MB
+  v ibi-webfocus-reporting-server@9.2.2 -> reference-documents/9-2-2 2 file(s),
+0.6 MB
+  v ibi-webfocus-reporting-server@9.2.1 -> user-guides/9-2-1 9 file(s), 87.4 MB
+  v ibi-webfocus-reporting-server@9.2.1 -> release-information/9-2-1 2 file(s),
+1.0 MB
+  v ibi-webfocus-reporting-server@9.2.1 -> reference-documents/9-2-1 2 file(s),
+0.6 MB
+  v ibi-webfocus-reporting-server@9.2.0 -> user-guides/9-2-0 9 file(s), 86.3 MB
+  v ibi-webfocus-reporting-server@9.2.0 -> release-information/9-2-0 2 file(s),
+0.9 MB
+  v ibi-webfocus-reporting-server@9.2.0 -> reference-documents/9-2-0 2 file(s),
+0.6 MB
+                                     Sync                                      
++-----------------------------------------------------------------------------+
+| Outcome     | Rows | online-help | user-guides | release-in… | reference-d… |
+|-------------+------+-------------+-------------+-------------+--------------|
+| Synced      |    9 |           0 |           3 |           3 |            3 |
+| Already     |    0 |           0 |           0 |           0 |            0 |
+| current     |      |             |             |             |              |
+| No source   |    3 |           3 |           0 |           0 |            0 |
+| tree        |      |             |             |             |              |
+| Skipped     |    0 |           0 |           0 |           0 |            0 |
+| Failed      |    0 |           0 |           0 |           0 |            0 |
++-----------------------------------------------------------------------------+
+39 file(s), 293.4 MB copied.
+1 product metadata.yml, 4 version.yml written.
+11850 redirect(s) in 1 published map(s), tree-rooted (no publish_base_url set).
+! ibi-webfocus-reporting-server@9.2.2: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-wf-reporting-server\ibi-webfocus-repo
+rting-server\9.2.2; run `docushift convert` first
+! ibi-webfocus-reporting-server@9.2.1: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-wf-reporting-server\ibi-webfocus-repo
+rting-server\9.2.1; run `docushift convert` first
+! ibi-webfocus-reporting-server@9.2.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-wf-reporting-server\ibi-webfocus-repo
+rting-server\9.2.0; run `docushift convert` first

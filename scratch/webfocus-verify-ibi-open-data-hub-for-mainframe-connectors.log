@@ -1,0 +1,49 @@
+Verifying 11 version(s) (local only); 2 triage entr(ies); redirect sample 10, 
+seed 861711...
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-0-3: lost, 189 old page(s), 1 lost, 0 warning(s), 0 explained
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-0-4: lost, 189 old page(s), 1 lost, 0 warning(s), 0 explained
+  ok 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-0-5: clean, 238 old page(s), 0 lost, 0 warning(s), 0 explained
+  ok 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-0-7: clean, 238 old page(s), 0 lost, 0 warning(s), 0 explained
+  ok 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-0-8: clean, 238 old page(s), 0 lost, 0 warning(s), 0 explained
+  ok 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-0-9: clean, 238 old page(s), 0 lost, 0 warning(s), 0 explained
+  ok 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-3-4: clean, 238 old page(s), 0 lost, 0 warning(s), 0 explained
+  ok 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-3-5: clean, 224 old page(s), 0 lost, 0 warning(s), 0 explained
+  ok 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-3-6: clean, 218 old page(s), 0 lost, 0 warning(s), 0 explained
+  ok 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-3-7: clean, 218 old page(s), 0 lost, 0 warning(s), 0 explained
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-3-8: lost, 48 old page(s), 2 lost, 2 warning(s), 0 explained
+                verify                 
+┌─────────────────────────────┬───────┐
+│ Finding                     │ Count │
+├─────────────────────────────┼───────┤
+│ VERIFY_LIVE_UNCHECKABLE     │     2 │
+│ VERIFY_REDIRECT_SAMPLED     │    11 │
+│ VERIFY_REDIRECT_UNCONVERTED │   359 │
+│ VERIFY_TEXT_DROPPED         │     2 │
+│ VERIFY_TOC_MOVED            │     2 │
+│ VERIFY_TOPIC_MISSING        │     2 │
+│ VERIFY_TOPIC_UNFILED        │   901 │
+└─────────────────────────────┴───────┘
+0 request(s) made; the rest came from cache/verify/.
+Index: C:\github\docushift-tool\reports\verify\INDEX.html

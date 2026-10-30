@@ -1,0 +1,26 @@
+Validating 66 published folder(s) in C:\github\ibi-docs-aem...
+  ! en-us-ibi-focus-userdocs/en-us/ibi-focus/online-help/9-3-0 755 finding(s), 
+0 error(s)
+  ! en-us-ibi-focus-userdocs/en-us/ibi-focus/online-help/9-3-1 746 finding(s), 
+0 error(s)
+  ! en-us-ibi-focus-userdocs/en-us/ibi-focus/online-help/9-3-2 746 finding(s), 
+0 error(s)
+  ! en-us-ibi-focus-userdocs/en-us/ibi-focus/online-help/9-3-3 746 finding(s), 
+0 error(s)
+  ! en-us-ibi-focus-userdocs/en-us/ibi-focus/online-help/9-3-4 562 finding(s), 
+0 error(s)
+  ! en-us-ibi-focus-userdocs/en-us/ibi-focus/online-help/9-3-5 27 finding(s), 0
+error(s)
+  ! en-us-ibi-focus-userdocs/en-us/ibi-focus/online-help/9-3-6 27 finding(s), 0
+error(s)
+                                   Validate                                    
+┌────────────┬───────┬────────────┬──────┬──────────┬────────────┬────────────┐
+│     Walked │ Files │ References │ HTML │ External │ Tree-root… │    Anchors │
+├────────────┼───────┼────────────┼──────┼──────────┼────────────┼────────────┤
+│         66 │ 18055 │      37363 │  693 │      908 │          0 │ 16469/194… │
+│  folder(s) │       │            │      │          │            │            │
+└────────────┴───────┴────────────┴──────┴──────────┴────────────┴────────────┘
+ANCHOR_MISSING 3019 row(s), 3019 occurrence(s)
+REDIRECT_SHADOWED 4 row(s), 4 occurrence(s)
+LINK_TO_UNFILED 4 row(s), 586 occurrence(s)
+Findings: 3023 warnings, 4 notes.

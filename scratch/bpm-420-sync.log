@@ -1,0 +1,26 @@
+Syncing 1 version(s) into ..\tibco-docs-aem...
+  v tibco-activematrix-bpm@4.2.0 -> api-references/4-2-0 3609 file(s), 345.6 MB
+  x tibco-activematrix-bpm@4.2.0 (online-help)
+  v tibco-activematrix-bpm@4.2.0 -> user-guides/4-2-0 40 file(s), 102.1 MB
+  v tibco-activematrix-bpm@4.2.0 -> release-information/4-2-0 2 file(s), 0.6 MB
+  v tibco-activematrix-bpm@4.2.0 -> reference-documents/4-2-0 8 file(s), 4.9 MB
+                                     Sync                                      
++-----------------------------------------------------------------------------+
+| Outcome | Rows | online… | user-g… | releas… | refere… | api-ref… | archiv… |
+|---------+------+---------+---------+---------+---------+----------+---------|
+| Synced  |    4 |       0 |       1 |       1 |       1 |        1 |       0 |
+| Already |    1 |       0 |       0 |       0 |       0 |        0 |       1 |
+| current |      |         |         |         |         |          |         |
+| No      |    0 |       0 |       0 |       0 |       0 |        0 |       0 |
+| source  |      |         |         |         |         |          |         |
+| tree    |      |         |         |         |         |          |         |
+| Skipped |    0 |       0 |       0 |       0 |       0 |        0 |       0 |
+| Failed  |    1 |       1 |       0 |       0 |       0 |        0 |       0 |
++-----------------------------------------------------------------------------+
+3659 file(s), 453.3 MB copied.
+1 product metadata.yml, 3 version.yml written.
+x tibco-activematrix-bpm@4.2.0: online-help: publishing 
+tibco-activematrix-bpm-tutorials/accessing-external-data-and-services/how-to-ca
+ll-a-bpm-runtime-service-from-a-process/deploying-testing-calllookupuser-applic
+ation.md would need 261 characters, over the 260 the published tree allows
+Findings: 1 error, 1 warning.

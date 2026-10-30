@@ -1,0 +1,17 @@
+Verifying 1 version(s) (local only); 2 triage entr(ies); redirect sample 10, 
+seed 585633...
+  x 
+en-us-ibi-container-editions-userdocs/en-us/ibi-webfocus-container-edition/onli
+ne-help/9-3-7: lost, 63 old page(s), 4 lost, 31 warning(s), 0 explained
+                verify                 
++-------------------------------------+
+| Finding                     | Count |
+|-----------------------------+-------|
+| VERIFY_REDIRECT_SAMPLED     |     1 |
+| VERIFY_REDIRECT_UNCONVERTED |    11 |
+| VERIFY_TEXT_DROPPED         |     4 |
+| VERIFY_TOC_MOVED            |    31 |
+| VERIFY_TOPIC_UNFILED        |     5 |
++-------------------------------------+
+0 request(s) made; the rest came from cache/verify/.
+Index: C:\github\docushift-tool\reports\verify\INDEX.html

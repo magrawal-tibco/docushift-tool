@@ -1,0 +1,47 @@
+Converting 3 version(s)...
+  v 
+tibco-businessconnect-container-edition-edi-protocol-powered-by-instream@1.6.1 
+362 topic(s), 74 asset(s), 1 unit(s), 373 nav node(s), 8 generated -> 446 
+file(s)
+  v 
+tibco-businessconnect-container-edition-edi-protocol-powered-by-instream@1.6.0 
+362 topic(s), 74 asset(s), 1 unit(s), 373 nav node(s), 8 generated -> 447 
+file(s)
+  v 
+tibco-businessconnect-container-edition-edi-protocol-powered-by-instream@1.5.0 
+362 topic(s), 73 asset(s), 1 unit(s), 373 nav node(s), 8 generated -> 446 
+file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        3 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+1086 topic(s), 221 asset(s) written.
+1339 file(s) standing in the measured output tree(s).
+tibco-businessconnect-container-edition-edi-protocol-powered-by-instream@1.6.1:
+75 resolved, 0 skin, 11 escaped, 0 dangling, 0 case-mismatch, 130 orphan (5.5 
+MB)
+tibco-businessconnect-container-edition-edi-protocol-powered-by-instream@1.6.1:
+CSH 32 resolved, 0 unresolved, 0 ambiguous
+tibco-businessconnect-container-edition-edi-protocol-powered-by-instream@1.6.1:
+skipped 41 api-reference, 4 generated-directory, 3 runtime-stub
+tibco-businessconnect-container-edition-edi-protocol-powered-by-instream@1.6.0:
+75 resolved, 0 skin, 11 escaped, 0 dangling, 0 case-mismatch, 130 orphan (5.5 
+MB)
+tibco-businessconnect-container-edition-edi-protocol-powered-by-instream@1.6.0:
+CSH 32 resolved, 0 unresolved, 0 ambiguous
+tibco-businessconnect-container-edition-edi-protocol-powered-by-instream@1.6.0:
+skipped 41 api-reference, 4 generated-directory, 3 runtime-stub
+tibco-businessconnect-container-edition-edi-protocol-powered-by-instream@1.5.0:
+74 resolved, 0 skin, 11 escaped, 0 dangling, 0 case-mismatch, 128 orphan (5.5 
+MB)
+tibco-businessconnect-container-edition-edi-protocol-powered-by-instream@1.5.0:
+CSH 32 resolved, 0 unresolved, 0 ambiguous
+tibco-businessconnect-container-edition-edi-protocol-powered-by-instream@1.5.0:
+skipped 41 api-reference, 4 generated-directory, 3 runtime-stub
+Findings: 6 warnings, 18 notes.

@@ -1,0 +1,178 @@
+Syncing 18 version(s) into ..\tibco-docs-aem...
+  x tibco-iprocess-engine@11.10.0 (online-help)
+  v tibco-iprocess-engine@11.10.0 -> user-guides/11-10-0 15 file(s), 57.2 MB
+  v tibco-iprocess-engine@11.10.0 -> release-information/11-10-0 7 file(s), 7.0
+MB
+  v tibco-iprocess-engine@11.10.0 -> reference-documents/11-10-0 6 file(s), 2.1
+MB
+  x tibco-iprocess-engine@11.9.2 (online-help)
+  v tibco-iprocess-engine@11.9.2 -> user-guides/11-9-2 15 file(s), 61.8 MB
+  v tibco-iprocess-engine@11.9.2 -> release-information/11-9-2 7 file(s), 8.1 
+MB
+  v tibco-iprocess-engine@11.9.2 -> reference-documents/11-9-2 6 file(s), 1.8 
+MB
+  x tibco-iprocess-engine@11.9.1 (online-help)
+  v tibco-iprocess-engine@11.9.1 -> user-guides/11-9-1 15 file(s), 59.8 MB
+  v tibco-iprocess-engine@11.9.1 -> release-information/11-9-1 6 file(s), 7.9 
+MB
+  v tibco-iprocess-engine@11.9.1 -> reference-documents/11-9-1 6 file(s), 2.2 
+MB
+  v tibco-iprocess-server-objects-java@11.10.0 -> user-guides/11-10-0 3 
+file(s), 11.1 MB
+  v tibco-iprocess-server-objects-java@11.10.0 -> release-information/11-10-0 2
+file(s), 1.6 MB
+  v tibco-iprocess-server-objects-java@11.10.0 -> reference-documents/11-10-0 2
+file(s), 0.1 MB
+  v tibco-iprocess-server-objects-net@11.10.0 -> user-guides/11-10-0 3 file(s),
+10.5 MB
+  v tibco-iprocess-server-objects-net@11.10.0 -> release-information/11-10-0 2 
+file(s), 1.7 MB
+  v tibco-iprocess-server-objects-net@11.10.0 -> reference-documents/11-10-0 2 
+file(s), 0.1 MB
+  v tibco-iprocess-server-objects-net@11.9.0 -> user-guides/11-9-0 3 file(s), 
+6.1 MB
+  v tibco-iprocess-server-objects-net@11.9.0 -> release-information/11-9-0 2 
+file(s), 0.4 MB
+  v tibco-iprocess-server-objects-net@11.9.0 -> reference-documents/11-9-0 2 
+file(s), 0.1 MB
+  x tibco-iprocess-technology-plug-ins@11.10.0 (online-help)
+  v tibco-iprocess-technology-plug-ins@11.10.0 -> user-guides/11-10-0 4 
+file(s), 12.7 MB
+  v tibco-iprocess-technology-plug-ins@11.10.0 -> release-information/11-10-0 2
+file(s), 1.6 MB
+  v tibco-iprocess-technology-plug-ins@11.10.0 -> reference-documents/11-10-0 2
+file(s), 0.9 MB
+  x tibco-iprocess-technology-plug-ins@11.9.2 (online-help)
+  v tibco-iprocess-technology-plug-ins@11.9.2 -> user-guides/11-9-2 4 file(s), 
+12.7 MB
+  v tibco-iprocess-technology-plug-ins@11.9.2 -> release-information/11-9-2 2 
+file(s), 1.8 MB
+  v tibco-iprocess-technology-plug-ins@11.9.2 -> reference-documents/11-9-2 2 
+file(s), 1.0 MB
+  v tibco-iprocess-web-services-client-plug-in@11.9.0 -> online-help/11-9-0 197
+file(s), 3.9 MB
+  v tibco-iprocess-web-services-client-plug-in@11.9.0 -> user-guides/11-9-0 2 
+file(s), 3.0 MB
+  v tibco-iprocess-web-services-client-plug-in@11.9.0 -> 
+release-information/11-9-0 2 file(s), 0.2 MB
+  v tibco-iprocess-web-services-client-plug-in@11.9.0 -> 
+reference-documents/11-9-0 2 file(s), 0.2 MB
+  v tibco-iprocess-web-services-server-plug-in@11.9.0 -> online-help/11-9-0 318
+file(s), 4.1 MB
+  v tibco-iprocess-web-services-server-plug-in@11.9.0 -> user-guides/11-9-0 1 
+file(s), 0.6 MB
+  v tibco-iprocess-web-services-server-plug-in@11.9.0 -> 
+release-information/11-9-0 2 file(s), 0.3 MB
+  v tibco-iprocess-web-services-server-plug-in@11.9.0 -> 
+reference-documents/11-9-0 2 file(s), 0.3 MB
+  v tibco-iprocess-workspace-browser@11.10.0 -> online-help/11-10-0 856 
+file(s), 29.5 MB
+  v tibco-iprocess-workspace-browser@11.10.0 -> user-guides/11-10-0 7 file(s), 
+31.6 MB
+  v tibco-iprocess-workspace-browser@11.10.0 -> release-information/11-10-0 2 
+file(s), 1.5 MB
+  v tibco-iprocess-workspace-browser@11.10.0 -> reference-documents/11-10-0 2 
+file(s), 0.9 MB
+  v tibco-iprocess-workspace-browser@11.9.0 -> online-help/11-9-0 1503 file(s),
+52.2 MB
+  v tibco-iprocess-workspace-browser@11.9.0 -> user-guides/11-9-0 7 file(s), 
+21.8 MB
+  v tibco-iprocess-workspace-browser@11.9.0 -> release-information/11-9-0 2 
+file(s), 0.3 MB
+  v tibco-iprocess-workspace-browser@11.9.0 -> reference-documents/11-9-0 2 
+file(s), 0.9 MB
+  v tibco-iprocess-workspace-plug-ins@11.10.0 -> online-help/11-10-0 17 
+file(s), 0.2 MB
+  v tibco-iprocess-workspace-plug-ins@11.10.0 -> user-guides/11-10-0 1 file(s),
+1.7 MB
+  v tibco-iprocess-workspace-plug-ins@11.10.0 -> release-information/11-10-0 2 
+file(s), 1.5 MB
+  v tibco-iprocess-workspace-plug-ins@11.10.0 -> reference-documents/11-10-0 1 
+file(s), 0.3 MB
+  v tibco-iprocess-workspace-plug-ins@11.9.0 -> online-help/11-9-0 22 file(s), 
+0.5 MB
+  v tibco-iprocess-workspace-plug-ins@11.9.0 -> user-guides/11-9-0 1 file(s), 
+0.4 MB
+  v tibco-iprocess-workspace-plug-ins@11.9.0 -> release-information/11-9-0 2 
+file(s), 0.2 MB
+  v tibco-iprocess-workspace-plug-ins@11.9.0 -> reference-documents/11-9-0 2 
+file(s), 0.3 MB
+  v tibco-iprocess-workspace-windows@11.10.0 -> online-help/11-10-0 920 
+file(s), 12.8 MB
+  v tibco-iprocess-workspace-windows@11.10.0 -> user-guides/11-10-0 15 file(s),
+42.3 MB
+  v tibco-iprocess-workspace-windows@11.10.0 -> release-information/11-10-0 2 
+file(s), 1.5 MB
+  v tibco-iprocess-workspace-windows@11.10.0 -> reference-documents/11-10-0 2 
+file(s), 0.1 MB
+  v tibco-iprocess-workspace-windows@11.9.2 -> online-help/11-9-2 857 file(s), 
+10.5 MB
+  v tibco-iprocess-workspace-windows@11.9.2 -> user-guides/11-9-2 14 file(s), 
+41.6 MB
+  v tibco-iprocess-workspace-windows@11.9.2 -> release-information/11-9-2 2 
+file(s), 1.6 MB
+  v tibco-iprocess-workspace-windows@11.9.2 -> reference-documents/11-9-2 2 
+file(s), 0.1 MB
+                                     Sync                                      
++-----------------------------------------------------------------------------+
+| Outcome   | Rows | online-h… | user-gui… | release-… | referenc… | archives |
+|-----------+------+-----------+-----------+-----------+-----------+----------|
+| Synced    |   56 |         8 |        16 |        16 |        16 |        0 |
+| Already   |    9 |         0 |         0 |         0 |         0 |        9 |
+| current   |      |           |           |           |           |          |
+| No source |    7 |         5 |         0 |         0 |         0 |        0 |
+| tree      |      |           |           |           |           |          |
+| Skipped   |    0 |         0 |         0 |         0 |         0 |        0 |
+| Failed    |    5 |         5 |         0 |         0 |         0 |        0 |
++-----------------------------------------------------------------------------+
+4889 file(s), 537.0 MB copied.
+9 product metadata.yml, 32 version.yml written.
+Published merged (Stage 6b): tibco-iprocess-web-services-client-plug-in, 
+tibco-iprocess-web-services-server-plug-in, tibco-iprocess-workspace-browser, 
+tibco-iprocess-workspace-plug-ins, tibco-iprocess-workspace-windows.
+7213 redirect(s) in 8 published map(s), tree-rooted (no publish_base_url set).
+! tibco-iprocess-server-objects-java@11.10.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-iprocess\tibco-iprocess-server-object
+s-java\11.10.0; run `docushift convert` first
+! tibco-iprocess-server-objects-java@11.9.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-iprocess\tibco-iprocess-server-object
+s-java\11.9.0; run `docushift convert` first
+! tibco-iprocess-server-objects-java@11.9.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-tib-iprocess\extracted\tibco-iprocess-s
+erver-objects-java\11.9.0; run `docushift extract` first
+! tibco-iprocess-server-objects-net@11.10.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-iprocess\tibco-iprocess-server-object
+s-net\11.10.0; run `docushift convert` first
+! tibco-iprocess-server-objects-net@11.9.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-iprocess\tibco-iprocess-server-object
+s-net\11.9.0; run `docushift convert` first
+! tibco-iprocess-suite@1.0.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-iprocess\tibco-iprocess-suite\1.0.0; 
+run `docushift convert` first
+! tibco-iprocess-suite@1.0.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-tib-iprocess\extracted\tibco-iprocess-s
+uite\1.0.0; run `docushift extract` first
+x tibco-iprocess-engine@11.10.0: online-help: publishing 
+tibco-iprocess-engine-administrators-guide/administrators-guide-objects-directo
+r/using-the-tibco-iprocess-objects-director/configuring-tibco-iprocess-objects-
+director.md would need 270 characters, over the 260 the published tree allows
+x tibco-iprocess-engine@11.9.2: online-help: publishing 
+tibco-iprocess-engine-administrators-guide/administrators-guide-objects-directo
+r/configuring-tibco-iprocess-objects-director/tcp-udp-ports-when-running-multip
+le-instances.md would need 273 characters, over the 260 the published tree 
+allows
+x tibco-iprocess-engine@11.9.1: online-help: publishing 
+tibco-iprocess-engine-administrators-guide/administrators-guide-objects-directo
+r/configuring-tibco-iprocess-objects-director/tcp-udp-ports-when-running-multip
+le-instances.md would need 273 characters, over the 260 the published tree 
+allows
+x tibco-iprocess-technology-plug-ins@11.10.0: online-help: publishing 
+server-plug-in-for-activematrix-businessworks/invoking-businessworks-from-iproc
+ess-engine/configuring-the-iprocess-engine-components/defining-an-iprocess-busi
+nessworks-step.md would need 289 characters, over the 260 the published tree 
+allows
+x tibco-iprocess-technology-plug-ins@11.9.2: online-help: publishing 
+user-guide/invoking-businessworks-from-iprocess-engine/configuring-the-iprocess
+-engine-components/the-define-businessworks-iprocess-mappings-dialog.md would 
+need 263 characters, over the 260 the published tree allows
+Findings: 5 errors.

@@ -1,0 +1,66 @@
+Downloading 41 version(s) with 4 worker(s)...
+  v tibco-activematrix-businessworks-plug-in-for-facebook@6.5.0 6.5 MiB
+  v tibco-activematrix-businessworks-plug-in-for-facebook@1.4.0 3.1 MiB
+  v 
+tibco-activematrix-businessworks-plug-in-for-files-for-unix-and-windows@8.3.0 
+5.2 MiB
+  v tibco-activematrix-businessworks-plug-in-for-google-bigquery@6.1.0 7.0 MiB
+  v tibco-activematrix-businessworks-plug-in-for-google-cloud-pub-sub@6.0.2 5.3
+MiB
+  v tibco-activematrix-businessworks-plug-in-for-google-cloud-pub-sub@6.0.1 2.6
+MiB
+  v tibco-activematrix-businessworks-plug-in-for-google-cloud-storage@6.0.0 9.6
+MiB
+  v tibco-activematrix-businessworks-plug-in-for-hl7-with-fhir@8.6.0 29.7 MiB
+  v tibco-activematrix-businessworks-plug-in-for-hl7-with-fhir@8.5.0 15.7 MiB
+  v tibco-activematrix-businessworks-plug-in-for-hl7-with-fhir@8.4.0 8.3 MiB
+  v tibco-activematrix-businessworks-plug-in-for-hl7-with-fhir@8.3.0 7.7 MiB
+  v tibco-activematrix-businessworks-plug-in-for-hl7-with-fhir@8.2.1 7.8 MiB
+  v tibco-activematrix-businessworks-plug-in-for-hl7-with-fhir@8.2.0 7.7 MiB
+  v tibco-activematrix-businessworks-plug-in-for-hl7-with-fhir@7.3.0 5.2 MiB
+  v tibco-activematrix-businessworks-plug-in-for-hl7-with-fhir@7.0.0 5.8 MiB
+  v tibco-activematrix-businessworks-plug-in-for-hl7-with-fhir@6.0.0 6.0 MiB
+  v tibco-activematrix-businessworks-plug-in-for-ibm-i@7.3.0 7.8 MiB
+  v tibco-activematrix-businessworks-plug-in-for-ibm-mq@8.8.2 8.8 MiB
+  v tibco-activematrix-businessworks-plug-in-for-ibm-mq@8.8.1 6.8 MiB
+  v tibco-activematrix-businessworks-plug-in-for-ibm-mq@8.8.0 6.6 MiB
+  v tibco-activematrix-businessworks-plug-in-for-ibm-mq@8.7.0 6.6 MiB
+  v tibco-activematrix-businessworks-plug-in-for-ibm-mq@7.8.0 10.4 MiB
+  v tibco-activematrix-businessworks-plug-in-for-ibm-mq@7.7.3 10.9 MiB
+  v tibco-activematrix-businessworks-plug-in-for-jd-edwards-enterpriseone@7.1.0
+5.2 MiB
+  v tibco-activematrix-businessworks-plug-in-for-large-xml@6.1.4 7.6 MiB
+  v tibco-activematrix-businessworks-plug-in-for-large-xml@1.1.0 2.3 MiB
+  v tibco-activematrix-businessworks-plug-in-for-ldap@7.3.0 8.0 MiB
+  v tibco-activematrix-businessworks-plug-in-for-ldap@6.1.2 11.3 MiB
+  v tibco-activematrix-businessworks-plug-in-for-marketo@7.2.2 3.9 MiB
+  v tibco-activematrix-businessworks-plug-in-for-mdm@7.0.2 9.3 MiB
+  v tibco-activematrix-businessworks-plug-in-for-mdm@7.0.1 9.2 MiB
+  v tibco-activematrix-businessworks-plug-in-for-mdm@7.0.0 4.5 MiB
+  v tibco-activematrix-businessworks-plug-in-for-mdm@6.3.1 2.1 MiB
+  v tibco-activematrix-businessworks-plug-in-for-microsoft-dynamics-crm@6.10.1 
+12.6 MiB
+  v tibco-activematrix-businessworks-plug-in-for-microsoft-dynamics-crm@6.10.0 
+8.0 MiB
+  v tibco-activematrix-businessworks-plug-in-for-microsoft-dynamics-crm@6.9.4 
+11.3 MiB
+  v tibco-activematrix-businessworks-plug-in-for-microsoft-dynamics-crm@6.9.3 
+11.6 MiB
+  v tibco-activematrix-businessworks-plug-in-for-microsoft-excel@6.1.1 3.6 MiB
+  v tibco-activematrix-businessworks-plug-in-for-microsoft-sharepoint@6.4.0 
+13.7 MiB
+  v tibco-activematrix-businessworks-plug-in-for-microsoft-sharepoint@6.3.1 
+13.5 MiB
+  v tibco-activematrix-businessworks-plug-in-for-microsoft-sharepoint@6.3.0 
+13.6 MiB
+           Download            
++-----------------------------+
+| Outcome          | Versions |
+|------------------+----------|
+| Downloaded       |       41 |
+| Already current  |        0 |
+| Skipped (manual) |        0 |
+| No ZIP endpoint  |        0 |
+| Failed           |        0 |
++-----------------------------+
+342.5 MiB written.

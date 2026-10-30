@@ -1,0 +1,25 @@
+Verifying 10 version(s) (local only); 2 triage entr(ies); redirect sample 10, seed 472015...
+  x loc-ibi-webfocus-userdocs/ja-jp/ibi-webfocus-app-studio/online-help/9-3-0: lost, 450 old page(s), 80 lost, 0 warning(s), 0 explained
+  x loc-ibi-webfocus-userdocs/ja-jp/ibi-webfocus-app-studio/online-help/9-3-5: lost, 303 old page(s), 14 lost, 0 warning(s), 0 explained
+  x loc-ibi-webfocus-userdocs/ja-jp/ibi-webfocus-app-studio/online-help/9-3-6: lost, 300 old page(s), 12 lost, 0 warning(s), 0 explained
+  x loc-ibi-webfocus-userdocs/ja-jp/ibi-webfocus-app-studio/online-help/9-3-7: lost, 261 old page(s), 7 lost, 0 warning(s), 0 explained
+  x loc-ibi-webfocus-userdocs/ja-jp/ibi-webfocus-app-studio/online-help/9-3-8: lost, 257 old page(s), 1 lost, 0 warning(s), 0 explained
+  x loc-ibi-webfocus-userdocs/ja-jp/ibi-webfocus-client/online-help/9-3-0: lost, 1415 old page(s), 144 lost, 0 warning(s), 0 explained
+  x loc-ibi-webfocus-userdocs/ja-jp/ibi-webfocus-client/online-help/9-3-5: lost, 2785 old page(s), 152 lost, 12 warning(s), 0 explained
+  x loc-ibi-webfocus-userdocs/ja-jp/ibi-webfocus-client/online-help/9-3-6: lost, 2825 old page(s), 129 lost, 19 warning(s), 0 explained
+  x loc-ibi-webfocus-userdocs/ja-jp/ibi-webfocus-client/online-help/9-3-7: lost, 2846 old page(s), 119 lost, 20 warning(s), 0 explained
+  x loc-ibi-webfocus-userdocs/ja-jp/ibi-webfocus-client/online-help/9-3-8: lost, 3366 old page(s), 1087 lost, 440 warning(s), 0 explained
+                verify                 
++-------------------------------------+
+| Finding                     | Count |
+|-----------------------------+-------|
+| VERIFY_IMAGE_MISSING        |   542 |
+| VERIFY_REDIRECT_SAMPLED     |    10 |
+| VERIFY_REDIRECT_UNCONVERTED |   253 |
+| VERIFY_TEXT_DROPPED         |    82 |
+| VERIFY_TOC_MOVED            |   488 |
+| VERIFY_TOC_ORDER            |     3 |
+| VERIFY_TOPIC_MISSING        |  1121 |
+| VERIFY_TOPIC_UNFILED        |  2069 |
++-------------------------------------+
+Index: C:\github\docushift-tool\reports\verify\INDEX.html

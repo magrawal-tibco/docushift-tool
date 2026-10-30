@@ -1,0 +1,44 @@
+Converting 1 version(s)...
+  v tibco-activematrix-service-grid@3.4.3 1839 topic(s), 698 asset(s), 1 
+unit(s), 1886 nav node(s), 18 generated -> 2559 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+1839 topic(s), 698 asset(s) written.
+2559 file(s) standing in the measured output tree(s).
+tibco-activematrix-service-grid@3.4.3: 873 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 705 orphan (45.3 MB)
+tibco-activematrix-service-grid@3.4.3: CSH 96 resolved, 0 unresolved, 0 
+ambiguous
+tibco-activematrix-service-grid@3.4.3: skipped 775 api-reference, 3 
+generated-directory, 7 runtime-stub, 1 unreferenced-template
+Findings: 3 warnings, 9 notes.
+Converting 1 version(s)...
+  v tibco-activematrix-service-grid@3.4.4 1839 topic(s), 698 asset(s), 1 
+unit(s), 1885 nav node(s), 18 generated -> 2559 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+1839 topic(s), 698 asset(s) written.
+2559 file(s) standing in the measured output tree(s).
+tibco-activematrix-service-grid@3.4.4: 873 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 705 orphan (45.3 MB)
+tibco-activematrix-service-grid@3.4.4: CSH 96 resolved, 0 unresolved, 0 
+ambiguous
+tibco-activematrix-service-grid@3.4.4: skipped 775 api-reference, 3 
+generated-directory, 7 runtime-stub, 1 unreferenced-template
+Findings: 3 warnings, 9 notes.

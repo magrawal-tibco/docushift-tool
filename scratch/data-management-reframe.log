@@ -1,0 +1,39 @@
+Reframing 11 version(s)...
+  v ibi-mdm-add-on-for-global-data-synchronization@4.0.0 135 topic(s) -> 29 
+page(s)
+  v tibco-mdm@11.1.0 2686 topic(s) -> 394 page(s)
+  v tibco-mdm@11.0.0 2543 topic(s) -> 503 page(s)
+  v tibco-mdm@10.0.0 2695 topic(s) -> 5676 page(s)
+  v tibco-mdm@9.3.2 2704 topic(s) -> 756 page(s)
+  v tibco-mdm-studio@6.1.1 933 topic(s) -> 1006 page(s)
+  v tibco-mdm-studio@6.1.0 920 topic(s) -> 101 page(s)
+  v tibco-mdm-studio@6.0.0 913 topic(s) -> 988 page(s)
+  v tibco-mdm-studio@5.3.0 913 topic(s) -> 988 page(s)
+  v tibco-mdm-studio@5.2.0 926 topic(s) -> 43 page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |       10 |
+| Already current             |        0 |
+| Not Flare or DITA (skipped) |        1 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+15368 topic(s) read into 10484 page(s).
+Files: 69411 source doc -> 23951 converted -> 10484 merged (56.2% fewer at the 
+merge, 84.9% end to end); 24260 file(s) standing in the measured merged 
+tree(s).
+8915 page(s) queued for editorial review:
+  ibi-mdm-add-on-for-global-data-synchronization@4.0.0: 12 of 29 -- see 
+review-queue.csv
+  tibco-mdm@11.1.0: 74 of 394 -- see review-queue.csv
+  tibco-mdm@11.0.0: 231 of 503 -- see review-queue.csv
+  tibco-mdm@10.0.0: 5365 of 5676 -- see review-queue.csv
+  tibco-mdm@9.3.2: 431 of 756 -- see review-queue.csv
+  tibco-mdm-studio@6.1.1: 917 of 1006 -- see review-queue.csv
+  tibco-mdm-studio@6.1.0: 53 of 101 -- see review-queue.csv
+  tibco-mdm-studio@6.0.0: 905 of 988 -- see review-queue.csv
+  tibco-mdm-studio@5.3.0: 903 of 988 -- see review-queue.csv
+  tibco-mdm-studio@5.2.0: 24 of 43 -- see review-queue.csv
+Findings: 23 warnings, 19 notes.

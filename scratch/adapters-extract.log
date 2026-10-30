@@ -1,0 +1,170 @@
+Extracting 47 version(s)...
+  v tibco-activematrix-adapter-for-database-tibco-business-studio@1.3.0 509 
+file(s), dita, 1 root(s)
+  v tibco-activematrix-adapter-for-database-tibco-business-studio@1.2.0 558 
+file(s), dita, 1 root(s)
+  v 
+tibco-activematrix-adapter-for-files-for-unix-win-tibco-business-studio@1.3.0 
+290 file(s), dita
+  v 
+tibco-activematrix-adapter-for-files-for-unix-win-tibco-business-studio@1.2.0 
+291 file(s), dita, 1 root(s)
+  v tibco-activematrix-adapter-for-ibm-i@6.4.0 1755 file(s), webworks, 6 
+root(s)
+  v tibco-activematrix-adapter-for-ibm-i@6.3.0 1755 file(s), webworks, 6 
+root(s)
+  v tibco-activematrix-adapter-for-ibm-i@6.2.2 1757 file(s), webworks, 6 
+root(s)
+  v tibco-activematrix-adapter-for-ibm-i@6.2.1 9 file(s), auto
+  v tibco-activematrix-adapter-for-ibm-i@6.2.0 1416 file(s), webworks, 4 
+root(s)
+  v tibco-activematrix-adapter-for-ibm-i@6.1.0 1422 file(s), webworks, 4 
+root(s)
+  v tibco-activematrix-adapter-for-jd-edwards-enterpriseone@6.1.0 1681 file(s),
+webworks, 6 root(s)
+  v tibco-activematrix-adapter-for-jd-edwards-enterpriseone@6.0.0 1280 file(s),
+webworks, 4 root(s)
+  v tibco-activematrix-adapter-for-kenan-bp@6.0.0 1264 file(s), webworks, 4 
+root(s)
+  v tibco-activematrix-adapter-for-sap-tibco-business-studio@1.3.0 284 file(s),
+dita, 1 root(s)
+  v tibco-activematrix-adapter-for-sap-tibco-business-studio@1.2.0 280 file(s),
+dita, 1 root(s)
+  v tibco-activematrix-adapter-framework@1.6.1 426 file(s), flare, 1 root(s)
+  v tibco-activematrix-adapter-framework@1.6.0 156 file(s), dita, 1 root(s)
+  v tibco-activematrix-adapter-framework@1.4.2 161 file(s), dita, 1 root(s)
+  v tibco-activematrix-adapter-framework@1.4.1 162 file(s), dita, 1 root(s)
+  v tibco-activematrix-adapter-framework@1.4.0 161 file(s), dita, 1 root(s)
+  v tibco-activematrix-adapter-framework@1.3.2 152 file(s), dita, 1 root(s)
+  v tibco-activematrix-adapter-framework@1.3.1 152 file(s), dita, 1 root(s)
+  v tibco-activematrix-adapter-framework@1.3.0 172 file(s), dita, 1 root(s)
+  v tibco-activematrix-adapter-framework@1.2.0 171 file(s), dita, 1 root(s)
+  v tibco-activematrix-adapter-framework@1.1.2 3120 file(s), webworks, 9 
+root(s)
+  v tibco-activematrix-adapter-framework@1.1.1 3120 file(s), webworks, 9 
+root(s)
+  v tibco-activematrix-adapter-framework@1.1.0 3120 file(s), webworks, 9 
+root(s)
+  v tibco-activematrix-adapter-service-engine-for-files@6.0.0 1054 file(s), 
+webworks, 3 root(s)
+  v tibco-activematrix-adapter-service-engine-for-ibm-i@6.0.0 1034 file(s), 
+webworks, 3 root(s)
+  v tibco-activematrix-adapter-service-engine-for-lotus-notes@6.0.0 1522 
+file(s), webworks, 3 root(s)
+  v tibco-activematrix-adapter-service-engine-for-peoplesoft@6.0.0 1061 
+file(s), webworks, 3 root(s)
+  v tibco-activematrix-adapter-service-engine-for-sap@6.0.0 724 file(s), 
+webworks, 2 root(s)
+  v tibco-activematrix-adapter-service-engine-for-siebel@6.0.0 1030 file(s), 
+webworks, 3 root(s)
+  v tibco-activematrix-adapter-service-engine-for-tuxedo@6.0.0 1015 file(s), 
+webworks, 3 root(s)
+  v tibco-activematrix-adapter-service-engine-for-websphere-mq@6.0.0 1050 
+file(s), webworks, 3 root(s)
+  v tibco-adapter-for-files-ibm-i@5.0.1 310 file(s), webworks, 1 root(s)
+  v tibco-adapter-for-files-z-os-mvs@4.7 487 file(s), webworks, 1 root(s)
+  v tibco-adapter-for-oracle-applications@5.4.1 1150 file(s), webworks, 2 
+root(s)
+  v tibco-adapter-migration@1.8.1 51 file(s), dita, 1 root(s)
+  v tibco-adapter-migration@1.8.0 52 file(s), dita, 1 root(s)
+  v tibco-adapter-migration@1.7.0 52 file(s), dita, 1 root(s)
+  v tibco-adapter-sdk@5.8.0 5 file(s), auto
+                Extract                
++-------------------------------------+
+| Outcome                  | Versions |
+|--------------------------+----------|
+| Extracted                |       42 |
+| Already current          |        0 |
+| Measured from cache      |        0 |
+| No package               |        5 |
+| Refused (unsafe archive) |        0 |
+| Failed                   |        0 |
++-------------------------------------+
+36221 file(s) written.
+        Engines        
++---------------------+
+| Engine   | Versions |
+|----------+----------|
+| webworks |       22 |
+| dita     |       17 |
+| auto     |        2 |
+| flare    |        1 |
++---------------------+
+? tibco-activematrix-adapter-for-ibm-i@6.2.1: engine undetected (`auto`)
+? tibco-adapter-sdk@5.8.0: engine undetected (`auto`)
+CSH: 112 source(s), 195 identifier(s).
+                     Assets                      
++-----------------------------------------------+
+| Category | Destination     | Files |     Size |
+|----------+-----------------+-------+----------|
+| topic    | output-root     |  6338 | 100.7 MB |
+| image    | output-root     |  3347 |  98.5 MB |
+| skin     | output-root     | 21715 | 123.4 MB |
+| other    | output-root     |   773 |  35.2 MB |
+| document | document-router |   301 | 229.0 MB |
+| topic    | unclaimed       |  1054 |   4.2 MB |
+| image    | unclaimed       |  1640 |   1.8 MB |
+| media    | unclaimed       |     2 |   0.2 MB |
+| other    | unclaimed       |  1051 |  15.0 MB |
++-----------------------------------------------+
+? 
+tibco-activematrix-adapter-for-files-for-unix-win-tibco-business-studio@1.3.0: 
+283 unclaimed file(s) in html/ (5.4 MB) -- no destination
+? tibco-activematrix-adapter-for-ibm-i@6.4.0: 161 unclaimed file(s) in html/ 
+(0.8 MB) -- no destination
+? tibco-activematrix-adapter-for-ibm-i@6.3.0: 161 unclaimed file(s) in html/ 
+(0.8 MB) -- no destination
+? tibco-activematrix-adapter-for-ibm-i@6.2.2: 161 unclaimed file(s) in html/ 
+(0.8 MB) -- no destination
+? tibco-activematrix-adapter-for-ibm-i@6.2.0: 164 unclaimed file(s) in html/ 
+(0.7 MB) -- no destination
+? tibco-activematrix-adapter-for-ibm-i@6.1.0: 164 unclaimed file(s) in html/ 
+(0.7 MB) -- no destination
+? tibco-activematrix-adapter-for-jd-edwards-enterpriseone@6.1.0: 167 unclaimed 
+file(s) in html/ (0.8 MB) -- no destination
+? tibco-activematrix-adapter-for-jd-edwards-enterpriseone@6.0.0: 163 unclaimed 
+file(s) in html/ (0.7 MB) -- no destination
+? tibco-activematrix-adapter-for-kenan-bp@6.0.0: 155 unclaimed file(s) in html/
+(0.7 MB) -- no destination
+? tibco-activematrix-adapter-framework@1.1.2: 157 unclaimed file(s) in html/ 
+(0.7 MB) -- no destination
+? tibco-activematrix-adapter-framework@1.1.1: 157 unclaimed file(s) in html/ 
+(0.7 MB) -- no destination
+? tibco-activematrix-adapter-framework@1.1.0: 157 unclaimed file(s) in html/ 
+(0.7 MB) -- no destination
+? tibco-activematrix-adapter-service-engine-for-files@6.0.0: 164 unclaimed 
+file(s) in html/ (0.7 MB) -- no destination
+? tibco-activematrix-adapter-service-engine-for-ibm-i@6.0.0: 164 unclaimed 
+file(s) in html/ (0.7 MB) -- no destination
+? tibco-activematrix-adapter-service-engine-for-lotus-notes@6.0.0: 230 
+unclaimed file(s) in html/ (1.4 MB) -- no destination
+? tibco-activematrix-adapter-service-engine-for-peoplesoft@6.0.0: 164 unclaimed
+file(s) in html/ (0.7 MB) -- no destination
+? tibco-activematrix-adapter-service-engine-for-sap@6.0.0: 162 unclaimed 
+file(s) in html/ (0.6 MB) -- no destination
+? tibco-activematrix-adapter-service-engine-for-siebel@6.0.0: 164 unclaimed 
+file(s) in html/ (0.7 MB) -- no destination
+? tibco-activematrix-adapter-service-engine-for-tuxedo@6.0.0: 164 unclaimed 
+file(s) in html/ (0.7 MB) -- no destination
+? tibco-activematrix-adapter-service-engine-for-websphere-mq@6.0.0: 164 
+unclaimed file(s) in html/ (0.7 MB) -- no destination
+? tibco-adapter-for-files-z-os-mvs@4.7: 157 unclaimed file(s) in html/ (0.7 MB)
+-- no destination
+? tibco-adapter-for-oracle-applications@5.4.1: 164 unclaimed file(s) in html/ 
+(0.7 MB) -- no destination
+! adapter-code-for-tibco-api-exchange-and-joomla@2.3.4: no package at 
+C:\github\docushift-tool\families\en-us-tib-adapters\downloads\adapter-code-for
+-tibco-api-exchange-and-joomla-2.3.4.zip; run `docushift download` first
+! adapter-code-for-tibco-api-exchange-and-joomla@2.3.3: no package at 
+C:\github\docushift-tool\families\en-us-tib-adapters\downloads\adapter-code-for
+-tibco-api-exchange-and-joomla-2.3.3.zip; run `docushift download` first
+! tibco-activematrix-adapter-for-ibm-i@6.0.0: no package at 
+C:\github\docushift-tool\families\en-us-tib-adapters\downloads\tibco-activematr
+ix-adapter-for-ibm-i-6.0.0.zip; run `docushift download` first
+! tibco-activematrix-adapter-for-jd-edwards-enterpriseone@5.3: no package at 
+C:\github\docushift-tool\families\en-us-tib-adapters\downloads\tibco-activematr
+ix-adapter-for-jd-edwards-enterpriseone-5.3.zip; run `docushift download` first
+! tibco-adapter-for-infranet-5-2-0@5.2.0: no package at 
+C:\github\docushift-tool\families\en-us-tib-adapters\downloads\tibco-adapter-fo
+r-infranet-5-2-0-5.2.0.zip; run `docushift download` first
+Recorded 33 notes -- `docushift report --run 472`.

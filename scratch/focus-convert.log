@@ -1,0 +1,93 @@
+Converting 19 version(s)...
+  v ibi-focus@9.3.8 2174 topic(s), 1550 asset(s), 2 unit(s), 2252 nav node(s), 
+18 generated -> 3746 file(s)
+  v ibi-focus@9.3.7 1899 topic(s), 1700 asset(s), 2 unit(s), 1946 nav node(s), 
+18 generated -> 3621 file(s)
+  v ibi-focus@9.3.6 1898 topic(s), 1700 asset(s), 2 unit(s), 1945 nav node(s), 
+18 generated -> 3620 file(s)
+  v ibi-focus@9.3.5 1902 topic(s), 1750 asset(s), 2 unit(s), 1949 nav node(s), 
+18 generated -> 3673 file(s)
+C:\github\docushift-tool\src\docushift\transforms\markdown.py:112: XMLParsedAsHTMLWarning: It looks like you're using an HTML parser to parse an XML document.
+
+Assuming this really is an XML document, what you're doing might work, but you should know that using an XML parser will be more reliable. To parse this document as XML, make sure you have the Python package 'lxml' installed, and pass the keyword argument `features="xml"` into the BeautifulSoup constructor.
+
+If you want or need to use an HTML parser on this document, you can make this warning go away by filtering it. To do that, run this code before calling the BeautifulSoup constructor:
+
+    from bs4 import XMLParsedAsHTMLWarning
+    import warnings
+
+    warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+  return BeautifulSoup(_CDATA.sub(_unwrap_cdata, text), PARSER)
+  v ibi-focus@9.3.4 1978 topic(s), 1825 asset(s), 2 unit(s), 2025 nav node(s), 
+18 generated -> 3824 file(s)
+  v ibi-focus@9.3.3 1965 topic(s), 1822 asset(s), 1 unit(s), 2011 nav node(s), 
+18 generated -> 3808 file(s)
+  v ibi-focus@9.3.2 1965 topic(s), 1755 asset(s), 1 unit(s), 2011 nav node(s), 
+18 generated -> 3741 file(s)
+  v ibi-focus@9.3.1 1972 topic(s), 1755 asset(s), 1 unit(s), 2019 nav node(s), 
+19 generated -> 3749 file(s)
+  v ibi-focus@9.3.0 1954 topic(s), 1743 asset(s), 1 unit(s), 2001 nav node(s), 
+19 generated -> 3719 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        9 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |       10 |
+| Failed            |        0 |
++------------------------------+
+17707 topic(s), 15600 asset(s) written.
+33501 file(s) standing in the measured output tree(s).
+ibi-focus@9.3.8: 1583 resolved, 0 skin, 0 escaped, 207 dangling, 0 
+case-mismatch, 3222 orphan (121.5 MB)
+ibi-focus@9.3.8: CSH 4 resolved, 0 unresolved, 0 ambiguous
+ibi-focus@9.3.8: skipped 13 generated-directory, 320 nested-output-root, 8 
+runtime-stub, 27 unreferenced-template
+ibi-focus@9.3.7: 1740 resolved, 0 skin, 0 escaped, 0 dangling, 0 case-mismatch,
+3326 orphan (132.0 MB)
+ibi-focus@9.3.7: CSH 4 resolved, 0 unresolved, 0 ambiguous
+ibi-focus@9.3.7: skipped 10 generated-directory, 235 nested-output-root, 8 
+runtime-stub, 4 unreferenced-template
+ibi-focus@9.3.6: 1740 resolved, 0 skin, 0 escaped, 0 dangling, 0 case-mismatch,
+3325 orphan (131.8 MB)
+ibi-focus@9.3.6: CSH 4 resolved, 0 unresolved, 0 ambiguous
+ibi-focus@9.3.6: skipped 10 generated-directory, 235 nested-output-root, 8 
+runtime-stub, 4 unreferenced-template
+ibi-focus@9.3.5: 1791 resolved, 0 skin, 4 escaped, 0 dangling, 0 case-mismatch,
+3284 orphan (131.3 MB)
+ibi-focus@9.3.5: skipped 10 generated-directory, 235 nested-output-root, 8 
+runtime-stub, 4 unreferenced-template
+ibi-focus@9.3.4: 1891 resolved, 5 skin, 27 escaped, 23 dangling, 0 
+case-mismatch, 3348 orphan (154.3 MB)
+ibi-focus@9.3.4: skipped 6 generated-directory, 248 nested-output-root, 3 
+no-content-container, 9 runtime-stub
+ibi-focus@9.3.3: 1889 resolved, 0 skin, 23 escaped, 51 dangling, 0 
+case-mismatch, 1346 orphan (45.1 MB)
+ibi-focus@9.3.3: skipped 4 generated-directory, 3 no-content-container, 3 
+runtime-stub
+ibi-focus@9.3.2: 1820 resolved, 0 skin, 22 escaped, 51 dangling, 0 
+case-mismatch, 1396 orphan (45.9 MB)
+ibi-focus@9.3.2: skipped 4 generated-directory, 3 no-content-container, 3 
+runtime-stub
+ibi-focus@9.3.1: 1820 resolved, 0 skin, 24 escaped, 51 dangling, 0 
+case-mismatch, 1396 orphan (45.9 MB)
+ibi-focus@9.3.1: skipped 4 generated-directory, 3 no-content-container, 3 
+runtime-stub
+ibi-focus@9.3.0: 1805 resolved, 0 skin, 21 escaped, 51 dangling, 0 
+case-mismatch, 1395 orphan (45.6 MB)
+ibi-focus@9.3.0: skipped 5 generated-directory, 3 no-content-container, 3 
+runtime-stub
+! ibi-focus@9.2.5: engine undetected (`auto`)
+! ibi-focus@9.2.4: engine undetected (`auto`)
+! ibi-focus@9.2.3: engine undetected (`auto`)
+! ibi-focus@9.2.2: engine undetected (`auto`)
+! ibi-focus@9.2.1: engine undetected (`auto`)
+! ibi-focus@9.2.0: engine undetected (`auto`)
+! ibi-focus@9.1.3: engine undetected (`auto`)
+! ibi-focus@9.1.2: engine undetected (`auto`)
+! ibi-focus@9.1.1: engine undetected (`auto`)
+! ibi-focus@9.1.0: engine undetected (`auto`)
+Findings: 7 errors, 52 warnings, 68 notes.

@@ -1,0 +1,33 @@
+Reframing 32 version(s)...
+  v tibco-activematrix-binding-type-for-rest@3.3.0 69 topic(s) -> 10 page(s)
+  x tibco-activematrix-service-grid@3.4.4
+  x tibco-activematrix-service-grid@3.4.3
+  x tibco-activematrix-service-grid-container-edition@1.0.1
+  v tibco-activematrix-service-grid-container-edition@1.0.0 205 topic(s) -> 78 
+page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |        2 |
+| Already current             |        0 |
+| Not Flare or DITA (skipped) |       27 |
+| No converted tree           |        0 |
+| Failed                      |        3 |
++----------------------------------------+
+4089 topic(s) read into 993 page(s).
+Files: 982 source doc -> 296 converted -> 88 merged (70.3% fewer at the merge, 
+91.0% end to end); 302 file(s) standing in the measured merged tree(s).
+35 page(s) queued for editorial review:
+  tibco-activematrix-binding-type-for-rest@3.3.0: 2 of 10 -- see 
+review-queue.csv
+  tibco-activematrix-service-grid-container-edition@1.0.0: 33 of 78 -- see 
+review-queue.csv
+x tibco-activematrix-service-grid@3.4.4: 2 acceptance check(s) failed: anchors:
+1856 topics located, 1866 anchored
+x tibco-activematrix-service-grid@3.4.3: 1 acceptance check(s) failed: word 
+conservation: 549286 words out, expected 549288 (549288 in + 0 added by anchors
+and headings); difference -2
+x tibco-activematrix-service-grid-container-edition@1.0.1: 2 acceptance 
+check(s) failed: anchors: 211 topics located, 212 anchored
+Findings: 5 errors, 5 warnings, 4 notes.

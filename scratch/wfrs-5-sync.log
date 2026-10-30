@@ -1,0 +1,56 @@
+Syncing 5 version(s) into C:\github\ibi-docs-aem...
+  v ibi-webfocus-reporting-server@9.1.4 -> user-guides/9-1-4 9 file(s), 89.8 MB
+  v ibi-webfocus-reporting-server@9.1.4 -> release-information/9-1-4 2 file(s),
+2.5 MB
+  v ibi-webfocus-reporting-server@9.1.4 -> reference-documents/9-1-4 3 file(s),
+0.8 MB
+  v ibi-webfocus-reporting-server@9.1.3 -> user-guides/9-1-3 9 file(s), 89.8 MB
+  v ibi-webfocus-reporting-server@9.1.3 -> release-information/9-1-3 2 file(s),
+2.5 MB
+  v ibi-webfocus-reporting-server@9.1.3 -> reference-documents/9-1-3 2 file(s),
+0.7 MB
+  v ibi-webfocus-reporting-server@9.1.2 -> user-guides/9-1-2 9 file(s), 87.4 MB
+  v ibi-webfocus-reporting-server@9.1.2 -> release-information/9-1-2 2 file(s),
+1.4 MB
+  v ibi-webfocus-reporting-server@9.1.2 -> reference-documents/9-1-2 2 file(s),
+0.6 MB
+  v ibi-webfocus-reporting-server@9.1.1 -> user-guides/9-1-1 9 file(s), 88.8 MB
+  v ibi-webfocus-reporting-server@9.1.1 -> release-information/9-1-1 2 file(s),
+1.3 MB
+  v ibi-webfocus-reporting-server@9.1.1 -> reference-documents/9-1-1 2 file(s),
+0.6 MB
+  v ibi-webfocus-reporting-server@9.1.0 -> user-guides/9-1-0 9 file(s), 86.2 MB
+  v ibi-webfocus-reporting-server@9.1.0 -> release-information/9-1-0 2 file(s),
+1.8 MB
+  v ibi-webfocus-reporting-server@9.1.0 -> reference-documents/9-1-0 2 file(s),
+0.6 MB
+                                     Sync                                      
++-----------------------------------------------------------------------------+
+| Outcome     | Rows | online-help | user-guides | release-in… | reference-d… |
+|-------------+------+-------------+-------------+-------------+--------------|
+| Synced      |   15 |           0 |           5 |           5 |            5 |
+| Already     |    0 |           0 |           0 |           0 |            0 |
+| current     |      |             |             |             |              |
+| No source   |    5 |           5 |           0 |           0 |            0 |
+| tree        |      |             |             |             |              |
+| Skipped     |    0 |           0 |           0 |           0 |            0 |
+| Failed      |    0 |           0 |           0 |           0 |            0 |
++-----------------------------------------------------------------------------+
+66 file(s), 454.9 MB copied.
+1 product metadata.yml, 4 version.yml written.
+11850 redirect(s) in 1 published map(s), tree-rooted (no publish_base_url set).
+! ibi-webfocus-reporting-server@9.1.4: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-wf-reporting-server\ibi-webfocus-repo
+rting-server\9.1.4; run `docushift convert` first
+! ibi-webfocus-reporting-server@9.1.3: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-wf-reporting-server\ibi-webfocus-repo
+rting-server\9.1.3; run `docushift convert` first
+! ibi-webfocus-reporting-server@9.1.2: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-wf-reporting-server\ibi-webfocus-repo
+rting-server\9.1.2; run `docushift convert` first
+! ibi-webfocus-reporting-server@9.1.1: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-wf-reporting-server\ibi-webfocus-repo
+rting-server\9.1.1; run `docushift convert` first
+! ibi-webfocus-reporting-server@9.1.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-wf-reporting-server\ibi-webfocus-repo
+rting-server\9.1.0; run `docushift convert` first

@@ -1,0 +1,139 @@
+Converting 1 version(s)...
+  v 
+tibco-businessconnect-container-edition-edi-protocol-powered-by-instream@1.5.0 
+362 topic(s), 73 asset(s), 1 unit(s), 373 nav node(s), 8 generated -> 446 
+file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+362 topic(s), 73 asset(s) written.
+446 file(s) standing in the measured output tree(s).
+tibco-businessconnect-container-edition-edi-protocol-powered-by-instream@1.5.0:
+74 resolved, 0 skin, 11 escaped, 0 dangling, 0 case-mismatch, 128 orphan (5.5 
+MB)
+tibco-businessconnect-container-edition-edi-protocol-powered-by-instream@1.5.0:
+CSH 32 resolved, 0 unresolved, 0 ambiguous
+tibco-businessconnect-container-edition-edi-protocol-powered-by-instream@1.5.0:
+skipped 41 api-reference, 4 generated-directory, 3 runtime-stub
+Findings: 2 warnings, 6 notes.
+Converting 1 version(s)...
+  v 
+tibco-businessconnect-container-edition-edi-protocol-powered-by-instream@1.6.0 
+362 topic(s), 74 asset(s), 1 unit(s), 373 nav node(s), 8 generated -> 447 
+file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+362 topic(s), 74 asset(s) written.
+447 file(s) standing in the measured output tree(s).
+tibco-businessconnect-container-edition-edi-protocol-powered-by-instream@1.6.0:
+75 resolved, 0 skin, 11 escaped, 0 dangling, 0 case-mismatch, 130 orphan (5.5 
+MB)
+tibco-businessconnect-container-edition-edi-protocol-powered-by-instream@1.6.0:
+CSH 32 resolved, 0 unresolved, 0 ambiguous
+tibco-businessconnect-container-edition-edi-protocol-powered-by-instream@1.6.0:
+skipped 41 api-reference, 4 generated-directory, 3 runtime-stub
+Findings: 2 warnings, 6 notes.
+Converting 1 version(s)...
+  v 
+tibco-businessconnect-container-edition-edi-protocol-powered-by-instream@1.6.1 
+362 topic(s), 74 asset(s), 1 unit(s), 373 nav node(s), 8 generated -> 446 
+file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+362 topic(s), 74 asset(s) written.
+446 file(s) standing in the measured output tree(s).
+tibco-businessconnect-container-edition-edi-protocol-powered-by-instream@1.6.1:
+75 resolved, 0 skin, 11 escaped, 0 dangling, 0 case-mismatch, 130 orphan (5.5 
+MB)
+tibco-businessconnect-container-edition-edi-protocol-powered-by-instream@1.6.1:
+CSH 32 resolved, 0 unresolved, 0 ambiguous
+tibco-businessconnect-container-edition-edi-protocol-powered-by-instream@1.6.1:
+skipped 41 api-reference, 4 generated-directory, 3 runtime-stub
+Findings: 2 warnings, 6 notes.
+Converting 1 version(s)...
+  v tibco-foresight-transaction-insight@5.5.0 1165 topic(s), 1306 asset(s), 2 
+unit(s), 1204 nav node(s), 39 generated -> 2512 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+1165 topic(s), 1306 asset(s) written.
+2512 file(s) standing in the measured output tree(s).
+tibco-foresight-transaction-insight@5.5.0: 1425 resolved, 0 skin, 8 escaped, 99
+dangling, 0 case-mismatch, 1705 orphan (39.9 MB)
+tibco-foresight-transaction-insight@5.5.0: skipped 11 generated-directory, 129 
+merged-subsystem-copy, 102 nested-output-root, 1 no-content-container, 11 
+runtime-stub, 5 unreferenced-template
+Findings: 3 errors, 6 warnings, 7 notes.
+Converting 1 version(s)...
+  v tibco-foresight-transaction-insight@6.0.0 1063 topic(s), 1239 asset(s), 1 
+unit(s), 1096 nav node(s), 33 generated -> 2338 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+1063 topic(s), 1239 asset(s) written.
+2338 file(s) standing in the measured output tree(s).
+tibco-foresight-transaction-insight@6.0.0: 1328 resolved, 0 skin, 8 escaped, 6 
+dangling, 0 case-mismatch, 1100 orphan (26.3 MB)
+tibco-foresight-transaction-insight@6.0.0: skipped 5 generated-directory, 39 
+merged-subsystem-copy, 1 no-content-container, 6 runtime-stub, 2 
+unreferenced-template
+Findings: 3 errors, 4 warnings, 7 notes.
+Converting 1 version(s)...
+  v tibco-platform-command-line-interface@1.2.0 422 topic(s), 440 asset(s), 1 
+unit(s), 429 nav node(s), 7 generated -> 872 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+422 topic(s), 440 asset(s) written.
+872 file(s) standing in the measured output tree(s).
+tibco-platform-command-line-interface@1.2.0: 495 resolved, 0 skin, 0 escaped, 2
+dangling, 0 case-mismatch, 2010 orphan (58.7 MB)
+tibco-platform-command-line-interface@1.2.0: CSH 36 resolved, 0 unresolved, 0 
+ambiguous
+tibco-platform-command-line-interface@1.2.0: skipped 4 generated-directory, 8 
+merged-subsystem-copy, 12 runtime-stub, 2 unreferenced-template
+Findings: 1 error, 3 warnings, 7 notes.

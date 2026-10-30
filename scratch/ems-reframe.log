@@ -1,0 +1,18 @@
+Reframing 7 version(s)...
+  v tibco-ems-client-for-ibm-i@8.6.0 45 topic(s) -> 9 page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |        1 |
+| Already current             |        6 |
+| Not Flare or DITA (skipped) |        0 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+45 topic(s) read into 9 page(s).
+Files: 13640 source doc -> 8682 converted -> 1000 merged (88.5% fewer at the 
+merge, 92.7% end to end); 1248 file(s) standing in the measured merged tree(s).
+2 page(s) queued for editorial review:
+  tibco-ems-client-for-ibm-i@8.6.0: 2 of 9 -- see review-queue.csv
+Findings: 1 warning, 7 notes.

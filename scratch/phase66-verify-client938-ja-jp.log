@@ -1,0 +1,16 @@
+Verifying 1 version(s) (local only); 4 triage entr(ies); redirect sample 10, seed 305387...
+  x loc-ibi-webfocus-userdocs/ja-jp/ibi-webfocus-client/online-help/9-3-8: lost, 3366 old page(s), 18 lost, 440 warning(s), 1069 explained
+                verify                 
++-------------------------------------+
+| Finding                     | Count |
+|-----------------------------+-------|
+| VERIFY_IMAGE_MISSING        |     7 |
+| VERIFY_REDIRECT_SAMPLED     |     1 |
+| VERIFY_REDIRECT_UNCONVERTED |    90 |
+| VERIFY_TEXT_DROPPED         |     8 |
+| VERIFY_TOC_MOVED            |   439 |
+| VERIFY_TOC_ORDER            |     1 |
+| VERIFY_TOPIC_MISSING        |  1072 |
+| VERIFY_TOPIC_UNFILED        |   361 |
++-------------------------------------+
+Index: C:\github\docushift-tool\reports\verify\INDEX.html

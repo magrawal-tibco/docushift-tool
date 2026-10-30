@@ -1,0 +1,19 @@
+Verifying 4 version(s) (local only); 2 triage entr(ies); redirect sample 10, seed 666688...
+  x loc-ibi-webfocus-userdocs/de-de/ibi-webfocus-client/online-help/9-3-5: lost, 2800 old page(s), 30 lost, 20 warning(s), 0 explained
+  x loc-ibi-webfocus-userdocs/de-de/ibi-webfocus-client/online-help/9-3-6: lost, 2708 old page(s), 58 lost, 19 warning(s), 0 explained
+  x loc-ibi-webfocus-userdocs/de-de/ibi-webfocus-client/online-help/9-3-7: lost, 2743 old page(s), 35 lost, 20 warning(s), 0 explained
+  x loc-ibi-webfocus-userdocs/de-de/ibi-webfocus-client/online-help/9-3-8: lost, 3257 old page(s), 1087 lost, 440 warning(s), 0 explained
+                verify                 
++-------------------------------------+
+| Finding                     | Count |
+|-----------------------------+-------|
+| VERIFY_IMAGE_MISSING        |     8 |
+| VERIFY_REDIRECT_SAMPLED     |     4 |
+| VERIFY_REDIRECT_UNCONVERTED |    32 |
+| VERIFY_TEXT_DROPPED         |    98 |
+| VERIFY_TOC_MOVED            |   498 |
+| VERIFY_TOC_ORDER            |     1 |
+| VERIFY_TOPIC_MISSING        |  1104 |
+| VERIFY_TOPIC_UNFILED        |   438 |
++-------------------------------------+
+Index: C:\github\docushift-tool\reports\verify\INDEX.html

@@ -1,0 +1,44 @@
+Converting 4 version(s)...
+  v ibi-webfocus-reporting-server@9.3.3 2392 topic(s), 1996 asset(s), 1 
+unit(s), 2443 nav node(s), 12 generated -> 4404 file(s)
+  v ibi-webfocus-reporting-server@9.3.2 2390 topic(s), 1998 asset(s), 1 
+unit(s), 2441 nav node(s), 12 generated -> 4404 file(s)
+  v ibi-webfocus-reporting-server@9.3.1 2387 topic(s), 2045 asset(s), 1 
+unit(s), 2438 nav node(s), 12 generated -> 4447 file(s)
+  v ibi-webfocus-reporting-server@9.3.0 2293 topic(s), 2061 asset(s), 1 
+unit(s), 2342 nav node(s), 10 generated -> 4368 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        4 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+9462 topic(s), 8100 asset(s) written.
+17623 file(s) standing in the measured output tree(s).
+ibi-webfocus-reporting-server@9.3.3: 2141 resolved, 0 skin, 15 escaped, 1 
+dangling, 0 case-mismatch, 2618 orphan (113.6 MB)
+ibi-webfocus-reporting-server@9.3.3: CSH 191 resolved, 0 unresolved, 0 
+ambiguous
+ibi-webfocus-reporting-server@9.3.3: skipped 3 generated-directory, 1 
+no-content-container, 2 runtime-stub
+ibi-webfocus-reporting-server@9.3.2: 2142 resolved, 0 skin, 15 escaped, 1 
+dangling, 0 case-mismatch, 2617 orphan (113.3 MB)
+ibi-webfocus-reporting-server@9.3.2: CSH 191 resolved, 0 unresolved, 0 
+ambiguous
+ibi-webfocus-reporting-server@9.3.2: skipped 3 generated-directory, 1 
+no-content-container, 2 runtime-stub
+ibi-webfocus-reporting-server@9.3.1: 2194 resolved, 0 skin, 15 escaped, 1 
+dangling, 0 case-mismatch, 2563 orphan (111.4 MB)
+ibi-webfocus-reporting-server@9.3.1: skipped 3 generated-directory, 1 
+no-content-container, 2 runtime-stub
+ibi-webfocus-reporting-server@9.3.0: 2198 resolved, 0 skin, 13 escaped, 0 
+dangling, 0 case-mismatch, 2525 orphan (108.4 MB)
+ibi-webfocus-reporting-server@9.3.0: CSH 191 resolved, 0 unresolved, 0 
+ambiguous
+ibi-webfocus-reporting-server@9.3.0: skipped 3 generated-directory, 1 
+no-content-container, 2 runtime-stub, 1 unreferenced-template
+Findings: 3 errors, 13 warnings, 26 notes.

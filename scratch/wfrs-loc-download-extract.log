@@ -1,0 +1,244 @@
+Downloading 1 version(s) with 4 worker(s)...
+  v ibi-webfocus-reporting-server@9.3.0 383.7 MiB
+           Download            
++-----------------------------+
+| Outcome          | Versions |
+|------------------+----------|
+| Downloaded       |        1 |
+| Already current  |        0 |
+| Skipped (manual) |        0 |
+| No ZIP endpoint  |        0 |
+| Failed           |        0 |
++-----------------------------+
+383.7 MiB written.
+Extracting 1 version(s)...
+  v ibi-webfocus-reporting-server@9.3.0 13211 file(s), flare, 2 root(s)
+                Extract                
++-------------------------------------+
+| Outcome                  | Versions |
+|--------------------------+----------|
+| Extracted                |        1 |
+| Already current          |        0 |
+| Measured from cache      |        0 |
+| No package               |        0 |
+| Refused (unsafe archive) |        0 |
+| Failed                   |        0 |
++-------------------------------------+
+13211 file(s) written.
+       Engines       
++-------------------+
+| Engine | Versions |
+|--------+----------|
+| flare  |        1 |
++-------------------+
+CSH: 2 source(s), 191 identifier(s).
+                     Assets                      
++-----------------------------------------------+
+| Category | Destination     | Files |     Size |
+|----------+-----------------+-------+----------|
+| topic    | output-root     |  4051 |  99.0 MB |
+| image    | output-root     |  7055 | 240.9 MB |
+| skin     | output-root     |  2058 | 158.1 MB |
+| other    | output-root     |    28 |   1.1 MB |
+| document | document-router |    14 | 115.6 MB |
+| topic    | unclaimed       |     1 |   0.0 MB |
+| other    | unclaimed       |     4 |   0.0 MB |
++-----------------------------------------------+
+? ibi-webfocus-reporting-server@9.3.0: 5 unclaimed file(s) in html/ (0.0 MB) --
+no destination
+Downloading 1 version(s) with 4 worker(s)...
+  v ibi-webfocus-reporting-server@9.3.5 416.5 MiB
+           Download            
++-----------------------------+
+| Outcome          | Versions |
+|------------------+----------|
+| Downloaded       |        1 |
+| Already current  |        0 |
+| Skipped (manual) |        0 |
+| No ZIP endpoint  |        0 |
+| Failed           |        0 |
++-----------------------------+
+416.5 MiB written.
+Extracting 1 version(s)...
+  v ibi-webfocus-reporting-server@9.3.5 15116 file(s), flare, 2 root(s)
+                Extract                
++-------------------------------------+
+| Outcome                  | Versions |
+|--------------------------+----------|
+| Extracted                |        1 |
+| Already current          |        0 |
+| Measured from cache      |        0 |
+| No package               |        0 |
+| Refused (unsafe archive) |        0 |
+| Failed                   |        0 |
++-------------------------------------+
+15116 file(s) written.
+       Engines       
++-------------------+
+| Engine | Versions |
+|--------+----------|
+| flare  |        1 |
++-------------------+
+CSH: 2 source(s), 183 identifier(s).
+                     Assets                      
++-----------------------------------------------+
+| Category | Destination     | Files |     Size |
+|----------+-----------------+-------+----------|
+| topic    | output-root     |  4810 | 120.7 MB |
+| image    | output-root     |  8010 | 274.1 MB |
+| document | output-root     |     1 |   0.0 MB |
+| skin     | output-root     |  2247 | 169.6 MB |
+| other    | output-root     |    27 |   1.1 MB |
+| document | document-router |    16 | 110.5 MB |
+| topic    | unclaimed       |     1 |   0.0 MB |
+| other    | unclaimed       |     4 |   0.0 MB |
++-----------------------------------------------+
+? ibi-webfocus-reporting-server@9.3.5: 5 unclaimed file(s) in html/ (0.0 MB) --
+no destination
+Downloading 1 version(s) with 4 worker(s)...
+  v ibi-webfocus-reporting-server@9.3.6 387.6 MiB
+           Download            
++-----------------------------+
+| Outcome          | Versions |
+|------------------+----------|
+| Downloaded       |        1 |
+| Already current  |        0 |
+| Skipped (manual) |        0 |
+| No ZIP endpoint  |        0 |
+| Failed           |        0 |
++-----------------------------+
+387.6 MiB written.
+Extracting 1 version(s)...
+  v ibi-webfocus-reporting-server@9.3.6 14534 file(s), flare, 2 root(s)
+                Extract                
++-------------------------------------+
+| Outcome                  | Versions |
+|--------------------------+----------|
+| Extracted                |        1 |
+| Already current          |        0 |
+| Measured from cache      |        0 |
+| No package               |        0 |
+| Refused (unsafe archive) |        0 |
+| Failed                   |        0 |
++-------------------------------------+
+14534 file(s) written.
+       Engines       
++-------------------+
+| Engine | Versions |
+|--------+----------|
+| flare  |        1 |
++-------------------+
+CSH: 2 source(s), 513 identifier(s).
+                     Assets                      
++-----------------------------------------------+
+| Category | Destination     | Files |     Size |
+|----------+-----------------+-------+----------|
+| topic    | output-root     |  4775 | 118.0 MB |
+| image    | output-root     |  7215 | 236.2 MB |
+| document | output-root     |     1 |   0.0 MB |
+| skin     | output-root     |  2495 | 186.5 MB |
+| other    | output-root     |    27 |   1.1 MB |
+| document | document-router |    16 | 110.5 MB |
+| topic    | unclaimed       |     1 |   0.0 MB |
+| other    | unclaimed       |     4 |   0.0 MB |
++-----------------------------------------------+
+? ibi-webfocus-reporting-server@9.3.6: 5 unclaimed file(s) in html/ (0.0 MB) --
+no destination
+Downloading 1 version(s) with 4 worker(s)...
+  v ibi-webfocus-reporting-server@9.3.7 476.3 MiB
+           Download            
++-----------------------------+
+| Outcome          | Versions |
+|------------------+----------|
+| Downloaded       |        1 |
+| Already current  |        0 |
+| Skipped (manual) |        0 |
+| No ZIP endpoint  |        0 |
+| Failed           |        0 |
++-----------------------------+
+476.3 MiB written.
+Extracting 1 version(s)...
+  v ibi-webfocus-reporting-server@9.3.7 16367 file(s), flare, 2 root(s)
+                Extract                
++-------------------------------------+
+| Outcome                  | Versions |
+|--------------------------+----------|
+| Extracted                |        1 |
+| Already current          |        0 |
+| Measured from cache      |        0 |
+| No package               |        0 |
+| Refused (unsafe archive) |        0 |
+| Failed                   |        0 |
++-------------------------------------+
+16367 file(s) written.
+       Engines       
++-------------------+
+| Engine | Versions |
+|--------+----------|
+| flare  |        1 |
++-------------------+
+CSH: 2 source(s), 523 identifier(s).
+                     Assets                      
++-----------------------------------------------+
+| Category | Destination     | Files |     Size |
+|----------+-----------------+-------+----------|
+| topic    | output-root     |  4809 | 121.6 MB |
+| image    | output-root     |  8970 | 331.5 MB |
+| document | output-root     |     1 |   0.0 MB |
+| skin     | output-root     |  2523 | 187.9 MB |
+| other    | output-root     |    43 |   1.2 MB |
+| document | document-router |    16 | 112.6 MB |
+| topic    | unclaimed       |     1 |   0.0 MB |
+| other    | unclaimed       |     4 |   0.0 MB |
++-----------------------------------------------+
+? ibi-webfocus-reporting-server@9.3.7: 5 unclaimed file(s) in html/ (0.0 MB) --
+no destination
+Downloading 1 version(s) with 4 worker(s)...
+  v ibi-webfocus-reporting-server@9.3.8 371.2 MiB
+           Download            
++-----------------------------+
+| Outcome          | Versions |
+|------------------+----------|
+| Downloaded       |        1 |
+| Already current  |        0 |
+| Skipped (manual) |        0 |
+| No ZIP endpoint  |        0 |
+| Failed           |        0 |
++-----------------------------+
+371.2 MiB written.
+Extracting 1 version(s)...
+  v ibi-webfocus-reporting-server@9.3.8 16804 file(s), flare, 3 root(s)
+                Extract                
++-------------------------------------+
+| Outcome                  | Versions |
+|--------------------------+----------|
+| Extracted                |        1 |
+| Already current          |        0 |
+| Measured from cache      |        0 |
+| No package               |        0 |
+| Refused (unsafe archive) |        0 |
+| Failed                   |        0 |
++-------------------------------------+
+16804 file(s) written.
+       Engines       
++-------------------+
+| Engine | Versions |
+|--------+----------|
+| flare  |        1 |
++-------------------+
+CSH: 3 source(s), 531 identifier(s).
+                     Assets                      
++-----------------------------------------------+
+| Category | Destination     | Files |     Size |
+|----------+-----------------+-------+----------|
+| topic    | output-root     |  5963 | 146.7 MB |
+| image    | output-root     |  7816 | 285.3 MB |
+| skin     | output-root     |  2974 | 227.6 MB |
+| other    | output-root     |    41 |   1.7 MB |
+| document | document-router |     5 |  10.3 MB |
+| topic    | unclaimed       |     1 |   0.0 MB |
+| other    | unclaimed       |     4 |   0.0 MB |
++-----------------------------------------------+
+? ibi-webfocus-reporting-server@9.3.8: 5 unclaimed file(s) in html/ (0.0 MB) --
+no destination
+Recorded 1 note -- `docushift report --run 1121`.

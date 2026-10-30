@@ -1,0 +1,30 @@
+Converting 14 version(s)...
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        0 |
+| Already current   |        0 |
+| No extracted tree |        2 |
+| Engine unknown    |       12 |
+| Failed            |        0 |
++------------------------------+
+! ibi-omni-gen@4.3.0: engine undetected (`auto`)
+! ibi-omni-gen-mdm@4.3.0: engine undetected (`auto`)
+! ibi-omni-healthdata@4.3.0: engine undetected (`auto`)
+! ibi-omni-healthdata-business-release@2023.3.0: engine undetected (`auto`)
+! ibi-omni-healthdata-business-release@2023.2.0: engine undetected (`auto`)
+! ibi-omni-healthdata-business-release@2023.1.0: engine undetected (`auto`)
+! ibi-omni-insurance@4.3.0: engine undetected (`auto`)
+! ibi-web-query-for-ibm-i@9.2.1: engine undetected (`auto`)
+! ibi-web-query-for-ibm-i@9.2.0: engine undetected (`auto`)
+! ibi-web-query-for-ibm-i@9.1.2: engine undetected (`auto`)
+! ibi-web-query-for-ibm-i@9.1.1: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-legacy\extracted\ibi-web-query-for-
+ibm-i\9.1.1; run `docushift extract` first
+! ibi-web-query-for-ibm-i@9.1.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-legacy\extracted\ibi-web-query-for-
+ibm-i\9.1.0; run `docushift extract` first
+! tibco-iway-business-activity-monitor@8.0.5: engine undetected (`auto`)
+! tibco-iway-trading-partner-manager@8.0.5: engine undetected (`auto`)
+Findings: 12 warnings.

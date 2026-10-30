@@ -1,0 +1,131 @@
+Syncing 23 version(s) into C:\github\ibi-docs-aem...
+  v ibi-webfocus-reporting-server@9.3.8 -> online-help/9-3-8 4993 file(s), 66.9
+MB
+  v ibi-webfocus-reporting-server@9.3.7 -> online-help/9-3-7 4208 file(s), 61.8
+MB
+  v ibi-webfocus-reporting-server@9.3.6 -> online-help/9-3-6 4097 file(s), 58.8
+MB
+  v ibi-webfocus-reporting-server@9.3.5 -> online-help/9-3-5 4360 file(s), 63.5
+MB
+  v ibi-webfocus-reporting-server@9.3.4 -> online-help/9-3-4 4399 file(s), 64.3
+MB
+  v ibi-webfocus-reporting-server@9.3.3 -> online-help/9-3-3 4406 file(s), 64.3
+MB
+  v ibi-webfocus-reporting-server@9.3.2 -> online-help/9-3-2 4406 file(s), 64.0
+MB
+  v ibi-webfocus-reporting-server@9.3.1 -> online-help/9-3-1 4449 file(s), 65.3
+MB
+  v ibi-webfocus-reporting-server@9.3.0 -> online-help/9-3-0 4370 file(s), 64.7
+MB
+                                     Sync                                      
+┌─────────────┬──────┬─────────────┬─────────────┬─────────────┬──────────────┐
+│ Outcome     │ Rows │ online-help │ user-guides │ release-in… │ reference-d… │
+├─────────────┼──────┼─────────────┼─────────────┼─────────────┼──────────────┤
+│ Synced      │    9 │           9 │           0 │           0 │            0 │
+│ Already     │   15 │           0 │           5 │           5 │            5 │
+│ current     │      │             │             │             │              │
+│ No source   │   32 │          14 │           0 │           0 │            0 │
+│ tree        │      │             │             │             │              │
+│ Skipped     │    0 │           0 │           0 │           0 │            0 │
+│ Failed      │    0 │           0 │           0 │           0 │            0 │
+└─────────────┴──────┴─────────────┴─────────────┴─────────────┴──────────────┘
+39688 file(s), 573.5 MB copied.
+1 product metadata.yml, 4 version.yml written.
+Published merged (Stage 6b): ibi-webfocus-reporting-server.
+33354 redirect(s) in 2 published map(s), tree-rooted (no publish_base_url set).
+! ibi-webfocus-reporting-server@9.3.4: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-wf-reporting-server\extracted\ibi-w
+ebfocus-reporting-server\9.3.4; run `docushift extract` first
+! ibi-webfocus-reporting-server@9.3.3: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-wf-reporting-server\extracted\ibi-w
+ebfocus-reporting-server\9.3.3; run `docushift extract` first
+! ibi-webfocus-reporting-server@9.3.2: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-wf-reporting-server\extracted\ibi-w
+ebfocus-reporting-server\9.3.2; run `docushift extract` first
+! ibi-webfocus-reporting-server@9.3.1: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-wf-reporting-server\extracted\ibi-w
+ebfocus-reporting-server\9.3.1; run `docushift extract` first
+! ibi-webfocus-reporting-server@9.2.8: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-wf-reporting-server\ibi-webfocus-repo
+rting-server\9.2.8; run `docushift convert` first
+! ibi-webfocus-reporting-server@9.2.8: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-wf-reporting-server\extracted\ibi-w
+ebfocus-reporting-server\9.2.8; run `docushift extract` first
+! ibi-webfocus-reporting-server@9.2.7: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-wf-reporting-server\ibi-webfocus-repo
+rting-server\9.2.7; run `docushift convert` first
+! ibi-webfocus-reporting-server@9.2.7: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-wf-reporting-server\extracted\ibi-w
+ebfocus-reporting-server\9.2.7; run `docushift extract` first
+! ibi-webfocus-reporting-server@9.2.6: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-wf-reporting-server\ibi-webfocus-repo
+rting-server\9.2.6; run `docushift convert` first
+! ibi-webfocus-reporting-server@9.2.6: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-wf-reporting-server\extracted\ibi-w
+ebfocus-reporting-server\9.2.6; run `docushift extract` first
+! ibi-webfocus-reporting-server@9.2.5: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-wf-reporting-server\ibi-webfocus-repo
+rting-server\9.2.5; run `docushift convert` first
+! ibi-webfocus-reporting-server@9.2.5: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-wf-reporting-server\extracted\ibi-w
+ebfocus-reporting-server\9.2.5; run `docushift extract` first
+! ibi-webfocus-reporting-server@9.2.4: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-wf-reporting-server\ibi-webfocus-repo
+rting-server\9.2.4; run `docushift convert` first
+! ibi-webfocus-reporting-server@9.2.4: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-wf-reporting-server\extracted\ibi-w
+ebfocus-reporting-server\9.2.4; run `docushift extract` first
+! ibi-webfocus-reporting-server@9.2.3: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-wf-reporting-server\ibi-webfocus-repo
+rting-server\9.2.3; run `docushift convert` first
+! ibi-webfocus-reporting-server@9.2.3: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-wf-reporting-server\extracted\ibi-w
+ebfocus-reporting-server\9.2.3; run `docushift extract` first
+! ibi-webfocus-reporting-server@9.2.2: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-wf-reporting-server\ibi-webfocus-repo
+rting-server\9.2.2; run `docushift convert` first
+! ibi-webfocus-reporting-server@9.2.2: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-wf-reporting-server\extracted\ibi-w
+ebfocus-reporting-server\9.2.2; run `docushift extract` first
+! ibi-webfocus-reporting-server@9.2.1: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-wf-reporting-server\ibi-webfocus-repo
+rting-server\9.2.1; run `docushift convert` first
+! ibi-webfocus-reporting-server@9.2.1: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-wf-reporting-server\extracted\ibi-w
+ebfocus-reporting-server\9.2.1; run `docushift extract` first
+! ibi-webfocus-reporting-server@9.2.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-wf-reporting-server\ibi-webfocus-repo
+rting-server\9.2.0; run `docushift convert` first
+! ibi-webfocus-reporting-server@9.2.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-wf-reporting-server\extracted\ibi-w
+ebfocus-reporting-server\9.2.0; run `docushift extract` first
+! ibi-webfocus-reporting-server@9.1.4: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-wf-reporting-server\ibi-webfocus-repo
+rting-server\9.1.4; run `docushift convert` first
+! ibi-webfocus-reporting-server@9.1.4: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-wf-reporting-server\extracted\ibi-w
+ebfocus-reporting-server\9.1.4; run `docushift extract` first
+! ibi-webfocus-reporting-server@9.1.3: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-wf-reporting-server\ibi-webfocus-repo
+rting-server\9.1.3; run `docushift convert` first
+! ibi-webfocus-reporting-server@9.1.3: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-wf-reporting-server\extracted\ibi-w
+ebfocus-reporting-server\9.1.3; run `docushift extract` first
+! ibi-webfocus-reporting-server@9.1.2: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-wf-reporting-server\ibi-webfocus-repo
+rting-server\9.1.2; run `docushift convert` first
+! ibi-webfocus-reporting-server@9.1.2: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-wf-reporting-server\extracted\ibi-w
+ebfocus-reporting-server\9.1.2; run `docushift extract` first
+! ibi-webfocus-reporting-server@9.1.1: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-wf-reporting-server\ibi-webfocus-repo
+rting-server\9.1.1; run `docushift convert` first
+! ibi-webfocus-reporting-server@9.1.1: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-wf-reporting-server\extracted\ibi-w
+ebfocus-reporting-server\9.1.1; run `docushift extract` first
+! ibi-webfocus-reporting-server@9.1.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-wf-reporting-server\ibi-webfocus-repo
+rting-server\9.1.0; run `docushift convert` first
+! ibi-webfocus-reporting-server@9.1.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-wf-reporting-server\extracted\ibi-w
+ebfocus-reporting-server\9.1.0; run `docushift extract` first

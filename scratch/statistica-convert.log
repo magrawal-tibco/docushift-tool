@@ -1,0 +1,280 @@
+Converting 42 version(s)...
+  v spotfire-data-science-author@2.2.0 15 topic(s), 1 asset(s), 1 unit(s), 17 
+nav node(s), 2 generated -> 20 file(s)
+  v spotfire-data-science-author@2.1.0 15 topic(s), 1 asset(s), 1 unit(s), 17 
+nav node(s), 2 generated -> 20 file(s)
+  v spotfire-data-science-author@2.0.0 15 topic(s), 3 asset(s), 1 unit(s), 17 
+nav node(s), 2 generated -> 22 file(s)
+  v spotfire-data-science-author@1.5.0 19 topic(s), 3 asset(s), 1 unit(s), 21 
+nav node(s), 2 generated -> 26 file(s)
+C:\github\docushift-tool\src\docushift\transforms\markdown.py:112: XMLParsedAsHTMLWarning: It looks like you're using an HTML parser to parse an XML document.
+
+Assuming this really is an XML document, what you're doing might work, but you should know that using an XML parser will be more reliable. To parse this document as XML, make sure you have the Python package 'lxml' installed, and pass the keyword argument `features="xml"` into the BeautifulSoup constructor.
+
+If you want or need to use an HTML parser on this document, you can make this warning go away by filtering it. To do that, run this code before calling the BeautifulSoup constructor:
+
+    from bs4 import XMLParsedAsHTMLWarning
+    import warnings
+
+    warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+  return BeautifulSoup(_CDATA.sub(_unwrap_cdata, text), PARSER)
+  v spotfire-data-science-author@1.4.0 12 topic(s), 3 asset(s), 1 unit(s), 13 
+nav node(s), 1 generated -> 19 file(s)
+  v spotfire-data-science-for-life-science-author@2.2.0 15 topic(s), 1 
+asset(s), 1 unit(s), 17 nav node(s), 2 generated -> 20 file(s)
+  v spotfire-data-science-for-life-science-author@2.1.0 15 topic(s), 1 
+asset(s), 1 unit(s), 17 nav node(s), 2 generated -> 20 file(s)
+  v spotfire-data-science-for-life-science-author@2.0.0 15 topic(s), 3 
+asset(s), 1 unit(s), 17 nav node(s), 2 generated -> 22 file(s)
+  v spotfire-data-science-for-life-science-author@1.5.0 19 topic(s), 3 
+asset(s), 1 unit(s), 21 nav node(s), 2 generated -> 26 file(s)
+C:\github\docushift-tool\src\docushift\transforms\markdown.py:112: XMLParsedAsHTMLWarning: It looks like you're using an HTML parser to parse an XML document.
+
+Assuming this really is an XML document, what you're doing might work, but you should know that using an XML parser will be more reliable. To parse this document as XML, make sure you have the Python package 'lxml' installed, and pass the keyword argument `features="xml"` into the BeautifulSoup constructor.
+
+If you want or need to use an HTML parser on this document, you can make this warning go away by filtering it. To do that, run this code before calling the BeautifulSoup constructor:
+
+    from bs4 import XMLParsedAsHTMLWarning
+    import warnings
+
+    warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+  return BeautifulSoup(_CDATA.sub(_unwrap_cdata, text), PARSER)
+  v spotfire-data-science-for-life-science-author@1.4.0 12 topic(s), 3 
+asset(s), 1 unit(s), 13 nav node(s), 1 generated -> 19 file(s)
+  v spotfire-data-science-for-life-science-operations@2.2.0 15 topic(s), 1 
+asset(s), 1 unit(s), 17 nav node(s), 2 generated -> 20 file(s)
+  v spotfire-data-science-for-life-science-operations@2.1.0 15 topic(s), 1 
+asset(s), 1 unit(s), 17 nav node(s), 2 generated -> 20 file(s)
+  v spotfire-data-science-for-life-science-operations@2.0.0 15 topic(s), 3 
+asset(s), 1 unit(s), 17 nav node(s), 2 generated -> 22 file(s)
+  v spotfire-data-science-for-life-science-operations@1.5.0 19 topic(s), 3 
+asset(s), 1 unit(s), 21 nav node(s), 2 generated -> 26 file(s)
+C:\github\docushift-tool\src\docushift\transforms\markdown.py:112: XMLParsedAsHTMLWarning: It looks like you're using an HTML parser to parse an XML document.
+
+Assuming this really is an XML document, what you're doing might work, but you should know that using an XML parser will be more reliable. To parse this document as XML, make sure you have the Python package 'lxml' installed, and pass the keyword argument `features="xml"` into the BeautifulSoup constructor.
+
+If you want or need to use an HTML parser on this document, you can make this warning go away by filtering it. To do that, run this code before calling the BeautifulSoup constructor:
+
+    from bs4 import XMLParsedAsHTMLWarning
+    import warnings
+
+    warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+  return BeautifulSoup(_CDATA.sub(_unwrap_cdata, text), PARSER)
+  v spotfire-data-science-for-life-science-operations@1.4.0 12 topic(s), 3 
+asset(s), 1 unit(s), 13 nav node(s), 1 generated -> 19 file(s)
+  v spotfire-data-science-operations@2.2.0 15 topic(s), 1 asset(s), 1 unit(s), 
+17 nav node(s), 2 generated -> 20 file(s)
+  v spotfire-data-science-operations@2.1.0 15 topic(s), 1 asset(s), 1 unit(s), 
+17 nav node(s), 2 generated -> 20 file(s)
+  v spotfire-data-science-operations@2.0.0 15 topic(s), 3 asset(s), 1 unit(s), 
+17 nav node(s), 2 generated -> 22 file(s)
+  v spotfire-data-science-operations@1.5.0 19 topic(s), 3 asset(s), 1 unit(s), 
+21 nav node(s), 2 generated -> 26 file(s)
+C:\github\docushift-tool\src\docushift\transforms\markdown.py:112: XMLParsedAsHTMLWarning: It looks like you're using an HTML parser to parse an XML document.
+
+Assuming this really is an XML document, what you're doing might work, but you should know that using an XML parser will be more reliable. To parse this document as XML, make sure you have the Python package 'lxml' installed, and pass the keyword argument `features="xml"` into the BeautifulSoup constructor.
+
+If you want or need to use an HTML parser on this document, you can make this warning go away by filtering it. To do that, run this code before calling the BeautifulSoup constructor:
+
+    from bs4 import XMLParsedAsHTMLWarning
+    import warnings
+
+    warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+  return BeautifulSoup(_CDATA.sub(_unwrap_cdata, text), PARSER)
+  v spotfire-data-science-operations@1.4.0 12 topic(s), 3 asset(s), 1 unit(s), 
+13 nav node(s), 1 generated -> 19 file(s)
+  v spotfire-data-science-workbench@14.4.0 14241 topic(s), 5774 asset(s), 3 
+unit(s), 16058 nav node(s), 12 generated -> 20028 file(s)
+  v spotfire-data-science-workbench@14.3.0 14225 topic(s), 5774 asset(s), 3 
+unit(s), 16042 nav node(s), 12 generated -> 20012 file(s)
+  v spotfire-data-science-workbench@14.1.0 14517 topic(s), 6103 asset(s), 4 
+unit(s), 16349 nav node(s), 29 generated -> 20473 file(s)
+  v spotfire-statistica@14.4.0 14241 topic(s), 5774 asset(s), 3 unit(s), 16058 
+nav node(s), 12 generated -> 20028 file(s)
+  v spotfire-statistica@14.3.0 14225 topic(s), 5774 asset(s), 3 unit(s), 16042 
+nav node(s), 12 generated -> 20012 file(s)
+  v spotfire-statistica@14.1.0 14517 topic(s), 6103 asset(s), 4 unit(s), 16349 
+nav node(s), 29 generated -> 20473 file(s)
+  v spotfire-statistica-all-servers@14.2.0 3 topic(s), 1 asset(s), 1 unit(s), 4
+nav node(s), 1 generated -> 6 file(s)
+  v spotfire-statistica-all-servers@14.1.0 289 topic(s), 304 asset(s), 1 
+unit(s), 290 nav node(s), 1 generated -> 595 file(s)
+  v spotfire-statistica-integration@14.5.0 136 topic(s), 47 asset(s), 1 
+unit(s), 137 nav node(s), 1 generated -> 186 file(s)
+  v spotfire-statistica-integration@14.4.0 96 topic(s), 35 asset(s), 1 unit(s),
+97 nav node(s), 1 generated -> 134 file(s)
+  v spotfire-statistica-integration@14.3.0 32 topic(s), 28 asset(s), 1 unit(s),
+33 nav node(s), 1 generated -> 63 file(s)
+  v spotfire-statistica-integration@14.2.0 15 topic(s), 10 asset(s), 2 unit(s),
+16 nav node(s), 1 generated -> 27 file(s)
+  x spotfire-statistics-services@14.0.0
+  v tibco-data-science-for-tibco-spotfire-analyst@14.1.0 324 topic(s), 331 
+asset(s), 2 unit(s), 325 nav node(s), 2 generated -> 658 file(s)
+  v tibco-data-science-service-for-tibco-spotfire@14.1.0 289 topic(s), 304 
+asset(s), 1 unit(s), 290 nav node(s), 1 generated -> 596 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |       34 |
+| Already current   |        0 |
+| No extracted tree |        1 |
+| Engine unknown    |        6 |
+| Failed            |        1 |
++------------------------------+
+87454 topic(s), 36406 asset(s) written.
+123719 file(s) standing in the measured output tree(s).
+spotfire-data-science-author@2.2.0: 1 resolved, 0 skin, 0 escaped, 0 dangling, 
+0 case-mismatch, 74 orphan (3.0 MB)
+spotfire-data-science-author@2.2.0: skipped 4 generated-directory, 2 
+runtime-stub, 1 unreferenced-template
+spotfire-data-science-author@2.1.0: 1 resolved, 0 skin, 0 escaped, 0 dangling, 
+0 case-mismatch, 72 orphan (3.0 MB)
+spotfire-data-science-author@2.1.0: skipped 3 generated-directory, 2 
+runtime-stub, 1 unreferenced-template
+spotfire-data-science-author@2.0.0: 3 resolved, 0 skin, 1 escaped, 0 dangling, 
+0 case-mismatch, 69 orphan (2.8 MB)
+spotfire-data-science-author@2.0.0: skipped 3 generated-directory, 2 
+runtime-stub
+spotfire-data-science-author@1.5.0: 3 resolved, 0 skin, 3 escaped, 0 dangling, 
+0 case-mismatch, 67 orphan (2.8 MB)
+spotfire-data-science-author@1.5.0: skipped 3 generated-directory, 2 
+runtime-stub
+spotfire-data-science-author@1.4.0: 3 resolved, 0 skin, 0 escaped, 0 dangling, 
+0 case-mismatch, 1 orphan (0.1 MB)
+spotfire-data-science-author@1.4.0: skipped 2 not-a-topic, 1 
+publication-homepage
+spotfire-data-science-for-life-science-author@2.2.0: 1 resolved, 0 skin, 0 
+escaped, 0 dangling, 0 case-mismatch, 74 orphan (3.0 MB)
+spotfire-data-science-for-life-science-author@2.2.0: skipped 4 
+generated-directory, 2 runtime-stub, 1 unreferenced-template
+spotfire-data-science-for-life-science-author@2.1.0: 1 resolved, 0 skin, 0 
+escaped, 0 dangling, 0 case-mismatch, 72 orphan (3.0 MB)
+spotfire-data-science-for-life-science-author@2.1.0: skipped 3 
+generated-directory, 2 runtime-stub, 1 unreferenced-template
+spotfire-data-science-for-life-science-author@2.0.0: 3 resolved, 0 skin, 1 
+escaped, 0 dangling, 0 case-mismatch, 69 orphan (2.8 MB)
+spotfire-data-science-for-life-science-author@2.0.0: skipped 3 
+generated-directory, 2 runtime-stub
+spotfire-data-science-for-life-science-author@1.5.0: 3 resolved, 0 skin, 3 
+escaped, 0 dangling, 0 case-mismatch, 67 orphan (2.8 MB)
+spotfire-data-science-for-life-science-author@1.5.0: skipped 3 
+generated-directory, 2 runtime-stub
+spotfire-data-science-for-life-science-author@1.4.0: 3 resolved, 0 skin, 0 
+escaped, 0 dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+spotfire-data-science-for-life-science-author@1.4.0: skipped 2 not-a-topic, 1 
+publication-homepage
+spotfire-data-science-for-life-science-operations@2.2.0: 1 resolved, 0 skin, 0 
+escaped, 0 dangling, 0 case-mismatch, 74 orphan (3.0 MB)
+spotfire-data-science-for-life-science-operations@2.2.0: skipped 4 
+generated-directory, 2 runtime-stub, 1 unreferenced-template
+spotfire-data-science-for-life-science-operations@2.1.0: 1 resolved, 0 skin, 0 
+escaped, 0 dangling, 0 case-mismatch, 72 orphan (3.0 MB)
+spotfire-data-science-for-life-science-operations@2.1.0: skipped 3 
+generated-directory, 2 runtime-stub, 1 unreferenced-template
+spotfire-data-science-for-life-science-operations@2.0.0: 3 resolved, 0 skin, 1 
+escaped, 0 dangling, 0 case-mismatch, 69 orphan (2.8 MB)
+spotfire-data-science-for-life-science-operations@2.0.0: skipped 3 
+generated-directory, 2 runtime-stub
+spotfire-data-science-for-life-science-operations@1.5.0: 3 resolved, 0 skin, 3 
+escaped, 0 dangling, 0 case-mismatch, 67 orphan (2.8 MB)
+spotfire-data-science-for-life-science-operations@1.5.0: skipped 3 
+generated-directory, 2 runtime-stub
+spotfire-data-science-for-life-science-operations@1.4.0: 3 resolved, 0 skin, 0 
+escaped, 0 dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+spotfire-data-science-for-life-science-operations@1.4.0: skipped 2 not-a-topic,
+1 publication-homepage
+spotfire-data-science-operations@2.2.0: 1 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 74 orphan (3.0 MB)
+spotfire-data-science-operations@2.2.0: skipped 4 generated-directory, 2 
+runtime-stub, 1 unreferenced-template
+spotfire-data-science-operations@2.1.0: 1 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 72 orphan (3.0 MB)
+spotfire-data-science-operations@2.1.0: skipped 3 generated-directory, 2 
+runtime-stub, 1 unreferenced-template
+spotfire-data-science-operations@2.0.0: 3 resolved, 0 skin, 1 escaped, 0 
+dangling, 0 case-mismatch, 69 orphan (2.8 MB)
+spotfire-data-science-operations@2.0.0: skipped 3 generated-directory, 2 
+runtime-stub
+spotfire-data-science-operations@1.5.0: 3 resolved, 0 skin, 3 escaped, 0 
+dangling, 0 case-mismatch, 67 orphan (2.8 MB)
+spotfire-data-science-operations@1.5.0: skipped 3 generated-directory, 2 
+runtime-stub
+spotfire-data-science-operations@1.4.0: 3 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+spotfire-data-science-operations@1.4.0: skipped 2 not-a-topic, 1 
+publication-homepage
+spotfire-data-science-workbench@14.4.0: 7942 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 897 orphan (30.5 MB)
+spotfire-data-science-workbench@14.4.0: skipped 11 generated-directory, 2 
+placeholder-template, 6 runtime-stub, 4 unreferenced-template
+spotfire-data-science-workbench@14.3.0: 7942 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 894 orphan (30.4 MB)
+spotfire-data-science-workbench@14.3.0: skipped 10 generated-directory, 2 
+placeholder-template, 6 runtime-stub, 4 unreferenced-template
+spotfire-data-science-workbench@14.1.0: 8286 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 1085 orphan (34.4 MB)
+spotfire-data-science-workbench@14.1.0: skipped 12 generated-directory, 4 
+placeholder-template, 8 runtime-stub, 10 unreferenced-template
+spotfire-statistica@14.4.0: 7942 resolved, 0 skin, 0 escaped, 0 dangling, 0 
+case-mismatch, 897 orphan (30.5 MB)
+spotfire-statistica@14.4.0: skipped 11 generated-directory, 2 
+placeholder-template, 6 runtime-stub, 4 unreferenced-template
+spotfire-statistica@14.3.0: 7942 resolved, 0 skin, 0 escaped, 0 dangling, 0 
+case-mismatch, 894 orphan (30.4 MB)
+spotfire-statistica@14.3.0: skipped 10 generated-directory, 2 
+placeholder-template, 6 runtime-stub, 4 unreferenced-template
+spotfire-statistica@14.1.0: 8286 resolved, 0 skin, 0 escaped, 0 dangling, 0 
+case-mismatch, 1085 orphan (34.4 MB)
+spotfire-statistica@14.1.0: skipped 12 generated-directory, 4 
+placeholder-template, 8 runtime-stub, 10 unreferenced-template
+spotfire-statistica-all-servers@14.2.0: 1 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 77 orphan (3.6 MB)
+spotfire-statistica-all-servers@14.2.0: skipped 3 generated-directory, 1 
+placeholder-template, 2 runtime-stub, 3 unreferenced-template
+spotfire-statistica-all-servers@14.1.0: 331 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 275 orphan (9.2 MB)
+spotfire-statistica-all-servers@14.1.0: skipped 3 generated-directory, 1 
+placeholder-template, 2 runtime-stub, 3 unreferenced-template
+spotfire-statistica-integration@14.5.0: 50 resolved, 0 skin, 0 escaped, 20 
+dangling, 0 case-mismatch, 120 orphan (7.0 MB)
+spotfire-statistica-integration@14.5.0: skipped 4 generated-directory, 2 
+runtime-stub
+spotfire-statistica-integration@14.4.0: 38 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 107 orphan (6.1 MB)
+spotfire-statistica-integration@14.4.0: skipped 4 generated-directory, 2 
+runtime-stub
+spotfire-statistica-integration@14.3.0: 31 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 99 orphan (5.0 MB)
+spotfire-statistica-integration@14.3.0: skipped 4 generated-directory, 2 
+runtime-stub
+spotfire-statistica-integration@14.2.0: 13 resolved, 0 skin, 2 escaped, 0 
+dangling, 0 case-mismatch, 158 orphan (7.1 MB)
+spotfire-statistica-integration@14.2.0: skipped 7 generated-directory, 1 
+placeholder-template, 4 runtime-stub, 4 unreferenced-template
+tibco-data-science-for-tibco-spotfire-analyst@14.1.0: 361 resolved, 0 skin, 0 
+escaped, 0 dangling, 0 case-mismatch, 355 orphan (12.7 MB)
+tibco-data-science-for-tibco-spotfire-analyst@14.1.0: skipped 6 
+generated-directory, 2 placeholder-template, 4 runtime-stub, 4 
+unreferenced-template
+tibco-data-science-service-for-tibco-spotfire@14.1.0: 331 resolved, 0 skin, 0 
+escaped, 0 dangling, 0 case-mismatch, 275 orphan (9.2 MB)
+tibco-data-science-service-for-tibco-spotfire@14.1.0: skipped 3 
+generated-directory, 1 placeholder-template, 2 runtime-stub, 3 
+unreferenced-template
+! spotfire-statistica-all-servers@14.4.0: engine undetected (`auto`)
+! spotfire-statistica-all-servers@14.3.0: engine undetected (`auto`)
+! spotfire-statistica-estore-edition@14.1.0: engine undetected (`auto`)
+! spotfire-statistics-services@Services: no extracted tree at 
+C:\github\docushift-tool\families\en-us-spotfire-statistica\extracted\spotfire-
+statistics-services\Services; run `docushift extract` first
+! tibco-statistica-language-packs@14.1.0: engine undetected (`auto`)
+! tibco-statistica-language-packs@14.0.0: engine undetected (`auto`)
+! tibco-statistica-language-packs@13.5.0: engine undetected (`auto`)
+x spotfire-statistics-services@14.0.0: nothing converted (0 unit(s), 0 
+documents); the previous output is kept
+Findings: 1 error, 81 warnings, 129 notes.

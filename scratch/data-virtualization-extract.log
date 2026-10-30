@@ -1,0 +1,48 @@
+Extracting 3 version(s)...
+  v tibco-data-virtualization@8.9.0 20164 file(s), flare, 5 root(s)
+  v tibco-data-virtualization@8.8.1 18749 file(s), flare, 5 root(s)
+  v tibco-data-virtualization@8.8.0 18652 file(s), flare, 5 root(s)
+                Extract                
++-------------------------------------+
+| Outcome                  | Versions |
+|--------------------------+----------|
+| Extracted                |        3 |
+| Already current          |        0 |
+| Measured from cache      |        0 |
+| No package               |        0 |
+| Refused (unsafe archive) |        0 |
+| Failed                   |        0 |
++-------------------------------------+
+57565 file(s) written.
+       Engines       
++-------------------+
+| Engine | Versions |
+|--------+----------|
+| flare  |        3 |
++-------------------+
+CSH: 15 source(s), 0 identifier(s).
+                     Assets                      
++-----------------------------------------------+
+| Category | Destination     | Files |     Size |
+|----------+-----------------+-------+----------|
+| topic    | output-root     | 32099 | 1.112 GB |
+| image    | output-root     |  3610 | 157.8 MB |
+| skin     | output-root     | 21354 | 1.325 GB |
+| other    | output-root     |   208 |  30.5 MB |
+| document | document-router |   282 | 996.0 MB |
+| topic    | unclaimed       |     8 |   0.1 MB |
+| image    | unclaimed       |     3 |   0.1 MB |
+| other    | unclaimed       |     1 |   0.0 MB |
++-----------------------------------------------+
+? tibco-data-virtualization@8.9.0: 12 unclaimed file(s) in LTS/ (0.2 MB) -- no 
+destination
+? tibco-data-virtualization@8.9.0: 
+spotfire-data-virtualization-8-9-0/onlinedocs/API/ 433 file(s), no known 
+generator marker
+? tibco-data-virtualization@8.8.1: 
+tibco-data-virtualization-8-8-1/StudioHelp/API/ 435 file(s), no known generator
+marker
+? tibco-data-virtualization@8.8.0: 
+tibco-data-virtualization-8-8-0/StudioHelp/API/ 433 file(s), no known generator
+marker
+Recorded 3 notes -- `docushift report --run 1066`.

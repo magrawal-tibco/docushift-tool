@@ -1,0 +1,36 @@
+== convert adapter-code-for-tibco-api-exchange-and-joomla 2.3.4
+  v adapter-code-for-tibco-api-exchange-and-joomla@2.3.4 117 topic(s), 73 
+| Failed            |        0 |
+Findings: 1 warning, 3 notes.
+== convert tibco-activematrix-businessworks-plug-in-for-applicability-statement-2-as2-protocol 6.0.0
+  v 
+| Failed            |        0 |
+Findings: 2 warnings, 3 notes.
+== convert tibco-activematrix-businessworks-plug-in-for-pdf 6.2.3
+  v tibco-activematrix-businessworks-plug-in-for-pdf@6.2.3 57 topic(s), 42 
+| Failed            |        0 |
+Findings: 3 warnings, 3 notes.
+== convert tibco-activematrix-businessworks-plug-in-for-tibco-managed-file-transfer 6.3.1
+  v 
+| Failed            |        0 |
+Findings: 2 warnings, 1 note.
+== convert ibi-webfocus-dsml-services-container-edition 1.0.7
+  v ibi-webfocus-dsml-services-container-edition@1.0.7 20 topic(s), 4 asset(s),
+| Failed            |        0 |
+Findings: 3 warnings, 3 notes.
+== reframe adapter-code-for-tibco-api-exchange-and-joomla 2.3.4
+  v adapter-code-for-tibco-api-exchange-and-joomla@2.3.4 120 topic(s) -> 15 
+4 page(s) queued for editorial review:
+Findings: 1 warning, 1 note.
+== reframe tibco-activematrix-businessworks-plug-in-for-applicability-statement-2-as2-protocol 6.0.0
+  v 
+6 page(s) queued for editorial review:
+Findings: 1 warning, 1 note.
+== reframe tibco-activematrix-businessworks-plug-in-for-pdf 6.2.3
+  v tibco-activematrix-businessworks-plug-in-for-pdf@6.2.3 55 topic(s) -> 13 
+7 page(s) queued for editorial review:
+Findings: 1 warning, 2 notes.
+== reframe tibco-activematrix-businessworks-plug-in-for-tibco-managed-file-transfer 6.3.1
+  v 
+4 page(s) queued for editorial review:
+Findings: 1 warning, 2 notes.

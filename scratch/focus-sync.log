@@ -1,0 +1,56 @@
+Syncing 19 version(s) into C:\github\ibi-docs-aem...
+  v ibi-focus@9.3.8 -> online-help/9-3-8 3747 file(s), 44.4 MB
+  v ibi-focus@9.3.7 -> online-help/9-3-7 3622 file(s), 47.3 MB
+  v ibi-focus@9.3.6 -> online-help/9-3-6 3621 file(s), 46.9 MB
+  v ibi-focus@9.3.5 -> online-help/9-3-5 3674 file(s), 48.0 MB
+  v ibi-focus@9.3.4 -> online-help/9-3-4 3865 file(s), 51.6 MB
+  v ibi-focus@9.3.3 -> online-help/9-3-3 3878 file(s), 51.5 MB
+  v ibi-focus@9.3.2 -> online-help/9-3-2 3811 file(s), 50.8 MB
+  v ibi-focus@9.3.1 -> online-help/9-3-1 3819 file(s), 50.8 MB
+  v ibi-focus@9.3.0 -> online-help/9-3-0 3789 file(s), 50.6 MB
+                                     Sync                                      
+┌─────────────┬──────┬─────────────┬─────────────┬─────────────┬──────────────┐
+│ Outcome     │ Rows │ online-help │ user-guides │ release-in… │ reference-d… │
+├─────────────┼──────┼─────────────┼─────────────┼─────────────┼──────────────┤
+│ Synced      │    9 │           9 │           0 │           0 │            0 │
+│ Already     │   57 │           0 │          19 │          19 │           19 │
+│ current     │      │             │             │             │              │
+│ No source   │   10 │          10 │           0 │           0 │            0 │
+│ tree        │      │             │             │             │              │
+│ Skipped     │    0 │           0 │           0 │           0 │            0 │
+│ Failed      │    0 │           0 │           0 │           0 │            0 │
+└─────────────┴──────┴─────────────┴─────────────┴─────────────┴──────────────┘
+33826 file(s), 441.9 MB copied.
+1 product metadata.yml, 4 version.yml written.
+Published merged (Stage 6b): ibi-focus.
+35242 redirect(s) in 2 published map(s), tree-rooted (no publish_base_url set).
+! ibi-focus@9.2.5: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-focus\ibi-focus\9.2.5; run `docushift
+convert` first
+! ibi-focus@9.2.4: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-focus\ibi-focus\9.2.4; run `docushift
+convert` first
+! ibi-focus@9.2.3: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-focus\ibi-focus\9.2.3; run `docushift
+convert` first
+! ibi-focus@9.2.2: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-focus\ibi-focus\9.2.2; run `docushift
+convert` first
+! ibi-focus@9.2.1: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-focus\ibi-focus\9.2.1; run `docushift
+convert` first
+! ibi-focus@9.2.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-focus\ibi-focus\9.2.0; run `docushift
+convert` first
+! ibi-focus@9.1.3: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-focus\ibi-focus\9.1.3; run `docushift
+convert` first
+! ibi-focus@9.1.2: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-focus\ibi-focus\9.1.2; run `docushift
+convert` first
+! ibi-focus@9.1.1: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-focus\ibi-focus\9.1.1; run `docushift
+convert` first
+! ibi-focus@9.1.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-focus\ibi-focus\9.1.0; run `docushift
+convert` first

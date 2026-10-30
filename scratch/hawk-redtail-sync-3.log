@@ -1,0 +1,20 @@
+Syncing 1 version(s) into ..\tibco-docs-aem...
+  v tibco-operational-intelligence-hawk-redtail@7.5.0 -> online-help/7-5-0 294 
+file(s), 12.4 MB
+                                     Sync                                      
++-----------------------------------------------------------------------------+
+| Outcome | Rows | online… | user-g… | releas… | refere… | api-ref… | archiv… |
+|---------+------+---------+---------+---------+---------+----------+---------|
+| Synced  |    1 |       1 |       0 |       0 |       0 |        0 |       0 |
+| Already |    5 |       0 |       1 |       1 |       1 |        1 |       1 |
+| current |      |         |         |         |         |          |         |
+| No      |    0 |       0 |       0 |       0 |       0 |        0 |       0 |
+| source  |      |         |         |         |         |          |         |
+| tree    |      |         |         |         |         |          |         |
+| Skipped |    0 |       0 |       0 |       0 |       0 |        0 |       0 |
+| Failed  |    0 |       0 |       0 |       0 |       0 |        0 |       0 |
++-----------------------------------------------------------------------------+
+294 file(s), 12.4 MB copied.
+1 product metadata.yml, 4 version.yml written.
+Published merged (Stage 6b): tibco-operational-intelligence-hawk-redtail.
+3452 redirect(s) in 2 published map(s), tree-rooted (no publish_base_url set).

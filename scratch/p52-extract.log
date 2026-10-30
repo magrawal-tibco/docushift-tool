@@ -1,0 +1,33 @@
+Extracting 1 version(s)...
+  v tibco-managed-file-transfer-platform-server-for-z-linux@8.1.0 608 file(s), 
+flare, 1 root(s)
+                Extract                
++-------------------------------------+
+| Outcome                  | Versions |
+|--------------------------+----------|
+| Extracted                |        1 |
+| Already current          |        0 |
+| Measured from cache      |        0 |
+| No package               |        0 |
+| Refused (unsafe archive) |        0 |
+| Failed                   |        0 |
++-------------------------------------+
+608 file(s) written.
+       Engines       
++-------------------+
+| Engine | Versions |
+|--------+----------|
+| flare  |        1 |
++-------------------+
+CSH: 1 source(s), 0 identifier(s).
+                    Assets                     
++---------------------------------------------+
+| Category | Destination     | Files |   Size |
+|----------+-----------------+-------+--------|
+| topic    | output-root     |   218 | 3.4 MB |
+| image    | output-root     |    65 | 2.7 MB |
+| skin     | output-root     |   305 | 6.3 MB |
+| other    | output-root     |    11 | 0.6 MB |
+| document | document-router |     9 | 3.3 MB |
++---------------------------------------------+
+Recorded 2 notes -- `docushift report --run 858`.

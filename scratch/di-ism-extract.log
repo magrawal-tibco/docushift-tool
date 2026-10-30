@@ -1,0 +1,73 @@
+Extracting 22 version(s)...
+  v ibi-data-intelligence@2.1.0 786 file(s), flare, 1 root(s)
+  v ibi-data-intelligence@2.0.0 1181 file(s), flare, 1 root(s)
+  v ibi-data-intelligence@1.2.0 1169 file(s), flare, 1 root(s)
+  v ibi-data-intelligence@1.1.0 1146 file(s), flare, 1 root(s)
+  v ibi-data-intelligence@1.0.0 590 file(s), flare, 1 root(s)
+  v ibi-data-quality@5.2.2 663 file(s), flare, 1 root(s)
+  v ibi-data-quality@5.2.1 558 file(s), flare, 1 root(s)
+  v ibi-data-quality@5.2.0 5 file(s), auto
+  v ibi-iway-service-manager@9.3.0 9991 file(s), flare, 1 root(s)
+  v ibi-iway-service-manager@9.2.0 9863 file(s), flare, 1 root(s)
+  v ibi-iway-service-manager@9.1.0 40 file(s), auto
+  v ibi-iway-service-manager@8.1.0 31 file(s), auto
+  v ibi-iway-service-manager-edi-add-on@9.3.0 947 file(s), flare, 1 root(s)
+  v ibi-iway-service-manager-edi-add-on@9.1.1 888 file(s), flare, 1 root(s)
+                Extract                
++-------------------------------------+
+| Outcome                  | Versions |
+|--------------------------+----------|
+| Extracted                |       14 |
+| Already current          |        0 |
+| Measured from cache      |        0 |
+| No package               |        8 |
+| Refused (unsafe archive) |        0 |
+| Failed                   |        0 |
++-------------------------------------+
+27858 file(s) written.
+       Engines       
++-------------------+
+| Engine | Versions |
+|--------+----------|
+| flare  |       11 |
+| auto   |        3 |
++-------------------+
+? ibi-data-quality@5.2.0: engine undetected (`auto`)
+? ibi-iway-service-manager@9.1.0: engine undetected (`auto`)
+? ibi-iway-service-manager@8.1.0: engine undetected (`auto`)
+CSH: 11 source(s), 0 identifier(s).
+                     Assets                      
++-----------------------------------------------+
+| Category | Destination     | Files |     Size |
+|----------+-----------------+-------+----------|
+| topic    | output-root     |  4175 | 143.1 MB |
+| image    | output-root     | 18688 | 642.2 MB |
+| skin     | output-root     |  4645 | 309.8 MB |
+| other    | output-root     |   142 |   6.4 MB |
+| document | document-router |   208 | 744.8 MB |
++-----------------------------------------------+
+! ibi-data-quality@5.1.1: no package at 
+C:\github\docushift-tool\families\en-us-ibi-di-ism\downloads\ibi-data-quality-5
+.1.1.zip; run `docushift download` first
+! ibi-data-quality@5.1.0: no package at 
+C:\github\docushift-tool\families\en-us-ibi-di-ism\downloads\ibi-data-quality-5
+.1.0.zip; run `docushift download` first
+! ibi-data-quality@5.0.0: no package at 
+C:\github\docushift-tool\families\en-us-ibi-di-ism\downloads\ibi-data-quality-5
+.0.0.zip; run `docushift download` first
+! ibi-data-quality@3.1.0: no package at 
+C:\github\docushift-tool\families\en-us-ibi-di-ism\downloads\ibi-data-quality-3
+.1.0.zip; run `docushift download` first
+! ibi-data-quality@3.0.0: no package at 
+C:\github\docushift-tool\families\en-us-ibi-di-ism\downloads\ibi-data-quality-3
+.0.0.zip; run `docushift download` first
+! ibi-iway-service-manager@8.0.7: no package at 
+C:\github\docushift-tool\families\en-us-ibi-di-ism\downloads\ibi-iway-service-m
+anager-8.0.7.zip; run `docushift download` first
+! ibi-iway-service-manager@8.0.6: no package at 
+C:\github\docushift-tool\families\en-us-ibi-di-ism\downloads\ibi-iway-service-m
+anager-8.0.6.zip; run `docushift download` first
+! ibi-iway-service-manager@8.0.5: no package at 
+C:\github\docushift-tool\families\en-us-ibi-di-ism\downloads\ibi-iway-service-m
+anager-8.0.5.zip; run `docushift download` first
+Recorded 11 notes -- `docushift report --run 357`.

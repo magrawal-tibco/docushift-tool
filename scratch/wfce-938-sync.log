@@ -1,0 +1,24 @@
+Syncing 1 version(s) into C:\github\ibi-docs-aem...
+  v ibi-webfocus-container-edition@9.3.8 -> online-help/9-3-8 121 file(s), 0.7 
+MB
+  v ibi-webfocus-container-edition@9.3.8 -> user-guides/9-3-8 3 file(s), 5.3 MB
+  v ibi-webfocus-container-edition@9.3.8 -> release-information/9-3-8 2 
+file(s), 1.4 MB
+  v ibi-webfocus-container-edition@9.3.8 -> reference-documents/9-3-8 1 
+file(s), 2.7 MB
+                                     Sync                                      
++-----------------------------------------------------------------------------+
+| Outcome     | Rows | online-help | user-guides | release-in… | reference-d… |
+|-------------+------+-------------+-------------+-------------+--------------|
+| Synced      |    4 |           1 |           1 |           1 |            1 |
+| Already     |    0 |           0 |           0 |           0 |            0 |
+| current     |      |             |             |             |              |
+| No source   |    0 |           0 |           0 |           0 |            0 |
+| tree        |      |             |             |             |              |
+| Skipped     |    0 |           0 |           0 |           0 |            0 |
+| Failed      |    0 |           0 |           0 |           0 |            0 |
++-----------------------------------------------------------------------------+
+127 file(s), 10.1 MB copied.
+1 product metadata.yml, 4 version.yml written.
+Published merged (Stage 6b): ibi-webfocus-container-edition.
+207 redirect(s) in 2 published map(s), tree-rooted (no publish_base_url set).

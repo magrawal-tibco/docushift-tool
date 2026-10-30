@@ -1,0 +1,16 @@
+! GET http://localhost:5001/ftp_portal/coveo/tibco-activematrix-businessworks-plug-in-for-ibm-i-7-0-2.xml failed: HTTPConnectionPool(host='localhost', port=5001): Max retries exceeded with url: 
+/ftp_portal/coveo/tibco-activematrix-businessworks-plug-in-for-ibm-i-7-0-2.xml (Caused by NewConnectionError("HTTPConnection(host='localhost', port=5001): Failed to establish a new connection: [WinError 10061] No connection could be made because the
+target machine actively refused it"))
+! GET http://localhost:5001/ftp_portal/coveo/tibco-graph-database-enterprise-edition-1-1-0.xml failed: HTTPConnectionPool(host='localhost', port=5001): Max retries exceeded with url: 
+/ftp_portal/coveo/tibco-graph-database-enterprise-edition-1-1-0.xml (Caused by NewConnectionError("HTTPConnection(host='localhost', port=5001): Failed to establish a new connection: [WinError 10061] No connection could be made because the target 
+machine actively refused it"))
+! GET http://localhost:5001/ftp_portal/coveo/tibco-graph-database-enterprise-edition-1-1-1.xml failed: HTTPConnectionPool(host='localhost', port=5001): Max retries exceeded with url: 
+/ftp_portal/coveo/tibco-graph-database-enterprise-edition-1-1-1.xml (Caused by NewConnectionError("HTTPConnection(host='localhost', port=5001): Failed to establish a new connection: [WinError 10061] No connection could be made because the target 
+machine actively refused it"))
+! tibco-loglogic.xml: expected <sitemapindex>, found <urlset>
+Sitemap: 1 fetched, 2024 reused; 288 of 604 products have a sitemap; 1731 of 4208 catalog versions have a page list.
+  20 product(s) not in the sitemap root: tibco-activematrix-bpm-mobilespace-for-ios-1-0-0, tibco-adapter-for-infranet-5-2-0, tibco-businessconnect-remote, tibco-cloud, tibco-cloud-administration, tibco-cloud-events, tibco-cloud-integration-ipaas, 
+tibco-cloud-live-apps, tibco-cloud-messaging, tibco-cloud-metadata, tibco-cloud-nimbus-essentials, tibco-cloud-nimbus-professional, tibco-cloud-passport, tibco-fulfillment-subscriber-inventory, tibco-health-essentials-cloud ...
+  297 file(s) answered with the docsite login page instead of a sitemap (no such file)
+  root lists more than once (first used): tibco-foresight-translator, spotfire-application, tibco-iprocess-engine
+  Report: C:\github\docushift-tool\reports\coveo-sitemap.csv

@@ -1,0 +1,36 @@
+Syncing 3 version(s) into ..\tibco-docs-aem...
+  v tibco-control-plane@1.20.0 -> online-help/1-20-0 756 file(s), 49.9 MB
+                             Sync                             
++------------------------------------------------------------+
+| Outcome         | Rows | online-help | reference-documents |
+|-----------------+------+-------------+---------------------|
+| Synced          |    1 |           1 |                   0 |
+| Already current |    5 |           2 |                   3 |
+| No source tree  |    0 |           0 |                   0 |
+| Skipped         |    0 |           0 |                   0 |
+| Failed          |    0 |           0 |                   0 |
++------------------------------------------------------------+
+756 file(s), 49.9 MB copied.
+1 product metadata.yml, 2 version.yml written.
+Published merged (Stage 6b): tibco-control-plane.
+3078 redirect(s) in 2 published map(s), tree-rooted (no publish_base_url set).
+Syncing 2 version(s) into ..\tibco-docs-aem...
+  v tibco-platform-command-line-interface@1.2.0 -> online-help/1-2-0 606 
+file(s), 39.7 MB
+                                     Sync                                      
++-----------------------------------------------------------------------------+
+| Outcome         | Rows | online-help | release-informat… | reference-docum… |
+|-----------------+------+-------------+-------------------+------------------|
+| Synced          |    1 |           1 |                 0 |                0 |
+| Already current |    3 |           0 |                 1 |                2 |
+| No source tree  |    1 |           1 |                 0 |                0 |
+| Skipped         |    0 |           0 |                 0 |                0 |
+| Failed          |    0 |           0 |                 0 |                0 |
++-----------------------------------------------------------------------------+
+606 file(s), 39.7 MB copied.
+1 product metadata.yml, 3 version.yml written.
+Published merged (Stage 6b): tibco-platform-command-line-interface.
+428 redirect(s) in 1 published map(s), tree-rooted (no publish_base_url set).
+! tibco-platform-command-line-interface@1.1.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-platform\tibco-platform-command-line-
+interface\1.1.0; run `docushift convert` first

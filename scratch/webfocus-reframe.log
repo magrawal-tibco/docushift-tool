@@ -1,0 +1,71 @@
+Reframing 90 version(s)...
+  v ibi-ai-assistant@9.3.8 24 topic(s) -> 24 page(s)
+  v ibi-open-data-hub-for-mainframe-connectors@1.3.8 55 topic(s) -> 55 page(s)
+  v ibi-open-data-hub-for-mainframe-connectors@1.3.7 220 topic(s) -> 220 
+page(s)
+  v ibi-open-data-hub-for-mainframe-connectors@1.3.6 220 topic(s) -> 220 
+page(s)
+  v ibi-open-data-hub-for-mainframe-connectors@1.3.5 226 topic(s) -> 226 
+page(s)
+  v ibi-open-data-hub-for-mainframe-connectors@1.3.4 240 topic(s) -> 240 
+page(s)
+  v ibi-open-data-hub-for-mainframe-connectors@1.0.9 240 topic(s) -> 240 
+page(s)
+  v ibi-open-data-hub-for-mainframe-connectors@1.0.8 240 topic(s) -> 240 
+page(s)
+  v ibi-open-data-hub-for-mainframe-connectors@1.0.7 240 topic(s) -> 240 
+page(s)
+  v ibi-open-data-hub-for-mainframe-connectors@1.0.5 240 topic(s) -> 240 
+page(s)
+  v ibi-open-data-hub-for-mainframe-connectors@1.0.4 191 topic(s) -> 191 
+page(s)
+  v ibi-open-data-hub-for-mainframe-connectors@1.0.3 191 topic(s) -> 191 
+page(s)
+  v ibi-webfocus-app-studio@9.3.8 324 topic(s) -> 326 page(s)
+  v ibi-webfocus-app-studio@9.3.7 263 topic(s) -> 263 page(s)
+  v ibi-webfocus-app-studio@9.3.6 303 topic(s) -> 303 page(s)
+  v ibi-webfocus-app-studio@9.3.5 304 topic(s) -> 304 page(s)
+  v ibi-webfocus-app-studio@9.3.4 303 topic(s) -> 303 page(s)
+  v ibi-webfocus-app-studio@9.3.3 303 topic(s) -> 303 page(s)
+  v ibi-webfocus-app-studio@9.3.2 303 topic(s) -> 303 page(s)
+  v ibi-webfocus-app-studio@9.3.1 303 topic(s) -> 303 page(s)
+  v ibi-webfocus-app-studio@9.3.0 304 topic(s) -> 304 page(s)
+  v ibi-webfocus-client@9.3.8 3029 topic(s) -> 2962 page(s)
+  v ibi-webfocus-client@9.3.7 2919 topic(s) -> 2883 page(s)
+  v ibi-webfocus-client@9.3.6 2860 topic(s) -> 2825 page(s)
+  v ibi-webfocus-client@9.3.5 2867 topic(s) -> 2831 page(s)
+  v ibi-webfocus-client@9.3.4 2804 topic(s) -> 2800 page(s)
+  v ibi-webfocus-client@9.3.3 2777 topic(s) -> 2773 page(s)
+  v ibi-webfocus-client@9.3.2 2775 topic(s) -> 2771 page(s)
+  v ibi-webfocus-client@9.3.1 2783 topic(s) -> 2779 page(s)
+  v ibi-webfocus-client@9.3.0 2904 topic(s) -> 2900 page(s)
+  v ibi-webfocus-dsml-services@9.3.8 8 topic(s) -> 8 page(s)
+  v ibi-webfocus-dsml-services@9.3.7 7 topic(s) -> 7 page(s)
+  v ibi-webfocus-dsml-services@9.3.6 8 topic(s) -> 8 page(s)
+  v ibi-webfocus-dsml-services@9.3.5 11 topic(s) -> 11 page(s)
+  v ibi-webfocus-dsml-services@9.3.4 22 topic(s) -> 22 page(s)
+  v ibi-webfocus-dsml-services@9.3.3 9 topic(s) -> 9 page(s)
+  v ibi-webfocus-dsml-services@9.3.2 9 topic(s) -> 9 page(s)
+  v ibi-webfocus-dsml-services@9.3.0 8 topic(s) -> 8 page(s)
+  v ibi-webfocus-installer@9.3.6 8 topic(s) -> 8 page(s)
+  v ibi-webfocus-installer@9.3.5 8 topic(s) -> 8 page(s)
+  v ibi-webfocus-installer@9.3.4 12 topic(s) -> 12 page(s)
+  v ibi-webfocus-installer@9.3.3 12 topic(s) -> 12 page(s)
+  v ibi-webfocus-installer@9.3.2 12 topic(s) -> 12 page(s)
+  v ibi-webfocus-installer@9.3.1 13 topic(s) -> 13 page(s)
+  v ibi-webfocus-installer@9.3.0 13 topic(s) -> 13 page(s)
+                 Reframe                  
+┌─────────────────────────────┬──────────┐
+│ Outcome                     │ Versions │
+├─────────────────────────────┼──────────┤
+│ Reframed                    │       45 │
+│ Already current             │        0 │
+│ Not Flare or DITA (skipped) │       45 │
+│ No converted tree           │        0 │
+│ Failed                      │        0 │
+└─────────────────────────────┴──────────┘
+30915 topic(s) read into 30723 page(s).
+Files: 364161 source doc -> 30561 converted -> 30723 merged (-0.5% fewer at the
+merge, 91.6% end to end); 85299 file(s) standing in the measured merged 
+tree(s).
+Findings: 54 warnings, 22 notes.

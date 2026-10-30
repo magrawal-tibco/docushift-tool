@@ -1,0 +1,102 @@
+Extracting 42 version(s)...
+  v spotfire-data-science-author@2.2.0 279 file(s), flare, 1 root(s)
+  v spotfire-data-science-author@2.1.0 274 file(s), flare, 1 root(s)
+  v spotfire-data-science-author@2.0.0 272 file(s), flare, 1 root(s)
+  v spotfire-data-science-author@1.5.0 279 file(s), flare, 1 root(s)
+  v spotfire-data-science-author@1.4.0 42 file(s), dita, 1 root(s)
+  v spotfire-data-science-for-life-science-author@2.2.0 279 file(s), flare, 1 
+root(s)
+  v spotfire-data-science-for-life-science-author@2.1.0 274 file(s), flare, 1 
+root(s)
+  v spotfire-data-science-for-life-science-author@2.0.0 272 file(s), flare, 1 
+root(s)
+  v spotfire-data-science-for-life-science-author@1.5.0 279 file(s), flare, 1 
+root(s)
+  v spotfire-data-science-for-life-science-author@1.4.0 42 file(s), dita, 1 
+root(s)
+  v spotfire-data-science-for-life-science-operations@2.2.0 279 file(s), flare,
+1 root(s)
+  v spotfire-data-science-for-life-science-operations@2.1.0 274 file(s), flare,
+1 root(s)
+  v spotfire-data-science-for-life-science-operations@2.0.0 272 file(s), flare,
+1 root(s)
+  v spotfire-data-science-for-life-science-operations@1.5.0 279 file(s), flare,
+1 root(s)
+  v spotfire-data-science-for-life-science-operations@1.4.0 42 file(s), dita, 1
+root(s)
+  v spotfire-data-science-operations@2.2.0 279 file(s), flare, 1 root(s)
+  v spotfire-data-science-operations@2.1.0 274 file(s), flare, 1 root(s)
+  v spotfire-data-science-operations@2.0.0 272 file(s), flare, 1 root(s)
+  v spotfire-data-science-operations@1.5.0 279 file(s), flare, 1 root(s)
+  v spotfire-data-science-operations@1.4.0 42 file(s), dita, 1 root(s)
+  v spotfire-data-science-workbench@14.4.0 25451 file(s), flare, 3 root(s)
+  v spotfire-data-science-workbench@14.3.0 25424 file(s), flare, 3 root(s)
+  v spotfire-data-science-workbench@14.1.0 26461 file(s), flare, 4 root(s)
+  v spotfire-statistica@14.4.0 25451 file(s), flare, 3 root(s)
+  v spotfire-statistica@14.3.0 25425 file(s), flare, 3 root(s)
+  v spotfire-statistica@14.1.0 26462 file(s), flare, 4 root(s)
+  v spotfire-statistica-all-servers@14.4.0 12 file(s), auto
+  v spotfire-statistica-all-servers@14.3.0 13 file(s), auto
+  v spotfire-statistica-all-servers@14.2.0 264 file(s), flare, 1 root(s)
+  v spotfire-statistica-all-servers@14.1.0 1092 file(s), flare, 1 root(s)
+  v spotfire-statistica-estore-edition@14.1.0 3 file(s), auto
+  v spotfire-statistica-integration@14.5.0 543 file(s), flare, 1 root(s)
+  v spotfire-statistica-integration@14.4.0 457 file(s), flare, 1 root(s)
+  v spotfire-statistica-integration@14.3.0 354 file(s), flare, 1 root(s)
+  v spotfire-statistica-integration@14.2.0 542 file(s), flare, 2 root(s)
+  v spotfire-statistics-services@14.0.0 88 file(s), dita
+  v tibco-data-science-for-tibco-spotfire-analyst@14.1.0 1415 file(s), flare, 2
+root(s)
+  v tibco-data-science-service-for-tibco-spotfire@14.1.0 1086 file(s), flare, 1
+root(s)
+  v tibco-statistica-language-packs@14.1.0 4 file(s), auto
+  v tibco-statistica-language-packs@14.0.0 4 file(s), auto
+  v tibco-statistica-language-packs@13.5.0 3 file(s), auto
+                Extract                
++-------------------------------------+
+| Outcome                  | Versions |
+|--------------------------+----------|
+| Extracted                |       41 |
+| Already current          |        0 |
+| Measured from cache      |        0 |
+| No package               |        1 |
+| Refused (unsafe archive) |        0 |
+| Failed                   |        0 |
++-------------------------------------+
+165138 file(s) written.
+       Engines       
++-------------------+
+| Engine | Versions |
+|--------+----------|
+| flare  |       30 |
+| auto   |        6 |
+| dita   |        5 |
++-------------------+
+? spotfire-statistica-all-servers@14.4.0: engine undetected (`auto`)
+? spotfire-statistica-all-servers@14.3.0: engine undetected (`auto`)
+? spotfire-statistica-estore-edition@14.1.0: engine undetected (`auto`)
+? tibco-statistica-language-packs@14.1.0: engine undetected (`auto`)
+? tibco-statistica-language-packs@14.0.0: engine undetected (`auto`)
+? tibco-statistica-language-packs@13.5.0: engine undetected (`auto`)
+CSH: 51 source(s), 0 identifier(s).
+                     Assets                      
++-----------------------------------------------+
+| Category | Destination     | Files |     Size |
+|----------+-----------------+-------+----------|
+| topic    | output-root     | 87793 | 1.712 GB |
+| image    | output-root     | 44132 | 895.1 MB |
+| document | output-root     |    60 |   0.3 MB |
+| skin     | output-root     | 32297 | 1.750 GB |
+| other    | output-root     |   564 |  41.7 MB |
+| document | document-router |   206 | 330.7 MB |
+| topic    | unclaimed       |    13 |   0.2 MB |
+| image    | unclaimed       |    44 |   0.7 MB |
+| document | unclaimed       |     1 |   0.4 MB |
+| other    | unclaimed       |    28 |   5.2 MB |
++-----------------------------------------------+
+? spotfire-statistics-services@14.0.0: 86 unclaimed file(s) in Migration-Guide/
+(6.5 MB) -- no destination
+! spotfire-statistics-services@Services: no package at 
+C:\github\docushift-tool\families\en-us-spotfire-statistica\downloads\spotfire-
+statistics-services-Services.zip; run `docushift download` first
+Recorded 35 notes -- `docushift report --run 1048`.

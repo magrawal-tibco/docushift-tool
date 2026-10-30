@@ -1,0 +1,15 @@
+Downloading 11 version(s) with 4 worker(s)...
+  v tibco-mainframe-red@2.5.1 3.7 MiB
+  v tibco-red-enabled-for-ziip@2.5.0 0.9 MiB
+  v tibco-transaction-interface-for-cics@2.14.0 9.8 MiB
+           Download            
++-----------------------------+
+| Outcome          | Versions |
+|------------------+----------|
+| Downloaded       |        3 |
+| Already current  |        8 |
+| Skipped (manual) |        0 |
+| No ZIP endpoint  |        0 |
+| Failed           |        0 |
++-----------------------------+
+14.3 MiB written.

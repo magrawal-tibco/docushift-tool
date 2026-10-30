@@ -1,0 +1,190 @@
+Syncing 25 version(s) into C:\github\tibco-docs-aem...
+  v tibco-gemini-powered-by-apache-cassandra@5.0.2 -> online-help/5-0-2 16 
+file(s), 0.0 MB
+  v tibco-gemini-powered-by-apache-cassandra@5.0.2 -> user-guides/5-0-2 1 
+file(s), 1.4 MB
+  v tibco-gemini-powered-by-apache-cassandra@5.0.2 -> release-information/5-0-2
+2 file(s), 1.4 MB
+  v tibco-gemini-powered-by-apache-cassandra@5.0.2 -> reference-documents/5-0-2
+2 file(s), 0.6 MB
+  v tibco-gems@1.1.0 -> release-information/1-1-0 2 file(s), 1.4 MB
+  v tibco-gems@1.1.0 -> reference-documents/1-1-0 2 file(s), 1.4 MB
+  v tibco-graphical-rendezvous@1.1.0 -> release-information/1-1-0 2 file(s), 
+1.4 MB
+  v tibco-graphical-rendezvous@1.1.0 -> reference-documents/1-1-0 2 file(s), 
+2.2 MB
+  v tibco-messaging@1.31.0 -> release-information/1-31-0 1 file(s), 0.0 MB
+  v tibco-messaging@1.31.0 -> reference-documents/1-31-0 3 file(s), 0.1 MB
+  v tibco-messaging@1.30.0 -> release-information/1-30-0 1 file(s), 0.0 MB
+  v tibco-messaging@1.30.0 -> reference-documents/1-30-0 3 file(s), 0.1 MB
+  v tibco-messaging@1.27.0 -> release-information/1-27-0 1 file(s), 0.0 MB
+  v tibco-messaging@1.27.0 -> reference-documents/1-27-0 3 file(s), 0.2 MB
+  v tibco-messaging@1.26.0 -> release-information/1-26-0 1 file(s), 0.0 MB
+  v tibco-messaging@1.26.0 -> reference-documents/1-26-0 3 file(s), 0.2 MB
+  v tibco-messaging@1.25.0 -> release-information/1-25-0 1 file(s), 0.0 MB
+  v tibco-messaging@1.25.0 -> reference-documents/1-25-0 3 file(s), 0.2 MB
+  v tibco-messaging@1.24.0 -> release-information/1-24-0 1 file(s), 0.0 MB
+  v tibco-messaging@1.24.0 -> reference-documents/1-24-0 3 file(s), 0.1 MB
+  v tibco-messaging@1.22.0 -> release-information/1-22-0 1 file(s), 0.0 MB
+  v tibco-messaging@1.22.0 -> reference-documents/1-22-0 3 file(s), 0.1 MB
+  v tibco-messaging@1.21.0 -> release-information/1-21-0 1 file(s), 0.0 MB
+  v tibco-messaging@1.21.0 -> reference-documents/1-21-0 3 file(s), 0.1 MB
+  v 
+tibco-messaging-eclipse-mosquitto-distribution-bridge-enterprise-edition@2.0.7 
+-> online-help/2-0-7 13 file(s), 0.1 MB
+  v 
+tibco-messaging-eclipse-mosquitto-distribution-bridge-enterprise-edition@2.0.7 
+-> user-guides/2-0-7 1 file(s), 0.3 MB
+  v 
+tibco-messaging-eclipse-mosquitto-distribution-bridge-enterprise-edition@2.0.7 
+-> release-information/2-0-7 2 file(s), 0.1 MB
+  v 
+tibco-messaging-eclipse-mosquitto-distribution-bridge-enterprise-edition@2.0.7 
+-> reference-documents/2-0-7 3 file(s), 0.1 MB
+  v 
+tibco-messaging-eclipse-mosquitto-distribution-core-enterprise-edition@2.0.7 ->
+online-help/2-0-7 13 file(s), 0.1 MB
+  v 
+tibco-messaging-eclipse-mosquitto-distribution-core-enterprise-edition@2.0.7 ->
+user-guides/2-0-7 1 file(s), 0.3 MB
+  v 
+tibco-messaging-eclipse-mosquitto-distribution-core-enterprise-edition@2.0.7 ->
+release-information/2-0-7 2 file(s), 0.1 MB
+  v 
+tibco-messaging-eclipse-mosquitto-distribution-core-enterprise-edition@2.0.7 ->
+reference-documents/2-0-7 3 file(s), 0.1 MB
+  v tibco-messaging-enterprise-edition@3.4.0 -> reference-documents/3-4-0 1 
+file(s), 0.0 MB
+  v tibco-messaging-enterprise-edition@3.3.0 -> reference-documents/3-3-0 1 
+file(s), 0.0 MB
+  v tibco-messaging-manager@4.0.0 -> user-guides/4-0-0 5 file(s), 1.0 MB
+  v tibco-messaging-manager@4.0.0 -> release-information/4-0-0 2 file(s), 0.1 
+MB
+  v tibco-messaging-manager@4.0.0 -> reference-documents/4-0-0 2 file(s), 0.2 
+MB
+  v tibco-messaging-manager@3.1.1 -> user-guides/3-1-1 5 file(s), 7.5 MB
+  v tibco-messaging-manager@3.1.1 -> release-information/3-1-1 2 file(s), 1.4 
+MB
+  v tibco-messaging-manager@3.1.1 -> reference-documents/3-1-1 2 file(s), 0.2 
+MB
+  v tibco-messaging-schema-repository-for-apache-kafka-enterprise-edition@2.1.0
+-> api-references/2-1-0 84 file(s), 1.2 MB
+  v tibco-messaging-schema-repository-for-apache-kafka-enterprise-edition@2.1.0
+-> online-help/2-1-0 22 file(s), 0.2 MB
+  v tibco-messaging-schema-repository-for-apache-kafka-enterprise-edition@2.1.0
+-> user-guides/2-1-0 2 file(s), 3.3 MB
+  v tibco-messaging-schema-repository-for-apache-kafka-enterprise-edition@2.1.0
+-> release-information/2-1-0 2 file(s), 1.4 MB
+  v tibco-messaging-schema-repository-for-apache-kafka-enterprise-edition@2.1.0
+-> reference-documents/2-1-0 2 file(s), 0.6 MB
+  v tibco-messaging-schema-repository-for-apache-kafka-enterprise-edition@2.0.0
+-> api-references/2-0-0 47 file(s), 0.5 MB
+  v tibco-messaging-schema-repository-for-apache-kafka-enterprise-edition@2.0.0
+-> online-help/2-0-0 36 file(s), 1.4 MB
+  v tibco-messaging-schema-repository-for-apache-kafka-enterprise-edition@2.0.0
+-> user-guides/2-0-0 2 file(s), 4.2 MB
+  v tibco-messaging-schema-repository-for-apache-kafka-enterprise-edition@2.0.0
+-> release-information/2-0-0 2 file(s), 1.4 MB
+  v tibco-messaging-schema-repository-for-apache-kafka-enterprise-edition@2.0.0
+-> reference-documents/2-0-0 2 file(s), 0.2 MB
+  v tibco-rendezvous@9.0.0 -> online-help/9-0-0 359 file(s), 9.7 MB
+  v tibco-rendezvous@9.0.0 -> user-guides/9-0-0 10 file(s), 25.3 MB
+  v tibco-rendezvous@9.0.0 -> release-information/9-0-0 2 file(s), 1.4 MB
+  v tibco-rendezvous@9.0.0 -> reference-documents/9-0-0 3 file(s), 0.2 MB
+  v tibco-rendezvous@8.8.1 -> online-help/8-8-1 380 file(s), 11.6 MB
+  v tibco-rendezvous@8.8.1 -> user-guides/8-8-1 11 file(s), 26.9 MB
+  v tibco-rendezvous@8.8.1 -> release-information/8-8-1 2 file(s), 1.4 MB
+  v tibco-rendezvous@8.8.1 -> reference-documents/8-8-1 3 file(s), 0.1 MB
+  v tibco-rendezvous@8.8.0 -> online-help/8-8-0 384 file(s), 11.6 MB
+  v tibco-rendezvous@8.8.0 -> user-guides/8-8-0 11 file(s), 26.8 MB
+  v tibco-rendezvous@8.8.0 -> release-information/8-8-0 2 file(s), 1.4 MB
+  v tibco-rendezvous@8.8.0 -> reference-documents/8-8-0 4 file(s), 0.1 MB
+  v tibco-rendezvous-network-service@2.2.0 -> online-help/2-2-0 13 file(s), 0.4
+MB
+  v tibco-rendezvous-network-service@2.2.0 -> user-guides/2-2-0 1 file(s), 1.8 
+MB
+  v tibco-rendezvous-network-service@2.2.0 -> release-information/2-2-0 2 
+file(s), 1.4 MB
+  v tibco-rendezvous-network-service@2.2.0 -> reference-documents/2-2-0 2 
+file(s), 0.5 MB
+  v tibco-rendezvous-network-service@2.1.0 -> online-help/2-1-0 14 file(s), 0.4
+MB
+  v tibco-rendezvous-network-service@2.1.0 -> user-guides/2-1-0 1 file(s), 1.8 
+MB
+  v tibco-rendezvous-network-service@2.1.0 -> release-information/2-1-0 2 
+file(s), 1.4 MB
+  v tibco-rendezvous-network-service@2.1.0 -> reference-documents/2-1-0 3 
+file(s), 0.2 MB
+  v tibco-messaging -> archives 21 file(s), 0.0 MB
+                                     Sync                                      
++-----------------------------------------------------------------------------+
+| Outcome | Rows | online… | user-g… | releas… | refere… | api-ref… | archiv… |
+|---------+------+---------+---------+---------+---------+----------+---------|
+| Synced  |   71 |      10 |      12 |      22 |      24 |        2 |       1 |
+| Already |    7 |       0 |       0 |       0 |       0 |        0 |       7 |
+| current |      |         |         |         |         |          |         |
+| No      |   16 |      15 |       0 |       0 |       0 |        0 |       0 |
+| source  |      |         |         |         |         |          |         |
+| tree    |      |         |         |         |         |          |         |
+| Skipped |    0 |       0 |       0 |       0 |       0 |        0 |       0 |
+| Failed  |    0 |       0 |       0 |       0 |       0 |        0 |       0 |
++-----------------------------------------------------------------------------+
+1550 file(s), 161.7 MB copied.
+11 product metadata.yml, 34 version.yml written.
+Published merged (Stage 6b): tibco-gemini-powered-by-apache-cassandra, 
+tibco-messaging-eclipse-mosquitto-distribution-bridge-enterprise-edition, 
+tibco-messaging-eclipse-mosquitto-distribution-core-enterprise-edition, 
+tibco-messaging-schema-repository-for-apache-kafka-enterprise-edition, 
+tibco-rendezvous, tibco-rendezvous-network-service.
+10213 redirect(s) in 9 published map(s), tree-rooted (no publish_base_url set).
+! tibco-gems@1.1.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-messaging\tibco-gems\1.1.0; run 
+`docushift convert` first
+! tibco-graphical-rendezvous@1.1.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-messaging\tibco-graphical-rendezvous\
+1.1.0; run `docushift convert` first
+! tibco-messaging@1.31.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-messaging\tibco-messaging\1.31.0; run
+`docushift convert` first
+! tibco-messaging@1.30.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-messaging\tibco-messaging\1.30.0; run
+`docushift convert` first
+! tibco-messaging@1.27.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-messaging\tibco-messaging\1.27.0; run
+`docushift convert` first
+! tibco-messaging@1.26.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-messaging\tibco-messaging\1.26.0; run
+`docushift convert` first
+! tibco-messaging@1.25.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-messaging\tibco-messaging\1.25.0; run
+`docushift convert` first
+! tibco-messaging@1.24.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-messaging\tibco-messaging\1.24.0; run
+`docushift convert` first
+! tibco-messaging@1.23.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-messaging\tibco-messaging\1.23.0; run
+`docushift convert` first
+! tibco-messaging@1.23.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-tib-messaging\extracted\tibco-messaging
+\1.23.0; run `docushift extract` first
+! tibco-messaging@1.22.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-messaging\tibco-messaging\1.22.0; run
+`docushift convert` first
+! tibco-messaging@1.21.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-messaging\tibco-messaging\1.21.0; run
+`docushift convert` first
+! tibco-messaging-enterprise-edition@3.4.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-messaging\tibco-messaging-enterprise-
+edition\3.4.0; run `docushift convert` first
+! tibco-messaging-enterprise-edition@3.3.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-messaging\tibco-messaging-enterprise-
+edition\3.3.0; run `docushift convert` first
+! tibco-messaging-manager@4.0.0: tibco-messaging-manager publishes merged and 
+no merged tree at 
+C:\github\docushift-tool\reframed\en-us-tib-messaging\tibco-messaging-manager\4
+.0.0; run `docushift reframe` first
+! tibco-messaging-manager@3.1.1: tibco-messaging-manager publishes merged and 
+no merged tree at 
+C:\github\docushift-tool\reframed\en-us-tib-messaging\tibco-messaging-manager\3
+.1.1; run `docushift reframe` first
+Findings: 4 warnings.

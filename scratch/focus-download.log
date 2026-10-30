@@ -1,0 +1,39 @@
+Downloading 19 version(s) with 4 worker(s)...
+  v ibi-focus@9.3.8 124.8 MiB
+  v ibi-focus@9.3.7 205.0 MiB
+  v ibi-focus@9.3.6 203.3 MiB
+  v ibi-focus@9.3.5 203.7 MiB
+  v ibi-focus@9.3.4 206.1 MiB
+  v ibi-focus@9.3.3 185.2 MiB
+  v ibi-focus@9.3.2 184.2 MiB
+  v ibi-focus@9.3.1 185.3 MiB
+  v ibi-focus@9.3.0 188.6 MiB
+  v ibi-focus@9.2.5 60.0 MiB
+  v ibi-focus@9.2.4 34.7 MiB
+  v ibi-focus@9.2.3 34.3 MiB
+  v ibi-focus@9.2.2 34.1 MiB
+  v ibi-focus@9.2.1 23.3 MiB
+  v ibi-focus@9.2.0 23.4 MiB
+  v ibi-focus@9.1.3 50.8 MiB
+  v ibi-focus@9.1.2 23.5 MiB
+  x ibi-focus@9.1.1
+  x ibi-focus@9.1.0
+           Download            
++-----------------------------+
+| Outcome          | Versions |
+|------------------+----------|
+| Downloaded       |       17 |
+| Already current  |        0 |
+| Skipped (manual) |        0 |
+| No ZIP endpoint  |        0 |
+| Failed           |        2 |
++-----------------------------+
+1970.5 MiB written.
+! ibi-focus@9.1.1: OSError: 
+https://docs.tibco.com/pub/focus/9.1.1/ibi-focus-9-1-1_documentation.zip did 
+not return a readable ZIP (most often an error or sign-in page served as HTTP 
+200)
+! ibi-focus@9.1.0: OSError: 
+https://docs.tibco.com/pub/focus/9.1.0/ibi-focus-9-1-0_documentation.zip did 
+not return a readable ZIP (most often an error or sign-in page served as HTTP 
+200)

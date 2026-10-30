@@ -1,0 +1,340 @@
+Downloading 1 version(s) with 4 worker(s)...
+  v 
+tibco-activematrix-businessworks-plug-in-component-for-aws-common-services@6.0.
+0 2.3 MiB
+           Download            
++-----------------------------+
+| Outcome          | Versions |
+|------------------+----------|
+| Downloaded       |        1 |
+| Already current  |        0 |
+| Skipped (manual) |        0 |
+| No ZIP endpoint  |        0 |
+| Failed           |        0 |
++-----------------------------+
+2.3 MiB written.
+Extracting 1 version(s)...
+  v 
+tibco-activematrix-businessworks-plug-in-component-for-aws-common-services@6.0.
+0 97 file(s), dita, 1 root(s)
+                Extract                
++-------------------------------------+
+| Outcome                  | Versions |
+|--------------------------+----------|
+| Extracted                |        1 |
+| Already current          |        0 |
+| Measured from cache      |        0 |
+| No package               |        0 |
+| Refused (unsafe archive) |        0 |
+| Failed                   |        0 |
++-------------------------------------+
+97 file(s) written.
+       Engines       
++-------------------+
+| Engine | Versions |
+|--------+----------|
+| dita   |        1 |
++-------------------+
+CSH: 1 source(s), 2 identifier(s).
+                    Assets                     
++---------------------------------------------+
+| Category | Destination     | Files |   Size |
+|----------+-----------------+-------+--------|
+| topic    | output-root     |    57 | 0.5 MB |
+| image    | output-root     |    13 | 0.4 MB |
+| skin     | output-root     |    19 | 0.8 MB |
+| other    | output-root     |     1 | 0.2 MB |
+| document | document-router |     7 | 1.6 MB |
++---------------------------------------------+
+Converting 1 version(s)...
+C:\github\docushift-tool\src\docushift\transforms\markdown.py:112: XMLParsedAsHTMLWarning: It looks like you're using an HTML parser to parse an XML document.
+
+Assuming this really is an XML document, what you're doing might work, but you should know that using an XML parser will be more reliable. To parse this document as XML, make sure you have the Python package 'lxml' installed, and pass the keyword argument `features="xml"` into the BeautifulSoup constructor.
+
+If you want or need to use an HTML parser on this document, you can make this warning go away by filtering it. To do that, run this code before calling the BeautifulSoup constructor:
+
+    from bs4 import XMLParsedAsHTMLWarning
+    import warnings
+
+    warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+  return BeautifulSoup(_CDATA.sub(_unwrap_cdata, text), PARSER)
+  v 
+tibco-activematrix-businessworks-plug-in-component-for-aws-common-services@6.0.
+0 51 topic(s), 13 asset(s), 1 unit(s), 52 nav node(s), 1 generated -> 68 
+file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+51 topic(s), 13 asset(s) written.
+68 file(s) standing in the measured output tree(s).
+tibco-activematrix-businessworks-plug-in-component-for-aws-common-services@6.0.
+0: 13 resolved, 0 skin, 0 escaped, 0 dangling, 0 case-mismatch, 1 orphan (0.2 
+MB)
+tibco-activematrix-businessworks-plug-in-component-for-aws-common-services@6.0.
+0: CSH 2 resolved, 0 unresolved, 0 ambiguous
+tibco-activematrix-businessworks-plug-in-component-for-aws-common-services@6.0.
+0: skipped 2 not-a-topic, 1 publication-homepage, 3 republished-duplicate
+Findings: 2 warnings, 3 notes.
+Downloading 1 version(s) with 4 worker(s)...
+  v 
+tibco-activematrix-businessworks-plug-in-component-for-aws-common-services@6.0.
+1 2.4 MiB
+           Download            
++-----------------------------+
+| Outcome          | Versions |
+|------------------+----------|
+| Downloaded       |        1 |
+| Already current  |        0 |
+| Skipped (manual) |        0 |
+| No ZIP endpoint  |        0 |
+| Failed           |        0 |
++-----------------------------+
+2.4 MiB written.
+Extracting 1 version(s)...
+  v 
+tibco-activematrix-businessworks-plug-in-component-for-aws-common-services@6.0.
+1 95 file(s), dita, 1 root(s)
+                Extract                
++-------------------------------------+
+| Outcome                  | Versions |
+|--------------------------+----------|
+| Extracted                |        1 |
+| Already current          |        0 |
+| Measured from cache      |        0 |
+| No package               |        0 |
+| Refused (unsafe archive) |        0 |
+| Failed                   |        0 |
++-------------------------------------+
+95 file(s) written.
+       Engines       
++-------------------+
+| Engine | Versions |
+|--------+----------|
+| dita   |        1 |
++-------------------+
+CSH: 1 source(s), 2 identifier(s).
+                    Assets                     
++---------------------------------------------+
+| Category | Destination     | Files |   Size |
+|----------+-----------------+-------+--------|
+| topic    | output-root     |    56 | 0.5 MB |
+| image    | output-root     |    13 | 0.4 MB |
+| skin     | output-root     |    19 | 0.8 MB |
+| other    | output-root     |     1 | 0.2 MB |
+| document | document-router |     6 | 1.7 MB |
++---------------------------------------------+
+Converting 1 version(s)...
+C:\github\docushift-tool\src\docushift\transforms\markdown.py:112: XMLParsedAsHTMLWarning: It looks like you're using an HTML parser to parse an XML document.
+
+Assuming this really is an XML document, what you're doing might work, but you should know that using an XML parser will be more reliable. To parse this document as XML, make sure you have the Python package 'lxml' installed, and pass the keyword argument `features="xml"` into the BeautifulSoup constructor.
+
+If you want or need to use an HTML parser on this document, you can make this warning go away by filtering it. To do that, run this code before calling the BeautifulSoup constructor:
+
+    from bs4 import XMLParsedAsHTMLWarning
+    import warnings
+
+    warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+  return BeautifulSoup(_CDATA.sub(_unwrap_cdata, text), PARSER)
+  v 
+tibco-activematrix-businessworks-plug-in-component-for-aws-common-services@6.0.
+1 51 topic(s), 13 asset(s), 1 unit(s), 52 nav node(s), 1 generated -> 68 
+file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+51 topic(s), 13 asset(s) written.
+68 file(s) standing in the measured output tree(s).
+tibco-activematrix-businessworks-plug-in-component-for-aws-common-services@6.0.
+1: 13 resolved, 0 skin, 0 escaped, 0 dangling, 0 case-mismatch, 1 orphan (0.2 
+MB)
+tibco-activematrix-businessworks-plug-in-component-for-aws-common-services@6.0.
+1: CSH 2 resolved, 0 unresolved, 0 ambiguous
+tibco-activematrix-businessworks-plug-in-component-for-aws-common-services@6.0.
+1: skipped 2 not-a-topic, 1 publication-homepage, 2 republished-duplicate
+Findings: 2 warnings, 3 notes.
+Downloading 1 version(s) with 4 worker(s)...
+  v 
+tibco-activematrix-businessworks-plug-in-component-for-aws-common-services@6.0.
+2 2.3 MiB
+           Download            
++-----------------------------+
+| Outcome          | Versions |
+|------------------+----------|
+| Downloaded       |        1 |
+| Already current  |        0 |
+| Skipped (manual) |        0 |
+| No ZIP endpoint  |        0 |
+| Failed           |        0 |
++-----------------------------+
+2.3 MiB written.
+Extracting 1 version(s)...
+  v 
+tibco-activematrix-businessworks-plug-in-component-for-aws-common-services@6.0.
+2 95 file(s), dita, 1 root(s)
+                Extract                
++-------------------------------------+
+| Outcome                  | Versions |
+|--------------------------+----------|
+| Extracted                |        1 |
+| Already current          |        0 |
+| Measured from cache      |        0 |
+| No package               |        0 |
+| Refused (unsafe archive) |        0 |
+| Failed                   |        0 |
++-------------------------------------+
+95 file(s) written.
+       Engines       
++-------------------+
+| Engine | Versions |
+|--------+----------|
+| dita   |        1 |
++-------------------+
+CSH: 1 source(s), 2 identifier(s).
+                    Assets                     
++---------------------------------------------+
+| Category | Destination     | Files |   Size |
+|----------+-----------------+-------+--------|
+| topic    | output-root     |    56 | 0.5 MB |
+| image    | output-root     |    13 | 0.4 MB |
+| skin     | output-root     |    19 | 0.8 MB |
+| other    | output-root     |     1 | 0.2 MB |
+| document | document-router |     6 | 1.6 MB |
++---------------------------------------------+
+Converting 1 version(s)...
+C:\github\docushift-tool\src\docushift\transforms\markdown.py:112: XMLParsedAsHTMLWarning: It looks like you're using an HTML parser to parse an XML document.
+
+Assuming this really is an XML document, what you're doing might work, but you should know that using an XML parser will be more reliable. To parse this document as XML, make sure you have the Python package 'lxml' installed, and pass the keyword argument `features="xml"` into the BeautifulSoup constructor.
+
+If you want or need to use an HTML parser on this document, you can make this warning go away by filtering it. To do that, run this code before calling the BeautifulSoup constructor:
+
+    from bs4 import XMLParsedAsHTMLWarning
+    import warnings
+
+    warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+  return BeautifulSoup(_CDATA.sub(_unwrap_cdata, text), PARSER)
+  v 
+tibco-activematrix-businessworks-plug-in-component-for-aws-common-services@6.0.
+2 51 topic(s), 13 asset(s), 1 unit(s), 52 nav node(s), 1 generated -> 68 
+file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+51 topic(s), 13 asset(s) written.
+68 file(s) standing in the measured output tree(s).
+tibco-activematrix-businessworks-plug-in-component-for-aws-common-services@6.0.
+2: 13 resolved, 0 skin, 0 escaped, 0 dangling, 0 case-mismatch, 1 orphan (0.2 
+MB)
+tibco-activematrix-businessworks-plug-in-component-for-aws-common-services@6.0.
+2: CSH 2 resolved, 0 unresolved, 0 ambiguous
+tibco-activematrix-businessworks-plug-in-component-for-aws-common-services@6.0.
+2: skipped 2 not-a-topic, 1 publication-homepage, 2 republished-duplicate
+Findings: 2 warnings, 2 notes.
+Downloading 1 version(s) with 4 worker(s)...
+  v 
+tibco-activematrix-businessworks-plug-in-component-for-aws-common-services@6.1.
+0 2.3 MiB
+           Download            
++-----------------------------+
+| Outcome          | Versions |
+|------------------+----------|
+| Downloaded       |        1 |
+| Already current  |        0 |
+| Skipped (manual) |        0 |
+| No ZIP endpoint  |        0 |
+| Failed           |        0 |
++-----------------------------+
+2.3 MiB written.
+Extracting 1 version(s)...
+  v 
+tibco-activematrix-businessworks-plug-in-component-for-aws-common-services@6.1.
+0 99 file(s), dita, 1 root(s)
+                Extract                
++-------------------------------------+
+| Outcome                  | Versions |
+|--------------------------+----------|
+| Extracted                |        1 |
+| Already current          |        0 |
+| Measured from cache      |        0 |
+| No package               |        0 |
+| Refused (unsafe archive) |        0 |
+| Failed                   |        0 |
++-------------------------------------+
+99 file(s) written.
+       Engines       
++-------------------+
+| Engine | Versions |
+|--------+----------|
+| dita   |        1 |
++-------------------+
+CSH: 1 source(s), 2 identifier(s).
+                    Assets                     
++---------------------------------------------+
+| Category | Destination     | Files |   Size |
+|----------+-----------------+-------+--------|
+| topic    | output-root     |    56 | 0.5 MB |
+| image    | output-root     |    15 | 0.4 MB |
+| skin     | output-root     |    20 | 0.8 MB |
+| other    | output-root     |     1 | 0.2 MB |
+| document | document-router |     7 | 1.6 MB |
++---------------------------------------------+
+Converting 1 version(s)...
+C:\github\docushift-tool\src\docushift\transforms\markdown.py:112: XMLParsedAsHTMLWarning: It looks like you're using an HTML parser to parse an XML document.
+
+Assuming this really is an XML document, what you're doing might work, but you should know that using an XML parser will be more reliable. To parse this document as XML, make sure you have the Python package 'lxml' installed, and pass the keyword argument `features="xml"` into the BeautifulSoup constructor.
+
+If you want or need to use an HTML parser on this document, you can make this warning go away by filtering it. To do that, run this code before calling the BeautifulSoup constructor:
+
+    from bs4 import XMLParsedAsHTMLWarning
+    import warnings
+
+    warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+  return BeautifulSoup(_CDATA.sub(_unwrap_cdata, text), PARSER)
+  v 
+tibco-activematrix-businessworks-plug-in-component-for-aws-common-services@6.1.
+0 53 topic(s), 15 asset(s), 1 unit(s), 54 nav node(s), 1 generated -> 72 
+file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+53 topic(s), 15 asset(s) written.
+72 file(s) standing in the measured output tree(s).
+tibco-activematrix-businessworks-plug-in-component-for-aws-common-services@6.1.
+0: 17 resolved, 0 skin, 0 escaped, 0 dangling, 0 case-mismatch, 1 orphan (0.2 
+MB)
+tibco-activematrix-businessworks-plug-in-component-for-aws-common-services@6.1.
+0: CSH 2 resolved, 0 unresolved, 0 ambiguous
+tibco-activematrix-businessworks-plug-in-component-for-aws-common-services@6.1.
+0: skipped 2 not-a-topic, 1 publication-homepage
+Findings: 2 warnings, 1 note.

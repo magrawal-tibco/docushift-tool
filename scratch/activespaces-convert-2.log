@@ -1,0 +1,50 @@
+Converting 6 version(s)...
+  v tibco-activespaces-enterprise-edition@5.2.0 319 topic(s), 8 asset(s), 1 
+unit(s), 324 nav node(s), 5 generated -> 335 file(s)
+  v tibco-activespaces-enterprise-edition@5.1.1 324 topic(s), 9 asset(s), 1 
+unit(s), 330 nav node(s), 6 generated -> 341 file(s)
+  v tibco-activespaces-enterprise-edition@5.1.0 324 topic(s), 9 asset(s), 1 
+unit(s), 330 nav node(s), 6 generated -> 341 file(s)
+  v tibco-activespaces-enterprise-edition@5.0.0 323 topic(s), 9 asset(s), 1 
+unit(s), 329 nav node(s), 6 generated -> 340 file(s)
+  v tibco-activespaces-enterprise-edition@4.10.1 316 topic(s), 9 asset(s), 1 
+unit(s), 322 nav node(s), 6 generated -> 333 file(s)
+  v tibco-activespaces-enterprise-edition@4.10.0 316 topic(s), 9 asset(s), 1 
+unit(s), 322 nav node(s), 6 generated -> 333 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        6 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+1922 topic(s), 53 asset(s) written.
+2023 file(s) standing in the measured output tree(s).
+tibco-activespaces-enterprise-edition@5.2.0: 8 resolved, 0 skin, 4 escaped, 0 
+dangling, 0 case-mismatch, 120 orphan (5.3 MB)
+tibco-activespaces-enterprise-edition@5.2.0: skipped 109 api-reference, 6 
+generated-directory, 10 runtime-stub
+tibco-activespaces-enterprise-edition@5.1.1: 9 resolved, 0 skin, 4 escaped, 0 
+dangling, 0 case-mismatch, 120 orphan (5.3 MB)
+tibco-activespaces-enterprise-edition@5.1.1: skipped 109 api-reference, 6 
+generated-directory, 10 runtime-stub
+tibco-activespaces-enterprise-edition@5.1.0: 9 resolved, 0 skin, 4 escaped, 0 
+dangling, 0 case-mismatch, 119 orphan (5.3 MB)
+tibco-activespaces-enterprise-edition@5.1.0: skipped 109 api-reference, 6 
+generated-directory, 10 runtime-stub
+tibco-activespaces-enterprise-edition@5.0.0: 9 resolved, 0 skin, 4 escaped, 0 
+dangling, 0 case-mismatch, 119 orphan (5.3 MB)
+tibco-activespaces-enterprise-edition@5.0.0: skipped 109 api-reference, 6 
+generated-directory, 10 runtime-stub
+tibco-activespaces-enterprise-edition@4.10.1: 9 resolved, 0 skin, 4 escaped, 0 
+dangling, 0 case-mismatch, 118 orphan (5.3 MB)
+tibco-activespaces-enterprise-edition@4.10.1: skipped 109 api-reference, 5 
+generated-directory, 10 runtime-stub
+tibco-activespaces-enterprise-edition@4.10.0: 9 resolved, 0 skin, 4 escaped, 0 
+dangling, 0 case-mismatch, 118 orphan (5.3 MB)
+tibco-activespaces-enterprise-edition@4.10.0: skipped 109 api-reference, 5 
+generated-directory, 10 runtime-stub
+Findings: 17 warnings, 44 notes.

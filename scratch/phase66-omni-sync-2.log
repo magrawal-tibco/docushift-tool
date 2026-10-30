@@ -1,0 +1,39 @@
+Syncing 1 version(s) into C:\github\ibi-docs-aem...
+                                             Sync                                              
++---------------------------------------------------------------------------------------------+
+| Outcome         | Rows | online-help | release-information | reference-documents | archives |
+|-----------------+------+-------------+---------------------+---------------------+----------|
+| Synced          |    0 |           0 |                   0 |                   0 |        0 |
+| Already current |    3 |           0 |                   1 |                   1 |        1 |
+| No source tree  |    1 |           1 |                   0 |                   0 |        0 |
+| Skipped         |    0 |           0 |                   0 |                   0 |        0 |
+| Failed          |    0 |           0 |                   0 |                   0 |        0 |
++---------------------------------------------------------------------------------------------+
+1 product metadata.yml, 2 version.yml written.
+! ibi-omni-gen@4.3.0: no converted tree at C:\github\docushift-tool\output\en-us-ibi-legacy\ibi-omni-gen\4.3.0; run `docushift convert` first
+Syncing 1 version(s) into C:\github\ibi-docs-aem...
+                                             Sync                                              
++---------------------------------------------------------------------------------------------+
+| Outcome         | Rows | online-help | release-information | reference-documents | archives |
+|-----------------+------+-------------+---------------------+---------------------+----------|
+| Synced          |    0 |           0 |                   0 |                   0 |        0 |
+| Already current |    3 |           0 |                   1 |                   1 |        1 |
+| No source tree  |    1 |           1 |                   0 |                   0 |        0 |
+| Skipped         |    0 |           0 |                   0 |                   0 |        0 |
+| Failed          |    0 |           0 |                   0 |                   0 |        0 |
++---------------------------------------------------------------------------------------------+
+1 product metadata.yml, 2 version.yml written.
+! ibi-omni-gen-mdm@4.3.0: no converted tree at C:\github\docushift-tool\output\en-us-ibi-legacy\ibi-omni-gen-mdm\4.3.0; run `docushift convert` first
+Syncing 1 version(s) into C:\github\ibi-docs-aem...
+                                             Sync                                              
++---------------------------------------------------------------------------------------------+
+| Outcome         | Rows | online-help | release-information | reference-documents | archives |
+|-----------------+------+-------------+---------------------+---------------------+----------|
+| Synced          |    0 |           0 |                   0 |                   0 |        0 |
+| Already current |    3 |           0 |                   1 |                   1 |        1 |
+| No source tree  |    1 |           1 |                   0 |                   0 |        0 |
+| Skipped         |    0 |           0 |                   0 |                   0 |        0 |
+| Failed          |    0 |           0 |                   0 |                   0 |        0 |
++---------------------------------------------------------------------------------------------+
+1 product metadata.yml, 2 version.yml written.
+! ibi-omni-healthdata@4.3.0: no converted tree at C:\github\docushift-tool\output\en-us-ibi-legacy\ibi-omni-healthdata\4.3.0; run `docushift convert` first

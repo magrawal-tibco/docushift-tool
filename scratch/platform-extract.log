@@ -1,0 +1,42 @@
+Extracting 7 version(s)...
+  v tibco-control-plane@1.20.0 3736 file(s), flare, 7 root(s)
+  v tibco-control-plane@1.19.0 3648 file(s), flare, 7 root(s)
+  v tibco-control-plane@1.18.0 3576 file(s), flare, 7 root(s)
+  v tibco-platform-add-on-for-business-process-management@1.0.0 5 file(s), auto
+  v tibco-platform-add-on-for-event-processing@1.9.0 5 file(s), auto
+  v tibco-platform-command-line-interface@1.2.0 3300 file(s), flare, 7 root(s)
+  v tibco-platform-command-line-interface@1.1.0 3 file(s), auto
+                Extract                
++-------------------------------------+
+| Outcome                  | Versions |
+|--------------------------+----------|
+| Extracted                |        7 |
+| Already current          |        0 |
+| Measured from cache      |        0 |
+| No package               |        0 |
+| Refused (unsafe archive) |        0 |
+| Failed                   |        0 |
++-------------------------------------+
+14273 file(s) written.
+       Engines       
++-------------------+
+| Engine | Versions |
+|--------+----------|
+| flare  |        4 |
+| auto   |        3 |
++-------------------+
+? tibco-platform-add-on-for-business-process-management@1.0.0: engine 
+undetected (`auto`)
+? tibco-platform-add-on-for-event-processing@1.9.0: engine undetected (`auto`)
+? tibco-platform-command-line-interface@1.1.0: engine undetected (`auto`)
+CSH: 28 source(s), 144 identifier(s).
+                     Assets                      
++-----------------------------------------------+
+| Category | Destination     | Files |     Size |
+|----------+-----------------+-------+----------|
+| topic    | output-root     |  2083 |  45.9 MB |
+| image    | output-root     |  5284 | 366.7 MB |
+| skin     | output-root     |  6571 | 105.9 MB |
+| other    | output-root     |   315 |  15.4 MB |
+| document | document-router |    20 |  27.0 MB |
++-----------------------------------------------+

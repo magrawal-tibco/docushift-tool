@@ -1,0 +1,66 @@
+Reframing 47 version(s)...
+  v tibco-activematrix-adapter-for-database-tibco-business-studio@1.3.0 271 
+topic(s) -> 54 page(s)
+  v tibco-activematrix-adapter-for-database-tibco-business-studio@1.2.0 266 
+topic(s) -> 84 page(s)
+  v 
+tibco-activematrix-adapter-for-files-for-unix-win-tibco-business-studio@1.3.0 
+206 topic(s) -> 39 page(s)
+  v 
+tibco-activematrix-adapter-for-files-for-unix-win-tibco-business-studio@1.2.0 
+206 topic(s) -> 39 page(s)
+  v tibco-activematrix-adapter-for-sap-tibco-business-studio@1.3.0 184 topic(s)
+-> 38 page(s)
+  v tibco-activematrix-adapter-for-sap-tibco-business-studio@1.2.0 184 topic(s)
+-> 40 page(s)
+  v tibco-activematrix-adapter-framework@1.6.1 98 topic(s) -> 18 page(s)
+  v tibco-activematrix-adapter-framework@1.6.0 97 topic(s) -> 10 page(s)
+  v tibco-activematrix-adapter-framework@1.4.2 99 topic(s) -> 10 page(s)
+  v tibco-activematrix-adapter-framework@1.4.1 99 topic(s) -> 10 page(s)
+  v tibco-activematrix-adapter-framework@1.4.0 99 topic(s) -> 10 page(s)
+  v tibco-activematrix-adapter-framework@1.3.2 89 topic(s) -> 11 page(s)
+  v tibco-activematrix-adapter-framework@1.3.1 89 topic(s) -> 11 page(s)
+  v tibco-activematrix-adapter-framework@1.3.0 77 topic(s) -> 8 page(s)
+  v tibco-activematrix-adapter-framework@1.2.0 77 topic(s) -> 8 page(s)
+  v tibco-adapter-migration@1.8.1 22 topic(s) -> 5 page(s)
+  v tibco-adapter-migration@1.8.0 22 topic(s) -> 5 page(s)
+  v tibco-adapter-migration@1.7.0 23 topic(s) -> 6 page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |       18 |
+| Already current             |        0 |
+| Not Flare or DITA (skipped) |       29 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+2208 topic(s) read into 406 page(s).
+Files: 4080 source doc -> 2231 converted -> 406 merged (81.8% fewer at the 
+merge, 90.0% end to end); 1185 file(s) standing in the measured merged tree(s).
+144 page(s) queued for editorial review:
+  tibco-activematrix-adapter-for-database-tibco-business-studio@1.3.0: 8 of 54 
+-- see review-queue.csv
+  tibco-activematrix-adapter-for-database-tibco-business-studio@1.2.0: 21 of 84
+-- see review-queue.csv
+  tibco-activematrix-adapter-for-files-for-unix-win-tibco-business-studio@1.3.0
+: 8 of 39 -- see review-queue.csv
+  tibco-activematrix-adapter-for-files-for-unix-win-tibco-business-studio@1.2.0
+: 8 of 39 -- see review-queue.csv
+  tibco-activematrix-adapter-for-sap-tibco-business-studio@1.3.0: 10 of 38 -- 
+see review-queue.csv
+  tibco-activematrix-adapter-for-sap-tibco-business-studio@1.2.0: 9 of 40 -- 
+see review-queue.csv
+  tibco-activematrix-adapter-framework@1.6.1: 7 of 18 -- see review-queue.csv
+  tibco-activematrix-adapter-framework@1.6.0: 9 of 10 -- see review-queue.csv
+  tibco-activematrix-adapter-framework@1.4.2: 9 of 10 -- see review-queue.csv
+  tibco-activematrix-adapter-framework@1.4.1: 9 of 10 -- see review-queue.csv
+  tibco-activematrix-adapter-framework@1.4.0: 9 of 10 -- see review-queue.csv
+  tibco-activematrix-adapter-framework@1.3.2: 9 of 11 -- see review-queue.csv
+  tibco-activematrix-adapter-framework@1.3.1: 9 of 11 -- see review-queue.csv
+  tibco-activematrix-adapter-framework@1.3.0: 8 of 8 -- see review-queue.csv
+  tibco-activematrix-adapter-framework@1.2.0: 8 of 8 -- see review-queue.csv
+  tibco-adapter-migration@1.8.1: 1 of 5 -- see review-queue.csv
+  tibco-adapter-migration@1.8.0: 1 of 5 -- see review-queue.csv
+  tibco-adapter-migration@1.7.0: 1 of 6 -- see review-queue.csv
+Findings: 18 warnings, 36 notes.

@@ -1,0 +1,344 @@
+Converting 47 version(s)...
+C:\github\docushift-tool\src\docushift\transforms\markdown.py:112: XMLParsedAsHTMLWarning: It looks like you're using an HTML parser to parse an XML document.
+
+Assuming this really is an XML document, what you're doing might work, but you should know that using an XML parser will be more reliable. To parse this document as XML, make sure you have the Python package 'lxml' installed, and pass the keyword argument `features="xml"` into the BeautifulSoup constructor.
+
+If you want or need to use an HTML parser on this document, you can make this warning go away by filtering it. To do that, run this code before calling the BeautifulSoup constructor:
+
+    from bs4 import XMLParsedAsHTMLWarning
+    import warnings
+
+    warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+  return BeautifulSoup(_CDATA.sub(_unwrap_cdata, text), PARSER)
+  v tibco-activematrix-adapter-for-database-tibco-business-studio@1.3.0 272 
+topic(s), 150 asset(s), 1 unit(s), 274 nav node(s), 2 generated -> 425 file(s)
+  v tibco-activematrix-adapter-for-database-tibco-business-studio@1.2.0 284 
+topic(s), 148 asset(s), 1 unit(s), 286 nav node(s), 2 generated -> 435 file(s)
+  x 
+tibco-activematrix-adapter-for-files-for-unix-win-tibco-business-studio@1.3.0
+  v 
+tibco-activematrix-adapter-for-files-for-unix-win-tibco-business-studio@1.2.0 
+205 topic(s), 18 asset(s), 1 unit(s), 206 nav node(s), 1 generated -> 226 
+file(s)
+  v tibco-activematrix-adapter-for-ibm-i@6.4.0 168 topic(s), 57 asset(s), 6 
+unit(s), 238 nav node(s), 5 generated -> 233 file(s)
+  v tibco-activematrix-adapter-for-ibm-i@6.3.0 168 topic(s), 57 asset(s), 6 
+unit(s), 238 nav node(s), 5 generated -> 233 file(s)
+  v tibco-activematrix-adapter-for-ibm-i@6.2.2 168 topic(s), 57 asset(s), 6 
+unit(s), 241 nav node(s), 5 generated -> 233 file(s)
+  v tibco-activematrix-adapter-for-ibm-i@6.2.0 188 topic(s), 72 asset(s), 4 
+unit(s), 281 nav node(s), 5 generated -> 268 file(s)
+  v tibco-activematrix-adapter-for-ibm-i@6.1.0 183 topic(s), 78 asset(s), 4 
+unit(s), 279 nav node(s), 5 generated -> 269 file(s)
+  v tibco-activematrix-adapter-for-jd-edwards-enterpriseone@6.1.0 133 topic(s),
+57 asset(s), 6 unit(s), 186 nav node(s), 8 generated -> 198 file(s)
+  v tibco-activematrix-adapter-for-jd-edwards-enterpriseone@6.0.0 136 topic(s),
+43 asset(s), 4 unit(s), 209 nav node(s), 5 generated -> 187 file(s)
+  v tibco-activematrix-adapter-for-kenan-bp@6.0.0 132 topic(s), 54 asset(s), 4 
+unit(s), 250 nav node(s), 5 generated -> 194 file(s)
+  v tibco-activematrix-adapter-for-sap-tibco-business-studio@1.3.0 183 
+topic(s), 34 asset(s), 1 unit(s), 184 nav node(s), 1 generated -> 220 file(s)
+  v tibco-activematrix-adapter-for-sap-tibco-business-studio@1.2.0 183 
+topic(s), 31 asset(s), 1 unit(s), 184 nav node(s), 1 generated -> 217 file(s)
+  v tibco-activematrix-adapter-framework@1.6.1 95 topic(s), 33 asset(s), 1 
+unit(s), 98 nav node(s), 3 generated -> 134 file(s)
+C:\github\docushift-tool\src\docushift\transforms\markdown.py:112: XMLParsedAsHTMLWarning: It looks like you're using an HTML parser to parse an XML document.
+
+Assuming this really is an XML document, what you're doing might work, but you should know that using an XML parser will be more reliable. To parse this document as XML, make sure you have the Python package 'lxml' installed, and pass the keyword argument `features="xml"` into the BeautifulSoup constructor.
+
+If you want or need to use an HTML parser on this document, you can make this warning go away by filtering it. To do that, run this code before calling the BeautifulSoup constructor:
+
+    from bs4 import XMLParsedAsHTMLWarning
+    import warnings
+
+    warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+  return BeautifulSoup(_CDATA.sub(_unwrap_cdata, text), PARSER)
+  v tibco-activematrix-adapter-framework@1.6.0 96 topic(s), 29 asset(s), 1 
+unit(s), 97 nav node(s), 1 generated -> 129 file(s)
+  v tibco-activematrix-adapter-framework@1.4.2 98 topic(s), 29 asset(s), 1 
+unit(s), 99 nav node(s), 1 generated -> 131 file(s)
+  v tibco-activematrix-adapter-framework@1.4.1 98 topic(s), 29 asset(s), 1 
+unit(s), 99 nav node(s), 1 generated -> 131 file(s)
+  v tibco-activematrix-adapter-framework@1.4.0 98 topic(s), 29 asset(s), 1 
+unit(s), 99 nav node(s), 1 generated -> 131 file(s)
+  v tibco-activematrix-adapter-framework@1.3.2 89 topic(s), 29 asset(s), 1 
+unit(s), 91 nav node(s), 2 generated -> 122 file(s)
+  v tibco-activematrix-adapter-framework@1.3.1 89 topic(s), 29 asset(s), 1 
+unit(s), 91 nav node(s), 2 generated -> 122 file(s)
+  v tibco-activematrix-adapter-framework@1.3.0 76 topic(s), 29 asset(s), 1 
+unit(s), 77 nav node(s), 1 generated -> 108 file(s)
+  v tibco-activematrix-adapter-framework@1.2.0 76 topic(s), 29 asset(s), 1 
+unit(s), 77 nav node(s), 1 generated -> 108 file(s)
+  v tibco-activematrix-adapter-framework@1.1.2 435 topic(s), 255 asset(s), 9 
+unit(s), 866 nav node(s), 14 generated -> 707 file(s)
+  v tibco-activematrix-adapter-framework@1.1.1 435 topic(s), 255 asset(s), 9 
+unit(s), 866 nav node(s), 14 generated -> 707 file(s)
+  v tibco-activematrix-adapter-framework@1.1.0 435 topic(s), 255 asset(s), 9 
+unit(s), 866 nav node(s), 14 generated -> 707 file(s)
+  v tibco-activematrix-adapter-service-engine-for-files@6.0.0 115 topic(s), 44 
+asset(s), 3 unit(s), 162 nav node(s), 4 generated -> 166 file(s)
+  v tibco-activematrix-adapter-service-engine-for-ibm-i@6.0.0 102 topic(s), 38 
+asset(s), 3 unit(s), 142 nav node(s), 4 generated -> 147 file(s)
+  v tibco-activematrix-adapter-service-engine-for-lotus-notes@6.0.0 328 
+topic(s), 55 asset(s), 3 unit(s), 384 nav node(s), 7 generated -> 390 file(s)
+  v tibco-activematrix-adapter-service-engine-for-peoplesoft@6.0.0 79 topic(s),
+84 asset(s), 3 unit(s), 155 nav node(s), 4 generated -> 170 file(s)
+  v tibco-activematrix-adapter-service-engine-for-sap@6.0.0 70 topic(s), 41 
+asset(s), 2 unit(s), 158 nav node(s), 3 generated -> 116 file(s)
+  v tibco-activematrix-adapter-service-engine-for-siebel@6.0.0 77 topic(s), 58 
+asset(s), 3 unit(s), 139 nav node(s), 4 generated -> 142 file(s)
+  v tibco-activematrix-adapter-service-engine-for-tuxedo@6.0.0 92 topic(s), 45 
+asset(s), 3 unit(s), 148 nav node(s), 4 generated -> 143 file(s)
+  v tibco-activematrix-adapter-service-engine-for-websphere-mq@6.0.0 115 
+topic(s), 29 asset(s), 3 unit(s), 200 nav node(s), 4 generated -> 151 file(s)
+  v tibco-adapter-for-files-ibm-i@5.0.1 46 topic(s), 12 asset(s), 1 unit(s), 
+114 nav node(s), 1 generated -> 62 file(s)
+  v tibco-adapter-for-files-z-os-mvs@4.7 59 topic(s), 13 asset(s), 1 unit(s), 
+134 nav node(s), 1 generated -> 75 file(s)
+  v tibco-adapter-for-oracle-applications@5.4.1 201 topic(s), 148 asset(s), 2 
+unit(s), 350 nav node(s), 3 generated -> 355 file(s)
+  v tibco-adapter-migration@1.8.1 21 topic(s), 0 asset(s), 1 unit(s), 22 nav 
+node(s), 1 generated -> 24 file(s)
+  v tibco-adapter-migration@1.8.0 21 topic(s), 0 asset(s), 1 unit(s), 22 nav 
+node(s), 1 generated -> 24 file(s)
+  v tibco-adapter-migration@1.7.0 22 topic(s), 0 asset(s), 1 unit(s), 23 nav 
+node(s), 1 generated -> 25 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |       39 |
+| Already current   |        0 |
+| No extracted tree |        5 |
+| Engine unknown    |        2 |
+| Failed            |        1 |
++------------------------------+
+5871 topic(s), 2453 asset(s) written.
+8565 file(s) standing in the measured output tree(s).
+tibco-activematrix-adapter-for-database-tibco-business-studio@1.3.0: 185 
+resolved, 0 skin, 0 escaped, 0 dangling, 0 case-mismatch, 8 orphan (2.1 MB)
+tibco-activematrix-adapter-for-database-tibco-business-studio@1.3.0: skipped 3 
+not-a-topic, 1 publication-homepage, 4 republished-duplicate
+tibco-activematrix-adapter-for-database-tibco-business-studio@1.2.0: 166 
+resolved, 0 skin, 0 escaped, 0 dangling, 0 case-mismatch, 61 orphan (5.4 MB)
+tibco-activematrix-adapter-for-database-tibco-business-studio@1.2.0: skipped 2 
+not-a-topic, 4 republished-duplicate
+tibco-activematrix-adapter-for-files-for-unix-win-tibco-business-studio@1.2.0: 
+41 resolved, 0 skin, 0 escaped, 1 dangling, 0 case-mismatch, 3 orphan (0.9 MB)
+tibco-activematrix-adapter-for-files-for-unix-win-tibco-business-studio@1.2.0: 
+skipped 2 not-a-topic, 4 republished-duplicate
+tibco-activematrix-adapter-for-ibm-i@6.4.0: 58 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 77 orphan (0.7 MB)
+tibco-activematrix-adapter-for-ibm-i@6.4.0: CSH 7 resolved, 0 unresolved, 0 
+ambiguous
+tibco-activematrix-adapter-for-ibm-i@6.4.0: skipped 4 front-matter, 5 
+generated-list, 12 runtime-stub
+tibco-activematrix-adapter-for-ibm-i@6.3.0: 58 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 77 orphan (0.7 MB)
+tibco-activematrix-adapter-for-ibm-i@6.3.0: CSH 7 resolved, 0 unresolved, 0 
+ambiguous
+tibco-activematrix-adapter-for-ibm-i@6.3.0: skipped 4 front-matter, 5 
+generated-list, 12 runtime-stub
+tibco-activematrix-adapter-for-ibm-i@6.2.2: 58 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 77 orphan (0.7 MB)
+tibco-activematrix-adapter-for-ibm-i@6.2.2: CSH 7 resolved, 0 unresolved, 0 
+ambiguous
+tibco-activematrix-adapter-for-ibm-i@6.2.2: skipped 4 front-matter, 5 
+generated-list, 12 runtime-stub
+tibco-activematrix-adapter-for-ibm-i@6.2.0: 73 resolved, 12 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 58 orphan (0.6 MB)
+tibco-activematrix-adapter-for-ibm-i@6.2.0: CSH 7 resolved, 0 unresolved, 0 
+ambiguous
+tibco-activematrix-adapter-for-ibm-i@6.2.0: skipped 4 front-matter, 6 
+generated-list, 8 runtime-stub
+tibco-activematrix-adapter-for-ibm-i@6.1.0: 79 resolved, 12 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 68 orphan (1.4 MB)
+tibco-activematrix-adapter-for-ibm-i@6.1.0: CSH 7 resolved, 0 unresolved, 0 
+ambiguous
+tibco-activematrix-adapter-for-ibm-i@6.1.0: skipped 4 front-matter, 5 
+generated-list, 8 runtime-stub
+tibco-activematrix-adapter-for-jd-edwards-enterpriseone@6.1.0: 66 resolved, 9 
+skin, 0 escaped, 1 dangling, 0 case-mismatch, 81 orphan (1.0 MB)
+tibco-activematrix-adapter-for-jd-edwards-enterpriseone@6.1.0: CSH 6 resolved, 
+0 unresolved, 0 ambiguous
+tibco-activematrix-adapter-for-jd-edwards-enterpriseone@6.1.0: skipped 4 
+front-matter, 4 generated-list, 12 runtime-stub
+tibco-activematrix-adapter-for-jd-edwards-enterpriseone@6.0.0: 63 resolved, 12 
+skin, 0 escaped, 1 dangling, 0 case-mismatch, 57 orphan (0.7 MB)
+tibco-activematrix-adapter-for-jd-edwards-enterpriseone@6.0.0: CSH 6 resolved, 
+0 unresolved, 0 ambiguous
+tibco-activematrix-adapter-for-jd-edwards-enterpriseone@6.0.0: skipped 4 
+front-matter, 4 generated-list, 8 runtime-stub
+tibco-activematrix-adapter-for-kenan-bp@6.0.0: 54 resolved, 12 skin, 0 escaped,
+0 dangling, 0 case-mismatch, 57 orphan (0.7 MB)
+tibco-activematrix-adapter-for-kenan-bp@6.0.0: CSH 4 resolved, 0 unresolved, 0 
+ambiguous
+tibco-activematrix-adapter-for-kenan-bp@6.0.0: skipped 4 front-matter, 5 
+generated-list, 8 runtime-stub
+tibco-activematrix-adapter-for-sap-tibco-business-studio@1.3.0: 58 resolved, 0 
+skin, 0 escaped, 0 dangling, 0 case-mismatch, 1 orphan (0.9 MB)
+tibco-activematrix-adapter-for-sap-tibco-business-studio@1.3.0: skipped 2 
+not-a-topic, 4 republished-duplicate
+tibco-activematrix-adapter-for-sap-tibco-business-studio@1.2.0: 54 resolved, 0 
+skin, 0 escaped, 0 dangling, 0 case-mismatch, 1 orphan (0.9 MB)
+tibco-activematrix-adapter-for-sap-tibco-business-studio@1.2.0: skipped 2 
+not-a-topic, 4 republished-duplicate
+tibco-activematrix-adapter-framework@1.6.1: 44 resolved, 0 skin, 5 escaped, 0 
+dangling, 0 case-mismatch, 82 orphan (2.0 MB)
+tibco-activematrix-adapter-framework@1.6.1: CSH 16 resolved, 0 unresolved, 0 
+ambiguous
+tibco-activematrix-adapter-framework@1.6.1: skipped 3 generated-directory, 2 
+runtime-stub
+tibco-activematrix-adapter-framework@1.6.0: 44 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 1 orphan (0.4 MB)
+tibco-activematrix-adapter-framework@1.6.0: CSH 8 resolved, 0 unresolved, 0 
+ambiguous
+tibco-activematrix-adapter-framework@1.6.0: skipped 2 not-a-topic, 1 
+publication-homepage
+tibco-activematrix-adapter-framework@1.4.2: 44 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 1 orphan (0.4 MB)
+tibco-activematrix-adapter-framework@1.4.2: CSH 8 resolved, 0 unresolved, 0 
+ambiguous
+tibco-activematrix-adapter-framework@1.4.2: skipped 2 not-a-topic, 1 
+publication-homepage, 4 republished-duplicate
+tibco-activematrix-adapter-framework@1.4.1: 44 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 1 orphan (0.4 MB)
+tibco-activematrix-adapter-framework@1.4.1: CSH 8 resolved, 0 unresolved, 0 
+ambiguous
+tibco-activematrix-adapter-framework@1.4.1: skipped 2 not-a-topic, 1 
+publication-homepage, 4 republished-duplicate
+tibco-activematrix-adapter-framework@1.4.0: 44 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 1 orphan (0.4 MB)
+tibco-activematrix-adapter-framework@1.4.0: CSH 8 resolved, 0 unresolved, 0 
+ambiguous
+tibco-activematrix-adapter-framework@1.4.0: skipped 2 not-a-topic, 1 
+publication-homepage, 4 republished-duplicate
+tibco-activematrix-adapter-framework@1.3.2: 44 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 1 orphan (0.4 MB)
+tibco-activematrix-adapter-framework@1.3.2: CSH 8 resolved, 0 unresolved, 0 
+ambiguous
+tibco-activematrix-adapter-framework@1.3.2: skipped 2 not-a-topic, 1 
+publication-homepage, 4 republished-duplicate
+tibco-activematrix-adapter-framework@1.3.1: 44 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 1 orphan (0.4 MB)
+tibco-activematrix-adapter-framework@1.3.1: CSH 8 resolved, 0 unresolved, 0 
+ambiguous
+tibco-activematrix-adapter-framework@1.3.1: skipped 2 not-a-topic, 1 
+publication-homepage, 4 republished-duplicate
+tibco-activematrix-adapter-framework@1.3.0: 44 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 1 orphan (0.3 MB)
+tibco-activematrix-adapter-framework@1.3.0: skipped 2 not-a-topic, 4 
+republished-duplicate
+tibco-activematrix-adapter-framework@1.2.0: 44 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 1 orphan (0.3 MB)
+tibco-activematrix-adapter-framework@1.2.0: skipped 2 not-a-topic, 4 
+republished-duplicate
+tibco-activematrix-adapter-framework@1.1.2: 268 resolved, 27 skin, 0 escaped, 0
+dangling, 0 case-mismatch, 172 orphan (4.3 MB)
+tibco-activematrix-adapter-framework@1.1.2: CSH 14 resolved, 0 unresolved, 8 
+ambiguous
+tibco-activematrix-adapter-framework@1.1.2: skipped 9 front-matter, 10 
+generated-list, 18 runtime-stub
+tibco-activematrix-adapter-framework@1.1.1: 268 resolved, 27 skin, 0 escaped, 0
+dangling, 0 case-mismatch, 172 orphan (4.3 MB)
+tibco-activematrix-adapter-framework@1.1.1: CSH 14 resolved, 0 unresolved, 8 
+ambiguous
+tibco-activematrix-adapter-framework@1.1.1: skipped 9 front-matter, 10 
+generated-list, 18 runtime-stub
+tibco-activematrix-adapter-framework@1.1.0: 268 resolved, 27 skin, 0 escaped, 0
+dangling, 0 case-mismatch, 172 orphan (4.3 MB)
+tibco-activematrix-adapter-framework@1.1.0: CSH 14 resolved, 0 unresolved, 8 
+ambiguous
+tibco-activematrix-adapter-framework@1.1.0: skipped 9 front-matter, 10 
+generated-list, 18 runtime-stub
+tibco-activematrix-adapter-service-engine-for-files@6.0.0: 51 resolved, 9 skin,
+0 escaped, 0 dangling, 0 case-mismatch, 42 orphan (0.5 MB)
+tibco-activematrix-adapter-service-engine-for-files@6.0.0: CSH 4 resolved, 0 
+unresolved, 0 ambiguous
+tibco-activematrix-adapter-service-engine-for-files@6.0.0: skipped 3 
+front-matter, 3 generated-list, 3 runtime-stub
+tibco-activematrix-adapter-service-engine-for-ibm-i@6.0.0: 40 resolved, 9 skin,
+0 escaped, 0 dangling, 0 case-mismatch, 53 orphan (1.1 MB)
+tibco-activematrix-adapter-service-engine-for-ibm-i@6.0.0: CSH 7 resolved, 0 
+unresolved, 0 ambiguous
+tibco-activematrix-adapter-service-engine-for-ibm-i@6.0.0: skipped 3 
+front-matter, 4 generated-list, 3 runtime-stub
+tibco-activematrix-adapter-service-engine-for-lotus-notes@6.0.0: 92 resolved, 
+24 skin, 0 escaped, 0 dangling, 0 case-mismatch, 63 orphan (1.6 MB)
+tibco-activematrix-adapter-service-engine-for-lotus-notes@6.0.0: CSH 9 
+resolved, 0 unresolved, 0 ambiguous
+tibco-activematrix-adapter-service-engine-for-lotus-notes@6.0.0: skipped 5 
+front-matter, 6 generated-list, 12 runtime-stub
+tibco-activematrix-adapter-service-engine-for-peoplesoft@6.0.0: 93 resolved, 7 
+skin, 0 escaped, 0 dangling, 0 case-mismatch, 44 orphan (0.5 MB)
+tibco-activematrix-adapter-service-engine-for-peoplesoft@6.0.0: CSH 2 resolved,
+0 unresolved, 0 ambiguous
+tibco-activematrix-adapter-service-engine-for-peoplesoft@6.0.0: skipped 3 
+front-matter, 5 generated-list, 6 runtime-stub
+tibco-activematrix-adapter-service-engine-for-sap@6.0.0: 42 resolved, 6 skin, 0
+escaped, 0 dangling, 0 case-mismatch, 29 orphan (0.5 MB)
+tibco-activematrix-adapter-service-engine-for-sap@6.0.0: skipped 2 
+front-matter, 2 runtime-stub
+tibco-activematrix-adapter-service-engine-for-siebel@6.0.0: 68 resolved, 7 
+skin, 0 escaped, 0 dangling, 0 case-mismatch, 44 orphan (0.5 MB)
+tibco-activematrix-adapter-service-engine-for-siebel@6.0.0: CSH 2 resolved, 0 
+unresolved, 0 ambiguous
+tibco-activematrix-adapter-service-engine-for-siebel@6.0.0: skipped 3 
+front-matter, 5 generated-list, 6 runtime-stub
+tibco-activematrix-adapter-service-engine-for-tuxedo@6.0.0: 52 resolved, 9 
+skin, 0 escaped, 0 dangling, 0 case-mismatch, 44 orphan (0.5 MB)
+tibco-activematrix-adapter-service-engine-for-tuxedo@6.0.0: skipped 3 
+front-matter, 5 generated-list, 3 runtime-stub
+tibco-activematrix-adapter-service-engine-for-websphere-mq@6.0.0: 30 resolved, 
+9 skin, 0 escaped, 0 dangling, 0 case-mismatch, 53 orphan (1.2 MB)
+tibco-activematrix-adapter-service-engine-for-websphere-mq@6.0.0: CSH 6 
+resolved, 0 unresolved, 0 ambiguous
+tibco-activematrix-adapter-service-engine-for-websphere-mq@6.0.0: skipped 3 
+front-matter, 3 generated-list, 3 runtime-stub
+tibco-adapter-for-files-ibm-i@5.0.1: 12 resolved, 3 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 16 orphan (0.3 MB)
+tibco-adapter-for-files-ibm-i@5.0.1: skipped 1 front-matter, 1 generated-list, 
+2 runtime-stub
+tibco-adapter-for-files-z-os-mvs@4.7: 13 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 16 orphan (0.3 MB)
+tibco-adapter-for-files-z-os-mvs@4.7: skipped 1 front-matter, 1 generated-list,
+1 runtime-stub
+tibco-adapter-for-oracle-applications@5.4.1: 240 resolved, 6 skin, 0 escaped, 1
+dangling, 0 case-mismatch, 28 orphan (0.3 MB)
+tibco-adapter-for-oracle-applications@5.4.1: CSH 8 resolved, 0 unresolved, 0 
+ambiguous
+tibco-adapter-for-oracle-applications@5.4.1: skipped 2 front-matter, 2 
+generated-list, 4 runtime-stub
+tibco-adapter-migration@1.8.1: 0 resolved, 0 skin, 0 escaped, 0 dangling, 0 
+case-mismatch, 1 orphan (0.1 MB)
+tibco-adapter-migration@1.8.1: skipped 2 not-a-topic, 1 publication-homepage
+tibco-adapter-migration@1.8.0: 0 resolved, 0 skin, 0 escaped, 0 dangling, 0 
+case-mismatch, 1 orphan (0.1 MB)
+tibco-adapter-migration@1.8.0: skipped 2 not-a-topic, 1 publication-homepage
+tibco-adapter-migration@1.7.0: 0 resolved, 0 skin, 0 escaped, 0 dangling, 0 
+case-mismatch, 1 orphan (0.1 MB)
+tibco-adapter-migration@1.7.0: skipped 2 not-a-topic, 1 publication-homepage
+! adapter-code-for-tibco-api-exchange-and-joomla@2.3.4: no extracted tree at 
+C:\github\docushift-tool\families\en-us-tib-adapters\extracted\adapter-code-for
+-tibco-api-exchange-and-joomla\2.3.4; run `docushift extract` first
+! adapter-code-for-tibco-api-exchange-and-joomla@2.3.3: no extracted tree at 
+C:\github\docushift-tool\families\en-us-tib-adapters\extracted\adapter-code-for
+-tibco-api-exchange-and-joomla\2.3.3; run `docushift extract` first
+! tibco-activematrix-adapter-for-ibm-i@6.2.1: engine undetected (`auto`)
+! tibco-activematrix-adapter-for-ibm-i@6.0.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-tib-adapters\extracted\tibco-activematr
+ix-adapter-for-ibm-i\6.0.0; run `docushift extract` first
+! tibco-activematrix-adapter-for-jd-edwards-enterpriseone@5.3: no extracted 
+tree at 
+C:\github\docushift-tool\families\en-us-tib-adapters\extracted\tibco-activematr
+ix-adapter-for-jd-edwards-enterpriseone\5.3; run `docushift extract` first
+! tibco-adapter-for-infranet-5-2-0@5.2.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-tib-adapters\extracted\tibco-adapter-fo
+r-infranet-5-2-0\5.2.0; run `docushift extract` first
+! tibco-adapter-sdk@5.8.0: engine undetected (`auto`)
+x 
+tibco-activematrix-adapter-for-files-for-unix-win-tibco-business-studio@1.3.0: 
+nothing converted (0 unit(s), 0 documents); the previous output is kept
+Findings: 4 errors, 89 warnings, 160 notes.

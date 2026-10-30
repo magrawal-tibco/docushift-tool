@@ -1,0 +1,73 @@
+Validating 132 published folder(s) in C:\tmp\p33-aem...
+  ! 
+en-us-tib-activespaces-userdocs/en-us/tibco-activespaces-enterprise-edition/onl
+ine-help/4-10-0 22 finding(s), 0 error(s)
+  ! 
+en-us-tib-activespaces-userdocs/en-us/tibco-activespaces-enterprise-edition/onl
+ine-help/4-10-1 22 finding(s), 0 error(s)
+  ! 
+en-us-tib-activespaces-userdocs/en-us/tibco-activespaces-enterprise-edition/onl
+ine-help/5-0-0 23 finding(s), 0 error(s)
+  ! 
+en-us-tib-activespaces-userdocs/en-us/tibco-activespaces-enterprise-edition/onl
+ine-help/5-1-0 21 finding(s), 0 error(s)
+  ! 
+en-us-tib-activespaces-userdocs/en-us/tibco-activespaces-enterprise-edition/onl
+ine-help/5-1-1 21 finding(s), 0 error(s)
+  ! 
+en-us-tib-activespaces-userdocs/en-us/tibco-activespaces-enterprise-edition/onl
+ine-help/5-2-0 21 finding(s), 0 error(s)
+  ! 
+en-us-tib-ems-userdocs/en-us/tibco-enterprise-message-service/online-help/10-4-
+0 2 finding(s), 0 error(s)
+  ! 
+en-us-tib-ems-userdocs/en-us/tibco-enterprise-message-service/online-help/10-4-
+1 1 finding(s), 0 error(s)
+  ! 
+en-us-tib-ems-userdocs/en-us/tibco-enterprise-message-service/online-help/10-4-
+3 1 finding(s), 0 error(s)
+  ! 
+en-us-tib-ems-userdocs/en-us/tibco-enterprise-message-service/online-help/10-4-
+4 1 finding(s), 0 error(s)
+  ! 
+en-us-tib-ems-userdocs/en-us/tibco-enterprise-message-service/online-help/10-5-
+0 1 finding(s), 0 error(s)
+  ! 
+en-us-tib-ems-userdocs/en-us/tibco-enterprise-message-service/online-help/10-5-
+1 1 finding(s), 0 error(s)
+  ! 
+en-us-tib-tra-userdocs/en-us/tibco-administrator-enterprise-edition/online-help
+/5-12-2 24 finding(s), 0 error(s)
+  ! 
+en-us-tib-tra-userdocs/en-us/tibco-administrator-enterprise-edition/online-help
+/5-12-4 24 finding(s), 0 error(s)
+  ! 
+en-us-tib-tra-userdocs/en-us/tibco-administrator-enterprise-edition/online-help
+/5-13-0 47 finding(s), 0 error(s)
+  ! 
+en-us-tib-tra-userdocs/en-us/tibco-designer-add-in-for-tibco-business-studio/on
+line-help/1-2-0 13 finding(s), 0 error(s)
+  ! 
+en-us-tib-tra-userdocs/en-us/tibco-designer-add-in-for-tibco-business-studio/on
+line-help/1-3-1 11 finding(s), 0 error(s)
+  ! 
+en-us-tib-tra-userdocs/en-us/tibco-designer-add-in-for-tibco-business-studio/on
+line-help/1-3-2 11 finding(s), 0 error(s)
+  ! en-us-tib-tra-userdocs/en-us/tibco-runtime-agent/online-help/5-12-2 90 
+finding(s), 0 error(s)
+  ! en-us-tib-tra-userdocs/en-us/tibco-runtime-agent/online-help/5-12-3 90 
+finding(s), 0 error(s)
+  ! en-us-tib-tra-userdocs/en-us/tibco-runtime-agent/online-help/5-12-4 90 
+finding(s), 0 error(s)
+  ! en-us-tib-tra-userdocs/en-us/tibco-runtime-agent/online-help/5-13-0 108 
+finding(s), 0 error(s)
+                                   Validate                                    
+┌────────────┬───────┬────────────┬──────┬──────────┬────────────┬────────────┐
+│     Walked │ Files │ References │ HTML │ External │ Tree-root… │    Anchors │
+├────────────┼───────┼────────────┼──────┼──────────┼────────────┼────────────┤
+│        132 │  4153 │      27314 │ 2714 │      746 │        552 │ 22944/229… │
+│  folder(s) │       │            │      │          │            │            │
+└────────────┴───────┴────────────┴──────┴──────────┴────────────┴────────────┘
+ANCHOR_MISSING 521 row(s), 521 occurrence(s)
+REDIRECT_SHADOWED 124 row(s), 124 occurrence(s)
+Findings: 645 warnings.

@@ -1,0 +1,78 @@
+Converting 8 version(s)...
+C:\github\docushift-tool\src\docushift\transforms\markdown.py:112: XMLParsedAsHTMLWarning: It looks like you're using an HTML parser to parse an XML document.
+
+Assuming this really is an XML document, what you're doing might work, but you should know that using an XML parser will be more reliable. To parse this document as XML, make sure you have the Python package 'lxml' installed, and pass the keyword argument `features="xml"` into the BeautifulSoup constructor.
+
+If you want or need to use an HTML parser on this document, you can make this warning go away by filtering it. To do that, run this code before calling the BeautifulSoup constructor:
+
+    from bs4 import XMLParsedAsHTMLWarning
+    import warnings
+
+    warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+  return BeautifulSoup(_CDATA.sub(_unwrap_cdata, text), PARSER)
+  v tibco-businessevents-data-modeling@5.0 54 topic(s), 21 asset(s), 2 unit(s),
+116 nav node(s), 3 generated -> 81 file(s)
+  v tibco-businessevents-enterprise-edition@6.4.0 1394 topic(s), 324 asset(s), 
+1 unit(s), 1408 nav node(s), 14 generated -> 1735 file(s)
+  v tibco-businessevents-enterprise-edition@6.3.2 1371 topic(s), 329 asset(s), 
+1 unit(s), 1385 nav node(s), 14 generated -> 1716 file(s)
+  v tibco-businessevents-enterprise-edition@6.3.1 1362 topic(s), 327 asset(s), 
+1 unit(s), 1375 nav node(s), 13 generated -> 1705 file(s)
+  v tibco-businessevents-enterprise-edition@6.3.0 1356 topic(s), 327 asset(s), 
+1 unit(s), 1370 nav node(s), 14 generated -> 1699 file(s)
+C:\github\docushift-tool\src\docushift\transforms\markdown.py:112: XMLParsedAsHTMLWarning: It looks like you're using an HTML parser to parse an XML document.
+
+Assuming this really is an XML document, what you're doing might work, but you should know that using an XML parser will be more reliable. To parse this document as XML, make sure you have the Python package 'lxml' installed, and pass the keyword argument `features="xml"` into the BeautifulSoup constructor.
+
+If you want or need to use an HTML parser on this document, you can make this warning go away by filtering it. To do that, run this code before calling the BeautifulSoup constructor:
+
+    from bs4 import XMLParsedAsHTMLWarning
+    import warnings
+
+    warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+  return BeautifulSoup(_CDATA.sub(_unwrap_cdata, text), PARSER)
+  v tibco-businessevents-event-stream-processing@5.0 71 topic(s), 44 asset(s), 
+3 unit(s), 179 nav node(s), 4 generated -> 122 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        6 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        2 |
+| Failed            |        0 |
++------------------------------+
+5608 topic(s), 1372 asset(s) written.
+7058 file(s) standing in the measured output tree(s).
+tibco-businessevents-data-modeling@5.0: 21 resolved, 3 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 29 orphan (0.4 MB)
+tibco-businessevents-data-modeling@5.0: skipped 2 front-matter, 1 
+generated-list, 4 runtime-stub
+tibco-businessevents-enterprise-edition@6.4.0: 363 resolved, 0 skin, 0 escaped,
+0 dangling, 0 case-mismatch, 392 orphan (18.1 MB)
+tibco-businessevents-enterprise-edition@6.4.0: skipped 215 api-reference, 4 
+generated-directory, 1318 no-content-container, 16 runtime-stub
+tibco-businessevents-enterprise-edition@6.3.2: 364 resolved, 0 skin, 0 escaped,
+0 dangling, 0 case-mismatch, 376 orphan (12.0 MB)
+tibco-businessevents-enterprise-edition@6.3.2: skipped 215 api-reference, 4 
+generated-directory, 1318 no-content-container, 16 runtime-stub
+tibco-businessevents-enterprise-edition@6.3.1: 362 resolved, 0 skin, 0 escaped,
+0 dangling, 0 case-mismatch, 373 orphan (10.9 MB)
+tibco-businessevents-enterprise-edition@6.3.1: skipped 215 api-reference, 4 
+generated-directory, 1318 no-content-container, 16 runtime-stub
+tibco-businessevents-enterprise-edition@6.3.0: 362 resolved, 0 skin, 1 escaped,
+0 dangling, 0 case-mismatch, 367 orphan (10.6 MB)
+tibco-businessevents-enterprise-edition@6.3.0: skipped 211 api-reference, 3 
+generated-directory, 1280 no-content-container, 15 runtime-stub
+tibco-businessevents-event-stream-processing@5.0: 44 resolved, 6 skin, 0 
+escaped, 0 dangling, 0 case-mismatch, 39 orphan (0.4 MB)
+tibco-businessevents-event-stream-processing@5.0: skipped 3 front-matter, 1 
+generated-list, 6 runtime-stub
+! tibco-businessevents-plug-in-for-edi-healthcare-edition@2.0.0: engine 
+undetected (`auto`)
+! tibco-businessevents-plug-in-for-edi-standard-edition@2.0.0: engine 
+undetected (`auto`)
+Findings: 5252 warnings, 38 notes.

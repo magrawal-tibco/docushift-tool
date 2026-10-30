@@ -1,0 +1,20 @@
+Validating 64 published folder(s) in C:\github\ibi-docs-aem...
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-installer/online-help/9-3-0 
+11 finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-installer/online-help/9-3-1 
+10 finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-installer/online-help/9-3-2 
+10 finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-installer/online-help/9-3-3 
+10 finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-installer/online-help/9-3-4 
+10 finding(s), 0 error(s)
+                                   Validate                                    
+┌──────────────┬───────┬────────────┬──────┬──────────┬─────────────┬─────────┐
+│       Walked │ Files │ References │ HTML │ External │ Tree-rooted │ Anchors │
+├──────────────┼───────┼────────────┼──────┼──────────┼─────────────┼─────────┤
+│ 64 folder(s) │   135 │        873 │    0 │      208 │           0 │ 132/162 │
+└──────────────┴───────┴────────────┴──────┴──────────┴─────────────┴─────────┘
+ANCHOR_MISSING 30 row(s), 30 occurrence(s)
+LINK_TO_UNFILED 5 row(s), 21 occurrence(s)
+Findings: 30 warnings, 5 notes.

@@ -1,0 +1,26 @@
+Reframing 90 version(s)...
+  v ibi-webfocus-app-studio@9.3.8 324 topic(s) -> 326 page(s)
+  v ibi-webfocus-app-studio@9.3.7 263 topic(s) -> 263 page(s)
+  v ibi-webfocus-app-studio@9.3.6 303 topic(s) -> 303 page(s)
+  v ibi-webfocus-app-studio@9.3.5 304 topic(s) -> 304 page(s)
+  v ibi-webfocus-app-studio@9.3.0 304 topic(s) -> 304 page(s)
+  v ibi-webfocus-client@9.3.8 3029 topic(s) -> 2962 page(s)
+  v ibi-webfocus-client@9.3.7 2919 topic(s) -> 2883 page(s)
+  v ibi-webfocus-client@9.3.6 2860 topic(s) -> 2825 page(s)
+  v ibi-webfocus-client@9.3.5 2867 topic(s) -> 2831 page(s)
+  v ibi-webfocus-client@9.3.0 2904 topic(s) -> 2900 page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |       10 |
+| Already current             |       35 |
+| Not Flare or DITA (skipped) |       45 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+16077 topic(s) read into 15901 page(s).
+Files: 364161 source doc -> 30561 converted -> 30723 merged (-0.5% fewer at the
+merge, 91.6% end to end); 85306 file(s) standing in the measured merged 
+tree(s).
+Findings: 12 warnings, 45 notes.

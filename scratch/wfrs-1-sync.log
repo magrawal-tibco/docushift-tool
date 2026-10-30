@@ -1,0 +1,55 @@
+Syncing 5 version(s) into C:\github\ibi-docs-aem...
+  v ibi-webfocus-reporting-server@9.3.8 -> online-help/9-3-8 4992 file(s), 65.8
+MB
+  v ibi-webfocus-reporting-server@9.3.8 -> user-guides/9-3-8 1 file(s), 5.2 MB
+  v ibi-webfocus-reporting-server@9.3.8 -> release-information/9-3-8 2 file(s),
+2.4 MB
+  v ibi-webfocus-reporting-server@9.3.8 -> reference-documents/9-3-8 2 file(s),
+2.7 MB
+  v ibi-webfocus-reporting-server@9.3.7 -> online-help/9-3-7 4206 file(s), 60.9
+MB
+  v ibi-webfocus-reporting-server@9.3.7 -> user-guides/9-3-7 11 file(s), 106.9 
+MB
+  v ibi-webfocus-reporting-server@9.3.7 -> release-information/9-3-7 2 file(s),
+2.1 MB
+  v ibi-webfocus-reporting-server@9.3.7 -> reference-documents/9-3-7 3 file(s),
+3.6 MB
+  v ibi-webfocus-reporting-server@9.3.6 -> online-help/9-3-6 4095 file(s), 57.9
+MB
+  v ibi-webfocus-reporting-server@9.3.6 -> user-guides/9-3-6 11 file(s), 106.8 
+MB
+  v ibi-webfocus-reporting-server@9.3.6 -> release-information/9-3-6 2 file(s),
+2.0 MB
+  v ibi-webfocus-reporting-server@9.3.6 -> reference-documents/9-3-6 3 file(s),
+1.7 MB
+  v ibi-webfocus-reporting-server@9.3.5 -> online-help/9-3-5 4358 file(s), 62.6
+MB
+  v ibi-webfocus-reporting-server@9.3.5 -> user-guides/9-3-5 11 file(s), 107.3 
+MB
+  v ibi-webfocus-reporting-server@9.3.5 -> release-information/9-3-5 2 file(s),
+1.9 MB
+  v ibi-webfocus-reporting-server@9.3.5 -> reference-documents/9-3-5 3 file(s),
+1.3 MB
+  v ibi-webfocus-reporting-server@9.3.4 -> online-help/9-3-4 4397 file(s), 63.2
+MB
+  v ibi-webfocus-reporting-server@9.3.4 -> user-guides/9-3-4 11 file(s), 106.8 
+MB
+  v ibi-webfocus-reporting-server@9.3.4 -> release-information/9-3-4 2 file(s),
+1.8 MB
+  v ibi-webfocus-reporting-server@9.3.4 -> reference-documents/9-3-4 3 file(s),
+1.3 MB
+                                     Sync                                      
++-----------------------------------------------------------------------------+
+| Outcome     | Rows | online-help | user-guides | release-in… | reference-d… |
+|-------------+------+-------------+-------------+-------------+--------------|
+| Synced      |   20 |           5 |           5 |           5 |            5 |
+| Already     |    0 |           0 |           0 |           0 |            0 |
+| current     |      |             |             |             |              |
+| No source   |    0 |           0 |           0 |           0 |            0 |
+| tree        |      |             |             |             |              |
+| Skipped     |    0 |           0 |           0 |           0 |            0 |
+| Failed      |    0 |           0 |           0 |           0 |            0 |
++-----------------------------------------------------------------------------+
+22117 file(s), 764.2 MB copied.
+1 product metadata.yml, 4 version.yml written.
+2388 redirect(s) in 1 published map(s), tree-rooted (no publish_base_url set).

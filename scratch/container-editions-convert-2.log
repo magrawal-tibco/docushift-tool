@@ -1,0 +1,26 @@
+Converting 32 version(s)...
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        0 |
+| Already current   |       21 |
+| No extracted tree |        1 |
+| Engine unknown    |       10 |
+| Failed            |        0 |
++------------------------------+
+! ibi-webfocus-container-edition@1.2.1: engine undetected (`auto`)
+! ibi-webfocus-container-edition@1.2.0: engine undetected (`auto`)
+! ibi-webfocus-container-edition@1.1.2: engine undetected (`auto`)
+! ibi-webfocus-container-edition@1.1.1: engine undetected (`auto`)
+! ibi-webfocus-container-edition@1.1.0: engine undetected (`auto`)
+! ibi-webfocus-container-edition@1.0.4: engine undetected (`auto`)
+! ibi-webfocus-container-edition@1.0.3: engine undetected (`auto`)
+! ibi-webfocus-container-edition@1.0.2: engine undetected (`auto`)
+! ibi-webfocus-container-edition@1.0.0: engine undetected (`auto`)
+! ibi-webfocus-dsml-services-container-edition@1.0.7: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-container-editions\extracted\ibi-we
+bfocus-dsml-services-container-edition\1.0.7; run `docushift extract` first
+! ibi-webfocus-dsml-services-container-edition@1.0.3: engine undetected 
+(`auto`)
+Findings: 10 warnings, 21 notes.

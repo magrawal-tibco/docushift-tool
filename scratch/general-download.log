@@ -1,0 +1,29 @@
+Downloading 13 version(s) with 4 worker(s)...
+  v tibco-activation-service@1.1.0 7.2 MiB
+  v tibco-activation-service@1.0.0 7.2 MiB
+  v tibco-api-exchange-gateway@2.5.1 17.5 MiB
+  v tibco-enterprise-administrator@2.4.3 21.9 MiB
+  v tibco-enterprise-administrator@2.4.2 19.0 MiB
+  x tibco-health-essentials-cloud@Cloud
+  v tibco-patterns@6.2.0 34.5 MiB
+  v tibco-patterns@6.1.2 34.8 MiB
+  v tibco-patterns@5.7.1 37.6 MiB
+  v tibco-reward@22.3.0 43.3 MiB
+  v tibco-reward@22.2.0 43.3 MiB
+  v tibco-rtview@7.6.0 11.9 MiB
+  v tibco-rtview@7.5.0 11.9 MiB
+           Download            
++-----------------------------+
+| Outcome          | Versions |
+|------------------+----------|
+| Downloaded       |       12 |
+| Already current  |        0 |
+| Skipped (manual) |        0 |
+| No ZIP endpoint  |        0 |
+| Failed           |        1 |
++-----------------------------+
+290.1 MiB written.
+! tibco-health-essentials-cloud@Cloud: NotAPackage: 
+https://docs.tibco.com/pub/health-essentials-cloud/Cloud/tibco-health-essential
+s-cloud-Cloud_documentation.zip did not return a readable ZIP (most often an 
+error or sign-in page served as HTTP 200)

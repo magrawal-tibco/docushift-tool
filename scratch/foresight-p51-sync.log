@@ -1,0 +1,154 @@
+Syncing 1 version(s) into ..\tibco-docs-aem...
+  v tibco-foresight-instream@9.4.0 -> online-help/9-4-0 2435 file(s), 42.6 MB
+  v tibco-foresight-instream@9.4.0 -> user-guides/9-4-0 28 file(s), 59.0 MB
+  v tibco-foresight-instream@9.4.0 -> release-information/9-4-0 3 file(s), 2.8 
+MB
+  v tibco-foresight-instream@9.4.0 -> reference-documents/9-4-0 2 file(s), 0.8 
+MB
+                                     Sync                                      
++-----------------------------------------------------------------------------+
+| Outcome   | Rows | online-h… | user-gui… | release-… | referenc… | archives |
+|-----------+------+-----------+-----------+-----------+-----------+----------|
+| Synced    |    4 |         1 |         1 |         1 |         1 |        0 |
+| Already   |    1 |         0 |         0 |         0 |         0 |        1 |
+| current   |      |           |           |           |           |          |
+| No source |    0 |         0 |         0 |         0 |         0 |        0 |
+| tree      |      |           |           |           |           |          |
+| Skipped   |    0 |         0 |         0 |         0 |         0 |        0 |
+| Failed    |    0 |         0 |         0 |         0 |         0 |        0 |
++-----------------------------------------------------------------------------+
+2468 file(s), 105.3 MB copied.
+1 product metadata.yml, 4 version.yml written.
+Published merged (Stage 6b): tibco-foresight-instream.
+2374 redirect(s) in 2 published map(s), tree-rooted (no publish_base_url set).
+Syncing 1 version(s) into ..\tibco-docs-aem...
+  x tibco-foresight-instream@9.3.0 (online-help)
+  v tibco-foresight-instream@9.3.0 -> user-guides/9-3-0 29 file(s), 67.4 MB
+  v tibco-foresight-instream@9.3.0 -> release-information/9-3-0 4 file(s), 2.9 
+MB
+  v tibco-foresight-instream@9.3.0 -> reference-documents/9-3-0 4 file(s), 1.6 
+MB
+                                     Sync                                      
++-----------------------------------------------------------------------------+
+| Outcome   | Rows | online-h… | user-gui… | release-… | referenc… | archives |
+|-----------+------+-----------+-----------+-----------+-----------+----------|
+| Synced    |    3 |         0 |         1 |         1 |         1 |        0 |
+| Already   |    1 |         0 |         0 |         0 |         0 |        1 |
+| current   |      |           |           |           |           |          |
+| No source |    0 |         0 |         0 |         0 |         0 |        0 |
+| tree      |      |           |           |           |           |          |
+| Skipped   |    0 |         0 |         0 |         0 |         0 |        0 |
+| Failed    |    1 |         1 |         0 |         0 |         0 |        0 |
++-----------------------------------------------------------------------------+
+37 file(s), 71.9 MB copied.
+1 product metadata.yml, 4 version.yml written.
+2374 redirect(s) in 2 published map(s), tree-rooted (no publish_base_url set).
+x tibco-foresight-instream@9.3.0: online-help: publishing 
+unfiled/tibco-foresight-instream-9-3-0/html/relnotes-addendum-guideline-update-
+9.2/Introduction_to_Guideline_Updates_for_TIBCO_Foresight_Instream_Release_9_1.
+md would need 263 characters, over the 260 the published tree allows
+Findings: 1 error.
+Syncing 1 version(s) into ..\tibco-docs-aem...
+  v tibco-foresight-instream@9.2.0 -> online-help/9-2-0 4539 file(s), 108.9 MB
+  v tibco-foresight-instream@9.2.0 -> user-guides/9-2-0 29 file(s), 37.7 MB
+  v tibco-foresight-instream@9.2.0 -> release-information/9-2-0 10 file(s), 1.9
+MB
+  v tibco-foresight-instream@9.2.0 -> reference-documents/9-2-0 6 file(s), 1.5 
+MB
+                                     Sync                                      
++-----------------------------------------------------------------------------+
+| Outcome   | Rows | online-h… | user-gui… | release-… | referenc… | archives |
+|-----------+------+-----------+-----------+-----------+-----------+----------|
+| Synced    |    4 |         1 |         1 |         1 |         1 |        0 |
+| Already   |    1 |         0 |         0 |         0 |         0 |        1 |
+| current   |      |           |           |           |           |          |
+| No source |    0 |         0 |         0 |         0 |         0 |        0 |
+| tree      |      |           |           |           |           |          |
+| Skipped   |    0 |         0 |         0 |         0 |         0 |        0 |
+| Failed    |    0 |         0 |         0 |         0 |         0 |        0 |
++-----------------------------------------------------------------------------+
+4584 file(s), 150.0 MB copied.
+1 product metadata.yml, 4 version.yml written.
+Published merged (Stage 6b): tibco-foresight-instream.
+4923 redirect(s) in 2 published map(s), tree-rooted (no publish_base_url set).
+Syncing 1 version(s) into ..\tibco-docs-aem...
+  x tibco-foresight-transaction-insight@6.0.0 (online-help)
+  v tibco-foresight-transaction-insight@6.0.0 -> user-guides/6-0-0 30 file(s), 
+67.5 MB
+  v tibco-foresight-transaction-insight@6.0.0 -> release-information/6-0-0 2 
+file(s), 1.4 MB
+  v tibco-foresight-transaction-insight@6.0.0 -> reference-documents/6-0-0 4 
+file(s), 1.2 MB
+                                     Sync                                      
++-----------------------------------------------------------------------------+
+| Outcome   | Rows | online-h… | user-gui… | release-… | referenc… | archives |
+|-----------+------+-----------+-----------+-----------+-----------+----------|
+| Synced    |    3 |         0 |         1 |         1 |         1 |        0 |
+| Already   |    1 |         0 |         0 |         0 |         0 |        1 |
+| current   |      |           |           |           |           |          |
+| No source |    0 |         0 |         0 |         0 |         0 |        0 |
+| tree      |      |           |           |           |           |          |
+| Skipped   |    0 |         0 |         0 |         0 |         0 |        0 |
+| Failed    |    1 |         1 |         0 |         0 |         0 |        0 |
++-----------------------------------------------------------------------------+
+36 file(s), 70.1 MB copied.
+1 product metadata.yml, 3 version.yml written.
+x tibco-foresight-transaction-insight@6.0.0: online-help: publishing 
+unfiled/tibco-foresight-transaction-insight-6-0-0/html/admin-guide-archive/Fore
+sight_Archive_and_Retrieval_System_Client_and_the_ArchiveTypes_Table.md would 
+need 264 characters, over the 260 the published tree allows
+Findings: 1 error.
+Syncing 1 version(s) into ..\tibco-docs-aem...
+  x tibco-foresight-transaction-insight@5.5.0 (online-help)
+  v tibco-foresight-transaction-insight@5.5.0 -> user-guides/5-5-0 32 file(s), 
+33.9 MB
+  v tibco-foresight-transaction-insight@5.5.0 -> release-information/5-5-0 2 
+file(s), 1.5 MB
+  v tibco-foresight-transaction-insight@5.5.0 -> reference-documents/5-5-0 5 
+file(s), 1.1 MB
+                                     Sync                                      
++-----------------------------------------------------------------------------+
+| Outcome   | Rows | online-h… | user-gui… | release-… | referenc… | archives |
+|-----------+------+-----------+-----------+-----------+-----------+----------|
+| Synced    |    3 |         0 |         1 |         1 |         1 |        0 |
+| Already   |    1 |         0 |         0 |         0 |         0 |        1 |
+| current   |      |           |           |           |           |          |
+| No source |    0 |         0 |         0 |         0 |         0 |        0 |
+| tree      |      |           |           |           |           |          |
+| Skipped   |    0 |         0 |         0 |         0 |         0 |        0 |
+| Failed    |    1 |         1 |         0 |         0 |         0 |        0 |
++-----------------------------------------------------------------------------+
+39 file(s), 36.4 MB copied.
+1 product metadata.yml, 3 version.yml written.
+x tibco-foresight-transaction-insight@5.5.0: online-help: publishing 
+unfiled/tibco-foresight-transaction-insight-5-5-0/html/admin-guide-archive/Fore
+sight_Archive_and_Retrieval_System_Client_and_the_ArchiveTypes_Table.md would 
+need 264 characters, over the 260 the published tree allows
+Findings: 1 error.
+Syncing 1 version(s) into ..\tibco-docs-aem...
+  x tibco-foresight-transaction-insight@5.4.0 (online-help)
+  v tibco-foresight-transaction-insight@5.4.0 -> user-guides/5-4-0 30 file(s), 
+31.3 MB
+  v tibco-foresight-transaction-insight@5.4.0 -> release-information/5-4-0 2 
+file(s), 0.1 MB
+  v tibco-foresight-transaction-insight@5.4.0 -> reference-documents/5-4-0 4 
+file(s), 1.1 MB
+                                     Sync                                      
++-----------------------------------------------------------------------------+
+| Outcome   | Rows | online-h… | user-gui… | release-… | referenc… | archives |
+|-----------+------+-----------+-----------+-----------+-----------+----------|
+| Synced    |    3 |         0 |         1 |         1 |         1 |        0 |
+| Already   |    1 |         0 |         0 |         0 |         0 |        1 |
+| current   |      |           |           |           |           |          |
+| No source |    0 |         0 |         0 |         0 |         0 |        0 |
+| tree      |      |           |           |           |           |          |
+| Skipped   |    0 |         0 |         0 |         0 |         0 |        0 |
+| Failed    |    1 |         1 |         0 |         0 |         0 |        0 |
++-----------------------------------------------------------------------------+
+36 file(s), 32.5 MB copied.
+1 product metadata.yml, 3 version.yml written.
+x tibco-foresight-transaction-insight@5.4.0: online-help: publishing 
+filters-for-foresight-portal-applications/transaction-insight-filters/setting-u
+p-transaction-filter-transaction-insight/creating-the-transaction-filter.md 
+would need 268 characters, over the 260 the published tree allows
+Findings: 1 error.

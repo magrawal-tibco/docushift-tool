@@ -1,0 +1,431 @@
+              Merge              
++-------------------------------+
+| Change                | Count |
+|-----------------------+-------|
+| products added        |     0 |
+| products updated      |   667 |
+| versions added        |    11 |
+| versions updated      |  5177 |
+| fields preserved      |  1219 |
+| products out of scope |   135 |
+| versions retired      |    93 |
++-------------------------------+
+93 in-scope eligible version(s) are retired and will be skipped 
+(config/eos.yaml).
+2 product(s) have no convertible version left -- every eligible version is 
+retired:
+  tibco-auditsafe
+  tibco-data-science-team-studio
+1 config/scope.yaml rule(s) matched no product: tibco-spotfire-for-apple-ipad
+Usually an upstream rename -- those products are no longer being excluded.
+Skipped 0 entries with no published versions and 69 that are not publicly 
+visible.
+2 product(s) are listed with versions but yielded none: ibi, 
+tibco-spotfire-for-apple-ipad
+Discovery could not read their versions -- missing from the catalog, not empty 
+upstream.
+WARN config/scope.yaml: 1 of 129 out-of-scope rules match no product in the 
+catalog (tibco-spotfire-for-apple-ipad). Expected until `catalog fetch --all` 
+has run; afterwards it means the product was renamed upstream and is no longer 
+being excluded.
+WARN ibi-data-quality@5.1.1: zip_source=manual, but discovery now has a zip_url
+for it. The manual package still wins. Run `docushift catalog set --product 
+ibi-data-quality --version 5.1.1 --zip-source auto` to download it instead.
+WARN ibi-data-quality@5.1.1: zip_source=manual, but no package at 
+C:\github\docushift-tool\families\en-us-ibi-di-ism\downloads\ibi-data-quality-5
+.1.1.zip. Run `docushift download --product ibi-data-quality --version 5.1.1 
+--from-file <zip>` to file one.
+WARN ibi-data-quality@5.1.0: zip_source=manual, but discovery now has a zip_url
+for it. The manual package still wins. Run `docushift catalog set --product 
+ibi-data-quality --version 5.1.0 --zip-source auto` to download it instead.
+WARN ibi-data-quality@5.1.0: zip_source=manual, but no package at 
+C:\github\docushift-tool\families\en-us-ibi-di-ism\downloads\ibi-data-quality-5
+.1.0.zip. Run `docushift download --product ibi-data-quality --version 5.1.0 
+--from-file <zip>` to file one.
+WARN ibi-data-quality@5.0.0: zip_source=manual, but discovery now has a zip_url
+for it. The manual package still wins. Run `docushift catalog set --product 
+ibi-data-quality --version 5.0.0 --zip-source auto` to download it instead.
+WARN ibi-data-quality@5.0.0: zip_source=manual, but no package at 
+C:\github\docushift-tool\families\en-us-ibi-di-ism\downloads\ibi-data-quality-5
+.0.0.zip. Run `docushift download --product ibi-data-quality --version 5.0.0 
+--from-file <zip>` to file one.
+WARN ibi-data-quality@3.1.0: zip_source=manual, but discovery now has a zip_url
+for it. The manual package still wins. Run `docushift catalog set --product 
+ibi-data-quality --version 3.1.0 --zip-source auto` to download it instead.
+WARN ibi-data-quality@3.1.0: zip_source=manual, but no package at 
+C:\github\docushift-tool\families\en-us-ibi-di-ism\downloads\ibi-data-quality-3
+.1.0.zip. Run `docushift download --product ibi-data-quality --version 3.1.0 
+--from-file <zip>` to file one.
+WARN ibi-data-quality@3.0.0: zip_source=manual, but discovery now has a zip_url
+for it. The manual package still wins. Run `docushift catalog set --product 
+ibi-data-quality --version 3.0.0 --zip-source auto` to download it instead.
+WARN ibi-data-quality@3.0.0: zip_source=manual, but no package at 
+C:\github\docushift-tool\families\en-us-ibi-di-ism\downloads\ibi-data-quality-3
+.0.0.zip. Run `docushift download --product ibi-data-quality --version 3.0.0 
+--from-file <zip>` to file one.
+WARN ibi-focus@9.1.1: zip_source=manual, but discovery now has a zip_url for 
+it. The manual package still wins. Run `docushift catalog set --product 
+ibi-focus --version 9.1.1 --zip-source auto` to download it instead.
+WARN ibi-focus@9.1.1: zip_source=manual, but no package at 
+C:\github\docushift-tool\families\en-us-ibi-focus\downloads\ibi-focus-9.1.1.zip
+. Run `docushift download --product ibi-focus --version 9.1.1 --from-file 
+<zip>` to file one.
+WARN ibi-focus@9.1.0: zip_source=manual, but discovery now has a zip_url for 
+it. The manual package still wins. Run `docushift catalog set --product 
+ibi-focus --version 9.1.0 --zip-source auto` to download it instead.
+WARN ibi-focus@9.1.0: zip_source=manual, but no package at 
+C:\github\docushift-tool\families\en-us-ibi-focus\downloads\ibi-focus-9.1.0.zip
+. Run `docushift download --product ibi-focus --version 9.1.0 --from-file 
+<zip>` to file one.
+WARN ibi-iway-service-manager@8.0.7: zip_source=manual, but discovery now has a
+zip_url for it. The manual package still wins. Run `docushift catalog set 
+--product ibi-iway-service-manager --version 8.0.7 --zip-source auto` to 
+download it instead.
+WARN ibi-iway-service-manager@8.0.7: zip_source=manual, but no package at 
+C:\github\docushift-tool\families\en-us-ibi-di-ism\downloads\ibi-iway-service-m
+anager-8.0.7.zip. Run `docushift download --product ibi-iway-service-manager 
+--version 8.0.7 --from-file <zip>` to file one.
+WARN ibi-iway-service-manager@8.0.6: zip_source=manual, but discovery now has a
+zip_url for it. The manual package still wins. Run `docushift catalog set 
+--product ibi-iway-service-manager --version 8.0.6 --zip-source auto` to 
+download it instead.
+WARN ibi-iway-service-manager@8.0.6: zip_source=manual, but no package at 
+C:\github\docushift-tool\families\en-us-ibi-di-ism\downloads\ibi-iway-service-m
+anager-8.0.6.zip. Run `docushift download --product ibi-iway-service-manager 
+--version 8.0.6 --from-file <zip>` to file one.
+WARN ibi-iway-service-manager@8.0.5: zip_source=manual, but discovery now has a
+zip_url for it. The manual package still wins. Run `docushift catalog set 
+--product ibi-iway-service-manager --version 8.0.5 --zip-source auto` to 
+download it instead.
+WARN ibi-iway-service-manager@8.0.5: zip_source=manual, but no package at 
+C:\github\docushift-tool\families\en-us-ibi-di-ism\downloads\ibi-iway-service-m
+anager-8.0.5.zip. Run `docushift download --product ibi-iway-service-manager 
+--version 8.0.5 --from-file <zip>` to file one.
+WARN ibi-web-query-for-ibm-i@9.1.1: zip_source=manual, but discovery now has a 
+zip_url for it. The manual package still wins. Run `docushift catalog set 
+--product ibi-web-query-for-ibm-i --version 9.1.1 --zip-source auto` to 
+download it instead.
+WARN ibi-web-query-for-ibm-i@9.1.1: zip_source=manual, but no package at 
+C:\github\docushift-tool\families\en-us-ibi-legacy\downloads\ibi-web-query-for-
+ibm-i-9.1.1.zip. Run `docushift download --product ibi-web-query-for-ibm-i 
+--version 9.1.1 --from-file <zip>` to file one.
+WARN ibi-web-query-for-ibm-i@9.1.0: zip_source=manual, but discovery now has a 
+zip_url for it. The manual package still wins. Run `docushift catalog set 
+--product ibi-web-query-for-ibm-i --version 9.1.0 --zip-source auto` to 
+download it instead.
+WARN ibi-web-query-for-ibm-i@9.1.0: zip_source=manual, but no package at 
+C:\github\docushift-tool\families\en-us-ibi-legacy\downloads\ibi-web-query-for-
+ibm-i-9.1.0.zip. Run `docushift download --product ibi-web-query-for-ibm-i 
+--version 9.1.0 --from-file <zip>` to file one.
+WARN ibi-webfocus-container-edition@1.1.1: zip_source=manual, but discovery now
+has a zip_url for it. The manual package still wins. Run `docushift catalog set
+--product ibi-webfocus-container-edition --version 1.1.1 --zip-source auto` to 
+download it instead.
+WARN ibi-webfocus-container-edition@1.1.1: zip_source=manual, but no package at
+C:\github\docushift-tool\families\en-us-ibi-container-editions\downloads\ibi-we
+bfocus-container-edition-1.1.1.zip. Run `docushift download --product 
+ibi-webfocus-container-edition --version 1.1.1 --from-file <zip>` to file one.
+WARN ibi-webfocus-container-edition@1.1.0: zip_source=manual, but discovery now
+has a zip_url for it. The manual package still wins. Run `docushift catalog set
+--product ibi-webfocus-container-edition --version 1.1.0 --zip-source auto` to 
+download it instead.
+WARN ibi-webfocus-container-edition@1.1.0: zip_source=manual, but no package at
+C:\github\docushift-tool\families\en-us-ibi-container-editions\downloads\ibi-we
+bfocus-container-edition-1.1.0.zip. Run `docushift download --product 
+ibi-webfocus-container-edition --version 1.1.0 --from-file <zip>` to file one.
+WARN ibi-webfocus-container-edition@1.0.4: zip_source=manual, but discovery now
+has a zip_url for it. The manual package still wins. Run `docushift catalog set
+--product ibi-webfocus-container-edition --version 1.0.4 --zip-source auto` to 
+download it instead.
+WARN ibi-webfocus-container-edition@1.0.4: zip_source=manual, but no package at
+C:\github\docushift-tool\families\en-us-ibi-container-editions\downloads\ibi-we
+bfocus-container-edition-1.0.4.zip. Run `docushift download --product 
+ibi-webfocus-container-edition --version 1.0.4 --from-file <zip>` to file one.
+WARN ibi-webfocus-container-edition@1.0.3: zip_source=manual, but discovery now
+has a zip_url for it. The manual package still wins. Run `docushift catalog set
+--product ibi-webfocus-container-edition --version 1.0.3 --zip-source auto` to 
+download it instead.
+WARN ibi-webfocus-container-edition@1.0.3: zip_source=manual, but no package at
+C:\github\docushift-tool\families\en-us-ibi-container-editions\downloads\ibi-we
+bfocus-container-edition-1.0.3.zip. Run `docushift download --product 
+ibi-webfocus-container-edition --version 1.0.3 --from-file <zip>` to file one.
+WARN ibi-webfocus-container-edition@1.0.2: zip_source=manual, but discovery now
+has a zip_url for it. The manual package still wins. Run `docushift catalog set
+--product ibi-webfocus-container-edition --version 1.0.2 --zip-source auto` to 
+download it instead.
+WARN ibi-webfocus-container-edition@1.0.2: zip_source=manual, but no package at
+C:\github\docushift-tool\families\en-us-ibi-container-editions\downloads\ibi-we
+bfocus-container-edition-1.0.2.zip. Run `docushift download --product 
+ibi-webfocus-container-edition --version 1.0.2 --from-file <zip>` to file one.
+WARN ibi-webfocus-container-edition@1.0.0: zip_source=manual, but discovery now
+has a zip_url for it. The manual package still wins. Run `docushift catalog set
+--product ibi-webfocus-container-edition --version 1.0.0 --zip-source auto` to 
+download it instead.
+WARN ibi-webfocus-container-edition@1.0.0: zip_source=manual, but no package at
+C:\github\docushift-tool\families\en-us-ibi-container-editions\downloads\ibi-we
+bfocus-container-edition-1.0.0.zip. Run `docushift download --product 
+ibi-webfocus-container-edition --version 1.0.0 --from-file <zip>` to file one.
+WARN tibco-activematrix-businessworks-activeaspects-plug-in@1.2: in batch 
+'bwp-1' but convert_eligible=false, so it will be skipped. Run `docushift 
+catalog enable --product tibco-activematrix-businessworks-activeaspects-plug-in
+--version 1.2`.
+WARN tibco-activematrix-businessworks-activeaspects-plug-in@1.1: in batch 
+'bwp-1' but convert_eligible=false, so it will be skipped. Run `docushift 
+catalog enable --product tibco-activematrix-businessworks-activeaspects-plug-in
+--version 1.1`.
+WARN tibco-activematrix-businessworks-activeaspects-plug-in@1.0: in batch 
+'bwp-1' but convert_eligible=false, so it will be skipped. Run `docushift 
+catalog enable --product tibco-activematrix-businessworks-activeaspects-plug-in
+--version 1.0`.
+WARN tibco-activematrix-businessworks-bpel-extension@5.9: in batch 'bwp-1' but 
+convert_eligible=false, so it will be skipped. Run `docushift catalog enable 
+--product tibco-activematrix-businessworks-bpel-extension --version 5.9`.
+WARN tibco-activematrix-businessworks-bpel-extension@5.8.0: in batch 'bwp-1' 
+but convert_eligible=false, so it will be skipped. Run `docushift catalog 
+enable --product tibco-activematrix-businessworks-bpel-extension --version 
+5.8.0`.
+WARN tibco-activematrix-businessworks-bpel-extension@5.7.1: in batch 'bwp-1' 
+but convert_eligible=false, so it will be skipped. Run `docushift catalog 
+enable --product tibco-activematrix-businessworks-bpel-extension --version 
+5.7.1`.
+WARN tibco-activematrix-businessworks-bpel-extension@5.7.0: in batch 'bwp-1' 
+but convert_eligible=false, so it will be skipped. Run `docushift catalog 
+enable --product tibco-activematrix-businessworks-bpel-extension --version 
+5.7.0`.
+WARN tibco-activematrix-businessworks-plug-in-for-activespaces@8.0.2: in batch 
+'bwp-dita' but convert_eligible=false, so it will be skipped. Run `docushift 
+catalog enable --product 
+tibco-activematrix-businessworks-plug-in-for-activespaces --version 8.0.2`.
+WARN tibco-activematrix-businessworks-plug-in-for-activespaces@7.2.2: in batch 
+'bwp-dita' but convert_eligible=false, so it will be skipped. Run `docushift 
+catalog enable --product 
+tibco-activematrix-businessworks-plug-in-for-activespaces --version 7.2.2`.
+WARN tibco-activematrix-businessworks-plug-in-for-activespaces@7.2.1: in batch 
+'bwp-dita' but convert_eligible=false, so it will be skipped. Run `docushift 
+catalog enable --product 
+tibco-activematrix-businessworks-plug-in-for-activespaces --version 7.2.1`.
+WARN tibco-activematrix-businessworks-plug-in-for-activespaces@7.2.0: in batch 
+'bwp-dita' but convert_eligible=false, so it will be skipped. Run `docushift 
+catalog enable --product 
+tibco-activematrix-businessworks-plug-in-for-activespaces --version 7.2.0`.
+WARN tibco-activematrix-businessworks-plug-in-for-activespaces@7.1.1: in batch 
+'bwp-dita' but convert_eligible=false, so it will be skipped. Run `docushift 
+catalog enable --product 
+tibco-activematrix-businessworks-plug-in-for-activespaces --version 7.1.1`.
+WARN tibco-activematrix-businessworks-plug-in-for-amazon-s3@6.6.0: in batch 
+'bwp-1' but convert_eligible=false, so it will be skipped. Run `docushift 
+catalog enable --product tibco-activematrix-businessworks-plug-in-for-amazon-s3
+--version 6.6.0`.
+WARN tibco-activematrix-businessworks-plug-in-for-amazon-s3@6.5.1: in batch 
+'bwp-dita' but convert_eligible=false, so it will be skipped. Run `docushift 
+catalog enable --product tibco-activematrix-businessworks-plug-in-for-amazon-s3
+--version 6.5.1`.
+WARN tibco-activematrix-businessworks-plug-in-for-amazon-sqs-and-sns@6.5.2: in 
+batch 'bwp-dita' but convert_eligible=false, so it will be skipped. Run 
+`docushift catalog enable --product 
+tibco-activematrix-businessworks-plug-in-for-amazon-sqs-and-sns --version 
+6.5.2`.
+WARN tibco-activematrix-businessworks-plug-in-for-amqp@6.5.0: in batch 'bwp-1' 
+but convert_eligible=false, so it will be skipped. Run `docushift catalog 
+enable --product tibco-activematrix-businessworks-plug-in-for-amqp --version 
+6.5.0`.
+WARN tibco-activematrix-businessworks-plug-in-for-amqp@6.4.0: in batch 'bwp-1' 
+but convert_eligible=false, so it will be skipped. Run `docushift catalog 
+enable --product tibco-activematrix-businessworks-plug-in-for-amqp --version 
+6.4.0`.
+WARN tibco-activematrix-businessworks-plug-in-for-amqp@6.3.0: in batch 'bwp-1' 
+but convert_eligible=false, so it will be skipped. Run `docushift catalog 
+enable --product tibco-activematrix-businessworks-plug-in-for-amqp --version 
+6.3.0`.
+WARN tibco-activematrix-businessworks-plug-in-for-apache-kafka@6.7.0: in batch 
+'bwp-2' but convert_eligible=false, so it will be skipped. Run `docushift 
+catalog enable --product 
+tibco-activematrix-businessworks-plug-in-for-apache-kafka --version 6.7.0`.
+WARN tibco-activematrix-businessworks-plug-in-for-apache-kafka@6.6.0: in batch 
+'bwp-2' but convert_eligible=false, so it will be skipped. Run `docushift 
+catalog enable --product 
+tibco-activematrix-businessworks-plug-in-for-apache-kafka --version 6.6.0`.
+WARN tibco-activematrix-businessworks-plug-in-for-apache-kafka@6.5.2: in batch 
+'bwp-dita' but convert_eligible=false, so it will be skipped. Run `docushift 
+catalog enable --product 
+tibco-activematrix-businessworks-plug-in-for-apache-kafka --version 6.5.2`.
+WARN tibco-activematrix-businessworks-plug-in-for-hl7-with-fhir@7.0.0: in batch
+'bwp-dita' but convert_eligible=false, so it will be skipped. Run `docushift 
+catalog enable --product 
+tibco-activematrix-businessworks-plug-in-for-hl7-with-fhir --version 7.0.0`.
+WARN tibco-activematrix-businessworks-plug-in-for-hl7-with-fhir@6.0.0: in batch
+'bwp-3' but convert_eligible=false, so it will be skipped. Run `docushift 
+catalog enable --product 
+tibco-activematrix-businessworks-plug-in-for-hl7-with-fhir --version 6.0.0`.
+WARN tibco-activematrix-businessworks-plug-in-for-large-xml@1.1.0: in batch 
+'bwp-3' but convert_eligible=false, so it will be skipped. Run `docushift 
+catalog enable --product tibco-activematrix-businessworks-plug-in-for-large-xml
+--version 1.1.0`.
+WARN tibco-activematrix-businessworks-plug-in-for-netsuite@1.0.0: in batch 
+'bwp-4' but convert_eligible=false, so it will be skipped. Run `docushift 
+catalog enable --product tibco-activematrix-businessworks-plug-in-for-netsuite 
+--version 1.0.0`.
+WARN 
+tibco-activematrix-businessworks-plug-in-for-oracle-e-business-suite@1.3.0: in 
+batch 'bwp-4' but convert_eligible=false, so it will be skipped. Run `docushift
+catalog enable --product 
+tibco-activematrix-businessworks-plug-in-for-oracle-e-business-suite --version 
+1.3.0`.
+WARN tibco-activematrix-businessworks-plug-in-for-osb@6.0.0: in batch 'bwp-4' 
+but convert_eligible=false, so it will be skipped. Run `docushift catalog 
+enable --product tibco-activematrix-businessworks-plug-in-for-osb --version 
+6.0.0`.
+WARN tibco-activematrix-businessworks-plug-in-for-osb@5.0.0: in batch 'bwp-4' 
+but convert_eligible=false, so it will be skipped. Run `docushift catalog 
+enable --product tibco-activematrix-businessworks-plug-in-for-osb --version 
+5.0.0`.
+WARN tibco-activematrix-businessworks-plug-in-for-osisoft-pi-system@1.1.0: in 
+batch 'bwp-4' but convert_eligible=false, so it will be skipped. Run `docushift
+catalog enable --product 
+tibco-activematrix-businessworks-plug-in-for-osisoft-pi-system --version 
+1.1.0`.
+WARN tibco-activematrix-businessworks-plug-in-for-peoplesoft@6.1.0: in batch 
+'bwp-4' but convert_eligible=false, so it will be skipped. Run `docushift 
+catalog enable --product 
+tibco-activematrix-businessworks-plug-in-for-peoplesoft --version 6.1.0`.
+WARN tibco-activematrix-businessworks-plug-in-for-sftp@1.1.0: in batch 'bwp-5' 
+but convert_eligible=false, so it will be skipped. Run `docushift catalog 
+enable --product tibco-activematrix-businessworks-plug-in-for-sftp --version 
+1.1.0`.
+WARN tibco-activematrix-businessworks-plug-in-for-swift@5.11.0: in batch 
+'bwp-5' but convert_eligible=false, so it will be skipped. Run `docushift 
+catalog enable --product tibco-activematrix-businessworks-plug-in-for-swift 
+--version 5.11.0`.
+WARN 
+tibco-activematrix-businessworks-plug-in-for-tibco-managed-file-transfer@6.0.1:
+in batch 'bwp-6' but convert_eligible=false, so it will be skipped. Run 
+`docushift catalog enable --product 
+tibco-activematrix-businessworks-plug-in-for-tibco-managed-file-transfer 
+--version 6.0.1`.
+WARN 
+tibco-activematrix-businessworks-plug-in-for-tibco-managed-file-transfer@6.0.0:
+in batch 'bwp-6' but convert_eligible=false, so it will be skipped. Run 
+`docushift catalog enable --product 
+tibco-activematrix-businessworks-plug-in-for-tibco-managed-file-transfer 
+--version 6.0.0`.
+WARN 
+tibco-activematrix-businessworks-plug-in-for-tibco-managed-file-transfer@1.0.0:
+in batch 'bwp-6' but convert_eligible=false, so it will be skipped. Run 
+`docushift catalog enable --product 
+tibco-activematrix-businessworks-plug-in-for-tibco-managed-file-transfer 
+--version 1.0.0`.
+WARN tibco-activematrix-businessworks-plug-in-for-tibco-patterns@1.1.0: in 
+batch 'bwp-6' but convert_eligible=false, so it will be skipped. Run `docushift
+catalog enable --product 
+tibco-activematrix-businessworks-plug-in-for-tibco-patterns --version 1.1.0`.
+WARN tibco-activematrix-businessworks-plug-in-for-tibco-patterns@1.0.0: in 
+batch 'bwp-6' but convert_eligible=false, so it will be skipped. Run `docushift
+catalog enable --product 
+tibco-activematrix-businessworks-plug-in-for-tibco-patterns --version 1.0.0`.
+WARN tibco-activematrix-businessworks-plug-in-for-trillium@6.0.0: in batch 
+'bwp-dita' but convert_eligible=false, so it will be skipped. Run `docushift 
+catalog enable --product tibco-activematrix-businessworks-plug-in-for-trillium 
+--version 6.0.0`.
+WARN tibco-activematrix-businessworks-plug-in-for-workday@1.0.0: in batch 
+'bwp-6' but convert_eligible=false, so it will be skipped. Run `docushift 
+catalog enable --product tibco-activematrix-businessworks-plug-in-for-workday 
+--version 1.0.0`.
+WARN 
+tibco-activematrix-businessworks-service-engine-plug-in-for-oracle-e-business-s
+uite@1.1: in batch 'bwp-6' but convert_eligible=false, so it will be skipped. 
+Run `docushift catalog enable --product 
+tibco-activematrix-businessworks-service-engine-plug-in-for-oracle-e-business-s
+uite --version 1.1`.
+WARN 
+tibco-activematrix-businessworks-service-engine-plug-in-for-smartmapper@5.5: in
+batch 'bwp-6' but convert_eligible=false, so it will be skipped. Run `docushift
+catalog enable --product 
+tibco-activematrix-businessworks-service-engine-plug-in-for-smartmapper 
+--version 5.5`.
+WARN tibco-businessworks-integrationmanager-plug-in@1.0: in batch 'bwp-6' but 
+convert_eligible=false, so it will be skipped. Run `docushift catalog enable 
+--product tibco-businessworks-integrationmanager-plug-in --version 1.0`.
+WARN tibco-datasynapse-gridserver-logviewer@1.0.0: zip_source=manual, but 
+discovery now has a zip_url for it. The manual package still wins. Run 
+`docushift catalog set --product tibco-datasynapse-gridserver-logviewer 
+--version 1.0.0 --zip-source auto` to download it instead.
+WARN tibco-datasynapse-gridserver-logviewer@1.0.0: zip_source=manual, but no 
+package at 
+C:\github\docushift-tool\families\en-us-datasynapse-datasynapse\downloads\tibco
+-datasynapse-gridserver-logviewer-1.0.0.zip. Run `docushift download --product 
+tibco-datasynapse-gridserver-logviewer --version 1.0.0 --from-file <zip>` to 
+file one.
+WARN tibco-datasynapse-gridserver-manager@7.2.0: zip_source=manual, but 
+discovery now has a zip_url for it. The manual package still wins. Run 
+`docushift catalog set --product tibco-datasynapse-gridserver-manager --version
+7.2.0 --zip-source auto` to download it instead.
+WARN tibco-datasynapse-gridserver-manager@7.2.0: zip_source=manual, but no 
+package at 
+C:\github\docushift-tool\families\en-us-datasynapse-datasynapse\downloads\tibco
+-datasynapse-gridserver-manager-7.2.0.zip. Run `docushift download --product 
+tibco-datasynapse-gridserver-manager --version 7.2.0 --from-file <zip>` to file
+one.
+WARN tibco-datasynapse-gridserver-manager@7.1.1: zip_source=manual, but 
+discovery now has a zip_url for it. The manual package still wins. Run 
+`docushift catalog set --product tibco-datasynapse-gridserver-manager --version
+7.1.1 --zip-source auto` to download it instead.
+WARN tibco-datasynapse-gridserver-manager@7.1.1: zip_source=manual, but no 
+package at 
+C:\github\docushift-tool\families\en-us-datasynapse-datasynapse\downloads\tibco
+-datasynapse-gridserver-manager-7.1.1.zip. Run `docushift download --product 
+tibco-datasynapse-gridserver-manager --version 7.1.1 --from-file <zip>` to file
+one.
+WARN tibco-datasynapse-high-performance-computing-cloud-adapter@2.2.0: 
+zip_source=manual, but discovery now has a zip_url for it. The manual package 
+still wins. Run `docushift catalog set --product 
+tibco-datasynapse-high-performance-computing-cloud-adapter --version 2.2.0 
+--zip-source auto` to download it instead.
+WARN tibco-datasynapse-high-performance-computing-cloud-adapter@2.2.0: 
+zip_source=manual, but no package at 
+C:\github\docushift-tool\families\en-us-datasynapse-datasynapse\downloads\tibco
+-datasynapse-high-performance-computing-cloud-adapter-2.2.0.zip. Run `docushift
+download --product tibco-datasynapse-high-performance-computing-cloud-adapter 
+--version 2.2.0 --from-file <zip>` to file one.
+WARN tibco-datasynapse-high-performance-computing-cloud-adapter@2.1.0: 
+zip_source=manual, but discovery now has a zip_url for it. The manual package 
+still wins. Run `docushift catalog set --product 
+tibco-datasynapse-high-performance-computing-cloud-adapter --version 2.1.0 
+--zip-source auto` to download it instead.
+WARN tibco-datasynapse-high-performance-computing-cloud-adapter@2.1.0: 
+zip_source=manual, but no package at 
+C:\github\docushift-tool\families\en-us-datasynapse-datasynapse\downloads\tibco
+-datasynapse-high-performance-computing-cloud-adapter-2.1.0.zip. Run `docushift
+download --product tibco-datasynapse-high-performance-computing-cloud-adapter 
+--version 2.1.0 --from-file <zip>` to file one.
+WARN tibco-datasynapse-high-performance-computing-cloud-adapter@2.0.0: 
+zip_source=manual, but discovery now has a zip_url for it. The manual package 
+still wins. Run `docushift catalog set --product 
+tibco-datasynapse-high-performance-computing-cloud-adapter --version 2.0.0 
+--zip-source auto` to download it instead.
+WARN tibco-datasynapse-high-performance-computing-cloud-adapter@2.0.0: 
+zip_source=manual, but no package at 
+C:\github\docushift-tool\families\en-us-datasynapse-datasynapse\downloads\tibco
+-datasynapse-high-performance-computing-cloud-adapter-2.0.0.zip. Run `docushift
+download --product tibco-datasynapse-high-performance-computing-cloud-adapter 
+--version 2.0.0 --from-file <zip>` to file one.
+WARN tibco-silver-fabric-enabler-for-activespaces-enterprise-edition@1.2.0: in 
+batch 'activespaces' but convert_eligible=false, so it will be skipped. Run 
+`docushift catalog enable --product 
+tibco-silver-fabric-enabler-for-activespaces-enterprise-edition --version 
+1.2.0`.
+WARN tibco-streaming@11.1.1: zip_source=manual, but discovery now has a zip_url
+for it. The manual package still wins. Run `docushift catalog set --product 
+tibco-streaming --version 11.1.1 --zip-source auto` to download it instead.
+WARN tibco-streaming@11.1.1: zip_source=manual, but no package at 
+C:\github\docushift-tool\families\en-us-tib-streaming\downloads\tibco-streaming
+-11.1.1.zip. Run `docushift download --product tibco-streaming --version 11.1.1
+--from-file <zip>` to file one.
+WARN tibco-streaming@11.1.0: zip_source=manual, but discovery now has a zip_url
+for it. The manual package still wins. Run `docushift catalog set --product 
+tibco-streaming --version 11.1.0 --zip-source auto` to download it instead.
+WARN tibco-streaming@11.1.0: zip_source=manual, but no package at 
+C:\github\docushift-tool\families\en-us-tib-streaming\downloads\tibco-streaming
+-11.1.0.zip. Run `docushift download --product tibco-streaming --version 11.1.0
+--from-file <zip>` to file one.
+Recorded 542 warnings -- `docushift report --run 649`.
+exit=0

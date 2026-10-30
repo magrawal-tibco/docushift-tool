@@ -1,0 +1,80 @@
+Extracting 8 version(s)...
+  v tibco-businessevents-data-modeling@5.0 677 file(s), webworks, 2 root(s)
+  v tibco-businessevents-enterprise-edition@6.4.0 5815 file(s), flare, 1 
+root(s)
+  v tibco-businessevents-enterprise-edition@6.3.2 5777 file(s), flare, 1 
+root(s)
+  v tibco-businessevents-enterprise-edition@6.3.1 5756 file(s), flare, 1 
+root(s)
+  v tibco-businessevents-enterprise-edition@6.3.0 5653 file(s), flare, 1 
+root(s)
+  v tibco-businessevents-event-stream-processing@5.0 923 file(s), webworks, 3 
+root(s)
+  v tibco-businessevents-plug-in-for-edi-healthcare-edition@2.0.0 5 file(s), 
+auto
+  v tibco-businessevents-plug-in-for-edi-standard-edition@2.0.0 5 file(s), auto
+                Extract                
++-------------------------------------+
+| Outcome                  | Versions |
+|--------------------------+----------|
+| Extracted                |        8 |
+| Already current          |        0 |
+| Measured from cache      |        0 |
+| No package               |        0 |
+| Refused (unsafe archive) |        0 |
+| Failed                   |        0 |
++-------------------------------------+
+24611 file(s) written.
+        Engines        
++---------------------+
+| Engine   | Versions |
+|----------+----------|
+| flare    |        4 |
+| auto     |        2 |
+| webworks |        2 |
++---------------------+
+? tibco-businessevents-plug-in-for-edi-healthcare-edition@2.0.0: engine 
+undetected (`auto`)
+? tibco-businessevents-plug-in-for-edi-standard-edition@2.0.0: engine 
+undetected (`auto`)
+CSH: 9 source(s), 0 identifier(s).
+                     Assets                      
++-----------------------------------------------+
+| Category | Destination     | Files |     Size |
+|----------+-----------------+-------+----------|
+| topic    | api-reference   |  1720 |  21.7 MB |
+| other    | api-reference   |    24 |   0.1 MB |
+| topic    | output-root     | 10933 | 125.9 MB |
+| image    | output-root     |  2855 |  74.1 MB |
+| skin     | output-root     |  3302 | 120.5 MB |
+| other    | output-root     |    81 |   5.6 MB |
+| document | document-router |    89 | 133.2 MB |
+| topic    | unclaimed       |  5357 |  15.4 MB |
+| image    | unclaimed       |   150 |   0.1 MB |
+| other    | unclaimed       |   100 |   1.2 MB |
++-----------------------------------------------+
+? tibco-businessevents-data-modeling@5.0: 155 unclaimed file(s) in html/ (0.7 
+MB) -- no destination
+? tibco-businessevents-enterprise-edition@6.4.0: 1334 unclaimed file(s) in 
+functions/ (3.9 MB) -- no destination
+? tibco-businessevents-enterprise-edition@6.3.2: 1334 unclaimed file(s) in 
+functions/ (3.9 MB) -- no destination
+? tibco-businessevents-enterprise-edition@6.3.1: 1334 unclaimed file(s) in 
+functions/ (3.9 MB) -- no destination
+? tibco-businessevents-enterprise-edition@6.3.0: 1295 unclaimed file(s) in 
+functions/ (3.8 MB) -- no destination
+? tibco-businessevents-event-stream-processing@5.0: 155 unclaimed file(s) in 
+html/ (0.7 MB) -- no destination
+? tibco-businessevents-enterprise-edition@6.4.0: 
+tibco-businessevents-enterprise-edition-6-4-0/html/api/ 219 file(s), no known 
+generator marker
+? tibco-businessevents-enterprise-edition@6.3.2: 
+tibco-businessevents-enterprise-edition-6-3-2/html/api/ 219 file(s), no known 
+generator marker
+? tibco-businessevents-enterprise-edition@6.3.1: 
+tibco-businessevents-enterprise-edition-6-3-1/html/api/ 219 file(s), no known 
+generator marker
+? tibco-businessevents-enterprise-edition@6.3.0: 
+tibco-businessevents-enterprise-edition-6-3-0/html/api/ 215 file(s), no known 
+generator marker
+Recorded 6 notes -- `docushift report --run 475`.

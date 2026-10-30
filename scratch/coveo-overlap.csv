@@ -1,0 +1,45 @@
+slug,version,sources,leaf_pages,best_hits,rival_hits,best_mapping,mappings
+spotfire-data-science-author,1.4.0,12,18,12,0,"(0, 'pub/dsc-author/1.4.0/doc')",1
+spotfire-data-streams,11.1.0,1171,3664,1171,199,"(1, 'pub/sfire-sfds/11.1.0/doc')",61
+spotfire-data-streams,11.1.1,1179,3672,1179,201,"(1, 'pub/sfire-sfds/11.1.1/doc')",61
+tibco-activematrix-adapter-service-engine-for-peoplesoft,6.0.0,82,,0,0,,0
+tibco-activespaces-enterprise-edition,4.10.0,316,449,316,146,"(1, 'pub/as/4.10.0/doc')",8
+tibco-activespaces-enterprise-edition,4.10.1,316,449,316,146,"(1, 'pub/as/4.10.1/doc')",8
+tibco-activespaces-enterprise-edition,5.0.0,323,456,323,153,"(1, 'pub/as/5.0.0/doc')",10
+tibco-activespaces-enterprise-edition,5.1.0,324,457,324,153,"(1, 'pub/as/5.1.0/doc')",10
+tibco-activespaces-enterprise-edition,5.1.1,324,456,324,153,"(1, 'pub/as/5.1.1/doc')",10
+tibco-activespaces-enterprise-edition,5.2.0,319,452,319,150,"(1, 'pub/as/5.2.0/doc')",7
+tibco-administrator-enterprise-edition,5.12.2,271,292,271,127,"(1, 'pub/administrator/5.12.2/doc')",4
+tibco-administrator-enterprise-edition,5.12.4,271,292,271,127,"(1, 'pub/administrator/5.12.4/doc')",4
+tibco-administrator-enterprise-edition,5.13.0,423,435,423,230,"(1, 'pub/administrator/5.13.0/doc')",5
+tibco-datasynapse-gridserver-logviewer,1.0.0,24,,0,0,,0
+tibco-datasynapse-gridserver-manager,7.1.1,919,,0,0,,0
+tibco-datasynapse-gridserver-manager,7.2.0,989,,0,0,,0
+tibco-datasynapse-high-performance-computing-cloud-adapter,2.0.0,18,,0,0,,0
+tibco-datasynapse-high-performance-computing-cloud-adapter,2.1.0,21,,0,0,,0
+tibco-datasynapse-high-performance-computing-cloud-adapter,2.2.0,22,,0,0,,0
+tibco-designer-add-in-for-tibco-business-studio,1.0.0,34,,0,0,,0
+tibco-designer-add-in-for-tibco-business-studio,1.1.0,34,,0,0,,0
+tibco-designer-add-in-for-tibco-business-studio,1.1.1,34,,0,0,,0
+tibco-designer-add-in-for-tibco-business-studio,1.2.0,36,,0,0,,0
+tibco-designer-add-in-for-tibco-business-studio,1.3.1,36,,0,0,,0
+tibco-designer-add-in-for-tibco-business-studio,1.3.2,36,,0,0,,0
+tibco-designer-add-in-for-tibco-business-studio,1.4.0,43,,0,0,,0
+tibco-designer-add-in-for-tibco-business-studio,1.5.0,41,,0,0,,0
+tibco-enterprise-message-service,10.4.0,1452,2124,1452,910,"(1, 'pub/ems/10.4.0/doc')",7
+tibco-enterprise-message-service,10.4.1,1437,2109,1437,899,"(1, 'pub/ems/10.4.1/doc')",7
+tibco-enterprise-message-service,10.4.3,1425,2094,1425,887,"(1, 'pub/ems/10.4.3/doc')",7
+tibco-enterprise-message-service,10.4.4,1425,2096,1425,887,"(1, 'pub/ems/10.4.4/doc')",7
+tibco-enterprise-message-service,10.5.0,1437,2118,1437,899,"(1, 'pub/ems/10.5.0/doc')",7
+tibco-enterprise-message-service,10.5.1,1437,2117,1437,899,"(1, 'pub/ems/10.5.1/doc')",7
+tibco-runtime-agent,5.12.2,267,317,267,152,"(1, 'pub/runtime_agent/5.12.2/doc/html')",11
+tibco-runtime-agent,5.12.3,115,139,115,73,"(1, 'pub/runtime_agent/5.12.3/doc/html')",3
+tibco-runtime-agent,5.12.4,273,328,273,158,"(1, 'pub/runtime_agent/5.12.4/doc/html')",11
+tibco-runtime-agent,5.13.0,643,669,643,325,"(1, 'pub/runtime_agent/5.13.0/doc')",13
+tibco-silver-fabric-enabler-for-activespaces-enterprise-edition,1.2.0,88,,0,0,,0
+tibco-streaming,11.1.0,1171,3664,1171,199,"(1, 'pub/str/11.1.0/doc')",61
+tibco-streaming,11.1.1,1179,3672,1179,201,"(1, 'pub/str/11.1.1/doc')",61
+tibco-streaming,11.1.2,1182,3612,1182,202,"(1, 'pub/str/11.1.2/doc')",61
+tibco-streaming,11.1.3,1187,3616,1186,202,"(1, 'pub/str/11.1.3/doc')",61
+tibco-streaming,11.2.0,1174,3496,1174,202,"(1, 'pub/str/11.2.0/doc')",68
+tibco-streaming,11.2.1,1178,3500,1178,202,"(1, 'pub/str/11.2.1/doc')",68

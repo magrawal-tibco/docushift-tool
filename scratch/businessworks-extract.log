@@ -1,0 +1,56 @@
+Extracting 10 version(s)...
+  v 
+premium-subscription-for-tibco-businessworks-container-edition-and-plug-ins-for
+-aws-marketplace@2.3.1 2 file(s), auto
+  v tibco-activematrix-businessworks@6.13.0 10552 file(s), flare, 3 root(s)
+  v tibco-activematrix-businessworks@6.12.0 10901 file(s), flare, 3 root(s)
+  v tibco-activematrix-businessworks@5.16.1 3280 file(s), flare, 2 root(s)
+  v tibco-businessworks-enterprise@3.12.0 5 file(s), auto
+  v tibco-businessworks-enterprise@3.11.0 5 file(s), auto
+  v tibco-businessworks-enterprise@3.10.0 5 file(s), auto
+  v tibco-integration@3.16.0 4 file(s), auto
+                Extract                
++-------------------------------------+
+| Outcome                  | Versions |
+|--------------------------+----------|
+| Extracted                |        8 |
+| Already current          |        0 |
+| Measured from cache      |        0 |
+| No package               |        2 |
+| Refused (unsafe archive) |        0 |
+| Failed                   |        0 |
++-------------------------------------+
+24754 file(s) written.
+       Engines       
++-------------------+
+| Engine | Versions |
+|--------+----------|
+| auto   |        5 |
+| flare  |        3 |
++-------------------+
+? 
+premium-subscription-for-tibco-businessworks-container-edition-and-plug-ins-for
+-aws-marketplace@2.3.1: engine undetected (`auto`)
+? tibco-businessworks-enterprise@3.12.0: engine undetected (`auto`)
+? tibco-businessworks-enterprise@3.11.0: engine undetected (`auto`)
+? tibco-businessworks-enterprise@3.10.0: engine undetected (`auto`)
+? tibco-integration@3.16.0: engine undetected (`auto`)
+CSH: 8 source(s), 654 identifier(s).
+                     Assets                      
++-----------------------------------------------+
+| Category | Destination     | Files |     Size |
+|----------+-----------------+-------+----------|
+| topic    | output-root     |  6354 | 134.3 MB |
+| image    | output-root     | 10568 | 535.6 MB |
+| skin     | output-root     |  7603 | 316.9 MB |
+| other    | output-root     |   137 |   7.7 MB |
+| document | document-router |    92 | 389.5 MB |
++-----------------------------------------------+
+! tibco-businessworks-container-edition-buildpack-for-pcf@2.2.1: no package at 
+C:\github\docushift-tool\families\en-us-tib-businessworks\downloads\tibco-busin
+essworks-container-edition-buildpack-for-pcf-2.2.1.zip; run `docushift 
+download` first
+! tibco-businessworks-formbuilder@5.3.2: no package at 
+C:\github\docushift-tool\families\en-us-tib-businessworks\downloads\tibco-busin
+essworks-formbuilder-5.3.2.zip; run `docushift download` first
+Recorded 1 note -- `docushift report --run 811`.

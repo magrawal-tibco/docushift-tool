@@ -1,0 +1,195 @@
+Extracting 32 version(s)...
+  v tibco-activematrix-binding-type-for-ejb@3.2.0 673 file(s), webworks, 2 
+root(s)
+  v tibco-activematrix-binding-type-for-ejb@3.1.2 653 file(s), webworks, 2 
+root(s)
+  v tibco-activematrix-binding-type-for-ejb@1.0.0 406 file(s), webworks, 1 
+root(s)
+  v tibco-activematrix-binding-type-for-rest@3.3.0 144 file(s), dita, 1 root(s)
+  v tibco-activematrix-binding-type-for-rest@3.2.0 625 file(s), webworks, 2 
+root(s)
+  v tibco-activematrix-implementation-type-for-microsoft-clr@3.3.0 750 file(s),
+webworks, 2 root(s)
+  v tibco-activematrix-implementation-type-for-microsoft-clr@3.2.0 778 file(s),
+webworks, 2 root(s)
+  v tibco-activematrix-implementation-type-for-microsoft-clr@3.1.2 648 file(s),
+webworks, 2 root(s)
+  v tibco-activematrix-implementation-type-for-scripting-in-ruby@1.0 405 
+file(s), webworks, 1 root(s)
+  v tibco-activematrix-implementation-type-for-wcf-host@1.0 406 file(s), 
+webworks, 1 root(s)
+  v tibco-activematrix-management-agent-for-wcf@1.2.1 949 file(s), webworks, 3 
+root(s)
+  v tibco-activematrix-management-agent-for-wcf@1.2 934 file(s), webworks, 3 
+root(s)
+  v tibco-activematrix-management-agent-for-wcf@1.1 874 file(s), webworks, 3 
+root(s)
+  v tibco-activematrix-management-agent-for-websphere@1.2.1 1302 file(s), 
+webworks, 4 root(s)
+  v tibco-activematrix-management-agent-for-websphere@1.2 721 file(s), 
+webworks, 2 root(s)
+  v tibco-activematrix-management-agent-for-websphere@1.1 873 file(s), 
+webworks, 3 root(s)
+  v tibco-activematrix-runtime-uddi-server@3.1 976 file(s), webworks, 3 root(s)
+  v tibco-activematrix-runtime-uddi-server@3.0.0 1073 file(s), webworks, 3 
+root(s)
+  v tibco-activematrix-service-gateway@1.1 5 file(s), auto
+  v tibco-activematrix-service-grid@3.4.4 4861 file(s), flare, 1 root(s)
+  v tibco-activematrix-service-grid@3.4.3 4861 file(s), flare, 1 root(s)
+  v tibco-activematrix-service-grid-container-edition@1.0.1 875 file(s), flare,
+1 root(s)
+  v tibco-activematrix-service-grid-container-edition@1.0.0 838 file(s), flare,
+1 root(s)
+  v tibco-activematrix-updater-tool-for-java-runtime-environment-jre@1.1.0 409 
+file(s), webworks, 1 root(s)
+  v tibco-activematrix-updater-tool-for-java-runtime-environment-jre@1.0.0 412 
+file(s), webworks, 1 root(s)
+  v tibco-business-studio-activematrix-decisions-add-in@1.4.0 1235 file(s), 
+webworks, 3 root(s)
+  v tibco-business-studio-activematrix-decisions-add-in@1.3.0 1333 file(s), 
+webworks, 3 root(s)
+                Extract                
++-------------------------------------+
+| Outcome                  | Versions |
+|--------------------------+----------|
+| Extracted                |       27 |
+| Already current          |        0 |
+| Measured from cache      |        0 |
+| No package               |        5 |
+| Refused (unsafe archive) |        0 |
+| Failed                   |        0 |
++-------------------------------------+
+28019 file(s) written.
+        Engines        
++---------------------+
+| Engine   | Versions |
+|----------+----------|
+| webworks |       21 |
+| flare    |        4 |
+| auto     |        1 |
+| dita     |        1 |
++---------------------+
+? tibco-activematrix-service-gateway@1.1: engine undetected (`auto`)
+CSH: 52 source(s), 307 identifier(s).
+                        Assets                        
++----------------------------------------------------+
+| Category      | Destination     | Files |     Size |
+|---------------+-----------------+-------+----------|
+| topic         | api-reference   |  1094 |  16.1 MB |
+| image         | api-reference   |    16 |   0.0 MB |
+| other         | api-reference   |    20 |   0.0 MB |
+| topic         | output-root     |  5646 |  98.0 MB |
+| image         | output-root     |  4525 | 200.3 MB |
+| archive       | output-root     |     4 |   3.9 MB |
+| source-format | output-root     |    60 |   6.0 MB |
+| skin          | output-root     | 11799 | 149.6 MB |
+| other         | output-root     |   419 |  18.1 MB |
+| document      | document-router |   168 | 231.8 MB |
+| topic         | unclaimed       |  1158 |   2.6 MB |
+| image         | unclaimed       |  1573 |   0.5 MB |
+| other         | unclaimed       |  1016 |  12.5 MB |
++----------------------------------------------------+
+? tibco-activematrix-binding-type-for-ejb@3.2.0: 157 unclaimed file(s) in html/
+(0.7 MB) -- no destination
+? tibco-activematrix-binding-type-for-ejb@3.1.2: 155 unclaimed file(s) in html/
+(0.7 MB) -- no destination
+? tibco-activematrix-binding-type-for-ejb@1.0.0: 159 unclaimed file(s) in html/
+(0.7 MB) -- no destination
+? tibco-activematrix-binding-type-for-rest@3.2.0: 157 unclaimed file(s) in 
+html/ (0.7 MB) -- no destination
+? tibco-activematrix-implementation-type-for-microsoft-clr@3.3.0: 157 unclaimed
+file(s) in html/ (0.7 MB) -- no destination
+? tibco-activematrix-implementation-type-for-microsoft-clr@3.2.0: 157 unclaimed
+file(s) in html/ (0.7 MB) -- no destination
+? tibco-activematrix-implementation-type-for-microsoft-clr@3.1.2: 155 unclaimed
+file(s) in html/ (0.7 MB) -- no destination
+? tibco-activematrix-implementation-type-for-scripting-in-ruby@1.0: 159 
+unclaimed file(s) in html/ (0.7 MB) -- no destination
+? tibco-activematrix-implementation-type-for-wcf-host@1.0: 159 unclaimed 
+file(s) in html/ (0.7 MB) -- no destination
+? tibco-activematrix-management-agent-for-wcf@1.2.1: 165 unclaimed file(s) in 
+html/ (0.7 MB) -- no destination
+? tibco-activematrix-management-agent-for-wcf@1.2: 155 unclaimed file(s) in 
+html/ (0.7 MB) -- no destination
+? tibco-activematrix-management-agent-for-wcf@1.1: 162 unclaimed file(s) in 
+html/ (0.6 MB) -- no destination
+? tibco-activematrix-management-agent-for-websphere@1.2.1: 165 unclaimed 
+file(s) in html/ (0.7 MB) -- no destination
+? tibco-activematrix-management-agent-for-websphere@1.2: 155 unclaimed file(s) 
+in html/ (0.7 MB) -- no destination
+? tibco-activematrix-management-agent-for-websphere@1.1: 162 unclaimed file(s) 
+in html/ (0.6 MB) -- no destination
+? tibco-activematrix-runtime-uddi-server@3.1: 155 unclaimed file(s) in html/ 
+(0.7 MB) -- no destination
+? tibco-activematrix-runtime-uddi-server@3.0.0: 181 unclaimed file(s) in html/ 
+(0.8 MB) -- no destination
+? tibco-activematrix-updater-tool-for-java-runtime-environment-jre@1.1.0: 161 
+unclaimed file(s) in html/ (0.7 MB) -- no destination
+? tibco-activematrix-updater-tool-for-java-runtime-environment-jre@1.0.0: 162 
+unclaimed file(s) in html/ (0.7 MB) -- no destination
+? tibco-business-studio-activematrix-decisions-add-in@1.4.0: 197 unclaimed 
+file(s) in Functions/ (0.5 MB) -- no destination
+? tibco-business-studio-activematrix-decisions-add-in@1.4.0: 157 unclaimed 
+file(s) in html/ (0.7 MB) -- no destination
+? tibco-business-studio-activematrix-decisions-add-in@1.3.0: 197 unclaimed 
+file(s) in Functions/ (0.5 MB) -- no destination
+? tibco-business-studio-activematrix-decisions-add-in@1.3.0: 158 unclaimed 
+file(s) in html/ (0.7 MB) -- no destination
+? tibco-activematrix-service-grid@3.4.4: 
+tibco-activematrix-service-grid-3-4-4/html/Admin-Web-Service-API-Reference/ 59 
+file(s), no known generator marker
+? tibco-activematrix-service-grid@3.4.4: 
+tibco-activematrix-service-grid-3-4-4/html/Mediation-Java-API-Reference/ 516 
+file(s), no known generator marker
+? tibco-activematrix-service-grid@3.4.4: 
+tibco-activematrix-service-grid-3-4-4/html/Admin-Web-Service-API-Reference/admi
+n_ws_api/ 57 file(s), no known generator marker
+? tibco-activematrix-service-grid@3.4.4: 
+tibco-activematrix-service-grid-3-4-4/html/Mediation-Java-API-Reference/mediati
+on_api/ 514 file(s), no known generator marker
+? tibco-activematrix-service-grid@3.4.4: 
+tibco-activematrix-service-grid-3-4-4/html/Mediation-Java-API-Reference/mediati
+on_api/javadoc/ 514 file(s), no known generator marker
+? tibco-activematrix-service-grid@3.4.4: 
+tibco-activematrix-service-grid-3-4-4/html/Admin-Web-Service-API-Reference/admi
+n_ws_api/administrator/ws-api/ 57 file(s), no known generator marker
+? tibco-activematrix-service-grid@3.4.3: 
+tibco-activematrix-service-grid-3-4-3/html/Admin-Web-Service-API-Reference/ 59 
+file(s), no known generator marker
+? tibco-activematrix-service-grid@3.4.3: 
+tibco-activematrix-service-grid-3-4-3/html/Mediation-Java-API-Reference/ 516 
+file(s), no known generator marker
+? tibco-activematrix-service-grid@3.4.3: 
+tibco-activematrix-service-grid-3-4-3/html/Admin-Web-Service-API-Reference/admi
+n_ws_api/ 57 file(s), no known generator marker
+? tibco-activematrix-service-grid@3.4.3: 
+tibco-activematrix-service-grid-3-4-3/html/Mediation-Java-API-Reference/mediati
+on_api/ 514 file(s), no known generator marker
+? tibco-activematrix-service-grid@3.4.3: 
+tibco-activematrix-service-grid-3-4-3/html/Mediation-Java-API-Reference/mediati
+on_api/javadoc/ 514 file(s), no known generator marker
+? tibco-activematrix-service-grid@3.4.3: 
+tibco-activematrix-service-grid-3-4-3/html/Admin-Web-Service-API-Reference/admi
+n_ws_api/administrator/ws-api/ 57 file(s), no known generator marker
+! tibco-activematrix-implementation-type-for-c++@3.2.0: no package at 
+C:\github\docushift-tool\families\en-us-tib-activematrix\downloads\tibco-active
+matrix-implementation-type-for-c++-3.2.0.zip; run `docushift download` first
+! tibco-activematrix-implementation-type-for-c++@3.1.2: no package at 
+C:\github\docushift-tool\families\en-us-tib-activematrix\downloads\tibco-active
+matrix-implementation-type-for-c++-3.1.2.zip; run `docushift download` first
+! tibco-activematrix-implementation-type-for-c++@3.0.1: no package at 
+C:\github\docushift-tool\families\en-us-tib-activematrix\downloads\tibco-active
+matrix-implementation-type-for-c++-3.0.1.zip; run `docushift download` first
+! tibco-activematrix-implementation-type-for-c++@3.0.0: no package at 
+C:\github\docushift-tool\families\en-us-tib-activematrix\downloads\tibco-active
+matrix-implementation-type-for-c++-3.0.0.zip; run `docushift download` first
+! tibco-activematrix-implementation-type-for-c++@1.1.0: no package at 
+C:\github\docushift-tool\families\en-us-tib-activematrix\downloads\tibco-active
+matrix-implementation-type-for-c++-1.1.0.zip; run `docushift download` first
+! tibco-activematrix-service-grid@3.4.4: partial walk: a directory could not be
+read, so the inventory columns are blank
+! tibco-activematrix-service-grid@3.4.3: partial walk: a directory could not be
+read, so the inventory columns are blank
+! tibco-business-studio-activematrix-decisions-add-in@1.3.0: partial walk: a 
+directory could not be read, so the inventory columns are blank
+Recorded 3 warnings, 22 notes -- `docushift report --run 469`.

@@ -1,0 +1,65 @@
+Converting 89 version(s)...
+  v ibi-ai-assistant@9.3.8 24 topic(s), 18 asset(s), 1 unit(s), 24 nav node(s) 
+-> 45 file(s)
+  v ibi-open-data-hub-for-mainframe-connectors@1.3.8 48 topic(s), 8 asset(s), 1
+unit(s), 55 nav node(s), 5 generated -> 64 file(s)
+  v ibi-open-data-hub-for-mainframe-connectors@1.3.7 218 topic(s), 122 
+asset(s), 1 unit(s), 220 nav node(s), 2 generated -> 345 file(s)
+  v ibi-open-data-hub-for-mainframe-connectors@1.3.6 218 topic(s), 122 
+asset(s), 1 unit(s), 220 nav node(s), 2 generated -> 345 file(s)
+  v ibi-open-data-hub-for-mainframe-connectors@1.3.5 224 topic(s), 122 
+asset(s), 1 unit(s), 226 nav node(s), 2 generated -> 351 file(s)
+  v ibi-open-data-hub-for-mainframe-connectors@1.3.4 238 topic(s), 127 
+asset(s), 1 unit(s), 240 nav node(s), 2 generated -> 370 file(s)
+  v ibi-open-data-hub-for-mainframe-connectors@1.0.9 238 topic(s), 127 
+asset(s), 1 unit(s), 240 nav node(s), 2 generated -> 370 file(s)
+  v ibi-open-data-hub-for-mainframe-connectors@1.0.8 238 topic(s), 127 
+asset(s), 1 unit(s), 240 nav node(s), 2 generated -> 370 file(s)
+  v ibi-open-data-hub-for-mainframe-connectors@1.0.7 238 topic(s), 127 
+asset(s), 1 unit(s), 240 nav node(s), 2 generated -> 370 file(s)
+  v ibi-open-data-hub-for-mainframe-connectors@1.0.5 238 topic(s), 104 
+asset(s), 1 unit(s), 240 nav node(s), 2 generated -> 347 file(s)
+  v ibi-open-data-hub-for-mainframe-connectors@1.0.4 189 topic(s), 82 asset(s),
+1 unit(s), 191 nav node(s), 2 generated -> 276 file(s)
+  v ibi-open-data-hub-for-mainframe-connectors@1.0.3 189 topic(s), 82 asset(s),
+1 unit(s), 191 nav node(s), 2 generated -> 276 file(s)
+  v ibi-webfocus-app-studio@9.3.8 323 topic(s), 735 asset(s), 2 unit(s), 324 
+nav node(s), 3 generated -> 1063 file(s)
+  v ibi-webfocus-app-studio@9.3.7 262 topic(s), 726 asset(s), 1 unit(s), 263 
+nav node(s), 1 generated -> 991 file(s)
+  v ibi-webfocus-app-studio@9.3.6 302 topic(s), 812 asset(s), 1 unit(s), 303 
+nav node(s), 1 generated -> 1117 file(s)
+  v ibi-webfocus-app-studio@9.3.5 303 topic(s), 836 asset(s), 1 unit(s), 304 
+nav node(s), 1 generated -> 1142 file(s)
+C:\github\docushift-tool\src\docushift\transforms\markdown.py:112: XMLParsedAsHTMLWarning: It looks like you're using an HTML parser to parse an XML document.
+
+Assuming this really is an XML document, what you're doing might work, but you should know that using an XML parser will be more reliable. To parse this document as XML, make sure you have the Python package 'lxml' installed, and pass the keyword argument `features="xml"` into the BeautifulSoup constructor.
+
+If you want or need to use an HTML parser on this document, you can make this warning go away by filtering it. To do that, run this code before calling the BeautifulSoup constructor:
+
+    from bs4 import XMLParsedAsHTMLWarning
+    import warnings
+
+    warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+  return BeautifulSoup(_CDATA.sub(_unwrap_cdata, text), PARSER)
+  v ibi-webfocus-app-studio@9.3.4 296 topic(s), 821 asset(s), 1 unit(s), 302 
+nav node(s), 6 generated -> 1126 file(s)
+  v ibi-webfocus-app-studio@9.3.3 293 topic(s), 816 asset(s), 1 unit(s), 299 
+nav node(s), 6 generated -> 1118 file(s)
+  v ibi-webfocus-app-studio@9.3.2 297 topic(s), 827 asset(s), 1 unit(s), 303 
+nav node(s), 6 generated -> 1133 file(s)
+  v ibi-webfocus-app-studio@9.3.1 297 topic(s), 869 asset(s), 1 unit(s), 303 
+nav node(s), 6 generated -> 1175 file(s)
+  v ibi-webfocus-app-studio@9.3.0 298 topic(s), 877 asset(s), 1 unit(s), 304 
+nav node(s), 6 generated -> 1184 file(s)
+  v ibi-webfocus-client@9.3.8 2961 topic(s), 4852 asset(s), 2 unit(s), 3029 nav
+node(s), 1 generated -> 7817 file(s)
+  v ibi-webfocus-client@9.3.7 2882 topic(s), 5101 asset(s), 2 unit(s), 2919 nav
+node(s), 1 generated -> 7987 file(s)
+  v ibi-webfocus-client@9.3.6 2824 topic(s), 4969 asset(s), 2 unit(s), 2860 nav
+node(s), 1 generated -> 7797 file(s)
+  v ibi-webfocus-client@9.3.5 2829 topic(s), 5149 asset(s), 2 unit(s), 2866 nav
+node(s), 1 generated -> 7982 file(s)
+  v ibi-webfocus-client@9.3.4 2743 topic(s), 5199 asset(s), 1 unit(s), 2803 nav
+node(s), 24 generated -> 7970 file(s)

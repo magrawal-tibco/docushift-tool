@@ -1,0 +1,29 @@
+Downloading 13 version(s) with 4 worker(s)...
+  v tibco-enterprise-fulfillment-orchestration-suite@1.1.0 0.2 MiB
+  v tibco-fulfillment-provisioning@3.10.0 28.6 MiB
+  v tibco-fulfillment-provisioning@3.9.0 16.7 MiB
+  v tibco-offer-and-price-engine@6.0.0 22.5 MiB
+  v tibco-order-management@6.1.0 110.4 MiB
+  v tibco-order-management@6.0.1 105.2 MiB
+  v tibco-order-management@6.0.0 84.9 MiB
+  v tibco-order-management@5.0.1 38.9 MiB
+  v tibco-product-and-service-catalog@5.1.0 87.0 MiB
+  v tibco-product-and-service-catalog-powered-by-tibco-ebx@1.1.0 13.0 MiB
+  v tibco-product-and-service-catalog-powered-by-tibco-ebx@1.0.0 13.0 MiB
+  v tibco-product-and-service-inventory@2.1.0 18.0 MiB
+  x tibco-product-and-service-inventory-2-1-0@2.1.0
+           Download            
++-----------------------------+
+| Outcome          | Versions |
+|------------------+----------|
+| Downloaded       |       12 |
+| Already current  |        0 |
+| Skipped (manual) |        0 |
+| No ZIP endpoint  |        0 |
+| Failed           |        1 |
++-----------------------------+
+538.5 MiB written.
+! tibco-product-and-service-inventory-2-1-0@2.1.0: NotAPackage: 
+https://docs.tibco.com/pub/fsi/2.1.0/tibco-product-and-service-inventory-2-1-0-
+2-1-0_documentation.zip did not return a readable ZIP (most often an error or 
+sign-in page served as HTTP 200)

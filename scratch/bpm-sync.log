@@ -1,0 +1,156 @@
+Syncing 19 version(s) into ..\tibco-docs-aem...
+  v tibco-activematrix-bpm@4.3.0 -> api-references/4-3-0 3604 file(s), 318.0 MB
+  x tibco-activematrix-bpm@4.3.0 (online-help)
+  v tibco-activematrix-bpm@4.3.0 -> user-guides/4-3-0 40 file(s), 111.9 MB
+  v tibco-activematrix-bpm@4.3.0 -> release-information/4-3-0 2 file(s), 0.9 MB
+  v tibco-activematrix-bpm@4.3.0 -> reference-documents/4-3-0 6 file(s), 6.2 MB
+  x tibco-activematrix-service-grid@3.4.4 (api-references)
+  x tibco-activematrix-service-grid@3.4.4 (online-help)
+  x tibco-activematrix-service-grid@3.4.3 (api-references)
+  x tibco-activematrix-service-grid@3.4.3 (online-help)
+  v tibco-bpm-enterprise@5.7.0 -> online-help/5-7-0 375 file(s), 7.4 MB
+  v tibco-bpm-enterprise@5.7.0 -> user-guides/5-7-0 7 file(s), 19.2 MB
+  v tibco-bpm-enterprise@5.7.0 -> release-information/5-7-0 2 file(s), 1.4 MB
+  v tibco-bpm-enterprise@5.7.0 -> reference-documents/5-7-0 2 file(s), 4.7 MB
+  v tibco-bpm-enterprise@5.6.1 -> online-help/5-6-1 370 file(s), 7.2 MB
+  v tibco-bpm-enterprise@5.6.1 -> user-guides/5-6-1 7 file(s), 17.5 MB
+  v tibco-bpm-enterprise@5.6.1 -> release-information/5-6-1 2 file(s), 1.4 MB
+  v tibco-bpm-enterprise@5.6.1 -> reference-documents/5-6-1 4 file(s), 4.0 MB
+  v tibco-bpm-enterprise@5.6.0 -> online-help/5-6-0 368 file(s), 7.2 MB
+  v tibco-bpm-enterprise@5.6.0 -> user-guides/5-6-0 7 file(s), 17.4 MB
+  v tibco-bpm-enterprise@5.6.0 -> release-information/5-6-0 2 file(s), 1.4 MB
+  v tibco-bpm-enterprise@5.6.0 -> reference-documents/5-6-0 4 file(s), 4.0 MB
+  v tibco-bpm-enterprise@4.3.5 -> online-help/4-3-5 2664 file(s), 48.7 MB
+  v tibco-bpm-enterprise@4.3.5 -> user-guides/4-3-5 24 file(s), 90.8 MB
+  v tibco-bpm-enterprise@4.3.5 -> release-information/4-3-5 2 file(s), 1.5 MB
+  v tibco-bpm-enterprise@4.3.5 -> reference-documents/4-3-5 2 file(s), 5.9 MB
+  v tibco-bpm-suite@4.3.2 -> release-information/4-3-2 1 file(s), 0.0 MB
+  v tibco-bpm-suite@4.3.2 -> reference-documents/4-3-2 3 file(s), 0.2 MB
+  v tibco-bpm-suite@4.3.1 -> release-information/4-3-1 1 file(s), 0.0 MB
+  v tibco-bpm-suite@4.3.1 -> reference-documents/4-3-1 3 file(s), 0.1 MB
+  v tibco-bpm-suite@4.3.0 -> release-information/4-3-0 1 file(s), 0.0 MB
+  v tibco-bpm-suite@4.3.0 -> reference-documents/4-3-0 3 file(s), 0.2 MB
+  v tibco-bpm-suite@4.2.0 -> release-information/4-2-0 1 file(s), 0.0 MB
+  v tibco-bpm-suite@4.2.0 -> reference-documents/4-2-0 2 file(s), 0.1 MB
+  v tibco-business-studio-analyst-edition@4.3.0 -> user-guides/4-3-0 1 file(s),
+0.4 MB
+  v tibco-business-studio-analyst-edition@4.3.0 -> release-information/4-3-0 2 
+file(s), 0.5 MB
+  v tibco-business-studio-analyst-edition@4.3.0 -> reference-documents/4-3-0 3 
+file(s), 1.7 MB
+  v tibco-business-studio-analyst-edition@4.2.0 -> user-guides/4-2-0 1 file(s),
+0.3 MB
+  v tibco-business-studio-analyst-edition@4.2.0 -> release-information/4-2-0 2 
+file(s), 0.4 MB
+  v tibco-business-studio-analyst-edition@4.2.0 -> reference-documents/4-2-0 3 
+file(s), 1.4 MB
+  x tibco-business-studio-bpm-edition@5.7.0 (online-help)
+  v tibco-business-studio-bpm-edition@5.7.0 -> user-guides/5-7-0 5 file(s), 
+23.1 MB
+  v tibco-business-studio-bpm-edition@5.7.0 -> release-information/5-7-0 2 
+file(s), 1.4 MB
+  v tibco-business-studio-bpm-edition@5.7.0 -> reference-documents/5-7-0 3 
+file(s), 1.7 MB
+  x tibco-business-studio-bpm-edition@5.6.1 (online-help)
+  v tibco-business-studio-bpm-edition@5.6.1 -> user-guides/5-6-1 5 file(s), 
+22.7 MB
+  v tibco-business-studio-bpm-edition@5.6.1 -> release-information/5-6-1 2 
+file(s), 1.4 MB
+  v tibco-business-studio-bpm-edition@5.6.1 -> reference-documents/5-6-1 3 
+file(s), 1.5 MB
+  x tibco-business-studio-bpm-edition@5.6.0 (online-help)
+  v tibco-business-studio-bpm-edition@5.6.0 -> user-guides/5-6-0 5 file(s), 
+22.7 MB
+  v tibco-business-studio-bpm-edition@5.6.0 -> release-information/5-6-0 2 
+file(s), 1.4 MB
+  v tibco-business-studio-bpm-edition@5.6.0 -> reference-documents/5-6-0 2 
+file(s), 1.4 MB
+  v tibco-business-studio-bpm-edition@4.3.5 -> online-help/4-3-5 1000 file(s), 
+13.4 MB
+  v tibco-business-studio-bpm-edition@4.3.5 -> user-guides/4-3-5 10 file(s), 
+31.4 MB
+  v tibco-business-studio-bpm-edition@4.3.5 -> release-information/4-3-5 2 
+file(s), 1.4 MB
+  v tibco-business-studio-bpm-edition@4.3.5 -> reference-documents/4-3-5 2 
+file(s), 3.3 MB
+                                     Sync                                      
++-----------------------------------------------------------------------------+
+| Outcome | Rows | online… | user-g… | releas… | refere… | api-ref… | archiv… |
+|---------+------+---------+---------+---------+---------+----------+---------|
+| Synced  |   47 |       5 |      11 |      15 |      15 |        1 |       0 |
+| Already |    8 |       0 |       2 |       0 |       0 |        0 |       6 |
+| current |      |         |         |         |         |          |         |
+| No      |   10 |       8 |       0 |       0 |       0 |        0 |       0 |
+| source  |      |         |         |         |         |          |         |
+| tree    |      |         |         |         |         |          |         |
+| Skipped |    0 |       0 |       0 |       0 |       0 |        0 |       0 |
+| Failed  |    8 |       6 |       0 |       0 |       0 |        2 |       0 |
++-----------------------------------------------------------------------------+
+8564 file(s), 808.9 MB copied.
+6 product metadata.yml, 17 version.yml written.
+Published merged (Stage 6b): tibco-bpm-enterprise, 
+tibco-business-studio-bpm-edition.
+14809 redirect(s) in 4 published map(s), tree-rooted (no publish_base_url set).
+! tibco-activematrix-bpm@4.2.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-bpm\tibco-activematrix-bpm\4.2.0; run
+`docushift convert` first
+! tibco-activematrix-bpm@4.2.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-tib-bpm\extracted\tibco-activematrix-bp
+m\4.2.0; run `docushift extract` first
+! tibco-bpm-suite@4.3.2: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-bpm\tibco-bpm-suite\4.3.2; run 
+`docushift convert` first
+! tibco-bpm-suite@4.3.1: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-bpm\tibco-bpm-suite\4.3.1; run 
+`docushift convert` first
+! tibco-bpm-suite@4.3.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-bpm\tibco-bpm-suite\4.3.0; run 
+`docushift convert` first
+! tibco-bpm-suite@4.2.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-bpm\tibco-bpm-suite\4.2.0; run 
+`docushift convert` first
+! tibco-business-studio-analyst-edition@4.3.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-bpm\tibco-business-studio-analyst-edi
+tion\4.3.0; run `docushift convert` first
+! tibco-business-studio-analyst-edition@4.2.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-bpm\tibco-business-studio-analyst-edi
+tion\4.2.0; run `docushift convert` first
+! tibco-business-studio-community-edition@4.2.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-bpm\tibco-business-studio-community-e
+dition\4.2.0; run `docushift convert` first
+! tibco-business-studio-community-edition@4.2.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-tib-bpm\extracted\tibco-business-studio
+-community-edition\4.2.0; run `docushift extract` first
+x tibco-activematrix-bpm@4.3.0: online-help: publishing 
+tibco-activematrix-bpm-tutorials/accessing-external-data-and-services/how-to-ca
+ll-a-bpm-runtime-service-from-a-process/deploying-testing-calllookupuser-applic
+ation.md would need 261 characters, over the 260 the published tree allows
+x tibco-activematrix-service-grid@3.4.4: 
+mediation-java-api-reference-mediation_api-javadoc-com.tibco.amf.platform.runti
+me.extension: publishing AttributedURI.html would need 276 characters, over the
+260 the published tree allows
+x tibco-activematrix-service-grid@3.4.4: online-help: publishing 
+spring-development-guide/spring-component-implementations/context-parameters/wo
+rking-with-context-parameters/retrieving-a-context-parameter-from-a-request.md 
+would need 261 characters, over the 260 the published tree allows
+x tibco-activematrix-service-grid@3.4.3: 
+mediation-java-api-reference-mediation_api-javadoc-com.tibco.amf.platform.runti
+me.extension: publishing AttributedURI.html would need 276 characters, over the
+260 the published tree allows
+x tibco-activematrix-service-grid@3.4.3: online-help: publishing 
+spring-development-guide/spring-component-implementations/context-parameters/wo
+rking-with-context-parameters/retrieving-a-context-parameter-from-a-request.md 
+would need 261 characters, over the 260 the published tree allows
+x tibco-business-studio-bpm-edition@5.7.0: online-help: publishing 
+application-designers-guide/using-data/using-case-data/using-a-case-data-model-
+in-a-business-process/searching-for-and-reading-case-objects/case-data-query-la
+nguage-dql.md would need 277 characters, over the 260 the published tree allows
+x tibco-business-studio-bpm-edition@5.6.1: online-help: publishing 
+application-designers-guide/using-data/using-case-data/using-a-case-data-model-
+in-a-business-process/searching-for-and-reading-case-objects/case-data-query-la
+nguage-dql.md would need 277 characters, over the 260 the published tree allows
+x tibco-business-studio-bpm-edition@5.6.0: online-help: publishing 
+application-designers-guide/using-data/using-case-data/using-a-case-data-model-
+in-a-business-process/searching-for-and-reading-case-objects/case-data-query-la
+nguage-dql.md would need 277 characters, over the 260 the published tree allows
+Findings: 8 errors, 1 warning.

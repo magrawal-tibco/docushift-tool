@@ -1,0 +1,22 @@
+Syncing 2 version(s) into C:\github\tibco-docs-aem...
+  v tibco-activematrix-bpm@4.3.0 -> online-help/4-3-0 5269 file(s), 134.7 MB
+  v tibco-activematrix-bpm@4.2.0 -> online-help/4-2-0 4687 file(s), 89.2 MB
+                                     Sync                                      
++-----------------------------------------------------------------------------+
+| Outcome | Rows | onlineà | user-gà | releasà | refereà | api-refà | archivà |
+|---------+------+---------+---------+---------+---------+----------+---------|
+| Synced  |    2 |       2 |       0 |       0 |       0 |        0 |       0 |
+| Already |    9 |       0 |       2 |       2 |       2 |        2 |       1 |
+| current |      |         |         |         |         |          |         |
+| Maps    |    0 |       0 |       0 |       0 |       0 |        0 |       0 |
+| refresà |      |         |         |         |         |          |         |
+| No      |    0 |       0 |       0 |       0 |       0 |        0 |       0 |
+| source  |      |         |         |         |         |          |         |
+| tree    |      |         |         |         |         |          |         |
+| Skipped |    0 |       0 |       0 |       0 |       0 |        0 |       0 |
+| Failed  |    0 |       0 |       0 |       0 |       0 |        0 |       0 |
++-----------------------------------------------------------------------------+
+9956 file(s), 223.9 MB copied.
+1 product metadata.yml, 4 version.yml written.
+Published merged (Stage 6b): tibco-activematrix-bpm.
+15410 redirect(s) in 1 published map(s), tree-rooted (no publish_base_url set).

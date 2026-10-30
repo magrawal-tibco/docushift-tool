@@ -1,0 +1,53 @@
+Reframing 25 version(s)...
+  v tibco-gemini-powered-by-apache-cassandra@5.0.2 19 topic(s) -> 13 page(s)
+  v 
+tibco-messaging-eclipse-mosquitto-distribution-bridge-enterprise-edition@2.0.7 
+28 topic(s) -> 9 page(s)
+  v 
+tibco-messaging-eclipse-mosquitto-distribution-core-enterprise-edition@2.0.7 28
+topic(s) -> 9 page(s)
+  x tibco-messaging-manager@4.0.0
+  x tibco-messaging-manager@3.1.1
+  v tibco-messaging-schema-repository-for-apache-kafka-enterprise-edition@2.1.0
+28 topic(s) -> 14 page(s)
+  v tibco-messaging-schema-repository-for-apache-kafka-enterprise-edition@2.0.0
+31 topic(s) -> 22 page(s)
+  v tibco-rendezvous@9.0.0 1734 topic(s) -> 223 page(s)
+  v tibco-rendezvous@8.8.1 1714 topic(s) -> 242 page(s)
+  v tibco-rendezvous@8.8.0 1714 topic(s) -> 246 page(s)
+  v tibco-rendezvous-network-service@2.2.0 34 topic(s) -> 7 page(s)
+  v tibco-rendezvous-network-service@2.1.0 31 topic(s) -> 8 page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |       10 |
+| Already current             |        0 |
+| Not Flare or DITA (skipped) |       13 |
+| No converted tree           |        0 |
+| Failed                      |        2 |
++----------------------------------------+
+5543 topic(s) read into 864 page(s).
+Files: 9576 source doc -> 5190 converted -> 793 merged (84.7% fewer at the 
+merge, 91.7% end to end); 1280 file(s) standing in the measured merged tree(s).
+121 page(s) queued for editorial review:
+  tibco-gemini-powered-by-apache-cassandra@5.0.2: 1 of 13 -- see 
+review-queue.csv
+  tibco-messaging-eclipse-mosquitto-distribution-bridge-enterprise-edition@2.0.
+7: 4 of 9 -- see review-queue.csv
+  tibco-messaging-eclipse-mosquitto-distribution-core-enterprise-edition@2.0.7:
+4 of 9 -- see review-queue.csv
+  tibco-messaging-schema-repository-for-apache-kafka-enterprise-edition@2.1.0: 
+3 of 14 -- see review-queue.csv
+  tibco-messaging-schema-repository-for-apache-kafka-enterprise-edition@2.0.0: 
+6 of 22 -- see review-queue.csv
+  tibco-rendezvous@9.0.0: 23 of 223 -- see review-queue.csv
+  tibco-rendezvous@8.8.1: 36 of 242 -- see review-queue.csv
+  tibco-rendezvous@8.8.0: 40 of 246 -- see review-queue.csv
+  tibco-rendezvous-network-service@2.2.0: 3 of 7 -- see review-queue.csv
+  tibco-rendezvous-network-service@2.1.0: 1 of 8 -- see review-queue.csv
+x tibco-messaging-manager@4.0.0: 1 acceptance check(s) failed: anchors: 
+users-guide/getting-started.md repeats 
+x tibco-messaging-manager@3.1.1: 1 acceptance check(s) failed: anchors: 
+users-guide/getting-started.md repeats 
+Findings: 2 errors, 14 warnings, 18 notes.

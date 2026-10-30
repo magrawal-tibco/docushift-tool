@@ -1,0 +1,38 @@
+Converting 4 version(s)...
+  v tibco-businessevents-enterprise-edition@6.4.0 1394 topic(s), 324 asset(s), 
+1 unit(s), 1408 nav node(s), 14 generated -> 1735 file(s)
+  v tibco-businessevents-enterprise-edition@6.3.2 1371 topic(s), 329 asset(s), 
+1 unit(s), 1385 nav node(s), 14 generated -> 1716 file(s)
+  v tibco-businessevents-enterprise-edition@6.3.1 1362 topic(s), 327 asset(s), 
+1 unit(s), 1375 nav node(s), 13 generated -> 1705 file(s)
+  v tibco-businessevents-enterprise-edition@6.3.0 1356 topic(s), 327 asset(s), 
+1 unit(s), 1370 nav node(s), 14 generated -> 1699 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        4 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+5483 topic(s), 1307 asset(s) written.
+6855 file(s) standing in the measured output tree(s).
+tibco-businessevents-enterprise-edition@6.4.0: 363 resolved, 0 skin, 0 escaped,
+0 dangling, 0 case-mismatch, 392 orphan (18.1 MB)
+tibco-businessevents-enterprise-edition@6.4.0: skipped 1533 api-reference, 4 
+generated-directory, 16 runtime-stub
+tibco-businessevents-enterprise-edition@6.3.2: 364 resolved, 0 skin, 0 escaped,
+0 dangling, 0 case-mismatch, 376 orphan (12.0 MB)
+tibco-businessevents-enterprise-edition@6.3.2: skipped 1533 api-reference, 4 
+generated-directory, 16 runtime-stub
+tibco-businessevents-enterprise-edition@6.3.1: 362 resolved, 0 skin, 0 escaped,
+0 dangling, 0 case-mismatch, 373 orphan (10.9 MB)
+tibco-businessevents-enterprise-edition@6.3.1: skipped 1533 api-reference, 4 
+generated-directory, 16 runtime-stub
+tibco-businessevents-enterprise-edition@6.3.0: 362 resolved, 0 skin, 1 escaped,
+0 dangling, 0 case-mismatch, 367 orphan (10.6 MB)
+tibco-businessevents-enterprise-edition@6.3.0: skipped 1491 api-reference, 3 
+generated-directory, 15 runtime-stub
+Findings: 11 warnings, 23 notes.

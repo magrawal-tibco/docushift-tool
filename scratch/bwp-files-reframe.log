@@ -1,0 +1,21 @@
+Reframing 1 version(s)...
+  v 
+tibco-activematrix-businessworks-plug-in-for-files-for-unix-and-windows@8.3.0 
+102 topic(s) -> 21 page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |        1 |
+| Already current             |        0 |
+| Not Flare or DITA (skipped) |        0 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+102 topic(s) read into 21 page(s).
+Files: 160 source doc -> 103 converted -> 21 merged (79.6% fewer at the merge, 
+86.9% end to end); 56 file(s) standing in the measured merged tree(s).
+10 page(s) queued for editorial review:
+  tibco-activematrix-businessworks-plug-in-for-files-for-unix-and-windows@8.3.0
+: 10 of 21 -- see review-queue.csv
+Findings: 1 warning, 2 notes.

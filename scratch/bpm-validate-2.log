@@ -1,0 +1,33 @@
+== tibco-activematrix-bpm
+METADATA_INVALID 1 row(s), 1 occurrence(s)
+Findings: 1 error.
+exit 1
+== tibco-activematrix-service-grid
+METADATA_INVALID 1 row(s), 1 occurrence(s)
+Findings: 1 error.
+exit 1
+== tibco-bpm-enterprise
+METADATA_INVALID 1 row(s), 1 occurrence(s)
+ANCHOR_MISSING 63 row(s), 63 occurrence(s)
+ANCHOR_WRONG_HEADING 2 row(s), 2 occurrence(s)
+REDIRECT_SHADOWED 75 row(s), 75 occurrence(s)
+Findings: 1 error, 140 warnings.
+exit 1
+== tibco-bpm-suite
+METADATA_INVALID 1 row(s), 1 occurrence(s)
+Findings: 1 error.
+exit 1
+== tibco-business-studio-analyst-edition
+METADATA_INVALID 1 row(s), 1 occurrence(s)
+Findings: 1 error.
+exit 1
+== tibco-business-studio-bpm-edition
+METADATA_INVALID 1 row(s), 1 occurrence(s)
+ANCHOR_MISSING 2 row(s), 2 occurrence(s)
+REDIRECT_SHADOWED 17 row(s), 17 occurrence(s)
+LINK_TO_UNFILED 1 row(s), 1 occurrence(s)
+Findings: 1 error, 19 warnings, 1 note.
+exit 1
+== tibco-business-studio-community-edition
+Findings: none.
+exit 0

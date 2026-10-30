@@ -1,0 +1,93 @@
+Syncing 11 version(s) into ..\tibco-docs-aem...
+  v ibi-mdm-add-on-for-global-data-synchronization@4.0.0 -> online-help/4-0-0 
+116 file(s), 1.8 MB
+  v ibi-mdm-add-on-for-global-data-synchronization@4.0.0 -> user-guides/4-0-0 2
+file(s), 2.1 MB
+  v ibi-mdm-add-on-for-global-data-synchronization@4.0.0 -> 
+release-information/4-0-0 2 file(s), 0.1 MB
+  v ibi-mdm-add-on-for-global-data-synchronization@4.0.0 -> 
+reference-documents/4-0-0 3 file(s), 0.8 MB
+  v tibco-enterprise-mdm@1.0.0 -> release-information/1-0-0 1 file(s), 0.0 MB
+  v tibco-enterprise-mdm@1.0.0 -> reference-documents/1-0-0 4 file(s), 0.1 MB
+  v tibco-mdm@11.1.0 -> api-references/11-1-0 165 file(s), 1.9 MB
+  x tibco-mdm@11.1.0 (online-help)
+  v tibco-mdm@11.1.0 -> user-guides/11-1-0 12 file(s), 47.8 MB
+  v tibco-mdm@11.1.0 -> release-information/11-1-0 2 file(s), 1.5 MB
+  v tibco-mdm@11.1.0 -> reference-documents/11-1-0 3 file(s), 3.4 MB
+  v tibco-mdm@11.0.0 -> api-references/11-0-0 165 file(s), 1.9 MB
+  x tibco-mdm@11.0.0 (online-help)
+  v tibco-mdm@11.0.0 -> user-guides/11-0-0 12 file(s), 47.4 MB
+  v tibco-mdm@11.0.0 -> release-information/11-0-0 2 file(s), 1.5 MB
+  v tibco-mdm@11.0.0 -> reference-documents/11-0-0 2 file(s), 1.8 MB
+  v tibco-mdm@10.0.0 -> api-references/10-0-0 165 file(s), 1.9 MB
+  x tibco-mdm@10.0.0 (online-help)
+  v tibco-mdm@10.0.0 -> user-guides/10-0-0 12 file(s), 37.1 MB
+  v tibco-mdm@10.0.0 -> release-information/10-0-0 2 file(s), 0.2 MB
+  v tibco-mdm@10.0.0 -> reference-documents/10-0-0 3 file(s), 2.1 MB
+  v tibco-mdm@9.3.2 -> api-references/9-3-2 165 file(s), 1.9 MB
+  x tibco-mdm@9.3.2 (online-help)
+  v tibco-mdm@9.3.2 -> user-guides/9-3-2 12 file(s), 62.6 MB
+  v tibco-mdm@9.3.2 -> release-information/9-3-2 2 file(s), 1.5 MB
+  v tibco-mdm@9.3.2 -> reference-documents/9-3-2 4 file(s), 3.3 MB
+  v tibco-mdm-studio@6.1.1 -> online-help/6-1-1 3434 file(s), 63.2 MB
+  v tibco-mdm-studio@6.1.1 -> user-guides/6-1-1 9 file(s), 38.7 MB
+  v tibco-mdm-studio@6.1.1 -> release-information/6-1-1 2 file(s), 1.4 MB
+  v tibco-mdm-studio@6.1.1 -> reference-documents/6-1-1 2 file(s), 1.4 MB
+  v tibco-mdm-studio@6.1.0 -> online-help/6-1-0 1317 file(s), 32.1 MB
+  v tibco-mdm-studio@6.1.0 -> user-guides/6-1-0 9 file(s), 39.3 MB
+  v tibco-mdm-studio@6.1.0 -> release-information/6-1-0 2 file(s), 1.4 MB
+  v tibco-mdm-studio@6.1.0 -> reference-documents/6-1-0 2 file(s), 1.3 MB
+  v tibco-mdm-studio@6.0.0 -> online-help/6-0-0 3356 file(s), 60.6 MB
+  v tibco-mdm-studio@6.0.0 -> user-guides/6-0-0 9 file(s), 26.7 MB
+  v tibco-mdm-studio@6.0.0 -> release-information/6-0-0 2 file(s), 0.2 MB
+  v tibco-mdm-studio@6.0.0 -> reference-documents/6-0-0 3 file(s), 1.4 MB
+  v tibco-mdm-studio@5.3.0 -> online-help/5-3-0 3354 file(s), 60.2 MB
+  v tibco-mdm-studio@5.3.0 -> user-guides/5-3-0 9 file(s), 26.6 MB
+  v tibco-mdm-studio@5.3.0 -> release-information/5-3-0 2 file(s), 0.3 MB
+  v tibco-mdm-studio@5.3.0 -> reference-documents/5-3-0 3 file(s), 1.4 MB
+  v tibco-mdm-studio@5.2.0 -> online-help/5-2-0 1208 file(s), 25.7 MB
+  v tibco-mdm-studio@5.2.0 -> user-guides/5-2-0 9 file(s), 28.4 MB
+  v tibco-mdm-studio@5.2.0 -> release-information/5-2-0 2 file(s), 0.4 MB
+  v tibco-mdm-studio@5.2.0 -> reference-documents/5-2-0 3 file(s), 1.4 MB
+                                     Sync                                      
++-----------------------------------------------------------------------------+
+| Outcome | Rows | online… | user-g… | releas… | refere… | api-ref… | archiv… |
+|---------+------+---------+---------+---------+---------+----------+---------|
+| Synced  |   42 |       6 |      10 |      11 |      11 |        4 |       0 |
+| Already |    3 |       0 |       0 |       0 |       0 |        0 |       3 |
+| current |      |         |         |         |         |          |         |
+| No      |    1 |       1 |       0 |       0 |       0 |        0 |       0 |
+| source  |      |         |         |         |         |          |         |
+| tree    |      |         |         |         |         |          |         |
+| Skipped |    0 |       0 |       0 |       0 |       0 |        0 |       0 |
+| Failed  |    4 |       4 |       0 |       0 |       0 |        0 |       0 |
++-----------------------------------------------------------------------------+
+13593 file(s), 634.9 MB copied.
+4 product metadata.yml, 13 version.yml written.
+Published merged (Stage 6b): ibi-mdm-add-on-for-global-data-synchronization, 
+tibco-mdm-studio.
+12167 redirect(s) in 4 published map(s), tree-rooted (no publish_base_url set).
+! tibco-enterprise-mdm@1.0.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-data-management\tibco-enterprise-mdm\
+1.0.0; run `docushift convert` first
+x tibco-mdm@11.1.0: online-help: publishing 
+tibco-mdm/installation-and-configuration/tibco-mdm-installation-on-application-
+servers/configuring-tibco-mdm-websphere-application-server/deploying-tibco-mdm-
+websphere-application-server.md would need 284 characters, over the 260 the 
+published tree allows
+x tibco-mdm@11.0.0: online-help: publishing 
+tibco-mdm/installation-and-configuration/tibco-mdm-installation-on-application-
+servers/configuring-tibco-mdm-websphere-application-server/deploying-tibco-mdm-
+websphere-application-server.md would need 284 characters, over the 260 the 
+published tree allows
+x tibco-mdm@10.0.0: online-help: publishing 
+tibco-mdm/installation-and-configuration/tibco-mdm-installation-on-application-
+servers/configuring-tibco-mdm-websphere-application-server/deploying-tibco-mdm-
+websphere-application-server.md would need 284 characters, over the 260 the 
+published tree allows
+x tibco-mdm@9.3.2: online-help: publishing 
+tibco-mdm/installation-and-configuration/tibco-mdm-installation-on-application-
+servers/configuring-tibco-mdm-websphere-application-server/deploying-tibco-mdm-
+websphere-application-server.md would need 283 characters, over the 260 the 
+published tree allows
+Findings: 4 errors, 4 warnings.

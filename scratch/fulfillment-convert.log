@@ -1,0 +1,110 @@
+Converting 13 version(s)...
+  v tibco-fulfillment-provisioning@3.10.0 650 topic(s), 91 asset(s), 1 unit(s),
+654 nav node(s), 4 generated -> 747 file(s)
+C:\github\docushift-tool\src\docushift\transforms\markdown.py:112: XMLParsedAsHTMLWarning: It looks like you're using an HTML parser to parse an XML document.
+
+Assuming this really is an XML document, what you're doing might work, but you should know that using an XML parser will be more reliable. To parse this document as XML, make sure you have the Python package 'lxml' installed, and pass the keyword argument `features="xml"` into the BeautifulSoup constructor.
+
+If you want or need to use an HTML parser on this document, you can make this warning go away by filtering it. To do that, run this code before calling the BeautifulSoup constructor:
+
+    from bs4 import XMLParsedAsHTMLWarning
+    import warnings
+
+    warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+  return BeautifulSoup(_CDATA.sub(_unwrap_cdata, text), PARSER)
+  v tibco-fulfillment-provisioning@3.9.0 652 topic(s), 90 asset(s), 1 unit(s), 
+654 nav node(s), 2 generated -> 746 file(s)
+  v tibco-offer-and-price-engine@6.0.0 229 topic(s), 49 asset(s), 1 unit(s), 
+235 nav node(s), 6 generated -> 287 file(s)
+  v tibco-order-management@6.1.0 1106 topic(s), 626 asset(s), 1 unit(s), 1142 
+nav node(s), 8 generated -> 1743 file(s)
+  v tibco-order-management@6.0.1 1059 topic(s), 575 asset(s), 1 unit(s), 1096 
+nav node(s), 8 generated -> 1644 file(s)
+  v tibco-order-management@6.0.0 1032 topic(s), 550 asset(s), 1 unit(s), 1069 
+nav node(s), 8 generated -> 1592 file(s)
+C:\github\docushift-tool\src\docushift\transforms\markdown.py:112: XMLParsedAsHTMLWarning: It looks like you're using an HTML parser to parse an XML document.
+
+Assuming this really is an XML document, what you're doing might work, but you should know that using an XML parser will be more reliable. To parse this document as XML, make sure you have the Python package 'lxml' installed, and pass the keyword argument `features="xml"` into the BeautifulSoup constructor.
+
+If you want or need to use an HTML parser on this document, you can make this warning go away by filtering it. To do that, run this code before calling the BeautifulSoup constructor:
+
+    from bs4 import XMLParsedAsHTMLWarning
+    import warnings
+
+    warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+  return BeautifulSoup(_CDATA.sub(_unwrap_cdata, text), PARSER)
+  v tibco-order-management@5.0.1 723 topic(s), 462 asset(s), 1 unit(s), 743 nav
+node(s), 2 generated -> 1189 file(s)
+  v tibco-product-and-service-catalog@5.1.0 1864 topic(s), 996 asset(s), 3 
+unit(s), 1869 nav node(s), 8 generated -> 2869 file(s)
+  v tibco-product-and-service-catalog-powered-by-tibco-ebx@1.1.0 356 topic(s), 
+74 asset(s), 2 unit(s), 359 nav node(s), 5 generated -> 436 file(s)
+  v tibco-product-and-service-catalog-powered-by-tibco-ebx@1.0.0 356 topic(s), 
+74 asset(s), 2 unit(s), 359 nav node(s), 5 generated -> 436 file(s)
+  v tibco-product-and-service-inventory@2.1.0 247 topic(s), 170 asset(s), 1 
+unit(s), 252 nav node(s), 5 generated -> 425 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |       11 |
+| Already current   |        0 |
+| No extracted tree |        1 |
+| Engine unknown    |        1 |
+| Failed            |        0 |
++------------------------------+
+8274 topic(s), 3757 asset(s) written.
+12114 file(s) standing in the measured output tree(s).
+tibco-fulfillment-provisioning@3.10.0: 92 resolved, 0 skin, 6 escaped, 0 
+dangling, 0 case-mismatch, 151 orphan (9.8 MB)
+tibco-fulfillment-provisioning@3.10.0: skipped 4 generated-directory, 2 
+runtime-stub
+tibco-fulfillment-provisioning@3.9.0: 92 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 1 orphan (1.5 MB)
+tibco-fulfillment-provisioning@3.9.0: skipped 2 not-a-topic, 1 
+publication-homepage, 4 republished-duplicate
+tibco-offer-and-price-engine@6.0.0: 50 resolved, 1 skin, 11 escaped, 0 
+dangling, 0 case-mismatch, 130 orphan (8.0 MB)
+tibco-offer-and-price-engine@6.0.0: skipped 3 generated-directory, 3 
+runtime-stub
+tibco-order-management@6.1.0: 679 resolved, 0 skin, 12 escaped, 3 dangling, 0 
+case-mismatch, 508 orphan (40.5 MB)
+tibco-order-management@6.1.0: skipped 4 generated-directory, 1 
+no-content-container, 2 runtime-stub
+tibco-order-management@6.0.1: 618 resolved, 0 skin, 31 escaped, 3 dangling, 0 
+case-mismatch, 494 orphan (35.0 MB)
+tibco-order-management@6.0.1: skipped 4 generated-directory, 2 runtime-stub
+tibco-order-management@6.0.0: 591 resolved, 0 skin, 12 escaped, 0 dangling, 0 
+case-mismatch, 456 orphan (31.9 MB)
+tibco-order-management@6.0.0: skipped 3 generated-directory, 1 
+no-content-container, 2 runtime-stub
+tibco-order-management@5.0.1: 492 resolved, 0 skin, 0 escaped, 0 dangling, 0 
+case-mismatch, 2 orphan (2.6 MB)
+tibco-order-management@5.0.1: skipped 2 not-a-topic, 1 publication-homepage, 18
+republished-duplicate
+tibco-product-and-service-catalog@5.1.0: 1197 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 918 orphan (44.3 MB)
+tibco-product-and-service-catalog@5.1.0: CSH 10 resolved, 0 unresolved, 10 
+ambiguous
+tibco-product-and-service-catalog@5.1.0: skipped 9 generated-directory, 3 
+placeholder-template, 6 runtime-stub, 5 unreferenced-template
+tibco-product-and-service-catalog-powered-by-tibco-ebx@1.1.0: 84 resolved, 0 
+skin, 0 escaped, 0 dangling, 0 case-mismatch, 81 orphan (2.8 MB)
+tibco-product-and-service-catalog-powered-by-tibco-ebx@1.1.0: skipped 6 
+generated-directory, 4 runtime-stub
+tibco-product-and-service-catalog-powered-by-tibco-ebx@1.0.0: 84 resolved, 0 
+skin, 0 escaped, 0 dangling, 0 case-mismatch, 81 orphan (2.8 MB)
+tibco-product-and-service-catalog-powered-by-tibco-ebx@1.0.0: skipped 6 
+generated-directory, 4 runtime-stub
+tibco-product-and-service-inventory@2.1.0: 176 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 91 orphan (2.9 MB)
+tibco-product-and-service-inventory@2.1.0: skipped 3 generated-directory, 1 
+placeholder-template, 2 runtime-stub
+! tibco-enterprise-fulfillment-orchestration-suite@1.1.0: engine undetected 
+(`auto`)
+! tibco-product-and-service-inventory-2-1-0@2.1.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-tib-fulfillment\extracted\tibco-product
+-and-service-inventory-2-1-0\2.1.0; run `docushift extract` first
+Findings: 2 errors, 32 warnings, 51 notes.

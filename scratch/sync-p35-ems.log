@@ -1,0 +1,94 @@
+Syncing 8 version(s) into C:\tmp\p35-aem...
+  v tibco-enterprise-message-service@10.5.1 -> api-references/10-5-1 1045 
+file(s), 19.3 MB
+  v tibco-enterprise-message-service@10.5.1 -> online-help/10-5-1 199 file(s), 
+3.8 MB
+  v tibco-enterprise-message-service@10.5.1 -> user-guides/10-5-1 3 file(s), 
+14.2 MB
+  v tibco-enterprise-message-service@10.5.1 -> release-information/10-5-1 2 
+file(s), 1.9 MB
+  v tibco-enterprise-message-service@10.5.1 -> reference-documents/10-5-1 1 
+file(s), 0.4 MB
+  v tibco-enterprise-message-service@10.5.0 -> api-references/10-5-0 1045 
+file(s), 19.3 MB
+  v tibco-enterprise-message-service@10.5.0 -> online-help/10-5-0 199 file(s), 
+3.8 MB
+  v tibco-enterprise-message-service@10.5.0 -> user-guides/10-5-0 3 file(s), 
+14.2 MB
+  v tibco-enterprise-message-service@10.5.0 -> release-information/10-5-0 2 
+file(s), 1.8 MB
+  v tibco-enterprise-message-service@10.5.0 -> reference-documents/10-5-0 2 
+file(s), 0.4 MB
+  v tibco-enterprise-message-service@10.4.4 -> api-references/10-4-4 1032 
+file(s), 19.2 MB
+  v tibco-enterprise-message-service@10.4.4 -> online-help/10-4-4 197 file(s), 
+3.7 MB
+  v tibco-enterprise-message-service@10.4.4 -> user-guides/10-4-4 3 file(s), 
+27.7 MB
+  v tibco-enterprise-message-service@10.4.4 -> release-information/10-4-4 2 
+file(s), 1.9 MB
+  v tibco-enterprise-message-service@10.4.4 -> reference-documents/10-4-4 1 
+file(s), 0.4 MB
+  v tibco-enterprise-message-service@10.4.3 -> api-references/10-4-3 1032 
+file(s), 19.2 MB
+  v tibco-enterprise-message-service@10.4.3 -> online-help/10-4-3 197 file(s), 
+3.7 MB
+  v tibco-enterprise-message-service@10.4.3 -> user-guides/10-4-3 3 file(s), 
+14.1 MB
+  v tibco-enterprise-message-service@10.4.3 -> release-information/10-4-3 2 
+file(s), 1.9 MB
+  v tibco-enterprise-message-service@10.4.3 -> reference-documents/10-4-3 1 
+file(s), 0.4 MB
+  v tibco-enterprise-message-service@10.4.1 -> api-references/10-4-1 1032 
+file(s), 19.2 MB
+  v tibco-enterprise-message-service@10.4.1 -> online-help/10-4-1 197 file(s), 
+3.7 MB
+  v tibco-enterprise-message-service@10.4.1 -> user-guides/10-4-1 3 file(s), 
+14.1 MB
+  v tibco-enterprise-message-service@10.4.1 -> release-information/10-4-1 2 
+file(s), 1.8 MB
+  v tibco-enterprise-message-service@10.4.1 -> reference-documents/10-4-1 2 
+file(s), 0.4 MB
+  v tibco-enterprise-message-service@10.4.0 -> api-references/10-4-0 1032 
+file(s), 19.2 MB
+  v tibco-enterprise-message-service@10.4.0 -> online-help/10-4-0 207 file(s), 
+3.9 MB
+  v tibco-enterprise-message-service@10.4.0 -> user-guides/10-4-0 3 file(s), 
+12.0 MB
+  v tibco-enterprise-message-service@10.4.0 -> release-information/10-4-0 2 
+file(s), 1.7 MB
+  v tibco-enterprise-message-service@10.4.0 -> reference-documents/10-4-0 2 
+file(s), 0.2 MB
+  v tibco-ems-client-for-ibm-i -> archives 12 file(s), 0.0 MB
+  v tibco-ems-transport-channel-for-wcf -> archives 3 file(s), 0.0 MB
+  v tibco-enterprise-message-service -> archives 28 file(s), 0.0 MB
+                                     Sync                                      
+┌─────────┬──────┬─────────┬─────────┬─────────┬─────────┬──────────┬─────────┐
+│ Outcome │ Rows │ online… │ user-g… │ releas… │ refere… │ api-ref… │ archiv… │
+├─────────┼──────┼─────────┼─────────┼─────────┼─────────┼──────────┼─────────┤
+│ Synced  │   33 │       6 │       6 │       6 │       6 │        6 │       3 │
+│ Already │    0 │       0 │       0 │       0 │       0 │        0 │       0 │
+│ current │      │         │         │         │         │          │         │
+│ No      │    4 │       2 │       0 │       0 │       0 │        0 │       0 │
+│ source  │      │         │         │         │         │          │         │
+│ tree    │      │         │         │         │         │          │         │
+│ Skipped │    0 │       0 │       0 │       0 │       0 │        0 │       0 │
+│ Failed  │    0 │       0 │       0 │       0 │       0 │        0 │       0 │
+└─────────┴──────┴─────────┴─────────┴─────────┴─────────┴──────────┴─────────┘
+7496 file(s), 247.5 MB copied.
+1 product metadata.yml, 4 version.yml written.
+Published merged (Stage 6b): tibco-enterprise-message-service.
+17252 redirect(s) in 2 published map(s), tree-rooted (no publish_base_url set).
+! tibco-ems-client-for-ibm-i@8.6.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-ems\tibco-ems-client-for-ibm-i\8.6.0;
+run `docushift convert` first
+! tibco-ems-client-for-ibm-i@8.6.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-tib-ems\extracted\tibco-ems-client-for-
+ibm-i\8.6.0; run `docushift extract` first
+! tibco-ems-transport-channel-for-wcf@2.0.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-ems\tibco-ems-transport-channel-for-w
+cf\2.0.0; run `docushift convert` first
+! tibco-ems-transport-channel-for-wcf@2.0.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-tib-ems\extracted\tibco-ems-transport-c
+hannel-for-wcf\2.0.0; run `docushift extract` first
+Findings: 6 warnings.

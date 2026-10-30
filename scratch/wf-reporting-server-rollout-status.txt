@@ -1,0 +1,8 @@
+reframe exit=0
+sync exit=0
+census exit=0
+validate-ibi-webfocus-reporting-server exit=1
+r001-ibi-webfocus-reporting-server exit=0
+census-after exit=0
+verify-ibi-webfocus-reporting-server exit=1
+done

@@ -1,0 +1,21 @@
+Converting 1 version(s)...
+  v ibi-webfocus-client@9.3.6 2825 topic(s), 4199 asset(s), 1 unit(s), 2862 nav
+node(s), 1 generated -> 7029 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+2825 topic(s), 4199 asset(s) written.
+7029 file(s) standing in the measured output tree(s).
+ibi-webfocus-client@9.3.6: 4778 resolved, 0 skin, 0 escaped, 900 dangling, 0 
+case-mismatch, 3839 orphan (188.1 MB)
+ibi-webfocus-client@9.3.6: CSH 135 resolved, 0 unresolved, 0 ambiguous
+ibi-webfocus-client@9.3.6: skipped 5 generated-directory, 2 runtime-stub, 1 
+unreferenced-template
+Findings: 16 errors, 9 warnings, 11 notes.

@@ -1,0 +1,75 @@
+Downloading 42 version(s) with 4 worker(s)...
+  v tibco-activematrix-businessworks-plug-in-for-tibco-clarity@6.1.1 3.8 MiB
+  v tibco-activematrix-businessworks-plug-in-for-tibco-eftl@6.0.0 2.4 MiB
+  v tibco-activematrix-businessworks-plug-in-for-tibco-ftl@6.7.4 8.7 MiB
+  v tibco-activematrix-businessworks-plug-in-for-tibco-ftl@6.7.3 8.5 MiB
+  v tibco-activematrix-businessworks-plug-in-for-tibco-ftl@6.7.2 8.4 MiB
+  v tibco-activematrix-businessworks-plug-in-for-tibco-ftl@6.7.1 8.5 MiB
+  v tibco-activematrix-businessworks-plug-in-for-tibco-ftl@6.7.0 4.2 MiB
+  v tibco-activematrix-businessworks-plug-in-for-tibco-ftl@6.6.0 2.1 MiB
+  v tibco-activematrix-businessworks-plug-in-for-tibco-ftl@6.5.0 2.2 MiB
+  v tibco-activematrix-businessworks-plug-in-for-tibco-ftl@6.4.4 2.0 MiB
+  v tibco-activematrix-businessworks-plug-in-for-tibco-ftl@5.0.0 10.1 MiB
+  x 
+tibco-activematrix-businessworks-plug-in-for-tibco-managed-file-transfer@6.3.1
+  v 
+tibco-activematrix-businessworks-plug-in-for-tibco-managed-file-transfer@6.3.0 
+2.8 MiB
+  v 
+tibco-activematrix-businessworks-plug-in-for-tibco-managed-file-transfer@6.0.1 
+3.4 MiB
+  v 
+tibco-activematrix-businessworks-plug-in-for-tibco-managed-file-transfer@6.0.0 
+3.3 MiB
+  v 
+tibco-activematrix-businessworks-plug-in-for-tibco-managed-file-transfer@1.0.0 
+3.4 MiB
+  v tibco-activematrix-businessworks-plug-in-for-tibco-patterns@6.2.0 8.2 MiB
+  v tibco-activematrix-businessworks-plug-in-for-tibco-patterns@6.1.2 7.9 MiB
+  v tibco-activematrix-businessworks-plug-in-for-tibco-patterns@6.1.0 3.1 MiB
+  v tibco-activematrix-businessworks-plug-in-for-tibco-patterns@6.0.0 3.1 MiB
+  v tibco-activematrix-businessworks-plug-in-for-tibco-patterns@5.7.0 2.6 MiB
+  v tibco-activematrix-businessworks-plug-in-for-tibco-patterns@5.6.1 2.6 MiB
+  v tibco-activematrix-businessworks-plug-in-for-tibco-patterns@5.4.0 1.5 MiB
+  v tibco-activematrix-businessworks-plug-in-for-tibco-patterns@2.1.2 11.2 MiB
+  v tibco-activematrix-businessworks-plug-in-for-tibco-patterns@2.1.0 5.1 MiB
+  v tibco-activematrix-businessworks-plug-in-for-tibco-patterns@2.0.0 5.3 MiB
+  v tibco-activematrix-businessworks-plug-in-for-tibco-patterns@1.5.0 6.1 MiB
+  v tibco-activematrix-businessworks-plug-in-for-tibco-patterns@1.2.0 3.4 MiB
+  v tibco-activematrix-businessworks-plug-in-for-tibco-patterns@1.1.0 3.9 MiB
+  v tibco-activematrix-businessworks-plug-in-for-tibco-patterns@1.0.0 3.6 MiB
+  v tibco-activematrix-businessworks-plug-in-for-transaction-insight@6.0.1 3.9 
+MiB
+  v tibco-activematrix-businessworks-plug-in-for-transaction-insight@6.0.0 2.0 
+MiB
+  v tibco-activematrix-businessworks-plug-in-for-trillium@6.0.0 2.9 MiB
+  v tibco-activematrix-businessworks-plug-in-for-twitter@6.1.2 4.1 MiB
+  v tibco-activematrix-businessworks-plug-in-for-workday@6.0.1 3.1 MiB
+  v tibco-activematrix-businessworks-plug-in-for-workday@1.0.0 3.4 MiB
+  v 
+tibco-activematrix-businessworks-service-engine-plug-in-for-oracle-e-business-s
+uite@1.1 2.7 MiB
+  v tibco-activematrix-businessworks-service-engine-plug-in-for-smartmapper@5.5
+2.6 MiB
+  v tibco-businessworks-integrationmanager-plug-in@1.0 0.6 MiB
+  v tibco-businessworks-plug-in-for-ai@6.0.1 10.6 MiB
+  v tibco-businessworks-plug-in-for-ai@6.0.0 9.9 MiB
+  v tibco-businessworks-plug-in-for-tibco-auditsafe-for-tibco-platform@6.0.0 
+11.6 MiB
+           Download            
++-----------------------------+
+| Outcome          | Versions |
+|------------------+----------|
+| Downloaded       |       41 |
+| Already current  |        0 |
+| Skipped (manual) |        0 |
+| No ZIP endpoint  |        0 |
+| Failed           |        1 |
++-----------------------------+
+198.7 MiB written.
+! 
+tibco-activematrix-businessworks-plug-in-for-tibco-managed-file-transfer@6.3.1:
+NotAPackage: 
+https://docs.tibco.com/pub/bwpluginmft/6.3.1/tibco-activematrix-businessworks-p
+lug-in-for-tibco-managed-file-transfer-6-3-1_documentation.zip did not return a
+readable ZIP (most often an error or sign-in page served as HTTP 200)

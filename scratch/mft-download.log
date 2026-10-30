@@ -1,0 +1,26 @@
+Downloading 14 version(s) with 4 worker(s)...
+  v tibco-managed-file-transfer-command-center@8.7.1 49.8 MiB
+  v tibco-managed-file-transfer-command-center@8.7.0 49.6 MiB
+  v tibco-managed-file-transfer-command-center@8.6.0 48.1 MiB
+  v tibco-managed-file-transfer-internet-server@8.7.1 53.8 MiB
+  v tibco-managed-file-transfer-internet-server@8.7.0 53.7 MiB
+  v tibco-managed-file-transfer-internet-server@8.6.0 51.9 MiB
+  v tibco-managed-file-transfer-platform-server-for-unix@8.2.0 14.7 MiB
+  v tibco-managed-file-transfer-platform-server-for-unix@8.1.2 7.9 MiB
+  v tibco-managed-file-transfer-platform-server-for-unix@8.1.1 6.8 MiB
+  v tibco-managed-file-transfer-platform-server-for-windows@8.2.0 23.1 MiB
+  v tibco-managed-file-transfer-platform-server-for-windows@8.1.0 19.3 MiB
+  v tibco-managed-file-transfer-platform-server-for-z-linux@8.1.2 15.0 MiB
+  v tibco-managed-file-transfer-platform-server-for-z-linux@8.1.1 6.8 MiB
+  v tibco-managed-file-transfer-platform-server-for-z-linux@8.1.0 8.0 MiB
+           Download            
++-----------------------------+
+| Outcome          | Versions |
+|------------------+----------|
+| Downloaded       |       14 |
+| Already current  |        0 |
+| Skipped (manual) |        0 |
+| No ZIP endpoint  |        0 |
+| Failed           |        0 |
++-----------------------------+
+408.7 MiB written.

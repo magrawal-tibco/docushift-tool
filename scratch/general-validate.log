@@ -1,0 +1,62 @@
+Validating 8 published folder(s) in ..\tibco-docs-aem...
+                                   Validate                                   
++----------------------------------------------------------------------------+
+|      Walked | Files | References | HTML | External | Tree-rooted | Anchors |
+|-------------+-------+------------+------+----------+-------------+---------|
+| 8 folder(s) |    39 |        106 |    0 |       31 |           0 |   53/53 |
++----------------------------------------------------------------------------+
+Findings: none.
+Validating 4 published folder(s) in ..\tibco-docs-aem...
+  ! 
+en-us-tib-general-userdocs/en-us/tibco-api-exchange-gateway/online-help/2-5-1 
+14 finding(s), 0 error(s)
+                                   Validate                                   
++----------------------------------------------------------------------------+
+|      Walked | Files | References | HTML | External | Tree-rooted | Anchors |
+|-------------+-------+------------+------+----------+-------------+---------|
+| 4 folder(s) |   143 |        749 |   95 |       34 |           0 | 595/599 |
++----------------------------------------------------------------------------+
+ANCHOR_MISSING 14 row(s), 14 occurrence(s)
+Findings: 14 warnings.
+Validating 11 published folder(s) in ..\tibco-docs-aem...
+                                   Validate                                    
++-----------------------------------------------------------------------------+
+|       Walked | Files | References | HTML | External | Tree-rooted | Anchors |
+|--------------+-------+------------+------+----------+-------------+---------|
+| 11 folder(s) |   135 |        548 |   24 |       57 |           0 | 372/372 |
++-----------------------------------------------------------------------------+
+Findings: none.
+Validating 11 published folder(s) in ..\tibco-docs-aem...
+  ! en-us-tib-general-userdocs/en-us/tibco-patterns/online-help/6-1-2 1 
+finding(s), 0 error(s)
+  ! en-us-tib-general-userdocs/en-us/tibco-patterns/online-help/6-2-0 1 
+finding(s), 0 error(s)
+                                   Validate                                    
++-----------------------------------------------------------------------------+
+|       Walked | Files | References | HTML | External | Tree-rooted | Anchors |
+|--------------+-------+------------+------+----------+-------------+---------|
+| 11 folder(s) |   267 |        751 |   32 |       36 |          16 | 617/617 |
++-----------------------------------------------------------------------------+
+ANCHOR_WRONG_HEADING 2 row(s), 2 occurrence(s)
+Findings: 2 warnings.
+Validating 8 published folder(s) in ..\tibco-docs-aem...
+  ! en-us-tib-general-userdocs/en-us/tibco-reward/online-help/22-2-0 1 
+finding(s), 0 error(s)
+  ! en-us-tib-general-userdocs/en-us/tibco-reward/online-help/22-3-0 1 
+finding(s), 0 error(s)
+                                   Validate                                   
++----------------------------------------------------------------------------+
+|      Walked | Files | References | HTML | External | Tree-rooted | Anchors |
+|-------------+-------+------------+------+----------+-------------+---------|
+| 8 folder(s) |   668 |       1976 |    4 |      170 |           0 | 908/908 |
++----------------------------------------------------------------------------+
+TOC_ENTRY_DUPLICATED 2 row(s), 2 occurrence(s)
+Findings: 2 warnings.
+Validating 6 published folder(s) in ..\tibco-docs-aem...
+                                   Validate                                   
++----------------------------------------------------------------------------+
+|      Walked | Files | References | HTML | External | Tree-rooted | Anchors |
+|-------------+-------+------------+------+----------+-------------+---------|
+| 6 folder(s) |     6 |         15 |    0 |        0 |           0 |     0/0 |
++----------------------------------------------------------------------------+
+Findings: none.

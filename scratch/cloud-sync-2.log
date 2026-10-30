@@ -1,0 +1,20 @@
+Syncing 1 version(s) into C:\github\tibco-docs-aem...
+  x tibco-cloud-integration-flogo-payg@2.11.0 (online-help)
+                                     Sync                                      
++-----------------------------------------------------------------------------+
+| Outcome     | Rows | online-help | user-guides | release-in… | reference-d… |
+|-------------+------+-------------+-------------+-------------+--------------|
+| Synced      |    0 |           0 |           0 |           0 |            0 |
+| Already     |    3 |           0 |           1 |           1 |            1 |
+| current     |      |             |             |             |              |
+| No source   |    0 |           0 |           0 |           0 |            0 |
+| tree        |      |             |             |             |              |
+| Skipped     |    0 |           0 |           0 |           0 |            0 |
+| Failed      |    1 |           1 |           0 |           0 |            0 |
++-----------------------------------------------------------------------------+
+1 product metadata.yml, 3 version.yml written.
+x tibco-cloud-integration-flogo-payg@2.11.0: online-help: publishing 
+users-guide/app-development/creating-flows-and-triggers/data-mappings/mapping-d
+ifferent-types-of-data/mapping-a-single-element-of-primitive-data-type.md would
+need 262 characters, over the 260 the published tree allows
+Findings: 1 error.

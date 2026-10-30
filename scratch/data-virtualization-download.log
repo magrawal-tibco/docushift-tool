@@ -1,0 +1,15 @@
+Downloading 3 version(s) with 4 worker(s)...
+  v tibco-data-virtualization@8.9.0 373.4 MiB
+  v tibco-data-virtualization@8.8.1 351.9 MiB
+  v tibco-data-virtualization@8.8.0 345.0 MiB
+           Download            
++-----------------------------+
+| Outcome          | Versions |
+|------------------+----------|
+| Downloaded       |        3 |
+| Already current  |        0 |
+| Skipped (manual) |        0 |
+| No ZIP endpoint  |        0 |
+| Failed           |        0 |
++-----------------------------+
+1070.3 MiB written.

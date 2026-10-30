@@ -1,0 +1,16 @@
+Validating 11 published folder(s) in C:\github\tibco-docs-aem...
+  ! en-us-tib-bpm-userdocs/en-us/tibco-activematrix-bpm/online-help/4-2-0 46 
+finding(s), 0 error(s)
+  ! en-us-tib-bpm-userdocs/en-us/tibco-activematrix-bpm/online-help/4-3-0 40 
+finding(s), 0 error(s)
+                                   Validate                                    
++-----------------------------------------------------------------------------+
+|     Walked | Files | References | HTML | External | Tree-rootà |    Anchors |
+|------------+-------+------------+------+----------+------------+------------|
+|         11 |  2640 |      35615 | 7931 |     1254 |       2578 | 22397/229à |
+|  folder(s) |       |            |      |          |            |            |
++-----------------------------------------------------------------------------+
+ANCHOR_MISSING 60 row(s), 60 occurrence(s)
+ANCHOR_WRONG_HEADING 22 row(s), 22 occurrence(s)
+REDIRECT_SHADOWED 4 row(s), 4 occurrence(s)
+Findings: 86 warnings.

@@ -1,0 +1,493 @@
+Converting 45 version(s)...
+  v tibco-activematrix-businessworks-plug-in-for-salesforce-com@6.11.0 119 
+topic(s), 52 asset(s), 1 unit(s), 120 nav node(s), 1 generated -> 176 file(s)
+  v tibco-activematrix-businessworks-plug-in-for-salesforce-com@6.10.0 118 
+topic(s), 92 asset(s), 1 unit(s), 119 nav node(s), 1 generated -> 215 file(s)
+C:\github\docushift-tool\src\docushift\transforms\markdown.py:112: XMLParsedAsHTMLWarning: It looks like you're using an HTML parser to parse an XML document.
+
+Assuming this really is an XML document, what you're doing might work, but you should know that using an XML parser will be more reliable. To parse this document as XML, make sure you have the Python package 'lxml' installed, and pass the keyword argument `features="xml"` into the BeautifulSoup constructor.
+
+If you want or need to use an HTML parser on this document, you can make this warning go away by filtering it. To do that, run this code before calling the BeautifulSoup constructor:
+
+    from bs4 import XMLParsedAsHTMLWarning
+    import warnings
+
+    warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+  return BeautifulSoup(_CDATA.sub(_unwrap_cdata, text), PARSER)
+  v tibco-activematrix-businessworks-plug-in-for-salesforce-com@6.9.3 117 
+topic(s), 41 asset(s), 1 unit(s), 119 nav node(s), 2 generated -> 164 file(s)
+  v tibco-activematrix-businessworks-plug-in-for-salesforce-com@2.6.0 52 
+topic(s), 40 asset(s), 1 unit(s), 54 nav node(s), 2 generated -> 96 file(s)
+C:\github\docushift-tool\src\docushift\transforms\markdown.py:112: XMLParsedAsHTMLWarning: It looks like you're using an HTML parser to parse an XML document.
+
+Assuming this really is an XML document, what you're doing might work, but you should know that using an XML parser will be more reliable. To parse this document as XML, make sure you have the Python package 'lxml' installed, and pass the keyword argument `features="xml"` into the BeautifulSoup constructor.
+
+If you want or need to use an HTML parser on this document, you can make this warning go away by filtering it. To do that, run this code before calling the BeautifulSoup constructor:
+
+    from bs4 import XMLParsedAsHTMLWarning
+    import warnings
+
+    warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+  return BeautifulSoup(_CDATA.sub(_unwrap_cdata, text), PARSER)
+  v tibco-activematrix-businessworks-plug-in-for-salesforce-com@2.5.0 60 
+topic(s), 40 asset(s), 2 unit(s), 135 nav node(s), 5 generated -> 108 file(s)
+  v tibco-activematrix-businessworks-plug-in-for-sap-ariba@6.0.0 54 topic(s), 
+22 asset(s), 1 unit(s), 55 nav node(s), 1 generated -> 81 file(s)
+  v 
+tibco-activematrix-businessworks-plug-in-for-sap-business-technology-platform@6
+.0.0 89 topic(s), 36 asset(s), 1 unit(s), 90 nav node(s), 1 generated -> 129 
+file(s)
+  v tibco-activematrix-businessworks-plug-in-for-sap-hana-database@6.1.0 69 
+topic(s), 28 asset(s), 1 unit(s), 70 nav node(s), 1 generated -> 102 file(s)
+  v tibco-activematrix-businessworks-plug-in-for-sap-solutions@8.8.0 113 
+topic(s), 23 asset(s), 1 unit(s), 114 nav node(s), 1 generated -> 141 file(s)
+  v tibco-activematrix-businessworks-plug-in-for-sap-solutions@8.7.0 112 
+topic(s), 25 asset(s), 1 unit(s), 113 nav node(s), 1 generated -> 142 file(s)
+C:\github\docushift-tool\src\docushift\transforms\markdown.py:112: XMLParsedAsHTMLWarning: It looks like you're using an HTML parser to parse an XML document.
+
+Assuming this really is an XML document, what you're doing might work, but you should know that using an XML parser will be more reliable. To parse this document as XML, make sure you have the Python package 'lxml' installed, and pass the keyword argument `features="xml"` into the BeautifulSoup constructor.
+
+If you want or need to use an HTML parser on this document, you can make this warning go away by filtering it. To do that, run this code before calling the BeautifulSoup constructor:
+
+    from bs4 import XMLParsedAsHTMLWarning
+    import warnings
+
+    warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+  return BeautifulSoup(_CDATA.sub(_unwrap_cdata, text), PARSER)
+  v tibco-activematrix-businessworks-plug-in-for-sap-solutions@8.6.0 114 
+topic(s), 23 asset(s), 1 unit(s), 115 nav node(s), 1 generated -> 142 file(s)
+  v tibco-activematrix-businessworks-plug-in-for-sap-solutions@7.3.2 437 
+topic(s), 154 asset(s), 1 unit(s), 448 nav node(s), 5 generated -> 600 file(s)
+C:\github\docushift-tool\src\docushift\transforms\markdown.py:112: XMLParsedAsHTMLWarning: It looks like you're using an HTML parser to parse an XML document.
+
+Assuming this really is an XML document, what you're doing might work, but you should know that using an XML parser will be more reliable. To parse this document as XML, make sure you have the Python package 'lxml' installed, and pass the keyword argument `features="xml"` into the BeautifulSoup constructor.
+
+If you want or need to use an HTML parser on this document, you can make this warning go away by filtering it. To do that, run this code before calling the BeautifulSoup constructor:
+
+    from bs4 import XMLParsedAsHTMLWarning
+    import warnings
+
+    warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+  return BeautifulSoup(_CDATA.sub(_unwrap_cdata, text), PARSER)
+  v tibco-activematrix-businessworks-plug-in-for-sap-solutions@7.3.1 209 
+topic(s), 142 asset(s), 6 unit(s), 426 nav node(s), 9 generated -> 364 file(s)
+  v tibco-activematrix-businessworks-plug-in-for-sap-successfactors@6.1.0 54 
+topic(s), 38 asset(s), 1 unit(s), 55 nav node(s), 1 generated -> 97 file(s)
+C:\github\docushift-tool\src\docushift\transforms\markdown.py:112: XMLParsedAsHTMLWarning: It looks like you're using an HTML parser to parse an XML document.
+
+Assuming this really is an XML document, what you're doing might work, but you should know that using an XML parser will be more reliable. To parse this document as XML, make sure you have the Python package 'lxml' installed, and pass the keyword argument `features="xml"` into the BeautifulSoup constructor.
+
+If you want or need to use an HTML parser on this document, you can make this warning go away by filtering it. To do that, run this code before calling the BeautifulSoup constructor:
+
+    from bs4 import XMLParsedAsHTMLWarning
+    import warnings
+
+    warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+  return BeautifulSoup(_CDATA.sub(_unwrap_cdata, text), PARSER)
+  v tibco-activematrix-businessworks-plug-in-for-servicenow@6.1.0 44 topic(s), 
+16 asset(s), 1 unit(s), 47 nav node(s), 1 generated -> 64 file(s)
+  v tibco-activematrix-businessworks-plug-in-for-sftp@6.2.0 58 topic(s), 15 
+asset(s), 1 unit(s), 60 nav node(s), 2 generated -> 79 file(s)
+  v tibco-activematrix-businessworks-plug-in-for-sftp@6.1.4 53 topic(s), 10 
+asset(s), 1 unit(s), 56 nav node(s), 3 generated -> 70 file(s)
+  v tibco-activematrix-businessworks-plug-in-for-sftp@1.1.1 61 topic(s), 15 
+asset(s), 1 unit(s), 63 nav node(s), 2 generated -> 82 file(s)
+C:\github\docushift-tool\src\docushift\transforms\markdown.py:112: XMLParsedAsHTMLWarning: It looks like you're using an HTML parser to parse an XML document.
+
+Assuming this really is an XML document, what you're doing might work, but you should know that using an XML parser will be more reliable. To parse this document as XML, make sure you have the Python package 'lxml' installed, and pass the keyword argument `features="xml"` into the BeautifulSoup constructor.
+
+If you want or need to use an HTML parser on this document, you can make this warning go away by filtering it. To do that, run this code before calling the BeautifulSoup constructor:
+
+    from bs4 import XMLParsedAsHTMLWarning
+    import warnings
+
+    warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+  return BeautifulSoup(_CDATA.sub(_unwrap_cdata, text), PARSER)
+  v tibco-activematrix-businessworks-plug-in-for-sftp@1.1.0 39 topic(s), 12 
+asset(s), 2 unit(s), 99 nav node(s), 3 generated -> 58 file(s)
+  v tibco-activematrix-businessworks-plug-in-for-siebel@7.3.0 162 topic(s), 118
+asset(s), 1 unit(s), 164 nav node(s), 1 generated -> 285 file(s)
+C:\github\docushift-tool\src\docushift\transforms\markdown.py:112: XMLParsedAsHTMLWarning: It looks like you're using an HTML parser to parse an XML document.
+
+Assuming this really is an XML document, what you're doing might work, but you should know that using an XML parser will be more reliable. To parse this document as XML, make sure you have the Python package 'lxml' installed, and pass the keyword argument `features="xml"` into the BeautifulSoup constructor.
+
+If you want or need to use an HTML parser on this document, you can make this warning go away by filtering it. To do that, run this code before calling the BeautifulSoup constructor:
+
+    from bs4 import XMLParsedAsHTMLWarning
+    import warnings
+
+    warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+  return BeautifulSoup(_CDATA.sub(_unwrap_cdata, text), PARSER)
+  v tibco-activematrix-businessworks-plug-in-for-siebel@6.1.0 266 topic(s), 140
+asset(s), 4 unit(s), 437 nav node(s), 5 generated -> 415 file(s)
+  v tibco-activematrix-businessworks-plug-in-for-smartmapper@7.1.3 209 
+topic(s), 73 asset(s), 1 unit(s), 210 nav node(s), 1 generated -> 287 file(s)
+C:\github\docushift-tool\src\docushift\transforms\markdown.py:112: XMLParsedAsHTMLWarning: It looks like you're using an HTML parser to parse an XML document.
+
+Assuming this really is an XML document, what you're doing might work, but you should know that using an XML parser will be more reliable. To parse this document as XML, make sure you have the Python package 'lxml' installed, and pass the keyword argument `features="xml"` into the BeautifulSoup constructor.
+
+If you want or need to use an HTML parser on this document, you can make this warning go away by filtering it. To do that, run this code before calling the BeautifulSoup constructor:
+
+    from bs4 import XMLParsedAsHTMLWarning
+    import warnings
+
+    warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+  return BeautifulSoup(_CDATA.sub(_unwrap_cdata, text), PARSER)
+  v tibco-activematrix-businessworks-plug-in-for-smartmapper@7.1.2 209 
+topic(s), 70 asset(s), 1 unit(s), 214 nav node(s), 1 generated -> 284 file(s)
+  v tibco-activematrix-businessworks-plug-in-for-smartmapper@6.0.0 146 
+topic(s), 165 asset(s), 3 unit(s), 321 nav node(s), 6 generated -> 320 file(s)
+  v tibco-activematrix-businessworks-plug-in-for-smpp@6.0.3 63 topic(s), 15 
+asset(s), 1 unit(s), 65 nav node(s), 1 generated -> 83 file(s)
+  v tibco-activematrix-businessworks-plug-in-for-snowflake@6.3.1 64 topic(s), 
+32 asset(s), 1 unit(s), 65 nav node(s), 1 generated -> 101 file(s)
+  v tibco-activematrix-businessworks-plug-in-for-snowflake@6.3.0 64 topic(s), 
+32 asset(s), 1 unit(s), 65 nav node(s), 1 generated -> 101 file(s)
+  v tibco-activematrix-businessworks-plug-in-for-snowflake@6.2.0 64 topic(s), 
+47 asset(s), 1 unit(s), 65 nav node(s), 1 generated -> 116 file(s)
+  v tibco-activematrix-businessworks-plug-in-for-swift@6.11.0 101 topic(s), 55 
+asset(s), 1 unit(s), 102 nav node(s), 1 generated -> 161 file(s)
+  v tibco-activematrix-businessworks-plug-in-for-swift@6.10.0 113 topic(s), 54 
+asset(s), 1 unit(s), 114 nav node(s), 1 generated -> 172 file(s)
+  v tibco-activematrix-businessworks-plug-in-for-swift@6.9.0 113 topic(s), 54 
+asset(s), 1 unit(s), 114 nav node(s), 1 generated -> 172 file(s)
+  v tibco-activematrix-businessworks-plug-in-for-swift@6.8.0 112 topic(s), 96 
+asset(s), 1 unit(s), 113 nav node(s), 1 generated -> 213 file(s)
+  v tibco-activematrix-businessworks-plug-in-for-swift@5.25.0 138 topic(s), 45 
+asset(s), 1 unit(s), 138 nav node(s) -> 187 file(s)
+  v tibco-activematrix-businessworks-plug-in-for-swift@5.24.0 150 topic(s), 44 
+asset(s), 1 unit(s), 151 nav node(s), 1 generated -> 199 file(s)
+  v tibco-activematrix-businessworks-plug-in-for-swift@5.23.0 150 topic(s), 44 
+asset(s), 1 unit(s), 151 nav node(s), 1 generated -> 199 file(s)
+  v tibco-activematrix-businessworks-plug-in-for-swift@5.22.0 150 topic(s), 44 
+asset(s), 1 unit(s), 151 nav node(s), 1 generated -> 199 file(s)
+C:\github\docushift-tool\src\docushift\transforms\markdown.py:112: XMLParsedAsHTMLWarning: It looks like you're using an HTML parser to parse an XML document.
+
+Assuming this really is an XML document, what you're doing might work, but you should know that using an XML parser will be more reliable. To parse this document as XML, make sure you have the Python package 'lxml' installed, and pass the keyword argument `features="xml"` into the BeautifulSoup constructor.
+
+If you want or need to use an HTML parser on this document, you can make this warning go away by filtering it. To do that, run this code before calling the BeautifulSoup constructor:
+
+    from bs4 import XMLParsedAsHTMLWarning
+    import warnings
+
+    warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+  return BeautifulSoup(_CDATA.sub(_unwrap_cdata, text), PARSER)
+  v tibco-activematrix-businessworks-plug-in-for-swift@5.11.0 243 topic(s), 103
+asset(s), 5 unit(s), 362 nav node(s), 6 generated -> 356 file(s)
+  v tibco-activematrix-businessworks-plug-in-for-tibco-auditsafe@6.4.2 52 
+topic(s), 31 asset(s), 1 unit(s), 53 nav node(s), 1 generated -> 88 file(s)
+  v tibco-activematrix-businessworks-plug-in-for-tibco-auditsafe@6.4.1 52 
+topic(s), 31 asset(s), 1 unit(s), 53 nav node(s), 1 generated -> 88 file(s)
+  v tibco-activematrix-businessworks-plug-in-for-tibco-auditsafe@6.4.0 52 
+topic(s), 31 asset(s), 1 unit(s), 53 nav node(s), 1 generated -> 88 file(s)
+  v tibco-activematrix-businessworks-plug-in-for-tibco-auditsafe@6.3.2 54 
+topic(s), 30 asset(s), 1 unit(s), 55 nav node(s), 1 generated -> 88 file(s)
+C:\github\docushift-tool\src\docushift\transforms\markdown.py:112: XMLParsedAsHTMLWarning: It looks like you're using an HTML parser to parse an XML document.
+
+Assuming this really is an XML document, what you're doing might work, but you should know that using an XML parser will be more reliable. To parse this document as XML, make sure you have the Python package 'lxml' installed, and pass the keyword argument `features="xml"` into the BeautifulSoup constructor.
+
+If you want or need to use an HTML parser on this document, you can make this warning go away by filtering it. To do that, run this code before calling the BeautifulSoup constructor:
+
+    from bs4 import XMLParsedAsHTMLWarning
+    import warnings
+
+    warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+  return BeautifulSoup(_CDATA.sub(_unwrap_cdata, text), PARSER)
+  v tibco-activematrix-businessworks-plug-in-for-tibco-auditsafe@6.3.1 42 
+topic(s), 15 asset(s), 1 unit(s), 43 nav node(s), 1 generated -> 62 file(s)
+  v tibco-activematrix-businessworks-plug-in-for-tibco-auditsafe@6.3.0 40 
+topic(s), 13 asset(s), 1 unit(s), 43 nav node(s), 1 generated -> 58 file(s)
+  v tibco-activematrix-businessworks-plug-in-for-tibco-auditsafe@6.2.0 40 
+topic(s), 13 asset(s), 1 unit(s), 43 nav node(s), 1 generated -> 58 file(s)
+  v tibco-activematrix-businessworks-plug-in-for-tibco-auditsafe@6.1.0 40 
+topic(s), 13 asset(s), 1 unit(s), 43 nav node(s), 1 generated -> 58 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |       45 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+4861 topic(s), 2232 asset(s) written.
+7348 file(s) standing in the measured output tree(s).
+tibco-activematrix-businessworks-plug-in-for-salesforce-com@6.11.0: 83 
+resolved, 0 skin, 0 escaped, 0 dangling, 0 case-mismatch, 121 orphan (4.8 MB)
+tibco-activematrix-businessworks-plug-in-for-salesforce-com@6.11.0: CSH 49 
+resolved, 0 unresolved, 0 ambiguous
+tibco-activematrix-businessworks-plug-in-for-salesforce-com@6.11.0: skipped 3 
+generated-directory, 2 runtime-stub
+tibco-activematrix-businessworks-plug-in-for-salesforce-com@6.10.0: 155 
+resolved, 0 skin, 0 escaped, 0 dangling, 0 case-mismatch, 94 orphan (2.3 MB)
+tibco-activematrix-businessworks-plug-in-for-salesforce-com@6.10.0: CSH 49 
+resolved, 0 unresolved, 0 ambiguous
+tibco-activematrix-businessworks-plug-in-for-salesforce-com@6.10.0: skipped 3 
+generated-directory, 2 runtime-stub
+tibco-activematrix-businessworks-plug-in-for-salesforce-com@6.9.3: 71 resolved,
+0 skin, 0 escaped, 0 dangling, 0 case-mismatch, 1 orphan (0.7 MB)
+tibco-activematrix-businessworks-plug-in-for-salesforce-com@6.9.3: CSH 24 
+resolved, 0 unresolved, 0 ambiguous
+tibco-activematrix-businessworks-plug-in-for-salesforce-com@6.9.3: skipped 2 
+not-a-topic, 1 publication-homepage
+tibco-activematrix-businessworks-plug-in-for-salesforce-com@2.6.0: 41 resolved,
+0 skin, 0 escaped, 0 dangling, 0 case-mismatch, 118 orphan (5.2 MB)
+tibco-activematrix-businessworks-plug-in-for-salesforce-com@2.6.0: skipped 4 
+generated-directory, 2 runtime-stub
+tibco-activematrix-businessworks-plug-in-for-salesforce-com@2.5.0: 40 resolved,
+6 skin, 0 escaped, 0 dangling, 0 case-mismatch, 28 orphan (0.3 MB)
+tibco-activematrix-businessworks-plug-in-for-salesforce-com@2.5.0: CSH 10 
+resolved, 0 unresolved, 0 ambiguous
+tibco-activematrix-businessworks-plug-in-for-salesforce-com@2.5.0: skipped 2 
+generated-list, 4 runtime-stub
+tibco-activematrix-businessworks-plug-in-for-sap-ariba@6.0.0: 24 resolved, 0 
+skin, 0 escaped, 0 dangling, 0 case-mismatch, 1 orphan (0.2 MB)
+tibco-activematrix-businessworks-plug-in-for-sap-ariba@6.0.0: CSH 2 resolved, 0
+unresolved, 0 ambiguous
+tibco-activematrix-businessworks-plug-in-for-sap-ariba@6.0.0: skipped 2 
+not-a-topic, 1 publication-homepage
+tibco-activematrix-businessworks-plug-in-for-sap-business-technology-platform@6
+.0.0: 47 resolved, 0 skin, 0 escaped, 0 dangling, 0 case-mismatch, 54 orphan 
+(4.1 MB)
+tibco-activematrix-businessworks-plug-in-for-sap-business-technology-platform@6
+.0.0: CSH 4 resolved, 0 unresolved, 0 ambiguous
+tibco-activematrix-businessworks-plug-in-for-sap-business-technology-platform@6
+.0.0: skipped 3 generated-directory, 2 runtime-stub, 2 unreferenced-template
+tibco-activematrix-businessworks-plug-in-for-sap-hana-database@6.1.0: 39 
+resolved, 0 skin, 0 escaped, 0 dangling, 0 case-mismatch, 108 orphan (4.4 MB)
+tibco-activematrix-businessworks-plug-in-for-sap-hana-database@6.1.0: CSH 18 
+resolved, 0 unresolved, 0 ambiguous
+tibco-activematrix-businessworks-plug-in-for-sap-hana-database@6.1.0: skipped 3
+generated-directory, 2 runtime-stub
+tibco-activematrix-businessworks-plug-in-for-sap-solutions@8.8.0: 44 resolved, 
+0 skin, 1 escaped, 0 dangling, 0 case-mismatch, 92 orphan (3.6 MB)
+tibco-activematrix-businessworks-plug-in-for-sap-solutions@8.8.0: CSH 18 
+resolved, 0 unresolved, 0 ambiguous
+tibco-activematrix-businessworks-plug-in-for-sap-solutions@8.8.0: skipped 4 
+generated-directory, 2 runtime-stub
+tibco-activematrix-businessworks-plug-in-for-sap-solutions@8.7.0: 46 resolved, 
+0 skin, 1 escaped, 0 dangling, 0 case-mismatch, 93 orphan (3.7 MB)
+tibco-activematrix-businessworks-plug-in-for-sap-solutions@8.7.0: CSH 18 
+resolved, 0 unresolved, 0 ambiguous
+tibco-activematrix-businessworks-plug-in-for-sap-solutions@8.7.0: skipped 4 
+generated-directory, 2 runtime-stub
+tibco-activematrix-businessworks-plug-in-for-sap-solutions@8.6.0: 43 resolved, 
+0 skin, 0 escaped, 0 dangling, 0 case-mismatch, 3 orphan (0.8 MB)
+tibco-activematrix-businessworks-plug-in-for-sap-solutions@8.6.0: CSH 14 
+resolved, 0 unresolved, 0 ambiguous
+tibco-activematrix-businessworks-plug-in-for-sap-solutions@8.6.0: skipped 2 
+not-a-topic, 1 publication-homepage
+tibco-activematrix-businessworks-plug-in-for-sap-solutions@7.3.2: 154 resolved,
+0 skin, 0 escaped, 0 dangling, 0 case-mismatch, 133 orphan (6.9 MB)
+tibco-activematrix-businessworks-plug-in-for-sap-solutions@7.3.2: CSH 16 
+resolved, 0 unresolved, 0 ambiguous
+tibco-activematrix-businessworks-plug-in-for-sap-solutions@7.3.2: skipped 3 
+generated-directory, 2 runtime-stub, 1 unreferenced-template
+tibco-activematrix-businessworks-plug-in-for-sap-solutions@7.3.1: 156 resolved,
+12 skin, 0 escaped, 0 dangling, 0 case-mismatch, 100 orphan (2.2 MB)
+tibco-activematrix-businessworks-plug-in-for-sap-solutions@7.3.1: CSH 17 
+resolved, 0 unresolved, 0 ambiguous
+tibco-activematrix-businessworks-plug-in-for-sap-solutions@7.3.1: skipped 4 
+front-matter, 4 generated-list, 12 runtime-stub
+tibco-activematrix-businessworks-plug-in-for-sap-successfactors@6.1.0: 42 
+resolved, 0 skin, 7 escaped, 0 dangling, 0 case-mismatch, 77 orphan (2.1 MB)
+tibco-activematrix-businessworks-plug-in-for-sap-successfactors@6.1.0: CSH 4 
+resolved, 0 unresolved, 0 ambiguous
+tibco-activematrix-businessworks-plug-in-for-sap-successfactors@6.1.0: skipped 
+3 generated-directory, 2 runtime-stub
+tibco-activematrix-businessworks-plug-in-for-servicenow@6.1.0: 17 resolved, 0 
+skin, 0 escaped, 0 dangling, 0 case-mismatch, 1 orphan (0.2 MB)
+tibco-activematrix-businessworks-plug-in-for-servicenow@6.1.0: CSH 1 resolved, 
+0 unresolved, 0 ambiguous
+tibco-activematrix-businessworks-plug-in-for-servicenow@6.1.0: skipped 2 
+not-a-topic, 1 publication-homepage, 2 republished-duplicate
+tibco-activematrix-businessworks-plug-in-for-sftp@6.2.0: 17 resolved, 0 skin, 0
+escaped, 0 dangling, 0 case-mismatch, 85 orphan (3.2 MB)
+tibco-activematrix-businessworks-plug-in-for-sftp@6.2.0: CSH 21 resolved, 0 
+unresolved, 0 ambiguous
+tibco-activematrix-businessworks-plug-in-for-sftp@6.2.0: skipped 4 
+generated-directory, 2 runtime-stub
+tibco-activematrix-businessworks-plug-in-for-sftp@6.1.4: 13 resolved, 0 skin, 5
+escaped, 0 dangling, 0 case-mismatch, 51 orphan (1.6 MB)
+tibco-activematrix-businessworks-plug-in-for-sftp@6.1.4: CSH 21 resolved, 0 
+unresolved, 0 ambiguous
+tibco-activematrix-businessworks-plug-in-for-sftp@6.1.4: skipped 3 
+generated-directory, 2 runtime-stub
+tibco-activematrix-businessworks-plug-in-for-sftp@1.1.1: 17 resolved, 0 skin, 0
+escaped, 0 dangling, 0 case-mismatch, 85 orphan (3.2 MB)
+tibco-activematrix-businessworks-plug-in-for-sftp@1.1.1: CSH 21 resolved, 0 
+unresolved, 0 ambiguous
+tibco-activematrix-businessworks-plug-in-for-sftp@1.1.1: skipped 4 
+generated-directory, 2 runtime-stub
+tibco-activematrix-businessworks-plug-in-for-sftp@1.1.0: 12 resolved, 6 skin, 0
+escaped, 0 dangling, 0 case-mismatch, 26 orphan (0.3 MB)
+tibco-activematrix-businessworks-plug-in-for-sftp@1.1.0: CSH 12 resolved, 0 
+unresolved, 0 ambiguous
+tibco-activematrix-businessworks-plug-in-for-sftp@1.1.0: skipped 2 
+front-matter, 4 runtime-stub
+tibco-activematrix-businessworks-plug-in-for-siebel@7.3.0: 138 resolved, 0 
+skin, 6 escaped, 0 dangling, 0 case-mismatch, 97 orphan (3.0 MB)
+tibco-activematrix-businessworks-plug-in-for-siebel@7.3.0: CSH 17 resolved, 0 
+unresolved, 0 ambiguous
+tibco-activematrix-businessworks-plug-in-for-siebel@7.3.0: skipped 3 
+generated-directory, 2 runtime-stub
+tibco-activematrix-businessworks-plug-in-for-siebel@6.1.0: 177 resolved, 12 
+skin, 0 escaped, 0 dangling, 0 case-mismatch, 60 orphan (0.7 MB)
+tibco-activematrix-businessworks-plug-in-for-siebel@6.1.0: CSH 12 resolved, 0 
+unresolved, 0 ambiguous
+tibco-activematrix-businessworks-plug-in-for-siebel@6.1.0: skipped 4 
+front-matter, 8 generated-list, 8 runtime-stub
+tibco-activematrix-businessworks-plug-in-for-smartmapper@7.1.3: 103 resolved, 0
+skin, 0 escaped, 1 dangling, 0 case-mismatch, 95 orphan (2.5 MB)
+tibco-activematrix-businessworks-plug-in-for-smartmapper@7.1.3: CSH 27 
+resolved, 0 unresolved, 0 ambiguous
+tibco-activematrix-businessworks-plug-in-for-smartmapper@7.1.3: skipped 3 
+generated-directory, 1 placeholder-template, 2 runtime-stub
+tibco-activematrix-businessworks-plug-in-for-smartmapper@7.1.2: 99 resolved, 0 
+skin, 0 escaped, 0 dangling, 0 case-mismatch, 1 orphan (0.6 MB)
+tibco-activematrix-businessworks-plug-in-for-smartmapper@7.1.2: CSH 27 
+resolved, 0 unresolved, 0 ambiguous
+tibco-activematrix-businessworks-plug-in-for-smartmapper@7.1.2: skipped 2 
+not-a-topic, 1 publication-homepage, 4 republished-duplicate
+tibco-activematrix-businessworks-plug-in-for-smartmapper@6.0.0: 202 resolved, 9
+skin, 0 escaped, 0 dangling, 0 case-mismatch, 43 orphan (0.5 MB)
+tibco-activematrix-businessworks-plug-in-for-smartmapper@6.0.0: CSH 28 
+resolved, 0 unresolved, 0 ambiguous
+tibco-activematrix-businessworks-plug-in-for-smartmapper@6.0.0: skipped 6 
+front-matter, 4 generated-list, 6 runtime-stub
+tibco-activematrix-businessworks-plug-in-for-smpp@6.0.3: 18 resolved, 0 skin, 0
+escaped, 0 dangling, 0 case-mismatch, 72 orphan (1.8 MB)
+tibco-activematrix-businessworks-plug-in-for-smpp@6.0.3: CSH 5 resolved, 0 
+unresolved, 0 ambiguous
+tibco-activematrix-businessworks-plug-in-for-smpp@6.0.3: skipped 3 
+generated-directory, 2 runtime-stub
+tibco-activematrix-businessworks-plug-in-for-snowflake@6.3.1: 40 resolved, 0 
+skin, 0 escaped, 0 dangling, 0 case-mismatch, 110 orphan (4.1 MB)
+tibco-activematrix-businessworks-plug-in-for-snowflake@6.3.1: CSH 14 resolved, 
+0 unresolved, 0 ambiguous
+tibco-activematrix-businessworks-plug-in-for-snowflake@6.3.1: skipped 4 
+generated-directory, 2 runtime-stub
+tibco-activematrix-businessworks-plug-in-for-snowflake@6.3.0: 40 resolved, 0 
+skin, 0 escaped, 0 dangling, 0 case-mismatch, 109 orphan (4.1 MB)
+tibco-activematrix-businessworks-plug-in-for-snowflake@6.3.0: CSH 14 resolved, 
+0 unresolved, 0 ambiguous
+tibco-activematrix-businessworks-plug-in-for-snowflake@6.3.0: skipped 3 
+generated-directory, 2 runtime-stub
+tibco-activematrix-businessworks-plug-in-for-snowflake@6.2.0: 64 resolved, 0 
+skin, 8 escaped, 0 dangling, 0 case-mismatch, 85 orphan (2.5 MB)
+tibco-activematrix-businessworks-plug-in-for-snowflake@6.2.0: CSH 14 resolved, 
+0 unresolved, 0 ambiguous
+tibco-activematrix-businessworks-plug-in-for-snowflake@6.2.0: skipped 3 
+generated-directory, 2 runtime-stub
+tibco-activematrix-businessworks-plug-in-for-swift@6.11.0: 109 resolved, 0 
+skin, 0 escaped, 0 dangling, 0 case-mismatch, 124 orphan (13.7 MB)
+tibco-activematrix-businessworks-plug-in-for-swift@6.11.0: CSH 16 resolved, 0 
+unresolved, 0 ambiguous
+tibco-activematrix-businessworks-plug-in-for-swift@6.11.0: skipped 1 
+generated-directory, 2 runtime-stub
+tibco-activematrix-businessworks-plug-in-for-swift@6.10.0: 136 resolved, 0 
+skin, 0 escaped, 0 dangling, 0 case-mismatch, 122 orphan (13.7 MB)
+tibco-activematrix-businessworks-plug-in-for-swift@6.10.0: CSH 16 resolved, 0 
+unresolved, 0 ambiguous
+tibco-activematrix-businessworks-plug-in-for-swift@6.10.0: skipped 1 
+generated-directory, 2 runtime-stub
+tibco-activematrix-businessworks-plug-in-for-swift@6.9.0: 136 resolved, 0 skin,
+0 escaped, 0 dangling, 0 case-mismatch, 119 orphan (12.6 MB)
+tibco-activematrix-businessworks-plug-in-for-swift@6.9.0: CSH 16 resolved, 0 
+unresolved, 0 ambiguous
+tibco-activematrix-businessworks-plug-in-for-swift@6.9.0: skipped 1 
+generated-directory, 2 runtime-stub
+tibco-activematrix-businessworks-plug-in-for-swift@6.8.0: 222 resolved, 0 skin,
+0 escaped, 0 dangling, 0 case-mismatch, 97 orphan (3.5 MB)
+tibco-activematrix-businessworks-plug-in-for-swift@6.8.0: CSH 16 resolved, 0 
+unresolved, 0 ambiguous
+tibco-activematrix-businessworks-plug-in-for-swift@6.8.0: skipped 3 
+generated-directory, 2 runtime-stub
+tibco-activematrix-businessworks-plug-in-for-swift@5.25.0: 128 resolved, 0 
+skin, 0 escaped, 0 dangling, 0 case-mismatch, 92 orphan (2.9 MB)
+tibco-activematrix-businessworks-plug-in-for-swift@5.25.0: CSH 12 resolved, 0 
+unresolved, 0 ambiguous
+tibco-activematrix-businessworks-plug-in-for-swift@5.25.0: skipped 4 
+generated-directory, 2 runtime-stub
+tibco-activematrix-businessworks-plug-in-for-swift@5.24.0: 127 resolved, 0 
+skin, 0 escaped, 0 dangling, 0 case-mismatch, 91 orphan (2.9 MB)
+tibco-activematrix-businessworks-plug-in-for-swift@5.24.0: CSH 12 resolved, 0 
+unresolved, 0 ambiguous
+tibco-activematrix-businessworks-plug-in-for-swift@5.24.0: skipped 4 
+generated-directory, 2 runtime-stub
+tibco-activematrix-businessworks-plug-in-for-swift@5.23.0: 127 resolved, 0 
+skin, 0 escaped, 0 dangling, 0 case-mismatch, 90 orphan (2.9 MB)
+tibco-activematrix-businessworks-plug-in-for-swift@5.23.0: CSH 12 resolved, 0 
+unresolved, 0 ambiguous
+tibco-activematrix-businessworks-plug-in-for-swift@5.23.0: skipped 3 
+generated-directory, 2 runtime-stub
+tibco-activematrix-businessworks-plug-in-for-swift@5.22.0: 127 resolved, 0 
+skin, 0 escaped, 0 dangling, 0 case-mismatch, 73 orphan (1.4 MB)
+tibco-activematrix-businessworks-plug-in-for-swift@5.22.0: CSH 12 resolved, 0 
+unresolved, 0 ambiguous
+tibco-activematrix-businessworks-plug-in-for-swift@5.22.0: skipped 3 
+generated-directory, 2 runtime-stub
+tibco-activematrix-businessworks-plug-in-for-swift@5.11.0: 124 resolved, 15 
+skin, 0 escaped, 0 dangling, 0 case-mismatch, 72 orphan (1.0 MB)
+tibco-activematrix-businessworks-plug-in-for-swift@5.11.0: CSH 21 resolved, 0 
+unresolved, 0 ambiguous
+tibco-activematrix-businessworks-plug-in-for-swift@5.11.0: skipped 6 
+front-matter, 7 generated-list, 10 runtime-stub
+tibco-activematrix-businessworks-plug-in-for-tibco-auditsafe@6.4.2: 35 
+resolved, 0 skin, 0 escaped, 0 dangling, 0 case-mismatch, 102 orphan (4.9 MB)
+tibco-activematrix-businessworks-plug-in-for-tibco-auditsafe@6.4.2: CSH 6 
+resolved, 0 unresolved, 0 ambiguous
+tibco-activematrix-businessworks-plug-in-for-tibco-auditsafe@6.4.2: skipped 4 
+generated-directory, 2 runtime-stub
+tibco-activematrix-businessworks-plug-in-for-tibco-auditsafe@6.4.1: 35 
+resolved, 0 skin, 0 escaped, 0 dangling, 0 case-mismatch, 99 orphan (4.8 MB)
+tibco-activematrix-businessworks-plug-in-for-tibco-auditsafe@6.4.1: CSH 6 
+resolved, 0 unresolved, 0 ambiguous
+tibco-activematrix-businessworks-plug-in-for-tibco-auditsafe@6.4.1: skipped 4 
+generated-directory, 2 runtime-stub
+tibco-activematrix-businessworks-plug-in-for-tibco-auditsafe@6.4.0: 35 
+resolved, 0 skin, 7 escaped, 0 dangling, 0 case-mismatch, 99 orphan (4.8 MB)
+tibco-activematrix-businessworks-plug-in-for-tibco-auditsafe@6.4.0: CSH 6 
+resolved, 0 unresolved, 0 ambiguous
+tibco-activematrix-businessworks-plug-in-for-tibco-auditsafe@6.4.0: skipped 4 
+generated-directory, 2 runtime-stub
+tibco-activematrix-businessworks-plug-in-for-tibco-auditsafe@6.3.2: 33 
+resolved, 0 skin, 7 escaped, 0 dangling, 0 case-mismatch, 79 orphan (2.9 MB)
+tibco-activematrix-businessworks-plug-in-for-tibco-auditsafe@6.3.2: skipped 3 
+generated-directory, 1 placeholder-template, 2 runtime-stub
+tibco-activematrix-businessworks-plug-in-for-tibco-auditsafe@6.3.1: 16 
+resolved, 0 skin, 0 escaped, 0 dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+tibco-activematrix-businessworks-plug-in-for-tibco-auditsafe@6.3.1: CSH 3 
+resolved, 0 unresolved, 0 ambiguous
+tibco-activematrix-businessworks-plug-in-for-tibco-auditsafe@6.3.1: skipped 2 
+not-a-topic, 1 publication-homepage
+tibco-activematrix-businessworks-plug-in-for-tibco-auditsafe@6.3.0: 14 
+resolved, 0 skin, 0 escaped, 0 dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+tibco-activematrix-businessworks-plug-in-for-tibco-auditsafe@6.3.0: CSH 3 
+resolved, 0 unresolved, 0 ambiguous
+tibco-activematrix-businessworks-plug-in-for-tibco-auditsafe@6.3.0: skipped 2 
+not-a-topic, 1 publication-homepage, 2 republished-duplicate
+tibco-activematrix-businessworks-plug-in-for-tibco-auditsafe@6.2.0: 14 
+resolved, 0 skin, 0 escaped, 0 dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+tibco-activematrix-businessworks-plug-in-for-tibco-auditsafe@6.2.0: CSH 3 
+resolved, 0 unresolved, 0 ambiguous
+tibco-activematrix-businessworks-plug-in-for-tibco-auditsafe@6.2.0: skipped 2 
+not-a-topic, 2 republished-duplicate
+tibco-activematrix-businessworks-plug-in-for-tibco-auditsafe@6.1.0: 14 
+resolved, 0 skin, 0 escaped, 0 dangling, 0 case-mismatch, 2 orphan (1.9 MB)
+tibco-activematrix-businessworks-plug-in-for-tibco-auditsafe@6.1.0: CSH 3 
+resolved, 0 unresolved, 0 ambiguous
+tibco-activematrix-businessworks-plug-in-for-tibco-auditsafe@6.1.0: skipped 2 
+not-a-topic, 2 republished-duplicate
+Findings: 1 error, 71 warnings, 147 notes.

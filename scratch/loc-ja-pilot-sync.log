@@ -1,0 +1,15 @@
+Syncing 1 version(s) into C:\github\ibi-docs-aem...
+  v ibi-webfocus-client@9.3.6 -> online-help/9-3-6 7848 file(s), 144.3 MB
+                  Sync                  
++--------------------------------------+
+| Outcome         | Rows | online-help |
+|-----------------+------+-------------|
+| Synced          |    1 |           1 |
+| Already current |    0 |           0 |
+| No source tree  |    0 |           0 |
+| Skipped         |    0 |           0 |
+| Failed          |    0 |           0 |
++--------------------------------------+
+7848 file(s), 144.3 MB copied.
+1 product metadata.yml, 1 version.yml written.
+2686 redirect(s) in 1 published map(s), tree-rooted (no publish_base_url set).

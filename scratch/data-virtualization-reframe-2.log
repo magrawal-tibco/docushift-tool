@@ -1,0 +1,19 @@
+Reframing 3 version(s)...
+  v tibco-data-virtualization@8.9.0 10152 topic(s) -> 11056 page(s)
+  v tibco-data-virtualization@8.8.1 10265 topic(s) -> 10515 page(s)
+  v tibco-data-virtualization@8.8.0 10265 topic(s) -> 10487 page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |        3 |
+| Already current             |        0 |
+| Not Flare or DITA (skipped) |        0 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+30682 topic(s) read into 32058 page(s).
+Files: 57565 source doc -> 32058 converted -> 32058 merged (0.0% fewer at the 
+merge, 44.3% end to end); 33469 file(s) standing in the measured merged 
+tree(s).
+Findings: 6 warnings, 6 notes.

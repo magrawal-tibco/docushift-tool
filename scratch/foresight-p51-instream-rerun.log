@@ -1,0 +1,76 @@
+Converting 1 version(s)...
+  v tibco-foresight-instream@9.4.0 1617 topic(s), 1385 asset(s), 1 unit(s), 
+1625 nav node(s), 1 generated -> 3006 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+1617 topic(s), 1385 asset(s) written.
+3006 file(s) standing in the measured output tree(s).
+tibco-foresight-instream@9.4.0: 1443 resolved, 0 skin, 0 escaped, 429 dangling,
+0 case-mismatch, 32409 orphan (635.9 MB)
+tibco-foresight-instream@9.4.0: skipped 4 generated-directory, 6565 
+merged-subsystem-copy, 26 runtime-stub, 1 unreferenced-template
+Findings: 2 errors, 4 warnings, 7 notes.
+Reframing 1 version(s)...
+  v tibco-foresight-instream@9.4.0 764 topic(s) -> 1045 page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |        1 |
+| Already current             |        0 |
+| Not Flare or DITA (skipped) |        0 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+764 topic(s) read into 1045 page(s).
+Files: 42606 source doc -> 1617 converted -> 1045 merged (35.4% fewer at the 
+merge, 97.5% end to end); 2438 file(s) standing in the measured merged tree(s).
+913 page(s) queued for editorial review:
+  tibco-foresight-instream@9.4.0: 913 of 1045 -- see review-queue.csv
+Findings: 2 warnings, 3 notes.
+Converting 1 version(s)...
+  v tibco-foresight-instream@9.3.0 1845 topic(s), 1370 asset(s), 1 unit(s), 
+1853 nav node(s), 1 generated -> 3219 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+1845 topic(s), 1370 asset(s) written.
+3219 file(s) standing in the measured output tree(s).
+tibco-foresight-instream@9.3.0: 1464 resolved, 0 skin, 4 escaped, 575 dangling,
+0 case-mismatch, 32408 orphan (635.1 MB)
+tibco-foresight-instream@9.3.0: skipped 4 generated-directory, 6624 
+merged-subsystem-copy, 26 runtime-stub, 1 unreferenced-template
+Findings: 2 errors, 4 warnings, 7 notes.
+Reframing 1 version(s)...
+  v tibco-foresight-instream@9.3.0 760 topic(s) -> 1225 page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |        1 |
+| Already current             |        0 |
+| Not Flare or DITA (skipped) |        0 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+760 topic(s) read into 1225 page(s).
+Files: 42932 source doc -> 1845 converted -> 1225 merged (33.6% fewer at the 
+merge, 97.1% end to end); 2603 file(s) standing in the measured merged tree(s).
+1154 page(s) queued for editorial review:
+  tibco-foresight-instream@9.3.0: 1154 of 1225 -- see review-queue.csv
+Findings: 1 warning, 3 notes.

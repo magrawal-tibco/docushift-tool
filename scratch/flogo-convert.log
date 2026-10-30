@@ -1,0 +1,41 @@
+Converting 6 version(s)...
+  v tibco-flogo@3.0.0 809 topic(s), 176 asset(s), 1 unit(s), 814 nav node(s), 5
+generated -> 993 file(s)
+  v tibco-flogo@2.26.8 858 topic(s), 234 asset(s), 1 unit(s), 863 nav node(s), 
+4 generated -> 1099 file(s)
+  v tibco-flogo@2.26.7 852 topic(s), 234 asset(s), 1 unit(s), 857 nav node(s), 
+4 generated -> 1094 file(s)
+  v tibco-flogo@2.26.6 841 topic(s), 234 asset(s), 1 unit(s), 846 nav node(s), 
+4 generated -> 1083 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        4 |
+| Already current   |        1 |
+| No extracted tree |        1 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+3360 topic(s), 878 asset(s) written.
+4269 file(s) standing in the measured output tree(s).
+tibco-flogo@3.0.0: 217 resolved, 0 skin, 3 escaped, 0 dangling, 0 
+case-mismatch, 388 orphan (22.9 MB)
+tibco-flogo@3.0.0: CSH 1 resolved, 0 unresolved, 0 ambiguous
+tibco-flogo@3.0.0: skipped 4 generated-directory, 2 runtime-stub
+tibco-flogo@2.26.8: 278 resolved, 0 skin, 3 escaped, 0 dangling, 0 
+case-mismatch, 614 orphan (39.8 MB)
+tibco-flogo@2.26.8: CSH 1 resolved, 0 unresolved, 0 ambiguous
+tibco-flogo@2.26.8: skipped 4 generated-directory, 2 runtime-stub
+tibco-flogo@2.26.7: 278 resolved, 0 skin, 3 escaped, 0 dangling, 0 
+case-mismatch, 612 orphan (39.8 MB)
+tibco-flogo@2.26.7: CSH 1 resolved, 0 unresolved, 0 ambiguous
+tibco-flogo@2.26.7: skipped 4 generated-directory, 2 runtime-stub
+tibco-flogo@2.26.6: 278 resolved, 0 skin, 3 escaped, 0 dangling, 0 
+case-mismatch, 612 orphan (39.8 MB)
+tibco-flogo@2.26.6: CSH 1 resolved, 0 unresolved, 0 ambiguous
+tibco-flogo@2.26.6: skipped 4 generated-directory, 2 runtime-stub
+! tibco-flogo@3.0.1: no extracted tree at 
+C:\github\docushift-tool\families\en-us-tib-flogo\extracted\tibco-flogo\3.0.1; 
+run `docushift extract` first
+Findings: 12 warnings, 21 notes.

@@ -1,0 +1,56 @@
+Extracting 14 version(s)...
+  v ibi-omni-gen@4.3.0 4 file(s), auto
+  v ibi-omni-gen-mdm@4.3.0 4 file(s), auto
+  v ibi-omni-healthdata@4.3.0 4 file(s), auto
+  v ibi-omni-healthdata-business-release@2023.3.0 3 file(s), auto
+  v ibi-omni-healthdata-business-release@2023.2.0 3 file(s), auto
+  v ibi-omni-healthdata-business-release@2023.1.0 3 file(s), auto
+  v ibi-omni-insurance@4.3.0 3 file(s), auto
+  v ibi-web-query-for-ibm-i@9.2.1 3 file(s), auto
+  v ibi-web-query-for-ibm-i@9.2.0 3 file(s), auto
+  v ibi-web-query-for-ibm-i@9.1.2 3 file(s), auto
+  v tibco-iway-business-activity-monitor@8.0.5 6 file(s), auto
+  v tibco-iway-trading-partner-manager@8.0.5 5 file(s), auto
+                Extract                
++-------------------------------------+
+| Outcome                  | Versions |
+|--------------------------+----------|
+| Extracted                |       12 |
+| Already current          |        0 |
+| Measured from cache      |        0 |
+| No package               |        2 |
+| Refused (unsafe archive) |        0 |
+| Failed                   |        0 |
++-------------------------------------+
+44 file(s) written.
+       Engines       
++-------------------+
+| Engine | Versions |
+|--------+----------|
+| auto   |       12 |
++-------------------+
+? ibi-omni-gen@4.3.0: engine undetected (`auto`)
+? ibi-omni-gen-mdm@4.3.0: engine undetected (`auto`)
+? ibi-omni-healthdata@4.3.0: engine undetected (`auto`)
+? ibi-omni-healthdata-business-release@2023.3.0: engine undetected (`auto`)
+? ibi-omni-healthdata-business-release@2023.2.0: engine undetected (`auto`)
+? ibi-omni-healthdata-business-release@2023.1.0: engine undetected (`auto`)
+? ibi-omni-insurance@4.3.0: engine undetected (`auto`)
+? ibi-web-query-for-ibm-i@9.2.1: engine undetected (`auto`)
+? ibi-web-query-for-ibm-i@9.2.0: engine undetected (`auto`)
+? ibi-web-query-for-ibm-i@9.1.2: engine undetected (`auto`)
+? tibco-iway-business-activity-monitor@8.0.5: engine undetected (`auto`)
+? tibco-iway-trading-partner-manager@8.0.5: engine undetected (`auto`)
+CSH: 0 source(s), 0 identifier(s).
+                     Assets                     
++----------------------------------------------+
+| Category | Destination     | Files |    Size |
+|----------+-----------------+-------+---------|
+| document | document-router |    44 | 28.0 MB |
++----------------------------------------------+
+! ibi-web-query-for-ibm-i@9.1.1: no package at 
+C:\github\docushift-tool\families\en-us-ibi-legacy\downloads\ibi-web-query-for-
+ibm-i-9.1.1.zip; run `docushift download` first
+! ibi-web-query-for-ibm-i@9.1.0: no package at 
+C:\github\docushift-tool\families\en-us-ibi-legacy\downloads\ibi-web-query-for-
+ibm-i-9.1.0.zip; run `docushift download` first

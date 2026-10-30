@@ -1,0 +1,87 @@
+Syncing 1 version(s) into ..\tibco-docs-aem...
+  v tibco-flogo@3.0.1 -> online-help/3-0-1 435 file(s), 13.1 MB
+  v tibco-flogo@3.0.1 -> user-guides/3-0-1 5 file(s), 27.5 MB
+  v tibco-flogo@3.0.1 -> release-information/3-0-1 2 file(s), 1.6 MB
+  v tibco-flogo@3.0.1 -> reference-documents/3-0-1 1 file(s), 1.9 MB
+                                     Sync                                      
++-----------------------------------------------------------------------------+
+| Outcome   | Rows | online-h… | user-gui… | release-… | referenc… | archives |
+|-----------+------+-----------+-----------+-----------+-----------+----------|
+| Synced    |    4 |         1 |         1 |         1 |         1 |        0 |
+| Already   |    1 |         0 |         0 |         0 |         0 |        1 |
+| current   |      |           |           |           |           |          |
+| No source |    0 |         0 |         0 |         0 |         0 |        0 |
+| tree      |      |           |           |           |           |          |
+| Skipped   |    0 |         0 |         0 |         0 |         0 |        0 |
+| Failed    |    0 |         0 |         0 |         0 |         0 |        0 |
++-----------------------------------------------------------------------------+
+443 file(s), 44.0 MB copied.
+1 product metadata.yml, 4 version.yml written.
+Published merged (Stage 6b): tibco-flogo.
+6628 redirect(s) in 2 published map(s), tree-rooted (no publish_base_url set).
+Syncing 1 version(s) into ..\tibco-docs-aem...
+  v tibco-product-and-service-inventory-2-1-0@2.1.0 -> online-help/2-1-0 273 
+file(s), 9.4 MB
+  v tibco-product-and-service-inventory-2-1-0@2.1.0 -> user-guides/2-1-0 4 
+file(s), 4.9 MB
+                         Sync                         
++----------------------------------------------------+
+| Outcome         | Rows | online-help | user-guides |
+|-----------------+------+-------------+-------------|
+| Synced          |    2 |           1 |           1 |
+| Already current |    0 |           0 |           0 |
+| No source tree  |    0 |           0 |           0 |
+| Skipped         |    0 |           0 |           0 |
+| Failed          |    0 |           0 |           0 |
++----------------------------------------------------+
+277 file(s), 14.3 MB copied.
+1 product metadata.yml, 2 version.yml written.
+Published merged (Stage 6b): tibco-product-and-service-inventory-2-1-0.
+251 redirect(s) in 1 published map(s), tree-rooted (no publish_base_url set).
+Syncing 1 version(s) into ..\tibco-docs-aem...
+  v tibco-businessworks-formbuilder@5.3.2 -> online-help/5-3-2 435 file(s), 3.6
+MB
+  v tibco-businessworks-formbuilder@5.3.2 -> user-guides/5-3-2 2 file(s), 4.0 
+MB
+  v tibco-businessworks-formbuilder@5.3.2 -> release-information/5-3-2 2 
+file(s), 0.3 MB
+  v tibco-businessworks-formbuilder@5.3.2 -> reference-documents/5-3-2 1 
+file(s), 0.0 MB
+                                     Sync                                      
++-----------------------------------------------------------------------------+
+| Outcome     | Rows | online-help | user-guides | release-in… | reference-d… |
+|-------------+------+-------------+-------------+-------------+--------------|
+| Synced      |    4 |           1 |           1 |           1 |            1 |
+| Already     |    0 |           0 |           0 |           0 |            0 |
+| current     |      |             |             |             |              |
+| No source   |    0 |           0 |           0 |           0 |            0 |
+| tree        |      |             |             |             |              |
+| Skipped     |    0 |           0 |           0 |           0 |            0 |
+| Failed      |    0 |           0 |           0 |           0 |            0 |
++-----------------------------------------------------------------------------+
+440 file(s), 7.9 MB copied.
+1 product metadata.yml, 4 version.yml written.
+Syncing 1 version(s) into ..\tibco-docs-aem...
+  v tibco-business-studio-community-edition@4.2.0 -> user-guides/4-2-0 1 
+file(s), 0.4 MB
+  v tibco-business-studio-community-edition@4.2.0 -> release-information/4-2-0 
+1 file(s), 0.0 MB
+  v tibco-business-studio-community-edition@4.2.0 -> reference-documents/4-2-0 
+1 file(s), 1.4 MB
+                                     Sync                                      
++-----------------------------------------------------------------------------+
+| Outcome     | Rows | online-help | user-guides | release-in… | reference-d… |
+|-------------+------+-------------+-------------+-------------+--------------|
+| Synced      |    3 |           0 |           1 |           1 |            1 |
+| Already     |    0 |           0 |           0 |           0 |            0 |
+| current     |      |             |             |             |              |
+| No source   |    1 |           1 |           0 |           0 |            0 |
+| tree        |      |             |             |             |              |
+| Skipped     |    0 |           0 |           0 |           0 |            0 |
+| Failed      |    0 |           0 |           0 |           0 |            0 |
++-----------------------------------------------------------------------------+
+3 file(s), 1.7 MB copied.
+1 product metadata.yml, 3 version.yml written.
+! tibco-business-studio-community-edition@4.2.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-bpm\tibco-business-studio-community-e
+dition\4.2.0; run `docushift convert` first

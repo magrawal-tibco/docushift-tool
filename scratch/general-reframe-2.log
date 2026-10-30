@@ -1,0 +1,38 @@
+Reframing 1 version(s)...
+  v tibco-api-exchange-gateway@2.5.1 848 topic(s) -> 140 page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |        1 |
+| Already current             |        0 |
+| Not Flare or DITA (skipped) |        0 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+848 topic(s) read into 140 page(s).
+Files: 1866 source doc -> 876 converted -> 140 merged (84.0% fewer at the 
+merge, 92.5% end to end); 227 file(s) standing in the measured merged tree(s).
+15 page(s) queued for editorial review:
+  tibco-api-exchange-gateway@2.5.1: 15 of 140 -- see review-queue.csv
+Findings: 1 warning, 2 notes.
+Reframing 2 version(s)...
+  v tibco-reward@22.3.0 838 topic(s) -> 331 page(s)
+  v tibco-reward@22.2.0 838 topic(s) -> 331 page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |        2 |
+| Already current             |        0 |
+| Not Flare or DITA (skipped) |        0 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+1676 topic(s) read into 662 page(s).
+Files: 5982 source doc -> 2094 converted -> 662 merged (68.4% fewer at the 
+merge, 88.9% end to end); 1538 file(s) standing in the measured merged tree(s).
+18 page(s) queued for editorial review:
+  tibco-reward@22.3.0: 9 of 331 -- see review-queue.csv
+  tibco-reward@22.2.0: 9 of 331 -- see review-queue.csv
+Findings: 4 warnings, 6 notes.

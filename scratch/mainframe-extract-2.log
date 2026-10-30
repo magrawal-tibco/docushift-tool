@@ -1,0 +1,35 @@
+Extracting 11 version(s)...
+  v tibco-mainframe-red@2.5.1 238 file(s), dita, 1 root(s)
+  v tibco-red-enabled-for-ziip@2.5.0 44 file(s), dita, 1 root(s)
+  v tibco-transaction-interface-for-cics@2.14.0 653 file(s), dita, 1 root(s)
+                Extract                
++-------------------------------------+
+| Outcome                  | Versions |
+|--------------------------+----------|
+| Extracted                |        3 |
+| Already current          |        8 |
+| Measured from cache      |        0 |
+| No package               |        0 |
+| Refused (unsafe archive) |        0 |
+| Failed                   |        0 |
++-------------------------------------+
+935 file(s) written.
+       Engines       
++-------------------+
+| Engine | Versions |
+|--------+----------|
+| dita   |        9 |
+| flare  |        2 |
++-------------------+
+CSH: 11 source(s), 0 identifier(s).
+                     Assets                     
++----------------------------------------------+
+| Category | Destination     | Files |    Size |
+|----------+-----------------+-------+---------|
+| topic    | output-root     |  2596 | 35.7 MB |
+| image    | output-root     |   306 | 11.4 MB |
+| skin     | output-root     |   581 | 16.5 MB |
+| other    | output-root     |    35 | 13.2 MB |
+| document | document-router |    85 | 39.4 MB |
++----------------------------------------------+
+Recorded 11 notes -- `docushift report --run 914`.

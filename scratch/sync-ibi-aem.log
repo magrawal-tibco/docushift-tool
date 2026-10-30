@@ -1,0 +1,1168 @@
+Syncing 198 version(s) into C:\github\ibi-docs-aem...
+  v ibi-webfocus-dsml-services-container-edition -> archives 3 file(s), 0.0 MB
+                                     Sync                                      
++-----------------------------------------------------------------------------+
+| Outcome   | Rows | online-h… | user-gui… | release-… | referenc… | archives |
+|-----------+------+-----------+-----------+-----------+-----------+----------|
+| Synced    |    1 |         0 |         0 |         0 |         0 |        1 |
+| Already   |   31 |         0 |         2 |        12 |        12 |        5 |
+| current   |      |           |           |           |           |          |
+| No source |  384 |       198 |         0 |         0 |         0 |        0 |
+| tree      |      |           |           |           |           |          |
+| Skipped   |    0 |         0 |         0 |         0 |         0 |        0 |
+| Failed    |    0 |         0 |         0 |         0 |         0 |        0 |
++-----------------------------------------------------------------------------+
+3 file(s), 0.0 MB copied.
+14 product metadata.yml, 45 version.yml written.
+! ibi-webfocus-container-edition@9.3.8: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-container-editions\ibi-webfocus-conta
+iner-edition\9.3.8; run `docushift convert` first
+! ibi-webfocus-container-edition@9.3.8: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-container-editions\extracted\ibi-we
+bfocus-container-edition\9.3.8; run `docushift extract` first
+! ibi-webfocus-container-edition@9.3.7: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-container-editions\ibi-webfocus-conta
+iner-edition\9.3.7; run `docushift convert` first
+! ibi-webfocus-container-edition@9.3.7: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-container-editions\extracted\ibi-we
+bfocus-container-edition\9.3.7; run `docushift extract` first
+! ibi-webfocus-container-edition@9.3.6: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-container-editions\ibi-webfocus-conta
+iner-edition\9.3.6; run `docushift convert` first
+! ibi-webfocus-container-edition@9.3.6: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-container-editions\extracted\ibi-we
+bfocus-container-edition\9.3.6; run `docushift extract` first
+! ibi-webfocus-container-edition@9.3.5: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-container-editions\ibi-webfocus-conta
+iner-edition\9.3.5; run `docushift convert` first
+! ibi-webfocus-container-edition@9.3.5: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-container-editions\extracted\ibi-we
+bfocus-container-edition\9.3.5; run `docushift extract` first
+! ibi-webfocus-container-edition@1.3.4: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-container-editions\ibi-webfocus-conta
+iner-edition\1.3.4; run `docushift convert` first
+! ibi-webfocus-container-edition@1.3.4: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-container-editions\extracted\ibi-we
+bfocus-container-edition\1.3.4; run `docushift extract` first
+! ibi-webfocus-container-edition@1.3.3: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-container-editions\ibi-webfocus-conta
+iner-edition\1.3.3; run `docushift convert` first
+! ibi-webfocus-container-edition@1.3.3: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-container-editions\extracted\ibi-we
+bfocus-container-edition\1.3.3; run `docushift extract` first
+! ibi-webfocus-container-edition@1.3.2: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-container-editions\ibi-webfocus-conta
+iner-edition\1.3.2; run `docushift convert` first
+! ibi-webfocus-container-edition@1.3.2: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-container-editions\extracted\ibi-we
+bfocus-container-edition\1.3.2; run `docushift extract` first
+! ibi-webfocus-container-edition@1.3.1: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-container-editions\ibi-webfocus-conta
+iner-edition\1.3.1; run `docushift convert` first
+! ibi-webfocus-container-edition@1.3.1: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-container-editions\extracted\ibi-we
+bfocus-container-edition\1.3.1; run `docushift extract` first
+! ibi-webfocus-container-edition@1.3.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-container-editions\ibi-webfocus-conta
+iner-edition\1.3.0; run `docushift convert` first
+! ibi-webfocus-container-edition@1.3.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-container-editions\extracted\ibi-we
+bfocus-container-edition\1.3.0; run `docushift extract` first
+! ibi-webfocus-container-edition@1.2.5: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-container-editions\ibi-webfocus-conta
+iner-edition\1.2.5; run `docushift convert` first
+! ibi-webfocus-container-edition@1.2.5: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-container-editions\extracted\ibi-we
+bfocus-container-edition\1.2.5; run `docushift extract` first
+! ibi-webfocus-container-edition@1.2.4: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-container-editions\ibi-webfocus-conta
+iner-edition\1.2.4; run `docushift convert` first
+! ibi-webfocus-container-edition@1.2.4: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-container-editions\extracted\ibi-we
+bfocus-container-edition\1.2.4; run `docushift extract` first
+! ibi-webfocus-container-edition@1.2.3: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-container-editions\ibi-webfocus-conta
+iner-edition\1.2.3; run `docushift convert` first
+! ibi-webfocus-container-edition@1.2.3: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-container-editions\extracted\ibi-we
+bfocus-container-edition\1.2.3; run `docushift extract` first
+! ibi-webfocus-container-edition@1.2.2: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-container-editions\ibi-webfocus-conta
+iner-edition\1.2.2; run `docushift convert` first
+! ibi-webfocus-container-edition@1.2.2: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-container-editions\extracted\ibi-we
+bfocus-container-edition\1.2.2; run `docushift extract` first
+! ibi-webfocus-container-edition@1.2.1: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-container-editions\ibi-webfocus-conta
+iner-edition\1.2.1; run `docushift convert` first
+! ibi-webfocus-container-edition@1.2.1: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-container-editions\extracted\ibi-we
+bfocus-container-edition\1.2.1; run `docushift extract` first
+! ibi-webfocus-container-edition@1.2.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-container-editions\ibi-webfocus-conta
+iner-edition\1.2.0; run `docushift convert` first
+! ibi-webfocus-container-edition@1.2.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-container-editions\extracted\ibi-we
+bfocus-container-edition\1.2.0; run `docushift extract` first
+! ibi-webfocus-container-edition@1.1.2: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-container-editions\ibi-webfocus-conta
+iner-edition\1.1.2; run `docushift convert` first
+! ibi-webfocus-container-edition@1.1.2: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-container-editions\extracted\ibi-we
+bfocus-container-edition\1.1.2; run `docushift extract` first
+! ibi-webfocus-container-edition@1.1.1: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-container-editions\ibi-webfocus-conta
+iner-edition\1.1.1; run `docushift convert` first
+! ibi-webfocus-container-edition@1.1.1: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-container-editions\extracted\ibi-we
+bfocus-container-edition\1.1.1; run `docushift extract` first
+! ibi-webfocus-container-edition@1.1.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-container-editions\ibi-webfocus-conta
+iner-edition\1.1.0; run `docushift convert` first
+! ibi-webfocus-container-edition@1.1.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-container-editions\extracted\ibi-we
+bfocus-container-edition\1.1.0; run `docushift extract` first
+! ibi-webfocus-container-edition@1.0.5: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-container-editions\ibi-webfocus-conta
+iner-edition\1.0.5; run `docushift convert` first
+! ibi-webfocus-container-edition@1.0.5: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-container-editions\extracted\ibi-we
+bfocus-container-edition\1.0.5; run `docushift extract` first
+! ibi-webfocus-container-edition@1.0.4: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-container-editions\ibi-webfocus-conta
+iner-edition\1.0.4; run `docushift convert` first
+! ibi-webfocus-container-edition@1.0.4: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-container-editions\extracted\ibi-we
+bfocus-container-edition\1.0.4; run `docushift extract` first
+! ibi-webfocus-container-edition@1.0.3: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-container-editions\ibi-webfocus-conta
+iner-edition\1.0.3; run `docushift convert` first
+! ibi-webfocus-container-edition@1.0.3: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-container-editions\extracted\ibi-we
+bfocus-container-edition\1.0.3; run `docushift extract` first
+! ibi-webfocus-container-edition@1.0.2: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-container-editions\ibi-webfocus-conta
+iner-edition\1.0.2; run `docushift convert` first
+! ibi-webfocus-container-edition@1.0.2: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-container-editions\extracted\ibi-we
+bfocus-container-edition\1.0.2; run `docushift extract` first
+! ibi-webfocus-container-edition@1.0.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-container-editions\ibi-webfocus-conta
+iner-edition\1.0.0; run `docushift convert` first
+! ibi-webfocus-container-edition@1.0.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-container-editions\extracted\ibi-we
+bfocus-container-edition\1.0.0; run `docushift extract` first
+! ibi-webfocus-dsml-services-container-edition@9.3.8: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-container-editions\ibi-webfocus-dsml-
+services-container-edition\9.3.8; run `docushift convert` first
+! ibi-webfocus-dsml-services-container-edition@9.3.8: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-container-editions\extracted\ibi-we
+bfocus-dsml-services-container-edition\9.3.8; run `docushift extract` first
+! ibi-webfocus-dsml-services-container-edition@9.3.7: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-container-editions\ibi-webfocus-dsml-
+services-container-edition\9.3.7; run `docushift convert` first
+! ibi-webfocus-dsml-services-container-edition@9.3.7: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-container-editions\extracted\ibi-we
+bfocus-dsml-services-container-edition\9.3.7; run `docushift extract` first
+! ibi-webfocus-dsml-services-container-edition@9.3.6: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-container-editions\ibi-webfocus-dsml-
+services-container-edition\9.3.6; run `docushift convert` first
+! ibi-webfocus-dsml-services-container-edition@9.3.6: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-container-editions\extracted\ibi-we
+bfocus-dsml-services-container-edition\9.3.6; run `docushift extract` first
+! ibi-webfocus-dsml-services-container-edition@9.3.5: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-container-editions\ibi-webfocus-dsml-
+services-container-edition\9.3.5; run `docushift convert` first
+! ibi-webfocus-dsml-services-container-edition@9.3.5: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-container-editions\extracted\ibi-we
+bfocus-dsml-services-container-edition\9.3.5; run `docushift extract` first
+! ibi-webfocus-dsml-services-container-edition@1.0.7: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-container-editions\ibi-webfocus-dsml-
+services-container-edition\1.0.7; run `docushift convert` first
+! ibi-webfocus-dsml-services-container-edition@1.0.7: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-container-editions\extracted\ibi-we
+bfocus-dsml-services-container-edition\1.0.7; run `docushift extract` first
+! ibi-webfocus-dsml-services-container-edition@1.0.6: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-container-editions\ibi-webfocus-dsml-
+services-container-edition\1.0.6; run `docushift convert` first
+! ibi-webfocus-dsml-services-container-edition@1.0.6: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-container-editions\extracted\ibi-we
+bfocus-dsml-services-container-edition\1.0.6; run `docushift extract` first
+! ibi-webfocus-dsml-services-container-edition@1.0.5: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-container-editions\ibi-webfocus-dsml-
+services-container-edition\1.0.5; run `docushift convert` first
+! ibi-webfocus-dsml-services-container-edition@1.0.5: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-container-editions\extracted\ibi-we
+bfocus-dsml-services-container-edition\1.0.5; run `docushift extract` first
+! ibi-webfocus-dsml-services-container-edition@1.0.4: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-container-editions\ibi-webfocus-dsml-
+services-container-edition\1.0.4; run `docushift convert` first
+! ibi-webfocus-dsml-services-container-edition@1.0.4: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-container-editions\extracted\ibi-we
+bfocus-dsml-services-container-edition\1.0.4; run `docushift extract` first
+! ibi-webfocus-dsml-services-container-edition@1.0.3: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-container-editions\ibi-webfocus-dsml-
+services-container-edition\1.0.3; run `docushift convert` first
+! ibi-webfocus-dsml-services-container-edition@1.0.3: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-container-editions\extracted\ibi-we
+bfocus-dsml-services-container-edition\1.0.3; run `docushift extract` first
+! ibi-data-intelligence@2.1.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-di-ism\ibi-data-intelligence\2.1.0; 
+run `docushift convert` first
+! ibi-data-intelligence@2.1.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-di-ism\extracted\ibi-data-intellige
+nce\2.1.0; run `docushift extract` first
+! ibi-data-intelligence@2.0.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-di-ism\ibi-data-intelligence\2.0.0; 
+run `docushift convert` first
+! ibi-data-intelligence@2.0.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-di-ism\extracted\ibi-data-intellige
+nce\2.0.0; run `docushift extract` first
+! ibi-data-intelligence@1.2.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-di-ism\ibi-data-intelligence\1.2.0; 
+run `docushift convert` first
+! ibi-data-intelligence@1.2.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-di-ism\extracted\ibi-data-intellige
+nce\1.2.0; run `docushift extract` first
+! ibi-data-intelligence@1.1.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-di-ism\ibi-data-intelligence\1.1.0; 
+run `docushift convert` first
+! ibi-data-intelligence@1.1.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-di-ism\extracted\ibi-data-intellige
+nce\1.1.0; run `docushift extract` first
+! ibi-data-intelligence@1.0.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-di-ism\ibi-data-intelligence\1.0.0; 
+run `docushift convert` first
+! ibi-data-intelligence@1.0.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-di-ism\extracted\ibi-data-intellige
+nce\1.0.0; run `docushift extract` first
+! ibi-data-quality@5.2.2: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-di-ism\ibi-data-quality\5.2.2; run 
+`docushift convert` first
+! ibi-data-quality@5.2.2: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-di-ism\extracted\ibi-data-quality\5
+.2.2; run `docushift extract` first
+! ibi-data-quality@5.2.1: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-di-ism\ibi-data-quality\5.2.1; run 
+`docushift convert` first
+! ibi-data-quality@5.2.1: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-di-ism\extracted\ibi-data-quality\5
+.2.1; run `docushift extract` first
+! ibi-data-quality@5.2.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-di-ism\ibi-data-quality\5.2.0; run 
+`docushift convert` first
+! ibi-data-quality@5.2.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-di-ism\extracted\ibi-data-quality\5
+.2.0; run `docushift extract` first
+! ibi-data-quality@5.1.1: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-di-ism\ibi-data-quality\5.1.1; run 
+`docushift convert` first
+! ibi-data-quality@5.1.1: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-di-ism\extracted\ibi-data-quality\5
+.1.1; run `docushift extract` first
+! ibi-data-quality@5.1.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-di-ism\ibi-data-quality\5.1.0; run 
+`docushift convert` first
+! ibi-data-quality@5.1.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-di-ism\extracted\ibi-data-quality\5
+.1.0; run `docushift extract` first
+! ibi-data-quality@5.0.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-di-ism\ibi-data-quality\5.0.0; run 
+`docushift convert` first
+! ibi-data-quality@5.0.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-di-ism\extracted\ibi-data-quality\5
+.0.0; run `docushift extract` first
+! ibi-data-quality@3.1.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-di-ism\ibi-data-quality\3.1.0; run 
+`docushift convert` first
+! ibi-data-quality@3.1.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-di-ism\extracted\ibi-data-quality\3
+.1.0; run `docushift extract` first
+! ibi-data-quality@3.0.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-di-ism\ibi-data-quality\3.0.0; run 
+`docushift convert` first
+! ibi-data-quality@3.0.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-di-ism\extracted\ibi-data-quality\3
+.0.0; run `docushift extract` first
+! ibi-iway-service-manager@9.3.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-di-ism\ibi-iway-service-manager\9.3.0
+; run `docushift convert` first
+! ibi-iway-service-manager@9.3.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-di-ism\extracted\ibi-iway-service-m
+anager\9.3.0; run `docushift extract` first
+! ibi-iway-service-manager@9.2.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-di-ism\ibi-iway-service-manager\9.2.0
+; run `docushift convert` first
+! ibi-iway-service-manager@9.2.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-di-ism\extracted\ibi-iway-service-m
+anager\9.2.0; run `docushift extract` first
+! ibi-iway-service-manager@9.1.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-di-ism\ibi-iway-service-manager\9.1.0
+; run `docushift convert` first
+! ibi-iway-service-manager@9.1.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-di-ism\extracted\ibi-iway-service-m
+anager\9.1.0; run `docushift extract` first
+! ibi-iway-service-manager@8.1.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-di-ism\ibi-iway-service-manager\8.1.0
+; run `docushift convert` first
+! ibi-iway-service-manager@8.1.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-di-ism\extracted\ibi-iway-service-m
+anager\8.1.0; run `docushift extract` first
+! ibi-iway-service-manager@8.0.7: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-di-ism\ibi-iway-service-manager\8.0.7
+; run `docushift convert` first
+! ibi-iway-service-manager@8.0.7: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-di-ism\extracted\ibi-iway-service-m
+anager\8.0.7; run `docushift extract` first
+! ibi-iway-service-manager@8.0.6: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-di-ism\ibi-iway-service-manager\8.0.6
+; run `docushift convert` first
+! ibi-iway-service-manager@8.0.6: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-di-ism\extracted\ibi-iway-service-m
+anager\8.0.6; run `docushift extract` first
+! ibi-iway-service-manager@8.0.5: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-di-ism\ibi-iway-service-manager\8.0.5
+; run `docushift convert` first
+! ibi-iway-service-manager@8.0.5: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-di-ism\extracted\ibi-iway-service-m
+anager\8.0.5; run `docushift extract` first
+! ibi-iway-service-manager-edi-add-on@9.3.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-di-ism\ibi-iway-service-manager-edi-a
+dd-on\9.3.0; run `docushift convert` first
+! ibi-iway-service-manager-edi-add-on@9.3.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-di-ism\extracted\ibi-iway-service-m
+anager-edi-add-on\9.3.0; run `docushift extract` first
+! ibi-iway-service-manager-edi-add-on@9.1.1: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-di-ism\ibi-iway-service-manager-edi-a
+dd-on\9.1.1; run `docushift convert` first
+! ibi-iway-service-manager-edi-add-on@9.1.1: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-di-ism\extracted\ibi-iway-service-m
+anager-edi-add-on\9.1.1; run `docushift extract` first
+! ibi-focus@9.3.8: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-focus\ibi-focus\9.3.8; run `docushift
+convert` first
+! ibi-focus@9.3.8: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-focus\extracted\ibi-focus\9.3.8; 
+run `docushift extract` first
+! ibi-focus@9.3.7: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-focus\ibi-focus\9.3.7; run `docushift
+convert` first
+! ibi-focus@9.3.7: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-focus\extracted\ibi-focus\9.3.7; 
+run `docushift extract` first
+! ibi-focus@9.3.6: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-focus\ibi-focus\9.3.6; run `docushift
+convert` first
+! ibi-focus@9.3.6: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-focus\extracted\ibi-focus\9.3.6; 
+run `docushift extract` first
+! ibi-focus@9.3.5: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-focus\ibi-focus\9.3.5; run `docushift
+convert` first
+! ibi-focus@9.3.5: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-focus\extracted\ibi-focus\9.3.5; 
+run `docushift extract` first
+! ibi-focus@9.3.4: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-focus\ibi-focus\9.3.4; run `docushift
+convert` first
+! ibi-focus@9.3.4: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-focus\extracted\ibi-focus\9.3.4; 
+run `docushift extract` first
+! ibi-focus@9.3.3: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-focus\ibi-focus\9.3.3; run `docushift
+convert` first
+! ibi-focus@9.3.3: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-focus\extracted\ibi-focus\9.3.3; 
+run `docushift extract` first
+! ibi-focus@9.3.2: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-focus\ibi-focus\9.3.2; run `docushift
+convert` first
+! ibi-focus@9.3.2: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-focus\extracted\ibi-focus\9.3.2; 
+run `docushift extract` first
+! ibi-focus@9.3.1: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-focus\ibi-focus\9.3.1; run `docushift
+convert` first
+! ibi-focus@9.3.1: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-focus\extracted\ibi-focus\9.3.1; 
+run `docushift extract` first
+! ibi-focus@9.3.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-focus\ibi-focus\9.3.0; run `docushift
+convert` first
+! ibi-focus@9.3.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-focus\extracted\ibi-focus\9.3.0; 
+run `docushift extract` first
+! ibi-focus@9.2.5: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-focus\ibi-focus\9.2.5; run `docushift
+convert` first
+! ibi-focus@9.2.5: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-focus\extracted\ibi-focus\9.2.5; 
+run `docushift extract` first
+! ibi-focus@9.2.4: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-focus\ibi-focus\9.2.4; run `docushift
+convert` first
+! ibi-focus@9.2.4: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-focus\extracted\ibi-focus\9.2.4; 
+run `docushift extract` first
+! ibi-focus@9.2.3: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-focus\ibi-focus\9.2.3; run `docushift
+convert` first
+! ibi-focus@9.2.3: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-focus\extracted\ibi-focus\9.2.3; 
+run `docushift extract` first
+! ibi-focus@9.2.2: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-focus\ibi-focus\9.2.2; run `docushift
+convert` first
+! ibi-focus@9.2.2: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-focus\extracted\ibi-focus\9.2.2; 
+run `docushift extract` first
+! ibi-focus@9.2.1: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-focus\ibi-focus\9.2.1; run `docushift
+convert` first
+! ibi-focus@9.2.1: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-focus\extracted\ibi-focus\9.2.1; 
+run `docushift extract` first
+! ibi-focus@9.2.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-focus\ibi-focus\9.2.0; run `docushift
+convert` first
+! ibi-focus@9.2.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-focus\extracted\ibi-focus\9.2.0; 
+run `docushift extract` first
+! ibi-focus@9.1.3: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-focus\ibi-focus\9.1.3; run `docushift
+convert` first
+! ibi-focus@9.1.3: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-focus\extracted\ibi-focus\9.1.3; 
+run `docushift extract` first
+! ibi-focus@9.1.2: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-focus\ibi-focus\9.1.2; run `docushift
+convert` first
+! ibi-focus@9.1.2: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-focus\extracted\ibi-focus\9.1.2; 
+run `docushift extract` first
+! ibi-focus@9.1.1: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-focus\ibi-focus\9.1.1; run `docushift
+convert` first
+! ibi-focus@9.1.1: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-focus\extracted\ibi-focus\9.1.1; 
+run `docushift extract` first
+! ibi-focus@9.1.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-focus\ibi-focus\9.1.0; run `docushift
+convert` first
+! ibi-focus@9.1.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-focus\extracted\ibi-focus\9.1.0; 
+run `docushift extract` first
+! ibi-omni-gen@4.3.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-legacy\ibi-omni-gen\4.3.0; run 
+`docushift convert` first
+! ibi-omni-gen-mdm@4.3.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-legacy\ibi-omni-gen-mdm\4.3.0; run 
+`docushift convert` first
+! ibi-omni-healthdata@4.3.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-legacy\ibi-omni-healthdata\4.3.0; run
+`docushift convert` first
+! ibi-omni-healthdata-business-release@2023.3.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-legacy\ibi-omni-healthdata-business-r
+elease\2023.3.0; run `docushift convert` first
+! ibi-omni-healthdata-business-release@2023.2.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-legacy\ibi-omni-healthdata-business-r
+elease\2023.2.0; run `docushift convert` first
+! ibi-omni-healthdata-business-release@2023.1.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-legacy\ibi-omni-healthdata-business-r
+elease\2023.1.0; run `docushift convert` first
+! ibi-omni-insurance@4.3.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-legacy\ibi-omni-insurance\4.3.0; run 
+`docushift convert` first
+! ibi-web-query-for-ibm-i@9.2.1: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-legacy\ibi-web-query-for-ibm-i\9.2.1;
+run `docushift convert` first
+! ibi-web-query-for-ibm-i@9.2.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-legacy\ibi-web-query-for-ibm-i\9.2.0;
+run `docushift convert` first
+! ibi-web-query-for-ibm-i@9.1.2: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-legacy\ibi-web-query-for-ibm-i\9.1.2;
+run `docushift convert` first
+! ibi-web-query-for-ibm-i@9.1.1: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-legacy\ibi-web-query-for-ibm-i\9.1.1;
+run `docushift convert` first
+! ibi-web-query-for-ibm-i@9.1.1: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-legacy\extracted\ibi-web-query-for-
+ibm-i\9.1.1; run `docushift extract` first
+! ibi-web-query-for-ibm-i@9.1.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-legacy\ibi-web-query-for-ibm-i\9.1.0;
+run `docushift convert` first
+! ibi-web-query-for-ibm-i@9.1.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-legacy\extracted\ibi-web-query-for-
+ibm-i\9.1.0; run `docushift extract` first
+! tibco-iway-business-activity-monitor@8.0.5: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-legacy\tibco-iway-business-activity-m
+onitor\8.0.5; run `docushift convert` first
+! tibco-iway-trading-partner-manager@8.0.5: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-legacy\tibco-iway-trading-partner-man
+ager\8.0.5; run `docushift convert` first
+! ibi-ai-assistant@9.3.8: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-ai-assistant\9.3.8; run 
+`docushift convert` first
+! ibi-ai-assistant@9.3.8: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-ai-assistant
+\9.3.8; run `docushift extract` first
+! ibi-open-data-hub-for-mainframe-connectors@1.3.8: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-open-data-hub-for-mainfr
+ame-connectors\1.3.8; run `docushift convert` first
+! ibi-open-data-hub-for-mainframe-connectors@1.3.8: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-open-data-hu
+b-for-mainframe-connectors\1.3.8; run `docushift extract` first
+! ibi-open-data-hub-for-mainframe-connectors@1.3.7: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-open-data-hub-for-mainfr
+ame-connectors\1.3.7; run `docushift convert` first
+! ibi-open-data-hub-for-mainframe-connectors@1.3.7: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-open-data-hu
+b-for-mainframe-connectors\1.3.7; run `docushift extract` first
+! ibi-open-data-hub-for-mainframe-connectors@1.3.6: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-open-data-hub-for-mainfr
+ame-connectors\1.3.6; run `docushift convert` first
+! ibi-open-data-hub-for-mainframe-connectors@1.3.6: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-open-data-hu
+b-for-mainframe-connectors\1.3.6; run `docushift extract` first
+! ibi-open-data-hub-for-mainframe-connectors@1.3.5: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-open-data-hub-for-mainfr
+ame-connectors\1.3.5; run `docushift convert` first
+! ibi-open-data-hub-for-mainframe-connectors@1.3.5: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-open-data-hu
+b-for-mainframe-connectors\1.3.5; run `docushift extract` first
+! ibi-open-data-hub-for-mainframe-connectors@1.3.4: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-open-data-hub-for-mainfr
+ame-connectors\1.3.4; run `docushift convert` first
+! ibi-open-data-hub-for-mainframe-connectors@1.3.4: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-open-data-hu
+b-for-mainframe-connectors\1.3.4; run `docushift extract` first
+! ibi-open-data-hub-for-mainframe-connectors@1.0.9: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-open-data-hub-for-mainfr
+ame-connectors\1.0.9; run `docushift convert` first
+! ibi-open-data-hub-for-mainframe-connectors@1.0.9: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-open-data-hu
+b-for-mainframe-connectors\1.0.9; run `docushift extract` first
+! ibi-open-data-hub-for-mainframe-connectors@1.0.8: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-open-data-hub-for-mainfr
+ame-connectors\1.0.8; run `docushift convert` first
+! ibi-open-data-hub-for-mainframe-connectors@1.0.8: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-open-data-hu
+b-for-mainframe-connectors\1.0.8; run `docushift extract` first
+! ibi-open-data-hub-for-mainframe-connectors@1.0.7: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-open-data-hub-for-mainfr
+ame-connectors\1.0.7; run `docushift convert` first
+! ibi-open-data-hub-for-mainframe-connectors@1.0.7: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-open-data-hu
+b-for-mainframe-connectors\1.0.7; run `docushift extract` first
+! ibi-open-data-hub-for-mainframe-connectors@1.0.6: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-open-data-hub-for-mainfr
+ame-connectors\1.0.6; run `docushift convert` first
+! ibi-open-data-hub-for-mainframe-connectors@1.0.6: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-open-data-hu
+b-for-mainframe-connectors\1.0.6; run `docushift extract` first
+! ibi-open-data-hub-for-mainframe-connectors@1.0.5: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-open-data-hub-for-mainfr
+ame-connectors\1.0.5; run `docushift convert` first
+! ibi-open-data-hub-for-mainframe-connectors@1.0.5: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-open-data-hu
+b-for-mainframe-connectors\1.0.5; run `docushift extract` first
+! ibi-open-data-hub-for-mainframe-connectors@1.0.4: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-open-data-hub-for-mainfr
+ame-connectors\1.0.4; run `docushift convert` first
+! ibi-open-data-hub-for-mainframe-connectors@1.0.4: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-open-data-hu
+b-for-mainframe-connectors\1.0.4; run `docushift extract` first
+! ibi-open-data-hub-for-mainframe-connectors@1.0.3: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-open-data-hub-for-mainfr
+ame-connectors\1.0.3; run `docushift convert` first
+! ibi-open-data-hub-for-mainframe-connectors@1.0.3: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-open-data-hu
+b-for-mainframe-connectors\1.0.3; run `docushift extract` first
+! ibi-open-data-hub-for-mainframe-connectors@1.0.2: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-open-data-hub-for-mainfr
+ame-connectors\1.0.2; run `docushift convert` first
+! ibi-open-data-hub-for-mainframe-connectors@1.0.2: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-open-data-hu
+b-for-mainframe-connectors\1.0.2; run `docushift extract` first
+! ibi-open-data-hub-for-mainframe-connectors@1.0.1: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-open-data-hub-for-mainfr
+ame-connectors\1.0.1; run `docushift convert` first
+! ibi-open-data-hub-for-mainframe-connectors@1.0.1: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-open-data-hu
+b-for-mainframe-connectors\1.0.1; run `docushift extract` first
+! ibi-open-data-hub-for-mainframe-connectors@1.0.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-open-data-hub-for-mainfr
+ame-connectors\1.0.0; run `docushift convert` first
+! ibi-open-data-hub-for-mainframe-connectors@1.0.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-open-data-hu
+b-for-mainframe-connectors\1.0.0; run `docushift extract` first
+! ibi-webfocus-app-studio@9.3.8: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-app-studio\9.3.
+8; run `docushift convert` first
+! ibi-webfocus-app-studio@9.3.8: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-app
+-studio\9.3.8; run `docushift extract` first
+! ibi-webfocus-app-studio@9.3.7: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-app-studio\9.3.
+7; run `docushift convert` first
+! ibi-webfocus-app-studio@9.3.7: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-app
+-studio\9.3.7; run `docushift extract` first
+! ibi-webfocus-app-studio@9.3.6: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-app-studio\9.3.
+6; run `docushift convert` first
+! ibi-webfocus-app-studio@9.3.6: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-app
+-studio\9.3.6; run `docushift extract` first
+! ibi-webfocus-app-studio@9.3.5: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-app-studio\9.3.
+5; run `docushift convert` first
+! ibi-webfocus-app-studio@9.3.5: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-app
+-studio\9.3.5; run `docushift extract` first
+! ibi-webfocus-app-studio@9.3.4: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-app-studio\9.3.
+4; run `docushift convert` first
+! ibi-webfocus-app-studio@9.3.4: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-app
+-studio\9.3.4; run `docushift extract` first
+! ibi-webfocus-app-studio@9.3.3: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-app-studio\9.3.
+3; run `docushift convert` first
+! ibi-webfocus-app-studio@9.3.3: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-app
+-studio\9.3.3; run `docushift extract` first
+! ibi-webfocus-app-studio@9.3.2: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-app-studio\9.3.
+2; run `docushift convert` first
+! ibi-webfocus-app-studio@9.3.2: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-app
+-studio\9.3.2; run `docushift extract` first
+! ibi-webfocus-app-studio@9.3.1: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-app-studio\9.3.
+1; run `docushift convert` first
+! ibi-webfocus-app-studio@9.3.1: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-app
+-studio\9.3.1; run `docushift extract` first
+! ibi-webfocus-app-studio@9.3.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-app-studio\9.3.
+0; run `docushift convert` first
+! ibi-webfocus-app-studio@9.3.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-app
+-studio\9.3.0; run `docushift extract` first
+! ibi-webfocus-app-studio@9.2.7: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-app-studio\9.2.
+7; run `docushift convert` first
+! ibi-webfocus-app-studio@9.2.7: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-app
+-studio\9.2.7; run `docushift extract` first
+! ibi-webfocus-app-studio@9.2.6: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-app-studio\9.2.
+6; run `docushift convert` first
+! ibi-webfocus-app-studio@9.2.6: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-app
+-studio\9.2.6; run `docushift extract` first
+! ibi-webfocus-app-studio@9.2.5: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-app-studio\9.2.
+5; run `docushift convert` first
+! ibi-webfocus-app-studio@9.2.5: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-app
+-studio\9.2.5; run `docushift extract` first
+! ibi-webfocus-app-studio@9.2.4: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-app-studio\9.2.
+4; run `docushift convert` first
+! ibi-webfocus-app-studio@9.2.4: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-app
+-studio\9.2.4; run `docushift extract` first
+! ibi-webfocus-app-studio@9.2.3: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-app-studio\9.2.
+3; run `docushift convert` first
+! ibi-webfocus-app-studio@9.2.3: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-app
+-studio\9.2.3; run `docushift extract` first
+! ibi-webfocus-app-studio@9.2.2: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-app-studio\9.2.
+2; run `docushift convert` first
+! ibi-webfocus-app-studio@9.2.2: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-app
+-studio\9.2.2; run `docushift extract` first
+! ibi-webfocus-app-studio@9.2.1: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-app-studio\9.2.
+1; run `docushift convert` first
+! ibi-webfocus-app-studio@9.2.1: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-app
+-studio\9.2.1; run `docushift extract` first
+! ibi-webfocus-app-studio@9.2.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-app-studio\9.2.
+0; run `docushift convert` first
+! ibi-webfocus-app-studio@9.2.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-app
+-studio\9.2.0; run `docushift extract` first
+! ibi-webfocus-app-studio@9.1.4: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-app-studio\9.1.
+4; run `docushift convert` first
+! ibi-webfocus-app-studio@9.1.4: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-app
+-studio\9.1.4; run `docushift extract` first
+! ibi-webfocus-app-studio@9.1.3: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-app-studio\9.1.
+3; run `docushift convert` first
+! ibi-webfocus-app-studio@9.1.3: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-app
+-studio\9.1.3; run `docushift extract` first
+! ibi-webfocus-app-studio@9.1.2: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-app-studio\9.1.
+2; run `docushift convert` first
+! ibi-webfocus-app-studio@9.1.2: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-app
+-studio\9.1.2; run `docushift extract` first
+! ibi-webfocus-app-studio@9.1.1: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-app-studio\9.1.
+1; run `docushift convert` first
+! ibi-webfocus-app-studio@9.1.1: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-app
+-studio\9.1.1; run `docushift extract` first
+! ibi-webfocus-app-studio@9.1.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-app-studio\9.1.
+0; run `docushift convert` first
+! ibi-webfocus-app-studio@9.1.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-app
+-studio\9.1.0; run `docushift extract` first
+! ibi-webfocus-client@9.3.8: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-client\9.3.8; 
+run `docushift convert` first
+! ibi-webfocus-client@9.3.8: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-cli
+ent\9.3.8; run `docushift extract` first
+! ibi-webfocus-client@9.3.7: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-client\9.3.7; 
+run `docushift convert` first
+! ibi-webfocus-client@9.3.7: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-cli
+ent\9.3.7; run `docushift extract` first
+! ibi-webfocus-client@9.3.6: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-client\9.3.6; 
+run `docushift convert` first
+! ibi-webfocus-client@9.3.6: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-cli
+ent\9.3.6; run `docushift extract` first
+! ibi-webfocus-client@9.3.5: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-client\9.3.5; 
+run `docushift convert` first
+! ibi-webfocus-client@9.3.5: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-cli
+ent\9.3.5; run `docushift extract` first
+! ibi-webfocus-client@9.3.4: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-client\9.3.4; 
+run `docushift convert` first
+! ibi-webfocus-client@9.3.4: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-cli
+ent\9.3.4; run `docushift extract` first
+! ibi-webfocus-client@9.3.3: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-client\9.3.3; 
+run `docushift convert` first
+! ibi-webfocus-client@9.3.3: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-cli
+ent\9.3.3; run `docushift extract` first
+! ibi-webfocus-client@9.3.2: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-client\9.3.2; 
+run `docushift convert` first
+! ibi-webfocus-client@9.3.2: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-cli
+ent\9.3.2; run `docushift extract` first
+! ibi-webfocus-client@9.3.1: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-client\9.3.1; 
+run `docushift convert` first
+! ibi-webfocus-client@9.3.1: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-cli
+ent\9.3.1; run `docushift extract` first
+! ibi-webfocus-client@9.3.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-client\9.3.0; 
+run `docushift convert` first
+! ibi-webfocus-client@9.3.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-cli
+ent\9.3.0; run `docushift extract` first
+! ibi-webfocus-client@9.2.7: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-client\9.2.7; 
+run `docushift convert` first
+! ibi-webfocus-client@9.2.7: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-cli
+ent\9.2.7; run `docushift extract` first
+! ibi-webfocus-client@9.2.6: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-client\9.2.6; 
+run `docushift convert` first
+! ibi-webfocus-client@9.2.6: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-cli
+ent\9.2.6; run `docushift extract` first
+! ibi-webfocus-client@9.2.5: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-client\9.2.5; 
+run `docushift convert` first
+! ibi-webfocus-client@9.2.5: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-cli
+ent\9.2.5; run `docushift extract` first
+! ibi-webfocus-client@9.2.4: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-client\9.2.4; 
+run `docushift convert` first
+! ibi-webfocus-client@9.2.4: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-cli
+ent\9.2.4; run `docushift extract` first
+! ibi-webfocus-client@9.2.3: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-client\9.2.3; 
+run `docushift convert` first
+! ibi-webfocus-client@9.2.3: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-cli
+ent\9.2.3; run `docushift extract` first
+! ibi-webfocus-client@9.2.2: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-client\9.2.2; 
+run `docushift convert` first
+! ibi-webfocus-client@9.2.2: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-cli
+ent\9.2.2; run `docushift extract` first
+! ibi-webfocus-client@9.2.1: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-client\9.2.1; 
+run `docushift convert` first
+! ibi-webfocus-client@9.2.1: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-cli
+ent\9.2.1; run `docushift extract` first
+! ibi-webfocus-client@9.2.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-client\9.2.0; 
+run `docushift convert` first
+! ibi-webfocus-client@9.2.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-cli
+ent\9.2.0; run `docushift extract` first
+! ibi-webfocus-client@9.1.4: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-client\9.1.4; 
+run `docushift convert` first
+! ibi-webfocus-client@9.1.4: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-cli
+ent\9.1.4; run `docushift extract` first
+! ibi-webfocus-client@9.1.3: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-client\9.1.3; 
+run `docushift convert` first
+! ibi-webfocus-client@9.1.3: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-cli
+ent\9.1.3; run `docushift extract` first
+! ibi-webfocus-client@9.1.2: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-client\9.1.2; 
+run `docushift convert` first
+! ibi-webfocus-client@9.1.2: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-cli
+ent\9.1.2; run `docushift extract` first
+! ibi-webfocus-client@9.1.1: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-client\9.1.1; 
+run `docushift convert` first
+! ibi-webfocus-client@9.1.1: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-cli
+ent\9.1.1; run `docushift extract` first
+! ibi-webfocus-client@9.1.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-client\9.1.0; 
+run `docushift convert` first
+! ibi-webfocus-client@9.1.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-cli
+ent\9.1.0; run `docushift extract` first
+! ibi-webfocus-dsml-services@9.3.8: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-dsml-services\9
+.3.8; run `docushift convert` first
+! ibi-webfocus-dsml-services@9.3.8: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-dsm
+l-services\9.3.8; run `docushift extract` first
+! ibi-webfocus-dsml-services@9.3.7: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-dsml-services\9
+.3.7; run `docushift convert` first
+! ibi-webfocus-dsml-services@9.3.7: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-dsm
+l-services\9.3.7; run `docushift extract` first
+! ibi-webfocus-dsml-services@9.3.6: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-dsml-services\9
+.3.6; run `docushift convert` first
+! ibi-webfocus-dsml-services@9.3.6: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-dsm
+l-services\9.3.6; run `docushift extract` first
+! ibi-webfocus-dsml-services@9.3.5: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-dsml-services\9
+.3.5; run `docushift convert` first
+! ibi-webfocus-dsml-services@9.3.5: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-dsm
+l-services\9.3.5; run `docushift extract` first
+! ibi-webfocus-dsml-services@9.3.4: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-dsml-services\9
+.3.4; run `docushift convert` first
+! ibi-webfocus-dsml-services@9.3.4: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-dsm
+l-services\9.3.4; run `docushift extract` first
+! ibi-webfocus-dsml-services@9.3.3: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-dsml-services\9
+.3.3; run `docushift convert` first
+! ibi-webfocus-dsml-services@9.3.3: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-dsm
+l-services\9.3.3; run `docushift extract` first
+! ibi-webfocus-dsml-services@9.3.2: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-dsml-services\9
+.3.2; run `docushift convert` first
+! ibi-webfocus-dsml-services@9.3.2: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-dsm
+l-services\9.3.2; run `docushift extract` first
+! ibi-webfocus-dsml-services@9.3.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-dsml-services\9
+.3.0; run `docushift convert` first
+! ibi-webfocus-dsml-services@9.3.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-dsm
+l-services\9.3.0; run `docushift extract` first
+! ibi-webfocus-dsml-services@9.2.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-dsml-services\9
+.2.0; run `docushift convert` first
+! ibi-webfocus-dsml-services@9.2.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-dsm
+l-services\9.2.0; run `docushift extract` first
+! ibi-webfocus-dsml-services@9.1.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-dsml-services\9
+.1.0; run `docushift convert` first
+! ibi-webfocus-dsml-services@9.1.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-dsm
+l-services\9.1.0; run `docushift extract` first
+! ibi-webfocus-installer@9.3.6: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-installer\9.3.6
+; run `docushift convert` first
+! ibi-webfocus-installer@9.3.6: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-ins
+taller\9.3.6; run `docushift extract` first
+! ibi-webfocus-installer@9.3.5: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-installer\9.3.5
+; run `docushift convert` first
+! ibi-webfocus-installer@9.3.5: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-ins
+taller\9.3.5; run `docushift extract` first
+! ibi-webfocus-installer@9.3.4: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-installer\9.3.4
+; run `docushift convert` first
+! ibi-webfocus-installer@9.3.4: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-ins
+taller\9.3.4; run `docushift extract` first
+! ibi-webfocus-installer@9.3.3: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-installer\9.3.3
+; run `docushift convert` first
+! ibi-webfocus-installer@9.3.3: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-ins
+taller\9.3.3; run `docushift extract` first
+! ibi-webfocus-installer@9.3.2: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-installer\9.3.2
+; run `docushift convert` first
+! ibi-webfocus-installer@9.3.2: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-ins
+taller\9.3.2; run `docushift extract` first
+! ibi-webfocus-installer@9.3.1: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-installer\9.3.1
+; run `docushift convert` first
+! ibi-webfocus-installer@9.3.1: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-ins
+taller\9.3.1; run `docushift extract` first
+! ibi-webfocus-installer@9.3.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-installer\9.3.0
+; run `docushift convert` first
+! ibi-webfocus-installer@9.3.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-ins
+taller\9.3.0; run `docushift extract` first
+! ibi-webfocus-installer@9.2.6: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-installer\9.2.6
+; run `docushift convert` first
+! ibi-webfocus-installer@9.2.6: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-ins
+taller\9.2.6; run `docushift extract` first
+! ibi-webfocus-installer@9.2.5: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-installer\9.2.5
+; run `docushift convert` first
+! ibi-webfocus-installer@9.2.5: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-ins
+taller\9.2.5; run `docushift extract` first
+! ibi-webfocus-installer@9.2.4: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-installer\9.2.4
+; run `docushift convert` first
+! ibi-webfocus-installer@9.2.4: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-ins
+taller\9.2.4; run `docushift extract` first
+! ibi-webfocus-installer@9.2.3: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-installer\9.2.3
+; run `docushift convert` first
+! ibi-webfocus-installer@9.2.3: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-ins
+taller\9.2.3; run `docushift extract` first
+! ibi-webfocus-installer@9.2.2: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-installer\9.2.2
+; run `docushift convert` first
+! ibi-webfocus-installer@9.2.2: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-ins
+taller\9.2.2; run `docushift extract` first
+! ibi-webfocus-installer@9.2.1: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-installer\9.2.1
+; run `docushift convert` first
+! ibi-webfocus-installer@9.2.1: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-ins
+taller\9.2.1; run `docushift extract` first
+! ibi-webfocus-installer@9.2.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-installer\9.2.0
+; run `docushift convert` first
+! ibi-webfocus-installer@9.2.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-ins
+taller\9.2.0; run `docushift extract` first
+! ibi-webfocus-installer@9.1.4: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-installer\9.1.4
+; run `docushift convert` first
+! ibi-webfocus-installer@9.1.4: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-ins
+taller\9.1.4; run `docushift extract` first
+! ibi-webfocus-installer@9.1.3: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-installer\9.1.3
+; run `docushift convert` first
+! ibi-webfocus-installer@9.1.3: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-ins
+taller\9.1.3; run `docushift extract` first
+! ibi-webfocus-installer@9.1.2: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-installer\9.1.2
+; run `docushift convert` first
+! ibi-webfocus-installer@9.1.2: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-ins
+taller\9.1.2; run `docushift extract` first
+! ibi-webfocus-installer@9.1.1: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-installer\9.1.1
+; run `docushift convert` first
+! ibi-webfocus-installer@9.1.1: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-ins
+taller\9.1.1; run `docushift extract` first
+! ibi-webfocus-installer@9.1.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-installer\9.1.0
+; run `docushift convert` first
+! ibi-webfocus-installer@9.1.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-ins
+taller\9.1.0; run `docushift extract` first
+! ibi-webfocus-reporting-server@9.3.8: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-wf-reporting-server\ibi-webfocus-repo
+rting-server\9.3.8; run `docushift convert` first
+! ibi-webfocus-reporting-server@9.3.8: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-wf-reporting-server\extracted\ibi-w
+ebfocus-reporting-server\9.3.8; run `docushift extract` first
+! ibi-webfocus-reporting-server@9.3.7: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-wf-reporting-server\ibi-webfocus-repo
+rting-server\9.3.7; run `docushift convert` first
+! ibi-webfocus-reporting-server@9.3.7: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-wf-reporting-server\extracted\ibi-w
+ebfocus-reporting-server\9.3.7; run `docushift extract` first
+! ibi-webfocus-reporting-server@9.3.6: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-wf-reporting-server\ibi-webfocus-repo
+rting-server\9.3.6; run `docushift convert` first
+! ibi-webfocus-reporting-server@9.3.6: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-wf-reporting-server\extracted\ibi-w
+ebfocus-reporting-server\9.3.6; run `docushift extract` first
+! ibi-webfocus-reporting-server@9.3.5: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-wf-reporting-server\ibi-webfocus-repo
+rting-server\9.3.5; run `docushift convert` first
+! ibi-webfocus-reporting-server@9.3.5: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-wf-reporting-server\extracted\ibi-w
+ebfocus-reporting-server\9.3.5; run `docushift extract` first
+! ibi-webfocus-reporting-server@9.3.4: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-wf-reporting-server\ibi-webfocus-repo
+rting-server\9.3.4; run `docushift convert` first
+! ibi-webfocus-reporting-server@9.3.4: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-wf-reporting-server\extracted\ibi-w
+ebfocus-reporting-server\9.3.4; run `docushift extract` first
+! ibi-webfocus-reporting-server@9.3.3: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-wf-reporting-server\ibi-webfocus-repo
+rting-server\9.3.3; run `docushift convert` first
+! ibi-webfocus-reporting-server@9.3.3: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-wf-reporting-server\extracted\ibi-w
+ebfocus-reporting-server\9.3.3; run `docushift extract` first
+! ibi-webfocus-reporting-server@9.3.2: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-wf-reporting-server\ibi-webfocus-repo
+rting-server\9.3.2; run `docushift convert` first
+! ibi-webfocus-reporting-server@9.3.2: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-wf-reporting-server\extracted\ibi-w
+ebfocus-reporting-server\9.3.2; run `docushift extract` first
+! ibi-webfocus-reporting-server@9.3.1: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-wf-reporting-server\ibi-webfocus-repo
+rting-server\9.3.1; run `docushift convert` first
+! ibi-webfocus-reporting-server@9.3.1: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-wf-reporting-server\extracted\ibi-w
+ebfocus-reporting-server\9.3.1; run `docushift extract` first
+! ibi-webfocus-reporting-server@9.3.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-wf-reporting-server\ibi-webfocus-repo
+rting-server\9.3.0; run `docushift convert` first
+! ibi-webfocus-reporting-server@9.3.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-wf-reporting-server\extracted\ibi-w
+ebfocus-reporting-server\9.3.0; run `docushift extract` first
+! ibi-webfocus-reporting-server@9.2.7: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-wf-reporting-server\ibi-webfocus-repo
+rting-server\9.2.7; run `docushift convert` first
+! ibi-webfocus-reporting-server@9.2.7: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-wf-reporting-server\extracted\ibi-w
+ebfocus-reporting-server\9.2.7; run `docushift extract` first
+! ibi-webfocus-reporting-server@9.2.6: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-wf-reporting-server\ibi-webfocus-repo
+rting-server\9.2.6; run `docushift convert` first
+! ibi-webfocus-reporting-server@9.2.6: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-wf-reporting-server\extracted\ibi-w
+ebfocus-reporting-server\9.2.6; run `docushift extract` first
+! ibi-webfocus-reporting-server@9.2.5: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-wf-reporting-server\ibi-webfocus-repo
+rting-server\9.2.5; run `docushift convert` first
+! ibi-webfocus-reporting-server@9.2.5: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-wf-reporting-server\extracted\ibi-w
+ebfocus-reporting-server\9.2.5; run `docushift extract` first
+! ibi-webfocus-reporting-server@9.2.4: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-wf-reporting-server\ibi-webfocus-repo
+rting-server\9.2.4; run `docushift convert` first
+! ibi-webfocus-reporting-server@9.2.4: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-wf-reporting-server\extracted\ibi-w
+ebfocus-reporting-server\9.2.4; run `docushift extract` first
+! ibi-webfocus-reporting-server@9.2.3: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-wf-reporting-server\ibi-webfocus-repo
+rting-server\9.2.3; run `docushift convert` first
+! ibi-webfocus-reporting-server@9.2.3: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-wf-reporting-server\extracted\ibi-w
+ebfocus-reporting-server\9.2.3; run `docushift extract` first
+! ibi-webfocus-reporting-server@9.2.2: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-wf-reporting-server\ibi-webfocus-repo
+rting-server\9.2.2; run `docushift convert` first
+! ibi-webfocus-reporting-server@9.2.2: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-wf-reporting-server\extracted\ibi-w
+ebfocus-reporting-server\9.2.2; run `docushift extract` first
+! ibi-webfocus-reporting-server@9.2.1: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-wf-reporting-server\ibi-webfocus-repo
+rting-server\9.2.1; run `docushift convert` first
+! ibi-webfocus-reporting-server@9.2.1: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-wf-reporting-server\extracted\ibi-w
+ebfocus-reporting-server\9.2.1; run `docushift extract` first
+! ibi-webfocus-reporting-server@9.2.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-wf-reporting-server\ibi-webfocus-repo
+rting-server\9.2.0; run `docushift convert` first
+! ibi-webfocus-reporting-server@9.2.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-wf-reporting-server\extracted\ibi-w
+ebfocus-reporting-server\9.2.0; run `docushift extract` first
+! ibi-webfocus-reporting-server@9.1.4: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-wf-reporting-server\ibi-webfocus-repo
+rting-server\9.1.4; run `docushift convert` first
+! ibi-webfocus-reporting-server@9.1.4: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-wf-reporting-server\extracted\ibi-w
+ebfocus-reporting-server\9.1.4; run `docushift extract` first
+! ibi-webfocus-reporting-server@9.1.3: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-wf-reporting-server\ibi-webfocus-repo
+rting-server\9.1.3; run `docushift convert` first
+! ibi-webfocus-reporting-server@9.1.3: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-wf-reporting-server\extracted\ibi-w
+ebfocus-reporting-server\9.1.3; run `docushift extract` first
+! ibi-webfocus-reporting-server@9.1.2: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-wf-reporting-server\ibi-webfocus-repo
+rting-server\9.1.2; run `docushift convert` first
+! ibi-webfocus-reporting-server@9.1.2: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-wf-reporting-server\extracted\ibi-w
+ebfocus-reporting-server\9.1.2; run `docushift extract` first
+! ibi-webfocus-reporting-server@9.1.1: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-wf-reporting-server\ibi-webfocus-repo
+rting-server\9.1.1; run `docushift convert` first
+! ibi-webfocus-reporting-server@9.1.1: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-wf-reporting-server\extracted\ibi-w
+ebfocus-reporting-server\9.1.1; run `docushift extract` first
+! ibi-webfocus-reporting-server@9.1.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-wf-reporting-server\ibi-webfocus-repo
+rting-server\9.1.0; run `docushift convert` first
+! ibi-webfocus-reporting-server@9.1.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-wf-reporting-server\extracted\ibi-w
+ebfocus-reporting-server\9.1.0; run `docushift extract` first

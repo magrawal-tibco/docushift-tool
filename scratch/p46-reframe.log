@@ -1,0 +1,228 @@
+Reframing 1 version(s)...
+  v tibco-activematrix-businessworks-plug-in-for-amazon-sqs-and-sns@6.5.2 64 
+topic(s) -> 6 page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |        1 |
+| Already current             |        0 |
+| Not Flare or DITA (skipped) |        0 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+64 topic(s) read into 6 page(s).
+Files: 104 source doc -> 64 converted -> 6 merged (90.6% fewer at the merge, 
+94.2% end to end); 25 file(s) standing in the measured merged tree(s).
+5 page(s) queued for editorial review:
+  tibco-activematrix-businessworks-plug-in-for-amazon-sqs-and-sns@6.5.2: 5 of 6
+-- see review-queue.csv
+Findings: 1 warning, 2 notes.
+Reframing 1 version(s)...
+  v tibco-activematrix-businessworks-plug-in-for-google-cloud-pub-sub@6.0.1 47 
+topic(s) -> 3 page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |        1 |
+| Already current             |        0 |
+| Not Flare or DITA (skipped) |        0 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+47 topic(s) read into 3 page(s).
+Files: 86 source doc -> 47 converted -> 3 merged (93.6% fewer at the merge, 
+96.5% end to end); 20 file(s) standing in the measured merged tree(s).
+3 page(s) queued for editorial review:
+  tibco-activematrix-businessworks-plug-in-for-google-cloud-pub-sub@6.0.1: 3 of
+3 -- see review-queue.csv
+Findings: 1 warning, 2 notes.
+Reframing 1 version(s)...
+  v tibco-activematrix-businessworks-plug-in-for-mobile-integration@6.3.0 74 
+topic(s) -> 7 page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |        1 |
+| Already current             |        0 |
+| Not Flare or DITA (skipped) |        0 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+74 topic(s) read into 7 page(s).
+Files: 151 source doc -> 74 converted -> 7 merged (90.5% fewer at the merge, 
+95.4% end to end); 54 file(s) standing in the measured merged tree(s).
+5 page(s) queued for editorial review:
+  tibco-activematrix-businessworks-plug-in-for-mobile-integration@6.3.0: 5 of 7
+-- see review-queue.csv
+Findings: 1 warning, 2 notes.
+Reframing 1 version(s)...
+  v tibco-activematrix-businessworks-plug-in-for-tibco-auditsafe@6.1.0 41 
+topic(s) -> 3 page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |        1 |
+| Already current             |        0 |
+| Not Flare or DITA (skipped) |        0 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+41 topic(s) read into 3 page(s).
+Files: 86 source doc -> 41 converted -> 3 merged (92.7% fewer at the merge, 
+96.5% end to end); 24 file(s) standing in the measured merged tree(s).
+3 page(s) queued for editorial review:
+  tibco-activematrix-businessworks-plug-in-for-tibco-auditsafe@6.1.0: 3 of 3 --
+see review-queue.csv
+Findings: 1 warning, 2 notes.
+Reframing 1 version(s)...
+  v tibco-activematrix-businessworks-plug-in-for-tibco-auditsafe@6.2.0 41 
+topic(s) -> 4 page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |        1 |
+| Already current             |        0 |
+| Not Flare or DITA (skipped) |        0 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+41 topic(s) read into 4 page(s).
+Files: 85 source doc -> 41 converted -> 4 merged (90.2% fewer at the merge, 
+95.3% end to end); 25 file(s) standing in the measured merged tree(s).
+3 page(s) queued for editorial review:
+  tibco-activematrix-businessworks-plug-in-for-tibco-auditsafe@6.2.0: 3 of 4 --
+see review-queue.csv
+Findings: 1 warning, 2 notes.
+Reframing 1 version(s)...
+  v tibco-activematrix-businessworks-plug-in-for-transaction-insight@6.0.0 14 
+topic(s) -> 3 page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |        1 |
+| Already current             |        0 |
+| Not Flare or DITA (skipped) |        0 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+14 topic(s) read into 3 page(s).
+Files: 53 source doc -> 14 converted -> 3 merged (78.6% fewer at the merge, 
+94.3% end to end); 21 file(s) standing in the measured merged tree(s).
+2 page(s) queued for editorial review:
+  tibco-activematrix-businessworks-plug-in-for-transaction-insight@6.0.0: 2 of 
+3 -- see review-queue.csv
+Findings: 1 warning, 2 notes.
+Reframing 1 version(s)...
+  v tibco-enterprise-message-service@10.4.0 1434 topic(s) -> 187 page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |        1 |
+| Already current             |        0 |
+| Not Flare or DITA (skipped) |        0 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+1434 topic(s) read into 187 page(s).
+Files: 2276 source doc -> 1456 converted -> 187 merged (87.2% fewer at the 
+merge, 91.8% end to end); 230 file(s) standing in the measured merged tree(s).
+38 page(s) queued for editorial review:
+  tibco-enterprise-message-service@10.4.0: 38 of 187 -- see review-queue.csv
+Findings: 2 warnings, 1 note.
+Reframing 1 version(s)...
+  v tibco-enterprise-message-service@10.4.1 1431 topic(s) -> 170 page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |        1 |
+| Already current             |        0 |
+| Not Flare or DITA (skipped) |        0 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+1431 topic(s) read into 170 page(s).
+Files: 2258 source doc -> 1441 converted -> 170 merged (88.2% fewer at the 
+merge, 92.5% end to end); 209 file(s) standing in the measured merged tree(s).
+26 page(s) queued for editorial review:
+  tibco-enterprise-message-service@10.4.1: 26 of 170 -- see review-queue.csv
+Findings: 2 warnings, 1 note.
+Reframing 1 version(s)...
+  v tibco-enterprise-message-service@10.4.3 1429 topic(s) -> 158 page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |        1 |
+| Already current             |        0 |
+| Not Flare or DITA (skipped) |        0 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+1429 topic(s) read into 158 page(s).
+Files: 2247 source doc -> 1429 converted -> 158 merged (88.9% fewer at the 
+merge, 93.0% end to end); 197 file(s) standing in the measured merged tree(s).
+19 page(s) queued for editorial review:
+  tibco-enterprise-message-service@10.4.3: 19 of 158 -- see review-queue.csv
+Findings: 2 warnings, 1 note.
+Reframing 1 version(s)...
+  v tibco-enterprise-message-service@10.4.4 1429 topic(s) -> 158 page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |        1 |
+| Already current             |        0 |
+| Not Flare or DITA (skipped) |        0 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+1429 topic(s) read into 158 page(s).
+Files: 2247 source doc -> 1429 converted -> 158 merged (88.9% fewer at the 
+merge, 93.0% end to end); 197 file(s) standing in the measured merged tree(s).
+19 page(s) queued for editorial review:
+  tibco-enterprise-message-service@10.4.4: 19 of 158 -- see review-queue.csv
+Findings: 2 warnings, 1 note.
+Reframing 1 version(s)...
+  v tibco-enterprise-message-service@10.5.0 1441 topic(s) -> 159 page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |        1 |
+| Already current             |        0 |
+| Not Flare or DITA (skipped) |        0 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+1441 topic(s) read into 159 page(s).
+Files: 2268 source doc -> 1441 converted -> 159 merged (89.0% fewer at the 
+merge, 93.0% end to end); 199 file(s) standing in the measured merged tree(s).
+19 page(s) queued for editorial review:
+  tibco-enterprise-message-service@10.5.0: 19 of 159 -- see review-queue.csv
+Findings: 2 warnings, 1 note.
+Reframing 1 version(s)...
+  v tibco-enterprise-message-service@10.5.1 1441 topic(s) -> 159 page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |        1 |
+| Already current             |        0 |
+| Not Flare or DITA (skipped) |        0 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+1441 topic(s) read into 159 page(s).
+Files: 2268 source doc -> 1441 converted -> 159 merged (89.0% fewer at the 
+merge, 93.0% end to end); 199 file(s) standing in the measured merged tree(s).
+19 page(s) queued for editorial review:
+  tibco-enterprise-message-service@10.5.1: 19 of 159 -- see review-queue.csv
+Findings: 2 warnings, 1 note.

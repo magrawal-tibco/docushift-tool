@@ -1,0 +1,16 @@
+Reframing 1 version(s)...
+  v ibi-webfocus-container-edition@9.3.7 59 topic(s) -> 64 page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |        1 |
+| Already current             |        0 |
+| Not Flare or DITA (skipped) |        0 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+59 topic(s) read into 64 page(s).
+Files: 409 source doc -> 64 converted -> 64 merged (0.0% fewer at the merge, 
+84.4% end to end); 78 file(s) standing in the measured merged tree(s).
+Findings: 1 warning, 1 note.

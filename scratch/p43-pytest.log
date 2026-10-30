@@ -1,0 +1,88 @@
+============================= test session starts =============================
+platform win32 -- Python 3.13.7, pytest-9.1.1, pluggy-1.6.0
+rootdir: C:\github\docushift-tool
+configfile: pyproject.toml
+testpaths: tests
+plugins: cov-7.1.0
+collected 2179 items
+
+tests\integration\test_pipeline_smoke.py ..                              [  0%]
+tests\unit\test_apirefs.py ...........................                   [  1%]
+tests\unit\test_archives.py .............                                [  1%]
+tests\unit\test_catalog.py ............................................. [  3%]
+........................................................................ [  7%]
+........................................................................ [ 10%]
+......................                                                   [ 11%]
+tests\unit\test_cli.py ................................................. [ 13%]
+........................................................................ [ 17%]
+..................................                                       [ 18%]
+tests\unit\test_config.py .............................................. [ 20%]
+...............                                                          [ 21%]
+tests\unit\test_content_root.py ..........                               [ 21%]
+tests\unit\test_converter.py ........................................... [ 23%]
+............................                                             [ 25%]
+tests\unit\test_csvio.py ............................................... [ 27%]
+.........                                                                [ 27%]
+tests\unit\test_discovery.py ........................................... [ 29%]
+.......                                                                  [ 30%]
+tests\unit\test_distributor.py ......................................... [ 31%]
+.......................................................                  [ 34%]
+tests\unit\test_dita.py ................................................ [ 36%]
+...........                                                              [ 37%]
+tests\unit\test_docbook.py .......................................       [ 39%]
+tests\unit\test_documents.py ..................................          [ 40%]
+tests\unit\test_downloader.py .......................................... [ 42%]
+.............                                                            [ 43%]
+tests\unit\test_extractor.py ........................................... [ 45%]
+................................                                         [ 46%]
+tests\unit\test_findings.py ..............                               [ 47%]
+tests\unit\test_flare.py ............................................... [ 49%]
+...................................................................      [ 52%]
+tests\unit\test_inventory.py ........................................... [ 54%]
+.....                                                                    [ 54%]
+tests\unit\test_longpath.py ....s................................        [ 56%]
+tests\unit\test_naming.py .............................                  [ 57%]
+tests\unit\test_navigation.py .............................              [ 58%]
+tests\unit\test_origins.py ....................................          [ 60%]
+tests\unit\test_orphans.py .........                                     [ 61%]
+tests\unit\test_reframe.py ............................................. [ 63%]
+........................................................................ [ 66%]
+........................................................................ [ 69%]
+....................                                                     [ 70%]
+tests\unit\test_reporting_views.py ..................................... [ 72%]
+.................................................................        [ 75%]
+tests\unit\test_roots.py ...........                                     [ 75%]
+tests\unit\test_router.py .........................                      [ 76%]
+tests\unit\test_scaffolding.py ....................                      [ 77%]
+tests\unit\test_sitemap.py .................                             [ 78%]
+tests\unit\test_slug.py .......................                          [ 79%]
+tests\unit\test_state.py .......................                         [ 80%]
+tests\unit\test_swap.py ...........                                      [ 81%]
+tests\unit\test_sync_versions.py ......................                  [ 82%]
+tests\unit\test_transforms.py .......................................... [ 84%]
+........................................................................ [ 87%]
+.....................                                                    [ 88%]
+tests\unit\test_validation.py .......................................... [ 90%]
+........................................................................ [ 93%]
+.......................                                                  [ 94%]
+tests\unit\test_version_status.py ....................                   [ 95%]
+tests\unit\test_webworks.py ............................................ [ 97%]
+..................................................                       [100%]
+
+============================== warnings summary ===============================
+tests/unit/test_dita.py: 57 warnings
+  C:\github\docushift-tool\src\docushift\transforms\markdown.py:112: XMLParsedAsHTMLWarning: It looks like you're using an HTML parser to parse an XML document.
+  
+  Assuming this really is an XML document, what you're doing might work, but you should know that using an XML parser will be more reliable. To parse this document as XML, make sure you have the Python package 'lxml' installed, and pass the keyword argument `features="xml"` into the BeautifulSoup constructor.
+  
+  If you want or need to use an HTML parser on this document, you can make this warning go away by filtering it. To do that, run this code before calling the BeautifulSoup constructor:
+  
+      from bs4 import XMLParsedAsHTMLWarning
+      import warnings
+  
+      warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+  
+    return BeautifulSoup(_CDATA.sub(_unwrap_cdata, text), PARSER)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+========== 2178 passed, 1 skipped, 57 warnings in 295.62s (0:04:55) ===========

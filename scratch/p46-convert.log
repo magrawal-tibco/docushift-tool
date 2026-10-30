@@ -1,0 +1,1157 @@
+Converting 1 version(s)...
+  v ibi-webfocus-container-edition@1.0.5 37 topic(s), 3 asset(s), 1 unit(s), 39
+nav node(s), 2 generated -> 44 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+37 topic(s), 3 asset(s) written.
+44 file(s) standing in the measured output tree(s).
+ibi-webfocus-container-edition@1.0.5: 3 resolved, 0 skin, 5 escaped, 0 
+dangling, 0 case-mismatch, 67 orphan (2.8 MB)
+ibi-webfocus-container-edition@1.0.5: skipped 3 generated-directory, 1 
+placeholder-template, 2 runtime-stub, 1 unreferenced-template
+Findings: 2 warnings, 4 notes.
+Converting 1 version(s)...
+  v ibi-webfocus-container-edition@1.2.2 40 topic(s), 2 asset(s), 1 unit(s), 42
+nav node(s), 2 generated -> 46 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+40 topic(s), 2 asset(s) written.
+46 file(s) standing in the measured output tree(s).
+ibi-webfocus-container-edition@1.2.2: 2 resolved, 0 skin, 5 escaped, 0 
+dangling, 0 case-mismatch, 69 orphan (2.9 MB)
+ibi-webfocus-container-edition@1.2.2: skipped 3 generated-directory, 2 
+runtime-stub, 1 unreferenced-template
+Findings: 2 warnings, 4 notes.
+Converting 1 version(s)...
+  v ibi-webfocus-container-edition@1.2.3 40 topic(s), 2 asset(s), 1 unit(s), 42
+nav node(s), 2 generated -> 46 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+40 topic(s), 2 asset(s) written.
+46 file(s) standing in the measured output tree(s).
+ibi-webfocus-container-edition@1.2.3: 2 resolved, 0 skin, 5 escaped, 0 
+dangling, 0 case-mismatch, 69 orphan (2.9 MB)
+ibi-webfocus-container-edition@1.2.3: skipped 3 generated-directory, 2 
+runtime-stub, 1 unreferenced-template
+Findings: 2 warnings, 4 notes.
+Converting 1 version(s)...
+  v ibi-webfocus-container-edition@1.2.4 48 topic(s), 5 asset(s), 1 unit(s), 50
+nav node(s), 2 generated -> 57 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+48 topic(s), 5 asset(s) written.
+57 file(s) standing in the measured output tree(s).
+ibi-webfocus-container-edition@1.2.4: 5 resolved, 0 skin, 6 escaped, 0 
+dangling, 0 case-mismatch, 77 orphan (3.3 MB)
+ibi-webfocus-container-edition@1.2.4: skipped 3 generated-directory, 2 
+runtime-stub, 1 unreferenced-template
+Findings: 2 warnings, 4 notes.
+Converting 1 version(s)...
+  v ibi-webfocus-container-edition@1.2.5 48 topic(s), 5 asset(s), 1 unit(s), 50
+nav node(s), 2 generated -> 57 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+48 topic(s), 5 asset(s) written.
+57 file(s) standing in the measured output tree(s).
+ibi-webfocus-container-edition@1.2.5: 5 resolved, 0 skin, 6 escaped, 0 
+dangling, 0 case-mismatch, 77 orphan (3.3 MB)
+ibi-webfocus-container-edition@1.2.5: skipped 3 generated-directory, 2 
+runtime-stub, 1 unreferenced-template
+Findings: 2 warnings, 4 notes.
+Converting 1 version(s)...
+  v ibi-webfocus-container-edition@1.3.0 57 topic(s), 5 asset(s), 1 unit(s), 59
+nav node(s), 2 generated -> 66 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+57 topic(s), 5 asset(s) written.
+66 file(s) standing in the measured output tree(s).
+ibi-webfocus-container-edition@1.3.0: 5 resolved, 0 skin, 5 escaped, 0 
+dangling, 0 case-mismatch, 77 orphan (3.3 MB)
+ibi-webfocus-container-edition@1.3.0: skipped 3 generated-directory, 2 
+runtime-stub, 1 unreferenced-template
+Findings: 2 warnings, 4 notes.
+Converting 1 version(s)...
+  v ibi-webfocus-container-edition@1.3.1 56 topic(s), 5 asset(s), 1 unit(s), 58
+nav node(s), 2 generated -> 65 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+56 topic(s), 5 asset(s) written.
+65 file(s) standing in the measured output tree(s).
+ibi-webfocus-container-edition@1.3.1: 5 resolved, 0 skin, 6 escaped, 0 
+dangling, 0 case-mismatch, 77 orphan (3.3 MB)
+ibi-webfocus-container-edition@1.3.1: skipped 3 generated-directory, 2 
+runtime-stub, 1 unreferenced-template
+Findings: 2 warnings, 4 notes.
+Converting 1 version(s)...
+  v ibi-webfocus-container-edition@1.3.2 59 topic(s), 7 asset(s), 1 unit(s), 61
+nav node(s), 2 generated -> 70 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+59 topic(s), 7 asset(s) written.
+70 file(s) standing in the measured output tree(s).
+ibi-webfocus-container-edition@1.3.2: 8 resolved, 0 skin, 6 escaped, 0 
+dangling, 0 case-mismatch, 79 orphan (3.4 MB)
+ibi-webfocus-container-edition@1.3.2: skipped 4 generated-directory, 2 
+runtime-stub, 1 unreferenced-template
+Findings: 2 warnings, 4 notes.
+Converting 1 version(s)...
+  v ibi-webfocus-container-edition@1.3.3 61 topic(s), 7 asset(s), 1 unit(s), 63
+nav node(s), 2 generated -> 72 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+61 topic(s), 7 asset(s) written.
+72 file(s) standing in the measured output tree(s).
+ibi-webfocus-container-edition@1.3.3: 8 resolved, 0 skin, 6 escaped, 0 
+dangling, 0 case-mismatch, 79 orphan (3.4 MB)
+ibi-webfocus-container-edition@1.3.3: skipped 4 generated-directory, 2 
+runtime-stub, 1 unreferenced-template
+Findings: 2 warnings, 4 notes.
+Converting 1 version(s)...
+  v ibi-webfocus-container-edition@1.3.4 62 topic(s), 6 asset(s), 1 unit(s), 64
+nav node(s), 2 generated -> 72 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+62 topic(s), 6 asset(s) written.
+72 file(s) standing in the measured output tree(s).
+ibi-webfocus-container-edition@1.3.4: 6 resolved, 0 skin, 6 escaped, 0 
+dangling, 0 case-mismatch, 80 orphan (3.5 MB)
+ibi-webfocus-container-edition@1.3.4: skipped 4 generated-directory, 2 
+runtime-stub, 1 unreferenced-template
+Findings: 2 warnings, 4 notes.
+Converting 1 version(s)...
+  v ibi-webfocus-container-edition@9.3.5 65 topic(s), 6 asset(s), 1 unit(s), 67
+nav node(s), 2 generated -> 75 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+65 topic(s), 6 asset(s) written.
+75 file(s) standing in the measured output tree(s).
+ibi-webfocus-container-edition@9.3.5: 6 resolved, 0 skin, 5 escaped, 0 
+dangling, 0 case-mismatch, 80 orphan (3.5 MB)
+ibi-webfocus-container-edition@9.3.5: skipped 5 generated-directory, 2 
+runtime-stub, 1 unreferenced-template
+Findings: 2 warnings, 4 notes.
+Converting 1 version(s)...
+  v ibi-webfocus-container-edition@9.3.6 68 topic(s), 6 asset(s), 1 unit(s), 70
+nav node(s), 2 generated -> 78 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+68 topic(s), 6 asset(s) written.
+78 file(s) standing in the measured output tree(s).
+ibi-webfocus-container-edition@9.3.6: 6 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 81 orphan (3.5 MB)
+ibi-webfocus-container-edition@9.3.6: skipped 5 generated-directory, 2 
+runtime-stub, 1 unreferenced-template
+Findings: 2 warnings, 4 notes.
+Converting 1 version(s)...
+  v ibi-webfocus-container-edition@9.3.7 63 topic(s), 7 asset(s), 1 unit(s), 65
+nav node(s), 2 generated -> 74 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+63 topic(s), 7 asset(s) written.
+74 file(s) standing in the measured output tree(s).
+ibi-webfocus-container-edition@9.3.7: 7 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 82 orphan (3.4 MB)
+ibi-webfocus-container-edition@9.3.7: skipped 5 generated-directory, 2 
+runtime-stub, 1 unreferenced-template
+Findings: 2 warnings, 4 notes.
+Converting 1 version(s)...
+  v ibi-webfocus-container-edition@9.3.8 107 topic(s), 7 asset(s), 1 unit(s), 
+111 nav node(s), 4 generated -> 120 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+107 topic(s), 7 asset(s) written.
+120 file(s) standing in the measured output tree(s).
+ibi-webfocus-container-edition@9.3.8: 7 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 82 orphan (3.4 MB)
+ibi-webfocus-container-edition@9.3.8: skipped 5 generated-directory, 2 
+runtime-stub, 1 unreferenced-template
+Findings: 3 warnings, 5 notes.
+Converting 1 version(s)...
+  v ibi-webfocus-dsml-services-container-edition@1.0.4 17 topic(s), 3 asset(s),
+1 unit(s), 19 nav node(s), 2 generated -> 24 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+17 topic(s), 3 asset(s) written.
+24 file(s) standing in the measured output tree(s).
+ibi-webfocus-dsml-services-container-edition@1.0.4: 3 resolved, 0 skin, 5 
+escaped, 0 dangling, 0 case-mismatch, 70 orphan (2.8 MB)
+ibi-webfocus-dsml-services-container-edition@1.0.4: skipped 3 
+generated-directory, 2 runtime-stub, 1 unreferenced-template
+Findings: 2 warnings, 3 notes.
+Converting 1 version(s)...
+  v ibi-webfocus-dsml-services-container-edition@1.0.5 19 topic(s), 6 asset(s),
+1 unit(s), 21 nav node(s), 2 generated -> 29 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+19 topic(s), 6 asset(s) written.
+29 file(s) standing in the measured output tree(s).
+ibi-webfocus-dsml-services-container-edition@1.0.5: 6 resolved, 0 skin, 5 
+escaped, 0 dangling, 0 case-mismatch, 70 orphan (2.8 MB)
+ibi-webfocus-dsml-services-container-edition@1.0.5: skipped 3 
+generated-directory, 2 runtime-stub, 1 unreferenced-template
+Findings: 2 warnings, 3 notes.
+Converting 1 version(s)...
+  v ibi-webfocus-dsml-services-container-edition@1.0.6 18 topic(s), 5 asset(s),
+1 unit(s), 20 nav node(s), 2 generated -> 27 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+18 topic(s), 5 asset(s) written.
+27 file(s) standing in the measured output tree(s).
+ibi-webfocus-dsml-services-container-edition@1.0.6: 5 resolved, 0 skin, 5 
+escaped, 0 dangling, 0 case-mismatch, 71 orphan (2.9 MB)
+ibi-webfocus-dsml-services-container-edition@1.0.6: skipped 3 
+generated-directory, 2 runtime-stub, 1 unreferenced-template
+Findings: 2 warnings, 3 notes.
+Converting 1 version(s)...
+  v ibi-webfocus-dsml-services-container-edition@9.3.5 21 topic(s), 4 asset(s),
+1 unit(s), 22 nav node(s), 1 generated -> 29 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+21 topic(s), 4 asset(s) written.
+29 file(s) standing in the measured output tree(s).
+ibi-webfocus-dsml-services-container-edition@9.3.5: 4 resolved, 0 skin, 4 
+escaped, 0 dangling, 0 case-mismatch, 73 orphan (3.0 MB)
+ibi-webfocus-dsml-services-container-edition@9.3.5: skipped 5 
+generated-directory, 2 runtime-stub, 1 unreferenced-template
+Findings: 1 warning, 2 notes.
+Converting 1 version(s)...
+  v ibi-webfocus-dsml-services-container-edition@9.3.6 21 topic(s), 3 asset(s),
+1 unit(s), 22 nav node(s), 1 generated -> 28 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+21 topic(s), 3 asset(s) written.
+28 file(s) standing in the measured output tree(s).
+ibi-webfocus-dsml-services-container-edition@9.3.6: 3 resolved, 0 skin, 0 
+escaped, 0 dangling, 0 case-mismatch, 75 orphan (3.1 MB)
+ibi-webfocus-dsml-services-container-edition@9.3.6: skipped 5 
+generated-directory, 2 runtime-stub, 1 unreferenced-template
+Findings: 1 warning, 4 notes.
+Converting 1 version(s)...
+  v ibi-webfocus-dsml-services-container-edition@9.3.7 22 topic(s), 3 asset(s),
+1 unit(s), 23 nav node(s), 1 generated -> 29 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+22 topic(s), 3 asset(s) written.
+29 file(s) standing in the measured output tree(s).
+ibi-webfocus-dsml-services-container-edition@9.3.7: 3 resolved, 0 skin, 0 
+escaped, 0 dangling, 0 case-mismatch, 76 orphan (3.1 MB)
+ibi-webfocus-dsml-services-container-edition@9.3.7: skipped 5 
+generated-directory, 2 runtime-stub, 1 unreferenced-template
+Findings: 1 warning, 2 notes.
+Converting 1 version(s)...
+  v ibi-webfocus-dsml-services-container-edition@9.3.8 24 topic(s), 3 asset(s),
+1 unit(s), 26 nav node(s), 2 generated -> 31 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+24 topic(s), 3 asset(s) written.
+31 file(s) standing in the measured output tree(s).
+ibi-webfocus-dsml-services-container-edition@9.3.8: 3 resolved, 0 skin, 0 
+escaped, 0 dangling, 0 case-mismatch, 76 orphan (3.1 MB)
+ibi-webfocus-dsml-services-container-edition@9.3.8: skipped 5 
+generated-directory, 2 runtime-stub, 1 unreferenced-template
+Findings: 3 warnings, 4 notes.
+Converting 1 version(s)...
+  v ibi-iway-service-manager@9.2.0 1693 topic(s), 3910 asset(s), 1 unit(s), 
+1737 nav node(s), 41 generated -> 5646 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+1693 topic(s), 3910 asset(s) written.
+5646 file(s) standing in the measured output tree(s).
+ibi-iway-service-manager@9.2.0: 4283 resolved, 0 skin, 13 escaped, 0 dangling, 
+0 case-mismatch, 2944 orphan (102.1 MB)
+ibi-iway-service-manager@9.2.0: skipped 4 generated-directory, 2 runtime-stub, 
+2 unreferenced-template
+Findings: 3 warnings, 6 notes.
+Converting 1 version(s)...
+  v ibi-iway-service-manager@9.3.0 1687 topic(s), 3964 asset(s), 1 unit(s), 
+1733 nav node(s), 43 generated -> 5696 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+1687 topic(s), 3964 asset(s) written.
+5696 file(s) standing in the measured output tree(s).
+ibi-iway-service-manager@9.3.0: 4295 resolved, 0 skin, 4 escaped, 0 dangling, 0
+case-mismatch, 3036 orphan (102.1 MB)
+ibi-iway-service-manager@9.3.0: skipped 5 generated-directory, 2 runtime-stub
+Findings: 3 warnings, 6 notes.
+Converting 1 version(s)...
+  v ibi-iway-service-manager-edi-add-on@9.1.1 25 topic(s), 242 asset(s), 1 
+unit(s), 27 nav node(s), 2 generated -> 271 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+25 topic(s), 242 asset(s) written.
+271 file(s) standing in the measured output tree(s).
+ibi-iway-service-manager-edi-add-on@9.1.1: 249 resolved, 0 skin, 5 escaped, 0 
+dangling, 0 case-mismatch, 416 orphan (17.4 MB)
+ibi-iway-service-manager-edi-add-on@9.1.1: skipped 3 generated-directory, 2 
+runtime-stub, 1 unreferenced-template
+Findings: 2 warnings, 4 notes.
+Converting 1 version(s)...
+  v ibi-iway-service-manager-edi-add-on@9.3.0 25 topic(s), 242 asset(s), 1 
+unit(s), 27 nav node(s), 2 generated -> 271 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+25 topic(s), 242 asset(s) written.
+271 file(s) standing in the measured output tree(s).
+ibi-iway-service-manager-edi-add-on@9.3.0: 249 resolved, 0 skin, 4 escaped, 0 
+dangling, 0 case-mismatch, 461 orphan (21.2 MB)
+ibi-iway-service-manager-edi-add-on@9.3.0: skipped 5 generated-directory, 2 
+runtime-stub
+Findings: 2 warnings, 4 notes.
+Converting 1 version(s)...
+  v tibco-activematrix-service-grid@3.4.3 1839 topic(s), 621 asset(s), 1 
+unit(s), 1886 nav node(s), 18 generated -> 2482 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+1839 topic(s), 621 asset(s) written.
+2482 file(s) standing in the measured output tree(s).
+tibco-activematrix-service-grid@3.4.3: 747 resolved, 0 skin, 0 escaped, 126 
+dangling, 0 case-mismatch, 782 orphan (47.6 MB)
+tibco-activematrix-service-grid@3.4.3: CSH 96 resolved, 0 unresolved, 0 
+ambiguous
+tibco-activematrix-service-grid@3.4.3: skipped 775 api-reference, 3 
+generated-directory, 7 runtime-stub, 1 unreferenced-template
+Findings: 1 error, 3 warnings, 8 notes.
+Converting 1 version(s)...
+  v tibco-activematrix-service-grid@3.4.4 1839 topic(s), 621 asset(s), 1 
+unit(s), 1885 nav node(s), 18 generated -> 2482 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+1839 topic(s), 621 asset(s) written.
+2482 file(s) standing in the measured output tree(s).
+tibco-activematrix-service-grid@3.4.4: 747 resolved, 0 skin, 0 escaped, 126 
+dangling, 0 case-mismatch, 782 orphan (47.6 MB)
+tibco-activematrix-service-grid@3.4.4: CSH 96 resolved, 0 unresolved, 0 
+ambiguous
+tibco-activematrix-service-grid@3.4.4: skipped 775 api-reference, 3 
+generated-directory, 7 runtime-stub, 1 unreferenced-template
+Findings: 1 error, 3 warnings, 8 notes.
+Converting 1 version(s)...
+  v tibco-activematrix-service-grid-container-edition@1.0.0 223 topic(s), 189 
+asset(s), 1 unit(s), 229 nav node(s), 5 generated -> 419 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+223 topic(s), 189 asset(s) written.
+419 file(s) standing in the measured output tree(s).
+tibco-activematrix-service-grid-container-edition@1.0.0: 249 resolved, 0 skin, 
+0 escaped, 0 dangling, 0 case-mismatch, 90 orphan (6.2 MB)
+tibco-activematrix-service-grid-container-edition@1.0.0: CSH 50 resolved, 0 
+unresolved, 0 ambiguous
+tibco-activematrix-service-grid-container-edition@1.0.0: skipped 3 
+generated-directory, 2 runtime-stub, 1 unreferenced-template
+Findings: 2 warnings, 4 notes.
+Converting 1 version(s)...
+  v tibco-activematrix-service-grid-container-edition@1.0.1 207 topic(s), 218 
+asset(s), 1 unit(s), 212 nav node(s), 4 generated -> 432 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+207 topic(s), 218 asset(s) written.
+432 file(s) standing in the measured output tree(s).
+tibco-activematrix-service-grid-container-edition@1.0.1: 272 resolved, 0 skin, 
+0 escaped, 0 dangling, 0 case-mismatch, 109 orphan (7.2 MB)
+tibco-activematrix-service-grid-container-edition@1.0.1: CSH 51 resolved, 0 
+unresolved, 0 ambiguous
+tibco-activematrix-service-grid-container-edition@1.0.1: skipped 3 
+generated-directory, 2 runtime-stub, 1 unreferenced-template
+Findings: 1 warning, 2 notes.
+Converting 1 version(s)...
+C:\github\docushift-tool\src\docushift\transforms\markdown.py:112: XMLParsedAsHTMLWarning: It looks like you're using an HTML parser to parse an XML document.
+
+Assuming this really is an XML document, what you're doing might work, but you should know that using an XML parser will be more reliable. To parse this document as XML, make sure you have the Python package 'lxml' installed, and pass the keyword argument `features="xml"` into the BeautifulSoup constructor.
+
+If you want or need to use an HTML parser on this document, you can make this warning go away by filtering it. To do that, run this code before calling the BeautifulSoup constructor:
+
+    from bs4 import XMLParsedAsHTMLWarning
+    import warnings
+
+    warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+  return BeautifulSoup(_CDATA.sub(_unwrap_cdata, text), PARSER)
+  v tibco-business-studio-activematrix-decisions-add-in@1.3.0 148 topic(s), 121
+asset(s), 3 unit(s), 154 nav node(s), 3 generated -> 274 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+148 topic(s), 121 asset(s) written.
+274 file(s) standing in the measured output tree(s).
+tibco-business-studio-activematrix-decisions-add-in@1.3.0: 128 resolved, 0 
+skin, 0 escaped, 0 dangling, 0 case-mismatch, 49 orphan (1.0 MB)
+tibco-business-studio-activematrix-decisions-add-in@1.3.0: skipped 6 
+runtime-stub
+Findings: 2 warnings, 5 notes.
+Converting 1 version(s)...
+C:\github\docushift-tool\src\docushift\transforms\markdown.py:112: XMLParsedAsHTMLWarning: It looks like you're using an HTML parser to parse an XML document.
+
+Assuming this really is an XML document, what you're doing might work, but you should know that using an XML parser will be more reliable. To parse this document as XML, make sure you have the Python package 'lxml' installed, and pass the keyword argument `features="xml"` into the BeautifulSoup constructor.
+
+If you want or need to use an HTML parser on this document, you can make this warning go away by filtering it. To do that, run this code before calling the BeautifulSoup constructor:
+
+    from bs4 import XMLParsedAsHTMLWarning
+    import warnings
+
+    warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+  return BeautifulSoup(_CDATA.sub(_unwrap_cdata, text), PARSER)
+  v tibco-business-studio-activematrix-decisions-add-in@1.4.0 80 topic(s), 121 
+asset(s), 3 unit(s), 133 nav node(s), 4 generated -> 207 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+80 topic(s), 121 asset(s) written.
+207 file(s) standing in the measured output tree(s).
+tibco-business-studio-activematrix-decisions-add-in@1.4.0: 128 resolved, 0 
+skin, 0 escaped, 0 dangling, 0 case-mismatch, 48 orphan (1.0 MB)
+tibco-business-studio-activematrix-decisions-add-in@1.4.0: skipped 3 
+front-matter, 6 runtime-stub
+Findings: 2 warnings, 6 notes.
+Converting 1 version(s)...
+C:\github\docushift-tool\src\docushift\transforms\markdown.py:112: XMLParsedAsHTMLWarning: It looks like you're using an HTML parser to parse an XML document.
+
+Assuming this really is an XML document, what you're doing might work, but you should know that using an XML parser will be more reliable. To parse this document as XML, make sure you have the Python package 'lxml' installed, and pass the keyword argument `features="xml"` into the BeautifulSoup constructor.
+
+If you want or need to use an HTML parser on this document, you can make this warning go away by filtering it. To do that, run this code before calling the BeautifulSoup constructor:
+
+    from bs4 import XMLParsedAsHTMLWarning
+    import warnings
+
+    warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+  return BeautifulSoup(_CDATA.sub(_unwrap_cdata, text), PARSER)
+  v 
+tibco-activematrix-adapter-for-files-for-unix-win-tibco-business-studio@1.3.0 
+205 topic(s), 18 asset(s), 1 unit(s), 206 nav node(s), 1 generated -> 226 
+file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+205 topic(s), 18 asset(s) written.
+226 file(s) standing in the measured output tree(s).
+tibco-activematrix-adapter-for-files-for-unix-win-tibco-business-studio@1.3.0: 
+41 resolved, 0 skin, 0 escaped, 0 dangling, 0 case-mismatch, 1 orphan (0.8 MB)
+tibco-activematrix-adapter-for-files-for-unix-win-tibco-business-studio@1.3.0: 
+skipped 2 not-a-topic, 4 republished-duplicate
+Findings: 1 warning, 3 notes.
+Converting 1 version(s)...
+C:\github\docushift-tool\src\docushift\transforms\markdown.py:112: XMLParsedAsHTMLWarning: It looks like you're using an HTML parser to parse an XML document.
+
+Assuming this really is an XML document, what you're doing might work, but you should know that using an XML parser will be more reliable. To parse this document as XML, make sure you have the Python package 'lxml' installed, and pass the keyword argument `features="xml"` into the BeautifulSoup constructor.
+
+If you want or need to use an HTML parser on this document, you can make this warning go away by filtering it. To do that, run this code before calling the BeautifulSoup constructor:
+
+    from bs4 import XMLParsedAsHTMLWarning
+    import warnings
+
+    warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+  return BeautifulSoup(_CDATA.sub(_unwrap_cdata, text), PARSER)
+  v tibco-activematrix-adapter-for-jd-edwards-enterpriseone@6.0.0 136 topic(s),
+43 asset(s), 4 unit(s), 209 nav node(s), 5 generated -> 187 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+136 topic(s), 43 asset(s) written.
+187 file(s) standing in the measured output tree(s).
+tibco-activematrix-adapter-for-jd-edwards-enterpriseone@6.0.0: 63 resolved, 12 
+skin, 0 escaped, 1 dangling, 0 case-mismatch, 57 orphan (0.7 MB)
+tibco-activematrix-adapter-for-jd-edwards-enterpriseone@6.0.0: CSH 6 resolved, 
+0 unresolved, 0 ambiguous
+tibco-activematrix-adapter-for-jd-edwards-enterpriseone@6.0.0: skipped 4 
+front-matter, 4 generated-list, 8 runtime-stub
+Findings: 1 error, 2 warnings, 5 notes.
+Converting 1 version(s)...
+C:\github\docushift-tool\src\docushift\transforms\markdown.py:112: XMLParsedAsHTMLWarning: It looks like you're using an HTML parser to parse an XML document.
+
+Assuming this really is an XML document, what you're doing might work, but you should know that using an XML parser will be more reliable. To parse this document as XML, make sure you have the Python package 'lxml' installed, and pass the keyword argument `features="xml"` into the BeautifulSoup constructor.
+
+If you want or need to use an HTML parser on this document, you can make this warning go away by filtering it. To do that, run this code before calling the BeautifulSoup constructor:
+
+    from bs4 import XMLParsedAsHTMLWarning
+    import warnings
+
+    warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+  return BeautifulSoup(_CDATA.sub(_unwrap_cdata, text), PARSER)
+  v tibco-activematrix-adapter-for-jd-edwards-enterpriseone@6.1.0 133 topic(s),
+57 asset(s), 6 unit(s), 186 nav node(s), 8 generated -> 198 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+133 topic(s), 57 asset(s) written.
+198 file(s) standing in the measured output tree(s).
+tibco-activematrix-adapter-for-jd-edwards-enterpriseone@6.1.0: 66 resolved, 9 
+skin, 0 escaped, 1 dangling, 0 case-mismatch, 81 orphan (1.0 MB)
+tibco-activematrix-adapter-for-jd-edwards-enterpriseone@6.1.0: CSH 6 resolved, 
+0 unresolved, 0 ambiguous
+tibco-activematrix-adapter-for-jd-edwards-enterpriseone@6.1.0: skipped 4 
+front-matter, 4 generated-list, 12 runtime-stub
+Findings: 1 error, 2 warnings, 5 notes.
+Converting 1 version(s)...
+  v tibco-businessevents-enterprise-edition@6.3.0 1356 topic(s), 327 asset(s), 
+1 unit(s), 1370 nav node(s), 14 generated -> 1699 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+1356 topic(s), 327 asset(s) written.
+1699 file(s) standing in the measured output tree(s).
+tibco-businessevents-enterprise-edition@6.3.0: 362 resolved, 0 skin, 1 escaped,
+0 dangling, 0 case-mismatch, 367 orphan (10.6 MB)
+tibco-businessevents-enterprise-edition@6.3.0: skipped 1491 api-reference, 3 
+generated-directory, 15 runtime-stub
+Findings: 3 warnings, 6 notes.
+Converting 1 version(s)...
+  v tibco-businessevents-enterprise-edition@6.3.1 1362 topic(s), 327 asset(s), 
+1 unit(s), 1375 nav node(s), 13 generated -> 1705 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+1362 topic(s), 327 asset(s) written.
+1705 file(s) standing in the measured output tree(s).
+tibco-businessevents-enterprise-edition@6.3.1: 362 resolved, 0 skin, 0 escaped,
+0 dangling, 0 case-mismatch, 373 orphan (10.9 MB)
+tibco-businessevents-enterprise-edition@6.3.1: skipped 1533 api-reference, 4 
+generated-directory, 16 runtime-stub
+Findings: 2 warnings, 5 notes.
+Converting 1 version(s)...
+  v tibco-businessevents-enterprise-edition@6.3.2 1371 topic(s), 329 asset(s), 
+1 unit(s), 1385 nav node(s), 14 generated -> 1716 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+1371 topic(s), 329 asset(s) written.
+1716 file(s) standing in the measured output tree(s).
+tibco-businessevents-enterprise-edition@6.3.2: 364 resolved, 0 skin, 0 escaped,
+0 dangling, 0 case-mismatch, 376 orphan (12.0 MB)
+tibco-businessevents-enterprise-edition@6.3.2: skipped 1533 api-reference, 4 
+generated-directory, 16 runtime-stub
+Findings: 3 warnings, 6 notes.
+Converting 1 version(s)...
+  v tibco-businessevents-enterprise-edition@6.4.0 1394 topic(s), 324 asset(s), 
+1 unit(s), 1408 nav node(s), 14 generated -> 1735 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+1394 topic(s), 324 asset(s) written.
+1735 file(s) standing in the measured output tree(s).
+tibco-businessevents-enterprise-edition@6.4.0: 363 resolved, 0 skin, 0 escaped,
+0 dangling, 0 case-mismatch, 392 orphan (18.1 MB)
+tibco-businessevents-enterprise-edition@6.4.0: skipped 1533 api-reference, 4 
+generated-directory, 16 runtime-stub
+Findings: 3 warnings, 6 notes.
+Converting 1 version(s)...
+C:\github\docushift-tool\src\docushift\transforms\markdown.py:112: XMLParsedAsHTMLWarning: It looks like you're using an HTML parser to parse an XML document.
+
+Assuming this really is an XML document, what you're doing might work, but you should know that using an XML parser will be more reliable. To parse this document as XML, make sure you have the Python package 'lxml' installed, and pass the keyword argument `features="xml"` into the BeautifulSoup constructor.
+
+If you want or need to use an HTML parser on this document, you can make this warning go away by filtering it. To do that, run this code before calling the BeautifulSoup constructor:
+
+    from bs4 import XMLParsedAsHTMLWarning
+    import warnings
+
+    warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+  return BeautifulSoup(_CDATA.sub(_unwrap_cdata, text), PARSER)
+  v tibco-activematrix-businessworks-plug-in-for-amazon-sqs-and-sns@6.5.2 63 
+topic(s), 11 asset(s), 1 unit(s), 64 nav node(s), 1 generated -> 79 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+63 topic(s), 11 asset(s) written.
+79 file(s) standing in the measured output tree(s).
+tibco-activematrix-businessworks-plug-in-for-amazon-sqs-and-sns@6.5.2: 22 
+resolved, 0 skin, 0 escaped, 0 dangling, 0 case-mismatch, 1 orphan (0.2 MB)
+tibco-activematrix-businessworks-plug-in-for-amazon-sqs-and-sns@6.5.2: CSH 9 
+resolved, 0 unresolved, 0 ambiguous
+tibco-activematrix-businessworks-plug-in-for-amazon-sqs-and-sns@6.5.2: skipped 
+2 not-a-topic, 1 publication-homepage
+Findings: 2 warnings, 3 notes.
+Converting 1 version(s)...
+C:\github\docushift-tool\src\docushift\transforms\markdown.py:112: XMLParsedAsHTMLWarning: It looks like you're using an HTML parser to parse an XML document.
+
+Assuming this really is an XML document, what you're doing might work, but you should know that using an XML parser will be more reliable. To parse this document as XML, make sure you have the Python package 'lxml' installed, and pass the keyword argument `features="xml"` into the BeautifulSoup constructor.
+
+If you want or need to use an HTML parser on this document, you can make this warning go away by filtering it. To do that, run this code before calling the BeautifulSoup constructor:
+
+    from bs4 import XMLParsedAsHTMLWarning
+    import warnings
+
+    warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+  return BeautifulSoup(_CDATA.sub(_unwrap_cdata, text), PARSER)
+  v tibco-activematrix-businessworks-plug-in-for-google-cloud-pub-sub@6.0.1 46 
+topic(s), 9 asset(s), 1 unit(s), 47 nav node(s), 1 generated -> 60 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+46 topic(s), 9 asset(s) written.
+60 file(s) standing in the measured output tree(s).
+tibco-activematrix-businessworks-plug-in-for-google-cloud-pub-sub@6.0.1: 9 
+resolved, 0 skin, 0 escaped, 0 dangling, 0 case-mismatch, 1 orphan (0.2 MB)
+tibco-activematrix-businessworks-plug-in-for-google-cloud-pub-sub@6.0.1: CSH 3 
+resolved, 0 unresolved, 0 ambiguous
+tibco-activematrix-businessworks-plug-in-for-google-cloud-pub-sub@6.0.1: 
+skipped 2 not-a-topic, 1 publication-homepage, 2 republished-duplicate
+Findings: 2 warnings, 3 notes.
+Converting 1 version(s)...
+C:\github\docushift-tool\src\docushift\transforms\markdown.py:112: XMLParsedAsHTMLWarning: It looks like you're using an HTML parser to parse an XML document.
+
+Assuming this really is an XML document, what you're doing might work, but you should know that using an XML parser will be more reliable. To parse this document as XML, make sure you have the Python package 'lxml' installed, and pass the keyword argument `features="xml"` into the BeautifulSoup constructor.
+
+If you want or need to use an HTML parser on this document, you can make this warning go away by filtering it. To do that, run this code before calling the BeautifulSoup constructor:
+
+    from bs4 import XMLParsedAsHTMLWarning
+    import warnings
+
+    warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+  return BeautifulSoup(_CDATA.sub(_unwrap_cdata, text), PARSER)
+  v tibco-activematrix-businessworks-plug-in-for-mobile-integration@6.3.0 73 
+topic(s), 39 asset(s), 1 unit(s), 74 nav node(s), 1 generated -> 117 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+73 topic(s), 39 asset(s) written.
+117 file(s) standing in the measured output tree(s).
+tibco-activematrix-businessworks-plug-in-for-mobile-integration@6.3.0: 40 
+resolved, 0 skin, 0 escaped, 0 dangling, 0 case-mismatch, 1 orphan (0.3 MB)
+tibco-activematrix-businessworks-plug-in-for-mobile-integration@6.3.0: CSH 11 
+resolved, 0 unresolved, 0 ambiguous
+tibco-activematrix-businessworks-plug-in-for-mobile-integration@6.3.0: skipped 
+2 not-a-topic, 1 publication-homepage, 6 republished-duplicate
+Findings: 2 warnings, 4 notes.
+Converting 1 version(s)...
+C:\github\docushift-tool\src\docushift\transforms\markdown.py:112: XMLParsedAsHTMLWarning: It looks like you're using an HTML parser to parse an XML document.
+
+Assuming this really is an XML document, what you're doing might work, but you should know that using an XML parser will be more reliable. To parse this document as XML, make sure you have the Python package 'lxml' installed, and pass the keyword argument `features="xml"` into the BeautifulSoup constructor.
+
+If you want or need to use an HTML parser on this document, you can make this warning go away by filtering it. To do that, run this code before calling the BeautifulSoup constructor:
+
+    from bs4 import XMLParsedAsHTMLWarning
+    import warnings
+
+    warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+  return BeautifulSoup(_CDATA.sub(_unwrap_cdata, text), PARSER)
+  v tibco-activematrix-businessworks-plug-in-for-tibco-auditsafe@6.1.0 40 
+topic(s), 13 asset(s), 1 unit(s), 41 nav node(s), 1 generated -> 58 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+40 topic(s), 13 asset(s) written.
+58 file(s) standing in the measured output tree(s).
+tibco-activematrix-businessworks-plug-in-for-tibco-auditsafe@6.1.0: 14 
+resolved, 0 skin, 0 escaped, 0 dangling, 0 case-mismatch, 2 orphan (1.9 MB)
+tibco-activematrix-businessworks-plug-in-for-tibco-auditsafe@6.1.0: CSH 3 
+resolved, 0 unresolved, 0 ambiguous
+tibco-activematrix-businessworks-plug-in-for-tibco-auditsafe@6.1.0: skipped 2 
+not-a-topic, 1 publication-homepage, 2 republished-duplicate
+Findings: 2 warnings, 2 notes.
+Converting 1 version(s)...
+C:\github\docushift-tool\src\docushift\transforms\markdown.py:112: XMLParsedAsHTMLWarning: It looks like you're using an HTML parser to parse an XML document.
+
+Assuming this really is an XML document, what you're doing might work, but you should know that using an XML parser will be more reliable. To parse this document as XML, make sure you have the Python package 'lxml' installed, and pass the keyword argument `features="xml"` into the BeautifulSoup constructor.
+
+If you want or need to use an HTML parser on this document, you can make this warning go away by filtering it. To do that, run this code before calling the BeautifulSoup constructor:
+
+    from bs4 import XMLParsedAsHTMLWarning
+    import warnings
+
+    warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+  return BeautifulSoup(_CDATA.sub(_unwrap_cdata, text), PARSER)
+  v tibco-activematrix-businessworks-plug-in-for-tibco-auditsafe@6.2.0 40 
+topic(s), 13 asset(s), 1 unit(s), 41 nav node(s), 1 generated -> 58 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+40 topic(s), 13 asset(s) written.
+58 file(s) standing in the measured output tree(s).
+tibco-activematrix-businessworks-plug-in-for-tibco-auditsafe@6.2.0: 14 
+resolved, 0 skin, 0 escaped, 0 dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+tibco-activematrix-businessworks-plug-in-for-tibco-auditsafe@6.2.0: CSH 3 
+resolved, 0 unresolved, 0 ambiguous
+tibco-activematrix-businessworks-plug-in-for-tibco-auditsafe@6.2.0: skipped 2 
+not-a-topic, 1 publication-homepage, 2 republished-duplicate
+Findings: 2 warnings, 2 notes.
+Converting 1 version(s)...
+C:\github\docushift-tool\src\docushift\transforms\markdown.py:112: XMLParsedAsHTMLWarning: It looks like you're using an HTML parser to parse an XML document.
+
+Assuming this really is an XML document, what you're doing might work, but you should know that using an XML parser will be more reliable. To parse this document as XML, make sure you have the Python package 'lxml' installed, and pass the keyword argument `features="xml"` into the BeautifulSoup constructor.
+
+If you want or need to use an HTML parser on this document, you can make this warning go away by filtering it. To do that, run this code before calling the BeautifulSoup constructor:
+
+    from bs4 import XMLParsedAsHTMLWarning
+    import warnings
+
+    warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+  return BeautifulSoup(_CDATA.sub(_unwrap_cdata, text), PARSER)
+  v tibco-activematrix-businessworks-plug-in-for-transaction-insight@6.0.0 13 
+topic(s), 11 asset(s), 1 unit(s), 14 nav node(s), 1 generated -> 28 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+13 topic(s), 11 asset(s) written.
+28 file(s) standing in the measured output tree(s).
+tibco-activematrix-businessworks-plug-in-for-transaction-insight@6.0.0: 11 
+resolved, 0 skin, 0 escaped, 0 dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+tibco-activematrix-businessworks-plug-in-for-transaction-insight@6.0.0: CSH 12 
+resolved, 0 unresolved, 0 ambiguous
+tibco-activematrix-businessworks-plug-in-for-transaction-insight@6.0.0: skipped
+2 not-a-topic, 1 publication-homepage
+Findings: 2 warnings, 1 note.
+Converting 1 version(s)...
+  v tibco-enterprise-message-service@10.4.0 1452 topic(s), 35 asset(s), 1 
+unit(s), 1459 nav node(s), 5 generated -> 1495 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+1452 topic(s), 35 asset(s) written.
+1495 file(s) standing in the measured output tree(s).
+tibco-enterprise-message-service@10.4.0: 36 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 466 orphan (7.4 MB)
+tibco-enterprise-message-service@10.4.0: skipped 655 api-reference, 4 
+generated-directory, 1 placeholder-template, 6 runtime-stub
+Findings: 3 warnings, 10 notes.
+Converting 1 version(s)...
+  v tibco-enterprise-message-service@10.4.1 1437 topic(s), 31 asset(s), 1 
+unit(s), 1444 nav node(s), 5 generated -> 1476 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+1437 topic(s), 31 asset(s) written.
+1476 file(s) standing in the measured output tree(s).
+tibco-enterprise-message-service@10.4.1: 32 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 477 orphan (7.6 MB)
+tibco-enterprise-message-service@10.4.1: skipped 655 api-reference, 4 
+generated-directory, 1 placeholder-template, 6 runtime-stub
+Findings: 3 warnings, 10 notes.
+Converting 1 version(s)...
+  v tibco-enterprise-message-service@10.4.3 1425 topic(s), 32 asset(s), 1 
+unit(s), 1429 nav node(s), 4 generated -> 1464 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+1425 topic(s), 32 asset(s) written.
+1464 file(s) standing in the measured output tree(s).
+tibco-enterprise-message-service@10.4.3: 33 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 480 orphan (7.7 MB)
+tibco-enterprise-message-service@10.4.3: skipped 655 api-reference, 4 
+generated-directory, 1 placeholder-template, 6 runtime-stub
+Findings: 2 warnings, 9 notes.
+Converting 1 version(s)...
+  v tibco-enterprise-message-service@10.4.4 1425 topic(s), 32 asset(s), 1 
+unit(s), 1429 nav node(s), 4 generated -> 1464 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+1425 topic(s), 32 asset(s) written.
+1464 file(s) standing in the measured output tree(s).
+tibco-enterprise-message-service@10.4.4: 33 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 480 orphan (7.7 MB)
+tibco-enterprise-message-service@10.4.4: skipped 655 api-reference, 4 
+generated-directory, 1 placeholder-template, 6 runtime-stub
+Findings: 2 warnings, 9 notes.
+Converting 1 version(s)...
+  v tibco-enterprise-message-service@10.5.0 1437 topic(s), 33 asset(s), 1 
+unit(s), 1441 nav node(s), 4 generated -> 1477 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+1437 topic(s), 33 asset(s) written.
+1477 file(s) standing in the measured output tree(s).
+tibco-enterprise-message-service@10.5.0: 34 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 487 orphan (7.8 MB)
+tibco-enterprise-message-service@10.5.0: skipped 664 api-reference, 4 
+generated-directory, 1 placeholder-template, 6 runtime-stub
+Findings: 2 warnings, 9 notes.
+Converting 1 version(s)...
+  v tibco-enterprise-message-service@10.5.1 1437 topic(s), 33 asset(s), 1 
+unit(s), 1441 nav node(s), 4 generated -> 1477 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+1437 topic(s), 33 asset(s) written.
+1477 file(s) standing in the measured output tree(s).
+tibco-enterprise-message-service@10.5.1: 34 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 487 orphan (7.8 MB)
+tibco-enterprise-message-service@10.5.1: skipped 664 api-reference, 4 
+generated-directory, 1 placeholder-template, 6 runtime-stub
+Findings: 2 warnings, 9 notes.

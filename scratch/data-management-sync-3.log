@@ -1,0 +1,23 @@
+Syncing 9 version(s) into ..\tibco-docs-aem...
+  v tibco-mdm-studio@6.1.1 -> online-help/6-1-1 2521 file(s), 62.3 MB
+  v tibco-mdm-studio@6.0.0 -> online-help/6-0-0 2460 file(s), 59.7 MB
+                                     Sync                                      
++-----------------------------------------------------------------------------+
+| Outcome | Rows | online… | user-g… | releas… | refere… | api-ref… | archiv… |
+|---------+------+---------+---------+---------+---------+----------+---------|
+| Synced  |    2 |       2 |       0 |       0 |       0 |        0 |       0 |
+| Already |   38 |       6 |       8 |       9 |       9 |        3 |       3 |
+| current |      |         |         |         |         |          |         |
+| No      |    1 |       1 |       0 |       0 |       0 |        0 |       0 |
+| source  |      |         |         |         |         |          |         |
+| tree    |      |         |         |         |         |          |         |
+| Skipped |    0 |       0 |       0 |       0 |       0 |        0 |       0 |
+| Failed  |    0 |       0 |       0 |       0 |       0 |        0 |       0 |
++-----------------------------------------------------------------------------+
+4981 file(s), 122.0 MB copied.
+4 product metadata.yml, 14 version.yml written.
+Published merged (Stage 6b): tibco-mdm-studio.
+28491 redirect(s) in 6 published map(s), tree-rooted (no publish_base_url set).
+! tibco-enterprise-mdm@1.0.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-data-management\tibco-enterprise-mdm\
+1.0.0; run `docushift convert` first

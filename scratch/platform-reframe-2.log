@@ -1,0 +1,37 @@
+Reframing 3 version(s)...
+  v tibco-control-plane@1.20.0 534 topic(s) -> 211 page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |        1 |
+| Already current             |        2 |
+| Not Flare or DITA (skipped) |        0 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+534 topic(s) read into 211 page(s).
+Files: 10960 source doc -> 1572 converted -> 470 merged (70.1% fewer at the 
+merge, 95.7% end to end); 2070 file(s) standing in the measured merged tree(s).
+61 page(s) queued for editorial review:
+  tibco-control-plane@1.20.0: 61 of 211 -- see review-queue.csv
+Findings: 1 warning, 5 notes.
+Reframing 2 version(s)...
+  v tibco-platform-command-line-interface@1.2.0 412 topic(s) -> 161 page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |        1 |
+| Already current             |        0 |
+| Not Flare or DITA (skipped) |        1 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+412 topic(s) read into 161 page(s).
+Files: 3300 source doc -> 428 converted -> 161 merged (62.4% fewer at the 
+merge, 95.1% end to end); 609 file(s) standing in the measured merged tree(s).
+54 page(s) queued for editorial review:
+  tibco-platform-command-line-interface@1.2.0: 54 of 161 -- see 
+review-queue.csv
+Findings: 1 warning, 2 notes.

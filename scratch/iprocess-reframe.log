@@ -1,0 +1,46 @@
+Reframing 18 version(s)...
+  v tibco-iprocess-engine@11.10.0 1822 topic(s) -> 643 page(s)
+  v tibco-iprocess-engine@11.9.2 1809 topic(s) -> 520 page(s)
+  v tibco-iprocess-engine@11.9.1 1803 topic(s) -> 504 page(s)
+  v tibco-iprocess-technology-plug-ins@11.10.0 261 topic(s) -> 57 page(s)
+  v tibco-iprocess-technology-plug-ins@11.9.2 200 topic(s) -> 108 page(s)
+  v tibco-iprocess-web-services-client-plug-in@11.9.0 140 topic(s) -> 23 
+page(s)
+  v tibco-iprocess-web-services-server-plug-in@11.9.0 47 topic(s) -> 136 
+page(s)
+  v tibco-iprocess-workspace-browser@11.10.0 666 topic(s) -> 158 page(s)
+  v tibco-iprocess-workspace-browser@11.9.0 666 topic(s) -> 140 page(s)
+  v tibco-iprocess-workspace-plug-ins@11.10.0 24 topic(s) -> 7 page(s)
+  v tibco-iprocess-workspace-plug-ins@11.9.0 24 topic(s) -> 6 page(s)
+  v tibco-iprocess-workspace-windows@11.10.0 1049 topic(s) -> 177 page(s)
+  v tibco-iprocess-workspace-windows@11.9.2 1028 topic(s) -> 161 page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |       13 |
+| Already current             |        0 |
+| Not Flare or DITA (skipped) |        5 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+9539 topic(s) read into 2640 page(s).
+Files: 27321 source doc -> 10766 converted -> 2640 merged (75.5% fewer at the 
+merge, 90.3% end to end); 8095 file(s) standing in the measured merged tree(s).
+1526 page(s) queued for editorial review:
+  tibco-iprocess-engine@11.10.0: 386 of 643 -- see review-queue.csv
+  tibco-iprocess-engine@11.9.2: 388 of 520 -- see review-queue.csv
+  tibco-iprocess-engine@11.9.1: 379 of 504 -- see review-queue.csv
+  tibco-iprocess-technology-plug-ins@11.10.0: 20 of 57 -- see review-queue.csv
+  tibco-iprocess-technology-plug-ins@11.9.2: 77 of 108 -- see review-queue.csv
+  tibco-iprocess-web-services-client-plug-in@11.9.0: 5 of 23 -- see 
+review-queue.csv
+  tibco-iprocess-web-services-server-plug-in@11.9.0: 130 of 136 -- see 
+review-queue.csv
+  tibco-iprocess-workspace-browser@11.10.0: 15 of 158 -- see review-queue.csv
+  tibco-iprocess-workspace-browser@11.9.0: 23 of 140 -- see review-queue.csv
+  tibco-iprocess-workspace-plug-ins@11.10.0: 3 of 7 -- see review-queue.csv
+  tibco-iprocess-workspace-plug-ins@11.9.0: 2 of 6 -- see review-queue.csv
+  tibco-iprocess-workspace-windows@11.10.0: 54 of 177 -- see review-queue.csv
+  tibco-iprocess-workspace-windows@11.9.2: 44 of 161 -- see review-queue.csv
+Findings: 15 warnings, 24 notes.

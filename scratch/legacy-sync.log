@@ -1,0 +1,118 @@
+Syncing 14 version(s) into C:\github\ibi-docs-aem...
+  v ibi-omni-gen@4.3.0 -> release-information/4-3-0 2 file(s), 0.4 MB
+  v ibi-omni-gen@4.3.0 -> reference-documents/4-3-0 2 file(s), 2.2 MB
+  v ibi-omni-gen-mdm@4.3.0 -> release-information/4-3-0 2 file(s), 0.4 MB
+  v ibi-omni-gen-mdm@4.3.0 -> reference-documents/4-3-0 2 file(s), 2.2 MB
+  v ibi-omni-healthdata@4.3.0 -> release-information/4-3-0 2 file(s), 0.4 MB
+  v ibi-omni-healthdata@4.3.0 -> reference-documents/4-3-0 2 file(s), 2.2 MB
+  v ibi-omni-healthdata-business-release@2023.3.0 -> 
+release-information/2023-3-0 1 file(s), 0.0 MB
+  v ibi-omni-healthdata-business-release@2023.3.0 -> 
+reference-documents/2023-3-0 2 file(s), 0.0 MB
+  v ibi-omni-healthdata-business-release@2023.2.0 -> 
+release-information/2023-2-0 1 file(s), 0.0 MB
+  v ibi-omni-healthdata-business-release@2023.2.0 -> 
+reference-documents/2023-2-0 2 file(s), 0.0 MB
+  v ibi-omni-healthdata-business-release@2023.1.0 -> 
+release-information/2023-1-0 1 file(s), 0.0 MB
+  v ibi-omni-healthdata-business-release@2023.1.0 -> 
+reference-documents/2023-1-0 2 file(s), 0.0 MB
+  v ibi-omni-insurance@4.3.0 -> release-information/4-3-0 1 file(s), 0.0 MB
+  v ibi-omni-insurance@4.3.0 -> reference-documents/4-3-0 2 file(s), 2.2 MB
+  v ibi-web-query-for-ibm-i@9.2.1 -> release-information/9-2-1 1 file(s), 0.0 
+MB
+  v ibi-web-query-for-ibm-i@9.2.1 -> reference-documents/9-2-1 2 file(s), 2.3 
+MB
+  v ibi-web-query-for-ibm-i@9.2.0 -> release-information/9-2-0 1 file(s), 0.0 
+MB
+  v ibi-web-query-for-ibm-i@9.2.0 -> reference-documents/9-2-0 2 file(s), 2.5 
+MB
+  v ibi-web-query-for-ibm-i@9.1.2 -> release-information/9-1-2 1 file(s), 0.0 
+MB
+  v ibi-web-query-for-ibm-i@9.1.2 -> reference-documents/9-1-2 2 file(s), 2.5 
+MB
+  v tibco-iway-business-activity-monitor@8.0.5 -> user-guides/8-0-5 1 file(s), 
+3.8 MB
+  v tibco-iway-business-activity-monitor@8.0.5 -> release-information/8-0-5 3 
+file(s), 0.3 MB
+  v tibco-iway-business-activity-monitor@8.0.5 -> reference-documents/8-0-5 2 
+file(s), 0.1 MB
+  v tibco-iway-trading-partner-manager@8.0.5 -> user-guides/8-0-5 1 file(s), 
+6.0 MB
+  v tibco-iway-trading-partner-manager@8.0.5 -> release-information/8-0-5 2 
+file(s), 0.1 MB
+  v tibco-iway-trading-partner-manager@8.0.5 -> reference-documents/8-0-5 2 
+file(s), 0.1 MB
+  v ibi-omni-gen -> archives 4 file(s), 0.0 MB
+  v ibi-omni-gen-mdm -> archives 4 file(s), 0.0 MB
+  v ibi-omni-healthdata -> archives 3 file(s), 0.0 MB
+  v ibi-omni-healthdata-business-release -> archives 7 file(s), 0.0 MB
+  v ibi-omni-insurance -> archives 3 file(s), 0.0 MB
+                                     Sync                                      
++-----------------------------------------------------------------------------+
+| Outcome   | Rows | online-h… | user-gui… | release-… | referenc… | archives |
+|-----------+------+-----------+-----------+-----------+-----------+----------|
+| Synced    |   31 |         0 |         2 |        12 |        12 |        5 |
+| Already   |    0 |         0 |         0 |         0 |         0 |        0 |
+| current   |      |           |           |           |           |          |
+| No source |   19 |        14 |         3 |         0 |         0 |        0 |
+| tree      |      |           |           |           |           |          |
+| Skipped   |    0 |         0 |         0 |         0 |         0 |        0 |
+| Failed    |    0 |         0 |         0 |         0 |         0 |        0 |
++-----------------------------------------------------------------------------+
+65 file(s), 28.0 MB copied.
+8 product metadata.yml, 21 version.yml written.
+! ibi-omni-gen@4.3.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-legacy\ibi-omni-gen\4.3.0; run 
+`docushift convert` first
+! ibi-omni-gen@4.3.0: user-guides/4-3-0/ removed: the extracted package no 
+longer ships a document for it
+! ibi-omni-gen-mdm@4.3.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-legacy\ibi-omni-gen-mdm\4.3.0; run 
+`docushift convert` first
+! ibi-omni-gen-mdm@4.3.0: user-guides/4-3-0/ removed: the extracted package no 
+longer ships a document for it
+! ibi-omni-healthdata@4.3.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-legacy\ibi-omni-healthdata\4.3.0; run
+`docushift convert` first
+! ibi-omni-healthdata@4.3.0: user-guides/4-3-0/ removed: the extracted package 
+no longer ships a document for it
+! ibi-omni-healthdata-business-release@2023.3.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-legacy\ibi-omni-healthdata-business-r
+elease\2023.3.0; run `docushift convert` first
+! ibi-omni-healthdata-business-release@2023.2.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-legacy\ibi-omni-healthdata-business-r
+elease\2023.2.0; run `docushift convert` first
+! ibi-omni-healthdata-business-release@2023.1.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-legacy\ibi-omni-healthdata-business-r
+elease\2023.1.0; run `docushift convert` first
+! ibi-omni-insurance@4.3.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-legacy\ibi-omni-insurance\4.3.0; run 
+`docushift convert` first
+! ibi-web-query-for-ibm-i@9.2.1: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-legacy\ibi-web-query-for-ibm-i\9.2.1;
+run `docushift convert` first
+! ibi-web-query-for-ibm-i@9.2.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-legacy\ibi-web-query-for-ibm-i\9.2.0;
+run `docushift convert` first
+! ibi-web-query-for-ibm-i@9.1.2: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-legacy\ibi-web-query-for-ibm-i\9.1.2;
+run `docushift convert` first
+! ibi-web-query-for-ibm-i@9.1.1: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-legacy\ibi-web-query-for-ibm-i\9.1.1;
+run `docushift convert` first
+! ibi-web-query-for-ibm-i@9.1.1: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-legacy\extracted\ibi-web-query-for-
+ibm-i\9.1.1; run `docushift extract` first
+! ibi-web-query-for-ibm-i@9.1.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-legacy\ibi-web-query-for-ibm-i\9.1.0;
+run `docushift convert` first
+! ibi-web-query-for-ibm-i@9.1.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-legacy\extracted\ibi-web-query-for-
+ibm-i\9.1.0; run `docushift extract` first
+! tibco-iway-business-activity-monitor@8.0.5: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-legacy\tibco-iway-business-activity-m
+onitor\8.0.5; run `docushift convert` first
+! tibco-iway-trading-partner-manager@8.0.5: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-legacy\tibco-iway-trading-partner-man
+ager\8.0.5; run `docushift convert` first

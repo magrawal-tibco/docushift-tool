@@ -1,0 +1,40 @@
+Reframing 12 version(s)...
+  v tibco-eftl-enterprise-edition@7.3.0 143 topic(s) -> 20 page(s)
+  v tibco-eftl-enterprise-edition@7.2.0 143 topic(s) -> 20 page(s)
+  v tibco-eftl-enterprise-edition@7.1.3 143 topic(s) -> 20 page(s)
+  v tibco-eftl-enterprise-edition@7.1.2 143 topic(s) -> 27 page(s)
+  v tibco-eftl-enterprise-edition@7.1.1 143 topic(s) -> 27 page(s)
+  v tibco-eftl-enterprise-edition@7.1.0 143 topic(s) -> 25 page(s)
+  v tibco-ftl-enterprise-edition@7.3.0 882 topic(s) -> 240 page(s)
+  v tibco-ftl-enterprise-edition@7.2.0 830 topic(s) -> 222 page(s)
+  v tibco-ftl-enterprise-edition@7.1.3 832 topic(s) -> 228 page(s)
+  v tibco-ftl-enterprise-edition@7.1.2 811 topic(s) -> 283 page(s)
+  v tibco-ftl-enterprise-edition@7.1.1 839 topic(s) -> 283 page(s)
+  v tibco-ftl-enterprise-edition@7.1.0 836 topic(s) -> 281 page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |       12 |
+| Already current             |        0 |
+| Not Flare or DITA (skipped) |        0 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+5888 topic(s) read into 1676 page(s).
+Files: 13377 source doc -> 5612 converted -> 1676 merged (70.1% fewer at the 
+merge, 87.5% end to end); 2374 file(s) standing in the measured merged tree(s).
+278 page(s) queued for editorial review:
+  tibco-eftl-enterprise-edition@7.3.0: 7 of 20 -- see review-queue.csv
+  tibco-eftl-enterprise-edition@7.2.0: 7 of 20 -- see review-queue.csv
+  tibco-eftl-enterprise-edition@7.1.3: 7 of 20 -- see review-queue.csv
+  tibco-eftl-enterprise-edition@7.1.2: 9 of 27 -- see review-queue.csv
+  tibco-eftl-enterprise-edition@7.1.1: 9 of 27 -- see review-queue.csv
+  tibco-eftl-enterprise-edition@7.1.0: 7 of 25 -- see review-queue.csv
+  tibco-ftl-enterprise-edition@7.3.0: 25 of 240 -- see review-queue.csv
+  tibco-ftl-enterprise-edition@7.2.0: 30 of 222 -- see review-queue.csv
+  tibco-ftl-enterprise-edition@7.1.3: 30 of 228 -- see review-queue.csv
+  tibco-ftl-enterprise-edition@7.1.2: 41 of 283 -- see review-queue.csv
+  tibco-ftl-enterprise-edition@7.1.1: 53 of 283 -- see review-queue.csv
+  tibco-ftl-enterprise-edition@7.1.0: 53 of 281 -- see review-queue.csv
+Findings: 24 warnings, 24 notes.

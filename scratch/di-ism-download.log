@@ -1,0 +1,66 @@
+Downloading 22 version(s) with 4 worker(s)...
+  v ibi-data-intelligence@2.1.0 46.9 MiB
+  v ibi-data-intelligence@2.0.0 56.5 MiB
+  v ibi-data-intelligence@1.2.0 56.9 MiB
+  v ibi-data-intelligence@1.1.0 46.7 MiB
+  v ibi-data-intelligence@1.0.0 29.6 MiB
+  v ibi-data-quality@5.2.2 22.9 MiB
+  v ibi-data-quality@5.2.1 16.2 MiB
+  v ibi-data-quality@5.2.0 4.6 MiB
+  x ibi-data-quality@5.1.1
+  x ibi-data-quality@5.1.0
+  x ibi-data-quality@5.0.0
+  x ibi-data-quality@3.1.0
+  x ibi-data-quality@3.0.0
+  v ibi-iway-service-manager@9.3.0 370.7 MiB
+  v ibi-iway-service-manager@9.2.0 371.8 MiB
+  v ibi-iway-service-manager@9.1.0 120.2 MiB
+  v ibi-iway-service-manager@8.1.0 85.2 MiB
+  x ibi-iway-service-manager@8.0.7
+  x ibi-iway-service-manager@8.0.6
+  x ibi-iway-service-manager@8.0.5
+  v ibi-iway-service-manager-edi-add-on@9.3.0 45.2 MiB
+  v ibi-iway-service-manager-edi-add-on@9.1.1 31.3 MiB
+           Download            
++-----------------------------+
+| Outcome          | Versions |
+|------------------+----------|
+| Downloaded       |       14 |
+| Already current  |        0 |
+| Skipped (manual) |        0 |
+| No ZIP endpoint  |        0 |
+| Failed           |        8 |
++-----------------------------+
+1304.8 MiB written.
+! ibi-data-quality@5.1.1: OSError: 
+https://docs.tibco.com/pub/tdq/5.1.1/ibi-data-quality-5-1-1_documentation.zip 
+did not return a readable ZIP (most often an error or sign-in page served as 
+HTTP 200)
+! ibi-data-quality@5.1.0: OSError: 
+https://docs.tibco.com/pub/tdq/5.1.0/ibi-data-quality-5-1-0_documentation.zip 
+did not return a readable ZIP (most often an error or sign-in page served as 
+HTTP 200)
+! ibi-data-quality@5.0.0: OSError: 
+https://docs.tibco.com/pub/tdq/5.0.0/ibi-data-quality-5-0-0_documentation.zip 
+did not return a readable ZIP (most often an error or sign-in page served as 
+HTTP 200)
+! ibi-data-quality@3.1.0: OSError: 
+https://docs.tibco.com/pub/data-quality/3.1.0/ibi-data-quality-3-1-0_documentat
+ion.zip did not return a readable ZIP (most often an error or sign-in page 
+served as HTTP 200)
+! ibi-data-quality@3.0.0: OSError: 
+https://docs.tibco.com/pub/data-quality/3.0.0/ibi-data-quality-3-0-0_documentat
+ion.zip did not return a readable ZIP (most often an error or sign-in page 
+served as HTTP 200)
+! ibi-iway-service-manager@8.0.7: OSError: 
+https://docs.tibco.com/pub/sm/8.0.7/ibi-iway-service-manager-8-0-7_documentatio
+n.zip did not return a readable ZIP (most often an error or sign-in page served
+as HTTP 200)
+! ibi-iway-service-manager@8.0.6: OSError: 
+https://docs.tibco.com/pub/sm/8.0.6/ibi-iway-service-manager-8-0-6_documentatio
+n.zip did not return a readable ZIP (most often an error or sign-in page served
+as HTTP 200)
+! ibi-iway-service-manager@8.0.5: OSError: 
+https://docs.tibco.com/pub/sm/8.0.5/ibi-iway-service-manager-8-0-5_documentatio
+n.zip did not return a readable ZIP (most often an error or sign-in page served
+as HTTP 200)

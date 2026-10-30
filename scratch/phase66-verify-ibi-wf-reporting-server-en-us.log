@@ -1,0 +1,38 @@
+Verifying 22 version(s) (local only); 2 triage entr(ies); redirect sample 10, seed 20714...
+  x en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/online-help/9-3-0: lost, 2307 old page(s), 8 lost, 37 warning(s), 0 explained
+  x en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/online-help/9-3-1: lost, 2402 old page(s), 7 lost, 37 warning(s), 0 explained
+  x en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/online-help/9-3-2: lost, 2405 old page(s), 8 lost, 37 warning(s), 0 explained
+  x en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/online-help/9-3-3: lost, 2408 old page(s), 9 lost, 37 warning(s), 0 explained
+  x en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/online-help/9-3-4: lost, 2404 old page(s), 7 lost, 37 warning(s), 0 explained
+  x en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/online-help/9-3-5: lost, 2409 old page(s), 7 lost, 37 warning(s), 0 explained
+  x en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/online-help/9-3-6: lost, 2391 old page(s), 7 lost, 37 warning(s), 0 explained
+  x en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/online-help/9-3-7: lost, 2410 old page(s), 7 lost, 37 warning(s), 0 explained
+  x en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/online-help/9-3-8: lost, 3024 old page(s), 77 lost, 63 warning(s), 0 explained
+  ok en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/reference-documents/9-1-0: clean, 13 old page(s), 0 lost, 0 warning(s), 0 explained
+  ok en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/reference-documents/9-1-1: clean, 13 old page(s), 0 lost, 0 warning(s), 0 explained
+  ok en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/reference-documents/9-1-2: clean, 13 old page(s), 0 lost, 0 warning(s), 0 explained
+  ok en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/reference-documents/9-1-3: clean, 13 old page(s), 0 lost, 0 warning(s), 0 explained
+  ok en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/reference-documents/9-1-4: clean, 14 old page(s), 0 lost, 0 warning(s), 0 explained
+  ok en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/reference-documents/9-2-0: clean, 13 old page(s), 0 lost, 0 warning(s), 0 explained
+  ok en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/reference-documents/9-2-1: clean, 13 old page(s), 0 lost, 0 warning(s), 0 explained
+  ok en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/reference-documents/9-2-2: clean, 13 old page(s), 0 lost, 0 warning(s), 0 explained
+  ok en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/reference-documents/9-2-3: clean, 13 old page(s), 0 lost, 0 warning(s), 0 explained
+  ok en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/reference-documents/9-2-4: clean, 13 old page(s), 0 lost, 0 warning(s), 0 explained
+  ok en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/reference-documents/9-2-5: clean, 13 old page(s), 0 lost, 0 warning(s), 0 explained
+  ok en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/reference-documents/9-2-6: clean, 14 old page(s), 0 lost, 0 warning(s), 0 explained
+  ok en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/reference-documents/9-2-7: clean, 13 old page(s), 0 lost, 0 warning(s), 0 explained
+                verify                 
++-------------------------------------+
+| Finding                     | Count |
+|-----------------------------+-------|
+| VERIFY_REDIRECT_SAMPLED     |     9 |
+| VERIFY_REDIRECT_UNCONVERTED |   138 |
+| VERIFY_REDIRECT_UNMAPPED    |    66 |
+| VERIFY_TEXT_DROPPED         |    68 |
+| VERIFY_TOC_ENTRY_MISSING    |     1 |
+| VERIFY_TOC_MOVED            |   358 |
+| VERIFY_TOC_ORDER            |     1 |
+| VERIFY_TOPIC_MISSING        |     2 |
+| VERIFY_TOPIC_UNFILED        |   912 |
++-------------------------------------+
+Index: C:\github\docushift-tool\reports\verify\INDEX.html

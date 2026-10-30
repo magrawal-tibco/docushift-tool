@@ -1,0 +1,53 @@
+Extracting 7 version(s)...
+  v tibco-hawk-database-adapter@6.2.1 599 file(s), flare, 1 root(s)
+  v tibco-hawk-database-adapter@6.2.0 1111 file(s), webworks, 3 root(s)
+  v tibco-hawk-microagent-for-tibco-activematrix-businessworks-6@6.8.0 341 
+file(s), flare, 1 root(s)
+  v tibco-hawk-microagent-for-tibco-activematrix-businessworks-6@6.7.2 293 
+file(s), flare, 1 root(s)
+  v tibco-hawk-microagent-for-tibco-businessworks-container-edition@2.2.0 271 
+file(s), flare, 1 root(s)
+  v tibco-operational-intelligence-hawk-redtail@7.5.0 2167 file(s), flare, 1 
+root(s)
+  v tibco-operational-intelligence-hawk-redtail@6.3.1 2571 file(s), flare, 1 
+root(s)
+                Extract                
++-------------------------------------+
+| Outcome                  | Versions |
+|--------------------------+----------|
+| Extracted                |        7 |
+| Already current          |        0 |
+| Measured from cache      |        0 |
+| No package               |        0 |
+| Refused (unsafe archive) |        0 |
+| Failed                   |        0 |
++-------------------------------------+
+7353 file(s) written.
+        Engines        
++---------------------+
+| Engine   | Versions |
+|----------+----------|
+| flare    |        6 |
+| webworks |        1 |
++---------------------+
+CSH: 9 source(s), 13 identifier(s).
+                       Assets                        
++---------------------------------------------------+
+| Category      | Destination     | Files |    Size |
+|---------------+-----------------+-------+---------|
+| topic         | api-reference   |   632 |  9.8 MB |
+| image         | api-reference   |     6 |  0.0 MB |
+| other         | api-reference   |    57 |  0.7 MB |
+| topic         | output-root     |  2363 | 48.5 MB |
+| image         | output-root     |   943 | 48.1 MB |
+| source-format | output-root     |    23 |  2.4 MB |
+| skin          | output-root     |  3019 | 53.5 MB |
+| other         | output-root     |    91 |  4.2 MB |
+| document      | document-router |    62 | 69.1 MB |
+| topic         | unclaimed       |    38 |  0.1 MB |
+| image         | unclaimed       |    71 |  0.0 MB |
+| other         | unclaimed       |    48 |  0.6 MB |
++---------------------------------------------------+
+? tibco-hawk-database-adapter@6.2.0: 157 unclaimed file(s) in html/ (0.7 MB) --
+no destination
+Recorded 6 notes -- `docushift report --run 902`.

@@ -1,0 +1,4 @@
+Usage: docushift repair census [OPTIONS]
+Try 'docushift repair census --help' for help.
+
+Error: No such option: --family

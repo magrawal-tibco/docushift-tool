@@ -1,0 +1,32 @@
+Extracting 3 version(s)...
+  v ibi-webfocus-reporting-server@9.2.2 13 file(s), auto
+  v ibi-webfocus-reporting-server@9.2.1 13 file(s), auto
+  v ibi-webfocus-reporting-server@9.2.0 13 file(s), auto
+                Extract                
++-------------------------------------+
+| Outcome                  | Versions |
+|--------------------------+----------|
+| Extracted                |        3 |
+| Already current          |        0 |
+| Measured from cache      |        0 |
+| No package               |        0 |
+| Refused (unsafe archive) |        0 |
+| Failed                   |        0 |
++-------------------------------------+
+39 file(s) written.
+       Engines       
++-------------------+
+| Engine | Versions |
+|--------+----------|
+| auto   |        3 |
++-------------------+
+? ibi-webfocus-reporting-server@9.2.2: engine undetected (`auto`)
+? ibi-webfocus-reporting-server@9.2.1: engine undetected (`auto`)
+? ibi-webfocus-reporting-server@9.2.0: engine undetected (`auto`)
+CSH: 0 source(s), 0 identifier(s).
+                     Assets                      
++-----------------------------------------------+
+| Category | Destination     | Files |     Size |
+|----------+-----------------+-------+----------|
+| document | document-router |    39 | 293.4 MB |
++-----------------------------------------------+

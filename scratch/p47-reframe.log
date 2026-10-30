@@ -1,0 +1,116 @@
+Reframing 1 version(s)...
+  v tibco-activematrix-service-grid@3.4.3 1806 topic(s) -> 421 page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |        1 |
+| Already current             |        0 |
+| Not Flare or DITA (skipped) |        0 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+1806 topic(s) read into 421 page(s).
+Files: 4063 source doc -> 1856 converted -> 421 merged (77.3% fewer at the 
+merge, 89.6% end to end); 1128 file(s) standing in the measured merged tree(s).
+102 page(s) queued for editorial review:
+  tibco-activematrix-service-grid@3.4.3: 102 of 421 -- see review-queue.csv
+Findings: 1 warning, 2 notes.
+Reframing 1 version(s)...
+  v tibco-activematrix-service-grid@3.4.4 1797 topic(s) -> 428 page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |        1 |
+| Already current             |        0 |
+| Not Flare or DITA (skipped) |        0 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+1797 topic(s) read into 428 page(s).
+Files: 4063 source doc -> 1856 converted -> 428 merged (76.9% fewer at the 
+merge, 89.5% end to end); 1135 file(s) standing in the measured merged tree(s).
+109 page(s) queued for editorial review:
+  tibco-activematrix-service-grid@3.4.4: 109 of 428 -- see review-queue.csv
+Findings: 1 warning, 2 notes.
+Reframing 1 version(s)...
+  v tibco-activematrix-service-grid-container-edition@1.0.0 205 topic(s) -> 79 
+page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |        1 |
+| Already current             |        0 |
+| Not Flare or DITA (skipped) |        0 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+205 topic(s) read into 79 page(s).
+Files: 838 source doc -> 227 converted -> 79 merged (65.2% fewer at the merge, 
+90.6% end to end); 275 file(s) standing in the measured merged tree(s).
+34 page(s) queued for editorial review:
+  tibco-activematrix-service-grid-container-edition@1.0.0: 34 of 79 -- see 
+review-queue.csv
+Findings: 1 warning, 2 notes.
+Reframing 1 version(s)...
+  v tibco-activematrix-service-grid-container-edition@1.0.1 212 topic(s) -> 57 
+page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |        1 |
+| Already current             |        0 |
+| Not Flare or DITA (skipped) |        0 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+212 topic(s) read into 57 page(s).
+Files: 875 source doc -> 211 converted -> 57 merged (73.0% fewer at the merge, 
+93.5% end to end); 282 file(s) standing in the measured merged tree(s).
+21 page(s) queued for editorial review:
+  tibco-activematrix-service-grid-container-edition@1.0.1: 21 of 57 -- see 
+review-queue.csv
+Findings: 1 warning, 2 notes.
+Reframing 1 version(s)...
+  v tibco-activematrix-businessworks-plug-in-for-smartmapper@7.1.2 212 topic(s)
+-> 14 page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |        1 |
+| Already current             |        0 |
+| Not Flare or DITA (skipped) |        0 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+212 topic(s) read into 14 page(s).
+Files: 312 source doc -> 210 converted -> 14 merged (93.3% fewer at the merge, 
+95.5% end to end); 92 file(s) standing in the measured merged tree(s).
+13 page(s) queued for editorial review:
+  tibco-activematrix-businessworks-plug-in-for-smartmapper@7.1.2: 13 of 14 -- 
+see review-queue.csv
+Findings: 2 warnings, 2 notes.
+Reframing 1 version(s)...
+  v tibco-activematrix-businessworks-plug-in-for-ibm-mq@8.7.0 79 topic(s) -> 16
+page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |        1 |
+| Already current             |        0 |
+| Not Flare or DITA (skipped) |        0 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+79 topic(s) read into 16 page(s).
+Files: 146 source doc -> 78 converted -> 16 merged (79.5% fewer at the merge, 
+89.0% end to end); 61 file(s) standing in the measured merged tree(s).
+13 page(s) queued for editorial review:
+  tibco-activematrix-businessworks-plug-in-for-ibm-mq@8.7.0: 13 of 16 -- see 
+review-queue.csv
+Findings: 1 warning, 2 notes.

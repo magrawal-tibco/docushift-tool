@@ -1,0 +1,74 @@
+Downloading 44 version(s) with 4 worker(s)...
+  v tibco-businessconnect@7.5.0 30.9 MiB
+  v tibco-businessconnect@7.4.0 17.0 MiB
+  v tibco-businessconnect-configstore-management-interface-protocol@6.1.0 3.0 
+MiB
+  v tibco-businessconnect-container-edition@1.7.1 27.3 MiB
+  v tibco-businessconnect-container-edition@1.7.0 25.3 MiB
+  v tibco-businessconnect-container-edition@1.6.1 25.4 MiB
+  v 
+tibco-businessconnect-container-edition-configstore-management-interface-protoc
+ol@1.2.1 14.1 MiB
+  v 
+tibco-businessconnect-container-edition-configstore-management-interface-protoc
+ol@1.2.0 12.1 MiB
+  v 
+tibco-businessconnect-container-edition-configstore-management-interface-protoc
+ol@1.1.0 11.4 MiB
+  v tibco-businessconnect-container-edition-ebxml-protocol@1.3.0 19.7 MiB
+  v tibco-businessconnect-container-edition-ebxml-protocol@1.2.1 19.9 MiB
+  v 
+tibco-businessconnect-container-edition-edi-protocol-hipaa-edition-powered-by-i
+nstream@1.3.0 16.8 MiB
+  v 
+tibco-businessconnect-container-edition-edi-protocol-hipaa-edition-powered-by-i
+nstream@1.2.0 16.2 MiB
+  v 
+tibco-businessconnect-container-edition-edi-protocol-powered-by-instream@1.6.1 
+31.4 MiB
+  v 
+tibco-businessconnect-container-edition-edi-protocol-powered-by-instream@1.6.0 
+29.4 MiB
+  v 
+tibco-businessconnect-container-edition-edi-protocol-powered-by-instream@1.5.0 
+28.6 MiB
+  v tibco-businessconnect-container-edition-rosettanet-protocol@1.7.0 14.3 MiB
+  v tibco-businessconnect-container-edition-rosettanet-protocol@1.6.0 13.6 MiB
+  v tibco-businessconnect-container-edition-services-plug-in@1.7.0 13.8 MiB
+  v tibco-businessconnect-container-edition-services-plug-in@1.6.0 13.1 MiB
+  v tibco-businessconnect-container-edition-soap-protocol@1.3.0 14.4 MiB
+  v tibco-businessconnect-container-edition-soap-protocol@1.2.1 14.9 MiB
+  v tibco-businessconnect-cxml-protocol@6.1.0 4.3 MiB
+  v tibco-businessconnect-ebxml-protocol@6.4.0 18.3 MiB
+  v tibco-businessconnect-ebxml-protocol@6.3.0 8.6 MiB
+  v tibco-businessconnect-edi-protocol-hipaa-edition-powered-by-instream@6.7.0 
+4.0 MiB
+  v tibco-businessconnect-edi-protocol-powered-by-instream@6.11.0 34.4 MiB
+  v tibco-businessconnect-edi-protocol-powered-by-instream@6.10.0 17.0 MiB
+  v tibco-businessconnect-palette@6.6.0 12.0 MiB
+  v tibco-businessconnect-palette@6.5.0 7.9 MiB
+  v tibco-businessconnect-partner-management-portal@1.1.1 20.5 MiB
+  v tibco-businessconnect-partner-management-portal@1.1.0 18.6 MiB
+  v tibco-businessconnect-partner-management-portal@1.0.0 17.8 MiB
+  v tibco-businessconnect-plug-in-for-ftp-server@1.0.1 1.6 MiB
+  v tibco-businessconnect-plug-in-for-ssh-server@1.1.0 2.0 MiB
+  v tibco-businessconnect-rosettanet-protocol@5.3.0 3.5 MiB
+  v tibco-businessconnect-services-plug-in@6.4.0 11.2 MiB
+  v tibco-businessconnect-services-plug-in@6.3.0 3.1 MiB
+  v tibco-businessconnect-soap-protocol@7.2.0 11.2 MiB
+  v tibco-businessconnect-soap-protocol@7.1.0 3.8 MiB
+  v tibco-businessconnect-trading-community-management@6.2.0 11.4 MiB
+  v tibco-businessconnect-trading-community-management@6.1.1 3.9 MiB
+  v tibco-businessconnect-trading-community-management@6.1.0 3.9 MiB
+  v tibco-trading-partner-management-rest-api@1.1.0 2.3 MiB
+           Download            
++-----------------------------+
+| Outcome          | Versions |
+|------------------+----------|
+| Downloaded       |       44 |
+| Already current  |        0 |
+| Skipped (manual) |        0 |
+| No ZIP endpoint  |        0 |
+| Failed           |        0 |
++-----------------------------+
+634.0 MiB written.

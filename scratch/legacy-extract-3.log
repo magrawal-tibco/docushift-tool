@@ -1,0 +1,42 @@
+Extracting 14 version(s)...
+  v ibi-web-query-for-ibm-i@9.1.1 3 file(s), auto
+  v ibi-web-query-for-ibm-i@9.1.0 3 file(s), auto
+                Extract                
++-------------------------------------+
+| Outcome                  | Versions |
+|--------------------------+----------|
+| Extracted                |        2 |
+| Already current          |       12 |
+| Measured from cache      |        0 |
+| No package               |        0 |
+| Refused (unsafe archive) |        0 |
+| Failed                   |        0 |
++-------------------------------------+
+6 file(s) written.
+       Engines       
++-------------------+
+| Engine | Versions |
+|--------+----------|
+| auto   |       14 |
++-------------------+
+? ibi-omni-gen@4.3.0: engine undetected (`auto`)
+? ibi-omni-gen-mdm@4.3.0: engine undetected (`auto`)
+? ibi-omni-healthdata@4.3.0: engine undetected (`auto`)
+? ibi-omni-healthdata-business-release@2023.3.0: engine undetected (`auto`)
+? ibi-omni-healthdata-business-release@2023.2.0: engine undetected (`auto`)
+? ibi-omni-healthdata-business-release@2023.1.0: engine undetected (`auto`)
+? ibi-omni-insurance@4.3.0: engine undetected (`auto`)
+? ibi-web-query-for-ibm-i@9.2.1: engine undetected (`auto`)
+? ibi-web-query-for-ibm-i@9.2.0: engine undetected (`auto`)
+? ibi-web-query-for-ibm-i@9.1.2: engine undetected (`auto`)
+? ibi-web-query-for-ibm-i@9.1.1: engine undetected (`auto`)
+? ibi-web-query-for-ibm-i@9.1.0: engine undetected (`auto`)
+? tibco-iway-business-activity-monitor@8.0.5: engine undetected (`auto`)
+? tibco-iway-trading-partner-manager@8.0.5: engine undetected (`auto`)
+CSH: 0 source(s), 0 identifier(s).
+                    Assets                     
++---------------------------------------------+
+| Category | Destination     | Files |   Size |
+|----------+-----------------+-------+--------|
+| document | document-router |     6 | 5.5 MB |
++---------------------------------------------+

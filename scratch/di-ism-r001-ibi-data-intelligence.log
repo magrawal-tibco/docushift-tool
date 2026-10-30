@@ -1,0 +1,14 @@
+                            R001 over 5 version(s)                             
+┌─────────────────────┬─────────┬───────┬──────────────┬───────────────┬──────┐
+│ Product             │ Version │ files │ fixed (repo) │ fixed (local) │ left │
+├─────────────────────┼─────────┼───────┼──────────────┼───────────────┼──────┤
+│ ibi-data-intellige… │ 1.0.0   │    72 │           33 │            66 │    0 │
+│ ibi-data-intellige… │ 1.1.0   │   108 │           67 │           134 │    0 │
+│ ibi-data-intellige… │ 1.2.0   │   111 │           70 │           140 │    0 │
+│ ibi-data-intellige… │ 2.0.0   │   117 │           77 │           154 │    0 │
+│ ibi-data-intellige… │ 2.1.0   │    48 │           43 │            86 │    0 │
+└─────────────────────┴─────────┴───────┴──────────────┴───────────────┴──────┘
+Report: C:\github\docushift-tool\reports\repairs\apply-R001-2026-10-25.csv
+Index: C:\github\docushift-tool\reports\repairs\INDEX.html
+Nothing is committed: review with `git diff` in each repo, then commit and 
+push.

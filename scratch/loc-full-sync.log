@@ -1,0 +1,328 @@
+Syncing 1 version(s) into C:\github\ibi-docs-aem...
+  v ibi-webfocus-client@9.3.0 -> online-help/9-3-0 4719 file(s), 88.2 MB
+                  Sync                  
++--------------------------------------+
+| Outcome         | Rows | online-help |
+|-----------------+------+-------------|
+| Synced          |    1 |           1 |
+| Already current |    0 |           0 |
+| No source tree  |    0 |           0 |
+| Skipped         |    0 |           0 |
+| Failed          |    0 |           0 |
++--------------------------------------+
+4719 file(s), 88.2 MB copied.
+1 product metadata.yml, 1 version.yml written.
+3044 redirect(s) in 1 published map(s), tree-rooted (no publish_base_url set).
+Syncing 1 version(s) into C:\github\ibi-docs-aem...
+  v ibi-webfocus-app-studio@9.3.0 -> online-help/9-3-0 1313 file(s), 24.4 MB
+                  Sync                  
++--------------------------------------+
+| Outcome         | Rows | online-help |
+|-----------------+------+-------------|
+| Synced          |    1 |           1 |
+| Already current |    0 |           0 |
+| No source tree  |    0 |           0 |
+| Skipped         |    0 |           0 |
+| Failed          |    0 |           0 |
++--------------------------------------+
+1313 file(s), 24.4 MB copied.
+1 product metadata.yml, 1 version.yml written.
+234 redirect(s) in 1 published map(s), tree-rooted (no publish_base_url set).
+Syncing 1 version(s) into C:\github\ibi-docs-aem...
+  v ibi-webfocus-client@9.3.5 -> online-help/9-3-5 7847 file(s), 150.0 MB
+                  Sync                  
++--------------------------------------+
+| Outcome         | Rows | online-help |
+|-----------------+------+-------------|
+| Synced          |    1 |           1 |
+| Already current |    0 |           0 |
+| No source tree  |    0 |           0 |
+| Skipped         |    0 |           0 |
+| Failed          |    0 |           0 |
++--------------------------------------+
+7847 file(s), 150.0 MB copied.
+1 product metadata.yml, 1 version.yml written.
+5721 redirect(s) in 1 published map(s), tree-rooted (no publish_base_url set).
+Syncing 1 version(s) into C:\github\ibi-docs-aem...
+  v ibi-webfocus-app-studio@9.3.5 -> online-help/9-3-5 1136 file(s), 23.1 MB
+                  Sync                  
++--------------------------------------+
+| Outcome         | Rows | online-help |
+|-----------------+------+-------------|
+| Synced          |    1 |           1 |
+| Already current |    0 |           0 |
+| No source tree  |    0 |           0 |
+| Skipped         |    0 |           0 |
+| Failed          |    0 |           0 |
++--------------------------------------+
+1136 file(s), 23.1 MB copied.
+1 product metadata.yml, 1 version.yml written.
+533 redirect(s) in 1 published map(s), tree-rooted (no publish_base_url set).
+Syncing 1 version(s) into C:\github\ibi-docs-aem...
+                  Sync                  
++--------------------------------------+
+| Outcome         | Rows | online-help |
+|-----------------+------+-------------|
+| Synced          |    0 |           0 |
+| Already current |    1 |           1 |
+| No source tree  |    0 |           0 |
+| Skipped         |    0 |           0 |
+| Failed          |    0 |           0 |
++--------------------------------------+
+1 product metadata.yml, 1 version.yml written.
+5721 redirect(s) in 1 published map(s), tree-rooted (no publish_base_url set).
+Syncing 1 version(s) into C:\github\ibi-docs-aem...
+  v ibi-webfocus-app-studio@9.3.6 -> online-help/9-3-6 1133 file(s), 23.0 MB
+                  Sync                  
++--------------------------------------+
+| Outcome         | Rows | online-help |
+|-----------------+------+-------------|
+| Synced          |    1 |           1 |
+| Already current |    0 |           0 |
+| No source tree  |    0 |           0 |
+| Skipped         |    0 |           0 |
+| Failed          |    0 |           0 |
++--------------------------------------+
+1133 file(s), 23.0 MB copied.
+1 product metadata.yml, 1 version.yml written.
+792 redirect(s) in 1 published map(s), tree-rooted (no publish_base_url set).
+Syncing 1 version(s) into C:\github\ibi-docs-aem...
+  v ibi-webfocus-client@9.3.7 -> online-help/9-3-7 7885 file(s), 143.8 MB
+                  Sync                  
++--------------------------------------+
+| Outcome         | Rows | online-help |
+|-----------------+------+-------------|
+| Synced          |    1 |           1 |
+| Already current |    0 |           0 |
+| No source tree  |    0 |           0 |
+| Skipped         |    0 |           0 |
+| Failed          |    0 |           0 |
++--------------------------------------+
+7885 file(s), 143.8 MB copied.
+1 product metadata.yml, 1 version.yml written.
+8426 redirect(s) in 1 published map(s), tree-rooted (no publish_base_url set).
+Syncing 1 version(s) into C:\github\ibi-docs-aem...
+  v ibi-webfocus-app-studio@9.3.7 -> online-help/9-3-7 977 file(s), 21.3 MB
+                  Sync                  
++--------------------------------------+
+| Outcome         | Rows | online-help |
+|-----------------+------+-------------|
+| Synced          |    1 |           1 |
+| Already current |    0 |           0 |
+| No source tree  |    0 |           0 |
+| Skipped         |    0 |           0 |
+| Failed          |    0 |           0 |
++--------------------------------------+
+977 file(s), 21.3 MB copied.
+1 product metadata.yml, 1 version.yml written.
+1051 redirect(s) in 1 published map(s), tree-rooted (no publish_base_url set).
+Syncing 1 version(s) into C:\github\ibi-docs-aem...
+  v ibi-webfocus-client@9.3.8 -> online-help/9-3-8 8619 file(s), 144.4 MB
+                  Sync                  
++--------------------------------------+
+| Outcome         | Rows | online-help |
+|-----------------+------+-------------|
+| Synced          |    1 |           1 |
+| Already current |    0 |           0 |
+| No source tree  |    0 |           0 |
+| Skipped         |    0 |           0 |
+| Failed          |    0 |           0 |
++--------------------------------------+
+8619 file(s), 144.4 MB copied.
+1 product metadata.yml, 1 version.yml written.
+11431 redirect(s) in 1 published map(s), tree-rooted (no publish_base_url set).
+Syncing 1 version(s) into C:\github\ibi-docs-aem...
+  v ibi-webfocus-app-studio@9.3.8 -> online-help/9-3-8 999 file(s), 19.5 MB
+                  Sync                  
++--------------------------------------+
+| Outcome         | Rows | online-help |
+|-----------------+------+-------------|
+| Synced          |    1 |           1 |
+| Already current |    0 |           0 |
+| No source tree  |    0 |           0 |
+| Skipped         |    0 |           0 |
+| Failed          |    0 |           0 |
++--------------------------------------+
+999 file(s), 19.5 MB copied.
+1 product metadata.yml, 1 version.yml written.
+1308 redirect(s) in 1 published map(s), tree-rooted (no publish_base_url set).
+Syncing 1 version(s) into C:\github\ibi-docs-aem...
+  v ibi-webfocus-client@9.3.5 -> online-help/9-3-5 7872 file(s), 138.4 MB
+                  Sync                  
++--------------------------------------+
+| Outcome         | Rows | online-help |
+|-----------------+------+-------------|
+| Synced          |    1 |           1 |
+| Already current |    0 |           0 |
+| No source tree  |    0 |           0 |
+| Skipped         |    0 |           0 |
+| Failed          |    0 |           0 |
++--------------------------------------+
+7872 file(s), 138.4 MB copied.
+1 product metadata.yml, 1 version.yml written.
+2688 redirect(s) in 1 published map(s), tree-rooted (no publish_base_url set).
+Syncing 1 version(s) into C:\github\ibi-docs-aem...
+  v ibi-webfocus-client@9.3.6 -> online-help/9-3-6 7540 file(s), 142.6 MB
+                  Sync                  
++--------------------------------------+
+| Outcome         | Rows | online-help |
+|-----------------+------+-------------|
+| Synced          |    1 |           1 |
+| Already current |    0 |           0 |
+| No source tree  |    0 |           0 |
+| Skipped         |    0 |           0 |
+| Failed          |    0 |           0 |
++--------------------------------------+
+7540 file(s), 142.6 MB copied.
+1 product metadata.yml, 1 version.yml written.
+5360 redirect(s) in 1 published map(s), tree-rooted (no publish_base_url set).
+Syncing 1 version(s) into C:\github\ibi-docs-aem...
+  v ibi-webfocus-client@9.3.7 -> online-help/9-3-7 7619 file(s), 143.1 MB
+                  Sync                  
++--------------------------------------+
+| Outcome         | Rows | online-help |
+|-----------------+------+-------------|
+| Synced          |    1 |           1 |
+| Already current |    0 |           0 |
+| No source tree  |    0 |           0 |
+| Skipped         |    0 |           0 |
+| Failed          |    0 |           0 |
++--------------------------------------+
+7619 file(s), 143.1 MB copied.
+1 product metadata.yml, 1 version.yml written.
+8065 redirect(s) in 1 published map(s), tree-rooted (no publish_base_url set).
+Syncing 1 version(s) into C:\github\ibi-docs-aem...
+  v ibi-webfocus-client@9.3.8 -> online-help/9-3-8 8345 file(s), 135.9 MB
+                  Sync                  
++--------------------------------------+
+| Outcome         | Rows | online-help |
+|-----------------+------+-------------|
+| Synced          |    1 |           1 |
+| Already current |    0 |           0 |
+| No source tree  |    0 |           0 |
+| Skipped         |    0 |           0 |
+| Failed          |    0 |           0 |
++--------------------------------------+
+8345 file(s), 135.9 MB copied.
+1 product metadata.yml, 1 version.yml written.
+11070 redirect(s) in 1 published map(s), tree-rooted (no publish_base_url set).
+Syncing 1 version(s) into C:\github\ibi-docs-aem...
+  v ibi-webfocus-client@9.3.5 -> online-help/9-3-5 7883 file(s), 139.8 MB
+                  Sync                  
++--------------------------------------+
+| Outcome         | Rows | online-help |
+|-----------------+------+-------------|
+| Synced          |    1 |           1 |
+| Already current |    0 |           0 |
+| No source tree  |    0 |           0 |
+| Skipped         |    0 |           0 |
+| Failed          |    0 |           0 |
++--------------------------------------+
+7883 file(s), 139.8 MB copied.
+1 product metadata.yml, 1 version.yml written.
+2688 redirect(s) in 1 published map(s), tree-rooted (no publish_base_url set).
+Syncing 1 version(s) into C:\github\ibi-docs-aem...
+  v ibi-webfocus-client@9.3.6 -> online-help/9-3-6 7584 file(s), 144.0 MB
+                  Sync                  
++--------------------------------------+
+| Outcome         | Rows | online-help |
+|-----------------+------+-------------|
+| Synced          |    1 |           1 |
+| Already current |    0 |           0 |
+| No source tree  |    0 |           0 |
+| Skipped         |    0 |           0 |
+| Failed          |    0 |           0 |
++--------------------------------------+
+7584 file(s), 144.0 MB copied.
+1 product metadata.yml, 1 version.yml written.
+5374 redirect(s) in 1 published map(s), tree-rooted (no publish_base_url set).
+Syncing 1 version(s) into C:\github\ibi-docs-aem...
+  v ibi-webfocus-client@9.3.7 -> online-help/9-3-7 7622 file(s), 144.2 MB
+                  Sync                  
++--------------------------------------+
+| Outcome         | Rows | online-help |
+|-----------------+------+-------------|
+| Synced          |    1 |           1 |
+| Already current |    0 |           0 |
+| No source tree  |    0 |           0 |
+| Skipped         |    0 |           0 |
+| Failed          |    0 |           0 |
++--------------------------------------+
+7622 file(s), 144.2 MB copied.
+1 product metadata.yml, 1 version.yml written.
+8079 redirect(s) in 1 published map(s), tree-rooted (no publish_base_url set).
+Syncing 1 version(s) into C:\github\ibi-docs-aem...
+  v ibi-webfocus-client@9.3.8 -> online-help/9-3-8 8345 file(s), 135.9 MB
+                  Sync                  
++--------------------------------------+
+| Outcome         | Rows | online-help |
+|-----------------+------+-------------|
+| Synced          |    1 |           1 |
+| Already current |    0 |           0 |
+| No source tree  |    0 |           0 |
+| Skipped         |    0 |           0 |
+| Failed          |    0 |           0 |
++--------------------------------------+
+8345 file(s), 135.9 MB copied.
+1 product metadata.yml, 1 version.yml written.
+11084 redirect(s) in 1 published map(s), tree-rooted (no publish_base_url set).
+Syncing 1 version(s) into C:\github\ibi-docs-aem...
+  v ibi-webfocus-client@9.3.5 -> online-help/9-3-5 7846 file(s), 138.8 MB
+                  Sync                  
++--------------------------------------+
+| Outcome         | Rows | online-help |
+|-----------------+------+-------------|
+| Synced          |    1 |           1 |
+| Already current |    0 |           0 |
+| No source tree  |    0 |           0 |
+| Skipped         |    0 |           0 |
+| Failed          |    0 |           0 |
++--------------------------------------+
+7846 file(s), 138.8 MB copied.
+1 product metadata.yml, 1 version.yml written.
+2688 redirect(s) in 1 published map(s), tree-rooted (no publish_base_url set).
+Syncing 1 version(s) into C:\github\ibi-docs-aem...
+  v ibi-webfocus-client@9.3.6 -> online-help/9-3-6 7585 file(s), 143.3 MB
+                  Sync                  
++--------------------------------------+
+| Outcome         | Rows | online-help |
+|-----------------+------+-------------|
+| Synced          |    1 |           1 |
+| Already current |    0 |           0 |
+| No source tree  |    0 |           0 |
+| Skipped         |    0 |           0 |
+| Failed          |    0 |           0 |
++--------------------------------------+
+7585 file(s), 143.3 MB copied.
+1 product metadata.yml, 1 version.yml written.
+5374 redirect(s) in 1 published map(s), tree-rooted (no publish_base_url set).
+Syncing 1 version(s) into C:\github\ibi-docs-aem...
+  v ibi-webfocus-client@9.3.7 -> online-help/9-3-7 7622 file(s), 142.8 MB
+                  Sync                  
++--------------------------------------+
+| Outcome         | Rows | online-help |
+|-----------------+------+-------------|
+| Synced          |    1 |           1 |
+| Already current |    0 |           0 |
+| No source tree  |    0 |           0 |
+| Skipped         |    0 |           0 |
+| Failed          |    0 |           0 |
++--------------------------------------+
+7622 file(s), 142.8 MB copied.
+1 product metadata.yml, 1 version.yml written.
+8079 redirect(s) in 1 published map(s), tree-rooted (no publish_base_url set).
+Syncing 1 version(s) into C:\github\ibi-docs-aem...
+  v ibi-webfocus-client@9.3.8 -> online-help/9-3-8 8345 file(s), 135.9 MB
+                  Sync                  
++--------------------------------------+
+| Outcome         | Rows | online-help |
+|-----------------+------+-------------|
+| Synced          |    1 |           1 |
+| Already current |    0 |           0 |
+| No source tree  |    0 |           0 |
+| Skipped         |    0 |           0 |
+| Failed          |    0 |           0 |
++--------------------------------------+
+8345 file(s), 135.9 MB copied.
+1 product metadata.yml, 1 version.yml written.
+11084 redirect(s) in 1 published map(s), tree-rooted (no publish_base_url set).

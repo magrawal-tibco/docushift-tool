@@ -1,0 +1,127 @@
+Extracting 1 version(s)...
+  v ibi-webfocus-reporting-server@9.3.1 8378 file(s), flare, 1 root(s)
+                Extract                
++-------------------------------------+
+| Outcome                  | Versions |
+|--------------------------+----------|
+| Extracted                |        1 |
+| Already current          |        0 |
+| Measured from cache      |        0 |
+| No package               |        0 |
+| Refused (unsafe archive) |        0 |
+| Failed                   |        0 |
++-------------------------------------+
+8378 file(s) written.
+       Engines       
++-------------------+
+| Engine | Versions |
+|--------+----------|
+| flare  |        1 |
++-------------------+
+CSH: 1 source(s), 0 identifier(s).
+                     Assets                      
++-----------------------------------------------+
+| Category | Destination     | Files |     Size |
+|----------+-----------------+-------+----------|
+| topic    | output-root     |  2393 |  60.5 MB |
+| image    | output-root     |  4596 | 165.5 MB |
+| skin     | output-root     |  1362 | 103.7 MB |
+| other    | output-root     |    12 |   0.5 MB |
+| document | document-router |    15 | 116.3 MB |
++-----------------------------------------------+
+Recorded 1 note -- `docushift report --run 1244`.
+Extracting 1 version(s)...
+  v ibi-webfocus-reporting-server@9.3.2 8388 file(s), flare, 1 root(s)
+                Extract                
++-------------------------------------+
+| Outcome                  | Versions |
+|--------------------------+----------|
+| Extracted                |        1 |
+| Already current          |        0 |
+| Measured from cache      |        0 |
+| No package               |        0 |
+| Refused (unsafe archive) |        0 |
+| Failed                   |        0 |
++-------------------------------------+
+8388 file(s) written.
+       Engines       
++-------------------+
+| Engine | Versions |
+|--------+----------|
+| flare  |        1 |
++-------------------+
+CSH: 1 source(s), 191 identifier(s).
+                     Assets                      
++-----------------------------------------------+
+| Category | Destination     | Files |     Size |
+|----------+-----------------+-------+----------|
+| topic    | output-root     |  2396 |  60.2 MB |
+| image    | output-root     |  4603 | 165.9 MB |
+| skin     | output-root     |  1362 | 103.7 MB |
+| other    | output-root     |    12 |   0.5 MB |
+| document | document-router |    15 | 111.0 MB |
++-----------------------------------------------+
+Extracting 1 version(s)...
+  v ibi-webfocus-reporting-server@9.3.3 8392 file(s), flare, 1 root(s)
+                Extract                
++-------------------------------------+
+| Outcome                  | Versions |
+|--------------------------+----------|
+| Extracted                |        1 |
+| Already current          |        0 |
+| Measured from cache      |        0 |
+| No package               |        0 |
+| Refused (unsafe archive) |        0 |
+| Failed                   |        0 |
++-------------------------------------+
+8392 file(s) written.
+       Engines       
++-------------------+
+| Engine | Versions |
+|--------+----------|
+| flare  |        1 |
++-------------------+
+CSH: 1 source(s), 191 identifier(s).
+                     Assets                      
++-----------------------------------------------+
+| Category | Destination     | Files |     Size |
+|----------+-----------------+-------+----------|
+| topic    | output-root     |  2398 |  60.1 MB |
+| image    | output-root     |  4601 | 166.6 MB |
+| document | output-root     |     1 |   0.0 MB |
+| skin     | output-root     |  1364 | 103.8 MB |
+| other    | output-root     |    12 |   0.5 MB |
+| document | document-router |    16 | 111.2 MB |
++-----------------------------------------------+
+Extracting 1 version(s)...
+  v ibi-webfocus-reporting-server@9.3.4 8384 file(s), flare, 1 root(s)
+                Extract                
++-------------------------------------+
+| Outcome                  | Versions |
+|--------------------------+----------|
+| Extracted                |        1 |
+| Already current          |        0 |
+| Measured from cache      |        0 |
+| No package               |        0 |
+| Refused (unsafe archive) |        0 |
+| Failed                   |        0 |
++-------------------------------------+
+8384 file(s) written.
+       Engines       
++-------------------+
+| Engine | Versions |
+|--------+----------|
+| flare  |        1 |
++-------------------+
+CSH: 1 source(s), 190 identifier(s).
+                     Assets                      
++-----------------------------------------------+
+| Category | Destination     | Files |     Size |
+|----------+-----------------+-------+----------|
+| topic    | output-root     |  2395 |  60.0 MB |
+| image    | output-root     |  4599 | 166.7 MB |
+| document | output-root     |     1 |   0.0 MB |
+| skin     | output-root     |  1361 | 103.6 MB |
+| other    | output-root     |    12 |   0.5 MB |
+| document | document-router |    16 | 109.8 MB |
++-----------------------------------------------+

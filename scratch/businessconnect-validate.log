@@ -1,0 +1,315 @@
+=== tibco-businessconnect
+Validating 11 published folder(s) in C:\github\tibco-docs-aem...
+  ! 
+en-us-tib-businessconnect-userdocs/en-us/tibco-businessconnect/online-help/7-4-
+0 11 finding(s), 0 error(s)
+  ! 
+en-us-tib-businessconnect-userdocs/en-us/tibco-businessconnect/online-help/7-5-
+0 9 finding(s), 0 error(s)
+                                   Validate                                    
++-----------------------------------------------------------------------------+
+|      Walked | Files | References | HTML | External | Tree-root… |   Anchors |
+|-------------+-------+------------+------+----------+------------+-----------|
+|          11 |   233 |       1693 |  172 |       69 |          1 | 1398/1398 |
+|   folder(s) |       |            |      |          |            |           |
++-----------------------------------------------------------------------------+
+ANCHOR_WRONG_HEADING 14 row(s), 14 occurrence(s)
+REDIRECT_SHADOWED 4 row(s), 4 occurrence(s)
+LINK_TO_UNFILED 1 row(s), 2 occurrence(s)
+Findings: 18 warnings, 1 note.
+=== tibco-businessconnect-configstore-management-interface-protocol
+Validating 5 published folder(s) in C:\github\tibco-docs-aem...
+  ! 
+en-us-tib-businessconnect-userdocs/en-us/tibco-businessconnect-configstore-mana
+gement-interface-protocol/online-help/6-1-0 25 finding(s), 0 error(s)
+                                   Validate                                   
++----------------------------------------------------------------------------+
+|      Walked | Files | References | HTML | External | Tree-rooted | Anchors |
+|-------------+-------+------------+------+----------+-------------+---------|
+| 5 folder(s) |    59 |        179 |   29 |       17 |           0 |  91/116 |
++----------------------------------------------------------------------------+
+ANCHOR_MISSING 25 row(s), 25 occurrence(s)
+Findings: 25 warnings.
+=== tibco-businessconnect-container-edition
+Validating 16 published folder(s) in C:\github\tibco-docs-aem...
+  ! 
+en-us-tib-businessconnect-userdocs/en-us/tibco-businessconnect-container-editio
+n/online-help/1-6-1 14 finding(s), 0 error(s)
+  ! 
+en-us-tib-businessconnect-userdocs/en-us/tibco-businessconnect-container-editio
+n/online-help/1-7-0 13 finding(s), 0 error(s)
+  ! 
+en-us-tib-businessconnect-userdocs/en-us/tibco-businessconnect-container-editio
+n/online-help/1-7-1 13 finding(s), 0 error(s)
+                                   Validate                                    
++-----------------------------------------------------------------------------+
+|       Walked | Files | References | HTML | External | Tree-rooted | Anchors |
+|--------------+-------+------------+------+----------+-------------+---------|
+| 16 folder(s) |   159 |        931 |   36 |       64 |           0 | 722/722 |
++-----------------------------------------------------------------------------+
+1 help identifier(s) dropped against a prior version; `docushift csh report 
+--since` lists them.
+CSH_IDENTIFIER_DROPPED 1 row(s), 1 occurrence(s)
+REDIRECT_SHADOWED 38 row(s), 38 occurrence(s)
+LINK_TO_UNFILED 1 row(s), 2 occurrence(s)
+Findings: 39 warnings, 1 note.
+=== tibco-businessconnect-container-edition-configstore-management-interface-protocol
+Validating 12 published folder(s) in C:\github\tibco-docs-aem...
+  ! 
+en-us-tib-businessconnect-userdocs/en-us/tibco-businessconnect-container-editio
+n-configstore-management-interface-protocol/online-help/1-1-0 2 finding(s), 0 
+error(s)
+  ! 
+en-us-tib-businessconnect-userdocs/en-us/tibco-businessconnect-container-editio
+n-configstore-management-interface-protocol/online-help/1-2-0 2 finding(s), 0 
+error(s)
+  ! 
+en-us-tib-businessconnect-userdocs/en-us/tibco-businessconnect-container-editio
+n-configstore-management-interface-protocol/online-help/1-2-1 2 finding(s), 0 
+error(s)
+                                   Validate                                    
++-----------------------------------------------------------------------------+
+|       Walked | Files | References | HTML | External | Tree-rooted | Anchors |
+|--------------+-------+------------+------+----------+-------------+---------|
+| 12 folder(s) |    51 |        279 |   12 |       51 |           0 | 192/198 |
++-----------------------------------------------------------------------------+
+ANCHOR_MISSING 6 row(s), 6 occurrence(s)
+Findings: 6 warnings.
+=== tibco-businessconnect-container-edition-ebxml-protocol
+Validating 6 published folder(s) in C:\github\tibco-docs-aem...
+                                   Validate                                   
++----------------------------------------------------------------------------+
+|      Walked | Files | References | HTML | External | Tree-rooted | Anchors |
+|-------------+-------+------------+------+----------+-------------+---------|
+| 6 folder(s) |     6 |         12 |    0 |        0 |           0 |     0/0 |
++----------------------------------------------------------------------------+
+Findings: none.
+=== tibco-businessconnect-container-edition-edi-protocol-hipaa-edition-powered-by-instream
+Validating 8 published folder(s) in C:\github\tibco-docs-aem...
+                                   Validate                                   
++----------------------------------------------------------------------------+
+|      Walked | Files | References | HTML | External | Tree-rooted | Anchors |
+|-------------+-------+------------+------+----------+-------------+---------|
+| 8 folder(s) |    36 |        214 |    2 |       38 |           0 | 122/122 |
++----------------------------------------------------------------------------+
+Findings: none.
+=== tibco-businessconnect-container-edition-edi-protocol-powered-by-instream
+Validating 13 published folder(s) in C:\github\tibco-docs-aem...
+                                   Validate                                    
++-----------------------------------------------------------------------------+
+|       Walked | Files | References | HTML | External | Tree-rooted | Anchors |
+|--------------+-------+------------+------+----------+-------------+---------|
+| 13 folder(s) |    10 |         32 |    0 |        1 |           0 |     0/0 |
++-----------------------------------------------------------------------------+
+Findings: none.
+=== tibco-businessconnect-container-edition-rosettanet-protocol
+Validating 7 published folder(s) in C:\github\tibco-docs-aem...
+                                   Validate                                   
++----------------------------------------------------------------------------+
+|      Walked | Files | References | HTML | External | Tree-rooted | Anchors |
+|-------------+-------+------------+------+----------+-------------+---------|
+| 7 folder(s) |     7 |         14 |    0 |        3 |           0 |     0/0 |
++----------------------------------------------------------------------------+
+Findings: none.
+=== tibco-businessconnect-container-edition-services-plug-in
+Validating 9 published folder(s) in C:\github\tibco-docs-aem...
+                                   Validate                                   
++----------------------------------------------------------------------------+
+|      Walked | Files | References | HTML | External | Tree-rooted | Anchors |
+|-------------+-------+------------+------+----------+-------------+---------|
+| 9 folder(s) |    33 |        344 |   38 |       36 |           0 | 224/224 |
++----------------------------------------------------------------------------+
+Findings: none.
+=== tibco-businessconnect-container-edition-soap-protocol
+Validating 8 published folder(s) in C:\github\tibco-docs-aem...
+  ! 
+en-us-tib-businessconnect-userdocs/en-us/tibco-businessconnect-container-editio
+n-soap-protocol/online-help/1-2-1 15 finding(s), 0 error(s)
+  ! 
+en-us-tib-businessconnect-userdocs/en-us/tibco-businessconnect-container-editio
+n-soap-protocol/online-help/1-3-0 11 finding(s), 0 error(s)
+                                   Validate                                   
++----------------------------------------------------------------------------+
+|      Walked | Files | References | HTML | External | Tree-rooted | Anchors |
+|-------------+-------+------------+------+----------+-------------+---------|
+| 8 folder(s) |   171 |        576 |  132 |       40 |           0 | 463/467 |
++----------------------------------------------------------------------------+
+1 help identifier(s) dropped against a prior version; `docushift csh report 
+--since` lists them.
+ANCHOR_MISSING 4 row(s), 4 occurrence(s)
+CSH_IDENTIFIER_DROPPED 1 row(s), 1 occurrence(s)
+LINK_TO_UNFILED 2 row(s), 22 occurrence(s)
+Findings: 5 warnings, 2 notes.
+=== tibco-businessconnect-cxml-protocol
+Validating 5 published folder(s) in C:\github\tibco-docs-aem...
+  ! 
+en-us-tib-businessconnect-userdocs/en-us/tibco-businessconnect-cxml-protocol/on
+line-help/6-1-0 164 finding(s), 0 error(s)
+                                   Validate                                   
++----------------------------------------------------------------------------+
+|      Walked | Files | References | HTML | External | Tree-rooted | Anchors |
+|-------------+-------+------------+------+----------+-------------+---------|
+| 5 folder(s) |   155 |        634 |   42 |       37 |           0 | 414/496 |
++----------------------------------------------------------------------------+
+ANCHOR_MISSING 82 row(s), 82 occurrence(s)
+LINK_TO_UNFILED 1 row(s), 82 occurrence(s)
+Findings: 82 warnings, 1 note.
+=== tibco-businessconnect-ebxml-protocol
+Validating 9 published folder(s) in C:\github\tibco-docs-aem...
+  ! 
+en-us-tib-businessconnect-userdocs/en-us/tibco-businessconnect-ebxml-protocol/o
+nline-help/6-3-0 6 finding(s), 0 error(s)
+                                   Validate                                    
++-----------------------------------------------------------------------------+
+|      Walked | Files | References | HTML | External | Tree-root… |   Anchors |
+|-------------+-------+------------+------+----------+------------+-----------|
+| 9 folder(s) |   232 |       1662 |  170 |      108 |          0 | 1282/1288 |
++-----------------------------------------------------------------------------+
+24 help identifier(s) dropped against a prior version; `docushift csh report 
+--since` lists them.
+ANCHOR_MISSING 6 row(s), 6 occurrence(s)
+CSH_IDENTIFIER_DROPPED 1 row(s), 24 occurrence(s)
+Findings: 7 warnings.
+=== tibco-businessconnect-edi-protocol-hipaa-edition-powered-by-instream
+Validating 5 published folder(s) in C:\github\tibco-docs-aem...
+                                   Validate                                   
++----------------------------------------------------------------------------+
+|      Walked | Files | References | HTML | External | Tree-rooted | Anchors |
+|-------------+-------+------------+------+----------+-------------+---------|
+| 5 folder(s) |    58 |        178 |    0 |       24 |           0 | 105/105 |
++----------------------------------------------------------------------------+
+Findings: none.
+=== tibco-businessconnect-edi-protocol-powered-by-instream
+Validating 10 published folder(s) in C:\github\tibco-docs-aem...
+  ! 
+en-us-tib-businessconnect-userdocs/en-us/tibco-businessconnect-edi-protocol-pow
+ered-by-instream/online-help/6-10-0 11 finding(s), 0 error(s)
+                                   Validate                                    
++-----------------------------------------------------------------------------+
+|       Walked | Files | References | HTML | External | Tree-rooted | Anchors |
+|--------------+-------+------------+------+----------+-------------+---------|
+| 10 folder(s) |   375 |       1321 |   67 |       83 |           1 | 936/942 |
++-----------------------------------------------------------------------------+
+ANCHOR_MISSING 6 row(s), 6 occurrence(s)
+CSH_ANCHOR_MISSING 5 row(s), 5 occurrence(s)
+Findings: 11 warnings.
+=== tibco-businessconnect-palette
+Validating 9 published folder(s) in C:\github\tibco-docs-aem...
+                                   Validate                                   
++----------------------------------------------------------------------------+
+|      Walked | Files | References | HTML | External | Tree-rooted | Anchors |
+|-------------+-------+------------+------+----------+-------------+---------|
+| 9 folder(s) |    35 |        142 |   24 |       22 |           0 |   85/85 |
++----------------------------------------------------------------------------+
+Findings: none.
+=== tibco-businessconnect-partner-management-portal
+Validating 9 published folder(s) in C:\github\tibco-docs-aem...
+                                   Validate                                   
++----------------------------------------------------------------------------+
+|      Walked | Files | References | HTML | External | Tree-rooted | Anchors |
+|-------------+-------+------------+------+----------+-------------+---------|
+| 9 folder(s) |     9 |         19 |    0 |        0 |           0 |     0/0 |
++----------------------------------------------------------------------------+
+Findings: none.
+=== tibco-businessconnect-plug-in-for-ftp-server
+Validating 4 published folder(s) in C:\github\tibco-docs-aem...
+  ! 
+en-us-tib-businessconnect-userdocs/en-us/tibco-businessconnect-plug-in-for-ftp-
+server/online-help/1-0-1 3 finding(s), 0 error(s)
+                                   Validate                                   
++----------------------------------------------------------------------------+
+|      Walked | Files | References | HTML | External | Tree-rooted | Anchors |
+|-------------+-------+------------+------+----------+-------------+---------|
+| 4 folder(s) |    42 |         58 |    1 |        8 |           0 |   31/31 |
++----------------------------------------------------------------------------+
+CSH_ANCHOR_MISSING 3 row(s), 3 occurrence(s)
+Findings: 3 warnings.
+=== tibco-businessconnect-plug-in-for-ssh-server
+Validating 5 published folder(s) in C:\github\tibco-docs-aem...
+  ! 
+en-us-tib-businessconnect-userdocs/en-us/tibco-businessconnect-plug-in-for-ssh-
+server/online-help/1-1-0 1 finding(s), 0 error(s)
+                                   Validate                                   
++----------------------------------------------------------------------------+
+|      Walked | Files | References | HTML | External | Tree-rooted | Anchors |
+|-------------+-------+------------+------+----------+-------------+---------|
+| 5 folder(s) |    44 |         79 |    1 |       18 |           0 |   40/40 |
++----------------------------------------------------------------------------+
+CSH_ANCHOR_MISSING 1 row(s), 1 occurrence(s)
+Findings: 1 warning.
+=== tibco-businessconnect-rosettanet-protocol
+Validating 5 published folder(s) in C:\github\tibco-docs-aem...
+  ! 
+en-us-tib-businessconnect-userdocs/en-us/tibco-businessconnect-rosettanet-proto
+col/online-help/5-3-0 2 finding(s), 0 error(s)
+                                   Validate                                   
++----------------------------------------------------------------------------+
+|      Walked | Files | References | HTML | External | Tree-rooted | Anchors |
+|-------------+-------+------------+------+----------+-------------+---------|
+| 5 folder(s) |    91 |        393 |   69 |       19 |           0 | 314/316 |
++----------------------------------------------------------------------------+
+ANCHOR_MISSING 2 row(s), 2 occurrence(s)
+Findings: 2 warnings.
+=== tibco-businessconnect-services-plug-in
+Validating 9 published folder(s) in C:\github\tibco-docs-aem...
+  ! 
+en-us-tib-businessconnect-userdocs/en-us/tibco-businessconnect-services-plug-in
+/online-help/6-3-0 5 finding(s), 0 error(s)
+  ! 
+en-us-tib-businessconnect-userdocs/en-us/tibco-businessconnect-services-plug-in
+/online-help/6-4-0 1 finding(s), 0 error(s)
+                                   Validate                                   
++----------------------------------------------------------------------------+
+|      Walked | Files | References | HTML | External | Tree-rooted | Anchors |
+|-------------+-------+------------+------+----------+-------------+---------|
+| 9 folder(s) |   104 |        687 |   40 |       32 |           0 | 580/585 |
++----------------------------------------------------------------------------+
+ANCHOR_MISSING 5 row(s), 5 occurrence(s)
+ANCHOR_WRONG_HEADING 1 row(s), 1 occurrence(s)
+Findings: 6 warnings.
+=== tibco-businessconnect-soap-protocol
+Validating 9 published folder(s) in C:\github\tibco-docs-aem...
+  ! 
+en-us-tib-businessconnect-userdocs/en-us/tibco-businessconnect-soap-protocol/on
+line-help/7-1-0 2 finding(s), 0 error(s)
+  ! 
+en-us-tib-businessconnect-userdocs/en-us/tibco-businessconnect-soap-protocol/on
+line-help/7-2-0 1 finding(s), 0 error(s)
+                                   Validate                                   
++----------------------------------------------------------------------------+
+|      Walked | Files | References | HTML | External | Tree-rooted | Anchors |
+|-------------+-------+------------+------+----------+-------------+---------|
+| 9 folder(s) |   149 |        801 |  129 |       63 |           0 | 620/622 |
++----------------------------------------------------------------------------+
+ANCHOR_MISSING 2 row(s), 2 occurrence(s)
+ANCHOR_WRONG_HEADING 1 row(s), 1 occurrence(s)
+Findings: 3 warnings.
+=== tibco-businessconnect-trading-community-management
+Validating 13 published folder(s) in C:\github\tibco-docs-aem...
+  ! 
+en-us-tib-businessconnect-userdocs/en-us/tibco-businessconnect-trading-communit
+y-management/online-help/6-1-0 4 finding(s), 0 error(s)
+  ! 
+en-us-tib-businessconnect-userdocs/en-us/tibco-businessconnect-trading-communit
+y-management/online-help/6-1-1 5 finding(s), 0 error(s)
+                                   Validate                                    
++-----------------------------------------------------------------------------+
+|       Walked | Files | References | HTML | External | Tree-rooted | Anchors |
+|--------------+-------+------------+------+----------+-------------+---------|
+| 13 folder(s) |   271 |        634 |   12 |       73 |           0 | 382/385 |
++-----------------------------------------------------------------------------+
+5 help identifier(s) dropped against a prior version; `docushift csh report 
+--since` lists them.
+ANCHOR_MISSING 3 row(s), 3 occurrence(s)
+CSH_ANCHOR_MISSING 6 row(s), 6 occurrence(s)
+CSH_IDENTIFIER_DROPPED 1 row(s), 5 occurrence(s)
+Findings: 10 warnings.
+=== tibco-trading-partner-management-rest-api
+Validating 6 published folder(s) in C:\github\tibco-docs-aem...
+                                   Validate                                   
++----------------------------------------------------------------------------+
+|      Walked | Files | References | HTML | External | Tree-rooted | Anchors |
+|-------------+-------+------------+------+----------+-------------+---------|
+| 6 folder(s) |    15 |         75 |    0 |       10 |           1 |   56/56 |
++----------------------------------------------------------------------------+
+Findings: none.

@@ -1,0 +1,42 @@
+Reframing 3 version(s)...
+  v tibco-iprocess-engine@11.10.0 1822 topic(s) -> 643 page(s)
+  v tibco-iprocess-engine@11.9.2 1809 topic(s) -> 520 page(s)
+  v tibco-iprocess-engine@11.9.1 1803 topic(s) -> 504 page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |        3 |
+| Already current             |        0 |
+| Not Flare or DITA (skipped) |        0 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+5434 topic(s) read into 1667 page(s).
+Files: 13158 source doc -> 6428 converted -> 1667 merged (74.1% fewer at the 
+merge, 87.3% end to end); 2971 file(s) standing in the measured merged tree(s).
+1146 page(s) queued for editorial review:
+  tibco-iprocess-engine@11.10.0: 381 of 643 -- see review-queue.csv
+  tibco-iprocess-engine@11.9.2: 387 of 520 -- see review-queue.csv
+  tibco-iprocess-engine@11.9.1: 378 of 504 -- see review-queue.csv
+Findings: 3 warnings, 9 notes.
+Reframing 2 version(s)...
+  v tibco-iprocess-technology-plug-ins@11.10.0 261 topic(s) -> 57 page(s)
+  v tibco-iprocess-technology-plug-ins@11.9.2 200 topic(s) -> 108 page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |        2 |
+| Already current             |        0 |
+| Not Flare or DITA (skipped) |        0 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+461 topic(s) read into 165 page(s).
+Files: 1481 source doc -> 536 converted -> 165 merged (69.2% fewer at the 
+merge, 88.9% end to end); 410 file(s) standing in the measured merged tree(s).
+89 page(s) queued for editorial review:
+  tibco-iprocess-technology-plug-ins@11.10.0: 14 of 57 -- see review-queue.csv
+  tibco-iprocess-technology-plug-ins@11.9.2: 75 of 108 -- see review-queue.csv
+Findings: 2 warnings, 6 notes.

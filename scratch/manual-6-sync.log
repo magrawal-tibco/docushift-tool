@@ -1,0 +1,135 @@
+Syncing 1 version(s) into ..\tibco-docs-aem...
+  v adapter-code-for-tibco-api-exchange-and-joomla@2.3.3 -> user-guides/2-3-3 3
+file(s), 4.0 MB
+                         Sync                         
++----------------------------------------------------+
+| Outcome         | Rows | online-help | user-guides |
+|-----------------+------+-------------+-------------|
+| Synced          |    1 |           0 |           1 |
+| Already current |    0 |           0 |           0 |
+| No source tree  |    1 |           1 |           0 |
+| Skipped         |    0 |           0 |           0 |
+| Failed          |    0 |           0 |           0 |
++----------------------------------------------------+
+3 file(s), 4.0 MB copied.
+1 product metadata.yml, 1 version.yml written.
+! adapter-code-for-tibco-api-exchange-and-joomla@2.3.3: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-adapters\adapter-code-for-tibco-api-e
+xchange-and-joomla\2.3.3; run `docushift convert` first
+Syncing 1 version(s) into ..\tibco-docs-aem...
+  v adapter-code-for-tibco-api-exchange-and-joomla@2.3.4 -> online-help/2-3-4 
+91 file(s), 8.3 MB
+  v adapter-code-for-tibco-api-exchange-and-joomla@2.3.4 -> user-guides/2-3-4 3
+file(s), 3.2 MB
+                         Sync                         
++----------------------------------------------------+
+| Outcome         | Rows | online-help | user-guides |
+|-----------------+------+-------------+-------------|
+| Synced          |    2 |           1 |           1 |
+| Already current |    0 |           0 |           0 |
+| No source tree  |    0 |           0 |           0 |
+| Skipped         |    0 |           0 |           0 |
+| Failed          |    0 |           0 |           0 |
++----------------------------------------------------+
+94 file(s), 11.5 MB copied.
+1 product metadata.yml, 2 version.yml written.
+Published merged (Stage 6b): adapter-code-for-tibco-api-exchange-and-joomla.
+120 redirect(s) in 1 published map(s), tree-rooted (no publish_base_url set).
+Syncing 1 version(s) into ..\tibco-docs-aem...
+  v 
+tibco-activematrix-businessworks-plug-in-for-applicability-statement-2-as2-prot
+ocol@6.0.0 -> online-help/6-0-0 40 file(s), 0.7 MB
+  v 
+tibco-activematrix-businessworks-plug-in-for-applicability-statement-2-as2-prot
+ocol@6.0.0 -> user-guides/6-0-0 2 file(s), 3.9 MB
+  v 
+tibco-activematrix-businessworks-plug-in-for-applicability-statement-2-as2-prot
+ocol@6.0.0 -> release-information/6-0-0 2 file(s), 1.4 MB
+  v 
+tibco-activematrix-businessworks-plug-in-for-applicability-statement-2-as2-prot
+ocol@6.0.0 -> reference-documents/6-0-0 2 file(s), 0.8 MB
+                                     Sync                                      
++-----------------------------------------------------------------------------+
+| Outcome     | Rows | online-help | user-guides | release-in… | reference-d… |
+|-------------+------+-------------+-------------+-------------+--------------|
+| Synced      |    4 |           1 |           1 |           1 |            1 |
+| Already     |    0 |           0 |           0 |           0 |            0 |
+| current     |      |             |             |             |              |
+| No source   |    0 |           0 |           0 |           0 |            0 |
+| tree        |      |             |             |             |              |
+| Skipped     |    0 |           0 |           0 |           0 |            0 |
+| Failed      |    0 |           0 |           0 |           0 |            0 |
++-----------------------------------------------------------------------------+
+46 file(s), 6.8 MB copied.
+1 product metadata.yml, 4 version.yml written.
+Published merged (Stage 6b): 
+tibco-activematrix-businessworks-plug-in-for-applicability-statement-2-as2-prot
+ocol.
+53 redirect(s) in 1 published map(s), tree-rooted (no publish_base_url set).
+Syncing 1 version(s) into ..\tibco-docs-aem...
+  v tibco-activematrix-businessworks-plug-in-for-pdf@6.2.3 -> online-help/6-2-3
+61 file(s), 0.9 MB
+  v tibco-activematrix-businessworks-plug-in-for-pdf@6.2.3 -> user-guides/6-2-3
+2 file(s), 4.2 MB
+                              Sync                               
++---------------------------------------------------------------+
+| Outcome         | Rows | online-help | user-guides | archives |
+|-----------------+------+-------------+-------------+----------|
+| Synced          |    2 |           1 |           1 |        0 |
+| Already current |    1 |           0 |           0 |        1 |
+| No source tree  |    0 |           0 |           0 |        0 |
+| Skipped         |    0 |           0 |           0 |        0 |
+| Failed          |    0 |           0 |           0 |        0 |
++---------------------------------------------------------------+
+63 file(s), 5.2 MB copied.
+1 product metadata.yml, 4 version.yml written.
+Published merged (Stage 6b): tibco-activematrix-businessworks-plug-in-for-pdf.
+226 redirect(s) in 2 published map(s), tree-rooted (no publish_base_url set).
+Syncing 1 version(s) into ..\tibco-docs-aem...
+  v 
+tibco-activematrix-businessworks-plug-in-for-tibco-managed-file-transfer@6.3.1 
+-> online-help/6-3-1 27 file(s), 0.5 MB
+  v 
+tibco-activematrix-businessworks-plug-in-for-tibco-managed-file-transfer@6.3.1 
+-> user-guides/6-3-1 2 file(s), 1.0 MB
+  v 
+tibco-activematrix-businessworks-plug-in-for-tibco-managed-file-transfer@6.3.1 
+-> release-information/6-3-1 2 file(s), 0.2 MB
+  v 
+tibco-activematrix-businessworks-plug-in-for-tibco-managed-file-transfer@6.3.1 
+-> reference-documents/6-3-1 2 file(s), 0.7 MB
+                                     Sync                                      
++-----------------------------------------------------------------------------+
+| Outcome     | Rows | online-help | user-guides | release-in… | reference-d… |
+|-------------+------+-------------+-------------+-------------+--------------|
+| Synced      |    4 |           1 |           1 |           1 |            1 |
+| Already     |    0 |           0 |           0 |           0 |            0 |
+| current     |      |             |             |             |              |
+| No source   |    0 |           0 |           0 |           0 |            0 |
+| tree        |      |             |             |             |              |
+| Skipped     |    0 |           0 |           0 |           0 |            0 |
+| Failed      |    0 |           0 |           0 |           0 |            0 |
++-----------------------------------------------------------------------------+
+33 file(s), 2.4 MB copied.
+1 product metadata.yml, 4 version.yml written.
+Published merged (Stage 6b): 
+tibco-activematrix-businessworks-plug-in-for-tibco-managed-file-transfer.
+106 redirect(s) in 1 published map(s), tree-rooted (no publish_base_url set).
+Syncing 1 version(s) into ..\ibi-docs-aem...
+  v ibi-webfocus-dsml-services-container-edition@1.0.7 -> online-help/1-0-7 27 
+file(s), 0.5 MB
+  v ibi-webfocus-dsml-services-container-edition@1.0.7 -> user-guides/1-0-7 1 
+file(s), 1.9 MB
+                              Sync                               
++---------------------------------------------------------------+
+| Outcome         | Rows | online-help | user-guides | archives |
+|-----------------+------+-------------+-------------+----------|
+| Synced          |    2 |           1 |           1 |        0 |
+| Already current |    1 |           0 |           0 |        1 |
+| No source tree  |    0 |           0 |           0 |        0 |
+| Skipped         |    0 |           0 |           0 |        0 |
+| Failed          |    0 |           0 |           0 |        0 |
++---------------------------------------------------------------+
+28 file(s), 2.3 MB copied.
+1 product metadata.yml, 4 version.yml written.
+142 redirect(s) in 1 published map(s), tree-rooted (no publish_base_url set).

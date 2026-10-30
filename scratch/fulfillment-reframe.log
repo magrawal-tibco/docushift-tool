@@ -1,0 +1,42 @@
+Reframing 13 version(s)...
+  v tibco-fulfillment-provisioning@3.10.0 642 topic(s) -> 71 page(s)
+  v tibco-fulfillment-provisioning@3.9.0 652 topic(s) -> 37 page(s)
+  v tibco-offer-and-price-engine@6.0.0 153 topic(s) -> 120 page(s)
+  v tibco-order-management@6.1.0 572 topic(s) -> 708 page(s)
+  v tibco-order-management@6.0.1 538 topic(s) -> 703 page(s)
+  v tibco-order-management@6.0.0 540 topic(s) -> 668 page(s)
+  v tibco-order-management@5.0.1 721 topic(s) -> 88 page(s)
+  v tibco-product-and-service-catalog@5.1.0 542 topic(s) -> 1397 page(s)
+  v tibco-product-and-service-catalog-powered-by-tibco-ebx@1.1.0 44 topic(s) ->
+324 page(s)
+  v tibco-product-and-service-catalog-powered-by-tibco-ebx@1.0.0 44 topic(s) ->
+324 page(s)
+  v tibco-product-and-service-inventory@2.1.0 180 topic(s) -> 99 page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |       11 |
+| Already current             |        0 |
+| Not Flare or DITA (skipped) |        2 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+4628 topic(s) read into 4539 page(s).
+Files: 21048 source doc -> 8320 converted -> 4539 merged (45.4% fewer at the 
+merge, 78.4% end to end); 8377 file(s) standing in the measured merged tree(s).
+2059 page(s) queued for editorial review:
+  tibco-fulfillment-provisioning@3.10.0: 16 of 71 -- see review-queue.csv
+  tibco-fulfillment-provisioning@3.9.0: 23 of 37 -- see review-queue.csv
+  tibco-offer-and-price-engine@6.0.0: 33 of 120 -- see review-queue.csv
+  tibco-order-management@6.1.0: 374 of 708 -- see review-queue.csv
+  tibco-order-management@6.0.1: 362 of 703 -- see review-queue.csv
+  tibco-order-management@6.0.0: 338 of 668 -- see review-queue.csv
+  tibco-order-management@5.0.1: 34 of 88 -- see review-queue.csv
+  tibco-product-and-service-catalog@5.1.0: 520 of 1397 -- see review-queue.csv
+  tibco-product-and-service-catalog-powered-by-tibco-ebx@1.1.0: 170 of 324 -- 
+see review-queue.csv
+  tibco-product-and-service-catalog-powered-by-tibco-ebx@1.0.0: 170 of 324 -- 
+see review-queue.csv
+  tibco-product-and-service-inventory@2.1.0: 19 of 99 -- see review-queue.csv
+Findings: 14 warnings, 19 notes.

@@ -1,0 +1,96 @@
+Converting 14 version(s)...
+  v tibco-managed-file-transfer-command-center@8.7.1 978 topic(s), 189 
+asset(s), 1 unit(s), 988 nav node(s), 9 generated -> 1178 file(s)
+  v tibco-managed-file-transfer-command-center@8.7.0 977 topic(s), 188 
+asset(s), 1 unit(s), 987 nav node(s), 9 generated -> 1176 file(s)
+  v tibco-managed-file-transfer-command-center@8.6.0 971 topic(s), 185 
+asset(s), 1 unit(s), 981 nav node(s), 9 generated -> 1167 file(s)
+  v tibco-managed-file-transfer-internet-server@8.7.1 977 topic(s), 192 
+asset(s), 1 unit(s), 989 nav node(s), 11 generated -> 1183 file(s)
+  v tibco-managed-file-transfer-internet-server@8.7.0 976 topic(s), 191 
+asset(s), 1 unit(s), 988 nav node(s), 11 generated -> 1181 file(s)
+  v tibco-managed-file-transfer-internet-server@8.6.0 970 topic(s), 188 
+asset(s), 1 unit(s), 982 nav node(s), 11 generated -> 1172 file(s)
+  v tibco-managed-file-transfer-platform-server-for-unix@8.2.0 216 topic(s), 15
+asset(s), 1 unit(s), 222 nav node(s), 6 generated -> 240 file(s)
+  v tibco-managed-file-transfer-platform-server-for-unix@8.1.2 208 topic(s), 26
+asset(s), 1 unit(s), 214 nav node(s), 6 generated -> 243 file(s)
+  v tibco-managed-file-transfer-platform-server-for-unix@8.1.1 208 topic(s), 26
+asset(s), 1 unit(s), 214 nav node(s), 6 generated -> 243 file(s)
+  v tibco-managed-file-transfer-platform-server-for-windows@8.2.0 164 topic(s),
+85 asset(s), 1 unit(s), 166 nav node(s), 2 generated -> 254 file(s)
+  v tibco-managed-file-transfer-platform-server-for-windows@8.1.0 166 topic(s),
+91 asset(s), 1 unit(s), 168 nav node(s), 2 generated -> 262 file(s)
+  v tibco-managed-file-transfer-platform-server-for-z-linux@8.1.2 211 topic(s),
+14 asset(s), 1 unit(s), 217 nav node(s), 6 generated -> 234 file(s)
+  v tibco-managed-file-transfer-platform-server-for-z-linux@8.1.1 208 topic(s),
+26 asset(s), 1 unit(s), 214 nav node(s), 6 generated -> 243 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |       13 |
+| Already current   |        0 |
+| No extracted tree |        1 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+7230 topic(s), 1416 asset(s) written.
+8776 file(s) standing in the measured output tree(s).
+tibco-managed-file-transfer-command-center@8.7.1: 196 resolved, 0 skin, 12 
+escaped, 3 dangling, 0 case-mismatch, 357 orphan (14.7 MB)
+tibco-managed-file-transfer-command-center@8.7.1: skipped 4 
+generated-directory, 2 runtime-stub
+tibco-managed-file-transfer-command-center@8.7.0: 195 resolved, 0 skin, 12 
+escaped, 3 dangling, 0 case-mismatch, 356 orphan (14.7 MB)
+tibco-managed-file-transfer-command-center@8.7.0: skipped 4 
+generated-directory, 2 runtime-stub
+tibco-managed-file-transfer-command-center@8.6.0: 192 resolved, 0 skin, 12 
+escaped, 4 dangling, 0 case-mismatch, 353 orphan (14.4 MB)
+tibco-managed-file-transfer-command-center@8.6.0: skipped 4 
+generated-directory, 2 runtime-stub
+tibco-managed-file-transfer-internet-server@8.7.1: 199 resolved, 0 skin, 14 
+escaped, 3 dangling, 0 case-mismatch, 353 orphan (14.2 MB)
+tibco-managed-file-transfer-internet-server@8.7.1: skipped 4 
+generated-directory, 2 runtime-stub
+tibco-managed-file-transfer-internet-server@8.7.0: 198 resolved, 0 skin, 14 
+escaped, 3 dangling, 0 case-mismatch, 352 orphan (14.2 MB)
+tibco-managed-file-transfer-internet-server@8.7.0: skipped 4 
+generated-directory, 2 runtime-stub
+tibco-managed-file-transfer-internet-server@8.6.0: 195 resolved, 0 skin, 14 
+escaped, 4 dangling, 0 case-mismatch, 349 orphan (14.0 MB)
+tibco-managed-file-transfer-internet-server@8.6.0: skipped 4 
+generated-directory, 2 runtime-stub
+tibco-managed-file-transfer-platform-server-for-unix@8.2.0: 15 resolved, 0 
+skin, 0 escaped, 0 dangling, 0 case-mismatch, 79 orphan (3.2 MB)
+tibco-managed-file-transfer-platform-server-for-unix@8.2.0: skipped 4 
+generated-directory, 2 runtime-stub
+tibco-managed-file-transfer-platform-server-for-unix@8.1.2: 26 resolved, 0 
+skin, 0 escaped, 0 dangling, 0 case-mismatch, 47 orphan (1.7 MB)
+tibco-managed-file-transfer-platform-server-for-unix@8.1.2: skipped 3 
+generated-directory, 2 runtime-stub
+tibco-managed-file-transfer-platform-server-for-unix@8.1.1: 26 resolved, 0 
+skin, 0 escaped, 0 dangling, 0 case-mismatch, 47 orphan (1.7 MB)
+tibco-managed-file-transfer-platform-server-for-unix@8.1.1: skipped 3 
+generated-directory, 2 runtime-stub
+tibco-managed-file-transfer-platform-server-for-windows@8.2.0: 91 resolved, 0 
+skin, 6 escaped, 0 dangling, 0 case-mismatch, 165 orphan (9.1 MB)
+tibco-managed-file-transfer-platform-server-for-windows@8.2.0: skipped 3 
+generated-directory, 2 runtime-stub
+tibco-managed-file-transfer-platform-server-for-windows@8.1.0: 97 resolved, 0 
+skin, 6 escaped, 0 dangling, 0 case-mismatch, 136 orphan (5.8 MB)
+tibco-managed-file-transfer-platform-server-for-windows@8.1.0: skipped 3 
+generated-directory, 2 runtime-stub
+tibco-managed-file-transfer-platform-server-for-z-linux@8.1.2: 14 resolved, 0 
+skin, 9 escaped, 0 dangling, 0 case-mismatch, 77 orphan (3.2 MB)
+tibco-managed-file-transfer-platform-server-for-z-linux@8.1.2: skipped 4 
+generated-directory, 2 runtime-stub
+tibco-managed-file-transfer-platform-server-for-z-linux@8.1.1: 26 resolved, 0 
+skin, 0 escaped, 0 dangling, 0 case-mismatch, 47 orphan (1.7 MB)
+tibco-managed-file-transfer-platform-server-for-z-linux@8.1.1: skipped 3 
+generated-directory, 2 runtime-stub
+! tibco-managed-file-transfer-platform-server-for-z-linux@8.1.0: no extracted 
+tree at 
+C:\github\docushift-tool\families\en-us-tib-mft\extracted\tibco-managed-file-tr
+ansfer-platform-server-for-z-linux\8.1.0; run `docushift extract` first
+Findings: 12 errors, 24 warnings, 61 notes.

@@ -1,0 +1,420 @@
+Syncing 19 version(s) into C:\github\ibi-docs-aem...
+  v ibi-focus@9.3.4 -> online-help/9-3-4 3864 file(s), 50.7 MB
+  v ibi-focus@9.3.3 -> online-help/9-3-3 3848 file(s), 50.3 MB
+  v ibi-focus@9.3.2 -> online-help/9-3-2 3781 file(s), 49.7 MB
+  v ibi-focus@9.3.1 -> online-help/9-3-1 3789 file(s), 49.7 MB
+  v ibi-focus@9.3.0 -> online-help/9-3-0 3759 file(s), 49.4 MB
+                                     Sync                                      
++-----------------------------------------------------------------------------+
+| Outcome     | Rows | online-help | user-guides | release-in… | reference-d… |
+|-------------+------+-------------+-------------+-------------+--------------|
+| Synced      |    5 |           5 |           0 |           0 |            0 |
+| Already     |   61 |           4 |          19 |          19 |           19 |
+| current     |      |             |             |             |              |
+| No source   |   10 |          10 |           0 |           0 |            0 |
+| tree        |      |             |             |             |              |
+| Skipped     |    0 |           0 |           0 |           0 |            0 |
+| Failed      |    0 |           0 |           0 |           0 |            0 |
++-----------------------------------------------------------------------------+
+19041 file(s), 249.8 MB copied.
+1 product metadata.yml, 4 version.yml written.
+17698 redirect(s) in 1 published map(s), tree-rooted (no publish_base_url set).
+! ibi-focus@9.2.5: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-focus\ibi-focus\9.2.5; run `docushift
+convert` first
+! ibi-focus@9.2.4: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-focus\ibi-focus\9.2.4; run `docushift
+convert` first
+! ibi-focus@9.2.3: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-focus\ibi-focus\9.2.3; run `docushift
+convert` first
+! ibi-focus@9.2.2: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-focus\ibi-focus\9.2.2; run `docushift
+convert` first
+! ibi-focus@9.2.1: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-focus\ibi-focus\9.2.1; run `docushift
+convert` first
+! ibi-focus@9.2.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-focus\ibi-focus\9.2.0; run `docushift
+convert` first
+! ibi-focus@9.1.3: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-focus\ibi-focus\9.1.3; run `docushift
+convert` first
+! ibi-focus@9.1.2: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-focus\ibi-focus\9.1.2; run `docushift
+convert` first
+! ibi-focus@9.1.1: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-focus\ibi-focus\9.1.1; run `docushift
+convert` first
+! ibi-focus@9.1.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-focus\ibi-focus\9.1.0; run `docushift
+convert` first
+Syncing 89 version(s) into C:\github\ibi-docs-aem...
+  v ibi-webfocus-app-studio@9.3.4 -> online-help/9-3-4 1132 file(s), 22.2 MB
+  v ibi-webfocus-app-studio@9.3.3 -> online-help/9-3-3 1134 file(s), 22.7 MB
+  v ibi-webfocus-client@9.3.5 -> online-help/9-3-5 7984 file(s), 139.8 MB
+  v ibi-webfocus-client@9.3.4 -> online-help/9-3-4 7972 file(s), 132.3 MB
+  v ibi-webfocus-client@9.3.3 -> online-help/9-3-3 7899 file(s), 130.9 MB
+  v ibi-webfocus-client@9.3.2 -> online-help/9-3-2 7738 file(s), 127.0 MB
+                                     Sync                                      
++-----------------------------------------------------------------------------+
+| Outcome     | Rows | online-help | user-guides | release-in… | reference-d… |
+|-------------+------+-------------+-------------+-------------+--------------|
+| Synced      |    6 |           6 |           0 |           0 |            0 |
+| Already     |  306 |          39 |          89 |          89 |           89 |
+| current     |      |             |             |             |              |
+| No source   |   44 |          44 |           0 |           0 |            0 |
+| tree        |      |             |             |             |              |
+| Skipped     |    0 |           0 |           0 |           0 |            0 |
+| Failed      |    0 |           0 |           0 |           0 |            0 |
++-----------------------------------------------------------------------------+
+33859 file(s), 574.9 MB copied.
+6 product metadata.yml, 24 version.yml written.
+17652 redirect(s) in 6 published map(s), tree-rooted (no publish_base_url set).
+! ibi-open-data-hub-for-mainframe-connectors@1.0.6: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-open-data-hub-for-mainfr
+ame-connectors\1.0.6; run `docushift convert` first
+! ibi-open-data-hub-for-mainframe-connectors@1.0.2: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-open-data-hub-for-mainfr
+ame-connectors\1.0.2; run `docushift convert` first
+! ibi-open-data-hub-for-mainframe-connectors@1.0.1: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-open-data-hub-for-mainfr
+ame-connectors\1.0.1; run `docushift convert` first
+! ibi-open-data-hub-for-mainframe-connectors@1.0.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-open-data-hub-for-mainfr
+ame-connectors\1.0.0; run `docushift convert` first
+! ibi-webfocus-app-studio@9.2.7: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-app-studio\9.2.
+7; run `docushift convert` first
+! ibi-webfocus-app-studio@9.2.6: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-app-studio\9.2.
+6; run `docushift convert` first
+! ibi-webfocus-app-studio@9.2.5: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-app-studio\9.2.
+5; run `docushift convert` first
+! ibi-webfocus-app-studio@9.2.4: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-app-studio\9.2.
+4; run `docushift convert` first
+! ibi-webfocus-app-studio@9.2.3: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-app-studio\9.2.
+3; run `docushift convert` first
+! ibi-webfocus-app-studio@9.2.2: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-app-studio\9.2.
+2; run `docushift convert` first
+! ibi-webfocus-app-studio@9.2.1: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-app-studio\9.2.
+1; run `docushift convert` first
+! ibi-webfocus-app-studio@9.2.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-app-studio\9.2.
+0; run `docushift convert` first
+! ibi-webfocus-app-studio@9.1.4: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-app-studio\9.1.
+4; run `docushift convert` first
+! ibi-webfocus-app-studio@9.1.3: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-app-studio\9.1.
+3; run `docushift convert` first
+! ibi-webfocus-app-studio@9.1.2: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-app-studio\9.1.
+2; run `docushift convert` first
+! ibi-webfocus-app-studio@9.1.1: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-app-studio\9.1.
+1; run `docushift convert` first
+! ibi-webfocus-app-studio@9.1.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-app-studio\9.1.
+0; run `docushift convert` first
+! ibi-webfocus-client@9.2.7: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-client\9.2.7; 
+run `docushift convert` first
+! ibi-webfocus-client@9.2.6: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-client\9.2.6; 
+run `docushift convert` first
+! ibi-webfocus-client@9.2.5: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-client\9.2.5; 
+run `docushift convert` first
+! ibi-webfocus-client@9.2.4: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-client\9.2.4; 
+run `docushift convert` first
+! ibi-webfocus-client@9.2.3: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-client\9.2.3; 
+run `docushift convert` first
+! ibi-webfocus-client@9.2.2: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-client\9.2.2; 
+run `docushift convert` first
+! ibi-webfocus-client@9.2.1: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-client\9.2.1; 
+run `docushift convert` first
+! ibi-webfocus-client@9.2.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-client\9.2.0; 
+run `docushift convert` first
+! ibi-webfocus-client@9.1.4: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-client\9.1.4; 
+run `docushift convert` first
+! ibi-webfocus-client@9.1.3: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-client\9.1.3; 
+run `docushift convert` first
+! ibi-webfocus-client@9.1.2: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-client\9.1.2; 
+run `docushift convert` first
+! ibi-webfocus-client@9.1.1: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-client\9.1.1; 
+run `docushift convert` first
+! ibi-webfocus-client@9.1.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-client\9.1.0; 
+run `docushift convert` first
+! ibi-webfocus-dsml-services@9.2.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-dsml-services\9
+.2.0; run `docushift convert` first
+! ibi-webfocus-dsml-services@9.1.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-dsml-services\9
+.1.0; run `docushift convert` first
+! ibi-webfocus-installer@9.2.6: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-installer\9.2.6
+; run `docushift convert` first
+! ibi-webfocus-installer@9.2.5: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-installer\9.2.5
+; run `docushift convert` first
+! ibi-webfocus-installer@9.2.4: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-installer\9.2.4
+; run `docushift convert` first
+! ibi-webfocus-installer@9.2.3: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-installer\9.2.3
+; run `docushift convert` first
+! ibi-webfocus-installer@9.2.2: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-installer\9.2.2
+; run `docushift convert` first
+! ibi-webfocus-installer@9.2.1: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-installer\9.2.1
+; run `docushift convert` first
+! ibi-webfocus-installer@9.2.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-installer\9.2.0
+; run `docushift convert` first
+! ibi-webfocus-installer@9.1.4: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-installer\9.1.4
+; run `docushift convert` first
+! ibi-webfocus-installer@9.1.3: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-installer\9.1.3
+; run `docushift convert` first
+! ibi-webfocus-installer@9.1.2: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-installer\9.1.2
+; run `docushift convert` first
+! ibi-webfocus-installer@9.1.1: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-installer\9.1.1
+; run `docushift convert` first
+! ibi-webfocus-installer@9.1.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-installer\9.1.0
+; run `docushift convert` first
+Validating 622 published folder(s) in C:\github\ibi-docs-aem...
+  ! 
+en-us-ibi-container-editions-userdocs/en-us/ibi-webfocus-container-edition/onli
+ne-help/9-3-8 66 finding(s), 0 error(s)
+  ! 
+en-us-ibi-container-editions-userdocs/en-us/ibi-webfocus-dsml-services-containe
+r-edition/online-help/9-3-8 66 finding(s), 0 error(s)
+  ! en-us-ibi-di-ism-userdocs/en-us/ibi-data-intelligence/online-help/1-0-0 9 
+finding(s), 0 error(s)
+  ! en-us-ibi-di-ism-userdocs/en-us/ibi-data-intelligence/online-help/1-1-0 12 
+finding(s), 0 error(s)
+  ! en-us-ibi-di-ism-userdocs/en-us/ibi-data-intelligence/online-help/1-2-0 11 
+finding(s), 0 error(s)
+  ! en-us-ibi-di-ism-userdocs/en-us/ibi-data-intelligence/online-help/2-0-0 11 
+finding(s), 0 error(s)
+  ! en-us-ibi-di-ism-userdocs/en-us/ibi-data-quality/online-help/5-2-2 3 
+finding(s), 0 error(s)
+  ! en-us-ibi-di-ism-userdocs/en-us/ibi-iway-service-manager/online-help/9-2-0 
+212 finding(s), 0 error(s)
+  ! en-us-ibi-di-ism-userdocs/en-us/ibi-iway-service-manager/online-help/9-3-0 
+212 finding(s), 0 error(s)
+  ! en-us-ibi-focus-userdocs/en-us/ibi-focus/online-help/9-3-0 1902 finding(s),
+0 error(s)
+  ! en-us-ibi-focus-userdocs/en-us/ibi-focus/online-help/9-3-1 1885 finding(s),
+0 error(s)
+  ! en-us-ibi-focus-userdocs/en-us/ibi-focus/online-help/9-3-2 1878 finding(s),
+0 error(s)
+  ! en-us-ibi-focus-userdocs/en-us/ibi-focus/online-help/9-3-3 1879 finding(s),
+0 error(s)
+  ! en-us-ibi-focus-userdocs/en-us/ibi-focus/online-help/9-3-4 1882 finding(s),
+0 error(s)
+  ! en-us-ibi-focus-userdocs/en-us/ibi-focus/online-help/9-3-5 207 finding(s), 
+0 error(s)
+  ! en-us-ibi-focus-userdocs/en-us/ibi-focus/online-help/9-3-6 208 finding(s), 
+0 error(s)
+  ! en-us-ibi-focus-userdocs/en-us/ibi-focus/online-help/9-3-7 1 finding(s), 0 
+error(s)
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-0-3 13 finding(s), 3 error(s)
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-0-4 13 finding(s), 3 error(s)
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-0-5 31 finding(s), 3 error(s)
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-0-7 30 finding(s), 3 error(s)
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-0-8 30 finding(s), 3 error(s)
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-0-9 30 finding(s), 3 error(s)
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-3-4 30 finding(s), 3 error(s)
+  ! 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-3-5 15 finding(s), 0 error(s)
+  ! 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-3-6 14 finding(s), 0 error(s)
+  ! 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-3-7 14 finding(s), 0 error(s)
+  ! 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-3-8 1 finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-app-studio/online-help/9-3-0
+305 finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-app-studio/online-help/9-3-1
+305 finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-app-studio/online-help/9-3-2
+304 finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-app-studio/online-help/9-3-3
+304 finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-app-studio/online-help/9-3-4
+304 finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-app-studio/online-help/9-3-6
+6 finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/online-help/9-3-0 
+2136 finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/online-help/9-3-1 
+2074 finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/online-help/9-3-2 
+2070 finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/online-help/9-3-3 
+2070 finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/online-help/9-3-4 
+2209 finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/online-help/9-3-5 
+2072 finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/online-help/9-3-6 10 
+finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/online-help/9-3-7 10 
+finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/online-help/9-3-8 21 
+finding(s), 0 error(s)
+  ! 
+en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-dsml-services/online-help/9-3-4 
+1 finding(s), 0 error(s)
+  ! 
+en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-dsml-services/online-help/9-3-8 
+66 finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-installer/online-help/9-3-0 
+12 finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-installer/online-help/9-3-1 
+12 finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-installer/online-help/9-3-2 
+12 finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-installer/online-help/9-3-3 
+12 finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-installer/online-help/9-3-4 
+12 finding(s), 0 error(s)
+                                   Validate                                    
++-----------------------------------------------------------------------------+
+|     Walked | Files | References | HTML | External | Tree-root… |    Anchors |
+|------------+-------+------------+------+----------+------------+------------|
+|        622 | 54179 |     163922 | 5703 |     6361 |          0 | 11375/362… |
+|  folder(s) |       |            |      |          |            |            |
++-----------------------------------------------------------------------------+
+1 help identifier(s) dropped against a prior version; `docushift csh report 
+--since` lists them.
+LINK_BROKEN 21 row(s), 21 occurrence(s)
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-0-3/server-install/USS/02-u2.md:43: 
+server-install/USS/inst_zos_new47.md is not in this version folder
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-0-3/server-install/USS/02-u2.md:55: 
+server-install/USS/inst_zos_new47.md is not in this version folder
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-0-3/server-install/USS/13.md:43: 
+server-install/USS/inst_zos_new47.md is not in this version folder
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-0-4/server-install/USS/02-u2.md:43: 
+server-install/USS/inst_zos_new47.md is not in this version folder
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-0-4/server-install/USS/02-u2.md:55: 
+server-install/USS/inst_zos_new47.md is not in this version folder
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-0-4/server-install/USS/13.md:43: 
+server-install/USS/inst_zos_new47.md is not in this version folder
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-0-5/server-install/USS/02-u2.md:43: 
+server-install/USS/inst_zos_new47.md is not in this version folder
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-0-5/server-install/USS/02-u2.md:55: 
+server-install/USS/inst_zos_new47.md is not in this version folder
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-0-5/server-install/USS/13.md:43: 
+server-install/USS/inst_zos_new47.md is not in this version folder
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-0-7/server-install/USS/02-u2.md:43: 
+server-install/USS/inst_zos_new47.md is not in this version folder
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-0-7/server-install/USS/02-u2.md:55: 
+server-install/USS/inst_zos_new47.md is not in this version folder
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-0-7/server-install/USS/13.md:43: 
+server-install/USS/inst_zos_new47.md is not in this version folder
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-0-8/server-install/USS/02-u2.md:43: 
+server-install/USS/inst_zos_new47.md is not in this version folder
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-0-8/server-install/USS/02-u2.md:55: 
+server-install/USS/inst_zos_new47.md is not in this version folder
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-0-8/server-install/USS/13.md:43: 
+server-install/USS/inst_zos_new47.md is not in this version folder
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-0-9/server-install/USS/02-u2.md:43: 
+server-install/USS/inst_zos_new47.md is not in this version folder
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-0-9/server-install/USS/02-u2.md:55: 
+server-install/USS/inst_zos_new47.md is not in this version folder
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-0-9/server-install/USS/13.md:43: 
+server-install/USS/inst_zos_new47.md is not in this version folder
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-3-4/server-install/USS/02-u2.md:43: 
+server-install/USS/inst_zos_new47.md is not in this version folder
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-3-4/server-install/USS/02-u2.md:55: 
+server-install/USS/inst_zos_new47.md is not in this version folder
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-3-4/server-install/USS/13.md:43: 
+server-install/USS/inst_zos_new47.md is not in this version folder
+ANCHOR_MISSING 24885 row(s), 24885 occurrence(s)
+ANCHOR_WRONG_HEADING 54 row(s), 54 occurrence(s)
+CSH_IDENTIFIER_DROPPED 1 row(s), 1 occurrence(s)
+TOC_ENTRY_DUPLICATED 32 row(s), 32 occurrence(s)
+Findings: 21 errors, 24972 warnings.

@@ -1,0 +1,73 @@
+Verifying 26 version(s) (local only); 2 triage entr(ies); redirect sample 10, 
+seed 922553...
+  x en-us-ibi-webfo    R001 confirmed on staging
+  x en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/online-help/9-3-0: 
+lost, 2841 o  x en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus    R001 confirmed on staging
+  x en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/o  x en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/online-help/9-3-2: 
+lo    R001 confirmed on staging
+  x en-us-ibi-webfocus-userd  x en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/online-help/9-3-3: 
+lost, 2717 old page(s), 18 lost,     R001 confirmed on stagin  x en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/online-help/9-3-4: 
+lost, 2744 old page(s), 18 lost, 20 warning(s), 0 explained
+  x en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/online-help/9-3-5: 
+lost, 2830 old page(s), 10552 lost, 56 warning(s), 0 explained
+  x en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/online-help/9-3-6: 
+lost, 2824 old page(s), 10952 lost, 54 warning(s), 0 explained
+  x en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/online-help/9-3-7: 
+lost, 2882 old page(s), 10999 lost, 57 warning(s), 0 explained
+  x en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/online-help/9-3-8: 
+lost, 2961 old page(s), 34030 lost, 89 warning(s), 0 explained
+  x loc-ibi-webfocus-userdocs/de-de/ibi-webfocus-client/online-help/9-3-5: 
+lost, 2830 old page(s), 16109 lost, 0 warning(s), 0 explained
+  x loc-ibi-webfocus-userdocs/de-de/ibi-webfocus-client/online-help/9-3-6: 
+lost, 2824 old page(s), 16543 lost, 0 warning(s), 0 explained
+  x loc-ibi-webfocus-userdocs/de-de/ibi-webfocus-client/online-help/9-3-7: 
+lost, 2882 old page(s), 16665 lost, 0 warning(s), 0 explained
+  x loc-ibi-webfocus-userdocs/de-de/ibi-webfocus-client/online-help/9-3-8: 
+lost, 2961 old page(s), 39924 lost, 0 warning(s), 0 explained
+  x loc-ibi-webfocus-userdocs/es-es/ibi-webfocus-client/online-help/9-3-5: 
+lost, 2830 old page(s), 16109 lost, 0 warning(s), 0 explained
+  x loc-ibi-webfocus-userdocs/es-es/ibi-webfocus-client/online-help/9-3-6: 
+lost, 2824 old page(s), 16543 lost, 0 warning(s), 0 explained
+  x loc-ibi-webfocus-userdocs/es-es/ibi-webfocus-client/online-help/9-3-7: 
+lost, 2882 old page(s), 16665 lost, 0 warning(s), 0 explained
+  x loc-ibi-webfocus-userdocs/es-es/ibi-webfocus-client/online-help/9-3-8: 
+lost, 2961 old page(s), 39924 lost, 0 warning(s), 0 explained
+  x loc-ibi-webfoc  x loc-ibi-webfocus-userdocs/es-es/ibi-webfocus-client/online-help/9-3-7: 
+lost, 2882 old page(s), 16666 lost, 0 warning  x loc-ibi-webfoc  x loc-ibi-webfocus-userdocs/es-es/ibi-webfocus-client/online-help/9-3-8: 
+lost, 2961 old page(s), 39925 lost, 0 warning  x loc-ibi-webfoc  x loc-ibi-webfocus-userdocs/fr-fr/ibi-webfocus-client/online-help/9-3-5: 
+lost, 2830 old page(s), 16110 lost, 0 warning  x loc-ibi-webfoc  x loc-ibi-webfocus-userdocs/fr-fr/ibi-webfocus-client/online-help/9-3-6: 
+lost, 2824 old page(s), 16544 lost, 0 warning(s), 0 explained
+  x loc-ibi-webfocus-userdocs/fr-fr/ibi-webfocus-client/online-help/9-3-7: 
+lost, 2882 old page(s), 16666 lost, 0 warning(s), 0 explained
+  x loc-ibi-webfocus-userdocs/fr-fr/ibi-webfocus-client/online-help/9-3-8: 
+lost, 2961 old page(s), 39925 lost, 0 warning(s), 0 explained
+  x loc-ibi-webfocus-userdocs/ja-jp/ibi-webfocus-client/online-help/9-3-0: 
+lost, 2841 old page(s), 5776 lost, 0 warning(s), 0 explained
+  x loc-ibi-webfocus-userdocs/ja-jp/ibi-webfocus-client/online-help/9-3-5: 
+lost, 2830 old page(s), 16110 lost, 0 warning(s), 0 explained
+  x loc-ibi-webfocus-userdocs/ja-jp/ibi-webfocus-client/online-help/9-3-6: 
+lost, 2824 old page(s), 16544 lost, 0 warning(s), 0 explained
+  x loc-ibi-webfocus-userdocs/ja-jp/ibi-webfocus-client/online-help/9-3-7: 
+lost, 2882 old page(s), 16666 lost, 0 warning(s), 0 explained
+  x loc-ibi-webfocus-userdocs/ja-jp/ibi-webfocus-client/online-help/9-3-8: 
+lost, 2961 old page(s), 39925 lost, 0 warning(s), 0 explained
+                  verify                   
+┌────────────────────────────────┬────────┐
+│ Finding                        │  Count │
+├────────────────────────────────┼────────┤
+│ VERIFY_IMAGE_MISSING           │     63 │
+│ VERIFY_LIVE_UNCHECKABLE        │    340 │
+│ VERIFY_PUBLISHED_PAGE_MISSING  │     26 │
+│ VERIFY_REDIRECT_MAP_MISSING    │      4 │
+│ VERIFY_REDIRECT_NOT_ON_STAGING │     22 │
+│ VERIFY_REDIRECT_SAMPLED        │     22 │
+│ VERIFY_REDIRECT_UNCONVERTED    │   4962 │
+│ VERIFY_TEXT_DROPPED            │     91 │
+│ VERIFY_TOC_ENTRY_MISSING       │  47875 │
+│ VERIFY_TOC_MOVED               │    355 │
+│ VERIFY_TOC_ORDER               │      1 │
+│ VERIFY_TOPIC_MISSING           │ 381684 │
+│ VERIFY_TOPIC_UNFILED           │    757 │
+└────────────────────────────────┴────────┘
+215 request(s) made; the rest came from cache/verify/.
+Index: C:\github\docushift-tool\reports\verify\INDEX.html

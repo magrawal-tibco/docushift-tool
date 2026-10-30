@@ -1,0 +1,42 @@
+Downloading 10 version(s) with 4 worker(s)...
+  x tibco-cloud@Cloud™
+  x tibco-cloud-administration@Administration
+  v tibco-cloud-api-modeler@1.5.0 3.0 MiB
+  v tibco-cloud-integration-businessworks-payg@2.8.0 11.2 MiB
+  v tibco-cloud-integration-flogo-payg@2.11.0 13.6 MiB
+  v tibco-cloud-integration-hybrid@3.12.0 0.2 MiB
+  v tibco-cloud-integration-hybrid-connectivity-add-on@3.10.0 0.1 MiB
+  x tibco-cloud-integration-ipaas@(iPaaS)
+  x tibco-cloud-messaging@Messaging
+  x tibco-cloud-metadata@Metadata
+           Download            
++-----------------------------+
+| Outcome          | Versions |
+|------------------+----------|
+| Downloaded       |        5 |
+| Already current  |        0 |
+| Skipped (manual) |        0 |
+| No ZIP endpoint  |        0 |
+| Failed           |        5 |
++-----------------------------+
+28.1 MiB written.
+! tibco-cloud@Cloud™: NotAPackage: 
+https://docs.tibco.com/pub/cloud/Cloud™/tibco-cloud-Cloud™_documentation.zip 
+did not return a readable ZIP (most often an error or sign-in page served as 
+HTTP 200)
+! tibco-cloud-administration@Administration: NotAPackage: 
+https://docs.tibco.com/pub/cloud-administration/Administration/tibco-cloud-admi
+nistration-Administration_documentation.zip did not return a readable ZIP (most
+often an error or sign-in page served as HTTP 200)
+! tibco-cloud-integration-ipaas@(iPaaS): NotAPackage: 
+https://docs.tibco.com/pub/cloud-integration-ipaas/(iPaaS)/tibco-cloud-integrat
+ion-ipaas-(iPaaS)_documentation.zip did not return a readable ZIP (most often 
+an error or sign-in page served as HTTP 200)
+! tibco-cloud-messaging@Messaging: NotAPackage: 
+https://docs.tibco.com/pub/cloud-messaging/Messaging/tibco-cloud-messaging-Mess
+aging_documentation.zip did not return a readable ZIP (most often an error or 
+sign-in page served as HTTP 200)
+! tibco-cloud-metadata@Metadata: NotAPackage: 
+https://docs.tibco.com/pub/cloud-metadata/Metadata/tibco-cloud-metadata-Metadat
+a_documentation.zip did not return a readable ZIP (most often an error or 
+sign-in page served as HTTP 200)

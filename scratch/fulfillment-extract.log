@@ -1,0 +1,52 @@
+Extracting 13 version(s)...
+  v tibco-enterprise-fulfillment-orchestration-suite@1.1.0 4 file(s), auto
+  v tibco-fulfillment-provisioning@3.10.0 1204 file(s), flare, 1 root(s)
+  v tibco-fulfillment-provisioning@3.9.0 775 file(s), dita, 1 root(s)
+  v tibco-offer-and-price-engine@6.0.0 871 file(s), flare, 1 root(s)
+  v tibco-order-management@6.1.0 3123 file(s), flare, 1 root(s)
+  v tibco-order-management@6.0.1 3104 file(s), flare, 1 root(s)
+  v tibco-order-management@6.0.0 2968 file(s), flare, 1 root(s)
+  v tibco-order-management@5.0.1 1240 file(s), dita, 1 root(s)
+  v tibco-product-and-service-catalog@5.1.0 5044 file(s), flare, 3 root(s)
+  v tibco-product-and-service-catalog-powered-by-tibco-ebx@1.1.0 985 file(s), 
+flare, 2 root(s)
+  v tibco-product-and-service-catalog-powered-by-tibco-ebx@1.0.0 987 file(s), 
+flare, 2 root(s)
+  v tibco-product-and-service-inventory@2.1.0 747 file(s), flare, 1 root(s)
+                Extract                
++-------------------------------------+
+| Outcome                  | Versions |
+|--------------------------+----------|
+| Extracted                |       12 |
+| Already current          |        0 |
+| Measured from cache      |        0 |
+| No package               |        1 |
+| Refused (unsafe archive) |        0 |
+| Failed                   |        0 |
++-------------------------------------+
+21052 file(s) written.
+       Engines       
++-------------------+
+| Engine | Versions |
+|--------+----------|
+| flare  |        9 |
+| dita   |        2 |
+| auto   |        1 |
++-------------------+
+? tibco-enterprise-fulfillment-orchestration-suite@1.1.0: engine undetected 
+(`auto`)
+CSH: 15 source(s), 10 identifier(s).
+                     Assets                      
++-----------------------------------------------+
+| Category | Destination     | Files |     Size |
+|----------+-----------------+-------+----------|
+| topic    | output-root     |  8382 | 138.0 MB |
+| image    | output-root     |  6509 | 357.7 MB |
+| skin     | output-root     |  5890 | 249.3 MB |
+| other    | output-root     |   161 |  12.2 MB |
+| document | document-router |   110 | 196.3 MB |
++-----------------------------------------------+
+! tibco-product-and-service-inventory-2-1-0@2.1.0: no package at 
+C:\github\docushift-tool\families\en-us-tib-fulfillment\downloads\tibco-product
+-and-service-inventory-2-1-0-2.1.0.zip; run `docushift download` first
+Recorded 10 notes -- `docushift report --run 813`.

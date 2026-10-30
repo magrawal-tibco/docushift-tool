@@ -1,0 +1,18 @@
+Reframing 1 version(s)...
+  v tibco-cloud-integration-flogo-payg@2.11.0 267 topic(s) -> 79 page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |        1 |
+| Already current             |        0 |
+| Not Flare or DITA (skipped) |        0 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+267 topic(s) read into 79 page(s).
+Files: 436 source doc -> 266 converted -> 79 merged (70.3% fewer at the merge, 
+81.9% end to end); 223 file(s) standing in the measured merged tree(s).
+4 page(s) queued for editorial review:
+  tibco-cloud-integration-flogo-payg@2.11.0: 4 of 79 -- see review-queue.csv
+Findings: 1 warning, 2 notes.

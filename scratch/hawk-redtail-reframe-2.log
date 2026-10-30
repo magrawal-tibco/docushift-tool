@@ -1,0 +1,24 @@
+Reframing 2 version(s)...
+  v tibco-operational-intelligence-hawk-redtail@7.5.0 783 topic(s) -> 153 
+page(s)
+  v tibco-operational-intelligence-hawk-redtail@6.3.1 868 topic(s) -> 323 
+page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |        2 |
+| Already current             |        0 |
+| Not Flare or DITA (skipped) |        0 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+1651 topic(s) read into 476 page(s).
+Files: 4043 source doc -> 1845 converted -> 476 merged (74.2% fewer at the 
+merge, 88.2% end to end); 879 file(s) standing in the measured merged tree(s).
+307 page(s) queued for editorial review:
+  tibco-operational-intelligence-hawk-redtail@7.5.0: 53 of 153 -- see 
+review-queue.csv
+  tibco-operational-intelligence-hawk-redtail@6.3.1: 254 of 323 -- see 
+review-queue.csv
+Findings: 2 warnings, 6 notes.

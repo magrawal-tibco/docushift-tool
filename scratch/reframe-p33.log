@@ -1,0 +1,47 @@
+Reframing 1765 version(s)...
+  v tibco-activespaces-enterprise-edition@5.2.0 324 topic(s) -> 56 page(s)
+  v tibco-activespaces-enterprise-edition@5.1.1 330 topic(s) -> 61 page(s)
+  v tibco-activespaces-enterprise-edition@5.1.0 330 topic(s) -> 61 page(s)
+  v tibco-activespaces-enterprise-edition@5.0.0 329 topic(s) -> 61 page(s)
+  v tibco-activespaces-enterprise-edition@4.10.1 322 topic(s) -> 60 page(s)
+  v tibco-activespaces-enterprise-edition@4.10.0 322 topic(s) -> 60 page(s)
+  v tibco-enterprise-message-service@10.5.1 1441 topic(s) -> 160 page(s)
+  v tibco-enterprise-message-service@10.5.0 1441 topic(s) -> 160 page(s)
+  v tibco-enterprise-message-service@10.4.4 1429 topic(s) -> 159 page(s)
+  v tibco-enterprise-message-service@10.4.3 1429 topic(s) -> 159 page(s)
+  v tibco-enterprise-message-service@10.4.1 1444 topic(s) -> 160 page(s)
+  v tibco-enterprise-message-service@10.4.0 1459 topic(s) -> 166 page(s)
+  v tibco-administrator-enterprise-edition@5.13.0 426 topic(s) -> 64 page(s)
+  v tibco-runtime-agent@5.13.0 649 topic(s) -> 118 page(s)
+             Reframe              
+┌─────────────────────┬──────────┐
+│ Outcome             │ Versions │
+├─────────────────────┼──────────┤
+│ Reframed            │       14 │
+│ Already current     │        0 │
+│ Not Flare (skipped) │     1751 │
+│ No converted tree   │        0 │
+│ Failed              │        0 │
+└─────────────────────┴──────────┘
+11675 topic(s) read into 1505 page(s).
+Files: 21738 source doc -> 11673 converted -> 1505 merged (87.1% fewer at the 
+merge, 93.1% end to end); 2348 file(s) standing in the measured merged tree(s).
+210 page(s) queued for editorial review:
+  tibco-activespaces-enterprise-edition@5.2.0: 12 of 56 -- see review-queue.csv
+  tibco-activespaces-enterprise-edition@5.1.1: 15 of 61 -- see review-queue.csv
+  tibco-activespaces-enterprise-edition@5.1.0: 15 of 61 -- see review-queue.csv
+  tibco-activespaces-enterprise-edition@5.0.0: 15 of 61 -- see review-queue.csv
+  tibco-activespaces-enterprise-edition@4.10.1: 15 of 60 -- see 
+review-queue.csv
+  tibco-activespaces-enterprise-edition@4.10.0: 15 of 60 -- see 
+review-queue.csv
+  tibco-enterprise-message-service@10.5.1: 19 of 160 -- see review-queue.csv
+  tibco-enterprise-message-service@10.5.0: 19 of 160 -- see review-queue.csv
+  tibco-enterprise-message-service@10.4.4: 19 of 159 -- see review-queue.csv
+  tibco-enterprise-message-service@10.4.3: 19 of 159 -- see review-queue.csv
+  tibco-enterprise-message-service@10.4.1: 20 of 160 -- see review-queue.csv
+  tibco-enterprise-message-service@10.4.0: 22 of 166 -- see review-queue.csv
+  tibco-administrator-enterprise-edition@5.13.0: 4 of 64 -- see 
+review-queue.csv
+  tibco-runtime-agent@5.13.0: 1 of 118 -- see review-queue.csv
+Findings: 27 warnings, 14 notes.

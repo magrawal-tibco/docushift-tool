@@ -1,0 +1,28 @@
+Syncing 6 version(s) into ..\tibco-docs-aem...
+  v tibco-activespaces-enterprise-edition@5.1.1 -> online-help/5-1-1 81 
+file(s), 1.0 MB
+  v tibco-activespaces-enterprise-edition@5.1.0 -> online-help/5-1-0 81 
+file(s), 1.1 MB
+  v tibco-activespaces-enterprise-edition@5.0.0 -> online-help/5-0-0 74 
+file(s), 1.0 MB
+  v tibco-activespaces-enterprise-edition@4.10.1 -> online-help/4-10-1 73 
+file(s), 1.0 MB
+  v tibco-activespaces-enterprise-edition@4.10.0 -> online-help/4-10-0 73 
+file(s), 1.0 MB
+                                     Sync                                      
++-----------------------------------------------------------------------------+
+| Outcome | Rows | online… | user-g… | releas… | refere… | api-ref… | archiv… |
+|---------+------+---------+---------+---------+---------+----------+---------|
+| Synced  |    5 |       5 |       0 |       0 |       0 |        0 |       0 |
+| Already |   26 |       1 |       6 |       6 |       6 |        6 |       1 |
+| current |      |         |         |         |         |          |         |
+| No      |    0 |       0 |       0 |       0 |       0 |        0 |       0 |
+| source  |      |         |         |         |         |          |         |
+| tree    |      |         |         |         |         |          |         |
+| Skipped |    0 |       0 |       0 |       0 |       0 |        0 |       0 |
+| Failed  |    0 |       0 |       0 |       0 |       0 |        0 |       0 |
++-----------------------------------------------------------------------------+
+382 file(s), 5.1 MB copied.
+1 product metadata.yml, 4 version.yml written.
+Published merged (Stage 6b): tibco-activespaces-enterprise-edition.
+3836 redirect(s) in 2 published map(s), tree-rooted (no publish_base_url set).

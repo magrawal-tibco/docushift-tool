@@ -1,0 +1,18 @@
+                            R001 over 9 version(s)                             
+┌─────────────────────┬─────────┬───────┬──────────────┬───────────────┬──────┐
+│ Product             │ Version │ files │ fixed (repo) │ fixed (local) │ left │
+├─────────────────────┼─────────┼───────┼──────────────┼───────────────┼──────┤
+│ ibi-webfocus-client │ 9.3.0   │   253 │          156 │           310 │    0 │
+│ ibi-webfocus-client │ 9.3.1   │   281 │          215 │           407 │    0 │
+│ ibi-webfocus-client │ 9.3.2   │  2856 │        2,900 │         5,764 │    0 │
+│ ibi-webfocus-client │ 9.3.3   │  2913 │        3,027 │         6,018 │    0 │
+│ ibi-webfocus-client │ 9.3.4   │  2955 │        3,102 │         6,168 │    0 │
+│ ibi-webfocus-client │ 9.3.5   │  2898 │        3,009 │         6,018 │    0 │
+│ ibi-webfocus-client │ 9.3.6   │  2856 │        2,786 │         5,572 │    0 │
+│ ibi-webfocus-client │ 9.3.7   │  2937 │        2,906 │         5,812 │    0 │
+│ ibi-webfocus-client │ 9.3.8   │  2715 │        2,704 │         5,408 │    0 │
+└─────────────────────┴─────────┴───────┴──────────────┴───────────────┴──────┘
+Report: C:\github\docushift-tool\reports\repairs\apply-R001-2026-10-25.csv
+Index: C:\github\docushift-tool\reports\repairs\INDEX.html
+Nothing is committed: review with `git diff` in each repo, then commit and 
+push.

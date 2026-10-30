@@ -1,0 +1,20 @@
+Verifying 5 version(s) (local only); 2 triage entr(ies); redirect sample 10, seed 422582...
+  x loc-ibi-wf-reporting-server-userdocs/ja-jp/ibi-webfocus-reporting-server/online-help/9-3-0: lost, 1746 old page(s), 17 lost, 29 warning(s), 0 explained
+  x loc-ibi-wf-reporting-server-userdocs/ja-jp/ibi-webfocus-reporting-server/online-help/9-3-5: lost, 2397 old page(s), 13 lost, 36 warning(s), 0 explained
+  x loc-ibi-wf-reporting-server-userdocs/ja-jp/ibi-webfocus-reporting-server/online-help/9-3-6: lost, 2382 old page(s), 25 lost, 36 warning(s), 0 explained
+  x loc-ibi-wf-reporting-server-userdocs/ja-jp/ibi-webfocus-reporting-server/online-help/9-3-7: lost, 2398 old page(s), 19 lost, 36 warning(s), 0 explained
+  x loc-ibi-wf-reporting-server-userdocs/ja-jp/ibi-webfocus-reporting-server/online-help/9-3-8: lost, 2904 old page(s), 8 lost, 30 warning(s), 0 explained
+                verify                 
++-------------------------------------+
+| Finding                     | Count |
+|-----------------------------+-------|
+| VERIFY_IMAGE_MISSING        |    45 |
+| VERIFY_REDIRECT_SAMPLED     |     5 |
+| VERIFY_REDIRECT_UNCONVERTED |   134 |
+| VERIFY_TEXT_DROPPED         |    30 |
+| VERIFY_TOC_MOVED            |   161 |
+| VERIFY_TOC_ORDER            |     6 |
+| VERIFY_TOPIC_MISSING        |     7 |
+| VERIFY_TOPIC_UNFILED        |  2628 |
++-------------------------------------+
+Index: C:\github\docushift-tool\reports\verify\INDEX.html

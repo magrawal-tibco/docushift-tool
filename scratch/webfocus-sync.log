@@ -1,0 +1,216 @@
+Syncing 90 version(s) into C:\github\ibi-docs-aem...
+  v ibi-ai-assistant@9.3.8 -> online-help/9-3-8 46 file(s), 1.5 MB
+  v ibi-open-data-hub-for-mainframe-connectors@1.3.8 -> online-help/1-3-8 68 
+file(s), 0.5 MB
+  v ibi-open-data-hub-for-mainframe-connectors@1.3.7 -> online-help/1-3-7 347 
+file(s), 5.8 MB
+  v ibi-open-data-hub-for-mainframe-connectors@1.3.6 -> online-help/1-3-6 347 
+file(s), 5.8 MB
+  v ibi-open-data-hub-for-mainframe-connectors@1.3.5 -> online-help/1-3-5 353 
+file(s), 5.9 MB
+  v ibi-open-data-hub-for-mainframe-connectors@1.3.4 -> online-help/1-3-4 372 
+file(s), 6.4 MB
+  v ibi-open-data-hub-for-mainframe-connectors@1.0.9 -> online-help/1-0-9 372 
+file(s), 6.4 MB
+  v ibi-open-data-hub-for-mainframe-connectors@1.0.8 -> online-help/1-0-8 372 
+file(s), 6.4 MB
+  v ibi-open-data-hub-for-mainframe-connectors@1.0.7 -> online-help/1-0-7 372 
+file(s), 6.4 MB
+  v ibi-open-data-hub-for-mainframe-connectors@1.0.5 -> online-help/1-0-5 349 
+file(s), 5.3 MB
+  v ibi-open-data-hub-for-mainframe-connectors@1.0.4 -> online-help/1-0-4 278 
+file(s), 4.2 MB
+  v ibi-open-data-hub-for-mainframe-connectors@1.0.3 -> online-help/1-0-3 278 
+file(s), 4.2 MB
+  v ibi-webfocus-app-studio@9.3.8 -> online-help/9-3-8 1064 file(s), 20.0 MB
+  v ibi-webfocus-app-studio@9.3.7 -> online-help/9-3-7 993 file(s), 18.8 MB
+  v ibi-webfocus-app-studio@9.3.6 -> online-help/9-3-6 1119 file(s), 21.2 MB
+  v ibi-webfocus-app-studio@9.3.5 -> online-help/9-3-5 1144 file(s), 22.6 MB
+  v ibi-webfocus-app-studio@9.3.4 -> online-help/9-3-4 1134 file(s), 22.3 MB
+  v ibi-webfocus-app-studio@9.3.3 -> online-help/9-3-3 1136 file(s), 22.9 MB
+  v ibi-webfocus-app-studio@9.3.2 -> online-help/9-3-2 1135 file(s), 22.3 MB
+  v ibi-webfocus-app-studio@9.3.1 -> online-help/9-3-1 1177 file(s), 23.6 MB
+  v ibi-webfocus-app-studio@9.3.0 -> online-help/9-3-0 1186 file(s), 23.6 MB
+  v ibi-webfocus-client@9.3.8 -> online-help/9-3-8 7818 file(s), 130.5 MB
+  v ibi-webfocus-client@9.3.7 -> online-help/9-3-7 7988 file(s), 140.0 MB
+  v ibi-webfocus-client@9.3.6 -> online-help/9-3-6 7798 file(s), 132.7 MB
+  v ibi-webfocus-client@9.3.5 -> online-help/9-3-5 7985 file(s), 140.9 MB
+  v ibi-webfocus-client@9.3.4 -> online-help/9-3-4 8006 file(s), 133.8 MB
+  v ibi-webfocus-client@9.3.3 -> online-help/9-3-3 7933 file(s), 132.3 MB
+  v ibi-webfocus-client@9.3.2 -> online-help/9-3-2 7772 file(s), 128.4 MB
+  v ibi-webfocus-client@9.3.1 -> online-help/9-3-1 7758 file(s), 127.6 MB
+  v ibi-webfocus-client@9.3.0 -> online-help/9-3-0 7913 file(s), 126.9 MB
+  v ibi-webfocus-client@9.1.1 -> reference-documents/9-1-1 4 file(s), 522.9 MB
+  v ibi-webfocus-client@9.1.0 -> reference-documents/9-1-0 4 file(s), 538.6 MB
+  v ibi-webfocus-dsml-services@9.3.8 -> online-help/9-3-8 12 file(s), 0.0 MB
+  v ibi-webfocus-dsml-services@9.3.7 -> online-help/9-3-7 11 file(s), 0.0 MB
+  v ibi-webfocus-dsml-services@9.3.6 -> online-help/9-3-6 12 file(s), 0.0 MB
+  v ibi-webfocus-dsml-services@9.3.5 -> online-help/9-3-5 16 file(s), 0.1 MB
+  v ibi-webfocus-dsml-services@9.3.4 -> online-help/9-3-4 31 file(s), 0.5 MB
+  v ibi-webfocus-dsml-services@9.3.3 -> online-help/9-3-3 14 file(s), 0.1 MB
+  v ibi-webfocus-dsml-services@9.3.2 -> online-help/9-3-2 14 file(s), 0.0 MB
+  v ibi-webfocus-dsml-services@9.3.0 -> online-help/9-3-0 13 file(s), 0.0 MB
+  v ibi-webfocus-installer@9.3.6 -> online-help/9-3-6 32 file(s), 1.1 MB
+  v ibi-webfocus-installer@9.3.5 -> online-help/9-3-5 32 file(s), 1.1 MB
+  v ibi-webfocus-installer@9.3.4 -> online-help/9-3-4 72 file(s), 3.7 MB
+  v ibi-webfocus-installer@9.3.3 -> online-help/9-3-3 72 file(s), 3.7 MB
+  v ibi-webfocus-installer@9.3.2 -> online-help/9-3-2 72 file(s), 3.7 MB
+  v ibi-webfocus-installer@9.3.1 -> online-help/9-3-1 77 file(s), 3.9 MB
+  v ibi-webfocus-installer@9.3.0 -> online-help/9-3-0 71 file(s), 3.6 MB
+                                     Sync                                      
+┌─────────────┬──────┬─────────────┬─────────────┬─────────────┬──────────────┐
+│ Outcome     │ Rows │ online-help │ user-guides │ release-in… │ reference-d… │
+├─────────────┼──────┼─────────────┼─────────────┼─────────────┼──────────────┤
+│ Synced      │   47 │          45 │           0 │           0 │            2 │
+│ Already     │  265 │           0 │          89 │          89 │           87 │
+│ current     │      │             │             │             │              │
+│ No source   │   46 │          45 │           0 │           0 │            0 │
+│ tree        │      │             │             │             │              │
+│ Skipped     │    0 │           0 │           0 │           0 │            0 │
+│ Failed      │    0 │           0 │           0 │           0 │            0 │
+└─────────────┴──────┴─────────────┴─────────────┴─────────────┴──────────────┘
+85172 file(s), 2.532 GB copied.
+6 product metadata.yml, 24 version.yml written.
+Published merged (Stage 6b): ibi-ai-assistant, 
+ibi-open-data-hub-for-mainframe-connectors, ibi-webfocus-app-studio, 
+ibi-webfocus-client, ibi-webfocus-dsml-services, ibi-webfocus-installer.
+46659 redirect(s) in 12 published map(s), tree-rooted (no publish_base_url 
+set).
+! ibi-open-data-hub-for-mainframe-connectors@1.0.6: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-open-data-hub-for-mainfr
+ame-connectors\1.0.6; run `docushift convert` first
+! ibi-open-data-hub-for-mainframe-connectors@1.0.2: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-open-data-hub-for-mainfr
+ame-connectors\1.0.2; run `docushift convert` first
+! ibi-open-data-hub-for-mainframe-connectors@1.0.1: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-open-data-hub-for-mainfr
+ame-connectors\1.0.1; run `docushift convert` first
+! ibi-open-data-hub-for-mainframe-connectors@1.0.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-open-data-hub-for-mainfr
+ame-connectors\1.0.0; run `docushift convert` first
+! ibi-webfocus-app-studio@9.2.8: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-app-studio\9.2.
+8; run `docushift convert` first
+! ibi-webfocus-app-studio@9.2.8: no extracted tree at 
+C:\github\docushift-tool\families\en-us-ibi-webfocus\extracted\ibi-webfocus-app
+-studio\9.2.8; run `docushift extract` first
+! ibi-webfocus-app-studio@9.2.7: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-app-studio\9.2.
+7; run `docushift convert` first
+! ibi-webfocus-app-studio@9.2.6: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-app-studio\9.2.
+6; run `docushift convert` first
+! ibi-webfocus-app-studio@9.2.5: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-app-studio\9.2.
+5; run `docushift convert` first
+! ibi-webfocus-app-studio@9.2.4: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-app-studio\9.2.
+4; run `docushift convert` first
+! ibi-webfocus-app-studio@9.2.3: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-app-studio\9.2.
+3; run `docushift convert` first
+! ibi-webfocus-app-studio@9.2.2: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-app-studio\9.2.
+2; run `docushift convert` first
+! ibi-webfocus-app-studio@9.2.1: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-app-studio\9.2.
+1; run `docushift convert` first
+! ibi-webfocus-app-studio@9.2.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-app-studio\9.2.
+0; run `docushift convert` first
+! ibi-webfocus-app-studio@9.1.4: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-app-studio\9.1.
+4; run `docushift convert` first
+! ibi-webfocus-app-studio@9.1.3: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-app-studio\9.1.
+3; run `docushift convert` first
+! ibi-webfocus-app-studio@9.1.2: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-app-studio\9.1.
+2; run `docushift convert` first
+! ibi-webfocus-app-studio@9.1.1: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-app-studio\9.1.
+1; run `docushift convert` first
+! ibi-webfocus-app-studio@9.1.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-app-studio\9.1.
+0; run `docushift convert` first
+! ibi-webfocus-client@9.2.7: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-client\9.2.7; 
+run `docushift convert` first
+! ibi-webfocus-client@9.2.6: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-client\9.2.6; 
+run `docushift convert` first
+! ibi-webfocus-client@9.2.5: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-client\9.2.5; 
+run `docushift convert` first
+! ibi-webfocus-client@9.2.4: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-client\9.2.4; 
+run `docushift convert` first
+! ibi-webfocus-client@9.2.3: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-client\9.2.3; 
+run `docushift convert` first
+! ibi-webfocus-client@9.2.2: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-client\9.2.2; 
+run `docushift convert` first
+! ibi-webfocus-client@9.2.1: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-client\9.2.1; 
+run `docushift convert` first
+! ibi-webfocus-client@9.2.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-client\9.2.0; 
+run `docushift convert` first
+! ibi-webfocus-client@9.1.4: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-client\9.1.4; 
+run `docushift convert` first
+! ibi-webfocus-client@9.1.3: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-client\9.1.3; 
+run `docushift convert` first
+! ibi-webfocus-client@9.1.2: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-client\9.1.2; 
+run `docushift convert` first
+! ibi-webfocus-client@9.1.1: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-client\9.1.1; 
+run `docushift convert` first
+! ibi-webfocus-client@9.1.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-client\9.1.0; 
+run `docushift convert` first
+! ibi-webfocus-dsml-services@9.2.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-dsml-services\9
+.2.0; run `docushift convert` first
+! ibi-webfocus-dsml-services@9.1.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-dsml-services\9
+.1.0; run `docushift convert` first
+! ibi-webfocus-installer@9.2.6: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-installer\9.2.6
+; run `docushift convert` first
+! ibi-webfocus-installer@9.2.5: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-installer\9.2.5
+; run `docushift convert` first
+! ibi-webfocus-installer@9.2.4: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-installer\9.2.4
+; run `docushift convert` first
+! ibi-webfocus-installer@9.2.3: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-installer\9.2.3
+; run `docushift convert` first
+! ibi-webfocus-installer@9.2.2: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-installer\9.2.2
+; run `docushift convert` first
+! ibi-webfocus-installer@9.2.1: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-installer\9.2.1
+; run `docushift convert` first
+! ibi-webfocus-installer@9.2.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-installer\9.2.0
+; run `docushift convert` first
+! ibi-webfocus-installer@9.1.4: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-installer\9.1.4
+; run `docushift convert` first
+! ibi-webfocus-installer@9.1.3: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-installer\9.1.3
+; run `docushift convert` first
+! ibi-webfocus-installer@9.1.2: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-installer\9.1.2
+; run `docushift convert` first
+! ibi-webfocus-installer@9.1.1: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-installer\9.1.1
+; run `docushift convert` first
+! ibi-webfocus-installer@9.1.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-ibi-webfocus\ibi-webfocus-installer\9.1.0
+; run `docushift convert` first

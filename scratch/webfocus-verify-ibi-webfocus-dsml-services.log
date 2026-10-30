@@ -1,0 +1,49 @@
+Verifying 8 version(s) (ibi: https://stg-docs.ibi.com); 2 triage entr(ies); 
+redirect sample 10, seed 435137...
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-dsml-services/online-help/9-3-0:
+lost, 6 old page(s), 4 lost, 0 warning(s), 0 explained
+    R001 confirmed on staging
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-dsml-services/online-help/9-3-2:
+lost, 7 old page(s), 4 lost, 0 warning(s), 0 explained
+    R001 confirmed on staging
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-dsml-services/online-help/9-3-3:
+lost, 7 old page(s), 5 lost, 0 warning(s), 0 explained
+    R001 confirmed on staging
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-dsml-services/online-help/9-3-4:
+lost, 20 old page(s), 1 lost, 0 warning(s), 0 explained
+    R001 confirmed on staging
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-dsml-services/online-help/9-3-5:
+lost, 9 old page(s), 6 lost, 0 warning(s), 0 explained
+    R001 confirmed on staging
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-dsml-services/online-help/9-3-6:
+lost, 7 old page(s), 6 lost, 0 warning(s), 0 explained
+    R001 confirmed on staging
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-dsml-services/online-help/9-3-7:
+lost, 6 old page(s), 6 lost, 0 warning(s), 0 explained
+    R001 confirmed on staging
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-dsml-services/online-help/9-3-8:
+lost, 6 old page(s), 3 lost, 0 warning(s), 0 explained
+                  verify                  
+┌────────────────────────────────┬───────┐
+│ Finding                        │ Count │
+├────────────────────────────────┼───────┤
+│ VERIFY_LIVE_UNCHECKABLE        │    16 │
+│ VERIFY_PUBLISHED_PAGE_MISSING  │     8 │
+│ VERIFY_REDIRECT_MAP_MISSING    │     1 │
+│ VERIFY_REDIRECT_NOT_ON_STAGING │     1 │
+│ VERIFY_REDIRECT_SAMPLED        │     7 │
+│ VERIFY_REDIRECT_UNCONVERTED    │    76 │
+│ VERIFY_REDIRECT_UNSERVED       │    25 │
+│ VERIFY_TOPIC_MISSING           │     1 │
+│ VERIFY_TOPIC_UNFILED           │    11 │
+└────────────────────────────────┴───────┘
+4 request(s) made; the rest came from cache/verify/.
+Index: C:\github\docushift-tool\reports\verify\INDEX.html

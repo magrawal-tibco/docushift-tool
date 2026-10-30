@@ -1,0 +1,43 @@
+Reframing 32 version(s)...
+  v ibi-webfocus-container-edition@9.3.6 59 topic(s) -> 69 page(s)
+  v ibi-webfocus-container-edition@9.3.5 56 topic(s) -> 66 page(s)
+  v ibi-webfocus-container-edition@1.3.4 55 topic(s) -> 63 page(s)
+  v ibi-webfocus-container-edition@1.3.3 54 topic(s) -> 62 page(s)
+  v ibi-webfocus-container-edition@1.3.2 52 topic(s) -> 60 page(s)
+  v ibi-webfocus-container-edition@1.3.1 49 topic(s) -> 57 page(s)
+  v ibi-webfocus-container-edition@1.3.0 48 topic(s) -> 58 page(s)
+  v ibi-webfocus-container-edition@1.2.5 41 topic(s) -> 49 page(s)
+  v ibi-webfocus-container-edition@1.2.4 41 topic(s) -> 49 page(s)
+  v ibi-webfocus-container-edition@1.2.3 39 topic(s) -> 41 page(s)
+  v ibi-webfocus-container-edition@1.2.2 39 topic(s) -> 41 page(s)
+  v ibi-webfocus-container-edition@1.0.5 34 topic(s) -> 38 page(s)
+  v ibi-webfocus-dsml-services-container-edition@9.3.8 22 topic(s) -> 25 
+page(s)
+  v ibi-webfocus-dsml-services-container-edition@9.3.7 23 topic(s) -> 23 
+page(s)
+  v ibi-webfocus-dsml-services-container-edition@9.3.6 22 topic(s) -> 22 
+page(s)
+  v ibi-webfocus-dsml-services-container-edition@9.3.5 22 topic(s) -> 22 
+page(s)
+  v ibi-webfocus-dsml-services-container-edition@1.0.7 20 topic(s) -> 21 
+page(s)
+  v ibi-webfocus-dsml-services-container-edition@1.0.6 18 topic(s) -> 19 
+page(s)
+  v ibi-webfocus-dsml-services-container-edition@1.0.5 18 topic(s) -> 20 
+page(s)
+  v ibi-webfocus-dsml-services-container-edition@1.0.4 17 topic(s) -> 18 
+page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |       20 |
+| Already current             |        2 |
+| Not Flare or DITA (skipped) |       10 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+729 topic(s) read into 823 page(s).
+Files: 7882 source doc -> 997 converted -> 997 merged (0.0% fewer at the merge,
+87.4% end to end); 1254 file(s) standing in the measured merged tree(s).
+Findings: 20 warnings, 15 notes.

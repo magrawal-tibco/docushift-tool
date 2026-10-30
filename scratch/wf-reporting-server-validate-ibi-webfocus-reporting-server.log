@@ -1,0 +1,119 @@
+Validating 80 published folder(s) in C:\github\ibi-docs-aem...
+  x 
+en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/onli
+ne-help/9-3-0 96 finding(s), 3 error(s)
+  x 
+en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/onli
+ne-help/9-3-1 174 finding(s), 3 error(s)
+  x 
+en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/onli
+ne-help/9-3-2 169 finding(s), 3 error(s)
+  x 
+en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/onli
+ne-help/9-3-3 197 finding(s), 3 error(s)
+  x 
+en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/onli
+ne-help/9-3-4 163 finding(s), 3 error(s)
+  ! 
+en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/onli
+ne-help/9-3-5 131 finding(s), 0 error(s)
+  ! 
+en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/onli
+ne-help/9-3-6 93 finding(s), 0 error(s)
+  ! 
+en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/onli
+ne-help/9-3-7 112 finding(s), 0 error(s)
+  ! 
+en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/onli
+ne-help/9-3-8 12 finding(s), 0 error(s)
+  ! 
+loc-ibi-wf-reporting-server-userdocs/ja-jp/ibi-webfocus-reporting-server/online
+-help/9-3-0 314 finding(s), 0 error(s)
+  ! 
+loc-ibi-wf-reporting-server-userdocs/ja-jp/ibi-webfocus-reporting-server/online
+-help/9-3-5 59 finding(s), 0 error(s)
+  ! 
+loc-ibi-wf-reporting-server-userdocs/ja-jp/ibi-webfocus-reporting-server/online
+-help/9-3-6 312 finding(s), 0 error(s)
+  ! 
+loc-ibi-wf-reporting-server-userdocs/ja-jp/ibi-webfocus-reporting-server/online
+-help/9-3-7 61 finding(s), 0 error(s)
+  ! 
+loc-ibi-wf-reporting-server-userdocs/ja-jp/ibi-webfocus-reporting-server/online
+-help/9-3-8 59 finding(s), 0 error(s)
+                                   Validate                                    
+┌────────────┬───────┬────────────┬──────┬──────────┬────────────┬────────────┐
+│     Walked │ Files │ References │ HTML │ External │ Tree-root… │    Anchors │
+├────────────┼───────┼────────────┼──────┼──────────┼────────────┼────────────┤
+│         80 │ 34003 │      59649 │ 3513 │     2319 │          0 │ 23790/245… │
+│  folder(s) │       │            │      │          │            │            │
+└────────────┴───────┴────────────┴──────┴──────────┴────────────┴────────────┘
+215 help identifier(s) dropped against a prior version; `docushift csh report 
+--since` lists them.
+LINK_BROKEN 15 row(s), 15 occurrence(s)
+  x 
+en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/onli
+ne-help/9-3-0/unfiled/download-the-installation-software-using-ftp-3.md:45: 
+unfiled/inst_zos_new47.md is not in this version folder
+  x 
+en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/onli
+ne-help/9-3-0/unfiled/download-the-installation-software-using-ftp-3.md:57: 
+unfiled/inst_zos_new47.md is not in this version folder
+  x 
+en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/onli
+ne-help/9-3-0/unfiled/download-the-installation-software-using-ftp-4.md:45: 
+unfiled/inst_zos_new47.md is not in this version folder
+  x 
+en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/onli
+ne-help/9-3-1/unfiled/download-the-installation-software-using-ftp-3.md:45: 
+unfiled/inst_zos_new47.md is not in this version folder
+  x 
+en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/onli
+ne-help/9-3-1/unfiled/download-the-installation-software-using-ftp-3.md:57: 
+unfiled/inst_zos_new47.md is not in this version folder
+  x 
+en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/onli
+ne-help/9-3-1/unfiled/download-the-installation-software-using-ftp-4.md:45: 
+unfiled/inst_zos_new47.md is not in this version folder
+  x 
+en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/onli
+ne-help/9-3-2/unfiled/download-the-installation-software-using-ftp-3.md:45: 
+unfiled/inst_zos_new47.md is not in this version folder
+  x 
+en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/onli
+ne-help/9-3-2/unfiled/download-the-installation-software-using-ftp-3.md:57: 
+unfiled/inst_zos_new47.md is not in this version folder
+  x 
+en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/onli
+ne-help/9-3-2/unfiled/download-the-installation-software-using-ftp-4.md:45: 
+unfiled/inst_zos_new47.md is not in this version folder
+  x 
+en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/onli
+ne-help/9-3-3/unfiled/download-the-installation-software-using-ftp-3.md:45: 
+unfiled/inst_zos_new47.md is not in this version folder
+  x 
+en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/onli
+ne-help/9-3-3/unfiled/download-the-installation-software-using-ftp-3.md:57: 
+unfiled/inst_zos_new47.md is not in this version folder
+  x 
+en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/onli
+ne-help/9-3-3/unfiled/download-the-installation-software-using-ftp-4.md:45: 
+unfiled/inst_zos_new47.md is not in this version folder
+  x 
+en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/onli
+ne-help/9-3-4/unfiled/download-the-installation-software-using-ftp-3.md:45: 
+unfiled/inst_zos_new47.md is not in this version folder
+  x 
+en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/onli
+ne-help/9-3-4/unfiled/download-the-installation-software-using-ftp-3.md:57: 
+unfiled/inst_zos_new47.md is not in this version folder
+  x 
+en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/onli
+ne-help/9-3-4/unfiled/download-the-installation-software-using-ftp-4.md:45: 
+unfiled/inst_zos_new47.md is not in this version folder
+ANCHOR_MISSING 797 row(s), 797 occurrence(s)
+ANCHOR_WRONG_HEADING 16 row(s), 16 occurrence(s)
+CSH_IDENTIFIER_DROPPED 6 row(s), 215 occurrence(s)
+TOC_ENTRY_DUPLICATED 22 row(s), 22 occurrence(s)
+LINK_TO_UNFILED 12 row(s), 1102 occurrence(s)
+Findings: 15 errors, 841 warnings, 12 notes.

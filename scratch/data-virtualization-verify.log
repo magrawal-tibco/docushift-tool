@@ -1,0 +1,24 @@
+Verifying 3 version(s) (local only); 2 triage entr(ies); redirect sample 10, 
+seed 65697...
+  x 
+en-us-spotfire-data-virtualization-userdocs/en-us/tibco-data-virtualization/onl
+ine-help/8-8-0: lost, 10473 old page(s), 3617 lost, 126 warning(s), 0 explained
+  x 
+en-us-spotfire-data-virtualization-userdocs/en-us/tibco-data-virtualization/onl
+ine-help/8-8-1: lost, 10500 old page(s), 3586 lost, 137 warning(s), 0 explained
+  x 
+en-us-spotfire-data-virtualization-userdocs/en-us/tibco-data-virtualization/onl
+ine-help/8-9-0: lost, 11041 old page(s), 3342 lost, 140 warning(s), 0 explained
+                verify                 
++-------------------------------------+
+| Finding                     | Count |
+|-----------------------------+-------|
+| VERIFY_REDIRECT_SAMPLED     |     3 |
+| VERIFY_REDIRECT_UNCONVERTED |   186 |
+| VERIFY_TEXT_DROPPED         |     6 |
+| VERIFY_TOC_ENTRY_MISSING    | 10510 |
+| VERIFY_TOC_MOVED            |   403 |
+| VERIFY_TOPIC_MISSING        |    29 |
+| VERIFY_TOPIC_UNFILED        |  3303 |
++-------------------------------------+
+Index: C:\github\docushift-tool\reports\verify\INDEX.html

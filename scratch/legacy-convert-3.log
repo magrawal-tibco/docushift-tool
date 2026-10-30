@@ -1,0 +1,26 @@
+Converting 14 version(s)...
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        0 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |       14 |
+| Failed            |        0 |
++------------------------------+
+! ibi-omni-gen@4.3.0: engine undetected (`auto`)
+! ibi-omni-gen-mdm@4.3.0: engine undetected (`auto`)
+! ibi-omni-healthdata@4.3.0: engine undetected (`auto`)
+! ibi-omni-healthdata-business-release@2023.3.0: engine undetected (`auto`)
+! ibi-omni-healthdata-business-release@2023.2.0: engine undetected (`auto`)
+! ibi-omni-healthdata-business-release@2023.1.0: engine undetected (`auto`)
+! ibi-omni-insurance@4.3.0: engine undetected (`auto`)
+! ibi-web-query-for-ibm-i@9.2.1: engine undetected (`auto`)
+! ibi-web-query-for-ibm-i@9.2.0: engine undetected (`auto`)
+! ibi-web-query-for-ibm-i@9.1.2: engine undetected (`auto`)
+! ibi-web-query-for-ibm-i@9.1.1: engine undetected (`auto`)
+! ibi-web-query-for-ibm-i@9.1.0: engine undetected (`auto`)
+! tibco-iway-business-activity-monitor@8.0.5: engine undetected (`auto`)
+! tibco-iway-trading-partner-manager@8.0.5: engine undetected (`auto`)
+Findings: 14 warnings.

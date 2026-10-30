@@ -1,0 +1,21 @@
+Downloading 14 version(s) with 4 worker(s)...
+  x ibi-web-query-for-ibm-i@9.1.1
+  x ibi-web-query-for-ibm-i@9.1.0
+           Download            
++-----------------------------+
+| Outcome          | Versions |
+|------------------+----------|
+| Downloaded       |        0 |
+| Already current  |       12 |
+| Skipped (manual) |        0 |
+| No ZIP endpoint  |        0 |
+| Failed           |        2 |
++-----------------------------+
+! ibi-web-query-for-ibm-i@9.1.1: OSError: 
+https://docs.tibco.com/pub/wq/9.1.1/ibi-web-query-for-ibm-i-9-1-1_documentation
+.zip did not return a readable ZIP (most often an error or sign-in page served 
+as HTTP 200)
+! ibi-web-query-for-ibm-i@9.1.0: OSError: 
+https://docs.tibco.com/pub/wq/9.1.0/ibi-web-query-for-ibm-i-9-1-0_documentation
+.zip did not return a readable ZIP (most often an error or sign-in page served 
+as HTTP 200)

@@ -1,0 +1,116 @@
+Converting 18 version(s)...
+  v tibco-iprocess-engine@11.10.0 2144 topic(s), 427 asset(s), 1 unit(s), 2180 
+nav node(s), 16 generated -> 2591 file(s)
+  v tibco-iprocess-engine@11.9.2 2130 topic(s), 441 asset(s), 1 unit(s), 2166 
+nav node(s), 16 generated -> 2590 file(s)
+  v tibco-iprocess-engine@11.9.1 2109 topic(s), 410 asset(s), 1 unit(s), 2145 
+nav node(s), 16 generated -> 2539 file(s)
+  v tibco-iprocess-technology-plug-ins@11.10.0 264 topic(s), 114 asset(s), 1 
+unit(s), 269 nav node(s), 5 generated -> 386 file(s)
+  v tibco-iprocess-technology-plug-ins@11.9.2 266 topic(s), 114 asset(s), 1 
+unit(s), 269 nav node(s), 3 generated -> 387 file(s)
+  v tibco-iprocess-web-services-client-plug-in@11.9.0 138 topic(s), 170 
+asset(s), 1 unit(s), 140 nav node(s), 2 generated -> 313 file(s)
+  v tibco-iprocess-web-services-server-plug-in@11.9.0 172 topic(s), 178 
+asset(s), 1 unit(s), 174 nav node(s), 2 generated -> 354 file(s)
+  v tibco-iprocess-workspace-browser@11.10.0 660 topic(s), 694 asset(s), 1 
+unit(s), 668 nav node(s), 8 generated -> 1364 file(s)
+  v tibco-iprocess-workspace-browser@11.9.0 659 topic(s), 1359 asset(s), 1 
+unit(s), 666 nav node(s), 7 generated -> 2028 file(s)
+  v tibco-iprocess-workspace-plug-ins@11.10.0 24 topic(s), 6 asset(s), 1 
+unit(s), 26 nav node(s), 2 generated -> 34 file(s)
+  v tibco-iprocess-workspace-plug-ins@11.9.0 23 topic(s), 12 asset(s), 1 
+unit(s), 24 nav node(s), 1 generated -> 39 file(s)
+  v tibco-iprocess-workspace-windows@11.10.0 1055 topic(s), 737 asset(s), 1 
+unit(s), 1072 nav node(s), 16 generated -> 1812 file(s)
+  v tibco-iprocess-workspace-windows@11.9.2 1023 topic(s), 690 asset(s), 1 
+unit(s), 1038 nav node(s), 15 generated -> 1732 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |       13 |
+| Already current   |        0 |
+| No extracted tree |        2 |
+| Engine unknown    |        3 |
+| Failed            |        0 |
++------------------------------+
+10667 topic(s), 5352 asset(s) written.
+16169 file(s) standing in the measured output tree(s).
+tibco-iprocess-engine@11.10.0: 449 resolved, 0 skin, 2 escaped, 0 dangling, 0 
+case-mismatch, 1344 orphan (40.1 MB)
+tibco-iprocess-engine@11.10.0: CSH 1 resolved, 0 unresolved, 0 ambiguous
+tibco-iprocess-engine@11.10.0: skipped 4 generated-directory, 41 
+merged-subsystem-copy, 8 runtime-stub
+tibco-iprocess-engine@11.9.2: 463 resolved, 0 skin, 2 escaped, 0 dangling, 0 
+case-mismatch, 1287 orphan (36.9 MB)
+tibco-iprocess-engine@11.9.2: CSH 1 resolved, 0 unresolved, 0 ambiguous
+tibco-iprocess-engine@11.9.2: skipped 4 generated-directory, 38 
+merged-subsystem-copy, 8 runtime-stub
+tibco-iprocess-engine@11.9.1: 414 resolved, 0 skin, 0 escaped, 0 dangling, 0 
+case-mismatch, 1268 orphan (36.2 MB)
+tibco-iprocess-engine@11.9.1: CSH 1 resolved, 0 unresolved, 0 ambiguous
+tibco-iprocess-engine@11.9.1: skipped 3 generated-directory, 35 
+merged-subsystem-copy, 8 runtime-stub
+tibco-iprocess-technology-plug-ins@11.10.0: 118 resolved, 0 skin, 8 escaped, 0 
+dangling, 0 case-mismatch, 102 orphan (7.3 MB)
+tibco-iprocess-technology-plug-ins@11.10.0: CSH 14 resolved, 1 unresolved, 0 
+ambiguous
+tibco-iprocess-technology-plug-ins@11.10.0: skipped 4 generated-directory, 2 
+runtime-stub, 3 unreferenced-template
+tibco-iprocess-technology-plug-ins@11.9.2: 118 resolved, 0 skin, 8 escaped, 0 
+dangling, 0 case-mismatch, 101 orphan (7.3 MB)
+tibco-iprocess-technology-plug-ins@11.9.2: CSH 14 resolved, 1 unresolved, 0 
+ambiguous
+tibco-iprocess-technology-plug-ins@11.9.2: skipped 4 generated-directory, 2 
+runtime-stub, 3 unreferenced-template
+tibco-iprocess-web-services-client-plug-in@11.9.0: 170 resolved, 0 skin, 6 
+escaped, 0 dangling, 0 case-mismatch, 55 orphan (1.5 MB)
+tibco-iprocess-web-services-client-plug-in@11.9.0: CSH 9 resolved, 1 
+unresolved, 0 ambiguous
+tibco-iprocess-web-services-client-plug-in@11.9.0: skipped 3 
+generated-directory, 2 runtime-stub, 2 unreferenced-template
+tibco-iprocess-web-services-server-plug-in@11.9.0: 178 resolved, 0 skin, 5 
+escaped, 0 dangling, 0 case-mismatch, 61 orphan (1.8 MB)
+tibco-iprocess-web-services-server-plug-in@11.9.0: CSH 9 resolved, 1 
+unresolved, 0 ambiguous
+tibco-iprocess-web-services-server-plug-in@11.9.0: skipped 3 
+generated-directory, 2 runtime-stub, 4 unreferenced-template
+tibco-iprocess-workspace-browser@11.10.0: 704 resolved, 0 skin, 11 escaped, 0 
+dangling, 0 case-mismatch, 200 orphan (7.5 MB)
+tibco-iprocess-workspace-browser@11.10.0: skipped 4 generated-directory, 2 
+runtime-stub, 1 unreferenced-template
+tibco-iprocess-workspace-browser@11.9.0: 1395 resolved, 0 skin, 11 escaped, 1 
+dangling, 1 case-mismatch, 182 orphan (4.3 MB)
+tibco-iprocess-workspace-browser@11.9.0: skipped 3 generated-directory, 2 
+runtime-stub, 1 unreferenced-template
+tibco-iprocess-workspace-plug-ins@11.10.0: 6 resolved, 0 skin, 5 escaped, 0 
+dangling, 0 case-mismatch, 73 orphan (2.9 MB)
+tibco-iprocess-workspace-plug-ins@11.10.0: skipped 4 generated-directory, 2 
+runtime-stub, 1 unreferenced-template
+tibco-iprocess-workspace-plug-ins@11.9.0: 12 resolved, 0 skin, 5 escaped, 0 
+dangling, 0 case-mismatch, 51 orphan (1.4 MB)
+tibco-iprocess-workspace-plug-ins@11.9.0: skipped 3 generated-directory, 2 
+runtime-stub, 1 unreferenced-template
+tibco-iprocess-workspace-windows@11.10.0: 894 resolved, 0 skin, 19 escaped, 0 
+dangling, 0 case-mismatch, 1062 orphan (27.5 MB)
+tibco-iprocess-workspace-windows@11.10.0: CSH 1 resolved, 0 unresolved, 0 
+ambiguous
+tibco-iprocess-workspace-windows@11.10.0: skipped 1 generated-directory, 1 
+no-content-container, 2 runtime-stub, 16 unreferenced-template
+tibco-iprocess-workspace-windows@11.9.2: 843 resolved, 0 skin, 19 escaped, 2 
+dangling, 0 case-mismatch, 982 orphan (20.0 MB)
+tibco-iprocess-workspace-windows@11.9.2: CSH 1 resolved, 0 unresolved, 0 
+ambiguous
+tibco-iprocess-workspace-windows@11.9.2: skipped 1 no-content-container, 2 
+runtime-stub, 14 unreferenced-template
+! tibco-iprocess-server-objects-java@11.10.0: engine undetected (`auto`)
+! tibco-iprocess-server-objects-java@11.9.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-tib-iprocess\extracted\tibco-iprocess-s
+erver-objects-java\11.9.0; run `docushift extract` first
+! tibco-iprocess-server-objects-net@11.10.0: engine undetected (`auto`)
+! tibco-iprocess-server-objects-net@11.9.0: engine undetected (`auto`)
+! tibco-iprocess-suite@1.0.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-tib-iprocess\extracted\tibco-iprocess-s
+uite\1.0.0; run `docushift extract` first
+Findings: 2 errors, 39 warnings, 52 notes.

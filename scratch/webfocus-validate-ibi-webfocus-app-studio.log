@@ -1,0 +1,31 @@
+Validating 80 published folder(s) in C:\github\ibi-docs-aem...
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-app-studio/online-help/9-3-0
+163 finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-app-studio/online-help/9-3-1
+162 finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-app-studio/online-help/9-3-2
+161 finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-app-studio/online-help/9-3-3
+145 finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-app-studio/online-help/9-3-4
+150 finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-app-studio/online-help/9-3-5
+5 finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-app-studio/online-help/9-3-6
+47 finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-app-studio/online-help/9-3-7
+5 finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/ja-jp/ibi-webfocus-app-studio/online-help/9-3-0 
+341 finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/ja-jp/ibi-webfocus-app-studio/online-help/9-3-5 9
+finding(s), 0 error(s)
+                                   Validate                                    
+┌─────────────┬───────┬────────────┬──────┬──────────┬────────────┬───────────┐
+│      Walked │ Files │ References │ HTML │ External │ Tree-root… │   Anchors │
+├─────────────┼───────┼────────────┼──────┼──────────┼────────────┼───────────┤
+│          80 │  4355 │      17211 │  912 │      741 │          0 │ 2211/3288 │
+│   folder(s) │       │            │      │          │            │           │
+└─────────────┴───────┴────────────┴──────┴──────────┴────────────┴───────────┘
+ANCHOR_MISSING 1077 row(s), 1077 occurrence(s)
+LINK_TO_UNFILED 10 row(s), 111 occurrence(s)
+Findings: 1077 warnings, 10 notes.

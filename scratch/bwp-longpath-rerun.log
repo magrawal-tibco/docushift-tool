@@ -1,0 +1,237 @@
+Downloading 1 version(s) with 4 worker(s)...
+  v 
+tibco-activematrix-businessworks-plug-in-for-files-for-unix-and-windows@8.3.0 
+5.2 MiB
+           Download            
++-----------------------------+
+| Outcome          | Versions |
+|------------------+----------|
+| Downloaded       |        1 |
+| Already current  |        0 |
+| Skipped (manual) |        0 |
+| No ZIP endpoint  |        0 |
+| Failed           |        0 |
++-----------------------------+
+5.2 MiB written.
+Extracting 1 version(s)...
+  v 
+tibco-activematrix-businessworks-plug-in-for-files-for-unix-and-windows@8.3.0 
+160 file(s), dita, 1 root(s)
+                Extract                
++-------------------------------------+
+| Outcome                  | Versions |
+|--------------------------+----------|
+| Extracted                |        1 |
+| Already current          |        0 |
+| Measured from cache      |        0 |
+| No package               |        0 |
+| Refused (unsafe archive) |        0 |
+| Failed                   |        0 |
++-------------------------------------+
+160 file(s) written.
+       Engines       
++-------------------+
+| Engine | Versions |
+|--------+----------|
+| dita   |        1 |
++-------------------+
+CSH: 1 source(s), 3 identifier(s).
+                    Assets                     
++---------------------------------------------+
+| Category | Destination     | Files |   Size |
+|----------+-----------------+-------+--------|
+| topic    | output-root     |   105 | 1.2 MB |
+| image    | output-root     |    27 | 1.8 MB |
+| skin     | output-root     |    20 | 0.9 MB |
+| other    | output-root     |     1 | 0.4 MB |
+| document | document-router |     7 | 3.6 MB |
++---------------------------------------------+
+Converting 1 version(s)...
+C:\github\docushift-tool\src\docushift\transforms\markdown.py:112: XMLParsedAsHTMLWarning: It looks like you're using an HTML parser to parse an XML document.
+
+Assuming this really is an XML document, what you're doing might work, but you should know that using an XML parser will be more reliable. To parse this document as XML, make sure you have the Python package 'lxml' installed, and pass the keyword argument `features="xml"` into the BeautifulSoup constructor.
+
+If you want or need to use an HTML parser on this document, you can make this warning go away by filtering it. To do that, run this code before calling the BeautifulSoup constructor:
+
+    from bs4 import XMLParsedAsHTMLWarning
+    import warnings
+
+    warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+  return BeautifulSoup(_CDATA.sub(_unwrap_cdata, text), PARSER)
+  v 
+tibco-activematrix-businessworks-plug-in-for-files-for-unix-and-windows@8.3.0 
+102 topic(s), 27 asset(s), 1 unit(s), 104 nav node(s), 2 generated -> 134 
+file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+102 topic(s), 27 asset(s) written.
+134 file(s) standing in the measured output tree(s).
+tibco-activematrix-businessworks-plug-in-for-files-for-unix-and-windows@8.3.0: 
+41 resolved, 0 skin, 0 escaped, 0 dangling, 0 case-mismatch, 1 orphan (0.4 MB)
+tibco-activematrix-businessworks-plug-in-for-files-for-unix-and-windows@8.3.0: 
+CSH 3 resolved, 0 unresolved, 0 ambiguous
+tibco-activematrix-businessworks-plug-in-for-files-for-unix-and-windows@8.3.0: 
+skipped 2 not-a-topic, 1 publication-homepage
+Findings: 3 warnings, 2 notes.
+Downloading 1 version(s) with 4 worker(s)...
+  v tibco-activematrix-businessworks-plug-in-for-oracle-e-business-suite@6.1.2 
+10.7 MiB
+           Download            
++-----------------------------+
+| Outcome          | Versions |
+|------------------+----------|
+| Downloaded       |        1 |
+| Already current  |        0 |
+| Skipped (manual) |        0 |
+| No ZIP endpoint  |        0 |
+| Failed           |        0 |
++-----------------------------+
+10.7 MiB written.
+Extracting 1 version(s)...
+  v tibco-activematrix-businessworks-plug-in-for-oracle-e-business-suite@6.1.2 
+249 file(s), dita, 1 root(s)
+                Extract                
++-------------------------------------+
+| Outcome                  | Versions |
+|--------------------------+----------|
+| Extracted                |        1 |
+| Already current          |        0 |
+| Measured from cache      |        0 |
+| No package               |        0 |
+| Refused (unsafe archive) |        0 |
+| Failed                   |        0 |
++-------------------------------------+
+249 file(s) written.
+       Engines       
++-------------------+
+| Engine | Versions |
+|--------+----------|
+| dita   |        1 |
++-------------------+
+CSH: 1 source(s), 0 identifier(s).
+                    Assets                     
++---------------------------------------------+
+| Category | Destination     | Files |   Size |
+|----------+-----------------+-------+--------|
+| topic    | output-root     |   100 | 0.9 MB |
+| image    | output-root     |    86 | 2.6 MB |
+| archive  | output-root     |     1 | 3.7 MB |
+| skin     | output-root     |    53 | 1.7 MB |
+| other    | output-root     |     1 | 0.4 MB |
+| document | document-router |     8 | 4.4 MB |
++---------------------------------------------+
+Recorded 1 note -- `docushift report --run 1090`.
+Converting 1 version(s)...
+C:\github\docushift-tool\src\docushift\transforms\markdown.py:112: XMLParsedAsHTMLWarning: It looks like you're using an HTML parser to parse an XML document.
+
+Assuming this really is an XML document, what you're doing might work, but you should know that using an XML parser will be more reliable. To parse this document as XML, make sure you have the Python package 'lxml' installed, and pass the keyword argument `features="xml"` into the BeautifulSoup constructor.
+
+If you want or need to use an HTML parser on this document, you can make this warning go away by filtering it. To do that, run this code before calling the BeautifulSoup constructor:
+
+    from bs4 import XMLParsedAsHTMLWarning
+    import warnings
+
+    warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+  return BeautifulSoup(_CDATA.sub(_unwrap_cdata, text), PARSER)
+  v tibco-activematrix-businessworks-plug-in-for-oracle-e-business-suite@6.1.2 
+97 topic(s), 86 asset(s), 1 unit(s), 98 nav node(s), 1 generated -> 187 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+97 topic(s), 86 asset(s) written.
+187 file(s) standing in the measured output tree(s).
+tibco-activematrix-businessworks-plug-in-for-oracle-e-business-suite@6.1.2: 104
+resolved, 0 skin, 0 escaped, 0 dangling, 0 case-mismatch, 2 orphan (4.1 MB)
+tibco-activematrix-businessworks-plug-in-for-oracle-e-business-suite@6.1.2: 
+skipped 2 not-a-topic, 1 republished-duplicate
+Findings: 1 warning, 4 notes.
+Downloading 1 version(s) with 4 worker(s)...
+  v 
+tibco-activematrix-businessworks-plug-in-for-oracle-fusion-cloud-applications-s
+uite@6.0.0 7.8 MiB
+           Download            
++-----------------------------+
+| Outcome          | Versions |
+|------------------+----------|
+| Downloaded       |        1 |
+| Already current  |        0 |
+| Skipped (manual) |        0 |
+| No ZIP endpoint  |        0 |
+| Failed           |        0 |
++-----------------------------+
+7.8 MiB written.
+Extracting 1 version(s)...
+  v 
+tibco-activematrix-businessworks-plug-in-for-oracle-fusion-cloud-applications-s
+uite@6.0.0 366 file(s), flare, 1 root(s)
+                Extract                
++-------------------------------------+
+| Outcome                  | Versions |
+|--------------------------+----------|
+| Extracted                |        1 |
+| Already current          |        0 |
+| Measured from cache      |        0 |
+| No package               |        0 |
+| Refused (unsafe archive) |        0 |
+| Failed                   |        0 |
++-------------------------------------+
+366 file(s) written.
+       Engines       
++-------------------+
+| Engine | Versions |
+|--------+----------|
+| flare  |        1 |
++-------------------+
+CSH: 1 source(s), 6 identifier(s).
+                    Assets                     
++---------------------------------------------+
+| Category | Destination     | Files |   Size |
+|----------+-----------------+-------+--------|
+| topic    | output-root     |    63 | 1.3 MB |
+| image    | output-root     |    92 | 4.3 MB |
+| skin     | output-root     |   191 | 2.3 MB |
+| other    | output-root     |    13 | 0.8 MB |
+| document | document-router |     7 | 3.0 MB |
++---------------------------------------------+
+Converting 1 version(s)...
+  v 
+tibco-activematrix-businessworks-plug-in-for-oracle-fusion-cloud-applications-s
+uite@6.0.0 58 topic(s), 23 asset(s), 1 unit(s), 59 nav node(s), 1 generated -> 
+85 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+58 topic(s), 23 asset(s) written.
+85 file(s) standing in the measured output tree(s).
+tibco-activematrix-businessworks-plug-in-for-oracle-fusion-cloud-applications-s
+uite@6.0.0: 27 resolved, 0 skin, 6 escaped, 0 dangling, 0 case-mismatch, 82 
+orphan (3.2 MB)
+tibco-activematrix-businessworks-plug-in-for-oracle-fusion-cloud-applications-s
+uite@6.0.0: CSH 6 resolved, 0 unresolved, 0 ambiguous
+tibco-activematrix-businessworks-plug-in-for-oracle-fusion-cloud-applications-s
+uite@6.0.0: skipped 3 generated-directory, 2 runtime-stub
+Findings: 2 warnings, 3 notes.

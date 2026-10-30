@@ -1,0 +1,90 @@
+Syncing 7 version(s) into C:\tmp\p33-aem...
+  v tibco-activespaces-enterprise-edition@5.2.0 -> api-references/5-2-0 150 
+file(s), 2.9 MB
+  v tibco-activespaces-enterprise-edition@5.2.0 -> online-help/5-2-0 71 
+file(s), 1.1 MB
+  v tibco-activespaces-enterprise-edition@5.2.0 -> user-guides/5-2-0 4 file(s),
+8.0 MB
+  v tibco-activespaces-enterprise-edition@5.2.0 -> release-information/5-2-0 2 
+file(s), 1.4 MB
+  v tibco-activespaces-enterprise-edition@5.2.0 -> reference-documents/5-2-0 3 
+file(s), 0.2 MB
+  v tibco-activespaces-enterprise-edition@5.1.1 -> api-references/5-1-1 150 
+file(s), 2.8 MB
+  v tibco-activespaces-enterprise-edition@5.1.1 -> online-help/5-1-1 77 
+file(s), 1.1 MB
+  v tibco-activespaces-enterprise-edition@5.1.1 -> user-guides/5-1-1 4 file(s),
+7.9 MB
+  v tibco-activespaces-enterprise-edition@5.1.1 -> release-information/5-1-1 2 
+file(s), 1.4 MB
+  v tibco-activespaces-enterprise-edition@5.1.1 -> reference-documents/5-1-1 2 
+file(s), 0.2 MB
+  v tibco-activespaces-enterprise-edition@5.1.0 -> api-references/5-1-0 150 
+file(s), 2.8 MB
+  v tibco-activespaces-enterprise-edition@5.1.0 -> online-help/5-1-0 77 
+file(s), 1.2 MB
+  v tibco-activespaces-enterprise-edition@5.1.0 -> user-guides/5-1-0 4 file(s),
+7.9 MB
+  v tibco-activespaces-enterprise-edition@5.1.0 -> release-information/5-1-0 2 
+file(s), 1.4 MB
+  v tibco-activespaces-enterprise-edition@5.1.0 -> reference-documents/5-1-0 3 
+file(s), 0.1 MB
+  v tibco-activespaces-enterprise-edition@5.0.0 -> api-references/5-0-0 150 
+file(s), 2.8 MB
+  v tibco-activespaces-enterprise-edition@5.0.0 -> online-help/5-0-0 77 
+file(s), 1.1 MB
+  v tibco-activespaces-enterprise-edition@5.0.0 -> user-guides/5-0-0 4 file(s),
+8.0 MB
+  v tibco-activespaces-enterprise-edition@5.0.0 -> release-information/5-0-0 2 
+file(s), 1.4 MB
+  v tibco-activespaces-enterprise-edition@5.0.0 -> reference-documents/5-0-0 3 
+file(s), 0.1 MB
+  v tibco-activespaces-enterprise-edition@4.10.1 -> api-references/4-10-1 150 
+file(s), 2.8 MB
+  v tibco-activespaces-enterprise-edition@4.10.1 -> online-help/4-10-1 76 
+file(s), 1.1 MB
+  v tibco-activespaces-enterprise-edition@4.10.1 -> user-guides/4-10-1 4 
+file(s), 8.0 MB
+  v tibco-activespaces-enterprise-edition@4.10.1 -> release-information/4-10-1 
+2 file(s), 1.4 MB
+  v tibco-activespaces-enterprise-edition@4.10.1 -> reference-documents/4-10-1 
+3 file(s), 0.1 MB
+  v tibco-activespaces-enterprise-edition@4.10.0 -> api-references/4-10-0 150 
+file(s), 2.8 MB
+  v tibco-activespaces-enterprise-edition@4.10.0 -> online-help/4-10-0 76 
+file(s), 1.1 MB
+  v tibco-activespaces-enterprise-edition@4.10.0 -> user-guides/4-10-0 4 
+file(s), 8.0 MB
+  v tibco-activespaces-enterprise-edition@4.10.0 -> release-information/4-10-0 
+3 file(s), 1.4 MB
+  v tibco-activespaces-enterprise-edition@4.10.0 -> reference-documents/4-10-0 
+3 file(s), 0.1 MB
+  v tibco-silver-fabric-enabler-for-activespaces-enterprise-edition@1.2.0 -> 
+online-help/1-2-0 139 file(s), 1.9 MB
+  v tibco-silver-fabric-enabler-for-activespaces-enterprise-edition@1.2.0 -> 
+user-guides/1-2-0 2 file(s), 1.3 MB
+  v tibco-silver-fabric-enabler-for-activespaces-enterprise-edition@1.2.0 -> 
+release-information/1-2-0 2 file(s), 0.1 MB
+  v tibco-silver-fabric-enabler-for-activespaces-enterprise-edition@1.2.0 -> 
+reference-documents/1-2-0 2 file(s), 0.8 MB
+  v tibco-activespaces-enterprise-edition -> archives 41 file(s), 0.0 MB
+  v tibco-silver-fabric-enabler-for-activespaces-enterprise-edition -> archives
+3 file(s), 0.0 MB
+                                     Sync                                      
+┌─────────┬──────┬─────────┬─────────┬─────────┬─────────┬──────────┬─────────┐
+│ Outcome │ Rows │ online… │ user-g… │ releas… │ refere… │ api-ref… │ archiv… │
+├─────────┼──────┼─────────┼─────────┼─────────┼─────────┼──────────┼─────────┤
+│ Synced  │   36 │       7 │       7 │       7 │       7 │        6 │       2 │
+│ Already │    0 │       0 │       0 │       0 │       0 │        0 │       0 │
+│ current │      │         │         │         │         │          │         │
+│ No      │    0 │       0 │       0 │       0 │       0 │        0 │       0 │
+│ source  │      │         │         │         │         │          │         │
+│ tree    │      │         │         │         │         │          │         │
+│ Skipped │    0 │       0 │       0 │       0 │       0 │        0 │       0 │
+│ Failed  │    0 │       0 │       0 │       0 │       0 │        0 │       0 │
+└─────────┴──────┴─────────┴─────────┴─────────┴─────────┴──────────┴─────────┘
+1597 file(s), 84.9 MB copied.
+2 product metadata.yml, 8 version.yml written.
+Published merged (Stage 6b): tibco-activespaces-enterprise-edition.
+3879 redirect(s) in 2 published map(s), tree-rooted (no publish_base_url set).
+Findings: 6 warnings.

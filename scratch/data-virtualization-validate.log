@@ -1,0 +1,57 @@
+Validating 14 published folder(s) in ..\tibco-docs-aem...
+  x 
+en-us-spotfire-data-virtualization-userdocs/en-us/tibco-data-virtualization/onl
+ine-help/8-8-0 106 finding(s), 2 error(s)
+  x 
+en-us-spotfire-data-virtualization-userdocs/en-us/tibco-data-virtualization/onl
+ine-help/8-8-1 105 finding(s), 2 error(s)
+  x 
+en-us-spotfire-data-virtualization-userdocs/en-us/tibco-data-virtualization/onl
+ine-help/8-9-0 128 finding(s), 2 error(s)
+                                   Validate                                    
++-----------------------------------------------------------------------------+
+|     Walked | Files | References | HTML | External | Tree-root… |    Anchors |
+|------------+-------+------------+------+----------+------------+------------|
+|         14 | 32069 |     400497 | 1727 |     2125 |          0 | 396515/39… |
+|  folder(s) |       |            |      |          |            |            |
++-----------------------------------------------------------------------------+
+LINK_BROKEN 6 row(s), 6 occurrence(s)
+  x 
+en-us-spotfire-data-virtualization-userdocs/en-us/tibco-data-virtualization/onl
+ine-help/8-8-0/user-guides/reference-guide/tdv-support-for-sql-functions/xml-fu
+nctions/identifier-escaping.md:38: 
+user-guides/reference-guide/tdv-support-for-sql-functions/xml-functions/a:- is 
+not in this version folder
+  x 
+en-us-spotfire-data-virtualization-userdocs/en-us/tibco-data-virtualization/onl
+ine-help/8-8-0/user-guides/reference-guide/tdv-support-for-sql-functions/xml-fu
+nctions/identifier-escaping.md:38: 
+user-guides/reference-guide/tdv-support-for-sql-functions/xml-functions/a:- is 
+not in this version folder
+  x 
+en-us-spotfire-data-virtualization-userdocs/en-us/tibco-data-virtualization/onl
+ine-help/8-8-1/user-guides/reference-guide/tdv-support-for-sql-functions/xml-fu
+nctions/identifier-escaping.md:38: 
+user-guides/reference-guide/tdv-support-for-sql-functions/xml-functions/a:- is 
+not in this version folder
+  x 
+en-us-spotfire-data-virtualization-userdocs/en-us/tibco-data-virtualization/onl
+ine-help/8-8-1/user-guides/reference-guide/tdv-support-for-sql-functions/xml-fu
+nctions/identifier-escaping.md:38: 
+user-guides/reference-guide/tdv-support-for-sql-functions/xml-functions/a:- is 
+not in this version folder
+  x 
+en-us-spotfire-data-virtualization-userdocs/en-us/tibco-data-virtualization/onl
+ine-help/8-9-0/user-guides/reference-guide/sdv-support-for-sql-functions/xml-fu
+nctions/identifier-escaping.md:38: 
+user-guides/reference-guide/sdv-support-for-sql-functions/xml-functions/a:- is 
+not in this version folder
+  x 
+en-us-spotfire-data-virtualization-userdocs/en-us/tibco-data-virtualization/onl
+ine-help/8-9-0/user-guides/reference-guide/sdv-support-for-sql-functions/xml-fu
+nctions/identifier-escaping.md:38: 
+user-guides/reference-guide/sdv-support-for-sql-functions/xml-functions/a:- is 
+not in this version folder
+ANCHOR_MISSING 145 row(s), 145 occurrence(s)
+LINK_TO_UNFILED 3 row(s), 188 occurrence(s)
+Findings: 6 errors, 145 warnings, 3 notes.

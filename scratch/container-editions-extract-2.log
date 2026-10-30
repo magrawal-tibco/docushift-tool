@@ -1,0 +1,48 @@
+Extracting 32 version(s)...
+  v ibi-webfocus-container-edition@1.1.1 5 file(s), auto
+  v ibi-webfocus-container-edition@1.1.0 5 file(s), auto
+  v ibi-webfocus-container-edition@1.0.4 4 file(s), auto
+  v ibi-webfocus-container-edition@1.0.3 4 file(s), auto
+  v ibi-webfocus-container-edition@1.0.2 4 file(s), auto
+  v ibi-webfocus-container-edition@1.0.0 4 file(s), auto
+                Extract                
++-------------------------------------+
+| Outcome                  | Versions |
+|--------------------------+----------|
+| Extracted                |        6 |
+| Already current          |       25 |
+| Measured from cache      |        0 |
+| No package               |        1 |
+| Refused (unsafe archive) |        0 |
+| Failed                   |        0 |
++-------------------------------------+
+26 file(s) written.
+       Engines       
++-------------------+
+| Engine | Versions |
+|--------+----------|
+| flare  |       21 |
+| auto   |       10 |
++-------------------+
+? ibi-webfocus-container-edition@1.2.1: engine undetected (`auto`)
+? ibi-webfocus-container-edition@1.2.0: engine undetected (`auto`)
+? ibi-webfocus-container-edition@1.1.2: engine undetected (`auto`)
+? ibi-webfocus-container-edition@1.1.1: engine undetected (`auto`)
+? ibi-webfocus-container-edition@1.1.0: engine undetected (`auto`)
+? ibi-webfocus-container-edition@1.0.4: engine undetected (`auto`)
+? ibi-webfocus-container-edition@1.0.3: engine undetected (`auto`)
+? ibi-webfocus-container-edition@1.0.2: engine undetected (`auto`)
+? ibi-webfocus-container-edition@1.0.0: engine undetected (`auto`)
+? ibi-webfocus-dsml-services-container-edition@1.0.3: engine undetected 
+(`auto`)
+CSH: 0 source(s), 0 identifier(s).
+                     Assets                     
++----------------------------------------------+
+| Category | Destination     | Files |    Size |
+|----------+-----------------+-------+---------|
+| document | document-router |    26 | 22.7 MB |
++----------------------------------------------+
+! ibi-webfocus-dsml-services-container-edition@1.0.7: no package at 
+C:\github\docushift-tool\families\en-us-ibi-container-editions\downloads\ibi-we
+bfocus-dsml-services-container-edition-1.0.7.zip; run `docushift download` 
+first

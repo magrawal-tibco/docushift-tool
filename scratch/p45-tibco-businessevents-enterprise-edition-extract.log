@@ -1,0 +1,54 @@
+Extracting 4 version(s)...
+  v tibco-businessevents-enterprise-edition@6.4.0 5815 file(s), flare, 1 
+root(s)
+  v tibco-businessevents-enterprise-edition@6.3.2 5777 file(s), flare, 1 
+root(s)
+  v tibco-businessevents-enterprise-edition@6.3.1 5756 file(s), flare, 1 
+root(s)
+  v tibco-businessevents-enterprise-edition@6.3.0 5653 file(s), flare, 1 
+root(s)
+                Extract                
++-------------------------------------+
+| Outcome                  | Versions |
+|--------------------------+----------|
+| Extracted                |        4 |
+| Already current          |        0 |
+| Measured from cache      |        0 |
+| No package               |        0 |
+| Refused (unsafe archive) |        0 |
+| Failed                   |        0 |
++-------------------------------------+
+23001 file(s) written.
+       Engines       
++-------------------+
+| Engine | Versions |
+|--------+----------|
+| flare  |        4 |
++-------------------+
+CSH: 4 source(s), 0 identifier(s).
+                     Assets                      
++-----------------------------------------------+
+| Category | Destination     | Files |     Size |
+|----------+-----------------+-------+----------|
+| topic    | api-reference   | 12290 |  52.2 MB |
+| image    | api-reference   |    16 |   0.2 MB |
+| other    | api-reference   |    32 |   0.1 MB |
+| topic    | output-root     |  5506 | 109.1 MB |
+| image    | output-root     |  2742 |  73.2 MB |
+| skin     | output-root     |  2298 | 116.1 MB |
+| other    | output-root     |    49 |   4.7 MB |
+| document | document-router |    68 | 127.5 MB |
++-----------------------------------------------+
+? tibco-businessevents-enterprise-edition@6.4.0: 
+tibco-businessevents-enterprise-edition-6-4-0/html/api/ 219 file(s), no known 
+generator marker
+? tibco-businessevents-enterprise-edition@6.3.2: 
+tibco-businessevents-enterprise-edition-6-3-2/html/api/ 219 file(s), no known 
+generator marker
+? tibco-businessevents-enterprise-edition@6.3.1: 
+tibco-businessevents-enterprise-edition-6-3-1/html/api/ 219 file(s), no known 
+generator marker
+? tibco-businessevents-enterprise-edition@6.3.0: 
+tibco-businessevents-enterprise-edition-6-3-0/html/api/ 215 file(s), no known 
+generator marker
+Recorded 4 notes -- `docushift report --run 477`.

@@ -1,0 +1,15 @@
+Downloading 3 version(s) with 4 worker(s)...
+  v ibi-webfocus-reporting-server@9.2.2 95.4 MiB
+  v ibi-webfocus-reporting-server@9.2.1 71.6 MiB
+  v ibi-webfocus-reporting-server@9.2.0 67.2 MiB
+           Download            
++-----------------------------+
+| Outcome          | Versions |
+|------------------+----------|
+| Downloaded       |        3 |
+| Already current  |        0 |
+| Skipped (manual) |        0 |
+| No ZIP endpoint  |        0 |
+| Failed           |        0 |
++-----------------------------+
+234.3 MiB written.

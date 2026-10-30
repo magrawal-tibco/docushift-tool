@@ -1,0 +1,16 @@
+Validating 5 published folder(s) in C:\github\ibi-docs-aem...
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/online-help/9-3-6 10 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/ja-jp/ibi-webfocus-client/online-help/9-3-6 134 
+finding(s), 0 error(s)
+                                   Validate                                    
++-----------------------------------------------------------------------------+
+|      Walked | Files | References | HTML | External | Tree-root… |   Anchors |
+|-------------+-------+------------+------+----------+------------+-----------|
+| 5 folder(s) |  5653 |      16815 |  683 |      608 |          0 | 1009/1110 |
++-----------------------------------------------------------------------------+
+ANCHOR_MISSING 101 row(s), 101 occurrence(s)
+ANCHOR_WRONG_HEADING 14 row(s), 14 occurrence(s)
+CSH_ANCHOR_MISSING 2 row(s), 2 occurrence(s)
+LINK_TO_UNFILED 1 row(s), 27 occurrence(s)
+Findings: 117 warnings, 1 note.

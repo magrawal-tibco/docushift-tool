@@ -1,0 +1,39 @@
+Reframing 1 version(s)...
+  v tibco-foresight-transaction-insight@6.0.0 821 topic(s) -> 427 page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |        1 |
+| Already current             |        0 |
+| Not Flare or DITA (skipped) |        0 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+821 topic(s) read into 427 page(s).
+Files: 3953 source doc -> 1095 converted -> 427 merged (61.0% fewer at the 
+merge, 89.2% end to end); 1674 file(s) standing in the measured merged tree(s).
+289 page(s) queued for editorial review:
+  tibco-foresight-transaction-insight@6.0.0: 289 of 427 -- see review-queue.csv
+Findings: 1 warning, 4 notes.
+Syncing 1 version(s) into C:\github\tibco-docs-aem...
+  v tibco-foresight-transaction-insight@6.0.0 -> online-help/6-0-0 1671 
+file(s), 59.8 MB
+                                     Sync                                      
++-----------------------------------------------------------------------------+
+| Outcome   | Rows | online-h… | user-gui… | release-… | referenc… | archives |
+|-----------+------+-----------+-----------+-----------+-----------+----------|
+| Synced    |    1 |         1 |         0 |         0 |         0 |        0 |
+| Already   |    4 |         0 |         1 |         1 |         1 |        1 |
+| current   |      |           |           |           |           |          |
+| Maps      |    0 |         0 |         0 |         0 |         0 |        0 |
+| refreshed |      |           |           |           |           |          |
+| No source |    0 |         0 |         0 |         0 |         0 |        0 |
+| tree      |      |           |           |           |           |          |
+| Skipped   |    0 |         0 |         0 |         0 |         0 |        0 |
+| Failed    |    0 |         0 |         0 |         0 |         0 |        0 |
++-----------------------------------------------------------------------------+
+1671 file(s), 59.8 MB copied.
+1 product metadata.yml, 4 version.yml written.
+Published merged (Stage 6b): tibco-foresight-transaction-insight.
+5696 redirect(s) in 2 published map(s), tree-rooted (no publish_base_url set).

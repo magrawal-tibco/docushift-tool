@@ -1,0 +1,355 @@
+Validating 92 published folder(s) in C:\github\ibi-docs-aem...
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/online-help/9-3-0 
+2136 finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/online-help/9-3-1 
+2074 finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/online-help/9-3-2 
+2070 finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/online-help/9-3-3 
+2070 finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/online-help/9-3-4 
+2209 finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/online-help/9-3-5 
+2072 finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/online-help/9-3-6 10 
+finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/online-help/9-3-7 10 
+finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/online-help/9-3-8 21 
+finding(s), 0 error(s)
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/reference-documents/9-1-0
+1 finding(s), 1 error(s)
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/reference-documents/9-1-1
+1 finding(s), 1 error(s)
+  ! loc-ibi-webfocus-userdocs/de-de/ibi-webfocus-client/online-help/9-3-5 2119 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/de-de/ibi-webfocus-client/online-help/9-3-6 27 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/de-de/ibi-webfocus-client/online-help/9-3-7 27 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/de-de/ibi-webfocus-client/online-help/9-3-8 52 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/es-es/ibi-webfocus-client/online-help/9-3-5 2095 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/es-es/ibi-webfocus-client/online-help/9-3-6 35 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/es-es/ibi-webfocus-client/online-help/9-3-7 35 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/es-es/ibi-webfocus-client/online-help/9-3-8 52 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/fr-fr/ibi-webfocus-client/online-help/9-3-5 2098 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/fr-fr/ibi-webfocus-client/online-help/9-3-6 22 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/fr-fr/ibi-webfocus-client/online-help/9-3-7 22 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/fr-fr/ibi-webfocus-client/online-help/9-3-8 52 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/ja-jp/ibi-webfocus-client/online-help/9-3-0 1024 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/ja-jp/ibi-webfocus-client/online-help/9-3-5 2063 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/ja-jp/ibi-webfocus-client/online-help/9-3-6 134 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/ja-jp/ibi-webfocus-client/online-help/9-3-7 137 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/ja-jp/ibi-webfocus-client/online-help/9-3-8 150 
+finding(s), 0 error(s)
+                                   Validate                                    
++-----------------------------------------------------------------------------+
+|     Walked | Files | References | HTML | External | Tree-root… |    Anchors |
+|------------+-------+------------+------+----------+------------+------------|
+|         92 | 73442 |     223687 | 8623 |     7566 |          0 | 16579/387… |
+|  folder(s) |       |            |      |          |            |            |
++-----------------------------------------------------------------------------+
+18 help identifier(s) dropped against a prior version; `docushift csh report 
+--since` lists them.
+LINK_BROKEN 2 row(s), 2 occurrence(s)
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/reference-documents/9-1-0
+/index.md:12: ibi_help910.zip is not in this version folder
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/reference-documents/9-1-1
+/index.md:12: ibi_help911.zip is not in this version folder
+ANCHOR_MISSING 22134 row(s), 22134 occurrence(s)
+ANCHOR_WRONG_HEADING 166 row(s), 166 occurrence(s)
+CSH_ANCHOR_MISSING 23 row(s), 23 occurrence(s)
+CSH_IDENTIFIER_DROPPED 6 row(s), 18 occurrence(s)
+TOC_ENTRY_DUPLICATED 5 row(s), 5 occurrence(s)
+LINK_TO_UNFILED 17 row(s), 488 occurrence(s)
+Findings: 2 errors, 22334 warnings, 17 notes.
+Validating 80 published folder(s) in C:\github\ibi-docs-aem...
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-app-studio/online-help/9-3-0
+305 finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-app-studio/online-help/9-3-1
+305 finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-app-studio/online-help/9-3-2
+304 finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-app-studio/online-help/9-3-3
+304 finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-app-studio/online-help/9-3-4
+304 finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-app-studio/online-help/9-3-6
+6 finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/ja-jp/ibi-webfocus-app-studio/online-help/9-3-0 
+341 finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/ja-jp/ibi-webfocus-app-studio/online-help/9-3-5 9
+finding(s), 0 error(s)
+                                   Validate                                    
++-----------------------------------------------------------------------------+
+|      Walked | Files | References | HTML | External | Tree-rooted |  Anchors |
+|-------------+-------+------------+------+----------+-------------+----------|
+|          80 |  4355 |      17096 |  912 |      741 |           0 | 360/2220 |
+|   folder(s) |       |            |      |          |             |          |
++-----------------------------------------------------------------------------+
+ANCHOR_MISSING 1860 row(s), 1860 occurrence(s)
+LINK_TO_UNFILED 2 row(s), 18 occurrence(s)
+Findings: 1860 warnings, 2 notes.
+Validating 92 published folder(s) in C:\github\ibi-docs-aem...
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/online-help/9-3-0 
+2136 finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/online-help/9-3-1 
+2074 finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/online-help/9-3-2 
+2070 finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/online-help/9-3-3 
+2070 finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/online-help/9-3-4 
+2209 finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/online-help/9-3-5 
+2072 finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/online-help/9-3-6 10 
+finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/online-help/9-3-7 10 
+finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/online-help/9-3-8 21 
+finding(s), 0 error(s)
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/reference-documents/9-1-0
+1 finding(s), 1 error(s)
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/reference-documents/9-1-1
+1 finding(s), 1 error(s)
+  ! loc-ibi-webfocus-userdocs/de-de/ibi-webfocus-client/online-help/9-3-5 2119 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/de-de/ibi-webfocus-client/online-help/9-3-6 27 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/de-de/ibi-webfocus-client/online-help/9-3-7 27 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/de-de/ibi-webfocus-client/online-help/9-3-8 52 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/es-es/ibi-webfocus-client/online-help/9-3-5 2095 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/es-es/ibi-webfocus-client/online-help/9-3-6 35 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/es-es/ibi-webfocus-client/online-help/9-3-7 35 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/es-es/ibi-webfocus-client/online-help/9-3-8 52 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/fr-fr/ibi-webfocus-client/online-help/9-3-5 2098 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/fr-fr/ibi-webfocus-client/online-help/9-3-6 22 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/fr-fr/ibi-webfocus-client/online-help/9-3-7 22 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/fr-fr/ibi-webfocus-client/online-help/9-3-8 52 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/ja-jp/ibi-webfocus-client/online-help/9-3-0 1024 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/ja-jp/ibi-webfocus-client/online-help/9-3-5 2063 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/ja-jp/ibi-webfocus-client/online-help/9-3-6 134 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/ja-jp/ibi-webfocus-client/online-help/9-3-7 137 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/ja-jp/ibi-webfocus-client/online-help/9-3-8 150 
+finding(s), 0 error(s)
+                                   Validate                                    
++-----------------------------------------------------------------------------+
+|     Walked | Files | References | HTML | External | Tree-root… |    Anchors |
+|------------+-------+------------+------+----------+------------+------------|
+|         92 | 73442 |     223687 | 8623 |     7566 |          0 | 16579/387… |
+|  folder(s) |       |            |      |          |            |            |
++-----------------------------------------------------------------------------+
+18 help identifier(s) dropped against a prior version; `docushift csh report 
+--since` lists them.
+LINK_BROKEN 2 row(s), 2 occurrence(s)
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/reference-documents/9-1-0
+/index.md:12: ibi_help910.zip is not in this version folder
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/reference-documents/9-1-1
+/index.md:12: ibi_help911.zip is not in this version folder
+ANCHOR_MISSING 22134 row(s), 22134 occurrence(s)
+ANCHOR_WRONG_HEADING 166 row(s), 166 occurrence(s)
+CSH_ANCHOR_MISSING 23 row(s), 23 occurrence(s)
+CSH_IDENTIFIER_DROPPED 6 row(s), 18 occurrence(s)
+TOC_ENTRY_DUPLICATED 5 row(s), 5 occurrence(s)
+LINK_TO_UNFILED 17 row(s), 488 occurrence(s)
+Findings: 2 errors, 22334 warnings, 17 notes.
+Validating 92 published folder(s) in C:\github\ibi-docs-aem...
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/online-help/9-3-0 
+2136 finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/online-help/9-3-1 
+2074 finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/online-help/9-3-2 
+2070 finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/online-help/9-3-3 
+2070 finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/online-help/9-3-4 
+2209 finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/online-help/9-3-5 
+2072 finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/online-help/9-3-6 10 
+finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/online-help/9-3-7 10 
+finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/online-help/9-3-8 21 
+finding(s), 0 error(s)
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/reference-documents/9-1-0
+1 finding(s), 1 error(s)
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/reference-documents/9-1-1
+1 finding(s), 1 error(s)
+  ! loc-ibi-webfocus-userdocs/de-de/ibi-webfocus-client/online-help/9-3-5 2119 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/de-de/ibi-webfocus-client/online-help/9-3-6 27 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/de-de/ibi-webfocus-client/online-help/9-3-7 27 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/de-de/ibi-webfocus-client/online-help/9-3-8 52 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/es-es/ibi-webfocus-client/online-help/9-3-5 2095 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/es-es/ibi-webfocus-client/online-help/9-3-6 35 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/es-es/ibi-webfocus-client/online-help/9-3-7 35 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/es-es/ibi-webfocus-client/online-help/9-3-8 52 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/fr-fr/ibi-webfocus-client/online-help/9-3-5 2098 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/fr-fr/ibi-webfocus-client/online-help/9-3-6 22 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/fr-fr/ibi-webfocus-client/online-help/9-3-7 22 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/fr-fr/ibi-webfocus-client/online-help/9-3-8 52 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/ja-jp/ibi-webfocus-client/online-help/9-3-0 1024 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/ja-jp/ibi-webfocus-client/online-help/9-3-5 2063 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/ja-jp/ibi-webfocus-client/online-help/9-3-6 134 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/ja-jp/ibi-webfocus-client/online-help/9-3-7 137 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/ja-jp/ibi-webfocus-client/online-help/9-3-8 150 
+finding(s), 0 error(s)
+                                   Validate                                    
++-----------------------------------------------------------------------------+
+|     Walked | Files | References | HTML | External | Tree-root… |    Anchors |
+|------------+-------+------------+------+----------+------------+------------|
+|         92 | 73442 |     223687 | 8623 |     7566 |          0 | 16579/387… |
+|  folder(s) |       |            |      |          |            |            |
++-----------------------------------------------------------------------------+
+18 help identifier(s) dropped against a prior version; `docushift csh report 
+--since` lists them.
+LINK_BROKEN 2 row(s), 2 occurrence(s)
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/reference-documents/9-1-0
+/index.md:12: ibi_help910.zip is not in this version folder
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/reference-documents/9-1-1
+/index.md:12: ibi_help911.zip is not in this version folder
+ANCHOR_MISSING 22134 row(s), 22134 occurrence(s)
+ANCHOR_WRONG_HEADING 166 row(s), 166 occurrence(s)
+CSH_ANCHOR_MISSING 23 row(s), 23 occurrence(s)
+CSH_IDENTIFIER_DROPPED 6 row(s), 18 occurrence(s)
+TOC_ENTRY_DUPLICATED 5 row(s), 5 occurrence(s)
+LINK_TO_UNFILED 17 row(s), 488 occurrence(s)
+Findings: 2 errors, 22334 warnings, 17 notes.
+Validating 92 published folder(s) in C:\github\ibi-docs-aem...
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/online-help/9-3-0 
+2136 finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/online-help/9-3-1 
+2074 finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/online-help/9-3-2 
+2070 finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/online-help/9-3-3 
+2070 finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/online-help/9-3-4 
+2209 finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/online-help/9-3-5 
+2072 finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/online-help/9-3-6 10 
+finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/online-help/9-3-7 10 
+finding(s), 0 error(s)
+  ! en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/online-help/9-3-8 21 
+finding(s), 0 error(s)
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/reference-documents/9-1-0
+1 finding(s), 1 error(s)
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/reference-documents/9-1-1
+1 finding(s), 1 error(s)
+  ! loc-ibi-webfocus-userdocs/de-de/ibi-webfocus-client/online-help/9-3-5 2119 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/de-de/ibi-webfocus-client/online-help/9-3-6 27 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/de-de/ibi-webfocus-client/online-help/9-3-7 27 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/de-de/ibi-webfocus-client/online-help/9-3-8 52 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/es-es/ibi-webfocus-client/online-help/9-3-5 2095 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/es-es/ibi-webfocus-client/online-help/9-3-6 35 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/es-es/ibi-webfocus-client/online-help/9-3-7 35 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/es-es/ibi-webfocus-client/online-help/9-3-8 52 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/fr-fr/ibi-webfocus-client/online-help/9-3-5 2098 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/fr-fr/ibi-webfocus-client/online-help/9-3-6 22 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/fr-fr/ibi-webfocus-client/online-help/9-3-7 22 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/fr-fr/ibi-webfocus-client/online-help/9-3-8 52 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/ja-jp/ibi-webfocus-client/online-help/9-3-0 1024 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/ja-jp/ibi-webfocus-client/online-help/9-3-5 2063 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/ja-jp/ibi-webfocus-client/online-help/9-3-6 134 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/ja-jp/ibi-webfocus-client/online-help/9-3-7 137 
+finding(s), 0 error(s)
+  ! loc-ibi-webfocus-userdocs/ja-jp/ibi-webfocus-client/online-help/9-3-8 150 
+finding(s), 0 error(s)
+                                   Validate                                    
++-----------------------------------------------------------------------------+
+|     Walked | Files | References | HTML | External | Tree-root… |    Anchors |
+|------------+-------+------------+------+----------+------------+------------|
+|         92 | 73442 |     223687 | 8623 |     7566 |          0 | 16579/387… |
+|  folder(s) |       |            |      |          |            |            |
++-----------------------------------------------------------------------------+
+18 help identifier(s) dropped against a prior version; `docushift csh report 
+--since` lists them.
+LINK_BROKEN 2 row(s), 2 occurrence(s)
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/reference-documents/9-1-0
+/index.md:12: ibi_help910.zip is not in this version folder
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-client/reference-documents/9-1-1
+/index.md:12: ibi_help911.zip is not in this version folder
+ANCHOR_MISSING 22134 row(s), 22134 occurrence(s)
+ANCHOR_WRONG_HEADING 166 row(s), 166 occurrence(s)
+CSH_ANCHOR_MISSING 23 row(s), 23 occurrence(s)
+CSH_IDENTIFIER_DROPPED 6 row(s), 18 occurrence(s)
+TOC_ENTRY_DUPLICATED 5 row(s), 5 occurrence(s)
+LINK_TO_UNFILED 17 row(s), 488 occurrence(s)
+Findings: 2 errors, 22334 warnings, 17 notes.

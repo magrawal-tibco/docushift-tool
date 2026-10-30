@@ -1,0 +1,34 @@
+Syncing 44 version(s) into C:\github\tibco-docs-aem...
+  v tibco-businessconnect-container-edition-ebxml-protocol@1.3.0 -> 
+online-help/1-3-0 154 file(s), 1.9 MB
+  v tibco-businessconnect-container-edition-ebxml-protocol@1.2.1 -> 
+online-help/1-2-1 153 file(s), 1.9 MB
+  v 
+tibco-businessconnect-container-edition-edi-protocol-powered-by-instream@1.6.1 
+-> online-help/1-6-1 150 file(s), 3.5 MB
+  v 
+tibco-businessconnect-container-edition-edi-protocol-powered-by-instream@1.6.0 
+-> online-help/1-6-0 151 file(s), 3.6 MB
+  v 
+tibco-businessconnect-container-edition-edi-protocol-powered-by-instream@1.5.0 
+-> online-help/1-5-0 150 file(s), 3.5 MB
+                                     Sync                                      
++-----------------------------------------------------------------------------+
+| Outcome | Rows | online… | user-g… | releas… | refere… | api-ref… | archiv… |
+|---------+------+---------+---------+---------+---------+----------+---------|
+| Synced  |    5 |       5 |       0 |       0 |       0 |        0 |       0 |
+| Already |  199 |      39 |      44 |      44 |      44 |       11 |      17 |
+| current |      |         |         |         |         |          |         |
+| No      |    0 |       0 |       0 |       0 |       0 |        0 |       0 |
+| source  |      |         |         |         |         |          |         |
+| tree    |      |         |         |         |         |          |         |
+| Skipped |    0 |       0 |       0 |       0 |       0 |        0 |       0 |
+| Failed  |    0 |       0 |       0 |       0 |       0 |        0 |       0 |
++-----------------------------------------------------------------------------+
+758 file(s), 14.4 MB copied.
+23 product metadata.yml, 92 version.yml written.
+Published merged (Stage 6b): 
+tibco-businessconnect-container-edition-ebxml-protocol, 
+tibco-businessconnect-container-edition-edi-protocol-powered-by-instream.
+10888 redirect(s) in 33 published map(s), tree-rooted (no publish_base_url 
+set).

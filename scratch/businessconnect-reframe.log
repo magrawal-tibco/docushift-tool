@@ -1,0 +1,134 @@
+Reframing 44 version(s)...
+  v tibco-businessconnect@7.5.0 557 topic(s) -> 112 page(s)
+  v tibco-businessconnect@7.4.0 551 topic(s) -> 114 page(s)
+  v tibco-businessconnect-container-edition@1.7.1 229 topic(s) -> 45 page(s)
+  v tibco-businessconnect-container-edition@1.7.0 229 topic(s) -> 45 page(s)
+  v tibco-businessconnect-container-edition@1.6.1 228 topic(s) -> 59 page(s)
+  v 
+tibco-businessconnect-container-edition-configstore-management-interface-protoc
+ol@1.2.1 49 topic(s) -> 13 page(s)
+  v 
+tibco-businessconnect-container-edition-configstore-management-interface-protoc
+ol@1.2.0 50 topic(s) -> 14 page(s)
+  v 
+tibco-businessconnect-container-edition-configstore-management-interface-protoc
+ol@1.1.0 50 topic(s) -> 15 page(s)
+  v tibco-businessconnect-container-edition-ebxml-protocol@1.3.0 237 topic(s) 
+-> 70 page(s)
+  v tibco-businessconnect-container-edition-ebxml-protocol@1.2.1 237 topic(s) 
+-> 70 page(s)
+  v 
+tibco-businessconnect-container-edition-edi-protocol-hipaa-edition-powered-by-i
+nstream@1.3.0 82 topic(s) -> 15 page(s)
+  v 
+tibco-businessconnect-container-edition-edi-protocol-hipaa-edition-powered-by-i
+nstream@1.2.0 82 topic(s) -> 15 page(s)
+  v 
+tibco-businessconnect-container-edition-edi-protocol-powered-by-instream@1.6.1 
+371 topic(s) -> 72 page(s)
+  v 
+tibco-businessconnect-container-edition-edi-protocol-powered-by-instream@1.6.0 
+371 topic(s) -> 72 page(s)
+  v 
+tibco-businessconnect-container-edition-edi-protocol-powered-by-instream@1.5.0 
+371 topic(s) -> 72 page(s)
+  v tibco-businessconnect-container-edition-rosettanet-protocol@1.7.0 74 
+topic(s) -> 25 page(s)
+  v tibco-businessconnect-container-edition-rosettanet-protocol@1.6.0 74 
+topic(s) -> 31 page(s)
+  v tibco-businessconnect-container-edition-services-plug-in@1.7.0 94 topic(s) 
+-> 13 page(s)
+  v tibco-businessconnect-container-edition-services-plug-in@1.6.0 94 topic(s) 
+-> 13 page(s)
+  v tibco-businessconnect-container-edition-soap-protocol@1.3.0 119 topic(s) ->
+60 page(s)
+  v tibco-businessconnect-container-edition-soap-protocol@1.2.1 119 topic(s) ->
+105 page(s)
+  v tibco-businessconnect-ebxml-protocol@6.4.0 301 topic(s) -> 66 page(s)
+  v tibco-businessconnect-edi-protocol-powered-by-instream@6.11.0 581 topic(s) 
+-> 98 page(s)
+  v tibco-businessconnect-palette@6.6.0 61 topic(s) -> 14 page(s)
+  v tibco-businessconnect-palette@6.5.0 60 topic(s) -> 14 page(s)
+  v tibco-businessconnect-partner-management-portal@1.1.1 71 topic(s) -> 82 
+page(s)
+  v tibco-businessconnect-partner-management-portal@1.1.0 71 topic(s) -> 82 
+page(s)
+  v tibco-businessconnect-partner-management-portal@1.0.0 71 topic(s) -> 82 
+page(s)
+  v tibco-businessconnect-services-plug-in@6.4.0 115 topic(s) -> 28 page(s)
+  v tibco-businessconnect-soap-protocol@7.2.0 176 topic(s) -> 32 page(s)
+  v tibco-businessconnect-trading-community-management@6.2.0 112 topic(s) -> 22
+page(s)
+  v tibco-trading-partner-management-rest-api@1.1.0 44 topic(s) -> 11 page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |       32 |
+| Already current             |        0 |
+| Not Flare or DITA (skipped) |       12 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+5931 topic(s) read into 1581 page(s).
+Files: 25842 source doc -> 6202 converted -> 1581 merged (74.5% fewer at the 
+merge, 93.9% end to end); 3204 file(s) standing in the measured merged tree(s).
+634 page(s) queued for editorial review:
+  tibco-businessconnect@7.5.0: 33 of 112 -- see review-queue.csv
+  tibco-businessconnect@7.4.0: 35 of 114 -- see review-queue.csv
+  tibco-businessconnect-container-edition@1.7.1: 18 of 45 -- see 
+review-queue.csv
+  tibco-businessconnect-container-edition@1.7.0: 18 of 45 -- see 
+review-queue.csv
+  tibco-businessconnect-container-edition@1.6.1: 30 of 59 -- see 
+review-queue.csv
+  tibco-businessconnect-container-edition-configstore-management-interface-prot
+ocol@1.2.1: 7 of 13 -- see review-queue.csv
+  tibco-businessconnect-container-edition-configstore-management-interface-prot
+ocol@1.2.0: 7 of 14 -- see review-queue.csv
+  tibco-businessconnect-container-edition-configstore-management-interface-prot
+ocol@1.1.0: 7 of 15 -- see review-queue.csv
+  tibco-businessconnect-container-edition-ebxml-protocol@1.3.0: 15 of 70 -- see
+review-queue.csv
+  tibco-businessconnect-container-edition-ebxml-protocol@1.2.1: 15 of 70 -- see
+review-queue.csv
+  tibco-businessconnect-container-edition-edi-protocol-hipaa-edition-powered-by
+-instream@1.3.0: 2 of 15 -- see review-queue.csv
+  tibco-businessconnect-container-edition-edi-protocol-hipaa-edition-powered-by
+-instream@1.2.0: 2 of 15 -- see review-queue.csv
+  tibco-businessconnect-container-edition-edi-protocol-powered-by-instream@1.6.
+1: 15 of 72 -- see review-queue.csv
+  tibco-businessconnect-container-edition-edi-protocol-powered-by-instream@1.6.
+0: 15 of 72 -- see review-queue.csv
+  tibco-businessconnect-container-edition-edi-protocol-powered-by-instream@1.5.
+0: 15 of 72 -- see review-queue.csv
+  tibco-businessconnect-container-edition-rosettanet-protocol@1.7.0: 9 of 25 --
+see review-queue.csv
+  tibco-businessconnect-container-edition-rosettanet-protocol@1.6.0: 14 of 31 
+-- see review-queue.csv
+  tibco-businessconnect-container-edition-services-plug-in@1.7.0: 7 of 13 -- 
+see review-queue.csv
+  tibco-businessconnect-container-edition-services-plug-in@1.6.0: 8 of 13 -- 
+see review-queue.csv
+  tibco-businessconnect-container-edition-soap-protocol@1.3.0: 41 of 60 -- see 
+review-queue.csv
+  tibco-businessconnect-container-edition-soap-protocol@1.2.1: 81 of 105 -- see
+review-queue.csv
+  tibco-businessconnect-ebxml-protocol@6.4.0: 12 of 66 -- see review-queue.csv
+  tibco-businessconnect-edi-protocol-powered-by-instream@6.11.0: 14 of 98 -- 
+see review-queue.csv
+  tibco-businessconnect-palette@6.6.0: 6 of 14 -- see review-queue.csv
+  tibco-businessconnect-palette@6.5.0: 3 of 14 -- see review-queue.csv
+  tibco-businessconnect-partner-management-portal@1.1.1: 63 of 82 -- see 
+review-queue.csv
+  tibco-businessconnect-partner-management-portal@1.1.0: 63 of 82 -- see 
+review-queue.csv
+  tibco-businessconnect-partner-management-portal@1.0.0: 63 of 82 -- see 
+review-queue.csv
+  tibco-businessconnect-services-plug-in@6.4.0: 6 of 28 -- see review-queue.csv
+  tibco-businessconnect-soap-protocol@7.2.0: 4 of 32 -- see review-queue.csv
+  tibco-businessconnect-trading-community-management@6.2.0: 3 of 22 -- see 
+review-queue.csv
+  tibco-trading-partner-management-rest-api@1.1.0: 3 of 11 -- see 
+review-queue.csv
+Findings: 38 warnings, 58 notes.

@@ -1,0 +1,21 @@
+census exit=0
+validate-ibi-ai-assistant exit=0
+r001-ibi-ai-assistant exit=0
+validate-ibi-open-data-hub-for-mainframe-connectors exit=1
+r001-ibi-open-data-hub-for-mainframe-connectors exit=0
+validate-ibi-webfocus-app-studio exit=0
+r001-ibi-webfocus-app-studio exit=0
+validate-ibi-webfocus-client exit=0
+r001-ibi-webfocus-client exit=0
+validate-ibi-webfocus-dsml-services exit=0
+r001-ibi-webfocus-dsml-services exit=0
+validate-ibi-webfocus-installer exit=0
+r001-ibi-webfocus-installer exit=0
+census-after exit=0
+verify-ibi-ai-assistant exit=1
+verify-ibi-open-data-hub-for-mainframe-connectors exit=1
+verify-ibi-webfocus-app-studio exit=1
+verify-ibi-webfocus-client exit=1
+verify-ibi-webfocus-dsml-services exit=1
+verify-ibi-webfocus-installer exit=1
+done

@@ -1,0 +1,51 @@
+Syncing 1 version(s) into C:\github\ibi-docs-aem...
+  v ibi-omni-gen@4.3.0 -> release-information/4-3-0 2 file(s), 0.4 MB
+  v ibi-omni-gen@4.3.0 -> reference-documents/4-3-0 2 file(s), 2.2 MB
+                                                    Sync                                                     
++-----------------------------------------------------------------------------------------------------------+
+| Outcome         | Rows | online-help | user-guides | release-information | reference-documents | archives |
+|-----------------+------+-------------+-------------+---------------------+---------------------+----------|
+| Synced          |    2 |           0 |           0 |                   1 |                   1 |        0 |
+| Already current |    1 |           0 |           0 |                   0 |                   0 |        1 |
+| No source tree  |    2 |           1 |           1 |                   0 |                   0 |        0 |
+| Skipped         |    0 |           0 |           0 |                   0 |                   0 |        0 |
+| Failed          |    0 |           0 |           0 |                   0 |                   0 |        0 |
++-----------------------------------------------------------------------------------------------------------+
+4 file(s), 2.6 MB copied.
+1 product metadata.yml, 3 version.yml written.
+! ibi-omni-gen@4.3.0: no converted tree at C:\github\docushift-tool\output\en-us-ibi-legacy\ibi-omni-gen\4.3.0; run `docushift convert` first
+! ibi-omni-gen@4.3.0: user-guides/4-3-0/ removed: the extracted package no longer ships a document for it
+Syncing 1 version(s) into C:\github\ibi-docs-aem...
+  v ibi-omni-gen-mdm@4.3.0 -> release-information/4-3-0 2 file(s), 0.4 MB
+  v ibi-omni-gen-mdm@4.3.0 -> reference-documents/4-3-0 2 file(s), 2.2 MB
+                                                    Sync                                                     
++-----------------------------------------------------------------------------------------------------------+
+| Outcome         | Rows | online-help | user-guides | release-information | reference-documents | archives |
+|-----------------+------+-------------+-------------+---------------------+---------------------+----------|
+| Synced          |    2 |           0 |           0 |                   1 |                   1 |        0 |
+| Already current |    1 |           0 |           0 |                   0 |                   0 |        1 |
+| No source tree  |    2 |           1 |           1 |                   0 |                   0 |        0 |
+| Skipped         |    0 |           0 |           0 |                   0 |                   0 |        0 |
+| Failed          |    0 |           0 |           0 |                   0 |                   0 |        0 |
++-----------------------------------------------------------------------------------------------------------+
+4 file(s), 2.6 MB copied.
+1 product metadata.yml, 3 version.yml written.
+! ibi-omni-gen-mdm@4.3.0: no converted tree at C:\github\docushift-tool\output\en-us-ibi-legacy\ibi-omni-gen-mdm\4.3.0; run `docushift convert` first
+! ibi-omni-gen-mdm@4.3.0: user-guides/4-3-0/ removed: the extracted package no longer ships a document for it
+Syncing 1 version(s) into C:\github\ibi-docs-aem...
+  v ibi-omni-healthdata@4.3.0 -> release-information/4-3-0 2 file(s), 0.4 MB
+  v ibi-omni-healthdata@4.3.0 -> reference-documents/4-3-0 2 file(s), 2.2 MB
+                                                    Sync                                                     
++-----------------------------------------------------------------------------------------------------------+
+| Outcome         | Rows | online-help | user-guides | release-information | reference-documents | archives |
+|-----------------+------+-------------+-------------+---------------------+---------------------+----------|
+| Synced          |    2 |           0 |           0 |                   1 |                   1 |        0 |
+| Already current |    1 |           0 |           0 |                   0 |                   0 |        1 |
+| No source tree  |    2 |           1 |           1 |                   0 |                   0 |        0 |
+| Skipped         |    0 |           0 |           0 |                   0 |                   0 |        0 |
+| Failed          |    0 |           0 |           0 |                   0 |                   0 |        0 |
++-----------------------------------------------------------------------------------------------------------+
+4 file(s), 2.6 MB copied.
+1 product metadata.yml, 3 version.yml written.
+! ibi-omni-healthdata@4.3.0: no converted tree at C:\github\docushift-tool\output\en-us-ibi-legacy\ibi-omni-healthdata\4.3.0; run `docushift convert` first
+! ibi-omni-healthdata@4.3.0: user-guides/4-3-0/ removed: the extracted package no longer ships a document for it

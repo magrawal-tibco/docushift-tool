@@ -1,0 +1,136 @@
+Converting 1 version(s)...
+  v ibi-focus@9.3.0 1957 topic(s), 1780 asset(s), 1 unit(s), 2004 nav node(s), 
+19 generated -> 3759 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+1957 topic(s), 1780 asset(s) written.
+3759 file(s) standing in the measured output tree(s).
+ibi-focus@9.3.0: 1857 resolved, 0 skin, 21 escaped, 51 dangling, 0 
+case-mismatch, 1358 orphan (44.6 MB)
+ibi-focus@9.3.0: skipped 5 generated-directory, 3 runtime-stub
+Findings: 1 error, 2 warnings, 8 notes.
+Converting 1 version(s)...
+  v ibi-focus@9.3.1 1975 topic(s), 1792 asset(s), 1 unit(s), 2022 nav node(s), 
+19 generated -> 3789 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+1975 topic(s), 1792 asset(s) written.
+3789 file(s) standing in the measured output tree(s).
+ibi-focus@9.3.1: 1872 resolved, 0 skin, 24 escaped, 51 dangling, 0 
+case-mismatch, 1359 orphan (45.0 MB)
+ibi-focus@9.3.1: skipped 4 generated-directory, 3 runtime-stub
+Findings: 1 error, 2 warnings, 8 notes.
+Converting 1 version(s)...
+  v ibi-focus@9.3.2 1968 topic(s), 1792 asset(s), 1 unit(s), 2014 nav node(s), 
+18 generated -> 3781 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+1968 topic(s), 1792 asset(s) written.
+3781 file(s) standing in the measured output tree(s).
+ibi-focus@9.3.2: 1872 resolved, 0 skin, 22 escaped, 51 dangling, 0 
+case-mismatch, 1359 orphan (45.0 MB)
+ibi-focus@9.3.2: skipped 4 generated-directory, 3 runtime-stub
+Findings: 1 error, 2 warnings, 8 notes.
+Converting 1 version(s)...
+  v ibi-focus@9.3.3 1968 topic(s), 1859 asset(s), 1 unit(s), 2014 nav node(s), 
+18 generated -> 3848 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+1968 topic(s), 1859 asset(s) written.
+3848 file(s) standing in the measured output tree(s).
+ibi-focus@9.3.3: 1941 resolved, 0 skin, 23 escaped, 51 dangling, 0 
+case-mismatch, 1309 orphan (44.2 MB)
+ibi-focus@9.3.3: skipped 4 generated-directory, 3 runtime-stub
+Findings: 1 error, 2 warnings, 8 notes.
+Converting 1 version(s)...
+  v ibi-focus@9.3.4 1981 topic(s), 1862 asset(s), 2 unit(s), 2028 nav node(s), 
+18 generated -> 3864 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+1981 topic(s), 1862 asset(s) written.
+3864 file(s) standing in the measured output tree(s).
+ibi-focus@9.3.4: 1943 resolved, 5 skin, 27 escaped, 23 dangling, 0 
+case-mismatch, 3311 orphan (153.3 MB)
+ibi-focus@9.3.4: skipped 6 generated-directory, 248 nested-output-root, 9 
+runtime-stub
+Findings: 1 error, 4 warnings, 9 notes.
+Converting 1 version(s)...
+  v ibi-webfocus-app-studio@9.3.3 297 topic(s), 828 asset(s), 1 unit(s), 303 
+nav node(s), 6 generated -> 1134 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+297 topic(s), 828 asset(s) written.
+1134 file(s) standing in the measured output tree(s).
+ibi-webfocus-app-studio@9.3.3: 893 resolved, 0 skin, 9 escaped, 5 dangling, 0 
+case-mismatch, 568 orphan (29.4 MB)
+ibi-webfocus-app-studio@9.3.3: skipped 4 generated-directory, 2 runtime-stub, 1
+unreferenced-template
+Findings: 1 error, 2 warnings, 7 notes.
+Converting 1 version(s)...
+  v ibi-webfocus-app-studio@9.3.4 297 topic(s), 826 asset(s), 1 unit(s), 303 
+nav node(s), 6 generated -> 1132 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+297 topic(s), 826 asset(s) written.
+1132 file(s) standing in the measured output tree(s).
+ibi-webfocus-app-studio@9.3.4: 890 resolved, 0 skin, 9 escaped, 5 dangling, 0 
+case-mismatch, 583 orphan (30.1 MB)
+ibi-webfocus-app-studio@9.3.4: skipped 5 generated-directory, 2 runtime-stub, 1
+unreferenced-template
+Findings: 1 error, 2 warnings, 7 notes.

@@ -1,0 +1,40 @@
+Converting 1 version(s)...
+  v tibco-mdm-studio@6.1.1 1848 topic(s), 2423 asset(s), 2 unit(s), 1864 nav 
+node(s), 11 generated -> 3371 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+1848 topic(s), 2423 asset(s) written.
+3371 file(s) standing in the measured output tree(s).
+tibco-mdm-studio@6.1.1: 2642 resolved, 0 skin, 28 escaped, 4 dangling, 0 
+case-mismatch, 3395 orphan (89.6 MB)
+tibco-mdm-studio@6.1.1: skipped 7 generated-directory, 4 runtime-stub, 2 
+unreferenced-template
+Findings: 3 errors, 2 warnings, 7 notes.
+Converting 1 version(s)...
+  v tibco-mdm-studio@6.0.0 1812 topic(s), 2364 asset(s), 2 unit(s), 1828 nav 
+node(s), 11 generated -> 3292 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+1812 topic(s), 2364 asset(s) written.
+3292 file(s) standing in the measured output tree(s).
+tibco-mdm-studio@6.0.0: 2570 resolved, 0 skin, 0 escaped, 2 dangling, 0 
+case-mismatch, 3300 orphan (78.3 MB)
+tibco-mdm-studio@6.0.0: skipped 7 generated-directory, 4 runtime-stub, 1 
+unreferenced-template
+Findings: 2 errors, 2 warnings, 7 notes.

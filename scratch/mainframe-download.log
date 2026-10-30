@@ -1,0 +1,32 @@
+Downloading 16 version(s) with 4 worker(s)...
+  v tibco-mainframe-red@3.1.0 12.2 MiB
+  v tibco-mainframe-tcp-library@3.0.0 2.4 MiB
+  v tibco-mainframe-tcp-library@2.5.0 2.3 MiB
+  v tibco-mainframe-tcp-library@2.1.0 2.2 MiB
+  v tibco-mainframe-webui@3.0.0 3.1 MiB
+  v tibco-mainframe-webui@2.5.0 3.0 MiB
+  v tibco-mainframe-webui@2.4.0 2.9 MiB
+  x tibco-mainframe-webui@2.2.0
+  v tibco-mainframe-webui@2.1.0 3.9 MiB
+  v tibco-red-enabled-for-ziip@3.1.0 5.4 MiB
+  v tibco-substation-es@2.14.0 9.8 MiB
+  v tibco-transaction-interface-for-ims@2.14.0 9.5 MiB
+  v tibco-transaction-interface-for-ims@2.13.0 8.8 MiB
+  v tibco-transaction-interface-for-ims@2.12.0 8.8 MiB
+  v tibco-transaction-interface-for-ims@2.11.0 8.7 MiB
+  v tibco-transaction-interface-for-ims@2.10.0 8.5 MiB
+           Download            
++-----------------------------+
+| Outcome          | Versions |
+|------------------+----------|
+| Downloaded       |       15 |
+| Already current  |        0 |
+| Skipped (manual) |        0 |
+| No ZIP endpoint  |        0 |
+| Failed           |        1 |
++-----------------------------+
+91.6 MiB written.
+! tibco-mainframe-webui@2.2.0: NotAPackage: 
+https://docs.tibco.com/pub/mainframewebui/2.2.0/tibco-mainframe-webui-2-2-0_doc
+umentation.zip did not return a readable ZIP (most often an error or sign-in 
+page served as HTTP 200)

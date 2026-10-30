@@ -1,0 +1,14 @@
+Validating 24 published folder(s) in C:\github\ibi-docs-aem...
+  ! en-us-ibi-di-ism-userdocs/en-us/ibi-iway-service-manager/online-help/9-2-0 
+68 finding(s), 0 error(s)
+  ! en-us-ibi-di-ism-userdocs/en-us/ibi-iway-service-manager/online-help/9-3-0 
+68 finding(s), 0 error(s)
+                                   Validate                                    
+┌────────────┬───────┬────────────┬──────┬──────────┬────────────┬────────────┐
+│     Walked │ Files │ References │ HTML │ External │ Tree-root… │    Anchors │
+├────────────┼───────┼────────────┼──────┼──────────┼────────────┼────────────┤
+│         24 │  3484 │      21465 │  888 │      468 │          0 │ 12059/121… │
+│  folder(s) │       │            │      │          │            │            │
+└────────────┴───────┴────────────┴──────┴──────────┴────────────┴────────────┘
+ANCHOR_MISSING 136 row(s), 136 occurrence(s)
+Findings: 136 warnings.

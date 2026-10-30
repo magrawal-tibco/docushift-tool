@@ -1,0 +1,76 @@
+Reframing 39 version(s)...
+  v tibco-foresight-archive-and-retrieval-system@6.0.0 95 topic(s) -> 26 
+page(s)
+  v tibco-foresight-archive-and-retrieval-system@5.5.0 94 topic(s) -> 20 
+page(s)
+  v tibco-foresight-archive-and-retrieval-system@5.4.0 100 topic(s) -> 13 
+page(s)
+  v tibco-foresight-connect-with-fhir@1.0.1 21 topic(s) -> 5 page(s)
+  v tibco-foresight-connect-with-fhir@1.0.0 21 topic(s) -> 5 page(s)
+  v tibco-foresight-edisim@6.21.0 1154 topic(s) -> 228 page(s)
+  v tibco-foresight-hipaa-validator-desktop@9.2.0 548 topic(s) -> 161 page(s)
+  v tibco-foresight-instream@9.4.0 778 topic(s) -> 7492 page(s)
+  v tibco-foresight-instream@9.3.0 774 topic(s) -> 7749 page(s)
+  v tibco-foresight-instream@9.2.0 865 topic(s) -> 1205 page(s)
+  v tibco-foresight-operational-monitor@6.0.0 25 topic(s) -> 6 page(s)
+  v tibco-foresight-operational-monitor@5.5.0 25 topic(s) -> 6 page(s)
+  v tibco-foresight-operational-monitor@5.4.0 26 topic(s) -> 6 page(s)
+  v tibco-foresight-rest-api@1.2.0 55 topic(s) -> 37 page(s)
+  v tibco-foresight-rest-api@1.1.0 42 topic(s) -> 32 page(s)
+  v tibco-foresight-rest-api@1.0.3 23 topic(s) -> 13 page(s)
+  v tibco-foresight-studio@9.3.0 347 topic(s) -> 69 page(s)
+  v tibco-foresight-studio@9.2.0 345 topic(s) -> 81 page(s)
+  v tibco-foresight-transaction-insight@6.0.0 821 topic(s) -> 449 page(s)
+  v tibco-foresight-transaction-insight@5.5.0 934 topic(s) -> 487 page(s)
+  v tibco-foresight-transaction-insight@5.4.0 817 topic(s) -> 216 page(s)
+  v tibco-foresight-translator@4.2.0 436 topic(s) -> 81 page(s)
+  v tibco-foresight-translator-attachment-adapter@3.0.0 21 topic(s) -> 9 
+page(s)
+  v tibco-foresight-translator-attachment-adapter@2.0.0 20 topic(s) -> 6 
+page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |       24 |
+| Already current             |        0 |
+| Not Flare or DITA (skipped) |       15 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+8387 topic(s) read into 18402 page(s).
+Files: 120967 source doc -> 25185 converted -> 18402 merged (26.9% fewer at the
+merge, 84.8% end to end); 53403 file(s) standing in the measured merged 
+tree(s).
+16828 page(s) queued for editorial review:
+  tibco-foresight-archive-and-retrieval-system@6.0.0: 13 of 26 -- see 
+review-queue.csv
+  tibco-foresight-archive-and-retrieval-system@5.5.0: 13 of 20 -- see 
+review-queue.csv
+  tibco-foresight-archive-and-retrieval-system@5.4.0: 6 of 13 -- see 
+review-queue.csv
+  tibco-foresight-connect-with-fhir@1.0.1: 2 of 5 -- see review-queue.csv
+  tibco-foresight-connect-with-fhir@1.0.0: 2 of 5 -- see review-queue.csv
+  tibco-foresight-edisim@6.21.0: 74 of 228 -- see review-queue.csv
+  tibco-foresight-hipaa-validator-desktop@9.2.0: 84 of 161 -- see 
+review-queue.csv
+  tibco-foresight-instream@9.4.0: 7102 of 7492 -- see review-queue.csv
+  tibco-foresight-instream@9.3.0: 7397 of 7749 -- see review-queue.csv
+  tibco-foresight-instream@9.2.0: 1139 of 1205 -- see review-queue.csv
+  tibco-foresight-operational-monitor@6.0.0: 3 of 6 -- see review-queue.csv
+  tibco-foresight-operational-monitor@5.5.0: 3 of 6 -- see review-queue.csv
+  tibco-foresight-operational-monitor@5.4.0: 2 of 6 -- see review-queue.csv
+  tibco-foresight-rest-api@1.2.0: 19 of 37 -- see review-queue.csv
+  tibco-foresight-rest-api@1.1.0: 14 of 32 -- see review-queue.csv
+  tibco-foresight-rest-api@1.0.3: 7 of 13 -- see review-queue.csv
+  tibco-foresight-studio@9.3.0: 24 of 69 -- see review-queue.csv
+  tibco-foresight-studio@9.2.0: 36 of 81 -- see review-queue.csv
+  tibco-foresight-transaction-insight@6.0.0: 294 of 449 -- see review-queue.csv
+  tibco-foresight-transaction-insight@5.5.0: 380 of 487 -- see review-queue.csv
+  tibco-foresight-transaction-insight@5.4.0: 161 of 216 -- see review-queue.csv
+  tibco-foresight-translator@4.2.0: 48 of 81 -- see review-queue.csv
+  tibco-foresight-translator-attachment-adapter@3.0.0: 3 of 9 -- see 
+review-queue.csv
+  tibco-foresight-translator-attachment-adapter@2.0.0: 2 of 6 -- see 
+review-queue.csv
+Findings: 25 warnings, 45 notes.

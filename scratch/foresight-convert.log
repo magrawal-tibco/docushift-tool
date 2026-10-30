@@ -1,0 +1,196 @@
+Converting 39 version(s)...
+  v tibco-foresight-archive-and-retrieval-system@6.0.0 99 topic(s), 160 
+asset(s), 1 unit(s), 103 nav node(s), 4 generated -> 266 file(s)
+  v tibco-foresight-archive-and-retrieval-system@5.5.0 98 topic(s), 158 
+asset(s), 1 unit(s), 102 nav node(s), 4 generated -> 263 file(s)
+  v tibco-foresight-archive-and-retrieval-system@5.4.0 97 topic(s), 154 
+asset(s), 1 unit(s), 100 nav node(s), 3 generated -> 257 file(s)
+  v tibco-foresight-connect-with-fhir@1.0.1 19 topic(s), 0 asset(s), 1 unit(s),
+21 nav node(s), 2 generated -> 24 file(s)
+C:\github\docushift-tool\src\docushift\transforms\markdown.py:112: XMLParsedAsHTMLWarning: It looks like you're using an HTML parser to parse an XML document.
+
+Assuming this really is an XML document, what you're doing might work, but you should know that using an XML parser will be more reliable. To parse this document as XML, make sure you have the Python package 'lxml' installed, and pass the keyword argument `features="xml"` into the BeautifulSoup constructor.
+
+If you want or need to use an HTML parser on this document, you can make this warning go away by filtering it. To do that, run this code before calling the BeautifulSoup constructor:
+
+    from bs4 import XMLParsedAsHTMLWarning
+    import warnings
+
+    warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+  return BeautifulSoup(_CDATA.sub(_unwrap_cdata, text), PARSER)
+  v tibco-foresight-connect-with-fhir@1.0.0 20 topic(s), 0 asset(s), 1 unit(s),
+21 nav node(s), 1 generated -> 24 file(s)
+  v tibco-foresight-edisim@6.21.0 1162 topic(s), 1414 asset(s), 1 unit(s), 1191
+nav node(s), 23 generated -> 2601 file(s)
+  v tibco-foresight-hipaa-validator-desktop@9.2.0 601 topic(s), 1418 asset(s), 
+1 unit(s), 608 nav node(s), 1 generated -> 2021 file(s)
+  v tibco-foresight-instream@9.4.0 8094 topic(s), 11262 asset(s), 15 unit(s), 
+8116 nav node(s), 15 generated -> 19359 file(s)
+  v tibco-foresight-instream@9.3.0 8381 topic(s), 11270 asset(s), 15 unit(s), 
+8403 nav node(s), 15 generated -> 19655 file(s)
+  v tibco-foresight-instream@9.2.0 1815 topic(s), 3329 asset(s), 1 unit(s), 
+1947 nav node(s), 1 generated -> 5148 file(s)
+  v tibco-foresight-operational-monitor@6.0.0 24 topic(s), 25 asset(s), 1 
+unit(s), 27 nav node(s), 3 generated -> 54 file(s)
+  v tibco-foresight-operational-monitor@5.5.0 24 topic(s), 23 asset(s), 1 
+unit(s), 27 nav node(s), 3 generated -> 52 file(s)
+  v tibco-foresight-operational-monitor@5.4.0 24 topic(s), 21 asset(s), 1 
+unit(s), 26 nav node(s), 2 generated -> 50 file(s)
+  v tibco-foresight-rest-api@1.2.0 64 topic(s), 6 asset(s), 1 unit(s), 69 nav 
+node(s), 5 generated -> 77 file(s)
+  v tibco-foresight-rest-api@1.1.0 48 topic(s), 6 asset(s), 1 unit(s), 52 nav 
+node(s), 4 generated -> 60 file(s)
+  v tibco-foresight-rest-api@1.0.3 25 topic(s), 0 asset(s), 1 unit(s), 26 nav 
+node(s), 1 generated -> 28 file(s)
+  v tibco-foresight-studio@9.3.0 343 topic(s), 371 asset(s), 1 unit(s), 353 nav
+node(s), 2 generated -> 719 file(s)
+  v tibco-foresight-studio@9.2.0 352 topic(s), 739 asset(s), 1 unit(s), 361 nav
+node(s), 1 generated -> 1094 file(s)
+  v tibco-foresight-transaction-insight@6.0.0 1087 topic(s), 1264 asset(s), 3 
+unit(s), 1120 nav node(s), 33 generated -> 2385 file(s)
+  v tibco-foresight-transaction-insight@5.5.0 1280 topic(s), 1481 asset(s), 4 
+unit(s), 1319 nav node(s), 39 generated -> 2800 file(s)
+  v tibco-foresight-transaction-insight@5.4.0 896 topic(s), 1033 asset(s), 1 
+unit(s), 927 nav node(s), 31 generated -> 1963 file(s)
+  v tibco-foresight-translator@4.2.0 441 topic(s), 630 asset(s), 1 unit(s), 474
+nav node(s), 6 generated -> 1078 file(s)
+  v tibco-foresight-translator-attachment-adapter@3.0.0 20 topic(s), 36 
+asset(s), 1 unit(s), 23 nav node(s), 3 generated -> 60 file(s)
+C:\github\docushift-tool\src\docushift\transforms\markdown.py:112: XMLParsedAsHTMLWarning: It looks like you're using an HTML parser to parse an XML document.
+
+Assuming this really is an XML document, what you're doing might work, but you should know that using an XML parser will be more reliable. To parse this document as XML, make sure you have the Python package 'lxml' installed, and pass the keyword argument `features="xml"` into the BeautifulSoup constructor.
+
+If you want or need to use an HTML parser on this document, you can make this warning go away by filtering it. To do that, run this code before calling the BeautifulSoup constructor:
+
+    from bs4 import XMLParsedAsHTMLWarning
+    import warnings
+
+    warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+  return BeautifulSoup(_CDATA.sub(_unwrap_cdata, text), PARSER)
+  v tibco-foresight-translator-attachment-adapter@2.0.0 20 topic(s), 29 
+asset(s), 1 unit(s), 22 nav node(s), 2 generated -> 52 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |       24 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |       15 |
+| Failed            |        0 |
++------------------------------+
+25034 topic(s), 34829 asset(s) written.
+60090 file(s) standing in the measured output tree(s).
+tibco-foresight-archive-and-retrieval-system@6.0.0: 180 resolved, 0 skin, 2 
+escaped, 0 dangling, 0 case-mismatch, 103 orphan (3.5 MB)
+tibco-foresight-archive-and-retrieval-system@6.0.0: skipped 5 
+generated-directory, 2 runtime-stub
+tibco-foresight-archive-and-retrieval-system@5.5.0: 180 resolved, 0 skin, 0 
+escaped, 0 dangling, 0 case-mismatch, 68 orphan (1.7 MB)
+tibco-foresight-archive-and-retrieval-system@5.5.0: skipped 5 
+generated-directory, 2 runtime-stub
+tibco-foresight-archive-and-retrieval-system@5.4.0: 164 resolved, 0 skin, 0 
+escaped, 0 dangling, 0 case-mismatch, 68 orphan (1.7 MB)
+tibco-foresight-archive-and-retrieval-system@5.4.0: skipped 5 
+generated-directory, 2 runtime-stub
+tibco-foresight-connect-with-fhir@1.0.1: 0 resolved, 0 skin, 7 escaped, 0 
+dangling, 0 case-mismatch, 46 orphan (1.4 MB)
+tibco-foresight-connect-with-fhir@1.0.1: skipped 3 generated-directory, 2 
+runtime-stub
+tibco-foresight-connect-with-fhir@1.0.0: 0 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+tibco-foresight-connect-with-fhir@1.0.0: skipped 2 not-a-topic, 1 
+publication-homepage
+tibco-foresight-edisim@6.21.0: 1483 resolved, 0 skin, 27 escaped, 1 dangling, 0
+case-mismatch, 1295 orphan (17.7 MB)
+tibco-foresight-edisim@6.21.0: skipped 4 generated-directory, 2 runtime-stub
+tibco-foresight-hipaa-validator-desktop@9.2.0: 1496 resolved, 0 skin, 0 
+escaped, 2 dangling, 1 case-mismatch, 1174 orphan (13.6 MB)
+tibco-foresight-hipaa-validator-desktop@9.2.0: skipped 3 generated-directory, 2
+runtime-stub
+tibco-foresight-instream@9.4.0: 11834 resolved, 0 skin, 0 escaped, 471 
+dangling, 0 case-mismatch, 49915 orphan (862.7 MB)
+tibco-foresight-instream@9.4.0: skipped 46 generated-directory, 6620 
+nested-output-root, 14 placeholder-template, 46 runtime-stub, 29 
+unreferenced-template
+tibco-foresight-instream@9.3.0: 11882 resolved, 0 skin, 4 escaped, 617 
+dangling, 0 case-mismatch, 49877 orphan (861.5 MB)
+tibco-foresight-instream@9.3.0: skipped 46 generated-directory, 6634 
+nested-output-root, 14 placeholder-template, 46 runtime-stub, 29 
+unreferenced-template
+tibco-foresight-instream@9.2.0: 3609 resolved, 0 skin, 4 escaped, 427 dangling,
+0 case-mismatch, 296 orphan (6.9 MB)
+tibco-foresight-instream@9.2.0: skipped 4 generated-directory, 2 runtime-stub
+tibco-foresight-operational-monitor@6.0.0: 25 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 79 orphan (3.2 MB)
+tibco-foresight-operational-monitor@6.0.0: skipped 5 generated-directory, 1 
+placeholder-template, 2 runtime-stub
+tibco-foresight-operational-monitor@5.5.0: 23 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 59 orphan (1.6 MB)
+tibco-foresight-operational-monitor@5.5.0: skipped 4 generated-directory, 1 
+placeholder-template, 2 runtime-stub
+tibco-foresight-operational-monitor@5.4.0: 21 resolved, 0 skin, 0 escaped, 2 
+dangling, 0 case-mismatch, 58 orphan (1.6 MB)
+tibco-foresight-operational-monitor@5.4.0: skipped 5 generated-directory, 1 
+placeholder-template, 2 runtime-stub
+tibco-foresight-rest-api@1.2.0: 6 resolved, 0 skin, 9 escaped, 0 dangling, 0 
+case-mismatch, 70 orphan (2.9 MB)
+tibco-foresight-rest-api@1.2.0: skipped 5 generated-directory, 2 runtime-stub
+tibco-foresight-rest-api@1.1.0: 6 resolved, 0 skin, 0 escaped, 0 dangling, 0 
+case-mismatch, 70 orphan (2.9 MB)
+tibco-foresight-rest-api@1.1.0: skipped 4 generated-directory, 2 runtime-stub
+tibco-foresight-rest-api@1.0.3: 0 resolved, 0 skin, 0 escaped, 0 dangling, 0 
+case-mismatch, 54 orphan (1.4 MB)
+tibco-foresight-rest-api@1.0.3: skipped 5 generated-directory, 1 
+placeholder-template, 2 runtime-stub
+tibco-foresight-studio@9.3.0: 409 resolved, 0 skin, 15 escaped, 0 dangling, 0 
+case-mismatch, 157 orphan (5.5 MB)
+tibco-foresight-studio@9.3.0: skipped 4 generated-directory, 2 runtime-stub
+tibco-foresight-studio@9.2.0: 804 resolved, 0 skin, 0 escaped, 0 dangling, 0 
+case-mismatch, 90 orphan (2.8 MB)
+tibco-foresight-studio@9.2.0: skipped 3 generated-directory, 2 runtime-stub
+tibco-foresight-transaction-insight@6.0.0: 1353 resolved, 0 skin, 10 escaped, 4
+dangling, 0 case-mismatch, 1440 orphan (36.1 MB)
+tibco-foresight-transaction-insight@6.0.0: skipped 15 generated-directory, 136 
+nested-output-root, 1 no-content-container, 1 placeholder-template, 8 
+runtime-stub, 6 unreferenced-template
+tibco-foresight-transaction-insight@5.5.0: 1626 resolved, 0 skin, 8 escaped, 99
+dangling, 0 case-mismatch, 1922 orphan (45.3 MB)
+tibco-foresight-transaction-insight@5.5.0: skipped 20 generated-directory, 330 
+nested-output-root, 1 no-content-container, 1 placeholder-template, 13 
+runtime-stub, 9 unreferenced-template
+tibco-foresight-transaction-insight@5.4.0: 1096 resolved, 0 skin, 23 escaped, 2
+dangling, 0 case-mismatch, 457 orphan (10.8 MB)
+tibco-foresight-transaction-insight@5.4.0: skipped 5 generated-directory, 1 
+no-content-container, 2 runtime-stub
+tibco-foresight-translator@4.2.0: 641 resolved, 0 skin, 10 escaped, 0 dangling,
+0 case-mismatch, 1757 orphan (28.2 MB)
+tibco-foresight-translator@4.2.0: skipped 4 generated-directory, 3 runtime-stub
+tibco-foresight-translator-attachment-adapter@3.0.0: 40 resolved, 0 skin, 0 
+escaped, 0 dangling, 0 case-mismatch, 85 orphan (4.4 MB)
+tibco-foresight-translator-attachment-adapter@3.0.0: skipped 3 
+generated-directory, 2 runtime-stub
+tibco-foresight-translator-attachment-adapter@2.0.0: 29 resolved, 0 skin, 0 
+escaped, 0 dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+tibco-foresight-translator-attachment-adapter@2.0.0: skipped 2 not-a-topic, 1 
+publication-homepage
+! tibco-enterprise-foresight@1.1.0: engine undetected (`auto`)
+! tibco-enterprise-foresight@1.0.0: engine undetected (`auto`)
+! tibco-enterprise-foresight-healthcare-add-on@1.1.0: engine undetected 
+(`auto`)
+! tibco-enterprise-foresight-healthcare-add-on@1.0.0: engine undetected 
+(`auto`)
+! tibco-foresight-edisim@6.20.0: engine undetected (`auto`)
+! tibco-foresight-edisim@6.19.0: engine undetected (`auto`)
+! tibco-foresight-hipaa-validator-desktop@9.1.0: engine undetected (`auto`)
+! tibco-foresight-hipaa-validator-desktop@9.0.0: engine undetected (`auto`)
+! tibco-foresight-instream@9.1.0: engine undetected (`auto`)
+! tibco-foresight-instream@9.0.0: engine undetected (`auto`)
+! tibco-foresight-studio@9.1.0: engine undetected (`auto`)
+! tibco-foresight-studio@9.0.1: engine undetected (`auto`)
+! tibco-foresight-studio@9.0.0: engine undetected (`auto`)
+! tibco-foresight-translator@4.1.0: engine undetected (`auto`)
+! tibco-foresight-translator@4.0.0: engine undetected (`auto`)
+Findings: 71 errors, 145 warnings, 113 notes.

@@ -1,0 +1,19 @@
+Validating 20 published folder(s) in C:\github\ibi-docs-aem...
+  ! en-us-ibi-di-ism-userdocs/en-us/ibi-data-intelligence/online-help/1-0-0 8 
+finding(s), 0 error(s)
+  ! en-us-ibi-di-ism-userdocs/en-us/ibi-data-intelligence/online-help/1-1-0 25 
+finding(s), 0 error(s)
+  ! en-us-ibi-di-ism-userdocs/en-us/ibi-data-intelligence/online-help/1-2-0 111
+finding(s), 0 error(s)
+  ! en-us-ibi-di-ism-userdocs/en-us/ibi-data-intelligence/online-help/2-0-0 107
+finding(s), 0 error(s)
+                                   Validate                                    
+┌──────────────┬───────┬────────────┬──────┬──────────┬─────────────┬─────────┐
+│       Walked │ Files │ References │ HTML │ External │ Tree-rooted │ Anchors │
+├──────────────┼───────┼────────────┼──────┼──────────┼─────────────┼─────────┤
+│ 20 folder(s) │   619 │       1984 │  112 │      154 │           0 │ 505/514 │
+└──────────────┴───────┴────────────┴──────┴──────────┴─────────────┴─────────┘
+ANCHOR_MISSING 9 row(s), 9 occurrence(s)
+ANCHOR_WRONG_HEADING 3 row(s), 3 occurrence(s)
+LINK_TO_UNFILED 4 row(s), 239 occurrence(s)
+Findings: 12 warnings, 4 notes.

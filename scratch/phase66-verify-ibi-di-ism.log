@@ -1,0 +1,34 @@
+Verifying 23 version(s) (local only); 2 triage entr(ies); redirect sample 10, seed 988856...
+  ok en-us-ibi-di-ism-userdocs/en-us/ibi-data-intelligence/online-help/1-0-0: clean, 108 old page(s), 0 lost, 0 warning(s), 0 explained
+  ok en-us-ibi-di-ism-userdocs/en-us/ibi-data-intelligence/online-help/1-1-0: clean, 153 old page(s), 0 lost, 0 warning(s), 0 explained
+  ok en-us-ibi-di-ism-userdocs/en-us/ibi-data-intelligence/online-help/1-2-0: clean, 153 old page(s), 0 lost, 0 warning(s), 0 explained
+  ok en-us-ibi-di-ism-userdocs/en-us/ibi-data-intelligence/online-help/2-0-0: clean, 150 old page(s), 0 lost, 0 warning(s), 0 explained
+  ok en-us-ibi-di-ism-userdocs/en-us/ibi-data-intelligence/online-help/2-1-0: clean, 55 old page(s), 0 lost, 0 warning(s), 0 explained
+  ok en-us-ibi-di-ism-userdocs/en-us/ibi-data-quality/online-help/5-2-1: clean, 44 old page(s), 0 lost, 0 warning(s), 0 explained
+  ok en-us-ibi-di-ism-userdocs/en-us/ibi-data-quality/online-help/5-2-2: clean, 45 old page(s), 0 lost, 0 warning(s), 0 explained
+  ok en-us-ibi-di-ism-userdocs/en-us/ibi-data-quality/reference-documents/3-0-0: clean, 3 old page(s), 0 lost, 0 warning(s), 0 explained
+  ok en-us-ibi-di-ism-userdocs/en-us/ibi-data-quality/reference-documents/3-1-0: clean, 4 old page(s), 0 lost, 0 warning(s), 0 explained
+  ok en-us-ibi-di-ism-userdocs/en-us/ibi-data-quality/reference-documents/5-0-0: clean, 4 old page(s), 0 lost, 0 warning(s), 0 explained
+  ok en-us-ibi-di-ism-userdocs/en-us/ibi-data-quality/reference-documents/5-1-0: clean, 5 old page(s), 0 lost, 0 warning(s), 0 explained
+  ok en-us-ibi-di-ism-userdocs/en-us/ibi-data-quality/reference-documents/5-1-1: clean, 5 old page(s), 0 lost, 0 warning(s), 0 explained
+  ok en-us-ibi-di-ism-userdocs/en-us/ibi-data-quality/reference-documents/5-2-0: clean, 5 old page(s), 0 lost, 0 warning(s), 0 explained
+  x en-us-ibi-di-ism-userdocs/en-us/ibi-iway-service-manager/online-help/9-2-0: lost, 1738 old page(s), 9 lost, 0 warning(s), 0 explained
+  x en-us-ibi-di-ism-userdocs/en-us/ibi-iway-service-manager/online-help/9-3-0: lost, 1726 old page(s), 9 lost, 0 warning(s), 0 explained
+  ok en-us-ibi-di-ism-userdocs/en-us/ibi-iway-service-manager/reference-documents/8-0-5: clean, 5 old page(s), 0 lost, 0 warning(s), 0 explained
+  ok en-us-ibi-di-ism-userdocs/en-us/ibi-iway-service-manager/reference-documents/8-0-6: clean, 29 old page(s), 0 lost, 0 warning(s), 0 explained
+  ok en-us-ibi-di-ism-userdocs/en-us/ibi-iway-service-manager/reference-documents/8-0-7: clean, 4 old page(s), 0 lost, 0 warning(s), 0 explained
+  ok en-us-ibi-di-ism-userdocs/en-us/ibi-iway-service-manager/reference-documents/8-1-0: clean, 31 old page(s), 0 lost, 0 warning(s), 0 explained
+  - en-us-ibi-di-ism-userdocs/en-us/ibi-iway-service-manager/reference-documents/9-0-0: skipped, extracted package not on disk
+  ok en-us-ibi-di-ism-userdocs/en-us/ibi-iway-service-manager/reference-documents/9-1-0: clean, 40 old page(s), 0 lost, 0 warning(s), 0 explained
+  ok en-us-ibi-di-ism-userdocs/en-us/ibi-iway-service-manager-edi-add-on/online-help/9-1-1: clean, 30 old page(s), 0 lost, 0 warning(s), 0 explained
+  ok en-us-ibi-di-ism-userdocs/en-us/ibi-iway-service-manager-edi-add-on/online-help/9-3-0: clean, 30 old page(s), 0 lost, 0 warning(s), 0 explained
+                verify                 
++-------------------------------------+
+| Finding                     | Count |
+|-----------------------------+-------|
+| VERIFY_REDIRECT_SAMPLED     |    11 |
+| VERIFY_REDIRECT_UNCONVERTED |   197 |
+| VERIFY_TEXT_DROPPED         |    18 |
+| VERIFY_TOPIC_UNFILED        |   441 |
++-------------------------------------+
+Index: C:\github\docushift-tool\reports\verify\INDEX.html

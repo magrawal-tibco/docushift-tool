@@ -1,0 +1,29 @@
+Reading output\en-us-spotfire-statistica
+  10,000 files read, 305 to change
+  20,000 files read, 909 to change
+  30,000 files read, 1,706 to change
+  40,000 files read, 2,183 to change
+  50,000 files read, 2,509 to change
+  60,000 files read, 3,348 to change
+  70,000 files read, 3,947 to change
+  80,000 files read, 4,233 to change
+Reading reframed\en-us-spotfire-statistica
+  10,000 files read, 1,974 to change
+Reading ..\tibco-docs-aem\en-us-spotfire-statistica-userdocs
+  10,000 files read, 345 to change
+  20,000 files read, 902 to change
+  30,000 files read, 1,683 to change
+  40,000 files read, 2,197 to change
+  50,000 files read, 2,533 to change
+Reading ..\tibco-docs-aem\en-us-spotfire-statistica-userdocs-resources
+                                                                 fix-callouts                                                                  
++---------------------------------------------------------------------------------------------------------------------------------------------+
+| folder                                                         | files changed | labels rewritten | blank lines removed | table-first notes |
+|----------------------------------------------------------------+---------------+------------------+---------------------+-------------------|
+| output\en-us-spotfire-statistica                               |          5060 |             6199 |                   0 |                 0 |
+| reframed\en-us-spotfire-statistica                             |          3863 |             6199 |                   0 |                 0 |
+| ..\tibco-docs-aem\en-us-spotfire-statistica-userdocs           |          3408 |             4175 |                   0 |                 0 |
+| ..\tibco-docs-aem\en-us-spotfire-statistica-userdocs-resources |             0 |                0 |                   0 |                 0 |
++---------------------------------------------------------------------------------------------------------------------------------------------+
+Report: C:\github\docushift-tool\reports\fix-callouts-2026-10-22.csv
+exit 0

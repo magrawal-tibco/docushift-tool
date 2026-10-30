@@ -1,0 +1,22 @@
+Verifying 5 version(s) (local only); 2 triage entr(ies); redirect sample 10, 
+seed 296065...
+  ok en-us-ibi-di-ism-userdocs/en-us/ibi-data-intelligence/online-help/1-0-0: 
+clean, 102 old page(s), 0 lost, 0 warning(s), 0 explained
+  ok en-us-ibi-di-ism-userdocs/en-us/ibi-data-intelligence/online-help/1-1-0: 
+clean, 147 old page(s), 0 lost, 0 warning(s), 0 explained
+  ok en-us-ibi-di-ism-userdocs/en-us/ibi-data-intelligence/online-help/1-2-0: 
+clean, 147 old page(s), 0 lost, 0 warning(s), 0 explained
+  ok en-us-ibi-di-ism-userdocs/en-us/ibi-data-intelligence/online-help/2-0-0: 
+clean, 145 old page(s), 0 lost, 0 warning(s), 0 explained
+  ok en-us-ibi-di-ism-userdocs/en-us/ibi-data-intelligence/online-help/2-1-0: 
+clean, 50 old page(s), 0 lost, 0 warning(s), 0 explained
+                verify                 
+┌─────────────────────────────┬───────┐
+│ Finding                     │ Count │
+├─────────────────────────────┼───────┤
+│ VERIFY_REDIRECT_SAMPLED     │     5 │
+│ VERIFY_REDIRECT_UNCONVERTED │    56 │
+│ VERIFY_TOPIC_UNFILED        │   311 │
+└─────────────────────────────┴───────┘
+100 request(s) made; the rest came from cache/verify/.
+Index: C:\github\docushift-tool\reports\verify\INDEX.html

@@ -1,0 +1,48 @@
+=== tibco-cloud-api-modeler
+Validating 2 published folder(s) in C:\github\tibco-docs-aem...
+  ! en-us-tib-cloud-userdocs/en-us/tibco-cloud-api-modeler/online-help/1-5-0 3 
+finding(s), 0 error(s)
+                                   Validate                                   
++----------------------------------------------------------------------------+
+|      Walked | Files | References | HTML | External | Tree-rooted | Anchors |
+|-------------+-------+------------+------+----------+-------------+---------|
+| 2 folder(s) |    22 |        117 |    0 |       10 |           0 |   85/85 |
++----------------------------------------------------------------------------+
+LINK_TO_UNFILED 1 row(s), 3 occurrence(s)
+Findings: 1 note.
+=== tibco-cloud-integration-businessworks-payg
+Validating 4 published folder(s) in C:\github\tibco-docs-aem...
+                                   Validate                                   
++----------------------------------------------------------------------------+
+|      Walked | Files | References | HTML | External | Tree-rooted | Anchors |
+|-------------+-------+------------+------+----------+-------------+---------|
+| 4 folder(s) |    12 |         87 |    0 |       25 |           0 |   16/16 |
++----------------------------------------------------------------------------+
+Findings: none.
+=== tibco-cloud-integration-flogo-payg
+Validating 4 published folder(s) in C:\github\tibco-docs-aem...
+                                   Validate                                   
++----------------------------------------------------------------------------+
+|      Walked | Files | References | HTML | External | Tree-rooted | Anchors |
+|-------------+-------+------------+------+----------+-------------+---------|
+| 4 folder(s) |    82 |       1131 |   34 |       40 |           0 | 898/898 |
++----------------------------------------------------------------------------+
+Findings: none.
+=== tibco-cloud-integration-hybrid
+Validating 2 published folder(s) in C:\github\tibco-docs-aem...
+                                   Validate                                   
++----------------------------------------------------------------------------+
+|      Walked | Files | References | HTML | External | Tree-rooted | Anchors |
+|-------------+-------+------------+------+----------+-------------+---------|
+| 2 folder(s) |     2 |          5 |    0 |        0 |           0 |     0/0 |
++----------------------------------------------------------------------------+
+Findings: none.
+=== tibco-cloud-integration-hybrid-connectivity-add-on
+Validating 2 published folder(s) in C:\github\tibco-docs-aem...
+                                   Validate                                   
++----------------------------------------------------------------------------+
+|      Walked | Files | References | HTML | External | Tree-rooted | Anchors |
+|-------------+-------+------------+------+----------+-------------+---------|
+| 2 folder(s) |     2 |          5 |    0 |        0 |           0 |     0/0 |
++----------------------------------------------------------------------------+
+Findings: none.

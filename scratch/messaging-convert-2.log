@@ -1,0 +1,54 @@
+Converting 10 version(s)...
+  v tibco-messaging-schema-repository-for-apache-kafka-enterprise-edition@2.1.0
+26 topic(s), 4 asset(s), 1 unit(s), 28 nav node(s), 2 generated -> 35 file(s)
+  v tibco-rendezvous@9.0.0 1653 topic(s), 131 asset(s), 1 unit(s), 1738 nav 
+node(s), 9 generated -> 1796 file(s)
+  v tibco-rendezvous@8.8.1 1653 topic(s), 133 asset(s), 1 unit(s), 1738 nav 
+node(s), 9 generated -> 1798 file(s)
+  v tibco-rendezvous@8.8.0 1656 topic(s), 133 asset(s), 1 unit(s), 1741 nav 
+node(s), 9 generated -> 1801 file(s)
+  v tibco-rendezvous-network-service@2.2.0 31 topic(s), 2 asset(s), 1 unit(s), 
+34 nav node(s) -> 36 file(s)
+  v tibco-rendezvous-network-service@2.1.0 29 topic(s), 2 asset(s), 1 unit(s), 
+34 nav node(s), 2 generated -> 35 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        6 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        4 |
+| Failed            |        0 |
++------------------------------+
+5048 topic(s), 405 asset(s) written.
+5501 file(s) standing in the measured output tree(s).
+tibco-messaging-schema-repository-for-apache-kafka-enterprise-edition@2.1.0: 4 
+resolved, 0 skin, 7 escaped, 0 dangling, 0 case-mismatch, 104 orphan (5.6 MB)
+tibco-messaging-schema-repository-for-apache-kafka-enterprise-edition@2.1.0: 
+skipped 63 api-reference, 4 generated-directory, 3 runtime-stub
+tibco-rendezvous@9.0.0: 131 resolved, 0 skin, 0 escaped, 0 dangling, 0 
+case-mismatch, 253 orphan (13.1 MB)
+tibco-rendezvous@9.0.0: CSH 120 resolved, 0 unresolved, 0 ambiguous
+tibco-rendezvous@9.0.0: skipped 4 generated-directory, 4 runtime-stub
+tibco-rendezvous@8.8.1: 133 resolved, 0 skin, 0 escaped, 0 dangling, 0 
+case-mismatch, 251 orphan (12.0 MB)
+tibco-rendezvous@8.8.1: CSH 120 resolved, 0 unresolved, 0 ambiguous
+tibco-rendezvous@8.8.1: skipped 4 generated-directory, 3 runtime-stub
+tibco-rendezvous@8.8.0: 133 resolved, 0 skin, 0 escaped, 0 dangling, 0 
+case-mismatch, 250 orphan (12.0 MB)
+tibco-rendezvous@8.8.0: CSH 120 resolved, 0 unresolved, 0 ambiguous
+tibco-rendezvous@8.8.0: skipped 4 generated-directory, 3 runtime-stub
+tibco-rendezvous-network-service@2.2.0: 2 resolved, 0 skin, 6 escaped, 0 
+dangling, 0 case-mismatch, 70 orphan (2.8 MB)
+tibco-rendezvous-network-service@2.2.0: skipped 3 generated-directory, 2 
+runtime-stub
+tibco-rendezvous-network-service@2.1.0: 2 resolved, 0 skin, 6 escaped, 0 
+dangling, 0 case-mismatch, 70 orphan (2.9 MB)
+tibco-rendezvous-network-service@2.1.0: skipped 3 generated-directory, 2 
+runtime-stub, 1 unreferenced-template
+! tibco-gems@1.1.0: no converter registered for docusaurus
+! tibco-graphical-rendezvous@1.1.0: no converter registered for docusaurus
+! tibco-messaging@1.31.0: engine undetected (`auto`)
+! tibco-messaging-enterprise-edition@3.4.0: engine undetected (`auto`)
+Findings: 20 warnings, 26 notes.

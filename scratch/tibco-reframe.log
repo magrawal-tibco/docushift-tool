@@ -1,0 +1,89 @@
+Reframing 646 version(s)...
+  v tibco-activematrix-adapter-for-database-tibco-business-studio@1.3.0 271 
+topic(s) -> 54 page(s)
+  v 
+tibco-activematrix-adapter-for-files-for-unix-win-tibco-business-studio@1.3.0 
+206 topic(s) -> 39 page(s)
+  v tibco-activematrix-adapter-for-sap-tibco-business-studio@1.3.0 184 topic(s)
+-> 38 page(s)
+  v tibco-activematrix-service-grid@3.4.4 1797 topic(s) -> 428 page(s)
+  v tibco-activematrix-service-grid@3.4.3 1806 topic(s) -> 421 page(s)
+  v tibco-activematrix-businessworks-plug-in-for-amazon-s3@6.7.0 62 topic(s) ->
+18 page(s)
+  v 
+tibco-activematrix-businessworks-plug-in-for-tibco-managed-file-transfer@6.3.0 
+52 topic(s) -> 11 page(s)
+  x tibco-messaging-manager@4.0.0
+  x tibco-messaging-manager@3.1.1
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |        7 |
+| Already current             |      320 |
+| Not Flare or DITA (skipped) |      310 |
+| No converted tree           |        7 |
+| Failed                      |        2 |
++----------------------------------------+
+4560 topic(s) read into 1080 page(s).
+Files: 345051 source doc -> 91121 converted -> 26676 merged (70.7% fewer at the
+merge, 92.3% end to end); 69658 file(s) standing in the measured merged 
+tree(s).
+248 page(s) queued for editorial review:
+  tibco-activematrix-adapter-for-database-tibco-business-studio@1.3.0: 8 of 54 
+-- see review-queue.csv
+  tibco-activematrix-adapter-for-files-for-unix-win-tibco-business-studio@1.3.0
+: 8 of 39 -- see review-queue.csv
+  tibco-activematrix-adapter-for-sap-tibco-business-studio@1.3.0: 10 of 38 -- 
+see review-queue.csv
+  tibco-activematrix-service-grid@3.4.4: 109 of 428 -- see review-queue.csv
+  tibco-activematrix-service-grid@3.4.3: 102 of 421 -- see review-queue.csv
+  tibco-activematrix-businessworks-plug-in-for-amazon-s3@6.7.0: 7 of 18 -- see 
+review-queue.csv
+  tibco-activematrix-businessworks-plug-in-for-tibco-managed-file-transfer@6.3.
+0: 4 of 11 -- see review-queue.csv
+! 
+tibco-activematrix-businessworks-plug-in-component-for-aws-common-services@6.1.
+0: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-bw-plugin\tibco-activematrix-business
+works-plug-in-component-for-aws-common-services\6.1.0; run `docushift convert` 
+first
+! 
+tibco-activematrix-businessworks-plug-in-component-for-aws-common-services@6.0.
+2: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-bw-plugin\tibco-activematrix-business
+works-plug-in-component-for-aws-common-services\6.0.2; run `docushift convert` 
+first
+! 
+tibco-activematrix-businessworks-plug-in-component-for-aws-common-services@6.0.
+1: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-bw-plugin\tibco-activematrix-business
+works-plug-in-component-for-aws-common-services\6.0.1; run `docushift convert` 
+first
+! 
+tibco-activematrix-businessworks-plug-in-component-for-aws-common-services@6.0.
+0: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-bw-plugin\tibco-activematrix-business
+works-plug-in-component-for-aws-common-services\6.0.0; run `docushift convert` 
+first
+! 
+tibco-activematrix-businessworks-plug-in-for-files-for-unix-and-windows@8.3.0: 
+no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-bw-plugin\tibco-activematrix-business
+works-plug-in-for-files-for-unix-and-windows\8.3.0; run `docushift convert` 
+first
+! tibco-activematrix-businessworks-plug-in-for-oracle-e-business-suite@6.1.2: 
+no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-bw-plugin\tibco-activematrix-business
+works-plug-in-for-oracle-e-business-suite\6.1.2; run `docushift convert` first
+! 
+tibco-activematrix-businessworks-plug-in-for-oracle-fusion-cloud-applications-s
+uite@6.0.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-tib-bw-plugin\tibco-activematrix-business
+works-plug-in-for-oracle-fusion-cloud-applications-suite\6.0.0; run `docushift 
+convert` first
+x tibco-messaging-manager@4.0.0: 1 acceptance check(s) failed: anchors: 
+users-guide/getting-started.md repeats 
+x tibco-messaging-manager@3.1.1: 1 acceptance check(s) failed: anchors: 
+users-guide/getting-started.md repeats 
+Findings: 2 errors, 11 warnings, 330 notes.

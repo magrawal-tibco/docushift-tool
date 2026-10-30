@@ -1,0 +1,102 @@
+Validating 75 published folder(s) in C:\github\ibi-docs-aem...
+  x 
+en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/onli
+ne-help/9-3-0 5 finding(s), 3 error(s)
+  x 
+en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/onli
+ne-help/9-3-1 506 finding(s), 3 error(s)
+  x 
+en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/onli
+ne-help/9-3-2 498 finding(s), 3 error(s)
+  x 
+en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/onli
+ne-help/9-3-3 494 finding(s), 3 error(s)
+  x 
+en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/onli
+ne-help/9-3-4 25 finding(s), 3 error(s)
+  ! 
+en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/onli
+ne-help/9-3-5 14 finding(s), 0 error(s)
+  ! 
+en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/onli
+ne-help/9-3-6 13 finding(s), 0 error(s)
+  ! 
+en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/onli
+ne-help/9-3-7 13 finding(s), 0 error(s)
+  ! 
+en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/onli
+ne-help/9-3-8 27 finding(s), 0 error(s)
+                                   Validate                                    
++-----------------------------------------------------------------------------+
+|     Walked | Files | References | HTML | External | Tree-root… |    Anchors |
+|------------+-------+------------+------+----------+------------+------------|
+|         75 | 22171 |      39947 | 2200 |     1586 |          0 | 10103/116… |
+|  folder(s) |       |            |      |          |            |            |
++-----------------------------------------------------------------------------+
+203 help identifier(s) dropped against a prior version; `docushift csh report 
+--since` lists them.
+LINK_BROKEN 15 row(s), 15 occurrence(s)
+  x 
+en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/onli
+ne-help/9-3-0/server-install/USS/02-u2.md:43: 
+server-install/USS/inst_zos_new47.md is not in this version folder
+  x 
+en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/onli
+ne-help/9-3-0/server-install/USS/02-u2.md:55: 
+server-install/USS/inst_zos_new47.md is not in this version folder
+  x 
+en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/onli
+ne-help/9-3-0/server-install/USS/13.md:43: server-install/USS/inst_zos_new47.md
+is not in this version folder
+  x 
+en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/onli
+ne-help/9-3-1/server-install/USS/02-u2.md:43: 
+server-install/USS/inst_zos_new47.md is not in this version folder
+  x 
+en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/onli
+ne-help/9-3-1/server-install/USS/02-u2.md:55: 
+server-install/USS/inst_zos_new47.md is not in this version folder
+  x 
+en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/onli
+ne-help/9-3-1/server-install/USS/13.md:43: server-install/USS/inst_zos_new47.md
+is not in this version folder
+  x 
+en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/onli
+ne-help/9-3-2/server-install/USS/02-u2.md:43: 
+server-install/USS/inst_zos_new47.md is not in this version folder
+  x 
+en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/onli
+ne-help/9-3-2/server-install/USS/02-u2.md:55: 
+server-install/USS/inst_zos_new47.md is not in this version folder
+  x 
+en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/onli
+ne-help/9-3-2/server-install/USS/13.md:43: server-install/USS/inst_zos_new47.md
+is not in this version folder
+  x 
+en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/onli
+ne-help/9-3-3/server-install/USS/02-u2.md:43: 
+server-install/USS/inst_zos_new47.md is not in this version folder
+  x 
+en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/onli
+ne-help/9-3-3/server-install/USS/02-u2.md:55: 
+server-install/USS/inst_zos_new47.md is not in this version folder
+  x 
+en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/onli
+ne-help/9-3-3/server-install/USS/13.md:43: server-install/USS/inst_zos_new47.md
+is not in this version folder
+  x 
+en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/onli
+ne-help/9-3-4/server-install/USS/02-u2.md:43: 
+server-install/USS/inst_zos_new47.md is not in this version folder
+  x 
+en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/onli
+ne-help/9-3-4/server-install/USS/02-u2.md:55: 
+server-install/USS/inst_zos_new47.md is not in this version folder
+  x 
+en-us-ibi-wf-reporting-server-userdocs/en-us/ibi-webfocus-reporting-server/onli
+ne-help/9-3-4/server-install/USS/13.md:43: server-install/USS/inst_zos_new47.md
+is not in this version folder
+ANCHOR_MISSING 1559 row(s), 1559 occurrence(s)
+CSH_IDENTIFIER_DROPPED 4 row(s), 203 occurrence(s)
+TOC_ENTRY_DUPLICATED 21 row(s), 21 occurrence(s)
+Findings: 15 errors, 1584 warnings.

@@ -1,0 +1,25 @@
+Reframing 19 version(s)...
+  v ibi-focus@9.3.8 2252 topic(s) -> 2192 page(s)
+  v ibi-focus@9.3.7 1946 topic(s) -> 1917 page(s)
+  v ibi-focus@9.3.6 1945 topic(s) -> 1916 page(s)
+  v ibi-focus@9.3.5 1949 topic(s) -> 1920 page(s)
+  v ibi-focus@9.3.4 2028 topic(s) -> 1999 page(s)
+  v ibi-focus@9.3.3 2014 topic(s) -> 2014 page(s)
+  v ibi-focus@9.3.2 2014 topic(s) -> 2014 page(s)
+  v ibi-focus@9.3.1 2022 topic(s) -> 2022 page(s)
+  v ibi-focus@9.3.0 2004 topic(s) -> 2004 page(s)
+                 Reframe                  
+┌─────────────────────────────┬──────────┐
+│ Outcome                     │ Versions │
+├─────────────────────────────┼──────────┤
+│ Reframed                    │        9 │
+│ Already current             │        0 │
+│ Not Flare or DITA (skipped) │       10 │
+│ No converted tree           │        0 │
+│ Failed                      │        0 │
+└─────────────────────────────┴──────────┘
+18174 topic(s) read into 17998 page(s).
+Files: 53992 source doc -> 17886 converted -> 17998 merged (-0.6% fewer at the 
+merge, 66.7% end to end); 33853 file(s) standing in the measured merged 
+tree(s).
+Findings: 9 warnings, 10 notes.

@@ -1,0 +1,11 @@
+                            R001 over 2 version(s)                             
+┌─────────────────────┬─────────┬───────┬──────────────┬───────────────┬──────┐
+│ Product             │ Version │ files │ fixed (repo) │ fixed (local) │ left │
+├─────────────────────┼─────────┼───────┼──────────────┼───────────────┼──────┤
+│ ibi-iway-service-m… │ 9.2.0   │   258 │          174 │           348 │    0 │
+│ ibi-iway-service-m… │ 9.3.0   │   255 │          172 │           344 │    0 │
+└─────────────────────┴─────────┴───────┴──────────────┴───────────────┴──────┘
+Report: C:\github\docushift-tool\reports\repairs\apply-R001-2026-10-25.csv
+Index: C:\github\docushift-tool\reports\repairs\INDEX.html
+Nothing is committed: review with `git diff` in each repo, then commit and 
+push.

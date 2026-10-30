@@ -1,0 +1,111 @@
+Reframing 1 version(s)...
+  v tibco-activematrix-businessworks@6.13.0 2324 topic(s) -> 643 page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |        1 |
+| Already current             |        0 |
+| Not Flare or DITA (skipped) |        0 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+2324 topic(s) read into 643 page(s).
+Files: 10552 source doc -> 2406 converted -> 643 merged (73.3% fewer at the 
+merge, 93.9% end to end); 3099 file(s) standing in the measured merged tree(s).
+158 page(s) queued for editorial review:
+  tibco-activematrix-businessworks@6.13.0: 158 of 643 -- see review-queue.csv
+Findings: 2 warnings, 4 notes.
+Syncing 1 version(s) into ..\tibco-docs-aem...
+  v tibco-activematrix-businessworks@6.13.0 -> online-help/6-13-0 3096 file(s),
+124.1 MB
+                                     Sync                                      
++-----------------------------------------------------------------------------+
+| Outcome   | Rows | online-h… | user-gui… | release-… | referenc… | archives |
+|-----------+------+-----------+-----------+-----------+-----------+----------|
+| Synced    |    1 |         1 |         0 |         0 |         0 |        0 |
+| Already   |    4 |         0 |         1 |         1 |         1 |        1 |
+| current   |      |           |           |           |           |          |
+| No source |    0 |         0 |         0 |         0 |         0 |        0 |
+| tree      |      |           |           |           |           |          |
+| Skipped   |    0 |         0 |         0 |         0 |         0 |        0 |
+| Failed    |    0 |         0 |         0 |         0 |         0 |        0 |
++-----------------------------------------------------------------------------+
+3096 file(s), 124.1 MB copied.
+1 product metadata.yml, 4 version.yml written.
+Published merged (Stage 6b): tibco-activematrix-businessworks.
+7471 redirect(s) in 2 published map(s), tree-rooted (no publish_base_url set).
+Reframing 1 version(s)...
+  v tibco-activematrix-businessworks@6.12.0 2380 topic(s) -> 688 page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |        1 |
+| Already current             |        0 |
+| Not Flare or DITA (skipped) |        0 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+2380 topic(s) read into 688 page(s).
+Files: 10901 source doc -> 2482 converted -> 688 merged (72.3% fewer at the 
+merge, 93.7% end to end); 3354 file(s) standing in the measured merged tree(s).
+183 page(s) queued for editorial review:
+  tibco-activematrix-businessworks@6.12.0: 183 of 688 -- see review-queue.csv
+Findings: 2 warnings, 4 notes.
+Syncing 1 version(s) into ..\tibco-docs-aem...
+  v tibco-activematrix-businessworks@6.12.0 -> online-help/6-12-0 3351 file(s),
+132.8 MB
+                                     Sync                                      
++-----------------------------------------------------------------------------+
+| Outcome   | Rows | online-h… | user-gui… | release-… | referenc… | archives |
+|-----------+------+-----------+-----------+-----------+-----------+----------|
+| Synced    |    1 |         1 |         0 |         0 |         0 |        0 |
+| Already   |    4 |         0 |         1 |         1 |         1 |        1 |
+| current   |      |           |           |           |           |          |
+| No source |    0 |         0 |         0 |         0 |         0 |        0 |
+| tree      |      |           |           |           |           |          |
+| Skipped   |    0 |         0 |         0 |         0 |         0 |        0 |
+| Failed    |    0 |         0 |         0 |         0 |         0 |        0 |
++-----------------------------------------------------------------------------+
+3351 file(s), 132.8 MB copied.
+1 product metadata.yml, 4 version.yml written.
+Published merged (Stage 6b): tibco-activematrix-businessworks.
+12249 redirect(s) in 2 published map(s), tree-rooted (no publish_base_url set).
+Reframing 1 version(s)...
+  v tibco-product-and-service-catalog@5.1.0 542 topic(s) -> 1397 page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |        1 |
+| Already current             |        0 |
+| Not Flare or DITA (skipped) |        0 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+542 topic(s) read into 1397 page(s).
+Files: 5044 source doc -> 1869 converted -> 1397 merged (25.3% fewer at the 
+merge, 72.3% end to end); 2401 file(s) standing in the measured merged tree(s).
+512 page(s) queued for editorial review:
+  tibco-product-and-service-catalog@5.1.0: 512 of 1397 -- see review-queue.csv
+Findings: 2 warnings, 2 notes.
+Syncing 1 version(s) into ..\tibco-docs-aem...
+  v tibco-product-and-service-catalog@5.1.0 -> online-help/5-1-0 2398 file(s), 
+39.7 MB
+                                     Sync                                      
++-----------------------------------------------------------------------------+
+| Outcome   | Rows | online-h… | user-gui… | release-… | referenc… | archives |
+|-----------+------+-----------+-----------+-----------+-----------+----------|
+| Synced    |    1 |         1 |         0 |         0 |         0 |        0 |
+| Already   |    4 |         0 |         1 |         1 |         1 |        1 |
+| current   |      |           |           |           |           |          |
+| No source |    0 |         0 |         0 |         0 |         0 |        0 |
+| tree      |      |           |           |           |           |          |
+| Skipped   |    0 |         0 |         0 |         0 |         0 |        0 |
+| Failed    |    0 |         0 |         0 |         0 |         0 |        0 |
++-----------------------------------------------------------------------------+
+2398 file(s), 39.7 MB copied.
+1 product metadata.yml, 4 version.yml written.
+Published merged (Stage 6b): tibco-product-and-service-catalog.
+2409 redirect(s) in 2 published map(s), tree-rooted (no publish_base_url set).

@@ -1,0 +1,110 @@
+Converting 1 version(s)...
+  v ibi-webfocus-reporting-server@9.3.0 1746 topic(s), 1303 asset(s), 1 
+unit(s), 1788 nav node(s), 1 generated -> 3054 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+1746 topic(s), 1303 asset(s) written.
+3054 file(s) standing in the measured output tree(s).
+ibi-webfocus-reporting-server@9.3.0: 1366 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 1195 orphan (49.2 MB)
+ibi-webfocus-reporting-server@9.3.0: CSH 185 resolved, 0 unresolved, 0 
+ambiguous
+ibi-webfocus-reporting-server@9.3.0: skipped 1 generated-directory, 2 
+runtime-stub, 2 unreferenced-template
+Findings: 6 warnings, 8 notes.
+Converting 1 version(s)...
+  v ibi-webfocus-reporting-server@9.3.5 2397 topic(s), 1935 asset(s), 1 
+unit(s), 4077 nav node(s), 3 generated -> 4339 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+2397 topic(s), 1935 asset(s) written.
+4339 file(s) standing in the measured output tree(s).
+ibi-webfocus-reporting-server@9.3.5: 2078 resolved, 0 skin, 0 escaped, 1 
+dangling, 0 case-mismatch, 2098 orphan (76.0 MB)
+ibi-webfocus-reporting-server@9.3.5: CSH 183 resolved, 0 unresolved, 0 
+ambiguous
+ibi-webfocus-reporting-server@9.3.5: skipped 5 generated-directory, 1 
+no-content-container, 2 runtime-stub, 1 unreferenced-template
+Findings: 1 error, 6 warnings, 10 notes.
+Converting 1 version(s)...
+  v ibi-webfocus-reporting-server@9.3.6 2382 topic(s), 1771 asset(s), 1 
+unit(s), 2423 nav node(s), 2 generated -> 4159 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+2382 topic(s), 1771 asset(s) written.
+4159 file(s) standing in the measured output tree(s).
+ibi-webfocus-reporting-server@9.3.6: 1901 resolved, 0 skin, 0 escaped, 27 
+dangling, 0 case-mismatch, 1803 orphan (54.1 MB)
+ibi-webfocus-reporting-server@9.3.6: CSH 513 resolved, 0 unresolved, 0 
+ambiguous
+ibi-webfocus-reporting-server@9.3.6: skipped 5 generated-directory, 2 
+runtime-stub, 3 unreferenced-template
+Findings: 3 errors, 5 warnings, 10 notes.
+Converting 1 version(s)...
+  v ibi-webfocus-reporting-server@9.3.7 2398 topic(s), 1976 asset(s), 1 
+unit(s), 3610 nav node(s), 3 generated -> 4380 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+2398 topic(s), 1976 asset(s) written.
+4380 file(s) standing in the measured output tree(s).
+ibi-webfocus-reporting-server@9.3.7: 2123 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 2193 orphan (77.0 MB)
+ibi-webfocus-reporting-server@9.3.7: CSH 523 resolved, 0 unresolved, 0 
+ambiguous
+ibi-webfocus-reporting-server@9.3.7: skipped 5 generated-directory, 2 
+runtime-stub, 1 unreferenced-template
+Findings: 5 warnings, 10 notes.
+Converting 1 version(s)...
+  v ibi-webfocus-reporting-server@9.3.8 2904 topic(s), 1970 asset(s), 1 
+unit(s), 2946 nav node(s), 1 generated -> 4879 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+2904 topic(s), 1970 asset(s) written.
+4879 file(s) standing in the measured output tree(s).
+ibi-webfocus-reporting-server@9.3.8: 2236 resolved, 0 skin, 5 escaped, 82 
+dangling, 0 case-mismatch, 1925 orphan (87.8 MB)
+ibi-webfocus-reporting-server@9.3.8: CSH 523 resolved, 0 unresolved, 0 
+ambiguous
+ibi-webfocus-reporting-server@9.3.8: skipped 5 generated-directory, 1 
+no-content-container, 2 runtime-stub, 12 unreferenced-template
+Findings: 3 errors, 7 warnings, 9 notes.

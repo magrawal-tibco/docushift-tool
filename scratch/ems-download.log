@@ -1,0 +1,19 @@
+Downloading 7 version(s) with 4 worker(s)...
+  v tibco-ems-client-for-ibm-i@8.6.0 4.5 MiB
+  v tibco-enterprise-message-service@10.5.1 31.6 MiB
+  v tibco-enterprise-message-service@10.5.0 31.6 MiB
+  v tibco-enterprise-message-service@10.4.4 41.7 MiB
+  v tibco-enterprise-message-service@10.4.3 31.0 MiB
+  v tibco-enterprise-message-service@10.4.1 31.2 MiB
+  v tibco-enterprise-message-service@10.4.0 30.6 MiB
+           Download            
++-----------------------------+
+| Outcome          | Versions |
+|------------------+----------|
+| Downloaded       |        7 |
+| Already current  |        0 |
+| Skipped (manual) |        0 |
+| No ZIP endpoint  |        0 |
+| Failed           |        0 |
++-----------------------------+
+202.1 MiB written.

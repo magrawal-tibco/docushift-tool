@@ -1,0 +1,17 @@
+reframe exit=0
+sync exit=0
+census exit=0
+validate-ibi-data-intelligence exit=0
+r001-ibi-data-intelligence exit=0
+validate-ibi-data-quality exit=0
+r001-ibi-data-quality exit=0
+validate-ibi-iway-service-manager exit=0
+r001-ibi-iway-service-manager exit=0
+validate-ibi-iway-service-manager-edi-add-on exit=0
+r001-ibi-iway-service-manager-edi-add-on exit=0
+census-after exit=0
+verify-ibi-data-intelligence exit=0
+verify-ibi-data-quality exit=0
+verify-ibi-iway-service-manager exit=1
+verify-ibi-iway-service-manager-edi-add-on exit=0
+done

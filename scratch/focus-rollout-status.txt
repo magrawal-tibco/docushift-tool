@@ -1,0 +1,8 @@
+reframe exit=0
+sync exit=0
+census exit=0
+validate-ibi-focus exit=0
+r001-ibi-focus exit=0
+census-after exit=0
+verify-ibi-focus exit=1
+done

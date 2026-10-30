@@ -1,0 +1,89 @@
+Extracting 12 version(s)...
+  v tibco-eftl-enterprise-edition@7.3.0 774 file(s), flare, 1 root(s)
+  v tibco-eftl-enterprise-edition@7.2.0 731 file(s), flare, 1 root(s)
+  v tibco-eftl-enterprise-edition@7.1.3 728 file(s), flare, 1 root(s)
+  v tibco-eftl-enterprise-edition@7.1.2 736 file(s), flare, 1 root(s)
+  v tibco-eftl-enterprise-edition@7.1.1 821 file(s), flare, 1 root(s)
+  v tibco-eftl-enterprise-edition@7.1.0 807 file(s), flare, 1 root(s)
+  v tibco-ftl-enterprise-edition@7.3.0 2850 file(s), flare, 1 root(s)
+  v tibco-ftl-enterprise-edition@7.2.0 2603 file(s), flare, 1 root(s)
+  v tibco-ftl-enterprise-edition@7.1.3 2609 file(s), flare, 1 root(s)
+  v tibco-ftl-enterprise-edition@7.1.2 2654 file(s), flare, 1 root(s)
+  v tibco-ftl-enterprise-edition@7.1.1 2681 file(s), flare, 1 root(s)
+  v tibco-ftl-enterprise-edition@7.1.0 2397 file(s), flare, 1 root(s)
+                Extract                
++-------------------------------------+
+| Outcome                  | Versions |
+|--------------------------+----------|
+| Extracted                |       12 |
+| Already current          |        0 |
+| Measured from cache      |        0 |
+| No package               |        0 |
+| Refused (unsafe archive) |        0 |
+| Failed                   |        0 |
++-------------------------------------+
+20391 file(s) written.
+       Engines       
++-------------------+
+| Engine | Versions |
+|--------+----------|
+| flare  |       12 |
++-------------------+
+CSH: 12 source(s), 0 identifier(s).
+                        Assets                        
++----------------------------------------------------+
+| Category      | Destination     | Files |     Size |
+|---------------+-----------------+-------+----------|
+| topic         | api-reference   |  5057 | 105.7 MB |
+| image         | api-reference   |  1174 |   1.4 MB |
+| other         | api-reference   |   783 |  49.3 MB |
+| topic         | output-root     |  5824 | 106.1 MB |
+| image         | output-root     |  2124 |  78.4 MB |
+| source-format | output-root     |   601 |  53.7 MB |
+| skin          | output-root     |  4452 | 186.1 MB |
+| other         | output-root     |   158 |  10.6 MB |
+| document      | document-router |   158 | 432.5 MB |
+| topic         | unclaimed       |    15 |   0.7 MB |
+| image         | unclaimed       |    11 |   0.9 MB |
+| document      | unclaimed       |     2 |   0.0 MB |
+| other         | unclaimed       |    32 |   1.2 MB |
++----------------------------------------------------+
+? tibco-ftl-enterprise-edition@7.3.0: 60 unclaimed file(s) in 
+fsk-documentation/ (2.8 MB) -- no destination
+? tibco-eftl-enterprise-edition@7.3.0: 
+tibco-eftl-enterprise-edition-7-3-0/html/api-reference/ 297 file(s), no known 
+generator marker
+? tibco-eftl-enterprise-edition@7.2.0: 
+tibco-eftl-enterprise-edition-7-2-0/html/api-reference/ 251 file(s), no known 
+generator marker
+? tibco-eftl-enterprise-edition@7.1.3: 
+tibco-eftl-enterprise-edition-7-1-3/html/api-reference/ 251 file(s), no known 
+generator marker
+? tibco-eftl-enterprise-edition@7.1.2: 
+tibco-eftl-enterprise-edition-7-1-2/html/api-reference/ 251 file(s), no known 
+generator marker
+? tibco-eftl-enterprise-edition@7.1.1: 
+tibco-eftl-enterprise-edition-7-1-1/html/api-reference/ 336 file(s), no known 
+generator marker
+? tibco-eftl-enterprise-edition@7.1.0: 
+tibco-eftl-enterprise-edition-7-1-0/html/api-reference/ 336 file(s), no known 
+generator marker
+? tibco-ftl-enterprise-edition@7.3.0: 
+tibco-ftl-enterprise-edition-7-3-0/html/api-docs/ 529 file(s), no known 
+generator marker
+? tibco-ftl-enterprise-edition@7.2.0: 
+tibco-ftl-enterprise-edition-7-2-0/html/api-docs/ 481 file(s), no known 
+generator marker
+? tibco-ftl-enterprise-edition@7.1.3: 
+tibco-ftl-enterprise-edition-7-1-3/html/api-docs/ 483 file(s), no known 
+generator marker
+? tibco-ftl-enterprise-edition@7.1.2: 
+tibco-ftl-enterprise-edition-7-1-2/html/api-docs/ 483 file(s), no known 
+generator marker
+? tibco-ftl-enterprise-edition@7.1.1: 
+tibco-ftl-enterprise-edition-7-1-1/html/api-docs/ 481 file(s), no known 
+generator marker
+? tibco-ftl-enterprise-edition@7.1.0: 
+tibco-ftl-enterprise-edition-7-1-0/html/api-docs/ 481 file(s), no known 
+generator marker
+Recorded 12 notes -- `docushift report --run 725`.

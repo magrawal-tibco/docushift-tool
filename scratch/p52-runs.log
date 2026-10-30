@@ -1,0 +1,121 @@
+Converting 1 version(s)...
+  v tibco-managed-file-transfer-platform-server-for-z-linux@8.1.0 213 topic(s),
+28 asset(s), 1 unit(s), 219 nav node(s), 6 generated -> 250 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+213 topic(s), 28 asset(s) written.
+250 file(s) standing in the measured output tree(s).
+tibco-managed-file-transfer-platform-server-for-z-linux@8.1.0: 28 resolved, 0 
+skin, 0 escaped, 0 dangling, 0 case-mismatch, 48 orphan (1.8 MB)
+tibco-managed-file-transfer-platform-server-for-z-linux@8.1.0: skipped 3 
+generated-directory, 2 runtime-stub
+Findings: 2 warnings, 4 notes.
+Reframing 1 version(s)...
+  v tibco-managed-file-transfer-platform-server-for-z-linux@8.1.0 203 topic(s) 
+-> 60 page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |        1 |
+| Already current             |        0 |
+| Not Flare or DITA (skipped) |        0 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+203 topic(s) read into 60 page(s).
+Files: 608 source doc -> 218 converted -> 60 merged (72.5% fewer at the merge, 
+90.1% end to end); 96 file(s) standing in the measured merged tree(s).
+23 page(s) queued for editorial review:
+  tibco-managed-file-transfer-platform-server-for-z-linux@8.1.0: 23 of 60 -- 
+see review-queue.csv
+Findings: 1 warning, 2 notes.
+Syncing 1 version(s) into ..\tibco-docs-aem...
+  v tibco-managed-file-transfer-platform-server-for-z-linux@8.1.0 -> 
+online-help/8-1-0 93 file(s), 2.0 MB
+  v tibco-managed-file-transfer-platform-server-for-z-linux@8.1.0 -> 
+user-guides/8-1-0 5 file(s), 3.1 MB
+  v tibco-managed-file-transfer-platform-server-for-z-linux@8.1.0 -> 
+release-information/8-1-0 2 file(s), 0.2 MB
+  v tibco-managed-file-transfer-platform-server-for-z-linux@8.1.0 -> 
+reference-documents/8-1-0 2 file(s), 0.1 MB
+                                     Sync                                      
++-----------------------------------------------------------------------------+
+| Outcome     | Rows | online-help | user-guides | release-in… | reference-d… |
+|-------------+------+-------------+-------------+-------------+--------------|
+| Synced      |    4 |           1 |           1 |           1 |            1 |
+| Already     |    0 |           0 |           0 |           0 |            0 |
+| current     |      |             |             |             |              |
+| No source   |    0 |           0 |           0 |           0 |            0 |
+| tree        |      |             |             |             |              |
+| Skipped     |    0 |           0 |           0 |           0 |            0 |
+| Failed      |    0 |           0 |           0 |           0 |            0 |
++-----------------------------------------------------------------------------+
+102 file(s), 5.3 MB copied.
+1 product metadata.yml, 4 version.yml written.
+Published merged (Stage 6b): 
+tibco-managed-file-transfer-platform-server-for-z-linux.
+1235 redirect(s) in 2 published map(s), tree-rooted (no publish_base_url set).
+Converting 1 version(s)...
+  v tibco-product-and-service-catalog@5.1.0 1864 topic(s), 996 asset(s), 3 
+unit(s), 1869 nav node(s), 8 generated -> 2869 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+1864 topic(s), 996 asset(s) written.
+2869 file(s) standing in the measured output tree(s).
+tibco-product-and-service-catalog@5.1.0: 1197 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 918 orphan (44.3 MB)
+tibco-product-and-service-catalog@5.1.0: CSH 10 resolved, 0 unresolved, 10 
+ambiguous
+tibco-product-and-service-catalog@5.1.0: skipped 9 generated-directory, 3 
+placeholder-template, 6 runtime-stub, 5 unreferenced-template
+Findings: 3 warnings, 6 notes.
+Reframing 1 version(s)...
+  v tibco-product-and-service-catalog@5.1.0 542 topic(s) -> 1397 page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |        1 |
+| Already current             |        0 |
+| Not Flare or DITA (skipped) |        0 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+542 topic(s) read into 1397 page(s).
+Files: 5044 source doc -> 1869 converted -> 1397 merged (25.3% fewer at the 
+merge, 72.3% end to end); 2401 file(s) standing in the measured merged tree(s).
+512 page(s) queued for editorial review:
+  tibco-product-and-service-catalog@5.1.0: 512 of 1397 -- see review-queue.csv
+Findings: 2 warnings, 2 notes.
+Syncing 1 version(s) into ..\tibco-docs-aem...
+                                     Sync                                      
++-----------------------------------------------------------------------------+
+| Outcome   | Rows | online-h… | user-gui… | release-… | referenc… | archives |
+|-----------+------+-----------+-----------+-----------+-----------+----------|
+| Synced    |    0 |         0 |         0 |         0 |         0 |        0 |
+| Already   |    5 |         1 |         1 |         1 |         1 |        1 |
+| current   |      |           |           |           |           |          |
+| No source |    0 |         0 |         0 |         0 |         0 |        0 |
+| tree      |      |           |           |           |           |          |
+| Skipped   |    0 |         0 |         0 |         0 |         0 |        0 |
+| Failed    |    0 |         0 |         0 |         0 |         0 |        0 |
++-----------------------------------------------------------------------------+
+1 product metadata.yml, 4 version.yml written.
+2409 redirect(s) in 2 published map(s), tree-rooted (no publish_base_url set).

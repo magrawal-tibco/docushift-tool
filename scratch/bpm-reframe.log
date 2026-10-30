@@ -1,0 +1,39 @@
+Reframing 19 version(s)...
+  v tibco-activematrix-bpm@4.3.0 8263 topic(s) -> 1347 page(s)
+  v tibco-activematrix-service-grid@3.4.4 1797 topic(s) -> 428 page(s)
+  v tibco-activematrix-service-grid@3.4.3 1806 topic(s) -> 421 page(s)
+  v tibco-bpm-enterprise@5.7.0 445 topic(s) -> 118 page(s)
+  v tibco-bpm-enterprise@5.6.1 431 topic(s) -> 118 page(s)
+  v tibco-bpm-enterprise@5.6.0 429 topic(s) -> 116 page(s)
+  v tibco-bpm-enterprise@4.3.5 4876 topic(s) -> 441 page(s)
+  v tibco-business-studio-bpm-edition@5.7.0 1109 topic(s) -> 196 page(s)
+  v tibco-business-studio-bpm-edition@5.6.1 1104 topic(s) -> 196 page(s)
+  v tibco-business-studio-bpm-edition@5.6.0 1104 topic(s) -> 196 page(s)
+  v tibco-business-studio-bpm-edition@4.3.5 1222 topic(s) -> 118 page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |       11 |
+| Already current             |        0 |
+| Not Flare or DITA (skipped) |        8 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+22586 topic(s) read into 3695 page(s).
+Files: 73131 source doc -> 22611 converted -> 3695 merged (83.7% fewer at the 
+merge, 94.9% end to end); 15074 file(s) standing in the measured merged 
+tree(s).
+779 page(s) queued for editorial review:
+  tibco-activematrix-bpm@4.3.0: 162 of 1347 -- see review-queue.csv
+  tibco-activematrix-service-grid@3.4.4: 109 of 428 -- see review-queue.csv
+  tibco-activematrix-service-grid@3.4.3: 102 of 421 -- see review-queue.csv
+  tibco-bpm-enterprise@5.7.0: 40 of 118 -- see review-queue.csv
+  tibco-bpm-enterprise@5.6.1: 38 of 118 -- see review-queue.csv
+  tibco-bpm-enterprise@5.6.0: 38 of 116 -- see review-queue.csv
+  tibco-bpm-enterprise@4.3.5: 202 of 441 -- see review-queue.csv
+  tibco-business-studio-bpm-edition@5.7.0: 10 of 196 -- see review-queue.csv
+  tibco-business-studio-bpm-edition@5.6.1: 11 of 196 -- see review-queue.csv
+  tibco-business-studio-bpm-edition@5.6.0: 11 of 196 -- see review-queue.csv
+  tibco-business-studio-bpm-edition@4.3.5: 56 of 118 -- see review-queue.csv
+Findings: 13 warnings, 22 notes.

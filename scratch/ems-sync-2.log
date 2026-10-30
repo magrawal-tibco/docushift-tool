@@ -1,0 +1,16 @@
+Syncing 7 version(s) into ..\tibco-docs-aem...
+                                     Sync                                      
++-----------------------------------------------------------------------------+
+| Outcome | Rows | online… | user-g… | releas… | refere… | api-ref… | archiv… |
+|---------+------+---------+---------+---------+---------+----------+---------|
+| Synced  |    0 |       0 |       0 |       0 |       0 |        0 |       0 |
+| Already |   36 |       7 |       7 |       7 |       7 |        6 |       2 |
+| current |      |         |         |         |         |          |         |
+| No      |    0 |       0 |       0 |       0 |       0 |        0 |       0 |
+| source  |      |         |         |         |         |          |         |
+| tree    |      |         |         |         |         |          |         |
+| Skipped |    0 |       0 |       0 |       0 |       0 |        0 |       0 |
+| Failed  |    0 |       0 |       0 |       0 |       0 |        0 |       0 |
++-----------------------------------------------------------------------------+
+2 product metadata.yml, 8 version.yml written.
+17303 redirect(s) in 4 published map(s), tree-rooted (no publish_base_url set).

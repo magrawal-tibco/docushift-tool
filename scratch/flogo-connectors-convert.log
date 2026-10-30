@@ -1,0 +1,913 @@
+Converting 125 version(s)...
+C:\github\docushift-tool\src\docushift\transforms\markdown.py:112: XMLParsedAsHTMLWarning: It looks like you're using an HTML parser to parse an XML document.
+
+Assuming this really is an XML document, what you're doing might work, but you should know that using an XML parser will be more reliable. To parse this document as XML, make sure you have the Python package 'lxml' installed, and pass the keyword argument `features="xml"` into the BeautifulSoup constructor.
+
+If you want or need to use an HTML parser on this document, you can make this warning go away by filtering it. To do that, run this code before calling the BeautifulSoup constructor:
+
+    from bs4 import XMLParsedAsHTMLWarning
+    import warnings
+
+    warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+  return BeautifulSoup(_CDATA.sub(_unwrap_cdata, text), PARSER)
+  v tibco-flogo-connection-for-sap@1.0.0 8 topic(s), 0 asset(s), 1 unit(s), 9 
+nav node(s), 1 generated -> 11 file(s)
+  v tibco-flogo-connector-for-amazon-dynamodb@1.1.0 11 topic(s), 0 asset(s), 1 
+unit(s), 12 nav node(s), 1 generated -> 14 file(s)
+  v tibco-flogo-connector-for-amazon-dynamodb@1.0.1 12 topic(s), 0 asset(s), 1 
+unit(s), 13 nav node(s), 1 generated -> 15 file(s)
+  v tibco-flogo-connector-for-amazon-dynamodb@1.0.0 10 topic(s), 0 asset(s), 1 
+unit(s), 11 nav node(s), 1 generated -> 13 file(s)
+  v tibco-flogo-connector-for-amazon-elastic-file-system@1.0.0 12 topic(s), 0 
+asset(s), 1 unit(s), 13 nav node(s), 1 generated -> 15 file(s)
+  v tibco-flogo-connector-for-amazon-glacier@1.0.0 12 topic(s), 0 asset(s), 1 
+unit(s), 13 nav node(s), 1 generated -> 15 file(s)
+  v tibco-flogo-connector-for-amazon-kinesis@1.1.1 16 topic(s), 0 asset(s), 1 
+unit(s), 17 nav node(s), 1 generated -> 19 file(s)
+  v tibco-flogo-connector-for-amazon-s3@1.3.1 16 topic(s), 0 asset(s), 1 
+unit(s), 17 nav node(s), 1 generated -> 19 file(s)
+  v tibco-flogo-connector-for-amazon-sns@1.0.1 11 topic(s), 0 asset(s), 1 
+unit(s), 12 nav node(s), 1 generated -> 14 file(s)
+  v tibco-flogo-connector-for-amazon-sqs@1.0.1 12 topic(s), 0 asset(s), 1 
+unit(s), 13 nav node(s), 1 generated -> 15 file(s)
+C:\github\docushift-tool\src\docushift\transforms\markdown.py:112: XMLParsedAsHTMLWarning: It looks like you're using an HTML parser to parse an XML document.
+
+Assuming this really is an XML document, what you're doing might work, but you should know that using an XML parser will be more reliable. To parse this document as XML, make sure you have the Python package 'lxml' installed, and pass the keyword argument `features="xml"` into the BeautifulSoup constructor.
+
+If you want or need to use an HTML parser on this document, you can make this warning go away by filtering it. To do that, run this code before calling the BeautifulSoup constructor:
+
+    from bs4 import XMLParsedAsHTMLWarning
+    import warnings
+
+    warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+  return BeautifulSoup(_CDATA.sub(_unwrap_cdata, text), PARSER)
+  v tibco-flogo-connector-for-apache-avro@1.1.1 9 topic(s), 0 asset(s), 1 
+unit(s), 10 nav node(s), 1 generated -> 12 file(s)
+  v tibco-flogo-connector-for-apache-avro@1.1.0 9 topic(s), 0 asset(s), 1 
+unit(s), 10 nav node(s), 1 generated -> 12 file(s)
+  v tibco-flogo-connector-for-apache-avro@1.0.0 9 topic(s), 0 asset(s), 1 
+unit(s), 10 nav node(s), 1 generated -> 12 file(s)
+  v tibco-flogo-connector-for-apache-couchdb@1.0.0 10 topic(s), 0 asset(s), 1 
+unit(s), 11 nav node(s), 1 generated -> 13 file(s)
+  v tibco-flogo-connector-for-apache-kafka@1.3.3 31 topic(s), 0 asset(s), 1 
+unit(s), 32 nav node(s), 1 generated -> 34 file(s)
+  v tibco-flogo-connector-for-apache-kafka@1.3.2 31 topic(s), 0 asset(s), 1 
+unit(s), 32 nav node(s), 1 generated -> 34 file(s)
+  v tibco-flogo-connector-for-apache-kafka@1.3.1 30 topic(s), 0 asset(s), 1 
+unit(s), 31 nav node(s), 1 generated -> 33 file(s)
+  v tibco-flogo-connector-for-apache-pulsar@1.3.4 13 topic(s), 0 asset(s), 1 
+unit(s), 13 nav node(s) -> 16 file(s)
+  v tibco-flogo-connector-for-apache-pulsar@1.3.3 13 topic(s), 0 asset(s), 1 
+unit(s), 13 nav node(s) -> 16 file(s)
+  v tibco-flogo-connector-for-apache-pulsar@1.3.2 13 topic(s), 0 asset(s), 1 
+unit(s), 13 nav node(s) -> 16 file(s)
+  v tibco-flogo-connector-for-apache-pulsar@1.3.1 12 topic(s), 0 asset(s), 1 
+unit(s), 12 nav node(s) -> 15 file(s)
+C:\github\docushift-tool\src\docushift\transforms\markdown.py:112: XMLParsedAsHTMLWarning: It looks like you're using an HTML parser to parse an XML document.
+
+Assuming this really is an XML document, what you're doing might work, but you should know that using an XML parser will be more reliable. To parse this document as XML, make sure you have the Python package 'lxml' installed, and pass the keyword argument `features="xml"` into the BeautifulSoup constructor.
+
+If you want or need to use an HTML parser on this document, you can make this warning go away by filtering it. To do that, run this code before calling the BeautifulSoup constructor:
+
+    from bs4 import XMLParsedAsHTMLWarning
+    import warnings
+
+    warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+  return BeautifulSoup(_CDATA.sub(_unwrap_cdata, text), PARSER)
+  v tibco-flogo-connector-for-apache-solr@1.1.0 10 topic(s), 1 asset(s), 1 
+unit(s), 11 nav node(s), 1 generated -> 14 file(s)
+  v tibco-flogo-connector-for-apache-solr@1.0.0 10 topic(s), 1 asset(s), 1 
+unit(s), 11 nav node(s), 1 generated -> 14 file(s)
+  v tibco-flogo-connector-for-data-conversion@1.0.0 32 topic(s), 2 asset(s), 1 
+unit(s), 33 nav node(s), 1 generated -> 37 file(s)
+  v tibco-flogo-connector-for-docusign@3.0.1 15 topic(s), 0 asset(s), 1 
+unit(s), 15 nav node(s) -> 18 file(s)
+C:\github\docushift-tool\src\docushift\transforms\markdown.py:112: XMLParsedAsHTMLWarning: It looks like you're using an HTML parser to parse an XML document.
+
+Assuming this really is an XML document, what you're doing might work, but you should know that using an XML parser will be more reliable. To parse this document as XML, make sure you have the Python package 'lxml' installed, and pass the keyword argument `features="xml"` into the BeautifulSoup constructor.
+
+If you want or need to use an HTML parser on this document, you can make this warning go away by filtering it. To do that, run this code before calling the BeautifulSoup constructor:
+
+    from bs4 import XMLParsedAsHTMLWarning
+    import warnings
+
+    warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+  return BeautifulSoup(_CDATA.sub(_unwrap_cdata, text), PARSER)
+  v tibco-flogo-connector-for-github@1.0.0 8 topic(s), 0 asset(s), 1 unit(s), 9
+nav node(s), 1 generated -> 11 file(s)
+  v tibco-flogo-connector-for-google-cloud-pub-sub@1.0.1 13 topic(s), 0 
+asset(s), 1 unit(s), 14 nav node(s), 1 generated -> 16 file(s)
+C:\github\docushift-tool\src\docushift\transforms\markdown.py:112: XMLParsedAsHTMLWarning: It looks like you're using an HTML parser to parse an XML document.
+
+Assuming this really is an XML document, what you're doing might work, but you should know that using an XML parser will be more reliable. To parse this document as XML, make sure you have the Python package 'lxml' installed, and pass the keyword argument `features="xml"` into the BeautifulSoup constructor.
+
+If you want or need to use an HTML parser on this document, you can make this warning go away by filtering it. To do that, run this code before calling the BeautifulSoup constructor:
+
+    from bs4 import XMLParsedAsHTMLWarning
+    import warnings
+
+    warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+  return BeautifulSoup(_CDATA.sub(_unwrap_cdata, text), PARSER)
+  v tibco-flogo-connector-for-google-cloud-sql@1.0.0 13 topic(s), 0 asset(s), 1
+unit(s), 14 nav node(s), 1 generated -> 16 file(s)
+  v tibco-flogo-connector-for-google-cloud-storage@1.0.0 13 topic(s), 0 
+asset(s), 1 unit(s), 14 nav node(s), 1 generated -> 16 file(s)
+  v tibco-flogo-connector-for-google-docs@1.0.0 14 topic(s), 0 asset(s), 1 
+unit(s), 15 nav node(s), 1 generated -> 17 file(s)
+  v tibco-flogo-connector-for-google-sheets@1.0.0 13 topic(s), 0 asset(s), 1 
+unit(s), 14 nav node(s), 1 generated -> 16 file(s)
+  v tibco-flogo-connector-for-http@1.1.1 8 topic(s), 1 asset(s), 1 unit(s), 9 
+nav node(s), 1 generated -> 12 file(s)
+C:\github\docushift-tool\src\docushift\transforms\markdown.py:112: XMLParsedAsHTMLWarning: It looks like you're using an HTML parser to parse an XML document.
+
+Assuming this really is an XML document, what you're doing might work, but you should know that using an XML parser will be more reliable. To parse this document as XML, make sure you have the Python package 'lxml' installed, and pass the keyword argument `features="xml"` into the BeautifulSoup constructor.
+
+If you want or need to use an HTML parser on this document, you can make this warning go away by filtering it. To do that, run this code before calling the BeautifulSoup constructor:
+
+    from bs4 import XMLParsedAsHTMLWarning
+    import warnings
+
+    warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+  return BeautifulSoup(_CDATA.sub(_unwrap_cdata, text), PARSER)
+  v tibco-flogo-connector-for-hubspot@2.1.0 14 topic(s), 0 asset(s), 1 unit(s),
+15 nav node(s), 1 generated -> 17 file(s)
+  v tibco-flogo-connector-for-ibm-mq@2.2.0 19 topic(s), 0 asset(s), 1 unit(s), 
+20 nav node(s), 1 generated -> 21 file(s)
+C:\github\docushift-tool\src\docushift\transforms\markdown.py:112: XMLParsedAsHTMLWarning: It looks like you're using an HTML parser to parse an XML document.
+
+Assuming this really is an XML document, what you're doing might work, but you should know that using an XML parser will be more reliable. To parse this document as XML, make sure you have the Python package 'lxml' installed, and pass the keyword argument `features="xml"` into the BeautifulSoup constructor.
+
+If you want or need to use an HTML parser on this document, you can make this warning go away by filtering it. To do that, run this code before calling the BeautifulSoup constructor:
+
+    from bs4 import XMLParsedAsHTMLWarning
+    import warnings
+
+    warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+  return BeautifulSoup(_CDATA.sub(_unwrap_cdata, text), PARSER)
+  v tibco-flogo-connector-for-ibm-mq@1.0.0 14 topic(s), 0 asset(s), 1 unit(s), 
+15 nav node(s), 1 generated -> 17 file(s)
+  v tibco-flogo-connector-for-jira@1.0.1 11 topic(s), 0 asset(s), 1 unit(s), 12
+nav node(s), 1 generated -> 14 file(s)
+  v tibco-flogo-connector-for-jira@1.0.0 11 topic(s), 0 asset(s), 1 unit(s), 12
+nav node(s), 1 generated -> 14 file(s)
+  v tibco-flogo-connector-for-magento@2.0.0 13 topic(s), 0 asset(s), 1 unit(s),
+14 nav node(s), 1 generated -> 16 file(s)
+  v tibco-flogo-connector-for-mailchimp@1.0.1 14 topic(s), 0 asset(s), 1 
+unit(s), 15 nav node(s), 1 generated -> 17 file(s)
+C:\github\docushift-tool\src\docushift\transforms\markdown.py:112: XMLParsedAsHTMLWarning: It looks like you're using an HTML parser to parse an XML document.
+
+Assuming this really is an XML document, what you're doing might work, but you should know that using an XML parser will be more reliable. To parse this document as XML, make sure you have the Python package 'lxml' installed, and pass the keyword argument `features="xml"` into the BeautifulSoup constructor.
+
+If you want or need to use an HTML parser on this document, you can make this warning go away by filtering it. To do that, run this code before calling the BeautifulSoup constructor:
+
+    from bs4 import XMLParsedAsHTMLWarning
+    import warnings
+
+    warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+  return BeautifulSoup(_CDATA.sub(_unwrap_cdata, text), PARSER)
+  v tibco-flogo-connector-for-mailchimp@1.0.0 12 topic(s), 0 asset(s), 1 
+unit(s), 13 nav node(s), 1 generated -> 16 file(s)
+  v tibco-flogo-connector-for-marketo@1.2.1 14 topic(s), 0 asset(s), 1 unit(s),
+15 nav node(s), 1 generated -> 16 file(s)
+  v tibco-flogo-connector-for-marketo@1.2.0 14 topic(s), 0 asset(s), 1 unit(s),
+15 nav node(s), 1 generated -> 16 file(s)
+C:\github\docushift-tool\src\docushift\transforms\markdown.py:112: XMLParsedAsHTMLWarning: It looks like you're using an HTML parser to parse an XML document.
+
+Assuming this really is an XML document, what you're doing might work, but you should know that using an XML parser will be more reliable. To parse this document as XML, make sure you have the Python package 'lxml' installed, and pass the keyword argument `features="xml"` into the BeautifulSoup constructor.
+
+If you want or need to use an HTML parser on this document, you can make this warning go away by filtering it. To do that, run this code before calling the BeautifulSoup constructor:
+
+    from bs4 import XMLParsedAsHTMLWarning
+    import warnings
+
+    warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+  return BeautifulSoup(_CDATA.sub(_unwrap_cdata, text), PARSER)
+  v tibco-flogo-connector-for-marketo@1.1.1 12 topic(s), 0 asset(s), 1 unit(s),
+13 nav node(s), 1 generated -> 15 file(s)
+  v tibco-flogo-connector-for-marketo@1.1.0 12 topic(s), 0 asset(s), 1 unit(s),
+13 nav node(s), 1 generated -> 15 file(s)
+  v tibco-flogo-connector-for-marketo@1.0.0 12 topic(s), 0 asset(s), 1 unit(s),
+13 nav node(s), 1 generated -> 15 file(s)
+  v tibco-flogo-connector-for-microsoft-azure-service-bus@1.4.3 13 topic(s), 0 
+asset(s), 1 unit(s), 14 nav node(s), 1 generated -> 16 file(s)
+  v tibco-flogo-connector-for-microsoft-azure-service-bus@1.4.1 24 topic(s), 0 
+asset(s), 1 unit(s), 25 nav node(s), 1 generated -> 27 file(s)
+  v tibco-flogo-connector-for-microsoft-azure-storage@1.2.0 17 topic(s), 0 
+asset(s), 1 unit(s), 18 nav node(s), 1 generated -> 20 file(s)
+  v tibco-flogo-connector-for-microsoft-azure-storage@1.1.3 17 topic(s), 0 
+asset(s), 1 unit(s), 18 nav node(s), 1 generated -> 20 file(s)
+  v tibco-flogo-connector-for-microsoft-sql-server@2.6.1 37 topic(s), 0 
+asset(s), 1 unit(s), 38 nav node(s), 1 generated -> 40 file(s)
+  v tibco-flogo-connector-for-mongodb@1.1.1 13 topic(s), 0 asset(s), 1 unit(s),
+14 nav node(s), 1 generated -> 16 file(s)
+  v tibco-flogo-connector-for-mqtt@1.3.1 23 topic(s), 0 asset(s), 1 unit(s), 24
+nav node(s), 1 generated -> 26 file(s)
+  v tibco-flogo-connector-for-odata@1.0.0 14 topic(s), 0 asset(s), 1 unit(s), 
+16 nav node(s), 2 generated -> 18 file(s)
+  v tibco-flogo-connector-for-oracle-database@1.2.2 23 topic(s), 0 asset(s), 1 
+unit(s), 24 nav node(s), 1 generated -> 26 file(s)
+  v tibco-flogo-connector-for-oracle-database@1.2.1 23 topic(s), 0 asset(s), 1 
+unit(s), 25 nav node(s), 2 generated -> 28 file(s)
+  v tibco-flogo-connector-for-oracle-mysql@2.4.5 43 topic(s), 0 asset(s), 1 
+unit(s), 44 nav node(s), 1 generated -> 46 file(s)
+  v tibco-flogo-connector-for-postgresql@2.7.1 13 topic(s), 0 asset(s), 1 
+unit(s), 15 nav node(s), 2 generated -> 17 file(s)
+C:\github\docushift-tool\src\docushift\transforms\markdown.py:112: XMLParsedAsHTMLWarning: It looks like you're using an HTML parser to parse an XML document.
+
+Assuming this really is an XML document, what you're doing might work, but you should know that using an XML parser will be more reliable. To parse this document as XML, make sure you have the Python package 'lxml' installed, and pass the keyword argument `features="xml"` into the BeautifulSoup constructor.
+
+If you want or need to use an HTML parser on this document, you can make this warning go away by filtering it. To do that, run this code before calling the BeautifulSoup constructor:
+
+    from bs4 import XMLParsedAsHTMLWarning
+    import warnings
+
+    warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+  return BeautifulSoup(_CDATA.sub(_unwrap_cdata, text), PARSER)
+  v tibco-flogo-connector-for-riak@1.0.0 13 topic(s), 0 asset(s), 1 unit(s), 14
+nav node(s), 1 generated -> 16 file(s)
+  v tibco-flogo-connector-for-salesforce-com@1.3.7 21 topic(s), 0 asset(s), 1 
+unit(s), 22 nav node(s), 1 generated -> 24 file(s)
+  v tibco-flogo-connector-for-salesforce-com@1.3.5 20 topic(s), 0 asset(s), 1 
+unit(s), 21 nav node(s), 1 generated -> 23 file(s)
+  v tibco-flogo-connector-for-salesforce-com@1.3.2 19 topic(s), 0 asset(s), 1 
+unit(s), 19 nav node(s) -> 22 file(s)
+  v tibco-flogo-connector-for-salesforce-com@1.3.1 18 topic(s), 0 asset(s), 1 
+unit(s), 18 nav node(s) -> 21 file(s)
+C:\github\docushift-tool\src\docushift\transforms\markdown.py:112: XMLParsedAsHTMLWarning: It looks like you're using an HTML parser to parse an XML document.
+
+Assuming this really is an XML document, what you're doing might work, but you should know that using an XML parser will be more reliable. To parse this document as XML, make sure you have the Python package 'lxml' installed, and pass the keyword argument `features="xml"` into the BeautifulSoup constructor.
+
+If you want or need to use an HTML parser on this document, you can make this warning go away by filtering it. To do that, run this code before calling the BeautifulSoup constructor:
+
+    from bs4 import XMLParsedAsHTMLWarning
+    import warnings
+
+    warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+  return BeautifulSoup(_CDATA.sub(_unwrap_cdata, text), PARSER)
+  v tibco-flogo-connector-for-salesforce-com@1.3.0 17 topic(s), 0 asset(s), 1 
+unit(s), 18 nav node(s), 1 generated -> 21 file(s)
+  v tibco-flogo-connector-for-salesforce-com@1.2.0 14 topic(s), 0 asset(s), 1 
+unit(s), 15 nav node(s), 1 generated -> 18 file(s)
+  v tibco-flogo-connector-for-salesforce-com@1.1.1 14 topic(s), 0 asset(s), 1 
+unit(s), 15 nav node(s), 1 generated -> 18 file(s)
+  v tibco-flogo-connector-for-salesforce-com@1.1.0 14 topic(s), 0 asset(s), 1 
+unit(s), 15 nav node(s), 1 generated -> 18 file(s)
+  v tibco-flogo-connector-for-salesforce-com@1.0.0 14 topic(s), 0 asset(s), 1 
+unit(s), 15 nav node(s), 1 generated -> 18 file(s)
+  v tibco-flogo-connector-for-salesforce-com-einstein-analytics@1.0.1 10 
+topic(s), 0 asset(s), 1 unit(s), 11 nav node(s), 1 generated -> 13 file(s)
+  v tibco-flogo-connector-for-salesforce-com-einstein-analytics@1.0.0 10 
+topic(s), 0 asset(s), 1 unit(s), 11 nav node(s), 1 generated -> 13 file(s)
+  v tibco-flogo-connector-for-salesforce-pardot@2.0.0 13 topic(s), 0 asset(s), 
+1 unit(s), 14 nav node(s), 1 generated -> 16 file(s)
+  v tibco-flogo-connector-for-salesforce-pardot@1.0.2 13 topic(s), 0 asset(s), 
+1 unit(s), 14 nav node(s), 1 generated -> 16 file(s)
+  v tibco-flogo-connector-for-salesforce-pardot@1.0.1 13 topic(s), 0 asset(s), 
+1 unit(s), 14 nav node(s), 1 generated -> 16 file(s)
+  v tibco-flogo-connector-for-salesforce-pardot@1.0.0 13 topic(s), 0 asset(s), 
+1 unit(s), 14 nav node(s), 1 generated -> 16 file(s)
+  v tibco-flogo-connector-for-sap-cloud-for-customer@1.0.0 11 topic(s), 0 
+asset(s), 1 unit(s), 12 nav node(s), 1 generated -> 14 file(s)
+  v tibco-flogo-connector-for-sap-hana-database@1.0.0 13 topic(s), 0 asset(s), 
+1 unit(s), 14 nav node(s), 1 generated -> 16 file(s)
+  v tibco-flogo-connector-for-sap-s-4hana-cloud@1.1.0 12 topic(s), 0 asset(s), 
+1 unit(s), 13 nav node(s), 1 generated -> 15 file(s)
+  v tibco-flogo-connector-for-sap-s-4hana-cloud@1.0.0 12 topic(s), 0 asset(s), 
+1 unit(s), 13 nav node(s), 1 generated -> 15 file(s)
+  v tibco-flogo-connector-for-sap-successfactors@1.0.0 11 topic(s), 0 asset(s),
+1 unit(s), 12 nav node(s), 1 generated -> 14 file(s)
+  v tibco-flogo-connector-for-sftp@1.0.0 16 topic(s), 0 asset(s), 1 unit(s), 17
+nav node(s), 1 generated -> 18 file(s)
+  v tibco-flogo-connector-for-slack@1.0.2 14 topic(s), 0 asset(s), 1 unit(s), 
+15 nav node(s), 1 generated -> 16 file(s)
+C:\github\docushift-tool\src\docushift\transforms\markdown.py:112: XMLParsedAsHTMLWarning: It looks like you're using an HTML parser to parse an XML document.
+
+Assuming this really is an XML document, what you're doing might work, but you should know that using an XML parser will be more reliable. To parse this document as XML, make sure you have the Python package 'lxml' installed, and pass the keyword argument `features="xml"` into the BeautifulSoup constructor.
+
+If you want or need to use an HTML parser on this document, you can make this warning go away by filtering it. To do that, run this code before calling the BeautifulSoup constructor:
+
+    from bs4 import XMLParsedAsHTMLWarning
+    import warnings
+
+    warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+  return BeautifulSoup(_CDATA.sub(_unwrap_cdata, text), PARSER)
+  v tibco-flogo-connector-for-slack@1.0.1 13 topic(s), 0 asset(s), 1 unit(s), 
+14 nav node(s), 1 generated -> 16 file(s)
+  v tibco-flogo-connector-for-slack@1.0.0 12 topic(s), 1 asset(s), 1 unit(s), 
+13 nav node(s), 1 generated -> 16 file(s)
+  v tibco-flogo-connector-for-snowflake@1.2.0 20 topic(s), 0 asset(s), 1 
+unit(s), 21 nav node(s), 1 generated -> 23 file(s)
+  v tibco-flogo-connector-for-stripe@3.0.1 14 topic(s), 0 asset(s), 1 unit(s), 
+14 nav node(s) -> 16 file(s)
+C:\github\docushift-tool\src\docushift\transforms\markdown.py:112: XMLParsedAsHTMLWarning: It looks like you're using an HTML parser to parse an XML document.
+
+Assuming this really is an XML document, what you're doing might work, but you should know that using an XML parser will be more reliable. To parse this document as XML, make sure you have the Python package 'lxml' installed, and pass the keyword argument `features="xml"` into the BeautifulSoup constructor.
+
+If you want or need to use an HTML parser on this document, you can make this warning go away by filtering it. To do that, run this code before calling the BeautifulSoup constructor:
+
+    from bs4 import XMLParsedAsHTMLWarning
+    import warnings
+
+    warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+  return BeautifulSoup(_CDATA.sub(_unwrap_cdata, text), PARSER)
+  v tibco-flogo-connector-for-stripe@3.0.0 13 topic(s), 0 asset(s), 1 unit(s), 
+14 nav node(s), 1 generated -> 16 file(s)
+  v tibco-flogo-connector-for-sugarcrm@1.3.2 14 topic(s), 0 asset(s), 1 
+unit(s), 15 nav node(s), 1 generated -> 17 file(s)
+  v tibco-flogo-connector-for-sugarcrm@1.3.1 14 topic(s), 0 asset(s), 1 
+unit(s), 15 nav node(s), 1 generated -> 17 file(s)
+  v tibco-flogo-connector-for-sugarcrm@1.3.0 14 topic(s), 0 asset(s), 1 
+unit(s), 15 nav node(s), 1 generated -> 17 file(s)
+  v tibco-flogo-connector-for-sugarcrm@1.0.0 14 topic(s), 0 asset(s), 1 
+unit(s), 15 nav node(s), 1 generated -> 17 file(s)
+  v tibco-flogo-connector-for-tibco-cloud-auditsafe@1.3.0 11 topic(s), 0 
+asset(s), 1 unit(s), 12 nav node(s), 1 generated -> 14 file(s)
+  v tibco-flogo-connector-for-tibco-cloud-messaging@1.3.3 12 topic(s), 0 
+asset(s), 1 unit(s), 12 nav node(s) -> 14 file(s)
+  v tibco-flogo-connector-for-tibco-cloud-messaging@1.3.2 12 topic(s), 0 
+asset(s), 1 unit(s), 12 nav node(s) -> 14 file(s)
+C:\github\docushift-tool\src\docushift\transforms\markdown.py:112: XMLParsedAsHTMLWarning: It looks like you're using an HTML parser to parse an XML document.
+
+Assuming this really is an XML document, what you're doing might work, but you should know that using an XML parser will be more reliable. To parse this document as XML, make sure you have the Python package 'lxml' installed, and pass the keyword argument `features="xml"` into the BeautifulSoup constructor.
+
+If you want or need to use an HTML parser on this document, you can make this warning go away by filtering it. To do that, run this code before calling the BeautifulSoup constructor:
+
+    from bs4 import XMLParsedAsHTMLWarning
+    import warnings
+
+    warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+  return BeautifulSoup(_CDATA.sub(_unwrap_cdata, text), PARSER)
+  v tibco-flogo-connector-for-tibco-cloud-messaging@1.1.0 11 topic(s), 0 
+asset(s), 1 unit(s), 12 nav node(s), 1 generated -> 14 file(s)
+  v tibco-flogo-connector-for-tibco-cloud-messaging@1.0.0 11 topic(s), 0 
+asset(s), 1 unit(s), 12 nav node(s), 1 generated -> 14 file(s)
+  v tibco-flogo-connector-for-tibco-data-virtualization@1.1.2 8 topic(s), 0 
+asset(s), 1 unit(s), 8 nav node(s) -> 11 file(s)
+  v tibco-flogo-connector-for-tibco-enterprise-message-service@1.0.1 18 
+topic(s), 0 asset(s), 1 unit(s), 19 nav node(s), 1 generated -> 21 file(s)
+  v tibco-flogo-connector-for-tibco-enterprise-message-service@1.0.0 18 
+topic(s), 0 asset(s), 1 unit(s), 19 nav node(s), 1 generated -> 21 file(s)
+C:\github\docushift-tool\src\docushift\transforms\markdown.py:112: XMLParsedAsHTMLWarning: It looks like you're using an HTML parser to parse an XML document.
+
+Assuming this really is an XML document, what you're doing might work, but you should know that using an XML parser will be more reliable. To parse this document as XML, make sure you have the Python package 'lxml' installed, and pass the keyword argument `features="xml"` into the BeautifulSoup constructor.
+
+If you want or need to use an HTML parser on this document, you can make this warning go away by filtering it. To do that, run this code before calling the BeautifulSoup constructor:
+
+    from bs4 import XMLParsedAsHTMLWarning
+    import warnings
+
+    warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+  return BeautifulSoup(_CDATA.sub(_unwrap_cdata, text), PARSER)
+  v tibco-flogo-connector-for-twilio@2.1.0 11 topic(s), 0 asset(s), 1 unit(s), 
+12 nav node(s), 1 generated -> 14 file(s)
+  v tibco-flogo-connector-for-websockets@1.0.1 8 topic(s), 1 asset(s), 1 
+unit(s), 8 nav node(s) -> 12 file(s)
+C:\github\docushift-tool\src\docushift\transforms\markdown.py:112: XMLParsedAsHTMLWarning: It looks like you're using an HTML parser to parse an XML document.
+
+Assuming this really is an XML document, what you're doing might work, but you should know that using an XML parser will be more reliable. To parse this document as XML, make sure you have the Python package 'lxml' installed, and pass the keyword argument `features="xml"` into the BeautifulSoup constructor.
+
+If you want or need to use an HTML parser on this document, you can make this warning go away by filtering it. To do that, run this code before calling the BeautifulSoup constructor:
+
+    from bs4 import XMLParsedAsHTMLWarning
+    import warnings
+
+    warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+  return BeautifulSoup(_CDATA.sub(_unwrap_cdata, text), PARSER)
+  v tibco-flogo-connector-for-zoho-crm@1.1.0 13 topic(s), 0 asset(s), 1 
+unit(s), 14 nav node(s), 1 generated -> 16 file(s)
+  v tibco-flogo-connector-for-zoho-crm@1.0.1 13 topic(s), 0 asset(s), 1 
+unit(s), 14 nav node(s), 1 generated -> 16 file(s)
+  v tibco-flogo-connector-for-zoho-crm@1.0.0 13 topic(s), 0 asset(s), 1 
+unit(s), 14 nav node(s), 1 generated -> 16 file(s)
+  v tibco-flogo-connector-for-zuora@2.0.0 10 topic(s), 0 asset(s), 1 unit(s), 
+11 nav node(s), 1 generated -> 13 file(s)
+  v tibco-flogo-extension-for-visual-studio-code@1.3.5 634 topic(s), 156 
+asset(s), 1 unit(s), 643 nav node(s), 1 generated -> 794 file(s)
+  v tibco-flogo-extension-for-visual-studio-code@1.3.4 634 topic(s), 156 
+asset(s), 1 unit(s), 643 nav node(s), 1 generated -> 794 file(s)
+  v tibco-flogo-extension-for-visual-studio-code@1.3.3 632 topic(s), 150 
+asset(s), 1 unit(s), 641 nav node(s), 1 generated -> 786 file(s)
+  v tibco-flogo-extension-for-visual-studio-code@1.3.2 622 topic(s), 150 
+asset(s), 1 unit(s), 631 nav node(s), 1 generated -> 776 file(s)
+  v tibco-flogo-extension-for-visual-studio-code@1.3.1 607 topic(s), 148 
+asset(s), 1 unit(s), 616 nav node(s), 1 generated -> 759 file(s)
+  v tibco-flogo-extension-for-visual-studio-code@1.3.0 365 topic(s), 142 
+asset(s), 1 unit(s), 374 nav node(s), 1 generated -> 510 file(s)
+  v tibco-flogo-extension-for-visual-studio-code@1.2.1 364 topic(s), 142 
+asset(s), 1 unit(s), 373 nav node(s), 1 generated -> 509 file(s)
+  v tibco-flogo-extension-for-visual-studio-code@1.2.0 362 topic(s), 142 
+asset(s), 1 unit(s), 371 nav node(s), 1 generated -> 507 file(s)
+  v tibco-flogo-extension-for-visual-studio-code@1.1.1 356 topic(s), 136 
+asset(s), 1 unit(s), 365 nav node(s), 1 generated -> 495 file(s)
+  v tibco-flogo-extension-for-visual-studio-code@1.1.0 345 topic(s), 131 
+asset(s), 1 unit(s), 354 nav node(s), 1 generated -> 479 file(s)
+  v tibco-flogo-extension-for-visual-studio-code@1.0.0 334 topic(s), 116 
+asset(s), 1 unit(s), 343 nav node(s), 1 generated -> 453 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |      114 |
+| Already current   |        0 |
+| No extracted tree |        5 |
+| Engine unknown    |        6 |
+| Failed            |        0 |
++------------------------------+
+6758 topic(s), 1576 asset(s) written.
+8683 file(s) standing in the measured output tree(s).
+tibco-flogo-connection-for-sap@1.0.0: 0 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+tibco-flogo-connection-for-sap@1.0.0: skipped 2 not-a-topic, 1 
+publication-homepage, 2 republished-duplicate
+tibco-flogo-connector-for-amazon-dynamodb@1.1.0: 0 resolved, 0 skin, 0 escaped,
+0 dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+tibco-flogo-connector-for-amazon-dynamodb@1.1.0: skipped 2 not-a-topic, 1 
+publication-homepage, 2 republished-duplicate
+tibco-flogo-connector-for-amazon-dynamodb@1.0.1: 0 resolved, 0 skin, 0 escaped,
+0 dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+tibco-flogo-connector-for-amazon-dynamodb@1.0.1: skipped 2 not-a-topic, 1 
+publication-homepage
+tibco-flogo-connector-for-amazon-dynamodb@1.0.0: 0 resolved, 0 skin, 0 escaped,
+0 dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+tibco-flogo-connector-for-amazon-dynamodb@1.0.0: skipped 2 not-a-topic, 1 
+publication-homepage, 2 republished-duplicate
+tibco-flogo-connector-for-amazon-elastic-file-system@1.0.0: 0 resolved, 0 skin,
+0 escaped, 0 dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+tibco-flogo-connector-for-amazon-elastic-file-system@1.0.0: skipped 2 
+not-a-topic, 1 publication-homepage, 2 republished-duplicate
+tibco-flogo-connector-for-amazon-glacier@1.0.0: 0 resolved, 0 skin, 0 escaped, 
+0 dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+tibco-flogo-connector-for-amazon-glacier@1.0.0: skipped 2 not-a-topic, 1 
+publication-homepage, 2 republished-duplicate
+tibco-flogo-connector-for-amazon-kinesis@1.1.1: 0 resolved, 0 skin, 0 escaped, 
+0 dangling, 0 case-mismatch, 54 orphan (1.4 MB)
+tibco-flogo-connector-for-amazon-kinesis@1.1.1: skipped 3 generated-directory, 
+1 placeholder-template, 2 runtime-stub
+tibco-flogo-connector-for-amazon-s3@1.3.1: 0 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 70 orphan (2.9 MB)
+tibco-flogo-connector-for-amazon-s3@1.3.1: skipped 4 generated-directory, 2 
+runtime-stub
+tibco-flogo-connector-for-amazon-sns@1.0.1: 0 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 70 orphan (2.9 MB)
+tibco-flogo-connector-for-amazon-sns@1.0.1: skipped 4 generated-directory, 2 
+runtime-stub
+tibco-flogo-connector-for-amazon-sqs@1.0.1: 0 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 70 orphan (2.9 MB)
+tibco-flogo-connector-for-amazon-sqs@1.0.1: skipped 4 generated-directory, 2 
+runtime-stub
+tibco-flogo-connector-for-apache-avro@1.1.1: 0 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 1 orphan (0.0 MB)
+tibco-flogo-connector-for-apache-avro@1.1.1: skipped 2 not-a-topic, 1 
+publication-homepage, 2 republished-duplicate
+tibco-flogo-connector-for-apache-avro@1.1.0: 0 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+tibco-flogo-connector-for-apache-avro@1.1.0: skipped 2 not-a-topic, 1 
+publication-homepage, 2 republished-duplicate
+tibco-flogo-connector-for-apache-avro@1.0.0: 0 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+tibco-flogo-connector-for-apache-avro@1.0.0: skipped 2 not-a-topic, 1 
+publication-homepage, 2 republished-duplicate
+tibco-flogo-connector-for-apache-couchdb@1.0.0: 0 resolved, 0 skin, 0 escaped, 
+0 dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+tibco-flogo-connector-for-apache-couchdb@1.0.0: skipped 2 not-a-topic, 1 
+publication-homepage, 2 republished-duplicate
+tibco-flogo-connector-for-apache-kafka@1.3.3: 0 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 73 orphan (2.9 MB)
+tibco-flogo-connector-for-apache-kafka@1.3.3: skipped 5 generated-directory, 2 
+runtime-stub
+tibco-flogo-connector-for-apache-kafka@1.3.2: 0 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 74 orphan (2.9 MB)
+tibco-flogo-connector-for-apache-kafka@1.3.2: skipped 5 generated-directory, 2 
+runtime-stub, 1 unreferenced-template
+tibco-flogo-connector-for-apache-kafka@1.3.1: 0 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 72 orphan (2.9 MB)
+tibco-flogo-connector-for-apache-kafka@1.3.1: skipped 5 generated-directory, 2 
+runtime-stub
+tibco-flogo-connector-for-apache-pulsar@1.3.4: 0 resolved, 0 skin, 0 escaped, 0
+dangling, 0 case-mismatch, 69 orphan (2.9 MB)
+tibco-flogo-connector-for-apache-pulsar@1.3.4: skipped 4 generated-directory, 2
+runtime-stub
+tibco-flogo-connector-for-apache-pulsar@1.3.3: 0 resolved, 0 skin, 0 escaped, 0
+dangling, 0 case-mismatch, 69 orphan (2.9 MB)
+tibco-flogo-connector-for-apache-pulsar@1.3.3: skipped 4 generated-directory, 2
+runtime-stub
+tibco-flogo-connector-for-apache-pulsar@1.3.2: 0 resolved, 0 skin, 0 escaped, 0
+dangling, 0 case-mismatch, 70 orphan (2.9 MB)
+tibco-flogo-connector-for-apache-pulsar@1.3.2: skipped 4 generated-directory, 2
+runtime-stub, 1 unreferenced-template
+tibco-flogo-connector-for-apache-pulsar@1.3.1: 0 resolved, 0 skin, 0 escaped, 0
+dangling, 0 case-mismatch, 69 orphan (2.9 MB)
+tibco-flogo-connector-for-apache-pulsar@1.3.1: skipped 4 generated-directory, 2
+runtime-stub
+tibco-flogo-connector-for-apache-solr@1.1.0: 1 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+tibco-flogo-connector-for-apache-solr@1.1.0: skipped 2 not-a-topic, 1 
+publication-homepage, 2 republished-duplicate
+tibco-flogo-connector-for-apache-solr@1.0.0: 1 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+tibco-flogo-connector-for-apache-solr@1.0.0: skipped 2 not-a-topic, 1 
+publication-homepage, 2 republished-duplicate
+tibco-flogo-connector-for-data-conversion@1.0.0: 2 resolved, 0 skin, 0 escaped,
+0 dangling, 0 case-mismatch, 1 orphan (0.2 MB)
+tibco-flogo-connector-for-data-conversion@1.0.0: skipped 2 not-a-topic, 1 
+publication-homepage, 2 republished-duplicate
+tibco-flogo-connector-for-docusign@3.0.1: 0 resolved, 0 skin, 0 escaped, 6 
+dangling, 0 case-mismatch, 70 orphan (2.8 MB)
+tibco-flogo-connector-for-docusign@3.0.1: skipped 3 generated-directory, 1 
+placeholder-template, 2 runtime-stub
+tibco-flogo-connector-for-github@1.0.0: 0 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 1 orphan (0.0 MB)
+tibco-flogo-connector-for-github@1.0.0: skipped 2 not-a-topic, 1 
+publication-homepage, 2 republished-duplicate
+tibco-flogo-connector-for-google-cloud-pub-sub@1.0.1: 0 resolved, 0 skin, 0 
+escaped, 0 dangling, 0 case-mismatch, 73 orphan (2.9 MB)
+tibco-flogo-connector-for-google-cloud-pub-sub@1.0.1: skipped 5 
+generated-directory, 2 runtime-stub
+tibco-flogo-connector-for-google-cloud-sql@1.0.0: 0 resolved, 0 skin, 0 
+escaped, 0 dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+tibco-flogo-connector-for-google-cloud-sql@1.0.0: skipped 2 not-a-topic, 1 
+publication-homepage, 2 republished-duplicate
+tibco-flogo-connector-for-google-cloud-storage@1.0.0: 0 resolved, 0 skin, 0 
+escaped, 0 dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+tibco-flogo-connector-for-google-cloud-storage@1.0.0: skipped 2 not-a-topic, 1 
+publication-homepage, 2 republished-duplicate
+tibco-flogo-connector-for-google-docs@1.0.0: 0 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+tibco-flogo-connector-for-google-docs@1.0.0: skipped 2 not-a-topic, 1 
+publication-homepage, 2 republished-duplicate
+tibco-flogo-connector-for-google-sheets@1.0.0: 0 resolved, 0 skin, 0 escaped, 0
+dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+tibco-flogo-connector-for-google-sheets@1.0.0: skipped 2 not-a-topic, 1 
+publication-homepage, 2 republished-duplicate
+tibco-flogo-connector-for-http@1.1.1: 1 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 70 orphan (2.9 MB)
+tibco-flogo-connector-for-http@1.1.1: skipped 4 generated-directory, 2 
+runtime-stub
+tibco-flogo-connector-for-hubspot@2.1.0: 0 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+tibco-flogo-connector-for-hubspot@2.1.0: skipped 2 not-a-topic, 1 
+publication-homepage, 2 republished-duplicate
+tibco-flogo-connector-for-ibm-mq@2.2.0: 0 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 71 orphan (2.9 MB)
+tibco-flogo-connector-for-ibm-mq@2.2.0: skipped 5 generated-directory, 1 
+placeholder-template, 2 runtime-stub
+tibco-flogo-connector-for-ibm-mq@1.0.0: 0 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+tibco-flogo-connector-for-ibm-mq@1.0.0: skipped 2 not-a-topic, 1 
+publication-homepage, 2 republished-duplicate
+tibco-flogo-connector-for-jira@1.0.1: 0 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+tibco-flogo-connector-for-jira@1.0.1: skipped 2 not-a-topic, 1 
+publication-homepage, 2 republished-duplicate
+tibco-flogo-connector-for-jira@1.0.0: 0 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+tibco-flogo-connector-for-jira@1.0.0: skipped 2 not-a-topic, 1 
+publication-homepage, 2 republished-duplicate
+tibco-flogo-connector-for-magento@2.0.0: 0 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+tibco-flogo-connector-for-magento@2.0.0: skipped 2 not-a-topic, 1 
+publication-homepage, 2 republished-duplicate
+tibco-flogo-connector-for-mailchimp@1.0.1: 0 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 71 orphan (2.9 MB)
+tibco-flogo-connector-for-mailchimp@1.0.1: skipped 4 generated-directory, 1 
+placeholder-template, 2 runtime-stub
+tibco-flogo-connector-for-mailchimp@1.0.0: 0 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+tibco-flogo-connector-for-mailchimp@1.0.0: skipped 2 not-a-topic, 1 
+publication-homepage, 2 republished-duplicate
+tibco-flogo-connector-for-marketo@1.2.1: 0 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 31 orphan (0.9 MB)
+tibco-flogo-connector-for-marketo@1.2.1: skipped 4 generated-directory, 1 
+placeholder-template, 2 runtime-stub
+tibco-flogo-connector-for-marketo@1.2.0: 0 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 26 orphan (0.9 MB)
+tibco-flogo-connector-for-marketo@1.2.0: skipped 4 generated-directory, 1 
+placeholder-template, 2 runtime-stub
+tibco-flogo-connector-for-marketo@1.1.1: 0 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+tibco-flogo-connector-for-marketo@1.1.1: skipped 2 not-a-topic, 1 
+publication-homepage, 2 republished-duplicate
+tibco-flogo-connector-for-marketo@1.1.0: 0 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+tibco-flogo-connector-for-marketo@1.1.0: skipped 2 not-a-topic, 1 
+publication-homepage, 2 republished-duplicate
+tibco-flogo-connector-for-marketo@1.0.0: 0 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+tibco-flogo-connector-for-marketo@1.0.0: skipped 2 not-a-topic, 1 
+publication-homepage, 2 republished-duplicate
+tibco-flogo-connector-for-microsoft-azure-service-bus@1.4.3: 0 resolved, 0 
+skin, 0 escaped, 0 dangling, 0 case-mismatch, 72 orphan (2.9 MB)
+tibco-flogo-connector-for-microsoft-azure-service-bus@1.4.3: skipped 4 
+generated-directory, 2 runtime-stub
+tibco-flogo-connector-for-microsoft-azure-service-bus@1.4.1: 0 resolved, 0 
+skin, 0 escaped, 0 dangling, 0 case-mismatch, 70 orphan (2.9 MB)
+tibco-flogo-connector-for-microsoft-azure-service-bus@1.4.1: skipped 4 
+generated-directory, 2 runtime-stub
+tibco-flogo-connector-for-microsoft-azure-storage@1.2.0: 0 resolved, 0 skin, 0 
+escaped, 0 dangling, 0 case-mismatch, 70 orphan (2.9 MB)
+tibco-flogo-connector-for-microsoft-azure-storage@1.2.0: skipped 4 
+generated-directory, 2 runtime-stub
+tibco-flogo-connector-for-microsoft-azure-storage@1.1.3: 0 resolved, 0 skin, 0 
+escaped, 6 dangling, 0 case-mismatch, 70 orphan (2.8 MB)
+tibco-flogo-connector-for-microsoft-azure-storage@1.1.3: skipped 3 
+generated-directory, 1 placeholder-template, 2 runtime-stub
+tibco-flogo-connector-for-microsoft-sql-server@2.6.1: 0 resolved, 0 skin, 0 
+escaped, 0 dangling, 0 case-mismatch, 73 orphan (2.8 MB)
+tibco-flogo-connector-for-microsoft-sql-server@2.6.1: skipped 4 
+generated-directory, 1 placeholder-template, 2 runtime-stub
+tibco-flogo-connector-for-mongodb@1.1.1: 0 resolved, 0 skin, 1 escaped, 0 
+dangling, 0 case-mismatch, 70 orphan (2.9 MB)
+tibco-flogo-connector-for-mongodb@1.1.1: skipped 3 generated-directory, 2 
+runtime-stub
+tibco-flogo-connector-for-mqtt@1.3.1: 0 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 72 orphan (2.9 MB)
+tibco-flogo-connector-for-mqtt@1.3.1: skipped 5 generated-directory, 2 
+runtime-stub
+tibco-flogo-connector-for-odata@1.0.0: 0 resolved, 0 skin, 3 escaped, 0 
+dangling, 0 case-mismatch, 70 orphan (2.9 MB)
+tibco-flogo-connector-for-odata@1.0.0: skipped 4 generated-directory, 2 
+runtime-stub
+tibco-flogo-connector-for-oracle-database@1.2.2: 0 resolved, 0 skin, 0 escaped,
+0 dangling, 0 case-mismatch, 70 orphan (2.9 MB)
+tibco-flogo-connector-for-oracle-database@1.2.2: skipped 4 generated-directory,
+2 runtime-stub
+tibco-flogo-connector-for-oracle-database@1.2.1: 0 resolved, 0 skin, 0 escaped,
+7 dangling, 0 case-mismatch, 70 orphan (2.8 MB)
+tibco-flogo-connector-for-oracle-database@1.2.1: skipped 3 generated-directory,
+1 placeholder-template, 2 runtime-stub, 2 unreferenced-template
+tibco-flogo-connector-for-oracle-mysql@2.4.5: 0 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 73 orphan (2.8 MB)
+tibco-flogo-connector-for-oracle-mysql@2.4.5: skipped 4 generated-directory, 1 
+placeholder-template, 2 runtime-stub
+tibco-flogo-connector-for-postgresql@2.7.1: 0 resolved, 0 skin, 0 escaped, 4 
+dangling, 0 case-mismatch, 73 orphan (2.8 MB)
+tibco-flogo-connector-for-postgresql@2.7.1: skipped 4 generated-directory, 2 
+runtime-stub
+tibco-flogo-connector-for-riak@1.0.0: 0 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+tibco-flogo-connector-for-riak@1.0.0: skipped 2 not-a-topic, 1 
+publication-homepage, 2 republished-duplicate
+tibco-flogo-connector-for-salesforce-com@1.3.7: 0 resolved, 0 skin, 0 escaped, 
+0 dangling, 0 case-mismatch, 73 orphan (2.9 MB)
+tibco-flogo-connector-for-salesforce-com@1.3.7: skipped 5 generated-directory, 
+2 runtime-stub
+tibco-flogo-connector-for-salesforce-com@1.3.5: 0 resolved, 0 skin, 0 escaped, 
+0 dangling, 0 case-mismatch, 72 orphan (2.9 MB)
+tibco-flogo-connector-for-salesforce-com@1.3.5: skipped 5 generated-directory, 
+2 runtime-stub
+tibco-flogo-connector-for-salesforce-com@1.3.2: 0 resolved, 0 skin, 0 escaped, 
+0 dangling, 0 case-mismatch, 29 orphan (0.9 MB)
+tibco-flogo-connector-for-salesforce-com@1.3.2: skipped 4 generated-directory, 
+1 placeholder-template, 2 runtime-stub
+tibco-flogo-connector-for-salesforce-com@1.3.1: 0 resolved, 0 skin, 0 escaped, 
+0 dangling, 0 case-mismatch, 26 orphan (0.9 MB)
+tibco-flogo-connector-for-salesforce-com@1.3.1: skipped 4 generated-directory, 
+1 placeholder-template, 2 runtime-stub
+tibco-flogo-connector-for-salesforce-com@1.3.0: 0 resolved, 0 skin, 0 escaped, 
+0 dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+tibco-flogo-connector-for-salesforce-com@1.3.0: skipped 2 not-a-topic, 1 
+publication-homepage, 2 republished-duplicate
+tibco-flogo-connector-for-salesforce-com@1.2.0: 0 resolved, 0 skin, 0 escaped, 
+0 dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+tibco-flogo-connector-for-salesforce-com@1.2.0: skipped 2 not-a-topic, 1 
+publication-homepage, 2 republished-duplicate
+tibco-flogo-connector-for-salesforce-com@1.1.1: 0 resolved, 0 skin, 0 escaped, 
+0 dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+tibco-flogo-connector-for-salesforce-com@1.1.1: skipped 2 not-a-topic, 1 
+publication-homepage, 2 republished-duplicate
+tibco-flogo-connector-for-salesforce-com@1.1.0: 0 resolved, 0 skin, 0 escaped, 
+0 dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+tibco-flogo-connector-for-salesforce-com@1.1.0: skipped 2 not-a-topic, 1 
+publication-homepage, 2 republished-duplicate
+tibco-flogo-connector-for-salesforce-com@1.0.0: 0 resolved, 0 skin, 0 escaped, 
+0 dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+tibco-flogo-connector-for-salesforce-com@1.0.0: skipped 2 not-a-topic, 1 
+publication-homepage, 2 republished-duplicate
+tibco-flogo-connector-for-salesforce-com-einstein-analytics@1.0.1: 0 resolved, 
+0 skin, 0 escaped, 0 dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+tibco-flogo-connector-for-salesforce-com-einstein-analytics@1.0.1: skipped 2 
+not-a-topic, 1 publication-homepage, 2 republished-duplicate
+tibco-flogo-connector-for-salesforce-com-einstein-analytics@1.0.0: 0 resolved, 
+0 skin, 0 escaped, 0 dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+tibco-flogo-connector-for-salesforce-com-einstein-analytics@1.0.0: skipped 2 
+not-a-topic, 1 publication-homepage, 2 republished-duplicate
+tibco-flogo-connector-for-salesforce-pardot@2.0.0: 0 resolved, 0 skin, 0 
+escaped, 0 dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+tibco-flogo-connector-for-salesforce-pardot@2.0.0: skipped 2 not-a-topic, 1 
+publication-homepage
+tibco-flogo-connector-for-salesforce-pardot@1.0.2: 0 resolved, 0 skin, 0 
+escaped, 0 dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+tibco-flogo-connector-for-salesforce-pardot@1.0.2: skipped 2 not-a-topic, 1 
+publication-homepage, 2 republished-duplicate
+tibco-flogo-connector-for-salesforce-pardot@1.0.1: 0 resolved, 0 skin, 0 
+escaped, 0 dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+tibco-flogo-connector-for-salesforce-pardot@1.0.1: skipped 2 not-a-topic, 1 
+publication-homepage, 2 republished-duplicate
+tibco-flogo-connector-for-salesforce-pardot@1.0.0: 0 resolved, 0 skin, 0 
+escaped, 0 dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+tibco-flogo-connector-for-salesforce-pardot@1.0.0: skipped 2 not-a-topic, 1 
+publication-homepage, 2 republished-duplicate
+tibco-flogo-connector-for-sap-cloud-for-customer@1.0.0: 0 resolved, 0 skin, 0 
+escaped, 0 dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+tibco-flogo-connector-for-sap-cloud-for-customer@1.0.0: skipped 2 not-a-topic, 
+1 publication-homepage, 2 republished-duplicate
+tibco-flogo-connector-for-sap-hana-database@1.0.0: 0 resolved, 0 skin, 0 
+escaped, 0 dangling, 0 case-mismatch, 2 orphan (0.4 MB)
+tibco-flogo-connector-for-sap-hana-database@1.0.0: skipped 2 not-a-topic, 1 
+publication-homepage, 2 republished-duplicate
+tibco-flogo-connector-for-sap-s-4hana-cloud@1.1.0: 0 resolved, 0 skin, 0 
+escaped, 0 dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+tibco-flogo-connector-for-sap-s-4hana-cloud@1.1.0: skipped 2 not-a-topic, 1 
+publication-homepage, 2 republished-duplicate
+tibco-flogo-connector-for-sap-s-4hana-cloud@1.0.0: 0 resolved, 0 skin, 0 
+escaped, 0 dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+tibco-flogo-connector-for-sap-s-4hana-cloud@1.0.0: skipped 2 not-a-topic, 1 
+publication-homepage, 2 republished-duplicate
+tibco-flogo-connector-for-sap-successfactors@1.0.0: 0 resolved, 0 skin, 0 
+escaped, 0 dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+tibco-flogo-connector-for-sap-successfactors@1.0.0: skipped 2 not-a-topic, 1 
+publication-homepage, 2 republished-duplicate
+tibco-flogo-connector-for-sftp@1.0.0: 0 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 70 orphan (2.9 MB)
+tibco-flogo-connector-for-sftp@1.0.0: skipped 4 generated-directory, 2 
+runtime-stub
+tibco-flogo-connector-for-slack@1.0.2: 0 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 26 orphan (0.9 MB)
+tibco-flogo-connector-for-slack@1.0.2: skipped 4 generated-directory, 2 
+runtime-stub
+tibco-flogo-connector-for-slack@1.0.1: 0 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+tibco-flogo-connector-for-slack@1.0.1: skipped 2 not-a-topic, 1 
+publication-homepage, 1 republished-duplicate
+tibco-flogo-connector-for-slack@1.0.0: 1 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+tibco-flogo-connector-for-slack@1.0.0: skipped 2 not-a-topic, 1 
+publication-homepage, 2 republished-duplicate
+tibco-flogo-connector-for-snowflake@1.2.0: 0 resolved, 0 skin, 1 escaped, 0 
+dangling, 0 case-mismatch, 69 orphan (2.8 MB)
+tibco-flogo-connector-for-snowflake@1.2.0: skipped 3 generated-directory, 2 
+runtime-stub
+tibco-flogo-connector-for-stripe@3.0.1: 0 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 26 orphan (0.9 MB)
+tibco-flogo-connector-for-stripe@3.0.1: skipped 4 generated-directory, 1 
+placeholder-template, 2 runtime-stub
+tibco-flogo-connector-for-stripe@3.0.0: 0 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+tibco-flogo-connector-for-stripe@3.0.0: skipped 2 not-a-topic, 1 
+publication-homepage, 2 republished-duplicate
+tibco-flogo-connector-for-sugarcrm@1.3.2: 0 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+tibco-flogo-connector-for-sugarcrm@1.3.2: skipped 2 not-a-topic, 1 
+publication-homepage, 2 republished-duplicate
+tibco-flogo-connector-for-sugarcrm@1.3.1: 0 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+tibco-flogo-connector-for-sugarcrm@1.3.1: skipped 2 not-a-topic, 1 
+publication-homepage, 2 republished-duplicate
+tibco-flogo-connector-for-sugarcrm@1.3.0: 0 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+tibco-flogo-connector-for-sugarcrm@1.3.0: skipped 2 not-a-topic, 1 
+publication-homepage, 2 republished-duplicate
+tibco-flogo-connector-for-sugarcrm@1.0.0: 0 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+tibco-flogo-connector-for-sugarcrm@1.0.0: skipped 2 not-a-topic, 1 
+publication-homepage, 2 republished-duplicate
+tibco-flogo-connector-for-tibco-cloud-auditsafe@1.3.0: 0 resolved, 0 skin, 0 
+escaped, 0 dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+tibco-flogo-connector-for-tibco-cloud-auditsafe@1.3.0: skipped 2 not-a-topic, 1
+publication-homepage, 4 republished-duplicate
+tibco-flogo-connector-for-tibco-cloud-messaging@1.3.3: 0 resolved, 0 skin, 0 
+escaped, 0 dangling, 0 case-mismatch, 69 orphan (2.9 MB)
+tibco-flogo-connector-for-tibco-cloud-messaging@1.3.3: skipped 5 
+generated-directory, 2 runtime-stub, 1 unreferenced-template
+tibco-flogo-connector-for-tibco-cloud-messaging@1.3.2: 0 resolved, 0 skin, 0 
+escaped, 0 dangling, 0 case-mismatch, 70 orphan (2.9 MB)
+tibco-flogo-connector-for-tibco-cloud-messaging@1.3.2: skipped 5 
+generated-directory, 2 runtime-stub, 1 unreferenced-template
+tibco-flogo-connector-for-tibco-cloud-messaging@1.1.0: 0 resolved, 0 skin, 0 
+escaped, 0 dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+tibco-flogo-connector-for-tibco-cloud-messaging@1.1.0: skipped 2 not-a-topic, 1
+publication-homepage, 2 republished-duplicate
+tibco-flogo-connector-for-tibco-cloud-messaging@1.0.0: 0 resolved, 0 skin, 0 
+escaped, 0 dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+tibco-flogo-connector-for-tibco-cloud-messaging@1.0.0: skipped 2 not-a-topic, 1
+publication-homepage, 2 republished-duplicate
+tibco-flogo-connector-for-tibco-data-virtualization@1.1.2: 0 resolved, 0 skin, 
+1 escaped, 0 dangling, 0 case-mismatch, 72 orphan (2.8 MB)
+tibco-flogo-connector-for-tibco-data-virtualization@1.1.2: skipped 3 
+generated-directory, 2 runtime-stub
+tibco-flogo-connector-for-tibco-enterprise-message-service@1.0.1: 0 resolved, 0
+skin, 0 escaped, 0 dangling, 0 case-mismatch, 69 orphan (2.8 MB)
+tibco-flogo-connector-for-tibco-enterprise-message-service@1.0.1: skipped 4 
+generated-directory, 2 runtime-stub
+tibco-flogo-connector-for-tibco-enterprise-message-service@1.0.0: 0 resolved, 0
+skin, 0 escaped, 0 dangling, 0 case-mismatch, 69 orphan (2.9 MB)
+tibco-flogo-connector-for-tibco-enterprise-message-service@1.0.0: skipped 4 
+generated-directory, 2 runtime-stub
+tibco-flogo-connector-for-twilio@2.1.0: 0 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+tibco-flogo-connector-for-twilio@2.1.0: skipped 2 not-a-topic, 1 
+publication-homepage
+tibco-flogo-connector-for-websockets@1.0.1: 6 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 71 orphan (2.8 MB)
+tibco-flogo-connector-for-websockets@1.0.1: skipped 3 generated-directory, 1 
+placeholder-template, 2 runtime-stub
+tibco-flogo-connector-for-zoho-crm@1.1.0: 0 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+tibco-flogo-connector-for-zoho-crm@1.1.0: skipped 2 not-a-topic, 1 
+publication-homepage, 2 republished-duplicate
+tibco-flogo-connector-for-zoho-crm@1.0.1: 0 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+tibco-flogo-connector-for-zoho-crm@1.0.1: skipped 2 not-a-topic, 1 
+publication-homepage, 2 republished-duplicate
+tibco-flogo-connector-for-zoho-crm@1.0.0: 0 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+tibco-flogo-connector-for-zoho-crm@1.0.0: skipped 2 not-a-topic, 1 
+publication-homepage, 2 republished-duplicate
+tibco-flogo-connector-for-zuora@2.0.0: 0 resolved, 0 skin, 0 escaped, 0 
+dangling, 0 case-mismatch, 1 orphan (0.1 MB)
+tibco-flogo-connector-for-zuora@2.0.0: skipped 2 not-a-topic, 1 
+publication-homepage, 2 republished-duplicate
+tibco-flogo-extension-for-visual-studio-code@1.3.5: 195 resolved, 0 skin, 0 
+escaped, 1 dangling, 0 case-mismatch, 218 orphan (7.6 MB)
+tibco-flogo-extension-for-visual-studio-code@1.3.5: skipped 4 
+generated-directory, 2 runtime-stub
+tibco-flogo-extension-for-visual-studio-code@1.3.4: 195 resolved, 0 skin, 0 
+escaped, 1 dangling, 0 case-mismatch, 216 orphan (7.5 MB)
+tibco-flogo-extension-for-visual-studio-code@1.3.4: skipped 4 
+generated-directory, 2 runtime-stub
+tibco-flogo-extension-for-visual-studio-code@1.3.3: 190 resolved, 0 skin, 0 
+escaped, 1 dangling, 0 case-mismatch, 201 orphan (6.6 MB)
+tibco-flogo-extension-for-visual-studio-code@1.3.3: skipped 4 
+generated-directory, 2 runtime-stub
+tibco-flogo-extension-for-visual-studio-code@1.3.2: 190 resolved, 0 skin, 0 
+escaped, 0 dangling, 0 case-mismatch, 199 orphan (6.6 MB)
+tibco-flogo-extension-for-visual-studio-code@1.3.2: skipped 4 
+generated-directory, 2 runtime-stub
+tibco-flogo-extension-for-visual-studio-code@1.3.1: 187 resolved, 0 skin, 0 
+escaped, 0 dangling, 0 case-mismatch, 198 orphan (6.6 MB)
+tibco-flogo-extension-for-visual-studio-code@1.3.1: skipped 4 
+generated-directory, 2 runtime-stub
+tibco-flogo-extension-for-visual-studio-code@1.3.0: 176 resolved, 0 skin, 0 
+escaped, 0 dangling, 0 case-mismatch, 193 orphan (6.2 MB)
+tibco-flogo-extension-for-visual-studio-code@1.3.0: skipped 4 
+generated-directory, 2 runtime-stub
+tibco-flogo-extension-for-visual-studio-code@1.2.1: 176 resolved, 0 skin, 0 
+escaped, 0 dangling, 0 case-mismatch, 193 orphan (6.2 MB)
+tibco-flogo-extension-for-visual-studio-code@1.2.1: skipped 4 
+generated-directory, 2 runtime-stub
+tibco-flogo-extension-for-visual-studio-code@1.2.0: 176 resolved, 0 skin, 0 
+escaped, 0 dangling, 0 case-mismatch, 193 orphan (6.2 MB)
+tibco-flogo-extension-for-visual-studio-code@1.2.0: skipped 4 
+generated-directory, 2 runtime-stub
+tibco-flogo-extension-for-visual-studio-code@1.1.1: 168 resolved, 0 skin, 0 
+escaped, 0 dangling, 0 case-mismatch, 185 orphan (6.0 MB)
+tibco-flogo-extension-for-visual-studio-code@1.1.1: skipped 4 
+generated-directory, 2 runtime-stub
+tibco-flogo-extension-for-visual-studio-code@1.1.0: 163 resolved, 0 skin, 0 
+escaped, 4 dangling, 0 case-mismatch, 183 orphan (6.1 MB)
+tibco-flogo-extension-for-visual-studio-code@1.1.0: skipped 4 
+generated-directory, 2 runtime-stub
+tibco-flogo-extension-for-visual-studio-code@1.0.0: 142 resolved, 0 skin, 0 
+escaped, 4 dangling, 0 case-mismatch, 175 orphan (5.8 MB)
+tibco-flogo-extension-for-visual-studio-code@1.0.0: skipped 4 
+generated-directory, 2 runtime-stub
+! tibco-flogo-connector-db-service@2.2.0: engine undetected (`auto`)
+! tibco-flogo-connector-db-service@2.1.1: engine undetected (`auto`)
+! tibco-flogo-connector-db-service@2.1.0: engine undetected (`auto`)
+! tibco-flogo-connector-db-service@2.0.1: engine undetected (`auto`)
+! tibco-flogo-connector-db-service@2.0.0: engine undetected (`auto`)
+! tibco-flogo-connector-for-amazon-redshift@2.1.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-tib-flogo-connectors\extracted\tibco-fl
+ogo-connector-for-amazon-redshift\2.1.0; run `docushift extract` first
+! tibco-flogo-connector-for-google-docs@1.1.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-tib-flogo-connectors\extracted\tibco-fl
+ogo-connector-for-google-docs\1.1.0; run `docushift extract` first
+! tibco-flogo-connector-for-greenplum-database@2.1.0: no extracted tree at 
+C:\github\docushift-tool\families\en-us-tib-flogo-connectors\extracted\tibco-fl
+ogo-connector-for-greenplum-database\2.1.0; run `docushift extract` first
+! tibco-flogo-connector-for-microsoft-azure-data-factory@1.1.1: no extracted 
+tree at 
+C:\github\docushift-tool\families\en-us-tib-flogo-connectors\extracted\tibco-fl
+ogo-connector-for-microsoft-azure-data-factory\1.1.1; run `docushift extract` 
+first
+! tibco-flogo-connector-for-redis@1.3.0: engine undetected (`auto`)
+! tibco-flogo-connector-for-salesforce-com@1.3.3: no extracted tree at 
+C:\github\docushift-tool\families\en-us-tib-flogo-connectors\extracted\tibco-fl
+ogo-connector-for-salesforce-com\1.3.3; run `docushift extract` first
+Findings: 9 errors, 239 warnings, 300 notes.

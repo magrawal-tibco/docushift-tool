@@ -1,0 +1,51 @@
+Downloading 39 version(s) with 4 worker(s)...
+  v tibco-enterprise-foresight@1.1.0 0.2 MiB
+  v tibco-enterprise-foresight@1.0.0 0.2 MiB
+  v tibco-enterprise-foresight-healthcare-add-on@1.1.0 0.2 MiB
+  v tibco-enterprise-foresight-healthcare-add-on@1.0.0 0.2 MiB
+  v tibco-foresight-archive-and-retrieval-system@6.0.0 15.4 MiB
+  v tibco-foresight-archive-and-retrieval-system@5.5.0 9.0 MiB
+  v tibco-foresight-archive-and-retrieval-system@5.4.0 8.8 MiB
+  v tibco-foresight-connect-with-fhir@1.0.1 2.0 MiB
+  v tibco-foresight-connect-with-fhir@1.0.0 1.2 MiB
+  v tibco-foresight-edisim@6.21.0 93.5 MiB
+  v tibco-foresight-edisim@6.20.0 33.1 MiB
+  v tibco-foresight-edisim@6.19.0 30.1 MiB
+  v tibco-foresight-hipaa-validator-desktop@9.2.0 67.1 MiB
+  v tibco-foresight-hipaa-validator-desktop@9.1.0 19.2 MiB
+  v tibco-foresight-hipaa-validator-desktop@9.0.0 18.9 MiB
+  v tibco-foresight-instream@9.4.0 590.5 MiB
+  v tibco-foresight-instream@9.3.0 598.1 MiB
+  v tibco-foresight-instream@9.2.0 141.7 MiB
+  v tibco-foresight-instream@9.1.0 37.0 MiB
+  v tibco-foresight-instream@9.0.0 34.9 MiB
+  v tibco-foresight-operational-monitor@6.0.0 9.3 MiB
+  v tibco-foresight-operational-monitor@5.5.0 4.0 MiB
+  v tibco-foresight-operational-monitor@5.4.0 3.8 MiB
+  v tibco-foresight-rest-api@1.2.0 11.7 MiB
+  v tibco-foresight-rest-api@1.1.0 10.4 MiB
+  v tibco-foresight-rest-api@1.0.3 2.0 MiB
+  v tibco-foresight-studio@9.3.0 38.1 MiB
+  v tibco-foresight-studio@9.2.0 35.4 MiB
+  v tibco-foresight-studio@9.1.0 9.8 MiB
+  v tibco-foresight-studio@9.0.1 0.5 MiB
+  v tibco-foresight-studio@9.0.0 9.9 MiB
+  v tibco-foresight-transaction-insight@6.0.0 141.5 MiB
+  v tibco-foresight-transaction-insight@5.5.0 117.2 MiB
+  v tibco-foresight-transaction-insight@5.4.0 92.6 MiB
+  v tibco-foresight-translator@4.2.0 55.1 MiB
+  v tibco-foresight-translator@4.1.0 12.6 MiB
+  v tibco-foresight-translator@4.0.0 12.5 MiB
+  v tibco-foresight-translator-attachment-adapter@3.0.0 7.0 MiB
+  v tibco-foresight-translator-attachment-adapter@2.0.0 5.2 MiB
+           Download            
++-----------------------------+
+| Outcome          | Versions |
+|------------------+----------|
+| Downloaded       |       39 |
+| Already current  |        0 |
+| Skipped (manual) |        0 |
+| No ZIP endpoint  |        0 |
+| Failed           |        0 |
++-----------------------------+
+2280.1 MiB written.

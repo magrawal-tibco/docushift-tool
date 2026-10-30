@@ -1,0 +1,28 @@
+Reframing 8 version(s)...
+  v tibco-businessevents-enterprise-edition@6.4.0 1340 topic(s) -> 296 page(s)
+  v tibco-businessevents-enterprise-edition@6.3.2 1371 topic(s) -> 253 page(s)
+  v tibco-businessevents-enterprise-edition@6.3.1 1375 topic(s) -> 288 page(s)
+  v tibco-businessevents-enterprise-edition@6.3.0 1358 topic(s) -> 258 page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |        4 |
+| Already current             |        0 |
+| Not Flare or DITA (skipped) |        4 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+5444 topic(s) read into 1095 page(s).
+Files: 10663 source doc -> 5535 converted -> 1095 merged (80.2% fewer at the 
+merge, 89.7% end to end); 2431 file(s) standing in the measured merged tree(s).
+274 page(s) queued for editorial review:
+  tibco-businessevents-enterprise-edition@6.4.0: 104 of 296 -- see 
+review-queue.csv
+  tibco-businessevents-enterprise-edition@6.3.2: 55 of 253 -- see 
+review-queue.csv
+  tibco-businessevents-enterprise-edition@6.3.1: 55 of 288 -- see 
+review-queue.csv
+  tibco-businessevents-enterprise-edition@6.3.0: 60 of 258 -- see 
+review-queue.csv
+Findings: 8 warnings, 8 notes.

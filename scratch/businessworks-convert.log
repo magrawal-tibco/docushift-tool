@@ -1,0 +1,53 @@
+Converting 10 version(s)...
+  v tibco-activematrix-businessworks@6.13.0 2406 topic(s), 2448 asset(s), 3 
+unit(s), 2449 nav node(s), 3 generated -> 4858 file(s)
+  v tibco-activematrix-businessworks@6.12.0 2482 topic(s), 2658 asset(s), 3 
+unit(s), 2525 nav node(s), 3 generated -> 5144 file(s)
+  v tibco-activematrix-businessworks@5.16.1 1423 topic(s), 531 asset(s), 2 
+unit(s), 1434 nav node(s), 9 generated -> 1966 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        3 |
+| Already current   |        0 |
+| No extracted tree |        2 |
+| Engine unknown    |        5 |
+| Failed            |        0 |
++------------------------------+
+6311 topic(s), 5637 asset(s) written.
+11968 file(s) standing in the measured output tree(s).
+tibco-activematrix-businessworks@6.13.0: 2823 resolved, 0 skin, 34 escaped, 0 
+dangling, 0 case-mismatch, 2216 orphan (133.9 MB)
+tibco-activematrix-businessworks@6.13.0: CSH 233 resolved, 0 unresolved, 125 
+ambiguous, 203 rescued version-wide
+tibco-activematrix-businessworks@6.13.0: skipped 6 generated-directory, 6 
+runtime-stub, 3 unreferenced-template
+tibco-activematrix-businessworks@6.12.0: 3063 resolved, 0 skin, 34 escaped, 0 
+dangling, 0 case-mismatch, 2201 orphan (133.8 MB)
+tibco-activematrix-businessworks@6.12.0: CSH 233 resolved, 0 unresolved, 125 
+ambiguous, 203 rescued version-wide
+tibco-activematrix-businessworks@6.12.0: skipped 6 generated-directory, 6 
+runtime-stub, 3 unreferenced-template
+tibco-activematrix-businessworks@5.16.1: 531 resolved, 0 skin, 10 escaped, 0 
+dangling, 0 case-mismatch, 651 orphan (29.3 MB)
+tibco-activematrix-businessworks@5.16.1: CSH 188 resolved, 0 unresolved, 0 
+ambiguous
+tibco-activematrix-businessworks@5.16.1: skipped 8 generated-directory, 4 
+runtime-stub, 1 unreferenced-template
+! 
+premium-subscription-for-tibco-businessworks-container-edition-and-plug-ins-for
+-aws-marketplace@2.3.1: engine undetected (`auto`)
+! tibco-businessworks-container-edition-buildpack-for-pcf@2.2.1: no extracted 
+tree at 
+C:\github\docushift-tool\families\en-us-tib-businessworks\extracted\tibco-busin
+essworks-container-edition-buildpack-for-pcf\2.2.1; run `docushift extract` 
+first
+! tibco-businessworks-enterprise@3.12.0: engine undetected (`auto`)
+! tibco-businessworks-enterprise@3.11.0: engine undetected (`auto`)
+! tibco-businessworks-enterprise@3.10.0: engine undetected (`auto`)
+! tibco-businessworks-formbuilder@5.3.2: no extracted tree at 
+C:\github\docushift-tool\families\en-us-tib-businessworks\extracted\tibco-busin
+essworks-formbuilder\5.3.2; run `docushift extract` first
+! tibco-integration@3.16.0: engine undetected (`auto`)
+Findings: 18 warnings, 23 notes.

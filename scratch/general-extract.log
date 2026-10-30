@@ -1,0 +1,75 @@
+Extracting 13 version(s)...
+  v tibco-activation-service@1.1.0 361 file(s), flare, 1 root(s)
+  v tibco-activation-service@1.0.0 356 file(s), flare, 1 root(s)
+  v tibco-api-exchange-gateway@2.5.1 1866 file(s), flare, 1 root(s)
+  v tibco-enterprise-administrator@2.4.3 1040 file(s), flare, 1 root(s)
+  v tibco-enterprise-administrator@2.4.2 1027 file(s), flare, 1 root(s)
+  v tibco-patterns@6.2.0 2100 file(s), flare, 1 root(s)
+  v tibco-patterns@6.1.2 1884 file(s), flare, 1 root(s)
+  x tibco-patterns@5.7.1
+  v tibco-reward@22.3.0 2998 file(s), flare, 2 root(s)
+  v tibco-reward@22.2.0 2984 file(s), flare, 2 root(s)
+  v tibco-rtview@7.6.0 8 file(s), auto
+  v tibco-rtview@7.5.0 7 file(s), auto
+                Extract                
++-------------------------------------+
+| Outcome                  | Versions |
+|--------------------------+----------|
+| Extracted                |       11 |
+| Already current          |        0 |
+| Measured from cache      |        0 |
+| No package               |        1 |
+| Refused (unsafe archive) |        1 |
+| Failed                   |        0 |
++-------------------------------------+
+14631 file(s) written.
+       Engines       
++-------------------+
+| Engine | Versions |
+|--------+----------|
+| flare  |        9 |
+| auto   |        2 |
++-------------------+
+? tibco-rtview@7.6.0: engine undetected (`auto`)
+? tibco-rtview@7.5.0: engine undetected (`auto`)
+CSH: 11 source(s), 0 identifier(s).
+                     Assets                      
++-----------------------------------------------+
+| Category | Destination     | Files |     Size |
+|----------+-----------------+-------+----------|
+| topic    | api-reference   |  1430 |  28.2 MB |
+| image    | api-reference   |   193 |   1.0 MB |
+| archive  | api-reference   |    42 |   0.1 MB |
+| other    | api-reference   |   715 |  16.7 MB |
+| topic    | output-root     |  5599 |  98.9 MB |
+| image    | output-root     |  2235 | 101.7 MB |
+| document | output-root     |     2 |   2.2 MB |
+| archive  | output-root     |     1 |   1.1 MB |
+| skin     | output-root     |  4196 | 162.7 MB |
+| other    | output-root     |   128 |   7.1 MB |
+| document | document-router |    90 | 117.2 MB |
++-----------------------------------------------+
+? tibco-patterns@6.2.0: tibco-patterns-6-2-0/html/api/ 764 file(s), no known 
+generator marker
+? tibco-patterns@6.2.0: tibco-patterns-6-2-0/html/api/java/ 200 file(s), no 
+known generator marker
+? tibco-patterns@6.1.2: tibco-patterns-6-1-2/html/api/ 671 file(s), no known 
+generator marker
+? tibco-patterns@6.1.2: tibco-patterns-6-1-2/html/api/java/ 144 file(s), no 
+known generator marker
+? tibco-reward@22.3.0: tibco-reward-22-3-0/html/blue-api-reference/ 52 file(s),
+no known generator marker
+? tibco-reward@22.3.0: tibco-reward-22-3-0/html_V3/blue-api-reference/ 52 
+file(s), no known generator marker
+? tibco-reward@22.2.0: tibco-reward-22-2-0/html/blue-api-reference/ 52 file(s),
+no known generator marker
+? tibco-reward@22.2.0: tibco-reward-22-2-0/html_V3/blue-api-reference/ 52 
+file(s), no known generator marker
+! tibco-health-essentials-cloud@Cloud: no package at 
+C:\github\docushift-tool\families\en-us-tib-general\downloads\tibco-health-esse
+ntials-cloud-Cloud.zip; run `docushift download` first
+x tibco-patterns@5.7.1: tibco-patterns-5.7.1.zip holds two members Windows 
+would write to one file: 
+'tibco-patterns-search-5-7-1/html/learning-UI/Exporting_a_Model.htm' and 
+'tibco-patterns-search-5-7-1/html/learning-ui/Exporting_a_Model.htm'
+Recorded 9 notes -- `docushift report --run 953`.

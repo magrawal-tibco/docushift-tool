@@ -1,0 +1,11 @@
+Validating 24 published folder(s) in C:\github\ibi-docs-aem...
+  ! en-us-ibi-di-ism-userdocs/en-us/ibi-data-quality/online-help/5-2-2 1 
+finding(s), 0 error(s)
+                                   Validate                                    
+┌──────────────┬───────┬────────────┬──────┬──────────┬─────────────┬─────────┐
+│       Walked │ Files │ References │ HTML │ External │ Tree-rooted │ Anchors │
+├──────────────┼───────┼────────────┼──────┼──────────┼─────────────┼─────────┤
+│ 24 folder(s) │   102 │        435 │   14 │       24 │           0 │ 104/105 │
+└──────────────┴───────┴────────────┴──────┴──────────┴─────────────┴─────────┘
+ANCHOR_MISSING 1 row(s), 1 occurrence(s)
+Findings: 1 warning.

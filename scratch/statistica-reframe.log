@@ -1,0 +1,112 @@
+Reframing 42 version(s)...
+  v spotfire-data-science-author@2.2.0 13 topic(s) -> 8 page(s)
+  v spotfire-data-science-author@2.1.0 13 topic(s) -> 8 page(s)
+  v spotfire-data-science-author@2.0.0 15 topic(s) -> 7 page(s)
+  v spotfire-data-science-author@1.5.0 15 topic(s) -> 11 page(s)
+  v spotfire-data-science-author@1.4.0 13 topic(s) -> 6 page(s)
+  v spotfire-data-science-for-life-science-author@2.2.0 13 topic(s) -> 8 
+page(s)
+  v spotfire-data-science-for-life-science-author@2.1.0 13 topic(s) -> 8 
+page(s)
+  v spotfire-data-science-for-life-science-author@2.0.0 15 topic(s) -> 7 
+page(s)
+  v spotfire-data-science-for-life-science-author@1.5.0 15 topic(s) -> 11 
+page(s)
+  v spotfire-data-science-for-life-science-author@1.4.0 13 topic(s) -> 6 
+page(s)
+  v spotfire-data-science-for-life-science-operations@2.2.0 13 topic(s) -> 8 
+page(s)
+  v spotfire-data-science-for-life-science-operations@2.1.0 13 topic(s) -> 8 
+page(s)
+  v spotfire-data-science-for-life-science-operations@2.0.0 15 topic(s) -> 7 
+page(s)
+  v spotfire-data-science-for-life-science-operations@1.5.0 15 topic(s) -> 11 
+page(s)
+  v spotfire-data-science-for-life-science-operations@1.4.0 13 topic(s) -> 6 
+page(s)
+  v spotfire-data-science-operations@2.2.0 13 topic(s) -> 8 page(s)
+  v spotfire-data-science-operations@2.1.0 13 topic(s) -> 8 page(s)
+  v spotfire-data-science-operations@2.0.0 15 topic(s) -> 7 page(s)
+  v spotfire-data-science-operations@1.5.0 15 topic(s) -> 11 page(s)
+  v spotfire-data-science-operations@1.4.0 13 topic(s) -> 6 page(s)
+  v spotfire-data-science-workbench@14.4.0 15736 topic(s) -> 3346 page(s)
+  v spotfire-data-science-workbench@14.3.0 15720 topic(s) -> 3342 page(s)
+  v spotfire-data-science-workbench@14.1.0 15740 topic(s) -> 2582 page(s)
+  v spotfire-statistica@14.4.0 15736 topic(s) -> 3346 page(s)
+  v spotfire-statistica@14.3.0 15720 topic(s) -> 3342 page(s)
+  v spotfire-statistica@14.1.0 15740 topic(s) -> 2582 page(s)
+  v spotfire-statistica-all-servers@14.2.0 2 topic(s) -> 3 page(s)
+  v spotfire-statistica-all-servers@14.1.0 4 topic(s) -> 289 page(s)
+  v spotfire-statistica-integration@14.5.0 67 topic(s) -> 110 page(s)
+  v spotfire-statistica-integration@14.4.0 49 topic(s) -> 78 page(s)
+  v spotfire-statistica-integration@14.3.0 12 topic(s) -> 27 page(s)
+  v spotfire-statistica-integration@14.2.0 14 topic(s) -> 8 page(s)
+  v tibco-data-science-for-tibco-spotfire-analyst@14.1.0 13 topic(s) -> 316 
+page(s)
+  v tibco-data-science-service-for-tibco-spotfire@14.1.0 4 topic(s) -> 289 
+page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |       34 |
+| Already current             |        0 |
+| Not Flare or DITA (skipped) |        7 |
+| No converted tree           |        1 |
+| Failed                      |        0 |
++----------------------------------------+
+94833 topic(s) read into 19820 page(s).
+Files: 165011 source doc -> 87208 converted -> 19820 merged (77.3% fewer at the
+merge, 88.0% end to end); 56467 file(s) standing in the measured merged 
+tree(s).
+5454 page(s) queued for editorial review:
+  spotfire-data-science-author@2.2.0: 2 of 8 -- see review-queue.csv
+  spotfire-data-science-author@2.1.0: 2 of 8 -- see review-queue.csv
+  spotfire-data-science-author@2.0.0: 1 of 7 -- see review-queue.csv
+  spotfire-data-science-author@1.5.0: 3 of 11 -- see review-queue.csv
+  spotfire-data-science-author@1.4.0: 1 of 6 -- see review-queue.csv
+  spotfire-data-science-for-life-science-author@2.2.0: 2 of 8 -- see 
+review-queue.csv
+  spotfire-data-science-for-life-science-author@2.1.0: 2 of 8 -- see 
+review-queue.csv
+  spotfire-data-science-for-life-science-author@2.0.0: 1 of 7 -- see 
+review-queue.csv
+  spotfire-data-science-for-life-science-author@1.5.0: 3 of 11 -- see 
+review-queue.csv
+  spotfire-data-science-for-life-science-author@1.4.0: 1 of 6 -- see 
+review-queue.csv
+  spotfire-data-science-for-life-science-operations@2.2.0: 2 of 8 -- see 
+review-queue.csv
+  spotfire-data-science-for-life-science-operations@2.1.0: 2 of 8 -- see 
+review-queue.csv
+  spotfire-data-science-for-life-science-operations@2.0.0: 1 of 7 -- see 
+review-queue.csv
+  spotfire-data-science-for-life-science-operations@1.5.0: 3 of 11 -- see 
+review-queue.csv
+  spotfire-data-science-for-life-science-operations@1.4.0: 1 of 6 -- see 
+review-queue.csv
+  spotfire-data-science-operations@2.2.0: 2 of 8 -- see review-queue.csv
+  spotfire-data-science-operations@2.1.0: 2 of 8 -- see review-queue.csv
+  spotfire-data-science-operations@2.0.0: 1 of 7 -- see review-queue.csv
+  spotfire-data-science-operations@1.5.0: 3 of 11 -- see review-queue.csv
+  spotfire-data-science-operations@1.4.0: 1 of 6 -- see review-queue.csv
+  spotfire-data-science-workbench@14.4.0: 893 of 3346 -- see review-queue.csv
+  spotfire-data-science-workbench@14.3.0: 893 of 3342 -- see review-queue.csv
+  spotfire-data-science-workbench@14.1.0: 824 of 2582 -- see review-queue.csv
+  spotfire-statistica@14.4.0: 893 of 3346 -- see review-queue.csv
+  spotfire-statistica@14.3.0: 893 of 3342 -- see review-queue.csv
+  spotfire-statistica@14.1.0: 824 of 2582 -- see review-queue.csv
+  spotfire-statistica-all-servers@14.2.0: 1 of 3 -- see review-queue.csv
+  spotfire-statistica-all-servers@14.1.0: 26 of 289 -- see review-queue.csv
+  spotfire-statistica-integration@14.5.0: 58 of 110 -- see review-queue.csv
+  spotfire-statistica-integration@14.4.0: 38 of 78 -- see review-queue.csv
+  spotfire-statistica-integration@14.3.0: 11 of 27 -- see review-queue.csv
+  spotfire-statistica-integration@14.2.0: 1 of 8 -- see review-queue.csv
+  tibco-data-science-for-tibco-spotfire-analyst@14.1.0: 37 of 316 -- see 
+review-queue.csv
+  tibco-data-science-service-for-tibco-spotfire@14.1.0: 26 of 289 -- see 
+review-queue.csv
+! spotfire-statistics-services@14.0.0: no converted tree at 
+C:\github\docushift-tool\output\en-us-spotfire-statistica\spotfire-statistics-s
+ervices\14.0.0; run `docushift convert` first
+Findings: 41 warnings, 68 notes.

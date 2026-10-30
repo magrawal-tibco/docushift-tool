@@ -1,0 +1,12 @@
+Validating 4 published folder(s) in C:\github\ibi-docs-aem...
+  ! 
+en-us-ibi-container-editions-userdocs/en-us/ibi-webfocus-container-edition/onli
+ne-help/9-3-8 66 finding(s), 0 error(s)
+                                   Validate                                   
++----------------------------------------------------------------------------+
+|      Walked | Files | References | HTML | External | Tree-rooted | Anchors |
+|-------------+-------+------------+------+----------+-------------+---------|
+| 4 folder(s) |   113 |        266 |    1 |       61 |           0 | 116/182 |
++----------------------------------------------------------------------------+
+ANCHOR_MISSING 66 row(s), 66 occurrence(s)
+Findings: 66 warnings.

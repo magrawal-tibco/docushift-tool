@@ -1,0 +1,30 @@
+Reframing 6 version(s)...
+  v tibco-activespaces-enterprise-edition@5.2.0 324 topic(s) -> 55 page(s)
+  v tibco-activespaces-enterprise-edition@5.1.1 317 topic(s) -> 68 page(s)
+  v tibco-activespaces-enterprise-edition@5.1.0 317 topic(s) -> 68 page(s)
+  v tibco-activespaces-enterprise-edition@5.0.0 324 topic(s) -> 61 page(s)
+  v tibco-activespaces-enterprise-edition@4.10.1 316 topic(s) -> 60 page(s)
+  v tibco-activespaces-enterprise-edition@4.10.0 316 topic(s) -> 60 page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |        6 |
+| Already current             |        0 |
+| Not Flare or DITA (skipped) |        0 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+1914 topic(s) read into 372 page(s).
+Files: 5525 source doc -> 1952 converted -> 372 merged (80.9% fewer at the 
+merge, 93.3% end to end); 467 file(s) standing in the measured merged tree(s).
+113 page(s) queued for editorial review:
+  tibco-activespaces-enterprise-edition@5.2.0: 12 of 55 -- see review-queue.csv
+  tibco-activespaces-enterprise-edition@5.1.1: 24 of 68 -- see review-queue.csv
+  tibco-activespaces-enterprise-edition@5.1.0: 24 of 68 -- see review-queue.csv
+  tibco-activespaces-enterprise-edition@5.0.0: 17 of 61 -- see review-queue.csv
+  tibco-activespaces-enterprise-edition@4.10.1: 18 of 60 -- see 
+review-queue.csv
+  tibco-activespaces-enterprise-edition@4.10.0: 18 of 60 -- see 
+review-queue.csv
+Findings: 12 warnings, 6 notes.

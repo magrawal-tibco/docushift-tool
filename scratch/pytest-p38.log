@@ -1,0 +1,200 @@
+============================= test session starts =============================
+platform win32 -- Python 3.13.7, pytest-9.1.1, pluggy-1.6.0
+rootdir: C:\github\docushift-tool
+configfile: pyproject.toml
+testpaths: tests
+plugins: cov-7.1.0
+collected 2137 items
+
+tests\integration\test_pipeline_smoke.py ..                              [  0%]
+tests\unit\test_apirefs.py ...........................                   [  1%]
+tests\unit\test_archives.py .............                                [  1%]
+tests\unit\test_catalog.py ............................................. [  4%]
+......................................................F................. [  7%]
+........................................................................ [ 10%]
+......................                                                   [ 11%]
+tests\unit\test_cli.py ..................................F.............. [ 14%]
+..................F..................................................... [ 17%]
+.................................                                        [ 19%]
+tests\unit\test_config.py .............................................. [ 21%]
+...............                                                          [ 21%]
+tests\unit\test_content_root.py ..........                               [ 22%]
+tests\unit\test_converter.py ........................................... [ 24%]
+.........................                                                [ 25%]
+tests\unit\test_csvio.py ............................................... [ 27%]
+.........                                                                [ 28%]
+tests\unit\test_discovery.py ........................................... [ 30%]
+.......                                                                  [ 30%]
+tests\unit\test_distributor.py ......................................... [ 32%]
+......................................................                   [ 34%]
+tests\unit\test_dita.py ................................................ [ 37%]
+...........                                                              [ 37%]
+tests\unit\test_docbook.py .......................................       [ 39%]
+tests\unit\test_documents.py ..................................          [ 41%]
+tests\unit\test_downloader.py .......................................... [ 43%]
+.....                                                                    [ 43%]
+tests\unit\test_extractor.py ........................................... [ 45%]
+................................                                         [ 46%]
+tests\unit\test_findings.py ..............                               [ 47%]
+tests\unit\test_flare.py ............................................... [ 49%]
+................................................................         [ 52%]
+tests\unit\test_inventory.py ........................................... [ 54%]
+.....                                                                    [ 54%]
+tests\unit\test_longpath.py ....s................................        [ 56%]
+tests\unit\test_naming.py .............................                  [ 58%]
+tests\unit\test_navigation.py ............................               [ 59%]
+tests\unit\test_origins.py ...................................           [ 60%]
+tests\unit\test_reframe.py ............................................. [ 63%]
+........................................................................ [ 66%]
+........................................................................ [ 69%]
+............                                                             [ 70%]
+tests\unit\test_reporting_views.py ..................................... [ 72%]
+...............................................................          [ 75%]
+tests\unit\test_roots.py ...........                                     [ 75%]
+tests\unit\test_router.py .........................                      [ 76%]
+tests\unit\test_scaffolding.py ....................                      [ 77%]
+tests\unit\test_sitemap.py .................                             [ 78%]
+tests\unit\test_slug.py .......................                          [ 79%]
+tests\unit\test_state.py .......................                         [ 80%]
+tests\unit\test_swap.py ...........                                      [ 81%]
+tests\unit\test_sync_versions.py ......................                  [ 82%]
+tests\unit\test_transforms.py .......................................... [ 84%]
+........................................................................ [ 87%]
+.....................                                                    [ 88%]
+tests\unit\test_validation.py .......................................... [ 90%]
+........................................................................ [ 93%]
+......................                                                   [ 94%]
+tests\unit\test_version_status.py ................                       [ 95%]
+tests\unit\test_webworks.py ............................................ [ 97%]
+..................................................                       [100%]
+
+================================== FAILURES ===================================
+______________ test_the_shipped_report_retires_the_measured_set _______________
+
+repo_root = WindowsPath('C:/github/docushift-tool')
+
+    def test_the_shipped_report_retires_the_measured_set(repo_root: Path) -> None:
+        """A guard on the real three files: products.csv, versions.csv and eos.yaml.
+    
+        The figures are what the 2026-09-10 report costs the *convertible* population,
+        and they are asserted exactly rather than as a floor: a report swap that moves
+        them is a decision to look at, not something to discover after a conversion run.
+    
+        *Re-baselined 2026-09-17, and the decision was looked at.* The catalog gained
+        two discovered products (634 -> 636), one of which the report covers (251 ->
+        252). The two retirement figures did not move at all, which is the check that
+        matters: nothing became retired or un-retired, so the delta is population, not
+        verdict.
+    
+        *Re-baselined again 2026-09-22, same reading.* `tibco-streaming` was added by
+        hand (636 -> 637, planning.md Phase 18c) because discovery cannot see a parent
+        product. Both retirement figures are again unmoved. Coverage rose with the
+        population, 252 -> 253, and that is worth one line: **support's report already
+        carried `tibco-streaming`.** The product was never in doubt anywhere except the
+        catalog, which is the whole of Phase 18.
+    
+        *Re-baselined 2026-09-23, and this time `versions_retired` moved: 128 -> 139.*
+        Phase 18d fixed discovery, so the catalog gained 32 products and 701 versions
+        in one fetch (637 -> 669, planning.md Phase 18d) -- the largest population
+        change this guard has seen. The delta is still population rather than verdict,
+        and the evidence is stronger than the count:
+    
+        * **Not one of the 4,480 pre-existing version rows changed `release_status` or
+          `convert_eligible`.** The merge was purely additive.
+        * All 173 newly retired rows sit on products added by the same fetch, led by
+          `tibco-activematrix-businessworks` (38) and
+          `tibco-businessevents-enterprise-edition` (26).
+        * `products_fully_retired` is **unmoved at 11**, and it is the same 11: nothing
+          newly discovered turned out to be retired in its entirety.
+    
+        So the report's verdict on everything it had already judged is untouched; it is
+        now judging products it could not previously see. That is the outcome 18d was
+        built for, and the number moving is what it looks like.
+    
+        *Re-baselined 2026-09-28, and both figures moved down: `versions_retired`
+        139 -> 133 and `products_fully_retired` 11 -> 10.* This one is not population
+        and it is not the report either -- **not one of the 5,181 version rows changed
+        `release_status`**, and coverage is unmoved at 270/669. What moved is
+        `convert_eligible`, hand-resolved against the docsite team's verdict (Phase 25):
+    
+        * **6 rows went eligible -> ineligible, and all 6 are retired.** That is the
+          whole of the -6: three versions of `tibco-data-science-team-studio`, two of
+          `spotfire-data-streams`, and `tibco-silver-fabric-enabler-for-tibco-
+          administrator-enterprise-edition@2.9.0`.
+        * **88 rows went ineligible -> eligible, and none of them is retired** (61
+          unknown, 25 retirement-announced, 2 GA), so they add nothing to the count.
+          One of them is what empties the emptied list: `tibco-activematrix-
+          businessworks-plug-in-for-twitter@6.1.2` is retirement-announced rather than
+          retired, so the product is no longer convertible-and-wholly-retired.
+    
+        The rule's verdict is therefore untouched in both directions; the convertible
+        population it is measured over is what a human changed.
+        """
+        manager = CatalogManager(
+            repo_root / "config" / "products.csv",
+            repo_root / "config" / "versions.csv",
+            config=ConfigManager(root_dir=repo_root),
+        )
+    
+        summary = manager.triage_summary()
+    
+>       assert summary["versions_retired"] == 133
+E       assert 123 == 133
+
+tests\unit\test_catalog.py:1268: AssertionError
+________ test_catalog_show_says_an_excluded_product_is_never_converted ________
+
+runner = <click.testing.CliRunner object at 0x000001B0FF9C8FA0>
+populated_root = WindowsPath('C:/Users/Mayur.Agrawal/AppData/Local/Temp/pytest-of-Mayur.Agrawal/pytest-887/test_catalog_show_says_an_excl0')
+
+    def test_catalog_show_says_an_excluded_product_is_never_converted(runner: CliRunner, populated_root: Path) -> None:
+        """The version rows below still say Eligible, so the scope line has to overrule them."""
+        _invoke(runner, populated_root, "catalog", "set", "--product", "ems", "--out-of-scope")
+    
+        result = _invoke(runner, populated_root, "catalog", "show", "--product", "ems")
+    
+        assert result.exit_code == 0
+        assert "in_scope=false" in result.output
+>       assert "10.4.0" in result.output
+E       AssertionError: assert '10.4.0' in 'TIBCO EMS (tibco-enterprise-message-service)\\n  bu=tibco  family=messaging (source: unclassified)\\n  product_code=ems...    \u2502       \u2502      \u2502 (aut\u2026 \u2502      \u2502\\n\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2518\\n'
+E        +  where 'TIBCO EMS (tibco-enterprise-message-service)\\n  bu=tibco  family=messaging (source: unclassified)\\n  product_code=ems...    \u2502       \u2502      \u2502 (aut\u2026 \u2502      \u2502\\n\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2518\\n' = <Result okay>.output
+
+tests\unit\test_cli.py:425: AssertionError
+________________ test_catalog_show_lists_the_lifecycle_status _________________
+
+runner = <click.testing.CliRunner object at 0x000001B083275390>
+populated_root = WindowsPath('C:/Users/Mayur.Agrawal/AppData/Local/Temp/pytest-of-Mayur.Agrawal/pytest-887/test_catalog_show_lists_the_li0')
+
+    def test_catalog_show_lists_the_lifecycle_status(runner: CliRunner, populated_root: Path) -> None:
+        _write_eos(populated_root, RETIRED_ROW)
+        _invoke(runner, populated_root, "catalog", "eos")
+    
+        result = _invoke(runner, populated_root, "catalog", "show", "--product", "ems")
+    
+        assert result.exit_code == 0
+>       assert "Status" in result.output
+E       AssertionError: assert 'Status' in 'TIBCO EMS (tibco-enterprise-message-service)\\n  bu=tibco  family=messaging (source: unclassified)\\n  product_code=ems...    \u2502       \u2502      \u2502 (aut\u2026 \u2502      \u2502\\n\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2518\\n'
+E        +  where 'TIBCO EMS (tibco-enterprise-message-service)\\n  bu=tibco  family=messaging (source: unclassified)\\n  product_code=ems...    \u2502       \u2502      \u2502 (aut\u2026 \u2502      \u2502\\n\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2518\\n' = <Result okay>.output
+
+tests\unit\test_cli.py:825: AssertionError
+============================== warnings summary ===============================
+tests/unit/test_dita.py: 57 warnings
+  C:\github\docushift-tool\src\docushift\transforms\markdown.py:112: XMLParsedAsHTMLWarning: It looks like you're using an HTML parser to parse an XML document.
+  
+  Assuming this really is an XML document, what you're doing might work, but you should know that using an XML parser will be more reliable. To parse this document as XML, make sure you have the Python package 'lxml' installed, and pass the keyword argument `features="xml"` into the BeautifulSoup constructor.
+  
+  If you want or need to use an HTML parser on this document, you can make this warning go away by filtering it. To do that, run this code before calling the BeautifulSoup constructor:
+  
+      from bs4 import XMLParsedAsHTMLWarning
+      import warnings
+  
+      warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+  
+    return BeautifulSoup(_CDATA.sub(_unwrap_cdata, text), PARSER)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/unit/test_catalog.py::test_the_shipped_report_retires_the_measured_set
+FAILED tests/unit/test_cli.py::test_catalog_show_says_an_excluded_product_is_never_converted
+FAILED tests/unit/test_cli.py::test_catalog_show_lists_the_lifecycle_status
+===== 3 failed, 2133 passed, 1 skipped, 57 warnings in 268.73s (0:04:28) ======

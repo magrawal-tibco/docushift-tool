@@ -1,0 +1,28 @@
+Validating 38 published folder(s) in C:\github\ibi-docs-aem...
+  ! 
+en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-dsml-services/online-help/9-3-0 
+2 finding(s), 0 error(s)
+  ! 
+en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-dsml-services/online-help/9-3-2 
+3 finding(s), 0 error(s)
+  ! 
+en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-dsml-services/online-help/9-3-3 
+2 finding(s), 0 error(s)
+  ! 
+en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-dsml-services/online-help/9-3-4 
+1 finding(s), 0 error(s)
+  ! 
+en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-dsml-services/online-help/9-3-5 
+2 finding(s), 0 error(s)
+  ! 
+en-us-ibi-webfocus-userdocs/en-us/ibi-webfocus-dsml-services/online-help/9-3-8 
+67 finding(s), 0 error(s)
+                                   Validate                                    
+┌──────────────┬───────┬────────────┬──────┬──────────┬─────────────┬─────────┐
+│       Walked │ Files │ References │ HTML │ External │ Tree-rooted │ Anchors │
+├──────────────┼───────┼────────────┼──────┼──────────┼─────────────┼─────────┤
+│ 38 folder(s) │   112 │        295 │    0 │      123 │           0 │  53/119 │
+└──────────────┴───────┴────────────┴──────┴──────────┴─────────────┴─────────┘
+ANCHOR_MISSING 66 row(s), 66 occurrence(s)
+LINK_TO_UNFILED 6 row(s), 11 occurrence(s)
+Findings: 66 warnings, 6 notes.

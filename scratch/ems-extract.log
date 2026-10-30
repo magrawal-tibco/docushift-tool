@@ -1,0 +1,33 @@
+Extracting 7 version(s)...
+  v tibco-ems-client-for-ibm-i@8.6.0 76 file(s), dita, 1 root(s)
+                Extract                
++-------------------------------------+
+| Outcome                  | Versions |
+|--------------------------+----------|
+| Extracted                |        1 |
+| Already current          |        6 |
+| Measured from cache      |        0 |
+| No package               |        0 |
+| Refused (unsafe archive) |        0 |
+| Failed                   |        0 |
++-------------------------------------+
+76 file(s) written.
+       Engines       
++-------------------+
+| Engine | Versions |
+|--------+----------|
+| flare  |        6 |
+| dita   |        1 |
++-------------------+
+CSH: 1 source(s), 0 identifier(s).
+                    Assets                     
++---------------------------------------------+
+| Category | Destination     | Files |   Size |
+|----------+-----------------+-------+--------|
+| topic    | output-root     |    47 | 0.5 MB |
+| image    | output-root     |     1 | 0.0 MB |
+| skin     | output-root     |    20 | 0.8 MB |
+| other    | output-root     |     1 | 0.2 MB |
+| document | document-router |     7 | 4.9 MB |
++---------------------------------------------+
+Recorded 1 note -- `docushift report --run 720`.

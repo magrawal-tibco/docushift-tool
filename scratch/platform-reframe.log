@@ -1,0 +1,63 @@
+Reframing 3 version(s)...
+  v tibco-control-plane@1.20.0 534 topic(s) -> 211 page(s)
+  v tibco-control-plane@1.19.0 506 topic(s) -> 132 page(s)
+  v tibco-control-plane@1.18.0 484 topic(s) -> 127 page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |        3 |
+| Already current             |        0 |
+| Not Flare or DITA (skipped) |        0 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+1524 topic(s) read into 470 page(s).
+Files: 10960 source doc -> 1572 converted -> 470 merged (70.1% fewer at the 
+merge, 95.7% end to end); 2070 file(s) standing in the measured merged tree(s).
+169 page(s) queued for editorial review:
+  tibco-control-plane@1.20.0: 63 of 211 -- see review-queue.csv
+  tibco-control-plane@1.19.0: 55 of 132 -- see review-queue.csv
+  tibco-control-plane@1.18.0: 51 of 127 -- see review-queue.csv
+Findings: 3 warnings, 6 notes.
+Reframing 2 version(s)...
+  v tibco-platform-command-line-interface@1.2.0 412 topic(s) -> 161 page(s)
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |        1 |
+| Already current             |        0 |
+| Not Flare or DITA (skipped) |        1 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+412 topic(s) read into 161 page(s).
+Files: 3300 source doc -> 428 converted -> 161 merged (62.4% fewer at the 
+merge, 95.1% end to end); 609 file(s) standing in the measured merged tree(s).
+55 page(s) queued for editorial review:
+  tibco-platform-command-line-interface@1.2.0: 55 of 161 -- see 
+review-queue.csv
+Findings: 1 warning, 1 note.
+Reframing 1 version(s)...
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |        0 |
+| Already current             |        0 |
+| Not Flare or DITA (skipped) |        1 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+
+Reframing 1 version(s)...
+                 Reframe                  
++----------------------------------------+
+| Outcome                     | Versions |
+|-----------------------------+----------|
+| Reframed                    |        0 |
+| Already current             |        0 |
+| Not Flare or DITA (skipped) |        1 |
+| No converted tree           |        0 |
+| Failed                      |        0 |
++----------------------------------------+

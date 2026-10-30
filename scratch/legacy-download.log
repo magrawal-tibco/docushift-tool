@@ -1,0 +1,34 @@
+Downloading 14 version(s) with 4 worker(s)...
+  v ibi-omni-gen@4.3.0 2.3 MiB
+  v ibi-omni-gen-mdm@4.3.0 2.3 MiB
+  v ibi-omni-healthdata@4.3.0 2.3 MiB
+  v ibi-omni-healthdata-business-release@2023.3.0 0.0 MiB
+  v ibi-omni-healthdata-business-release@2023.2.0 0.0 MiB
+  v ibi-omni-healthdata-business-release@2023.1.0 0.0 MiB
+  v ibi-omni-insurance@4.3.0 2.0 MiB
+  v ibi-web-query-for-ibm-i@9.2.1 2.1 MiB
+  v ibi-web-query-for-ibm-i@9.2.0 2.2 MiB
+  v ibi-web-query-for-ibm-i@9.1.2 2.2 MiB
+  x ibi-web-query-for-ibm-i@9.1.1
+  x ibi-web-query-for-ibm-i@9.1.0
+  v tibco-iway-business-activity-monitor@8.0.5 3.5 MiB
+  v tibco-iway-trading-partner-manager@8.0.5 4.8 MiB
+           Download            
++-----------------------------+
+| Outcome          | Versions |
+|------------------+----------|
+| Downloaded       |       12 |
+| Already current  |        0 |
+| Skipped (manual) |        0 |
+| No ZIP endpoint  |        0 |
+| Failed           |        2 |
++-----------------------------+
+23.7 MiB written.
+! ibi-web-query-for-ibm-i@9.1.1: OSError: 
+https://docs.tibco.com/pub/wq/9.1.1/ibi-web-query-for-ibm-i-9-1-1_documentation
+.zip did not return a readable ZIP (most often an error or sign-in page served 
+as HTTP 200)
+! ibi-web-query-for-ibm-i@9.1.0: OSError: 
+https://docs.tibco.com/pub/wq/9.1.0/ibi-web-query-for-ibm-i-9-1-0_documentation
+.zip did not return a readable ZIP (most often an error or sign-in page served 
+as HTTP 200)

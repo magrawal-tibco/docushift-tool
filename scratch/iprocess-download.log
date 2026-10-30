@@ -1,0 +1,38 @@
+Downloading 18 version(s) with 4 worker(s)...
+  v tibco-iprocess-engine@11.10.0 92.9 MiB
+  v tibco-iprocess-engine@11.9.2 92.8 MiB
+  v tibco-iprocess-engine@11.9.1 87.4 MiB
+  v tibco-iprocess-server-objects-java@11.10.0 9.9 MiB
+  x tibco-iprocess-server-objects-java@11.9.0
+  v tibco-iprocess-server-objects-net@11.10.0 9.4 MiB
+  v tibco-iprocess-server-objects-net@11.9.0 4.2 MiB
+  x tibco-iprocess-suite@1.0.0
+  v tibco-iprocess-technology-plug-ins@11.10.0 24.9 MiB
+  v tibco-iprocess-technology-plug-ins@11.9.2 25.0 MiB
+  v tibco-iprocess-web-services-client-plug-in@11.9.0 9.1 MiB
+  v tibco-iprocess-web-services-server-plug-in@11.9.0 8.0 MiB
+  v tibco-iprocess-workspace-browser@11.10.0 46.3 MiB
+  v tibco-iprocess-workspace-browser@11.9.0 52.5 MiB
+  v tibco-iprocess-workspace-plug-ins@11.10.0 6.0 MiB
+  v tibco-iprocess-workspace-plug-ins@11.9.0 2.4 MiB
+  v tibco-iprocess-workspace-windows@11.10.0 76.9 MiB
+  v tibco-iprocess-workspace-windows@11.9.2 65.6 MiB
+           Download            
++-----------------------------+
+| Outcome          | Versions |
+|------------------+----------|
+| Downloaded       |       16 |
+| Already current  |        0 |
+| Skipped (manual) |        0 |
+| No ZIP endpoint  |        0 |
+| Failed           |        2 |
++-----------------------------+
+613.3 MiB written.
+! tibco-iprocess-server-objects-java@11.9.0: NotAPackage: 
+https://docs.tibco.com/pub/ip-srvrobj-java/11.9.0/tibco-iprocess-server-objects
+-java-11-9-0_documentation.zip did not return a readable ZIP (most often an 
+error or sign-in page served as HTTP 200)
+! tibco-iprocess-suite@1.0.0: NotAPackage: 
+https://docs.tibco.com/pub/iprocess/1.0.0/tibco-iprocess-suite-1-0-0_documentat
+ion.zip did not return a readable ZIP (most often an error or sign-in page 
+served as HTTP 200)

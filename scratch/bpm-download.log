@@ -1,0 +1,33 @@
+Downloading 19 version(s) with 4 worker(s)...
+  v tibco-activematrix-bpm@4.3.0 298.6 MiB
+  v tibco-activematrix-bpm@4.2.0 666.1 MiB
+  v tibco-bpm-enterprise@5.7.0 105.4 MiB
+  v tibco-bpm-enterprise@5.6.1 101.9 MiB
+  v tibco-bpm-enterprise@5.6.0 103.0 MiB
+  v tibco-bpm-enterprise@4.3.5 174.9 MiB
+  v tibco-bpm-suite@4.3.2 0.2 MiB
+  v tibco-bpm-suite@4.3.1 0.1 MiB
+  v tibco-bpm-suite@4.3.0 0.2 MiB
+  v tibco-bpm-suite@4.2.0 0.1 MiB
+  v tibco-business-studio-analyst-edition@4.3.0 2.3 MiB
+  v tibco-business-studio-analyst-edition@4.2.0 1.8 MiB
+  v tibco-business-studio-bpm-edition@5.7.0 50.2 MiB
+  v tibco-business-studio-bpm-edition@5.6.1 48.9 MiB
+  v tibco-business-studio-bpm-edition@5.6.0 48.8 MiB
+  v tibco-business-studio-bpm-edition@4.3.5 58.6 MiB
+  x tibco-business-studio-community-edition@4.2.0
+           Download            
++-----------------------------+
+| Outcome          | Versions |
+|------------------+----------|
+| Downloaded       |       16 |
+| Already current  |        2 |
+| Skipped (manual) |        0 |
+| No ZIP endpoint  |        0 |
+| Failed           |        1 |
++-----------------------------+
+1661.2 MiB written.
+! tibco-business-studio-community-edition@4.2.0: NotAPackage: 
+https://docs.tibco.com/pub/business-studio-community-edition/4.2.0/tibco-busine
+ss-studio-community-edition-4-2-0_documentation.zip did not return a readable 
+ZIP (most often an error or sign-in page served as HTTP 200)

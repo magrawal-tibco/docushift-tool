@@ -1,0 +1,71 @@
+Downloading 32 version(s) with 4 worker(s)...
+  v tibco-activematrix-binding-type-for-ejb@3.2.0 5.4 MiB
+  v tibco-activematrix-binding-type-for-ejb@3.1.2 2.4 MiB
+  v tibco-activematrix-binding-type-for-ejb@1.0.0 1.3 MiB
+  v tibco-activematrix-binding-type-for-rest@3.3.0 3.0 MiB
+  v tibco-activematrix-binding-type-for-rest@3.2.0 2.3 MiB
+  x tibco-activematrix-implementation-type-for-c++@3.2.0
+  x tibco-activematrix-implementation-type-for-c++@3.1.2
+  x tibco-activematrix-implementation-type-for-c++@3.0.1
+  x tibco-activematrix-implementation-type-for-c++@3.0.0
+  x tibco-activematrix-implementation-type-for-c++@1.1.0
+  v tibco-activematrix-implementation-type-for-microsoft-clr@3.3.0 6.9 MiB
+  v tibco-activematrix-implementation-type-for-microsoft-clr@3.2.0 7.3 MiB
+  v tibco-activematrix-implementation-type-for-microsoft-clr@3.1.2 2.1 MiB
+  v tibco-activematrix-implementation-type-for-scripting-in-ruby@1.0 1.5 MiB
+  v tibco-activematrix-implementation-type-for-wcf-host@1.0 1.4 MiB
+  v tibco-activematrix-management-agent-for-wcf@1.2.1 7.0 MiB
+  v tibco-activematrix-management-agent-for-wcf@1.2 6.4 MiB
+  v tibco-activematrix-management-agent-for-wcf@1.1 5.9 MiB
+  v tibco-activematrix-management-agent-for-websphere@1.2.1 6.1 MiB
+  v tibco-activematrix-management-agent-for-websphere@1.2 3.6 MiB
+  v tibco-activematrix-management-agent-for-websphere@1.1 4.3 MiB
+  v tibco-activematrix-runtime-uddi-server@3.1 6.0 MiB
+  v tibco-activematrix-runtime-uddi-server@3.0.0 8.8 MiB
+  v tibco-activematrix-service-gateway@1.1 1.7 MiB
+  v tibco-activematrix-service-grid@3.4.4 114.5 MiB
+  v tibco-activematrix-service-grid@3.4.3 114.5 MiB
+  v tibco-activematrix-service-grid-container-edition@1.0.1 37.8 MiB
+  v tibco-activematrix-service-grid-container-edition@1.0.0 31.0 MiB
+  v tibco-activematrix-updater-tool-for-java-runtime-environment-jre@1.1.0 1.5 
+MiB
+  v tibco-activematrix-updater-tool-for-java-runtime-environment-jre@1.0.0 1.6 
+MiB
+  v tibco-business-studio-activematrix-decisions-add-in@1.4.0 12.2 MiB
+  v tibco-business-studio-activematrix-decisions-add-in@1.3.0 13.7 MiB
+           Download            
++-----------------------------+
+| Outcome          | Versions |
+|------------------+----------|
+| Downloaded       |       27 |
+| Already current  |        0 |
+| Skipped (manual) |        0 |
+| No ZIP endpoint  |        0 |
+| Failed           |        5 |
++-----------------------------+
+410.2 MiB written.
+! tibco-activematrix-implementation-type-for-c++@3.2.0: NotAPackage: 
+https://docs.tibco.com/pub/activematrix_implementation_type_for_cpp/3.2.0_augus
+t_2012/tibco-activematrix-implementation-type-for-c++-3-2-0_documentation.zip 
+did not return a readable ZIP (most often an error or sign-in page served as 
+HTTP 200)
+! tibco-activematrix-implementation-type-for-c++@3.1.2: NotAPackage: 
+https://docs.tibco.com/pub/activematrix_implementation_type_for_cpp/3.1.2_april
+_2011/tibco-activematrix-implementation-type-for-c++-3-1-2_documentation.zip 
+did not return a readable ZIP (most often an error or sign-in page served as 
+HTTP 200)
+! tibco-activematrix-implementation-type-for-c++@3.0.1: NotAPackage: 
+https://docs.tibco.com/pub/activematrix_implementation_type_for_cpp/3.0.1_augus
+t_2010/tibco-activematrix-implementation-type-for-c++-3-0-1_documentation.zip 
+did not return a readable ZIP (most often an error or sign-in page served as 
+HTTP 200)
+! tibco-activematrix-implementation-type-for-c++@3.0.0: NotAPackage: 
+https://docs.tibco.com/pub/activematrix_implementation_type_for_cpp/3.0.0_may_2
+010/tibco-activematrix-implementation-type-for-c++-3-0-0_documentation.zip did 
+not return a readable ZIP (most often an error or sign-in page served as HTTP 
+200)
+! tibco-activematrix-implementation-type-for-c++@1.1.0: NotAPackage: 
+https://docs.tibco.com/pub/activematrix_implementation_type_for_cpp/1.1.0_febru
+ary_2009/tibco-activematrix-implementation-type-for-c++-1-1-0_documentation.zip
+ did not return a readable ZIP (most often an error or sign-in page served as 
+HTTP 200)

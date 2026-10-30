@@ -1,0 +1,47 @@
+Converting 7 version(s)...
+  v tibco-control-plane@1.20.0 544 topic(s), 539 asset(s), 1 unit(s), 551 nav 
+node(s), 7 generated -> 1094 file(s)
+  v tibco-control-plane@1.19.0 516 topic(s), 525 asset(s), 1 unit(s), 523 nav 
+node(s), 7 generated -> 1052 file(s)
+  v tibco-control-plane@1.18.0 494 topic(s), 509 asset(s), 1 unit(s), 501 nav 
+node(s), 7 generated -> 1014 file(s)
+  v tibco-platform-command-line-interface@1.2.0 422 topic(s), 440 asset(s), 1 
+unit(s), 429 nav node(s), 7 generated -> 872 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        4 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        3 |
+| Failed            |        0 |
++------------------------------+
+1976 topic(s), 2013 asset(s) written.
+4032 file(s) standing in the measured output tree(s).
+tibco-control-plane@1.20.0: 615 resolved, 14 skin, 0 escaped, 2 dangling, 0 
+case-mismatch, 2126 orphan (73.2 MB)
+tibco-control-plane@1.20.0: CSH 36 resolved, 0 unresolved, 0 ambiguous
+tibco-control-plane@1.20.0: skipped 4 generated-directory, 9 
+merged-subsystem-copy, 12 runtime-stub, 2 unreferenced-template
+tibco-control-plane@1.19.0: 601 resolved, 13 skin, 0 escaped, 2 dangling, 0 
+case-mismatch, 2123 orphan (72.9 MB)
+tibco-control-plane@1.19.0: CSH 36 resolved, 0 unresolved, 0 ambiguous
+tibco-control-plane@1.19.0: skipped 4 generated-directory, 9 
+merged-subsystem-copy, 12 runtime-stub, 2 unreferenced-template
+tibco-control-plane@1.18.0: 577 resolved, 12 skin, 0 escaped, 2 dangling, 0 
+case-mismatch, 2115 orphan (72.1 MB)
+tibco-control-plane@1.18.0: CSH 36 resolved, 0 unresolved, 0 ambiguous
+tibco-control-plane@1.18.0: skipped 4 generated-directory, 9 
+merged-subsystem-copy, 12 runtime-stub, 2 unreferenced-template
+tibco-platform-command-line-interface@1.2.0: 495 resolved, 0 skin, 0 escaped, 2
+dangling, 0 case-mismatch, 2010 orphan (58.7 MB)
+tibco-platform-command-line-interface@1.2.0: CSH 36 resolved, 0 unresolved, 0 
+ambiguous
+tibco-platform-command-line-interface@1.2.0: skipped 4 generated-directory, 8 
+merged-subsystem-copy, 12 runtime-stub, 2 unreferenced-template
+! tibco-platform-add-on-for-business-process-management@1.0.0: engine 
+undetected (`auto`)
+! tibco-platform-add-on-for-event-processing@1.9.0: engine undetected (`auto`)
+! tibco-platform-command-line-interface@1.1.0: engine undetected (`auto`)
+Findings: 4 errors, 15 warnings, 25 notes.

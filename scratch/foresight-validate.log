@@ -1,0 +1,161 @@
+=== tibco-enterprise-foresight
+Validating 5 published folder(s) in ..\tibco-docs-aem...
+                                   Validate                                   
++----------------------------------------------------------------------------+
+|      Walked | Files | References | HTML | External | Tree-rooted | Anchors |
+|-------------+-------+------------+------+----------+-------------+---------|
+| 5 folder(s) |     5 |          9 |    0 |        0 |           0 |     0/0 |
++----------------------------------------------------------------------------+
+Findings: none.
+=== tibco-enterprise-foresight-healthcare-add-on
+Validating 5 published folder(s) in ..\tibco-docs-aem...
+                                   Validate                                   
++----------------------------------------------------------------------------+
+|      Walked | Files | References | HTML | External | Tree-rooted | Anchors |
+|-------------+-------+------------+------+----------+-------------+---------|
+| 5 folder(s) |     5 |          9 |    0 |        0 |           0 |     0/0 |
++----------------------------------------------------------------------------+
+Findings: none.
+=== tibco-foresight-archive-and-retrieval-system
+Validating 13 published folder(s) in ..\tibco-docs-aem...
+  ! 
+en-us-tib-foresight-userdocs/en-us/tibco-foresight-archive-and-retrieval-system
+/online-help/5-5-0 2 finding(s), 0 error(s)
+  ! 
+en-us-tib-foresight-userdocs/en-us/tibco-foresight-archive-and-retrieval-system
+/online-help/6-0-0 4 finding(s), 0 error(s)
+                                   Validate                                    
++-----------------------------------------------------------------------------+
+|       Walked | Files | References | HTML | External | Tree-rooted | Anchors |
+|--------------+-------+------------+------+----------+-------------+---------|
+| 13 folder(s) |    69 |        816 |   42 |       44 |           0 | 225/225 |
++-----------------------------------------------------------------------------+
+ANCHOR_WRONG_HEADING 4 row(s), 4 occurrence(s)
+LINK_TO_UNFILED 2 row(s), 2 occurrence(s)
+Findings: 4 warnings, 2 notes.
+=== tibco-foresight-connect-with-fhir
+Validating 9 published folder(s) in ..\tibco-docs-aem...
+                                   Validate                                   
++----------------------------------------------------------------------------+
+|      Walked | Files | References | HTML | External | Tree-rooted | Anchors |
+|-------------+-------+------------+------+----------+-------------+---------|
+| 9 folder(s) |    17 |         66 |    0 |       26 |           0 |   26/26 |
++----------------------------------------------------------------------------+
+Findings: none.
+=== tibco-foresight-edisim
+Validating 11 published folder(s) in ..\tibco-docs-aem...
+  ! 
+en-us-tib-foresight-userdocs/en-us/tibco-foresight-edisim/online-help/6-21-0 32
+finding(s), 0 error(s)
+                                   Validate                                    
++-----------------------------------------------------------------------------+
+|      Walked | Files | References | HTML | External | Tree-root… |   Anchors |
+|-------------+-------+------------+------+----------+------------+-----------|
+|          11 |   238 |       3453 |  101 |       40 |          0 | 1834/1850 |
+|   folder(s) |       |            |      |          |            |           |
++-----------------------------------------------------------------------------+
+ANCHOR_MISSING 16 row(s), 16 occurrence(s)
+ANCHOR_WRONG_HEADING 10 row(s), 10 occurrence(s)
+REDIRECT_SHADOWED 6 row(s), 6 occurrence(s)
+Findings: 32 warnings.
+=== tibco-foresight-hipaa-validator-desktop
+Validating 11 published folder(s) in ..\tibco-docs-aem...
+  x 
+en-us-tib-foresight-userdocs/en-us/tibco-foresight-hipaa-validator-desktop/onli
+ne-help/9-2-0 13 finding(s), 1 error(s)
+                                   Validate                                    
++-----------------------------------------------------------------------------+
+|       Walked | Files | References | HTML | External | Tree-rooted | Anchors |
+|--------------+-------+------------+------+----------+-------------+---------|
+| 11 folder(s) |   171 |       2358 |  121 |       33 |           0 | 757/757 |
++-----------------------------------------------------------------------------+
+LINK_BROKEN 1 row(s), 1 occurrence(s)
+  x 
+en-us-tib-foresight-userdocs/en-us/tibco-foresight-hipaa-validator-desktop/onli
+ne-help/9-2-0/business-rules/business-rules-reference/list-business-rules.md:63
+: business-rules/Resources/Images/BusinessRules/inlist_thumb_0_0.jpg is not in 
+this version folder
+ANCHOR_WRONG_HEADING 10 row(s), 10 occurrence(s)
+REDIRECT_SHADOWED 2 row(s), 2 occurrence(s)
+Findings: 1 error, 12 warnings.
+=== tibco-foresight-operational-monitor
+Validating 13 published folder(s) in ..\tibco-docs-aem...
+  ! 
+en-us-tib-foresight-userdocs/en-us/tibco-foresight-operational-monitor/online-h
+elp/5-4-0 3 finding(s), 0 error(s)
+  ! 
+en-us-tib-foresight-userdocs/en-us/tibco-foresight-operational-monitor/online-h
+elp/5-5-0 3 finding(s), 0 error(s)
+  ! 
+en-us-tib-foresight-userdocs/en-us/tibco-foresight-operational-monitor/online-h
+elp/6-0-0 3 finding(s), 0 error(s)
+                                   Validate                                    
++-----------------------------------------------------------------------------+
+|       Walked | Files | References | HTML | External | Tree-rooted | Anchors |
+|--------------+-------+------------+------+----------+-------------+---------|
+| 13 folder(s) |    28 |        210 |   35 |       35 |           0 |   86/86 |
++-----------------------------------------------------------------------------+
+ANCHOR_WRONG_HEADING 9 row(s), 9 occurrence(s)
+Findings: 9 warnings.
+=== tibco-foresight-rest-api
+Validating 13 published folder(s) in ..\tibco-docs-aem...
+  ! 
+en-us-tib-foresight-userdocs/en-us/tibco-foresight-rest-api/online-help/1-1-0 1
+finding(s), 0 error(s)
+                                   Validate                                    
++-----------------------------------------------------------------------------+
+|       Walked | Files | References | HTML | External | Tree-rooted | Anchors |
+|--------------+-------+------------+------+----------+-------------+---------|
+| 13 folder(s) |    92 |        297 |   26 |       64 |           0 | 199/199 |
++-----------------------------------------------------------------------------+
+REDIRECT_SHADOWED 1 row(s), 1 occurrence(s)
+Findings: 1 warning.
+=== tibco-foresight-studio
+Validating 18 published folder(s) in ..\tibco-docs-aem...
+  ! en-us-tib-foresight-userdocs/en-us/tibco-foresight-studio/online-help/9-2-0
+6 finding(s), 0 error(s)
+  ! en-us-tib-foresight-userdocs/en-us/tibco-foresight-studio/online-help/9-3-0
+7 finding(s), 0 error(s)
+                                   Validate                                    
++-----------------------------------------------------------------------------+
+|      Walked | Files | References | HTML | External | Tree-root… |   Anchors |
+|-------------+-------+------------+------+----------+------------+-----------|
+|          18 |   166 |       2523 |  122 |       50 |          0 | 1197/1197 |
+|   folder(s) |       |            |      |          |            |           |
++-----------------------------------------------------------------------------+
+ANCHOR_WRONG_HEADING 10 row(s), 10 occurrence(s)
+REDIRECT_SHADOWED 2 row(s), 2 occurrence(s)
+LINK_TO_UNFILED 1 row(s), 1 occurrence(s)
+Findings: 12 warnings, 1 note.
+=== tibco-foresight-translator
+Validating 11 published folder(s) in ..\tibco-docs-aem...
+  ! 
+en-us-tib-foresight-userdocs/en-us/tibco-foresight-translator/online-help/4-2-0
+3 finding(s), 0 error(s)
+                                   Validate                                    
++-----------------------------------------------------------------------------+
+|       Walked | Files | References | HTML | External | Tree-rooted | Anchors |
+|--------------+-------+------------+------+----------+-------------+---------|
+| 11 folder(s) |    91 |       1289 |   36 |       36 |           0 | 574/576 |
++-----------------------------------------------------------------------------+
+ANCHOR_MISSING 2 row(s), 2 occurrence(s)
+ANCHOR_WRONG_HEADING 1 row(s), 1 occurrence(s)
+Findings: 3 warnings.
+=== tibco-foresight-translator-attachment-adapter
+Validating 8 published folder(s) in ..\tibco-docs-aem...
+                                   Validate                                   
++----------------------------------------------------------------------------+
+|      Walked | Files | References | HTML | External | Tree-rooted | Anchors |
+|-------------+-------+------------+------+----------+-------------+---------|
+| 8 folder(s) |    21 |        140 |    0 |       22 |           0 |   35/35 |
++----------------------------------------------------------------------------+
+Findings: none.
+=== tibco-foresight-instream
+Validating 7 published folder(s) in ..\tibco-docs-aem...
+                                   Validate                                   
++----------------------------------------------------------------------------+
+|      Walked | Files | References | HTML | External | Tree-rooted | Anchors |
+|-------------+-------+------------+------+----------+-------------+---------|
+| 7 folder(s) |     7 |        117 |    0 |       14 |           0 |     0/0 |
++----------------------------------------------------------------------------+
+Findings: none.

@@ -1,0 +1,89 @@
+Converting 11 version(s)...
+  v ibi-mdm-add-on-for-global-data-synchronization@4.0.0 138 topic(s), 83 
+asset(s), 1 unit(s), 141 nav node(s), 3 generated -> 226 file(s)
+  v tibco-mdm@11.1.0 2688 topic(s), 676 asset(s), 3 unit(s), 2712 nav node(s), 
+15 generated -> 3380 file(s)
+  v tibco-mdm@11.0.0 2695 topic(s), 676 asset(s), 3 unit(s), 2718 nav node(s), 
+14 generated -> 3387 file(s)
+  v tibco-mdm@10.0.0 7969 topic(s), 2019 asset(s), 3 unit(s), 7992 nav node(s),
+14 generated -> 10004 file(s)
+  v tibco-mdm@9.3.2 3055 topic(s), 722 asset(s), 3 unit(s), 3083 nav node(s), 
+16 generated -> 3795 file(s)
+  v tibco-mdm-studio@6.1.1 1848 topic(s), 2423 asset(s), 2 unit(s), 1864 nav 
+node(s), 11 generated -> 4284 file(s)
+  v tibco-mdm-studio@6.1.0 931 topic(s), 1212 asset(s), 1 unit(s), 947 nav 
+node(s), 10 generated -> 2155 file(s)
+  v tibco-mdm-studio@6.0.0 1812 topic(s), 2364 asset(s), 2 unit(s), 1828 nav 
+node(s), 11 generated -> 4188 file(s)
+  v tibco-mdm-studio@5.3.0 1812 topic(s), 2362 asset(s), 2 unit(s), 1828 nav 
+node(s), 11 generated -> 4186 file(s)
+C:\github\docushift-tool\src\docushift\transforms\markdown.py:112: XMLParsedAsHTMLWarning: It looks like you're using an HTML parser to parse an XML document.
+
+Assuming this really is an XML document, what you're doing might work, but you should know that using an XML parser will be more reliable. To parse this document as XML, make sure you have the Python package 'lxml' installed, and pass the keyword argument `features="xml"` into the BeautifulSoup constructor.
+
+If you want or need to use an HTML parser on this document, you can make this warning go away by filtering it. To do that, run this code before calling the BeautifulSoup constructor:
+
+    from bs4 import XMLParsedAsHTMLWarning
+    import warnings
+
+    warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+  return BeautifulSoup(_CDATA.sub(_unwrap_cdata, text), PARSER)
+  v tibco-mdm-studio@5.2.0 915 topic(s), 1161 asset(s), 2 unit(s), 926 nav 
+node(s), 3 generated -> 2082 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |       10 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        1 |
+| Failed            |        0 |
++------------------------------+
+23863 topic(s), 13698 asset(s) written.
+37687 file(s) standing in the measured output tree(s).
+ibi-mdm-add-on-for-global-data-synchronization@4.0.0: 83 resolved, 0 skin, 0 
+escaped, 0 dangling, 0 case-mismatch, 155 orphan (4.6 MB)
+ibi-mdm-add-on-for-global-data-synchronization@4.0.0: skipped 3 runtime-stub
+tibco-mdm@11.1.0: 737 resolved, 4 skin, 12 escaped, 0 dangling, 0 
+case-mismatch, 1218 orphan (60.0 MB)
+tibco-mdm@11.1.0: CSH 141 resolved, 0 unresolved, 0 ambiguous
+tibco-mdm@11.1.0: skipped 15 generated-directory, 6 runtime-stub
+tibco-mdm@11.0.0: 740 resolved, 4 skin, 12 escaped, 0 dangling, 0 
+case-mismatch, 1026 orphan (54.8 MB)
+tibco-mdm@11.0.0: CSH 141 resolved, 0 unresolved, 0 ambiguous
+tibco-mdm@11.0.0: skipped 9 generated-directory, 6 runtime-stub, 6 
+unreferenced-template
+tibco-mdm@10.0.0: 2208 resolved, 12 skin, 0 escaped, 0 dangling, 0 
+case-mismatch, 2107 orphan (84.2 MB)
+tibco-mdm@10.0.0: CSH 138 resolved, 0 unresolved, 138 ambiguous
+tibco-mdm@10.0.0: skipped 9 generated-directory, 6 runtime-stub, 2 
+unreferenced-template
+tibco-mdm@9.3.2: 793 resolved, 4 skin, 0 escaped, 0 dangling, 0 case-mismatch, 
+1022 orphan (53.8 MB)
+tibco-mdm@9.3.2: CSH 138 resolved, 0 unresolved, 0 ambiguous
+tibco-mdm@9.3.2: skipped 11 generated-directory, 6 runtime-stub, 5 
+unreferenced-template
+tibco-mdm-studio@6.1.1: 2642 resolved, 0 skin, 28 escaped, 4 dangling, 0 
+case-mismatch, 3395 orphan (89.6 MB)
+tibco-mdm-studio@6.1.1: skipped 7 generated-directory, 4 runtime-stub, 2 
+unreferenced-template
+tibco-mdm-studio@6.1.0: 1324 resolved, 0 skin, 14 escaped, 1 dangling, 0 
+case-mismatch, 1696 orphan (45.3 MB)
+tibco-mdm-studio@6.1.0: skipped 3 generated-directory, 2 runtime-stub, 2 
+unreferenced-template
+tibco-mdm-studio@6.0.0: 2570 resolved, 0 skin, 0 escaped, 2 dangling, 0 
+case-mismatch, 3300 orphan (78.3 MB)
+tibco-mdm-studio@6.0.0: skipped 7 generated-directory, 4 runtime-stub, 1 
+unreferenced-template
+tibco-mdm-studio@5.3.0: 2570 resolved, 0 skin, 0 escaped, 2 dangling, 0 
+case-mismatch, 3172 orphan (71.5 MB)
+tibco-mdm-studio@5.3.0: skipped 6 generated-directory, 4 runtime-stub, 1 
+unreferenced-template
+tibco-mdm-studio@5.2.0: 1283 resolved, 0 skin, 0 escaped, 0 dangling, 0 
+case-mismatch, 2 orphan (1.9 MB)
+tibco-mdm-studio@5.2.0: skipped 4 not-a-topic, 2 publication-homepage, 10 
+republished-duplicate
+! tibco-enterprise-mdm@1.0.0: engine undetected (`auto`)
+Findings: 8 errors, 25 warnings, 58 notes.

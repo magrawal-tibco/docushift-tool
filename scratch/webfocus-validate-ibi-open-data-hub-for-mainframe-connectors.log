@@ -1,0 +1,130 @@
+Validating 56 published folder(s) in C:\github\ibi-docs-aem...
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-0-3 47 finding(s), 3 error(s)
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-0-4 47 finding(s), 3 error(s)
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-0-5 117 finding(s), 3 error(s)
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-0-7 116 finding(s), 3 error(s)
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-0-8 116 finding(s), 3 error(s)
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-0-9 116 finding(s), 3 error(s)
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-3-4 116 finding(s), 3 error(s)
+  ! 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-3-5 95 finding(s), 0 error(s)
+  ! 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-3-6 89 finding(s), 0 error(s)
+  ! 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-3-7 89 finding(s), 0 error(s)
+  ! 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-3-8 43 finding(s), 0 error(s)
+                                   Validate                                    
+┌─────────────┬───────┬────────────┬──────┬──────────┬────────────┬───────────┐
+│      Walked │ Files │ References │ HTML │ External │ Tree-root… │   Anchors │
+├─────────────┼───────┼────────────┼──────┼──────────┼────────────┼───────────┤
+│          56 │  2348 │       4524 │  420 │      516 │          0 │ 2632/2646 │
+│   folder(s) │       │            │      │          │            │           │
+└─────────────┴───────┴────────────┴──────┴──────────┴────────────┴───────────┘
+LINK_BROKEN 21 row(s), 21 occurrence(s)
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-0-3/unfiled/download-the-installation-software-using-ftp-3.md:45: 
+unfiled/inst_zos_new47.md is not in this version folder
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-0-3/unfiled/download-the-installation-software-using-ftp-3.md:57: 
+unfiled/inst_zos_new47.md is not in this version folder
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-0-3/unfiled/download-the-installation-software-using-ftp-4.md:45: 
+unfiled/inst_zos_new47.md is not in this version folder
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-0-4/unfiled/download-the-installation-software-using-ftp-3.md:45: 
+unfiled/inst_zos_new47.md is not in this version folder
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-0-4/unfiled/download-the-installation-software-using-ftp-3.md:57: 
+unfiled/inst_zos_new47.md is not in this version folder
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-0-4/unfiled/download-the-installation-software-using-ftp-4.md:45: 
+unfiled/inst_zos_new47.md is not in this version folder
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-0-5/unfiled/download-the-installation-software-using-ftp-3.md:45: 
+unfiled/inst_zos_new47.md is not in this version folder
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-0-5/unfiled/download-the-installation-software-using-ftp-3.md:57: 
+unfiled/inst_zos_new47.md is not in this version folder
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-0-5/unfiled/download-the-installation-software-using-ftp-4.md:45: 
+unfiled/inst_zos_new47.md is not in this version folder
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-0-7/unfiled/download-the-installation-software-using-ftp-3.md:45: 
+unfiled/inst_zos_new47.md is not in this version folder
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-0-7/unfiled/download-the-installation-software-using-ftp-3.md:57: 
+unfiled/inst_zos_new47.md is not in this version folder
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-0-7/unfiled/download-the-installation-software-using-ftp-4.md:45: 
+unfiled/inst_zos_new47.md is not in this version folder
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-0-8/unfiled/download-the-installation-software-using-ftp-3.md:45: 
+unfiled/inst_zos_new47.md is not in this version folder
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-0-8/unfiled/download-the-installation-software-using-ftp-3.md:57: 
+unfiled/inst_zos_new47.md is not in this version folder
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-0-8/unfiled/download-the-installation-software-using-ftp-4.md:45: 
+unfiled/inst_zos_new47.md is not in this version folder
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-0-9/unfiled/download-the-installation-software-using-ftp-3.md:45: 
+unfiled/inst_zos_new47.md is not in this version folder
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-0-9/unfiled/download-the-installation-software-using-ftp-3.md:57: 
+unfiled/inst_zos_new47.md is not in this version folder
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-0-9/unfiled/download-the-installation-software-using-ftp-4.md:45: 
+unfiled/inst_zos_new47.md is not in this version folder
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-3-4/unfiled/download-the-installation-software-using-ftp-3.md:45: 
+unfiled/inst_zos_new47.md is not in this version folder
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-3-4/unfiled/download-the-installation-software-using-ftp-3.md:57: 
+unfiled/inst_zos_new47.md is not in this version folder
+  x 
+en-us-ibi-webfocus-userdocs/en-us/ibi-open-data-hub-for-mainframe-connectors/on
+line-help/1-3-4/unfiled/download-the-installation-software-using-ftp-4.md:45: 
+unfiled/inst_zos_new47.md is not in this version folder
+ANCHOR_MISSING 14 row(s), 14 occurrence(s)
+TOC_ENTRY_DUPLICATED 31 row(s), 31 occurrence(s)
+LINK_TO_UNFILED 11 row(s), 925 occurrence(s)
+Findings: 21 errors, 45 warnings, 11 notes.

@@ -1,0 +1,65 @@
+Extracting 14 version(s)...
+  v tibco-managed-file-transfer-command-center@8.7.1 2006 file(s), flare, 1 
+root(s)
+  v tibco-managed-file-transfer-command-center@8.7.0 2002 file(s), flare, 1 
+root(s)
+  v tibco-managed-file-transfer-command-center@8.6.0 1982 file(s), flare, 1 
+root(s)
+  v tibco-managed-file-transfer-internet-server@8.7.1 2007 file(s), flare, 1 
+root(s)
+  v tibco-managed-file-transfer-internet-server@8.7.0 2003 file(s), flare, 1 
+root(s)
+  v tibco-managed-file-transfer-internet-server@8.6.0 1982 file(s), flare, 1 
+root(s)
+  v tibco-managed-file-transfer-platform-server-for-unix@8.2.0 643 file(s), 
+flare, 1 root(s)
+  v tibco-managed-file-transfer-platform-server-for-unix@8.1.2 588 file(s), 
+flare, 1 root(s)
+  v tibco-managed-file-transfer-platform-server-for-unix@8.1.1 588 file(s), 
+flare, 1 root(s)
+  v tibco-managed-file-transfer-platform-server-for-windows@8.2.0 881 file(s), 
+flare, 1 root(s)
+  v tibco-managed-file-transfer-platform-server-for-windows@8.1.0 852 file(s), 
+flare, 1 root(s)
+  v tibco-managed-file-transfer-platform-server-for-z-linux@8.1.2 626 file(s), 
+flare, 1 root(s)
+  v tibco-managed-file-transfer-platform-server-for-z-linux@8.1.1 588 file(s), 
+flare, 1 root(s)
+  x tibco-managed-file-transfer-platform-server-for-z-linux@8.1.0
+                Extract                
++-------------------------------------+
+| Outcome                  | Versions |
+|--------------------------+----------|
+| Extracted                |       13 |
+| Already current          |        0 |
+| Measured from cache      |        0 |
+| No package               |        0 |
+| Refused (unsafe archive) |        1 |
+| Failed                   |        0 |
++-------------------------------------+
+16748 file(s) written.
+       Engines       
++-------------------+
+| Engine | Versions |
+|--------+----------|
+| flare  |       13 |
++-------------------+
+CSH: 13 source(s), 0 identifier(s).
+                     Assets                      
++-----------------------------------------------+
+| Category | Destination     | Files |     Size |
+|----------+-----------------+-------+----------|
+| topic    | output-root     |  7303 | 140.4 MB |
+| image    | output-root     |  3987 | 171.7 MB |
+| skin     | output-root     |  5179 | 179.3 MB |
+| other    | output-root     |   147 |   7.1 MB |
+| document | document-router |   132 | 209.5 MB |
++-----------------------------------------------+
+x tibco-managed-file-transfer-platform-server-for-z-linux@8.1.0: 
+tibco-managed-file-transfer-platform-server-for-z-linux-8.1.0.zip holds two 
+members Windows would write to one file: 
+'tibco-managed-file-transfer-platform-server-for-z-linux-8-1-0/html/Resources/S
+tylesheets/fonts/sourcesanspro-regular.otf' and 
+'tibco-managed-file-transfer-platform-server-for-z-linux-8-1-0/html/Resources/S
+tylesheets/fonts/SourceSansPro-Regular.otf'
+Recorded 13 notes -- `docushift report --run 815`.

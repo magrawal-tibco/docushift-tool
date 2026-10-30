@@ -1,0 +1,38 @@
+Syncing 7 version(s) into C:\github\tibco-docs-aem...
+  v tibco-ems-client-for-ibm-i@8.6.0 -> online-help/8-6-0 14 file(s), 0.1 MB
+  v tibco-ems-client-for-ibm-i@8.6.0 -> user-guides/8-6-0 3 file(s), 4.6 MB
+  v tibco-ems-client-for-ibm-i@8.6.0 -> release-information/8-6-0 2 file(s), 
+0.2 MB
+  v tibco-ems-client-for-ibm-i@8.6.0 -> reference-documents/8-6-0 2 file(s), 
+0.0 MB
+  v tibco-enterprise-message-service@10.5.1 -> online-help/10-5-1 196 file(s), 
+3.5 MB
+  v tibco-enterprise-message-service@10.5.0 -> online-help/10-5-0 196 file(s), 
+3.5 MB
+  v tibco-enterprise-message-service@10.4.4 -> online-help/10-4-4 194 file(s), 
+3.4 MB
+  v tibco-enterprise-message-service@10.4.3 -> online-help/10-4-3 194 file(s), 
+3.4 MB
+  v tibco-enterprise-message-service@10.4.1 -> online-help/10-4-1 206 file(s), 
+3.4 MB
+  v tibco-enterprise-message-service@10.4.0 -> online-help/10-4-0 227 file(s), 
+3.6 MB
+  v tibco-enterprise-message-service -> archives 28 file(s), 0.0 MB
+                                     Sync                                      
++-----------------------------------------------------------------------------+
+| Outcome | Rows | online… | user-g… | releas… | refere… | api-ref… | archiv… |
+|---------+------+---------+---------+---------+---------+----------+---------|
+| Synced  |   11 |       7 |       1 |       1 |       1 |        0 |       1 |
+| Already |   25 |       0 |       6 |       6 |       6 |        6 |       1 |
+| current |      |         |         |         |         |          |         |
+| No      |    0 |       0 |       0 |       0 |       0 |        0 |       0 |
+| source  |      |         |         |         |         |          |         |
+| tree    |      |         |         |         |         |          |         |
+| Skipped |    0 |       0 |       0 |       0 |       0 |        0 |       0 |
+| Failed  |    0 |       0 |       0 |       0 |       0 |        0 |       0 |
++-----------------------------------------------------------------------------+
+1262 file(s), 25.8 MB copied.
+2 product metadata.yml, 8 version.yml written.
+Published merged (Stage 6b): tibco-ems-client-for-ibm-i, 
+tibco-enterprise-message-service.
+17303 redirect(s) in 4 published map(s), tree-rooted (no publish_base_url set).
