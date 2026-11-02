@@ -1,6 +1,6 @@
 # Jira Tracking — What Is Logged in DOCOPS
 
-> **Last reconciled:** 2026-10-30, against Jira and `config/versions.csv`.
+> **Last reconciled:** 2026-11-02, against Jira and `config/versions.csv`.
 > Conventions (site, cloud ID, story points, transitions, who owns what) live in
 > `C:\github\confluence-mcp\reports\docushift-claude-atlassian-context.md`; this file
 > does not repeat them. It answers one question: **is this piece of work in Jira, and where?**
@@ -14,13 +14,9 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 | When this happens | Do this in Jira |
 |---|---|
-| Phase 47 re-runs (8 versions) pass | DOCOPS-187 → Done |
-| `catalog sitemap` over the whole scope run (StreamBase half done 2026-10-21) | DOCOPS-123 → Done |
-| 50 long-path + 8 DITA versions re-run | DOCOPS-188 → Done |
 | Moving DOCOPS-134 to Done is allowed (blocked by a permission check on 2026-10-30; note already posted) | DOCOPS-134 → Done |
-| A family reassignment is committed | Add a dated line to the progress comment on DOCOPS-120 |
-| Family review finished | DOCOPS-120 → Done, then DOCOPS-130 |
 | Edit to DOCOPS-217 is allowed (blocked by a permission check on 2026-10-09) | DOCOPS-217: append the 2026-10-09 publish note → Done |
+| Engineering approves which of the 25 deselected BW plug-in versions still published to remove (list given 2026-11-02; user getting approval, expected ~2026-11-04) | Remove the agreed ones as DOCOPS-316 did; dated note there or a new sub-task |
 | A follow-up from the BusinessConnect warnings is planned | DOCOPS-220 → In Progress |
 | General resources repo created and pushed (4 API references) | DOCOPS-245: dated note → Done |
 | `fix-callouts` has run over output/, reframed/ and both repos, pushed, and labels show on staging | DOCOPS-250: dated note → Done |
@@ -50,6 +46,12 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 **Log** (newest first, one line per session):
 
+- 2026-11-02 — DOCOPS-256 → In Progress, note: Phase 58 step 8 (no staging) built: old-TOC readers for DITA,
+  WebWorks, DocBook. Local pilot trial: DocBook drops 101 nested TOC sections in Streaming 11.1.3 (converter).
+- 2026-11-02 — DOCOPS-316 created under DOCOPS-7 (0.25 SP, Content Migration, `tibco`) and → Done: 16 retirement-announced
+  BW plug-in versions removed from bw-plugin `content-fix` (3178f344), validate 0 errors. 25 deselected versions still published, for review.
+- 2026-11-02 — DOCOPS-188, 187, 123 → Done (re-runs already done in October; nothing selected waits to download);
+  DOCOPS-120 → Done (family review finished), DOCOPS-130 → In Progress. Notes on each.
 - 2026-10-30 — DOCOPS-313 note: R001 on all remaining TIBCO families, pushed to `content-fix` in 18 repos. No TIBCO
   version needs R001 (500 fixed, 95 none); 40 notes in 16 pages left for a hand edit (bad code fences).
 - 2026-10-30 — DOCOPS-313 note: R001 MFT (3b5cfdd) and Data Management (4ea48bb) pushed to TIBCO `content-fix`.
