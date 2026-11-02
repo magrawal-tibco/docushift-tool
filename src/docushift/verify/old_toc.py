@@ -18,6 +18,7 @@ from dataclasses import dataclass, field
 from pathlib import Path, PurePosixPath
 
 from docushift.engines import dita, docbook, flare_toc
+from docushift.engines.webworks import GENERATED_LIST_STEMS
 from docushift.engines.webworks_toc import read_books, read_files, read_return
 from docushift.engines.webworks_toc import read_toc as read_webworks_toc
 from docushift.models import SourceEngine
@@ -250,10 +251,22 @@ class _Book:
                 source = self.lower.get(wanted.lower())
                 if source is not None:
                     key = self.bookmark(self.key_of(source), item.anchor)
+                elif _generated_list(wanted):
+                    pass  # `lof`/`lot`/`ix`: never converted, by the engine's own rule
                 elif (self.extracted / wanted).is_file():
                     self.result.unconverted.append((wanted, item.label))
             out.append(Node(item.label, key, self.build(item.children)))
         return out
+
+
+def _generated_list(path: str) -> bool:
+    """A list of figures, tables or index entries, which WebWorks never converts.
+
+    Matched as the engine matches it (`webworks._skip_reason`): the stem, folded,
+    with the generator's numbering (`lof.2.htm`, `LOF.htm`) read off first.
+    """
+    stem = PurePosixPath(path).name.lower().split(".", 1)[0]
+    return stem in GENERATED_LIST_STEMS
 
 
 def _books_in_order(roots: list[Path], extracted: Path) -> list[Path]:

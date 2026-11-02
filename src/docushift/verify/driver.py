@@ -31,10 +31,11 @@ from docushift.engines import flare_toc
 from docushift.engines.dita import CHROME_SELECTORS as DITA_CHROME
 from docushift.engines.dita import CONTENT_SELECTOR as DITA_CONTENT
 from docushift.engines.docbook import CONTENT_ID as DOCBOOK_CONTENT_ID
+from docushift.engines.docbook import NAVIGATION_CLASSES as DOCBOOK_NAVIGATION
 from docushift.engines.flare import CHROME_SELECTORS as FLARE_CHROME
 from docushift.engines.flare import CONTENT_SELECTOR as FLARE_CONTENT
 from docushift.engines.flare import LANDING_CHROME, PORTAL_BLOCKS
-from docushift.engines.roots import by_language, find_output_roots
+from docushift.engines.roots import by_language, find_output_roots, is_skin_path, owning_root
 from docushift.extractor import content_root
 from docushift.models import SourceEngine
 from docushift.reframe.toc import schema_for
@@ -67,7 +68,9 @@ _SELECTORS = {
     SourceEngine.FLARE: FLARE_CONTENT,
     SourceEngine.DITA: DITA_CONTENT,
     SourceEngine.DOCBOOK: f"#{DOCBOOK_CONTENT_ID}",
-    SourceEngine.WEBWORKS: "body",
+    # `body > blockquote`, as the engine selects it; the 2004-2006 flavour has none
+    # and falls back to `body`, as `_compare` does for any selector (Phase 58, step 8).
+    SourceEngine.WEBWORKS: "body > blockquote",
 }
 #: Chrome *inside* the container, removed exactly as the engine removes it -- a
 #: Flare topic's feedback widget is in `#mc-main-content`, and left in it would
@@ -75,6 +78,9 @@ _SELECTORS = {
 _CHROME: dict[SourceEngine, tuple[str, ...]] = {
     SourceEngine.FLARE: FLARE_CHROME,
     SourceEngine.DITA: DITA_CHROME,
+    # The page's own contents list and navigation bars: the menu replaces them.
+    SourceEngine.DOCBOOK: tuple(f"div.{name}" for name in sorted(DOCBOOK_NAVIGATION)),
+    SourceEngine.WEBWORKS: ("div.WebWorks_Breadcrumbs", "script", "style", "noscript"),
 }
 
 COLUMNS = [
@@ -199,6 +205,15 @@ class Verifier:
         selector = _SELECTORS.get(engine, "body")
         chrome = _CHROME.get(engine, ())
         landings = _landings(roots, extracted)
+        # Phase 58, step 8: a skin picture is the engine's chrome, judged as the engine
+        # judges it -- by its path from its own output root.
+        # Resolved, because `images` resolves each picture's path before asking.
+        skin_roots = [root.resolve() for root in
+                      (roots if engine is SourceEngine.FLARE else find_output_roots(extracted, engine))]
+
+        def skin(path: Path) -> bool:
+            owner = owning_root(path, skin_roots)
+            return owner is not None and is_skin_path(path.relative_to(owner).parts, engine)
         drops = self.state.latest_counts(folder.slug, number, DROP_CODES) if self.state else {}
         old_urls = {to: url for url, to in live.origins(folder.path / "301.yml", _rooted_prefix(folder))}
 
@@ -236,7 +251,7 @@ class Verifier:
                 row["published_status"] = "missing locally"
                 continue
             self._compare(result, folder, extracted / PurePosixPath(source), md_path, page, selector,
-                          chrome, landing=source in landings, row=row)
+                          chrome, landing=source in landings, row=row, skin=skin)
         if unfiled:
             self._record(result, "VERIFY_TOPIC_UNFILED", folder, "", f"{unfiled} topic(s) under unfiled/",
                          count=unfiled)
@@ -375,7 +390,7 @@ class Verifier:
         return rows
 
     def _compare(self, result, folder, source: Path, md_path: Path, page: str, selector: str,
-                 chrome: tuple[str, ...], landing: bool, row: dict[str, str]) -> None:
+                 chrome: tuple[str, ...], landing: bool, row: dict[str, str], skin=None) -> None:
         try:
             html = source.read_text(encoding="utf-8", errors="replace")
             markdown = md_path.read_text(encoding="utf-8")
@@ -387,7 +402,7 @@ class Verifier:
         for css in (*chrome, *(LANDING_CHROME if landing else ())):
             for tag in container.select(css):
                 tag.decompose()
-        found = pictures.html_images(container, source)
+        found = pictures.html_images(container, source, skin)
         old = texts.Text(texts.html_blocks(container))
         if landing:
             old = texts.cut_at(old, _PORTAL)

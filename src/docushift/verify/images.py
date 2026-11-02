@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import hashlib
 import re
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path, PurePosixPath
 from urllib.parse import unquote, urlsplit
@@ -56,11 +57,13 @@ class PageImages:
         return {p.sha for p in self.pictures if p.sha}
 
 
-def html_images(container: Tag, page: Path) -> PageImages:
+def html_images(container: Tag, page: Path, skin: Callable[[Path], bool] | None = None) -> PageImages:
     """The `<img>` inside a source page's content container, resolved and hashed.
 
     A reference to a file that is not in the package is not counted: there is no
     picture to have lost, and the converter reports the broken reference itself.
+    `skin` says whether a resolved path is the engine's chrome (Phase 58, step 8:
+    WebWorks' `tpl/` icons and tracking pixel); Flare's `Skins/` is skipped always.
     """
     out = PageImages()
     seen: set[str] = set()
@@ -71,6 +74,8 @@ def html_images(container: Tag, page: Path) -> PageImages:
         # expand arrow -- are the old site's chrome, never content (Flare's
         # `Skins/`, a generated directory, `engines/flare.py`).
         if path is None or any(part.lower() in SKIN_DIRECTORIES for part in path.parts):
+            continue
+        if skin is not None and skin(path):
             continue
         sha = digest(path)
         if sha and sha not in seen:

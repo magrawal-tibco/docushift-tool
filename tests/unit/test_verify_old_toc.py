@@ -298,3 +298,86 @@ def test_any_other_page_moved_to_the_end_is_still_reported() -> None:
                 Node("TIBCO Documentation and Support Services", "support.md")])
 
     assert [i.kind for i in by_page(tail_moved(old, new), new).issues] == ["order"]
+
+
+# -- pilot fixes (Phase 58, step 8, 2026-11-02) --------------------------------------
+
+
+def _all_codes(config, state, engine: SourceEngine, target: Path) -> list[str]:
+    product = make_product(SLUG, bu="tibco", family="adapters")
+    product.versions = {NUMBER: make_version(SLUG, NUMBER, engine=engine)}
+    findings = FindingsRun("verify")
+    verifier = Verifier(config, Catalog(products={SLUG: product}), state, target, findings)
+    for folder in verifier.selection(SLUG, None):
+        verifier.version(folder)
+    findings.flush()
+    return sorted(f.code for f in findings.all if not f.code.startswith("VERIFY_REDIRECT"))
+
+
+def test_a_generated_webworks_list_in_the_toc_is_not_an_unconverted_topic(tmp_path: Path) -> None:
+    _webworks_book(tmp_path / "Book", "User Guide")
+    (tmp_path / "Book/LOF.htm").write_text("<html><body>Figures</body></html>", encoding="utf-8")
+    files = tmp_path / "Book/wwhdata/common/files.js"
+    files.write_text(files.read_text(encoding="utf-8").replace("}\n", ' P.fA("Figures","LOF.htm");\n}\n'),
+                     encoding="utf-8")
+    toc = tmp_path / "Book/wwhdata/js/toc.js"
+    toc.write_text(toc.read_text(encoding="utf-8").replace("}\n", ' P.fN("Figures","2");\n}\n'), encoding="utf-8")
+    outmap = {"Book/intro.htm": "intro.md", "Book/setup.htm": "setup.md"}
+    old = old_toc.webworks_books([tmp_path / "Book"], tmp_path, outmap, outmap.get, _no_marker)
+
+    assert old.unconverted == []
+
+
+def test_webworks_page_furniture_and_skin_icons_are_not_losses(config, state) -> None:
+    """The copyright banner and breadcrumb sit outside `body > blockquote`; `tpl/` is skin."""
+    extracted = config.extract_path("tibco", "adapters", SLUG, NUMBER)
+    _webworks_book(extracted / "Book", "User Guide")
+    (extracted / "Book/tpl").mkdir(parents=True)
+    (extracted / "Book/tpl/note.gif").write_bytes(b"GIF89a-note")
+    (extracted / "Book/tpl/ga.gif").write_bytes(b"GIF89a-pixel")
+    (extracted / "Book/intro.htm").write_text(
+        "<html><body><p>Copyright Cloud Software Group, Inc. All rights reserved here.</p>"
+        "<blockquote><div class='WebWorks_Breadcrumbs'>User Guide : Intro</div>"
+        "<h1>Intro</h1><p><img src='tpl/note.gif'> What the book covers.</p></blockquote>"
+        "<img src='tpl/ga.gif'></body></html>", encoding="utf-8")
+    state.record_output_map(SLUG, NUMBER, [("Book/intro.htm", "intro.md", ""), ("Book/setup.htm", "setup.md", "")])
+    pages = {"intro.md": "# Intro\n\nWhat the book covers.\n",
+             "setup.md": '# Setup\n\n## <a id="99"></a>Ports\n\nOpen port 80.\n'}
+    toc = _toc([("Intro", "intro.md", [("Setup", "setup.md", [("Ports", "setup.md#ports", [])])])])
+
+    assert _all_codes(config, state, SourceEngine.WEBWORKS, _published(config, pages, toc)) == []
+
+
+def test_a_docbook_page_s_own_contents_list_is_not_dropped_text(config, state) -> None:
+    extracted = config.extract_path("tibco", "adapters", SLUG, NUMBER)
+    _docbook_package(extracted / "html", part_toc=True)
+    state.record_output_map(SLUG, NUMBER, [(k, v, "") for k, v in DOCBOOK_OUT.items()])
+    pages = {"index.md": "# Home\n\nWelcome.\n", "guide/index.md": "# The Guide\n",
+             "guide/part.md": '# Part One\n\nPart text.\n\n## <a id="sec"></a>A Section\n',
+             "guide/deep.md": "# Deep Page\n\nDeep text.\n", "guide/other.md": "# Other\n\nOther text.\n"}
+    section = [("A Section", "guide/part.md#a-section", []), ("Deep Page", "guide/deep.md", [])]
+    whole = [("The Guide", "guide/index.md", [("Part One", "guide/part.md", section),
+                                               ("Other", "guide/other.md", [])])]
+
+    assert _all_codes(config, state, SourceEngine.DOCBOOK, _published(config, pages, _toc(whole))) == []
+
+
+def test_a_link_around_code_reads_as_its_words() -> None:
+    from docushift.verify import text as texts
+
+    page = texts.markdown_text("- Use the [`epadmin add container`](../rtcmd/x.md#a) command with this syntax:\n")
+    assert page.blocks == ["Use the epadmin add container command with this syntax:"]
+    source = texts.Text(["Use the epadmin add container command with this syntax:"])
+    assert texts.coverage(source, page).missing == []
+
+
+def test_a_footnote_marker_and_a_windows_path_in_raw_html_read_as_their_words() -> None:
+    from docushift.verify import text as texts
+
+    footnote = texts.markdown_text(
+        r'They run transactions.<sup>\[<a id="d0e1"></a>[1](#loc)\]</sup>For more, see [RTPP](x.md).' + "\n")
+    assert "<a" not in " ".join(footnote.blocks)
+    path = texts.markdown_text(r"<td><pre>C:\Users\<em><code>username</code></em>\AppData\Local</pre></td>" + "\n")
+    assert "<em>" not in " ".join(path.blocks) and "username" in " ".join(path.blocks)
+    kept = texts.markdown_text(r"Copy it to the \<webfocus-ce>/scripts folder." + "\n")
+    assert "<webfocus-ce>" in kept.blocks[0]

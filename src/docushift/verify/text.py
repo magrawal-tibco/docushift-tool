@@ -244,10 +244,16 @@ def html_text(html: str, selector: str, drop: tuple[str, ...] = ()) -> Text | No
 
 _FRONTMATTER = re.compile(r"\A---\r?\n.*?\r?\n---\r?\n", re.DOTALL)
 _IMAGE = re.compile(r"!\[[^\]]*\]\([^)]*\)")
-_LINK = re.compile(r"\[([^\]]*)\]\([^)]*\)")
+# Not from an escaped `\[`: a DocBook footnote marker is `\[<a id="…"></a>[1](#x)\]`,
+# and a link taken from the escaped bracket left the `<a>` tag behind as words
+# (Phase 58, step 8).
+_LINK = re.compile(r"(?<!\\)\[([^\]]*)\]\([^)]*\)")
 # Not an escaped `\<`: `\<webfocus-ce>/scripts` renders "<webfocus-ce>/scripts", and
-# deleting it as a tag read the sentence as dropped (Phase 60).
-_TAG = re.compile(r"(?<!\\)<[^>]+>")
+# deleting it as a tag read the sentence as dropped (Phase 60). Except before a real
+# inline tag: a Windows path in raw HTML is `C:\Users\<em>username</em>`, and there
+# the backslash is the path's (Phase 58, step 8).
+_TAG = re.compile(r"(?<!\\)<[^>]+>"
+                  r"|(?<=\\)</?(?:a|b|br|code|em|i|p|pre|span|strong|sub|sup|td|th|tr)\b[^>]*>")
 # A cell boundary, but not a `\|` inside a cell (Phase 60).
 _CELL = re.compile(r"(?<!\\)\|")
 _PREFIX = re.compile(r"^[ \t]*(?:>[ \t]?)*[ \t]*(?:#{1,6}[ \t]+|[-*+][ \t]+|\d+[.)][ \t]+)?")
@@ -315,12 +321,17 @@ def markdown_text(text: str) -> Text:
 
 
 _CODE_SPAN = re.compile(r"(`+)(.+?)\1")
+#: A link whose text holds a code span -- `` [`epadmin`](../rtcmd/epadmin.md) `` -- is
+#: read as its text before code spans are cut out, or its `](...)` half is left
+#: behind as words (Phase 58, step 8: 49 of 118 DocBook findings on Streaming 11.1.3).
+_CODE_LINK = re.compile(r"(?<![!\\])\[([^\[\]]*`[^\[\]]*)\]\([^)\s]*\)")
 
 
 def _inline(line: str) -> str:
     """One line with its inline markup gone. A code span is kept verbatim: inside
     backticks `<install-root>` is text, not a tag, and `config\\.env` keeps its
     backslash."""
+    line = _CODE_LINK.sub(r"\1", line)
     out: list[str] = []
     at = 0
     for span in _CODE_SPAN.finditer(line):
