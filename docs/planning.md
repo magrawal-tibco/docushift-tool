@@ -1673,8 +1673,82 @@ the suite and `ruff` pass. The staging probe still waits for stg-docs.tibco.com
   pages to the end of the old tree before `by_page`. Any other page moved to the end is
   still reported. Re-trial: DITA 1.8.1 has no TOC finding left, and DocBook 11.1.3 keeps
   only the 101 real ones. 2 more tests (11 in the file).
+#### Step 8, pilot fixes — plan (2026-11-02, DOCOPS-256; awaiting approval)
+
+**Traced 2026-11-02** (`scratch/verify_toc_probe.py`; nothing recorded):
+
+- **WebWorks, 5.0.1: none of the 113 findings is a loss.**
+  - The 46 `VERIFY_TEXT_DROPPED` are the copyright line at the top and bottom of every page,
+    and the breadcrumb ("Appendix A Trace Log Examples :"). `verify` reads all of `body`. The
+    engine reads `body > blockquote`, falls back to `body` for the 2004–2006 flavour, and
+    removes `div.WebWorks_Breadcrumbs` (`webworks._strip_chrome`).
+  - The 67 `VERIFY_IMAGE_MISSING` are skin pictures: `tpl/ga.gif` (a tracking pixel) and the
+    `tpl/note.gif`, `warning.gif` and `tip.gif` icons. `verify/images.py` knows only Flare's
+    `Skins/`, while `roots.SKIN_PREFIXES` lists every engine's.
+  - The 1 `VERIFY_TOPIC_MISSING` is "Figures" (`LOF.htm`), a generated list the engine never
+    converts (`webworks.GENERATED_LIST_STEMS`: `lof`, `lot`, `ix`).
+- **DocBook, Streaming 11.1.3: almost all of the 118 `VERIFY_TEXT_DROPPED` have two causes.**
+  - **49 are a misreading.** The sentence is on the page, but a word in it is a link around
+    code (`` [`epadmin`](../rtcmd/epadmin.md) ``), which `markdown_text` does not reduce to
+    its words.
+  - **About 60 sit on guide index and `part-*` pages.** The "sentences" are the entries of the
+    page's own `div.toc`. The engine removes `div.toc`, `div.navheader` and `div.navfooter`
+    on purpose, since the menu replaces them (`docbook.NAVIGATION_CLASSES`). `verify` does
+    not remove them yet.
+  - The few left (for example `apiguide/configurevisualc.md`) are traced after these fixes.
+
+| decision | choice | why |
+|---|---|---|
+| **WebWorks content** | `verify` reads `body > blockquote`, else `body`, and removes `div.WebWorks_Breadcrumbs`, as the engine does (`_SELECTORS` / `_CHROME`) | The same container rule as Flare and DITA: compare what the converter was given, not the page furniture |
+| **DocBook in-page navigation** | `_CHROME[DOCBOOK]` = `div.toc`, `div.navheader`, `div.navfooter`, taken from `docbook.NAVIGATION_CLASSES` | A deliberate converter cut. Taking it from the engine's constant keeps the two from drifting |
+| **Skin pictures** | A picture is skipped when its path, relative to its owning output root (`roots.owning_root`), is a skin path for the version's engine (`roots.is_skin_path`). This replaces `images.SKIN_DIRECTORIES` | It is the engine's own rule, matched as whole leading segments. A content folder that happens to be called `static` deeper down still counts |
+| **Generated WebWorks lists** | The WebWorks old-TOC reader leaves out an entry whose file is a generated list (`GENERATED_LIST_STEMS`, matched as the engine matches it). It is not reported as unconverted | The data proves it is a deliberate drop, Phase 55's rule for what may be excused in code |
+| **A link around code** | `verify/text.markdown_text` reads `` [`x`](url) `` as `x`, as it already reads `[x](url)` | 49 of 118 DocBook findings. Any engine whose converter writes code in link text is affected |
+
+**Steps**
+
+1. `verify/driver.py`: the WebWorks selector and chrome; DocBook chrome from
+   `NAVIGATION_CLASSES`; pass the engine and roots to the picture check.
+2. `verify/images.py`: the skin rule by engine and root. `verify/text.py`: a link around code.
+   `verify/old_toc.py`: generated WebWorks lists.
+3. Tests: a WebWorks page whose copyright and breadcrumb are outside `blockquote` drops
+   nothing; a `tpl/` icon is not a missing picture; a `div.toc` on a DocBook page is not
+   dropped text; `` [`epadmin`](x.md) command `` covers "epadmin command"; a `LOF.htm` TOC
+   entry is not reported.
+4. Re-trial the WebWorks and DocBook pilots, and trace what is left.
+
+*Exit: the WebWorks pilot has no finding left that is not explained; the DocBook pilot has
+only the 101 TOC entries (Phase 70) and traced remainders; the suite and `ruff` pass.*
+
+**As built (2026-11-02, approved the same day).**
+
+- **Steps 1–3 done, as planned:**
+  - WebWorks reads `body > blockquote` and removes the breadcrumb (`_CHROME`);
+  - DocBook's `_CHROME` is built from `NAVIGATION_CLASSES`;
+  - `images.html_images` takes a `skin` test built from `owning_root` + `is_skin_path`,
+    with resolved roots, because pictures are resolved;
+  - `old_toc` leaves out generated WebWorks lists, with the engine's own stem rule;
+  - `text._CODE_LINK` reads a link around code as its words.
+- **Two more misreadings, found by the re-trial and fixed in `verify/text.py`:**
+  - A link is no longer taken from an escaped `\[`. A DocBook footnote marker,
+    `\[<a id="…"></a>[1](#x)\]`, left its `<a>` behind as words (Streaming `samplesinfo/RTPP`).
+  - A backslash before a real inline tag is a path, not an escape, in
+    `C:\Users\<em>username</em>` (`install/default-install-dirs`). Phase 60's `\<webfocus-ce>`
+    case still reads as text.
+- **Re-trial (nothing recorded):**
+
+  | pilot | result |
+  |---|---|
+  | Flare 1.0.1 | redirect notes only |
+  | DITA 1.8.1 | `VERIFY_REDIRECT_MAP_MISSING` 1 (Phase 60's check; not this step) |
+  | WebWorks 5.0.1 | clean, from 113 findings |
+  | DocBook 11.1.3 | only the 101 `VERIFY_TOC_ENTRY_MISSING`, from 118 + 101 + 2 |
+
+- Tests: 6 more in `test_verify_old_toc.py` (17). Suite: 2,436 passed, plus the same 2
+  catalog-count failures that predate this. `ruff` is clean.
+
 - **Left:**
-  - tracing the WebWorks and DocBook text and picture findings;
+  - the pilot fixes above;
   - step 4 as the user's run, which records the results.
 
 ---
@@ -2709,6 +2783,76 @@ estimate (Statistica and Data Science Workbench 14.x, Service Grid Container Edi
 BusinessEvents EE 6.3.0/6.3.1, MDM 10.0.0, Transaction Insight 6.0.0). Not yet checked against
 the catalog (published, retired or held); the estimate uses `{family}-userdocs` for the repo
 name.
+
+---
+
+### Phase 70: DocBook Keeps Nested Sections in the TOC — **Done 2026-11-02; DOCOPS-317**
+
+**Why.** Phase 58's new DocBook old-TOC reader found, on its first trial (TIBCO Streaming
+11.1.3), **101 menu entries that the old site showed and `toc.yml` does not**. Every one is a
+third-level section. For example, the old site lists "Linux systemd Support" and "Windows
+Service Support" under "Operating System Service Management" in `admin/platform-specific`.
+The published page has both headings and their markers. Only the menu entries are gone.
+
+**Cause** (`engines/docbook._toc_node`). The children of an entry are built first. Then an
+entry whose page is already placed (a "second sighting") that names a section of it returns
+`NavNode(label, document, anchor)` **without the children it just built**. A section entry
+is always a second sighting, because its page was placed by the entry above it. So
+everything nested under a section is dropped, and no finding says so.
+
+#### Decisions
+
+| decision | choice | why |
+|---|---|---|
+| **The fix** | The second-sighting section node keeps its `children`, exactly as a first sighting does. Nothing else in the walk changes: the `filed` guard, the depth limit and the link graph stay as they are | A one-line cause. The guard exists to stop a part page's own TOC repeating the book's slice; nested entries are not that repeat |
+| **Converter version** | `_CONVERTER_VERSION` 3 → 4, as every change to converter output is. `_restamp` keeps the other engines' trees current without re-converting them | Phase 34's rule. Only DocBook output changes |
+| **Scope of the re-run** | The 8 published DocBook versions: TIBCO Streaming 11.1.0–11.1.3, 11.2.0, 11.2.1 and Spotfire Data Streams 11.1.0, 11.1.1. All 8 are unpacked on disk. Streaming is not merged (Phase 42's family block), so the run is `convert --force`, `sync`, `validate`, then `verify` | These are all the DocBook versions in the catalog |
+| **Where it is published** | `en-us-tib-streaming-userdocs`, on `content-fix` (the TIBCO rule since 2026-10-30), after a fetch | As for every TIBCO fix |
+| **Proof** | `verify` (the local half, with Phase 58's DocBook reader) shows no `VERIFY_TOC_ENTRY_MISSING` on the 8, against 101 on 11.1.3 today | The check that found it is the check that closes it |
+
+#### Steps
+
+1. `engines/docbook.py`: keep the children on the second-sighting section node. Bump
+   `_CONVERTER_VERSION`.
+2. Tests: a book TOC whose section entry nests two sub-sections keeps all three levels in
+   `unit.nav`. A part page whose own `div.toc` repeats the book's slice still adds nothing.
+3. Runs (the user, as `!` commands): `convert --force`, `sync` and `validate` for the 8
+   versions, then `verify --skip-published` on them.
+4. Publish: fetch, commit to `content-fix` in `en-us-tib-streaming-userdocs`, push.
+5. Docs: this entry's *As built*; `architecture.md` §5.6.5 if it describes the walk.
+
+*Exit: the 8 versions publish with the nested sections; `verify` reports no
+`VERIFY_TOC_ENTRY_MISSING` on them; the suite and `ruff` pass. Jira: DOCOPS-317 under
+DOCOPS-11.*
+
+#### As built (2026-11-02, approved the same day)
+
+- Steps 1–2 done. In `_toc_node`, the second-sighting section node is built with
+  `children=children`. `_CONVERTER_VERSION` is 4.
+- New test: `test_a_section_entry_keeps_the_sub_sections_nested_under_it`. It fails with the
+  fix taken out. The part-page duplicate test still passes. Converter, DocBook and
+  integration tests: 119 passed.
+- `convert --dry-run` selects exactly the 8 versions (6 Streaming, 2 Spotfire Data Streams).
+  `en-us-tib-streaming-userdocs` is on `content-fix`, clean and level with the remote
+  (fetched 2026-11-02).
+- **Runs (the user, 2026-11-02):** `convert --force`, `sync` and `validate` for both products.
+  The re-sync changed 16 files: the 8 `toc.yml` (+236 lines each, +248 for 11.2.x) and the
+  8 `apiguide/monitorapi.md`.
+- **Verify** (`scratch/verify_toc_probe.py`, local, nothing recorded): **0
+  `VERIFY_TOC_ENTRY_MISSING` on all 8** (101 on 11.1.3 before). 6 are clean. 11.1.1 of both
+  products has 1 `VERIFY_TEXT_DROPPED` in `reference/javaproperties.md`, a misreading: the
+  sentence is there, but a wrapped line inside a raw-HTML table starts "0) for tuple ids",
+  and `markdown_text` strips it as a list marker. Left as a known limit.
+- **Published:** only the 8 `toc.yml`, to `en-us-tib-streaming-userdocs` `content-fix`
+  (`ecff12b`, fetched first). Exit met.
+- **Not published: a note label the converter doubles.** The re-convert writes
+  `> **Note:**` then the source's own `> **Notes:**` in `apiguide/monitorapi.md`. On 30
+  October R001 (`callouts.fix_markdown`) made the source's own label the note's label (its
+  run-in rule). `render` has no such rule, so any re-convert brings the double label back.
+  The 8 changed `monitorapi.md` are left uncommitted in the repo for the user (restoring them
+  was refused as a destructive step). `output/` holds the doubled form, so the next sync of
+  these products would publish it. **Follow-up:** the converter applies the same run-in
+  label rule as `fix_markdown`. To be planned.
 
 ---
 

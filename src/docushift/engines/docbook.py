@@ -756,9 +756,12 @@ class DocBookEngine(BaseEngine):
             # A second sighting. Worth a node only when it names a section of a
             # page already placed, which is how `samplesinfo` publishes its
             # 200-entry contents list -- one page, many anchors.
+            # With its children (Phase 70): a section entry is always a second
+            # sighting -- the entry above it placed its page -- and returning it bare
+            # dropped every sub-section nested under it, 101 in Streaming 11.1.3.
             if reference.fragment and reference.fragment in target.anchors:
                 return NavNode(label=entry.label, document=target.output,
-                               anchor=reference.fragment)
+                               anchor=reference.fragment, children=children)
             return NavNode(label=entry.label, children=children) if children else None
 
         filed.add(key)

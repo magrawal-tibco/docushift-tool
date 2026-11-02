@@ -90,7 +90,9 @@ _TOC_PATH = re.compile(r'url:[ \t]*"([^"\n]*)"')
 #: 2 = a support/legal page the TOC lists twice is moved once, not left in place
 #:     (Phase 42, 2026-10-06).
 #: 3 = orphan topics leave the TOC for `unfiled/` (Phase 43, 2026-10-07).
-_CONVERTER_VERSION = 3
+#: 4 = a DocBook section entry keeps the sub-sections nested under it (Phase 70,
+#:     2026-11-02).
+_CONVERTER_VERSION = 4
 
 #: The `config/aem_templates/` files the converter renders (X3-07). Named, not
 #: the whole folder: `sync`'s own templates must not re-convert every tree.

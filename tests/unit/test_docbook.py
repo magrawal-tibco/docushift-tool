@@ -777,6 +777,31 @@ def test_the_book_toc_nests_and_a_part_page_does_not_duplicate_it(tmp_path: Path
     assert "TOC_ORPHAN" not in result.codes()
 
 
+def test_a_section_entry_keeps_the_sub_sections_nested_under_it(tmp_path: Path) -> None:
+    """Phase 70. A section entry is a second sighting of its page; it kept its anchor
+    and dropped its children -- 101 entries in Streaming 11.1.3."""
+    sections = ('<h2><a name="os"></a>Service Management</h2><h3><a name="linux"></a>Linux</h3>'
+                '<h3><a name="windows"></a>Windows</h3>')
+    result = run(tmp_path, {
+        "html/css/sbhelp.css": "body{}",
+        "html/index.html": page("index.html", "Home", titlepage("Home")),
+        "html/admin/index.html": page("admin/index.html", "Administration", (
+            titlepage("Administration")
+            + toc(entry("platform.html", "Platform",
+                        entry("platform.html#os", "Service Management",
+                              entry("platform.html#linux", "Linux")
+                              + entry("platform.html#windows", "Windows"))))
+        )),
+        "html/admin/platform.html": page("admin/platform.html", "Platform", titlepage("Platform") + sections),
+    })
+
+    platform = result.unit.nav[0].children[0]
+    management = platform.children[0]
+    assert (management.label, management.anchor) == ("Service Management", "os")
+    assert [(child.label, child.anchor) for child in management.children] == [("Linux", "linux"),
+                                                                              ("Windows", "windows")]
+
+
 def test_a_guide_with_no_toc_is_filed_by_its_link_graph(tmp_path: Path) -> None:
     """`adaptersguide`, `samplesinfo` and `lv-reference` ship no `div.toc` at all.
 
