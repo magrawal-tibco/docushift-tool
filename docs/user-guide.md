@@ -1811,8 +1811,8 @@ docushift --locale en-us verify --target-dir ../ibi-docs-aem --bu ibi --family w
   purpose, are not counted.
 - **Pictures are compared by content**, so an image renamed for length still matches.
 - **The menu is compared as a tree**: every old entry, under the same parent, in the
-  same order. For now this reads Flare TOCs only; other engines get a
-  `VERIFY_TOC_UNCHECKED` note.
+  same order. Flare, DITA, WebWorks and DocBook menus are all read; a WebWorks
+  book that shipped no menu at all gets a `VERIFY_TOC_UNCHECKED` note naming it.
 - **Staging is read through its own menu.** Each page's address comes from the menu
   staging serves, so nothing is guessed. A page staging answers with its home page
   counts as not served. Notes shown without their label and pictures served without

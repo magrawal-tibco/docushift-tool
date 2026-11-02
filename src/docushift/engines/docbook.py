@@ -148,7 +148,7 @@ _HEADINGS = ["h1", "h2", "h3", "h4", "h5", "h6"]
 # fallback takes. The measured book TOC nests one level and its part pages carry a
 # duplicate of their own slice, so 4 is slack rather than a limit; the graph is 2
 # because that is what was measured to close the gap (§5.6.5).
-_TOC_DEPTH = 4
+TOC_DEPTH = 4
 _GRAPH_HOPS = 2
 
 # An anchor in the *rendered* body: `<a … id="X"…>`, which is how the renderer's
@@ -566,11 +566,11 @@ class DocBookEngine(BaseEngine):
 
         listing = container.find("div", class_="toc")
         if isinstance(listing, Tag):
-            page.toc = _read_toc(listing)
+            page.toc = read_toc(listing)
         plan.pages.append(page)
 
         if not plan.menu:
-            plan.menu = _read_menu(soup, base)
+            plan.menu = read_menu(soup, base)
         if not plan.footer:
             plan.footer = _read_footer(soup, base)
 
@@ -763,7 +763,7 @@ class DocBookEngine(BaseEngine):
 
         filed.add(key)
         document = documents.get(key)
-        if depth < _TOC_DEPTH:
+        if depth < TOC_DEPTH:
             children.extend(self._toc_nodes(target, plan, documents, filed, depth + 1))
         if document is None:
             self._dropped += 1
@@ -926,7 +926,7 @@ def _prune_anchors(container: Tag, referenced: set[str]) -> set[str]:
 # -- the plan pass's readers ---------------------------------------------------
 
 
-def _read_toc(listing: Tag) -> list[_Entry]:
+def read_toc(listing: Tag) -> list[_Entry]:
     """A `div.toc` as a forest. `dl` of `dt` entries, each `dd` nesting the next.
 
     The corpus writes `dl`/`dt`/`dd` in every TOC measured; the `ul`/`li` flavour
@@ -953,7 +953,7 @@ def _entries(listing: Tag) -> list[_Entry]:
     return out
 
 
-def _read_menu(soup: Tag, base: PurePosixPath) -> list[tuple[str, PurePosixPath]]:
+def read_menu(soup: Tag, base: PurePosixPath) -> list[tuple[str, PurePosixPath]]:
     """`p#mainhelp-navmenu` as (label, unit-relative target), in menu order."""
     menu = soup.find(id=MENU_ID)
     if not isinstance(menu, Tag):

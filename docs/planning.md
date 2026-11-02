@@ -1582,6 +1582,101 @@ suite pass.*
   - Step 8, TIBCO readiness: the DITA, WebWorks and DocBook old-TOC readers and the
     local pilots now; the staging probe once stg-docs.tibco.com has content.
 
+#### Step 8 without staging — plan (2026-11-02, DOCOPS-256; approved the same day)
+
+**Measured 2026-11-02** (`versions.csv` × `state.db` `output_map` × `families/*/extracted/`):
+published TIBCO versions by engine, and how many `verify` can read today (converted output
+recorded and the package still unpacked):
+
+| engine | published | readable now |
+|---|---|---|
+| Flare, merged | 315 | 173 |
+| DITA, merged | 84 | 83 |
+| WebWorks | 41 | 22 |
+| DocBook | 8 | 8 |
+| PDF only | 68 | (documents check, Phase 66) |
+
+The unreadable ones are skipped with "extracted package not on disk". Re-extracting them
+is a wave matter, not this step's.
+
+| decision | choice | why |
+|---|---|---|
+| **What an old-TOC reader reads** | The engine's own *raw* TOC reader, as Flare's does (`flare_toc.read_toc`), never the engine's navigation builder. Each entry is resolved to its source file, then to the published page via `output_map` and the merge's `redirects.yml` (`key_of`, unchanged) | The builder already drops and folds nodes. Comparing `toc.yml` with the builder's output would hide exactly the losses this check is for |
+| **DITA** | Each doc-set (a folder holding `suitehelp_topic_list.html`, else `toc_crawler.html`, the engine's `TOC_SOURCES` order) is read with `dita.read_toc`. An href is matched to a topic by GUID. A `_unique_N` republished copy is never converted, so it resolves to its original by the topic identifier, as the engine's `_deduplicate` does. Doc-sets sit side by side at the top, as Flare's roots do | Same pairing rule as the converter, so a copy at a second TOC position is not reported as an unconverted topic |
+| **WebWorks** | Each book (a folder with `wwhdata/js/toc.js`), in `books.xml` order where there is one: `read_files` + `read_toc`, an entry's index naming its file. Matched to `output_map` without regard to case, as the engine does. A stripped book (no `files.js`, 45 corpus-wide) has no TOC: `VERIFY_TOC_UNCHECKED` for that book alone, by name | A stripped book had no navigation on the old site either, so there is nothing to compare, but it must not pass silently |
+| **DocBook** | `index.html`'s menu gives the guides and their order. Each guide's book page `div.toc` is read, then each listed page's own `div.toc` down to the engine's depth limit, first sighting only. Guides missing from the menu follow, alphabetically, as the engine orders them. `_read_menu` and `_read_toc` become public (`read_menu`, `read_toc`), with no change in behaviour | Pages the engine adds from the link graph, or as unfiled, are in `toc.yml` and not in the old TOC. The comparison only walks old → new, so they are not reported |
+| **Where the code lives** | `verify/old_toc.py` (new): one reader per engine, all with the shape `_flare_tree` has today (tree, unconverted rows). `_flare_tree` moves there unchanged. The driver picks the reader by engine | `driver.py` is 657 lines. Four readers belong together, not inside the run loop |
+| **A deliberate converter change** (for example, support and legal pages moved to the end of the TOC) | A pilot finding that the converter made on purpose gets an `accepted` entry in `config/verify-triage.yaml`, with the reason. No exception in code | The same rule as the ibi pilot: triage changes how a finding is counted and never hides it |
+| **Pilots** | Local comparison plus the docs.tibco.com live sample, with `--skip-published` (no TIBCO staging host is set). One version per kind: Flare merged, TIBCO Foresight Connect with FHIR 1.0.1; DITA, Adapter Migration 1.8.1; WebWorks, Adapter for Files (IBM i) 5.0.1; DocBook, the newest TIBCO Streaming 11.1.x. Run by the user as `!` commands. Every finding is traced to a tool fix, a triage entry, or an open issue | The smallest readable version of each kind keeps every finding traceable by hand. DocBook has only one product family to choose from |
+
+**Steps**
+
+1. `verify/old_toc.py`: move `_flare_tree` there; add the DITA, WebWorks and DocBook readers.
+   In `engines/docbook.py`, make `read_menu` and `read_toc` public.
+2. `verify/driver.py`: choose the reader by engine. `VERIFY_TOC_UNCHECKED` remains only for an
+   engine with no reader, and for a stripped WebWorks book.
+3. Tests, each on a small fixture: a DITA doc-set with a section node and a `_unique_N` copy; a
+   WebWorks book with a label-only entry, a bookmark entry, and a stripped sibling book; a
+   DocBook menu with a book page and a nested part page. One driver test per engine: a
+   `toc.yml` that lost an entry reports `VERIFY_TOC_ENTRY_MISSING`.
+4. Pilots (the user): four `verify --skip-published --live-sample 5` runs. Trace each one to
+   zero unexplained findings.
+5. Docs: this entry's *As built*; `design.md` (the TOC comparison, per engine);
+   `user-guide.md` (no change unless an option changes).
+
+*Exit: the four pilots are recorded here, each at `clean` or `explained`; no
+`VERIFY_TOC_UNCHECKED` on a DITA, WebWorks or DocBook version, except for stripped books;
+the suite and `ruff` pass. The staging probe still waits for stg-docs.tibco.com
+(DOCOPS-257).*
+
+#### Step 8 without staging — as built (2026-11-02)
+
+- **Steps 1–3 and 5 done.**
+  - `verify/old_toc.py` has `flare` (moved unchanged), `dita_sets`, `webworks_books`
+    and `docbook_guides`. The driver picks a reader by engine.
+  - `engines/docbook.py`: `read_menu`, `read_toc` and `TOC_DEPTH` are now public.
+  - Tests: 9 new in `tests/unit/test_verify_old_toc.py`. Suite: 2,429 passed, 2 failed. Both
+    failures predate this step (they fail the same way with the change stashed):
+    `test_the_shipped_report_retires_the_measured_set` and
+    `test_shipped_scope_lists_the_ebx_and_spotfire_products`, which count rows in the shipped
+    catalog and scope files. `ruff` is clean on the changed files. `test_repairs.py` and
+    `test_verify.py` have earlier import-order warnings.
+- **Two additions to the decisions.**
+  - **A bookmark row is placed on the published page's heading** (`_bookmark`, using
+    `fragments.marker_targets`), not by its raw anchor. The converter rewrites a TOC bookmark
+    that way (`_retarget_fragments`), and the page keeps the marker. Without this, every
+    WebWorks bookmark (`setup.htm#99`) read as missing. Flare goes through the same function,
+    so its results do not change where the raw anchor already matched.
+  - **The DocBook reader puts a parent before its children.** A first version followed the
+    engine's children-first order: a section entry claimed its page, and its parent lost the
+    page. The test caught it.
+- **Local trial of the four pilots** (`scratch/verify_toc_probe.py`: buffered findings, nothing
+  written, no network):
+
+  | pilot | TOC | other findings |
+  |---|---|---|
+  | Flare merged, Foresight Connect with FHIR 1.0.1 | clean | none (11 redirect notes) |
+  | DITA, Adapter Migration 1.8.1 | 1 `VERIFY_TOC_ORDER` at the top: the converter's support/legal tail move (`navigation._tail`), deliberate | `VERIFY_REDIRECT_MAP_MISSING` 1 |
+  | WebWorks, Adapter for Files (IBM i) 5.0.1 | clean. 1 `VERIFY_TOPIC_MISSING`: "Figures" (`LOF.htm`, the generated list of figures, a `NAV_NODE_DROPPED`) | 46 `VERIFY_TEXT_DROPPED`, 67 `VERIFY_IMAGE_MISSING`, to trace (the WebWorks `body` container, as the plan expected) |
+  | DocBook, TIBCO Streaming 11.1.3 | **101 `VERIFY_TOC_ENTRY_MISSING`**, real. 2 `VERIFY_TOC_MOVED`: the tail move again | 118 `VERIFY_TEXT_DROPPED`, to trace |
+
+- **Found: the DocBook converter drops nested sections from the TOC.** The old menu lists,
+  for example, "Linux systemd Support" under "Operating System Service Management" in
+  `admin/platform-specific`. The published `toc.yml` stops at the second level, although
+  the page has the heading and its marker. In `engines/docbook._toc_node`, an entry whose
+  page was already placed returns a node with its anchor but without its children. This is
+  for a converter phase, not this step.
+- **The tail move is known to the comparison** (user, 2026-11-02, option A, not a triage
+  entry). `toc.tail_moved` reads the support and legal pages off the end of `toc.yml`: at
+  most two, each matching `is_support_label` / `is_legal_label` or with "support" in its
+  title, since DocBook picks "Contacting Support for ..." from the footer. It moves the same
+  pages to the end of the old tree before `by_page`. Any other page moved to the end is
+  still reported. Re-trial: DITA 1.8.1 has no TOC finding left, and DocBook 11.1.3 keeps
+  only the 101 real ones. 2 more tests (11 in the file).
+- **Left:**
+  - tracing the WebWorks and DocBook text and picture findings;
+  - step 4 as the user's run, which records the results.
+
 ---
 
 ### Phase 59: A Generic Fix Is a Repair, Applied to Every Published Version — **Built 2026-10-23; R001 waves pending**

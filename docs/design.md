@@ -813,6 +813,17 @@ under a different parent is `moved`, siblings out of order are one `order` per p
 (moved rows excluded), and a retitled row is a note. `toc.yml` and the served menu are
 matched **by title**, because the menu's links are AEM URLs; that match is also where
 each page's staging URL comes from.
+
+**The old TOC, per engine** (Phase 58, step 8; `verify/old_toc.py`). Each engine's
+*raw* TOC reader, never its navigation builder, which already drops and folds rows:
+Flare's TOC files; DITA's `suitehelp_topic_list.html` (else `toc_crawler.html`), an
+href naming a topic by GUID and a `_unique_N` copy resolving to its original;
+WebWorks' `toc.js` naming `files.js` by position, books in `books.xml` order, a
+stripped book named unchecked; DocBook's menu for the guides, then each book's
+`div.toc` and each listed page's own, parent before children, an exact repeat left
+out. Several units are one heading each, as `navigation._assemble` lays them out. A
+bookmark row is placed on the heading after its marker in the published page
+(`fragments.marker_targets`), which is how the converter writes it.
 ### 8.10 What a verify result counts as — **Built** (Phase 58)
 
 Each version's result is one of four verdicts, from its findings, **notes never

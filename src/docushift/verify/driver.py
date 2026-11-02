@@ -34,7 +34,7 @@ from docushift.engines.docbook import CONTENT_ID as DOCBOOK_CONTENT_ID
 from docushift.engines.flare import CHROME_SELECTORS as FLARE_CHROME
 from docushift.engines.flare import CONTENT_SELECTOR as FLARE_CONTENT
 from docushift.engines.flare import LANDING_CHROME, PORTAL_BLOCKS
-from docushift.engines.roots import by_language
+from docushift.engines.roots import by_language, find_output_roots
 from docushift.extractor import content_root
 from docushift.models import SourceEngine
 from docushift.reframe.toc import schema_for
@@ -42,16 +42,17 @@ from docushift.reporting.findings import FindingsRun, Severity
 from docushift.state import READ_BACK_CODES
 from docushift.sync import distributor, rooted, router
 from docushift.sync import documents as document_index
+from docushift.transforms import fragments
 from docushift.utils.csvio import natural_version_key
 from docushift.utils.slug import is_primary_locale, version_segment
 from docushift.validation import references
 from docushift.validation.tree import VersionFolder, walk
 from docushift.verify import images as pictures
-from docushift.verify import live, published, triage
+from docushift.verify import live, old_toc, published, triage
 from docushift.verify import redirects as redirect_maps
 from docushift.verify import text as texts
 from docushift.verify.fetch import Fetcher
-from docushift.verify.toc import Node, by_page, root
+from docushift.verify.toc import Node, by_page, root, tail_moved
 
 #: The doc-class `verify` reads. The others hold PDFs and generated index pages,
 #: read only for a version with no online help (Phase 66).
@@ -240,24 +241,38 @@ class Verifier:
             self._record(result, "VERIFY_TOPIC_UNFILED", folder, "", f"{unfiled} topic(s) under unfiled/",
                          count=unfiled)
 
-        # A1 for topics only the old TOC names, and A5.
+        # A1 for topics only the old TOC names, and A5 -- every engine with a reader
+        # (Phase 58, step 8).
+        markers: dict[str, dict[str, str]] = {}
+
+        def bookmark(key: str, anchor: str) -> str:
+            return _bookmark(folder.path, key, anchor, markers)
+
+        old = None
         if engine is SourceEngine.FLARE and roots:
-            old_tree, unconverted = _flare_tree(roots, extracted, outmap, key_of)
-            for source, title in unconverted:
+            old = old_toc.flare(roots, extracted, outmap, key_of, bookmark)
+        elif engine in old_toc.READERS:
+            own = by_language(find_output_roots(extracted, engine), folder.locale,
+                              is_primary_locale(folder.locale, PRIMARY_LOCALE))[0]
+            old = old_toc.READERS[engine](own, extracted, outmap, key_of, bookmark)
+        if old is None:
+            self._record(result, "VERIFY_TOC_UNCHECKED", folder, "",
+                         f"engine {engine}: no old-TOC reader in verify yet")
+        else:
+            for part in old.unchecked:
+                self._record(result, "VERIFY_TOC_UNCHECKED", folder, "", part)
+            for source, title in old.unconverted:
                 self._record(result, "VERIFY_TOPIC_MISSING", folder, source,
                              f"old TOC entry {title!r} ({source}) was not converted{_counts(drops)}")
             new_tree = _toc_tree(folder.path / "toc.yml")
-            if new_tree is not None:
+            if new_tree is not None and old.tree.children:
                 skip = {k for k in (key_of(s) for s in outmap) if k.startswith(UNFILED)}
-                compared = by_page(old_tree, new_tree, skip)
+                compared = by_page(tail_moved(old.tree, new_tree), new_tree, skip)
                 codes = {"missing": "VERIFY_TOC_ENTRY_MISSING", "moved": "VERIFY_TOC_MOVED",
                          "order": "VERIFY_TOC_ORDER", "title": "VERIFY_TOC_TITLE_CHANGED"}
                 for issue in compared.issues:
                     self._record(result, codes[issue.kind], folder, issue.key, issue.detail)
                 _mark_toc(rows.values(), compared)
-        else:
-            self._record(result, "VERIFY_TOC_UNCHECKED", folder, "",
-                         f"engine {engine}: no old-TOC reader in verify yet")
 
         # Phase 60: both 301 maps, every run; a sample of their rows followed.
         host = self.base_url or self.base_urls.get(product.bu, "")
@@ -578,43 +593,25 @@ def _landings(roots: list[Path], extracted: Path) -> set[str]:
     return found
 
 
-def _flare_tree(roots: list[Path], extracted: Path, outmap: dict[str, str], key_of):
-    """The old TOC of every Flare root as one tree keyed by published page.
+def _bookmark(folder: Path, key: str, anchor: str, cache: dict[str, dict[str, str]]) -> str:
+    """An old bookmark entry as `toc.yml` writes it: the page's heading anchor.
 
-    Returns the tree and the `(source, title)` rows whose page was never converted.
-    A `.flprj` insertion point is a merge marker, not a page (Phase 51), and is left out.
+    The converter points a TOC bookmark at the heading after its marker
+    (`_retarget_fragments`), and the published page keeps the marker, so the same
+    `marker_targets` read places it here. A key that already carries an anchor (a
+    merged topic's section) is its own target; an anchor with no marker is kept
+    as written, as the converter keeps it.
     """
-    unconverted: list[tuple[str, str]] = []
-
-    def build(nodes, base: str) -> list[Node]:
-        out: list[Node] = []
-        for node in nodes:
-            if node.entry.project:
-                continue
-            key = None
-            if node.entry.path:
-                source = f"{base}/{node.entry.path}" if base else node.entry.path
-                if source in outmap:
-                    key = key_of(source)
-                    # A bookmark row opens the page at its anchor, as `toc.yml`
-                    # writes it -- unless the merge already placed the topic at
-                    # an anchor of its own, which then is the row's target.
-                    if node.entry.anchor and "#" not in key:
-                        key = f"{key}#{node.entry.anchor}"
-                else:
-                    unconverted.append((source, node.entry.label))
-            out.append(Node(node.entry.label, key, build(node.children, base)))
-        return out
-
-    top: list[Node] = []
-    for root_dir in roots:
-        manifest = flare_toc.read_manifest(root_dir)
-        name = manifest.toc if manifest and manifest.toc else ""
-        files = [root_dir / name] if name else flare_toc.tree_files(root_dir)[:1]
-        for file in files:
-            toc = flare_toc.read_toc(file)
-            top.extend(build(toc.nodes, root_dir.relative_to(extracted).as_posix()))
-    return root(top), unconverted
+    if not anchor or "#" in key:
+        return key
+    if key not in cache:
+        try:
+            text = (folder / PurePosixPath(key)).read_text(encoding="utf-8")
+        except OSError:
+            text = ""
+        cache[key] = fragments.marker_targets(text)
+    placed = cache[key].get(unquote(anchor).lower())
+    return f"{key}#{placed or anchor}"
 
 
 def _toc_tree(path: Path) -> Node | None:

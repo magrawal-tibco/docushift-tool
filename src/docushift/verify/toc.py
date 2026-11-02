@@ -18,6 +18,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
+from docushift.engines.base import is_legal_label, is_support_label
 from docushift.verify.text import words
 
 
@@ -106,6 +107,67 @@ def by_page(old: Node, new: Node, skip: set[str] = frozenset()) -> Comparison:
 
     _order(result, groups, lambda key: placed[key])
     return result
+
+
+def _page(key: str | None) -> str:
+    return (key or "").partition("#")[0]
+
+
+def _tail_page(node: Node) -> bool:
+    """Is this a support or legal page the converter moves to the end on purpose?
+
+    The shared label rules (`is_support_label`, `is_legal_label`), plus "support" in
+    the title, because DocBook chooses its support page from the footer and titles
+    it "Contacting Support for ..." (Phase 58, step 8).
+    """
+    if node.key is None:
+        return False
+    page = _page(node.key)
+    if any(_page(n.key) != page for n, _ in node.walk()):
+        return False  # a section with pages of its own is not a tail page
+    return is_support_label(node.title, page) or is_legal_label(node.title, page) or \
+        "support" in node.title.lower()
+
+
+def tail_moved(old: Node, new: Node) -> Node:
+    """The old tree with the converter's tail move applied (`navigation._tail`).
+
+    The converter puts the version's support and legal pages last at the top, on
+    purpose. The pages moved are read off the end of `toc.yml` -- at most two,
+    each passing `_tail_page` -- and every old row opening the same page, with
+    nothing but its own sections under it, is taken out and the first one placed
+    last. Any other reorder is still reported.
+    """
+    tails: list[Node] = []
+    for node in reversed(new.children[-2:]):
+        if not _tail_page(node):
+            break
+        tails.insert(0, node)
+    if not tails:
+        return old
+
+    def take(tree: Node, page: str) -> list[Node]:
+        taken: list[Node] = []
+        kept: list[Node] = []
+        for child in tree.children:
+            if _page(child.key) == page and all(_page(n.key) == page for n, _ in child.walk()):
+                taken.append(child)
+            else:
+                taken.extend(take(child, page))
+                kept.append(child)
+        tree.children = kept
+        return taken
+
+    moved = _copy(old)
+    for tail in tails:
+        found = take(moved, _page(tail.key))
+        if found:
+            moved.children.append(found[0])
+    return moved
+
+
+def _copy(node: Node) -> Node:
+    return Node(node.title, node.key, [_copy(child) for child in node.children], node.ref)
 
 
 def _parent(tree: Node, parent: Node) -> Node | None:
