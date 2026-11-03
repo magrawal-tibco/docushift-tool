@@ -1762,7 +1762,8 @@ only the 101 TOC entries (Phase 70) and traced remainders; the suite and `ruff` 
   package's `overview.htm`. Fixed: the exact `page.md#anchor` first, then the topic whose key
   is the bare page. This affects every merged version (315 Flare, 84 DITA in TIBCO). New test
   `test_a_live_page_is_compared_with_its_own_topic_on_a_merged_page`, which fails with the
-  old lookup. The Flare pilot is to be run again.
+  old lookup. **Re-run (the user, 2026-11-03): clean**, 26 old pages, 0 lost, 0 warnings.
+  So three of the four pilots are clean; DITA waits only on its `301.yml`.
 - **116 of 501 published TIBCO help versions have no `301.yml`** (70 products: BW plug-ins
   38 versions, adapters 20, BusinessConnect 15, TRA 8 ...; git-tracked files, 2026-11-03). A
   map's live URLs come from the Coveo sitemap cache (`origins.page_list`), which holds 288
