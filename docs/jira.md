@@ -47,6 +47,8 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 **Log** (newest first, one line per session):
 
+- 2026-11-03 — DOCOPS-318 + DOCOPS-313 notes: doubled note labels fixed in 5 published repos on `content-fix`
+  (456 files: Foresight, Scribe, WebFOCUS, loc WebFOCUS, loc Reporting Server). German empty notes: open issue.
 - 2026-11-03 — DOCOPS-318 → Done: Phase 71 runs (user); local doubled note labels folded, Streaming re-sync
   byte-identical to published, nothing to commit.
 - 2026-11-02 — DOCOPS-318 created under DOCOPS-11 (0.5 SP, AI & Content Intelligence), In Progress: Phase 71,

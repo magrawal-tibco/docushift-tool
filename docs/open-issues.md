@@ -73,6 +73,20 @@ shows them, and the published products are being corrected one family at a time
 (Statistica and ibi™ AI Assistant so far). Each product clears once the site
 republishes it.
 
+### German WebFOCUS notes with an empty box
+
+- **Status:** Open
+- **Owner:** this project to look into; the translation team if the source is at fault
+- **Raised:** 3 Nov 2026 (found while fixing note labels, DOCOPS-318)
+- **Blocks publishing:** no
+
+In some German (de-de) WebFOCUS Client pages, a note shows its "Note" label with
+nothing in it. The note's text appears just after the box as a heading ("Hinweis:
+Weitere Informationen ..."). Example: `9-3-5/910-crlang/cr11_Linking124.md` in
+`loc-ibi-webfocus-userdocs`. The text is not lost, but it reads as a heading
+instead of a note. How many pages are affected, and whether the translated source
+or the conversion puts it there, is not yet measured.
+
 ---
 
 ## Publishing repositories (every TIBCO product)

@@ -2938,6 +2938,20 @@ the suite and `ruff` pass. Jira: DOCOPS-318 under DOCOPS-11.*
   - `fix_markdown` finds nothing left to fold in `output/` Streaming 11.1.3, Container Edition
     DSML 9.3.8 and FOCUS 9.3.8 `12rda91`, which held doubled labels before the run.
 - Exit met. Phase 71 is done.
+- **The published repos were not all clean** (the user's dry run, 2026-11-03: tibco 16 files,
+  ibi 440). The split (`C:/tmp/repo_callout_split.py`, read-only) found **0 markers**: no R001
+  leftovers. There were 90 doubled labels (`folded`) and 699 blank lines after a label, in 5
+  repos converted before Phase 71 and never repaired.
+  - TIBCO: Foresight 12 files (18 folded, 4 blanks), Scribe 4 (4 folded).
+  - ibi: WebFOCUS 3 (3 folded), `loc-ibi-webfocus` 375 (65 folded, 615 blanks),
+    `loc-ibi-wf-reporting-server` 62 (80 blanks).
+
+  `fix-callouts` was run over those 5 (the user). All 456 changed files are exactly
+  `fix_markdown(HEAD)` (`C:/tmp/check_fix_exact.py`), and nothing else changed. Committed and
+  pushed on `content-fix` after a fetch: Foresight 0e80e0b, Scribe c6fcca1, WebFOCUS fed53feb,
+  `loc` WebFOCUS 4221ba61, `loc` Reporting Server b9216cc.
+- **Seen, not fixed:** some de-de WebFOCUS notes have an empty body, with their text published
+  after the box as `## Hinweis: …`. Logged in `open-issues.md`.
 
 ---
 
