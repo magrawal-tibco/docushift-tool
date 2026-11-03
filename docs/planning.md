@@ -1747,6 +1747,30 @@ only the 101 TOC entries (Phase 70) and traced remainders; the suite and `ruff` 
 - Tests: 6 more in `test_verify_old_toc.py` (17). Suite: 2,436 passed, plus the same 2
   catalog-count failures that predate this. `ruff` is clean.
 
+**Step 4, the recorded pilots** (the user, 2026-11-03: `verify --skip-published --live-sample 5`):
+
+| pilot | verdict | findings | traced to |
+|---|---|---|---|
+| WebWorks, Adapter for Files (IBM i) 5.0.1 | **clean** | none | — |
+| DocBook, Streaming 11.1.3 | **clean**, 1,189 old pages | none | Phase 70 published |
+| Flare merged, Foresight Connect with FHIR 1.0.1 | issues | 2 `VERIFY_LIVE_DRIFT` | **a `verify` defect, fixed** |
+| DITA, Adapter Migration 1.8.1 | lost | 1 `VERIFY_REDIRECT_MAP_MISSING` | **real: no `301.yml`** (Phase 60's ground) |
+
+- **Live drift on a merged page was a misreading.** `_live` looked up the local copy by page
+  alone, and a merged page holds many topics. It compared the live `overview.htm` with
+  whichever topic of `users-guide.md` came first. The "missing" sentences are in the
+  package's `overview.htm`. Fixed: the exact `page.md#anchor` first, then the topic whose key
+  is the bare page. This affects every merged version (315 Flare, 84 DITA in TIBCO). New test
+  `test_a_live_page_is_compared_with_its_own_topic_on_a_merged_page`, which fails with the
+  old lookup. The Flare pilot is to be run again.
+- **116 of 501 published TIBCO help versions have no `301.yml`** (70 products: BW plug-ins
+  38 versions, adapters 20, BusinessConnect 15, TRA 8 ...; git-tracked files, 2026-11-03). A
+  map's live URLs come from the Coveo sitemap cache (`origins.page_list`), which holds 288
+  products. **43 of the 70 products are not in it**, Adapter Migration among them, so the
+  whole-scope `catalog sitemap` run (Phase 40, DOCOPS-123) is what supplies them. DOCOPS-123
+  was closed on 2026-11-02 on the belief that it served downloads only. That was wrong. The
+  other 27 are in the cache and still have no map, and are not traced yet.
+
 - **Left:**
   - the pilot fixes above;
   - step 4 as the user's run, which records the results.

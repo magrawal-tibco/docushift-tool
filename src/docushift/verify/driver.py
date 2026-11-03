@@ -475,12 +475,16 @@ class Verifier:
 
     def _live(self, result, folder, extracted: Path, outmap, key_of, selector: str,
               chrome: tuple[str, ...]) -> None:
-        by_page: dict[str, str] = {}
+        # The topic the live URL names, by its exact `page.md#anchor` first (Phase 58,
+        # step 8): a merged page holds many topics, and taking any of them compared
+        # the live page with a different topic and read every sentence as drift. A
+        # bare page falls back to the topic that opens it, whose key is the page.
+        by_key: dict[str, str] = {}
         for source in outmap:
-            by_page.setdefault(key_of(source).partition("#")[0], source)
+            by_key.setdefault(key_of(source), source)
         uncheckable = 0
         for url, to in live.sample(live.origins(folder.path / "301.yml", _rooted_prefix(folder)), self.live_sample):
-            source = by_page.get(to.partition("#")[0])
+            source = by_key.get(to) or by_key.get(to.partition("#")[0])
             local = None
             if source is not None:
                 try:

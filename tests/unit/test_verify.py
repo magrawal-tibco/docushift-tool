@@ -891,3 +891,28 @@ def test_repo_rooted_maps_read_like_folder_relative_ones(config, state) -> None:
     rows[f"{OLD}/one.htm"] = f"{root}one.md#nowhere"
     _maps(folder, rows, product=rows)
     assert _codes(_verify(config, state, target)) == ["VERIFY_REDIRECT_TARGET_MISSING"]
+
+
+def test_a_live_page_is_compared_with_its_own_topic_on_a_merged_page(config, state) -> None:
+    """Phase 58, step 8: a merged page holds three topics; the live `one.htm` is checked
+    against `one.htm`, not whichever topic of the page came first (2 false drifts on
+    Foresight Connect with FHIR 1.0.1)."""
+    target = _fixture(config, state)
+    reframed = config.reframed_path("ibi", "webfocus", SLUG, NUMBER)
+    reframed.mkdir(parents=True, exist_ok=True)
+    (reframed / "redirects.yml").write_text(
+        "redirects:\n" + "".join(f"- from: {n}.md\n  to: guide.md#{n}\n" for n in ("one", "two")), encoding="utf-8")
+    folder = config.root_dir / "repos/en-us-ibi-webfocus-userdocs/en-us" / SLUG / "online-help/1-0-0"
+    _maps(folder, {f"{OLD}/one.htm": "guide.md#one"})
+    one = (config.extracted_dir("ibi", "webfocus") / SLUG / NUMBER / "pkg/html/one.htm").read_bytes()
+    fetcher = FakeFetcher({f"{OLD}/one.htm": (200, one)})
+
+    product = make_product(SLUG, bu="ibi", family="webfocus")
+    product.versions = {NUMBER: make_version(SLUG, NUMBER, engine=SourceEngine.FLARE)}
+    findings = FindingsRun("verify")
+    verifier = Verifier(config, Catalog(products={SLUG: product}), state, target, findings, fetcher=fetcher,
+                        live_sample=5)
+    for found in verifier.selection(SLUG, None):
+        verifier.version(found)
+    findings.flush()
+    assert "VERIFY_LIVE_DRIFT" not in [f.code for f in findings.all]
