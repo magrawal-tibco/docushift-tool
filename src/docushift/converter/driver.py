@@ -92,7 +92,9 @@ _TOC_PATH = re.compile(r'url:[ \t]*"([^"\n]*)"')
 #: 3 = orphan topics leave the TOC for `unfiled/` (Phase 43, 2026-10-07).
 #: 4 = a DocBook section entry keeps the sub-sections nested under it (Phase 70,
 #:     2026-11-02).
-_CONVERTER_VERSION = 4
+#: 5 = a note whose body opens with an authored label (`**Notes:**`) takes it as
+#:     its label instead of gaining a second one (Phase 71, 2026-11-02).
+_CONVERTER_VERSION = 5
 
 #: The `config/aem_templates/` files the converter renders (X3-07). Named, not
 #: the whole folder: `sync`'s own templates must not re-convert every tree.

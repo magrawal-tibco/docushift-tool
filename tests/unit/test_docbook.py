@@ -451,6 +451,16 @@ def test_a_title_that_is_not_the_kind_label_is_kept_and_one_that_is_is_not(
     assert "**Note:** Plain" not in body and "**WARNING**" not in body
 
 
+def test_a_title_that_is_a_label_word_becomes_the_note_s_label(tmp_path: Path) -> None:
+    """Phase 71. `Notes:` (96 corpus-wide) is the box's label, not a second one under `Note:`."""
+    body = one_page(tmp_path, (
+        '<div class="note"><h3 class="title">Notes:</h3><ul><li><p>One.</p></li></ul></div>'
+    )).body("authoring/topic.md")
+
+    assert "> **Notes:**\n> - One." in body
+    assert "> **Note:**" not in body
+
+
 def test_a_mapped_span_is_unwrapped_before_it_is_wrapped(tmp_path: Path) -> None:
     """3,145 `span.bold` contain a `strong`; `**` around `**` renders `****`."""
     body = one_page(tmp_path, (

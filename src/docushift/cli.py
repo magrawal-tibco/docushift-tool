@@ -3791,14 +3791,14 @@ def fix_callouts(ctx: click.Context, paths: tuple[Path, ...], dry_run: bool) -> 
                 if not fixed.changed and not fixed.tables:
                     continue
                 files += fixed.changed
-                markers += fixed.markers
+                markers += fixed.markers + fixed.folded
                 blanks += fixed.blanks
                 tables += fixed.tables
                 if fixed.tables:
                     console.print(f"[yellow]table-first note, blank line kept:[/yellow] {escape(str(path))}")
                 rows.append({
                     "folder": str(root), "file": str(path.relative_to(root)),
-                    "labels_rewritten": str(fixed.markers), "blank_lines_removed": str(fixed.blanks),
+                    "labels_rewritten": str(fixed.markers + fixed.folded), "blank_lines_removed": str(fixed.blanks),
                     "table_first_notes": str(fixed.tables),
                     "written": "yes" if fixed.changed and not dry_run else "no",
                 })

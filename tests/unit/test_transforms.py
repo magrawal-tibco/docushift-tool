@@ -224,6 +224,32 @@ def test_an_unknown_run_in_label_and_a_docbook_caption_stay_in_the_body() -> Non
     )
 
 
+def test_render_takes_an_authored_run_in_label_as_the_label() -> None:
+    """Phase 71: the converter writes what R001 publishes -- one label, not two."""
+    assert callouts.render(callouts.Alert.NOTE, "**Notes:**\n\n- one\n- two") == "> **Notes:**\n> - one\n> - two"
+    assert callouts.render(callouts.Alert.NOTE, "**Remember:** Save.") == "> **Remember:**\n> Save."
+    # A title, not a label: no colon, or a word the vocabulary does not know.
+    assert callouts.render(callouts.Alert.CAUTION, "**Caution 2**\n\nSecond.") == (
+        "> **Caution:**\n> **Caution 2**\n>\n> Second."
+    )
+    assert callouts.render(callouts.Alert.NOTE, "**Third-Party Software:** Listed.") == (
+        "> **Note:**\n> **Third-Party Software:** Listed."
+    )
+    # An engine's own authored label still wins over the body.
+    assert callouts.render(callouts.Alert.TIP, "**Notes:** x", label="Fastpath").startswith("> **Fastpath:**")
+
+
+def test_fix_markdown_folds_a_doubled_label_and_a_second_run_changes_nothing() -> None:
+    doubled = "> **Note:**\n> **Notes:**\n>\n> - The import statements\n"
+    fixed = callouts.fix_markdown(doubled)
+    assert fixed.text == "> **Notes:**\n> - The import statements\n"
+    assert fixed.folded == 1 and fixed.markers == 0
+    assert callouts.fix_markdown(fixed.text).text == fixed.text
+    # A converter label followed by a title stays as it is.
+    titled = "> **Caution:**\n> **Caution 2**\n>\n> Second.\n"
+    assert callouts.fix_markdown(titled).text == titled
+
+
 def test_line_endings_are_kept_and_a_second_run_changes_nothing() -> None:
     once = callouts.fix_markdown("> [!NOTE]\r\n>\r\n> Text.\r\n").text
 

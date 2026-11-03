@@ -2849,10 +2849,95 @@ DOCOPS-11.*
   `> **Note:**` then the source's own `> **Notes:**` in `apiguide/monitorapi.md`. On 30
   October R001 (`callouts.fix_markdown`) made the source's own label the note's label (its
   run-in rule). `render` has no such rule, so any re-convert brings the double label back.
-  The 8 changed `monitorapi.md` are left uncommitted in the repo for the user (restoring them
-  was refused as a destructive step). `output/` holds the doubled form, so the next sync of
-  these products would publish it. **Follow-up:** the converter applies the same run-in
-  label rule as `fix_markdown`. To be planned.
+  The 8 changed `monitorapi.md` were left uncommitted, and the user restored them the same
+  day. `output/` holds the doubled form, so the next sync of these products would publish
+  it. Follow-up: Phase 71.
+
+---
+
+### Phase 71: The Converter Writes the Note Label R001 Does — **Done 2026-11-03; DOCOPS-318**
+
+**Why.** Phase 70's re-convert wrote, in Streaming's `apiguide/monitorapi.md` (8 versions):
+
+```
+> **Note:**
+> **Notes:**
+```
+
+The published page, after R001 (30 October), reads `> **Notes:**` alone. The two labelling
+paths disagree:
+
+- **`callouts.fix_markdown`** (R001, `fix-callouts`) turns `> [!NOTE]` into a label. When the
+  first body line is an authored `**Word:**` whose word names an alert (`alert_for`, so
+  `Notes`, `Remember`, `Fastpath`), that word *becomes* the label (the run-in rule).
+- **`callouts.render`** (every engine, since Phase 56) always writes its own label first.
+  DocBook passes a non-kind `h3.title` such as "Notes:" in as the first body line
+  (`_admonition`, 96 corpus-wide by its own count), so it is labelled twice. Any engine
+  whose body opens with such a label does the same.
+
+So every published page R001 fixed this way **goes back to the doubled label on its next
+re-convert and sync**. The local trees already hold it. A sample search (the Grep tool,
+which skips git-ignored files, so the count is low) found 13 in ibi `output/` trees
+(Container Editions, WebFOCUS de-de, FOCUS), as well as Streaming's 8. A full read-only count
+over `output/` and `reframed/` was stopped on 2026-11-02 for lack of memory. Step 0
+repeats it.
+
+#### Decisions
+
+| decision | choice | why |
+|---|---|---|
+| **One rule, in `render`** | When no `label` is passed and the body's first line is a run-in `**Word:**` (alone, or followed by text) whose word `alert_for` maps, that word is the label and the line leaves the body. This is `fix_markdown`'s rule, shared as one helper so the two cannot drift | The converter then writes what R001 publishes. A DocBook-only fix would leave the same gap in the other engines |
+| **What stays a title** | A caption without a colon (`**Caution 2**`, `**Disclaimer**`), or with a colon but no alert word (`**Third-Party Software:**`), stays in the body as today | The same line `_RUN_IN` and `fix_markdown` draw. Numbered cautions must stay distinguishable |
+| **The trees already converted** | `fix_markdown` also folds a `**Word:**` line that directly follows an existing `**Kind:**` label (the doubled form), so `fix-callouts` can repair `output/` and `reframed/` without a re-convert, as Phase 56 did | A re-convert of every affected version is far more work for the same text |
+| **Converter version** | `_CONVERTER_VERSION` 4 → 5 | Phase 34's rule |
+| **Published repos** | Expected to be unchanged: they already carry R001's form. `fix-callouts` runs over them too, and any change it makes is reviewed before a commit | Proves the converter, the local trees and the repos agree |
+
+#### Steps
+
+0. Measure (read-only, the user's run, or mine when memory allows): doubled labels in
+   `output/` and `reframed/` by family, split into alert-word and title.
+1. `transforms/callouts.py`: a shared run-in helper used by `render` and by `fix_markdown`'s
+   marker branch; `fix_markdown` also folds the doubled form. Bump `_CONVERTER_VERSION`.
+2. Tests:
+   - `render` with a body opening `**Notes:**` gives one label `Notes`;
+   - `**Caution 2**` and `**Third-Party Software:**` stay titles;
+   - `fix_markdown` folds `> **Note:**` / `> **Notes:**` and is idempotent;
+   - a DocBook note titled "Notes:" converts to `> **Notes:**`.
+3. Runs (the user): `fix-callouts` over `output/` and `reframed/`, then over the published
+   repos as a dry run. Expected: changes in the local trees, none in the repos.
+4. Re-sync the 8 Streaming versions. `monitorapi.md` matches the published page, with no diff.
+
+*Exit: no doubled label in `output/` or `reframed/`; a re-sync of Streaming changes nothing;
+the suite and `ruff` pass. Jira: DOCOPS-318 under DOCOPS-11.*
+
+#### As built (2026-11-02, approved the same day)
+
+- **Steps 1–2 done.**
+  - `callouts.run_in_label(line)` is the shared rule: an unquoted `**Word:**`, alone or
+    with text, whose word `alert_for` maps.
+  - `render` takes it as the label when no `label` is passed. An engine's own label still
+    wins.
+  - `fix_markdown` folds a run-in that directly follows a label it recognises, counted in
+    the new `Fixed.folded`. `markers` is unchanged, so R001's census keeps its meaning.
+    `fix-callouts` reports `markers + folded` as labels rewritten.
+  - `_CONVERTER_VERSION` is 5.
+- Step 0 (the full count) was not run: memory was short on 2026-11-02.
+- **Tests:** 2 in `test_transforms.py` (render; fold, idempotent, a title kept) and 1 in
+  `test_docbook.py` (a `Notes:` title becomes the label). The callouts, DocBook, DITA,
+  WebWorks, Flare and repair tests: 495 passed. `ruff` is clean.
+- **Checked on the real page:** `fix_markdown` on `output/` Streaming 11.1.3 and 11.2.1
+  `apiguide/monitorapi.md` folds 1 label each and gives exactly the published file.
+- **Runs (the user, 2026-11-03; my background runs were stopped twice for low memory):**
+  `fix-callouts` dry run, then for real, over `output/` and `reframed/`; a dry run over both
+  repo folders; `sync` of both Streaming products. The counts were printed in the user's
+  terminal and are not recorded here.
+- **Checked (read-only):**
+  - The 8 Streaming `monitorapi.md` are **byte-identical** to their committed blobs
+    (`hash-object --no-filters` = `HEAD:`), and `git diff` is empty. Git still lists them as
+    modified: the blobs hold CRLF while `core.autocrlf=true`. Nothing to commit.
+  - `fix_markdown` finds nothing left to fold in `output/` Streaming 11.1.3, Container Edition
+    DSML 9.3.8 and FOCUS 9.3.8 `12rda91`, which held doubled labels before the run.
+- Exit met. Phase 71 is done.
 
 ---
 

@@ -86,12 +86,33 @@ def _opens_table(line: str) -> bool:
     return line.lstrip().startswith("|")
 
 
+#: An authored label opening a note's body, unquoted: `**Notes:**`, `**Remember:** text`.
+#: The colon is required -- DocBook's captions (`**Caution 2**`) are titles, not labels.
+_BODY_RUN_IN = re.compile(r"^\*\*(?P<word>[^*\n]+?):\*\*(?:[ \t]+(?P<rest>.*))?$")
+
+
+def run_in_label(line: str) -> tuple[str, str] | None:
+    """`(word, rest)` when `line` is an authored label that names an alert, else None.
+
+    The run-in rule, shared by `render` and `fix_markdown` (Phase 71) so the
+    converter writes what R001 publishes: `**Notes:**` opening a note *is* its
+    label. A word the vocabulary does not know (`**Third-Party Software:**`) is a
+    title and stays in the body.
+    """
+    found = _BODY_RUN_IN.match(line.strip())
+    if found is None or alert_for(found["word"]) is None:
+        return None
+    return found["word"].strip(), (found["rest"] or "").strip()
+
+
 def render(kind: Alert, body: str, label: str | None = None) -> str:
     """One admonition: the bold label, then the body quoted line by line.
 
     `label` is an authored word that says more than the kind (`Remember`,
-    `Fastpath`); without one the kind's own word is used. A trailing colon is
-    the label's punctuation, written once here.
+    `Fastpath`); without one the kind's own word is used -- unless the body
+    opens with an authored label of its own (`run_in_label`), which then is the
+    label (Phase 71). A trailing colon is the label's punctuation, written once
+    here.
 
     The body starts on the line after the label with no blank line between, so
     the two read as one paragraph -- except before a table (`_opens_table`). A
@@ -99,8 +120,18 @@ def render(kind: Alert, body: str, label: str | None = None) -> str:
     ends there and the rest of the admonition renders as body text -- which is how
     a two-paragraph warning becomes one paragraph of warning and one of prose.
     """
-    word = (label or "").strip().rstrip(":").strip() or kind.label
     lines = body.strip("\n").split("\n")
+    authored = None if label else run_in_label(lines[0])
+    if authored is not None:
+        label, rest = authored
+        if rest:
+            lines[0] = rest
+        else:
+            lines = lines[1:]
+            while lines and not lines[0].strip():
+                lines = lines[1:]
+            lines = lines or [""]
+    word = (label or "").strip().rstrip(":").strip() or kind.label
     head = [f"> **{word}:**"]
     if _opens_table(lines[0]):
         head.append(">")
@@ -159,6 +190,8 @@ class Fixed:
     blanks: int = 0
     #: Notes that open with a table, so keep one blank line after the label.
     tables: int = 0
+    #: Doubled labels folded into one (`> **Note:**` then `> **Notes:**`, Phase 71).
+    folded: int = 0
 
     @property
     def changed(self) -> bool:
@@ -170,7 +203,9 @@ def fix_markdown(text: str) -> Fixed:
 
     Touches only marker lines and the line after a label: a blank quote line there
     is dropped, unless a table follows (`_opens_table`), and an authored
-    `**Remember:**` opening the body becomes the label. Lines inside a fenced code
+    `**Remember:**` opening the body becomes the label -- after a marker, and after
+    a label written above it (the doubled form a converter before Phase 71 wrote:
+    `> **Note:**` then `> **Notes:**`, counted in `folded`). Lines inside a fenced code
     block are content and are left alone. Line endings are kept as found, and a
     second run changes nothing.
     """
@@ -208,12 +243,22 @@ def fix_markdown(text: str) -> Fixed:
         quote = found["quote"]
         depth = _depth(quote)
         i += 1
+        # The run-in rule: an authored label opening the body becomes the label --
+        # after an old `[!KIND]` marker (R001), and after a label the converter
+        # wrote above an authored one before Phase 71 (the doubled form).
+        run_in = _RUN_IN.match(lines[i].rstrip("\r\n")) if i < len(lines) else None
+        if run_in and (_depth(run_in["quote"]) != depth or alert_for(run_in["word"]) is None):
+            run_in = None
         if marker:
             kind = alert_for(marker["kind"]) or Alert.NOTE
             word = kind.label
             result.markers += 1
-            run_in = _RUN_IN.match(lines[i].rstrip("\r\n")) if i < len(lines) else None
-            if run_in and _depth(run_in["quote"]) == depth and alert_for(run_in["word"]) is not None:
+        else:
+            word = labelled["word"].strip()
+            if run_in:
+                result.folded += 1
+        if marker or run_in:
+            if run_in:
                 word = run_in["word"].strip()
                 rest = run_in["rest"]
                 if rest:

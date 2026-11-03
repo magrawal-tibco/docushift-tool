@@ -1,6 +1,6 @@
 # Jira Tracking — What Is Logged in DOCOPS
 
-> **Last reconciled:** 2026-11-02, against Jira and `config/versions.csv`.
+> **Last reconciled:** 2026-11-03, against Jira and `config/versions.csv`.
 > Conventions (site, cloud ID, story points, transitions, who owns what) live in
 > `C:\github\confluence-mcp\reports\docushift-claude-atlassian-context.md`; this file
 > does not repeat them. It answers one question: **is this piece of work in Jira, and where?**
@@ -36,7 +36,6 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | Phase 63 rolled out and every family re-synced | DOCOPS-274 → Done |
 | Translated WebFOCUS layout phase is opened | New sub-task under DOCOPS-11 (deferred from Phase 63) |
 | A redirect source is decided for each Go URL with several destinations, and the Go URL redirects are built | DOCOPS-279: dated note → Done |
-| A fix for the doubled note label on re-convert (`render` lacks `fix_markdown`'s run-in rule; 8 Streaming `monitorapi.md` left uncommitted 2026-11-02) is planned | New sub-task under DOCOPS-11, In Progress |
 | The four TIBCO verify pilots are run and recorded (Phase 58 step 4) | DOCOPS-256: dated note with each outcome |
 | A new phase is opened | One sub-task under the matching story, In Progress, no `retro` |
 | Phase 66 runs: every synced PDF-only version verified (15 after a re-extract, 3 Omni-Gen after a re-sync) | DOCOPS-285: dated note with the counts → Done; per-BU results on the BU's verify issue |
@@ -48,6 +47,10 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 **Log** (newest first, one line per session):
 
+- 2026-11-03 — DOCOPS-318 → Done: Phase 71 runs (user); local doubled note labels folded, Streaming re-sync
+  byte-identical to published, nothing to commit.
+- 2026-11-02 — DOCOPS-318 created under DOCOPS-11 (0.5 SP, AI & Content Intelligence), In Progress: Phase 71,
+  converter takes an authored note label (no doubled `Note:`/`Notes:`); built, runs pending.
 - 2026-11-02 — DOCOPS-317 → Done: 8 DocBook menus published to streaming `content-fix` (ecff12b), verify 0
   missing entries. Re-convert doubles a note label in 8 `monitorapi.md`: not published, follow-up to plan.
 - 2026-11-02 — DOCOPS-317 created under DOCOPS-11 (0.5 SP, AI & Content Intelligence), In Progress: Phase 70,
