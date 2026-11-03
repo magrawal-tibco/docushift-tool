@@ -97,6 +97,22 @@ def layout(source: str, segment: str) -> str:
     return parts[0] if len(parts) > 1 else ""
 
 
+def selected(row) -> bool:
+    """Selected for migration: eligible, and neither retired nor deselected (2026-11-03: the
+    first sheet listed 20 published-but-deselected versions, which need no map)."""
+    return bool(row) and row["convert_eligible"] == "true" and row["_status"] not in ("retired", "not-selected")
+
+
+# What a person has already filled in is kept across rebuilds.
+kept: dict[tuple[str, str], tuple[str, str]] = {}
+if OUT.exists():
+    for old in csv.DictReader(OUT.open(encoding="utf-8-sig")):
+        if old.get("live_url", "").strip() or old.get("notes", "").strip():
+            kept[(old["slug"], old["version"])] = (old.get("live_url", ""), old.get("notes", ""))
+dropped = [m for m in missing if not selected(catalog.get((m[1], m[2])))]
+missing = [m for m in missing if selected(catalog.get((m[1], m[2])))]
+lost = [k for k in kept if k not in {(m[1], (catalog.get((m[1], m[2])) or {}).get("version", m[2])) for m in missing}]
+
 seen: set[tuple[str, str]] = set()
 OUT.parent.mkdir(exist_ok=True)
 with OUT.open("w", newline="", encoding="utf-8-sig") as handle:
@@ -117,8 +133,12 @@ with OUT.open("w", newline="", encoding="utf-8-sig") as handle:
         needed = "yes" if shape not in seen else "no"
         seen.add(shape)
         reason = "not in docsite sitemap" if slug not in sitemap else "in sitemap, no map derived"
+        live_url, notes = kept.get((slug, number), ("", ""))
         writer.writerow([slug, product.get("display_name", ""), number, reason, needed,
                          f"https://docs.tibco.com/products/{slug}",
-                         folder_path(row["zip_url"]) if row else "", title, source, "", ""])
+                         folder_path(row["zip_url"]) if row else "", title, source, live_url, notes])
 print(f"{OUT}: {len(missing)} versions, {len({m[1] for m in missing})} products, "
-      f"{sum(1 for s in seen)} layouts to fill")
+      f"{sum(1 for s in seen)} layouts to fill; {len(dropped)} not-selected versions left out; "
+      f"{len(kept) - len(lost)} filled rows kept")
+for key in lost:
+    print("  filled row on a version no longer listed (not selected):", *key, kept[key])
