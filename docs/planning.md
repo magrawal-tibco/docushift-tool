@@ -1788,6 +1788,10 @@ only the 101 TOC entries (Phase 70) and traced remainders; the suite and `ruff` 
   - So a WebWorks map can name each topic, and the template drops the `wwhelp…#href=` part:
     `…/pub/{folder_path}/doc/<code>/html/{path}`. A `#href=` link pasted in the sheet is read
     that way.
+  - **Except IBM i 6.2.0 and JD Edwards 6.1.0** (user, 2026-11-03). Their old sites offer no
+    per-topic link, so nobody is expected to arrive with one. Each gets **one redirect, from
+    the old help's home page to the version's landing page**, and no per-topic rows. The
+    sheet marks both rows that way.
 
 - **Left:**
   - the pilot fixes above;
