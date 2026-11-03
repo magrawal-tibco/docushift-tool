@@ -37,6 +37,8 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | Translated WebFOCUS layout phase is opened | New sub-task under DOCOPS-11 (deferred from Phase 63) |
 | A redirect source is decided for each Go URL with several destinations, and the Go URL redirects are built | DOCOPS-279: dated note → Done |
 | The four TIBCO verify pilots are run and recorded (Phase 58 step 4) | DOCOPS-256: dated note with each outcome |
+| `catalog sitemap` over the whole scope run (reopened 2026-11-03: it also feeds the 301 maps) | DOCOPS-123: dated note with coverage → Done |
+| The AEM team's `301.yml` structure changes are settled (redirect rebuild on hold 2026-11-03; 116 of 501 TIBCO help versions have no map) | Plan the rebuild under DOCOPS-271; then re-run the DITA pilot (DOCOPS-256) |
 | A new phase is opened | One sub-task under the matching story, In Progress, no `retro` |
 | Phase 66 runs: every synced PDF-only version verified (15 after a re-extract, 3 Omni-Gen after a re-sync) | DOCOPS-285: dated note with the counts → Done; per-BU results on the BU's verify issue |
 | A fix for merged links whose target contains parentheses is planned | New sub-task under DOCOPS-12, In Progress; Data Management re-published |
@@ -47,6 +49,8 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 **Log** (newest first, one line per session):
 
+- 2026-11-03 — DOCOPS-256 notes: TIBCO pilots Flare, WebWorks, DocBook clean; DITA waits on its 301.yml. DOCOPS-123
+  reopened (closed in error: the sitemap feeds 301 maps); redirect rebuild on hold for AEM's 301.yml changes.
 - 2026-11-03 — DOCOPS-318 + DOCOPS-313 notes: doubled note labels fixed in 5 published repos on `content-fix`
   (456 files: Foresight, Scribe, WebFOCUS, loc WebFOCUS, loc Reporting Server). German empty notes: open issue.
 - 2026-11-03 — DOCOPS-318 → Done: Phase 71 runs (user); local doubled note labels folded, Streaming re-sync
