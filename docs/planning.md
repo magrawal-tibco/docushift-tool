@@ -1771,6 +1771,23 @@ only the 101 TOC entries (Phase 70) and traced remainders; the suite and `ruff` 
   whole-scope `catalog sitemap` run (Phase 40, DOCOPS-123) is what supplies them. DOCOPS-123
   was closed on 2026-11-02 on the belief that it served downloads only. That was wrong. The
   other 27 are in the cache and still have no map, and are not traced yet.
+- **Redirect rebuild on hold** (user, 2026-11-03: the AEM team is changing `301.yml`'s
+  structure). The whole-scope `catalog sitemap` run still gives 288 products; the docsite
+  lists no more (DOCOPS-123 Done). So the map-less products need declared templates.
+- **Patterns being collected by hand:** `reports/origin-url-requests.csv`
+  (`scratch/origin_url_requests.py`) lists one sample topic per product and layout, with
+  `live_url` for the user to fill. Its first build listed 20 published-but-deselected versions.
+  It now lists selected versions only: 96 versions, 63 products, 66 layouts. A rebuild keeps
+  what was filled. 15 URLs were in on 2026-11-03.
+- **WebWorks topics have their own address** (user, 2026-11-03).
+  - The docsite shows them through `…/wwhelp/wwhimpl/js/html/wwhelp.htm#href=<path>`, and a
+    server never sees the part after `#`.
+  - But `https://docs.tibco.com/pub/adas400/6.4.0/doc/adas400/html/tib_adas400_config_deploy/adas400_configuration_deployment.4.47.htm`
+    serves the topic itself ("getActivityStatisticsByService()", the sheet's sample), without
+    the menu.
+  - So a WebWorks map can name each topic, and the template drops the `wwhelp…#href=` part:
+    `…/pub/{folder_path}/doc/<code>/html/{path}`. A `#href=` link pasted in the sheet is read
+    that way.
 
 - **Left:**
   - the pilot fixes above;
