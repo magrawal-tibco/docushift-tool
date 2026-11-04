@@ -1,6 +1,6 @@
 # Jira Tracking — What Is Logged in DOCOPS
 
-> **Last reconciled:** 2026-11-03, against Jira and `config/versions.csv`.
+> **Last reconciled:** 2026-11-04, against Jira and `config/versions.csv`.
 > Conventions (site, cloud ID, story points, transitions, who owns what) live in
 > `C:\github\confluence-mcp\reports\docushift-claude-atlassian-context.md`; this file
 > does not repeat them. It answers one question: **is this piece of work in Jira, and where?**
@@ -38,6 +38,7 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | A redirect source is decided for each Go URL with several destinations, and the Go URL redirects are built | DOCOPS-279: dated note → Done |
 | The four TIBCO verify pilots are run and recorded (Phase 58 step 4) | DOCOPS-256: dated note with each outcome |
 | The AEM team's `301.yml` structure changes are settled (redirect rebuild on hold 2026-11-03; 116 of 501 TIBCO help versions have no map; 43 of the 70 products are not in the docsite sitemap, so need `origin-urls.yaml` patterns) | Plan the rebuild under DOCOPS-271; then re-run the DITA pilot (DOCOPS-256) |
+| The URL request sheet is filled (`reports/origin-url-requests.csv`; 15 of the needed rows in on 2026-11-03) | DOCOPS-322: declare and test each pattern in `config/origin-urls.yaml`, dated note |
 | A new phase is opened | One sub-task under the matching story, In Progress, no `retro` |
 | Phase 66 runs: every synced PDF-only version verified (15 after a re-extract, 3 Omni-Gen after a re-sync) | DOCOPS-285: dated note with the counts → Done; per-BU results on the BU's verify issue |
 | A fix for merged links whose target contains parentheses is planned | New sub-task under DOCOPS-12, In Progress; Data Management re-published |
@@ -48,6 +49,8 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 **Log** (newest first, one line per session):
 
+- 2026-11-04 — DOCOPS-322 created under DOCOPS-7 (0.25 SP, Content Migration, `tibco`), In Progress: URL patterns
+  for 96 map-less TIBCO help versions (63 products) collected in a sheet; map rebuild on hold for AEM.
 - 2026-11-03 — DOCOPS-123 → Done: whole-scope sitemap run, still 288 products (the docsite lists no more);
   download dry run 738 (sitemap 587, template 77, archive 41, manual 33). 43 map-less products need declared patterns.
 - 2026-11-03 — DOCOPS-256 notes: TIBCO pilots Flare, WebWorks, DocBook clean; DITA waits on its 301.yml. DOCOPS-123
