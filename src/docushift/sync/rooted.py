@@ -23,7 +23,6 @@ repositories are re-synced.
 from __future__ import annotations
 
 from pathlib import Path, PurePosixPath
-from typing import Any
 
 import yaml
 
@@ -36,9 +35,9 @@ ORIGINS = "301.yml"
 CSH = "csh.yml"
 
 ORIGINS_HEADER = (
-    "# Origin 301 map -- the docs.tibco.com URL each page is served at today,\n"
-    "# against where it lands in the new structure (planning.md Phase 22).\n"
-    "# `to` is the Markdown file's path from the repository root (Phase 68).\n"
+    "# Origin 301 map -- \"old docs.tibco.com URL\": \"new location\" (planning.md Phase 72).\n"
+    "# A page is its Markdown file's path from the repository root (Phase 68); a\n"
+    "# document (PDF, txt, ...) is its AEM DAM path.\n"
 )
 
 CSH_NOTE = "# Paths are from the repository root (planning.md Phase 68).\n"
@@ -92,30 +91,33 @@ def _leading_comments(text: str) -> str:
     return "".join(lines)
 
 
-def origins_text(text: str, prefix: str) -> str | None:
-    """A version's `301.yml` with every `to` rooted. `None` if it does not parse.
+def origins_text(text: str, prefix: str, assets: dict[str, str] | None = None) -> str | None:
+    """A version's published `301.yml`: `"old": "new"`, one per line. `None` if the
+    working tree's file does not parse.
 
-    The header is replaced rather than kept: the converted tree's says `to` is
-    relative to the folder, which is the one thing the published copy is not.
+    Phase 72 (the AEM team, 2026-11-04): the flat shape `csh.yml` already has, in
+    place of the list of `from` / `to` / `status`. Pages are rooted (Phase 68);
+    `assets` are the version's document rows, old URL -> DAM path, written in the
+    same file. Sorted by old URL, so a re-sync is a reviewable diff. A page row and
+    an asset row with the same old URL cannot both stand; the page row wins.
     """
     try:
-        document = yaml.safe_load(text)
+        document = yaml.safe_load(text) if text else None
     except yaml.YAMLError:
         return None
     if document is None:
         document = {"redirects": []}
     if not isinstance(document, dict) or not isinstance(document.get("redirects") or [], list):
         return None
-    rows: list[dict[str, Any]] = []
+    published: dict[str, str] = dict(assets or {})
     for row in document.get("redirects") or []:
-        if not isinstance(row, dict) or "to" not in row:
+        if not isinstance(row, dict) or "to" not in row or not row.get("from"):
             return None
-        moved = dict(row)
-        moved["to"] = rooted(prefix, str(row["to"]))
-        rows.append(moved)
-    body = yaml.safe_dump({**document, "redirects": rows}, sort_keys=False,
-                          allow_unicode=True, width=10**6)
-    return ORIGINS_HEADER + body
+        published[str(row["from"])] = rooted(prefix, str(row["to"]))
+    if not published:
+        return NOT_PUBLISHED
+    lines = [f"{quote(old)}: {quote(published[old])}" for old in sorted(published)]
+    return ORIGINS_HEADER + "\n".join(lines) + "\n"
 
 
 def csh_text(text: str, prefix: str) -> str | None:
@@ -153,10 +155,12 @@ def csh_text(text: str, prefix: str) -> str | None:
 _REWRITERS = {ORIGINS: origins_text, CSH: csh_text}
 
 
-def published_maps(source: Path, prefix: str) -> dict[str, str]:
+def published_maps(source: Path, prefix: str, assets: dict[str, str] | None = None) -> dict[str, str]:
     """`{file name: published text}` for the maps a converted version folder has.
 
     `NOT_PUBLISHED` for a map that exists in the source and must not be published.
+    `assets` (Phase 72) are the version's document rows; a version whose tree has
+    no `301.yml` but has asset rows still publishes one, holding only those.
 
     A map that will not parse is left out, so it is copied through verbatim and
     `validate` names it -- the rule every other artifact `sync` cannot read follows.
@@ -165,12 +169,14 @@ def published_maps(source: Path, prefix: str) -> dict[str, str]:
     for name, rewrite in _REWRITERS.items():
         path = source / name
         if not path.is_file():
+            if name == ORIGINS and assets:
+                found[name] = origins_text("", prefix, assets) or NOT_PUBLISHED
             continue
         try:
             text = path.read_text(encoding="utf-8")
         except (OSError, UnicodeDecodeError):
             continue
-        rewritten = rewrite(text, prefix)
+        rewritten = origins_text(text, prefix, assets) if name == ORIGINS else rewrite(text, prefix)
         if rewritten is not None:
             found[name] = rewritten
     return found

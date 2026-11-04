@@ -541,6 +541,10 @@ REGISTRY: dict[str, Code] = _codes(
          "No Coveo sitemap page list for this version and no declared template, so "
          "no 301.yml was written",
          "planning.md Phase 33"),
+    Code("SYNC_ASSET_UNMAPPED", Severity.NOTE, Stage.SYNC,
+         "Published documents (PDF, txt, ...) whose old URL the docsite sitemap does not "
+         "list, or lists twice, so the version's 301.yml has no row for them",
+         "planning.md Phase 72"),
     Code("ORIGIN_URL_UNLISTED", Severity.NOTE, Stage.CONVERT,
          "Converted topics whose origin URL the docsite sitemap does not list; a "
          "derived row is withheld rather than written unproven",
@@ -786,10 +790,7 @@ REGISTRY: dict[str, Code] = _codes(
          "Sampled docs.tibco.com pages that answered with the sign-in page or an error",
          "planning.md Phase 55 (C)"),
     Code("VERIFY_REDIRECT_MAP_MISSING", Severity.ERROR, Stage.VERIFY,
-         "A version or its product publishes no readable 301.yml; every old URL breaks at cutover",
-         "planning.md Phase 60 (0)"),
-    Code("VERIFY_REDIRECT_MAP_INCOMPLETE", Severity.ERROR, Stage.VERIFY,
-         "The product 301.yml lacks a version's rows or sends them somewhere else",
+         "A version publishes no readable 301.yml; every old URL breaks at cutover",
          "planning.md Phase 60 (0)"),
     Code("VERIFY_REDIRECT_UNMAPPED", Severity.ERROR, Stage.VERIFY,
          "A live page of a published topic that no 301.yml row starts from",

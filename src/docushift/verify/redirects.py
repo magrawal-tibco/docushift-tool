@@ -67,11 +67,12 @@ class Context:
 
 def check(ctx: Context, sample: int, seed: int, fetcher: Fetcher | None = None, host: str = "") -> Check:
     result = Check()
-    rows = _maps(ctx, result)
-    if rows is None:
+    every = _maps(ctx, result)
+    if every is None:
         return result
+    rows = _assets(ctx, every, result)
     find = _source_finder(ctx.sources)
-    _coverage(ctx, rows, find, result)
+    _coverage(ctx, every, find, result)
     picked = _pick(rows, sample, seed, ctx)
     if not picked:
         return result
@@ -105,30 +106,35 @@ def check(ctx: Context, sample: int, seed: int, fetcher: Fetcher | None = None, 
 
 
 def _maps(ctx: Context, result: Check) -> list[tuple[str, str]] | None:
+    """The version's rows. Phase 72: AEM reads the version's own `301.yml` only, so
+    there is no product-level map to compare against any more."""
     mine = ctx.folder / FILE
     rows = live.origins(mine, _prefix(ctx))
     if not rows:
         why = "no" if not mine.is_file() else "an unreadable or empty"
         result.add("VERIFY_REDIRECT_MAP_MISSING", FILE, f"the version has {why} {FILE}")
         return None
-    product = ctx.folder.parent / FILE
-    assembled = dict(live.origins(product))
-    if not assembled:
-        why = "no" if not product.is_file() else "an unreadable or empty"
-        result.add("VERIFY_REDIRECT_MAP_MISSING", "",
-                   f"{ctx.doc_class} has {why} product-level {FILE} beside version.yml")
-        return rows
-    absent = [frm for frm, _ in rows if frm not in assembled]
-    moved = [frm for frm, to in rows if frm in assembled and assembled[frm] not in _assembled(ctx, to)]
-    if absent:
-        result.add("VERIFY_REDIRECT_MAP_INCOMPLETE", "",
-                   f"{len(absent)} of {len(rows)} row(s) missing from the product {FILE}, e.g. {absent[0]}",
-                   len(absent))
-    if moved:
-        result.add("VERIFY_REDIRECT_MAP_INCOMPLETE", "",
-                   f"{len(moved)} row(s) sent elsewhere by the product {FILE}, e.g. {moved[0]} -> "
-                   f"{assembled[moved[0]]}", len(moved))
     return rows
+
+
+def _assets(ctx: Context, rows: list[tuple[str, str]], result: Check) -> list[tuple[str, str]]:
+    """Phase 72: every asset row names a document that is published. Returns the page rows.
+
+    Cheap, so every row rather than a sample: a DAM path names the repository file
+    `<locale>/<slug>/<doc-class>/<version>/<file>`, and only its existence is asked.
+    """
+    pages: list[tuple[str, str]] = []
+    product = ctx.folder.parent.parent
+    for frm, to in rows:
+        if not origins.is_asset_target(to):
+            pages.append((frm, to))
+            continue
+        parts = to.split("/")
+        doc_class, segment, name = parts[-3], parts[-2], parts[-1]
+        if not (product / doc_class / segment / name).is_file():
+            result.add("VERIFY_REDIRECT_TARGET_MISSING", f"../../{doc_class}/{segment}/{name}",
+                       f"{frm} -> {to}: no such document is published")
+    return pages
 
 
 def _served(ctx: Context, to: str) -> str:
@@ -138,12 +144,6 @@ def _served(ctx: Context, to: str) -> str:
 
 def _prefix(ctx: Context) -> str:
     return rooted.folder_prefix(ctx.locale, ctx.slug, ctx.doc_class, ctx.segment)
-
-
-def _assembled(ctx: Context, to: str) -> tuple[str, str]:
-    """A version-root `to` as the product map writes it: from the repo root since
-    Phase 68, or the served URL a map not yet re-synced still carries."""
-    return rooted.rooted(_prefix(ctx), to), _served(ctx, to)
 
 
 # -- 1: every live page of a published topic has a row ---------------------------

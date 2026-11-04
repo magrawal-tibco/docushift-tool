@@ -15,8 +15,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from pathlib import Path
 
-import yaml
-
+from docushift import origins as origins_module
 from docushift.discovery.client import _looks_like_auth_page
 from docushift.sync import rooted
 from docushift.verify import text as texts
@@ -29,14 +28,8 @@ def origins(path: Path, prefix: str = "") -> list[tuple[str, str]]:
     `prefix` is the version folder from the repo root: a published `to` names its
     page from there (Phase 68), and is read back folder-relative.
     """
-    try:
-        document = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
-    except (OSError, yaml.YAMLError):
-        return []
-    rows = document.get("redirects") if isinstance(document, dict) else None
-    return [(str(r.get("from") or ""), rooted.unroot(prefix, str(r.get("to") or "")) if prefix
-             else str(r.get("to") or "")) for r in rows or []
-            if isinstance(r, dict) and r.get("from") and r.get("to")]
+    # Either shape (Phase 72): the working tree's list, or the published `"old": "new"`.
+    return [(old, rooted.unroot(prefix, new) if prefix else new) for old, new in origins_module.read_pairs(path)]
 
 
 def sample(rows: list[tuple[str, str]], size: int) -> list[tuple[str, str]]:

@@ -209,6 +209,8 @@ class SyncStats:
     # The `publish_base_url` those rows were rendered against, so the report can
     # say whether they carry a host without re-reading the config.
     redirect_base: str = ""
+    # Product-level `301.yml` files removed (Phase 72: AEM reads the version's own).
+    maps_removed: int = 0
     # `version.yml` files left alone because they would not parse. Named in the
     # report; the file is not touched.
     unparsed: list[str] = field(default_factory=list)
@@ -333,7 +335,8 @@ class WorkspaceDistributor:
         # Phase 68: the two maps publish with paths from the repo root, so they are
         # compared, and written, as rewritten text rather than as the source file.
         tree_root = self.product_dir(product, target).parent.parent
-        maps = rooted.published_maps(source, "/" + destination.relative_to(tree_root).as_posix() + "/")
+        assets = self._asset_rows(product, version, destination.relative_to(tree_root).parts[0], segment)
+        maps = rooted.published_maps(source, "/" + destination.relative_to(tree_root).as_posix() + "/", assets)
 
         if not force and destination.is_dir():
             pages_same, stale = _compare(source, destination, maps)
@@ -368,6 +371,35 @@ class WorkspaceDistributor:
             slug, number, SyncOutcome.SYNCED, path=destination, segment=segment,
             files=files, bytes=size, merged=merged,
         )
+
+    def _asset_rows(self, product: Product, version: ProductVersion, locale: str, segment: str) -> dict[str, str]:
+        """Phase 72: the version's documents as `301.yml` rows, old URL -> DAM path.
+
+        The documents are the ones `sync_documents` places (the same router and
+        de-duplication), so a row names a file that is published. Primary locale
+        only, as the documents are. A document the sitemap does not list gets no
+        row and is counted (`SYNC_ASSET_UNMAPPED`).
+        """
+        if not self.config.is_primary_locale():
+            return {}
+        slug, number = product.slug, version.version
+        tree = self.config.extract_path(product.bu, product.family, slug, number)
+        if not tree.is_dir():
+            return {}
+        grouped = document_index.group(
+            router.route_version(self.content_tree(product, version, tree), version.engine, [])
+        )
+        documents = {doc_class: [item.path.name for item in files] for doc_class, files in grouped.items()
+                     if doc_class in router.DOCUMENT_DOC_CLASSES}
+        if not documents:
+            return {}
+        pages = origins.page_list(self.config.cache_dir, slug, number)
+        found, missing = origins.asset_pairs(pages, documents, product.bu, locale, slug, segment)
+        if missing:
+            self._record("SYNC_ASSET_UNMAPPED", slug, number, count=len(missing),
+                         message=f"{len(missing)} document(s) with no old URL in the docsite sitemap, "
+                                 f"so no 301 row, e.g. {missing[0]}")
+        return found
 
     def _extract_unfinished(self, slug: str, number: str) -> bool:
         """Whether an extract was killed between its swap and its bookkeeping (X3-01)."""
@@ -1081,22 +1113,17 @@ class WorkspaceDistributor:
     def _write_origin_map(
         self, product: Product, folder: Path, present: set[str], stats: SyncStats
     ) -> None:
-        """The doc-class origin 301 map -- live docsite URL -> published page (Phase 22).
+        """No doc-class origin 301 map since Phase 72: removes the one written before.
 
-        The same assembly as `redirects.yml` and the same four rules, over the file
-        Reframe writes beside it. It differs in exactly two places, both because the
-        `from` side is somebody else's address rather than one of ours: only `to` is
-        rewritten -- as the Markdown file's path from the repo root since Phase 68,
-        not a served URL -- and entitlement is read off `to`.
+        The AEM team, 2026-11-04: the product-level `301.yml` had grown too large,
+        and each version's own file is what AEM reads. Until then `sync` assembled
+        it from the version folders (Phase 22); every row it held is in a version's
+        file, so removing it loses nothing.
         """
-        self._assemble_map(
-            product, folder, present, stats,
-            file_name=origins.ORIGINS,
-            header=origins.PUBLISHED_HEADER,
-            prefix_keys=(),
-            owned_key="to",
-            rooted_keys=("to",),
-        )
+        path = folder / origins.ORIGINS
+        if path.is_file():
+            path.unlink()
+            stats.maps_removed += 1
 
     def _assemble_map(
         self, product: Product, folder: Path, present: set[str], stats: SyncStats,

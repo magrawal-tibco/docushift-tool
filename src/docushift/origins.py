@@ -192,6 +192,79 @@ def document(built: list[dict[str, Any]]) -> dict[str, Any]:
     return {"redirects": built}
 
 
+# -- Phase 72: the published shape, `"old": "new"`, and asset rows ---------------
+
+
+def pairs(document: Any) -> list[tuple[str, str]]:
+    """`(old, new)` rows of a `301.yml` in either shape; `[]` for anything else.
+
+    The working trees keep the list shape (`redirects:` of `from` / `to`); what
+    `sync` publishes since Phase 72 is AEM's flat `"old": "new"` mapping. Every
+    reader goes through here, so a repository part re-synced reads like the rest.
+    """
+    if not isinstance(document, dict):
+        return []
+    listed = document.get("redirects")
+    if isinstance(listed, list):
+        return [(str(row.get("from") or ""), str(row.get("to") or "")) for row in listed
+                if isinstance(row, dict) and row.get("from") and row.get("to")]
+    return [(str(old), str(new)) for old, new in document.items()
+            if isinstance(old, str) and isinstance(new, str) and old and new]
+
+
+def read_pairs(path: Path) -> list[tuple[str, str]]:
+    """`pairs` of a file; `[]` when it is absent or will not parse."""
+    try:
+        return pairs(yaml.safe_load(path.read_text(encoding="utf-8")))
+    except (OSError, UnicodeDecodeError, yaml.YAMLError):
+        return []
+
+
+#: Where AEM serves an asset (the AEM team, 2026-11-04):
+#: `/content/dam/<bu>/<country>/<language>/<product>/<doc-class>/<version>/<file>`.
+DAM_ROOT = "/content/dam"
+
+
+def dam_path(bu: str, locale: str, slug: str, doc_class: str, segment: str, name: str) -> str:
+    """An asset's new address. `en-us` is `us/en` and `ja-jp` is `jp/ja`: country, then
+    language (the user, 2026-11-04). The file name is kept as published."""
+    language, _, country = locale.lower().partition("-")
+    return f"{DAM_ROOT}/{bu.lower()}/{country or language}/{language}/{slug}/{doc_class}/{segment}/{name}"
+
+
+def is_asset_target(new: str) -> bool:
+    """Whether a row's new side is a DAM path rather than a page in the repository."""
+    return new.startswith(DAM_ROOT + "/")
+
+
+def asset_pairs(
+    page_urls: Iterable[str], documents: Mapping[str, Iterable[str]],
+    bu: str, locale: str, slug: str, segment: str,
+) -> tuple[dict[str, str], list[str]]:
+    """`({old URL: DAM path}, [names with no old URL])` for a version's documents.
+
+    `documents` is `{doc-class: [published file name]}`. The old URL is the sitemap
+    entry whose last segment is the file's name, case folded -- the only source
+    that does not guess. A name the sitemap lists twice is ambiguous and gets no
+    row, so it is counted rather than redirected to one of them at random.
+    """
+    by_name: dict[str, list[str]] = {}
+    for url in page_urls:
+        name = unquote(urlsplit(url).path.rsplit("/", 1)[-1]).lower()
+        if name:
+            by_name.setdefault(name, []).append(url)
+    found: dict[str, str] = {}
+    missing: list[str] = []
+    for doc_class in sorted(documents):
+        for name in sorted(documents[doc_class]):
+            urls = by_name.get(name.lower(), [])
+            if len(urls) == 1:
+                found[urls[0]] = dam_path(bu, locale, slug, doc_class, segment, name)
+            else:
+                missing.append(f"{doc_class}/{name}")
+    return found, missing
+
+
 # -- Phase 33: derived from the Coveo sitemap ----------------------------------
 
 #: How many leading source segments `derive` will try to drop. The four layouts

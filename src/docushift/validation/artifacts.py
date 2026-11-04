@@ -323,7 +323,13 @@ def _check_redirects(folder: VersionFolder, index: FolderIndex,
         return [loaded.failure]
 
     document = loaded.document
-    entries = document.get("redirects") if isinstance(document, dict) else None
+    # Phase 72: a published `301.yml` is `"old": "new"`; `redirects.yml` and the
+    # working trees keep the list. An asset row's DAM path is not a file here, so
+    # `unroot` leaves it absolute and it is skipped below like any other.
+    if isinstance(document, dict) and "redirects" not in document:
+        entries = [{"from": old, "to": new} for old, new in origins.pairs(document)]
+    else:
+        entries = document.get("redirects") if isinstance(document, dict) else None
     prefix = rooted.folder_prefix(folder.locale, folder.slug, folder.doc_class, folder.segment)
     findings: list[Finding] = []
     for entry in entries or []:

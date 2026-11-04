@@ -578,17 +578,36 @@ def test_a_version_without_its_301_map_is_lost(config, state) -> None:
     assert _codes(_verify(config, state, target)) == ["VERIFY_REDIRECT_MAP_MISSING"]
 
 
-def test_a_product_map_missing_or_disagreeing_with_the_version_is_incomplete(config, state) -> None:
+def test_only_the_version_map_is_read_in_either_shape(config, state) -> None:
+    """Phase 72: no product-level map is compared any more, and the published
+    `"old": "new"` shape reads like the working tree's list."""
     target = _fixture(config, state)
     folder = _version_folder(target)
-    _maps(folder, {f"{OLD}/guide.htm": "guide.md#guide", f"{OLD}/one.htm": "one.md#one"},
-          product={f"{OLD}/guide.htm": "us/en/prod/online-help/1-0-0/two.html#two"})
+    rows = {f"{OLD}/{n}.htm": f"/en-us/{SLUG}/online-help/1-0-0/{n}.md#{n}" for n in ("guide", "one", "two")}
+    (folder / "301.yml").write_text("".join(f'"{old}": "{new}"\n' for old, new in rows.items()), encoding="utf-8")
+    (folder.parent / "301.yml").unlink(missing_ok=True)
 
-    findings = _verify(config, state, target)
-
-    assert _codes(findings) == ["VERIFY_REDIRECT_MAP_INCOMPLETE", "VERIFY_REDIRECT_MAP_INCOMPLETE"]
-    (folder.parent / "301.yml").unlink()
+    assert _codes(_verify(config, state, target)) == []
+    (folder / "301.yml").unlink()
     assert _codes(_verify(config, state, target)) == ["VERIFY_REDIRECT_MAP_MISSING"]
+
+
+def test_an_asset_row_must_name_a_published_document(config, state) -> None:
+    """Phase 72: an asset row's DAM path names `<doc-class>/<version>/<file>` of the
+    product; it is checked for every row, and kept out of the page sample."""
+    target = _fixture(config, state)
+    folder = _version_folder(target)
+    pdf = f"{OLD}/../pdf/guide.pdf"
+    rows = {f"{OLD}/{n}.htm": f"/en-us/{SLUG}/online-help/1-0-0/{n}.md#{n}" for n in ("guide", "one", "two")}
+    rows[pdf] = f"/content/dam/ibi/us/en/{SLUG}/user-guides/1-0-0/guide.pdf"
+    (folder / "301.yml").write_text("".join(f'"{old}": "{new}"\n' for old, new in rows.items()), encoding="utf-8")
+
+    assert _codes(_verify(config, state, target)) == ["VERIFY_REDIRECT_TARGET_MISSING"]
+    document = folder.parent.parent / "user-guides" / "1-0-0" / "guide.pdf"
+    document.parent.mkdir(parents=True)
+    document.write_bytes(b"%PDF")
+    # (The fixture's package ships no such PDF, so the documents check calls it extra.)
+    assert "VERIFY_REDIRECT_TARGET_MISSING" not in _codes(_verify(config, state, target))
 
 
 def test_a_sampled_row_into_a_missing_anchor_or_the_wrong_page_is_found(config, state) -> None:
@@ -832,7 +851,8 @@ def test_a_translated_folder_reads_the_english_package_it_ships_in(config, state
     # Compared page by page, nothing lost; the fixture has no `ja-jp` Flare root or
     # product-level 301.yml, which is what the two other codes say.
     assert [(r.folder.locale, r.skipped, len(r.rows)) for r in results] == [("ja-jp", "", 3)]
-    assert set(results[0].codes) == {"VERIFY_TOC_UNCHECKED", "VERIFY_REDIRECT_MAP_MISSING"}
+    # Phase 72: no product-level map is asked for, so none is missing.
+    assert set(results[0].codes) == {"VERIFY_TOC_UNCHECKED"}
     ja_state.close()
 
 

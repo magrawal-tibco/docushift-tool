@@ -3174,6 +3174,7 @@ The concrete deliverable of §7.1: every deferred "report line" in the three doc
 | `REFRAME_PATH_SHORTENED`⁶³ | note | reframe | Pages on a TOC chain that would publish past 259 characters took shorter names, the folders along the chain with them | Phase 63 |
 | `REFRAME_PATH_TOO_LONG`⁶³ | warn | reframe | Pages still past 259 characters published with every name on the chain cut; `sync` will refuse the version | Phase 63 |
 | `SYNC_DOCUMENT_SKIPPED`⁶⁴ | warn | sync | A file in a document folder was not published: an archive or installer, or 100 MB or more (GitHub's limit) | Phase 64 |
+| `SYNC_ASSET_UNMAPPED`⁷² | note | sync | Published documents (PDF, txt, ...) whose old URL the docsite sitemap does not list, or lists twice, so the version's 301.yml has no row for them | Phase 72 |
 | `RENAME_MAP_APPLIED`²⁹ | note | reframe | Page names taken from `rename-map.csv` rather than recomputed, so a published URL does not move when a title is edited | Phase 29 |
 | `RENAME_MAP_REFUSED`³⁴ | warn | reframe | A name in `rename-map.csv` that another page ends up holding; the computed name is kept, and each refused pin is named | Phase 34 (R9-05) |
 | `RENAME_MAP_AMBIGUOUS`⁵⁰ | warn | reframe | A row in `rename-map.csv` for a source topic that leads more than one page, with no `page_key` to say which; no page takes the name, each row named | Phase 50 |
@@ -3222,8 +3223,7 @@ The concrete deliverable of §7.1: every deferred "report line" in the three doc
 | `VERIFY_PUBLISHED_TOC_TITLE_CHANGED`⁵⁵ | note | verify | A menu row titled differently from its toc.yml entry | Phase 55 (B4) |
 | `VERIFY_LIVE_DRIFT`⁵⁵ | warn | verify | A sampled docs.tibco.com page holding sentences the downloaded copy lacks; updated since download, or not what was downloaded | Phase 55 (C) |
 | `VERIFY_LIVE_UNCHECKABLE`⁵⁵ | note | verify | Sampled docs.tibco.com pages that answered with the sign-in page or an error | Phase 55 (C) |
-| `VERIFY_REDIRECT_MAP_MISSING`⁶⁰ | error | verify | A version or its product publishes no readable `301.yml` | Phase 60 |
-| `VERIFY_REDIRECT_MAP_INCOMPLETE`⁶⁰ | error | verify | The product `301.yml` lacks a version's rows or sends them elsewhere | Phase 60 |
+| `VERIFY_REDIRECT_MAP_MISSING`⁶⁰ | error | verify | A version publishes no readable `301.yml` (no product-level map since Phase 72) | Phase 60 |
 | `VERIFY_REDIRECT_UNMAPPED`⁶⁰ | error | verify | A live page of a published topic that no row starts from | Phase 60 |
 | `VERIFY_REDIRECT_UNCONVERTED`⁶⁰ | note | verify | Live pages with no row that were never converted | Phase 60 |
 | `VERIFY_REDIRECT_FROM_UNLISTED`⁶⁰ | warn | verify | A sampled row from a URL the sitemap does not list | Phase 60 |
