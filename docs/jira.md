@@ -49,6 +49,8 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 **Log** (newest first, one line per session):
 
+- 2026-11-04 — DOCOPS-323 created under DOCOPS-7 (0.25 SP, Content Migration, `tibco`) and → Done: 6 archived versions
+  deselected and removed from bw-plugin, businessconnect, mainframe `content-fix` (643 files); FormBuilder 5.3.2 kept.
 - 2026-11-04 — DOCOPS-322 created under DOCOPS-7 (0.25 SP, Content Migration, `tibco`), In Progress: URL patterns
   for 96 map-less TIBCO help versions (63 products) collected in a sheet; map rebuild on hold for AEM.
 - 2026-11-03 — DOCOPS-123 → Done: whole-scope sitemap run, still 288 products (the docsite lists no more);
