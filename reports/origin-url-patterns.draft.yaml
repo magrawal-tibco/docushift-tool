@@ -1,0 +1,242 @@
+# DRAFT for config/origin-urls.yaml (DOCOPS-322). Not read by any command.
+# Built by scratch/origin_url_patterns.py from reports/origin-url-requests.csv.
+products:
+  adapter-code-for-tibco-api-exchange-and-joomla:
+    template: https://docs.tibco.com/pub/{folder_path}/{path}
+    drop_segments: 0
+    verified: https://docs.tibco.com/pub/api-exchange-joomla-adapter/2.3.4/doc/html/installation/Extracting_the_File_Contents_.htm (sheet 2.3.4, 2026-11-04)
+  tibco-activation-service:
+    template: https://docs.tibco.com/pub/{folder_path}/doc/{path}
+    drop_segments: 1
+    verified: https://docs.tibco.com/pub/tibco-activation/1.1.0/doc/html/user-guide/license-command.htm (sheet 1.1.0, 2026-11-04)
+  tibco-activematrix-adapter-for-database-tibco-business-studio:
+    template: https://docs.tibco.com/pub/{folder_path}/doc/{path}
+    drop_segments: 1
+    verified: https://docs.tibco.com/pub/adadbbs/1.3.0/doc/html/GUID-7EC3F482-B0AE-4154-95FA-AF58D31BB470.html (sheet 1.3.0, 2026-11-04)
+  tibco-activematrix-adapter-for-files-for-unix-win-tibco-business-studio:
+    template: https://docs.tibco.com/pub/{folder_path}/doc/{path}
+    drop_segments: 1
+    verified: https://docs.tibco.com/pub/adfilesbs/1.3.0/doc/html/GUID-87518A95-94F7-4B96-913C-E8801359475A.html (sheet 1.3.0, 2026-11-04)
+  tibco-activematrix-adapter-for-ibm-i:
+    template: https://docs.tibco.com/pub/{folder_path}/doc/adas400/{path}
+    drop_segments: 1
+    verified: https://docs.tibco.com/pub/adas400/6.4.0/doc/adas400/html/tib_adas400_config_deploy/adas400_configuration_deployment.4.47.htm (sheet 6.4.0, 2026-11-04)
+  tibco-activematrix-adapter-for-sap-tibco-business-studio:
+    template: https://docs.tibco.com/pub/{folder_path}/doc/{path}
+    drop_segments: 1
+    verified: https://docs.tibco.com/pub/adr3bs/1.3.0/doc/html/GUID-7FA5B20D-D76B-4E7B-939F-985BEA6FE6B8.html (sheet 1.3.0, 2026-11-04)
+  tibco-activematrix-adapter-framework:
+    template: https://docs.tibco.com/pub/{folder_path}/doc/{path}
+    drop_segments: 1
+    verified: https://docs.tibco.com/pub/adapteruipack/1.6.1/doc/html/administration/managing-app-spaces.htm (sheet 1.6.1, 2026-11-04)
+    per_version:
+      1.6.1:
+        template: https://docs.tibco.com/pub/{folder_path}/doc/{path}
+        drop_segments: 1
+      1.3.1:
+        template: https://docs.tibco.com/pub/{folder_path}/doc/{path}
+        drop_segments: 0
+  tibco-activematrix-bpm:
+    template: https://docs.tibco.com/pub/{folder_path}/doc/html/{path}
+    drop_segments: 1
+    verified: https://docs.tibco.com/pub/amx-bpm/4.3.0/doc/html/bpmhelp/GUID-C43932D8-2931-468E-B096-1715578DDBBC.html (sheet 4.3.0, 2026-11-04)
+  tibco-activematrix-businessworks-plug-in-component-for-aws-common-services:
+    template: https://docs.tibco.com/pub/{folder_path}/doc/{path}
+    drop_segments: 1
+    verified: https://docs.tibco.com/pub/bwplugin-cawscs/6.1.1/doc/html/users-guide/amazon-common-services-shared-connection-resource.htm (sheet 6.1.1, 2026-11-04)
+  tibco-activematrix-businessworks-plug-in-development-kit:
+    template: https://docs.tibco.com/pub/{folder_path}/doc/{path}
+    drop_segments: 1
+    verified: https://docs.tibco.com/pub/bwpdk/6.3.1/doc/html/developers-guide/installing-runtime-using-scripts.htm (sheet 6.3.1, 2026-11-04)
+  tibco-activematrix-businessworks-plug-in-for-applicability-statement-2-as2-protocol:
+    template: https://docs.tibco.com/pub/{folder_path}/doc/{path}
+    drop_segments: 1
+    verified: https://docs.tibco.com/pub/bwpluginas2/6.0.0/doc/html/installation/plugin-uninstalling-update-site.htm (sheet 6.0.0, 2026-11-04)
+  tibco-activematrix-businessworks-plug-in-for-edi:
+    template: https://docs.tibco.com/pub/{folder_path}/doc/{path}
+    drop_segments: 1
+    verified: https://docs.tibco.com/pub/bwpluginedi_healthcare/6.3.0/doc/html/GUID-8FBF62C8-9F27-4B2B-8180-86F7D5BE864D.html (sheet 6.3.0, 2026-11-04)
+  tibco-activematrix-businessworks-plug-in-for-ibm-i:
+    template: https://docs.tibco.com/pub/{folder_path}/doc/{path}
+    drop_segments: 1
+    verified: https://docs.tibco.com/pub/bwpluginibmi/7.3.0/doc/html/GUID-830F5892-4228-403E-8A87-AB6FA505AC10.html (sheet 7.3.0, 2026-11-04)
+  tibco-activematrix-businessworks-plug-in-for-sap-business-technology-platform:
+    template: https://docs.tibco.com/pub/{folder_path}/doc/{path}
+    drop_segments: 1
+    verified: https://docs.tibco.com/pub/bwpluginsapcp/6.0.0/doc/html/_templates/Whats-New.htm (sheet 6.0.0, 2026-11-04)
+  tibco-activematrix-businessworks-plug-in-for-servicenow:
+    template: https://docs.tibco.com/pub/{folder_path}/doc/{path}
+    drop_segments: 1
+    verified: https://docs.tibco.com/pub/bwpluginservicenow/6.1.0/doc/html/GUID-67E68E00-634F-4156-9B33-41F1B00ECCA6.html (sheet 6.1.0, 2026-11-04)
+  tibco-activematrix-businessworks-plug-in-for-tibco-eftl:
+    template: https://docs.tibco.com/pub/{folder_path}/doc/{path}
+    drop_segments: 1
+    verified: https://docs.tibco.com/pub/bwplugineftl/6.0.0/doc/html/GUID-64CEF31B-63A9-45EE-A7E8-9E9982A52C7D.html (sheet 6.0.0, 2026-11-04)
+  tibco-activematrix-businessworks-plug-in-for-tibco-managed-file-transfer:
+    template: https://docs.tibco.com/pub/{folder_path}/doc/{path}
+    drop_segments: 1
+    verified: https://docs.tibco.com/pub/bwpluginmft/6.3.1/doc/html/GUID-85B069CB-79C9-4F56-86B2-C7C257C0C8E3.html (sheet 6.3.1, 2026-11-04)
+    per_version:
+      6.3.1:
+        template: https://docs.tibco.com/pub/{folder_path}/doc/{path}
+        drop_segments: 1
+      6.3.0:
+        template: https://docs.tibco.com/pub/{folder_path}/doc/{path}
+        drop_segments: 0
+  tibco-activematrix-businessworks-plug-in-for-transaction-insight:
+    template: https://docs.tibco.com/pub/{folder_path}/doc/{path}
+    drop_segments: 1
+    verified: https://docs.tibco.com/pub/bwpluginti/6.0.1/doc/html/installation/plugin-uninstalling-gui-mode.htm (sheet 6.0.1, 2026-11-04)
+  tibco-adapter-migration:
+    template: https://docs.tibco.com/pub/{folder_path}/doc/{path}
+    drop_segments: 1
+    verified: https://docs.tibco.com/pub/adm/1.8.1/doc/html/GUID-A2BB2FB9-5FCE-4DBF-BBC8-879F59286DAD.html (sheet 1.8.1, 2026-11-04)
+  tibco-api-exchange-gateway:
+    template: https://docs.tibco.com/pub/{folder_path}/doc/{path}
+    drop_segments: 1
+    verified: https://docs.tibco.com/pub/api-exchange-gateway/2.5.1/doc/html/user-guide/example-use-case.htm (sheet 2.5.1, 2026-11-04)
+  tibco-businessconnect:
+    template: https://docs.tibco.com/pub/{folder_path}/doc/bcis/{path}
+    drop_segments: 1
+    verified: https://docs.tibco.com/pub/bc/7.5.0/doc/bcis/html/script-deploy-user/Starting_bcappmanage_.htm (sheet 7.5.0, 2026-11-04)
+  tibco-businessconnect-configstore-management-interface-protocol:
+    template: https://docs.tibco.com/pub/{folder_path}/doc/bccmi/{path}
+    drop_segments: 1
+    verified: https://docs.tibco.com/pub/bccmi/6.1.0/doc/bccmi/html/TIB_bccmi_user/bccmi_user.3.12.htm (sheet 6.1.0, 2026-11-04)
+  tibco-businessconnect-container-edition:
+    template: https://docs.tibco.com/pub/{folder_path}/doc/{path}
+    drop_segments: 1
+    verified: https://docs.tibco.com/pub/bcce/1.7.1/doc/html/Trading-Partner-Management/creating-a-business-agreement.htm (sheet 1.7.1, 2026-11-04)
+  tibco-businessconnect-container-edition-configstore-management-interface-protocol:
+    template: https://docs.tibco.com/pub/{folder_path}/doc/{path}
+    drop_segments: 1
+    verified: https://docs.tibco.com/pub/bcce-cmi/1.2.1/doc/html/users-guide/Message_Queue.htm (sheet 1.2.1, 2026-11-04)
+  tibco-businessconnect-container-edition-edi-protocol-powered-by-instream:
+    template: https://docs.tibco.com/pub/{folder_path}/doc/{path}
+    drop_segments: 1
+    verified: https://docs.tibco.com/pub/bcce-edi/1.6.1/doc/html/X12Configuration/running-the-tutorial.htm (sheet 1.6.1, 2026-11-04)
+  tibco-businessconnect-partner-management-portal:
+    template: https://docs.tibco.com/pub/{folder_path}/doc/{path}
+    drop_segments: 1
+    verified: https://docs.tibco.com/pub/bcce-pmp/1.1.1/doc/html-client/web-client/Updating_Business_Location_Information.htm (sheet 1.1.1, 2026-11-04)
+  tibco-businessconnect-plug-in-for-ftp-server:
+    template: https://docs.tibco.com/pub/{folder_path}/doc/bcftps/{path}
+    drop_segments: 1
+    verified: https://docs.tibco.com/pub/bcftps/1.0.1/doc/bcftps/html/tib_bcftps_usr/bcftpsUser.3.05.htm (sheet 1.0.1, 2026-11-04)
+  tibco-businessconnect-plug-in-for-ssh-server:
+    template: https://docs.tibco.com/pub/{folder_path}/doc/bcsftp/{path}
+    drop_segments: 1
+    verified: https://docs.tibco.com/pub/bcsftp/1.1.0/doc/bcsftp/html/TIB_bcsftp_user_guide/bcsftpUser.3.05.htm (sheet 1.1.0, 2026-11-04)
+  tibco-businessconnect-trading-community-management:
+    template: https://docs.tibco.com/pub/{folder_path}/doc/bctcm/{path}
+    drop_segments: 1
+    verified: https://docs.tibco.com/pub/bctcm/6.2.0/doc/bctcm/html/users-guide/Unfinished_Registrations.htm (sheet 6.2.0, 2026-11-04)
+  tibco-cloud-api-modeler:
+    template: https://docs.tibco.com/pub/{folder_path}/doc/{path}
+    drop_segments: 1
+    verified: https://docs.tibco.com/pub/tcam/1.5.0/doc/html/modeling-apis/adding-methods.htm (sheet 1.5.0, 2026-11-04)
+  tibco-cloud-integration-businessworks-payg:
+    template: https://docs.tibco.com/pub/{folder_path}/doc/{path}
+    drop_segments: 1
+    verified: https://docs.tibco.com/pub/bwce-aws/2.8.0/doc/html/payg-user-guide/launching-cloudformation-template-to-setup-bwce-base-docker-image.htm (sheet 2.8.0, 2026-11-04)
+  tibco-cloud-integration-flogo-payg:
+    template: https://docs.tibco.com/pub/{folder_path}/doc/{path}
+    drop_segments: 1
+    verified: https://docs.tibco.com/pub/tci-flogo-payg/2.11.0/doc/html/GUID-8A7A521A-7252-4CA6-9FCC-45F77C713923.html (sheet 2.11.0, 2026-11-04)
+  tibco-eftl-enterprise-edition:
+    template: https://docs.tibco.com/pub/{folder_path}/doc/{path}
+    drop_segments: 1
+    verified: https://docs.tibco.com/pub/eftl/7.1.3/doc/html/concepts/client-id-field.htm (sheet 7.1.3, 2026-11-04)
+  tibco-flogo:
+    template: https://docs.tibco.com/pub/{folder_path}/doc/{path}
+    drop_segments: 1
+    verified: https://docs.tibco.com/pub/flogo/3.0.1/doc/html/data-mappings/reserved-keywords-to-avoide.htm (sheet 3.0.1, 2026-11-04)
+  tibco-foresight-translator:
+    template: https://docs.tibco.com/pub/{folder_path}/doc/{path}
+    drop_segments: 1
+    verified: https://docs.tibco.com/pub/translator/4.2.0/doc/html/User/Opening_Translation_Tool.htm (sheet 4.2.0, 2026-11-04)
+  tibco-foresight-translator-attachment-adapter:
+    template: https://docs.tibco.com/pub/{folder_path}/doc/{path}
+    drop_segments: 1
+    verified: https://docs.tibco.com/pub/fs-translator-attch-adapter/3.0.0/doc/html/user-guide/cda-file.htm (sheet 3.0.0, 2026-11-04)
+  tibco-ftl-enterprise-edition:
+    template: https://docs.tibco.com/pub/{folder_path}/doc/{path}
+    drop_segments: 1
+    verified: https://docs.tibco.com/pub/ftl/7.1.3/doc/html/administration/persistence-service-fault-tolerance.htm (sheet 7.1.3, 2026-11-04)
+  tibco-hawk-database-adapter:
+    template: https://docs.tibco.com/pub/{folder_path}/doc/{path}
+    drop_segments: 1
+    verified: https://docs.tibco.com/pub/hawkdbhma/6.2.1/doc/html/user-guide/Oracle_getOpenCursor.htm (sheet 6.2.1, 2026-11-04)
+  tibco-iprocess-engine:
+    template: https://docs.tibco.com/pub/{folder_path}/doc/{path}
+    drop_segments: 1
+    verified: https://docs.tibco.com/pub/ipe-db2/11.9.2/doc/html/admin-guide/Issue_a_Shutdown_Event.htm (sheet 11.9.2, 2026-11-04)
+  tibco-iprocess-web-services-client-plug-in:
+    template: https://docs.tibco.com/pub/{folder_path}/doc/{path}
+    drop_segments: 1
+    verified: https://docs.tibco.com/pub/ip-websvcs-clnt-pi/11.9.0/doc/html/user-guide/Overview_2.htm (sheet 11.9.0, 2026-11-04)
+  tibco-iprocess-web-services-server-plug-in:
+    template: https://docs.tibco.com/pub/{folder_path}/doc/{path}
+    drop_segments: 1
+    verified: https://docs.tibco.com/pub/ip-websvcs-srvr-pi/11.9.0/doc/html/install-server/Java_Version_Encoding_Set_Combinatio.htm (sheet 11.9.0, 2026-11-04)
+  tibco-mainframe-tcp-library:
+    template: https://docs.tibco.com/pub/{folder_path}/doc/{path}
+    drop_segments: 1
+    verified: https://docs.tibco.com/pub/mainframetcp/3.0.0/doc/html/GUID-8FE63F79-FDB7-4B83-9078-2E6223516C16.html (sheet 3.0.0, 2026-11-04)
+  tibco-mainframe-webui:
+    template: https://docs.tibco.com/pub/{folder_path}/doc/{path}
+    drop_segments: 1
+    verified: https://docs.tibco.com/pub/mainframewebui/3.0.0/doc/html/GUID-84499E0D-70FE-4FCC-8052-6C55D3817318.html (sheet 3.0.0, 2026-11-04)
+  tibco-platform-command-line-interface:
+    template: https://docs.tibco.com/pub/platform-cp/1.11.0/doc/{path}
+    drop_segments: 1
+    verified: https://docs.tibco.com/pub/platform-cp/1.11.0/doc/html/Subsystems/flogo-capability/flogo-user-guide/upgrading-an-app.htm (sheet 1.2.0, 2026-11-04)
+  tibco-product-and-service-catalog-powered-by-tibco-ebx:
+    template: https://docs.tibco.com/pub/{folder_path}/doc/{path}
+    drop_segments: 1
+    verified: https://docs.tibco.com/pub/psc-ebx/1.1.0/doc/html/Installation_Guide/ImportingArtifacts.htm (sheet 1.1.0, 2026-11-04)
+  tibco-product-and-service-inventory-2-1-0:
+    template: https://docs.tibco.com/pub/fsi/2.1.0/{path}
+    drop_segments: 0
+    verified: https://docs.tibco.com/pub/fsi/2.1.0/doc/html/rest-services/view-a-party.htm (sheet 2.1.0, 2026-11-04)
+  tibco-reward:
+    template: https://docs.tibco.com/pub/{folder_path}/doc/html/{path}
+    drop_segments: 2
+    verified: https://docs.tibco.com/pub/loyalty/22.3.0/doc/html/blue-integration-guide/export-file-usage-guidelines-data-elements-and-formats.htm (sheet 22.3.0, 2026-11-04)
+  tibco-trading-partner-management-rest-api:
+    template: https://docs.tibco.com/pub/{folder_path}/doc/tpm-rest/{path}
+    drop_segments: 1
+    verified: https://docs.tibco.com/pub/tpm-rest/1.1.0/doc/tpm-rest/html/GUID-6CC53458-317D-4BAA-8D0E-A94FB675457C.html (sheet 1.1.0, 2026-11-04)
+  tibco-transaction-interface-for-ims:
+    template: https://docs.tibco.com/pub/{folder_path}/doc/{path}
+    drop_segments: 1
+    verified: https://docs.tibco.com/pub/substation-ims/2.14.0/doc/html/GUID-831FCD14-7677-4207-83B3-11410ECAB289.html (sheet 2.14.0, 2026-11-04)
+home_page_only:
+- slug: tibco-activematrix-adapter-for-ibm-i
+  version: 6.2.0
+  reason: 'Home page redirect only (user, 2026-11-03): old site has no per-topic links'
+- slug: tibco-activematrix-adapter-for-jd-edwards-enterpriseone
+  version: 6.1.0
+  reason: 'Home page redirect only (user, 2026-11-03): old site has no per-topic links'
+- slug: tibco-activematrix-businessworks-plug-in-for-activespaces
+  version: 2.2.0
+  reason: Archived version in old site. no redirection required at the topic level. For base URL, need to identify the engine.
+- slug: tibco-activematrix-businessworks-plug-in-for-salesforce-com
+  version: 2.6.0
+  reason: Archived version in old site. no redirection required at the topic level. For base URL, need to identify the engine.
+- slug: tibco-activematrix-businessworks-plug-in-for-smartmapper
+  version: 6.0.0
+  reason: No specific topic links
+- slug: tibco-activematrix-businessworks-plug-in-for-tibco-clarity
+  version: 6.1.1
+  reason: Archived version in old site. no redirection required at the topic level. For base URL, need to identify the engine.
+- slug: tibco-businessconnect-edi-protocol-hipaa-edition-powered-by-instream
+  version: 6.7.0
+  reason: No specific topic links
+- slug: tibco-red-enabled-for-ziip
+  version: 2.5.0
+  reason: Archived version in old site. no redirection required at the topic level. For base URL, need to identify the engine.
+no_redirect:
+- slug: spotfire-statistica-all-servers
+  version: 14.1.0
+  reason: no online help
