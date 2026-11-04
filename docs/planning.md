@@ -2832,6 +2832,71 @@ name.
 
 ---
 
+### Phase 72: `301.yml` in AEM's New Shape — `"old": "new"`, Per Version, Assets Included — **Planned 2026-11-04; awaiting approval**
+
+**Why.** The AEM team changed what they read (relayed by the user, 2026-11-04):
+
+1. **Shape.** One `"old": "new"` line per redirect, like `csh.yml`, instead of a list of
+   `from` / `to` / `status: 301` entries. Paths keep today's structure (Phase 68,
+   repo-rooted `.md`).
+2. **Per version only.** The product-level `301.yml`, assembled by `sync` from the version
+   folders, has grown too large and is no longer wanted.
+3. **Assets too.** Old URLs of PDFs, `.txt` and other documents get rows in the same
+   version's `301.yml`. Their new side is a DAM path:
+   `/content/dam/<bu>/<country>/<language>/<product-slug>/<doc-class>/<version>/<file>`.
+   For example, `/content/dam/ibi/us/en/ibi-focus/user-guides/9-3-2/IBI_focus_9.3.2_compatibility_all_active_products.pdf`.
+   Spotfire and TIBCO use `/content/dam/spotfire/…` and `/content/dam/tibco/…`.
+
+**Measured 2026-11-04.**
+
+- Published assets across both repo trees, as git-tracked files in `user-guides`,
+  `release-information` and `reference-documents`: **5,611 PDF, 1,461 `.txt`**, 10 `.xlsx`,
+  3 `.xls`, 1 `.docx`.
+- The Coveo sitemap lists assets: 2,707 `.pdf` and 650 `.txt` in the first 401 cached files.
+  It gives the old URL exactly. FOCUS 9.3.2's sample is listed as
+  `https://docs.tibco.com/pub/focus/9.3.2/doc/pdf/IBI_focus_9.3.2_compatibility_all_active_products.pdf`.
+- Published versions by BU: tibco 561, ibi 200, spotfire 38.
+
+#### Decisions
+
+| decision | choice | why |
+|---|---|---|
+| **The published shape** (user, 2026-11-04) | `"<full old URL>": "<new path>"`, one per line, quoted, sorted, under a short comment header as `csh.yml` has. The old side is the **full docs.tibco.com URL**. The new side keeps the **section anchor** (`page.md#section`) | The full URL is what readers bookmarked; the anchor lands them on the merged section, as today |
+| **Where the change is made** | Only in what `sync` **publishes** (`rooted.origins_text`, which already rewrites every published `301.yml`). The `301.yml` in `output/` and `reframed/` keeps its list shape | The local file feeds reframe, `verify` and validate. Changing the published form alone touches one writer, not five |
+| **No product-level `301.yml`** | `sync` stops writing it (`_write_origin_map`) and removes the one it wrote before, per product it syncs | AEM's request. Each version's file stands alone |
+| **Asset rows** | For each document `sync` places in a doc-class folder, the old URL is the sitemap entry with the same file name in that version's page list (`origins.page_list`). The new side is the DAM path from the catalog `bu`, the folder's locale (`en-us` → `us/en`, `de-de` → `de/de`, `ja-jp` → `jp/ja`; user, 2026-11-04), the product slug, doc-class, version segment and file name. A document with no sitemap entry gets no row and is counted | The sitemap is the only source that does not guess; the file name is unique within a version's folder |
+| **Which file holds the asset rows** | The version's `online-help/<version>/301.yml`, with the page rows | AEM's "the same `301.yml` for that version" |
+| **PDF-only versions** (about 170) | **Held** (user, 2026-11-04: ask the AEM team where they read it). No asset rows written for them until answered | They have no `online-help` folder |
+| **Readers** | One reader, `origins.read`, accepts both shapes. It is used by `verify` (Phase 60's redirect check and the live sample), `validate` (`artifacts.py`) and `rooted` | Published and local files differ in shape from now on; every reader has to take both |
+| **Out of scope** | API reference trees in `-resources`; pictures inside help pages; TIBCO's 96 versions with no map (Phase 73: the DOCOPS-322 patterns, then per-version `drop_segments`) | Not asked for, or their own piece of work |
+
+#### Steps
+
+1. `origins.py`: `read()` for both shapes; the DAM path builder; asset rows from a version's
+   placed documents and its sitemap page list.
+2. `sync/rooted.py` + `sync/distributor.py`: publish `301.yml` in the new shape with the asset
+   rows; stop the product-level map and remove a previous one; count assets without a row.
+3. Readers: `verify/redirects.py`, `verify/live.py`, `validation/artifacts.py` through
+   `origins.read`.
+4. Tests:
+   - the new shape round-trips;
+   - a FOCUS-like version gets its PDF row with the DAM path;
+   - a `de-de` folder gives `de/de`;
+   - a document absent from the sitemap gets no row and is counted;
+   - the product-level file is removed;
+   - Phase 60's checks pass on the new shape.
+5. Pilot: FOCUS 9.3.2 (`sync` as a `!` command), then `validate` and `verify`. Review the
+   `301.yml` with the user before a wider run.
+6. Rollout, the user's runs, family by family, on `content-fix`. It rewrites every
+   published `301.yml` and deletes every product-level one.
+7. Docs: `architecture.md` (the redirect artifact), `user-guide.md`, this entry's As built.
+
+*Exit: FOCUS 9.3.2's `301.yml` has page and asset rows in the new shape and no
+product-level file remains; Phase 60's check passes on it; the suite and `ruff` pass. Jira: a
+new sub-task under DOCOPS-96 when approved.*
+
+---
+
 ### Phase 70: DocBook Keeps Nested Sections in the TOC — **Done 2026-11-02; DOCOPS-317**
 
 **Why.** Phase 58's new DocBook old-TOC reader found, on its first trial (TIBCO Streaming
