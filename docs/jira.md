@@ -42,6 +42,7 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | Phase 72 rolled out in TIBCO (385 version maps / 146 product-level; ibi done 2026-11-05) | DOCOPS-324: dated note → Done |
 | A way for `sync` to keep files added by hand in a version folder is planned and built (WFCE 9.3.7/9.3.8 split-PDF test files, 2026-11-05) | DOCOPS-327 → In Progress, then Done (due 2026-11-28) |
 | AEM says where a PDF-only version's 301.yml lives | Plan its document rows under DOCOPS-324 or a follow-up |
+| Adapter for Database (Business Studio) 1.3.0's merge is rebuilt (`reframe --force`, then sync) | DOCOPS-329: dated note |
 | A new phase is opened | One sub-task under the matching story, In Progress, no `retro` |
 | Phase 66 runs: every synced PDF-only version verified (15 after a re-extract, 3 Omni-Gen after a re-sync) | DOCOPS-285: dated note with the counts → Done; per-BU results on the BU's verify issue |
 | A fix for merged links whose target contains parentheses is planned | New sub-task under DOCOPS-12, In Progress; Data Management re-published |
@@ -52,6 +53,9 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 **Log** (newest first, one line per session):
 
+- 2026-11-05 — DOCOPS-329 created under DOCOPS-7 (1 SP, Content Migration, `tibco`), In Progress: Phase 72 TIBCO
+  rollout in 5 batches. Batch 1 (adapters, scribe, businessevents, businessworks, platform) pushed. Issue: Adapter for
+  Database (BS) 1.3.0 needs `reframe --force`.
 - 2026-11-05 — DOCOPS-328 created under DOCOPS-149 (0.5 SP, Content Migration, `ibi`) and → Done: Phase 72 ibi
   rollout; DOCOPS-327 created under DOCOPS-96 (0.5 SP, AI & CI), Backlog, due 2026-11-28: sync keeps hand-added files.
   DOCOPS-324 note: stays open for TIBCO. (Two Jira calls hit a connection error; checked, no duplicate.)
