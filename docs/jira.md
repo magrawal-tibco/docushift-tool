@@ -40,7 +40,7 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | The AEM team's `301.yml` structure changes are settled (redirect rebuild on hold 2026-11-03; 116 of 501 TIBCO help versions have no map; 43 of the 70 products are not in the docsite sitemap, so need `origin-urls.yaml` patterns) | Plan the rebuild under DOCOPS-271; then re-run the DITA pilot (DOCOPS-256) |
 | The URL request sheet is filled (`reports/origin-url-requests.csv`; 15 of the needed rows in on 2026-11-03) | DOCOPS-322: declare and test each pattern in `config/origin-urls.yaml`, dated note |
 | Phase 72 rolled out in TIBCO (385 version maps / 146 product-level; ibi done 2026-11-05) | DOCOPS-324: dated note → Done |
-| A way for `sync` to keep files added by hand in a version folder is planned (WFCE 9.3.7/9.3.8 split-PDF test files, 2026-11-05) | New sub-task under DOCOPS-96 |
+| A way for `sync` to keep files added by hand in a version folder is planned and built (WFCE 9.3.7/9.3.8 split-PDF test files, 2026-11-05) | DOCOPS-327 → In Progress, then Done (due 2026-11-28) |
 | AEM says where a PDF-only version's 301.yml lives | Plan its document rows under DOCOPS-324 or a follow-up |
 | A new phase is opened | One sub-task under the matching story, In Progress, no `retro` |
 | Phase 66 runs: every synced PDF-only version verified (15 after a re-extract, 3 Omni-Gen after a re-sync) | DOCOPS-285: dated note with the counts → Done; per-BU results on the BU's verify issue |
@@ -52,6 +52,9 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 **Log** (newest first, one line per session):
 
+- 2026-11-05 — DOCOPS-328 created under DOCOPS-149 (0.5 SP, Content Migration, `ibi`) and → Done: Phase 72 ibi
+  rollout; DOCOPS-327 created under DOCOPS-96 (0.5 SP, AI & CI), Backlog, due 2026-11-28: sync keeps hand-added files.
+  DOCOPS-324 note: stays open for TIBCO. (Two Jira calls hit a connection error; checked, no duplicate.)
 - 2026-11-05 — DOCOPS-324 note: Phase 72 ibi rollout done (7 repos, 123 version maps, 0 product-level left);
   sync KeyError fixed mid-run (0cc3c99); translated csh.yml rooted too (user's choice).
 - 2026-11-05 — DOCOPS-324 created under DOCOPS-96 (1 SP, AI & Content Intelligence), In Progress, note: Phase 72
