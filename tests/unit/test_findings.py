@@ -191,9 +191,10 @@ def test_the_register_carries_every_row_of_7_5() -> None:
     a PDF-only version's documents. Phase 67 adds three for API references
     published past 260 characters: `PUBLISHED_PATH_LONG`, `GIT_LONGPATHS_OFF` and
     `API_PATH_LONG`. Phase 69 adds two for guide names in `reframe.yaml`:
-    `REFRAME_GUIDE_NAME_REFUSED` and `REFRAME_GUIDE_NAME_UNMATCHED`.
+    `REFRAME_GUIDE_NAME_REFUSED` and `REFRAME_GUIDE_NAME_UNMATCHED`. Phase 75 adds
+    `EOS_REPORT_NO_DATES`, for a report that ships without its date column.
     """
-    assert len(REGISTRY) == 137
+    assert len(REGISTRY) == 138
 
 
 def test_severity_comes_from_the_registry_and_not_from_the_call_site() -> None:

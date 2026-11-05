@@ -82,6 +82,8 @@ REGISTRY: dict[str, Code] = _codes(
          "A scope.yaml rule matching no product", "design.md §8.2.5"),
     Code("EOS_ALIAS_STALE", Severity.WARNING, Stage.CATALOG,
          "An alias naming a product the active report lacks", "design.md §8.2"),
+    Code("EOS_REPORT_NO_DATES", Severity.WARNING, Stage.CATALOG,
+         "The active EOS report has no Retirement Date column; dates kept", "planning.md Phase 75"),
     Code("EOS_PRODUCT_EMPTIED", Severity.WARNING, Stage.CATALOG,
          "Retirement left a product with nothing to convert", "planning.md Phase 3.7"),
     Code("BATCH_NOT_ELIGIBLE", Severity.WARNING, Stage.CATALOG,

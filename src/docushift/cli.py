@@ -650,6 +650,12 @@ def _record_catalog_findings(
                 slug=rule,
                 message=f"config/scope.yaml excludes '{rule}', which matches no catalogued product",
             )
+    undated = manager.eos_report_without_dates()
+    if undated:
+        findings.record(
+            "EOS_REPORT_NO_DATES",
+            message=f"{undated} has no Retirement Date column -- statuses applied, dates kept from the catalog",
+        )
     for alias in manager.unmatched_eos_aliases():
         findings.record(
             "EOS_ALIAS_STALE",

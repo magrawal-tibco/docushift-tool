@@ -2832,6 +2832,47 @@ name.
 
 ---
 
+### Phase 75: A Report Without Dates Keeps the Catalog's Retirement Dates — **Done 2026-11-06; DOCOPS-333**
+
+**Why.** Support's 2026-11-05 end-of-support report has no `Retirement Date` column (the
+2026-10-09 one had). `_read_eos_report` reads a missing column as "no date", so the
+2026-11-05 catalog fetch blanked `retirement_date` on 2,180 versions. Statuses were applied
+correctly (4 report rows added, 0 changed; SAP Solutions plug-in 8.6.0 newly retired), so
+conversion is unaffected; only the dates were lost. The fetch is held uncommitted
+(baseline e9498e1, backup `cache/backups/catalog-2026-11-05/`).
+
+#### Decisions
+
+| decision | choice | why |
+|---|---|---|
+| **A report with no date column** | A version the report lists keeps the `retirement_date` already in the catalog; status and source are still taken from the report | A missing column says nothing about the date. The user chose this over blank dates or waiting for a re-export |
+| **A report with the column** | Unchanged: the report's date is written, blank included | A blank cell in a dated report is the report's answer |
+| **A version the report no longer lists** | Unchanged: reset to `unknown` with no date | §3.11's reset rule; a kept date without a status would mislead |
+| **Visibility** | New warning `EOS_REPORT_NO_DATES` once per `catalog fetch` / `catalog eos`, naming the report | The report changing shape is the finding; a silent fallback is how this was missed |
+| **The 4 newly listed versions** | No date | Nothing to keep; filled when a dated report arrives |
+
+#### Steps
+
+1. `EosReport.has_dates`, set from the CSV header; `_resolve_release_status` keeps the row's
+   date when it is false. Register and emit `EOS_REPORT_NO_DATES`.
+2. Tests: no-date report keeps the date; dated report overwrites it; an unlisted version
+   still resets.
+3. Repair today's fetch without re-crawling: copy `retirement_date` back from e9498e1 for
+   rows still sourced `eos_report` (not in the hand-edit record, so not pinned `manual`),
+   then `catalog eos`; expect no further change. Diff against e9498e1 should show only the
+   17 new versions, the 4 report rows, and gaps filled (44 ZIP links, 16 release dates).
+4. Docs (architecture §3.11, user guide), commit, DOCOPS-333 note → Done.
+
+**Result (2026-11-06).** Built and applied. 2,180 dates restored; `catalog eos` kept them and
+warned `EOS_REPORT_NO_DATES` once. Against e9498e1 the catalog differs only by 17 new versions,
+1 new product (`tibco-graphical-activespaces`), 44 ZIP links and 16 release dates filled, and
+the 4 report rows. Retired-and-eligible 70 -> 71; the shipped-report guard re-baselined from
+115, where it had stood since 2026-10-09 (the other 45 left through hand eligibility and
+scope edits, no status change). Not fixed here: `test_shipped_scope_lists_the_ebx_and_spotfire_products`
+already failed before this phase (130 scope rules, test expects 129).
+
+---
+
 ### Phase 74: The Automatic Layout Pin Is Chosen Per Engine — **Done 2026-11-05; DOCOPS-332**
 
 **Why.** Since Phase 42, a multi-version product with no `pin_layout_to` in `reframe.yaml`
@@ -3212,6 +3253,7 @@ The concrete deliverable of §7.1: every deferred "report line" in the three doc
 | :--- | :--- | :--- | :--- | :--- |
 | `SCOPE_RULE_UNMATCHED` | warn | catalog | A `scope.yaml` rule matching no product | `design.md` §8.2.5 |
 | `EOS_ALIAS_STALE` | warn | catalog | An alias naming a product the active report lacks | `design.md` §8.2 |
+| `EOS_REPORT_NO_DATES`⁷⁵ | warn | catalog | The active report has no `Retirement Date` column; statuses applied, catalog dates kept | Phase 75 |
 | `EOS_PRODUCT_EMPTIED` | warn | catalog | Retirement left a product with nothing to convert (11 products) | Phase 3.7 |
 | `BATCH_NOT_ELIGIBLE` | warn | catalog | Tagged into a batch but not eligible | `design.md` §8.2.2 |
 | `MIGRATE_SHEET_SLUG_UNMATCHED`²⁵ | warn | catalog | A migration-export slug matching no catalogued product (104 slugs, 410 rows, 91 marked migrate) | Phase 25 |

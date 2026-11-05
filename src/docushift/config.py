@@ -151,6 +151,12 @@ class EosReport:
     report_names: set[str] = field(default_factory=set)
     # Statuses the report used that this tool has no enum value for.
     unknown_statuses: list[str] = field(default_factory=list)
+    # Whether the report carries a `Retirement Date` column (Phase 75). The
+    # 2026-11-05 report dropped it; a missing column says nothing about the date,
+    # so resolution keeps the one already in the catalog rather than blanking it.
+    has_dates: bool = True
+    # The report's filename, for the warning that names a report without dates.
+    report_name: str = ""
 
     @property
     def unmatched_aliases(self) -> list[str]:
@@ -838,7 +844,10 @@ class ConfigManager:
         """
         seen_unknown: set[str] = set()
         with io.StringIO(read_text(path), newline="") as handle:
-            for row in csv.DictReader(handle):
+            reader = csv.DictReader(handle)
+            report.report_name = path.name
+            report.has_dates = "Retirement Date" in (reader.fieldnames or [])
+            for row in reader:
                 name = (row.get("Product Name") or "").strip()
                 version = (row.get("Version") or "").strip()
                 if not name or not version:

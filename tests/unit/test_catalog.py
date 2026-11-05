@@ -872,8 +872,12 @@ def _eos(
     rows: tuple[tuple[str, str, str, str], ...] = (),
     aliases: str = "",
     out_of_scope: tuple[str, ...] = (),
+    dated: bool = True,
 ) -> CatalogManager:
     """A catalog manager over an end-of-support report carrying exactly `rows`.
+
+    `dated=False` writes the report without its `Retirement Date` column, as
+    support's 2026-11-05 report shipped (Phase 75); each row's date is ignored.
 
     Each row is `(report name, version, status, retirement date)` in the report's
     own `MM-DD-YYYY` spelling. Built fresh each call for the same reason `_scoped`
@@ -883,11 +887,15 @@ def _eos(
     """
     report = project_root / "config" / "eos" / "report.csv"
     report.parent.mkdir(parents=True, exist_ok=True)
-    report.write_text(
-        "Product Name,Version,Release Status,Retirement Date,Last Updated On,\n"
-        + "".join(f"{name},{version},{status},{date},01-05-2025,\n" for name, version, status, date in rows),
-        encoding="utf-8-sig",
-    )
+    if dated:
+        text = "Product Name,Version,Release Status,Retirement Date,Last Updated On,\n" + "".join(
+            f"{name},{version},{status},{date},01-05-2025,\n" for name, version, status, date in rows
+        )
+    else:
+        text = "Product Name,Version,Release Status,Last Updated On,\n" + "".join(
+            f"{name},{version},{status},01-05-2025,\n" for name, version, status, _ in rows
+        )
+    report.write_text(text, encoding="utf-8-sig")
     (project_root / "config" / "eos.yaml").write_text(f"report: eos/report.csv\n{aliases}", encoding="utf-8")
     body = "out_of_scope:\n" + "".join(f'  - slug: {slug}\n    reason: "test"\n' for slug in out_of_scope)
     (project_root / "config" / "scope.yaml").write_text(body, encoding="utf-8")
@@ -1068,6 +1076,53 @@ def test_apply_eos_re_resolves_without_a_crawl(project_root: Path, state: StateS
     assert _eos(project_root, state, RETIRED_8_6).get_version("tibco-ems", "8.6.0").release_status is (
         ReleaseStatus.RETIRED
     )
+
+
+def test_a_report_without_dates_keeps_the_catalog_date(project_root: Path, state: StateStore) -> None:
+    """Phase 75: a missing column says nothing about the date, so it is not blanked."""
+    _fetch(_eos(project_root, state, RETIRED_8_6), _ems("10.4.0", "8.6.0"))
+
+    stats = _eos(project_root, state, RETIRED_8_6, dated=False).apply_eos()
+
+    version = _eos(project_root, state, RETIRED_8_6, dated=False).get_version("tibco-ems", "8.6.0")
+    assert stats.versions_retired == 1
+    assert (version.release_status, version.retirement_date) == (ReleaseStatus.RETIRED, "2024-12-31")
+    assert version.release_status_source is ReleaseStatusSource.EOS_REPORT
+
+
+def test_a_report_without_dates_still_applies_a_new_status(project_root: Path, state: StateStore) -> None:
+    """A version newly listed by an undated report is retired, with no date to keep."""
+    _fetch(_eos(project_root, state), _ems("10.4.0", "8.6.0"))
+
+    _eos(project_root, state, RETIRED_8_6, dated=False).apply_eos()
+
+    version = _eos(project_root, state, RETIRED_8_6, dated=False).get_version("tibco-ems", "8.6.0")
+    assert (version.release_status, version.retirement_date) == (ReleaseStatus.RETIRED, None)
+
+
+def test_a_dated_report_overwrites_the_catalog_date(project_root: Path, state: StateStore) -> None:
+    _fetch(_eos(project_root, state, RETIRED_8_6), _ems("8.6.0"))
+    moved = (("TIBCO EMS", "8.6.0", "Retired", "06-30-2025"),)
+
+    _eos(project_root, state, moved).apply_eos()
+
+    assert _eos(project_root, state, moved).get_version("tibco-ems", "8.6.0").retirement_date == "2025-06-30"
+
+
+def test_a_report_without_dates_still_resets_an_unlisted_version(project_root: Path, state: StateStore) -> None:
+    """The kept date is only for listed versions; §3.11's reset is unchanged."""
+    _fetch(_eos(project_root, state, RETIRED_8_6), _ems("8.6.0"))
+    other = (("TIBCO EMS", "10.4.0", "GA", ""),)
+
+    _eos(project_root, state, other, dated=False).apply_eos()
+
+    version = _eos(project_root, state, other, dated=False).get_version("tibco-ems", "8.6.0")
+    assert (version.release_status, version.retirement_date) == (ReleaseStatus.UNKNOWN, None)
+
+
+def test_a_report_without_dates_is_named(project_root: Path, state: StateStore) -> None:
+    assert _eos(project_root, state, RETIRED_8_6, dated=False).eos_report_without_dates() == "report.csv"
+    assert _eos(project_root, state, RETIRED_8_6).eos_report_without_dates() is None
 
 
 def test_a_product_left_with_nothing_convertible_is_named(project_root: Path, state: StateStore) -> None:
@@ -1272,6 +1327,16 @@ def test_the_shipped_report_retires_the_measured_set(repo_root: Path) -> None:
     any report changed. Then the 2026-10-09 report (`5d8b461`) retired 22 more
     eligible versions and emptied the Facebook, Marketo and Twitter plug-ins, which
     the user confirmed should be dropped.
+
+    *Re-baselined 2026-11-06: `versions_retired` 115 -> 71, `products_fully_retired`
+    5 -> 4, catalog 669 -> 670 products.* No `release_status` moved before the new
+    report. Of the 45 that left the count, 35 were made ineligible by hand (BPM
+    Edition and BPM Enterprise, AuditSafe, iProcess plug-ins, Messaging Bridge and
+    others) and 10 left with `spotfire-statistics-services` going out of scope.
+    `tibco-auditsafe` and `tibco-data-science-team-studio` left the fully-retired list
+    the same way; `tibco-businessworks-container-edition` joined it. The 2026-11-05
+    report then retired one eligible version (SAP Solutions plug-in 8.6.0), and the
+    fetch added `tibco-graphical-activespaces`, which the report does not cover.
     """
     manager = CatalogManager(
         repo_root / "config" / "products.csv",
@@ -1281,9 +1346,9 @@ def test_the_shipped_report_retires_the_measured_set(repo_root: Path) -> None:
 
     summary = manager.triage_summary()
 
-    assert summary["versions_retired"] == 115
-    assert len(summary["products_fully_retired"]) == 5
-    assert manager.eos_coverage() == (274, 669)
+    assert summary["versions_retired"] == 71
+    assert len(summary["products_fully_retired"]) == 4
+    assert manager.eos_coverage() == (274, 670)
 
 
 def test_the_shipped_report_never_retires_a_look_alike(repo_root: Path) -> None:

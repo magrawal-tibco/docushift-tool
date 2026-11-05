@@ -859,6 +859,11 @@ class CatalogManager:
         products = self.load().products
         return sum(1 for slug in products if slug in report.entries), len(products)
 
+    def eos_report_without_dates(self) -> str | None:
+        """The active report's filename if it has no `Retirement Date` column."""
+        report = self._eos_report()
+        return None if report.has_dates or not report.report_name else report.report_name
+
     def unmatched_eos_aliases(self) -> list[str]:
         """Aliases in `eos.yaml` naming a product the active report does not carry."""
         return self._eos_report().unmatched_aliases
@@ -1731,7 +1736,11 @@ def _resolve_release_status(
 
         found = report.status_for(product.slug, version.version)
         if found is not None:
-            version.release_status, version.retirement_date = found[0], found[1] or None
+            version.release_status = found[0]
+            # A report without the date column keeps the date already in the row
+            # (Phase 75); a dated report's blank cell is its answer and clears it.
+            if report.has_dates:
+                version.retirement_date = found[1] or None
             version.release_status_source = ReleaseStatusSource.EOS_REPORT
             continue
 

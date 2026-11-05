@@ -598,6 +598,8 @@ Two files because they have two authors. The CSV is support's, arrives periodica
 
 **Why it is re-applied on every fetch and not converted into cleared flags.** Exactly the §3.10 argument: a fetch defaults a newly discovered version to `convert_eligible=true`. A retirement applied once by clearing flags would be undone the next time the crawl found something. So the report is consulted at merge time, on every product, every fetch — and `docushift catalog eos` re-applies it on its own when a new report lands and nothing else has changed, which costs a CSV swap rather than an hour of crawling at two requests a second.
 
+**A report without a `Retirement Date` column keeps the catalog's dates** (Phase 75). Support's 2026-11-05 report dropped the column. A missing column says nothing about the date, so a listed version takes its status from the report and keeps the `retirement_date` already in its row; a version newly listed gets none. A report that has the column is read as before, blank cells included. The run warns `EOS_REPORT_NO_DATES`, naming the report.
+
 **Only `Retired` gates.** The report's other two statuses are recorded and neither one blocks anything:
 
 | `release_status` | Meaning | Blocks conversion? |

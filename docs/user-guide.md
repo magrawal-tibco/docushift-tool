@@ -224,7 +224,7 @@ When a new report arrives, drop it in `config/eos/`, point `eos.yaml` at it, and
 docushift catalog eos
 ```
 
-That re-applies the report to every row and prints what changed, how many products the report actually covers, and — named in full, never as a count — every product it leaves with nothing to publish. `catalog fetch` does the same thing, but only as a side effect of re-crawling the whole docsite, which takes about an hour.
+If the new report has no `Retirement Date` column (the 2026-11-05 one does not), statuses are still applied and each version keeps the date it already had; the run warns `EOS_REPORT_NO_DATES`. That re-applies the report to every row and prints what changed, how many products the report actually covers, and — named in full, never as a count — every product it leaves with nothing to publish. `catalog fetch` does the same thing, but only as a side effect of re-crawling the whole docsite, which takes about an hour.
 
 To see what is being skipped, and to convert something anyway:
 

@@ -606,6 +606,7 @@ def test_the_shipped_eos_config_resolves_cleanly(repo_root: Path) -> None:
     # 528 names in the 2026-09-10 report; 535 in the 2026-10-09 one, which adds
     # seven (Amazon Redshift plug-in, Cloud AuditSafe, Cloud Nimbus, two iProcess
     # clients, the iProcess Spotfire library and a `z_DoNotUse_` Streaming row).
+    # The 2026-11-05 report adds 4 rows, all under names it already carried.
     assert len(report.report_names) == 535
     assert report.unmatched_aliases == []
     assert report.unknown_statuses == []
@@ -613,7 +614,10 @@ def test_the_shipped_eos_config_resolves_cleanly(repo_root: Path) -> None:
     # Analytics` shares 0 of 7 versions with `tibco-analytics`, so it is not an alias.
     assert report.aliases["EBX"] == "tibco-ebx"
     assert "Spotfire Analytics" not in report.aliases
-    assert report.status_for("tibco-ebx", "5.9.0") == (ReleaseStatus.RETIRED, "2024-06-30")
+    # The 2026-11-05 report has no `Retirement Date` column (Phase 75): the verdict
+    # is read, the date is not, and the catalog keeps the one it already holds.
+    assert report.has_dates is False
+    assert report.status_for("tibco-ebx", "5.9.0") == (ReleaseStatus.RETIRED, "")
 
 
 def test_shipped_taxonomy_rules_resolve_the_bu_of_known_products(repo_root: Path) -> None:
