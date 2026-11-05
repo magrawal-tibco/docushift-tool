@@ -459,46 +459,47 @@ tibco-product-and-service-catalog,cim-ac,TIBCO® Product and Service Catalog,tib
 tibco-product-and-service-catalog-powered-by-tibco-ebx,psc-ebx,TIBCO® Product and Service Catalog powered by TIBCO EBX®,tibco,fulfillment,manual,Fulfillment,"Order management, fulfillment orchestration, and provisioning",27,onebx/data_management,true,default,false
 tibco-product-and-service-inventory,fsi,TIBCO® Product and Service Inventory,tibco,fulfillment,manual,Fulfillment,"Order management, fulfillment orchestration, and provisioning",27,,true,default,false
 tibco-product-and-service-inventory-2-1-0,fsi,TIBCO® Product and Service Inventory 2.1.0,tibco,fulfillment,manual,Fulfillment,"Order management, fulfillment orchestration, and provisioning",27,,true,default,false
-"tibbr,-tibbr-service,-tibbr-community,-and-tibbrcommunity-service",tibbr,"tibbr®, tibbr® Service, tibbr® Community, and tibbr®Community Service",tibco,general,unclassified,General,Not yet triaged into a family,40,,true,default,false
-tibbr-for-ios,tibbr-for-ios,tibbr® for iOS,tibco,general,unclassified,General,Not yet triaged into a family,40,,true,default,false
-tibbr-for-microsoft-outlook,tibbr-for-microsoft-outlook,tibbr® for Microsoft Outlook,tibco,general,unclassified,General,Not yet triaged into a family,40,,true,default,false
-tibbr-for-microsoft-sharepoint,tibbr-for-microsoft-sharepoint,tibbr® for Microsoft SharePoint,tibco,general,unclassified,General,Not yet triaged into a family,40,,true,default,false
-tibbr-for-salesforce-com-app,tibbr-for-salesforce-com-app,tibbr® for Salesforce.com App,tibco,general,unclassified,General,Not yet triaged into a family,40,,true,default,false
-tibbr-ideas,tibbr-ideas,tibbr® Ideas,tibco,general,unclassified,General,Not yet triaged into a family,40,,true,default,false
-tibbr-pages,tibbr-pages,tibbr® Pages,tibco,general,unclassified,General,Not yet triaged into a family,40,,true,default,false
-tibbr-tasks,tibbr-tasks,tibbr® Tasks,tibco,general,unclassified,General,Not yet triaged into a family,40,,true,default,false
-tibco-activation-service,tibco-activation,TIBCO® Activation Service,tibco,general,unclassified,General,Not yet triaged into a family,40,,true,default,false
-tibco-api-exchange-gateway,api-exchange-gateway,TIBCO® API Exchange Gateway,tibco,general,manual,General,Not yet triaged into a family,40,integration,true,default,false
-tibco-api-exchange-manager,api-exchange-manager,TIBCO® API Exchange Manager,tibco,general,manual,General,Not yet triaged into a family,40,integration,true,default,false
-tibco-clarity,clarity-dt,TIBCO® Clarity,tibco,general,unclassified,General,Not yet triaged into a family,40,,true,default,false
-tibco-clarity-cloud-edition,clarity,TIBCO® Clarity - Cloud Edition,tibco,general,unclassified,General,Not yet triaged into a family,40,,true,default,false
-tibco-clarity-enterprise-edition,clarity-dt,TIBCO® Clarity - Enterprise Edition,tibco,general,unclassified,General,Not yet triaged into a family,40,,true,default,false
-tibco-computedb-enterprise-edition,compute,TIBCO ComputeDB™ - Enterprise Edition,tibco,general,unclassified,General,Not yet triaged into a family,40,,true,default,false
-tibco-configuration-tool,cofiguration-tool,TIBCO Configuration Tool,tibco,general,unclassified,General,Not yet triaged into a family,40,,true,default,false
-tibco-enterprise-administrator,tea,TIBCO® Enterprise Administrator,tibco,general,unclassified,General,Not yet triaged into a family,40,,true,default,false
-tibco-enterprise-administrator-sdk,tea-sdk,TIBCO® Enterprise Administrator SDK,tibco,general,unclassified,General,Not yet triaged into a family,40,,true,default,false
-tibco-formvine,formvine,TIBCO Formvine®,tibco,general,manual,General,Not yet triaged into a family,40,,true,default,false
-tibco-general-interface-enterprise-edition,general-interface-enterprise-edition,TIBCO® General Interface - Enterprise Edition,tibco,general,unclassified,General,Not yet triaged into a family,40,,true,default,false
-tibco-geoanalytics,geo,TIBCO GeoAnalytics,tibco,general,unclassified,General,Not yet triaged into a family,40,,true,default,false
-tibco-geoanalytics-builder,geo-build,TIBCO GeoAnalytics Builder,tibco,general,unclassified,General,Not yet triaged into a family,40,,true,default,false
-tibco-graph-database-community-edition,tgdb-ce,TIBCO® Graph Database - Community Edition,tibco,general,unclassified,General,Not yet triaged into a family,40,,true,default,false
-tibco-graph-database-enterprise-edition,tgdb,TIBCO® Graph Database - Enterprise Edition,tibco,general,unclassified,General,Not yet triaged into a family,40,,true,default,false
-tibco-health-essentials-cloud,health-essentials-cloud,TIBCO® Health Essentials Cloud,tibco,general,unclassified,General,Not yet triaged into a family,40,,true,default,false
-tibco-it-operations-analytics,it-oa-suite,TIBCO® IT Operations Analytics,tibco,general,manual,General,Not yet triaged into a family,40,,true,default,false
-tibco-kabira-adapter-factory-for-java,kabira-jaf,TIBCO Kabira® Adapter Factory for JAVA,tibco,general,unclassified,General,Not yet triaged into a family,40,,true,default,false
-tibco-kabira-adapter-factory-for-persistence,kabira-paf,TIBCO Kabira® Adapter Factory for Persistence,tibco,general,unclassified,General,Not yet triaged into a family,40,,true,default,false
-tibco-kabira-adapter-factory-for-snmp,kabira-snmpaf,TIBCO Kabira® Adapter Factory for SNMP,tibco,general,unclassified,General,Not yet triaged into a family,40,,true,default,false
-tibco-kabira-builder,kab-p-builder,TIBCO Kabira® Builder,tibco,general,unclassified,General,Not yet triaged into a family,40,,true,default,false
-tibco-microflow-container-edition,microflow-container-edition,TIBCO Microflow™ Container Edition,tibco,general,unclassified,General,Not yet triaged into a family,40,,true,default,false
-tibco-monitoring-1-0-0,mon-suite,TIBCO® Monitoring 1.0.0,tibco,general,manual,General,Not yet triaged into a family,40,,true,default,false
-tibco-orchestra-networks,orchestra-networks,TIBCO® Orchestra Networks,tibco,general,unclassified,General,Not yet triaged into a family,40,,true,default,false
-tibco-patterns,tps,TIBCO® Patterns,tibco,general,unclassified,General,Not yet triaged into a family,40,,true,default,false
-tibco-reward,loyalty,TIBCO® Reward,tibco,general,manual,General,Not yet triaged into a family,40,,true,default,false
-tibco-rtview,rtview,TIBCO® RTView®,tibco,general,manual,General,Not yet triaged into a family,40,,true,default,false
-tibco-service-gateway-for-files,service-gateway-for-files,TIBCO Service Gateway™ for Files,tibco,general,unclassified,General,Not yet triaged into a family,40,,false,manual,false
-tibco-service-performance-manager,activematrix-service-performance-manager,TIBCO® Service Performance Manager,tibco,general,manual,General,Not yet triaged into a family,40,,true,default,false
-tibco-slingshot,slingshot,TIBCO Slingshot™,tibco,general,unclassified,General,Not yet triaged into a family,40,,true,default,false
-tibco-vault,vault,TIBCO® Vault,tibco,general,unclassified,General,Not yet triaged into a family,40,,true,default,false
+"tibbr,-tibbr-service,-tibbr-community,-and-tibbrcommunity-service",tibbr,"tibbr®, tibbr® Service, tibbr® Community, and tibbr®Community Service",tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibbr-for-ios,tibbr-for-ios,tibbr® for iOS,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibbr-for-microsoft-outlook,tibbr-for-microsoft-outlook,tibbr® for Microsoft Outlook,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibbr-for-microsoft-sharepoint,tibbr-for-microsoft-sharepoint,tibbr® for Microsoft SharePoint,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibbr-for-salesforce-com-app,tibbr-for-salesforce-com-app,tibbr® for Salesforce.com App,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibbr-ideas,tibbr-ideas,tibbr® Ideas,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibbr-pages,tibbr-pages,tibbr® Pages,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibbr-tasks,tibbr-tasks,tibbr® Tasks,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibco-activation-service,tibco-activation,TIBCO® Activation Service,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibco-api-exchange-gateway,api-exchange-gateway,TIBCO® API Exchange Gateway,tibco,general,manual,General,Not yet triaged into a family,41,integration,true,default,false
+tibco-api-exchange-manager,api-exchange-manager,TIBCO® API Exchange Manager,tibco,general,manual,General,Not yet triaged into a family,41,integration,true,default,false
+tibco-clarity,clarity-dt,TIBCO® Clarity,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibco-clarity-cloud-edition,clarity,TIBCO® Clarity - Cloud Edition,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibco-clarity-enterprise-edition,clarity-dt,TIBCO® Clarity - Enterprise Edition,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibco-computedb-enterprise-edition,compute,TIBCO ComputeDB™ - Enterprise Edition,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibco-configuration-tool,cofiguration-tool,TIBCO Configuration Tool,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibco-enterprise-administrator,tea,TIBCO® Enterprise Administrator,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibco-enterprise-administrator-sdk,tea-sdk,TIBCO® Enterprise Administrator SDK,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibco-formvine,formvine,TIBCO Formvine®,tibco,general,manual,General,Not yet triaged into a family,41,,true,default,false
+tibco-general-interface-enterprise-edition,general-interface-enterprise-edition,TIBCO® General Interface - Enterprise Edition,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibco-geoanalytics,geo,TIBCO GeoAnalytics,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibco-geoanalytics-builder,geo-build,TIBCO GeoAnalytics Builder,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibco-graph-database-community-edition,tgdb-ce,TIBCO® Graph Database - Community Edition,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibco-graph-database-enterprise-edition,tgdb,TIBCO® Graph Database - Enterprise Edition,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibco-graphical-activespaces,msg-gas,TIBCO® Graphical ActiveSpaces®,tibco,general,unclassified,General,Not yet triaged into a family,41,messaging,true,default,false
+tibco-health-essentials-cloud,health-essentials-cloud,TIBCO® Health Essentials Cloud,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibco-it-operations-analytics,it-oa-suite,TIBCO® IT Operations Analytics,tibco,general,manual,General,Not yet triaged into a family,41,,true,default,false
+tibco-kabira-adapter-factory-for-java,kabira-jaf,TIBCO Kabira® Adapter Factory for JAVA,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibco-kabira-adapter-factory-for-persistence,kabira-paf,TIBCO Kabira® Adapter Factory for Persistence,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibco-kabira-adapter-factory-for-snmp,kabira-snmpaf,TIBCO Kabira® Adapter Factory for SNMP,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibco-kabira-builder,kab-p-builder,TIBCO Kabira® Builder,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibco-microflow-container-edition,microflow-container-edition,TIBCO Microflow™ Container Edition,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibco-monitoring-1-0-0,mon-suite,TIBCO® Monitoring 1.0.0,tibco,general,manual,General,Not yet triaged into a family,41,,true,default,false
+tibco-orchestra-networks,orchestra-networks,TIBCO® Orchestra Networks,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibco-patterns,tps,TIBCO® Patterns,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibco-reward,loyalty,TIBCO® Reward,tibco,general,manual,General,Not yet triaged into a family,41,,true,default,false
+tibco-rtview,rtview,TIBCO® RTView®,tibco,general,manual,General,Not yet triaged into a family,41,,true,default,false
+tibco-service-gateway-for-files,service-gateway-for-files,TIBCO Service Gateway™ for Files,tibco,general,unclassified,General,Not yet triaged into a family,41,,false,manual,false
+tibco-service-performance-manager,activematrix-service-performance-manager,TIBCO® Service Performance Manager,tibco,general,manual,General,Not yet triaged into a family,41,,true,default,false
+tibco-slingshot,slingshot,TIBCO Slingshot™,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
+tibco-vault,vault,TIBCO® Vault,tibco,general,unclassified,General,Not yet triaged into a family,41,,true,default,false
 tibco-hawk-activematrix-plug-in,hawk-activematrix-plugin,TIBCO Hawk ActiveMatrix® Plug-in,tibco,hawk,manual,Hawk,"Infrastructure monitoring agents, adapters, and plug-ins",9,,true,default,false
 tibco-hawk-container-edition,hkce,TIBCO Hawk® - Container Edition,tibco,hawk,unclassified,Hawk,"Infrastructure monitoring agents, adapters, and plug-ins",9,,true,default,false
 tibco-hawk-database-adapter,hawkdbhma,TIBCO Hawk® Database Adapter,tibco,hawk,unclassified,Hawk,"Infrastructure monitoring agents, adapters, and plug-ins",9,,true,default,false
