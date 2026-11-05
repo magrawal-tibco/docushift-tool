@@ -1,6 +1,6 @@
 # Jira Tracking — What Is Logged in DOCOPS
 
-> **Last reconciled:** 2026-11-04, against Jira and `config/versions.csv`.
+> **Last reconciled:** 2026-11-05, against Jira and `config/versions.csv`.
 > Conventions (site, cloud ID, story points, transitions, who owns what) live in
 > `C:\github\confluence-mcp\reports\docushift-claude-atlassian-context.md`; this file
 > does not repeat them. It answers one question: **is this piece of work in Jira, and where?**
@@ -39,6 +39,8 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | The four TIBCO verify pilots are run and recorded (Phase 58 step 4) | DOCOPS-256: dated note with each outcome |
 | The AEM team's `301.yml` structure changes are settled (redirect rebuild on hold 2026-11-03; 116 of 501 TIBCO help versions have no map; 43 of the 70 products are not in the docsite sitemap, so need `origin-urls.yaml` patterns) | Plan the rebuild under DOCOPS-271; then re-run the DITA pilot (DOCOPS-256) |
 | The URL request sheet is filled (`reports/origin-url-requests.csv`; 15 of the needed rows in on 2026-11-03) | DOCOPS-322: declare and test each pattern in `config/origin-urls.yaml`, dated note |
+| Phase 72 rolled out: every family re-synced, new-shape 301.yml checked and pushed (ibi 121 / 20, TIBCO 385 / 146) | DOCOPS-324: dated note → Done |
+| AEM says where a PDF-only version's 301.yml lives | Plan its document rows under DOCOPS-324 or a follow-up |
 | A new phase is opened | One sub-task under the matching story, In Progress, no `retro` |
 | Phase 66 runs: every synced PDF-only version verified (15 after a re-extract, 3 Omni-Gen after a re-sync) | DOCOPS-285: dated note with the counts → Done; per-BU results on the BU's verify issue |
 | A fix for merged links whose target contains parentheses is planned | New sub-task under DOCOPS-12, In Progress; Data Management re-published |
@@ -49,6 +51,8 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 **Log** (newest first, one line per session):
 
+- 2026-11-05 — DOCOPS-324 created under DOCOPS-96 (1 SP, AI & Content Intelligence), In Progress, note: Phase 72
+  built (301.yml "old": "new" + DAM rows), FOCUS 9.3.2 pilot pushed (ff43b1cb); rollout next.
 - 2026-11-04 — DOCOPS-323 created under DOCOPS-7 (0.25 SP, Content Migration, `tibco`) and → Done: 6 archived versions
   deselected and removed from bw-plugin, businessconnect, mainframe `content-fix` (643 files); FormBuilder 5.3.2 kept.
 - 2026-11-04 — DOCOPS-322 created under DOCOPS-7 (0.25 SP, Content Migration, `tibco`), In Progress: URL patterns

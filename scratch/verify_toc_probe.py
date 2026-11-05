@@ -23,7 +23,8 @@ state = cfg.state_store()
 catalog = CatalogManager(cfg.products_path, cfg.versions_path, state, config=cfg).load()
 findings = FindingsRun("verify")
 findings.start()
-v = Verifier(cfg, catalog, state, Path("C:/github/tibco-docs-aem"), findings,
+target = sys.argv[sys.argv.index("--target") + 1] if "--target" in sys.argv else "C:/github/tibco-docs-aem"
+v = Verifier(cfg, catalog, state, Path(target), findings, redirect_sample=10, seed=1,
              triaged=triage.load(cfg.config_dir / "verify-triage.yaml"))
 folders = [f for f in v.selection(slug, version) if f.doc_class == "online-help"]
 for folder in folders:

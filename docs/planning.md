@@ -2832,7 +2832,7 @@ name.
 
 ---
 
-### Phase 72: `301.yml` in AEM's New Shape — `"old": "new"`, Per Version, Assets Included — **Planned 2026-11-04; awaiting approval**
+### Phase 72: `301.yml` in AEM's New Shape — `"old": "new"`, Per Version, Assets Included — **Built 2026-11-04; pilot done, rollout pending; DOCOPS-324**
 
 **Why.** The AEM team changed what they read (relayed by the user, 2026-11-04):
 
@@ -2892,8 +2892,44 @@ name.
 7. Docs: `architecture.md` (the redirect artifact), `user-guide.md`, this entry's As built.
 
 *Exit: FOCUS 9.3.2's `301.yml` has page and asset rows in the new shape and no
-product-level file remains; Phase 60's check passes on it; the suite and `ruff` pass. Jira: a
-new sub-task under DOCOPS-96 when approved.*
+product-level file remains; Phase 60's check passes on it; the suite and `ruff` pass. Jira:
+DOCOPS-324 under DOCOPS-96.*
+
+#### As built (2026-11-04 to 05, approved 2026-11-04)
+
+- **Steps 1–4 done** (`b6d5cc1`):
+  - `origins.pairs` / `read_pairs` read both shapes; `dam_path`, `is_asset_target` and
+    `asset_pairs` are the asset side.
+  - `rooted.origins_text` publishes the sorted `"old": "new"` lines, assets included. A
+    version with no row publishes no file; one with assets but no page map publishes the
+    assets alone.
+  - `distributor._asset_rows` uses the same router and de-duplication as `sync_documents`.
+    It works on the primary locale only and records `SYNC_ASSET_UNMAPPED` (new, a note).
+  - `_write_origin_map` now removes the doc-class file (`SyncStats.maps_removed`).
+  - `verify/redirects` reads the version's file only. `_assets` checks every asset row
+    against the published document and keeps it out of the page sample.
+    `VERIFY_REDIRECT_MAP_INCOMPLETE` is retired, so the register stays at 137.
+- **Tests:** the product-level tests are replaced; there are new ones for the shape, asset rows,
+  removal and the asset check. Suite: **2,439 passed**, excluding the 2 catalog-count tests
+  that already failed. `ruff` is clean on `src`.
+- **Pilot, FOCUS 9.3.2** (`sync` by the user, 2026-11-05):
+  - Only two files changed: `online-help/9-3-2/301.yml` was rewritten, and the product-level
+    `online-help/301.yml` was deleted.
+  - 1,902 rows. 1,882 are page rows, **identical to the old file's** apart from the shape.
+    20 are asset rows; 20 of the version's 21 documents have one. `IBI_focus_9.3.2_license.pdf`
+    is not in the sitemap.
+  - The user's sample is exact:
+    `…/doc/pdf/IBI_focus_9.3.2_compatibility_all_active_products.pdf` →
+    `/content/dam/ibi/us/en/ibi-focus/user-guides/9-3-2/IBI_focus_9.3.2_compatibility_all_active_products.pdf`.
+  - `validate`: 0 errors, with the same warnings before and after (598 `ANCHOR_MISSING`,
+    already there).
+  - The redirect check (`scratch/verify_toc_probe.py --target`, recording nothing) passes:
+    10 of the 1,882 page rows sampled, no asset row unpublished.
+- **Rollout size** (git-tracked, 2026-11-05):
+  - ibi: 121 version maps to rewrite, 20 product-level maps to delete.
+  - TIBCO: 385 version maps to rewrite, 146 product-level maps to delete.
+- **Left:** the rollout, family by family; asset rows for PDF-only versions, which wait for AEM
+  to say where their file lives.
 
 ---
 
