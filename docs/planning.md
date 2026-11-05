@@ -2832,6 +2832,43 @@ name.
 
 ---
 
+### Phase 74: The Automatic Layout Pin Is Chosen Per Engine — **Approved 2026-11-05; DOCOPS-332**
+
+**Why.** Since Phase 42, a multi-version product with no `pin_layout_to` in `reframe.yaml`
+lays out every version against the newest converted one (`Reframer._policy`). When that
+version is Flare and an older one is DITA, the two share no topic paths. `project` then
+treats every topic as new and packs it as a flat run by word count, ignoring the TOC
+subtrees `pack` would respect.
+
+Found on BW PDF plug-in 6.2.2 (DOCOPS-331, 2026-11-05). It was published 2026-10-14 with
+11 pages; 6.2.3 (Flare) was converted 2026-10-21. A forced rebuild gave 8 pages, cut
+mid-section, with 53 redirect targets moved. The user kept the published version.
+Laid out on its own, 6.2.2 reproduces the published pages, `toc.yml` and `redirects.yml`
+exactly (probe, `C:\tmp\pdfprobe`).
+
+**Measured 2026-11-05.** 144 products have two or more eligible Flare or DITA versions; 34
+of them mix the two engines, none with a hand pin. Most are BW plug-ins and Flogo
+connectors.
+
+#### Decisions
+
+| decision | choice | why |
+|---|---|---|
+| **The automatic pin** | Chosen **per engine**: the newest converted eligible version of the same engine (else the newest eligible of it). A version alone in its engine is its own pin and is packed on its own | Projection only keeps boundaries when the versions share topic paths, which is a same-engine property |
+| **Hand pins** | Unchanged: `pin_layout_to` in `reframe.yaml` applies to every version, whatever its engine | A writer's pin is an instruction, as Phase 42 says |
+| **The note** | `REFRAME_LAYOUT_UNPINNED` names the pin per engine | So a writer can still freeze it |
+| **Already published** | No republish in this phase. The other 33 mixed products are checked read-only (rebuild into a scratch folder, compare the page list with the published one) and reported | A layout that went live flat may now have readers; moving it back is the user's call |
+
+#### Steps
+
+1. `Reframer`: per-engine automatic pins; `pin_for(product, version)` used by the layout,
+   the failure message, the note and the `--dry-run` "Pinned" column.
+2. Tests: a mixed product's DITA version packs on its own and its Flare versions still
+   project; a hand pin still wins.
+3. Rebuild PDF 6.2.2, confirm it matches the published tree, re-sync (no change expected);
+   drop the "don't sync PDF 6.2.2" rule.
+4. Read-only check of the other 33 products; report.
+
 ### Phase 72: `301.yml` in AEM's New Shape — `"old": "new"`, Per Version, Assets Included — **Built 2026-11-04; pilot done, rollout pending; DOCOPS-324**
 
 **Why.** The AEM team changed what they read (relayed by the user, 2026-11-04):

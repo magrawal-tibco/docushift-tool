@@ -2106,7 +2106,7 @@ def reframe(ctx, bu, family, product, version, batch, select_all, force, dry_run
                 str(ver.engine) if merged else f"[dim]{ver.engine}[/dim]",
                 "present" if source.is_dir() else "[yellow]missing[/yellow]",
                 str(policy.max_words) if merged else "[dim]-[/dim]",
-                policy.pin_layout_to or "[dim]-[/dim]",
+                planner.pin_for(found, ver) or "[dim]-[/dim]",
                 str(target) if merged else "[dim]skipped[/dim]",
             )
         console.print(table)

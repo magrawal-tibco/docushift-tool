@@ -357,6 +357,9 @@ class Reframer:
         # which products got their pin that way rather than from `reframe.yaml`.
         self._policies: dict[str, ReframePolicy] = {}
         self._automatic: set[str] = set()
+        # Phase 74. An automatic pin is chosen per engine: a DITA version shares no
+        # topic paths with a Flare one, so projecting it there packs it flat.
+        self._engine_pins: dict[str, dict[str, str]] = {}
 
     # -- one version ----------------------------------------------------------
 
@@ -380,6 +383,9 @@ class Reframer:
         # path, and it is checked against the version in hand rather than trusting
         # that the selection already filtered. `--input` is the case that matters.
         policy = self._policy(product)
+        if slug in self._automatic:
+            # Phase 74: this version's own pin, so the currency key moves with it.
+            policy = replace(policy, pin_layout_to=self.pin_for(product, version))
         if not reframes(version.engine, policy):
             return ReframeResult(
                 slug, number, ReframeOutcome.NOT_FLARE, engine=version.engine,
@@ -567,7 +573,7 @@ class Reframer:
             return ReframeResult(
                 slug, number, ReframeOutcome.FAILED, engine=version.engine, topics=topics,
                 toc_schema=schema_name,
-                message=f"layout pinned to {policy.pin_layout_to}, which cannot be laid out",
+                message=f"layout pinned to {self.pin_for(product, version)}, which cannot be laid out",
             )
         # Topics the navigation never listed. Stage 7 publishes them today, so
         # dropping them would delete live content; `packer.carry` explains the call.
@@ -1139,9 +1145,10 @@ class Reframer:
         """
         if not merges(version.engine, policy):
             return single(roots, source.words)
-        if not policy.pin_layout_to or policy.pin_layout_to == version.version:
+        pin = self.pin_for(product, version)
+        if not pin or pin == version.version:
             return pack(roots, source.words, policy.max_words, policy.keep_separate)
-        reference = self._reference_layout(product, policy)
+        reference = self._reference_layout(product, policy, pin)
         if reference is None:
             # A pin the tool chose is not an instruction it was given: the version
             # is laid out on its own, as it would have been before Phase 42. The
@@ -1152,7 +1159,7 @@ class Reframer:
         return project(reference, roots, source.words, policy.max_words, policy.keep_separate)
 
     def _reference_layout(
-        self, product: Product, policy: ReframePolicy
+        self, product: Product, policy: ReframePolicy, number: str
     ) -> list[tuple[PurePosixPath, tuple[PurePosixPath, ...]]] | None:
         """The pinned version's topic->page mapping, packed once and cached.
 
@@ -1160,7 +1167,6 @@ class Reframer:
         `--input`: the reference is a property of the doc set, not of whichever
         folder this invocation happens to be pointed at.
         """
-        number = policy.pin_layout_to
         key = (product.slug, number)
         if key in self._layouts:
             return self._layouts[key]
@@ -1254,8 +1260,26 @@ class Reframer:
                 chosen = (converted or eligible)[0]
                 policy = replace(policy, pin_layout_to=chosen.version)
                 self._automatic.add(product.slug)
+                # Phase 74: the same rule within each engine, newest first.
+                pins: dict[str, str] = {}
+                for version in converted + eligible:
+                    pins.setdefault(str(version.engine), version.version)
+                self._engine_pins[product.slug] = pins
         self._policies[product.slug] = policy
         return policy
+
+    def pin_for(self, product: Product, version: ProductVersion) -> str:
+        """The version this one is laid out against; `""` for none (Phase 74).
+
+        A hand pin applies to every version. An automatic one is the pin of the
+        version's own engine, so a DITA version never projects onto a Flare layout,
+        and a version alone in its engine is its own pin and packs on its own.
+        """
+        policy = self._policy(product)
+        if product.slug not in self._automatic:
+            return policy.pin_layout_to
+        pins = self._engine_pins.get(product.slug, {})
+        return pins.get(str(version.engine), version.version)
 
     def _check_pin(self, product: Product, policy: ReframePolicy) -> None:
         """A note naming the pin the tool chose, so a writer can make it permanent.
@@ -1269,8 +1293,10 @@ class Reframer:
         self._record(
             "REFRAME_LAYOUT_UNPINNED", product.slug, "",
             message=(
-                f"no `pin_layout_to` in config/reframe.yaml; laid out on "
-                f"{policy.pin_layout_to}, the newest eligible version"
+                f"no `pin_layout_to` in config/reframe.yaml; laid out on the newest "
+                f"eligible version of each engine: "
+                + ", ".join(f"{engine} {number}" for engine, number in
+                            sorted(self._engine_pins.get(product.slug, {}).items()))
             ),
         )
 

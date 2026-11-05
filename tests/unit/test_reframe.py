@@ -909,6 +909,57 @@ def test_a_written_pin_wins_over_the_automatic_one(config, catalog, flare):
     assert Reframer(config, catalog)._policy(reloaded).pin_layout_to == "10.5.0"
 
 
+def _mixed(config, catalog, flare):
+    """10.5.1 Flare (the fixture), 10.5.0 Flare, 10.4.0 and 10.3.0 DITA, all converted."""
+    flare.versions["10.5.0"] = make_version("tibco-flare-docs", "10.5.0", engine=SourceEngine.FLARE)
+    flare.versions["10.4.0"] = make_version("tibco-flare-docs", "10.4.0", engine=SourceEngine.DITA)
+    flare.versions["10.3.0"] = make_version("tibco-flare-docs", "10.3.0", engine=SourceEngine.DITA)
+    catalog.merge_fetch_results([flare])
+    reloaded = catalog.get_product("tibco-flare-docs")
+    for number in ("10.5.1", "10.5.0", "10.4.0", "10.3.0"):
+        converted_tree(config, reloaded, number)
+    return reloaded
+
+
+def test_the_automatic_pin_is_chosen_per_engine(config, catalog, flare):
+    """Phase 74: a DITA version shares no topic paths with a Flare one, so projecting
+    it onto the Flare pin packed it flat (BW PDF plug-in 6.2.2, 11 pages became 8)."""
+    product = _mixed(config, catalog, flare)
+    reframer = Reframer(config, catalog)
+
+    pins = {number: reframer.pin_for(product, product.versions[number])
+            for number in ("10.5.1", "10.5.0", "10.4.0", "10.3.0")}
+
+    assert pins == {"10.5.1": "10.5.1", "10.5.0": "10.5.1", "10.4.0": "10.4.0", "10.3.0": "10.4.0"}
+
+
+def test_a_version_alone_in_its_engine_is_its_own_pin(config, catalog, flare):
+    flare.versions["10.4.0"] = make_version("tibco-flare-docs", "10.4.0", engine=SourceEngine.DITA)
+    catalog.merge_fetch_results([flare])
+    product = catalog.get_product("tibco-flare-docs")
+    converted_tree(config, product, "10.5.1")
+    converted_tree(config, product, "10.4.0")
+    findings = FindingsRun("reframe")
+    reframer = Reframer(config, catalog, findings=findings)
+
+    result = reframer.reframe_one(product, product.versions["10.4.0"])
+
+    assert result.outcome is ReframeOutcome.REFRAMED
+    assert reframer.pin_for(product, product.versions["10.4.0"]) == "10.4.0"
+    assert "flare 10.5.1" in findings.all[0].message and "dita 10.4.0" in findings.all[0].message
+
+
+def test_a_written_pin_applies_to_every_engine(config, catalog, flare):
+    product = _mixed(config, catalog, flare)
+    config.reframe_path.parent.mkdir(parents=True, exist_ok=True)
+    config.reframe_path.write_text(
+        'products:\n  tibco-flare-docs:\n    pin_layout_to: "10.5.1"\n', encoding="utf-8"
+    )
+    reframer = Reframer(config, catalog)
+
+    assert reframer.pin_for(product, product.versions["10.3.0"]) == "10.5.1"
+
+
 def test_policy_resolves_defaults_then_bu_then_family_then_product():
     """Phase 42: TIBCO on, Streaming off, and one product can still be held back."""
     reframe = {
