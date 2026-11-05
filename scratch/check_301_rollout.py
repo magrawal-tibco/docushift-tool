@@ -14,7 +14,7 @@ import yaml
 
 sys.path.insert(0, "src")
 from docushift.origins import is_asset_target, pairs  # noqa: E402
-from docushift.sync.rooted import rooted  # noqa: E402
+from docushift.sync.rooted import in_unfiled, rooted  # noqa: E402
 
 repo = Path(sys.argv[1])
 # Content changes only (`git diff`, which reads through `core.autocrlf`), plus new files:
@@ -26,8 +26,29 @@ new_files = subprocess.run(["git", "-C", str(repo), "ls-files", "--others", "--e
                            capture_output=True, text=True, encoding="utf-8").stdout.splitlines()
 status = [f"{line.split(chr(9))[0]:<2} {line.split(chr(9))[-1]}" for line in diff] + [f"?? {n}" for n in new_files]
 other, deleted_product, deleted_version, checked, assets, problems = [], [], [], 0, 0, []
+csh_rooted = 0
+
+
+def _csh_only_rooted(name: str) -> bool:
+    """A `csh.yml` whose change is Phase 68's rooting alone: the same IDs to the same pages,
+    IDs into `unfiled/` dropped (the rule the user accepted for ibi, 2026-11-05)."""
+    old_text = subprocess.run(["git", "-C", str(repo), "show", f"HEAD:{name}"], capture_output=True,
+                              text=True, encoding="utf-8").stdout
+    try:
+        old = yaml.safe_load(old_text) or {}
+        new = yaml.safe_load((repo / name).read_text(encoding="utf-8")) or {}
+    except (OSError, yaml.YAMLError):
+        return False
+    prefix = "/" + name.rsplit("/", 1)[0] + "/"
+    return isinstance(old, dict) and new == {k: rooted(prefix, str(v)) for k, v in old.items()
+                                             if not in_unfiled(str(v))}
+
+
 for line in status:
     code, name = line[:2].strip(), line[3:].strip().strip('"')
+    if code == "M" and name.endswith("/csh.yml") and _csh_only_rooted(name):
+        csh_rooted += 1
+        continue
     if not name.endswith("/301.yml"):
         other.append(line)
         continue
@@ -62,10 +83,11 @@ for line in status:
         problems.append(f"{name}: page rows differ ({len(lost)} gone, {len(changed)} changed, "
                         f"{len(set(new_pages) - set(old))} new), e.g. {(sorted(lost) or changed or [''])[0]}")
 print(f"{repo.name}: {checked} version map(s) checked, {assets} asset row(s); "
-      f"{len(deleted_product)} product-level map(s) deleted; {len(other)} other change(s)")
+      f"{len(deleted_product)} product-level map(s) deleted; {csh_rooted} csh.yml rooted only; "
+      f"{len(other)} other change(s)")
 for name in deleted_version:
     print("  VERSION MAP DELETED:", name)
-for line in other[:10]:
+for line in other[:25]:
     print("  OTHER CHANGE:", line)
 for problem in problems:
     print("  PROBLEM:", problem)
