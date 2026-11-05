@@ -1,6 +1,6 @@
 # Jira Tracking — What Is Logged in DOCOPS
 
-> **Last reconciled:** 2026-11-05, against Jira and `config/versions.csv`.
+> **Last reconciled:** 2026-11-06, against Jira and `config/versions.csv`.
 > Conventions (site, cloud ID, story points, transitions, who owns what) live in
 > `C:\github\confluence-mcp\reports\docushift-claude-atlassian-context.md`; this file
 > does not repeat them. It answers one question: **is this piece of work in Jira, and where?**
@@ -44,6 +44,8 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | On hold (user, 2026-11-05) until clearer: Spotfire Statistica's Phase 72 commit (d34eb6cd, on `main`, not pushed, no content-fix branch) | New sub-task under DOCOPS-7 when decided |
 | On hold (user, 2026-11-05) until clearer: Spotfire Data Virtualization repo is empty; first publish decided | New sub-task under DOCOPS-7 when decided |
 | Foresight `-resources` folder is not a clone (58 KB untracked archives, 2026-11-05); clone or remove decided (Minor, later) | DOCOPS-330 → Done |
+| User decides whether to unpublish BW Plug-in for SAP Solutions 8.6.0 (retired by the 2026-11-05 report; synced 2026-11-05) | Dated note on DOCOPS-333, or a removal sub-task as DOCOPS-316 did |
+| Support sends an end-of-support report with the Retirement Date column again | `catalog eos`; dated note on a new catalog sub-task under DOCOPS-6 (4 versions dateless since 2026-11-05) |
 | A new phase is opened | One sub-task under the matching story, In Progress, no `retro` |
 | Phase 66 runs: every synced PDF-only version verified (15 after a re-extract, 3 Omni-Gen after a re-sync) | DOCOPS-285: dated note with the counts → Done; per-BU results on the BU's verify issue |
 | A fix for merged links whose target contains parentheses is planned | New sub-task under DOCOPS-12, In Progress; Data Management re-published |
@@ -54,6 +56,8 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 **Log** (newest first, one line per session):
 
+- 2026-11-06 — DOCOPS-333 created under DOCOPS-6 (0.25 SP, Content Migration, `docushift` `tibco`) and Done:
+  catalog refresh, 2026-11-05 report adopted, Phase 75 (dates kept when the report has none). f948cb0, 6caa2fe.
 - 2026-11-05 — No Jira change: user ruled published pages on staging are not regrouped; re-merge risk (310
   versions on older policy keys) recorded as an accepted known issue in docs/open-issues.md.
 - 2026-11-05 — DOCOPS-332 → Done: Phase 74 check reported; Phase 74 makes nothing newly out of date. Wider finding
