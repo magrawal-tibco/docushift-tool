@@ -2067,3 +2067,28 @@ def test_help_entries_into_unfiled_pages_are_not_published(
 
     results = distributor.sync_many([(product, product.versions["10.4.0"])], target).results
     assert [r.outcome for r in results if r.doc_class == ONLINE_HELP] == [SyncOutcome.CURRENT]
+
+
+def test_a_version_gaining_document_rows_and_no_page_map_is_refreshed_not_crashed(
+    config, catalog, product, target, monkeypatch
+) -> None:
+    """The WebFOCUS rollout's `KeyError` (2026-11-05): a version whose working tree has
+    no `301.yml`, published before it had any row, then given document rows. The map
+    is new on the published side; it is written in place, the pages left alone."""
+    from docushift import origins
+
+    convert_output(config, product, "10.4.0")
+    extract_tree(config, product, "10.4.0", **SHIPMENT)
+    monkeypatch.setattr(origins, "page_list", lambda *_: [])
+    WorkspaceDistributor(config, catalog).sync_many([(product, product.versions["10.4.0"])], target)
+    folder = published(target)
+    assert not (folder / ORIGIN_MAP).exists()
+
+    pdf = "https://docs.tibco.com/pub/ems/10.4.0/doc/pdf/tib_ems_users_guide.pdf"
+    monkeypatch.setattr(origins, "page_list", lambda *_: [pdf])
+    results = WorkspaceDistributor(config, catalog).sync_many(
+        [(product, product.versions["10.4.0"])], target).results
+
+    assert [r.outcome for r in results if r.doc_class == ONLINE_HELP] == [SyncOutcome.MAPS_REFRESHED]
+    assert yaml.safe_load((folder / ORIGIN_MAP).read_text(encoding="utf-8")) == {
+        pdf: "/content/dam/tibco/us/en/tibco-ems/user-guides/10-4-0/tib_ems_users_guide.pdf"}

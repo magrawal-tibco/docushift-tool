@@ -1342,16 +1342,21 @@ def _compare(source: Path, target: Path,
     for name in REFRAME_WORKING_FILES:  # never published (X1-03)
         left.pop(Path(name), None)
     right = dict(walk_files(target))
-    # A map that is not published is expected absent; one still there is stale.
-    withheld = {Path(name) for name, text in maps.items() if text == rooted.NOT_PUBLISHED}
-    if left.keys() - withheld != right.keys() - withheld:
-        return False, []
+    # The maps are judged apart from the pages: a map that is not published is
+    # expected absent, and one still there is stale; any other map is stale when it
+    # is missing or holds other text. Since Phase 72 a version can publish a
+    # `301.yml` its working tree does not have (its document rows alone), so a map
+    # may be absent on both sides of the page comparison, or on the published one
+    # only -- the WebFOCUS rollout's `KeyError`, 2026-11-05.
     rewritten = {Path(name) for name in maps}
+    withheld = {Path(name) for name, text in maps.items() if text == rooted.NOT_PUBLISHED}
+    if left.keys() - rewritten != right.keys() - rewritten:
+        return False, []
     pages_same = all(filecmp.cmp(left[name], right[name], shallow=True)
                      for name in left if name not in rewritten)
     stale = [name for name in sorted(maps)
              if (Path(name) in right if Path(name) in withheld
-                 else not _holds(right[Path(name)], maps[name]))]
+                 else Path(name) not in right or not _holds(right[Path(name)], maps[name]))]
     return pages_same, stale
 
 
