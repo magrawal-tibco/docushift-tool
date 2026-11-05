@@ -41,7 +41,7 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | The URL request sheet is filled (`reports/origin-url-requests.csv`; 15 of the needed rows in on 2026-11-03) | DOCOPS-322: declare and test each pattern in `config/origin-urls.yaml`, dated note |
 | A way for `sync` to keep files added by hand in a version folder is planned and built (WFCE 9.3.7/9.3.8 split-PDF test files, 2026-11-05) | DOCOPS-327 → In Progress, then Done (due 2026-11-28) |
 | AEM says where a PDF-only version's 301.yml lives | Plan its document rows in a new sub-task (DOCOPS-324 is Done) |
-| User reviews BW PDF plug-in 6.2.2's regrouped pages (rebuild left uncommitted in bw-plugin: 6 pages gone, 3 new, 53 redirect targets moved; published structure looks better) | DOCOPS-331: dated note → Done |
+| Why reframe regroups BW PDF plug-in 6.2.2 is found and the published grouping kept (user kept published, 2026-11-05; reframed/ still holds the regrouped merge, so a bw-plugin sync would republish it: don't sync PDF 6.2.2 until fixed) | DOCOPS-331: dated note → Done |
 | On hold (user, 2026-11-05) until clearer: Spotfire Statistica's Phase 72 commit (d34eb6cd, on `main`, not pushed, no content-fix branch) | New sub-task under DOCOPS-7 when decided |
 | On hold (user, 2026-11-05) until clearer: Spotfire Data Virtualization repo is empty; first publish decided | New sub-task under DOCOPS-7 when decided |
 | Foresight `-resources` folder is not a clone (58 KB untracked archives, 2026-11-05); clone or remove decided (Minor, later) | DOCOPS-330 → Done |
@@ -55,6 +55,8 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 **Log** (newest first, one line per session):
 
+- 2026-11-05 — DOCOPS-331 note: user kept published PDF plug-in 6.2.2; rebuilt files discarded. Regrouping cause
+  still to find before the next bw-plugin sync.
 - 2026-11-05 — DOCOPS-331 notes, batches 1-4: 20 stale products rebuilt and synced (mainframe 5c31ed5, ems 6f9f728,
   bpm ad26093, foresight eb387da, bw-plugin 27460f10/03324dc6/de92fde8). Issues: BPM 4.3.0 sync access-denied, retry
   OK; PDF plug-in 6.2.2 regrouped, held for review. Stays In Progress.
