@@ -2832,7 +2832,7 @@ name.
 
 ---
 
-### Phase 74: The Automatic Layout Pin Is Chosen Per Engine — **Approved 2026-11-05; DOCOPS-332**
+### Phase 74: The Automatic Layout Pin Is Chosen Per Engine — **Done 2026-11-05; DOCOPS-332**
 
 **Why.** Since Phase 42, a multi-version product with no `pin_layout_to` in `reframe.yaml`
 lays out every version against the newest converted one (`Reframer._policy`). When that
@@ -2868,6 +2868,13 @@ connectors.
 3. Rebuild PDF 6.2.2, confirm it matches the published tree, re-sync (no change expected);
    drop the "don't sync PDF 6.2.2" rule.
 4. Read-only check of the other 33 products; report.
+
+**Result (2026-11-05).** Built (a0952c0). PDF 6.2.2 rebuilt to its published pages; its map
+pushed (bw-plugin 62d5e854). Of 55 versions whose pin changes, 3 rebuild to their published
+pages, 7 products have nothing converted, and 45 DITA versions (26 products) differ, but the old
+rule does not reproduce them either: they were published by older merge logic. No merged
+version becomes out of date through this change. Open for the user: 310 of 329 auto-pinned
+merged versions already carry an older policy key, so a plain `reframe` would re-merge them.
 
 ### Phase 72: `301.yml` in AEM's New Shape — `"old": "new"`, Per Version, Assets Included — **Built 2026-11-04; pilot done, rollout pending; DOCOPS-324**
 
