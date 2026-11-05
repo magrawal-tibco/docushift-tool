@@ -91,6 +91,28 @@ or the conversion puts it there, is not yet measured.
 
 ## Publishing repositories (every TIBCO product)
 
+### Rebuilding a merged product can regroup pages that are already on staging
+
+- **Status:** Accepted (known issue)
+- **Owner:** user
+- **Raised:** 5 Nov 2026
+- **Blocks publishing:** no, as long as the rule below is kept
+
+Most TIBCO help is published as merged pages: several source topics joined into
+one page. On 5 Nov 2026, 310 of the 329 merged versions that the tool lays out
+automatically had been merged under older settings. Any ordinary rebuild of
+them, not only a forced one, merges them again with today's rules. Page names
+are usually kept, but if the grouping changes, pages split or join and their
+web addresses move. That happened to the BW PDF plug-in 6.2.2 on 5 Nov 2026,
+where 11 published pages would have become 8, and it was put back. A read-only
+check that day found 45 older versions in 26 products, mostly BW plug-ins, that
+would regroup if rebuilt.
+
+**Decision (user, 5 Nov 2026):** pages already on staging are not regrouped.
+Rebuilds are run one product at a time and compared with the published pages
+before anything is committed. A rebuild that would split, join or rename a
+published page is discarded. A family-wide or catalog-wide rebuild is not run.
+
 ### Resources folders that hold only archived-version lists come back on every publish
 
 - **Status:** Open, to be decided

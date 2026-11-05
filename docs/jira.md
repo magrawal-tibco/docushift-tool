@@ -41,7 +41,6 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | The URL request sheet is filled (`reports/origin-url-requests.csv`; 15 of the needed rows in on 2026-11-03) | DOCOPS-322: declare and test each pattern in `config/origin-urls.yaml`, dated note |
 | A way for `sync` to keep files added by hand in a version folder is planned and built (WFCE 9.3.7/9.3.8 split-PDF test files, 2026-11-05) | DOCOPS-327 → In Progress, then Done (due 2026-11-28) |
 | AEM says where a PDF-only version's 301.yml lives | Plan its document rows in a new sub-task (DOCOPS-324 is Done) |
-| User decides how to guard against a plain `reframe` re-cutting published pages: 310 of 329 auto-pinned merged versions carry a pre-Phase-74 policy key (2026-11-05), and 45 DITA versions in 26 products were published by older merge logic (C:/tmp/phase74/report.csv) | New sub-task under DOCOPS-96 if a guard is wanted |
 | On hold (user, 2026-11-05) until clearer: Spotfire Statistica's Phase 72 commit (d34eb6cd, on `main`, not pushed, no content-fix branch) | New sub-task under DOCOPS-7 when decided |
 | On hold (user, 2026-11-05) until clearer: Spotfire Data Virtualization repo is empty; first publish decided | New sub-task under DOCOPS-7 when decided |
 | Foresight `-resources` folder is not a clone (58 KB untracked archives, 2026-11-05); clone or remove decided (Minor, later) | DOCOPS-330 → Done |
@@ -55,6 +54,8 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 **Log** (newest first, one line per session):
 
+- 2026-11-05 — No Jira change: user ruled published pages on staging are not regrouped; re-merge risk (310
+  versions on older policy keys) recorded as an accepted known issue in docs/open-issues.md.
 - 2026-11-05 — DOCOPS-332 → Done: Phase 74 check reported; Phase 74 makes nothing newly out of date. Wider finding
   (310 merged versions on older policy keys) added to Waiting.
 - 2026-11-05 — DOCOPS-332 created under DOCOPS-96 (0.5 SP, AI & Content Intelligence, `reframe`), In Progress:
