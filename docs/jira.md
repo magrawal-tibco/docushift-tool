@@ -39,13 +39,12 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | The four TIBCO verify pilots are run and recorded (Phase 58 step 4) | DOCOPS-256: dated note with each outcome |
 | The AEM team's `301.yml` structure changes are settled (redirect rebuild on hold 2026-11-03; 116 of 501 TIBCO help versions have no map; 43 of the 70 products are not in the docsite sitemap, so need `origin-urls.yaml` patterns) | Plan the rebuild under DOCOPS-271; then re-run the DITA pilot (DOCOPS-256) |
 | The URL request sheet is filled (`reports/origin-url-requests.csv`; 15 of the needed rows in on 2026-11-03) | DOCOPS-322: declare and test each pattern in `config/origin-urls.yaml`, dated note |
-| Phase 72 rolled out in TIBCO (385 version maps / 146 product-level; ibi done 2026-11-05) | DOCOPS-324: dated note → Done |
 | A way for `sync` to keep files added by hand in a version folder is planned and built (WFCE 9.3.7/9.3.8 split-PDF test files, 2026-11-05) | DOCOPS-327 → In Progress, then Done (due 2026-11-28) |
-| AEM says where a PDF-only version's 301.yml lives | Plan its document rows under DOCOPS-324 or a follow-up |
-| Stale merges are rebuilt (`reframe --force`, then sync): Adapter for Database (BS) 1.3.0; Substation ES, Transaction Interface for CICS and for IMS 2.14.0; EMS Client for IBM i 8.6.0; ActiveMatrix BPM 4.3.0; BPM Enterprise 5.6.1; Foresight REST API 1.1.0; 12 BW plug-ins (list in DOCOPS-329 batch 5 note) | DOCOPS-329: dated note |
-| On hold (user, 2026-11-05) until clearer: Spotfire Statistica's Phase 72 commit (d34eb6cd, on `main`, not pushed, no content-fix branch) | DOCOPS-329: dated note |
-| On hold (user, 2026-11-05) until clearer: Spotfire Data Virtualization repo is empty; first publish decided | DOCOPS-329: dated note |
-| Foresight `-resources` folder is not a clone (58 KB untracked archives, 2026-11-05); clone or remove decided | DOCOPS-329: dated note |
+| AEM says where a PDF-only version's 301.yml lives | Plan its document rows in a new sub-task (DOCOPS-324 is Done) |
+| Stale merges are rebuilt (`reframe --force`, then sync): Adapter for Database (BS) 1.3.0; Substation ES, Transaction Interface for CICS and for IMS 2.14.0; EMS Client for IBM i 8.6.0; ActiveMatrix BPM 4.3.0; BPM Enterprise 5.6.1; Foresight REST API 1.1.0; 12 BW plug-ins (listed in DOCOPS-331) | DOCOPS-331: dated note per batch of 5 → Done |
+| On hold (user, 2026-11-05) until clearer: Spotfire Statistica's Phase 72 commit (d34eb6cd, on `main`, not pushed, no content-fix branch) | New sub-task under DOCOPS-7 when decided |
+| On hold (user, 2026-11-05) until clearer: Spotfire Data Virtualization repo is empty; first publish decided | New sub-task under DOCOPS-7 when decided |
+| Foresight `-resources` folder is not a clone (58 KB untracked archives, 2026-11-05); clone or remove decided (Minor, later) | DOCOPS-330 → Done |
 | A new phase is opened | One sub-task under the matching story, In Progress, no `retro` |
 | Phase 66 runs: every synced PDF-only version verified (15 after a re-extract, 3 Omni-Gen after a re-sync) | DOCOPS-285: dated note with the counts → Done; per-BU results on the BU's verify issue |
 | A fix for merged links whose target contains parentheses is planned | New sub-task under DOCOPS-12, In Progress; Data Management re-published |
@@ -56,6 +55,9 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 **Log** (newest first, one line per session):
 
+- 2026-11-05 — DOCOPS-329 and DOCOPS-324 → Done (TIBCO rollout complete; Spotfire on hold). DOCOPS-330 created
+  (0.25 SP, Minor, Backlog): Foresight -resources folder. DOCOPS-331 created (0.5 SP, In Progress): rebuild 20
+  stale merged products in 4 batches. All under DOCOPS-7, Content Migration, `tibco`.
 - 2026-11-05 — DOCOPS-329 note: Spotfire Statistica (push) and Data Virtualization (first publish) put on hold by
   the user until clearer. Foresight -resources folder still to decide.
 - 2026-11-05 — DOCOPS-329 note: batch 5 (foresight, businessconnect, bw-plugin) pushed; Statistica committed, not
