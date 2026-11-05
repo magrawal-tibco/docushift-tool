@@ -14,6 +14,7 @@ import yaml
 
 sys.path.insert(0, "src")
 from docushift.origins import is_asset_target, pairs  # noqa: E402
+from docushift.sync.rooted import rooted  # noqa: E402
 
 repo = Path(sys.argv[1])
 # Content changes only (`git diff`, which reads through `core.autocrlf`), plus new files:
@@ -38,7 +39,10 @@ for line in status:
     new = pairs(yaml.safe_load((repo / name).read_text(encoding="utf-8")))
     old_text = subprocess.run(["git", "-C", str(repo), "show", f"HEAD:{name}"], capture_output=True,
                               text=True, encoding="utf-8").stdout if code != "??" else ""
-    old = dict(pairs(yaml.safe_load(old_text))) if old_text else {}
+    # The committed file may predate Phase 68 (version-relative `to`, as the translated
+    # repos still had on 2026-11-05); read it in the rooted form before comparing.
+    prefix = "/" + "/".join(parts[:-1]) + "/"
+    old = {o: rooted(prefix, n) for o, n in pairs(yaml.safe_load(old_text))} if old_text else {}
     new_pages = {o: n for o, n in new if not is_asset_target(n)}
     new_assets = [o for o, n in new if is_asset_target(n)]
     # Each DAM path names `<doc-class>/<version>/<file>` of the product; it must be published.

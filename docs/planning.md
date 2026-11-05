@@ -2939,6 +2939,20 @@ DOCOPS-324 under DOCOPS-96.*
   | di-ism | 11 | 121 | 4 | e19811a |
   | focus | 8 (+9.3.2 pilot) | 149 | 0 (pilot) | 4a339894 |
   | container-editions | 22 | 85 | 2 | e115cb2 |
+  | webfocus | 43 + 2 new | 393 | 6 | d71782d0 |
+  | loc webfocus (de, es, fr, ja) | 22 | — | 5 | 513f8fe3 |
+  | loc wf-reporting-server (ja) | 5 | — | 1 | ea7db48 |
+
+  **ibi done (2026-11-05).** On the remote: 0 product-level maps; 123 version maps, all in the
+  new shape. The 2 new WebFOCUS maps (App Studio 9.3.8, DSML Services 9.3.8) hold document
+  rows only.
+  - **A crash, fixed mid-rollout** (`0cc3c99`): a version gaining a `301.yml` its published
+    folder lacked raised `KeyError` in `_compare`. A regression test now covers it.
+  - **The translated repos had never been re-synced since Phase 68.** Their `301.yml` and
+    `csh.yml` still used version-relative paths. The check now compares in the rooted form
+    (every row was the same page). The user chose, 2026-11-05, to commit the 20 `csh.yml`
+    roots with the maps: same IDs to the same pages. Help IDs into `unfiled/` pages were
+    dropped by Phase 68's rule (ja-jp RS 9.3.0: 99, 9.3.8: 155; WebFOCUS Client 9.3.0: 8).
 
 - **Found in the rollout: `sync` deletes files added by hand to a version folder.** The
   container-editions re-sync re-copied WFCE 9.3.7 and 9.3.8 and removed 4 `*-pdf-toc.yml`
