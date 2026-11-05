@@ -42,7 +42,10 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | Phase 72 rolled out in TIBCO (385 version maps / 146 product-level; ibi done 2026-11-05) | DOCOPS-324: dated note → Done |
 | A way for `sync` to keep files added by hand in a version folder is planned and built (WFCE 9.3.7/9.3.8 split-PDF test files, 2026-11-05) | DOCOPS-327 → In Progress, then Done (due 2026-11-28) |
 | AEM says where a PDF-only version's 301.yml lives | Plan its document rows under DOCOPS-324 or a follow-up |
-| Stale merges are rebuilt (`reframe --force`, then sync): Adapter for Database (BS) 1.3.0; Substation ES, Transaction Interface for CICS and for IMS 2.14.0; EMS Client for IBM i 8.6.0; ActiveMatrix BPM 4.3.0; BPM Enterprise 5.6.1 | DOCOPS-329: dated note |
+| Stale merges are rebuilt (`reframe --force`, then sync): Adapter for Database (BS) 1.3.0; Substation ES, Transaction Interface for CICS and for IMS 2.14.0; EMS Client for IBM i 8.6.0; ActiveMatrix BPM 4.3.0; BPM Enterprise 5.6.1; Foresight REST API 1.1.0; 12 BW plug-ins (list in DOCOPS-329 batch 5 note) | DOCOPS-329: dated note |
+| User confirms pushing Spotfire Statistica's Phase 72 commit (d34eb6cd, on `main`, no content-fix branch) | DOCOPS-329: dated note |
+| Spotfire Data Virtualization repo is empty: first publish decided | DOCOPS-329: dated note |
+| Foresight `-resources` folder is not a clone (58 KB untracked archives, 2026-11-05); clone or remove decided | DOCOPS-329: dated note |
 | A new phase is opened | One sub-task under the matching story, In Progress, no `retro` |
 | Phase 66 runs: every synced PDF-only version verified (15 after a re-extract, 3 Omni-Gen after a re-sync) | DOCOPS-285: dated note with the counts → Done; per-BU results on the BU's verify issue |
 | A fix for merged links whose target contains parentheses is planned | New sub-task under DOCOPS-12, In Progress; Data Management re-published |
@@ -53,6 +56,8 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 **Log** (newest first, one line per session):
 
+- 2026-11-05 — DOCOPS-329 note: batch 5 (foresight, businessconnect, bw-plugin) pushed; Statistica committed, not
+  pushed (main); Data Virtualization skipped (empty repo). 13 more stale merges; foresight -resources not a clone.
 - 2026-11-05 — DOCOPS-329 note: batch 4 (fulfillment, bpm, ftl, iprocess, mft) pushed. Issue: ActiveMatrix BPM
   4.3.0 and BPM Enterprise 5.6.1 merges stale, need `reframe --force`.
 - 2026-11-05 — DOCOPS-329 note: batch 3 (ems, messaging, tra, data_management, streaming) pushed. Issue: EMS
