@@ -2930,6 +2930,23 @@ DOCOPS-324 under DOCOPS-96.*
   - TIBCO: 385 version maps to rewrite, 146 product-level maps to delete.
 - **Left:** the rollout, family by family; asset rows for PDF-only versions, which wait for AEM
   to say where their file lives.
+- **Rollout, ibi** (2026-11-05; agents ran the `sync`, `scratch/check_301_rollout.py`, the
+  commit and the push, one family at a time):
+
+  | family | maps | asset rows | product maps removed | commit |
+  |---|---|---|---|---|
+  | wf-reporting-server | 9 | 120 | 1 | 5b7e7bbf |
+  | di-ism | 11 | 121 | 4 | e19811a |
+  | focus | 8 (+9.3.2 pilot) | 149 | 0 (pilot) | 4a339894 |
+  | container-editions | 22 | 85 | 2 | e115cb2 |
+
+- **Found in the rollout: `sync` deletes files added by hand to a version folder.** The
+  container-editions re-sync re-copied WFCE 9.3.7 and 9.3.8 and removed 4 `*-pdf-toc.yml`
+  files the user had committed by hand (`059c327`, 2026-10-26, a split-PDF test). Restored
+  and kept (user, 2026-11-05); only the `301.yml` changes were committed. The next re-copy of
+  those versions removes them again, so a way to keep hand-added files is **to be planned**.
+  The check script now reads content changes (`git diff`), not `git status`, which also listed
+  180 files rewritten byte for byte (a `core.autocrlf` artefact).
 
 ---
 
