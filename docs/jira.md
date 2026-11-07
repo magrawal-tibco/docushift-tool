@@ -48,6 +48,7 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | A new phase is opened | One sub-task under the matching story, In Progress, no `retro` |
 | Phase 66 runs: every synced PDF-only version verified (15 after a re-extract, 3 Omni-Gen after a re-sync) | DOCOPS-285: dated note with the counts → Done; per-BU results on the BU's verify issue |
 | A fix for merged links whose target contains parentheses is planned | New sub-task under DOCOPS-12, In Progress; Data Management re-published |
+| TIBCO ZIP backup to the shared drive finishes (2,015 versions: every non-retired version of in-scope products, eligible or not, current or archived; `C:/tmp/zip-backup/ledger.csv`; Docs ZIP Archive / TIBCO BU Docs Archive) | DOCOPS-282 (In Progress since 2026-11-06): dated note with counts and failures → Done |
 | Every family in a BU has its source ZIPs backed up | DOCOPS-281 (ibi), DOCOPS-282 (TIBCO), DOCOPS-283 (Spotfire, DataSynapse): dated note with gaps → Done |
 | help.scribesoft.com ownership transferred (decided 2026-10-30) | New sub-task under DOCOPS-7, or a dated note on DOCOPS-302 (Done 2026-10-30); point the host at the new site so Scribe's 375 `301.yml` rows apply |
 
@@ -55,6 +56,9 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 **Log** (newest first, one line per session):
 
+- 2026-11-06 — DOCOPS-282 → In Progress: TIBCO source ZIPs backed up to the Technical Communications shared drive
+  in product batches (fetch → upload → MD5 check → delete local; 14 hand-obtained kept). Batch 1: 27/27. Widened to all
+  non-retired versions of in-scope products (2,015), at the user's request.
 - 2026-11-06 — DOCOPS-334 created under DOCOPS-7 (0.25 SP, Content Migration, `docushift` `tibco`) and Done: retired
   SAP Solutions plug-in 8.6.0 removed from bw-plugin `content-fix` (75e01d6c), validate 0 errors.
 - 2026-11-06 — DOCOPS-333 created under DOCOPS-6 (0.25 SP, Content Migration, `docushift` `tibco`) and Done:
