@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 from typing import Any
 
 # Only the keys that change the output belong in the digest. A comment edit or a
@@ -51,7 +51,10 @@ _NOT_OUTPUT = frozenset({"publish", "toc_folders"})
 #: (Phase 44). Links only.
 #: 7 = a title-only page whose TOC row has children lists them, one link per
 #: immediate child (Phase 63). No boundary moves; blank parents gain a body.
-_ALGORITHM = 7
+#: 8 = a topic opening on its only `##`/`###` keeps that heading as its title
+#: instead of gaining a synthesized copy, and no heading skips a level below a
+#: synthesized one (Phase 76). Headings and anchors only; no boundary moves.
+_ALGORITHM = 8
 
 
 @dataclass(frozen=True)
@@ -77,6 +80,11 @@ class ReframePolicy:
     #: reordering the list in the file is not a re-merge -- the currency key reads
     #: this field, unlike `publish`, because it changes every byte downstream.
     keep_separate: tuple[str, ...] = ()
+    #: Phase 76. `keep_separate` entries written with `versions:`, as sorted
+    #: `(path, versions)` pairs. Folded into `keep_separate` by `for_version` before
+    #: a version is laid out, so a doc set whose versions are shaped differently can
+    #: split one of them without the split being projected onto the others.
+    keep_separate_in: tuple[tuple[str, tuple[str, ...]], ...] = ()
     #: Phase 63. Off for a doc set published unmerged by decision: every TOC row
     #: becomes its own page, and the stage still names pages, lays the folders out
     #: as the TOC and writes the redirects -- the part AEM needs whatever the merge.
@@ -112,8 +120,21 @@ class ReframePolicy:
             del shaping["merge"]
         if not self.guide_names:
             del shaping["guide_names"]
+        if not self.keep_separate_in:
+            del shaping["keep_separate_in"]
         payload = json.dumps(shaping, sort_keys=True, separators=(",", ":"))
         return hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16]
+
+
+    def for_version(self, number: str) -> ReframePolicy:
+        """This policy as one version sees it: its scoped `keep_separate` entries
+        joined to the unscoped ones, and the scoped list then cleared, so a version
+        no scoped entry names keeps the digest it would have without them."""
+        if not self.keep_separate_in:
+            return self
+        scoped = {path for path, versions in self.keep_separate_in if number in versions}
+        return replace(self, keep_separate=tuple(sorted(set(self.keep_separate) | scoped)),
+                       keep_separate_in=())
 
 
 def policy_for(
@@ -145,6 +166,7 @@ def policy_for(
         pin_layout_to=str(values.get("pin_layout_to") or "").strip(),
         publish=bool(values.get("publish") or False),
         keep_separate=_paths(values.get("keep_separate")),
+        keep_separate_in=_scoped(values.get("keep_separate")),
         merge=values.get("merge") is not False,
         toc_folders=bool(values.get("toc_folders") or False),
         guide_names=_names(own.get("guide_names")),
@@ -176,8 +198,31 @@ def _paths(value: Any) -> tuple[str, ...]:
         value = [value]
     if not isinstance(value, list):
         return ()
-    cleaned = {_one(entry) for entry in value}
+    cleaned = {_one(entry) for entry in value if not isinstance(entry, dict)}
     return tuple(sorted(path for path in cleaned if path))
+
+
+def _scoped(value: Any) -> tuple[tuple[str, tuple[str, ...]], ...]:
+    """`keep_separate` entries written as `{path: ..., versions: [...]}` (Phase 76).
+
+    Sorted for the digest. An entry with no usable `versions` is dropped rather
+    than widened to every version: a writer who scoped a split did not ask for it
+    everywhere.
+    """
+    if not isinstance(value, list):
+        return ()
+    pairs: dict[str, set[str]] = {}
+    for entry in value:
+        if not isinstance(entry, dict):
+            continue
+        path = _one(entry.get("path", ""))
+        versions = entry.get("versions")
+        if isinstance(versions, (str, int, float)):
+            versions = [versions]
+        named = {str(v).strip() for v in versions or [] if str(v).strip()}
+        if path and named:
+            pairs.setdefault(path, set()).update(named)
+    return tuple(sorted((path, tuple(sorted(named))) for path, named in pairs.items()))
 
 
 def _one(entry: Any) -> str:

@@ -164,23 +164,77 @@ def shift_headings(body: str, title: str, level: int = 2) -> tuple[str, int]:
     title, for a topic that had no H1 of its own.
     """
     hashes = "#" * level
+    matches = list(HEADING.finditer(mask_code(body)))
+    own = own_heading(body, title, matches)
+    depths = [len(match.group("hashes")) for match in matches]
+    base = min(depths, default=2)
+    # Phase 76. Every heading moves by an offset that keeps the topic's own
+    # heading at `level` and nothing below it skipping a level. With an H1 that is
+    # `level - 1`, as before. With an opening `##`/`###` that is the title, its own
+    # section hangs directly under it (`level - base`), and any later section at
+    # that same level becomes a child (`level + 1 - base`). With a synthesized
+    # title, the shallowest heading sits one below it. It used to be `level - 1`
+    # whatever the body held, so a topic opening on `###` came out `#`, `#####`.
     edits: list[tuple[int, int, str]] = []
-    found = False
-    for match in HEADING.finditer(mask_code(body)):
-        depth = len(match.group("hashes"))
-        if depth == 1 and not found:
-            found = True
-            edits.append((match.start("hashes"), match.start("hashes") + depth, hashes))
+    later = False
+    for index, (match, depth) in enumerate(zip(matches, depths, strict=True)):
+        if own is not None and depths[own] == 1:
+            offset = level - 1
+        elif own is not None:
+            later = later or (index > own and depth == base)
+            offset = level + 1 - base if later else level - base
         else:
-            edits.append((match.start("hashes"), match.start("hashes") + depth,
-                          "#" * min(depth + level - 1, 6)))
+            offset = level + 1 - base
+        target = hashes if index == own else "#" * min(max(depth + offset, 1), 6)
+        edits.append((match.start("hashes"), match.start("hashes") + depth, target))
 
     shifted = _apply(body, edits)
-    if found:
+    if own is not None:
         return shifted, 0
     heading = f"{hashes} {title}"
     added = 1 + word_count(title)
     return (f"{heading}\n\n{shifted}" if shifted else heading), added
+
+
+# Only whitespace and empty `<a id>`/`<a name>` targets may stand above a heading
+# for it to be the topic's opening line.
+_LEAD_IN = re.compile(r'(?:\s|<a\s+(?:id|name)\s*=\s*"[^"]*"\s*>\s*</a>)*', re.IGNORECASE)
+
+
+def own_heading(body: str, title: str = "",
+                matches: list[re.Match[str]] | None = None) -> int | None:
+    """Which of a topic's headings is its title, or `None` to synthesize one.
+
+    The first H1 when there is one (R2.1, unchanged). Otherwise, since Phase 76, a
+    heading that **opens** the topic at its shallowest level, when it is either
+    the **only** heading at that level or **says the same as the TOC title**:
+    converted Flare topics that start at `##` or `###` carry their title that
+    way, and synthesizing the TOC title above it printed the title twice on
+    6,414 merged pages. A topic that opens on prose, or on one of several
+    sections none of which is its title, keeps the synthesized one.
+
+    `driver._Source.headings` asks the same question to predict anchors; the two
+    must agree or an anchor names a heading that is not there.
+    """
+    if matches is None:
+        matches = list(HEADING.finditer(mask_code(body)))
+    depths = [len(match.group("hashes")) for match in matches]
+    if 1 in depths:
+        return depths.index(1)
+    if not depths or depths[0] != min(depths):
+        return None
+    if not _LEAD_IN.fullmatch(body[:matches[0].start()]):
+        return None
+    if depths.count(depths[0]) == 1 or _same(matches[0].group("text"), title):
+        return 0
+    return None
+
+
+def _same(heading: str, title: str) -> bool:
+    """Equal once case, punctuation and spacing are set aside."""
+    def bare(text: str) -> str:
+        return " ".join(re.sub(r"[^0-9a-z]+", " ", text.lower()).split())
+    return bool(bare(title)) and bare(heading) == bare(title)
 
 
 def rewrite_links(

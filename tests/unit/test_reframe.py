@@ -14,6 +14,7 @@ disk that the TOC never mentions, a filename whose natural slug already ends in
 `-2`.
 """
 
+import dataclasses
 from pathlib import Path, PurePosixPath
 
 import pytest
@@ -38,6 +39,7 @@ from docushift.reframe.packer import (
 )
 from docushift.reframe.pages import (
     LinkCounts,
+    own_heading,
     render,
     rewrite_links,
     shift_headings,
@@ -810,7 +812,32 @@ def test_the_loader_knows_every_field_the_policy_has():
 
     from docushift.config import REFRAME_DEFAULTS
 
-    assert set(REFRAME_DEFAULTS) == {f.name for f in fields(ReframePolicy)}
+    # `keep_separate_in` is not a key of its own: it is read out of
+    # `keep_separate`'s `{path, versions}` entries (Phase 76).
+    assert set(REFRAME_DEFAULTS) == {f.name for f in fields(ReframePolicy)} - {"keep_separate_in"}
+
+
+def test_a_keep_separate_entry_can_name_its_versions(config):
+    """Phase 76. Activation Service 1.1.0 splits its steps; 1.0.0, shaped
+    differently, must not have the split projected onto it."""
+    config.reframe_path.parent.mkdir(parents=True, exist_ok=True)
+    config.reframe_path.write_text(
+        "products:\n  p:\n    keep_separate:\n      - a/all.md\n"
+        "      - path: a/one.md\n        versions: ['1.1.0']\n"
+        "      - path: a/none.md\n        versions: []\n",
+        encoding="utf-8",
+    )
+
+    policy = policy_for(config.load_reframe(), "p")
+
+    assert policy.keep_separate == ("a/all.md",)
+    assert policy.keep_separate_in == (("a/one.md", ("1.1.0",)),)
+    newer, older = policy.for_version("1.1.0"), policy.for_version("1.0.0")
+    assert newer.keep_separate == ("a/all.md", "a/one.md")
+    assert older.keep_separate == ("a/all.md",)
+    assert newer.keep_separate_in == older.keep_separate_in == ()
+    # A version no scoped entry names keeps the digest it had without them.
+    assert older.key == dataclasses.replace(policy, keep_separate_in=()).key
 
 
 def test_one_eligible_version_needs_no_pin(config, catalog, flare):
@@ -1706,6 +1733,80 @@ def test_a_topic_with_no_h1_gets_one_synthesized_from_its_toc_title():
 
     assert shifted == "## Release Notes\n\njust prose\n"
     assert added == 1 + 2  # the `##` and the two-word title
+
+
+def test_a_topic_opening_on_its_only_h2_keeps_it_as_its_title():
+    """Phase 76. Activation Service's `## Step 1: Planning for Activation` came out
+    under a synthesized copy of itself, `# Step 1` then `## Step 1`."""
+    body = "## Step 1: Planning\n\nprose\n\n### Detail\n"
+
+    shifted, added = shift_headings(body, "Step 1: Planning (TOC)", 1)
+
+    assert shifted == "# Step 1: Planning\n\nprose\n\n## Detail\n"
+    assert added == 0
+
+
+def test_a_topic_opening_on_h3_moves_to_its_level_without_a_gap():
+    """`### Determining Where...` sat at `#####` under a synthesized `###`."""
+    body = '<a id="Determining"></a>\n\n### Determining\n\nprose\n\n##### Deep\n'
+
+    shifted, added = shift_headings(body, "Ignored", 3)
+
+    assert shifted == '<a id="Determining"></a>\n\n### Determining\n\nprose\n\n##### Deep\n'
+    assert added == 0
+    shifted, _ = shift_headings("### Determining\n\n#### Sub\n", "Ignored", 2)
+    assert shifted == "## Determining\n\n### Sub\n"
+
+
+def test_a_topic_with_several_top_sections_still_gets_its_toc_title():
+    """Two `##` at the top are sections, not a title: synthesize, and hang them
+    one level below it."""
+    body = "## Linux\n\nprose\n\n## Windows\n"
+
+    shifted, added = shift_headings(body, "Installing", 2)
+
+    assert shifted == "## Installing\n\n### Linux\n\nprose\n\n### Windows\n"
+    assert added == 1 + 1
+
+
+def test_a_topic_opening_on_prose_still_gets_its_toc_title_and_no_gap():
+    """Below a synthesized title, the shallowest heading sits one level down,
+    whatever level the source used; a `###` used to land two down."""
+    body = "Intro prose.\n\n### Only Section\n\n#### Sub\n"
+
+    shifted, added = shift_headings(body, "Overview", 1)
+
+    assert shifted == "# Overview\n\nIntro prose.\n\n## Only Section\n\n### Sub\n"
+    assert added == 1 + 1
+
+
+def test_an_opening_section_named_like_the_toc_row_is_the_title_and_later_ones_nest():
+    """Activation Service's "Microsoft Windows" topic: `## Microsoft Windows`, then
+    `## Uninstalling ...`. The first is the title the TOC names, so it is not
+    repeated; the second becomes its child, and nothing skips a level."""
+    body = ("## Microsoft Windows\n\n### Prerequisites\n\n#### Install\n\n"
+            "## Uninstalling\n\n### Linux\n")
+
+    shifted, added = shift_headings(body, "Microsoft  Windows", 3)
+
+    assert shifted == ("### Microsoft Windows\n\n#### Prerequisites\n\n##### Install\n\n"
+                       "#### Uninstalling\n\n##### Linux\n")
+    assert added == 0
+    assert own_heading(body, "Something Else") is None
+
+
+def test_a_heading_deeper_than_a_later_one_is_not_the_title():
+    body = "### Note\n\nprose\n\n## Real Section\n"
+
+    assert own_heading(body) is None
+    shifted, _ = shift_headings(body, "Topic", 1)
+    assert shifted == "# Topic\n\n### Note\n\nprose\n\n## Real Section\n"
+
+
+def test_own_heading_prefers_an_h1_wherever_it_is():
+    assert own_heading("## Above\n\n# Title\n") == 1
+    assert own_heading("prose only\n") is None
+    assert own_heading("```\n## not a heading\n```\n\n## Real\n") is None
 
 
 def test_a_hash_comment_inside_a_fence_is_not_a_heading():
@@ -4033,7 +4134,8 @@ def test_no_guide_names_leaves_every_existing_digest_unchanged():
     plain = ReframePolicy(keep_separate=("g",))
     before = {"algorithm": policy_module._ALGORITHM,
               **{k: v for k, v in asdict(plain).items()
-                 if k not in {"publish", "toc_folders", "merge", "guide_names"}}}
+                 if k not in {"publish", "toc_folders", "merge", "guide_names",
+                               "keep_separate_in"}}}
     payload = json.dumps(before, sort_keys=True, separators=(",", ":"))
 
     assert plain.key == hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16]

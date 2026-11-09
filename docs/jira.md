@@ -1,6 +1,6 @@
 # Jira Tracking — What Is Logged in DOCOPS
 
-> **Last reconciled:** 2026-11-06, against Jira and `config/versions.csv`.
+> **Last reconciled:** 2026-11-09, against Jira and `config/versions.csv`.
 > Conventions (site, cloud ID, story points, transitions, who owns what) live in
 > `C:\github\confluence-mcp\reports\docushift-claude-atlassian-context.md`; this file
 > does not repeat them. It answers one question: **is this piece of work in Jira, and where?**
@@ -49,6 +49,7 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | Phase 66 runs: every synced PDF-only version verified (15 after a re-extract, 3 Omni-Gen after a re-sync) | DOCOPS-285: dated note with the counts → Done; per-BU results on the BU's verify issue |
 | A fix for merged links whose target contains parentheses is planned | New sub-task under DOCOPS-12, In Progress; Data Management re-published |
 | TIBCO ZIP backup to the shared drive finishes (2,015 versions: every non-retired version of in-scope products, eligible or not, current or archived; `C:/tmp/zip-backup/ledger.csv`; Docs ZIP Archive / TIBCO BU Docs Archive) | DOCOPS-282 (In Progress since 2026-11-06): dated note with counts and failures → Done |
+| Phase 76 built and the 42 products with doubled headings re-run one at a time (Activation Service first; 6,414 pages measured 2026-11-09) | DOCOPS-336 (In Progress since 2026-11-09): dated note per family with the before/after count → Done when all read 0 |
 | Every family in a BU has its source ZIPs backed up | DOCOPS-281 (ibi), DOCOPS-282 (TIBCO), DOCOPS-283 (Spotfire, DataSynapse): dated note with gaps → Done |
 | help.scribesoft.com ownership transferred (decided 2026-10-30) | New sub-task under DOCOPS-7, or a dated note on DOCOPS-302 (Done 2026-10-30); point the host at the new site so Scribe's 375 `301.yml` rows apply |
 
@@ -56,6 +57,11 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 **Log** (newest first, one line per session):
 
+- 2026-11-09 — DOCOPS-336: Phase 76 built (heading rule, version-scoped `keep_separate`, Activation Service 1.1.0
+  split); pilot on 4 versions: no page moved except the approved split, doubled headings 580 → 2. Runs pending.
+- 2026-11-09 — DOCOPS-336 created under DOCOPS-75 (0.5 SP, AI & Content Intelligence, `reframe` `tibco`; component set by edit), In Progress:
+  Phase 76 planned — doubled headings on 6,414 reframed pages in 42 products; Activation Service steps split per product. Stricter
+  grouping rule and higher page limit recorded in open-issues.md for later.
 - 2026-11-06 — DOCOPS-282 → In Progress: TIBCO source ZIPs backed up to the Technical Communications shared drive
   in product batches (fetch → upload → MD5 check → delete local; 14 hand-obtained kept). Batch 1: 27/27. Widened to all
   non-retired versions of in-scope products (2,015), at the user's request.
@@ -485,6 +491,7 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | 66 | `verify` checks every version's documents, PDF-only versions included | DOCOPS-285 (in progress) |
 | 68 | `301.yml` / `csh.yml` targets are repo-rooted `.md` paths (AEM) | DOCOPS-292 (done) |
 | 69 | ActiveMatrix BPM help fits: short guide folders (`guide_names`), reframe cuts to 259 | DOCOPS-297 (done) |
+| 76 | A topic's own heading is its title at any level (doubled headings); Activation Service steps split | DOCOPS-336 (in progress) |
 | 57 | Translated help to the `loc-` tree (`--locale`) | build DOCOPS-253; runs DOCOPS-148 (in progress) |
 
 Other logged work: Jira reconcile and this handoff DOCOPS-208; stakeholder status page DOCOPS-197; TIBCO family reassignments DOCOPS-120

@@ -138,6 +138,38 @@ platform team's call.
 
 ---
 
+## Merged pages (every merged product)
+
+### Neighbouring topics can share a page, which can read as one step absorbing the next
+
+- **Status:** Open, to be decided
+- **Owner:** user
+- **Raised:** 9 Nov 2026
+- **Blocks publishing:** no
+
+When a section is too long for one page (over 3,000 words), its parent topic
+gets a page of its own and its child topics are packed, in order, onto pages of
+one or more neighbouring topics. In TIBCO Activation Service, Steps 1 to 3 of
+*Activation Setup* landed on one page titled "Step 1", and Steps 4 and 5 on one
+titled "Step 4". That follows the rule chosen on 30 Sep 2026; Activation Service
+itself is being split by hand, one step per page.
+
+To decide later, together:
+
+- **A stricter rule:** neighbouring topics never share a page. A section folds
+  into its parent only when the whole section fits; otherwise every child gets
+  its own page. When this was measured in Sep 2026 it gave far more, much
+  smaller pages (EMS 160 → 628 pages, 363 of them under 200 words), which is why
+  it was set aside.
+- **A higher page limit than 3,000 words,** which would let more sections fold
+  whole into their parent and could offset the stricter rule's page count. The
+  two should be measured together on a few products before choosing.
+
+Either change moves pages that are already published, so it would only apply
+to products not yet on staging, or under the no-regrouping rule above.
+
+---
+
 ## ActiveSpaces
 
 ### Never published to the real destination

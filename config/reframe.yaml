@@ -181,3 +181,22 @@ products:
       tibco-activematrix-bpm-installation: installation
       tibco-activematrix-bpm-soa-development: soa-development
       tibco-activematrix-bpm-tutorials: tutorials
+
+  # Phase 76 (2026-11-09, DOCOPS-336). *Activation Setup* is a numbered procedure,
+  # and R1 had put Steps 1-3 on one page titled "Step 1" and Steps 4-5 on one titled
+  # "Step 4". The user asked for one step per page here, keeping R1 for everyone
+  # else. Steps 1, 3 and 5 are listed; Steps 2 and 4 then sit alone between them
+  # and keep their own sub-topics. Listing 2 or 4 would split those off too.
+  # 1.1.0 only: 1.0.0 numbers its steps differently (Step 1 has the sub-topics;
+  # four steps), and the split projected onto it put Step 1's sub-topics on a page
+  # named after 1.1.0's Step 2. 1.0.0 keeps its 16 published pages.
+  # 1.1.0 was on staging (synced 2026-11-05): this split is the one approved
+  # exception to the no-regrouping rule (open-issues.md).
+  tibco-activation-service:
+    keep_separate:
+      - path: user-guide/planning-for-license-activation.md
+        versions: ["1.1.0"]
+      - path: user-guide/generating-licenses.md
+        versions: ["1.1.0"]
+      - path: user-guide/upgrading-your-tibco-products.md
+        versions: ["1.1.0"]

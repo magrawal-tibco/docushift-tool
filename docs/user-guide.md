@@ -1204,6 +1204,20 @@ path matching no topic in a version is a `REFRAME_KEEP_SEPARATE_UNMATCHED` warni
 which is what makes the strictness safe, and which also catches the real case behind it: a
 path right for 10.5.1 and absent from 10.4.0.
 
+An entry can name the versions it applies to, for a doc set whose versions are shaped
+differently. Every version's pages follow one reference version's layout, so an unscoped
+split made for the reference is copied onto the others even where it no longer fits:
+
+```yaml
+  tibco-activation-service:
+    keep_separate:
+      - path: user-guide/planning-for-license-activation.md
+        versions: ["1.1.0"]
+```
+
+A version the entry does not name is laid out as if the entry were not there, and its merge
+stays current. An entry with an empty `versions` list is ignored, not widened to every version.
+
 Editing the list re-merges the doc set, deliberately — it is part of the currency key, unlike
 `publish`, because it changes every page boundary downstream. Reordering the list does not:
 it is sorted and de-duplicated before it is digested, so grouping lines by guide is free.

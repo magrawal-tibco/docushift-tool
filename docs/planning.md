@@ -2832,6 +2832,81 @@ name.
 
 ---
 
+### Phase 76: A Topic's Own Heading Is Its Title, at Any Level — **Built 2026-11-09; runs pending; DOCOPS-336**
+
+**Why.** Reported on TIBCO Activation Service 1.1.0 (*Activation Setup*): `# Step 1: Planning
+for Activation` followed by `## Step 1: Planning for Activation`, and `###` → `#####` under
+Step 2. `pages.shift_headings` (R2.1) takes a topic's first `#` as its title; a topic with no
+`#` gets a heading synthesized from its TOC title, and every existing heading is moved by
+`level - 1` as if it had been an H1's sub-heading. These topics start at `##`/`###`, so the
+title appears twice and the levels below it skip.
+
+**Measured (2026-11-09, read-only, `C:/tmp/reframe-audit/dup_exact.py`):** a heading followed
+directly by a deeper heading with the same text on **6,414 of 175,793** reframed pages, in **42
+products** — 8,303 pairs, 4,118 also skipping a level. ibi WebFOCUS Reporting Server 4,742,
+WebFOCUS Client 494, Foresight Instream 248, Foresight Transaction Insight 219, Data
+Virtualization 161, the other 37 products 550.
+
+The same report asked why Steps 1–3 share one page and Steps 4–5 another. That is R1 as
+written (Phase 28: *Activation Setup*'s subtree, ~3,770 words, is over `max_words` 3,000, so
+its children group into runs of whole consecutive sibling subtrees). The user's answer:
+split this product's steps with `keep_separate`, keep R1, and record the stricter rule
+(siblings never share a page) and a higher cap in `open-issues.md` for later.
+
+#### Decisions
+
+| decision | choice | why |
+|---|---|---|
+| **A topic with no `#`** | Its **shallowest** heading level is the base. A heading that opens the topic at that level *is* the title when it is the only one there **or reads the same as the TOC title** (case and punctuation aside): moved to `level`, nothing synthesized. Its own section moves by `level - base`; later same-level sections by `level + 1 - base` | The source's own first heading is the title the writer wrote; the H1 path already prefers it over the TOC title. The title-match half was added after the pilot: without it 21 + 21 + 1 duplicates remained (an opening section that is the title, followed by sibling sections) |
+| **A topic whose first heading is deeper than a later one, or that has no heading** | Synthesize from the TOC title as today, but shift the body by `level + 1 - base` | Keeps the title and removes the skipped level; measured in step 1 before relying on it |
+| **Heading text differs from the TOC title** (`… (for Remote Activation)`) | The body's text wins, as it does for an H1 | Anchors follow the heading text (Phase 29); `toc.yml`, redirects and links are re-derived from it in the same run. Step 1 counts anchors that change |
+| **Currency** | `_ALGORITHM` 7 → 8 | Without it a merged tree reads current while carrying the defect. `sync` does not gate on the policy key (only on the conversion build), so publishing is not blocked; and 310 of 329 merged versions are already on an older key, so the no-regrouping rule below already governs re-runs |
+| **Activation Service steps** | `keep_separate` for this product, **1.1.0 only** (a `{path, versions}` entry, new here): Steps 1, 3, 5 (`planning-for-license-activation.md`, `generating-licenses.md`, `upgrading-your-tibco-products.md`). Steps 2 and 4 are then whole subtrees between separated units, so each lands on its own page *with* its children | Listing Step 2 or 4 would also split their children (a separated unit stops its subtree collapsing). 1.0.0 numbers its steps differently and is laid out on 1.1.0's pin, so an unscoped split moved its Step 1 sub-topics to a page named `step-2-deploying-…` and left its Steps 3–4 together. User chose (2026-11-09) to split 1.1.0 only |
+| **Scoped `keep_separate`** | `ReframePolicy.keep_separate_in`, folded in by `for_version` before layout, currency key and pinned reference; the reference cache keys on the effective list | Without the fold, the reference version's split is projected onto every version. A version no entry names keeps the digest it would have had without them |
+| **Published pages** | Activation Service 1.0.0/1.1.0 (synced 2026-11-05) is the one approved regrouping. Every other product: heading changes only; a re-run that splits, joins or renames a page is discarded (open issue, 5 Nov) | User decision 2026-11-05 and 2026-11-09 |
+
+#### Steps
+
+1. **Measure first, on a copy.** Build the change, re-run three products into scratch
+   (`--input/--output`): Activation Service 1.1.0, one ibi WebFOCUS Reporting Server version,
+   Foresight Instream. Report: duplicate pairs before/after (expect 0), skipped levels, page
+   list identical to the published tree, anchors changed, and how many topics hit the
+   "first heading not the shallowest" case. Stop and report if the page list moves.
+2. `shift_headings` change; tests: `##`-first topic, `###`-first topic, deeper-first-then-
+   shallower topic, no heading at all, H1 topic unchanged, word conservation (§6) still exact.
+   `_ALGORITHM` 8.
+3. `keep_separate` for `tibco-activation-service` in `config/reframe.yaml`; re-run both
+   versions into scratch; check Activation Setup becomes 6 pages in 1.1.0 (parent + 5 steps).
+
+**Built (2026-11-09).** `pages.own_heading` (shared with `driver._Source.headings`, so anchors
+are predicted from the same rule), `shift_headings` offsets, `_ALGORITHM` 8, scoped
+`keep_separate`. 9 new tests; full suite 2,458 passed, 1 failed — the same
+`test_shipped_scope_lists_the_ebx_and_spotfire_products` failure recorded under Phase 75.
+Pilot into `C:/tmp/reframe-pilot` (copies of the published trees, `--input/--output --force`):
+
+| version | pages before → after | pages with a doubled heading | anchors changed |
+|---|---:|---:|---:|
+| Activation Service 1.1.0 | 17 → 20 (Steps 2, 3, 5 new; none removed) | 7 → 0 | 1 |
+| Activation Service 1.0.0 | 16 → 16 | 7 → 0 | 3 |
+| Foresight Instream 9.4.0 | 1,045 → 1,045 | 61 → 1 | 26 |
+| WebFOCUS Reporting Server 9.3.8 | 3,020 → 3,020 | 505 → 1 | 7 new, 1 gone |
+
+No page split, joined or renamed outside the approved Activation Service split. Every changed
+anchor is a topic whose own heading words differ from its TOC row (e.g. Instream's "Copy the
+guideline from EDISIM to Instream"); `toc.yml`, redirects and links follow it. The two
+remaining duplicates are a source topic repeating its own heading one level down.
+4. Docs: R2.1 as-built note in `REFRAME-REQUIREMENTS.md`, user guide if the heading rule is
+   described there; open-issues entry (stricter grouping rule, higher cap). Commit.
+5. **Runs (the user's, as `!` commands):** Activation Service, then the 42 products one at a
+   time, each compared with the published pages before sync; ibi into `content-fix`.
+   Re-measure with the audit script after each family. DOCOPS-336 dated notes; Done when all
+   42 read 0.
+
+**Not in this phase:** changing R1 (stricter sibling rule) or `max_words` — recorded in
+`open-issues.md` for a later decision.
+
+---
+
 ### Phase 75: A Report Without Dates Keeps the Catalog's Retirement Dates — **Done 2026-11-06; DOCOPS-333**
 
 **Why.** Support's 2026-11-05 end-of-support report has no `Retirement Date` column (the

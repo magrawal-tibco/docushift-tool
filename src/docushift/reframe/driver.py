@@ -65,7 +65,14 @@ from docushift.reframe.packer import (
     shortened,
     single,
 )
-from docushift.reframe.pages import LinkCounts, render, split_frontmatter, title_of, word_count
+from docushift.reframe.pages import (
+    LinkCounts,
+    own_heading,
+    render,
+    split_frontmatter,
+    title_of,
+    word_count,
+)
 from docushift.reframe.policy import ReframePolicy, policy_for
 from docushift.reframe.review import Flag, branches, inspect
 from docushift.reframe.toc import TocEntry, retarget, schema_for
@@ -222,9 +229,11 @@ class _Source:
         a shell sample is not a heading, and treating one as the topic's own H1 is
         the proof-of-concept corruption requirements §7 singles out.
 
-        A body with no H1 gets its TOC title first, because that is precisely what
-        `shift_headings` prepends -- the two have to agree or the anchor names a
-        heading that is not there.
+        A body with no heading of its own to stand as its title gets its TOC
+        title first, because that is precisely what `shift_headings` prepends --
+        the two have to agree or the anchor names a heading that is not there.
+        `pages.own_heading` answers that for both (Phase 76: a topic opening on
+        its only `##` or `###` has a title and gets nothing prepended).
 
         `assign` takes index 0 as the topic's own heading. Measured over EMS
         10.5.1: 1,441 of 1,441 topics have an H1 and it is the first heading in
@@ -234,9 +243,9 @@ class _Source:
         """
         if topic.source not in self._headings:
             body = split_frontmatter(self.read(topic.source))[1]
-            found = HEADING.findall(mask_code(body))
-            texts = [text for _hashes, text in found]
-            if not any(len(hashes) == 1 for hashes, _text in found):
+            found = list(HEADING.finditer(mask_code(body)))
+            texts = [match.group("text") for match in found]
+            if own_heading(body, topic.title, found) is None:
                 texts.insert(0, topic.title)
             self._headings[topic.source] = texts
         return self._headings[topic.source]
@@ -352,7 +361,8 @@ class Reframer:
         # pinned set asks for it once per sibling -- six times over for EMS. Keyed on
         # (slug, reference version) and holding `None` for a reference that could not
         # be read, so the failure is reported once per product rather than per version.
-        self._layouts: dict[tuple[str, str], list[tuple[PurePosixPath, tuple[PurePosixPath, ...]]] | None] = {}
+        self._layouts: dict[tuple[str, str, tuple[str, ...]],
+                            list[tuple[PurePosixPath, tuple[PurePosixPath, ...]]] | None] = {}
         # Phase 42. The effective policy per product, automatic pin included, and
         # which products got their pin that way rather than from `reframe.yaml`.
         self._policies: dict[str, ReframePolicy] = {}
@@ -386,6 +396,9 @@ class Reframer:
         if slug in self._automatic:
             # Phase 74: this version's own pin, so the currency key moves with it.
             policy = replace(policy, pin_layout_to=self.pin_for(product, version))
+        # Phase 76: `keep_separate` entries scoped to other versions drop out here,
+        # before the layout, the currency key or the pinned reference reads it.
+        policy = policy.for_version(number)
         if not reframes(version.engine, policy):
             return ReframeResult(
                 slug, number, ReframeOutcome.NOT_FLARE, engine=version.engine,
@@ -1167,7 +1180,10 @@ class Reframer:
         `--input`: the reference is a property of the doc set, not of whichever
         folder this invocation happens to be pointed at.
         """
-        key = (product.slug, number)
+        # Keyed on the overrides too (Phase 76): with a version-scoped
+        # `keep_separate`, two versions projecting onto one reference may ask for
+        # it laid out two ways in a single run.
+        key = (product.slug, number, policy.keep_separate)
         if key in self._layouts:
             return self._layouts[key]
 

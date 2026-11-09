@@ -148,6 +148,15 @@ heading moves by the same offset; everything caps at H6. If a topic has no H1, p
 
 > *As built (Phase 29):* nothing is written above the heading; its anchor is the platform's
 > slug of the heading text (R2's as-built note).
+>
+> *As built (Phase 76):* "no H1" is narrower. A topic that **opens** on a heading at its
+> shallowest level has a title already when that heading is the only one at its level or
+> reads the same as the TOC title; it moves to the topic's level and nothing is prepended.
+> Prepending regardless printed the title twice on 6,414 pages in 42 products, where Flare
+> topics open on `##` or `###`. Below a prepended title the shallowest heading sits one
+> level down, and an opening title's later same-level sections become its children, so no
+> heading skips a level. The heading's own wording wins over the TOC's, as an H1's always
+> has, so a topic whose two disagree gets a new anchor.
 
 - Depth is counted in **what is emitted**, not in what the TOC holds: a bare container row, or
   a row whose topic an earlier guide already claimed, contributes no level. Counting those
