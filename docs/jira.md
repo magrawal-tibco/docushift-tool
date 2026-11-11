@@ -1,6 +1,6 @@
 # Jira Tracking — What Is Logged in DOCOPS
 
-> **Last reconciled:** 2026-11-09, against Jira and `config/versions.csv`.
+> **Last reconciled:** 2026-11-11, against Jira and `config/versions.csv`.
 > Conventions (site, cloud ID, story points, transitions, who owns what) live in
 > `C:\github\confluence-mcp\reports\docushift-claude-atlassian-context.md`; this file
 > does not repeat them. It answers one question: **is this piece of work in Jira, and where?**
@@ -29,7 +29,10 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | Phase 61 or 62 is planned in full and approved | Its sub-task (DOCOPS-272–273) → In Progress |
 | AEM owners fix alt text with `/`, `:` or `⌘` and a verify re-run shows none dropped | DOCOPS-255: dated note → Done |
 | Phase 58 built (records, triage, selectors) and the first ibi wave summarised | DOCOPS-256 → In Progress while building, then Done |
-| stg-docs.tibco.com has real content | DOCOPS-257: run the TIBCO staging probe and staging pilots |
+| Staging menu fix built and the five TIBCO staging pilots re-run and traced (probe done 2026-11-09; plan 2026-11-11) | DOCOPS-257: dated note with each pilot's outcome → Done |
+| The AEM team answers on section rows missing from the staging menu (accepted for now, user raising it, 2026-11-11) | DOCOPS-257 or its successor: dated note |
+| The AEM team answers on heading link targets (every case in `reports/verify/anchor-targets.csv` reported by the user, 2026-11-11) | DOCOPS-257 or a new sub-task: dated note with the rule; plan the re-write of anchors and `301.yml` if the tool's rule changes |
+| The AEM team answers on Streaming's staging pages (reported by the user, 2026-11-11; Streaming left out of the staging pilots until then) | Re-run Streaming 11.1.3 `verify`; dated note on DOCOPS-257 or its successor |
 | Staging shows one Japanese and one German WebFOCUS page correctly | DOCOPS-148: dated note → Done |
 | Data Virtualization team answers the error report and the corrections are republished (published as-is 2026-10-26) | DOCOPS-254: dated note → Done |
 | Staging has rebuilt from `wip` (all five ibi `phase63-*` branches merged 2026-10-26, deleted 2026-10-28) | `verify` with staging per family: DOCOPS-274 note; notes on DOCOPS-259/260/262/263; R001 sub-tasks DOCOPS-264/265/266/267/268 → Done if labels show |
@@ -59,10 +62,16 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 - 2026-11-11 — DOCOPS-336 note: ibi WebFOCUS Client (9 versions) re-merged, headings only, published to
   `content-fix` (efd0cca1), pushed. 39 products left.
+- 2026-11-11 — DOCOPS-257 → In Progress, note: TIBCO staging probed (same layout as ibi), 5 staging pilots run; findings are
+  merged-page section rows the staging menu does not list (accepted, user to ask AEM). Menu fix planned.
+  Streaming left out: its staging pages reported to AEM by the user. Later: staging menu compared by page only;
+  link targets listed in `reports/verify/anchor-targets.csv` (with old URLs); all cases reported to AEM by the user.
 - 2026-11-11 — DOCOPS-336 note: ibi WebFOCUS Reporting Server (9 versions) re-merged, headings only, published to
   `content-fix` (8452d4e3), pushed. 40 products left.
 - 2026-11-09 — DOCOPS-336 note: Activation Service re-merged (1.1.0 one page per step; 1.0.0 headings only) and
   published to TIBCO General `content-fix` (1bbe4b6), pushed. 41 products left.
+- 2026-11-09 — DOCOPS-337 created under DOCOPS-10 (0.25 SP, Content Migration, `docushift` `tibco` `ibi`; component
+  set by edit) and Done: webhook on the TIBCO and ibi UAT issues sheet posts new issues to the Digital Platform Google Space.
 - 2026-11-09 — DOCOPS-336: Phase 76 built (heading rule, version-scoped `keep_separate`, Activation Service 1.1.0
   split); pilot on 4 versions: no page moved except the approved split, doubled headings 580 → 2. Runs pending.
 - 2026-11-09 — DOCOPS-336 created under DOCOPS-75 (0.5 SP, AI & Content Intelligence, `reframe` `tibco`; component set by edit), In Progress:
