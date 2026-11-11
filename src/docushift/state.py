@@ -811,6 +811,12 @@ class StateStore:
         )
         return {(row["slug"], row["version"]): dict(row) for row in rows}
 
+    def verify_findings(self, slug: str, version: str, run_id: int) -> list[dict[str, Any]]:
+        """One version's findings from one `verify` run (Phase 77: re-triage, the issue list)."""
+        return [dict(r) for r in self._all(
+            "SELECT * FROM findings WHERE run_id = ? AND slug = ? AND version = ? AND stage = 'verify'",
+            (run_id, slug, version))]
+
     def repair_rows(self) -> dict[tuple[str, str, str], dict[str, Any]]:
         """`{(slug, version, repair): row}` for every recorded repair status (Phase 59)."""
         return {(r["slug"], r["version"], r["repair"]): dict(r)
@@ -1036,9 +1042,17 @@ class StateStore:
                 f"AND f.run_id = latest.run_id",
                 READ_BACK_CODES,
             )]
+            # Phase 77: each version's latest `verify` findings, which `--retriage` and
+            # the issue list are rebuilt from, however old the run.
+            kept += [row[0] for row in conn.execute(
+                "SELECT f.id FROM findings f JOIN verify_result v ON f.run_id = v.run_id "
+                "AND f.slug = v.slug AND f.version = v.version JOIN (SELECT slug, version, MAX(at) AS at "
+                "FROM verify_result GROUP BY slug, version) m ON v.slug = m.slug AND v.version = m.version "
+                "AND v.at = m.at WHERE f.stage = 'verify'"
+            )]
             conn.execute("CREATE TEMP TABLE IF NOT EXISTS prune_keep (id INTEGER PRIMARY KEY)")
             conn.execute("DELETE FROM prune_keep")
-            conn.executemany("INSERT INTO prune_keep (id) VALUES (?)", ((i,) for i in kept))
+            conn.executemany("INSERT OR IGNORE INTO prune_keep (id) VALUES (?)", ((i,) for i in kept))
             cursor = conn.execute(
                 f"DELETE FROM findings WHERE run_id IN ({placeholders}) "
                 f"AND id NOT IN (SELECT id FROM prune_keep)",

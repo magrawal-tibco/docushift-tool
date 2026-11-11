@@ -8,7 +8,10 @@ what they are:
 - `ours`     -- this project fixes it (a phase, or a run like `fix-callouts`);
 - `platform` -- the AEM owners fix it; carries their Jira key;
 - `source`   -- it is in the documents we received;
-- `accepted` -- a difference someone decided to live with; says who and why.
+- `accepted` -- a difference someone decided to live with; says who and why;
+- `logged`   -- a problem in Jira (`ticket`), to be fixed later (Phase 77). It counts
+  apart: a version whose every finding is triaged and one is `logged` reads `logged`,
+  not `explained`, so what is left to fix is never hidden.
 
 Triage never removes a finding: the report still lists it, with its decision.
 It changes only how the finding counts toward a version's status
@@ -24,7 +27,9 @@ from pathlib import Path
 
 import yaml
 
-DECISIONS = ("ours", "platform", "source", "accepted")
+DECISIONS = ("ours", "platform", "source", "accepted", "logged")
+#: Decisions that need a Jira key.
+TICKETED = ("platform", "logged")
 
 
 class TriageError(ValueError):
@@ -76,8 +81,8 @@ def load(path: Path) -> list[Entry]:
             raise TriageError(f"{where}: `decision` must be one of {', '.join(DECISIONS)}, got {decision!r}")
         if not reason:
             raise TriageError(f"{where}: `reason` is required -- a decision nobody can explain is not one")
-        if decision == "platform" and not str(row.get("ticket") or "").strip():
-            raise TriageError(f"{where}: a `platform` decision needs the owners' `ticket`")
+        if decision in TICKETED and not str(row.get("ticket") or "").strip():
+            raise TriageError(f"{where}: a `{decision}` decision needs its Jira `ticket`")
         entries.append(Entry(
             code, decision, reason,
             str(row.get("slug") or "*"), str(row.get("version") or "*"),
@@ -90,3 +95,28 @@ def load(path: Path) -> list[Entry]:
 def match(entries: list[Entry], code: str, slug: str, version: str, path: str) -> Entry | None:
     """The first entry that matches, or None. File order is precedence."""
     return next((e for e in entries if e.matches(code, slug, version, path)), None)
+
+
+def decide(entries: list[Entry], repair_states: dict[tuple[str, str, str], str], code: str, slug: str,
+           version: str, path: str) -> tuple[Entry | None, str]:
+    """The entry that explains a finding, and a note for its message.
+
+    An entry naming a repair (Phase 59) does not explain the finding on a version the
+    repair has not reached yet: then None, with the note saying so. One rule for a
+    `verify` run and for `verify --retriage` (Phase 77).
+    """
+    found = match(entries, code, slug, version, path)
+    if found is not None and found.repair and repair_states.get((slug, version, found.repair)) == "needed":
+        return None, f"[repair {found.repair} still needed here]"
+    return found, (f"[triage: {found.label}]" if found is not None else "")
+
+
+def outcome(errors: int, warnings: int, logged: int, explained: int) -> str:
+    """`lost` > `issues` > `logged` > `explained` > `clean` (Phases 58, 77; notes never count)."""
+    if errors:
+        return "lost"
+    if warnings:
+        return "issues"
+    if logged:
+        return "logged"
+    return "explained" if explained else "clean"

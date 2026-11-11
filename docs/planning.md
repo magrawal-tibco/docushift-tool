@@ -1938,6 +1938,39 @@ lost), and a list of them is kept, since `301.yml` points at the same anchors.
   opens on the heading. Cache preview: EMS 37 section / 26 topic / 1 none, Foresight 1
   section, IBM i 12 page.
 
+#### Staging pilots, the two broken EMS pages (2026-11-11, DOCOPS-257)
+
+**Traced** (cached staging pages, `wip` sources):
+
+- **tibemsConnectionMetaData: ours.** The page carries
+  `<a id="Certificate_EncodingsConstant_
+   _Value_
+   _TIBEMS_SSL_ENCODING_AUTO(0x0000)…">`:
+  an id spanning three lines that holds the next table's text. Flare's source bookmark is
+  named that way and `markdown.anchor_marker` copies it. Staging drops the caption after it
+  and everything after the table: the three `tibemsSSL_*` sections. "Appendix B: Monitor
+  Messages" has the same kind of id (its 97% text). **12 pages, all EMS**: these two pages
+  in 10.4.0, 10.4.1, 10.4.3, 10.4.4, 10.5.0, 10.5.1. No other TIBCO repo and no ibi repo has
+  one (`git grep` of `wip`, 2026-11-11).
+- **Configuring the FTL Server Cluster: not traced.** Staging serves the page with an empty
+  article (26 KB of Markdown). Nothing in it is unusual: its `<…>` placeholders in code
+  blocks render on 14 other EMS pages, and `wip` differs from `content-fix` only in note
+  labels. Only the AEM side can say why. For the user to report to the AEM team.
+
+**Fix — plan (parked 2026-11-11: logged under Phase 77, fixed in a later phase)**
+
+| decision | choice | why |
+|---|---|---|
+| **An anchor whose name holds whitespace** | `anchor_marker` writes no marker for it | An HTML id cannot contain whitespace, so nothing can link to it; the platform also takes anchors from headings only (design §17). Writing it breaks the page; dropping it loses nothing |
+| **Catching it if it comes back** | `validate`: a `<a id="…">` with whitespace in the id is an error, under an existing or one new code | 12 pages reached staging without a finding |
+
+**Steps**
+
+1. `transforms/markdown.py`: the rule above; a test with the EMS bookmark name.
+2. `validation`: the check and its test.
+3. Re-convert, reframe and sync EMS 10.4.0–10.5.1 to `content-fix` (the user, as `!`
+   commands); `validate`; `verify` 10.5.1 after staging rebuilds.
+
 - **The 7 `missing` are two pages staging serves broken — real losses, to trace:**
   - `user-guide/ftl-stores/…/configuring-the-ftl-server-cluster.md`: the served article is
     **empty** (26 KB of Markdown). The page opens with a YAML block holding
@@ -2979,6 +3012,73 @@ estimate (Statistica and Data Science Workbench 14.x, Service Grid Container Edi
 BusinessEvents EE 6.3.0/6.3.1, MDM 10.0.0, Transaction Insight 6.0.0). Not yet checked against
 the catalog (published, retired or held); the estimate uses `{family}-userdocs` for the repo
 name.
+
+---
+
+### Phase 77: Every Published Version Verified, Its Issues Logged, Fixes Later — **Built 2026-11-11; logging and waves pending; DOCOPS-338**
+
+**Why.** The user, 2026-11-11: verify every published product, keep count of how many are
+verified and how many are left, log what is found in Jira and report it. Problems are
+**not fixed as they are found**: they are logged, and fixed later in their own phases.
+
+**Measured 2026-11-11** (`versions.csv`): 821 published versions have a verify status.
+TIBCO 583 (578 `not-verified`, 24 families; BW plug-ins 253, BusinessConnect 44,
+Foresight 39, Streaming 29), ibi 200 (198 `stale` after re-publishing), Spotfire 38.
+
+**User decisions (2026-11-11):** Jira holds **one sub-task per kind of problem**, listing
+the products and versions it hits, with a dated note after each wave. A version whose
+every problem is logged but not fixed reads **`logged`**, a new status. Order: **TIBCO
+by family, newest version of each product first**, then ibi (re-run, stale), then Spotfire.
+
+| decision | choice | why |
+|---|---|---|
+| **What "logged" is** | A new triage decision `logged`, `ticket` required: we know it, it is in Jira, it is to be fixed later. Outcome order: `lost` (an unlogged error) > `issues` (unlogged warnings) > `logged` (every finding triaged, at least one `logged`) > `explained` > `clean` | Keeps "still broken, fixed later" apart from "accepted" or "fixed elsewhere", so the count of what is left to fix is never hidden. Existing entries keep their decisions |
+| **One Jira issue per kind** | A triage entry is the kind: its `code`, narrowed by `slug` / `path` when one code covers two different problems. Its `ticket` is the Jira sub-task. A new kind found in a wave is proposed as a sub-task (summary, products, versions, example), created after approval, then entered in the triage file as `logged` | The triage file already matches findings to decisions; making it the issue list keeps one source for "which Jira covers this finding" |
+| **Logging needs no re-run** | `verify --retriage`: re-applies the current triage file to every version's latest stored findings (`state.db` `findings`, by run) and rewrites the statuses, `versions.csv`, the index and the issue list. No request is made | A wave can take hours of staging requests; logging its findings must not mean running it again |
+| **The issue list** | `reports/verify/ISSUES.csv` and `.html`: one row per kind, from each version's latest run. Columns: kind (code + narrowing), Jira, decision, versions, families, findings, an example (version, page, message), first and last seen. Unlogged findings are grouped by code at the top, as the candidates for new Jira issues | What the report to Jira is written from, and what a fix phase starts from |
+| **Progress** | `INDEX.html` opens with a table by BU and family: published, verified, left (`not-verified` + `stale`), and per outcome. `verify` prints the same totals for the wave's BU at the end | "How many verified, how many left" in one place, filterable in `versions.csv` as today |
+| **A wave** | The user runs it (`!` command): `verify --target-dir ../tibco-docs-aem/ --bu tibco --family <family> --latest-only`, then the same with `--status not-verified` for the older versions. Streaming is left out until the AEM team answers. Then: the issue list is read; new kinds proposed for Jira; approved ones created and entered as `logged`; `--retriage`; a dated note on each Jira issue whose counts changed; a row in `docs/jira.md` "Verify waves" | One family per wave keeps a summary readable (Phase 58's rule); newest first covers what readers use most |
+| **What is already found** | Logged as the first kinds, not fixed: broken anchor ids on 12 EMS pages (the fix planned above waits for a fix phase); the empty FTL page (AEM); heading link targets (`VERIFY_PUBLISHED_ANCHOR_DIFFERS`, AEM, sheet sent 2026-11-11); the shortened IBM i title; EMS SVG bytes; IBM i pictures | Same rule from the start |
+
+**Steps**
+
+1. `verify/triage.py`: the `logged` decision (ticket required). `verify/driver.py`: count
+   logged findings apart; the outcome order above. `reporting/status.py`: `logged` passes
+   through. Tests: each outcome; a logged error does not make `lost`.
+2. `cli.verify --retriage`: latest run per version from `state.db`, re-triaged, statuses
+   and reports rewritten, no fetcher. Test: a new `logged` entry turns `lost` into `logged`
+   with no request.
+3. `verify/report.py`: `ISSUES.csv`/`.html`; the progress table in `INDEX.html`; the
+   end-of-wave totals. Tests: grouping by entry, unlogged by code, progress counts.
+4. Docs: `user-guide.md` (the wave routine, `--retriage`, the two files), `design.md`
+   (status order), `docs/jira.md` ("Verify waves" gains a Jira-issues column; an "Issue
+   kinds" table: kind → Jira key).
+5. Log the kinds already found (proposed to the user for Jira first), `--retriage`.
+6. Waves, TIBCO family by family; then ibi; then Spotfire.
+
+*Exit: every published version has a status other than `not-verified` or `stale`; every
+finding of the latest runs is logged, explained or clean; each kind has a Jira issue with
+its products and versions; the suite and `ruff` pass.*
+
+**As built (2026-11-11, DOCOPS-338; steps 1–4).**
+
+- `verify/triage.py`: the `logged` decision (ticket required, as `platform`), `decide` (the
+  repair rule, shared) and `outcome`. `VersionResult.logged`. The stored `explained` count
+  includes logged findings; the outcome tells them apart. `--status logged` selects them.
+- `verify/issues.py` (new): `retriage`, `build`, `write`. A stored finding's path is turned
+  back into the version-relative path triage matches on (`page_of`). The issue list covers
+  versions whose result still stands: a `stale` version's findings are left out.
+  `state.verify_findings`; `prune_findings` keeps each version's latest verify findings.
+- `verify/report.py`: `progress` and `OUTCOMES`; `INDEX.html` opens with the progress table
+  and links `ISSUES.html`. `cli.verify`: `--retriage` (no `--target-dir`, no fetcher), the
+  issue list after every run, the progress table for the wave's BUs, `~` for `logged`.
+- Tests: 6 in `test_verify.py`, 1 in `test_reporting_views.py`.
+- **First `--retriage` (2026-11-11):** 0 statuses changed (4 triage entries). Progress:
+  TIBCO 583 published, 5 verified, 578 left; ibi 200, 0 verified (all `stale`); Spotfire 38,
+  3 verified. Issue list: 11 kinds, 10 not in Jira: TIBCO pilots (anchor ids differ 3
+  versions; image broken 2; text diff 2; anchor missing 1; Streaming not served 1; 301 map
+  missing 1; EMS text dropped / topic missing, local) and Spotfire Data Virtualization's three
+  `lost` versions (TOC entries missing 10,510; moved 403).
 
 ---
 

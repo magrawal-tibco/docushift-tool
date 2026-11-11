@@ -537,6 +537,14 @@ DOCOPS-267, Data Intelligence & iWay Service Manager DOCOPS-268, Legacy DOCOPS-2
 sub-task for all families, DOCOPS-313 (under DOCOPS-7). Checking the
 ibi redirect lists is DOCOPS-270 (under DOCOPS-149), and waits on Phase 60.
 
+**Issue kinds (Phase 77, DOCOPS-338).** One Jira sub-task per kind of problem, fixed later
+in its own phase. The triage entry (`config/verify-triage.yaml`, `decision: logged`) carries
+the key; `reports/verify/ISSUES.html` lists every kind with its versions.
+
+| Kind (finding, narrowed) | Jira | Logged | Fix |
+|---|---|---|---|
+| (none yet) | | | |
+
 | Wave | Date | Selection | Versions | Outcome | Jira |
 |---|---|---|---|---|---|
 | Pilot | 2026-10-23 | ibi™ AI Assistant 9.3.8, local + staging + live | 1 | explained (5 alt texts → DOCOPS-255; 61 note labels → DOCOPS-250) | DOCOPS-249 |

@@ -333,3 +333,22 @@ def test_pruning_keeps_the_drops_verify_reads_and_compacts_the_file(tmp_path: Pa
     assert store.latest_counts("wf", "9.3.5", ("NAV_NODE_DROPPED",)) == {"NAV_NODE_DROPPED": 2}
     assert (tmp_path / "state.db").stat().st_size < before
     store.close()
+
+
+def test_pruning_keeps_each_versions_latest_verify_findings(tmp_path: Path) -> None:
+    """Phase 77. `verify --retriage` and the issue list are rebuilt from each version's
+    latest verify run, however old it is."""
+    store = StateStore(tmp_path / "state.db")
+    wave = FindingsRun("verify", store=store).start()
+    wave.record("VERIFY_TEXT_DROPPED", slug="ems", version="10.5.1", path="p.md")
+    wave.finish()
+    store.record_verify({"slug": "ems", "version": "10.5.1", "run_id": wave.run_id,
+                         "at": "2026-11-11T10:00:00+00:00", "scope": "local", "outcome": "lost"})
+    later = FindingsRun("convert", store=store).start()
+    later.record("ENGINE_UNKNOWN", slug="bw", version="1")
+    later.finish()
+
+    store.prune_findings(keep=1)
+
+    assert [r["code"] for r in store.verify_findings("ems", "10.5.1", wave.run_id)] == ["VERIFY_TEXT_DROPPED"]
+    store.close()

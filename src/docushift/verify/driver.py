@@ -100,6 +100,8 @@ class VersionResult:
     errors: int = 0
     warnings: int = 0
     explained: int = 0
+    #: Of `explained`, those triaged `logged`: in Jira, not fixed yet (Phase 77).
+    logged: int = 0
     codes: Counter = field(default_factory=Counter)
     scope: str = "local"
     commit: str = ""
@@ -111,12 +113,7 @@ class VersionResult:
 
     @property
     def outcome(self) -> str:
-        """`lost` > `issues` > `explained` > `clean` (Phase 58; notes never count)."""
-        if self.errors:
-            return "lost"
-        if self.warnings:
-            return "issues"
-        return "explained" if self.explained else "clean"
+        return triage.outcome(self.errors, self.warnings, self.logged, self.explained)
 
 
 class Verifier:
@@ -526,15 +523,9 @@ class Verifier:
     def _record(self, result: VersionResult, code: str, folder: VersionFolder, path: str,
                 message: str, count: int = 1) -> None:
         version = result.version or folder.segment
-        decided = triage.match(self.triaged, code, folder.slug, version, path)
-        needed = decided is not None and decided.repair and \
-            self.repair_states.get((folder.slug, version, decided.repair)) == "needed"
-        if needed:
-            # The repair that explains it has not reached this version yet.
-            message = f"{message} [repair {decided.repair} still needed here]"
-            decided = None
-        if decided is not None:
-            message = f"{message} [triage: {decided.label}]"
+        decided, note = triage.decide(self.triaged, self.repair_states, code, folder.slug, version, path)
+        if note:
+            message = f"{message} {note}"
         finding = self.findings.record(code, folder.slug, version,
                                        (folder.relative / path).as_posix() if path else folder.relative.as_posix(),
                                        message, count)
@@ -544,6 +535,7 @@ class Verifier:
             return
         if decided is not None:
             result.explained += 1
+            result.logged += decided.decision == "logged"
         elif finding.severity is Severity.ERROR:
             result.errors += 1
         else:

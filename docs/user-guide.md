@@ -1851,10 +1851,34 @@ docushift --locale en-us verify --target-dir ../ibi-docs-aem --bu ibi --family w
     replaces its own versions' rows. It is the list for the AEM team while the
     heading-id rule is open, and the work list once it is settled;
   - `_verify_status` and `_verify_date` in `versions.csv`, filterable in Excel.
+- **Verifying everything, logging as you go** (Phase 77). A wave is one family:
+
+  ```
+  docushift verify --target-dir ../tibco-docs-aem/ --bu tibco --family ems --latest-only
+  docushift verify --target-dir ../tibco-docs-aem/ --bu tibco --family ems --status not-verified
+  ```
+
+  Each run ends with a progress table for its business unit (published, verified,
+  left, and each outcome) and rewrites `reports/verify/ISSUES.html` (and `.csv`): one
+  row per kind of problem across every version whose result still stands, with its
+  Jira key, how many versions and findings, the families, and an example. Kinds with
+  no Jira issue yet come first. To log one, create its Jira issue and add an entry to
+  `config/verify-triage.yaml` with `decision: logged` and `ticket: DOCOPS-…`, then:
+
+  ```
+  docushift verify --retriage
+  ```
+
+  This re-applies the triage file to every version's latest findings, fetching
+  nothing, and rewrites the statuses, `INDEX.html` (which opens with the same
+  progress table by family) and `ISSUES.html`. `--status logged` selects the logged
+  versions for a re-check once their fix is published.
 - **What a status means:**
   - `lost`: something is gone that nobody has explained;
   - `issues`: unexplained warnings only;
-  - `explained`: every finding is in the triage file;
+  - `logged`: every finding is in the triage file and at least one is `logged`: in
+    Jira, to be fixed later (Phase 77);
+  - `explained`: every finding is in the triage file, none of them only logged;
   - `clean`: nothing found;
   - `stale`: the version was published again after it was checked;
   - `not-verified`: published, never checked.

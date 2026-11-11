@@ -66,7 +66,28 @@ def _score(row: dict[str, str]) -> tuple[float, int]:
 
 _STYLE = ("<style>body{font-family:sans-serif;margin:2em}table{border-collapse:collapse}"
           "td,th{border:1px solid #ccc;padding:4px 8px;vertical-align:top;font-size:13px}"
-          ".lost{color:#b00020;font-weight:bold}.issues{color:#a15c00}.stale{color:#666}</style>")
+          ".lost{color:#b00020;font-weight:bold}.issues{color:#a15c00}.logged{color:#5b4bb7}.stale{color:#666}</style>")
+
+#: Phase 77: outcomes in the progress table, in this order; `left` is not-verified + stale.
+OUTCOMES = ("lost", "issues", "logged", "explained", "clean")
+
+
+def progress(rows: list[dict[str, str]]) -> list[dict[str, str]]:
+    """Per BU and family, then per BU: published, verified, left, and each outcome."""
+    groups: dict[tuple[str, str], Counter] = {}
+    for r in rows:
+        status = r["verify_status"] or "not-verified"
+        for key in ((r["bu"], r["family"]), (r["bu"], "")):
+            count = groups.setdefault(key, Counter())
+            count["published"] += 1
+            count["left" if status in ("not-verified", "stale") else "verified"] += 1
+            count[status] += 1
+    out = []
+    for (bu, family), count in sorted(groups.items(), key=lambda kv: (kv[0][0], kv[0][1] == "", kv[0][1])):
+        out.append({"bu": bu, "family": family or "(all)", "published": str(count["published"]),
+                    "verified": str(count["verified"]), "left": str(count["left"]),
+                    **{o: str(count[o]) for o in OUTCOMES}})
+    return out
 
 
 def _html(name: str, rows: list[dict[str, str]], totals: dict[str, int], outcome: str) -> str:
@@ -121,9 +142,15 @@ def _index_html(rows: list[dict[str, str]]) -> str:
         f"<td>{escape(r['findings'])}</td><td>{report(r)}</td></tr>"
         for r in rows
     )
+    columns = ("bu", "family", "published", "verified", "left", *OUTCOMES)
+    table = "".join("<tr>" + "".join(f"<td>{escape(p[c])}</td>" for c in columns) + "</tr>"
+                    for p in progress(rows))
     return (
         f"<!doctype html><meta charset='utf-8'><title>verify index</title>{_STYLE}"
         f"<h1>verify: every published version</h1><p>{len(rows)} version(s): {escape(summary)}.</p>"
+        "<h2>Progress</h2><p>left = not verified, or re-published since it was. Issues by kind: "
+        "<a href='ISSUES.html'>ISSUES.html</a>.</p><table><tr>"
+        + "".join(f"<th>{c}</th>" for c in columns) + f"</tr>{table}</table><h2>Versions</h2>"
         "<table><tr><th>bu</th><th>family</th><th>product</th><th>version</th><th>status</th><th>date</th>"
         "<th>scope</th><th>pages</th><th>lost</th><th>warnings</th><th>explained</th><th>findings</th>"
         f"<th></th></tr>{body}</table>"

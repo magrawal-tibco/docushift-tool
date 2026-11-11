@@ -842,6 +842,15 @@ patterns match. Triage changes the count, never the report: the finding is still
 recorded, its message ends with `[triage: <decision> <ticket>]`, and the page's CSV
 row names it.
 
+**`logged`** (Phase 77) sits between `issues` and `explained`: every error and
+warning is triaged and at least one entry's decision is `logged`, a problem in Jira
+to be fixed later. So `lost` > `issues` > `logged` > `explained` > `clean`, one rule
+(`triage.outcome`) for a run and for `verify --retriage`, which re-applies the triage
+file to each version's latest stored findings without fetching anything. The
+`explained` count stored per run includes the logged ones; the verdict tells them
+apart. `reports/verify/ISSUES.*` groups the latest findings of every version whose
+result still stands (not `stale`) by kind: a triage entry, or a code no entry covers.
+
 `_verify_status` is that verdict, with two more states. **`stale`**: the version was
 synced after it was checked, so the published tree is not the one that passed.
 **`not-verified`**: it has been synced and never checked. A version never synced has

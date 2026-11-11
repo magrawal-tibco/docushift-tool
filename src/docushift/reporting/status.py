@@ -205,7 +205,7 @@ def version_status(product, version, evidence: StatusEvidence) -> VersionStatus:
 def _verify(result: dict | None, events: Events, sync_date: str) -> tuple[str, str]:
     """`_verify_status` and `_verify_date` (Phase 58).
 
-    The latest `verify` outcome -- clean, explained, issues or lost -- unless the
+    The latest `verify` outcome -- clean, explained, logged, issues or lost -- unless the
     version was placed again after it: then `stale`, because a re-published tree is
     not the one that was checked. A published version never verified is
     `not-verified`; one never published has nothing to verify and stays blank.

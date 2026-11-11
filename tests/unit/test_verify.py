@@ -592,6 +592,90 @@ def test_a_triaged_loss_is_reported_and_the_version_reads_explained(config, stat
     assert next(r for r in result.rows if r["new_path"] == "one.md")["triage"] == "accepted"
 
 
+def test_the_outcome_order_puts_logged_between_issues_and_explained() -> None:
+    """Phase 77: logged = every finding triaged, one of them in Jira to fix later."""
+    from docushift.verify import triage
+
+    assert triage.outcome(1, 0, 1, 1) == "lost"
+    assert triage.outcome(0, 1, 1, 1) == "issues"
+    assert triage.outcome(0, 0, 1, 2) == "logged"
+    assert triage.outcome(0, 0, 0, 2) == "explained"
+    assert triage.outcome(0, 0, 0, 0) == "clean"
+
+
+def test_a_logged_entry_needs_its_jira_key(tmp_path: Path) -> None:
+    import pytest
+
+    from docushift.verify import triage
+
+    path = tmp_path / "verify-triage.yaml"
+    path.write_text("triage:\n  - code: VERIFY_TEXT_DROPPED\n    decision: logged\n    reason: later\n",
+                    encoding="utf-8")
+
+    with pytest.raises(triage.TriageError, match="a `logged` decision needs its Jira `ticket`"):
+        triage.load(path)
+
+
+def _stored_wave(config, state):
+    """A version verified `lost`, stored as `verify` stores it: findings and result."""
+    target = _fixture(config, state, drop_paragraph=True)
+    product = make_product(SLUG, bu="ibi", family="webfocus")
+    product.versions = {NUMBER: make_version(SLUG, NUMBER, engine=SourceEngine.FLARE)}
+    findings = FindingsRun("verify", store=state).start()
+    verifier = Verifier(config, Catalog(products={SLUG: product}), state, target, findings)
+    folder = verifier.selection(SLUG, None)[0]
+    result = verifier.version(folder)
+    findings.flush()
+    state.record_verify({"slug": SLUG, "version": result.version, "run_id": findings.run_id,
+                         "at": "2026-11-11T10:00:00+00:00", "scope": result.scope, "target": str(folder.path),
+                         "errors": result.errors, "warnings": result.warnings, "explained": result.explained,
+                         "outcome": result.outcome})
+    return result
+
+
+def test_retriage_turns_a_logged_loss_into_logged_without_a_request(config, state) -> None:
+    from docushift.verify import issues, triage
+
+    assert _stored_wave(config, state).outcome == "lost"
+    entries = [triage.Entry("VERIFY_TEXT_DROPPED", "logged", "fix later", ticket="DOCOPS-1")]
+
+    changed = issues.retriage(state, entries, {})
+
+    assert changed == [(SLUG, NUMBER, "lost", "logged")]
+    assert state.verify_latest()[(SLUG, NUMBER)]["outcome"] == "logged"
+    assert issues.retriage(state, entries, {}) == []  # nothing left to change
+
+
+def test_the_issue_list_groups_by_kind_and_puts_unlogged_first(config, state) -> None:
+    from docushift.verify import issues, triage
+
+    _stored_wave(config, state)
+
+    before = issues.build(state, [], {}, {SLUG: "webfocus"})
+    after = issues.build(state, [triage.Entry("VERIFY_TEXT_DROPPED", "logged", "later", ticket="DOCOPS-1")],
+                         {}, {SLUG: "webfocus"})
+
+    dropped = next(r for r in before if r["code"] == "VERIFY_TEXT_DROPPED")
+    assert (dropped["kind"], dropped["versions"], dropped["families"]) == ("unlogged", "1", "webfocus")
+    assert dropped["example_page"] == "one.md" and "[triage" not in dropped["example_message"]
+    logged = next(r for r in after if r["code"] == "VERIFY_TEXT_DROPPED")
+    assert (logged["kind"], logged["decision"], logged["jira"]) == ("triaged", "logged", "DOCOPS-1")
+
+
+def test_progress_counts_verified_and_left_per_family_and_bu() -> None:
+    from docushift.verify import report
+
+    def row(family: str, status: str) -> dict[str, str]:
+        return {"bu": "tibco", "family": family, "verify_status": status}
+
+    rows = report.progress([row("ems", "logged"), row("ems", "not-verified"), row("bw", "stale"),
+                            row("bw", "clean")])
+
+    by = {(r["bu"], r["family"]): r for r in rows}
+    assert (by["tibco", "ems"]["verified"], by["tibco", "ems"]["left"], by["tibco", "ems"]["logged"]) == ("1", "1", "1")
+    assert (by["tibco", "(all)"]["published"], by["tibco", "(all)"]["left"]) == ("4", "2")
+
+
 def test_an_unexplained_loss_reads_lost(config, state) -> None:
     target = _fixture(config, state, drop_image=True)
     product = make_product(SLUG, bu="ibi", family="webfocus")

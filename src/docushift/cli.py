@@ -3332,12 +3332,12 @@ def _archive_target(manager: CatalogManager, product: str, version: str):
     return found, ver
 
 
-VERIFY_STATUSES = ("not-verified", "stale", "lost", "issues", "explained", "clean")
+VERIFY_STATUSES = ("not-verified", "stale", "lost", "issues", "logged", "explained", "clean")
 
 
 @main.command()
-@click.option("--target-dir", type=DIR_PATH, required=True,
-              help="Folder holding the published repos, e.g. ../ibi-docs-aem.")
+@click.option("--target-dir", type=DIR_PATH, default=None,
+              help="Folder holding the published repos, e.g. ../ibi-docs-aem. Not needed with --retriage.")
 @click.option("--product", "product", default=None, help="Restrict to one published product slug.")
 @click.option("--version", default=None, help="Restrict to one version (9.3.8 or 9-3-8).")
 @click.option("--bu", default=None, help="Restrict to one business unit (ibi, tibco).")
@@ -3357,9 +3357,11 @@ VERIFY_STATUSES = ("not-verified", "stale", "lost", "issues", "explained", "clea
               help="Staging host for this run; default publishing.yaml's verify_base_urls by BU.")
 @click.option("--refresh", is_flag=True, help="Fetch again what cache/verify/ already holds.")
 @click.option("--dry-run", is_flag=True, help="List the versions this wave would verify, and stop.")
+@click.option("--retriage", is_flag=True,
+              help="Re-apply verify-triage.yaml to every version's latest stored findings; no request.")
 @click.pass_context
 def verify(ctx, target_dir, product, version, bu, family, latest_only, statuses, limit, skip_published,
-           live_sample, redirect_sample, seed, base_url, refresh, dry_run) -> None:
+           live_sample, redirect_sample, seed, base_url, refresh, dry_run, retriage) -> None:
     """Prove nothing was lost: old pages vs published pages vs staging (Phases 55, 58).
 
     For every selected published online-help version: each old page's topic, text
@@ -3384,6 +3386,12 @@ def verify(ctx, target_dir, product, version, bu, family, latest_only, statuses,
 
     `docushift --locale en-us verify ...` checks only that language's folders
     (Phase 64); without `--locale`, every published language is checked.
+
+    Phase 77: a finding triaged `logged` is in Jira, to be fixed later; a version
+    whose every finding is triaged and one is logged reads `logged`.
+    `reports/verify/ISSUES.html` groups every version's latest findings by kind,
+    the unlogged first. `--retriage` re-applies the triage file to the stored
+    findings and rewrites the statuses and both reports, with no request.
     """
     import datetime
     import random
@@ -3398,6 +3406,11 @@ def verify(ctx, target_dir, product, version, bu, family, latest_only, statuses,
         triaged = triage.load(cfg.config_dir / "verify-triage.yaml")
     except triage.TriageError as exc:
         raise click.ClickException(str(exc)) from exc
+    if retriage:
+        _verify_retriage(ctx, cfg, triaged)
+        return
+    if target_dir is None:
+        raise click.UsageError("--target-dir is required (except with --retriage).")
     if seed is None:
         seed = random.SystemRandom().randrange(1_000_000)
     hosts = {} if skip_published else cfg.verify_base_urls()
@@ -3487,12 +3500,15 @@ def verify(ctx, target_dir, product, version, bu, family, latest_only, statuses,
                         folder.slug, result.version, repair.id,
                         datetime.datetime.now(datetime.UTC).isoformat(timespec="seconds")):
                     console.print(f"    {repair.id} confirmed on staging")
-        marker = {"lost": "[red]x[/red]", "issues": "[yellow]![/yellow]"}.get(result.outcome, "[green]ok[/green]")
+        marker = {"lost": "[red]x[/red]", "issues": "[yellow]![/yellow]", "logged": "[magenta]~[/magenta]"}.get(
+            result.outcome, "[green]ok[/green]")
         console.print(f"  {marker} {folder.relative.as_posix()}: {result.outcome}, {len(result.rows)} old page(s), "
                       f"{result.errors} lost, {result.warnings} warning(s), {result.explained} explained")
 
     _refresh_status(manager)
-    _, index_html = report.write_index(cfg.root_dir / "reports", _verify_index(manager, state))
+    index_rows = _verify_index(manager, state)
+    _, index_html = report.write_index(cfg.root_dir / "reports", index_rows)
+    _write_issues(cfg, manager, state, triaged, repair_states)
     recorded = [f for _, _, run_findings, _ in runs.values() for f in run_findings.recorded]
     totals: Counter = Counter()
     for finding in recorded:
@@ -3506,6 +3522,7 @@ def verify(ctx, target_dir, product, version, bu, family, latest_only, statuses,
     if fetcher is not None:
         console.print(f"[dim]{fetcher.requests} request(s) made; the rest came from cache/verify/.[/dim]")
     console.print(f"Index: {escape(str(index_html))}")
+    _print_progress(index_rows, {verifier.catalog.products[f.slug].bu for f in folders})
     errors = sum(1 for f in recorded if f.severity is Severity.ERROR and "[triage:" not in f.message)
     for _, run_state, run_findings, _ in runs.values():
         run_findings.finish(exit_code=1 if errors else 0)
@@ -3513,6 +3530,52 @@ def verify(ctx, target_dir, product, version, bu, family, latest_only, statuses,
             run_state.close()
     if errors:
         raise click.exceptions.Exit(1)
+
+
+def _write_issues(cfg, manager: CatalogManager, state, triaged, repair_states) -> None:
+    """Phase 77: `reports/verify/ISSUES.*` from every version's latest findings."""
+    from docushift.verify import issues
+
+    family_of = {slug: p.family for slug, p in manager.load().products.items()}
+    current = {(r["slug"], r["version"]) for r in manager.status_rows()
+               if r.get("_verify_status") not in ("", "not-verified", "stale")}
+    rows = issues.build(state, triaged, repair_states, family_of, current)
+    _, html = issues.write(cfg.root_dir / "reports", rows)
+    unlogged = sum(1 for r in rows if r["kind"] == "unlogged")
+    console.print(f"Issues: {len(rows)} kind(s), {unlogged} not logged in Jira yet: {escape(str(html))}")
+
+
+def _print_progress(index_rows, bus) -> None:
+    """Phase 77: verified / left / outcomes for each BU the wave touched."""
+    from docushift.verify import report
+
+    table = Table(title="verify progress")
+    columns = ("bu", "published", "verified", "left", *report.OUTCOMES)
+    for column in columns:
+        table.add_column(column, justify="left" if column == "bu" else "right")
+    for row in report.progress(index_rows):
+        if row["family"] == "(all)" and row["bu"] in bus:
+            table.add_row(*(row[c] for c in columns))
+    console.print(table)
+
+
+def _verify_retriage(ctx, cfg, triaged) -> None:
+    """`verify --retriage` (Phase 77): statuses and reports from stored findings, no request."""
+    from docushift.verify import issues, report
+
+    manager = _catalog_manager(ctx)
+    state = cfg.state_store()
+    repair_states = {key: row["state"] for key, row in state.repair_rows().items()}
+    changed = issues.retriage(state, triaged, repair_states)
+    for slug, version, old, new in changed:
+        console.print(f"  {slug} {version}: {old} -> {new}")
+    console.print(f"{len(changed)} version(s) changed status; {len(triaged)} triage entr(ies).")
+    _refresh_status(manager)
+    index_rows = _verify_index(manager, state)
+    _, index_html = report.write_index(cfg.root_dir / "reports", index_rows)
+    _write_issues(cfg, manager, state, triaged, repair_states)
+    console.print(f"Index: {escape(str(index_html))}")
+    _print_progress(index_rows, {r["bu"] for r in index_rows})
 
 
 def _verify_index(manager: CatalogManager, state) -> list[dict[str, str]]:
