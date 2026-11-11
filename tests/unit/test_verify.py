@@ -311,6 +311,36 @@ def _anchor_site(tmp_path: Path):
     return folder, published.check(fetcher, VERSION, toc, folder), toc
 
 
+def test_a_menu_pairing_that_lands_on_another_page_is_not_compared(tmp_path: Path) -> None:
+    """DOCOPS-352: with pages left out of the menu, the pairing slipped (FTL 7.1.0
+    Transport Bridge was read against "IPv4 and IPv6"). The page's own address is
+    tried; failing that, the page is unmatched, not reported as lost text."""
+    folder = tmp_path / "online-help" / "1-0-0"
+    folder.mkdir(parents=True)
+    (folder / "guide.md").write_text("# Guide\n\nAll about the guide here.\n", encoding="utf-8")
+    (folder / "bridge.md").write_text("---\ntitle: Bridge\n---\n\n# Bridge\n\nA bridge forwards messages.\n",
+                                      encoding="utf-8")
+    (folder / "gone.md").write_text("# Gone\n\nThis page is not served anywhere.\n", encoding="utf-8")
+    ipv = "/us/en/prod/online-help/1-0-0/ipv.html"
+    menu = (_item("Guide", "/us/en/prod/online-help/1-0-0/guide.html")
+            + _item("Bridge", ipv) + _item("Gone", ipv))
+    fetcher = FakeFetcher({
+        VERSION: (200, _served("", menu=menu).encode()),
+        f"{BASE}/us/en/prod/online-help/1-0-0/guide.html": (
+            200, _served("/guide", "<p>All about the guide here.</p>", menu).encode()),
+        f"{BASE}{ipv}": (200, _served("/ipv", "<p>Addresses.</p>", menu, title="IPv4 and IPv6").encode()),
+        f"{BASE}/us/en/prod/online-help/1-0-0/bridge.html": (
+            200, _served("/bridge", "<p>A bridge forwards messages.</p>", menu, title="Bridge").encode()),
+    })
+    toc = root([Node("Guide", "guide.md"), Node("Bridge", "bridge.md"), Node("Gone", "gone.md")])
+
+    checked = published.check(fetcher, VERSION, toc, folder)
+
+    bridge, gone = checked.pages["bridge.md"], checked.pages["gone.md"]
+    assert (bridge.status, bridge.url, bridge.missing) == ("ok", f"{BASE}/us/en/prod/online-help/1-0-0/bridge.html", [])
+    assert (gone.status, gone.url, gone.missing) == ("unmatched", "", [])
+
+
 def test_link_targets_are_ok_differs_or_missing(tmp_path: Path) -> None:
     folder, checked, toc = _anchor_site(tmp_path)
     redirects = [("https://old/a.htm", "guide.md#modes-roles"), ("https://old/b.htm", "guide.md#kept"),

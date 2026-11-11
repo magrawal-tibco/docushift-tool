@@ -3087,6 +3087,25 @@ its products and versions; the suite and `ruff` pass.*
   **fixed before the waves** (user), DOCOPS-350: `text._LINK` lets link text hold escapes,
   1 test; `#Using` is a dead bookmark in the source, `source`. Left unlogged: Spotfire Data
   Virtualization (user: not now).
+- **EMS wave (2026-11-11):** 7 of 66 versions are on staging; all `logged`. New: pages placed
+  under a heading row (`page.md#anchor`) in `toc.yml` are dropped from the staging menu with
+  the row, DOCOPS-351 (2,218 pages in 120 TIBCO versions sit so); the duplicated Appendix B
+  rows of 10.4.0/10.4.1 pair crosswise, `accepted`.
+- **FTL wave (2026-11-12):** 12 versions, all `lost`. Logged: escaped `\<` in headings
+  shown as `\&lt;` with another id, DOCOPS-353 (AEM; 1,007 targets); FTL/eFTL 7.1.3
+  `301.yml` with no page rows, DOCOPS-354; DOCOPS-351 again, some of those pages 404. Topics
+  shared by several guides pair crosswise in the old TOC (`TOC_MOVED`, `accepted`); metric
+  catalogs absent from the package and `#Assign` / `#Manually` dead bookmarks, `source`.
+- **Fixed before the next wave (user), DOCOPS-352:** where staging leaves pages out of the
+  menu, `toc.by_title` pairs the rest by position and a page was compared with another
+  (FTL 7.1.0 Transport Bridge against "IPv4 and IPv6": 144 sentences, 11 images, 8 heading
+  targets, all false). `published._page` now compares the served `h1#topic-title` with the
+  page's own title (front matter `title:`, else `# `), one inside the other counting as the
+  same (`same_title`: WebWorks serves "Appendix B Error Messages"); a page the menu points
+  at its own address (`own_url`: its repo path under the version) is trusted whatever its
+  title. On a mismatch the own address is tried, else the page is `unmatched` (its menu
+  finding stands, nothing else). Measured on the cached pages of the 30 versions verified:
+  2,139 pages, 39 mismatched (FTL 37, EMS 10.4.0 2), every one a real slip; no other. 1 test.
 
 ---
 

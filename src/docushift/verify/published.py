@@ -27,6 +27,7 @@ The probe (2026-10-22) settled the shape this module reads:
 from __future__ import annotations
 
 import hashlib
+import re
 from dataclasses import dataclass, field
 from pathlib import Path, PurePosixPath
 from urllib.parse import unquote, urljoin, urlsplit
@@ -114,7 +115,7 @@ class PageCheck:
 
     key: str
     url: str
-    status: str = "ok"            # ok | missing | unmatched
+    status: str = "ok"            # ok | missing | unmatched | mismatched (another page's title)
     text_percent: float = 100.0
     missing: list[str] = field(default_factory=list)
     callouts: int = 0
@@ -169,11 +170,50 @@ def check(fetcher: Fetcher, urls: list[str] | str, toc: Node, folder: Path) -> V
         if not href:
             result.pages[page] = PageCheck(page, "", status="unmatched")
             continue
-        result.pages[page] = _page(fetcher, page, href, folder)
+        own = own_url(href, folder.name, page)
+        # At its own address the page is the right one, whatever its served title.
+        checked = _page(fetcher, page, href, folder, check_title=href != own)
+        if checked.status == "mismatched":
+            retry = _page(fetcher, page, own, folder, check_title=False) if own else None
+            checked = retry if retry is not None and retry.status == "ok" else PageCheck(page, "", status="unmatched")
+        result.pages[page] = checked
     return result
 
 
-def _page(fetcher: Fetcher, page: str, url: str, folder: Path) -> PageCheck:
+def own_url(menu_url: str, segment: str, page: str) -> str:
+    """`page` at its repo path under the version, where TIBCO serves most pages.
+
+    Tried only when the menu's pairing led to another page (DOCOPS-352).
+    """
+    marker = f"/{segment}/"
+    if marker not in menu_url or not page.endswith(".md"):
+        return ""
+    return menu_url.split(marker, 1)[0] + marker + page[: -len(".md")].lower() + ".html"
+
+
+_FRONT = re.compile(r"\A---\r?\n(.*?)\r?\n---", re.DOTALL)
+_FRONT_TITLE = re.compile(r"^title:[ \t]*(.+?)[ \t]*$", re.MULTILINE)
+_H1 = re.compile(r"^# (.+)$", re.MULTILINE)
+
+
+def page_title(markdown: str) -> str:
+    """The page's title: its front matter `title:`, else its first `# ` heading."""
+    front = _FRONT.match(markdown)
+    found = _FRONT_TITLE.search(front.group(1)) if front else None
+    if found:
+        return found.group(1).strip("'\"")
+    heading = _H1.search(markdown)
+    return heading.group(1) if heading else ""
+
+
+def same_title(served: str, expected: str) -> bool:
+    """One title's words run inside the other's: "Error Messages" is served as
+    "Appendix B Error Messages" (WebWorks), "Docker" as "Docker Containerization for eFTL"."""
+    a, b = " ".join(texts.words(served)), " ".join(texts.words(expected))
+    return not a or not b or f" {a} " in f" {b} " or f" {b} " in f" {a} "
+
+
+def _page(fetcher: Fetcher, page: str, url: str, folder: Path, check_title: bool = True) -> PageCheck:
     out = PageCheck(page, url)
     fetched = fetcher.get(url)
     if not fetched.ok or not is_page(fetched.text, url):
@@ -189,12 +229,18 @@ def _page(fetcher: Fetcher, page: str, url: str, folder: Path) -> PageCheck:
     if article is None:
         out.status = "missing"
         return out
+    title = soup.select_one(TITLE)
+    # The menu is matched by title; where staging leaves pages out of it the pairing
+    # can slip and land on another page (DOCOPS-352, FTL 7.1.0). Not compared then.
+    expected = page_title(local_md)
+    if check_title and title is not None and not same_title(title.get_text(" "), expected):
+        out.status = "mismatched"
+        return out
 
     out.callouts = len(article.select('[data-attr-keyref^="!"]'))
     out.anchors = {str(tag.get("id")) for tag in article.find_all(id=True)}
     # The page title is rendered above the article, outside it; the Markdown's
     # `# Title` is page text all the same.
-    title = soup.select_one(TITLE)
     heading = [" ".join(title.get_text(" ").split())] if title is not None else []
     out.headings = [(heading[0], "")] if heading else []
     for tag in article.find_all(_HEADINGS):

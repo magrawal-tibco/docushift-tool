@@ -175,6 +175,88 @@ triage:
     reason: >-
       EMS 10.4.0 and 10.4.1 list the two Appendix B topics twice in the menu, as the
       original help did; both copies are kept and the check pairs them crosswise.
+  - code: VERIFY_PUBLISHED_TOC_ENTRY_MISSING
+    decision: logged
+    ticket: DOCOPS-351
+    slug: "tibco-*ftl-enterprise-edition"
+    reason: >-
+      FTL pages sit in toc.yml under heading rows (page.md#anchor); staging drops them from the menu, and some are not served at all (404). Fix later.
+  - code: VERIFY_PUBLISHED_TOC_MOVED
+    decision: logged
+    ticket: DOCOPS-351
+    slug: "tibco-*ftl-enterprise-edition"
+    reason: >-
+      FTL pages sit in toc.yml under heading rows (page.md#anchor); staging drops them from the menu, and some are not served at all (404). Fix later.
+  - code: VERIFY_PUBLISHED_TOC_ORDER
+    decision: logged
+    ticket: DOCOPS-351
+    slug: "tibco-*ftl-enterprise-edition"
+    reason: >-
+      FTL pages sit in toc.yml under heading rows (page.md#anchor); staging drops them from the menu, and some are not served at all (404). Fix later.
+  - code: VERIFY_REDIRECT_UNSERVED
+    decision: logged
+    ticket: DOCOPS-351
+    slug: "tibco-*ftl-enterprise-edition"
+    reason: >-
+      FTL pages sit in toc.yml under heading rows (page.md#anchor); staging drops them from the menu, and some are not served at all (404). Fix later.
+  - code: VERIFY_REDIRECT_UNMAPPED
+    decision: logged
+    ticket: DOCOPS-354
+    slug: "tibco-*ftl-enterprise-edition"
+    version: "7.1.3"
+    reason: >-
+      The 7.1.3 301.yml lists only the documents, no page rows. Fix later.
+  - code: VERIFY_TOC_MOVED
+    decision: accepted
+    slug: "tibco-*ftl-enterprise-edition"
+    reason: >-
+      FTL repeats a topic in several guides (Administration, Development, Security); each guide keeps its own page, and the check pairs the old menu entries with the copies crosswise. Not a content change.
+  - code: VERIFY_TOPIC_MISSING
+    decision: source
+    slug: "tibco-*ftl-enterprise-edition"
+    path: "*/monitoring/catalog-of-*.htm"
+    reason: >-
+      The old menu names monitoring/catalog-of-*.htm topics that are not in the original package; broken on the old site too.
+  - code: VERIFY_PUBLISHED_ANCHOR_MISSING
+    decision: source
+    slug: "tibco-*ftl-enterprise-edition"
+    path: "*#Assign"
+    reason: >-
+      The source links to a bookmark #Assign that does not exist on the page; broken on the old site too.
+  - code: VERIFY_PUBLISHED_ANCHOR_MISSING
+    decision: source
+    slug: "tibco-*ftl-enterprise-edition"
+    path: "*#Manually"
+    reason: >-
+      The source links to a bookmark #Manually that does not exist on the page; broken on the old site too.
+  - code: VERIFY_PUBLISHED_ANCHOR_MISSING
+    decision: logged
+    ticket: DOCOPS-353
+    slug: "tibco-*ftl-enterprise-edition"
+    path: "*/ftl-server-web-api/*#*"
+    reason: >-
+      Headings with an escaped < (GET \<chan_name>/...) are shown on staging as \&lt; and get another id. For AEM.
+  - code: VERIFY_PUBLISHED_ANCHOR_MISSING
+    decision: logged
+    ticket: DOCOPS-353
+    slug: "tibco-*ftl-enterprise-edition"
+    path: "*eftl-service-monitoring.md#*"
+    reason: >-
+      Headings with an escaped < (GET \<chan_name>/...) are shown on staging as \&lt; and get another id. For AEM.
+  - code: VERIFY_PUBLISHED_ANCHOR_MISSING
+    decision: logged
+    ticket: DOCOPS-353
+    slug: "tibco-*ftl-enterprise-edition"
+    path: "*eftl-rest-api.md#*"
+    reason: >-
+      Headings with an escaped < (GET \<chan_name>/...) are shown on staging as \&lt; and get another id. For AEM.
+  - code: VERIFY_PUBLISHED_ANCHOR_MISSING
+    decision: logged
+    ticket: DOCOPS-353
+    slug: "tibco-*ftl-enterprise-edition"
+    path: "*monitoring-data-timing-and-interruptions.md#*"
+    reason: >-
+      Headings with an escaped < (GET \<chan_name>/...) are shown on staging as \&lt; and get another id. For AEM.
   - code: VERIFY_PUBLISHED_ANCHOR_MISSING
     decision: source
     slug: tibco-enterprise-message-service

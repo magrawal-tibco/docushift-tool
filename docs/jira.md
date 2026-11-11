@@ -62,6 +62,8 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 **Log** (newest first, one line per session):
 
+- 2026-11-12 — DOCOPS-352 (In Progress, 0.5 SP), 353 (0.25), 354 (0.5) created under DOCOPS-96, AI & CI by edit; DOCOPS-351 note
+  (FTL: some pages under heading rows 404). FTL wave: 12 versions `lost`; shared-topic moves accepted, catalogs and dead bookmarks `source`.
 - 2026-11-11 — DOCOPS-351 created under DOCOPS-96 (Backlog, 1 SP, AI & CI by edit): pages under a heading row hidden from the
   staging menu. EMS wave done (7 of 7 on staging verified, all `logged`); duplicate Appendix B menu rows accepted.
 - 2026-11-11 — DOCOPS-350 → Done, note: EMS 10.5.1 re-checked on staging after the fix, false `TEXT_DROPPED` gone,
@@ -567,6 +569,9 @@ the key; `reports/verify/ISSUES.html` lists every kind with its versions.
 | No `301.yml` (`REDIRECT_MAP_MISSING`) | DOCOPS-271 (existing) | — | 2026-11-11 | redirect rebuild, waits on AEM |
 | Real topics named default.htm / index.htm dropped (`TOPIC_MISSING`; EMS 10.4.0–10.5.1 `users-guide/default.htm`) | DOCOPS-349 | 0.5 | 2026-11-11 | ours, Flare engine stub rule + re-publish |
 | Pages under a heading row hidden from the staging menu (`PUBLISHED_TOC_ENTRY_MISSING` + knock-on `ANCHOR_MISSING`; EMS 10.4.0; 2,218 pages / 120 versions in our menus) | DOCOPS-351 | 1 | 2026-11-11 | AEM shows heading rows, or we lift the pages in toc.yml |
+| `verify` compared some pages with the wrong staging page (menu pairing slips where pages are hidden; false `TEXT_DIFF` / `IMAGE_BROKEN` / `ANCHOR_MISSING`) | DOCOPS-352 | 0.5 | 2026-11-12 | **fixing before the next wave** (user) |
+| Escaped `\<` in headings shown as `\&lt;` on staging, heading id changes (`ANCHOR_MISSING`; FTL/eFTL, 1,007) | DOCOPS-353 | 0.25 | 2026-11-12 | AEM team |
+| FTL and eFTL 7.1.3 `301.yml` has no page rows (`REDIRECT_UNMAPPED`, 884) | DOCOPS-354 | 0.5 | 2026-11-12 | ours, redirect build |
 | `verify` misread escaped brackets in link text (false `TEXT_DROPPED` / `TEXT_DIFF`) | DOCOPS-350 | 0.25 | 2026-11-11 | **Done 2026-11-11**; EMS 10.5.1 re-checked, now `logged` |
 
 Story points are estimates, adjusted when each fix is done.
