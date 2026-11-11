@@ -62,6 +62,8 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 **Log** (newest first, one line per session):
 
+- 2026-11-11 — DOCOPS-351 created under DOCOPS-96 (Backlog, 1 SP, AI & CI by edit): pages under a heading row hidden from the
+  staging menu. EMS wave done (7 of 7 on staging verified, all `logged`); duplicate Appendix B menu rows accepted.
 - 2026-11-11 — DOCOPS-350 → Done, note: EMS 10.5.1 re-checked on staging after the fix, false `TEXT_DROPPED` gone,
   version now `logged`. Only Data Virtualization's kinds remain unlogged (deferred by the user).
 - 2026-11-11 — DOCOPS-349 (Backlog, 0.5 SP) and DOCOPS-350 (In Progress, 0.25 SP) created under DOCOPS-96, AI & CI by edit:
@@ -564,6 +566,7 @@ the key; `reports/verify/ISSUES.html` lists every kind with its versions.
 | Small text differences on staging (`TEXT_DIFF`, the rest) | DOCOPS-348 | 0.5 | 2026-11-11 | to trace; partly `verify` |
 | No `301.yml` (`REDIRECT_MAP_MISSING`) | DOCOPS-271 (existing) | — | 2026-11-11 | redirect rebuild, waits on AEM |
 | Real topics named default.htm / index.htm dropped (`TOPIC_MISSING`; EMS 10.4.0–10.5.1 `users-guide/default.htm`) | DOCOPS-349 | 0.5 | 2026-11-11 | ours, Flare engine stub rule + re-publish |
+| Pages under a heading row hidden from the staging menu (`PUBLISHED_TOC_ENTRY_MISSING` + knock-on `ANCHOR_MISSING`; EMS 10.4.0; 2,218 pages / 120 versions in our menus) | DOCOPS-351 | 1 | 2026-11-11 | AEM shows heading rows, or we lift the pages in toc.yml |
 | `verify` misread escaped brackets in link text (false `TEXT_DROPPED` / `TEXT_DIFF`) | DOCOPS-350 | 0.25 | 2026-11-11 | **Done 2026-11-11**; EMS 10.5.1 re-checked, now `logged` |
 
 Story points are estimates, adjusted when each fix is done.
@@ -573,6 +576,7 @@ Story points are estimates, adjusted when each fix is done.
 | Pilot | 2026-10-23 | ibi™ AI Assistant 9.3.8, local + staging + live | 1 | explained (5 alt texts → DOCOPS-255; 61 note labels → DOCOPS-250) | DOCOPS-249 |
 | ibi translated, Phase 66 | 2026-10-28 | `--locale` ja-jp (Reporting Server, WebFOCUS), de-de, fr-fr, es-es (WebFOCUS), local | 23 | all `lost` from page findings; Client 9.3.8 ~1,070 per language are menu entries to pages the language never shipped | DOCOPS-262, 263 |
 | ibi, Phase 66 | 2026-10-27 | `--bu ibi` per family, local only; translated folders not checked (open issue) | 196 | PDF-only: 102 of 102 `clean` (iWay BAM and TPM 8.0.5 were on remote `wip` since 26 Oct; the local checkout was behind). No document finding anywhere. Help: Container Editions 32/32 and Legacy clean; `lost` from page findings: WebFOCUS 22, Reporting Server 9, FOCUS 9, DI-ISM 2 | DOCOPS-258, 261 Done; 259, 260, 262, 263 noted, open |
+| EMS | 2026-11-11 | `--bu tibco --family ems`, `--latest-only` then `--status not-verified`; 7 of 66 versions are on staging | 7 | all `logged` (10.4.0 `lost` → `logged` with DOCOPS-351) | DOCOPS-338, 351 |
 | EMS 10.5.1 re-check | 2026-11-11 | one version, local + staging + 5 live, after the DOCOPS-350 fix | 1 | `logged` (DOCOPS-343, 344, 345, 347, 348, 349; `#Using` = source) | DOCOPS-338 |
 | Container Editions | 2026-10-23 | `--bu ibi --family container-editions`, local + staging + live | 20 | all `lost`: published copy (5 Oct) predates the conversion (7 Oct); front pages and link text are the old copy's losses. Re-sync, then re-check. Staging serves 2 of 20 | DOCOPS-258 |
 

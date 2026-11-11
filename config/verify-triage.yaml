@@ -141,6 +141,40 @@ triage:
       engine skips every file named default.htm as a start-page stub
       (engines/flare.py STUB_FILENAMES). EMS 10.4.0-10.5.1. Fix later.
 
+  - code: VERIFY_PUBLISHED_TOC_ENTRY_MISSING
+    decision: logged
+    ticket: DOCOPS-351
+    slug: tibco-enterprise-message-service
+    version: 10.4.0
+    reason: >-
+      Four pages sit in toc.yml under a heading row (page.md#anchor); staging drops
+      heading rows from the menu and the pages under them with it. The other two
+      entries reported are the knock-on of the menu pairing. Fix later.
+  - code: VERIFY_PUBLISHED_ANCHOR_MISSING
+    decision: logged
+    ticket: DOCOPS-351
+    slug: tibco-enterprise-message-service
+    version: 10.4.0
+    path: "*/unsupported-tibemsd-options.md#*"
+    reason: >-
+      The page is hidden from the staging menu (under a heading row), so its
+      heading was looked for on the wrong served page.
+  - code: VERIFY_PUBLISHED_ANCHOR_MISSING
+    decision: logged
+    ticket: DOCOPS-351
+    slug: tibco-enterprise-message-service
+    version: 10.4.0
+    path: "*/fips140-2.md#*"
+    reason: >-
+      The page is hidden from the staging menu (under a heading row), so its
+      heading was looked for on the wrong served page.
+  - code: VERIFY_TOC_MOVED
+    decision: accepted
+    slug: tibco-enterprise-message-service
+    path: "*/appendix-b-monitor-messages.md#description-of-*"
+    reason: >-
+      EMS 10.4.0 and 10.4.1 list the two Appendix B topics twice in the menu, as the
+      original help did; both copies are kept and the check pairs them crosswise.
   - code: VERIFY_PUBLISHED_ANCHOR_MISSING
     decision: source
     slug: tibco-enterprise-message-service
