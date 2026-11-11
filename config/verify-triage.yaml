@@ -54,3 +54,79 @@ triage:
       The same translated Functions Reference menu heads its wf-server, wf-client
       and focus branches with _z-temp-pages/ pages no package ships (55 entries per
       language). Dead on the old site too.
+
+  # Phase 77, 2026-11-11: logged in Jira, to be fixed later. Narrow entries first:
+  # the first matching entry wins.
+  - code: VERIFY_PUBLISHED_ANCHOR_MISSING
+    decision: logged
+    ticket: DOCOPS-344
+    slug: tibco-enterprise-message-service
+    path: "*configuring-the-ftl-server-cluster.md*"
+    reason: >-
+      Staging serves "Configuring the FTL Server Cluster" with an empty article;
+      the Markdown is ordinary. For the AEM team.
+
+  - code: VERIFY_PUBLISHED_TEXT_DIFF
+    decision: logged
+    ticket: DOCOPS-344
+    slug: tibco-enterprise-message-service
+    path: "*configuring-the-ftl-server-cluster.md"
+    reason: The same empty page.
+
+  - code: VERIFY_PUBLISHED_ANCHOR_MISSING
+    decision: logged
+    ticket: DOCOPS-343
+    slug: tibco-enterprise-message-service
+    path: "*tibemsconnectionmetadata.md*"
+    reason: >-
+      A converted `<a id>` spanning three lines (a Flare bookmark named after a
+      table) cuts the page short on staging. Converter fix parked.
+
+  - code: VERIFY_PUBLISHED_TEXT_DIFF
+    decision: logged
+    ticket: DOCOPS-343
+    slug: tibco-enterprise-message-service
+    path: "*tibemsconnectionmetadata.md"
+    reason: The same broken anchor.
+
+  - code: VERIFY_PUBLISHED_TEXT_DIFF
+    decision: logged
+    ticket: DOCOPS-343
+    slug: tibco-enterprise-message-service
+    path: "*appendix-b-monitor-messages.md"
+    reason: The same kind of broken anchor, on Appendix B.
+
+  - code: VERIFY_PUBLISHED_ANCHOR_DIFFERS
+    decision: logged
+    ticket: DOCOPS-345
+    reason: >-
+      Staging writes heading ids by its own rule (punctuation kept, `_` as `-`,
+      no number on a repeat). Every case is in reports/verify/anchor-targets.csv;
+      sent to the AEM team 2026-11-11.
+
+  - code: VERIFY_PUBLISHED_PAGE_MISSING
+    decision: logged
+    ticket: DOCOPS-346
+    slug: tibco-streaming
+    reason: Streaming's online help is not served on staging; reported to the AEM team.
+
+  - code: VERIFY_PUBLISHED_IMAGE_BROKEN
+    decision: logged
+    ticket: DOCOPS-347
+    reason: >-
+      A picture not on the served page, or served with other bytes (IBM i pages;
+      EMS SVG diagrams). To trace.
+
+  - code: VERIFY_PUBLISHED_TEXT_DIFF
+    decision: logged
+    ticket: DOCOPS-348
+    reason: >-
+      A few sentences not found on the served page; several are verify misreading
+      raw `<a id>` and link markup. To trace page by page.
+
+  - code: VERIFY_REDIRECT_MAP_MISSING
+    decision: logged
+    ticket: DOCOPS-271
+    reason: >-
+      116 of 501 TIBCO help versions have no 301.yml; the redirect rebuild waits on
+      the AEM team's new 301.yml shape (planning.md Phase 58, 2026-11-03).

@@ -62,6 +62,8 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 **Log** (newest first, one line per session):
 
+- 2026-11-11 — DOCOPS-343–348 created under DOCOPS-96 (Backlog, `docushift` `verify-issue` `tibco`, AI & CI by edit; SP
+  estimates 0.5/0.25/1/0.25/0.5/0.5): the pilots' issue kinds, logged in `verify-triage.yaml`; `--retriage`: 3 versions → logged.
 - 2026-11-11 — DOCOPS-338 created under DOCOPS-96 (1 SP, AI & Content Intelligence, `docushift` `tibco` `ibi`;
   component set by edit), In Progress: Phase 77, verify every published version, log issues by kind, fix later.
   Tool built (logged status, `--retriage`, ISSUES list, progress). DOCOPS-257 note: AEM link-target list sent.
@@ -546,9 +548,17 @@ ibi redirect lists is DOCOPS-270 (under DOCOPS-149), and waits on Phase 60.
 in its own phase. The triage entry (`config/verify-triage.yaml`, `decision: logged`) carries
 the key; `reports/verify/ISSUES.html` lists every kind with its versions.
 
-| Kind (finding, narrowed) | Jira | Logged | Fix |
-|---|---|---|---|
-| (none yet) | | | |
+| Kind (finding, narrowed) | Jira | SP (estimate) | Logged | Fix |
+|---|---|---|---|---|
+| Broken anchor names cut pages short (`ANCHOR_MISSING`, `TEXT_DIFF`; EMS tibemsConnectionMetaData, Appendix B) | DOCOPS-343 | 0.5 | 2026-11-11 | ours, converter + validate + re-publish EMS 10.4.0–10.5.1 |
+| Page served empty (`ANCHOR_MISSING`, `TEXT_DIFF`; EMS FTL Server Cluster) | DOCOPS-344 | 0.25 | 2026-11-11 | AEM team |
+| Heading link targets differ (`ANCHOR_DIFFERS`; list in `anchor-targets.csv`) | DOCOPS-345 | 1 | 2026-11-11 | waits on AEM rule |
+| Streaming online help not served (`PAGE_MISSING`, tibco-streaming) | DOCOPS-346 | 0.25 | 2026-11-11 | AEM team |
+| Images missing or different on staging (`IMAGE_BROKEN`) | DOCOPS-347 | 0.5 | 2026-11-11 | to trace |
+| Small text differences on staging (`TEXT_DIFF`, the rest) | DOCOPS-348 | 0.5 | 2026-11-11 | to trace; partly `verify` |
+| No `301.yml` (`REDIRECT_MAP_MISSING`) | DOCOPS-271 (existing) | — | 2026-11-11 | redirect rebuild, waits on AEM |
+
+Story points are estimates, adjusted when each fix is done.
 
 | Wave | Date | Selection | Versions | Outcome | Jira |
 |---|---|---|---|---|---|
