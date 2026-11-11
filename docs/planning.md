@@ -3079,6 +3079,14 @@ its products and versions; the suite and `ruff` pass.*
   versions; image broken 2; text diff 2; anchor missing 1; Streaming not served 1; 301 map
   missing 1; EMS text dropped / topic missing, local) and Spotfire Data Virtualization's three
   `lost` versions (TOC entries missing 10,510; moved 403).
+- **Logged (2026-11-11):** DOCOPS-343–348 for the pilots' staging kinds, DOCOPS-271 for the
+  missing `301.yml`; then, traced: EMS `users-guide/default.htm` (a real topic, "default"
+  overflow policy) dropped by the Flare engine's stub rule, which skips every
+  `default.htm` / `index.htm` wherever it sits, in EMS 10.4.0–10.5.1, DOCOPS-349; the
+  REST Proxy "dropped" sentences were `verify` misreading `[ems.server_groups\[\]](…)`,
+  **fixed before the waves** (user), DOCOPS-350: `text._LINK` lets link text hold escapes,
+  1 test; `#Using` is a dead bookmark in the source, `source`. Left unlogged: Spotfire Data
+  Virtualization (user: not now).
 
 ---
 

@@ -371,6 +371,18 @@ def test_a_link_around_code_reads_as_its_words() -> None:
     assert texts.coverage(source, page).missing == []
 
 
+def test_a_link_whose_text_has_escaped_brackets_reads_as_its_words() -> None:
+    """DOCOPS-350: EMS REST Proxy pages read as dropped although the sentence was there."""
+    from docushift.verify import text as texts
+
+    page = texts.markdown_text(
+        r"These options apply to each group in the [ems.server_groups\[\]](../ems-options.md#emsserver_groups) array."
+        + "\n")
+    source = texts.Text(["These options apply to each group in the ems.server_groups[] array."])
+    assert page.blocks == source.blocks
+    assert texts.coverage(source, page).missing == []
+
+
 def test_a_footnote_marker_and_a_windows_path_in_raw_html_read_as_their_words() -> None:
     from docushift.verify import text as texts
 

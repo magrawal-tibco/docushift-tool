@@ -130,3 +130,21 @@ triage:
     reason: >-
       116 of 501 TIBCO help versions have no 301.yml; the redirect rebuild waits on
       the AEM team's new 301.yml shape (planning.md Phase 58, 2026-11-03).
+
+  - code: VERIFY_TOPIC_MISSING
+    decision: logged
+    ticket: DOCOPS-349
+    slug: tibco-enterprise-message-service
+    path: "*/users-guide/default.htm"
+    reason: >-
+      A real topic ("default", the overflow policy) dropped because the Flare
+      engine skips every file named default.htm as a start-page stub
+      (engines/flare.py STUB_FILENAMES). EMS 10.4.0-10.5.1. Fix later.
+
+  - code: VERIFY_PUBLISHED_ANCHOR_MISSING
+    decision: source
+    slug: tibco-enterprise-message-service
+    path: "*authentication-using-oauth-2-0.md#Using"
+    reason: >-
+      The source page links "Access Token Expiration" to a bookmark #Using that does
+      not exist (AccessTokenExpiration.htm); broken on the old site too.

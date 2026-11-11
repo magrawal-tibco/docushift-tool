@@ -62,6 +62,8 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 **Log** (newest first, one line per session):
 
+- 2026-11-11 — DOCOPS-349 (Backlog, 0.5 SP) and DOCOPS-350 (In Progress, 0.25 SP) created under DOCOPS-96, AI & CI by edit:
+  EMS dropped `default.htm` topic, logged; verify misreading escaped brackets, fixed before the waves. `#Using` = source.
 - 2026-11-11 — DOCOPS-336 note: Foresight Instream (3 versions) re-merged, headings only, published to
   `content-fix` (36cdd76), pushed. 38 products left.
 - 2026-11-11 — DOCOPS-343–348 created under DOCOPS-96 (Backlog, `docushift` `verify-issue` `tibco`, AI & CI by edit; SP
@@ -559,6 +561,8 @@ the key; `reports/verify/ISSUES.html` lists every kind with its versions.
 | Images missing or different on staging (`IMAGE_BROKEN`) | DOCOPS-347 | 0.5 | 2026-11-11 | to trace |
 | Small text differences on staging (`TEXT_DIFF`, the rest) | DOCOPS-348 | 0.5 | 2026-11-11 | to trace; partly `verify` |
 | No `301.yml` (`REDIRECT_MAP_MISSING`) | DOCOPS-271 (existing) | — | 2026-11-11 | redirect rebuild, waits on AEM |
+| Real topics named default.htm / index.htm dropped (`TOPIC_MISSING`; EMS 10.4.0–10.5.1 `users-guide/default.htm`) | DOCOPS-349 | 0.5 | 2026-11-11 | ours, Flare engine stub rule + re-publish |
+| `verify` misread escaped brackets in link text (false `TEXT_DROPPED` / `TEXT_DIFF`) | DOCOPS-350 | 0.25 | 2026-11-11 | **fixed 2026-11-11**, before the waves (user) |
 
 Story points are estimates, adjusted when each fix is done.
 
