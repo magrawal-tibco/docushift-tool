@@ -3106,6 +3106,10 @@ its products and versions; the suite and `ruff` pass.*
   title. On a mismatch the own address is tried, else the page is `unmatched` (its menu
   finding stands, nothing else). Measured on the cached pages of the 30 versions verified:
   2,139 pages, 39 mismatched (FTL 37, EMS 10.4.0 2), every one a real slip; no other. 1 test.
+  FTL re-run (2026-11-12): 8 of 12 `logged`; 4 still `lost` on 22 targets of pages that
+  share a title across guides ("Key-Value Maps" in Administration and Development), which
+  the menu swapped and the title check cannot see. A title two page rows share is now read
+  at the page's own address first, the menu's address the fallback. 1 test.
 
 ---
 

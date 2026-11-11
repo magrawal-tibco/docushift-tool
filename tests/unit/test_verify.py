@@ -341,6 +341,32 @@ def test_a_menu_pairing_that_lands_on_another_page_is_not_compared(tmp_path: Pat
     assert (gone.status, gone.url, gone.missing) == ("unmatched", "", [])
 
 
+def test_two_pages_sharing_a_title_are_each_read_at_their_own_address(tmp_path: Path) -> None:
+    """DOCOPS-352: FTL keeps "Key-Value Maps" in two guides; matched by title, the menu
+    swapped them, and the titles agree, so only the address can tell them apart."""
+    folder = tmp_path / "online-help" / "1-0-0"
+    (folder / "admin").mkdir(parents=True)
+    (folder / "dev").mkdir()
+    (folder / "admin/maps.md").write_text("# Maps\n\nAdministrators configure maps here.\n", encoding="utf-8")
+    (folder / "dev/maps.md").write_text("# Maps\n\nDevelopers call the map methods here.\n", encoding="utf-8")
+    root_url = "/us/en/prod/online-help/1-0-0"
+    menu = _item("Maps", f"{root_url}/dev/maps.html") + _item("Maps", f"{root_url}/admin/maps.html")
+    fetcher = FakeFetcher({
+        VERSION: (200, _served("", menu=menu).encode()),
+        f"{BASE}{root_url}/admin/maps.html": (
+            200, _served("/admin/maps", "<p>Administrators configure maps here.</p>", menu, title="Maps").encode()),
+        f"{BASE}{root_url}/dev/maps.html": (
+            200, _served("/dev/maps", "<p>Developers call the map methods here.</p>", menu, title="Maps").encode()),
+    })
+    toc = root([Node("Maps", "admin/maps.md"), Node("Maps", "dev/maps.md")])
+
+    checked = published.check(fetcher, VERSION, toc, folder)
+
+    assert checked.pages["admin/maps.md"].url == f"{BASE}{root_url}/admin/maps.html"
+    assert checked.pages["dev/maps.md"].url == f"{BASE}{root_url}/dev/maps.html"
+    assert checked.pages["admin/maps.md"].missing == checked.pages["dev/maps.md"].missing == []
+
+
 def test_link_targets_are_ok_differs_or_missing(tmp_path: Path) -> None:
     folder, checked, toc = _anchor_site(tmp_path)
     redirects = [("https://old/a.htm", "guide.md#modes-roles"), ("https://old/b.htm", "guide.md#kept"),

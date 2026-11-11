@@ -28,6 +28,7 @@ from __future__ import annotations
 
 import hashlib
 import re
+from collections import Counter
 from dataclasses import dataclass, field
 from pathlib import Path, PurePosixPath
 from urllib.parse import unquote, urljoin, urlsplit
@@ -159,6 +160,10 @@ def check(fetcher: Fetcher, urls: list[str] | str, toc: Node, folder: Path) -> V
     pages = pages_only(toc)
     result.menu = by_title(pages, menu)
 
+    # A title two pages share pairs by position, and can swap them: FTL keeps "Key-Value
+    # Maps" in both Administration and Development (DOCOPS-352).
+    shared = Counter(" ".join(texts.words(row.title)) for row, _ in pages.walk()
+                     if row.key is not None and "#" not in row.key)
     for row, _ in pages.walk():
         if row.key is None:
             continue
@@ -171,6 +176,11 @@ def check(fetcher: Fetcher, urls: list[str] | str, toc: Node, folder: Path) -> V
             result.pages[page] = PageCheck(page, "", status="unmatched")
             continue
         own = own_url(href, folder.name, page)
+        if own and own != href and shared[" ".join(texts.words(row.title))] > 1:
+            first = _page(fetcher, page, own, folder, check_title=False)
+            if first.status == "ok":
+                result.pages[page] = first
+                continue
         # At its own address the page is the right one, whatever its served title.
         checked = _page(fetcher, page, href, folder, check_title=href != own)
         if checked.status == "mismatched":
