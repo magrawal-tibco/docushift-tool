@@ -49,7 +49,7 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | Phase 66 runs: every synced PDF-only version verified (15 after a re-extract, 3 Omni-Gen after a re-sync) | DOCOPS-285: dated note with the counts → Done; per-BU results on the BU's verify issue |
 | A fix for merged links whose target contains parentheses is planned | New sub-task under DOCOPS-12, In Progress; Data Management re-published |
 | TIBCO ZIP backup to the shared drive finishes (2,015 versions: every non-retired version of in-scope products, eligible or not, current or archived; `C:/tmp/zip-backup/ledger.csv`; Docs ZIP Archive / TIBCO BU Docs Archive) | DOCOPS-282 (In Progress since 2026-11-06): dated note with counts and failures → Done |
-| The 40 products still showing doubled headings are re-run one at a time (Activation Service 2026-11-09, Reporting Server 2026-11-11 done; 6,414 pages measured 2026-11-09) | DOCOPS-336 (In Progress since 2026-11-09): dated note per family with the before/after count → Done when all read 0 |
+| The 39 products still showing doubled headings are re-run one at a time (Activation Service 2026-11-09, Reporting Server and WebFOCUS Client 2026-11-11 done; 6,414 pages measured 2026-11-09) | DOCOPS-336 (In Progress since 2026-11-09): dated note per family with the before/after count → Done when all read 0 |
 | Every family in a BU has its source ZIPs backed up | DOCOPS-281 (ibi), DOCOPS-282 (TIBCO), DOCOPS-283 (Spotfire, DataSynapse): dated note with gaps → Done |
 | help.scribesoft.com ownership transferred (decided 2026-10-30) | New sub-task under DOCOPS-7, or a dated note on DOCOPS-302 (Done 2026-10-30); point the host at the new site so Scribe's 375 `301.yml` rows apply |
 
@@ -57,6 +57,8 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 **Log** (newest first, one line per session):
 
+- 2026-11-11 — DOCOPS-336 note: ibi WebFOCUS Client (9 versions) re-merged, headings only, published to
+  `content-fix` (efd0cca1), pushed. 39 products left.
 - 2026-11-11 — DOCOPS-336 note: ibi WebFOCUS Reporting Server (9 versions) re-merged, headings only, published to
   `content-fix` (8452d4e3), pushed. 40 products left.
 - 2026-11-09 — DOCOPS-336 note: Activation Service re-merged (1.1.0 one page per step; 1.0.0 headings only) and
