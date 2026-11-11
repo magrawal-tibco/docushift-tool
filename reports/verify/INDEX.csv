@@ -617,7 +617,7 @@ tibco,ems,tibco-enterprise-message-service,10.4.1,not-verified,,,,,,,,,
 tibco,ems,tibco-enterprise-message-service,10.4.3,not-verified,,,,,,,,,
 tibco,ems,tibco-enterprise-message-service,10.4.4,not-verified,,,,,,,,,
 tibco,ems,tibco-enterprise-message-service,10.5.0,not-verified,,,,,,,,,
-tibco,ems,tibco-enterprise-message-service,10.5.1,lost,2026-11-11,local+staging+live,1443,5,0,181,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=57 VERIFY_PUBLISHED_ANCHOR_MISSING=7 VERIFY_PUBLISHED_CALLOUT_UNRENDERED=492 VERIFY_PUBLISHED_IMAGE_BROKEN=14 VERIFY_PUBLISHED_TEXT_DIFF=8 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=675 VERIFY_TEXT_DROPPED=5 VERIFY_TOPIC_MISSING=1,312e3e4,reports/verify/tibco/tibco-enterprise-message-service/10.5.1-2026-11-11.csv
+tibco,ems,tibco-enterprise-message-service,10.5.1,logged,2026-11-11,local+staging+live,1443,0,0,179,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=57 VERIFY_PUBLISHED_ANCHOR_MISSING=7 VERIFY_PUBLISHED_CALLOUT_UNRENDERED=492 VERIFY_PUBLISHED_IMAGE_BROKEN=14 VERIFY_PUBLISHED_TEXT_DIFF=6 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=675 VERIFY_TOPIC_MISSING=1,312e3e4,reports/verify/tibco/tibco-enterprise-message-service/10.5.1-2026-11-11.csv
 tibco,flogo,tibco-flogo,2.26.6,not-verified,,,,,,,,,
 tibco,flogo,tibco-flogo,2.26.7,not-verified,,,,,,,,,
 tibco,flogo,tibco-flogo,2.26.8,not-verified,,,,,,,,,
