@@ -46,6 +46,41 @@ They affect every product, so they live here once rather than under each
 product. The check records each one as already explained, so it does not hide a
 new loss; the decisions are kept in the tool's triage file.
 
+### Section entries of a merged page are not shown in the menu
+
+- **Status:** Accepted; to be raised with the AEM team
+- **Owner:** user (DOCOPS-257)
+- **Raised:** 11 Nov 2026
+- **Blocks publishing:** no
+
+When short topics are merged into one page, each topic stays listed in the
+page's table of contents as a section. The TIBCO staging site's left-hand menu
+shows only the pages; the sections appear in the page's "In this article"
+panel instead. Accepted on 11 Nov 2026 so the checks can go on; the user is
+asking the AEM team whether the menu should show them. The check now compares
+the menu with pages only and looks for each section as a heading on its page.
+
+### Heading links are written differently by the staging site
+
+- **Status:** Waiting on the AEM team (every case in the list reported by the user, 11 Nov 2026)
+- **Owner:** user (DOCOPS-257)
+- **Raised:** 11 Nov 2026
+- **Blocks publishing:** no, but links to a section land at the top of the page
+
+The tool names a heading's link target by dropping punctuation, as GitHub does
+(`Modes, Roles, and States` → `modes-roles-and-states`), and numbers a repeated
+heading (`installation-1`). The TIBCO staging site keeps the punctuation
+(`modes,-roles,-and-states`, `bridges.conf`, `jms-2.0-specification`), turns `_`
+into `-`, and does not number repeats. In four products checked on 11 Nov 2026,
+49 section entries point at a target the served page does not have, so the
+reader lands at the top of the page, not on the section. The same holds for
+any link into a section with such a heading, and every `301.yml` redirect that
+points at one. User, 11 Nov 2026: to be confirmed with the AEM team; until then
+each affected target counts as an issue and is kept in
+`reports/verify/anchor-targets.csv` (product, page, our target, the site's id,
+where it is used). Then: change the tool's rule to the site's (re-publishing every
+affected page and `301.yml`), or the AEM team follows the GitHub rule.
+
 ### Picture descriptions dropped when they contain `/`, `:` or `⌘`
 
 - **Status:** Waiting

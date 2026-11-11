@@ -1841,6 +1841,15 @@ docushift --locale en-us verify --target-dir ../ibi-docs-aem --bu ibi --family w
     the lowest-scoring pages with links to old and new;
   - `reports/verify/INDEX.html` (and `INDEX.csv`): every published version and its
     latest result, verified or not, so the rollout's progress is one page;
+  - `reports/verify/anchor-targets.csv` (staging runs, primary language): every link
+    target into a page's section that staging serves under another heading id
+    (`differs`, with the served id) or not at all (`missing`). One row per target,
+    with the old docs.tibco.com page to compare against (`old_url`; `old_url_is` says
+    whether it is the section's own redirect, the merged topic's that holds it, or the
+    page's), the staging page opened at the served heading, where the target is used
+    (`toc`, `301`, `link`, with counts) and an example. A run
+    replaces its own versions' rows. It is the list for the AEM team while the
+    heading-id rule is open, and the work list once it is settled;
   - `_verify_status` and `_verify_date` in `versions.csv`, filterable in Excel.
 - **What a status means:**
   - `lost`: something is gone that nobody has explained;

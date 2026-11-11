@@ -15,12 +15,12 @@ from docushift.models import Catalog, SourceEngine
 from docushift.sync import redirects
 from docushift.reporting.findings import FindingsRun
 from docushift.validation.tree import walk
-from docushift.verify import images, live, published
+from docushift.verify import anchors, images, live, published
 from docushift.verify import text as texts
 from docushift.verify import redirects as redirect_maps
 from docushift.verify.driver import Verifier
 from docushift.verify.fetch import Fetched
-from docushift.verify.toc import Node, by_page, by_title, root
+from docushift.verify.toc import Node, by_page, by_title, pages_only, root
 from tests.conftest import make_product, make_version
 from tests.unit.test_flare import build, manifest, toc_files, topic
 
@@ -272,6 +272,92 @@ def test_staging_reports_unlabelled_notes_dropped_alt_text_and_changed_bytes(tmp
     assert page.callouts == 1 and page.missing == []
     assert page.alt_dropped == ["images/a.png"]
     assert page.broken_images == ["images/b.png: served bytes differ from the repo"]
+
+
+def test_the_menu_is_compared_with_page_rows_only() -> None:
+    """The staging menu lists pages, not a merged page's sections (TIBCO, 2026-11-09)."""
+    local = root([Node("Guide", "guide.md", [
+        Node("Intro", "guide.md#intro", [Node("Child page", "child.md"), Node("Deep", "guide.md#deep")]),
+        Node("Other", "other.md")])])
+    served = root([Node("Guide", ref="u/guide", children=[Node("Child page", ref="u/child"),
+                                                          Node("Other", ref="u/other")])])
+
+    pruned = pages_only(local)
+
+    assert [c.key for c in pruned.children[0].children] == ["child.md", "other.md"]
+    assert by_title(pruned, served).issues == []
+
+
+def _anchor_site(tmp_path: Path):
+    """One merged page whose served heading ids follow the TIBCO site's rule (2026-11-11)."""
+    folder = tmp_path / "online-help" / "1-0-0"
+    folder.mkdir(parents=True)
+    (folder / "guide.md").write_text(
+        "# Guide\n\n## Kept\n\n## Modes, Roles\n\n## Guide\n\nSee [modes](#modes-roles).\n", encoding="utf-8")
+    (folder / "other.md").write_text("# Other\n\nRead [modes](guide.md#modes-roles) first.\n", encoding="utf-8")
+    menu = (_item("Guide", "/us/en/prod/online-help/1-0-0/guide.html")
+            + _item("Other", "/us/en/prod/online-help/1-0-0/other.html"))
+    article = ("<h2 id='kept'>Kept</h2><div class='topic' id='modes,-roles'><h2>Modes, Roles</h2></div>"
+               "<h2 id='guide'>Guide</h2><p>See modes.</p>")
+    fetcher = FakeFetcher({
+        VERSION: (200, _served("", menu=menu).encode()),
+        f"{BASE}/us/en/prod/online-help/1-0-0/guide.html": (200, _served("/guide", article, menu).encode()),
+        f"{BASE}/us/en/prod/online-help/1-0-0/other.html": (
+            200, _served("/other", "<p>Read modes first.</p>", menu, title="Other").encode()),
+    })
+    toc = root([Node("Guide", "guide.md", [Node("Kept", "guide.md#kept"), Node("Modes", "guide.md#modes-roles"),
+                                           Node("Again", "guide.md#guide-1"), Node("Gone", "guide.md#gone")]),
+                Node("Other", "other.md")])
+    return folder, published.check(fetcher, VERSION, toc, folder), toc
+
+
+def test_link_targets_are_ok_differs_or_missing(tmp_path: Path) -> None:
+    folder, checked, toc = _anchor_site(tmp_path)
+    redirects = [("https://old/a.htm", "guide.md#modes-roles"), ("https://old/b.htm", "guide.md#kept"),
+                 ("https://old/guide.htm", "guide.md")]
+
+    targets = anchors.gather(toc, redirects, folder, set(checked.pages))
+    for target in targets.values():
+        anchors.classify(target, checked.pages[target.page])
+
+    assert checked.menu.issues == []
+    got = {key: (t.outcome, t.served_id) for key, t in targets.items()}
+    assert got == {"guide.md#kept": ("ok", ""), "guide.md#modes-roles": ("differs", "modes,-roles"),
+                   "guide.md#guide-1": ("differs", "guide"), "guide.md#gone": ("missing", "")}
+    # One target, every source: the menu, a 301 and two links (same page and another page).
+    assert anchors.sources(targets["guide.md#modes-roles"]) == "301:1 link:2 toc:1"
+    # The old page a reader came from: the section's own 301 row, else its topic's,
+    # else the page's own.
+    old = {key: (t.old_url, t.old_url_is) for key, t in targets.items()}
+    assert old["guide.md#modes-roles"] == ("https://old/a.htm", "section")
+    assert old["guide.md#guide-1"] == ("https://old/a.htm", "topic")
+    assert old["guide.md#gone"] == ("https://old/guide.htm", "page")
+
+
+def test_a_target_naming_the_page_title_is_fine_without_an_id() -> None:
+    """The title has no id on staging, but the page opens at its top (anchor list row 121, 2026-11-11)."""
+    check = published.PageCheck("guide.md", "u", headings=[("Appendix B: Monitor Messages", ""), ("Events", "events")])
+    title, other = anchors.Target("guide.md", "appendix-b-monitor-messages"), anchors.Target("guide.md", "gone")
+
+    anchors.classify(title, check)
+    anchors.classify(other, check)
+
+    assert (title.outcome, other.outcome) == ("ok", "missing")
+
+
+def test_the_anchor_list_replaces_only_its_own_versions_rows(tmp_path: Path) -> None:
+    from docushift.utils.csvio import read_rows
+
+    def target(anchor: str, outcome: str) -> anchors.Target:
+        return anchors.Target("guide.md", anchor, outcome=outcome)
+
+    anchors.write_list(tmp_path, "tibco", "prod", "1.0.0", [target("a", "differs"), target("b", "ok")], {}, "d1")
+    anchors.write_list(tmp_path, "tibco", "other", "2.0.0", [target("c", "missing")], {}, "d1")
+    anchors.write_list(tmp_path, "tibco", "prod", "1.0.0", [target("d", "differs")], {}, "d2")
+
+    rows = read_rows(tmp_path / "verify" / anchors.FILE)
+    assert [(r["slug"], r["anchor"], r["outcome"]) for r in rows] == [
+        ("other", "c", "missing"), ("prod", "d", "differs")]
 
 
 # -- live sample -----------------------------------------------------------------

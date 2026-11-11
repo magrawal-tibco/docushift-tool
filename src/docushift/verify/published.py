@@ -9,14 +9,19 @@ The probe (2026-10-22) settled the shape this module reads:
   once, matched to `toc.yml` by title (`toc.by_title`), and each page's URL comes
   from the menu. No URL is derived by rule: below the version, AEM paths follow the
   menu, not the repo (`installation/overview.md` is `installation_guide/overview.html`).
-- **An unknown path is served the docs home page with HTTP 200.** A page counts as
-  found only when its `main[data-page-path]` names the path that was asked for.
+- **An unknown path is served the docs home page with HTTP 200** (ibi; stg-docs.tibco.com
+  answers 404, probe 2026-11-09). A page counts as found only when its
+  `main[data-page-path]` names the path that was asked for.
 - The article is `main#section-topic div.topic-renderer__content`; everything else
   on the page is chrome.
 - Images are served from `/content/dam/.../{slug}/{doc-class}/{segment}/<repo path>`
   with the repo's own bytes, so they are compared by hash.
 - A GitHub alert renders as `<a ... data-attr-keyref="!NOTE">` with no label
   (Phase 56); each one left is counted.
+- **The menu lists pages only** (TIBCO, 2026-11-09). A merged page's section rows
+  (`page.md#anchor`) are not in it; the page's "In this article" panel links them by
+  the heading's `id`. So the menu is compared with `toc.pages_only`; the section rows
+  are checked as link targets (`verify/anchors.py`).
 """
 
 from __future__ import annotations
@@ -31,12 +36,13 @@ from bs4 import BeautifulSoup, Tag
 from docushift.verify import images as pictures
 from docushift.verify import text as texts
 from docushift.verify.fetch import Fetcher
-from docushift.verify.toc import Comparison, Node, by_title
+from docushift.verify.toc import Comparison, Node, by_title, pages_only
 
 MENU = "nav.cmp-navigation"
 ARTICLE = "main#section-topic div.topic-renderer__content"
 PAGE_PATH = "main[data-page-path]"
 TITLE = "main#section-topic h1#topic-title"
+_HEADINGS = ["h1", "h2", "h3", "h4", "h5", "h6"]
 
 
 def version_url(base: str, locale: str, slug: str, doc_class: str, segment: str) -> str:
@@ -114,6 +120,11 @@ class PageCheck:
     callouts: int = 0
     broken_images: list[str] = field(default_factory=list)
     alt_dropped: list[str] = field(default_factory=list)
+    #: Every `id` in the served article: where a link target must land.
+    anchors: set[str] = field(default_factory=set)
+    #: The served headings in order, the title first, as (text, id of the heading or
+    #: of the `div.topic` holding it).
+    headings: list[tuple[str, str]] = field(default_factory=list)
 
 
 @dataclass
@@ -144,9 +155,10 @@ def check(fetcher: Fetcher, urls: list[str] | str, toc: Node, folder: Path) -> V
     if menu is None:
         return result
     result.reachable = True
-    result.menu = by_title(toc, menu)
+    pages = pages_only(toc)
+    result.menu = by_title(pages, menu)
 
-    for row, _ in toc.walk():
+    for row, _ in pages.walk():
         if row.key is None:
             continue
         page = row.key.partition("#")[0]
@@ -179,10 +191,15 @@ def _page(fetcher: Fetcher, page: str, url: str, folder: Path) -> PageCheck:
         return out
 
     out.callouts = len(article.select('[data-attr-keyref^="!"]'))
+    out.anchors = {str(tag.get("id")) for tag in article.find_all(id=True)}
     # The page title is rendered above the article, outside it; the Markdown's
     # `# Title` is page text all the same.
     title = soup.select_one(TITLE)
     heading = [" ".join(title.get_text(" ").split())] if title is not None else []
+    out.headings = [(heading[0], "")] if heading else []
+    for tag in article.find_all(_HEADINGS):
+        holder = tag if tag.get("id") else tag.find_parent("div", class_="topic", id=True)
+        out.headings.append((" ".join(tag.get_text(" ").split()), str(holder.get("id")) if holder else ""))
     served = texts.Text([*heading, *texts.html_blocks(BeautifulSoup(str(article), "html.parser"))])
     cover = texts.coverage(texts.markdown_text(local_md), served)
     out.text_percent, out.missing = cover.percent, cover.missing

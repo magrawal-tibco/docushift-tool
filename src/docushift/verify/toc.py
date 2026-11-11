@@ -42,6 +42,28 @@ def root(children: list[Node]) -> Node:
     return Node("", None, children)
 
 
+def is_section(node: Node) -> bool:
+    """A merged page's section row (`page.md#anchor`), not a page of its own."""
+    return bool(node.key) and "#" in node.key
+
+
+def pages_only(node: Node) -> Node:
+    """`node` with every section row replaced by its own children, pruned alike.
+
+    The staging menu lists pages only (TIBCO probe 2026-11-09; accepted by the user
+    2026-11-11): a merged page's sections are linked from its "In this article" panel.
+    A page listed under a section stays in order, under the nearest page.
+    """
+    kept: list[Node] = []
+    for child in node.children:
+        pruned = pages_only(child)
+        if is_section(child):
+            kept.extend(pruned.children)
+        else:
+            kept.append(pruned)
+    return Node(node.title, node.key, kept, ref=node.ref)
+
+
 def same_title(a: str, b: str) -> bool:
     return words(a) == words(b)
 

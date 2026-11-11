@@ -812,7 +812,14 @@ re-encode does not.
 under a different parent is `moved`, siblings out of order are one `order` per parent
 (moved rows excluded), and a retitled row is a note. `toc.yml` and the served menu are
 matched **by title**, because the menu's links are AEM URLs; that match is also where
-each page's staging URL comes from.
+each page's staging URL comes from. The menu lists pages only, so it is compared with
+`toc.pages_only` (a section row gives way to its children), and each section row
+(`page.md#anchor`) is checked as a link target instead, with every `301.yml` target and
+page link into the version (`verify/anchors.py`): an `id` on the served page is fine; a
+served heading the tool's own rule slugs to the anchor, under another id, is
+`VERIFY_PUBLISHED_ANCHOR_DIFFERS` (warning); no such heading is
+`VERIFY_PUBLISHED_ANCHOR_MISSING` (error). Both go to `reports/verify/anchor-targets.csv`
+(Phase 58, staging pilots).
 
 **The old TOC, per engine** (Phase 58, step 8; `verify/old_toc.py`). Each engine's
 *raw* TOC reader, never its navigation builder, which already drops and folds rows:

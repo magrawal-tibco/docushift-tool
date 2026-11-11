@@ -48,8 +48,8 @@ from docushift.utils.csvio import natural_version_key
 from docushift.utils.slug import is_primary_locale, version_segment
 from docushift.validation import references
 from docushift.validation.tree import VersionFolder, walk
+from docushift.verify import anchors, live, old_toc, published, triage
 from docushift.verify import images as pictures
-from docushift.verify import live, old_toc, published, triage
 from docushift.verify import redirects as redirect_maps
 from docushift.verify import text as texts
 from docushift.verify.fetch import Fetcher
@@ -105,6 +105,9 @@ class VersionResult:
     commit: str = ""
     #: page -> [(code, triage label)], for the report's per-page columns.
     on_page: dict[str, list[tuple[str, str]]] = field(default_factory=dict)
+    #: Link targets checked on staging, and each served page's URL, for the anchor list.
+    anchor_targets: list = field(default_factory=list)
+    staging_urls: dict[str, str] = field(default_factory=dict)
 
     @property
     def outcome(self) -> str:
@@ -453,12 +456,29 @@ class Verifier:
                 self._record(result, "VERIFY_PUBLISHED_IMAGE_BROKEN", folder, page, detail)
             for rel in check.alt_dropped:
                 self._record(result, "VERIFY_PUBLISHED_ALT_DROPPED", folder, page, f"{rel}: alt text not served")
+        self._anchors(result, folder, toc, checked)
         for row in rows.values():
             check = checked.pages.get(row["new_path"].partition("#")[0])
             if check is not None:
                 row["staging_url"] = check.url
                 row["published_status"] = check.status if check.status != "ok" else (
                     "ok" if not check.missing else f"text {check.text_percent}%")
+
+    def _anchors(self, result: VersionResult, folder: VersionFolder, toc, checked) -> None:
+        """Every link target into a served page, against the page's heading ids."""
+        served = {page for page, check in checked.pages.items() if check.status == "ok"}
+        redirects = live.origins(folder.path / "301.yml", _rooted_prefix(folder))
+        targets = anchors.gather(toc, redirects, folder.path, served)
+        for target in targets.values():
+            anchors.classify(target, checked.pages[target.page])
+            if target.outcome == "differs":
+                self._record(result, "VERIFY_PUBLISHED_ANCHOR_DIFFERS", folder, target.key,
+                             f"served as #{target.served_id} ({anchors.sources(target)})")
+            elif target.outcome == "missing":
+                self._record(result, "VERIFY_PUBLISHED_ANCHOR_MISSING", folder, target.key,
+                             f"no heading on the served page ({anchors.sources(target)})")
+        result.anchor_targets = list(targets.values())
+        result.staging_urls = {page: check.url for page, check in checked.pages.items() if check.url}
 
     def _redirect_maps(self, result, folder, number: str, outmap, key_of, extracted: Path, selector: str,
                        chrome: tuple[str, ...], host: str) -> None:

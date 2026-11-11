@@ -3388,7 +3388,7 @@ def verify(ctx, target_dir, product, version, bu, family, latest_only, statuses,
     import datetime
     import random
 
-    from docushift.verify import report, triage
+    from docushift.verify import anchors, report, triage
     from docushift.verify.driver import Verifier
     from docushift.verify.fetch import Fetcher
 
@@ -3466,6 +3466,11 @@ def verify(ctx, target_dir, product, version, bu, family, latest_only, statuses,
         prod = verifier.catalog.products[folder.slug]
         path = report.write_version(cfg.root_dir / "reports", prod.bu, result, day,
                                     locale="" if run_cfg.is_primary_locale() else run_cfg.locale)
+        # Phase 58: link targets staging serves under another id, or not at all, kept
+        # in one list across products (the primary language's pages only, for now).
+        if "+staging" in result.scope and run_cfg.is_primary_locale():
+            anchors.write_list(cfg.root_dir / "reports", prod.bu, folder.slug, result.version,
+                               result.anchor_targets, result.staging_urls, day)
         run_state.record_verify({
             "slug": folder.slug, "version": result.version, "run_id": run_findings.run_id,
             "at": datetime.datetime.now(datetime.UTC).isoformat(timespec="seconds"),

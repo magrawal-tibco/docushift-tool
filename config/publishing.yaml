@@ -71,6 +71,5 @@ published_root_length: 24
 # `--base-url` overrides it for one run. A BU with no entry gets no staging check.
 verify_base_urls:
   ibi: "https://stg-docs.ibi.com"
-  # Uncomment once stg-docs.tibco.com has real content (it had none on 2026-10-23);
-  # until then every TIBCO page would read as "not served".
-  # tibco: "https://stg-docs.tibco.com"
+  # Probed 2026-11-09 (planning.md Phase 58, step 8): same layout as ibi, no login.
+  tibco: "https://stg-docs.tibco.com"

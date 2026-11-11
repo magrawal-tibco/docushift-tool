@@ -263,10 +263,10 @@ tibco,adapters,tibco-activematrix-adapter-framework,1.4.1,not-verified,,,,,,,,,
 tibco,adapters,tibco-activematrix-adapter-framework,1.4.2,not-verified,,,,,,,,,
 tibco,adapters,tibco-activematrix-adapter-framework,1.6.0,not-verified,,,,,,,,,
 tibco,adapters,tibco-activematrix-adapter-framework,1.6.1,not-verified,,,,,,,,,
-tibco,adapters,tibco-adapter-for-files-ibm-i,5.0.1,clean,2026-11-03,local+live,51,0,0,0,VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=9,2e0cf5a,reports/verify/tibco/tibco-adapter-for-files-ibm-i/5.0.1-2026-11-03.csv
+tibco,adapters,tibco-adapter-for-files-ibm-i,5.0.1,lost,2026-11-11,local+staging+live,51,8,12,15,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=12 VERIFY_PUBLISHED_CALLOUT_UNRENDERED=28 VERIFY_PUBLISHED_IMAGE_BROKEN=8 VERIFY_PUBLISHED_TOC_TITLE_CHANGED=1 VERIFY_REDIRECT_NOT_ON_STAGING=1 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=5,df97769,reports/verify/tibco/tibco-adapter-for-files-ibm-i/5.0.1-2026-11-11.csv
 tibco,adapters,tibco-adapter-migration,1.7.0,not-verified,,,,,,,,,
 tibco,adapters,tibco-adapter-migration,1.8.0,not-verified,,,,,,,,,
-tibco,adapters,tibco-adapter-migration,1.8.1,lost,2026-11-03,local+live,27,1,0,0,VERIFY_REDIRECT_MAP_MISSING=1,2e0cf5a,reports/verify/tibco/tibco-adapter-migration/1.8.1-2026-11-03.csv
+tibco,adapters,tibco-adapter-migration,1.8.1,lost,2026-11-11,local+staging+live,27,1,1,2,VERIFY_PUBLISHED_CALLOUT_UNRENDERED=9 VERIFY_PUBLISHED_TEXT_DIFF=1 VERIFY_REDIRECT_MAP_MISSING=1,2e0cf5a,reports/verify/tibco/tibco-adapter-migration/1.8.1-2026-11-11.csv
 tibco,adapters,tibco-adapter-sdk,5.8.0,not-verified,,,,,,,,,
 tibco,bpm,tibco-activematrix-bpm,4.2.0,not-verified,,,,,,,,,
 tibco,bpm,tibco-activematrix-bpm,4.3.0,not-verified,,,,,,,,,
@@ -617,7 +617,7 @@ tibco,ems,tibco-enterprise-message-service,10.4.1,not-verified,,,,,,,,,
 tibco,ems,tibco-enterprise-message-service,10.4.3,not-verified,,,,,,,,,
 tibco,ems,tibco-enterprise-message-service,10.4.4,not-verified,,,,,,,,,
 tibco,ems,tibco-enterprise-message-service,10.5.0,not-verified,,,,,,,,,
-tibco,ems,tibco-enterprise-message-service,10.5.1,not-verified,,,,,,,,,
+tibco,ems,tibco-enterprise-message-service,10.5.1,lost,2026-11-11,local+staging+live,1443,27,65,94,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=57 VERIFY_PUBLISHED_ANCHOR_MISSING=7 VERIFY_PUBLISHED_CALLOUT_UNRENDERED=492 VERIFY_PUBLISHED_IMAGE_BROKEN=14 VERIFY_PUBLISHED_TEXT_DIFF=8 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=675 VERIFY_TEXT_DROPPED=5 VERIFY_TOPIC_MISSING=1,312e3e4,reports/verify/tibco/tibco-enterprise-message-service/10.5.1-2026-11-11.csv
 tibco,flogo,tibco-flogo,2.26.6,not-verified,,,,,,,,,
 tibco,flogo,tibco-flogo,2.26.7,not-verified,,,,,,,,,
 tibco,flogo,tibco-flogo,2.26.8,not-verified,,,,,,,,,
@@ -632,7 +632,7 @@ tibco,foresight,tibco-foresight-archive-and-retrieval-system,5.4.0,not-verified,
 tibco,foresight,tibco-foresight-archive-and-retrieval-system,5.5.0,not-verified,,,,,,,,,
 tibco,foresight,tibco-foresight-archive-and-retrieval-system,6.0.0,not-verified,,,,,,,,,
 tibco,foresight,tibco-foresight-connect-with-fhir,1.0.0,not-verified,,,,,,,,,
-tibco,foresight,tibco-foresight-connect-with-fhir,1.0.1,clean,2026-11-03,local+live,26,0,0,0,VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=11,89203dd,reports/verify/tibco/tibco-foresight-connect-with-fhir/1.0.1-2026-11-03.csv
+tibco,foresight,tibco-foresight-connect-with-fhir,1.0.1,issues,2026-11-11,local+staging+live,26,0,1,2,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=1 VERIFY_PUBLISHED_CALLOUT_UNRENDERED=6 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=5,8cb160c,reports/verify/tibco/tibco-foresight-connect-with-fhir/1.0.1-2026-11-11.csv
 tibco,foresight,tibco-foresight-edisim,6.19.0,not-verified,,,,,,,,,
 tibco,foresight,tibco-foresight-edisim,6.20.0,not-verified,,,,,,,,,
 tibco,foresight,tibco-foresight-edisim,6.21.0,not-verified,,,,,,,,,
@@ -801,7 +801,7 @@ tibco,streaming,tibco-streambase-high-performance-fix-engine,11.2.1,not-verified
 tibco,streaming,tibco-streaming,11.1.0,not-verified,,,,,,,,,
 tibco,streaming,tibco-streaming,11.1.1,not-verified,,,,,,,,,
 tibco,streaming,tibco-streaming,11.1.2,not-verified,,,,,,,,,
-tibco,streaming,tibco-streaming,11.1.3,clean,2026-11-03,local+live,1189,0,0,0,VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=2430,ecff12b,reports/verify/tibco/tibco-streaming/11.1.3-2026-11-03.csv
+tibco,streaming,tibco-streaming,11.1.3,lost,2026-11-09,local+staging+live,1189,1,0,0,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_PAGE_MISSING=1 VERIFY_REDIRECT_NOT_ON_STAGING=1 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=2429,e5a1c2d,reports/verify/tibco/tibco-streaming/11.1.3-2026-11-09.csv
 tibco,streaming,tibco-streaming,11.2.0,not-verified,,,,,,,,,
 tibco,streaming,tibco-streaming,11.2.1,not-verified,,,,,,,,,
 tibco,streaming,tibco-streaming-for-3gpp,1.1.0,not-verified,,,,,,,,,

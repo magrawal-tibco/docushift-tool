@@ -1797,6 +1797,156 @@ only the 101 TOC entries (Phase 70) and traced remainders; the suite and `ruff` 
   - the pilot fixes above;
   - step 4 as the user's run, which records the results.
 
+#### Step 8, the TIBCO staging probe (2026-11-09, DOCOPS-257)
+
+Read-only, from the user's `curl` runs (saved under `C:/tmp/tibco-probe`). Sample: TIBCO
+Enterprise Message Service 10.5.1 online help (Flare, merged), `wip` 52796ce.
+
+| what | stg-docs.tibco.com | same as ibi? |
+|---|---|---|
+| Login | None | yes |
+| URL | `/us/en/{slug}/{doc-class}/{segment}/<menu path>.html`; the version URL (`…/10-5-1.html`) is a stub with no menu or article | yes |
+| Unknown path | **HTTP 404**, a bare "404 - Page Not Found" page | **no**: ibi serves its home page with 200. `is_page` still says "not this page" (no `main[data-page-path]`), so no change |
+| Menu | `nav.cmp-navigation`, whole tree on every page (159 entries, 8 at the top) | yes |
+| Article, title, page path | `main#section-topic div.topic-renderer__content`, `h1#topic-title`, `main[data-page-path]` = `/content/tibco/us/en/…` | yes |
+| Images | `/content/dam/tibco/us/en/{slug}/{doc-class}/{segment}/<repo path>`; the sample's bytes equal the repo's (SHA-1) | yes |
+| Alt text | Empty in the repo, empty on the page | nothing to compare in this sample |
+| Notes | `<a data-attr-keyref="!NOTE">` / `"!WARNING"` with no label: 7 on the fault-tolerance page, 6 on `tibemsadmin-close` | yes: the known DOCOPS-250 case, triaged; labels come with `content-fix` |
+
+So `published.py` needs no change. `publishing.yaml` now sets `verify_base_urls.tibco`.
+**Next:** the staging half of the pilots, with EMS 10.5.1 added as a large merged Flare case.
+
+**Staging pilots, first run (the user, 2026-11-09):** all five `lost`, but no loss traced.
+Replayed from `cache/verify/` (no network):
+
+| version | menu findings | what they are |
+|---|---|---|
+| EMS 10.5.1 | 664 | 598 section rows (`page.md#anchor`); 66 page rows paired wrongly once the sections are absent. All 159 pages are served, same paths, same order |
+| Foresight Connect with FHIR 1.0.1 | 12 | all section rows |
+| Adapter for Files (IBM i) 5.0.1 | 68 | 67 section rows; 1 real title: "Appendix A Trace Log Examples" is served as "Trace Log Examples" |
+| Adapter Migration 1.8.1 | 6 | all section rows |
+| Streaming 11.1.3 | — | no menu read: the first row is `index.md`, and `…/11-1-3/index.html` is not served |
+
+**The staging menu lists pages only.** A merged page's section rows are not in it; the page's
+"In this article" panel links them (`<a href="#heartbeat-parameters">`). The user, 2026-11-11:
+acceptable; they will ask the AEM team too, and verification does not wait for that.
+
+#### Staging pilots, menu fix — plan (2026-11-11, DOCOPS-257; awaiting approval)
+
+| decision | choice | why |
+|---|---|---|
+| **Which `toc.yml` rows the menu is compared with** | Page rows only. Before `by_title`, a section row (`#` in its key) is replaced by its own children, pruned the same way, so a page listed under a section stays in order under the nearest page | That is what the platform serves. Comparing section rows makes every merged version `lost`, and their absence throws the title pairing off for the page rows too (EMS: 66 false page findings) |
+| **How a section row is still checked** | On its page, already fetched: the served article must have an element whose `id` is the row's anchor. If not, `VERIFY_PUBLISHED_SECTION_MISSING` (error), naming the row | Readers reach a section through "In this article" or a link to `page#anchor`. The heading id is what both need. No extra request |
+| **The menu-row decision, written down** | `docs/open-issues.md`, AEM platform section: section rows are not shown in the menu; accepted 2026-11-11, the user to raise with the AEM team | So the decision outlives this run, and the AEM answer has a place to land |
+
+**Steps**
+
+1. `verify/toc.py`: `pages_only(node)`, the pruning above. `verify/published.py`: compare
+   `pages_only(toc)`; for each section row, look up its anchor id in its page's article.
+   `verify/driver.py`: record `VERIFY_PUBLISHED_SECTION_MISSING`; register the code.
+2. Tests: a section row is not reported missing from the menu; a page under a section is
+   matched under its page parent; a missing anchor id is reported, a present one is not.
+3. `docs/open-issues.md` entry; `design.md` (staging menu comparison) one line.
+4. Re-run the five from cache (the user, `!` command; no new requests except pages not
+   fetched before), Streaming left out. Trace what is left: the 8 IBM i images, the
+   title, the text differences. A product's entry page can be found from
+   `/us/en/product-a-z.html` (the user's pointer: it leads to the product's guide page,
+   then its online help).
+5. **Streaming is not checked against staging for now** (user, 2026-11-11: its staging
+   pages are reported to the AEM team). Re-run it once they answer.
+
+*Exit: every pilot's remaining finding (Streaming excepted) is traced to a fix, a triage entry or an open issue;
+the suite and `ruff` pass.*
+
+**As built (2026-11-11, approved the same day).**
+
+- Steps 1–3 done: `toc.is_section` / `toc.pages_only`; `published.check` compares
+  `pages_only(toc)` and fills `sections_missing` from each page's article `id`s
+  (`PageCheck.anchors`); the driver records `VERIFY_PUBLISHED_SECTION_MISSING`
+  (error, registered; the register is 139). 2 new tests; the verify and findings
+  suites pass (93). `ruff` is clean on the changed code; `test_verify.py` keeps its
+  earlier import-order warning.
+- **Replay from the cache** (4 pilots; 50 EMS pages fetched once by the replay, 11 not yet):
+  menu findings 750 → 1 (the IBM i title). The section check finds **49 anchors the
+  served page does not have**. Every one is a heading id the site writes differently
+  (punctuation kept, `_` as `-`, no `-1` on a repeat): `docs/open-issues.md`, "Heading
+  links are written differently by the staging site". A decision, not this step's.
+- **Left to trace after the user's re-run:** EMS SVG bytes differing on staging (6
+  pages); IBM i pictures not on 2 pages; text differences, several of them `verify`
+  reading `<a id>` and link markup as words.
+
+#### Staging pilots, anchor list — plan (2026-11-11, DOCOPS-257; approved the same day)
+
+The user, 2026-11-11: the heading-id rule is to be confirmed with the AEM team. Until
+then it stays open, every affected link target is an **issue** (not explained, not
+lost), and a list of them is kept, since `301.yml` points at the same anchors.
+
+| decision | choice | why |
+|---|---|---|
+| **Which targets are checked** | Every `page.md#anchor` of the version whose page staging served: `toc.yml` section rows, `301.yml` targets in this version folder (`/en-us/{slug}/{class}/{segment}/page.md#anchor`), and links inside the version's pages (`](other.md#anchor)`, `](#anchor)`) | The same anchor fails the same way from all three; `301.yml` was the user's concern. All three are read locally and the page is already fetched, so no extra request |
+| **Two outcomes for a target not on the page** | **Differs:** a served heading whose own text the tool's rule (`anchors.anchor_run`, repeats numbered) slugs to the anchor; its served `id` is recorded. New `VERIFY_PUBLISHED_ANCHOR_DIFFERS`, **warning**, so the version reads `issues`. **Missing:** no such heading. `VERIFY_PUBLISHED_SECTION_MISSING` is renamed `VERIFY_PUBLISHED_ANCHOR_MISSING`, error | A heading that is there under another id is the rule question, open with AEM. A heading that is not there at all is loss |
+| **One finding per target, not per source** | A target cited by the menu, a 301 and three links is one finding; the list keeps every source | The count then says how many headings are affected, not how often they are cited |
+| **The list** | `reports/verify/anchor-targets.csv`: bu, slug, version, page, anchor, served id, outcome, sources (`toc`, `301`, `link`, with counts), an example (the old URL or linking page), staging URL, date. A run replaces its versions' rows and keeps the rest | One file across all products, filterable in Excel, ready to hand to the AEM team. When the rule is settled it is the work list for re-writing anchors and `301.yml` |
+
+**Steps**
+
+1. `verify/published.py`: collect each served page's headings (text, id) as well as its
+   ids; classify targets as above. `verify/driver.py`: gather the targets from `toc.yml`,
+   `301.yml` and page links; record the two codes; write the list. `reporting/findings.py`:
+   the rename and the new code (register 140).
+2. Tests: a punctuation heading is `differs` with its served id; a repeat (`-1`) is
+   `differs`; an absent heading is `missing`; a 301 target and a link to one anchor
+   make one row with both sources; a re-run replaces only its own versions' rows.
+3. Docs: `open-issues.md` points to the list; `user-guide.md` (the file); `design.md`.
+4. The user re-runs the four pilots; the list is read and the rest traced.
+
+**As built (2026-11-11).**
+
+- Steps 1–3 done. `verify/anchors.py` (new): `gather` (toc section rows, `301.yml`, page
+  links, one `Target` per anchor with its sources), `classify`, `write_list`.
+  `PageCheck.headings` holds the served title and headings with their ids (a heading's
+  own, else its `div.topic`'s). `VERIFY_PUBLISHED_SECTION_MISSING` became
+  `VERIFY_PUBLISHED_ANCHOR_MISSING`; `VERIFY_PUBLISHED_ANCHOR_DIFFERS` is new (register 140).
+  `cli.verify` writes the list after each staging run (primary language). 2 tests replace
+  the earlier one.
+- **Replay from the cache** (no request; 11 EMS pages not cached yet):
+
+  | pilot | targets | differs | missing | used by (problem targets) |
+  |---|---|---|---|---|
+  | EMS 10.5.1 | 1,377 | 199 | 7 | toc 36, 301 179, link 152 |
+  | Foresight Connect with FHIR 1.0.1 | 19 | 4 | 0 | toc 1, 301 4, link 1 |
+  | Adapter for Files (IBM i) 5.0.1 | 111 | 47 | 0 | toc 12, link 36 |
+  | Adapter Migration 1.8.1 | 21 | 4 | 0 | link 4 |
+
+- **Correction after the user's run (row 121 of the list):** 196 of its 273 rows named a
+  page's own title (`appendix-b-monitor-messages.md#appendix-b-monitor-messages`). Staging
+  gives the title no id, but an unknown fragment opens the page at its top, which is the
+  title, so the reader lands where meant. `classify` now counts that as fine (1 test).
+  Recount from the cache, all 159 EMS pages:
+
+  | pilot | targets | differs | missing | used by (problem targets) |
+  |---|---|---|---|---|
+  | EMS 10.5.1 | 1,482 | 57 | 7 | toc 37, 301 37, link 48 |
+  | Foresight Connect with FHIR 1.0.1 | 19 | 1 | 0 | toc 1, 301 1, link 1 |
+  | Adapter for Files (IBM i) 5.0.1 | 111 | 12 | 0 | toc 12, link 1 |
+  | Adapter Migration 1.8.1 | 21 | 0 | 0 | — |
+
+- **The list gains the old URL** (user, 2026-11-11: nothing to compare against).
+  `old_url` from `301.yml`: the section's own row, else the nearest heading above it with
+  one (the merged topic), else the page's own row (IBM i: WebWorks, unmerged).
+  `old_url_is` says which. `staging_url` ends in `#<served id>` for a `differs`, so it
+  opens on the heading. Cache preview: EMS 37 section / 26 topic / 1 none, Foresight 1
+  section, IBM i 12 page.
+
+- **The 7 `missing` are two pages staging serves broken — real losses, to trace:**
+  - `user-guide/ftl-stores/…/configuring-the-ftl-server-cluster.md`: the served article is
+    **empty** (26 KB of Markdown). The page opens with a YAML block holding
+    `<name of FTL server #1>`-style placeholders.
+  - `c-and-cobol-reference/connection/tibemsconnectionmetadata.md`: served up to the
+    "Certificate Encodings" table, nothing after (the three `tibemsSSL_*` sections). Just
+    before it is an `<a id="…">` whose id spans three lines and holds the whole table's
+    text, written by the converter.
+
 ---
 
 ### Phase 59: A Generic Fix Is a Repair, Applied to Every Published Version — **Built 2026-10-23; R001 waves pending**
@@ -3446,6 +3596,8 @@ The concrete deliverable of §7.1: every deferred "report line" in the three doc
 | `VERIFY_PUBLISHED_ALT_DROPPED`⁵⁵ | warn | verify | An image whose Markdown alt text staging serves empty | Phase 55 (probe) |
 | `VERIFY_PUBLISHED_CALLOUT_UNRENDERED`⁵⁵ | warn | verify | GitHub alerts AEM rendered with no label, counted per page; fix-callouts repairs them (Phase 56) | Phase 55 (probe) |
 | `VERIFY_PUBLISHED_TOC_ENTRY_MISSING`⁵⁵ | error | verify | A toc.yml entry with no row in the menu staging serves | Phase 55 (B4) |
+| `VERIFY_PUBLISHED_ANCHOR_MISSING`⁵⁸ | error | verify | A link target (toc.yml section row, 301.yml or a page link) into a served page with no heading for it | Phase 58 (staging pilots) |
+| `VERIFY_PUBLISHED_ANCHOR_DIFFERS`⁵⁸ | warn | verify | A link target whose heading staging serves under another id; listed in reports/verify/anchor-targets.csv until the AEM rule is settled | Phase 58 (staging pilots) |
 | `VERIFY_PUBLISHED_TOC_MOVED`⁵⁵ | warn | verify | A toc.yml entry the served menu shows under another parent | Phase 55 (B4) |
 | `VERIFY_PUBLISHED_TOC_ORDER`⁵⁵ | warn | verify | Menu siblings in a different order than toc.yml, once per parent | Phase 55 (B4) |
 | `VERIFY_PUBLISHED_TOC_TITLE_CHANGED`⁵⁵ | note | verify | A menu row titled differently from its toc.yml entry | Phase 55 (B4) |

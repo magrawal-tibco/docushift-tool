@@ -778,6 +778,13 @@ REGISTRY: dict[str, Code] = _codes(
          "repairs them (Phase 56)", "planning.md Phase 55 (probe)"),
     Code("VERIFY_PUBLISHED_TOC_ENTRY_MISSING", Severity.ERROR, Stage.VERIFY,
          "A toc.yml entry with no row in the menu staging serves", "planning.md Phase 55 (B4)"),
+    Code("VERIFY_PUBLISHED_ANCHOR_MISSING", Severity.ERROR, Stage.VERIFY,
+         "A link target (toc.yml section row, 301.yml or a page link) into a served page "
+         "with no heading for it", "planning.md Phase 58 (staging pilots)"),
+    Code("VERIFY_PUBLISHED_ANCHOR_DIFFERS", Severity.WARNING, Stage.VERIFY,
+         "A link target whose heading staging serves under another id; listed in "
+         "reports/verify/anchor-targets.csv until the AEM rule is settled",
+         "planning.md Phase 58 (staging pilots)"),
     Code("VERIFY_PUBLISHED_TOC_MOVED", Severity.WARNING, Stage.VERIFY,
          "A toc.yml entry the served menu shows under another parent", "planning.md Phase 55 (B4)"),
     Code("VERIFY_PUBLISHED_TOC_ORDER", Severity.WARNING, Stage.VERIFY,
