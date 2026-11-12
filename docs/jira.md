@@ -57,7 +57,7 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | The 38 products still showing doubled headings are re-run one at a time (done: Activation Service, Reporting Server, WebFOCUS Client, Foresight Instream; 6,414 pages measured 2026-11-09) | DOCOPS-336 (In Progress since 2026-11-09): dated note per family with the before/after count → Done when all read 0 |
 | Every family in a BU has its source ZIPs backed up | DOCOPS-281 (ibi), DOCOPS-282 (TIBCO), DOCOPS-283 (Spotfire, DataSynapse): dated note with gaps → Done |
 | help.scribesoft.com ownership transferred (decided 2026-10-30) | New sub-task under DOCOPS-7, or a dated note on DOCOPS-302 (Done 2026-10-30); point the host at the new site so Scribe's 375 `301.yml` rows apply |
-| BusinessEvents and Scribe re-verified on the DOCOPS-361 fix (user to run, 2026-11-12) | Both `logged` → DOCOPS-361 → Done with SP; trace BE 6.3.2 "Addressing Schema Elements" (staging menu, unexplained) |
+| BE 6.3.2 "Developers Guide > … > Addressing Schema Elements" traced (missing from the staging menu; the version's only open finding, 2026-11-12) | Log or triage it; BE 6.3.2 → `logged` |
 | User decides how `content-fix` reaches `wip` in the 22 TIBCO repos where it is ahead (R001 labels, 301.yml new shape, stale rebuilds, doubled headings; every `wip` commit triggers an AEM build — **ask before merging**; Streaming's `wip` has its own commit) | PRs or merges as decided; then DOCOPS-313 / DOCOPS-329 notes; re-verify what changed |
 | User reports the AEM items (rows in `reports/verify/aem-content-missing.csv`, links on `wip`; DOCOPS-344, 345 case, 351, 353; questions on duplicate menu entries and section rows; status of 346, 271) | Dated note on each issue when AEM answers |
 | Spotfire ZIP backup run finishes (`C:/tmp/zip-backup/run-spotfire-backup.bat`, started by the user 2026-11-12; ledger `spotfire-ledger.csv`) | DOCOPS-283: dated note with counts → Done (DataSynapse part: confirm or split) |
@@ -69,6 +69,8 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 **Log** (newest first, one line per session):
 
+- 2026-11-12 — DOCOPS-361 → Done (0.25 SP), note: BE 6.4.0 and Scribe `logged` after the re-run; BE 6.3.2 one menu entry left.
+  AEM report list (`reports/verify/aem-content-missing.csv`, wip links); 22 TIBCO repos have content-fix ahead of wip, merge awaits the user.
 - 2026-11-12 — Small-family wave (Scribe, BusinessEvents, Cloud): DOCOPS-360–363 created under DOCOPS-96 (AI & CI by edit; 361 In
   Progress, fixed); DOCOPS-344 widened to pages served nearly empty (renamed, note); DOCOPS-351 note (BE). Flogo PAYG `logged`; BE, Scribe re-run.
 - 2026-11-12 — Team requirements logged under DOCOPS-7 (Content Migration, label `team-requirement`): DOCOPS-355 Messaging
@@ -590,7 +592,7 @@ the key; `reports/verify/ISSUES.html` lists every kind with its versions.
 | Pages under a heading row hidden from the staging menu (`PUBLISHED_TOC_ENTRY_MISSING` + knock-on `ANCHOR_MISSING`; EMS 10.4.0; 2,218 pages / 120 versions in our menus) | DOCOPS-351 | 1 | 2026-11-11 | AEM shows heading rows, or we lift the pages in toc.yml |
 | `verify` compared some pages with the wrong staging page (menu pairing slips where pages are hidden; false `TEXT_DIFF` / `IMAGE_BROKEN` / `ANCHOR_MISSING`) | DOCOPS-352 | 0.75 | 2026-11-12 | **Done 2026-11-12** (two passes: title check, then same-titled pages) |
 | Text in angle brackets written unescaped, gone when shown (`TEXT_DROPPED`; BE, Scribe) | DOCOPS-360 | 0.5 | 2026-11-12 | ours, converter |
-| `verify` cut link targets with brackets (`#GetChannels()`), case of served ids | DOCOPS-361 | 0.25 | 2026-11-12 | **fixed 2026-11-12**, before the next wave |
+| `verify` cut link targets with brackets (`#GetChannels()`), case of served ids | DOCOPS-361 | 0.25 | 2026-11-12 | **Done 2026-11-12** |
 | Links to headings with code written as dashes (`ANCHOR_MISSING`; Flogo PAYG) | DOCOPS-362 | 0.25 | 2026-11-12 | ours, converter |
 | Links to anchors the converter did not keep (figure/GUID bookmarks, code-suffixed headings; BE) | DOCOPS-363 | 0.5 | 2026-11-12 | ours, converter |
 | Escaped `\<` in headings shown as `\&lt;` on staging, heading id changes (`ANCHOR_MISSING`; FTL/eFTL, 1,007) | DOCOPS-353 | 0.25 | 2026-11-12 | AEM team |
