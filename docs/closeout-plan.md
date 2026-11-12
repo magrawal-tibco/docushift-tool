@@ -208,6 +208,30 @@ You add the screenshot and the assignee. After pasting, tell Claude the row numb
 - The lowercase-anchor case of DOCOPS-345.
 - The questions on duplicate menu entries.
 
+## 8a. Jira guardrails (user, 12 Nov)
+
+Claude creates, updates and closes Jira issues itself, within these limits.
+
+1. **One issue per workstream or per kind of problem**, never one per step, run, batch or release. Steps, runs and releases are dated notes on the issue they belong to.
+2. **A new issue only for:**
+   - a new workstream of at least 2 hours of work;
+   - a new kind of problem found by a check (the Phase 77 rule);
+   - a team requirement.
+
+   Anything else is a note.
+3. **Story points measure Claude-assisted effort** (1 = 8 h, 0.25 = 2 h, the smallest step):
+   - on sub-tasks only;
+   - nothing for machine time or waiting;
+   - most sub-tasks 1 or less;
+   - changed at close only if off by 0.5 or more.
+4. **Close as soon as the issue's exit is met**, with a closing note; Canceled if it is overtaken.
+5. **Expected new issues to 30 Nov:**
+   - DOCOPS-364, Karan's list (created 12 Nov, 1 SP);
+   - one for the delta migration, covering all three passes (§6a), created when Δ1 runs;
+   - one per new kind of problem from triage.
+
+   Fixes are noted on the existing issues (343–363). Releases R1–R4 are notes on DOCOPS-313 and on the issue each release carries. More new issues than these needs a reason in the morning note.
+
 ## 9. How a batch is run (for reference)
 
 - `scratch/overnight_batch.py <file> --target <repos> --bu <bu> --family <f> ...` writes the batch file: one line per product, newest version.
