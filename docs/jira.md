@@ -1,6 +1,6 @@
 # Jira Tracking — What Is Logged in DOCOPS
 
-> **Last reconciled:** 2026-11-11, against Jira and `config/versions.csv`.
+> **Last reconciled:** 2026-11-12, against Jira and `config/versions.csv`.
 > Conventions (site, cloud ID, story points, transitions, who owns what) live in
 > `C:\github\confluence-mcp\reports\docushift-claude-atlassian-context.md`; this file
 > does not repeat them. It answers one question: **is this piece of work in Jira, and where?**
@@ -57,6 +57,13 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | The 38 products still showing doubled headings are re-run one at a time (done: Activation Service, Reporting Server, WebFOCUS Client, Foresight Instream; 6,414 pages measured 2026-11-09) | DOCOPS-336 (In Progress since 2026-11-09): dated note per family with the before/after count → Done when all read 0 |
 | Every family in a BU has its source ZIPs backed up | DOCOPS-281 (ibi), DOCOPS-282 (TIBCO), DOCOPS-283 (Spotfire, DataSynapse): dated note with gaps → Done |
 | help.scribesoft.com ownership transferred (decided 2026-10-30) | New sub-task under DOCOPS-7, or a dated note on DOCOPS-302 (Done 2026-10-30); point the host at the new site so Scribe's 375 `301.yml` rows apply |
+| BusinessEvents and Scribe re-verified on the DOCOPS-361 fix (user to run, 2026-11-12) | Both `logged` → DOCOPS-361 → Done with SP; trace BE 6.3.2 "Addressing Schema Elements" (staging menu, unexplained) |
+| User decides how `content-fix` reaches `wip` in the 22 TIBCO repos where it is ahead (R001 labels, 301.yml new shape, stale rebuilds, doubled headings; every `wip` commit triggers an AEM build — **ask before merging**; Streaming's `wip` has its own commit) | PRs or merges as decided; then DOCOPS-313 / DOCOPS-329 notes; re-verify what changed |
+| User reports the AEM items (rows in `reports/verify/aem-content-missing.csv`, links on `wip`; DOCOPS-344, 345 case, 351, 353; questions on duplicate menu entries and section rows; status of 346, 271) | Dated note on each issue when AEM answers |
+| Spotfire ZIP backup run finishes (`C:/tmp/zip-backup/run-spotfire-backup.bat`, started by the user 2026-11-12; ledger `spotfire-ledger.csv`) | DOCOPS-283: dated note with counts → Done (DataSynapse part: confirm or split) |
+| User confirms the 18 hand-obtained ibi PDF-only versions are in the Google Drive backup | DOCOPS-281 → Done |
+| Next verify waves (Phase 77): Flogo, ActiveSpaces, Hawk, Platform, then larger TIBCO families; BW plug-ins last; Streaming excluded | Per wave: propose Jira for unlogged kinds, triage, `--retriage`, Verify waves row |
+| Team requirements move (Messaging Docusaurus, iProcess offline HTML, Scribe redirects, Streaming build, PRISM integration) | DOCOPS-355–359: dated notes; adjust SP |
 
 **Left alone on purpose:** DOCOPS-8 is a Task where its siblings are Stories.
 
