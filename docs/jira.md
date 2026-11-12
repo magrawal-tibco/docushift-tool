@@ -1,6 +1,6 @@
 # Jira Tracking — What Is Logged in DOCOPS
 
-> **Last reconciled:** 2026-11-12, against Jira and `config/versions.csv`.
+> **Last reconciled:** 2026-11-12 (afternoon), against Jira and `config/versions.csv`.
 > Conventions (site, cloud ID, story points, transitions, who owns what) live in
 > `C:\github\confluence-mcp\reports\docushift-claude-atlassian-context.md`; this file
 > does not repeat them. It answers one question: **is this piece of work in Jira, and where?**
@@ -9,6 +9,9 @@
 
 Any session that touches Jira, closes a phase, or lands a run updates this section before it
 ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled* above.
+
+**What to do next, and in which order, is set by [`docs/closeout-plan.md`](closeout-plan.md)** (12–30 Nov 2026).
+This table says only what changes in Jira when an event happens.
 
 **Waiting** (Jira changes due when the event happens):
 
@@ -64,10 +67,16 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 | User confirms the 18 hand-obtained ibi PDF-only versions are in the Google Drive backup | DOCOPS-281 → Done |
 | Next verify waves (Phase 77): Flogo, ActiveSpaces, Hawk, Platform, then larger TIBCO families; BW plug-ins last; Streaming excluded | Per wave: propose Jira for unlogged kinds, triage, `--retriage`, Verify waves row |
 | Team requirements move (Messaging Docusaurus, iProcess offline HTML, Scribe redirects, Streaming build, PRISM integration) | DOCOPS-355–359: dated notes; adjust SP |
+| Batch 1b finishes (BW plug-in packages re-downloaded and unpacked: 184 of 253 published versions had no original on disk, deleted after the TIBCO backup; then newest-version checks) | DOCOPS-338: dated note with BW plug-in counts; DOCOPS-282: note that the deleted workspace ZIPs were re-fetched |
+| The user pastes UAT sheet rows (closeout plan §8) | Dated note on each Jira kind with its sheet row number |
+| The user sends engineering's list of older BW plug-in versions to convert | New sub-task under the TIBCO conversion story; slot Tue 24 – Wed 25 Nov |
 
 **Left alone on purpose:** DOCOPS-8 is a Task where its siblings are Stories.
 
 **Log** (newest first, one line per session):
+
+- 2026-11-12 — Close-out plan (`docs/closeout-plan.md`) agreed: overnight batches per product (`scratch/overnight.sh`), spread-out R1 on Fri 13,
+  UAT sheet rows from triage. Batch 1 (BW plug-ins, newest): 26 of 80 checked, 54 skipped (no original on disk); Batch 1b started. No Jira change.
 
 - 2026-11-12 — DOCOPS-361 → Done (0.25 SP), note: BE 6.4.0 and Scribe `logged` after the re-run; BE 6.3.2 one menu entry left.
   AEM report list (`reports/verify/aem-content-missing.csv`, wip links); 22 TIBCO repos have content-fix ahead of wip, merge awaits the user.
