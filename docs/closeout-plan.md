@@ -98,6 +98,7 @@ Ready when:
 |---|---|
 | BusinessEvents 6.3.2: "Addressing Schema Elements" missing from the staging menu | Triage, Mon 16 |
 | Statistica and Data Virtualization: most old pages reported missing (checker or real) | Triage, Fri 13 |
+| FOCUS 9.3.4 publishes Flare's generated `_globalpages` pages (contents, title): found by the DOCOPS-349 fixer, our converter | Triage, Fri 13 (fold into an existing issue or a new kind) |
 | Spotfire backup run summary → close DOCOPS-283 | Whenever you paste it, by Fri 27 |
 | ibi: confirm the 18 hand-obtained PDF-only versions are on Google Drive → close DOCOPS-281 | By Fri 27 |
 | Streaming `content-fix` (its `wip` has its own commit, so a real merge is needed) | R3 |
@@ -214,6 +215,16 @@ You add the screenshot and the assignee. After pasting, tell Claude the row numb
 - DOCOPS-351: pages under a heading row hidden from the menu or not found, which is the 96-page list in `reports/verify/aem-content-missing.csv`.
 - The lowercase-anchor case of DOCOPS-345.
 - The questions on duplicate menu entries.
+
+## 7a. Fixes built for D5 (Mon 16)
+
+Each fix sits on its own branch with tests. Nothing is merged or re-converted until D5.
+
+| Jira | Branch | What it fixes | Re-run to apply |
+|---|---|---|---|
+| DOCOPS-349 | `fix/default-htm` (71378d4) | Real pages named `default` / `index` below the help root were dropped | EMS 10.4.0–10.5.1 (6); ibi WebFOCUS Client 9.3.0–9.3.8 (with 9.3.5's translations); ibi FOCUS 9.3.0–9.3.8. One page each. |
+| DOCOPS-354 | `fix/ftl-301` (4045308) | Cause was old data: FTL/eFTL 7.1.3 were merged before the old site listed their pages, and never rebuilt, so their redirect files hold no pages. The branch adds a publishing warning so this cannot pass silently again. | **No re-conversion:** re-merge and re-publish FTL and eFTL 7.1.3, Flogo 2.26.8 and 3.0.1, and 4 BusinessConnect Container Edition versions. 6 more versions need URL patterns first (DOCOPS-322). |
+| DOCOPS-360 (and most of 353) | `fix/angle-brackets` (d9b71f9) | `<` in text was written as `\<`, which AEM shows as `\&lt;`: placeholders like `<host>` read wrong in prose, lists and headings on hundreds of pages (FTL 7.1.1 alone: 575). Now written as `&lt;`; menu paths escaped; anchors unchanged. | First confirm on staging that `&lt;` in plain text shows as `<` (a one-page test, riding R1). Then either re-convert the affected families, or, much cheaper, a new in-place repair of the published pages (R002, not built; about half a day). |
 
 ## 8a. Jira guardrails (user, 12 Nov)
 
