@@ -249,7 +249,8 @@ _IMAGE = re.compile(r"!\[[^\]]*\]\([^)]*\)")
 # (Phase 58, step 8).
 # Link text may hold escaped brackets: `[ems.server_groups\[\]](x.md)` is a link whose
 # words are `ems.server_groups[]` (DOCOPS-350, Phase 77).
-_LINK = re.compile(r"(?<!\\)\[((?:\\.|[^\]\\])*)\]\([^)]*\)")
+# The destination may hold balanced brackets: `(…/zdtaw1bw(v=vs.110).aspx)` (DOCOPS-361).
+_LINK = re.compile(r"(?<!\\)\[((?:\\.|[^\]\\])*)\]\((?:[^()]|\([^()]*\))*\)")
 # Not an escaped `\<`: `\<webfocus-ce>/scripts` renders "<webfocus-ce>/scripts", and
 # deleting it as a tag read the sentence as dropped (Phase 60). Except before a real
 # inline tag: a Windows path in raw HTML is `C:\Users\<em>username</em>`, and there

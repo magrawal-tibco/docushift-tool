@@ -29,7 +29,9 @@ FILE = "anchor-targets.csv"
 COLUMNS = ["bu", "slug", "version", "page", "anchor", "served_id", "outcome", "old_url", "old_url_is",
            "staging_url", "sources", "example", "date"]
 # `](target#anchor)` or `](#anchor)`; a URL or a rooted path is not this version's page.
-_LINK = re.compile(r"\]\(([^)\s#]*)#([^)\s]+)\)")
+# The anchor may hold balanced brackets, as Markdown allows: `[GetChannels()](#GetChannels())`
+# targets `GetChannels()`, not `GetChannels(` (DOCOPS-361, BusinessEvents).
+_LINK = re.compile(r"\]\(([^)\s#]*)#((?:[^()\s]|\([^()\s]*\))+)\)")
 _HEADING = re.compile(r"^#{1,6}\s+(.+?)\s*#*\s*$")
 _FENCE = re.compile(r"^\s*(```|~~~)")
 
@@ -140,6 +142,12 @@ def classify(target: Target, check: PageCheck) -> None:
         return
     if target.anchor in run:
         target.outcome, target.served_id = "differs", check.headings[run.index(target.anchor)][1]
+        return
+    # The same id in another case: `<a id="GetChannels()">` is served as the heading's
+    # `getchannels()`, and a fragment is matched case-sensitively (DOCOPS-361).
+    folded = {served.lower(): served for served in check.anchors}
+    if target.anchor.lower() in folded:
+        target.outcome, target.served_id = "differs", folded[target.anchor.lower()]
     else:
         target.outcome = "missing"
 

@@ -62,6 +62,8 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 **Log** (newest first, one line per session):
 
+- 2026-11-12 — Small-family wave (Scribe, BusinessEvents, Cloud): DOCOPS-360–363 created under DOCOPS-96 (AI & CI by edit; 361 In
+  Progress, fixed); DOCOPS-344 widened to pages served nearly empty (renamed, note); DOCOPS-351 note (BE). Flogo PAYG `logged`; BE, Scribe re-run.
 - 2026-11-12 — Team requirements logged under DOCOPS-7 (Content Migration, label `team-requirement`): DOCOPS-355 Messaging
   Docusaurus (0.5, In Progress), 356 iProcess offline HTML for CHM (0.5, Backlog, Dec), 357 Scribe redirects from help.scribesoft.com
   (0.5, Backlog), 358 Streaming build hand-off + ModelOps to confirm (0.25, In Progress), 359 PRISM / build-script integration (1, In Progress).
@@ -580,6 +582,10 @@ the key; `reports/verify/ISSUES.html` lists every kind with its versions.
 | Real topics named default.htm / index.htm dropped (`TOPIC_MISSING`; EMS 10.4.0–10.5.1 `users-guide/default.htm`) | DOCOPS-349 | 0.5 | 2026-11-11 | ours, Flare engine stub rule + re-publish |
 | Pages under a heading row hidden from the staging menu (`PUBLISHED_TOC_ENTRY_MISSING` + knock-on `ANCHOR_MISSING`; EMS 10.4.0; 2,218 pages / 120 versions in our menus) | DOCOPS-351 | 1 | 2026-11-11 | AEM shows heading rows, or we lift the pages in toc.yml |
 | `verify` compared some pages with the wrong staging page (menu pairing slips where pages are hidden; false `TEXT_DIFF` / `IMAGE_BROKEN` / `ANCHOR_MISSING`) | DOCOPS-352 | 0.75 | 2026-11-12 | **Done 2026-11-12** (two passes: title check, then same-titled pages) |
+| Text in angle brackets written unescaped, gone when shown (`TEXT_DROPPED`; BE, Scribe) | DOCOPS-360 | 0.5 | 2026-11-12 | ours, converter |
+| `verify` cut link targets with brackets (`#GetChannels()`), case of served ids | DOCOPS-361 | 0.25 | 2026-11-12 | **fixed 2026-11-12**, before the next wave |
+| Links to headings with code written as dashes (`ANCHOR_MISSING`; Flogo PAYG) | DOCOPS-362 | 0.25 | 2026-11-12 | ours, converter |
+| Links to anchors the converter did not keep (figure/GUID bookmarks, code-suffixed headings; BE) | DOCOPS-363 | 0.5 | 2026-11-12 | ours, converter |
 | Escaped `\<` in headings shown as `\&lt;` on staging, heading id changes (`ANCHOR_MISSING`; FTL/eFTL, 1,007) | DOCOPS-353 | 0.25 | 2026-11-12 | AEM team |
 | FTL and eFTL 7.1.3 `301.yml` has no page rows (`REDIRECT_UNMAPPED`, 884) | DOCOPS-354 | 0.5 | 2026-11-12 | ours, redirect build |
 | `verify` misread escaped brackets in link text (false `TEXT_DROPPED` / `TEXT_DIFF`) | DOCOPS-350 | 0.25 | 2026-11-11 | **Done 2026-11-11**; EMS 10.5.1 re-checked, now `logged` |
@@ -591,6 +597,7 @@ Story points are estimates, adjusted when each fix is done.
 | Pilot | 2026-10-23 | ibi™ AI Assistant 9.3.8, local + staging + live | 1 | explained (5 alt texts → DOCOPS-255; 61 note labels → DOCOPS-250) | DOCOPS-249 |
 | ibi translated, Phase 66 | 2026-10-28 | `--locale` ja-jp (Reporting Server, WebFOCUS), de-de, fr-fr, es-es (WebFOCUS), local | 23 | all `lost` from page findings; Client 9.3.8 ~1,070 per language are menu entries to pages the language never shipped | DOCOPS-262, 263 |
 | ibi, Phase 66 | 2026-10-27 | `--bu ibi` per family, local only; translated folders not checked (open issue) | 196 | PDF-only: 102 of 102 `clean` (iWay BAM and TPM 8.0.5 were on remote `wip` since 26 Oct; the local checkout was behind). No document finding anywhere. Help: Container Editions 32/32 and Legacy clean; `lost` from page findings: WebFOCUS 22, Reporting Server 9, FOCUS 9, DI-ISM 2 | DOCOPS-258, 261 Done; 259, 260, 262, 263 noted, open |
+| Scribe, BusinessEvents, Cloud | 2026-11-12 | one family per run | 8 | Cloud: 2 `logged`, 2 `clean`, Flogo PAYG `logged` after triage; BE, Scribe `lost` until re-run on the DOCOPS-361 fix | DOCOPS-344, 351, 360–363 |
 | FTL | 2026-11-12 | `--bu tibco --family ftl`, then re-runs after the DOCOPS-352 fixes | 12 | all `logged` | DOCOPS-351, 353, 354 |
 | EMS | 2026-11-11 | `--bu tibco --family ems`, `--latest-only` then `--status not-verified`; 7 of 66 versions are on staging | 7 | all `logged` (10.4.0 `lost` → `logged` with DOCOPS-351) | DOCOPS-338, 351 |
 | EMS 10.5.1 re-check | 2026-11-11 | one version, local + staging + 5 live, after the DOCOPS-350 fix | 1 | `logged` (DOCOPS-343, 344, 345, 347, 348, 349; `#Using` = source) | DOCOPS-338 |

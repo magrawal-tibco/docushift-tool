@@ -3110,6 +3110,16 @@ its products and versions; the suite and `ruff` pass.*
   share a title across guides ("Key-Value Maps" in Administration and Development), which
   the menu swapped and the title check cannot see. A title two page rows share is now read
   at the page's own address first, the menu's address the fallback. 1 test.
+- **Scribe, BusinessEvents, Cloud wave (2026-11-12):** 8 versions; Cloud 4 of 5 `logged`/`clean`.
+  Logged: pages served nearly empty (Scribe Tools, BE Domain Object Override) widen DOCOPS-344;
+  text in angle brackets written unescaped, gone when shown, DOCOPS-360; links to headings
+  with code written as dashes, DOCOPS-362; anchors the converter did not keep (figure, GUID
+  bookmarks, headings with a code suffix), DOCOPS-363; BE pages under heading rows,
+  DOCOPS-351. Accepted: Scribe pages listed under several parents (shown once on staging).
+  **Fixed before the next wave, DOCOPS-361:** link targets and addresses with balanced
+  brackets (`#GetChannels()`, MSDN `(v=vs.110)`) were cut at the first `)`, in
+  `anchors._LINK` and `text._LINK`; and a target matching a served id in another case
+  (`getchannels()`) is `differs`, not `missing`: a fragment is case-sensitive. 2 tests.
 
 ---
 

@@ -257,6 +257,197 @@ triage:
     path: "*monitoring-data-timing-and-interruptions.md#*"
     reason: >-
       Headings with an escaped < (GET \<chan_name>/...) are shown on staging as \&lt; and get another id. For AEM.
+  - code: VERIFY_PUBLISHED_TEXT_DIFF
+    decision: logged
+    ticket: DOCOPS-344
+    slug: "tibco-scribe"
+    path: "*connector-extensions/tools.md*"
+    reason: >-
+      Staging serves the page nearly empty (DOCOPS-344). Fix later.
+  - code: VERIFY_PUBLISHED_ANCHOR_MISSING
+    decision: logged
+    ticket: DOCOPS-344
+    slug: "tibco-scribe"
+    path: "*connector-extensions/tools.md*"
+    reason: >-
+      Staging serves the page nearly empty (DOCOPS-344). Fix later.
+  - code: VERIFY_PUBLISHED_IMAGE_BROKEN
+    decision: logged
+    ticket: DOCOPS-344
+    slug: "tibco-scribe"
+    path: "*connector-extensions/tools.md*"
+    reason: >-
+      Staging serves the page nearly empty (DOCOPS-344). Fix later.
+  - code: VERIFY_PUBLISHED_TEXT_DIFF
+    decision: logged
+    ticket: DOCOPS-344
+    slug: "tibco-businessevents-enterprise-edition"
+    path: "*domain-object-override-settings-reference.md*"
+    reason: >-
+      Staging serves the page nearly empty (DOCOPS-344). Fix later.
+  - code: VERIFY_PUBLISHED_ANCHOR_MISSING
+    decision: logged
+    ticket: DOCOPS-344
+    slug: "tibco-businessevents-enterprise-edition"
+    path: "*domain-object-override-settings-reference.md*"
+    reason: >-
+      Staging serves the page nearly empty (DOCOPS-344). Fix later.
+  - code: VERIFY_PUBLISHED_IMAGE_BROKEN
+    decision: logged
+    ticket: DOCOPS-344
+    slug: "tibco-businessevents-enterprise-edition"
+    path: "*domain-object-override-settings-reference.md*"
+    reason: >-
+      Staging serves the page nearly empty (DOCOPS-344). Fix later.
+  - code: VERIFY_TEXT_DROPPED
+    decision: logged
+    ticket: DOCOPS-360
+    slug: "tibco-businessevents-enterprise-edition"
+    path: "*/activation.md"
+    reason: >-
+      Text in angle brackets (<version_number>, <br>, XSL examples) is written unescaped and disappears when shown. Fix later.
+  - code: VERIFY_TEXT_DROPPED
+    decision: logged
+    ticket: DOCOPS-360
+    slug: "tibco-businessevents-enterprise-edition"
+    path: "*/validating-project-from-tibco-businessevents-cli.md"
+    reason: >-
+      Text in angle brackets (<version_number>, <br>, XSL examples) is written unescaped and disappears when shown. Fix later.
+  - code: VERIFY_TEXT_DROPPED
+    decision: logged
+    ticket: DOCOPS-360
+    slug: "tibco-businessevents-enterprise-edition"
+    path: "*/basic-user-workflow-tibco-businessevents-webstudio.md"
+    reason: >-
+      Text in angle brackets (<version_number>, <br>, XSL examples) is written unescaped and disappears when shown. Fix later.
+  - code: VERIFY_TEXT_DROPPED
+    decision: logged
+    ticket: DOCOPS-360
+    slug: "tibco-scribe"
+    path: "*/netsuite.md"
+    reason: >-
+      Text in angle brackets (<version_number>, <br>, XSL examples) is written unescaped and disappears when shown. Fix later.
+  - code: VERIFY_TEXT_DROPPED
+    decision: logged
+    ticket: DOCOPS-360
+    slug: "tibco-scribe"
+    path: "*connector-extensions/tools.md"
+    reason: >-
+      Text in angle brackets (<version_number>, <br>, XSL examples) is written unescaped and disappears when shown. Fix later.
+  - code: VERIFY_TEXT_DROPPED
+    decision: accepted
+    slug: "tibco-businessevents-enterprise-edition"
+    path: "*/agent-classes-all-om-types.md"
+    reason: >-
+      "Default value is 10." is present (raw HTML table, <code>10.</code>); the check reads it in two parts.
+  - code: VERIFY_PUBLISHED_ANCHOR_MISSING
+    decision: logged
+    ticket: DOCOPS-362
+    slug: "tibco-cloud-integration-flogo-payg"
+    path: "*#*-----*"
+    reason: >-
+      Link to a heading with code written as dashes. Fix later.
+  - code: VERIFY_PUBLISHED_ANCHOR_MISSING
+    decision: logged
+    ticket: DOCOPS-363
+    slug: "tibco-businessevents-enterprise-edition"
+    path: "*#FIG_*"
+    reason: >-
+      Link to an anchor the converter did not keep (figure/GUID bookmark, or a heading that gained a code suffix). Fix later.
+  - code: VERIFY_PUBLISHED_ANCHOR_MISSING
+    decision: logged
+    ticket: DOCOPS-363
+    slug: "tibco-businessevents-enterprise-edition"
+    path: "*#GUID-*"
+    reason: >-
+      Link to an anchor the converter did not keep (figure/GUID bookmark, or a heading that gained a code suffix). Fix later.
+  - code: VERIFY_PUBLISHED_ANCHOR_MISSING
+    decision: logged
+    ticket: DOCOPS-363
+    slug: "tibco-businessevents-enterprise-edition"
+    path: "*/command-line-interface.md#*-commands"
+    reason: >-
+      Link to an anchor the converter did not keep (figure/GUID bookmark, or a heading that gained a code suffix). Fix later.
+  - code: VERIFY_PUBLISHED_ANCHOR_MISSING
+    decision: source
+    slug: "tibco-scribe"
+    path: "*#*_*"
+    reason: >-
+      The source page links to a bookmark it does not define (#notes_entities, #special_ops, #alt_keys); broken on the old site too.
+  - code: VERIFY_PUBLISHED_TOC_ENTRY_MISSING
+    decision: logged
+    ticket: DOCOPS-351
+    slug: "tibco-businessevents-enterprise-edition"
+    version: "6.3.2"
+    path: "*Enabling the Legacy Lookup Strategy"
+    reason: >-
+      Page under a heading row, hidden from the staging menu (DOCOPS-351). Fix later.
+  - code: VERIFY_PUBLISHED_TOC_ENTRY_MISSING
+    decision: logged
+    ticket: DOCOPS-351
+    slug: "tibco-businessevents-enterprise-edition"
+    version: "6.3.2"
+    path: "*Global Diagram Preferences"
+    reason: >-
+      Page under a heading row, hidden from the staging menu (DOCOPS-351). Fix later.
+  - code: VERIFY_PUBLISHED_TOC_ENTRY_MISSING
+    decision: logged
+    ticket: DOCOPS-351
+    slug: "tibco-businessevents-enterprise-edition"
+    version: "6.3.2"
+    path: "*Setting Up Legacy ActiveSpaces as Cluster and Cache Provider"
+    reason: >-
+      Page under a heading row, hidden from the staging menu (DOCOPS-351). Fix later.
+  - code: VERIFY_PUBLISHED_TOC_ORDER
+    decision: logged
+    ticket: DOCOPS-351
+    slug: "tibco-businessevents-enterprise-edition"
+    version: "6.3.2"
+    path: "*Enabling the Legacy Lookup Strategy"
+    reason: >-
+      Page under a heading row, hidden from the staging menu (DOCOPS-351). Fix later.
+  - code: VERIFY_PUBLISHED_TOC_ORDER
+    decision: logged
+    ticket: DOCOPS-351
+    slug: "tibco-businessevents-enterprise-edition"
+    version: "6.3.2"
+    path: "*Global Diagram Preferences"
+    reason: >-
+      Page under a heading row, hidden from the staging menu (DOCOPS-351). Fix later.
+  - code: VERIFY_PUBLISHED_TOC_ORDER
+    decision: logged
+    ticket: DOCOPS-351
+    slug: "tibco-businessevents-enterprise-edition"
+    version: "6.3.2"
+    path: "*Setting Up Legacy ActiveSpaces as Cluster and Cache Provider"
+    reason: >-
+      Page under a heading row, hidden from the staging menu (DOCOPS-351). Fix later.
+  - code: VERIFY_PUBLISHED_TOC_ENTRY_MISSING
+    decision: accepted
+    slug: "tibco-scribe"
+    reason: >-
+      Scribe lists one page under several parents (e.g. Solution Requirements three times); staging shows each page once, and readers still reach it. One title holds a non-breaking space.
+  - code: VERIFY_PUBLISHED_TOC_MOVED
+    decision: accepted
+    slug: "tibco-scribe"
+    reason: >-
+      Scribe lists one page under several parents (e.g. Solution Requirements three times); staging shows each page once, and readers still reach it. One title holds a non-breaking space.
+  - code: VERIFY_TOC_MOVED
+    decision: accepted
+    slug: "tibco-scribe"
+    reason: >-
+      A page listed under several parents in the old menu pairs crosswise; not a content change.
+  - code: VERIFY_TOC_MOVED
+    decision: accepted
+    slug: "tibco-cloud-integration-flogo-payg"
+    reason: >-
+      A page listed under several parents in the old menu pairs crosswise; not a content change.
+  - code: VERIFY_TOPIC_MISSING
+    decision: source
+    slug: "tibco-scribe"
+    path: "*child*.htm"
+    reason: >-
+      The old menu names *child.htm topics that are not in the original package.
   - code: VERIFY_PUBLISHED_ANCHOR_MISSING
     decision: source
     slug: tibco-enterprise-message-service

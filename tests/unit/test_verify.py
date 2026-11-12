@@ -367,6 +367,32 @@ def test_two_pages_sharing_a_title_are_each_read_at_their_own_address(tmp_path: 
     assert checked.pages["admin/maps.md"].missing == checked.pages["dev/maps.md"].missing == []
 
 
+def test_a_link_target_with_brackets_is_read_whole_and_matched_in_any_case(tmp_path: Path) -> None:
+    """DOCOPS-361: `#GetChannels()` was read as `#GetChannels(`; staging serves the id
+    lowercased, which a browser does not match, so it differs rather than being missing."""
+    folder = tmp_path / "online-help" / "1-0-0"
+    folder.mkdir(parents=True)
+    (folder / "jmx.md").write_text('# JMX\n\n- [GetChannels()](#GetChannels())\n\n'
+                                   '<a id="GetChannels()"></a>\n\n## GetChannels()\n\nLists channels.\n',
+                                   encoding="utf-8")
+    menu = _item("JMX", "/us/en/prod/online-help/1-0-0/jmx.html")
+    fetcher = FakeFetcher({
+        VERSION: (200, _served("", menu=menu).encode()),
+        f"{BASE}/us/en/prod/online-help/1-0-0/jmx.html": (200, _served(
+            "/jmx", "<ul><li>GetChannels()</li></ul><h2 id='getchannels()'>GetChannels()</h2><p>Lists channels.</p>",
+            menu, title="JMX").encode()),
+    })
+    toc = root([Node("JMX", "jmx.md")])
+    checked = published.check(fetcher, VERSION, toc, folder)
+
+    targets = anchors.gather(toc, [], folder, set(checked.pages))
+    for target in targets.values():
+        anchors.classify(target, checked.pages[target.page])
+
+    assert {key: (t.outcome, t.served_id) for key, t in targets.items()} == {
+        "jmx.md#GetChannels()": ("differs", "getchannels()")}
+
+
 def test_link_targets_are_ok_differs_or_missing(tmp_path: Path) -> None:
     folder, checked, toc = _anchor_site(tmp_path)
     redirects = [("https://old/a.htm", "guide.md#modes-roles"), ("https://old/b.htm", "guide.md#kept"),

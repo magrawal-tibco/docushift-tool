@@ -383,6 +383,16 @@ def test_a_link_whose_text_has_escaped_brackets_reads_as_its_words() -> None:
     assert texts.coverage(source, page).missing == []
 
 
+def test_a_link_whose_address_has_brackets_reads_as_its_words() -> None:
+    """DOCOPS-361: an MSDN address `(…(v=vs.110).aspx)` left `.aspx)` behind as words."""
+    from docushift.verify import text as texts
+
+    page = texts.markdown_text(
+        "See [Microsoft .NET DateTime.ToString Method](http://msdn.microsoft.com/en-us/library/"
+        "zdtaw1bw(v=vs.110).aspx), and the format strings.\n")
+    assert page.blocks == ["See Microsoft .NET DateTime.ToString Method, and the format strings."]
+
+
 def test_a_footnote_marker_and_a_windows_path_in_raw_html_read_as_their_words() -> None:
     from docushift.verify import text as texts
 
