@@ -19,7 +19,7 @@ This table says only what changes in Jira when an event happens.
 |---|---|
 | Moving DOCOPS-134 to Done is allowed (blocked by a permission check on 2026-10-30; note already posted) | DOCOPS-134 → Done |
 | Edit to DOCOPS-217 is allowed (blocked by a permission check on 2026-10-09) | DOCOPS-217: append the 2026-10-09 publish note → Done |
-| Engineering approves which of the 25 deselected BW plug-in versions still published to remove (list given 2026-11-02; user getting approval, expected ~2026-11-04) | Remove the agreed ones as DOCOPS-316 did; dated note there or a new sub-task |
+| Karan's list applied (`reports/karan-decision-changes-2026-11-12.csv`; closeout plan §6: K1 catalog Fri 13, K2 80 removals and K3 27 additions in R2, Thu 19) | One new sub-task for the list (proposed 12 Nov); dated note per step; the 25 BW plug-in removals held since 2 Nov are part of K2 |
 | A follow-up from the BusinessConnect warnings is planned | DOCOPS-220 → In Progress |
 | General resources repo created and pushed (4 API references) | DOCOPS-245: dated note → Done |
 | `fix-callouts` has run over output/, reframed/ and both repos, pushed, and labels show on staging | DOCOPS-250: dated note → Done |
@@ -69,14 +69,13 @@ This table says only what changes in Jira when an event happens.
 | Team requirements move (Messaging Docusaurus, iProcess offline HTML, Scribe redirects, Streaming build, PRISM integration) | DOCOPS-355–359: dated notes; adjust SP |
 | Batch 1b finishes (BW plug-in packages re-downloaded and unpacked: 184 of 253 published versions had no original on disk, deleted after the TIBCO backup; then newest-version checks) | DOCOPS-338: dated note with BW plug-in counts; DOCOPS-282: note that the deleted workspace ZIPs were re-fetched |
 | The user pastes UAT sheet rows (closeout plan §8) | Dated note on each Jira kind with its sheet row number |
-| The user sends engineering's list of older BW plug-in versions to convert | New sub-task under the TIBCO conversion story; slot Tue 24 – Wed 25 Nov |
 
 **Left alone on purpose:** DOCOPS-8 is a Task where its siblings are Stories.
 
 **Log** (newest first, one line per session):
 
 - 2026-11-12 — Close-out plan (`docs/closeout-plan.md`) agreed: overnight batches per product (`scratch/overnight.sh`), spread-out R1 on Fri 13,
-  UAT sheet rows from triage. Batch 1 (BW plug-ins, newest): 26 of 80 checked, 54 skipped (no original on disk); Batch 1b started. No Jira change.
+  UAT sheet rows from triage; Karan's list final for 1,166 Integration versions (27 add, 80 remove). Batch 1 (BW plug-ins, newest): 26 of 80 checked, 54 skipped (no original on disk); Batch 1b started. No Jira change.
 
 - 2026-11-12 — DOCOPS-361 → Done (0.25 SP), note: BE 6.4.0 and Scribe `logged` after the re-run; BE 6.3.2 one menu entry left.
   AEM report list (`reports/verify/aem-content-missing.csv`, wip links); 22 TIBCO repos have content-fix ahead of wip, merge awaits the user.

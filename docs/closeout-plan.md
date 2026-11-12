@@ -15,7 +15,9 @@
 - 54 of its 80 versions were skipped: their original packages had been deleted from this machine after the backup.
 - Tonight, **Batch 1b** downloads them again from the old site, unpacks them, and checks the skipped versions.
 
-Nothing needed from you until Friday morning.
+Karan's list received (§6). It is final for 1,166 Integration versions: 27 to add, 80 published ones to remove, both in R2 before go-live.
+
+Nothing needed from you until Friday morning, apart from one Jira yes or no.
 
 ---
 
@@ -59,19 +61,18 @@ Machine time: about 5 minutes per version checked.
 | Day | Focus | Lane A: machine | Lane B: agents | Lane C: you |
 |---|---|---|---|---|
 | **Thu 12** | Plan | Day: **Batch 1**, BW plug-ins, newest versions; 26 of 80 could be checked. Night: **Batch 1b**, download and unpack the BW plug-in packages again, then check the newest versions Batch 1 skipped. | – | Done |
-| **Fri 13** | **Release R1** | Day: R1 in four spread-out groups, each after the previous shows on staging: TIBCO small families; TIBCO middle families; TIBCO large families and the four already checked (FTL, Cloud, BusinessEvents, Scribe); ibi (7 repos, 4 with `wip` commits of their own, merged properly). Night: **Batch 2**, 117 TIBCO newest versions and the 20 re-checks, about 11 h. Then **Batch 3**, ibi newest (22) and Statistica newest (11), about 3 h. | Triage of Batch 1 and 1b; UAT sheet rows for the open AEM items (§8) | Sign in. Paste the new rows into the UAT sheet. |
+| **Fri 13** | **Release R1** | Day: first, **K1**: Karan's list written into the catalog (§6). Then R1 in four spread-out groups, each after the previous shows on staging: TIBCO small families; TIBCO middle families; TIBCO large families and the four already checked (FTL, Cloud, BusinessEvents, Scribe); ibi (7 repos, 4 with `wip` commits of their own, merged properly). Night: **Batch 2**: the 27 additions from Karan's list downloaded and unpacked (K3); then the TIBCO newest versions, without Karan's "do not migrate" ones, and the 20 re-checks, about 11 h. Then **Batch 3**, ibi newest (22) and Statistica newest (11), about 3 h. | Triage of Batch 1 and 1b; UAT sheet rows for the open AEM items (§8) | Sign in. Paste the new rows into the UAT sheet. |
 | Sat 14 – Sun 15 | – | Batches 2–3 finish on their own | – | Nothing |
-| **Mon 16** | **Triage** | – | Triage of Batches 2–3, one agent per family. One list of every problem kind, with counts, plus UAT sheet rows for the new site, pipeline and AEM kinds. | Sign in. Paste the sheet rows. **D5:** which fixes go into R2, before go-live, and which wait until after 30 Nov |
+| **Mon 16** | **Triage** | Day: **K2**, the 80 removals in `content-fix`; **K3**, convert and merge the 27 additions (continues Tue) | Triage of Batches 2–3, one agent per family. One list of every problem kind, with counts, plus UAT sheet rows for the new site, pipeline and AEM kinds. | Sign in. Paste the sheet rows. **D5:** which fixes go into R2, before go-live, and which wait until after 30 Nov |
 | **Tue 17 – Wed 18** | **Fixes** | Day: re-conversion of what R2 touches, then publish to `content-fix` | Fix agents, one per chosen Jira issue (candidates: 349 dropped topics, 360 angle-bracket text, 363 lost anchors, 362 code headings, 354 FTL redirects, 343 EMS anchors) | Nothing, unless an agent finds a design question |
-| **Thu 19** | **Release R2** | Day: R2, spread out as R1. Night: **Batch 4**, re-check what R2 changed. | – | Approve R2 (one yes or no) |
+| **Thu 19** | **Release R2** | Day: R2 (fixes, Karan's 80 removals and 27 additions), spread out as R1. Night: **Batch 4**, re-check what R2 changed. | – | Approve R2 (one yes or no) |
 | **Fri 20** | **Go / no-go** | – | Triage of Batch 4 | **Go / no-go** against §4. **D6:** the 82 TIBCO versions with no package on the old site. |
 | Sat 21 – Sun 22 | Buffer | Re-runs if needed | – | – |
 | **Mon 23** | **Go-live** | – | – | – |
 | **Mon 23 – Wed 25** | Stage 2 | Nights: **Batches 5–6**, older TIBCO versions outside BW plug-ins (about 154), including the comparison with the live old site | Triage | AEM follow-ups |
-| **Tue 24 – Wed 25** | **Older BW plug-ins (engineering)** | Day: catalog, download, convert, merge and publish to `content-fix`, for engineering's list (§6) | – | – |
-| **Thu 26** | **Release R3** | Day: R3 (older BW plug-ins, Streaming, anything held from R2). Night: **Batch 7**, check them. | – | Approve R3 |
+| **Thu 26** | **Release R3** | Day: R3 (Streaming, anything held from R2, including additions that did not convert cleanly). Night: **Batch 7**, check them. | – | Approve R3 |
 | **Fri 27 – Mon 30** | Old-site close | Collect old addresses for help with no redirect map (DOCOPS-322, 279), while the old site is up | Triage | Close the backups (DOCOPS-281, 283); confirm nothing else is needed from the old site |
-| **After 30 Nov** | Stage 3 | Older BW plug-in versions already published (171, now on disk after Batch 1b), older ibi (178), Statistica (24); Streaming once AEM serves it | Fixes left from §4 | – |
+| **After 30 Nov** | Stage 3 | Older BW plug-in versions still published after Karan's removals (on disk after Batch 1b), older ibi (178), Statistica (24); Streaming once AEM serves it | Fixes left from §4 | – |
 
 If go-live moves to 25–26 Nov, the calendar shifts by those days. R2 still lands three days before go-live.
 
@@ -87,7 +88,6 @@ Ready when:
 
 | Item | Slot |
 |---|---|
-| **Older BW plug-in versions: engineering's exact list** (D3) | When you send it; work slot Tue 24 – Wed 25 |
 | BusinessEvents 6.3.2: "Addressing Schema Elements" missing from the staging menu | Triage, Mon 16 |
 | EMS 10.4.0: re-check with the fixed checker | Batch 3 (Fri 13 night) |
 | Spotfire backup run summary → close DOCOPS-283 | Whenever you paste it, by Fri 27 |
@@ -95,29 +95,43 @@ Ready when:
 | Streaming `content-fix` (its `wip` has its own commit, so a real merge is needed) | R3 |
 | Doubled headings in 38 products (DOCOPS-336) | D5 decides R2 or after 30 Nov |
 | Team requirements (DOCOPS-355–359) | Owned by those teams; notes when they move |
-| BW plug-in versions to remove (25 named on 2 Nov, waiting on engineering) | When engineering answers |
 | PDFs, translated help, search, help-button links, layout and browser checks | After 30 Nov |
 
-## 6. Older BW plug-in versions (engineering request)
+## 6. Karan's list: what Integration publishes (engineering request, D3)
 
-Waiting for engineering's exact list (D3).
+**The source.** `cache/Integration Products migration to new docsite - versions.csv` lists 1,166 versions of the Integration families:
 
-**What the catalog shows.** 33 archived BW plug-in versions were never converted:
+| Family | Versions |
+|---|---|
+| BW plug-ins | 661 |
+| BusinessWorks | 177 |
+| Cloud | 129 |
+| Integration Platform | 114 |
+| TRA | 55 |
+| Platform | 30 |
 
-- 30 with no retirement record;
-- 3 with a retirement announced, still published on the old site.
+**The rule.** For every version on this list, **"Karan's decision" is final** (user, 12 Nov). It wins over our own migrate column, over the support report's retirements, and over what is already published. Karan changed the earlier column on 44 rows.
 
-They cover 22 products, including MDM (8), Amazon SQS and SNS (5), Files for Unix and Windows (3), HL7 with FHIR (3) and SmartMapper (2).
+**Against what is published today.** The full list is `reports/karan-decision-changes-2026-11-12.csv`.
 
-**Where their packages are.** 32 of the 33 are on the shared drive. PDF 1.0.0's backup failed, so the old site must supply it before 30 Nov.
+| Change | Versions | Which |
+|---|---|---|
+| **Add:** migrate, never published | **27** | Control Plane 1.3.0–1.17.0 (16); Platform 1.0.0, 1.1.0; BusinessWorks 6.11.0, 5.15.1, 5.15.0; SmartMapper Enterprise Server 6.0.0, 6.0.1; BWCE 2.10.0; Hybrid Integration Connectivity Add-on 3.11.0; and 2 versions **retired** in the support report: BW plug-in for CICS 2.4.1 and for Files 8.2.0 |
+| **Remove:** published, but do not migrate | **80** | BW plug-ins 64 (the 25 held for engineering since 2 Nov are among them); TRA 11 (Runtime Agent 5.12.2 and 5.12.3, Administrator 5.12.2, Designer Add-in 1.0.0–1.5.0); BusinessWorks 3 (BusinessWorks Enterprise 3.10.0 and 3.11.0, the AWS Marketplace subscription 2.3.1); Cloud 2 (BusinessWorks and Flogo pay-as-you-go 2.8.0 and 2.11.0) |
+| Already as decided | 1,057 | – |
 
-**Steps once the list arrives:**
+**Where the packages are.** 25 of the 27 additions are in the TIBCO backup and on the old site. The 2 retired ones are in neither the backup nor the local files, so they must come from the old site before 30 Nov.
 
-1. One Jira sub-task.
-2. Mark the versions as selected.
-3. Download, PDF 1.0.0 first.
-4. Convert, merge pages, publish to `content-fix`.
-5. R3, then Batch 7.
+My guess of 33 older BW plug-in versions is dropped: Karan marks all 33 "do not migrate".
+
+**Steps (Jira first: one sub-task for the whole list):**
+
+| Step | When | What |
+|---|---|---|
+| K1 | Fri 13, before R1 (no batch running) | Karan's decision written into the catalog's `migrate_decision`, as a manual decision a refresh cannot undo, with the selection to match. Retirement overridden for CICS 2.4.1 and Files 8.2.0. The batch builder skips "do not migrate" versions from then on. |
+| K2 | Mon 16, day | The 80 removed from `content-fix`, the way DOCOPS-316 did it (version folders, version lists, redirect maps). Goes out with R2, so they are gone before go-live. |
+| K3 | Fri 13, night | The 27 additions downloaded and unpacked, at the start of Batch 2 |
+| K3 | Mon 16 – Tue 17, day | Converted, pages merged, published to `content-fix`. Out with R2 (Thu 19) and checked in Batch 4. If a version does not convert cleanly, it moves to R3 (Thu 26) and is logged. |
 
 **Found 12 Nov (published BW plug-ins).** 184 of the 253 published BW plug-in versions had no unpacked original on this machine. The TIBCO backup run deleted the packages after uploading them, and their unpacked folders were gone as well. Every other TIBCO family is complete.
 
@@ -129,7 +143,7 @@ Without the originals, these versions cannot be checked, now or after 30 Nov. Ba
 |---|---|---|
 | D1 | How `content-fix` reaches `wip` (R1: 20 TIBCO and 7 ibi repos) | **Claude merges, spread out** in groups of about five, each after the previous rebuild shows on staging; fetch first; Streaming held to R3 (user, 12 Nov) |
 | D2 | Claude starts the calendar's runs, keeps going past failures, and reports in the morning | **Yes** (user, 12 Nov) |
-| D3 | Older BW plug-ins: which versions, by when | **The user sends engineering's exact list** (12 Nov) |
+| D3 | Which Integration versions to publish | **Karan's decision is final** for the 1,166 versions on his list: 27 to add, 80 to remove, both before go-live (§6; user, 12 Nov) |
 | D4 | Parallel agents for triage and fixes | **Yes** (user, 12 Nov). Not while a batch runs (memory). |
 | D5 | Which fixes go into R2 | Mon 16, from the measured counts |
 | D6 | The 82 TIBCO versions with no package on the old site | Fri 20 |
