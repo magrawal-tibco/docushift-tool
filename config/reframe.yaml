@@ -192,6 +192,16 @@ products:
   # named after 1.1.0's Step 2. 1.0.0 keeps its 16 published pages.
   # 1.1.0 was on staging (synced 2026-11-05): this split is the one approved
   # exception to the no-regrouping rule (open-issues.md).
+  # DOCOPS-354 (2026-11-12): the rebuild under the 3.0.1 pin folded each SQL Direct
+  # activity into a sibling activity's page; 2.26.8 is published with them as pages
+  # of their own, which is right. Version-scoped, so 3.0.1 keeps its digest.
+  tibco-flogo:
+    keep_separate:
+      - path: connectors/oracledb/oracle-database-sql-direct.md
+        versions: ["2.26.8"]
+      - path: connectors/mysql/mysql-direct.md
+        versions: ["2.26.8"]
+
   tibco-activation-service:
     keep_separate:
       - path: user-guide/planning-for-license-activation.md
