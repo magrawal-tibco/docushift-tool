@@ -1,0 +1,13 @@
+﻿slug,version,old_url,local_source,new_path,staging_url,text_percent,missing_sentences_count,images_found,images_expected,toc_parent_matched,toc_position_matched,published_status,skip_reason,findings,triage,missing_sentences
+spotfire-statistica-all-servers,14.4.0,,spotfire-statistica-all-servers-14-4-0/pdf/SPOT_stat-all-servers_14.4.0_admin_data_entry.pdf,user-guides/SPOT_stat-all-servers_14.4.0_admin_data_entry.pdf,,,,,,,,ok,,,,
+spotfire-statistica-all-servers,14.4.0,,spotfire-statistica-all-servers-14-4-0/pdf/SPOT_stat-all-servers_14.4.0_admin_product_traceability.pdf,user-guides/SPOT_stat-all-servers_14.4.0_admin_product_traceability.pdf,,,,,,,,ok,,,,
+spotfire-statistica-all-servers,14.4.0,,spotfire-statistica-all-servers-14-4-0/pdf/SPOT_stat-all-servers_14.4.0_admin_server.pdf,user-guides/SPOT_stat-all-servers_14.4.0_admin_server.pdf,,,,,,,,ok,,,,
+spotfire-statistica-all-servers,14.4.0,,spotfire-statistica-all-servers-14-4-0/pdf/SPOT_stat-all-servers_14.4.0_configuration.pdf,user-guides/SPOT_stat-all-servers_14.4.0_configuration.pdf,,,,,,,,ok,,,,
+spotfire-statistica-all-servers,14.4.0,,spotfire-statistica-all-servers-14-4-0/pdf/SPOT_stat-all-servers_14.4.0_configuration_statistica_server.pdf,user-guides/SPOT_stat-all-servers_14.4.0_configuration_statistica_server.pdf,,,,,,,,ok,,,,
+spotfire-statistica-all-servers,14.4.0,,spotfire-statistica-all-servers-14-4-0/pdf/SPOT_stat-all-servers_14.4.0_installation_instructions.pdf,user-guides/SPOT_stat-all-servers_14.4.0_installation_instructions.pdf,,,,,,,,ok,,,,
+spotfire-statistica-all-servers,14.4.0,,spotfire-statistica-all-servers-14-4-0/pdf/SPOT_stat-all-servers_14.4.0_quick_ref.pdf,user-guides/SPOT_stat-all-servers_14.4.0_quick_ref.pdf,,,,,,,,ok,,,,
+spotfire-statistica-all-servers,14.4.0,,spotfire-statistica-all-servers-14-4-0/pdf/SPOT_stat-all-servers_14.4.0_security.pdf,user-guides/SPOT_stat-all-servers_14.4.0_security.pdf,,,,,,,,ok,,,,
+spotfire-statistica-all-servers,14.4.0,,spotfire-statistica-all-servers-14-4-0/pdf/SPOT_stat-all-servers_14.4.0_relnotes.pdf,release-information/SPOT_stat-all-servers_14.4.0_relnotes.pdf,,,,,,,,ok,,,,
+spotfire-statistica-all-servers,14.4.0,,spotfire-statistica-all-servers-14-4-0/doc/SPOT_stat-all-servers_14.4.0_readme.txt,release-information/SPOT_stat-all-servers_14.4.0_readme.txt,,,,,,,,ok,,,,
+spotfire-statistica-all-servers,14.4.0,,spotfire-statistica-all-servers-14-4-0/pdf/SPOT_stat-all-servers_14.4.0_license.pdf,reference-documents/SPOT_stat-all-servers_14.4.0_license.pdf,,,,,,,,ok,,,,
+spotfire-statistica-all-servers,14.4.0,,spotfire-statistica-all-servers-14-4-0/pdf/SPOT_stat-all-servers_14.4.0_vpat.pdf,reference-documents/SPOT_stat-all-servers_14.4.0_vpat.pdf,,,,,,,,ok,,,,

@@ -206,37 +206,37 @@ spotfire,statistica,spotfire-data-science-author,1.4.0,not-verified,,,,,,,,,
 spotfire,statistica,spotfire-data-science-author,1.5.0,not-verified,,,,,,,,,
 spotfire,statistica,spotfire-data-science-author,2.0.0,not-verified,,,,,,,,,
 spotfire,statistica,spotfire-data-science-author,2.1.0,not-verified,,,,,,,,,
-spotfire,statistica,spotfire-data-science-author,2.2.0,not-verified,,,,,,,,,
+spotfire,statistica,spotfire-data-science-author,2.2.0,lost,2026-11-12,local+live,17,23,0,0,VERIFY_LIVE_UNCHECKABLE=14 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=7 VERIFY_TOC_ENTRY_MISSING=11 VERIFY_TOPIC_MISSING=12 VERIFY_TOPIC_UNFILED=3,d34eb6cd,reports/verify/spotfire/spotfire-data-science-author/2.2.0-2026-11-12.csv
 spotfire,statistica,spotfire-data-science-for-life-science-author,1.4.0,not-verified,,,,,,,,,
 spotfire,statistica,spotfire-data-science-for-life-science-author,1.5.0,not-verified,,,,,,,,,
 spotfire,statistica,spotfire-data-science-for-life-science-author,2.0.0,not-verified,,,,,,,,,
 spotfire,statistica,spotfire-data-science-for-life-science-author,2.1.0,not-verified,,,,,,,,,
-spotfire,statistica,spotfire-data-science-for-life-science-author,2.2.0,not-verified,,,,,,,,,
+spotfire,statistica,spotfire-data-science-for-life-science-author,2.2.0,lost,2026-11-12,local+live,17,23,0,0,VERIFY_LIVE_UNCHECKABLE=14 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=7 VERIFY_TOC_ENTRY_MISSING=11 VERIFY_TOPIC_MISSING=12 VERIFY_TOPIC_UNFILED=3,d34eb6cd,reports/verify/spotfire/spotfire-data-science-for-life-science-author/2.2.0-2026-11-12.csv
 spotfire,statistica,spotfire-data-science-for-life-science-operations,1.4.0,not-verified,,,,,,,,,
 spotfire,statistica,spotfire-data-science-for-life-science-operations,1.5.0,not-verified,,,,,,,,,
 spotfire,statistica,spotfire-data-science-for-life-science-operations,2.0.0,not-verified,,,,,,,,,
 spotfire,statistica,spotfire-data-science-for-life-science-operations,2.1.0,not-verified,,,,,,,,,
-spotfire,statistica,spotfire-data-science-for-life-science-operations,2.2.0,not-verified,,,,,,,,,
+spotfire,statistica,spotfire-data-science-for-life-science-operations,2.2.0,lost,2026-11-12,local+live,17,23,0,0,VERIFY_LIVE_UNCHECKABLE=14 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=7 VERIFY_TOC_ENTRY_MISSING=11 VERIFY_TOPIC_MISSING=12 VERIFY_TOPIC_UNFILED=3,d34eb6cd,reports/verify/spotfire/spotfire-data-science-for-life-science-operations/2.2.0-2026-11-12.csv
 spotfire,statistica,spotfire-data-science-operations,1.4.0,not-verified,,,,,,,,,
 spotfire,statistica,spotfire-data-science-operations,1.5.0,not-verified,,,,,,,,,
 spotfire,statistica,spotfire-data-science-operations,2.0.0,not-verified,,,,,,,,,
 spotfire,statistica,spotfire-data-science-operations,2.1.0,not-verified,,,,,,,,,
-spotfire,statistica,spotfire-data-science-operations,2.2.0,not-verified,,,,,,,,,
+spotfire,statistica,spotfire-data-science-operations,2.2.0,lost,2026-11-12,local+live,17,23,0,0,VERIFY_LIVE_UNCHECKABLE=14 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=7 VERIFY_TOC_ENTRY_MISSING=11 VERIFY_TOPIC_MISSING=12 VERIFY_TOPIC_UNFILED=3,d34eb6cd,reports/verify/spotfire/spotfire-data-science-operations/2.2.0-2026-11-12.csv
 spotfire,statistica,spotfire-data-science-workbench,14.1.0,not-verified,,,,,,,,,
 spotfire,statistica,spotfire-data-science-workbench,14.3.0,not-verified,,,,,,,,,
-spotfire,statistica,spotfire-data-science-workbench,14.4.0,not-verified,,,,,,,,,
+spotfire,statistica,spotfire-data-science-workbench,14.4.0,lost,2026-11-12,local+live,14253,29651,0,0,VERIFY_LIVE_UNCHECKABLE=20 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=23 VERIFY_TOC_ENTRY_MISSING=15626 VERIFY_TOPIC_MISSING=14025 VERIFY_TOPIC_UNFILED=319,d34eb6cd,reports/verify/spotfire/spotfire-data-science-workbench/14.4.0-2026-11-12.csv
 spotfire,statistica,spotfire-statistica,14.1.0,not-verified,,,,,,,,,
 spotfire,statistica,spotfire-statistica,14.3.0,not-verified,,,,,,,,,
-spotfire,statistica,spotfire-statistica,14.4.0,not-verified,,,,,,,,,
+spotfire,statistica,spotfire-statistica,14.4.0,lost,2026-11-12,local+live,14253,29651,0,0,VERIFY_LIVE_UNCHECKABLE=20 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=23 VERIFY_TOC_ENTRY_MISSING=15626 VERIFY_TOPIC_MISSING=14025 VERIFY_TOPIC_UNFILED=319,d34eb6cd,reports/verify/spotfire/spotfire-statistica/14.4.0-2026-11-12.csv
 spotfire,statistica,spotfire-statistica-all-servers,14.1.0,not-verified,,,,,,,,,
 spotfire,statistica,spotfire-statistica-all-servers,14.2.0,not-verified,,,,,,,,,
 spotfire,statistica,spotfire-statistica-all-servers,14.3.0,not-verified,,,,,,,,,
-spotfire,statistica,spotfire-statistica-all-servers,14.4.0,not-verified,,,,,,,,,
+spotfire,statistica,spotfire-statistica-all-servers,14.4.0,clean,2026-11-12,local,12,0,0,0,,da507f9a,reports/verify/spotfire/spotfire-statistica-all-servers/14.4.0-2026-11-12.csv
 spotfire,statistica,spotfire-statistica-integration,14.4.0,not-verified,,,,,,,,,
-spotfire,statistica,spotfire-statistica-integration,14.5.0,not-verified,,,,,,,,,
-spotfire,statistica,tibco-data-science-for-tibco-spotfire-analyst,14.1.0,not-verified,,,,,,,,,
-spotfire,statistica,tibco-data-science-service-for-tibco-spotfire,14.1.0,not-verified,,,,,,,,,
-spotfire,statistica,tibco-statistica-language-packs,14.1.0,not-verified,,,,,,,,,
+spotfire,statistica,spotfire-statistica-integration,14.5.0,lost,2026-11-12,local+live,140,132,0,0,VERIFY_LIVE_UNCHECKABLE=20 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=7 VERIFY_TOC_ENTRY_MISSING=65 VERIFY_TOPIC_MISSING=67 VERIFY_TOPIC_UNFILED=69,d34eb6cd,reports/verify/spotfire/spotfire-statistica-integration/14.5.0-2026-11-12.csv
+spotfire,statistica,tibco-data-science-for-tibco-spotfire-analyst,14.1.0,lost,2026-11-12,local+live,328,26,0,0,VERIFY_LIVE_UNCHECKABLE=17 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=16 VERIFY_TOC_ENTRY_MISSING=14 VERIFY_TOPIC_MISSING=12 VERIFY_TOPIC_UNFILED=310,d34eb6cd,reports/verify/spotfire/tibco-data-science-for-tibco-spotfire-analyst/14.1.0-2026-11-12.csv
+spotfire,statistica,tibco-data-science-service-for-tibco-spotfire,14.1.0,lost,2026-11-12,local+live,296,8,0,0,VERIFY_LIVE_UNCHECKABLE=10 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=294 VERIFY_TOC_ENTRY_MISSING=4 VERIFY_TOPIC_MISSING=4 VERIFY_TOPIC_UNFILED=285,d34eb6cd,reports/verify/spotfire/tibco-data-science-service-for-tibco-spotfire/14.1.0-2026-11-12.csv
+spotfire,statistica,tibco-statistica-language-packs,14.1.0,clean,2026-11-12,local,4,0,0,0,,da507f9a,reports/verify/spotfire/tibco-statistica-language-packs/14.1.0-2026-11-12.csv
 tibco,activespaces,tibco-activespaces-enterprise-edition,4.10.0,not-verified,,,,,,,,,
 tibco,activespaces,tibco-activespaces-enterprise-edition,4.10.1,not-verified,,,,,,,,,
 tibco,activespaces,tibco-activespaces-enterprise-edition,5.0.0,not-verified,,,,,,,,,
@@ -612,7 +612,7 @@ tibco,data_management,tibco-mdm-studio,6.0.0,not-verified,,,,,,,,,
 tibco,data_management,tibco-mdm-studio,6.1.0,not-verified,,,,,,,,,
 tibco,data_management,tibco-mdm-studio,6.1.1,not-verified,,,,,,,,,
 tibco,ems,tibco-ems-client-for-ibm-i,8.6.0,logged,2026-11-11,local+staging+live,51,0,0,6,VERIFY_LIVE_UNCHECKABLE=3 VERIFY_PUBLISHED_CALLOUT_UNRENDERED=9 VERIFY_PUBLISHED_TEXT_DIFF=2 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=3,6f9f728,reports/verify/tibco/tibco-ems-client-for-ibm-i/8.6.0-2026-11-11.csv
-tibco,ems,tibco-enterprise-message-service,10.4.0,logged,2026-11-11,local+staging+live,1459,0,0,190,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=56 VERIFY_PUBLISHED_ANCHOR_MISSING=6 VERIFY_PUBLISHED_CALLOUT_UNRENDERED=478 VERIFY_PUBLISHED_IMAGE_BROKEN=18 VERIFY_PUBLISHED_TEXT_DIFF=9 VERIFY_PUBLISHED_TOC_ENTRY_MISSING=4 VERIFY_PUBLISHED_TOC_TITLE_CHANGED=3 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=666 VERIFY_TOC_MOVED=2 VERIFY_TOPIC_MISSING=1 VERIFY_TOPIC_UNFILED=24,312e3e4,reports/verify/tibco/tibco-enterprise-message-service/10.4.0-2026-11-11.csv
+tibco,ems,tibco-enterprise-message-service,10.4.0,logged,2026-11-12,local+staging+live,1459,0,0,185,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=56 VERIFY_PUBLISHED_ANCHOR_MISSING=4 VERIFY_PUBLISHED_CALLOUT_UNRENDERED=477 VERIFY_PUBLISHED_IMAGE_BROKEN=18 VERIFY_PUBLISHED_TEXT_DIFF=7 VERIFY_PUBLISHED_TOC_ENTRY_MISSING=4 VERIFY_PUBLISHED_TOC_TITLE_CHANGED=3 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=666 VERIFY_TOC_MOVED=2 VERIFY_TOPIC_MISSING=1 VERIFY_TOPIC_UNFILED=24,312e3e4,reports/verify/tibco/tibco-enterprise-message-service/10.4.0-2026-11-12.csv
 tibco,ems,tibco-enterprise-message-service,10.4.1,logged,2026-11-11,local+staging+live,1444,0,0,178,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=57 VERIFY_PUBLISHED_ANCHOR_MISSING=4 VERIFY_PUBLISHED_CALLOUT_UNRENDERED=486 VERIFY_PUBLISHED_IMAGE_BROKEN=14 VERIFY_PUBLISHED_TEXT_DIFF=6 VERIFY_PUBLISHED_TOC_TITLE_CHANGED=1 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=666 VERIFY_TOC_MOVED=2 VERIFY_TOPIC_MISSING=1 VERIFY_TOPIC_UNFILED=12,312e3e4,reports/verify/tibco/tibco-enterprise-message-service/10.4.1-2026-11-11.csv
 tibco,ems,tibco-enterprise-message-service,10.4.3,logged,2026-11-11,local+staging+live,1431,0,0,178,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=57 VERIFY_PUBLISHED_ANCHOR_MISSING=7 VERIFY_PUBLISHED_CALLOUT_UNRENDERED=483 VERIFY_PUBLISHED_IMAGE_BROKEN=14 VERIFY_PUBLISHED_TEXT_DIFF=6 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=664 VERIFY_TOPIC_MISSING=1,312e3e4,reports/verify/tibco/tibco-enterprise-message-service/10.4.3-2026-11-11.csv
 tibco,ems,tibco-enterprise-message-service,10.4.4,logged,2026-11-11,local+staging+live,1431,0,0,178,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=57 VERIFY_PUBLISHED_ANCHOR_MISSING=7 VERIFY_PUBLISHED_CALLOUT_UNRENDERED=483 VERIFY_PUBLISHED_IMAGE_BROKEN=14 VERIFY_PUBLISHED_TEXT_DIFF=6 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=666 VERIFY_TOPIC_MISSING=1,312e3e4,reports/verify/tibco/tibco-enterprise-message-service/10.4.4-2026-11-11.csv
