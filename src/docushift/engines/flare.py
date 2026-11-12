@@ -116,6 +116,8 @@ TEMPLATES_DIRECTORY = "_templates"
 
 # The predecessor's `skip_filenames`, minus `Home.htm` -- which is the `DefaultUrl`
 # landing page in 644 of 676 roots, and skipping it is why its output has none.
+# A stub at the root by name; below it unless listed in the TOC and marked `Topic`
+# (DOCOPS-349).
 STUB_FILENAMES = frozenset({"default.htm", "default_csh.htm", "index.htm", "index.html",
                             "index_csh.htm", "default.js"})
 
@@ -755,15 +757,21 @@ class FlareEngine(BaseEngine):
             return "localized-subtree"
         if first in GENERATED_DIRECTORIES:
             return "generated-directory"
-        if path.name.lower() in STUB_FILENAMES:
+        name = path.name.lower()
+        key = str(relative).lower()
+        if len(relative.parts) == 1 and (name in STUB_FILENAMES or name in stubs):
             return "runtime-stub"
-        if len(relative.parts) == 1 and path.name.lower() in stubs:
+        if name in STUB_FILENAMES and not (key in referenced and _marked_topic(path)):
+            # Below the root the name alone proves nothing: EMS 10.4-10.5's
+            # `users-guide/default.htm` (the "default" overflow policy) and ibi's
+            # `INDEX.htm` are in the TOC and marked `Topic` (DOCOPS-349). A frameset,
+            # a redirect, a Javadoc `index.html` or an unlisted generated
+            # `Content/_globalpages/index.htm` lacks one of the two: still a stub.
             return "runtime-stub"
         if any(root in path.parents for root in nested):
             return "nested-output-root"
         if self.skips_api_references and is_api_reference(path, api_roots):
             return "api-reference"
-        key = str(relative).lower()
         if placeholder and key == placeholder:
             # Rejected whether or not a TOC entry reaches it, which is the one
             # place this overrules the source. 4 versions file the unfilled
@@ -1694,6 +1702,12 @@ def _is_runtime_topic(soup: BeautifulSoup) -> bool:
     """MadCap's own marker for a topic file, on `<html>`. A Javadoc page has none."""
     html = soup.find("html")
     return isinstance(html, Tag) and str(html.get("data-mc-runtime-file-type", "")) == "Topic"
+
+
+def _marked_topic(path: Path) -> bool:
+    """`_is_runtime_topic`, read from disk. An unreadable file is not one."""
+    text = _read(path)
+    return text is not None and _is_runtime_topic(_parse(text))
 
 
 def _title(container: Tag) -> str:

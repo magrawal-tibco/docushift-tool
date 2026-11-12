@@ -469,6 +469,46 @@ def test_runtime_stubs_named_after_the_project_are_stubs(tmp_path: Path) -> None
     assert result.document("Content/platform-ct.md").title == "Control Tower"
 
 
+def test_a_topic_named_like_a_stub_below_the_root_is_a_topic(tmp_path: Path) -> None:
+    """EMS 10.4-10.5's `users-guide/default.htm`, the "default" overflow policy.
+
+    In the TOC and marked `Topic`, it was skipped by name alone (DOCOPS-349), as
+    was ibi's `INDEX.htm`. The root's own entry pages are stubs whatever they say;
+    below the root a frameset (even one in the TOC), a redirect, and a marked page
+    no TOC lists (FOCUS 9.3.4's `Content/_globalpages/index.htm`) still are.
+    """
+    marked = topic("default").replace("<html>", "<html data-mc-runtime-file-type='Topic'>")
+    files = basic()
+    files.update({
+        "html/Default.htm": marked.replace("'Topic'", "'Default;TriPane'"),
+        "html/Default_CSH.htm": marked.replace("'Topic'", "'CSH'"),
+        "html/index.htm": marked,
+        "html/users-guide/default.htm": marked,
+        "html/users-guide/INDEX.htm": marked.replace("default", "INDEX"),
+        "html/old/index.html": "<html><head><meta http-equiv='refresh' content='0; url=../Default.htm'/>"
+                               "</head><body></body></html>",
+        "html/frames/Default.htm": "<html data-mc-runtime-file-type='Default;TriPane'>"
+                                   "<frameset><frame src='a.htm'/></frameset></html>",
+        "html/Content/_globalpages/index.htm": marked,
+    })
+    files.update({f"html/{k}": v for k, v in toc_files(
+        [{"i": 1}, {"i": 2}, {"i": 3}],
+        {
+            "users-guide/default.htm": {"i": [1], "t": ["default"], "b": [""]},
+            "users-guide/INDEX.htm": {"i": [2], "t": ["INDEX"], "b": [""]},
+            "frames/Default.htm": {"i": [3], "t": ["Frames"], "b": [""]},
+        },
+    ).items()})
+
+    result = run(tmp_path, files)
+
+    assert result.unit.skipped["runtime-stub"] == 6
+    assert result.document("users-guide/default.md").title == "default"
+    assert result.document("users-guide/INDEX.md").title == "INDEX"
+    assert result.codes().get("NAV_NODE_DROPPED") == 1
+    assert "CONTENT_MISSING" not in result.codes()
+
+
 def test_the_localized_subtree_is_skipped_and_counted(tmp_path: Path) -> None:
     """8,004 files, and the corpus's only localized tree."""
     files = basic()
