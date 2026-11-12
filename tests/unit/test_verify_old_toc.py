@@ -14,6 +14,7 @@ from docushift.verify import old_toc
 from docushift.verify.driver import Verifier
 from docushift.verify.toc import Node, by_page, root, tail_moved
 from tests.conftest import make_product, make_version
+from tests.unit.test_flare import build, manifest, toc_files
 
 SLUG, NUMBER = "prod", "1.0.0"
 
@@ -447,3 +448,29 @@ def test_ditas_important_information_moved_to_the_end_is_the_converters_tail_mov
     other = root([Node("Guide", "guide.md"), Node("Important Information", "important-information.md")])
     assert [i.kind for i in by_page(tail_moved(root([other.children[1], other.children[0]]), other), other)
             .issues] == ["order"]
+
+
+# -- Statistica wave false findings (DOCOPS-366, 2026-11-13) -------------------------
+
+
+def test_a_flare_menu_path_in_another_case_is_matched_to_its_converted_page(tmp_path: Path) -> None:
+    """Statistica 14.4.0: the menu names `10-working-with-Statistica-query/`, the package
+    and `output_map` `10-working-with-statistica-query/`; 82 rows read as not converted."""
+    html = tmp_path / "pkg/html"
+    build(html, {
+        "Data/HelpSystem.xml": manifest(default_url="guide.htm"),
+        **toc_files(
+            [{"i": 1, "n": [{"i": 2}, {"i": 3}]}],
+            {"/guide.htm": {"i": [1], "t": ["Guide"], "b": [""]},
+             "/10-working-with-Statistica-query/Query-Overview.htm": {"i": [2], "t": ["Query"], "b": [""]},
+             "/gone.htm": {"i": [3], "t": ["Gone"], "b": [""]}},
+        ),
+    })
+    outmap = {"pkg/html/guide.htm": "guide.md",
+              "pkg/html/10-working-with-statistica-query/query-overview.htm": "query/query-overview.md"}
+
+    old = old_toc.flare([html], tmp_path, outmap, outmap.__getitem__, _no_marker)
+
+    assert _keys(old.tree) == [(0, "Guide", "guide.md"), (1, "Query", "query/query-overview.md"),
+                               (1, "Gone", None)]
+    assert old.unconverted == [("pkg/html/gone.htm", "Gone")]

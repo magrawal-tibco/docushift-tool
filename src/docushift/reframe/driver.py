@@ -116,6 +116,20 @@ def reframes(engine: SourceEngine | str | None, policy: ReframePolicy) -> bool:
     return policy.toc_folders and engine in REFRAMABLE_ENGINES + LAYOUT_ENGINES
 
 
+def publishes_merged(reframe: dict, product: Product, engine: SourceEngine | str | None,
+                     primary_locale: bool) -> bool:
+    """Whether Stage 7 publishes this version's `reframed/` tree rather than `output/`.
+
+    The one rule `sync` publishes by and `verify` reads by (DOCOPS-366): a merge
+    left on disk for a product that does not publish it must not send `verify`
+    looking for merged pages (Spotfire Statistica: 13,922 topics read as missing).
+    `publish` is opted into in `reframe.yaml`; an engine the stage does not take
+    has no tree to hold it to (Phase 42); a localized tree is never merged (Phase 57).
+    """
+    policy = policy_for(reframe, product.slug, product.bu, product.family)
+    return policy.publish and reframes(engine, policy) and primary_locale
+
+
 #: Written fresh by this stage, so a copy of the source's version would be stale.
 _REGENERATED = frozenset(
     {"toc.yml", "reframe.yml", "redirects.yml", "review-queue.csv", csh_map.CSH_FILE,

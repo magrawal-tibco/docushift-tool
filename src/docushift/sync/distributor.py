@@ -454,11 +454,10 @@ class WorkspaceDistributor:
         # `validation.references` for its fence-aware masking, and `validation`
         # reads this module for `STAGING_SUFFIX`. A top-level import closes that
         # loop and nothing in `docushift.validation` will load.
-        from docushift.reframe import policy_for, reframes
+        from docushift.reframe import publishes_merged
 
         slug, number = product.slug, version.version
         converted = self.config.output_path(product.bu, product.family, slug, number)
-        policy = policy_for(self.config.load_reframe(), slug, product.bu, product.family)
 
         # X3-03. A stage killed between its swap and its bookkeeping leaves its
         # mark, and the tree under it is not one any stage has vouched for.
@@ -469,8 +468,9 @@ class WorkspaceDistributor:
         # set left unmerged, one it lays out (Phase 63).
         # Phase 57: localized trees are not merged, so a `--locale` run publishes
         # its converted tree whatever the product's English policy is.
-        if (not policy.publish or not reframes(version.engine, policy)
-                or not self.config.is_primary_locale()):
+        # `verify` reads by the same rule (DOCOPS-366).
+        if not publishes_merged(self.config.load_reframe(), product, version.engine,
+                                self.config.is_primary_locale()):
             if not converted.is_dir():
                 extracted = self.config.extract_path(product.bu, product.family, slug, number)
                 if version.engine not in CONVERTIBLE_ENGINES and extracted.is_dir():

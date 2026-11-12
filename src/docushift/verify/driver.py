@@ -2,7 +2,7 @@
 
 Reads the catalog for the version's workspace, `state.db` for what each source
 became (`output_map`) and what the conversion dropped on purpose, the merge's
-`redirects.yml` where there is one, and the published folder itself. Writes
+`redirects.yml` where `sync` publishes the merge, and the published folder itself. Writes
 nothing but findings and the report rows the CLI turns into a CSV.
 
 **Known drops are classified per topic only where the data proves it** (Phase 55,
@@ -39,6 +39,7 @@ from docushift.engines.flare import LANDING_CHROME, PORTAL_BLOCKS
 from docushift.engines.roots import by_language, find_output_roots, is_skin_path, owning_root
 from docushift.extractor import content_root
 from docushift.models import SourceEngine
+from docushift.reframe import publishes_merged
 from docushift.reframe.toc import schema_for
 from docushift.reporting.findings import FindingsRun, Severity
 from docushift.state import READ_BACK_CODES
@@ -199,7 +200,11 @@ class Verifier:
             result.skipped = "no converted output recorded" if not outmap else "extracted package not on disk"
             return result
 
-        redirects = _redirects(self.cfg.reframed_path(product.bu, product.family, folder.slug, number))
+        # DOCOPS-366: the merge's addresses only where `sync` publishes the merge. A
+        # merged tree left on disk for a product that publishes `output/` is not live.
+        redirects = (_redirects(self.cfg.reframed_path(product.bu, product.family, folder.slug, number))
+                     if publishes_merged(self.cfg.load_reframe(), product, ver.engine,
+                                         is_primary_locale(folder.locale, PRIMARY_LOCALE)) else {})
         found = sorted(p.parent.parent for p in extracted.rglob("Data/HelpSystem.xml"))
         engine = ver.engine if ver.engine in _SELECTORS else (SourceEngine.FLARE if found else ver.engine)
         # Phase 64. A package can ship one Flare root per language

@@ -919,9 +919,33 @@ def test_staging_that_serves_no_target_is_not_yet_there_and_one_gap_is_unserved(
     assert "VERIFY_REDIRECT_NOT_ON_STAGING" not in codes
 
 
+def _publish_merged(config) -> None:
+    """`reframe.yaml` opting the fixture's BU into publishing its merged tree."""
+    config.reframe_path.parent.mkdir(parents=True, exist_ok=True)
+    config.reframe_path.write_text("bus:\n  ibi:\n    publish: true\n", encoding="utf-8")
+    config._reframe_cache = None
+
+
+def test_a_merge_left_on_disk_is_read_only_where_sync_publishes_it(config, state) -> None:
+    """DOCOPS-366, Spotfire Statistica: a 21 Oct merge sat in `reframed/` while `sync`
+    published `output/`; verify looked for 13,922 merged pages that were never published."""
+    target = _fixture(config, state)
+    reframed = config.reframed_path("ibi", "webfocus", SLUG, NUMBER)
+    reframed.mkdir(parents=True, exist_ok=True)
+    (reframed / "redirects.yml").write_text(
+        "redirects:\n" + "".join(f"- from: {n}.md\n  to: merged.md#{n}\n" for n in ("one", "two")),
+        encoding="utf-8")
+
+    assert _codes(_verify(config, state, target)) == []
+
+    _publish_merged(config)
+    assert "VERIFY_TOPIC_MISSING" in _codes(_verify(config, state, target))
+
+
 def test_a_page_opening_at_its_own_top_heading_matches_the_bare_toc_entry(config, state) -> None:
     """Phase 63's unmerged reframe maps a topic to `page.md#top`; the TOC lists `page.md`."""
     target = _fixture(config, state)
+    _publish_merged(config)
     reframed = config.reframed_path("ibi", "webfocus", SLUG, NUMBER)
     reframed.mkdir(parents=True, exist_ok=True)
     (reframed / "redirects.yml").write_text(
@@ -1180,6 +1204,7 @@ def test_a_live_page_is_compared_with_its_own_topic_on_a_merged_page(config, sta
     against `one.htm`, not whichever topic of the page came first (2 false drifts on
     Foresight Connect with FHIR 1.0.1)."""
     target = _fixture(config, state)
+    _publish_merged(config)
     reframed = config.reframed_path("ibi", "webfocus", SLUG, NUMBER)
     reframed.mkdir(parents=True, exist_ok=True)
     (reframed / "redirects.yml").write_text(

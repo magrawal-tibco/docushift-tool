@@ -73,8 +73,14 @@ def _wrap(units: list[tuple[str, list[Node]]]) -> Node:
 def flare(roots: list[Path], extracted: Path, outmap: dict[str, str], key_of: KeyOf,
           bookmark: Bookmark) -> OldToc:
     """Every Flare root's TOC as one tree. A `.flprj` insertion point is a merge
-    marker, not a page (Phase 51), and is left out."""
+    marker, not a page (Phase 51), and is left out.
+
+    Matched to `output_map` without regard to case, as the other readers are: a
+    menu may name `10-working-with-Statistica-query/` for a folder the package
+    ships in lower case, and Windows extracted it either way (DOCOPS-366).
+    """
     result = OldToc(root([]))
+    lower = {source.lower(): source for source in outmap}
 
     def build(nodes, base: str) -> list[Node]:
         out: list[Node] = []
@@ -84,6 +90,7 @@ def flare(roots: list[Path], extracted: Path, outmap: dict[str, str], key_of: Ke
             key = None
             if node.entry.path:
                 source = f"{base}/{node.entry.path}" if base else node.entry.path
+                source = source if source in outmap else lower.get(source.lower(), source)
                 if source in outmap:
                     key = bookmark(key_of(source), node.entry.anchor)
                 else:
