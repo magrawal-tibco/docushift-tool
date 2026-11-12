@@ -62,6 +62,9 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 **Log** (newest first, one line per session):
 
+- 2026-11-12 — Team requirements logged under DOCOPS-7 (Content Migration, label `team-requirement`): DOCOPS-355 Messaging
+  Docusaurus (0.5, In Progress), 356 iProcess offline HTML for CHM (0.5, Backlog, Dec), 357 Scribe redirects from help.scribesoft.com
+  (0.5, Backlog), 358 Streaming build hand-off + ModelOps to confirm (0.25, In Progress), 359 PRISM / build-script integration (1, In Progress).
 - 2026-11-12 — Spotfire ZIP backup script for DOCOPS-283 (`C:/tmp/zip-backup/run-spotfire-backup.bat`): 80 non-retired versions to
   https://drive.google.com/drive/folders/1eSc3bHEYg15TUxTvBPMhyHoKB5OTJkU5 (workspace ZIPs uploaded and kept, 37 fetched). Run by the user.
 - 2026-11-12 — Testing plan around go-live (23 Nov, maybe 25–26; old site off 30 Nov) saved to `reports/uat-plan-2026-11-12.md`.
