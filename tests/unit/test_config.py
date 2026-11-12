@@ -419,13 +419,14 @@ def test_shipped_scope_lists_the_ebx_and_spotfire_products(repo_root: Path) -> N
     # exactness stops a rule matching the wrong product, and says nothing about a
     # product missing from the list. See architecture.md §3.10. Then 67 on
     # 2026-10-08: the 64 Flogo connectors (Phase 48) and 3 Analytics products moved
-    # to Spotfire.
-    assert len(rules) == 129
+    # to Spotfire. Then Spotfire Statistics Services on 2026-10-21 (dev input).
+    assert len(rules) == 130
     for slug in ("tibco-ebx", "spotfire", "spotfire-server", "spotfire-desktop", "tibco-spotfire-for-apple-ipad"):
         assert slug in rules
     assert "spotfire-application" in rules
+    assert "spotfire-statistics-services" in rules  # out of scope on dev input, 2026-10-21
     # The look-alikes the exact-slug rule exists to protect -- see §3.10.
-    for slug in ("tibco-businessconnect-ebxml-protocol", "spotfire-data-streams", "spotfire-statistics-services"):
+    for slug in ("tibco-businessconnect-ebxml-protocol", "spotfire-data-streams"):
         assert slug not in rules
 
 
