@@ -110,6 +110,211 @@ triage:
     slug: tibco-streaming
     reason: Streaming's online help is not served on staging; reported to the AEM team.
 
+  # Phase 77, BW plug-ins wave 2026-11-12.
+  - code: VERIFY_PUBLISHED_TEXT_DIFF
+    decision: logged
+    ticket: DOCOPS-344
+    slug: tibco-activematrix-businessworks-plug-in-for-ldap
+    path: "*/modifydn-entry.md"
+    reason: >-
+      Staging serves ModifyDN Entry (LDAP 7.3.0) with an empty article; the Markdown is
+      ordinary. For the AEM team.
+  - code: VERIFY_PUBLISHED_ANCHOR_MISSING
+    decision: logged
+    ticket: DOCOPS-344
+    slug: tibco-activematrix-businessworks-plug-in-for-ldap
+    path: "*/modifydn-entry.md#*"
+    reason: The same empty page.
+  - code: VERIFY_PUBLISHED_IMAGE_BROKEN
+    decision: logged
+    ticket: DOCOPS-344
+    slug: tibco-activematrix-businessworks-plug-in-for-ldap
+    path: "*/modifydn-entry.md"
+    reason: The same empty page.
+
+  - code: VERIFY_PUBLISHED_TOC_ENTRY_MISSING
+    decision: logged
+    ticket: DOCOPS-351
+    slug: tibco-businessevents-enterprise-edition
+    version: "6.3.2"
+    path: "*Addressing Schema Elements"
+    reason: >-
+      The page's first toc.yml row is a heading row elsewhere (#mapping-and-transforming-
+      data-to-function-input, line 1841); staging shows the page once, at that row and
+      under that title, at .../mapping-and-transforming-data/xpath-formula-builder-for-
+      xpath-2-0.html, and drops its own row (line 1926). Fix later.
+
+  # Trillium 6.0.0: on Karan's remove list (K2); the published copy is the old flat tree.
+  - code: VERIFY_TEXT_DROPPED
+    decision: logged
+    ticket: DOCOPS-364
+    slug: tibco-activematrix-businessworks-plug-in-for-trillium
+    reason: To be removed (Karan's list, K2); the published copy predates the current conversion.
+  - code: VERIFY_TOC_ENTRY_MISSING
+    decision: logged
+    ticket: DOCOPS-364
+    slug: tibco-activematrix-businessworks-plug-in-for-trillium
+    reason: To be removed (Karan's list, K2).
+  - code: VERIFY_TOPIC_MISSING
+    decision: logged
+    ticket: DOCOPS-364
+    slug: tibco-activematrix-businessworks-plug-in-for-trillium
+    reason: To be removed (Karan's list, K2).
+  - code: VERIFY_TOC_MOVED
+    decision: logged
+    ticket: DOCOPS-364
+    slug: tibco-activematrix-businessworks-plug-in-for-trillium
+    reason: To be removed (Karan's list, K2).
+
+  # Version-level only in practice: no served BW plug-in version has a page-level
+  # PAGE_MISSING today. Triage cannot match an empty path, see Open question 6.
+  - code: VERIFY_PUBLISHED_PAGE_MISSING
+    decision: logged
+    ticket: DOCOPS-346
+    slug: "tibco-*businessworks-plug-in*"
+    reason: >-
+      61 of 73 BW plug-in versions with online help are not on staging (version page,
+      menu and product page 404) although they are in the repo on wip and main. For
+      the AEM team.
+
+  # NEW-A: published incomplete.
+  - code: VERIFY_TOPIC_MISSING
+    decision: logged
+    ticket: DOCOPS-365
+    slug: "tibco-activematrix-businessworks-plug-in-for-*sap-*"
+    path: "*/_templates/*.htm"
+    reason: >-
+      OData S/4HANA and SAP BTP were converted with an empty menu (NAV_NODE_DROPPED
+      126/106); every topic is in unfiled/, support and legal pages not converted.
+      Re-convert and re-publish.
+  - code: VERIFY_DOCUMENT_MISSING
+    decision: logged
+    ticket: DOCOPS-365
+    slug: "tibco-*businessworks-plug-in*"
+    reason: >-
+      Package documents (PDF guides, readme, license) never published for 6 versions;
+      the packages are on disk again since Batch 1b. Re-sync.
+  - code: VERIFY_DOCUMENT_CHANGED
+    decision: logged
+    ticket: DOCOPS-365
+    slug: tibco-activematrix-businessworks-plug-in-for-rest-and-json
+    version: "2.1.0"
+    reason: The readme was updated on docs.tibco.com after we published it. Re-sync.
+
+  # NEW-B: verify false findings. Delete these once NEW-B is fixed and the versions re-run.
+  - code: VERIFY_TOC_ENTRY_MISSING
+    decision: logged
+    ticket: DOCOPS-366
+    slug: tibco-activematrix-businessworks-plug-in-for-tibco-patterns
+    version: "6.2.0"
+    reason: >-
+      verify keeps a Flare TOC bookmark that lands on the page's own top heading as
+      page.md#top-heading; toc.yml lists the page bare (driver._bookmark). Not a content change.
+  - code: VERIFY_TOC_MOVED
+    decision: logged
+    ticket: DOCOPS-366
+    slug: tibco-activematrix-businessworks-plug-in-for-tibco-patterns
+    version: "6.2.0"
+    reason: The same bookmark misreading, on the rows under those pages.
+  - code: VERIFY_TOC_MOVED
+    decision: logged
+    ticket: DOCOPS-366
+    slug: "tibco-*businessworks-plug-in*"
+    path: important-information.md
+    reason: >-
+      DITA's legal page "Important Information" is moved to the end by the converter;
+      verify's tail rule does not know it (toc._tail_page). Not a content change.
+  - code: VERIFY_TOC_MOVED
+    decision: logged
+    ticket: DOCOPS-366
+    slug: "tibco-*businessworks-plug-in*"
+    path: tibco-documentation-and-support-services.md
+    reason: The same tail move, for the support page listed in each DITA guide.
+  - code: VERIFY_TOC_ORDER
+    decision: logged
+    ticket: DOCOPS-366
+    slug: tibco-activematrix-businessworks-plug-in-for-edi
+    version: "6.3.0"
+    path: "(top)"
+    reason: The same tail move, read as a reorder of the top level.
+  - code: VERIFY_TEXT_DROPPED
+    decision: logged
+    ticket: DOCOPS-366
+    slug: tibco-activematrix-businessworks-plug-in-for-oracle-e-business-suite
+    version: "6.1.2"
+    path: "users-guide/oracle-e-business-suite-palette/*"
+    reason: >-
+      verify leaves `\<var>` in a Windows path inside a raw HTML table as words
+      (text._TAG lacks `var`); the page is right.
+  - code: VERIFY_TEXT_DROPPED
+    decision: logged
+    ticket: DOCOPS-366
+    slug: tibco-activematrix-businessworks-plug-in-for-sap-hana-database
+    version: "6.1.0"
+    path: user-guide/getting-started.md
+    reason: >-
+      verify deletes `< version_number >` as a tag (text._TAG); with a space after `<`
+      it is text in Markdown.
+  - code: VERIFY_TEXT_DROPPED
+    decision: logged
+    ticket: DOCOPS-366
+    slug: tibco-activematrix-businessworks-plug-in-for-oracle-fusion-cloud-applications-suite
+    version: "6.0.0"
+    path: user-guide/advanced-topics.md
+    reason: >-
+      A fence opened on a list-item line (`- ` + three backticks, line 175) is not seen
+      by text._FENCE, so later fences pair wrongly and two logback.xml code blocks are lost
+      to the check. The page has them.
+
+  # K6: one topic under two parents, crosswise (as for Scribe and Flogo PAYG).
+  - code: VERIFY_TOC_MOVED
+    decision: accepted
+    slug: tibco-activematrix-businessworks-plug-in-for-data-conversion
+    version: "5.0.0"
+    reason: &crosswise >-
+      The old menu and toc.yml both list this topic under two parents; the check pairs
+      the copies crosswise. Not a content change.
+  - {code: VERIFY_TOC_MOVED, decision: accepted, slug: tibco-activematrix-businessworks-plug-in-for-database, version: "8.6.0", reason: *crosswise}
+  - {code: VERIFY_TOC_MOVED, decision: accepted, slug: tibco-activematrix-businessworks-plug-in-for-pdf, version: "6.2.3", reason: *crosswise}
+  - {code: VERIFY_TOC_MOVED, decision: accepted, slug: tibco-activematrix-businessworks-plug-in-for-peoplesoft, version: "7.4.0", reason: *crosswise}
+  - {code: VERIFY_TOC_MOVED, decision: accepted, slug: tibco-activematrix-businessworks-plug-in-for-siebel, version: "7.3.0", reason: *crosswise}
+  - {code: VERIFY_TOC_MOVED, decision: accepted, slug: tibco-activematrix-businessworks-plug-in-for-smpp, version: "6.0.3", reason: *crosswise}
+
+  # Source and accepted.
+  - code: VERIFY_TEXT_DROPPED
+    decision: source
+    slug: tibco-activematrix-businessworks-plug-in-for-confidentiality
+    version: "6.1.1"
+    reason: >-
+      The original help publishes the writers' draft comments ("Draft comments:",
+      "<draft>:"); shown on docs.tibco.com too. The check misses only the "<draft>:" prefixes.
+  - code: VERIFY_TOPIC_MISSING
+    decision: source
+    slug: tibco-activematrix-businessworks-plug-in-for-mdm
+    version: "7.0.2"
+    path: "*/applying-the-hf-001-hotfix-*"
+    reason: >-
+      The old menu's "Installing TIBCO BusinessWorks" points to
+      applying-the-hf-001-hotfix-to-tibco-businessworks-container-edition.htm, which the
+      package does not ship; broken on the old site too.
+  - code: VERIFY_TEXT_DROPPED
+    decision: accepted
+    slug: tibco-activematrix-businessworks-plug-in-for-siebel
+    version: "7.3.0"
+    path: home.md
+    reason: >-
+      The landing banner (product name with a broken character in the source, version,
+      date, links to the release documents) is not kept; the documents are published
+      separately.
+  - code: VERIFY_IMAGE_MISSING
+    decision: accepted
+    slug: tibco-activematrix-businessworks-plug-in-for-apache-kafka
+    version: "6.8.2"
+    path: user-guide/pushing-an-application-to-the-cloud.md
+    reason: >-
+      A decorative toolbar icon inside "Debug > Debug Configurations" is dropped; the
+      menu path is kept.
+
   - code: VERIFY_PUBLISHED_IMAGE_BROKEN
     decision: logged
     ticket: DOCOPS-347
@@ -126,7 +331,7 @@ triage:
 
   - code: VERIFY_REDIRECT_MAP_MISSING
     decision: logged
-    ticket: DOCOPS-271
+    ticket: DOCOPS-322
     reason: >-
       116 of 501 TIBCO help versions have no 301.yml; the redirect rebuild waits on
       the AEM team's new 301.yml shape (planning.md Phase 58, 2026-11-03).
