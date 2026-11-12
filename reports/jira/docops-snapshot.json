@@ -1,5 +1,5 @@
 {
- "fetched": "2026-10-30",
+ "fetched": "2026-11-13",
  "issues": [
   {
    "key": "DOCOPS-5",
@@ -1199,8 +1199,8 @@
    "summary": "TIBCO product-family review (re-suggested, unclassified, empty families)",
    "type": "Sub-task",
    "parent": "DOCOPS-6",
-   "status": "In Progress",
-   "category": "indeterminate",
+   "status": "Done",
+   "category": "done",
    "components": [
     "Content Migration"
    ],
@@ -1259,8 +1259,8 @@
    "summary": "Phase 40: sitemap mapping for 615 versions and StreamBase re-download",
    "type": "Sub-task",
    "parent": "DOCOPS-7",
-   "status": "In Progress",
-   "category": "indeterminate",
+   "status": "Done",
+   "category": "done",
    "components": [
     "Content Migration"
    ],
@@ -1269,7 +1269,7 @@
     "tibco"
    ],
    "created": "2026-10-07",
-   "resolved": "",
+   "resolved": "2026-11-03",
    "due": "",
    "assignee": "Mayur Agrawal",
    "sp": 0.25
@@ -1399,8 +1399,8 @@
    "summary": "Frontmatter and taxonomy alignment after family review",
    "type": "Sub-task",
    "parent": "DOCOPS-8",
-   "status": "Backlog",
-   "category": "new",
+   "status": "In Progress",
+   "category": "indeterminate",
    "components": [
     "Content Migration"
    ],
@@ -2567,8 +2567,8 @@
    "summary": "Service Grid merges: 3 self-check failures and 126 lost images (Phase 47)",
    "type": "Sub-task",
    "parent": "DOCOPS-114",
-   "status": "In Progress",
-   "category": "indeterminate",
+   "status": "Done",
+   "category": "done",
    "components": [
     "AI & Content Intelligence"
    ],
@@ -2586,8 +2586,8 @@
    "summary": "Re-run 50 long-path versions and 8 blocked DITA versions",
    "type": "Sub-task",
    "parent": "DOCOPS-7",
-   "status": "Backlog",
-   "category": "new",
+   "status": "Done",
+   "category": "done",
    "components": [
     "Content Migration"
    ],
@@ -3393,8 +3393,8 @@
    "summary": "Keep, triage and track verify results per version (Phase 58)",
    "type": "Sub-task",
    "parent": "DOCOPS-96",
-   "status": "Backlog",
-   "category": "new",
+   "status": "In Progress",
+   "category": "indeterminate",
    "components": [
     "AI & Content Intelligence"
    ],
@@ -3412,8 +3412,8 @@
    "summary": "Verify readiness for TIBCO: stg-docs.tibco.com, all engines' TOCs, pilots (Phase 58)",
    "type": "Sub-task",
    "parent": "DOCOPS-96",
-   "status": "Backlog",
-   "category": "new",
+   "status": "In Progress",
+   "category": "indeterminate",
    "components": [
     "AI & Content Intelligence"
    ],
@@ -3841,8 +3841,8 @@
    "summary": "TIBCO: back up source ZIPs, family by family",
    "type": "Sub-task",
    "parent": "DOCOPS-7",
-   "status": "Backlog",
-   "category": "new",
+   "status": "In Progress",
+   "category": "indeterminate",
    "components": [],
    "labels": [
     "docushift",
@@ -3969,6 +3969,887 @@
    "due": "",
    "assignee": "Mayur Agrawal",
    "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-313",
+   "summary": "Note labels fixed in published TIBCO docs: all families (R001)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-7",
+   "status": "In Progress",
+   "category": "indeterminate",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "tibco"
+   ],
+   "created": "2026-10-30",
+   "resolved": "",
+   "due": "",
+   "assignee": "",
+   "sp": 1.0
+  },
+  {
+   "key": "DOCOPS-316",
+   "summary": "Remove retirement-announced BW plug-in versions from the bw-plugin repos",
+   "type": "Sub-task",
+   "parent": "DOCOPS-7",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "tibco"
+   ],
+   "created": "2026-11-02",
+   "resolved": "2026-11-02",
+   "due": "",
+   "assignee": "",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-317",
+   "summary": "Phase 70: DocBook keeps nested sections in the TOC",
+   "type": "Sub-task",
+   "parent": "DOCOPS-11",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift",
+    "tibco"
+   ],
+   "created": "2026-11-02",
+   "resolved": "2026-11-02",
+   "due": "",
+   "assignee": "",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-318",
+   "summary": "Phase 71: the converter writes the note label R001 does",
+   "type": "Sub-task",
+   "parent": "DOCOPS-11",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift"
+   ],
+   "created": "2026-11-02",
+   "resolved": "2026-11-03",
+   "due": "",
+   "assignee": "",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-322",
+   "summary": "TIBCO help with no redirect map: collect docs.tibco.com URL patterns",
+   "type": "Sub-task",
+   "parent": "DOCOPS-7",
+   "status": "In Progress",
+   "category": "indeterminate",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "tibco"
+   ],
+   "created": "2026-11-04",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-323",
+   "summary": "Deselect 6 archived TIBCO versions and remove them from the published repos",
+   "type": "Sub-task",
+   "parent": "DOCOPS-7",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "tibco"
+   ],
+   "created": "2026-11-04",
+   "resolved": "2026-11-04",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-324",
+   "summary": "Phase 72: 301.yml in AEM's new shape, per version, with asset redirects",
+   "type": "Sub-task",
+   "parent": "DOCOPS-96",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift"
+   ],
+   "created": "2026-11-04",
+   "resolved": "2026-11-05",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 1.0
+  },
+  {
+   "key": "DOCOPS-327",
+   "summary": "sync keeps files added by hand to a version folder",
+   "type": "Sub-task",
+   "parent": "DOCOPS-96",
+   "status": "Backlog",
+   "category": "new",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift"
+   ],
+   "created": "2026-11-05",
+   "resolved": "",
+   "due": "2026-11-28",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-328",
+   "summary": "ibi: publish 301.yml in AEM's new shape (Phase 72 rollout)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-149",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "ibi"
+   ],
+   "created": "2026-11-05",
+   "resolved": "2026-11-05",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-329",
+   "summary": "TIBCO and Spotfire: publish 301.yml in AEM's new shape (Phase 72 rollout)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-7",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "tibco"
+   ],
+   "created": "2026-11-05",
+   "resolved": "2026-11-05",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 1.0
+  },
+  {
+   "key": "DOCOPS-330",
+   "summary": "Foresight: decide whether the -resources folder needs its own repo",
+   "type": "Sub-task",
+   "parent": "DOCOPS-7",
+   "status": "Backlog",
+   "category": "new",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "tibco"
+   ],
+   "created": "2026-11-05",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-331",
+   "summary": "TIBCO: rebuild 20 stale merged products (reframe --force, then sync)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-7",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "tibco"
+   ],
+   "created": "2026-11-05",
+   "resolved": "2026-11-05",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-332",
+   "summary": "Reframe: automatic layout pin per authoring engine (Phase 74)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-96",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift",
+    "reframe"
+   ],
+   "created": "2026-11-05",
+   "resolved": "2026-11-05",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-333",
+   "summary": "Catalog refresh and 2026-11-05 end-of-support report",
+   "type": "Sub-task",
+   "parent": "DOCOPS-6",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "tibco"
+   ],
+   "created": "2026-11-05",
+   "resolved": "2026-11-05",
+   "due": "",
+   "assignee": "",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-334",
+   "summary": "Remove retired BW Plug-in for SAP Solutions 8.6.0 from published docs",
+   "type": "Sub-task",
+   "parent": "DOCOPS-7",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "tibco"
+   ],
+   "created": "2026-11-06",
+   "resolved": "2026-11-06",
+   "due": "",
+   "assignee": "",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-336",
+   "summary": "Reframe: doubled headings fixed; Activation Service steps on own pages (Phase 76)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-75",
+   "status": "In Progress",
+   "category": "indeterminate",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "reframe",
+    "tibco"
+   ],
+   "created": "2026-11-09",
+   "resolved": "",
+   "due": "",
+   "assignee": "",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-337",
+   "summary": "Webhook on TIBCO and ibi UAT issues sheet to post new issues to the Digital Platform Google Space",
+   "type": "Sub-task",
+   "parent": "DOCOPS-10",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "ibi",
+    "tibco"
+   ],
+   "created": "2026-11-09",
+   "resolved": "2026-11-09",
+   "due": "",
+   "assignee": "",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-338",
+   "summary": "Verify every published version; log issues by kind, fix later (Phase 77)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-96",
+   "status": "In Progress",
+   "category": "indeterminate",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift",
+    "ibi",
+    "tibco"
+   ],
+   "created": "2026-11-11",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 1.0
+  },
+  {
+   "key": "DOCOPS-343",
+   "summary": "Verify issue: broken anchor names cut EMS pages short on staging",
+   "type": "Sub-task",
+   "parent": "DOCOPS-96",
+   "status": "In Progress",
+   "category": "indeterminate",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift",
+    "tibco",
+    "verify-issue"
+   ],
+   "created": "2026-11-11",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-344",
+   "summary": "Verify issue: pages served (nearly) empty on staging (EMS, Scribe, BusinessEvents)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-96",
+   "status": "Backlog",
+   "category": "new",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift",
+    "tibco",
+    "verify-issue"
+   ],
+   "created": "2026-11-11",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-345",
+   "summary": "Verify issue: heading link targets differ between the tool and staging",
+   "type": "Sub-task",
+   "parent": "DOCOPS-96",
+   "status": "Backlog",
+   "category": "new",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift",
+    "tibco",
+    "verify-issue"
+   ],
+   "created": "2026-11-11",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 1.0
+  },
+  {
+   "key": "DOCOPS-346",
+   "summary": "Online help not served on staging: Streaming and 61 BW plug-in versions",
+   "type": "Sub-task",
+   "parent": "DOCOPS-96",
+   "status": "Backlog",
+   "category": "new",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift",
+    "tibco",
+    "verify-issue"
+   ],
+   "created": "2026-11-11",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-347",
+   "summary": "Verify issue: images missing or different on staging",
+   "type": "Sub-task",
+   "parent": "DOCOPS-96",
+   "status": "Backlog",
+   "category": "new",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift",
+    "tibco",
+    "verify-issue"
+   ],
+   "created": "2026-11-11",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-348",
+   "summary": "Verify issue: small text differences on staging pages",
+   "type": "Sub-task",
+   "parent": "DOCOPS-96",
+   "status": "Backlog",
+   "category": "new",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift",
+    "tibco",
+    "verify-issue"
+   ],
+   "created": "2026-11-11",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-349",
+   "summary": "Verify issue: converter drops real topics named default.htm / index.htm",
+   "type": "Sub-task",
+   "parent": "DOCOPS-96",
+   "status": "In Progress",
+   "category": "indeterminate",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift",
+    "tibco",
+    "verify-issue"
+   ],
+   "created": "2026-11-11",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-350",
+   "summary": "Verify checker misreads escaped brackets in link text",
+   "type": "Sub-task",
+   "parent": "DOCOPS-96",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift",
+    "verify-issue"
+   ],
+   "created": "2026-11-11",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-351",
+   "summary": "Staging menu hides pages placed under a heading row",
+   "type": "Sub-task",
+   "parent": "DOCOPS-96",
+   "status": "Backlog",
+   "category": "new",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift",
+    "tibco",
+    "verify-issue"
+   ],
+   "created": "2026-11-11",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 1.0
+  },
+  {
+   "key": "DOCOPS-352",
+   "summary": "verify compares some pages with the wrong staging page",
+   "type": "Sub-task",
+   "parent": "DOCOPS-96",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift",
+    "tibco",
+    "verify-issue"
+   ],
+   "created": "2026-11-11",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.75
+  },
+  {
+   "key": "DOCOPS-353",
+   "summary": "Staging shows escaped \"<\" in headings as \"\\&lt;\"",
+   "type": "Sub-task",
+   "parent": "DOCOPS-96",
+   "status": "Backlog",
+   "category": "new",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift",
+    "tibco",
+    "verify-issue"
+   ],
+   "created": "2026-11-11",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-354",
+   "summary": "FTL and eFTL 7.1.3 301.yml has no page rows",
+   "type": "Sub-task",
+   "parent": "DOCOPS-96",
+   "status": "In Progress",
+   "category": "indeterminate",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift",
+    "tibco",
+    "verify-issue"
+   ],
+   "created": "2026-11-11",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-355",
+   "summary": "Messaging: decide how to migrate the Docusaurus help (GEMS, Graphical Rendezvous)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-7",
+   "status": "In Progress",
+   "category": "indeterminate",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "team-requirement",
+    "tibco"
+   ],
+   "created": "2026-11-12",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-356",
+   "summary": "iProcess: offline HTML help bundled with the product instead of CHM",
+   "type": "Sub-task",
+   "parent": "DOCOPS-7",
+   "status": "Backlog",
+   "category": "new",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "team-requirement",
+    "tibco"
+   ],
+   "created": "2026-11-12",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-357",
+   "summary": "Scribe: redirect help.scribesoft.com to the new docs site",
+   "type": "Sub-task",
+   "parent": "DOCOPS-7",
+   "status": "Backlog",
+   "category": "new",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "team-requirement",
+    "tibco"
+   ],
+   "created": "2026-11-12",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-358",
+   "summary": "Streaming: documentation tied to the product build — converted files handed over",
+   "type": "Sub-task",
+   "parent": "DOCOPS-7",
+   "status": "In Progress",
+   "category": "indeterminate",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "team-requirement",
+    "tibco"
+   ],
+   "created": "2026-11-12",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-359",
+   "summary": "Integrate the new publishing pipeline with PRISM and product build scripts",
+   "type": "Sub-task",
+   "parent": "DOCOPS-7",
+   "status": "In Progress",
+   "category": "indeterminate",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "team-requirement",
+    "tibco"
+   ],
+   "created": "2026-11-12",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 1.0
+  },
+  {
+   "key": "DOCOPS-360",
+   "summary": "Text in angle brackets disappears: written unescaped into Markdown",
+   "type": "Sub-task",
+   "parent": "DOCOPS-96",
+   "status": "In Progress",
+   "category": "indeterminate",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift",
+    "tibco",
+    "verify-issue"
+   ],
+   "created": "2026-11-12",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-361",
+   "summary": "verify misreads link targets that contain brackets, e.g. #GetChannels()",
+   "type": "Sub-task",
+   "parent": "DOCOPS-96",
+   "status": "Done",
+   "category": "done",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift",
+    "tibco",
+    "verify-issue"
+   ],
+   "created": "2026-11-12",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-362",
+   "summary": "Links to headings containing code are written as dashes",
+   "type": "Sub-task",
+   "parent": "DOCOPS-96",
+   "status": "In Progress",
+   "category": "indeterminate",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift",
+    "tibco",
+    "verify-issue"
+   ],
+   "created": "2026-11-12",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.25
+  },
+  {
+   "key": "DOCOPS-363",
+   "summary": "Links to anchors the converter did not keep (figure bookmarks, renamed headings)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-96",
+   "status": "In Progress",
+   "category": "indeterminate",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift",
+    "tibco",
+    "verify-issue"
+   ],
+   "created": "2026-11-12",
+   "resolved": "",
+   "due": "",
+   "assignee": "Mayur Agrawal",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-364",
+   "summary": "Integration: apply Karan's migrate decisions (27 add, 80 remove)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-7",
+   "status": "In Progress",
+   "category": "indeterminate",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "tibco"
+   ],
+   "created": "2026-11-12",
+   "resolved": "",
+   "due": "",
+   "assignee": "",
+   "sp": 1.0
+  },
+  {
+   "key": "DOCOPS-365",
+   "summary": "BW plug-ins published incomplete: empty menu, missing documents",
+   "type": "Sub-task",
+   "parent": "DOCOPS-96",
+   "status": "Backlog",
+   "category": "new",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift",
+    "tibco",
+    "verify-issue"
+   ],
+   "created": "2026-11-12",
+   "resolved": "",
+   "due": "",
+   "assignee": "",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-366",
+   "summary": "verify: false findings on BW plug-ins (TOC bookmarks, legal page, text)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-96",
+   "status": "In Progress",
+   "category": "indeterminate",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "docushift",
+    "tibco",
+    "verify-issue"
+   ],
+   "created": "2026-11-12",
+   "resolved": "",
+   "due": "",
+   "assignee": "",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-367",
+   "summary": "Reframe: all-or-nothing sibling merging, measured at 3,000 vs 3,500 words",
+   "type": "Sub-task",
+   "parent": "DOCOPS-12",
+   "status": "In Progress",
+   "category": "indeterminate",
+   "components": [
+    "AI & Content Intelligence"
+   ],
+   "labels": [
+    "reframe",
+    "tibco"
+   ],
+   "created": "2026-11-12",
+   "resolved": "",
+   "due": "",
+   "assignee": "",
+   "sp": 0.5
   }
  ]
 }
