@@ -14,9 +14,9 @@
 - **Decided:** Phase 78 approved (EMS 10.5.1 pages by menu depth; build Mon 16, out with R2). UAT rows pasted.
 - **K1 done:** Karan's decision is in the catalog for all 1,166 versions, each checked afterwards (DOCOPS-364).
 - **R1 is paused after 2 of 5 groups.** Groups 1 (Scribe, Messaging, Cloud, Hawk, ActiveSpaces) and 2 (Adapters, Mainframe, Platform, BusinessEvents) are on `wip`.
-  - Cloud showed on staging within minutes.
-  - Group 2 is still not rebuilt after 80 minutes: Control Plane 1.18.0 still shows 203 notes without a label.
-  - The remaining groups wait until staging catches up; if it has not by the morning, Digital Platform is asked about the build queue.
+  - **Correction, 03:20: staging shows neither group after about 2 hours.** On fresh fetches, Cloud API Modeler 1.5.0 still has 24 notes without a label and Control Plane 1.18.0 has 203. The earlier "Cloud updated" reading was wrong.
+  - **R1 is stopped** until Digital Platform says how staging builds from `wip`: on each push, on a schedule, or by a manual trigger, and how long a repository takes.
+  - **Question for you to send to Digital Platform (morning):** "We pushed `wip` for 9 TIBCO repos at about 01:00 on 13 Nov (Scribe, Messaging, Cloud, Hawk, ActiveSpaces, Adapters, Mainframe, Platform, BusinessEvents). Staging still serves the older pages at 03:20. How and when does staging rebuild from `wip`, and is a build queued or failed?"
   - Not yet merged:
     - TIBCO medium: General, FTL, TRA, Foresight, Flogo, BusinessWorks, iProcess, BusinessConnect;
     - TIBCO large, one at a time: Fulfillment, Data Management, MFT, BPM;

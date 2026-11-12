@@ -1,19 +1,19 @@
 # Documentation migration: where we stand
 
-As of 13 Nov 2026, 01:16 (Jira as of Fri 13 Nov).
+As of 13 Nov 2026, 02:53 (Jira as of Fri 13 Nov).
 
 - **Go-live:** Mon 23 Nov, in 10 days. **Old site switched off:** Mon 30 Nov, in 17 days.
-- **744 documentation versions are in the migration.** Converted: 723 (97%). In the new site's repositories: 723 (97%). Checked page by page on the staging site: 99 of the 723 in the repositories.
-  - TIBCO: 520 versions; 501 converted, 501 in the repositories, 99 checked on staging.
+- **746 documentation versions are in the migration.** Converted: 708 (95%). In the new site's repositories: 706 (95%). Checked page by page on the staging site: 98 of the 706 in the repositories.
+  - TIBCO: 522 versions; 486 converted, 484 in the repositories, 98 checked on staging.
   - IBI: 202 versions; 200 converted, 200 in the repositories, 0 checked on staging.
   - Spotfire: 22 versions; 22 converted, 22 in the repositories, 0 checked on staging.
 
 ## Areas
 
-- **Converting the documentation**: on track (723 of 744 versions done). Karan's additions, releases since 5 Nov and the chosen fixes are converted Mon 16 to Wed 18. Next, Mon 16 Nov: Convert Karan's additions, the new releases and the fixes for release 2 (to Wed 18). Owner: TechDocs.
-- **Publishing to the new site**: on track (723 of 744 versions done). Release 1 goes out Fri 13 in four groups, each after staging shows the previous one; release 2 Thu 19, release 3 Thu 26, release 4 early December. Next, Fri 13 Nov: Release 1, in four groups. Owner: TechDocs.
-- **Checking the new site (staging)**: on track (99 of 723 versions done). Every newest version is checked page by page on staging before go-live, overnight; older versions follow after go-live. Next, Mon 16 Nov: Read the weekend's checks (TIBCO and ibi newest versions). Owner: TechDocs.
-- **Problems found by the checks**: on track (79 of 83 finding types done). Each kind of problem gets one Jira issue at the morning triage and is fixed in a planned window; every fix built so far goes into release 2. Next, Mon 16 Nov: Sort the weekend's findings; re-convert with the fixes (Mon 16 to Tue 17). Owner: TechDocs.
+- **Converting the documentation**: on track (708 of 746 versions done). Karan's additions, releases since 5 Nov and the chosen fixes are converted Mon 16 to Wed 18. Next, Mon 16 Nov: Convert Karan's additions, the new releases and the fixes for release 2 (to Wed 18). Owner: TechDocs.
+- **Publishing to the new site**: at risk (706 of 746 versions done). Release 1 started Fri 13 (9 repos on wip) but staging had not rebuilt them after 2 hours, so the rest is held until Digital Platform says how staging builds; release 2 Thu 19, release 3 Thu 26, release 4 early December. Next, Fri 13 Nov: Release 1, in four groups. Owner: TechDocs.
+- **Checking the new site (staging)**: on track (98 of 706 versions done). Every newest version is checked page by page on staging before go-live, overnight; older versions follow after go-live. Next, Mon 16 Nov: Read the weekend's checks (TIBCO and ibi newest versions). Owner: TechDocs.
+- **Problems found by the checks**: on track (79 of 89 finding types done). Each kind of problem gets one Jira issue at the morning triage and is fixed in a planned window; every fix built so far goes into release 2. Next, Mon 16 Nov: Sort the weekend's findings; re-convert with the fixes (Mon 16 to Tue 17). Owner: TechDocs.
 - **Go-live blockers on the new site**: blocked (0 of 2 Jira items done). 61 of the 73 newest BW plug-in versions are not served on staging (Critical); pages placed under a heading row are hidden from the staging menu or not found. Next, Fri 20 Nov: Go / no-go: served, or a date from Digital Platform. Owner: Digital Platform.
 - **Which Integration versions to publish (Karan's list)**: on track (1 of 107 changes done). Engineering's list is final for 1,166 Integration versions; the decisions are written into the catalog Fri 13, and 27 versions are added and 80 removed before go-live. Next, Mon 16 Nov: Remove the 80 from the repositories; add the 27 with release 2 (Thu 19). Owner: TechDocs.
 - **Releases since 5 Nov (delta migration)**: on track. The catalog was last refreshed on 5 Nov; it is refreshed Mon 16 and for the last time Fri 27, before the old site closes. Next, Mon 16 Nov: Refresh the catalog and list what is new. Owner: TechDocs.
@@ -22,7 +22,7 @@ As of 13 Nov 2026, 01:16 (Jira as of Fri 13 Nov).
 - **Product teams' own requirements**: on track (0 of 5 Jira items done). Messaging, iProcess, Scribe and Streaming need more than conversion, and the publishing pipeline is being joined to PRISM and the product builds; most finish after 30 Nov. Next, to confirm: Each team's next step, noted as it moves. Owner: Engineering.
 - **Translated help**: on track (1 of 2 Jira items done). Checks of the translated help are planned after 30 Nov. Next, after 30 Nov: Check the translated help on the new site. Owner: TechDocs.
 - **Writers' spot-checks**: on track (0 of 2 Jira items done). Writers spot-check the migrated help after 30 Nov. Next, after 30 Nov: Writers spot-check each family. Owner: TechDocs.
-- **EMS 10.5.1 in its new page layout**: on track (0 of 1 Jira items done). Pages grouped by menu depth, 214 pages instead of 159 today, older EMS versions unchanged; the plan awaits approval Fri 13. Next, Mon 16 Nov: Build it; out with release 2 (Thu 19). Owner: TechDocs.
+- **EMS 10.5.1 in its new page layout**: on track (0 of 1 Jira items done). Pages grouped by menu depth, 214 pages instead of 159 today, older EMS versions unchanged; plan approved Fri 13 (Phase 78). Next, Mon 16 Nov: Build it; out with release 2 (Thu 19). Owner: TechDocs.
 
 ## Effort
 
@@ -60,7 +60,7 @@ Work started Fri 25 Sep, 49 days ago. Effort logged in Jira: 65.5 points done, 1
 - Fri 27 Nov, Backups of the original help packages: Close the backups (Spotfire run summary; ibi count confirmed)
 - after 30 Nov, Translated help: Check the translated help on the new site
 - after 30 Nov, Writers' spot-checks: Writers spot-check each family
-- 26 kinds of problem found by the checks, 4 still to sort at the morning triage
+- 32 kinds of problem found by the checks, 10 still to sort at the morning triage
 - 50 open items in Jira
 
 **Digital Platform**

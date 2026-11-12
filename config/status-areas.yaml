@@ -62,8 +62,8 @@ areas:
   - id: publishing
     name: Publishing to the new site
     team: TechDocs
-    status: on track
-    note: Release 1 goes out Fri 13 in four groups, each after staging shows the previous one; release 2 Thu 19, release 3 Thu 26, release 4 early December.
+    status: at risk
+    note: Release 1 started Fri 13 (9 repos on wip) but staging had not rebuilt them after 2 hours, so the rest is held until Digital Platform says how staging builds; release 2 Thu 19, release 3 Thu 26, release 4 early December.
     plan: "§3, §2"
     next: 2026-11-13
     next_step: Release 1, in four groups
