@@ -21,10 +21,15 @@
     - Statistica newest: 9 have unsorted findings and 2 are clean.
     - Statistica's main product reports about 14,000 of 14,250 old pages missing, and its menu entries missing too. That is the same pattern as Spotfire Data Virtualization's. It is either a real loss or the checker misreading Spotfire's help, and it goes to triage on Fri 13. Not chased today.
   - Four fix agents are building fixes, each on its own branch, for 343, 362 and 363 together, 349, 354 and 360. All six issues are In Progress.
-  - One agent is sorting the 11 new problem kinds and tracing BE 6.3.2.
+  - **Triage of the BW plug-in wave is done.**
+    - All 67 `lost` versions now read `logged`; TIBCO stands at 106 checked, every one logged or clean.
+    - **Go-live blocker, Digital Platform:** 61 of the 73 newest BW plug-in versions are not served on staging at all (404), although they are on `wip`. Kafka 6.8.2 was checked by hand against AMQP 6.5.3, which is served. DOCOPS-346 is widened and marked Critical.
+    - New kinds, both ours: DOCOPS-365 (3 SAP plug-in versions published with an empty menu, 6 with no package documents) and DOCOPS-366 (checker false findings; fixer running, aiming to finish before Friday night's batch).
+    - BE 6.3.2 is a variant of DOCOPS-351.
+    - The UAT sheet rows are ready: `reports/uat-sheet-rows-2026-11-12.csv` (4 rows: BW not served, Critical; empty pages; pages under heading rows; the BE variant).
   - Nothing gets merged or applied. The fixes wait for D5 on Mon 16.
 
-Nothing needed from you until Friday morning: sign in, then paste the first UAT sheet rows.
+**Friday morning, from you:** sign in; paste the 4 UAT rows, and flag the BW plug-in row to Digital Platform as Critical; say yes or no to the one-page `&lt;` test riding R1 (DOCOPS-360); and say yes or no to merging the checker fix (DOCOPS-366) before Friday night's batch.
 
 ---
 
@@ -91,12 +96,13 @@ Ready when:
 - Every newest version (TIBCO without Streaming, ibi, Statistica) has a check result, and every finding is logged, explained or clean.
 - No go-live blocker is open on our side. AEM-side items (344, 345, 346, 351, 353) are reported, with the AEM team's answer noted.
 - Redirect maps are loaded by AEM (DOCOPS-271), or the AEM team has said when they will be.
+- The BW plug-ins missing from staging (DOCOPS-346, 61 versions) are served, or Digital Platform has a date for it.
 
 ## 5. Parking lot (dated, not now)
 
 | Item | Slot |
 |---|---|
-| BusinessEvents 6.3.2: "Addressing Schema Elements" missing from the staging menu | Triage, Mon 16 |
+| Writers' draft comments published in the original help ("Draft comments:"; 16 versions, 7 families; `source`): drop them in conversion? | Writers, after 30 Nov |
 | Statistica and Data Virtualization: most old pages reported missing (checker or real) | Triage, Fri 13 |
 | FOCUS 9.3.4 publishes Flare's generated `_globalpages` pages (contents, title): found by the DOCOPS-349 fixer, our converter | Triage, Fri 13 (fold into an existing issue or a new kind) |
 | Spotfire backup run summary → close DOCOPS-283 | Whenever you paste it, by Fri 27 |
