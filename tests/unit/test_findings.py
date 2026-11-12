@@ -197,8 +197,9 @@ def test_the_register_carries_every_row_of_7_5() -> None:
     menu lists pages only, and its heading ids follow another rule than the tool's.
     DOCOPS-354 adds `SYNC_ORIGIN_NO_PAGE_ROWS`, for a published 301.yml with
     documents and no page while the sitemap lists the version's pages.
+    DOCOPS-366 adds `VERIFY_TOC_LOST`, for a version whose old menu sits under unfiled/.
     """
-    assert len(REGISTRY) == 141
+    assert len(REGISTRY) == 142
 
 
 def test_severity_comes_from_the_registry_and_not_from_the_call_site() -> None:
