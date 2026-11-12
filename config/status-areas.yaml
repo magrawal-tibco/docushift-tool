@@ -207,7 +207,7 @@ areas:
     name: EMS 10.5.1 in its new page layout
     team: TechDocs
     status: on track
-    note: Pages grouped by menu depth, 214 pages instead of 159 today, older EMS versions unchanged; the plan awaits approval Fri 13.
+    note: Pages grouped by menu depth, 214 pages instead of 159 today, older EMS versions unchanged; plan approved Fri 13 (Phase 78).
     plan: "§5"
     next: 2026-11-16
     next_step: Build it; out with release 2 (Thu 19)
