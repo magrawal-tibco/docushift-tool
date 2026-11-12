@@ -15,7 +15,11 @@
 - **BW plug-in results:** 75 of 253 published versions checked: 63 with findings not yet triaged, 7 logged, 3 with warnings, 2 clean. 178 older versions stay for Stage 3. 4 were skipped, on Karan's remove list or never downloaded.
 - **Problem kinds:** 11 not yet in Jira. They go to Friday's triage.
 - **Karan's list:** received (§6) and final for 1,166 Integration versions: 27 to add and 80 to remove, both in R2 before go-live. DOCOPS-364 created.
-- **Nothing is running.**
+- **Using the free afternoon (user, 12 Nov):**
+  - **Batch 1c** is checking Statistica's 11 newest versions and re-checking EMS 10.4.0. Both were planned for Friday night.
+  - Four fix agents are building fixes, each on its own branch, for 343, 362 and 363 together, 349, 354 and 360. All six issues are In Progress.
+  - One agent is sorting the 11 new problem kinds and tracing BE 6.3.2.
+  - Nothing gets merged or applied. The fixes wait for D5 on Mon 16.
 
 Nothing needed from you until Friday morning: sign in, then paste the first UAT sheet rows.
 
