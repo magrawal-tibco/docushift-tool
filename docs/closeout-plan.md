@@ -102,6 +102,7 @@ Ready when:
 
 | Item | Slot |
 |---|---|
+| **Flogo 2.26.8: held, not re-published.** The DOCOPS-354 rebuild regrouped 3 Oracle connector pages. Its merged tree now differs from what is published, so **do not run a Flogo family-wide sync** until its layout is pinned to the published grouping. | Mon 16, with the re-conversions |
 | Writers' draft comments published in the original help ("Draft comments:"; 16 versions, 7 families; `source`): drop them in conversion? | Writers, after 30 Nov |
 | Statistica and Data Virtualization: most old pages reported missing (checker or real) | Triage, Fri 13 |
 | FOCUS 9.3.4 publishes Flare's generated `_globalpages` pages (contents, title): found by the DOCOPS-349 fixer, our converter | Triage, Fri 13 (fold into an existing issue or a new kind) |
@@ -183,7 +184,7 @@ Without the originals, these versions cannot be checked, now or after 30 Nov. Ba
 | D2 | Claude starts the calendar's runs, keeps going past failures, and reports in the morning | **Yes** (user, 12 Nov) |
 | D3 | Which Integration versions to publish | **Karan's decision is final** for the 1,166 versions on his list: 27 to add, 80 to remove, both before go-live (§6; user, 12 Nov) |
 | D4 | Parallel agents for triage and fixes | **Yes** (user, 12 Nov). Not while a batch runs (memory). |
-| D5 | Which fixes go into R2 | Mon 16, from the measured counts |
+| D5 | Which fixes go into R2 | **All of them** (user, 12 Nov: "go ahead with the remaining suggested fixes"). Re-conversions Mon 16 – Tue 17; 360's way of applying waits for the staging test. |
 | D6 | The 82 TIBCO versions with no package on the old site | Fri 20 |
 | D7 | Delta before go-live: which new versions from Δ1 go into R2, and the cut-off for hand-supplied ZIPs | Mon 16, from the refresh list. Recommendation: all of Δ1, and ZIPs received by Tue 17 noon; anything later goes in R3 (§6a). |
 
@@ -224,7 +225,17 @@ You add the screenshot and the assignee. After pasting, tell Claude the row numb
 
 ## 7a. Fixes built for D5 (Mon 16)
 
-Each fix sits on its own branch with tests. Nothing is merged or re-converted until D5. When merging: `fix/ftl-301`, `fix/anchors` and `fix/verify-bw` each add a finding code (the register count conflicts), and `fix/anchors` and `fix/angle-brackets` both touch `utils/anchors.py`. Merge them one by one, and run the full suite after each.
+**Status 12 Nov evening (user: "go ahead with the remaining suggested fixes"):**
+- All five branches are merged into the tool. The full suite passes: 2,507 tests.
+- **Applied:**
+  - DOCOPS-354: 7 of 8 versions re-published on `content-fix`; they go out with R1 on Fri 13.
+  - The `&lt;` test page: FTL 7.3.0, Persistence Status Objects, also with R1.
+  - The checker fix, live from Batch 2 on.
+- **Still to apply:**
+  - 349 and 343/362/363: re-convert Mon 16 – Tue 17, out with R2.
+  - 360: an in-place repair or re-convert, once the test page reads right on staging.
+
+~~Each fix sits on its own branch with tests. Nothing is merged or re-converted until D5.~~ When merging: `fix/ftl-301`, `fix/anchors` and `fix/verify-bw` each add a finding code (the register count conflicts), and `fix/anchors` and `fix/angle-brackets` both touch `utils/anchors.py`. Merge them one by one, and run the full suite after each.
 
 | Jira | Branch | What it fixes | Re-run to apply |
 |---|---|---|---|
@@ -232,7 +243,7 @@ Each fix sits on its own branch with tests. Nothing is merged or re-converted un
 | DOCOPS-354 | `fix/ftl-301` (4045308) | Cause was old data: FTL/eFTL 7.1.3 were merged before the old site listed their pages, and never rebuilt, so their redirect files hold no pages. The branch adds a publishing warning so this cannot pass silently again. | **No re-conversion:** re-merge and re-publish FTL and eFTL 7.1.3, Flogo 2.26.8 and 3.0.1, and 4 BusinessConnect Container Edition versions. 6 more versions need URL patterns first (DOCOPS-322). |
 | DOCOPS-360 (and most of 353) | `fix/angle-brackets` (d9b71f9) | `<` in text was written as `\<`, which AEM shows as `\&lt;`: placeholders like `<host>` read wrong in prose, lists and headings on hundreds of pages (FTL 7.1.1 alone: 575). Now written as `&lt;`; menu paths escaped; anchors unchanged. | First confirm on staging that `&lt;` in plain text shows as `<` (a one-page test, riding R1). Then either re-convert the affected families, or, much cheaper, a new in-place repair of the published pages (R002, not built; about half a day). |
 | DOCOPS-343, 362, 363 | `fix/anchors` (f87b912, 248c4c1) | Links to headings containing code pointed at a wrong, dashed target; EMS caption bookmarks running over several lines cut pages short on staging. Heading targets are now read from the heading as written; split bookmark names are not written; `validate` reports both. BusinessEvents figure/GUID links point at bookmarks the source never had: triaged `source` (Claude, 12 Nov; reversible). | EMS 10.4.0–10.5.1 (6): convert, merge, publish. Links to headings with code: convert and merge each affected version (Flogo PAYG 2.11.0, BE 6.3.2 and 6.4.0 measured; a per-version count chooses the rest). |
-| DOCOPS-366 (checker) | `fix/verify-bw` (571e526) | Four false findings in the check: bookmarks on a page's own heading; DITA's legal page moved last; `<var>`, `< x >` and fences in list items. Plus a new error when a version's whole menu was lost. Measured on the 73 BW plug-in versions: 83 false findings gone, 2 real errors raised (the SAP versions of DOCOPS-365). | **Merge before Friday night's Batch 2** (yes or no, Fri morning), then delete its 8 triage entries after the re-run. No content change. |
+| DOCOPS-366 (checker) | `fix/verify-bw` (571e526) | Four false findings in the check: bookmarks on a page's own heading; DITA's legal page moved last; `<var>`, `< x >` and fences in list items. Plus a new error when a version's whole menu was lost. Measured on the 73 BW plug-in versions: 83 false findings gone, 2 real errors raised (the SAP versions of DOCOPS-365). | **Merged 12 Nov** (user: go ahead). Delete its 8 triage entries after Batch 2 re-checks those versions. No content change. |
 
 ## 8a. Jira guardrails (user, 12 Nov)
 
