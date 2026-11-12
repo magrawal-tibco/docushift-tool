@@ -3015,6 +3015,70 @@ name.
 
 ---
 
+### Phase 78: Pages by Menu Depth: EMS 10.5.1 First — **Planned 2026-11-13; waiting for approval; DOCOPS-367**
+
+**Why.** Today's packing (R1) fills pages up to 3,000 words with runs of consecutive siblings. On 432 merged TIBCO versions, 40% of pages hold only some of a parent's children. EMS 10.5.1's 17 destination properties, for example, are split 10 + 7 across two pages. "All-or-nothing" sibling merging was measured and rejected: pages more than double (`reports/reframe-rule-2026-11-12/`).
+
+The user's alternative: for selected products, **no word cap**. Each guide or chapter gets a **menu depth**, chosen by judgement. Every entry at that depth becomes one page holding everything below it, and each entry above it is a page of its own.
+
+**User decisions (2026-11-12/13):**
+
+| decision | choice |
+|---|---|
+| Where | **EMS 10.5.1 only**; older EMS versions keep today's layout and are handled later |
+| When | **Before go-live**, out with R2 (Thu 19 Nov) |
+| Depth | Set **by judgement** per chapter, no numeric limit |
+| Administration Tool command listing (120 commands, 11,698 words) | **One reference page**, a heading per command |
+| C reference | **One page per C type** where a chapter is split, never one per function |
+| Installation | **One page** (1,940 words, as today) |
+
+**The EMS 10.5.1 layout:** 214 pages, against 159 today; median 518 words; none holding only some of a parent's children.
+
+- **Installation:** whole guide, 1 page.
+- **User Guide, by section (depth 2):**
+  - Messages, Destinations, Running the EMS Server
+  - Using the EMS Administration Tool (the command listing one page), REST Proxy
+  - Authentication and Permissions, JAAS Authentication Modules, FTL Stores
+  - Developing an EMS Client Application, Monitor Server Activity, Fault Tolerance, Routes
+- **User Guide, by subsection (depth 3):** Configuration Files, giving one page per `tibemsd.conf` parameter group and per other configuration file.
+- **User Guide, whole chapters:** all the rest (Overview, Getting Started, Extensible Security, JNDI, the four interoperation chapters, TLS, the conversion page, Appendices A–C).
+- **C and COBOL Reference, one page per C type (depth 2):** Messages, Connection, Connection Factory, Session, Administration.
+- **C and COBOL Reference, whole chapters:** the other chapters, each under 5,000 words.
+- **Measured:** 5 pages pass 5,000 words, each one reference unit: the command listing, `tibemsMsg`, `tibemsConnectionFactory`, the REST configuration reference, and FTL Stores' "Configuring and Deploying". No page spans two source directories (R4.2 holds unchanged).
+
+**Design**
+
+| decision | choice | why |
+|---|---|---|
+| **Policy shape** | `config/reframe.yaml`, under the product: `depth:` entries `{guide: <title>, chapter: <title>?, depth: N, versions: [...]}`. An entry without `chapter` sets the whole guide (`depth: 1` = one page). Matched on TOC titles, exactly. | The plan is written in titles, and a reviewer reads titles. `versions:` scopes it like Phase 76's `keep_separate`. |
+| **Packing** | A node with a depth entry is laid out by the depth rule. Everything else keeps R1 unchanged (other guides, chapters with no entry, other products). R1.1, R1.3 and R4.2 still apply; R1.2's cap does not apply inside a depth entry. | The rule is opt-in per chapter, so the rest of the corpus cannot move. |
+| **Older versions** | Unchanged. A version-scoped entry folds into the policy only for the versions it names (`for_version`). The pinned reference layout is computed with the caller's policy (`_reference_layout`), so 10.4.x–10.5.0 still project onto 10.5.1 packed by R1. The layout cache key gains the depth entries, as it did for `keep_separate`. | User: older versions later. Monday's re-conversions for DOCOPS-343/349 must not regroup them. |
+| **A wrong entry fails loudly** | An entry naming no TOC node is `REFRAME_DEPTH_UNMATCHED` (error). That version is not merged, and its last merge stays. | A typo must not silently fall back to R1. |
+| **Currency** | The depth entries are part of the policy digest only when present, as with `keep_separate_in`. | Adding entries for 10.5.1 must not mark any other product stale. |
+
+**Steps**
+
+1. `reframe/policy.py`: parse `depth:`; fold version-scoped entries in `for_version`; digest only when present. Tests: digest unchanged without entries; another version unaffected.
+2. `reframe/packer.py`: `pack_by_depth` inside `pack`, with R1 for everything outside the entries. Tests:
+   - whole chapter; by section; by subsection;
+   - the command listing kept whole at depth 2;
+   - an unmatched entry raises the finding;
+   - a page spanning two directories still splits per R4.2.
+3. `reframe/driver.py`: the layout cache key; `REFRAME_DEPTH_UNMATCHED` in the register (§7.5 row and count). Test: 10.4.4 pinned to 10.5.1 keeps its R1 layout when 10.5.1 has depth entries.
+4. `config/reframe.yaml`: EMS's `depth:` entries for 10.5.1, as listed above.
+5. Docs: `REFRAME-REQUIREMENTS.md` (R1 amendment: depth entries), `design.md`, `user-guide.md` (how to write a `depth:` entry).
+6. **Apply to EMS 10.5.1:**
+   - reframe 10.5.1;
+   - compare against the 214-page plan;
+   - `validate`: no new error;
+   - check that `301.yml`, `csh.yml` and `redirects.yml` are rebuilt and every old URL has a row;
+   - sync to `content-fix` as **one commit** (about 400 files);
+   - out with R2, then `verify` on staging in Batch 4.
+
+*Exit: EMS 10.5.1 published in the new layout and verified on staging; every other version's merged tree byte-identical to before; the suite and `ruff` pass.*
+
+---
+
 ### Phase 77: Every Published Version Verified, Its Issues Logged, Fixes Later — **Built 2026-11-11; logging and waves pending; DOCOPS-338**
 
 **Why.** The user, 2026-11-11: verify every published product, keep count of how many are
