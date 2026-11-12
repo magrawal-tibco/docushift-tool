@@ -3694,6 +3694,7 @@ The concrete deliverable of §7.1: every deferred "report line" in the three doc
 | `REFRAME_PATH_TOO_LONG`⁶³ | warn | reframe | Pages still past 259 characters published with every name on the chain cut; `sync` will refuse the version | Phase 63 |
 | `SYNC_DOCUMENT_SKIPPED`⁶⁴ | warn | sync | A file in a document folder was not published: an archive or installer, or 100 MB or more (GitHub's limit) | Phase 64 |
 | `SYNC_ASSET_UNMAPPED`⁷² | note | sync | Published documents (PDF, txt, ...) whose old URL the docsite sitemap does not list, or lists twice, so the version's 301.yml has no row for them | Phase 72 |
+| `SYNC_ORIGIN_NO_PAGE_ROWS`⁷² | warn | sync | The docsite sitemap lists the version's pages but its published 301.yml has no page row (documents only, or no file); every old page URL 404s until the tree is rebuilt | Phase 72 (DOCOPS-354) |
 | `RENAME_MAP_APPLIED`²⁹ | note | reframe | Page names taken from `rename-map.csv` rather than recomputed, so a published URL does not move when a title is edited | Phase 29 |
 | `RENAME_MAP_REFUSED`³⁴ | warn | reframe | A name in `rename-map.csv` that another page ends up holding; the computed name is kept, and each refused pin is named | Phase 34 (R9-05) |
 | `RENAME_MAP_AMBIGUOUS`⁵⁰ | warn | reframe | A row in `rename-map.csv` for a source topic that leads more than one page, with no `page_key` to say which; no page takes the name, each row named | Phase 50 |

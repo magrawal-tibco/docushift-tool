@@ -195,6 +195,8 @@ def test_the_register_carries_every_row_of_7_5() -> None:
     `EOS_REPORT_NO_DATES`, for a report that ships without its date column.
     Phase 58 adds `VERIFY_PUBLISHED_ANCHOR_MISSING` and `_DIFFERS`: the TIBCO staging
     menu lists pages only, and its heading ids follow another rule than the tool's.
+    DOCOPS-354 adds `SYNC_ORIGIN_NO_PAGE_ROWS`, for a published 301.yml with
+    documents and no page while the sitemap lists the version's pages.
     """
     assert len(REGISTRY) == 141
 

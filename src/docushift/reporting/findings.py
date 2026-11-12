@@ -547,6 +547,14 @@ REGISTRY: dict[str, Code] = _codes(
          "Published documents (PDF, txt, ...) whose old URL the docsite sitemap does not "
          "list, or lists twice, so the version's 301.yml has no row for them",
          "planning.md Phase 72"),
+    # DOCOPS-354. A tree built before the sitemap listed its version has no
+    # `301.yml`, and sync still published one holding the document rows alone,
+    # which reads as a map and hid the gap until verify. A warning: every old
+    # page URL of the version 404s at cutover until the tree is rebuilt.
+    Code("SYNC_ORIGIN_NO_PAGE_ROWS", Severity.WARNING, Stage.SYNC,
+         "The docsite sitemap lists this version's pages but the published 301.yml has "
+         "no page row; the tree predates the list or no mapping was derived",
+         "planning.md Phase 72 (DOCOPS-354)"),
     Code("ORIGIN_URL_UNLISTED", Severity.NOTE, Stage.CONVERT,
          "Converted topics whose origin URL the docsite sitemap does not list; a "
          "derived row is withheld rather than written unproven",

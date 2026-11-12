@@ -1575,6 +1575,52 @@ def test_a_versions_documents_get_dam_rows_and_an_unlisted_one_is_counted(
     assert rows["https://docs.tibco.com/pub/ems/10.4.0/doc/html/users-guide/old.htm"].endswith("new.md#old")
     unmapped = [f for f in findings.all if f.code == "SYNC_ASSET_UNMAPPED"]
     assert len(unmapped) == 1 and "tib_ems_licenses.txt" in unmapped[0].message
+    assert not [f for f in findings.all if f.code == "SYNC_ORIGIN_NO_PAGE_ROWS"]
+
+
+def test_a_map_of_documents_alone_is_named_when_the_sitemap_lists_pages(
+    config, catalog, product, target, monkeypatch
+) -> None:
+    """DOCOPS-354: FTL 7.1.3 was merged before the sitemap listed it, so its tree had
+    no `301.yml`; sync published one of document rows alone and said nothing. It is
+    still published -- the document rows are right -- and the gap is a warning,
+    counted per listed page, on this run and every later one."""
+    from docushift import origins
+
+    opt_in(config, product.slug)
+    merged_version(config, catalog, product, "10.4.0")  # no 301.yml in the tree
+    extract_tree(config, product, "10.4.0", **SHIPMENT)
+    html = "https://docs.tibco.com/pub/ems/10.4.0/doc/html/users-guide/"
+    pdf = "https://docs.tibco.com/pub/ems/10.4.0/doc/pdf/tib_ems_users_guide.pdf"
+    monkeypatch.setattr(origins, "page_list", lambda *_: [html + "old.htm", html + "other.htm", pdf])
+
+    for _ in range(2):
+        findings = FindingsRun("sync")
+        WorkspaceDistributor(config, catalog, findings=findings).sync_many(
+            [(product, product.versions["10.4.0"])], target)
+        named = [f for f in findings.all if f.code == "SYNC_ORIGIN_NO_PAGE_ROWS"]
+        assert len(named) == 1 and named[0].count == 2 and named[0].version == "10.4.0"
+        assert html + "old.htm" in named[0].message
+    assert list(published_origins(target, product)) == [pdf]
+
+
+def test_no_page_row_warning_without_a_listed_page(config, catalog, product, target, monkeypatch) -> None:
+    """A version the sitemap does not list, or lists only by its documents, has its
+    own finding at convert (ORIGIN_SITEMAP_MISSING) or no help to redirect."""
+    from docushift import origins
+
+    opt_in(config, product.slug)
+    merged_version(config, catalog, product, "10.4.0")
+    extract_tree(config, product, "10.4.0", **SHIPMENT)
+    pdf = "https://docs.tibco.com/pub/ems/10.4.0/doc/pdf/tib_ems_users_guide.pdf"
+    findings = FindingsRun("sync")
+    distributor = WorkspaceDistributor(config, catalog, findings=findings)
+
+    for listed in ([], [pdf]):
+        monkeypatch.setattr(origins, "page_list", lambda *_, listed=listed: listed)
+        distributor.sync_many([(product, product.versions["10.4.0"])], target, force=True)
+
+    assert not [f for f in findings.all if f.code == "SYNC_ORIGIN_NO_PAGE_ROWS"]
 
 
 def test_a_product_with_no_declared_origin_template_gets_no_origin_map(

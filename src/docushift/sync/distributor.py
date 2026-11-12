@@ -337,6 +337,8 @@ class WorkspaceDistributor:
         tree_root = self.product_dir(product, target).parent.parent
         assets = self._asset_rows(product, version, destination.relative_to(tree_root).parts[0], segment)
         maps = rooted.published_maps(source, "/" + destination.relative_to(tree_root).as_posix() + "/", assets)
+        # Before the currency test, so a version already published so is named on every run.
+        self._check_page_rows(product, version, source, assets)
 
         if not force and destination.is_dir():
             pages_same, stale = _compare(source, destination, maps)
@@ -400,6 +402,31 @@ class WorkspaceDistributor:
                          message=f"{len(missing)} document(s) with no old URL in the docsite sitemap, "
                                  f"so no 301 row, e.g. {missing[0]}")
         return found
+
+    def _check_page_rows(
+        self, product: Product, version: ProductVersion, source: Path, assets: dict[str, str]
+    ) -> None:
+        """DOCOPS-354: the sitemap lists this version's pages, so its map must have page rows.
+
+        `published_maps` publishes a `301.yml` from the document rows alone when the
+        tree has none, and that file read as a complete map. FTL and eFTL 7.1.3 were
+        merged before `catalog sitemap` listed them, so their trees had no `301.yml`;
+        the refreshed list left `reframe` stale, nothing re-ran it, and every old page
+        URL was left without a row while `sync` reported success.
+        """
+        slug, number = product.slug, version.version
+        listed = origins.for_locale(origins.page_list(self.config.cache_dir, slug, number),
+                                    self.config.locale, self.config.is_primary_locale())
+        # A document's URL is listed too, and is the asset rows' to cover.
+        pages = [url for url in listed if url not in assets]
+        if not pages or origins.read_pairs(source / origins.ORIGINS):
+            return
+        self._record("SYNC_ORIGIN_NO_PAGE_ROWS", slug, number, count=len(pages),
+                     message=f"the docsite sitemap lists {len(pages)} page(s) for this version, e.g. "
+                             f"{pages[0]}, but its published {origins.ORIGINS} has no page row "
+                             f"({len(assets)} document row(s)); re-run reframe (or convert, for an "
+                             f"unmerged product) for this version, and read its ORIGIN_* finding "
+                             f"if that writes none")
 
     def _extract_unfinished(self, slug: str, number: str) -> bool:
         """Whether an extract was killed between its swap and its bookkeeping (X3-01)."""
