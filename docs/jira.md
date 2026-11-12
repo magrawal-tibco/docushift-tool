@@ -64,7 +64,7 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 - 2026-11-12 — Testing plan around go-live (23 Nov, maybe 25–26; old site off 30 Nov) saved to `reports/uat-plan-2026-11-12.md`.
   Backup gaps measured (no Jira change yet): TIBCO 1,933/2,015 on the drive; Spotfire 43 on local disk only; ibi on Google Drive
-  (user, 12 Nov; DOCOPS-281 to note and close).
+  (https://drive.google.com/drive/folders/1twC6LtZl7xnIYQkkvaXutL0d3PmtFX_F; user, 12 Nov; DOCOPS-281 noted, open until the count is confirmed).
 - 2026-11-12 — DOCOPS-352 → Done (0.5 → 0.75 SP), note. FTL re-run: all 12 FTL/eFTL versions `logged`. Status report by BU
   saved to `reports/migration-status-2026-11-12.md`.
 - 2026-11-12 — DOCOPS-352 (In Progress, 0.5 SP), 353 (0.25), 354 (0.5) created under DOCOPS-96, AI & CI by edit; DOCOPS-351 note
