@@ -67,13 +67,21 @@ This table says only what changes in Jira when an event happens.
 | User confirms the 18 hand-obtained ibi PDF-only versions are in the Google Drive backup | DOCOPS-281 → Done |
 | Next verify waves (Phase 77): Flogo, ActiveSpaces, Hawk, Platform, then larger TIBCO families; BW plug-ins last; Streaming excluded | Per wave: propose Jira for unlogged kinds, triage, `--retriage`, Verify waves row |
 | Team requirements move (Messaging Docusaurus, iProcess offline HTML, Scribe redirects, Streaming build, PRISM integration) | DOCOPS-355–359: dated notes; adjust SP |
-| Batch 1b finishes (BW plug-in packages re-downloaded and unpacked: 184 of 253 published versions had no original on disk, deleted after the TIBCO backup; then newest-version checks) | DOCOPS-338: dated note with BW plug-in counts; DOCOPS-282: note that the deleted workspace ZIPs were re-fetched |
+| Fix branches merged after D5 (Mon 16): `fix/default-htm`, `fix/ftl-301`, `fix/angle-brackets`, `fix/anchors`; `fix/verify-bw` merged before Batch 2 if approved Fri 13 | Dated note on each issue (349, 354, 360, 343/362/363, 366); Done once applied and re-checked on staging; 366 Done after the re-run and its 8 triage entries are deleted |
 | Delta migration runs (closeout plan §6a: Δ1 refresh Mon 16, Δ2 hand-supplied ZIPs by Tue 17 noon, Δ3 last refresh Fri 27; old site off 30 Nov) | One sub-task under DOCOPS-6 (catalog) for all three passes, created at Δ1, notes per pass with counts of new versions and products; new Integration versions listed for Karan; hand-supplied ZIPs noted per version |
 | The user pastes UAT sheet rows (closeout plan §8) | Dated note on each Jira kind with its sheet row number |
 
 **Left alone on purpose:** DOCOPS-8 is a Task where its siblings are Stories.
 
 **Log** (newest first, one line per session):
+
+- 2026-11-12 (afternoon) — Fixes built on branches, nothing merged:
+  - 349, 354, 360, 343/362/363 and 366: In Progress, each with a dated note.
+  - 353: noted as mostly ours, via 360.
+  - New: DOCOPS-365 (BW plug-ins published incomplete, 0.5) and DOCOPS-366 (checker false findings, 0.5).
+  - Notes on 344, 351 and 364. 346 renamed: Streaming and 61 BW plug-ins not served; Critical.
+  - BW and BE 6.3.2 wave triaged: 67 versions to `logged`. The triage entry on DOCOPS-271 moved to DOCOPS-322.
+  - Statistica newest and EMS 10.4.0 (now `logged`) checked.
 
 - 2026-11-12 — Close-out plan (`docs/closeout-plan.md`) agreed: overnight batches per product (`scratch/overnight.sh`), spread-out R1 on Fri 13,
   UAT sheet rows from triage; Jira guardrails (plan §8a); DOCOPS-364 created (Karan's list, 1 SP, Backlog); DOCOPS-338 note; Karan's list final for 1,166 Integration versions (27 add, 80 remove). Batch 1 (BW plug-ins, newest): 26 of 80 checked, 54 skipped (no original on disk); Batch 1b started.
