@@ -68,6 +68,7 @@ This table says only what changes in Jira when an event happens.
 | Next verify waves (Phase 77): Flogo, ActiveSpaces, Hawk, Platform, then larger TIBCO families; BW plug-ins last; Streaming excluded | Per wave: propose Jira for unlogged kinds, triage, `--retriage`, Verify waves row |
 | Team requirements move (Messaging Docusaurus, iProcess offline HTML, Scribe redirects, Streaming build, PRISM integration) | DOCOPS-355–359: dated notes; adjust SP |
 | Batch 1b finishes (BW plug-in packages re-downloaded and unpacked: 184 of 253 published versions had no original on disk, deleted after the TIBCO backup; then newest-version checks) | DOCOPS-338: dated note with BW plug-in counts; DOCOPS-282: note that the deleted workspace ZIPs were re-fetched |
+| Delta migration runs (closeout plan §6a: Δ1 refresh Mon 16, Δ2 hand-supplied ZIPs by Tue 17 noon, Δ3 last refresh Fri 27; old site off 30 Nov) | New sub-task under DOCOPS-6 (catalog) for each refresh, with counts of new versions and products; new Integration versions listed for Karan; hand-supplied ZIPs noted per version |
 | The user pastes UAT sheet rows (closeout plan §8) | Dated note on each Jira kind with its sheet row number |
 
 **Left alone on purpose:** DOCOPS-8 is a Task where its siblings are Stories.

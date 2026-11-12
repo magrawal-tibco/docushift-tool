@@ -51,7 +51,7 @@ Nothing needed from you until Friday morning, apart from one Jira yes or no.
 1. **One focus per day**, as in the calendar below.
 2. **A problem found by a check is logged, not chased.** The morning triage gives it a Jira issue, and it gets fixed in a planned fix window, never the same day.
 3. **A new request goes to the parking lot (§5) with a date.** Only a go-live blocker jumps the queue. A go-live blocker means a reader of the newest version cannot find or read a page.
-4. **Merges to `wip` happen only in release windows** (R1, R2, R3). Within a window they are **spread out**: a group of about five repos at a time, and the next group only once staging shows the previous one rebuilt.
+4. **Merges to `wip` happen only in release windows** (R1–R4). Within a window they are **spread out**: a group of about five repos at a time, and the next group only once staging shows the previous one rebuilt.
 5. **You get one note a day:** what ran overnight, what was found, and what is decided next.
 
 ## 3. Calendar
@@ -63,15 +63,16 @@ Machine time: about 5 minutes per version checked.
 | **Thu 12** | Plan | Day: **Batch 1**, BW plug-ins, newest versions; 26 of 80 could be checked. Night: **Batch 1b**, download and unpack the BW plug-in packages again, then check the newest versions Batch 1 skipped. | – | Done |
 | **Fri 13** | **Release R1** | Day: first, **K1**: Karan's list written into the catalog (§6). Then R1 in four spread-out groups, each after the previous shows on staging: TIBCO small families; TIBCO middle families; TIBCO large families and the four already checked (FTL, Cloud, BusinessEvents, Scribe); ibi (7 repos, 4 with `wip` commits of their own, merged properly). Night: **Batch 2**: the 27 additions from Karan's list downloaded and unpacked (K3); then the TIBCO newest versions, without Karan's "do not migrate" ones, and the 20 re-checks, about 11 h. Then **Batch 3**, ibi newest (22) and Statistica newest (11), about 3 h. | Triage of Batch 1 and 1b; UAT sheet rows for the open AEM items (§8) | Sign in. Paste the new rows into the UAT sheet. |
 | Sat 14 – Sun 15 | – | Batches 2–3 finish on their own | – | Nothing |
-| **Mon 16** | **Triage** | Day: **K2**, the 80 removals in `content-fix`; **K3**, convert and merge the 27 additions (continues Tue) | Triage of Batches 2–3, one agent per family. One list of every problem kind, with counts, plus UAT sheet rows for the new site, pipeline and AEM kinds. | Sign in. Paste the sheet rows. **D5:** which fixes go into R2, before go-live, and which wait until after 30 Nov |
-| **Tue 17 – Wed 18** | **Fixes** | Day: re-conversion of what R2 touches, then publish to `content-fix` | Fix agents, one per chosen Jira issue (candidates: 349 dropped topics, 360 angle-bracket text, 363 lost anchors, 362 code headings, 354 FTL redirects, 343 EMS anchors) | Nothing, unless an agent finds a design question |
-| **Thu 19** | **Release R2** | Day: R2 (fixes, Karan's 80 removals and 27 additions), spread out as R1. Night: **Batch 4**, re-check what R2 changed. | – | Approve R2 (one yes or no) |
+| **Mon 16** | **Triage** | Day: **Δ1**, catalog refresh (test run, then the real one, §6a); **K2**, the 80 removals in `content-fix`; **K3**, convert and merge the 27 additions (continues Tue). Night: Δ1's new versions downloaded and unpacked. | Triage of Batches 2–3, one agent per family. One list of every problem kind, with counts, plus UAT sheet rows for the new site, pipeline and AEM kinds. | Sign in. Paste the sheet rows. **D5:** which fixes go into R2, before go-live, and which wait until after 30 Nov. **D7:** the delta for R2. Ask the writers for ZIPs of in-progress releases (by Tue 17 noon). |
+| **Tue 17 – Wed 18** | **Fixes and delta** | Day: re-conversion of what R2 touches; Δ1 and Δ2 versions converted and merged; all published to `content-fix` | Fix agents, one per chosen Jira issue (candidates: 349 dropped topics, 360 angle-bracket text, 363 lost anchors, 362 code headings, 354 FTL redirects, 343 EMS anchors) | Nothing, unless an agent finds a design question |
+| **Thu 19** | **Release R2** | Day: R2 (fixes, Karan's 80 removals and 27 additions, the delta), spread out as R1. Night: **Batch 4**, re-check what R2 changed. | – | Approve R2 (one yes or no) |
 | **Fri 20** | **Go / no-go** | – | Triage of Batch 4 | **Go / no-go** against §4. **D6:** the 82 TIBCO versions with no package on the old site. |
 | Sat 21 – Sun 22 | Buffer | Re-runs if needed | – | – |
 | **Mon 23** | **Go-live** | – | – | – |
 | **Mon 23 – Wed 25** | Stage 2 | Nights: **Batches 5–6**, older TIBCO versions outside BW plug-ins (about 154), including the comparison with the live old site | Triage | AEM follow-ups |
 | **Thu 26** | **Release R3** | Day: R3 (Streaming, anything held from R2, including additions that did not convert cleanly). Night: **Batch 7**, check them. | – | Approve R3 |
-| **Fri 27 – Mon 30** | Old-site close | Collect old addresses for help with no redirect map (DOCOPS-322, 279), while the old site is up | Triage | Close the backups (DOCOPS-281, 283); confirm nothing else is needed from the old site |
+| **Fri 27 – Mon 30** | Old-site close | Fri 27: **Δ3**, the last catalog refresh; that night, its packages are downloaded and backed up. Collect old addresses for help with no redirect map (DOCOPS-322, 279), while the old site is up | Triage | Close the backups (DOCOPS-281, 283); confirm nothing else is needed from the old site |
+| **Early Dec** | **Release R4** | Δ3's new versions and late hand-supplied ZIPs, converted and published | – | Approve R4 |
 | **After 30 Nov** | Stage 3 | Older BW plug-in versions still published after Karan's removals (on disk after Batch 1b), older ibi (178), Statistica (24); Streaming once AEM serves it | Fixes left from §4 | – |
 
 If go-live moves to 25–26 Nov, the calendar shifts by those days. R2 still lands three days before go-live.
@@ -137,6 +138,29 @@ My guess of 33 older BW plug-in versions is dropped: Karan marks all 33 "do not 
 
 Without the originals, these versions cannot be checked, now or after 30 Nov. Batch 1b downloads all of them again from the old site: about 2 GB, with 63 GB free. The 3 retired Facebook and Twitter versions are not held anywhere.
 
+## 6a. Delta migration: what was released since the last catalog refresh
+
+**Why.** The catalog was last refreshed from docs.tibco.com on **5 Nov** (DOCOPS-333). Versions released since then, and releases still being written, are not converted.
+
+**The limit.** A refresh reads the old site, so **the last possible refresh is before Mon 30 Nov**. After that, a new release can only come in as a ZIP supplied by hand, until the publishing pipeline is joined to the product builds (DOCOPS-359).
+
+**Three passes:**
+
+| Step | When | What |
+|---|---|---|
+| Δ1 refresh | Mon 16, day | Catalog refresh, first as a test run that lists what is new without writing anything: new versions and new products since 5 Nov, all BUs. The list goes in the morning note. Then the real refresh, with the end-of-support report re-applied. |
+| Δ1 runs | Mon 16 night, then Tue 17 – Wed 18 | Download and unpack the new versions in the Mon 16 night batch; convert, merge and publish them to `content-fix` with K3 and the fixes. Out with R2 (Thu 19), checked in Batch 4. |
+| Δ2 in-progress releases | ZIPs by **Tue 17, noon** for R2; later ones for R3 (Thu 26) | Releases whose documentation is not yet on the old site. You collect the ZIPs from the writers into `cache/manual-zips/` (one file per version, product and version in the name). Claude files each one as hand-supplied, so a later refresh cannot replace it. A new version of a known product gets its catalog row added on the way in. A brand-new product needs its catalog entry first. Then the same convert, merge and publish steps. |
+| Δ3 final refresh | **Fri 27**, day; packages that night | Last refresh while the old site is up. Everything new since Δ1 is listed, and that night's batch downloads its packages to disk and adds them to the TIBCO backup, so they survive the shutdown. Converted and published in **R4** (early December), with nothing waiting on the old site. |
+| After 30 Nov | Ongoing | New releases only as hand-supplied ZIPs (the Δ2 path) |
+
+**Rules for what a refresh finds:**
+
+- A new version is selected as usual: an active version converts, an archived one does not, a retired one is skipped.
+- A new version of a product on **Karan's list** is not covered by his decision. It is selected by default, because it is the current release, and goes on a short list for Karan to confirm. If he says "do not migrate", it is removed in the next release window.
+- A refresh never undoes a manual decision: Karan's, the retirement overrides, or the migrate column.
+- A refresh writes the status files, so it runs only when no batch is running.
+
 ## 7. Decisions
 
 | # | Decision | Answer |
@@ -147,6 +171,7 @@ Without the originals, these versions cannot be checked, now or after 30 Nov. Ba
 | D4 | Parallel agents for triage and fixes | **Yes** (user, 12 Nov). Not while a batch runs (memory). |
 | D5 | Which fixes go into R2 | Mon 16, from the measured counts |
 | D6 | The 82 TIBCO versions with no package on the old site | Fri 20 |
+| D7 | Delta before go-live: which new versions from Δ1 go into R2, and the cut-off for hand-supplied ZIPs | Mon 16, from the refresh list. Recommendation: all of Δ1, and ZIPs received by Tue 17 noon; anything later goes in R3 (§6a). |
 
 ## 8. Reporting a problem: Jira and the UAT sheet
 
