@@ -403,3 +403,47 @@ def test_a_footnote_marker_and_a_windows_path_in_raw_html_read_as_their_words() 
     assert "<em>" not in " ".join(path.blocks) and "username" in " ".join(path.blocks)
     kept = texts.markdown_text(r"Copy it to the \<webfocus-ce>/scripts folder." + "\n")
     assert "<webfocus-ce>" in kept.blocks[0]
+
+
+# -- BW plug-in wave false findings (DOCOPS-366, 2026-11-12) -------------------------
+
+
+def test_a_bookmark_on_the_pages_own_top_heading_is_the_bare_page(tmp_path: Path) -> None:
+    """Patterns 6.2.0: a Flare TOC bookmark to the marker above `# Installation Overview`
+    read as `page.md#installation-overview`; `toc.yml` lists the page bare."""
+    from docushift.verify.driver import _bookmark
+
+    (tmp_path / "overview.md").write_text(
+        '<a id="install_1"></a>\n\n# Installation Overview\n\nText.\n\n'
+        '<a id="install_2"></a>\n\n## Installation Modes\n\nMore text.\n', encoding="utf-8")
+    markers: dict = {}
+    tops: dict = {}
+
+    assert _bookmark(tmp_path, "overview.md", "install_1", markers, tops) == "overview.md"
+    assert _bookmark(tmp_path, "overview.md", "installation-overview", markers, tops) == "overview.md"
+    assert _bookmark(tmp_path, "overview.md", "install_2", markers, tops) == "overview.md#installation-modes"
+
+
+def test_ditas_important_information_moved_to_the_end_is_the_converters_tail_move() -> None:
+    """Each DITA guide lists the support and "Important Information" pages; the converter
+    places one of each last at the top (`dita.is_suitehelp_legal`)."""
+    from docushift.engines.dita import is_suitehelp_legal
+
+    def guide(name: str) -> Node:
+        return Node(name.title(), f"{name}.md", [
+            Node("Overview", f"{name}/overview.md"),
+            Node("TIBCO Documentation and Support Services", "support.md"),
+            Node("Important Information", "important-information.md")])
+
+    old = root([guide("installation"), guide("users-guide")])
+    new = root([Node("Installation", "installation.md", [Node("Overview", "installation/overview.md")]),
+                Node("Users-Guide", "users-guide.md", [Node("Overview", "users-guide/overview.md")]),
+                Node("TIBCO Documentation and Support Services", "support.md"),
+                Node("Important Information", "important-information.md")])
+
+    assert by_page(tail_moved(old, new, (is_suitehelp_legal,)), new).issues == []
+    assert {i.kind for i in by_page(tail_moved(old, new), new).issues} == {"moved"}
+    # Only where the engine's converter applies the rule: elsewhere the title is a topic's.
+    other = root([Node("Guide", "guide.md"), Node("Important Information", "important-information.md")])
+    assert [i.kind for i in by_page(tail_moved(root([other.children[1], other.children[0]]), other), other)
+            .issues] == ["order"]

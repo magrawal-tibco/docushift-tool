@@ -16,6 +16,7 @@ which is the failure this module exists for.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
 
 from docushift.engines.base import is_legal_label, is_support_label
@@ -135,12 +136,18 @@ def _page(key: str | None) -> str:
     return (key or "").partition("#")[0]
 
 
-def _tail_page(node: Node) -> bool:
+#: An engine's own tail-page rule on a row's title, beside the shared ones.
+TailRule = Callable[[str], bool]
+
+
+def _tail_page(node: Node, also: tuple[TailRule, ...] = ()) -> bool:
     """Is this a support or legal page the converter moves to the end on purpose?
 
     The shared label rules (`is_support_label`, `is_legal_label`), plus "support" in
     the title, because DocBook chooses its support page from the footer and titles
-    it "Contacting Support for ..." (Phase 58, step 8).
+    it "Contacting Support for ..." (Phase 58, step 8). `also`: the engine's own
+    rules, as its converter applies them -- DITA's "Important Information"
+    (`dita.is_suitehelp_legal`, DOCOPS-366).
     """
     if node.key is None:
         return False
@@ -148,21 +155,21 @@ def _tail_page(node: Node) -> bool:
     if any(_page(n.key) != page for n, _ in node.walk()):
         return False  # a section with pages of its own is not a tail page
     return is_support_label(node.title, page) or is_legal_label(node.title, page) or \
-        "support" in node.title.lower()
+        "support" in node.title.lower() or any(rule(node.title) for rule in also)
 
 
-def tail_moved(old: Node, new: Node) -> Node:
+def tail_moved(old: Node, new: Node, also: tuple[TailRule, ...] = ()) -> Node:
     """The old tree with the converter's tail move applied (`navigation._tail`).
 
     The converter puts the version's support and legal pages last at the top, on
     purpose. The pages moved are read off the end of `toc.yml` -- at most two,
-    each passing `_tail_page` -- and every old row opening the same page, with
+    each passing `_tail_page` with the engine's own rules `also` -- and every old row opening the same page, with
     nothing but its own sections under it, is taken out and the first one placed
     last. Any other reorder is still reported.
     """
     tails: list[Node] = []
     for node in reversed(new.children[-2:]):
-        if not _tail_page(node):
+        if not _tail_page(node, also):
             break
         tails.insert(0, node)
     if not tails:

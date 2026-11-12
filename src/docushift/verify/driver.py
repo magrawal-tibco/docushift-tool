@@ -30,6 +30,7 @@ from docushift import origins
 from docushift.engines import flare_toc
 from docushift.engines.dita import CHROME_SELECTORS as DITA_CHROME
 from docushift.engines.dita import CONTENT_SELECTOR as DITA_CONTENT
+from docushift.engines.dita import is_suitehelp_legal
 from docushift.engines.docbook import CONTENT_ID as DOCBOOK_CONTENT_ID
 from docushift.engines.docbook import NAVIGATION_CLASSES as DOCBOOK_NAVIGATION
 from docushift.engines.flare import CHROME_SELECTORS as FLARE_CHROME
@@ -82,6 +83,9 @@ _CHROME: dict[SourceEngine, tuple[str, ...]] = {
     SourceEngine.DOCBOOK: tuple(f"div.{name}" for name in sorted(DOCBOOK_NAVIGATION)),
     SourceEngine.WEBWORKS: ("div.WebWorks_Breadcrumbs", "script", "style", "noscript"),
 }
+#: An engine's own rule for a page its converter moves to the end of `toc.yml`,
+#: beside the shared ones `toc._tail_page` applies (DOCOPS-366).
+_TAIL_RULES = {SourceEngine.DITA: (is_suitehelp_legal,)}
 
 COLUMNS = [
     "slug", "version", "old_url", "local_source", "new_path", "staging_url", "text_percent",
@@ -261,7 +265,7 @@ class Verifier:
         markers: dict[str, dict[str, str]] = {}
 
         def bookmark(key: str, anchor: str) -> str:
-            return _bookmark(folder.path, key, anchor, markers)
+            return _bookmark(folder.path, key, anchor, markers, tops)
 
         old = None
         if engine is SourceEngine.FLARE and roots:
@@ -282,7 +286,12 @@ class Verifier:
             new_tree = _toc_tree(folder.path / "toc.yml")
             if new_tree is not None and old.tree.children:
                 skip = {k for k in (key_of(s) for s in outmap) if k.startswith(UNFILED)}
-                compared = by_page(tail_moved(old.tree, new_tree), new_tree, skip)
+                lost, listed = _unfiled_pages(old.tree)
+                if lost * 2 > listed:
+                    self._record(result, "VERIFY_TOC_LOST", folder, "",
+                                 f"{lost} of the {listed} pages the old TOC lists are under unfiled/, "
+                                 f"in no menu: the version's menu was lost{_counts(drops)}")
+                compared = by_page(tail_moved(old.tree, new_tree, _TAIL_RULES.get(engine, ())), new_tree, skip)
                 codes = {"missing": "VERIFY_TOC_ENTRY_MISSING", "moved": "VERIFY_TOC_MOVED",
                          "order": "VERIFY_TOC_ORDER", "title": "VERIFY_TOC_TITLE_CHANGED"}
                 for issue in compared.issues:
@@ -624,14 +633,17 @@ def _landings(roots: list[Path], extracted: Path) -> set[str]:
     return found
 
 
-def _bookmark(folder: Path, key: str, anchor: str, cache: dict[str, dict[str, str]]) -> str:
+def _bookmark(folder: Path, key: str, anchor: str, cache: dict[str, dict[str, str]],
+              tops: dict[str, str]) -> str:
     """An old bookmark entry as `toc.yml` writes it: the page's heading anchor.
 
     The converter points a TOC bookmark at the heading after its marker
     (`_retarget_fragments`), and the published page keeps the marker, so the same
     `marker_targets` read places it here. A key that already carries an anchor (a
     merged topic's section) is its own target; an anchor with no marker is kept
-    as written, as the converter keeps it.
+    as written, as the converter keeps it. A bookmark that lands on the page's own
+    top heading is the page, listed bare in `toc.yml` -- the rule `key_of` applies
+    to a merged topic's anchor (DOCOPS-366: Patterns 6.2.0, 12 missing, 38 moved).
     """
     if not anchor or "#" in key:
         return key
@@ -641,8 +653,10 @@ def _bookmark(folder: Path, key: str, anchor: str, cache: dict[str, dict[str, st
         except OSError:
             text = ""
         cache[key] = fragments.marker_targets(text)
-    placed = cache[key].get(unquote(anchor).lower())
-    return f"{key}#{placed or anchor}"
+    placed = cache[key].get(unquote(anchor).lower()) or anchor
+    if placed == _top_anchor(folder / PurePosixPath(key), tops):
+        return key
+    return f"{key}#{placed}"
 
 
 def _toc_tree(path: Path) -> Node | None:
@@ -660,6 +674,19 @@ def _toc_tree(path: Path) -> Node | None:
                      if e.path is not None else None, convert(e.children)) for e in entries]
 
     return root(convert(schema.parse(document)))
+
+
+def _unfiled_pages(tree: Node) -> tuple[int, int]:
+    """How many of the pages an old TOC lists sit under `unfiled/`, and of how many.
+
+    An `unfiled/` page is a TOC orphan, so an old TOC entry opening one is skipped
+    as a known drop (`NAV_NODE_DROPPED`, counted by the conversion). That holds for
+    a few. When more than half the pages the old menu lists are there, the menu
+    itself was lost, and the skip would leave only a note (DOCOPS-366: OData
+    S/4HANA 6.4.0, SAP BTP 6.0.0, `toc.yml` down to Home and What's New).
+    """
+    pages = {key.partition("#")[0] for key in (node.key for node, _ in tree.walk()) if key}
+    return sum(page.startswith(UNFILED) for page in pages), len(pages)
 
 
 def _mark_toc(rows, compared) -> None:

@@ -762,6 +762,9 @@ REGISTRY: dict[str, Code] = _codes(
     Code("VERIFY_TOPIC_UNFILED", Severity.NOTE, Stage.VERIFY,
          "Converted topics kept under unfiled/ (TOC_ORPHAN): in the tree, in no menu",
          "planning.md Phase 55, known drops"),
+    Code("VERIFY_TOC_LOST", Severity.ERROR, Stage.VERIFY,
+         "More than half the pages the old TOC lists sit under unfiled/: the version's "
+         "menu was lost in conversion", "planning.md Phase 77 (DOCOPS-366)"),
     Code("VERIFY_PUBLISHED_PAGE_MISSING", Severity.ERROR, Stage.VERIFY,
          "A published page, or the version itself, not served by staging (non-200, or "
          "the home-page fallback)", "planning.md Phase 55 (B1)"),

@@ -816,7 +816,7 @@ class DitaEngine(BaseEngine):
         """
         for attribute, rules, label in (
             ("support", (_shared(is_support_label),), "support"),
-            ("legal", (_shared(is_legal_label), _is_suitehelp_legal), "legal"),
+            ("legal", (_shared(is_legal_label), is_suitehelp_legal), "legal"),
         ):
             found = None
             for matches in rules:
@@ -1105,8 +1105,12 @@ def _shared(predicate):
     return lambda label, _depth: predicate(label)
 
 
-def _is_suitehelp_legal(label: str, depth: int) -> bool:
-    """SuiteHelp's licence page: `Important Information`, near the top (R6-04)."""
+def is_suitehelp_legal(label: str, depth: int = 0) -> bool:
+    """SuiteHelp's licence page: `Important Information`, near the top (R6-04).
+
+    Public because `verify/toc.py` must know every page the converter moves to the
+    end of `toc.yml` (DOCOPS-366); there the page is a top-level row, depth 0.
+    """
     return depth <= LEGAL_LABEL_MAX_DEPTH and label.strip().casefold() == LEGAL_LABEL
 
 

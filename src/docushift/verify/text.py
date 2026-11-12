@@ -255,12 +255,16 @@ _LINK = re.compile(r"(?<!\\)\[((?:\\.|[^\]\\])*)\]\((?:[^()]|\([^()]*\))*\)")
 # deleting it as a tag read the sentence as dropped (Phase 60). Except before a real
 # inline tag: a Windows path in raw HTML is `C:\Users\<em>username</em>`, and there
 # the backslash is the path's (Phase 58, step 8).
-_TAG = re.compile(r"(?<!\\)<[^>]+>"
-                  r"|(?<=\\)</?(?:a|b|br|code|em|i|p|pre|span|strong|sub|sup|td|th|tr)\b[^>]*>")
+# A tag opens with its name, `/`, `!` or `?` straight after the `<`, as Markdown reads
+# raw HTML: `< version_number >` is text, shown as written (DOCOPS-366). The escaped
+# list holds `var`, which DITA writes in Windows paths: `\<var class="varname">`.
+_TAG = re.compile(r"(?<!\\)<[A-Za-z/!?][^>]*>"
+                  r"|(?<=\\)</?(?:a|b|br|code|em|i|p|pre|span|strong|sub|sup|td|th|tr|var)\b[^>]*>")
 # A cell boundary, but not a `\|` inside a cell (Phase 60).
 _CELL = re.compile(r"(?<!\\)\|")
 _PREFIX = re.compile(r"^[ \t]*(?:>[ \t]?)*[ \t]*(?:#{1,6}[ \t]+|[-*+][ \t]+|\d+[.)][ \t]+)?")
-_FENCE = re.compile(r"^[ \t>]*(`{3,}|~{3,})")
+# A fence may open on a list item's own line: `- ```` (DOCOPS-366).
+_FENCE = re.compile(r"^[ \t>]*(?:(?:[-*+]|\d+[.)])[ \t]+)?(`{3,}|~{3,})")
 _RULE = re.compile(r"^[ \t>]*(?:[-*_][ \t]*){3,}$")
 _TABLE_RULE = re.compile(r"^[ \t>]*\|?[ \t:]*-{3,}[ \t:]*(\|[ \t:]*-{3,}[ \t:]*)*\|?[ \t]*$")
 _ESCAPE = re.compile(r"\\([!-/:-@\[-`{-~])")

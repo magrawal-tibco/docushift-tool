@@ -3731,6 +3731,7 @@ The concrete deliverable of §7.1: every deferred "report line" in the three doc
 | `VERIFY_TOC_TITLE_CHANGED`⁵⁵ | note | verify | A toc.yml entry titled differently from the old TOC's | Phase 55 (A5) |
 | `VERIFY_TOC_UNCHECKED`⁵⁵ | note | verify | A version whose old TOC verify cannot read yet (engine other than Flare); its TOC structure was not compared | Phase 55, as built |
 | `VERIFY_TOPIC_UNFILED`⁵⁵ | note | verify | Converted topics kept under unfiled/ (TOC_ORPHAN): in the tree, in no menu | Phase 55, known drops |
+| `VERIFY_TOC_LOST`⁷⁷ | error | verify | More than half the pages the old TOC lists sit under unfiled/: the version's menu was lost in conversion | Phase 77 (DOCOPS-366) |
 | `VERIFY_PUBLISHED_PAGE_MISSING`⁵⁵ | error | verify | A published page, or the version itself, not served by staging (non-200, or the home-page fallback) | Phase 55 (B1) |
 | `VERIFY_PUBLISHED_TEXT_DIFF`⁵⁵ | warn | verify | Sentences of a published page missing from what staging serves | Phase 55 (B2) |
 | `VERIFY_PUBLISHED_IMAGE_BROKEN`⁵⁵ | error | verify | A page's image not on the served page, not served, or served with other bytes | Phase 55 (B3) |

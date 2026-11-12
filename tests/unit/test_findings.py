@@ -196,7 +196,7 @@ def test_the_register_carries_every_row_of_7_5() -> None:
     Phase 58 adds `VERIFY_PUBLISHED_ANCHOR_MISSING` and `_DIFFERS`: the TIBCO staging
     menu lists pages only, and its heading ids follow another rule than the tool's.
     """
-    assert len(REGISTRY) == 140
+    assert len(REGISTRY) == 141
 
 
 def test_severity_comes_from_the_registry_and_not_from_the_call_site() -> None:

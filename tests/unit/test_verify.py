@@ -1188,3 +1188,51 @@ def test_a_live_page_is_compared_with_its_own_topic_on_a_merged_page(config, sta
         verifier.version(found)
     findings.flush()
     assert "VERIFY_LIVE_DRIFT" not in [f.code for f in findings.all]
+
+
+def test_placeholders_in_angle_brackets_and_a_fence_on_a_list_item_are_page_text() -> None:
+    """DOCOPS-366. `\\<var>` in a Windows path is a tag; `< version_number >` (a space
+    after `<`) and `&lt;version_number>` are text as Markdown shows them; a fence opened
+    on a list item's line pairs with its own close, so later code blocks are read."""
+    source = texts.Text([
+        r"The scripts are created in the TIBCO_HOME\bw\palettes\oracleebs\version_number\sql directory:",
+        "Click Start > All Programs > TIBCO Business Studio <version_number > Studio for Designers.",
+        "Open the TIBCO Business Studio <version_number> folder for the designers.",
+        '<appender name="FILE" class="ch.qos.logback.core.FileAppender"> <file>c:/.log</file> </appender>',
+    ])
+    page = texts.markdown_text(
+        '<td>The scripts are created in the <span class="filepath"><var class="varname">TIBCO_HOME</var>'
+        r'\bw\palettes\oracleebs\<var class="varname">version_number</var>\sql</span> directory:</td>'
+        "\n\n"
+        "- Click **Start > All Programs > TIBCO Business Studio < version_number > Studio for Designers**.\n"
+        "- Open the TIBCO Business Studio &lt;version_number> folder for the designers.\n\n"
+        "   - ```\n"
+        '     <logger name="com.tibco.bw.palette.oerp.runtime"><level value="DEBUG"/></logger>\n'
+        "     ```\n\n"
+        "2. Add the node:\n\n"
+        "   ```\n"
+        '   <appender name="FILE" class="ch.qos.logback.core.FileAppender">\n'
+        "      <file>c:/.log</file>\n"
+        "   </appender>\n"
+        "   ```\n")
+
+    assert texts.coverage(source, page).missing == []
+
+
+def test_a_version_whose_old_menu_sits_under_unfiled_has_lost_its_menu(config, state) -> None:
+    """DOCOPS-366: more than half the pages the old TOC lists are under `unfiled/`
+    (OData S/4HANA 6.4.0, SAP BTP 6.0.0); a few there stay a note."""
+    target = _fixture(config, state)
+    state.record_output_map(SLUG, NUMBER, [("pkg/html/guide.htm", "guide.md", ""),
+                                           ("pkg/html/one.htm", "unfiled/one.md", ""),
+                                           ("pkg/html/two.htm", "unfiled/two.md", "")])
+    findings = _verify(config, state, target)
+
+    assert "VERIFY_TOC_LOST" in _codes(findings)
+    lost = next(f for f in findings.recorded if f.code == "VERIFY_TOC_LOST")
+    assert lost.message.startswith("2 of the 3 pages")
+
+    state.record_output_map(SLUG, NUMBER, [("pkg/html/guide.htm", "guide.md", ""),
+                                           ("pkg/html/one.htm", "one.md", ""),
+                                           ("pkg/html/two.htm", "unfiled/two.md", "")])
+    assert "VERIFY_TOC_LOST" not in _codes(_verify(config, state, target))
