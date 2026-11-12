@@ -62,6 +62,8 @@ ends: rewrite **Waiting**, append one line to **Log**, and bump *Last reconciled
 
 **Log** (newest first, one line per session):
 
+- 2026-11-12 — Spotfire ZIP backup script for DOCOPS-283 (`C:/tmp/zip-backup/run-spotfire-backup.bat`): 80 non-retired versions to
+  https://drive.google.com/drive/folders/1eSc3bHEYg15TUxTvBPMhyHoKB5OTJkU5 (workspace ZIPs uploaded and kept, 37 fetched). Run by the user.
 - 2026-11-12 — Testing plan around go-live (23 Nov, maybe 25–26; old site off 30 Nov) saved to `reports/uat-plan-2026-11-12.md`.
   Backup gaps measured (no Jira change yet): TIBCO 1,933/2,015 on the drive; Spotfire 43 on local disk only; ibi on Google Drive
   (https://drive.google.com/drive/folders/1twC6LtZl7xnIYQkkvaXutL0d3PmtFX_F; user, 12 Nov; DOCOPS-281 noted, open until the count is confirmed).
