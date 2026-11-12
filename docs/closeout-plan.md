@@ -218,13 +218,14 @@ You add the screenshot and the assignee. After pasting, tell Claude the row numb
 
 ## 7a. Fixes built for D5 (Mon 16)
 
-Each fix sits on its own branch with tests. Nothing is merged or re-converted until D5.
+Each fix sits on its own branch with tests. Nothing is merged or re-converted until D5. When merging: `fix/ftl-301` and `fix/anchors` each add a finding code (the register count conflicts), and `fix/anchors` and `fix/angle-brackets` both touch `utils/anchors.py`. Merge them one by one, and run the full suite after each.
 
 | Jira | Branch | What it fixes | Re-run to apply |
 |---|---|---|---|
 | DOCOPS-349 | `fix/default-htm` (71378d4) | Real pages named `default` / `index` below the help root were dropped | EMS 10.4.0–10.5.1 (6); ibi WebFOCUS Client 9.3.0–9.3.8 (with 9.3.5's translations); ibi FOCUS 9.3.0–9.3.8. One page each. |
 | DOCOPS-354 | `fix/ftl-301` (4045308) | Cause was old data: FTL/eFTL 7.1.3 were merged before the old site listed their pages, and never rebuilt, so their redirect files hold no pages. The branch adds a publishing warning so this cannot pass silently again. | **No re-conversion:** re-merge and re-publish FTL and eFTL 7.1.3, Flogo 2.26.8 and 3.0.1, and 4 BusinessConnect Container Edition versions. 6 more versions need URL patterns first (DOCOPS-322). |
 | DOCOPS-360 (and most of 353) | `fix/angle-brackets` (d9b71f9) | `<` in text was written as `\<`, which AEM shows as `\&lt;`: placeholders like `<host>` read wrong in prose, lists and headings on hundreds of pages (FTL 7.1.1 alone: 575). Now written as `&lt;`; menu paths escaped; anchors unchanged. | First confirm on staging that `&lt;` in plain text shows as `<` (a one-page test, riding R1). Then either re-convert the affected families, or, much cheaper, a new in-place repair of the published pages (R002, not built; about half a day). |
+| DOCOPS-343, 362, 363 | `fix/anchors` (f87b912, 248c4c1) | Links to headings containing code pointed at a wrong, dashed target; EMS caption bookmarks running over several lines cut pages short on staging. Heading targets are now read from the heading as written; split bookmark names are not written; `validate` reports both. BusinessEvents figure/GUID links point at bookmarks the source never had: triaged `source` (Claude, 12 Nov; reversible). | EMS 10.4.0–10.5.1 (6): convert, merge, publish. Links to headings with code: convert and merge each affected version (Flogo PAYG 2.11.0, BE 6.3.2 and 6.4.0 measured; a per-version count chooses the rest). |
 
 ## 8a. Jira guardrails (user, 12 Nov)
 
