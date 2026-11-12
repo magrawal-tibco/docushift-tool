@@ -11,13 +11,13 @@
 
 **Thu 12 Nov.** Plan agreed (D1–D4 answered).
 
-- **Batch 1** (BW plug-ins, newest versions) ran from 13:50.
-- 54 of its 80 versions were skipped: their original packages had been deleted from this machine after the backup.
-- Tonight, **Batch 1b** downloads them again from the old site, unpacks them, and checks the skipped versions.
+- **Batches 1 and 1b are done** (BW plug-ins, newest versions). The 184 deleted packages were downloaded again from the old site and unpacked.
+- **BW plug-in results:** 75 of 253 published versions checked: 63 with findings not yet triaged, 7 logged, 3 with warnings, 2 clean. 178 older versions stay for Stage 3. 4 were skipped, on Karan's remove list or never downloaded.
+- **Problem kinds:** 11 not yet in Jira. They go to Friday's triage.
+- **Karan's list:** received (§6) and final for 1,166 Integration versions: 27 to add and 80 to remove, both in R2 before go-live. DOCOPS-364 created.
+- **Nothing is running.**
 
-Karan's list received (§6). It is final for 1,166 Integration versions: 27 to add, 80 published ones to remove, both in R2 before go-live.
-
-Nothing needed from you until Friday morning, apart from one Jira yes or no.
+Nothing needed from you until Friday morning: sign in, then paste the first UAT sheet rows.
 
 ---
 
