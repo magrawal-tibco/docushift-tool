@@ -233,14 +233,15 @@ def headings(text: str) -> dict[str, tuple[int, str]]:
     masked = mask_code(text)
     found: dict[str, tuple[int, str]] = {}
     matches = list(anchors_util.HEADING.finditer(masked))
-    run = anchors_util.anchor_run([match.group(2) for match in matches])
+    titles = anchors_util.titles_of(text, matches)
+    run = anchors_util.anchor_run(titles)
     # Counted incrementally: one pass over the text, not one per heading.
     line, position = 1, 0
-    for match, anchor in zip(matches, run, strict=True):
+    for match, title, anchor in zip(matches, titles, run, strict=True):
         line += masked.count("\n", position, match.start())
         position = match.start()
         if anchor:
-            found.setdefault(anchor, (line, anchors_util.slugify_heading(match.group(2))))
+            found.setdefault(anchor, (line, anchors_util.slugify_heading(title)))
     return found
 
 
@@ -266,10 +267,6 @@ def anchors(text: str) -> set[str]:
     R11-08): this used to fold both sides on the belief that renderers fold
     anchor case, but a browser matches a fragment to an id case-sensitively.
     """
-    return {
-        anchor
-        for anchor in anchors_util.anchor_run(
-            [title for _level, title in anchors_util.HEADING.findall(mask_code(text))]
-        )
-        if anchor
-    }
+    matches = anchors_util.HEADING.finditer(mask_code(text))
+    return {anchor for anchor in anchors_util.anchor_run(anchors_util.titles_of(text, matches))
+            if anchor}

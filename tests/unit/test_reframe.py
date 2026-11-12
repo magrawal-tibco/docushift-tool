@@ -4192,3 +4192,27 @@ def test_reframe_cuts_to_the_limit_sync_holds_a_path_to(config, catalog, flare, 
     Reframer(config, catalog)._fit(flare, flare.versions["10.5.1"], pages)
 
     assert 200 + 1 + len(str(pages[0].path)) <= 259
+
+
+def test_a_merged_section_anchor_keeps_the_code_in_its_heading(tmp_path):
+    """DOCOPS-362. `_Source.headings` read titles off the code-masked body, so
+    the merged page's menu and links named `#using-the-------------------function`
+    (Flogo PAYG 2.11.0). A fence still hides a `# comment` from the run."""
+    from docushift.reframe.driver import _Source
+
+    (tmp_path / "g").mkdir()
+    (tmp_path / "g/fn.md").write_text(
+        "# Using the `array.forEach()` Function\n\n```\n# comment\n```\n\n"
+        "## Run (`configurationMgmt.py`)\n",
+        encoding="utf-8",
+    )
+    topic = Topic("Using the array.forEach() Function", PurePosixPath("g/fn.md"), 10)
+    pages = [Page("Guide", [topic])]
+
+    assign(pages, _Source(tmp_path).headings)
+
+    assert pages[0].anchors[topic.source] == "using-the-arrayforeach-function"
+    assert pages[0].sections[topic.source] == {
+        "using-the-arrayforeach-function": "using-the-arrayforeach-function",
+        "run-configurationmgmtpy": "run-configurationmgmtpy",
+    }

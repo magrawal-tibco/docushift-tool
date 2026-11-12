@@ -43,7 +43,7 @@ import html
 import re
 from collections.abc import Callable
 
-from docushift.utils.anchors import HEADING, anchor_run
+from docushift.utils.anchors import HEADING, anchor_run, titles_of
 from docushift.utils.mdlinks import MD_LINKED_IMAGE
 
 
@@ -84,9 +84,10 @@ def marker_targets(text: str) -> dict[str, str]:
     with a link that fails quietly somewhere else.
     """
     masked = _mask_code(text)
-    headings = [(match.start(), match.group(2)) for match in HEADING.finditer(masked)]
-    if not headings:
+    matches = list(HEADING.finditer(masked))
+    if not matches:
         return {}
+    headings = list(zip([match.start() for match in matches], titles_of(text, matches), strict=True))
     anchors = anchor_run([title for _start, title in headings])
 
     found: dict[str, str] = {}

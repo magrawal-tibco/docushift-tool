@@ -1654,3 +1654,26 @@ def test_a_fragment_the_resolver_cannot_place_is_left_exactly_as_written() -> No
     out, count = fragments.retarget(body, lambda path, fragment: None)
 
     assert (out, count) == (body, 0)
+
+
+def test_a_heading_holding_code_is_slugged_from_its_text_and_not_its_mask() -> None:
+    """DOCOPS-362. Headings are found on the code-masked copy, and the masked
+    title was slugged too: the code span's blanks became dashes, so links went to
+    `#using-the-------------------function`, which no heading has."""
+    text = '<a id="forEach"></a>\n\n## Using the `array.forEach()` Function\n'
+
+    assert fragments.marker_targets(text) == {"foreach": "using-the-arrayforeach-function"}
+
+
+def test_a_heading_ending_in_code_keeps_the_code_in_its_anchor() -> None:
+    """DOCOPS-363. A trailing code span masked to blanks and was stripped, so the
+    link named `#configuration-management-commands` and the heading is longer."""
+    text = (
+        '# Reference\n\n<a id="Configur"></a>\n\n'
+        "## Configuration Management Commands (`configurationMgmt.py`)\n\n"
+        "```\n# not a heading\n```\n"
+    )
+
+    assert fragments.marker_targets(text) == {
+        "configur": "configuration-management-commands-configurationmgmtpy",
+    }

@@ -26,6 +26,7 @@ writer making the headings distinct.
 
 import re
 import unicodedata
+from collections.abc import Iterable
 
 #: An ATX heading, the one pattern every reader of headings shares: Reframe
 #: predicts section anchors with it and shifts heading levels by its offsets, the
@@ -77,6 +78,25 @@ def slugify_heading(title: str) -> str:
     text = unicodedata.normalize("NFKD", text).strip().lower()
     text = _DROP.sub("", text)
     return text.replace(" ", "-")
+
+
+def titles_of(text: str, matches: Iterable[re.Match[str]]) -> list[str]:
+    """Each heading's title read from `text`, for `matches` found on its masked copy.
+
+    Headings are found on `mask_code`'s output, so a `# comment` in a shell sample
+    is not one -- but the mask also blanks a heading's own code spans, and slugging
+    the masked title turned "Using the `array.forEach()` Function" into
+    `using-the-------------------function`, an anchor no renderer makes
+    (DOCOPS-362), and dropped the code from "Configuration Management Commands
+    (`configurationMgmt.py`)", so links named a shorter anchor than the heading's
+    (DOCOPS-363). The mask keeps offsets, so the same line of the original is the
+    title as written.
+    """
+    titles: list[str] = []
+    for match in matches:
+        own = HEADING.match(text, match.start(), match.end())
+        titles.append(own.group("text") if own else match.group("text"))
+    return titles
 
 
 def anchor_run(titles: list[str]) -> list[str]:

@@ -2288,3 +2288,23 @@ def test_an_unfiled_page_keeps_its_identifiers_without_a_map_entry(tmp_path: Pat
     publish(target, {"guide/unfiled/a.md": "---\ncsh:\n  - \"help_1\"\n---\n\n# A\n"})
 
     assert csh_of(target) == []
+
+
+def test_a_fragment_to_a_heading_holding_code_names_the_heading_with_its_code(
+    tmp_path: Path,
+) -> None:
+    """DOCOPS-362/363. The checker slugged the code-masked title, as the writer
+    did, so the two agreed on `#using-the-------------------function` and the
+    reader's renderer on neither. Both read the title as written now."""
+    target = tmp_path / "target"
+    publish(target, {"a.md": (
+        "# Top\n\n## Using the `array.forEach()` Function\n\n"
+        "[good](#using-the-arrayforeach-function)\n"
+        "[old](#using-the-------------------function)\n"
+    )})
+
+    report, _ = links_of(target)
+
+    assert codes(report.findings) == ["ANCHOR_MISSING"]
+    assert "#using-the-------------------function" in report.findings[0].message
+    assert refs.headings("## Run `x.py`\n") == {"run-xpy": (1, "run-xpy")}

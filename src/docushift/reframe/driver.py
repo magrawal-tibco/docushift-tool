@@ -78,7 +78,7 @@ from docushift.reframe.review import Flag, branches, inspect
 from docushift.reframe.toc import TocEntry, retarget, schema_for
 from docushift.reporting.findings import FindingsRun
 from docushift.utils import textfile
-from docushift.utils.anchors import HEADING
+from docushift.utils.anchors import HEADING, titles_of
 from docushift.utils.longpath import PUBLISHED_PATH_LIMIT, long_path, walk_files
 from docushift.utils.naming import is_unfiled
 from docushift.utils.slug import version_segment
@@ -244,7 +244,7 @@ class _Source:
         if topic.source not in self._headings:
             body = split_frontmatter(self.read(topic.source))[1]
             found = list(HEADING.finditer(mask_code(body)))
-            texts = [match.group("text") for match in found]
+            texts = titles_of(body, found)
             if own_heading(body, topic.title, found) is None:
                 texts.insert(0, topic.title)
             self._headings[topic.source] = texts
