@@ -648,6 +648,12 @@ REGISTRY: dict[str, Code] = _codes(
          "A same-page #fragment resolving to an earlier topic's heading: a heading "
          "with the same title, renumbered, sits between the target and the link",
          "planning.md Phase 34 (R11-02)"),
+    # DOCOPS-343. An error: AEM serves the page cut short after it (EMS
+    # tibemsConnectionMetaData lost its three `tibemsSSL_*` sections), and the
+    # clean answer is knowable -- no published tree held one but those 12 pages.
+    Code("ANCHOR_ID_SPLIT", Severity.ERROR, Stage.VALIDATE,
+         "An <a id> or name= value that spans lines; AEM drops the page after it",
+         "DOCOPS-343"),
     Code("LINK_EXTERNAL_DEAD", Severity.WARNING, Stage.VALIDATE,
          "An absolute URL that did not respond, under --check-external",
          "planning.md §7.4"),

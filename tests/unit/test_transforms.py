@@ -585,13 +585,14 @@ def test_a_pipe_table_keeps_its_caption_as_an_italic_line_ahead_of_it() -> None:
     )
 
     assert rendered == '<a id="T1"></a>\n\n*Processing Instruction*\n\n| Field |\n| --- |\n| Name |'
-    # The target is taken from the tag, not from the collapsed caption text: one
-    # EMS target has a pasted table, newlines and all, in its name.
+    # One EMS target has a pasted table, newlines and all, in its name. Written
+    # out it cut the page short on AEM, so it gets no marker (DOCOPS-343); the
+    # caption stays.
     pasted = render(
         "<table><caption><a name='Event_Value_\n   _Description_'></a>Values</caption>"
         "<tr><th>Field</th></tr><tr><td>Name</td></tr></table>"
     )
-    assert pasted.startswith('<a id="Event_Value_\n   _Description_"></a>\n\n*Values*')
+    assert pasted.startswith("*Values*\n\n")
 
 
 def test_a_thead_row_of_td_cells_is_the_header() -> None:
@@ -839,6 +840,19 @@ def test_an_anchor_with_neither_href_nor_target_is_still_unwrapped() -> None:
 def test_a_named_anchor_in_prose_emits_its_target() -> None:
     """`_anchor` returned `""` for an empty one, deleting the destination."""
     assert render("<p><a name='ID-7B'></a>See below.</p>") == '<a id="ID-7B"></a>See below.'
+
+
+def test_a_target_whose_name_spans_lines_writes_no_marker() -> None:
+    """DOCOPS-343. EMS's caption bookmark holds a table's text over three lines,
+    and AEM dropped tibemsConnectionMetaData after the `<a id>` it became. A name
+    with a plain space still gets one: links to `tibdg proxy shed` place by it."""
+    name = "Certificate_EncodingsConstant_&#xA;   _Value_&#xA;   _TIBEMS_SSL_ENCODING_AUTO(0x0000)"
+    rendered = render(f'<table><caption><a name="{name}"></a>Certificate Encodings</caption>'
+                      "<tr><td>a</td><td>b</td></tr></table>")
+
+    assert "<a id" not in rendered
+    assert "Certificate Encodings" in rendered
+    assert markdown.anchor_marker("tibdg proxy shed") == '<a id="tibdg proxy shed"></a>'
 
 
 def test_a_named_anchor_in_a_heading_is_hoisted_above_it() -> None:

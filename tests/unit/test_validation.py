@@ -2308,3 +2308,20 @@ def test_a_fragment_to_a_heading_holding_code_names_the_heading_with_its_code(
     assert codes(report.findings) == ["ANCHOR_MISSING"]
     assert "#using-the-------------------function" in report.findings[0].message
     assert refs.headings("## Run `x.py`\n") == {"run-xpy": (1, "run-xpy")}
+
+
+def test_an_anchor_id_spanning_lines_is_an_error(tmp_path: Path) -> None:
+    """DOCOPS-343. Twelve EMS pages reached staging with one and no finding; AEM
+    served each cut short after it. One in a code sample is content."""
+    target = tmp_path / "target"
+    publish(target, {"a.md": (
+        "# Top\n\nprose\n\n"
+        '<a id="Certificate_EncodingsConstant_\n   _Value_\n   _TIBEMS_SSL"></a><a id="ok"></a>\n\n'
+        '```\n<a id="x\ny"></a>\n```\n\n<a id="tibdg proxy shed"></a>\n'
+    )})
+
+    report, _ = links_of(target)
+
+    assert codes(report.findings) == ["ANCHOR_ID_SPLIT"]
+    assert report.findings[0].path.endswith("a.md:5")
+    assert REGISTRY["ANCHOR_ID_SPLIT"].severity is Severity.ERROR

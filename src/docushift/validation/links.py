@@ -52,6 +52,7 @@ Javadoc, not this tool's output.
 
 import os
 import posixpath
+import re
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path, PurePosixPath
@@ -72,6 +73,11 @@ from docushift.validation.tree import VersionFolder
 # Only a Markdown target can have its anchors computed. A fragment onto a `.html`
 # in a copied API tree is not this tool's output and is not read.
 _ANCHORED = (".md",)
+
+# An `<a id>` or `<a name>` whose value runs onto the next line (DOCOPS-343).
+# EMS's Flare caption bookmarks named after a whole table did, and AEM drops the
+# rest of the page after one. `anchor_marker` writes none now; this is the check.
+_SPLIT_ID = re.compile(r'<a\b[^>]*?\b(?:id|name)\s*=\s*"[^"\n]*\n', re.IGNORECASE)
 
 
 def anchor_miss(fragment: str, anchors: set[str]) -> str | None:
@@ -306,6 +312,10 @@ def _check_file(
                 message=message,
             )
         )
+
+    for match in _SPLIT_ID.finditer(references.mask_code(text)):
+        issue("ANCHOR_ID_SPLIT", text.count("\n", 0, match.start()) + 1,
+              "an <a id> whose value spans lines; AEM drops the page after it")
 
     for reference in references.references(text):
         report.references += 1

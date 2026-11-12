@@ -198,8 +198,10 @@ def test_the_register_carries_every_row_of_7_5() -> None:
     DOCOPS-354 adds `SYNC_ORIGIN_NO_PAGE_ROWS`, for a published 301.yml with
     documents and no page while the sitemap lists the version's pages.
     DOCOPS-366 adds `VERIFY_TOC_LOST`, for a version whose old menu sits under unfiled/.
+    DOCOPS-343 adds `ANCHOR_ID_SPLIT`, an `<a id>` spanning lines, which AEM cuts
+    the page after.
     """
-    assert len(REGISTRY) == 142
+    assert len(REGISTRY) == 143
 
 
 def test_severity_comes_from_the_registry_and_not_from_the_call_site() -> None:

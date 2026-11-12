@@ -156,8 +156,19 @@ def anchor_target(tag: Tag) -> str:
 
 
 def anchor_marker(target: str) -> str:
-    """`target` as the inline HTML that makes `#target` resolve in the output."""
-    return f'<a id="{_html_escape(target)}"></a>' if target else ""
+    """`target` as the inline HTML that makes `#target` resolve in the output.
+
+    Nothing for a name that spans lines (DOCOPS-343). EMS's Flare caption
+    bookmarks hold a whole table's text over three lines, and AEM drops the page
+    after such an `<a id>`: the three `tibemsSSL_*` sections of
+    tibemsConnectionMetaData, 12 pages in 10.4.0-10.5.1. The platform anchors on
+    headings only, so the marker served `fragments.marker_targets` and nothing
+    else; a link to it falls back to its topic in reframe. A name with a plain
+    space is kept: R8-08's links to `tibdg proxy shed` place through it.
+    """
+    if not target or "\n" in target or "\r" in target:
+        return ""
+    return f'<a id="{_html_escape(target)}"></a>'
 
 
 def text_of(node: Tag) -> str:
