@@ -269,7 +269,7 @@ Claude creates, updates and closes Jira issues itself, within these limits.
 
    Fixes are noted on the existing issues (343–363). Releases R1–R4 are notes on DOCOPS-313 and on the issue each release carries. More new issues than these needs a reason in the morning note.
 
-## 8b. Where we stand: one status page (user, 12 Nov; approved, built Fri 13)
+## 8b. Where we stand: one status page (user, 12 Nov; built 13 Nov)
 
 **Why.** When anyone asks, you need one place that says where the migration stands, how much is left, how much effort went in and is left, and which team owes what. Today that is spread over a dated report (`reports/migration-status-2026-11-12.md`, stale the next day), the per-version page (`reports/conversion-status.html`), Jira and this plan.
 
@@ -283,6 +283,13 @@ Claude creates, updates and closes Jira issues itself, within these limits.
 | Pending by team | What each of the three teams owes, with dates (user, 12 Nov). **TechDocs** (us): our fixes and runs, writers' spot-checks and in-progress ZIPs, and the open decisions D5–D7. **Digital Platform**: the AEM site and staging problems, UAT sheet rows, redirect loading, and the PRISM integration. **Engineering**: Karan's Integration decisions; the product teams (Messaging, iProcess, Streaming, Scribe); support's end-of-support reports. | A problem kind's owner from its triage decision (`platform` = Digital Platform; ours and `source` = TechDocs); open Jira issues by area; the decisions table in this plan |
 
 **Built by** a helper agent in its own copy of the code, during the waits between the R1 merge groups on **Fri 13**. Claude reviews it before it is merged. It only reads; it changes nothing in the catalog or the repos. Jira: a note on DOCOPS-280 (Phase 65 built the page), no new issue; 0.5 SP added there if it takes over 4 h.
+
+**Each morning (after sign-in), Claude:**
+1. Updates `config/status-areas.yaml` from the night's results: status, next dates.
+2. Runs `.venv/Scripts/python scratch/fetch_docops.py`.
+3. Runs `.venv/Scripts/python scratch/build_conversion_status.py`.
+
+The page and `reports/status-latest.md` are then current. Built 13 Nov (DOCOPS-280).
 
 ## 9. How a batch is run (for reference)
 
