@@ -12,12 +12,12 @@ from pathlib import Path
 from bs4 import BeautifulSoup
 
 from docushift.models import Catalog, SourceEngine
-from docushift.sync import redirects
 from docushift.reporting.findings import FindingsRun
+from docushift.sync import redirects
 from docushift.validation.tree import walk
 from docushift.verify import anchors, images, live, published
-from docushift.verify import text as texts
 from docushift.verify import redirects as redirect_maps
+from docushift.verify import text as texts
 from docushift.verify.driver import Verifier
 from docushift.verify.fetch import Fetched
 from docushift.verify.toc import Node, by_page, by_title, pages_only, root

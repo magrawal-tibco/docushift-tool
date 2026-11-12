@@ -1309,8 +1309,8 @@ class Reframer:
         self._record(
             "REFRAME_LAYOUT_UNPINNED", product.slug, "",
             message=(
-                f"no `pin_layout_to` in config/reframe.yaml; laid out on the newest "
-                f"eligible version of each engine: "
+                "no `pin_layout_to` in config/reframe.yaml; laid out on the newest "
+                "eligible version of each engine: "
                 + ", ".join(f"{engine} {number}" for engine, number in
                             sorted(self._engine_pins.get(product.slug, {}).items()))
             ),

@@ -11,8 +11,8 @@ from click.testing import CliRunner
 
 from docushift import repairs
 from docushift.cli import main
-from docushift.reporting.status import _repairs
 from docushift.repairs import run
+from docushift.reporting.status import _repairs
 from docushift.state import StateStore
 from docushift.transforms import callouts
 from tests.unit.test_cli import populated_root, runner  # noqa: F401 -- fixtures
