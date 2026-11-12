@@ -1,0 +1,214 @@
+# Where we stand: the hand-kept part of the status page (closeout plan §8b).
+#
+# Claude updates this file with the morning note; scratch/build_conversion_status.py
+# reads it and writes the "Where we stand" tab of reports/conversion-status.html and
+# reports/status-latest.md. Counts (versions, problem kinds, story points, open Jira
+# issues) are read from the data, never typed here.
+#
+# Per area:
+#   name        plain words; a business reader sees it
+#   team        TechDocs, Digital Platform or Engineering (no other names)
+#   status      done, on track, at risk or blocked
+#   note        one sentence: why that status (plain words, no release codes)
+#   plan        the closeout-plan section it comes from
+#   next        the next date (YYYY-MM-DD), or plain words such as "after 30 Nov"
+#   next_step   what happens on that date
+#   jira        DOCOPS keys; a story or epic also counts the sub-tasks under it
+#   jira_labels Jira labels whose sub-tasks count here (after keys named anywhere)
+#   measure     which counted "done and left" to show: conversion, publishing,
+#               staging_checks, problems or karan; otherwise its Jira items done
+#   waiting_on  what another team (or this one) owes, with a date
+#
+# A sub-task counts under one area only: named in `jira` first, then by label,
+# then by its nearest named parent; the first area listed wins. The rest shows as
+# "Building the conversion tool, and earlier work".
+#
+# Format: a small subset of YAML (one-line values; quote a value holding ": " or "#").
+
+go_live: 2026-11-23
+old_site_off: 2026-11-30
+
+# Who owns a Jira issue when it is not the area's own team. A logged problem kind
+# follows its issue's owner here (closeout plan §4: AEM-side items).
+jira_owner:
+  DOCOPS-255: Digital Platform
+  DOCOPS-344: Digital Platform
+  DOCOPS-345: Digital Platform
+  DOCOPS-346: Digital Platform
+  DOCOPS-351: Digital Platform
+  # §4 lists 353 as AEM-side; jira.md (12 Nov) notes it is mostly ours, fixed by 360. To confirm.
+  DOCOPS-353: TechDocs
+  DOCOPS-355: Engineering
+  DOCOPS-356: Engineering
+  DOCOPS-357: Engineering
+  DOCOPS-358: Engineering
+  DOCOPS-359: Digital Platform
+  DOCOPS-279: TechDocs
+  DOCOPS-322: TechDocs
+  DOCOPS-354: TechDocs
+
+areas:
+  - id: migration
+    name: Converting the documentation
+    team: TechDocs
+    status: on track
+    note: Karan's additions, releases since 5 Nov and the chosen fixes are converted Mon 16 to Wed 18.
+    plan: "§3"
+    next: 2026-11-16
+    next_step: Convert Karan's additions, the new releases and the fixes for release 2 (to Wed 18)
+    jira: [DOCOPS-5, DOCOPS-139, DOCOPS-153, DOCOPS-170]
+    measure: conversion
+
+  - id: publishing
+    name: Publishing to the new site
+    team: TechDocs
+    status: on track
+    note: Release 1 goes out Fri 13 in four groups, each after staging shows the previous one; release 2 Thu 19, release 3 Thu 26, release 4 early December.
+    plan: "§3, §2"
+    next: 2026-11-13
+    next_step: Release 1, in four groups
+    jira: [DOCOPS-313]
+    measure: publishing
+
+  - id: staging-checks
+    name: Checking the new site (staging)
+    team: TechDocs
+    status: on track
+    note: Every newest version is checked page by page on staging before go-live, overnight; older versions follow after go-live.
+    plan: "§3, §4"
+    next: 2026-11-16
+    next_step: Read the weekend's checks (TIBCO and ibi newest versions)
+    jira: [DOCOPS-338, DOCOPS-257, DOCOPS-10, DOCOPS-149]
+    measure: staging_checks
+
+  - id: problems
+    name: Problems found by the checks
+    team: TechDocs
+    status: on track
+    note: Each kind of problem gets one Jira issue at the morning triage and is fixed in a planned window; every fix built so far goes into release 2.
+    plan: "§7a, §8"
+    next: 2026-11-16
+    next_step: Sort the weekend's findings; re-convert with the fixes (Mon 16 to Tue 17)
+    jira_labels: [verify-issue]
+    measure: problems
+    waiting_on:
+      - team: Digital Platform
+        what: Answer the site problems reported in the UAT sheet
+        due: to confirm
+
+  - id: go-live-blockers
+    name: Go-live blockers on the new site
+    team: Digital Platform
+    status: blocked
+    note: 61 of the 73 newest BW plug-in versions are not served on staging (Critical); pages placed under a heading row are hidden from the staging menu or not found.
+    plan: "§4"
+    next: 2026-11-20
+    next_step: "Go / no-go: served, or a date from Digital Platform"
+    jira: [DOCOPS-346, DOCOPS-351]
+    waiting_on:
+      - team: Digital Platform
+        what: Serve the 61 BW plug-in versions on staging, or give a date
+        due: 2026-11-20
+      - team: Digital Platform
+        what: Show pages under heading rows in the staging menu, or agree that we restructure our menus
+        due: 2026-11-20
+
+  - id: karan
+    name: Which Integration versions to publish (Karan's list)
+    team: TechDocs
+    status: on track
+    note: Engineering's list is final for 1,166 Integration versions; the decisions are written into the catalog Fri 13, and 27 versions are added and 80 removed before go-live.
+    plan: "§6"
+    next: 2026-11-16
+    next_step: Remove the 80 from the repositories; add the 27 with release 2 (Thu 19)
+    jira: [DOCOPS-364]
+    measure: karan
+    waiting_on:
+      - team: Engineering
+        what: Confirm or decline new Integration versions the catalog refreshes find
+        due: to confirm
+
+  - id: delta
+    name: Releases since 5 Nov (delta migration)
+    team: TechDocs
+    status: on track
+    note: The catalog was last refreshed on 5 Nov; it is refreshed Mon 16 and for the last time Fri 27, before the old site closes.
+    plan: "§6a"
+    next: 2026-11-16
+    next_step: Refresh the catalog and list what is new
+    # Its own Jira issue is created under DOCOPS-6 when the 16 Nov refresh runs (plan §8a); add it here then.
+    waiting_on:
+      - team: TechDocs
+        what: Writers send the files of releases still in progress (by noon)
+        due: 2026-11-17
+      - team: Engineering
+        what: Support sends the end-of-support report with its retirement dates again
+        due: to confirm
+
+  - id: redirects
+    name: Old links keep working (redirects)
+    team: Digital Platform
+    status: at risk
+    note: Go-live needs the new site to load our redirect maps, or a date for it; no date is recorded yet (to confirm). Old addresses for help with no map are collected while the old site is up.
+    plan: "§4, §3"
+    next: 2026-11-20
+    next_step: "Go / no-go: redirect maps loaded, or a date"
+    jira: [DOCOPS-271, DOCOPS-322, DOCOPS-354, DOCOPS-279]
+    waiting_on:
+      - team: Digital Platform
+        what: Load the redirect maps on the new site, or give a date
+        due: 2026-11-20
+      - team: TechDocs
+        what: Collect old addresses for help with no redirect map
+        due: 2026-11-27
+
+  - id: backups
+    name: Backups of the original help packages
+    team: TechDocs
+    status: on track
+    note: TIBCO is on the shared drive (1,933 of 2,015 versions; 82 have no package on the old site), ibi on Google Drive, Spotfire copy started 12 Nov.
+    plan: "§3, §5"
+    next: 2026-11-27
+    next_step: Close the backups (Spotfire run summary; ibi count confirmed)
+    jira: [DOCOPS-281, DOCOPS-282, DOCOPS-283]
+
+  - id: team-requirements
+    name: Product teams' own requirements
+    team: Engineering
+    status: on track
+    note: Messaging, iProcess, Scribe and Streaming need more than conversion, and the publishing pipeline is being joined to PRISM and the product builds; most finish after 30 Nov.
+    plan: "§5"
+    next: to confirm
+    next_step: Each team's next step, noted as it moves
+    jira: [DOCOPS-355, DOCOPS-356, DOCOPS-357, DOCOPS-358, DOCOPS-359]
+    jira_labels: [team-requirement]
+
+  - id: translated
+    name: Translated help
+    team: TechDocs
+    status: on track
+    note: Checks of the translated help are planned after 30 Nov.
+    plan: "§5"
+    next: after 30 Nov
+    next_step: Check the translated help on the new site
+    jira: [DOCOPS-148, DOCOPS-253]
+
+  - id: writer-checks
+    name: Writers' spot-checks
+    team: TechDocs
+    status: on track
+    note: Writers spot-check the migrated help after 30 Nov.
+    plan: "§3"
+    next: after 30 Nov
+    next_step: Writers spot-check each family
+    jira: [DOCOPS-137, DOCOPS-151]
+
+  - id: ems-layout
+    name: EMS 10.5.1 in its new page layout
+    team: TechDocs
+    status: on track
+    note: Pages grouped by menu depth, 214 pages instead of 159 today, older EMS versions unchanged; the plan awaits approval Fri 13.
+    plan: "§5"
+    next: 2026-11-16
+    next_step: Build it; out with release 2 (Thu 19)
+    jira: [DOCOPS-367]

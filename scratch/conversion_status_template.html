@@ -207,6 +207,52 @@ ul.plain b { color: var(--text-primary); font-weight: 620; }
 .foot b { color: var(--text-secondary); font-weight: 600; }
 .empty { font-size: 13px; color: var(--text-muted); padding: 22px 0; text-align: center; }
 
+/* Tabs */
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--axis); margin: 0 0 18px; }
+.tabs button { font: inherit; font-size: 13.5px; font-weight: 600; color: var(--text-secondary); background: none;
+  border: 0; border-bottom: 2px solid transparent; padding: 8px 14px 9px; margin-bottom: -1px; cursor: pointer; }
+.tabs button[aria-selected="true"] { color: var(--text-primary); border-bottom-color: var(--series-1); }
+.tabs button:hover { color: var(--text-primary); }
+.tabs button:focus-visible { outline: 2px solid var(--series-1); outline-offset: 2px; }
+
+/* Where we stand. Status colours are the fixed status roles, always with an icon and a label. */
+.viz-root { --good: #0ca30c; --warning: #fab219; --critical: #d03b3b; }
+.kpis5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 16px; }
+.kpis5 .tile .v { font-size: 34px; }
+.kpis5 .tile.days .v { font-size: 44px; }
+.kpis5 .tile .stack { margin-top: 10px; }
+.badge { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; font-weight: 600; font-size: 12px; }
+.badge .bi { display: inline-flex; align-items: center; justify-content: center; width: 17px; height: 17px;
+  border-radius: 50%; font-size: 11px; font-weight: 800; flex: none; box-sizing: border-box; }
+.st-done .bi { background: var(--good); color: #fff; }
+.st-track .bi { background: none; color: var(--text-secondary); border: 1.5px solid var(--axis); }
+.st-risk .bi { background: var(--warning); color: #0b0b0b; }
+.st-blocked .bi { background: var(--critical); color: #fff; }
+.areas td { vertical-align: top; }
+.areas th:nth-child(1) { width: 27%; } .areas th:nth-child(3) { width: 21%; } .areas th:nth-child(5) { width: 19%; }
+.areas td.l .note { color: var(--text-muted); margin-top: 3px; line-height: 1.45; max-width: 46ch; }
+.areas td.meas { min-width: 170px; text-align: left; font-variant-numeric: tabular-nums; }
+.areas td.meas .stack { margin: 3px 0 4px; }
+.areas td .keys { font-size: 11.5px; line-height: 1.6; }
+.eff { display: grid; grid-template-columns: minmax(180px, 30%) 1fr 160px; gap: 6px 12px; align-items: center; font-size: 12.5px; }
+.eff .nm { color: var(--text-primary); }
+.eff .nums { color: var(--text-muted); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+.seg-done { background: var(--s-checked); } .seg-doing { background: var(--s-fixes); } .seg-todo { background: var(--track); }
+.teams { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+.teams h3 { margin-top: 0; font-size: 14px; }
+.teams ol { margin: 0; padding-left: 0; list-style: none; font-size: 12.5px; line-height: 1.5; }
+.teams li { margin-bottom: 9px; color: var(--text-secondary); }
+.teams li .due { color: var(--text-primary); font-weight: 620; }
+.teams li .ar { color: var(--text-muted); font-size: 11.5px; display: block; }
+.teams details { margin-top: 10px; font-size: 12px; color: var(--text-secondary); }
+.teams details summary { cursor: pointer; color: var(--text-primary); font-weight: 600; }
+.teams details li { margin-bottom: 5px; }
+.kindline { font-size: 12.5px; color: var(--text-secondary); margin: 6px 0 0; line-height: 1.5; }
+.kindline b { color: var(--text-primary); }
+
+@media (max-width: 980px) { .kpis5 { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 880px) { .teams { grid-template-columns: 1fr; } .eff { grid-template-columns: 1fr; } }
+@media print { .tabs { display: none; } [role=tabpanel][hidden] { display: block !important; } }
 @media (max-width: 980px) { .kpis { grid-template-columns: 1fr 1fr; } .tile.hero { grid-column: 1 / -1; } .jk { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 880px) { .grid, .dec, .jgrid { grid-template-columns: 1fr; } .qual { grid-template-columns: 1fr; } }
 @media (forced-colors: active) { .stack > span { forced-color-adjust: none; } }
@@ -231,6 +277,45 @@ ul.plain b { color: var(--text-primary); font-weight: 620; }
     <button class="btn" id="theme" aria-pressed="false">Dark</button>
   </div>
 
+  <div class="tabs" role="tablist" aria-label="Views">
+    <button role="tab" id="tb-stand" aria-controls="tab-stand" aria-selected="true">Where we stand</button>
+    <button role="tab" id="tb-detail" aria-controls="tab-detail" aria-selected="false" tabindex="-1">Versions in detail</button>
+  </div>
+
+  <section id="tab-stand" role="tabpanel" aria-labelledby="tb-stand">
+    <div class="kpis5" id="w-kpis"></div>
+    <div class="grid">
+      <div class="card wide">
+        <div class="cardhead"><div><h2>By business unit</h2>
+          <p class="sub">Documentation versions in the migration, and how far each has come. &ldquo;In the
+            repositories&rdquo; is what the new site is built from; &ldquo;checked on staging&rdquo; is the
+            page-by-page check against the staging site.</p></div></div>
+        <div id="w-bu"></div>
+      </div>
+      <div class="card wide">
+        <div class="cardhead"><div><h2>Areas</h2>
+          <p class="sub" id="w-areas-sub"></p></div></div>
+        <div id="w-areas"></div>
+      </div>
+      <div class="card wide">
+        <div class="cardhead"><div><h2>What each team owes</h2>
+          <p class="sub">Dated items first. Problem kinds are owned by whoever fixes them: the site&rsquo;s own
+            problems by Digital Platform; ours and those already in the documents we received by TechDocs.</p></div></div>
+        <div id="w-teams"></div>
+      </div>
+      <div class="card wide">
+        <div class="cardhead"><div><h2>Effort</h2>
+          <p class="sub" id="w-eff-sub"></p></div>
+          <div class="spacer"></div>
+          <button class="tbtn" data-table="t-eff" aria-expanded="false">Table</button></div>
+        <div id="w-eff"></div>
+        <div class="tbl" id="t-eff"></div>
+      </div>
+    </div>
+    <p class="foot" id="w-foot"></p>
+  </section>
+
+  <section id="tab-detail" role="tabpanel" aria-labelledby="tb-detail" hidden>
   <div class="filters">
     <div class="field"><label for="f-bu">Business unit</label>
       <select id="f-bu"><option value="">All business units</option></select></div>
@@ -330,6 +415,7 @@ ul.plain b { color: var(--text-primary); font-weight: 620; }
   </div>
 
   <p class="foot" id="foot"></p>
+  </section>
 </div>
 </div>
 
@@ -413,7 +499,7 @@ const PROD = DATA.products.map(([name, fam, slug]) => ({ name, fam, slug }));
 const R = { p: 0, ver: 1, step: 2, why: 3, st: 4, std: 5, sync: 6, syncd: 7, vf: 8, vfd: 9, rep: 10,
             eng: 11, md: 12, topics: 13, pages: 14 };
 const STEPS = [
-  { key: "checked",       label: "Checked: nothing lost",                       cls: "seg-checked",    v: "--s-checked" },
+  { key: "checked",       label: "Checked: nothing lost, or every problem logged", cls: "seg-checked", v: "--s-checked" },
   { key: "placed",        label: "In the repositories, check to do",            cls: "seg-placed",     v: "--s-placed" },
   { key: "fixes_pending", label: "In the repositories, standard fix to apply",  cls: "seg-fixes",      v: "--s-fixes" },
   { key: "built",         label: "Converted, not yet in the repositories",      cls: "seg-built",      v: "--s-built" },
@@ -511,7 +597,7 @@ function renderKpis(s) {
     el("div", { class: "k" }, "Versions in the migration"),
     el("div", { class: "v" }, fmt(s.inMig), el("small", {}, "documentation versions")));
   hero.append(stackBar(vec(s), "thin", "Versions in the migration"));
-  hero.append(el("div", { class: "s" }, `${pctTxt(s.placed, s.inMig)} are in the repositories; ${pctTxt(s.steps.checked, s.inMig)} have been checked against the old site with nothing lost.`));
+  hero.append(el("div", { class: "s" }, `${pctTxt(s.placed, s.inMig)} are in the repositories; ${pctTxt(s.steps.checked, s.inMig)} have been checked against the old site with nothing lost or every problem logged.`));
 
   const r = s.reasons;
   const blocked = (r["blocked-download"] || 0) + (r["blocked-format"] || 0) + (r["blocked-failed"] || 0);
@@ -527,7 +613,7 @@ function renderKpis(s) {
   $("kpis").replaceChildren(hero,
     tile("In the repositories", el("span", {}, fmt(s.placed), el("small", {}, pctTxt(s.placed, s.inMig))),
       `${fmt(s.steps.fixes_pending)} still need the standard fix applied`),
-    tile("Checked: nothing lost", el("span", {}, fmt(s.steps.checked), el("small", {}, pctTxt(s.steps.checked, s.inMig))),
+    tile("Checked: nothing lost or all logged", el("span", {}, fmt(s.steps.checked), el("small", {}, pctTxt(s.steps.checked, s.inMig))),
       `compared page by page with the old site; ${fmt(s.steps.placed)} placed versions still to check`),
     att);
   $("context").replaceChildren(el("b", {}, `${fmt(s.catalogued)} versions are catalogued`), "; ",
@@ -957,6 +1043,169 @@ function renderDecisions() {
     el("div", {}, el("h3", {}, "Next steps"), el("ol", {}, ...next))));
 }
 
+/* -- where we stand (closeout plan §8b) -------------------------------------- */
+const STATUS = {
+  "done":     { icon: "✓", cls: "st-done",    label: "Done" },
+  "on track": { icon: "→", cls: "st-track",   label: "On track" },
+  "at risk":  { icon: "!", cls: "st-risk",    label: "At risk" },
+  "blocked":  { icon: "✕", cls: "st-blocked", label: "Blocked" },
+};
+const KIND_WORDS = { logged: "logged in Jira", unlogged: "still to sort", source: "in the documents we received",
+                     ours: "ours to fix", platform: "the site's to fix" };
+const JIRA_SITE = "https://csg-engops.atlassian.net/browse/";
+const isDay = v => /^\d{4}-\d{2}-\d{2}$/.test(v || "");
+const dayText = v => isDay(v)
+  ? new Date(v + "T00:00:00").toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })
+  : (v || "date to confirm");
+function badge(status) {
+  const s = STATUS[status];
+  return el("span", { class: "badge " + s.cls }, el("span", { class: "bi", "aria-hidden": "true" }, s.icon), s.label);
+}
+function jiraLink(key) { return el("a", { href: JIRA_SITE + key, target: "_blank", rel: "noopener" }, key); }
+function meter(done, total, title) {
+  const bar = el("div", { class: "stack thin", role: "img", "aria-label": `${title}: ${done} of ${total}` });
+  if (done) bar.append(el("span", { class: "seg-done", style: `flex:${done} 1 0` }));
+  if (total - done > 0) bar.append(el("span", { class: "seg-todo", style: `flex:${total - done} 1 0` }));
+  return bar;
+}
+const nOf = (n, d) => el("span", {}, fmt(n), el("small", {}, `of ${fmt(d)}`));
+
+function renderStand() {
+  const W = DATA.stand;
+  if (!W) { $("tab-stand").replaceChildren(el("p", { class: "empty" }, "No status built for this page.")); return; }
+  const h = W.headline, t = h.total;
+  const days = (n, when, what) => el("div", { class: "tile days" }, el("div", { class: "k" }, what),
+    el("div", { class: "v" }, fmt(n), el("small", {}, n === 1 ? "day" : "days")), el("div", { class: "s" }, dayText(when)));
+  const prog = (k, n, d, s) => tile(k, nOf(n, d), s, meter(n, d, k));
+  $("w-kpis").replaceChildren(
+    days(h.daysToGoLive, h.goLive, "To go-live"),
+    days(h.daysToOldSiteOff, h.oldSiteOff, "To the old site's shutdown"),
+    prog("Converted", t.converted, t.inMig, `${pctTxt(t.converted, t.inMig)} of the versions in the migration`),
+    prog("In the repositories", t.published, t.inMig, `${pctTxt(t.published, t.inMig)}; what the new site is built from`),
+    prog("Checked on staging", t.staging, t.published, `${pctTxt(t.staging, t.published)} of those in the repositories`));
+
+  const cell = (n, d) => el("span", {}, fmt(n), " ", el("span", { class: "muted" }, pctTxt(n, d)));
+  $("w-bu").replaceChildren(table(["Business unit", "In the migration", "Converted", "In the repositories", "Checked on staging"],
+    h.byBu.concat([t]).map(r => [r.bu === "All" ? el("b", {}, "All") : r.bu, fmt(r.inMig), cell(r.converted, r.inMig),
+      cell(r.published, r.inMig), cell(r.staging, r.published)]), [false, true, true, true, true]));
+
+  const counts = Object.fromEntries(Object.keys(STATUS).map(k => [k, W.areas.filter(a => a.status === k).length]));
+  $("w-areas-sub").textContent = `${W.areas.length} areas: ` + Object.entries(counts).filter(([, n]) => n)
+    .map(([k, n]) => `${n} ${STATUS[k].label.toLowerCase()}`).join(", ") +
+    ". Done and left is counted from the data; status, next step and team are kept by hand with the morning note.";
+  const at = el("table", { class: "areas" });
+  at.append(el("thead", {}, el("tr", {}, ...["Area", "Status", "Done and left", "Team", "Next", "Jira"]
+    .map((x, i) => el("th", { class: i === 2 ? "" : "l" }, x)))));
+  const ab = el("tbody");
+  for (const a of W.areas) {
+    const m = a.measure;
+    const meas = m ? el("td", { class: "meas" }, el("div", {}, el("b", {}, fmt(m.done)), ` of ${fmt(m.total)} ${m.unit}`),
+      meter(m.done, m.total, a.name), m.detail ? el("div", { class: "muted" }, m.detail) : null)
+      : el("td", { class: "meas muted" }, "not counted yet");
+    const keys = el("div", { class: "keys" });
+    a.keys.forEach((k, i) => { if (i) keys.append(", "); keys.append(jiraLink(k)); });
+    if (!a.keys.length && !a.issueCount) keys.append(el("span", { class: "muted" }, "none yet"));
+    if (a.openIssues.length) keys.append(el("div", { class: "muted" }, `${a.openIssues.length} open of ${a.issueCount}`));
+    ab.append(el("tr", {},
+      el("td", { class: "l" }, el("b", {}, a.name), el("div", { class: "note" }, a.note),
+        a.plan ? el("div", { class: "note" }, `Plan ${a.plan}`) : null),
+      el("td", { class: "l" }, badge(a.status)),
+      meas,
+      el("td", { class: "l" }, a.team),
+      el("td", { class: "l" }, el("b", {}, dayText(a.next)), el("div", { class: "note" }, a.nextStep)),
+      el("td", { class: "l" }, keys)));
+  }
+  at.append(ab);
+  $("w-areas").replaceChildren(at);
+
+  const teams = el("div", { class: "teams" });
+  for (const [team, p] of Object.entries(W.pending)) {
+    const col = el("div", {}, el("h3", {}, team));
+    const ol = el("ol");
+    for (const it of p.items) ol.append(el("li", {}, el("span", { class: "due" }, dayText(it.due)), " · ",
+      it.decision ? el("b", {}, it.decision + " ") : null, it.what, el("span", { class: "ar" }, it.area)));
+    if (!p.items.length) ol.append(el("li", { class: "muted" }, "Nothing dated"));
+    col.append(ol);
+    const k = p.kinds;
+    if (k.kinds) col.append(el("p", { class: "kindline" }, el("b", {}, plural(k.kinds, "problem kind", "problem kinds")), ": ",
+      Object.entries(k.byDecision).map(([d, n]) => `${n} ${KIND_WORDS[d] || d}`).join(", ") + "."));
+    if (p.issues.length) {
+      const list = el("ol");
+      for (const i of p.issues) list.append(el("li", {}, jiraLink(i.key), " ", i.summary, " ",
+        el("span", { class: "muted" }, `· ${i.status}${i.due ? " · due " + dayText(i.due) : ""}`), el("span", { class: "ar" }, i.area)));
+      col.append(el("details", {}, el("summary", {}, `Open Jira items (${p.issues.length})`), list));
+    }
+    teams.append(col);
+  }
+  $("w-teams").replaceChildren(teams);
+
+  const e = W.effort;
+  if (!e) {
+    $("w-eff-sub").textContent = "No Jira snapshot was found; run scratch/fetch_docops.py, then rebuild.";
+    $("w-eff").replaceChildren();
+  } else {
+    const tt = e.total;
+    $("w-eff-sub").textContent = `Story points on Jira sub-tasks (1 point is about one 8-hour day of work), from the ` +
+      `snapshot of ${DATE(e.fetched)}. Work started ${DATE(e.firstIssue)}, ${fmt(e.daysSinceFirst)} days ago. Each sub-task ` +
+      `counts under one area, so the rows add up to the total.` +
+      (e.missing.length ? ` Not in the snapshot: ${e.missing.join(", ")}.` : "");
+    const box = el("div");
+    box.append(el("div", { class: "jk" },
+      tile("Done", el("span", {}, fmtSp(tt.done), el("small", {}, "points")), `${pctTxt(tt.done, tt.done + tt.doing + tt.todo)} of all logged`),
+      tile("In progress", el("span", {}, fmtSp(tt.doing), el("small", {}, "points")), ""),
+      tile("To do", el("span", {}, fmtSp(tt.todo), el("small", {}, "points")), ""),
+      tile("Since the first issue", el("span", {}, fmt(e.daysSinceFirst), el("small", {}, "days")), `${fmt(tt.issues)} sub-tasks`)));
+    const parts = [["done", "Done", "--s-checked"], ["doing", "In progress", "--s-fixes"], ["todo", "To do", "--axis"]];
+    box.append(el("ul", { class: "legend" }, ...parts.map(([k, l]) => el("li", {}, el("span", { class: "key seg-" + k }), l))));
+    const max = Math.max(...e.rows.map(r => r.done + r.doing + r.todo), 1);
+    const grid = el("div", { class: "eff" });
+    for (const r of e.rows) {
+      const sum = r.done + r.doing + r.todo;
+      const bar = el("div", { class: "stack thin", role: "img", style: `width:${Math.max(sum / max * 100, sum ? 1 : 0)}%`,
+        "aria-label": `${r.name}: ${r.done} done, ${r.doing} in progress, ${r.todo} to do` });
+      for (const [k, l, v] of parts) if (r[k]) {
+        const seg = el("span", { class: "seg-" + k, style: `flex:${r[k]} 1 0`, tabindex: "-1" });
+        hoverable(seg, r.name, () => [[cssVar(v), fmtSp(r[k]), `${l} · points`]]);
+        bar.append(seg);
+      }
+      grid.append(el("div", { class: "nm" }, r.name), el("div", {}, sum ? bar : el("span", { class: "muted" }, "no points logged")),
+        el("div", { class: "nums" }, `${fmtSp(r.done)} · ${fmtSp(r.doing)} · ${fmtSp(r.todo)}`));
+    }
+    box.append(grid);
+    $("w-eff").replaceChildren(box);
+    $("t-eff").replaceChildren(table(["Area", "Done", "In progress", "To do", "Sub-tasks"],
+      e.rows.concat([{ name: "Total", ...tt }]).map(r => [r.name, fmtSp(r.done), fmtSp(r.doing), fmtSp(r.todo), fmt(r.issues)]),
+      [false, true, true, true, true]));
+  }
+
+  const src = W.sources;
+  $("w-foot").replaceChildren(el("b", {}, "Where this comes from. "),
+    `Built ${W.asOfText}. Versions sheet last changed ${src.versions || "unknown"}; check results ${src.checks || "unknown"}; ` +
+    `Jira snapshot ${src.jira || "none"}; status areas file ${src.areas || "unknown"}; close-out plan ${src.plan || "unknown"}. ` +
+    "The same status, as text to paste, is reports/status-latest.md.");
+}
+
+function initTabs() {
+  const tabs = ["stand", "detail"];
+  const show = name => {
+    for (const t of tabs) {
+      $("tab-" + t).hidden = t !== name;
+      $("tb-" + t).setAttribute("aria-selected", String(t === name));
+      $("tb-" + t).tabIndex = t === name ? 0 : -1;
+    }
+    history.replaceState(null, "", "#" + name);
+  };
+  tabs.forEach((t, i) => {
+    $("tb-" + t).addEventListener("click", () => show(t));
+    $("tb-" + t).addEventListener("keydown", ev => {
+      if (ev.key !== "ArrowRight" && ev.key !== "ArrowLeft") return;
+      const next = tabs[(i + (ev.key === "ArrowRight" ? 1 : tabs.length - 1)) % tabs.length];
+      show(next); $("tb-" + next).focus();
+    });
+  });
+  show(location.hash === "#detail" ? "detail" : "stand");
+}
+
 /* -- shared table builder -------------------------------------------------- */
 function table(head, rows, numeric) {
   const t = el("table");
@@ -981,7 +1230,7 @@ function render() {
 }
 
 function init() {
-  $("lede").textContent = `Status as of ${DATE(DATA.asOf)}. Moving TIBCO and IBI product documentation from docs.tibco.com ` +
+  $("lede").textContent = `Status as of ${DATA.stand ? DATA.stand.asOfText : DATE(DATA.asOf)}. Moving TIBCO and IBI product documentation from docs.tibco.com ` +
     `to the new documentation repositories. Every number is read from the versions sheet, the product list, the tool's ` +
     `own checks and Jira; nothing is typed in by hand.`;
   $("foot").replaceChildren(
@@ -989,7 +1238,8 @@ function init() {
     "One unit is one documentation version of one product (for example, Enterprise Message Service 10.4.0). " +
     "“In the repositories” means the tool last placed that version in the folders the documentation repositories are " +
     "built from (a hand edit made there since is not visible here); it is not yet the live site. “Checked” means the " +
-    "page-by-page comparison with the old site found nothing lost, or only findings already explained. " +
+    "page-by-page comparison with the old site found nothing lost, or only findings already explained or logged " +
+    "in Jira to be fixed. " +
     "The “standard fix” is a correction applied across every published version after it was placed. " +
     "A version that needs attention also keeps its step, so the bar always adds up to the versions in the migration.");
   initFilters();
@@ -997,6 +1247,8 @@ function init() {
   renderDecisions();
   renderJira();
   render();
+  renderStand();
+  initTabs();
   document.querySelectorAll(".tbtn[data-table]").forEach(b => b.addEventListener("click", () => {
     const t = $(b.dataset.table), on = !t.classList.contains("on");
     t.classList.toggle("on", on); b.setAttribute("aria-expanded", on); b.textContent = on ? "Chart only" : "Table";

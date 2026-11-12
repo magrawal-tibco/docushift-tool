@@ -2,13 +2,20 @@
 
 A reader, never a writer: it reads config/products.csv, config/versions.csv,
 cache/state.db and the DOCOPS snapshot (reports/jira/docops-snapshot.json, written by
-fetch_docops.py), and embeds what it found into the page. Where each version stands
+fetch_docops.py), and embeds what it found into the page. Its first tab, "Where we
+stand" (closeout plan §8b), also reads config/status-areas.yaml (hand-kept),
+reports/verify/INDEX.csv and ISSUES.csv, the Karan change list and the plan's
+decisions table, and writes the same status as reports/status-latest.md. Where each version stands
 is read from versions.csv's `_status`, `_sync_status`, `_verify_status` and
 `_repairs_pending` columns, which the tool derives with the same rules as `docushift
 status`, so the page, the sheet and the command cannot disagree. Standard library
 only, so it runs without the tool installed.
 
+    python scratch/fetch_docops.py
     python scratch/build_conversion_status.py
+
+`--data-root` reads the catalog, state and reports from another checkout (a worktree
+builds from the main tree's live data); outputs and the areas file stay in this one.
 """
 
 import argparse
@@ -18,6 +25,8 @@ import datetime as dt
 import json
 import sqlite3
 from pathlib import Path
+
+import status_page
 
 ROOT = Path(__file__).resolve().parents[1]
 BU_NAMES = {"tibco": "TIBCO", "ibi": "IBI", "spotfire": "Spotfire", "datasynapse": "DataSynapse", "onebx": "EBX"}
@@ -32,7 +41,9 @@ def read_csv(path: Path) -> list[dict]:
 
 
 def validation_summary(db_path: Path) -> dict | None:
-    db = sqlite3.connect(db_path)
+    if not db_path.exists():
+        return None
+    db = sqlite3.connect(f"{db_path.as_uri()}?mode=ro", uri=True)
     run = db.execute(
         "SELECT run_id, started_at FROM runs WHERE command='validate' ORDER BY run_id DESC LIMIT 1"
     ).fetchone()
@@ -61,7 +72,10 @@ BUILD_STEP = {
 }
 PLACED = {"synced", "out-of-date"}
 SYNC_KNOWN = PLACED | {"sync-failed", ""}
-VERIFY_KNOWN = {"", "not-verified", "stale", "clean", "explained", "issues", "lost"}
+VERIFY_KNOWN = {"", "not-verified", "stale", "clean", "explained", "logged", "issues", "lost"}
+# A check result in which every finding is understood: nothing lost, explained, or
+# each kind logged in Jira to be fixed later (Phase 77).
+VERIFY_UNDERSTOOD = ("clean", "explained", "logged")
 
 
 def place(v: dict) -> tuple[str | None, list[str]]:
@@ -86,7 +100,7 @@ def place(v: dict) -> tuple[str | None, list[str]]:
     if step == "built" and not reasons:
         if sync in PLACED:
             step = ("fixes_pending" if v["_repairs_pending"]
-                    else "checked" if verify in ("clean", "explained") else "placed")
+                    else "checked" if verify in VERIFY_UNDERSTOOD else "placed")
             if sync == "out-of-date":
                 reasons.append("resync")
             if verify in ("lost", "issues"):
@@ -96,9 +110,9 @@ def place(v: dict) -> tuple[str | None, list[str]]:
     return step, reasons
 
 
-def build(jira_snapshot: Path) -> dict:
-    products = {row["slug"]: row for row in read_csv(ROOT / "config/products.csv")}
-    versions = read_csv(ROOT / "config/versions.csv")
+def build(jira_snapshot: Path, data: Path = ROOT) -> dict:
+    products = {row["slug"]: row for row in read_csv(data / "config/products.csv")}
+    versions = read_csv(data / "config/versions.csv")
     if versions and "_repairs_pending" not in versions[0]:
         raise SystemExit("versions.csv has no _repairs_pending column; run `docushift catalog refresh` first.")
 
@@ -132,7 +146,8 @@ def build(jira_snapshot: Path) -> dict:
         ])
 
     family_list = [
-        {"key": f["key"], "bu": f["bu"], "name": f["name"], "products": len(f["products"]), "inScope": len(f["in_scope"])}
+        {"key": f["key"], "bu": f["bu"], "name": f["name"], "products": len(f["products"]),
+         "inScope": len(f["in_scope"])}
         for f in families.values()
     ]
     return {
@@ -142,7 +157,7 @@ def build(jira_snapshot: Path) -> dict:
         "families": family_list,
         "products": product_list,
         "rows": rows,
-        "validation": validation_summary(ROOT / "cache/state.db"),
+        "validation": validation_summary(data / "cache/state.db"),
         "jira": jira_work(jira_snapshot),
     }
 
@@ -185,19 +200,107 @@ def jira_work(path: Path) -> dict | None:
             "stories": list(stories.values()), "tasks": tasks}
 
 
+CHECK_RESULTS = {"clean", "explained", "logged", "issues", "lost"}
+
+
+def _modified(path: Path) -> str:
+    return dt.datetime.fromtimestamp(path.stat().st_mtime).strftime("%Y-%m-%d %H:%M") if path.exists() else ""
+
+
+def where_we_stand(data: Path, areas_path: Path, jira_snapshot: Path, now: dt.datetime) -> dict:
+    """The first tab and status-latest.md (closeout plan §8b): headline, areas, effort, pending."""
+    cfg = status_page.load_areas(areas_path.read_text(encoding="utf-8"))
+    products = {row["slug"]: row for row in read_csv(data / "config/products.csv")}
+    versions = read_csv(data / "config/versions.csv")
+    index_path = data / "reports/verify/INDEX.csv"
+    staging_scope = {(r["slug"], r["version"]) for r in (read_csv(index_path) if index_path.exists() else [])
+                     if "staging" in r["scope"].split("+")}
+
+    records, by_version = [], {}
+    understood = local_only = 0
+    for v in versions:
+        step, _ = place(v)
+        published = v["_sync_status"] in PLACED
+        checked = bool(step) and published and v["_verify_status"] in CHECK_RESULTS
+        on_staging = checked and (v["slug"], v["version"]) in staging_scope
+        understood += on_staging and v["_verify_status"] in VERIFY_UNDERSTOOD
+        local_only += checked and not on_staging
+        bu = products[v["slug"]]["bu"]
+        records.append({"bu": BU_NAMES.get(bu, bu), "inMig": bool(step),
+                        "converted": step not in (None, "not_started", "downloaded"),
+                        "published": bool(step) and published, "staging": on_staging})
+        by_version[(v["slug"], v["version"])] = {"migrate_decision": v["migrate_decision"], "published": published}
+    head = status_page.headline(records, now.date(), cfg["goLive"], cfg["oldSiteOff"])
+    t = head["total"]
+
+    issues_path = data / "reports/verify/ISSUES.csv"
+    kind_summary = status_page.problem_kinds(read_csv(issues_path) if issues_path.exists() else [], cfg["owners"])
+    measures = {
+        "conversion": {"done": t["converted"], "total": t["inMig"], "unit": "versions", "detail": "converted"},
+        "publishing": {"done": t["published"], "total": t["inMig"], "unit": "versions",
+                       "detail": "in the new site's repositories"},
+        "staging_checks": {"done": t["staging"], "total": t["published"], "unit": "versions",
+                           "detail": f"of those in the repositories, checked on staging; {understood} with every "
+                                     f"finding clean, explained or logged; {local_only} more checked against our "
+                                     f"own copy only"},
+        "problems": {"done": kind_summary["entries"] - kind_summary["unlogged"], "total": kind_summary["entries"],
+                     "unit": "finding types", "detail": f"sorted at triage; {kind_summary['unlogged']} still to sort, "
+                                                        f"{kind_summary['accepted']} accepted as they are"},
+    }
+    karan_path = data / "reports/karan-decision-changes-2026-11-12.csv"
+    if karan_path.exists():
+        measures["karan"] = status_page.karan_measure(read_csv(karan_path), by_version)
+
+    snap = json.loads(jira_snapshot.read_text(encoding="utf-8")) if jira_snapshot.exists() else None
+    issues = snap["issues"] if snap else []
+    eff = status_page.effort(issues, cfg["areas"]) if snap else None
+    rows = status_page.area_rows(cfg["areas"], measures, issues, eff["assigned"] if eff else {}, cfg["owners"])
+    plan_path = data / "docs/closeout-plan.md"
+    plan_text = plan_path.read_text(encoding="utf-8") if plan_path.exists() else ""
+    decisions = status_page.open_decisions(plan_text, cfg["goLive"][:7])
+    if eff:
+        del eff["assigned"]
+        eff["fetched"] = snap["fetched"]
+        eff["daysSinceFirst"] = (now.date() - dt.date.fromisoformat(eff["firstIssue"])).days
+    return {
+        "asOf": now.strftime("%Y-%m-%d %H:%M"),
+        "asOfText": f"{now.day} {now.strftime('%b %Y, %H:%M')}"
+                    + (f" (Jira as of {status_page.day_text(snap['fetched'])})" if snap else " (no Jira snapshot)"),
+        "sources": {"versions": _modified(data / "config/versions.csv"), "checks": _modified(issues_path),
+                    "areas": _modified(areas_path), "plan": _modified(plan_path),
+                    "jira": snap["fetched"] if snap else ""},
+        "headline": head,
+        "areas": rows,
+        "effort": eff,
+        "decisions": decisions,
+        "pending": status_page.pending_by_team(rows, decisions, kind_summary),
+        "kinds": kind_summary,
+    }
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "reports/conversion-status.html")
+    parser.add_argument("--md-out", type=Path, default=ROOT / "reports/status-latest.md")
     parser.add_argument("--jira", type=Path, default=ROOT / "reports/jira/docops-snapshot.json")
+    parser.add_argument("--areas", type=Path, default=ROOT / "config/status-areas.yaml")
+    parser.add_argument("--data-root", type=Path, default=ROOT,
+                        help="checkout to read config/, cache/, reports/verify/ and docs/ from")
     args = parser.parse_args()
-    data = build(args.jira)
+    data = build(args.jira, args.data_root)
+    stand = where_we_stand(args.data_root, args.areas, args.jira, dt.datetime.now())
+    data["stand"] = stand
     template = (ROOT / "scratch/conversion_status_template.html").read_text(encoding="utf-8")
     page = template.replace("/*__DATA__*/null", json.dumps(data, separators=(",", ":"), ensure_ascii=False))
     args.out.write_text(page, encoding="utf-8")
+    args.md_out.write_text(status_page.render_markdown(stand), encoding="utf-8")
     steps = collections.Counter(r[2] for r in data["rows"] if r[2])
     attention = sum(1 for r in data["rows"] if r[3])
+    t = stand["headline"]["total"]
     print(f"wrote {args.out}  {dict(steps)}  needs attention: {attention}"
           f"  jira: {'snapshot ' + data['jira']['fetched'] if data['jira'] else 'no snapshot'}")
+    print(f"wrote {args.md_out}  in migration {t['inMig']}, converted {t['converted']}, "
+          f"in repositories {t['published']}, checked on staging {t['staging']}")
 
 
 if __name__ == "__main__":
