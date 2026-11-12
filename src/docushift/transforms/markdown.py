@@ -24,6 +24,11 @@ Two rules in here are corpus-measured rather than conventional:
   well -- the obvious wider net -- would put a backslash inside every
   `MY_ENV_VAR` in a corpus whose subject matter is configuration files, and GFM
   gives no intra-word emphasis to `_` anyway.
+- **`<` is written `&lt;`, not `\\<`** (DOCOPS-360). Both are GFM, but AEM shows
+  `\\<host>` as `\\&lt;host>` in paragraphs, list items and headings alike (FTL
+  7.1.1 on staging, 2026-11-12; DOCOPS-353), and only a real tag name such as
+  `\\<br>` survives. An entity reads the same on GitHub and on AEM. A `&` that
+  would itself read as an entity (`&lt;` written as text) becomes `&amp;`.
 """
 
 import re
@@ -93,7 +98,10 @@ _UNRENDERED = frozenset({"iframe", "video", "audio", "object", "embed", "svg", "
 _NUMBERING = frozenset({"a", "A", "i", "I"})
 
 _WHITESPACE = re.compile(r"\s+")
-_ESCAPES = re.compile(r"([\\`*\[\]<])")
+_ESCAPES = re.compile(r"([\\`*\[\]])")
+# A `&` that starts an entity reference: in the text it is a character, and left
+# alone `&lt;` would render `<` (and `escape`'s own `&lt;` could not be told apart).
+_ENTITY_AMP = re.compile(r"&(?=#[0-9]+;|#[xX][0-9a-fA-F]+;|[A-Za-z][A-Za-z0-9]*;)")
 # Only what would start a *block* if it led a line. Applied per line, after the
 # inline run is assembled, because that is the only point at which "leads a line"
 # is a fact rather than a guess.
@@ -131,8 +139,13 @@ def is_text(node: object) -> bool:
 
 
 def escape(text: str) -> str:
-    """Escapes the inline metacharacters, and nothing else."""
-    return _ESCAPES.sub(r"\\\1", text)
+    """Escapes the inline metacharacters, and nothing else.
+
+    `<` becomes `&lt;` rather than `\\<`, which AEM does not honour (DOCOPS-360);
+    the `&` of an entity-shaped run goes first, so the two cannot be confused.
+    """
+    text = _ENTITY_AMP.sub("&amp;", text)
+    return _ESCAPES.sub(r"\\\1", text).replace("<", "&lt;")
 
 
 def escape_leading(text: str) -> str:

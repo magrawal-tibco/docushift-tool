@@ -32,6 +32,7 @@ removes one.
 
 from __future__ import annotations
 
+import html
 import re
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -233,7 +234,9 @@ def own_heading(body: str, title: str = "",
 def _same(heading: str, title: str) -> bool:
     """Equal once case, punctuation and spacing are set aside."""
     def bare(text: str) -> str:
-        return " ".join(re.sub(r"[^0-9a-z]+", " ", text.lower()).split())
+        # Entities first: a heading writes `<` as `&lt;` (DOCOPS-360), whose letters
+        # would otherwise read as a word the title does not have.
+        return " ".join(re.sub(r"[^0-9a-z]+", " ", html.unescape(text).lower()).split())
     return bool(bare(title)) and bare(heading) == bare(title)
 
 

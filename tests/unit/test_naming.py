@@ -173,6 +173,15 @@ def test_an_anchor_is_slugged_from_the_text_the_heading_renders() -> None:
     assert slugify_heading(r"Use \*args and MY\_VAR") == "use-args-and-my_var"
 
 
+def test_an_entity_bracket_in_a_heading_slugs_as_the_escaped_one_did() -> None:
+    """The converter writes `<` as `&lt;` since DOCOPS-360; the anchor it predicts
+    must not move, or every fragment pointing at the heading breaks."""
+    assert slugify_heading("GET clusters/&lt;clus_name>") == slugify_heading(r"GET clusters/\<clus_name>")
+    assert slugify_heading("GET clusters/&lt;clus_name>") == "get-clustersclus_name"
+    # Text that reads "&lt;" on the page slugs as that text.
+    assert slugify_heading("Write &amp;lt; here") == "write-lt-here"
+
+
 def test_a_repeated_heading_is_numbered_from_the_second_occurrence() -> None:
     """First bare, then `-1`, `-2`: the platform's rule, and the reason the suffix
     is positional and moves when a section is inserted above."""

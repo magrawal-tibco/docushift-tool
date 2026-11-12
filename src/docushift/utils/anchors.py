@@ -24,6 +24,7 @@ published anchor. Nothing here can prevent that; the fix, where it matters, is a
 writer making the headings distinct.
 """
 
+import html
 import re
 import unicodedata
 from collections.abc import Iterable
@@ -73,7 +74,9 @@ def slugify_heading(title: str) -> str:
     when a test written against the sentence failed against the function.)
     """
     text = _LINK.sub(r"\1", _IMAGE.sub("", title))
-    text = _ESCAPE.sub(r"\1", _TAG.sub("", text))
+    # An entity renders as its character, after the tags are gone: `&lt;clus_name>`
+    # is the text "<clus_name>", slugged exactly as `\<clus_name>` was (DOCOPS-360).
+    text = html.unescape(_ESCAPE.sub(r"\1", _TAG.sub("", text)))
     text = _INLINE_MARKUP.sub("", text)
     text = unicodedata.normalize("NFKD", text).strip().lower()
     text = _DROP.sub("", text)

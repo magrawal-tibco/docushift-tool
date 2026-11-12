@@ -1795,6 +1795,13 @@ def test_an_opening_section_named_like_the_toc_row_is_the_title_and_later_ones_n
     assert own_heading(body, "Something Else") is None
 
 
+def test_an_opening_section_with_an_entity_bracket_is_still_the_title():
+    """The converter writes `<` as `&lt;` (DOCOPS-360); `lt` is not a word of the title."""
+    body = "## GET clusters/&lt;clus_name>\n\ntext\n\n## Response\n"
+
+    assert own_heading(body, "GET clusters/<clus_name>") == 0
+
+
 def test_a_heading_deeper_than_a_later_one_is_not_the_title():
     body = "### Note\n\nprose\n\n## Real Section\n"
 

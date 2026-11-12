@@ -942,6 +942,16 @@ def test_escaped_markdown_and_a_run_together_label_are_not_dropped_text() -> Non
     assert texts.coverage(source, page).missing == []
 
 
+def test_a_bracket_written_as_an_entity_is_not_dropped_text() -> None:
+    """The converter writes `<` as `&lt;` since DOCOPS-360, `<br>` included."""
+    source = texts.Text(["Click Start > TIBCO BusinessEvents <version_number> > Studio.",
+                         "Use the <br> code to insert line breaks in the string."])
+    page = texts.markdown_text("Click **Start > TIBCO BusinessEvents &lt;version_number> > Studio**.\n\n"
+                               "Use the &lt;br> code to insert line breaks in the string.\n")
+
+    assert texts.coverage(source, page).missing == []
+
+
 def test_a_heading_only_parent_given_a_page_is_the_same_parent() -> None:
     """Phase 63 gives a heading-only TOC row a generated page; its children did not move."""
     old = root([Node("Guide", None, [Node("One", "one.md"), Node("Two", "two.md")])])

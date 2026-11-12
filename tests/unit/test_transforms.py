@@ -634,7 +634,55 @@ def test_markup_inside_a_cdata_section_stays_text() -> None:
     Only the `<` is escaped: a bare `>` mid-line starts nothing, and one that leads
     a line is `escape_leading`'s to catch.
     """
-    assert render("<p><![CDATA[<b>literal</b>]]></p>") == r"\<b>literal\</b>"
+    assert render("<p><![CDATA[<b>literal</b>]]></p>") == "&lt;b>literal&lt;/b>"
+
+
+# -- angle brackets in text (DOCOPS-360) ----------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("source", "expected"),
+    [
+        # Prose: a placeholder, and a tag named in a sentence.
+        ("<p>Run TIBCO &lt;version_number&gt; now.</p>", "Run TIBCO &lt;version_number> now."),
+        ("<p>Use the &lt;br&gt; code.</p>", "Use the &lt;br> code."),
+        # A list item, and an item that opens on the placeholder.
+        ("<ul><li>&lt;host&gt;:&lt;port&gt; is the server.</li></ul>", "- &lt;host>:&lt;port> is the server."),
+        # Emphasis and link text.
+        ("<p><b>&lt;clus_name&gt;</b> and <a href='x.htm'>GET &lt;id&gt;</a></p>",
+         "**&lt;clus_name>** and [GET &lt;id>](x.htm)"),
+        # A heading.
+        ("<h2>GET clusters/&lt;clus_name&gt;</h2>", "## GET clusters/&lt;clus_name>"),
+        # Text that would read as an entity keeps its `&`; any other `&` is left alone.
+        ("<p>Write &amp;lt; for a bracket.</p>", "Write &amp;lt; for a bracket."),
+        ("<p>R&amp;D and a &amp; b; c</p>", "R&D and a & b; c"),
+    ],
+)
+def test_angle_brackets_in_text_are_entities(source: str, expected: str) -> None:
+    """AEM shows `\\<host>` as `\\&lt;host>`; `&lt;` reads right there and on GitHub."""
+    assert render(source) == expected
+
+
+def test_angle_brackets_in_a_table_cell_and_an_alt_are_entities() -> None:
+    table = render("<table><tr><th>Name</th></tr><tr><td>&lt;svc_name&gt;</td></tr></table>")
+    assert "| &lt;svc_name> |" in table
+
+    class Images(markdown.Renderer):
+        def image(self, tag):
+            return "a.png"
+
+    assert render("<p><img src='a.png' alt='the &lt;x&gt; view'></p>", Images()) == "![the &lt;x> view](a.png)"
+
+
+def test_angle_brackets_in_code_are_left_literal() -> None:
+    """Inside backticks or a fence an entity is literal text, so `<` stays `<`."""
+    assert render("<p><code>&lt;TIBCO_HOME&gt;/bin</code></p>") == "`<TIBCO_HOME>/bin`"
+    assert render("<pre>&lt;a href='x'&gt;</pre>") == "```\n<a href='x'>\n```"
+
+
+def test_the_markup_the_walk_means_to_write_is_not_escaped() -> None:
+    """An anchor target and `sub` are HTML on purpose; only the text is escaped."""
+    assert render("<p><a name='T1'></a>H<sub>2</sub>O &lt;x&gt;</p>") == '<a id="T1"></a>H<sub>2</sub>O &lt;x>'
 
 
 def test_a_comment_is_not_prose() -> None:

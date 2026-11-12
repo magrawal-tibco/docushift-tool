@@ -254,6 +254,7 @@ class FlareRenderer(markdown.Renderer):
         sits under the topic's `h1` and would compete with the topic's own
         sections in the page outline.
         """
+        label = markdown.escape(label)
         blocks = self._block(tag)
         if not blocks:
             return f"**{label}**"
@@ -288,7 +289,9 @@ class FlareRenderer(markdown.Renderer):
             return None
         classes = _classes(tag)
         if "menucascade" in classes:
-            return markdown.wrap(" ".join(tag.get_text(" ").split()), "**")
+            # Escaped like any other text: `Start > TIBCO <version_number>` went out
+            # raw, and the placeholder read as a tag (DOCOPS-360).
+            return markdown.wrap(markdown.escape(" ".join(tag.get_text(" ").split())), "**")
         if "autonumber" in classes:
             # The label the skin draws from `data-mc-autonum`, already in the DOM.
             # Recovered from the attribute by `_labelled`, so leaving it here emits

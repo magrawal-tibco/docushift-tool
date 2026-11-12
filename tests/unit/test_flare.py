@@ -837,6 +837,18 @@ def test_a_task_label_runs_in_before_prose_and_stands_alone_before_a_list(
     assert "**Procedure**\n\n1. Open the console." in body
 
 
+def test_an_autonum_label_is_escaped_like_text(tmp_path: Path) -> None:
+    """The label is text the skin drew, and was the one text written unescaped
+    beside the menu cascade (DOCOPS-360). (A `<` in it is gone already: the
+    attribute is parsed as markup by `autonum_label`.)"""
+    files = basic()
+    files["html/Content/intro.htm"] = topic(
+        "Introduction", "<p data-mc-autonum='Step [*]: '>Open the console.</p>",
+    )
+
+    assert r"**Step \[\*\]:** Open the console." in run(tmp_path, files).body("Content/intro.md")
+
+
 def test_the_rendered_autonumber_span_is_dropped_so_the_label_is_not_doubled(
     tmp_path: Path,
 ) -> None:
@@ -862,6 +874,11 @@ def test_the_rendered_autonumber_span_is_dropped_so_the_label_is_not_doubled(
         ("<span class='filepath'>/etc/hosts</span>", "`/etc/hosts`"),
         ("<span class='varname'>name</span>", "*name*"),
         ("<span class='menucascade'>File &gt; Save</span>", "**File > Save**"),
+        # BusinessEvents' Start-menu paths: the placeholder was written raw and read
+        # as a tag (DOCOPS-360).
+        ("<span class='menucascade'><span class='uicontrol'>TIBCO &gt; </span>"
+         "<span class='uicontrol'>BusinessEvents <span class='varname'>&lt;version_number&gt;</span></span></span>",
+         "**TIBCO > BusinessEvents &lt;version_number>**"),
         ("<code class='CodeItalic'>value</code>", "*value*"),
     ],
 )
