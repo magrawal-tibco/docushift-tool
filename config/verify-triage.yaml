@@ -201,6 +201,14 @@ triage:
     version: "2.1.0"
     reason: The readme was updated on docs.tibco.com after we published it. Re-sync.
 
+  - code: VERIFY_TOC_LOST
+    decision: logged
+    ticket: DOCOPS-365
+    slug: "tibco-activematrix-businessworks-plug-in-for-*sap-*"
+    reason: >-
+      The whole old menu sits under unfiled/ (converted with an empty toc.yml);
+      raised once the DOCOPS-366 check is merged. Re-convert and re-publish.
+
   # NEW-B: verify false findings. Delete these once NEW-B is fixed and the versions re-run.
   - code: VERIFY_TOC_ENTRY_MISSING
     decision: logged
