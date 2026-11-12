@@ -9,27 +9,23 @@
 
 *Rewritten each morning. Never more than three decisions.*
 
-**Thu 12 Nov.** Plan agreed (D1–D4 answered).
+**Fri 13 Nov (written 02:15).**
 
-- **Batches 1 and 1b are done** (BW plug-ins, newest versions). The 184 deleted packages were downloaded again from the old site and unpacked.
-- **BW plug-in results:** 75 of 253 published versions checked: 63 with findings not yet triaged, 7 logged, 3 with warnings, 2 clean. 178 older versions stay for Stage 3. 4 were skipped, on Karan's remove list or never downloaded.
-- **Problem kinds:** 11 not yet in Jira. They go to Friday's triage.
-- **Karan's list:** received (§6) and final for 1,166 Integration versions: 27 to add and 80 to remove, both in R2 before go-live. DOCOPS-364 created.
-- **Using the free afternoon (user, 12 Nov):**
-  - **Batch 1c is done** (14:58).
-    - EMS 10.4.0 now reads `logged`, so its parking-lot item is closed.
-    - Statistica newest: 9 have unsorted findings and 2 are clean.
-    - Statistica's main product reports about 14,000 of 14,250 old pages missing, and its menu entries missing too. That is the same pattern as Spotfire Data Virtualization's. It is either a real loss or the checker misreading Spotfire's help, and it goes to triage on Fri 13. Not chased today.
-  - Four fix agents are building fixes, each on its own branch, for 343, 362 and 363 together, 349, 354 and 360. All six issues are In Progress.
-  - **Triage of the BW plug-in wave is done.**
-    - All 67 `lost` versions now read `logged`; TIBCO stands at 106 checked, every one logged or clean.
-    - **Go-live blocker, Digital Platform:** 61 of the 73 newest BW plug-in versions are not served on staging at all (404), although they are on `wip`. Kafka 6.8.2 was checked by hand against AMQP 6.5.3, which is served. DOCOPS-346 is widened and marked Critical.
-    - New kinds, both ours: DOCOPS-365 (3 SAP plug-in versions published with an empty menu, 6 with no package documents) and DOCOPS-366 (checker false findings; fixer running, aiming to finish before Friday night's batch).
-    - BE 6.3.2 is a variant of DOCOPS-351.
-    - The UAT sheet rows are ready: `reports/uat-sheet-rows-2026-11-12.csv` (4 rows: BW not served, Critical; empty pages; pages under heading rows; the BE variant).
-  - Nothing gets merged or applied. The fixes wait for D5 on Mon 16.
+- **Decided:** Phase 78 approved (EMS 10.5.1 pages by menu depth; build Mon 16, out with R2). UAT rows pasted.
+- **K1 done:** Karan's decision is in the catalog for all 1,166 versions, each checked afterwards (DOCOPS-364).
+- **R1 is paused after 2 of 5 groups.** Groups 1 (Scribe, Messaging, Cloud, Hawk, ActiveSpaces) and 2 (Adapters, Mainframe, Platform, BusinessEvents) are on `wip`.
+  - Cloud showed on staging within minutes.
+  - Group 2 is still not rebuilt after 80 minutes: Control Plane 1.18.0 still shows 203 notes without a label.
+  - The remaining groups wait until staging catches up; if it has not by the morning, Digital Platform is asked about the build queue.
+  - Not yet merged:
+    - TIBCO medium: General, FTL, TRA, Foresight, Flogo, BusinessWorks, iProcess, BusinessConnect;
+    - TIBCO large, one at a time: Fulfillment, Data Management, MFT, BPM;
+    - ibi: 7 repos.
+- **Tonight (the batch is running):** K3 downloads and unpacks Karan's 27 additions, then Statistica is re-checked with the fixed checker. **Batch 2 (TIBCO newest) and Batch 3 (ibi newest) move to after R1 is visible on staging**, so they do not check stale pages.
+- **Built and merged today:**
+  - the status page (`reports/conversion-status.html`, `reports/status-latest.md`);
+  - two more checker fixes (DOCOPS-366: Statistica's 14,025 false "missing" pages are now 1 real gap).
 
-**Friday morning, from you:** sign in; paste the 4 UAT rows, and flag the BW plug-in row to Digital Platform as Critical; say yes or no to the one-page `&lt;` test riding R1 (DOCOPS-360); and say yes or no to merging the checker fix (DOCOPS-366) before Friday night's batch.
 
 ---
 
