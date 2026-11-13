@@ -11,6 +11,11 @@
 
 **Fri 13 Nov (written 02:15).**
 
+- **Update 11:20:** staging rebuilt groups 1–2 sometime between 03:20 and 11:20 (Control Plane now shows its "Note:" labels). So rebuilds take hours or follow a schedule; the question to Digital Platform still stands. **R1 resumed:** group 3 (General, FTL, Foresight, Flogo) is on `wip` at 11:21. Next groups follow once group 3 shows; TRA and BusinessWorks are pushed only up to before their K2 commits.
+- **Pulled forward from Mon–Tue (user, 13 Nov: use the free time):**
+  - **K2:** Karan's 80 removals are on `content-fix`, one commit per product.
+  - **Batch running (110 steps):** re-conversion for 349 and 343/362/363 (EMS, BE 6.3.2 and 6.4.0, ibi FOCUS and WebFOCUS Client 9.3.x, WFC 9.3.5 translations), K3 conversion of the 27 additions, and the Δ1 test refresh. Nothing is synced until page lists are compared with the published ones.
+  - **Phase 78:** build started.
 - **Decided:** Phase 78 approved (EMS 10.5.1 pages by menu depth; build Mon 16, out with R2). UAT rows pasted.
 - **K1 done:** Karan's decision is in the catalog for all 1,166 versions, each checked afterwards (DOCOPS-364).
 - **R1 is paused after 2 of 5 groups.** Groups 1 (Scribe, Messaging, Cloud, Hawk, ActiveSpaces) and 2 (Adapters, Mainframe, Platform, BusinessEvents) are on `wip`.
