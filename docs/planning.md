@@ -3015,7 +3015,7 @@ name.
 
 ---
 
-### Phase 78: Pages by Menu Depth: EMS 10.5.1 First — **Planned 2026-11-13; waiting for approval; DOCOPS-367**
+### Phase 78: Pages by Menu Depth: EMS 10.5.1 First — **Built 2026-11-13; apply pending; DOCOPS-367**
 
 **Why.** Today's packing (R1) fills pages up to 3,000 words with runs of consecutive siblings. On 432 merged TIBCO versions, 40% of pages hold only some of a parent's children. EMS 10.5.1's 17 destination properties, for example, are split 10 + 7 across two pages. "All-or-nothing" sibling merging was measured and rejected: pages more than double (`reports/reframe-rule-2026-11-12/`).
 
@@ -3076,6 +3076,15 @@ The user's alternative: for selected products, **no word cap**. Each guide or ch
    - out with R2, then `verify` on staging in Batch 4.
 
 *Exit: EMS 10.5.1 published in the new layout and verified on staging; every other version's merged tree byte-identical to before; the suite and `ruff` pass.*
+
+**As built (2026-11-13, steps 1–5; branch `feat/phase78-depth`).**
+
+- **Policy.** `ReframePolicy.depth` (unscoped) and `depth_in` (scoped), `(guide, chapter, depth)` triples read from the product block only. `for_version` folds the scoped ones in, as Phase 76 does for `keep_separate_in`; both drop out of the digest when empty, so no existing key moves. An entry with no guide, a depth below 1 or an empty `versions:` is dropped.
+- **Packer.** `pack(..., depth=)`; `depth_nodes` resolves entries to TOC nodes on exact titles. A named node goes to `_by_depth`: depth 1 = the whole subtree through `_collect` with no cap; deeper = the node alone, each child at one less (a child's own entry wins). `_collect` refuses a subtree containing a named node, so no ancestor swallows it, and R1's sibling loop never runs a named chapter together with its neighbours. A subtree spanning two directories, or holding a `keep_separate` topic, goes one level deeper (R4.2, 20e).
+- **Driver.** `REFRAME_DEPTH_UNMATCHED` (error) before layout: the version fails and its last merge stays. The reference-layout cache key gains `policy.depth`.
+- **Config.** 44 entries for EMS 10.5.1: Installation whole; 12 User Guide chapters at depth 2, Configuration Files at 3, the other 13 whole; 5 C chapters at 2, the other 12 whole. Two titles carry odd characters and are escaped in YAML: `REST\u00a0Proxy`, `XA\u2014External Transaction Manager`. All 44 match the converted 10.5.1 TOC; none apply to another version.
+- **Measured (read-only, in-process, and a standalone run into `C:/tmp`):** EMS 10.5.1 **217 pages** (159 today): Installation 1, User Guide 150, C and COBOL Reference 61, five other top-level pages. Every chapter's count equals `levels.py`'s prototype at the chosen depth; the plan's ~149 and ~60 leave out the two guides' own landing pages (114 and 49 words, pages today too), and the remaining one-page gap to 214 is among the top-level pages, not in any chapter. Median 516 words. Five pages over 5,000: command listing 11,698, `tibemsMsg` 7,851, FTL Stores' "Configuring and Deploying" 6,439, `tibemsConnectionFactory` 5,590, REST configuration reference 5,013. No page spans two directories; no R4.2 split happened. The standalone merge passed its self-check; 46 rows of 10.5.1's `rename-map.csv` no longer lead a page (their URLs need redirect rows at apply time).
+- **10.4.4 unchanged:** its projected layout (158 pages, every topic, level and name) and its policy key are identical to the current code's.
 
 ---
 
@@ -3780,6 +3789,7 @@ The concrete deliverable of §7.1: every deferred "report line" in the three doc
 | `SYNC_MERGE_UNAVAILABLE`²⁰ᵈ | warn | sync | A product set to publish merged has no current reframed tree; it publishes nothing rather than falling back | §20d |
 | `REDIRECT_SHADOWED`²⁰ᵈ | warn | validate | A redirect whose source path still exists in the published tree; a 301 loop where the two differ only in case | `REFRAME-REQUIREMENTS.md` R5 |
 | `REFRAME_KEEP_SEPARATE_UNMATCHED`²⁰ᵉ | warn | reframe | A `keep_separate` path matches no topic in this version; the merge a writer meant to undo still happened | §20e |
+| `REFRAME_DEPTH_UNMATCHED`⁷⁸ | error | reframe | A `depth:` entry names no guide or chapter in this version's TOC; the version is not merged and its last merge stays | Phase 78 |
 | `ORIGIN_TEMPLATE_UNDECLARED`²² | warn | convert ³⁵ | No verified docsite URL template for this product, so no `301.yml` was written; a guessed origin URL redirects to a page that never existed | Phase 22 |
 | `ORIGIN_SITEMAP_MISSING`³³ | warn | convert ³⁵ | No Coveo sitemap page list for this version and no declared template, so no `301.yml` was written | Phase 33 |
 | `ORIGIN_URL_UNLISTED`³³ | note | convert ³⁵ | Converted topics whose origin URL the docsite sitemap does not list; a derived row is withheld rather than written unproven | Phase 33 |

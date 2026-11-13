@@ -112,6 +112,23 @@ topic→page mapping, with topics absent from a given version simply omitted.
 > versions produce non-corresponding files, and porting a fix across versions stops being a
 > clean diff — permanently, since these trees are hand-authored from then on.
 
+**R1.5 — Menu-depth entries override the parent-leads rule, per guide or chapter.** A product
+may name a guide (a top-level TOC title) or a chapter (a direct child of one) with a **depth**
+N, optionally scoped to versions. That node is laid out by depth instead of by the rule above:
+at depth 1 its whole subtree is one page; deeper, the node is a page of its own body and each
+child is laid out at N − 1. So every entry at the chosen depth is one page holding everything
+below it, and a page never holds only some of a parent's children. MAX_WORDS does not apply
+inside an entry; R1.1, R1.3 and R4.2 do (a subtree spanning two directories is laid out one
+level further down), and so does a writer's `keep_separate`. An entry's node is never run
+together with a sibling. Titles match exactly; an entry naming no node refuses the version's
+merge (`REFRAME_DEPTH_UNMATCHED`). Under R1.4 the reference is laid out with the projecting
+version's own entries, so entries scoped to the reference alone do not move an older version.
+
+> **Amended 13 Nov 2026 (planning.md Phase 78).** Sibling runs left 40% of merged TIBCO pages
+> holding only some of a parent's children (EMS 10.5.1's 17 destination properties split
+> 10 + 7). "All-or-nothing" sibling merging more than doubled the pages, so depth is chosen by
+> judgement per chapter instead. First applied to EMS 10.5.1 only: 217 pages against 159.
+
 ### R2 — Anchors
 
 Every former topic becomes an anchored heading on its merged page, at the level its place

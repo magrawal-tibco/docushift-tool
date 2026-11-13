@@ -414,6 +414,13 @@ REGISTRY: dict[str, Code] = _codes(
     Code("REFRAME_KEEP_SEPARATE_UNMATCHED", Severity.WARNING, Stage.REFRAME,
          "A keep_separate path in reframe.yaml matches no topic in this version",
          "planning.md §20e"),
+    # Phase 78. An error where the row above is a warning: a `depth:` entry is a
+    # layout chosen by judgement, and a mistyped title falling back to R1 would
+    # publish a layout nobody chose. The version is refused; its last merge stays.
+    Code("REFRAME_DEPTH_UNMATCHED", Severity.ERROR, Stage.REFRAME,
+         "A depth entry in reframe.yaml names no guide or chapter in this version's "
+         "TOC, so the version was not merged",
+         "planning.md Phase 78"),
     # Requirements §6: "Reframe must self-validate and fail the stage if any check
     # fails." One row per failed check, because the eight checks fail for eight
     # unrelated reasons and a single "the audit failed" row would send a reader
