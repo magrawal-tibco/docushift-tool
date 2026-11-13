@@ -19,7 +19,9 @@ from bs4 import Tag
 
 SKIN_DIRECTORIES = frozenset({"skins"})
 
-_MD_IMAGE = re.compile(r"!\[(?P<alt>[^\]]*)\]\((?P<src><[^>]*>|[^)\s]+)(?:\s+\"[^\"]*\")?\)")
+#: The alt may hold escaped brackets: `![\[Animated Cauchy Distribution\]](an-cauchy.gif)`
+#: (DOCOPS-366, Statistica 14.4.0: 12 pictures on one page read as missing).
+_MD_IMAGE = re.compile(r"!\[(?P<alt>(?:\\.|[^\]\\])*)\]\((?P<src><[^>]*>|[^)\s]+)(?:\s+\"[^\"]*\")?\)")
 _HTML_IMG = re.compile(r"<img\b[^>]*\bsrc\s*=\s*[\"'](?P<src>[^\"']+)[\"'][^>]*>", re.IGNORECASE)
 _HTML_ALT = re.compile(r"\balt\s*=\s*[\"'](?P<alt>[^\"']*)[\"']", re.IGNORECASE)
 

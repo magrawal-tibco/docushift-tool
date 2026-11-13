@@ -243,7 +243,8 @@ def html_text(html: str, selector: str, drop: tuple[str, ...] = ()) -> Text | No
 # -- Markdown -----------------------------------------------------------------
 
 _FRONTMATTER = re.compile(r"\A---\r?\n.*?\r?\n---\r?\n", re.DOTALL)
-_IMAGE = re.compile(r"!\[[^\]]*\]\([^)]*\)")
+#: The alt may hold escaped brackets, `![\[Animated Cauchy\]](a.gif)` (DOCOPS-366).
+_IMAGE = re.compile(r"!\[(?:\\.|[^\]\\])*\]\([^)]*\)")
 # Not from an escaped `\[`: a DocBook footnote marker is `\[<a id="…"></a>[1](#x)\]`,
 # and a link taken from the escaped bracket left the `<a>` tag behind as words
 # (Phase 58, step 8).

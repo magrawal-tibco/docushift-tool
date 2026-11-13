@@ -120,6 +120,23 @@ def test_skin_pictures_are_chrome_and_a_dropped_picture_is_missing(tmp_path: Pat
     assert [p.src for p in images.missing(found, images.PageImages())] == ["Resources/shot.png"]
 
 
+def test_an_image_whose_alt_has_escaped_brackets_is_on_the_page(tmp_path: Path) -> None:
+    """DOCOPS-366, Statistica 14.4.0: `![\\[Animated Cauchy Distribution\\]](an-cauchy.gif)`
+    was not read as an image, so 12 published pictures read as missing."""
+    _png(tmp_path / "src/an-cauchy.gif", b"cauchy")
+    _png(tmp_path / "out/an-cauchy.gif", b"cauchy")
+    soup = BeautifulSoup("<div><img src='an-cauchy.gif' alt='[Animated Cauchy Distribution]'></div>",
+                         "html.parser")
+    page = r"See the curve: ![\[Animated Cauchy Distribution\]](an-cauchy.gif) below."
+
+    found = images.html_images(soup.div, tmp_path / "src/topic.htm")
+    held = images.markdown_images(page, tmp_path / "out/topic.md")
+
+    assert [p.alt for p in held.pictures] == [r"\[Animated Cauchy Distribution\]"]
+    assert images.missing(found, held) == []
+    assert texts.markdown_text(page).blocks == ["See the curve: below."]
+
+
 # -- TOC ------------------------------------------------------------------------
 
 
