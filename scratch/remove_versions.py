@@ -26,6 +26,25 @@ TARGETS = [
     ("en-us-tib-mainframe-userdocs", "tibco-mainframe-red", "2.5.1"),
 ]
 
+# `--from-csv <file>`: take the targets from a change list with `action,family,slug,version` columns
+# (rows whose action starts with "remove"), e.g. reports/karan-decision-changes-2026-11-12.csv
+# (DOCOPS-364, K2). The repo is the one whose en-us/ holds the product.
+if "--from-csv" in sys.argv:
+    import csv
+
+    _csv = sys.argv[sys.argv.index("--from-csv") + 1]
+    _repos = [d for d in os.listdir(TREE) if os.path.isdir(os.path.join(TREE, d, "en-us"))]
+    TARGETS = []
+    with open(_csv, encoding="utf-8") as _fh:
+        for _row in csv.DictReader(_fh):
+            if not _row["action"].startswith("remove"):
+                continue
+            _hits = [r for r in _repos if os.path.isdir(os.path.join(TREE, r, "en-us", _row["slug"]))]
+            if not _hits:
+                print("  not published in any repo:", _row["slug"], _row["version"])
+            for _repo in _hits:  # the content repo and its -resources repo
+                TARGETS.append((_repo, _row["slug"], _row["version"]))
+
 
 def drop_rows(path, pred):
     """Remove YAML list items (`- ` blocks) for which pred(block_text) is true."""
