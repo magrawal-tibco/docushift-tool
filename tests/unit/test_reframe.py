@@ -813,8 +813,10 @@ def test_the_loader_knows_every_field_the_policy_has():
     from docushift.config import REFRAME_DEFAULTS
 
     # `keep_separate_in` is not a key of its own: it is read out of
-    # `keep_separate`'s `{path, versions}` entries (Phase 76).
-    assert set(REFRAME_DEFAULTS) == {f.name for f in fields(ReframePolicy)} - {"keep_separate_in"}
+    # `keep_separate`'s `{path, versions}` entries (Phase 76); `depth_in` likewise
+    # out of `depth`'s (Phase 78).
+    assert set(REFRAME_DEFAULTS) == ({f.name for f in fields(ReframePolicy)}
+                                     - {"keep_separate_in", "depth_in"})
 
 
 def test_a_keep_separate_entry_can_name_its_versions(config):
@@ -4142,7 +4144,7 @@ def test_no_guide_names_leaves_every_existing_digest_unchanged():
     before = {"algorithm": policy_module._ALGORITHM,
               **{k: v for k, v in asdict(plain).items()
                  if k not in {"publish", "toc_folders", "merge", "guide_names",
-                               "keep_separate_in"}}}
+                               "keep_separate_in", "depth", "depth_in"}}}
     payload = json.dumps(before, sort_keys=True, separators=(",", ":"))
 
     assert plain.key == hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16]
@@ -4223,3 +4225,305 @@ def test_a_merged_section_anchor_keeps_the_code_in_its_heading(tmp_path):
         "using-the-arrayforeach-function": "using-the-arrayforeach-function",
         "run-configurationmgmtpy": "run-configurationmgmtpy",
     }
+
+
+# -- Phase 78: pages by menu depth ------------------------------------------------
+#
+# A `depth:` entry lays one guide or chapter out by menu depth with no word cap; R1
+# keeps everything else. The packer tests use sizes that make R1 and the depth rule
+# disagree, so a test passing under R1 alone would prove nothing.
+
+
+def chapters():
+    """A guide of two chapters. `Messages` has two sections, one with a subsection;
+    every topic is small, so R1 would make the whole guide one page."""
+    return [node("Guide", "g/guide.md",
+                 node("Messages", "g/messages.md",
+                      node("Priority", "g/priority.md"),
+                      node("Selectors", "g/selectors.md", node("Identifiers", "g/identifiers.md"))),
+                 node("Destinations", "g/destinations.md", node("Wildcards", "g/wildcards.md")))]
+
+
+SMALL = sized(g__guide=10, g__messages=10, g__priority=10, g__selectors=10, g__identifiers=10,
+              g__destinations=10, g__wildcards=10)
+
+
+def test_no_depth_entry_changes_no_boundary():
+    assert layout(pack(chapters(), SMALL, 3000, (), ())) == layout(pack(chapters(), SMALL, 3000))
+    assert len(pack(chapters(), SMALL, 3000)) == 1
+
+
+def test_a_chapter_at_depth_1_is_one_page_and_never_run_with_a_sibling():
+    """Over the cap and still one page; and its small sibling, which R1 would have
+    run together with it, keeps R1's layout on a page of its own."""
+    words = sized(g__guide=10, g__messages=4000, g__priority=10, g__selectors=10,
+                  g__identifiers=10, g__destinations=10, g__wildcards=10)
+
+    pages = pack(chapters(), words, 3000, depth=[("Guide", "Messages", 1)])
+
+    assert layout(pages) == [
+        ["g/guide.md"],
+        ["g/messages.md", "g/priority.md", "g/selectors.md", "g/identifiers.md"],
+        ["g/destinations.md", "g/wildcards.md"],
+    ]
+    assert [topic.level for topic in pages[1].topics] == [1, 2, 2, 3]
+
+
+def test_a_chapter_at_depth_2_is_its_own_page_then_one_page_per_section():
+    pages = pack(chapters(), SMALL, 3000, depth=[("Guide", "Messages", 2)])
+
+    assert layout(pages) == [
+        ["g/guide.md"],
+        ["g/messages.md"],
+        ["g/priority.md"],
+        ["g/selectors.md", "g/identifiers.md"],
+        ["g/destinations.md", "g/wildcards.md"],
+    ]
+    assert [topic.level for topic in pages[3].topics] == [1, 2]
+
+
+def test_a_chapter_at_depth_3_is_one_page_per_subsection():
+    pages = pack(chapters(), SMALL, 3000, depth=[("Guide", "Messages", 3)])
+
+    assert layout(pages) == [
+        ["g/guide.md"],
+        ["g/messages.md"],
+        ["g/priority.md"],
+        ["g/selectors.md"],
+        ["g/identifiers.md"],
+        ["g/destinations.md", "g/wildcards.md"],
+    ]
+
+
+def test_a_whole_guide_at_depth_1_is_one_page():
+    """Installation: one page, as today, whatever its size."""
+    words = sized(g__guide=3000, g__messages=10, g__priority=10, g__selectors=10,
+                  g__identifiers=10, g__destinations=10, g__wildcards=10)
+
+    pages = pack(chapters(), words, 3000, depth=[("Guide", "", 1)])
+
+    assert len(pages) == 1 and len(pages[0].topics) == 7
+
+
+def test_a_section_with_many_children_stays_one_page_at_depth_2():
+    """The Administration Tool's command listing: 120 commands, ~11,700 words, one
+    reference page with a heading per command."""
+    commands = [node(f"cmd {n}", f"g/cmd-{n}.md") for n in range(120)]
+    roots = [node("Guide", "g/guide.md",
+                  node("Using the Tool", "g/tool.md",
+                       node("Starting", "g/starting.md"),
+                       node("Command Listing", "g/listing.md", *commands)))]
+    sizes = {f"g/cmd-{n}.md": 100 for n in range(120)}
+    sizes.update({"g/guide.md": 10, "g/tool.md": 10, "g/starting.md": 10, "g/listing.md": 10})
+
+    pages = pack(roots, lambda path: sizes[str(path)], 3000,
+                 depth=[("Guide", "Using the Tool", 2)])
+
+    assert layout(pages)[:3] == [["g/guide.md"], ["g/tool.md"], ["g/starting.md"]]
+    assert len(pages) == 4
+    assert pages[3].topics[0].source == PurePosixPath("g/listing.md")
+    assert len(pages[3].topics) == 121 and pages[3].words == 12010
+    assert {topic.level for topic in pages[3].topics[1:]} == {2}
+
+
+def test_a_depth_page_spanning_two_directories_still_splits_by_r4_2():
+    """No cap inside an entry, but R4.2 holds: the subtree is laid out one level
+    further down instead, so no page mixes two source directories."""
+    roots = [node("Guide", "g/guide.md",
+                  node("Messages", "g/messages.md",
+                       node("Priority", "g/priority.md"),
+                       node("Selectors", "h/selectors.md", node("Identifiers", "h/identifiers.md"))))]
+    words = sized(g__guide=10, g__messages=10, g__priority=10, h__selectors=10, h__identifiers=10)
+
+    pages = pack(roots, words, 3000, depth=[("Guide", "Messages", 1)])
+
+    assert layout(pages) == [["g/guide.md"], ["g/messages.md"], ["g/priority.md"],
+                             ["h/selectors.md", "h/identifiers.md"]]
+    assert all(len({topic.directory for topic in page.topics}) == 1 for page in pages)
+
+
+def test_keep_separate_still_wins_inside_a_depth_entry():
+    pages = pack(chapters(), SMALL, 3000, keep_separate=["g/priority.md"],
+                 depth=[("Guide", "Messages", 1)])
+
+    assert ["g/priority.md"] in layout(pages)
+    assert ["g/messages.md"] in layout(pages)
+
+
+NBSP = "\u00a0"
+
+
+def test_depth_entries_match_titles_exactly():
+    """EMS's TOC spells `REST Proxy` with a no-break space; a plain space names nothing."""
+    from docushift.reframe.packer import depth_nodes
+
+    roots = [node("Guide", "g/guide.md", node(f"REST{NBSP}Proxy", "g/rest.md"))]
+
+    chosen, unmatched = depth_nodes(roots, [("Guide", f"REST{NBSP}Proxy", 2),
+                                            ("Guide", "REST Proxy", 2), ("Gide", "", 1)])
+
+    assert list(chosen.values()) == [2]
+    assert unmatched == [("Guide", "REST Proxy", 2), ("Gide", "", 1)]
+
+
+def test_depth_entries_are_parsed_scoped_and_folded_per_version():
+    reframe = {"products": {"p": {"depth": [
+        {"guide": "Installation", "depth": 1},
+        {"guide": "User Guide", "chapter": "Messages", "depth": 2, "versions": ["10.5.1"]},
+        {"guide": "User Guide", "chapter": "Routes", "depth": 2, "versions": []},
+        {"guide": "User Guide", "chapter": "Bad", "depth": 0},
+        {"chapter": "No guide", "depth": 1},
+    ]}}}
+
+    policy = policy_for(reframe, "p")
+
+    assert policy.depth == (("Installation", "", 1),)
+    assert policy.depth_in == ((("User Guide", "Messages", 2), ("10.5.1",)),)
+    assert policy.for_version("10.5.1").depth == (("Installation", "", 1),
+                                                  ("User Guide", "Messages", 2))
+    assert policy.for_version("10.4.4").depth == (("Installation", "", 1),)
+    assert policy.for_version("10.4.4").depth_in == ()
+
+
+def test_depth_is_read_from_the_product_block_only():
+    assert policy_for({"defaults": {"depth": [{"guide": "G", "depth": 1}]}}, "x").depth == ()
+
+
+def test_no_depth_entries_leave_every_digest_unchanged():
+    """Adding entries for EMS 10.5.1 must not mark any other product, or any other
+    EMS version, stale."""
+    plain = policy_for({"products": {"p": {"pin_layout_to": "10.5.1"}}}, "p")
+    scoped = policy_for({"products": {"p": {"pin_layout_to": "10.5.1", "depth": [
+        {"guide": "User Guide", "chapter": "Messages", "depth": 2, "versions": ["10.5.1"]}]}}}, "p")
+
+    assert plain.key == dataclasses.replace(plain, depth=(), depth_in=()).key
+    assert scoped.for_version("10.4.4").key == plain.for_version("10.4.4").key
+    assert scoped.for_version("10.5.1").key != plain.for_version("10.5.1").key
+
+
+def test_the_shipped_ems_depth_entries_are_10_5_1_only(repo_root):
+    shipped = ConfigManager(root_dir=repo_root).load_reframe()
+    policy = policy_for(shipped, "tibco-enterprise-message-service")
+
+    newest = policy.for_version("10.5.1").depth
+    assert len(newest) == 44
+    assert ("User Guide", f"REST{NBSP}Proxy", 2) in newest
+    assert ("User Guide", "Configuration Files", 3) in newest
+    assert ("C and COBOL Reference", "XA\u2014External Transaction Manager", 1) in newest
+    assert ("Installation", "", 1) in newest
+    for older in ("10.4.0", "10.4.1", "10.4.3", "10.4.4", "10.5.0"):
+        assert policy.for_version(older).depth == ()
+
+
+DEPTH_TOC = """\
+docs_list_title: "Online Help"
+docs:
+  - title: "Installation"
+    url: "installation/installation-2.md"
+    subfolderlist:
+      - title: "Installation Overview"
+        url: "installation/installation-overvie.md"
+  - title: "User Guide"
+    url: "users-guide/user-guide.md"
+    subfolderlist:
+      - title: "Messages"
+        url: "users-guide/messages.md"
+        subfolderlist:
+          - title: "Message Priority"
+            url: "users-guide/message-priority.md"
+          - title: "Message Selectors"
+            url: "users-guide/message-selectors.md"
+            subfolderlist:
+              - title: "Identifiers"
+                url: "users-guide/identifiers.md"
+      - title: "Destinations"
+        url: "users-guide/destinations.md"
+"""
+
+MESSAGES_10_5_1 = ('      - {guide: "User Guide", chapter: "Messages", depth: 2, '
+                   'versions: ["10.5.1"]}\n')
+
+
+def depth_config(config, entries: str = "") -> None:
+    config.reframe_path.parent.mkdir(parents=True, exist_ok=True)
+    config.reframe_path.write_text(
+        'defaults:\n  max_words: 3000\nproducts:\n  tibco-flare-docs:\n    pin_layout_to: "10.5.1"\n'
+        + (f"    depth:\n{entries}" if entries else ""),
+        encoding="utf-8",
+    )
+    config._reframe_cache = None
+
+
+def written(result) -> dict[str, str]:
+    return {p.relative_to(result.path).as_posix(): p.read_text(encoding="utf-8")
+            for p in sorted(result.path.rglob("*")) if p.is_file()}
+
+
+def pages_in(tree: dict[str, str]) -> list[str]:
+    return sorted(path for path in tree if path.endswith(".md"))
+
+
+def two_ems_versions(config, catalog, flare):
+    flare.versions["10.4.4"] = make_version("tibco-flare-docs", "10.4.4", engine=SourceEngine.FLARE)
+    catalog.merge_fetch_results([flare])
+    product = catalog.get_product("tibco-flare-docs")
+    converted_tree(config, product, "10.5.1", DEPTH_TOC)
+    converted_tree(config, product, "10.4.4", DEPTH_TOC)
+    return product
+
+
+def test_a_depth_entry_reaches_the_written_tree(config, catalog, flare):
+    product = two_ems_versions(config, catalog, flare)
+    depth_config(config, MESSAGES_10_5_1)
+
+    result = Reframer(config, catalog).reframe_one(product, product.versions["10.5.1"])
+
+    assert result.outcome is ReframeOutcome.REFRAMED
+    # Installation keeps R1; the guide's own page; Messages alone, then one page per
+    # section (Selectors with its subsection); Destinations by R1.
+    assert len(pages_in(written(result))) == 6, pages_in(written(result))
+
+
+def test_a_pinned_older_version_keeps_its_r1_layout_when_the_pin_has_depth_entries(
+        config, catalog, flare):
+    """The key safety test. 10.4.4 projects onto 10.5.1; with entries scoped to 10.5.1
+    the reference is still packed by R1 for 10.4.4, so its tree is byte-identical
+    to the one it gets with no entries at all, and its currency key is the same."""
+    product = two_ems_versions(config, catalog, flare)
+
+    depth_config(config)
+    before_key = Reframer(config, catalog)._policy(product).for_version("10.4.4").key
+    before = written(Reframer(config, catalog).reframe_one(product, product.versions["10.4.4"]))
+
+    depth_config(config, MESSAGES_10_5_1)
+    reframer = Reframer(config, catalog)
+    # 10.5.1 first, in the same run: its own layout must not leak into the reference.
+    newest = reframer.reframe_one(product, product.versions["10.5.1"], force=True)
+    after = reframer.reframe_one(product, product.versions["10.4.4"], force=True)
+
+    assert newest.outcome is ReframeOutcome.REFRAMED
+    assert len(pages_in(written(newest))) == 6
+    assert after.outcome is ReframeOutcome.REFRAMED
+    assert len(pages_in(before)) == 2
+    assert written(after) == before
+    assert reframer._policy(product).for_version("10.4.4").key == before_key
+
+
+def test_a_depth_entry_naming_no_toc_node_refuses_the_merge(config, catalog, flare):
+    """A typo must not fall back to R1 silently: an error, and the last merge stays."""
+    product = two_ems_versions(config, catalog, flare)
+    depth_config(config)
+    first = Reframer(config, catalog).reframe_one(product, product.versions["10.5.1"])
+    kept = written(first)
+    depth_config(config, '      - {guide: "User Guide", chapter: "Mesages", depth: 2, '
+                         'versions: ["10.5.1"]}\n')
+    findings = FindingsRun("reframe")
+
+    result = Reframer(config, catalog, findings=findings).reframe_one(
+        product, product.versions["10.5.1"], force=True)
+
+    assert result.outcome is ReframeOutcome.FAILED
+    assert codes(findings.all) == ["REFRAME_DEPTH_UNMATCHED"]
+    assert findings.all[0].severity is Severity.ERROR
+    assert "'Mesages'" in findings.all[0].message
+    assert written(first) == kept

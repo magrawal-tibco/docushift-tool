@@ -135,6 +135,67 @@ products:
   tibco-enterprise-message-service:
     pin_layout_to: "10.5.1"
     publish: true
+    # Phase 78 (2026-11-13, DOCOPS-367): pages by menu depth, 10.5.1 only. Each
+    # entry lays one guide or chapter out with no word cap: depth 1 = one page,
+    # depth 2 = the chapter's own page then one page per section with everything
+    # under it, depth 3 = one level further. Chosen by judgement (planning.md
+    # Phase 78); a chapter kept whole is listed too, so this list is the record.
+    # Titles are matched exactly as toc.yml spells them, so two are escaped:
+    # "REST\u00a0Proxy" has a no-break space and "XA\u2014External ..." an em dash.
+    # A title that matches nothing is REFRAME_DEPTH_UNMATCHED; 10.5.1 is then not merged.
+    # 10.4.0-10.5.0 keep their R1 layout: they project onto 10.5.1 packed by R1.
+    depth:
+      - {guide: "Installation", depth: 1, versions: ["10.5.1"]}
+      # User Guide, one page per section.
+      - {guide: "User Guide", chapter: "Messages", depth: 2, versions: ["10.5.1"]}
+      - {guide: "User Guide", chapter: "Destinations", depth: 2, versions: ["10.5.1"]}
+      - {guide: "User Guide", chapter: "Running the EMS Server", depth: 2, versions: ["10.5.1"]}
+      # The command listing is one section: one reference page, a heading per command.
+      - {guide: "User Guide", chapter: "Using the EMS Administration Tool", depth: 2, versions: ["10.5.1"]}
+      - {guide: "User Guide", chapter: "REST\u00a0Proxy", depth: 2, versions: ["10.5.1"]}
+      - {guide: "User Guide", chapter: "Authentication and Permissions", depth: 2, versions: ["10.5.1"]}
+      - {guide: "User Guide", chapter: "JAAS Authentication Modules", depth: 2, versions: ["10.5.1"]}
+      - {guide: "User Guide", chapter: "FTL Stores", depth: 2, versions: ["10.5.1"]}
+      - {guide: "User Guide", chapter: "Developing an EMS Client Application", depth: 2, versions: ["10.5.1"]}
+      - {guide: "User Guide", chapter: "Monitor Server Activity", depth: 2, versions: ["10.5.1"]}
+      - {guide: "User Guide", chapter: "Fault Tolerance", depth: 2, versions: ["10.5.1"]}
+      - {guide: "User Guide", chapter: "Routes", depth: 2, versions: ["10.5.1"]}
+      # User Guide, one page per subsection: per tibemsd.conf parameter group and
+      # per other configuration file.
+      - {guide: "User Guide", chapter: "Configuration Files", depth: 3, versions: ["10.5.1"]}
+      # User Guide, whole chapters.
+      - {guide: "User Guide", chapter: "Overview", depth: 1, versions: ["10.5.1"]}
+      - {guide: "User Guide", chapter: "Getting Started", depth: 1, versions: ["10.5.1"]}
+      - {guide: "User Guide", chapter: "Extensible Security", depth: 1, versions: ["10.5.1"]}
+      - {guide: "User Guide", chapter: "The EMS Implementation of JNDI", depth: 1, versions: ["10.5.1"]}
+      - {guide: "User Guide", chapter: "Interoperation with Apache Pulsar", depth: 1, versions: ["10.5.1"]}
+      - {guide: "User Guide", chapter: "Interoperation with Apache Kafka", depth: 1, versions: ["10.5.1"]}
+      - {guide: "User Guide", chapter: "Interoperation with TIBCO FTL", depth: 1, versions: ["10.5.1"]}
+      - {guide: "User Guide", chapter: "Interoperation with TIBCO Rendezvous", depth: 1, versions: ["10.5.1"]}
+      - {guide: "User Guide", chapter: "TLS Protocol", depth: 1, versions: ["10.5.1"]}
+      - {guide: "User Guide", chapter: "Conversion of Server Configuration Files to JSON", depth: 1, versions: ["10.5.1"]}
+      - {guide: "User Guide", chapter: "Appendix A: License Caching and Expiration", depth: 1, versions: ["10.5.1"]}
+      - {guide: "User Guide", chapter: "Appendix B: Monitor Messages", depth: 1, versions: ["10.5.1"]}
+      - {guide: "User Guide", chapter: "Appendix C: Error and Status Messages", depth: 1, versions: ["10.5.1"]}
+      # C and COBOL Reference, one page per C type.
+      - {guide: "C and COBOL Reference", chapter: "Messages", depth: 2, versions: ["10.5.1"]}
+      - {guide: "C and COBOL Reference", chapter: "Connection", depth: 2, versions: ["10.5.1"]}
+      - {guide: "C and COBOL Reference", chapter: "Connection Factory", depth: 2, versions: ["10.5.1"]}
+      - {guide: "C and COBOL Reference", chapter: "Session", depth: 2, versions: ["10.5.1"]}
+      - {guide: "C and COBOL Reference", chapter: "Administration", depth: 2, versions: ["10.5.1"]}
+      # C and COBOL Reference, whole chapters (each under 5,000 words).
+      - {guide: "C and COBOL Reference", chapter: "Introduction", depth: 1, versions: ["10.5.1"]}
+      - {guide: "C and COBOL Reference", chapter: "Destination", depth: 1, versions: ["10.5.1"]}
+      - {guide: "C and COBOL Reference", chapter: "Consumer", depth: 1, versions: ["10.5.1"]}
+      - {guide: "C and COBOL Reference", chapter: "Producer", depth: 1, versions: ["10.5.1"]}
+      - {guide: "C and COBOL Reference", chapter: "Requestor", depth: 1, versions: ["10.5.1"]}
+      - {guide: "C and COBOL Reference", chapter: "Queue Browser", depth: 1, versions: ["10.5.1"]}
+      - {guide: "C and COBOL Reference", chapter: "Name Server Lookup", depth: 1, versions: ["10.5.1"]}
+      - {guide: "C and COBOL Reference", chapter: "XA\u2014External Transaction Manager", depth: 1, versions: ["10.5.1"]}
+      - {guide: "C and COBOL Reference", chapter: "Types", depth: 1, versions: ["10.5.1"]}
+      - {guide: "C and COBOL Reference", chapter: "Utilities", depth: 1, versions: ["10.5.1"]}
+      - {guide: "C and COBOL Reference", chapter: "Exception", depth: 1, versions: ["10.5.1"]}
+      - {guide: "C and COBOL Reference", chapter: "IBM z/OS and IBM i", depth: 1, versions: ["10.5.1"]}
 
   # The other three multi-version Flare sets, pinned on the same rule -- the newest
   # eligible version, which is the one `iter_versions` yields first and the one a

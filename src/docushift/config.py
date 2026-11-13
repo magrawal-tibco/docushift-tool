@@ -104,6 +104,8 @@ REFRAME_DEFAULTS: dict[str, Any] = {
     "toc_folders": False,
     # Read from a product block only (Phase 69); a `defaults:` value is ignored.
     "guide_names": {},
+    # Phase 78, likewise product level only: menu-depth entries name TOC titles.
+    "depth": (),
 }
 
 # A publishing suffix must be one lowercase token. A hyphen makes the family/suffix

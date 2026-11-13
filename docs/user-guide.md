@@ -1243,6 +1243,42 @@ Editing it re-merges the product. On a version already published, the saved name
 `rename-map.csv` still win, so the new name takes effect only with `--renormalize`, which
 moves the published URLs.
 
+**A guide or chapter can be laid out by menu depth** (Phase 78). By default pages are runs
+of sibling topics up to `max_words`, so a long list of siblings can be split across two
+pages. A `depth:` entry, in a product block only, lays one guide or chapter out by its menu
+instead, with no word cap:
+
+```yaml
+products:
+  tibco-enterprise-message-service:
+    depth:
+      - {guide: "Installation", depth: 1, versions: ["10.5.1"]}
+      - {guide: "User Guide", chapter: "Messages", depth: 2, versions: ["10.5.1"]}
+      - {guide: "User Guide", chapter: "Configuration Files", depth: 3, versions: ["10.5.1"]}
+      - {guide: "User Guide", chapter: "TLS Protocol", depth: 1, versions: ["10.5.1"]}
+```
+
+- `guide` is a top-level title in the version's `toc.yml`; `chapter`, if given, one of its
+  direct children. Without `chapter` the entry covers the whole guide.
+- `depth: 1` is one page for the whole guide or chapter. `depth: 2` is the chapter's own
+  page, then one page per section with everything under it. `depth: 3` goes one level
+  further. A chapter with an entry always has pages of its own; it is never put on a page
+  with the chapter before or after it. Chapters with no entry keep the default layout.
+- Titles must match `toc.yml` exactly, odd characters included. Write a no-break space as
+  `\u00a0` and an em dash as `\u2014` inside double quotes (`"REST\u00a0Proxy"`). An entry
+  that matches nothing is a `REFRAME_DEPTH_UNMATCHED` error: that version is not merged and
+  its last merge stays, so a typo never falls back to the default layout without a word.
+- `versions:` limits the entry to the versions it names, as for `keep_separate`. Older
+  versions pinned to that version still follow its default layout, so adding entries for
+  the newest version moves no older one. Without `versions:` the entry applies to every
+  version.
+- `keep_separate` still wins inside an entry, and a page never mixes two source folders: a
+  subtree that would is laid out one level further down.
+
+Adding, removing or changing an entry re-merges only the versions it names. Check the result
+against the plan before syncing: on a published version it regroups pages, and its old URLs
+then need redirect rows.
+
 `oversized` is the one flag `keep_separate` cannot answer. That page is a single source topic
 larger than the cap, and the merge does not split topic bodies; the decision there is a
 writing one.

@@ -100,6 +100,15 @@ class ReframePolicy:
     #: the cut works on the short name. Product level only: the names are the ones a
     #: product's own TOC produced.
     guide_names: tuple[tuple[str, str], ...] = ()
+    #: Phase 78. `depth:` entries as sorted `(guide, chapter, depth)` triples, chapter
+    #: "" for a whole guide: the named TOC node is laid out by menu depth, with no
+    #: word cap, instead of by R1's sibling runs (`packer.pack`). Product level only,
+    #: like `guide_names`: the titles are the product's own.
+    depth: tuple[tuple[str, str, int], ...] = ()
+    #: Phase 78. `depth:` entries written with `versions:`, as sorted `(entry,
+    #: versions)` pairs; folded into `depth` by `for_version`, as `keep_separate_in`
+    #: is into `keep_separate`, so a pinned older version keeps its R1 layout.
+    depth_in: tuple[tuple[tuple[str, str, int], tuple[str, ...]], ...] = ()
 
     @property
     def key(self) -> str:
@@ -122,19 +131,31 @@ class ReframePolicy:
             del shaping["guide_names"]
         if not self.keep_separate_in:
             del shaping["keep_separate_in"]
+        if not self.depth:
+            del shaping["depth"]
+        if not self.depth_in:
+            del shaping["depth_in"]
         payload = json.dumps(shaping, sort_keys=True, separators=(",", ":"))
         return hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16]
 
 
     def for_version(self, number: str) -> ReframePolicy:
-        """This policy as one version sees it: its scoped `keep_separate` entries
-        joined to the unscoped ones, and the scoped list then cleared, so a version
-        no scoped entry names keeps the digest it would have without them."""
-        if not self.keep_separate_in:
+        """This policy as one version sees it: its scoped `keep_separate` and `depth`
+        entries joined to the unscoped ones, and the scoped lists then cleared, so a
+        version no scoped entry names keeps the digest it would have without them."""
+        if not self.keep_separate_in and not self.depth_in:
             return self
         scoped = {path for path, versions in self.keep_separate_in if number in versions}
+        # One depth per node: a scoped entry overrides an unscoped one for the same
+        # guide and chapter, and of two scoped ones the deeper wins (sorted order).
+        depths = {(guide, chapter): depth for guide, chapter, depth in self.depth}
+        for (guide, chapter, depth), versions in self.depth_in:
+            if number in versions:
+                depths[guide, chapter] = depth
         return replace(self, keep_separate=tuple(sorted(set(self.keep_separate) | scoped)),
-                       keep_separate_in=())
+                       keep_separate_in=(),
+                       depth=tuple(sorted((g, c, d) for (g, c), d in depths.items())),
+                       depth_in=())
 
 
 def policy_for(
@@ -170,7 +191,55 @@ def policy_for(
         merge=values.get("merge") is not False,
         toc_folders=bool(values.get("toc_folders") or False),
         guide_names=_names(own.get("guide_names")),
+        depth=tuple(sorted({entry for entry, versions in _depths(own.get("depth"))
+                            if versions is None})),
+        depth_in=_scoped_depths(own.get("depth")),
     )
+
+
+def _depths(value: Any) -> list[tuple[tuple[str, str, int], tuple[str, ...] | None]]:
+    """`depth:` entries (Phase 78) as `((guide, chapter, depth), versions)`.
+
+    `versions` is None for an entry written without `versions:`, which applies to
+    every version. Titles are kept exactly as written, since they are matched
+    exactly against the TOC's. An entry with no guide, a depth below 1, or a
+    `versions:` that names nothing is dropped rather than guessed at -- the
+    same call `keep_separate` makes for a scope that names no version.
+    """
+    if not isinstance(value, list):
+        return []
+    out: list[tuple[tuple[str, str, int], tuple[str, ...] | None]] = []
+    for entry in value:
+        if not isinstance(entry, dict):
+            continue
+        guide = str(entry.get("guide") or "")
+        chapter = str(entry.get("chapter") or "")
+        try:
+            depth = int(entry.get("depth"))
+        except (TypeError, ValueError):
+            continue
+        if not guide or depth < 1:
+            continue
+        if "versions" not in entry:
+            out.append(((guide, chapter, depth), None))
+            continue
+        versions = entry.get("versions")
+        if isinstance(versions, (str, int, float)):
+            versions = [versions]
+        named = tuple(sorted({str(v).strip() for v in versions or [] if str(v).strip()}))
+        if named:
+            out.append(((guide, chapter, depth), named))
+    return out
+
+
+def _scoped_depths(value: Any) -> tuple[tuple[tuple[str, str, int], tuple[str, ...]], ...]:
+    """The `depth:` entries that name their versions, merged per entry and sorted
+    for the digest."""
+    merged: dict[tuple[str, str, int], set[str]] = {}
+    for entry, versions in _depths(value):
+        if versions is not None:
+            merged.setdefault(entry, set()).update(versions)
+    return tuple(sorted((entry, tuple(sorted(named))) for entry, named in merged.items()))
 
 
 def _names(value: Any) -> tuple[tuple[str, str], ...]:

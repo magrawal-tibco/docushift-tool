@@ -199,9 +199,10 @@ def test_the_register_carries_every_row_of_7_5() -> None:
     documents and no page while the sitemap lists the version's pages.
     DOCOPS-366 adds `VERIFY_TOC_LOST`, for a version whose old menu sits under unfiled/.
     DOCOPS-343 adds `ANCHOR_ID_SPLIT`, an `<a id>` spanning lines, which AEM cuts
-    the page after.
+    the page after. Phase 78 adds `REFRAME_DEPTH_UNMATCHED`, a `depth:` entry naming
+    no guide or chapter, which refuses the version's merge.
     """
-    assert len(REGISTRY) == 143
+    assert len(REGISTRY) == 144
 
 
 def test_severity_comes_from_the_registry_and_not_from_the_call_site() -> None:

@@ -52,6 +52,7 @@ from docushift.reframe.packer import (
     asset_destination,
     assign,
     carry,
+    depth_nodes,
     fit,
     layout_of,
     list_children,
@@ -375,7 +376,7 @@ class Reframer:
         # pinned set asks for it once per sibling -- six times over for EMS. Keyed on
         # (slug, reference version) and holding `None` for a reference that could not
         # be read, so the failure is reported once per product rather than per version.
-        self._layouts: dict[tuple[str, str, tuple[str, ...]],
+        self._layouts: dict[tuple[str, str, tuple[str, ...], tuple[tuple[str, str, int], ...]],
                             list[tuple[PurePosixPath, tuple[PurePosixPath, ...]]] | None] = {}
         # Phase 42. The effective policy per product, automatic pin included, and
         # which products got their pin that way rather than from `reframe.yaml`.
@@ -594,6 +595,30 @@ class Reframer:
                     f"{', ...' if len(unmatched) > 5 else ''}"
                 ),
             )
+
+        # Phase 78. Unlike `keep_separate` above, an error that refuses the merge:
+        # a mistyped title would otherwise fall back to R1 without a word, and
+        # publish a layout nobody chose. The last merge stays.
+        if policy.depth and merges(version.engine, policy):
+            _, unmatched_depth = depth_nodes(roots, policy.depth)
+            if unmatched_depth:
+                shown = "; ".join(
+                    f"{guide!r}" + (f" / {chapter!r}" if chapter else "") + f" (depth {depth})"
+                    for guide, chapter, depth in unmatched_depth[:5]
+                )
+                self._record(
+                    "REFRAME_DEPTH_UNMATCHED", slug, number, path="reframe.yaml",
+                    message=(
+                        f"{len(unmatched_depth)} depth entr{'y' if len(unmatched_depth) == 1 else 'ies'} "
+                        f"name no TOC node here, so this version was not merged: {shown}"
+                        f"{'; ...' if len(unmatched_depth) > 5 else ''}"
+                    ),
+                )
+                return ReframeResult(
+                    slug, number, ReframeOutcome.FAILED, engine=version.engine, topics=topics,
+                    toc_schema=schema_name,
+                    message=f"{len(unmatched_depth)} depth entry(ies) name no TOC node",
+                )
 
         packed = self._lay_out(product, version, policy, roots, source)
         if packed is None:
@@ -1174,14 +1199,16 @@ class Reframer:
             return single(roots, source.words)
         pin = self.pin_for(product, version)
         if not pin or pin == version.version:
-            return pack(roots, source.words, policy.max_words, policy.keep_separate)
+            return pack(roots, source.words, policy.max_words, policy.keep_separate,
+                        policy.depth)
         reference = self._reference_layout(product, policy, pin)
         if reference is None:
             # A pin the tool chose is not an instruction it was given: the version
             # is laid out on its own, as it would have been before Phase 42. The
             # unavailable reference is still reported.
             if product.slug in self._automatic:
-                return pack(roots, source.words, policy.max_words, policy.keep_separate)
+                return pack(roots, source.words, policy.max_words, policy.keep_separate,
+                            policy.depth)
             return None
         return project(reference, roots, source.words, policy.max_words, policy.keep_separate)
 
@@ -1196,8 +1223,9 @@ class Reframer:
         """
         # Keyed on the overrides too (Phase 76): with a version-scoped
         # `keep_separate`, two versions projecting onto one reference may ask for
-        # it laid out two ways in a single run.
-        key = (product.slug, number, policy.keep_separate)
+        # it laid out two ways in a single run. Phase 78's `depth` the same way:
+        # 10.4.4 projects onto 10.5.1 packed by R1 while 10.5.1 itself is not.
+        key = (product.slug, number, policy.keep_separate, policy.depth)
         if key in self._layouts:
             return self._layouts[key]
 
@@ -1249,7 +1277,7 @@ class Reframer:
         because the carried pages compete for filenames: leaving them out would let
         the reference report a name its own merge never used.
         """
-        packed = pack(roots, source.words, policy.max_words, policy.keep_separate)
+        packed = pack(roots, source.words, policy.max_words, policy.keep_separate, policy.depth)
         stranded = [path for path in source.topics if path not in nodes]
         carried = carry(stranded, lambda path: title_of(source.read(path), path.stem), source.words)
         assign(packed + carried, source.headings)

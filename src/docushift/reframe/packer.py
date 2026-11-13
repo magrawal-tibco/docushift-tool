@@ -48,7 +48,8 @@ The POC's `MIN_WORDS` is not reimplemented (R1.2), and its unused basename-keyed
 from __future__ import annotations
 
 import posixpath
-from collections.abc import Callable, Hashable, Sequence
+import sys
+from collections.abc import Callable, Hashable, Mapping, Sequence
 from dataclasses import dataclass, field, replace
 from pathlib import PurePosixPath
 
@@ -160,7 +161,7 @@ _DEEPEST = 6
 
 
 def pack(roots: Sequence[TocEntry], words_of: Callable[[PurePosixPath], int], max_words: int,
-         keep_separate: Sequence[str] = ()) -> list[Page]:
+         keep_separate: Sequence[str] = (), depth: Sequence[DepthEntry] = ()) -> list[Page]:
     """Every page one version becomes, in reading order.
 
     `roots` are the top-level TOC rows; each is packed independently, which is
@@ -171,9 +172,15 @@ def pack(roots: Sequence[TocEntry], words_of: Callable[[PurePosixPath], int], ma
     topic layout. It only ever *refuses* a join, like the cap -- there is no
     entry that can make a page bigger, which is what keeps a hand-edited config
     from being able to invent a layout the packer would not otherwise produce.
+
+    `depth` is Phase 78's per-chapter override: a node an entry names is laid out
+    by menu depth (`_by_depth`) with no word cap, and R1 is unchanged everywhere
+    else. An entry naming no node changes nothing here; the driver refuses the
+    version before it gets this far (`REFRAME_DEPTH_UNMATCHED`).
     """
     pages: list[Page] = []
     prefixes = tuple(keep_separate)
+    chosen, _ = depth_nodes(roots, depth)
     for root in roots:
         # **One `claimed` per guide, not one per version (Phase 29).** A topic
         # listed under two guides used to be packed once, with every later node
@@ -191,8 +198,40 @@ def pack(roots: Sequence[TocEntry], words_of: Callable[[PurePosixPath], int], ma
         claimed: set[PurePosixPath] = set()
         # R1.1 is structural now: a root's recursion emits that root's pages and
         # returns, so nothing can span two roots however much room is left.
-        pages.extend(_subtree(root, root.title, words_of, max_words, claimed, prefixes))
+        pages.extend(_subtree(root, root.title, words_of, max_words, claimed, prefixes,
+                              chosen=chosen))
     return pages
+
+
+#: Phase 78. One `depth:` entry as the packer reads it: the guide's title, its
+#: chapter's title ("" for the whole guide), and the menu depth.
+DepthEntry = tuple[str, str, int]
+
+
+def depth_nodes(
+    roots: Sequence[TocEntry], entries: Sequence[DepthEntry]
+) -> tuple[dict[int, int], list[DepthEntry]]:
+    """`id()` of each TOC node a `depth:` entry names -> its depth, and the entries
+    that name none.
+
+    Matched on titles exactly as the TOC adapter yields them, no-break spaces and
+    all: a guide is a top-level row, a chapter one of its direct children. Fuzzy
+    matching would let a typo land on a different node, which is worse than the
+    error an unmatched entry raises. Entries are applied in order, so of two for
+    one node the later wins (`for_version` hands them over sorted).
+    """
+    chosen: dict[int, int] = {}
+    unmatched: list[DepthEntry] = []
+    for entry in entries:
+        guide, chapter, depth = entry
+        hits = [root for root in roots if root.title == guide]
+        if chapter:
+            hits = [child for root in hits for child in root.children if child.title == chapter]
+        if not hits:
+            unmatched.append(entry)
+        for hit in hits:
+            chosen[id(hit)] = depth
+    return chosen, unmatched
 
 
 def single(roots: Sequence[TocEntry], words_of: Callable[[PurePosixPath], int]) -> list[Page]:
@@ -472,6 +511,7 @@ def _subtree(
     claimed: set[PurePosixPath],
     prefixes: Sequence[str] = (),
     parent: str = "",
+    chosen: Mapping[int, int] | None = None,
 ) -> list[Page]:
     """Every page this node's subtree becomes, in reading order.
 
@@ -480,8 +520,15 @@ def _subtree(
     pages of whole sibling subtrees -- which is the guarantee the whole rewrite
     exists for: a page's topics always share one TOC parent, so the page's first
     topic is the thing the page is about.
+
+    A node a `depth:` entry names (`chosen`, Phase 78) is laid out by `_by_depth`
+    instead, and is never joined to a sibling: it is a menu entry of its own.
     """
-    whole = _collect(node, words_of, max_words, claimed, prefixes, parent)
+    chosen = chosen or {}
+    if id(node) in chosen:
+        return _by_depth(node, chosen[id(node)], guide, words_of, claimed, prefixes, parent,
+                         chosen)
+    whole = _collect(node, words_of, max_words, claimed, prefixes, parent, chosen)
     if whole is not None:
         _commit(whole, claimed)
         return [Page(guide, list(whole))] if whole else []
@@ -503,13 +550,15 @@ def _subtree(
         run.clear()
 
     for child in node.children:
-        unit = _collect(child, words_of, max_words, claimed, prefixes, node.title)
+        # A child a depth entry names is laid out by that entry, never run together.
+        unit = (None if id(child) in chosen
+                else _collect(child, words_of, max_words, claimed, prefixes, node.title, chosen))
         if unit is None:
             # This child overflows and will emit its own pages. Flush first, or
             # a later sibling that still fits would jump in front of them.
             flush()
             pages.extend(_subtree(child, guide, words_of, max_words, claimed, prefixes,
-                                  node.title))
+                                  node.title, chosen))
             continue
         if not unit:
             continue
@@ -519,6 +568,49 @@ def _subtree(
     return pages
 
 
+def _by_depth(
+    node: TocEntry,
+    depth: int,
+    guide: str,
+    words_of: Callable[[PurePosixPath], int],
+    claimed: set[PurePosixPath],
+    prefixes: Sequence[str],
+    parent: str,
+    chosen: Mapping[int, int],
+) -> list[Page]:
+    """Phase 78: this node's pages by menu depth, in reading order.
+
+    At depth 1 the whole subtree is one page, however long (R1.2's cap does not
+    apply inside an entry). Deeper, the node is a page of its own body and each
+    child is laid out at one depth less -- so `depth: 2` is the chapter's own page
+    then one page per section, each with everything under it. A page therefore
+    never holds only some of a parent's children.
+
+    R1.3 and R4.2 still hold, and 20e still wins: a subtree that spans two source
+    directories or holds a `keep_separate` topic is not one page; it is laid out one
+    level further down instead, as R1 does with a subtree it cannot take whole. A
+    descendant with an entry of its own follows that entry.
+    """
+    if depth <= 1 or not node.children:
+        whole = _collect(node, words_of, _UNCAPPED, claimed, prefixes, parent, chosen)
+        if whole is not None:
+            _commit(whole, claimed)
+            return [Page(guide, list(whole))] if whole else []
+    pages: list[Page] = []
+    if node.path is not None and node.path not in claimed:
+        claimed.add(node.path)
+        pages.append(Page(guide, [Topic(node.title, node.path, words_of(node.path),
+                                        parent=parent, node=id(node), level=1)]))
+    for child in node.children:
+        pages.extend(_by_depth(child, chosen.get(id(child), max(depth - 1, 1)), guide,
+                               words_of, claimed, prefixes, node.title, chosen))
+    return pages
+
+
+#: No cap: what `_by_depth` passes for R1.2's when it takes a subtree whole.
+_UNCAPPED = sys.maxsize
+
+
 def _collect(
     node: TocEntry,
     words_of: Callable[[PurePosixPath], int],
@@ -526,6 +618,7 @@ def _collect(
     claimed: set[PurePosixPath],
     prefixes: Sequence[str],
     parent: str = "",
+    chosen: Mapping[int, int] | None = None,
 ) -> tuple[Topic, ...] | None:
     """This subtree as one page's worth of topics, or None if it may not be one.
 
@@ -548,13 +641,19 @@ def _collect(
     result. A rejected probe that had mutated `claimed` would silently drop every
     topic it touched -- the one way this recursion can lose content, and the
     reason the probe and the commit are two functions rather than one walk.
+
+    **A descendant a `depth:` entry names refuses the probe** (Phase 78), so no
+    ancestor can swallow it whole: it is laid out by its own entry.
     """
     topics: list[Topic] = []
     seen: set[PurePosixPath] = set()
     total = 0
+    chosen = chosen or {}
 
     def walk(entry: TocEntry, level: int, parent: str) -> bool:
         nonlocal total
+        if entry is not node and id(entry) in chosen:
+            return False
         emitted = False
         if entry.path is not None and entry.path not in claimed and entry.path not in seen:
             if separated(entry.path, prefixes):
