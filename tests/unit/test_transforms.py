@@ -586,13 +586,13 @@ def test_a_pipe_table_keeps_its_caption_as_an_italic_line_ahead_of_it() -> None:
 
     assert rendered == '<a id="T1"></a>\n\n*Processing Instruction*\n\n| Field |\n| --- |\n| Name |'
     # One EMS target has a pasted table, newlines and all, in its name. Written
-    # out it cut the page short on AEM, so it gets no marker (DOCOPS-343); the
-    # caption stays.
+    # out as is it cut the page short on AEM, so it is written on one line
+    # (DOCOPS-343); the caption stays.
     pasted = render(
         "<table><caption><a name='Event_Value_\n   _Description_'></a>Values</caption>"
         "<tr><th>Field</th></tr><tr><td>Name</td></tr></table>"
     )
-    assert pasted.startswith("*Values*\n\n")
+    assert pasted.startswith('<a id="Event_Value_ _Description_"></a>\n\n*Values*\n\n')
 
 
 def test_a_thead_row_of_td_cells_is_the_header() -> None:
@@ -890,17 +890,33 @@ def test_a_named_anchor_in_prose_emits_its_target() -> None:
     assert render("<p><a name='ID-7B'></a>See below.</p>") == '<a id="ID-7B"></a>See below.'
 
 
-def test_a_target_whose_name_spans_lines_writes_no_marker() -> None:
+def test_a_target_whose_name_spans_lines_is_written_on_one_line() -> None:
     """DOCOPS-343. EMS's caption bookmark holds a table's text over three lines,
-    and AEM dropped tibemsConnectionMetaData after the `<a id>` it became. A name
-    with a plain space still gets one: links to `tibdg proxy shed` place by it."""
+    and AEM dropped tibemsConnectionMetaData after the `<a id>` it became. Writing
+    none left the links to it unplaced, so the name is written with its
+    whitespace collapsed. A name with a plain space is kept: `tibdg proxy shed`."""
     name = "Certificate_EncodingsConstant_&#xA;   _Value_&#xA;   _TIBEMS_SSL_ENCODING_AUTO(0x0000)"
     rendered = render(f'<table><caption><a name="{name}"></a>Certificate Encodings</caption>'
                       "<tr><td>a</td><td>b</td></tr></table>")
 
-    assert "<a id" not in rendered
+    assert ('<a id="Certificate_EncodingsConstant_ _Value_ _TIBEMS_SSL_ENCODING_AUTO(0x0000)"></a>'
+            in rendered)
+    assert "\n   _Value_" not in rendered
     assert "Certificate Encodings" in rendered
     assert markdown.anchor_marker("tibdg proxy shed") == '<a id="tibdg proxy shed"></a>'
+
+
+def test_a_link_to_a_name_that_spanned_lines_still_places_on_its_heading() -> None:
+    """DOCOPS-343 follow-up. EMS 10.4.0-10.5.1 `appendix-b-monitor-messages.md`
+    links to "Event Reason Property Values" by the bookmark's three-line name; with
+    no marker written the link stayed raw and unresolved. The marker and the
+    lookup both collapse whitespace, so the link lands on the heading again."""
+    from docushift.converter.driver import _fragment_key
+
+    name = "Event_Values\n   _Description_"
+    body = f"## Topic Message Properties\n\n{markdown.anchor_marker(name)}\n\ntext\n"
+
+    assert fragments.marker_targets(body)[_fragment_key(name)] == "topic-message-properties"
 
 
 def test_a_named_anchor_in_a_heading_is_hoisted_above_it() -> None:

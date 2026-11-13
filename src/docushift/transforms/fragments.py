@@ -92,7 +92,8 @@ def marker_targets(text: str) -> dict[str, str]:
 
     found: dict[str, str] = {}
     for marker in _MARKER.finditer(masked):
-        name = html.unescape(marker.group(1)).strip()
+        # Whitespace collapsed as `markdown.anchor_marker` writes it (DOCOPS-343).
+        name = " ".join(html.unescape(marker.group(1)).split())
         if not name:
             continue
         after = [index for index, (start, _t) in enumerate(headings) if start >= marker.end()]

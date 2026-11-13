@@ -108,7 +108,9 @@ def _fragment_key(fragment: str) -> str:
     name as written; comparing the two raw missed every target whose name has a
     space in it (Phase 34, R8-08).
     """
-    return unquote(fragment).lower()
+    # Whitespace collapsed as the marker is written: a name that spanned lines is
+    # one line in the output (DOCOPS-343).
+    return " ".join(unquote(fragment).split()).lower()
 
 
 class ConvertOutcome(StrEnum):
