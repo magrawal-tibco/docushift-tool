@@ -1,6 +1,6 @@
 # Jira Tracking — What Is Logged in DOCOPS
 
-> **Last reconciled:** 2026-11-12 (afternoon), against Jira and `config/versions.csv`.
+> **Last reconciled:** 2026-11-13 (night), against Jira and `config/versions.csv`.
 > Conventions (site, cloud ID, story points, transitions, who owns what) live in
 > `C:\github\confluence-mcp\reports\docushift-claude-atlassian-context.md`; this file
 > does not repeat them. It answers one question: **is this piece of work in Jira, and where?**
@@ -74,6 +74,13 @@ This table says only what changes in Jira when an event happens.
 **Left alone on purpose:** DOCOPS-8 is a Task where its siblings are Stories.
 
 **Log** (newest first, one line per session):
+
+- 2026-11-13 (night):
+  - DOCOPS-364 In Progress: K1 (1,166 decisions in the catalog, all checked) and K3 downloads (27 on disk) done; notes.
+  - DOCOPS-366: two more checker fixes merged (Statistica 14,025 false missing pages now 1), note.
+  - DOCOPS-367: depth rule measured; EMS 10.5.1 plan approved as Phase 78, notes.
+  - DOCOPS-280: status page note (no SP added).
+  - R1 started (9 repos on `wip`) and then stopped: staging did not rebuild in 2 h; question for Digital Platform in the close-out plan's Today.
 
 - 2026-11-12 (afternoon) — Fixes built on branches, nothing merged:
   - 349, 354, 360, 343/362/363 and 366: In Progress, each with a dated note.
