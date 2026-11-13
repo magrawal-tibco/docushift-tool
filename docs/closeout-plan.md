@@ -11,6 +11,9 @@
 
 **Fri 13 Nov (written 02:15).**
 
+- **Priorities (user, 13 Nov 12:55):**
+  - **TIBCO first, then ibi.** Statistica and Spotfire (Data Virtualization included) are last: their triage, checks and fixes come after all TIBCO and ibi work, and do not take a Monday slot.
+  - **ibi is held until Mon 16:** Digital Platform refreshes the ibi content over the weekend. Nothing is pushed to any ibi repository (`wip` or `content-fix`), and R1's ibi group and Batch 3 (ibi newest) move to Mon 16 or later. Local ibi conversion in the running batch carries on; its syncs wait for Monday and are made only after a fresh fetch.
 - **Update 11:20:** staging rebuilt groups 1–2 sometime between 03:20 and 11:20 (Control Plane now shows its "Note:" labels). So rebuilds take hours or follow a schedule; the question to Digital Platform still stands. **R1 resumed:** group 3 (General, FTL, Foresight, Flogo) is on `wip` at 11:21. Next groups follow once group 3 shows; TRA and BusinessWorks are pushed only up to before their K2 commits.
 - **Pulled forward from Mon–Tue (user, 13 Nov: use the free time):**
   - **K2:** Karan's 80 removals are on `content-fix`, one commit per product.
@@ -106,7 +109,7 @@ Ready when:
 |---|---|
 | **Merge rule:** all-or-nothing siblings was measured and rejected (pages more than double). **The user chose pages by menu depth instead, EMS 10.5.1 first** (Phase 78, DOCOPS-367): 214 pages for 10.5.1 (159 today), older EMS versions unchanged. Waiting for approval of the Phase 78 plan; the build is Mon 16, and 10.5.1 goes out with R2 as one commit (about 400 files). | Approval Fri 13; build Mon 16 |
 | Writers' draft comments published in the original help ("Draft comments:"; 16 versions, 7 families; `source`): drop them in conversion? | Writers, after 30 Nov |
-| Statistica 14.4.0 text findings: most are Greek letters the source double-escapes (`&amp;alpha;`, so the old site showed the literal code, and our page shows the letter): `source`. To check as possibly real: `_templates/Whats-New.md` (25 sentences) and `itrees-results-manager-tab.md` (3). Data Virtualization: 81% of its old findings are cleared by the 12 Nov checker fix. | Triage, Mon 16 |
+| Statistica 14.4.0 text findings: most are Greek letters the source double-escapes (`&amp;alpha;`, so the old site showed the literal code, and our page shows the letter): `source`. To check as possibly real: `_templates/Whats-New.md` (25 sentences) and `itrees-results-manager-tab.md` (3). Data Virtualization: 81% of its old findings are cleared by the 12 Nov checker fix. | **Last priority**, after TIBCO and ibi (user, 13 Nov) |
 | FOCUS 9.3.4 publishes Flare's generated `_globalpages` pages (contents, title): found by the DOCOPS-349 fixer, our converter | Triage, Fri 13 (fold into an existing issue or a new kind) |
 | Spotfire backup run summary → close DOCOPS-283 | Whenever you paste it, by Fri 27 |
 | ibi: confirm the 18 hand-obtained PDF-only versions are on Google Drive → close DOCOPS-281 | By Fri 27 |
