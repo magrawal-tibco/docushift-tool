@@ -19,6 +19,7 @@
   - **K2:** Karan's 80 removals are on `content-fix`, one commit per product.
   - **Batch running (110 steps):** re-conversion for 349 and 343/362/363 (EMS, BE 6.3.2 and 6.4.0, ibi FOCUS and WebFOCUS Client 9.3.x, WFC 9.3.5 translations), K3 conversion of the 27 additions, and the Δ1 test refresh. Nothing is synced until page lists are compared with the published ones.
   - **Phase 78: built, merged and applied (12:05).** EMS 10.5.1 has 217 pages (159 before); every old URL keeps its redirect row. It is one commit on `content-fix` (`28ce5b9`), held for R2.
+  - **DOCOPS-360, second case (user's spot check, 13:30):** a backslash in normal text shows doubled on staging (`Systems\\ArchiverDemo`); in code text it is fine. About 11,600 occurrences on about 1,970 TIBCO pages. Test page pushed to `wip` (Foresight 6.0.0 "General Configuration After Installation", 53c7ee8). Once it and the FTL `&lt;` page show on staging, one in-place repair covers both cases for R2, plus a converter change. **UAT sheet row:** add it once the test result is in.
   - **DOCOPS-343 follow-up:** the first fix broke one EMS link per version. It is fixed (`9718ae6`), and EMS 10.4.0–10.5.1 are re-converted and committed per version on `content-fix` (R2). The link check has 0 errors.
 - **Decided:** Phase 78 approved (EMS 10.5.1 pages by menu depth; build Mon 16, out with R2). UAT rows pasted.
 - **K1 done:** Karan's decision is in the catalog for all 1,166 versions, each checked afterwards (DOCOPS-364).
