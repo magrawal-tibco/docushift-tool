@@ -209,6 +209,15 @@ triage:
       The whole old menu sits under unfiled/ (converted with an empty toc.yml);
       raised once the DOCOPS-366 check is merged. Re-convert and re-publish.
 
+  - code: VERIFY_TOPIC_MISSING
+    decision: source
+    slug: "spotfire-*"
+    version: "14.4.0"
+    path: "*/statistica-object-model-guide/libraries/whengraphdatachangeaction-enumeration.htm"
+    reason: >-
+      The old Statistica Object Model menu lists this topic but the package does not ship it
+      (traced 2026-11-13).
+
   # NEW-B: verify false findings. Delete these once NEW-B is fixed and the versions re-run.
   - code: VERIFY_TOC_ENTRY_MISSING
     decision: logged

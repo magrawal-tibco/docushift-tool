@@ -100,7 +100,7 @@ Ready when:
 |---|---|
 | **Merge rule:** all-or-nothing siblings was measured and rejected (pages more than double). **The user chose pages by menu depth instead, EMS 10.5.1 first** (Phase 78, DOCOPS-367): 214 pages for 10.5.1 (159 today), older EMS versions unchanged. Waiting for approval of the Phase 78 plan; the build is Mon 16, and 10.5.1 goes out with R2 as one commit (about 400 files). | Approval Fri 13; build Mon 16 |
 | Writers' draft comments published in the original help ("Draft comments:"; 16 versions, 7 families; `source`): drop them in conversion? | Writers, after 30 Nov |
-| Statistica and Data Virtualization: most old pages reported missing (checker or real) | Triage, Fri 13 |
+| Statistica 14.4.0 text findings: most are Greek letters the source double-escapes (`&amp;alpha;`, so the old site showed the literal code, and our page shows the letter): `source`. To check as possibly real: `_templates/Whats-New.md` (25 sentences) and `itrees-results-manager-tab.md` (3). Data Virtualization: 81% of its old findings are cleared by the 12 Nov checker fix. | Triage, Mon 16 |
 | FOCUS 9.3.4 publishes Flare's generated `_globalpages` pages (contents, title): found by the DOCOPS-349 fixer, our converter | Triage, Fri 13 (fold into an existing issue or a new kind) |
 | Spotfire backup run summary → close DOCOPS-283 | Whenever you paste it, by Fri 27 |
 | ibi: confirm the 18 hand-obtained PDF-only versions are on Google Drive → close DOCOPS-281 | By Fri 27 |
