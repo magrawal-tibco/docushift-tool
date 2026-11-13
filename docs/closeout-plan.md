@@ -191,7 +191,7 @@ Without the originals, these versions cannot be checked, now or after 30 Nov. Ba
 | D3 | Which Integration versions to publish | **Karan's decision is final** for the 1,166 versions on his list: 27 to add, 80 to remove, both before go-live (§6; user, 12 Nov) |
 | D4 | Parallel agents for triage and fixes | **Yes** (user, 12 Nov). Not while a batch runs (memory). |
 | D5 | Which fixes go into R2 | **All of them** (user, 12 Nov: "go ahead with the remaining suggested fixes"). Re-conversions Mon 16 – Tue 17; 360's way of applying waits for the staging test. |
-| D6 | The 82 TIBCO versions with no package on the old site | Fri 20 |
+| D6 | The TIBCO versions with no package on the old site: 82 on 12 Nov. **13 Nov:** 23 uploaded by hand (checksums verified), 29 marked not required by the user; **33 left** (`C:/tmp/handzips/still-missing.csv`). 30 are for the user to obtain; 3 BW plug-in additions (K3) have never been tried, so the backup script fetches them after batch-fixes ends (it deletes workspace ZIPs). | Fri 20 |
 | D7 | Delta before go-live: which new versions from Δ1 go into R2, and the cut-off for hand-supplied ZIPs | Mon 16, from the refresh list. Recommendation: all of Δ1, and ZIPs received by Tue 17 noon; anything later goes in R3 (§6a). |
 
 ## 8. Reporting a problem: Jira and the UAT sheet

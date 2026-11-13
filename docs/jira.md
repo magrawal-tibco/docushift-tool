@@ -97,6 +97,7 @@ This table says only what changes in Jira when an event happens.
   AEM report list (`reports/verify/aem-content-missing.csv`, wip links); 22 TIBCO repos have content-fix ahead of wip, merge awaits the user.
 - 2026-11-12 — Small-family wave (Scribe, BusinessEvents, Cloud): DOCOPS-360–363 created under DOCOPS-96 (AI & CI by edit; 361 In
   Progress, fixed); DOCOPS-344 widened to pages served nearly empty (renamed, note); DOCOPS-351 note (BE). Flogo PAYG `logged`; BE, Scribe re-run.
+- 2026-11-13 — TIBCO Drive backup: 23 ZIPs the user downloaded by hand were uploaded with checksums verified (`C:/tmp/zip-backup/upload_hand.py`; MDM GDS ZIP 1-1-0 filed as 1.1.1, which the user confirmed is the same package); 29 versions marked `not-required` in the ledger, which the backup script now counts as finished. 1,985 of 2,018 done; 33 left. DOCOPS-360: the `&lt;` test renders correctly on staging (FTL 7.3.0); backslash in normal text is the same kind (Foresight test page 53c7ee8). R1 group 3 is visible; iProcess and BusinessConnect pushed to wip at 14:55.
 - 2026-11-12 — Team requirements logged under DOCOPS-7 (Content Migration, label `team-requirement`): DOCOPS-355 Messaging
   Docusaurus (0.5, In Progress), 356 iProcess offline HTML for CHM (0.5, Backlog, Dec), 357 Scribe redirects from help.scribesoft.com
   (0.5, Backlog), 358 Streaming build hand-off + ModelOps to confirm (0.25, In Progress), 359 PRISM / build-script integration (1, In Progress).
