@@ -52,10 +52,10 @@ areas:
     name: Converting the documentation
     team: TechDocs
     status: on track
-    note: Karan's additions, releases since 5 Nov and the chosen fixes are converted Mon 16 to Wed 18.
+    note: Karan's 27 additions and the EMS, BusinessEvents and ibi fixes are converted (Fri 13); releases since 5 Nov follow Mon 16 to Wed 18.
     plan: "§3"
     next: 2026-11-16
-    next_step: Convert Karan's additions, the new releases and the fixes for release 2 (to Wed 18)
+    next_step: Convert the releases since 5 Nov and the remaining fixes for release 2 (to Wed 18)
     jira: [DOCOPS-5, DOCOPS-139, DOCOPS-153, DOCOPS-170]
     measure: conversion
 
@@ -63,10 +63,10 @@ areas:
     name: Publishing to the new site
     team: TechDocs
     status: at risk
-    note: Release 1 started Fri 13 (9 repos on wip) but staging had not rebuilt them after 2 hours, so the rest is held until Digital Platform says how staging builds; release 2 Thu 19, release 3 Thu 26, release 4 early December.
+    note: Release 1 is going out a group at a time as staging rebuilds (2 to 10 hours each); 16 TIBCO repos are out, Data Management is waiting, and MFT, BPM, TRA and BusinessWorks follow; ibi waits for Digital Platform's weekend refresh. Release 2 Thu 19, release 3 Thu 26, release 4 early December.
     plan: "§3, §2"
-    next: 2026-11-13
-    next_step: Release 1, in four groups
+    next: 2026-11-16
+    next_step: Finish release 1 (TIBCO over the weekend, ibi on Monday)
     jira: [DOCOPS-313]
     measure: publishing
 
@@ -117,10 +117,10 @@ areas:
     name: Which Integration versions to publish (Karan's list)
     team: TechDocs
     status: on track
-    note: Engineering's list is final for 1,166 Integration versions; the decisions are written into the catalog Fri 13, and 27 versions are added and 80 removed before go-live.
+    note: Engineering's list is final for 1,166 Integration versions; the decisions are in the catalog, the 80 removals and 26 of the 27 additions are ready for release 2, and one PDF-only addition has no site repository yet.
     plan: "§6"
     next: 2026-11-16
-    next_step: Remove the 80 from the repositories; add the 27 with release 2 (Thu 19)
+    next_step: Out with release 2 (Thu 19); a repository for the Integration Platform family, or drop that one addition
     jira: [DOCOPS-364]
     measure: karan
     waiting_on:
@@ -166,7 +166,7 @@ areas:
     name: Backups of the original help packages
     team: TechDocs
     status: on track
-    note: TIBCO is on the shared drive (1,933 of 2,015 versions; 82 have no package on the old site), ibi on Google Drive, Spotfire copy started 12 Nov.
+    note: TIBCO is on the shared drive (1,988 of 2,018 versions; 30 are being obtained by hand, 29 more marked not needed), ibi on Google Drive, Spotfire copy started 12 Nov.
     plan: "§3, §5"
     next: 2026-11-27
     next_step: Close the backups (Spotfire run summary; ibi count confirmed)
@@ -207,8 +207,8 @@ areas:
     name: EMS 10.5.1 in its new page layout
     team: TechDocs
     status: on track
-    note: Pages grouped by menu depth, 214 pages instead of 159 today, older EMS versions unchanged; plan approved Fri 13 (Phase 78).
+    note: Built and ready on Fri 13, three days early: 217 pages instead of 159, every old link still redirected, older EMS versions unchanged.
     plan: "§5"
-    next: 2026-11-16
-    next_step: Build it; out with release 2 (Thu 19)
+    next: 2026-11-19
+    next_step: Out with release 2 (Thu 19), then checked on staging
     jira: [DOCOPS-367]

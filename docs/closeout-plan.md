@@ -296,6 +296,7 @@ Claude creates, updates and closes Jira issues itself, within these limits.
 1. Updates `config/status-areas.yaml` from the night's results: status, next dates.
 2. Runs `.venv/Scripts/python scratch/fetch_docops.py`.
 3. Runs `.venv/Scripts/python scratch/build_conversion_status.py`.
+4. Runs `scratch/publish_status.sh`: copies the page to `C:/github/apps-script/report.html`, `clasp push`, and moves the shared web-app deployment ("TIBCO++ Docs Migration Status") to the new version, so others see the live report (user, 13 Nov). **Every** rebuild of the page is followed by this step, not only the morning one.
 
 The page and `reports/status-latest.md` are then current. Built 13 Nov (DOCOPS-280).
 
