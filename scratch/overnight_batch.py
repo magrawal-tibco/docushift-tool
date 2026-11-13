@@ -36,7 +36,10 @@ def main() -> None:
 
     with open(ROOT / "config" / "versions.csv", encoding="utf-8-sig", newline="") as fh:
         rows = [r for r in csv.DictReader(fh)
-                if r["_verify_status"] and r["_bu"] == a.bu and r["slug"] not in a.exclude_product]
+                if r["_verify_status"] and r["_bu"] == a.bu and r["slug"] not in a.exclude_product
+                # Karan's list (DOCOPS-364): a version declined by hand is removed in K2, never checked.
+                and not (r.get("migrate_decision") == "do_not_migrate"
+                         and r.get("migrate_decision_source") == "manual")]
     by_product: dict[tuple[str, str], list[dict]] = defaultdict(list)
     for r in rows:
         by_product[(r["_family"], r["slug"])].append(r)
@@ -54,7 +57,9 @@ def main() -> None:
                         lines.append(f"verify --target-dir {a.target} --product {slug} --version {r['version']}")
                         counts[family] += 1
             elif a.recheck or versions[-1]["_verify_status"] in LEFT:
-                lines.append(f"verify --target-dir {a.target} --product {slug} --latest-only")
+                # The exact version, not --latest-only: the newest published one may be on
+                # Karan's remove list, and --latest-only would still pick it.
+                lines.append(f"verify --target-dir {a.target} --product {slug} --version {versions[-1]['version']}")
                 counts[family] += 1
     Path(a.out).parent.mkdir(parents=True, exist_ok=True)
     Path(a.out).write_text("\n".join(lines) + "\n", encoding="utf-8")
