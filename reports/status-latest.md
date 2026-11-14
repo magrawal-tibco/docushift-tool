@@ -1,10 +1,10 @@
 # Documentation migration: where we stand
 
-As of 14 Nov 2026, 08:20 (Jira as of Sat 14 Nov).
+As of 14 Nov 2026, 14:12 (Jira as of Sat 14 Nov).
 
 - **Go-live:** Mon 23 Nov, in 9 days. **Old site switched off:** Mon 30 Nov, in 16 days.
-- **746 documentation versions are in the migration.** Converted: 733 (98%). In the new site's repositories: 733 (98%). Checked page by page on the staging site: 171 of the 733 in the repositories.
-  - TIBCO: 522 versions; 511 converted, 511 in the repositories, 171 checked on staging.
+- **746 documentation versions are in the migration.** Converted: 733 (98%). In the new site's repositories: 733 (98%). Checked page by page on the staging site: 175 of the 733 in the repositories.
+  - TIBCO: 522 versions; 511 converted, 511 in the repositories, 175 checked on staging.
   - IBI: 202 versions; 200 converted, 200 in the repositories, 0 checked on staging.
   - Spotfire: 22 versions; 22 converted, 22 in the repositories, 0 checked on staging.
 
@@ -12,9 +12,9 @@ As of 14 Nov 2026, 08:20 (Jira as of Sat 14 Nov).
 
 - **Converting the documentation**: on track (733 of 746 versions done). Karan's 27 additions and the EMS, BusinessEvents and ibi fixes are converted (Fri 13); releases since 5 Nov follow Mon 16 to Wed 18. Next, Mon 16 Nov: Convert the releases since 5 Nov and the remaining fixes for release 2 (to Wed 18). Owner: TechDocs.
 - **Publishing to the new site**: at risk (733 of 746 versions done). Release 1 is going out a group at a time as staging rebuilds (2 to 10 hours each); 16 TIBCO repos are out, Data Management is waiting, and MFT, BPM, TRA and BusinessWorks follow; ibi waits for Digital Platform's weekend refresh. Release 2 Thu 19, release 3 Thu 26, release 4 early December. Next, Mon 16 Nov: Finish release 1 (TIBCO over the weekend, ibi on Monday). Owner: TechDocs.
-- **Checking the new site (staging)**: on track (171 of 733 versions done). Every newest version is checked page by page on staging before go-live, overnight; older versions follow after go-live. Next, Mon 16 Nov: Read the weekend's checks (TIBCO and ibi newest versions). Owner: TechDocs.
-- **Problems found by the checks**: on track (275 of 287 finding types done). Each kind of problem gets one Jira issue at the morning triage and is fixed in a planned window; every fix built so far goes into release 2. Next, Mon 16 Nov: Sort the weekend's findings; re-convert with the fixes (Mon 16 to Tue 17). Owner: TechDocs.
-- **Go-live blockers on the new site**: blocked (0 of 2 Jira items done). 61 of the 73 newest BW plug-in versions are not served on staging (Critical); pages placed under a heading row are hidden from the staging menu or not found. Next, Fri 20 Nov: Go / no-go: served, or a date from Digital Platform. Owner: Digital Platform.
+- **Checking the new site (staging)**: on track (175 of 733 versions done). Every newest version is checked page by page on staging before go-live, overnight; older versions follow after go-live. Next, Mon 16 Nov: Read the weekend's checks (TIBCO and ibi newest versions). Owner: TechDocs.
+- **Problems found by the checks**: on track (275 of 288 finding types done). Each kind of problem gets one Jira issue at the morning triage and is fixed in a planned window; every fix built so far goes into release 2. Next, Mon 16 Nov: Sort the weekend's findings; re-convert with the fixes (Mon 16 to Tue 17). Owner: TechDocs.
+- **Go-live blockers on the new site**: blocked (0 of 2 Jira items done). Staging cuts product folder names after 50 characters, which moves 92 products to other addresses and puts 24 of them on top of each other (Critical); 9 more versions are not served at all; pages under a heading row are hidden from the menu. Next, Fri 20 Nov: Go / no-go: served, or a date from Digital Platform. Owner: Digital Platform.
 - **Which Integration versions to publish (Karan's list)**: on track (28 of 107 changes done). Engineering's list is final for 1,166 Integration versions; the decisions are in the catalog, the 80 removals and 26 of the 27 additions are ready for release 2, and one PDF-only addition has no site repository yet. Next, Mon 16 Nov: Out with release 2 (Thu 19); a repository for the Integration Platform family, or drop that one addition. Owner: TechDocs.
 - **Releases since 5 Nov (delta migration)**: on track. The catalog was last refreshed on 5 Nov; it is refreshed Mon 16 and for the last time Fri 27, before the old site closes. Next, Mon 16 Nov: Refresh the catalog and list what is new. Owner: TechDocs.
 - **Old links keep working (redirects)**: at risk (1 of 4 Jira items done). Go-live needs the new site to load our redirect maps, or a date for it; no date is recorded yet (to confirm). Old addresses for help with no map are collected while the old site is up. Next, Fri 20 Nov: Go / no-go: redirect maps loaded, or a date. Owner: Digital Platform.
@@ -60,12 +60,12 @@ Work started Fri 25 Sep, 50 days ago. Effort logged in Jira: 65.5 points done, 1
 - Fri 27 Nov, Backups of the original help packages: Close the backups (Spotfire run summary; ibi count confirmed)
 - after 30 Nov, Translated help: Check the translated help on the new site
 - after 30 Nov, Writers' spot-checks: Writers spot-check each family
-- 49 kinds of problem found by the checks, 12 still to sort at the morning triage
+- 50 kinds of problem found by the checks, 13 still to sort at the morning triage
 - 52 open items in Jira
 
 **Digital Platform**
 
-- Fri 20 Nov, Go-live blockers on the new site: Serve the 61 BW plug-in versions on staging, or give a date
+- Fri 20 Nov, Go-live blockers on the new site: Keep full product folder names in the address (50-character limit), and serve the 9 missing versions
 - Fri 20 Nov, Go-live blockers on the new site: Show pages under heading rows in the staging menu, or agree that we restructure our menus
 - Fri 20 Nov, Old links keep working (redirects): Load the redirect maps on the new site, or give a date
 - to confirm, Problems found by the checks: Answer the site problems reported in the UAT sheet

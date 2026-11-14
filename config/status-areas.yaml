@@ -100,14 +100,14 @@ areas:
     name: Go-live blockers on the new site
     team: Digital Platform
     status: blocked
-    note: 61 of the 73 newest BW plug-in versions are not served on staging (Critical); pages placed under a heading row are hidden from the staging menu or not found.
+    note: Staging cuts product folder names after 50 characters, which moves 92 products to other addresses and puts 24 of them on top of each other (Critical); 9 more versions are not served at all; pages under a heading row are hidden from the menu.
     plan: "§4"
     next: 2026-11-20
     next_step: "Go / no-go: served, or a date from Digital Platform"
     jira: [DOCOPS-346, DOCOPS-351]
     waiting_on:
       - team: Digital Platform
-        what: Serve the 61 BW plug-in versions on staging, or give a date
+        what: Keep full product folder names in the address (50-character limit), and serve the 9 missing versions
         due: 2026-11-20
       - team: Digital Platform
         what: Show pages under heading rows in the staging menu, or agree that we restructure our menus
