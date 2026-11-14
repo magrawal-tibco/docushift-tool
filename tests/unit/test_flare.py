@@ -1152,6 +1152,73 @@ def test_a_step_list_does_not_merge_across_prose(tmp_path: Path) -> None:
     assert "1. Open the console.\n\nThen, from a shell:" in body
 
 
+def test_a_merged_list_keeps_what_was_written_straight_into_it(tmp_path: Path) -> None:
+    """Flogo VS Code 1.3.5 `Extension-with-Dev-Containers`: step 5's `docker commit`
+    and its two sub-steps sit in an `<ol data-mc-continue>` outside any `<li>`, and
+    the merge moved only the items (DOCOPS-370)."""
+    files = basic()
+    files["html/Content/intro.htm"] = topic(
+        "Introduction",
+        "<ol><li><p>List the containers.</p></li></ol>"
+        "<ol data-mc-continue='true'><li>Commit it:</li><pre>docker commit c img</pre>"
+        "<ol><li>Replace c.</li></ol></ol>"
+        "<ol start='3'><li><p>Push it.</p></li></ol>",
+    )
+
+    body = run(tmp_path, files).body("Content/intro.md")
+
+    assert (
+        "1. List the containers.\n\n2. Commit it:\n\n   ```\n   docker commit c img\n   ```\n\n"
+        "   1. Replace c.\n\n3. Push it."
+    ) in body
+
+
+def test_a_merged_list_keeps_a_stray_picture_and_table(tmp_path: Path) -> None:
+    """Control Plane 1.20.0 `developer-hub` (`<ul><p><img/></p><li>`) and EDISIM
+    6.21.0 (`<li>..</li><p>..</p><table>`) each lost them in the merge."""
+    files = basic()
+    files["html/Content/images/shot.png"] = "png"
+    files["html/Content/intro.htm"] = topic(
+        "Introduction",
+        "<ul><li>Import.</li></ul><ul><p><img src='images/shot.png'/></p><li>Refresh.</li></ul>"
+        "<ul><li>Comparator.</li></ul><ul><li>Viewer.</li><p>Other products:</p>"
+        "<table><tr><th>Product</th></tr><tr><td>Instream</td></tr></table></ul>",
+    )
+
+    body = run(tmp_path, files).body("Content/intro.md")
+
+    assert "- Import.\n\n![](images/shot.png)\n\n- Refresh." in body
+    assert "- Viewer.\n\n  Other products:\n\n  | Product |\n  | --- |\n  | Instream |" in body
+
+
+def test_a_labelled_procedure_is_never_merged_into_the_one_before(tmp_path: Path) -> None:
+    """Control Plane 1.20.0 `Configuring-monitoring-for-machines`: four `<ol
+    class="steps">`, each with its "Procedure" label and `<b>` title ahead of
+    step 1. Merged, two titles vanished and their steps ran on as 5-7 (DOCOPS-370)."""
+    def procedure(title: str, *steps: str) -> str:
+        return (
+            "<ol class='steps' data-mc-autonum='Procedure'><span class='autonumber'>"
+            f"<span class='stephead'>Procedure</span></span><b>{title}</b>"
+            + "".join(f"<li><p>{step}</p></li>" for step in steps) + "</ol>"
+        )
+
+    files = basic()
+    files["html/Content/intro.htm"] = topic(
+        "Introduction",
+        procedure("To Add an Event", "Add.", "Save.")
+        + procedure("To Clear a Configuration", "Clear.")
+        + "<ol><b>To Delete</b><li>Delete.</li></ol>",
+    )
+
+    body = run(tmp_path, files).body("Content/intro.md")
+
+    assert (
+        "**Procedure** **To Add an Event**\n\n1. Add.\n2. Save.\n\n"
+        "**Procedure** **To Clear a Configuration**\n\n1. Clear.\n\n"
+        "**To Delete**\n\n1. Delete."
+    ) in body
+
+
 def test_a_text_popup_is_kept_apart_from_the_words_around_it(tmp_path: Path) -> None:
     """`sfire-dsc/7.1.0`: "PCA Apply1This operator is deprecated" (R5-13)."""
     files = basic()

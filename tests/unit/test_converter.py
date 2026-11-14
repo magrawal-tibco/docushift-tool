@@ -395,6 +395,48 @@ def test_a_written_page_has_no_backslash_escape_aem_shows_literally() -> None:
     assert repairs.get("R002").detect(page) == 0
 
 
+def test_samp_and_var_in_raw_html_are_rewritten_only_when_the_switch_is_on() -> None:
+    """DOCOPS-371: AEM drops `<samp>`/`<var>` with their text ("The supported codes
+    are,, and", Substation ES 2.14.0). The walk writes them as Markdown already;
+    in a passthrough table they stay tags, and `aem.inline_tags_rewrite` renames
+    them -- R003's rule, so a page converted with it on never needs R003."""
+    from docushift import repairs
+    from docushift.converter.driver import _render
+    from docushift.transforms import markdown
+
+    html = ("<p>Run <samp>ls</samp> as <var>user</var>.</p>"
+            "<table><tr><th>a</th></tr><tr><td><p>Codes <samp>1</samp> and"
+            " <var class='varname'>Code</var>.</p><p>More.</p></td></tr></table>")
+    body = markdown.Renderer().render(markdown.parse(html).body)
+    document = Document(source=Path("t.htm"), relative=PurePosixPath("t.md"), title="", body=body)
+
+    off = _render(document)
+    on = _render(document, inline_tags_rewrite=True)
+
+    assert off.startswith("Run `ls` as *user*.\n\n<table>")
+    assert "<samp>1</samp>" in off and '<var class="varname">Code</var>' in off
+    assert on == off.replace("<samp>1</samp>", "<code>1</code>").replace(
+        '<var class="varname">Code</var>', '<em class="varname">Code</em>')
+    assert repairs.get("R003").detect(off) == 2 and repairs.get("R003").detect(on) == 0
+
+
+def test_the_inline_tags_switch_keys_the_inputs_only_when_on(
+    project_root: Path, config, catalog, product, version
+) -> None:
+    """Shipped `false` re-converts nothing; `true` makes every version stale."""
+    absent = DocumentConverter(config, catalog, findings=FindingsRun("convert"))._inputs_key(product, version)
+    keys = {}
+    for value in ("false", "true"):
+        (project_root / "config" / "converter.yaml").write_text(
+            f"aem:\n  inline_tags_rewrite: {value}\n", encoding="utf-8")
+        fresh = ConfigManager(root_dir=project_root)
+        keys[value] = DocumentConverter(fresh, catalog, findings=FindingsRun("convert"))._inputs_key(
+            product, version)
+
+    assert keys["false"] == absent
+    assert keys["true"] != absent
+
+
 def test_identifiers_reach_the_topics_first_and_only_write(
     config, catalog, product, version, extracted, fake_engine
 ) -> None:

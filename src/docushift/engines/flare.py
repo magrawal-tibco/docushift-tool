@@ -1251,6 +1251,11 @@ def _merge_list_continuations(container: Tag) -> None:
     EMS it is the example for the whole list, not for its last bullet. A
     `p.ListContinue` still joins any list, because the class is the author
     saying so.
+
+    **A list with a lead of its own is a list of its own** (DOCOPS-370). A
+    `data-mc-autonum` label, a title or a picture ahead of the first `<li>` opens
+    a new procedure: merged, Control Plane 1.20.0's "To Clear..." and "To
+    Delete..." lost their titles and ran on as steps 5-7 of "To Add an Event".
     """
     for parent in [container, *container.find_all(True)]:
         if not getattr(parent, "decomposed", False):
@@ -1280,12 +1285,21 @@ def _merge_once(parent: Tag) -> bool:
         ):
             items[-1].append(sibling.extract())
             return True
-        if sibling.name == node.name:
-            for item in sibling.find_all("li", recursive=False):
-                node.append(item.extract())
+        if sibling.name == node.name and not _opens_its_own(sibling):
+            # Every child, not only the `<li>`s (DOCOPS-370): a `<pre>`, a nested
+            # list or a table written straight into the second list belongs to the
+            # item before it, which `Renderer.list` and `Renderer.rewrite` place.
+            # Moving the items alone deleted the rest -- Flogo VS Code 1.3.5's
+            # `docker commit`, EDISIM 6.21.0's product table.
+            node.extend(list(sibling.children))
             sibling.decompose()
             return True
     return False
+
+
+def _opens_its_own(listing: Tag) -> bool:
+    """A list with a label or a lead of its own, which no merge may swallow."""
+    return bool(autonum_label(listing)) or markdown.list_lead(listing)
 
 
 def _adjacent(node: Tag) -> Tag | None:

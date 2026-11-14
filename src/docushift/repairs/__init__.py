@@ -36,6 +36,9 @@ class Repair:
     fix: Callable[[str], tuple[str, int]]
     confirm: str = ""
     phase: str = ""
+    # A fallback waiting on a decision (R003, DOCOPS-371): left out of a `census`
+    # that names no repair, so it never shows as pending until someone asks for it.
+    optional: bool = False
 
 
 _REGISTRY: dict[str, Repair] = {}
@@ -57,4 +60,4 @@ def registered() -> list[Repair]:
 
 
 # The register is the list of modules imported here, in ID order.
-from docushift.repairs import r001_note_labels, r002_escapes  # noqa: E402,F401
+from docushift.repairs import r001_note_labels, r002_escapes, r003_inline_tags  # noqa: E402,F401

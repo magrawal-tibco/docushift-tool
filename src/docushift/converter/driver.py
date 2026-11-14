@@ -64,7 +64,7 @@ from docushift.reporting.findings import FindingsRun
 # function, and two copies of the naming rule is exactly the failure it forbids.
 from docushift.sync import apirefs
 from docushift.transforms import csh as csh_transform
-from docushift.transforms import escapes, fragments, links
+from docushift.transforms import escapes, fragments, inline_tags, links
 from docushift.transforms.assets import AssetCopier, Counts
 from docushift.utils import textfile
 from docushift.utils.csvio import release_year
@@ -755,7 +755,7 @@ class DocumentConverter:
                 document.csh = owned.get(str(relative), [])
             path = staging / Path(*relative.parts)
             path.parent.mkdir(parents=True, exist_ok=True)
-            textfile.write_text(path, _render(document))
+            textfile.write_text(path, _render(document, self.config.inline_tags_rewrite))
 
     def _synthesize(
         self,
@@ -778,7 +778,7 @@ class DocumentConverter:
         for document in synthesis.documents:
             path = staging / Path(*document.relative.parts)
             path.parent.mkdir(parents=True, exist_ok=True)
-            textfile.write_text(path, _render(document))
+            textfile.write_text(path, _render(document, self.config.inline_tags_rewrite))
 
         title = f"{product.display_name} {version.version}".strip()
         textfile.write_text(
@@ -1210,6 +1210,10 @@ class DocumentConverter:
                 self._pages(slug, number),
             ),
         }
+        if self.config.inline_tags_rewrite:
+            # DOCOPS-371. Only when on, so the switch's shipped `false` leaves every
+            # recorded key -- and so every converted version -- current.
+            shaping["inline_tags_rewrite"] = True
         if not self.config.is_primary_locale():
             # Phase 57 keyed a localized run on its "Online Help" label. The title
             # is the product and version since 2026-11-14 (`display_name` above
@@ -1351,7 +1355,7 @@ class DocumentConverter:
         return stats
 
 
-def _render(document: Document) -> str:
+def _render(document: Document, inline_tags_rewrite: bool = False) -> str:
     """One Markdown file: frontmatter, then the body.
 
     Frontmatter is emitted only when there is something to say. An empty `---`
@@ -1362,6 +1366,10 @@ def _render(document: Document) -> str:
     tree (`transforms/escapes.py`, DOCOPS-360): AEM shows both as typed. Here rather
     than in `markdown.escape`, because whether a backslash may stand alone depends on
     the character after it, which a text node does not know.
+
+    `inline_tags_rewrite` (`config/converter.yaml`, off by default) first writes
+    `<samp>` and `<var>` as code and emphasis, R003's rule (DOCOPS-371): AEM drops
+    them with their text. The walk already does so in Markdown; this reaches raw HTML.
     """
     lines: list[str] = []
     if document.title:
@@ -1370,7 +1378,10 @@ def _render(document: Document) -> str:
         lines.append(f"{key}: {_scalar(document.frontmatter[key])}")
     if document.csh:
         lines.append(f"csh: {csh_transform.frontmatter_value(document.csh)}")
-    body = escapes.fix_markdown(document.body, frontmatter=False).text.rstrip("\n")
+    body = document.body
+    if inline_tags_rewrite:
+        body = inline_tags.fix_markdown(body, frontmatter=False).text
+    body = escapes.fix_markdown(body, frontmatter=False).text.rstrip("\n")
     if not lines:
         return body + "\n"
     return "---\n" + "\n".join(lines) + "\n---\n\n" + body + "\n"

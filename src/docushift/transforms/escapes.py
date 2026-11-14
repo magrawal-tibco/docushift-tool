@@ -139,21 +139,40 @@ def fix_markdown(text: str, frontmatter: bool = True) -> Fixed:
     has no front matter yet when it is fixed.
     """
     result = Fixed(text)
-    head = ""
-    if frontmatter and (matter := _FRONTMATTER.match(text)):
-        head, text = matter.group(0), text[matter.end():]
+    result.text = "".join(
+        _fix_prose(chunk, result) if kind == PROSE else chunk
+        for kind, chunk in split_markdown(text, frontmatter)
+    )
+    return result
 
-    out: list[str] = []
+
+#: The kinds of text `split_markdown` tells apart.
+FRONT, PROSE, CODE, HTML = "front", "prose", "code", "html"
+
+
+def split_markdown(text: str, frontmatter: bool = True) -> list[tuple[str, str]]:
+    """`text` cut into runs of front matter, prose, code and raw HTML, in order.
+
+    Joined back, the runs are `text` exactly. Code is fenced and indented code
+    blocks; a code span is inside prose, for the caller's own tokens to skip. HTML
+    is CommonMark's HTML blocks (see the module docstring). R002 and R003
+    (`transforms/inline_tags.py`) read a page through this one classification.
+    """
+    segments: list[tuple[str, str]] = []
+    if frontmatter and (matter := _FRONTMATTER.match(text)):
+        segments.append((FRONT, matter.group(0)))
+        text = text[matter.end():]
+
     prose: list[str] = []
 
     def flush() -> None:
         if prose:
-            out.append(_fix_prose("".join(prose), result))
+            segments.append((PROSE, "".join(prose)))
             prose.clear()
 
-    def skip(line: str) -> None:
+    def skip(line: str, kind: str = CODE) -> None:
         flush()
-        out.append(line)
+        segments.append((kind, line))
 
     fence = ""          # the open fence's marker, while inside one
     html_end = None     # the open HTML block's end condition: "", or a closing text
@@ -181,7 +200,7 @@ def fix_markdown(text: str, frontmatter: bool = True) -> Fixed:
                     continue
             elif html_end in bare.lower():
                 html_end = None
-            skip(line)
+            skip(line, HTML)
             blank = code = False
             continue
 
@@ -224,18 +243,18 @@ def fix_markdown(text: str, frontmatter: bool = True) -> Fixed:
                 tag = _HTML_RAW.match(stripped).group(1).lower()
                 if f"</{tag}>" not in stripped.lower():
                     html_end = f"</{tag}>"
-                skip(line)
+                skip(line, HTML)
                 blank = False
                 continue
             if _HTML_COMMENT.match(stripped):
                 if "-->" not in stripped[4:]:
                     html_end = "-->"
-                skip(line)
+                skip(line, HTML)
                 blank = False
                 continue
             if _HTML_BLOCK.match(stripped) or (blank and _HTML_LONE_TAG.match(stripped)):
                 html_end = ""
-                skip(line)
+                skip(line, HTML)
                 blank = False
                 continue
 
@@ -250,8 +269,7 @@ def fix_markdown(text: str, frontmatter: bool = True) -> Fixed:
         blank = False
 
     flush()
-    result.text = head + "".join(out)
-    return result
+    return segments
 
 
 def count(text: str) -> int:

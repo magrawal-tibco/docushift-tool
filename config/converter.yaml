@@ -1,0 +1,17 @@
+# DocuShift converter options
+#
+# Switches that change what `convert` writes, for a decision that is not ours to
+# make yet. Every key below is also the built-in default (`config.CONVERTER_DEFAULTS`),
+# so a missing file converts exactly as this one does. Turning a switch on makes
+# the versions converted before it stale (`convert` re-runs them); off adds nothing
+# to that key, so shipping this file re-converts nothing.
+
+version: "1.0"
+
+aem:
+  # DOCOPS-371. AEM removes `<samp>` and `<var>` with their text ("The supported
+  # codes are,, and", Mainframe Substation ES 2.14.0). Keeping them is the Digital
+  # Platform's fix. If they cannot, turn this on: in Markdown prose `<samp>x</samp>`
+  # becomes `x` as code and `<var>x</var>` *x*; in raw HTML (tables) they become
+  # `<code>` and `<em>`. R003 rewrites already-published trees the same way.
+  inline_tags_rewrite: false

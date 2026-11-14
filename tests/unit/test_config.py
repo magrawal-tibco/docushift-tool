@@ -153,6 +153,23 @@ def test_a_localized_run_publishes_to_loc_and_has_no_resources_tree(project_root
         cfg.resources_tree_name("tibco", "messaging")
 
 
+def test_the_inline_tags_switch_is_off_unless_the_file_says_true(config: ConfigManager) -> None:
+    """DOCOPS-371's fallback ships off: no file, the shipped file, and anything but
+    YAML `true` all leave it off."""
+    from docushift.config import CONVERTER_DEFAULTS
+
+    assert config.load_converter() == CONVERTER_DEFAULTS
+    assert config.inline_tags_rewrite is False
+    shipped = Path(__file__).resolve().parents[2] / "config" / "converter.yaml"
+    assert yaml.safe_load(shipped.read_text(encoding="utf-8"))["aem"]["inline_tags_rewrite"] is False
+
+    for text, expected in (("aem:\n  inline_tags_rewrite: true\n", True),
+                           ("aem:\n  inline_tags_rewrite: 'yes'\n", False),
+                           ("aem: off\n", False)):
+        config.converter_path.write_text(text, encoding="utf-8")
+        assert ConfigManager(root_dir=config.root_dir).inline_tags_rewrite is expected
+
+
 def test_publishing_defaults_apply_with_no_file(config: ConfigManager) -> None:
     """Nothing publishes until Stage 7; a fresh checkout must still name a folder.
 
