@@ -23,6 +23,20 @@
   - **R1:** iProcess shows on staging (16:46). Fulfillment pushed to `wip` at 16:47 and showed by 18:55. **Data Management** pushed at 18:56 (`bcf95df`, about 1,050 files) has **still not shown at Sat 06:34**, 11½ h later: the probe page keeps its notes unlabelled. **R1 is held** (MFT, BPM, TRA, BusinessWorks) until it shows or Digital Platform says whether that build failed. **Sat 07:02 (user):** re-triggered with a small real change, the 8 online-help menu titles from "Online Help" to "<product name> <version>" (`0c6f0bd`). The user said to go on with the plan: **MFT** pushed at 07:03 (`5f38c6f`, about 1,450 files). Both are checked about 08:35; BPM next.
   - **Δ1 test refresh** (Fri, in batch-fixes, nothing written): **16 versions added** since 5 Nov, 0 new products, 6 in-scope versions now retired. The dry run does not name the 16; the real refresh on Mon 16 lists them for D7.
   - **Sat 07:30, agents (user: use the free resources):** (1) the menu title "<product name> <version>" in the converter and merge step, plus an in-place script for existing trees; (2) repair R002 for DOCOPS-360 (`\<` → `&lt;`, prose `\\` → `\`/`&#92;`) and the converter change; (3) and (4) triage of Batch 2, split by kind. All are read-only or on their own branches; nothing is published until reviewed.
+  - **Sat 08:20, agent results:**
+    - menu title merged (`6b41d78`), repair R002 merged (`0c48a15`), tests 502 passed;
+    - Batch 2 triaged: entries merged (`e0cff51`) and 44 versions moved; TIBCO stands at 124 logged, 40 lost, 9 issues and 17 clean of 190 checked;
+    - new issues DOCOPS-370 (ours, content directly inside a list dropped, 1 SP) and DOCOPS-371 (Digital Platform, `<samp>`/`<var>` dropped);
+    - DOCOPS-346 widened (20 more versions, MFT, ActiveSpaces menu);
+    - status page published (deployment @3).
+  - **R1:** TRA was pushed (pre-K2) at 08:11. BPM (2,072-file commit) is held until Data Management or MFT shows; BusinessWorks (pre-K2) follows TRA. Data Management had still not shown at 08:22.
+  - **Open questions for the user (Monday):**
+    - pictures in dot folders: Digital Platform fixes the DAM, or we rename the folders;
+    - `.wmf`/`.emf`/`.bmp`/`.dib`: convert to PNG, or accept;
+    - remove the DOCOPS-347 catch-all after Batch 3;
+    - the list fix (370) in R2;
+    - accept the "nested under the guide page" menu moves;
+    - `<samp>`/`<var>`: wait for AEM, or write other tags.
   - **Batch 2 done** (Fri 23:03): 100 checks, 60 with findings. Errors by kind are in `reports/verify/batch2-prep-2026-11-14.md` for Monday.
   - **DOCOPS-360, second case (user's spot check, 13:30):** a backslash in normal text shows doubled on staging (`Systems\\ArchiverDemo`); in code text it is fine. About 11,600 occurrences on about 1,970 TIBCO pages. Test page pushed to `wip` (Foresight 6.0.0 "General Configuration After Installation", 53c7ee8). Once it and the FTL `&lt;` page show on staging, one in-place repair covers both cases for R2, plus a converter change. **UAT sheet row:** add it once the test result is in.
   - **DOCOPS-343 follow-up:** the first fix broke one EMS link per version. It is fixed (`9718ae6`), and EMS 10.4.0–10.5.1 are re-converted and committed per version on `content-fix` (R2). The link check has 0 errors.
