@@ -1,0 +1,93 @@
+﻿family,current folder,proposed folder,length,published versions,product name,how
+activespaces,tibco-silver-fabric-enabler-for-activespaces-enterprise-edition,tibco-silver-fabric-enabler-for-activespaces-ee,47,1,TIBCO Silver® Fabric Enabler for ActiveSpaces® Enterprise Edition,rules
+adapters,tibco-activematrix-adapter-for-database-tibco-business-studio,tibco-adapter-database-business-studio,38,1,TIBCO ActiveMatrix® Adapter for Database (TIBCO Business Studio™),rules
+adapters,tibco-activematrix-adapter-for-files-for-unix-win-tibco-business-studio,tibco-adapter-files-unix-win-business-studio,44,1,TIBCO ActiveMatrix® Adapter for Files for Unix/Win (TIBCO Business Studio™),rules
+adapters,tibco-activematrix-adapter-for-jd-edwards-enterpriseone,tibco-adapter-jd-edwards-enterpriseone,38,1,TIBCO ActiveMatrix® Adapter for JD Edwards EnterpriseOne,rules
+adapters,tibco-activematrix-adapter-for-sap-tibco-business-studio,tibco-adapter-sap-business-studio,33,1,TIBCO ActiveMatrix Adapter for SAP (TIBCO Business Studio),rules
+businessconnect,tibco-businessconnect-configstore-management-interface-protocol,tibco-businessconnect-cmi-protocol,34,1,TIBCO BusinessConnect™ ConfigStore Management Interface Protocol,rules
+businessconnect,tibco-businessconnect-container-edition-configstore-management-interface-protocol,tibco-businessconnect-ce-cmi-protocol,37,3,TIBCO BusinessConnect™ Container Edition ConfigStore Management Interface Protocol,rules
+businessconnect,tibco-businessconnect-container-edition-ebxml-protocol,tibco-businessconnect-ce-ebxml-protocol,39,2,TIBCO BusinessConnect™ Container Edition - ebXML Protocol,rules
+businessconnect,tibco-businessconnect-container-edition-edi-protocol-hipaa-edition-powered-by-instream,tibco-businessconnect-ce-edi-protocol-hipaa,43,2,TIBCO BusinessConnect™ Container Edition - EDI Protocol HIPAA Edition powered by Instream®,rules
+businessconnect,tibco-businessconnect-container-edition-edi-protocol-powered-by-instream,tibco-businessconnect-ce-edi-protocol,37,3,TIBCO BusinessConnect™ Container Edition - EDI Protocol powered by Instream®,rules
+businessconnect,tibco-businessconnect-container-edition-rosettanet-protocol,tibco-businessconnect-ce-rosettanet-protocol,44,2,TIBCO BusinessConnect™ Container Edition - RosettaNet Protocol,rules
+businessconnect,tibco-businessconnect-container-edition-services-plug-in,tibco-businessconnect-ce-services-plug-in,41,2,TIBCO BusinessConnect™ Container Edition - Services Plug-in,rules
+businessconnect,tibco-businessconnect-container-edition-soap-protocol,tibco-businessconnect-ce-soap-protocol,38,2,TIBCO BusinessConnect™ Container Edition - SOAP Protocol,rules
+businessconnect,tibco-businessconnect-edi-protocol-hipaa-edition-powered-by-instream,tibco-businessconnect-edi-protocol-hipaa,40,1,TIBCO BusinessConnect™ EDI Protocol HIPAA Edition powered by Instream®,rules
+businessconnect,tibco-businessconnect-edi-protocol-powered-by-instream,tibco-businessconnect-edi-protocol,34,2,TIBCO BusinessConnect™ EDI Protocol powered by Instream®,rules
+businessworks,premium-subscription-for-tibco-businessworks-container-edition-and-plug-ins-for-aws-marketplace,premium-subscription-bwce-plug-ins-aws-marketplace,50,1,Premium Subscription for TIBCO BusinessWorks™ Container Edition and Plug-ins for AWS Marketplace,by hand
+businessworks,tibco-activematrix-businessworks-smartmapper-enterprise-server,tibco-businessworks-smartmapper-enterprise-server,49,2,TIBCO ActiveMatrix BusinessWorks™ SmartMapper Enterprise Server,rules
+bw-plugin,tibco-activematrix-businessworks-activeaspects-plug-in,tibco-businessworks-activeaspects-plug-in,41,3,TIBCO ActiveMatrix BusinessWorks™ ActiveAspects Plug-in,rules
+bw-plugin,tibco-activematrix-businessworks-plug-in-component-for-aws-common-services,tibco-bw-plugin-component-aws-common-services,45,5,TIBCO ActiveMatrix BusinessWorks™ Plug-in Component for AWS Common Services,by hand
+bw-plugin,tibco-activematrix-businessworks-plug-in-development-kit,tibco-businessworks-plug-in-development-kit,43,3,TIBCO ActiveMatrix BusinessWorks™ Plug-in Development Kit,rules
+bw-plugin,tibco-activematrix-businessworks-plug-in-for-activespaces,tibco-bw-plugin-activespaces,28,12,TIBCO ActiveMatrix BusinessWorks™ Plug-in for ActiveSpaces®,rules
+bw-plugin,tibco-activematrix-businessworks-plug-in-for-amazon-redshift,tibco-bw-plugin-amazon-redshift,31,1,TIBCO ActiveMatrix BusinessWorks™ Plug-in for Amazon Redshift,rules
+bw-plugin,tibco-activematrix-businessworks-plug-in-for-amazon-s3,tibco-bw-plugin-amazon-s3,25,3,TIBCO ActiveMatrix BusinessWorks™ Plug-in for Amazon S3,rules
+bw-plugin,tibco-activematrix-businessworks-plug-in-for-amazon-sqs-and-sns,tibco-bw-plugin-amazon-sqs-and-sns,34,3,TIBCO ActiveMatrix BusinessWorks™ Plug-in for Amazon SQS and SNS,rules
+bw-plugin,tibco-activematrix-businessworks-plug-in-for-apache-cassandra,tibco-bw-plugin-apache-cassandra,32,2,TIBCO ActiveMatrix BusinessWorks™ Plug-in for Apache Cassandra,rules
+bw-plugin,tibco-activematrix-businessworks-plug-in-for-apache-kafka,tibco-bw-plugin-apache-kafka,28,8,TIBCO ActiveMatrix BusinessWorks™ Plug-in for Apache Kafka,rules
+bw-plugin,tibco-activematrix-businessworks-plug-in-for-apache-pulsar,tibco-bw-plugin-apache-pulsar,29,5,TIBCO ActiveMatrix BusinessWorks™ Plug-in for Apache Pulsar,rules
+bw-plugin,tibco-activematrix-businessworks-plug-in-for-applicability-statement-2-as2-protocol,tibco-bw-plugin-as2-protocol,28,1,TIBCO ActiveMatrix BusinessWorks™ Plug-in for Applicability Statement 2 (AS2 Protocol),by hand
+bw-plugin,tibco-activematrix-businessworks-plug-in-for-azure-cloud-services-azure-data-lake-storage-gen2,tibco-bw-plugin-azure-data-lake-storage-gen2,44,1,TIBCO ActiveMatrix BusinessWorks™ Plug-in for Azure Cloud Services (Azure Data Lake Storage Gen2),by hand
+bw-plugin,tibco-activematrix-businessworks-plug-in-for-big-data,tibco-bw-plugin-big-data,24,1,TIBCO ActiveMatrix BusinessWorks™ Plug-in for Big Data,rules
+bw-plugin,tibco-activematrix-businessworks-plug-in-for-businessconnect,tibco-bw-plugin-businessconnect,31,5,TIBCO ActiveMatrix BusinessWorks™ Plug-in for BusinessConnect™,rules
+bw-plugin,tibco-activematrix-businessworks-plug-in-for-change-data-capture,tibco-bw-plugin-change-data-capture,35,2,TIBCO ActiveMatrix BusinessWorks™ Plug-in for Change Data Capture,rules
+bw-plugin,tibco-activematrix-businessworks-plug-in-for-confidentiality,tibco-bw-plugin-confidentiality,31,1,TIBCO ActiveMatrix BusinessWorks™ Plug-in for Confidentiality,rules
+bw-plugin,tibco-activematrix-businessworks-plug-in-for-data-conversion,tibco-bw-plugin-data-conversion,31,6,TIBCO ActiveMatrix BusinessWorks™ Plug-in for Data Conversion,rules
+bw-plugin,tibco-activematrix-businessworks-plug-in-for-database,tibco-bw-plugin-database,24,5,TIBCO ActiveMatrix BusinessWorks™ Plug-in for Database,rules
+bw-plugin,tibco-activematrix-businessworks-plug-in-for-edi-healthcare-edition,tibco-bw-plugin-edi-healthcare-edition,38,1,TIBCO ActiveMatrix BusinessWorks™ Plug-in for EDI Healthcare Edition,rules
+bw-plugin,tibco-activematrix-businessworks-plug-in-for-edi-standard-edition,tibco-bw-plugin-edi-standard-edition,36,1,TIBCO ActiveMatrix BusinessWorks™ Plug-in for EDI Standard Edition,rules
+bw-plugin,tibco-activematrix-businessworks-plug-in-for-facebook,tibco-bw-plugin-facebook,24,2,TIBCO ActiveMatrix BusinessWorks™ Plug-in for Facebook,rules
+bw-plugin,tibco-activematrix-businessworks-plug-in-for-files-for-unix-and-windows,tibco-bw-plugin-files-for-unix-and-windows,42,2,TIBCO ActiveMatrix BusinessWorks™ Plug-in for Files for Unix and Windows,rules
+bw-plugin,tibco-activematrix-businessworks-plug-in-for-google-bigquery,tibco-bw-plugin-google-bigquery,31,1,TIBCO ActiveMatrix BusinessWorks™ Plug-in for Google BigQuery,rules
+bw-plugin,tibco-activematrix-businessworks-plug-in-for-google-cloud-pub-sub,tibco-bw-plugin-google-cloud-pub-sub,36,2,TIBCO ActiveMatrix BusinessWorks™ Plug-in for Google Cloud Pub/Sub,rules
+bw-plugin,tibco-activematrix-businessworks-plug-in-for-google-cloud-storage,tibco-bw-plugin-google-cloud-storage,36,1,TIBCO ActiveMatrix BusinessWorks™ Plug-in for Google Cloud Storage,rules
+bw-plugin,tibco-activematrix-businessworks-plug-in-for-hl7-with-fhir,tibco-bw-plugin-hl7-with-fhir,29,9,TIBCO ActiveMatrix BusinessWorks™ Plug-in for HL7 with FHIR,rules
+bw-plugin,tibco-activematrix-businessworks-plug-in-for-ibm-mq,tibco-bw-plugin-ibm-mq,22,6,TIBCO ActiveMatrix BusinessWorks™ Plug-in for IBM MQ,rules
+bw-plugin,tibco-activematrix-businessworks-plug-in-for-jd-edwards-enterpriseone,tibco-bw-plugin-jd-edwards-enterpriseone,40,1,TIBCO ActiveMatrix BusinessWorks™ Plug-in for JD Edwards EnterpriseOne,rules
+bw-plugin,tibco-activematrix-businessworks-plug-in-for-large-xml,tibco-bw-plugin-large-xml,25,2,TIBCO ActiveMatrix BusinessWorks™ Plug-in for Large XML,rules
+bw-plugin,tibco-activematrix-businessworks-plug-in-for-marketo,tibco-bw-plugin-marketo,23,1,TIBCO ActiveMatrix BusinessWorks™ Plug-in for Marketo,rules
+bw-plugin,tibco-activematrix-businessworks-plug-in-for-microsoft-dynamics-crm,tibco-bw-plugin-microsoft-dynamics-crm,38,4,TIBCO ActiveMatrix BusinessWorks Plug-in for Microsoft Dynamics CRM,rules
+bw-plugin,tibco-activematrix-businessworks-plug-in-for-microsoft-excel,tibco-bw-plugin-microsoft-excel,31,1,TIBCO ActiveMatrix BusinessWorks™ Plug-in for Microsoft Excel,rules
+bw-plugin,tibco-activematrix-businessworks-plug-in-for-microsoft-sharepoint,tibco-bw-plugin-microsoft-sharepoint,36,3,TIBCO ActiveMatrix BusinessWorks™ Plug-in for Microsoft SharePoint,rules
+bw-plugin,tibco-activematrix-businessworks-plug-in-for-mobile-integration,tibco-bw-plugin-mobile-integration,34,5,TIBCO ActiveMatrix BusinessWorks™ Plug-in for Mobile Integration,rules
+bw-plugin,tibco-activematrix-businessworks-plug-in-for-mongodb,tibco-bw-plugin-mongodb,23,4,TIBCO ActiveMatrix BusinessWorks™ Plug-in for MongoDB,rules
+bw-plugin,tibco-activematrix-businessworks-plug-in-for-netsuite,tibco-bw-plugin-netsuite,24,6,TIBCO ActiveMatrix BusinessWorks™ Plug-in for NetSuite,rules
+bw-plugin,tibco-activematrix-businessworks-plug-in-for-odata-services-for-sap-s-4hana,tibco-bw-plugin-odata-services-for-sap-s-4hana,46,2,TIBCO ActiveMatrix BusinessWorks™ Plug-in for OData Services for SAP S/4HANA,rules
+bw-plugin,tibco-activematrix-businessworks-plug-in-for-oracle-e-business-suite,tibco-bw-plugin-oracle-e-business-suite,39,1,TIBCO ActiveMatrix BusinessWorks™ Plug-in for Oracle E-Business Suite,rules
+bw-plugin,tibco-activematrix-businessworks-plug-in-for-oracle-fusion-cloud-applications-suite,tibco-bw-plugin-oracle-fusion-cloud-apps,40,1,TIBCO ActiveMatrix BusinessWorks™ Plug-in for Oracle Fusion Cloud Applications Suite,rules
+bw-plugin,tibco-activematrix-businessworks-plug-in-for-oracle-tuxedo,tibco-bw-plugin-oracle-tuxedo,29,4,TIBCO ActiveMatrix BusinessWorks™ Plug-in for Oracle Tuxedo,rules
+bw-plugin,tibco-activematrix-businessworks-plug-in-for-osisoft-pi-system,tibco-bw-plugin-osisoft-pi-system,33,2,TIBCO ActiveMatrix BusinessWorks™ Plug-in for OSIsoft PI System,rules
+bw-plugin,tibco-activematrix-businessworks-plug-in-for-peoplesoft,tibco-bw-plugin-peoplesoft,26,4,TIBCO ActiveMatrix BusinessWorks™ Plug-in for PeopleSoft,rules
+bw-plugin,tibco-activematrix-businessworks-plug-in-for-rest-and-json,tibco-bw-plugin-rest-and-json,29,1,TIBCO ActiveMatrix BusinessWorks™ Plug-in for REST and JSON,rules
+bw-plugin,tibco-activematrix-businessworks-plug-in-for-salesforce-com,tibco-bw-plugin-salesforce-com,30,5,TIBCO ActiveMatrix BusinessWorks™ Plug-in for Salesforce.com,rules
+bw-plugin,tibco-activematrix-businessworks-plug-in-for-sap-ariba,tibco-bw-plugin-sap-ariba,25,1,TIBCO ActiveMatrix BusinessWorks™ Plug-in for SAP Ariba,rules
+bw-plugin,tibco-activematrix-businessworks-plug-in-for-sap-business-technology-platform,tibco-bw-plugin-sap-business-technology-platform,48,1,TIBCO ActiveMatrix BusinessWorks™ Plug-in for SAP Business Technology Platform,rules
+bw-plugin,tibco-activematrix-businessworks-plug-in-for-sap-hana-database,tibco-bw-plugin-sap-hana-database,33,1,TIBCO ActiveMatrix BusinessWorks™ Plug-in for SAP HANA Database,rules
+bw-plugin,tibco-activematrix-businessworks-plug-in-for-sap-solutions,tibco-bw-plugin-sap-solutions,29,5,TIBCO ActiveMatrix BusinessWorks™ Plug-in for SAP Solutions,rules
+bw-plugin,tibco-activematrix-businessworks-plug-in-for-sap-successfactors,tibco-bw-plugin-sap-successfactors,34,1,TIBCO ActiveMatrix BusinessWorks™ Plug-in for SAP SuccessFactors,rules
+bw-plugin,tibco-activematrix-businessworks-plug-in-for-servicenow,tibco-bw-plugin-servicenow,26,1,TIBCO ActiveMatrix BusinessWorks™ Plug-in for ServiceNow,rules
+bw-plugin,tibco-activematrix-businessworks-plug-in-for-siebel,tibco-bw-plugin-siebel,22,2,TIBCO ActiveMatrix BusinessWorks™ Plug-in for Siebel,rules
+bw-plugin,tibco-activematrix-businessworks-plug-in-for-smartmapper,tibco-bw-plugin-smartmapper,27,3,TIBCO ActiveMatrix BusinessWorks™ Plug-in for SmartMapper,rules
+bw-plugin,tibco-activematrix-businessworks-plug-in-for-snowflake,tibco-bw-plugin-snowflake,25,3,TIBCO ActiveMatrix BusinessWorks™ Plug-in for Snowflake,rules
+bw-plugin,tibco-activematrix-businessworks-plug-in-for-tibco-auditsafe,tibco-bw-plugin-tibco-auditsafe,31,8,TIBCO ActiveMatrix BusinessWorks™ Plug-in for TIBCO AuditSafe,rules
+bw-plugin,tibco-activematrix-businessworks-plug-in-for-tibco-clarity,tibco-bw-plugin-tibco-clarity,29,1,TIBCO ActiveMatrix BusinessWorks™ Plug-in for TIBCO® Clarity,rules
+bw-plugin,tibco-activematrix-businessworks-plug-in-for-tibco-eftl,tibco-bw-plugin-tibco-eftl,26,1,TIBCO ActiveMatrix BusinessWorks™ Plug-in for TIBCO eFTL™,rules
+bw-plugin,tibco-activematrix-businessworks-plug-in-for-tibco-ftl,tibco-bw-plugin-tibco-ftl,25,9,TIBCO ActiveMatrix BusinessWorks™ Plug-in for TIBCO FTL®,rules
+bw-plugin,tibco-activematrix-businessworks-plug-in-for-tibco-managed-file-transfer,tibco-bw-plugin-tibco-managed-file-transfer,43,3,TIBCO ActiveMatrix BusinessWorks™ Plug-in for TIBCO® Managed File Transfer,rules
+bw-plugin,tibco-activematrix-businessworks-plug-in-for-tibco-patterns,tibco-bw-plugin-tibco-patterns,30,14,TIBCO ActiveMatrix BusinessWorks™ Plug-in for TIBCO® Patterns,rules
+bw-plugin,tibco-activematrix-businessworks-plug-in-for-transaction-insight,tibco-bw-plugin-transaction-insight,35,2,TIBCO ActiveMatrix BusinessWorks™ Plug-in for Transaction Insight®,rules
+bw-plugin,tibco-activematrix-businessworks-plug-in-for-trillium,tibco-bw-plugin-trillium,24,1,TIBCO ActiveMatrix BusinessWorks™ Plug-in for Trillium,rules
+bw-plugin,tibco-activematrix-businessworks-plug-in-for-twitter,tibco-bw-plugin-twitter,23,1,TIBCO ActiveMatrix BusinessWorks™ Plug-in for Twitter,rules
+bw-plugin,tibco-activematrix-businessworks-plug-in-for-workday,tibco-bw-plugin-workday,23,2,TIBCO ActiveMatrix BusinessWorks™ Plug-in for Workday,rules
+bw-plugin,tibco-businessworks-plug-in-for-tibco-auditsafe-for-tibco-platform,tibco-bw-plugin-tibco-auditsafe-tibco-platform,46,1,TIBCO BusinessWorks™ Plug-in for TIBCO® AuditSafe for TIBCO® Platform,by hand
+fulfillment,tibco-product-and-service-catalog-powered-by-tibco-ebx,tibco-product-and-service-catalog-ebx,37,2,TIBCO® Product and Service Catalog powered by TIBCO EBX®,rules
+hawk,tibco-hawk-microagent-for-tibco-activematrix-businessworks-6,tibco-hawk-microagent-businessworks-6,37,2,TIBCO Hawk® Microagent for TIBCO Activematrix BusinessWorks™ 6,rules
+hawk,tibco-hawk-microagent-for-tibco-businessworks-container-edition,tibco-hawk-microagent-bwce,26,1,TIBCO Hawk® Microagent for TIBCO BusinessWorks™ Container Edition,rules
+messaging,tibco-messaging-eclipse-mosquitto-distribution-bridge-enterprise-edition,tibco-messaging-mosquitto-distribution-bridge-ee,48,1,TIBCO® Messaging - Eclipse Mosquitto Distribution - Bridge - Enterprise Edition,by hand
+messaging,tibco-messaging-eclipse-mosquitto-distribution-core-enterprise-edition,tibco-messaging-mosquitto-distribution-core-ee,46,1,TIBCO® Messaging - Eclipse Mosquitto Distribution - Core - Enterprise Edition,by hand
+messaging,tibco-messaging-schema-repository-for-apache-kafka-enterprise-edition,tibco-messaging-schema-repository-kafka-ee,42,2,TIBCO® Messaging - Schema Repository for Apache Kafka - Enterprise Edition,rules
+mft,tibco-managed-file-transfer-platform-server-for-unix,tibco-mft-platform-server-unix,30,3,TIBCO® Managed File Transfer Platform Server for UNIX,rules
+mft,tibco-managed-file-transfer-platform-server-for-windows,tibco-mft-platform-server-windows,33,2,TIBCO® Managed File Transfer Platform Server for Windows,rules
+mft,tibco-managed-file-transfer-platform-server-for-z-linux,tibco-mft-platform-server-z-linux,33,3,TIBCO® Managed File Transfer Platform Server for z/Linux,rules
+platform,tibco-platform-add-on-for-business-process-management,tibco-platform-add-on-for-bpm,29,1,TIBCO® Platform Add-on for Business Process Management,by hand
+streaming,tibco-enterprise-streaming-high-performance-fix-engine,tibco-enterprise-streaming-fix-engine,37,4,TIBCO® Enterprise Streaming - High-Performance FIX Engine,by hand
