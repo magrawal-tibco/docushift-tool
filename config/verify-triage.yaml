@@ -24,6 +24,18 @@ triage:
       AEM serves no alt text when it contains /, : or the command sign (found on
       ibi AI Assistant 9.3.8, 2026-10-23). The Markdown is right; AEM drops it.
 
+  # R001 left a note in GitHub alert form (inside or right after a list).
+  - code: VERIFY_PUBLISHED_CALLOUT_UNRENDERED
+    decision: logged
+    ticket: DOCOPS-313
+    slug: tibco-fulfillment-provisioning
+    version: "3.10.0"
+    path: "*/developers-guide/data-mapping.md"
+    reason: &r001miss >-
+      R001 left one note as `> [!NOTE]` (after a list, or indented in one); AEM shows it
+      with no label. A second R001 pass, for notes in or after lists.
+  - {code: VERIFY_PUBLISHED_CALLOUT_UNRENDERED, decision: logged, ticket: DOCOPS-313, slug: tibco-product-and-service-catalog, version: "5.1.0", path: "*/sid-based-data-modeling-for-the-product-catalog.md", reason: *r001miss}
+
   - code: VERIFY_PUBLISHED_CALLOUT_UNRENDERED
     decision: ours
     ticket: DOCOPS-250
@@ -332,26 +344,601 @@ triage:
       A decorative toolbar icon inside "Debug > Debug Configurations" is dropped; the
       menu path is kept.
 
-  - code: VERIFY_PUBLISHED_IMAGE_BROKEN
-    decision: logged
-    ticket: DOCOPS-347
-    reason: >-
-      A picture not on the served page, or served with other bytes (IBM i pages;
-      EMS SVG diagrams). To trace.
+  # Batch 2 triage, 2026-11-14 (reports/verify/triage-batch2-*-2026-11-14.md).
+  # Batch 2 (TIBCO newest, 13 Nov), pages, text and menus. Narrow entries: keep them
+  # before the general DOCOPS-347 / DOCOPS-348 entries, and after the K6 &crosswise anchor.
+  # DOCOPS-370 and DOCOPS-371 are placeholders for the keys of the two new sub-tasks.
 
+  # Help not on staging: the version, its menu entry page and its product page are 404,
+  # although the folder is on wip and main (most since 30 Oct or 5 Nov). Version-level
+  # findings only: the path is the version folder, so a page-level PAGE_MISSING still counts.
+  - code: VERIFY_PUBLISHED_PAGE_MISSING
+    decision: logged
+    ticket: DOCOPS-346
+    slug: tibco-activematrix-adapter-for-database-tibco-business-studio
+    version: "1.3.0"
+    path: "*/online-help/1-3-0"
+    reason: &notserved >-
+      Not on staging: the version, its first menu page and the product page return 404,
+      although the version is on wip and main. Same as the BW plug-ins and Streaming.
+      For the AEM team.
+  - {code: VERIFY_PUBLISHED_PAGE_MISSING, decision: logged, ticket: DOCOPS-346, slug: tibco-activematrix-adapter-for-files-for-unix-win-tibco-business-studio, version: "1.3.0", path: "*/online-help/1-3-0", reason: *notserved}
+  - {code: VERIFY_PUBLISHED_PAGE_MISSING, decision: logged, ticket: DOCOPS-346, slug: tibco-activematrix-adapter-for-jd-edwards-enterpriseone, version: "6.1.0", path: "*/online-help/6-1-0", reason: *notserved}
+  - {code: VERIFY_PUBLISHED_PAGE_MISSING, decision: logged, ticket: DOCOPS-346, slug: tibco-activematrix-adapter-for-sap-tibco-business-studio, version: "1.3.0", path: "*/online-help/1-3-0", reason: *notserved}
+  - {code: VERIFY_PUBLISHED_PAGE_MISSING, decision: logged, ticket: DOCOPS-346, slug: tibco-businessconnect-configstore-management-interface-protocol, version: "6.1.0", path: "*/online-help/6-1-0", reason: *notserved}
+  - {code: VERIFY_PUBLISHED_PAGE_MISSING, decision: logged, ticket: DOCOPS-346, slug: tibco-businessconnect-container-edition-configstore-management-interface-protocol, version: "1.2.1", path: "*/online-help/1-2-1", reason: *notserved}
+  - {code: VERIFY_PUBLISHED_PAGE_MISSING, decision: logged, ticket: DOCOPS-346, slug: tibco-businessconnect-container-edition-ebxml-protocol, version: "1.3.0", path: "*/online-help/1-3-0", reason: *notserved}
+  - {code: VERIFY_PUBLISHED_PAGE_MISSING, decision: logged, ticket: DOCOPS-346, slug: tibco-businessconnect-container-edition-edi-protocol-hipaa-edition-powered-by-instream, version: "1.3.0", path: "*/online-help/1-3-0", reason: *notserved}
+  - {code: VERIFY_PUBLISHED_PAGE_MISSING, decision: logged, ticket: DOCOPS-346, slug: tibco-businessconnect-container-edition-edi-protocol-powered-by-instream, version: "1.6.1", path: "*/online-help/1-6-1", reason: *notserved}
+  - {code: VERIFY_PUBLISHED_PAGE_MISSING, decision: logged, ticket: DOCOPS-346, slug: tibco-businessconnect-container-edition-rosettanet-protocol, version: "1.7.0", path: "*/online-help/1-7-0", reason: *notserved}
+  - {code: VERIFY_PUBLISHED_PAGE_MISSING, decision: logged, ticket: DOCOPS-346, slug: tibco-businessconnect-container-edition-services-plug-in, version: "1.7.0", path: "*/online-help/1-7-0", reason: *notserved}
+  - {code: VERIFY_PUBLISHED_PAGE_MISSING, decision: logged, ticket: DOCOPS-346, slug: tibco-businessconnect-container-edition-soap-protocol, version: "1.3.0", path: "*/online-help/1-3-0", reason: *notserved}
+  - {code: VERIFY_PUBLISHED_PAGE_MISSING, decision: logged, ticket: DOCOPS-346, slug: tibco-businessconnect-edi-protocol-hipaa-edition-powered-by-instream, version: "6.7.0", path: "*/online-help/6-7-0", reason: *notserved}
+  - {code: VERIFY_PUBLISHED_PAGE_MISSING, decision: logged, ticket: DOCOPS-346, slug: tibco-businessconnect-edi-protocol-powered-by-instream, version: "6.11.0", path: "*/online-help/6-11-0", reason: *notserved}
+  - {code: VERIFY_PUBLISHED_PAGE_MISSING, decision: logged, ticket: DOCOPS-346, slug: tibco-foresight-edisim, version: "6.21.0", path: "*/online-help/6-21-0", reason: *notserved}
+  - {code: VERIFY_PUBLISHED_PAGE_MISSING, decision: logged, ticket: DOCOPS-346, slug: tibco-foresight-instream, version: "9.4.0", path: "*/online-help/9-4-0", reason: *notserved}
+  - {code: VERIFY_PUBLISHED_PAGE_MISSING, decision: logged, ticket: DOCOPS-346, slug: tibco-hawk-microagent-for-tibco-activematrix-businessworks-6, version: "6.8.0", path: "*/online-help/6-8-0", reason: *notserved}
+  - {code: VERIFY_PUBLISHED_PAGE_MISSING, decision: logged, ticket: DOCOPS-346, slug: tibco-hawk-microagent-for-tibco-businessworks-container-edition, version: "2.2.0", path: "*/online-help/2-2-0", reason: *notserved}
+  - {code: VERIFY_PUBLISHED_PAGE_MISSING, decision: logged, ticket: DOCOPS-346, slug: tibco-messaging-schema-repository-for-apache-kafka-enterprise-edition, version: "2.1.0", path: "*/online-help/2-1-0", reason: *notserved}
+  - {code: VERIFY_PUBLISHED_PAGE_MISSING, decision: logged, ticket: DOCOPS-346, slug: tibco-product-and-service-catalog-powered-by-tibco-ebx, version: "1.1.0", path: "*/online-help/1-1-0", reason: *notserved}
+  - code: VERIFY_PUBLISHED_PAGE_MISSING
+    decision: logged
+    ticket: DOCOPS-346
+    slug: tibco-activespaces-enterprise-edition
+    version: "5.2.0"
+    path: "*/online-help/5-2-0"
+    reason: >-
+      Staging serves the pages (Last published 30 Oct) but with an empty menu, here and on
+      5.1.0; toc.yml is ordinary (733 lines, valid). For the AEM team, with DOCOPS-346.
+
+  - code: VERIFY_PUBLISHED_PAGE_MISSING
+    decision: logged
+    ticket: DOCOPS-344
+    slug: tibco-operational-intelligence-hawk-redtail
+    version: "7.5.0"
+    path: "*/7-5-0/error-codes/error-codes.md"
+    reason: >-
+      Staging answers 500 for Error Codes (error-codes/error-codes.html, 14 Nov, twice);
+      the Markdown is an ordinary 131 KB page of tables. Its parent page is served.
+
+  # Silver Fabric Enabler for ActiveSpaces 1.2.0: published 30 Sep in the early shape
+  # (toc.yml `items:`/`path:`, each book twice under html/), never re-converted.
+  - code: VERIFY_PUBLISHED_PAGE_MISSING
+    decision: logged
+    ticket: DOCOPS-365
+    slug: tibco-silver-fabric-enabler-for-activespaces-enterprise-edition
+    version: "1.2.0"
+    path: "*/online-help/1-2-0"
+    reason: &oldshape >-
+      Published 30 Sep in the early shape: toc.yml uses `items:`/`path:`, which AEM does
+      not read, and every book is there twice (top level and html/). Not served. To
+      re-convert and re-publish (WebWorks; Phase 34 drops the html/ copy).
+  - {code: VERIFY_TOC_ENTRY_MISSING, decision: logged, ticket: DOCOPS-365, slug: tibco-silver-fabric-enabler-for-activespaces-enterprise-edition, version: "1.2.0", reason: *oldshape}
+
+  # Topics the old menu names under a Flare subproject path (html/Subsystems/<proj>/...):
+  # the converter took the master copy (html/<folder>/<name>.htm or its _1 rename) and
+  # published it; verify does not resolve that alias. All 387 resolve to a menu page.
+  - code: VERIFY_TOPIC_MISSING
+    decision: logged
+    ticket: DOCOPS-366
+    slug: tibco-foresight-instream
+    version: "9.4.0"
+    path: "*/html/Subsystems/*"
+    reason: &subproject >-
+      verify reads the old menu's subproject path (html/Subsystems/<proj>/x.htm); the
+      converter published the master copy (html/<folder>/x.htm or x_1.htm). Every one of
+      these resolves to a published menu page (checked 14 Nov). Checker fix.
+  - {code: VERIFY_TOPIC_MISSING, decision: logged, ticket: DOCOPS-366, slug: tibco-foresight-transaction-insight, version: "6.0.0", path: "*/html/Subsystems/*", reason: *subproject}
+
+  # DOCOPS-349 (real pages named default/index): the built fix covers these two.
+  - code: VERIFY_TOPIC_MISSING
+    decision: logged
+    ticket: DOCOPS-349
+    slug: tibco-foresight-translator
+    version: "4.2.0"
+    path: "*/html/User/Default.htm"
+    reason: >-
+      "Default" (a target rule) is a real topic, listed in the menu and marked Topic; the
+      Flare stub rule dropped it. Fixed in the converter (4202b6d); needs a re-convert.
+  - code: VERIFY_TOPIC_MISSING
+    decision: logged
+    ticket: DOCOPS-349
+    slug: tibco-offer-and-price-engine
+    version: "6.0.0"
+    path: "*/html/installation-configuration/index.htm"
+    reason: >-
+      "Index" (the Offer Search Index Service) is a real topic, listed in the menu and
+      marked Topic; the Flare stub rule dropped it. Fixed in the converter (4202b6d);
+      needs a re-convert.
+  - code: VERIFY_TOPIC_MISSING
+    decision: logged
+    ticket: DOCOPS-349
+    slug: tibco-activespaces-enterprise-edition
+    version: "5.2.0"
+    path: "*/html/_globalpages/About-this-Product.htm"
+    reason: >-
+      "About This Product" is listed in the menu but sits in Flare's _globalpages/, which
+      the converter skips as generated. 4 sentences; the landing page has the first one.
+      Not covered by the 4202b6d fix.
+
+  # The old menu names files the package does not ship.
+  - code: VERIFY_TOPIC_MISSING
+    decision: source
+    path: "*/html/Subsystems/platform-ct/user-guide/process-archive-cp-190.htm"
+    reason: >-
+      The old menu's "Process Archive or Adapter Archive" points to
+      process-archive-cp-190.htm, which the Control Plane 1.20.0, Platform 1.1.0 and
+      Platform CLI 1.2.0 packages do not ship; broken on the old site too.
+  - code: VERIFY_TOPIC_MISSING
+    decision: source
+    slug: tibco-platform
+    version: "1.1.0"
+    path: "*/html/Subsystems/platform-ct/user-guide/managing-app-archives-apidocs-bw6.htm"
+    reason: >-
+      The old menu's "Managing Application Archives" points to a file the package does not
+      ship; broken on the old site too.
+  - code: VERIFY_TOPIC_MISSING
+    decision: source
+    slug: tibco-reward
+    version: "22.3.0"
+    path: "*=GUID-*=en_US=.htm"
+    reason: >-
+      7 old menu entries point to GUID-named files ("Award & Limits Options =GUID-...=en_US=.htm")
+      that the 22.3.0 package does not ship; broken on the old site too.
+
+  # DOCOPS-370: a block written directly inside a list (not inside a list item) is dropped,
+  # or the lists around it are run together. Real content loss.
+  - code: VERIFY_TEXT_DROPPED
+    decision: logged
+    ticket: DOCOPS-370
+    slug: tibco-activation-service
+    version: "1.1.0"
+    path: "*/user-guide/activation-setup/step-1-planning-for-activation.md"
+    reason: &listblock >-
+      The source puts a list, table, code block or procedure title directly inside a list,
+      outside any list item; the converter drops it (or merges the lists around it).
+      The original shows it. Converter fix and re-convert.
+  - {code: VERIFY_TEXT_DROPPED, decision: logged, ticket: DOCOPS-370, slug: tibco-flogo, version: "3.0.1", path: "*/oracle-database/oracle-database-query.md", reason: *listblock}
+  - {code: VERIFY_TEXT_DROPPED, decision: logged, ticket: DOCOPS-370, slug: tibco-flogo-extension-for-visual-studio-code, version: "1.3.5", path: "*/oracle-database/oracle-database-query.md", reason: *listblock}
+  - {code: VERIFY_TEXT_DROPPED, decision: logged, ticket: DOCOPS-370, slug: tibco-flogo-extension-for-visual-studio-code, version: "1.3.5", path: "*/1-3-5/installation.md", reason: *listblock}
+  - {code: VERIFY_TEXT_DROPPED, decision: logged, ticket: DOCOPS-370, slug: tibco-foresight-edisim, version: "6.21.0", path: "*/6-21-0/introduction-to-edisim.md", reason: *listblock}
+  - {code: VERIFY_TEXT_DROPPED, decision: logged, ticket: DOCOPS-370, slug: tibco-offer-and-price-engine, version: "6.0.0", path: "*/installation-and-configuration-guide/docker.md", reason: *listblock}
+  - {code: VERIFY_TEXT_DROPPED, decision: logged, ticket: DOCOPS-370, slug: tibco-control-plane, version: "1.20.0", path: "*/configuration/resource-management-overview.md", reason: *listblock}
+  - {code: VERIFY_TEXT_DROPPED, decision: logged, ticket: DOCOPS-370, slug: tibco-platform, version: "1.1.0", path: "*/configuration/service-instance-configuration.md", reason: *listblock}
+
+  # DOCOPS-360: `\<` in prose (AEM shows the backslash); R002 rewrites it as &lt;.
+  - code: VERIFY_TEXT_DROPPED
+    decision: logged
+    ticket: DOCOPS-360
+    slug: tibco-activematrix-adapter-for-files-for-unix-win-tibco-business-studio
+    version: "1.3.0"
+    path: "*/users-guide/advanced-topics/jms-messages-compression.md"
+    reason: &escapedlt >-
+      The sentence is on the page with `\<` (‘\<’, *\<var name>*, *\<end date>*); the check
+      does not read it, and AEM shows the backslash. R002 (`\<` -> `&lt;`) clears both.
+  - {code: VERIFY_TEXT_DROPPED, decision: logged, ticket: DOCOPS-360, slug: tibco-businessconnect, version: "7.5.0", path: "*/trading-partner-administration/remote-client-service-audit-log.md", reason: *escapedlt}
+  - {code: VERIFY_TEXT_DROPPED, decision: logged, ticket: DOCOPS-360, slug: tibco-businessconnect-container-edition-edi-protocol-hipaa-edition-powered-by-instream, version: "1.3.0", path: "*/de-identifying-a-file.md", reason: *escapedlt}
+  - {code: VERIFY_TEXT_DROPPED, decision: logged, ticket: DOCOPS-360, slug: tibco-businessconnect-edi-protocol-hipaa-edition-powered-by-instream, version: "6.7.0", path: "*/hipaa.5.09.md", reason: *escapedlt}
+  - code: VERIFY_TEXT_DROPPED
+    decision: logged
+    ticket: DOCOPS-360
+    slug: tibco-foresight-translator
+    version: "4.2.0"
+    path: "*/user-guide/rules-reference/rules-string.md"
+    reason: &literalentity >-
+      The source shows an entity name as text (&amp;apos;, &amp;lt;: the page is about the
+      code itself); the page writes &apos; / &lt;, which shows as the character. Same
+      escaping area as DOCOPS-360.
+  - {code: VERIFY_TEXT_DROPPED, decision: logged, ticket: DOCOPS-360, slug: tibco-fulfillment-provisioning, version: "3.10.0", path: "*/developers-guide/provtest/deploying.md", reason: *literalentity}
+
+  # Present on the page; the check misreads it.
+  - code: VERIFY_TEXT_DROPPED
+    decision: accepted
+    path: "*/substation-es-messages/lta-agent-messages.md"
+    reason: >-
+      "The supported codes are 1, 2, and 3." is present (raw HTML table, each code in
+      <samp> on its own line); the check reads it in parts. Substation ES, Transaction
+      Interface for CICS and IMS 2.14.0.
+  - code: VERIFY_TEXT_DROPPED
+    decision: accepted
+    slug: tibco-businessconnect-container-edition
+    version: "1.7.1"
+    path: "*/others/activate-protocol-plug-ins.md"
+    reason: >-
+      "The default value is 1000." is present (raw HTML table, split over two lines); the
+      check reads it in two parts.
+  - code: VERIFY_TEXT_DROPPED
+    decision: logged
+    ticket: DOCOPS-366
+    slug: tibco-order-management
+    version: "6.1.0"
+    path: "*/administration/deployment.md"
+    reason: >-
+      The ENTRYPOINT line with <service_name> is in a fenced code block, wrapped as in the
+      source; verify does not read it. Checker.
+  - code: VERIFY_TEXT_DROPPED
+    decision: logged
+    ticket: DOCOPS-366
+    slug: tibco-control-plane
+    version: "1.20.0"
+    path: "*/release-notes/known-issues.md"
+    reason: &backtick >-
+      "helm uninstall <oauth2proxy-release-name> ..." is present, escaped, inside <code>
+      with the source's own backticks; verify does not read it. Checker.
+  - {code: VERIFY_TEXT_DROPPED, decision: logged, ticket: DOCOPS-366, slug: tibco-platform-command-line-interface, version: "1.2.0", path: "*/release-notes/known-issues.md", reason: *backtick}
+
+  # Support and legal pages: one copy kept at the end of the menu, further copies dropped
+  # on purpose (navigation._tail; planning.md, DITA tail move).
+  - code: VERIFY_TOC_ENTRY_MISSING
+    decision: accepted
+    slug: tibco-activematrix-adapter-for-ibm-i
+    version: "6.4.0"
+    path: "*Notices/*"
+    reason: &tailcopy >-
+      A second copy of the support or legal page (one per guide in the old menu); toc.yml
+      keeps one copy, at the end, by design (navigation._tail). The page is published.
+  - {code: VERIFY_TOC_ENTRY_MISSING, decision: accepted, slug: tibco-activematrix-adapter-for-ibm-i, version: "6.4.0", path: "*/TIBCO Product Documentation and Support Services/*", reason: *tailcopy}
+  - {code: VERIFY_TOC_ENTRY_MISSING, decision: accepted, slug: tibco-activematrix-adapter-for-jd-edwards-enterpriseone, version: "6.1.0", path: "*/Legal/*", reason: *tailcopy}
+  - {code: VERIFY_TOC_ENTRY_MISSING, decision: accepted, slug: tibco-activematrix-adapter-for-jd-edwards-enterpriseone, version: "6.1.0", path: "*/TIBCO_Documentation_and_Support/*", reason: *tailcopy}
+  - {code: VERIFY_TOC_ENTRY_MISSING, decision: accepted, slug: tibco-businessconnect-configstore-management-interface-protocol, version: "6.1.0", path: "*/TIB_bccmi_user/preface.2.4.md*", reason: *tailcopy}
+  - {code: VERIFY_TOC_ENTRY_MISSING, decision: accepted, slug: tibco-businessconnect-cxml-protocol, version: "6.1.0", path: "*/preface.?.4.md*", reason: *tailcopy}
+  - {code: VERIFY_TOC_ENTRY_MISSING, decision: accepted, slug: tibco-businessconnect-edi-protocol-hipaa-edition-powered-by-instream, version: "6.7.0", path: "*/TIB_bcedihed_6.7_configuration/preface.4.4.md*", reason: *tailcopy}
+  - {code: VERIFY_TOC_ENTRY_MISSING, decision: accepted, slug: tibco-businessconnect-plug-in-for-ssh-server, version: "1.1.0", path: "*/TIB_bcsftp_user_guide/preface.2.4.md*", reason: *tailcopy}
+  - {code: VERIFY_TOC_ENTRY_MISSING, decision: accepted, slug: tibco-businessconnect-rosettanet-protocol, version: "5.3.0", path: "*/tib_bcrn_usr/preface.3.4.md*", reason: *tailcopy}
+  - {code: VERIFY_TOC_ENTRY_MISSING, decision: accepted, slug: tibco-businessconnect-partner-management-portal, version: "1.1.1", path: "*/legal-and-third-party-notices.md", reason: *tailcopy}
+  - {code: VERIFY_TOC_ENTRY_MISSING, decision: accepted, slug: tibco-businessconnect-partner-management-portal, version: "1.1.1", path: "*/tibco-documentation-and-support-services.md", reason: *tailcopy}
+  - {code: VERIFY_TOC_ENTRY_MISSING, decision: accepted, slug: tibco-product-and-service-catalog, version: "5.1.0", path: "*/_templates/legal-and-third-party-notices.md", reason: *tailcopy}
+  - {code: VERIFY_TOC_ENTRY_MISSING, decision: accepted, slug: tibco-product-and-service-catalog, version: "5.1.0", path: "*/_templates/tibco-documentation-and-support-services.md", reason: *tailcopy}
+  - {code: VERIFY_TOC_ENTRY_MISSING, decision: accepted, slug: tibco-product-and-service-catalog-powered-by-tibco-ebx, version: "1.1.0", path: "*/legal-and-third-party-notices.md", reason: *tailcopy}
+  - {code: VERIFY_TOC_ENTRY_MISSING, decision: accepted, slug: tibco-product-and-service-catalog-powered-by-tibco-ebx, version: "1.1.0", path: "*/tibco-documentation-and-support-services.md", reason: *tailcopy}
+  - {code: VERIFY_TOC_ENTRY_MISSING, decision: accepted, slug: tibco-reward, version: "22.3.0", path: "*/tibco-reward-2/legal-and-third-party-notices.md", reason: *tailcopy}
+  - {code: VERIFY_TOC_ENTRY_MISSING, decision: accepted, slug: tibco-reward, version: "22.3.0", path: "*/tibco-reward-2/tibco-documentation-and-support-services.md", reason: *tailcopy}
+
+  # Doubled heading (DOCOPS-336): the merged page repeats its title as "## Title", so the
+  # old entry pairs with #title-1. Clears when the doubled headings go.
+  - code: VERIFY_TOC_ENTRY_MISSING
+    decision: logged
+    ticket: DOCOPS-336
+    slug: tibco-foresight-edisim
+    version: "6.21.0"
+    path: "*.md#*-1"
+    reason: &doubled >-
+      The page repeats its title as a second heading, so the old menu entry pairs with
+      #<title>-1, a row toc.yml does not have; the page is in the menu. Clears with
+      DOCOPS-336.
+  - {code: VERIFY_TOC_ENTRY_MISSING, decision: logged, ticket: DOCOPS-336, slug: tibco-foresight-hipaa-validator-desktop, version: "9.2.0", path: "*.md#*-1", reason: *doubled}
+  - {code: VERIFY_TOC_ENTRY_MISSING, decision: logged, ticket: DOCOPS-336, slug: tibco-patterns, version: "6.2.0", path: "*.md#*-1", reason: *doubled}
+  - {code: VERIFY_TOC_MOVED, decision: logged, ticket: DOCOPS-336, slug: tibco-patterns, version: "6.2.0", path: "*/utilities/nsc-commands*", reason: *doubled}
+  - {code: VERIFY_TOC_MOVED, decision: logged, ticket: DOCOPS-336, slug: tibco-foresight-edisim, version: "6.21.0", path: "*/using-xml/using-standards-editor-with-schemas-and-dtds/*", reason: *doubled}
+
+  - code: VERIFY_TOC_ENTRY_MISSING
+    decision: logged
+    ticket: DOCOPS-362
+    slug: tibco-flogo-extension-for-visual-studio-code
+    version: "1.3.5"
+    path: "*#*-----*"
+    reason: >-
+      "Mapping Data by Using if/else Conditions": the heading target is written with
+      dashes for the code part. Fixed in fix/anchors; needs a re-convert.
+
+  # A topic in two guides (sister guides: EE/CE, ebMS2/ebMS3, X12/HIPAA, user/installation):
+  # the check pairs the old entries with the copies crosswise. Not a content change.
+  - {code: VERIFY_TOC_MOVED, decision: accepted, slug: tibco-businessconnect-container-edition-ebxml-protocol, version: "1.3.0", reason: *crosswise}
+  - {code: VERIFY_TOC_MOVED, decision: accepted, slug: tibco-businessconnect-container-edition-edi-protocol-powered-by-instream, version: "1.6.1", reason: *crosswise}
+  - {code: VERIFY_TOC_MOVED, decision: accepted, slug: tibco-enterprise-administrator, version: "2.4.3", path: "*/*", reason: *crosswise}
+  - {code: VERIFY_TOC_MOVED, decision: accepted, slug: tibco-foresight-edisim, version: "6.21.0", path: "*/business-rules/*", reason: *crosswise}
+  - {code: VERIFY_TOC_MOVED, decision: accepted, slug: tibco-foresight-hipaa-validator-desktop, version: "9.2.0", reason: *crosswise}
+  - {code: VERIFY_TOC_MOVED, decision: accepted, slug: tibco-foresight-studio, version: "9.3.0", reason: *crosswise}
+  - {code: VERIFY_TOC_MOVED, decision: accepted, slug: tibco-operational-intelligence-hawk-redtail, version: "7.5.0", reason: *crosswise}
+  - {code: VERIFY_TOC_MOVED, decision: accepted, slug: tibco-order-management, version: "6.1.0", reason: *crosswise}
+  - {code: VERIFY_TOC_MOVED, decision: accepted, slug: tibco-flogo-extension-for-visual-studio-code, version: "1.3.5", reason: *crosswise}
+  - {code: VERIFY_TOC_MOVED, decision: accepted, slug: tibco-reward, version: "22.3.0", path: "*/22-3-0/tibco-reward/*", reason: *crosswise}
+  - {code: VERIFY_TOC_MOVED, decision: accepted, slug: tibco-foresight-instream, version: "9.4.0", path: "*/*", reason: *crosswise}
+
+  # Staging shows a page listed twice only once (as for Scribe).
+  - code: VERIFY_PUBLISHED_TOC_MOVED
+    decision: accepted
+    slug: tibco-flogo-extension-for-visual-studio-code
+    version: "1.3.5"
+    reason: &shownonce >-
+      toc.yml lists the page under two parents, as the old menu did; staging shows it
+      once, and readers still reach it.
+  - {code: VERIFY_PUBLISHED_TOC_MOVED, decision: accepted, slug: tibco-order-management, version: "6.1.0", reason: *shownonce}
+  - {code: VERIFY_PUBLISHED_TOC_MOVED, decision: accepted, slug: tibco-product-and-service-catalog, version: "5.1.0", path: "*Offer and Price Designer Overview > Offer and Price Designer Overview", reason: *shownonce}
+
+  - code: VERIFY_PUBLISHED_TOC_ENTRY_MISSING
+    decision: logged
+    ticket: DOCOPS-351
+    slug: tibco-iprocess-workspace-windows
+    version: "11.10.0"
+    path: "*Where To Find More Information On Defining Procedures"
+    reason: >-
+      The page follows four heading rows (defining-the-procedure.md#...), which staging
+      drops; the pairing slips. The page is served and in the menu (14 Nov).
+
+  # AEM drops <samp> and <var> (with their text) from raw HTML: message codes and
+  # placeholders vanish (Substation ES "The supported codes are,, and").
   - code: VERIFY_PUBLISHED_TEXT_DIFF
     decision: logged
-    ticket: DOCOPS-348
+    ticket: DOCOPS-371
+    path: "*/2-14-0/messages-and-codes/*"
     reason: >-
-      A few sentences not found on the served page; several are verify misreading
-      raw `<a id>` and link markup. To trace page by page.
+      Staging drops <samp> and <var> elements with their text from raw HTML tables: the
+      Code column is empty and placeholders are gone. Substation ES, Transaction Interface
+      for CICS and IMS 2.14.0. For the AEM team (UAT row); or we write <code>/<em>.
 
-  - code: VERIFY_REDIRECT_MAP_MISSING
+  # Batch 2 (13 Nov), links and media (triage 2026-11-14). Narrow entries first: insert this
+  # block before the DOCOPS-347 / DOCOPS-348 catch-alls, then the generated DOCOPS-344 page list.
+
+  # Redirects.
+  - code: VERIFY_REDIRECT_UNMAPPED
     decision: logged
     ticket: DOCOPS-322
+    slug: tibco-activation-service
+    version: "1.1.0"
     reason: >-
-      116 of 501 TIBCO help versions have no 301.yml; the redirect rebuild waits on
-      the AEM team's new 301.yml shape (planning.md Phase 58, 2026-11-03).
+      The sitemap places 32 of 36 topics under /pub/tibco-activation/1.1.0/doc/, under the
+      derivation's threshold, so 301.yml holds only the 4 document rows. Needs the declared
+      pattern (URL request sheet, row 4).
+  - code: VERIFY_REDIRECT_UNMAPPED
+    decision: logged
+    ticket: DOCOPS-322
+    slug: tibco-businessconnect
+    version: "7.5.0"
+    reason: >-
+      The old site serves this help twice, under doc/bcgs/html/ and doc/bcis/html/ (507 pages
+      each); the derivation ties and writes no page row. One declared template covers one
+      folder; both need rows.
+  - code: VERIFY_REDIRECT_UNMAPPED
+    decision: logged
+    ticket: DOCOPS-322
+    slug: tibco-businessconnect-trading-community-management
+    version: "6.2.0"
+    reason: >-
+      The same two-folder case: doc/bctcm/html/ and doc/webclient/html/ (107 pages each).
+  - code: VERIFY_REDIRECT_UNSERVED
+    decision: logged
+    ticket: DOCOPS-346
+    slug: tibco-activespaces-enterprise-edition
+    version: "5.2.0"
+    reason: >-
+      ActiveSpaces 5.2.0 is not served on staging (menu, version page and topics 404) although
+      it is on wip and main; the sampled 301 targets fail with it.
+
+  # Pictures dropped by unusual source markup (DOCOPS-370).
+  - code: VERIFY_IMAGE_MISSING
+    decision: logged
+    ticket: DOCOPS-370
+    slug: tibco-platform
+    version: "1.1.0"
+    path: "managing-capabilities/tibco-businessworks-6-containers/monitoring-tibco-businessworks6-containers.md"
+    reason: &p-in-ul >-
+      The Import Projects screenshot sits in a <p> placed directly inside <ul> in the source
+      (developer-hub.htm); the converter drops it. Control Plane 1.20.0, Platform 1.1.0, Platform CLI 1.2.0.
+  - code: VERIFY_IMAGE_MISSING
+    decision: logged
+    ticket: DOCOPS-370
+    slug: tibco-control-plane
+    version: "1.20.0"
+    path: "managing-capabilities/tibco-businessworks-6-containers/monitoring-tibco-businessworks6-containers.md"
+    reason: *p-in-ul
+  - {code: VERIFY_IMAGE_MISSING, decision: logged, ticket: DOCOPS-370, slug: tibco-platform-command-line-interface, version: "1.2.0", path: "managing-capabilities/tibco-businessworks-6-containers/monitoring-tibco-businessworks6-containers.md", reason: *p-in-ul}
+  - code: VERIFY_IMAGE_MISSING
+    decision: logged
+    ticket: DOCOPS-370
+    slug: tibco-foresight-edisim
+    version: "6.21.0"
+    path: "test-data-generator-user-guide/tdg-tutorial/steps-in-creating-test-data/step-1-building-a-new-message-set-model.md"
+    reason: >-
+      The "excluded" icon is an <img> inside <code><code> in the source; the converter drops it,
+      leaving "This element is to be excluded from the test data." with no icon.
+  - code: VERIFY_IMAGE_MISSING
+    decision: logged
+    ticket: DOCOPS-370
+    slug: tibco-foresight-hipaa-validator-desktop
+    version: "9.2.0"
+    path: "business-rules/business-rules-reference/list-business-rules.md"
+    reason: &case-path >-
+      The thumbnail is written as ../Resources/Images/BusinessRules/inlist_thumb_0_0.jpg; the
+      file is resources/images/businessrules/InList_thumb_0_0.jpg, one folder up. The old site
+      ignored case; AEM does not.
+  - code: VERIFY_PUBLISHED_IMAGE_BROKEN
+    decision: logged
+    ticket: DOCOPS-370
+    slug: tibco-foresight-hipaa-validator-desktop
+    version: "9.2.0"
+    path: "business-rules/business-rules-reference/list-business-rules.md"
+    reason: *case-path
+  - code: VERIFY_IMAGE_MISSING
+    decision: accepted
+    slug: tibco-businessconnect-container-edition
+    version: "1.7.1"
+    path: trading-partner-management/sshftp-transport.md
+    reason: >-
+      A decorative 18x18 "add" icon inside the menu path "Transport > Add Outbound Transport" is
+      dropped; the words carry the meaning (as for Kafka 6.8.2).
+
+  # Anchors.
+  - code: VERIFY_PUBLISHED_ANCHOR_MISSING
+    decision: logged
+    ticket: DOCOPS-362
+    slug: tibco-platform-command-line-interface
+    version: "1.2.0"
+    path: "*#*-----*"
+    reason: &code-dashes >-
+      Link to a heading with code written as dashes (fix built 12 Nov, applied so far to
+      Flogo PAYG and BE only). Control Plane 1.20.0, Platform CLI 1.2.0, Flogo VS Code 1.3.5.
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-362, slug: tibco-control-plane, version: "1.20.0", path: "*#*-----*", reason: *code-dashes}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-362, slug: tibco-flogo-extension-for-visual-studio-code, version: "1.3.5", path: "*#*-----*", reason: *code-dashes}
+  - code: VERIFY_PUBLISHED_ANCHOR_MISSING
+    decision: logged
+    ticket: DOCOPS-345
+    slug: "tibco-iprocess-*"
+    version: "11.10.0"
+    path: "*#error-messages-in-the-swdirlogssw_warn-file"
+    reason: >-
+      Staging writes the heading "Error Messages in the SWDIR\logs\sw_warn File" as
+      #error-messages-in-the-swdirlogssw-warn-file (`_` as `-`, AEM's rule); verify does not pair
+      it because the heading text differs too (backslashes, DOCOPS-360).
+
+  # The source page links to a bookmark no source page defines; broken on the old site too.
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: source, slug: tibco-platform-command-line-interface, version: "1.2.0", path: "*/tibco-developer-hub-overview/integrations.md#[ML]*", reason: &no-bookmark "The source page links to a bookmark that no source page defines (#Manually, #Linking, #Configur, #Running, #Packet, #Generate2, #Listener2, Word _Ref/_bookmark ids); broken on the old site too. Checked 2026-11-14."}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: source, slug: tibco-control-plane, version: "1.20.0", path: "*/tibco-developer-hub-overview/integrations.md#[ML]*", reason: *no-bookmark}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: source, slug: tibco-flogo, version: "3.0.1", path: "*/about-tibco-flogo-flow-state-manager.md#Configur", reason: *no-bookmark}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: source, slug: tibco-foresight-transaction-insight, version: "6.0.0", path: "*/ti-ems-queue-reader.md#_Ref292373532", reason: *no-bookmark}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: source, slug: tibco-foresight-translator, version: "4.2.0", path: "installation/windows-installation-steps.md#_bookmark1?", reason: *no-bookmark}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: source, slug: tibco-iprocess-workspace-windows, version: "11.10.0", path: "*/procedure-objects.md#pm_intro_2170742793_locked_object_handling", reason: *no-bookmark}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: source, slug: tibco-operational-intelligence-hawk-redtail, version: "7.5.0", path: "*/troubleshooting-for-container-components.md#Running", reason: *no-bookmark}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: source, slug: tibco-operational-intelligence-hawk-redtail, version: "7.5.0", path: "*/starting-tibco-oi-hawk-redtail-services.md#Manually", reason: *no-bookmark}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: source, slug: tibco-operational-intelligence-hawk-redtail, version: "7.5.0", path: "*/uninstalling-tibco-oi-hawk-redtail.md#Packet", reason: *no-bookmark}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: source, slug: tibco-order-management, version: "6.1.0", path: "*/create-user*.md#Generate2", reason: *no-bookmark}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: source, slug: tibco-order-management, version: "6.1.0", path: "*/design-and-implementation.md#Listener2", reason: *no-bookmark}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: source, slug: tibco-rendezvous, version: "9.0.0", path: "installation.md#rv_install_2928680826_33603921", reason: *no-bookmark}
+
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-api-exchange-gateway, version: "2.5.1", path: "user-guide/overview-of-security-policies/authentication-using-file-based-identity-store.md#*", reason: &empty-article "Staging serves the page with an empty article (DOCOPS-344); its headings and pictures are not there."}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-control-plane, version: "1.20.0", path: "managing-capabilities/tibco-flogo/managing-tibco-flogo-apps/app-configuration-management/consul.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-flogo, version: "3.0.1", path: "connectors-user-guide/supported-flogo-connectors/microsoft-sql-server/creating-a-microsoft-sql-server-connection.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-flogo, version: "3.0.1", path: "connectors-user-guide/supported-flogo-connectors/websocket.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: tibco-flogo, version: "3.0.1", path: "connectors-user-guide/supported-flogo-connectors/websocket.md", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-flogo, version: "3.0.1", path: "user-guide/deployment-and-configuration/app-configuration-management/app-configuration-management/consul.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-flogo, version: "3.0.1", path: "user-guide/deployment-and-configuration/environment-variables.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-flogo, version: "3.0.1", path: "user-guide/designing-flogo-applications-flogo-extension/general-category-triggers-activities-connections/activities/configurehttpresponse.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: tibco-flogo, version: "3.0.1", path: "user-guide/designing-flogo-applications-flogo-extension/general-category-triggers-activities-connections/activities/configurehttpresponse.md", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-flogo-extension-for-visual-studio-code, version: "1.3.5", path: "supported-flogo-connectors/amazon-kinesis.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-flogo-extension-for-visual-studio-code, version: "1.3.5", path: "supported-flogo-connectors/amazon-s3/creating-an-amazon-s3-connection.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-flogo-extension-for-visual-studio-code, version: "1.3.5", path: "supported-flogo-connectors/amazon-sns.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-flogo-extension-for-visual-studio-code, version: "1.3.5", path: "supported-flogo-connectors/microsoft-sql-server/creating-a-microsoft-sql-server-connection.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-flogo-extension-for-visual-studio-code, version: "1.3.5", path: "supported-flogo-connectors/tibco-eftl.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-flogo-extension-for-visual-studio-code, version: "1.3.5", path: "supported-flogo-connectors/websocket.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: tibco-flogo-extension-for-visual-studio-code, version: "1.3.5", path: "supported-flogo-connectors/websocket.md", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-flogo-extension-for-visual-studio-code, version: "1.3.5", path: "user-guide/app-configuration-management/consul.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-flogo-extension-for-visual-studio-code, version: "1.3.5", path: "user-guide/app-development/general-category-triggers-activities-connections/activities/configurehttpresponse.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: tibco-flogo-extension-for-visual-studio-code, version: "1.3.5", path: "user-guide/app-development/general-category-triggers-activities-connections/activities/configurehttpresponse.md", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-flogo-extension-for-visual-studio-code, version: "1.3.5", path: "user-guide/app-development/unit-testing/creating-and-running-a-test-case.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: tibco-flogo-extension-for-visual-studio-code, version: "1.3.5", path: "user-guide/app-development/unit-testing/creating-and-running-a-test-case.md", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-foresight-archive-and-retrieval-system, version: "6.0.0", path: "administration-guide/appendix-a-filtering-technical-details.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: tibco-foresight-archive-and-retrieval-system, version: "6.0.0", path: "administration-guide/appendix-a-filtering-technical-details.md", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-foresight-archive-and-retrieval-system, version: "6.0.0", path: "administration-guide/appendix-b-tibco-foresight-archive-retrieval.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: tibco-foresight-archive-and-retrieval-system, version: "6.0.0", path: "administration-guide/appendix-b-tibco-foresight-archive-retrieval.md", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-foresight-archive-and-retrieval-system, version: "6.0.0", path: "administration-guide/introduction.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: tibco-foresight-archive-and-retrieval-system, version: "6.0.0", path: "administration-guide/introduction.md", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-foresight-archive-and-retrieval-system, version: "6.0.0", path: "user-guide/page-details/common-elements.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: tibco-foresight-archive-and-retrieval-system, version: "6.0.0", path: "user-guide/page-details/common-elements.md", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-foresight-archive-and-retrieval-system, version: "6.0.0", path: "user-guide/page-details/viewing-data.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: tibco-foresight-archive-and-retrieval-system, version: "6.0.0", path: "user-guide/page-details/viewing-data.md", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-foresight-hipaa-validator-desktop, version: "9.2.0", path: "using-flat-files/introduction.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: tibco-foresight-hipaa-validator-desktop, version: "9.2.0", path: "using-flat-files/introduction.md", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-foresight-hipaa-validator-desktop, version: "9.2.0", path: "using-xml/introduction.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: tibco-foresight-hipaa-validator-desktop, version: "9.2.0", path: "using-xml/introduction.md", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-foresight-hipaa-validator-desktop, version: "9.2.0", path: "using-xml/printing-dtds-and-schemas.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: tibco-foresight-hipaa-validator-desktop, version: "9.2.0", path: "using-xml/printing-dtds-and-schemas.md", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-foresight-hipaa-validator-desktop, version: "9.2.0", path: "using-xml/using-standards-editor-with-schemas-and-dtds/editing-a-schema-or-dtd.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: tibco-foresight-hipaa-validator-desktop, version: "9.2.0", path: "using-xml/using-standards-editor-with-schemas-and-dtds/editing-a-schema-or-dtd.md", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-foresight-hipaa-validator-desktop, version: "9.2.0", path: "using-xml/using-standards-editor-with-schemas-and-dtds/opening-a-schema-or-dtd.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: tibco-foresight-hipaa-validator-desktop, version: "9.2.0", path: "using-xml/using-standards-editor-with-schemas-and-dtds/opening-a-schema-or-dtd.md", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-foresight-transaction-insight, version: "6.0.0", path: "tibco-foresight-archive-and-retrieval-system/archive-and-retrieval-system-administration-guide/appendix-a-filtering-technical-details.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: tibco-foresight-transaction-insight, version: "6.0.0", path: "tibco-foresight-archive-and-retrieval-system/archive-and-retrieval-system-administration-guide/appendix-a-filtering-technical-details.md", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-foresight-transaction-insight, version: "6.0.0", path: "tibco-foresight-archive-and-retrieval-system/archive-and-retrieval-system-administration-guide/appendix-b-tibco-foresight-archive-retrieval.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: tibco-foresight-transaction-insight, version: "6.0.0", path: "tibco-foresight-archive-and-retrieval-system/archive-and-retrieval-system-administration-guide/appendix-b-tibco-foresight-archive-retrieval.md", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-foresight-transaction-insight, version: "6.0.0", path: "tibco-foresight-archive-and-retrieval-system/archive-and-retrieval-system-administration-guide/introduction.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: tibco-foresight-transaction-insight, version: "6.0.0", path: "tibco-foresight-archive-and-retrieval-system/archive-and-retrieval-system-administration-guide/introduction.md", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-foresight-transaction-insight, version: "6.0.0", path: "tibco-foresight-archive-and-retrieval-system/archive-and-retrieval-system-user-guide/page-details/common-elements.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: tibco-foresight-transaction-insight, version: "6.0.0", path: "tibco-foresight-archive-and-retrieval-system/archive-and-retrieval-system-user-guide/page-details/common-elements.md", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-foresight-transaction-insight, version: "6.0.0", path: "tibco-foresight-archive-and-retrieval-system/archive-and-retrieval-system-user-guide/page-details/viewing-data.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: tibco-foresight-transaction-insight, version: "6.0.0", path: "tibco-foresight-archive-and-retrieval-system/archive-and-retrieval-system-user-guide/page-details/viewing-data.md", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-foresight-transaction-insight, version: "6.0.0", path: "tibco-foresight-transaction-insight/common-administration/administrator-pages/alerts.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: tibco-foresight-transaction-insight, version: "6.0.0", path: "tibco-foresight-transaction-insight/common-administration/administrator-pages/alerts.md", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-foresight-transaction-insight, version: "6.0.0", path: "tibco-foresight-transaction-insight/common-administration/administrator-pages/fhir.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: tibco-foresight-transaction-insight, version: "6.0.0", path: "tibco-foresight-transaction-insight/common-administration/administrator-pages/fhir.md", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-foresight-transaction-insight, version: "6.0.0", path: "tibco-foresight-transaction-insight/common-administration/administrator-pages/filters.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: tibco-foresight-transaction-insight, version: "6.0.0", path: "tibco-foresight-transaction-insight/common-administration/administrator-pages/filters.md", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-foresight-transaction-insight, version: "6.0.0", path: "tibco-foresight-transaction-insight/common-administration/administrator-pages/partners.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: tibco-foresight-transaction-insight, version: "6.0.0", path: "tibco-foresight-transaction-insight/common-administration/administrator-pages/partners.md", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-foresight-transaction-insight, version: "6.0.0", path: "tibco-foresight-transaction-insight/common-administration/administrator-pages/settings/event-log.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: tibco-foresight-transaction-insight, version: "6.0.0", path: "tibco-foresight-transaction-insight/common-administration/administrator-pages/settings/event-log.md", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-foresight-transaction-insight, version: "6.0.0", path: "tibco-foresight-transaction-insight/common-administration/administrator-pages/settings/portals.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: tibco-foresight-transaction-insight, version: "6.0.0", path: "tibco-foresight-transaction-insight/common-administration/administrator-pages/settings/portals.md", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-foresight-transaction-insight, version: "6.0.0", path: "tibco-foresight-transaction-insight/common-administration/administrator-pages/teams.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: tibco-foresight-transaction-insight, version: "6.0.0", path: "tibco-foresight-transaction-insight/common-administration/administrator-pages/teams.md", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-foresight-transaction-insight, version: "6.0.0", path: "tibco-foresight-transaction-insight/common-administration/administrator-pages/users.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: tibco-foresight-transaction-insight, version: "6.0.0", path: "tibco-foresight-transaction-insight/common-administration/administrator-pages/users.md", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-foresight-transaction-insight, version: "6.0.0", path: "tibco-foresight-transaction-insight/common-administration/appendix-b-partner-assignment-errors.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: tibco-foresight-transaction-insight, version: "6.0.0", path: "tibco-foresight-transaction-insight/common-administration/appendix-b-partner-assignment-errors.md", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-foresight-transaction-insight, version: "6.0.0", path: "tibco-foresight-transaction-insight/common-administration/appendix-d-administrators-guide-to-forms-and-views/edi-viewing-formats.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: tibco-foresight-transaction-insight, version: "6.0.0", path: "tibco-foresight-transaction-insight/common-administration/appendix-d-administrators-guide-to-forms-and-views/edi-viewing-formats.md", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-foresight-transaction-insight, version: "6.0.0", path: "tibco-foresight-transaction-insight/common-administration/managing-statistics-tasks-and-files-pages.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: tibco-foresight-transaction-insight, version: "6.0.0", path: "tibco-foresight-transaction-insight/common-administration/managing-statistics-tasks-and-files-pages.md", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-foresight-transaction-insight, version: "6.0.0", path: "tibco-foresight-transaction-insight/common-administration/tutorial/set-up-an-administrative-user-for-the-tutorial.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: tibco-foresight-transaction-insight, version: "6.0.0", path: "tibco-foresight-transaction-insight/common-administration/tutorial/set-up-an-administrative-user-for-the-tutorial.md", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-foresight-transaction-insight, version: "6.0.0", path: "tibco-foresight-transaction-insight/filters-for-foresight-portal-applications/transaction-insight-filters.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: tibco-foresight-transaction-insight, version: "6.0.0", path: "tibco-foresight-transaction-insight/filters-for-foresight-portal-applications/transaction-insight-filters.md", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-iprocess-engine, version: "11.10.0", path: "tibco-iprocess-engine-database-administration/administration-guide-db2/cases/case-data.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-iprocess-engine, version: "11.10.0", path: "tibco-iprocess-engine-database-administration/administration-guide-db2/lists.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: tibco-iprocess-engine, version: "11.10.0", path: "tibco-iprocess-engine-database-administration/administration-guide-db2/lists.md", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-iprocess-engine, version: "11.10.0", path: "tibco-iprocess-engine-database-administration/administration-guide-db2/mbox-sets-and-message-queues/table-relationships.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: tibco-iprocess-engine, version: "11.10.0", path: "tibco-iprocess-engine-database-administration/administration-guide-db2/mbox-sets-and-message-queues/table-relationships.md", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-iprocess-engine, version: "11.10.0", path: "tibco-iprocess-engine-database-administration/administration-guide-db2/monitoring/stat-rp-daily.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-iprocess-engine, version: "11.10.0", path: "tibco-iprocess-engine-database-administration/administration-guide-db2/monitoring/table-relationships.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: tibco-iprocess-engine, version: "11.10.0", path: "tibco-iprocess-engine-database-administration/administration-guide-db2/monitoring/table-relationships.md", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-iprocess-engine, version: "11.10.0", path: "tibco-iprocess-engine-database-administration/administration-guide-db2/procedures/proc-instance.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-iprocess-engine, version: "11.10.0", path: "tibco-iprocess-engine-database-administration/administration-guide-db2/ssolite-stored-procedures/overview.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-iprocess-engine, version: "11.10.0", path: "tibco-iprocess-engine-database-administration/administration-guide-oracle/cases/case-data-2.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-iprocess-engine, version: "11.10.0", path: "tibco-iprocess-engine-database-administration/administration-guide-oracle/cases/table-relationships-2.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: tibco-iprocess-engine, version: "11.10.0", path: "tibco-iprocess-engine-database-administration/administration-guide-oracle/cases/table-relationships-2.md", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-iprocess-engine, version: "11.10.0", path: "tibco-iprocess-engine-database-administration/administration-guide-oracle/lists.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: tibco-iprocess-engine, version: "11.10.0", path: "tibco-iprocess-engine-database-administration/administration-guide-oracle/lists.md", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-iprocess-engine, version: "11.10.0", path: "tibco-iprocess-engine-database-administration/administration-guide-oracle/mbox-sets-and-message-queues.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: tibco-iprocess-engine, version: "11.10.0", path: "tibco-iprocess-engine-database-administration/administration-guide-oracle/mbox-sets-and-message-queues.md", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-iprocess-engine, version: "11.10.0", path: "tibco-iprocess-engine-database-administration/administration-guide-oracle/monitoring/stat-rp-daily-2.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-iprocess-engine, version: "11.10.0", path: "tibco-iprocess-engine-database-administration/administration-guide-oracle/monitoring/table-relationships-2.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: tibco-iprocess-engine, version: "11.10.0", path: "tibco-iprocess-engine-database-administration/administration-guide-oracle/monitoring/table-relationships-2.md", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-iprocess-engine, version: "11.10.0", path: "tibco-iprocess-engine-database-administration/administration-guide-oracle/procedures/procedure-lock.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-iprocess-engine, version: "11.10.0", path: "tibco-iprocess-engine-database-administration/administration-guide-oracle/ssolite-stored-procedures/overview-2.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-iprocess-engine, version: "11.10.0", path: "tibco-iprocess-engine-database-administration/administration-guide-oracle/work-items/table-relationships-2.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: tibco-iprocess-engine, version: "11.10.0", path: "tibco-iprocess-engine-database-administration/administration-guide-oracle/work-items/table-relationships-2.md", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-iprocess-engine, version: "11.10.0", path: "tibco-iprocess-engine-database-administration/administration-guide-sql-server/cases/case-data-3.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-iprocess-engine, version: "11.10.0", path: "tibco-iprocess-engine-database-administration/administration-guide-sql-server/cases/table-relationships-3.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: tibco-iprocess-engine, version: "11.10.0", path: "tibco-iprocess-engine-database-administration/administration-guide-sql-server/cases/table-relationships-3.md", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-iprocess-engine, version: "11.10.0", path: "tibco-iprocess-engine-database-administration/administration-guide-sql-server/lists.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: tibco-iprocess-engine, version: "11.10.0", path: "tibco-iprocess-engine-database-administration/administration-guide-sql-server/lists.md", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-iprocess-engine, version: "11.10.0", path: "tibco-iprocess-engine-database-administration/administration-guide-sql-server/mbox-sets-and-message-queues/table-relationships-2.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: tibco-iprocess-engine, version: "11.10.0", path: "tibco-iprocess-engine-database-administration/administration-guide-sql-server/mbox-sets-and-message-queues/table-relationships-2.md", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-iprocess-engine, version: "11.10.0", path: "tibco-iprocess-engine-database-administration/administration-guide-sql-server/monitoring/stat-rp-daily-3.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-iprocess-engine, version: "11.10.0", path: "tibco-iprocess-engine-database-administration/administration-guide-sql-server/monitoring/table-relationships-3.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: tibco-iprocess-engine, version: "11.10.0", path: "tibco-iprocess-engine-database-administration/administration-guide-sql-server/monitoring/table-relationships-3.md", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-iprocess-engine, version: "11.10.0", path: "tibco-iprocess-engine-database-administration/administration-guide-sql-server/procedures/proc-audit.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-iprocess-engine, version: "11.10.0", path: "tibco-iprocess-engine-database-administration/administration-guide-sql-server/ssolite-stored-procedures/overview-3.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-iprocess-engine, version: "11.10.0", path: "tibco-iprocess-engine-database-administration/administration-guide-sql-server/work-items/table-relationships-3.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: tibco-iprocess-engine, version: "11.10.0", path: "tibco-iprocess-engine-database-administration/administration-guide-sql-server/work-items/table-relationships-3.md", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-iprocess-workspace-windows, version: "11.10.0", path: "basic-design/defining-a-procedure/placing-procedure-objects.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: tibco-iprocess-workspace-windows, version: "11.10.0", path: "basic-design/defining-a-procedure/placing-procedure-objects.md", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-iprocess-workspace-windows, version: "11.10.0", path: "integration-techniques/understanding-xpdl-produced-from-iprocess/about-xpdl-entities-transformed-from-iprocess/procedure-package.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-offer-and-price-engine, version: "6.0.0", path: "installation-and-configuration-guide/docker.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-offer-and-price-engine, version: "6.0.0", path: "installation-and-configuration-guide/installation.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-offer-and-price-engine, version: "6.0.0", path: "installation-and-configuration-guide/postinstallation-tasks/task-1-copying-dependencies.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: tibco-offer-and-price-engine, version: "6.0.0", path: "installation-and-configuration-guide/postinstallation-tasks/task-1-copying-dependencies.md", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-offer-and-price-engine, version: "6.0.0", path: "user-guide/data-models.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: tibco-offer-and-price-engine, version: "6.0.0", path: "user-guide/data-models.md", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-offer-and-price-engine, version: "6.0.0", path: "web-services-guide/transport-modes.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-platform-command-line-interface, version: "1.2.0", path: "managing-capabilities/integration-flogo/managing-tibco-flogo-apps/app-configuration-management/consul.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-product-and-service-inventory, version: "2.1.0", path: "installation-and-configuration/installation-overview.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-product-and-service-inventory, version: "2.1.0", path: "user-guide/configurator-ui.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: tibco-product-and-service-inventory, version: "2.1.0", path: "user-guide/configurator-ui.md", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-product-and-service-inventory-2-1-0, version: "2.1.0", path: "installation-and-configuration/installation-overview.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-product-and-service-inventory-2-1-0, version: "2.1.0", path: "user-guide/configurator-ui.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: tibco-product-and-service-inventory-2-1-0, version: "2.1.0", path: "user-guide/configurator-ui.md", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-rendezvous, version: "9.0.0", path: "concepts/the-rendezvous-daemon.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-rendezvous, version: "9.0.0", path: "net-reference/data/messagefield.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-rendezvous, version: "9.0.0", path: "net-reference/event-queues/idispatchable.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-rendezvous, version: "9.0.0", path: "net-reference/listeners/listener.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: tibco-rendezvous, version: "9.0.0", path: "net-reference/listeners/listener.md", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-reward, version: "22.3.0", path: "tibco-reward-2/analytics-user-guide.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-reward, version: "22.3.0", path: "tibco-reward/api-reference-guide/api-entity-attribute-description-tables/api-entity-attributes-and-their-properties/registered-card-attribute-properties.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-reward, version: "22.3.0", path: "tibco-reward/api-reference-guide/api-entity-attribute-description-tables/api-entity-attributes-and-their-properties/shopper-entity-attributes-and-properties.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-reward, version: "22.3.0", path: "tibco-reward/api-reference-guide/overview-of-apis/start-with-authentication.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-reward, version: "22.3.0", path: "tibco-reward/integration-guide/batch-file-integration/product-catalog-import-file/product-catalog-file-guidelines-data-elements.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-reward, version: "22.3.0", path: "tibco-reward/integration-guide/batch-file-integration/reward-export-file.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-reward, version: "22.3.0", path: "tibco-reward/integration-guide/the-data-integration-process.md#*", reason: *empty-article}
 
   - code: VERIFY_TOPIC_MISSING
     decision: logged
@@ -677,3 +1264,30 @@ triage:
     reason: >-
       The source page links "Access Token Expiration" to a bookmark #Using that does
       not exist (AccessTokenExpiration.htm); broken on the old site too.
+
+  # Catch-alls: keep last; the first matching entry wins.
+  - code: VERIFY_REDIRECT_MAP_MISSING
+    decision: logged
+    ticket: DOCOPS-322
+    reason: >-
+      No 301.yml can be built: the docsite sitemap has no page list for the version and no URL
+      pattern is declared in config/origin-urls.yaml (25 of Batch 2's 28; the requests are in
+      reports/origin-url-requests.csv), or the list it has does not fit (Foresight Translator
+      4.2.0 not listed; Platform 1.1.0 and Platform CLI 1.2.0 matched to Control Plane's lists).
+      Traced 2026-11-14.
+
+  - code: VERIFY_PUBLISHED_IMAGE_BROKEN
+    decision: logged
+    ticket: DOCOPS-347
+    reason: >-
+      A picture not served: DAM answers 404 for folders whose name has a dot and for .wmf, .emf,
+      .bmp, .dib; on some pages AEM writes a page-relative src, an empty src (thumbnails) or
+      placeholder.png (spaces in the name); SVGs served with other bytes (EMS, API Exchange).
+      Traced on Batch 2, 2026-11-14. Keep last in the file.
+
+  - code: VERIFY_PUBLISHED_TEXT_DIFF
+    decision: logged
+    ticket: DOCOPS-348
+    reason: >-
+      A few sentences not found on the served page; several are verify misreading
+      raw `<a id>` and link markup. To trace page by page.

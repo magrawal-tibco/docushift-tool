@@ -242,19 +242,19 @@ tibco,activespaces,tibco-activespaces-enterprise-edition,4.10.1,not-verified,,,,
 tibco,activespaces,tibco-activespaces-enterprise-edition,5.0.0,not-verified,,,,,,,,,
 tibco,activespaces,tibco-activespaces-enterprise-edition,5.1.0,not-verified,,,,,,,,,
 tibco,activespaces,tibco-activespaces-enterprise-edition,5.1.1,not-verified,,,,,,,,,
-tibco,activespaces,tibco-activespaces-enterprise-edition,5.2.0,not-verified,,,,,,,,,
-tibco,activespaces,tibco-silver-fabric-enabler-for-activespaces-enterprise-edition,1.2.0,not-verified,,,,,,,,,
+tibco,activespaces,tibco-activespaces-enterprise-edition,5.2.0,lost,2026-11-13,local+staging+live,328,1,0,10,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_PAGE_MISSING=1 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=125 VERIFY_REDIRECT_UNSERVED=9 VERIFY_TOPIC_MISSING=1,8edf6dd,reports/verify/tibco/tibco-activespaces-enterprise-edition/5.2.0-2026-11-13.csv
+tibco,activespaces,tibco-silver-fabric-enabler-for-activespaces-enterprise-edition,1.2.0,lost,2026-11-13,local+staging+live,48,1,0,33,VERIFY_PUBLISHED_PAGE_MISSING=1 VERIFY_REDIRECT_MAP_MISSING=1 VERIFY_TOC_ENTRY_MISSING=32 VERIFY_TOC_UNCHECKED=2 VERIFY_TOPIC_UNFILED=13,9303af6,reports/verify/tibco/tibco-silver-fabric-enabler-for-activespaces-enterprise-edition/1.2.0-2026-11-13.csv
 tibco,adapters,adapter-code-for-tibco-api-exchange-and-joomla,2.3.3,not-verified,,,,,,,,,
-tibco,adapters,adapter-code-for-tibco-api-exchange-and-joomla,2.3.4,not-verified,,,,,,,,,
-tibco,adapters,tibco-activematrix-adapter-for-database-tibco-business-studio,1.3.0,not-verified,,,,,,,,,
-tibco,adapters,tibco-activematrix-adapter-for-files-for-unix-win-tibco-business-studio,1.3.0,not-verified,,,,,,,,,
+tibco,adapters,adapter-code-for-tibco-api-exchange-and-joomla,2.3.4,logged,2026-11-13,local+staging+live,120,0,0,4,VERIFY_PUBLISHED_TEXT_DIFF=3 VERIFY_REDIRECT_MAP_MISSING=1,2e0cf5a,reports/verify/tibco/adapter-code-for-tibco-api-exchange-and-joomla/2.3.4-2026-11-13.csv
+tibco,adapters,tibco-activematrix-adapter-for-database-tibco-business-studio,1.3.0,lost,2026-11-13,local+staging+live,279,1,0,1,VERIFY_PUBLISHED_PAGE_MISSING=1 VERIFY_REDIRECT_MAP_MISSING=1 VERIFY_TOPIC_UNFILED=2,2e0cf5a,reports/verify/tibco/tibco-activematrix-adapter-for-database-tibco-business-studio/1.3.0-2026-11-13.csv
+tibco,adapters,tibco-activematrix-adapter-for-files-for-unix-win-tibco-business-studio,1.3.0,lost,2026-11-13,local+staging+live,212,2,0,1,VERIFY_PUBLISHED_PAGE_MISSING=1 VERIFY_REDIRECT_MAP_MISSING=1 VERIFY_TEXT_DROPPED=1,2e0cf5a,reports/verify/tibco/tibco-activematrix-adapter-for-files-for-unix-win-tibco-business-studio/1.3.0-2026-11-13.csv
 tibco,adapters,tibco-activematrix-adapter-for-ibm-i,6.2.0,not-verified,,,,,,,,,
 tibco,adapters,tibco-activematrix-adapter-for-ibm-i,6.2.1,not-verified,,,,,,,,,
 tibco,adapters,tibco-activematrix-adapter-for-ibm-i,6.2.2,not-verified,,,,,,,,,
 tibco,adapters,tibco-activematrix-adapter-for-ibm-i,6.3.0,not-verified,,,,,,,,,
-tibco,adapters,tibco-activematrix-adapter-for-ibm-i,6.4.0,not-verified,,,,,,,,,
-tibco,adapters,tibco-activematrix-adapter-for-jd-edwards-enterpriseone,6.1.0,not-verified,,,,,,,,,
-tibco,adapters,tibco-activematrix-adapter-for-sap-tibco-business-studio,1.3.0,not-verified,,,,,,,,,
+tibco,adapters,tibco-activematrix-adapter-for-ibm-i,6.4.0,lost,2026-11-13,local+staging+live,177,3,0,2,VERIFY_REDIRECT_MAP_MISSING=1 VERIFY_TOC_ENTRY_MISSING=4,2e0cf5a,reports/verify/tibco/tibco-activematrix-adapter-for-ibm-i/6.4.0-2026-11-13.csv
+tibco,adapters,tibco-activematrix-adapter-for-jd-edwards-enterpriseone,6.1.0,lost,2026-11-13,local+staging+live,141,7,0,1,VERIFY_PUBLISHED_PAGE_MISSING=1 VERIFY_REDIRECT_MAP_MISSING=1 VERIFY_TOC_ENTRY_MISSING=6 VERIFY_TOPIC_UNFILED=12,2e0cf5a,reports/verify/tibco/tibco-activematrix-adapter-for-jd-edwards-enterpriseone/6.1.0-2026-11-13.csv
+tibco,adapters,tibco-activematrix-adapter-for-sap-tibco-business-studio,1.3.0,lost,2026-11-13,local+staging+live,190,1,0,1,VERIFY_PUBLISHED_PAGE_MISSING=1 VERIFY_REDIRECT_MAP_MISSING=1,2e0cf5a,reports/verify/tibco/tibco-activematrix-adapter-for-sap-tibco-business-studio/1.3.0-2026-11-13.csv
 tibco,adapters,tibco-activematrix-adapter-framework,1.3.0,not-verified,,,,,,,,,
 tibco,adapters,tibco-activematrix-adapter-framework,1.3.1,not-verified,,,,,,,,,
 tibco,adapters,tibco-activematrix-adapter-framework,1.3.2,not-verified,,,,,,,,,
@@ -262,12 +262,12 @@ tibco,adapters,tibco-activematrix-adapter-framework,1.4.0,not-verified,,,,,,,,,
 tibco,adapters,tibco-activematrix-adapter-framework,1.4.1,not-verified,,,,,,,,,
 tibco,adapters,tibco-activematrix-adapter-framework,1.4.2,not-verified,,,,,,,,,
 tibco,adapters,tibco-activematrix-adapter-framework,1.6.0,not-verified,,,,,,,,,
-tibco,adapters,tibco-activematrix-adapter-framework,1.6.1,not-verified,,,,,,,,,
+tibco,adapters,tibco-activematrix-adapter-framework,1.6.1,logged,2026-11-13,local+staging+live,102,0,0,7,VERIFY_PUBLISHED_ALT_DROPPED=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=1 VERIFY_PUBLISHED_TEXT_DIFF=4 VERIFY_REDIRECT_MAP_MISSING=1,2e0cf5a,reports/verify/tibco/tibco-activematrix-adapter-framework/1.6.1-2026-11-13.csv
 tibco,adapters,tibco-adapter-for-files-ibm-i,5.0.1,logged,2026-11-11,local+staging+live,51,0,0,35,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=12 VERIFY_PUBLISHED_CALLOUT_UNRENDERED=28 VERIFY_PUBLISHED_IMAGE_BROKEN=8 VERIFY_PUBLISHED_TOC_TITLE_CHANGED=1 VERIFY_REDIRECT_NOT_ON_STAGING=1 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=5,df97769,reports/verify/tibco/tibco-adapter-for-files-ibm-i/5.0.1-2026-11-11.csv
 tibco,adapters,tibco-adapter-migration,1.7.0,not-verified,,,,,,,,,
 tibco,adapters,tibco-adapter-migration,1.8.0,not-verified,,,,,,,,,
 tibco,adapters,tibco-adapter-migration,1.8.1,logged,2026-11-11,local+staging+live,27,0,0,4,VERIFY_PUBLISHED_CALLOUT_UNRENDERED=9 VERIFY_PUBLISHED_TEXT_DIFF=1 VERIFY_REDIRECT_MAP_MISSING=1,2e0cf5a,reports/verify/tibco/tibco-adapter-migration/1.8.1-2026-11-11.csv
-tibco,adapters,tibco-adapter-sdk,5.8.0,not-verified,,,,,,,,,
+tibco,adapters,tibco-adapter-sdk,5.8.0,clean,2026-11-13,local,5,0,0,0,,dca4827,reports/verify/tibco/tibco-adapter-sdk/5.8.0-2026-11-13.csv
 tibco,bpm,tibco-activematrix-bpm,4.2.0,not-verified,,,,,,,,,
 tibco,bpm,tibco-activematrix-bpm,4.3.0,not-verified,,,,,,,,,
 tibco,bpm,tibco-activematrix-service-grid,3.4.3,not-verified,,,,,,,,,
@@ -282,61 +282,67 @@ tibco,bpm,tibco-bpm-suite,4.3.1,not-verified,,,,,,,,,
 tibco,bpm,tibco-bpm-suite,4.3.2,not-verified,,,,,,,,,
 tibco,bpm,tibco-business-studio-analyst-edition,4.2.0,not-verified,,,,,,,,,
 tibco,bpm,tibco-business-studio-analyst-edition,4.3.0,not-verified,,,,,,,,,
-tibco,bpm,tibco-business-studio-bpm-edition,4.3.5,not-verified,,,,,,,,,
+tibco,bpm,tibco-business-studio-bpm-edition,4.3.5,lost,2026-11-14,local+staging+live,1238,52,35,129,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=56 VERIFY_PUBLISHED_ANCHOR_MISSING=2 VERIFY_PUBLISHED_CALLOUT_UNRENDERED=453 VERIFY_PUBLISHED_IMAGE_BROKEN=4 VERIFY_PUBLISHED_TEXT_DIFF=9 VERIFY_PUBLISHED_TOC_ENTRY_MISSING=35 VERIFY_PUBLISHED_TOC_MOVED=34 VERIFY_PUBLISHED_TOC_ORDER=1 VERIFY_PUBLISHED_TOC_TITLE_CHANGED=8 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=7 VERIFY_REDIRECT_UNSERVED=7 VERIFY_TEXT_DROPPED=3 VERIFY_TOPIC_MISSING=5 VERIFY_TOPIC_UNFILED=3,1560707,reports/verify/tibco/tibco-business-studio-bpm-edition/4.3.5-2026-11-14.csv
 tibco,bpm,tibco-business-studio-bpm-edition,5.6.0,not-verified,,,,,,,,,
 tibco,bpm,tibco-business-studio-bpm-edition,5.6.1,not-verified,,,,,,,,,
 tibco,bpm,tibco-business-studio-bpm-edition,5.7.0,not-verified,,,,,,,,,
 tibco,bpm,tibco-business-studio-community-edition,4.2.0,not-verified,,,,,,,,,
 tibco,businessconnect,tibco-businessconnect,7.4.0,not-verified,,,,,,,,,
-tibco,businessconnect,tibco-businessconnect,7.5.0,not-verified,,,,,,,,,
-tibco,businessconnect,tibco-businessconnect-configstore-management-interface-protocol,6.1.0,not-verified,,,,,,,,,
+tibco,businessconnect,tibco-businessconnect,7.5.0,lost,2026-11-13,local+staging+live,534,1,0,1067,VERIFY_LIVE_UNCHECKABLE=9 VERIFY_PUBLISHED_ANCHOR_DIFFERS=1 VERIFY_PUBLISHED_IMAGE_BROKEN=21 VERIFY_PUBLISHED_TEXT_DIFF=31 VERIFY_REDIRECT_UNCONVERTED=98 VERIFY_REDIRECT_UNMAPPED=1014 VERIFY_TEXT_DROPPED=1 VERIFY_TOPIC_UNFILED=17,8df9178,reports/verify/tibco/tibco-businessconnect/7.5.0-2026-11-13.csv
+tibco,businessconnect,tibco-businessconnect-configstore-management-interface-protocol,6.1.0,lost,2026-11-13,local+staging+live,59,5,0,1,VERIFY_PUBLISHED_PAGE_MISSING=1 VERIFY_REDIRECT_MAP_MISSING=1 VERIFY_TOC_ENTRY_MISSING=4,08add6c,reports/verify/tibco/tibco-businessconnect-configstore-management-interface-protocol/6.1.0-2026-11-13.csv
 tibco,businessconnect,tibco-businessconnect-container-edition,1.6.1,not-verified,,,,,,,,,
 tibco,businessconnect,tibco-businessconnect-container-edition,1.7.0,not-verified,,,,,,,,,
-tibco,businessconnect,tibco-businessconnect-container-edition,1.7.1,not-verified,,,,,,,,,
+tibco,businessconnect,tibco-businessconnect-container-edition,1.7.1,logged,2026-11-13,local+staging+live,232,0,0,24,VERIFY_IMAGE_MISSING=1 VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=14 VERIFY_PUBLISHED_TEXT_DIFF=8 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=48 VERIFY_TEXT_DROPPED=1,0c7cea9,reports/verify/tibco/tibco-businessconnect-container-edition/1.7.1-2026-11-13.csv
 tibco,businessconnect,tibco-businessconnect-container-edition-configstore-management-interface-protocol,1.1.0,not-verified,,,,,,,,,
 tibco,businessconnect,tibco-businessconnect-container-edition-configstore-management-interface-protocol,1.2.0,not-verified,,,,,,,,,
-tibco,businessconnect,tibco-businessconnect-container-edition-configstore-management-interface-protocol,1.2.1,not-verified,,,,,,,,,
+tibco,businessconnect,tibco-businessconnect-container-edition-configstore-management-interface-protocol,1.2.1,lost,2026-11-13,local+staging+live,56,1,0,0,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_PAGE_MISSING=1 VERIFY_REDIRECT_NOT_ON_STAGING=1 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=6 VERIFY_TOPIC_UNFILED=4,0c7cea9,reports/verify/tibco/tibco-businessconnect-container-edition-configstore-management-interface-protocol/1.2.1-2026-11-13.csv
 tibco,businessconnect,tibco-businessconnect-container-edition-ebxml-protocol,1.2.1,not-verified,,,,,,,,,
-tibco,businessconnect,tibco-businessconnect-container-edition-ebxml-protocol,1.3.0,not-verified,,,,,,,,,
+tibco,businessconnect,tibco-businessconnect-container-edition-ebxml-protocol,1.3.0,lost,2026-11-13,local+staging+live,238,1,0,2,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_PAGE_MISSING=1 VERIFY_REDIRECT_NOT_ON_STAGING=1 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=6 VERIFY_TOC_MOVED=2,8df9178,reports/verify/tibco/tibco-businessconnect-container-edition-ebxml-protocol/1.3.0-2026-11-13.csv
 tibco,businessconnect,tibco-businessconnect-container-edition-edi-protocol-hipaa-edition-powered-by-instream,1.2.0,not-verified,,,,,,,,,
-tibco,businessconnect,tibco-businessconnect-container-edition-edi-protocol-hipaa-edition-powered-by-instream,1.3.0,not-verified,,,,,,,,,
+tibco,businessconnect,tibco-businessconnect-container-edition-edi-protocol-hipaa-edition-powered-by-instream,1.3.0,lost,2026-11-13,local+staging+live,85,1,0,1,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_PAGE_MISSING=1 VERIFY_REDIRECT_NOT_ON_STAGING=1 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=6 VERIFY_TEXT_DROPPED=1,8df9178,reports/verify/tibco/tibco-businessconnect-container-edition-edi-protocol-hipaa-edition-powered-by-instream/1.3.0-2026-11-13.csv
 tibco,businessconnect,tibco-businessconnect-container-edition-edi-protocol-powered-by-instream,1.5.0,not-verified,,,,,,,,,
 tibco,businessconnect,tibco-businessconnect-container-edition-edi-protocol-powered-by-instream,1.6.0,not-verified,,,,,,,,,
-tibco,businessconnect,tibco-businessconnect-container-edition-edi-protocol-powered-by-instream,1.6.1,not-verified,,,,,,,,,
+tibco,businessconnect,tibco-businessconnect-container-edition-edi-protocol-powered-by-instream,1.6.1,lost,2026-11-13,local+staging+live,372,1,0,1,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_PAGE_MISSING=1 VERIFY_REDIRECT_NOT_ON_STAGING=1 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=48 VERIFY_TOC_MOVED=1 VERIFY_TOC_TITLE_CHANGED=1 VERIFY_TOPIC_UNFILED=1,0c7cea9,reports/verify/tibco/tibco-businessconnect-container-edition-edi-protocol-powered-by-instream/1.6.1-2026-11-13.csv
 tibco,businessconnect,tibco-businessconnect-container-edition-rosettanet-protocol,1.6.0,not-verified,,,,,,,,,
-tibco,businessconnect,tibco-businessconnect-container-edition-rosettanet-protocol,1.7.0,not-verified,,,,,,,,,
+tibco,businessconnect,tibco-businessconnect-container-edition-rosettanet-protocol,1.7.0,lost,2026-11-13,local+staging+live,81,1,0,0,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_PAGE_MISSING=1 VERIFY_REDIRECT_NOT_ON_STAGING=1 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=5 VERIFY_TOPIC_UNFILED=4,8df9178,reports/verify/tibco/tibco-businessconnect-container-edition-rosettanet-protocol/1.7.0-2026-11-13.csv
 tibco,businessconnect,tibco-businessconnect-container-edition-services-plug-in,1.6.0,not-verified,,,,,,,,,
-tibco,businessconnect,tibco-businessconnect-container-edition-services-plug-in,1.7.0,not-verified,,,,,,,,,
+tibco,businessconnect,tibco-businessconnect-container-edition-services-plug-in,1.7.0,lost,2026-11-13,local+staging+live,97,1,0,0,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_PAGE_MISSING=1 VERIFY_REDIRECT_NOT_ON_STAGING=1 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=6,8df9178,reports/verify/tibco/tibco-businessconnect-container-edition-services-plug-in/1.7.0-2026-11-13.csv
 tibco,businessconnect,tibco-businessconnect-container-edition-soap-protocol,1.2.1,not-verified,,,,,,,,,
-tibco,businessconnect,tibco-businessconnect-container-edition-soap-protocol,1.3.0,not-verified,,,,,,,,,
-tibco,businessconnect,tibco-businessconnect-cxml-protocol,6.1.0,not-verified,,,,,,,,,
+tibco,businessconnect,tibco-businessconnect-container-edition-soap-protocol,1.3.0,lost,2026-11-13,local+staging+live,158,1,0,0,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_PAGE_MISSING=1 VERIFY_REDIRECT_NOT_ON_STAGING=1 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=7 VERIFY_TOPIC_UNFILED=36,8df9178,reports/verify/tibco/tibco-businessconnect-container-edition-soap-protocol/1.3.0-2026-11-13.csv
+tibco,businessconnect,tibco-businessconnect-cxml-protocol,6.1.0,logged,2026-11-13,local+staging+live,151,0,0,39,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=11 VERIFY_PUBLISHED_IMAGE_BROKEN=16 VERIFY_REDIRECT_NOT_ON_STAGING=1 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=22 VERIFY_TOC_ENTRY_MISSING=12 VERIFY_TOPIC_UNFILED=2,8df9178,reports/verify/tibco/tibco-businessconnect-cxml-protocol/6.1.0-2026-11-13.csv
 tibco,businessconnect,tibco-businessconnect-ebxml-protocol,6.3.0,not-verified,,,,,,,,,
-tibco,businessconnect,tibco-businessconnect-ebxml-protocol,6.4.0,not-verified,,,,,,,,,
-tibco,businessconnect,tibco-businessconnect-edi-protocol-hipaa-edition-powered-by-instream,6.7.0,not-verified,,,,,,,,,
+tibco,businessconnect,tibco-businessconnect-ebxml-protocol,6.4.0,logged,2026-11-13,local+staging+live,305,0,0,52,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=1 VERIFY_PUBLISHED_IMAGE_BROKEN=37 VERIFY_PUBLISHED_TEXT_DIFF=14 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=6,8df9178,reports/verify/tibco/tibco-businessconnect-ebxml-protocol/6.4.0-2026-11-13.csv
+tibco,businessconnect,tibco-businessconnect-edi-protocol-hipaa-edition-powered-by-instream,6.7.0,lost,2026-11-13,local+staging+live,57,5,0,2,VERIFY_PUBLISHED_PAGE_MISSING=1 VERIFY_REDIRECT_MAP_MISSING=1 VERIFY_TEXT_DROPPED=1 VERIFY_TOC_ENTRY_MISSING=4,08add6c,reports/verify/tibco/tibco-businessconnect-edi-protocol-hipaa-edition-powered-by-instream/6.7.0-2026-11-13.csv
 tibco,businessconnect,tibco-businessconnect-edi-protocol-powered-by-instream,6.10.0,not-verified,,,,,,,,,
-tibco,businessconnect,tibco-businessconnect-edi-protocol-powered-by-instream,6.11.0,not-verified,,,,,,,,,
+tibco,businessconnect,tibco-businessconnect-edi-protocol-powered-by-instream,6.11.0,lost,2026-11-13,local+staging+live,584,1,0,0,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_PAGE_MISSING=1 VERIFY_REDIRECT_NOT_ON_STAGING=1 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=48 VERIFY_TOC_TITLE_CHANGED=1 VERIFY_TOPIC_UNFILED=3,8df9178,reports/verify/tibco/tibco-businessconnect-edi-protocol-powered-by-instream/6.11.0-2026-11-13.csv
 tibco,businessconnect,tibco-businessconnect-palette,6.5.0,not-verified,,,,,,,,,
-tibco,businessconnect,tibco-businessconnect-palette,6.6.0,not-verified,,,,,,,,,
+tibco,businessconnect,tibco-businessconnect-palette,6.6.0,logged,2026-11-13,local+staging+live,58,0,0,3,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_TEXT_DIFF=3 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=6 VERIFY_TOC_TITLE_CHANGED=8 VERIFY_TOPIC_UNFILED=2,8df9178,reports/verify/tibco/tibco-businessconnect-palette/6.6.0-2026-11-13.csv
 tibco,businessconnect,tibco-businessconnect-partner-management-portal,1.0.0,not-verified,,,,,,,,,
 tibco,businessconnect,tibco-businessconnect-partner-management-portal,1.1.0,not-verified,,,,,,,,,
-tibco,businessconnect,tibco-businessconnect-partner-management-portal,1.1.1,not-verified,,,,,,,,,
-tibco,businessconnect,tibco-businessconnect-plug-in-for-ftp-server,1.0.1,not-verified,,,,,,,,,
-tibco,businessconnect,tibco-businessconnect-plug-in-for-ssh-server,1.1.0,not-verified,,,,,,,,,
-tibco,businessconnect,tibco-businessconnect-rosettanet-protocol,5.3.0,not-verified,,,,,,,,,
+tibco,businessconnect,tibco-businessconnect-partner-management-portal,1.1.1,issues,2026-11-13,local+staging+live,140,0,1,3,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_TEXT_DIFF=1 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=12 VERIFY_TOC_ENTRY_MISSING=2 VERIFY_TOC_MOVED=1 VERIFY_TOPIC_UNFILED=64,0c7cea9,reports/verify/tibco/tibco-businessconnect-partner-management-portal/1.1.1-2026-11-13.csv
+tibco,businessconnect,tibco-businessconnect-plug-in-for-ftp-server,1.0.1,logged,2026-11-13,local+staging+live,42,0,0,6,VERIFY_PUBLISHED_ANCHOR_DIFFERS=4 VERIFY_PUBLISHED_TEXT_DIFF=1 VERIFY_REDIRECT_MAP_MISSING=1,08add6c,reports/verify/tibco/tibco-businessconnect-plug-in-for-ftp-server/1.0.1-2026-11-13.csv
+tibco,businessconnect,tibco-businessconnect-plug-in-for-ssh-server,1.1.0,lost,2026-11-13,local+staging+live,44,4,0,6,VERIFY_PUBLISHED_ANCHOR_DIFFERS=4 VERIFY_PUBLISHED_TEXT_DIFF=1 VERIFY_REDIRECT_MAP_MISSING=1 VERIFY_TOC_ENTRY_MISSING=4,08add6c,reports/verify/tibco/tibco-businessconnect-plug-in-for-ssh-server/1.1.0-2026-11-13.csv
+tibco,businessconnect,tibco-businessconnect-rosettanet-protocol,5.3.0,lost,2026-11-13,local+staging+live,91,4,0,12,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=6 VERIFY_PUBLISHED_IMAGE_BROKEN=6 VERIFY_REDIRECT_NOT_ON_STAGING=1 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=11 VERIFY_TOC_ENTRY_MISSING=4,8df9178,reports/verify/tibco/tibco-businessconnect-rosettanet-protocol/5.3.0-2026-11-13.csv
 tibco,businessconnect,tibco-businessconnect-services-plug-in,6.3.0,not-verified,,,,,,,,,
-tibco,businessconnect,tibco-businessconnect-services-plug-in,6.4.0,not-verified,,,,,,,,,
+tibco,businessconnect,tibco-businessconnect-services-plug-in,6.4.0,logged,2026-11-13,local+staging+live,122,0,0,6,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_TEXT_DIFF=6 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=6 VERIFY_TOPIC_UNFILED=3,8df9178,reports/verify/tibco/tibco-businessconnect-services-plug-in/6.4.0-2026-11-13.csv
 tibco,businessconnect,tibco-businessconnect-soap-protocol,7.1.0,not-verified,,,,,,,,,
-tibco,businessconnect,tibco-businessconnect-soap-protocol,7.2.0,not-verified,,,,,,,,,
+tibco,businessconnect,tibco-businessconnect-soap-protocol,7.2.0,logged,2026-11-13,local+staging+live,180,0,0,19,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=1 VERIFY_PUBLISHED_IMAGE_BROKEN=9 VERIFY_PUBLISHED_TEXT_DIFF=9 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=7,8df9178,reports/verify/tibco/tibco-businessconnect-soap-protocol/7.2.0-2026-11-13.csv
 tibco,businessconnect,tibco-businessconnect-trading-community-management,6.1.0,not-verified,,,,,,,,,
 tibco,businessconnect,tibco-businessconnect-trading-community-management,6.1.1,not-verified,,,,,,,,,
-tibco,businessconnect,tibco-businessconnect-trading-community-management,6.2.0,not-verified,,,,,,,,,
-tibco,businessconnect,tibco-trading-partner-management-rest-api,1.1.0,not-verified,,,,,,,,,
-tibco,businessevents,tibco-businessevents-enterprise-edition,6.3.2,logged,2026-11-12,local+staging+live,1388,0,0,323,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=112 VERIFY_PUBLISHED_ANCHOR_MISSING=7 VERIFY_PUBLISHED_CALLOUT_UNRENDERED=515 VERIFY_PUBLISHED_IMAGE_BROKEN=3 VERIFY_PUBLISHED_TEXT_DIFF=30 VERIFY_PUBLISHED_TOC_ENTRY_MISSING=3 VERIFY_PUBLISHED_TOC_ORDER=1 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=1553 VERIFY_TEXT_DROPPED=4 VERIFY_TOPIC_UNFILED=13,0647b2d,reports/verify/tibco/tibco-businessevents-enterprise-edition/6.3.2-2026-11-12.csv
-tibco,businessevents,tibco-businessevents-enterprise-edition,6.4.0,logged,2026-11-12,local+staging+live,1410,0,0,308,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=106 VERIFY_PUBLISHED_ANCHOR_MISSING=7 VERIFY_PUBLISHED_CALLOUT_UNRENDERED=504 VERIFY_PUBLISHED_IMAGE_BROKEN=3 VERIFY_PUBLISHED_TEXT_DIFF=29 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=1553 VERIFY_TEXT_DROPPED=4 VERIFY_TOPIC_UNFILED=67,0647b2d,reports/verify/tibco/tibco-businessevents-enterprise-edition/6.4.0-2026-11-12.csv
+tibco,businessconnect,tibco-businessconnect-trading-community-management,6.2.0,logged,2026-11-13,local+staging+live,115,0,0,217,VERIFY_LIVE_UNCHECKABLE=6 VERIFY_PUBLISHED_TEXT_DIFF=3 VERIFY_REDIRECT_UNCONVERTED=12 VERIFY_REDIRECT_UNMAPPED=214 VERIFY_TOPIC_UNFILED=1,8df9178,reports/verify/tibco/tibco-businessconnect-trading-community-management/6.2.0-2026-11-13.csv
+tibco,businessconnect,tibco-trading-partner-management-rest-api,1.1.0,logged,2026-11-13,local+staging+live,50,0,0,2,VERIFY_PUBLISHED_TEXT_DIFF=1 VERIFY_REDIRECT_MAP_MISSING=1,08add6c,reports/verify/tibco/tibco-trading-partner-management-rest-api/1.1.0-2026-11-13.csv
+tibco,businessevents,tibco-businessevents-enterprise-edition,6.3.2,stale,2026-11-12,local+staging+live,1388,0,0,323,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=112 VERIFY_PUBLISHED_ANCHOR_MISSING=7 VERIFY_PUBLISHED_CALLOUT_UNRENDERED=515 VERIFY_PUBLISHED_IMAGE_BROKEN=3 VERIFY_PUBLISHED_TEXT_DIFF=30 VERIFY_PUBLISHED_TOC_ENTRY_MISSING=3 VERIFY_PUBLISHED_TOC_ORDER=1 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=1553 VERIFY_TEXT_DROPPED=4 VERIFY_TOPIC_UNFILED=13,0647b2d,reports/verify/tibco/tibco-businessevents-enterprise-edition/6.3.2-2026-11-12.csv
+tibco,businessevents,tibco-businessevents-enterprise-edition,6.4.0,stale,2026-11-12,local+staging+live,1410,0,0,308,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=106 VERIFY_PUBLISHED_ANCHOR_MISSING=7 VERIFY_PUBLISHED_CALLOUT_UNRENDERED=504 VERIFY_PUBLISHED_IMAGE_BROKEN=3 VERIFY_PUBLISHED_TEXT_DIFF=29 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=1553 VERIFY_TEXT_DROPPED=4 VERIFY_TOPIC_UNFILED=67,0647b2d,reports/verify/tibco/tibco-businessevents-enterprise-edition/6.4.0-2026-11-12.csv
 tibco,businessworks,premium-subscription-for-tibco-businessworks-container-edition-and-plug-ins-for-aws-marketplace,2.3.1,not-verified,,,,,,,,,
+tibco,businessworks,tibco-activematrix-businessworks,5.15.0,not-verified,,,,,,,,,
+tibco,businessworks,tibco-activematrix-businessworks,5.15.1,not-verified,,,,,,,,,
 tibco,businessworks,tibco-activematrix-businessworks,5.16.1,not-verified,,,,,,,,,
+tibco,businessworks,tibco-activematrix-businessworks,6.11.0,not-verified,,,,,,,,,
 tibco,businessworks,tibco-activematrix-businessworks,6.12.0,not-verified,,,,,,,,,
 tibco,businessworks,tibco-activematrix-businessworks,6.13.0,not-verified,,,,,,,,,
+tibco,businessworks,tibco-activematrix-businessworks-smartmapper-enterprise-server,6.0.0,not-verified,,,,,,,,,
+tibco,businessworks,tibco-activematrix-businessworks-smartmapper-enterprise-server,6.0.1,not-verified,,,,,,,,,
+tibco,businessworks,tibco-businessworks-container-edition,2.10.0,not-verified,,,,,,,,,
 tibco,businessworks,tibco-businessworks-enterprise,3.10.0,not-verified,,,,,,,,,
 tibco,businessworks,tibco-businessworks-enterprise,3.11.0,not-verified,,,,,,,,,
 tibco,businessworks,tibco-businessworks-enterprise,3.12.0,not-verified,,,,,,,,,
@@ -411,6 +417,7 @@ tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-change-data-capture
 tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-change-data-capture,6.2.0,logged,2026-11-12,local+staging+live,70,0,0,1,VERIFY_PUBLISHED_PAGE_MISSING=1 VERIFY_REDIRECT_NOT_ON_STAGING=1 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=11 VERIFY_TOPIC_UNFILED=3,bc069869,reports/verify/tibco/tibco-activematrix-businessworks-plug-in-for-change-data-capture/6.2.0-2026-11-12.csv
 tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-cics,1.2.2,not-verified,,,,,,,,,
 tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-cics,1.5.0,not-verified,,,,,,,,,
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-cics,2.4.1,not-verified,,,,,,,,,
 tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-cics,2.5.0,logged,2026-11-12,local+staging+live,75,0,0,3,VERIFY_PUBLISHED_ANCHOR_DIFFERS=2 VERIFY_PUBLISHED_TEXT_DIFF=1 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=12 VERIFY_TOPIC_UNFILED=2,bc069869,reports/verify/tibco/tibco-activematrix-businessworks-plug-in-for-cics/2.5.0-2026-11-12.csv
 tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-confidentiality,6.1.1,logged,2026-11-12,local+staging+live,51,0,0,3,VERIFY_PUBLISHED_PAGE_MISSING=1 VERIFY_REDIRECT_NOT_ON_STAGING=1 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=11 VERIFY_TEXT_DROPPED=2 VERIFY_TOPIC_UNFILED=2,bc069869,reports/verify/tibco/tibco-activematrix-businessworks-plug-in-for-confidentiality/6.1.1-2026-11-12.csv
 tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-data-conversion,3.6.0,not-verified,,,,,,,,,
@@ -431,6 +438,7 @@ tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-ejb,5.4.0,not-verif
 tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-ejb,6.1.1,logged,2026-11-12,local+staging+live,68,0,0,6,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_TEXT_DIFF=2 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=5 VERIFY_TOC_MOVED=4,27460f10,reports/verify/tibco/tibco-activematrix-businessworks-plug-in-for-ejb/6.1.1-2026-11-12.csv
 tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-facebook,1.4.0,not-verified,,,,,,,,,
 tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-facebook,6.5.0,not-verified,,,,,,,,,
+tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-files-for-unix-and-windows,8.2.0,not-verified,,,,,,,,,
 tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-files-for-unix-and-windows,8.3.0,logged,2026-11-12,local+staging+live,109,0,0,1,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_PAGE_MISSING=1 VERIFY_REDIRECT_NOT_ON_STAGING=1 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=4 VERIFY_TOPIC_UNFILED=1,03324dc6,reports/verify/tibco/tibco-activematrix-businessworks-plug-in-for-files-for-unix-and-windows/8.3.0-2026-11-12.csv
 tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-google-bigquery,6.1.0,logged,2026-11-12,local+staging+live,83,0,0,1,VERIFY_PUBLISHED_PAGE_MISSING=1 VERIFY_REDIRECT_NOT_ON_STAGING=1 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=13 VERIFY_TOPIC_UNFILED=3,bc069869,reports/verify/tibco/tibco-activematrix-businessworks-plug-in-for-google-bigquery/6.1.0-2026-11-12.csv
 tibco,bw-plugin,tibco-activematrix-businessworks-plug-in-for-google-cloud-pub-sub,6.0.1,not-verified,,,,,,,,,
@@ -595,11 +603,11 @@ tibco,bw-plugin,tibco-businessworks-integrationmanager-plug-in,1.0,not-verified,
 tibco,bw-plugin,tibco-businessworks-plug-in-for-ai,6.0.0,not-verified,,,,,,,,,
 tibco,bw-plugin,tibco-businessworks-plug-in-for-ai,6.0.1,logged,2026-11-12,local+staging+live,61,0,0,10,VERIFY_PUBLISHED_IMAGE_BROKEN=9 VERIFY_PUBLISHED_TEXT_DIFF=1 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=10 VERIFY_TOPIC_UNFILED=4,bc069869,reports/verify/tibco/tibco-businessworks-plug-in-for-ai/6.0.1-2026-11-12.csv
 tibco,bw-plugin,tibco-businessworks-plug-in-for-tibco-auditsafe-for-tibco-platform,6.0.0,logged,2026-11-12,local+staging+live,53,0,0,6,VERIFY_DOCUMENT_MISSING=5 VERIFY_PUBLISHED_PAGE_MISSING=1 VERIFY_REDIRECT_NOT_ON_STAGING=1 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=10 VERIFY_TOPIC_UNFILED=10,bc069869,reports/verify/tibco/tibco-businessworks-plug-in-for-tibco-auditsafe-for-tibco-platform/6.0.0-2026-11-12.csv
-tibco,cloud,tibco-cloud-api-modeler,1.5.0,logged,2026-11-12,local+staging+live,33,0,0,14,VERIFY_PUBLISHED_ANCHOR_DIFFERS=4 VERIFY_PUBLISHED_CALLOUT_UNRENDERED=24 VERIFY_PUBLISHED_TEXT_DIFF=1 VERIFY_REDIRECT_MAP_MISSING=1 VERIFY_TOPIC_UNFILED=6,039bf8c,reports/verify/tibco/tibco-cloud-api-modeler/1.5.0-2026-11-13.csv
+tibco,cloud,tibco-cloud-api-modeler,1.5.0,logged,2026-11-13,local+staging+live,33,0,0,14,VERIFY_PUBLISHED_ANCHOR_DIFFERS=4 VERIFY_PUBLISHED_CALLOUT_UNRENDERED=24 VERIFY_PUBLISHED_TEXT_DIFF=1 VERIFY_REDIRECT_MAP_MISSING=1 VERIFY_TOPIC_UNFILED=6,039bf8c,reports/verify/tibco/tibco-cloud-api-modeler/1.5.0-2026-11-13.csv
 tibco,cloud,tibco-cloud-integration-businessworks-payg,2.8.0,logged,2026-11-12,local+staging+live,27,0,0,12,VERIFY_PUBLISHED_ANCHOR_DIFFERS=4 VERIFY_PUBLISHED_CALLOUT_UNRENDERED=20 VERIFY_PUBLISHED_TEXT_DIFF=3 VERIFY_REDIRECT_MAP_MISSING=1,039bf8c,reports/verify/tibco/tibco-cloud-integration-businessworks-payg/2.8.0-2026-11-12.csv
 tibco,cloud,tibco-cloud-integration-flogo-payg,2.11.0,logged,2026-11-12,local+staging+live,273,0,0,94,VERIFY_PUBLISHED_ANCHOR_DIFFERS=10 VERIFY_PUBLISHED_ANCHOR_MISSING=4 VERIFY_PUBLISHED_CALLOUT_UNRENDERED=129 VERIFY_PUBLISHED_IMAGE_BROKEN=14 VERIFY_PUBLISHED_TEXT_DIFF=24 VERIFY_REDIRECT_MAP_MISSING=1 VERIFY_TOC_MOVED=1,039bf8c,reports/verify/tibco/tibco-cloud-integration-flogo-payg/2.11.0-2026-11-12.csv
-tibco,cloud,tibco-cloud-integration-hybrid,3.12.0,clean,2026-11-12,local,5,0,0,0,,731ff5b,reports/verify/tibco/tibco-cloud-integration-hybrid/3.12.0-2026-11-12.csv
-tibco,cloud,tibco-cloud-integration-hybrid-connectivity-add-on,3.10.0,clean,2026-11-12,local,5,0,0,0,,731ff5b,reports/verify/tibco/tibco-cloud-integration-hybrid-connectivity-add-on/3.10.0-2026-11-12.csv
+tibco,cloud,tibco-cloud-integration-hybrid,3.12.0,clean,2026-11-13,local,5,0,0,0,,731ff5b,reports/verify/tibco/tibco-cloud-integration-hybrid/3.12.0-2026-11-13.csv
+tibco,cloud,tibco-cloud-integration-hybrid-connectivity-add-on,3.10.0,clean,2026-11-13,local,5,0,0,0,,731ff5b,reports/verify/tibco/tibco-cloud-integration-hybrid-connectivity-add-on/3.10.0-2026-11-13.csv
 tibco,data_management,ibi-mdm-add-on-for-global-data-synchronization,4.0.0,not-verified,,,,,,,,,
 tibco,data_management,tibco-enterprise-mdm,1.0.0,not-verified,,,,,,,,,
 tibco,data_management,tibco-mdm,10.0.0,not-verified,,,,,,,,,
@@ -612,128 +620,129 @@ tibco,data_management,tibco-mdm-studio,6.0.0,not-verified,,,,,,,,,
 tibco,data_management,tibco-mdm-studio,6.1.0,not-verified,,,,,,,,,
 tibco,data_management,tibco-mdm-studio,6.1.1,not-verified,,,,,,,,,
 tibco,ems,tibco-ems-client-for-ibm-i,8.6.0,logged,2026-11-11,local+staging+live,51,0,0,6,VERIFY_LIVE_UNCHECKABLE=3 VERIFY_PUBLISHED_CALLOUT_UNRENDERED=9 VERIFY_PUBLISHED_TEXT_DIFF=2 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=3,6f9f728,reports/verify/tibco/tibco-ems-client-for-ibm-i/8.6.0-2026-11-11.csv
-tibco,ems,tibco-enterprise-message-service,10.4.0,logged,2026-11-12,local+staging+live,1459,0,0,185,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=56 VERIFY_PUBLISHED_ANCHOR_MISSING=4 VERIFY_PUBLISHED_CALLOUT_UNRENDERED=477 VERIFY_PUBLISHED_IMAGE_BROKEN=18 VERIFY_PUBLISHED_TEXT_DIFF=7 VERIFY_PUBLISHED_TOC_ENTRY_MISSING=4 VERIFY_PUBLISHED_TOC_TITLE_CHANGED=3 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=666 VERIFY_TOC_MOVED=2 VERIFY_TOPIC_MISSING=1 VERIFY_TOPIC_UNFILED=24,312e3e4,reports/verify/tibco/tibco-enterprise-message-service/10.4.0-2026-11-12.csv
-tibco,ems,tibco-enterprise-message-service,10.4.1,logged,2026-11-11,local+staging+live,1444,0,0,178,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=57 VERIFY_PUBLISHED_ANCHOR_MISSING=4 VERIFY_PUBLISHED_CALLOUT_UNRENDERED=486 VERIFY_PUBLISHED_IMAGE_BROKEN=14 VERIFY_PUBLISHED_TEXT_DIFF=6 VERIFY_PUBLISHED_TOC_TITLE_CHANGED=1 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=666 VERIFY_TOC_MOVED=2 VERIFY_TOPIC_MISSING=1 VERIFY_TOPIC_UNFILED=12,312e3e4,reports/verify/tibco/tibco-enterprise-message-service/10.4.1-2026-11-11.csv
-tibco,ems,tibco-enterprise-message-service,10.4.3,logged,2026-11-11,local+staging+live,1431,0,0,178,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=57 VERIFY_PUBLISHED_ANCHOR_MISSING=7 VERIFY_PUBLISHED_CALLOUT_UNRENDERED=483 VERIFY_PUBLISHED_IMAGE_BROKEN=14 VERIFY_PUBLISHED_TEXT_DIFF=6 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=664 VERIFY_TOPIC_MISSING=1,312e3e4,reports/verify/tibco/tibco-enterprise-message-service/10.4.3-2026-11-11.csv
-tibco,ems,tibco-enterprise-message-service,10.4.4,logged,2026-11-11,local+staging+live,1431,0,0,178,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=57 VERIFY_PUBLISHED_ANCHOR_MISSING=7 VERIFY_PUBLISHED_CALLOUT_UNRENDERED=483 VERIFY_PUBLISHED_IMAGE_BROKEN=14 VERIFY_PUBLISHED_TEXT_DIFF=6 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=666 VERIFY_TOPIC_MISSING=1,312e3e4,reports/verify/tibco/tibco-enterprise-message-service/10.4.4-2026-11-11.csv
-tibco,ems,tibco-enterprise-message-service,10.5.0,logged,2026-11-11,local+staging+live,1444,0,0,198,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=57 VERIFY_PUBLISHED_ANCHOR_MISSING=7 VERIFY_PUBLISHED_CALLOUT_UNRENDERED=491 VERIFY_PUBLISHED_IMAGE_BROKEN=33 VERIFY_PUBLISHED_TEXT_DIFF=6 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=675 VERIFY_TOPIC_MISSING=1,312e3e4,reports/verify/tibco/tibco-enterprise-message-service/10.5.0-2026-11-11.csv
-tibco,ems,tibco-enterprise-message-service,10.5.1,logged,2026-11-11,local+staging+live,1443,0,0,179,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=57 VERIFY_PUBLISHED_ANCHOR_MISSING=7 VERIFY_PUBLISHED_CALLOUT_UNRENDERED=492 VERIFY_PUBLISHED_IMAGE_BROKEN=14 VERIFY_PUBLISHED_TEXT_DIFF=6 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=675 VERIFY_TOPIC_MISSING=1,312e3e4,reports/verify/tibco/tibco-enterprise-message-service/10.5.1-2026-11-11.csv
+tibco,ems,tibco-enterprise-message-service,10.4.0,stale,2026-11-12,local+staging+live,1459,0,0,185,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=56 VERIFY_PUBLISHED_ANCHOR_MISSING=4 VERIFY_PUBLISHED_CALLOUT_UNRENDERED=477 VERIFY_PUBLISHED_IMAGE_BROKEN=18 VERIFY_PUBLISHED_TEXT_DIFF=7 VERIFY_PUBLISHED_TOC_ENTRY_MISSING=4 VERIFY_PUBLISHED_TOC_TITLE_CHANGED=3 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=666 VERIFY_TOC_MOVED=2 VERIFY_TOPIC_MISSING=1 VERIFY_TOPIC_UNFILED=24,312e3e4,reports/verify/tibco/tibco-enterprise-message-service/10.4.0-2026-11-12.csv
+tibco,ems,tibco-enterprise-message-service,10.4.1,stale,2026-11-11,local+staging+live,1444,0,0,178,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=57 VERIFY_PUBLISHED_ANCHOR_MISSING=4 VERIFY_PUBLISHED_CALLOUT_UNRENDERED=486 VERIFY_PUBLISHED_IMAGE_BROKEN=14 VERIFY_PUBLISHED_TEXT_DIFF=6 VERIFY_PUBLISHED_TOC_TITLE_CHANGED=1 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=666 VERIFY_TOC_MOVED=2 VERIFY_TOPIC_MISSING=1 VERIFY_TOPIC_UNFILED=12,312e3e4,reports/verify/tibco/tibco-enterprise-message-service/10.4.1-2026-11-11.csv
+tibco,ems,tibco-enterprise-message-service,10.4.3,stale,2026-11-11,local+staging+live,1431,0,0,178,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=57 VERIFY_PUBLISHED_ANCHOR_MISSING=7 VERIFY_PUBLISHED_CALLOUT_UNRENDERED=483 VERIFY_PUBLISHED_IMAGE_BROKEN=14 VERIFY_PUBLISHED_TEXT_DIFF=6 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=664 VERIFY_TOPIC_MISSING=1,312e3e4,reports/verify/tibco/tibco-enterprise-message-service/10.4.3-2026-11-11.csv
+tibco,ems,tibco-enterprise-message-service,10.4.4,stale,2026-11-11,local+staging+live,1431,0,0,178,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=57 VERIFY_PUBLISHED_ANCHOR_MISSING=7 VERIFY_PUBLISHED_CALLOUT_UNRENDERED=483 VERIFY_PUBLISHED_IMAGE_BROKEN=14 VERIFY_PUBLISHED_TEXT_DIFF=6 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=666 VERIFY_TOPIC_MISSING=1,312e3e4,reports/verify/tibco/tibco-enterprise-message-service/10.4.4-2026-11-11.csv
+tibco,ems,tibco-enterprise-message-service,10.5.0,stale,2026-11-11,local+staging+live,1444,0,0,198,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=57 VERIFY_PUBLISHED_ANCHOR_MISSING=7 VERIFY_PUBLISHED_CALLOUT_UNRENDERED=491 VERIFY_PUBLISHED_IMAGE_BROKEN=33 VERIFY_PUBLISHED_TEXT_DIFF=6 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=675 VERIFY_TOPIC_MISSING=1,312e3e4,reports/verify/tibco/tibco-enterprise-message-service/10.5.0-2026-11-11.csv
+tibco,ems,tibco-enterprise-message-service,10.5.1,stale,2026-11-11,local+staging+live,1443,0,0,179,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=57 VERIFY_PUBLISHED_ANCHOR_MISSING=7 VERIFY_PUBLISHED_CALLOUT_UNRENDERED=492 VERIFY_PUBLISHED_IMAGE_BROKEN=14 VERIFY_PUBLISHED_TEXT_DIFF=6 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=675 VERIFY_TOPIC_MISSING=1,312e3e4,reports/verify/tibco/tibco-enterprise-message-service/10.5.1-2026-11-11.csv
 tibco,flogo,tibco-flogo,2.26.6,not-verified,,,,,,,,,
 tibco,flogo,tibco-flogo,2.26.7,not-verified,,,,,,,,,
 tibco,flogo,tibco-flogo,2.26.8,not-verified,,,,,,,,,
 tibco,flogo,tibco-flogo,3.0.0,not-verified,,,,,,,,,
-tibco,flogo,tibco-flogo,3.0.1,not-verified,,,,,,,,,
-tibco,flogo,tibco-flogo-extension-for-visual-studio-code,1.3.5,not-verified,,,,,,,,,
+tibco,flogo,tibco-flogo,3.0.1,logged,2026-11-13,local+staging+live,864,0,0,110,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=56 VERIFY_PUBLISHED_ANCHOR_MISSING=19 VERIFY_PUBLISHED_IMAGE_BROKEN=7 VERIFY_PUBLISHED_TEXT_DIFF=27 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=6 VERIFY_TEXT_DROPPED=1 VERIFY_TOPIC_UNFILED=63,dac7124,reports/verify/tibco/tibco-flogo/3.0.1-2026-11-13.csv
+tibco,flogo,tibco-flogo-extension-for-visual-studio-code,1.3.5,lost,2026-11-13,local+staging+live,640,1,0,163,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=52 VERIFY_PUBLISHED_ANCHOR_MISSING=61 VERIFY_PUBLISHED_IMAGE_BROKEN=18 VERIFY_PUBLISHED_TEXT_DIFF=26 VERIFY_PUBLISHED_TOC_MOVED=1 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=6 VERIFY_TEXT_DROPPED=2 VERIFY_TOC_ENTRY_MISSING=1 VERIFY_TOC_MOVED=3 VERIFY_TOPIC_UNFILED=18,4525bfb,reports/verify/tibco/tibco-flogo-extension-for-visual-studio-code/1.3.5-2026-11-13.csv
 tibco,foresight,tibco-enterprise-foresight,1.0.0,not-verified,,,,,,,,,
-tibco,foresight,tibco-enterprise-foresight,1.1.0,not-verified,,,,,,,,,
+tibco,foresight,tibco-enterprise-foresight,1.1.0,clean,2026-11-13,local,4,0,0,0,,ba30375,reports/verify/tibco/tibco-enterprise-foresight/1.1.0-2026-11-13.csv
 tibco,foresight,tibco-enterprise-foresight-healthcare-add-on,1.0.0,not-verified,,,,,,,,,
-tibco,foresight,tibco-enterprise-foresight-healthcare-add-on,1.1.0,not-verified,,,,,,,,,
+tibco,foresight,tibco-enterprise-foresight-healthcare-add-on,1.1.0,clean,2026-11-13,local,4,0,0,0,,ba30375,reports/verify/tibco/tibco-enterprise-foresight-healthcare-add-on/1.1.0-2026-11-13.csv
 tibco,foresight,tibco-foresight-archive-and-retrieval-system,5.4.0,not-verified,,,,,,,,,
 tibco,foresight,tibco-foresight-archive-and-retrieval-system,5.5.0,not-verified,,,,,,,,,
-tibco,foresight,tibco-foresight-archive-and-retrieval-system,6.0.0,not-verified,,,,,,,,,
+tibco,foresight,tibco-foresight-archive-and-retrieval-system,6.0.0,logged,2026-11-13,local+staging+live,106,0,0,224,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=1 VERIFY_PUBLISHED_ANCHOR_MISSING=49 VERIFY_PUBLISHED_IMAGE_BROKEN=168 VERIFY_PUBLISHED_TEXT_DIFF=6 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=7 VERIFY_TOPIC_UNFILED=7,8cb160c,reports/verify/tibco/tibco-foresight-archive-and-retrieval-system/6.0.0-2026-11-13.csv
 tibco,foresight,tibco-foresight-connect-with-fhir,1.0.0,not-verified,,,,,,,,,
 tibco,foresight,tibco-foresight-connect-with-fhir,1.0.1,logged,2026-11-11,local+staging+live,26,0,0,3,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=1 VERIFY_PUBLISHED_CALLOUT_UNRENDERED=6 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=5,8cb160c,reports/verify/tibco/tibco-foresight-connect-with-fhir/1.0.1-2026-11-11.csv
 tibco,foresight,tibco-foresight-edisim,6.19.0,not-verified,,,,,,,,,
 tibco,foresight,tibco-foresight-edisim,6.20.0,not-verified,,,,,,,,,
-tibco,foresight,tibco-foresight-edisim,6.21.0,not-verified,,,,,,,,,
+tibco,foresight,tibco-foresight-edisim,6.21.0,lost,2026-11-13,local+staging+live,1188,2,13,3,VERIFY_IMAGE_MISSING=1 VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_PAGE_MISSING=1 VERIFY_REDIRECT_NOT_ON_STAGING=1 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=6 VERIFY_TEXT_DROPPED=1 VERIFY_TOC_ENTRY_MISSING=2 VERIFY_TOC_MOVED=13 VERIFY_TOPIC_UNFILED=36,8cb160c,reports/verify/tibco/tibco-foresight-edisim/6.21.0-2026-11-13.csv
 tibco,foresight,tibco-foresight-hipaa-validator-desktop,9.0.0,not-verified,,,,,,,,,
 tibco,foresight,tibco-foresight-hipaa-validator-desktop,9.1.0,not-verified,,,,,,,,,
-tibco,foresight,tibco-foresight-hipaa-validator-desktop,9.2.0,not-verified,,,,,,,,,
+tibco,foresight,tibco-foresight-hipaa-validator-desktop,9.2.0,logged,2026-11-13,local+staging+live,625,0,0,255,VERIFY_IMAGE_MISSING=9 VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ALT_DROPPED=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=7 VERIFY_PUBLISHED_ANCHOR_MISSING=63 VERIFY_PUBLISHED_IMAGE_BROKEN=144 VERIFY_PUBLISHED_TEXT_DIFF=23 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=5 VERIFY_TOC_ENTRY_MISSING=2 VERIFY_TOC_MOVED=6 VERIFY_TOPIC_UNFILED=59,8cb160c,reports/verify/tibco/tibco-foresight-hipaa-validator-desktop/9.2.0-2026-11-13.csv
 tibco,foresight,tibco-foresight-instream,9.0.0,not-verified,,,,,,,,,
 tibco,foresight,tibco-foresight-instream,9.1.0,not-verified,,,,,,,,,
 tibco,foresight,tibco-foresight-instream,9.2.0,not-verified,,,,,,,,,
 tibco,foresight,tibco-foresight-instream,9.3.0,not-verified,,,,,,,,,
-tibco,foresight,tibco-foresight-instream,9.4.0,not-verified,,,,,,,,,
+tibco,foresight,tibco-foresight-instream,9.4.0,lost,2026-11-13,local+staging+live,1650,1,1,373,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_PAGE_MISSING=1 VERIFY_REDIRECT_NOT_ON_STAGING=1 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=6632 VERIFY_TOC_MOVED=6 VERIFY_TOC_ORDER=1 VERIFY_TOC_TITLE_CHANGED=1 VERIFY_TOPIC_MISSING=367 VERIFY_TOPIC_UNFILED=860,36cdd76,reports/verify/tibco/tibco-foresight-instream/9.4.0-2026-11-13.csv
 tibco,foresight,tibco-foresight-operational-monitor,5.4.0,not-verified,,,,,,,,,
 tibco,foresight,tibco-foresight-operational-monitor,5.5.0,not-verified,,,,,,,,,
-tibco,foresight,tibco-foresight-operational-monitor,6.0.0,not-verified,,,,,,,,,
+tibco,foresight,tibco-foresight-operational-monitor,6.0.0,logged,2026-11-13,local+staging+live,30,0,0,25,VERIFY_LIVE_UNCHECKABLE=4 VERIFY_PUBLISHED_IMAGE_BROKEN=25 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=8 VERIFY_TOPIC_UNFILED=1,8cb160c,reports/verify/tibco/tibco-foresight-operational-monitor/6.0.0-2026-11-13.csv
 tibco,foresight,tibco-foresight-rest-api,1.0.3,not-verified,,,,,,,,,
 tibco,foresight,tibco-foresight-rest-api,1.1.0,not-verified,,,,,,,,,
-tibco,foresight,tibco-foresight-rest-api,1.2.0,not-verified,,,,,,,,,
+tibco,foresight,tibco-foresight-rest-api,1.2.0,logged,2026-11-13,local+staging+live,72,0,0,10,VERIFY_LIVE_UNCHECKABLE=3 VERIFY_PUBLISHED_ANCHOR_DIFFERS=2 VERIFY_PUBLISHED_TEXT_DIFF=8 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=7 VERIFY_TOPIC_UNFILED=13,8cb160c,reports/verify/tibco/tibco-foresight-rest-api/1.2.0-2026-11-13.csv
 tibco,foresight,tibco-foresight-studio,9.0.0,not-verified,,,,,,,,,
 tibco,foresight,tibco-foresight-studio,9.0.1,not-verified,,,,,,,,,
 tibco,foresight,tibco-foresight-studio,9.1.0,not-verified,,,,,,,,,
 tibco,foresight,tibco-foresight-studio,9.2.0,not-verified,,,,,,,,,
-tibco,foresight,tibco-foresight-studio,9.3.0,not-verified,,,,,,,,,
+tibco,foresight,tibco-foresight-studio,9.3.0,logged,2026-11-13,local+staging+live,357,0,0,19,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=4 VERIFY_PUBLISHED_TEXT_DIFF=12 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=6 VERIFY_TOC_MOVED=3 VERIFY_TOC_TITLE_CHANGED=2 VERIFY_TOPIC_UNFILED=5,8cb160c,reports/verify/tibco/tibco-foresight-studio/9.3.0-2026-11-13.csv
 tibco,foresight,tibco-foresight-transaction-insight,5.4.0,not-verified,,,,,,,,,
 tibco,foresight,tibco-foresight-transaction-insight,5.5.0,not-verified,,,,,,,,,
-tibco,foresight,tibco-foresight-transaction-insight,6.0.0,not-verified,,,,,,,,,
+tibco,foresight,tibco-foresight-transaction-insight,6.0.0,logged,2026-11-13,local+staging+live,1099,0,0,1025,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=26 VERIFY_PUBLISHED_ANCHOR_MISSING=154 VERIFY_PUBLISHED_CALLOUT_UNRENDERED=69 VERIFY_PUBLISHED_IMAGE_BROKEN=757 VERIFY_PUBLISHED_TEXT_DIFF=43 VERIFY_REDIRECT_NOT_ON_STAGING=1 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=84 VERIFY_TOPIC_MISSING=20 VERIFY_TOPIC_UNFILED=274,53c7ee8,reports/verify/tibco/tibco-foresight-transaction-insight/6.0.0-2026-11-13.csv
 tibco,foresight,tibco-foresight-translator,4.0.0,not-verified,,,,,,,,,
 tibco,foresight,tibco-foresight-translator,4.1.0,not-verified,,,,,,,,,
-tibco,foresight,tibco-foresight-translator,4.2.0,not-verified,,,,,,,,,
+tibco,foresight,tibco-foresight-translator,4.2.0,lost,2026-11-13,local+staging+live,451,1,0,305,VERIFY_PUBLISHED_ANCHOR_DIFFERS=21 VERIFY_PUBLISHED_ANCHOR_MISSING=2 VERIFY_PUBLISHED_IMAGE_BROKEN=268 VERIFY_PUBLISHED_TEXT_DIFF=12 VERIFY_REDIRECT_MAP_MISSING=1 VERIFY_TEXT_DROPPED=1 VERIFY_TOPIC_MISSING=1 VERIFY_TOPIC_UNFILED=37,89203dd,reports/verify/tibco/tibco-foresight-translator/4.2.0-2026-11-13.csv
 tibco,foresight,tibco-foresight-translator-attachment-adapter,2.0.0,not-verified,,,,,,,,,
-tibco,foresight,tibco-foresight-translator-attachment-adapter,3.0.0,not-verified,,,,,,,,,
+tibco,foresight,tibco-foresight-translator-attachment-adapter,3.0.0,logged,2026-11-13,local+staging+live,27,0,0,1,VERIFY_REDIRECT_MAP_MISSING=1 VERIFY_TOPIC_UNFILED=1,89203dd,reports/verify/tibco/tibco-foresight-translator-attachment-adapter/3.0.0-2026-11-13.csv
 tibco,ftl,tibco-eftl-enterprise-edition,7.1.0,logged,2026-11-11,local+staging+live,154,0,0,73,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=8 VERIFY_PUBLISHED_ANCHOR_MISSING=41 VERIFY_PUBLISHED_CALLOUT_UNRENDERED=19 VERIFY_PUBLISHED_IMAGE_BROKEN=12 VERIFY_PUBLISHED_TEXT_DIFF=3 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=203 VERIFY_TOC_MOVED=1 VERIFY_TOPIC_UNFILED=5,7ef2587,reports/verify/tibco/tibco-eftl-enterprise-edition/7.1.0-2026-11-12.csv
 tibco,ftl,tibco-eftl-enterprise-edition,7.1.1,logged,2026-11-11,local+staging+live,156,0,0,61,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=8 VERIFY_PUBLISHED_ANCHOR_MISSING=41 VERIFY_PUBLISHED_CALLOUT_UNRENDERED=19 VERIFY_PUBLISHED_TEXT_DIFF=3 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=203 VERIFY_TOC_MOVED=1 VERIFY_TOPIC_UNFILED=7,7ef2587,reports/verify/tibco/tibco-eftl-enterprise-edition/7.1.1-2026-11-12.csv
 tibco,ftl,tibco-eftl-enterprise-edition,7.1.2,logged,2026-11-11,local+staging+live,156,0,0,61,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=8 VERIFY_PUBLISHED_ANCHOR_MISSING=41 VERIFY_PUBLISHED_CALLOUT_UNRENDERED=19 VERIFY_PUBLISHED_TEXT_DIFF=3 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=146 VERIFY_TOC_MOVED=1 VERIFY_TOPIC_UNFILED=7,7ef2587,reports/verify/tibco/tibco-eftl-enterprise-edition/7.1.2-2026-11-12.csv
 tibco,ftl,tibco-eftl-enterprise-edition,7.1.3,stale,2026-11-11,local+staging+live,148,0,0,199,VERIFY_LIVE_UNCHECKABLE=9 VERIFY_PUBLISHED_ANCHOR_DIFFERS=8 VERIFY_PUBLISHED_ANCHOR_MISSING=41 VERIFY_PUBLISHED_CALLOUT_UNRENDERED=19 VERIFY_PUBLISHED_TEXT_DIFF=3 VERIFY_REDIRECT_UNCONVERTED=146 VERIFY_REDIRECT_UNMAPPED=138 VERIFY_TOC_MOVED=1,7ef2587,reports/verify/tibco/tibco-eftl-enterprise-edition/7.1.3-2026-11-12.csv
 tibco,ftl,tibco-eftl-enterprise-edition,7.2.0,logged,2026-11-11,local+staging+live,149,0,0,61,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=8 VERIFY_PUBLISHED_ANCHOR_MISSING=41 VERIFY_PUBLISHED_CALLOUT_UNRENDERED=19 VERIFY_PUBLISHED_TEXT_DIFF=3 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=146 VERIFY_TOC_MOVED=1,7ef2587,reports/verify/tibco/tibco-eftl-enterprise-edition/7.2.0-2026-11-12.csv
-tibco,ftl,tibco-eftl-enterprise-edition,7.3.0,logged,2026-11-11,local+staging+live,148,0,0,61,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=8 VERIFY_PUBLISHED_ANCHOR_MISSING=41 VERIFY_PUBLISHED_CALLOUT_UNRENDERED=19 VERIFY_PUBLISHED_TEXT_DIFF=3 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=145 VERIFY_TOC_MOVED=1,7ef2587,reports/verify/tibco/tibco-eftl-enterprise-edition/7.3.0-2026-11-12.csv
+tibco,ftl,tibco-eftl-enterprise-edition,7.3.0,logged,2026-11-13,local+staging+live,148,0,0,61,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=49 VERIFY_PUBLISHED_CALLOUT_UNRENDERED=19 VERIFY_PUBLISHED_TEXT_DIFF=3 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=145 VERIFY_TOC_MOVED=1,7ef2587,reports/verify/tibco/tibco-eftl-enterprise-edition/7.3.0-2026-11-13.csv
 tibco,ftl,tibco-ftl-enterprise-edition,7.1.0,logged,2026-11-11,local+staging+live,826,0,0,450,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=57 VERIFY_PUBLISHED_ANCHOR_MISSING=132 VERIFY_PUBLISHED_CALLOUT_UNRENDERED=140 VERIFY_PUBLISHED_IMAGE_BROKEN=92 VERIFY_PUBLISHED_TEXT_DIFF=17 VERIFY_PUBLISHED_TOC_ENTRY_MISSING=10 VERIFY_PUBLISHED_TOC_MOVED=28 VERIFY_PUBLISHED_TOC_ORDER=2 VERIFY_PUBLISHED_TOC_TITLE_CHANGED=9 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=381 VERIFY_REDIRECT_UNSERVED=1 VERIFY_TOC_MOVED=41 VERIFY_TOC_TITLE_CHANGED=2 VERIFY_TOPIC_UNFILED=64,7ef2587,reports/verify/tibco/tibco-ftl-enterprise-edition/7.1.0-2026-11-12.csv
 tibco,ftl,tibco-ftl-enterprise-edition,7.1.1,logged,2026-11-11,local+staging+live,829,0,0,450,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=57 VERIFY_PUBLISHED_ANCHOR_MISSING=132 VERIFY_PUBLISHED_CALLOUT_UNRENDERED=143 VERIFY_PUBLISHED_IMAGE_BROKEN=92 VERIFY_PUBLISHED_TEXT_DIFF=17 VERIFY_PUBLISHED_TOC_ENTRY_MISSING=10 VERIFY_PUBLISHED_TOC_MOVED=28 VERIFY_PUBLISHED_TOC_ORDER=2 VERIFY_PUBLISHED_TOC_TITLE_CHANGED=9 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=381 VERIFY_TOC_MOVED=41 VERIFY_TOC_TITLE_CHANGED=2 VERIFY_TOPIC_UNFILED=64,7ef2587,reports/verify/tibco/tibco-ftl-enterprise-edition/7.1.1-2026-11-12.csv
 tibco,ftl,tibco-ftl-enterprise-edition,7.1.2,logged,2026-11-11,local+staging+live,804,0,0,397,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=54 VERIFY_PUBLISHED_ANCHOR_MISSING=129 VERIFY_PUBLISHED_CALLOUT_UNRENDERED=156 VERIFY_PUBLISHED_IMAGE_BROKEN=71 VERIFY_PUBLISHED_TEXT_DIFF=19 VERIFY_PUBLISHED_TOC_ENTRY_MISSING=1 VERIFY_PUBLISHED_TOC_MOVED=14 VERIFY_PUBLISHED_TOC_TITLE_CHANGED=7 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=383 VERIFY_TOC_MOVED=37 VERIFY_TOC_TITLE_CHANGED=2 VERIFY_TOPIC_UNFILED=62,7ef2587,reports/verify/tibco/tibco-ftl-enterprise-edition/7.1.2-2026-11-12.csv
 tibco,ftl,tibco-ftl-enterprise-edition,7.1.3,stale,2026-11-11,local+staging+live,761,0,0,1207,VERIFY_LIVE_UNCHECKABLE=14 VERIFY_PUBLISHED_ANCHOR_DIFFERS=66 VERIFY_PUBLISHED_ANCHOR_MISSING=128 VERIFY_PUBLISHED_CALLOUT_UNRENDERED=156 VERIFY_PUBLISHED_IMAGE_BROKEN=102 VERIFY_PUBLISHED_TEXT_DIFF=22 VERIFY_PUBLISHED_TOC_MOVED=19 VERIFY_PUBLISHED_TOC_TITLE_CHANGED=5 VERIFY_REDIRECT_UNCONVERTED=384 VERIFY_REDIRECT_UNMAPPED=746 VERIFY_TOC_MOVED=47 VERIFY_TOC_TITLE_CHANGED=2 VERIFY_TOPIC_MISSING=2,7ef2587,reports/verify/tibco/tibco-ftl-enterprise-edition/7.1.3-2026-11-12.csv
 tibco,ftl,tibco-ftl-enterprise-edition,7.2.0,logged,2026-11-11,local+staging+live,760,0,0,447,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=65 VERIFY_PUBLISHED_ANCHOR_MISSING=129 VERIFY_PUBLISHED_CALLOUT_UNRENDERED=146 VERIFY_PUBLISHED_IMAGE_BROKEN=71 VERIFY_PUBLISHED_TEXT_DIFF=16 VERIFY_PUBLISHED_TOC_ENTRY_MISSING=10 VERIFY_PUBLISHED_TOC_MOVED=34 VERIFY_PUBLISHED_TOC_TITLE_CHANGED=14 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=382 VERIFY_TOC_MOVED=47 VERIFY_TOC_TITLE_CHANGED=2 VERIFY_TOPIC_MISSING=4,7ef2587,reports/verify/tibco/tibco-ftl-enterprise-edition/7.2.0-2026-11-12.csv
-tibco,ftl,tibco-ftl-enterprise-edition,7.3.0,logged,2026-11-11,local+staging+live,811,0,0,446,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=71 VERIFY_PUBLISHED_ANCHOR_MISSING=129 VERIFY_PUBLISHED_CALLOUT_UNRENDERED=187 VERIFY_PUBLISHED_IMAGE_BROKEN=89 VERIFY_PUBLISHED_TEXT_DIFF=22 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=399 VERIFY_TOC_MOVED=47 VERIFY_TOC_TITLE_CHANGED=2,7ef2587,reports/verify/tibco/tibco-ftl-enterprise-edition/7.3.0-2026-11-12.csv
-tibco,fulfillment,tibco-enterprise-fulfillment-orchestration-suite,1.1.0,not-verified,,,,,,,,,
-tibco,fulfillment,tibco-fulfillment-provisioning,3.10.0,not-verified,,,,,,,,,
+tibco,ftl,tibco-ftl-enterprise-edition,7.3.0,logged,2026-11-13,local+staging+live,811,0,0,445,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=195 VERIFY_PUBLISHED_ANCHOR_MISSING=4 VERIFY_PUBLISHED_CALLOUT_UNRENDERED=187 VERIFY_PUBLISHED_IMAGE_BROKEN=89 VERIFY_PUBLISHED_TEXT_DIFF=22 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=399 VERIFY_TOC_MOVED=47 VERIFY_TOC_TITLE_CHANGED=2,476383b,reports/verify/tibco/tibco-ftl-enterprise-edition/7.3.0-2026-11-13.csv
+tibco,fulfillment,tibco-enterprise-fulfillment-orchestration-suite,1.1.0,clean,2026-11-13,local,4,0,0,0,,303fd94,reports/verify/tibco/tibco-enterprise-fulfillment-orchestration-suite/1.1.0-2026-11-13.csv
+tibco,fulfillment,tibco-fulfillment-provisioning,3.10.0,lost,2026-11-13,local+staging+live,657,1,0,28,VERIFY_LIVE_UNCHECKABLE=2 VERIFY_PUBLISHED_ANCHOR_DIFFERS=19 VERIFY_PUBLISHED_CALLOUT_UNRENDERED=1 VERIFY_PUBLISHED_TEXT_DIFF=8 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=6 VERIFY_TEXT_DROPPED=1 VERIFY_TOPIC_UNFILED=11,25a0764,reports/verify/tibco/tibco-fulfillment-provisioning/3.10.0-2026-11-13.csv
 tibco,fulfillment,tibco-fulfillment-provisioning,3.9.0,not-verified,,,,,,,,,
-tibco,fulfillment,tibco-offer-and-price-engine,6.0.0,not-verified,,,,,,,,,
+tibco,fulfillment,tibco-offer-and-price-engine,6.0.0,lost,2026-11-13,local+staging+live,239,1,0,67,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=1 VERIFY_PUBLISHED_ANCHOR_MISSING=41 VERIFY_PUBLISHED_IMAGE_BROKEN=15 VERIFY_PUBLISHED_TEXT_DIFF=9 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=7 VERIFY_TEXT_DROPPED=1 VERIFY_TOPIC_MISSING=1 VERIFY_TOPIC_UNFILED=81,25a0764,reports/verify/tibco/tibco-offer-and-price-engine/6.0.0-2026-11-13.csv
 tibco,fulfillment,tibco-order-management,5.0.1,not-verified,,,,,,,,,
 tibco,fulfillment,tibco-order-management,6.0.0,not-verified,,,,,,,,,
 tibco,fulfillment,tibco-order-management,6.0.1,not-verified,,,,,,,,,
-tibco,fulfillment,tibco-order-management,6.1.0,not-verified,,,,,,,,,
-tibco,fulfillment,tibco-product-and-service-catalog,5.1.0,not-verified,,,,,,,,,
+tibco,fulfillment,tibco-order-management,6.1.0,lost,2026-11-13,local+staging+live,1117,1,0,105,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=20 VERIFY_PUBLISHED_ANCHOR_MISSING=3 VERIFY_PUBLISHED_IMAGE_BROKEN=60 VERIFY_PUBLISHED_TEXT_DIFF=4 VERIFY_PUBLISHED_TOC_MOVED=2 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=7 VERIFY_TEXT_DROPPED=1 VERIFY_TOC_MOVED=16 VERIFY_TOPIC_UNFILED=569,25a0764,reports/verify/tibco/tibco-order-management/6.1.0-2026-11-13.csv
+tibco,fulfillment,tibco-product-and-service-catalog,5.1.0,issues,2026-11-13,local+staging+live,1876,0,14,27,VERIFY_LIVE_UNCHECKABLE=2 VERIFY_PUBLISHED_ANCHOR_DIFFERS=11 VERIFY_PUBLISHED_CALLOUT_UNRENDERED=1 VERIFY_PUBLISHED_TEXT_DIFF=10 VERIFY_PUBLISHED_TOC_MOVED=1 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=23 VERIFY_TOC_ENTRY_MISSING=4 VERIFY_TOC_MOVED=14 VERIFY_TOPIC_UNFILED=1324,25a0764,reports/verify/tibco/tibco-product-and-service-catalog/5.1.0-2026-11-13.csv
 tibco,fulfillment,tibco-product-and-service-catalog-powered-by-tibco-ebx,1.0.0,not-verified,,,,,,,,,
-tibco,fulfillment,tibco-product-and-service-catalog-powered-by-tibco-ebx,1.1.0,not-verified,,,,,,,,,
-tibco,fulfillment,tibco-product-and-service-inventory,2.1.0,not-verified,,,,,,,,,
-tibco,fulfillment,tibco-product-and-service-inventory-2-1-0,2.1.0,not-verified,,,,,,,,,
+tibco,fulfillment,tibco-product-and-service-catalog-powered-by-tibco-ebx,1.1.0,lost,2026-11-13,local+staging+live,364,1,6,3,VERIFY_PUBLISHED_PAGE_MISSING=1 VERIFY_REDIRECT_MAP_MISSING=1 VERIFY_TOC_ENTRY_MISSING=2 VERIFY_TOC_MOVED=6 VERIFY_TOPIC_UNFILED=313,a3f1002,reports/verify/tibco/tibco-product-and-service-catalog-powered-by-tibco-ebx/1.1.0-2026-11-13.csv
+tibco,fulfillment,tibco-product-and-service-inventory,2.1.0,logged,2026-11-13,local+staging+live,256,0,0,58,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ANCHOR_MISSING=38 VERIFY_PUBLISHED_IMAGE_BROKEN=18 VERIFY_PUBLISHED_TEXT_DIFF=2 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=8 VERIFY_TOPIC_UNFILED=71,25a0764,reports/verify/tibco/tibco-product-and-service-inventory/2.1.0-2026-11-13.csv
+tibco,fulfillment,tibco-product-and-service-inventory-2-1-0,2.1.0,logged,2026-11-13,local+staging+live,251,0,0,59,VERIFY_PUBLISHED_ANCHOR_MISSING=38 VERIFY_PUBLISHED_IMAGE_BROKEN=18 VERIFY_PUBLISHED_TEXT_DIFF=2 VERIFY_REDIRECT_MAP_MISSING=1 VERIFY_TOPIC_UNFILED=71,a3f1002,reports/verify/tibco/tibco-product-and-service-inventory-2-1-0/2.1.0-2026-11-13.csv
 tibco,general,tibco-activation-service,1.0.0,not-verified,,,,,,,,,
-tibco,general,tibco-activation-service,1.1.0,not-verified,,,,,,,,,
-tibco,general,tibco-api-exchange-gateway,2.5.1,not-verified,,,,,,,,,
+tibco,general,tibco-activation-service,1.1.0,lost,2026-11-13,local+staging+live,41,1,0,29,VERIFY_LIVE_UNCHECKABLE=4 VERIFY_PUBLISHED_ANCHOR_DIFFERS=3 VERIFY_PUBLISHED_TEXT_DIFF=1 VERIFY_REDIRECT_UNCONVERTED=8 VERIFY_REDIRECT_UNMAPPED=25 VERIFY_TEXT_DROPPED=1 VERIFY_TOPIC_UNFILED=7,1bbe4b6,reports/verify/tibco/tibco-activation-service/1.1.0-2026-11-13.csv
+tibco,general,tibco-api-exchange-gateway,2.5.1,logged,2026-11-13,local+staging+live,880,0,0,54,VERIFY_PUBLISHED_ANCHOR_DIFFERS=22 VERIFY_PUBLISHED_ANCHOR_MISSING=8 VERIFY_PUBLISHED_IMAGE_BROKEN=8 VERIFY_PUBLISHED_TEXT_DIFF=15 VERIFY_REDIRECT_MAP_MISSING=1 VERIFY_TOPIC_UNFILED=28,f42256c,reports/verify/tibco/tibco-api-exchange-gateway/2.5.1-2026-11-13.csv
 tibco,general,tibco-enterprise-administrator,2.4.2,not-verified,,,,,,,,,
-tibco,general,tibco-enterprise-administrator,2.4.3,not-verified,,,,,,,,,
+tibco,general,tibco-enterprise-administrator,2.4.3,logged,2026-11-13,local+staging+live,301,0,0,59,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ALT_DROPPED=2 VERIFY_PUBLISHED_ANCHOR_DIFFERS=9 VERIFY_PUBLISHED_CALLOUT_UNRENDERED=143 VERIFY_PUBLISHED_TEXT_DIFF=9 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=204 VERIFY_TOC_MOVED=6 VERIFY_TOPIC_UNFILED=6,4819513,reports/verify/tibco/tibco-enterprise-administrator/2.4.3-2026-11-13.csv
 tibco,general,tibco-patterns,6.1.2,not-verified,,,,,,,,,
-tibco,general,tibco-patterns,6.2.0,not-verified,,,,,,,,,
+tibco,general,tibco-patterns,6.2.0,issues,2026-11-13,local+staging+live,343,0,12,51,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=35 VERIFY_PUBLISHED_TEXT_DIFF=13 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=541 VERIFY_TOC_ENTRY_MISSING=3 VERIFY_TOC_MOVED=12 VERIFY_TOPIC_UNFILED=12,4819513,reports/verify/tibco/tibco-patterns/6.2.0-2026-11-13.csv
 tibco,general,tibco-reward,22.2.0,not-verified,,,,,,,,,
-tibco,general,tibco-reward,22.3.0,not-verified,,,,,,,,,
+tibco,general,tibco-reward,22.3.0,lost,2026-11-13,local+staging+live,1675,2,2,153,VERIFY_PUBLISHED_ANCHOR_DIFFERS=72 VERIFY_PUBLISHED_ANCHOR_MISSING=26 VERIFY_PUBLISHED_IMAGE_BROKEN=34 VERIFY_PUBLISHED_TEXT_DIFF=13 VERIFY_REDIRECT_MAP_MISSING=1 VERIFY_TOC_ENTRY_MISSING=2 VERIFY_TOC_MOVED=2 VERIFY_TOPIC_MISSING=7 VERIFY_TOPIC_UNFILED=208,f42256c,reports/verify/tibco/tibco-reward/22.3.0-2026-11-13.csv
 tibco,general,tibco-rtview,7.5.0,not-verified,,,,,,,,,
-tibco,general,tibco-rtview,7.6.0,not-verified,,,,,,,,,
+tibco,general,tibco-rtview,7.6.0,clean,2026-11-13,local,8,0,0,0,,a7d2916,reports/verify/tibco/tibco-rtview/7.6.0-2026-11-13.csv
 tibco,hawk,tibco-hawk-database-adapter,6.2.0,not-verified,,,,,,,,,
-tibco,hawk,tibco-hawk-database-adapter,6.2.1,not-verified,,,,,,,,,
+tibco,hawk,tibco-hawk-database-adapter,6.2.1,logged,2026-11-13,local+staging+live,207,0,0,24,VERIFY_PUBLISHED_ANCHOR_DIFFERS=2 VERIFY_PUBLISHED_IMAGE_BROKEN=13 VERIFY_PUBLISHED_TEXT_DIFF=8 VERIFY_REDIRECT_MAP_MISSING=1 VERIFY_TOPIC_UNFILED=1,d45ee9e,reports/verify/tibco/tibco-hawk-database-adapter/6.2.1-2026-11-13.csv
 tibco,hawk,tibco-hawk-microagent-for-tibco-activematrix-businessworks-6,6.7.2,not-verified,,,,,,,,,
-tibco,hawk,tibco-hawk-microagent-for-tibco-activematrix-businessworks-6,6.8.0,not-verified,,,,,,,,,
-tibco,hawk,tibco-hawk-microagent-for-tibco-businessworks-container-edition,2.2.0,not-verified,,,,,,,,,
+tibco,hawk,tibco-hawk-microagent-for-tibco-activematrix-businessworks-6,6.8.0,lost,2026-11-13,local+staging+live,63,1,0,0,VERIFY_LIVE_UNCHECKABLE=2 VERIFY_PUBLISHED_PAGE_MISSING=1 VERIFY_REDIRECT_NOT_ON_STAGING=1 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=7 VERIFY_TOPIC_UNFILED=6,3985517,reports/verify/tibco/tibco-hawk-microagent-for-tibco-activematrix-businessworks-6/6.8.0-2026-11-13.csv
+tibco,hawk,tibco-hawk-microagent-for-tibco-businessworks-container-edition,2.2.0,lost,2026-11-13,local+staging+live,19,1,0,0,VERIFY_LIVE_UNCHECKABLE=4 VERIFY_PUBLISHED_PAGE_MISSING=1 VERIFY_REDIRECT_NOT_ON_STAGING=1 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=6 VERIFY_TOPIC_UNFILED=1,3985517,reports/verify/tibco/tibco-hawk-microagent-for-tibco-businessworks-container-edition/2.2.0-2026-11-13.csv
 tibco,hawk,tibco-operational-intelligence-hawk-redtail,6.3.1,not-verified,,,,,,,,,
-tibco,hawk,tibco-operational-intelligence-hawk-redtail,7.5.0,not-verified,,,,,,,,,
-tibco,iprocess,tibco-iprocess-engine,11.10.0,not-verified,,,,,,,,,
+tibco,hawk,tibco-operational-intelligence-hawk-redtail,7.5.0,lost,2026-11-13,local+staging+live,773,2,0,271,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=239 VERIFY_PUBLISHED_ANCHOR_MISSING=3 VERIFY_PUBLISHED_PAGE_MISSING=2 VERIFY_PUBLISHED_TEXT_DIFF=21 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=208 VERIFY_TOC_MOVED=8 VERIFY_TOPIC_UNFILED=6,3985517,reports/verify/tibco/tibco-operational-intelligence-hawk-redtail/7.5.0-2026-11-13.csv
+tibco,int-platform,tibco-hybrid-integration-connectivity-add-on,3.11.0,not-verified,,,,,,,,,
+tibco,iprocess,tibco-iprocess-engine,11.10.0,issues,2026-11-13,local+staging+live,2172,0,75,259,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=2 VERIFY_PUBLISHED_ANCHOR_MISSING=153 VERIFY_PUBLISHED_IMAGE_BROKEN=34 VERIFY_PUBLISHED_TEXT_DIFF=70 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=53 VERIFY_TOC_MOVED=75 VERIFY_TOC_TITLE_CHANGED=1 VERIFY_TOPIC_UNFILED=357,ce1eed0,reports/verify/tibco/tibco-iprocess-engine/11.10.0-2026-11-13.csv
 tibco,iprocess,tibco-iprocess-engine,11.9.1,not-verified,,,,,,,,,
 tibco,iprocess,tibco-iprocess-engine,11.9.2,not-verified,,,,,,,,,
-tibco,iprocess,tibco-iprocess-server-objects-java,11.10.0,not-verified,,,,,,,,,
+tibco,iprocess,tibco-iprocess-server-objects-java,11.10.0,clean,2026-11-13,local,7,0,0,0,,126927e,reports/verify/tibco/tibco-iprocess-server-objects-java/11.10.0-2026-11-13.csv
 tibco,iprocess,tibco-iprocess-server-objects-java,11.9.0,not-verified,,,,,,,,,
-tibco,iprocess,tibco-iprocess-server-objects-net,11.10.0,not-verified,,,,,,,,,
+tibco,iprocess,tibco-iprocess-server-objects-net,11.10.0,clean,2026-11-13,local,7,0,0,0,,126927e,reports/verify/tibco/tibco-iprocess-server-objects-net/11.10.0-2026-11-13.csv
 tibco,iprocess,tibco-iprocess-server-objects-net,11.9.0,not-verified,,,,,,,,,
-tibco,iprocess,tibco-iprocess-technology-plug-ins,11.10.0,not-verified,,,,,,,,,
+tibco,iprocess,tibco-iprocess-technology-plug-ins,11.10.0,logged,2026-11-13,local+staging+live,272,0,0,7,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ANCHOR_MISSING=1 VERIFY_PUBLISHED_TEXT_DIFF=6 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=9 VERIFY_TOPIC_UNFILED=7,ce1eed0,reports/verify/tibco/tibco-iprocess-technology-plug-ins/11.10.0-2026-11-13.csv
 tibco,iprocess,tibco-iprocess-technology-plug-ins,11.9.2,not-verified,,,,,,,,,
-tibco,iprocess,tibco-iprocess-web-services-client-plug-in,11.9.0,not-verified,,,,,,,,,
-tibco,iprocess,tibco-iprocess-web-services-server-plug-in,11.9.0,not-verified,,,,,,,,,
-tibco,iprocess,tibco-iprocess-workspace-browser,11.10.0,not-verified,,,,,,,,,
+tibco,iprocess,tibco-iprocess-web-services-client-plug-in,11.9.0,logged,2026-11-13,local+staging+live,144,0,0,6,VERIFY_PUBLISHED_ANCHOR_DIFFERS=3 VERIFY_PUBLISHED_TEXT_DIFF=2 VERIFY_REDIRECT_MAP_MISSING=1,10fb7b4,reports/verify/tibco/tibco-iprocess-web-services-client-plug-in/11.9.0-2026-11-13.csv
+tibco,iprocess,tibco-iprocess-web-services-server-plug-in,11.9.0,logged,2026-11-13,local+staging+live,177,0,0,4,VERIFY_PUBLISHED_ANCHOR_DIFFERS=2 VERIFY_PUBLISHED_TEXT_DIFF=1 VERIFY_REDIRECT_MAP_MISSING=1 VERIFY_TOPIC_UNFILED=126,10fb7b4,reports/verify/tibco/tibco-iprocess-web-services-server-plug-in/11.9.0-2026-11-13.csv
+tibco,iprocess,tibco-iprocess-workspace-browser,11.10.0,logged,2026-11-13,local+staging+live,671,0,0,46,VERIFY_LIVE_UNCHECKABLE=3 VERIFY_PUBLISHED_ANCHOR_DIFFERS=3 VERIFY_PUBLISHED_IMAGE_BROKEN=11 VERIFY_PUBLISHED_TEXT_DIFF=32 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=7 VERIFY_TOPIC_UNFILED=1,ce1eed0,reports/verify/tibco/tibco-iprocess-workspace-browser/11.10.0-2026-11-13.csv
 tibco,iprocess,tibco-iprocess-workspace-browser,11.9.0,not-verified,,,,,,,,,
-tibco,iprocess,tibco-iprocess-workspace-plug-ins,11.10.0,not-verified,,,,,,,,,
+tibco,iprocess,tibco-iprocess-workspace-plug-ins,11.10.0,clean,2026-11-13,local+staging+live,28,0,0,0,VERIFY_LIVE_UNCHECKABLE=2 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=8 VERIFY_TOPIC_UNFILED=1,ce1eed0,reports/verify/tibco/tibco-iprocess-workspace-plug-ins/11.10.0-2026-11-13.csv
 tibco,iprocess,tibco-iprocess-workspace-plug-ins,11.9.0,not-verified,,,,,,,,,
-tibco,iprocess,tibco-iprocess-workspace-windows,11.10.0,not-verified,,,,,,,,,
+tibco,iprocess,tibco-iprocess-workspace-windows,11.10.0,issues,2026-11-13,local+staging+live,1074,0,1,186,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=37 VERIFY_PUBLISHED_ANCHOR_MISSING=35 VERIFY_PUBLISHED_IMAGE_BROKEN=87 VERIFY_PUBLISHED_TEXT_DIFF=26 VERIFY_PUBLISHED_TOC_ENTRY_MISSING=1 VERIFY_PUBLISHED_TOC_TITLE_CHANGED=1 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=20 VERIFY_TOC_ORDER=1 VERIFY_TOPIC_UNFILED=22,ce1eed0,reports/verify/tibco/tibco-iprocess-workspace-windows/11.10.0-2026-11-13.csv
 tibco,iprocess,tibco-iprocess-workspace-windows,11.9.2,not-verified,,,,,,,,,
 tibco,mainframe,tibco-mainframe-red,2.5.1,not-verified,,,,,,,,,
-tibco,mainframe,tibco-mainframe-red,3.1.0,not-verified,,,,,,,,,
+tibco,mainframe,tibco-mainframe-red,3.1.0,logged,2026-11-13,local+staging+live,251,0,0,12,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=10 VERIFY_PUBLISHED_TEXT_DIFF=2 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=6 VERIFY_TOPIC_UNFILED=17,bcb6788,reports/verify/tibco/tibco-mainframe-red/3.1.0-2026-11-13.csv
 tibco,mainframe,tibco-mainframe-tcp-library,2.5.0,not-verified,,,,,,,,,
-tibco,mainframe,tibco-mainframe-tcp-library,3.0.0,not-verified,,,,,,,,,
+tibco,mainframe,tibco-mainframe-tcp-library,3.0.0,logged,2026-11-13,local+staging+live,65,0,0,4,VERIFY_PUBLISHED_IMAGE_BROKEN=1 VERIFY_PUBLISHED_TEXT_DIFF=2 VERIFY_REDIRECT_MAP_MISSING=1,50ba6c2,reports/verify/tibco/tibco-mainframe-tcp-library/3.0.0-2026-11-13.csv
 tibco,mainframe,tibco-mainframe-webui,2.5.0,not-verified,,,,,,,,,
-tibco,mainframe,tibco-mainframe-webui,3.0.0,not-verified,,,,,,,,,
+tibco,mainframe,tibco-mainframe-webui,3.0.0,logged,2026-11-13,local+staging+live,123,0,0,18,VERIFY_PUBLISHED_ANCHOR_DIFFERS=13 VERIFY_PUBLISHED_TEXT_DIFF=4 VERIFY_REDIRECT_MAP_MISSING=1,50ba6c2,reports/verify/tibco/tibco-mainframe-webui/3.0.0-2026-11-13.csv
 tibco,mainframe,tibco-red-enabled-for-ziip,2.5.0,not-verified,,,,,,,,,
-tibco,mainframe,tibco-red-enabled-for-ziip,3.1.0,not-verified,,,,,,,,,
-tibco,mainframe,tibco-substation-es,2.14.0,not-verified,,,,,,,,,
-tibco,mainframe,tibco-transaction-interface-for-cics,2.14.0,not-verified,,,,,,,,,
-tibco,mainframe,tibco-transaction-interface-for-ims,2.14.0,not-verified,,,,,,,,,
+tibco,mainframe,tibco-red-enabled-for-ziip,3.1.0,clean,2026-11-13,local+staging+live,20,0,0,0,VERIFY_LIVE_UNCHECKABLE=4 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=6,bcb6788,reports/verify/tibco/tibco-red-enabled-for-ziip/3.1.0-2026-11-13.csv
+tibco,mainframe,tibco-substation-es,2.14.0,issues,2026-11-13,local+staging+live,578,0,1,80,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=27 VERIFY_PUBLISHED_TEXT_DIFF=52 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=12 VERIFY_TEXT_DROPPED=1 VERIFY_TOC_ORDER=1,5c31ed5,reports/verify/tibco/tibco-substation-es/2.14.0-2026-11-13.csv
+tibco,mainframe,tibco-transaction-interface-for-cics,2.14.0,issues,2026-11-13,local+staging+live,578,0,1,80,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=27 VERIFY_PUBLISHED_TEXT_DIFF=52 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=12 VERIFY_TEXT_DROPPED=1 VERIFY_TOC_ORDER=1,5c31ed5,reports/verify/tibco/tibco-transaction-interface-for-cics/2.14.0-2026-11-13.csv
+tibco,mainframe,tibco-transaction-interface-for-ims,2.14.0,issues,2026-11-13,local+staging+live,578,0,1,81,VERIFY_PUBLISHED_ANCHOR_DIFFERS=27 VERIFY_PUBLISHED_TEXT_DIFF=52 VERIFY_REDIRECT_MAP_MISSING=1 VERIFY_TEXT_DROPPED=1 VERIFY_TOC_ORDER=1,50ba6c2,reports/verify/tibco/tibco-transaction-interface-for-ims/2.14.0-2026-11-13.csv
 tibco,messaging,tibco-gemini-powered-by-apache-cassandra,5.0.2,not-verified,,,,,,,,,
 tibco,messaging,tibco-messaging,1.21.0,not-verified,,,,,,,,,
 tibco,messaging,tibco-messaging,1.22.0,not-verified,,,,,,,,,
@@ -742,24 +751,24 @@ tibco,messaging,tibco-messaging,1.25.0,not-verified,,,,,,,,,
 tibco,messaging,tibco-messaging,1.26.0,not-verified,,,,,,,,,
 tibco,messaging,tibco-messaging,1.27.0,not-verified,,,,,,,,,
 tibco,messaging,tibco-messaging,1.30.0,not-verified,,,,,,,,,
-tibco,messaging,tibco-messaging,1.31.0,not-verified,,,,,,,,,
+tibco,messaging,tibco-messaging,1.31.0,clean,2026-11-13,local,4,0,0,0,,223758f,reports/verify/tibco/tibco-messaging/1.31.0-2026-11-13.csv
 tibco,messaging,tibco-messaging-eclipse-mosquitto-distribution-bridge-enterprise-edition,2.0.7,not-verified,,,,,,,,,
 tibco,messaging,tibco-messaging-eclipse-mosquitto-distribution-core-enterprise-edition,2.0.7,not-verified,,,,,,,,,
 tibco,messaging,tibco-messaging-enterprise-edition,3.3.0,not-verified,,,,,,,,,
-tibco,messaging,tibco-messaging-enterprise-edition,3.4.0,not-verified,,,,,,,,,
+tibco,messaging,tibco-messaging-enterprise-edition,3.4.0,clean,2026-11-13,local,1,0,0,0,,223758f,reports/verify/tibco/tibco-messaging-enterprise-edition/3.4.0-2026-11-13.csv
 tibco,messaging,tibco-messaging-schema-repository-for-apache-kafka-enterprise-edition,2.0.0,not-verified,,,,,,,,,
-tibco,messaging,tibco-messaging-schema-repository-for-apache-kafka-enterprise-edition,2.1.0,not-verified,,,,,,,,,
+tibco,messaging,tibco-messaging-schema-repository-for-apache-kafka-enterprise-edition,2.1.0,lost,2026-11-13,local+staging+live,32,1,0,0,VERIFY_LIVE_UNCHECKABLE=3 VERIFY_PUBLISHED_PAGE_MISSING=1 VERIFY_REDIRECT_NOT_ON_STAGING=1 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=70,5f642c5,reports/verify/tibco/tibco-messaging-schema-repository-for-apache-kafka-enterprise-edition/2.1.0-2026-11-13.csv
 tibco,messaging,tibco-rendezvous,8.8.0,not-verified,,,,,,,,,
 tibco,messaging,tibco-rendezvous,8.8.1,not-verified,,,,,,,,,
-tibco,messaging,tibco-rendezvous,9.0.0,not-verified,,,,,,,,,
+tibco,messaging,tibco-rendezvous,9.0.0,issues,2026-11-13,local+staging+live,1668,0,1,274,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=168 VERIFY_PUBLISHED_ANCHOR_MISSING=63 VERIFY_PUBLISHED_IMAGE_BROKEN=4 VERIFY_PUBLISHED_TEXT_DIFF=39 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=8 VERIFY_TOC_ORDER=1 VERIFY_TOC_TITLE_CHANGED=25 VERIFY_TOPIC_UNFILED=3,5f642c5,reports/verify/tibco/tibco-rendezvous/9.0.0-2026-11-13.csv
 tibco,messaging,tibco-rendezvous-network-service,2.1.0,not-verified,,,,,,,,,
-tibco,messaging,tibco-rendezvous-network-service,2.2.0,not-verified,,,,,,,,,
+tibco,messaging,tibco-rendezvous-network-service,2.2.0,logged,2026-11-13,local+staging+live,36,0,0,5,VERIFY_LIVE_UNCHECKABLE=2 VERIFY_PUBLISHED_ANCHOR_DIFFERS=4 VERIFY_PUBLISHED_TEXT_DIFF=1 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=5,5f642c5,reports/verify/tibco/tibco-rendezvous-network-service/2.2.0-2026-11-13.csv
 tibco,mft,tibco-managed-file-transfer-command-center,8.6.0,not-verified,,,,,,,,,
 tibco,mft,tibco-managed-file-transfer-command-center,8.7.0,not-verified,,,,,,,,,
 tibco,mft,tibco-managed-file-transfer-command-center,8.7.1,not-verified,,,,,,,,,
 tibco,mft,tibco-managed-file-transfer-internet-server,8.6.0,not-verified,,,,,,,,,
 tibco,mft,tibco-managed-file-transfer-internet-server,8.7.0,not-verified,,,,,,,,,
-tibco,mft,tibco-managed-file-transfer-internet-server,8.7.1,not-verified,,,,,,,,,
+tibco,mft,tibco-managed-file-transfer-internet-server,8.7.1,lost,2026-11-14,local+staging+live,990,3,1,0,VERIFY_LIVE_UNCHECKABLE=1 VERIFY_PUBLISHED_PAGE_MISSING=1 VERIFY_REDIRECT_NOT_ON_STAGING=1 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=6 VERIFY_TOC_MOVED=1 VERIFY_TOPIC_MISSING=2 VERIFY_TOPIC_UNFILED=230,5f38c6f,reports/verify/tibco/tibco-managed-file-transfer-internet-server/8.7.1-2026-11-14.csv
 tibco,mft,tibco-managed-file-transfer-platform-server-for-unix,8.1.1,not-verified,,,,,,,,,
 tibco,mft,tibco-managed-file-transfer-platform-server-for-unix,8.1.2,not-verified,,,,,,,,,
 tibco,mft,tibco-managed-file-transfer-platform-server-for-unix,8.2.0,not-verified,,,,,,,,,
@@ -768,14 +777,32 @@ tibco,mft,tibco-managed-file-transfer-platform-server-for-windows,8.2.0,not-veri
 tibco,mft,tibco-managed-file-transfer-platform-server-for-z-linux,8.1.0,not-verified,,,,,,,,,
 tibco,mft,tibco-managed-file-transfer-platform-server-for-z-linux,8.1.1,not-verified,,,,,,,,,
 tibco,mft,tibco-managed-file-transfer-platform-server-for-z-linux,8.1.2,not-verified,,,,,,,,,
-tibco,platform,tibco-control-plane,1.18.0,lost,2026-11-12,local+staging+live,496,44,63,87,VERIFY_IMAGE_MISSING=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=23 VERIFY_PUBLISHED_ANCHOR_MISSING=10 VERIFY_PUBLISHED_CALLOUT_UNRENDERED=203 VERIFY_PUBLISHED_IMAGE_BROKEN=4 VERIFY_PUBLISHED_TEXT_DIFF=9 VERIFY_PUBLISHED_TOC_ENTRY_MISSING=28 VERIFY_PUBLISHED_TOC_MOVED=13 VERIFY_PUBLISHED_TOC_TITLE_CHANGED=16 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=27 VERIFY_REDIRECT_UNSERVED=2 VERIFY_TEXT_DROPPED=2 VERIFY_TOC_MOVED=50 VERIFY_TOPIC_MISSING=1 VERIFY_TOPIC_UNFILED=16,2a0a690,reports/verify/tibco/tibco-control-plane/1.18.0-2026-11-13.csv
+tibco,platform,tibco-control-plane,1.10.0,not-verified,,,,,,,,,
+tibco,platform,tibco-control-plane,1.11.0,not-verified,,,,,,,,,
+tibco,platform,tibco-control-plane,1.12.0,not-verified,,,,,,,,,
+tibco,platform,tibco-control-plane,1.13.0,not-verified,,,,,,,,,
+tibco,platform,tibco-control-plane,1.14.0,not-verified,,,,,,,,,
+tibco,platform,tibco-control-plane,1.15.0,not-verified,,,,,,,,,
+tibco,platform,tibco-control-plane,1.16.0,not-verified,,,,,,,,,
+tibco,platform,tibco-control-plane,1.17.0,not-verified,,,,,,,,,
+tibco,platform,tibco-control-plane,1.18.0,lost,2026-11-12,local+staging+live,496,43,63,88,VERIFY_IMAGE_MISSING=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=23 VERIFY_PUBLISHED_ANCHOR_MISSING=10 VERIFY_PUBLISHED_CALLOUT_UNRENDERED=203 VERIFY_PUBLISHED_IMAGE_BROKEN=4 VERIFY_PUBLISHED_TEXT_DIFF=9 VERIFY_PUBLISHED_TOC_ENTRY_MISSING=28 VERIFY_PUBLISHED_TOC_MOVED=13 VERIFY_PUBLISHED_TOC_TITLE_CHANGED=16 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=27 VERIFY_REDIRECT_UNSERVED=2 VERIFY_TEXT_DROPPED=2 VERIFY_TOC_MOVED=50 VERIFY_TOPIC_MISSING=1 VERIFY_TOPIC_UNFILED=16,2a0a690,reports/verify/tibco/tibco-control-plane/1.18.0-2026-11-13.csv
 tibco,platform,tibco-control-plane,1.19.0,not-verified,,,,,,,,,
-tibco,platform,tibco-control-plane,1.20.0,not-verified,,,,,,,,,
-tibco,platform,tibco-platform-add-on-for-business-process-management,1.0.0,not-verified,,,,,,,,,
-tibco,platform,tibco-platform-add-on-for-event-processing,1.9.0,not-verified,,,,,,,,,
+tibco,platform,tibco-control-plane,1.20.0,lost,2026-11-13,local+staging+live,546,1,50,79,VERIFY_IMAGE_MISSING=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=33 VERIFY_PUBLISHED_ANCHOR_MISSING=6 VERIFY_PUBLISHED_IMAGE_BROKEN=22 VERIFY_PUBLISHED_TEXT_DIFF=15 VERIFY_REDIRECT_SAMPLED=1 VERIFY_REDIRECT_UNCONVERTED=27 VERIFY_TEXT_DROPPED=2 VERIFY_TOC_MOVED=50 VERIFY_TOPIC_MISSING=1 VERIFY_TOPIC_UNFILED=16,2a0a690,reports/verify/tibco/tibco-control-plane/1.20.0-2026-11-13.csv
+tibco,platform,tibco-control-plane,1.3.0,not-verified,,,,,,,,,
+tibco,platform,tibco-control-plane,1.4.0,not-verified,,,,,,,,,
+tibco,platform,tibco-control-plane,1.5.0,not-verified,,,,,,,,,
+tibco,platform,tibco-control-plane,1.5.1,not-verified,,,,,,,,,
+tibco,platform,tibco-control-plane,1.6.0,not-verified,,,,,,,,,
+tibco,platform,tibco-control-plane,1.7.0,not-verified,,,,,,,,,
+tibco,platform,tibco-control-plane,1.8.0,not-verified,,,,,,,,,
+tibco,platform,tibco-control-plane,1.9.0,not-verified,,,,,,,,,
+tibco,platform,tibco-platform,1.0.0,not-verified,,,,,,,,,
+tibco,platform,tibco-platform,1.1.0,lost,2026-11-13,local+staging+live,583,1,51,5,VERIFY_IMAGE_MISSING=1 VERIFY_PUBLISHED_PAGE_MISSING=1 VERIFY_REDIRECT_MAP_MISSING=1 VERIFY_TEXT_DROPPED=1 VERIFY_TOC_MOVED=51 VERIFY_TOPIC_MISSING=2 VERIFY_TOPIC_UNFILED=18,fad28d8,reports/verify/tibco/tibco-platform/1.1.0-2026-11-13.csv
+tibco,platform,tibco-platform-add-on-for-business-process-management,1.0.0,clean,2026-11-13,local,5,0,0,0,,0407104,reports/verify/tibco/tibco-platform-add-on-for-business-process-management/1.0.0-2026-11-13.csv
+tibco,platform,tibco-platform-add-on-for-event-processing,1.9.0,clean,2026-11-13,local,5,0,0,0,,0407104,reports/verify/tibco/tibco-platform-add-on-for-event-processing/1.9.0-2026-11-13.csv
 tibco,platform,tibco-platform-command-line-interface,1.1.0,not-verified,,,,,,,,,
-tibco,platform,tibco-platform-command-line-interface,1.2.0,not-verified,,,,,,,,,
-tibco,scribe,tibco-scribe,Online,logged,2026-11-12,local+staging+live,470,0,0,113,VERIFY_PUBLISHED_ALT_DROPPED=5 VERIFY_PUBLISHED_ANCHOR_DIFFERS=19 VERIFY_PUBLISHED_ANCHOR_MISSING=6 VERIFY_PUBLISHED_IMAGE_BROKEN=21 VERIFY_PUBLISHED_TEXT_DIFF=28 VERIFY_PUBLISHED_TOC_ENTRY_MISSING=4 VERIFY_PUBLISHED_TOC_MOVED=10 VERIFY_PUBLISHED_TOC_TITLE_CHANGED=6 VERIFY_REDIRECT_SAMPLED=1 VERIFY_TEXT_DROPPED=2 VERIFY_TOC_MOVED=15 VERIFY_TOPIC_MISSING=3 VERIFY_TOPIC_UNFILED=95,d83f0dd,reports/verify/tibco/tibco-scribe/Online-2026-11-12.csv
+tibco,platform,tibco-platform-command-line-interface,1.2.0,lost,2026-11-13,local+staging+live,423,1,48,39,VERIFY_IMAGE_MISSING=1 VERIFY_PUBLISHED_ANCHOR_DIFFERS=20 VERIFY_PUBLISHED_ANCHOR_MISSING=6 VERIFY_PUBLISHED_TEXT_DIFF=10 VERIFY_REDIRECT_MAP_MISSING=1 VERIFY_TEXT_DROPPED=1 VERIFY_TOC_MOVED=48 VERIFY_TOPIC_MISSING=1 VERIFY_TOPIC_UNFILED=16,9c55c78,reports/verify/tibco/tibco-platform-command-line-interface/1.2.0-2026-11-13.csv
+tibco,scribe,tibco-scribe,Online,logged,2026-11-13,local+staging+live,470,0,0,113,VERIFY_PUBLISHED_ALT_DROPPED=5 VERIFY_PUBLISHED_ANCHOR_DIFFERS=19 VERIFY_PUBLISHED_ANCHOR_MISSING=6 VERIFY_PUBLISHED_IMAGE_BROKEN=21 VERIFY_PUBLISHED_TEXT_DIFF=28 VERIFY_PUBLISHED_TOC_ENTRY_MISSING=4 VERIFY_PUBLISHED_TOC_MOVED=10 VERIFY_PUBLISHED_TOC_TITLE_CHANGED=6 VERIFY_REDIRECT_SAMPLED=1 VERIFY_TEXT_DROPPED=2 VERIFY_TOC_MOVED=15 VERIFY_TOPIC_MISSING=3 VERIFY_TOPIC_UNFILED=95,d83f0dd,reports/verify/tibco/tibco-scribe/Online-2026-11-13.csv
 tibco,streaming,spotfire-data-streams,11.1.0,not-verified,,,,,,,,,
 tibco,streaming,spotfire-data-streams,11.1.1,not-verified,,,,,,,,,
 tibco,streaming,spotfire-liveview-web-enterprise-edition,1.7.0,not-verified,,,,,,,,,
