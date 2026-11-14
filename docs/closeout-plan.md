@@ -29,6 +29,7 @@
     - new issues DOCOPS-370 (ours, content directly inside a list dropped, 1 SP) and DOCOPS-371 (Digital Platform, `<samp>`/`<var>` dropped);
     - DOCOPS-346 widened (20 more versions, MFT, ActiveSpaces menu);
     - status page published (deployment @3).
+  - **Sat 22:30: R002 committed locally in 23 TIBCO repos** (36,204 changes, 4,735 files; one commit per repo; idempotent; independently checked; script `8a0f8aa`). Not pushed: it waits for the `&#92;` check, and goes with R2 by the R2 plan's chunks.
   - **Sat 22:00:**
     - **R2 plan** written (`reports/r2-release-plan-2026-11-15.md`): about 47,000–52,000 files, 45 pushes Mon–Wed plus Δ1 on Thu. It fits if `&#92;` is confirmed Mon, 370 is committed Mon evening and ibi's refresh is on `wip` Mon. The BW plug-in renames go to R3 unless AEM answers by Tue.
     - **Repos where Digital Platform committed to `wip`:** EMS (12), Data Management (2), Streaming (2), all 8 ibi repos. So pushes go through a branch made from `origin/wip` that merges each chunk.
