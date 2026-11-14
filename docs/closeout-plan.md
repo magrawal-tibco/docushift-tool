@@ -29,6 +29,7 @@
     - new issues DOCOPS-370 (ours, content directly inside a list dropped, 1 SP) and DOCOPS-371 (Digital Platform, `<samp>`/`<var>` dropped);
     - DOCOPS-346 widened (20 more versions, MFT, ActiveSpaces menu);
     - status page published (deployment @3).
+  - **R1, 10:45:** TRA showed within 2½ h, so staging builds normally and the Data Management build alone is stuck (old pages at 10:43, 16 h after the first push). Message to Digital Platform is with the user. **BusinessWorks** was pushed (pre-K2) at 10:43; **BPM** follows once it shows.
   - **R1:** TRA was pushed (pre-K2) at 08:11. BPM (2,072-file commit) is held until Data Management or MFT shows; BusinessWorks (pre-K2) follows TRA. Data Management had still not shown at 08:22.
   - **Open questions for the user (Monday):**
     - pictures in dot folders: Digital Platform fixes the DAM, or we rename the folders;
