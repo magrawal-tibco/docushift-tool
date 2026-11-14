@@ -29,7 +29,9 @@
     - new issues DOCOPS-370 (ours, content directly inside a list dropped, 1 SP) and DOCOPS-371 (Digital Platform, `<samp>`/`<var>` dropped);
     - DOCOPS-346 widened (20 more versions, MFT, ActiveSpaces menu);
     - status page published (deployment @3).
+  - **R1, 13:12:** BusinessWorks showed (notes labelled on 6.12.0). **BPM pushed** (`ad26093`, the last TIBCO group). Data Management is still stuck (old pages at 13:11). Left for R1: Data Management (Digital Platform), ibi (Mon 16), Streaming (held).
   - **R1, 10:45:** TRA showed within 2½ h, so staging builds normally and the Data Management build alone is stuck (old pages at 10:43, 16 h after the first push). Message to Digital Platform is with the user. **BusinessWorks** was pushed (pre-K2) at 10:43; **BPM** follows once it shows.
+  - **R1, 13:20:** **BusinessWorks shows** (its probe page has the "Warning:" label). **Data Management still old** (the GDS 4.0.0 note has no label), 18 h after the first push. **MFT is not served at all** (404 on Internet Server 8.7.1 and Command Center 8.6.0/8.7.1; Batch 2 found 977 pages "version not served"), so it cannot show a rebuild: add it to the AEM "not served" items with DOCOPS-346. **BPM** is ready to push (fast-forward of 3 pre-K2 commits, `ad26093`); the push needs the user's approval.
   - **R1:** TRA was pushed (pre-K2) at 08:11. BPM (2,072-file commit) is held until Data Management or MFT shows; BusinessWorks (pre-K2) follows TRA. Data Management had still not shown at 08:22.
   - **Open questions for the user (Monday):**
     - pictures in dot folders: Digital Platform fixes the DAM, or we rename the folders;
