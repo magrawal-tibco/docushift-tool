@@ -1,5 +1,5 @@
 {
- "fetched": "2026-11-13",
+ "fetched": "2026-11-14",
  "issues": [
   {
    "key": "DOCOPS-5",
@@ -4850,6 +4850,45 @@
    "due": "",
    "assignee": "",
    "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-370",
+   "summary": "Content placed directly inside a list is dropped in conversion",
+   "type": "Sub-task",
+   "parent": "DOCOPS-96",
+   "status": "Backlog",
+   "category": "new",
+   "components": [],
+   "labels": [
+    "docushift",
+    "tibco",
+    "verify-issue"
+   ],
+   "created": "2026-11-13",
+   "resolved": "",
+   "due": "",
+   "assignee": "",
+   "sp": 1.0
+  },
+  {
+   "key": "DOCOPS-371",
+   "summary": "AEM drops <samp> and <var> elements with their text",
+   "type": "Sub-task",
+   "parent": "DOCOPS-96",
+   "status": "Backlog",
+   "category": "new",
+   "components": [],
+   "labels": [
+    "aem",
+    "docushift",
+    "tibco",
+    "verify-issue"
+   ],
+   "created": "2026-11-13",
+   "resolved": "",
+   "due": "",
+   "assignee": "",
+   "sp": null
   }
  ]
 }
