@@ -96,6 +96,10 @@ def backslash(after: str) -> str:
     following = after[:1]
     if following.isalnum():
         return "\\"
+    # Only ASCII punctuation can follow a backslash as an escape, so before any other
+    # visible character (MDM 11.0.0's curly quotes, `‘\\’`) a plain one is literal too.
+    if following and ord(following) > 127 and not following.isspace():
+        return "\\"
     if following == " " and after.strip(" \t\r\n"):
         return "\\"
     return BACKSLASH_BEFORE_PUNCT

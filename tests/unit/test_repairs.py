@@ -216,6 +216,8 @@ def test_r002_is_registered_with_its_ticket() -> None:
         (r"ArchiverDemo\\Workflows\\1.0", r"ArchiverDemo\Workflows\1.0"),
         # Before a space with more text on the line.
         (r"Type C:\\ and press Enter.", r"Type C:\ and press Enter."),
+        # Before a non-ASCII character: not escapable, so one plain backslash (MDM 11.0.0).
+        ("if the \u2018\\\\\u2019 character is used", "if the \u2018\\\u2019 character is used"),
         # Before punctuation: a plain `\*` would be an escaped asterisk.
         (r"TransactionInsight\\*version*\\DemoData", r"TransactionInsight&#92;*version*\DemoData"),
         (r"a\\_b", r"a&#92;_b"),
