@@ -207,7 +207,7 @@ areas:
     name: EMS 10.5.1 in its new page layout
     team: TechDocs
     status: on track
-    note: Built and ready on Fri 13, three days early: 217 pages instead of 159, every old link still redirected, older EMS versions unchanged.
+    note: Built and ready on Fri 13, three days early, with 217 pages instead of 159, every old link still redirected, older EMS versions unchanged.
     plan: "§5"
     next: 2026-11-19
     next_step: Out with release 2 (Thu 19), then checked on staging
