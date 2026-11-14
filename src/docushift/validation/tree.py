@@ -23,8 +23,8 @@ Three shapes the walk has to get right, all of them measured on the sample tree 
   not acquire meaning by being walked.
 """
 
-from collections.abc import Iterator
-from dataclasses import dataclass, field
+from collections.abc import Callable, Iterator
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 
 from docushift.sync import API_REFERENCES, ARCHIVES, DOC_CLASSES
@@ -54,11 +54,19 @@ class VersionFolder:
     # (`10.4.0` and `10-4-0` both dash to the same thing, and so does `10 4 0`),
     # so a `validate` finding names the folder it is about and nothing else.
     segment: str = ""
+    # Phase 80. The product's folder on disk when `slug` was relabelled to the
+    # catalog slug it holds (`relabel`); empty when the two are the same.
+    name: str = ""
+
+    @property
+    def folder_name(self) -> str:
+        """The product's folder in the repo -- what a path or served address names."""
+        return self.name or self.slug
 
     @property
     def relative(self) -> Path:
-        """`{tree}/{locale}/{slug}/{doc-class}/{segment}` -- what a finding prints."""
-        parts = [self.tree, self.locale, self.slug, self.doc_class]
+        """`{tree}/{locale}/{folder}/{doc-class}/{segment}` -- what a finding prints."""
+        parts = [self.tree, self.locale, self.folder_name, self.doc_class]
         if self.segment:
             parts.append(self.segment)
         return Path(*parts)
@@ -80,10 +88,16 @@ class ProductFolder:
     # `.part` directories found under this product. Litter from a sync that
     # failed, which may have gone unnoticed -- worth a note, never a check.
     residue: list[Path] = field(default_factory=list)
+    # Phase 80, as `VersionFolder.name`.
+    name: str = ""
+
+    @property
+    def folder_name(self) -> str:
+        return self.name or self.slug
 
     @property
     def relative(self) -> Path:
-        return Path(self.tree, self.locale, self.slug)
+        return Path(self.tree, self.locale, self.folder_name)
 
     @property
     def is_resources(self) -> bool:
@@ -151,6 +165,27 @@ def walk(
     return found
 
 
+def relabel(found: list[ProductFolder], slug_of: Callable[[str], str]) -> list[ProductFolder]:
+    """Each product folder under the catalog slug it holds, its on-disk name kept (Phase 80).
+
+    `slug_of` is `ConfigManager.catalog_slug`. For the readers that take the
+    catalog (`verify`, the repair runner): they look a folder up by its slug, and
+    build addresses from `folder_name`. `validate` does not relabel -- the target is
+    the evidence, and a finding there names the folder.
+    """
+    out: list[ProductFolder] = []
+    for entry in found:
+        slug = slug_of(entry.slug)
+        if slug == entry.slug:
+            out.append(entry)
+            continue
+        out.append(replace(
+            entry, slug=slug, name=entry.slug,
+            versions=[replace(v, slug=slug, name=v.slug) for v in entry.versions],
+        ))
+    return out
+
+
 def _units(
     product: ProductFolder, folder: Path, wanted_segment: str | None
 ) -> Iterator[VersionFolder]:
@@ -191,3 +226,17 @@ def tree_names(target: Path) -> set[str]:
         return {child.name for child in target.iterdir() if child.is_dir()}
     except OSError:  # pragma: no cover
         return set()
+
+
+def product_folders(target: Path) -> dict[str, set[str]]:
+    """`{locale: every product folder name under it, in any tree}` (Phase 80).
+
+    For the 50-character check, which compares a folder with every other one the
+    site would serve under the same locale: a served address has no repository in
+    it, so the trees are pooled.
+    """
+    found: dict[str, set[str]] = {}
+    for tree in _subdirs(target):
+        for locale in _subdirs(tree):
+            found.setdefault(locale.name, set()).update(child.name for child in _subdirs(locale))
+    return found

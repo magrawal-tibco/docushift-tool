@@ -2138,3 +2138,100 @@ def test_a_version_gaining_document_rows_and_no_page_map_is_refreshed_not_crashe
     assert [r.outcome for r in results if r.doc_class == ONLINE_HELP] == [SyncOutcome.MAPS_REFRESHED]
     assert yaml.safe_load((folder / ORIGIN_MAP).read_text(encoding="utf-8")) == {
         pdf: "/content/dam/tibco/us/en/tibco-ems/user-guides/10-4-0/tib_ems_users_guide.pdf"}
+
+
+# -- Phase 80: a product publishes under its publish name -------------------------
+#
+# AEM cuts a product folder in a URL after 50 characters, so a listed product
+# publishes under a shorter folder. The slug stays the key for the workspace; only
+# the published folder and every address formed from it move.
+
+SHORT = "tibco-ems-short"
+
+
+def publish_as(config: ConfigManager, names: dict[str, str]) -> None:
+    config.publish_names_path.write_text(
+        "".join(f"{slug}: {folder}\n" for slug, folder in names.items()), encoding="utf-8")
+    config._publish_names_cache = None
+
+
+def test_a_listed_product_publishes_under_its_publish_name(config, distributor, product, target) -> None:
+    publish_as(config, {product.slug: SHORT})
+    convert_output(config, product, "10.4.0", **{"topics/a.md": "a\n"})
+
+    result = distributor.sync_one(product, product.versions["10.4.0"], target)
+
+    assert result.outcome is SyncOutcome.SYNCED
+    assert result.slug == product.slug  # the key is unchanged
+    assert result.path == target / TREE / "en-us" / SHORT / ONLINE_HELP / "10-4-0"
+    assert (result.path / "topics" / "a.md").is_file()
+    assert not (target / TREE / "en-us" / product.slug).exists()
+    # The workspace is not renamed.
+    assert config.output_path(product.bu, product.family, product.slug, "10.4.0").is_dir()
+
+
+def test_an_unlisted_product_publishes_under_its_slug(config, distributor, product, target) -> None:
+    publish_as(config, {"tibco-some-other-product": "tibco-other"})
+    convert_output(config, product, "10.4.0")
+
+    result = distributor.sync_one(product, product.versions["10.4.0"], target)
+
+    assert result.path == published(target)
+
+
+def test_the_served_maps_name_the_publish_name(config, catalog, product, target, monkeypatch) -> None:
+    """`301.yml` (pages and DAM paths), `csh.yml` and the product's `redirects.yml`."""
+    from docushift import origins
+
+    publish_as(config, {product.slug: SHORT})
+    opt_in(config, product.slug)
+    origin_version(config, catalog, product, "10.4.0")
+    reframed = config.reframed_path(product.bu, product.family, product.slug, "10.4.0")
+    (reframed / "csh.yml").write_text(CSH, encoding="utf-8")
+    extract_tree(config, product, "10.4.0", **SHIPMENT)
+    live = "https://docs.tibco.com/pub/ems/10.4.0/doc/pdf/"
+    monkeypatch.setattr(origins, "page_list", lambda *_: [
+        "https://docs.tibco.com/pub/ems/10.4.0/doc/html/users-guide/old.htm", live + "readme.txt"])
+
+    WorkspaceDistributor(config, catalog).sync_many([(product, product.versions["10.4.0"])], target)
+
+    folder = target / TREE / "en-us" / SHORT / ONLINE_HELP
+    rooted = f"/en-us/{SHORT}/online-help/10-4-0/"
+    old_301 = yaml.safe_load((folder / "10-4-0" / ORIGIN_MAP).read_text(encoding="utf-8"))
+    assert old_301 == {
+        "https://docs.tibco.com/pub/ems/10.4.0/doc/html/users-guide/old.htm": f"{rooted}users-guide/new.md#old",
+        live + "readme.txt": f"/content/dam/tibco/us/en/{SHORT}/release-information/10-4-0/readme.txt",
+    }
+    assert yaml.safe_load((folder / "10-4-0" / "csh.yml").read_text(encoding="utf-8")) == {
+        "help_one": f"{rooted}users-guide/new.md#old", "1234": f"{rooted}index.md"}
+    rows = yaml.safe_load((folder / REDIRECT_MAP).read_text(encoding="utf-8"))["redirects"]
+    assert [(row["from"], row["to"]) for row in rows] == [(
+        f"{SERVED}/{SHORT}/online-help/10-4-0/users-guide/old.html",
+        f"{SERVED}/{SHORT}/online-help/10-4-0/users-guide/new.html#old",
+    )]
+
+
+def test_a_moved_folder_has_its_slug_rows_replaced_not_doubled(config, catalog, product, target) -> None:
+    """`move_publish_folders.py` renames the folder; the next `sync` rewrites every row
+    that still names the slug. Claimed as owned, so none survives beside its copy."""
+    opt_in(config, product.slug)
+    for number in ("10.4.0", "10.3.1"):
+        origin_version(config, catalog, product, number)
+    versions = [(product, v) for v in product.versions.values()]
+    WorkspaceDistributor(config, catalog).sync_many(versions, target)
+    old = target / TREE / "en-us" / product.slug
+    assert len(yaml.safe_load((old / ONLINE_HELP / REDIRECT_MAP).read_text(encoding="utf-8"))["redirects"]) == 2
+
+    old.rename(old.with_name(SHORT))
+    publish_as(config, {product.slug: SHORT})
+    stats = WorkspaceDistributor(config, catalog).sync_many(versions, target)
+
+    folder = target / TREE / "en-us" / SHORT / ONLINE_HELP
+    rows = yaml.safe_load((folder / REDIRECT_MAP).read_text(encoding="utf-8"))["redirects"]
+    assert len(rows) == 2
+    assert all(row["from"].startswith(f"{SERVED}/{SHORT}/") and row["to"].startswith(f"{SERVED}/{SHORT}/")
+               for row in rows)
+    assert {r.outcome for r in stats.results if r.doc_class == ONLINE_HELP} == {SyncOutcome.MAPS_REFRESHED}
+    for segment in ("10-4-0", "10-3-1"):
+        text = (folder / segment / ORIGIN_MAP).read_text(encoding="utf-8")
+        assert f"/en-us/{SHORT}/online-help/{segment}/" in text and f"/{product.slug}/" not in text

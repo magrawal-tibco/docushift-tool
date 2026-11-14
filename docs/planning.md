@@ -3018,7 +3018,7 @@ name.
 
 ---
 
-### Phase 80: Product Folder Names AEM Can Serve (50 Characters) — **Approved 2026-11-14 (user); build started; DOCOPS-346, decision D8**
+### Phase 80: Product Folder Names AEM Can Serve (50 Characters) — **Built 2026-11-14; apply pending; DOCOPS-372 (DOCOPS-346), decision D8**
 
 **Why.** The AEM team says staging cuts a product's folder name after 50 characters (confirmed: `tibco-businessconnect-configstore-management-interface-protocol` is served at `/us/en/tibco-businessconnect-configstore-management-inter/...`). They are not expected to lift the limit.
 
@@ -3046,6 +3046,15 @@ Go-live blocker.
 4. With R2; then `verify` the 250 versions (Batch 4).
 
 *Effort: about 1.5 SP (build 1, apply 0.5). Exit: no published product folder over 50 characters; the 250 versions served at their new folders; old-site redirects and help IDs reach them.*
+
+**As built (2026-11-14).**
+- `config/publish-names.yaml`: the 108 approved rows, `slug: folder`. `ConfigManager.publish_name(slug)` (the folder, or the slug) and `catalog_slug(folder)` (the reverse, for readers of the repos). Checked on load (`PublishNamesError`, also in `publishing_problems`): a folder is lowercase letters, digits and hyphens, at most 50; no two products share one; none is another product's slug.
+- Writers: `sync`'s product folder in both trees (so every doc-class, `archives/` and `api-references/`), and from it the rooted `301.yml` / `csh.yml` rows; the `301.yml` DAM paths; the product's `redirects.yml`, which also claims rows written under the slug, so a moved folder's rows are replaced, not doubled; `convert`'s API-reference links (the API prefix is part of convert's currency, so the 5 pages linking API trees of renamed products re-convert on the next `convert`); `reframe`'s `rename-map.csv` URL column (not in the merge's key: never published).
+- Readers: `verify` finds the folder, looks the product up by its slug (`validation.tree.relabel`) and builds every staging URL and rooted prefix from the folder; `repair census/apply` key by slug and match paths by folder; `--product` on `validate`, `csh`, `verify` and `repair` takes the slug or the folder.
+- Unchanged on purpose: `published_help_length` measures with the slug (never shorter), so converted and merged trees do not move; `validate` reports folder names (it reads the target, not the config). No cross-product links exist in the TIBCO repos (only `docs.tibco.com/products/<slug>` links to the old site).
+- Guard: `PUBLISH_NAME_TOO_LONG` (validate, error), naming any folder served at the same address; `PUBLISH_NAME_MISSING` (catalog, warning) for an in-scope product over 50 with an eligible version and no entry (0 today).
+- `scratch/move_publish_folders.py`: `git mv` per repo and locale, then rewrites the folder's map rows; dry run by default, `--family`, `--product`, `--apply`; never commits. Dry run 14 Nov: 105 products (3 BW plug-ins are not published), 172 moves in 19 repos, 25,384 files, 63,362 map rows. On a copy of BW Kafka, move then `sync` left only the folder name changed, apart from document rows `sync` was already due to add.
+- Left: 8 published product folders over 50 are not in the list (9 folders, archives or documents only, nothing eligible); `validate` names them until they are removed or named.
 
 ### Phase 79: Backslash Escapes AEM Shows Literally — Repair R002 — **Built 2026-11-14; census and waves pending; DOCOPS-360**
 
@@ -3776,6 +3785,7 @@ The concrete deliverable of §7.1: every deferred "report line" in the three doc
 | `MIGRATE_SHEET_SLUG_UNMATCHED`²⁵ | warn | catalog | A migration-export slug matching no catalogued product (104 slugs, 410 rows, 91 marked migrate) | Phase 25 |
 | `MIGRATE_ALIAS_STALE`²⁵ | warn | catalog | An alias naming a slug the active export lacks | Phase 25 |
 | `MIGRATE_DECISION_CONFLICT`²⁵ | warn | catalog | `migrate_decision` disagrees with `convert_eligible` (376 versions; 458 on the first apply) | Phase 25 |
+| `PUBLISH_NAME_MISSING` | warn | catalog | An in-scope product whose slug is over 50 characters has no `config/publish-names.yaml` entry, so AEM would serve it at a cut address | Phase 80 |
 | `ZIP_URL_UNRESOLVED`¹⁴ᵃ | warn | download | No ZIP endpoint could be derived for an active version (7 of 35 sampled products); supply it with `--from-file` | Phase 14a |
 | `PUBLISHED_PATH_TOO_LONG`¹⁵ᵈ | error | sync | A file's published path would exceed 260 characters; the tree is skipped rather than half-copied (API trees excepted since Phase 67) | Phase 15d |
 | `PUBLISHED_PATH_LONG` | note | sync | An API reference published with paths over 260 characters, as shipped; count and longest | Phase 67 |
@@ -3823,6 +3833,7 @@ The concrete deliverable of §7.1: every deferred "report line" in the three doc
 | `LINK_TO_UNFILED` | note | validate | A listed page links to an orphan under `unfiled/`, which AEM does not publish; listed in that version's `unfiled/inbound-links.csv` | Phase 43 |
 | `PATH_TOO_LONG`³⁴ | **error** | validate | A published file whose absolute path under `--target-dir` exceeds 260 characters, measured as `sync` measures it; Windows readers cannot open it (longest today: 236) | Phase 34 (R11-06) |
 | `API_PATH_LONG` | note | validate | `PATH_TOO_LONG` in an `api-references/` folder, published as shipped on purpose; one per folder | Phase 67 |
+| `PUBLISH_NAME_TOO_LONG` | **error** | validate | A published product folder over 50 characters, which AEM serves cut short; the message names any other folder sharing its first 50 characters (one address for two products) | Phase 80 |
 | `ANCHOR_MISSING`⁷ᵇ | warn | validate | A `#fragment` naming no heading in the file it resolves to (heading slugs only since Phase 29; an `id=`/`name=` attribute is not an anchor) | §7.4 |
 | `ANCHOR_WRONG_HEADING`³⁴ | warn | validate | A same-page `#fragment` that resolves, but to an earlier topic's heading: a heading with the same title, renumbered `-N` by the merge, sits between the target and the link (R9-01; 3 in p35, all real) | Phase 34 (R11-02) |
 | `ANCHOR_ID_SPLIT` | error | validate | An `<a id>` or `name=` value that spans lines; AEM drops the page after it (12 EMS pages, 10.4.0–10.5.1) | DOCOPS-343 |

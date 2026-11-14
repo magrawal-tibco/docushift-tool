@@ -2325,3 +2325,47 @@ def test_an_anchor_id_spanning_lines_is_an_error(tmp_path: Path) -> None:
     assert codes(report.findings) == ["ANCHOR_ID_SPLIT"]
     assert report.findings[0].path.endswith("a.md:5")
     assert REGISTRY["ANCHOR_ID_SPLIT"].severity is Severity.ERROR
+
+
+# -- Phase 80: product folders AEM can serve ----------------------------------------
+
+LONG = "tibco-activematrix-businessworks-plug-in-for-apache-cassandra"  # 61
+
+
+def _run(target: Path, product: str | None = None):
+    from docushift.reporting.findings import FindingsRun
+
+    run = FindingsRun("validate")
+    Validator(target, findings=run).run(product=product)
+    return [f for f in run.all if f.code == "PUBLISH_NAME_TOO_LONG"]
+
+
+def test_a_product_folder_over_50_characters_is_an_error(tmp_path: Path) -> None:
+    publish(tmp_path, slug=LONG)
+    publish(tmp_path, slug="tibco-bw-plugin-apache-kafka")
+
+    (found,) = _run(tmp_path)
+
+    assert REGISTRY["PUBLISH_NAME_TOO_LONG"].severity is Severity.ERROR
+    assert found.slug == LONG
+    assert found.path == f"{TREE}/en-us/{LONG}"
+    assert f"'{LONG[:50]}'" in found.message
+    assert "same address" not in found.message
+
+
+def test_two_folders_sharing_their_first_50_characters_are_named_together(tmp_path: Path) -> None:
+    """Cassandra and Kafka both become `...-plug-in-for-apach`: one address, in any repo."""
+    kafka = "tibco-activematrix-businessworks-plug-in-for-apache-kafka"
+    publish(tmp_path, slug=LONG)
+    publish(tmp_path, slug=kafka, tree=RESOURCES, segment="", doc_class="archives")
+
+    found = _run(tmp_path, product=LONG)  # a scoped run still sees the other folder
+
+    assert [f.slug for f in found] == [LONG]
+    assert f"served at the same address as {kafka}" in found[0].message
+
+
+def test_a_folder_of_exactly_50_characters_is_served(tmp_path: Path) -> None:
+    publish(tmp_path, slug="x" * 50)
+
+    assert _run(tmp_path) == []

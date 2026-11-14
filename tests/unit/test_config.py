@@ -741,3 +741,59 @@ def test_the_shipped_locales_file_parses_and_holds_no_label() -> None:
     shipped = yaml.safe_load((Path(__file__).parents[2] / "config" / "locales.yaml").read_text(
         encoding="utf-8"))
     assert shipped["labels"] == {}
+
+
+# -- Phase 80: publish names --------------------------------------------------------
+
+
+def _names(config: ConfigManager, text: str, products: str = "") -> ConfigManager:
+    config.publish_names_path.write_text(text, encoding="utf-8")
+    if products:
+        config.products_path.write_text("slug,product_code\n" + products, encoding="utf-8")
+    return config
+
+
+def test_no_publish_names_file_publishes_every_product_under_its_slug(config: ConfigManager) -> None:
+    assert config.load_publish_names() == {}
+    assert config.publish_name("tibco-ems") == "tibco-ems"
+    assert config.catalog_slug("tibco-ems") == "tibco-ems"
+
+
+def test_a_publish_name_maps_both_ways(config: ConfigManager) -> None:
+    slug = "tibco-activematrix-businessworks-plug-in-for-apache-kafka"
+    _names(config, f"# why\n{slug}: tibco-bw-plugin-apache-kafka\n")
+
+    assert config.publish_name(slug) == "tibco-bw-plugin-apache-kafka"
+    assert config.catalog_slug("tibco-bw-plugin-apache-kafka") == slug
+    # Not listed: itself, both ways.
+    assert config.publish_name("tibco-ems") == "tibco-ems"
+    assert config.catalog_slug("tibco-ems") == "tibco-ems"
+
+
+@pytest.mark.parametrize(("text", "products", "expected"), [
+    ("tibco-a: " + "x" * 51 + "\n", "", "51 characters"),
+    ("tibco-a: tibco-short\ntibco-b: tibco-short\n", "", "both publish under 'tibco-short'"),
+    ("tibco-a: tibco-b\n", "tibco-a,a\ntibco-b,b\n", "another product's slug"),
+    ("tibco-a: Tibco_Short\n", "", "not lowercase"),
+    ("tibco-a:\n", "", "empty slug or folder"),
+    ("- tibco-a\n", "", "slug: folder"),
+])
+def test_a_bad_publish_name_is_refused_on_load(config: ConfigManager, text: str, products: str,
+                                               expected: str) -> None:
+    from docushift.config import PublishNamesError
+
+    _names(config, text, products)
+
+    with pytest.raises(PublishNamesError, match=expected):
+        config.load_publish_names()
+    assert any(expected in problem for problem in config.publishing_problems())
+
+
+def test_the_shipped_publish_names_are_valid(repo_root: Path) -> None:
+    """108 products (Phase 80, approved 2026-11-14), checked against the real catalog."""
+    names = ConfigManager(root_dir=repo_root).load_publish_names()
+
+    assert len(names) == 108
+    assert max(len(folder) for folder in names.values()) <= 50
+    assert names["tibco-businessconnect-configstore-management-interface-protocol"] == \
+        "tibco-businessconnect-cmi-protocol"

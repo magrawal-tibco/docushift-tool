@@ -203,8 +203,10 @@ def test_the_register_carries_every_row_of_7_5() -> None:
     no guide or chapter, which refuses the version's merge.
     2026-11-14 removes `LOCALIZED_LABEL_UNTRANSLATED`: the help menu's title is the
     product's name and version, which has nothing to translate.
+    Phase 80 adds `PUBLISH_NAME_TOO_LONG`, a published product folder AEM cuts at 50
+    characters, and `PUBLISH_NAME_MISSING`, an in-scope product that would need one.
     """
-    assert len(REGISTRY) == 143
+    assert len(REGISTRY) == 145
 
 
 def test_severity_comes_from_the_registry_and_not_from_the_call_site() -> None:

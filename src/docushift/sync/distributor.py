@@ -107,6 +107,9 @@ def published_help_length(config: ConfigManager, product: Product, number: str) 
     segment = version_segment(number)
     if not root or not segment:
         return 0
+    # The slug, not the publish name (Phase 80): no publish name is longer, so the
+    # measure stays an upper bound, and a product's converted and merged trees do
+    # not change because its published folder was renamed.
     parts = (config.docs_tree_name(product.bu, product.family),
              slugify(config.locale), product.slug, ONLINE_HELP, segment)
     return root + sum(1 + len(part) for part in parts)
@@ -254,17 +257,26 @@ class WorkspaceDistributor:
 
     # -- paths -----------------------------------------------------------------
 
+    def published_name(self, product: Product) -> str:
+        """The product's folder in the published repos (Phase 80): its publish name.
+
+        `config/publish-names.yaml`'s entry, or the slug. Every path and address
+        below the locale is formed from this; the slug stays the key for the
+        workspace, the state and the findings.
+        """
+        # X2-11: one folder, or a swap below here replaces what it names.
+        return path_segment(self.config.publish_name(product.slug), "slug")
+
     def product_dir(self, product: Product, target: Path) -> Path:
-        """`{target}/{docs-tree}/{locale}/{slug}/` -- the product level (§6.1)."""
+        """`{target}/{docs-tree}/{locale}/{folder}/` -- the product level (§6.1)."""
         tree = self.config.docs_tree_name(product.bu, product.family)
-        # X2-11: a slug is one folder, or a swap below here replaces what it names.
-        return target / tree / slugify(self.config.locale) / path_segment(product.slug, "slug")
+        return target / tree / slugify(self.config.locale) / self.published_name(product)
 
     def doc_class_dir(self, product: Product, target: Path, doc_class: str = ONLINE_HELP) -> Path:
         return self.product_dir(product, target) / doc_class
 
     def resources_dir(self, product: Product, target: Path) -> Path:
-        """`{target}/{resources-tree}/{locale}/{slug}/` -- the sibling tree (§6.3).
+        """`{target}/{resources-tree}/{locale}/{folder}/` -- the sibling tree (§6.3).
 
         The same shape one level up in a *different* repository, which is why it is
         not `doc_class_dir` with a fifth name. Callers must check
@@ -273,7 +285,7 @@ class WorkspaceDistributor:
         localized tree carries every language and an API reference has none.
         """
         tree = self.config.resources_tree_name(product.bu, product.family)
-        return target / tree / slugify(self.config.locale) / path_segment(product.slug, "slug")
+        return target / tree / slugify(self.config.locale) / self.published_name(product)
 
     def archive_path_of(self, product: Product) -> Callable[[str], Path]:
         """Where `archive download` puts one of `product`'s archived ZIPs, by version."""
@@ -396,7 +408,9 @@ class WorkspaceDistributor:
         if not documents:
             return {}
         pages = origins.page_list(self.config.cache_dir, slug, number)
-        found, missing = origins.asset_pairs(pages, documents, product.bu, locale, slug, segment)
+        # The DAM path follows the published folder (Phase 80), as the page rows do.
+        found, missing = origins.asset_pairs(pages, documents, product.bu, locale,
+                                             self.published_name(product), segment)
         if missing:
             self._record("SYNC_ASSET_UNMAPPED", slug, number, count=len(missing),
                          message=f"{len(missing)} document(s) with no old URL in the docsite sitemap, "
@@ -1166,8 +1180,9 @@ class WorkspaceDistributor:
         base = self.config.publish_base_url()
         tree = self.config.docs_tree_name(product.bu, product.family)
         locale = slugify(self.config.locale)
+        name = self.published_name(product)
         rows, unparsed = redirect_map.generated_rows(
-            folder, present, base, tree, locale, product.slug, file_name, prefix_keys,
+            folder, present, base, tree, locale, name, file_name, prefix_keys,
             rooted_keys,
         )
         stats.unparsed.extend(unparsed)
@@ -1184,12 +1199,12 @@ class WorkspaceDistributor:
             stats.unparsed.append(str(path))
             return
 
-        merged = redirect_map.merge(
-            existing, rows,
-            redirect_map.owned_prefixes(present, base, tree, locale, product.slug,
-                                        folder.name),
-            owned_key,
-        )
+        # Phase 80: rows written under the slug before the folder was renamed are
+        # claimed too, so they are replaced rather than kept beside the new ones.
+        owned = [*redirect_map.owned_prefixes(present, base, tree, locale, name, folder.name),
+                 *(redirect_map.owned_prefixes(present, base, tree, locale, product.slug, folder.name)
+                   if name != product.slug else [])]
+        merged = redirect_map.merge(existing, rows, list(dict.fromkeys(owned)), owned_key)
         _replace_text(path, redirect_map.render(merged, header))
         stats.redirect_maps += 1
         stats.redirect_rows += len(merged)

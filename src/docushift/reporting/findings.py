@@ -103,6 +103,12 @@ REGISTRY: dict[str, Code] = _codes(
     # (458 on the first apply; 94 were hand-resolved the same day).
     Code("MIGRATE_DECISION_CONFLICT", Severity.WARNING, Stage.CATALOG,
          "migrate_decision disagrees with convert_eligible", "planning.md Phase 25"),
+    # Phase 80 (D8). A product new from a delta refresh whose slug AEM would cut,
+    # caught before it is published. A warning: nothing is published yet, and the
+    # fix is one line in `config/publish-names.yaml`.
+    Code("PUBLISH_NAME_MISSING", Severity.WARNING, Stage.CATALOG,
+         "An in-scope product over 50 characters with no publish-names entry",
+         "planning.md Phase 80"),
     # Phase 14a, and the register's first `download` row -- the stage had never
     # had one, because until the template was corrected the stage had never run.
     # A warning rather than an error: 7 of 35 sampled products publish their
@@ -604,6 +610,13 @@ REGISTRY: dict[str, Code] = _codes(
     Code("API_PATH_LONG", Severity.NOTE, Stage.VALIDATE,
          "An API reference holds paths over 260 characters, published as shipped",
          "planning.md Phase 67"),
+    # Phase 80 (D8). AEM cuts a product folder in a URL after 50 characters, so
+    # the pages are served at a truncated address -- and two folders sharing the
+    # first 50 are served at one. An error: the clean answer is knowable (every
+    # folder is renamed through `config/publish-names.yaml`).
+    Code("PUBLISH_NAME_TOO_LONG", Severity.ERROR, Stage.VALIDATE,
+         "A published product folder over 50 characters, which AEM serves cut short",
+         "planning.md Phase 80"),
     # Emitted from Phase 7c, and a warning on arithmetic rather than on taste, the
     # same way 7b's six were. Measured over the whole cache: 51 of 317 adjacent
     # version pairs (16.1%) drop at least one identifier -- 11.9% even when the

@@ -1506,7 +1506,7 @@ you can act on.
 
 ```
 en-us-tib-messaging-userdocs/           # the docs tree — what a reader reads
-└── en-us/ems/
+└── en-us/ems/                          # the product folder: its slug, or its publish name
     ├── metadata.yml                    # csg-product
     ├── online-help/
     │   ├── version.yml                 # the drop-down, listing only this doc-class's versions
@@ -1526,7 +1526,7 @@ en-us-tib-messaging-userdocs-resources/ # the bulk tree
                                         # no version segment: the folder is the whole history
 ```
 
-Fourteen things to expect:
+Fifteen things to expect:
 
 - **`version.yml` is the drop-down, and a scoped sync does not shrink it.** Each doc-class gets its own, listing only the versions that doc-class actually holds — so `user-guides` and `online-help` will legitimately disagree. It is rebuilt by reading the folder on disk and matching it against the catalog's active versions — plus any archived version you marked `convert_eligible`, which `sync` publishes like an active one — *not* from what the run just wrote, so `sync --product ems --version 10.4.0` updates one entry and leaves the other thirty-seven alone. Titles carry the release date (`10.4.0 (Feb 2026)`); an undated version keeps the version and drops the bracket.
 
@@ -1541,6 +1541,8 @@ Fourteen things to expect:
 - **What goes where is decided by the folder it shipped in, not by the extension.** Everything directly inside the package's `pdf/` is a user guide unless its name says VPAT, licence, reminder notice or release note; everything directly inside `doc/` is a reference document unless it is a readme or a release note. So a licence PDF and a licence `.txt` land together, and a user-guide PDF and a readme do not. Files in subdirectories are left to the converter.
 - **`archives/` is indexed from the catalog, so it lists every archived version — including the ones you have not downloaded.** Entries whose ZIP is not in the repository link to the docsite instead, and the index says which is which. That is deliberate: `archives/` exists to be the complete product history, and `archive download` is what fills it in. `api-references/` gets no generated index — Javadoc ships its own.
 - **Versions are dashed here** (`10.4.0` → `10-4-0`) and nowhere else. The catalog and the `families/` workspace keep the dots. Two versions in the catalog are not version numbers at all — `Cloud™` and `(iPaaS)`, upstream parse artifacts — and those are reduced further to `cloud` and `ipaas`, because a trademark glyph and a bracket pair cannot be a URL path. Any version that is not `N.N.N` is named in the run report, whether it was reshaped or just sorted to the bottom of the drop-down.
+
+- **The product folder is its publish name** (Phase 80). AEM cuts a folder name in a URL after 50 characters, so the products listed in `config/publish-names.yaml` (108: the TIBCO products with a longer slug, and every BW plug-in) publish under a shorter folder in both trees — `tibco-activematrix-businessworks-plug-in-for-apache-kafka` is `en-us/tibco-bw-plugin-apache-kafka/` — and every address written from it follows: the `301.yml` and `csh.yml` rows, the DAM paths, `redirects.yml`, the API-reference links `convert` writes, and `verify`'s staging URLs. Everything else keeps the slug: `output/`, `reframed/`, `state.db`, `versions.csv`, the reports, and the `--product` you type (`validate`, `csh`, `verify` and `repair` take the slug or the folder). A product already published under its slug is moved with `scratch/move_publish_folders.py` — a dry run by default, `--family` / `--product` to choose, `--apply` to `git mv` the folders and rewrite their map rows; it does not commit — and then `sync`. `validate` raises `PUBLISH_NAME_TOO_LONG` for any product folder over 50 characters, naming any other folder served at the same address, and `catalog fetch` warns `PUBLISH_NAME_MISSING` for a publishable product that needs an entry.
 
 - **Re-running sync replaces a version's folder wholesale**, so a topic deleted upstream does not survive as a stale file. It replaces exactly that folder: `version.yml`, the product's `metadata.yml`, and every other version are untouched. The same goes for a whole doc-class: if a re-extracted package no longer ships anything for `release-information` (or no longer carries an API tree), that version's folder is removed, its drop-down row goes with it, and the run lists it as `no source tree` with the word "removed". If the extracted package itself is missing, nothing is removed.
 - **API references are never converted, and the folder names come from the package.** Javadoc, the C / Go / `tibdg` trees and the BusinessEvents function catalog (`functions/`, one page per catalog function) are copied through as HTML, byte for byte, with only a `metadata.yml` added beside them. Each gets a folder named from its path inside the package with the uninformative segments removed — `html/api-reference/java` becomes `java`, `api/java/lib` becomes `java-lib` — and if two of a version's trees would end up with the same name, *all* of that version's folders fall back to their full path so the set stays readable as one scheme.

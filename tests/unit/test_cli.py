@@ -2156,3 +2156,32 @@ def test_fix_callouts_rewrites_published_notes_in_place(
     again = _invoke(runner, populated_root, "fix-callouts", str(repo))
     assert again.exit_code == 0
     assert page.read_bytes() == b"> **Tip:**\r\n> Dock it.\r\n\r\n```\r\n> [!NOTE]\r\n```\r\n"
+
+
+# -- Phase 80: catalog warns for a product AEM would serve cut short ----------------
+
+
+def test_a_publishable_product_over_50_characters_with_no_publish_name_is_warned(config) -> None:
+    from types import SimpleNamespace
+
+    from docushift.cli import _record_publish_names
+    from docushift.models import Catalog
+    from docushift.reporting.findings import FindingsRun
+
+    def product(slug: str, eligible: bool = True, in_scope: bool = True):
+        built = make_product(slug, in_scope=in_scope)
+        built.versions = {"1.0": make_version(slug, "1.0", convert_eligible=eligible)}
+        return built
+
+    long = "tibco-" + "x" * 45  # 51
+    mapped = "tibco-" + "y" * 45
+    products = [product(long), product(mapped), product("tibco-" + "z" * 45, eligible=False),
+                product("tibco-" + "w" * 45, in_scope=False), product("tibco-" + "v" * 44)]
+    config.publish_names_path.write_text(f"{mapped}: tibco-y\n", encoding="utf-8")
+    manager = SimpleNamespace(config=config, load=lambda: Catalog(products={p.slug: p for p in products}))
+    findings = FindingsRun("catalog")
+
+    _record_publish_names(manager, findings)
+
+    assert [(f.code, f.slug) for f in findings.all] == [("PUBLISH_NAME_MISSING", long)]
+    assert "config/publish-names.yaml" in findings.all[0].message
