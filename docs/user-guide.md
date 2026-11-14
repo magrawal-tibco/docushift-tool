@@ -1968,6 +1968,13 @@ docushift repair apply R001 --target-dir ../tibco-docs-aem --family bpm
   (menu, merges, names) is not a repair: re-convert and re-sync those versions.
 - `fix-callouts` still exists and rewrites the folders you give it, but it records
   nothing. Use `repair apply R001` so the status follows.
+- **The repairs so far:**
+  - **R001** (DOCOPS-250): notes written `> [!NOTE]` get their bold label.
+  - **R002** (DOCOPS-360): AEM shows backslash escapes in normal text as typed, so
+    `\<host>` becomes `&lt;host>`. An escaped backslash `\\` becomes a single `\`
+    before a letter, digit or space, and `&#92;` before punctuation or at the end of
+    a line. Code, raw HTML blocks and front matter are left alone, and so is every
+    other escape (`\*`, `\_` ...). The `&#92;` form is not yet confirmed on staging.
 
 **Rolling out in waves.** Pick the versions with the catalog's selectors and carry on
 where the last wave stopped:

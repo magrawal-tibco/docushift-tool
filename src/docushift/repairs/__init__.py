@@ -57,4 +57,4 @@ def registered() -> list[Repair]:
 
 
 # The register is the list of modules imported here, in ID order.
-from docushift.repairs import r001_note_labels  # noqa: E402,F401
+from docushift.repairs import r001_note_labels, r002_escapes  # noqa: E402,F401

@@ -29,6 +29,11 @@ Two rules in here are corpus-measured rather than conventional:
   7.1.1 on staging, 2026-11-12; DOCOPS-353), and only a real tag name such as
   `\\<br>` survives. An entity reads the same on GitHub and on AEM. A `&` that
   would itself read as an entity (`&lt;` written as text) becomes `&amp;`.
+- **A text backslash is `\\\\` here, and only here.** The walk relies on it (a
+  backslash before a newline is always a break). AEM shows `\\\\` as two, so the
+  converter rewrites the finished page body (`converter.driver._render`, with
+  `transforms/escapes.py`, R002's rule): `\\` before a letter, digit or space,
+  `&#92;` elsewhere (DOCOPS-360).
 """
 
 import re
