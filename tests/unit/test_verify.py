@@ -7,15 +7,19 @@ fixture, and one whose only differences are known drops, produce none.
 
 from __future__ import annotations
 
+import threading
+import time
+import zlib
 from pathlib import Path
 
+import pytest
 from bs4 import BeautifulSoup
 
 from docushift.models import Catalog, SourceEngine
 from docushift.reporting.findings import FindingsRun
 from docushift.sync import redirects
 from docushift.validation.tree import walk
-from docushift.verify import anchors, images, live, published
+from docushift.verify import anchors, fetch, images, live, published
 from docushift.verify import redirects as redirect_maps
 from docushift.verify import text as texts
 from docushift.verify.driver import Verifier
@@ -1316,3 +1320,153 @@ def test_a_product_moved_to_its_publish_name_is_read_at_the_short_url(config, st
     assert asked and all(url.startswith(f"{BASE}/us/en/prd/online-help/1-0-0") for url in asked)
     assert {f.slug for f in findings.recorded} == {SLUG}
     assert "VERIFY_TOPIC_MISSING" not in _codes(findings)
+
+
+# -- concurrent fetching (verify speed-up, 2026-11-14) ------------------------------
+
+
+class SlowFetcher(FakeFetcher):
+    """A fake site that answers out of order: each URL waits its own few milliseconds."""
+
+    def __init__(self, pages: dict[str, tuple[int, bytes]], workers: int) -> None:
+        super().__init__(pages)
+        self.workers, self.asked = workers, []
+        self.running = self.most = 0
+        self._lock = threading.Lock()
+
+    def get(self, url: str) -> Fetched:
+        with self._lock:
+            self.asked.append(url)
+            self.running += 1
+            self.most = max(self.most, self.running)
+        time.sleep((zlib.crc32(url.encode()) % 7) / 1000 + 0.002)
+        try:
+            return super().get(url)
+        finally:
+            with self._lock:
+                self.running -= 1
+
+
+def _staged_site() -> dict[str, tuple[int, bytes]]:
+    """The fixture's three pages on staging: one picture's bytes changed, one sentence lost."""
+    path = f"/us/en/{SLUG}/online-help/1-0-0"
+    menu = _item("Guide", f"{path}/guide.html", _item("One", f"{path}/one.html") + _item("Two", f"{path}/two.html"))
+    shot = f"/content/dam/ibi{path}/images/shot.png"
+    return {
+        f"{BASE}{path}/guide.html": (200, _served("/guide", "<p>The guide introduces the product and its parts.</p>",
+                                                  menu).encode()),
+        f"{BASE}{path}/one.html": (200, _served("/one", f"<p>Step one installs the product on the server.</p>"
+                                                f"<img src='{shot}'>", menu, title="One").encode()),
+        f"{BASE}{path}/two.html": (200, _served("/two", "<p>Nothing else.</p>", menu, title="Two").encode()),
+        f"{BASE}{shot}": (200, b"other bytes"),
+        f"{OLD}/one.htm": (200, topic("One", "<p>Step one installs the product on the server.</p>"
+                                             "<p>A sentence the live site added later on.</p>").encode()),
+        f"{OLD}/two.htm": (404, b""),
+    }
+
+
+def _findings_with(config, state, target: Path, workers: int) -> tuple[list[tuple[str, str, str]], SlowFetcher]:
+    fetcher = SlowFetcher(_staged_site(), workers)
+    product = make_product(SLUG, bu="ibi", family="webfocus")
+    product.versions = {NUMBER: make_version(SLUG, NUMBER, engine=SourceEngine.FLARE)}
+    findings = FindingsRun("verify")
+    verifier = Verifier(config, Catalog(products={SLUG: product}), state, target, findings, fetcher=fetcher,
+                        base_url=BASE, live_sample=5, redirect_sample=10, seed=7)
+    rows = []
+    for folder in verifier.selection(SLUG, None):
+        result = verifier.version(folder)
+        rows += [(r["new_path"], r["findings"], r["published_status"]) for r in result.rows]
+    findings.flush()
+    return [(f.code, f.path, f.message) for f in findings.recorded] + [("row", *r) for r in rows], fetcher
+
+
+def test_many_workers_find_the_same_things_in_the_same_order_as_one(config, state) -> None:
+    target = _fixture(config, state, drop_paragraph=True)
+
+    one, serial = _findings_with(config, state, target, workers=1)
+    many, parallel = _findings_with(config, state, target, workers=6)
+
+    codes = {code for code, *_ in one}
+    assert {"VERIFY_PUBLISHED_TEXT_DIFF", "VERIFY_PUBLISHED_IMAGE_BROKEN", "VERIFY_LIVE_DRIFT"} <= codes
+    assert many == one
+    assert sorted(parallel.asked) == sorted(serial.asked)
+    assert serial.most == 1 and parallel.most > 1
+
+
+def test_fan_out_keeps_the_order_it_was_given() -> None:
+    fetcher = SlowFetcher({}, workers=4)
+
+    assert fetch.fan_out(fetcher, lambda n: fetcher.get(f"u{n}").url, range(20)) == [f"u{n}" for n in range(20)]
+    assert fetcher.most > 1
+
+
+class _Response:
+    def __init__(self, url: str) -> None:
+        self.status_code, self.content, self.headers = 200, f"body of {url}".encode() * 1000, {}
+
+
+class _Session:
+    def __init__(self) -> None:
+        self.calls = 0
+
+    def get(self, url: str, timeout: float) -> _Response:
+        self.calls += 1
+        time.sleep(0.001)
+        return _Response(url)
+
+
+def _offline(tmp_path: Path, monkeypatch, **kwargs) -> fetch.Fetcher:
+    sessions: list[_Session] = []
+
+    def build(crawl, accept=None):
+        sessions.append(_Session())
+        return sessions[-1]
+
+    monkeypatch.setattr(fetch, "build_session", build)
+    fetcher = fetch.Fetcher(tmp_path / "verify", {}, **kwargs)
+    fetcher.sessions = sessions
+    return fetcher
+
+
+def test_the_page_cache_is_written_whole_from_many_threads(tmp_path: Path, monkeypatch) -> None:
+    """Body then meta, each through a temporary file and a rename: no `.tmp` left, no
+    torn entry, and a second run reads every page back without a request."""
+    fetcher = _offline(tmp_path, monkeypatch, workers=8)
+    urls = [f"https://stg.example.com/p{n % 10}.html" for n in range(40)]  # each URL asked four times
+
+    got = fetch.fan_out(fetcher, fetcher.get, urls)
+
+    assert [g.body for g in got] == [f"body of {u}".encode() * 1000 for u in urls]
+    assert not list((tmp_path / "verify").rglob("*.tmp"))
+    assert len(list((tmp_path / "verify").rglob("*.json"))) == 10
+    again = _offline(tmp_path, monkeypatch, workers=8)
+    assert [g.body for g in fetch.fan_out(again, again.get, urls)] == [g.body for g in got]
+    assert again.requests == 0
+
+
+def test_a_refresh_fetches_each_url_once_per_run(tmp_path: Path, monkeypatch) -> None:
+    _offline(tmp_path, monkeypatch).get("https://stg.example.com/icon.png")
+    fetcher = _offline(tmp_path, monkeypatch, refresh=True)
+
+    for _ in range(3):
+        fetcher.get("https://stg.example.com/icon.png")
+
+    assert fetcher.requests == 1
+
+
+def test_a_failed_write_leaves_the_old_entry_and_no_temp_file(tmp_path: Path, monkeypatch) -> None:
+    fetcher = _offline(tmp_path, monkeypatch)
+    url = "https://stg.example.com/p.html"
+    fetcher.get(url)
+    meta, body = fetcher._paths(url)
+    before = body.read_bytes()
+
+    def broken(staging: Path, target: Path) -> None:
+        raise PermissionError("held open")
+
+    monkeypatch.setattr(fetch, "replace_file", broken)
+    refreshed = _offline(tmp_path, monkeypatch, refresh=True)
+    with pytest.raises(PermissionError):
+        refreshed.get(url)
+    assert body.read_bytes() == before and meta.is_file()
+    assert not list((tmp_path / "verify").rglob("*.tmp"))

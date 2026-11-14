@@ -37,7 +37,7 @@ from bs4 import BeautifulSoup, Tag
 
 from docushift.verify import images as pictures
 from docushift.verify import text as texts
-from docushift.verify.fetch import Fetcher
+from docushift.verify.fetch import Fetcher, fan_out
 from docushift.verify.toc import Comparison, Node, by_title, pages_only
 
 MENU = "nav.cmp-navigation"
@@ -164,28 +164,33 @@ def check(fetcher: Fetcher, urls: list[str] | str, toc: Node, folder: Path) -> V
     # Maps" in both Administration and Development (DOCOPS-352).
     shared = Counter(" ".join(texts.words(row.title)) for row, _ in pages.walk()
                      if row.key is not None and "#" not in row.key)
+    matched = result.menu.matched
+    # Each page once, by its first row; checked on the fetcher's threads and kept in
+    # menu order, so the findings read as a one-thread run's.
+    todo: dict[str, Node] = {}
     for row, _ in pages.walk():
-        if row.key is None:
-            continue
-        page = row.key.partition("#")[0]
-        if page in result.pages:
-            continue
-        twin = result.menu.matched.get(id(row))
+        if row.key is not None:
+            todo.setdefault(row.key.partition("#")[0], row)
+
+    def one(item: tuple[str, Node]) -> PageCheck:
+        page, row = item
+        twin = matched.get(id(row))
         href = twin.ref.partition("#")[0] if twin is not None else ""
         if not href:
-            result.pages[page] = PageCheck(page, "", status="unmatched")
-            continue
+            return PageCheck(page, "", status="unmatched")
         own = own_url(href, folder.name, page)
         if own and own != href and shared[" ".join(texts.words(row.title))] > 1:
             first = _page(fetcher, page, own, folder, check_title=False)
             if first.status == "ok":
-                result.pages[page] = first
-                continue
+                return first
         # At its own address the page is the right one, whatever its served title.
         checked = _page(fetcher, page, href, folder, check_title=href != own)
         if checked.status == "mismatched":
             retry = _page(fetcher, page, own, folder, check_title=False) if own else None
             checked = retry if retry is not None and retry.status == "ok" else PageCheck(page, "", status="unmatched")
+        return checked
+
+    for page, checked in zip(todo, fan_out(fetcher, one, todo.items()), strict=True):
         result.pages[page] = checked
     return result
 

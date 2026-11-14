@@ -3389,12 +3389,14 @@ VERIFY_STATUSES = ("not-verified", "stale", "lost", "issues", "logged", "explain
 @click.option("--base-url", default=None,
               help="Staging host for this run; default publishing.yaml's verify_base_urls by BU.")
 @click.option("--refresh", is_flag=True, help="Fetch again what cache/verify/ already holds.")
+@click.option("--workers", type=click.IntRange(min=1), default=None,
+              help="Pages fetched at once. Defaults to docsite.yaml's verify.max_concurrent_requests (6).")
 @click.option("--dry-run", is_flag=True, help="List the versions this wave would verify, and stop.")
 @click.option("--retriage", is_flag=True,
               help="Re-apply verify-triage.yaml to every version's latest stored findings; no request.")
 @click.pass_context
 def verify(ctx, target_dir, product, version, bu, family, latest_only, statuses, limit, skip_published,
-           live_sample, redirect_sample, seed, base_url, refresh, dry_run, retriage) -> None:
+           live_sample, redirect_sample, seed, base_url, refresh, workers, dry_run, retriage) -> None:
     """Prove nothing was lost: old pages vs published pages vs staging (Phases 55, 58).
 
     For every selected published online-help version: each old page's topic, text
@@ -3431,7 +3433,7 @@ def verify(ctx, target_dir, product, version, bu, family, latest_only, statuses,
 
     from docushift.verify import anchors, report, triage
     from docushift.verify.driver import Verifier
-    from docushift.verify.fetch import Fetcher
+    from docushift.verify.fetch import DEFAULT_WORKERS, Fetcher
 
     cfg: ConfigManager = ctx.obj["config"]
     _require_long_paths(cfg)
@@ -3450,8 +3452,15 @@ def verify(ctx, target_dir, product, version, bu, family, latest_only, statuses,
     base = "" if skip_published else (base_url or "").rstrip("/")
     fetcher = None
     if hosts or base or live_sample > 0:
-        crawl = dict(cfg.load_docsite().get("crawl") or {})
-        fetcher = Fetcher(cfg.cache_dir / "verify", crawl, refresh=refresh)
+        docsite = cfg.load_docsite()
+        crawl = dict(docsite.get("crawl") or {})
+        # The staging and live sites' own politeness, where docsite.yaml gives one;
+        # the crawler's floor otherwise. Threads overlap the waiting, not the rate.
+        own = dict(docsite.get("verify") or {})
+        if own.get("rate_limit_per_second") is not None:
+            crawl["rate_limit_per_second"] = own["rate_limit_per_second"]
+        workers = workers or int(own.get("max_concurrent_requests") or DEFAULT_WORKERS)
+        fetcher = Fetcher(cfg.cache_dir / "verify", crawl, refresh=refresh, workers=workers)
     manager = _catalog_manager(ctx)
     state = cfg.state_store()
     status_of = {(r["slug"], r["version"]): r.get("_verify_status", "") for r in manager.status_rows()}
@@ -3553,7 +3562,8 @@ def verify(ctx, target_dir, product, version, bu, family, latest_only, statuses,
         table.add_row(code, str(count))
     console.print(table)
     if fetcher is not None:
-        console.print(f"[dim]{fetcher.requests} request(s) made; the rest came from cache/verify/.[/dim]")
+        console.print(f"[dim]{fetcher.requests} request(s) made on {fetcher.workers} thread(s); "
+                      f"the rest came from cache/verify/.[/dim]")
     console.print(f"Index: {escape(str(index_html))}")
     _print_progress(index_rows, {verifier.catalog.products[f.slug].bu for f in folders})
     errors = sum(1 for f in recorded if f.severity is Severity.ERROR and "[triage:" not in f.message)
