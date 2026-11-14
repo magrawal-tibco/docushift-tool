@@ -155,3 +155,14 @@ tibco-platform-add-on-for-business-process-management: tibco-platform-add-on-for
 
 # streaming
 tibco-enterprise-streaming-high-performance-fix-engine: tibco-enterprise-streaming-fix-engine
+
+# Archive-only products over 50 characters, found by the Phase 80 build (14 Nov);
+# named by the same rules as the approved list.
+tibco-businessevents-plug-in-for-edi-healthcare-edition: tibco-businessevents-plug-in-edi-healthcare
+tibco-businessevents-plug-in-for-edi-standard-edition: tibco-businessevents-plug-in-edi-standard
+tibco-activematrix-businessworks-service-engine-plug-in-for-oracle-e-business-suite: tibco-bw-service-engine-plugin-oracle-ebs
+tibco-activematrix-businessworks-service-engine-plug-in-for-smartmapper: tibco-bw-service-engine-plugin-smartmapper
+"tibbr,-tibbr-service,-tibbr-community,-and-tibbrcommunity-service": tibbr-and-tibbr-community
+tibco-managed-file-transfer-platform-server-for-z-os: tibco-mft-platform-server-z-os
+tibco-managed-file-transfer-internet-server-with-rocketstream-accelerator: tibco-mft-internet-server-rocketstream
+tibco-messaging-bridge-for-apache-kafka-enterprise-edition: tibco-messaging-bridge-kafka-ee
