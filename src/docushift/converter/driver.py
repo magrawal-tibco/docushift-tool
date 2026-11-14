@@ -64,7 +64,7 @@ from docushift.reporting.findings import FindingsRun
 # function, and two copies of the naming rule is exactly the failure it forbids.
 from docushift.sync import apirefs
 from docushift.transforms import csh as csh_transform
-from docushift.transforms import fragments, links
+from docushift.transforms import escapes, fragments, links
 from docushift.transforms.assets import AssetCopier, Counts
 from docushift.utils import textfile
 from docushift.utils.csvio import release_year
@@ -1354,6 +1354,11 @@ def _render(document: Document) -> str:
     Frontmatter is emitted only when there is something to say. An empty `---`
     block is noise in every renderer, and a `csh: []` would claim a page is a help
     target with no identifiers rather than not a help target.
+
+    The body's prose `\\<` and `\\\\` are rewritten last, as R002 rewrites a written
+    tree (`transforms/escapes.py`, DOCOPS-360): AEM shows both as typed. Here rather
+    than in `markdown.escape`, because whether a backslash may stand alone depends on
+    the character after it, which a text node does not know.
     """
     lines: list[str] = []
     if document.title:
@@ -1362,7 +1367,7 @@ def _render(document: Document) -> str:
         lines.append(f"{key}: {_scalar(document.frontmatter[key])}")
     if document.csh:
         lines.append(f"csh: {csh_transform.frontmatter_value(document.csh)}")
-    body = document.body.rstrip("\n")
+    body = escapes.fix_markdown(document.body, frontmatter=False).text.rstrip("\n")
     if not lines:
         return body + "\n"
     return "---\n" + "\n".join(lines) + "\n---\n\n" + body + "\n"

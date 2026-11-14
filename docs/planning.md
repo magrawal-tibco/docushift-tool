@@ -3018,6 +3018,52 @@ name.
 
 ---
 
+### Phase 79: Backslash Escapes AEM Shows Literally — Repair R002 — **Built 2026-11-14; census and waves pending; DOCOPS-360**
+
+**Why.** AEM's Markdown renderer does not read CommonMark backslash escapes in normal
+text (code spans and fences are fine). Two kinds were confirmed on staging: `\<` shows as
+`\<` (FTL `## GET persistence/clusters/\<clus_name>`), and `\\`, the escape for one
+backslash, shows as `\\` (Foresight `Systems\\ArchiverDemo\\Archiver_Main`). Measured
+13 Nov: about 11,600 prose `\\` on about 1,970 TIBCO pages, plus `\<` (FTL alone about
+3,800). The converter already writes `&lt;` for new conversions (`fix/angle-brackets`).
+
+**The rule** (`transforms/escapes.py`, shared by the converter and the repair):
+
+| written today | becomes | staging |
+|---|---|---|
+| `\<` | `&lt;` | confirmed, FTL 7.3.0 test page (476383b) |
+| `\\` before a letter, a digit, or a space with more text on the line | `\` | confirmed, Foresight 6.0.0 test page (53c7ee8) |
+| `\\` before punctuation, at a line end, or at the end of the text | `&#92;` | **not confirmed**; one constant, `BACKSLASH_BEFORE_PUNCT` |
+
+A plain `\` there would escape the next character (`\*` is an asterisk) or make the line
+ending a hard break. Every other escape (`\*`, `\_`, `\[`, `\#`, `\|` ...) is unchanged.
+Not touched: front matter, fenced and indented code, code spans, raw HTML blocks
+(CommonMark's types 1, 2, 6, 7) and inline HTML tags. In raw HTML no escape is read, so
+`\\` there is the source's text: BusinessWorks' `<span class="Code">\\</span> signifies to
+split when a backslash`, EMS's `<code>'^.*_SERVER\\.tibco\\.com'</code>` in a raw table.
+
+**Built.**
+- `transforms/escapes.py`: `fix_markdown` (idempotent, line endings kept).
+- Converter: `driver._render` applies it to every page body as it is written.
+  `markdown.escape` still writes `\\` inside the walk, which relies on it (a backslash
+  before a newline is always a break). `_CONVERTER_VERSION` is unchanged: trees already
+  written are R002's job.
+- `repairs/r002_escapes.py`: R002, `git grep -E` pattern `\\\\|\\<`, no confirm finding
+  (none names a literal backslash on staging), ticket DOCOPS-360.
+- Tests: `test_repairs.py` (rule, code, raw HTML, front matter, CRLF, a pipe cell,
+  idempotence, the pattern in a real git repo), `test_converter.py` (a written page needs
+  no R002).
+
+**Measured 2026-11-14, read-only** (`detect` over the files `git grep` names; 24 TIBCO
+repos, no Spotfire, no ibi): **5,511 files, 40,354 changes**: 28,602 `\<` and 11,752
+`\\`, of which 2,058 take `&#92;`. Biggest: Data Management 6,330, Foresight 5,969,
+iProcess 4,722 (734 `&#92;`), Streaming 4,150, BPM 3,838, FTL 3,829.
+
+**Left:** confirm `&#92;` on a staging page (change the constant if AEM shows it raw);
+`repair census`, then R002 in waves with R1/R2, as R001 was.
+
+---
+
 ### Phase 78: Pages by Menu Depth: EMS 10.5.1 First — **Built 2026-11-13; apply pending; DOCOPS-367**
 
 **Why.** Today's packing (R1) fills pages up to 3,000 words with runs of consecutive siblings. On 432 merged TIBCO versions, 40% of pages hold only some of a parent's children. EMS 10.5.1's 17 destination properties, for example, are split 10 + 7 across two pages. "All-or-nothing" sibling merging was measured and rejected: pages more than double (`reports/reframe-rule-2026-11-12/`).

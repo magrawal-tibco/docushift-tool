@@ -368,6 +368,33 @@ def test_the_shared_writer_folds_carriage_returns_already_in_the_text(tmp_path: 
     assert path.read_bytes() == b"a\nb\nc\n"
 
 
+def test_a_written_page_has_no_backslash_escape_aem_shows_literally() -> None:
+    """DOCOPS-360: AEM shows `\\<` and `\\\\` in prose as typed. A page is written with
+    `&lt;`, a plain backslash before a letter, digit or space, and `&#92;` before
+    punctuation or a line end -- R002's rule, so a fresh page never needs R002.
+    Code, the title in front matter, and every other escape are as before."""
+    from docushift import repairs
+    from docushift.converter.driver import _render
+    from docushift.transforms import markdown
+
+    html = ("<h2>GET clusters/&lt;clus_name&gt;</h2>"
+            r"<p>Copy Systems\ArchiverDemo\Main to C:\ now, from TransactionInsight\<i>version</i>\Demo"
+            r" or \\server\share; a_b, 2*3. Run <code>C:\x &lt;y&gt;</code>.</p>"
+            r"<p>Ends in C:\<br/>next</p><pre>C:\x</pre>")
+    body = markdown.Renderer().render(markdown.parse(html).body)
+    page = _render(Document(source=Path("t.htm"), relative=PurePosixPath("t.md"), title=r"C:\x", body=body))
+
+    assert page == (
+        '---\ntitle: "C:\\\\x"\n---\n\n'
+        "## GET clusters/&lt;clus_name>\n\n"
+        r"Copy Systems\ArchiverDemo\Main to C:\ now, from TransactionInsight&#92;*version*\Demo"
+        r" or &#92;\server\share; a_b, 2\*3. Run `C:\x <y>`." "\n\n"
+        "Ends in C:&#92;\\\nnext\n\n"
+        "```\nC:\\x\n```\n"
+    )
+    assert repairs.get("R002").detect(page) == 0
+
+
 def test_identifiers_reach_the_topics_first_and_only_write(
     config, catalog, product, version, extracted, fake_engine
 ) -> None:
