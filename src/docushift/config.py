@@ -108,6 +108,13 @@ REFRAME_DEFAULTS: dict[str, Any] = {
     "depth": (),
 }
 
+# `config/converter.yaml`'s switches, and their values when the file or a key is
+# missing. Off, each one leaves the output exactly as it was without it.
+CONVERTER_DEFAULTS: dict[str, Any] = {
+    # DOCOPS-371: `<samp>`/`<var>` as code and emphasis, for AEM, which drops them.
+    "aem.inline_tags_rewrite": False,
+}
+
 # A publishing suffix must be one lowercase token. A hyphen makes the family/suffix
 # boundary unparseable (`...-messaging-user-docs` -- where does the family end?) and
 # an empty value silently turns a tree name back into the bare workspace name.
@@ -313,6 +320,7 @@ class ConfigManager:
         self.origin_urls_path = self.config_dir / "origin-urls.yaml"
         self.locales_path = self.config_dir / "locales.yaml"
         self.publish_names_path = self.config_dir / "publish-names.yaml"
+        self.converter_path = self.config_dir / "converter.yaml"
         self.aem_templates_dir = self.config_dir / "aem_templates"
         self.products_path = self.config_dir / "products.csv"
         self.versions_path = self.config_dir / "versions.csv"
@@ -331,6 +339,7 @@ class ConfigManager:
         self._eos_cache: EosReport | None = None
         self._migration_cache: MigrationSheet | None = None
         self._publishing_cache: dict[str, str] | None = None
+        self._converter_cache: dict[str, Any] | None = None
         self._reframe_cache: dict[str, Any] | None = None
         self._origin_urls_cache: dict[str, dict[str, Any]] | None = None
         self._publish_names_cache: dict[str, str] | None = None
@@ -698,6 +707,32 @@ class ConfigManager:
                 resolved[key] = value
         self._publishing_cache = resolved
         return resolved
+
+    def load_converter(self) -> dict[str, Any]:
+        """`config/converter.yaml`, flattened to `CONVERTER_DEFAULTS`' dotted keys.
+
+        A missing file or key is its default, as `load_publishing`; a key the
+        defaults do not name is ignored. A switch is on only when it is YAML `true`.
+        """
+        if self._converter_cache is not None:
+            return self._converter_cache
+        loaded: dict[str, Any] = {}
+        if self.converter_path.exists():
+            loaded = yaml.safe_load(read_text(self.converter_path)) or {}
+        resolved = dict(CONVERTER_DEFAULTS)
+        for key in CONVERTER_DEFAULTS:
+            value: Any = loaded
+            for part in key.split("."):
+                value = value.get(part) if isinstance(value, dict) else None
+            if value is not None:
+                resolved[key] = value is True
+        self._converter_cache = resolved
+        return resolved
+
+    @property
+    def inline_tags_rewrite(self) -> bool:
+        """`aem.inline_tags_rewrite` (DOCOPS-371): off unless the file says `true`."""
+        return bool(self.load_converter()["aem.inline_tags_rewrite"])
 
     def load_reframe(self) -> dict[str, Any]:
         """Loads `reframe.yaml` -- the editorial policy Stage 6b merges topics by.

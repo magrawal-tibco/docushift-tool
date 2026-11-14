@@ -784,6 +784,67 @@ def test_content_between_list_items_belongs_to_the_item_before_it() -> None:
     assert nested == "- Use the default Java security vendor.\n\n  - Set: TIBCO_SECURITY_VENDOR = j2se"
 
 
+def test_a_stray_picture_and_table_join_the_item_before_them() -> None:
+    """EDISIM 6.21.0's "Other TIBCO Foresight products" table and Control Plane
+    1.20.0's screenshot sit straight in a `<ul>` (DOCOPS-370)."""
+    pictured = render("<ul><li>Import.</li><p><img src='x.png'/></p><li>Refresh.</li></ul>")
+    tabled = render(
+        "<ul><li>Comparator</li><p>Other products:</p>"
+        "<table><tr><th>Product</th></tr><tr><td>Instream</td></tr></table></ul>"
+    )
+
+    assert pictured == "- Import.\n\n  ![](x.png)\n\n- Refresh."
+    assert tabled == (
+        "- Comparator\n\n  Other products:\n\n  | Product |\n  | --- |\n  | Instream |"
+    )
+
+
+def test_an_ordered_list_keeps_its_numbers_around_a_stray_block() -> None:
+    rendered = render("<ol start='3'><li>Run.</li><pre>make</pre><li>Check.</li></ol>")
+
+    assert rendered == "3. Run.\n\n   ```\n   make\n   ```\n\n4. Check."
+
+
+def test_a_stray_heading_in_a_list_is_bold_in_the_item_and_a_heading_ahead_of_it() -> None:
+    """EDISIM 6.21.0 writes its "What You Need to Run EDISIM" `<h2>` into a `<ul>`
+    after the last item: a `##` there would put a section inside a bullet."""
+    after = render("<ul><li>Comparator</li><h2>What You Need</h2><p>See the readme.</p></ul>")
+    ahead = render("<ul><h3>Options</h3><li>One</li></ul>")
+
+    assert after == "- Comparator\n\n  **What You Need**\n\n  See the readme."
+    assert ahead == "### Options\n\n- One"
+
+
+def test_a_stray_title_ahead_of_the_first_item_leads_the_list_as_a_paragraph() -> None:
+    rendered = render("<ol><b>To Delete a Configuration</b><li>Select it.</li><li>Delete.</li></ol>")
+
+    assert rendered == "**To Delete a Configuration**\n\n1. Select it.\n2. Delete."
+
+
+def test_raw_html_moves_stray_list_children_where_a_browser_draws_them() -> None:
+    """Flogo 3.0.1 `oracle-database-delete`: a `<ul>` straight inside a `<ul>`,
+    in a table cell that passes through as HTML. HTML allows only `<li>` there and
+    staging dropped the rest, `Exec Procedure_Name;` with it (DOCOPS-370)."""
+    rendered = render(
+        "<table><tr><th>a</th><th>b</th></tr><tr><td>x</td><td>"
+        "<ul><li><b>Call Syntax:</b></li><ul><li><pre>Exec Procedure_Name;</pre></li></ul></ul>"
+        "<ol>Pick one:<b>now</b><li>One</li><p>Also one.</p><li>Two</li></ol>"
+        "</td></tr></table>"
+    )
+
+    assert "<ul><li><b>Call Syntax:</b><ul><li><pre>Exec Procedure_Name;</pre></li></ul></li></ul>" in rendered
+    assert "<p>Pick one:<b>now</b></p><ol><li>One<p>Also one.</p></li><li>Two</li></ol>" in rendered
+
+
+def test_adopting_strays_leaves_a_valid_list_alone() -> None:
+    tag = markdown.parse("<ul> <li>a</li> <!-- c --> <li>b</li> </ul>").body.ul
+
+    assert markdown.adopt_list_strays(tag) == 0
+    assert str(tag) == "<ul> <li>a</li> <!-- c --> <li>b</li> </ul>"
+    assert not markdown.list_lead(tag)
+    assert markdown.list_lead(markdown.parse("<ul><p><img src='x.png'/></p><li>a</li></ul>").body.ul)
+
+
 @pytest.mark.parametrize(("html", "expected"), [
     ("<p>are <b>tcp</b> and <b>ssl</b><b>.</b> For example</p>",
      "are **tcp** and **ssl**<!-- -->**.** For example"),

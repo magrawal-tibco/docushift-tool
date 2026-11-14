@@ -119,6 +119,9 @@ _LEADING = re.compile(r"^(\s*)([#>+=|-]|\d+[.)])(\s|$)")
 # heading.)
 _MARKER = re.compile(r'<a id="[^"]*"></a>')
 
+# A factory for the tags `adopt_list_strays` creates. The parser is irrelevant.
+_SOUP = BeautifulSoup("", "html.parser")
+
 
 def parse(text: str) -> BeautifulSoup:
     """Parses one source topic. The engines' single entry point to bs4."""
@@ -304,9 +307,7 @@ class Renderer:
             # 424 that do not. Out here both anchors work and the slug is the
             # same string it was. A `<br>` is a space: a heading is one line, and
             # a break in it split the title from its second half (R8-13).
-            inline = _trim(self.inline_children(tag)).replace(_BREAK, " ")
-            markers = "".join(_MARKER.findall(inline))
-            text = _MARKER.sub("", inline).strip()
+            markers, text = self._heading(tag)
             out = [markers] if markers else []
             if text:
                 out.append(f"{'#' * _HEADINGS[name]} {text}")
@@ -336,6 +337,32 @@ class Renderer:
             return [rendered] if rendered.strip() else []
         return self.blocks(tag)  # pragma: no cover - _BLOCKS and this switch agree
 
+    def _heading(self, tag: Tag) -> tuple[str, str]:
+        """A heading's hoisted anchor markers, and its text on one line."""
+        inline = _trim(self.inline_children(tag)).replace(_BREAK, " ")
+        return "".join(_MARKER.findall(inline)), _MARKER.sub("", inline).strip()
+
+    def _item_strays(self, nodes: list[object]) -> list[str]:
+        """Content written into a list after an item, as blocks of that item.
+
+        A heading there is a paragraph of its text in bold (DOCOPS-370): a `##`
+        inside a list item puts a section of the page outline inside a bullet.
+        EDISIM 6.21.0 writes "What You Need to Run EDISIM" into its `<ul>`.
+        """
+        out: list[str] = []
+        run: list[object] = []
+        for node in nodes:
+            if (isinstance(node, Tag) and node.name in _HEADINGS
+                    and self.block_override(node) is None):
+                out.extend(self._gather(run))
+                run = []
+                markers, text = self._heading(node)
+                out.extend(block for block in (markers, wrap(text, "**") if text else "") if block)
+            else:
+                run.append(node)
+        out.extend(self._gather(run))
+        return out
+
     def list(self, tag: Tag, ordered: bool) -> str:
         """One list. Nested lists arrive as blocks of their `<li>` and indent.
 
@@ -349,7 +376,9 @@ class Renderer:
         into the list belongs to the item before it, which is where a browser
         draws it; ahead of the first item it leads the list. Reading `<li>` alone
         dropped 62 such elements in the families without a count -- ActiveSpaces
-        5.2.0's JDBC registration lost its whole procedure, sentence and code.
+        5.2.0's JDBC registration lost its whole procedure, sentence and code. A
+        heading after an item becomes a bold paragraph in it (`_item_strays`); one
+        ahead of the first item stays a heading, outside the list.
 
         An `<ol type="a">` or `type="i"` is emitted as HTML around Markdown item
         bodies (`_typed_list`), because GFM can only draw `1.` (R8-14).
@@ -360,7 +389,10 @@ class Renderer:
 
         def place() -> None:
             if loose_nodes:
-                (entries[-1] if entries else lead).extend(self._gather(loose_nodes))
+                if entries:
+                    entries[-1].extend(self._item_strays(loose_nodes))
+                else:
+                    lead.extend(self._gather(loose_nodes))
                 loose_nodes.clear()
 
         for child in tag.children:
@@ -429,7 +461,13 @@ class Renderer:
         at a file nothing ever copied, in the one branch where no hook was
         consulted. The subtree is mutated in place, which is safe because it is
         discarded as soon as the topic is rendered.
+
+        Content written straight into a `<ul>`/`<ol>` is moved where a browser
+        draws it (`adopt_list_strays`, DOCOPS-370): HTML allows only `<li>` there,
+        and staging dropped the rest -- Flogo 3.0.1's `Exec` examples, a `<ul>`
+        inside a `<ul>` in a table cell.
         """
+        adopt_list_strays(tag)
         for image in tag.find_all("img"):
             url = self.image(image)
             if url:
@@ -601,6 +639,84 @@ class Renderer:
             return ""
         alt = _collapse(str(tag.get("alt", ""))).strip()
         return f"![{escape(alt)}]({url})"
+
+
+def _carries_content(node: object) -> bool:
+    """Visible text, or a picture: what a stray list child must not lose."""
+    if is_text(node):
+        return bool(str(node).strip())
+    if not isinstance(node, Tag):
+        return False
+    if node.name == "img" or node.find("img") is not None:
+        return True
+    return bool(text_of(node).strip())
+
+
+def list_lead(listing: Tag) -> bool:
+    """Does `listing` hold content ahead of its first `<li>` (DOCOPS-370)?
+
+    A title, a sentence or a picture there leads the list rather than continuing
+    the one before it: Control Plane 1.20.0's "**Procedure** To Clear a Monitoring
+    Configuration" is written into its own `<ol>`, before step 1.
+    """
+    for child in listing.children:
+        if isinstance(child, Tag) and child.name == "li":
+            return False
+        if _carries_content(child):
+            return True
+    return False
+
+
+def adopt_list_strays(root: Tag) -> int:
+    """Moves content written straight into a list where a browser draws it.
+
+    HTML allows only `<li>` in a `<ul>`/`<ol>`. A browser draws anything else
+    inside the list, after the item before it, and that is where it goes: appended
+    to that `<li>`. Ahead of the first item it leads the list, so it moves out in
+    front, its loose text wrapped in a `<p>`. Every list under `root` (and `root`
+    itself) is read; whitespace and empty elements stay where they are. Returns how
+    many children moved.
+
+    For raw HTML (`Renderer.rewrite`): the Markdown walk reads the list the same
+    way in `Renderer.list`, without moving anything (DOCOPS-370).
+    """
+    listings = root.find_all(["ul", "ol"])
+    if root.name in ("ul", "ol"):
+        listings.insert(0, root)
+    moved = 0
+    for listing in listings:
+        item: Tag | None = None
+        lead: list[object] = []
+        for child in list(listing.children):
+            if isinstance(child, Tag) and child.name == "li":
+                item = child
+                continue
+            if not _carries_content(child):
+                continue
+            moved += 1
+            if item is not None:
+                item.append(child.extract())
+            else:
+                lead.append(child.extract())
+        for block in _lead_blocks(lead):
+            listing.insert_before(block)
+    return moved
+
+
+def _lead_blocks(nodes: list[object]) -> list[object]:
+    """Stray nodes ahead of a list's first item, loose inline runs as paragraphs."""
+    blocks: list[object] = []
+    run: Tag | None = None
+    for node in nodes:
+        if isinstance(node, Tag) and node.name in _BLOCKS:
+            run = None
+            blocks.append(node)
+            continue
+        if run is None:
+            run = _SOUP.new_tag("p")
+            blocks.append(run)
+        run.append(node)
+    return blocks
 
 
 def _html_escape(text: str) -> str:

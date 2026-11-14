@@ -341,3 +341,99 @@ def test_the_r002_pattern_finds_candidates_in_git_crlf_included(tmp_path: Path) 
 
     assert found is not None and sorted(path.name for path in found) == ["crlf.md", "page.md"]
     assert run.census_exact(root, R002, run.published_versions(root)) == {(SLUG, "10-4-0"): 2}
+
+
+# -- R003: <samp> and <var> (DOCOPS-371) --------------------------------------------
+
+R003 = repairs.get("R003")
+
+
+def test_r003_is_registered_optional_with_its_ticket() -> None:
+    """A fallback for if AEM cannot keep the tags: a census must name it."""
+    assert R003 is not None and R003.ticket == "DOCOPS-371" and R003.optional
+    assert "if AEM cannot keep the tags" in R003.title
+    assert [r.id for r in repairs.registered()][:3] == ["R001", "R002", "R003"]
+    assert not R001.optional and not R002.optional
+
+
+@pytest.mark.parametrize(
+    ("before", "after"),
+    [
+        # Substation ES 2.14.0 `lta-agent-messages`, in a raw table.
+        ("<td>The supported codes are\n<samp>1</samp>,\n<samp>2</samp>, and\n<samp>3.</samp>\n</td>",
+         "<td>The supported codes are\n<code>1</code>,\n<code>2</code>, and\n<code>3.</code>\n</td>"),
+        ('<td>The format code\n<var class="varname">Code</var> IS UNSUPPORTED</td>',
+         '<td>The format code\n<em class="varname">Code</em> IS UNSUPPORTED</td>'),
+        # In prose: Markdown, its escapes undone inside the code span.
+        ("Run <samp>ls -l</samp> as <var>user</var>.", "Run `ls -l` as *user*."),
+        (r"Type <samp>a\*b &lt;c></samp> now.", "Type `a*b <c>` now."),
+        ("Use <samp>a`b</samp>.", "Use ``a`b``."),
+        # Markup inside, or a line break: renamed, content kept.
+        ('See <samp><a href="x.md">Dump</a></samp>.', 'See <code><a href="x.md">Dump</a></code>.'),
+    ],
+)
+def test_r003_rewrites_samp_and_var(before: str, after: str) -> None:
+    fixed, count = R003.fix(_lines(before))
+
+    assert fixed == _lines(after)
+    assert count == R003.detect(_lines(before)) > 0
+    assert R003.fix(fixed) == (fixed, 0)
+
+
+def test_r003_leaves_code_and_front_matter_alone() -> None:
+    text = _lines("---", 'title: "<samp>x</samp>"', "---", "",
+                  "Run `<samp>x</samp>` here.", "",
+                  "```", "<samp>x</samp> <var>y</var>", "```", "",
+                  "    <var>indented</var>", "",
+                  "<sample> and <variable> are other tags.")
+
+    assert R003.fix(text) == (text, 0)
+
+
+def test_r003_rewrites_a_whole_html_block_and_markdown_after_it() -> None:
+    text = _lines("<table><tr><td><samp>A</samp></td></tr>", "<tr><td><var>B</var></td></tr></table>",
+                  "", "Then <var>C</var>.", "",
+                  "<pre><samp>D</samp>", "", "</pre>")
+
+    assert R003.fix(text) == (_lines(
+        "<table><tr><td><code>A</code></td></tr>", "<tr><td><em>B</em></td></tr></table>",
+        "", "Then *C*.", "",
+        "<pre><code>D</code>", "", "</pre>"), 4)
+
+
+def test_r003_keeps_crlf_line_endings() -> None:
+    text = "<td><samp>1</samp></td>\r\n\r\nRun <var>x</var>.\r\n"
+
+    assert R003.fix(text) == ("<td><code>1</code></td>\r\n\r\nRun *x*.\r\n", 2)
+
+
+def test_a_census_naming_no_repair_skips_an_optional_one(
+    runner: CliRunner, populated_root: Path, target: Path  # noqa: F811
+) -> None:
+    """R003 waits on AEM's answer: it never shows as pending until asked for."""
+    def census(*argv: str) -> str:
+        result = runner.invoke(main, ["--root", str(populated_root), "repair", "census",
+                                      "--target-dir", str(target), *argv], color=False)
+        assert result.exit_code == 0, result.output
+        return result.output
+
+    assert "R002" in census() and "R003" not in census()
+    assert "R003" in census("--repair", "R003")
+
+
+def test_the_r003_pattern_finds_candidates_in_git(tmp_path: Path) -> None:
+    if shutil.which("git") is None:  # pragma: no cover - git is on every dev box this runs on
+        pytest.skip("git not available")
+    root = tmp_path / "repos"
+    folder = _published(root, "10-4-0", _lines("<td><samp>1</samp></td>"))
+    (folder / "var.md").write_bytes(b'Run <var class="v">x</var>.\r\n')
+    (folder / "code.md").write_text(_lines("```", "<samp>x</samp>", "```"), encoding="utf-8")
+    (folder / "other.md").write_text(_lines("<variable> and <sample>"), encoding="utf-8")
+    repo = root / "en-us-tib-messaging-userdocs"
+    _git(repo, "init", "-q")
+    _git(repo, "add", "-A")
+
+    found = run._grep(repo, R003)
+
+    assert found is not None and sorted(path.name for path in found) == ["code.md", "page.md", "var.md"]
+    assert run.census_exact(root, R003, run.published_versions(root)) == {(SLUG, "10-4-0"): 2}

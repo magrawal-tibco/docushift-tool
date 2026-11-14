@@ -3690,7 +3690,8 @@ def repair_list(ctx: click.Context) -> None:
 
 @repair_group.command("census")
 @click.option("--target-dir", type=DIR_PATH, required=True, help="Folder holding the published repos.")
-@click.option("--repair", "repair_id", default=None, help="One repair; default every registered one.")
+@click.option("--repair", "repair_id", default=None,
+              help="One repair; default every registered one that is not optional.")
 @click.option("--product", "product", default=None, help="Restrict to one product: catalog slug or published folder.")
 @click.pass_context
 def repair_census(ctx: click.Context, target_dir: Path, repair_id: str | None, product: str | None) -> None:
@@ -3705,7 +3706,8 @@ def repair_census(ctx: click.Context, target_dir: Path, repair_id: str | None, p
     _require_long_paths(cfg)
     manager = _catalog_manager(ctx)
     catalog = manager.load()
-    chosen = [_repair_or_fail(repair_id)] if repair_id else repairs.registered()
+    chosen = ([_repair_or_fail(repair_id)] if repair_id
+              else [repair for repair in repairs.registered() if not repair.optional])
     versions = run.published_versions(target_dir, cfg.publish_name(product) if product else None,
                                       cfg.catalog_slug)
     at = datetime.datetime.now(datetime.UTC).isoformat(timespec="seconds")
