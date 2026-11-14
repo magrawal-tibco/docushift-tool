@@ -105,7 +105,7 @@ def _target_options(target_help: str = "Synced workspace to read."):
     return lambda func: _with_options(func, [
         click.option("--target-dir", type=DIR_PATH, required=True, help=target_help),
         click.option("--product", "product", default=None,
-                     help="Restrict to one published product slug."),
+                     help="Restrict to one product: catalog slug or published folder."),
         click.option("--version", default=None,
                      help="Restrict to one version (10.4.0 or 10-4-0)."),
         click.option("--doc-class", "doc_class", default=None,
@@ -677,6 +677,34 @@ def _record_catalog_findings(
                 message=f"tagged into batch '{version.convert_batch}' but convert_eligible is false",
             )
     _record_migrate_conflicts(manager, findings)
+    _record_publish_names(manager, findings)
+
+
+def _record_publish_names(manager: CatalogManager, findings: FindingsRun) -> None:
+    """`PUBLISH_NAME_MISSING` for a product AEM would serve at a cut address (Phase 80).
+
+    An in-scope product with a convert-eligible version, a slug over 50 characters
+    and no `config/publish-names.yaml` entry: it would publish under a folder AEM
+    cuts short. A product that publishes nothing is left alone -- 66 in-scope ones
+    are over 50 today with nothing eligible, and naming them would bury the one
+    that matters, a new product from a delta refresh.
+    """
+    from docushift.config import PUBLISH_NAME_LIMIT
+
+    config = manager.config
+    if config is None:
+        return
+    names = config.load_publish_names()
+    for product in manager.load().products.values():
+        if (len(product.slug) <= PUBLISH_NAME_LIMIT or product.slug in names or not product.in_scope
+                or not any(version.convert_eligible for version in product.versions.values())):
+            continue
+        findings.record(
+            "PUBLISH_NAME_MISSING",
+            slug=product.slug,
+            message=(f"slug is {len(product.slug)} characters, and AEM serves a product folder cut at "
+                     f"{PUBLISH_NAME_LIMIT}; add it to config/publish-names.yaml before it is synced"),
+        )
 
 
 @catalog.command("eos")
@@ -2417,6 +2445,8 @@ def validate(ctx, target_dir, product, version, doc_class, check_external, dry_r
     if not dry_run:
         _require_long_paths(cfg)
     validator = Validator(target_dir)
+    # Phase 80: `--product` takes the catalog slug; the folder is its publish name.
+    product = cfg.publish_name(product) if product else product
     selection = validator.selection(product, version, doc_class)
     folders = [folder for entry in selection for folder in entry.versions]
     if not folders:
@@ -2592,6 +2622,9 @@ def _published(target_dir: Path, product, version, doc_class, command: str):
     """
     from docushift.validation.tree import walk
 
+    # Phase 80: `--product` takes the catalog slug; the folder is its publish name.
+    if product:
+        product = click.get_current_context().obj["config"].publish_name(product)
     selection = [
         entry for entry in walk(target_dir, product, version, doc_class)
         if not entry.is_resources
@@ -3338,7 +3371,7 @@ VERIFY_STATUSES = ("not-verified", "stale", "lost", "issues", "logged", "explain
 @main.command()
 @click.option("--target-dir", type=DIR_PATH, default=None,
               help="Folder holding the published repos, e.g. ../ibi-docs-aem. Not needed with --retriage.")
-@click.option("--product", "product", default=None, help="Restrict to one published product slug.")
+@click.option("--product", "product", default=None, help="Restrict to one product: catalog slug or published folder.")
 @click.option("--version", default=None, help="Restrict to one version (9.3.8 or 9-3-8).")
 @click.option("--bu", default=None, help="Restrict to one business unit (ibi, tibco).")
 @click.option("--family", default=None, help="Restrict to one family.")
@@ -3658,7 +3691,7 @@ def repair_list(ctx: click.Context) -> None:
 @repair_group.command("census")
 @click.option("--target-dir", type=DIR_PATH, required=True, help="Folder holding the published repos.")
 @click.option("--repair", "repair_id", default=None, help="One repair; default every registered one.")
-@click.option("--product", "product", default=None, help="Restrict to one published product slug.")
+@click.option("--product", "product", default=None, help="Restrict to one product: catalog slug or published folder.")
 @click.pass_context
 def repair_census(ctx: click.Context, target_dir: Path, repair_id: str | None, product: str | None) -> None:
     """Count every repair in every published version (read-only; `git grep` per repo)."""
@@ -3673,7 +3706,8 @@ def repair_census(ctx: click.Context, target_dir: Path, repair_id: str | None, p
     manager = _catalog_manager(ctx)
     catalog = manager.load()
     chosen = [_repair_or_fail(repair_id)] if repair_id else repairs.registered()
-    versions = run.published_versions(target_dir, product)
+    versions = run.published_versions(target_dir, cfg.publish_name(product) if product else None,
+                                      cfg.catalog_slug)
     at = datetime.datetime.now(datetime.UTC).isoformat(timespec="seconds")
     table = Table(title=f"Census of {len(versions)} published version(s) in {target_dir}")
     for column in ("Repair", "needed", "left", "fixed", "confirmed", "none", "not catalogued"):
@@ -3706,7 +3740,7 @@ def repair_census(ctx: click.Context, target_dir: Path, repair_id: str | None, p
 @repair_group.command("apply")
 @click.argument("repair_id")
 @click.option("--target-dir", type=DIR_PATH, required=True, help="Folder holding the published repos.")
-@click.option("--product", "product", default=None, help="Restrict to one published product slug.")
+@click.option("--product", "product", default=None, help="Restrict to one product: catalog slug or published folder.")
 @click.option("--version", default=None, help="Restrict to one version (10.4.0 or 10-4-0).")
 @click.option("--bu", default=None, help="Restrict to one business unit.")
 @click.option("--family", default=None, help="Restrict to one family.")
@@ -3737,7 +3771,8 @@ def repair_apply(ctx: click.Context, repair_id: str, target_dir: Path, product, 
     status = manager.state.repair_rows()
     events = manager.state.stage_events()
     wanted_segment = version_segment(version) if version else None
-    versions = run.published_versions(target_dir, product)
+    versions = run.published_versions(target_dir, cfg.publish_name(product) if product else None,
+                                      cfg.catalog_slug)
 
     selected, refused = [], []
     for (slug, segment), folders in sorted(versions.items()):

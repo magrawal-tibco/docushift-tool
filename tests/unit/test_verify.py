@@ -1288,3 +1288,31 @@ def test_a_version_whose_old_menu_sits_under_unfiled_has_lost_its_menu(config, s
                                            ("pkg/html/one.htm", "one.md", ""),
                                            ("pkg/html/two.htm", "unfiled/two.md", "")])
     assert "VERIFY_TOC_LOST" not in _codes(_verify(config, state, target))
+
+
+# -- Phase 80: a product published under its publish name -------------------------
+
+
+def test_a_product_moved_to_its_publish_name_is_read_at_the_short_url(config, state) -> None:
+    """Found under its folder, looked up by its slug, and every staging URL names the folder."""
+    target = _fixture(config, state)
+    home = target / "en-us-ibi-webfocus-userdocs/en-us"
+    (home / SLUG).rename(home / "prd")
+    config.publish_names_path.write_text(f"{SLUG}: prd\n", encoding="utf-8")
+    asked: list[str] = []
+
+    class Recording(FakeFetcher):
+        def get(self, url: str) -> Fetched:
+            asked.append(url)
+            return super().get(url)
+
+    product = make_product(SLUG, bu="ibi", family="webfocus")
+    (folder,) = Verifier(config, Catalog(products={SLUG: product}), state, target,
+                         FindingsRun("verify")).selection(SLUG, None)
+    findings = _verify(config, state, target, fetcher=Recording({}), host=BASE)
+
+    assert (folder.slug, folder.folder_name) == (SLUG, "prd")
+    assert folder.relative.as_posix() == "en-us-ibi-webfocus-userdocs/en-us/prd/online-help/1-0-0"
+    assert asked and all(url.startswith(f"{BASE}/us/en/prd/online-help/1-0-0") for url in asked)
+    assert {f.slug for f in findings.recorded} == {SLUG}
+    assert "VERIFY_TOPIC_MISSING" not in _codes(findings)

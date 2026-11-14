@@ -31,7 +31,7 @@ from docushift.reporting.findings import Finding, FindingsRun, Severity
 from docushift.sync import API_REFERENCES
 from docushift.validation import artifacts, csh, links
 from docushift.validation.links import FolderIndex, LinkContext, LinkReport
-from docushift.validation.tree import ProductFolder, VersionFolder, tree_names, walk
+from docushift.validation.tree import ProductFolder, VersionFolder, product_folders, tree_names, walk
 
 
 @dataclass
@@ -80,6 +80,7 @@ class Validator:
         self.target = target
         self.findings = findings
         self.context = LinkContext(target=target, trees=tree_names(target))
+        self._folders: dict[str, set[str]] | None = None
 
     # -- one folder ------------------------------------------------------------
 
@@ -129,6 +130,7 @@ class Validator:
         )
         for entry in found:
             stats.products += 1
+            self._record(artifacts.check_publish_name(entry, self._siblings(entry.locale)))
             self._record(artifacts.check_product(entry))
             self._record(self._dropdowns(entry))
             # §7.6 is a product-level question -- it needs two version folders --
@@ -168,6 +170,16 @@ class Validator:
         return walk(self.target, product, version, doc_class)
 
     # -- internals -------------------------------------------------------------
+
+    def _siblings(self, locale: str) -> set[str]:
+        """Every product folder under `locale` in any tree of the target (Phase 80).
+
+        The whole target, not the selection: a `--product` run must still see the
+        folder it would collide with.
+        """
+        if self._folders is None:
+            self._folders = product_folders(self.target)
+        return self._folders.get(locale, set())
 
     def _dropdowns(self, entry: ProductFolder) -> list[Finding]:
         """`version.yml` sits above the version folders, so it is checked here.

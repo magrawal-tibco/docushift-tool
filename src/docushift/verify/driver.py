@@ -49,7 +49,7 @@ from docushift.transforms import fragments
 from docushift.utils.csvio import natural_version_key
 from docushift.utils.slug import is_primary_locale, version_segment
 from docushift.validation import references
-from docushift.validation.tree import VersionFolder, walk
+from docushift.validation.tree import VersionFolder, relabel, walk
 from docushift.verify import anchors, live, old_toc, published, triage
 from docushift.verify import images as pictures
 from docushift.verify import redirects as redirect_maps
@@ -155,7 +155,10 @@ class Verifier:
         Phase 66) is selected once, by its first document folder; `version` reads
         all of them.
         """
-        folders = _version_folders(walk(self.target, product, version))
+        # Phase 80: a product is found under its published folder and looked up by
+        # its catalog slug; `folder.folder_name` is what an address names.
+        folder_name = self.cfg.publish_name(product) if product else None
+        folders = _version_folders(relabel(walk(self.target, folder_name, version), self.cfg.catalog_slug))
         if locale:
             folders = [f for f in folders if f.locale.lower() == locale.lower()]
         picked: list[VersionFolder] = []
@@ -362,7 +365,7 @@ class Verifier:
         rows: list[dict[str, str]] = []
         for doc_class in router.DOCUMENT_DOC_CLASSES:
             place = VersionFolder(folder.path.parent.parent / doc_class / folder.segment, folder.tree,
-                                  folder.locale, folder.slug, doc_class, folder.segment)
+                                  folder.locale, folder.slug, doc_class, folder.segment, folder.name)
             expected = grouped.get(doc_class, [])
             if not expected and not place.path.is_dir():
                 continue
@@ -441,7 +444,7 @@ class Verifier:
         toc = _toc_tree(folder.path / "toc.yml")
         if toc is None:
             return
-        urls = published.entry_urls(host, folder.locale, folder.slug, folder.doc_class,
+        urls = published.entry_urls(host, folder.locale, folder.folder_name, folder.doc_class,
                                     folder.segment, toc)
         checked = published.check(self.fetcher, urls, toc, folder.path)
         if not checked.reachable:
@@ -496,7 +499,7 @@ class Verifier:
         pages = origins.page_list(self.cfg.cache_dir, folder.slug, number)
         pages = origins.for_locale(pages, folder.locale, is_primary_locale(folder.locale, PRIMARY_LOCALE))
         ctx = redirect_maps.Context(
-            folder=folder.path, locale=folder.locale, slug=folder.slug, doc_class=folder.doc_class,
+            folder=folder.path, locale=folder.locale, slug=folder.folder_name, doc_class=folder.doc_class,
             segment=folder.segment, base=self.cfg.publish_base_url(), pages=pages,
             sources={source: key_of(source) for source in outmap}, extracted=extracted,
             selector=selector, chrome=chrome)
@@ -714,4 +717,4 @@ def _quote(sentences: list[str]) -> str:
 
 def _rooted_prefix(folder) -> str:
     """The version folder from the repo root -- how a published `301.yml` names pages (Phase 68)."""
-    return rooted.folder_prefix(folder.locale, folder.slug, folder.doc_class, folder.segment)
+    return rooted.folder_prefix(folder.locale, folder.folder_name, folder.doc_class, folder.segment)

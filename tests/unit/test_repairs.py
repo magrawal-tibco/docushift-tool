@@ -109,6 +109,26 @@ def test_the_census_counts_per_version_from_git_and_exactly_where_asked(target: 
     assert run.census(target, R001, versions, exact={(SLUG, "8-6-0")})[(SLUG, "8-6-0")] == 0
 
 
+def test_a_folder_moved_to_its_publish_name_is_counted_under_its_catalog_slug(tmp_path: Path) -> None:
+    """Phase 80: the path names the folder, the key names the product."""
+    if shutil.which("git") is None:  # pragma: no cover
+        pytest.skip("git not available")
+    root = tmp_path / "repos"
+    folder = _published(root, "10-4-0", "> [!NOTE]\n> One.\n")
+    folder.parent.parent.rename(folder.parent.parent.with_name("ems-short"))
+    repo = root / "en-us-tib-messaging-userdocs"
+    _git(repo, "init", "-q")
+    _git(repo, "add", "-A")
+    slug_of = {"ems-short": SLUG}.get
+
+    versions = run.published_versions(root, "ems-short", lambda name: slug_of(name, name))
+
+    assert list(versions) == [(SLUG, "10-4-0")]
+    assert versions[(SLUG, "10-4-0")][0].folder_name == "ems-short"
+    assert run.census(root, R001, versions) == {(SLUG, "10-4-0"): 1}
+    assert run.census_exact(root, R001, versions) == {(SLUG, "10-4-0"): 1}
+
+
 def test_the_census_pattern_finds_notes_nested_in_a_list_or_a_note(tmp_path: Path) -> None:
     """The two shapes the Container Editions wave left behind (2026-10-25)."""
     root = tmp_path / "repos"

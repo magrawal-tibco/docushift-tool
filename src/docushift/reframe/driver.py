@@ -1040,10 +1040,14 @@ class Reframer:
         base = str(self.config.load_publishing().get("publish_base_url") or "")
         locale = str(self.config.load_publishing().get("primary_locale") or "en-us")
         segment = version_segment(version.version)
+        # The published folder (Phase 80). Not part of `_inputs_key`: the rename map
+        # is a review file that is never published, and keying on it would re-merge
+        # every renamed product for a column nobody serves.
+        folder = self.config.publish_name(product.slug)
 
         def url_of(path: PurePosixPath) -> str:
             return redirect_urls.published(
-                base, "", locale, product.slug, "online-help", segment, str(path)
+                base, "", locale, folder, "online-help", segment, str(path)
             )
 
         return url_of

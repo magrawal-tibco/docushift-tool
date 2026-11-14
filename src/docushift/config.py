@@ -113,6 +113,18 @@ REFRAME_DEFAULTS: dict[str, Any] = {
 # an empty value silently turns a tree name back into the bare workspace name.
 _SUFFIX_TOKEN = re.compile(r"^[a-z0-9]+$")
 
+# Phase 80 (decision D8). AEM cuts a product's folder name in a URL after this many
+# characters, so a longer one is served at a truncated address, and two products
+# sharing the first 50 characters are served at one.
+PUBLISH_NAME_LIMIT = 50
+
+# A publish name is one folder and one URL segment: lowercase, digits, hyphens.
+_PUBLISH_NAME = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+
+
+class PublishNamesError(ValueError):
+    """`config/publish-names.yaml` would publish into a folder nobody meant."""
+
 # The end-of-support report writes `12-31-2025`, and it is unambiguously
 # month-first: field one never exceeds 12 across all 5,948 rows while field two
 # reaches 31 in 5,134 of them. Parsed with one explicit format rather than through
@@ -300,6 +312,7 @@ class ConfigManager:
         self.reframe_path = self.config_dir / "reframe.yaml"
         self.origin_urls_path = self.config_dir / "origin-urls.yaml"
         self.locales_path = self.config_dir / "locales.yaml"
+        self.publish_names_path = self.config_dir / "publish-names.yaml"
         self.aem_templates_dir = self.config_dir / "aem_templates"
         self.products_path = self.config_dir / "products.csv"
         self.versions_path = self.config_dir / "versions.csv"
@@ -320,6 +333,8 @@ class ConfigManager:
         self._publishing_cache: dict[str, str] | None = None
         self._reframe_cache: dict[str, Any] | None = None
         self._origin_urls_cache: dict[str, dict[str, Any]] | None = None
+        self._publish_names_cache: dict[str, str] | None = None
+        self._catalog_slugs_cache: dict[str, str] | None = None
         self._primary_cache: ConfigManager | None = None
 
     @property
@@ -438,6 +453,63 @@ class ConfigManager:
         output of 13.
         """
         return self.load_publishing()["publish_base_url"].rstrip("/")
+
+    def load_publish_names(self) -> dict[str, str]:
+        """`config/publish-names.yaml` as `{catalog slug: published folder}` (Phase 80).
+
+        The folder a product publishes under when its slug is not one AEM can serve
+        (over `PUBLISH_NAME_LIMIT` characters), and for every BW plug-in so the family
+        reads alike. The slug stays the key everywhere else -- the workspace,
+        `state.db`, `versions.csv`, every report -- so only the published folder and
+        the addresses formed from it change.
+
+        A missing file is `{}`: every product publishes under its slug. A bad entry
+        raises `PublishNamesError` naming every problem at once, rather than
+        publishing two products into one folder or into one AEM cannot serve.
+        """
+        if self._publish_names_cache is not None:
+            return self._publish_names_cache
+        loaded: Any = {}
+        if self.publish_names_path.exists():
+            loaded = yaml.safe_load(read_text(self.publish_names_path)) or {}
+        if not isinstance(loaded, dict):
+            raise PublishNamesError(f"{self.publish_names_path}: expected a `slug: folder` mapping")
+        names = {str(slug).strip(): str(folder or "").strip() for slug, folder in loaded.items()}
+        problems = publish_name_problems(names, self._catalog_product_slugs())
+        if problems:
+            raise PublishNamesError(
+                f"{self.publish_names_path}: " + "; ".join(problems))
+        self._publish_names_cache = names
+        self._catalog_slugs_cache = {folder: slug for slug, folder in names.items()}
+        return names
+
+    def publish_name(self, slug: str) -> str:
+        """The folder `slug` publishes under: its `publish-names.yaml` entry, or itself.
+
+        The one function every published path and served address goes through
+        (Phase 80): sync's repo folder, the redirect, help-ID and asset maps,
+        `verify`'s staging URLs.
+        """
+        return self.load_publish_names().get(slug, slug)
+
+    def catalog_slug(self, folder: str) -> str:
+        """The reverse of `publish_name`: the catalog slug a published folder holds.
+
+        For the readers of a published repo (`verify`, the repair runner), which
+        find folders on disk and look them up in the catalog. A folder with no entry
+        is its own slug -- which is also how a product not yet moved reads.
+        """
+        self.load_publish_names()
+        return (self._catalog_slugs_cache or {}).get(folder, folder)
+
+    def _catalog_product_slugs(self) -> set[str]:
+        """Every slug in `products.csv`, read lightly; empty when there is no catalog."""
+        if not self.products_path.exists():
+            return set()
+        return {
+            (row.get("slug") or "").strip()
+            for row in csv.DictReader(io.StringIO(read_text(self.products_path)))
+        } - {""}
 
     def verify_base_url(self) -> str:
         """The staging host `verify` compares against, without a trailing slash (Phase 55)."""
@@ -726,6 +798,11 @@ class ConfigManager:
                 f"'{publishing['published_root_length']}' is not a whole number. "
                 f"Images whose published path would pass 260 characters are not shortened."
             )
+
+        try:
+            self.load_publish_names()
+        except PublishNamesError as exc:
+            problems.append(str(exc))
 
         for bu in sorted(self.load_taxonomy()["business_units"]):
             seen: dict[str, str] = {}
@@ -1036,3 +1113,31 @@ class ConfigManager:
                 break
 
         return info
+
+
+def publish_name_problems(names: dict[str, str], catalog_slugs: set[str] | None = None) -> list[str]:
+    """Why a `{slug: folder}` publish-name mapping cannot be used (Phase 80); [] if it can.
+
+    Each folder is one URL segment of at most `PUBLISH_NAME_LIMIT` characters; no
+    two products share one; and none is another product's slug, which is a folder
+    that product publishes under (or did, until it was moved) -- reading a folder
+    back to its product (`ConfigManager.catalog_slug`) must have one answer.
+    """
+    problems: list[str] = []
+    owners: dict[str, str] = {}
+    slugs = set(catalog_slugs or ()) | set(names)
+    for slug, folder in sorted(names.items()):
+        if not slug or not folder:
+            problems.append(f"'{slug}' has an empty slug or folder")
+            continue
+        if not _PUBLISH_NAME.match(folder):
+            problems.append(f"'{slug}': folder '{folder}' is not lowercase letters, digits and single hyphens")
+        if len(folder) > PUBLISH_NAME_LIMIT:
+            problems.append(f"'{slug}': folder '{folder}' is {len(folder)} characters, "
+                            f"over the {PUBLISH_NAME_LIMIT} AEM serves")
+        if folder in owners:
+            problems.append(f"'{owners[folder]}' and '{slug}' both publish under '{folder}'")
+        owners.setdefault(folder, slug)
+        if folder != slug and folder in slugs:
+            problems.append(f"'{slug}': folder '{folder}' is another product's slug")
+    return problems

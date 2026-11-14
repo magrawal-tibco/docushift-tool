@@ -40,6 +40,7 @@ from pathlib import Path, PurePosixPath
 import yaml
 
 from docushift import origins
+from docushift.config import PUBLISH_NAME_LIMIT
 from docushift.reporting.findings import Finding
 from docushift.sync import API_REFERENCES, ARCHIVES, DOCUMENT_DOC_CLASSES, rooted
 from docushift.sync import redirects as redirect_map
@@ -147,6 +148,27 @@ def check_product(product: ProductFolder) -> list[Finding]:
     if not path.is_file():
         return [Finding("METADATA_INVALID", slug=product.slug, path=where, message="is missing")]
     return _check_metadata(path, product.slug, "", where, PRODUCT_KEY)
+
+
+def check_publish_name(product: ProductFolder, siblings: set[str]) -> list[Finding]:
+    """`PUBLISH_NAME_TOO_LONG` for a product folder AEM would serve cut short (Phase 80).
+
+    `siblings` is every product folder in the target under the same locale, in any
+    tree: the served address has no repository in it, so two folders sharing their
+    first 50 characters are one address whichever repos hold them. They are named
+    in the message, because that is the case where one product overwrites another.
+    """
+    name = product.folder_name
+    if len(name) <= PUBLISH_NAME_LIMIT:
+        return []
+    cut = name[:PUBLISH_NAME_LIMIT]
+    sharing = sorted(other for other in siblings if other != name and other[:PUBLISH_NAME_LIMIT] == cut)
+    message = (f"product folder is {len(name)} characters; AEM serves it as '{cut}'. "
+               f"Give it a folder in config/publish-names.yaml and move it")
+    if sharing:
+        message += f"; served at the same address as {', '.join(sharing)}"
+    return [Finding("PUBLISH_NAME_TOO_LONG", slug=product.slug,
+                    path=product.relative.as_posix(), message=message)]
 
 
 # -- toc.yml --------------------------------------------------------------------

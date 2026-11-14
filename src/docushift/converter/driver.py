@@ -1237,9 +1237,11 @@ class DocumentConverter:
         if not segment or not self.config.publishes_resources():
             return ""
         tree_name = self.config.resources_tree_name(product.bu, product.family)
+        # The published folder (Phase 80), so a version whose API links were written
+        # under the slug is no longer current and the next `convert` rewrites them.
         return apirefs.published_url(
             self.config.publish_base_url(), tree_name,
-            slugify(self.config.locale), product.slug, segment, "",
+            slugify(self.config.locale), self.config.publish_name(product.slug), segment, "",
         )
 
     def _content_tree(self, product: Product, version: str, tree: Path) -> Path:
@@ -1275,7 +1277,8 @@ class DocumentConverter:
             self._content_tree(product, version, tree), api_roots,
             self.config.publish_base_url(),
             self.config.resources_tree_name(product.bu, product.family),
-            slugify(self.config.locale), product.slug, version_segment(version),
+            slugify(self.config.locale), self.config.publish_name(product.slug),
+            version_segment(version),
         )
 
     def _csh_sources(

@@ -16,23 +16,42 @@ from __future__ import annotations
 import os
 import subprocess
 from collections import defaultdict
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
 
 from docushift.repairs import Repair
-from docushift.validation.tree import VersionFolder, walk
+from docushift.validation.tree import VersionFolder, relabel, walk
 
-Key = tuple[str, str]  # (slug, published segment)
+Key = tuple[str, str]  # (catalog slug, published segment)
 
 
-def published_versions(target: Path, product: str | None = None) -> dict[Key, list[VersionFolder]]:
-    """Every published version folder under `target`, every doc-class, by (slug, segment)."""
+def published_versions(target: Path, product: str | None = None,
+                       slug_of: Callable[[str], str] | None = None) -> dict[Key, list[VersionFolder]]:
+    """Every published version folder under `target`, every doc-class, by (slug, segment).
+
+    `product` is the folder name on disk; `slug_of` (`ConfigManager.catalog_slug`)
+    keys a folder renamed by Phase 80's publish names under its catalog slug.
+    """
+    entries = walk(target, product)
+    if slug_of is not None:
+        entries = relabel(entries, slug_of)
     found: dict[Key, list[VersionFolder]] = defaultdict(list)
-    for entry in walk(target, product):
+    for entry in entries:
         for folder in entry.versions:
             if folder.segment:
                 found[(folder.slug, folder.segment)].append(folder)
     return dict(found)
+
+
+def _owners(versions: dict[Key, list[VersionFolder]], tree: str) -> dict[tuple[str, str], Key]:
+    """`{(folder on disk, segment): key}` for one repo -- how a matched path finds its version.
+
+    The path names the product's published folder, which is not the key's slug
+    for a product published under a publish name (Phase 80).
+    """
+    return {(folder.folder_name, folder.segment): key
+            for key, folders in versions.items() for folder in folders if folder.tree == tree}
 
 
 def markdown_files(root: Path):
@@ -113,11 +132,11 @@ def census(target: Path, repair: Repair, versions: dict[Key, list[VersionFolder]
                     if folder.tree == tree:
                         counts[key] += count_tree(folder.path, repair)
             continue
-        mine = set(keys)
+        mine = _owners(versions, tree)
         for path, matched in found.items():
             parts = path.relative_to(repo).parts
-            owner = (parts[1], parts[3]) if len(parts) > 4 else None
-            if owner not in mine:
+            owner = mine.get((parts[1], parts[3])) if len(parts) > 4 else None
+            if owner is None:
                 continue
             if owner in exact:
                 text = _read(path)
@@ -143,15 +162,15 @@ def census_exact(target: Path, repair: Repair, versions: dict[Key, list[VersionF
                     if folder.tree == tree:
                         counts[key] += count_tree(folder.path, repair)
             continue
-        mine = set(keys)
+        mine = _owners(versions, tree)
         for path in files:
             # The published layout names the version in the path itself:
-            # `{locale}/{slug}/{doc-class}/{segment}/...` below the repo. Read from
+            # `{locale}/{folder}/{doc-class}/{segment}/...` below the repo. Read from
             # the name, not by resolving every file on disk, which is what made the
             # first census take minutes (2026-10-23).
             parts = path.relative_to(repo).parts
-            owner = (parts[1], parts[3]) if len(parts) > 4 else None
-            if owner not in mine:
+            owner = mine.get((parts[1], parts[3])) if len(parts) > 4 else None
+            if owner is None:
                 continue
             text = _read(path)
             if text is not None:

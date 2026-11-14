@@ -52,6 +52,8 @@ class Context:
 
     folder: Path
     locale: str
+    #: The product's published folder (Phase 80), which the served and rooted
+    #: addresses name -- not necessarily its catalog slug.
     slug: str
     doc_class: str
     segment: str
