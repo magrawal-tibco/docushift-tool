@@ -29,6 +29,11 @@
     - new issues DOCOPS-370 (ours, content directly inside a list dropped, 1 SP) and DOCOPS-371 (Digital Platform, `<samp>`/`<var>` dropped);
     - DOCOPS-346 widened (20 more versions, MFT, ActiveSpaces menu);
     - status page published (deployment @3).
+  - **Sat 21:00 (user: use more agents):**
+    - Phase 80 moves are committed locally for every non-BW family, each 0 errors in validate. Push by sha one family at a time: Messaging `bdca327`/`c4ffac8`, Adapters `bf9bd99`, Fulfillment `8415181`/`9dfe5ee`, MFT `fbfb772`/`796fe65`, BusinessConnect `4bad5b4`/`a88dca5`, General archives `ec07c55`, BusinessEvents archives `103d6eb`.
+    - Agents: (1) R002 applied as local commits per TIBCO repo, without the census, which writes the catalog while a batch runs; (2) the R2 release plan (`reports/r2-release-plan-2026-11-15.md`), with chunks of ≤2,500 files and pushes by sha.
+    - The fix370 batch also re-converts 5 versions whose API links name old folders.
+    - Found: the Messaging archives page now links old versions to ZIPs on docs.tibco.com, which stop working on 30 Nov. Kept out of the commit; it needs a decision on archive links after shutdown.
   - **Sat evening:**
     - Phase 80: Hawk serves at its new folders (verify, 20:25). **ActiveSpaces pushed 20:31.**
     - DOCOPS-370 fixed and merged (`42e7c31`; the cause was Flare's list merge). **68 versions to re-convert** (`reports/fix-370-affected-2026-11-14.csv`); queued to run after Batch 2b (`cache/overnight/fix370.txt`, 136 steps), then compared with published before any sync.
