@@ -54,12 +54,12 @@ def main() -> None:
             if a.all_versions:
                 for r in versions[:-1]:          # the newest is Stage 1's
                     if a.recheck or r["_verify_status"] in LEFT:
-                        lines.append(f"verify --target-dir {a.target} --product {slug} --version {r['version']}")
+                        lines.append(f"verify --target-dir {a.target} --product {slug} --version {r['version']} --refresh")
                         counts[family] += 1
             elif a.recheck or versions[-1]["_verify_status"] in LEFT:
                 # The exact version, not --latest-only: the newest published one may be on
                 # Karan's remove list, and --latest-only would still pick it.
-                lines.append(f"verify --target-dir {a.target} --product {slug} --version {versions[-1]['version']}")
+                lines.append(f"verify --target-dir {a.target} --product {slug} --version {versions[-1]['version']} --refresh")
                 counts[family] += 1
     Path(a.out).parent.mkdir(parents=True, exist_ok=True)
     Path(a.out).write_text("\n".join(lines) + "\n", encoding="utf-8")
