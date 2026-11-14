@@ -3018,7 +3018,7 @@ name.
 
 ---
 
-### Phase 80: Product Folder Names AEM Can Serve (50 Characters) — **Proposed 2026-11-14; DOCOPS-346, decision D8**
+### Phase 80: Product Folder Names AEM Can Serve (50 Characters) — **Approved 2026-11-14 (user); build started; DOCOPS-346, decision D8**
 
 **Why.** The AEM team says staging cuts a product's folder name after 50 characters (confirmed: `tibco-businessconnect-configstore-management-interface-protocol` is served at `/us/en/tibco-businessconnect-configstore-management-inter/...`). They are not expected to lift the limit.
 
@@ -3034,7 +3034,7 @@ Go-live blocker.
 | decision | choice | why |
 |---|---|---|
 | **Where the short name lives** | A **publish name** per product, kept apart from the catalog slug. It is listed in `config/publish-names.yaml` (`slug: folder`); products not listed publish under their slug as today. | The slug keys the workspace, `state.db`, `versions.csv` and every report. Renaming it would move every tree for a URL concern. |
-| **The names** | `reports/url-names/proposal-2026-11-14.csv`: 92 names, longest 50, no duplicates, none equal to another product's folder. A fixed list of word substitutions (`activematrix-businessworks-plug-in-for-` → `bw-plugin-`, `businessconnect-container-edition-` → `businessconnect-ce-`, `managed-file-transfer` → `mft`, `-enterprise-edition` → `-ee`, ...) applies to every name over 50; 9 names are picked by hand. **Only names over 50 change**, so every product already served keeps its address. | The site is not live, so no public URL changes; the old docs.tibco.com redirects are rebuilt to the new folders anyway. |
+| **The names** | `reports/url-names/proposal-2026-11-14-v2.csv` (approved): **108 products**. The 92 over 50 characters, plus the 16 shorter BW plug-ins, so the whole family is `tibco-bw-plugin-...` (user, 14 Nov). For the 92: longest 50, no duplicates, none equal to another product's folder. A fixed list of word substitutions (`activematrix-businessworks-plug-in-for-` → `bw-plugin-`, `businessconnect-container-edition-` → `businessconnect-ce-`, `managed-file-transfer` → `mft`, `-enterprise-edition` → `-ee`, ...) applies to every name over 50; 9 names are picked by hand. Outside the BW plug-ins, **only names over 50 change**, so every other product already served keeps its address. | The site is not live, so no public URL changes; the old docs.tibco.com redirects are rebuilt to the new folders anyway. |
 | **Who uses it** | Every writer and reader of a served address: sync's repo folder (`en-us/<folder>/...`), the served form of `301.yml`, `redirects.yml` and `csh.yml`, cross-product links, `verify`'s URL building, and the status page's links. The workspace (`output/`, `reframed/`) is unchanged. | One function, `publish_name(slug)`, used everywhere an address is formed. |
 | **A guard** | `validate` raises a new error, `PUBLISH_NAME_TOO_LONG`, for a product folder over 50 characters or two products sharing a 50-character prefix. `catalog fetch` warns for a new product whose name would need an entry. | New products from the delta refreshes must not bring the problem back. |
 | **Republishing** | Per product: `git mv en-us/<slug> en-us/<folder>` in its repo (history kept), then `sync` writes the changed redirect and help-ID files. One commit per family chunk (about 10 products), on `content-fix`, out with **R2 (Thu 19)**, spread out as R1. | The move is a rename, so git and the pipeline see renames, not deletes plus adds. |
