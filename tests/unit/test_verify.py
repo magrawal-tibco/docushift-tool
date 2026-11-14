@@ -1470,3 +1470,16 @@ def test_a_failed_write_leaves_the_old_entry_and_no_temp_file(tmp_path: Path, mo
         refreshed.get(url)
     assert body.read_bytes() == before and meta.is_file()
     assert not list((tmp_path / "verify").rglob("*.tmp"))
+
+
+def test_only_the_main_element_is_parsed_and_the_article_is_the_same() -> None:
+    """The menu is most of a staging page's bytes (BusinessWorks: ~450 KB a page)."""
+    menu = "".join(_item(f"Page {n}", f"/p{n}.html") for n in range(50))
+    html = _served("/guide", "<p>Body text <b>here</b>.</p>", menu)
+
+    soup = published._main_soup(html)
+
+    assert soup.select_one(published.MENU) is None
+    assert str(soup.select_one(published.ARTICLE)) == str(BeautifulSoup(html, "html.parser").select_one(
+        published.ARTICLE))
+    assert published._main_soup("<html><body><p>no main</p></body></html>").select_one("p") is not None
