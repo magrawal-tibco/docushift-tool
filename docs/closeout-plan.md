@@ -29,6 +29,11 @@
     - new issues DOCOPS-370 (ours, content directly inside a list dropped, 1 SP) and DOCOPS-371 (Digital Platform, `<samp>`/`<var>` dropped);
     - DOCOPS-346 widened (20 more versions, MFT, ActiveSpaces menu);
     - status page published (deployment @3).
+  - **Sat 22:00:**
+    - **R2 plan** written (`reports/r2-release-plan-2026-11-15.md`): about 47,000–52,000 files, 45 pushes Mon–Wed plus Δ1 on Thu. It fits if `&#92;` is confirmed Mon, 370 is committed Mon evening and ibi's refresh is on `wip` Mon. The BW plug-in renames go to R3 unless AEM answers by Tue.
+    - **Repos where Digital Platform committed to `wip`:** EMS (12), Data Management (2), Streaming (2), all 8 ibi repos. So pushes go through a branch made from `origin/wip` that merges each chunk.
+    - **EMS:** Thiyagu's 9 Nov hand fix replaced two `[`code`](link)` links with HTML links, because AEM's link resolver fails on links whose text is code. It clashes with our 10.5.1 relayout, so merge it and point it at the moved page. Ask Digital Platform whether such links fail site-wide (a common pattern).
+    - Phase 80: Messaging pushed 22:00 by sha. ActiveSpaces needs no wait (only Silver Fabric moved, never served, DOCOPS-365).
   - **Sat 21:00 (user: use more agents):**
     - Phase 80 moves are committed locally for every non-BW family, each 0 errors in validate. Push by sha one family at a time: Messaging `bdca327`/`c4ffac8`, Adapters `bf9bd99`, Fulfillment `8415181`/`9dfe5ee`, MFT `fbfb772`/`796fe65`, BusinessConnect `4bad5b4`/`a88dca5`, General archives `ec07c55`, BusinessEvents archives `103d6eb`.
     - Agents: (1) R002 applied as local commits per TIBCO repo, without the census, which writes the catalog while a batch runs; (2) the R2 release plan (`reports/r2-release-plan-2026-11-15.md`), with chunks of ≤2,500 files and pushes by sha.
