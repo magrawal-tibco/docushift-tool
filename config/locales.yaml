@@ -4,10 +4,11 @@
 # alone -- the PDFs and release notes beside it in the package are English -- so
 # the document-class titles never reach a `loc-` tree and are not listed here.
 #
-# One block per label, keyed by locale. A locale missing from a block keeps the
-# English text and the run says so (`LOCALIZED_LABEL_UNTRANSLATED`). Translations
-# come from the docs team; the tool never invents one.
-labels:
-  # `docs_list_title` of each version's `toc.yml`.
-  online_help:
-    en-us: "Online Help"
+# One block per label, keyed by locale, read by `ConfigManager.label`. A locale
+# missing from a block keeps the English text. Translations come from the docs
+# team; the tool never invents one.
+#
+# Empty since 2026-11-14. The one label it held, `toc.yml`'s `docs_list_title`
+# ("Online Help"), is now the product's name and version, the same in every
+# language.
+labels: {}

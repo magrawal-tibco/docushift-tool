@@ -961,7 +961,7 @@ navigation, the three document folders' and the archives' — is a `docs` list o
 entries with `title`, `url` and `subfolderlist`, under a `docs_list_title`:
 
 ```yaml
-docs_list_title: "Online Help"
+docs_list_title: "TIBCO® MDM Studio 6.1.1"
 docs:
   - title: "Installation"
     url: "Installation/installation-2.md"
@@ -970,9 +970,13 @@ docs:
         url: "Installation/Product-Overview.md"
 ```
 
-`docs_list_title` is `Online Help` for a version's navigation, `User Guides (PDF)`,
-`Release Information` or `Reference Documents` for the document folders, and the product
-name for archives — the values html-to-md used. Only the names match html-to-md; the
+`docs_list_title` is the title of the menu on the site. For a version's online help it is
+the product's name and version from the catalog, such as `TIBCO® MDM Studio 6.1.1`
+(`Online Help` if the product has no name); `convert` and `reframe` both write it, in
+every language. The document folders keep `User Guides (PDF)`, `Release Information` or
+`Reference Documents`, and archives the product name. Trees written before 2026-11-14
+say `Online Help`; `scratch/set_list_title.py` updates them in place without a
+re-conversion. Only the names match html-to-md; the
 structure is DocuShift's: one TOC per version, the landing page first, support and legal
 last. A TOC written before 2026-10-02 still says `items` / `path` / `children`; `reframe`
 and `validate` read it, and reconverting the version rewrites it.
@@ -1791,9 +1795,8 @@ Japanese builds lack about half their screenshots. Any image a translated page r
 but its build lacks is copied from the English build at the same path, and the run counts
 those in a `LOCALIZED_IMAGE_BORROWED` note.
 
-**One label is written by the tool:** the help TOC's "Online Help". It stays English, with a
-`LOCALIZED_LABEL_UNTRANSLATED` note, until `config/locales.yaml` carries the text for that
-language. Adding it re-converts that language on the next run.
+**The help menu's title is not translated.** It is the product's name and version, the
+same as the English tree's.
 
 **Not available with `--locale`:**
 - `catalog` and `reframe`. Translated trees are not merged.

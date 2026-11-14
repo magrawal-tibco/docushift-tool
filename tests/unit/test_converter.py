@@ -1387,6 +1387,64 @@ def test_a_display_name_edit_makes_the_tree_stale(
     assert "Spotfire EMS" in (again.path / "toc.yml").read_text(encoding="utf-8")
 
 
+def test_the_help_menu_is_titled_with_the_product_and_its_version(
+    config, catalog, product, version, extracted, fake_engine
+) -> None:
+    """2026-11-14: `docs_list_title` names the product and version, not "Online Help"."""
+    result, _ = convert(config, catalog, product, version)
+
+    toc = yaml.safe_load((result.path / "toc.yml").read_text(encoding="utf-8"))
+    assert toc["docs_list_title"] == "TIBCO-EMS 10.4.0"
+
+
+def test_a_product_with_no_display_name_keeps_online_help(
+    config, catalog, product, version, extracted, fake_engine
+) -> None:
+    nameless = catalog.get_product("tibco-ems")
+    nameless.display_name = ""
+
+    result, _ = convert(config, catalog, nameless, version)
+
+    toc = yaml.safe_load((result.path / "toc.yml").read_text(encoding="utf-8"))
+    assert toc["docs_list_title"] == "Online Help"
+
+
+def test_the_new_title_leaves_a_tree_converted_before_it_current(
+    project_root: Path, config, catalog, product, version, extracted, fake_engine
+) -> None:
+    """The title changed without a converter bump: thousands of published versions
+    take it from `scratch/set_list_title.py`, not from a re-conversion. A localized
+    run's key keeps the label it was built with, too."""
+    import hashlib
+    import json
+
+    from docushift.converter import driver
+
+    convert(config, catalog, product, version)
+    assert convert(config, catalog, product, version)[0].outcome is ConvertOutcome.CURRENT
+
+    japanese = ConfigManager(root_dir=project_root, locale="ja-jp")
+    converter = DocumentConverter(japanese, catalog, findings=FindingsRun("convert"))
+    shaping = {
+        "converter": driver._CONVERTER_VERSION,
+        "display_name": product.display_name,
+        "online_help": "Online Help",
+    }
+    key = converter._inputs_key(product, version)
+    # Rebuilt by hand from the key's parts as they were before the title change.
+    templates = hashlib.sha256()
+    for name in driver._TEMPLATES:
+        path = japanese.aem_templates_dir / name
+        templates.update(name.encode("utf-8") + bytes(1))
+        templates.update(path.read_bytes() if path.is_file() else b"")
+    shaping["templates"] = templates.hexdigest()[:16]
+    shaping["origins"] = driver.origins.fingerprint(
+        japanese.load_origin_urls(), product.slug, version.zip_url,
+        converter._pages(product.slug, version.version))
+    payload = json.dumps(shaping, sort_keys=True, separators=(",", ":"))
+    assert key == hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16]
+
+
 def test_a_template_edit_makes_the_tree_stale(
     config, catalog, product, version, extracted, fake_engine
 ) -> None:
@@ -1680,8 +1738,8 @@ def test_a_localized_run_reads_the_english_package_and_touches_nothing_english(
     [borrowed] = [f for f in findings.all if f.code == "LOCALIZED_IMAGE_BORROWED"]
     assert borrowed.count == 1
     assert not [f for f in findings.all if f.code == "REFERENCE_UNRESOLVED"]
-    assert 'docs_list_title: "Online Help"' in (target / "toc.yml").read_text(encoding="utf-8")
-    assert [f.code for f in findings.all if f.code == "LOCALIZED_LABEL_UNTRANSLATED"]
+    # The product's name and version: nothing to translate, so nothing reported.
+    assert 'docs_list_title: "TIBCO-EMS 10.4.0"' in (target / "toc.yml").read_text(encoding="utf-8")
     [share] = [f for f in findings.all if f.code == "LOCALIZED_SHARE_UNTRANSLATED"]
     assert share.message.startswith("1 of 4 page(s) (25%) are identical")
     assert "2 have no English counterpart" in share.message
@@ -1693,9 +1751,11 @@ def test_a_localized_run_reads_the_english_package_and_touches_nothing_english(
     store.close()
 
 
-def test_a_translated_label_is_written_and_not_reported(
+def test_a_localized_help_menu_carries_the_english_product_title(
     project_root: Path, config, catalog, product, version, fake_engine
 ) -> None:
+    """2026-11-14: a translation of "Online Help" no longer applies -- the title is
+    the product's name and version, the same in every language."""
     (project_root / "config" / "locales.yaml").write_text(
         'labels:\n  online_help:\n    ja-jp: "オンラインヘルプ"\n', encoding="utf-8")
     place_package(config, product, version, LOCALIZED_PACKAGE)
@@ -1708,8 +1768,7 @@ def test_a_translated_label_is_written_and_not_reported(
     result, findings = convert(japanese, local, found, found.versions[version.version])
 
     toc = (result.path / "toc.yml").read_text(encoding="utf-8")
-    assert 'docs_list_title: "オンラインヘルプ"' in toc
-    assert not [f for f in findings.all if f.code == "LOCALIZED_LABEL_UNTRANSLATED"]
+    assert yaml.safe_load(toc)["docs_list_title"] == "TIBCO-EMS 10.4.0"
     # No English conversion to measure against: said, not guessed.
     [share] = [f for f in findings.all if f.code == "LOCALIZED_SHARE_UNTRANSLATED"]
     assert share.count == 0 and "not converted" in share.message

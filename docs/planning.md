@@ -1402,14 +1402,17 @@ Approved by the user 2026-10-22. Steps 1-6 done; steps 7-8 are the user's runs.
   level when its package holds more than one guide set: WebFOCUS Client publishes
   `9-3-6/en-us/bi-portal/x.md` because `Release-Notes-93x` is a second unit. The Japanese
   run has one unit, so it publishes `9-3-6/bi-portal/x.md`.
-- **Labels:** `config/locales.yaml` holds the one label a `loc-` tree shows, `toc.yml`'s
-  `docs_list_title` ("Online Help"), read by `ConfigManager.label`. The other labels the
-  plan listed never reach a `loc-` tree:
+- **Labels:** `config/locales.yaml` held the one label a `loc-` tree shows, `toc.yml`'s
+  `docs_list_title` ("Online Help"), read by `ConfigManager.label`. Since 2026-11-14 that
+  title is the product's name and version (`navigation.online_help_title`), the same in
+  every language, so the file holds no label and `LOCALIZED_LABEL_UNTRANSLATED` is gone.
+  The other labels the plan listed never reach a `loc-` tree:
   - `sync_documents` publishes nothing for a localized run, because the package's PDFs and
     release notes are English and publish through the primary run.
   - The "Unfiled" node is shelved out of the TOC (Phase 43).
 
   The label is folded into a localized run's inputs key only, so no English key moves.
+  It stays there as the constant "Online Help", so no `loc-` key moved either.
 - **Redirects:** `origins.in_locale` narrows a version's sitemap to its own language before
   `301.yml` is built and fingerprinted. Measured on WebFOCUS Client 9.3.6: 2,833 ja-jp
   pages, the same as the root's page count; 2,716 de-de; 2,779 en-us of 13,972. The English
@@ -3727,7 +3730,6 @@ The concrete deliverable of §7.1: every deferred "report line" in the three doc
 | `LOCALIZED_ROOT_SKIPPED`³⁴ | warn | convert | An output root built for another locale (24 in the corpus: `ja`, `ja-jp`, `de-de`, `fr-fr`, `es-es`), not converted into this locale's tree; one row per root, naming its locale | Phase 34 (R5-01) |
 | `LOCALIZED_UNTAGGED_ROOT_LEFT`⁵⁷ | note | convert | A localized run's root that names no language (`Release-Notes-93x`), left to the primary run; one row per version, naming the roots | Phase 57 |
 | `LOCALIZED_SHARE_UNTRANSLATED`⁵⁷ | warn | convert | A localized version's pages whose body is identical to the English build's page of the same source name, counted with those that have no English counterpart; published as shipped (user, 2026-10-22). Also a count-0 row when the English version is not converted, so the share was not measured | Phase 57 |
-| `LOCALIZED_LABEL_UNTRANSLATED`⁵⁷ | note | convert | A label the tool writes into a `loc-` tree (`toc.yml`'s "Online Help") kept in English, because `config/locales.yaml` has no text for the run's locale | Phase 57 |
 | `LOCALIZED_IMAGE_BORROWED`⁵⁷ | note | convert | A file a localized build references but does not ship, copied from its English sibling root at the same path (user, 2026-10-22); one row per unit with the count | Phase 57 |
 | `ASSET_ORPHANED` | note | convert | Unreferenced asset — 54.6% is normal for Flare | `architecture.md` §5.5.7 |
 | `REFERENCE_UNRESOLVED` | **error** | convert | A reference producing neither link nor copy | invariant 13 |

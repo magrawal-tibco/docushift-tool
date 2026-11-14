@@ -119,7 +119,7 @@ class DocsUrlSubfolderlist(_Keyed):
 
     html-to-md's dialect, adopted for its field names by the user's call. Its
     `docs_list_title` is not read: Reframe only merges `online-help` trees, and
-    `retarget` writes the one value Stage 6a does.
+    `retarget` writes the value Stage 6a does, from the catalog.
     """
 
     name = "docs-url-subfolderlist"
@@ -147,7 +147,8 @@ class ItemsPathChildren(_Keyed):
 
 
 def retarget(roots: list[TocEntry], located: dict[Any, tuple[Any, str]],
-             placements: dict[int, tuple[Any, str]] | None = None) -> dict[str, Any]:
+             placements: dict[int, tuple[Any, str]] | None = None,
+             list_title: str = ONLINE_HELP_LIST_TITLE) -> dict[str, Any]:
     """R3. The merged `toc.yml`: every node kept, every path pointed at its page.
 
     A node whose topic leads its page gets the bare `page.md`; an absorbed topic
@@ -164,7 +165,8 @@ def retarget(roots: list[TocEntry], located: dict[Any, tuple[Any, str]],
 
     The keys are Stage 6a's since Phase 36 -- `docs_list_title` / `docs` / `url` /
     `subfolderlist` -- and so is the list title: Reframe only merges `online-help`
-    trees, so the value is the one constant 6a writes, not something to carry.
+    trees, so `list_title` is what 6a writes (`navigation.online_help_title`),
+    computed from the catalog rather than carried from the converted tree.
 
     A TOC path with no page is left without a `url` rather than raising -- the POC
     subscripted `anchor_of` here and died on a TOC entry it had never packed. The
@@ -180,7 +182,7 @@ def retarget(roots: list[TocEntry], located: dict[Any, tuple[Any, str]],
     """
     placements = placements or {}
     return {
-        "docs_list_title": ONLINE_HELP_LIST_TITLE,
+        "docs_list_title": list_title,
         "docs": [_node(root, located, placements) for root in roots],
     }
 

@@ -781,15 +781,10 @@ class DocumentConverter:
             textfile.write_text(path, _render(document))
 
         title = f"{product.display_name} {version.version}".strip()
-        list_title, translated = self.config.label("online_help", navigation.ONLINE_HELP_LIST_TITLE)
-        if not translated:
-            self._record("LOCALIZED_LABEL_UNTRANSLATED", product.slug, version.version,
-                         path="toc.yml",
-                         message=f"no {self.config.locale} text for 'online_help' in "
-                                 f"config/locales.yaml; written as {list_title!r}")
         textfile.write_text(
             staging / "toc.yml",
-            navigation.render_toc(synthesis.nodes, templates, title, list_title),
+            navigation.render_toc(synthesis.nodes, templates, title,
+                                  navigation.online_help_title(product.display_name, version.version)),
         )
         # Version level, so `csg-version` and nothing else -- `csg-product` belongs
         # to the product folder, which only the distributor (6b) creates. Dotted,
@@ -1216,10 +1211,12 @@ class DocumentConverter:
             ),
         }
         if not self.config.is_primary_locale():
-            # Phase 57: a translation added to `locales.yaml` changes the tree.
-            # Only for a localized run, so no English key moves.
-            shaping["online_help"] = self.config.label(
-                "online_help", navigation.ONLINE_HELP_LIST_TITLE)[0]
+            # Phase 57 keyed a localized run on its "Online Help" label. The title
+            # is the product and version since 2026-11-14 (`display_name` above
+            # already keys it), and no locale ever had a translation, so the old
+            # value stays as a constant: dropping it would make every `loc-` tree
+            # stale for a title `scratch/set_list_title.py` fixes in place.
+            shaping["online_help"] = navigation.ONLINE_HELP_LIST_TITLE
         payload = json.dumps(shaping, sort_keys=True, separators=(",", ":"))
         return hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16]
 

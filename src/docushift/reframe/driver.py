@@ -41,6 +41,7 @@ import yaml
 from docushift import origins
 from docushift.catalog import CatalogError, CatalogManager
 from docushift.config import ConfigManager
+from docushift.converter.navigation import ONLINE_HELP_LIST_TITLE, online_help_title
 from docushift.converter.orphans import write_inbound
 from docushift.models import Product, ProductVersion, SourceEngine
 from docushift.reframe import csh as csh_map
@@ -768,6 +769,7 @@ class Reframer:
         self._write_navigation(
             staging, source, roots, built, located, policy, counts, schema_name, flagged,
             queue, self._url_for(product, version), placements, cut, worked, keys,
+            online_help_title(product.display_name, number),
         )
         self._write_origins(staging, product, version, located, standalone)
         # The merged pages link differently from the converted ones (Phase 43).
@@ -1063,6 +1065,7 @@ class Reframer:
         cut: set[PurePosixPath],
         worked: list[dict[str, str]] | None = None,
         keys: dict[int, renames.Key] | None = None,
+        list_title: str = ONLINE_HELP_LIST_TITLE,
     ) -> None:
         """Copies the assets through, then writes `toc.yml` and the three sidecars.
 
@@ -1080,7 +1083,7 @@ class Reframer:
             shutil.copy2(long_path(source.root / relative), destination)
 
         manifest.write(staging / "toc.yml", manifest.TOC_HEADER,
-                       retarget(roots, located, placements))
+                       retarget(roots, located, placements, list_title))
         manifest.write(
             staging / "reframe.yml",
             manifest.PAGES_HEADER,
