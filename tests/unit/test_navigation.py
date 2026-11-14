@@ -18,7 +18,13 @@ from pathlib import Path, PurePosixPath
 import pytest
 import yaml
 
-from docushift.converter.navigation import render_metadata, render_toc, synthesize
+from docushift.converter.navigation import (
+    ONLINE_HELP_LIST_TITLE,
+    online_help_title,
+    render_metadata,
+    render_toc,
+    synthesize,
+)
 from docushift.engines.base import ConversionContext, Document, NavNode, Unit
 from docushift.models import SourceEngine
 from docushift.reporting.findings import FindingsRun
@@ -587,12 +593,22 @@ def test_render_toc_writes_html_to_md_s_dialect(templates) -> None:
     of the old `items` / `path` / `children` left anywhere in the file."""
     nodes = [node("Chapter", "ch/index.md", node("A", "ch/a.md"))]
 
-    text = render_toc(nodes, templates, title="TIBCO EMS 10.4.0")
+    text = render_toc(nodes, templates, title="TIBCO EMS 10.4.0",
+                      list_title=online_help_title("TIBCO EMS", "10.4.0"))
     parsed = yaml.safe_load(text)
 
     assert list(parsed) == ["docs_list_title", "docs"]
-    assert parsed["docs_list_title"] == "Online Help"
+    assert parsed["docs_list_title"] == "TIBCO EMS 10.4.0"
     assert not any(key in text for key in ("items:", "path:", "children:"))
+
+
+def test_the_online_help_title_is_the_product_and_its_version() -> None:
+    """2026-11-14: the help menu on the site is titled with the product and version."""
+    assert online_help_title("TIBCO® MDM Studio", "6.1.1") == "TIBCO® MDM Studio 6.1.1"
+    assert online_help_title(" TIBCO EMS ", " 10.4.0 ") == "TIBCO EMS 10.4.0"
+    # No name to give it: html-to-md's constant, never a bare version number.
+    assert online_help_title("", "6.1.1") == ONLINE_HELP_LIST_TITLE == "Online Help"
+    assert online_help_title("  ", "6.1.1") == "Online Help"
 
 
 def test_render_toc_trims_the_padding_a_source_label_carries(templates) -> None:

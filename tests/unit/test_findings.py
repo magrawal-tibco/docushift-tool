@@ -201,8 +201,10 @@ def test_the_register_carries_every_row_of_7_5() -> None:
     DOCOPS-343 adds `ANCHOR_ID_SPLIT`, an `<a id>` spanning lines, which AEM cuts
     the page after. Phase 78 adds `REFRAME_DEPTH_UNMATCHED`, a `depth:` entry naming
     no guide or chapter, which refuses the version's merge.
+    2026-11-14 removes `LOCALIZED_LABEL_UNTRANSLATED`: the help menu's title is the
+    product's name and version, which has nothing to translate.
     """
-    assert len(REGISTRY) == 144
+    assert len(REGISTRY) == 143
 
 
 def test_severity_comes_from_the_registry_and_not_from_the_call_site() -> None:

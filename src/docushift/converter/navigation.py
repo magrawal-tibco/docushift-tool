@@ -435,8 +435,22 @@ def _link(parent: str, node: NavNode) -> str:
 
 
 #: `docs_list_title` of a version's `toc.yml` -- html-to-md's value for its help
-#: TOC, adopted verbatim in Phase 36 along with its field names.
+#: TOC, adopted verbatim in Phase 36 along with its field names. Since 2026-11-14
+#: only the fallback for a product with no display name (`online_help_title`).
 ONLINE_HELP_LIST_TITLE = "Online Help"
+
+
+def online_help_title(display_name: str, version: str) -> str:
+    """`docs_list_title` of a version's help `toc.yml`: "<product> <version>".
+
+    The title of the help menu on the AEM site (the user's call, 2026-11-14), e.g.
+    `TIBCO® MDM Studio 6.1.1`. Written by `convert` and by `reframe`, the same in
+    every locale: a product name and a version number need no translation.
+    """
+    name = (display_name or "").strip()
+    if not name:
+        return ONLINE_HELP_LIST_TITLE
+    return f"{name} {(version or '').strip()}".strip()
 
 
 def render_toc(nodes: list[NavNode], templates: Path, title: str = "",

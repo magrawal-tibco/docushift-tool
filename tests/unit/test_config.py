@@ -736,7 +736,8 @@ def test_a_label_falls_back_to_english_until_it_is_translated(project_root: Path
         "online_help", "Online Help") == ("Online Help", False)
 
 
-def test_the_shipped_locales_file_parses_and_starts_english_only() -> None:
+def test_the_shipped_locales_file_parses_and_holds_no_label() -> None:
+    """2026-11-14: the help title is the product and version, so nothing to translate."""
     shipped = yaml.safe_load((Path(__file__).parents[2] / "config" / "locales.yaml").read_text(
         encoding="utf-8"))
-    assert shipped["labels"]["online_help"] == {"en-us": "Online Help"}
+    assert shipped["labels"] == {}

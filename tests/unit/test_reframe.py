@@ -261,7 +261,8 @@ def test_the_toc_points_absorbed_topics_at_a_fragment_and_leaders_at_a_page(
 #: What R3 writes for `TOC`, from either input dialect: html-to-md's keys
 #: (Phase 36), with the merged section's fragment carried in `url`.
 MERGED_TOC = {
-    "docs_list_title": "Online Help",
+    # The product's name and version, as the converted tree's (2026-11-14).
+    "docs_list_title": "TIBCO-FLARE-DOCS 10.5.1",
     "docs": [
         {
             "title": "Installation",
