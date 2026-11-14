@@ -20,6 +20,7 @@ from html import escape
 from pathlib import Path, PurePosixPath
 
 from docushift.utils.csvio import write_rows
+from docushift.utils.filelock import exclusive
 from docushift.verify import triage
 
 FILE = "ISSUES"
@@ -146,9 +147,19 @@ def build(state, entries, repair_states, family_of: dict[str, str],
             for k in ordered]
 
 
+#: Beside the reports, held while one `verify` run writes them: two runs at once
+#: (parallel batches) must not interleave a rewrite of the same file.
+REPORTS_LOCK = ".reports.lock"
+
+
 def write(root: Path, rows: list[dict[str, str]]) -> tuple[Path, Path]:
     folder = root / "verify"
     folder.mkdir(parents=True, exist_ok=True)
+    with exclusive(folder / REPORTS_LOCK):
+        return _write(folder, rows)
+
+
+def _write(folder: Path, rows: list[dict[str, str]]) -> tuple[Path, Path]:
     csv_path, html_path = folder / f"{FILE}.csv", folder / f"{FILE}.html"
     write_rows(csv_path, COLUMNS, rows)
     unlogged = sum(1 for r in rows if r["kind"] == "unlogged")

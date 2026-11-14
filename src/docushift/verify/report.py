@@ -17,7 +17,9 @@ from html import escape
 from pathlib import Path
 
 from docushift.utils.csvio import write_rows
+from docushift.utils.filelock import exclusive
 from docushift.verify.driver import COLUMNS, VersionResult
+from docushift.verify.issues import REPORTS_LOCK
 
 SUMMARY_ROWS = 40
 INDEX_COLUMNS = ["bu", "family", "slug", "version", "verify_status", "verify_date", "scope", "pages",
@@ -51,8 +53,9 @@ def write_index(root: Path, rows: list[dict[str, str]]) -> tuple[Path, Path]:
     folder.mkdir(parents=True, exist_ok=True)
     ordered = sorted(rows, key=lambda r: (r["bu"], r["family"], r["slug"], r["version"]))
     csv_path, html_path = folder / "INDEX.csv", folder / "INDEX.html"
-    write_rows(csv_path, INDEX_COLUMNS, ordered)
-    html_path.write_text(_index_html(ordered), encoding="utf-8", newline="\n")
+    with exclusive(folder / REPORTS_LOCK):
+        write_rows(csv_path, INDEX_COLUMNS, ordered)
+        html_path.write_text(_index_html(ordered), encoding="utf-8", newline="\n")
     return csv_path, html_path
 
 

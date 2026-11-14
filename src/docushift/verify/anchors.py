@@ -22,6 +22,8 @@ from urllib.parse import unquote
 
 from docushift.utils.anchors import anchor_run
 from docushift.utils.csvio import read_rows, write_rows
+from docushift.utils.filelock import exclusive
+from docushift.verify.issues import REPORTS_LOCK
 from docushift.verify.published import PageCheck
 from docushift.verify.toc import Node, is_section
 
@@ -163,8 +165,19 @@ def sources(target: Target) -> str:
 
 def write_list(root: Path, bu: str, slug: str, version: str, targets: list[Target],
                urls: dict[str, str], day: str) -> Path:
-    """Replace this version's rows in the list; keep every other version's."""
+    """Replace this version's rows in the list; keep every other version's.
+
+    Read and written under the reports lock: a parallel run's version must not be
+    dropped by a list read before it was added.
+    """
     path = root / "verify" / FILE
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with exclusive(path.parent / REPORTS_LOCK):
+        return _write_list(path, bu, slug, version, targets, urls, day)
+
+
+def _write_list(path: Path, bu: str, slug: str, version: str, targets: list[Target],
+                urls: dict[str, str], day: str) -> Path:
     kept = [r for r in read_rows(path) if (r.get("slug"), r.get("version")) != (slug, version)] \
         if path.is_file() else []
     rows = [{"bu": bu, "slug": slug, "version": version, "page": t.page, "anchor": t.anchor,
@@ -172,7 +185,6 @@ def write_list(root: Path, bu: str, slug: str, version: str, targets: list[Targe
              "staging_url": _staging(urls.get(t.page, ""), t.served_id), "sources": sources(t),
              "example": t.example, "date": day}
             for t in sorted(targets, key=lambda t: (t.page, t.anchor)) if t.outcome != "ok"]
-    path.parent.mkdir(parents=True, exist_ok=True)
     write_rows(path, COLUMNS, sorted(kept + rows, key=lambda r: (r["bu"], r["slug"], r["version"],
                                                                   r["page"], r["anchor"])))
     return path

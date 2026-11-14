@@ -33,6 +33,9 @@ from docushift.models import ConversionStatus, Product, ProductVersion
 # open.
 SCHEMA_VERSION = 2
 
+#: How long a write waits for another process's transaction to end (sqlite `timeout`).
+BUSY_TIMEOUT_SECONDS = 60.0
+
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS schema_info (
     version INTEGER NOT NULL
@@ -297,7 +300,9 @@ class StateStore:
             # it. `sqlite3` is built serialized (`threadsafety == 3`), which makes a
             # shared connection safe at the C level; `_tx` adds the lock that keeps
             # one thread's commit from landing inside another's write.
-            self._conn = sqlite3.connect(self.db_path, check_same_thread=False)
+            # Two `docushift` runs at once (2026-11-14): a write waits up to a minute
+            # for the other's to commit instead of failing at sqlite's default 5 s.
+            self._conn = sqlite3.connect(self.db_path, check_same_thread=False, timeout=BUSY_TIMEOUT_SECONDS)
             self._conn.row_factory = sqlite3.Row
             self._conn.executescript(_SCHEMA)
             if self._conn.execute("SELECT COUNT(*) FROM schema_info").fetchone()[0] == 0:
