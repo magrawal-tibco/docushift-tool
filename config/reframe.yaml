@@ -265,6 +265,72 @@ products:
         versions: ["2.26.8"]
       - path: connectors/mysql/mysql-direct.md
         versions: ["2.26.8"]
+    # Phase 81 (15 Nov): AI-assisted grouping for the new versions; drafts and reasons in
+    # reports/ai-grouping/. Older versions keep the 3.0.1 layout.
+    depth:
+      # ---- 3.0.2 (15 entries). 229 pages incl. 23 not in navigation; today 219 (projected on 3.0.1).
+      # Whole guides: Installation and the Migration Guide, one page each.
+      - {guide: "Installation", depth: 1, versions: ["3.0.2"]}
+      - {guide: "Migration Guide", depth: 1, versions: ["3.0.2"]}
+      # User Guide, one page per subsection. Designing: Triggers, Activities and Connections one
+      # reference page each, Data Mappings' parts, App Properties/Schemas/Specs, one page per Flows
+      # task. Deployment: one page per platform, per configuration provider, per Monitoring area.
+      - {guide: "User Guide", chapter: "Designing Flogo Applications in Flogo Extension for Visual Studio Code", depth: 3, versions: ["3.0.2"]}
+      - {guide: "User Guide", chapter: "Deployment and Configuration", depth: 3, versions: ["3.0.2"]}
+      # User Guide, one page per section: the Design Assistant (Tools a reference page, CLI reference whole).
+      - {guide: "User Guide", chapter: "TIBCO Flogo\u00ae Design Assistant - Tech Preview", depth: 2, versions: ["3.0.2"]}
+      # User Guide, whole chapters (Introduction: the REST API tutorial is its own page anyway, R4.2).
+      - {guide: "User Guide", chapter: "Introduction", depth: 1, versions: ["3.0.2"]}
+      - {guide: "User Guide", chapter: "License Activation and Enforcement", depth: 1, versions: ["3.0.2"]}
+      - {guide: "User Guide", chapter: "Best Practices", depth: 1, versions: ["3.0.2"]}
+      - {guide: "User Guide", chapter: "Performance Tuning", depth: 1, versions: ["3.0.2"]}
+      - {guide: "User Guide", chapter: "Troubleshooting Workspace App Indexing", depth: 1, versions: ["3.0.2"]}
+      # Mapper Functions: one reference page per function group (the guide at depth 2).
+      - {guide: "Mapper Functions", depth: 2, versions: ["3.0.2"]}
+      # Connectors User Guide: one page per connector; the other two chapters whole.
+      - {guide: "Connectors User Guide", chapter: "Supported Flogo Connectors", depth: 2, versions: ["3.0.2"]}
+      - {guide: "Connectors User Guide", chapter: "Introduction", depth: 1, versions: ["3.0.2"]}
+      - {guide: "Connectors User Guide", chapter: "Using Connectors", depth: 1, versions: ["3.0.2"]}
+      # Security Guide: whole guide.
+      - {guide: "Security Guide", depth: 1, versions: ["3.0.2"]}
+      # ---- 2.26.9 (13 entries). 254 pages incl. 40 not in navigation; today 257 (projected on 3.0.1).
+      # Whole guide: Installation, one page.
+      - {guide: "Installation", depth: 1, versions: ["2.26.9"]}
+      # User Guide, one page per subsection. Designing: Triggers, Activities and Connections one
+      # reference page each, Data Mappings' parts, App Properties/Schemas/Specs, one page per Flows
+      # task. Deployment: one page per platform, per configuration provider, per Monitoring area.
+      - {guide: "User Guide", chapter: "Designing Flogo Applications in Flogo Extension for Visual Studio Code", depth: 3, versions: ["2.26.9"]}
+      - {guide: "User Guide", chapter: "Deployment and Configuration", depth: 3, versions: ["2.26.9"]}
+      # User Guide, one page per section: the Design Assistant, and Introduction so that the
+      # REST API tutorial is its own page, as in 3.0.2.
+      - {guide: "User Guide", chapter: "TIBCO Flogo\u00ae Design Assistant - Tech Preview", depth: 2, versions: ["2.26.9"]}
+      - {guide: "User Guide", chapter: "Introduction", depth: 2, versions: ["2.26.9"]}
+      # User Guide, whole chapters.
+      - {guide: "User Guide", chapter: "License Activation and Enforcement", depth: 1, versions: ["2.26.9"]}
+      - {guide: "User Guide", chapter: "Best Practices", depth: 1, versions: ["2.26.9"]}
+      - {guide: "User Guide", chapter: "Performance Tuning", depth: 1, versions: ["2.26.9"]}
+      # Mapper Functions: one reference page per function group (the guide at depth 2).
+      - {guide: "Mapper Functions", depth: 2, versions: ["2.26.9"]}
+      # Connectors User Guide: one page per connector; the other two chapters whole.
+      - {guide: "Connectors User Guide", chapter: "Supported Flogo Connectors", depth: 2, versions: ["2.26.9"]}
+      - {guide: "Connectors User Guide", chapter: "Introduction", depth: 1, versions: ["2.26.9"]}
+      - {guide: "Connectors User Guide", chapter: "Using Connectors", depth: 1, versions: ["2.26.9"]}
+      # Security Guide: whole guide.
+      - {guide: "Security Guide", depth: 1, versions: ["2.26.9"]}
+
+  # Phase 81 (15 Nov): AI-assisted grouping for CICS 1.5.1 (reports/ai-grouping/); it is its
+  # own pin, so 2.5.0 and 2.4.1 keep their layout.
+  tibco-activematrix-businessworks-plug-in-for-cics:
+    depth:
+      # ---- 1.5.1 (6 entries). 29 pages incl. 12 not in navigation; today 22.
+      # Installation, one page per platform (Open Systems, z/OS) and Plug-in Data Sets.
+      - {guide: "Installation", depth: 2, versions: ["1.5.1"]}
+      # User Guide: CICS Palette one page per palette resource or activity; the other chapters whole.
+      - {guide: "User Guide", chapter: "CICS Palette", depth: 2, versions: ["1.5.1"]}
+      - {guide: "User Guide", chapter: "Product Overview", depth: 1, versions: ["1.5.1"]}
+      - {guide: "User Guide", chapter: "Sample ActiveMatrix BusinessWorks Projects", depth: 1, versions: ["1.5.1"]}
+      - {guide: "User Guide", chapter: "Security Modes for z/OS Components", depth: 1, versions: ["1.5.1"]}
+      - {guide: "User Guide", chapter: "Transport Layer Security", depth: 1, versions: ["1.5.1"]}
 
   tibco-activation-service:
     keep_separate:
