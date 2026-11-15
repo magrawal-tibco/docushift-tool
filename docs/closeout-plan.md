@@ -29,6 +29,11 @@
     - new issues DOCOPS-370 (ours, content directly inside a list dropped, 1 SP) and DOCOPS-371 (Digital Platform, `<samp>`/`<var>` dropped);
     - DOCOPS-346 widened (20 more versions, MFT, ActiveSpaces menu);
     - status page published (deployment @3).
+  - **Sun 11:08:**
+    - Batch 2b stalled: ActiveMatrix BPM 4.3.0 ran 14 h fetching pages one at a time. It was stopped, and steps 7–8 cleared to re-run.
+    - **Speed-up merged** (`c40d244`): verify fetches 6 pages at a time and parses only `<main>`; catalog saves are lock-safe; `overnight.sh` runs up to 3 batches.
+    - The speed-up agent died on Google re-auth (16 h rule), and overnight the memory reaper stopped the fix370 trigger and the Messaging timer.
+    - **Now running in 3 slots:** Batch 2b (18 left), fix370 (147 steps), and the Messaging Phase 80 check.
   - **Sat 22:30: R002 committed locally in 23 TIBCO repos** (36,204 changes, 4,735 files; one commit per repo; idempotent; independently checked; script `8a0f8aa`). Not pushed: it waits for the `&#92;` check, and goes with R2 by the R2 plan's chunks.
   - **Sat 22:00:**
     - **R2 plan** written (`reports/r2-release-plan-2026-11-15.md`): about 47,000–52,000 files, 45 pushes Mon–Wed plus Δ1 on Thu. It fits if `&#92;` is confirmed Mon, 370 is committed Mon evening and ibi's refresh is on `wip` Mon. The BW plug-in renames go to R3 unless AEM answers by Tue.
