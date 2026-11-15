@@ -1,5 +1,5 @@
 {
- "fetched": "2026-11-14",
+ "fetched": "2026-11-15",
  "issues": [
   {
    "key": "DOCOPS-5",
@@ -4889,6 +4889,25 @@
    "due": "",
    "assignee": "",
    "sp": null
+  },
+  {
+   "key": "DOCOPS-372",
+   "summary": "Shorten product folder names to AEM's 50-character limit (Phase 80)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-96",
+   "status": "Backlog",
+   "category": "new",
+   "components": [],
+   "labels": [
+    "docushift",
+    "tibco",
+    "verify-issue"
+   ],
+   "created": "2026-11-14",
+   "resolved": "",
+   "due": "",
+   "assignee": "",
+   "sp": 1.5
   }
  ]
 }
