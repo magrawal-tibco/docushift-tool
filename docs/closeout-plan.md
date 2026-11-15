@@ -29,6 +29,11 @@
     - new issues DOCOPS-370 (ours, content directly inside a list dropped, 1 SP) and DOCOPS-371 (Digital Platform, `<samp>`/`<var>` dropped);
     - DOCOPS-346 widened (20 more versions, MFT, ActiveSpaces menu);
     - status page published (deployment @3).
+  - **Sun 22:20:**
+    - **Phase 81 merged** (`e1889a9`); the metrics script is now in `scratch/ai-grouping/levels.py`.
+    - **Δ1 TIBCO all converted** (Flogo 3.0.2, 2.26.9, CICS 1.5.1) and their **ZIPs are on Drive** (checksums verified). An agent is drafting their AI depth grouping (`reports/ai-grouping/`); reframe follows its review.
+    - **Staging checks scaled up:** Stage 2a/2b run 163 checks in 2 slots (the older TIBCO versions of the 17 families whose staging is current), about 4 h. That takes TIBCO coverage to about 300 of 610; the rest wait on Digital Platform (stalled builds, not served) and ibi on Mon.
+    - **Found and fixed:** three batches at once hit `database is locked` in `state.db`, and the runner counted the crashes as findings. Now WAL mode, and a traceback marks a step FAILED (`eed302c`). **Stage 2b's 4 crashed checks must be re-run** after it finishes (delete their summary lines). The backup trigger also fired on the failed run's DONE and deleted a ZIP before the re-run; Flogo 2.26.9 was re-downloaded.
   - **Sun 22:00 (user decisions):**
     - **AI-assisted grouping is the default for all new and future versions**; older published versions are not regrouped (too expensive). Phase 81: a version with its own depth entries is laid out on its own even if the product is pinned (being built by an agent).
     - **Spotfire conversions are only Statistica and Data Virtualization**; the 14 new Spotfire Analytics versions are out of scope (already excluded by `config/scope.yaml`).
