@@ -257,6 +257,9 @@ products:
   # activity into a sibling activity's page; 2.26.8 is published with them as pages
   # of their own, which is right. Version-scoped, so 3.0.1 keeps its digest.
   tibco-flogo:
+    # Pinned by hand (15 Nov): the catalog refresh added 3.0.2. The automatic pin
+    # (newest converted) would move to it and regroup every published Flogo version.
+    pin_layout_to: "3.0.1"
     keep_separate:
       - path: connectors/oracledb/oracle-database-sql-direct.md
         versions: ["2.26.8"]
