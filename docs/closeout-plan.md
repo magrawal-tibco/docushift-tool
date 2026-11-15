@@ -29,6 +29,20 @@
     - new issues DOCOPS-370 (ours, content directly inside a list dropped, 1 SP) and DOCOPS-371 (Digital Platform, `<samp>`/`<var>` dropped);
     - DOCOPS-346 widened (20 more versions, MFT, ActiveSpaces menu);
     - status page published (deployment @3).
+  - **Sun 19:00:**
+    - **Staging has rebuilt nothing pushed since about 11:30** (EMS 10.5.1 still in its old menu at 18:50; Adapters still not served), so the next families are held. Asked Digital Platform (chat text in the session). Two more AEM-side items: links to the author host `author-p185304-…adobeaemcloud.com`, and Thiyagu's HTML link shows as plain code.
+    - The two batches died together about 12:50 (cause unknown) and were restarted at 13:31; both DONE at 14:18. A memory-reaper kill of the wake-up timer lost 4½ h.
+    - **Δ1 refresh done** (`0fb1df0`): 17 new versions (`reports/delta1-new-versions-2026-11-15.csv`). TIBCO: Flogo 3.0.2 and 2.26.9, BW plug-in CICS 1.5.1 (a Karan-list question); 14 Spotfire. **Flogo pinned to 3.0.1** so 3.0.2 cannot regroup published versions.
+    - **Publish names for families not yet moved are switched off** (`4fc7dc0`). Otherwise a sync would create duplicate folders for the BW plug-ins, BusinessWorks, Platform and Streaming.
+    - **370 re-conversion compared:** 57 of 73 have the same page list and are syncing locally. **16 are held for review:**
+      - Service Grid 3.4.3/3.4.4: 23 pages renamed;
+      - Control Plane 1.17/1.18 and Flogo 2.26.6/2.26.7/3.0.0: pages added or renamed by the fix;
+      - Product and Service Catalog 5.1.0: 1,041 unfiled pages that the rebuild drops;
+      - MDM 9.3.2/11.0.0: unfiled pages dropped;
+      - BusinessWorks 5.16.1/6.12/6.13: one unfiled page;
+      - Offer and Price Engine 6.0.0: 2 pages added (DOCOPS-349);
+      - BE 6.3.1 and MDM 10.0.0: not published.
+    - Batch 2b triage running (agent).
   - **Sun 11:33: EMS 10.5.1 new layout pushed to `wip`** (user: part of today's pushes; `4e31308`, 290 files, with the 10.4.0–10.5.0 fixes). Merged with Digital Platform's 12 `wip` commits: Thiyagu's Pulsar HTML-link fix now points at the new `transports-conf` page, and the Jakarta overview is folded as designed. validate 0 errors. `content-fix` holds `wip` again (`b139ebe`). Staging check about 13:30 (a new page: `c-and-cobol-reference/administration/tibemsqueueinfo.html`). Google re-auth done by the user.
   - **Sun 11:08:**
     - Batch 2b stalled: ActiveMatrix BPM 4.3.0 ran 14 h fetching pages one at a time. It was stopped, and steps 7–8 cleared to re-run.
