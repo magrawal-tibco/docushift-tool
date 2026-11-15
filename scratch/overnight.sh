@@ -81,6 +81,9 @@ while IFS= read -r args || [ -n "$args" ]; do
   mins=$(( ($(date +%s) - start) / 60 ))
   # verify exits 1 when a version has an unexplained finding: a result, not a crash.
   case $code in 0) what=ok ;; 1) what="ok-findings" ;; *) what="FAILED" ;; esac
+  # Exit 1 is also what a crash returns: a traceback means FAILED, not findings (15 Nov:
+  # "database is locked" crashes were counted as ok-findings and skipped on re-run).
+  grep -q "^Traceback (most recent call last)" "$log" 2>/dev/null && what="FAILED"
   printf '%03d %-11s %4s min  exit %-3s %5s MB  docushift %s\n' "$n" "$what" "$mins" "$code" "$(avail_mb)" "$args" >> "$summary"
 done < "$batch"
 echo "DONE $(date '+%F %T')" >> "$summary"

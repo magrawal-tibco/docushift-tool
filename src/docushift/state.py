@@ -304,6 +304,10 @@ class StateStore:
             # for the other's to commit instead of failing at sqlite's default 5 s.
             self._conn = sqlite3.connect(self.db_path, check_same_thread=False, timeout=BUSY_TIMEOUT_SECONDS)
             self._conn.row_factory = sqlite3.Row
+            # WAL (15 Nov): in rollback-journal mode a long read by one run (verify) blocks
+            # another run's commit past the busy timeout ("database is locked"). WAL lets
+            # readers and one writer proceed together; the mode is stored in the file.
+            self._conn.execute("PRAGMA journal_mode=WAL")
             self._conn.executescript(_SCHEMA)
             if self._conn.execute("SELECT COUNT(*) FROM schema_info").fetchone()[0] == 0:
                 self._conn.execute("INSERT INTO schema_info (version) VALUES (?)", (SCHEMA_VERSION,))
