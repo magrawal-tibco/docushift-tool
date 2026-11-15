@@ -29,6 +29,12 @@
     - new issues DOCOPS-370 (ours, content directly inside a list dropped, 1 SP) and DOCOPS-371 (Digital Platform, `<samp>`/`<var>` dropped);
     - DOCOPS-346 widened (20 more versions, MFT, ActiveSpaces menu);
     - status page published (deployment @3).
+  - **Sun 23:00: Δ1 TIBCO ready for R2, the first AI-assisted grouping.**
+    - Flogo 3.0.2: 229 pages, median 623 words (1,340 under the old projection); 2.26.9: 254; CICS 1.5.1: 29. Drafts and reasons: `reports/ai-grouping/`. Entries are in `config/reframe.yaml` (`8ce7bc7`).
+    - Older Flogo versions are still `already current`; CICS 2.5.0 rebuilt with the same 17 pages, so no regrouping.
+    - Synced and committed on `content-fix`: Flogo `69d779d`, CICS `d6bffcd0`. **CICS 1.5.1 waits for Karan's yes before it is pushed.**
+    - For review: Flogo's Activities reference page (12,091 words, kept whole like EMS's command list) and CICS Installation split per platform (one page is the alternative).
+    - Follow-up: `levels.py` miscounts guides whose rows all carry `#fragment` (CICS).
   - **Sun 22:20:**
     - **Phase 81 merged** (`e1889a9`); the metrics script is now in `scratch/ai-grouping/levels.py`.
     - **Δ1 TIBCO all converted** (Flogo 3.0.2, 2.26.9, CICS 1.5.1) and their **ZIPs are on Drive** (checksums verified). An agent is drafting their AI depth grouping (`reports/ai-grouping/`); reframe follows its review.
