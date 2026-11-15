@@ -29,6 +29,14 @@
     - new issues DOCOPS-370 (ours, content directly inside a list dropped, 1 SP) and DOCOPS-371 (Digital Platform, `<samp>`/`<var>` dropped);
     - DOCOPS-346 widened (20 more versions, MFT, ActiveSpaces menu);
     - status page published (deployment @3).
+  - **Sun 21:00:**
+    - **370:** 55 re-converted versions synced and committed locally on `content-fix`, one commit per repo across 12 repos (597 files), for R2. validate showed no new errors; the BW plug-ins show only PUBLISH_NAME_TOO_LONG until their rename, and MDM's broken `Globalization-(G11n).md` link predates the sync. 16 versions are held for review (see 19:00).
+    - **Batch 2b triaged** (`a98a94b`): 12 versions moved; TIBCO now 109 logged / 9 issues / 7 lost / 20 clean.
+      - New issue DOCOPS-373 (DITA table descriptions dropped, 0.5 SP).
+      - Placeholders inside bold are a DOCOPS-360 gap that R002 does not fix.
+      - **Staging never rebuilt General and Foresight from Fri 13**, and serves Transaction Insight and FormBuilder at their menu path, not their folder path, so our redirects to the folder path 404. Both questions are in the Digital Platform chat message.
+      - UAT rows: `reports/uat-sheet-rows-2026-11-15.csv` (3).
+    - **Monday decisions added:** the two small converter gaps (DOCOPS-373, bold placeholders: R2 or after go-live), and Flogo 3.0.2 / 2.26.9 and CICS 1.5.1 under D7.
   - **Sun 19:00:**
     - **Staging has rebuilt nothing pushed since about 11:30** (EMS 10.5.1 still in its old menu at 18:50; Adapters still not served), so the next families are held. Asked Digital Platform (chat text in the session). Two more AEM-side items: links to the author host `author-p185304-…adobeaemcloud.com`, and Thiyagu's HTML link shows as plain code.
     - The two batches died together about 12:50 (cause unknown) and were restarted at 13:31; both DONE at 14:18. A memory-reaper kill of the wake-up timer lost 4½ h.
