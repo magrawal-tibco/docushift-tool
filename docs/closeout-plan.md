@@ -29,6 +29,10 @@
     - new issues DOCOPS-370 (ours, content directly inside a list dropped, 1 SP) and DOCOPS-371 (Digital Platform, `<samp>`/`<var>` dropped);
     - DOCOPS-346 widened (20 more versions, MFT, ActiveSpaces menu);
     - status page published (deployment @3).
+  - **Sun 22:00 (user decisions):**
+    - **AI-assisted grouping is the default for all new and future versions**; older published versions are not regrouped (too expensive). Phase 81: a version with its own depth entries is laid out on its own even if the product is pinned (being built by an agent).
+    - **Spotfire conversions are only Statistica and Data Virtualization**; the 14 new Spotfire Analytics versions are out of scope (already excluded by `config/scope.yaml`).
+    - **Δ1 TIBCO conversion started** (Flogo 3.0.2 and 2.26.9, CICS 1.5.1; `cache/overnight/delta1-tibco.txt`). Their ZIPs go to the Drive backup once unpacked (user). The merge waits for the AI depth drafts.
   - **Sun 21:00:**
     - **370:** 55 re-converted versions synced and committed locally on `content-fix`, one commit per repo across 12 repos (597 files), for R2. validate showed no new errors; the BW plug-ins show only PUBLISH_NAME_TOO_LONG until their rename, and MDM's broken `Globalization-(G11n).md` link predates the sync. 16 versions are held for review (see 19:00).
     - **Batch 2b triaged** (`a98a94b`): 12 versions moved; TIBCO now 109 logged / 9 issues / 7 lost / 20 clean.
