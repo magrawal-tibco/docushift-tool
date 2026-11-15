@@ -36,6 +36,9 @@ triage:
       with no label. A second R001 pass, for notes in or after lists.
   - {code: VERIFY_PUBLISHED_CALLOUT_UNRENDERED, decision: logged, ticket: DOCOPS-313, slug: tibco-product-and-service-catalog, version: "5.1.0", path: "*/sid-based-data-modeling-for-the-product-catalog.md", reason: *r001miss}
 
+  - {code: VERIFY_PUBLISHED_CALLOUT_UNRENDERED, decision: logged, ticket: DOCOPS-313, slug: tibco-activematrix-bpm, version: "4.3.0", path: "*/tasks/mappings-tab.md", reason: *r001miss}
+  - {code: VERIFY_PUBLISHED_CALLOUT_UNRENDERED, decision: logged, ticket: DOCOPS-313, slug: tibco-activematrix-service-grid, version: "3.4.4", path: "*/host-manager/patch-commands.md", reason: *r001miss}
+
   - code: VERIFY_PUBLISHED_CALLOUT_UNRENDERED
     decision: ours
     ticket: DOCOPS-250
@@ -1264,6 +1267,262 @@ triage:
     reason: >-
       The source page links "Access Token Expiration" to a bookmark #Using that does
       not exist (AccessTokenExpiration.htm); broken on the old site too.
+
+  # Batch 2b triage, 2026-11-15 (reports/verify/triage-batch2b-2026-11-15.md).
+  # Batch 2b (14-15 Nov: TRA, BusinessWorks, BPM, Data Management, re-checks; triage
+  # 2026-11-15, reports/verify/triage-batch2b-2026-11-15.md). Narrow entries: keep them
+  # after the generated DOCOPS-344 page list and before the catch-alls.
+  # DOCOPS-373 is a placeholder for the new sub-task's key.
+
+  # Support and legal copies (and DITA's Important Information) kept once, at the end.
+  - {code: VERIFY_TOC_ENTRY_MISSING, decision: accepted, slug: tibco-runtime-agent, version: "5.13.0", path: "*/tibco-documentation-and-support-services.md", reason: *tailcopy}
+  - {code: VERIFY_TOC_ENTRY_MISSING, decision: accepted, slug: tibco-runtime-agent, version: "5.13.0", path: "*/legal-and-third-party-notices.md", reason: *tailcopy}
+  - {code: VERIFY_TOC_ENTRY_MISSING, decision: accepted, slug: tibco-activematrix-businessworks, version: "6.13.0", path: "tibco-businessworks-container-edition/tibco-documentation-and-support-services.md", reason: *tailcopy}
+  - {code: VERIFY_TOC_ENTRY_MISSING, decision: accepted, slug: tibco-activematrix-businessworks, version: "6.13.0", path: "tibco-businessworks-container-edition/legal-and-third-party-notices.md", reason: *tailcopy}
+  - {code: VERIFY_TOC_ENTRY_MISSING, decision: accepted, slug: tibco-activematrix-bpm, version: "4.3.0", path: "tutorials/tibco-documentation-and-support-services.md", reason: *tailcopy}
+  - {code: VERIFY_TOC_ENTRY_MISSING, decision: accepted, slug: tibco-activematrix-bpm, version: "4.3.0", path: "tutorials/important-information.md", reason: *tailcopy}
+  - {code: VERIFY_TOC_ENTRY_MISSING, decision: accepted, slug: tibco-mdm, version: "11.1.0", path: "*/tibco-documentation-and-support-services.md", reason: *tailcopy}
+  - {code: VERIFY_TOC_ENTRY_MISSING, decision: accepted, slug: tibco-mdm, version: "11.1.0", path: "*/legal-and-third-party-notices.md", reason: *tailcopy}
+  - {code: VERIFY_TOC_ENTRY_MISSING, decision: accepted, slug: tibco-mdm-studio, version: "6.1.1", path: "tibco-mdm-studio-2/tibco-documentation-and-support-services.md", reason: *tailcopy}
+  - {code: VERIFY_TOC_ENTRY_MISSING, decision: accepted, slug: tibco-mdm-studio, version: "6.1.1", path: "tibco-mdm-studio-2/legal-and-third-party-notices.md", reason: *tailcopy}
+  - code: VERIFY_TOC_MOVED
+    decision: logged
+    ticket: DOCOPS-366
+    slug: tibco-activematrix-bpm
+    version: "4.3.0"
+    path: "*important-information.md*"
+    reason: >-
+      DITA's "Important Information" pages (one per guide) sit where the converter puts them;
+      verify's tail rule does not know them (as for the BW plug-ins). Not a content change.
+
+  # Topics listed under two parents, or a merged page's section paired with the other
+  # parent. Every page is in the menu. Not a content change.
+  - {code: VERIFY_TOC_MOVED, decision: accepted, slug: tibco-activematrix-businessworks, version: "6.13.0", path: "*/*/*", reason: *crosswise}
+  - {code: VERIFY_TOC_MOVED, decision: accepted, slug: tibco-mdm, version: "11.1.0", path: "*/*/*", reason: *crosswise}
+  - {code: VERIFY_TOC_MOVED, decision: accepted, slug: tibco-mdm-studio, version: "6.1.1", path: "*/*/*", reason: *crosswise}
+  - {code: VERIFY_TOC_MOVED, decision: accepted, slug: tibco-activematrix-bpm, version: "4.3.0", reason: *crosswise}
+  - {code: VERIFY_TOC_MOVED, decision: accepted, slug: tibco-activematrix-service-grid, version: "3.4.4", reason: *crosswise}
+  - {code: VERIFY_TOC_MOVED, decision: accepted, slug: tibco-bpm-enterprise, version: "5.7.0", reason: *crosswise}
+  - {code: VERIFY_TOC_MOVED, decision: accepted, slug: tibco-business-studio-bpm-edition, version: "5.7.0", reason: *crosswise}
+  - {code: VERIFY_TOC_MOVED, decision: accepted, slug: ibi-mdm-add-on-for-global-data-synchronization, version: "4.0.0", path: global-data-synchronization-network-overview.md, reason: *crosswise}
+  - {code: VERIFY_PUBLISHED_TOC_MOVED, decision: accepted, slug: tibco-activematrix-businessworks, version: "6.13.0", reason: *shownonce}
+  - {code: VERIFY_PUBLISHED_TOC_MOVED, decision: accepted, slug: tibco-activematrix-bpm, version: "4.3.0", reason: *shownonce}
+  - {code: VERIFY_PUBLISHED_TOC_MOVED, decision: accepted, slug: tibco-activematrix-service-grid, version: "3.4.4", reason: *shownonce}
+  - {code: VERIFY_PUBLISHED_TOC_MOVED, decision: accepted, slug: tibco-business-studio-bpm-edition, version: "5.7.0", reason: *shownonce}
+  - code: VERIFY_PUBLISHED_TOC_ENTRY_MISSING
+    decision: accepted
+    slug: tibco-mdm
+    version: "11.1.0"
+    path: "Custom Guide Specific to your Installation Requirements > Custom Guide Specific to your Installation Requirements > *"
+    reason: &selfchild >-
+      toc.yml lists the Custom Guide page under itself (rows 1 and 2, same url); staging
+      shows it once, so its 7 environments sit one level up. Every page is reached.
+  - {code: VERIFY_PUBLISHED_TOC_MOVED, decision: accepted, slug: tibco-mdm, version: "11.1.0", path: "Custom Guide Specific to your Installation Requirements > *", reason: *selfchild}
+
+  # DOCOPS-351: pages after (or titled like) a heading row; staging drops or moves them,
+  # their own path is 404, so their headings are looked for on the wrong page.
+  - code: VERIFY_PUBLISHED_TOC_ENTRY_MISSING
+    decision: logged
+    ticket: DOCOPS-351
+    slug: tibco-activematrix-bpm
+    version: "4.3.0"
+    reason: &afterheading >-
+      The page follows heading rows (page.md#anchor) in toc.yml, or shares its title with one
+      (HTTP Connector after hibernate.md#http-client); staging drops or moves it, and its own
+      path is 404. Resource-template and SOAP-binding pages, SOA guides.
+  - {code: VERIFY_PUBLISHED_TOC_ENTRY_MISSING, decision: logged, ticket: DOCOPS-351, slug: tibco-activematrix-service-grid, version: "3.4.4", reason: *afterheading}
+  - {code: VERIFY_PUBLISHED_TOC_ENTRY_MISSING, decision: logged, ticket: DOCOPS-351, slug: tibco-mdm-studio, version: "6.1.1", path: "*Classification Functions", reason: *afterheading}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-351, slug: tibco-activematrix-bpm, version: "4.3.0", path: "*/properties-resource-templates/ldap-connection.md#*", reason: *afterheading}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-351, slug: tibco-activematrix-bpm, version: "4.3.0", path: "*/soap-bindings-2/ws-addressing-2.md#*", reason: *afterheading}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-351, slug: tibco-activematrix-bpm, version: "4.3.0", path: "*/managing-applications-2/soap-bindings-3.md#*", reason: *afterheading}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-351, slug: tibco-activematrix-service-grid, version: "3.4.4", path: "*/properties-of-resource-templates/jms-resource-templates.md#*", reason: *afterheading}
+
+  # The old menu names files the package does not ship (linked from exporting-from-gui.htm
+  # and the Flare TOC; NAV_NODE_DROPPED at conversion).
+  - code: VERIFY_TOPIC_MISSING
+    decision: source
+    slug: tibco-activematrix-service-grid
+    version: "3.4.4"
+    path: "*/html/*/*archive*.htm"
+    reason: &unshipped2b >-
+      The old menu lists archive topics (deleting-the-archive, export-archive-direc,
+      modifying-archive-st, distributed-application-archive-daa, enterprise-archive-ear-loader;
+      MDM ProcessExportArchive, ProcessExportArchive30) that the package does not ship;
+      broken on the old site too. Checked 2026-11-15.
+  - {code: VERIFY_TOPIC_MISSING, decision: source, slug: tibco-mdm, version: "11.1.0", path: "*/html/Workflow-reference/ProcessExportArchive*.htm", reason: *unshipped2b}
+
+  # Staging serves Transaction Insight pages at their menu path, not their folder path.
+  - code: VERIFY_REDIRECT_UNSERVED
+    decision: logged
+    ticket: DOCOPS-351
+    slug: tibco-foresight-transaction-insight
+    version: "6.0.0"
+    reason: >-
+      Staging serves these pages at their menu path (6-0-0/common-administration/
+      administrator-pages/alerts.html), not at their folder path (6-0-0/tibco-foresight-
+      transaction-insight/common-administration/...), which verify asks for: 9 of 10 sampled
+      301 targets 404 (13 Nov: 10 of 10, read then as "not on staging yet"). The pages are
+      served. Open: does AEM resolve 301 rows written as Markdown paths?
+
+  # The old site also serves the release notes under relnotes/; 301.yml has doc/html/ rows only.
+  - code: VERIFY_REDIRECT_UNMAPPED
+    decision: logged
+    ticket: DOCOPS-322
+    slug: tibco-activematrix-businessworks
+    version: "6.13.0"
+    reason: >-
+      44 release-note topics live at /pub/activematrix_businessworks/6.13.0/relnotes/
+      bw-ent-relnotes/; the 301.yml (2,269 rows) has none for relnotes/. The topics are
+      published. A second old folder, as for BusinessConnect 7.5.0.
+
+  # Text.
+  - {code: VERIFY_TEXT_DROPPED, decision: logged, ticket: DOCOPS-370, slug: tibco-activematrix-businessworks, version: "6.13.0", path: "*/installation/installation-requirements*.md", reason: *listblock}
+  - code: VERIFY_TEXT_DROPPED
+    decision: logged
+    ticket: DOCOPS-360
+    slug: tibco-activematrix-businessworks
+    version: "6.13.0"
+    path: "*/getting-started/rest-*.md"
+    reason: &rawangle >-
+      A placeholder in angle brackets is written unescaped inside bold (**... <launched>
+      BWEclipseAppNode ...**, <Application Name>, <version_number>, <version>, <project >);
+      the browser reads it as a tag and shows nothing. R002 (`\<` only) does not cover it.
+  - {code: VERIFY_TEXT_DROPPED, decision: logged, ticket: DOCOPS-360, slug: tibco-activematrix-businessworks, version: "6.13.0", path: "*/creating-a-rest-reference*.md", reason: *rawangle}
+  - {code: VERIFY_TEXT_DROPPED, decision: logged, ticket: DOCOPS-360, slug: tibco-activematrix-businessworks, version: "6.13.0", path: "*/tibco-business-studio-for-businessworks*.md", reason: *rawangle}
+  - {code: VERIFY_TEXT_DROPPED, decision: logged, ticket: DOCOPS-360, slug: tibco-business-studio-bpm-edition, version: "5.7.0", path: "*/tasks/localization-of-forms.md", reason: *rawangle}
+  - {code: VERIFY_TEXT_DROPPED, decision: logged, ticket: DOCOPS-360, slug: ibi-mdm-add-on-for-global-data-synchronization, version: "4.0.0", path: "*/configure-tibco-businessconnect-tibco.md", reason: *rawangle}
+  - {code: VERIFY_TEXT_DROPPED, decision: logged, ticket: DOCOPS-360, slug: tibco-mdm, version: "11.1.0", path: "*/configuration-tibco-businessconnect-tibco.md", reason: *rawangle}
+  - {code: VERIFY_TEXT_DROPPED, decision: logged, ticket: DOCOPS-360, slug: tibco-activematrix-businessworks, version: "6.13.0", path: "*/closed-issues-of-tibco-activematrix-businessworks/palette.md", reason: *literalentity}
+  - code: VERIFY_TEXT_DROPPED
+    decision: logged
+    ticket: DOCOPS-373
+    slug: tibco-activematrix-bpm
+    version: "4.3.0"
+    path: "*/working-with-processes/sorting-filtering-lists-process-templates.md"
+    reason: &tabledesc >-
+      DITA writes a table's description (<span class="tabledesc">) inside <table>, before
+      <thead>; the converter drops it: "Note that:" and its 4-item list (Query Parameter
+      Attributes), "Consider the following set of mappings:" (URL Mappings).
+  - {code: VERIFY_TEXT_DROPPED, decision: logged, ticket: DOCOPS-373, slug: tibco-activematrix-bpm, version: "4.3.0", path: "*/web-application-component-development/url-mappings.md", reason: *tabledesc}
+  - code: VERIFY_TEXT_DROPPED
+    decision: accepted
+    slug: "tibco-*bpm*"
+    path: "*/api-for-scripting/m*-for-*-class.md"
+    reason: >-
+      "The default value is 0." is present (raw HTML table, <samp>0.</samp> or <code>0.</code>
+      on its own line); the check reads it in two parts. ActiveMatrix BPM 4.3.0, Business
+      Studio BPM Edition 5.7.0.
+  - code: VERIFY_TEXT_DROPPED
+    decision: logged
+    ticket: DOCOPS-366
+    slug: tibco-activematrix-bpm
+    version: "4.3.0"
+    path: "*/business-object-model-mappings-to-xml-schema/data-type-mappings.md"
+    reason: >-
+      The XSD date patterns (\-\-\-(0[1-9]|...)) are in a raw <pre>, written as in the
+      source; verify reads `\-` there as a Markdown escape. Checker.
+
+  # MDM Studio 6.1.1 ships the help twice (html/ and relnotes/, both live on the old site,
+  # slightly different); we publish html/, verify compares some pages with relnotes/.
+  - code: VERIFY_IMAGE_MISSING
+    decision: logged
+    ticket: DOCOPS-366
+    slug: tibco-mdm-studio
+    version: "6.1.1"
+    reason: &twobuilds >-
+      The package holds two Flare builds of the help (html/ 917 topics, relnotes/ 931), both
+      on the old site. The page is converted from html/; verify compares it with relnotes/,
+      whose icons are other files (GroupConnectorIcon_116x22 vs _108x21) and whose wording
+      differs in places. Every flagged picture is on the page, from html/.
+  - {code: VERIFY_TEXT_DROPPED, decision: logged, ticket: DOCOPS-366, slug: tibco-mdm-studio, version: "6.1.1", reason: *twobuilds}
+
+  # Pictures: example code read as pictures (checker); one icon dropped from a menu path.
+  - code: VERIFY_IMAGE_MISSING
+    decision: logged
+    ticket: DOCOPS-366
+    slug: tibco-activematrix-bpm
+    version: "4.3.0"
+    path: "*/application-class-methods/application-log-methods.md"
+    reason: &imgincode >-
+      The "picture" is example code: <img src='path/?.gif'> in inline code, an HTML form
+      template (submit_btn.gif), Flare skin markup (%%Skin.FileUrl), or `<![CDATA[` read as
+      the start of an image. Checker.
+  - {code: VERIFY_IMAGE_MISSING, decision: logged, ticket: DOCOPS-366, slug: tibco-activematrix-bpm, version: "4.3.0", path: "*/processmanagerservice/resumeprocessinstances.md", reason: *imgincode}
+  - {code: VERIFY_IMAGE_MISSING, decision: logged, ticket: DOCOPS-366, slug: tibco-mdm, version: "11.1.0", path: "*/workitem-forms-and-email-templates-customization/how-forms-work.md", reason: *imgincode}
+  - {code: VERIFY_IMAGE_MISSING, decision: logged, ticket: DOCOPS-366, slug: tibco-businessworks-formbuilder, version: "5.3.2", path: "*/desktop.12.6.md", reason: *imgincode}
+  - code: VERIFY_IMAGE_MISSING
+    decision: logged
+    ticket: DOCOPS-370
+    slug: tibco-bpm-enterprise
+    version: "5.7.0"
+    path: "*/work-views/processing-work-items-overview.md"
+    reason: >-
+      The overflow icon (ellipsis_10x21.png) inside a menu cascade is dropped, so the step
+      reads "click > Open Next". Unlike Kafka 6.8.2, the icon is the first menu step.
+
+  # Anchors.
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: source, slug: tibco-administrator-enterprise-edition, version: "5.13.0", path: "*/fault-tolerance-load-balancing-rendezvous/overview.md#admin_server_1931582264_2109256", reason: *no-bookmark}
+  - code: VERIFY_PUBLISHED_ANCHOR_MISSING
+    decision: logged
+    ticket: DOCOPS-345
+    slug: tibco-activematrix-businessworks
+    version: "6.13.0"
+    path: "*/using-the-bwdesign-utility-2/messaging.md#integrating-with-tibco-ftl"
+    reason: &regid >-
+      Heading with a registered sign (TIBCO FTL<sup>®</sup>, TIBCO Hawk<sup>®</sup>): staging
+      keeps the sign in the id (#integrating-with-tibco-ftl®); our links drop it.
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-345, slug: tibco-activematrix-bpm, version: "4.3.0", path: "*/reconfiguring-jdbc.md#editing-tibco-hawk-rulebase-files", reason: *regid}
+  - code: VERIFY_PUBLISHED_ANCHOR_MISSING
+    decision: logged
+    ticket: DOCOPS-345
+    slug: tibco-activematrix-businessworks
+    version: "6.13.0"
+    path: "*/generating-reports-for-engine-data/triggers.md#/*"
+    reason: >-
+      Raw anchors whose id starts with "/" (<a id="/monitor2">, REST paths) are not on the
+      served page; staging drops them. Other raw <a id> anchors are served.
+  - code: VERIFY_PUBLISHED_ANCHOR_MISSING
+    decision: logged
+    ticket: DOCOPS-345
+    slug: tibco-businessworks-formbuilder
+    version: "5.3.2"
+    path: "*/preface.04.3.md#30096"
+    reason: >-
+      A WebWorks heading holding only a numeric anchor (## <a id="30096"></a>) is not on the
+      served page. Not traced further.
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-362, slug: tibco-businessworks-formbuilder, version: "5.3.2", path: "*/custom_control.08.?.md#*", reason: &codeid "Link or menu row to a heading with code, the code part written as dashes or dropped (#example-for, #understanding-the-------------example, #installation-environment). Fix built 12 Nov; needs a re-convert."}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-362, slug: tibco-activematrix-bpm, version: "4.3.0", path: "*/case-data-model-versioning.md#*-----*", reason: *codeid}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-362, slug: tibco-activematrix-bpm, version: "4.3.0", path: "*/tibco-activematrix-bpm-installation-developer/important-information.md#*", reason: *codeid}
+  - code: VERIFY_PUBLISHED_ANCHOR_MISSING
+    decision: logged
+    ticket: DOCOPS-363
+    slug: tibco-activematrix-service-grid
+    version: "3.4.4"
+    path: "*#[SC][ET][CE][TP]*"
+    reason: >-
+      Link to a DITA section or step id (#SECTION_9059..., #STEP_XPP_NQW_2G) the converter
+      did not keep. Same as BusinessEvents' #GUID-/#FIG_ links.
+
+  # Served with an empty article (DOCOPS-344): 11 pages, served text 0% of the page.
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-activematrix-businessworks, version: "6.13.0", path: "tibco-activematrix-businessworks/administration/opentelemetry/traces.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: tibco-activematrix-businessworks, version: "6.13.0", path: "tibco-activematrix-businessworks/administration/opentelemetry/traces.md", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-activematrix-businessworks, version: "6.13.0", path: "tibco-activematrix-businessworks/bindings-and-palettes-reference/basic-activities-palette/scope.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: tibco-activematrix-businessworks, version: "6.13.0", path: "tibco-activematrix-businessworks/bindings-and-palettes-reference/basic-activities-palette/scope.md", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-activematrix-businessworks, version: "6.13.0", path: "tibco-activematrix-businessworks/bindings-and-palettes-reference/shared-resources/http-client.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-activematrix-businessworks, version: "6.13.0", path: "tibco-activematrix-businessworks/maven-plug-in/deploying-a-shared-module-on-remote-repository.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: tibco-activematrix-businessworks, version: "6.13.0", path: "tibco-activematrix-businessworks/maven-plug-in/deploying-a-shared-module-on-remote-repository.md", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-activematrix-businessworks, version: "6.13.0", path: "tibco-businessworks-container-edition/bindings-and-palettes-reference/basic-activities-palette-2/scope-2.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: tibco-activematrix-businessworks, version: "6.13.0", path: "tibco-businessworks-container-edition/bindings-and-palettes-reference/basic-activities-palette-2/scope-2.md", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-activematrix-businessworks, version: "6.13.0", path: "tibco-businessworks-container-edition/maven-plug-in/deploying-a-shared-module-on-remote-repository-2.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: tibco-activematrix-businessworks, version: "6.13.0", path: "tibco-businessworks-container-edition/maven-plug-in/deploying-a-shared-module-on-remote-repository-2.md", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-activematrix-bpm, version: "4.3.0", path: "bpm/workspace/workspace-components/using-wcc-components-mash-ups/using-tibco-pagebus-managed/managed-hub-sample.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: tibco-activematrix-bpm, version: "4.3.0", path: "bpm/workspace/workspace-components/using-wcc-components-mash-ups/using-tibco-pagebus-managed/managed-hub-sample.md", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-activematrix-bpm, version: "4.3.0", path: "bpm/workspace/workspace-configuration-and-customization-guide/introduction/configuring-customizing-non-deployed-application.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: tibco-activematrix-bpm, version: "4.3.0", path: "bpm/workspace/workspace-configuration-and-customization-guide/introduction/configuring-customizing-non-deployed-application.md", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-activematrix-bpm, version: "4.3.0", path: "bpm/workspace/workspace-configuration-and-customization-guide/introduction/launching-a-wcc-application.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-activematrix-bpm, version: "4.3.0", path: "bpm/workspace/workspace-configuration-and-customization-guide/localization/default-language.md#*", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: tibco-activematrix-bpm, version: "4.3.0", path: "bpm/workspace/workspace-configuration-and-customization-guide/localization/default-language.md", reason: *empty-article}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: tibco-activematrix-bpm, version: "4.3.0", path: "installation/tibco-activematrix-bpm/installation-upgrade/performing-post-installation/configuring-business-data.md#*", reason: *empty-article}
 
   # Catch-alls: keep last; the first matching entry wins.
   - code: VERIFY_REDIRECT_MAP_MISSING
