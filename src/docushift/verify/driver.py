@@ -54,7 +54,7 @@ from docushift.verify import anchors, live, old_toc, published, triage
 from docushift.verify import images as pictures
 from docushift.verify import redirects as redirect_maps
 from docushift.verify import text as texts
-from docushift.verify.fetch import Fetcher
+from docushift.verify.fetch import Fetcher, fan_out
 from docushift.verify.toc import Node, by_page, root, tail_moved
 
 #: The doc-class `verify` reads. The others hold PDFs and generated index pages,
@@ -517,7 +517,9 @@ class Verifier:
         for source in outmap:
             by_key.setdefault(key_of(source), source)
         uncheckable = 0
-        for url, to in live.sample(live.origins(folder.path / "301.yml", _rooted_prefix(folder)), self.live_sample):
+
+        def one(pair: tuple[str, str]) -> live.LiveCheck:
+            url, to = pair
             source = by_key.get(to) or by_key.get(to.partition("#")[0])
             local = None
             if source is not None:
@@ -526,7 +528,11 @@ class Verifier:
                         encoding="utf-8", errors="replace"), selector, chrome)
                 except OSError:
                     local = None
-            checked = live.check(self.fetcher, url, local, selector, chrome)
+            return live.check(self.fetcher, url, local, selector, chrome)
+
+        picked = live.sample(live.origins(folder.path / "301.yml", _rooted_prefix(folder)), self.live_sample)
+        # On the fetcher's threads; recorded in sample order, as one thread would.
+        for (url, to), checked in zip(picked, fan_out(self.fetcher, one, picked), strict=True):
             if checked.status == "uncheckable":
                 uncheckable += 1
             elif checked.status == "drift":

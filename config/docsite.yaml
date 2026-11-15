@@ -50,6 +50,12 @@ crawl:
   rate_limit_per_second: 2
   max_concurrent_requests: 4
 
+# `docushift verify`: staging and docs.tibco.com pages fetched at once (`--workers`
+# overrides). The crawl's rate floor still applies, shared by every thread; set
+# `rate_limit_per_second` here to give verify its own.
+verify:
+  max_concurrent_requests: 6
+
 defaults:
   # Conversion policy -- see docs/architecture.md section 2.3.
   active_convert_eligible: true

@@ -37,7 +37,7 @@ from bs4 import BeautifulSoup, Tag
 
 from docushift.verify import images as pictures
 from docushift.verify import text as texts
-from docushift.verify.fetch import Fetcher
+from docushift.verify.fetch import Fetcher, fan_out
 from docushift.verify.toc import Comparison, Node, by_title, pages_only
 
 MENU = "nav.cmp-navigation"
@@ -96,18 +96,33 @@ def _items(group: Tag, page_url: str) -> list[Node]:
     return out
 
 
-def _served_path(html: str) -> str:
-    soup = BeautifulSoup(html, "html.parser")
+def _main_soup(html: str) -> BeautifulSoup:
+    """The page's `<main>` alone, parsed; the whole page when that finds no page path.
+
+    Everything a page check reads -- the page path, the title, the article -- is
+    inside `<main>`, and the menu around it is most of the bytes: a BusinessWorks
+    6.13.0 page is ~450 KB, and parsing it whole took 0.36 s against 0.03 s for its
+    `<main>`, with the same article (all 519 pages compared, 2026-11-14).
+    """
+    start, end = html.find("<main"), html.rfind("</main>")
+    if 0 <= start < end:
+        soup = BeautifulSoup(html[start:end + len("</main>")], "html.parser")
+        if soup.select_one(PAGE_PATH) is not None:
+            return soup
+    return BeautifulSoup(html, "html.parser")
+
+
+def _is_served(soup: BeautifulSoup, url: str) -> bool:
+    wanted = unquote(urlsplit(url).path)
+    wanted = wanted[: -len(".html")] if wanted.endswith(".html") else wanted
     main = soup.select_one(PAGE_PATH)
-    return str(main.get("data-page-path") or "") if main is not None else ""
+    served = str(main.get("data-page-path") or "") if main is not None else ""
+    return bool(served) and served.endswith(wanted)
 
 
 def is_page(fetched_html: str, url: str) -> bool:
     """Did the server send *this* page, not its home-page fallback?"""
-    wanted = unquote(urlsplit(url).path)
-    wanted = wanted[: -len(".html")] if wanted.endswith(".html") else wanted
-    served = _served_path(fetched_html)
-    return bool(served) and served.endswith(wanted)
+    return _is_served(_main_soup(fetched_html), url)
 
 
 @dataclass
@@ -164,28 +179,33 @@ def check(fetcher: Fetcher, urls: list[str] | str, toc: Node, folder: Path) -> V
     # Maps" in both Administration and Development (DOCOPS-352).
     shared = Counter(" ".join(texts.words(row.title)) for row, _ in pages.walk()
                      if row.key is not None and "#" not in row.key)
+    matched = result.menu.matched
+    # Each page once, by its first row; checked on the fetcher's threads and kept in
+    # menu order, so the findings read as a one-thread run's.
+    todo: dict[str, Node] = {}
     for row, _ in pages.walk():
-        if row.key is None:
-            continue
-        page = row.key.partition("#")[0]
-        if page in result.pages:
-            continue
-        twin = result.menu.matched.get(id(row))
+        if row.key is not None:
+            todo.setdefault(row.key.partition("#")[0], row)
+
+    def one(item: tuple[str, Node]) -> PageCheck:
+        page, row = item
+        twin = matched.get(id(row))
         href = twin.ref.partition("#")[0] if twin is not None else ""
         if not href:
-            result.pages[page] = PageCheck(page, "", status="unmatched")
-            continue
+            return PageCheck(page, "", status="unmatched")
         own = own_url(href, folder.name, page)
         if own and own != href and shared[" ".join(texts.words(row.title))] > 1:
             first = _page(fetcher, page, own, folder, check_title=False)
             if first.status == "ok":
-                result.pages[page] = first
-                continue
+                return first
         # At its own address the page is the right one, whatever its served title.
         checked = _page(fetcher, page, href, folder, check_title=href != own)
         if checked.status == "mismatched":
             retry = _page(fetcher, page, own, folder, check_title=False) if own else None
             checked = retry if retry is not None and retry.status == "ok" else PageCheck(page, "", status="unmatched")
+        return checked
+
+    for page, checked in zip(todo, fan_out(fetcher, one, todo.items()), strict=True):
         result.pages[page] = checked
     return result
 
@@ -226,10 +246,13 @@ def same_title(served: str, expected: str) -> bool:
 def _page(fetcher: Fetcher, page: str, url: str, folder: Path, check_title: bool = True) -> PageCheck:
     out = PageCheck(page, url)
     fetched = fetcher.get(url)
-    if not fetched.ok or not is_page(fetched.text, url):
+    if not fetched.ok:
         out.status = "missing"
         return out
-    soup = BeautifulSoup(fetched.text, "html.parser")
+    soup = _main_soup(fetched.text)  # parsed once, for the check and the article
+    if not _is_served(soup, url):
+        out.status = "missing"
+        return out
     article = soup.select_one(ARTICLE)
     local_path = folder / PurePosixPath(page)
     try:

@@ -46,6 +46,7 @@ from docushift.utils.csvio import (
     read_rows,
     write_rows_together,
 )
+from docushift.utils.filelock import LockTimeout, exclusive
 from docushift.utils.longpath import segment_problem
 
 if TYPE_CHECKING:  # pragma: no cover - import kept lazy to avoid a config <-> catalog cycle
@@ -317,6 +318,12 @@ class CatalogManager:
         # unchanged only when there is no `state.db` to derive them from, so a save
         # without one cannot blank what a save with one wrote.
         self._read_status: dict[tuple[str, str], VersionStatus] = {}
+        # For `save` with parallel runs: this run's own view of each sheet's rows (as
+        # last read or saved), each sheet as this run last read or wrote it, and
+        # whether the in-memory catalog still holds every row the sheets do.
+        self._base: tuple[dict, dict] = ({}, {})
+        self._written: tuple[dict, dict] = ({}, {})
+        self._in_sync = True
 
     # -- load / save ---------------------------------------------------------
 
@@ -325,16 +332,31 @@ class CatalogManager:
         if self._catalog is not None:
             return self._catalog
 
-        catalog = Catalog()
-        self._duplicate_slugs = []
-        self._read_status = {}
+        product_rows, version_rows = self._read_files()
+        catalog, self._duplicate_slugs, self._read_status = self._parse(product_rows, version_rows)
+        # What this run read, by row: `save` writes back only the cells it changed
+        # since, so a parallel run's rows survive (verify speed-up, 2026-11-14).
+        self._base = self._written = (_keyed(product_rows, _product_key), _keyed(version_rows, _version_key))
+        self._in_sync = True
+        self._catalog = catalog
+        return catalog
+
+    def _read_files(self) -> tuple[list[dict[str, str]], list[dict[str, str]]]:
         # X2-04: a sheet in neither UTF-8 nor Windows-1252 is the one-line
         # `CatalogError` every command already prints, not a traceback.
         try:
-            product_rows = read_rows(self.products_path)
-            version_rows = read_rows(self.versions_path)
+            return read_rows(self.products_path), read_rows(self.versions_path)
         except NotUtf8 as exc:
             raise CatalogError(str(exc)) from exc
+
+    @staticmethod
+    def _parse(
+        product_rows: list[dict[str, str]], version_rows: list[dict[str, str]]
+    ) -> tuple[Catalog, list[str], dict[tuple[str, str], VersionStatus]]:
+        """The catalog in two sheets' rows, the slugs seen twice, and the status cells as read."""
+        catalog = Catalog()
+        duplicate_slugs: list[str] = []
+        read_status: dict[tuple[str, str], VersionStatus] = {}
         for row in product_rows:
             slug = row.get("slug", "").strip().lower()
             if not slug:
@@ -344,7 +366,7 @@ class CatalogManager:
             # `validate()` reports it, so `catalog import` refuses the sheet before
             # a `save()` writes the collapsed version back over the original.
             if slug in catalog.products:
-                self._duplicate_slugs.append(slug)
+                duplicate_slugs.append(slug)
             catalog.products[slug] = Product(
                 slug=slug,
                 product_code=row.get("product_code", "").strip() or slug,
@@ -375,7 +397,7 @@ class CatalogManager:
                     f"Add the product to products.csv or remove the orphaned version row."
                 )
             is_archived = parse_bool(row.get("is_archived"))
-            self._read_status[(slug, version)] = VersionStatus(
+            read_status[(slug, version)] = VersionStatus(
                 row.get("_status", ""), row.get("_status_date", ""),
                 row.get("_sync_status", ""), row.get("_sync_date", ""),
                 row.get("_verify_status", ""), row.get("_verify_date", ""),
@@ -428,9 +450,7 @@ class CatalogManager:
                 reframed_md_files=parse_optional_int(row.get("_reframed_md_files")),
                 reframed_files=parse_optional_int(row.get("_reframed_files")),
             )
-
-        self._catalog = catalog
-        return catalog
+        return catalog, duplicate_slugs, read_status
 
     def _family_views(self, products: list[Product]) -> dict[str, dict[str, str]]:
         """The four read-only family columns of each product row (Phase 37).
@@ -464,8 +484,11 @@ class CatalogManager:
             views[p.slug] = view
         return views
 
-    def _statuses(self, products: list[Product]) -> dict[tuple[str, str], dict[str, str]]:
+    def _statuses(
+        self, products: list[Product], read_status: dict[tuple[str, str], VersionStatus] | None = None
+    ) -> dict[tuple[str, str], dict[str, str]]:
         """The four status cells for every version, read from `state.db` in one pass."""
+        read_status = self._read_status if read_status is None else read_status
         evidence = StatusEvidence.read(self.state) if self.state is not None else None
         cells = {}
         for product in products:
@@ -474,7 +497,7 @@ class CatalogManager:
                 if evidence is not None:
                     status = version_status(product, version, evidence)
                 else:
-                    status = self._read_status.get(key, VersionStatus(""))
+                    status = read_status.get(key, VersionStatus(""))
                 cells[key] = {
                     "_status": status.status,
                     "_status_date": status.status_date,
@@ -512,13 +535,57 @@ class CatalogManager:
         A localized run writes neither (Phase 57). The CSVs are the English view:
         their status and count columns describe the primary locale's tree, and a
         `--locale ja-jp` convert recording its own counts would overwrite them.
+
+        **Parallel runs** (2026-11-14). Every run read the whole sheet and wrote it
+        back, so two runs at once lost one another's rows. The write is now made
+        under `config/.catalog.lock`, against the sheets as they are at that moment.
+        When nobody has written them since this run read them, it is the write it
+        always was. Otherwise the cells this run changed (since it read, or last
+        saved) are laid onto the current sheets -- rows it added or removed
+        included -- and the derived columns (family views, `_bu`/`_family`, the
+        status cells) are worked out again from the result. Two runs changing one
+        cell: the later save wins.
         """
         if self.config is not None and not self.config.is_primary_locale():
             return
         catalog = self.load()
+        mine = tuple(_keyed(rows, key) for rows, key in zip(
+            self._rows(catalog, self._read_status, derived=False), (_product_key, _version_key), strict=True))
+        try:
+            with exclusive(self.products_path.parent / LOCK_NAME):
+                current = tuple(_keyed(rows, key) for rows, key in zip(
+                    self._read_files(), (_product_key, _version_key), strict=True))
+                if self._in_sync and current == self._written:
+                    product_rows, version_rows = self._rows(catalog, self._read_status)
+                else:
+                    merged = [_merge(now, base, ours, columns) for now, base, ours, columns in zip(
+                        current, self._base, mine, (_PRODUCT_DATA, _VERSION_DATA), strict=True)]
+                    merged_catalog, _, read_status = self._parse(*merged)
+                    product_rows, version_rows = self._rows(merged_catalog, read_status)
+                    self._in_sync = False
+                write_rows_together(
+                    [
+                        (self.products_path, PRODUCT_COLUMNS, product_rows),
+                        (self.versions_path, VERSION_COLUMNS, version_rows),
+                    ]
+                )
+        except LockTimeout as exc:
+            raise CatalogError(f"{exc}: another docushift run is saving the catalog. Re-run when it ends.") from exc
+        except OSError as exc:
+            raise CatalogError(
+                f"Could not write {exc.filename or 'the catalog'} ({exc.strerror or exc}). It is usually open "
+                f"in Excel; close it and re-run. Neither CSV was changed."
+            ) from exc
+        self._base = mine
+        self._written = (_keyed(product_rows, _product_key), _keyed(version_rows, _version_key))
 
+    def _rows(
+        self, catalog: Catalog, read_status: dict[tuple[str, str], VersionStatus], derived: bool = True
+    ) -> tuple[list[dict[str, str]], list[dict[str, str]]]:
+        """Both sheets' rows, in file order. `derived=False` leaves out the columns
+        worked out from other rows or from `state.db`: only what a run sets itself."""
         products = sorted(catalog.products.values(), key=lambda p: (p.bu, p.family, p.slug))
-        views = self._family_views(products)
+        views = self._family_views(products) if derived else {}
         product_rows = [
             {
                 "slug": p.slug,
@@ -527,7 +594,7 @@ class CatalogManager:
                 "bu": p.bu,
                 "family": p.family,
                 "family_source": str(p.family_source),
-                **views[p.slug],
+                **views.get(p.slug, {}),
                 "in_scope": format_bool(p.in_scope),
                 "scope_source": str(p.scope_source),
                 "custom_override": format_bool(p.custom_override),
@@ -535,56 +602,46 @@ class CatalogManager:
             for p in products
         ]
 
-        statuses = self._statuses(products)
+        statuses = self._statuses(products, read_status) if derived else {}
         version_rows = []
         for product in products:
             for version in sorted(
                 product.versions.values(), key=lambda v: natural_version_key(v.version), reverse=True
             ):
-                version_rows.append(
-                    {
-                        "slug": product.slug,
-                        "version": version.version,
-                        "is_archived": format_bool(version.is_archived),
-                        "convert_eligible": format_bool(version.convert_eligible),
-                        "convert_batch": version.convert_batch,
-                        "migrate_decision": str(version.migrate_decision),
-                        "migrate_decision_source": str(version.migrate_decision_source),
-                        "release_date": normalize_date(version.release_date),
-                        "release_status": str(version.release_status),
-                        "retirement_date": version.retirement_date or "",
-                        "release_status_source": str(version.release_status_source),
-                        "engine": str(version.engine),
-                        "engine_source": str(version.engine_source),
-                        "zip_url": version.zip_url or "",
-                        "zip_source": str(version.zip_source),
-                        "custom_override": format_bool(version.custom_override),
-                        "_bu": product.bu,
-                        "_family": product.family,
-                        **statuses[(product.slug, version.version)],
-                        "_has_csh": format_optional_bool(version.has_csh),
-                        "_csh_names": format_optional_int(version.csh_names),
-                        "_has_api_ref": format_optional_bool(version.has_api_ref),
-                        "_api_files": format_optional_int(version.api_files),
-                        "_doc_files": format_optional_int(version.doc_files),
-                        "_md_files": format_optional_int(version.md_files),
-                        "_out_files": format_optional_int(version.out_files),
-                        "_reframed_md_files": format_optional_int(version.reframed_md_files),
-                        "_reframed_files": format_optional_int(version.reframed_files),
-                    }
-                )
-        try:
-            write_rows_together(
-                [
-                    (self.products_path, PRODUCT_COLUMNS, product_rows),
-                    (self.versions_path, VERSION_COLUMNS, version_rows),
-                ]
-            )
-        except OSError as exc:
-            raise CatalogError(
-                f"Could not write {exc.filename or 'the catalog'} ({exc.strerror or exc}). It is usually open "
-                f"in Excel; close it and re-run. Neither CSV was changed."
-            ) from exc
+                row = {
+                    "slug": product.slug,
+                    "version": version.version,
+                    "is_archived": format_bool(version.is_archived),
+                    "convert_eligible": format_bool(version.convert_eligible),
+                    "convert_batch": version.convert_batch,
+                    "migrate_decision": str(version.migrate_decision),
+                    "migrate_decision_source": str(version.migrate_decision_source),
+                    "release_date": normalize_date(version.release_date),
+                    "release_status": str(version.release_status),
+                    "retirement_date": version.retirement_date or "",
+                    "release_status_source": str(version.release_status_source),
+                    "engine": str(version.engine),
+                    "engine_source": str(version.engine_source),
+                    "zip_url": version.zip_url or "",
+                    "zip_source": str(version.zip_source),
+                    "custom_override": format_bool(version.custom_override),
+                }
+                if derived:
+                    row["_bu"], row["_family"] = product.bu, product.family
+                    row.update(statuses[(product.slug, version.version)])
+                row.update({
+                    "_has_csh": format_optional_bool(version.has_csh),
+                    "_csh_names": format_optional_int(version.csh_names),
+                    "_has_api_ref": format_optional_bool(version.has_api_ref),
+                    "_api_files": format_optional_int(version.api_files),
+                    "_doc_files": format_optional_int(version.doc_files),
+                    "_md_files": format_optional_int(version.md_files),
+                    "_out_files": format_optional_int(version.out_files),
+                    "_reframed_md_files": format_optional_int(version.reframed_md_files),
+                    "_reframed_files": format_optional_int(version.reframed_files),
+                })
+                version_rows.append(row)
+        return product_rows, version_rows
 
     # -- accessors -----------------------------------------------------------
 
@@ -1653,6 +1710,63 @@ _FAMILY_PRECEDENCE = {
     FamilySource.DOCSITE_CATEGORY: 2,
     FamilySource.UNCLASSIFIED: 3,
 }
+
+
+# -- parallel runs (2026-11-14) -----------------------------------------------
+
+#: Beside the CSVs: held while one run re-reads and writes them.
+LOCK_NAME = ".catalog.lock"
+
+#: The columns a run sets itself. The rest are worked out on every write, from the
+#: whole sheet (family views, `_bu`/`_family`) or from `state.db` (the status cells).
+_PRODUCT_DATA = tuple(c for c in PRODUCT_COLUMNS if c not in
+                      ("_family_name", "_family_description", "_family_products", "_rule_family"))
+_VERSION_DATA = tuple(c for c in VERSION_COLUMNS if c not in
+                      ("_bu", "_family", "_status", "_status_date", "_sync_status", "_sync_date",
+                       "_verify_status", "_verify_date", "_repairs_pending", "_repairs_date"))
+
+
+def _product_key(row: dict[str, str]) -> str:
+    return (row.get("slug") or "").strip().lower()
+
+
+def _version_key(row: dict[str, str]) -> tuple[str, str]:
+    return (row.get("slug") or "").strip().lower(), (row.get("version") or "").strip()
+
+
+def _keyed(rows: list[dict[str, str]], key) -> dict:
+    """Rows by key, in file order; a row with a blank key is dropped, as `load` drops it."""
+    out: dict = {}
+    for row in rows:
+        k = key(row)
+        if all(k) if isinstance(k, tuple) else k:
+            out[k] = row
+    return out
+
+
+def _merge(current: dict, base: dict, mine: dict, columns: tuple[str, ...]) -> tuple[dict[str, str], ...]:
+    """The sheet as it is now, with this run's changes since `base` laid on.
+
+    A cell this run changed takes this run's value; every other cell stays as the
+    sheet has it now. A row this run added is added and one it removed is removed.
+    A row only the sheet has (another run's) is kept, and so is a row another run
+    removed unless this run changed it.
+    """
+    out = dict(current)
+    for key, row in mine.items():
+        old = base.get(key)
+        if old is None:
+            out[key] = {**current.get(key, {}), **row}
+            continue
+        changed = {c: row.get(c, "") for c in columns if row.get(c, "") != old.get(c, "")}
+        if key in current:
+            out[key] = {**current[key], **changed}
+        elif changed:
+            out[key] = {**old, **row}
+    for key in base:
+        if key not in mine:
+            out.pop(key, None)
+    return tuple(out.values())
 
 
 def _family_rank(source: FamilySource) -> int:

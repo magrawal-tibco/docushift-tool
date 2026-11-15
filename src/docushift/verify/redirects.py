@@ -23,7 +23,7 @@ from docushift.sync import rooted
 from docushift.validation import references
 from docushift.verify import live, published
 from docushift.verify import text as texts
-from docushift.verify.fetch import Fetcher
+from docushift.verify.fetch import Fetcher, fan_out
 
 FILE = "301.yml"
 #: Below this share of the old page's words, a target is another page, not this one.
@@ -79,7 +79,7 @@ def check(ctx: Context, sample: int, seed: int, fetcher: Fetcher | None = None, 
     if not picked:
         return result
     listed = {origins.page_path(url) for url in ctx.pages}
-    asked: list[tuple[str, str, bool]] = []
+    wanted: list[tuple[str, str]] = []
     for frm, to in picked:
         if listed and origins.page_path(frm) not in listed:
             result.add("VERIFY_REDIRECT_FROM_UNLISTED", "", f"{frm} is not in the docsite sitemap")
@@ -94,10 +94,15 @@ def check(ctx: Context, sample: int, seed: int, fetcher: Fetcher | None = None, 
             result.add("VERIFY_REDIRECT_TARGET_MISSING", page, f"{frm} -> {to}: no #{fragment} on the page")
         _same_topic(ctx, frm, to, page, markdown, find, result)
         if fetcher is not None and host:
-            url = f"{host.rstrip('/')}/{_served(ctx, to).partition('#')[0]}"
-            fetched = fetcher.get(url)
-            asked.append((page, url, fetched.ok and published.is_page(fetched.text, url)))
-    _staging(asked, result)
+            wanted.append((page, f"{host.rstrip('/')}/{_served(ctx, to).partition('#')[0]}"))
+
+    def served_ok(item: tuple[str, str]) -> bool:
+        fetched = fetcher.get(item[1])
+        return fetched.ok and published.is_page(fetched.text, item[1])
+
+    # On the fetcher's threads, read back in sample order.
+    oks = fan_out(fetcher, served_ok, wanted) if wanted else []
+    _staging([(page, url, ok) for (page, url), ok in zip(wanted, oks, strict=True)], result)
     result.add("VERIFY_REDIRECT_SAMPLED", "",
                f"{len(picked)} of {len(rows)} row(s) checked (seed {seed})"
                + ("" if ctx.pages else "; no cached sitemap, so coverage and `from` were not checked"))

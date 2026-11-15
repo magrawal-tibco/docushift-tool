@@ -320,3 +320,8 @@ def test_a_localized_store_reads_stage_4_from_the_primary_and_writes_only_its_ow
     assert base.get_output_rows("wf", "9.3.6") == [("html/en-us/a.htm", "en-us/a.md", "en-us")]
     assert ("convert", "failed") not in base.stage_events()[("wf", "9.3.6")]
     local.close()
+
+
+def test_a_write_waits_for_another_process_instead_of_failing_at_once(state: StateStore) -> None:
+    """Two `docushift` runs share `state.db` (2026-11-14): a busy database is waited for."""
+    assert state.connect().execute("PRAGMA busy_timeout").fetchone()[0] == 60_000

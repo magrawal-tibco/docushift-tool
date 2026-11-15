@@ -5,6 +5,9 @@ output/
 reframed/
 *.db
 *.db-journal
+# Held while a run writes the catalog CSVs (catalog.py, parallel runs)
+config/.catalog.lock
+reports/verify/.reports.lock
 
 # Python
 .venv/
