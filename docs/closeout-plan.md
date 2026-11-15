@@ -29,6 +29,7 @@
     - new issues DOCOPS-370 (ours, content directly inside a list dropped, 1 SP) and DOCOPS-371 (Digital Platform, `<samp>`/`<var>` dropped);
     - DOCOPS-346 widened (20 more versions, MFT, ActiveSpaces menu);
     - status page published (deployment @3).
+  - **Sun 11:33: EMS 10.5.1 new layout pushed to `wip`** (user: part of today's pushes; `4e31308`, 290 files, with the 10.4.0–10.5.0 fixes). Merged with Digital Platform's 12 `wip` commits: Thiyagu's Pulsar HTML-link fix now points at the new `transports-conf` page, and the Jakarta overview is folded as designed. validate 0 errors. `content-fix` holds `wip` again (`b139ebe`). Staging check about 13:30 (a new page: `c-and-cobol-reference/administration/tibemsqueueinfo.html`). Google re-auth done by the user.
   - **Sun 11:08:**
     - Batch 2b stalled: ActiveMatrix BPM 4.3.0 ran 14 h fetching pages one at a time. It was stopped, and steps 7–8 cleared to re-run.
     - **Speed-up merged** (`c40d244`): verify fetches 6 pages at a time and parses only `<main>`; catalog saves are lock-safe; `overnight.sh` runs up to 3 batches.
