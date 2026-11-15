@@ -3018,6 +3018,27 @@ name.
 
 ---
 
+### Phase 81: AI-Assisted Grouping for New Versions — **Built 2026-11-15; first candidate Flogo 3.0.2**
+
+**Decision (user, 15 Nov).** Pages by menu depth (Phase 78), with the `depth:` entries drafted by an AI agent per chapter, is the **default for every newer and future version**. Older published versions keep their layout: correcting them is too expensive.
+
+**The problem.** A pinned product laid out every version against the pin (`Reframer.pin_for`), so a new version could not have its own depth layout while its older versions stayed pinned. Flogo was pinned to 3.0.1 on 15 Nov so that 3.0.2 would not regroup the published versions; 3.0.2 should still get its own layout.
+
+**The rule (built).** A version whose own policy (`policy.for_version(number)`) has `depth:` entries is laid out on its own: its pin is itself, whatever `pin_layout_to` or the automatic pin says. Every other version keeps its pin and its layout exactly; the reference it projects onto is packed with its own policy (Phase 78's `_reference_layout` key), so the new version's entries never reach it. A product with no pin at all is unchanged.
+- `pin_for` applies the rule, so the layout, the refusal message and `reframe --dry-run`'s Pinned column all agree. `reframe_one` now writes `pin_for` into the policy for hand pins too; that only differs for a depth version, whose key changes anyway with its entries.
+- Tests: a hand-pinned product with entries on its newest version (that version by depth; the pin and an older version byte-identical, policy keys unchanged); the same with an automatic pin; an unpinned product still reports no pin.
+
+**The process for each new version.**
+1. Convert the version.
+2. An agent drafts `depth:` entries per guide and chapter, scoped to that version (`versions: ["<version>"]`). It measures chapter sizes with `C:/tmp/reframe-rule/levels.py` (the method used for EMS) and follows Phase 78's criteria and `reports/reframe-rule-2026-11-12/ems-level-plan-draft.md`: a chapter is one page unless it is large, and then it is grouped one or two levels down; reference listings stay whole.
+3. The draft goes to `reports/ai-grouping/<slug>-<version>.md` for review.
+4. The approved entries go into `config/reframe.yaml`.
+5. Reframe, compare with the draft, and publish.
+
+Older versions are untouched: no entries are written for them, and they keep projecting onto their pin.
+
+---
+
 ### Phase 80: Product Folder Names AEM Can Serve (50 Characters) — **Built 2026-11-14; apply pending; DOCOPS-372 (DOCOPS-346), decision D8**
 
 **Why.** The AEM team says staging cuts a product's folder name after 50 characters (confirmed: `tibco-businessconnect-configstore-management-interface-protocol` is served at `/us/en/tibco-businessconnect-configstore-management-inter/...`). They are not expected to lift the limit.

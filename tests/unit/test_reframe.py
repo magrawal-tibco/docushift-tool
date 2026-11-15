@@ -4528,3 +4528,101 @@ def test_a_depth_entry_naming_no_toc_node_refuses_the_merge(config, catalog, fla
     assert findings.all[0].severity is Severity.ERROR
     assert "'Mesages'" in findings.all[0].message
     assert written(first) == kept
+
+
+# -- Phase 81: a version with depth entries is laid out on its own -----------------
+#
+# AI-assisted grouping is the default for new versions, and a hand or automatic pin
+# would otherwise project the new version onto the pinned layout. The rule: a
+# version whose own policy has depth entries is its own pin; every other version
+# keeps the pin it had, with the reference packed by its own policy.
+
+MESSAGES_10_6_0 = ('      - {guide: "User Guide", chapter: "Messages", depth: 2, '
+                   'versions: ["10.6.0"]}\n')
+
+
+def pinned_config(config, pin: str, entries: str = "") -> None:
+    config.reframe_path.parent.mkdir(parents=True, exist_ok=True)
+    config.reframe_path.write_text(
+        'defaults:\n  max_words: 3000\nproducts:\n  tibco-flare-docs:\n'
+        + (f'    pin_layout_to: "{pin}"\n' if pin else "")
+        + (f"    depth:\n{entries}" if entries else ""),
+        encoding="utf-8",
+    )
+    config._reframe_cache = None
+
+
+def three_versions(config, catalog, flare, *numbers: str):
+    for number in numbers:
+        flare.versions[number] = make_version("tibco-flare-docs", number, engine=SourceEngine.FLARE)
+    catalog.merge_fetch_results([flare])
+    product = catalog.get_product("tibco-flare-docs")
+    for number in product.versions:
+        converted_tree(config, product, number, DEPTH_TOC)
+    return product
+
+
+def merged_trees(config, catalog, product, numbers) -> tuple[dict[str, dict[str, str]], dict[str, str]]:
+    """Each version's written tree and stored policy key, from one run."""
+    reframer = Reframer(config, catalog)
+    trees, keys = {}, {}
+    for number in numbers:
+        result = reframer.reframe_one(product, product.versions[number], force=True)
+        assert result.outcome is ReframeOutcome.REFRAMED, (number, result.message)
+        trees[number] = written(result)
+        keys[number] = catalog.state.get_version_metadata(product.slug, number)["reframe_policy_key"]
+    return trees, keys
+
+
+def test_a_hand_pinned_newest_version_with_depth_entries_is_laid_out_on_its_own(
+        config, catalog, flare):
+    """Flogo's case: pinned to an older version, the new one gets its own depth
+    layout; the pin and the version projecting onto it are untouched, byte for
+    byte and key for key."""
+    product = three_versions(config, catalog, flare, "10.6.0", "10.4.4")
+    order = ["10.6.0", "10.5.1", "10.4.4"]
+
+    pinned_config(config, "10.5.1")
+    before, before_keys = merged_trees(config, catalog, product, order)
+    pinned_config(config, "10.5.1", MESSAGES_10_6_0)
+    after, after_keys = merged_trees(config, catalog, product, order)
+
+    reframer = Reframer(config, catalog)
+    assert reframer.pin_for(product, product.versions["10.6.0"]) == "10.6.0"
+    assert reframer.pin_for(product, product.versions["10.4.4"]) == "10.5.1"
+    assert len(pages_in(before["10.6.0"])) == 2
+    assert len(pages_in(after["10.6.0"])) == 6
+    for older in ("10.5.1", "10.4.4"):
+        assert after[older] == before[older]
+        assert after_keys[older] == before_keys[older]
+
+
+def test_an_automatically_pinned_product_lays_a_depth_version_out_on_its_own(
+        config, catalog, flare):
+    """No `pin_layout_to`: the newest converted version is the pin. A depth entry on
+    an older version lays that one out on its own; the others still project."""
+    product = three_versions(config, catalog, flare, "10.4.4", "10.3.0")
+    order = ["10.5.1", "10.4.4", "10.3.0"]
+    entry = ('      - {guide: "User Guide", chapter: "Messages", depth: 2, '
+             'versions: ["10.4.4"]}\n')
+
+    pinned_config(config, "")
+    before, before_keys = merged_trees(config, catalog, product, order)
+    pinned_config(config, "", entry)
+    after, after_keys = merged_trees(config, catalog, product, order)
+
+    reframer = Reframer(config, catalog)
+    assert reframer.pin_for(product, product.versions["10.4.4"]) == "10.4.4"
+    assert reframer.pin_for(product, product.versions["10.3.0"]) == "10.5.1"
+    assert len(pages_in(before["10.4.4"])) == 2
+    assert len(pages_in(after["10.4.4"])) == 6
+    for other in ("10.5.1", "10.3.0"):
+        assert after[other] == before[other]
+        assert after_keys[other] == before_keys[other]
+
+
+def test_an_unpinned_version_with_depth_entries_still_reports_no_pin(config, catalog, flare):
+    """A doc set with no pin at all was already laid out on its own: nothing changes."""
+    pinned_config(config, "", '      - {guide: "User Guide", chapter: "Messages", depth: 2}\n')
+
+    assert Reframer(config, catalog).pin_for(flare, flare.versions["10.5.1"]) == ""

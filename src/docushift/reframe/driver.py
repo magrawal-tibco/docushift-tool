@@ -408,10 +408,9 @@ class Reframer:
         # C2: the gate is the first thing the stage does, before it has looked at a
         # path, and it is checked against the version in hand rather than trusting
         # that the selection already filtered. `--input` is the case that matters.
-        policy = self._policy(product)
-        if slug in self._automatic:
-            # Phase 74: this version's own pin, so the currency key moves with it.
-            policy = replace(policy, pin_layout_to=self.pin_for(product, version))
+        # Phase 74: this version's own pin, so the currency key moves with it. Phase
+        # 81: a hand pin too, which only differs for a version with depth entries.
+        policy = replace(self._policy(product), pin_layout_to=self.pin_for(product, version))
         # Phase 76: `keep_separate` entries scoped to other versions drop out here,
         # before the layout, the currency key or the pinned reference reads it.
         policy = policy.for_version(number)
@@ -1339,12 +1338,20 @@ class Reframer:
         A hand pin applies to every version. An automatic one is the pin of the
         version's own engine, so a DITA version never projects onto a Flare layout,
         and a version alone in its engine is its own pin and packs on its own.
+
+        Phase 81: a version with `depth` entries of its own is its own pin, whatever
+        either rule says, so a new version gets its AI-assisted layout while the
+        versions pinned before it keep theirs. Their reference is packed by their
+        own policy (`_reference_layout`), so this version's entries never reach it.
         """
         policy = self._policy(product)
         if product.slug not in self._automatic:
-            return policy.pin_layout_to
-        pins = self._engine_pins.get(product.slug, {})
-        return pins.get(str(version.engine), version.version)
+            pin = policy.pin_layout_to
+        else:
+            pin = self._engine_pins.get(product.slug, {}).get(str(version.engine), version.version)
+        if pin and pin != version.version and policy.for_version(version.version).depth:
+            return version.version
+        return pin
 
     def _check_pin(self, product: Product, policy: ReframePolicy) -> None:
         """A note naming the pin the tool chose, so a writer can make it permanent.

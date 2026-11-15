@@ -1279,6 +1279,14 @@ products:
 - `keep_separate` still wins inside an entry, and a page never mixes two source folders: a
   subtree that would is laid out one level further down.
 
+**New versions are grouped this way by default** (Phase 81, decided 15 Nov). After a new
+version is converted, an agent drafts its `depth:` entries, scoped to that version, into
+`reports/ai-grouping/<slug>-<version>.md`; once reviewed they go into `config/reframe.yaml`.
+A version with entries of its own is laid out on its own even when the product is pinned
+(`pin_layout_to` or the automatic pin), so it never projects onto the older layout, and the
+older versions keep projecting onto their pin exactly as before. Write no entries for
+older published versions: their layout stays.
+
 Adding, removing or changing an entry re-merges only the versions it names. Check the result
 against the plan before syncing: on a published version it regroups pages, and its old URLs
 then need redirect rows.
