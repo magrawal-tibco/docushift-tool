@@ -3030,7 +3030,7 @@ name.
 
 **The process for each new version.**
 1. Convert the version.
-2. An agent drafts `depth:` entries per guide and chapter, scoped to that version (`versions: ["<version>"]`). It measures chapter sizes with `C:/tmp/reframe-rule/levels.py` (the method used for EMS) and follows Phase 78's criteria and `reports/reframe-rule-2026-11-12/ems-level-plan-draft.md`: a chapter is one page unless it is large, and then it is grouped one or two levels down; reference listings stay whole.
+2. An agent drafts `depth:` entries per guide and chapter, scoped to that version (`versions: ["<version>"]`). It measures chapter sizes with `scratch/ai-grouping/levels.py` (the method used for EMS) and follows Phase 78's criteria and `reports/reframe-rule-2026-11-12/ems-level-plan-draft.md`: a chapter is one page unless it is large, and then it is grouped one or two levels down; reference listings stay whole.
 3. The draft goes to `reports/ai-grouping/<slug>-<version>.md` for review.
 4. The approved entries go into `config/reframe.yaml`.
 5. Reframe, compare with the draft, and publish.
