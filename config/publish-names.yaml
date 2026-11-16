@@ -57,9 +57,9 @@ tibco-businessconnect-edi-protocol-powered-by-instream: tibco-businessconnect-ed
 # pending move (family businessworks): tibco-activematrix-businessworks-smartmapper-enterprise-server: tibco-businessworks-smartmapper-enterprise-server
 
 # bw-plugin
-tibco-activematrix-businessworks-activeaspects-plug-in: tibco-businessworks-activeaspects-plug-in
+tibco-activematrix-businessworks-activeaspects-plug-in: tibco-bw-plugin-activeaspects
 tibco-activematrix-businessworks-plug-in-component-for-aws-common-services: tibco-bw-plugin-component-aws-common-services
-tibco-activematrix-businessworks-plug-in-development-kit: tibco-businessworks-plug-in-development-kit
+tibco-activematrix-businessworks-plug-in-development-kit: tibco-bw-plugin-development-kit
 tibco-activematrix-businessworks-plug-in-for-activespaces: tibco-bw-plugin-activespaces
 tibco-activematrix-businessworks-plug-in-for-amazon-redshift: tibco-bw-plugin-amazon-redshift
 tibco-activematrix-businessworks-plug-in-for-amazon-s3: tibco-bw-plugin-amazon-s3
