@@ -1,0 +1,852 @@
+﻿old_product_id,old_version,new_slug,new_folder,folder_status,new_version,bu,row_source
+ibiai,9.3.8,ibi-ai-assistant,ibi-ai-assistant,unchanged,9-3-8,ibi,30 Oct map
+ibi-di,1.0.0,ibi-data-intelligence,ibi-data-intelligence,unchanged,1-0-0,ibi,30 Oct map
+ibi-di,1.1.0,ibi-data-intelligence,ibi-data-intelligence,unchanged,1-1-0,ibi,30 Oct map
+ibi-di,1.2.0,ibi-data-intelligence,ibi-data-intelligence,unchanged,1-2-0,ibi,30 Oct map
+ibi-di,2.0.0,ibi-data-intelligence,ibi-data-intelligence,unchanged,2-0-0,ibi,30 Oct map
+ibi-di,2.1.0,ibi-data-intelligence,ibi-data-intelligence,unchanged,2-1-0,ibi,30 Oct map
+tdq,3.0.0,ibi-data-quality,ibi-data-quality,unchanged,3-0-0,ibi,30 Oct map
+tdq,3.1.0,ibi-data-quality,ibi-data-quality,unchanged,3-1-0,ibi,30 Oct map
+tdq,5.0.0,ibi-data-quality,ibi-data-quality,unchanged,5-0-0,ibi,30 Oct map
+tdq,5.1.0,ibi-data-quality,ibi-data-quality,unchanged,5-1-0,ibi,30 Oct map
+tdq,5.1.1,ibi-data-quality,ibi-data-quality,unchanged,5-1-1,ibi,30 Oct map
+tdq,5.2.0,ibi-data-quality,ibi-data-quality,unchanged,5-2-0,ibi,30 Oct map
+tdq,5.2.1,ibi-data-quality,ibi-data-quality,unchanged,5-2-1,ibi,30 Oct map
+tdq,5.2.2,ibi-data-quality,ibi-data-quality,unchanged,5-2-2,ibi,30 Oct map
+focus,9.1.0,ibi-focus,ibi-focus,unchanged,9-1-0,ibi,30 Oct map
+focus,9.1.1,ibi-focus,ibi-focus,unchanged,9-1-1,ibi,30 Oct map
+focus,9.1.2,ibi-focus,ibi-focus,unchanged,9-1-2,ibi,30 Oct map
+focus,9.1.3,ibi-focus,ibi-focus,unchanged,9-1-3,ibi,30 Oct map
+focus,9.2.0,ibi-focus,ibi-focus,unchanged,9-2-0,ibi,30 Oct map
+focus,9.2.1,ibi-focus,ibi-focus,unchanged,9-2-1,ibi,30 Oct map
+focus,9.2.2,ibi-focus,ibi-focus,unchanged,9-2-2,ibi,30 Oct map
+focus,9.2.3,ibi-focus,ibi-focus,unchanged,9-2-3,ibi,30 Oct map
+focus,9.2.4,ibi-focus,ibi-focus,unchanged,9-2-4,ibi,30 Oct map
+focus,9.2.5,ibi-focus,ibi-focus,unchanged,9-2-5,ibi,30 Oct map
+focus,9.3.0,ibi-focus,ibi-focus,unchanged,9-3-0,ibi,30 Oct map
+focus,9.3.1,ibi-focus,ibi-focus,unchanged,9-3-1,ibi,30 Oct map
+focus,9.3.2,ibi-focus,ibi-focus,unchanged,9-3-2,ibi,30 Oct map
+focus,9.3.3,ibi-focus,ibi-focus,unchanged,9-3-3,ibi,30 Oct map
+focus,9.3.4,ibi-focus,ibi-focus,unchanged,9-3-4,ibi,30 Oct map
+focus,9.3.5,ibi-focus,ibi-focus,unchanged,9-3-5,ibi,30 Oct map
+focus,9.3.6,ibi-focus,ibi-focus,unchanged,9-3-6,ibi,30 Oct map
+focus,9.3.7,ibi-focus,ibi-focus,unchanged,9-3-7,ibi,30 Oct map
+focus,9.3.8,ibi-focus,ibi-focus,unchanged,9-3-8,ibi,30 Oct map
+sm,8.0.5,ibi-iway-service-manager,ibi-iway-service-manager,unchanged,8-0-5,ibi,30 Oct map
+sm,8.0.6,ibi-iway-service-manager,ibi-iway-service-manager,unchanged,8-0-6,ibi,30 Oct map
+sm,8.0.7,ibi-iway-service-manager,ibi-iway-service-manager,unchanged,8-0-7,ibi,30 Oct map
+sm,8.1.0,ibi-iway-service-manager,ibi-iway-service-manager,unchanged,8-1-0,ibi,30 Oct map
+sm,9.1.0,ibi-iway-service-manager,ibi-iway-service-manager,unchanged,9-1-0,ibi,30 Oct map
+sm,9.2.0,ibi-iway-service-manager,ibi-iway-service-manager,unchanged,9-2-0,ibi,30 Oct map
+sm,9.3.0,ibi-iway-service-manager,ibi-iway-service-manager,unchanged,9-3-0,ibi,30 Oct map
+sm-edi,9.1.1,ibi-iway-service-manager-edi-add-on,ibi-iway-service-manager-edi-add-on,unchanged,9-1-1,ibi,30 Oct map
+sm-edi,9.3.0,ibi-iway-service-manager-edi-add-on,ibi-iway-service-manager-edi-add-on,unchanged,9-3-0,ibi,30 Oct map
+og,4.3.0,ibi-omni-gen,ibi-omni-gen,unchanged,4-3-0,ibi,30 Oct map
+og-mdm,4.3.0,ibi-omni-gen-mdm,ibi-omni-gen-mdm,unchanged,4-3-0,ibi,30 Oct map
+ohd,4.3.0,ibi-omni-healthdata,ibi-omni-healthdata,unchanged,4-3-0,ibi,30 Oct map
+ohd-br,2023.1.0,ibi-omni-healthdata-business-release,ibi-omni-healthdata-business-release,unchanged,2023-1-0,ibi,30 Oct map
+ohd-br,2023.2.0,ibi-omni-healthdata-business-release,ibi-omni-healthdata-business-release,unchanged,2023-2-0,ibi,30 Oct map
+ohd-br,2023.3.0,ibi-omni-healthdata-business-release,ibi-omni-healthdata-business-release,unchanged,2023-3-0,ibi,30 Oct map
+oin,4.3.0,ibi-omni-insurance,ibi-omni-insurance,unchanged,4-3-0,ibi,30 Oct map
+odh-mf-cnct,1.0.0,ibi-open-data-hub-for-mainframe-connectors,ibi-open-data-hub-for-mainframe-connectors,unchanged,1-0-0,ibi,30 Oct map
+odh-mf-cnct,1.0.1,ibi-open-data-hub-for-mainframe-connectors,ibi-open-data-hub-for-mainframe-connectors,unchanged,1-0-1,ibi,30 Oct map
+odh-mf-cnct,1.0.2,ibi-open-data-hub-for-mainframe-connectors,ibi-open-data-hub-for-mainframe-connectors,unchanged,1-0-2,ibi,30 Oct map
+odh-mf-cnct,1.0.3,ibi-open-data-hub-for-mainframe-connectors,ibi-open-data-hub-for-mainframe-connectors,unchanged,1-0-3,ibi,30 Oct map
+odh-mf-cnct,1.0.4,ibi-open-data-hub-for-mainframe-connectors,ibi-open-data-hub-for-mainframe-connectors,unchanged,1-0-4,ibi,30 Oct map
+odh-mf-cnct,1.0.5,ibi-open-data-hub-for-mainframe-connectors,ibi-open-data-hub-for-mainframe-connectors,unchanged,1-0-5,ibi,30 Oct map
+odh-mf-cnct,1.0.6,ibi-open-data-hub-for-mainframe-connectors,ibi-open-data-hub-for-mainframe-connectors,unchanged,1-0-6,ibi,30 Oct map
+odh-mf-cnct,1.0.7,ibi-open-data-hub-for-mainframe-connectors,ibi-open-data-hub-for-mainframe-connectors,unchanged,1-0-7,ibi,30 Oct map
+odh-mf-cnct,1.0.8,ibi-open-data-hub-for-mainframe-connectors,ibi-open-data-hub-for-mainframe-connectors,unchanged,1-0-8,ibi,30 Oct map
+odh-mf-cnct,1.0.9,ibi-open-data-hub-for-mainframe-connectors,ibi-open-data-hub-for-mainframe-connectors,unchanged,1-0-9,ibi,30 Oct map
+odh-mf-cnct,1.3.4,ibi-open-data-hub-for-mainframe-connectors,ibi-open-data-hub-for-mainframe-connectors,unchanged,1-3-4,ibi,30 Oct map
+odh-mf-cnct,1.3.5,ibi-open-data-hub-for-mainframe-connectors,ibi-open-data-hub-for-mainframe-connectors,unchanged,1-3-5,ibi,30 Oct map
+odh-mf-cnct,1.3.6,ibi-open-data-hub-for-mainframe-connectors,ibi-open-data-hub-for-mainframe-connectors,unchanged,1-3-6,ibi,30 Oct map
+odh-mf-cnct,1.3.7,ibi-open-data-hub-for-mainframe-connectors,ibi-open-data-hub-for-mainframe-connectors,unchanged,1-3-7,ibi,30 Oct map
+odh-mf-cnct,1.3.8,ibi-open-data-hub-for-mainframe-connectors,ibi-open-data-hub-for-mainframe-connectors,unchanged,1-3-8,ibi,30 Oct map
+wq,9.1.0,ibi-web-query-for-ibm-i,ibi-web-query-for-ibm-i,unchanged,9-1-0,ibi,30 Oct map
+wq,9.1.1,ibi-web-query-for-ibm-i,ibi-web-query-for-ibm-i,unchanged,9-1-1,ibi,30 Oct map
+wq,9.1.2,ibi-web-query-for-ibm-i,ibi-web-query-for-ibm-i,unchanged,9-1-2,ibi,30 Oct map
+wq,9.2.0,ibi-web-query-for-ibm-i,ibi-web-query-for-ibm-i,unchanged,9-2-0,ibi,30 Oct map
+wq,9.2.1,ibi-web-query-for-ibm-i,ibi-web-query-for-ibm-i,unchanged,9-2-1,ibi,30 Oct map
+wf-as,9.1.0,ibi-webfocus-app-studio,ibi-webfocus-app-studio,unchanged,9-1-0,ibi,30 Oct map
+wf-as,9.1.1,ibi-webfocus-app-studio,ibi-webfocus-app-studio,unchanged,9-1-1,ibi,30 Oct map
+wf-as,9.1.2,ibi-webfocus-app-studio,ibi-webfocus-app-studio,unchanged,9-1-2,ibi,30 Oct map
+wf-as,9.1.3,ibi-webfocus-app-studio,ibi-webfocus-app-studio,unchanged,9-1-3,ibi,30 Oct map
+wf-as,9.1.4,ibi-webfocus-app-studio,ibi-webfocus-app-studio,unchanged,9-1-4,ibi,30 Oct map
+wf-as,9.2.0,ibi-webfocus-app-studio,ibi-webfocus-app-studio,unchanged,9-2-0,ibi,30 Oct map
+wf-as,9.2.1,ibi-webfocus-app-studio,ibi-webfocus-app-studio,unchanged,9-2-1,ibi,30 Oct map
+wf-as,9.2.2,ibi-webfocus-app-studio,ibi-webfocus-app-studio,unchanged,9-2-2,ibi,30 Oct map
+wf-as,9.2.3,ibi-webfocus-app-studio,ibi-webfocus-app-studio,unchanged,9-2-3,ibi,30 Oct map
+wf-as,9.2.4,ibi-webfocus-app-studio,ibi-webfocus-app-studio,unchanged,9-2-4,ibi,30 Oct map
+wf-as,9.2.5,ibi-webfocus-app-studio,ibi-webfocus-app-studio,unchanged,9-2-5,ibi,30 Oct map
+wf-as,9.2.6,ibi-webfocus-app-studio,ibi-webfocus-app-studio,unchanged,9-2-6,ibi,30 Oct map
+wf-as,9.2.7,ibi-webfocus-app-studio,ibi-webfocus-app-studio,unchanged,9-2-7,ibi,30 Oct map
+wf-as,9.2.8,ibi-webfocus-app-studio,ibi-webfocus-app-studio,unchanged,9-2-8,ibi,30 Oct map
+wf-as,9.3.0,ibi-webfocus-app-studio,ibi-webfocus-app-studio,unchanged,9-3-0,ibi,30 Oct map
+wf-as,9.3.1,ibi-webfocus-app-studio,ibi-webfocus-app-studio,unchanged,9-3-1,ibi,30 Oct map
+wf-as,9.3.2,ibi-webfocus-app-studio,ibi-webfocus-app-studio,unchanged,9-3-2,ibi,30 Oct map
+wf-as,9.3.3,ibi-webfocus-app-studio,ibi-webfocus-app-studio,unchanged,9-3-3,ibi,30 Oct map
+wf-as,9.3.4,ibi-webfocus-app-studio,ibi-webfocus-app-studio,unchanged,9-3-4,ibi,30 Oct map
+wf-as,9.3.5,ibi-webfocus-app-studio,ibi-webfocus-app-studio,unchanged,9-3-5,ibi,30 Oct map
+wf-as,9.3.6,ibi-webfocus-app-studio,ibi-webfocus-app-studio,unchanged,9-3-6,ibi,30 Oct map
+wf-as,9.3.7,ibi-webfocus-app-studio,ibi-webfocus-app-studio,unchanged,9-3-7,ibi,30 Oct map
+wf-as,9.3.8,ibi-webfocus-app-studio,ibi-webfocus-app-studio,unchanged,9-3-8,ibi,30 Oct map
+wf-wf,9.1.0,ibi-webfocus-client,ibi-webfocus-client,unchanged,9-1-0,ibi,30 Oct map
+wf-wf,9.1.1,ibi-webfocus-client,ibi-webfocus-client,unchanged,9-1-1,ibi,30 Oct map
+wf-wf,9.1.2,ibi-webfocus-client,ibi-webfocus-client,unchanged,9-1-2,ibi,30 Oct map
+wf-wf,9.1.3,ibi-webfocus-client,ibi-webfocus-client,unchanged,9-1-3,ibi,30 Oct map
+wf-wf,9.1.4,ibi-webfocus-client,ibi-webfocus-client,unchanged,9-1-4,ibi,30 Oct map
+wf-wf,9.2.0,ibi-webfocus-client,ibi-webfocus-client,unchanged,9-2-0,ibi,30 Oct map
+wf-wf,9.2.1,ibi-webfocus-client,ibi-webfocus-client,unchanged,9-2-1,ibi,30 Oct map
+wf-wf,9.2.2,ibi-webfocus-client,ibi-webfocus-client,unchanged,9-2-2,ibi,30 Oct map
+wf-wf,9.2.3,ibi-webfocus-client,ibi-webfocus-client,unchanged,9-2-3,ibi,30 Oct map
+wf-wf,9.2.4,ibi-webfocus-client,ibi-webfocus-client,unchanged,9-2-4,ibi,30 Oct map
+wf-wf,9.2.5,ibi-webfocus-client,ibi-webfocus-client,unchanged,9-2-5,ibi,30 Oct map
+wf-wf,9.2.6,ibi-webfocus-client,ibi-webfocus-client,unchanged,9-2-6,ibi,30 Oct map
+wf-wf,9.2.7,ibi-webfocus-client,ibi-webfocus-client,unchanged,9-2-7,ibi,30 Oct map
+wf-wf,9.3.0,ibi-webfocus-client,ibi-webfocus-client,unchanged,9-3-0,ibi,30 Oct map
+wf-wf,9.3.1,ibi-webfocus-client,ibi-webfocus-client,unchanged,9-3-1,ibi,30 Oct map
+wf-wf,9.3.2,ibi-webfocus-client,ibi-webfocus-client,unchanged,9-3-2,ibi,30 Oct map
+wf-wf,9.3.3,ibi-webfocus-client,ibi-webfocus-client,unchanged,9-3-3,ibi,30 Oct map
+wf-wf,9.3.4,ibi-webfocus-client,ibi-webfocus-client,unchanged,9-3-4,ibi,30 Oct map
+wf-wf,9.3.5,ibi-webfocus-client,ibi-webfocus-client,unchanged,9-3-5,ibi,30 Oct map
+wf-wf,9.3.6,ibi-webfocus-client,ibi-webfocus-client,unchanged,9-3-6,ibi,30 Oct map
+wf-wf,9.3.7,ibi-webfocus-client,ibi-webfocus-client,unchanged,9-3-7,ibi,30 Oct map
+wf-wf,9.3.8,ibi-webfocus-client,ibi-webfocus-client,unchanged,9-3-8,ibi,30 Oct map
+wfce,1.0.0,ibi-webfocus-container-edition,ibi-webfocus-container-edition,unchanged,1-0-0,ibi,30 Oct map
+wfce,1.0.2,ibi-webfocus-container-edition,ibi-webfocus-container-edition,unchanged,1-0-2,ibi,30 Oct map
+wfce,1.0.3,ibi-webfocus-container-edition,ibi-webfocus-container-edition,unchanged,1-0-3,ibi,30 Oct map
+wfce,1.0.4,ibi-webfocus-container-edition,ibi-webfocus-container-edition,unchanged,1-0-4,ibi,30 Oct map
+wfce,1.0.5,ibi-webfocus-container-edition,ibi-webfocus-container-edition,unchanged,1-0-5,ibi,30 Oct map
+wfce,1.1.0,ibi-webfocus-container-edition,ibi-webfocus-container-edition,unchanged,1-1-0,ibi,30 Oct map
+wfce,1.1.1,ibi-webfocus-container-edition,ibi-webfocus-container-edition,unchanged,1-1-1,ibi,30 Oct map
+wfce,1.1.2,ibi-webfocus-container-edition,ibi-webfocus-container-edition,unchanged,1-1-2,ibi,30 Oct map
+wfce,1.2.0,ibi-webfocus-container-edition,ibi-webfocus-container-edition,unchanged,1-2-0,ibi,30 Oct map
+wfce,1.2.1,ibi-webfocus-container-edition,ibi-webfocus-container-edition,unchanged,1-2-1,ibi,30 Oct map
+wfce,1.2.2,ibi-webfocus-container-edition,ibi-webfocus-container-edition,unchanged,1-2-2,ibi,30 Oct map
+wfce,1.2.3,ibi-webfocus-container-edition,ibi-webfocus-container-edition,unchanged,1-2-3,ibi,30 Oct map
+wfce,1.2.4,ibi-webfocus-container-edition,ibi-webfocus-container-edition,unchanged,1-2-4,ibi,30 Oct map
+wfce,1.2.5,ibi-webfocus-container-edition,ibi-webfocus-container-edition,unchanged,1-2-5,ibi,30 Oct map
+wfce,1.3.0,ibi-webfocus-container-edition,ibi-webfocus-container-edition,unchanged,1-3-0,ibi,30 Oct map
+wfce,1.3.1,ibi-webfocus-container-edition,ibi-webfocus-container-edition,unchanged,1-3-1,ibi,30 Oct map
+wfce,1.3.2,ibi-webfocus-container-edition,ibi-webfocus-container-edition,unchanged,1-3-2,ibi,30 Oct map
+wfce,1.3.3,ibi-webfocus-container-edition,ibi-webfocus-container-edition,unchanged,1-3-3,ibi,30 Oct map
+wfce,1.3.4,ibi-webfocus-container-edition,ibi-webfocus-container-edition,unchanged,1-3-4,ibi,30 Oct map
+wfce,9.3.5,ibi-webfocus-container-edition,ibi-webfocus-container-edition,unchanged,9-3-5,ibi,30 Oct map
+wfce,9.3.6,ibi-webfocus-container-edition,ibi-webfocus-container-edition,unchanged,9-3-6,ibi,30 Oct map
+wfce,9.3.7,ibi-webfocus-container-edition,ibi-webfocus-container-edition,unchanged,9-3-7,ibi,30 Oct map
+wfce,9.3.8,ibi-webfocus-container-edition,ibi-webfocus-container-edition,unchanged,9-3-8,ibi,30 Oct map
+dsml,9.1.0,ibi-webfocus-dsml-services,ibi-webfocus-dsml-services,unchanged,9-1-0,ibi,30 Oct map
+dsml,9.2.0,ibi-webfocus-dsml-services,ibi-webfocus-dsml-services,unchanged,9-2-0,ibi,30 Oct map
+dsml,9.3.0,ibi-webfocus-dsml-services,ibi-webfocus-dsml-services,unchanged,9-3-0,ibi,30 Oct map
+dsml,9.3.2,ibi-webfocus-dsml-services,ibi-webfocus-dsml-services,unchanged,9-3-2,ibi,30 Oct map
+dsml,9.3.3,ibi-webfocus-dsml-services,ibi-webfocus-dsml-services,unchanged,9-3-3,ibi,30 Oct map
+dsml,9.3.4,ibi-webfocus-dsml-services,ibi-webfocus-dsml-services,unchanged,9-3-4,ibi,30 Oct map
+dsml,9.3.5,ibi-webfocus-dsml-services,ibi-webfocus-dsml-services,unchanged,9-3-5,ibi,30 Oct map
+dsml,9.3.6,ibi-webfocus-dsml-services,ibi-webfocus-dsml-services,unchanged,9-3-6,ibi,30 Oct map
+dsml,9.3.7,ibi-webfocus-dsml-services,ibi-webfocus-dsml-services,unchanged,9-3-7,ibi,30 Oct map
+dsml,9.3.8,ibi-webfocus-dsml-services,ibi-webfocus-dsml-services,unchanged,9-3-8,ibi,30 Oct map
+dsmlce,1.0.3,ibi-webfocus-dsml-services-container-edition,ibi-webfocus-dsml-services-container-edition,unchanged,1-0-3,ibi,30 Oct map
+dsmlce,1.0.4,ibi-webfocus-dsml-services-container-edition,ibi-webfocus-dsml-services-container-edition,unchanged,1-0-4,ibi,30 Oct map
+dsmlce,1.0.5,ibi-webfocus-dsml-services-container-edition,ibi-webfocus-dsml-services-container-edition,unchanged,1-0-5,ibi,30 Oct map
+dsmlce,1.0.6,ibi-webfocus-dsml-services-container-edition,ibi-webfocus-dsml-services-container-edition,unchanged,1-0-6,ibi,30 Oct map
+dsmlce,1.0.7,ibi-webfocus-dsml-services-container-edition,ibi-webfocus-dsml-services-container-edition,unchanged,1-0-7,ibi,30 Oct map
+dsmlce,9.3.5,ibi-webfocus-dsml-services-container-edition,ibi-webfocus-dsml-services-container-edition,unchanged,9-3-5,ibi,30 Oct map
+dsmlce,9.3.6,ibi-webfocus-dsml-services-container-edition,ibi-webfocus-dsml-services-container-edition,unchanged,9-3-6,ibi,30 Oct map
+dsmlce,9.3.7,ibi-webfocus-dsml-services-container-edition,ibi-webfocus-dsml-services-container-edition,unchanged,9-3-7,ibi,30 Oct map
+dsmlce,9.3.8,ibi-webfocus-dsml-services-container-edition,ibi-webfocus-dsml-services-container-edition,unchanged,9-3-8,ibi,30 Oct map
+wf-wi,9.1.0,ibi-webfocus-installer,ibi-webfocus-installer,unchanged,9-1-0,ibi,30 Oct map
+wf-wi,9.1.1,ibi-webfocus-installer,ibi-webfocus-installer,unchanged,9-1-1,ibi,30 Oct map
+wf-wi,9.1.2,ibi-webfocus-installer,ibi-webfocus-installer,unchanged,9-1-2,ibi,30 Oct map
+wf-wi,9.1.3,ibi-webfocus-installer,ibi-webfocus-installer,unchanged,9-1-3,ibi,30 Oct map
+wf-wi,9.1.4,ibi-webfocus-installer,ibi-webfocus-installer,unchanged,9-1-4,ibi,30 Oct map
+wf-wi,9.2.0,ibi-webfocus-installer,ibi-webfocus-installer,unchanged,9-2-0,ibi,30 Oct map
+wf-wi,9.2.1,ibi-webfocus-installer,ibi-webfocus-installer,unchanged,9-2-1,ibi,30 Oct map
+wf-wi,9.2.2,ibi-webfocus-installer,ibi-webfocus-installer,unchanged,9-2-2,ibi,30 Oct map
+wf-wi,9.2.3,ibi-webfocus-installer,ibi-webfocus-installer,unchanged,9-2-3,ibi,30 Oct map
+wf-wi,9.2.4,ibi-webfocus-installer,ibi-webfocus-installer,unchanged,9-2-4,ibi,30 Oct map
+wf-wi,9.2.5,ibi-webfocus-installer,ibi-webfocus-installer,unchanged,9-2-5,ibi,30 Oct map
+wf-wi,9.2.6,ibi-webfocus-installer,ibi-webfocus-installer,unchanged,9-2-6,ibi,30 Oct map
+wf-wi,9.3.0,ibi-webfocus-installer,ibi-webfocus-installer,unchanged,9-3-0,ibi,30 Oct map
+wf-wi,9.3.1,ibi-webfocus-installer,ibi-webfocus-installer,unchanged,9-3-1,ibi,30 Oct map
+wf-wi,9.3.2,ibi-webfocus-installer,ibi-webfocus-installer,unchanged,9-3-2,ibi,30 Oct map
+wf-wi,9.3.3,ibi-webfocus-installer,ibi-webfocus-installer,unchanged,9-3-3,ibi,30 Oct map
+wf-wi,9.3.4,ibi-webfocus-installer,ibi-webfocus-installer,unchanged,9-3-4,ibi,30 Oct map
+wf-wi,9.3.5,ibi-webfocus-installer,ibi-webfocus-installer,unchanged,9-3-5,ibi,30 Oct map
+wf-wi,9.3.6,ibi-webfocus-installer,ibi-webfocus-installer,unchanged,9-3-6,ibi,30 Oct map
+wf-rs,9.1.0,ibi-webfocus-reporting-server,ibi-webfocus-reporting-server,unchanged,9-1-0,ibi,30 Oct map
+wf-rs,9.1.1,ibi-webfocus-reporting-server,ibi-webfocus-reporting-server,unchanged,9-1-1,ibi,30 Oct map
+wf-rs,9.1.2,ibi-webfocus-reporting-server,ibi-webfocus-reporting-server,unchanged,9-1-2,ibi,30 Oct map
+wf-rs,9.1.3,ibi-webfocus-reporting-server,ibi-webfocus-reporting-server,unchanged,9-1-3,ibi,30 Oct map
+wf-rs,9.1.4,ibi-webfocus-reporting-server,ibi-webfocus-reporting-server,unchanged,9-1-4,ibi,30 Oct map
+wf-rs,9.2.0,ibi-webfocus-reporting-server,ibi-webfocus-reporting-server,unchanged,9-2-0,ibi,30 Oct map
+wf-rs,9.2.1,ibi-webfocus-reporting-server,ibi-webfocus-reporting-server,unchanged,9-2-1,ibi,30 Oct map
+wf-rs,9.2.2,ibi-webfocus-reporting-server,ibi-webfocus-reporting-server,unchanged,9-2-2,ibi,30 Oct map
+wf-rs,9.2.3,ibi-webfocus-reporting-server,ibi-webfocus-reporting-server,unchanged,9-2-3,ibi,30 Oct map
+wf-rs,9.2.4,ibi-webfocus-reporting-server,ibi-webfocus-reporting-server,unchanged,9-2-4,ibi,30 Oct map
+wf-rs,9.2.5,ibi-webfocus-reporting-server,ibi-webfocus-reporting-server,unchanged,9-2-5,ibi,30 Oct map
+wf-rs,9.2.6,ibi-webfocus-reporting-server,ibi-webfocus-reporting-server,unchanged,9-2-6,ibi,30 Oct map
+wf-rs,9.2.7,ibi-webfocus-reporting-server,ibi-webfocus-reporting-server,unchanged,9-2-7,ibi,30 Oct map
+wf-rs,9.2.8,ibi-webfocus-reporting-server,ibi-webfocus-reporting-server,unchanged,9-2-8,ibi,30 Oct map
+wf-rs,9.3.0,ibi-webfocus-reporting-server,ibi-webfocus-reporting-server,unchanged,9-3-0,ibi,30 Oct map
+wf-rs,9.3.1,ibi-webfocus-reporting-server,ibi-webfocus-reporting-server,unchanged,9-3-1,ibi,30 Oct map
+wf-rs,9.3.2,ibi-webfocus-reporting-server,ibi-webfocus-reporting-server,unchanged,9-3-2,ibi,30 Oct map
+wf-rs,9.3.3,ibi-webfocus-reporting-server,ibi-webfocus-reporting-server,unchanged,9-3-3,ibi,30 Oct map
+wf-rs,9.3.4,ibi-webfocus-reporting-server,ibi-webfocus-reporting-server,unchanged,9-3-4,ibi,30 Oct map
+wf-rs,9.3.5,ibi-webfocus-reporting-server,ibi-webfocus-reporting-server,unchanged,9-3-5,ibi,30 Oct map
+wf-rs,9.3.6,ibi-webfocus-reporting-server,ibi-webfocus-reporting-server,unchanged,9-3-6,ibi,30 Oct map
+wf-rs,9.3.7,ibi-webfocus-reporting-server,ibi-webfocus-reporting-server,unchanged,9-3-7,ibi,30 Oct map
+wf-rs,9.3.8,ibi-webfocus-reporting-server,ibi-webfocus-reporting-server,unchanged,9-3-8,ibi,30 Oct map
+sm-bam,8.0.5,tibco-iway-business-activity-monitor,tibco-iway-business-activity-monitor,unchanged,8-0-5,ibi,30 Oct map
+sm-tpm,8.0.5,tibco-iway-trading-partner-manager,tibco-iway-trading-partner-manager,unchanged,8-0-5,ibi,30 Oct map
+dsc-author,1.4.0,spotfire-data-science-author,spotfire-data-science-author,unchanged,1-4-0,spotfire,added 16 Nov (from zip_url)
+dsc-author,1.5.0,spotfire-data-science-author,spotfire-data-science-author,unchanged,1-5-0,spotfire,30 Oct map
+dsc-author,2.0.0,spotfire-data-science-author,spotfire-data-science-author,unchanged,2-0-0,spotfire,added 16 Nov (from zip_url)
+dsc-author,2.1.0,spotfire-data-science-author,spotfire-data-science-author,unchanged,2-1-0,spotfire,added 16 Nov (from zip_url)
+dsc-author,2.2.0,spotfire-data-science-author,spotfire-data-science-author,unchanged,2-2-0,spotfire,30 Oct map
+dscls-author,1.4.0,spotfire-data-science-for-life-science-author,spotfire-data-science-for-life-science-author,unchanged,1-4-0,spotfire,added 16 Nov (from zip_url)
+dscls-author,1.5.0,spotfire-data-science-for-life-science-author,spotfire-data-science-for-life-science-author,unchanged,1-5-0,spotfire,30 Oct map
+dscls-author,2.0.0,spotfire-data-science-for-life-science-author,spotfire-data-science-for-life-science-author,unchanged,2-0-0,spotfire,added 16 Nov (from zip_url)
+dscls-author,2.1.0,spotfire-data-science-for-life-science-author,spotfire-data-science-for-life-science-author,unchanged,2-1-0,spotfire,added 16 Nov (from zip_url)
+dscls-author,2.2.0,spotfire-data-science-for-life-science-author,spotfire-data-science-for-life-science-author,unchanged,2-2-0,spotfire,30 Oct map
+dscls-operations,1.4.0,spotfire-data-science-for-life-science-operations,spotfire-data-science-for-life-science-operations,unchanged,1-4-0,spotfire,added 16 Nov (from zip_url)
+dscls-operations,1.5.0,spotfire-data-science-for-life-science-operations,spotfire-data-science-for-life-science-operations,unchanged,1-5-0,spotfire,30 Oct map
+dscls-operations,2.0.0,spotfire-data-science-for-life-science-operations,spotfire-data-science-for-life-science-operations,unchanged,2-0-0,spotfire,added 16 Nov (from zip_url)
+dscls-operations,2.1.0,spotfire-data-science-for-life-science-operations,spotfire-data-science-for-life-science-operations,unchanged,2-1-0,spotfire,added 16 Nov (from zip_url)
+dscls-operations,2.2.0,spotfire-data-science-for-life-science-operations,spotfire-data-science-for-life-science-operations,unchanged,2-2-0,spotfire,30 Oct map
+dsc-operations,1.4.0,spotfire-data-science-operations,spotfire-data-science-operations,unchanged,1-4-0,spotfire,added 16 Nov (from zip_url)
+dsc-operations,1.5.0,spotfire-data-science-operations,spotfire-data-science-operations,unchanged,1-5-0,spotfire,30 Oct map
+dsc-operations,2.0.0,spotfire-data-science-operations,spotfire-data-science-operations,unchanged,2-0-0,spotfire,added 16 Nov (from zip_url)
+dsc-operations,2.1.0,spotfire-data-science-operations,spotfire-data-science-operations,unchanged,2-1-0,spotfire,added 16 Nov (from zip_url)
+dsc-operations,2.2.0,spotfire-data-science-operations,spotfire-data-science-operations,unchanged,2-2-0,spotfire,30 Oct map
+dsc-stat,14.1.0,spotfire-data-science-workbench,spotfire-data-science-workbench,unchanged,14-1-0,spotfire,30 Oct map
+dsc-stat,14.3.0,spotfire-data-science-workbench,spotfire-data-science-workbench,unchanged,14-3-0,spotfire,added 16 Nov (from zip_url)
+dsc-stat,14.4.0,spotfire-data-science-workbench,spotfire-data-science-workbench,unchanged,14-4-0,spotfire,30 Oct map
+stat,14.1.0,spotfire-statistica,spotfire-statistica,unchanged,14-1-0,spotfire,30 Oct map
+stat,14.3.0,spotfire-statistica,spotfire-statistica,unchanged,14-3-0,spotfire,added 16 Nov (from zip_url)
+stat,14.4.0,spotfire-statistica,spotfire-statistica,unchanged,14-4-0,spotfire,30 Oct map
+stat-all-servers,14.1.0,spotfire-statistica-all-servers,spotfire-statistica-all-servers,unchanged,14-1-0,spotfire,30 Oct map
+stat-all-servers,14.2.0,spotfire-statistica-all-servers,spotfire-statistica-all-servers,unchanged,14-2-0,spotfire,added 16 Nov (from zip_url)
+stat-all-servers,14.3.0,spotfire-statistica-all-servers,spotfire-statistica-all-servers,unchanged,14-3-0,spotfire,added 16 Nov (from zip_url)
+stat-all-servers,14.4.0,spotfire-statistica-all-servers,spotfire-statistica-all-servers,unchanged,14-4-0,spotfire,30 Oct map
+stat-ext,14.4.0,spotfire-statistica-integration,spotfire-statistica-integration,unchanged,14-4-0,spotfire,30 Oct map
+stat-ext,14.5.0,spotfire-statistica-integration,spotfire-statistica-integration,unchanged,14-5-0,spotfire,30 Oct map
+stat-ext,14.1.0,tibco-data-science-for-tibco-spotfire-analyst,tibco-data-science-for-tibco-spotfire-analyst,unchanged,14-1-0,spotfire,30 Oct map
+stat-sts,14.1.0,tibco-data-science-service-for-tibco-spotfire,tibco-data-science-service-for-tibco-spotfire,unchanged,14-1-0,spotfire,30 Oct map
+sdv,8.8.0,tibco-data-virtualization,tibco-data-virtualization,unchanged,8-8-0,spotfire,30 Oct map
+sdv,8.8.1,tibco-data-virtualization,tibco-data-virtualization,unchanged,8-8-1,spotfire,30 Oct map
+sdv,8.9.0,tibco-data-virtualization,tibco-data-virtualization,unchanged,8-9-0,spotfire,30 Oct map
+stat-lp,14.1.0,tibco-statistica-language-packs,tibco-statistica-language-packs,unchanged,14-1-0,spotfire,30 Oct map
+api-exchange-joomla-adapter,2.3.3,adapter-code-for-tibco-api-exchange-and-joomla,adapter-code-for-tibco-api-exchange-and-joomla,unchanged,2-3-3,tibco,30 Oct map
+api-exchange-joomla-adapter,2.3.4,adapter-code-for-tibco-api-exchange-and-joomla,adapter-code-for-tibco-api-exchange-and-joomla,unchanged,2-3-4,tibco,30 Oct map
+cim-gdsn,4.0.0,ibi-mdm-add-on-for-global-data-synchronization,ibi-mdm-add-on-for-global-data-synchronization,unchanged,4-0-0,tibco,30 Oct map
+bwce-aws-premsub,2.3.1,premium-subscription-for-tibco-businessworks-container-edition-and-plug-ins-for-aws-marketplace,premium-subscription-bwce-plug-ins-aws-marketplace,pending (goes with R2),2-3-1,tibco,30 Oct map
+sfire-sfds,11.1.0,spotfire-data-streams,spotfire-data-streams,unchanged,11-1-0,tibco,30 Oct map
+sfire-sfds,11.1.1,spotfire-data-streams,spotfire-data-streams,unchanged,11-1-1,tibco,30 Oct map
+ldm-web,1.7.0,spotfire-liveview-web-enterprise-edition,spotfire-liveview-web-enterprise-edition,unchanged,1-7-0,tibco,30 Oct map
+ldm-web,1.7.1,spotfire-liveview-web-enterprise-edition,spotfire-liveview-web-enterprise-edition,unchanged,1-7-1,tibco,30 Oct map
+tibco-activation,1.0.0,tibco-activation-service,tibco-activation-service,unchanged,1-0-0,tibco,30 Oct map
+tibco-activation,1.1.0,tibco-activation-service,tibco-activation-service,unchanged,1-1-0,tibco,30 Oct map
+adadbbs,1.3.0,tibco-activematrix-adapter-for-database-tibco-business-studio,tibco-adapter-database-business-studio,moved,1-3-0,tibco,30 Oct map
+adfilesbs,1.3.0,tibco-activematrix-adapter-for-files-for-unix-win-tibco-business-studio,tibco-adapter-files-unix-win-business-studio,moved,1-3-0,tibco,30 Oct map
+adas400,6.2.0,tibco-activematrix-adapter-for-ibm-i,tibco-activematrix-adapter-for-ibm-i,unchanged,6-2-0,tibco,30 Oct map
+adas400,6.2.1,tibco-activematrix-adapter-for-ibm-i,tibco-activematrix-adapter-for-ibm-i,unchanged,6-2-1,tibco,30 Oct map
+adas400,6.2.2,tibco-activematrix-adapter-for-ibm-i,tibco-activematrix-adapter-for-ibm-i,unchanged,6-2-2,tibco,30 Oct map
+adas400,6.3.0,tibco-activematrix-adapter-for-ibm-i,tibco-activematrix-adapter-for-ibm-i,unchanged,6-3-0,tibco,30 Oct map
+adas400,6.4.0,tibco-activematrix-adapter-for-ibm-i,tibco-activematrix-adapter-for-ibm-i,unchanged,6-4-0,tibco,30 Oct map
+adjdexe,6.1.0,tibco-activematrix-adapter-for-jd-edwards-enterpriseone,tibco-adapter-jd-edwards-enterpriseone,moved,6-1-0,tibco,30 Oct map
+adr3bs,1.3.0,tibco-activematrix-adapter-for-sap-tibco-business-studio,tibco-adapter-sap-business-studio,moved,1-3-0,tibco,30 Oct map
+adapteruipack,1.3.0,tibco-activematrix-adapter-framework,tibco-activematrix-adapter-framework,unchanged,1-3-0,tibco,30 Oct map
+adapteruipack,1.3.1,tibco-activematrix-adapter-framework,tibco-activematrix-adapter-framework,unchanged,1-3-1,tibco,30 Oct map
+adapteruipack,1.3.2,tibco-activematrix-adapter-framework,tibco-activematrix-adapter-framework,unchanged,1-3-2,tibco,30 Oct map
+adapteruipack,1.4.0,tibco-activematrix-adapter-framework,tibco-activematrix-adapter-framework,unchanged,1-4-0,tibco,30 Oct map
+adapteruipack,1.4.1,tibco-activematrix-adapter-framework,tibco-activematrix-adapter-framework,unchanged,1-4-1,tibco,30 Oct map
+adapteruipack,1.4.2,tibco-activematrix-adapter-framework,tibco-activematrix-adapter-framework,unchanged,1-4-2,tibco,30 Oct map
+adapteruipack,1.6.0,tibco-activematrix-adapter-framework,tibco-activematrix-adapter-framework,unchanged,1-6-0,tibco,30 Oct map
+adapteruipack,1.6.1,tibco-activematrix-adapter-framework,tibco-activematrix-adapter-framework,unchanged,1-6-1,tibco,30 Oct map
+amx-bpm,4.2.0,tibco-activematrix-bpm,tibco-activematrix-bpm,unchanged,4-2-0,tibco,30 Oct map
+amx-bpm,4.3.0,tibco-activematrix-bpm,tibco-activematrix-bpm,unchanged,4-3-0,tibco,30 Oct map
+activematrix_businessworks,5.15.0,tibco-activematrix-businessworks,tibco-activematrix-businessworks,unchanged,5-15-0,tibco,added 16 Nov (from zip_url)
+activematrix_businessworks,5.15.1,tibco-activematrix-businessworks,tibco-activematrix-businessworks,unchanged,5-15-1,tibco,added 16 Nov (from zip_url)
+activematrix-businessworks,5.16.1,tibco-activematrix-businessworks,tibco-activematrix-businessworks,unchanged,5-16-1,tibco,30 Oct map
+activematrix_businessworks,6.11.0,tibco-activematrix-businessworks,tibco-activematrix-businessworks,unchanged,6-11-0,tibco,added 16 Nov (from zip_url)
+activematrix-businessworks,6.12.0,tibco-activematrix-businessworks,tibco-activematrix-businessworks,unchanged,6-12-0,tibco,30 Oct map
+activematrix-businessworks,6.13.0,tibco-activematrix-businessworks,tibco-activematrix-businessworks,unchanged,6-13-0,tibco,30 Oct map
+activematrix_businessworks_activeaspects_plugin,1.0,tibco-activematrix-businessworks-activeaspects-plug-in,tibco-bw-plugin-activeaspects,moved,1-0,tibco,added 16 Nov (from zip_url)
+activematrix_businessworks_activeaspects_plugin,1.1,tibco-activematrix-businessworks-activeaspects-plug-in,tibco-bw-plugin-activeaspects,moved,1-1,tibco,added 16 Nov (from zip_url)
+activematrix_businessworks_activeaspects_plugin,1.2,tibco-activematrix-businessworks-activeaspects-plug-in,tibco-bw-plugin-activeaspects,moved,1-2,tibco,added 16 Nov (from zip_url)
+activematrix_businessworks_bpel_extension,5.7.0,tibco-activematrix-businessworks-bpel-extension,tibco-activematrix-businessworks-bpel-extension,unchanged,5-7-0,tibco,added 16 Nov (from zip_url)
+activematrix_businessworks_bpel_extension,5.7.1,tibco-activematrix-businessworks-bpel-extension,tibco-activematrix-businessworks-bpel-extension,unchanged,5-7-1,tibco,added 16 Nov (from zip_url)
+activematrix_businessworks_bpel_extension,5.8.0,tibco-activematrix-businessworks-bpel-extension,tibco-activematrix-businessworks-bpel-extension,unchanged,5-8-0,tibco,added 16 Nov (from zip_url)
+activematrix_businessworks_bpel_extension,5.9,tibco-activematrix-businessworks-bpel-extension,tibco-activematrix-businessworks-bpel-extension,unchanged,5-9,tibco,added 16 Nov (from zip_url)
+bwplugin-cawscs,6.0.0,tibco-activematrix-businessworks-plug-in-component-for-aws-common-services,tibco-bw-plugin-component-aws-common-services,moved,6-0-0,tibco,30 Oct map
+bwplugin-cawscs,6.0.1,tibco-activematrix-businessworks-plug-in-component-for-aws-common-services,tibco-bw-plugin-component-aws-common-services,moved,6-0-1,tibco,30 Oct map
+bwplugin-cawscs,6.0.2,tibco-activematrix-businessworks-plug-in-component-for-aws-common-services,tibco-bw-plugin-component-aws-common-services,moved,6-0-2,tibco,30 Oct map
+bwplugin-cawscs,6.1.0,tibco-activematrix-businessworks-plug-in-component-for-aws-common-services,tibco-bw-plugin-component-aws-common-services,moved,6-1-0,tibco,30 Oct map
+bwplugin-cawscs,6.1.1,tibco-activematrix-businessworks-plug-in-component-for-aws-common-services,tibco-bw-plugin-component-aws-common-services,moved,6-1-1,tibco,30 Oct map
+bwpdk,6.2.1,tibco-activematrix-businessworks-plug-in-development-kit,tibco-bw-plugin-development-kit,moved,6-2-1,tibco,30 Oct map
+bwpdk,6.3.0,tibco-activematrix-businessworks-plug-in-development-kit,tibco-bw-plugin-development-kit,moved,6-3-0,tibco,30 Oct map
+bwpdk,6.3.1,tibco-activematrix-businessworks-plug-in-development-kit,tibco-bw-plugin-development-kit,moved,6-3-1,tibco,30 Oct map
+bwpluginas,2.2.0,tibco-activematrix-businessworks-plug-in-for-activespaces,tibco-bw-plugin-activespaces,moved,2-2-0,tibco,30 Oct map
+bwpluginas,7.1.1,tibco-activematrix-businessworks-plug-in-for-activespaces,tibco-bw-plugin-activespaces,moved,7-1-1,tibco,added 16 Nov (from zip_url)
+bwpluginas,7.2.0,tibco-activematrix-businessworks-plug-in-for-activespaces,tibco-bw-plugin-activespaces,moved,7-2-0,tibco,added 16 Nov (from zip_url)
+bwpluginas,7.2.1,tibco-activematrix-businessworks-plug-in-for-activespaces,tibco-bw-plugin-activespaces,moved,7-2-1,tibco,added 16 Nov (from zip_url)
+bwpluginas,7.2.2,tibco-activematrix-businessworks-plug-in-for-activespaces,tibco-bw-plugin-activespaces,moved,7-2-2,tibco,added 16 Nov (from zip_url)
+bwpluginas,7.3.0,tibco-activematrix-businessworks-plug-in-for-activespaces,tibco-bw-plugin-activespaces,moved,7-3-0,tibco,30 Oct map
+bwpluginas,7.3.1,tibco-activematrix-businessworks-plug-in-for-activespaces,tibco-bw-plugin-activespaces,moved,7-3-1,tibco,30 Oct map
+bwpluginas,7.3.2,tibco-activematrix-businessworks-plug-in-for-activespaces,tibco-bw-plugin-activespaces,moved,7-3-2,tibco,30 Oct map
+bwpluginas,8.0.2,tibco-activematrix-businessworks-plug-in-for-activespaces,tibco-bw-plugin-activespaces,moved,8-0-2,tibco,added 16 Nov (from zip_url)
+bwpluginas,8.0.3,tibco-activematrix-businessworks-plug-in-for-activespaces,tibco-bw-plugin-activespaces,moved,8-0-3,tibco,30 Oct map
+bwpluginas,8.1.0,tibco-activematrix-businessworks-plug-in-for-activespaces,tibco-bw-plugin-activespaces,moved,8-1-0,tibco,30 Oct map
+bwpluginas,8.1.1,tibco-activematrix-businessworks-plug-in-for-activespaces,tibco-bw-plugin-activespaces,moved,8-1-1,tibco,30 Oct map
+bwpluginawsredshift,6.1.0,tibco-activematrix-businessworks-plug-in-for-amazon-redshift,tibco-bw-plugin-amazon-redshift,moved,6-1-0,tibco,30 Oct map
+bwpluginawss3,6.5.1,tibco-activematrix-businessworks-plug-in-for-amazon-s3,tibco-bw-plugin-amazon-s3,moved,6-5-1,tibco,added 16 Nov (from zip_url)
+bwpluginawss3,6.6.0,tibco-activematrix-businessworks-plug-in-for-amazon-s3,tibco-bw-plugin-amazon-s3,moved,6-6-0,tibco,added 16 Nov (from zip_url)
+bwpluginawss3,6.7.0,tibco-activematrix-businessworks-plug-in-for-amazon-s3,tibco-bw-plugin-amazon-s3,moved,6-7-0,tibco,30 Oct map
+bwpluginawsm,6.5.2,tibco-activematrix-businessworks-plug-in-for-amazon-sqs-and-sns,tibco-bw-plugin-amazon-sqs-and-sns,moved,6-5-2,tibco,added 16 Nov (from zip_url)
+bwpluginawsm,6.6.0,tibco-activematrix-businessworks-plug-in-for-amazon-sqs-and-sns,tibco-bw-plugin-amazon-sqs-and-sns,moved,6-6-0,tibco,30 Oct map
+bwpluginawsm,6.6.1,tibco-activematrix-businessworks-plug-in-for-amazon-sqs-and-sns,tibco-bw-plugin-amazon-sqs-and-sns,moved,6-6-1,tibco,30 Oct map
+bwpluginamqp,5.0.0,tibco-activematrix-businessworks-plug-in-for-amqp,tibco-bw-plugin-amqp,moved,5-0-0,tibco,30 Oct map
+bwpluginamqp,6.3.0,tibco-activematrix-businessworks-plug-in-for-amqp,tibco-bw-plugin-amqp,moved,6-3-0,tibco,added 16 Nov (from zip_url)
+bwpluginamqp,6.3.1,tibco-activematrix-businessworks-plug-in-for-amqp,tibco-bw-plugin-amqp,moved,6-3-1,tibco,30 Oct map
+bwpluginamqp,6.4.0,tibco-activematrix-businessworks-plug-in-for-amqp,tibco-bw-plugin-amqp,moved,6-4-0,tibco,added 16 Nov (from zip_url)
+bwpluginamqp,6.5.0,tibco-activematrix-businessworks-plug-in-for-amqp,tibco-bw-plugin-amqp,moved,6-5-0,tibco,added 16 Nov (from zip_url)
+bwpluginamqp,6.5.1,tibco-activematrix-businessworks-plug-in-for-amqp,tibco-bw-plugin-amqp,moved,6-5-1,tibco,30 Oct map
+bwpluginamqp,6.5.2,tibco-activematrix-businessworks-plug-in-for-amqp,tibco-bw-plugin-amqp,moved,6-5-2,tibco,30 Oct map
+bwpluginamqp,6.5.3,tibco-activematrix-businessworks-plug-in-for-amqp,tibco-bw-plugin-amqp,moved,6-5-3,tibco,30 Oct map
+bwplugincassandra,6.3.2,tibco-activematrix-businessworks-plug-in-for-apache-cassandra,tibco-bw-plugin-apache-cassandra,moved,6-3-2,tibco,30 Oct map
+bwplugincassandra,6.3.3,tibco-activematrix-businessworks-plug-in-for-apache-cassandra,tibco-bw-plugin-apache-cassandra,moved,6-3-3,tibco,30 Oct map
+bwpluginkafka,5.0.0,tibco-activematrix-businessworks-plug-in-for-apache-kafka,tibco-bw-plugin-apache-kafka,moved,5-0-0,tibco,30 Oct map
+bwpluginkafka,5.0.1,tibco-activematrix-businessworks-plug-in-for-apache-kafka,tibco-bw-plugin-apache-kafka,moved,5-0-1,tibco,30 Oct map
+bwpluginkafka,6.5.2,tibco-activematrix-businessworks-plug-in-for-apache-kafka,tibco-bw-plugin-apache-kafka,moved,6-5-2,tibco,added 16 Nov (from zip_url)
+bwpluginkafka,6.6.0,tibco-activematrix-businessworks-plug-in-for-apache-kafka,tibco-bw-plugin-apache-kafka,moved,6-6-0,tibco,added 16 Nov (from zip_url)
+bwpluginkafka,6.7.0,tibco-activematrix-businessworks-plug-in-for-apache-kafka,tibco-bw-plugin-apache-kafka,moved,6-7-0,tibco,added 16 Nov (from zip_url)
+bwpluginkafka,6.8.0,tibco-activematrix-businessworks-plug-in-for-apache-kafka,tibco-bw-plugin-apache-kafka,moved,6-8-0,tibco,30 Oct map
+bwpluginkafka,6.8.1,tibco-activematrix-businessworks-plug-in-for-apache-kafka,tibco-bw-plugin-apache-kafka,moved,6-8-1,tibco,30 Oct map
+bwpluginkafka,6.8.2,tibco-activematrix-businessworks-plug-in-for-apache-kafka,tibco-bw-plugin-apache-kafka,moved,6-8-2,tibco,30 Oct map
+bwpluginap,5.0.0,tibco-activematrix-businessworks-plug-in-for-apache-pulsar,tibco-bw-plugin-apache-pulsar,moved,5-0-0,tibco,30 Oct map
+bwpluginap,6.0.0,tibco-activematrix-businessworks-plug-in-for-apache-pulsar,tibco-bw-plugin-apache-pulsar,moved,6-0-0,tibco,30 Oct map
+bwpluginap,6.1.0,tibco-activematrix-businessworks-plug-in-for-apache-pulsar,tibco-bw-plugin-apache-pulsar,moved,6-1-0,tibco,30 Oct map
+bwpluginap,6.2.0,tibco-activematrix-businessworks-plug-in-for-apache-pulsar,tibco-bw-plugin-apache-pulsar,moved,6-2-0,tibco,30 Oct map
+bwpluginap,6.2.1,tibco-activematrix-businessworks-plug-in-for-apache-pulsar,tibco-bw-plugin-apache-pulsar,moved,6-2-1,tibco,30 Oct map
+bwpluginas2,6.0.0,tibco-activematrix-businessworks-plug-in-for-applicability-statement-2-as2-protocol,tibco-bw-plugin-as2-protocol,moved,6-0-0,tibco,30 Oct map
+bwpluginacs,6.0.0,tibco-activematrix-businessworks-plug-in-for-azure-cloud-services-azure-data-lake-storage-gen2,tibco-bw-plugin-azure-data-lake-storage-gen2,moved,6-0-0,tibco,30 Oct map
+bwpluginbigdata,6.6.1,tibco-activematrix-businessworks-plug-in-for-big-data,tibco-bw-plugin-big-data,moved,6-6-1,tibco,30 Oct map
+bwpluginbc,6.3.0,tibco-activematrix-businessworks-plug-in-for-businessconnect,tibco-bw-plugin-businessconnect,moved,6-3-0,tibco,30 Oct map
+bwpluginbc,6.3.1,tibco-activematrix-businessworks-plug-in-for-businessconnect,tibco-bw-plugin-businessconnect,moved,6-3-1,tibco,30 Oct map
+bwpluginbc,6.3.2,tibco-activematrix-businessworks-plug-in-for-businessconnect,tibco-bw-plugin-businessconnect,moved,6-3-2,tibco,30 Oct map
+bwpluginbc,6.3.3,tibco-activematrix-businessworks-plug-in-for-businessconnect,tibco-bw-plugin-businessconnect,moved,6-3-3,tibco,30 Oct map
+bwpluginbc,6.4.0,tibco-activematrix-businessworks-plug-in-for-businessconnect,tibco-bw-plugin-businessconnect,moved,6-4-0,tibco,30 Oct map
+bwplugincdc,6.1.0,tibco-activematrix-businessworks-plug-in-for-change-data-capture,tibco-bw-plugin-change-data-capture,moved,6-1-0,tibco,30 Oct map
+bwplugincdc,6.2.0,tibco-activematrix-businessworks-plug-in-for-change-data-capture,tibco-bw-plugin-change-data-capture,moved,6-2-0,tibco,30 Oct map
+bwcp,1.2.2,tibco-activematrix-businessworks-plug-in-for-cics,tibco-bw-plugin-cics,moved,1-2-2,tibco,30 Oct map
+bwcp,1.5.0,tibco-activematrix-businessworks-plug-in-for-cics,tibco-bw-plugin-cics,moved,1-5-0,tibco,30 Oct map
+bwcp,1.5.1,tibco-activematrix-businessworks-plug-in-for-cics,tibco-bw-plugin-cics,moved,1-5-1,tibco,added 16 Nov (from zip_url)
+bwcp,2.4.1,tibco-activematrix-businessworks-plug-in-for-cics,tibco-bw-plugin-cics,moved,2-4-1,tibco,added 16 Nov (from zip_url)
+bwcp,2.5.0,tibco-activematrix-businessworks-plug-in-for-cics,tibco-bw-plugin-cics,moved,2-5-0,tibco,30 Oct map
+bwpluginconfidentiality,6.1.1,tibco-activematrix-businessworks-plug-in-for-confidentiality,tibco-bw-plugin-confidentiality,moved,6-1-1,tibco,30 Oct map
+bwdcp,3.6.0,tibco-activematrix-businessworks-plug-in-for-data-conversion,tibco-bw-plugin-data-conversion,moved,3-6-0,tibco,30 Oct map
+bwdcp,4.6.0,tibco-activematrix-businessworks-plug-in-for-data-conversion,tibco-bw-plugin-data-conversion,moved,4-6-0,tibco,30 Oct map
+bwdcp,4.7.0,tibco-activematrix-businessworks-plug-in-for-data-conversion,tibco-bw-plugin-data-conversion,moved,4-7-0,tibco,30 Oct map
+bwdcp,4.8.0,tibco-activematrix-businessworks-plug-in-for-data-conversion,tibco-bw-plugin-data-conversion,moved,4-8-0,tibco,30 Oct map
+bwdcp,4.8.1,tibco-activematrix-businessworks-plug-in-for-data-conversion,tibco-bw-plugin-data-conversion,moved,4-8-1,tibco,30 Oct map
+bwdcp,5.0.0,tibco-activematrix-businessworks-plug-in-for-data-conversion,tibco-bw-plugin-data-conversion,moved,5-0-0,tibco,30 Oct map
+bwpluginadb,7.2.1,tibco-activematrix-businessworks-plug-in-for-database,tibco-bw-plugin-database,moved,7-2-1,tibco,30 Oct map
+bwpluginadb,7.3.1,tibco-activematrix-businessworks-plug-in-for-database,tibco-bw-plugin-database,moved,7-3-1,tibco,30 Oct map
+bwpluginadb,7.3.2,tibco-activematrix-businessworks-plug-in-for-database,tibco-bw-plugin-database,moved,7-3-2,tibco,30 Oct map
+bwpluginadb,8.5.0,tibco-activematrix-businessworks-plug-in-for-database,tibco-bw-plugin-database,moved,8-5-0,tibco,30 Oct map
+bwpluginadb,8.6.0,tibco-activematrix-businessworks-plug-in-for-database,tibco-bw-plugin-database,moved,8-6-0,tibco,30 Oct map
+bwpluginedi-healthcare,6.3.0,tibco-activematrix-businessworks-plug-in-for-edi,tibco-bw-plugin-edi,moved,6-3-0,tibco,30 Oct map
+bwpluginedi-healthcare,6.3.1,tibco-activematrix-businessworks-plug-in-for-edi-healthcare-edition,tibco-bw-plugin-edi-healthcare-edition,moved,6-3-1,tibco,30 Oct map
+bwpluginedi-standard,6.3.1,tibco-activematrix-businessworks-plug-in-for-edi-standard-edition,tibco-bw-plugin-edi-standard-edition,moved,6-3-1,tibco,30 Oct map
+bwpluginejb,5.4.0,tibco-activematrix-businessworks-plug-in-for-ejb,tibco-bw-plugin-ejb,moved,5-4-0,tibco,30 Oct map
+bwpluginejb,6.1.1,tibco-activematrix-businessworks-plug-in-for-ejb,tibco-bw-plugin-ejb,moved,6-1-1,tibco,30 Oct map
+bwpluginfacebook,1.4.0,tibco-activematrix-businessworks-plug-in-for-facebook,tibco-bw-plugin-facebook,moved,1-4-0,tibco,added 16 Nov (from zip_url)
+bwpluginfacebook,6.5.0,tibco-activematrix-businessworks-plug-in-for-facebook,tibco-bw-plugin-facebook,moved,6-5-0,tibco,added 16 Nov (from zip_url)
+bwpluginfiles,8.2.0,tibco-activematrix-businessworks-plug-in-for-files-for-unix-and-windows,tibco-bw-plugin-files-for-unix-and-windows,moved,8-2-0,tibco,added 16 Nov (from zip_url)
+bwpluginfiles,8.3.0,tibco-activematrix-businessworks-plug-in-for-files-for-unix-and-windows,tibco-bw-plugin-files-for-unix-and-windows,moved,8-3-0,tibco,30 Oct map
+bwpluginbigquery,6.1.0,tibco-activematrix-businessworks-plug-in-for-google-bigquery,tibco-bw-plugin-google-bigquery,moved,6-1-0,tibco,30 Oct map
+bwplugingooglecps,6.0.1,tibco-activematrix-businessworks-plug-in-for-google-cloud-pub-sub,tibco-bw-plugin-google-cloud-pub-sub,moved,6-0-1,tibco,30 Oct map
+bwplugingooglecps,6.0.2,tibco-activematrix-businessworks-plug-in-for-google-cloud-pub-sub,tibco-bw-plugin-google-cloud-pub-sub,moved,6-0-2,tibco,30 Oct map
+bwplugingooglecs,6.0.0,tibco-activematrix-businessworks-plug-in-for-google-cloud-storage,tibco-bw-plugin-google-cloud-storage,moved,6-0-0,tibco,30 Oct map
+activematrix_businessworks_plugin_for_HL7,6.0.0,tibco-activematrix-businessworks-plug-in-for-hl7-with-fhir,tibco-bw-plugin-hl7-with-fhir,moved,6-0-0,tibco,added 16 Nov (from zip_url)
+bwpluginhl7,7.0.0,tibco-activematrix-businessworks-plug-in-for-hl7-with-fhir,tibco-bw-plugin-hl7-with-fhir,moved,7-0-0,tibco,added 16 Nov (from zip_url)
+bwpluginhl7,7.3.0,tibco-activematrix-businessworks-plug-in-for-hl7-with-fhir,tibco-bw-plugin-hl7-with-fhir,moved,7-3-0,tibco,30 Oct map
+bwpluginhl7,8.2.0,tibco-activematrix-businessworks-plug-in-for-hl7-with-fhir,tibco-bw-plugin-hl7-with-fhir,moved,8-2-0,tibco,30 Oct map
+bwpluginhl7,8.2.1,tibco-activematrix-businessworks-plug-in-for-hl7-with-fhir,tibco-bw-plugin-hl7-with-fhir,moved,8-2-1,tibco,30 Oct map
+bwpluginhl7,8.3.0,tibco-activematrix-businessworks-plug-in-for-hl7-with-fhir,tibco-bw-plugin-hl7-with-fhir,moved,8-3-0,tibco,30 Oct map
+bwpluginhl7,8.4.0,tibco-activematrix-businessworks-plug-in-for-hl7-with-fhir,tibco-bw-plugin-hl7-with-fhir,moved,8-4-0,tibco,30 Oct map
+bwpluginhl7,8.5.0,tibco-activematrix-businessworks-plug-in-for-hl7-with-fhir,tibco-bw-plugin-hl7-with-fhir,moved,8-5-0,tibco,30 Oct map
+bwpluginhl7,8.6.0,tibco-activematrix-businessworks-plug-in-for-hl7-with-fhir,tibco-bw-plugin-hl7-with-fhir,moved,8-6-0,tibco,30 Oct map
+bwpluginibmi,7.3.0,tibco-activematrix-businessworks-plug-in-for-ibm-i,tibco-bw-plugin-ibm-i,moved,7-3-0,tibco,30 Oct map
+bwmq,7.7.3,tibco-activematrix-businessworks-plug-in-for-ibm-mq,tibco-bw-plugin-ibm-mq,moved,7-7-3,tibco,30 Oct map
+bwmq,7.8.0,tibco-activematrix-businessworks-plug-in-for-ibm-mq,tibco-bw-plugin-ibm-mq,moved,7-8-0,tibco,30 Oct map
+bwmq,8.7.0,tibco-activematrix-businessworks-plug-in-for-ibm-mq,tibco-bw-plugin-ibm-mq,moved,8-7-0,tibco,30 Oct map
+bwmq,8.8.0,tibco-activematrix-businessworks-plug-in-for-ibm-mq,tibco-bw-plugin-ibm-mq,moved,8-8-0,tibco,30 Oct map
+bwmq,8.8.1,tibco-activematrix-businessworks-plug-in-for-ibm-mq,tibco-bw-plugin-ibm-mq,moved,8-8-1,tibco,30 Oct map
+bwmq,8.8.2,tibco-activematrix-businessworks-plug-in-for-ibm-mq,tibco-bw-plugin-ibm-mq,moved,8-8-2,tibco,30 Oct map
+bwpluginjde,7.1.0,tibco-activematrix-businessworks-plug-in-for-jd-edwards-enterpriseone,tibco-bw-plugin-jd-edwards-enterpriseone,moved,7-1-0,tibco,30 Oct map
+bwlx,1.1.0,tibco-activematrix-businessworks-plug-in-for-large-xml,tibco-bw-plugin-large-xml,moved,1-1-0,tibco,added 16 Nov (from zip_url)
+bwlx,6.1.4,tibco-activematrix-businessworks-plug-in-for-large-xml,tibco-bw-plugin-large-xml,moved,6-1-4,tibco,30 Oct map
+bwpluginldap,6.1.2,tibco-activematrix-businessworks-plug-in-for-ldap,tibco-bw-plugin-ldap,moved,6-1-2,tibco,30 Oct map
+bwpluginldap,7.3.0,tibco-activematrix-businessworks-plug-in-for-ldap,tibco-bw-plugin-ldap,moved,7-3-0,tibco,30 Oct map
+bwpluginmarketo,7.2.2,tibco-activematrix-businessworks-plug-in-for-marketo,tibco-bw-plugin-marketo,moved,7-2-2,tibco,added 16 Nov (from zip_url)
+bwpluginmdm,6.3.1,tibco-activematrix-businessworks-plug-in-for-mdm,tibco-bw-plugin-mdm,moved,6-3-1,tibco,30 Oct map
+bwpluginmdm,7.0.0,tibco-activematrix-businessworks-plug-in-for-mdm,tibco-bw-plugin-mdm,moved,7-0-0,tibco,30 Oct map
+bwpluginmdm,7.0.1,tibco-activematrix-businessworks-plug-in-for-mdm,tibco-bw-plugin-mdm,moved,7-0-1,tibco,30 Oct map
+bwpluginmdm,7.0.2,tibco-activematrix-businessworks-plug-in-for-mdm,tibco-bw-plugin-mdm,moved,7-0-2,tibco,30 Oct map
+bwplugindynamicscrm,6.10.0,tibco-activematrix-businessworks-plug-in-for-microsoft-dynamics-crm,tibco-bw-plugin-microsoft-dynamics-crm,moved,6-10-0,tibco,30 Oct map
+bwplugindynamicscrm,6.10.1,tibco-activematrix-businessworks-plug-in-for-microsoft-dynamics-crm,tibco-bw-plugin-microsoft-dynamics-crm,moved,6-10-1,tibco,30 Oct map
+bwplugindynamicscrm,6.9.3,tibco-activematrix-businessworks-plug-in-for-microsoft-dynamics-crm,tibco-bw-plugin-microsoft-dynamics-crm,moved,6-9-3,tibco,30 Oct map
+bwplugindynamicscrm,6.9.4,tibco-activematrix-businessworks-plug-in-for-microsoft-dynamics-crm,tibco-bw-plugin-microsoft-dynamics-crm,moved,6-9-4,tibco,30 Oct map
+bwpluginexcel,6.1.1,tibco-activematrix-businessworks-plug-in-for-microsoft-excel,tibco-bw-plugin-microsoft-excel,moved,6-1-1,tibco,30 Oct map
+bwpluginsharepoint,6.3.0,tibco-activematrix-businessworks-plug-in-for-microsoft-sharepoint,tibco-bw-plugin-microsoft-sharepoint,moved,6-3-0,tibco,30 Oct map
+bwpluginsharepoint,6.3.1,tibco-activematrix-businessworks-plug-in-for-microsoft-sharepoint,tibco-bw-plugin-microsoft-sharepoint,moved,6-3-1,tibco,30 Oct map
+bwpluginsharepoint,6.4.0,tibco-activematrix-businessworks-plug-in-for-microsoft-sharepoint,tibco-bw-plugin-microsoft-sharepoint,moved,6-4-0,tibco,30 Oct map
+bwmi,1.2.2,tibco-activematrix-businessworks-plug-in-for-mobile-integration,tibco-bw-plugin-mobile-integration,moved,1-2-2,tibco,30 Oct map
+bwmi,1.3.0,tibco-activematrix-businessworks-plug-in-for-mobile-integration,tibco-bw-plugin-mobile-integration,moved,1-3-0,tibco,30 Oct map
+bwmi,1.4.0,tibco-activematrix-businessworks-plug-in-for-mobile-integration,tibco-bw-plugin-mobile-integration,moved,1-4-0,tibco,30 Oct map
+bwmi,6.3.0,tibco-activematrix-businessworks-plug-in-for-mobile-integration,tibco-bw-plugin-mobile-integration,moved,6-3-0,tibco,30 Oct map
+bwmi,6.4.0,tibco-activematrix-businessworks-plug-in-for-mobile-integration,tibco-bw-plugin-mobile-integration,moved,6-4-0,tibco,30 Oct map
+bwpluginmongodb,1.2.0,tibco-activematrix-businessworks-plug-in-for-mongodb,tibco-bw-plugin-mongodb,moved,1-2-0,tibco,30 Oct map
+bwpluginmongodb,6.1.0,tibco-activematrix-businessworks-plug-in-for-mongodb,tibco-bw-plugin-mongodb,moved,6-1-0,tibco,30 Oct map
+bwpluginmongodb,6.4.2,tibco-activematrix-businessworks-plug-in-for-mongodb,tibco-bw-plugin-mongodb,moved,6-4-2,tibco,30 Oct map
+bwpluginmongodb,6.5.0,tibco-activematrix-businessworks-plug-in-for-mongodb,tibco-bw-plugin-mongodb,moved,6-5-0,tibco,30 Oct map
+bwpluginmqtt,6.0.0,tibco-activematrix-businessworks-plug-in-for-mqtt,tibco-bw-plugin-mqtt,moved,6-0-0,tibco,30 Oct map
+activematrix_businessworks_plugin_for_netsuite,1.0.0,tibco-activematrix-businessworks-plug-in-for-netsuite,tibco-bw-plugin-netsuite,moved,1-0-0,tibco,added 16 Nov (from zip_url)
+bwpluginnetsuite,1.1.0,tibco-activematrix-businessworks-plug-in-for-netsuite,tibco-bw-plugin-netsuite,moved,1-1-0,tibco,30 Oct map
+bwpluginnetsuite,1.2.0,tibco-activematrix-businessworks-plug-in-for-netsuite,tibco-bw-plugin-netsuite,moved,1-2-0,tibco,30 Oct map
+bwpluginnetsuite,1.3.0,tibco-activematrix-businessworks-plug-in-for-netsuite,tibco-bw-plugin-netsuite,moved,1-3-0,tibco,30 Oct map
+bwpluginnetsuite,6.3.6,tibco-activematrix-businessworks-plug-in-for-netsuite,tibco-bw-plugin-netsuite,moved,6-3-6,tibco,30 Oct map
+bwpluginnetsuite,6.4.0,tibco-activematrix-businessworks-plug-in-for-netsuite,tibco-bw-plugin-netsuite,moved,6-4-0,tibco,30 Oct map
+bwpluginodata,6.3.0,tibco-activematrix-businessworks-plug-in-for-odata,tibco-bw-plugin-odata,moved,6-3-0,tibco,30 Oct map
+bwpluginodata,6.5.0,tibco-activematrix-businessworks-plug-in-for-odata,tibco-bw-plugin-odata,moved,6-5-0,tibco,30 Oct map
+bwpluginodata,6.6.0,tibco-activematrix-businessworks-plug-in-for-odata,tibco-bw-plugin-odata,moved,6-6-0,tibco,30 Oct map
+bwpluginodata,6.7.0,tibco-activematrix-businessworks-plug-in-for-odata,tibco-bw-plugin-odata,moved,6-7-0,tibco,30 Oct map
+bwpluginodata,6.8.0,tibco-activematrix-businessworks-plug-in-for-odata,tibco-bw-plugin-odata,moved,6-8-0,tibco,30 Oct map
+bwplugins4hana,6.3.0,tibco-activematrix-businessworks-plug-in-for-odata-services-for-sap-s-4hana,tibco-bw-plugin-odata-services-for-sap-s-4hana,moved,6-3-0,tibco,30 Oct map
+bwplugins4hana,6.4.0,tibco-activematrix-businessworks-plug-in-for-odata-services-for-sap-s-4hana,tibco-bw-plugin-odata-services-for-sap-s-4hana,moved,6-4-0,tibco,30 Oct map
+bwpluginoracleebs,6.1.2,tibco-activematrix-businessworks-plug-in-for-oracle-e-business-suite,tibco-bw-plugin-oracle-e-business-suite,moved,6-1-2,tibco,30 Oct map
+bwpluginoracleclouderp,6.0.0,tibco-activematrix-businessworks-plug-in-for-oracle-fusion-cloud-applications-suite,tibco-bw-plugin-oracle-fusion-cloud-apps,moved,6-0-0,tibco,30 Oct map
+bwplugintuxedo,6.1.1,tibco-activematrix-businessworks-plug-in-for-oracle-tuxedo,tibco-bw-plugin-oracle-tuxedo,moved,6-1-1,tibco,30 Oct map
+bwplugintuxedo,6.1.2,tibco-activematrix-businessworks-plug-in-for-oracle-tuxedo,tibco-bw-plugin-oracle-tuxedo,moved,6-1-2,tibco,30 Oct map
+bwplugintuxedo,8.2.0,tibco-activematrix-businessworks-plug-in-for-oracle-tuxedo,tibco-bw-plugin-oracle-tuxedo,moved,8-2-0,tibco,30 Oct map
+bwplugintuxedo,8.3.0,tibco-activematrix-businessworks-plug-in-for-oracle-tuxedo,tibco-bw-plugin-oracle-tuxedo,moved,8-3-0,tibco,30 Oct map
+businessworks_osb_plugin,5.0.0,tibco-activematrix-businessworks-plug-in-for-osb,tibco-bw-plugin-osb,moved,5-0-0,tibco,added 16 Nov (from zip_url)
+businessworks_osb_plugin,6.0.0,tibco-activematrix-businessworks-plug-in-for-osb,tibco-bw-plugin-osb,moved,6-0-0,tibco,added 16 Nov (from zip_url)
+activematrix-adapter-for-osisoft-pi,1.1.0,tibco-activematrix-businessworks-plug-in-for-osisoft-pi-system,tibco-bw-plugin-osisoft-pi-system,moved,1-1-0,tibco,added 16 Nov (from zip_url)
+bwpluginpi,6.5.0,tibco-activematrix-businessworks-plug-in-for-osisoft-pi-system,tibco-bw-plugin-osisoft-pi-system,moved,6-5-0,tibco,30 Oct map
+bwpluginpdf,6.2.2,tibco-activematrix-businessworks-plug-in-for-pdf,tibco-bw-plugin-pdf,moved,6-2-2,tibco,30 Oct map
+bwpluginpdf,6.2.3,tibco-activematrix-businessworks-plug-in-for-pdf,tibco-bw-plugin-pdf,moved,6-2-3,tibco,30 Oct map
+activematrix-adapter-for-peoplesoft,6.1.0,tibco-activematrix-businessworks-plug-in-for-peoplesoft,tibco-bw-plugin-peoplesoft,moved,6-1-0,tibco,added 16 Nov (from zip_url)
+bwpluginpeoplesoft,7.2.0,tibco-activematrix-businessworks-plug-in-for-peoplesoft,tibco-bw-plugin-peoplesoft,moved,7-2-0,tibco,30 Oct map
+bwpluginpeoplesoft,7.3.0,tibco-activematrix-businessworks-plug-in-for-peoplesoft,tibco-bw-plugin-peoplesoft,moved,7-3-0,tibco,30 Oct map
+bwpluginpeoplesoft,7.4.0,tibco-activematrix-businessworks-plug-in-for-peoplesoft,tibco-bw-plugin-peoplesoft,moved,7-4-0,tibco,30 Oct map
+bwpluginredis,6.0.0,tibco-activematrix-businessworks-plug-in-for-redis,tibco-bw-plugin-redis,moved,6-0-0,tibco,30 Oct map
+bwpluginredis,6.1.0,tibco-activematrix-businessworks-plug-in-for-redis,tibco-bw-plugin-redis,moved,6-1-0,tibco,30 Oct map
+bwpluginrestjson,2.1.0,tibco-activematrix-businessworks-plug-in-for-rest-and-json,tibco-bw-plugin-rest-and-json,moved,2-1-0,tibco,30 Oct map
+bwpluginsalesforce,2.5.0,tibco-activematrix-businessworks-plug-in-for-salesforce-com,tibco-bw-plugin-salesforce-com,moved,2-5-0,tibco,30 Oct map
+bwpluginsalesforce,2.6.0,tibco-activematrix-businessworks-plug-in-for-salesforce-com,tibco-bw-plugin-salesforce-com,moved,2-6-0,tibco,30 Oct map
+bwpluginsalesforce,6.10.0,tibco-activematrix-businessworks-plug-in-for-salesforce-com,tibco-bw-plugin-salesforce-com,moved,6-10-0,tibco,30 Oct map
+bwpluginsalesforce,6.11.0,tibco-activematrix-businessworks-plug-in-for-salesforce-com,tibco-bw-plugin-salesforce-com,moved,6-11-0,tibco,30 Oct map
+bwpluginsalesforce,6.9.3,tibco-activematrix-businessworks-plug-in-for-salesforce-com,tibco-bw-plugin-salesforce-com,moved,6-9-3,tibco,30 Oct map
+bwpluginariba,6.0.0,tibco-activematrix-businessworks-plug-in-for-sap-ariba,tibco-bw-plugin-sap-ariba,moved,6-0-0,tibco,30 Oct map
+bwpluginsapcp,6.0.0,tibco-activematrix-businessworks-plug-in-for-sap-business-technology-platform,tibco-bw-plugin-sap-business-technology-platform,moved,6-0-0,tibco,30 Oct map
+bwpluginsaphanadatabase,6.1.0,tibco-activematrix-businessworks-plug-in-for-sap-hana-database,tibco-bw-plugin-sap-hana-database,moved,6-1-0,tibco,30 Oct map
+bwpluginsap,7.3.1,tibco-activematrix-businessworks-plug-in-for-sap-solutions,tibco-bw-plugin-sap-solutions,moved,7-3-1,tibco,30 Oct map
+bwpluginsap,7.3.2,tibco-activematrix-businessworks-plug-in-for-sap-solutions,tibco-bw-plugin-sap-solutions,moved,7-3-2,tibco,30 Oct map
+bwpluginsap,8.6.0,tibco-activematrix-businessworks-plug-in-for-sap-solutions,tibco-bw-plugin-sap-solutions,moved,8-6-0,tibco,30 Oct map
+bwpluginsap,8.7.0,tibco-activematrix-businessworks-plug-in-for-sap-solutions,tibco-bw-plugin-sap-solutions,moved,8-7-0,tibco,30 Oct map
+bwpluginsap,8.8.0,tibco-activematrix-businessworks-plug-in-for-sap-solutions,tibco-bw-plugin-sap-solutions,moved,8-8-0,tibco,30 Oct map
+bwpluginsapsuccessfactors,6.1.0,tibco-activematrix-businessworks-plug-in-for-sap-successfactors,tibco-bw-plugin-sap-successfactors,moved,6-1-0,tibco,30 Oct map
+bwpluginservicenow,6.1.0,tibco-activematrix-businessworks-plug-in-for-servicenow,tibco-bw-plugin-servicenow,moved,6-1-0,tibco,30 Oct map
+bwsp,1.1.0,tibco-activematrix-businessworks-plug-in-for-sftp,tibco-bw-plugin-sftp,moved,1-1-0,tibco,added 16 Nov (from zip_url)
+bwsp,1.1.1,tibco-activematrix-businessworks-plug-in-for-sftp,tibco-bw-plugin-sftp,moved,1-1-1,tibco,30 Oct map
+bwsp,6.1.4,tibco-activematrix-businessworks-plug-in-for-sftp,tibco-bw-plugin-sftp,moved,6-1-4,tibco,30 Oct map
+bwsp,6.2.0,tibco-activematrix-businessworks-plug-in-for-sftp,tibco-bw-plugin-sftp,moved,6-2-0,tibco,30 Oct map
+bwpluginsiebel,6.1.0,tibco-activematrix-businessworks-plug-in-for-siebel,tibco-bw-plugin-siebel,moved,6-1-0,tibco,30 Oct map
+bwpluginsiebel,7.3.0,tibco-activematrix-businessworks-plug-in-for-siebel,tibco-bw-plugin-siebel,moved,7-3-0,tibco,30 Oct map
+adsmartmapper,6.0.0,tibco-activematrix-businessworks-plug-in-for-smartmapper,tibco-bw-plugin-smartmapper,moved,6-0-0,tibco,30 Oct map
+adsmartmapper,7.1.2,tibco-activematrix-businessworks-plug-in-for-smartmapper,tibco-bw-plugin-smartmapper,moved,7-1-2,tibco,30 Oct map
+adsmartmapper,7.1.3,tibco-activematrix-businessworks-plug-in-for-smartmapper,tibco-bw-plugin-smartmapper,moved,7-1-3,tibco,30 Oct map
+bwsmpp,6.0.3,tibco-activematrix-businessworks-plug-in-for-smpp,tibco-bw-plugin-smpp,moved,6-0-3,tibco,30 Oct map
+bwpluginsnowflake,6.2.0,tibco-activematrix-businessworks-plug-in-for-snowflake,tibco-bw-plugin-snowflake,moved,6-2-0,tibco,30 Oct map
+bwpluginsnowflake,6.3.0,tibco-activematrix-businessworks-plug-in-for-snowflake,tibco-bw-plugin-snowflake,moved,6-3-0,tibco,30 Oct map
+bwpluginsnowflake,6.3.1,tibco-activematrix-businessworks-plug-in-for-snowflake,tibco-bw-plugin-snowflake,moved,6-3-1,tibco,30 Oct map
+adapter-for-swift,5.11.0,tibco-activematrix-businessworks-plug-in-for-swift,tibco-bw-plugin-swift,moved,5-11-0,tibco,added 16 Nov (from zip_url)
+bwpluginswift,5.22.0,tibco-activematrix-businessworks-plug-in-for-swift,tibco-bw-plugin-swift,moved,5-22-0,tibco,30 Oct map
+bwpluginswift,5.23.0,tibco-activematrix-businessworks-plug-in-for-swift,tibco-bw-plugin-swift,moved,5-23-0,tibco,30 Oct map
+bwpluginswift,5.24.0,tibco-activematrix-businessworks-plug-in-for-swift,tibco-bw-plugin-swift,moved,5-24-0,tibco,30 Oct map
+bwpluginswift,5.25.0,tibco-activematrix-businessworks-plug-in-for-swift,tibco-bw-plugin-swift,moved,5-25-0,tibco,30 Oct map
+bwpluginswift,6.10.0,tibco-activematrix-businessworks-plug-in-for-swift,tibco-bw-plugin-swift,moved,6-10-0,tibco,30 Oct map
+bwpluginswift,6.11.0,tibco-activematrix-businessworks-plug-in-for-swift,tibco-bw-plugin-swift,moved,6-11-0,tibco,30 Oct map
+bwpluginswift,6.8.0,tibco-activematrix-businessworks-plug-in-for-swift,tibco-bw-plugin-swift,moved,6-8-0,tibco,30 Oct map
+bwpluginswift,6.9.0,tibco-activematrix-businessworks-plug-in-for-swift,tibco-bw-plugin-swift,moved,6-9-0,tibco,30 Oct map
+bwpluginauditsafe,6.1.0,tibco-activematrix-businessworks-plug-in-for-tibco-auditsafe,tibco-bw-plugin-tibco-auditsafe,moved,6-1-0,tibco,30 Oct map
+bwpluginauditsafe,6.2.0,tibco-activematrix-businessworks-plug-in-for-tibco-auditsafe,tibco-bw-plugin-tibco-auditsafe,moved,6-2-0,tibco,30 Oct map
+bwpluginauditsafe,6.3.0,tibco-activematrix-businessworks-plug-in-for-tibco-auditsafe,tibco-bw-plugin-tibco-auditsafe,moved,6-3-0,tibco,30 Oct map
+bwpluginauditsafe,6.3.1,tibco-activematrix-businessworks-plug-in-for-tibco-auditsafe,tibco-bw-plugin-tibco-auditsafe,moved,6-3-1,tibco,30 Oct map
+bwpluginauditsafe,6.3.2,tibco-activematrix-businessworks-plug-in-for-tibco-auditsafe,tibco-bw-plugin-tibco-auditsafe,moved,6-3-2,tibco,30 Oct map
+bwpluginauditsafe,6.4.0,tibco-activematrix-businessworks-plug-in-for-tibco-auditsafe,tibco-bw-plugin-tibco-auditsafe,moved,6-4-0,tibco,30 Oct map
+bwpluginauditsafe,6.4.1,tibco-activematrix-businessworks-plug-in-for-tibco-auditsafe,tibco-bw-plugin-tibco-auditsafe,moved,6-4-1,tibco,30 Oct map
+bwpluginauditsafe,6.4.2,tibco-activematrix-businessworks-plug-in-for-tibco-auditsafe,tibco-bw-plugin-tibco-auditsafe,moved,6-4-2,tibco,30 Oct map
+bwpluginclarity,6.1.1,tibco-activematrix-businessworks-plug-in-for-tibco-clarity,tibco-bw-plugin-tibco-clarity,moved,6-1-1,tibco,30 Oct map
+bwplugineftl,6.0.0,tibco-activematrix-businessworks-plug-in-for-tibco-eftl,tibco-bw-plugin-tibco-eftl,moved,6-0-0,tibco,30 Oct map
+bwpluginftl,5.0.0,tibco-activematrix-businessworks-plug-in-for-tibco-ftl,tibco-bw-plugin-tibco-ftl,moved,5-0-0,tibco,30 Oct map
+bwpluginftl,6.4.4,tibco-activematrix-businessworks-plug-in-for-tibco-ftl,tibco-bw-plugin-tibco-ftl,moved,6-4-4,tibco,30 Oct map
+bwpluginftl,6.5.0,tibco-activematrix-businessworks-plug-in-for-tibco-ftl,tibco-bw-plugin-tibco-ftl,moved,6-5-0,tibco,30 Oct map
+bwpluginftl,6.6.0,tibco-activematrix-businessworks-plug-in-for-tibco-ftl,tibco-bw-plugin-tibco-ftl,moved,6-6-0,tibco,30 Oct map
+bwpluginftl,6.7.0,tibco-activematrix-businessworks-plug-in-for-tibco-ftl,tibco-bw-plugin-tibco-ftl,moved,6-7-0,tibco,30 Oct map
+bwpluginftl,6.7.1,tibco-activematrix-businessworks-plug-in-for-tibco-ftl,tibco-bw-plugin-tibco-ftl,moved,6-7-1,tibco,30 Oct map
+bwpluginftl,6.7.2,tibco-activematrix-businessworks-plug-in-for-tibco-ftl,tibco-bw-plugin-tibco-ftl,moved,6-7-2,tibco,30 Oct map
+bwpluginftl,6.7.3,tibco-activematrix-businessworks-plug-in-for-tibco-ftl,tibco-bw-plugin-tibco-ftl,moved,6-7-3,tibco,30 Oct map
+bwpluginftl,6.7.4,tibco-activematrix-businessworks-plug-in-for-tibco-ftl,tibco-bw-plugin-tibco-ftl,moved,6-7-4,tibco,30 Oct map
+businessworks-mft-plugin,1.0.0,tibco-activematrix-businessworks-plug-in-for-tibco-managed-file-transfer,tibco-bw-plugin-tibco-managed-file-transfer,moved,1-0-0,tibco,added 16 Nov (from zip_url)
+bwpluginmft,6.3.0,tibco-activematrix-businessworks-plug-in-for-tibco-managed-file-transfer,tibco-bw-plugin-tibco-managed-file-transfer,moved,6-3-0,tibco,30 Oct map
+bwpluginmft,6.3.1,tibco-activematrix-businessworks-plug-in-for-tibco-managed-file-transfer,tibco-bw-plugin-tibco-managed-file-transfer,moved,6-3-1,tibco,30 Oct map
+activematrix_businessworks_plugin_for_patterns,1.0.0,tibco-activematrix-businessworks-plug-in-for-tibco-patterns,tibco-bw-plugin-tibco-patterns,moved,1-0-0,tibco,added 16 Nov (from zip_url)
+activematrix_businessworks_plugin_for_patterns,1.1.0,tibco-activematrix-businessworks-plug-in-for-tibco-patterns,tibco-bw-plugin-tibco-patterns,moved,1-1-0,tibco,added 16 Nov (from zip_url)
+bwpluginpatterns,1.2.0,tibco-activematrix-businessworks-plug-in-for-tibco-patterns,tibco-bw-plugin-tibco-patterns,moved,1-2-0,tibco,30 Oct map
+bwpluginpatterns,1.5.0,tibco-activematrix-businessworks-plug-in-for-tibco-patterns,tibco-bw-plugin-tibco-patterns,moved,1-5-0,tibco,30 Oct map
+bwpluginpatterns,2.0.0,tibco-activematrix-businessworks-plug-in-for-tibco-patterns,tibco-bw-plugin-tibco-patterns,moved,2-0-0,tibco,30 Oct map
+bwpluginpatterns,2.1.0,tibco-activematrix-businessworks-plug-in-for-tibco-patterns,tibco-bw-plugin-tibco-patterns,moved,2-1-0,tibco,30 Oct map
+bwpluginpatterns,2.1.2,tibco-activematrix-businessworks-plug-in-for-tibco-patterns,tibco-bw-plugin-tibco-patterns,moved,2-1-2,tibco,30 Oct map
+bwpluginpatterns,5.4.0,tibco-activematrix-businessworks-plug-in-for-tibco-patterns,tibco-bw-plugin-tibco-patterns,moved,5-4-0,tibco,30 Oct map
+bwpluginpatterns,5.6.1,tibco-activematrix-businessworks-plug-in-for-tibco-patterns,tibco-bw-plugin-tibco-patterns,moved,5-6-1,tibco,30 Oct map
+bwpluginpatterns,5.7.0,tibco-activematrix-businessworks-plug-in-for-tibco-patterns,tibco-bw-plugin-tibco-patterns,moved,5-7-0,tibco,30 Oct map
+bwpluginpatterns,6.0.0,tibco-activematrix-businessworks-plug-in-for-tibco-patterns,tibco-bw-plugin-tibco-patterns,moved,6-0-0,tibco,30 Oct map
+bwpluginpatterns,6.1.0,tibco-activematrix-businessworks-plug-in-for-tibco-patterns,tibco-bw-plugin-tibco-patterns,moved,6-1-0,tibco,30 Oct map
+bwpluginpatterns,6.1.2,tibco-activematrix-businessworks-plug-in-for-tibco-patterns,tibco-bw-plugin-tibco-patterns,moved,6-1-2,tibco,30 Oct map
+bwpluginpatterns,6.2.0,tibco-activematrix-businessworks-plug-in-for-tibco-patterns,tibco-bw-plugin-tibco-patterns,moved,6-2-0,tibco,30 Oct map
+bwpluginti,6.0.0,tibco-activematrix-businessworks-plug-in-for-transaction-insight,tibco-bw-plugin-transaction-insight,moved,6-0-0,tibco,30 Oct map
+bwpluginti,6.0.1,tibco-activematrix-businessworks-plug-in-for-transaction-insight,tibco-bw-plugin-transaction-insight,moved,6-0-1,tibco,30 Oct map
+bwplugintrillium,6.0.0,tibco-activematrix-businessworks-plug-in-for-trillium,tibco-bw-plugin-trillium,moved,6-0-0,tibco,added 16 Nov (from zip_url)
+bwplugintwitter,6.1.2,tibco-activematrix-businessworks-plug-in-for-twitter,tibco-bw-plugin-twitter,moved,6-1-2,tibco,added 16 Nov (from zip_url)
+bwpluginworkday,1.0.0,tibco-activematrix-businessworks-plug-in-for-workday,tibco-bw-plugin-workday,moved,1-0-0,tibco,added 16 Nov (from zip_url)
+bwpluginworkday,6.0.1,tibco-activematrix-businessworks-plug-in-for-workday,tibco-bw-plugin-workday,moved,6-0-1,tibco,30 Oct map
+businessworks_smartmapper,6.0.0,tibco-activematrix-businessworks-smartmapper-enterprise-server,tibco-businessworks-smartmapper-enterprise-server,pending (goes with R2),6-0-0,tibco,added 16 Nov (from zip_url)
+adsmartmappereps,6.0.1,tibco-activematrix-businessworks-smartmapper-enterprise-server,tibco-businessworks-smartmapper-enterprise-server,pending (goes with R2),6-0-1,tibco,added 16 Nov (from zip_url)
+amsg,3.4.3,tibco-activematrix-service-grid,tibco-activematrix-service-grid,unchanged,3-4-3,tibco,30 Oct map
+amsg,3.4.4,tibco-activematrix-service-grid,tibco-activematrix-service-grid,unchanged,3-4-4,tibco,30 Oct map
+as,4.10.0,tibco-activespaces-enterprise-edition,tibco-activespaces-enterprise-edition,unchanged,4-10-0,tibco,30 Oct map
+as,4.10.1,tibco-activespaces-enterprise-edition,tibco-activespaces-enterprise-edition,unchanged,4-10-1,tibco,30 Oct map
+as,5.0.0,tibco-activespaces-enterprise-edition,tibco-activespaces-enterprise-edition,unchanged,5-0-0,tibco,30 Oct map
+as,5.1.0,tibco-activespaces-enterprise-edition,tibco-activespaces-enterprise-edition,unchanged,5-1-0,tibco,30 Oct map
+as,5.1.1,tibco-activespaces-enterprise-edition,tibco-activespaces-enterprise-edition,unchanged,5-1-1,tibco,30 Oct map
+as,5.2.0,tibco-activespaces-enterprise-edition,tibco-activespaces-enterprise-edition,unchanged,5-2-0,tibco,30 Oct map
+fa,5.0.1,tibco-adapter-for-files-ibm-i,tibco-adapter-for-files-ibm-i,unchanged,5-0-1,tibco,30 Oct map
+adm,1.7.0,tibco-adapter-migration,tibco-adapter-migration,unchanged,1-7-0,tibco,30 Oct map
+adm,1.8.0,tibco-adapter-migration,tibco-adapter-migration,unchanged,1-8-0,tibco,30 Oct map
+adm,1.8.1,tibco-adapter-migration,tibco-adapter-migration,unchanged,1-8-1,tibco,30 Oct map
+adapter-sdk,5.8.0,tibco-adapter-sdk,tibco-adapter-sdk,unchanged,5-8-0,tibco,30 Oct map
+administrator,5.12.2,tibco-administrator-enterprise-edition,tibco-administrator-enterprise-edition,unchanged,5-12-2,tibco,added 16 Nov (from zip_url)
+administrator,5.12.4,tibco-administrator-enterprise-edition,tibco-administrator-enterprise-edition,unchanged,5-12-4,tibco,30 Oct map
+administrator,5.13.0,tibco-administrator-enterprise-edition,tibco-administrator-enterprise-edition,unchanged,5-13-0,tibco,30 Oct map
+api-exchange-gateway,2.5.1,tibco-api-exchange-gateway,tibco-api-exchange-gateway,unchanged,2-5-1,tibco,30 Oct map
+bpme,4.3.5,tibco-bpm-enterprise,tibco-bpm-enterprise,unchanged,4-3-5,tibco,30 Oct map
+bpme,5.6.0,tibco-bpm-enterprise,tibco-bpm-enterprise,unchanged,5-6-0,tibco,30 Oct map
+bpme,5.6.1,tibco-bpm-enterprise,tibco-bpm-enterprise,unchanged,5-6-1,tibco,30 Oct map
+bpme,5.7.0,tibco-bpm-enterprise,tibco-bpm-enterprise,unchanged,5-7-0,tibco,30 Oct map
+bpm-suite,4.2.0,tibco-bpm-suite,tibco-bpm-suite,unchanged,4-2-0,tibco,30 Oct map
+bpm-suite,4.3.0,tibco-bpm-suite,tibco-bpm-suite,unchanged,4-3-0,tibco,30 Oct map
+bpm-suite,4.3.1,tibco-bpm-suite,tibco-bpm-suite,unchanged,4-3-1,tibco,30 Oct map
+bpm-suite,4.3.2,tibco-bpm-suite,tibco-bpm-suite,unchanged,4-3-2,tibco,30 Oct map
+business-studio-analyst-edition,4.2.0,tibco-business-studio-analyst-edition,tibco-business-studio-analyst-edition,unchanged,4-2-0,tibco,30 Oct map
+business-studio-analyst-edition,4.3.0,tibco-business-studio-analyst-edition,tibco-business-studio-analyst-edition,unchanged,4-3-0,tibco,30 Oct map
+business-studio-bpm-edition,4.3.5,tibco-business-studio-bpm-edition,tibco-business-studio-bpm-edition,unchanged,4-3-5,tibco,30 Oct map
+business-studio-bpm-edition,5.6.0,tibco-business-studio-bpm-edition,tibco-business-studio-bpm-edition,unchanged,5-6-0,tibco,30 Oct map
+business-studio-bpm-edition,5.6.1,tibco-business-studio-bpm-edition,tibco-business-studio-bpm-edition,unchanged,5-6-1,tibco,30 Oct map
+business-studio-bpm-edition,5.7.0,tibco-business-studio-bpm-edition,tibco-business-studio-bpm-edition,unchanged,5-7-0,tibco,30 Oct map
+business-studio-community-edition,4.2.0,tibco-business-studio-community-edition,tibco-business-studio-community-edition,unchanged,4-2-0,tibco,30 Oct map
+bc,7.4.0,tibco-businessconnect,tibco-businessconnect,unchanged,7-4-0,tibco,30 Oct map
+bc,7.5.0,tibco-businessconnect,tibco-businessconnect,unchanged,7-5-0,tibco,30 Oct map
+bccmi,6.1.0,tibco-businessconnect-configstore-management-interface-protocol,tibco-businessconnect-cmi-protocol,moved,6-1-0,tibco,30 Oct map
+bcce,1.6.1,tibco-businessconnect-container-edition,tibco-businessconnect-container-edition,unchanged,1-6-1,tibco,30 Oct map
+bcce,1.7.0,tibco-businessconnect-container-edition,tibco-businessconnect-container-edition,unchanged,1-7-0,tibco,30 Oct map
+bcce,1.7.1,tibco-businessconnect-container-edition,tibco-businessconnect-container-edition,unchanged,1-7-1,tibco,30 Oct map
+bcce-cmi,1.1.0,tibco-businessconnect-container-edition-configstore-management-interface-protocol,tibco-businessconnect-ce-cmi-protocol,moved,1-1-0,tibco,30 Oct map
+bcce-cmi,1.2.0,tibco-businessconnect-container-edition-configstore-management-interface-protocol,tibco-businessconnect-ce-cmi-protocol,moved,1-2-0,tibco,30 Oct map
+bcce-cmi,1.2.1,tibco-businessconnect-container-edition-configstore-management-interface-protocol,tibco-businessconnect-ce-cmi-protocol,moved,1-2-1,tibco,30 Oct map
+bcce-ebxml,1.2.1,tibco-businessconnect-container-edition-ebxml-protocol,tibco-businessconnect-ce-ebxml-protocol,moved,1-2-1,tibco,30 Oct map
+bcce-ebxml,1.3.0,tibco-businessconnect-container-edition-ebxml-protocol,tibco-businessconnect-ce-ebxml-protocol,moved,1-3-0,tibco,30 Oct map
+bcce-edihipaa,1.2.0,tibco-businessconnect-container-edition-edi-protocol-hipaa-edition-powered-by-instream,tibco-businessconnect-ce-edi-protocol-hipaa,moved,1-2-0,tibco,30 Oct map
+bcce-edihipaa,1.3.0,tibco-businessconnect-container-edition-edi-protocol-hipaa-edition-powered-by-instream,tibco-businessconnect-ce-edi-protocol-hipaa,moved,1-3-0,tibco,30 Oct map
+bcce-edi,1.5.0,tibco-businessconnect-container-edition-edi-protocol-powered-by-instream,tibco-businessconnect-ce-edi-protocol,moved,1-5-0,tibco,30 Oct map
+bcce-edi,1.6.0,tibco-businessconnect-container-edition-edi-protocol-powered-by-instream,tibco-businessconnect-ce-edi-protocol,moved,1-6-0,tibco,30 Oct map
+bcce-edi,1.6.1,tibco-businessconnect-container-edition-edi-protocol-powered-by-instream,tibco-businessconnect-ce-edi-protocol,moved,1-6-1,tibco,30 Oct map
+bcce-rn,1.6.0,tibco-businessconnect-container-edition-rosettanet-protocol,tibco-businessconnect-ce-rosettanet-protocol,moved,1-6-0,tibco,30 Oct map
+bcce-rn,1.7.0,tibco-businessconnect-container-edition-rosettanet-protocol,tibco-businessconnect-ce-rosettanet-protocol,moved,1-7-0,tibco,30 Oct map
+bcce-ezcomm,1.6.0,tibco-businessconnect-container-edition-services-plug-in,tibco-businessconnect-ce-services-plug-in,moved,1-6-0,tibco,30 Oct map
+bcce-ezcomm,1.7.0,tibco-businessconnect-container-edition-services-plug-in,tibco-businessconnect-ce-services-plug-in,moved,1-7-0,tibco,30 Oct map
+bcce-soap,1.2.1,tibco-businessconnect-container-edition-soap-protocol,tibco-businessconnect-ce-soap-protocol,moved,1-2-1,tibco,30 Oct map
+bcce-soap,1.3.0,tibco-businessconnect-container-edition-soap-protocol,tibco-businessconnect-ce-soap-protocol,moved,1-3-0,tibco,30 Oct map
+bccxml,6.1.0,tibco-businessconnect-cxml-protocol,tibco-businessconnect-cxml-protocol,unchanged,6-1-0,tibco,30 Oct map
+bcebxml,6.3.0,tibco-businessconnect-ebxml-protocol,tibco-businessconnect-ebxml-protocol,unchanged,6-3-0,tibco,30 Oct map
+bcebxml,6.4.0,tibco-businessconnect-ebxml-protocol,tibco-businessconnect-ebxml-protocol,unchanged,6-4-0,tibco,30 Oct map
+bcedihed,6.7.0,tibco-businessconnect-edi-protocol-hipaa-edition-powered-by-instream,tibco-businessconnect-edi-protocol-hipaa,moved,6-7-0,tibco,30 Oct map
+bcedi,6.10.0,tibco-businessconnect-edi-protocol-powered-by-instream,tibco-businessconnect-edi-protocol,moved,6-10-0,tibco,30 Oct map
+bcedi,6.11.0,tibco-businessconnect-edi-protocol-powered-by-instream,tibco-businessconnect-edi-protocol,moved,6-11-0,tibco,30 Oct map
+bcpalette,6.5.0,tibco-businessconnect-palette,tibco-businessconnect-palette,unchanged,6-5-0,tibco,30 Oct map
+bcpalette,6.6.0,tibco-businessconnect-palette,tibco-businessconnect-palette,unchanged,6-6-0,tibco,30 Oct map
+bcce-pmp,1.0.0,tibco-businessconnect-partner-management-portal,tibco-businessconnect-partner-management-portal,unchanged,1-0-0,tibco,30 Oct map
+bcce-pmp,1.1.0,tibco-businessconnect-partner-management-portal,tibco-businessconnect-partner-management-portal,unchanged,1-1-0,tibco,30 Oct map
+bcce-pmp,1.1.1,tibco-businessconnect-partner-management-portal,tibco-businessconnect-partner-management-portal,unchanged,1-1-1,tibco,30 Oct map
+bcftps,1.0.1,tibco-businessconnect-plug-in-for-ftp-server,tibco-businessconnect-plug-in-for-ftp-server,unchanged,1-0-1,tibco,30 Oct map
+bcsftp,1.1.0,tibco-businessconnect-plug-in-for-ssh-server,tibco-businessconnect-plug-in-for-ssh-server,unchanged,1-1-0,tibco,30 Oct map
+bcrn,5.3.0,tibco-businessconnect-rosettanet-protocol,tibco-businessconnect-rosettanet-protocol,unchanged,5-3-0,tibco,30 Oct map
+bcezcomm,6.3.0,tibco-businessconnect-services-plug-in,tibco-businessconnect-services-plug-in,unchanged,6-3-0,tibco,30 Oct map
+bcezcomm,6.4.0,tibco-businessconnect-services-plug-in,tibco-businessconnect-services-plug-in,unchanged,6-4-0,tibco,30 Oct map
+bcsoap,7.1.0,tibco-businessconnect-soap-protocol,tibco-businessconnect-soap-protocol,unchanged,7-1-0,tibco,30 Oct map
+bcsoap,7.2.0,tibco-businessconnect-soap-protocol,tibco-businessconnect-soap-protocol,unchanged,7-2-0,tibco,30 Oct map
+bctcm,6.1.0,tibco-businessconnect-trading-community-management,tibco-businessconnect-trading-community-management,unchanged,6-1-0,tibco,30 Oct map
+bctcm,6.1.1,tibco-businessconnect-trading-community-management,tibco-businessconnect-trading-community-management,unchanged,6-1-1,tibco,30 Oct map
+bctcm,6.2.0,tibco-businessconnect-trading-community-management,tibco-businessconnect-trading-community-management,unchanged,6-2-0,tibco,30 Oct map
+businessevents-enterprise,6.3.2,tibco-businessevents-enterprise-edition,tibco-businessevents-enterprise-edition,unchanged,6-3-2,tibco,30 Oct map
+businessevents-enterprise,6.4.0,tibco-businessevents-enterprise-edition,tibco-businessevents-enterprise-edition,unchanged,6-4-0,tibco,30 Oct map
+bwce,2.10.0,tibco-businessworks-container-edition,tibco-businessworks-container-edition,unchanged,2-10-0,tibco,added 16 Nov (from zip_url)
+bwent,3.10.0,tibco-businessworks-enterprise,tibco-businessworks-enterprise,unchanged,3-10-0,tibco,30 Oct map
+bwent,3.11.0,tibco-businessworks-enterprise,tibco-businessworks-enterprise,unchanged,3-11-0,tibco,30 Oct map
+bwent,3.12.0,tibco-businessworks-enterprise,tibco-businessworks-enterprise,unchanged,3-12-0,tibco,30 Oct map
+formbuilder,5.3.2,tibco-businessworks-formbuilder,tibco-businessworks-formbuilder,unchanged,5-3-2,tibco,30 Oct map
+businessworks_integrationmanager_plugin,1.0,tibco-businessworks-integrationmanager-plug-in,tibco-businessworks-integrationmanager-plug-in,unchanged,1-0,tibco,added 16 Nov (from zip_url)
+bwpluginai,6.0.0,tibco-businessworks-plug-in-for-ai,tibco-bw-plugin-ai,moved,6-0-0,tibco,30 Oct map
+bwpluginai,6.0.1,tibco-businessworks-plug-in-for-ai,tibco-bw-plugin-ai,moved,6-0-1,tibco,30 Oct map
+bwpluginauditsafeplatform,6.0.0,tibco-businessworks-plug-in-for-tibco-auditsafe-for-tibco-platform,tibco-bw-plugin-tibco-auditsafe-tibco-platform,moved,6-0-0,tibco,30 Oct map
+tcam,1.5.0,tibco-cloud-api-modeler,tibco-cloud-api-modeler,unchanged,1-5-0,tibco,30 Oct map
+bwce-aws,2.8.0,tibco-cloud-integration-businessworks-payg,tibco-cloud-integration-businessworks-payg,unchanged,2-8-0,tibco,30 Oct map
+tci-flogo-payg,2.11.0,tibco-cloud-integration-flogo-payg,tibco-cloud-integration-flogo-payg,unchanged,2-11-0,tibco,30 Oct map
+cloud-integration-sku,3.12.0,tibco-cloud-integration-hybrid,tibco-cloud-integration-hybrid,unchanged,3-12-0,tibco,30 Oct map
+cloud-int-connectivity,3.10.0,tibco-cloud-integration-hybrid-connectivity-add-on,tibco-cloud-integration-hybrid-connectivity-add-on,unchanged,3-10-0,tibco,30 Oct map
+platform-cp,1.10.0,tibco-control-plane,tibco-control-plane,unchanged,1-10-0,tibco,added 16 Nov (from zip_url)
+platform-cp,1.11.0,tibco-control-plane,tibco-control-plane,unchanged,1-11-0,tibco,added 16 Nov (from zip_url)
+platform-cp,1.12.0,tibco-control-plane,tibco-control-plane,unchanged,1-12-0,tibco,added 16 Nov (from zip_url)
+platform-cp,1.13.0,tibco-control-plane,tibco-control-plane,unchanged,1-13-0,tibco,added 16 Nov (from zip_url)
+platform-cp,1.14.0,tibco-control-plane,tibco-control-plane,unchanged,1-14-0,tibco,added 16 Nov (from zip_url)
+platform-cp,1.15.0,tibco-control-plane,tibco-control-plane,unchanged,1-15-0,tibco,added 16 Nov (from zip_url)
+platform-cp,1.16.0,tibco-control-plane,tibco-control-plane,unchanged,1-16-0,tibco,added 16 Nov (from zip_url)
+platform-cp,1.17.0,tibco-control-plane,tibco-control-plane,unchanged,1-17-0,tibco,added 16 Nov (from zip_url)
+platform-cp,1.18.0,tibco-control-plane,tibco-control-plane,unchanged,1-18-0,tibco,30 Oct map
+platform-cp,1.19.0,tibco-control-plane,tibco-control-plane,unchanged,1-19-0,tibco,30 Oct map
+platform-cp,1.20.0,tibco-control-plane,tibco-control-plane,unchanged,1-20-0,tibco,30 Oct map
+platform-cp,1.3.0,tibco-control-plane,tibco-control-plane,unchanged,1-3-0,tibco,added 16 Nov (from zip_url)
+platform-cp,1.4.0,tibco-control-plane,tibco-control-plane,unchanged,1-4-0,tibco,added 16 Nov (from zip_url)
+platform-cp,1.5.0,tibco-control-plane,tibco-control-plane,unchanged,1-5-0,tibco,added 16 Nov (from zip_url)
+platform-cp,1.5.1,tibco-control-plane,tibco-control-plane,unchanged,1-5-1,tibco,added 16 Nov (from zip_url)
+platform-cp,1.6.0,tibco-control-plane,tibco-control-plane,unchanged,1-6-0,tibco,added 16 Nov (from zip_url)
+platform-cp,1.7.0,tibco-control-plane,tibco-control-plane,unchanged,1-7-0,tibco,added 16 Nov (from zip_url)
+platform-cp,1.8.0,tibco-control-plane,tibco-control-plane,unchanged,1-8-0,tibco,added 16 Nov (from zip_url)
+platform-cp,1.9.0,tibco-control-plane,tibco-control-plane,unchanged,1-9-0,tibco,added 16 Nov (from zip_url)
+designer_addin_for_business_studio,1.0.0,tibco-designer-add-in-for-tibco-business-studio,tibco-designer-add-in-for-tibco-business-studio,unchanged,1-0-0,tibco,added 16 Nov (from zip_url)
+designer_addin_for_business_studio,1.1.0,tibco-designer-add-in-for-tibco-business-studio,tibco-designer-add-in-for-tibco-business-studio,unchanged,1-1-0,tibco,added 16 Nov (from zip_url)
+designer_addin_for_business_studio,1.1.1,tibco-designer-add-in-for-tibco-business-studio,tibco-designer-add-in-for-tibco-business-studio,unchanged,1-1-1,tibco,added 16 Nov (from zip_url)
+designer_addin_for_business_studio,1.2.0,tibco-designer-add-in-for-tibco-business-studio,tibco-designer-add-in-for-tibco-business-studio,unchanged,1-2-0,tibco,added 16 Nov (from zip_url)
+designer_addin_for_business_studio,1.3.1,tibco-designer-add-in-for-tibco-business-studio,tibco-designer-add-in-for-tibco-business-studio,unchanged,1-3-1,tibco,added 16 Nov (from zip_url)
+designer_addin_for_business_studio,1.3.2,tibco-designer-add-in-for-tibco-business-studio,tibco-designer-add-in-for-tibco-business-studio,unchanged,1-3-2,tibco,added 16 Nov (from zip_url)
+designer_addin_for_business_studio,1.4.0,tibco-designer-add-in-for-tibco-business-studio,tibco-designer-add-in-for-tibco-business-studio,unchanged,1-4-0,tibco,added 16 Nov (from zip_url)
+designer_addin_for_business_studio,1.5.0,tibco-designer-add-in-for-tibco-business-studio,tibco-designer-add-in-for-tibco-business-studio,unchanged,1-5-0,tibco,added 16 Nov (from zip_url)
+eftl,7.1.0,tibco-eftl-enterprise-edition,tibco-eftl-enterprise-edition,unchanged,7-1-0,tibco,30 Oct map
+eftl,7.1.1,tibco-eftl-enterprise-edition,tibco-eftl-enterprise-edition,unchanged,7-1-1,tibco,30 Oct map
+eftl,7.1.2,tibco-eftl-enterprise-edition,tibco-eftl-enterprise-edition,unchanged,7-1-2,tibco,30 Oct map
+eftl,7.1.3,tibco-eftl-enterprise-edition,tibco-eftl-enterprise-edition,unchanged,7-1-3,tibco,30 Oct map
+eftl,7.2.0,tibco-eftl-enterprise-edition,tibco-eftl-enterprise-edition,unchanged,7-2-0,tibco,30 Oct map
+eftl,7.3.0,tibco-eftl-enterprise-edition,tibco-eftl-enterprise-edition,unchanged,7-3-0,tibco,30 Oct map
+emsi5os,8.6.0,tibco-ems-client-for-ibm-i,tibco-ems-client-for-ibm-i,unchanged,8-6-0,tibco,30 Oct map
+tea,2.4.2,tibco-enterprise-administrator,tibco-enterprise-administrator,unchanged,2-4-2,tibco,30 Oct map
+tea,2.4.3,tibco-enterprise-administrator,tibco-enterprise-administrator,unchanged,2-4-3,tibco,30 Oct map
+fs-ent,1.0.0,tibco-enterprise-foresight,tibco-enterprise-foresight,unchanged,1-0-0,tibco,30 Oct map
+fs-ent,1.1.0,tibco-enterprise-foresight,tibco-enterprise-foresight,unchanged,1-1-0,tibco,30 Oct map
+fs-hc-addon,1.0.0,tibco-enterprise-foresight-healthcare-add-on,tibco-enterprise-foresight-healthcare-add-on,unchanged,1-0-0,tibco,30 Oct map
+fs-hc-addon,1.1.0,tibco-enterprise-foresight-healthcare-add-on,tibco-enterprise-foresight-healthcare-add-on,unchanged,1-1-0,tibco,30 Oct map
+tp-fos,1.1.0,tibco-enterprise-fulfillment-orchestration-suite,tibco-enterprise-fulfillment-orchestration-suite,unchanged,1-1-0,tibco,30 Oct map
+tp-mdm,1.0.0,tibco-enterprise-mdm,tibco-enterprise-mdm,unchanged,1-0-0,tibco,30 Oct map
+ems,10.4.0,tibco-enterprise-message-service,tibco-enterprise-message-service,unchanged,10-4-0,tibco,30 Oct map
+ems,10.4.1,tibco-enterprise-message-service,tibco-enterprise-message-service,unchanged,10-4-1,tibco,30 Oct map
+ems,10.4.3,tibco-enterprise-message-service,tibco-enterprise-message-service,unchanged,10-4-3,tibco,30 Oct map
+ems,10.4.4,tibco-enterprise-message-service,tibco-enterprise-message-service,unchanged,10-4-4,tibco,30 Oct map
+ems,10.5.0,tibco-enterprise-message-service,tibco-enterprise-message-service,unchanged,10-5-0,tibco,30 Oct map
+ems,10.5.1,tibco-enterprise-message-service,tibco-enterprise-message-service,unchanged,10-5-1,tibco,30 Oct map
+platform-tp-stream,11.1.2,tibco-enterprise-streaming,tibco-enterprise-streaming,unchanged,11-1-2,tibco,30 Oct map
+platform-tp-stream,11.1.3,tibco-enterprise-streaming,tibco-enterprise-streaming,unchanged,11-1-3,tibco,30 Oct map
+platform-tp-stream,11.2.0,tibco-enterprise-streaming,tibco-enterprise-streaming,unchanged,11-2-0,tibco,30 Oct map
+platform-tp-stream,11.2.1,tibco-enterprise-streaming,tibco-enterprise-streaming,unchanged,11-2-1,tibco,30 Oct map
+platform-tp-stream-hpfe,11.1.2,tibco-enterprise-streaming-high-performance-fix-engine,tibco-enterprise-streaming-fix-engine,pending (goes with R2),11-1-2,tibco,30 Oct map
+platform-tp-stream-hpfe,11.1.3,tibco-enterprise-streaming-high-performance-fix-engine,tibco-enterprise-streaming-fix-engine,pending (goes with R2),11-1-3,tibco,30 Oct map
+platform-tp-stream-hpfe,11.2.0,tibco-enterprise-streaming-high-performance-fix-engine,tibco-enterprise-streaming-fix-engine,pending (goes with R2),11-2-0,tibco,30 Oct map
+platform-tp-stream-hpfe,11.2.1,tibco-enterprise-streaming-high-performance-fix-engine,tibco-enterprise-streaming-fix-engine,pending (goes with R2),11-2-1,tibco,30 Oct map
+flogo,2.26.6,tibco-flogo,tibco-flogo,unchanged,2-26-6,tibco,30 Oct map
+flogo,2.26.7,tibco-flogo,tibco-flogo,unchanged,2-26-7,tibco,30 Oct map
+flogo,2.26.8,tibco-flogo,tibco-flogo,unchanged,2-26-8,tibco,30 Oct map
+flogo,2.26.9,tibco-flogo,tibco-flogo,unchanged,2-26-9,tibco,added 16 Nov (from zip_url)
+flogo,3.0.0,tibco-flogo,tibco-flogo,unchanged,3-0-0,tibco,30 Oct map
+flogo,3.0.1,tibco-flogo,tibco-flogo,unchanged,3-0-1,tibco,30 Oct map
+flogo,3.0.2,tibco-flogo,tibco-flogo,unchanged,3-0-2,tibco,added 16 Nov (from zip_url)
+flogo-vscode,1.3.5,tibco-flogo-extension-for-visual-studio-code,tibco-flogo-extension-for-visual-studio-code,unchanged,1-3-5,tibco,30 Oct map
+fsp-archive,5.4.0,tibco-foresight-archive-and-retrieval-system,tibco-foresight-archive-and-retrieval-system,unchanged,5-4-0,tibco,30 Oct map
+fsp-archive,5.5.0,tibco-foresight-archive-and-retrieval-system,tibco-foresight-archive-and-retrieval-system,unchanged,5-5-0,tibco,30 Oct map
+fsp-archive,6.0.0,tibco-foresight-archive-and-retrieval-system,tibco-foresight-archive-and-retrieval-system,unchanged,6-0-0,tibco,30 Oct map
+fs-confhir,1.0.0,tibco-foresight-connect-with-fhir,tibco-foresight-connect-with-fhir,unchanged,1-0-0,tibco,30 Oct map
+fs-confhir,1.0.1,tibco-foresight-connect-with-fhir,tibco-foresight-connect-with-fhir,unchanged,1-0-1,tibco,30 Oct map
+fsp-edisim,6.19.0,tibco-foresight-edisim,tibco-foresight-edisim,unchanged,6-19-0,tibco,30 Oct map
+fsp-edisim,6.20.0,tibco-foresight-edisim,tibco-foresight-edisim,unchanged,6-20-0,tibco,30 Oct map
+fsp-edisim,6.21.0,tibco-foresight-edisim,tibco-foresight-edisim,unchanged,6-21-0,tibco,30 Oct map
+fsp-desktop,9.0.0,tibco-foresight-hipaa-validator-desktop,tibco-foresight-hipaa-validator-desktop,unchanged,9-0-0,tibco,30 Oct map
+fsp-desktop,9.1.0,tibco-foresight-hipaa-validator-desktop,tibco-foresight-hipaa-validator-desktop,unchanged,9-1-0,tibco,30 Oct map
+fsp-desktop,9.2.0,tibco-foresight-hipaa-validator-desktop,tibco-foresight-hipaa-validator-desktop,unchanged,9-2-0,tibco,30 Oct map
+fsp-instream,9.0.0,tibco-foresight-instream,tibco-foresight-instream,unchanged,9-0-0,tibco,30 Oct map
+fsp-instream,9.1.0,tibco-foresight-instream,tibco-foresight-instream,unchanged,9-1-0,tibco,30 Oct map
+fsp-instream,9.2.0,tibco-foresight-instream,tibco-foresight-instream,unchanged,9-2-0,tibco,30 Oct map
+fsp-instream,9.3.0,tibco-foresight-instream,tibco-foresight-instream,unchanged,9-3-0,tibco,30 Oct map
+fsp-instream,9.4.0,tibco-foresight-instream,tibco-foresight-instream,unchanged,9-4-0,tibco,30 Oct map
+fsp-opmon,5.4.0,tibco-foresight-operational-monitor,tibco-foresight-operational-monitor,unchanged,5-4-0,tibco,30 Oct map
+fsp-opmon,5.5.0,tibco-foresight-operational-monitor,tibco-foresight-operational-monitor,unchanged,5-5-0,tibco,30 Oct map
+fsp-opmon,6.0.0,tibco-foresight-operational-monitor,tibco-foresight-operational-monitor,unchanged,6-0-0,tibco,30 Oct map
+fs-restapi,1.0.3,tibco-foresight-rest-api,tibco-foresight-rest-api,unchanged,1-0-3,tibco,30 Oct map
+fs-restapi,1.1.0,tibco-foresight-rest-api,tibco-foresight-rest-api,unchanged,1-1-0,tibco,30 Oct map
+fs-restapi,1.2.0,tibco-foresight-rest-api,tibco-foresight-rest-api,unchanged,1-2-0,tibco,30 Oct map
+fsp-studio,9.0.0,tibco-foresight-studio,tibco-foresight-studio,unchanged,9-0-0,tibco,30 Oct map
+fsp-studio,9.0.1,tibco-foresight-studio,tibco-foresight-studio,unchanged,9-0-1,tibco,30 Oct map
+fsp-studio,9.1.0,tibco-foresight-studio,tibco-foresight-studio,unchanged,9-1-0,tibco,30 Oct map
+fsp-studio,9.2.0,tibco-foresight-studio,tibco-foresight-studio,unchanged,9-2-0,tibco,30 Oct map
+fsp-studio,9.3.0,tibco-foresight-studio,tibco-foresight-studio,unchanged,9-3-0,tibco,30 Oct map
+fsp-transactioninsight,5.4.0,tibco-foresight-transaction-insight,tibco-foresight-transaction-insight,unchanged,5-4-0,tibco,30 Oct map
+fsp-transactioninsight,5.5.0,tibco-foresight-transaction-insight,tibco-foresight-transaction-insight,unchanged,5-5-0,tibco,30 Oct map
+fsp-transactioninsight,6.0.0,tibco-foresight-transaction-insight,tibco-foresight-transaction-insight,unchanged,6-0-0,tibco,30 Oct map
+translator,4.0.0,tibco-foresight-translator,tibco-foresight-translator,unchanged,4-0-0,tibco,30 Oct map
+translator,4.1.0,tibco-foresight-translator,tibco-foresight-translator,unchanged,4-1-0,tibco,30 Oct map
+translator,4.2.0,tibco-foresight-translator,tibco-foresight-translator,unchanged,4-2-0,tibco,30 Oct map
+fs-translator-attch-adapter,2.0.0,tibco-foresight-translator-attachment-adapter,tibco-foresight-translator-attachment-adapter,unchanged,2-0-0,tibco,30 Oct map
+fs-translator-attch-adapter,3.0.0,tibco-foresight-translator-attachment-adapter,tibco-foresight-translator-attachment-adapter,unchanged,3-0-0,tibco,30 Oct map
+ftl,7.1.0,tibco-ftl-enterprise-edition,tibco-ftl-enterprise-edition,unchanged,7-1-0,tibco,30 Oct map
+ftl,7.1.1,tibco-ftl-enterprise-edition,tibco-ftl-enterprise-edition,unchanged,7-1-1,tibco,30 Oct map
+ftl,7.1.2,tibco-ftl-enterprise-edition,tibco-ftl-enterprise-edition,unchanged,7-1-2,tibco,30 Oct map
+ftl,7.1.3,tibco-ftl-enterprise-edition,tibco-ftl-enterprise-edition,unchanged,7-1-3,tibco,30 Oct map
+ftl,7.2.0,tibco-ftl-enterprise-edition,tibco-ftl-enterprise-edition,unchanged,7-2-0,tibco,30 Oct map
+ftl,7.3.0,tibco-ftl-enterprise-edition,tibco-ftl-enterprise-edition,unchanged,7-3-0,tibco,30 Oct map
+fp,3.10.0,tibco-fulfillment-provisioning,tibco-fulfillment-provisioning,unchanged,3-10-0,tibco,30 Oct map
+fp,3.9.0,tibco-fulfillment-provisioning,tibco-fulfillment-provisioning,unchanged,3-9-0,tibco,30 Oct map
+acd,5.0.2,tibco-gemini-powered-by-apache-cassandra,tibco-gemini-powered-by-apache-cassandra,unchanged,5-0-2,tibco,added 16 Nov (from zip_url)
+hawkdbhma,6.2.0,tibco-hawk-database-adapter,tibco-hawk-database-adapter,unchanged,6-2-0,tibco,30 Oct map
+hawkdbhma,6.2.1,tibco-hawk-database-adapter,tibco-hawk-database-adapter,unchanged,6-2-1,tibco,30 Oct map
+hkbw6,6.7.2,tibco-hawk-microagent-for-tibco-activematrix-businessworks-6,tibco-hawk-microagent-businessworks-6,moved,6-7-2,tibco,30 Oct map
+hkbw6,6.8.0,tibco-hawk-microagent-for-tibco-activematrix-businessworks-6,tibco-hawk-microagent-businessworks-6,moved,6-8-0,tibco,30 Oct map
+hkbwce,2.2.0,tibco-hawk-microagent-for-tibco-businessworks-container-edition,tibco-hawk-microagent-bwce,moved,2-2-0,tibco,30 Oct map
+cn-addon-itg-suite,3.11.0,tibco-hybrid-integration-connectivity-add-on,tibco-hybrid-integration-connectivity-add-on,unchanged,3-11-0,tibco,added 16 Nov (from zip_url)
+tibco-int,3.16.0,tibco-integration,tibco-integration,unchanged,3-16-0,tibco,30 Oct map
+ipe-oracle,11.10.0,tibco-iprocess-engine,tibco-iprocess-engine,unchanged,11-10-0,tibco,30 Oct map
+ipe-oracle,11.9.1,tibco-iprocess-engine,tibco-iprocess-engine,unchanged,11-9-1,tibco,30 Oct map
+ipe-oracle,11.9.2,tibco-iprocess-engine,tibco-iprocess-engine,unchanged,11-9-2,tibco,30 Oct map
+ip-srvrobj-java,11.10.0,tibco-iprocess-server-objects-java,tibco-iprocess-server-objects-java,unchanged,11-10-0,tibco,30 Oct map
+ip-srvrobj-java,11.9.0,tibco-iprocess-server-objects-java,tibco-iprocess-server-objects-java,unchanged,11-9-0,tibco,30 Oct map
+ip-srvrobj-dotnet,11.10.0,tibco-iprocess-server-objects-net,tibco-iprocess-server-objects-net,unchanged,11-10-0,tibco,30 Oct map
+ip-srvrobj-dotnet,11.9.0,tibco-iprocess-server-objects-net,tibco-iprocess-server-objects-net,unchanged,11-9-0,tibco,30 Oct map
+ip-tech-pi,11.10.0,tibco-iprocess-technology-plug-ins,tibco-iprocess-technology-plug-ins,unchanged,11-10-0,tibco,30 Oct map
+ip-tech-pi,11.9.2,tibco-iprocess-technology-plug-ins,tibco-iprocess-technology-plug-ins,unchanged,11-9-2,tibco,30 Oct map
+ip-websvcs-clnt-pi,11.9.0,tibco-iprocess-web-services-client-plug-in,tibco-iprocess-web-services-client-plug-in,unchanged,11-9-0,tibco,30 Oct map
+ip-websvcs-srvr-pi,11.9.0,tibco-iprocess-web-services-server-plug-in,tibco-iprocess-web-services-server-plug-in,unchanged,11-9-0,tibco,30 Oct map
+ip-wksp-brwsr,11.10.0,tibco-iprocess-workspace-browser,tibco-iprocess-workspace-browser,unchanged,11-10-0,tibco,30 Oct map
+ip-wksp-brwsr,11.9.0,tibco-iprocess-workspace-browser,tibco-iprocess-workspace-browser,unchanged,11-9-0,tibco,30 Oct map
+ip-wksp-pi,11.10.0,tibco-iprocess-workspace-plug-ins,tibco-iprocess-workspace-plug-ins,unchanged,11-10-0,tibco,30 Oct map
+ip-wksp-pi,11.9.0,tibco-iprocess-workspace-plug-ins,tibco-iprocess-workspace-plug-ins,unchanged,11-9-0,tibco,30 Oct map
+ip-wksp-win,11.10.0,tibco-iprocess-workspace-windows,tibco-iprocess-workspace-windows,unchanged,11-10-0,tibco,30 Oct map
+ip-wksp-win,11.9.2,tibco-iprocess-workspace-windows,tibco-iprocess-workspace-windows,unchanged,11-9-2,tibco,30 Oct map
+mfred,2.5.1,tibco-mainframe-red,tibco-mainframe-red,unchanged,2-5-1,tibco,30 Oct map
+mfred,3.1.0,tibco-mainframe-red,tibco-mainframe-red,unchanged,3-1-0,tibco,30 Oct map
+mainframetcp,2.5.0,tibco-mainframe-tcp-library,tibco-mainframe-tcp-library,unchanged,2-5-0,tibco,30 Oct map
+mainframetcp,3.0.0,tibco-mainframe-tcp-library,tibco-mainframe-tcp-library,unchanged,3-0-0,tibco,30 Oct map
+mainframewebui,2.5.0,tibco-mainframe-webui,tibco-mainframe-webui,unchanged,2-5-0,tibco,30 Oct map
+mainframewebui,3.0.0,tibco-mainframe-webui,tibco-mainframe-webui,unchanged,3-0-0,tibco,30 Oct map
+mftcc,8.6.0,tibco-managed-file-transfer-command-center,tibco-managed-file-transfer-command-center,unchanged,8-6-0,tibco,30 Oct map
+mftcc,8.7.0,tibco-managed-file-transfer-command-center,tibco-managed-file-transfer-command-center,unchanged,8-7-0,tibco,30 Oct map
+mftcc,8.7.1,tibco-managed-file-transfer-command-center,tibco-managed-file-transfer-command-center,unchanged,8-7-1,tibco,30 Oct map
+mftis,8.6.0,tibco-managed-file-transfer-internet-server,tibco-managed-file-transfer-internet-server,unchanged,8-6-0,tibco,30 Oct map
+mftis,8.7.0,tibco-managed-file-transfer-internet-server,tibco-managed-file-transfer-internet-server,unchanged,8-7-0,tibco,30 Oct map
+mftis,8.7.1,tibco-managed-file-transfer-internet-server,tibco-managed-file-transfer-internet-server,unchanged,8-7-1,tibco,30 Oct map
+mftps-unix,8.1.1,tibco-managed-file-transfer-platform-server-for-unix,tibco-mft-platform-server-unix,moved,8-1-1,tibco,30 Oct map
+mftps-unix,8.1.2,tibco-managed-file-transfer-platform-server-for-unix,tibco-mft-platform-server-unix,moved,8-1-2,tibco,30 Oct map
+mftps-unix,8.2.0,tibco-managed-file-transfer-platform-server-for-unix,tibco-mft-platform-server-unix,moved,8-2-0,tibco,30 Oct map
+mftps-win,8.1.0,tibco-managed-file-transfer-platform-server-for-windows,tibco-mft-platform-server-windows,moved,8-1-0,tibco,30 Oct map
+mftps-win,8.2.0,tibco-managed-file-transfer-platform-server-for-windows,tibco-mft-platform-server-windows,moved,8-2-0,tibco,30 Oct map
+mftps-zlinux,8.1.0,tibco-managed-file-transfer-platform-server-for-z-linux,tibco-mft-platform-server-z-linux,moved,8-1-0,tibco,30 Oct map
+mftps-zlinux,8.1.1,tibco-managed-file-transfer-platform-server-for-z-linux,tibco-mft-platform-server-z-linux,moved,8-1-1,tibco,30 Oct map
+mftps-zlinux,8.1.2,tibco-managed-file-transfer-platform-server-for-z-linux,tibco-mft-platform-server-z-linux,moved,8-1-2,tibco,30 Oct map
+mdm,10.0.0,tibco-mdm,tibco-mdm,unchanged,10-0-0,tibco,added 16 Nov (from zip_url)
+mdm,11.0.0,tibco-mdm,tibco-mdm,unchanged,11-0-0,tibco,30 Oct map
+mdm,11.1.0,tibco-mdm,tibco-mdm,unchanged,11-1-0,tibco,30 Oct map
+mdm,9.3.2,tibco-mdm,tibco-mdm,unchanged,9-3-2,tibco,30 Oct map
+bstudio-mdm,5.2.0,tibco-mdm-studio,tibco-mdm-studio,unchanged,5-2-0,tibco,30 Oct map
+bstudio-mdm,5.3.0,tibco-mdm-studio,tibco-mdm-studio,unchanged,5-3-0,tibco,added 16 Nov (from zip_url)
+bstudio-mdm,6.0.0,tibco-mdm-studio,tibco-mdm-studio,unchanged,6-0-0,tibco,30 Oct map
+bstudio-mdm,6.1.0,tibco-mdm-studio,tibco-mdm-studio,unchanged,6-1-0,tibco,30 Oct map
+bstudio-mdm,6.1.1,tibco-mdm-studio,tibco-mdm-studio,unchanged,6-1-1,tibco,30 Oct map
+messaging-suite,1.21.0,tibco-messaging,tibco-messaging,unchanged,1-21-0,tibco,added 16 Nov (from zip_url)
+messaging-suite,1.22.0,tibco-messaging,tibco-messaging,unchanged,1-22-0,tibco,added 16 Nov (from zip_url)
+messaging-suite,1.24.0,tibco-messaging,tibco-messaging,unchanged,1-24-0,tibco,added 16 Nov (from zip_url)
+messaging-suite,1.25.0,tibco-messaging,tibco-messaging,unchanged,1-25-0,tibco,added 16 Nov (from zip_url)
+messaging-suite,1.26.0,tibco-messaging,tibco-messaging,unchanged,1-26-0,tibco,added 16 Nov (from zip_url)
+messaging-suite,1.27.0,tibco-messaging,tibco-messaging,unchanged,1-27-0,tibco,added 16 Nov (from zip_url)
+messaging-suite,1.30.0,tibco-messaging,tibco-messaging,unchanged,1-30-0,tibco,added 16 Nov (from zip_url)
+messaging-suite,1.31.0,tibco-messaging,tibco-messaging,unchanged,1-31-0,tibco,30 Oct map
+msg-emd-bridge,2.0.7,tibco-messaging-eclipse-mosquitto-distribution-bridge-enterprise-edition,tibco-messaging-mosquitto-distribution-bridge-ee,moved,2-0-7,tibco,added 16 Nov (from zip_url)
+msg-emd-core,2.0.7,tibco-messaging-eclipse-mosquitto-distribution-core-enterprise-edition,tibco-messaging-mosquitto-distribution-core-ee,moved,2-0-7,tibco,added 16 Nov (from zip_url)
+messaging,3.3.0,tibco-messaging-enterprise-edition,tibco-messaging-enterprise-edition,unchanged,3-3-0,tibco,added 16 Nov (from zip_url)
+messaging,3.4.0,tibco-messaging-enterprise-edition,tibco-messaging-enterprise-edition,unchanged,3-4-0,tibco,30 Oct map
+msg-akd-repo,2.0.0,tibco-messaging-schema-repository-for-apache-kafka-enterprise-edition,tibco-messaging-schema-repository-kafka-ee,moved,2-0-0,tibco,added 16 Nov (from zip_url)
+msg-akd-repo,2.1.0,tibco-messaging-schema-repository-for-apache-kafka-enterprise-edition,tibco-messaging-schema-repository-kafka-ee,moved,2-1-0,tibco,30 Oct map
+ope,6.0.0,tibco-offer-and-price-engine,tibco-offer-and-price-engine,unchanged,6-0-0,tibco,30 Oct map
+oihr,6.3.1,tibco-operational-intelligence-hawk-redtail,tibco-operational-intelligence-hawk-redtail,unchanged,6-3-1,tibco,30 Oct map
+oihr,7.5.0,tibco-operational-intelligence-hawk-redtail,tibco-operational-intelligence-hawk-redtail,unchanged,7-5-0,tibco,30 Oct map
+om,5.0.1,tibco-order-management,tibco-order-management,unchanged,5-0-1,tibco,30 Oct map
+om,6.0.0,tibco-order-management,tibco-order-management,unchanged,6-0-0,tibco,30 Oct map
+om,6.0.1,tibco-order-management,tibco-order-management,unchanged,6-0-1,tibco,30 Oct map
+om,6.1.0,tibco-order-management,tibco-order-management,unchanged,6-1-0,tibco,30 Oct map
+tps,6.1.2,tibco-patterns,tibco-patterns,unchanged,6-1-2,tibco,30 Oct map
+tps,6.2.0,tibco-patterns,tibco-patterns,unchanged,6-2-0,tibco,30 Oct map
+tp,1.0.0,tibco-platform,tibco-platform,unchanged,1-0-0,tibco,added 16 Nov (from zip_url)
+tp,1.1.0,tibco-platform,tibco-platform,unchanged,1-1-0,tibco,added 16 Nov (from zip_url)
+tp-bpm,1.0.0,tibco-platform-add-on-for-business-process-management,tibco-platform-add-on-for-bpm,pending (goes with R2),1-0-0,tibco,30 Oct map
+tp-ep,1.9.0,tibco-platform-add-on-for-event-processing,tibco-platform-add-on-for-event-processing,unchanged,1-9-0,tibco,30 Oct map
+tibco-platform-cli,1.1.0,tibco-platform-command-line-interface,tibco-platform-command-line-interface,unchanged,1-1-0,tibco,30 Oct map
+tibco-platform-cli,1.2.0,tibco-platform-command-line-interface,tibco-platform-command-line-interface,unchanged,1-2-0,tibco,30 Oct map
+cim-ac,5.1.0,tibco-product-and-service-catalog,tibco-product-and-service-catalog,unchanged,5-1-0,tibco,30 Oct map
+psc-ebx,1.0.0,tibco-product-and-service-catalog-powered-by-tibco-ebx,tibco-product-and-service-catalog-ebx,moved,1-0-0,tibco,30 Oct map
+psc-ebx,1.1.0,tibco-product-and-service-catalog-powered-by-tibco-ebx,tibco-product-and-service-catalog-ebx,moved,1-1-0,tibco,30 Oct map
+fsi,2.1.0,tibco-product-and-service-inventory,tibco-product-and-service-inventory,unchanged,2-1-0,tibco,30 Oct map
+fsi,2.1.0,tibco-product-and-service-inventory-2-1-0,tibco-product-and-service-inventory-2-1-0,unchanged,2-1-0,tibco,added 16 Nov (from zip_url)
+mfred-ziip,2.5.0,tibco-red-enabled-for-ziip,tibco-red-enabled-for-ziip,unchanged,2-5-0,tibco,30 Oct map
+mfred-ziip,3.1.0,tibco-red-enabled-for-ziip,tibco-red-enabled-for-ziip,unchanged,3-1-0,tibco,30 Oct map
+rendezvous,8.8.0,tibco-rendezvous,tibco-rendezvous,unchanged,8-8-0,tibco,30 Oct map
+rendezvous,8.8.1,tibco-rendezvous,tibco-rendezvous,unchanged,8-8-1,tibco,30 Oct map
+rendezvous,9.0.0,tibco-rendezvous,tibco-rendezvous,unchanged,9-0-0,tibco,30 Oct map
+trns,2.1.0,tibco-rendezvous-network-service,tibco-rendezvous-network-service,unchanged,2-1-0,tibco,30 Oct map
+trns,2.2.0,tibco-rendezvous-network-service,tibco-rendezvous-network-service,unchanged,2-2-0,tibco,30 Oct map
+loyalty,22.2.0,tibco-reward,tibco-reward,unchanged,22-2-0,tibco,30 Oct map
+loyalty,22.3.0,tibco-reward,tibco-reward,unchanged,22-3-0,tibco,30 Oct map
+rtview,7.5.0,tibco-rtview,tibco-rtview,unchanged,7-5-0,tibco,30 Oct map
+rtview,7.6.0,tibco-rtview,tibco-rtview,unchanged,7-6-0,tibco,30 Oct map
+runtime_agent,5.12.2,tibco-runtime-agent,tibco-runtime-agent,unchanged,5-12-2,tibco,added 16 Nov (from zip_url)
+runtime_agent,5.12.3,tibco-runtime-agent,tibco-runtime-agent,unchanged,5-12-3,tibco,added 16 Nov (from zip_url)
+runtime-agent,5.12.4,tibco-runtime-agent,tibco-runtime-agent,unchanged,5-12-4,tibco,30 Oct map
+runtime-agent,5.13.0,tibco-runtime-agent,tibco-runtime-agent,unchanged,5-13-0,tibco,30 Oct map
+scribe,Online,tibco-scribe,tibco-scribe,unchanged,Online,tibco,30 Oct map
+sfas,1.2.0,tibco-silver-fabric-enabler-for-activespaces-enterprise-edition,tibco-silver-fabric-enabler-for-activespaces-ee,moved,1-2-0,tibco,added 16 Nov (from zip_url)
+sb-hp-fix,10.6.4,tibco-streambase-high-performance-fix-engine,tibco-streambase-high-performance-fix-engine,unchanged,10-6-4,tibco,30 Oct map
+sb-hp-fix,10.6.5,tibco-streambase-high-performance-fix-engine,tibco-streambase-high-performance-fix-engine,unchanged,10-6-5,tibco,30 Oct map
+sb-hp-fix,10.6.6,tibco-streambase-high-performance-fix-engine,tibco-streambase-high-performance-fix-engine,unchanged,10-6-6,tibco,30 Oct map
+sb-hp-fix,11.0.1,tibco-streambase-high-performance-fix-engine,tibco-streambase-high-performance-fix-engine,unchanged,11-0-1,tibco,30 Oct map
+sb-hp-fix,11.1.0,tibco-streambase-high-performance-fix-engine,tibco-streambase-high-performance-fix-engine,unchanged,11-1-0,tibco,30 Oct map
+sb-hp-fix,11.1.1,tibco-streambase-high-performance-fix-engine,tibco-streambase-high-performance-fix-engine,unchanged,11-1-1,tibco,30 Oct map
+sb-hp-fix,11.1.2,tibco-streambase-high-performance-fix-engine,tibco-streambase-high-performance-fix-engine,unchanged,11-1-2,tibco,30 Oct map
+sb-hp-fix,11.1.3,tibco-streambase-high-performance-fix-engine,tibco-streambase-high-performance-fix-engine,unchanged,11-1-3,tibco,30 Oct map
+sb-hp-fix,11.2.0,tibco-streambase-high-performance-fix-engine,tibco-streambase-high-performance-fix-engine,unchanged,11-2-0,tibco,30 Oct map
+sb-hp-fix,11.2.1,tibco-streambase-high-performance-fix-engine,tibco-streambase-high-performance-fix-engine,unchanged,11-2-1,tibco,30 Oct map
+str,11.1.0,tibco-streaming,tibco-streaming,unchanged,11-1-0,tibco,30 Oct map
+str,11.1.1,tibco-streaming,tibco-streaming,unchanged,11-1-1,tibco,30 Oct map
+str,11.1.2,tibco-streaming,tibco-streaming,unchanged,11-1-2,tibco,30 Oct map
+str,11.1.3,tibco-streaming,tibco-streaming,unchanged,11-1-3,tibco,30 Oct map
+str,11.2.0,tibco-streaming,tibco-streaming,unchanged,11-2-0,tibco,30 Oct map
+str,11.2.1,tibco-streaming,tibco-streaming,unchanged,11-2-1,tibco,30 Oct map
+str-gpp,1.1.0,tibco-streaming-for-3gpp,tibco-streaming-for-3gpp,unchanged,1-1-0,tibco,30 Oct map
+substation,2.14.0,tibco-substation-es,tibco-substation-es,unchanged,2-14-0,tibco,30 Oct map
+tpm-rest,1.1.0,tibco-trading-partner-management-rest-api,tibco-trading-partner-management-rest-api,unchanged,1-1-0,tibco,30 Oct map
+substation-cics,2.14.0,tibco-transaction-interface-for-cics,tibco-transaction-interface-for-cics,unchanged,2-14-0,tibco,30 Oct map
+substation-ims,2.14.0,tibco-transaction-interface-for-ims,tibco-transaction-interface-for-ims,unchanged,2-14-0,tibco,30 Oct map
