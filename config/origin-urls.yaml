@@ -109,3 +109,20 @@ products:
     template: "https://docs.tibco.com/pub/{folder_path}/doc/{path}"
     drop_segments: 1
     verified: "11.1.0: 2688/2688 in the sitemap and equal to the published 301.yml page rows (origin/wip ccabb06), 2026-11-16"
+
+  # -- Phase 82 (2026-11-16, DOCOPS-354): versions served at a different address
+  # from their siblings. A version listed under `versions:` uses its own rule; the
+  # other versions derive as before. Proven against the cached sitemap; counts in
+  # reports/redirects/origin-templates-2026-11-16.md.
+  tibco-businessconnect-partner-management-portal:
+    versions:
+      # Served under /emp/, not /pub/; 1.1.0 and 1.1.1 derive under /pub/.
+      "1.0.0": {template: "https://docs.tibco.com/emp/{folder_path}/doc/{path}", drop_segments: 1}
+  tibco-businessconnect-trading-community-management:
+    versions:
+      # The same help is also listed under doc/webclient/; doc/bctcm/ is the copy confirmed.
+      "6.2.0": {template: "https://docs.tibco.com/pub/{folder_path}/doc/bctcm/{path}", drop_segments: 1}
+      # zip_url has no version, and the two source roots are served at two addresses.
+      "6.1.0":
+        - {prefix: "html/", template: "https://docs.tibco.com/pub/bctcm/6.1.0/doc/bctcm/{path}", drop_segments: 1}
+        - {prefix: "tib_bctcm_client/", template: "https://docs.tibco.com/pub/bctcm/6.1.0/doc/webclient/html/{path}", drop_segments: 1}

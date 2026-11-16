@@ -972,6 +972,7 @@ class Reframer:
                 self.config.load_origin_urls(), product.slug, version.zip_url,
                 origins.for_locale(origins.page_list(self.config.cache_dir, product.slug, version.version),
                                    self.config.locale, self.config.is_primary_locale()),
+                version=version.version,
             ),
             "publish_base_url": str(publishing.get("publish_base_url") or ""),
             "primary_locale": str(publishing.get("primary_locale") or ""),
@@ -1146,7 +1147,7 @@ class Reframer:
         pages = origins.for_locale(pages, self.config.locale, self.config.is_primary_locale())
         built = origins.build(
             self.config.load_origin_urls(), slug, version.zip_url,
-            self.state.get_output_map(slug, number), moved, pages, missing,
+            self.state.get_output_map(slug, number), moved, pages, missing, version=number,
         )
         for code, message, count in built.findings:
             self._record(code, slug, number, message=message, count=count)

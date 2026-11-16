@@ -3018,7 +3018,7 @@ name.
 
 ---
 
-### Phase 82: Old-Site URL Rules per Version — **Planned 2026-11-16; awaiting approval; DOCOPS-354**
+### Phase 82: Old-Site URL Rules per Version — **Built 2026-11-16 (approved the same day); DOCOPS-354**
 
 **Problem.** `config/origin-urls.yaml` takes one URL template per product. Three published versions need a different rule from their sibling versions, so none can be declared, and their `301.yml` holds no page rows (every old page URL 404s after 30 Nov):
 - Partner Management Portal 1.0.0 was served under `/emp/`, while 1.1.0 and 1.1.1 derive correctly under `/pub/`;

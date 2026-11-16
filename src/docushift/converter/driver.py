@@ -706,7 +706,7 @@ class DocumentConverter:
         pages, missing = origins.listing(self.config.cache_dir, slug, number)
         pages = origins.for_locale(pages, self.config.locale, self.config.is_primary_locale())
         built = origins.build(
-            self.config.load_origin_urls(), slug, version.zip_url, mapping, {}, pages, missing,
+            self.config.load_origin_urls(), slug, version.zip_url, mapping, {}, pages, missing, version=number,
         )
         for code, message, count in built.findings:
             self._record(code, slug, number, message=message, count=count)
@@ -1207,7 +1207,7 @@ class DocumentConverter:
             "templates": templates.hexdigest()[:16],
             "origins": origins.fingerprint(
                 self.config.load_origin_urls(), slug, version.zip_url,
-                self._pages(slug, number),
+                self._pages(slug, number), version=number,
             ),
         }
         if self.config.inline_tags_rewrite:

@@ -364,3 +364,70 @@ def test_a_list_in_one_language_is_used_whole() -> None:
     assert origins.for_locale(PAGES, "en-us", primary=True) == PAGES
     assert origins.for_locale([f"{LIVE}/ja-jp/a.htm", f"{LIVE}/en-us/a.htm"], "ja-jp",
                               primary=False) == [f"{LIVE}/ja-jp/a.htm"]
+
+
+# -- Phase 82: a rule per version -------------------------------------------------
+
+PMP = {"pmp": {"versions": {"1.0.0": {"template": "https://docs.tibco.com/emp/{folder_path}/doc/{path}",
+                                      "drop_segments": 1}}}}
+TCM = {"tcm": {
+    "template": TEMPLATE, "drop_segments": 1,
+    "versions": {"6.1.0": [
+        {"prefix": "html/", "template": "https://docs.tibco.com/pub/bctcm/6.1.0/doc/bctcm/{path}",
+         "drop_segments": 1},
+        {"prefix": "tib_bctcm_client/",
+         "template": "https://docs.tibco.com/pub/bctcm/6.1.0/doc/webclient/html/{path}", "drop_segments": 1},
+    ]}}}
+
+
+def test_a_listed_version_uses_its_own_template_and_the_others_derive() -> None:
+    found = origins.template_for(PMP, "pmp", "1.0.0")
+    assert found is not None and found.template.startswith("https://docs.tibco.com/emp/")
+    # An entry with only `versions:` declares nothing for 1.1.0: it derives, as before.
+    assert origins.declaration(PMP, "pmp", "1.1.0") == (None, "")
+    assert origins.declaration(PMP, "pmp") == (None, "")
+
+
+def test_a_version_not_listed_falls_back_to_the_products_template() -> None:
+    assert origins.template_for(TCM, "tcm", "6.2.0") == origins.OriginTemplate(TEMPLATE, 1)
+
+
+def test_a_rule_list_places_each_source_by_its_prefix() -> None:
+    rules = origins.template_for(TCM, "tcm", "6.1.0")
+    assert rules is not None and len(rules.rules) == 2
+
+    assert origins.origin_url(rules, "bctcm", "pkg/html/a.htm") == \
+        "https://docs.tibco.com/pub/bctcm/6.1.0/doc/bctcm/html/a.htm"
+    assert origins.origin_url(rules, "bctcm", "pkg/tib_bctcm_client/b.htm") == \
+        "https://docs.tibco.com/pub/bctcm/6.1.0/doc/webclient/html/tib_bctcm_client/b.htm"
+    # No rule matches: no row, counted with the drops.
+    assert origins.origin_url(rules, "bctcm", "pkg/other/c.htm") is None
+
+
+def test_a_bad_version_entry_is_refused_and_named() -> None:
+    for bad, why in [([{"template": TEMPLATE}], "rule 1 has no `prefix`"),
+                     ([{"prefix": "html/", "template": "x"}], "rule 1: template 'x' has no {path}"),
+                     ("text", "neither a template mapping nor a list of rules")]:
+        found, refused = origins.declaration({"p": {"versions": {"1.0": bad}}}, "p", "1.0")
+        assert found is None and why in refused and refused.startswith("version 1.0:")
+    assert "not a mapping" in origins.declaration({"p": {"versions": ["1.0"]}}, "p", "1.0")[1]
+
+
+def test_the_fingerprint_of_a_version_moves_only_with_its_own_rule() -> None:
+    def digest(declared, version):
+        return origins.fingerprint(declared, "tcm", None, [], version=version)
+
+    changed = {"tcm": {**TCM["tcm"], "versions": {"6.1.0": [{"prefix": "html/", "template": TEMPLATE}]}}}
+    assert digest(TCM, "6.1.0") != digest(changed, "6.1.0")
+    assert digest(TCM, "6.2.0") == digest(changed, "6.2.0")
+    # A product without `versions:` keeps the digest it had before Phase 82.
+    assert origins.fingerprint(EMS, "tibco-enterprise-message-service", None, [], version="10.5.1") == \
+        origins.fingerprint(EMS, "tibco-enterprise-message-service", None, [])
+
+
+def test_build_writes_a_listed_versions_rows_and_leaves_a_sibling_derived() -> None:
+    sources = {"pkg/html-client/a.htm": "html-client/a.md"}
+    page = "https://docs.tibco.com/emp/bcce-pmp/1.0.0/doc/html-client/a.htm"
+    built = origins.build(PMP, "pmp", "https://docs.tibco.com/pub/bcce-pmp/1.0.0/x.zip", sources, {},
+                          [page], version="1.0.0")
+    assert [row["from"] for row in built.rows] == [page]

@@ -78,19 +78,27 @@ class OriginTemplate:
     #: Leading segments of the recorded source path to discard -- the package
     #: wrapper, usually exactly one, and zero for a tree recorded from its root.
     drop_segments: int = 0
+    #: Phase 82: a rule in a version's list applies to a source whose path, after
+    #: `drop_segments`, starts with this. Empty for a single template.
+    prefix: str = ""
+    #: Phase 82: a version declared as a list of rules; the first whose `prefix`
+    #: matches places the source. Empty for a single template.
+    rules: tuple["OriginTemplate", ...] = ()
 
 
-def template_for(declared: Mapping[str, Any], slug: str) -> OriginTemplate | None:
+def template_for(declared: Mapping[str, Any], slug: str, version: str = "") -> OriginTemplate | None:
     """This product's template, or `None` if it has not been declared.
 
     `None` is a routine answer and not an error condition: one product is
     declared today. The caller turns it into a finding once per version, which is
     where the version is in hand and can be named.
     """
-    return declaration(declared, slug)[0]
+    return declaration(declared, slug, version)[0]
 
 
-def declaration(declared: Mapping[str, Any], slug: str) -> tuple[OriginTemplate | None, str]:
+def declaration(
+    declared: Mapping[str, Any], slug: str, version: str = ""
+) -> tuple[OriginTemplate | None, str]:
     """`template_for`, plus why a declaration that exists was refused.
 
     The reason is empty when the product is simply not declared, and non-empty
@@ -103,6 +111,41 @@ def declaration(declared: Mapping[str, Any], slug: str) -> tuple[OriginTemplate 
     entry = declared.get(slug)
     if not isinstance(entry, dict):
         return None, "the entry is not a mapping with `template` and `drop_segments`"
+    # Phase 82: a version listed under `versions:` wins over the product's own
+    # template; a version not listed falls back to it, and an entry with only
+    # `versions:` declares nothing for the others (they derive, as before).
+    versions = entry.get("versions")
+    if versions is not None and not isinstance(versions, dict):
+        return None, "`versions` is not a mapping of version to template or rules"
+    own = (versions or {}).get(str(version)) if version else None
+    if own is not None:
+        found, refused = _version_entry(own)
+        return found, (f"version {version}: {refused}" if refused else "")
+    if versions and "template" not in entry:
+        return None, ""
+    return _single(entry)
+
+
+def _version_entry(own: Any) -> tuple[OriginTemplate | None, str]:
+    """One version's declaration: a template mapping, or a list of prefixed rules."""
+    if isinstance(own, dict):
+        return _single(own)
+    if not isinstance(own, list) or not own:
+        return None, "the entry is neither a template mapping nor a list of rules"
+    rules = []
+    for number, rule in enumerate(own, 1):
+        if not isinstance(rule, dict) or not str(rule.get("prefix") or "").strip():
+            return None, f"rule {number} has no `prefix`"
+        found, refused = _single(rule)
+        if found is None:
+            return None, f"rule {number}: {refused}"
+        rules.append(OriginTemplate(found.template, found.drop_segments,
+                                    prefix=str(rule["prefix"]).strip()))
+    return OriginTemplate(rules[0].template, rules[0].drop_segments, rules=tuple(rules)), ""
+
+
+def _single(entry: Mapping[str, Any]) -> tuple[OriginTemplate | None, str]:
+    """One `template` + `drop_segments` mapping, validated."""
     template = str(entry.get("template") or "").strip()
     if not template:
         return None, "the entry has no `template`"
@@ -152,6 +195,13 @@ def origin_url(template: OriginTemplate, folder: str, source: str) -> str | None
     same way here as in the page that links to it.
     """
     parts = PurePosixPath(str(source)).parts
+    if template.rules:
+        # Phase 82: the first rule whose prefix the source's tail starts with.
+        for rule in template.rules:
+            tail = "/".join(parts[rule.drop_segments:])
+            if len(parts) > rule.drop_segments and tail.startswith(rule.prefix):
+                return origin_url(rule, folder, source)
+        return None
     if len(parts) <= template.drop_segments:
         return None
     tail = "/".join(parts[template.drop_segments:])
@@ -489,7 +539,8 @@ def listing(cache_dir: Path, slug: str, version: str) -> tuple[list[str], str]:
 
 
 def fingerprint(
-    declared: Mapping[str, Any], slug: str, zip_url: str | None, page_urls: Iterable[str]
+    declared: Mapping[str, Any], slug: str, zip_url: str | None, page_urls: Iterable[str],
+    version: str = "",
 ) -> str:
     """A short digest of what `build` reads besides the output map, for currency.
 
@@ -502,11 +553,28 @@ def fingerprint(
     written, not validated, so a fix to a rejected entry is a change too.
     """
     payload = json.dumps(
-        {"declared": declared.get(slug), "folder": folder_path(zip_url),
+        {"declared": _declared_for(declared.get(slug), version), "folder": folder_path(zip_url),
          "pages": sorted(page_urls)},
         sort_keys=True, separators=(",", ":"), default=str,
     )
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16]
+
+
+def _declared_for(entry: Any, version: str) -> Any:
+    """What of a product's entry one version reads (Phase 82).
+
+    An entry without `versions:` is taken whole, so its digest is unchanged. With
+    it, the version's own entry or the product's remaining keys, so a change to
+    one version's rule re-merges that version only.
+    """
+    if not isinstance(entry, dict) or "versions" not in entry:
+        return entry
+    versions = entry.get("versions")
+    own = versions.get(str(version)) if isinstance(versions, dict) and version else None
+    if own is not None:
+        return {"version": own}
+    rest = {key: value for key, value in entry.items() if key != "versions"}
+    return rest or None
 
 
 def build(
@@ -517,6 +585,7 @@ def build(
     moved: Mapping[str, str],
     page_urls: list[str],
     missing: str = "",
+    version: str = "",
 ) -> Built:
     """One version's `301.yml` rows, by Phase 22's and Phase 33's rules.
 
@@ -530,7 +599,7 @@ def build(
     """
     found: list[tuple[str, str, int]] = []
     folder = folder_path(zip_url)
-    template, refused = declaration(declared, slug)
+    template, refused = declaration(declared, slug, version)
     derived = template is None
     if refused:
         # Then derived exactly as if undeclared: the sitemap's rows are each
@@ -573,7 +642,8 @@ def build(
     if dropped:
         found.append(("ORIGIN_PATH_TOO_SHORT", (
             f"{len(dropped)} source path(s) are shorter than the template's "
-            f"drop_segments and produced no URL, e.g. '{dropped[0]}'"), len(dropped)))
+            f"drop_segments, or match no rule's prefix, and produced no URL, "
+            f"e.g. '{dropped[0]}'"), len(dropped)))
 
     if page_urls:
         # A derived row must be on the list to be written; a declared one was
