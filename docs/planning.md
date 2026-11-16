@@ -3018,6 +3018,34 @@ name.
 
 ---
 
+### Phase 82: Old-Site URL Rules per Version — **Planned 2026-11-16; awaiting approval; DOCOPS-354**
+
+**Problem.** `config/origin-urls.yaml` takes one URL template per product. Three published versions need a different rule from their sibling versions, so none can be declared, and their `301.yml` holds no page rows (every old page URL 404s after 30 Nov):
+- Partner Management Portal 1.0.0 was served under `/emp/`, while 1.1.0 and 1.1.1 derive correctly under `/pub/`;
+- BCTCM 6.2.0 needs `doc/bctcm/` (it ties with `doc/webclient/`), and a product-wide entry would write invented rows for 6.1.0 and 6.1.1;
+- BCTCM 6.1.0 (and 6.1.1) has no version in its `zip_url` and serves two source roots at two addresses (`html/` under `doc/bctcm/html/`, `tib_bctcm_client/` under `doc/webclient/html/`).
+
+**Change.** An entry may carry `versions:`, keyed by version, each a template or a list of rules:
+```yaml
+tibco-businessconnect-partner-management-portal:
+  versions:
+    "1.0.0": {template: "https://docs.tibco.com/emp/{folder_path}/doc/{path}", drop_segments: 1}
+tibco-businessconnect-trading-community-management:
+  versions:
+    "6.2.0": {template: "https://docs.tibco.com/pub/{folder_path}/doc/bctcm/{path}", drop_segments: 1}
+    "6.1.0":
+      - {prefix: "html/", template: "https://docs.tibco.com/pub/bctcm/6.1.0/doc/bctcm/{path}", drop_segments: 1}
+      - {prefix: "tib_bctcm_client/", template: "https://docs.tibco.com/pub/bctcm/6.1.0/doc/webclient/html/{path}", drop_segments: 1}
+```
+- A version listed wins over the product's own template; a version not listed falls back to the product template, then to derivation, exactly as today. An entry with only `versions:` declares nothing for the other versions.
+- A rule list picks the first rule whose `prefix` the source path (after `drop_segments`) starts with; a topic no rule matches gets no row and is counted in `ORIGIN_PAGE_UNMAPPED`.
+- A template with no `{folder_path}` is allowed (6.1.0's folder has no version). `ORIGIN_TEMPLATE_REJECTED` names a bad version entry.
+- `origins.fingerprint` covers the version entry, so a change re-merges only that version.
+
+**Steps.** (1) `origins.declaration` takes the version; parse and validate `versions:`, with unit tests for each case above, including that 1.1.0/1.1.1 and the other BCTCM versions keep their rows. (2) Declare the three, and prove each in memory against the cached sitemap (placed / total). (3) Re-merge the four versions (6.1.1 too, if it is published) and compare page lists with what is published. (4) Sync, keep only the `301.yml` files (a sync would undo R002 on the pages), commit locally, push with R2.
+
+**Effort.** About half a day. No change to any published page.
+
 ### Phase 81: AI-Assisted Grouping for New Versions — **Built 2026-11-15; first candidate Flogo 3.0.2**
 
 **Decision (user, 15 Nov).** Pages by menu depth (Phase 78), with the `depth:` entries drafted by an AI agent per chapter, is the **default for every newer and future version**. Older published versions keep their layout: correcting them is too expensive.
