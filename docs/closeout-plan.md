@@ -10,6 +10,7 @@
 *Rewritten each morning. Never more than three decisions.*
 
 **Mon 16 Nov.**
+- **ibi checks started (user, Mon):** 12 ibi products are on staging (12 of 22 products, 41 of 200 versions). The 4 repos they live in were brought up to `wip` locally (no push); 41 checks running in 2 batches (`ibi1-a`, `ibi1-b`). The other 10 products (WebFOCUS, Reporting Server, Container Editions, iWay Service Manager, Data Quality) wait for Digital Platform.
 - **`wip` frozen for now (user, Mon):** Digital Platform is pushing ibi and the build pipeline is full. Nothing goes to `wip` until they finish; local work keeps going to `content-fix` (29 TIBCO repos pushed to `content-fix` Mon).
 - **BW plug-in renames approved (user, Mon), without waiting for AEM's answer:** 133 folder moves in the 2 BW plug-in repos, committed on `content-fix` (`a69a137f`, `8b02901`); names active in `config/publish-names.yaml` (`90ac6c9`). They go to `wip` when it opens.
 - **Phase 82 built (user approved Mon):** per-version old-site URL rules. TCM 6.1.0 (81), TCM 6.2.0 (107) and Partner Management Portal 1.0.0 (70) now have page redirects; BusinessConnect `1ac777f` on `content-fix`. TCM 6.1.1 is not published. All known redirect files without page rows are now fixed.
