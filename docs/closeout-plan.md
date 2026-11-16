@@ -10,6 +10,9 @@
 *Rewritten each morning. Never more than three decisions.*
 
 **Mon 16 Nov.**
+- **`wip` frozen for now (user, Mon):** Digital Platform is pushing ibi and the build pipeline is full. Nothing goes to `wip` until they finish; local work keeps going to `content-fix` (29 TIBCO repos pushed to `content-fix` Mon).
+- **BW plug-in renames approved (user, Mon), without waiting for AEM's answer:** 133 folder moves in the 2 BW plug-in repos, committed on `content-fix` (`a69a137f`, `8b02901`); names active in `config/publish-names.yaml` (`90ac6c9`). They go to `wip` when it opens.
+- **Phase 82 planned** (per-version old-site URL rules, for BCTCM 6.1.0/6.2.0 and Partner Management Portal 1.0.0): awaiting approval.
 - **Staging checks, end of Mon:** 516 of 613 TIBCO versions checked (84%, from 17% Sat). Lost 36, issues 47, logged 362, explained 1, clean 70; 97 not checked (Karan's removals and versions with no published folder). Triage 2a/2b/3 merged (`284ffdd`), status page published. Stalled builds: EMS and Adapters only. Redirect fix: rules for Activation Service, BusinessConnect, MDM (`50058a5`); MDM 11.1.0 restored (`44216cd`).
 - **`&#92;` confirmed on staging (user, Mon):** the Foresight test row (TI 6.0.0, "Sending in a File") shows `TransactionInsight\*version*\DemoData` with *version* in italics. R002 is cleared for R2 as committed; no change to the repair.
 - **Stage 3 checks running (3 at once):** 3a, 83 (the 4 Stage 2b crash re-runs and the remaining TIBCO families); 3b, 119 BW plug-ins; 3c, 42 Streaming and MFT. Two agents triage Stage 2a and 2b into `reports/verify/triage-stage2{a,b}-2026-11-16.*`. Batch windows now close themselves when done.
