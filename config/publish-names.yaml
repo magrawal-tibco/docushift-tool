@@ -57,86 +57,86 @@ tibco-businessconnect-edi-protocol-powered-by-instream: tibco-businessconnect-ed
 # pending move (family businessworks): tibco-activematrix-businessworks-smartmapper-enterprise-server: tibco-businessworks-smartmapper-enterprise-server
 
 # bw-plugin
-# pending move (family bw-plugin): tibco-activematrix-businessworks-activeaspects-plug-in: tibco-businessworks-activeaspects-plug-in
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-component-for-aws-common-services: tibco-bw-plugin-component-aws-common-services
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-development-kit: tibco-businessworks-plug-in-development-kit
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-activespaces: tibco-bw-plugin-activespaces
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-amazon-redshift: tibco-bw-plugin-amazon-redshift
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-amazon-s3: tibco-bw-plugin-amazon-s3
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-amazon-sqs-and-sns: tibco-bw-plugin-amazon-sqs-and-sns
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-amqp: tibco-bw-plugin-amqp
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-apache-cassandra: tibco-bw-plugin-apache-cassandra
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-apache-kafka: tibco-bw-plugin-apache-kafka
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-apache-pulsar: tibco-bw-plugin-apache-pulsar
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-applicability-statement-2-as2-protocol: tibco-bw-plugin-as2-protocol
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-azure-cloud-services-azure-data-lake-storage-gen2: tibco-bw-plugin-azure-data-lake-storage-gen2
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-big-data: tibco-bw-plugin-big-data
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-businessconnect: tibco-bw-plugin-businessconnect
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-change-data-capture: tibco-bw-plugin-change-data-capture
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-cics: tibco-bw-plugin-cics
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-confidentiality: tibco-bw-plugin-confidentiality
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-data-conversion: tibco-bw-plugin-data-conversion
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-database: tibco-bw-plugin-database
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-edi: tibco-bw-plugin-edi
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-edi-healthcare-edition: tibco-bw-plugin-edi-healthcare-edition
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-edi-standard-edition: tibco-bw-plugin-edi-standard-edition
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-ejb: tibco-bw-plugin-ejb
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-facebook: tibco-bw-plugin-facebook
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-files-for-unix-and-windows: tibco-bw-plugin-files-for-unix-and-windows
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-google-bigquery: tibco-bw-plugin-google-bigquery
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-google-cloud-pub-sub: tibco-bw-plugin-google-cloud-pub-sub
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-google-cloud-storage: tibco-bw-plugin-google-cloud-storage
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-hl7-with-fhir: tibco-bw-plugin-hl7-with-fhir
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-ibm-i: tibco-bw-plugin-ibm-i
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-ibm-mq: tibco-bw-plugin-ibm-mq
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-jd-edwards-enterpriseone: tibco-bw-plugin-jd-edwards-enterpriseone
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-large-xml: tibco-bw-plugin-large-xml
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-ldap: tibco-bw-plugin-ldap
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-marketo: tibco-bw-plugin-marketo
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-mdm: tibco-bw-plugin-mdm
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-microsoft-dynamics-crm: tibco-bw-plugin-microsoft-dynamics-crm
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-microsoft-excel: tibco-bw-plugin-microsoft-excel
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-microsoft-sharepoint: tibco-bw-plugin-microsoft-sharepoint
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-mobile-integration: tibco-bw-plugin-mobile-integration
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-mongodb: tibco-bw-plugin-mongodb
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-mqtt: tibco-bw-plugin-mqtt
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-netsuite: tibco-bw-plugin-netsuite
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-odata: tibco-bw-plugin-odata
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-odata-services-for-sap-s-4hana: tibco-bw-plugin-odata-services-for-sap-s-4hana
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-oracle-e-business-suite: tibco-bw-plugin-oracle-e-business-suite
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-oracle-fusion-cloud-applications-suite: tibco-bw-plugin-oracle-fusion-cloud-apps
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-oracle-tuxedo: tibco-bw-plugin-oracle-tuxedo
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-osb: tibco-bw-plugin-osb
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-osisoft-pi-system: tibco-bw-plugin-osisoft-pi-system
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-pdf: tibco-bw-plugin-pdf
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-peoplesoft: tibco-bw-plugin-peoplesoft
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-redis: tibco-bw-plugin-redis
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-rest-and-json: tibco-bw-plugin-rest-and-json
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-salesforce-com: tibco-bw-plugin-salesforce-com
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-sap-ariba: tibco-bw-plugin-sap-ariba
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-sap-business-technology-platform: tibco-bw-plugin-sap-business-technology-platform
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-sap-hana-database: tibco-bw-plugin-sap-hana-database
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-sap-solutions: tibco-bw-plugin-sap-solutions
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-sap-successfactors: tibco-bw-plugin-sap-successfactors
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-servicenow: tibco-bw-plugin-servicenow
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-sftp: tibco-bw-plugin-sftp
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-siebel: tibco-bw-plugin-siebel
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-smartmapper: tibco-bw-plugin-smartmapper
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-smpp: tibco-bw-plugin-smpp
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-snowflake: tibco-bw-plugin-snowflake
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-swift: tibco-bw-plugin-swift
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-tibco-auditsafe: tibco-bw-plugin-tibco-auditsafe
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-tibco-clarity: tibco-bw-plugin-tibco-clarity
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-tibco-eftl: tibco-bw-plugin-tibco-eftl
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-tibco-ftl: tibco-bw-plugin-tibco-ftl
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-tibco-managed-file-transfer: tibco-bw-plugin-tibco-managed-file-transfer
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-tibco-patterns: tibco-bw-plugin-tibco-patterns
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-transaction-insight: tibco-bw-plugin-transaction-insight
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-trillium: tibco-bw-plugin-trillium
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-twitter: tibco-bw-plugin-twitter
-# pending move (family bw-plugin): tibco-activematrix-businessworks-plug-in-for-workday: tibco-bw-plugin-workday
-# pending move (family bw-plugin): tibco-businessworks-plug-in-for-ai: tibco-bw-plugin-ai
-# pending move (family bw-plugin): tibco-businessworks-plug-in-for-tibco-auditsafe-for-tibco-platform: tibco-bw-plugin-tibco-auditsafe-tibco-platform
+tibco-activematrix-businessworks-activeaspects-plug-in: tibco-businessworks-activeaspects-plug-in
+tibco-activematrix-businessworks-plug-in-component-for-aws-common-services: tibco-bw-plugin-component-aws-common-services
+tibco-activematrix-businessworks-plug-in-development-kit: tibco-businessworks-plug-in-development-kit
+tibco-activematrix-businessworks-plug-in-for-activespaces: tibco-bw-plugin-activespaces
+tibco-activematrix-businessworks-plug-in-for-amazon-redshift: tibco-bw-plugin-amazon-redshift
+tibco-activematrix-businessworks-plug-in-for-amazon-s3: tibco-bw-plugin-amazon-s3
+tibco-activematrix-businessworks-plug-in-for-amazon-sqs-and-sns: tibco-bw-plugin-amazon-sqs-and-sns
+tibco-activematrix-businessworks-plug-in-for-amqp: tibco-bw-plugin-amqp
+tibco-activematrix-businessworks-plug-in-for-apache-cassandra: tibco-bw-plugin-apache-cassandra
+tibco-activematrix-businessworks-plug-in-for-apache-kafka: tibco-bw-plugin-apache-kafka
+tibco-activematrix-businessworks-plug-in-for-apache-pulsar: tibco-bw-plugin-apache-pulsar
+tibco-activematrix-businessworks-plug-in-for-applicability-statement-2-as2-protocol: tibco-bw-plugin-as2-protocol
+tibco-activematrix-businessworks-plug-in-for-azure-cloud-services-azure-data-lake-storage-gen2: tibco-bw-plugin-azure-data-lake-storage-gen2
+tibco-activematrix-businessworks-plug-in-for-big-data: tibco-bw-plugin-big-data
+tibco-activematrix-businessworks-plug-in-for-businessconnect: tibco-bw-plugin-businessconnect
+tibco-activematrix-businessworks-plug-in-for-change-data-capture: tibco-bw-plugin-change-data-capture
+tibco-activematrix-businessworks-plug-in-for-cics: tibco-bw-plugin-cics
+tibco-activematrix-businessworks-plug-in-for-confidentiality: tibco-bw-plugin-confidentiality
+tibco-activematrix-businessworks-plug-in-for-data-conversion: tibco-bw-plugin-data-conversion
+tibco-activematrix-businessworks-plug-in-for-database: tibco-bw-plugin-database
+tibco-activematrix-businessworks-plug-in-for-edi: tibco-bw-plugin-edi
+tibco-activematrix-businessworks-plug-in-for-edi-healthcare-edition: tibco-bw-plugin-edi-healthcare-edition
+tibco-activematrix-businessworks-plug-in-for-edi-standard-edition: tibco-bw-plugin-edi-standard-edition
+tibco-activematrix-businessworks-plug-in-for-ejb: tibco-bw-plugin-ejb
+tibco-activematrix-businessworks-plug-in-for-facebook: tibco-bw-plugin-facebook
+tibco-activematrix-businessworks-plug-in-for-files-for-unix-and-windows: tibco-bw-plugin-files-for-unix-and-windows
+tibco-activematrix-businessworks-plug-in-for-google-bigquery: tibco-bw-plugin-google-bigquery
+tibco-activematrix-businessworks-plug-in-for-google-cloud-pub-sub: tibco-bw-plugin-google-cloud-pub-sub
+tibco-activematrix-businessworks-plug-in-for-google-cloud-storage: tibco-bw-plugin-google-cloud-storage
+tibco-activematrix-businessworks-plug-in-for-hl7-with-fhir: tibco-bw-plugin-hl7-with-fhir
+tibco-activematrix-businessworks-plug-in-for-ibm-i: tibco-bw-plugin-ibm-i
+tibco-activematrix-businessworks-plug-in-for-ibm-mq: tibco-bw-plugin-ibm-mq
+tibco-activematrix-businessworks-plug-in-for-jd-edwards-enterpriseone: tibco-bw-plugin-jd-edwards-enterpriseone
+tibco-activematrix-businessworks-plug-in-for-large-xml: tibco-bw-plugin-large-xml
+tibco-activematrix-businessworks-plug-in-for-ldap: tibco-bw-plugin-ldap
+tibco-activematrix-businessworks-plug-in-for-marketo: tibco-bw-plugin-marketo
+tibco-activematrix-businessworks-plug-in-for-mdm: tibco-bw-plugin-mdm
+tibco-activematrix-businessworks-plug-in-for-microsoft-dynamics-crm: tibco-bw-plugin-microsoft-dynamics-crm
+tibco-activematrix-businessworks-plug-in-for-microsoft-excel: tibco-bw-plugin-microsoft-excel
+tibco-activematrix-businessworks-plug-in-for-microsoft-sharepoint: tibco-bw-plugin-microsoft-sharepoint
+tibco-activematrix-businessworks-plug-in-for-mobile-integration: tibco-bw-plugin-mobile-integration
+tibco-activematrix-businessworks-plug-in-for-mongodb: tibco-bw-plugin-mongodb
+tibco-activematrix-businessworks-plug-in-for-mqtt: tibco-bw-plugin-mqtt
+tibco-activematrix-businessworks-plug-in-for-netsuite: tibco-bw-plugin-netsuite
+tibco-activematrix-businessworks-plug-in-for-odata: tibco-bw-plugin-odata
+tibco-activematrix-businessworks-plug-in-for-odata-services-for-sap-s-4hana: tibco-bw-plugin-odata-services-for-sap-s-4hana
+tibco-activematrix-businessworks-plug-in-for-oracle-e-business-suite: tibco-bw-plugin-oracle-e-business-suite
+tibco-activematrix-businessworks-plug-in-for-oracle-fusion-cloud-applications-suite: tibco-bw-plugin-oracle-fusion-cloud-apps
+tibco-activematrix-businessworks-plug-in-for-oracle-tuxedo: tibco-bw-plugin-oracle-tuxedo
+tibco-activematrix-businessworks-plug-in-for-osb: tibco-bw-plugin-osb
+tibco-activematrix-businessworks-plug-in-for-osisoft-pi-system: tibco-bw-plugin-osisoft-pi-system
+tibco-activematrix-businessworks-plug-in-for-pdf: tibco-bw-plugin-pdf
+tibco-activematrix-businessworks-plug-in-for-peoplesoft: tibco-bw-plugin-peoplesoft
+tibco-activematrix-businessworks-plug-in-for-redis: tibco-bw-plugin-redis
+tibco-activematrix-businessworks-plug-in-for-rest-and-json: tibco-bw-plugin-rest-and-json
+tibco-activematrix-businessworks-plug-in-for-salesforce-com: tibco-bw-plugin-salesforce-com
+tibco-activematrix-businessworks-plug-in-for-sap-ariba: tibco-bw-plugin-sap-ariba
+tibco-activematrix-businessworks-plug-in-for-sap-business-technology-platform: tibco-bw-plugin-sap-business-technology-platform
+tibco-activematrix-businessworks-plug-in-for-sap-hana-database: tibco-bw-plugin-sap-hana-database
+tibco-activematrix-businessworks-plug-in-for-sap-solutions: tibco-bw-plugin-sap-solutions
+tibco-activematrix-businessworks-plug-in-for-sap-successfactors: tibco-bw-plugin-sap-successfactors
+tibco-activematrix-businessworks-plug-in-for-servicenow: tibco-bw-plugin-servicenow
+tibco-activematrix-businessworks-plug-in-for-sftp: tibco-bw-plugin-sftp
+tibco-activematrix-businessworks-plug-in-for-siebel: tibco-bw-plugin-siebel
+tibco-activematrix-businessworks-plug-in-for-smartmapper: tibco-bw-plugin-smartmapper
+tibco-activematrix-businessworks-plug-in-for-smpp: tibco-bw-plugin-smpp
+tibco-activematrix-businessworks-plug-in-for-snowflake: tibco-bw-plugin-snowflake
+tibco-activematrix-businessworks-plug-in-for-swift: tibco-bw-plugin-swift
+tibco-activematrix-businessworks-plug-in-for-tibco-auditsafe: tibco-bw-plugin-tibco-auditsafe
+tibco-activematrix-businessworks-plug-in-for-tibco-clarity: tibco-bw-plugin-tibco-clarity
+tibco-activematrix-businessworks-plug-in-for-tibco-eftl: tibco-bw-plugin-tibco-eftl
+tibco-activematrix-businessworks-plug-in-for-tibco-ftl: tibco-bw-plugin-tibco-ftl
+tibco-activematrix-businessworks-plug-in-for-tibco-managed-file-transfer: tibco-bw-plugin-tibco-managed-file-transfer
+tibco-activematrix-businessworks-plug-in-for-tibco-patterns: tibco-bw-plugin-tibco-patterns
+tibco-activematrix-businessworks-plug-in-for-transaction-insight: tibco-bw-plugin-transaction-insight
+tibco-activematrix-businessworks-plug-in-for-trillium: tibco-bw-plugin-trillium
+tibco-activematrix-businessworks-plug-in-for-twitter: tibco-bw-plugin-twitter
+tibco-activematrix-businessworks-plug-in-for-workday: tibco-bw-plugin-workday
+tibco-businessworks-plug-in-for-ai: tibco-bw-plugin-ai
+tibco-businessworks-plug-in-for-tibco-auditsafe-for-tibco-platform: tibco-bw-plugin-tibco-auditsafe-tibco-platform
 
 # fulfillment
 tibco-product-and-service-catalog-powered-by-tibco-ebx: tibco-product-and-service-catalog-ebx
@@ -165,8 +165,8 @@ tibco-managed-file-transfer-platform-server-for-z-linux: tibco-mft-platform-serv
 # named by the same rules as the approved list.
 tibco-businessevents-plug-in-for-edi-healthcare-edition: tibco-businessevents-plug-in-edi-healthcare
 tibco-businessevents-plug-in-for-edi-standard-edition: tibco-businessevents-plug-in-edi-standard
-# pending move (family bw-plugin): tibco-activematrix-businessworks-service-engine-plug-in-for-oracle-e-business-suite: tibco-bw-service-engine-plugin-oracle-ebs
-# pending move (family bw-plugin): tibco-activematrix-businessworks-service-engine-plug-in-for-smartmapper: tibco-bw-service-engine-plugin-smartmapper
+tibco-activematrix-businessworks-service-engine-plug-in-for-oracle-e-business-suite: tibco-bw-service-engine-plugin-oracle-ebs
+tibco-activematrix-businessworks-service-engine-plug-in-for-smartmapper: tibco-bw-service-engine-plugin-smartmapper
 "tibbr,-tibbr-service,-tibbr-community,-and-tibbrcommunity-service": tibbr-and-tibbr-community
 tibco-managed-file-transfer-platform-server-for-z-os: tibco-mft-platform-server-z-os
 tibco-managed-file-transfer-internet-server-with-rocketstream-accelerator: tibco-mft-internet-server-rocketstream
