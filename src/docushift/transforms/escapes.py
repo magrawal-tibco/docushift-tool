@@ -37,9 +37,9 @@ import re
 from dataclasses import dataclass
 
 #: What a backslash is written as where a plain `\` would escape the next character
-#: or end the line as a hard break. **Not yet confirmed on staging** (DOCOPS-360):
-#: `&lt;` and a plain `\` are; a decimal reference is the same mechanism as `&lt;`,
-#: but if AEM shows it raw, this constant is the one place to change.
+#: or end the line as a hard break. Confirmed on staging, 2026-11-16 (DOCOPS-360):
+#: Foresight TI 6.0.0's `TransactionInsight&#92;*version*\DemoData` shows one
+#: backslash and an italic *version*.
 BACKSLASH_BEFORE_PUNCT = "&#92;"
 
 # A backslash escape, as CommonMark reads it: a backslash and one ASCII punctuation

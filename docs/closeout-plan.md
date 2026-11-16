@@ -9,6 +9,11 @@
 
 *Rewritten each morning. Never more than three decisions.*
 
+**Mon 16 Nov.**
+- **`&#92;` confirmed on staging (user, Mon):** the Foresight test row (TI 6.0.0, "Sending in a File") shows `TransactionInsight\*version*\DemoData` with *version* in italics. R002 is cleared for R2 as committed; no change to the repair.
+- **Stage 3 checks running (3 at once):** 3a, 83 (the 4 Stage 2b crash re-runs and the remaining TIBCO families); 3b, 119 BW plug-ins; 3c, 42 Streaming and MFT. Two agents triage Stage 2a and 2b into `reports/verify/triage-stage2{a,b}-2026-11-16.*`. Batch windows now close themselves when done.
+- **ibi still held:** Digital Platform's refresh is not on any ibi `wip` yet (newest commits 10–11 Nov).
+
 **Fri 13 Nov (written 02:15).**
 
 - **Priorities (user, 13 Nov 12:55):**
