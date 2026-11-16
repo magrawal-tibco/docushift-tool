@@ -325,13 +325,17 @@ def test_pruning_keeps_the_drops_verify_reads_and_compacts_the_file(tmp_path: Pa
         for i in range(500):
             run.record("VERIFY_TOPIC_MISSING", slug="wf", version="9.3.5", path=f"ja-jp/t{i}.htm")
         run.finish()
-    before = (tmp_path / "state.db").stat().st_size
+
+    def size() -> int:  # WAL mode: the database is the main file and its -wal
+        return sum(p.stat().st_size for p in tmp_path.glob("state.db*") if p.suffix != ".db-shm")
+
+    before = size()
 
     runs, rows = store.prune_findings(keep=1)
 
     assert (runs, rows) == (2, 501)
     assert store.latest_counts("wf", "9.3.5", ("NAV_NODE_DROPPED",)) == {"NAV_NODE_DROPPED": 2}
-    assert (tmp_path / "state.db").stat().st_size < before
+    assert size() < before
     store.close()
 
 
