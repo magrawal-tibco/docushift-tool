@@ -1071,6 +1071,8 @@ class StateStore:
             conn.execute("DROP TABLE prune_keep")
         with self._lock:
             self.connect().execute("VACUUM")
+            # WAL mode: the compacted pages sit in the -wal file until checkpointed.
+            self.connect().execute("PRAGMA wal_checkpoint(TRUNCATE)")
         return len(stale), deleted
 
 

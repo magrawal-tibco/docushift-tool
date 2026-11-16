@@ -73,3 +73,39 @@ products:
     template: "https://help.scribesoft.com/scribe/en/{path}"
     drop_segments: 0
     verified: "user-confirmed direct topic URL https://help.scribesoft.com/scribe/en/sol/general/whitelist_reqs.htm (2026-10-30)"
+
+  # -- DOCOPS-354 / DOCOPS-322 (2026-11-16): published versions whose 301.yml had
+  # document rows only. Each template was checked in memory against the cached
+  # Coveo sitemap (origins.listing) and the state.db output map, not fetched live;
+  # counts and samples in reports/redirects/origin-templates-2026-11-16.md. An
+  # entry applies to every version of the product, so each was also checked
+  # against that product's other converted versions.
+
+  # 1.1.0: derivation placed 32 of 36 topics (under the 90% bar); this template
+  # is the one it found. The 4 others (deploying-activation-service, upgrading-
+  # your-tibco-products, product-releases-that-support-activation[-outage]) are
+  # in the package but not the sitemap, and are written anyway. 1.0.0 derives
+  # this same template; declaring it adds its 2 unlisted rows.
+  tibco-activation-service:
+    template: "https://docs.tibco.com/pub/{folder_path}/doc/{path}"
+    drop_segments: 1
+    verified: "https://docs.tibco.com/pub/tibco-activation/1.1.0/doc/html/user-guide/license-command.htm (DOCOPS-322 sheet, 2026-11-04); 32/36 in the 1.1.0 sitemap, 2026-11-16"
+
+  # The docsite serves one Flare output twice, under doc/bcis/html and
+  # doc/bcgs/html, so the derivation tied (524 vs 524) and wrote nothing. bcis
+  # is the copy the DOCOPS-322 sheet confirmed. The bcgs URLs cannot be mapped
+  # by a one-template entry and stay unmapped (ORIGIN_PAGE_UNMAPPED).
+  tibco-businessconnect:
+    template: "https://docs.tibco.com/pub/{folder_path}/doc/bcis/{path}"
+    drop_segments: 1
+    verified: "https://docs.tibco.com/pub/bc/7.5.0/doc/bcis/html/script-deploy-user/Starting_bcappmanage_.htm (DOCOPS-322 sheet, 2026-11-04); 7.4.0 and 7.5.0 every topic in the sitemap, 2026-11-16"
+
+  # 11.1.0 lists a second copy of Install-config-guide pages under
+  # doc/Custom-installation/, so "drop 2" ran second at 2549 of 2688 and the
+  # margin failed. This is the mapping that places all 2688 and reproduces the
+  # page rows of the hand-restored published map; 9.3.2, 10.0.0 and 11.0.0
+  # already derive it, so their rows do not change.
+  tibco-mdm:
+    template: "https://docs.tibco.com/pub/{folder_path}/doc/{path}"
+    drop_segments: 1
+    verified: "11.1.0: 2688/2688 in the sitemap and equal to the published 301.yml page rows (origin/wip ccabb06), 2026-11-16"
