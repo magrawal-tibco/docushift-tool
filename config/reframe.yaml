@@ -240,6 +240,71 @@ products:
   # published version on its next merge. 1.22.0 is laid out on its own (Phase 81).
   tibco-control-plane:
     pin_layout_to: "1.20.0"
+    depth:
+      # Release Notes: one page per note (the guide splits per note at any depth: R4.2).
+      - {guide: "Release Notes", depth: 2, versions: ["1.21.0", "1.22.0"]}
+      - {guide: "TIBCO Control Plane and Data Plane Overview", depth: 1, versions: ["1.21.0", "1.22.0"]}
+      # Install-path guides: one page per chapter (R4.2 already splits them by source folder).
+      - {guide: "Requirements and Prerequisites", depth: 2, versions: ["1.21.0", "1.22.0"]}
+      - {guide: "Installation", depth: 2, versions: ["1.21.0", "1.22.0"]}
+      - {guide: "Upgrades", depth: 2, versions: ["1.21.0", "1.22.0"]}
+      - {guide: "Rollback", depth: 2, versions: ["1.21.0", "1.22.0"]}
+      - {guide: "Getting Started", depth: 1, versions: ["1.21.0", "1.22.0"]}
+      # TESSA: 7,674 words, 12 independent topics; one page each.
+      - {guide: "TIBCO Enterprise Smart System Agent (TESSA\u2122)", depth: 2, versions: ["1.21.0", "1.22.0"]}
+      # MCP Hub: the two large chapters one page per task / per plugin category; the rest whole.
+      - {guide: "TIBCO\u00a0MCP Hub", chapter: "TIBCO MCP Hub Overview", depth: 1, versions: ["1.21.0", "1.22.0"]}
+      - {guide: "TIBCO\u00a0MCP Hub", chapter: "Installing TIBCO MCP Hub", depth: 1, versions: ["1.21.0", "1.22.0"]}
+      - {guide: "TIBCO\u00a0MCP Hub", chapter: "Managing Gateways", depth: 1, versions: ["1.21.0", "1.22.0"]}
+      - {guide: "TIBCO\u00a0MCP Hub", chapter: "Managing MCP Server, tools, and registry", depth: 2, versions: ["1.21.0", "1.22.0"]}
+      - {guide: "TIBCO\u00a0MCP Hub", chapter: "Plugins and Governance", depth: 2, versions: ["1.21.0", "1.22.0"]}
+      - {guide: "TIBCO\u00a0MCP Hub", chapter: "Managing Gateway Access Tokens", depth: 1, versions: ["1.21.0", "1.22.0"]}
+      - {guide: "TIBCO\u00a0MCP Hub", chapter: "Troubleshooting MCP Hub", depth: 1, versions: ["1.21.0", "1.22.0"]}
+      # Platform CLI: the command reference one page per command group; the other chapters whole.
+      - {guide: "TIBCO Platform CLI", chapter: "Installing Platform CLI", depth: 1, versions: ["1.21.0", "1.22.0"]}
+      - {guide: "TIBCO Platform CLI", chapter: "TIBCO Platform CLI Concepts", depth: 1, versions: ["1.21.0", "1.22.0"]}
+      - {guide: "TIBCO Platform CLI", chapter: "Command Format", depth: 1, versions: ["1.21.0", "1.22.0"]}
+      - {guide: "TIBCO Platform CLI", chapter: "Using Interactive Mode", depth: 1, versions: ["1.21.0", "1.22.0"]}
+      - {guide: "TIBCO Platform CLI", chapter: "Using Profiles", depth: 1, versions: ["1.21.0", "1.22.0"]}
+      - {guide: "TIBCO Platform CLI", chapter: "TIBCO Platform CLI Reference", depth: 2, versions: ["1.21.0", "1.22.0"]}
+      - {guide: "TIBCO Platform CLI", chapter: "Uninstalling Platform CLI", depth: 1, versions: ["1.21.0", "1.22.0"]}
+      # Administration guides under 5,000 words: one page each.
+      - {guide: "User Management", depth: 1, versions: ["1.21.0", "1.22.0"]}
+      - {guide: "Setting up Kubernetes Infrastructure", depth: 2, versions: ["1.21.0", "1.22.0"]}
+      - {guide: "Registering a Data Plane", depth: 1, versions: ["1.21.0", "1.22.0"]}
+      - {guide: "Managing Data Planes", depth: 1, versions: ["1.21.0", "1.22.0"]}
+      # Control Tower (Flare sub-project platform-ct): small chapters whole; Data Plane
+      # Configuration per task (forced by R4.2 at any depth); Products one page per section of
+      # each product (BW5 + Adapters, BW6, BusinessEvents), so each CI/CD API area is its own page.
+      - {guide: "Managing Control Tower Data Planes", chapter: "Overview", depth: 1, versions: ["1.21.0", "1.22.0"]}
+      - {guide: "Managing Control Tower Data Planes", chapter: "Software Requirements", depth: 1, versions: ["1.21.0", "1.22.0"]}
+      - {guide: "Managing Control Tower Data Planes", chapter: "Setting up a Control Tower Data Plane", depth: 1, versions: ["1.21.0", "1.22.0"]}
+      - {guide: "Managing Control Tower Data Planes", chapter: "Registering a Control Tower Data Plane", depth: 1, versions: ["1.21.0", "1.22.0"]}
+      - {guide: "Managing Control Tower Data Planes", chapter: "Data Plane RBACs", depth: 1, versions: ["1.21.0", "1.22.0"]}
+      - {guide: "Managing Control Tower Data Planes", chapter: "Introduction: Control Tower Data Plane", depth: 1, versions: ["1.21.0", "1.22.0"]}
+      - {guide: "Managing Control Tower Data Planes", chapter: "Data Plane Configuration", depth: 2, versions: ["1.21.0", "1.22.0"]}
+      - {guide: "Managing Control Tower Data Planes", chapter: "Deleting Control Tower Data Plane", depth: 1, versions: ["1.21.0", "1.22.0"]}
+      - {guide: "Managing Control Tower Data Planes", chapter: "Control Tower Data Plane: Products", depth: 4, versions: ["1.21.0", "1.22.0"]}
+      - {guide: "Managing Control Tower Data Planes", chapter: "Native Control Tower", depth: 1, versions: ["1.21.0", "1.22.0"]}
+      - {guide: "Managing Resources", depth: 1, versions: ["1.21.0", "1.22.0"]}
+      - {guide: "Managing OAuth Access Tokens", depth: 1, versions: ["1.21.0", "1.22.0"]}
+      # Managing Capabilities: one chapter per Flare sub-project, each at its own depth.
+      - {guide: "Managing Capabilities", chapter: "Provisioning a Capability", depth: 1, versions: ["1.21.0", "1.22.0"]}
+      - {guide: "Managing Capabilities", chapter: "Refreshing Capability", depth: 1, versions: ["1.21.0", "1.22.0"]}
+      - {guide: "Managing Capabilities", chapter: "TIBCO BusinessWorks\u2122 6 (Containers)", depth: 2, versions: ["1.21.0", "1.22.0"]}
+      - {guide: "Managing Capabilities", chapter: "TIBCO BusinessWorks\u2122 5 (Containers)", depth: 3, versions: ["1.21.0", "1.22.0"]}
+      - {guide: "Managing Capabilities", chapter: "TIBCO Flogo", depth: 3, versions: ["1.21.0", "1.22.0"]}
+      - {guide: "Managing Capabilities", chapter: "TIBCO Enterprise Message Service", depth: 2, versions: ["1.21.0", "1.22.0"]}
+      - {guide: "Managing Capabilities", chapter: "TIBCO ActiveSpaces\u00ae", depth: 1, versions: ["1.21.0", "1.22.0"]}
+      - {guide: "Managing Capabilities", chapter: "TIBCO Developer Hub", depth: 3, versions: ["1.21.0", "1.22.0"]}
+      - {guide: "Managing Capabilities", chapter: "TIBCO Platform Infra MCP Server", depth: 1, versions: ["1.21.0", "1.22.0"]}
+      - {guide: "Monitoring", depth: 1, versions: ["1.21.0", "1.22.0"]}
+      # Observability: every chapter whole (the dashboard-cards listing one reference page).
+      - {guide: "Observability in TIBCO Control Plane", depth: 2, versions: ["1.21.0", "1.22.0"]}
+      - {guide: "TIBCO Platform Console", depth: 2, versions: ["1.21.0", "1.22.0"]}
+      - {guide: "Security Guide", depth: 1, versions: ["1.21.0", "1.22.0"]}
+      - {guide: "Disaster Recovery", depth: 2, versions: ["1.21.0", "1.22.0"]}
+      - {guide: "Legal Notices", depth: 2, versions: ["1.21.0", "1.22.0"]}
 
   # Pinned 17 Nov for the same reason: 6.0.2 (Δ2) is laid out on its own (Phase 81).
   tibco-businessworks-plug-in-for-ai:
