@@ -126,3 +126,9 @@ products:
       "6.1.0":
         - {prefix: "html/", template: "https://docs.tibco.com/pub/bctcm/6.1.0/doc/bctcm/{path}", drop_segments: 1}
         - {prefix: "tib_bctcm_client/", template: "https://docs.tibco.com/pub/bctcm/6.1.0/doc/webclient/html/{path}", drop_segments: 1}
+  # DOCOPS-365 (2026-11-17): 63 of 91 topics are on the sitemap (under the 90% bar);
+  # the rest are topics copied in from other plug-ins that the old site never listed.
+  tibco-activematrix-businessworks-plug-in-for-sap-business-technology-platform:
+    template: "https://docs.tibco.com/pub/{folder_path}/doc/{path}"
+    drop_segments: 1
+    verified: "63/91 in the 6.0.0 sitemap, 2026-11-17"
