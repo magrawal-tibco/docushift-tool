@@ -223,3 +223,25 @@ def commit_of(path: Path) -> str:
     except (OSError, subprocess.SubprocessError):
         return ""
     return done.stdout.strip() if done.returncode == 0 else ""
+
+
+def census_repo(target: Path, repair: Repair, versions: dict[Key, list[VersionFolder]],
+                ref: str | None = None) -> dict[Key, int]:
+    """A repo-scope repair's count for every version in `versions`, 0 included (Phase 83).
+
+    One `repair.census_repo` per repo, keyed by `(product folder, segment)` from the
+    path; mapped to catalog keys through `_owners`, as the text census is. A count
+    for a folder outside `versions` (another product, `--product`) is dropped.
+    """
+    counts: dict[Key, int] = dict.fromkeys(versions, 0)
+    trees = {folder.tree for folders in versions.values() for folder in folders}
+    for tree in sorted(trees):
+        repo = target / tree
+        if not (repo / ".git").exists() or repair.census_repo is None:
+            continue
+        mine = _owners(versions, tree)
+        for where, count in repair.census_repo(repo, ref).items():
+            owner = mine.get(where)
+            if owner is not None:
+                counts[owner] += count
+    return counts

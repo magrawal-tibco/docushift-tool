@@ -103,6 +103,7 @@ class Validator:
             return result
         result.report = links.check(folder, self.context, index)
         result.findings.extend(result.report.findings)
+        result.findings.extend(links.check_committed(folder, self.context, index))
         result.findings.extend(artifacts.check(folder, index))
         result.findings.extend(csh.check(folder, index))
         return result

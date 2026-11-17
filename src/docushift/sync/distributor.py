@@ -54,6 +54,7 @@ the only place in Stage 7 that has heard of Reframe.
 
 import filecmp
 import shutil
+import subprocess
 from collections.abc import Callable, Iterable, Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass, field
@@ -69,7 +70,7 @@ from docushift.converter import navigation
 from docushift.extractor import content_root
 from docushift.models import CONVERTIBLE_ENGINES, Product, ProductVersion
 from docushift.reporting.findings import FindingsRun
-from docushift.sync import apirefs, rooted, router
+from docushift.sync import apirefs, reindex, rooted, router
 from docushift.sync import archives as archive_index
 from docushift.sync import documents as document_index
 from docushift.sync import redirects as redirect_map
@@ -193,6 +194,8 @@ class SyncResult:
     # Empty means the row is about the version rather than one of its doc-classes
     # -- the extracted tree being gone is not a fact about `user-guides`.
     doc_class: str = ONLINE_HELP
+    # Phase 83: case-only renames the re-index recorded, `(old, new)` repo paths.
+    renamed: list[tuple[str, str]] = field(default_factory=list)
 
 
 @dataclass
@@ -381,10 +384,27 @@ class WorkspaceDistributor:
             message = f"{type(exc).__name__}: {exc}"
             return SyncResult(slug, number, SyncOutcome.FAILED, segment=segment, message=message)
 
+        renamed, message = self._reindex(destination, target)
         return SyncResult(
             slug, number, SyncOutcome.SYNCED, path=destination, segment=segment,
-            files=files, bytes=size, merged=merged,
+            files=files, bytes=size, merged=merged, renamed=renamed, message=message,
         )
+
+    @staticmethod
+    def _reindex(destination: Path, target: Path) -> tuple[list[tuple[str, str]], str]:
+        """Phase 83 (DOCOPS-374): let git record the case `_place` just wrote.
+
+        Only in a git work tree under the target; a plain folder is left alone. A
+        git failure does not fail the sync -- the tree is placed -- but is named in
+        the row's message, since the folder then still needs `repair apply R004`.
+        """
+        repo = reindex.repo_of(destination, target)
+        if repo is None:
+            return [], ""
+        try:
+            return reindex.reindex_case(repo, destination), ""
+        except (OSError, subprocess.SubprocessError) as exc:
+            return [], f"re-index for letter case failed ({type(exc).__name__}: {exc}); run repair R004"
 
     def _asset_rows(self, product: Product, version: ProductVersion, locale: str, segment: str) -> dict[str, str]:
         """Phase 72: the version's documents as `301.yml` rows, old URL -> DAM path.

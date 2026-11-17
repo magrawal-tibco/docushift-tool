@@ -205,8 +205,10 @@ def test_the_register_carries_every_row_of_7_5() -> None:
     product's name and version, which has nothing to translate.
     Phase 80 adds `PUBLISH_NAME_TOO_LONG`, a published product folder AEM cuts at 50
     characters, and `PUBLISH_NAME_MISSING`, an in-scope product that would need one.
+    Phase 83 adds `LINK_CASE_UNCOMMITTED`, a link target on disk in its case and
+    committed to git only in another, which AEM serves.
     """
-    assert len(REGISTRY) == 145
+    assert len(REGISTRY) == 146
 
 
 def test_severity_comes_from_the_registry_and_not_from_the_call_site() -> None:

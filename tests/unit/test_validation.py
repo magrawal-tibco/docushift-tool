@@ -2369,3 +2369,42 @@ def test_a_folder_of_exactly_50_characters_is_served(tmp_path: Path) -> None:
     publish(tmp_path, slug="x" * 50)
 
     assert _run(tmp_path) == []
+
+
+# -- Phase 83: the committed tree (DOCOPS-374) --------------------------------------
+
+
+def test_a_target_on_disk_in_its_case_but_committed_in_another_is_link_case_uncommitted(
+    tmp_path: Path,
+) -> None:
+    """The disk resolves the link; git, with core.ignorecase, kept the old folder case."""
+    import shutil
+    import subprocess
+
+    if shutil.which("git") is None:  # pragma: no cover
+        pytest.skip("git not available")
+
+    def git(*args: str) -> None:
+        subprocess.run(["git", "-C", str(target / TREE), *args], check=True, capture_output=True)
+
+    target = tmp_path / "target"
+    folder = publish(target, {"page.md": "# Page\n\n![a](resources/a.png)\n",
+                              "Resources/a.png": "png",
+                              "toc.yml": "- title: Page\n  url: page.md\n"})
+    git("init", "-q")
+    git("config", "core.ignorecase", "true")
+    git("add", "-A")
+    (folder / "Resources").rename(folder / "aside")
+    (folder / "aside").rename(folder / "resources")
+
+    result = Validator(target).check_folder(only(target))
+
+    found = [f for f in result.findings if f.code == "LINK_CASE_UNCOMMITTED"]
+    assert len(found) == 1 and "LINK_BROKEN" not in codes(result.findings)
+    assert found[0].path.endswith("page.md:3")
+    assert "resources/a.png" in found[0].message and "Resources/a.png" in found[0].message
+    assert REGISTRY["LINK_CASE_UNCOMMITTED"].severity is Severity.ERROR
+
+    git("rm", "-r", "--cached", "-q", "--", "en-us")
+    git("add", "--", "en-us")
+    assert "LINK_CASE_UNCOMMITTED" not in codes(Validator(target).check_folder(only(target)).findings)

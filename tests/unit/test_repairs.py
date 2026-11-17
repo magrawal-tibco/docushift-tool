@@ -437,3 +437,119 @@ def test_the_r003_pattern_finds_candidates_in_git(tmp_path: Path) -> None:
 
     assert found is not None and sorted(path.name for path in found) == ["code.md", "page.md", "var.md"]
     assert run.census_exact(root, R003, run.published_versions(root)) == {(SLUG, "10-4-0"): 2}
+
+
+# -- R004: a committed path differs in case from the file on disk (DOCOPS-374) ------
+
+R004 = repairs.get("R004")
+
+
+def _respell(path: Path, name: str) -> Path:
+    """A case-only rename, through an aside, so a case-folding disk takes it too."""
+    aside = path.with_name(path.name + ".aside")
+    path.rename(aside)
+    aside.rename(path.with_name(name))
+    return path.with_name(name)
+
+
+@pytest.fixture
+def old_case(tmp_path: Path) -> Path:
+    """Phase 83's shape: `Resources/Images/a.png` in the index, `resources/...` on disk and linked."""
+    if shutil.which("git") is None:  # pragma: no cover
+        pytest.skip("git not available")
+    root = tmp_path / "repos"
+    folder = _published(root, "10-4-0", "![a](resources/images/a.png)\n\n![gone](resources/images/gone.png)\n")
+    (folder / "Resources" / "Images").mkdir(parents=True)
+    (folder / "Resources" / "Images" / "a.png").write_bytes(b"png")
+    (folder / "toc.yml").write_text("- title: Page\n  url: page.md\n", encoding="utf-8")
+    repo = root / "en-us-tib-messaging-userdocs"
+    _git(repo, "init", "-q")
+    _git(repo, "config", "core.ignorecase", "true")
+    _git(repo, "add", "-A")
+    _respell(_respell(folder / "Resources", "resources") / "Images", "images")
+    return root
+
+
+def test_r004_is_registered_after_r003_as_a_repo_repair() -> None:
+    assert R004 is not None and R004.ticket == "DOCOPS-374" and R004.scope == "repo"
+    assert R004.confirm == "LINK_CASE_UNCOMMITTED" and R004.census_repo and R004.apply_repo
+    assert [r.id for r in repairs.registered()][2:4] == ["R003", "R004"]
+
+
+def test_r004_census_then_apply_records_the_rename_and_a_second_apply_does_nothing(old_case: Path) -> None:
+    repo = old_case / "en-us-tib-messaging-userdocs"
+    folder = repo / "en-us" / SLUG / "online-help" / "10-4-0"
+    page = (folder / "page.md").read_bytes()
+    versions = run.published_versions(old_case)
+
+    # The missing picture is in no case at all: LINK_BROKEN's, not counted here.
+    assert run.census_repo(old_case, R004, versions) == {(SLUG, "10-4-0"): 1}
+
+    done = R004.apply_repo(repo, [folder])
+
+    prefix = f"en-us/{SLUG}/online-help/10-4-0/"
+    assert done.renamed == [(prefix + "Resources/Images/a.png", prefix + "resources/images/a.png")]
+    assert done.rewritten == [] and done.failed == []
+    assert run.census_repo(old_case, R004, versions) == {(SLUG, "10-4-0"): 0}
+    assert (folder / "page.md").read_bytes() == page
+    again = R004.apply_repo(repo, [folder])
+    assert (again.renamed, again.rewritten) == ([], [])
+
+
+def test_r004_respells_a_link_the_disk_does_not_match_and_lists_it(old_case: Path) -> None:
+    """The disk agrees with git and not with the link: re-indexing cannot help."""
+    repo = old_case / "en-us-tib-messaging-userdocs"
+    folder = repo / "en-us" / SLUG / "online-help" / "10-4-0"
+    (folder / "Other").mkdir()
+    (folder / "Other" / "b.png").write_bytes(b"png")
+    (folder / "two.md").write_bytes(b"Text.\r\n<img src=\"./other/b.png\"/>\r\n")
+    _git(repo, "add", "-A")
+
+    dry = R004.apply_repo(repo, [folder], dry_run=True)
+    assert {"file": f"en-us/{SLUG}/online-help/10-4-0/two.md", "line": "2",
+            "before": "./other/b.png", "after": "./Other/b.png"} in dry.rewritten
+    assert b"./other/b.png" in (folder / "two.md").read_bytes()
+
+    done = R004.apply_repo(repo, [folder])
+
+    assert (folder / "two.md").read_bytes() == b"Text.\r\n<img src=\"./Other/b.png\"/>\r\n"
+    assert len(done.renamed) == 1 and len(done.rewritten) == 1
+    assert run.census_repo(old_case, R004, run.published_versions(old_case)) == {(SLUG, "10-4-0"): 0}
+
+
+def test_r004_counts_toc_and_301_rows_against_git(tmp_path: Path) -> None:
+    if shutil.which("git") is None:  # pragma: no cover
+        pytest.skip("git not available")
+    root = tmp_path / "repos"
+    folder = _published(root, "10-4-0", "# Page\n")
+    (folder / "Admin").mkdir()
+    (folder / "Admin" / "x.md").write_text("# X\n", encoding="utf-8")
+    (folder / "toc.yml").write_text("- title: X\n  url: admin/x.md\n", encoding="utf-8")
+    (folder / "301.yml").write_text(
+        f'"https://docs.tibco.com/x.html": "/en-us/{SLUG}/online-help/10-4-0/admin/x.md"\n', encoding="utf-8")
+    repo = root / "en-us-tib-messaging-userdocs"
+    _git(repo, "init", "-q")
+    _git(repo, "add", "-A")
+
+    assert R004.census_repo(repo) == {(SLUG, "10-4-0"): 2}
+
+
+def test_r004_through_the_cli_reads_the_index_and_stages_the_rename(
+    runner: CliRunner, populated_root: Path, old_case: Path  # noqa: F811
+) -> None:
+    def invoke(*argv: str):
+        return runner.invoke(main, ["--root", str(populated_root), *argv], color=False)
+
+    census = invoke("repair", "census", "--target-dir", str(old_case), "--repair", "R004")
+    assert census.exit_code == 0, census.output
+    rows = StateStore(populated_root / "cache" / "state.db").repair_rows()
+    assert rows[(SLUG, "10.4.0", "R004")]["remaining"] == 1
+
+    done = invoke("repair", "apply", "R004", "--target-dir", str(old_case))
+
+    assert done.exit_code == 0, done.output
+    rows = StateStore(populated_root / "cache" / "state.db").repair_rows()
+    assert rows[(SLUG, "10.4.0", "R004")]["state"] == "fixed"
+    report = next((populated_root / "reports" / "repairs").glob("apply-R004-*.csv")).read_text(encoding="utf-8-sig")
+    assert ",renamed," in report and "resources/images/a.png" in report
+    assert "No version needs R004" in invoke("repair", "apply", "R004", "--target-dir", str(old_case)).output

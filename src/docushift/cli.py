@@ -2388,6 +2388,11 @@ def sync(ctx, bu, family, product, version, batch, select_all, target_dir, force
                 f"  [green]v[/green] {_who(result)} -> {where} "
                 f"{result.files} file(s), {_gb(result.bytes)}"
             )
+            if result.renamed:
+                console.print(f"    [dim]{len(result.renamed)} case-only rename(s) recorded in git, "
+                              f"e.g. {escape(result.renamed[0][0])} -> {escape(result.renamed[0][1])}[/dim]")
+            if result.message:
+                console.print(f"    [yellow]{escape(result.message)}[/yellow]")
         elif result.outcome is SyncOutcome.MAPS_REFRESHED:
             console.print(f"  [green]v[/green] {_who(result)} -> {result.doc_class}/{result.segment} "
                           f"{result.files} map(s) refreshed in place")
@@ -3703,8 +3708,11 @@ def repair_list(ctx: click.Context) -> None:
 @click.option("--repair", "repair_id", default=None,
               help="One repair; default every registered one that is not optional.")
 @click.option("--product", "product", default=None, help="Restrict to one product: catalog slug or published folder.")
+@click.option("--ref", default=None,
+              help="Repo-scope repairs (R004): the git ref to read; default the index (the next commit).")
 @click.pass_context
-def repair_census(ctx: click.Context, target_dir: Path, repair_id: str | None, product: str | None) -> None:
+def repair_census(ctx: click.Context, target_dir: Path, repair_id: str | None, product: str | None,
+                  ref: str | None) -> None:
     """Count every repair in every published version (read-only; `git grep` per repo)."""
     import datetime
 
@@ -3730,7 +3738,8 @@ def repair_census(ctx: click.Context, target_dir: Path, repair_id: str | None, p
         exact = {(slug, segment) for (slug, segment) in versions
                  if (row := recorded.get((slug, _number(catalog.products.get(slug), segment) or "", repair.id)))
                  and row["state"] != "needed"}
-        counts = run.census(target_dir, repair, versions, exact)
+        counts = (run.census_repo(target_dir, repair, versions, ref) if repair.scope == "repo"
+                  else run.census(target_dir, repair, versions, exact))
         states: Counter = Counter()
         left = unknown = 0
         for (slug, segment), count in counts.items():
@@ -3814,6 +3823,9 @@ def repair_apply(ctx: click.Context, repair_id: str, target_dir: Path, product, 
     table = Table(title=f"{repair.id} {'(dry run) ' if dry_run else ''}over {len(selected)} version(s)")
     for column in ("Product", "Version", "files", "fixed (repo)", "fixed (local)", "left"):
         table.add_column(column, justify="left" if column in ("Product", "Version") else "right")
+    if repair.scope == "repo":
+        _repair_apply_repo(cfg, manager, repair, target_dir, selected, at, dry_run)
+        return
     report_rows, failed = [], []
     for prod, number, folders in selected:
         done = run.Applied()
@@ -3846,6 +3858,70 @@ def repair_apply(ctx: click.Context, repair_id: str, target_dir: Path, product, 
         _refresh_status(manager)
         console.print(f"Report: {escape(str(report))}\nIndex: {escape(str(_repairs_index(cfg, manager)))}")
         console.print("[dim]Nothing is committed: review with `git diff` in each repo, then commit and push.[/dim]")
+    for line in failed:
+        console.print(f"[red]failed:[/red] {escape(line)}")
+    if failed:
+        raise click.exceptions.Exit(1)
+
+
+def _repair_apply_repo(cfg: ConfigManager, manager: CatalogManager, repair, target_dir: Path,
+                       selected: list, at: str, dry_run: bool) -> None:
+    """`repair apply` for a repo-scope repair (Phase 83, R004): the git index, not text.
+
+    Per version, `apply_repo` over its published folders in each repo, then its
+    targets counted again from the index (`validation.committed`, R004's census),
+    so `left` is what the next commit would serve.
+    `output/` and `reframed/` are not touched: they already spell the disk's case.
+    Writes `reports/repairs/apply-<ID>-<date>.csv`, one row per rename or respelled link.
+    """
+    from collections import defaultdict
+
+    from docushift.utils.csvio import write_rows
+    from docushift.validation import committed
+
+    table = Table(title=f"{repair.id} {'(dry run) ' if dry_run else ''}over {len(selected)} version(s)")
+    for column in ("Product", "Version", "renamed", "links respelled", "left"):
+        table.add_column(column, justify="left" if column in ("Product", "Version") else "right")
+    report_rows, failed = [], []
+    for prod, number, folders in selected:
+        by_repo: dict[Path, list[Path]] = defaultdict(list)
+        for folder in folders:
+            by_repo[target_dir / folder.tree].append(folder.path)
+        renamed = respelled = 0
+        for repo, paths in sorted(by_repo.items()):
+            done = repair.apply_repo(repo, paths, dry_run)
+            failed.extend(done.failed)
+            renamed += len(done.renamed)
+            respelled += len(done.rewritten)
+            for old, new in done.renamed:
+                report_rows.append({"slug": prod.slug, "version": number, "repo": repo.name,
+                                    "action": "renamed", "file": old, "line": "", "before": old, "after": new})
+            for row in done.rewritten:
+                report_rows.append({"slug": prod.slug, "version": number, "repo": repo.name,
+                                    "action": "respelled", **row})
+        # The version's own folders only: a whole-repo census per version would grep
+        # the repo once per version.
+        left = 0 if dry_run else sum(
+            len(committed.case_rows(target_dir / folder.tree, None,
+                                    [folder.path.relative_to(target_dir / folder.tree).as_posix()]))
+            for folder in folders)
+        if not dry_run:
+            manager.state.record_census(prod.slug, number, repair.id, left, at,
+                                        target=str(folders[0].path), fixed=renamed + respelled)
+        table.add_row(prod.slug, number, str(renamed), str(respelled), "-" if dry_run else str(left))
+    console.print(table)
+    if not dry_run:
+        report = cfg.root_dir / "reports" / "repairs" / f"apply-{repair.id}-{at[:10]}.csv"
+        if report.is_file():
+            import csv
+
+            with report.open(encoding="utf-8-sig", newline="") as handle:
+                report_rows = [*csv.DictReader(handle), *report_rows]
+        write_rows(report, ["slug", "version", "repo", "action", "file", "line", "before", "after"], report_rows)
+        _refresh_status(manager)
+        console.print(f"Report: {escape(str(report))}\nIndex: {escape(str(_repairs_index(cfg, manager)))}")
+        console.print("[dim]Staged, not committed: review with `git diff --cached --stat -M` in each repo, "
+                      "then commit and push.[/dim]")
     for line in failed:
         console.print(f"[red]failed:[/red] {escape(line)}")
     if failed:

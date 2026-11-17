@@ -67,6 +67,7 @@ from docushift.utils.longpath import (
     walk_files,
 )
 from docushift.utils.naming import is_unfiled
+from docushift.validation import committed as committed_paths
 from docushift.validation import references
 from docushift.validation.tree import VersionFolder
 
@@ -176,6 +177,8 @@ class LinkContext:
     # Case-exact lookups outside the version folder, shared by the whole run so
     # each directory is listed once (R11-04).
     paths: TargetPaths | None = None
+    # Phase 83: each repo's index, listed once per run; `None` for a tree not in git.
+    committed: dict[str, "committed_paths.Committed | None"] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         if self.paths is None:
@@ -462,6 +465,61 @@ def _check_tree_rooted(
     else:
         issue("ANCHOR_MISSING", line,
               f"#{classified.fragment} is not an anchor in {actual}{miss}")
+
+
+# -- the committed tree (Phase 83) ------------------------------------------------
+
+
+def _held(context: LinkContext, tree: str) -> "committed_paths.Committed | None":
+    if tree not in context.committed:
+        repo = context.target / tree
+        context.committed[tree] = (committed_paths.Committed(committed_paths.listing(repo))
+                                   if (repo / ".git").exists() else None)
+    return context.committed[tree]
+
+
+def check_committed(folder: VersionFolder, context: LinkContext, index: FolderIndex) -> list[Finding]:
+    """`LINK_CASE_UNCOMMITTED`: a target on disk in its exact case, in git only in another.
+
+    Phase 83 (DOCOPS-374). `check` resolves against the disk's exact listing, which
+    is right on disk and wrong in git: with `core.ignorecase=true` the index keeps
+    `Resources/` while the disk and the link say `resources/`, and AEM serves the
+    index's. Asked of `git ls-files`, so only when the tree is a git work tree.
+    A folder whose every file is in the index in its disk case cannot hold such a
+    link to itself, so it is skipped without reading a page; the rest read every
+    page body link, `toc.yml` row and `301.yml` target, as R004's census does.
+    """
+    held = _held(context, folder.tree)
+    if held is None:
+        return []
+    assert context.paths is not None
+    base = PurePosixPath(*folder.relative.parts[1:]).as_posix()
+    if not any(held.respelled(f"{base}/{relative}") for relative in index.present):
+        return []
+    findings: list[Finding] = []
+    for relative in sorted(index.present):
+        file = f"{base}/{relative}"
+        if committed_paths.kind_of(file) is None:
+            continue
+        try:
+            text = long_path(folder.path / relative).read_text(encoding="utf-8", errors="replace")
+        except OSError:  # pragma: no cover - the file was just listed
+            continue
+        for number, line in enumerate(text.splitlines(), start=1):
+            for target in committed_paths.targets(file, number, line):
+                real = held.case_only(target.resolved)
+                if real is None:
+                    continue
+                on_disk = f"{folder.tree}/{target.resolved}"
+                if context.paths.actual(on_disk) != on_disk:
+                    continue  # LINK_BROKEN's, when it is not on disk in this case either
+                findings.append(Finding(
+                    "LINK_CASE_UNCOMMITTED", slug=folder.slug, version=folder.segment,
+                    path=f"{folder.tree}/{file}:{number}",
+                    message=f"{target.resolved} is on disk in this case but committed as {real}; "
+                            f"AEM serves the committed one, so this 404s (repair apply R004)",
+                ))
+    return findings
 
 
 # -- path length ---------------------------------------------------------------

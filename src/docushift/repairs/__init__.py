@@ -18,12 +18,16 @@ identical, line endings kept, fenced code untouched, and a second run a no-op. A
 that moves a page -- the menu, a merge, a file name -- is not a repair; those
 versions go back through the pipeline. Each repair ships with the converter change
 that makes new conversions clean, so a repair is only ever catch-up.
+
+**Repo-scope repairs** (Phase 83, `scope="repo"`): R004 fixes git's index, not page
+text -- a path committed in a letter case the disk and the links no longer use. It
+brings its own `census_repo` and `apply_repo`; the text repairs are unchanged.
 """
 
 from __future__ import annotations
 
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass(frozen=True)
@@ -39,6 +43,23 @@ class Repair:
     # A fallback waiting on a decision (R003, DOCOPS-371): left out of a `census`
     # that names no repair, so it never shows as pending until someone asks for it.
     optional: bool = False
+    # Phase 83 (R004). `"repo"`: the repair is to a repo's git index, not to page
+    # text, so `pattern`/`detect`/`fix` are unused and these two stand in for them.
+    # `census_repo(repo, ref) -> {(product folder, segment): count}` reads git at
+    # `ref` (the index when None); `apply_repo(repo, folders, dry_run) -> RepoApplied`.
+    scope: str = "text"
+    census_repo: Callable[..., dict[tuple[str, str], int]] | None = None
+    apply_repo: Callable[..., RepoApplied] | None = None
+
+
+@dataclass
+class RepoApplied:
+    """What a repo-scope repair did to one version: renames git recorded, links rewritten."""
+
+    renamed: list[tuple[str, str]] = field(default_factory=list)
+    # `{file, line, before, after}`: links the re-index could not fix, respelled.
+    rewritten: list[dict[str, str]] = field(default_factory=list)
+    failed: list[str] = field(default_factory=list)
 
 
 _REGISTRY: dict[str, Repair] = {}
@@ -60,4 +81,9 @@ def registered() -> list[Repair]:
 
 
 # The register is the list of modules imported here, in ID order.
-from docushift.repairs import r001_note_labels, r002_escapes, r003_inline_tags  # noqa: E402,F401
+from docushift.repairs import (  # noqa: E402,F401
+    r001_note_labels,
+    r002_escapes,
+    r003_inline_tags,
+    r004_path_case,
+)

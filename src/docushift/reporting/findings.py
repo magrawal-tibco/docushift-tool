@@ -590,6 +590,13 @@ REGISTRY: dict[str, Code] = _codes(
          "planning.md Phase 34"),
     Code("LINK_BROKEN", Severity.ERROR, Stage.VALIDATE,
          "Relative link resolving to nothing", "design.md §8.4"),
+    # Phase 83 (DOCOPS-374). Resolves on disk in its exact case; git, with
+    # `core.ignorecase=true`, holds it only in another, and AEM serves git's. An
+    # error: the clean answer is knowable (R004 re-indexes the folder).
+    Code("LINK_CASE_UNCOMMITTED", Severity.ERROR, Stage.VALIDATE,
+         "A link, toc.yml or 301.yml target on disk in its exact case but committed "
+         "only in another case; AEM serves the committed spelling",
+         "planning.md Phase 83 (DOCOPS-374)"),
     # Phase 43. The link resolves in the tree and breaks on AEM, which does not
     # publish `unfiled/`. A note: the user let these break; this is the record.
     Code("LINK_TO_UNFILED", Severity.NOTE, Stage.VALIDATE,

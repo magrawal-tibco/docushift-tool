@@ -3018,7 +3018,7 @@ name.
 
 ---
 
-### Phase 83: Committed Paths in the Case the Links Use — **Proposed 2026-11-17; DOCOPS-374**
+### Phase 83: Committed Paths in the Case the Links Use — **Built 2026-11-17 (approved the same day); DOCOPS-374**
 
 **Problem.** A published link names a picture, a file or a page in a letter case the repository does not hold: BW Plug-in for AI 6.0.1 `user-guide/rag-palette/chunk-activity.md` links `../../resources/images/chunk-activity.png`, the repo holds `Resources/Images/chunk-activity.png`. Windows folds case, so `validate` passes; AEM does not, and serves a placeholder.
 
@@ -3051,6 +3051,13 @@ Measured 17 Nov on `origin/wip` (`git ls-tree` + `git grep`, never the disk; scr
 **Steps.** (1) `reindex_case` in `sync/` with tests; call it from `sync` after `_place`. (2) R004 with its census and apply, tests as above. (3) `LINK_CASE_UNCOMMITTED` in `validate`, with a test on a temp repo. (4) `repair census --repair R004` on the content-fix trees; compare with this table. (5) Apply on `content-fix` only (wip frozen): ibi container-editions, di-ism, focus, webfocus, wf-reporting-server; TIBCO activespaces, bw-plugin, data-management, tra. One commit per repo, renames only; `git diff --stat -M` shows 100% renames and no page text changed, so R002 and the other repairs on these pages stay. Then `validate` (0 `LINK_CASE_UNCOMMITTED`) and census 0. (6) Push with R2, in R2's chunks. (7) After any later sync of these versions, the R002 apply runs first and R004's census must read 0 (the sync-side fix makes it so); a version that shows R004 again is re-indexed before the push. (8) Confirm on staging with the BW Plug-in for AI 6.0.1 chunk-activity picture and one ibi FOCUS page; add the UAT row.
 
 **Effort.** About 2 days: sync step and tests 0.5, R004 and tests 1, validate 0.25, apply and checks over 10 repos 0.25. No page text changes; the AEM paths of the affected pictures and of ActiveSpaces' four folders change case, which is what the links and menus already name.
+
+**As built (2026-11-17), Steps (1)-(3).**
+- `validation/committed.py`: the audit script's extraction and the case-only lookup against `git ls-tree -r <ref>` (or the index when no ref), shared by R004 and `validate`.
+- `sync/reindex.py` `reindex_case(repo, folder)`; `sync_one` calls it after `_place` when the folder is in a git work tree under the target, and prints the renames. A folder git does not track yet is not staged; a tracked file `.gitignore` matches is added back by force.
+- R004 (`scope="repo"`): `repair census --repair R004 [--ref <ref>]` reads the index by default, so a census right after an apply (staged, not committed) reads 0. `repair apply R004` stages; it writes `reports/repairs/apply-R004-<date>.csv` (one row per rename or respelled link).
+- `LINK_CASE_UNCOMMITTED` (error): checked only in a version folder holding a file committed in another case, so the clean folders read no page twice.
+- Left: Steps (4)-(8).
 
 ### Phase 82: Old-Site URL Rules per Version — **Built 2026-11-16 (approved the same day); DOCOPS-354**
 
@@ -3913,6 +3920,7 @@ The concrete deliverable of §7.1: every deferred "report line" in the three doc
 | `PUBLISH_BASE_URL_UNSET`⁶ᵈ | warn | sync | `api-references` placed with no `publish_base_url`; cross-tree links have no host | `architecture.md` §6.4 |
 | `API_LINK_REWRITTEN`⁶ᵉ | note | convert | Link into an api-reference tree pointed at its published `-resources` URL | `design.md` §10.7 |
 | `LINK_BROKEN` | **error** | validate | Relative link resolving to nothing | `design.md` §8.4 |
+| `LINK_CASE_UNCOMMITTED`⁸³ | **error** | validate | A link, `toc.yml` or `301.yml` target on disk in its exact case but committed (`git ls-files`) only in another case; AEM serves the committed one. Only for a target in a git work tree; R004 re-indexes the folder | Phase 83 (DOCOPS-374) |
 | `LINK_TO_UNFILED` | note | validate | A listed page links to an orphan under `unfiled/`, which AEM does not publish; listed in that version's `unfiled/inbound-links.csv` | Phase 43 |
 | `PATH_TOO_LONG`³⁴ | **error** | validate | A published file whose absolute path under `--target-dir` exceeds 260 characters, measured as `sync` measures it; Windows readers cannot open it (longest today: 236) | Phase 34 (R11-06) |
 | `API_PATH_LONG` | note | validate | `PATH_TOO_LONG` in an `api-references/` folder, published as shipped on purpose; one per folder | Phase 67 |

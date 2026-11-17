@@ -1,8 +1,10 @@
 """Stage 7: publishing-layout organizer.
 
-Writes repo-shaped directory trees under the sync target. Deliberately runs no
-git command and creates no repository -- publishing is out of scope for this
-tool (docs/architecture.md §6.0).
+Writes repo-shaped directory trees under the sync target. Creates no repository
+and commits nothing -- publishing is out of scope for this tool
+(docs/architecture.md §6.0). The one git command since Phase 83 re-indexes a
+version folder it placed in an existing work tree, so the index records the
+letter case on disk (`sync/reindex.py`, DOCOPS-374).
 
 Phase 6b built the spine and placed `online-help`; 6c added the three document
 doc-classes -- `user-guides`, `release-information` and `reference-documents` --
