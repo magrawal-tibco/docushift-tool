@@ -2351,6 +2351,231 @@ triage:
   # short name. The rename waits for AEM's answer. Delete after the push and a re-verify.
   - {code: VERIFY_PUBLISHED_PAGE_MISSING, decision: logged, ticket: DOCOPS-372, slug: "tibco-managed-file-transfer-platform-server-for-*", version: "8.*", reason: *notpushed}
 
+  # ---- ibi batch 1 on stg-docs.ibi.com (16 Nov runs 2916-2956), triaged 17 Nov:
+  # reports/verify/triage-ibi1-2026-11-17.md. Own anchors (&ibi1-...).
+  # ---- I1. Letter case of files and folders (DOCOPS-374). The links and toc.yml use the new
+  # spelling; git on wip kept the old one (Whats-New.md, Installation/, Overview.md,
+  # Resources/Images/, Subsystems/Default/, focus-studio/Images/...). AEM is case-sensitive, so
+  # the page or picture is not served and the menu row is dropped; verify then pairs the rest
+  # of that menu level by position, which shows as rows "found under another parent".
+  # Fixed on content-fix (DI/ISM cfe3f1c, FOCUS 4d7c6e37), not yet on wip. Clears when it ships.
+  #
+  # Empty menu titles first (I2, DOCOPS-376): same findings code, own cause.
+  - code: VERIFY_PUBLISHED_TOC_ENTRY_MISSING
+    decision: ours
+    ticket: DOCOPS-376
+    slug: ibi-data-intelligence
+    version: "[12].*"
+    path: "Unfiled > "
+    reason: &ibi1-notitle >-
+      toc.yml lists the page with an empty title (title: ''), because the source page has no
+      title and its heading is an H3 under an empty "# " line; staging shows the file name
+      instead (access-shared-proj, add-matchcase, ...). DI 1.0.0 3 rows, 1.1.0/1.2.0/2.0.0 75
+      each, FOCUS 9.3.4 4. Converter: take the first heading as the title. New, 17 Nov.
+  - {code: VERIFY_PUBLISHED_TOC_ENTRY_MISSING, decision: ours, ticket: DOCOPS-376, slug: ibi-focus, version: "9.3.4", path: "*Unfiled > ", reason: *ibi1-notitle}
+
+  - code: VERIFY_PUBLISHED_IMAGE_BROKEN
+    decision: ours
+    ticket: DOCOPS-374
+    slug: ibi-data-intelligence
+    reason: &ibi1-case >-
+      Letter case: the Markdown links resources/images/..., toc.yml links whats-new.md and
+      installation/...; git on wip still has Resources/Images/..., Whats-New.md, Installation/
+      (FOCUS: Subsystems/Default/, Overview.md). AEM is case-sensitive, so the picture or page
+      is not served and the menu row is dropped, which shifts verify's pairing of the rows after
+      it. Fixed on content-fix (DI/ISM cfe3f1c, FOCUS 4d7c6e37); clears when it reaches wip.
+  - {code: VERIFY_PUBLISHED_TOC_ENTRY_MISSING, decision: ours, ticket: DOCOPS-374, slug: ibi-data-intelligence, version: "[12].*", reason: *ibi1-case}
+  - {code: VERIFY_PUBLISHED_TOC_MOVED, decision: ours, ticket: DOCOPS-374, slug: ibi-data-intelligence, version: "[12].*", reason: *ibi1-case}
+  - {code: VERIFY_REDIRECT_UNSERVED, decision: ours, ticket: DOCOPS-374, slug: ibi-data-intelligence, version: "1.0.0", path: "installation/*", reason: *ibi1-case}
+  - {code: VERIFY_PUBLISHED_TEXT_DIFF, decision: ours, ticket: DOCOPS-374, slug: ibi-data-intelligence, version: "1.0.0", path: whats-new.md, reason: *ibi1-case}
+  - {code: VERIFY_PUBLISHED_TOC_ENTRY_MISSING, decision: ours, ticket: DOCOPS-374, slug: ibi-iway-service-manager-edi-add-on, version: "9.*", reason: *ibi1-case}
+  - {code: VERIFY_PUBLISHED_TOC_MOVED, decision: ours, ticket: DOCOPS-374, slug: ibi-iway-service-manager-edi-add-on, version: "9.*", reason: *ibi1-case}
+  - {code: VERIFY_REDIRECT_UNSERVED, decision: ours, ticket: DOCOPS-374, slug: ibi-iway-service-manager-edi-add-on, version: "9.*", path: whats-new.md, reason: *ibi1-case}
+  - {code: VERIFY_PUBLISHED_TOC_MOVED, decision: ours, ticket: DOCOPS-374, slug: ibi-focus, version: "9.3.[0-3]", path: "Compatibility Information for All Active Products > Overview", reason: *ibi1-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-focus, version: "9.3.[123]", path: "studio-installation-and-user-guide/ibi-focus-studio-server-browser-interface-hover.md", reason: *ibi1-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-focus, version: "9.3.[123]", path: "studio-installation-and-user-guide/ibi-focus-studio-server-browser-interface-ribbon.md", reason: *ibi1-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-focus, version: "9.3.[123]", path: "studio-installation-and-user-guide/menu-options/user-menu-options.md", reason: *ibi1-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-focus, version: "9.3.[123]", path: "studio-installation-and-user-guide/opening-ibi-focus-studio-server-browser-interface.md", reason: *ibi1-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-focus, version: "9.3.[123]", path: "studio-installation-and-user-guide/webfocus-reporting-server-profiles/profile-level.md", reason: *ibi1-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-focus, version: "9.3.[4-8]", reason: *ibi1-case}
+
+  # ---- I3. Empty articles (DOCOPS-344): staging serves the page with no text.
+  - code: VERIFY_PUBLISHED_ANCHOR_MISSING
+    decision: logged
+    ticket: DOCOPS-344
+    slug: ibi-data-intelligence
+    version: "1.0.0"
+    path: "user-guide/working-with-the-mdm-project/step-1-creating-a-new-project/creating-new-subjects/add-predefined-attribute-groups.md#*"
+    reason: &ibi1-empty >-
+      Staging serves the page with an empty article (0 words in div.topic-renderer__content;
+      add-predefined-attribute-groups.md has 252 in the Markdown); its headings and text are
+      not there. DI 1.0.0: 22 pages, mostly "Working with the MDM Project". For the AEM team.
+  - {code: VERIFY_PUBLISHED_TEXT_DIFF, decision: logged, ticket: DOCOPS-344, slug: ibi-data-intelligence, version: "1.0.0", path: "user-guide/working-with-the-mdm-project/*", reason: *ibi1-empty}
+  - {code: VERIFY_PUBLISHED_TEXT_DIFF, decision: logged, ticket: DOCOPS-344, slug: ibi-data-intelligence, version: "1.0.0", path: "user-guide/concepts/*", reason: *ibi1-empty}
+
+  # FOCUS 9.3.1: whole guides served with an empty article (HTML5 charts, Studio, In-Document
+  # Analytics, HLI, Simultaneous Usage, Unfiled); the pictures and text on them are not there.
+  - code: VERIFY_PUBLISHED_IMAGE_BROKEN
+    decision: logged
+    ticket: DOCOPS-344
+    slug: ibi-focus
+    version: "9.3.1"
+    path: "creating-html5-charts-ibi-webfocus/*"
+    reason: &ibi1-empty931 >-
+      FOCUS 9.3.1 only: staging serves most pages of six guides with an empty article (HTML5
+      charts, Studio, In-Document Analytics, Host Language Interface, Simultaneous Usage,
+      Unfiled); 9.3.0 and 9.3.2, built from the same kind of Markdown, are served whole. For
+      the AEM team (a stuck or partial build of that version).
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: ibi-focus, version: "9.3.1", path: "studio-installation-and-user-guide/*", reason: *ibi1-empty931}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: ibi-focus, version: "9.3.1", path: "in-document-analytics-user-guide/*", reason: *ibi1-empty931}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: ibi-focus, version: "9.3.1", path: "host-language-interface-user-guide/*", reason: *ibi1-empty931}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: ibi-focus, version: "9.3.1", path: "simultaneous-usage-reference-for-z-os/*", reason: *ibi1-empty931}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: ibi-focus, version: "9.3.1", path: "unfiled/*", reason: *ibi1-empty931}
+  - {code: VERIFY_PUBLISHED_TEXT_DIFF, decision: logged, ticket: DOCOPS-344, slug: ibi-focus, version: "9.3.1", path: "creating-html5-charts-ibi-webfocus/*", reason: *ibi1-empty931}
+  - {code: VERIFY_PUBLISHED_TEXT_DIFF, decision: logged, ticket: DOCOPS-344, slug: ibi-focus, version: "9.3.1", path: "studio-installation-and-user-guide/*", reason: *ibi1-empty931}
+  - {code: VERIFY_PUBLISHED_TEXT_DIFF, decision: logged, ticket: DOCOPS-344, slug: ibi-focus, version: "9.3.1", path: "in-document-analytics-user-guide/*", reason: *ibi1-empty931}
+  - {code: VERIFY_PUBLISHED_TEXT_DIFF, decision: logged, ticket: DOCOPS-344, slug: ibi-focus, version: "9.3.1", path: "host-language-interface-user-guide/*", reason: *ibi1-empty931}
+  - {code: VERIFY_PUBLISHED_TEXT_DIFF, decision: logged, ticket: DOCOPS-344, slug: ibi-focus, version: "9.3.1", path: "simultaneous-usage-reference-for-z-os/*", reason: *ibi1-empty931}
+  - {code: VERIFY_PUBLISHED_TEXT_DIFF, decision: logged, ticket: DOCOPS-344, slug: ibi-focus, version: "9.3.1", path: "unfiled/*", reason: *ibi1-empty931}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: ibi-focus, version: "9.3.1", path: "studio-installation-and-user-guide/webfocus-reporting-server-profiles.md#ibi-focus-studio-server-profiles", reason: *ibi1-empty931}
+
+  # ---- I4. Source: links to bookmarks the package never defines (broken on the old site too).
+  - code: VERIFY_PUBLISHED_ANCHOR_MISSING
+    decision: source
+    slug: ibi-focus
+    version: "9.3.[0-6]"
+    path: "*.md#*"
+    reason: &ibi1-nobookmark >-
+      The source page links to a Flare/Word bookmark (#ddis1008903, #dmfcr_01_ctr1027529,
+      #WS471B7B3D-4713-...) that no file in the package defines (id= or name=), checked over the
+      whole extracted package for 9.3.0-9.3.6; on the old site the link opens the page at its
+      top. 9.3.0-9.3.4 about 440 each, 9.3.5/9.3.6 18 (chart extension API page).
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: source, slug: ibi-data-intelligence, version: "1.1.0", path: "*/managing-services.md#Service3", reason: *ibi1-nobookmark}
+
+  # ---- I5. "INDEX" (SET INDEX parameter) is a real topic named INDEX.htm; the converter skips
+  # it as a generated index page (DOCOPS-349, as default.htm / index.htm on EMS).
+  - code: VERIFY_TOPIC_MISSING
+    decision: logged
+    ticket: DOCOPS-349
+    slug: ibi-focus
+    version: "9.3.*"
+    path: "*customizing-your-environment/set-parameter-syntax/index.md"
+    reason: &ibi1-index >-
+      focus-develope-app/INDEX.htm is the "INDEX" SET parameter topic (about 60 words of
+      syntax), not a generated index; the converter drops it as one (NAV_NODE_DROPPED), so the
+      menu row and its 301 row have no page. FOCUS 9.3.0-9.3.8.
+  - {code: VERIFY_TOC_ENTRY_MISSING, decision: logged, ticket: DOCOPS-349, slug: ibi-focus, version: "9.3.*", path: "*customizing-your-environment/set-parameter-syntax/index.md#index", reason: *ibi1-index}
+  - {code: VERIFY_REDIRECT_UNMAPPED, decision: logged, ticket: DOCOPS-349, slug: ibi-focus, version: "9.3.*", path: "*customizing-your-environment/set-parameter-syntax/index.md", reason: *ibi1-index}
+
+  # ---- I6. Checker (DOCOPS-366): verify's page map misses the ibi-focus/ folder for these
+  # pages. FOCUS 9.3.4-9.3.8 publish every guide under ibi-focus/; for the three chapters the
+  # conversion placed late (TOC_SUBPROJECT_UNPLACED), verify still looks at
+  # maintaining-databases/... and developing-applications/... without it. The pages are in the
+  # repo, in toc.yml and in the staging menu.
+  - code: VERIFY_TOPIC_MISSING
+    decision: logged
+    ticket: DOCOPS-366
+    slug: ibi-focus
+    version: "9.3.[4-8]"
+    path: "maintaining-databases/designing-screens-with-fidel*"
+    reason: &ibi1-prefix >-
+      Checker. The page is published at ibi-focus/<same path> (in the repo, in toc.yml, and in
+      the staging menu: ibi-focus/maintaining-databases/designing-screens-with-fidel.html);
+      verify's page map leaves out the ibi-focus/ folder for the FIDEL, FSCAN and Window
+      Painter chapters (28 pages, 56 old-menu rows per version).
+  - {code: VERIFY_TOPIC_MISSING, decision: logged, ticket: DOCOPS-366, slug: ibi-focus, version: "9.3.[4-8]", path: "maintaining-databases/directly-editing-ibi-focus-databases-with-fscan*", reason: *ibi1-prefix}
+  - {code: VERIFY_TOPIC_MISSING, decision: logged, ticket: DOCOPS-366, slug: ibi-focus, version: "9.3.[4-8]", path: "developing-applications/designing-windows-with-window-painter*", reason: *ibi1-prefix}
+  - {code: VERIFY_TOC_ENTRY_MISSING, decision: logged, ticket: DOCOPS-366, slug: ibi-focus, version: "9.3.[4-8]", path: "maintaining-databases/designing-screens-with-fidel*", reason: *ibi1-prefix}
+  - {code: VERIFY_TOC_ENTRY_MISSING, decision: logged, ticket: DOCOPS-366, slug: ibi-focus, version: "9.3.[4-8]", path: "maintaining-databases/directly-editing-ibi-focus-databases-with-fscan*", reason: *ibi1-prefix}
+  - {code: VERIFY_TOC_ENTRY_MISSING, decision: logged, ticket: DOCOPS-366, slug: ibi-focus, version: "9.3.[4-8]", path: "developing-applications/designing-windows-with-window-painter*", reason: *ibi1-prefix}
+
+  # ---- I7. Local text check (TEXT_DROPPED), FOCUS 9.3.0-9.3.8.
+  # Real: the page loses characters.
+  - code: VERIFY_TEXT_DROPPED
+    decision: logged
+    ticket: DOCOPS-360
+    slug: ibi-focus
+    version: "9.3.*"
+    path: "*/character-functions/xml??cod-*.md"
+    reason: &ibi1-entity >-
+      The source shows the entity names as text ("For &amp;, the result is &."); the Markdown
+      writes &amp; / &gt;, which show as & and >. Staging reads "For &, the result is &." and
+      "For >, the result is >." on XMLDECOD and XMLENCOD. Same escaping area as DOCOPS-360.
+  - code: VERIFY_TEXT_DROPPED
+    decision: logged
+    ticket: DOCOPS-360
+    slug: ibi-focus
+    version: "9.3.*"
+    path: "*/html-codes-in-strings.md"
+    reason: &ibi1-escapedlt >-
+      The sentence is in the Markdown with \< (\<u>, \<br>, \<span); verify's text check does
+      not read it. On staging \<u> and \<em> become real underline/italic tags (the words "<u>"
+      and "<em>" are gone), \<br> shows correctly, and "\<span" and "(\\)" show the backslash.
+      ibi has no R002 (\< -> &lt;) yet: about 1,450 lines in FOCUS, 800 in DI/ISM, 4,000 in
+      WebFOCUS on wip.
+  - {code: VERIFY_TEXT_DROPPED, decision: logged, ticket: DOCOPS-360, slug: ibi-focus, version: "9.3.*", path: "*/defining-callback-function-display-values-labels.md", reason: *ibi1-escapedlt}
+  - {code: VERIFY_TEXT_DROPPED, decision: logged, ticket: DOCOPS-360, slug: ibi-focus, version: "9.3.*", path: "*/defining-or-hiding-a-tooltip-for-risers.md", reason: *ibi1-escapedlt}
+  # Checker: the text is served whole.
+  - code: VERIFY_TEXT_DROPPED
+    decision: logged
+    ticket: DOCOPS-366
+    slug: ibi-focus
+    version: "9.3.*"
+    path: "*/supplying-and-verifying-values-for-variables.md"
+    reason: &ibi1-reg >-
+      Checker. "&REGIONMGR" (a Dialogue Manager variable) is read by verify's HTML parser as
+      the legacy entity &REG + "IONMGR" (®IONMGR). Staging serves "&amp;REGIONMGR" and the
+      sentence reads correctly (checked on 9.3.8).
+  - {code: VERIFY_TEXT_DROPPED, decision: logged, ticket: DOCOPS-366, slug: ibi-focus, version: "9.3.*", path: "*/designing-screens-with-fidel/introduction.md", reason: *ibi1-reg}
+  - {code: VERIFY_TEXT_DROPPED, decision: logged, ticket: DOCOPS-366, slug: ibi-focus, version: "9.3.2", path: "*/designing-screens-with-fidel/10designscreens161.md", reason: *ibi1-reg}
+  - code: VERIFY_TEXT_DROPPED
+    decision: logged
+    ticket: DOCOPS-366
+    slug: ibi-focus
+    version: "9.3.*"
+    path: "*/alphabetical-list-of-hli-commands.md"
+    reason: &ibi1-split >-
+      Checker. The sentence is split over lines inside raw HTML or a screen layout (<p> ...
+      "the status is" / "1."; menu lines "1. DISPLAY ADUCOL CONTENTS" in <pre>), and the check
+      reads the number as a list item. Staging shows each sentence whole (checked on 9.3.8).
+  - {code: VERIFY_TEXT_DROPPED, decision: logged, ticket: DOCOPS-366, slug: ibi-focus, version: "9.3.*", path: "*/automated-procedures/autodbc.md", reason: *ibi1-split}
+  - {code: VERIFY_TEXT_DROPPED, decision: logged, ticket: DOCOPS-366, slug: ibi-focus, version: "9.3.*", path: "*/designing-screens-with-fidel/using-fidel-in-modify.md", reason: *ibi1-split}
+
+  # ---- I8. Staging menu: a page toc.yml lists twice is shown once (accepted, as on TIBCO).
+  - code: VERIFY_PUBLISHED_TOC_MOVED
+    decision: accepted
+    slug: ibi-focus
+    version: "9.3.[4-8]"
+    path: "*Studio Installation and User Guide > D*"
+    reason: &ibi1-once >-
+      toc.yml lists the page under two parents, as the old menu did (FIDEL, FSCAN and Window
+      Painter under both their guide and the Studio guide; on 9.3.8 the SQL function rows that
+      reuse the Simplified function pages; REGEXP_SUBSTR twice in one list); staging shows it
+      once, and readers still reach it.
+  - {code: VERIFY_PUBLISHED_TOC_MOVED, decision: accepted, slug: ibi-focus, version: "9.3.8", path: "*Using Functions > SQL * Functions > *", reason: *ibi1-once}
+  - {code: VERIFY_PUBLISHED_TOC_ENTRY_MISSING, decision: accepted, slug: ibi-focus, version: "9.3.8", path: "*Regular Expression Functions > REGEXP_SUBSTR*", reason: *ibi1-once}
+  - code: VERIFY_PUBLISHED_TOC_MOVED
+    decision: accepted
+    slug: ibi-focus
+    version: "9.3.[4-8]"
+    path: "Introduction to ibi WebFOCUS HTML5 Charts > Introduction to ibi WebFOCUS HTML5 Charts"
+    reason: >-
+      toc.yml lists the chart guide's first page under itself (rows 1 and 2, same url);
+      staging shows it once. Every page is reached.
+
+  # ---- I9. Staging's menu for FOCUS 9.3.4 and 9.3.7 still starts with two rows no toc.yml has,
+  # "Studio Installation and User Guide" and "Unfiled"; neither page is in the repo's history.
+  # verify pairs the menu by position, so every row after them reads "found under another
+  # parent" (9.3.4: 80, 9.3.7: 19). For the AEM team.
+  - code: VERIFY_PUBLISHED_TOC_MOVED
+    decision: platform
+    ticket: DOCOPS-377
+    slug: ibi-focus
+    version: "9.3.[47]"
+    reason: >-
+      Staging's menu keeps two old top-level rows ("Studio Installation and User Guide",
+      "Unfiled") that toc.yml and the repo do not have; verify's pairing slips after them.
+
   # Catch-alls: keep last; the first matching entry wins.
   - code: VERIFY_REDIRECT_MAP_MISSING
     decision: logged
