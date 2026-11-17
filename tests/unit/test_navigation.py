@@ -604,7 +604,11 @@ def test_render_toc_writes_html_to_md_s_dialect(templates) -> None:
 
 def test_the_online_help_title_is_the_product_and_its_version() -> None:
     """2026-11-14: the help menu on the site is titled with the product and version."""
-    assert online_help_title("TIBCO® MDM Studio", "6.1.1") == "TIBCO® MDM Studio 6.1.1"
+    assert online_help_title("TIBCO® MDM Studio", "6.1.1") == "TIBCO MDM Studio 6.1.1"
+    # Registered, trademark and copyright signs are left out (user, 2026-11-17).
+    assert online_help_title("ibi™ WebFOCUS® App Studio", "9.3.8") == "ibi WebFOCUS App Studio 9.3.8"
+    assert online_help_title("TIBCO ActiveMatrix BusinessWorks™ Plug-in ©", "6.0.1") == \
+        "TIBCO ActiveMatrix BusinessWorks Plug-in 6.0.1"
     assert online_help_title(" TIBCO EMS ", " 10.4.0 ") == "TIBCO EMS 10.4.0"
     # No name to give it: html-to-md's constant, never a bare version number.
     assert online_help_title("", "6.1.1") == ONLINE_HELP_LIST_TITLE == "Online Help"

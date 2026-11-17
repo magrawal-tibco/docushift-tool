@@ -439,15 +439,20 @@ def _link(parent: str, node: NavNode) -> str:
 #: only the fallback for a product with no display name (`online_help_title`).
 ONLINE_HELP_LIST_TITLE = "Online Help"
 
+#: The signs a menu title leaves out (user, 2026-11-17).
+_MARKS = re.compile("[\u00ae\u2122\u00a9\u2120]")
+
 
 def online_help_title(display_name: str, version: str) -> str:
     """`docs_list_title` of a version's help `toc.yml`: "<product> <version>".
 
     The title of the help menu on the AEM site (the user's call, 2026-11-14), e.g.
-    `TIBCO® MDM Studio 6.1.1`. Written by `convert` and by `reframe`, the same in
+    `TIBCO MDM Studio 6.1.1`. Written by `convert` and by `reframe`, the same in
     every locale: a product name and a version number need no translation.
+    The registered, trademark and copyright signs are left out (user, 2026-11-17):
+    the catalog's `TIBCO® MDM Studio` is titled `TIBCO MDM Studio`.
     """
-    name = (display_name or "").strip()
+    name = " ".join(_MARKS.sub("", display_name or "").split())
     if not name:
         return ONLINE_HELP_LIST_TITLE
     return f"{name} {(version or '').strip()}".strip()

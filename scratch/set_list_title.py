@@ -123,6 +123,8 @@ def main() -> int:
     parser.add_argument("--root", action="append", required=True, type=Path,
                         help="a published repo, or output/, reframed/ or the folder holding them")
     parser.add_argument("--product", help="one product slug")
+    parser.add_argument("--workspace-dir", help="only this folder under output/ and reframed/, "
+                        "e.g. en-us-tib-bw-plugin (published roots are not filtered)")
     parser.add_argument("--project", type=Path, default=REPO,
                         help="the DocuShift checkout whose catalog names the products")
     parser.add_argument("--apply", action="store_true", help="write the files (default: report only)")
@@ -133,13 +135,19 @@ def main() -> int:
     catalog = CatalogManager(config.products_path, config.versions_path, config=config).load()
     # Every catalog row, retired or out of scope included: a published tree may hold one.
     products = catalog.products
+    # Phase 80: a moved product's published folder is its publish name.
+    slug_of = {config.publish_name(slug): slug for slug in products}
 
     changed = same = 0
     unmapped: list[str] = []
     for root in args.root:
-        found = [(p, False) for p in published(root)] + [(p, True) for p in workspace(root)]
+        found = [(p, False) for p in published(root)] + [
+            (p, True) for p in workspace(root)
+            if not args.workspace_dir or p.parents[2].name == args.workspace_dir]
         for path, in_workspace in sorted(found):
             folder, slug = path.parent.name, path.parents[1 if in_workspace else 2].name
+            if not in_workspace:
+                slug = slug_of.get(slug, slug)
             if args.product and slug != args.product.lower():
                 continue
             product = products.get(slug)
