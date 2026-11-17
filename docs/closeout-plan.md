@@ -10,6 +10,7 @@
 *Rewritten each morning. Never more than three decisions.*
 
 **Mon 16 Nov.**
+- **DOCOPS-374 / Phase 83 done on `content-fix` (Tue 17):** git had kept old folder spellings (`core.ignorecase`), so ~21,000 links missed their files on AEM. 14,812 files re-recorded in the links' case in 8 repos (renames only, R100), pushed to `content-fix`; audit on `content-fix` reads 0 in every TIBCO and ibi repo. Code `b016894`: sync re-records a version's spelling after placing it, repair R004, validate `LINK_CASE_UNCOMMITTED`. Ships with R2 (TIBCO) and ibi R1.
 - **ibi checks started (user, Mon):** 12 ibi products are on staging (12 of 22 products, 41 of 200 versions). The 4 repos they live in were brought up to `wip` locally (no push); 41 checks running in 2 batches (`ibi1-a`, `ibi1-b`). The other 10 products (WebFOCUS, Reporting Server, Container Editions, iWay Service Manager, Data Quality) wait for Digital Platform.
 - **`wip` frozen for now (user, Mon):** Digital Platform is pushing ibi and the build pipeline is full. Nothing goes to `wip` until they finish; local work keeps going to `content-fix` (29 TIBCO repos pushed to `content-fix` Mon).
 - **BW plug-in renames approved (user, Mon), without waiting for AEM's answer:** 133 folder moves in the 2 BW plug-in repos, committed on `content-fix` (`a69a137f`, `8b02901`); names active in `config/publish-names.yaml` (`90ac6c9`). They go to `wip` when it opens.
