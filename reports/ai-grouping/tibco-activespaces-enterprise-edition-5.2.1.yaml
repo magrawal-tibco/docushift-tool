@@ -1,0 +1,24 @@
+# Phase 81 (AI-assisted grouping): proposed `depth:` entries, drafted 2026-11-17.
+# A DRAFT FOR REVIEW. Nothing here is in config/reframe.yaml yet.
+# Reasons per guide and chapter: reports/ai-grouping/tibco-activespaces-enterprise-edition-5.2.1.md.
+#
+# Goes under the EXISTING product block `tibco-activespaces-enterprise-edition:` in
+# config/reframe.yaml (products:), which already has `pin_layout_to: "5.2.0"` and
+# `publish: true`. Add `depth:` at the same indent as `pin_layout_to:`, with these lines.
+# 5.2.1 then becomes its own pin (Phase 81); 4.10.0 to 5.2.0 keep projecting onto 5.2.0.
+# Titles match toc.yml exactly; none of them needs an escape.
+# Validated in memory 2026-11-17 (policy_for -> for_version -> packer.depth_nodes against
+# 5.2.1's toc.yml): 6 of 6 matched, 0 unmatched; no other version picks any entry up.
+tibco-activespaces-enterprise-edition:
+  depth:
+    # ---- 5.2.1 (6 entries). 63 menu pages + 4 not in navigation; today 55 (projected on 5.2.0).
+    # Whole guides, one page each: Installation, Security Guidelines, API Reference.
+    - {guide: "Installation", depth: 1, versions: ["5.2.1"]}
+    - {guide: "Security Guidelines", depth: 1, versions: ["5.2.1"]}
+    - {guide: "API Reference", depth: 1, versions: ["5.2.1"]}
+    # Concepts: one page per chapter; Programming with ActiveSpaces one page per section
+    # (Structuring Programs, Querying, Modifying Data, SQL Expressions, SQL Functions ...).
+    - {guide: "Concepts", depth: 2, versions: ["5.2.1"]}
+    - {guide: "Concepts", chapter: "Programming with ActiveSpaces", depth: 2, versions: ["5.2.1"]}
+    # Administration: one page per chapter (Administration Tool one reference page).
+    - {guide: "Administration", depth: 2, versions: ["5.2.1"]}

@@ -1,0 +1,26 @@
+# Phase 81 (AI-assisted grouping): proposed `depth:` entries for BW Plug-in for AI 6.0.2,
+# drafted 2026-11-17. A DRAFT FOR REVIEW. Nothing here is in config/reframe.yaml yet.
+# Reasons per chapter: reports/ai-grouping/tibco-businessworks-plug-in-for-ai-6.0.2.md.
+#
+# config/reframe.yaml has NO block for this product today (no pin, no keep_separate).
+# These lines go under `products:` as a NEW block, e.g. after the CICS block.
+# See the .md: the new block should probably also carry `pin_layout_to: "6.0.1"` so that
+# 6.0.0 and 6.0.1 (published) keep their layout; that is a separate decision, not drafted here.
+#
+# Titles match output/.../tibco-businessworks-plug-in-for-ai/6.0.2/toc.yml exactly; all ASCII.
+# Validated in memory 2026-11-17 (policy_for -> for_version -> packer.depth_nodes):
+# 8 entries, 8 matched, 0 unmatched; 6.0.1 and 6.0.0 pick up no entry.
+
+tibco-businessworks-plug-in-for-ai:
+  depth:
+    # ---- 6.0.2 (8 entries).
+    # Installation, one page per chapter (requirements, each install/uninstall method, troubleshooting).
+    - {guide: "Installation", depth: 2, versions: ["6.0.2"]}
+    # User Guide: RAG Palette one page per activity; the other chapters whole.
+    - {guide: "User Guide", chapter: "RAG Palette", depth: 2, versions: ["6.0.2"]}
+    - {guide: "User Guide", chapter: "Getting Started", depth: 1, versions: ["6.0.2"]}
+    - {guide: "User Guide", chapter: "Deploying Applications", depth: 1, versions: ["6.0.2"]}
+    - {guide: "User Guide", chapter: "RAG LLM and Embedding Connection", depth: 1, versions: ["6.0.2"]}
+    - {guide: "User Guide", chapter: "Working with Sample Projects", depth: 1, versions: ["6.0.2"]}
+    - {guide: "User Guide", chapter: "Log Management", depth: 1, versions: ["6.0.2"]}
+    - {guide: "User Guide", chapter: "Error Codes", depth: 1, versions: ["6.0.2"]}

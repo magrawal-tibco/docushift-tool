@@ -222,6 +222,40 @@ products:
   tibco-activespaces-enterprise-edition:
     pin_layout_to: "5.2.0"
     publish: true
+    depth:
+      # ---- 5.2.1 (6 entries). 63 menu pages + 4 not in navigation; today 55 (projected on 5.2.0).
+      # Whole guides, one page each: Installation, Security Guidelines, API Reference.
+      - {guide: "Installation", depth: 1, versions: ["5.2.1"]}
+      - {guide: "Security Guidelines", depth: 1, versions: ["5.2.1"]}
+      - {guide: "API Reference", depth: 1, versions: ["5.2.1"]}
+      # Concepts: one page per chapter; Programming with ActiveSpaces one page per section
+      # (Structuring Programs, Querying, Modifying Data, SQL Expressions, SQL Functions ...).
+      - {guide: "Concepts", depth: 2, versions: ["5.2.1"]}
+      - {guide: "Concepts", chapter: "Programming with ActiveSpaces", depth: 2, versions: ["5.2.1"]}
+      # Administration: one page per chapter (Administration Tool one reference page).
+      - {guide: "Administration", depth: 2, versions: ["5.2.1"]}
+
+  # Pinned 17 Nov to the newest published version: the 5 Nov refresh added 1.21.0
+  # and 1.22.0, and the automatic pin would have moved to 1.22.0, re-cutting every
+  # published version on its next merge. 1.22.0 is laid out on its own (Phase 81).
+  tibco-control-plane:
+    pin_layout_to: "1.20.0"
+
+  # Pinned 17 Nov for the same reason: 6.0.2 (Δ2) is laid out on its own (Phase 81).
+  tibco-businessworks-plug-in-for-ai:
+    pin_layout_to: "6.0.1"
+    depth:
+      # ---- 6.0.2 (8 entries).
+      # Installation, one page per chapter (requirements, each install/uninstall method, troubleshooting).
+      - {guide: "Installation", depth: 2, versions: ["6.0.2"]}
+      # User Guide: RAG Palette one page per activity; the other chapters whole.
+      - {guide: "User Guide", chapter: "RAG Palette", depth: 2, versions: ["6.0.2"]}
+      - {guide: "User Guide", chapter: "Getting Started", depth: 1, versions: ["6.0.2"]}
+      - {guide: "User Guide", chapter: "Deploying Applications", depth: 1, versions: ["6.0.2"]}
+      - {guide: "User Guide", chapter: "RAG LLM and Embedding Connection", depth: 1, versions: ["6.0.2"]}
+      - {guide: "User Guide", chapter: "Working with Sample Projects", depth: 1, versions: ["6.0.2"]}
+      - {guide: "User Guide", chapter: "Log Management", depth: 1, versions: ["6.0.2"]}
+      - {guide: "User Guide", chapter: "Error Codes", depth: 1, versions: ["6.0.2"]}
 
   # Pinned, but neither has a convert-eligible version on disk yet, so the pin first
   # takes effect the run after they are converted.
