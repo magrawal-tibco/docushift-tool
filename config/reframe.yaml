@@ -291,7 +291,7 @@ products:
       # Managing Capabilities: one chapter per Flare sub-project, each at its own depth.
       - {guide: "Managing Capabilities", chapter: "Provisioning a Capability", depth: 1, versions: ["1.21.0", "1.22.0"]}
       - {guide: "Managing Capabilities", chapter: "Refreshing Capability", depth: 1, versions: ["1.21.0", "1.22.0"]}
-      - {guide: "Managing Capabilities", chapter: "TIBCO BusinessWorks\u2122 6 (Containers)", depth: 2, versions: ["1.21.0", "1.22.0"]}
+      - {guide: "Managing Capabilities", chapter: "TIBCO BusinessWorks\u2122 6 (Containers)", depth: 3, versions: ["1.21.0", "1.22.0"]}
       - {guide: "Managing Capabilities", chapter: "TIBCO BusinessWorks\u2122 5 (Containers)", depth: 3, versions: ["1.21.0", "1.22.0"]}
       - {guide: "Managing Capabilities", chapter: "TIBCO Flogo", depth: 3, versions: ["1.21.0", "1.22.0"]}
       - {guide: "Managing Capabilities", chapter: "TIBCO Enterprise Message Service", depth: 2, versions: ["1.21.0", "1.22.0"]}
