@@ -3018,6 +3018,40 @@ name.
 
 ---
 
+### Phase 83: Committed Paths in the Case the Links Use — **Proposed 2026-11-17; DOCOPS-374**
+
+**Problem.** A published link names a picture, a file or a page in a letter case the repository does not hold: BW Plug-in for AI 6.0.1 `user-guide/rag-palette/chunk-activity.md` links `../../resources/images/chunk-activity.png`, the repo holds `Resources/Images/chunk-activity.png`. Windows folds case, so `validate` passes; AEM does not, and serves a placeholder.
+
+Measured 17 Nov on `origin/wip` (`git ls-tree` + `git grep`, never the disk; script and rows in `C:/tmp/case_audit/`):
+
+| | Versions | Files | Links | of which: pictures in pages | other files in pages | `toc.yml` rows | `301.yml` rows |
+|---|---|---|---|---|---|---|---|
+| ibi | 85 | 3,114 | 17,307 | 16,219 | 0 | 544 | 544 |
+| TIBCO | 64 | 181 | 4,151 | 417 | 10 | 1,862 | 1,862 |
+| **Total** | **149** | **3,295** | **21,458** | 16,636 | 10 | 2,406 | 2,406 |
+
+- Top products: ibi WebFOCUS client (9 versions, 10,232), ActiveSpaces EE (6 versions, 3,560, nearly all `toc.yml`/`301.yml` rows into `Installation/`, `Administration/`, `Concepts/`, `Security/`), ibi FOCUS (9, 3,224), Data Intelligence (5, 1,121), WebFOCUS Container Edition (13, 1,100), iWay Service Manager (2, 677), Reporting Server (9, 426), Open Data Hub (11, 336), 23 BW plug-ins (1-175 each).
+- Page-to-page links in page bodies, measured separately: 746 more (Container Edition 365, ActiveSpaces 324, BW plug-ins 47).
+- **Where the case differs:** a folder in 99.2% (`infoassist`/`infoAssist` 4,397, `securityadmin`/`securityAdmin` 3,765, `subsystems`/`Subsystems` 3,120, `resources`/`Resources` 2,743, `administration`/`Administration` 1,782 ...), the file name in 136, both in 32. **No collisions:** no repo holds two files that differ only by case.
+- `verify` saw 14 versions / 2,660 because it checks only what staging has served; the census above is the full count.
+- **Missing entirely (not this phase):** 3,781 links whose target is in no case at all — TIBCO 2,567 in 233 versions (1,955 `301.yml` rows), ibi 1,214 in 107 versions. Rows in `C:/tmp/case_audit/missing.csv`.
+- `origin/content-fix` (where the fix ships): the same 9 repos, 21,456 links (bw-plugin 578 instead of 580).
+- Spotfire DV and Statistica have no `wip` branch and were not measured.
+
+**Cause.** Not the converter's links. The converter writes link and file in one spelling: `transforms/assets.py` `_on_disk` (Phase 52) spells an asset as the source disk does, and `reframe/packer.py` `asset_destination` lower-cases asset folders for the copy and the link alike, so the reframed tree is consistent (`reframed/.../6.0.1/resources/images/`). `sync` swaps that tree onto the repo, and the working tree on disk is right too (`.../6-0-1/resources/`). The case is lost at **`git add`**: every publish repo has `core.ignorecase=true`, so a path already tracked as `Resources/Images/x.png` (the first publish, or the predecessor's content of 6 Oct) keeps its index spelling when the disk now says `resources/images/x.png`, and a new file under that folder takes the folder's index spelling. `git status` stays clean. Every finding is an old folder spelling the index never let go of; that is why it is folders and never collisions.
+
+**Change.**
+1. **Publish step records case-only renames.** After `sync` places a version (and in any `git add` script under `scratch/`), the version folder is re-indexed from disk: `git rm -r --cached -q <folder>` then `git add <folder>`. Git then records `Resources/Images/x.png -> resources/images/x.png` as a rename; blobs are unchanged. A helper in `sync/` (`reindex_case(repo, folder)`) does it and reports the renames it made.
+2. **R004 "Committed path differs in case from the file on disk"** (`src/docushift/repairs/r004_path_case.py`, DOCOPS-374, Phase 83). Unlike R001-R003 it does not rewrite text: R002 already sits in these pages, and a link rewrite would be undone by the next sync (the reframed tree spells `resources/`). It repairs the repo index.
+   - **census:** per version, the links (`![]()`, `<img src>`, local non-page files, page links), `toc.yml` and `301.yml` targets that resolve only case-insensitively against `git ls-tree -r <ref>`. `Repair` gains an optional `scope="repo"` with `census_repo(repo, ref) -> {key: count}` and `apply_repo(repo, folders, dry_run)`; text repairs are unchanged.
+   - **apply:** re-indexes each affected version folder as in (1) when the disk spelling matches the links; where it does not (a file on disk in neither spelling, a folder moved by Phase 80), it rewrites the link to the committed spelling instead and lists it. Idempotent: a second run finds nothing.
+   - Tests in `tests/unit/test_repairs.py`: registered with ticket; a temp git repo with `core.ignorecase=true` and `Resources/Images/a.png` tracked, `resources/images/a.png` on disk and linked → census 1, apply records the rename, census 0, second apply no change; a target missing in every case is not counted; a page's text bytes unchanged.
+3. **validate checks the committed tree, not the disk.** `validation/links.py` resolves by exact listing of the disk, which is right on disk and wrong in git. New error **`LINK_CASE_UNCOMMITTED`**: a link, `toc.yml` or `301.yml` target that exists on disk in its exact case but is committed (`git ls-files`) only in another case. The message names both spellings. Run by `validate` when the target is a git repo; R004's `confirm` is this code.
+
+**Steps.** (1) `reindex_case` in `sync/` with tests; call it from `sync` after `_place`. (2) R004 with its census and apply, tests as above. (3) `LINK_CASE_UNCOMMITTED` in `validate`, with a test on a temp repo. (4) `repair census --repair R004` on the content-fix trees; compare with this table. (5) Apply on `content-fix` only (wip frozen): ibi container-editions, di-ism, focus, webfocus, wf-reporting-server; TIBCO activespaces, bw-plugin, data-management, tra. One commit per repo, renames only; `git diff --stat -M` shows 100% renames and no page text changed, so R002 and the other repairs on these pages stay. Then `validate` (0 `LINK_CASE_UNCOMMITTED`) and census 0. (6) Push with R2, in R2's chunks. (7) After any later sync of these versions, the R002 apply runs first and R004's census must read 0 (the sync-side fix makes it so); a version that shows R004 again is re-indexed before the push. (8) Confirm on staging with the BW Plug-in for AI 6.0.1 chunk-activity picture and one ibi FOCUS page; add the UAT row.
+
+**Effort.** About 2 days: sync step and tests 0.5, R004 and tests 1, validate 0.25, apply and checks over 10 repos 0.25. No page text changes; the AEM paths of the affected pictures and of ActiveSpaces' four folders change case, which is what the links and menus already name.
+
 ### Phase 82: Old-Site URL Rules per Version — **Built 2026-11-16 (approved the same day); DOCOPS-354**
 
 **Problem.** `config/origin-urls.yaml` takes one URL template per product. Three published versions need a different rule from their sibling versions, so none can be declared, and their `301.yml` holds no page rows (every old page URL 404s after 30 Nov):
