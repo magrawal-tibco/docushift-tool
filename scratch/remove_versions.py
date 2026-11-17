@@ -39,6 +39,10 @@ if "--from-csv" in sys.argv:
         for _row in csv.DictReader(_fh):
             if not _row["action"].startswith("remove"):
                 continue
+            # Phase 80: a moved product's folder is its publish name (ActiveAspects and 5
+            # more declined versions were missed on 17 Nov because the slug no longer matched).
+            from docushift.config import ConfigManager
+            _row["slug"] = ConfigManager(root_dir=__import__("pathlib").Path(".")).publish_name(_row["slug"])
             _hits = [r for r in _repos if os.path.isdir(os.path.join(TREE, r, "en-us", _row["slug"]))]
             if not _hits:
                 print("  not published in any repo:", _row["slug"], _row["version"])
