@@ -1,6 +1,6 @@
 # Jira Tracking — What Is Logged in DOCOPS
 
-> **Last reconciled:** 2026-11-13 (night), against Jira and `config/versions.csv`.
+> **Last reconciled:** 2026-11-18 (morning), against Jira and `config/versions.csv`.
 > Conventions (site, cloud ID, story points, transitions, who owns what) live in
 > `C:\github\confluence-mcp\reports\docushift-claude-atlassian-context.md`; this file
 > does not repeat them. It answers one question: **is this piece of work in Jira, and where?**
@@ -35,9 +35,10 @@ This table says only what changes in Jira when an event happens.
 | Staging menu fix built and the five TIBCO staging pilots re-run and traced (probe done 2026-11-09; plan 2026-11-11) | DOCOPS-257: dated note with each pilot's outcome → Done |
 | The AEM team answers on section rows missing from the staging menu (accepted for now, user raising it, 2026-11-11) | DOCOPS-257 or its successor: dated note |
 | The AEM team answers on heading link targets (every case in `reports/verify/anchor-targets.csv` reported by the user, 2026-11-11) | DOCOPS-257 or a new sub-task: dated note with the rule; plan the re-write of anchors and `301.yml` if the tool's rule changes |
+| Streaming MMS guide shows on staging (built and on `content-fix` 18 Nov; goes to `wip` with Streaming) | DOCOPS-381 (In Progress 18 Nov): dated note → Done. Component not set: the create call rejected it, so set it in the CSV |
 | The AEM team answers on Streaming's staging pages (reported by the user, 2026-11-11; Streaming left out of the staging pilots until then) | Re-run Streaming 11.1.3 `verify`; dated note on DOCOPS-257 or its successor |
 | Staging shows one Japanese and one German WebFOCUS page correctly | DOCOPS-148: dated note → Done |
-| Data Virtualization team answers the error report and the corrections are republished (published as-is 2026-10-26) | DOCOPS-254: dated note → Done |
+| Spotfire Statistica and Data Virtualization handed over to Digital Platform (`main` pushed, Thu 19; team's DV answers applied 18 Nov) | DOCOPS-382: dated note → Done; DOCOPS-254 → Done |
 | Staging has rebuilt from `wip` (all five ibi `phase63-*` branches merged 2026-10-26, deleted 2026-10-28) | `verify` with staging per family: DOCOPS-274 note; notes on DOCOPS-259/260/262/263; R001 sub-tasks DOCOPS-264/265/266/267/268 → Done if labels show |
 | Phase 63 rolled out and every family re-synced | DOCOPS-274 → Done |
 | Translated WebFOCUS layout phase is opened | New sub-task under DOCOPS-11 (deferred from Phase 63) |
@@ -47,8 +48,6 @@ This table says only what changes in Jira when an event happens.
 | The URL request sheet is filled (`reports/origin-url-requests.csv`; 15 of the needed rows in on 2026-11-03) | DOCOPS-322: declare and test each pattern in `config/origin-urls.yaml`, dated note |
 | A way for `sync` to keep files added by hand in a version folder is planned and built (WFCE 9.3.7/9.3.8 split-PDF test files, 2026-11-05) | DOCOPS-327 → In Progress, then Done (due 2026-11-28) |
 | AEM says where a PDF-only version's 301.yml lives | Plan its document rows in a new sub-task (DOCOPS-324 is Done) |
-| On hold (user, 2026-11-05) until clearer: Spotfire Statistica's Phase 72 commit (d34eb6cd, on `main`, not pushed, no content-fix branch) | New sub-task under DOCOPS-7 when decided |
-| On hold (user, 2026-11-05) until clearer: Spotfire Data Virtualization repo is empty; first publish decided | New sub-task under DOCOPS-7 when decided |
 | Foresight `-resources` folder is not a clone (58 KB untracked archives, 2026-11-05); clone or remove decided (Minor, later) | DOCOPS-330 → Done |
 | Support sends an end-of-support report with the Retirement Date column again | `catalog eos`; dated note on a new catalog sub-task under DOCOPS-6 (4 versions dateless since 2026-11-05) |
 | A verify wave finishes (Phase 77) | Propose Jira sub-tasks for the unlogged kinds in `reports/verify/ISSUES.html`; create the approved ones, enter them `logged`, `--retriage`; dated note on each kind whose counts changed; a Verify waves row |
@@ -75,6 +74,10 @@ This table says only what changes in Jira when an event happens.
 
 **Log** (newest first, one line per session):
 
+- 2026-11-18 (evening): DOCOPS-382 created under DOCOPS-7 (Spotfire hand-over, 1 SP, due 19 Nov; component not accepted by the API); notes on DOCOPS-382 and DOCOPS-254 (264 DV links restored). The two Spotfire 'on hold' rows are closed by it (Statistica `d34eb6cd` released; DV was published 26 Oct, not empty).
+- 2026-11-18 (afternoon): dated notes on DOCOPS-344, 374, 347, 322, 360, 150 (ibi batch 2, first 58 versions triaged: 0 lost; 44 entries in `config/verify-triage.yaml`, `--retriage`, status page @11). No new issues. R2 overnight pushes checked on staging at 13:15: 2 of 19 partly built, 17 not (`reports/verify/wip-push-check-2026-11-18.md`; list for Digital Platform `reports/wip-pushes-2026-11-18.md`); note on DOCOPS-313 due once they build. ibi batch 2 still running (`cache/overnight/ibi2-{new,a,b}`); the next triage covers the rest.
+- 2026-11-18: DOCOPS-381 created under DOCOPS-7: the Streaming MMS guide (11.2.0/11.2.1) was never converted. Source is the writers' Markdown at the release tags; Phase 84 approved, built and pushed to `content-fix` the same day (In Progress, note posted).
+- 2026-11-18 (morning): DOCOPS-370, 372, 374 Backlog → In Progress with dated notes (fixes out with R2's overnight waves); snapshot refreshed and status page republished (@9). DOCOPS-379 created under DOCOPS-6 for the delta migration (Δ1, Δ2, Δ3 on 27 Nov; 1 SP, due 27 Nov, In Progress).
 - 2026-11-13 (night):
   - DOCOPS-364 In Progress: K1 (1,166 decisions in the catalog, all checked) and K3 downloads (27 on disk) done; notes.
   - DOCOPS-366: two more checker fixes merged (Statistica 14,025 false missing pages now 1), note.
