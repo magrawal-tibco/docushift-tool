@@ -57,6 +57,8 @@ echo "$batch" > "$lock/name"
 trap 'rm -rf "$lock"' EXIT
 
 avail_mb() { awk '/^MemAvailable:|^MemFree:/{print int($2/1024); exit}' /proc/meminfo; }
+LOW_DISK_MB=${LOW_DISK_MB:-5000}
+free_disk_mb() { df -m . | awk 'NR==2{print $4}'; }
 
 echo "start $(date '+%F %T')  $(avail_mb) MB available  (slot ${lock##*/.lock} of $SLOTS)" >> "$summary"
 n=0
@@ -72,6 +74,17 @@ while IFS= read -r args || [ -n "$args" ]; do
     sleep 60; waited=$((waited + 1))
   done
   [ "$waited" -gt 0 ] && echo "     low memory: waited $waited min, now $(avail_mb) MB" >> "$summary"
+  # Disk (18 Nov: the disk filled at 23:49 and every later run failed at once). Wait up to
+  # an hour for space; if it does not come back, stop the batch so a re-run resumes here.
+  waited=0
+  while [ "$(free_disk_mb)" -lt "$LOW_DISK_MB" ] && [ "$waited" -lt 60 ]; do
+    sleep 60; waited=$((waited + 1))
+  done
+  if [ "$(free_disk_mb)" -lt "$LOW_DISK_MB" ]; then
+    echo "STOPPED $(date '+%F %T'): disk low ($(free_disk_mb) MB free) before line $n; re-run to resume" >> "$summary"
+    exit
+  fi
+  [ "$waited" -gt 0 ] && echo "     low disk: waited $waited min, now $(free_disk_mb) MB free" >> "$summary"
   log=$(printf '%s/%03d.log' "$logs" "$n")
   start=$(date +%s)
   echo "\$ docushift $args" > "$log"

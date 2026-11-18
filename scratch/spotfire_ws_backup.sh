@@ -5,7 +5,9 @@ set -eu
 cd "$(dirname "$0")/.."
 dest=C:/tmp/spotfire-ws-backup-2026-11-18
 mkdir -p "$dest/output" "$dest/reframed"
-for d in en-us-spotfire-statistica en-us-spotfire-data-virtualization; do
+# Data Virtualization only (19 Nov): Statistica is converted into a scratch folder tonight, so
+# its workspace is not touched; its backup filled the disk.
+for d in en-us-spotfire-data-virtualization; do
   cp -r "output/$d" "$dest/output/" && cp -r "reframed/$d" "$dest/reframed/"
   echo "backed up $d"
 done
