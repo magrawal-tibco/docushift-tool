@@ -1,0 +1,225 @@
+# Proposed verify-triage entries: ibi batch 2 on stg-docs.ibi.com (18 Nov runs 3032-3091).
+# Report: reports/verify/triage-ibi2-2026-11-18.md. Nothing here is in config/verify-triage.yaml yet.
+#
+# Paste the whole `triage:` list (without this header and `triage:`) directly ABOVE
+# "  # Catch-alls: keep last" in config/verify-triage.yaml, after the ibi batch 1 block.
+# First match wins. The file is self-contained (its own &ibi2-... anchors), so it also loads
+# alone. Every entry is limited to the slug and versions checked in this batch, and every one
+# decides at least one stored finding of it (checked 18 Nov in a --retriage simulation).
+
+triage:
+  # ---- J1. Letter case of files and folders (DOCOPS-374). The Markdown links
+  # resources/images/...; git on wip still has Resources/Images/... AEM is case-sensitive, so
+  # staging shows placeholder.png. Fixed on content-fix (WebFOCUS 9da55f7b, Reporting Server
+  # d92a8864), not yet on wip. Delete after content-fix reaches wip and a re-verify.
+  - code: VERIFY_PUBLISHED_IMAGE_BROKEN
+    decision: ours
+    ticket: DOCOPS-374
+    slug: ibi-open-data-hub-for-mainframe-connectors
+    version: "1.*"
+    reason: &ibi2-case >-
+      Letter case: the Markdown links resources/images/<file>, git on wip has
+      Resources/Images/<file>; AEM is case-sensitive, so staging shows placeholder.png.
+      Fixed on content-fix (WebFOCUS 9da55f7b, Reporting Server d92a8864); clears when it
+      reaches wip. Every picture checked: the exact path is on content-fix, and on wip only in
+      another letter case.
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-installer, version: "9.3.[0-4]", reason: *ibi2-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-app-studio, version: "9.3.[0-3]", path: "*/browser-support-for-selenium/updating-driver-executables-different-web-browsers.md", reason: *ibi2-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-app-studio, version: "9.3.0", path: "unfiled/ibi-webfocus-app-studio-online-help.md", reason: *ibi2-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-reporting-server, version: "9.3.0", path: "reporting-server/configuring-local-online-help.md", reason: *ibi2-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-reporting-server, version: "9.3.0", path: "reporting-server/installation-for-windows/installing-ibi-webfocus-reporting-server.md", reason: *ibi2-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-reporting-server, version: "9.3.0", path: "reporting-server/installation-for-z-os/*", reason: *ibi2-case}
+
+  # ---- J2. Empty articles (DOCOPS-344): staging serves the page with no text.
+  # WebFOCUS Installer 9.3.5: 6 of its 7 pages (all but the landing page).
+  - code: VERIFY_PUBLISHED_ANCHOR_MISSING
+    decision: logged
+    ticket: DOCOPS-344
+    slug: ibi-webfocus-installer
+    version: "9.3.5"
+    path: "ibi-webfocus-integrated-installation/*"
+    reason: &ibi2-empty935 >-
+      Staging serves 6 of the 7 pages of Installer 9.3.5 with an empty article (0 words in
+      div.topic-renderer__content); installing-ibi-webfocus-integrated-installation.md has
+      5,975 words in the Markdown. Only the landing page has text. 9.3.0-9.3.4 are served
+      whole. For the AEM team (a stuck or partial build of that version).
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: ibi-webfocus-installer, version: "9.3.5", path: "ibi-webfocus-integrated-installation/*", reason: *ibi2-empty935}
+  - {code: VERIFY_PUBLISHED_TEXT_DIFF, decision: logged, ticket: DOCOPS-344, slug: ibi-webfocus-installer, version: "9.3.5", path: "ibi-webfocus-integrated-installation*", reason: *ibi2-empty935}
+  - {code: VERIFY_PUBLISHED_TEXT_DIFF, decision: logged, ticket: DOCOPS-344, slug: ibi-webfocus-installer, version: "9.3.5", path: "ibi-documentation-and-support-services.md", reason: *ibi2-empty935}
+  - {code: VERIFY_PUBLISHED_TEXT_DIFF, decision: logged, ticket: DOCOPS-344, slug: ibi-webfocus-installer, version: "9.3.5", path: "legal-and-third-party-notices.md", reason: *ibi2-empty935}
+
+  # Reporting Server 9.3.0: 910 of 2,293 pages empty. Only the links into those pages are
+  # listed here (each glob covers empty pages only); their pictures and text stay under the
+  # DOCOPS-347/348 catch-alls (262 globs would be needed to move them).
+  - code: VERIFY_PUBLISHED_ANCHOR_MISSING
+    decision: logged
+    ticket: DOCOPS-344
+    slug: ibi-webfocus-reporting-server
+    version: "9.3.0"
+    path: "extender-for-z-os-db2/*"
+    reason: &ibi2-emptyrs >-
+      Reporting Server 9.3.0: staging serves 910 of the 2,293 pages checked with an empty
+      article, so the link target is not there. All of Extender for DB2, Resource Analyzer,
+      Resource Governor, the 3GL subroutine reference and Unfiled; 411 of 620 Server
+      Administration pages; 256 of 402 Data Migrator function pages. Example:
+      resource-governor/configuring/administering-resource/resource-management.md, 7,598 words
+      in the Markdown, 0 served. Adapter Administration, Data Migrator User and Installation
+      are served whole. For the AEM team.
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: ibi-webfocus-reporting-server, version: "9.3.0", path: "ibi-data-migrator-functions-reference/date-time-functions/*", reason: *ibi2-emptyrs}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: ibi-webfocus-reporting-server, version: "9.3.0", path: "ibi-data-migrator-functions-reference/numeric-functions/*", reason: *ibi2-emptyrs}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: ibi-webfocus-reporting-server, version: "9.3.0", path: "reporting-server-2/metadata/using-data-assist/enhancing-a-synonym/creating-a-join.md#*", reason: *ibi2-emptyrs}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: ibi-webfocus-reporting-server, version: "9.3.0", path: "reporting-server-2/stored-procedures/platform-specific/ddname-translation-user.md#*", reason: *ibi2-emptyrs}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: ibi-webfocus-reporting-server, version: "9.3.0", path: "resource-analyzer/*", reason: *ibi2-emptyrs}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: ibi-webfocus-reporting-server, version: "9.3.0", path: "resource-governor/*", reason: *ibi2-emptyrs}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: ibi-webfocus-reporting-server, version: "9.3.0", path: "tibco-documentation-and-support-services.md#*", reason: *ibi2-emptyrs}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: ibi-webfocus-reporting-server, version: "9.3.0", path: "unfiled/*", reason: *ibi2-emptyrs}
+
+  # ---- J3. Source: links to bookmarks no file in the package defines (as batch 1's I4).
+  - code: VERIFY_PUBLISHED_ANCHOR_MISSING
+    decision: source
+    slug: ibi-webfocus-app-studio
+    version: "9.3.[0-3]"
+    path: "*.md#*"
+    reason: &ibi2-nobookmark >-
+      The source page links to a Flare/Word bookmark (#WS3F8AE458-9190-..., #d13tri1027395,
+      #d04cpt1026870, #topic_..., #task_...) that no file in the package defines (id= or
+      name=), checked over the whole extracted package of each version; on the old site the
+      link opens the page at its top, as it does on staging. App Studio 9.3.0-9.3.2 about 120
+      each, 9.3.3 106; Installer 9.3.0-9.3.4 6 each; Open Data Hub 1.3.5 1 (#Use).
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: source, slug: ibi-webfocus-installer, version: "9.3.[0-4]", path: "unfiled/installing-webfocus-integrated-installation*.md#WS*", reason: *ibi2-nobookmark}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: source, slug: ibi-open-data-hub-for-mainframe-connectors, version: "1.3.5", path: "open-data-hub-installation/using-applications.md#Use", reason: *ibi2-nobookmark}
+
+  # ---- J4. Link targets that differ on staging (DOCOPS-345).
+  - code: VERIFY_PUBLISHED_ANCHOR_MISSING
+    decision: logged
+    ticket: DOCOPS-345
+    slug: ibi-open-data-hub-for-mainframe-connectors
+    version: "1.[03].*"
+    path: "unfiled/file-locations.md#*-files-location"
+    reason: &ibi2-idiffer >-
+      The link names the heading without its code part (#supplied-files-location for "Supplied
+      Files Location (`EDAHOME`)"); staging's heading id keeps it,
+      "supplied-files-location-(edahome)". The text is on the page; the link opens it at the
+      top. Reporting Server 9.3.0: two 301 rows point at a doubled-hyphen title id
+      (#mailing--an-html-file-...) the served page does not have.
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-345, slug: ibi-webfocus-reporting-server, version: "9.3.0", path: "reporting-server-2/managing-applications/*.md#*--*", reason: *ibi2-idiffer}
+  # "#top" links: the source's top-of-page bookmark is not kept; a link to another page's
+  # #top opens that page at its top, which is what it was for.
+  - code: VERIFY_PUBLISHED_ANCHOR_MISSING
+    decision: accepted
+    slug: ibi-open-data-hub-for-mainframe-connectors
+    version: "1.[03].*"
+    path: "*run-isetup.md#top"
+    reason: >-
+      Link to the page's "top" bookmark (Flare <a name="top">); staging has no element with
+      that id, so the page opens at its top, which is where the bookmark was. No reader effect.
+
+  # ---- J5. Local text check (TEXT_DROPPED).
+  # Real: XMLDECOD / XMLENCOD show "For &, the result is &." (as FOCUS in batch 1). Not fixed by
+  # the 18 Nov R002 commit on content-fix either.
+  - code: VERIFY_TEXT_DROPPED
+    decision: logged
+    ticket: DOCOPS-360
+    slug: ibi-webfocus-reporting-server
+    version: "9.3.0"
+    path: "*/character-functions/xml??cod-*.md"
+    reason: >-
+      The source shows the entity names as text ("For &amp;, the result is &."); the Markdown
+      writes &amp; / &gt;, which show as & and >. Staging reads "For &, the result is &." and
+      "For >, the result is >." on XMLDECOD and XMLENCOD (Data Migrator Functions Reference).
+      Same as FOCUS (batch 1). Unchanged on content-fix after R002 (506b860f).
+  # Checker (DOCOPS-366): the text is served whole.
+  - code: VERIFY_TEXT_DROPPED
+    decision: logged
+    ticket: DOCOPS-366
+    slug: ibi-webfocus-reporting-server
+    version: "9.3.0"
+    path: "*/adding-a-configuration-instance-for-zfs.md"
+    reason: &ibi2-split >-
+      Checker. The sentence is split over lines inside raw HTML ("Just supply a number greater
+      than" / "9."; "Provide a value greater than" / "0.") and the check reads the number as a
+      list item. Staging shows each sentence whole (checked on Open Data Hub 1.0.3 and
+      Reporting Server 9.3.0).
+  - {code: VERIFY_TEXT_DROPPED, decision: logged, ticket: DOCOPS-366, slug: ibi-webfocus-reporting-server, version: "9.3.0", path: "*/configuring-the-adapter-for-cics-transactions.md", reason: *ibi2-split}
+  - {code: VERIFY_TEXT_DROPPED, decision: logged, ticket: DOCOPS-366, slug: ibi-webfocus-reporting-server, version: "9.3.0", path: "*/configuring-adapter-natural-cics-transactions.md", reason: *ibi2-split}
+  - {code: VERIFY_TEXT_DROPPED, decision: logged, ticket: DOCOPS-366, slug: ibi-open-data-hub-for-mainframe-connectors, version: "1.0.[34]", path: "*/adding-a-configuration-instance-for-zfs.md", reason: *ibi2-split}
+  - code: VERIFY_TEXT_DROPPED
+    decision: logged
+    ticket: DOCOPS-366
+    slug: ibi-webfocus-app-studio
+    version: "9.3.[0-38]"
+    path: "*/creating-esri-maps/configuring-maps-to-interact-with-other-components.md"
+    reason: &ibi2-amp >-
+      Checker. A Dialogue Manager variable (&REGION, &CTR, &LTABLE) is read by verify's HTML
+      parser as a legacy entity (&REG -> ®, &LT -> <). Staging serves the text correctly
+      ("equal to the &REGION parameter values", "to value &LTABLE", "named &CTR").
+  - {code: VERIFY_TEXT_DROPPED, decision: logged, ticket: DOCOPS-366, slug: ibi-webfocus-reporting-server, version: "9.3.0", path: "*/iterating-through-multiple-tables.md", reason: *ibi2-amp}
+  - {code: VERIFY_TEXT_DROPPED, decision: logged, ticket: DOCOPS-366, slug: ibi-webfocus-reporting-server, version: "9.3.0", path: "*/debugging-a-stored-procedure.md", reason: *ibi2-amp}
+  # Accepted: authored (unbuilt) source pages (Phase 41).
+  - code: VERIFY_TEXT_DROPPED
+    decision: accepted
+    slug: ibi-webfocus-app-studio
+    version: "9.3.3"
+    path: "*/creating-html-pages/html-*.md"
+    reason: >-
+      html_responsive.htm and html_task_animation.htm ship as the authored Flare page, with
+      every release's conditional text still in it. The converter keeps the text this release's
+      built pages show and removes the rest (releaseNumber.8205, 8204... variants, Phase 41);
+      the missing sentences are those old-release variants ("...in the Flow Direction field,
+      in the Responsive design section of the Properties panel"). The current wording is there.
+  - code: VERIFY_TEXT_DROPPED
+    decision: accepted
+    slug: ibi-webfocus-app-studio
+    version: "9.3.3"
+    path: "*/creating-reports/reporting48.md"
+    reason: >-
+      The authored source page has empty variables ("upload to  for use", "Blending Data Using
+      Syntax"); the converter fills them in (Phase 41), so the Markdown and staging read
+      "upload to WebFOCUS App Studio for use" and "Blending Data Using WebFOCUS Syntax".
+
+  # ---- J6. Menus.
+  - code: VERIFY_PUBLISHED_TOC_MOVED
+    decision: accepted
+    slug: ibi-webfocus-reporting-server
+    version: "9.3.0"
+    path: "*> SQL * Functions > *"
+    reason: &ibi2-once >-
+      toc.yml lists the page under two parents, as the old menu did (35 pages: the SQL
+      function rows that reuse the Simplified function pages, Third-Party Software and Licenses
+      under four platforms, Indexing Applications and ON TABLE HOLD/PCHOLD twice); staging
+      shows it once, and readers still reach it.
+  - {code: VERIFY_PUBLISHED_TOC_MOVED, decision: accepted, slug: ibi-webfocus-reporting-server, version: "9.3.0", path: "Reporting Server Installation > * > Third-Party Software and Licenses", reason: *ibi2-once}
+  - {code: VERIFY_PUBLISHED_TOC_MOVED, decision: accepted, slug: ibi-webfocus-reporting-server, version: "9.3.0", path: "*> Managing Applications > Indexing Applications For Global Searches", reason: *ibi2-once}
+  - {code: VERIFY_PUBLISHED_TOC_MOVED, decision: accepted, slug: ibi-webfocus-reporting-server, version: "9.3.0", path: "*> Creating Expressions > ON TABLE *", reason: *ibi2-once}
+  - code: VERIFY_TOC_ENTRY_MISSING
+    decision: accepted
+    slug: ibi-webfocus-app-studio
+    version: "9.3.8"
+    path: "ibi-webfocus-app-studio/*"
+    reason: >-
+      The layout (Phase 81) lists "ibi Documentation and Support Services" and "Legal and
+      Third-Party Notices" at the top of the menu (9-3-8/legal-and-third-party-notices.md);
+      verify matches the old rows to the copies left under ibi-webfocus-app-studio/, which no
+      menu lists. Readers reach both pages. The two unlisted copies can be removed.
+  - code: VERIFY_TOPIC_MISSING
+    decision: accepted
+    slug: ibi-open-data-hub-for-mainframe-connectors
+    version: "1.3.8"
+    path: "*/html/_globalpages/*.htm"
+    reason: >-
+      Flare's print title page (title.htm: product name, version, date) and generated contents
+      list (contents.htm) are in the old menu; the converter skips _globalpages/ as generated.
+      The landing page and the menu carry both. No content lost.
+
+  # ---- J7. 301 map with no page rows (ours, DOCOPS-322).
+  - code: VERIFY_REDIRECT_UNMAPPED
+    decision: ours
+    ticket: DOCOPS-322
+    slug: ibi-webfocus-app-studio
+    version: "9.3.8"
+    reason: >-
+      9-3-8/301.yml (written 5 Nov, d71782d0) has only the 4 document rows: there was no page
+      list for wf-as 9.3.8 when it was built. verify now has the docsite list (323 published
+      pages with no row, 257 under doc/html/en-us, 66 under relnotes/en-us), so every old page
+      would 404 at cutover. Rebuild the version's 301.yml (sync) and push. DSML Services 9.3.8
+      has the same empty map (not verified yet).
