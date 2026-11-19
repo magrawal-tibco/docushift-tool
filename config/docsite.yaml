@@ -54,7 +54,14 @@ crawl:
 # overrides). The crawl's rate floor still applies, shared by every thread; set
 # `rate_limit_per_second` here to give verify its own.
 verify:
-  max_concurrent_requests: 6
+  # Phase 85 (DOCOPS-383): staging refused ~2,000 requests overnight 18-19 Nov at 2/s per run
+  # and 6 threads. Verify's own floor, gentler than the docsite crawl's.
+  max_concurrent_requests: 4
+  rate_limit_per_second: 1
+  # A refusal (429, 5xx, no answer) is waited out: Retry-After, else 30 s doubling to 5 min.
+  refusal_rounds: 6
+  refusal_wait_seconds: 30
+  refusal_max_wait_seconds: 300
 
 defaults:
   # Conversion policy -- see docs/architecture.md section 2.3.

@@ -131,7 +131,9 @@ class PageCheck:
 
     key: str
     url: str
-    status: str = "ok"            # ok | missing | unmatched | mismatched (another page's title)
+    status: str = "ok"            # ok | missing | unmatched | mismatched (another page's title) | refused
+    #: Pictures staging turned away (Phase 85): not checked, not counted as broken.
+    refused_images: list[str] = field(default_factory=list)
     text_percent: float = 100.0
     missing: list[str] = field(default_factory=list)
     callouts: int = 0
@@ -148,6 +150,8 @@ class PageCheck:
 class VersionCheck:
     url: str
     reachable: bool = False
+    #: Every menu entry point was refused (Phase 85): the version was not compared.
+    refused: bool = False
     menu: Comparison | None = None
     pages: dict[str, PageCheck] = field(default_factory=dict)
 
@@ -161,8 +165,10 @@ def check(fetcher: Fetcher, urls: list[str] | str, toc: Node, folder: Path) -> V
     candidates = [urls] if isinstance(urls, str) else list(urls)
     result = VersionCheck(candidates[0] if candidates else "")
     menu = None
+    refusals = 0
     for url in candidates:
         landing = fetcher.get(url)
+        refusals += landing.refused
         if landing.ok and is_page(landing.text, url):
             menu = read_menu(landing.text, url)
             if menu is not None and menu.children:
@@ -170,6 +176,7 @@ def check(fetcher: Fetcher, urls: list[str] | str, toc: Node, folder: Path) -> V
                 break
             menu = None
     if menu is None:
+        result.refused = bool(candidates) and refusals == len(candidates)
         return result
     result.reachable = True
     pages = pages_only(toc)
@@ -246,6 +253,9 @@ def same_title(served: str, expected: str) -> bool:
 def _page(fetcher: Fetcher, page: str, url: str, folder: Path, check_title: bool = True) -> PageCheck:
     out = PageCheck(page, url)
     fetched = fetcher.get(url)
+    if fetched.refused:  # Phase 85: turned away, so not checked -- not "not served"
+        out.status = "refused"
+        return out
     if not fetched.ok:
         out.status = "missing"
         return out
@@ -302,7 +312,9 @@ def _page(fetcher: Fetcher, page: str, url: str, folder: Path, check_title: bool
             out.broken_images.append(f"{rel}: not on the served page")
             continue
         got = fetcher.get(urljoin(url, str(img.get("src"))))
-        if not got.ok:
+        if got.refused:
+            out.refused_images.append(f"{rel}: HTTP {got.status}")
+        elif not got.ok:
             out.broken_images.append(f"{rel}: HTTP {got.status}")
         elif picture.sha and hashlib.sha256(got.body).hexdigest() != picture.sha:
             out.broken_images.append(f"{rel}: served bytes differ from the repo")

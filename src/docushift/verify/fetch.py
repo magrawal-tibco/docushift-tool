@@ -19,8 +19,10 @@ from __future__ import annotations
 
 import hashlib
 import json
+import logging
 import os
 import threading
+import time
 from collections.abc import Callable, Iterable
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
@@ -31,6 +33,8 @@ import requests
 
 from docushift.utils.http import Throttle, build_session
 from docushift.utils.swap import replace_file
+
+log = logging.getLogger(__name__)
 
 #: Threads per run when neither `--workers` nor `verify.max_concurrent_requests` says.
 DEFAULT_WORKERS = 6
@@ -54,16 +58,36 @@ class Fetched:
     def ok(self) -> bool:
         return self.status == 200
 
+    @property
+    def refused(self) -> bool:
+        """The site turned the request away (Phase 85): it says nothing about the page."""
+        return self.status in REFUSED
+
+
+#: Answers that say nothing about the page (Phase 85): rate limited, server trouble, or
+#: no answer at all (0, a dropped connection). Never cached; waited out and retried.
+REFUSED = frozenset({0, 429, 500, 502, 503, 504})
+
 
 class Fetcher:
     def __init__(self, cache_dir: Path, crawl: dict[str, Any], refresh: bool = False,
-                 workers: int = 1) -> None:
+                 workers: int = 1, sleep: Callable[[float], None] = time.sleep) -> None:
         self.cache_dir = cache_dir
         self.timeout = float(crawl.get("timeout_seconds", 30))
         self.throttle = Throttle.from_crawl(crawl)
         self.refresh = refresh
         self.workers = max(1, int(workers or 1))
         self.requests = 0
+        #: Pages still refused after every round, and the cool-downs taken (Phase 85).
+        self.refused = 0
+        self.cooldowns = 0
+        self._rounds = int(crawl.get("refusal_rounds", 6))
+        self._first_wait = float(crawl.get("refusal_wait_seconds", 30))
+        self._max_wait = float(crawl.get("refusal_max_wait_seconds", 300))
+        self._sleep = sleep
+        self._cool_until = 0.0
+        self._strikes = 0
+        self._slowed = False
         self._crawl = dict(crawl)
         self._local = threading.local()
         self._lock = threading.Lock()
@@ -90,19 +114,24 @@ class Fetcher:
         if from_cache and meta_path.is_file() and body_path.is_file():
             try:
                 meta = json.loads(meta_path.read_text(encoding="utf-8"))
-                return Fetched(url, int(meta["status"]), body_path.read_bytes(), meta.get("content_type", ""))
+                if int(meta["status"]) not in REFUSED:  # one stored before Phase 85: ask again
+                    return Fetched(url, int(meta["status"]), body_path.read_bytes(),
+                                   meta.get("content_type", ""))
             except (OSError, ValueError, KeyError):
                 pass  # an unreadable entry is fetched again, not a crash
-        self.throttle.wait()
+        for _ in range(max(1, self._rounds)):
+            fetched, retry_after = self._request(url)
+            if not fetched.refused:
+                break
+            self._cool_down(url, fetched.status, retry_after)
+        else:
+            with self._lock:
+                self.refused += 1
+            log.warning("verify: %s still refused (HTTP %s) after %d round(s)", url, fetched.status,
+                        self._rounds)
+            return fetched  # not cached: it says nothing about the page
         with self._lock:
-            self.requests += 1
-        try:
-            response = self.session.get(url, timeout=self.timeout)
-            fetched = Fetched(url, response.status_code, response.content,
-                              response.headers.get("Content-Type", ""))
-        except requests.RequestException as exc:
-            # Not cached: a network failure says nothing about the page.
-            return Fetched(url, 0, str(exc).encode("utf-8"))
+            self._strikes = 0
         meta_path.parent.mkdir(parents=True, exist_ok=True)
         # The body first, then the meta that says the entry is there.
         _write_atomic(body_path, fetched.body)
@@ -111,6 +140,57 @@ class Fetcher:
         with self._lock:
             self._fresh.add(url)
         return fetched
+
+    def _request(self, url: str) -> tuple[Fetched, float | None]:
+        """One GET after the shared cool-down and the throttle; with `Retry-After` if sent."""
+        while True:  # every thread honours a cool-down another one started
+            with self._lock:
+                left = self._cool_until - time.monotonic()
+            if left <= 0:
+                break
+            self._sleep(left)
+        self.throttle.wait()
+        with self._lock:
+            self.requests += 1
+        try:
+            response = self.session.get(url, timeout=self.timeout)
+        except requests.RequestException as exc:
+            return Fetched(url, 0, str(exc).encode("utf-8")), None
+        fetched = Fetched(url, response.status_code, response.content,
+                          response.headers.get("Content-Type", ""))
+        return fetched, _retry_after(response.headers.get("Retry-After"))
+
+    def _cool_down(self, url: str, status: int, retry_after: float | None) -> None:
+        """Pause every thread: `Retry-After` if given, else 30 s doubling to 5 min; and,
+        once per run, halve the request rate."""
+        with self._lock:
+            wait = retry_after if retry_after is not None else min(
+                self._first_wait * (2 ** self._strikes), self._max_wait)
+            self._strikes += 1
+            self.cooldowns += 1
+            until = time.monotonic() + wait
+            if until > self._cool_until:
+                self._cool_until = until
+            slow, self._slowed = not self._slowed, True
+        if slow:
+            self.throttle.slow_down()
+        log.warning("verify: staging refused %s (HTTP %s); pausing %.0f s", url, status, wait)
+
+
+def _retry_after(value: str | None) -> float | None:
+    """`Retry-After` in seconds (a number of seconds or an HTTP date), or None."""
+    if not value:
+        return None
+    try:
+        return max(0.0, float(value))
+    except ValueError:
+        pass
+    try:
+        from email.utils import parsedate_to_datetime
+        from datetime import datetime, timezone
+        return max(0.0, (parsedate_to_datetime(value) - datetime.now(timezone.utc)).total_seconds())
+    except (TypeError, ValueError):
+        return None
 
 
 def _write_atomic(path: Path, data: bytes) -> None:

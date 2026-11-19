@@ -448,6 +448,12 @@ class Verifier:
                                     folder.segment, toc)
         checked = published.check(self.fetcher, urls, toc, folder.path)
         if not checked.reachable:
+            if checked.refused:  # Phase 85: staging turned us away; nothing was compared
+                self._record(result, "VERIFY_PUBLISHED_PAGE_REFUSED", folder, "",
+                             f"menu page refused at {' or '.join(urls)}: version not compared")
+                for row in rows.values():
+                    row["published_status"] = row["published_status"] or "not checked (refused)"
+                return
             self._record(result, "VERIFY_PUBLISHED_PAGE_MISSING", folder, "",
                          f"no menu served at {' or '.join(urls)}")
             for row in rows.values():
@@ -460,6 +466,12 @@ class Verifier:
         for page, check in checked.pages.items():
             if check.status == "missing":
                 self._record(result, "VERIFY_PUBLISHED_PAGE_MISSING", folder, page, f"{check.url} is not served")
+            elif check.status == "refused":
+                self._record(result, "VERIFY_PUBLISHED_PAGE_REFUSED", folder, page,
+                             f"{check.url} refused by staging: not checked")
+            for detail in check.refused_images:
+                self._record(result, "VERIFY_PUBLISHED_PAGE_REFUSED", folder, page,
+                             f"picture refused by staging, not checked: {detail}")
             if check.missing:
                 self._record(result, "VERIFY_PUBLISHED_TEXT_DIFF", folder, page,
                              f"{len(check.missing)} sentence(s) not served, e.g. {_quote(check.missing)}")

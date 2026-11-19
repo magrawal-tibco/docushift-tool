@@ -72,6 +72,14 @@ class Throttle:
     def from_crawl(cls, crawl: dict[str, Any]) -> "Throttle":
         return cls(float(crawl.get("rate_limit_per_second", 0) or 0))
 
+    def slow_down(self, factor: float = 2.0, floor_seconds: float = 0.5) -> None:
+        """Lengthen the interval between starts (Phase 85: after the site refuses us).
+
+        A throttle with no rate gets `floor_seconds` first, so slowing down always slows.
+        """
+        with self._lock:
+            self._min_interval = max(self._min_interval, floor_seconds / factor) * factor
+
     def wait(self) -> None:
         """Blocks until the next request is allowed to start."""
         if self._min_interval <= 0:

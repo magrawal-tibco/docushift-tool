@@ -207,8 +207,10 @@ def test_the_register_carries_every_row_of_7_5() -> None:
     characters, and `PUBLISH_NAME_MISSING`, an in-scope product that would need one.
     Phase 83 adds `LINK_CASE_UNCOMMITTED`, a link target on disk in its case and
     committed to git only in another, which AEM serves.
+    Phase 85 adds `VERIFY_PUBLISHED_PAGE_REFUSED`, a page staging turned away: not
+    checked, where it used to read as not served.
     """
-    assert len(REGISTRY) == 146
+    assert len(REGISTRY) == 147
 
 
 def test_severity_comes_from_the_registry_and_not_from_the_call_site() -> None:

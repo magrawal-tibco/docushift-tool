@@ -806,6 +806,10 @@ REGISTRY: dict[str, Code] = _codes(
     Code("VERIFY_PUBLISHED_PAGE_MISSING", Severity.ERROR, Stage.VERIFY,
          "A published page, or the version itself, not served by staging (non-200, or "
          "the home-page fallback)", "planning.md Phase 55 (B1)"),
+    Code("VERIFY_PUBLISHED_PAGE_REFUSED", Severity.WARNING, Stage.VERIFY,
+         "A published page, picture or the version's menu staging turned away (429, 5xx or "
+         "no answer) after every wait: not checked, so not counted as missing; re-run",
+         "planning.md Phase 85 (DOCOPS-383)"),
     Code("VERIFY_PUBLISHED_TEXT_DIFF", Severity.WARNING, Stage.VERIFY,
          "Sentences of a published page missing from what staging serves",
          "planning.md Phase 55 (B2)"),

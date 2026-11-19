@@ -3464,6 +3464,9 @@ def verify(ctx, target_dir, product, version, bu, family, latest_only, statuses,
         own = dict(docsite.get("verify") or {})
         if own.get("rate_limit_per_second") is not None:
             crawl["rate_limit_per_second"] = own["rate_limit_per_second"]
+        for key in ("refusal_rounds", "refusal_wait_seconds", "refusal_max_wait_seconds"):  # Phase 85
+            if own.get(key) is not None:
+                crawl[key] = own[key]
         workers = workers or int(own.get("max_concurrent_requests") or DEFAULT_WORKERS)
         fetcher = Fetcher(cfg.cache_dir / "verify", crawl, refresh=refresh, workers=workers)
     manager = _catalog_manager(ctx)

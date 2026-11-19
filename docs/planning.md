@@ -3018,7 +3018,7 @@ name.
 
 ---
 
-### Phase 85: `verify` Waits Out a Refusal Instead of Calling the Page Missing — **Planned 2026-11-19; awaiting approval**
+### Phase 85: `verify` Waits Out a Refusal Instead of Calling the Page Missing — **Built 2026-11-19 (approved the same day); DOCOPS-383**
 
 **Problem.** From about 19:30 on 18 Nov to 05:52 on 19 Nov, stg-docs.ibi.com answered about 2,000 of our requests with `429 Too Many Requests` or dropped the connection. Two ibi batches and the Spotfire batch were running, at 2 requests a second each, 6 threads per run. The checker treated each refusal as a page that is not served:
 - `utils/http.build_session` retries a 429 three times with backoff 1.5 (about 10 seconds in all), then returns the 429;
@@ -3038,6 +3038,8 @@ name.
 **Not in scope.** Asking Digital Platform whether a rate limit was switched on and what rate is allowed (UAT row in the triage report). If they name a rate, it goes into step 5.
 
 **Jira.** A sub-task under DOCOPS-338 (verify, Phase 77) when approved, or a note on DOCOPS-366 (checker false alarms).
+
+**As built.** `fetch.Fetcher` (`REFUSED`, `_request`, `_cool_down`, `_retry_after`; a stored refusal is asked again), `Throttle.slow_down`, `published` status `refused` and `refused_images`, `VersionCheck.refused`, driver records `VERIFY_PUBLISHED_PAGE_REFUSED`, `config/docsite.yaml` verify keys passed through by `cli.verify`. 8 tests; suite green apart from the stale catalog guard `test_the_shipped_report_retires_the_measured_set` (fails before this phase too: 6 against 71). Re-checks: `cache/overnight/ibi2-fix.txt` (18 lines), then `ibi2-a`/`ibi2-b` resume, one slot.
 
 **Order after approval.** Build and test (about 1.5 h). Purge, then re-check the 10 versions and Container Edition 1.2.2–1.3.3 (stored nothing when the disk was full). Then the 68 not started, in one slot. Then triage, applying `triage-ibi2b`'s YAML first.
 
@@ -4048,6 +4050,7 @@ The concrete deliverable of §7.1: every deferred "report line" in the three doc
 | `VERIFY_TOPIC_UNFILED`⁵⁵ | note | verify | Converted topics kept under unfiled/ (TOC_ORPHAN): in the tree, in no menu | Phase 55, known drops |
 | `VERIFY_TOC_LOST`⁷⁷ | error | verify | More than half the pages the old TOC lists sit under unfiled/: the version's menu was lost in conversion | Phase 77 (DOCOPS-366) |
 | `VERIFY_PUBLISHED_PAGE_MISSING`⁵⁵ | error | verify | A published page, or the version itself, not served by staging (non-200, or the home-page fallback) | Phase 55 (B1) |
+| `VERIFY_PUBLISHED_PAGE_REFUSED`⁸⁵ | warn | verify | A published page, picture or the version's menu staging turned away (429, 5xx or no answer) after every wait: not checked, so not counted as missing; re-run | Phase 85 (DOCOPS-383) |
 | `VERIFY_PUBLISHED_TEXT_DIFF`⁵⁵ | warn | verify | Sentences of a published page missing from what staging serves | Phase 55 (B2) |
 | `VERIFY_PUBLISHED_IMAGE_BROKEN`⁵⁵ | error | verify | A page's image not on the served page, not served, or served with other bytes | Phase 55 (B3) |
 | `VERIFY_PUBLISHED_ALT_DROPPED`⁵⁵ | warn | verify | An image whose Markdown alt text staging serves empty | Phase 55 (probe) |

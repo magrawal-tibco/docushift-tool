@@ -1,4 +1,4 @@
-"""Drop Data Science Workbench 14.4.0; its old URLs go to Statistica 14.4.0 (user, 18 Nov; DOCOPS-382).
+"""Drop a Data Science Workbench version; its old URLs go to the same Statistica version (DOCOPS-382).
 
 Workbench 14.4.0 publishes the same pages as Statistica 14.4.0 (14,250 each) from a different
 old address (docs.tibco.com/pub/dsc-stat/14.4.0 vs /pub/stat/14.4.0). Every row of Workbench's
@@ -7,7 +7,7 @@ appended to Statistica's map; then the Workbench 14.4.0 folders and their `versi
 removed, in the repo and the reframed/ workspace.
 
     python scratch/drop_workbench_1440.py            # dry run
-    python scratch/drop_workbench_1440.py --apply
+    python scratch/drop_workbench_1440.py --apply [--version 14.1.0]   (default 14.4.0)
 """
 import os
 import re
@@ -16,8 +16,10 @@ import sys
 
 APPLY = "--apply" in sys.argv
 REPO = "C:/github/tibco-docs-aem/en-us-spotfire-statistica-userdocs"
-WB, ST, SEG = "spotfire-data-science-workbench", "spotfire-statistica", "14-4-0"
-WS = f"reframed/en-us-spotfire-statistica/{WB}/14.4.0"
+WB, ST = "spotfire-data-science-workbench", "spotfire-statistica"
+VER = sys.argv[sys.argv.index("--version") + 1] if "--version" in sys.argv else "14.4.0"
+SEG = VER.replace(".", "-")
+WS = f"reframed/en-us-spotfire-statistica/{WB}/{VER}"
 ROW = re.compile(r'^"(https://[^"]+)": "([^"]+)"$', re.M)
 
 wb_map = open(f"{REPO}/en-us/{WB}/online-help/{SEG}/301.yml", encoding="utf-8").read()
@@ -34,14 +36,14 @@ for old, new in ROW.findall(wb_map):
         target = path.replace(f"/en-us/{WB}/", f"/en-us/{ST}/", 1)
         local = REPO + target
     else:  # a document in the DAM: Statistica's copy is named SPOT_stat_..., Workbench's SPOT_dsc-stat_...
-        target = path.replace(f"/{WB}/", f"/{ST}/", 1).replace("SPOT_dsc-stat_", "SPOT_stat_")
+        target = path.replace(f"/{WB}/", f"/{ST}/", 1).replace("SPOT_dsc-stat_", "SPOT_stat_").replace("TIB_dsc-stat_", "TIB_stat_")
         local = REPO + "/en-us/" + target.split("/us/en/", 1)[1]
     if not os.path.exists(local):
         missing.append((old, target))
         continue
     added.append(f'"{old}": "{target}{"#" + anchor if anchor else ""}"')
 
-print(f"{len(added)} Workbench URL(s) re-pointed at Statistica 14.4.0; {len(missing)} with no Statistica page")
+print(f"{len(added)} Workbench URL(s) re-pointed at Statistica {VER}; {len(missing)} with no Statistica page")
 for old, target in missing[:20]:
     print("  no target:", old, "->", target)
 
@@ -51,7 +53,7 @@ print("remove:", *folders, WS if os.path.isdir(WS) else "(no workspace copy)", s
 
 if APPLY and not missing:
     with open(st_path, "a", encoding="utf-8", newline="") as fh:
-        fh.write(f"# Data Science Workbench 14.4.0 (same pages, not migrated; DOCOPS-382)\n")
+        fh.write(f"# Data Science Workbench {VER} (same pages, not migrated; DOCOPS-382)\n")
         fh.write("\n".join(added) + "\n")
     for f in folders:
         shutil.rmtree(f)

@@ -7,6 +7,7 @@ fixture, and one whose only differences are known drops, produce none.
 
 from __future__ import annotations
 
+import json
 import threading
 import time
 import zlib
@@ -1483,3 +1484,109 @@ def test_only_the_main_element_is_parsed_and_the_article_is_the_same() -> None:
     assert str(soup.select_one(published.ARTICLE)) == str(BeautifulSoup(html, "html.parser").select_one(
         published.ARTICLE))
     assert published._main_soup("<html><body><p>no main</p></body></html>").select_one("p") is not None
+
+
+# ---- Phase 85 (DOCOPS-383): a refusal is waited out, never cached, never "missing" ----
+
+class _Answers:
+    """A session answering from a script of (status, headers) per call; then 200."""
+
+    def __init__(self, script: list[tuple[int, dict]]) -> None:
+        self.script, self.calls = list(script), 0
+
+    def get(self, url: str, timeout: float) -> _Response:
+        self.calls += 1
+        out = _Response(url)
+        if self.script:
+            out.status_code, out.headers = self.script.pop(0)
+        return out
+
+
+def _scripted(tmp_path: Path, monkeypatch, script, crawl=None) -> tuple[fetch.Fetcher, list[float]]:
+    session = _Answers(script)
+    monkeypatch.setattr(fetch, "build_session", lambda crawl, accept=None: session)
+    slept: list[float] = []
+    fetcher = fetch.Fetcher(tmp_path / "verify", {"refusal_rounds": 3, "refusal_wait_seconds": 30,
+                                                  **(crawl or {})}, sleep=slept.append)
+    fetcher.session_ = session
+    # The cool-down is measured on the monotonic clock: make each sleep advance it.
+    clock = [1000.0]
+    monkeypatch.setattr(fetch.time, "monotonic", lambda: clock[0])
+    fetcher._sleep = lambda s: (slept.append(s), clock.__setitem__(0, clock[0] + s))
+    return fetcher, slept
+
+
+def test_a_429_is_waited_out_then_the_page_is_cached_once(tmp_path: Path, monkeypatch) -> None:
+    fetcher, slept = _scripted(tmp_path, monkeypatch, [(429, {}), (429, {})])
+
+    got = fetcher.get("https://stg.example.com/p.html")
+
+    assert got.status == 200 and fetcher.cooldowns == 2
+    assert slept == [30.0, 60.0]  # 30 s, doubling
+    meta, _ = fetcher._paths("https://stg.example.com/p.html")
+    assert json.loads(meta.read_text(encoding="utf-8"))["status"] == 200
+
+
+def test_retry_after_is_honoured(tmp_path: Path, monkeypatch) -> None:
+    fetcher, slept = _scripted(tmp_path, monkeypatch, [(429, {"Retry-After": "7"})])
+
+    assert fetcher.get("https://stg.example.com/p.html").ok
+    assert slept == [7.0]
+
+
+def test_a_page_refused_every_round_is_not_cached(tmp_path: Path, monkeypatch) -> None:
+    fetcher, _ = _scripted(tmp_path, monkeypatch, [(429, {})] * 3)
+
+    got = fetcher.get("https://stg.example.com/p.html")
+
+    assert got.refused and fetcher.refused == 1
+    assert not list((tmp_path / "verify").rglob("*.json"))
+
+
+def test_a_refusal_stored_before_phase_85_is_asked_again(tmp_path: Path, monkeypatch) -> None:
+    fetcher, _ = _scripted(tmp_path, monkeypatch, [])
+    url = "https://stg.example.com/p.html"
+    meta, body = fetcher._paths(url)
+    meta.parent.mkdir(parents=True)
+    body.write_bytes(b"Too Many Requests")
+    meta.write_text(json.dumps({"url": url, "status": 429}), encoding="utf-8")
+
+    assert fetcher.get(url).ok and fetcher.requests == 1
+
+
+def test_the_first_refusal_halves_the_rate(tmp_path: Path, monkeypatch) -> None:
+    fetcher, _ = _scripted(tmp_path, monkeypatch, [(503, {}), (503, {})], {"rate_limit_per_second": 1})
+
+    fetcher.get("https://stg.example.com/p.html")
+
+    assert fetcher.throttle._min_interval == 2.0  # 1/s became 1 every 2 s, once
+
+
+def test_a_refused_page_is_not_reported_missing(tmp_path: Path) -> None:
+    folder = tmp_path / "online-help" / "1-0-0"
+    folder.mkdir(parents=True)
+    (folder / "guide.md").write_text("# Guide\n\nBody.\n", encoding="utf-8")
+    menu = _item("Guide", "/us/en/prod/online-help/1-0-0/guide.html")
+    url = f"{BASE}/us/en/prod/online-help/1-0-0/guide.html"
+    fetcher = FakeFetcher({VERSION: (200, _served("", menu=menu).encode()), url: (429, b"")})
+
+    checked = published.check(fetcher, VERSION, root([Node("Guide", "guide.md")]), folder)
+
+    assert checked.pages["guide.md"].status == "refused"
+
+
+def test_a_refused_menu_page_marks_the_version_refused_not_unserved(tmp_path: Path) -> None:
+    fetcher = FakeFetcher({VERSION: (429, b"")})
+
+    checked = published.check(fetcher, [VERSION], root([Node("Guide", "guide.md")]), tmp_path)
+
+    assert not checked.reachable and checked.refused
+    unserved = published.check(FakeFetcher({VERSION: (404, b"")}), [VERSION],
+                               root([Node("Guide", "guide.md")]), tmp_path)
+    assert not unserved.reachable and not unserved.refused
+
+
+def test_the_refused_finding_is_a_warning() -> None:
+    from docushift.reporting.findings import REGISTRY, Severity
+
+    assert REGISTRY["VERIFY_PUBLISHED_PAGE_REFUSED"].severity is Severity.WARNING
