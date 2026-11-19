@@ -1,0 +1,406 @@
+# Proposed verify-triage entries: ibi batch 2, second part, on stg-docs.ibi.com
+# (runs 3067-3183, 18 Nov 14:29 IST to 19 Nov 06:48 IST).
+# Report: reports/verify/triage-ibi2b-2026-11-19.md. Nothing here is in config/verify-triage.yaml yet.
+#
+# Paste the whole `triage:` list (without this header and `triage:`) directly ABOVE
+# "  # Catch-alls: keep last" in config/verify-triage.yaml, after the ibi batch 2 block (J7).
+# First match wins. The file is self-contained (its own &ibi2b-... anchors), so it also loads
+# alone. Every entry is limited to the slug and versions checked here, and every one decides at
+# least one stored finding of this part (checked 19 Nov in a --retriage simulation).
+# Every ours/logged entry carries a DOCOPS key, so none is commented out.
+
+triage:
+  # ---- ibi batch 2, second part, on stg-docs.ibi.com (runs 3067-3183, 18 Nov 14:29 IST to
+  # 19 Nov 06:48 IST), triaged 19 Nov: reports/verify/triage-ibi2b-2026-11-19.md. Own anchors (&ibi2b-...).
+  #
+  # ---- L1. Letter case of files and folders (DOCOPS-374), as in batch 1 and 2. Fixed on content-fix
+  # (WebFOCUS 9da55f7b, Reporting Server d92a8864, DI/ISM cfe3f1c, Container Editions a3a0932), not yet
+  # on wip. Delete the DOCOPS-374 entries after content-fix reaches wip and a re-verify.
+  # ISM's one row listed twice comes first (accepted).
+  - code: VERIFY_PUBLISHED_TOC_ENTRY_MISSING
+    decision: accepted
+    slug: ibi-iway-service-manager
+    version: "9.3.0"
+    path: "HTTP Solutions Development Guide > Configuring iWay HTTP Services (Adapters)"
+    reason: &ibi2b-twiceism >-
+      toc.yml lists "Configuring iWay HTTP Services (Adapters)" twice under HTTP Solutions
+      Development Guide (lines 1466 and 1473, same page); staging shows it once. Readers reach
+      it.
+  - {code: VERIFY_PUBLISHED_TOC_MOVED, decision: accepted, slug: ibi-iway-service-manager, version: "9.3.0", path: "HTTP Solutions Development Guide > Configuring iWay HTTP Services (Adapters)", reason: *ibi2b-twiceism}
+
+  - code: VERIFY_PUBLISHED_IMAGE_BROKEN
+    decision: ours
+    ticket: DOCOPS-374
+    slug: ibi-data-quality
+    version: "5.2.2"
+    reason: &ibi2b-case >-
+      Letter case: the Markdown and toc.yml link resources/images/<file>, whats-new.md,
+      installation-and-deployment-guide/...; git on wip still has Resources/Images/<file>,
+      Whats-New.md, Installation-and-Deployment-Guide/. AEM is case-sensitive, so staging shows
+      placeholder.png or drops the menu row (What's New in Data Quality 5.2.2 and iWay Service
+      Manager 9.3.0; the 33 children of the Installation and Deployment Guide in Container
+      Edition 1.3.4), and verify's pairing of the rows after a dropped row slips (rows "found
+      under another parent", pages compared with a neighbour). Fixed on content-fix (9da55f7b,
+      d92a8864, cfe3f1c, a3a0932); clears when it reaches wip. Every picture checked: the exact
+      path is on content-fix, and on wip only in another letter case.
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-iway-service-manager, version: "9.3.0", path: "connector-user-guides/*", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-iway-service-manager, version: "9.3.0", path: "installation-and-configuration-guide/*", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-iway-service-manager, version: "9.3.0", path: "iway-integration-tools-user-guide/*", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-iway-service-manager, version: "9.3.0", path: "programmer-guide/*", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-app-studio, version: "9.3.4", path: "app-studio-users-manual/*", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-app-studio, version: "9.3.5", path: "unfiled/*", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-app-studio, version: "9.3.5", path: "user-guide/*", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-app-studio, version: "9.3.6", path: "unfiled/ibi-webfocus-app-studio-online-help.md", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-app-studio, version: "9.3.7", path: "unfiled/*", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-app-studio, version: "9.3.7", path: "user-guide/*", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-client, version: "9.3.0", path: "creating-reports-ibi-webfocus/*", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-client, version: "9.3.0", path: "hyperstage-pg-reference/*", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-client, version: "9.3.0", path: "infoassist-user-guide/*", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-client, version: "9.3.0", path: "installation-and-configuration-for-unix/*", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-client, version: "9.3.0", path: "installation-and-configuration-for-windows/*", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-client, version: "9.3.0", path: "reportcaster-user-guide/*", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-client, version: "9.3.0", path: "security-and-administration-best-practices/*", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-client, version: "9.3.0", path: "security-and-administration/*", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-client, version: "9.3.0", path: "unfiled/*", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-client, version: "9.3.1", path: "creating-reports-ibi-webfocus/*", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-client, version: "9.3.1", path: "infoassist-user-guide/*", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-client, version: "9.3.1", path: "installation-and-configuration-for-unix/*", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-client, version: "9.3.1", path: "installation-and-configuration-for-windows/*", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-client, version: "9.3.1", path: "reportcaster-user-guide/*", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-client, version: "9.3.1", path: "security-and-administration-best-practices/*", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-client, version: "9.3.1", path: "security-and-administration/*", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-client, version: "9.3.1", path: "unfiled/*", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-client, version: "9.3.8", path: "ibi-webfocus/ibi-webfocus-infoassist/*", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-client, version: "9.3.8", path: "ibi-webfocus/installation-guide-for-unix-linux/*", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-client, version: "9.3.8", path: "ibi-webfocus/installation-guide-for-windows/*", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-client, version: "9.3.8", path: "ibi-webfocus/security-and-administration-best-practices/*", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-client, version: "9.3.8", path: "ibi-webfocus/security-and-administration/*", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-client, version: "9.3.8", path: "ibi-webfocus/unfiled/*", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-dsml-services-container-edition, version: "9.3.8", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-installer, version: "9.3.6", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-reporting-server, version: "9.3.1", path: "hyperstage-pg-reference/installing-configuring-hyperstage-pg/*", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-reporting-server, version: "9.3.1", path: "hyperstage-pg-reference/using-the-hyperstage-pg-database-beyond-webfocus/starting-stopping-hyperstage-pg-server-under.md", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-reporting-server, version: "9.3.1", path: "reporting-server-2/workspace-manager/notification/suppressing-an-edaprint-log-message.md", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-reporting-server, version: "9.3.1", path: "reporting-server/configuring-local-online-help.md", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-reporting-server, version: "9.3.1", path: "reporting-server/installation-for-z-os/defining-icsf-dataset-key-label-zfs-use-pervasive.md", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-reporting-server, version: "9.3.2", path: "hyperstage-pg-reference/*", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-reporting-server, version: "9.3.2", path: "reporting-server-2/workspace-manager/notification/suppressing-an-edaprint-log-message.md", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-reporting-server, version: "9.3.2", path: "reporting-server/*", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-reporting-server, version: "9.3.2", path: "unfiled/adding-a-configuration-instance-for-pds.md", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-reporting-server, version: "9.3.2", path: "unfiled/new-pds-install-run-isetup.md", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-reporting-server, version: "9.3.2", path: "unfiled/step-5-run-isetup.md", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-reporting-server, version: "9.3.3", path: "hyperstage-pg-reference/*", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-reporting-server, version: "9.3.3", path: "ibi-data-migrator-functions-reference/*", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-reporting-server, version: "9.3.3", path: "reporting-server-2/workspace-manager/notification/suppressing-an-edaprint-log-message.md", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-reporting-server, version: "9.3.3", path: "reporting-server/*", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-reporting-server, version: "9.3.3", path: "unfiled/adding-a-configuration-instance-for-pds.md", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-reporting-server, version: "9.3.3", path: "unfiled/new-pds-install-run-isetup.md", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-reporting-server, version: "9.3.3", path: "unfiled/step-5-run-isetup.md", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-reporting-server, version: "9.3.4", path: "hyperstage-pg-reference/*", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-reporting-server, version: "9.3.4", path: "ibi-data-migrator-functions-reference/*", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-reporting-server, version: "9.3.4", path: "reporting-server-2/workspace-manager/notification/suppressing-an-edaprint-log-message.md", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-reporting-server, version: "9.3.4", path: "reporting-server/*", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-reporting-server, version: "9.3.4", path: "unfiled/adding-a-configuration-instance-for-pds.md", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-reporting-server, version: "9.3.4", path: "unfiled/new-pds-install-run-isetup.md", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-reporting-server, version: "9.3.4", path: "unfiled/step-5-run-isetup.md", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-reporting-server, version: "9.3.6", path: "hyperstage-pg-reference/*", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-reporting-server, version: "9.3.6", path: "ibi-data-migrator-functions/*", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-reporting-server, version: "9.3.6", path: "unfiled/*", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_TOC_MOVED, decision: ours, ticket: DOCOPS-374, slug: ibi-data-quality, version: "5.2.2", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_TOC_ENTRY_MISSING, decision: ours, ticket: DOCOPS-374, slug: ibi-data-quality, version: "5.2.2", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_PAGE_MISSING, decision: ours, ticket: DOCOPS-374, slug: ibi-data-quality, version: "5.2.2", path: "installation-and-user-guide.md", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_TOC_ENTRY_MISSING, decision: ours, ticket: DOCOPS-374, slug: ibi-iway-service-manager, version: "9.3.0", path: "Legal and Third-Party Notices", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_TOC_MOVED, decision: ours, ticket: DOCOPS-374, slug: ibi-iway-service-manager, version: "9.3.0", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_PAGE_MISSING, decision: ours, ticket: DOCOPS-374, slug: ibi-iway-service-manager, version: "9.3.0", path: "flow-debugger-user-guide.md", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_PAGE_MISSING, decision: ours, ticket: DOCOPS-374, slug: ibi-iway-service-manager, version: "9.3.0", path: "iway-integration-solution-for-edi-x12-user-guide.md", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_PAGE_MISSING, decision: ours, ticket: DOCOPS-374, slug: ibi-iway-service-manager, version: "9.3.0", path: "iway-integration-solution-for-edi-x12-user-guide/batching-for-outbound-documents/trading-partner-flags-and-counters.md", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_PAGE_MISSING, decision: ours, ticket: DOCOPS-374, slug: ibi-iway-service-manager, version: "9.3.0", path: "iway-integration-solution-for-edi-x12-user-guide/batching-for-outbound-documents/database-sweep-data-selection-for-batching.md", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_PAGE_MISSING, decision: ours, ticket: DOCOPS-374, slug: ibi-iway-service-manager, version: "9.3.0", path: "iway-integration-solution-un-edifact-user-guide/deployment-information-your-iway-integration.md", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_PAGE_MISSING, decision: ours, ticket: DOCOPS-374, slug: ibi-iway-service-manager, version: "9.3.0", path: "iway-integration-solution-un-edifact-user-guide/batching-for-outbound-documents/outbound-batching-process-flow-2.md", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_PAGE_MISSING, decision: ours, ticket: DOCOPS-374, slug: ibi-iway-service-manager, version: "9.3.0", path: "iway-integration-solution-un-edifact-user-guide/batching-for-outbound-documents/extracted-fields-2.md", reason: *ibi2b-case}
+  - {code: VERIFY_PUBLISHED_TOC_ENTRY_MISSING, decision: ours, ticket: DOCOPS-374, slug: ibi-webfocus-container-edition, version: "1.3.4", reason: *ibi2b-case}
+
+  # ---- L2. Empty articles (DOCOPS-344): staging serves the page with no text.
+  - code: VERIFY_PUBLISHED_ANCHOR_MISSING
+    decision: logged
+    ticket: DOCOPS-344
+    slug: ibi-webfocus-reporting-server
+    version: "9.3.1"
+    reason: &ibi2b-empty >-
+      Staging serves the page with an empty article (0 words in div.topic-renderer__content), so
+      the link target, pictures and text are not there. Reporting Server 9.3.1: 2,386 of the
+      2,387 pages checked, the whole version (resource-governor/.../resource-management.md has
+      7,598 words in the Markdown). App Studio 9.3.6: 299 of 302, every guide. Reporting Server
+      9.3.2-9.3.4 and 9.3.6: the same 400-424 pages in every version (two thirds of Server
+      Administration, Gathering Diagnostic Information, a few Unfiled), as on 9.3.0 in batch 2;
+      only the links into those pages are listed for them (each glob covers empty pages only),
+      their pictures and text stay under the DOCOPS-347/348 catch-alls. WebFOCUS Client 9.3.0,
+      9.3.1, 9.3.8: Installation Requirements (Windows) is empty; the UNIX copy's two section
+      links pair with it. For the AEM team.
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: ibi-webfocus-reporting-server, version: "9.3.1", reason: *ibi2b-empty}
+  - {code: VERIFY_PUBLISHED_TEXT_DIFF, decision: logged, ticket: DOCOPS-344, slug: ibi-webfocus-reporting-server, version: "9.3.1", reason: *ibi2b-empty}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: ibi-webfocus-app-studio, version: "9.3.6", path: "installation-and-configuration/*", reason: *ibi2b-empty}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: ibi-webfocus-app-studio, version: "9.3.6", path: "maintain-data-language-reference/*", reason: *ibi2b-empty}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: ibi-webfocus-app-studio, version: "9.3.6", path: "unfiled/*", reason: *ibi2b-empty}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: ibi-webfocus-app-studio, version: "9.3.6", path: "installation-and-configuration/*", reason: *ibi2b-empty}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: ibi-webfocus-app-studio, version: "9.3.6", path: "maintain-data-getting-started/*", reason: *ibi2b-empty}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: ibi-webfocus-app-studio, version: "9.3.6", path: "maintain-data-language-reference/*", reason: *ibi2b-empty}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: ibi-webfocus-app-studio, version: "9.3.6", path: "unfiled/*", reason: *ibi2b-empty}
+  - {code: VERIFY_PUBLISHED_IMAGE_BROKEN, decision: logged, ticket: DOCOPS-344, slug: ibi-webfocus-app-studio, version: "9.3.6", path: "user-guide/*", reason: *ibi2b-empty}
+  - {code: VERIFY_PUBLISHED_TEXT_DIFF, decision: logged, ticket: DOCOPS-344, slug: ibi-webfocus-app-studio, version: "9.3.6", path: "installation-and-configuration.md", reason: *ibi2b-empty}
+  - {code: VERIFY_PUBLISHED_TEXT_DIFF, decision: logged, ticket: DOCOPS-344, slug: ibi-webfocus-app-studio, version: "9.3.6", path: "installation-and-configuration/*", reason: *ibi2b-empty}
+  - {code: VERIFY_PUBLISHED_TEXT_DIFF, decision: logged, ticket: DOCOPS-344, slug: ibi-webfocus-app-studio, version: "9.3.6", path: "maintain-data-getting-started.md", reason: *ibi2b-empty}
+  - {code: VERIFY_PUBLISHED_TEXT_DIFF, decision: logged, ticket: DOCOPS-344, slug: ibi-webfocus-app-studio, version: "9.3.6", path: "maintain-data-getting-started/*", reason: *ibi2b-empty}
+  - {code: VERIFY_PUBLISHED_TEXT_DIFF, decision: logged, ticket: DOCOPS-344, slug: ibi-webfocus-app-studio, version: "9.3.6", path: "maintain-data-language-reference.md", reason: *ibi2b-empty}
+  - {code: VERIFY_PUBLISHED_TEXT_DIFF, decision: logged, ticket: DOCOPS-344, slug: ibi-webfocus-app-studio, version: "9.3.6", path: "maintain-data-language-reference/*", reason: *ibi2b-empty}
+  - {code: VERIFY_PUBLISHED_TEXT_DIFF, decision: logged, ticket: DOCOPS-344, slug: ibi-webfocus-app-studio, version: "9.3.6", path: "unfiled/*", reason: *ibi2b-empty}
+  - {code: VERIFY_PUBLISHED_TEXT_DIFF, decision: logged, ticket: DOCOPS-344, slug: ibi-webfocus-app-studio, version: "9.3.6", path: "user-guide.md", reason: *ibi2b-empty}
+  - {code: VERIFY_PUBLISHED_TEXT_DIFF, decision: logged, ticket: DOCOPS-344, slug: ibi-webfocus-app-studio, version: "9.3.6", path: "user-guide/*", reason: *ibi2b-empty}
+  - {code: VERIFY_PUBLISHED_TEXT_DIFF, decision: logged, ticket: DOCOPS-344, slug: ibi-webfocus-app-studio, version: "9.3.6", path: "whats-new.md", reason: *ibi2b-empty}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: ibi-webfocus-reporting-server, version: "9.3.2", path: "reporting-server-2/managing-applications/managing-applications/linking-to-a-git-repository.md#*", reason: *ibi2b-empty}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: ibi-webfocus-reporting-server, version: "9.3.2", path: "reporting-server-2/metadata/using-data-assist/enhancing-a-synonym/creating-a-join.md#*", reason: *ibi2b-empty}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: ibi-webfocus-reporting-server, version: "9.3.2", path: "reporting-server-2/stored-procedures/platform-specific/ddname-translation-user.md#*", reason: *ibi2b-empty}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: ibi-webfocus-reporting-server, version: "9.3.2", path: "unfiled/proc-add-remote-servers.md#*", reason: *ibi2b-empty}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: ibi-webfocus-reporting-server, version: "9.3.2", path: "unfiled/proc-config-cluster.md#*", reason: *ibi2b-empty}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: ibi-webfocus-reporting-server, version: "9.3.2", path: "unfiled/ref-remote-cluster-config-params.md#*", reason: *ibi2b-empty}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: ibi-webfocus-reporting-server, version: "9.3.2", path: "unfiled/ref-remote-server-config-params.md#*", reason: *ibi2b-empty}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: ibi-webfocus-reporting-server, version: "9.3.3", path: "reporting-server-2/managing-applications/managing-applications/linking-to-a-git-repository.md#*", reason: *ibi2b-empty}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: ibi-webfocus-reporting-server, version: "9.3.3", path: "reporting-server-2/metadata/using-data-assist/enhancing-a-synonym/creating-a-join.md#*", reason: *ibi2b-empty}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: ibi-webfocus-reporting-server, version: "9.3.3", path: "reporting-server-2/stored-procedures/platform-specific/ddname-translation-user.md#*", reason: *ibi2b-empty}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: ibi-webfocus-reporting-server, version: "9.3.3", path: "unfiled/proc-add-remote-servers.md#*", reason: *ibi2b-empty}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: ibi-webfocus-reporting-server, version: "9.3.3", path: "unfiled/proc-config-cluster.md#*", reason: *ibi2b-empty}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: ibi-webfocus-reporting-server, version: "9.3.3", path: "unfiled/ref-remote-cluster-config-params.md#*", reason: *ibi2b-empty}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: ibi-webfocus-reporting-server, version: "9.3.3", path: "unfiled/ref-remote-server-config-params.md#*", reason: *ibi2b-empty}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: ibi-webfocus-reporting-server, version: "9.3.4", path: "reporting-server-2/metadata/using-data-assist/enhancing-a-synonym/creating-a-join.md#*", reason: *ibi2b-empty}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: ibi-webfocus-reporting-server, version: "9.3.4", path: "reporting-server-2/stored-procedures/platform-specific/ddname-translation-user.md#*", reason: *ibi2b-empty}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: ibi-webfocus-reporting-server, version: "9.3.4", path: "unfiled/proc-add-remote-servers.md#*", reason: *ibi2b-empty}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: ibi-webfocus-reporting-server, version: "9.3.4", path: "unfiled/ref-remote-cluster-config-params.md#*", reason: *ibi2b-empty}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: ibi-webfocus-reporting-server, version: "9.3.4", path: "unfiled/ref-remote-server-config-params.md#*", reason: *ibi2b-empty}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: ibi-webfocus-reporting-server, version: "9.3.6", path: "server-administration/metadata/using-data-assist/enhancing-a-synonym/creating-a-join.md#*", reason: *ibi2b-empty}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: ibi-webfocus-reporting-server, version: "9.3.6", path: "unfiled/proc-add-remote-servers.md#*", reason: *ibi2b-empty}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: ibi-webfocus-reporting-server, version: "9.3.6", path: "unfiled/ref-remote-cluster-config-params.md#*", reason: *ibi2b-empty}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: ibi-webfocus-reporting-server, version: "9.3.6", path: "unfiled/ref-remote-server-config-params.md#*", reason: *ibi2b-empty}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: ibi-webfocus-client, version: "9.3.8", path: "ibi-webfocus/installation-guide-for-windows/ibi-webfocus-installation-requirements/ibi-webfocus-installation-requirements.md#*", reason: *ibi2b-empty}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-344, slug: ibi-webfocus-client, version: "9.3.[01]", path: "installation-and-configuration-for-unix/ibi-webfocus-installation-requirements/ibi-webfocus-installation-requirements-2.md#*", reason: *ibi2b-empty}
+
+  # ---- L3. A page cut short by an escaped \<a href> (ours, DOCOPS-360; R002 on content-fix).
+  - code: VERIFY_PUBLISHED_ANCHOR_MISSING
+    decision: ours
+    ticket: DOCOPS-360
+    slug: ibi-webfocus-client
+    version: "9.3.[018]"
+    path: "*/configuration-settings/application-settings.md#*"
+    reason: &ibi2b-r002cut >-
+      The page is cut off on staging after "The following HTML tags may be used in the sign-in
+      message: \<l>, \<br>, \<b>, \<u>, \<a href>": AEM turns the escaped \<a href> into a real
+      link and the rest of the page (about 8,500 of 21,000 words; 20 sections from "Configure a
+      Default Workspace Repository Path" on) is not shown, so links to those headings fail. R002
+      on content-fix writes &lt;a href> (0cec5732); clears when it reaches wip. 18 Client pages
+      (9.3.0-9.3.8) have the pattern on wip, 0 on content-fix.
+
+  # ---- L4. Link targets that differ on staging (DOCOPS-345), "#top" (accepted), then source bookmarks.
+  - code: VERIFY_PUBLISHED_ANCHOR_MISSING
+    decision: logged
+    ticket: DOCOPS-345
+    slug: ibi-webfocus-reporting-server
+    version: "9.3.[1-6]"
+    path: "*.md#*--*"
+    reason: &ibi2b-idiffer >-
+      The link target differs from the id staging gives the heading: doubled hyphens where the
+      title had a symbol or a code part (#mailing--an-html-file-...,
+      #creating--------file-of-the-client- repository, #generating--insights-...; 301 rows and
+      links), the code part dropped (#supplied-files-location for "Supplied Files Location
+      (EDAHOME)"), the raw <a id="_regex()"> not kept (staging:
+      _regex():-replace-portions-of-a-string), and a heading the source puts inside a numbered
+      list (Container Edition 9.3.8 "PART 4", served without an id). The text is on the page;
+      the link opens it at the top.
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-345, slug: ibi-webfocus-reporting-server, version: "9.3.[1-6]", path: "unfiled/file-locations.md#*-files-location", reason: *ibi2b-idiffer}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-345, slug: ibi-webfocus-client, version: "9.3.[01]", path: "*.md#*--*", reason: *ibi2b-idiffer}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-345, slug: ibi-iway-service-manager, version: "9.3.0", path: "functional-language-reference-guide/iway-functions/string-functions.md#_regex()", reason: *ibi2b-idiffer}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: logged, ticket: DOCOPS-345, slug: ibi-webfocus-container-edition, version: "9.3.8", path: "deployment-on-oracle-kubernetes-engine-oke/build-load-images-push-oci-container-registry.md#part-4*", reason: *ibi2b-idiffer}
+
+  - code: VERIFY_PUBLISHED_ANCHOR_MISSING
+    decision: accepted
+    slug: ibi-webfocus-reporting-server
+    version: "9.3.[2-4]"
+    path: "unfiled/new-pds-install-run-isetup.md#top"
+    reason: >-
+      Link to the page's "top" bookmark (Flare <a name="top">); staging has no element with that
+      id, so the page opens at its top, which is where the bookmark was. No reader effect.
+
+  - code: VERIFY_PUBLISHED_ANCHOR_MISSING
+    decision: source
+    slug: ibi-webfocus-app-studio
+    version: "9.3.4"
+    path: "*.md#*"
+    reason: &ibi2b-nobookmark >-
+      Source. The link points at a Flare/Word bookmark (#WS91CD770C-..., #d05db21027262,
+      #dcr..., #concept_..., #reference_..., Flare's 8-letter #Displayi2, #Using, #Configur2...)
+      that no file of the version's package defines as id= or name= (whole extracted package
+      searched); on the old site the link opens the page at its top, as it does on staging. App
+      Studio 9.3.4 111; WebFOCUS Client 9.3.0 about 340, 9.3.1 335, 9.3.8 11; iWay Service
+      Manager 9.3.0 23; Reporting Server 9.3.2-9.3.4 1-26; Data Quality 5.2.2 #Service3 (as DI
+      in batch 1). DSML Services 9.3.8: html/temp/WebFOCUS_Container_Edition.htm is a draft left
+      in the package (the contents list of an "ECS Deployment Guide", 66 links to headings the
+      page does not have); no old menu lists it, so it is filed under Unfiled. The old menu also
+      names three files the package does not ship (DSML dsml_intro.htm; Reporting Server 9.3.3
+      SOLR_preparing.htm, ms_365_dataflow_934.htm).
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: source, slug: ibi-webfocus-client, version: "9.3.[018]", path: "*.md#*", reason: *ibi2b-nobookmark}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: source, slug: ibi-iway-service-manager, version: "9.3.0", path: "*.md#*", reason: *ibi2b-nobookmark}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: source, slug: ibi-webfocus-reporting-server, version: "9.3.[2-4]", path: "*.md#*", reason: *ibi2b-nobookmark}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: source, slug: ibi-data-quality, version: "5.2.2", path: "installation-and-user-guide/management-and-monitoring/managing-services.md#Service3", reason: *ibi2b-nobookmark}
+  - {code: VERIFY_PUBLISHED_ANCHOR_MISSING, decision: source, slug: ibi-webfocus-dsml-services, version: "9.3.8", path: "unfiled/webfocus-container-edition-ecs-deployment-guide.md#*", reason: *ibi2b-nobookmark}
+  - {code: VERIFY_TOPIC_MISSING, decision: source, slug: ibi-webfocus-dsml-services, version: "9.3.8", path: "*/install-goldenKeys/dsml_intro.htm", reason: *ibi2b-nobookmark}
+  - {code: VERIFY_TOPIC_MISSING, decision: source, slug: ibi-webfocus-reporting-server, version: "9.3.3", path: "*/adapter-admin/SOLR_preparing.htm", reason: *ibi2b-nobookmark}
+  - {code: VERIFY_TOPIC_MISSING, decision: source, slug: ibi-webfocus-reporting-server, version: "9.3.3", path: "*/adapter-admin/ms_365_dataflow_934.htm", reason: *ibi2b-nobookmark}
+
+  # ---- L5. Local text check (TEXT_DROPPED) and pictures read in example code (IMAGE_MISSING).
+  - code: VERIFY_TEXT_DROPPED
+    decision: logged
+    ticket: DOCOPS-360
+    slug: ibi-webfocus-client
+    version: "9.3.[01]"
+    path: "*/character-functions/xml??cod-*.md"
+    reason: &ibi2b-amp >-
+      The source shows entity names as text ("For &amp;, the result is &.", "A&B becomes
+      A&amp;B", "eliminates XML entities (such as &lt. to < and &gt to >)"); the Markdown writes
+      &amp;, &lt. and &gt; as entities, so staging shows the character ("For &, the result is
+      &.", "A&B becomes A&B"). XMLDECOD/XMLENCOD (Client 9.3.0, 9.3.1; Reporting Server
+      9.3.1-9.3.6, 9.3.8) and four iWay Service Manager 9.3.0 pages. Not changed by R002 on
+      content-fix.
+  - {code: VERIFY_TEXT_DROPPED, decision: logged, ticket: DOCOPS-360, slug: ibi-webfocus-reporting-server, version: "9.3.[1-68]", path: "*/xml??cod-*.md", reason: *ibi2b-amp}
+  - {code: VERIFY_TEXT_DROPPED, decision: logged, ticket: DOCOPS-360, slug: ibi-iway-service-manager, version: "9.3.0", path: "programmer-guide/iway-api-reference/service-functions.md", reason: *ibi2b-amp}
+  - {code: VERIFY_TEXT_DROPPED, decision: logged, ticket: DOCOPS-360, slug: ibi-iway-service-manager, version: "9.3.0", path: "component-reference-guide/iway-preemitters/*preemitter*.md", reason: *ibi2b-amp}
+  - {code: VERIFY_TEXT_DROPPED, decision: logged, ticket: DOCOPS-360, slug: ibi-iway-service-manager, version: "9.3.0", path: "functional-language-reference-guide/iway-functions/string-functions.md", reason: *ibi2b-amp}
+
+  - code: VERIFY_TEXT_DROPPED
+    decision: logged
+    ticket: DOCOPS-366
+    slug: ibi-webfocus-reporting-server
+    version: "9.3.[1-68]"
+    path: "*/configuring-the-adapter-for-cics-transactions.md"
+    reason: &ibi2b-checker >-
+      Checker. A sentence split over lines inside raw HTML ("greater than" / "0.", "has index" /
+      "0.", "returns" / "012.", "The default value is" / "1.") read as a list number; a Dialogue
+      Manager variable (&REGION, &REGIONMGR, &CTR, &LTABLE) read as a legacy entity (&REG, &LT);
+      raw HTML in the sentence (<strong>View All,&nbsp;</strong>; audit-log lines in a raw <pre>
+      table); <IMG SRC="/ibi_html/ibilogo.gif">, <insertvariable FOCHTMLURL />/...,
+      logo_webfocus.png in example code read as pictures. Staging serves each sentence whole and
+      the code as code.
+  - {code: VERIFY_TEXT_DROPPED, decision: logged, ticket: DOCOPS-366, slug: ibi-webfocus-reporting-server, version: "9.3.[1-68]", path: "*/configuring-adapter-natural-cics-transactions.md", reason: *ibi2b-checker}
+  - {code: VERIFY_TEXT_DROPPED, decision: logged, ticket: DOCOPS-366, slug: ibi-iway-service-manager, version: "9.3.0", path: "component-reference-guide/iway-iterators/available-iterators.md", reason: *ibi2b-checker}
+  - {code: VERIFY_TEXT_DROPPED, decision: logged, ticket: DOCOPS-366, slug: ibi-iway-service-manager, version: "9.3.0", path: "iway-integration-tools-transformer-user-guide/iway-transformer-concepts/transform-functions.md", reason: *ibi2b-checker}
+  - {code: VERIFY_TEXT_DROPPED, decision: logged, ticket: DOCOPS-366, slug: ibi-iway-service-manager, version: "9.3.0", path: "protocol-guide/queuing-protocol-adapters/websphere-mq-and-mqjms.md", reason: *ibi2b-checker}
+  - {code: VERIFY_TEXT_DROPPED, decision: logged, ticket: DOCOPS-366, slug: ibi-webfocus-app-studio, version: "9.3.[4-7]", path: "*/creating-esri-maps/configuring-maps-to-interact-with-other-components.md", reason: *ibi2b-checker}
+  - {code: VERIFY_TEXT_DROPPED, decision: logged, ticket: DOCOPS-366, slug: ibi-webfocus-reporting-server, version: "9.3.[1-68]", path: "*/iterating-through-multiple-tables.md", reason: *ibi2b-checker}
+  - {code: VERIFY_TEXT_DROPPED, decision: logged, ticket: DOCOPS-366, slug: ibi-webfocus-reporting-server, version: "9.3.[1-68]", path: "*/debugging-a-stored-procedure.md", reason: *ibi2b-checker}
+  - {code: VERIFY_TEXT_DROPPED, decision: logged, ticket: DOCOPS-366, slug: ibi-webfocus-client, version: "9.3.[018]", path: "*/customizing-a-procedure-with-variables.md", reason: *ibi2b-checker}
+  - {code: VERIFY_TEXT_DROPPED, decision: logged, ticket: DOCOPS-366, slug: ibi-webfocus-client, version: "9.3.[018]", path: "*/logging/understanding-audit-logs.md", reason: *ibi2b-checker}
+  - {code: VERIFY_TEXT_DROPPED, decision: logged, ticket: DOCOPS-366, slug: ibi-webfocus-client, version: "9.3.[018]", path: "*/adding-comment-document-analytics-report.md", reason: *ibi2b-checker}
+  - {code: VERIFY_IMAGE_MISSING, decision: logged, ticket: DOCOPS-366, slug: ibi-webfocus-client, version: "9.3.[018]", path: "*/adding-an-image-to-a-report.md", reason: *ibi2b-checker}
+  - {code: VERIFY_IMAGE_MISSING, decision: logged, ticket: DOCOPS-366, slug: ibi-webfocus-client, version: "9.3.[018]", path: "*/customizing-the-deferred-report-status-screen.md", reason: *ibi2b-checker}
+  - {code: VERIFY_IMAGE_MISSING, decision: logged, ticket: DOCOPS-366, slug: ibi-webfocus-client, version: "9.3.[018]", path: "*/using-cascading-style-sheet-standardize-display.md", reason: *ibi2b-checker}
+  - {code: VERIFY_IMAGE_MISSING, decision: logged, ticket: DOCOPS-366, slug: ibi-webfocus-client, version: "9.3.[018]", path: "*/signing-in-to-webfocus.md", reason: *ibi2b-checker}
+
+  - code: VERIFY_TEXT_DROPPED
+    decision: accepted
+    slug: ibi-webfocus-app-studio
+    version: "9.3.4"
+    path: "*/creating-html-pages/html-*.md"
+    reason: &ibi2b-authored >-
+      Authored (unbuilt) source pages (Phase 41): html_responsive.htm keeps every release's
+      conditional text; the converter keeps this release's text and removes the old-release
+      variants (releaseNumber.8205...), as on App Studio 9.3.3. The IMS page (Reporting Server
+      9.3.2) has an empty product variable in the source ("as many segments as supports"); the
+      converter fills it in ("as WebFOCUS supports").
+  - {code: VERIFY_TEXT_DROPPED, decision: accepted, slug: ibi-webfocus-reporting-server, version: "9.3.2", path: "adapter-administration/using-the-adapter-for-ims/ims200-7708.md", reason: *ibi2b-authored}
+
+  # ---- L6. Menus and dropped topics.
+  - code: VERIFY_PUBLISHED_TOC_MOVED
+    decision: accepted
+    slug: ibi-webfocus-reporting-server
+    version: "9.3.[1-6]"
+    path: "*> SQL * Functions > *"
+    reason: &ibi2b-once >-
+      toc.yml lists the page under two (or three) parents, as the old menu did: the SQL function
+      rows that reuse the Simplified function pages, Common Windows-Based Java Implementations /
+      Third-Party Software under four platforms, Indexing Applications, ON TABLE HOLD/PCHOLD
+      (Reporting Server); in Client 9.3.8 the 14 shared Installation pages under Windows and
+      UNIX/Linux, Deleting a Role, Adding a Rule, Autoprompt Parameter Prompting, the Chart
+      Rollup Tool, REGEXP_SUBSTR (3 rows). Staging shows each page once, and readers still reach
+      it.
+  - {code: VERIFY_PUBLISHED_TOC_MOVED, decision: accepted, slug: ibi-webfocus-client, version: "9.3.[018]", path: "*> SQL * Functions > *", reason: *ibi2b-once}
+  - {code: VERIFY_PUBLISHED_TOC_MOVED, decision: accepted, slug: ibi-webfocus-reporting-server, version: "9.3.[1-6]", path: "* > Common Windows-Based Java Implementations", reason: *ibi2b-once}
+  - {code: VERIFY_PUBLISHED_TOC_MOVED, decision: accepted, slug: ibi-webfocus-reporting-server, version: "9.3.[1-6]", path: "* > Third-Party Software and Licenses", reason: *ibi2b-once}
+  - {code: VERIFY_PUBLISHED_TOC_MOVED, decision: accepted, slug: ibi-webfocus-reporting-server, version: "9.3.[1-6]", path: "*> Managing Applications > Indexing Applications For Global Searches", reason: *ibi2b-once}
+  - {code: VERIFY_PUBLISHED_TOC_MOVED, decision: accepted, slug: ibi-webfocus-reporting-server, version: "9.3.[1-6]", path: "*> Creating Expressions > ON TABLE *", reason: *ibi2b-once}
+  - {code: VERIFY_PUBLISHED_TOC_MOVED, decision: accepted, slug: ibi-webfocus-client, version: "9.3.8", path: "*> Installation Guide for UNIX/Linux > *", reason: *ibi2b-once}
+  - {code: VERIFY_PUBLISHED_TOC_MOVED, decision: accepted, slug: ibi-webfocus-client, version: "9.3.[018]", path: "*> Deleting a Role", reason: *ibi2b-once}
+  - {code: VERIFY_PUBLISHED_TOC_MOVED, decision: accepted, slug: ibi-webfocus-client, version: "9.3.[018]", path: "*> Adding a Rule", reason: *ibi2b-once}
+  - {code: VERIFY_PUBLISHED_TOC_MOVED, decision: accepted, slug: ibi-webfocus-client, version: "9.3.[018]", path: "*> Autoprompt Parameter Prompting", reason: *ibi2b-once}
+  - {code: VERIFY_PUBLISHED_TOC_MOVED, decision: accepted, slug: ibi-webfocus-client, version: "9.3.[018]", path: "*> Creating Content Using the Chart Rollup Tool", reason: *ibi2b-once}
+  - {code: VERIFY_PUBLISHED_TOC_ENTRY_MISSING, decision: accepted, slug: ibi-webfocus-client, version: "9.3.8", path: "*> REGEXP_SUBSTR: *", reason: *ibi2b-once}
+
+  - code: VERIFY_TOC_ENTRY_MISSING
+    decision: accepted
+    slug: ibi-webfocus-reporting-server
+    version: "9.3.8"
+    path: "ibi-webfocus/legal-and-third-party-notices.md"
+    reason: >-
+      The layout (Phase 81) lists "Legal and Third-Party Notices" at the top of the menu
+      (9-3-8/legal-and-third-party-notices.md); verify matches the old row to the copy left
+      under ibi-webfocus/, which no menu lists. Readers reach the page. The unlisted copy can be
+      removed (as App Studio 9.3.8 in batch 2).
+
+  - code: VERIFY_TOPIC_MISSING
+    decision: logged
+    ticket: DOCOPS-349
+    slug: ibi-webfocus-client
+    version: "9.3.[018]"
+    path: "*/set-parameter-syntax/index.md*"
+    reason: &ibi2b-index >-
+      dev-reporting-apps/INDEX.htm is a real topic (the SET INDEX parameter), not a generated
+      index; the converter skips files named INDEX.htm, so the topic, its menu row and its 301
+      row are missing (as FOCUS in batch 1).
+  - {code: VERIFY_TOC_ENTRY_MISSING, decision: logged, ticket: DOCOPS-349, slug: ibi-webfocus-client, version: "9.3.[018]", path: "*/set-parameter-syntax/index.md*", reason: *ibi2b-index}
+  - {code: VERIFY_REDIRECT_UNMAPPED, decision: logged, ticket: DOCOPS-349, slug: ibi-webfocus-client, version: "9.3.[018]", path: "*/set-parameter-syntax/index.md*", reason: *ibi2b-index}
+
+  # ---- L7. 301 maps missing the release-notes pages (ours, DOCOPS-322).
+  - code: VERIFY_REDIRECT_UNMAPPED
+    decision: ours
+    ticket: DOCOPS-322
+    slug: ibi-webfocus-client
+    version: "9.3.8"
+    reason: &ibi2b-301 >-
+      9-3-8/301.yml (written 5 Nov, d71782d0) has no rows for the release notes' pages: WebFOCUS
+      Client and Reporting Server 66 old pages each (relnotes/en-us/Release-Notes-93x/... and
+      relnotes/en-us/_templates/...; both keep 10 document rows); DSML Services 9.3.8 has no
+      page rows at all (5 pages: Home, Legal, Documentation and Support, two installation
+      pages). The page list for these was not cached when the maps were built (as App Studio
+      9.3.8 in batch 2). Every such old page would 404 at cutover. Rebuild the three maps (sync)
+      and push.
+  - {code: VERIFY_REDIRECT_UNMAPPED, decision: ours, ticket: DOCOPS-322, slug: ibi-webfocus-reporting-server, version: "9.3.8", reason: *ibi2b-301}
+  - {code: VERIFY_REDIRECT_UNMAPPED, decision: ours, ticket: DOCOPS-322, slug: ibi-webfocus-dsml-services, version: "9.3.8", reason: *ibi2b-301}
+
+  # ---- L8. Findings made while staging throttled verify, proven false by the cached page (checker).
+  - code: VERIFY_REDIRECT_UNSERVED
+    decision: logged
+    ticket: DOCOPS-366
+    slug: ibi-webfocus-reporting-server
+    version: "9.3.8"
+    path: "ibi-webfocus/adapter/using-adapter-5.md"
+    reason: &ibi2b-throttle >-
+      Checker. The redirect sample asked for the page while stg-docs.ibi.com was answering 429
+      Too Many Requests or dropping connections (18 Nov 19:30 to 19 Nov 05:52 IST); verify
+      counted that as "not served". The cached answer for the same URL is 200 with the page's
+      own data-page-path, so the page is served. Only these proven cases are listed; the other
+      findings made while staging answered 429 (about 2,000 PAGE_MISSING, Reporting Server
+      9.3.5/9.3.8 "no menu served") stay open until a re-run.
+  - {code: VERIFY_REDIRECT_UNSERVED, decision: logged, ticket: DOCOPS-366, slug: ibi-webfocus-reporting-server, version: "9.3.8", path: "ibi-webfocus/adapter/using-the-adapter-for-trino-and-prestodb/trino-presto-optimization-settings.md", reason: *ibi2b-throttle}
+  - {code: VERIFY_REDIRECT_UNSERVED, decision: logged, ticket: DOCOPS-366, slug: ibi-webfocus-reporting-server, version: "9.3.8", path: "ibi-webfocus/ibi-webfocus/installation-z-os/reconfigure-adapters/smf-record-format-2.md", reason: *ibi2b-throttle}
+  - {code: VERIFY_REDIRECT_UNSERVED, decision: logged, ticket: DOCOPS-366, slug: ibi-webfocus-reporting-server, version: "9.3.8", path: "ibi-webfocus/unfiled/refreshing-or-upgrading-an-installation.md", reason: *ibi2b-throttle}
+  - {code: VERIFY_REDIRECT_UNSERVED, decision: logged, ticket: DOCOPS-366, slug: ibi-webfocus-reporting-server, version: "9.3.8", path: "ibi-webfocus/server/workspace-manager/workspace/workspace-set/smtp-server-settings.md", reason: *ibi2b-throttle}
+  - {code: VERIFY_REDIRECT_UNSERVED, decision: logged, ticket: DOCOPS-366, slug: ibi-iway-service-manager, version: "9.3.0", path: "component-reference-guide/additional-sql-service-reference-information/sql-service-edge-returns-sorted-by-xopen-code.md", reason: *ibi2b-throttle}
+  - {code: VERIFY_REDIRECT_UNSERVED, decision: logged, ticket: DOCOPS-366, slug: ibi-iway-service-manager, version: "9.3.0", path: "iway-integration-solution-for-hipaa-user-guide/batching-for-outbound-documents/outbound-batching-process-flow-3.md", reason: *ibi2b-throttle}
+  - {code: VERIFY_REDIRECT_UNSERVED, decision: logged, ticket: DOCOPS-366, slug: ibi-webfocus-reporting-server, version: "9.3.6", path: "adapter-administration/using-the-adapter-for-mariadb/managing-mariadb-metadata.md", reason: *ibi2b-throttle}
+
