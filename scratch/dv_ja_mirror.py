@@ -150,7 +150,9 @@ def mirror(version: str) -> dict:
                     url, counts["section rows mapped"] = f"{page}#{jp[en.index(frag)]}", counts["section rows mapped"] + 1
                 else:
                     url, counts["section rows to the page"] = page, counts["section rows to the page"] + 1
-            entry = {"title": titles.get(ja) or node.get("title"), "url": url}
+            title = titles.get(ja) or str(node.get("title"))
+            # AEM shows a raw `<` as a tag: written as an entity (angle-brackets fix).
+            entry = {"title": title.replace("<", "&lt;").replace(">", "&gt;"), "url": url}
             if children:
                 entry["subfolderlist"] = children
             out.append(entry)
