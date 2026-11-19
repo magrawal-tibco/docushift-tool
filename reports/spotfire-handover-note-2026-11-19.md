@@ -5,7 +5,7 @@ the TIBCO and ibi repositories.
 
 | Repository | Commit on `main` |
 |---|---|
-| [en-us-spotfire-statistica-userdocs](https://github.com/tibco/en-us-spotfire-statistica-userdocs) | [`0084f280`](https://github.com/tibco/en-us-spotfire-statistica-userdocs/commit/0084f280) |
+| [en-us-spotfire-statistica-userdocs](https://github.com/tibco/en-us-spotfire-statistica-userdocs) | [`bb3e518e`](https://github.com/tibco/en-us-spotfire-statistica-userdocs/commit/bb3e518e) |
 | [en-us-spotfire-data-virtualization-userdocs](https://github.com/tibco/en-us-spotfire-data-virtualization-userdocs) | [`b7d0eed5`](https://github.com/tibco/en-us-spotfire-data-virtualization-userdocs/commit/b7d0eed5) |
 
 ## What is in them
@@ -16,9 +16,9 @@ the TIBCO and ibi repositories.
   product-level redirect file is gone.
 - Note labels shown as "Note:"; backslashes and `<` written so AEM shows them as text; help menu
   titled "<product> <version>".
-- **Data Science Workbench 14.4.0 is not published:** it was the same 14,250 pages as Statistica
-  14.4.0. Its 13,933 old addresses (`docs.tibco.com/pub/dsc-stat/14.4.0/...`) redirect to the same
-  pages under Statistica 14.4.0.
+- **Data Science Workbench is not published:** its two versions were the same pages as Statistica
+  14.4.0 and 14.1.0 (14,250 and 14,366). Their old addresses (`docs.tibco.com/pub/dsc-stat/...`,
+  13,933 and 13,920) redirect to the same pages under Statistica.
 - **Data Virtualization:** the Data Virtualization team's link corrections for 8.9.0 are applied (88
   links per version, 8.8.x matched by page name); re-converted with the current converter
   (doubled headings, the "Text Escaping" page).
@@ -32,12 +32,10 @@ packages never shipped).
 
 ## Open points
 
-1. **Data Science Workbench 14.1.0 publishes the same pages as Statistica 14.1.0** (14,366). To
-   decide whether it is dropped the same way as 14.4.0.
-2. **Data Virtualization team, to confirm:** the link "ApplicantApplications" (Dynamics GP adapter)
+1. **Data Virtualization team, to confirm:** the link "ApplicantApplications" (Dynamics GP adapter)
    was answered with the singular page; we used the plural page `ApplicantApplications`, which exists.
    The 6 missing pictures stay out, as answered.
-3. **Statistica is published one page per topic** (as converted; never merged). Grouping it the way
+2. **Statistica is published one page per topic** (as converted; never merged). Grouping it the way
    the TIBCO help is grouped is a follow-up before the Spotfire site goes live.
-4. Please tell us which branch and site the Spotfire build reads, and when a staging site is
+3. Please tell us which branch and site the Spotfire build reads, and when a staging site is
    available, so the pages can be checked there.
