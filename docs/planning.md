@@ -3034,8 +3034,9 @@ name.
    - which existing subtree goes under which section;
    - wrapper entries to collapse (`deployment-manager/deployment-manager` → `deployment-manager`);
    - new parent groups where a list is too long, with a title and folder name (adapters by kind: relational databases, big data and NoSQL, cloud storage and files, SaaS and web);
-   - retitles (each Home page, the four What's New pages named per component) and duplicates to drop (the second Drill entry).
-   No page's content changes and no page is dropped.
+   - retitles (each Home page, the four What's New pages named per component) and duplicates to drop (the second Drill entry);
+   - **topics shared between help systems** (measured 19 Nov on 8.9.0: 110 titles appear in more than one system; 45 have identical text, 14 nearly identical, 51 differ): an identical copy is published once, and the other copy's old address redirects to it; a nearly identical pair is listed with its differences for a decision; a different pair with the same title ("Authentication" per adapter, "Introduction") stays, and its parent tells them apart. The Deployment Manager help (41 pages) repeats the titles of the Administration Guide's Deployment Manager chapter, but only 5 texts are identical, so the draft compares them page by page and recommends which to keep.
+   No page's content changes. A page is only dropped as an identical duplicate, with a redirect, and only once the draft is approved.
 2. **Review.** You approve or edit the draft before anything moves.
 3. **Apply** with a new script, `scratch/restructure.py`, on the reframed workspace:
    - move each page to its new folder path;
