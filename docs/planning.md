@@ -3523,6 +3523,25 @@ remaining duplicates are a source topic repeating its own heading one level down
    time, each compared with the published pages before sync; ibi into `content-fix`.
    Re-measure with the audit script after each family. DOCOPS-336 dated notes; Done when all
    42 read 0.
+6. **Products whose repo has moved past `reframed/` (added 2026-11-19, ibi DI/ISM first).**
+   Since 16–18 Nov, `content-fix` carries fixes made in the repo only (R002 `&lt;`, help-menu
+   titles without ™, `301.yml`, DOCOPS-374 case); `sync` would overwrite them. Measured on
+   DI: 3–9 files per version differ between `reframed/` and the repo. So no `sync` for these:
+   1. Copy the product's `reframed/` tree aside; user runs `reframe --product … --force`.
+   2. `scratch/heading_patch.py old new repo` (read-only): page list must be identical (else
+      restore the copy, stop); every `.md` hunk may change only heading and blank lines (else
+      that file is listed, not patched); `toc.yml`/`301.yml`/`csh`/redirect changes (an
+      anchor that moved) are listed, never applied. Prints doubled-title and skipped-level
+      counts before/after per version.
+   3. Same command with `--apply` on `content-fix`, all-or-nothing. Each heading change is
+      placed only where its lines sit unedited in the repo (not `git merge-file`, which calls
+      a removed title one line above an R002-fixed paragraph a conflict), and the result may
+      differ from the repo copy in heading and blank lines only, else nothing is written.
+      `git diff` reviewed before commit.
+   Built 2026-11-19; tested on a stop case for each guarantee. DI baseline (repo, before):
+   skipped levels 21/22/22/22/0 and doubled titles 70/4/4/4/5 for 1.0.0/1.1.0/1.2.0/2.0.0/2.1.0;
+   the extra skips are `unfiled/` pages with the same `#` then `###` shape.
+   4. User commits and pushes `content-fix`; `wip` later by PR (ibi freeze).
 
 **Not in this phase:** changing R1 (stricter sibling rule) or `max_words` — recorded in
 `open-issues.md` for a later decision.

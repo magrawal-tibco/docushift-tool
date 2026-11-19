@@ -1447,6 +1447,15 @@ on a site this tool does not own, and the only honest test of it is a network re
 `validate` does not make. Sample a handful by hand before you hand the map over.
 
 ### AEM Synthesis & Publishing Layout
+
+> **Before you `sync` a version that is already published, check that the repo has no fixes
+> of its own.** From 16–18 Nov 2026 the `content-fix` branches carry edits made in the repo
+> only (R002 `&lt;`, help-menu titles without ™, `301.yml`, DOCOPS-374 file-name case), and
+> `sync` copies `reframed/` over them. So a re-convert or re-merge done to fix *one* thing
+> must not be synced: compare `reframed/` with the repo (`diff -rq`) first, and if they
+> differ, carry only the intended change across as a patch. For heading changes that is
+> `scratch/heading_patch.py` ([planning.md Phase 76 step 6](planning.md)).
+
 ```bash
 # Organize converted AEM files into repo-shaped folders on disk
 docushift sync --all --target-dir ../tibco-docs-aem/
