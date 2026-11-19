@@ -3018,6 +3018,44 @@ name.
 
 ---
 
+### Phase 87: One Structure for Data Virtualization's Five Help Systems, Drafted by AI — **Planned 2026-11-19; awaiting approval**
+
+**Problem (user, 19 Nov).** Data Virtualization ships five help systems (Adapters, Business Directory, Deployment Manager, Studio = the user guides, Web UI). The tool laid each one out as its own TOC and put them side by side, which reads badly (measured on 8.9.0, 10,152 menu entries):
+- five top-level entries all titled "Spotfire® Data Virtualization" (each system's Home page), and four "What's New" pages;
+- a folder repeated below itself on 80 pages (`deployment-manager/deployment-manager/...`) and a name repeated in the first three levels on 74 (`business-directory/businessdirectory/business-directory/...`);
+- 76 adapters in one flat list under a product-name title (Drill twice);
+- wrapper titles copied from folder names ("BusinessDirectory", "SDV Web UI", "Whats New").
+
+`config/reframe.yaml` can merge pages by depth or keep guides apart, but cannot restructure across help systems, rename folders or retitle parents.
+
+**Plan.**
+1. **AI draft per version** (8.9.0 first; 8.8.1/8.8.0 reuse it where their trees match). An agent reads the five TOCs and writes `reports/ai-grouping/tibco-data-virtualization-<version>.md` plus a plan file:
+   - top-level sections in reading order (for example What's New; Getting Started and Installation; User Guide; Adapters; Business Directory; Deployment Manager; Web UI; Administration and Security; Client Interfaces and API; Reference; Troubleshooting), each with a title and a short folder name;
+   - which existing subtree goes under which section;
+   - wrapper entries to collapse (`deployment-manager/deployment-manager` → `deployment-manager`);
+   - new parent groups where a list is too long, with a title and folder name (adapters by kind: relational databases, big data and NoSQL, cloud storage and files, SaaS and web);
+   - retitles (each Home page, the four What's New pages named per component) and duplicates to drop (the second Drill entry).
+   No page's content changes and no page is dropped.
+2. **Review.** You approve or edit the draft before anything moves.
+3. **Apply** with a new script, `scratch/restructure.py`, on the reframed workspace:
+   - move each page to its new folder path;
+   - write a short landing page for each new parent group (title plus the list of its children);
+   - rewrite every link;
+   - regenerate `toc.yml`;
+   - record the new names in `rename-map.csv` and re-point `redirects.yml`, so `sync` rebuilds `301.yml` and a later reframe keeps the layout.
+   Then `sync` to the repo.
+4. **Japanese.** Re-run `scratch/dv_ja_mirror.py`. It reads `rename-map.csv` and the English menu, so the Japanese follows the new layout page for page.
+5. **Checks.**
+   - every page before is a page after (page counts per version unchanged);
+   - every old address still redirects;
+   - `validate` with 0 errors and the letter-case, spaces, heading and `<` checks;
+   - `verify --skip-published` against the old site;
+   - an AI review of the final menu for remaining repetition or odd titles.
+
+**Scope.** Data Virtualization 8.9.0, 8.8.1, 8.8.0 (English and Japanese). Statistica is the same kind of problem (several help systems, one page per topic) and could follow with the same script, after DV.
+
+**Time.** About a day: draft 1–2 h, script 3–4 h, apply and checks 2–3 h. It changes every published DV path, so the old URLs rely on the redirects; Digital Platform gets a note. The old site goes off 30 Nov.
+
 ### Phase 86: Data Virtualization in Japanese, from the Docs Team's Packages — **Approved 2026-11-19; in progress; DOCOPS-254**
 
 **Problem.** Data Virtualization 8.8.0 and 8.8.1 have Japanese online help on docs.tibco.com only (6,917 pages, open-issues.md "Translated pages that are on the live site but not in any package"). The docs team has now supplied full product drops (user, 19 Nov): `cache/downloads/8.8.0-DOC-3/` and `cache/downloads/8.8.1-GA/`, each with `doc/html/en-US/` and `doc/html/ja-JP/`.
