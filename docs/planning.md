@@ -3018,6 +3018,23 @@ name.
 
 ---
 
+### Phase 86: Data Virtualization in Japanese, from the Docs Team's Packages — **Planned 2026-11-19; awaiting approval; DOCOPS-254**
+
+**Problem.** Data Virtualization 8.8.0 and 8.8.1 have Japanese online help on docs.tibco.com only (6,917 pages, open-issues.md "Translated pages that are on the live site but not in any package"). The docs team has now supplied full product drops (user, 19 Nov): `cache/downloads/8.8.0-DOC-3/` and `cache/downloads/8.8.1-GA/`, each with `doc/html/en-US/` and `doc/html/ja-JP/`.
+
+**Measured (19 Nov).** Japanese roots `BusDirHelp`, `DeployManHelp`, `StudioHelp`, `WebUI`; no `AdapterHelp` (the adapter guides are English only). 8.8.0: 111 + 45 + 2,999 + 53 = 3,208 pages; 8.8.1: 113 + 45 + 3,016 + 535 = 3,709. Total 6,917, the live site's count. One Japanese PDF per version.
+
+**Plan.** The Phase 57 path, as for WebFOCUS:
+1. **Package.** Zip each drop as it is and register it as the version's translated package: `docushift --locale ja-jp download --product tibco-data-virtualization --version 8.8.x --from-file <zip>` (lands in `families/ja-jp-…/`). Check first that its `en-US` tree matches the English package already converted; if it differs, only `ja-JP` is used.
+2. **Convert.** `docushift --locale ja-jp convert` for both versions (a `!` command for the user). Output in `output/ja-jp-spotfire-data-virtualization/`, records in `cache/state-ja-jp.db`; `versions.csv` is not touched.
+3. **Layout.** Translated trees are not merged (Phase 57), so the Japanese help is **one page per topic**, while the English 8.8.x help is grouped. The menu follows the Japanese package's own TOC. Pictures the Japanese build lacks are borrowed from the English build (`LOCALIZED_IMAGE_BORROWED`).
+4. **Repo.** `loc-spotfire-data-virtualization-userdocs` does not exist. It is created locally in `C:/github/tibco-docs-aem/` (`git init`, branch `main` like the English repo), and `--locale ja-jp sync` places `ja-jp/tibco-data-virtualization/online-help/8-8-x/`. **Digital Platform creates the GitHub repo**; we push once it exists.
+5. **Fixes.** The same as the English: R002 escapes, note labels, menu title, `301.yml` in the new shape for the Japanese old URLs (`docs.tibco.com/pub/tdv/8.8.x/doc/html/ja-JP/...`). Then `validate`, a local `verify --skip-published` against the Japanese live pages, and a hand-over note.
+
+**Not in scope.** Grouping the Japanese help like the English; the English-only adapter guides; 8.9.0 (no Japanese edition).
+
+**Time.** About half a day after approval (conversion of ~7,000 pages is the long step); the push waits for the repo. The old site goes off 30 Nov.
+
 ### Phase 85: `verify` Waits Out a Refusal Instead of Calling the Page Missing — **Built 2026-11-19 (approved the same day); DOCOPS-383**
 
 **Problem.** From about 19:30 on 18 Nov to 05:52 on 19 Nov, stg-docs.ibi.com answered about 2,000 of our requests with `429 Too Many Requests` or dropped the connection. Two ibi batches and the Spotfire batch were running, at 2 requests a second each, 6 threads per run. The checker treated each refusal as a page that is not served:
