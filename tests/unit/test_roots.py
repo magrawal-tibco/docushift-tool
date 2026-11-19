@@ -154,3 +154,15 @@ def test_a_run_keeps_its_own_language_and_the_untagged_roots() -> None:
     # An untagged root is the primary run's even nested in `ja-jp` (Phase 57's rule).
     assert by_language(roots, "ja-jp", primary=False) == (
         [html / "ja-jp"], [html / "en-us"], [html / "ja-jp/sub", Path("v/doc/Release-Notes")])
+
+
+def test_roots_inside_a_plain_language_folder_take_its_language() -> None:
+    """Phase 86: Data Virtualization ships `doc/html/ja-JP/StudioHelp`, one Flare root per
+    help system inside a language folder that is not itself a root."""
+    html = Path("v/doc/html")
+    roots = [html / "en-US/StudioHelp", html / "en-US/WebUI", html / "ja-JP/StudioHelp", html / "ja-JP/WebUI"]
+
+    assert by_language(roots, "ja-jp", primary=False) == (
+        [html / "ja-JP/StudioHelp", html / "ja-JP/WebUI"], [html / "en-US/StudioHelp", html / "en-US/WebUI"], [])
+    assert by_language(roots, "en-us", primary=True) == (
+        [html / "en-US/StudioHelp", html / "en-US/WebUI"], [html / "ja-JP/StudioHelp", html / "ja-JP/WebUI"], [])

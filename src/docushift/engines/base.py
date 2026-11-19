@@ -36,7 +36,7 @@ from typing import Any, ClassVar
 from urllib.parse import quote
 
 from docushift.config import DEFAULT_LOCALE
-from docushift.engines.roots import by_language, find_output_roots, root_locale
+from docushift.engines.roots import by_language, container_locale, find_output_roots, root_locale
 from docushift.models import SourceEngine
 from docushift.reporting.findings import FindingsRun
 from docushift.transforms import links
@@ -478,7 +478,7 @@ def _without_localized(context: ConversionContext, roots: list[Path]) -> list[Pa
     """
     kept, skipped, untagged = by_language(roots, context.locale, context.primary)
     for i, root in enumerate(skipped):
-        tag = root_locale(root)
+        tag = root_locale(root) or container_locale(root, roots)
         inside = next((other for other in skipped[:i] if other in root.parents), None)
         relative = _relative_to(context.tree, root)
         context.record(

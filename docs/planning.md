@@ -3018,7 +3018,7 @@ name.
 
 ---
 
-### Phase 86: Data Virtualization in Japanese, from the Docs Team's Packages — **Planned 2026-11-19; awaiting approval; DOCOPS-254**
+### Phase 86: Data Virtualization in Japanese, from the Docs Team's Packages — **Approved 2026-11-19; in progress; DOCOPS-254**
 
 **Problem.** Data Virtualization 8.8.0 and 8.8.1 have Japanese online help on docs.tibco.com only (6,917 pages, open-issues.md "Translated pages that are on the live site but not in any package"). The docs team has now supplied full product drops (user, 19 Nov): `cache/downloads/8.8.0-DOC-3/` and `cache/downloads/8.8.1-GA/`, each with `doc/html/en-US/` and `doc/html/ja-JP/`.
 
@@ -3028,12 +3028,13 @@ name.
 1. **Package.** Zip each drop as it is and register it as the version's translated package: `docushift --locale ja-jp download --product tibco-data-virtualization --version 8.8.x --from-file <zip>` (lands in `families/ja-jp-…/`). Check first that its `en-US` tree matches the English package already converted; if it differs, only `ja-JP` is used.
 2. **Convert.** `docushift --locale ja-jp convert` for both versions (a `!` command for the user). Output in `output/ja-jp-spotfire-data-virtualization/`, records in `cache/state-ja-jp.db`; `versions.csv` is not touched.
 3. **Layout.** Translated trees are not merged (Phase 57), so the Japanese help is **one page per topic**, while the English 8.8.x help is grouped. The menu follows the Japanese package's own TOC. Pictures the Japanese build lacks are borrowed from the English build (`LOCALIZED_IMAGE_BORROWED`).
-4. **Repo.** `loc-spotfire-data-virtualization-userdocs` does not exist. It is created locally in `C:/github/tibco-docs-aem/` (`git init`, branch `main` like the English repo), and `--locale ja-jp sync` places `ja-jp/tibco-data-virtualization/online-help/8-8-x/`. **Digital Platform creates the GitHub repo**; we push once it exists.
+4. **Repo (user, 19 Nov): the English repo.** The Japanese help goes into `en-us-spotfire-data-virtualization-userdocs` as `ja-jp/tibco-data-virtualization/online-help/8-8-x/`, beside `en-us/`; no `loc-` repo. `--locale ja-jp sync` writes a `loc-` tree, so it syncs into a local scratch folder and the `ja-jp/` tree is moved into the English repo; `301.yml` targets are rooted at the repo, so `/ja-jp/...` holds.
+   - **Found while converting (19 Nov):** the drops hold one Flare root per help system *inside* the language folder (`doc/html/ja-JP/StudioHelp`), so no root named a language and every one was left to the English run. `roots.container_locale`: a root takes its folder's language when that folder is not itself a root (a root nested in WebFOCUS's `html/ja-jp/` root stays the primary run's, Phase 57). Test in `test_roots.py`.
 5. **Fixes.** The same as the English: R002 escapes, note labels, menu title, `301.yml` in the new shape for the Japanese old URLs (`docs.tibco.com/pub/tdv/8.8.x/doc/html/ja-JP/...`). Then `validate`, a local `verify --skip-published` against the Japanese live pages, and a hand-over note.
 
 **Not in scope.** Grouping the Japanese help like the English; the English-only adapter guides; 8.9.0 (no Japanese edition).
 
-**Time.** About half a day after approval (conversion of ~7,000 pages is the long step); the push waits for the repo. The old site goes off 30 Nov.
+**Time.** About half a day after approval (conversion of ~7,000 pages is the long step). The old site goes off 30 Nov.
 
 ### Phase 85: `verify` Waits Out a Refusal Instead of Calling the Page Missing — **Built 2026-11-19 (approved the same day); DOCOPS-383**
 

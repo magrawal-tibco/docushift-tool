@@ -249,6 +249,19 @@ def root_locale(root: Path) -> str:
     return root.name.lower()
 
 
+def container_locale(root: Path, roots: list[Path]) -> str:
+    """The locale of the plain folder a root sits in, when that folder is not a root (Phase 86).
+
+    Data Virtualization's drops hold one Flare root per help system inside the
+    language folder, `doc/html/ja-JP/StudioHelp`. A language folder that is itself a
+    root (`html/ja-jp/` in WebFOCUS) is not read this way: an untagged root nested in
+    it stays the primary run's (Phase 57).
+    """
+    if root.parent in roots:
+        return ""
+    return root_locale(root.parent)
+
+
 def same_language(tag: str, locale: str) -> bool:
     """Do two locale tags name one language? `en` and `en-us` do; `ja-jp` does not."""
     return re.split(r"[-_]", tag.lower())[0] == re.split(r"[-_]", locale.lower())[0]
@@ -271,7 +284,7 @@ def by_language(roots: list[Path], locale: str, primary: bool) -> tuple[list[Pat
     untagged: list[Path] = []
     kept: list[Path] = []
     for root in roots:
-        tag = root_locale(root)
+        tag = root_locale(root) or container_locale(root, roots)
         inside = any(other in root.parents for other in skipped)
         if not inside and not tag and not primary:
             untagged.append(root)
