@@ -3018,6 +3018,66 @@ name.
 
 ---
 
+### Phase 85: `verify` Waits Out a Refusal Instead of Calling the Page Missing — **Planned 2026-11-19; awaiting approval**
+
+**Problem.** From about 19:30 on 18 Nov to 05:52 on 19 Nov, stg-docs.ibi.com answered about 2,000 of our requests with `429 Too Many Requests` or dropped the connection. Two ibi batches and the Spotfire batch were running, at 2 requests a second each, 6 threads per run. The checker treated each refusal as a page that is not served:
+- `utils/http.build_session` retries a 429 three times with backoff 1.5 (about 10 seconds in all), then returns the 429;
+- `Fetcher.get` **caches** that 429 as the page's answer, so a later run without `--refresh` reads it back;
+- `published._page` turns any non-200 into `missing`.
+
+10 ibi versions read `lost` only because of this (`reports/verify/triage-ibi2b-2026-11-19.md`); about 1,700 refusals sit in `cache/verify/`.
+
+**Plan.**
+1. **Never cache a refusal.** `Fetcher.get` caches 200, 3xx and 404/410 only. A 429, a 5xx or a dropped connection is returned to the caller and not written, like a network failure today.
+2. **Wait it out, shared across threads.** On a 429, 503 or dropped connection after the session's own retries, the fetcher sets a cool-down every thread honours: `Retry-After` if the site sends one, else 30 s doubling to at most 5 min. It then retries the URL, up to 6 rounds (about 15 min at worst), and halves its own request rate for the rest of the run. Each cool-down is a line in the run's log.
+3. **Report a refusal as "not checked", not "missing".** If a page is still refused after the rounds, `_page` records the new status `refused`, not `missing`. A new finding, `VERIFY_PAGE_REFUSED` (warning), lists those pages, and the version reads `issues`, never `lost`, on refusals alone. A refused **menu page** stops the version with `uncheckable` (existing status), so a version is never compared against nothing.
+4. **Clear the stored refusals.** `scratch/purge_verify_refusals.py` (dry run first) deletes `cache/verify/` entries whose status is 429, 5xx or 0. Then the 10 affected versions are re-checked.
+5. **Gentler defaults for staging.** `verify.rate_limit_per_second: 1` in `config/docsite.yaml` (verify's own floor; the docsite crawl keeps 2), `verify.max_concurrent_requests: 4`. The remaining ibi checks run **one batch at a time** (`SLOTS=1`).
+6. **Tests:** a fake session answering 429 then 200 (retried, cached once as 200), always 429 (not cached, `refused`, finding raised, version not `lost`), `Retry-After` honoured, menu page refused (`uncheckable`).
+
+**Not in scope.** Asking Digital Platform whether a rate limit was switched on and what rate is allowed (UAT row in the triage report). If they name a rate, it goes into step 5.
+
+**Jira.** A sub-task under DOCOPS-338 (verify, Phase 77) when approved, or a note on DOCOPS-366 (checker false alarms).
+
+**Order after approval.** Build and test (about 1.5 h). Purge, then re-check the 10 versions and Container Edition 1.2.2–1.3.3 (stored nothing when the disk was full). Then the 68 not started, in one slot. Then triage, applying `triage-ibi2b`'s YAML first.
+
+### Phase 84: Streaming's Model Management Server Guide from Its Markdown — **Built 2026-11-18 (approved the same day); on `content-fix`; DOCOPS-381**
+
+**Problem.** Streaming 11.2.0 and 11.2.1 ship a second manual in `html/mms/`, the Model Management Server (MMS) guide: 46 pages per version, made by Maven Doxia from Markdown. §5.6.1 set it aside as `foreign-generator`, and nothing converted it, the predecessor included. The old site publishes all 92 pages, and they are in its Coveo sitemaps for both versions. Our output has no MMS page, no `301.yml` row for one, and no link into one (no Streaming guide links to `mms/`). When the old site goes off on 30 Nov, the guide is gone. User, 18 Nov: it cannot be dropped, and it goes in Streaming's main menu.
+
+**Source (measured 18 Nov).** The writers' repository, cloned to `cache/downloads/ep-streaming-web/ep-streaming-web/` (`master` is 11.3.0-SNAPSHOT). The guide is `documentation/public-documentation/src/site/`: `markdown/` plus `site.xml` (the menu). **Release tags `sb/releases/11.2.0` and `sb/releases/11.2.1` hold each version's text**, 45 `.md`/`.md.vm` files each. Only 11.2.1 has `release-notes/mms-110201.md`. The copy in `cache/downloads/ep-streaming-web/markdown/` is `master`, so it is not used.
+- 39 `.md` files; links between pages already point to `.md`.
+- 6 `.md.vm` files (Velocity templates, all in `installation/`): `${project.version}` (11.2.x) and `${installerVersion}` (pom `installer.version`, 1.4.0 / 1.4.1), plus `#[[###]]#` escapes for headings. Every other `$NAME` sits in a shell example and stays as written.
+- Pictures: 127 PNG and 10 SVG under `markdown/images/`; 12 `.plantuml` sources, whose rendered pictures are taken from the published HTML.
+- 46 published pages against 45 files: the extra one is `reference/openapi/artifact-manager/index.html`, which Doxia generates from an OpenAPI spec (one large page).
+
+**Change.**
+1. **Export per version.** `git archive <tag> documentation/public-documentation/src/site` into `cache/downloads/str-mms/<version>/`. Then render the 6 templates: fill in the two variables (values from the tag's pom) and turn `#[[…]]#` back into plain text. The other Velocity text stays as written. Check: no `${project.` or `${installer` left.
+2. **Fit to the help's house style.** Use the same small Markdown pass `reframe` applies to converted pages (front matter title, note labels, picture paths), then copy the result under each version as the folder `mms/` (`output/en-us-tib-streaming/tibco-streaming/<version>/mms/`). Each page's title comes from its first heading.
+3. **Menu.** One new top-level entry in each version's `toc.yml`, **"Model Management Server"**, after "Studio Reference". Its children follow `site.xml` (Overview, Installation Guide, User Tasks, Administration, Authorization and Authentication, Reference with Glossary, REST APIs and Release Notes). The menu builder reads `site.xml`, so the menu is not hand-edited and is rebuilt on every run.
+4. **Redirects.** One `301.yml` row per page, from `…/pub/str/<v>/doc/html/mms/<path>.html` to `mms/<path>.md`.
+5. **The OpenAPI page.** Not prose. Same treatment as the other API references (§6.3, DOCOPS-245); the menu entry links to wherever that puts it. *Open point for the user (below).*
+6. **Checks.** `validate` on both versions: 0 broken links and pictures; menu and redirects resolve. Text check: each page's words against the published HTML (`verify`-style comparison, local). Spot-check 3 pages a reader would open: Installing MMS, AKS Installation, Release Notes.
+7. **Publish.** On Streaming's `content-fix`, one commit per version. It goes to `wip` with Streaming in R3 (Thu 26).
+
+**Scope guard.** No change to the DocBook engine or the rest of Streaming. `sfire-sfds` (Spotfire Data Streams) has no `mms/`, so it is not touched.
+
+**Open point.** The OpenAPI page: (a) with the other API references (default), or (b) skipped, with the menu linking to the REST APIs index only.
+
+**Effort.** About 1 day (DOCOPS-381, 1 SP): export and templates 0.25, house style, menu and redirects 0.5, checks and publish 0.25.
+
+**As built (2026-11-18).** User: convert from the tags; OpenAPI page with the other API references.
+- `scratch/mms_build.py` does Steps 1-5; `--publish` places the guide in the repo. **Re-run it after any `convert` of Streaming 11.2.0/11.2.1**: convert rewrites `toc.yml` and `301.yml` without the guide. Its blocks are marked, so a re-run replaces them.
+- **Publish is targeted, not a `sync`.** A full Streaming sync would re-copy every page and undo the repo-only R002 fixes (`05f0c9f`). So `--publish` copies `mms/`, adds the marked menu block, and adds the redirects in the repo's served form.
+- **House style added during checks:** underlined headings become `#`/`##`; the writers' hidden `<!-- -->` notes outside code are removed. `<a name>` markers become `<a id>`, and every `#fragment` is pointed at the heading's anchor, because the platform builds anchors from heading text only (`validation/references.py`; 26 links in 11.2.0, 21 in 11.2.1). Links to pages that were never published become plain text, and the 2 pictures that were never published are dropped. All of these are dead on the old site too.
+- The 6 pages missing from `site.xml`'s menu (GKE, Synchronizing Artifacts, Usage, external storage in 11.2.0, the release notes) are listed last under their folder.
+- `mms-sso-setup.md` keeps `kubernetes-installer-${installerVersion}.tgz`: it is a plain `.md`, and the live page shows the same.
+- **Checks:** `validate` on the repo: 0 errors on both versions. Warnings: 17 (11.2.0) and 22 (11.2.1) `ANCHOR_MISSING`, 2 of them there before. The MMS ones are source typos and sections with no marker (`installation-0f-prerequisites`, the 11.2.1 release-notes index); each lands on the right page, as on the old site. Text against the live pages: 98% of words present. The remainder is the live pages' raw Markdown (the GKE list on the installation index shows unrendered there) and `<placeholder>` words in code that the word count reads differently.
+- **Commits (`content-fix`, pushed):** userdocs `c163c7e` (11.2.0) and `98d5eef` (11.2.1) (184 files each); resources `b2e09ef` (`api-references/11-2-x/mms-artifact-manager/`). They go to `wip` with Streaming.
+- Left: staging check after the `wip` push; the UAT row if anything shows wrong.
+
+---
+
 ### Phase 83: Committed Paths in the Case the Links Use — **Built 2026-11-17 (approved the same day); DOCOPS-374**
 
 **Problem.** A published link names a picture, a file or a page in a letter case the repository does not hold: BW Plug-in for AI 6.0.1 `user-guide/rag-palette/chunk-activity.md` links `../../resources/images/chunk-activity.png`, the repo holds `Resources/Images/chunk-activity.png`. Windows folds case, so `validate` passes; AEM does not, and serves a placeholder.
