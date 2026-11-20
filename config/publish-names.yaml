@@ -54,7 +54,7 @@ tibco-businessconnect-edi-protocol-powered-by-instream: tibco-businessconnect-ed
 
 # businessworks
 # pending move (family businessworks): premium-subscription-for-tibco-businessworks-container-edition-and-plug-ins-for-aws-marketplace: premium-subscription-bwce-plug-ins-aws-marketplace
-# pending move (family businessworks): tibco-activematrix-businessworks-smartmapper-enterprise-server: tibco-businessworks-smartmapper-enterprise-server
+tibco-activematrix-businessworks-smartmapper-enterprise-server: tibco-businessworks-smartmapper-enterprise-server
 
 # bw-plugin
 tibco-activematrix-businessworks-activeaspects-plug-in: tibco-bw-plugin-activeaspects
