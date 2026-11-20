@@ -73,7 +73,7 @@ Notes:
 - **370 counts are upper bounds**: the source pages of the affected versions (`reports/fix-370-affected-2026-11-14.csv`, queue `cache/overnight/fix370.txt`). The real change is known only after sync. Sync commits **one commit per version**, so a large family can be chunked.
 - **Commits not yet on `origin/content-fix`** (local only, safe to re-cut): BusinessWorks 5, bw-plugin 24, Platform 5, EMS 6, TRA 3, Cloud 2, BE 2, and each Phase 80 commit. Streaming's 3 and all ibi commits are already on `origin/content-fix`: do not rewrite them.
 - **Spotfire/Statistica** (`main` only, no `wip`) and `tib-scribe-userdocs-resources` (on branch `wip`, no `content-fix`) are not in R2.
-- **Held from R2 already:** Hybrid Integration Connectivity Add-on 3.11.0 (K3, no AEM repo); the menu-title rollout (`docs_list_title`) until Digital Platform says where the menu heading comes from. If they answer by Mon, the rollout is about one `toc.yml` per version and can ride the R002/370 chunk of each repo.
+- **Held from R2 already:** Hybrid Integration Connectivity Add-on 3.11.0 (K3, no AEM repo); ~~the menu-title rollout (`docs_list_title`)~~ released (Wed 18): the title feeds the breadcrumbs, not the menu heading, so nothing blocks it. It is about one `toc.yml` per version and goes in each repo's R2 chunk.
 
 ### 1.2 ibi (`C:/github/ibi-docs-aem/`)
 

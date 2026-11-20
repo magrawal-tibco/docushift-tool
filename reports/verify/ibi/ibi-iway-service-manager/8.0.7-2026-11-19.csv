@@ -1,0 +1,5 @@
+﻿slug,version,old_url,local_source,new_path,staging_url,text_percent,missing_sentences_count,images_found,images_expected,toc_parent_matched,toc_position_matched,published_status,skip_reason,findings,triage,missing_sentences
+ibi-iway-service-manager,8.0.7,,tibco-iway-service-manager-8-0-7/pdf/TIB_sm_8.0.7_relnotes.pdf,release-information/TIB_sm_8.0.7_relnotes.pdf,,,,,,,,ok,,,,
+ibi-iway-service-manager,8.0.7,,tibco-iway-service-manager-8-0-7/doc/TIB_sm_8.0.7_readme.txt,release-information/TIB_sm_8.0.7_readme.txt,,,,,,,,ok,,,,
+ibi-iway-service-manager,8.0.7,,tibco-iway-service-manager-8-0-7/pdf/TIB_sm_8.0.7_license.pdf,reference-documents/TIB_sm_8.0.7_license.pdf,,,,,,,,ok,,,,
+ibi-iway-service-manager,8.0.7,,tibco-iway-service-manager-8-0-7/doc/TIB_sm_ReminderNotice.txt,reference-documents/TIB_sm_ReminderNotice.txt,,,,,,,,ok,,,,

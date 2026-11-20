@@ -1,0 +1,20 @@
+Validating 14 published folder(s) in C:\github\tibco-docs-aem...
+  ! 
+en-us-spotfire-data-virtualization-userdocs/en-us/tibco-data-virtualization/onl
+ine-help/8-8-0 104 finding(s), 0 error(s)
+  ! 
+en-us-spotfire-data-virtualization-userdocs/en-us/tibco-data-virtualization/onl
+ine-help/8-8-1 103 finding(s), 0 error(s)
+  ! 
+en-us-spotfire-data-virtualization-userdocs/en-us/tibco-data-virtualization/onl
+ine-help/8-9-0 126 finding(s), 0 error(s)
+                                   Validate                                    
++-----------------------------------------------------------------------------+
+|     Walked | Files | References | HTML | External | Tree-root… |    Anchors |
+|------------+-------+------------+------+----------+------------+------------|
+|         14 | 32069 |     400744 | 1727 |     2114 |          0 | 396779/39… |
+|  folder(s) |       |            |      |          |            |            |
++-----------------------------------------------------------------------------+
+ANCHOR_MISSING 145 row(s), 145 occurrence(s)
+LINK_TO_UNFILED 3 row(s), 188 occurrence(s)
+Findings: 145 warnings, 3 notes.

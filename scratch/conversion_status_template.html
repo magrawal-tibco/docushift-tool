@@ -262,6 +262,55 @@ ul.plain b { color: var(--text-primary); font-weight: 620; }
   .card, .tile { break-inside: avoid; }
   .scroll { max-height: none; overflow: visible; }
 }
+
+/* -- Modern skin (user, 20 Nov: "looks dated"). Colour roles stay the validated ones:
+   the blue ramp for brand and progress, the fixed status palette for health, always
+   with icon + label. Status tints are the status colour at low alpha behind ink text. */
+.viz-root { --radius: 14px; --shadow: 0 1px 2px rgba(16,24,40,.05), 0 4px 14px rgba(16,24,40,.06);
+  --brand-1: #0d366b; --brand-2: #256abf; --good-t: rgba(12,163,12,.12); --warning-t: rgba(250,178,25,.18);
+  --critical-t: rgba(208,59,59,.12); --track-t: rgba(42,120,214,.10); background: #f3f5f9; padding-top: 0; }
+:root[data-theme="dark"] .viz-root { background: #111112; --shadow: 0 1px 2px rgba(0,0,0,.4); }
+@media (prefers-color-scheme: dark) { :root:where(:not([data-theme="light"])) .viz-root { background: #111112; --shadow: 0 1px 2px rgba(0,0,0,.4); } }
+.head { margin: 0 -24px 22px; padding: 26px 24px 24px; color: #fff;
+  background: linear-gradient(120deg, var(--brand-1) 0%, var(--brand-2) 100%); border-radius: 0 0 var(--radius) var(--radius); }
+.head > div:first-child { max-width: 1180px; }
+.head h1 { font-size: 25px; font-weight: 700; color: #fff; }
+.head p { color: rgba(255,255,255,.82); }
+.head .btn { background: rgba(255,255,255,.14); color: #fff; border-color: rgba(255,255,255,.35); }
+.tabs { border-bottom: 0; background: var(--surface-1); padding: 4px; border-radius: 999px; display: inline-flex;
+  box-shadow: var(--shadow); }
+.tabs button { border: 0; border-radius: 999px; padding: 7px 16px; margin: 0; }
+.tabs button[aria-selected="true"] { background: var(--brand-2); color: #fff; }
+.card, .tile, .filters { border: 0; border-radius: var(--radius); box-shadow: var(--shadow); }
+.tile { position: relative; overflow: hidden; }
+.kpis5 .tile::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 4px; background: var(--brand-2); }
+.kpis5 .tile.days::before { background: var(--warning); }
+.kpis5 .tile.days .v { color: var(--brand-1); }
+:root[data-theme="dark"] .kpis5 .tile.days .v { color: #9ec5f4; }
+.badge { padding: 3px 10px 3px 4px; border-radius: 999px; }
+.badge.st-done { background: var(--good-t); } .badge.st-risk { background: var(--warning-t); }
+.badge.st-blocked { background: var(--critical-t); } .badge.st-track { background: var(--track-t); }
+.areas tbody tr:hover td { background: var(--track-t); }
+thead th { text-transform: uppercase; font-size: 11px; letter-spacing: .05em; }
+/* Business-unit health cards */
+.bucards { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; margin-bottom: 12px; }
+.bucard { background: var(--surface-1); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px 18px 14px;
+  border-top: 5px solid var(--axis); }
+.bucard.st-track { border-top-color: var(--good); } .bucard.st-done { border-top-color: var(--good); }
+.bucard.st-risk { border-top-color: var(--warning); } .bucard.st-blocked { border-top-color: var(--critical); }
+.bucard .top { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.bucard .top h3 { margin: 0; font-size: 18px; font-weight: 700; flex: 1; }
+.bucard .why { font-size: 12.5px; color: var(--text-secondary); line-height: 1.5; margin: 0 0 12px; min-height: 3em; }
+.bucard .m { display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; font-size: 12px; margin-bottom: 8px; }
+.bucard .m .lab { color: var(--text-secondary); } .bucard .m .num { font-weight: 650; font-variant-numeric: tabular-nums; }
+.bucard .m .stack { grid-column: 1 / -1; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.chip { font-size: 11.5px; font-weight: 600; padding: 3px 9px; border-radius: 999px; background: var(--plane);
+  color: var(--text-secondary); white-space: nowrap; }
+.chip.crit { background: var(--critical-t); color: var(--text-primary); }
+.chip.high { background: var(--warning-t); color: var(--text-primary); }
+.chip.retest { background: var(--track-t); color: var(--text-primary); }
+details.numtable summary { cursor: pointer; font-size: 12.5px; color: var(--text-secondary); margin: 4px 0 8px; }
 </style>
 </head>
 <body>
@@ -289,8 +338,12 @@ ul.plain b { color: var(--text-primary); font-weight: 620; }
         <div class="cardhead"><div><h2>By business unit</h2>
           <p class="sub">Documentation versions in the migration, and how far each has come. &ldquo;In the
             repositories&rdquo; is what the new site is built from; &ldquo;checked on staging&rdquo; is the
-            page-by-page check against the staging site.</p></div></div>
-        <div id="w-bu"></div>
+            page-by-page check against the staging site. Health is the weakest of converted, in the
+            repositories, checked, and findings understood: 95% or more on track, 80% or more at risk,
+            less blocked; open Critical or High UAT rows make it at risk. &ldquo;To retest&rdquo; are UAT rows
+            Digital Platform marked Completed, waiting on our check.</p></div></div>
+        <div class="bucards" id="w-bucards"></div>
+        <details class="numtable"><summary>The numbers as a table</summary><div id="w-bu"></div></details>
       </div>
       <div class="card wide">
         <div class="cardhead"><div><h2>Areas</h2>
@@ -1085,9 +1138,37 @@ function renderStand() {
     prog("Checked on staging", t.staging, t.published, `${pctTxt(t.staging, t.published)} of those in the repositories`));
 
   const cell = (n, d) => el("span", {}, fmt(n), " ", el("span", { class: "muted" }, pctTxt(n, d)));
-  $("w-bu").replaceChildren(table(["Business unit", "In the migration", "Converted", "In the repositories", "Checked on staging"],
-    h.byBu.concat([t]).map(r => [r.bu === "All" ? el("b", {}, "All") : r.bu, fmt(r.inMig), cell(r.converted, r.inMig),
-      cell(r.published, r.inMig), cell(r.staging, r.published)]), [false, true, true, true, true]));
+  const health = r => r.health ? el("div", {}, badge(r.health.status),
+    el("div", { class: "muted" }, r.health.reason + (r.health.byHand ? " (set by hand)" : ""))) : "";
+  const uatCell = r => {
+    const u = r.health && r.health.uat;
+    if (!u) return el("span", { class: "muted" }, r.bu === "All" ? "" : "no tab");
+    if (!u.rows) return el("span", { class: "muted" }, "no rows yet");
+    return el("div", {}, `${fmt(u.open)} open`, el("div", { class: "muted" },
+      `${u.openCritical} Critical, ${u.openHigh} High; ${u.retest} to retest; ${u.rows} in all`));
+  };
+  const meterRow = (lab, n, d) => el("div", { class: "m" }, el("span", { class: "lab" }, lab),
+    el("span", { class: "num" }, `${fmt(n)} / ${fmt(d)}`), meter(n, d, lab));
+  $("w-bucards").replaceChildren(...h.byBu.map(r => {
+    const st = r.health ? r.health.status : "on track", u = r.health && r.health.uat;
+    const chips = el("div", { class: "chips" });
+    if (u && u.rows) {
+      if (u.openCritical) chips.append(el("span", { class: "chip crit" }, `${u.openCritical} Critical open`));
+      if (u.openHigh) chips.append(el("span", { class: "chip high" }, `${u.openHigh} High open`));
+      if (u.retest) chips.append(el("span", { class: "chip retest" }, `${u.retest} to retest`));
+      chips.append(el("span", { class: "chip" }, `${u.open} open of ${u.rows} UAT rows`));
+    }
+    return el("div", { class: "bucard " + STATUS[st].cls },
+      el("div", { class: "top" }, el("h3", {}, r.bu), badge(st)),
+      el("p", { class: "why" }, r.health ? r.health.reason + (r.health.byHand ? " (set by hand)" : "") : ""),
+      meterRow("Converted", r.converted, r.inMig), meterRow("In the repositories", r.published, r.inMig),
+      meterRow("Checked on staging", r.staging, r.published), chips);
+  }));
+  $("w-bu").replaceChildren(table(["Business unit", "Health", "In the migration", "Converted", "In the repositories",
+    "Checked on staging", "UAT sheet"],
+    h.byBu.concat([t]).map(r => [r.bu === "All" ? el("b", {}, "All") : r.bu, health(r), fmt(r.inMig),
+      cell(r.converted, r.inMig), cell(r.published, r.inMig), cell(r.staging, r.published), uatCell(r)]),
+    [false, false, true, true, true, true, false]));
 
   const counts = Object.fromEntries(Object.keys(STATUS).map(k => [k, W.areas.filter(a => a.status === k).length]));
   $("w-areas-sub").textContent = `${W.areas.length} areas: ` + Object.entries(counts).filter(([, n]) => n)

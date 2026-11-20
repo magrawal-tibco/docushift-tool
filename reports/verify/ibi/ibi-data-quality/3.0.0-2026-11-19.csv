@@ -1,0 +1,4 @@
+﻿slug,version,old_url,local_source,new_path,staging_url,text_percent,missing_sentences_count,images_found,images_expected,toc_parent_matched,toc_position_matched,published_status,skip_reason,findings,triage,missing_sentences
+ibi-data-quality,3.0.0,,tibco-data-quality-3-0-0/doc/TIB_data-quality_3.0.0_readme.txt,release-information/TIB_data-quality_3.0.0_readme.txt,,,,,,,,ok,,,,
+ibi-data-quality,3.0.0,,tibco-data-quality-3-0-0/pdf/TIB_data-quality_3.0.0_license.pdf,reference-documents/TIB_data-quality_3.0.0_license.pdf,,,,,,,,ok,,,,
+ibi-data-quality,3.0.0,,tibco-data-quality-3-0-0/pdf/TIB_data-quality_3.0.0_vpat.pdf,reference-documents/TIB_data-quality_3.0.0_vpat.pdf,,,,,,,,ok,,,,

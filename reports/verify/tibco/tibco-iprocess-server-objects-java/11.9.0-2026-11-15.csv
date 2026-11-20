@@ -1,0 +1,8 @@
+﻿slug,version,old_url,local_source,new_path,staging_url,text_percent,missing_sentences_count,images_found,images_expected,toc_parent_matched,toc_position_matched,published_status,skip_reason,findings,triage,missing_sentences
+tibco-iprocess-server-objects-java,11.9.0,,tibco-iprocess-server-objects-java-11-9-0/pdf/TIB_ip-srvrobj-java_11.9.0_installation.pdf,user-guides/TIB_ip-srvrobj-java_11.9.0_installation.pdf,,,,,,,,ok,,,,
+tibco-iprocess-server-objects-java,11.9.0,,tibco-iprocess-server-objects-java-11-9-0/pdf/TIB_ip-srvrobj-java_11.9.0_object_model.pdf,user-guides/TIB_ip-srvrobj-java_11.9.0_object_model.pdf,,,,,,,,ok,,,,
+tibco-iprocess-server-objects-java,11.9.0,,tibco-iprocess-server-objects-java-11-9-0/pdf/TIB_ip-srvrobj-java_11.9.0_prog_guide.pdf,user-guides/TIB_ip-srvrobj-java_11.9.0_prog_guide.pdf,,,,,,,,ok,,,,
+tibco-iprocess-server-objects-java,11.9.0,,tibco-iprocess-server-objects-java-11-9-0/pdf/TIB_ip-srvrobj-java_11.9.0_relnotes.pdf,release-information/TIB_ip-srvrobj-java_11.9.0_relnotes.pdf,,,,,,,,ok,,,,
+tibco-iprocess-server-objects-java,11.9.0,,tibco-iprocess-server-objects-java-11-9-0/doc/TIB_ip-srvrobj-java_11.9.0_readme.txt,release-information/TIB_ip-srvrobj-java_11.9.0_readme.txt,,,,,,,,ok,,,,
+tibco-iprocess-server-objects-java,11.9.0,,tibco-iprocess-server-objects-java-11-9-0/pdf/TIB_ip-srvrobj-java_11.9.0_license.pdf,reference-documents/TIB_ip-srvrobj-java_11.9.0_license.pdf,,,,,,,,ok,,,,
+tibco-iprocess-server-objects-java,11.9.0,,tibco-iprocess-server-objects-java-11-9-0/doc/TIB_ip-srvrobj-java_ReminderNotice.txt,reference-documents/TIB_ip-srvrobj-java_ReminderNotice.txt,,,,,,,,ok,,,,

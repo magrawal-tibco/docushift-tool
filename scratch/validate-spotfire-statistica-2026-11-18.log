@@ -1,0 +1,16 @@
+Validating 9 published folder(s) in C:\github\tibco-docs-aem...
+  ! 
+en-us-spotfire-statistica-userdocs/en-us/spotfire-statistica/online-help/14-1-0
+544 finding(s), 0 error(s)
+  ! 
+en-us-spotfire-statistica-userdocs/en-us/spotfire-statistica/online-help/14-4-0
+544 finding(s), 0 error(s)
+                                   Validate                                   
++----------------------------------------------------------------------------+
+|      Walked | Files | References | HTML | External | Tree-rooted | Anchors |
+|-------------+-------+------------+------+----------+-------------+---------|
+| 9 folder(s) | 28623 |      65296 | 7256 |      415 |           0 | 226/226 |
++----------------------------------------------------------------------------+
+TOC_ENTRY_DUPLICATED 6 row(s), 6 occurrence(s)
+LINK_TO_UNFILED 2 row(s), 1082 occurrence(s)
+Findings: 6 warnings, 2 notes.

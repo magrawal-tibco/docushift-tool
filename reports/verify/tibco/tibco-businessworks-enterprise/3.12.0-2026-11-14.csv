@@ -1,0 +1,6 @@
+﻿slug,version,old_url,local_source,new_path,staging_url,text_percent,missing_sentences_count,images_found,images_expected,toc_parent_matched,toc_position_matched,published_status,skip_reason,findings,triage,missing_sentences
+tibco-businessworks-enterprise,3.12.0,,tibco-businessworks-enterprise-3-12-0/doc/TIB_bwent_3.12.0_readme.txt,release-information/TIB_bwent_3.12.0_readme.txt,,,,,,,,ok,,,,
+tibco-businessworks-enterprise,3.12.0,,tibco-businessworks-enterprise-3-12-0/pdf/TIB_bwent_3.12.0_license.pdf,reference-documents/TIB_bwent_3.12.0_license.pdf,,,,,,,,ok,,,,
+tibco-businessworks-enterprise,3.12.0,,tibco-businessworks-enterprise-3-12-0/doc/TIB_bwent_licensedetails.txt,reference-documents/TIB_bwent_licensedetails.txt,,,,,,,,ok,,,,
+tibco-businessworks-enterprise,3.12.0,,tibco-businessworks-enterprise-3-12-0/doc/TIB_bwent_ReminderNotice.txt,reference-documents/TIB_bwent_ReminderNotice.txt,,,,,,,,ok,,,,
+tibco-businessworks-enterprise,3.12.0,,tibco-businessworks-enterprise-3-12-0/doc/TIB_bwent_RTU.txt,reference-documents/TIB_bwent_RTU.txt,,,,,,,,ok,,,,

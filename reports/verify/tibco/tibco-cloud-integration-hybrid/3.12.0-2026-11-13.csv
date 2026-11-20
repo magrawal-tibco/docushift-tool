@@ -1,0 +1,6 @@
+﻿slug,version,old_url,local_source,new_path,staging_url,text_percent,missing_sentences_count,images_found,images_expected,toc_parent_matched,toc_position_matched,published_status,skip_reason,findings,triage,missing_sentences
+tibco-cloud-integration-hybrid,3.12.0,,tibco-cloud-integration-hybrid-3-12-0/doc/TIB_cloud-integration-sku_3.12.0_readme.txt,release-information/TIB_cloud-integration-sku_3.12.0_readme.txt,,,,,,,,ok,,,,
+tibco-cloud-integration-hybrid,3.12.0,,tibco-cloud-integration-hybrid-3-12-0/pdf/TIB_cloud-integration-sku_3.12.0_license.pdf,reference-documents/TIB_cloud-integration-sku_3.12.0_license.pdf,,,,,,,,ok,,,,
+tibco-cloud-integration-hybrid,3.12.0,,tibco-cloud-integration-hybrid-3-12-0/doc/TIB_cloud-integration-sku_licensedetails.txt,reference-documents/TIB_cloud-integration-sku_licensedetails.txt,,,,,,,,ok,,,,
+tibco-cloud-integration-hybrid,3.12.0,,tibco-cloud-integration-hybrid-3-12-0/doc/TIB_cloud-integration-sku_ReminderNotice.txt,reference-documents/TIB_cloud-integration-sku_ReminderNotice.txt,,,,,,,,ok,,,,
+tibco-cloud-integration-hybrid,3.12.0,,tibco-cloud-integration-hybrid-3-12-0/doc/TIB_cloud-integration-sku_RTU.txt,reference-documents/TIB_cloud-integration-sku_RTU.txt,,,,,,,,ok,,,,

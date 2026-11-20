@@ -1,0 +1,8 @@
+﻿slug,version,old_url,local_source,new_path,staging_url,text_percent,missing_sentences_count,images_found,images_expected,toc_parent_matched,toc_position_matched,published_status,skip_reason,findings,triage,missing_sentences
+tibco-rtview,7.5.0,,tibco-rtview-7-5-0/pdf/TIB_rtview_7.5.0_installation.pdf,user-guides/TIB_rtview_7.5.0_installation.pdf,,,,,,,,ok,,,,
+tibco-rtview,7.5.0,,tibco-rtview-7-5-0/pdf/TIB_rtview_7.5.0_users_guide.pdf,user-guides/TIB_rtview_7.5.0_users_guide.pdf,,,,,,,,ok,,,,
+tibco-rtview,7.5.0,,tibco-rtview-7-5-0/pdf/TIB_rtview_7.5.0_relnotes.pdf,release-information/TIB_rtview_7.5.0_relnotes.pdf,,,,,,,,ok,,,,
+tibco-rtview,7.5.0,,tibco-rtview-7-5-0/doc/TIB_rtview_7.5.0_readme.txt,release-information/TIB_rtview_7.5.0_readme.txt,,,,,,,,ok,,,,
+tibco-rtview,7.5.0,,tibco-rtview-7-5-0/pdf/TIB_rtview_7.5.0_license.pdf,reference-documents/TIB_rtview_7.5.0_license.pdf,,,,,,,,ok,,,,
+tibco-rtview,7.5.0,,tibco-rtview-7-5-0/doc/TIB_rtview_7.5.0_tps.txt.docx,reference-documents/TIB_rtview_7.5.0_tps.txt.docx,,,,,,,,ok,,,,
+tibco-rtview,7.5.0,,tibco-rtview-7-5-0/doc/TIB_rtview_ReminderNotice.txt,reference-documents/TIB_rtview_ReminderNotice.txt,,,,,,,,ok,,,,

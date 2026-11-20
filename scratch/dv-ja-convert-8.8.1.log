@@ -1,0 +1,20 @@
+Converting 1 version(s)...
+  v tibco-data-virtualization@8.8.1 3691 topic(s), 413 asset(s), 4 unit(s), 
+4382 nav node(s), 17 generated -> 4122 file(s)
+            Convert             
++------------------------------+
+| Outcome           | Versions |
+|-------------------+----------|
+| Converted         |        1 |
+| Already current   |        0 |
+| No extracted tree |        0 |
+| Engine unknown    |        0 |
+| Failed            |        0 |
++------------------------------+
+3691 topic(s), 413 asset(s) written.
+4122 file(s) standing in the measured output tree(s).
+tibco-data-virtualization@8.8.1: 413 resolved, 0 skin, 0 escaped, 46 dangling, 
+0 case-mismatch, 679 orphan (37.2 MB)
+tibco-data-virtualization@8.8.1: skipped 9 generated-directory, 4 
+no-content-container, 4 runtime-stub, 1 unreferenced-template
+Findings: 7 errors, 12 warnings, 8 notes.

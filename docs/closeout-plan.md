@@ -3,11 +3,28 @@
 > The one plan for finishing the migration. It replaces day-to-day picking from the Jira handoff.
 > The testing scope (what each check covers, Stages 1–3, team requirements, backup table) stays in
 > `reports/uat-plan-2026-11-12.md`; this file says **who does what, on which day**.
-> Go-live: **Mon 23 Nov** (may move to 25–26 Nov). Old site off: **Mon 30 Nov**.
+> Go-live: **Mon 30 Nov** (moved from Mon 23 Nov, user, Fri 20 Nov). Old site off: **Mon 30 Nov**.
 
 ## Today
 
 *Rewritten each morning. Never more than three decisions.*
+
+**Fri 20 Nov: `content-fix` → `wip` merge schedule (PROPOSED, awaiting approval; DOCOPS-313 TIBCO, DOCOPS-150 ibi).** Survey 13:50 (`scratch/merge_survey.sh`, `cache/merge-survey-2026-11-20.csv`): 9 repos and 7 resources repos still have work not on `wip`, about **366 builds** (versions written), close to the 383 that filled the pipeline on 18 Nov. All others match `wip`. A test merge shows no conflicts, including where Digital Platform committed to `wip` (Streaming, FOCUS, Container Editions, Reporting Server). One PR per repo (D1); the next opens only when the previous one shows on staging.
+
+| # | When | Repo(s) | Builds | What it carries |
+|---|---|---|---|---|
+| 1 | Fri, now | BE, Fulfillment, General, MFT resources | not known (resources repos) | Phase 80 folder renames (24 files); their help repos already have the new names on `wip`, so resource links may point at old folders on staging today |
+| 2 | Fri, after 1 | BusinessWorks | 10 (+3 removed) | K3 additions (BW 5.15.0/5.15.1/6.11.0, BWCE 2.10.0, SmartMapper), Karan's removals, R002, DOCOPS-370, menu titles |
+| 3 | Fri, after 2 | Platform | 24 | Control Plane 1.3.0–1.22.0 (K3 + Δ2), Platform 1.0.0/1.1.0, R002, 370, titles |
+| 4 | Fri evening | ibi Reporting Server, then FOCUS | 9 + 9 | R002, DOCOPS-374 case, titles, doubled headings (RS). Reporting Server's local `content-fix` (with Digital Platform's `wip` merged, 18 Nov) is pushed to `content-fix` first |
+| 5 | Fri night, after `ibi2-a` finishes (~19:00–20:00) | ibi WebFOCUS | 47 | R002, 374, Δ2 (Client 9.2.8, AI Assistant 9.3.81), titles, Client doubled headings. Waits because `ibi2-a` is checking this repo on staging now |
+| 6 | Sat morning | Streaming + resources | 12 | 11.1.4 for 4 products (Δ2), MMS guide (DOCOPS-381), R001, R002, 301 new shape, menus; D1 had this in R3 |
+| 7 | Sat, after 6 | BusinessConnect + resources | 43 (+20 removed) | Phase 80 renames, per-version redirects (Phase 82, DOCOPS-354), R002, 370, titles |
+| 8 | Sat, after 7 | ibi Container Editions | 22 | as row 4; local `content-fix` pushed first |
+| 9 | Sat night | BW plug-ins + resources | 190 (+232 removed) | Phase 80 renames, Karan's removals, K3/Δ1/Δ2 additions, R002, 370, 374, menus, titles. Alone overnight so it builds by Mon |
+| – | Sun – Mon morning | re-check | – | `verify --refresh` of every version these PRs touched, before go-live |
+
+**Fri 20 Nov: ibi checks resumed.** The last 22 WebFOCUS versions are running (`ibi2-a`, started 10:33, one slot). AI Assistant 9.3.81 (patch release of 9.3.8) and Client 9.2.8 are clean. **After the triage of this batch (user, Fri 20):** clear the checker's saved pages from before 20 Nov (`cache/verify/`, ~100 GB; every check runs with `--refresh`, so nothing is lost). Command: `python scratch/purge_verify_cache_before.py 2026-11-20` (dry run), then add `--apply`.
 
 **Fri 20 Nov: Data Virtualization restructured (Phase 87, DOCOPS-385).** One AI-drafted menu of 11 sections for its five help systems, in 8.9.0/8.8.1/8.8.0 and the Japanese 8.8.x; Deployment Manager kept as the Administration Guide chapter (user). DV now works on `wip` (user, 20 Nov), pushed `5e4ac3a1`; GitHub `main` stays at `540ccdcf`. Report for the DV team: `reports/dv-menu-changes-2026-11-20.md`.
 
@@ -198,7 +215,7 @@ Machine time: about 5 minutes per version checked.
 | **Thu 19** | **R2 complete** | Day: Δ1 pushes and re-pushes; last wave by 17:30. Night: **Batch 4**, re-check what R2 changed, plus the 250 renamed versions. | – | One yes or no: R2 complete; what is left moves to R3 |
 | **Fri 20** | **Go / no-go** | – | Triage of Batch 4 | **Go / no-go** against §4. **D6:** the 82 TIBCO versions with no package on the old site. |
 | Sat 21 – Sun 22 | Buffer | Re-runs if needed | – | – |
-| **Mon 23** | **Go-live** | – | – | – |
+| Mon 23 | (was go-live; moved to Mon 30, user, Fri 20) | – | – | – |
 | **Mon 23 – Wed 25** | Stage 2 | Nights: **Batches 5–6**, older TIBCO versions outside BW plug-ins (about 154), including the comparison with the live old site | Triage | AEM follow-ups |
 | **Thu 26** | **Release R3** | Day: R3 (Streaming, anything held from R2, including additions that did not convert cleanly). Night: **Batch 7**, check them. | – | Approve R3 |
 | **Fri 27 – Mon 30** | Old-site close | Fri 27: **Δ3**, the last catalog refresh; that night, its packages are downloaded and backed up. Collect old addresses for help with no redirect map (DOCOPS-322, 279), while the old site is up | Triage | Close the backups (DOCOPS-281, 283); confirm nothing else is needed from the old site |
@@ -413,6 +430,15 @@ Claude creates, updates and closes Jira issues itself, within these limits.
 4. Runs `scratch/publish_status.sh`: copies the page to `C:/github/apps-script/report.html`, `clasp push`, and moves the shared web-app deployment ("TIBCO++ Docs Migration Status") to the new version, so others see the live report (user, 13 Nov). **Every** rebuild of the page is followed by this step, not only the morning one.
 
 The page and `reports/status-latest.md` are then current. Built 13 Nov (DOCOPS-280).
+
+**Health per business unit (user, Fri 20 Nov; built and published Fri 20, status page @15).** The headline's TIBCO / IBI / Spotfire lines each get a health light, **on track / at risk / blocked**, and one short reason, on the page and in `status-latest.md`.
+- **Worked out from four signals**, each a share of the BU's versions in the migration: *converted*; *in the repositories*; *checked* (on staging, or against our own copy where the BU has no staging, i.e. Spotfire); *findings understood* (of the checked, clean, explained or logged in Jira). The light is the weakest signal: 95% or more on track, 80–95% at risk, under 80% blocked. The reason names the weakest signal and what it waits on.
+- **UAT sheet (user, Fri 20):** the BU's own tab (Tibco UAT, IBI UAT, Spotfire UAT) also counts. Open = New, In progress, Needs Discussion; Completed means Digital Platform's fix is ready for **our** retest (shown as "waiting on us", not open); Closed and Not a bug are done. Any open Critical or High row makes the BU at risk (user, Fri 20: Critical means risk, not blocked); UAT rows alone never make it blocked. The reason names the count. Read from the user's .xlsx download (`cache/TIbco_IBI_Spotfire UAT Sheet.xlsx`, all tabs, `scratch/read_xlsx.py`, standard library); the file's date shows beside the light. Direct Google read is not possible: gcloud's sign-in no longer grants Sheets (20 Nov).
+- **Retesting Completed rows (user, Fri 20):** we check each Completed row on staging, and the user marks it Closed (or back to In progress with a comment) in the sheet. Claude writes the results as a paste-ready list.
+- **Set by hand when the numbers mislead:** an optional `bu_health:` entry in `config/status-areas.yaml` (status + reason) wins over the rule, and the page marks it "set by hand".
+- **First reading (sheet as downloaded 20 Nov, before the retest results are in the sheet):** TIBCO at risk (83% checked on staging; 8 Critical and 15 High UAT rows open); IBI blocked (42% checked on staging, 10 products not yet served by Digital Platform; 1 Critical and 5 High open); Spotfire blocked (74% of findings understood; no UAT rows yet). Completed, waiting on our retest: TIBCO 7, IBI 6.
+- **Fri 20, later (user):** Spotfire left out of the whole page (`NOT_OURS` in `build_conversion_status.py`; handed to Digital Platform 19 Nov). New look: blue header band, pill tabs, a health card per business unit (table folded under it), tinted status pills; colours stay the validated ramp and status palette. Published @16.
+- Code: `status_page.uat_summary` and `bu_health`, `build_conversion_status.py` (reads the .xlsx), the page template (Health and UAT columns) and `render_markdown`; tests in `tests/unit/test_status_page.py`. Jira: dated note on DOCOPS-280. To refresh the UAT numbers, the user downloads the sheet again over the same file.
 
 ## 9. How a batch is run (for reference)
 

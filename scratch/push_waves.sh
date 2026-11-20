@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# RETIRED (user, 18 Nov): content-fix reaches wip only by a GitHub PR merged with a
+# merge commit (closeout plan D1). This script pushed straight to wip; do not re-run.
 # Tonight's wip pushes (user, 18 Nov): waves of up to 3 repos, about 75 min apart,
 # so staging builds each wave before the next. Fast-forward only: a repo whose wip
 # has moved since the plan is skipped and logged, never force-pushed.

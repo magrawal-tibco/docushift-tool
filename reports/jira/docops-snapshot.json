@@ -1,5 +1,5 @@
 {
- "fetched": "2026-11-15",
+ "fetched": "2026-11-19",
  "issues": [
   {
    "key": "DOCOPS-5",
@@ -4856,8 +4856,8 @@
    "summary": "Content placed directly inside a list is dropped in conversion",
    "type": "Sub-task",
    "parent": "DOCOPS-96",
-   "status": "Backlog",
-   "category": "new",
+   "status": "In Progress",
+   "category": "indeterminate",
    "components": [],
    "labels": [
     "docushift",
@@ -4895,8 +4895,8 @@
    "summary": "Shorten product folder names to AEM's 50-character limit (Phase 80)",
    "type": "Sub-task",
    "parent": "DOCOPS-96",
-   "status": "Backlog",
-   "category": "new",
+   "status": "In Progress",
+   "category": "indeterminate",
    "components": [],
    "labels": [
     "docushift",
@@ -4908,6 +4908,170 @@
    "due": "",
    "assignee": "",
    "sp": 1.5
+  },
+  {
+   "key": "DOCOPS-373",
+   "summary": "DITA table descriptions are dropped in conversion",
+   "type": "Sub-task",
+   "parent": "DOCOPS-96",
+   "status": "Backlog",
+   "category": "new",
+   "components": [],
+   "labels": [
+    "docushift",
+    "tibco",
+    "verify-issue"
+   ],
+   "created": "2026-11-15",
+   "resolved": "",
+   "due": "",
+   "assignee": "",
+   "sp": 0.5
+  },
+  {
+   "key": "DOCOPS-374",
+   "summary": "Picture links differ in letter case from the repo files (images vs Images)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-96",
+   "status": "In Progress",
+   "category": "indeterminate",
+   "components": [],
+   "labels": [
+    "docushift",
+    "tibco",
+    "verify-issue"
+   ],
+   "created": "2026-11-16",
+   "resolved": "",
+   "due": "",
+   "assignee": "",
+   "sp": null
+  },
+  {
+   "key": "DOCOPS-375",
+   "summary": "Menu entries placed differently from the old site: triage per product",
+   "type": "Sub-task",
+   "parent": "DOCOPS-96",
+   "status": "Backlog",
+   "category": "new",
+   "components": [],
+   "labels": [
+    "docushift",
+    "tibco",
+    "verify-issue"
+   ],
+   "created": "2026-11-17",
+   "resolved": "",
+   "due": "",
+   "assignee": "",
+   "sp": null
+  },
+  {
+   "key": "DOCOPS-376",
+   "summary": "ibi menu rows with empty titles show file names on staging",
+   "type": "Sub-task",
+   "parent": "DOCOPS-96",
+   "status": "Backlog",
+   "category": "new",
+   "components": [],
+   "labels": [
+    "docushift",
+    "ibi",
+    "verify-issue"
+   ],
+   "created": "2026-11-17",
+   "resolved": "",
+   "due": "",
+   "assignee": "",
+   "sp": null
+  },
+  {
+   "key": "DOCOPS-377",
+   "summary": "ibi FOCUS staging menus show rows that are not in git",
+   "type": "Sub-task",
+   "parent": "DOCOPS-96",
+   "status": "Backlog",
+   "category": "new",
+   "components": [],
+   "labels": [
+    "docushift",
+    "ibi",
+    "verify-issue"
+   ],
+   "created": "2026-11-17",
+   "resolved": "",
+   "due": "",
+   "assignee": "",
+   "sp": null
+  },
+  {
+   "key": "DOCOPS-379",
+   "summary": "Delta migration: releases since 5 Nov (Δ1, Δ2, Δ3 on 27 Nov)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-6",
+   "status": "In Progress",
+   "category": "indeterminate",
+   "components": [
+    "Content Migration"
+   ],
+   "labels": [
+    "docushift",
+    "ibi",
+    "tibco"
+   ],
+   "created": "2026-11-17",
+   "resolved": "",
+   "due": "2026-11-27",
+   "assignee": "Mayur Agrawal",
+   "sp": 1.0
+  },
+  {
+   "key": "DOCOPS-381",
+   "summary": "Streaming: convert the Model Management Server guide (11.2.0, 11.2.1)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-7",
+   "status": "In Progress",
+   "category": "indeterminate",
+   "components": [],
+   "labels": [
+    "docushift",
+    "tibco"
+   ],
+   "created": "2026-11-18",
+   "resolved": "",
+   "due": "2026-11-26",
+   "assignee": "",
+   "sp": 1.0
+  },
+  {
+   "key": "DOCOPS-382",
+   "summary": "Spotfire Statistica and Data Virtualization: catch-up fixes, check, hand over",
+   "type": "Sub-task",
+   "parent": "DOCOPS-7",
+   "status": "Done",
+   "category": "done",
+   "components": [],
+   "labels": [],
+   "created": "2026-11-18",
+   "resolved": "2026-11-19",
+   "due": "2026-11-19",
+   "assignee": "",
+   "sp": 1.0
+  },
+  {
+   "key": "DOCOPS-383",
+   "summary": "verify: wait out a 429 instead of calling the page missing (Phase 85)",
+   "type": "Sub-task",
+   "parent": "DOCOPS-10",
+   "status": "In Progress",
+   "category": "indeterminate",
+   "components": [],
+   "labels": [],
+   "created": "2026-11-18",
+   "resolved": "",
+   "due": "2026-11-19",
+   "assignee": "",
+   "sp": 0.5
   }
  ]
 }

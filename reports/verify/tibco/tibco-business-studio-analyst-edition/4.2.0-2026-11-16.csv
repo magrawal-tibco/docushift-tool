@@ -1,0 +1,7 @@
+﻿slug,version,old_url,local_source,new_path,staging_url,text_percent,missing_sentences_count,images_found,images_expected,toc_parent_matched,toc_position_matched,published_status,skip_reason,findings,triage,missing_sentences
+tibco-business-studio-analyst-edition,4.2.0,,pdf/TIB_business-studio-analyst-edition_4.2.0_installation.pdf,user-guides/TIB_business-studio-analyst-edition_4.2.0_installation.pdf,,,,,,,,ok,,,,
+tibco-business-studio-analyst-edition,4.2.0,,pdf/TIB_business-studio-analyst-edition_4.2.0_relnotes.pdf,release-information/TIB_business-studio-analyst-edition_4.2.0_relnotes.pdf,,,,,,,,ok,,,,
+tibco-business-studio-analyst-edition,4.2.0,,doc/TIB_business-studio-analyst-edition_4.2.0_readme.txt,release-information/TIB_business-studio-analyst-edition_4.2.0_readme.txt,,,,,,,,ok,,,,
+tibco-business-studio-analyst-edition,4.2.0,,pdf/TIB_business-studio-analyst-edition_4.2.0_license.pdf,reference-documents/TIB_business-studio-analyst-edition_4.2.0_license.pdf,,,,,,,,ok,,,,
+tibco-business-studio-analyst-edition,4.2.0,,pdf/TIB_business-studio-analyst-edition_4.2.0_vpat.pdf,reference-documents/TIB_business-studio-analyst-edition_4.2.0_vpat.pdf,,,,,,,,ok,,,,
+tibco-business-studio-analyst-edition,4.2.0,,doc/t1.aspx,reference-documents/t1.aspx,,,,,,,,ok,,,,

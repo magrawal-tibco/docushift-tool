@@ -1,0 +1,5 @@
+﻿slug,version,old_url,local_source,new_path,staging_url,text_percent,missing_sentences_count,images_found,images_expected,toc_parent_matched,toc_position_matched,published_status,skip_reason,findings,triage,missing_sentences
+tibco-integration,3.16.0,,tibco-integration-3-16-0/doc/TIB_tibco-int_3.16.0_readme.txt,release-information/TIB_tibco-int_3.16.0_readme.txt,,,,,,,,ok,,,,
+tibco-integration,3.16.0,,tibco-integration-3-16-0/pdf/TIB_tibco-int_3.16.0_license.pdf,reference-documents/TIB_tibco-int_3.16.0_license.pdf,,,,,,,,ok,,,,
+tibco-integration,3.16.0,,tibco-integration-3-16-0/doc/TIB_tibco-int_licensedetails.txt,reference-documents/TIB_tibco-int_licensedetails.txt,,,,,,,,ok,,,,
+tibco-integration,3.16.0,,tibco-integration-3-16-0/doc/TIB_tibco-int_RTU.txt,reference-documents/TIB_tibco-int_RTU.txt,,,,,,,,ok,,,,

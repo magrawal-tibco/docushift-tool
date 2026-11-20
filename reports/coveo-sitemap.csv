@@ -2013,6 +2013,8 @@ tibco-computedb-enterprise-edition,1.2.0,True,yes,5,Public
 tibco-computedb-enterprise-edition,1.1.1,True,yes,5,Public
 tibco-computedb-enterprise-edition,1.1.0,True,yes,5,Public
 tibco-configuration-tool,1.3.0,False,no,,
+tibco-control-plane,1.22.0,False,yes,610,Public
+tibco-control-plane,1.21.0,False,yes,603,Public
 tibco-control-plane,1.20.0,False,yes,571,Public
 tibco-control-plane,1.19.0,False,yes,543,Public
 tibco-control-plane,1.18.0,False,yes,521,Public
@@ -2032,7 +2034,6 @@ tibco-control-plane,1.5.1,False,no,,
 tibco-control-plane,1.5.0,False,no,,
 tibco-control-plane,1.4.0,False,no,,
 tibco-control-plane,1.3.0,False,no,,
-tibco-control-plane,(uncatalogued leaf tibco-control-plane-1-21-0),,yes,,
 tibco-data-science-for-tibco-spotfire-analyst,14.1.0,False,yes,343,Public
 tibco-data-science-for-tibco-spotfire-analyst,14.0.1,True,yes,41,Public
 tibco-data-science-for-tibco-spotfire-analyst,14.0.0,True,yes,17,Public

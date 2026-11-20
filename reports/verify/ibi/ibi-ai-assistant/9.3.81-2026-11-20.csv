@@ -1,0 +1,7 @@
+﻿slug,version,old_url,local_source,new_path,staging_url,text_percent,missing_sentences_count,images_found,images_expected,toc_parent_matched,toc_position_matched,published_status,skip_reason,findings,triage,missing_sentences
+ibi-ai-assistant,9.3.81,,ibi-ai-assistant-9-3-81/pdf/IBI_ibiai_9.3.81_deployment_guide.pdf,user-guides/IBI_ibiai_9.3.81_deployment_guide.pdf,,,,,,,,ok,,,,
+ibi-ai-assistant,9.3.81,,ibi-ai-assistant-9-3-81/pdf/IBI_ibiai_9.3.81_installation.pdf,user-guides/IBI_ibiai_9.3.81_installation.pdf,,,,,,,,ok,,,,
+ibi-ai-assistant,9.3.81,,ibi-ai-assistant-9-3-81/pdf/IBI_ibiai_9.3.81_relnotes.pdf,release-information/IBI_ibiai_9.3.81_relnotes.pdf,,,,,,,,ok,,,,
+ibi-ai-assistant,9.3.81,,ibi-ai-assistant-9-3-81/doc/IBI_ibiai_9.3.81_readme.txt,release-information/IBI_ibiai_9.3.81_readme.txt,,,,,,,,ok,,,,
+ibi-ai-assistant,9.3.81,,ibi-ai-assistant-9-3-81/pdf/IBI_ibiai_9.3.81_license.pdf,reference-documents/IBI_ibiai_9.3.81_license.pdf,,,,,,,,ok,,,,
+ibi-ai-assistant,9.3.81,,ibi-ai-assistant-9-3-81/doc/IBI_ibiai_ReminderNotice.txt,reference-documents/IBI_ibiai_ReminderNotice.txt,,,,,,,,ok,,,,

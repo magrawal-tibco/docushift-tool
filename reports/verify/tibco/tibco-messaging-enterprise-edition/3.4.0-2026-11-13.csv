@@ -1,0 +1,2 @@
+﻿slug,version,old_url,local_source,new_path,staging_url,text_percent,missing_sentences_count,images_found,images_expected,toc_parent_matched,toc_position_matched,published_status,skip_reason,findings,triage,missing_sentences
+tibco-messaging-enterprise-edition,3.4.0,,tibco-messaging-enterprise-edition-3-4-0/doc/TIB_messaging_3.4.0_licenseinfo.txt,reference-documents/TIB_messaging_3.4.0_licenseinfo.txt,,,,,,,,ok,,,,

@@ -1,0 +1,6 @@
+﻿slug,version,old_url,local_source,new_path,staging_url,text_percent,missing_sentences_count,images_found,images_expected,toc_parent_matched,toc_position_matched,published_status,skip_reason,findings,triage,missing_sentences
+tibco-iway-trading-partner-manager,8.0.5,,tibco-iway-trading-partner-manager-8-0-5/pdf/TIB_sm-tpm_8.0.5_users_guide.pdf,user-guides/TIB_sm-tpm_8.0.5_users_guide.pdf,,,,,,,,ok,,,,
+tibco-iway-trading-partner-manager,8.0.5,,tibco-iway-trading-partner-manager-8-0-5/pdf/TIB_sm-tpm_8.0.5_relnotes.pdf,release-information/TIB_sm-tpm_8.0.5_relnotes.pdf,,,,,,,,ok,,,,
+tibco-iway-trading-partner-manager,8.0.5,,tibco-iway-trading-partner-manager-8-0-5/doc/TIB_sm-tpm_8.0.5_readme.txt,release-information/TIB_sm-tpm_8.0.5_readme.txt,,,,,,,,ok,,,,
+tibco-iway-trading-partner-manager,8.0.5,,tibco-iway-trading-partner-manager-8-0-5/pdf/TIB_sm-tpm_8.0.5_license.pdf,reference-documents/TIB_sm-tpm_8.0.5_license.pdf,,,,,,,,ok,,,,
+tibco-iway-trading-partner-manager,8.0.5,,tibco-iway-trading-partner-manager-8-0-5/doc/TIB_sm-tpm_ReminderNotice.txt,reference-documents/TIB_sm-tpm_ReminderNotice.txt,,,,,,,,ok,,,,

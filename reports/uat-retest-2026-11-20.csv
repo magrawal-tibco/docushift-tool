@@ -1,0 +1,14 @@
+﻿Tab,Row,Priority,Set Status to,Comment
+Tibco UAT,7,High,Closed,Retest 20 Nov: fixed. In EMS 10.4.4 the transports.conf links go to .../10-4-4/user-guide/configuration-files/using-other-configuration-files/stores-conf.html#transportsconf. EMS 10.5.1 has a new page layout; its 2 links on this page are a separate problem on our side (TechDocs fixing).
+Tibco UAT,9,High,Closed,"Retest 20 Nov (user, in the browser): fixed. EMS 10.4.4 stores-conf.html#tibrvcmconf opens the tibrvcm.conf heading. The fix runs in the browser."
+Tibco UAT,10,Medium,Closed,Retest 20 Nov: fixed. EMS dropdown shows the version.yml titles exactly (10.5.1 (Aug 2026) ... 10.4.0 (Feb 2025)).
+Tibco UAT,12,Critical,Closed,"Retest 20 Nov: fixed. Streaming 11.1.0, 11.1.1, 11.1.2, 11.1.3, 11.2.0, 11.2.1 open on staging. 11.1.4 is not on wip yet (ours)."
+Tibco UAT,13,High,Closed,"Retest 20 Nov (user, in the browser): fixed. #flow-control-threads-and-deadlock opens the heading. The fix runs in the browser; the page HTML still has the comma."
+Tibco UAT,24,Critical,Closed,Retest 20 Nov: fixed. Version dropdown shows on EMS 10.5.1 and Streaming 11.2.1.
+Tibco UAT,2,Medium,Completed,"Not retested: GitHub commit tool popup, not visible on staging."
+IBI UAT,2,High,Closed,"Retest 20 Nov: fixed. ibi logo and ibi menus in the header. New row suggested: header links Downloads, Customer support and Product documentation still go to tibco.com; Product documentation goes to docs.tibco.com/products/ibi (old site, off 30 Nov)."
+IBI UAT,3,High,Closed,"Retest 20 Nov: fixed. Product names have their spaces, e.g. ibi WebFOCUS Client."
+IBI UAT,4,Medium,Closed,Retest 20 Nov: fixed. WebFOCUS Client links to /us/en/ibi-webfocus-client.html.
+IBI UAT,5,Medium,Closed,"Retest 20 Nov: fixed. Footer is ibi; copyright reads Cloud Software Group, LLC."
+IBI UAT,6,High,Closed,"Retest 20 Nov: fixed. Online Help opens the version list (/us/en/ibi-webfocus-client/online-help), not samples."
+IBI UAT,7,Medium,Closed,Retest 20 Nov: fixed on stg-docs.ibi.com (Quick Actions right under the title). TIBCO site not checked.

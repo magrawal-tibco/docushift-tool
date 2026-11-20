@@ -1,0 +1,17 @@
+Validating 2 published folder(s) in C:\tmp\dv-ja-sync...
+  ! 
+loc-spotfire-data-virtualization-userdocs/ja-jp/tibco-data-virtualization/onlin
+e-help/8-8-0 29 finding(s), 0 error(s)
+  ! 
+loc-spotfire-data-virtualization-userdocs/ja-jp/tibco-data-virtualization/onlin
+e-help/8-8-1 65 finding(s), 0 error(s)
+                                   Validate                                    
++-----------------------------------------------------------------------------+
+|     Walked | Files | References | HTML | External | Tree-root… |    Anchors |
+|------------+-------+------------+------+----------+------------+------------|
+|          2 |  6908 |      94779 |  459 |     1207 |          0 | 11445/114… |
+|  folder(s) |       |            |      |          |            |            |
++-----------------------------------------------------------------------------+
+ANCHOR_MISSING 51 row(s), 51 occurrence(s)
+LINK_TO_UNFILED 2 row(s), 43 occurrence(s)
+Findings: 51 warnings, 2 notes.

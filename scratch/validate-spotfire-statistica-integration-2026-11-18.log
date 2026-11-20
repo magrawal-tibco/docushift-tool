@@ -1,0 +1,12 @@
+Validating 6 published folder(s) in C:\github\tibco-docs-aem...
+  ! 
+en-us-spotfire-statistica-userdocs/en-us/spotfire-statistica-integration/online
+-help/14-5-0 1 finding(s), 0 error(s)
+                                   Validate                                   
++----------------------------------------------------------------------------+
+|      Walked | Files | References | HTML | External | Tree-rooted | Anchors |
+|-------------+-------+------------+------+----------+-------------+---------|
+| 6 folder(s) |   236 |        412 |    0 |       56 |           0 | 241/242 |
++----------------------------------------------------------------------------+
+ANCHOR_MISSING 1 row(s), 1 occurrence(s)
+Findings: 1 warning.

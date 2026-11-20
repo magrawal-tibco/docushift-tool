@@ -164,7 +164,13 @@ def load_areas(text: str) -> dict:
                 raise ValueError(f"{where}: each waiting_on item needs a known team and a 'what'")
             area["waiting"].append({"team": w["team"], "what": w["what"], "due": w.get("due") or ""})
         areas.append(area)
-    return {"goLive": doc["go_live"], "oldSiteOff": doc["old_site_off"], "owners": owners, "areas": areas}
+    bu_override = {}
+    for bu, raw in (doc.get("bu_health") or {}).items():
+        if (raw or {}).get("status") not in STATUSES or not raw.get("reason"):
+            raise ValueError(f"status-areas.yaml: bu_health {bu}: needs a status ({', '.join(STATUSES)}) and a reason")
+        bu_override[bu] = {"status": raw["status"], "reason": raw["reason"]}
+    return {"goLive": doc["go_live"], "oldSiteOff": doc["old_site_off"], "owners": owners, "areas": areas,
+            "buHealth": bu_override}
 
 
 # -- headline --------------------------------------------------------------------
@@ -172,17 +178,18 @@ def load_areas(text: str) -> dict:
 def headline(versions: list[dict], today: dt.date, go_live: str, old_site_off: str) -> dict:
     """Days left, and per BU: in the migration, converted, placed, checked on staging.
 
-    `versions` rows: {bu, inMig, converted, published, staging} with booleans; only
-    rows in the migration count anywhere.
+    `versions` rows: {bu, inMig, converted, published, staging} with booleans, plus
+    optional `checked` (on staging or against our own copy) and `understood` (checked,
+    every finding clean, explained or logged); only rows in the migration count.
     """
     by_bu: dict[str, dict] = {}
-    keys = ("inMig", "converted", "published", "staging")
+    keys = ("inMig", "converted", "published", "staging", "checked", "understood")
     for v in versions:
         if not v["inMig"]:
             continue
         row = by_bu.setdefault(v["bu"], {"bu": v["bu"], **{k: 0 for k in keys}})
         for k in keys:
-            row[k] += bool(v[k])
+            row[k] += bool(v.get(k))
     rows = sorted(by_bu.values(), key=lambda r: -r["inMig"])
     total = {"bu": "All", **{k: sum(r[k] for r in rows) for k in keys}}
     return {
@@ -190,6 +197,86 @@ def headline(versions: list[dict], today: dt.date, go_live: str, old_site_off: s
         "daysToOldSiteOff": (dt.date.fromisoformat(old_site_off) - today).days,
         "goLive": go_live, "oldSiteOff": old_site_off, "byBu": rows, "total": total,
     }
+
+
+# -- health per business unit (closeout plan §8b, user 20 Nov) -----------------
+
+# UAT sheet tab -> business unit; statuses that are no longer open.
+UAT_TABS = {"Tibco UAT": "TIBCO", "IBI UAT": "IBI", "Spotfire UAT": "Spotfire"}
+UAT_DONE = {"closed", "not a bug"}
+UAT_RETEST = {"completed"}
+HEALTH_ORDER = ("on track", "at risk", "blocked")
+
+
+def uat_summary(sheets: dict[str, list[list[str]]]) -> dict[str, dict]:
+    """Per BU: open Critical and High rows, Completed rows waiting on our retest, total.
+
+    A row counts when it has an issue description. Open is anything not Completed,
+    Closed or Not a bug (New, In progress, Needs Discussion, blank).
+    """
+    out = {}
+    for tab, bu in UAT_TABS.items():
+        rows = sheets.get(tab)
+        if rows is None:
+            continue
+        head = [h.strip().lower() for h in rows[0]] if rows else []
+        col = {name: head.index(name) for name in ("issue description", "priority", "status") if name in head}
+        if len(col) < 3:
+            raise ValueError(f"UAT tab {tab!r}: needs Issue description, Priority and Status columns")
+        n = {"bu": bu, "rows": 0, "openCritical": 0, "openHigh": 0, "open": 0, "retest": 0}
+        for r in rows[1:]:
+            cell = lambda name: (r[col[name]] if col[name] < len(r) else "").strip()
+            if not cell("issue description"):
+                continue
+            n["rows"] += 1
+            status, prio = cell("status").lower(), cell("priority").lower()
+            if status in UAT_DONE:
+                continue
+            if status in UAT_RETEST:
+                n["retest"] += 1
+                continue
+            n["open"] += 1
+            n["openCritical"] += prio == "critical"
+            n["openHigh"] += prio == "high"
+        out[bu] = n
+    return out
+
+
+def _share(n: int, d: int) -> float:
+    return n / d if d else 1.0
+
+
+def bu_health(row: dict, uat: dict | None, override: dict | None = None) -> dict:
+    """The light for one BU row of the headline: on track / at risk / blocked, and why.
+
+    The weakest of four shares sets it: 95% or more on track, 80% or more at risk,
+    less blocked. Checked means on staging, or against our own copy when the BU has
+    nothing on staging. Open Critical or High UAT rows make it at least at risk, never
+    blocked (user, 20 Nov). A hand-set `override` ({status, reason}) wins.
+    """
+    staged = row["staging"] > 0
+    checked = row["staging"] if staged else row.get("checked", 0)
+    signals = [
+        ("converted", row["converted"], row["inMig"]),
+        ("in the repositories", row["published"], row["inMig"]),
+        ("checked on staging" if staged else "checked against our own copy (no staging)", checked, row["published"]),
+        ("of checked with every finding understood", row.get("understood", 0), row.get("checked", 0)),
+    ]
+    name, n, d = min(signals, key=lambda s: _share(s[1], s[2]))
+    share = _share(n, d)
+    status = "on track" if share >= 0.95 else "at risk" if share >= 0.80 else "blocked"
+    reasons = [f"{round(100 * share)}% {name}"] if status != "on track" else []
+    if uat and (uat["openCritical"] or uat["openHigh"]):
+        status = max(status, "at risk", key=HEALTH_ORDER.index)
+        parts = [f"{uat[k]} {w}" for k, w in (("openCritical", "Critical"), ("openHigh", "High")) if uat[k]]
+        reasons.append(f"open UAT rows: {' and '.join(parts)}")
+    if uat and uat["retest"]:
+        reasons.append(f"{uat['retest']} UAT row{'' if uat['retest'] == 1 else 's'} fixed by Digital Platform, waiting on our retest")
+    out = {"status": status, "reason": "; ".join(reasons) or "every measure at 95% or more",
+           "byHand": False, "uat": uat}
+    if override:
+        out.update(status=override["status"], reason=override["reason"], byHand=True)
+    return out
 
 
 # -- Jira: which area each sub-task counts under ----------------------------------
@@ -432,8 +519,13 @@ def render_markdown(status: dict) -> str:
         f"Checked page by page on the staging site: {t['staging']:,} of the {t['published']:,} in the repositories.",
     ]
     for r in h["byBu"]:
-        lines.append(f"  - {r['bu']}: {r['inMig']:,} versions; {r['converted']:,} converted, "
+        light = r.get("health")
+        tag = (f"**{light['status']}**{' (set by hand)' if light['byHand'] else ''}: {light['reason']}. "
+               if light else "")
+        lines.append(f"  - {r['bu']}: {tag}{r['inMig']:,} versions; {r['converted']:,} converted, "
                      f"{r['published']:,} in the repositories, {r['staging']:,} checked on staging.")
+    if h.get("uatAsOf"):
+        lines.append(f"  - UAT sheet as downloaded {h['uatAsOf']}.")
     lines += ["", "## Areas", ""]
     for a in status["areas"]:
         m = a["measure"]

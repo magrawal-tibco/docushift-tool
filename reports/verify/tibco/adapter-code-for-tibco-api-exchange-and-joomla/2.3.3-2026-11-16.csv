@@ -1,0 +1,4 @@
+﻿slug,version,old_url,local_source,new_path,staging_url,text_percent,missing_sentences_count,images_found,images_expected,toc_parent_matched,toc_position_matched,published_status,skip_reason,findings,triage,missing_sentences
+adapter-code-for-tibco-api-exchange-and-joomla,2.3.3,,doc/pdf/TIB_api-exchange-joomla-adapter_2.3_administration.pdf,user-guides/TIB_api-exchange-joomla-adapter_2.3_administration.pdf,,,,,,,,ok,,,,
+adapter-code-for-tibco-api-exchange-and-joomla,2.3.3,,doc/pdf/TIB_api-exchange-joomla-adapter_2.3_installation.pdf,user-guides/TIB_api-exchange-joomla-adapter_2.3_installation.pdf,,,,,,,,ok,,,,
+adapter-code-for-tibco-api-exchange-and-joomla,2.3.3,,doc/pdf/TIB_api-exchange-joomla-adapter_2.3_users_guide.pdf,user-guides/TIB_api-exchange-joomla-adapter_2.3_users_guide.pdf,,,,,,,,ok,,,,

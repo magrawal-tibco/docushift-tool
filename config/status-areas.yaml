@@ -25,7 +25,7 @@
 #
 # Format: a small subset of YAML (one-line values; quote a value holding ": " or "#").
 
-go_live: 2026-11-23
+go_live: 2026-11-30
 old_site_off: 2026-11-30
 
 # Who owns a Jira issue when it is not the area's own team. A logged problem kind
@@ -47,15 +47,21 @@ jira_owner:
   DOCOPS-322: TechDocs
   DOCOPS-354: TechDocs
 
+# A business unit's health light set by hand, when the rule's numbers mislead (closeout plan §8b).
+bu_health:
+  IBI:
+    status: at risk
+    reason: "42% checked on staging, waiting for Digital Platform to put 10 products on staging; 1 Critical and 5 High UAT rows open"
+
 areas:
   - id: migration
     name: Converting the documentation
     team: TechDocs
     status: on track
-    note: Karan's additions and the fixes are converted; 73 versions are re-converting on Sun 15 for the list fix (DOCOPS-370); releases since 5 Nov follow Mon 16 to Wed 18.
+    note: Karan's additions, the list fix (DOCOPS-370) and the 13 versions the 5 Nov refresh missed are converted; two Messaging versions in another help format wait on a decision (DOCOPS-355).
     plan: "§3"
-    next: 2026-11-16
-    next_step: Convert the releases since 5 Nov and the remaining fixes for release 2 (to Wed 18)
+    next: 2026-11-27
+    next_step: Convert what the last catalog refresh finds
     jira: [DOCOPS-5, DOCOPS-139, DOCOPS-153, DOCOPS-170]
     measure: conversion
 
@@ -63,10 +69,10 @@ areas:
     name: Publishing to the new site
     team: TechDocs
     status: on track
-    note: Release 1 is on staging for every TIBCO repo (Data Management fixed Sat after a repo-name problem); EMS 10.5.1's new layout went out Sun 15; release 2 runs Mon 16 to Thu 19 in small pushes the pipeline can take; ibi Mon 16.
+    note: Release 2 went out overnight Wed 18 in 7 waves to 21 TIBCO repos with no errors; the 4 largest (BusinessConnect, BusinessWorks, Streaming, Platform) and the BW plug-ins follow in smaller pieces; first ibi update since the freeze went out Fri 20 (Data Intelligence and iWay Service Manager, 11 versions) and showed on staging within the hour.
     plan: "§3, §2"
-    next: 2026-11-16
-    next_step: Release 2 opens (pushes Mon to Wed, last wave Thu); ibi release 1
+    next: 2026-11-23
+    next_step: Send the other ibi fixes to staging one repository at a time
     jira: [DOCOPS-313]
     measure: publishing
 
@@ -74,10 +80,10 @@ areas:
     name: Checking the new site (staging)
     team: TechDocs
     status: on track
-    note: Newest versions are checked page by page on staging, now 6 pages at a time and up to 3 batches at once; older versions follow after go-live.
+    note: Newest TIBCO versions are checked page by page on staging; ibi checks resumed Fri 20; the 10 versions refused earlier are re-checked, and the last 22 WebFOCUS versions are running; older versions follow after go-live.
     plan: "§3, §4"
-    next: 2026-11-16
-    next_step: Read the weekend's checks (TIBCO and ibi newest versions)
+    next: 2026-11-20
+    next_step: Sort the WebFOCUS check results
     jira: [DOCOPS-338, DOCOPS-257, DOCOPS-10, DOCOPS-149]
     measure: staging_checks
 
@@ -85,10 +91,10 @@ areas:
     name: Problems found by the checks
     team: TechDocs
     status: on track
-    note: Each kind of problem gets one Jira issue; the backslash/angle-bracket repair (36,204 changes) and the list fix are ready for release 2; AEM-side problems are in the UAT sheet.
+    note: Each kind of problem gets one Jira issue; the backslash repair (confirmed on staging Mon), the list fix and the picture-link letter-case fix (about 21,000 links) went out with release 2; AEM-side problems are in the UAT sheet.
     plan: "§7a, §8"
-    next: 2026-11-16
-    next_step: Sort the weekend's findings; re-convert with the fixes (Mon 16 to Tue 17)
+    next: 2026-11-20
+    next_step: Read the re-check of what release 2 changed
     jira_labels: [verify-issue]
     measure: problems
     waiting_on:
@@ -100,7 +106,7 @@ areas:
     name: Go-live blockers on the new site
     team: Digital Platform
     status: blocked
-    note: AEM cuts product folder names after 50 characters, so we are renaming 116 product folders (Phase 80); 8 families done or in progress, the BW plug-ins wait for an AEM answer; 9 versions are still not served at all; pages under a heading row are hidden from the menu.
+    note: AEM cuts product folder names after 50 characters, so we are renaming 116 product folders (Phase 80); every family but the BW plug-ins is renamed, and the BW plug-in renames (approved Mon) go out after release 2's main waves; 9 versions are still not served at all; pages under a heading row are hidden from the menu.
     plan: "§4"
     next: 2026-11-20
     next_step: "Go / no-go: served, or a date from Digital Platform"
@@ -117,9 +123,9 @@ areas:
     name: Which Integration versions to publish (Karan's list)
     team: TechDocs
     status: on track
-    note: Engineering's list is final for 1,166 Integration versions; the 80 removals and 26 of the 27 additions are ready for release 2; one PDF-only addition has no site repository yet.
+    note: Engineering's list is final for 1,166 Integration versions; the 80 removals and 26 of the 27 additions are going out with release 2; one PDF-only addition has no site repository yet.
     plan: "§6"
-    next: 2026-11-16
+    next: 2026-11-19
     next_step: Out with release 2 (Thu 19); a repository for the Integration Platform family, or drop that one addition
     jira: [DOCOPS-364]
     measure: karan
@@ -132,11 +138,11 @@ areas:
     name: Releases since 5 Nov (delta migration)
     team: TechDocs
     status: on track
-    note: The catalog was last refreshed on 5 Nov; it is refreshed Mon 16 and for the last time Fri 27, before the old site closes.
+    note: Refreshed Sun 15 (17 new versions) and checked against the live site Tue 17 (13 versions no batch had picked up); all are converted and on their way with release 2. The last refresh is Fri 27, before the old site closes.
     plan: "§6a"
-    next: 2026-11-16
-    next_step: Refresh the catalog and list what is new
-    # Its own Jira issue is created under DOCOPS-6 when the 16 Nov refresh runs (plan §8a); add it here then.
+    next: 2026-11-27
+    next_step: Last catalog refresh; its new versions are converted the same day
+    jira: [DOCOPS-379]
     waiting_on:
       - team: TechDocs
         what: Writers send the files of releases still in progress (by noon)
@@ -166,10 +172,10 @@ areas:
     name: Backups of the original help packages
     team: TechDocs
     status: on track
-    note: TIBCO is on the shared drive (1,988 of 2,018 versions; 30 are being obtained by hand, 29 more marked not needed), ibi on Google Drive, Spotfire copy started 12 Nov.
+    note: TIBCO is on the shared drive (1,988 of 2,018 versions; 30 are being obtained by hand, 29 more marked not needed), ibi on Google Drive.
     plan: "§3, §5"
     next: 2026-11-27
-    next_step: Close the backups (Spotfire run summary; ibi count confirmed)
+    next_step: Close the backups (ibi count confirmed)
     jira: [DOCOPS-281, DOCOPS-282, DOCOPS-283]
 
   - id: team-requirements
@@ -203,12 +209,3 @@ areas:
     next_step: Writers spot-check each family
     jira: [DOCOPS-137, DOCOPS-151]
 
-  - id: ems-layout
-    name: EMS 10.5.1 in its new page layout
-    team: TechDocs
-    status: done
-    note: Pushed to staging Sun 15, four days early, with 217 pages instead of 159, every old link still redirected, older EMS versions unchanged.
-    plan: "§5"
-    next: 2026-11-16
-    next_step: Check it on staging
-    jira: [DOCOPS-367]

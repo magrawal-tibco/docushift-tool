@@ -1,0 +1,5 @@
+﻿slug,version,old_url,local_source,new_path,staging_url,text_percent,missing_sentences_count,images_found,images_expected,toc_parent_matched,toc_position_matched,published_status,skip_reason,findings,triage,missing_sentences
+tibco-streambase-high-performance-fix-engine,10.6.6,,spotfire-streambase-high-performance-fix-engine-10-6-6/doc/SPOT_sb-hp-fix_10.6.6_readme.txt,release-information/SPOT_sb-hp-fix_10.6.6_readme.txt,,,,,,,,ok,,,,
+tibco-streambase-high-performance-fix-engine,10.6.6,,spotfire-streambase-high-performance-fix-engine-10-6-6/pdf/SPOT_sb-hp-fix_10.6.6_license.pdf,reference-documents/SPOT_sb-hp-fix_10.6.6_license.pdf,,,,,,,,ok,,,,
+tibco-streambase-high-performance-fix-engine,10.6.6,,spotfire-streambase-high-performance-fix-engine-10-6-6/pdf/SPOT_sb-hp-fix_10.6.6_vpat.pdf,reference-documents/SPOT_sb-hp-fix_10.6.6_vpat.pdf,,,,,,,,ok,,,,
+tibco-streambase-high-performance-fix-engine,10.6.6,,spotfire-streambase-high-performance-fix-engine-10-6-6/doc/SPOT_sb-hp-fix_ReminderNotice.txt,reference-documents/SPOT_sb-hp-fix_ReminderNotice.txt,,,,,,,,ok,,,,

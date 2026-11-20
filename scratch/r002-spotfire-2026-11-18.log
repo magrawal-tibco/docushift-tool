@@ -1,0 +1,69 @@
+                            R002 over 3 version(s)                             
++-----------------------------------------------------------------------------+
+| Product             | Version | files | fixed (repo) | fixed (local) | left |
+|---------------------+---------+-------+--------------+---------------+------|
+| tibco-data-virtual… | 8.8.0   |  2463 |        3,728 |         7,456 |    0 |
+| tibco-data-virtual… | 8.8.1   |  2478 |        3,745 |         7,490 |    0 |
+| tibco-data-virtual… | 8.9.0   |  2694 |        4,047 |         8,094 |    0 |
++-----------------------------------------------------------------------------+
+Report: C:\github\docushift-tool\reports\repairs\apply-R002-2026-11-18.csv
+Index: C:\github\docushift-tool\reports\repairs\INDEX.html
+Nothing is committed: review with `git diff` in each repo, then commit and 
+push.
+No version needs R002 in this selection.
+No version needs R002 in this selection.
+No version needs R002 in this selection.
+No version needs R002 in this selection.
+                            R002 over 2 version(s)                             
++-----------------------------------------------------------------------------+
+| Product             | Version | files | fixed (repo) | fixed (local) | left |
+|---------------------+---------+-------+--------------+---------------+------|
+| spotfire-statistica | 14.1.0  |  1141 |        1,270 |         2,540 |    0 |
+| spotfire-statistica | 14.4.0  |  1129 |        1,281 |         2,562 |    0 |
++-----------------------------------------------------------------------------+
+Report: C:\github\docushift-tool\reports\repairs\apply-R002-2026-11-18.csv
+Index: C:\github\docushift-tool\reports\repairs\INDEX.html
+Nothing is committed: review with `git diff` in each repo, then commit and 
+push.
+                            R002 over 1 version(s)                             
++-----------------------------------------------------------------------------+
+| Product             | Version | files | fixed (repo) | fixed (local) | left |
+|---------------------+---------+-------+--------------+---------------+------|
+| spotfire-statistic… | 14.1.0  |    42 |           25 |            50 |    0 |
++-----------------------------------------------------------------------------+
+Report: C:\github\docushift-tool\reports\repairs\apply-R002-2026-11-18.csv
+Index: C:\github\docushift-tool\reports\repairs\INDEX.html
+Nothing is committed: review with `git diff` in each repo, then commit and 
+push.
+                            R002 over 2 version(s)                             
++-----------------------------------------------------------------------------+
+| Product             | Version | files | fixed (repo) | fixed (local) | left |
+|---------------------+---------+-------+--------------+---------------+------|
+| spotfire-statistic… | 14.4.0  |     9 |            9 |            18 |    0 |
+| spotfire-statistic… | 14.5.0  |     9 |            9 |            18 |    0 |
++-----------------------------------------------------------------------------+
+Report: C:\github\docushift-tool\reports\repairs\apply-R002-2026-11-18.csv
+Index: C:\github\docushift-tool\reports\repairs\INDEX.html
+Nothing is committed: review with `git diff` in each repo, then commit and 
+push.
+                            R002 over 1 version(s)                             
++-----------------------------------------------------------------------------+
+| Product             | Version | files | fixed (repo) | fixed (local) | left |
+|---------------------+---------+-------+--------------+---------------+------|
+| tibco-data-science… | 14.1.0  |    51 |           44 |            88 |    0 |
++-----------------------------------------------------------------------------+
+Report: C:\github\docushift-tool\reports\repairs\apply-R002-2026-11-18.csv
+Index: C:\github\docushift-tool\reports\repairs\INDEX.html
+Nothing is committed: review with `git diff` in each repo, then commit and 
+push.
+                            R002 over 1 version(s)                             
++-----------------------------------------------------------------------------+
+| Product             | Version | files | fixed (repo) | fixed (local) | left |
+|---------------------+---------+-------+--------------+---------------+------|
+| tibco-data-science… | 14.1.0  |    42 |           25 |            50 |    0 |
++-----------------------------------------------------------------------------+
+Report: C:\github\docushift-tool\reports\repairs\apply-R002-2026-11-18.csv
+Index: C:\github\docushift-tool\reports\repairs\INDEX.html
+Nothing is committed: review with `git diff` in each repo, then commit and 
+push.
+No version needs R002 in this selection.

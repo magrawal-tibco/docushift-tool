@@ -1,0 +1,6 @@
+﻿slug,version,old_url,local_source,new_path,staging_url,text_percent,missing_sentences_count,images_found,images_expected,toc_parent_matched,toc_position_matched,published_status,skip_reason,findings,triage,missing_sentences
+spotfire-liveview-web-enterprise-edition,1.7.1,,spotfire-liveview-web-enterprise-edition-1-7-1/pdf/LiveViewWeb_GettingStarted.pdf,user-guides/LiveViewWeb_GettingStarted.pdf,,,,,,,,ok,,,,
+spotfire-liveview-web-enterprise-edition,1.7.1,,spotfire-liveview-web-enterprise-edition-1-7-1/pdf/LiveViewWeb_NewNote.pdf,user-guides/LiveViewWeb_NewNote.pdf,,,,,,,,ok,,,,
+spotfire-liveview-web-enterprise-edition,1.7.1,,spotfire-liveview-web-enterprise-edition-1-7-1/doc/SPOT_ldm-web_1.7.1_readme.txt,release-information/SPOT_ldm-web_1.7.1_readme.txt,,,,,,,,ok,,,,
+spotfire-liveview-web-enterprise-edition,1.7.1,,spotfire-liveview-web-enterprise-edition-1-7-1/pdf/SPOT_ldm-web_1.7.1_license.pdf,reference-documents/SPOT_ldm-web_1.7.1_license.pdf,,,,,,,,ok,,,,
+spotfire-liveview-web-enterprise-edition,1.7.1,,spotfire-liveview-web-enterprise-edition-1-7-1/doc/SPOT_ldm-web_ReminderNotice.txt,reference-documents/SPOT_ldm-web_ReminderNotice.txt,,,,,,,,ok,,,,

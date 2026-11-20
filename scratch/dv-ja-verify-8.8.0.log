@@ -1,0 +1,28 @@
+Verifying 1 version(s) (local only); 1050 triage entr(ies); redirect sample 10,
+seed 444841...
+  x 
+loc-spotfire-data-virtualization-userdocs/ja-jp/tibco-data-virtualization/onlin
+e-help/8-8-0: lost, 3189 old page(s), 2940 lost, 716 warning(s), 0 explained
+Issues: 20 kind(s), 13 not logged in Jira yet: 
+C:\github\docushift-tool\reports\verify\ISSUES.html
+                verify                 
++-------------------------------------+
+| Finding                     | Count |
+|-----------------------------+-------|
+| VERIFY_REDIRECT_SAMPLED     |     1 |
+| VERIFY_REDIRECT_UNCONVERTED |    19 |
+| VERIFY_TEXT_DROPPED         |     1 |
+| VERIFY_TOC_ENTRY_MISSING    |  2938 |
+| VERIFY_TOC_MOVED            |   716 |
+| VERIFY_TOC_TITLE_CHANGED    |     3 |
+| VERIFY_TOPIC_MISSING        |     1 |
+| VERIFY_TOPIC_UNFILED        |   186 |
++-------------------------------------+
+0 request(s) made on 4 thread(s); the rest came from cache/verify/.
+Index: C:\github\docushift-tool\reports\verify\INDEX.html
+                                verify progress                                
++-----------------------------------------------------------------------------+
+| bu     | publis… | verif… | left | lost | issues | logged | explai… | clean |
+|--------+---------+--------+------+------+--------+--------+---------+-------|
+| spotf… |       2 |      2 |    0 |    2 |      0 |      0 |       0 |     0 |
++-----------------------------------------------------------------------------+

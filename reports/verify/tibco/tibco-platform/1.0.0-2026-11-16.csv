@@ -1,0 +1,2 @@
+﻿slug,version,old_url,local_source,new_path,staging_url,text_percent,missing_sentences_count,images_found,images_expected,toc_parent_matched,toc_position_matched,published_status,skip_reason,findings,triage,missing_sentences
+tibco-platform,1.0.0,,tibco-platform-1-0-0/doc/TIB_tp_licensedetails.txt,reference-documents/TIB_tp_licensedetails.txt,,,,,,,,ok,,,,

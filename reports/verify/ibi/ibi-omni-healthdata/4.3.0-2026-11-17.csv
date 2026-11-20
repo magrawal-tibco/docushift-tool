@@ -1,0 +1,5 @@
+﻿slug,version,old_url,local_source,new_path,staging_url,text_percent,missing_sentences_count,images_found,images_expected,toc_parent_matched,toc_position_matched,published_status,skip_reason,findings,triage,missing_sentences
+ibi-omni-healthdata,4.3.0,,ibi-omni-healthdata-4-3-0/pdf/IBI_ohd_4.3.0_release_notes.pdf,release-information/IBI_ohd_4.3.0_release_notes.pdf,,,,,,,,ok,,,,
+ibi-omni-healthdata,4.3.0,,ibi-omni-healthdata-4-3-0/doc/TIB_ohd_4.3.0_readme.txt,release-information/TIB_ohd_4.3.0_readme.txt,,,,,,,,ok,,,,
+ibi-omni-healthdata,4.3.0,,ibi-omni-healthdata-4-3-0/pdf/TIB_ohd_4.3.0_license.pdf,reference-documents/TIB_ohd_4.3.0_license.pdf,,,,,,,,ok,,,,
+ibi-omni-healthdata,4.3.0,,ibi-omni-healthdata-4-3-0/doc/TIB_ohd_ReminderNotice.txt,reference-documents/TIB_ohd_ReminderNotice.txt,,,,,,,,ok,,,,

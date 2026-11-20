@@ -1,0 +1,4 @@
+﻿slug,version,old_url,local_source,new_path,staging_url,text_percent,missing_sentences_count,images_found,images_expected,toc_parent_matched,toc_position_matched,published_status,skip_reason,findings,triage,missing_sentences
+ibi-web-query-for-ibm-i,9.1.2,,ibi-web-query-for-ibm-i-9-1-2/doc/IBI_wq_9.1.2_readme.txt,release-information/IBI_wq_9.1.2_readme.txt,,,,,,,,ok,,,,
+ibi-web-query-for-ibm-i,9.1.2,,ibi-web-query-for-ibm-i-9-1-2/pdf/IBI_wq_9.1.2_license.pdf,reference-documents/IBI_wq_9.1.2_license.pdf,,,,,,,,ok,,,,
+ibi-web-query-for-ibm-i,9.1.2,,ibi-web-query-for-ibm-i-9-1-2/doc/IBI_wq_ReminderNotice.txt,reference-documents/IBI_wq_ReminderNotice.txt,,,,,,,,ok,,,,

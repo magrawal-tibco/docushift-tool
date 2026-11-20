@@ -1,0 +1,5 @@
+﻿slug,version,old_url,local_source,new_path,staging_url,text_percent,missing_sentences_count,images_found,images_expected,toc_parent_matched,toc_position_matched,published_status,skip_reason,findings,triage,missing_sentences
+ibi-webfocus-container-edition,1.1.2,,ibi-webfocus-container-edition-1-1-2/pdf/IBI_wfce_1.1.2_deployment_guide.pdf,user-guides/IBI_wfce_1.1.2_deployment_guide.pdf,,,,,,,,ok,,,,
+ibi-webfocus-container-edition,1.1.2,,ibi-webfocus-container-edition-1-1-2/doc/IBI_wfce_1.1.2_readme.txt,release-information/IBI_wfce_1.1.2_readme.txt,,,,,,,,ok,,,,
+ibi-webfocus-container-edition,1.1.2,,ibi-webfocus-container-edition-1-1-2/pdf/IBI_wfce_1.1.2_license.pdf,reference-documents/IBI_wfce_1.1.2_license.pdf,,,,,,,,ok,,,,
+ibi-webfocus-container-edition,1.1.2,,ibi-webfocus-container-edition-1-1-2/doc/IBI_wfce_ReminderNotice.txt,reference-documents/IBI_wfce_ReminderNotice.txt,,,,,,,,ok,,,,

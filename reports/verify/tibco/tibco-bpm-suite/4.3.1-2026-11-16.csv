@@ -1,0 +1,5 @@
+﻿slug,version,old_url,local_source,new_path,staging_url,text_percent,missing_sentences_count,images_found,images_expected,toc_parent_matched,toc_position_matched,published_status,skip_reason,findings,triage,missing_sentences
+tibco-bpm-suite,4.3.1,,tibco-bpm-suite-4-3-1/doc/TIB_bpm-suite_4.3.1_readme.txt,release-information/TIB_bpm-suite_4.3.1_readme.txt,,,,,,,,ok,,,,
+tibco-bpm-suite,4.3.1,,tibco-bpm-suite-4-3-1/pdf/TIB_bpm-suite_4.3.1_license.pdf,reference-documents/TIB_bpm-suite_4.3.1_license.pdf,,,,,,,,ok,,,,
+tibco-bpm-suite,4.3.1,,tibco-bpm-suite-4-3-1/doc/TIB_bpm-suite_ReminderNotice.txt,reference-documents/TIB_bpm-suite_ReminderNotice.txt,,,,,,,,ok,,,,
+tibco-bpm-suite,4.3.1,,tibco-bpm-suite-4-3-1/doc/TIB_bpm-suite_RTU.txt,reference-documents/TIB_bpm-suite_RTU.txt,,,,,,,,ok,,,,

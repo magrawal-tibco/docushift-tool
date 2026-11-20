@@ -26,9 +26,15 @@ import json
 import sqlite3
 from pathlib import Path
 
+import read_xlsx
 import status_page
 
 ROOT = Path(__file__).resolve().parents[1]
+# The user's .xlsx download of the UAT sheet, all tabs (20 Nov; gcloud cannot read Sheets).
+UAT_XLSX = "cache/TIbco_IBI_Spotfire UAT Sheet.xlsx"
+# Business units handed over and not ours to report (user, 20 Nov: Spotfire belongs to
+# Digital Platform since the 19 Nov hand-over). Left out of every tab of the page.
+NOT_OURS = {"spotfire"}
 BU_NAMES = {"tibco": "TIBCO", "ibi": "IBI", "spotfire": "Spotfire", "datasynapse": "DataSynapse", "onebx": "EBX"}
 ENGINE_NAMES = {"flare": "MadCap Flare", "webworks": "WebWorks", "docbook": "DocBook", "dita": "DITA (SuiteHelp)"}
 # The epics this tool's work is logged under (docs/jira.md); DOCOPS also holds other teams' issues.
@@ -111,8 +117,8 @@ def place(v: dict) -> tuple[str | None, list[str]]:
 
 
 def build(jira_snapshot: Path, data: Path = ROOT) -> dict:
-    products = {row["slug"]: row for row in read_csv(data / "config/products.csv")}
-    versions = read_csv(data / "config/versions.csv")
+    products = {row["slug"]: row for row in read_csv(data / "config/products.csv") if row["bu"] not in NOT_OURS}
+    versions = [v for v in read_csv(data / "config/versions.csv") if v["slug"] in products]
     if versions and "_repairs_pending" not in versions[0]:
         raise SystemExit("versions.csv has no _repairs_pending column; run `docushift catalog refresh` first.")
 
@@ -210,8 +216,8 @@ def _modified(path: Path) -> str:
 def where_we_stand(data: Path, areas_path: Path, jira_snapshot: Path, now: dt.datetime) -> dict:
     """The first tab and status-latest.md (closeout plan §8b): headline, areas, effort, pending."""
     cfg = status_page.load_areas(areas_path.read_text(encoding="utf-8"))
-    products = {row["slug"]: row for row in read_csv(data / "config/products.csv")}
-    versions = read_csv(data / "config/versions.csv")
+    products = {row["slug"]: row for row in read_csv(data / "config/products.csv") if row["bu"] not in NOT_OURS}
+    versions = [v for v in read_csv(data / "config/versions.csv") if v["slug"] in products]
     index_path = data / "reports/verify/INDEX.csv"
     staging_scope = {(r["slug"], r["version"]) for r in (read_csv(index_path) if index_path.exists() else [])
                      if "staging" in r["scope"].split("+")}
@@ -228,9 +234,15 @@ def where_we_stand(data: Path, areas_path: Path, jira_snapshot: Path, now: dt.da
         bu = products[v["slug"]]["bu"]
         records.append({"bu": BU_NAMES.get(bu, bu), "inMig": bool(step),
                         "converted": step not in (None, "not_started", "downloaded"),
-                        "published": bool(step) and published, "staging": on_staging})
+                        "published": bool(step) and published, "staging": on_staging,
+                        "checked": checked, "understood": checked and v["_verify_status"] in VERIFY_UNDERSTOOD})
         by_version[(v["slug"], v["version"])] = {"migrate_decision": v["migrate_decision"], "published": published}
     head = status_page.headline(records, now.date(), cfg["goLive"], cfg["oldSiteOff"])
+    uat_path = data / UAT_XLSX
+    uat = status_page.uat_summary(read_xlsx.read(str(uat_path))) if uat_path.exists() else {}
+    head["uatAsOf"] = _modified(uat_path)
+    for row in head["byBu"]:
+        row["health"] = status_page.bu_health(row, uat.get(row["bu"]), cfg["buHealth"].get(row["bu"]))
     t = head["total"]
 
     issues_path = data / "reports/verify/ISSUES.csv"
@@ -267,7 +279,7 @@ def where_we_stand(data: Path, areas_path: Path, jira_snapshot: Path, now: dt.da
         "asOfText": f"{now.day} {now.strftime('%b %Y, %H:%M')}"
                     + (f" (Jira as of {status_page.day_text(snap['fetched'])})" if snap else " (no Jira snapshot)"),
         "sources": {"versions": _modified(data / "config/versions.csv"), "checks": _modified(issues_path),
-                    "areas": _modified(areas_path), "plan": _modified(plan_path),
+                    "areas": _modified(areas_path), "plan": _modified(plan_path), "uat": _modified(uat_path),
                     "jira": snap["fetched"] if snap else ""},
         "headline": head,
         "areas": rows,

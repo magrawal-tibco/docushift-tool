@@ -1,0 +1,6 @@
+﻿slug,version,old_url,local_source,new_path,staging_url,text_percent,missing_sentences_count,images_found,images_expected,toc_parent_matched,toc_position_matched,published_status,skip_reason,findings,triage,missing_sentences
+ibi-data-quality,5.2.0,,ibi-data-quality-5-2-0/pdf/520_ibi_data_quality_user_guide.pdf,user-guides/520_ibi_data_quality_user_guide.pdf,,,,,,,,ok,,,,
+ibi-data-quality,5.2.0,,ibi-data-quality-5-2-0/pdf/520_ibi_data_quality_release_notes.pdf,release-information/520_ibi_data_quality_release_notes.pdf,,,,,,,,ok,,,,
+ibi-data-quality,5.2.0,,ibi-data-quality-5-2-0/doc/TIB_tdq_5.2.0_readme.txt,release-information/TIB_tdq_5.2.0_readme.txt,,,,,,,,ok,,,,
+ibi-data-quality,5.2.0,,ibi-data-quality-5-2-0/pdf/TIB_tdq_5.2.0_license.pdf,reference-documents/TIB_tdq_5.2.0_license.pdf,,,,,,,,ok,,,,
+ibi-data-quality,5.2.0,,ibi-data-quality-5-2-0/doc/TIB_tdq_ReminderNotice.txt,reference-documents/TIB_tdq_ReminderNotice.txt,,,,,,,,ok,,,,

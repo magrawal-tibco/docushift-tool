@@ -1,0 +1,6 @@
+﻿slug,version,old_url,local_source,new_path,staging_url,text_percent,missing_sentences_count,images_found,images_expected,toc_parent_matched,toc_position_matched,published_status,skip_reason,findings,triage,missing_sentences
+tibco-enterprise-mdm,1.0.0,,tibco-enterprise-mdm-1-0-0/doc/TIB_tp-mdm_1.0.0_readme.txt,release-information/TIB_tp-mdm_1.0.0_readme.txt,,,,,,,,ok,,,,
+tibco-enterprise-mdm,1.0.0,,tibco-enterprise-mdm-1-0-0/pdf/TIB_tp-mdm_1.0.0_license.pdf,reference-documents/TIB_tp-mdm_1.0.0_license.pdf,,,,,,,,ok,,,,
+tibco-enterprise-mdm,1.0.0,,tibco-enterprise-mdm-1-0-0/doc/TIB_tp-mdm_licensedetails.txt,reference-documents/TIB_tp-mdm_licensedetails.txt,,,,,,,,ok,,,,
+tibco-enterprise-mdm,1.0.0,,tibco-enterprise-mdm-1-0-0/doc/TIB_tp-mdm_ReminderNotice.txt,reference-documents/TIB_tp-mdm_ReminderNotice.txt,,,,,,,,ok,,,,
+tibco-enterprise-mdm,1.0.0,,tibco-enterprise-mdm-1-0-0/doc/TIB_tp-mdm_RTU.txt,reference-documents/TIB_tp-mdm_RTU.txt,,,,,,,,ok,,,,
