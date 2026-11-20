@@ -1,0 +1,52 @@
+version,file,status
+9.2.0,container-edition-user-guide/loading-iway-container-edition-into-docker-desktop.md,patch
+9.2.0,data-flow-connector-user-guide/overview-of-the-data-flow-connector/connector-use-cases.md,patch
+9.2.0,microsoft-office-365-outlook-connector-user-guide/connector-configuration.md,patch
+9.2.0,microsoft-office-365-outlook-connector-user-guide/connector-use-cases.md,patch
+9.2.0,microsoft-office-365-outlook-connector-user-guide/example-setting-up-outlook-connector-send-email/configuring-the-message-listener-in-iit.md,patch
+9.2.0,microsoft-office-365-outlook-connector-user-guide/prerequisites/registering-application-azure-active-directory.md,patch
+9.2.0,unfiled/data-flow-connector/Configuration_1.md,patch
+9.2.0,unfiled/data-flow-connector/Configuring_the_RDB_HWM_Listener_in_TIBCO_Service_Manager_Integration_Tools.md,patch
+9.2.0,unfiled/data-flow-connector/High-watermark-Listener.md,patch
+9.2.0,unfiled/gmail-connector-user-guide/Configuring_the_Gmail_Listener_in_TIBCO_Service_Manager_Integration_Tools.md,patch
+9.2.0,unfiled/gmail-connector-user-guide/Configuring_the_Gmail_Listener_in_TIBCO_iWay_Service_Manager.md,patch
+9.2.0,unfiled/gmail-connector-user-guide/Configuring_the_Message_Listener_in_TIBCO_Service_Manager_Integration_Tools.md,patch
+9.2.0,unfiled/gmail-connector-user-guide/Connector_Use_Cases.md,patch
+9.2.0,unfiled/gmail-connector-user-guide/Email_Listening_Support.md,patch
+9.2.0,unfiled/gmail-connector-user-guide/Functionality_Overview.md,patch
+9.2.0,unfiled/gmail-connector-user-guide/Prereq.md,patch
+9.2.0,unfiled/gmail-connector-user-guide/Registering_an_Application_With_Azure_Active_Directory.md,patch
+9.2.0,unfiled/ms-365-excel-connector-userguide/Configuring_the_Message_Listener_in_TIBCO_Service_Manager_Integration_Tools.md,patch
+9.2.0,unfiled/ms-365-excel-connector-userguide/Configuring_the_Message_Listener_in_TIBCO_iWay_Service_Manager.md,patch
+9.2.0,unfiled/ms-365-excel-connector-userguide/Connector-Configuration.md,patch
+9.2.0,unfiled/ms-365-excel-connector-userguide/Connector_Use_Cases.md,patch
+9.2.0,unfiled/ms-365-excel-connector-userguide/Email_Listening_Support.md,patch
+9.2.0,unfiled/ms-365-excel-connector-userguide/Functionality_Overview.md,patch
+9.2.0,unfiled/ms-365-excel-connector-userguide/Registering_an_Application_With_Azure_Active_Directory.md,patch
+9.2.0,unfiled/ms-powershell/Registering_an_Application_With_Azure_Active_Directory.md,patch
+9.2.0,unfiled/msoffice-365-outlook-connector-userguide/Configuring_the_Message_Listener_in_TIBCO_iWay_Service_Manager.md,patch
+9.2.0,unfiled/msoffice-365-outlook-connector-userguide/Functionality_Overview.md,patch
+9.2.0,redirects.yml,"listed, not applied: anchors or menu changed"
+9.2.0,reframe.yml,local only (not published)
+9.3.0,connector-user-guides/data-flow-connector-user-guide/overview-of-the-data-flow-connector/connector-use-cases.md,patch
+9.3.0,connector-user-guides/gmail-connector-user-guide/overview-of-the-gmail-connector/connector-use-cases.md,patch
+9.3.0,connector-user-guides/gmail-connector-user-guide/overview-of-the-gmail-connector/prerequisites.md,patch
+9.3.0,connector-user-guides/microsoft-office-365-outlook-connector-user/connector-configuration.md,patch
+9.3.0,connector-user-guides/microsoft-office-365-outlook-connector-user/connector-use-cases.md,patch
+9.3.0,connector-user-guides/microsoft-office-365-outlook-connector-user/example-setting-up-outlook-connector-send-email/configuring-the-message-listener-in-iit.md,patch
+9.3.0,connector-user-guides/microsoft-office-365-outlook-connector-user/prerequisites/registering-application-azure-active-directory.md,patch
+9.3.0,container-edition-user-guide/loading-iway-container-edition-into-docker-desktop.md,patch
+9.3.0,unfiled/data-flow-connector/Configuration_1.md,patch
+9.3.0,unfiled/data-flow-connector/Configuring_the_RDB_HWM_Listener_in_TIBCO_Service_Manager_Integration_Tools.md,patch
+9.3.0,unfiled/data-flow-connector/High-watermark-Listener.md,patch
+9.3.0,unfiled/gmail-connector-user-guide/Configuring_the_Gmail_Listener_in_TIBCO_Service_Manager_Integration_Tools.md,patch
+9.3.0,unfiled/gmail-connector-user-guide/Configuring_the_Gmail_Listener_in_TIBCO_iWay_Service_Manager.md,patch
+9.3.0,unfiled/gmail-connector-user-guide/Configuring_the_Message_Listener_in_TIBCO_Service_Manager_Integration_Tools.md,patch
+9.3.0,unfiled/gmail-connector-user-guide/Email_Listening_Support.md,patch
+9.3.0,unfiled/gmail-connector-user-guide/Functionality_Overview.md,patch
+9.3.0,unfiled/gmail-connector-user-guide/Registering_an_Application_With_Azure_Active_Directory.md,patch
+9.3.0,unfiled/ms-powershell/Registering_an_Application_With_Azure_Active_Directory.md,patch
+9.3.0,unfiled/msoffice-365-outlook-connector-userguide/Configuring_the_Message_Listener_in_TIBCO_iWay_Service_Manager.md,patch
+9.3.0,unfiled/msoffice-365-outlook-connector-userguide/Functionality_Overview.md,patch
+9.3.0,redirects.yml,"listed, not applied: anchors or menu changed"
+9.3.0,reframe.yml,local only (not published)

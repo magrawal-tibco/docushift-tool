@@ -1,6 +1,6 @@
 # Jira Tracking — What Is Logged in DOCOPS
 
-> **Last reconciled:** 2026-11-19, against Jira and `config/versions.csv`.
+> **Last reconciled:** 2026-11-20, against Jira and `config/versions.csv`.
 > Conventions (site, cloud ID, story points, transitions, who owns what) live in
 > `C:\github\confluence-mcp\reports\docushift-claude-atlassian-context.md`; this file
 > does not repeat them. It answers one question: **is this piece of work in Jira, and where?**
@@ -56,7 +56,7 @@ This table says only what changes in Jira when an event happens.
 | Phase 66 runs: every synced PDF-only version verified (15 after a re-extract, 3 Omni-Gen after a re-sync) | DOCOPS-285: dated note with the counts → Done; per-BU results on the BU's verify issue |
 | A fix for merged links whose target contains parentheses is planned | New sub-task under DOCOPS-12, In Progress; Data Management re-published |
 | TIBCO ZIP backup to the shared drive finishes (2,015 versions: every non-retired version of in-scope products, eligible or not, current or archived; `C:/tmp/zip-backup/ledger.csv`; Docs ZIP Archive / TIBCO BU Docs Archive) | DOCOPS-282 (In Progress since 2026-11-06): dated note with counts and failures → Done |
-| The 38 products still showing doubled headings are re-run one at a time (done: Activation Service, Reporting Server, WebFOCUS Client, Foresight Instream, Data Intelligence; 6,414 pages measured 2026-11-09). From 19 Nov by patch, not `sync` (Phase 76 step 6); iWay Service Manager next | DOCOPS-336 (In Progress since 2026-11-09): dated note per family with the before/after count → Done when all read 0 |
+| The 38 products still showing doubled headings are re-run one at a time (done: Activation Service, Reporting Server, WebFOCUS Client, Foresight Instream, Data Intelligence, iWay Service Manager; 6,414 pages measured 2026-11-09). From 19 Nov by patch, not `sync` (Phase 76 step 6) | DOCOPS-336 (In Progress since 2026-11-09): dated note per family with the before/after count → Done when all read 0 |
 | Every family in a BU has its source ZIPs backed up | DOCOPS-281 (ibi), DOCOPS-282 (TIBCO), DOCOPS-283 (Spotfire, DataSynapse): dated note with gaps → Done |
 | help.scribesoft.com ownership transferred (decided 2026-10-30) | New sub-task under DOCOPS-7, or a dated note on DOCOPS-302 (Done 2026-10-30); point the host at the new site so Scribe's 375 `301.yml` rows apply |
 | BE 6.3.2 "Developers Guide > … > Addressing Schema Elements" traced (missing from the staging menu; the version's only open finding, 2026-11-12) | Log or triage it; BE 6.3.2 → `logged` |
@@ -74,6 +74,7 @@ This table says only what changes in Jira when an event happens.
 
 **Log** (newest first, one line per session):
 
+- 2026-11-20: DOCOPS-336 note: ibi iWay Service Manager 9.2.0/9.3.0 heading fix pushed to `content-fix` (201bfca), same patch route; doubled titles 15 → 1, 49 files (47 pages, 2 redirects.yml with section names only). 36 products left.
 - 2026-11-19 (afternoon): DOCOPS-336 note: ibi Data Intelligence (5 versions) heading fix pushed to `content-fix` (f140acd) as a heading-only patch (`scratch/heading_patch.py`, Phase 76 step 6), not `sync`, which would have undone the repo-only fixes. Skipped levels 87 → 0, doubled titles 87 → 1. 37 products left.
 - 2026-11-19: C:/tmp cleanup deleted `C:/tmp/zip-backup` (DOCOPS-282/283 scripts and ledgers). Scripts rebuilt from session logs; ledgers rebuilt from the Drive listing: TIBCO 1,962 done + 29 not-required + 30 not backed up (`tibco-not-backed-up.csv`); Spotfire 78/80 (`spotfire-not-backed-up.csv`). No Jira change.
 - 2026-11-19 (late morning): DOCOPS-382 → Done (hand-over note sent by the user; Workbench 14.1.0 dropped, Statistica `bb3e518e`). DOCOPS-254 note: English done, stays open for DV Japanese. DOCOPS-383 created under DOCOPS-10 (Phase 85, In Progress; DOCOPS-338 is itself a sub-task).

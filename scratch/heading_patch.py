@@ -31,6 +31,7 @@ from pathlib import Path
 HEADING = re.compile(r"^(#{1,6})(?:\s+(.*?))?\s*#*\s*$")
 FENCE = re.compile(r"^ {0,3}(```|~~~)")
 LOCAL_ONLY = {"reframe.yml", "rename-map.csv", "review-queue.csv"}
+TEXT_SIDE = {".yml", ".yaml", ".csv"}
 
 
 def read(path: Path) -> str:
@@ -193,7 +194,10 @@ def main() -> int:
                 rows.append({"version": v, "file": rel, "status": status})
         totals[v] = before + after
 
-        for rel in sorted((files(old_v) | files(new_v)) - old_md - new_md):
+        # Text side files only: images are copied, never rewritten, by a re-merge, and
+        # the OLD copy may hold text alone.
+        side = {r for r in files(old_v) | files(new_v) if Path(r).suffix in TEXT_SIDE}
+        for rel in sorted(side - old_md - new_md):
             o, n = old_v / rel, new_v / rel
             if o.is_file() and n.is_file() and o.read_bytes() == n.read_bytes():
                 continue
