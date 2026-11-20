@@ -310,6 +310,8 @@ thead th { text-transform: uppercase; font-size: 11px; letter-spacing: .05em; }
 .chip.crit { background: var(--critical-t); color: var(--text-primary); }
 .chip.high { background: var(--warning-t); color: var(--text-primary); }
 .chip.retest { background: var(--track-t); color: var(--text-primary); }
+.chip.link { background: none; border: 1px solid var(--brand-2); color: var(--brand-2); text-decoration: none; margin-left: auto; }
+.chip.link:hover { background: var(--track-t); }
 details.numtable summary { cursor: pointer; font-size: 12.5px; color: var(--text-secondary); margin: 4px 0 8px; }
 </style>
 </head>
@@ -1158,6 +1160,8 @@ function renderStand() {
       if (u.retest) chips.append(el("span", { class: "chip retest" }, `${u.retest} to retest`));
       chips.append(el("span", { class: "chip" }, `${u.open} open of ${u.rows} UAT rows`));
     }
+    if (u && h.uatUrl) chips.append(el("a", { class: "chip link", href: h.uatUrl, target: "_blank", rel: "noopener" },
+      "Open the UAT sheet ↗"));
     return el("div", { class: "bucard " + STATUS[st].cls },
       el("div", { class: "top" }, el("h3", {}, r.bu), badge(st)),
       el("p", { class: "why" }, r.health ? r.health.reason + (r.health.byHand ? " (set by hand)" : "") : ""),

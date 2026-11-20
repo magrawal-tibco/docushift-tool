@@ -525,7 +525,8 @@ def render_markdown(status: dict) -> str:
         lines.append(f"  - {r['bu']}: {tag}{r['inMig']:,} versions; {r['converted']:,} converted, "
                      f"{r['published']:,} in the repositories, {r['staging']:,} checked on staging.")
     if h.get("uatAsOf"):
-        lines.append(f"  - UAT sheet as downloaded {h['uatAsOf']}.")
+        lines.append(f"  - UAT sheet as downloaded {h['uatAsOf']}"
+                     + (f": {h['uatUrl']}" if h.get("uatUrl") else "") + ".")
     lines += ["", "## Areas", ""]
     for a in status["areas"]:
         m = a["measure"]

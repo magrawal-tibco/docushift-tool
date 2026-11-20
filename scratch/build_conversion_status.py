@@ -32,6 +32,7 @@ import status_page
 ROOT = Path(__file__).resolve().parents[1]
 # The user's .xlsx download of the UAT sheet, all tabs (20 Nov; gcloud cannot read Sheets).
 UAT_XLSX = "cache/TIbco_IBI_Spotfire UAT Sheet.xlsx"
+UAT_URL = "https://docs.google.com/spreadsheets/d/1lcMg602HoTxxvMTQnrzEt2i4Ft2Z4ch0dwmmIlZo6eg/edit?usp=sharing"
 # Business units handed over and not ours to report (user, 20 Nov: Spotfire belongs to
 # Digital Platform since the 19 Nov hand-over). Left out of every tab of the page.
 NOT_OURS = {"spotfire"}
@@ -241,6 +242,7 @@ def where_we_stand(data: Path, areas_path: Path, jira_snapshot: Path, now: dt.da
     uat_path = data / UAT_XLSX
     uat = status_page.uat_summary(read_xlsx.read(str(uat_path))) if uat_path.exists() else {}
     head["uatAsOf"] = _modified(uat_path)
+    head["uatUrl"] = UAT_URL
     for row in head["byBu"]:
         row["health"] = status_page.bu_health(row, uat.get(row["bu"]), cfg["buHealth"].get(row["bu"]))
     t = head["total"]

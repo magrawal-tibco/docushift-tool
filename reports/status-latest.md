@@ -1,12 +1,12 @@
 # Documentation migration: where we stand
 
-As of 20 Nov 2026, 13:58 (Jira as of Thu 19 Nov).
+As of 20 Nov 2026, 14:00 (Jira as of Thu 19 Nov).
 
 - **Go-live:** Mon 30 Nov, in 10 days. **Old site switched off:** Mon 30 Nov, in 10 days.
 - **728 documentation versions are in the migration.** Converted: 725 (100%). In the new site's repositories: 725 (100%). Checked page by page on the staging site: 516 of the 725 in the repositories.
   - TIBCO: **at risk**: 83% checked on staging; open UAT rows: 8 Critical and 16 High; 1 UAT row fixed by Digital Platform, waiting on our retest. 526 versions; 523 converted, 523 in the repositories, 432 checked on staging.
   - IBI: **at risk** (set by hand): 42% checked on staging, waiting for Digital Platform to put 10 products on staging; 1 Critical and 5 High UAT rows open. 202 versions; 202 converted, 202 in the repositories, 84 checked on staging.
-  - UAT sheet as downloaded 2026-11-20 13:47.
+  - UAT sheet as downloaded 2026-11-20 13:47: https://docs.google.com/spreadsheets/d/1lcMg602HoTxxvMTQnrzEt2i4Ft2Z4ch0dwmmIlZo6eg/edit?usp=sharing.
 
 ## Areas
 
