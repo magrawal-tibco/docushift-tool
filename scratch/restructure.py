@@ -158,6 +158,8 @@ if twice:
     fail(f"placed twice: {twice}")
 
 offmenu: list[str] = []
+rules = sorted([(o, n, "move") for o, n in prefix] + [(o, n, "lift") for o, n in lifted],
+               key=lambda r: -len(r[0]))
 prefix.sort(key=lambda p: -len(p[0]))
 lifted.sort(key=lambda p: -len(p[0]))
 
@@ -170,11 +172,13 @@ def new_path(rel: str) -> str | None:
         return exact[rel]
     if rel.startswith(KEEP_IN_PLACE) or "/" not in rel and rel in META:
         return rel
-    for old, new in prefix:
-        if rel == old + ".md" or rel.startswith(old + "/"):
+    # The most specific rule wins, whether it renames a folder or lifts a collapsed one's
+    # children: `web-ui/sdv-web-ui` (collapsed into the Web UI section) beats `web-ui`
+    # (moved to What's New as Key New Features).
+    for old, new, kind in rules:
+        if kind == "move" and (rel == old + ".md" or rel.startswith(old + "/")):
             return new + rel[len(old):]
-    for old, new in lifted:
-        if rel.startswith(old + "/"):
+        if kind == "lift" and rel.startswith(old + "/"):
             return f"{new}/{rel[len(old) + 1:]}".strip("/")
     if rel.endswith(".md"):          # an off-menu page no rule covers: kept, under unfiled/
         offmenu.append(rel)
@@ -207,12 +211,17 @@ def resolve(rel: str) -> str | None:
 
 
 # ---- the new menu ----
+collapsed_or_placed = collapsed | set(placed)
 def remap_entry(entry) -> list:
     if isinstance(entry, tuple):
         _, node = entry
         url = str(node.get("url") or "")
         page, h, frag = url.partition("#")
-        kids = [e for c in node.get("subfolderlist") or [] for e in remap_entry(("node", c))]
+        # Children collapsed or placed elsewhere by the plan are not copied here (they would
+        # show twice in the menu).
+        kids = [e for c in node.get("subfolderlist") or []
+                if str(c.get("url") or "").partition("#")[0] not in collapsed_or_placed
+                for e in remap_entry(("node", c))]
         if page in drops:            # a dropped duplicate's entry goes; its children stay
             return kids
         out = {"title": retitle.get(page) or node.get("title"), "url": (resolve(page) or page) + (h + frag)}
