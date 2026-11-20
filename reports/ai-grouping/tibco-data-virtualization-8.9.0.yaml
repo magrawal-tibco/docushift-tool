@@ -1,0 +1,400 @@
+# Phase 87 (DOCOPS-385): one menu for Data Virtualization 8.9.0's five help systems.
+# AI draft 2026-11-19 for review; nothing applied yet. Reasons: tibco-data-virtualization-8.9.0.md (same folder).
+# Items apply in order. An item naming an entry that an earlier collapse already lifted moves it
+# again in place (used only to set its folder). Folders not given keep their current last segment.
+# A collapsed wrapper whose page is the section landing disappears from the menu; its children take its place.
+# Edited 20 Nov per the user: Deployment Manager section removed (Administration Guide
+# copy kept), Adapters landing generated, one What's New page.
+version: 8.9.0
+sections:
+- title: What's New
+  folder: whats-new
+  landing: whats-new.md
+  items:
+  - from: web-ui.md
+    title: Key New Features
+    folder: key-new-features
+- title: Getting Started
+  folder: getting-started
+  landing: user-guides.md
+  items:
+  - from: user-guides/getting-started-guide.md
+  - from: user-guides/tutorial-guide.md
+- title: Installation and Upgrade Guide
+  folder: installation
+  landing: user-guides/installation-upgrade-guide.md
+  items:
+  - from: user-guides/installation-upgrade-guide.md
+    collapse: true
+- title: Using Studio
+  folder: studio
+  landing: new
+  items:
+  - from: user-guides/user-guide.md
+  - from: user-guides/discovery-guide.md
+- title: Web UI
+  folder: web-ui
+  landing: web-ui/sdv-web-ui.md
+  items:
+  - from: web-ui/sdv-web-ui.md
+    collapse: true
+- title: Adapters
+  folder: adapters
+  landing: new
+  items:
+  - group:
+      title: Relational Databases
+      folder: relational-databases
+      items:
+      - from: adapters/sdv-db2-adapter.md
+        folder: db2
+      - from: adapters/sdv-greenplum-adapter.md
+        folder: greenplum
+      - from: adapters/sdv-hsqldb-adapter.md
+        folder: hsqldb
+      - from: adapters/sdv-informix-adapter.md
+        folder: informix
+      - from: adapters/sdv-microsoft-access-adapter.md
+        folder: microsoft-access
+      - from: adapters/sdv-microsoft-access.md
+        folder: microsoft-access-non-odbc
+        title: SDV Microsoft Access Adapter (Non-ODBC)
+      - from: adapters/sdv-mysql-adapter.md
+        folder: mysql
+      - from: adapters/sdv-neoview-adapter.md
+        folder: neoview
+      - from: adapters/sdv-netezza-adapter.md
+        folder: netezza
+      - from: adapters/sdv-oracle-adapter.md
+        folder: oracle
+      - from: adapters/sdv-postgresql-adapter.md
+        folder: postgresql
+      - from: adapters/sdv-sap-hana-adapter.md
+        folder: sap-hana
+      - from: adapters/sdv-singlestore-adapter.md
+        folder: singlestore
+      - from: adapters/sdv-sql-server-adapter.md
+        folder: sql-server
+      - from: adapters/sdv-sybase-adapter.md
+        folder: sybase
+      - from: adapters/sdv-teradata-adapter.md
+        folder: teradata
+      - from: adapters/sdv-vertica-adapter.md
+        folder: vertica
+      - from: adapters/sdv-datadirect-mainframe.md
+        folder: datadirect-mainframe
+      - from: adapters/sdv-composite-adapter.md
+        folder: composite
+  - group:
+      title: Cloud Data Warehouses
+      folder: cloud-data-warehouses
+      items:
+      - from: adapters/sdv-amazon-redshift-adapter.md
+        folder: amazon-redshift
+      - from: adapters/sdv-google-bigquery-adapter.md
+        folder: google-bigquery
+      - from: adapters/sdv-snowflake-adapter.md
+        folder: snowflake
+  - group:
+      title: Big Data, NoSQL and Streaming
+      folder: big-data-nosql
+      items:
+      - from: adapters/sdv-drill-adapter.md
+        folder: drill
+      - from: adapters/sdv-hbase-adapter.md
+        folder: hbase
+      - from: adapters/sdv-apache-hbase-adapter.md
+        folder: apache-hbase
+      - from: adapters/sdv-hive-adapter.md
+        folder: hive
+      - from: adapters/sdv-impala-adapter.md
+        folder: impala
+      - from: adapters/sdv-sparksql-adapter.md
+        folder: sparksql
+      - from: adapters/sdv-computedb-adapter.md
+        folder: computedb
+      - from: adapters/sdv-cassandra-adapter.md
+        folder: cassandra
+      - from: adapters/sdv-cosmosdb-adapter.md
+        folder: cosmosdb
+      - from: adapters/sdv-couchbase-adapter.md
+        folder: couchbase
+      - from: adapters/sdv-amazon-dynamodb-adapter.md
+        folder: amazon-dynamodb
+      - from: adapters/sdv-elasticsearch-adapter.md
+        folder: elasticsearch
+      - from: adapters/sdv-marklogic-adapter.md
+        folder: marklogic
+      - from: adapters/sdv-mongodb-adapter.md
+        folder: mongodb
+      - from: adapters/sdv-splunk-adapter.md
+        folder: splunk
+      - from: adapters/sdv-streaming-adapter.md
+        folder: streaming
+  - group:
+      title: Files and Cloud Storage
+      folder: files-and-storage
+      items:
+      - from: adapters/sdv-file-data-sources.md
+        folder: file-data-sources
+      - from: adapters/sdv-local-file-storage-adapter.md
+        folder: local-file-storage
+      - from: adapters/sdv-amazon-s3-adapter.md
+        folder: amazon-s3
+      - from: adapters/sdv-azure-data-lake-adapter.md
+        folder: azure-data-lake
+      - from: adapters/sdv-google-cloud-storage-adapter.md
+        folder: google-cloud-storage
+  - group:
+      title: Enterprise Applications
+      folder: enterprise-applications
+      items:
+      - from: adapters/using-the-oracle-e-business-suite-adapter.md
+        folder: oracle-e-business-suite
+        title: Oracle E-Business Suite Adapter
+      - from: adapters/sdv-netsuite-adapter.md
+        folder: netsuite
+      - from: adapters/using-the-salesforce-com-adapter.md
+        folder: salesforce
+        title: Salesforce.com Adapter
+      - from: adapters/sdv-salesforce-with-sso-adapter.md
+        folder: salesforce-with-sso
+      - from: adapters/using-the-sap-for-sdv-adapter.md
+        folder: sap
+        title: SAP Adapter
+      - from: adapters/using-sap-bw-with-sdv.md
+        folder: sap-bw
+        title: SAP BW
+      - from: adapters/using-sap-bw-bex-with-sdv.md
+        folder: sap-bw-bex
+        title: SAP BW BEx
+      - from: adapters/using-siebel-with-sdv.md
+        folder: siebel
+        title: Siebel
+      - from: adapters/sdv-microsoft-dynamicscrm-adapter.md
+        folder: dynamics-crm
+        title: SDV Microsoft Dynamics CRM Adapter
+      - from: adapters/sdv-microsoft-dynamicsgp-adapter.md
+        folder: dynamics-gp
+        title: SDV Microsoft Dynamics GP Adapter
+      - from: adapters/sdv-microsoft-dynamicsnav-adapter.md
+        folder: dynamics-nav
+        title: SDV Microsoft Dynamics NAV Adapter
+      - from: adapters/sdv-sharepoint-adapter.md
+        folder: sharepoint
+      - from: adapters/sdv-active-directory-adapter.md
+        folder: active-directory
+  - group:
+      title: SaaS, Marketing and Social
+      folder: saas-and-social
+      items:
+      - from: adapters/sdv-google-ads-adapter.md
+        folder: google-ads
+      - from: adapters/sdv-google-analytics-adapter.md
+        folder: google-analytics
+      - from: adapters/sdv-google-calendar-adapter.md
+        folder: google-calendar
+      - from: adapters/sdv-google-contacts-adapter.md
+        folder: google-contacts
+      - from: adapters/sdv-google-directory-adapter.md
+        folder: google-directory
+      - from: adapters/sdv-google-drive-adapter.md
+        folder: google-drive
+      - from: adapters/sdv-google-sheets-adapter.md
+        folder: google-sheets
+      - from: adapters/sdv-hubspot-adapter.md
+        folder: hubspot
+      - from: adapters/sdv-marketo-adapter.md
+        folder: marketo
+      - from: adapters/sdv-oracleeloqua-adapter.md
+        folder: oracle-eloqua
+        title: SDV Oracle Eloqua Adapter
+      - from: adapters/sdv-facebook-adapter.md
+        folder: facebook
+      - from: adapters/sdv-twitter-adapter.md
+        folder: twitter
+      - from: adapters/sdv-email-adapter.md
+        folder: email
+      - from: adapters/sdv-rss-adapter.md
+        folder: rss
+  - group:
+      title: Web Services and Custom Sources
+      folder: web-and-custom
+      items:
+      - from: adapters/sdv-web-based-data-sources.md
+        folder: web-based-data-sources
+      - from: adapters/sdv-odata-adapter.md
+        folder: odata
+      - from: adapters/sdv-jdbc-odbc-bridge-adapter.md
+        folder: jdbc-odbc-bridge
+      - from: adapters/sdv-custom-java-procedures.md
+        folder: custom-java-procedures
+- title: Business Directory
+  folder: business-directory
+  landing: business-directory/businessdirectory.md
+  items:
+  - from: business-directory.md
+    collapse: true
+  - from: business-directory/businessdirectory.md
+    collapse: true
+  - from: business-directory/businessdirectory/install-business-directory.md
+    folder: installation
+  - from: business-directory/businessdirectory/business-directory.md
+    folder: introduction
+  - from: business-directory/businessdirectory/using-business-directory.md
+    folder: using
+  - from: business-directory/businessdirectory/business-directory-api.md
+    folder: api-and-system-tables
+  - from: business-directory/businessdirectory/business-directory-rest-api.md
+    folder: rest-api
+- title: Administration and Security
+  folder: administration
+  landing: new
+  items:
+  - from: user-guides/administration-guide.md
+  - from: user-guides/security-features-guide.md
+  - from: user-guides/activecluster.md
+    title: ActiveCluster Guide
+  - from: user-guides/troubleshooting.md
+- title: Client Interfaces and APIs
+  folder: developer
+  landing: new
+  items:
+  - from: user-guides/client-interfaces-guide.md
+  - from: user-guides/application-programming.md
+  - from: user-guides/data-source-toolkit-guide.md
+- title: Reference Guide
+  folder: reference
+  landing: user-guides/reference-guide.md
+  items:
+  - from: user-guides/reference-guide.md
+    collapse: true
+- title: Documentation, Support and Legal
+  folder: support-and-legal
+  landing: new
+  items:
+  - from: spotfire-documentation-and-support-services.md
+    folder: documentation-and-support
+  - from: legal-and-third-party-notices.md
+drop_duplicates:
+- drop: business-directory.md
+  keep: adapters.md
+- drop: deployment-manager.md
+  keep: user-guides.md
+- drop: web-ui/whats-new.md
+  keep: whats-new.md
+- drop: business-directory/whats-new-in-sdv-8-9.md
+  keep: user-guides/whats-new-2.md
+- drop: user-guides/user-guide/configuring-relational-data/data-source-limitations/apache-drill-data-source-limitations.md
+  keep: adapters/sdv-drill-adapter/apache-drill-data-source-limitations.md
+- drop: user-guides/user-guide/configuring-relational-data/data-source-limitations/db2-db2-z-os-data-source.md
+  keep: adapters/sdv-db2-adapter/db2-and-db2-z-os-data-source-limitations.md
+- drop: user-guides/user-guide/configuring-relational-data/data-source-limitations/hive-compatible-data-source.md
+  keep: adapters/sdv-hive-adapter/hive-compatible-data-source-limitations.md
+- drop: user-guides/user-guide/configuring-relational-data/data-source-limitations/netezza-data-source-limitations.md
+  keep: adapters/sdv-netezza-adapter/netezza-data-source-limitations.md
+- drop: user-guides/user-guide/configuring-relational-data/data-source-limitations/oracle-data-source-limitations.md
+  keep: adapters/sdv-oracle-adapter/oracle-data-source-limitations.md
+- drop: user-guides/user-guide/configuring-relational-data/data-source-limitations/teradata-data-source-introspection.md
+  keep: adapters/sdv-teradata-adapter/teradata-data-source-introspection.md
+- drop: user-guides/user-guide/configuring-relational-data/data-source-limitations/vertica-data-source-limitations.md
+  keep: adapters/sdv-vertica-adapter/vertica-data-source-limitations.md
+- drop: user-guides/user-guide/configuring-relational-data/connecting-sql-server-datasource-using-active.md
+  keep: adapters/sdv-sql-server-adapter/connecting-sql-server-datasource-using-active.md
+- drop: user-guides/user-guide/sdv-caching/cache-requirements-and-limitations/netezza-caching-tips-from-an-expert.md
+  keep: adapters/sdv-netezza-adapter/netezza-data-source-limitations/netezza-caching-tips-from-an-expert.md
+- drop: deployment-manager/deployment-manager.md
+  keep: user-guides/administration-guide/deployment-manager.md
+- drop: deployment-manager/deployment-manager/about-deployment-manager.md
+  keep: user-guides/administration-guide/deployment-manager/about-deployment-manager-2.md
+- drop: deployment-manager/deployment-manager/about-deployment-manager/basic-deployment-manager-concepts-and-definitions.md
+  keep: user-guides/administration-guide/deployment-manager/about-deployment-manager-2/basic-deployment-manager.md
+- drop: deployment-manager/deployment-manager/about-deployment-manager/deployment-manager-architecture.md
+  keep: user-guides/administration-guide/deployment-manager/about-deployment-manager-2/deployment-manager-architecture-2.md
+- drop: deployment-manager/deployment-manager/about-deployment-manager/limitations.md
+  keep: user-guides/administration-guide/deployment-manager/about-deployment-manager-2/limitations-2.md
+- drop: deployment-manager/deployment-manager/about-deployment-manager/user-roles-and-workflows.md
+  keep: user-guides/administration-guide/deployment-manager/about-deployment-manager-2/user-roles-and-workflows-2.md
+- drop: deployment-manager/deployment-manager/backing-up-restoring-deployment-manager-server.md
+  keep: user-guides/administration-guide/deployment-manager/backing-up-restoring.md
+- drop: deployment-manager/deployment-manager/backing-up-restoring-deployment-manager-server/backing-up-the-deployment-manager.md
+  keep: user-guides/administration-guide/deployment-manager/backing-up-restoring/backing-up-deployment.md
+- drop: deployment-manager/deployment-manager/backing-up-restoring-deployment-manager-server/restoring-the-deployment-manager-server.md
+  keep: user-guides/administration-guide/deployment-manager/backing-up-restoring/restoring-deployment.md
+- drop: deployment-manager/deployment-manager/defining-deployment-plans.md
+  keep: user-guides/administration-guide/deployment-manager/defining-deployment-plans-2.md
+- drop: deployment-manager/deployment-manager/defining-deployment-plans/accessing-plans.md
+  keep: user-guides/administration-guide/deployment-manager/defining-deployment-plans-2/accessing-plans-2.md
+- drop: deployment-manager/deployment-manager/defining-deployment-plans/creating-a-new-deployment-plan.md
+  keep: user-guides/administration-guide/deployment-manager/defining-deployment-plans-2/creating-a-new-deployment-plan-2.md
+- drop: deployment-manager/deployment-manager/defining-deployment-plans/defining-the-principal-bundles-to-migrate.md
+  keep: user-guides/administration-guide/deployment-manager/defining-deployment-plans-2/defining-principal-bundles.md
+- drop: deployment-manager/deployment-manager/defining-deployment-plans/defining-the-resource-bundle-to-migrate.md
+  keep: user-guides/administration-guide/deployment-manager/defining-deployment-plans-2/defining-resource-bundle.md
+- drop: deployment-manager/deployment-manager/defining-deployment-plans/deleting-a-deployment-plan.md
+  keep: user-guides/administration-guide/deployment-manager/defining-deployment-plans-2/deleting-a-deployment-plan-2.md
+- drop: deployment-manager/deployment-manager/defining-deployment-plans/editing-deployment-plan-properties.md
+  keep: user-guides/administration-guide/deployment-manager/defining-deployment-plans-2/editing-deployment-plan-properties-2.md
+- drop: deployment-manager/deployment-manager/defining-deployment-plans/exporting-a-deployment-plan.md
+  keep: user-guides/administration-guide/deployment-manager/defining-deployment-plans-2/exporting-a-deployment-plan-2.md
+- drop: deployment-manager/deployment-manager/defining-deployment-plans/extending-deployments-procedure-call-operations.md
+  keep: user-guides/administration-guide/deployment-manager/defining-deployment-plans-2/extending-deployments.md
+- drop: deployment-manager/deployment-manager/defining-deployment-plans/previewing-a-deployment-plan.md
+  keep: user-guides/administration-guide/deployment-manager/defining-deployment-plans-2/previewing-a-deployment-plan-2.md
+- drop: deployment-manager/deployment-manager/defining-deployment-plans/refreshing-deployment-plans.md
+  keep: user-guides/administration-guide/deployment-manager/defining-deployment-plans-2/refreshing-deployment-plans-2.md
+- drop: deployment-manager/deployment-manager/defining-deployment-plans/removing-principals-from-a-target-site.md
+  keep: user-guides/administration-guide/deployment-manager/defining-deployment-plans-2/removing-principals-from.md
+- drop: deployment-manager/deployment-manager/defining-deployment-plans/removing-resources-from-a-target-site.md
+  keep: user-guides/administration-guide/deployment-manager/defining-deployment-plans-2/removing-resources-from-a-target-site-2.md
+- drop: deployment-manager/deployment-manager/defining-sites.md
+  keep: user-guides/administration-guide/deployment-manager/defining-sites-2.md
+- drop: deployment-manager/deployment-manager/defining-sites/accessing-sites.md
+  keep: user-guides/administration-guide/deployment-manager/defining-sites-2/accessing-sites-2.md
+- drop: deployment-manager/deployment-manager/defining-sites/adding-a-new-site.md
+  keep: user-guides/administration-guide/deployment-manager/defining-sites-2/adding-a-new-site-2.md
+- drop: deployment-manager/deployment-manager/defining-sites/defining-mappings.md
+  keep: user-guides/administration-guide/deployment-manager/defining-sites-2/defining-mappings-2.md
+- drop: deployment-manager/deployment-manager/defining-sites/defining-principal-bundles.md
+  keep: user-guides/administration-guide/deployment-manager/defining-sites-2/defining-principal-bundles-2.md
+- drop: deployment-manager/deployment-manager/defining-sites/defining-resource-bundles.md
+  keep: user-guides/administration-guide/deployment-manager/defining-sites-2/defining-resource-bundles-2.md
+- drop: deployment-manager/deployment-manager/defining-sites/deleting-a-site.md
+  keep: user-guides/administration-guide/deployment-manager/defining-sites-2/deleting-a-site-2.md
+- drop: deployment-manager/deployment-manager/defining-sites/editing-site-properties.md
+  keep: user-guides/administration-guide/deployment-manager/defining-sites-2/editing-site-properties-2.md
+- drop: deployment-manager/deployment-manager/defining-sites/refreshing-site-resources.md
+  keep: user-guides/administration-guide/deployment-manager/defining-sites-2/refreshing-site-resources-2.md
+- drop: deployment-manager/deployment-manager/executing-deployment-plans.md
+  keep: user-guides/administration-guide/deployment-manager/executing-deployment-plans-2.md
+- drop: deployment-manager/deployment-manager/executing-deployment-plans/executing-a-deployment-plan-remotely.md
+  keep: user-guides/administration-guide/deployment-manager/executing-deployment-plans-2/executing-a-deployment-plan-remotely-2.md
+- drop: deployment-manager/deployment-manager/executing-deployment-plans/executing-a-deployment-plan.md
+  keep: user-guides/administration-guide/deployment-manager/executing-deployment-plans-2/executing-a-deployment-plan-2.md
+- drop: deployment-manager/deployment-manager/executing-deployment-plans/importing-and-executing-a-deployment-plan.md
+  keep: user-guides/administration-guide/deployment-manager/executing-deployment-plans-2/importing-executing.md
+- drop: deployment-manager/deployment-manager/executing-deployment-plans/purging-the-execution-logs.md
+  keep: user-guides/administration-guide/deployment-manager/executing-deployment-plans-2/purging-the-execution-logs-2.md
+- drop: deployment-manager/deployment-manager/executing-deployment-plans/viewing-source-site-updates-since-last-plan.md
+  keep: user-guides/administration-guide/deployment-manager/executing-deployment-plans-2/viewing-source-site-updates.md
+- drop: deployment-manager/deployment-manager/executing-deployment-plans/viewing-the-execution-log-results.md
+  keep: user-guides/administration-guide/deployment-manager/executing-deployment-plans-2/viewing-the-execution-log-results-2.md
+- drop: deployment-manager/deployment-manager/starting-deployment-manager.md
+  keep: user-guides/administration-guide/deployment-manager/starting-deployment-manager-2.md
+- drop: adapters.md
+  keep: user-guides.md
+- drop: user-guides/whats-new-2.md
+  keep: whats-new.md
+review:
+- a: business-directory/businessdirectory/business-directory/changing-the-repository-password.md
+  b: user-guides/administration-guide/basic-sdv-administration/changing-the-repository-password.md
+  note: 'Two words: BD says ''SDV'' and ''<SDV_install_dir>'', Admin Guide says ''Spotfire'' and ''<TDV_install_dir>''. Recommend keep both (each guide''s own procedure).'
+- a: business-directory/businessdirectory/install-business-directory/tips-from-an-expert-if-the-server-does-not-start.md
+  b: user-guides/installation-upgrade-guide/installing-sdv-studio/tips-from-expert-if-server.md
+  note: 'Install Guide copy is fuller: one extra sentence (server.properties is reread when composite.sh monitor restarts the server), ''locations'', ''<BD_install_dir>''. BD copy says ''the SDV server''. Recommend keep both.'
+- a: adapters/sdv-sql-server-adapter/microsoft-sql-server-2008-limitation.md
+  b: user-guides/user-guide/configuring-relational-data/data-source-limitations/microsoft-sql-server-2008-limitation.md
+  note: 'java.security path differs: adapter ''<TDV_install_dir>\conf\server\security\java.security'', User Guide ''<TDV_install_dir>/jdk/conf/security/java.security''. A writer should say which is right; then drop the other.'
+- a: adapters/sdv-sap-hana-adapter/sap-hana-data-source-limitations-characteristics.md
+  b: user-guides/user-guide/configuring-relational-data/data-source-limitations/sap-hana-data-source.md
+  note: Adapter copy keeps stale PDF page numbers in two link texts (', page 218', ', page 219'); otherwise same. Recommend drop the User Guide copy -> adapter copy (as for the other limitations pages) and accept the page numbers, or keep both.
